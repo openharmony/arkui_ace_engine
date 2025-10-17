@@ -832,7 +832,7 @@ void JSNavigationStack::SetJSParentStack(JSRef<JSVal> parent)
     func->Call(dataSourceObj_, 1, params);
 }
 
-void JSNavigationStack::RemoveInvalidPage(int32_t index)
+void JSNavigationStack::RemoveInvalidPage(int32_t index, const std::string& name)
 {
     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
     if (dataSourceObj_->IsEmpty()) {
@@ -841,8 +841,12 @@ void JSNavigationStack::RemoveInvalidPage(int32_t index)
     auto removeInvalidPage = dataSourceObj_->GetProperty("removeInvalidPage");
     if (removeInvalidPage->IsFunction()) {
         auto func = JSRef<JSFunc>::Cast(removeInvalidPage);
-        JSRef<JSVal> params[1] = { JSRef<JSVal>::Make(ToJSValue(index)) };
-        func->Call(dataSourceObj_, 1, params);
+        const int32_t argc = 2;
+        JSRef<JSVal> params[argc] = {
+            JSRef<JSVal>::Make(ToJSValue(index)),
+            JSRef<JSVal>::Make(ToJSValue(name)),
+        };
+        func->Call(dataSourceObj_, argc, params);
     }
 }
 
@@ -1431,7 +1435,8 @@ bool JSNavigationStack::RemoveDestinationIfNeeded(const JSRef<JSObject>& pathInf
         return true;
     }
     // push destination failed, remove page in pathStack
-    RemoveInvalidPage(index);
+    auto name = pathInfo->GetPropertyValue<std::string>("name", "");
+    RemoveInvalidPage(index, name);
     const int32_t argc = 2;
     JSRef<JSVal> params[argc];
     JSRef<JSObject> errorInfo = JSRef<JSObject>::New();

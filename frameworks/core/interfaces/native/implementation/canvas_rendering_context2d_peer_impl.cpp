@@ -148,21 +148,19 @@ void CanvasRenderingContext2DPeerImpl::StartImageAnalyzer(Ark_VMContext vmContex
             promise->Reject(error);
         }
     };
-    auto vectorIATypes = Converter::Convert<std::vector<ImageAnalyzerType>>(config->types);
-    std::set<ImageAnalyzerType> types(vectorIATypes.begin(), vectorIATypes.end());
-    config_ = {
-        .types = std::move(types)
-    };
 
-    promise->StartAsync(vmContext, *asyncWorker, [peer = Claim(this), onAnalyzed = std::move(onAnalyzed)]() {
+    promise->StartAsync(vmContext, *asyncWorker, [peer = Claim(this), wrapConfigFunc = wrapAnalyzerConfigImpl,
+        onAnalyzed = std::move(onAnalyzed)]() {
         auto model = AceType::DynamicCast<CanvasRenderingContext2DModel>(peer->renderingContext2DModel_);
         if (model) {
             OnAnalyzedCallback optOnAnalyzed = std::move(onAnalyzed);
-            model->StartImageAnalyzer(reinterpret_cast<void*>(&peer->config_), optOnAnalyzed);
+            void* config = wrapConfigFunc == nullptr ? nullptr : wrapConfigFunc();
+            model->StartImageAnalyzer(config, optOnAnalyzed);
         } else {
             onAnalyzed(ImageAnalyzerState::STOPPED);
         }
     });
+    wrapAnalyzerConfigImpl = nullptr;
 }
 void CanvasRenderingContext2DPeerImpl::StopImageAnalyzer()
 {

@@ -25,7 +25,7 @@ import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { VoidCallback } from "./units"
-import { AttributeModifier, hookXComponentAttributeModifier, AttributeUpdater } from "#handwritten"
+import { AttributeModifier, hookXComponentAttributeModifier, AttributeUpdater, hookSetXComponentOptions, hookXComponentStartImageAnalyzer } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
@@ -42,24 +42,9 @@ export class XComponentController implements MaterializedBase {
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    get onSurfaceCreated(): ((surfaceId: string) => void) {
-        return this.getOnSurfaceCreated()
-    }
-    set onSurfaceCreated(onSurfaceCreated: ((surfaceId: string) => void)) {
-        this.setOnSurfaceCreated(onSurfaceCreated)
-    }
-    get onSurfaceChanged(): ((surfaceId: string,rect: SurfaceRect) => void) {
-        return this.getOnSurfaceChanged()
-    }
-    set onSurfaceChanged(onSurfaceChanged: ((surfaceId: string,rect: SurfaceRect) => void)) {
-        this.setOnSurfaceChanged(onSurfaceChanged)
-    }
-    get onSurfaceDestroyed(): ((surfaceId: string) => void) {
-        return this.getOnSurfaceDestroyed()
-    }
-    set onSurfaceDestroyed(onSurfaceDestroyed: ((surfaceId: string) => void)) {
-        this.setOnSurfaceDestroyed(onSurfaceDestroyed)
-    }
+    onSurfaceCreated(surfaceId: string): void {}
+    onSurfaceChanged(surfaceId: string,rect: SurfaceRect): void {}
+    onSurfaceDestroyed(surfaceId: string): void {}
     constructor(peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, XComponentController.getFinalizer())
     }
@@ -93,6 +78,7 @@ export class XComponentController implements MaterializedBase {
         return this.getXComponentSurfaceRotation_serialize()
     }
     public startImageAnalyzer(config: ImageAnalyzerConfig): Promise<void> {
+        return hookXComponentStartImageAnalyzer(this, config)
         const config_casted = config as (ImageAnalyzerConfig)
         return this.startImageAnalyzer_serialize(config_casted)
     }
@@ -373,6 +359,7 @@ export class ArkXComponentComponent extends ArkCommonMethodComponent implements 
     }
     public setXComponentOptions(params: XComponentParameters | XComponentOptions | NativeXComponentParameters): this {
         if (this.checkPriority("setXComponentOptions")) {
+            hookSetXComponentOptions(this, params)
             const params_casted = params as (XComponentParameters | XComponentOptions | NativeXComponentParameters)
             this.getPeer()?.setXComponentOptionsAttribute(params_casted)
             return this

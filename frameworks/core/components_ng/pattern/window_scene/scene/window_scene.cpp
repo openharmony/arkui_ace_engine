@@ -219,6 +219,7 @@ void WindowScene::OnAttachToFrameNode()
     Rosen::SceneSessionManager::GetInstance().NotifyOnAttachToFrameNode(session_);
     RegisterFocusCallback();
     WindowPattern::OnAttachToFrameNode();
+    session_->ResetLockedCacheSnapshot();
 }
 
 void WindowScene::InsertSurfaceNodeId(uint64_t nodeId)
@@ -576,7 +577,8 @@ void WindowScene::BufferAvailableCallbackForSnapshot()
 
 void WindowScene::OnActivation()
 {
-    auto uiTask = [weakThis = WeakClaim(this)]() {
+    bool isRestart = session_->GetSessionInfo().isRestartApp_;
+    auto uiTask = [weakThis = WeakClaim(this), isRestart]() {
         ACE_SCOPED_TRACE("WindowScene::OnActivation");
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
@@ -616,6 +618,7 @@ void WindowScene::OnActivation()
             CHECK_NULL_VOID(surfaceNode);
             self->AddChild(host, self->appWindow_, self->appWindowName_, 0);
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            CHECK_EQUAL_VOID(isRestart, true);
             surfaceNode->SetBufferAvailableCallback(self->callback_);
         } else if (self->snapshotWindow_) {
             self->session_->SetEnableAddSnapshot(true);
@@ -944,6 +947,49 @@ void WindowScene::OnPreLoadStartingWindowFinished()
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->PostAsyncEvent(
         std::move(uiTask), "ArkUIWindowScenePreLoadStartingWindowFinished", TaskExecutor::TaskType::UI);
+}
+
+void WindowScene::OnRestart()
+{
+    auto uiTask = [weakThis = WeakClaim(this)]() {
+        ACE_SCOPED_TRACE("WindowScene::OnRestart");
+        auto self = weakThis.Upgrade();
+        CHECK_NULL_VOID(self);
+        CHECK_NULL_VOID(self->session_);
+        auto host = self->GetHost();
+        CHECK_NULL_VOID(host);
+        self->RemoveChild(host, self->startingWindow_, self->startingWindowName_);
+        self->RemoveChild(host, self->appWindow_, self->appWindowName_);
+        self->RemoveChild(host, self->snapshotWindow_, self->snapshotWindowName_);
+        self->RemoveChild(host, self->blankWindow_, self->blankWindowName_);
+        self->RemoveChild(host, self->newAppWindow_, self->newAppWindowName_);
+        self->startingWindow_.Reset();
+        self->appWindow_.Reset();
+        self->snapshotWindow_.Reset();
+        self->newAppWindow_.Reset();
+        self->blankWindow_.Reset();
+        self->session_->SetNeedSnapshot(true);
+        self->SetSubSessionVisible();
+
+        self->CreateAppWindow();
+        self->CreateStartingWindow();
+        self->AddChild(host, self->startingWindow_, self->startingWindowName_);
+        auto surfaceNode = self->session_->GetSurfaceNode();
+        CHECK_NULL_VOID(surfaceNode);
+        auto context = self->GetContextByDisableDelegator(false, false);
+        CHECK_NULL_VOID(context);
+        context->SetRSNode(surfaceNode);
+
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "OnRestart id %{public}d host id %{public}d",
+            self->session_->GetPersistentId(), host->GetId());
+    };
+
+    ContainerScope scope(instanceId_);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->PostAsyncEvent(
+        std::move(uiTask), "ArkUIWindowSceneRestartApp", TaskExecutor::TaskType::UI);
 }
 
 bool WindowScene::IsWindowSizeEqual()

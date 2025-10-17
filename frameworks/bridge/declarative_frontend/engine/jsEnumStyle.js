@@ -1340,8 +1340,8 @@ let SourceType;
   SourceType[SourceType.Unknown = 0] = 'Unknown';
   SourceType[SourceType.Mouse = 1] = 'Mouse';
   SourceType[SourceType.TouchScreen = 2] = 'TouchScreen';
-  SourceType[SourceType.Key = 4] = 'Key';
-  SourceType[SourceType.JoyStick = 5] = 'JoyStick';
+  SourceType[SourceType.KEY = 4] = 'KEY';
+  SourceType[SourceType.JOYSTICK = 5] = 'JOYSTICK';
 })(SourceType || (SourceType = {}));
 
 let SourceTool;
@@ -3030,8 +3030,12 @@ class NavPathStack {
     this.isReplace = 0;
     this.nativeStack?.onStateChanged();
   }
-  removeInvalidPage(index) {
+  removeInvalidPage(index, name) {
     if (index >= this.pathArray.length || index < 0) {
+      return;
+    }
+    if (this.pathArray[index].name !== name) {
+      console.warn('[AceNavigation] cannot find info to remove: ', name);
       return;
     }
     if (this.pathArray[index].replacedDestinationInfo !== undefined) {

@@ -231,7 +231,7 @@ class AppStorageV2Impl extends StorageHelper {
     return this.memorizedValues_.has(key);
   }
 
-  public getValue(key: string): any {
+  public getValue(key: string): object {
       const obj = this.memorizedValues_.get(key);
       return obj;
   }

@@ -43,10 +43,15 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
 {
     auto gridLayoutProperty = GetLayoutProperty<GridLayoutProperty>();
     CHECK_NULL_RETURN(gridLayoutProperty, nullptr);
-    auto cols = gridLayoutProperty->GetColumnsTemplate().value_or("");
-    auto rows = gridLayoutProperty->GetRowsTemplate().value_or("");
-    // When rowsTemplate and columnsTemplate is both not setting, use adaptive layout algorithm.
-    if (rows.empty() && cols.empty()) {
+    auto columnsTemplate = gridLayoutProperty->GetColumnsTemplate();
+    auto itemFillPolicy = gridLayoutProperty->GetItemFillPolicy();
+    bool setColumns = false;
+    if (itemFillPolicy.has_value() || columnsTemplate.has_value())  {
+        setColumns = true;
+    }
+    auto rowTemplate = gridLayoutProperty->GetRowsTemplate();
+    bool setRows = rowTemplate.has_value();
+    if (!setColumns && !setRows) {
         return MakeRefPtr<GridAdaptiveLayoutAlgorithm>(info_);
     }
 
@@ -54,7 +59,7 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
         info_.targetIndex_ = targetIndex_;
     }
     // When rowsTemplate and columnsTemplate is both setting, use static layout algorithm.
-    if (!rows.empty() && !cols.empty()) {
+    if (setColumns && setRows) {
         return MakeRefPtr<GridLayoutAlgorithm>(info_);
     }
 

@@ -1399,6 +1399,14 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg027, TestSize.Level1)
     context_->rootNode_->geometryNode_->frame_.rect_.y_ = 3.0;
     context_->StartWindowSizeChangeAnimate(DEFAULT_INT3, DEFAULT_INT3, WindowSizeChangeReason::UNDEFINED);
     EXPECT_EQ(context_->rootNode_->GetGeometryNode()->GetFrameOffset().GetY(), 0);
+
+    /**
+     * @tc.steps6: Call the function StartWindowSizeChangeAnimate with WindowSizeChangeReason::SCENE_WITH_ANIMATION.
+     * @tc.expected: The designWidthScale_ is changed to DEFAULT_INT3.
+     */
+    context_->designWidthScale_ = DEFAULT_DOUBLE0;
+    context_->StartWindowSizeChangeAnimate(DEFAULT_INT3, DEFAULT_INT3, WindowSizeChangeReason::SCENE_WITH_ANIMATION);
+    EXPECT_DOUBLE_EQ(context_->designWidthScale_, DEFAULT_INT3);
 }
 
 /**

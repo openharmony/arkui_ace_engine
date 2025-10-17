@@ -46,9 +46,9 @@ public:
     }
 
 private:
-    void Init(const SizeF& frameSize);
+    void Init(const SizeF& frameSize, double originalWidth);
     /* init WaterFlow without Sections */
-    void SingleInit(const SizeF& frameSize);
+    void SingleInit(const SizeF& frameSize, double originalWidth);
     /**
      * @brief check if any items have changed and require a re-layout
      *

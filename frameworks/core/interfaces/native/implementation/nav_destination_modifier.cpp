@@ -77,7 +77,7 @@ void SetOnShownImpl(Ark_NativePointer node,
         // Implement Reset value
         return;
     }
-    auto onShownEvent = [arkCallback = CallbackHelper(*optValue)]() {
+    auto onShownEvent = [arkCallback = CallbackHelper(*optValue)](int32_t reason) {
         arkCallback.InvokeSync();
     };
     NavDestinationModelStatic::SetOnShown(frameNode, std::move(onShownEvent));
@@ -92,7 +92,7 @@ void SetOnHiddenImpl(Ark_NativePointer node,
         // Implement Reset value
         return;
     }
-    auto onHiddenEvent = [arkCallback = CallbackHelper(*optValue)]() { arkCallback.InvokeSync(); };
+    auto onHiddenEvent = [arkCallback = CallbackHelper(*optValue)](int32_t reason) { arkCallback.InvokeSync(); };
     NavDestinationModelStatic::SetOnHidden(frameNode, std::move(onHiddenEvent));
 }
 void SetOnBackPressedImpl(Ark_NativePointer node,
@@ -204,7 +204,13 @@ void SetSystemBarStyleImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    LOGE("ARKOALA NavDestination.SystemBarStyleImpl -> Method is not implemented, Opt_CustomObject is not supported!");
+    auto optValue = Converter::GetOptPtr(value);
+    auto contentColor = optValue ? Converter::OptConvert<Color>(optValue->statusBarContentColor): std::nullopt;
+    if (!contentColor) {
+        // Implement Reset value
+        return;
+    }
+    NavDestinationModelStatic::SetSystemBarStyle(frameNode, *contentColor);
 }
 void SetRecoverableImpl(Ark_NativePointer node,
                         const Opt_Boolean* value)

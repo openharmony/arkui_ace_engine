@@ -3344,7 +3344,7 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager057, TestSize.Level1)
     accessibilityProperty->accessibilityGroupOptions_ = accessibilityGroupOptions;
 
     /**
-     * @tc.steps: step2. test ResetAccessibilityGroupOptions
+     * @tc.steps: step3. test ResetAccessibilityGroupOptions
      */
     EXPECT_TRUE(accessibilityProperty->accessibilityGroupOptions_.has_value());
     accessibilityProperty->ResetAccessibilityGroupOptions();

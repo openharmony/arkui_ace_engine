@@ -75,7 +75,35 @@ void ResetListLanes(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ListModelNG::SetLanes(frameNode, 1);
+    ListModelNG::ResetItemFillPolicy(frameNode);
     ListModelNG::SetLaneGutter(frameNode, Dimension(0));
+}
+
+void SetListItemFillPolicy(ArkUINodeHandle node, ArkUI_Int32 fillType, const struct ArkUIDimensionType* gutterType)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetLanes(frameNode, 1);
+    if (fillType >= static_cast<int32_t>(PresetFillType::BREAKPOINT_DEFAULT) &&
+        fillType <= static_cast<int32_t>(PresetFillType::BREAKPOINT_SM2MD3LG5)) {
+        ListModelNG::SetItemFillPolicy(frameNode, static_cast<PresetFillType>(fillType));
+    }
+    Dimension gutter = Dimension(gutterType->value, static_cast<OHOS::Ace::DimensionUnit>(gutterType->units));
+    ListModelNG::SetLaneGutter(frameNode, gutter);
+}
+
+void ResetListItemFillPolicy(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::ResetItemFillPolicy(frameNode);
+}
+
+ArkUI_Int32 GetListItemFillPolicy(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(ListModelNG::GetItemFillPolicy(frameNode));
 }
 
 void ResetlistLaneMinAndMaxLength(ArkUINodeHandle node)
@@ -929,6 +957,9 @@ const ArkUIListModifier* GetListModifier()
         .setListLanes = SetListLanes,
         .resetListLanes = ResetListLanes,
         .resetlistLaneMinAndMaxLength = ResetlistLaneMinAndMaxLength,
+        .setListItemFillPolicy = SetListItemFillPolicy,
+        .resetListItemFillPolicy = ResetListItemFillPolicy,
+        .getListItemFillPolicy = GetListItemFillPolicy,
         .getListLanes = GetListLanes,
         .getlistLaneMinLength = GetlistLaneMinLength,
         .getListLaneMaxLength = GetListLaneMaxLength,

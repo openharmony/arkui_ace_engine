@@ -326,7 +326,7 @@ class ListLanesModifier extends ModifierWithKey<ArkLanesOpt> {
       getUINativeModule().list.resetListLanes(node);
     } else {
       getUINativeModule().list.setListLanes(node, this.value.lanesNum,
-        this.value.minLength, this.value.maxLength, this.value.gutter);
+        this.value.minLength, this.value.maxLength, this.value.fillType, this.value.gutter);
     }
   }
   checkObjectDiff(): boolean {
@@ -679,17 +679,25 @@ class ArkListComponent extends ArkScrollable<ListAttribute> implements ListAttri
   allowChildTypes(): string[] {
     return ["ListItem", "ListItemGroup"];
   }
-  lanes(value: number | LengthConstrain, gutter?: undefined): this {
+  lanes(value: number | LengthConstrain | ItemFillPolicy, gutter?: Length): this {
     let opt: ArkLanesOpt = new ArkLanesOpt();
     opt.gutter = gutter;
     if (isUndefined(value)) {
       opt.lanesNum = undefined;
     } else if (isNumber(value)) {
       opt.lanesNum = value as number;
-    } else {
-      const lc = value as LengthConstrain;
-      opt.minLength = lc.minLength;
-      opt.maxLength = lc.maxLength;
+    } else if (isObject(value)) {
+      if (isNumber(value.fillType)) {
+        opt.fillType = value.fillType as number;
+      }
+      else {
+        const lc = value as LengthConstrain;
+        opt.minLength = lc.minLength;
+        opt.maxLength = lc.maxLength;
+        if (isUndefined(opt.minLength) && isUndefined(opt.maxLength)) {
+          opt.fillType = -1;
+        }
+      }
     }
     modifierWithKey(this._modifiersWithKeys, ListLanesModifier.identity, ListLanesModifier, opt);
     return this;

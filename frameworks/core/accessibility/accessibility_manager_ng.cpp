@@ -106,6 +106,31 @@ void ConvertTouchEvent2TouchEventInfo(const RefPtr<NG::FrameNode>& node, const T
     eventInfo.SetTarget(eventTarget);
 }
 
+bool NeedChangeToReadableNode(const RefPtr<NG::FrameNode>& curFrameNode, RefPtr<NG::FrameNode>& readableNode)
+{
+    CHECK_NULL_RETURN(curFrameNode, false);
+    auto pipeline = curFrameNode->GetContextRefPtr();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto accessibilityManager = pipeline->GetAccessibilityManager();
+    CHECK_NULL_RETURN(accessibilityManager, false);
+    return accessibilityManager->NeedChangeToReadableNode(curFrameNode, readableNode);
+}
+
+bool CheckAndSendHoverEnterEvent(const RefPtr<NG::FrameNode>& curFrameNode)
+{
+    CHECK_NULL_RETURN(curFrameNode, false);
+    RefPtr<NG::FrameNode> readableNode;
+    auto useChecked = NeedChangeToReadableNode(curFrameNode, readableNode);
+    if (!useChecked) {
+        curFrameNode->OnAccessibilityEvent(AccessibilityEventType::HOVER_ENTER_EVENT);
+        return true;
+    }
+    if (readableNode) {
+        readableNode->OnAccessibilityEvent(AccessibilityEventType::HOVER_ENTER_EVENT);
+    }
+    return true;
+}
+
 bool CheckAndSendHoverEnterByAncestor(const RefPtr<NG::FrameNode>& ancestor)
 {
     CHECK_NULL_RETURN(ancestor, false);
@@ -115,7 +140,7 @@ bool CheckAndSendHoverEnterByAncestor(const RefPtr<NG::FrameNode>& ancestor)
     // need send hover enter when no component hovered to focus outside
     if (pipeline->IsFormRender() || pipeline->IsJsCard() || pipeline->IsJsPlugin()) {
         TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "SendHoverEnterByAncestor");
-        ancestor->OnAccessibilityEvent(AccessibilityEventType::HOVER_ENTER_EVENT);
+        CheckAndSendHoverEnterEvent(ancestor);
         return true;
     }
     return false;
@@ -453,7 +478,7 @@ HandleHoverRet AccessibilityManagerNG::HandleAccessibilityHoverEventInner(
     }
     if (currentHovering && (currentHoveringId != INVALID_NODE_ID)) {
         if (currentHoveringId != lastHoveringId && (!IgnoreCurrentHoveringNode(currentHovering))) {
-            currentHovering->OnAccessibilityEvent(AccessibilityEventType::HOVER_ENTER_EVENT);
+            CheckAndSendHoverEnterEvent(currentHovering);
             sendHoverEnter = true;
         }
         transformHover = NotifyHoverEventToNodeSession(currentHovering, root, param.point,

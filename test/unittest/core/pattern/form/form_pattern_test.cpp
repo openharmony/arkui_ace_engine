@@ -2122,7 +2122,7 @@ HWTEST_F(FormPatternTest, FormPatternTest_060, TestSize.Level0)
     RefPtr<FormNode> frameNode = CreateFromNode();
     auto pattern = frameNode->GetPattern<FormPattern>();
     EXPECT_NE(pattern, nullptr);
-    
+
     AAFwk::Want want;
     int layoutWidthInt = 100;
     want.SetParam(OHOS::AppExecFwk::Constants::PARAM_LAYOUT_WIDTH_KEY, layoutWidthInt);

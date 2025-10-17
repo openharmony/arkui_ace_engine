@@ -743,7 +743,8 @@ OffsetF OverlayManager::CalculateMenuPosition(const RefPtr<FrameNode>& menuWrapp
     if (IsContextMenuDragHideFinished()) {
         return OffsetF(0.0f, 0.0f);
     }
-    UpdateDragMoveVector(offset);
+    auto updateOffset = DragDropFuncWrapper::GetPointRelativeToMainWindow({offset.GetX(), offset.GetY()});
+    UpdateDragMoveVector(updateOffset);
     if (menuMap_.empty() || IsOriginDragMoveVector() || !IsUpdateDragMoveVector()) {
         return OffsetF(0.0f, 0.0f);
     }

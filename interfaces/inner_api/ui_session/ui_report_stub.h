@@ -49,6 +49,16 @@ public:
      */
     void ReportSearchEvent(const std::string& data) override;
 
+    /*
+    * @description: receive proxy side communication to report scroll value
+    */
+    void ReportScrollEvent(const std::string& data) override;
+
+    /*
+    * @description: receive proxy side communication to report life cycle value
+    */
+    void ReportLifeCycleEvent(const std::string& data) override;
+
     /**
      * @description: register a callback when click event occurs execute
      * @param eventCallback callback to be performed
@@ -93,6 +103,18 @@ public:
     void RegisterGetBaseInfoCallback(const EventCallback& eventCallback);
 
     /**
+     * @description: register a callback when get scroll event
+     * @param eventCallback callback to be performed
+     */
+    void RegisterScrollEventCallback(const EventCallback& eventCallback);
+
+    /**
+     * @description: register a callback when get life cycle event
+     * @param eventCallback callback to be performed
+     */
+    void RegisterLifeCycleEventCallback(const EventCallback& eventCallback);
+
+    /**
      * @description: unregister the click callback last register
      */
     void UnregisterClickEventCallback();
@@ -116,6 +138,16 @@ public:
      * @description: unregister the web unfocus event callback last register
      */
     void UnregisterWebUnfocusEventCallback();
+
+    /**
+     * @description: unregister the scroll event callback last register
+     */
+    void UnregisterScrollEventCallback();
+
+    /**
+     * @description: unregister the life cycle event callback last register
+     */
+    void UnregisterLifeCycleEventCallback();
 
     /**
      * @description: report whole inspectorTree for SA
@@ -151,6 +183,8 @@ private:
     EventCallback sendBaseInfoCallback_;
     EventCallback getWebViewCurrentLanguageCallback_;
     EventCallback getCurrentPageNameCallback_;
+    EventCallback scrollEventCallback_;
+    EventCallback lifeCycleEventCallback_;
     std::function<void(int32_t, std::string)> getTranslateTextCallback_;
     std::function<void(std::string, int32_t, bool)> inspectorTreeCallback_;
     std::function<void(int64_t accessibilityId, const std::string& data)> unfocusEvent_;

@@ -1413,6 +1413,10 @@ public:
     RefPtr<TextOverlayModifier> GetOverlayModifier() const { return overlayMod_; };
 
 protected:
+    RefPtr<TextSelectOverlay> GetSelectOverlay() override
+    {
+        return selectOverlay_;
+    }
     bool CanStartAITask() const override;
     std::vector<RectF> GetSelectedRects(int32_t start, int32_t end) override;
     PointF GetTextOffset(const Offset& localLocation, const RectF& contentRect) override;
@@ -1942,10 +1946,9 @@ private:
     // record caret bottom position relative to window when keyboard avoid
     std::optional<float> lastCaretPos_ = std::nullopt;
     int32_t touchedFingerCount_ = 0;
-#if defined(IOS_PLATFORM)
-    TextCompose compose_;
-    bool unmarkText_;
-#endif    
+#if defined(CROSS_PLATFORM)
+    std::shared_ptr<TextEditingValue> editingValue_;
+#endif
 };
 } // namespace OHOS::Ace::NG
 

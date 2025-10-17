@@ -5787,12 +5787,17 @@ void TextPattern::SelectAIDetect()
         auto textPattern = weak.Upgrade();
         CHECK_NULL_VOID(textPattern);
         textPattern->UpdateAIMenuOptions();
-        auto selectOverlay = textPattern->selectOverlay_;
+        auto selectOverlay = textPattern->GetSelectOverlay();
         CHECK_NULL_VOID(selectOverlay);
         selectOverlay->UpdateAISelectMenu();
     };
     selectDetectorAdapter_->SetUpdateAISelectMenuCallBack(std::move(updateTask));
     selectDetectorAdapter_->StartAITask(true /* default value */, true);
+}
+
+RefPtr<TextSelectOverlay> TextPattern::GetSelectOverlay()
+{
+    return selectOverlay_;
 }
 
 void TextPattern::SetTextDetectEnable(bool enable)

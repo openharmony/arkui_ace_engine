@@ -17,6 +17,7 @@
 
 #include "accessibility_system_ability_client.h"
 
+#include "adapter/ohos/osal/accessibility/focus_move/accessibility_focus_move_osal_third.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "js_third_provider_interaction_operation_utils.h"
 
@@ -702,12 +703,34 @@ void JsThirdProviderInteractionOperation::FocusMoveSearchWithCondition(
     const int64_t elementId, const AccessibilityFocusMoveParam param,
     const int32_t requestId, AccessibilityElementOperatorCallback &callback)
 {
+    Accessibility::AccessibilityElementInfo nodeInfo;
+    std::list<Accessibility::AccessibilityElementInfo> infos;
+    auto jsAccessibilityManager = jsAccessibilityManager_.Upgrade();
+    auto accessibilityProvider = accessibilityProvider_.Upgrade();
+    NodeConfig config;
+    GetNodeConfig(config);
+    FocusStrategyOsalThird strategy(jsAccessibilityManager, accessibilityProvider, config);
+    if (FocusStrategyOsal::IsProcessGetScrollAncestor(param)) {
+        strategy.ProcessGetScrollAncestor(elementId, param, infos);
+        auto result = FocusMoveResult::SEARCH_SUCCESS;
+        if (infos.empty()) {
+            nodeInfo.SetValidElement(false);
+            infos.emplace_back(nodeInfo);
+            result = FocusMoveResult::SEARCH_FAIL;
+        }
+        callback.SetFocusMoveSearchWithConditionResult(infos, result, requestId);
+        return;
+    }
+    auto result = strategy.ExecuteFocusMoveSearch(elementId, param, nodeInfo);
+    infos.emplace_back(nodeInfo);
+    callback.SetFocusMoveSearchWithConditionResult(infos, result, requestId);
 }
 
 void JsThirdProviderInteractionOperation::DetectElementInfoFocusableThroughAncestor(
     const AccessibilityElementInfo &info, const int64_t parentId, const int32_t requestId,
     AccessibilityElementOperatorCallback &callback)
 {
+    callback.SetDetectElementInfoFocusableThroughAncestorResult(true, requestId);
 }
 
 int32_t JsThirdProviderInteractionOperation::SendAccessibilityAsyncEventForThird(

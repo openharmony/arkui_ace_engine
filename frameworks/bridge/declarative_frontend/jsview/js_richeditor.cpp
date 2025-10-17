@@ -1125,6 +1125,36 @@ void JSRichEditor::SetOnPaste(const JSCallbackInfo& info)
     RichEditorModel::GetInstance()->SetOnPaste(std::move(onPaste));
 }
 
+void JSRichEditor::SetSelectDetectEnable(const JSCallbackInfo& info)
+{
+    if (info[0]->IsBoolean()) {
+        auto enabled = info[0]->ToBoolean();
+        RichEditorModel::GetInstance()->SetSelectDetectEnable(enabled);
+    }
+}
+
+void JSRichEditor::SetSelectDetectConfig(const JSCallbackInfo& info)
+{
+    std::vector<TextDataDetectType> typesList;
+    if (!info[0]->IsObject()) {
+        return;
+    }
+    auto args = info[0];
+    auto paramObject = JSRef<JSObject>::Cast(args);
+    auto getTypes = paramObject->GetProperty("types");
+    if (!getTypes->IsArray()) {
+        return;
+    }
+    JSRef<JSArray> array = JSRef<JSArray>::Cast(getTypes);
+    for (size_t i = 0; i < array->Length(); ++i) {
+        JSRef<JSVal> type = array->GetValueAt(i);
+        if (type->IsNumber()) {
+            typesList.push_back(static_cast<TextDataDetectType>(type->ToNumber<int32_t>()));
+        }
+    }
+    RichEditorModel::GetInstance()->SetSelectDetectConfig(typesList);
+}
+
 void JSRichEditor::JsEnableDataDetector(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -1179,7 +1209,7 @@ void JSRichEditor::SetPlaceholder(const JSCallbackInfo& info)
         JSRef<JSVal> colorVal = object->GetProperty("fontColor");
         Color fontColor;
         RefPtr<ResourceObject> resourceObject;
-        if (!colorVal->IsNull() && JSContainerBase::ParseJsColor(colorVal, fontColor, resourceObject)) {
+        if (!colorVal->IsNull() && ParseJsColorWithResource(colorVal, fontColor, resourceObject)) {
             RegisterColorResource(key, fontColor, resourceObject);
             options.fontColor = fontColor;
         }
@@ -1267,7 +1297,7 @@ void JSRichEditor::SetCaretColor(const JSCallbackInfo& info)
     const auto& key = NG::StyleManager::CARET_COLOR_KEY;
     UnRegisterResource(key);
     RefPtr<ResourceObject> resourceObject;
-    if (!ParseJsColor(colorVal, color, resourceObject)) {
+    if (!ParseJsColorWithResource(colorVal, color, resourceObject)) {
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetThemeManager()->GetTheme<NG::RichEditorTheme>();
@@ -1290,7 +1320,7 @@ void JSRichEditor::SetSelectedBackgroundColor(const JSCallbackInfo& info)
     const auto& key = NG::StyleManager::SELECTED_BACKGROUND_COLOR_KEY;
     UnRegisterResource(key);
     RefPtr<ResourceObject> resourceObject;
-    if (!ParseJsColor(colorVal, selectedColor, resourceObject)) {
+    if (!ParseJsColorWithResource(colorVal, selectedColor, resourceObject)) {
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetThemeManager()->GetTheme<NG::RichEditorTheme>();
@@ -1467,11 +1497,60 @@ void JSRichEditor::SetScrollBarColor(const JSCallbackInfo& info)
     const auto& key = NG::StyleManager::SCROLL_BAR_COLOR_KEY;
     UnRegisterResource(key);
     RefPtr<ResourceObject> resourceObject;
-    if (Color color; JSContainerBase::ParseColorMetricsToColor(jsValue, color, resourceObject)) {
+    if (Color color; ParseColorMetricsToColor(jsValue, color, resourceObject)) {
         RegisterColorResource(key, color, resourceObject);
         scrollBarColor = color;
     }
     RichEditorModel::GetInstance()->SetScrollBarColor(scrollBarColor);
+}
+
+bool JSRichEditor::ParseColorMetricsToColor(const JSRef<JSVal>& jsValue, Color& result, RefPtr<ResourceObject>& resObj)
+{
+    bool ret = JSContainerBase::ParseColorMetricsToColor(jsValue, result, resObj);
+    CHECK_NULL_RETURN(ret, false);
+ 
+    CHECK_NULL_RETURN(jsValue->IsObject(), ret);
+    auto colorObj = JSRef<JSObject>::Cast(jsValue);
+    auto jsRes = colorObj->GetProperty("res_");
+    if (!jsRes->IsUndefined() && !jsRes->IsNull() && jsRes->IsObject()) {
+        JSRef<JSObject> jsResObj = JSRef<JSObject>::Cast(jsRes);
+        JSViewAbstract::CompleteResourceObject(jsResObj);
+        resObj = JSViewAbstract::GetResourceObject(jsResObj);
+    }
+    return true;
+}
+ 
+bool JSRichEditor::ParseJsColorWithResource(const JSRef<JSVal>& colorObj, Color& result, RefPtr<ResourceObject>& resObj)
+{
+    bool ret = JSViewAbstract::ParseJsColor(colorObj, result, resObj);
+    CHECK_NULL_RETURN(ret, false);
+ 
+    CHECK_NULL_RETURN(colorObj->IsObject(), ret);
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(colorObj);
+    JSViewAbstract::CompleteResourceObject(jsObj);
+    resObj = JSViewAbstract::GetResourceObject(jsObj);
+    return true;
+}
+ 
+bool JSRichEditor::ParseJsSymbolColorWithResource(const JSRef<JSVal>& jsValue, std::vector<Color>& result,
+    std::vector<std::pair<int32_t, RefPtr<ResourceObject>>>& resObjArr)
+{
+    CHECK_NULL_RETURN(jsValue->IsArray(), false);
+ 
+    JSRef<JSArray> array = JSRef<JSArray>::Cast(jsValue);
+    for (size_t i = 0; i < array->Length(); i++) {
+        JSRef<JSVal> value = array->GetValueAt(i);
+        CHECK_NULL_RETURN(value->IsNumber() || value->IsString() || value->IsObject(), false);
+        RefPtr<ResourceObject> resObj;
+        Color color;
+        ParseJsColorWithResource(value, color, resObj);
+        result.emplace_back(color);
+        if (resObj) {
+            std::pair<int32_t, RefPtr<ResourceObject>> pair(i, resObj);
+            resObjArr.push_back(pair);
+        }
+    }
+    return true;
 }
 
 void JSRichEditor::RegisterColorResource(
@@ -1479,7 +1558,7 @@ void JSRichEditor::RegisterColorResource(
     const Color& color,
     const RefPtr<ResourceObject>& resourceObject)
 {
-    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform() && resourceObject);
+    CHECK_NULL_VOID(resourceObject);
     RegisterResource<Color>(key, resourceObject, color);
 }
 
@@ -1524,6 +1603,8 @@ void JSRichEditor::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditor>::StaticMethod("copyOptions", &JSRichEditor::SetCopyOptions);
     JSClass<JSRichEditor>::StaticMethod("bindSelectionMenu", &JSRichEditor::BindSelectionMenu);
     JSClass<JSRichEditor>::StaticMethod("onPaste", &JSRichEditor::SetOnPaste);
+    JSClass<JSRichEditor>::StaticMethod("enableSelectedDataDetector", &JSRichEditor::SetSelectDetectEnable);
+    JSClass<JSRichEditor>::StaticMethod("selectedDataDetectorConfig", &JSRichEditor::SetSelectDetectConfig);
     JSClass<JSRichEditor>::StaticMethod("enableDataDetector", &JSRichEditor::JsEnableDataDetector);
     JSClass<JSRichEditor>::StaticMethod("enablePreviewText", &JSRichEditor::JsEnablePreviewText);
     JSClass<JSRichEditor>::StaticMethod("dataDetectorConfig", &JSRichEditor::JsDataDetectorConfig);
@@ -1629,7 +1710,7 @@ void JSRichEditorController::ParseJsSymbolSpanStyle(
     COLOR_MODE_LOCK(GetColorMode());
     std::vector<Color> symbolColor;
     std::vector<std::pair<int32_t, RefPtr<ResourceObject>>> resObjArr;
-    if (!fontColor->IsNull() && JSContainerBase::ParseJsSymbolColor(fontColor, symbolColor, true, resObjArr)) {
+    if (!fontColor->IsNull() && JSRichEditor::ParseJsSymbolColorWithResource(fontColor, symbolColor, resObjArr)) {
         updateSpanStyle.updateSymbolColor = symbolColor;
         style.SetSymbolColorList(symbolColor);
         NG::StyleManager::AddSymbolColorResource(style, resObjArr);
@@ -2183,9 +2264,11 @@ void JSRichEditorController::ParseOptions(const JSCallbackInfo& args, SpanOption
     }
     COLOR_MODE_LOCK(GetColorMode());
     JSRef<JSVal> colorMetrics = placeholderOptionObject->GetProperty("dragBackgroundColor");
+    RefPtr<ResourceObject> resourceObject;
     if (Color dragBackgroundColor; !colorMetrics->IsNull() &&
-        JSContainerBase::ParseColorMetricsToColor(colorMetrics, dragBackgroundColor)) {
+        JSRichEditor::ParseColorMetricsToColor(colorMetrics, dragBackgroundColor, resourceObject)) {
         placeholderSpan.dragBackgroundColor = dragBackgroundColor;
+        placeholderSpan.dragBackgroundColorResObj = resourceObject;
     }
     JSRef<JSVal> isDragShadowNeeded = placeholderOptionObject->GetProperty("isDragShadowNeeded");
     if (!isDragShadowNeeded->IsNull() && isDragShadowNeeded->IsBoolean()) {
@@ -2610,11 +2693,12 @@ void JSRichEditorBaseController::ParseJsTextStyle(
     COLOR_MODE_LOCK(GetColorMode());
     Color textColor;
     RefPtr<ResourceObject> colorResObj;
-    if (!fontColor->IsNull() && JSContainerBase::ParseJsColor(fontColor, textColor, colorResObj)) {
+    if (!fontColor->IsNull() && JSRichEditor::ParseJsColorWithResource(fontColor, textColor, colorResObj)) {
         style.SetTextColor(textColor);
         updateSpanStyle.updateTextColor = textColor;
         updateSpanStyle.useThemeFontColor = false;
         NG::StyleManager::AddTextColorResource(style, colorResObj);
+        NG::StyleManager::AddTextColorResource(updateSpanStyle, colorResObj);
     }
     JSRef<JSVal> fontSize = styleObject->GetProperty("fontSize");
     CalcDimension size;
@@ -2745,11 +2829,12 @@ void JSRichEditorBaseController::ParseTextDecoration(
         JSRef<JSVal> color = decorationObject->GetProperty("color");
         Color decorationColor;
         RefPtr<ResourceObject> colorResObj;
-        if (!color->IsNull() && JSContainerBase::ParseJsColor(color, decorationColor, colorResObj)) {
+        if (!color->IsNull() && JSRichEditor::ParseJsColorWithResource(color, decorationColor, colorResObj)) {
             updateSpanStyle.updateTextDecorationColor = decorationColor;
             style.SetTextDecorationColor(decorationColor);
             updateSpanStyle.useThemeDecorationColor = false;
             NG::StyleManager::AddTextDecorationColorResource(style, colorResObj);
+            NG::StyleManager::AddTextDecorationColorResource(updateSpanStyle, colorResObj);
         }
         JSRef<JSVal> textDecorationStyle = decorationObject->GetProperty("style");
         if (!textDecorationStyle->IsNull() && !textDecorationStyle->IsUndefined()) {
@@ -2786,7 +2871,7 @@ void JSRichEditorBaseController::ParseTextShadow(
         return;
     }
     std::vector<Shadow> shadows;
-    ParseTextShadowFromShadowObject(shadowObject, shadows);
+    ParseTextShadowFromShadowObject(shadowObject, shadows, true);
     if (!shadows.empty()) {
         updateSpanStyle.updateTextShadows = shadows;
         style.SetTextShadows(shadows);
@@ -2799,7 +2884,7 @@ void JSRichEditorBaseController::ParseTextBackgroundStyle(
     ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
     auto backgroundObject = styleObject->GetProperty("textBackgroundStyle");
     CHECK_NULL_VOID(!backgroundObject->IsNull() && !backgroundObject->IsUndefined());
-    auto textBackgroundValue = JSContainerSpan::ParseTextBackgroundStyle(backgroundObject);
+    auto textBackgroundValue = JSContainerSpan::ParseTextBackgroundStyle(backgroundObject, true);
     style.SetTextBackgroundStyle(textBackgroundValue);
     updateSpanStyle.updateTextBackgroundStyle = textBackgroundValue;
 }

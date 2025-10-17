@@ -46,9 +46,11 @@ export class StateDecoratedVariable<T> extends DecoratedV1VariableBase<T> implem
     constructor(owningView: ExtendableComponent | null, varName: string, initValue: T, watchFunc?: WatchFuncType) {
         super('@State', owningView, varName, watchFunc);
         if (isDynamicObject(initValue)) {
-            initValue = getObservedObject(initValue, this);
+            initValue = getObservedObject(initValue);
+            this.backing_ = FactoryInternal.mkInteropDecoratorValue(varName, initValue);
+        } else {
+            this.backing_ = FactoryInternal.mkDecoratorValue(varName, initValue);
         }
-        this.backing_ = FactoryInternal.mkDecoratorValue(varName, initValue);
         // @Watch
         // if initial value is object, register so that property changes trigger
         // @Watch function exec
@@ -72,10 +74,12 @@ export class StateDecoratedVariable<T> extends DecoratedV1VariableBase<T> implem
         }
         let value: T = uiUtils.makeObserved(newValue);
         // for interop
-        if (isDynamicObject(value)) {
-            value = getObservedObject(value, this);
+        if (isDynamicObject(newValue)) {
+            let value = getObservedObject(newValue);
+            this.backing_.setNoCheck(value);
+        } else {
+            this.backing_.setNoCheck(value);
         }
-        this.backing_.setNoCheck(value);
         if (this.setProxyValue) {
             this.setProxyValue!(value);
         }
@@ -84,7 +88,7 @@ export class StateDecoratedVariable<T> extends DecoratedV1VariableBase<T> implem
         // Watch function exec
         // unregister if old value is an object
         this.unregisterWatchFromObservedObjectChanges(oldValue);
-        this.registerWatchForObservedObjectChanges(value);
+        this.registerWatchForObservedObjectChanges(this.backing_.get(false));
         this.execWatchFuncs();
     }
 

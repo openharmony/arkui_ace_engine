@@ -78,6 +78,8 @@ public:
     void SetOnItemDragLeave(OnItemDragLeaveFunc&& onItemDragLeave) override;
     void SetOnItemDragMove(OnItemDragMoveFunc&& onItemDragMove) override;
     void SetOnItemDrop(OnItemDropFunc&& onItemDrop) override;
+    void SetItemFillPolicy(PresetFillType fillType) override;
+    void ResetItemFillPolicy() override;
     RefPtr<ListChildrenMainSize> GetOrCreateListChildrenMainSize() override;
     void ParseResObjDividerStrokeWidth(const RefPtr<ResourceObject>& resObj) override;
     void ParseResObjDividerColor(const RefPtr<ResourceObject>& resObj) override;
@@ -123,6 +125,9 @@ public:
     static void SetListScrollBarColor(FrameNode* frameNode, const std::string& value);
     static void SetLanes(FrameNode* frameNode, int32_t lanes);
     static int32_t GetLanes(FrameNode* frameNode);
+    static void SetItemFillPolicy(FrameNode* frameNode, PresetFillType fillType);
+    static void ResetItemFillPolicy(FrameNode* frameNode);
+    static int32_t GetItemFillPolicy(FrameNode* frameNode);
     static void SetLaneConstrain(FrameNode* frameNode, const Dimension& laneMinLength, const Dimension& laneMaxLength);
     static void SetLaneMinLength(FrameNode* frameNode, const Dimension& laneMinLength);
     static float GetLaneMinLength(FrameNode* frameNode);

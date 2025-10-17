@@ -753,4 +753,29 @@ PaddingProperty ConstraintPaddingPropertyNonNegative(PaddingProperty padding)
     return padding;
 }
 
+WidthBreakpoint GetCalcWidthBreakpoint(const OHOS::Ace::WidthLayoutBreakPoint &finalBreakpoints,
+    double density, double width)
+{
+    WidthBreakpoint breakpoint;
+    if (finalBreakpoints.widthVPXS_ < 0 || GreatNotEqual(finalBreakpoints.widthVPXS_ * density, width)) {
+        breakpoint = WidthBreakpoint::WIDTH_XS;
+    } else if (finalBreakpoints.widthVPSM_ < 0 || GreatNotEqual(finalBreakpoints.widthVPSM_ * density, width)) {
+        breakpoint = WidthBreakpoint::WIDTH_SM;
+    } else if (finalBreakpoints.widthVPMD_ < 0 || GreatNotEqual(finalBreakpoints.widthVPMD_ * density, width)) {
+        breakpoint = WidthBreakpoint::WIDTH_MD;
+    } else if (finalBreakpoints.widthVPLG_ < 0 || GreatNotEqual(finalBreakpoints.widthVPLG_ * density, width)) {
+        breakpoint = WidthBreakpoint::WIDTH_LG;
+    } else if (finalBreakpoints.widthVPXL_ < 0 || GreatNotEqual(finalBreakpoints.widthVPXL_ * density, width)) {
+        breakpoint = WidthBreakpoint::WIDTH_XL;
+    } else {
+        breakpoint = WidthBreakpoint::WIDTH_XXL;
+    }
+    return breakpoint;
+}
+
+WidthBreakpoint GetCommonWidthBreakpoint(double width, double density)
+{
+    WidthLayoutBreakPoint finalBreakpoints = SystemProperties::GetWidthLayoutBreakpoints();
+    return GetCalcWidthBreakpoint(finalBreakpoints, density, width);
+}
 } // namespace OHOS::Ace::NG

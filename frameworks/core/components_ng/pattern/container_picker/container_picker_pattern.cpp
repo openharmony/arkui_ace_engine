@@ -12,11 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "core/components_ng/pattern/container_picker/container_picker_pattern.h"
 
 #include <sys/time.h>
+
 #include "base/log/dump_log.h"
 #include "core/components_ng/pattern/container_picker/container_picker_paint_method.h"
-#include "core/components_ng/pattern/container_picker/container_picker_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -116,6 +117,9 @@ bool ContainerPickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper
 
 float ContainerPickerPattern::ShortestDistanceBetweenCurrentAndTarget()
 {
+    if (totalItemCount_ <= 0) {
+        return 0.0;
+    }
     auto defaultItemHeight = static_cast<float>(PICKER_ITEM_DEFAULT_HEIGHT.ConvertToPx());
     int32_t targetIndex = targetIndex_.value();
     if (!isLoop_) {
@@ -124,8 +128,7 @@ float ContainerPickerPattern::ShortestDistanceBetweenCurrentAndTarget()
     }
     auto forwardDelta = (targetIndex - selectedIndex_ + totalItemCount_) % totalItemCount_;
     auto backwardDelta = (selectedIndex_ - targetIndex + totalItemCount_) % totalItemCount_;
-    return forwardDelta <= backwardDelta ? forwardDelta * defaultItemHeight
-                                         : backwardDelta * defaultItemHeight * -1;
+    return forwardDelta <= backwardDelta ? forwardDelta * defaultItemHeight : backwardDelta * defaultItemHeight * -1;
 }
 
 void ContainerPickerPattern::HandleTargetIndex(
@@ -227,7 +230,7 @@ void ContainerPickerPattern::OnModifyDone()
     containerPickerId_ = host->GetId();
     totalItemCount_ = host->TotalChildCount();
     isLoop_ = IsLoop();
-    
+
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     PickerMarkDirty();
 }
@@ -363,10 +366,10 @@ void ContainerPickerPattern::CreateChildrenClickEvent(RefPtr<UINode>& host)
     const auto& children = host->GetChildren();
     for (auto child : children) {
         auto tag = child->GetTag();
-        if (tag == V2::JS_FOR_EACH_ETS_TAG || tag == V2::JS_SYNTAX_ITEM_ETS_TAG) {
+        if (tag == V2::JS_FOR_EACH_ETS_TAG || tag == V2::JS_SYNTAX_ITEM_ETS_TAG || tag == V2::JS_IF_ELSE_ETS_TAG) {
             CreateChildrenClickEvent(child);
-        } else if (tag == V2::ROW_ETS_TAG || tag == V2::IMAGE_ETS_TAG ||
-                   tag == V2::TEXT_ETS_TAG || tag == V2::SYMBOL_ETS_TAG) {
+        } else if (tag == V2::ROW_ETS_TAG || tag == V2::IMAGE_ETS_TAG || tag == V2::TEXT_ETS_TAG ||
+                   tag == V2::SYMBOL_ETS_TAG) {
             RefPtr<ContainerPickerEventParam> param = MakeRefPtr<ContainerPickerEventParam>();
             param->itemNodeId = child->GetId();
             RefPtr<FrameNode> childNode = AceType::DynamicCast<FrameNode>(child);
@@ -664,6 +667,7 @@ void ContainerPickerPattern::StartInertialAnimation()
             pattern->animationOffset_ = 0.0f;
         }
         pattern->isInertialRolling = false;
+        pattern->FireScrollStopEvent();
     };
     snapOffsetProperty_->AnimateWithVelocity(option, -endOffset, dragVelocity_, finishCallback);
     isNeedStartInertialAnimation_ = false;
@@ -833,7 +837,8 @@ void ContainerPickerPattern::CreateAnimation(double from, double to)
             pattern->lastAnimationScroll_ = 0.0f;
             pattern->animationOffset_ = 0.0f;
             pattern->FireScrollStopEvent();
-        }, nullptr, context);
+        },
+        nullptr, context);
 }
 
 void ContainerPickerPattern::CreateSwipeToTargetAnimation(double from, double to)
@@ -860,7 +865,8 @@ void ContainerPickerPattern::CreateSwipeToTargetAnimation(double from, double to
             pattern->animationOffset_ = 0.0f;
             pattern->FireScrollStopEvent();
             pattern->isTargetAnimationRunning_ = false;
-        }, nullptr, context);
+        },
+        nullptr, context);
 }
 
 void ContainerPickerPattern::PickerMarkDirty()
@@ -920,8 +926,9 @@ double ContainerPickerPattern::GetCurrentTime() const
 
 float ContainerPickerPattern::CalculateResetOffset(float totalOffset)
 {
-    ContainerPickerDirection dir = GreatNotEqual(animationOffset_ + dragOffsetForAnimation_, 0.0f) ?
-        ContainerPickerDirection::UP : ContainerPickerDirection::DOWN;
+    ContainerPickerDirection dir = GreatNotEqual(animationOffset_ + dragOffsetForAnimation_, 0.0f)
+                                       ? ContainerPickerDirection::UP
+                                       : ContainerPickerDirection::DOWN;
     int32_t n = std::trunc(totalOffset) / ITEM_HEIGHT_PX;
     float distance = std::abs(totalOffset - ITEM_HEIGHT_PX * n);
     float resetOffset = 0.0f;

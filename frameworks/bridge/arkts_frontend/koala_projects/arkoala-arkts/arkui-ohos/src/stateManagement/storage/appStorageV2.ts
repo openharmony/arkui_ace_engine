@@ -16,6 +16,7 @@
 import { uiUtils } from '../base/uiUtilsImpl';
 import { StorageHelper } from './persistenceV2'
 import { StorageDefaultCreator } from './persistenceV2'
+import { transferTypeName } from './persistenceV2'
 import { StateMgmtConsole } from '../tools/stateMgmtDFX';
 import { InteropAppStorageV2 } from '../interop/interopStorageV2';
 
@@ -88,7 +89,7 @@ export class AppStorageV2Impl {
     }
 
     public connect<T extends object>(ttype: Type, defaultCreator?: StorageDefaultCreator<T>): T | undefined {
-        return this.connect(ttype, ttype.getName(), defaultCreator);
+        return this.connect(ttype, transferTypeName(ttype.getName()), defaultCreator);
     }
 
     public remove(keyOrType: string | Type): void {
@@ -106,7 +107,7 @@ export class AppStorageV2Impl {
     private removeFromMemory(key: string): void {
         const isDeleted: boolean = this.memorizedValues_.delete(key);
         if (!isDeleted) {
-            StateMgmtConsole.log(StorageHelper.DELETE_NOT_EXIST_KEY);
+            StateMgmtConsole.warn(StorageHelper.DELETE_NOT_EXIST_KEY);
         }
     }
 
@@ -116,7 +117,7 @@ export class AppStorageV2Impl {
 
     public getValue(key: string): object | undefined {
         const obj = this.memorizedValues_.get(key);
-        if (obj == undefined) {
+        if (obj === undefined) {
             return undefined;
         }
         return obj!;

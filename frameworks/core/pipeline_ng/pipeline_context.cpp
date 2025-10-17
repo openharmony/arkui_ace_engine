@@ -1977,6 +1977,12 @@ void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height
             FlushUITasks();
             break;
         }
+        case WindowSizeChangeReason::SCENE_WITH_ANIMATION: {
+            safeAreaManager_->UpdateKeyboardOffset(0.0);
+            SetRootRect(width, height, 0.0);
+            FlushUITasks();
+            break;
+        }
         case WindowSizeChangeReason::DRAG_START:
         case WindowSizeChangeReason::DRAG:
         case WindowSizeChangeReason::DRAG_END:
@@ -5763,7 +5769,7 @@ std::string PipelineContext::GetCurrentExtraInfo()
 
 void PipelineContext::SetCursor(int32_t cursorValue)
 {
-    if (cursorValue >= 0 && cursorValue <= static_cast<int32_t>(MouseFormat::RUNNING)) {
+    if (cursorValue >= 0 && cursorValue <= static_cast<int32_t>(MouseFormat::LASER_CURSOR_DOT_RED)) {
         auto mouseFormat = static_cast<MouseFormat>(cursorValue);
         auto mouseStyleManager = eventManager_->GetMouseStyleManager();
         CHECK_NULL_VOID(mouseStyleManager);
@@ -5780,7 +5786,6 @@ void PipelineContext::RestoreDefault(int32_t windowId, MouseStyleChangeReason re
     auto mouseStyleManager = eventManager_->GetMouseStyleManager();
     CHECK_NULL_VOID(mouseStyleManager);
     mouseStyleManager->SetUserSetCursor(false);
-    eventManager_->FlushCursorStyleRequests();
 }
 
 void PipelineContext::FlushAnimationDirtysWhenExist(const AnimationOption& option)

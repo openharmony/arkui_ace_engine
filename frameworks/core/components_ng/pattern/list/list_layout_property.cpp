@@ -28,6 +28,19 @@ V2::ItemDivider ItemDividerFromJson(const std::unique_ptr<JsonValue>& json)
 }
 } // namespace
 
+void ListLayoutProperty::SetListItemFillPolicy(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    if (propItemFillPolicy_.has_value()) {
+        if (propItemFillPolicy_.value() == PresetFillType::BREAKPOINT_SM1MD2LG3) {
+            json->PutExtAttr("itemFillPolicy", "PresetFillType::BREAKPOINT_SM1MD2LG3", filter);
+        } else if (propItemFillPolicy_.value() == PresetFillType::BREAKPOINT_SM2MD3LG5) {
+            json->PutExtAttr("itemFillPolicy", "PresetFillType::BREAKPOINT_SM2MD3LG5", filter);
+        } else {
+            json->PutExtAttr("itemFillPolicy", "PresetFillType::BREAKPOINT_DEFAULT", filter);
+        }
+    }
+}
+
 void ListLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     ScrollableLayoutProperty::ToJsonValue(json, filter);
@@ -55,6 +68,7 @@ void ListLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
         propLaneMinLength_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
     json->PutExtAttr("laneMaxLength",
         propLaneMaxLength_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
+    SetListItemFillPolicy(json, filter);
     json->PutExtAttr("laneGutter",
         propLaneGutter_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
     if (propListItemAlign_.value_or(V2::ListItemAlign::START) == V2::ListItemAlign::START) {
@@ -133,6 +147,7 @@ void ListLayoutProperty::Clone(RefPtr<LayoutProperty> layoutProperty) const
     value->propStackFromEnd_ = CloneStackFromEnd();
     value->propSyncLoad_ = CloneSyncLoad();
     value->propCacheRange_ = CloneCacheRange();
+    value->propItemFillPolicy_ = CloneItemFillPolicy();
 }
 
 void ListLayoutProperty::Reset()
@@ -156,5 +171,6 @@ void ListLayoutProperty::Reset()
     ResetStackFromEnd();
     ResetSyncLoad();
     ResetCacheRange();
+    ResetItemFillPolicy();
 }
 } // namespace OHOS::Ace::NG

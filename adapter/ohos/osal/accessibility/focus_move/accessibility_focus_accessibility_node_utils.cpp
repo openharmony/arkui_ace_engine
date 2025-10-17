@@ -24,11 +24,11 @@ AccessibilityNodeRulesCheckNode::AccessibilityNodeRulesCheckNode(
 {
 }
 
-bool AccessibilityNodeRulesCheckNode::GetPropText(Accessibility::PropValueStub& value)
+bool AccessibilityNodeRulesCheckNode::GetPropText(Accessibility::PropValue& value)
 {
     auto node = weakNode_.Upgrade();
     CHECK_NULL_RETURN(node, false);
-    value.valueType = Accessibility::ValueTypeStub::STRING;
+    value.valueType = Accessibility::ValueType::STRING;
     if (node->GetIsPassword()) {
         std::string strStar(node->GetText().size(), '*');
         value.valueStr = strStar;
@@ -38,82 +38,82 @@ bool AccessibilityNodeRulesCheckNode::GetPropText(Accessibility::PropValueStub& 
     return true;
 }
 
-bool AccessibilityNodeRulesCheckNode::GetPropHintText(Accessibility::PropValueStub& value)
+bool AccessibilityNodeRulesCheckNode::GetPropHintText(Accessibility::PropValue& value)
 {
     auto node = weakNode_.Upgrade();
     CHECK_NULL_RETURN(node, false);
-    value.valueType = Accessibility::ValueTypeStub::STRING;
+    value.valueType = Accessibility::ValueType::STRING;
     value.valueStr = node->GetHintText();
     return true;
 }
 
-bool AccessibilityNodeRulesCheckNode::GetPropDesc(Accessibility::PropValueStub& value)
+bool AccessibilityNodeRulesCheckNode::GetPropDesc(Accessibility::PropValue& value)
 {
     auto node = weakNode_.Upgrade();
     CHECK_NULL_RETURN(node, false);
-    value.valueType = Accessibility::ValueTypeStub::STRING;
+    value.valueType = Accessibility::ValueType::STRING;
     value.valueStr = "";
     return true;
 }
 
-bool AccessibilityNodeRulesCheckNode::GetPropAccessibilityText(Accessibility::PropValueStub& value)
+bool AccessibilityNodeRulesCheckNode::GetPropAccessibilityText(Accessibility::PropValue& value)
 {
     auto node = weakNode_.Upgrade();
     CHECK_NULL_RETURN(node, false);
-    value.valueType = Accessibility::ValueTypeStub::STRING;
+    value.valueType = Accessibility::ValueType::STRING;
     value.valueStr = "";
     return true;
 }
 
-bool AccessibilityNodeRulesCheckNode::GetPropType(Accessibility::PropValueStub& value)
+bool AccessibilityNodeRulesCheckNode::GetPropType(Accessibility::PropValue& value)
 {
     auto node = weakNode_.Upgrade();
     CHECK_NULL_RETURN(node, false);
-    value.valueType = Accessibility::ValueTypeStub::STRING;
+    value.valueType = Accessibility::ValueType::STRING;
     value.valueStr = node->GetTag();
     return true;
 }
 
-bool AccessibilityNodeRulesCheckNode::GetPropAccessibilityLevel(Accessibility::PropValueStub& value)
+bool AccessibilityNodeRulesCheckNode::GetPropAccessibilityLevel(Accessibility::PropValue& value)
 {
     auto node = weakNode_.Upgrade();
     CHECK_NULL_RETURN(node, false);
-    value.valueType = Accessibility::ValueTypeStub::STRING;
+    value.valueType = Accessibility::ValueType::STRING;
     value.valueStr = "auto";
     return true;
 }
 
-bool AccessibilityNodeRulesCheckNode::GetPropAccessibilityGroup(Accessibility::PropValueStub& value)
+bool AccessibilityNodeRulesCheckNode::GetPropAccessibilityGroup(Accessibility::PropValue& value)
 {
     auto node = weakNode_.Upgrade();
     CHECK_NULL_RETURN(node, false);
-    value.valueType = Accessibility::ValueTypeStub::BOOL;
+    value.valueType = Accessibility::ValueType::BOOL;
     value.valueBool = false;
     return true;
 }
 
-bool AccessibilityNodeRulesCheckNode::GetPropIsEnable(Accessibility::PropValueStub& value)
+bool AccessibilityNodeRulesCheckNode::GetPropIsEnable(Accessibility::PropValue& value)
 {
     auto node = weakNode_.Upgrade();
     CHECK_NULL_RETURN(node, false);
-    value.valueType = Accessibility::ValueTypeStub::BOOL;
+    value.valueType = Accessibility::ValueType::BOOL;
     value.valueBool = node->GetEnabledState();
     return true;
 }
 
-bool AccessibilityNodeRulesCheckNode::GetPropChildrenCount(Accessibility::PropValueStub& value)
+bool AccessibilityNodeRulesCheckNode::GetPropChildrenCount(Accessibility::PropValue& value)
 {
     auto node = weakNode_.Upgrade();
     CHECK_NULL_RETURN(node, false);
-    value.valueType = Accessibility::ValueTypeStub::NUMBER;
+    value.valueType = Accessibility::ValueType::NUMBER;
     auto children = node->GetChildList();
     value.valueNum = static_cast<int32_t>(children.size());
     return true;
 }
 
-bool AccessibilityNodeRulesCheckNode::GetPropActionNames(Accessibility::PropValueStub& value)
+bool AccessibilityNodeRulesCheckNode::GetPropActionNames(Accessibility::PropValue& value)
 {
-    value.valueType = Accessibility::ValueTypeStub::ARRAY;
+    value.valueType = Accessibility::ValueType::ARRAY;
     auto node = weakNode_.Upgrade();
     CHECK_NULL_RETURN(node, false);
     auto supportAceActions = node->GetSupportAction();
@@ -147,9 +147,9 @@ std::vector<std::shared_ptr<FocusRulesCheckNode>> AccessibilityNodeRulesCheckNod
     return GetChildrenTemplate<FocusRulesCheckNode>();
 }
 
-std::vector<std::shared_ptr<Accessibility::ReadableRulesNodeStub>> AccessibilityNodeRulesCheckNode::GetChildren()
+std::vector<std::shared_ptr<Accessibility::ReadableRulesNode>> AccessibilityNodeRulesCheckNode::GetChildren()
 {
-    return GetChildrenTemplate<Accessibility::ReadableRulesNodeStub>();
+    return GetChildrenTemplate<Accessibility::ReadableRulesNode>();
 }
 
 std::shared_ptr<FocusRulesCheckNode> AccessibilityNodeRulesCheckNode::GetAceParent()
@@ -163,7 +163,7 @@ std::shared_ptr<FocusRulesCheckNode> AccessibilityNodeRulesCheckNode::GetAcePare
     return checkNode;
 }
 
-std::shared_ptr<Accessibility::ReadableRulesNodeStub> AccessibilityNodeRulesCheckNode::GetParent()
+std::shared_ptr<Accessibility::ReadableRulesNode> AccessibilityNodeRulesCheckNode::GetParent()
 {
     return GetAceParent();
 }

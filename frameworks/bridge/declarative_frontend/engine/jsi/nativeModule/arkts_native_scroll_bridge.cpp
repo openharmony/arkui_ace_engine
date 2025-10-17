@@ -333,13 +333,12 @@ ArkUINativeModuleValue ScrollBridge::SetScrollBarColor(ArkUIRuntimeCallInfo* run
     if (!ArkTSUtils::ParseJsColorAlpha(vm, barcolorArg, color, resObj, nodeInfo)) {
         GetArkUINodeModifiers()->getScrollModifier()->resetScrollScrollBarColor(nativeNode);
     } else {
-        if (SystemProperties::ConfigChangePerform()) {
-            GetArkUINodeModifiers()->getScrollModifier()->createWithResourceObjScrollBarColor(
-                nativeNode, reinterpret_cast<void*>(AceType::RawPtr(resObj)));
-        }
         GetArkUINodeModifiers()->getScrollModifier()->setScrollScrollBarColor(nativeNode, color.GetValue());
     }
-
+    if (SystemProperties::ConfigChangePerform()) {
+        GetArkUINodeModifiers()->getScrollModifier()->createWithResourceObjScrollBarColor(
+            nativeNode, reinterpret_cast<void*>(AceType::RawPtr(resObj)));
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 

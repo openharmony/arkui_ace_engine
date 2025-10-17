@@ -106,6 +106,7 @@ protected:
     virtual void OnAppRemoveStartingWindow() {}
     virtual void OnUpdateSnapshotWindow() {}
     virtual void OnPreLoadStartingWindowFinished() {}
+    virtual void OnRestart() {}
 
     RefPtr<FrameNode> startingWindow_;
     RefPtr<StartingWindowLayoutHelper> startingWindowLayoutHelper_;
@@ -132,6 +133,7 @@ private:
     bool IsSnapshotSizeChanged();
     void UpdateStartingWindowProperty(const Rosen::SessionInfo& sessionInfo,
         Color &color, ImageSourceInfo &sourceInfo);
+    bool CheckAndHandleRestartApp();
     bool CheckAndAddStartingWindowAboveLocked();
     void HideStartingWindow();
     void AddBackgroundColorDelayed();

@@ -243,15 +243,6 @@ public:
         return blurRadius_ > 0.0 || spreadRadius_ > 0.0 || offset_ != Offset::Zero();
     }
 
-    void UpdateColorByResourceId()
-    {
-        if (SystemProperties::ConfigChangePerform()) {
-            ReloadResources();
-            return;
-        }
-        color_.UpdateColorByResourceId();
-    }
-
     void AddResource(
         const std::string& key,
         const RefPtr<ResourceObject>& resObj,

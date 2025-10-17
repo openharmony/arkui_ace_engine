@@ -3422,6 +3422,8 @@ frameworks/core/interfaces/native/implementation/swiper_modifier.cpp @arkui_navi
 frameworks/core/interfaces/native/implementation/select_modifier.cpp @arkuipopupwindow_all
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/@ohos.arkui.inspector.ts @arkui-idlize
 
+interfaces/ets/ani/observer @arkui_framework_resource
+
 [Test source]
 test/mock/base @arkui_framework_xnode
 test/mock/core/event/ @ArkUI_Event
@@ -3549,6 +3551,8 @@ test/unittest/core/pattern/overlay/sheet_drag_bar_test_ng.cpp @arkuicodepulse
 test/unittest/core/pattern/overlay/sheet_popup_test_ng.cpp @arkuicodepulse
 test/unittest/core/pattern/overlay/sheet_presentation_test_five_ng.cpp @arkuicodepulse
 test/unittest/core/pattern/overlay/sheet_presentation_test_four_ng.cpp @arkuicodepulse
+test/unittest/core/pattern/overlay/sheet_presentation_test_six_ng.cpp @arkuicodepulse
+test/unittest/core/pattern/overlay/sheet_presentation_test_seven_ng.cpp @arkuicodepulse
 test/unittest/core/pattern/overlay/sheet_presentation_test_ng.cpp @arkuicodepulse
 test/unittest/core/pattern/overlay/sheet_presentation_test_three_ng.cpp @arkuicodepulse
 test/unittest/core/pattern/overlay/sheet_presentation_test_two_ng.cpp @arkuicodepulse

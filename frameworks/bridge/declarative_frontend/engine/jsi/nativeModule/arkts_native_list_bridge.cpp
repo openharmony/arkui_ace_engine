@@ -38,6 +38,32 @@ constexpr int32_t DEFAULT_CACHED_COUNT = 1;
 
 constexpr int32_t ARG_LENGTH = 3;
 
+void SetGutterType(const Local<JSValueRef>& gutterArg, const EcmaVM* vm, ArkUIDimensionType* gutterType)
+{
+    CalcDimension gutter = Dimension(0.0);
+    if (!gutterArg->IsUndefined() && ArkTSUtils::ParseJsDimensionVp(vm, gutterArg, gutter)) {
+        if (gutter.IsNegative()) {
+            gutter.Reset();
+        }
+        gutterType->value = gutter.Value();
+        gutterType->units = static_cast<int32_t>(gutter.Unit());
+    }
+}
+
+void SetFillType(const Local<JSValueRef>& fillTypeArg, const EcmaVM* vm, ArkUINodeHandle nativeNode,
+    const struct ArkUIDimensionType* gutterType)
+{
+    int32_t fillType = -1;
+    if (!fillTypeArg->IsUndefined()) {
+        if (ArkTSUtils::ParseJsInteger(vm, fillTypeArg, fillType) && fillType == -1) {
+            fillType = 0;
+        }
+        GetArkUINodeModifiers()->getListModifier()->setListItemFillPolicy(nativeNode, fillType, gutterType);
+    } else {
+        GetArkUINodeModifiers()->getListModifier()->resetListItemFillPolicy(nativeNode);
+    }
+}
+
 ArkUINativeModuleValue ListBridge::SetListLanes(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -46,23 +72,18 @@ ArkUINativeModuleValue ListBridge::SetListLanes(ArkUIRuntimeCallInfo* runtimeCal
     Local<JSValueRef> laneNumArg = runtimeCallInfo->GetCallArgRef(1);   // 1: index of parameter laneNum
     Local<JSValueRef> minLengthArg = runtimeCallInfo->GetCallArgRef(2); // 2: index of parameter minLength
     Local<JSValueRef> maxLengthArg = runtimeCallInfo->GetCallArgRef(3); // 3: index of parameter maxLength
-    Local<JSValueRef> gutterArg = runtimeCallInfo->GetCallArgRef(4);    // 4: index of parameter gutter
+    Local<JSValueRef> fillTypeArg = runtimeCallInfo->GetCallArgRef(4); // 4: index of parameter fillType
+    Local<JSValueRef> gutterArg = runtimeCallInfo->GetCallArgRef(5);    // 5: index of parameter gutter
     auto nativeNode = nodePtr(frameNodeArg->ToNativePointer(vm)->Value());
     ArkUIDimensionType gutterType;
     ArkUIDimensionType minLengthType;
     ArkUIDimensionType maxLengthType;
 
-    CalcDimension gutter = Dimension(0.0);
     int32_t laneNum = 1;
     CalcDimension minLength = -1.0_vp;
     CalcDimension maxLength = -1.0_vp;
-    if (!gutterArg->IsUndefined() && ArkTSUtils::ParseJsDimensionVp(vm, gutterArg, gutter)) {
-        if (gutter.IsNegative()) {
-            gutter.Reset();
-        }
-        gutterType.value = gutter.Value();
-        gutterType.units = static_cast<int32_t>(gutter.Unit());
-    }
+    SetGutterType(gutterArg, vm, &gutterType);
+    SetFillType(fillTypeArg, vm, nativeNode, &gutterType);
     if (!laneNumArg->IsUndefined() && ArkTSUtils::ParseJsInteger(vm, laneNumArg, laneNum)) {
         minLengthType.value = minLength.Value();
         minLengthType.units = static_cast<int32_t>(minLength.Unit());
@@ -600,9 +621,9 @@ ArkUINativeModuleValue ListBridge::SetListScrollBarColor(ArkUIRuntimeCallInfo* r
         } else {
             GetArkUINodeModifiers()->getListModifier()->setListScrollBarColor(
                 nativeNode, color.ColorToString().c_str());
-            GetArkUINodeModifiers()->getListModifier()->createWithResourceObjScrollBarColor(
-                nativeNode, AceType::RawPtr(resObj));
         }
+        GetArkUINodeModifiers()->getListModifier()->createWithResourceObjScrollBarColor(
+            nativeNode, AceType::RawPtr(resObj));
         return panda::JSValueRef::Undefined(vm);
     }
     if (!ArkTSUtils::ParseJsColorAlpha(vm, argColor, color) || color.ColorToString().empty()) {

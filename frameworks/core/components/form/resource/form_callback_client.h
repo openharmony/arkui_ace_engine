@@ -162,6 +162,26 @@ public:
             TaskExecutor::TaskType::UI, "ArkUIFormProcessLockForm");
     }
 
+    void ProcessDueControlForm(bool isDisablePolicy, bool isControl) override
+    {
+        TAG_LOGI(AceLogTag::ACE_FORM, "FormCallbackClient::ProcessDueControlForm");
+        auto container = AceEngine::Get().GetContainer(instanceId_);
+        CHECK_NULL_VOID(container);
+        ContainerScope scope(instanceId_);
+        auto taskExecutor = container->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [delegate = delegate_, isDisablePolicy, isControl]() {
+                auto formManagerDelegate = delegate.Upgrade();
+                if (!formManagerDelegate) {
+                    TAG_LOGE(AceLogTag::ACE_FORM, "formManagerDelegate is nullptr");
+                    return;
+                }
+                formManagerDelegate->ProcessDueControlForm(isDisablePolicy, isControl);
+            },
+            TaskExecutor::TaskType::UI, "ArkUIFormProcessDueControlForm");
+    }
+
 private:
     int32_t instanceId_ = -1;
     WeakPtr<FormManagerDelegate> delegate_;

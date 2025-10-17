@@ -21,7 +21,7 @@
 
 #include "core/common/ime/text_selection.h"
 
-#if defined(IOS_PLATFORM)
+#if defined(CROSS_PLATFORM)
 #include "core/common/ime/text_compose.h"
 #endif
 
@@ -80,7 +80,7 @@ struct TextEditingValue {
     bool isDelete;
     std::string appendText;
 
-#if defined(IOS_PLATFORM)
+#if defined(CROSS_PLATFORM)
     TextCompose compose;
     bool unmarkText;
 #endif

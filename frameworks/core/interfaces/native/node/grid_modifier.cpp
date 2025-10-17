@@ -38,6 +38,7 @@ constexpr int32_t DEFAULT_CELL_LENGTH = 0;
 constexpr bool DEFAULT_MULTI_SELECTABLE = false;
 constexpr bool DEFAULT_SUPPORT_ANIMATION = false;
 constexpr Dimension DEFAULT_FADING_EDGE_LENGTH = Dimension(32.0f, DimensionUnit::VP); // default value
+
 const float ERROR_FLOAT_CODE = -1.0f;
 const int32_t ERROR_INT_CODE = -1;
 std::string g_strValue;
@@ -649,6 +650,28 @@ void ResetGridLayoutOptions(ArkUINodeHandle node)
     GridModelNG::ResetLayoutOptions(frameNode);
 }
 
+void SetItemFillPolicy(ArkUINodeHandle node, int32_t policy)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    PresetFillType fileType = static_cast<PresetFillType>(policy);
+    GridModelNG::SetItemFillPolicy(frameNode, fileType);
+}
+
+void ResetItemFillPolicy(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    GridModelNG::SetItemFillPolicy(frameNode, PresetFillType::BREAKPOINT_DEFAULT);
+}
+
+ArkUI_Int32 GetItemFillPolicy(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<int32_t>(GridModelNG::GetItemFillPolicy(frameNode));
+}
+
 namespace NodeModifier {
 const ArkUIGridModifier* GetGridModifier()
 {
@@ -743,6 +766,9 @@ const ArkUIGridModifier* GetGridModifier()
         .getGridEnableScrollInteraction = GetGridEnableScrollInteraction,
         .resetGridLayoutOptions = ResetGridLayoutOptions,
         .setGridLayoutOptions = SetGridLayoutOptions,
+        .resetItemFillPolicy = ResetItemFillPolicy,
+        .setItemFillPolicy = SetItemFillPolicy,
+        .getItemFillPolicy = GetItemFillPolicy,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

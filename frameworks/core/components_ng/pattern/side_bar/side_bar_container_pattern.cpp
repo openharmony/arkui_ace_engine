@@ -17,6 +17,7 @@
 
 #include <optional>
 #include "base/log/ace_trace.h"
+#include "base/utils/multi_thread.h"
 
 #if defined(OHOS_STANDARD_SYSTEM) and !defined(ACE_UNITTEST)
 #include "accessibility_element_info.h"
@@ -86,6 +87,7 @@ void SideBarContainerPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode);
     host->GetRenderContext()->SetClipToBounds(true);
 
     auto layoutProperty = host->GetLayoutProperty<SideBarContainerLayoutProperty>();
@@ -103,10 +105,25 @@ void SideBarContainerPattern::OnAttachToFrameNode()
 void SideBarContainerPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
+    THREAD_SAFE_NODE_CHECK(frameNode, OnDetachFromFrameNode, frameNode);
     auto pipeline = frameNode->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowSizeChangeCallback(frameNode->GetId());
     pipeline->RemoveWindowFocusChangedCallback(frameNode->GetId());
+}
+
+void SideBarContainerPattern::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
+}
+
+void SideBarContainerPattern::OnDetachFromMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree);
 }
 
 void SideBarContainerPattern::OnUpdateShowSideBar(const RefPtr<SideBarContainerLayoutProperty>& layoutProperty)
@@ -434,6 +451,30 @@ void SideBarContainerPattern::OnModifyDone()
         hasInit_ = true;
     }
     SideBarModifyDoneToolBarManager();
+    UpdateSideBarColorToToolbarManager();
+}
+
+void SideBarContainerPattern::OnHostChildUpdateDone()
+{
+    Pattern::OnHostChildUpdateDone();
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    CreateAndMountNodes();
+
+    auto layoutProperty = host->GetLayoutProperty<SideBarContainerLayoutProperty>();
+    OnUpdateShowSideBar(layoutProperty);
+    OnUpdateShowControlButton(layoutProperty, host);
+    OnUpdateShowDivider(layoutProperty, host);
+    UpdateControlButtonIcon();
+
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+        OnUpdateSideBarAndContent(host);
+    }
+
     UpdateSideBarColorToToolbarManager();
 }
 

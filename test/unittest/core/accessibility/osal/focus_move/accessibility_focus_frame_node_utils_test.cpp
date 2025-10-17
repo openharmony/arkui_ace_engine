@@ -59,21 +59,21 @@ HWTEST_F(JsAccessibilityFocusFrameNodeUtilsTest, JsAccessibilityFocusFrameNodeUt
     /**
      * @tc.steps: step2. test GetPropText
      */
-    Accessibility::PropValueStub newPropValueStub;
-    Accessibility::PropValueStub propValueStub1;
-    Accessibility::PropValueStub propValueStub2;
-    EXPECT_FALSE(frameNodeRulesCheckNode1.GetPropText(propValueStub1));
-    EXPECT_EQ(propValueStub1.valueType, newPropValueStub.valueType);
-    EXPECT_EQ(propValueStub1.valueArray, newPropValueStub.valueArray);
-    EXPECT_EQ(propValueStub1.valueStr, newPropValueStub.valueStr);
-    EXPECT_EQ(propValueStub1.valueNum, newPropValueStub.valueNum);
-    EXPECT_EQ(propValueStub1.valueBool, newPropValueStub.valueBool);
-    EXPECT_FALSE(frameNodeRulesCheckNode2.GetPropText(propValueStub2));
-    EXPECT_EQ(propValueStub2.valueType, newPropValueStub.valueType);
-    EXPECT_EQ(propValueStub2.valueArray, newPropValueStub.valueArray);
-    EXPECT_EQ(propValueStub2.valueStr, newPropValueStub.valueStr);
-    EXPECT_EQ(propValueStub2.valueNum, newPropValueStub.valueNum);
-    EXPECT_EQ(propValueStub2.valueBool, newPropValueStub.valueBool);
+    Accessibility::PropValue newPropValue;
+    Accessibility::PropValue PropValue1;
+    Accessibility::PropValue PropValue2;
+    EXPECT_FALSE(frameNodeRulesCheckNode1.GetPropText(PropValue1));
+    EXPECT_EQ(PropValue1.valueType, newPropValue.valueType);
+    EXPECT_EQ(PropValue1.valueArray, newPropValue.valueArray);
+    EXPECT_EQ(PropValue1.valueStr, newPropValue.valueStr);
+    EXPECT_EQ(PropValue1.valueNum, newPropValue.valueNum);
+    EXPECT_EQ(PropValue1.valueBool, newPropValue.valueBool);
+    EXPECT_FALSE(frameNodeRulesCheckNode2.GetPropText(PropValue2));
+    EXPECT_EQ(PropValue2.valueType, newPropValue.valueType);
+    EXPECT_EQ(PropValue2.valueArray, newPropValue.valueArray);
+    EXPECT_EQ(PropValue2.valueStr, newPropValue.valueStr);
+    EXPECT_EQ(PropValue2.valueNum, newPropValue.valueNum);
+    EXPECT_EQ(PropValue2.valueBool, newPropValue.valueBool);
 }
 
 /**
@@ -93,21 +93,21 @@ HWTEST_F(JsAccessibilityFocusFrameNodeUtilsTest, JsAccessibilityFocusFrameNodeUt
     /**
      * @tc.steps: step2. test GetPropHintText
      */
-    Accessibility::PropValueStub newPropValueStub;
-    Accessibility::PropValueStub propValueStub1;
-    Accessibility::PropValueStub propValueStub2;
-    EXPECT_FALSE(frameNodeRulesCheckNode1.GetPropHintText(propValueStub1));
-    EXPECT_EQ(propValueStub1.valueType, newPropValueStub.valueType);
-    EXPECT_EQ(propValueStub1.valueArray, newPropValueStub.valueArray);
-    EXPECT_EQ(propValueStub1.valueStr, newPropValueStub.valueStr);
-    EXPECT_EQ(propValueStub1.valueNum, newPropValueStub.valueNum);
-    EXPECT_EQ(propValueStub1.valueBool, newPropValueStub.valueBool);
-    EXPECT_FALSE(frameNodeRulesCheckNode2.GetPropHintText(propValueStub2));
-    EXPECT_EQ(propValueStub2.valueType, newPropValueStub.valueType);
-    EXPECT_EQ(propValueStub2.valueArray, newPropValueStub.valueArray);
-    EXPECT_EQ(propValueStub2.valueStr, newPropValueStub.valueStr);
-    EXPECT_EQ(propValueStub2.valueNum, newPropValueStub.valueNum);
-    EXPECT_EQ(propValueStub2.valueBool, newPropValueStub.valueBool);
+    Accessibility::PropValue newPropValue;
+    Accessibility::PropValue PropValue1;
+    Accessibility::PropValue PropValue2;
+    EXPECT_FALSE(frameNodeRulesCheckNode1.GetPropHintText(PropValue1));
+    EXPECT_EQ(PropValue1.valueType, newPropValue.valueType);
+    EXPECT_EQ(PropValue1.valueArray, newPropValue.valueArray);
+    EXPECT_EQ(PropValue1.valueStr, newPropValue.valueStr);
+    EXPECT_EQ(PropValue1.valueNum, newPropValue.valueNum);
+    EXPECT_EQ(PropValue1.valueBool, newPropValue.valueBool);
+    EXPECT_FALSE(frameNodeRulesCheckNode2.GetPropHintText(PropValue2));
+    EXPECT_EQ(PropValue2.valueType, newPropValue.valueType);
+    EXPECT_EQ(PropValue2.valueArray, newPropValue.valueArray);
+    EXPECT_EQ(PropValue2.valueStr, newPropValue.valueStr);
+    EXPECT_EQ(PropValue2.valueNum, newPropValue.valueNum);
+    EXPECT_EQ(PropValue2.valueBool, newPropValue.valueBool);
 }
 
 /**
@@ -127,21 +127,21 @@ HWTEST_F(JsAccessibilityFocusFrameNodeUtilsTest, JsAccessibilityFocusFrameNodeUt
     /**
      * @tc.steps: step2. test GetPropDesc
      */
-    Accessibility::PropValueStub newPropValueStub;
-    Accessibility::PropValueStub propValueStub1;
-    Accessibility::PropValueStub propValueStub2;
-    EXPECT_FALSE(frameNodeRulesCheckNode1.GetPropDesc(propValueStub1));
-    EXPECT_EQ(propValueStub1.valueType, newPropValueStub.valueType);
-    EXPECT_EQ(propValueStub1.valueArray, newPropValueStub.valueArray);
-    EXPECT_EQ(propValueStub1.valueStr, newPropValueStub.valueStr);
-    EXPECT_EQ(propValueStub1.valueNum, newPropValueStub.valueNum);
-    EXPECT_EQ(propValueStub1.valueBool, newPropValueStub.valueBool);
-    EXPECT_FALSE(frameNodeRulesCheckNode2.GetPropDesc(propValueStub2));
-    EXPECT_EQ(propValueStub2.valueType, newPropValueStub.valueType);
-    EXPECT_EQ(propValueStub2.valueArray, newPropValueStub.valueArray);
-    EXPECT_EQ(propValueStub2.valueStr, newPropValueStub.valueStr);
-    EXPECT_EQ(propValueStub2.valueNum, newPropValueStub.valueNum);
-    EXPECT_EQ(propValueStub2.valueBool, newPropValueStub.valueBool);
+    Accessibility::PropValue newPropValue;
+    Accessibility::PropValue PropValue1;
+    Accessibility::PropValue PropValue2;
+    EXPECT_FALSE(frameNodeRulesCheckNode1.GetPropDesc(PropValue1));
+    EXPECT_EQ(PropValue1.valueType, newPropValue.valueType);
+    EXPECT_EQ(PropValue1.valueArray, newPropValue.valueArray);
+    EXPECT_EQ(PropValue1.valueStr, newPropValue.valueStr);
+    EXPECT_EQ(PropValue1.valueNum, newPropValue.valueNum);
+    EXPECT_EQ(PropValue1.valueBool, newPropValue.valueBool);
+    EXPECT_FALSE(frameNodeRulesCheckNode2.GetPropDesc(PropValue2));
+    EXPECT_EQ(PropValue2.valueType, newPropValue.valueType);
+    EXPECT_EQ(PropValue2.valueArray, newPropValue.valueArray);
+    EXPECT_EQ(PropValue2.valueStr, newPropValue.valueStr);
+    EXPECT_EQ(PropValue2.valueNum, newPropValue.valueNum);
+    EXPECT_EQ(PropValue2.valueBool, newPropValue.valueBool);
 }
 
 /**
@@ -161,21 +161,21 @@ HWTEST_F(JsAccessibilityFocusFrameNodeUtilsTest, JsAccessibilityFocusFrameNodeUt
     /**
      * @tc.steps: step2. test GetPropAccessibilityText
      */
-    Accessibility::PropValueStub newPropValueStub;
-    Accessibility::PropValueStub propValueStub1;
-    Accessibility::PropValueStub propValueStub2;
-    EXPECT_FALSE(frameNodeRulesCheckNode1.GetPropAccessibilityText(propValueStub1));
-    EXPECT_EQ(propValueStub1.valueType, newPropValueStub.valueType);
-    EXPECT_EQ(propValueStub1.valueArray, newPropValueStub.valueArray);
-    EXPECT_EQ(propValueStub1.valueStr, newPropValueStub.valueStr);
-    EXPECT_EQ(propValueStub1.valueNum, newPropValueStub.valueNum);
-    EXPECT_EQ(propValueStub1.valueBool, newPropValueStub.valueBool);
-    EXPECT_FALSE(frameNodeRulesCheckNode2.GetPropAccessibilityText(propValueStub2));
-    EXPECT_EQ(propValueStub2.valueType, newPropValueStub.valueType);
-    EXPECT_EQ(propValueStub2.valueArray, newPropValueStub.valueArray);
-    EXPECT_EQ(propValueStub2.valueStr, newPropValueStub.valueStr);
-    EXPECT_EQ(propValueStub2.valueNum, newPropValueStub.valueNum);
-    EXPECT_EQ(propValueStub2.valueBool, newPropValueStub.valueBool);
+    Accessibility::PropValue newPropValue;
+    Accessibility::PropValue PropValue1;
+    Accessibility::PropValue PropValue2;
+    EXPECT_FALSE(frameNodeRulesCheckNode1.GetPropAccessibilityText(PropValue1));
+    EXPECT_EQ(PropValue1.valueType, newPropValue.valueType);
+    EXPECT_EQ(PropValue1.valueArray, newPropValue.valueArray);
+    EXPECT_EQ(PropValue1.valueStr, newPropValue.valueStr);
+    EXPECT_EQ(PropValue1.valueNum, newPropValue.valueNum);
+    EXPECT_EQ(PropValue1.valueBool, newPropValue.valueBool);
+    EXPECT_FALSE(frameNodeRulesCheckNode2.GetPropAccessibilityText(PropValue2));
+    EXPECT_EQ(PropValue2.valueType, newPropValue.valueType);
+    EXPECT_EQ(PropValue2.valueArray, newPropValue.valueArray);
+    EXPECT_EQ(PropValue2.valueStr, newPropValue.valueStr);
+    EXPECT_EQ(PropValue2.valueNum, newPropValue.valueNum);
+    EXPECT_EQ(PropValue2.valueBool, newPropValue.valueBool);
 }
 
 /**
@@ -195,21 +195,21 @@ HWTEST_F(JsAccessibilityFocusFrameNodeUtilsTest, JsAccessibilityFocusFrameNodeUt
     /**
      * @tc.steps: step2. test GetPropType
      */
-    Accessibility::PropValueStub newPropValueStub;
-    Accessibility::PropValueStub propValueStub1;
-    Accessibility::PropValueStub propValueStub2;
-    EXPECT_FALSE(frameNodeRulesCheckNode1.GetPropType(propValueStub1));
-    EXPECT_EQ(propValueStub1.valueType, newPropValueStub.valueType);
-    EXPECT_EQ(propValueStub1.valueArray, newPropValueStub.valueArray);
-    EXPECT_EQ(propValueStub1.valueStr, newPropValueStub.valueStr);
-    EXPECT_EQ(propValueStub1.valueNum, newPropValueStub.valueNum);
-    EXPECT_EQ(propValueStub1.valueBool, newPropValueStub.valueBool);
-    EXPECT_FALSE(frameNodeRulesCheckNode2.GetPropType(propValueStub2));
-    EXPECT_EQ(propValueStub2.valueType, newPropValueStub.valueType);
-    EXPECT_EQ(propValueStub2.valueArray, newPropValueStub.valueArray);
-    EXPECT_EQ(propValueStub2.valueStr, newPropValueStub.valueStr);
-    EXPECT_EQ(propValueStub2.valueNum, newPropValueStub.valueNum);
-    EXPECT_EQ(propValueStub2.valueBool, newPropValueStub.valueBool);
+    Accessibility::PropValue newPropValue;
+    Accessibility::PropValue PropValue1;
+    Accessibility::PropValue PropValue2;
+    EXPECT_FALSE(frameNodeRulesCheckNode1.GetPropType(PropValue1));
+    EXPECT_EQ(PropValue1.valueType, newPropValue.valueType);
+    EXPECT_EQ(PropValue1.valueArray, newPropValue.valueArray);
+    EXPECT_EQ(PropValue1.valueStr, newPropValue.valueStr);
+    EXPECT_EQ(PropValue1.valueNum, newPropValue.valueNum);
+    EXPECT_EQ(PropValue1.valueBool, newPropValue.valueBool);
+    EXPECT_FALSE(frameNodeRulesCheckNode2.GetPropType(PropValue2));
+    EXPECT_EQ(PropValue2.valueType, newPropValue.valueType);
+    EXPECT_EQ(PropValue2.valueArray, newPropValue.valueArray);
+    EXPECT_EQ(PropValue2.valueStr, newPropValue.valueStr);
+    EXPECT_EQ(PropValue2.valueNum, newPropValue.valueNum);
+    EXPECT_EQ(PropValue2.valueBool, newPropValue.valueBool);
 }
 
 /**
@@ -229,21 +229,21 @@ HWTEST_F(JsAccessibilityFocusFrameNodeUtilsTest, JsAccessibilityFocusFrameNodeUt
     /**
      * @tc.steps: step2. test GetPropAccessibilityLevel
      */
-    Accessibility::PropValueStub newPropValueStub;
-    Accessibility::PropValueStub propValueStub1;
-    Accessibility::PropValueStub propValueStub2;
-    EXPECT_FALSE(frameNodeRulesCheckNode1.GetPropAccessibilityLevel(propValueStub1));
-    EXPECT_EQ(propValueStub1.valueType, newPropValueStub.valueType);
-    EXPECT_EQ(propValueStub1.valueArray, newPropValueStub.valueArray);
-    EXPECT_EQ(propValueStub1.valueStr, newPropValueStub.valueStr);
-    EXPECT_EQ(propValueStub1.valueNum, newPropValueStub.valueNum);
-    EXPECT_EQ(propValueStub1.valueBool, newPropValueStub.valueBool);
-    EXPECT_FALSE(frameNodeRulesCheckNode2.GetPropAccessibilityLevel(propValueStub2));
-    EXPECT_EQ(propValueStub2.valueType, newPropValueStub.valueType);
-    EXPECT_EQ(propValueStub2.valueArray, newPropValueStub.valueArray);
-    EXPECT_EQ(propValueStub2.valueStr, newPropValueStub.valueStr);
-    EXPECT_EQ(propValueStub2.valueNum, newPropValueStub.valueNum);
-    EXPECT_EQ(propValueStub2.valueBool, newPropValueStub.valueBool);
+    Accessibility::PropValue newPropValue;
+    Accessibility::PropValue PropValue1;
+    Accessibility::PropValue PropValue2;
+    EXPECT_FALSE(frameNodeRulesCheckNode1.GetPropAccessibilityLevel(PropValue1));
+    EXPECT_EQ(PropValue1.valueType, newPropValue.valueType);
+    EXPECT_EQ(PropValue1.valueArray, newPropValue.valueArray);
+    EXPECT_EQ(PropValue1.valueStr, newPropValue.valueStr);
+    EXPECT_EQ(PropValue1.valueNum, newPropValue.valueNum);
+    EXPECT_EQ(PropValue1.valueBool, newPropValue.valueBool);
+    EXPECT_FALSE(frameNodeRulesCheckNode2.GetPropAccessibilityLevel(PropValue2));
+    EXPECT_EQ(PropValue2.valueType, newPropValue.valueType);
+    EXPECT_EQ(PropValue2.valueArray, newPropValue.valueArray);
+    EXPECT_EQ(PropValue2.valueStr, newPropValue.valueStr);
+    EXPECT_EQ(PropValue2.valueNum, newPropValue.valueNum);
+    EXPECT_EQ(PropValue2.valueBool, newPropValue.valueBool);
 }
 
 /**
@@ -263,21 +263,21 @@ HWTEST_F(JsAccessibilityFocusFrameNodeUtilsTest, JsAccessibilityFocusFrameNodeUt
     /**
      * @tc.steps: step2. test GetPropAccessibilityGroup
      */
-    Accessibility::PropValueStub newPropValueStub;
-    Accessibility::PropValueStub propValueStub1;
-    Accessibility::PropValueStub propValueStub2;
-    EXPECT_FALSE(frameNodeRulesCheckNode1.GetPropAccessibilityGroup(propValueStub1));
-    EXPECT_EQ(propValueStub1.valueType, newPropValueStub.valueType);
-    EXPECT_EQ(propValueStub1.valueArray, newPropValueStub.valueArray);
-    EXPECT_EQ(propValueStub1.valueStr, newPropValueStub.valueStr);
-    EXPECT_EQ(propValueStub1.valueNum, newPropValueStub.valueNum);
-    EXPECT_EQ(propValueStub1.valueBool, newPropValueStub.valueBool);
-    EXPECT_FALSE(frameNodeRulesCheckNode2.GetPropAccessibilityGroup(propValueStub2));
-    EXPECT_EQ(propValueStub2.valueType, newPropValueStub.valueType);
-    EXPECT_EQ(propValueStub2.valueArray, newPropValueStub.valueArray);
-    EXPECT_EQ(propValueStub2.valueStr, newPropValueStub.valueStr);
-    EXPECT_EQ(propValueStub2.valueNum, newPropValueStub.valueNum);
-    EXPECT_EQ(propValueStub2.valueBool, newPropValueStub.valueBool);
+    Accessibility::PropValue newPropValue;
+    Accessibility::PropValue PropValue1;
+    Accessibility::PropValue PropValue2;
+    EXPECT_FALSE(frameNodeRulesCheckNode1.GetPropAccessibilityGroup(PropValue1));
+    EXPECT_EQ(PropValue1.valueType, newPropValue.valueType);
+    EXPECT_EQ(PropValue1.valueArray, newPropValue.valueArray);
+    EXPECT_EQ(PropValue1.valueStr, newPropValue.valueStr);
+    EXPECT_EQ(PropValue1.valueNum, newPropValue.valueNum);
+    EXPECT_EQ(PropValue1.valueBool, newPropValue.valueBool);
+    EXPECT_FALSE(frameNodeRulesCheckNode2.GetPropAccessibilityGroup(PropValue2));
+    EXPECT_EQ(PropValue2.valueType, newPropValue.valueType);
+    EXPECT_EQ(PropValue2.valueArray, newPropValue.valueArray);
+    EXPECT_EQ(PropValue2.valueStr, newPropValue.valueStr);
+    EXPECT_EQ(PropValue2.valueNum, newPropValue.valueNum);
+    EXPECT_EQ(PropValue2.valueBool, newPropValue.valueBool);
 }
 
 /**
@@ -297,20 +297,20 @@ HWTEST_F(JsAccessibilityFocusFrameNodeUtilsTest, JsAccessibilityFocusFrameNodeUt
     /**
      * @tc.steps: step2. test GetPropIsEnable
      */
-    Accessibility::PropValueStub newPropValueStub;
-    Accessibility::PropValueStub propValueStub1;
-    Accessibility::PropValueStub propValueStub2;
-    EXPECT_FALSE(frameNodeRulesCheckNode1.GetPropIsEnable(propValueStub1));
-    EXPECT_EQ(propValueStub1.valueType, newPropValueStub.valueType);
-    EXPECT_EQ(propValueStub1.valueArray, newPropValueStub.valueArray);
-    EXPECT_EQ(propValueStub1.valueStr, newPropValueStub.valueStr);
-    EXPECT_EQ(propValueStub1.valueNum, newPropValueStub.valueNum);
-    EXPECT_EQ(propValueStub1.valueBool, newPropValueStub.valueBool);
-    EXPECT_FALSE(frameNodeRulesCheckNode2.GetPropIsEnable(propValueStub2));
-    EXPECT_EQ(propValueStub2.valueType, newPropValueStub.valueType);
-    EXPECT_EQ(propValueStub2.valueArray, newPropValueStub.valueArray);
-    EXPECT_EQ(propValueStub2.valueStr, newPropValueStub.valueStr);
-    EXPECT_EQ(propValueStub2.valueNum, newPropValueStub.valueNum);
-    EXPECT_EQ(propValueStub2.valueBool, newPropValueStub.valueBool);
+    Accessibility::PropValue newPropValue;
+    Accessibility::PropValue PropValue1;
+    Accessibility::PropValue PropValue2;
+    EXPECT_FALSE(frameNodeRulesCheckNode1.GetPropIsEnable(PropValue1));
+    EXPECT_EQ(PropValue1.valueType, newPropValue.valueType);
+    EXPECT_EQ(PropValue1.valueArray, newPropValue.valueArray);
+    EXPECT_EQ(PropValue1.valueStr, newPropValue.valueStr);
+    EXPECT_EQ(PropValue1.valueNum, newPropValue.valueNum);
+    EXPECT_EQ(PropValue1.valueBool, newPropValue.valueBool);
+    EXPECT_FALSE(frameNodeRulesCheckNode2.GetPropIsEnable(PropValue2));
+    EXPECT_EQ(PropValue2.valueType, newPropValue.valueType);
+    EXPECT_EQ(PropValue2.valueArray, newPropValue.valueArray);
+    EXPECT_EQ(PropValue2.valueStr, newPropValue.valueStr);
+    EXPECT_EQ(PropValue2.valueNum, newPropValue.valueNum);
+    EXPECT_EQ(PropValue2.valueBool, newPropValue.valueBool);
 }
 } // namespace OHOS::Ace::Framework

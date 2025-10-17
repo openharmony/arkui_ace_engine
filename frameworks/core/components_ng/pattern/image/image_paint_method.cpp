@@ -158,13 +158,37 @@ void ImagePaintMethod::UpdatePaintConfig(PaintWrapper* paintWrapper)
     }
 }
 
+void ImagePaintMethod::UpdateCanvasImage(const RefPtr<CanvasImage>& canvasImage)
+{
+    if (contentTransitionType_ == ContentTransitionType::IDENTITY || !canvasImage) {
+        canvasImage_ = canvasImage;
+        needContentTransition_ = false;
+        return;
+    }
+    auto&& config = canvasImage->GetPaintConfig();
+    if ((config.isSvg_ && !canvasImage->IsStatic()) || config.frameCount_ > 1) {
+        canvasImage_ = canvasImage;
+        needContentTransition_ = false;
+        return;
+    }
+    if (!canvasImage_) {
+        needContentTransition_ = true;
+    } else {
+        auto originalSrc = canvasImage_->GetImageSourceInfo();
+        auto newSrc = canvasImage->GetImageSourceInfo();
+        needContentTransition_ = (originalSrc != newSrc);
+    }
+    canvasImage_ = canvasImage;
+}
+
 void ImagePaintMethod::UpdatePaintMethod(
     const RefPtr<CanvasImage>& canvasImage, const ImagePaintMethodConfig& imagePainterMethodConfig)
 {
     selected_ = imagePainterMethodConfig.selected;
     selected_ = imagePainterMethodConfig.selected;
     sensitive_ = imagePainterMethodConfig.sensitive;
-    canvasImage_ = canvasImage;
+    contentTransitionType_ = imagePainterMethodConfig.contentTransitionType;
+    UpdateCanvasImage(canvasImage);
     interpolationDefault_ = imagePainterMethodConfig.interpolation;
     imageOverlayModifier_ = imagePainterMethodConfig.imageOverlayModifier;
     imageContentModifier_ = imagePainterMethodConfig.imageContentModifier;
@@ -205,13 +229,6 @@ void ImagePaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 
 bool ImagePaintMethod::NeedsContentTransition()
 {
-    CHECK_NULL_RETURN(canvasImage_, false);
-    auto&& config = canvasImage_->GetPaintConfig();
-    if (config.isSvg_ && !canvasImage_->IsStatic()) {
-        return false;
-    } else if (config.frameCount_ > 1) {
-        return false;
-    }
-    return true;
+    return needContentTransition_;
 }
 } // namespace OHOS::Ace::NG

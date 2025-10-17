@@ -33,6 +33,7 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/window_scene/scene/window_node.h"
+#include "core/components_ng/pattern/window_scene/scene/window_pattern.h"
 #include "core/components_ng/pattern/window_scene/scene/window_scene.h"
 #include "core/components_ng/pattern/window_scene/scene/window_scene_model.h"
 
@@ -506,6 +507,30 @@ HWTEST_F(WindowSceneTest, OnPreLoadStartingWindowFinished, TestSize.Level1)
     ASSERT_NE(windowScene->GetHost(), nullptr);
 
     windowScene->OnPreLoadStartingWindowFinished();
+    usleep(WAIT_SYNC_IN_NS);
+    ASSERT_NE(windowScene->startingWindow_, nullptr);
+}
+
+/**
+ * @tc.name: OnRestart
+ * @tc.desc: notify restart app
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneTest, OnRestart, TestSize.Level1)
+{
+    Rosen::SessionInfo sessionInfo = {
+        .abilityName_ = ABILITY_NAME,
+        .bundleName_ = BUNDLE_NAME,
+        .moduleName_ = MODULE_NAME,
+    };
+    auto windowScene = CreateWindowSceneForStartingWindowTest(sessionInfo);
+    ASSERT_NE(windowScene, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), windowScene);
+    windowScene->frameNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    ASSERT_NE(windowScene->GetHost(), nullptr);
+
+    windowScene->OnRestart();
     usleep(WAIT_SYNC_IN_NS);
     ASSERT_NE(windowScene->startingWindow_, nullptr);
 }

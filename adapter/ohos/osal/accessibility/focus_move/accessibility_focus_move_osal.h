@@ -26,49 +26,6 @@
 #include "adapter/ohos/osal/accessibility/focus_move/accessibility_focus_strategy.h"
 #include "frameworks/core/accessibility/accessibility_manager.h"
 
-namespace OHOS::Accessibility {
-
-enum class FocusMoveResultStub : int32_t {
-    NOT_SUPPORT = -1,
-    SEARCH_SUCCESS = 0,
-    SEARCH_SUCCESS_NEXT_BYPASS_DESCENDANTS,
-    SEARCH_FAIL,
-    SEARCH_FAIL_IN_CHILDTREE,
-    SEARCH_FAIL_LOST_NODE,
-    SEARCH_NEXT,
-    DOUBLE_CHECK_CHILD_PROPERTY,
-    DOUBLE_CHECK_CHILD_PROPERTY_AND_GET_LAST,
-    SERAH_FAIL_IN_SCROLL
-};
-
-enum class DetailConditionStub : int32_t {
-    BYPASS_SELF = 0x00000001,
-    BYPASS_SELF_DESCENDANTS = 0x00000002,
-    CHECK_SELF = 0x00000004,
-    CHECK_SELF_BYPASS_DESCENDANTS = 0x00000008,
-};
-
-enum class FocusMoveDirectionStub : int32_t {
-    DIRECTION_INVAILD = 0,
-    UP = 0x00000001,
-    DOWN = 0x00000002,
-    LEFT = 0x00000004,
-    RIGHT = 0x00000008,
-    FORWARD = 0x00000010,
-    BACKWARD = 0x00000020,
-    FIND_LAST = 0x00000040,
-    GET_FORWARD_SCROLL_ANCESTOR = 0x00000080,
-    GET_BACKWARD_SCROLL_ANCESTOR = 0x00000100,
-    GET_SCROLLABLE_ANCESTOR = 0x00000200,
-};
-
-struct AccessibilityFocusMoveParamStub {
-    FocusMoveDirectionStub direction;
-    DetailConditionStub condition;
-};
-
-}
-
 namespace OHOS::Ace::Framework {
 
 class FocusStrategyOsal : public virtual AceType {
@@ -93,22 +50,22 @@ public:
     {
         return false;
     }
-    Accessibility::FocusMoveResultStub ExecuteFocusMoveSearch(
+    Accessibility::FocusMoveResult ExecuteFocusMoveSearch(
         const int64_t elementId,
-        const Accessibility::AccessibilityFocusMoveParamStub& param,
+        const Accessibility::AccessibilityFocusMoveParam& param,
         Accessibility::AccessibilityElementInfo& info);
 
     void ProcessGetScrollAncestor(
         const int64_t elementId,
-        const Accessibility::AccessibilityFocusMoveParamStub& param,
+        const Accessibility::AccessibilityFocusMoveParam& param,
         std::list<Accessibility::AccessibilityElementInfo>& infos);
 
-    static bool IsProcessGetScrollAncestor(const Accessibility::AccessibilityFocusMoveParamStub& param);
+    static bool IsProcessGetScrollAncestor(const Accessibility::AccessibilityFocusMoveParam& param);
 private:
     AceFocusMoveDetailCondition GetAceCondition(
-        const Accessibility::AccessibilityFocusMoveParamStub& param);
-    Accessibility::FocusMoveResultStub HandleFocusMoveSearchResult(
-        const Accessibility::AccessibilityFocusMoveParamStub& param,
+        const Accessibility::AccessibilityFocusMoveParam& param);
+    Accessibility::FocusMoveResult HandleFocusMoveSearchResult(
+        const Accessibility::AccessibilityFocusMoveParam& param,
         const std::shared_ptr<FocusRulesCheckNode>& targetNode,
         AceFocusMoveResult result,
         Accessibility::AccessibilityElementInfo& info);

@@ -378,6 +378,15 @@ void RichEditorPattern::InsertValueInStyledString(
 {
     CHECK_NULL_VOID(styledString_);
     IF_TRUE(shouldCommitInput && previewTextRecord_.IsValid(), FinishTextPreviewInner());
+#if defined(CROSS_PLATFORM)
+    if (editingValue_ && editingValue_->compose.IsValid() &&
+        (editingValue_->compose.GetEnd() > editingValue_->compose.GetStart()) &&
+        (!insertValue.empty() || editingValue_->unmarkText)) {
+        auto deleteLength = editingValue_->compose.GetEnd() - editingValue_->compose.GetStart();
+        DeleteValueInStyledString(editingValue_->compose.GetStart(), deleteLength);
+        editingValue_->compose.Update(-1);
+    }
+#endif
     int32_t changeStart = caretPosition_;
     int32_t changeLength = 0;
     if (textSelector_.IsValid()) {
@@ -645,6 +654,9 @@ void RichEditorPattern::OnModifyDone()
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
     SetIsEnableSubWindowMenu();
+    if (dataDetectorAdapter_->textDetectResult_.menuOptionAndAction.empty()) {
+        dataDetectorAdapter_->GetAIEntityMenu();
+    }
 }
 
 void RichEditorPattern::HandleEnabled()
@@ -787,7 +799,7 @@ void RichEditorPattern::UpdateSelectionAndHandleVisibility()
             showSelect_ = true;
             MarkContentNodeForRender();
             CalculateHandleOffsetAndShowOverlay();
-            selectOverlay_->ProcessOverlay({.menuIsShow = false, .animation = false});
+            ProcessOverlay({.menuIsShow = false, .animation = false});
         }
     }
     FireOnSelectionChange(start, end, true);
@@ -1191,6 +1203,7 @@ int32_t RichEditorPattern::AddPlaceholderSpan(const RefPtr<UINode>& customNode, 
     spanItem->content = u" ";
     spanItem->SetCustomNode(customNode);
     spanItem->dragBackgroundColor_ = options.dragBackgroundColor;
+    StyleManager::AddDragBackgroundColorResource(spanItem, options.dragBackgroundColorResObj);
     spanItem->isDragShadowNeeded_ = options.isDragShadowNeeded;
     AddSpanItem(spanItem, spanIndex);
     IF_TRUE(options.optionSource != OptionSource::UNDO_REDO,
@@ -3232,7 +3245,7 @@ bool RichEditorPattern::HandleClickSelection(const OHOS::Ace::GestureEvent& info
         selectOverlay_->ToggleMenu();
     } else {
         CalculateHandleOffsetAndShowOverlay();
-        selectOverlay_->ProcessOverlay({.animation = true, .requestCode = REQUEST_RECREATE});
+        ProcessOverlay({.animation = true, .requestCode = REQUEST_RECREATE});
     }
     return true;
 }
@@ -3377,7 +3390,7 @@ void RichEditorPattern::CreateAndShowSingleHandle()
     textSelector_.Update(caretPosition_);
     CalculateHandleOffsetAndShowOverlay();
     UpdateSelectionType(GetSpansInfo(caretPosition_, caretPosition_, GetSpansMethod::ONSELECT));
-    selectOverlay_->ProcessOverlay({ .animation = true });
+    ProcessOverlay({ .animation = true });
 }
 
 void RichEditorPattern::MoveCaretAndStartFocus(const Offset& textOffset)
@@ -4106,7 +4119,7 @@ bool RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info, RefPtr<
     bool isShowSelectOverlay = !isDoubleClickByMouse && caretUpdateType_ != CaretUpdateType::LONG_PRESSED;
     if (isShowSelectOverlay) {
         selectOverlay_->SwitchToOverlayMode();
-        selectOverlay_->ProcessOverlay({ .menuIsShow = !selectOverlay_->GetIsHandleMoving(), .animation = true });
+        ProcessOverlay({ .menuIsShow = !selectOverlay_->GetIsHandleMoving(), .animation = true });
         StopTwinkling();
     } else if (selectStart == selectEnd && isDoubleClickByMouse) {
         StartTwinkling();
@@ -4175,10 +4188,10 @@ void RichEditorPattern::HandleMenuCallbackOnSelectAll(bool isShowMenu)
         CHECK_NULL_VOID(context);
         auto taskExecutor = context->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostTask([selectOverlay = WeakPtr<RichEditorSelectOverlay>(selectOverlay_), isShowMenu]() {
-                auto overlay = selectOverlay.Upgrade();
-                CHECK_NULL_VOID(overlay);
-                overlay->ProcessOverlay({ .menuIsShow = isShowMenu, .animation = true });
+        taskExecutor->PostTask([weak = WeakClaim(this), isShowMenu]() {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                pattern->ProcessOverlay({ .menuIsShow = isShowMenu, .animation = true });
             }, TaskExecutor::TaskType::UI, "ArkUIRichEditorHandleMenuCallbackOnSelectAll", PriorityType::VIP);
     }
     MarkContentNodeForRender();
@@ -5066,13 +5079,25 @@ void RichEditorPattern::UpdateEditingValue(const std::shared_ptr<TextEditingValu
     InsertValue(UtfUtils::Str8ToStr16(value->text), true);
 #else
     if (value->isDelete) {
+#ifdef IOS_PLATFORM
+        if (value->compose.IsValid()) {
+            EmojiRelation relation = GetEmojiRelation(value->selection.GetEnd());
+            if (relation == EmojiRelation::IN_EMOJI || relation == EmojiRelation::MIDDLE_EMOJI ||
+                relation == EmojiRelation::BEFORE_EMOJI || value->selection.GetEnd() != value->compose.GetStart()) {
+                HandleOnDelete(true);
+            } else {
+                DeleteBackward(value->compose.GetEnd() - value->compose.GetStart(), TextChangeReason::INPUT);
+                value->compose.Update(-1);
+            }
+        } else {
+            HandleOnDelete(true);
+        }
+#else
         HandleOnDelete(true);
+#endif
     } else {
 #ifdef CROSS_PLATFORM
-#ifdef IOS_PLATFORM
-        compose_ = value->compose;
-        unmarkText_ = value->unmarkText;
-#endif
+        editingValue_ = value;
 #ifdef ANDROID_PLATFORM
         if (value->appendText.empty()) {
             return;
@@ -5538,7 +5563,7 @@ void RichEditorPattern::OnCommonColorChange()
         if (placeholderSpan) {
             auto spanItem = placeholderSpan->GetSpanItem();
             CHECK_NULL_CONTINUE(spanItem);
-            IF_PRESENT(spanItem, UpdateColorByResourceId());
+            IF_PRESENT(spanItem, ReloadResources());
         }
         auto spanNode = DynamicCast<SpanNode>(uiNode);
         CHECK_NULL_CONTINUE(spanNode);
@@ -5547,12 +5572,11 @@ void RichEditorPattern::OnCommonColorChange()
         auto& textColor = spanItem->urlOnRelease ? themeUrlSpanColor : themeTextColor;
         IF_TRUE(spanItem->useThemeFontColor, spanNode->UpdateTextColorWithoutCheck(textColor));
         IF_TRUE(spanItem->useThemeDecorationColor, spanNode->UpdateTextDecorationColorWithoutCheck(themeTextDecColor));
-        spanNode->UpdateColorByResourceId();
+        spanNode->ReloadResources();
     }
     paragraphCache_.Clear();
-    IF_PRESENT(typingTextStyle_, UpdateColorByResourceId());
-    IF_PRESENT(typingStyle_, UpdateColorByResourceId());
-    IF_PRESENT(selectedBackgroundColor_, UpdateColorByResourceId());
+    IF_PRESENT(typingTextStyle_, ReloadResources());
+    IF_PRESENT(typingStyle_, ReloadResources());
 
     IF_PRESENT(magnifierController_, SetColorModeChange(true));
     UpdateScrollBarColor(GetScrollBarColor());
@@ -5565,6 +5589,19 @@ void RichEditorPattern::UpdateCaretInfoToController()
     for (auto iter = spans_.begin(); iter != spans_.end(); iter++) {
         text += (*iter)->content;
     }
+#if defined(CROSS_PLATFORM)
+#if defined(IOS_PLATFORM)
+    if (editingValue_ && editingValue_->selection.IsValid() && editingValue_->selection.GetEnd() < caretPosition_) {
+#else
+    if (editingValue_ && editingValue_->selection.IsValid() &&
+        editingValue_->selection.GetEnd() < caretPosition_ && !editingValue_->appendText.empty()) {
+#endif
+        SetCaretPosition(editingValue_->selection.GetEnd());
+    }
+    if (editingValue_ && editingValue_->selection.IsValid()) {
+        editingValue_->selection.Update(-1);
+    }
+#endif
     auto start = textSelector_.IsValid() ? textSelector_.GetTextStart() : caretPosition_;
     auto end = textSelector_.IsValid() ? textSelector_.GetTextEnd() : caretPosition_;
 #if defined(ENABLE_STANDARD_INPUT)
@@ -6040,10 +6077,11 @@ void RichEditorPattern::InsertValueByOperationType(const std::u16string& insertV
 bool RichEditorPattern::ProcessTextTruncationOperation(std::u16string& text, bool shouldCommitInput)
 {
 #if defined(IOS_PLATFORM)
-    if (compose_.IsValid()) {
+    if (editingValue_ && editingValue_->compose.IsValid()) {
         return true;
     }
-    if (GetTextContentLength() - text.length() < maxLength_.value_or(INT_MAX) && text.length() == 1 && !unmarkText_) {
+    if (GetTextContentLength() - text.length() < maxLength_.value_or(INT_MAX) && text.length() == 1 &&
+        !editingValue_->unmarkText) {
         return true;
     }
 #endif
@@ -6098,9 +6136,12 @@ void RichEditorPattern::ProcessInsertValueMore(const std::u16string& text, Opera
         return;
     }
     ClearRedoOperationRecords();
-#if defined(IOS_PLATFORM)
-    if (compose_.IsValid() && (record.addText.value_or(u"").length() > 0 || unmarkText_)) {
-        DeleteByRange(&record, compose_.GetStart(), compose_.GetEnd());
+#if defined(CROSS_PLATFORM)
+    if (editingValue_ && editingValue_->compose.IsValid() &&
+        (editingValue_->compose.GetEnd() > editingValue_->compose.GetStart()) &&
+        (record.addText.value_or(u"").length() > 0 || editingValue_->unmarkText)) {
+        DeleteByRange(&record, editingValue_->compose.GetStart(), editingValue_->compose.GetEnd());
+        editingValue_->compose.Update(-1);
     }
 #endif
     InsertValueOperation(text, &record, operationType, shouldCommitInput);
@@ -6158,9 +6199,11 @@ void RichEditorPattern::ProcessInsertValue(const std::u16string& insertValue, Op
         previewInputRecord_.Reset();
         undoManager_->ClearPreviewInputRecord();
 #if defined(IOS_PLATFORM)
-        if (compose_.IsValid() && (record.addText.value_or(u"").length() > 0 || unmarkText_)) {
-            DeleteByRange(&record, compose_.GetStart(), compose_.GetEnd());
-        }
+    if (editingValue_ && editingValue_->compose.IsValid() && (record.addText.value_or(u"").length() > 0 ||
+        editingValue_->unmarkText)) {
+        DeleteByRange(&record, editingValue_->compose.GetStart(), editingValue_->compose.GetEnd());
+        editingValue_->compose.Update(-1);
+    }
 #endif
         return;
     }
@@ -7933,7 +7976,7 @@ void RichEditorPattern::HandleTouchUpAfterLongPress()
     FireOnSelect(selectStart, selectEnd);
     SetCaretPositionWithAffinity({ selectEnd, TextAffinity::UPSTREAM });
     CalculateHandleOffsetAndShowOverlay();
-    selectOverlay_->ProcessOverlay({ .animation = true });
+    ProcessOverlay({ .animation = true });
     FireOnSelectionChange(selectStart, selectEnd);
     IF_TRUE(IsSingleHandle(), ForceTriggerAvoidOnCaretChange());
 }
@@ -7949,7 +7992,7 @@ void RichEditorPattern::HandleTouchCancelAfterLongPress()
     textSelector_.Update(selectStart, selectEnd);
     SetCaretPositionWithAffinity({ selectEnd, TextAffinity::UPSTREAM });
     CalculateHandleOffsetAndShowOverlay();
-    selectOverlay_->ProcessOverlay({ .menuIsShow = selectOverlay_->IsCurrentMenuVisibile(), .animation = true });
+    ProcessOverlay({ .menuIsShow = selectOverlay_->IsCurrentMenuVisibile(), .animation = true });
     FireOnSelectionChange(selectStart, selectEnd);
 }
 
@@ -8555,6 +8598,7 @@ void RichEditorPattern::CopySelectionMenuParams(SelectOverlayInfo& selectInfo, T
 
 void RichEditorPattern::ProcessOverlay(const OverlayRequest& request)
 {
+    SelectAIDetect();
     // this selectOverlay_ and selectOverlay_ in TextPattern are two distinct objects.
     selectOverlay_->ProcessOverlay(request);
 }
@@ -9143,7 +9187,7 @@ void RichEditorPattern::ShowHandles()
         CHECK_NULL_VOID(textSelector_.IsValid());
         CHECK_NULL_VOID(!isMouseSelect_);
         CalculateHandleOffsetAndShowOverlay();
-        selectOverlay_->ProcessOverlay({.menuIsShow = false, .animation = false});
+        ProcessOverlay({.menuIsShow = false, .animation = false});
     }
 }
 
@@ -9673,27 +9717,27 @@ void RichEditorPattern::ProcessOverlayOnSetSelection(const std::optional<Selecti
 {
     if (options.has_value()) {
         auto handlePolicy = options.value().handlePolicy;
-        IF_TRUE(handlePolicy == HandlePolicy::SHOW, selectOverlay_->ProcessOverlay({ .animation = true }));
+        IF_TRUE(handlePolicy == HandlePolicy::SHOW, ProcessOverlay({ .animation = true }));
         IF_TRUE(handlePolicy == HandlePolicy::HIDE, CloseSelectOverlay());
         CHECK_NULL_VOID(handlePolicy == HandlePolicy::DEFAULT);
     }
     if (!IsShowHandle()) {
         CloseSelectOverlay();
     } else if (!options.has_value() || options.value().menuPolicy == MenuPolicy::DEFAULT) {
-        selectOverlay_->ProcessOverlay({ .menuIsShow = selectOverlay_->IsCurrentMenuVisibile(),
+        ProcessOverlay({ .menuIsShow = selectOverlay_->IsCurrentMenuVisibile(),
             .animation = true, .requestCode = REQUEST_RECREATE });
         IF_PRESENT(magnifierController_, RemoveMagnifierFrameNode());
     } else if (options.value().menuPolicy == MenuPolicy::HIDE) {
         if (selectOverlay_->IsUsingMouse()) {
             CloseSelectOverlay();
         } else {
-            selectOverlay_->ProcessOverlay({ .menuIsShow = false, .animation = true });
+            ProcessOverlay({ .menuIsShow = false, .animation = true });
         }
     } else if (options.value().menuPolicy == MenuPolicy::SHOW) {
         if (selectOverlay_->IsUsingMouse() || sourceType_ == SourceType::MOUSE) {
             selectionMenuOffsetByMouse_ = selectionMenuOffsetClick_;
         }
-        selectOverlay_->ProcessOverlay({ .animation = true, .requestCode = REQUEST_RECREATE });
+        ProcessOverlay({ .animation = true, .requestCode = REQUEST_RECREATE });
         IF_PRESENT(magnifierController_, RemoveMagnifierFrameNode());
     }
 }
@@ -10153,7 +10197,7 @@ void RichEditorPattern::OnScrollEndCallback()
     if (IsSelectAreaVisible()) {
         auto info = selectOverlay_->GetSelectOverlayInfo();
         if (info && info->menuInfo.menuBuilder) {
-            selectOverlay_->ProcessOverlay({ .animation = true });
+            ProcessOverlay({ .animation = true });
         } else {
             selectOverlay_->UpdateMenuOffset();
             selectOverlay_->ShowMenu();
@@ -12340,7 +12384,7 @@ void RichEditorPattern::HandleOnShowMenu()
         }
         textResponseType_ = TextResponseType::RIGHT_CLICK;
         selectionMenuOffsetByMouse_ = GetCaretRect().GetOffset() + GetParentGlobalOffset();
-        selectOverlay_->ProcessOverlay({ .animation = true });
+        ProcessOverlay({ .animation = true });
         return;
     }
     if (!IsSelected()) {
@@ -12350,7 +12394,7 @@ void RichEditorPattern::HandleOnShowMenu()
     if (SelectOverlayIsOn()) {
         selectOverlay_->SwitchToOverlayMode();
         if (selectOverlay_->NeedRefreshMenu()) {
-            selectOverlay_->ProcessOverlay({ .animation = true, .requestCode = REQUEST_RECREATE });
+            ProcessOverlay({ .animation = true, .requestCode = REQUEST_RECREATE });
             return;
         }
         selectOverlay_->UpdateMenuOffset();
@@ -12358,7 +12402,7 @@ void RichEditorPattern::HandleOnShowMenu()
         return;
     }
     CalculateHandleOffsetAndShowOverlay();
-    selectOverlay_->ProcessOverlay({ .animation = true });
+    ProcessOverlay({ .animation = true });
 }
 
 PositionType RichEditorPattern::GetPositionTypeFromLine()
@@ -12688,7 +12732,7 @@ void RichEditorPattern::TripleClickSection(GestureEvent& info, int32_t start, in
         RequestKeyboard(false, true, true);
         HandleOnEditChanged(true);
         CalculateHandleOffsetAndShowOverlay();
-        selectOverlay_->ProcessOverlay({ .menuIsShow = !selectOverlay_->GetIsHandleMoving(), .animation = true });
+        ProcessOverlay({ .menuIsShow = !selectOverlay_->GetIsHandleMoving(), .animation = true });
     }
     if (info.GetSourceDevice() == SourceType::TOUCH && start == end) {
         selectOverlay_->SetIsSingleHandle(true);

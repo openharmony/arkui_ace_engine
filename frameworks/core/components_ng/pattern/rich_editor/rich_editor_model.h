@@ -138,24 +138,32 @@ struct UpdateSpanStyle {
     std::optional<uint32_t> updateSymbolRenderingStrategy = std::nullopt;
     std::optional<uint32_t> updateSymbolEffectStrategy = std::nullopt;
 
-    void UpdateColorByResourceId()
+    struct resourceUpdater {
+        RefPtr<ResourceObject> resObj;
+        std::function<void(const RefPtr<ResourceObject>&, struct UpdateSpanStyle&)> updateFunc;
+    };
+    std::unordered_map<std::string, resourceUpdater> resMap_;
+
+    void AddResource(
+        const std::string& key,
+        const RefPtr<ResourceObject>& resObj,
+        std::function<void(const RefPtr<ResourceObject>&, struct UpdateSpanStyle&)>&& updateFunc)
     {
-        if (updateTextColor) {
-            updateTextColor->UpdateColorByResourceId();
+        CHECK_NULL_VOID(resObj && updateFunc);
+        resMap_[key] = { resObj, std::move(updateFunc) };
+    }
+
+    void ReloadResources()
+    {
+        for (const auto& [key, resourceUpdater] : resMap_) {
+            resourceUpdater.updateFunc(resourceUpdater.resObj, *this);
         }
-        if (updateTextDecorationColor) {
-            updateTextDecorationColor->UpdateColorByResourceId();
-        }
-        if (updateTextShadows) {
+        if (updateTextShadows.has_value()) {
             auto& shadows = updateTextShadows.value();
-            std::for_each(shadows.begin(), shadows.end(), [](Shadow& sd) { sd.UpdateColorByResourceId(); });
+            std::for_each(shadows.begin(), shadows.end(), [](Shadow& sd) { sd.ReloadResources(); });
         }
-        if (updateSymbolColor) {
-            auto& colors = updateSymbolColor.value();
-            std::for_each(colors.begin(), colors.end(), [](Color& cl) { cl.UpdateColorByResourceId(); });
-        }
-        if (updateTextBackgroundStyle) {
-            updateTextBackgroundStyle->UpdateColorByResourceId();
+        if (updateTextBackgroundStyle.has_value()) {
+            updateTextBackgroundStyle->ReloadResources();
         }
     }
 
@@ -384,6 +392,8 @@ public:
     virtual void SetPlaceholder(PlaceholderOptions& options) = 0;
     virtual void SetTextDetectEnable(bool value) = 0;
     virtual void SetSupportPreviewText(bool value) = 0;
+    virtual void SetSelectDetectEnable(const bool value) = 0;
+    virtual void SetSelectDetectConfig(std::vector<TextDataDetectType>& types) = 0;
     virtual void SetTextDetectConfig(const TextDetectConfig& textDetectConfig) = 0;
     virtual void SetSelectedBackgroundColor(const Color& selectedColor) = 0;
     virtual void SetCaretColor(const Color& color) = 0;

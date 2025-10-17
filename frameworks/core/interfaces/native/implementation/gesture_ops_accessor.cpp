@@ -28,6 +28,8 @@
 #include "core/components_ng/gestures/tap_gesture.h"
 #include "core/components_ng/pattern/gesture/gesture_model_ng_static.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
+#include "core/interfaces/native/implementation/base_gesture_event_peer.h"
+#include "core/interfaces/native/implementation/event_target_info_peer.h"
 #include "core/interfaces/native/implementation/pan_gesture_options_peer.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
@@ -61,7 +63,6 @@ namespace GestureOpsAccessor {
 Ark_NativePointer CreateTapGestureImpl(const Ark_Number* fingers, const Ark_Number* count,
     const Ark_Number* distanceThreshold, Ark_Boolean isFingerCountLimited)
 {
-    LOGE("zcb CreateTapGestureImpl");
     int32_t fingerValue = Converter::Convert<int32_t>(*fingers);
     if (fingerValue > DEFAULT_MAX_FINGERS || fingerValue < DEFAULT_TAP_FINGER) {
         fingerValue = DEFAULT_TAP_FINGER;
@@ -254,7 +255,6 @@ void SetAllowedTypesImpl(Ark_NativePointer gesture, const Array_SourceTool* type
 void AddGestureToNodeImpl(Ark_NativePointer node, const Ark_Number* priority, Ark_GestureMask mask,
     Ark_NativePointer gesture, Ark_Boolean isModifier)
 {
-    LOGE("zcb AddGestureToNodeImpl");
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
@@ -305,6 +305,19 @@ void ClearGesturesImpl(Ark_NativePointer node)
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     gestureHub->ClearModifierGesture();
 }
+Ark_Number GetGestureEventType(Ark_NativePointer event)
+{
+    auto* peer = reinterpret_cast<Ark_BaseGestureEvent>(event);
+    CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_Number>(-1););
+    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(peer->GetRecognizerType()));
+}
+Ark_Boolean IsScrollableComponent(Ark_NativePointer event)
+{
+    auto defaultResult = Converter::ArkValue<Ark_Boolean>(true);
+    auto* peer = reinterpret_cast<Ark_EventTargetInfo>(event);
+    CHECK_NULL_RETURN(peer, defaultResult);
+    return Converter::ArkValue<Ark_Boolean>(peer->isScrollableComponent_);
+}
 } // namespace GestureOpsAccessor
 
 const GENERATED_ArkUIGestureOpsAccessor* GetGestureOpsAccessor()
@@ -330,6 +343,8 @@ const GENERATED_ArkUIGestureOpsAccessor* GetGestureOpsAccessor()
         GestureOpsAccessor::AddGestureToGroupImpl,
         GestureOpsAccessor::RemoveGestureByTagImpl,
         GestureOpsAccessor::ClearGesturesImpl,
+        GestureOpsAccessor::GetGestureEventType,
+        GestureOpsAccessor::IsScrollableComponent,
     };
     return &GestureOpsAccessorImpl;
 }

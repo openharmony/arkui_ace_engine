@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 #ifdef WINDOW_SCENE_SUPPORTED
-void UIExtensionProxyPeerImpl::SendData(const AAFwk::WantParams& wantParams)
+void UIExtensionProxyPeerHost::SendData(const AAFwk::WantParams& wantParams)
 {
     if (proxy_ == nullptr) {
         return;
@@ -29,7 +29,7 @@ void UIExtensionProxyPeerImpl::SendData(const AAFwk::WantParams& wantParams)
     proxy_->SendData(wantParams);
 }
 
-int32_t UIExtensionProxyPeerImpl::SendDataSync(
+int32_t UIExtensionProxyPeerHost::SendDataSync(
     const AAFwk::WantParams& wantParams, AAFwk::WantParams& reWantParams)
 {
     if (proxy_ == nullptr) {

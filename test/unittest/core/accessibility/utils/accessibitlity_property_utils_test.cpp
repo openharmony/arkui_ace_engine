@@ -414,4 +414,137 @@ HWTEST_F(AccessibilityPropertyUtilsTest, CheckAndGetActionController003, TestSiz
     EXPECT_EQ(controllerNode, nullptr);
     EXPECT_EQ(result, ActionControllerType::CONTROLLER_NONE);
 }
+
+/**
+ * @tc.name: NeedRemoveControllerTextFromGroup001
+ * @tc.desc: test NeedRemoveControllerTextFromGroup when node is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyUtilsTest, NeedRemoveControllerTextFromGroup001, TestSize.Level1)
+{
+    RefPtr<NG::FrameNode> node = nullptr;
+    auto result = AccessibilityPropertyUtils::NeedRemoveControllerTextFromGroup(node);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: NeedRemoveControllerTextFromGroup002
+ * @tc.desc: test NeedRemoveControllerTextFromGroup when node has nothing
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyUtilsTest, NeedRemoveControllerTextFromGroup002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct frameNode
+     */
+    std::string testTag = "frameNodeForTestNeedRemoveControllerTextFromGroup";
+    auto frameNode = FrameNode::CreateFrameNode(testTag,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_FALSE(accessibilityProperty->HasAccessibilityCustomRole());
+    EXPECT_FALSE(accessibilityProperty->HasAccessibilityRole());
+
+    /**
+     * @tc.steps: step2. test NeedRemoveControllerTextFromGroup
+     */
+    auto result = AccessibilityPropertyUtils::NeedRemoveControllerTextFromGroup(frameNode);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: NeedRemoveControllerTextFromGroup003
+ * @tc.desc: test NeedRemoveControllerTextFromGroup when node has AccessibilityCustomRole
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyUtilsTest, NeedRemoveControllerTextFromGroup003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct frameNode
+     */
+    std::string testTag = "frameNodeForTestNeedRemoveControllerTextFromGroup";
+    auto frameNode = FrameNode::CreateFrameNode(testTag,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_FALSE(accessibilityProperty->HasAccessibilityCustomRole());
+
+    /**
+     * @tc.steps: step2. test NeedRemoveControllerTextFromGroup
+     */
+    accessibilityProperty->accessibilityCustomRole_ = "";
+    EXPECT_TRUE(accessibilityProperty->HasAccessibilityCustomRole());
+    auto result = AccessibilityPropertyUtils::NeedRemoveControllerTextFromGroup(frameNode);
+    EXPECT_FALSE(result);
+    accessibilityProperty->accessibilityCustomRole_ = "InvalidRole";
+    EXPECT_TRUE(accessibilityProperty->HasAccessibilityCustomRole());
+    result = AccessibilityPropertyUtils::NeedRemoveControllerTextFromGroup(frameNode);
+    EXPECT_FALSE(result);
+    accessibilityProperty->accessibilityCustomRole_ = "checkbox";
+    EXPECT_TRUE(accessibilityProperty->HasAccessibilityCustomRole());
+    result = AccessibilityPropertyUtils::NeedRemoveControllerTextFromGroup(frameNode);
+    EXPECT_TRUE(result);
+    accessibilityProperty->accessibilityCustomRole_ = "checkboxgroup";
+    EXPECT_TRUE(accessibilityProperty->HasAccessibilityCustomRole());
+    result = AccessibilityPropertyUtils::NeedRemoveControllerTextFromGroup(frameNode);
+    EXPECT_TRUE(result);
+    accessibilityProperty->accessibilityCustomRole_ = "radio";
+    EXPECT_TRUE(accessibilityProperty->HasAccessibilityCustomRole());
+    result = AccessibilityPropertyUtils::NeedRemoveControllerTextFromGroup(frameNode);
+    EXPECT_TRUE(result);
+    accessibilityProperty->accessibilityCustomRole_ = "imagedata";
+    EXPECT_TRUE(accessibilityProperty->HasAccessibilityCustomRole());
+    result = AccessibilityPropertyUtils::NeedRemoveControllerTextFromGroup(frameNode);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: NeedRemoveControllerTextFromGroup004
+ * @tc.desc: test NeedRemoveControllerTextFromGroup when node has AccessibilityRole
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyUtilsTest, NeedRemoveControllerTextFromGroup004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct frameNode
+     */
+    std::string testTag = "frameNodeForTestNeedRemoveControllerTextFromGroup";
+    auto frameNode = FrameNode::CreateFrameNode(testTag,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_FALSE(accessibilityProperty->HasAccessibilityCustomRole());
+    EXPECT_FALSE(accessibilityProperty->HasAccessibilityRole());
+
+    /**
+     * @tc.steps: step2. test NeedRemoveControllerTextFromGroup
+     */
+    accessibilityProperty->accessibilityRole_ = "";
+    EXPECT_TRUE(accessibilityProperty->HasAccessibilityRole());
+    auto result = AccessibilityPropertyUtils::NeedRemoveControllerTextFromGroup(frameNode);
+    EXPECT_FALSE(result);
+    accessibilityProperty->accessibilityRole_ = "InvalidRole";
+    EXPECT_TRUE(accessibilityProperty->HasAccessibilityRole());
+    result = AccessibilityPropertyUtils::NeedRemoveControllerTextFromGroup(frameNode);
+    EXPECT_FALSE(result);
+    accessibilityProperty->accessibilityRole_ = V2::CHECK_BOX_ETS_TAG;
+    EXPECT_TRUE(accessibilityProperty->HasAccessibilityRole());
+    result = AccessibilityPropertyUtils::NeedRemoveControllerTextFromGroup(frameNode);
+    EXPECT_TRUE(result);
+    accessibilityProperty->accessibilityRole_ = V2::CHECKBOXGROUP_ETS_TAG;
+    EXPECT_TRUE(accessibilityProperty->HasAccessibilityRole());
+    result = AccessibilityPropertyUtils::NeedRemoveControllerTextFromGroup(frameNode);
+    EXPECT_TRUE(result);
+    accessibilityProperty->accessibilityRole_ = V2::RADIO_ETS_TAG;
+    EXPECT_TRUE(accessibilityProperty->HasAccessibilityRole());
+    result = AccessibilityPropertyUtils::NeedRemoveControllerTextFromGroup(frameNode);
+    EXPECT_TRUE(result);
+    accessibilityProperty->accessibilityRole_ = V2::LINE_ETS_TAG;
+    EXPECT_TRUE(accessibilityProperty->HasAccessibilityRole());
+    result = AccessibilityPropertyUtils::NeedRemoveControllerTextFromGroup(frameNode);
+    EXPECT_FALSE(result);
+}
 } // namespace OHOS::Ace::NG

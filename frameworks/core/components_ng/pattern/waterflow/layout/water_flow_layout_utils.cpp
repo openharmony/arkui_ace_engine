@@ -20,6 +20,7 @@ namespace OHOS::Ace::NG {
 namespace {
 const std::string UNIT_AUTO = "auto";
 }
+double WaterFlowLayoutUtils::originalWidth_ = 0.0f;
 std::string WaterFlowLayoutUtils::PreParseArgs(const std::string& args)
 {
     if (args.empty() || args.find(UNIT_AUTO) == std::string::npos) {
@@ -166,6 +167,8 @@ std::pair<SizeF, bool> WaterFlowLayoutUtils::PreMeasureSelf(LayoutWrapper* wrapp
     if (!matchChildren) {
         wrapper->GetGeometryNode()->SetFrameSize(size);
     }
+    double originalWidth = size.Width();
+    originalWidth_ = originalWidth;
     MinusPaddingToSize(props->CreatePaddingAndBorder(), size);
     wrapper->GetGeometryNode()->SetContentSize(size);
     return { size, matchChildren };
@@ -234,5 +237,10 @@ AdjustOffset WaterFlowLayoutUtils::GetAdjustOffset(const RefPtr<LayoutWrapper>& 
         child = child->GetFirstChild();
     } while (child);
     return pos;
+}
+
+double WaterFlowLayoutUtils::GetOriginalWidth()
+{
+    return originalWidth_;
 }
 } // namespace OHOS::Ace::NG

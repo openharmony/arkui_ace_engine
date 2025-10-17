@@ -261,6 +261,7 @@ void RichEditorSelectOverlay::OnHandleMoveDone(const RectF& handleRect, bool isF
                             DIRTY_SELECT_TEXT | DIRTY_COPY_ALL_ITEM | DIRTY_AI_MENU_ITEM | DIRTY_ASK_CELIA);
     ProcessOverlay({ .animation = true, .requestCode = recreateAfterMoveDone_ ? REQUEST_RECREATE : 0 });
     recreateAfterMoveDone_ = false;
+    pattern->SelectAIDetect();
     contentHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -317,6 +318,15 @@ void RichEditorSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectO
     menuInfo.showAIWrite = pattern->IsShowAIWrite() && hasValue;
     menuInfo.isAskCeliaEnabled = pattern->IsAskCeliaEnabled();
     pattern->UpdateSelectMenuInfo(menuInfo);
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "OnUpdateMenuInfo, IsShowAIMenuOption=%{public}d, AIItemOptionEmpty=%{public}d",
+        pattern->IsShowAIMenuOption(), pattern->GetAIItemOption().empty());
+    if (pattern->IsShowAIMenuOption() && !pattern->GetAIItemOption().empty()) {
+        // do not support two selected ai entity, hence it's enough to pick first item to determine type
+        auto firstSpanItem = pattern->GetAIItemOption().begin()->second;
+        menuInfo.aiMenuOptionType = firstSpanItem.type;
+    } else {
+        menuInfo.aiMenuOptionType = TextDataDetectType::INVALID;
+    }
 }
 
 // param filling except callback
@@ -555,7 +565,6 @@ void RichEditorSelectOverlay::UpdateMenuOffset()
 {
     auto pattern = GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->UpdateAIMenuOptions();
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
     manager->MarkInfoChange(DIRTY_SELECT_AREA | DIRTY_ALL_MENU_ITEM);

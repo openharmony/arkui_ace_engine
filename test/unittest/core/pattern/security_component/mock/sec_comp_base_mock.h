@@ -136,6 +136,7 @@ public:
     bool isWearableDevice_ = false;
     bool isCustomizable_ = false;
     TipPosition tipPosition_ = TipPosition::ABOVE_BOTTOM;
+    bool isArkuiComponent_ = false;
 };
 }  // namespace SecurityComponent
 }  // namespace Security

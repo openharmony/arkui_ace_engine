@@ -48,23 +48,11 @@ void FormLinkPattern::SetAction(const std::string& action)
 {
     TAG_LOGD(AceLogTag::ACE_FORM, "SetAction:%{public}s", action.c_str());
     formLinkInfo_.SetAction(action);
-    PostTask([weak = WeakClaim(this)] {
-        auto pattern = weak.Upgrade();
-        auto host = pattern->GetHost();
-        CHECK_NULL_VOID(host);
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        pipeline->AddFormLinkInfo(host->GetId(), pattern->formLinkInfo_.ToString());
-        }, TaskExecutor::TaskType::BACKGROUND, "ArkUIAddFormLinkInfo");
-}
- 
-void FormLinkPattern::PostTask(const TaskExecutor::Task& task, TaskExecutor::TaskType type, const std::string& name)
-{
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto taskExecutor = pipeline->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(task, type, name, PriorityType::HIGH);
+    pipeline->AddFormLinkInfo(host->GetId(), formLinkInfo_.ToString());
 }
 
 } // namespace OHOS::Ace::NG

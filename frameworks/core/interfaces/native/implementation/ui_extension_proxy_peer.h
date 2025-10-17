@@ -15,25 +15,36 @@
 #ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_UI_EXTENSION_PROXY_PEER_H
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_UI_EXTENSION_PROXY_PEER_H
 
+#include "base/memory/ace_type.h"
 #ifdef WINDOW_SCENE_SUPPORTED
 #include <mutex>
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_proxy.h"
+#include "frameworks/core/interfaces/native/implementation/ui_extension_proxy_peer_base.h"
 #endif //WINDOW_SCENE_SUPPORTED
-
-struct UIExtensionProxyPeer {
+namespace OHOS::Ace::NG::GeneratedModifier {
+#ifdef WINDOW_SCENE_SUPPORTED
+struct UIExtensionProxyPeerHost : public UIExtensionProxyPeerBase {
+#else
+struct UIExtensionProxyPeerHost : public AceType {
+#endif
 #ifdef WINDOW_SCENE_SUPPORTED
     using ProxyRefPtr = OHOS::Ace::RefPtr<OHOS::Ace::NG::UIExtensionProxy>;
     using CallbackFunc = std::function<void(const ProxyRefPtr&)>;
     using CallbackFuncPairList = std::list<std::pair<int32_t, CallbackFunc>>;
     using PatternRefPtr = OHOS::Ace::RefPtr<OHOS::Ace::NG::UIExtensionPattern>;
 #endif //WINDOW_SCENE_SUPPORTED
-    UIExtensionProxyPeer() = default;
-    ~UIExtensionProxyPeer() = default;
+    UIExtensionProxyPeerHost() = default;
+    ~UIExtensionProxyPeerHost() = default;
 #ifdef WINDOW_SCENE_SUPPORTED
     inline void SetProxy(const ProxyRefPtr& proxy)
     {
         proxy_ = proxy;
     }
+
+    void SendData(const AAFwk::WantParams& wantParams) override;
+
+    int32_t SendDataSync(
+        const AAFwk::WantParams& wantParams, AAFwk::WantParams& reWantParams) override;
     
     inline PatternRefPtr GetPattern()
     {
@@ -114,5 +125,8 @@ private:
     CallbackFuncPairList onAsyncCallbackList_;
 #endif //WINDOW_SCENE_SUPPORTED
 };
+} // namespace OHOS::Ace::NG::GeneratedModifier
+
+struct UIExtensionProxyPeer : public OHOS::Ace::NG::GeneratedModifier::UIExtensionProxyPeerHost {};
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_UI_EXTENSION_PROXY_PEER_H
 

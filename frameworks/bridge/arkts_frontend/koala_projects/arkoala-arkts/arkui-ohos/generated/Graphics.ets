@@ -16,7 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { Size, ColorMetrics, DrawContext, Frame, LengthMetrics, LengthUnit } from "arkui.Graphics"
+import { Size, ColorMetrics, DrawContext, Frame, LengthMetrics, LengthUnit, Vector2 } from "arkui.Graphics"
 import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, runtimeType, toPeerPtr, nullptr, KPointer, NativeBuffer, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { TypeChecker } from "#components"
@@ -95,6 +95,22 @@ export class LengthMetrics_serializer {
         const unitTmpResult : LengthUnit = LengthUnit.fromValue(valueDeserializer.readInt32())
         const valueTmpResult : number = (valueDeserializer.readNumber() as number)
         let value : LengthMetrics = ({unit: unitTmpResult, value: valueTmpResult} as LengthMetrics)
+        return value
+    }
+}
+export class Vector2_serializer {
+    public static write(buffer: SerializerBase, value: Vector2): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForX  = value.x
+        valueSerializer.writeFloat64(valueHolderForX)
+        const valueHolderForY  = value.y
+        valueSerializer.writeFloat64(valueHolderForY)
+    }
+    public static read(buffer: DeserializerBase): Vector2 {
+        let valueDeserializer : DeserializerBase = buffer
+        const xTmpResult : double = valueDeserializer.readFloat64()
+        const yTmpResult : double = valueDeserializer.readFloat64()
+        let value : Vector2 = ({x: xTmpResult, y: yTmpResult} as Vector2)
         return value
     }
 }

@@ -76,4 +76,35 @@ ani_long ExtractorsToSymbolGlyphModifierPtr(ani_env* env, [[maybe_unused]] ani_o
         reinterpret_cast<void*>(symbolModifierAni));
     return reinterpret_cast<ani_long>(symbolModifierPeer);
 }
+
+ani_object ExtractorsFromTextModifierPtr(ani_env* env, [[maybe_unused]]ani_object aniClass, ani_long pointer)
+{
+    const auto* modifier = GetNodeAniModifier();
+    CHECK_NULL_RETURN(modifier, nullptr);
+    auto textModifierAni = modifier->getTextBasedAniModifier()->fromTextModifierPeer(
+        reinterpret_cast<void*>(pointer));
+    return reinterpret_cast<ani_object>(textModifierAni);
+}
+
+ani_long ExtractorsToTextModifierPtr(ani_env* env, [[maybe_unused]] ani_object obj, ani_fn_object fnObj,
+    ani_object textModifierAni)
+{
+    const auto* modifier = GetNodeAniModifier();
+    CHECK_NULL_RETURN(modifier && fnObj, 0);
+
+    auto callbackAni = std::make_shared<TextBasedComponentCallbackAni>(env, fnObj);
+    std::function<void(WeakPtr<NG::FrameNode>)> textApply =
+        [env, callbackAni](WeakPtr<NG::FrameNode> frameNode) -> void {
+            auto node = reinterpret_cast<void*>(frameNode.Upgrade().GetRawPtr());
+            ani_object pointerObject = AniUtils::CreateLong(env, reinterpret_cast<ani_long>(node));
+            CHECK_NULL_VOID(pointerObject);
+            std::vector<ani_ref> args = { pointerObject };
+            ani_ref ret = nullptr;
+            callbackAni->Call(env, args.size(), args.data(), &ret);
+        };
+
+    auto textModifierPeer = modifier->getTextBasedAniModifier()->toTextModifierPeer(textApply,
+        reinterpret_cast<void*>(textModifierAni));
+    return reinterpret_cast<ani_long>(textModifierPeer);
+}
 } // namespace OHOS::Ace::Ani

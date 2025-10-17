@@ -16,8 +16,8 @@
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_CANVAS_RENDERER_PEER_IMPL_H
 
 #include "core/components_ng/pattern/canvas/rendering_context_2d_model.h"
+#include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
 #include "canvas_path_peer_impl.h"
-#include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 const auto IMAGE_FLAG_0 = 0;
@@ -218,6 +218,8 @@ public:
     {
         renderingContext2DModel_ = renderingContext2DModel;
     }
+
+    std::function<void*()> wrapAnalyzerConfigImpl = nullptr;
 
 protected:
     OHOS::Ace::RefPtr<OHOS::Ace::RenderingContext2DModel> renderingContext2DModel_;

@@ -68,9 +68,17 @@ enum class MouseFormat : int32_t {
     CURSOR_CIRCLE = 41,
     LOADING = 42,
     RUNNING = 43,
-    CURSOR_NONE = 46,
-    CONTEXT_MENU = 47,
-    ALIAS = 48,
+    MIDDLE_BTN_EAST_WEST = 44,
+    RUNNING_LEFT = 45,
+    RUNNING_RIGHT = 46,
+    AECH_DEVELOPER_DEFINED_ICON = 47,
+    SCREENRECORDER_CURSOR = 48,
+    LASER_CURSOR = 49,
+    LASER_CURSOR_DOT = 50,
+    LASER_CURSOR_DOT_RED = 51,
+    CURSOR_NONE = 1001,
+    CONTEXT_MENU = 1002,
+    ALIAS = 1003,
 };
 
 class ACE_EXPORT MouseStyle : public AceType {

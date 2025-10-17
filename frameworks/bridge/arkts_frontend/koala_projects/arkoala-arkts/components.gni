@@ -392,8 +392,11 @@ arkui_files = [
   "arkui-preprocessed/arkui/handwritten/transfer/TransferUtil.ets",
   "arkui-preprocessed/arkui/handwritten/transfer/UIContextTransfer.ets",
   "arkui-preprocessed/arkui/hooks/NavigationOpsHandWritten.ets",
+  "arkui-preprocessed/arkui/hooks/XComponentOpsHandWritten.ets",
   "arkui-preprocessed/arkui/hooks/content_modifiers/ContentModifierHooks.ets",
   "arkui-preprocessed/arkui/hooks/ImageOpsHandWritten.ets",
+  "arkui-preprocessed/arkui/hooks/VideoOpsHandWritten.ets",
+  "arkui-preprocessed/arkui/hooks/CanvasOpsHandWritten.ets",
   "arkui-preprocessed/arkui/hooks/index.ets",
   "arkui-preprocessed/arkui/hooks/modifiers/ArkCommonModifier.ets",
   "arkui-preprocessed/arkui/hooks/modifiers/index.ets",
@@ -517,6 +520,7 @@ arkui_files = [
   "arkui-preprocessed/arkui/typedNode/ArkToggleNode.ets",
   "arkui-preprocessed/arkui/typedNode/ArkWaterFlowNode.ets",
   "arkui-preprocessed/arkui/typedNode/ArkXComponentNode.ets",
+  "arkui-preprocessed/arkui/stateManagement/interop/interopBackingValue.ets",
 ]
 
 arkui_path_keys = [

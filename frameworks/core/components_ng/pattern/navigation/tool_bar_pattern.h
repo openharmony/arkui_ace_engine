@@ -97,6 +97,7 @@ private:
 
     void SetDefaultBackgroundColorIfNeeded(RefPtr<FrameNode>& host);
     void UpdateBackgroundStyle();
+    void UpdateBackgroundStyleMultiThread();
 
     NavigationToolbarOptions options_;
     MoreButtonOptions moreButtonOptions_;

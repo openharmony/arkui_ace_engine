@@ -753,6 +753,7 @@ HWTEST_F(RichEditorPreviewTextTestNg, RichEditorPatternTestGetPreviewTextStyle00
  */
 HWTEST_F(RichEditorPreviewTextTestNg, SetResultObjectText001, TestSize.Level0)
 {
+    ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     ResultObject resultObject;

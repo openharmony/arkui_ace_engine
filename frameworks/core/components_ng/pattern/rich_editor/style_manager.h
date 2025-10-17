@@ -35,6 +35,7 @@ public:
     // color in TextStyle
     inline static const std::string TEXT_COLOR_KEY = "textColor";
     inline static const std::string TEXT_DECORATION_COLOR_KEY = "textDecorationColor";
+    inline static const std::string DRAG_BACKGROUND_COLOR_KEY = "dragBackgroundColor";
     inline static const std::string SYMBOL_COLOR_KEY_PREFIX = "symbolColor_";
 
     // color updater
@@ -49,6 +50,13 @@ public:
         Color colorValue;
         ResourceParseUtils::ParseResColor(colorResObj, colorValue);
         textStyle.SetTextColor(colorValue);
+    };
+
+    inline static const auto UPDATE_SPAN_STYLE_TEXT_COLOR_UPDATER = [](
+        const RefPtr<ResourceObject>& colorResObj, struct UpdateSpanStyle& updateSpanStyle) {
+        Color colorValue;
+        ResourceParseUtils::ParseResColor(colorResObj, colorValue);
+        updateSpanStyle.updateTextColor = colorValue;
     };
     
     inline static const auto TEXT_DECORATION_COLOR_UPDATER = [](
@@ -65,17 +73,41 @@ public:
         textStyle.SetTextDecorationColor(colorValue);
     };
 
+    inline static const auto UPDATE_SPAN_STYLE_TEXT_DECORATION_COLOR_UPDATER = [](
+        const RefPtr<ResourceObject>& colorResObj, struct UpdateSpanStyle& updateSpanStyle) {
+        Color colorValue;
+        ResourceParseUtils::ParseResColor(colorResObj, colorValue);
+        updateSpanStyle.updateTextDecorationColor = colorValue;
+    };
+
+    inline static const auto DRAG_BACKGROUND_COLOR_UPDATER = [](
+        const RefPtr<SpanItem>& spanItem, const RefPtr<ResourceObject>& colorResObj) {
+        auto placeholderSpanItem = AceType::DynamicCast<PlaceholderSpanItem>(spanItem);
+        CHECK_NULL_VOID(placeholderSpanItem && placeholderSpanItem->dragBackgroundColor_.has_value());
+        Color colorValue;
+        ResourceParseUtils::ParseResColor(colorResObj, colorValue);
+        placeholderSpanItem->dragBackgroundColor_ = colorValue;
+    };
+
     static void AddTextColorResource(TextStyle& textStyle, const RefPtr<ResourceObject>& colorResObj)
     {
-        CHECK_NULL_VOID(SystemProperties::ConfigChangePerform() && colorResObj);
+        CHECK_NULL_VOID(colorResObj);
         const auto& key = TEXT_COLOR_KEY;
         const auto& updater = TEXT_STYLE_TEXT_COLOR_UPDATER;
         textStyle.AddResource(key, colorResObj, updater);
     }
 
+    static void AddTextColorResource(struct UpdateSpanStyle& updateSpanStyle, const RefPtr<ResourceObject>& colorResObj)
+    {
+        CHECK_NULL_VOID(colorResObj);
+        const auto& key = TEXT_COLOR_KEY;
+        const auto& updater = UPDATE_SPAN_STYLE_TEXT_COLOR_UPDATER;
+        updateSpanStyle.AddResource(key, colorResObj, updater);
+    }
+
     static void AddTextColorResource(RefPtr<SpanNode>& spanNode, const TextStyle& textStyle)
     {
-        CHECK_NULL_VOID(SystemProperties::ConfigChangePerform() && spanNode);
+        CHECK_NULL_VOID(spanNode);
         const auto& key = TEXT_COLOR_KEY;
         const auto& updater = TEXT_COLOR_UPDATER;
         spanNode->AddResource(key, textStyle.GetResource(key), updater);
@@ -83,24 +115,45 @@ public:
 
     static void AddTextDecorationColorResource(TextStyle& textStyle, const RefPtr<ResourceObject>& colorResObj)
     {
-        CHECK_NULL_VOID(SystemProperties::ConfigChangePerform() && colorResObj);
+        CHECK_NULL_VOID(colorResObj);
         const auto& key = TEXT_DECORATION_COLOR_KEY;
         const auto& updater = TEXT_STYLE_TEXT_DECORATION_COLOR_UPDATER;
         textStyle.AddResource(key, colorResObj, updater);
     }
 
+    static void AddTextDecorationColorResource(struct UpdateSpanStyle& updateSpanStyle,
+        const RefPtr<ResourceObject>& colorResObj)
+    {
+        CHECK_NULL_VOID(colorResObj);
+        const auto& key = TEXT_DECORATION_COLOR_KEY;
+        const auto& updater = UPDATE_SPAN_STYLE_TEXT_DECORATION_COLOR_UPDATER;
+        updateSpanStyle.AddResource(key, colorResObj, updater);
+    }
+
     static void AddTextDecorationColorResource(RefPtr<SpanNode>& spanNode, const TextStyle& textStyle)
     {
-        CHECK_NULL_VOID(SystemProperties::ConfigChangePerform() && spanNode);
+        CHECK_NULL_VOID(spanNode);
         const auto& key = TEXT_DECORATION_COLOR_KEY;
         const auto& updater = TEXT_DECORATION_COLOR_UPDATER;
         spanNode->AddResource(key, textStyle.GetResource(key), updater);
     }
 
+    static void AddDragBackgroundColorResource(const RefPtr<PlaceholderSpanItem>& spanItem,
+        const RefPtr<ResourceObject>& colorResObj)
+    {
+        CHECK_NULL_VOID(spanItem && colorResObj);
+        const auto& key = DRAG_BACKGROUND_COLOR_KEY;
+        const auto& updater = [weak = AceType::WeakClaim(AceType::RawPtr(spanItem))](
+            const RefPtr<ResourceObject>& colorResObj) {
+            auto spanItem = weak.Upgrade();
+            DRAG_BACKGROUND_COLOR_UPDATER(spanItem, colorResObj);
+        };
+        spanItem->AddResObj(key, colorResObj, updater);
+    }
+
     static void AddSymbolColorResource(
         TextStyle& textStyle, const std::vector<std::pair<int32_t, RefPtr<ResourceObject>>>& resObjArr)
     {
-        CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
         for (const auto& [resObjIndex, colorResObj] : resObjArr) {
             CHECK_NULL_CONTINUE(colorResObj);
             auto&& updater = [i = resObjIndex] (const RefPtr<ResourceObject>& colorResObj, TextStyle& textStyle) {
@@ -117,7 +170,7 @@ public:
 
     static void AddSymbolColorResource(const RefPtr<SpanNode>& spanNode, const TextStyle& textStyle)
     {
-        CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+        CHECK_NULL_VOID(spanNode);
         auto& symbolColorList = textStyle.GetSymbolColorList();
         for (size_t i = 0; i < symbolColorList.size(); ++i) {
             auto updater = [i](const RefPtr<ResourceObject>& colorResObj, FontStyle& fontStyle) {
@@ -164,9 +217,8 @@ public:
         }
     }
 
-    static void UpdateTextStyle(RefPtr<SpanNode>& spanNode, const struct UpdateSpanStyle& updateSpanStyle)
+    static void UpdateTextStyle(RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle updateSpanStyle)
     {
-        CHECK_NULL_VOID(spanNode);
         auto spanItem = spanNode->GetSpanItem();
         CHECK_NULL_VOID(spanItem);
         spanNode->UpdateTextColor(updateSpanStyle.updateTextColor);
@@ -228,7 +280,7 @@ public:
 
     void UpdateTextStyleByTypingStyle(RefPtr<SpanItem>& spanItem)
     {
-        CHECK_NULL_VOID(spanItem && typingFontStyle_.has_value());
+        CHECK_NULL_VOID(spanItem);
         auto spanNode = AceType::MakeRefPtr<SpanNode>(ElementRegister::GetInstance()->MakeUniqueId());
         spanNode->SetSpanItem(spanItem);
         UpdateTextStyleByTypingStyle(spanNode);
@@ -263,6 +315,7 @@ public:
         std::optional<Color> colorOption;
         std::optional<TextDecorationStyle> styleOption;
         std::optional<TextDecorationOptions> options;
+        std::optional<float> thicknessScale;
         if (updateSpanStyle.updateTextDecoration.has_value()) {
             type = textStyle.GetTextDecorationFirst();
         }
@@ -272,11 +325,15 @@ public:
         if (updateSpanStyle.updateTextDecorationStyle.has_value()) {
             styleOption = textStyle.GetTextDecorationStyle();
         }
+        if (updateSpanStyle.updateLineThicknessScale.has_value()) {
+            thicknessScale = textStyle.GetLineThicknessScale();
+        }
         return AceType::MakeRefPtr<DecorationSpan>(
-            std::vector<TextDecoration>({ type }), colorOption, styleOption, options, 0, length, nullptr);
+            std::vector<TextDecoration>({type}), colorOption, styleOption, thicknessScale, options, 0, length, nullptr);
     }
 
-    bool NeedTypingParagraphStyle(const RefPtr<MutableSpanString>& styledString, int32_t changeStart, int32_t changeLength)
+    bool NeedTypingParagraphStyle(const RefPtr<MutableSpanString>& styledString,
+        int32_t changeStart, int32_t changeLength)
     {
         CHECK_NULL_RETURN(styledString && typingParagraphStyle_.has_value(), false);
         auto length = styledString->GetLength();
@@ -286,7 +343,7 @@ public:
         CHECK_NULL_RETURN(changeStart + changeLength == length || changeStart == length, false);
         auto& string = styledString->GetU16string();
         if (changeStart > length || changeStart <= 0) {
-            TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "NeedTypingParagraphStyle, error, changeStart=%{public}d, length=%{public}d",
+            TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "NeedTypingParagraphStyle, changeStart=%{public}d, length=%{public}d",
                 changeStart, length);
             return false;
         }
@@ -332,15 +389,14 @@ public:
     bool NeedTypingParagraphStyle(const std::list<RefPtr<SpanItem>>& spans, int32_t caretPosition)
     {
         // empty
-        CHECK_NULL_RETURN(!spans.empty(), true);
-
+        if (spans.empty()) return true;
+        
         // insert in last new Line
         auto contentLength = spans.back()->position;
         if (caretPosition == contentLength && spans.back()->content.back() == u'\n') {
             return true;
         }
         return false;
-
     }
 
     bool UseTypingParaStyle(const std::list<RefPtr<SpanItem>>& spans, const RichEditorChangeValue& changeValue)
@@ -351,10 +407,10 @@ public:
     bool UseTypingParaStyle(const std::list<RefPtr<SpanItem>>& spans, int32_t caretPosition)
     {
         return typingParagraphStyle_.has_value() && NeedTypingParagraphStyle(spans, caretPosition);
-
     }
 
-    RefPtr<SpanString> CreateStyledStringByTypingStyle(const std::u16string& insertValue, const RefPtr<MutableSpanString>& styledString, int32_t changeStart, int32_t changeLength)
+    RefPtr<SpanString> CreateStyledStringByTypingStyle(const std::u16string& insertValue,
+        const RefPtr<MutableSpanString>& styledString, int32_t changeStart, int32_t changeLength)
     {
         bool hasTypingStyle = typingFontStyle_.has_value();
         bool needTypingParagraphStyle = NeedTypingParagraphStyle(styledString, changeStart, changeLength);
@@ -371,7 +427,6 @@ public:
 
     void HandleStyledStringByTypingTextStyle(int length, std::vector<RefPtr<SpanBase>>& spans)
     {
-        CHECK_NULL_VOID(typingTextStyle_.has_value() && typingFontStyle_.has_value());
         auto& textStyle = typingTextStyle_.value();
         auto& updateSpanStyle = typingFontStyle_.value();
         spans.push_back(CreateFontSpanByTextStyle(updateSpanStyle, textStyle, length));

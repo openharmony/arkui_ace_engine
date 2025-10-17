@@ -1245,7 +1245,7 @@ HWTEST_F(RichEditorMenuTestNg, UpdateAIMenuOptions002, TestSize.Level1)
     ASSERT_NE(selectOverlay, nullptr);
     pattern->copyOption_ = CopyOptions::Local;
     selectOverlay->UpdateMenuOffset();
-    EXPECT_EQ(pattern->IsShowAIMenuOption(), true);
+    EXPECT_EQ(pattern->IsShowAIMenuOption(), false);
 
     pattern->copyOption_ = CopyOptions::Distributed;
     pattern->UpdateAIMenuOptions();
@@ -1296,6 +1296,10 @@ HWTEST_F(RichEditorMenuTestNg, UpdateAIMenuOptions003, TestSize.Level1)
     pattern->UpdateAIMenuOptions();
     EXPECT_EQ(pattern->IsShowAIMenuOption(), false);
     EXPECT_EQ(pattern->IsAskCeliaEnabled(), true);
+
+    pattern->textSelector_.Update(0, 0);
+    pattern->isEditing_ = false;
+    EXPECT_EQ(pattern->IsShowAIMenuOption(), false);
 }
 
 /**
