@@ -1041,6 +1041,9 @@ public:
     void HandleSelectionEnd();
     void HandleSelectionParagraghEnd();
     bool HandleOnEscape() override;
+#ifdef ANDROID_PLATFORM
+    bool HandleOnKeyBack() override;
+#endif
     bool HandleOnTab(bool backward) override;
     void HandleOnEnter() override
     {
@@ -2114,7 +2117,11 @@ private:
     bool ShouldSkipUpdateParagraph();
     void UpdateParagraphForDragNode(bool skipUpdate);
     void UpdateMagnifierWithFloatingCaretPos();
+    void HandleEditingEventCrossPlatform(const std::shared_ptr<TextEditingValue>& value);
     void ApplyInnerBorderColor();
+#if defined(ENABLE_STANDARD_INPUT)
+    void UpdateCaretInfoStandard(bool forceUpdate);
+#endif
 
     RectF frameRect_;
     RectF textRect_;

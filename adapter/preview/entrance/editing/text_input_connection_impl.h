@@ -38,6 +38,7 @@ public:
     void SetEditingState(
         const TextEditingValue& value, int32_t instanceId, bool needFireChangeEvent = true) override;
     void Close(int32_t instanceId) override;
+    void FinishComposing(int32_t instanceId) override;
 private:
     bool Attached();
 };
