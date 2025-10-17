@@ -236,13 +236,19 @@ class ObserveV2 {
       const symRefs: Object = target?.[ObserveV2.SYMBOL_REFS];
 
       if (idRefs) {
-        idRefs[id]?.forEach(key =>
+        idRefs[id]?.forEach(key => {
           symRefs?.[key]?.delete(id)
-        );
+          if (symRefs?.[key]?.size === 0) {
+            delete symRefs[key];
+          }
+        });
         delete idRefs[id];
       } else {
         for (let key in symRefs) {
           symRefs[key]?.delete(id);
+          if (symRefs?.[key]?.size === 0) {
+            delete symRefs[key];
+          }
         };
       }
 
