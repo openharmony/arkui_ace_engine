@@ -22,6 +22,7 @@ ohos_source_set("capi-ut-stubs") {
     "capi-ut-stubs.cpp",
     "mock_component_snapshot.cpp",
     "mock_custom_render_descriptor.cpp",
+    "mock_date_picker_dialog.cpp",
     "mock_effect_component_pattern.cpp",
     "mock_form_pattern.cpp",
     "mock_gestures.cpp",
