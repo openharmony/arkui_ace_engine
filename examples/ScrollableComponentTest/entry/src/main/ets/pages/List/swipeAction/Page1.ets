@@ -1,5 +1,5 @@
 import { BusinessError } from '@ohos.base';
-import { ListDataSource } from './ListDataSource./ListDataSource';
+import { ListDataSource } from './ListDataSource./ListDataSource1';
 
 @Entry
 @Component
@@ -134,7 +134,7 @@ struct ListItemExample2 {
                 ListItemSwipeActionManager.expand(this.getList()?.getChild(Number(this.text)),
                   this.directions[this.dirIndex])
               } catch (error) {
-                console.error("CXN Error expanding ite m:", (error as BusinessError).code,
+                console.error("CXN Error expanding item:", (error as BusinessError).code,
                   (error as BusinessError).message);
               }
             })
