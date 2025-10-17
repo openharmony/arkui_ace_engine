@@ -204,4 +204,26 @@ HWTEST_F(UiEventTest, UiEventTest007, TestSize.Level1)
     bool result = UIEventFunc::Get().IsAvailable();
     EXPECT_FALSE(result);
 }
+
+/**
+ * @tc.name: UiEventTest008
+ * @tc.desc: test UIEvent GetComponentImageInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(UiEventTest, UiEventTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     */
+    ComponentParams params = { 0, 0 };
+    auto result = std::make_shared<ComponentResult>();
+
+    /**
+     * @tc.steps2: Call the function GetComponentImageInfo.
+     * @tc.expected: IsAvailable() is false.
+     */
+    UIEvent::GetComponentImageInfo(params, result);
+    bool ret = UIEventFunc::Get().IsAvailable();
+    EXPECT_FALSE(ret);
+}
 } // namespace OHOS::Ace

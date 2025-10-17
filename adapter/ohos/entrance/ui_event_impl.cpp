@@ -140,6 +140,13 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_ExecuteCommandAsync(const UICommandPar
     inspector->ExecuteUICommand(collector);
 }
 
+extern "C" ACE_FORCE_EXPORT void OHOS_ACE_GetComponentImageInfo(
+    const ComponentParams& params, std::shared_ptr<ComponentResult>& result)
+{
+    auto inspector = std::make_shared<NG::SimplifiedInspector>(0, params);
+    inspector->GetComponentImageInfo(result);
+}
+
 namespace Recorder {
 constexpr char HA_CLIENT_SO_PATH[] = "libha_ace_engine.z.so";
 

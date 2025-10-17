@@ -29,11 +29,14 @@ class SimplifiedInspector final : public std::enable_shared_from_this<Simplified
 public:
     SimplifiedInspector(int32_t containerId, const TreeParams& params);
     SimplifiedInspector(int32_t containerId, const UICommandParams& params);
+    SimplifiedInspector(int32_t containerId, const ComponentParams& params);
     ~SimplifiedInspector() = default;
     std::string GetInspector();
     void GetInspectorAsync(const std::shared_ptr<Recorder::InspectorTreeCollector>& collector);
     void GetInspectorBackgroundAsync(const std::shared_ptr<Recorder::InspectorTreeCollector>& collector);
     void ExecuteUICommand(const std::shared_ptr<Recorder::InspectorTreeCollector>& collector);
+
+    void GetComponentImageInfo(std::shared_ptr<ComponentResult>& result);
 
     static void TestScrollToTarget(const std::vector<std::string>& params, const RefPtr<FrameNode>& pageRootNode);
 
@@ -58,11 +61,15 @@ private:
     void GetInspectorChildrenBackground(
         const std::shared_ptr<SimplifiedInspectorTree>& treeNode, std::unique_ptr<OHOS::Ace::JsonValue>& jsonNodeArray);
     int32_t ExecuteWebScrollCommand(const RefPtr<FrameNode>& rootNode, int32_t nodeId, const std::string& jsCode);
+    std::shared_ptr<Media::PixelMap> GetImagePixelMap(const RefPtr<UINode>& node);
+    void GetComponentSnapshot(const RefPtr<FrameNode>& rootNode, std::shared_ptr<ComponentResult>& result);
+
     RectF deviceRect_;
-    int32_t containerId_;
+    int32_t containerId_ { 0 };
     int pageId_ = 0;
     TreeParams params_;
     UICommandParams commandParams_;
+    ComponentParams componentParams_;
     InspectorConfig inspectorCfg_;
     size_t size_ = 0;
     bool isAsync_ = false;

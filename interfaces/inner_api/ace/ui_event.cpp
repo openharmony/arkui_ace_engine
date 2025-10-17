@@ -54,4 +54,9 @@ void UIEvent::ExecuteCommandAsync(const UICommandParams& params, UICommandResult
 {
     UIEventFunc::ExecuteCommandAsync(params, std::move(callback));
 }
+
+void UIEvent::GetComponentImageInfo(const ComponentParams& params, std::shared_ptr<ComponentResult>& result)
+{
+    UIEventFunc::GetComponentImageInfo(params, result);
+}
 } // namespace OHOS::Ace
