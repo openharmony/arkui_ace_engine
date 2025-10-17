@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_FOLDER_STACK_FOLDER_STACK_PATTERN_H
 
 #include "base/thread/cancelable_callback.h"
+#include "base/utils/multi_thread.h"
 #include "core/common/display_info.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/folder_stack/folder_stack_event_hub.h"
@@ -128,6 +129,12 @@ private:
     void OnDetachFromFrameNode(FrameNode* node) override;
     void RegisterFoldStatusListener();
     void OnAttachToFrameNode() override;
+    void OnAttachToMainTree() override;
+    void OnDetachFromMainTree() override;
+    void OnAttachToFrameNodeMultiThread();
+    void OnDetachFromFrameNodeMultiThread(FrameNode* node);
+    void OnAttachToMainTreeMultiThread();
+    void OnDetachFromMainTreeMultiThread();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
     void StartOffsetEnteringAnimation();
     RefPtr<RenderContext> GetRenderContext();
