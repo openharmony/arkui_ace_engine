@@ -248,7 +248,7 @@ HWTEST_F(CheckboxStaticTestNg, CheckboxStaticTestNg005, TestSize.Level1)
      */
     std::optional<Dimension> markSize = std::nullopt;
     CheckBoxModelStatic::SetCheckMarkSize(frameNode, markSize);
-    EXPECT_EQ(checkBoxPaintProperty->GetCheckBoxCheckMarkSize(), std::nullopt);
+    EXPECT_EQ(checkBoxPaintProperty->GetCheckBoxCheckMarkSize(), Dimension(20, DimensionUnit::VP));
     markSize = CHECK_MARK_SIZE;
     CheckBoxModelStatic::SetCheckMarkSize(frameNode, markSize);
     EXPECT_EQ(checkBoxPaintProperty->GetCheckBoxCheckMarkSize(), CHECK_MARK_SIZE);
@@ -279,9 +279,16 @@ HWTEST_F(CheckboxStaticTestNg, CheckboxStaticTestNg006, TestSize.Level1)
      * @tc.steps: step3. test SetCheckMarkWidth.
      * @tc.expected: step3. the property value meet expectations.
      */
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<CheckboxTheme>();
+    ASSERT_NE(theme, nullptr);
+    const Dimension mockDefaultWidth = theme->GetCheckStroke();
+
     std::optional<Dimension> markWidth = std::nullopt;
     CheckBoxModelStatic::SetCheckMarkWidth(frameNode, markWidth);
-    EXPECT_EQ(checkBoxPaintProperty->GetCheckBoxCheckMarkWidth(), std::nullopt);
+    EXPECT_EQ(checkBoxPaintProperty->GetCheckBoxCheckMarkWidth(), mockDefaultWidth);
     markWidth = CHECK_MARK_WIDTH;
     CheckBoxModelStatic::SetCheckMarkWidth(frameNode, markWidth);
     EXPECT_EQ(checkBoxPaintProperty->GetCheckBoxCheckMarkWidth(), CHECK_MARK_WIDTH);
