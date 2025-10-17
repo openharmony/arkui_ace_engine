@@ -85,8 +85,6 @@ void WaterFlowLayoutAlgorithm::InitialItemsCrossSize(const RefPtr<WaterFlowLayou
 
 void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
-    CHECK_NULL_VOID(layoutWrapper);
-    layoutWrapper_ = layoutWrapper;
     auto layoutProperty = AceType::DynamicCast<WaterFlowLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     auto host = layoutWrapper->GetHostNode();

@@ -2235,4 +2235,137 @@ HWTEST_F(WaterFlowSWTest, WaterFlowSWReMeasureTest001, TestSize.Level1)
     layoutAlgorithm->Layout(AceType::RawPtr(frameNode_));
     EXPECT_TRUE(layoutAlgorithm->isLayouted_);
 }
+
+/**
+ * @tc.name: ItemFillPolicySWTestWithWidth500
+ * @tc.desc: Test specify the number of columnsTemplate on waterFlow for width 500 in different responsive breakpoints
+ * and sliding window mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, ItemFillPolicySWTest001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(500));
+    CreateWaterFlowItems(15);
+    pattern_->SetLayoutMode(WaterFlowLayoutMode::SLIDING_WINDOW);
+    CreateDone();
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 1), ITEM_MAIN_SIZE);
+    /**
+     * @tc.steps: step1. Set ItemFillPolicy to BREAKPOINT_SM2MD3LG5.
+     * @tc.expected: The number of columns should be two.
+     */
+    model.SetItemFillPolicy((AceType::RawPtr(frameNode_)), PresetFillType::BREAKPOINT_SM2MD3LG5);
+    FlushUITasks();
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 2), ITEM_MAIN_SIZE);
+    EXPECT_EQ(GetChildY(frameNode_, 4), ITEM_MAIN_SIZE * 2);
+    /**
+     * @tc.steps: step2. Set ItemFillPolicy to BREAKPOINT_SM1MD2LG3.
+     * @tc.expected: The number of columns should be one.
+     */
+    model.SetItemFillPolicy((AceType::RawPtr(frameNode_)), PresetFillType::BREAKPOINT_SM1MD2LG3);
+    FlushUITasks();
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 1), ITEM_MAIN_SIZE);
+    EXPECT_LT(GetChildY(frameNode_, 1), GetChildY(frameNode_, 2));
+    /**
+     * @tc.steps: step2. Set ItemFillPolicy to BREAKPOINT_DEFAULT.
+     * @tc.expected: The number of columns should be two.
+     */
+    model.SetItemFillPolicy((AceType::RawPtr(frameNode_)), PresetFillType::BREAKPOINT_DEFAULT);
+    FlushUITasks();
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 2), ITEM_MAIN_SIZE);
+    EXPECT_EQ(GetChildY(frameNode_, 4), ITEM_MAIN_SIZE * 2);
+}
+
+/**
+ * @tc.name: ItemFillPolicySWTestWithWidth800
+ * @tc.desc: Test specify the number of columnsTemplate on waterFlow for width 800 in different responsive breakpoints
+ * and sliding window mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, ItemFillPolicySWTest002, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(800));
+    CreateWaterFlowItems(15);
+    pattern_->SetLayoutMode(WaterFlowLayoutMode::SLIDING_WINDOW);
+    CreateDone();
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 1), ITEM_MAIN_SIZE);
+    /**
+     * @tc.steps: step1. Set ItemFillPolicy to BREAKPOINT_SM2MD3LG5.
+     * @tc.expected: The number of columns should be three.
+     */
+    model.SetItemFillPolicy((AceType::RawPtr(frameNode_)), PresetFillType::BREAKPOINT_SM2MD3LG5);
+    FlushUITasks();
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 2), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 3), ITEM_MAIN_SIZE);
+    /**
+     * @tc.steps: step1. Set ItemFillPolicy to BREAKPOINT_SM1MD2LG3.
+     * @tc.expected: The number of columns should be two.
+     */
+    model.SetItemFillPolicy((AceType::RawPtr(frameNode_)), PresetFillType::BREAKPOINT_SM1MD2LG3);
+    FlushUITasks();
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 1), 0.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 2), ITEM_MAIN_SIZE);
+    /**
+     * @tc.steps: step1. Set ItemFillPolicy to BREAKPOINT_DEFAULT.
+     * @tc.expected: The number of columns should be three.
+     */
+    model.SetItemFillPolicy((AceType::RawPtr(frameNode_)), PresetFillType::BREAKPOINT_DEFAULT);
+    FlushUITasks();
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 2), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 3), ITEM_MAIN_SIZE);
+}
+
+/**
+ * @tc.name: ItemFillPolicySWTestWithWidth1200
+ * @tc.desc: Test specify the number of columnsTemplate on waterFlow for width 1200 in different responsive breakpoints
+ * and sliding window mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, ItemFillPolicySWTest003, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(1200));
+    CreateWaterFlowItems(15);
+    pattern_->SetLayoutMode(WaterFlowLayoutMode::SLIDING_WINDOW);
+    CreateDone();
+    FlushUITasks();
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 1), ITEM_MAIN_SIZE);
+    /**
+     * @tc.steps: step1. Set ItemFillPolicy to BREAKPOINT_SM2MD3LG5.
+     * @tc.expected: The number of columns should be five.
+     */
+    model.SetItemFillPolicy((AceType::RawPtr(frameNode_)), PresetFillType::BREAKPOINT_SM2MD3LG5);
+    FlushUITasks();
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 4), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 5), ITEM_MAIN_SIZE);
+    /**
+     * @tc.steps: step1. Set ItemFillPolicy to BREAKPOINT_SM1MD2LG3.
+     * @tc.expected: The number of columns should be three.
+     */
+    model.SetItemFillPolicy((AceType::RawPtr(frameNode_)), PresetFillType::BREAKPOINT_SM1MD2LG3);
+    FlushUITasks();
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 2), 0.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 3), ITEM_MAIN_SIZE);
+    /**
+     * @tc.steps: step1. Set ItemFillPolicy to BREAKPOINT_DEFAULT.
+     * @tc.expected: The number of columns should be five.
+     */
+    model.SetItemFillPolicy((AceType::RawPtr(frameNode_)), PresetFillType::BREAKPOINT_DEFAULT);
+    FlushUITasks();
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 4), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 5), ITEM_MAIN_SIZE);
+}
 } // namespace OHOS::Ace::NG

@@ -330,17 +330,22 @@ void JSWaterFlow::SetLayoutDirection(const JSCallbackInfo& info)
 
 void JSWaterFlow::SetColumnsTemplate(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1) {
+        return;
+    }
     auto jsValue = info[0];
     if (jsValue->IsObject()) {
-        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
+        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
         auto fillTypeParam = jsObj->GetProperty("fillType");
         if (!fillTypeParam->IsNull()) {
             auto type = JSScrollable::ParsePresetFillType(fillTypeParam);
             if (type.has_value()) {
                 WaterFlowModel::GetInstance()->SetItemFillPolicy(type.value());
             } else {
-                WaterFlowModel::GetInstance()->SetColumnsTemplate("");
+                WaterFlowModel::GetInstance()->SetItemFillPolicy(PresetFillType::BREAKPOINT_DEFAULT);
             }
+        } else {
+            WaterFlowModel::GetInstance()->SetItemFillPolicy(PresetFillType::BREAKPOINT_DEFAULT);
         }
     } else {
         WaterFlowModel::GetInstance()->SetColumnsTemplate(jsValue->ToString());
