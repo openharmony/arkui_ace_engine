@@ -77,6 +77,9 @@ void SyncChildrenSize(const JSRef<JSObject>& childrenSizeObj, RefPtr<NG::ListChi
 void InitNativeMainSize(const JSRef<JSObject>& childrenSizeObj, RefPtr<NG::ListChildrenMainSize> listChildrenMainSize)
 {
     auto nativeMainSize = JSClass<JSListChildrenMainSize>::NewInstance();
+    if (nativeMainSize->IsEmpty()) {
+        return;
+    }
     auto nativeMainSizeObj = JSRef<JSObject>::Cast(nativeMainSize);
     JSListChildrenMainSize* jsChildrenMainSize = nativeMainSizeObj->Unwrap<JSListChildrenMainSize>();
     auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
@@ -147,12 +150,19 @@ void JSListItemGroup::SetChildrenMainSize(const JSRef<JSObject>& childrenSizeObj
     CHECK_NULL_VOID(listChildrenMainSize);
 
     auto property = childrenSizeObj->GetProperty("getNativeMainSize");
+    if (!property->IsFunction()) {
+        return;
+    }
     auto getNativeMainSizeFunc = JSRef<JSFunc>::Cast(property);
     auto nativeMainSize = getNativeMainSizeFunc->Call(childrenSizeObj);
-    auto nativeMainSizeObj = JSRef<JSObject>::Cast(nativeMainSize);
-    JSListChildrenMainSize* jsChildrenMainSize = nativeMainSizeObj->Unwrap<JSListChildrenMainSize>();
+    JSListChildrenMainSize* jsChildrenMainSize;
+    if (nativeMainSize->IsObject()) {
+        auto nativeMainSizeObj = JSRef<JSObject>::Cast(nativeMainSize);
+        jsChildrenMainSize = nativeMainSizeObj->Unwrap<JSListChildrenMainSize>();
+    }
     auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    if (nativeMainSize->IsEmpty() || !nativeMainSize->IsObject() || !jsChildrenMainSize->IsHostEqual(frameNode)) {
+    if (nativeMainSize->IsEmpty() || !nativeMainSize->IsObject() ||
+        (jsChildrenMainSize && !jsChildrenMainSize->IsHostEqual(frameNode))) {
         InitNativeMainSize(childrenSizeObj, listChildrenMainSize);
         listChildrenMainSize->UpdateDefaultSize(Dimension(defaultSize, DimensionUnit::VP).ConvertToPx());
         SyncChildrenSize(childrenSizeObj, listChildrenMainSize);
