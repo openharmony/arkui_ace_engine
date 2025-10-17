@@ -196,10 +196,11 @@ ArkUI_Bool ConvertPoint(ArkUINodeHandle node, ArkUI_Float32 (*position)[2], ArkU
     if (!sameParentNode) {
         return false;
     }
-    auto offset =
-        currentNode->ConvertPoint({ (*position)[0], (*position)[1] }, Referenced::Claim<FrameNode>(targetNode));
-    (*targetNodePositionOffset)[0] = offset.GetX();
-    (*targetNodePositionOffset)[1] = offset.GetY();
+    auto offset = currentNode->ConvertPoint({ PipelineBase::Vp2PxWithCurrentDensity((*position)[0]),
+                                                PipelineBase::Vp2PxWithCurrentDensity((*position)[1]) },
+        Referenced::Claim<FrameNode>(targetNode));
+    (*targetNodePositionOffset)[0] = PipelineBase::Px2VpWithCurrentDensity(offset.GetX());
+    (*targetNodePositionOffset)[1] = PipelineBase::Px2VpWithCurrentDensity(offset.GetY());
     return true;
 }
 

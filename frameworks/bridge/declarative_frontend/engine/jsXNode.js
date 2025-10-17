@@ -1634,8 +1634,7 @@ class FrameNode extends Disposable {
             throw { message: "The parameter 'position' is invalid: it cannot be null. Provide a non-null position object.", code: 100025 };
         }
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        const offsetPosition = getUINativeModule().frameNode.convertPoint(
-            this.getNodePtr(), position.x, position.y, targetNode.nodePtr_);
+        const offsetPosition = getUINativeModule().frameNode.convertPoint(this.getNodePtr(), position.x, position.y, targetNode.nodePtr_);
         __JSScopeUtil__.restoreInstanceId();
         return { x: offsetPosition[0], y: offsetPosition[1] };
     }
