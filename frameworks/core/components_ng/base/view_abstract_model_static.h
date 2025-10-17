@@ -373,6 +373,10 @@ void SetBackgroundEffectMultiThread(FrameNode* frameNode,
 void SetTranslateMultiThread(FrameNode* frameNode, const NG::TranslateOptions& value);
 void SetGeometryTransitionMultiThread(FrameNode* frameNode, const std::string& id,
     bool followWithoutTransition, bool doRegisterSharedTransition);
+void BindMenuMultiThread(FrameNode* frameNode, std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc,
+    const MenuParam& menuParam);
+void BindContextMenuStaticMultiThread(const RefPtr<FrameNode>& targetNode, ResponseType type,
+    std::function<void()>&& buildFunc, const NG::MenuParam& menuParam, std::function<void()>&& previewBuildFunc);
 // multi thread function end
 } // namespace OHOS::Ace::NG
 

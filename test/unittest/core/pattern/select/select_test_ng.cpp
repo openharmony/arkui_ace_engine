@@ -29,6 +29,7 @@
 
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_engine.h"
+#include "core/common/multi_thread_build_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components/select/select_theme.h"
@@ -3776,5 +3777,141 @@ HWTEST_F(SelectTestNg, SetOptionBgColor, TestSize.Level1)
     const Color& color = BG_COLOR_VALUE;
     selectModelInstance.SetOptionBgColor(Referenced::RawPtr(framenode), color);
     EXPECT_NE(framenode, nullptr);
+}
+
+/**
+ * @tc.name: InitSelectMultiThread001
+ * @tc.desc: Test InitSelectMultiThread in multi-thread scenario.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, InitSelectMultiThread001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Simulate non-UI thread environment and create a thread-safe select node.
+     */
+    MultiThreadBuildManager::SetIsThreadSafeNodeScope(true);
+    bool isUIThread = MultiThreadBuildManager::isUIThread_;
+    MultiThreadBuildManager::isUIThread_ = false;
+
+    SelectModelNG selectModelInstance;
+    // Create an empty Select node first by passing an empty vector.
+    selectModelInstance.Create({});
+    auto selectNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(selectNode, nullptr);
+    ViewStackProcessor::GetInstance()->Push(selectNode); // Push back for subsequent operations if needed
+
+    /**
+     * @tc.steps: step2. Call InitSelectMultiThread and check if a task is posted.
+     * @tc.expected: A task should be added to afterAttachMainTreeTasks_.
+     */
+    auto selectPattern = selectNode->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    // Replace with a new empty vector to bypass the initialization check in InitSelect.
+    selectPattern->options_ = std::vector<RefPtr<FrameNode>>();
+    // Record the number of tasks before calling the function to be tested.
+    auto initialTaskCount = selectNode->afterAttachMainTreeTasks_.size();
+
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE } };
+    selectModelInstance.InitSelectMultiThread(selectNode, params);
+    // Verify that exactly one task has been added.
+    EXPECT_EQ(selectNode->afterAttachMainTreeTasks_.size(), initialTaskCount + 1);
+
+    /**
+     * @tc.steps: step3. Execute the posted task.
+     * @tc.expected: The options in SelectPattern should be initialized correctly.
+     */
+    selectNode->afterAttachMainTreeTasks_.back()();
+    EXPECT_EQ(selectPattern->options_.size(), 0);
+
+    /**
+     * @tc.steps: step4. Restore environment.
+     */
+    MultiThreadBuildManager::isUIThread_ = isUIThread;
+    MultiThreadBuildManager::SetIsThreadSafeNodeScope(false);
+}
+
+/**
+ * @tc.name: OnAttachToMainTreeMultiThread001
+ * @tc.desc: Test OnAttachToMainTreeMultiThread to verify event registration.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, OnAttachToMainTreeMultiThread001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a select node and get its pattern and event hub.
+     */
+    SelectModelNG selectModelInstance;
+    selectModelInstance.Create({});
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto selectPattern = frameNode->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call OnAttachToMainTreeMultiThread.
+     * @tc.expected: All related events should be registered on the event hub.
+     */
+    selectPattern->OnAttachToMainTreeMultiThread();
+
+    auto focusHub = frameNode->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    EXPECT_FALSE(focusHub->onKeyEventsInternal_.empty());
+
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+    EXPECT_TRUE(gestureHub->clickEventActuator_);
+    EXPECT_TRUE(gestureHub->touchEventActuator_);
+
+    auto inputHub = frameNode->GetOrCreateInputEventHub();
+    ASSERT_NE(inputHub, nullptr);
+    EXPECT_TRUE(inputHub->hoverEventActuator_);
+}
+
+/**
+ * @tc.name: ResetOptionPropsMultiThread001
+ * @tc.desc: Test ResetOptionPropsMultiThread posts a task correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, ResetOptionPropsMultiThread001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Simulate non-UI thread, create a select node, and set an option property.
+     */
+    MultiThreadBuildManager::SetIsThreadSafeNodeScope(true);
+    bool isUIThread = MultiThreadBuildManager::isUIThread_;
+    MultiThreadBuildManager::isUIThread_ = false;
+
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { "Test", "Test" } };
+    selectModelInstance.Create(params);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    // Set property after node creation
+    selectModelInstance.SetOptionBgColor(Color::RED);
+
+    auto selectPattern = frameNode->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    // Execute tasks to make sure the property is set on the pattern
+    frameNode->ExecuteAfterAttachMainTreeTasks();
+
+    /**
+     * @tc.steps: step2. Call ResetOptionPropsMultiThread and check if a task is posted.
+     */
+    auto initialTaskCount = frameNode->afterAttachMainTreeTasks_.size();
+    selectPattern->ResetOptionPropsMultiThread();
+    EXPECT_EQ(frameNode->afterAttachMainTreeTasks_.size(), initialTaskCount + 1);
+
+    /**
+     * @tc.steps: step3. Execute the posted task and verify the result.
+     * @tc.expected: The option background color should be reset.
+     */
+    frameNode->afterAttachMainTreeTasks_.back()();
+    EXPECT_FALSE(selectPattern->optionBgColor_.has_value());
+
+    /**
+     * @tc.steps: step4. Restore environment.
+     */
+    MultiThreadBuildManager::isUIThread_ = isUIThread;
+    MultiThreadBuildManager::SetIsThreadSafeNodeScope(false);
 }
 } // namespace OHOS::Ace::NG

@@ -404,6 +404,14 @@ protected:
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
+    void OnAttachToFrameNodeMultiThread();
+    void OnAttachToFrameNodeImpl();
+    void OnDetachFromFrameNodeMultiThread(FrameNode* frameNode);
+    void OnDetachFromFrameNodeImpl(FrameNode* frameNode);
+    void OnAttachToMainTree() override;
+    void OnAttachToMainTreeMultiThread();
+    void OnDetachFromMainTree() override;
+    void OnDetachFromMainTreeMultiThread();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
 
     RefPtr<FrameNode> GetButtonRowNode();

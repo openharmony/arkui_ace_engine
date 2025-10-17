@@ -24,6 +24,7 @@
 #include "base/memory/referenced.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/measure_util.h"
+#include "base/utils/multi_thread.h"
 #include "base/utils/utf_helper.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
@@ -119,6 +120,14 @@ void DialogPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode);
+    OnAttachToFrameNodeImpl();
+}
+
+void DialogPattern::OnAttachToFrameNodeImpl()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->AddWindowSizeChangeCallback(host->GetId());
@@ -181,6 +190,13 @@ void DialogPattern::OnWindowShow()
 }
 
 void DialogPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    THREAD_SAFE_NODE_CHECK(frameNode, OnDetachFromFrameNode, frameNode);
+    OnDetachFromFrameNodeImpl(frameNode);
+}
+
+void DialogPattern::OnDetachFromFrameNodeImpl(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
     auto pipeline = frameNode->GetContext();
@@ -2356,6 +2372,14 @@ RefPtr<OverlayManager> DialogPattern::GetEmbeddedOverlay(const RefPtr<OverlayMan
 
 void DialogPattern::OnAttachToMainTree()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
+    OnAttachToMainTreeImpl();
+}
+
+void DialogPattern::OnAttachToMainTreeImpl()
+{
     AddFollowParentWindowLayoutNode();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -2373,6 +2397,14 @@ void DialogPattern::OnAttachToMainTree()
 }
 
 void DialogPattern::OnDetachFromMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree);
+    OnDetachFromMainTreeImpl();
+}
+
+void DialogPattern::OnDetachFromMainTreeImpl()
 {
     if (dialogProperties_.destroyCallback) {
         dialogProperties_.destroyCallback(customNode_);

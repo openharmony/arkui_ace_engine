@@ -15,26 +15,30 @@
 
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
 
-#include "core/pipeline_ng/pipeline_context.h"
-
 namespace OHOS::Ace::NG {
 void CheckBoxPattern::OnAttachToFrameNodeMultiThread(const RefPtr<FrameNode>& frameNode)
 {
-    frameNode->GetLayoutProperty()->UpdateAlignment(Alignment::CENTER);
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateAlignment(Alignment::CENTER);
 }
 
 void CheckBoxPattern::OnAttachToMainTreeMultiThread(const RefPtr<FrameNode>& frameNode)
 {
+    CHECK_NULL_VOID(frameNode);
     UpdateNavIdAndState(frameNode);
     RegisterVisibleAreaChange();
 }
 
 void CheckBoxPattern::OnDetachFromFrameNodeMultiThread()
 {
+    // nothing, thread unsafe
 }
 
 void CheckBoxPattern::OnDetachFromMainTreeMultiThread(const RefPtr<FrameNode>& frameNode)
 {
+    CHECK_NULL_VOID(frameNode);
     UpdateGroupStatus(frameNode.GetRawPtr());
 }
 } // namespace OHOS::Ace::NG

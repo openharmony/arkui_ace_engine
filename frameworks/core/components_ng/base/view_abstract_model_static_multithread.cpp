@@ -52,4 +52,30 @@ void SetGeometryTransitionMultiThread(FrameNode* frameNode, const std::string& i
             id, followWithoutTransition, doRegisterSharedTransition);
     });
 }
+
+void BindMenuMultiThread(FrameNode* frameNode, std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc,
+    const MenuParam& menuParam)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->PostAfterAttachMainTreeTask([weak = AceType::WeakClaim(frameNode), params = std::move(params),
+                                               buildFunc = std::move(buildFunc), menuParam]() mutable {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        ViewAbstractModelStatic::BindMenu(frameNode.GetRawPtr(), std::move(params), std::move(buildFunc), menuParam);
+    });
+}
+
+void BindContextMenuStaticMultiThread(const RefPtr<FrameNode>& targetNode, ResponseType type,
+    std::function<void()>&& buildFunc, const NG::MenuParam& menuParam, std::function<void()>&& previewBuildFunc)
+{
+    CHECK_NULL_VOID(targetNode);
+    targetNode->PostAfterAttachMainTreeTask(
+        [weak = AceType::WeakClaim(targetNode.GetRawPtr()), type, builder = std::move(buildFunc), menuParam,
+            previewBuildFunc = std::move(previewBuildFunc)]() mutable {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            ViewAbstractModelStatic::BindContextMenuStatic(
+                frameNode, type, std::move(builder), menuParam, std::move(previewBuildFunc));
+        });
+}
 } // namespace OHOS::Ace::NG

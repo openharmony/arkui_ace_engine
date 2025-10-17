@@ -25,6 +25,7 @@
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "base/utils/utf_helper.h"
+#include "base/utils/multi_thread.h"
 #include "core/animation/curves.h"
 #include "core/common/ace_engine.h"
 #include "core/common/recorder/event_recorder.h"
@@ -125,10 +126,20 @@ static std::string ConvertVectorToString(std::vector<std::string> vec)
 
 void SelectPattern::OnAttachToFrameNode()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode);
     RegisterOnKeyEvent();
     RegisterOnClick();
     RegisterOnPress();
     RegisterOnHover();
+}
+
+void SelectPattern::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
 }
 
 void SelectPattern::OnModifyDone()
@@ -1239,6 +1250,7 @@ void SelectPattern::ResetOptionProps()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    FREE_NODE_CHECK(host, ResetOptionProps);
     auto selectLayoutProps = host->GetLayoutProperty<SelectLayoutProperty>();
     for (const auto& option : options_) {
         auto pattern = option->GetPattern<MenuItemPattern>();
@@ -2205,6 +2217,7 @@ void SelectPattern::ResetParams()
     }
     auto select = GetHost();
     CHECK_NULL_VOID(select);
+    FREE_NODE_CHECK(select, ResetParams);
     auto* pipeline = select->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto selectTheme = pipeline->GetTheme<SelectTheme>();

@@ -430,6 +430,8 @@ public:
     }
 
     void SetMenuTransitionEffect(const RefPtr<FrameNode>& menuWrapperNode, const MenuParam& menuParam);
+    void SetMenuTransitionEffectMultiThread(const RefPtr<FrameNode>& frameNode, const MenuParam& menuParam);
+    void SetMenuTransitionEffectImpl(const RefPtr<FrameNode>& menuWrapperNode, const MenuParam& menuParam);
 
     bool HasPreviewTransitionEffect() const
     {
@@ -705,8 +707,12 @@ private:
     void OnModifyDone() override;
     void InitFocusEvent();
     void OnAttachToFrameNode() override;
+    void OnAttachToFrameNodeMultiThread();
     void OnAttachToMainTree() override;
+    void OnAttachToMainTreeMultiThread();
     void OnDetachFromMainTree() override;
+    void OnDetachFromMainTreeMultiThread();
+    void OnDetachFromMainTreeImpl();
     void RegisterDetachCallback();
     void UnRegisterDetachCallback();
     void RegisterOnTouch();

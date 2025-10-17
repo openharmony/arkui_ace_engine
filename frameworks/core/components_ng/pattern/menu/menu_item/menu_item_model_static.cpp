@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model_static.h"
 
+#include "base/utils/multi_thread.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 
@@ -85,7 +86,13 @@ void MenuItemModelStatic::AddRowChild(FrameNode* frameNode, const MenuItemProper
     CHECK_NULL_VOID(frameNode);
     auto menuItem = AceType::Claim<FrameNode>(frameNode);
     CHECK_NULL_VOID(menuItem);
+    FREE_NODE_CHECK(menuItem, AddRowChild, menuItem, menuItemProps);
+    AddRowChildBase(menuItem, menuItemProps);
+}
 
+void MenuItemModelStatic::AddRowChildBase(
+    const RefPtr<NG::FrameNode>& menuItem, const MenuItemProperties& menuItemProps)
+{
     UpdateRadius(menuItem);
     if (menuItem->GetChildren().empty()) {
         DoMountRow(menuItem);
