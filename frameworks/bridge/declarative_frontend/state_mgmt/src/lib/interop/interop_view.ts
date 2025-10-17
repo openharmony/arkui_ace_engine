@@ -46,7 +46,7 @@ class ViewInterop extends PUV2ViewBase implements IView {
     protected debugInfoStateVars(): string {
         throw new Error('Method not implemented.');
     }
-    protected purgeVariableDependenciesOnElmtId(removedElmtId: number) {
+    protected purgeVariableDependenciesOnElmtId(removedElmtId: number): void {
         throw new Error('Method not implemented.');
     }
     protected initialRender(): void {
@@ -61,7 +61,7 @@ class ViewInterop extends PUV2ViewBase implements IView {
     public updateRecycleElmtId(oldElmtId: number, newElmtId: number): void {
         throw new Error('Method not implemented.');
     }
-    public updateStateVars(params: Object) {
+    public updateStateVars(params: Object): void {
         throw new Error('Method not implemented.');
     }
     public UpdateElement(elmtId: number): void {
@@ -136,7 +136,7 @@ function findDynamicProvider(
 
 class DummyViewV2 {}
 
-function createDummyViewV2<T>(staticProvider: Object, propertyKey: string, value: T) {
+function createDummyViewV2<T>(staticProvider: Object, propertyKey: string, value: T): Object {
     const result = new DummyViewV2();
     result[propertyKey] = value;
     result[makeInteropAliasKey(propertyKey)] = staticProvider;
