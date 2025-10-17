@@ -123,7 +123,9 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _Button_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
-    native static _ButtonInterface_setButtonOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _ButtonInterface_setButtonOptions0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ButtonInterface_setButtonOptions1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _ButtonAttribute_setType(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
