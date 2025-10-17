@@ -234,7 +234,7 @@ export class FrameNode implements MaterializedBase {
             ArkUIAniModule._Common_Restore_InstanceId();
             FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.set(this._nodeId, this);
             ArkUIAniModule._SetCustomCallback(this!.peer!.ptr, this.onMeasureInner, this.onLayoutInner);
-            ArkUIAniModule._SetFrameNodeDrawCallback(this.peer!.ptr, this.onDraw);
+            ArkUIAniModule._SetFrameNodeDrawCallback(this.peer!.ptr, this.onDrawWrapper);
         }
     }
     static getFinalizer(): KPointer {
@@ -499,6 +499,15 @@ export class FrameNode implements MaterializedBase {
         return FrameNodeExtender.getInspectorInfo(this);
     }
     public onDraw(context: DrawContext): void {
+    }
+    public onDrawWrapper(context: DrawContext): void {
+        context.canvas.clipRect({
+            left: 0,
+            top: 0,
+            right: this.uiContext!.vp2px(context.size.width),
+            bottom: this.uiContext!.vp2px(context.size.height)
+        })
+        this.onDraw(context);
     }
     public onMeasureInner(width1: number, height1: number, width2: number, height2: number,
         width3: number, height3: number): void {
