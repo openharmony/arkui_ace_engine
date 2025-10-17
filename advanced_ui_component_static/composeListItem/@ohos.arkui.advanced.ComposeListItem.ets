@@ -258,7 +258,7 @@ struct ContentItemStruct {
   @State secondaryThirdTextSize: string | number | Resource =
     $r('sys.float.composeListItem_left_secondary_tertiary_text_size');
   @State descriptionColors: ResourceColor = $r('sys.color.font_tertiary');
-  @Link isWrapText?: Boolean | null;
+  @Link isWrapText: Boolean;
   @State @Watch('onPropChange') isWrapFirstText: Boolean = false;
   @State @Watch('onPropChange') isWrapSecondText: Boolean = false;
   @State @Watch('onPropChange') isWrapThirdText: Boolean = false;
@@ -1472,7 +1472,7 @@ export struct ComposeListItem {
       Flex(this.getFlexOptions()) {
         if (this.contentItem === null) {
           ContentItemStruct({
-            isWrapText: this.isWrapText as Boolean
+            isWrapText: this.isWrapText
           })
         }
         if (this.contentItem !== null) {
@@ -1488,7 +1488,7 @@ export struct ComposeListItem {
             itemDirection: this.contentItemDirection,
             isFocus: this.isFocus,
             itemHeight: this.itemHeight,
-            isWrapText: this.isWrapText as Boolean
+            isWrapText: this.isWrapText
           });
         }
         if (this.operateItem !== null) {
