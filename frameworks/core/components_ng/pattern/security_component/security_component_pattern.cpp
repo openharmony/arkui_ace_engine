@@ -14,6 +14,7 @@
  */
 
 #include "base/geometry/dimension.h"
+#include "base/utils/multi_thread.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/security_component/security_component_common.h"
 #include "core/components_ng/pattern/security_component/security_component_pattern.h"
@@ -754,6 +755,13 @@ void SecurityComponentPattern::UpdateButtonProperty(RefPtr<FrameNode>& scNode, R
         inputHub->SetHoverEffect(scLayoutProp->GetHoverEffect().value());
     }
     HandleEnabled();
+}
+
+void SecurityComponentPattern::OnAttachToMainTree()
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    FREE_NODE_CHECK(frameNode, OnAttachToMainTree);
 }
 
 void SecurityComponentPattern::OnModifyDone()

@@ -23,6 +23,7 @@ build_component_ng("security_component_pattern_ng") {
     "security_component_layout_element.cpp",
     "security_component_model_ng.cpp",
     "security_component_pattern.cpp",
+    "security_component_pattern_multi_thread.cpp",
   ]
 
   if (is_standard_system) {
