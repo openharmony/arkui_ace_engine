@@ -173,7 +173,7 @@ void SetAutoResetImpl(Ark_NativePointer node,
     PatternLockModelStatic::SetAutoReset(frameNode, convValue);
 }
 void SetOnDotConnectImpl(Ark_NativePointer node,
-                         const Opt_Callback_Number_Void* value)
+                         const Opt_Callback_I32_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -184,7 +184,7 @@ void SetOnDotConnectImpl(Ark_NativePointer node,
         return;
     }
     auto call = [arkCallback = CallbackHelper(*optValue)](int32_t index) {
-        auto arkIndex = Converter::ArkValue<Ark_Number>(index);
+        auto arkIndex = Converter::ArkValue<Ark_Int32>(index);
         arkCallback.Invoke(arkIndex);
     };
     PatternLockModelNG::SetDotConnect(frameNode, std::move(call));

@@ -330,7 +330,7 @@ export class ArkPatternLockPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._PatternLockAttribute_setAutoReset(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnDotConnectAttribute(value: ((value0: number) => void) | undefined): void {
+    setOnDotConnectAttribute(value: ((value0: int32) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -409,7 +409,7 @@ export interface PatternLockAttribute extends CommonMethod {
     autoReset(value: boolean | undefined): this {
         throw new Error("Unimplemented method autoReset")
     }
-    onDotConnect(value: ((value0: number) => void) | undefined): this {
+    onDotConnect(value: ((value0: int32) => void) | undefined): this {
         throw new Error("Unimplemented method onDotConnect")
     }
     activateCircleStyle(value: CircleStyleOptions | undefined): this {
@@ -433,7 +433,7 @@ export class ArkPatternLockStyle extends ArkCommonMethodStyle implements Pattern
     pathStrokeWidth_value?: double | string | undefined
     onPatternComplete_value?: ((input: Array<int32>) => void) | undefined
     autoReset_value?: boolean | undefined
-    onDotConnect_value?: ((value0: number) => void) | undefined
+    onDotConnect_value?: ((value0: int32) => void) | undefined
     activateCircleStyle_value?: CircleStyleOptions | undefined
     skipUnselectedPoint_value?: boolean | undefined
     attributeModifier_value?: AttributeModifier<PatternLockAttribute> | AttributeModifier<CommonMethod> | undefined
@@ -470,7 +470,7 @@ export class ArkPatternLockStyle extends ArkCommonMethodStyle implements Pattern
     autoReset(value: boolean | undefined): this {
         return this
     }
-    onDotConnect(value: ((value0: number) => void) | undefined): this {
+    onDotConnect(value: ((value0: int32) => void) | undefined): this {
         return this
     }
     activateCircleStyle(value: CircleStyleOptions | undefined): this {
@@ -579,9 +579,9 @@ export class ArkPatternLockComponent extends ArkCommonMethodComponent implements
         }
         return this
     }
-    public onDotConnect(value: ((value0: number) => void) | undefined): this {
+    public onDotConnect(value: ((value0: int32) => void) | undefined): this {
         if (this.checkPriority("onDotConnect")) {
-            const value_casted = value as (((value0: number) => void) | undefined)
+            const value_casted = value as (((value0: int32) => void) | undefined)
             this.getPeer()?.setOnDotConnectAttribute(value_casted)
             return this
         }

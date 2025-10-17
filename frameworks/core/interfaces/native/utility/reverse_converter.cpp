@@ -671,8 +671,8 @@ void AssignArkValue(Ark_HistoricalPoint& dst, const OHOS::Ace::TouchLocationInfo
 
 void AssignArkValue(Ark_ImageError& dst, const LoadImageFailEvent& src)
 {
-    dst.componentWidth = Converter::ArkValue<Ark_Number>(src.GetComponentWidth());
-    dst.componentHeight = Converter::ArkValue<Ark_Number>(src.GetComponentHeight());
+    dst.componentWidth = Converter::ArkValue<Ark_Int32>(src.GetComponentWidth());
+    dst.componentHeight = Converter::ArkValue<Ark_Int32>(src.GetComponentHeight());
     dst.message = Converter::ArkValue<Ark_String>(src.GetErrorMessage());
     dst.error = ArkValue<Opt_BusinessError>(std::nullopt);
 }

@@ -762,8 +762,8 @@ export class ArkImageStyle extends ArkCommonMethodStyle implements ImageAttribut
 export type ImageErrorCallback = (error: ImageError) => void;
 export type ImageOnCompleteCallback = (loadEvent?: ImageCompleteEvent) => void;
 export interface ImageError {
-    componentWidth: number;
-    componentHeight: number;
+    componentWidth: int32;
+    componentHeight: int32;
     message: string;
     error?: BusinessError;
 }
@@ -1100,9 +1100,9 @@ export class ImageError_serializer {
     public static write(buffer: SerializerBase, value: ImageError): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForComponentWidth  = value.componentWidth
-        valueSerializer.writeNumber(valueHolderForComponentWidth)
+        valueSerializer.writeInt32(valueHolderForComponentWidth)
         const valueHolderForComponentHeight  = value.componentHeight
-        valueSerializer.writeNumber(valueHolderForComponentHeight)
+        valueSerializer.writeInt32(valueHolderForComponentHeight)
         const valueHolderForMessage  = value.message
         valueSerializer.writeString(valueHolderForMessage)
         const valueHolderForError  = value.error
@@ -1116,8 +1116,8 @@ export class ImageError_serializer {
     }
     public static read(buffer: DeserializerBase): ImageError {
         let valueDeserializer : DeserializerBase = buffer
-        const componentWidthTmpResult : number = (valueDeserializer.readNumber() as number)
-        const componentHeightTmpResult : number = (valueDeserializer.readNumber() as number)
+        const componentWidthTmpResult : int32 = valueDeserializer.readInt32()
+        const componentHeightTmpResult : int32 = valueDeserializer.readInt32()
         const messageTmpResult : string = (valueDeserializer.readString() as string)
         const errorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let errorTmpBuf : BusinessError | undefined = undefined
