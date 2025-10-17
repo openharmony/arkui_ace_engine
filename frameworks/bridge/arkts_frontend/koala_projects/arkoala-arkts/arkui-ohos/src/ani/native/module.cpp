@@ -976,6 +976,16 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::TransferScrollableTargetInfoPointer)
         },
         ani_native_function {
+            "_Extractors_toUnifiedDataChannelUnifiedDataPtr",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorFromUnifiedDataToPtr)
+        },
+        ani_native_function {
+            "_Extractors_fromUnifiedDataChannelUnifiedDataPtr",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorFromPtrToUnifiedData)
+        },
+        ani_native_function {
             "_createDragEventAccessorWithPointer",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::CreateDragEventAccessorWithPointer)
