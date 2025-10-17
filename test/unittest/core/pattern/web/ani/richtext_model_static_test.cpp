@@ -64,6 +64,11 @@ HWTEST_F(RichTextModelStaticTest, Create_001, TestSize.Level1)
     auto webData = webPattern->GetWebData();
     EXPECT_EQ(webData.has_value(), true);
     EXPECT_EQ(webData.value(), data);
+    const std::string dataStr = "<p>p text for test</p>";
+    RichTextModelStatic::SetRichTextOptions(AccessibilityManager::RawPtr(frameNode), dataStr);
+    webData = webPattern->GetWebData();
+    EXPECT_EQ(webData.has_value(), true);
+    EXPECT_EQ(webData.value(), dataStr);
 }
 
 /**

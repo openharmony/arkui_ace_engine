@@ -13235,11 +13235,25 @@ Ark_NativePointer impl_RichText_construct(Ark_Int32 id, Ark_Int32 flags) {
         return GetNodeModifiers()->getRichTextModifier()->construct(id, flags);
 }
 KOALA_INTEROP_DIRECT_2(RichText_construct, Ark_NativePointer, Ark_Int32, Ark_Int32)
-void impl_RichTextInterface_setRichTextOptions(Ark_NativePointer thisPtr, const KStringPtr& content) {
+void impl_RichTextInterface_setRichTextOptions(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
-        GetNodeModifiers()->getRichTextModifier()->setRichTextOptions(self, (const Ark_String*) (&content));
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const Ark_Int8 contentValueTempTmpBufUnionSelector = thisDeserializer.readInt8();
+        Ark_Union_String_Resource contentValueTempTmpBuf = {};
+        contentValueTempTmpBuf.selector = contentValueTempTmpBufUnionSelector;
+        if (contentValueTempTmpBufUnionSelector == 0) {
+            contentValueTempTmpBuf.selector = 0;
+            contentValueTempTmpBuf.value0 = static_cast<Ark_String>(thisDeserializer.readString());
+        } else if (contentValueTempTmpBufUnionSelector == 1) {
+            contentValueTempTmpBuf.selector = 1;
+            contentValueTempTmpBuf.value1 = Resource_serializer::read(thisDeserializer);
+        } else {
+            INTEROP_FATAL("One of the branches for contentValueTempTmpBuf has to be chosen through deserialisation.");
+        }
+        Ark_Union_String_Resource contentValueTemp = static_cast<Ark_Union_String_Resource>(contentValueTempTmpBuf);;
+        GetNodeModifiers()->getRichTextModifier()->setRichTextOptions(self, static_cast<Ark_Union_String_Resource*>(&contentValueTemp));
 }
-KOALA_INTEROP_V2(RichTextInterface_setRichTextOptions, Ark_NativePointer, KStringPtr)
+KOALA_INTEROP_DIRECT_V3(RichTextInterface_setRichTextOptions, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_RichTextAttribute_setOnStart(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);

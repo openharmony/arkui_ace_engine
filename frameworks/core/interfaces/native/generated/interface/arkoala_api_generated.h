@@ -21083,7 +21083,7 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
     void (*setOnAccessibilityFocus)(Ark_NativePointer node,
                                     const Opt_AccessibilityFocusCallback* value);
     void (*setOnAccessibilityActionIntercept)(Ark_NativePointer node,
-                                              const Opt_AccessibilityActionInterceptCallback* value);                                
+                                              const Opt_AccessibilityActionInterceptCallback* value);
     void (*setAccessibilityTextHint)(Ark_NativePointer node,
                                      const Opt_String* value);
     void (*setAccessibilityDescriptionOfStringType)(Ark_NativePointer node,
@@ -22400,7 +22400,7 @@ typedef struct GENERATED_ArkUIRichTextModifier {
     Ark_NativePointer (*construct)(Ark_Int32 id,
                                    Ark_Int32 flags);
     void (*setRichTextOptions)(Ark_NativePointer node,
-                               const Ark_String* content);
+                               const Ark_Union_String_Resource* content);
     void (*setOnStart)(Ark_NativePointer node,
                        const Opt_Callback_Void* value);
     void (*setOnComplete)(Ark_NativePointer node,
