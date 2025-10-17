@@ -82,11 +82,13 @@ export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent 
     ): void {
         ArkComponentRoot(this, (node: PeerNode) => {
             this.__updateStruct(initializers);
+            const savedRenderingComponent = OBSERVE.renderingComponent
+            OBSERVE.renderingComponent = 
             this.isV2()
-                ? OBSERVE.renderingComponent = ObserveSingleton.RenderingComponentV2
-                : OBSERVE.renderingComponent = ObserveSingleton.RenderingComponentV1;
+                ? ObserveSingleton.RenderingComponentV2
+                : ObserveSingleton.RenderingComponentV1;
             this.build();
-            OBSERVE.renderingComponent = ObserveSingleton.RenderingComponent;
+            OBSERVE.renderingComponent = savedRenderingComponent
             remember(() => {
                 this.onDidBuild();
             });
