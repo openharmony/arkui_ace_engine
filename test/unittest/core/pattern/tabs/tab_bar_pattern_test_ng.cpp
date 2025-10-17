@@ -849,8 +849,12 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateImageColor002, TestSize.Level1)
     tabBarPattern_->SetIconStyle(iconStyle, 0);
     tabBarPattern_->UpdateImageColor(0);
     EXPECT_NE(tabBarNode_->GetChildAtIndex(0), nullptr);
+    EXPECT_TRUE(tabBarPattern_->GetImageColorOnIndex().has_value());
+    EXPECT_EQ(tabBarPattern_->GetImageColorOnIndex().value_or(-1), 0);
     tabBarPattern_->UpdateImageColor(1);
     EXPECT_NE(tabBarNode_->GetChildAtIndex(1), nullptr);
+    EXPECT_TRUE(tabBarPattern_->GetImageColorOnIndex().has_value());
+    EXPECT_EQ(tabBarPattern_->GetImageColorOnIndex().value_or(-1), 1);
     EXPECT_EQ(tabBarPattern_->indicator_, 0);
     tabBarPattern_->SetMaskAnimationByCreate(false);
     EXPECT_EQ(tabBarPattern_->IsMaskAnimationByCreate(), false);
