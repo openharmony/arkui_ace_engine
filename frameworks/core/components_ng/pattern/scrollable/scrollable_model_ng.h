@@ -107,6 +107,7 @@ public:
     static void SetBackToTop(FrameNode* frameNode, bool backToTop);
     static void SetBackToTopMultiThread(FrameNode* frameNode, bool backToTop);
     static void ResetBackToTop(FrameNode* frameNode);
+    static void ResetBackToTopMultiThread(FrameNode* frameNode);
     static bool GetBackToTop(FrameNode* frameNode);
     static void SetScrollBarMargin(const ScrollBarMargin& scrollBarMargin);
     static void SetScrollBarMargin(FrameNode* frameNode, const ScrollBarMargin& scrollBarMargin);

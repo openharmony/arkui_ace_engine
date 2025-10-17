@@ -584,6 +584,13 @@ public:
 
     void SetMaxFlingVelocity(double max);
 
+    void SetMaxFlingVelocityMultiThread(double max);
+
+    void SetMaxFlingVelocityValue(double max)
+    {
+        maxFlingVelocity_ = max;
+    }
+
     double GetMaxFlingVelocity() const
     {
         return maxFlingVelocity_;

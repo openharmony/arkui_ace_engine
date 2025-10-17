@@ -17,6 +17,7 @@
 
 #include "base/geometry/rect.h"
 #include "base/log/dump_log.h"
+#include "base/utils/multi_thread.h"
 #include "base/utils/system_properties.h"
 #include "base/memory/referenced.h"
 #include "core/components/common/layout/constants.h"
@@ -3188,11 +3189,35 @@ RefPtr<ListChildrenMainSize> ListPattern::GetOrCreateListChildrenMainSize()
         context->RequestFrame();
     };
     childrenSize_->SetOnDataChange(callback);
+    UpdateChildrenMainSizeRoundingMode();
+    return childrenSize_;
+}
+
+void ListPattern::UpdateChildrenMainSizeRoundingModeMultiThread()
+{
+    auto node = GetHost();
+    CHECK_NULL_VOID(node);
+    node->PostAfterAttachMainTreeTask([weak = AceType::WeakClaim(AceType::RawPtr(node))]() {
+        auto node = weak.Upgrade();
+        CHECK_NULL_VOID(node);
+        auto pattern = node->GetPattern<ListPattern>();
+        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID(pattern->childrenSize_);
+        auto pipeline = node->GetContext();
+        if (pipeline && pipeline->GetPixelRoundMode() == PixelRoundMode::PIXEL_ROUND_AFTER_MEASURE) {
+            pattern->childrenSize_->SetIsRoundingMode();
+        }
+    });
+}
+
+void ListPattern::UpdateChildrenMainSizeRoundingMode()
+{
+    auto node = GetHost();
+    FREE_NODE_CHECK(node, UpdateChildrenMainSizeRoundingMode);
     auto pipeline = GetContext();
     if (pipeline && pipeline->GetPixelRoundMode() == PixelRoundMode::PIXEL_ROUND_AFTER_MEASURE) {
         childrenSize_->SetIsRoundingMode();
     }
-    return childrenSize_;
 }
 
 void ListPattern::OnChildrenSizeChanged(std::tuple<int32_t, int32_t, int32_t> change, ListChangeFlag flag)

@@ -341,6 +341,8 @@ public:
 
     void SetListItemGroupStyle(V2::ListItemGroupStyle style);
     RefPtr<ListChildrenMainSize> GetOrCreateListChildrenMainSize();
+    void UpdateChildrenMainSizeRoundingMode();
+    void UpdateChildrenMainSizeRoundingModeMultiThread();
     void SetListChildrenMainSize(float defaultSize, const std::vector<float>& mainSize);
     void OnChildrenSizeChanged(std::tuple<int32_t, int32_t, int32_t> change, ListChangeFlag flag);
     bool ListChildrenSizeExist();

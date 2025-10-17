@@ -88,6 +88,7 @@ void SetDividerImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto options = value ? Converter::OptConvert<Ark_ListDividerOptions>(*value) : std::nullopt;
     V2::ItemDivider dividerAns;
+    bool needGetThemeColor = false;
     if (options.has_value()) {
         auto widthOpt = Converter::OptConvert<Dimension>(options->strokeWidth);
         dividerAns.strokeWidth = widthOpt.value_or(0.0_vp);
@@ -99,13 +100,12 @@ void SetDividerImpl(Ark_NativePointer node,
         if (colorOpt.has_value()) {
             dividerAns.color = colorOpt.value();
         } else {
-            auto listTheme = ListItemGroupModifier::GetListTheme();
-            if (listTheme) {
-                dividerAns.color = listTheme->GetDividerColor();
-            }
+            needGetThemeColor = true;
         }
+        ListItemGroupModelStatic::SetDivider(frameNode, dividerAns, needGetThemeColor);
+    } else {
+        ListItemGroupModelStatic::SetDivider(frameNode, std::nullopt);
     }
-    ListItemGroupModelStatic::SetDivider(frameNode, dividerAns);
 }
 void SetChildrenMainSizeImpl(Ark_NativePointer node,
                              const Opt_ChildrenMainSize* value)
