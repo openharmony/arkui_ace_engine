@@ -277,7 +277,7 @@ static ani_string AniGetFilteredInspectorTree(ani_env *env, ani_array filters)
     bool needThrow = false;
     auto nodeInfos = NG::Inspector::GetInspector(isLayoutInspector, inspectorFilter, needThrow);
     if (needThrow) {
-        AniThrow(env, "Unable to obtain current ui context", ERROR_CODE_INSPECTOR_GET_UI_CONTEXT_FAILED);
+        AniThrow(env, "Unable to obtain current ui context", ERROR_CODE_PARAM_ERROR);
         return nullptr;
     }
     ani_string result;
@@ -291,8 +291,8 @@ static ani_string AniGetFilteredInspectorTree(ani_env *env, ani_array filters)
 static ani_string AniGetFilteredInspectorTreeById(ani_env *env, ani_string id, ani_double depth, ani_array filters)
 {
     if (depth < 0) {
-        // AniThrow(env, "The parameter depth must be greater than 0.",
-        //     ERROR_CODE_INSPECTOR_PARAM_DEPTH_INVALID);
+        AniThrow(env, "The parameter depth must be greater than 0.",
+            ERROR_CODE_INSPECTOR_PARAM_DEPTH_INVALID);
         return nullptr;
     }
     bool isLayoutInspector = false;
@@ -308,7 +308,7 @@ static ani_string AniGetFilteredInspectorTreeById(ani_env *env, ani_string id, a
     bool needThrow = false;
     auto nodeInfos = NG::Inspector::GetInspector(false, inspectorFilter, needThrow);
     if (needThrow) {
-        AniThrow(env, "Unable to obtain current UI context", ERROR_CODE_INSPECTOR_GET_UI_CONTEXT_FAILED);
+        AniThrow(env, "Unable to obtain current UI context", ERROR_CODE_PARAM_ERROR);
         return nullptr;
     }
     ani_string result;
