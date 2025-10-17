@@ -88,4 +88,20 @@ void GaugeModelStatic::SetDescription(FrameNode* frameNode, const RefPtr<AceType
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(GaugeLayoutProperty, IsShowDescription, true, frameNode);
     frameNode->MarkModifyDone();
 }
+
+void GaugeModelStatic::SetGradientColors(FrameNode* frameNode, const std::vector<LinearGradientColorSteps>& colors,
+    const std::vector<float>& values, const GaugeType& type)
+{
+    std::vector<ColorStopArray> convColors;
+    for (const auto& item1: colors) {
+        ColorStopArray colorStopArray;
+        for (const auto& item2: item1) {
+            colorStopArray.push_back(std::make_pair(item2.first.value_or(ERROR_COLOR), item2.second));
+        }
+        convColors.push_back(colorStopArray);
+    }
+    ACE_UPDATE_NODE_PAINT_PROPERTY(GaugePaintProperty, GradientColors, convColors, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(GaugePaintProperty, Values, values, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(GaugePaintProperty, GaugeType, type, frameNode);
+}
 } // namespace OHOS::Ace::NG
