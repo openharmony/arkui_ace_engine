@@ -68,6 +68,7 @@ export abstract class ExtendableComponent implements LifeCycle {
     private backLocalStorage_?: LocalStorage | undefined = undefined;
     private useSharedStorage_?: boolean | undefined = undefined;
     private childrenWeakRefMap_: Map<int32, WeakRef<ExtendableComponent>> = new Map<int32, WeakRef<ExtendableComponent>>();
+    private activeChangeListenerForInterop_: Set<(active: boolean, isReuse: boolean) => void> = new Set<(active: boolean, isReuse: boolean) => void>();
 
     constructor(useSharedStorage?: boolean, storage?: LocalStorage) {
         this.useSharedStorage_ = useSharedStorage;
@@ -115,11 +116,24 @@ export abstract class ExtendableComponent implements LifeCycle {
         return this.delegate_!.isViewActive();
     }
 
+    addActiveChangeListenerForInterop(listener: (active: boolean, isReuse: boolean) => void): void {
+        this.activeChangeListenerForInterop_.add(listener);
+    }
+
+    removeActiveChangeListenerForInterop(listener: (active: boolean, isReuse: boolean) => void): void {
+        this.activeChangeListenerForInterop_.delete(listener);
+    }
+
     propagateToChild(active: boolean, isReuse: boolean): void {
         if (this.childrenWeakRefMap_.size > 0) {
             this.childrenWeakRefMap_.forEach((weak: WeakRef<ExtendableComponent>, _: int32) => {
                 const child = weak.deref();
                 child?.setActiveInternal(active, isReuse);
+            });
+        }
+        if (this.activeChangeListenerForInterop_.size > 0) {
+            this.activeChangeListenerForInterop_.forEach((listener: (active: boolean, isReuse: boolean) => void) => {
+                listener(active, isReuse);
             });
         }
     }

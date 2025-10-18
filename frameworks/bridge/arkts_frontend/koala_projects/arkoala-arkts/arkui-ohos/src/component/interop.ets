@@ -53,6 +53,7 @@ export class CompatiblePeerNode extends PeerNode {
     protected constructor(peerPtr: KPointer, id: int32, view: ESValue, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags);
         this.view = view;
+        this.view.setProperty('isCompFreezeAllowed_', ESValue.wrap(true));
     }
     public view: ESValue;
     public static create(_peerPtr: KPointer, view: ESValue, flags: int32 = 0): CompatiblePeerNode {
@@ -60,7 +61,23 @@ export class CompatiblePeerNode extends PeerNode {
         const _peer = new CompatiblePeerNode(_peerPtr, peerId, view, 'ComponentRoot', flags);
         return _peer;
     }
-} 
+    private staticParent?: ExtendableComponent;
+    private onActiveChange: (active: boolean, isReuse: boolean) => void = (active: boolean, isReuse: boolean): void => {
+        this.setActive(active);
+    };
+    public setStaticParent(parent: ExtendableComponent): void {
+        this.staticParent = parent;
+        this.staticParent!.addActiveChangeListenerForInterop(this.onActiveChange);
+    }
+    public setActive(active: boolean): void {
+        this.view.invokeMethod('setActiveInternal', ESValue.wrap(active));
+    }
+    public dispose(): void {
+        this.staticParent!.removeActiveChangeListenerForInterop(this.onActiveChange);
+        this.staticParent = undefined;
+        super.dispose();
+    }
+}
 
 export interface CompatibleComponentInfo {
     name: string,
@@ -92,7 +109,9 @@ export function compatibleComponent(
         const dynamicComponent = result.component;
         const nodePtr = ArkUIAniModule._PopViewStackProcessor();
         ArkUIAniModule._DeleteViewStackProcessor(ptr);
-        return CompatiblePeerNode.create(nodePtr, dynamicComponent);
+        const node = CompatiblePeerNode.create(nodePtr, dynamicComponent);
+        node.setStaticParent(staticComponent);
+        return node;
     }, (node: CompatiblePeerNode) => {
         update(node.view);
     });

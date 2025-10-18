@@ -22,10 +22,14 @@ import {
     LocalStorage,
     uiUtils
 } from '../stateManagement';
+import { finalizerRegisterWithCleaner } from '@koalaui/common';
 
 export class InteropExtendableComponent extends ExtendableComponent {
     dynamicComponent: ESValue;
     originComponent?: WeakRef<ExtendableComponent>;
+    private onActiveChange: ESValue = ESValue.wrap((active: boolean): void => {
+        this.setActive(active);
+    });
     constructor(dynamicComponent: ESValue) {
         super();
         this.dynamicComponent = dynamicComponent;
@@ -33,6 +37,16 @@ export class InteropExtendableComponent extends ExtendableComponent {
         if (prev) {
             this.originComponent = new WeakRef<ExtendableComponent>(prev! as ExtendableComponent);
         }
+        this.dynamicComponent.invokeMethod('addActiveChangeListenerForInterop', this.onActiveChange);
+        const parent = this.dynamicComponent;
+        const listener = this.onActiveChange;
+        finalizerRegisterWithCleaner(this, () => {
+            parent.invokeMethod('removeActiveChangeListenerForInterop', listener);
+        });
+    }
+
+    public setActive(active: boolean): void {
+        this.propagateToChild(active, false);
     }
 
     /** @memo */ build(): void {}
