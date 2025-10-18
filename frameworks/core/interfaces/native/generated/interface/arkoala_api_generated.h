@@ -4825,10 +4825,10 @@ typedef struct Opt_IndexerAlign {
 } Opt_IndexerAlign;
 typedef enum Ark_InputType {
     ARK_INPUT_TYPE_NORMAL = 0,
-    ARK_INPUT_TYPE_NUMBER = 1,
-    ARK_INPUT_TYPE_PHONE_NUMBER = 2,
-    ARK_INPUT_TYPE_EMAIL = 3,
-    ARK_INPUT_TYPE_PASSWORD = 4,
+    ARK_INPUT_TYPE_NUMBER = 2,
+    ARK_INPUT_TYPE_PHONE_NUMBER = 3,
+    ARK_INPUT_TYPE_EMAIL = 5,
+    ARK_INPUT_TYPE_PASSWORD = 7,
     ARK_INPUT_TYPE_NUMBER_PASSWORD = 8,
     ARK_INPUT_TYPE_SCREEN_LOCK_PASSWORD = 9,
     ARK_INPUT_TYPE_USER_NAME = 10,
@@ -6191,8 +6191,8 @@ typedef struct Opt_TabsCacheMode {
     Ark_TabsCacheMode value;
 } Opt_TabsCacheMode;
 typedef enum Ark_TextAlign {
-    ARK_TEXT_ALIGN_CENTER = 0,
-    ARK_TEXT_ALIGN_START = 1,
+    ARK_TEXT_ALIGN_CENTER = 1,
+    ARK_TEXT_ALIGN_START = 0,
     ARK_TEXT_ALIGN_END = 2,
     ARK_TEXT_ALIGN_JUSTIFY = 3,
 } Ark_TextAlign;
@@ -22925,6 +22925,21 @@ typedef struct GENERATED_ArkUISpanModifier {
                           const Opt_Length* value);
     void (*setTextShadow)(Ark_NativePointer node,
                           const Opt_Union_ShadowOptions_Array_ShadowOptions* value);
+    void (*setTextBackgroundStyle)(Ark_NativePointer node,
+                                   const Opt_TextBackgroundStyle* value);
+    void (*setBaselineOffset)(Ark_NativePointer node,
+                              const Opt_LengthMetrics* value);
+    void (*setKey)(Ark_NativePointer node,
+                   const Opt_String* value);
+    void (*setId)(Ark_NativePointer node,
+                  const Opt_String* value);
+    void (*setOnClick0)(Ark_NativePointer node,
+                        const Opt_Callback_ClickEvent_Void* value);
+    void (*setOnHover)(Ark_NativePointer node,
+                       const Opt_HoverCallback* value);
+    void (*setOnClick1)(Ark_NativePointer node,
+                        const Opt_Callback_ClickEvent_Void* event,
+                        const Opt_Float64* distanceThreshold);
 } GENERATED_ArkUISpanModifier;
 
 typedef struct GENERATED_ArkUIStackModifier {
@@ -23084,6 +23099,10 @@ typedef struct GENERATED_ArkUISymbolSpanModifier {
                               const Opt_SymbolEffectStrategy* value);
     void (*setRenderingStrategy)(Ark_NativePointer node,
                                  const Opt_SymbolRenderingStrategy* value);
+    void (*setKey)(Ark_NativePointer node,
+                   const Opt_String* value);
+    void (*setId)(Ark_NativePointer node,
+                  const Opt_String* value);
 } GENERATED_ArkUISymbolSpanModifier;
 
 typedef struct GENERATED_ArkUITabContentModifier {
