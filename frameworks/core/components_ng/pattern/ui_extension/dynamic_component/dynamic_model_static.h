@@ -24,7 +24,7 @@
 #include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_param.h"
 
 namespace OHOS::Ace::NG {
-
+// For Arkts Static
 class ACE_FORCE_EXPORT DynamicModelStatic : public AceType {
     DECLARE_ACE_TYPE(DynamicModelStatic, AceType);
 public:
