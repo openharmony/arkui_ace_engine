@@ -778,11 +778,7 @@ void ViewFunctions::Destroy()
 // Partial update method
 void ViewFunctions::ExecuteRerender()
 {
-    int32_t id = -1;
-    if (SystemProperties::GetAcePerformanceMonitorEnabled()) {
-        id = Container::CurrentId();
-    }
-    COMPONENT_UPDATE_DURATION(id);
+    COMPONENT_UPDATE_DURATION();
     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
     if (jsRerenderFunc_.IsEmpty()) {
         LOGE("no rerender function in View!");

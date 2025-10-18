@@ -2365,10 +2365,7 @@ std::optional<UITask> FrameNode::CreateRenderTask(bool forceUseMainThread)
         ACE_SCOPED_TRACE("FrameNode[%s][id:%d][parentId:%d]::RenderTask", self->GetTag().c_str(),
             self->GetId(), self->GetParent()? self->GetParent()->GetId() : -1);
         auto pipeline = PipelineContext::GetCurrentContext();
-        if (pipeline) {
-            auto id = pipeline->GetInstanceId();
-            ArkUIPerfMonitor::GetPerfMonitor(id)->RecordRenderNode();
-        }
+        ArkUIPerfMonitor::GetInstance().RecordRenderNode();
         wrapper->FlushRender();
         paintProperty->CleanDirty();
         auto eventHub = self->GetEventHub<NG::EventHub>();
@@ -4974,10 +4971,7 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
                                                        : "NA");
     }
     auto pipeline = GetContext();
-    if (pipeline) {
-        auto id = pipeline->GetInstanceId();
-        ArkUIPerfMonitor::GetPerfMonitor(id)->RecordLayoutNode();
-    }
+    ArkUIPerfMonitor::GetInstance().RecordLayoutNode();
     isLayoutComplete_ = false;
     if (!oldGeometryNode_) {
         oldGeometryNode_ = geometryNode_->Clone();
