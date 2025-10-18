@@ -59,7 +59,9 @@ import { PageMapBuilder } from "../component/builder";
 import { NavigationOpsHandWritten } from "./NavigationOpsHandWritten";
 import { int32 } from "@koalaui/common"
 import { ArkImageComponent, ResourceStr, ImageContent, ImageAIOptions } from "#generated";
+import { ArkWaterFlowComponent, WaterFlowOptions } from "#generated";
 import { ImageOpsHandWritten } from "./ImageOpsHandWritten";
+import { WaterFlowHandWritten } from "./WaterFlowHandWritten";
 import { XComponentOpsHandWritten } from "./XComponentOpsHandWritten";
 import { PeerNode } from '../PeerNode';
 import { int32 } from "@koalaui/common";
@@ -387,4 +389,7 @@ export function hookPutImageData(peerPtr: CanvasRenderer, imagedata: ImageData, 
 export function hookGetContext(peerPtr: OffscreenCanvas, contextType: string, options: RenderingContextSettings)
 {
   return peerPtr.getContext2d(options)
+}
+export function hookWaterFlowOptionsImpl(node: ArkWaterFlowComponent, options: WaterFlowOptions | undefined): void {
+    WaterFlowHandWritten.hookWaterFlowOptionsImpl(node, options)
 }
