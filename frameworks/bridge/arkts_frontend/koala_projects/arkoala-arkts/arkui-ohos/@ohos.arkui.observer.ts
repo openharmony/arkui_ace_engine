@@ -56,6 +56,11 @@ declare namespace uiObserver {
 
         onDidLayout(callback: Callback<void>): void;
         offDidLayout(callback?: Callback<void>): void;
+
+        onTabContentUpdate(callback: Callback<TabContentInfo>): void;
+        offTabContentUpdate(callback?: Callback<TabContentInfo>): void;
+        onTabContentUpdate(options: ObserverOptions, callback: Callback<TabContentInfo>): void;
+        offTabContentUpdate(options: ObserverOptions, callback?: Callback<TabContentInfo>): void;
     }
     export function createUIObserver(id: number): UIObserver;
 
@@ -125,6 +130,20 @@ declare namespace uiObserver {
     export enum ScrollEventType {
       SCROLL_START = 0,
       SCROLL_STOP = 1
+    }
+
+    export class TabContentInfo {
+        tabContentId: string;
+        tabContentUniqueId: int;
+        state: TabContentState;
+        index: int;
+        id: string;
+        uniqueId: int;
+    }
+
+    export enum TabContentState {
+        ON_SHOW = 0,
+        ON_HIDE = 1
     }
 }
 

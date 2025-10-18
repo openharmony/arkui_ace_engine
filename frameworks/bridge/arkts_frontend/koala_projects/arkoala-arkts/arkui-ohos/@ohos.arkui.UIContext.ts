@@ -888,6 +888,30 @@ export class UIObserver {
             this.observerImpl!.offDidLayout(callback);
         }
     }
+
+    public onTabContentUpdate(callback: Callback<uiObserver.TabContentInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.onTabContentUpdate(callback);
+        }
+    }
+
+    public offTabContentUpdate(callback?: Callback<uiObserver.TabContentInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.offTabContentUpdate(callback);
+        }
+    }
+
+    public onTabContentUpdate(options: uiObserver.ObserverOptions, callback: Callback<uiObserver.TabContentInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.onTabContentUpdate(options, callback);
+        }
+    }
+
+    public offTabContentUpdate(options: uiObserver.ObserverOptions, callback?: Callback<uiObserver.TabContentInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.offTabContentUpdate(options, callback);
+        }
+    }
 }
 export interface PageInfo {}
 export interface ContentCoverController {}
