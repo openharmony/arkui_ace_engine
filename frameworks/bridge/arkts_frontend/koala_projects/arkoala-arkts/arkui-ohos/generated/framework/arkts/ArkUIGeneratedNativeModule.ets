@@ -77,6 +77,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _AlphabetIndexerAttribute_setEnableHapticFeedback(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _VideoAttribute_setSurfaceBackgroundColor(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _AlphabetIndexerAttribute_setAlignStyle(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _Animator_construct(id: KInt, flags: KInt): KPointer

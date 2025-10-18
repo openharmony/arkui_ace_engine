@@ -23629,6 +23629,19 @@ void impl_VideoAttribute_setEnableShortcutKey(Ark_NativePointer thisPtr, KSerial
         GetNodeModifiers()->getVideoModifier()->setEnableShortcutKey(self, static_cast<Opt_Boolean*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(VideoAttribute_setEnableShortcutKey, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_VideoAttribute_setSurfaceBackgroundColor(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_ColorMetrics valueValueTempTmpBuf = {};
+        valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            valueValueTempTmpBuf.value = static_cast<Ark_ColorMetrics>(ColorMetrics_serializer::read(thisDeserializer));
+        }
+        Opt_ColorMetrics valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getVideoModifier()->setSurfaceBackgroundColor(self, static_cast<Opt_ColorMetrics*>(&valueValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(VideoAttribute_setSurfaceBackgroundColor, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_WaterFlow_construct(Ark_Int32 id, Ark_Int32 flags) {
         return GetNodeModifiers()->getWaterFlowModifier()->construct(id, flags);
 }
