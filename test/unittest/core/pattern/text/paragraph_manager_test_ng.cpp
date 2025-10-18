@@ -59,6 +59,7 @@ void ParagraphManagerTestNg::ConstructParagraphs(RefPtr<ParagraphManager>& pMana
     EXPECT_CALL(*paragraph, GetGlyphIndexByCoordinate(_, _)).WillRepeatedly(Return(4));
     PositionWithAffinity positionWithAffinity(POSITION_WITH_AFFINITY, TextAffinity::UPSTREAM);
     EXPECT_CALL(*paragraph, GetGlyphPositionAtCoordinate(_)).WillRepeatedly(Return(positionWithAffinity));
+
     TextLineMetrics textLineMetrics;
     textLineMetrics.lineNumber = 0;
     EXPECT_CALL(*paragraph, GetLineMetrics(_)).WillRepeatedly(Return(textLineMetrics));

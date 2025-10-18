@@ -3827,10 +3827,21 @@ float TextPattern::GetLineHeight() const
 
 std::vector<RectF> TextPattern::GetTextBoxes()
 {
+    std::vector<RectF> selectedRects;
     if (IsAiSelected()) {
-        return pManager_->GetRects(textSelector_.aiStart.value(), textSelector_.aiEnd.value());
+        selectedRects = pManager_->GetRects(textSelector_.aiStart.value(), textSelector_.aiEnd.value());
+    } else {
+        selectedRects = pManager_->GetRects(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
     }
-    return pManager_->GetRects(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
+#ifndef ACE_UNITTEST
+    if (!selectedRects.empty() && pManager_->IsSelectLineHeadAndUseLeadingMargin(textSelector_.GetTextStart())) {
+        // To make drag screenshot include LeadingMarginPlaceholder when not single line
+        if (selectedRects.front().GetY() != selectedRects.back().GetY()) {
+            selectedRects.front().SetLeft(0.0f);
+        }
+    }
+#endif
+    return selectedRects;
 }
 
 OffsetF TextPattern::GetParentGlobalOffset() const

@@ -496,6 +496,17 @@ void TextContentModifier::SetHybridRenderTypeIfNeeded(DrawingContext& drawingCon
 #endif
 }
 
+float TextContentModifier::AdjustParagraphX(const ParagraphManager::ParagraphInfo& info, const RectF& contentRect)
+{
+    auto x = paintOffset_.GetX();
+    CHECK_NULL_RETURN(info.paragraph && info.paragraph->empty(), x);
+    const auto& paraStyle = info.paragraphStyle;
+    CHECK_NULL_RETURN(paraStyle.leadingMargin && paraStyle.leadingMargin->pixmap, x);
+    CHECK_NULL_RETURN(paraStyle.direction == TextDirection::RTL, x);
+    float leadingMarginWidth = static_cast<float>(paraStyle.leadingMargin->size.Width().ConvertToPx());
+    return contentRect.GetX() + contentRect.Width() - leadingMarginWidth;
+}
+
 void TextContentModifier::DrawText(
     RSCanvas& canvas, const RefPtr<ParagraphManager>& pManager, const RefPtr<TextPattern>& textPattern)
 {
@@ -506,7 +517,9 @@ void TextContentModifier::DrawText(
         auto paragraph = info.paragraph;
         CHECK_NULL_VOID(paragraph);
         ChangeParagraphColor(paragraph);
-        paragraph->Paint(canvas, paintOffset_.GetX(), paintOffsetY);
+        auto contentRect = textPattern->GetTextContentRect();
+        float paintOffsetX = AdjustParagraphX(info, contentRect);
+        paragraph->Paint(canvas, paintOffsetX, paintOffsetY);
         paintOffsetY += paragraph->GetHeight();
         paragraphContent += paragraph->GetParagraphText();
     }
@@ -531,46 +544,8 @@ void TextContentModifier::PaintLeadingMarginSpan(const RefPtr<TextPattern>& text
 {
     CHECK_NULL_VOID(textPattern);
     CHECK_NULL_VOID(pManager);
-    auto paragraphs = pManager->GetParagraphs();
     auto offset = textPattern->GetTextRect().GetOffset();
-    size_t lineCount = 0;
-    for (auto&& paragraphInfo : paragraphs) {
-        const auto& drawableLeadingMargin = paragraphInfo.paragraphStyle.drawableLeadingMargin;
-        auto currentParagraphLineCount = paragraphInfo.paragraph->GetLineCount();
-        if (!drawableLeadingMargin.has_value() || currentParagraphLineCount <= 0) {
-            lineCount += currentParagraphLineCount;
-            continue;
-        }
-        if (SystemProperties::GetTextTraceEnabled()) {
-            ACE_TEXT_SCOPED_TRACE("TextContentModifier::PaintLeadingMarginSpan");
-        }
-        CHECK_NULL_VOID(paragraphInfo.paragraph);
-        const auto& leadingMarginOnDraw = drawableLeadingMargin.value().onDraw_;
-        CHECK_NULL_VOID(leadingMarginOnDraw);
-        for (size_t i = 0; i < currentParagraphLineCount; i++) {
-            auto lineMetrics = pManager->GetLineMetrics(lineCount + i);
-            if (paragraphInfo.paragraph->empty()) {
-                CaretMetricsF caretMetricsF;
-                paragraphInfo.paragraph->HandleCaretWhenEmpty(caretMetricsF, true);
-                lineMetrics.x = caretMetricsF.offset.GetX();
-                lineMetrics.height = caretMetricsF.height;
-            }
-            LeadingMarginSpanOptions options;
-            options.x = paragraphInfo.paragraphStyle.direction != TextDirection::RTL ?
-                lineMetrics.x + offset.GetX() : lineMetrics.x + offset.GetX() + lineMetrics.width;
-            options.direction = paragraphInfo.paragraphStyle.direction;
-            options.top = lineMetrics.y + offset.GetY();
-            options.baseline = lineMetrics.baseline + offset.GetY();
-            options.bottom = options.top + lineMetrics.height;
-            options.start = lineMetrics.startIndex;
-            options.end = lineMetrics.endIndex;
-            if (i == 0) {
-                options.first = true;
-            }
-            leadingMarginOnDraw(drawingContext, options);
-        }
-        lineCount += currentParagraphLineCount;
-    }
+    pManager->PaintAllLeadingMarginSpan(drawingContext, offset);
 }
 
 void TextContentModifier::DrawTextRacing(DrawingContext& drawingContext, const FadeoutInfo& info,
@@ -588,6 +563,16 @@ void TextContentModifier::DrawTextRacing(DrawingContext& drawingContext, const F
     if (info.paragraph2StartPosition < drawingContext.width) {
         paragraph->Paint(canvas, info.paragraph2StartPosition, paintOffset_.GetY());
         PaintImage(canvas, info.paragraph2StartPosition, paintOffset_.GetY());
+    }
+
+    auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(textPattern);
+    if (info.paragraph2StartPosition < drawingContext.width) {
+        canvas.Translate(info.paragraph2StartPosition, paintOffset_.GetY());
+        PaintLeadingMarginSpan(textPattern, drawingContext, pManager);
+    } else if (info.paragraph1EndPosition > 0) {
+        canvas.Translate(info.paragraph1StartPosition, paintOffset_.GetY());
+        PaintLeadingMarginSpan(textPattern, drawingContext, pManager);
     }
 }
 

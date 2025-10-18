@@ -48,15 +48,13 @@ void RichEditorDragOverlayModifier::onDraw(DrawingContext& context)
     auto textDragPattern = DynamicCast<TextDragPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textDragPattern);
     auto hostPattern = hostPattern_.Upgrade();
-    auto richEditor = DynamicCast<RichEditorPattern>(hostPattern);
-    std::shared_ptr<RSPath> path;
-    if (isAnimating_) {
-        path = textDragPattern->GenerateBackgroundPath(backgroundOffset_->Get(), 1 - selectedBackgroundOpacity_->Get());
-    } else {
-        path = textDragPattern->GetBackgroundPath();
-    }
-    PaintBackground(*path, canvas, textDragPattern, richEditor);
     CHECK_NULL_VOID(hostPattern);
+    auto richEditor = DynamicCast<RichEditorPattern>(hostPattern);
+    auto textPattern = DynamicCast<TextPattern>(hostPattern);
+    std::shared_ptr<RSPath> path;
+    path = isAnimating_ ? textDragPattern->GenerateBackgroundPath(backgroundOffset_->Get(),
+        1 - selectedBackgroundOpacity_->Get()) : textDragPattern->GetBackgroundPath();
+    PaintBackground(*path, canvas, textDragPattern, richEditor);
     canvas.Save();
     canvas.ClipPath(*pattern->GetClipPath(), RSClipOp::INTERSECT, true);
     OffsetF offset = { pattern->GetTextRect().GetX(), pattern->GetTextRect().GetY() };
@@ -71,6 +69,8 @@ void RichEditorDragOverlayModifier::onDraw(DrawingContext& context)
                 richEditor->GetRichEditorParagraphManager().PaintLeadingMarginSpan(info, relativeOffset, context));
             offset.AddY(info.paragraph->GetHeight());
         }
+        IF_TRUE(!richEditor && textPattern && textPattern->GetParagraphManager(),
+            textPattern->GetParagraphManager()->PaintAllLeadingMarginSpan(context, relativeOffset));
     }
     PaintImage(context);
     canvas.Restore();
