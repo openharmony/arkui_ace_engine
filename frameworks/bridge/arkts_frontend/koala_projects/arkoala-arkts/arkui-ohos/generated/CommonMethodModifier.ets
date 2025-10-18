@@ -24,7 +24,7 @@ import { int32 } from "@koalaui/common"
 import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, VoidCallback, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions } from "./component/units"
 import { Resource } from "global.resource"
 import { HitTestMode, Color, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey } from "./component/enums"
-import { LengthMetrics } from "arkui.Graphics"
+import { LengthMetrics, ColorMetrics} from "arkui.Graphics"
 import { ResizableOptions } from "./component/image"
 import { default as uiEffect } from "@ohos.graphics.uiEffect"
 import { FocusBoxStyle, FocusPriority } from "./component/focus"
@@ -71,7 +71,7 @@ export class CommonMethodModifier implements CommonMethod {
     _margin_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _margin_0_0value?: Padding | Length | LocalizedPadding | undefined
     _backgroundColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _backgroundColor_0_0value?: ResourceColor | undefined
+    _backgroundColor_0_0value?: ResourceColor | ColorMetrics | undefined
     _pixelRound_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _pixelRound_0_0value?: PixelRoundPolicy | undefined
     _backgroundImageSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -360,10 +360,12 @@ export class CommonMethodModifier implements CommonMethod {
     _background_0_1value?: BackgroundOptions | undefined
     _backgroundImage_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _backgroundImage_0_0value?: ResourceStr | image.PixelMap | undefined
-    _backgroundImage_0_1value?: ImageRepeat | undefined
     _backgroundImage_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _backgroundImage_1_0value?: ResourceStr | image.PixelMap | undefined
-    _backgroundImage_1_1value?: BackgroundImageOptions | undefined
+    _backgroundImage_1_1value?: BackgroundImageOptions
+    _backgroundImage_2_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _backgroundImage_2_0value?: ResourceStr | image.PixelMap | undefined
+    _backgroundImage_2_1value?: ImageRepeat
     _backgroundBlurStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _backgroundBlurStyle_0_0value?: BlurStyle | undefined
     _backgroundBlurStyle_0_1value?: BackgroundBlurStyleOptions | undefined
@@ -734,7 +736,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (this._backgroundColor_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setBackgroundColorAttribute((this._backgroundColor_0_0value as ResourceColor | undefined));
+                    peer.setBackgroundColorAttribute((this._backgroundColor_0_0value as ResourceColor | ColorMetrics | undefined));
                     this._backgroundColor_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -744,7 +746,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     this._backgroundColor_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setBackgroundColorAttribute((undefined as ResourceColor | undefined));
+                    peer.setBackgroundColorAttribute((undefined as ResourceColor | ColorMetrics | undefined));
                 }
             }
         }
@@ -3308,7 +3310,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (this._backgroundImage_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setBackgroundImage0Attribute((this._backgroundImage_0_0value as ResourceStr | image.PixelMap | undefined), (this._backgroundImage_0_1value as ImageRepeat | undefined | undefined));
+                    peer.setBackgroundImage0Attribute((this._backgroundImage_0_0value as ResourceStr | image.PixelMap | undefined));
                     this._backgroundImage_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -3318,7 +3320,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     this._backgroundImage_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setBackgroundImage0Attribute((undefined as ResourceStr | image.PixelMap | undefined), (undefined as ImageRepeat | undefined | undefined));
+                    peer.setBackgroundImage0Attribute((undefined as ResourceStr | image.PixelMap | undefined));
                 }
             }
         }
@@ -3337,6 +3339,24 @@ export class CommonMethodModifier implements CommonMethod {
                 default: {
                     this._backgroundImage_1_flag = AttributeUpdaterFlag.INITIAL;
                     peer.setBackgroundImage1Attribute((undefined as ResourceStr | image.PixelMap | undefined), (undefined as BackgroundImageOptions | undefined | undefined));
+                }
+            }
+        }
+        if (this._backgroundImage_2_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._backgroundImage_2_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setBackgroundImage2Attribute((this._backgroundImage_2_0value as ResourceStr | image.PixelMap | undefined), (this._backgroundImage_2_1value as ImageRepeat | undefined | undefined));
+                    this._backgroundImage_2_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._backgroundImage_2_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._backgroundImage_2_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setBackgroundImage2Attribute((undefined as ResourceStr | image.PixelMap | undefined), (undefined as ImageRepeat | undefined | undefined));
                 }
             }
         }
@@ -4127,7 +4147,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.backgroundColor((undefined as ResourceColor | undefined));
+                    this.backgroundColor((undefined as ResourceColor | ColorMetrics | undefined));
                 }
             }
         }
@@ -5982,11 +6002,11 @@ export class CommonMethodModifier implements CommonMethod {
             switch (modifier._backgroundImage_0_flag) {
                 case AttributeUpdaterFlag.UPDATE:
                 case AttributeUpdaterFlag.SKIP: {
-                    this.backgroundImage(modifier._backgroundImage_0_0value, modifier._backgroundImage_0_1value);
+                    this.backgroundImage(modifier._backgroundImage_0_0value);
                     break;
                 }
                 default: {
-                    this.backgroundImage((undefined as ResourceStr | image.PixelMap | undefined), (undefined as ImageRepeat | undefined | undefined));
+                    this.backgroundImage((undefined as ResourceStr | image.PixelMap | undefined));
                 }
             }
         }
@@ -6000,6 +6020,19 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     this.backgroundImage((undefined as ResourceStr | image.PixelMap | undefined), (undefined as BackgroundImageOptions | undefined | undefined));
+                }
+            }
+        }
+        if (modifier._backgroundImage_2_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._backgroundImage_2_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.backgroundImage(modifier._backgroundImage_2_0value, modifier._backgroundImage_2_1value);
+                    break;
+                }
+                default: {
+                    this.backgroundImage((undefined as ResourceStr | image.PixelMap | undefined), (undefined as ImageRepeat | undefined | undefined));
                 }
             }
         }
@@ -6587,7 +6620,7 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    backgroundColor(value: ResourceColor | undefined): this {
+    backgroundColor(value: ResourceColor | ColorMetrics | undefined): this {
         if (((this._backgroundColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._backgroundColor_0_flag = AttributeUpdaterFlag.UPDATE
@@ -8162,19 +8195,18 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    backgroundImage(src: ResourceStr | image.PixelMap | undefined, repeat?: ImageRepeat): this {
-        if (((this._backgroundImage_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || (true))
+    backgroundImage(value: ResourceStr | image.PixelMap | undefined): this {
+        if (((this._backgroundImage_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._backgroundImage_0_flag = AttributeUpdaterFlag.UPDATE
-            this._backgroundImage_0_0value = src
-            this._backgroundImage_0_1value = repeat
+            this._backgroundImage_0_0value = value
         } else
         {
             this._backgroundImage_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
-    backgroundImage(src: ResourceStr | image.PixelMap | undefined, options?: BackgroundImageOptions): this {
+    backgroundImage(src: ResourceStr | image.PixelMap | undefined, options: BackgroundImageOptions): this {
         if (((this._backgroundImage_1_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || (true))
         {
             this._backgroundImage_1_flag = AttributeUpdaterFlag.UPDATE
@@ -8183,6 +8215,18 @@ export class CommonMethodModifier implements CommonMethod {
         } else
         {
             this._backgroundImage_1_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    backgroundImage(src: ResourceStr | image.PixelMap | undefined, repeat: ImageRepeat): this {
+        if (((this._backgroundImage_2_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || (true))
+        {
+            this._backgroundImage_2_flag = AttributeUpdaterFlag.UPDATE
+            this._backgroundImage_2_0value = src
+            this._backgroundImage_2_1value = repeat
+        } else
+        {
+            this._backgroundImage_2_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

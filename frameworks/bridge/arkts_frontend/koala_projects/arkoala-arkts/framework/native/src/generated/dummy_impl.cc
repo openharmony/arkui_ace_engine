@@ -2621,7 +2621,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetBackgroundColorImpl(Ark_NativePointer node,
-                                const Opt_ResourceColor* value)
+                                const Opt_Union_ResourceColor_ColorMetrics* value)
     {
         if (!needGroupedLog(1))
         {
@@ -4343,17 +4343,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetBackgroundImage0Impl(Ark_NativePointer node,
-                                 const Opt_Union_ResourceStr_PixelMap* src,
-                                 const Opt_ImageRepeat* repeat)
+                                 const Opt_Union_ResourceStr_PixelMap* value)
     {
         if (!needGroupedLog(1))
         {
             return;
         }
         string out("setBackgroundImage0(");
-        WriteToString(&out, src);
-        out.append(", ");
-        WriteToString(&out, repeat);
+        WriteToString(&out, value);
         out.append(") \n");
         appendGroupedLog(1, out);
     }
@@ -4369,6 +4366,21 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         WriteToString(&out, src);
         out.append(", ");
         WriteToString(&out, options);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetBackgroundImage2Impl(Ark_NativePointer node,
+                                 const Opt_Union_ResourceStr_PixelMap* src,
+                                 const Opt_ImageRepeat* repeat)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setBackgroundImage2(");
+        WriteToString(&out, src);
+        out.append(", ");
+        WriteToString(&out, repeat);
         out.append(") \n");
         appendGroupedLog(1, out);
     }
@@ -21474,6 +21486,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetBackgroundImpl,
             CommonMethodModifier::SetBackgroundImage0Impl,
             CommonMethodModifier::SetBackgroundImage1Impl,
+            CommonMethodModifier::SetBackgroundImage2Impl,
             CommonMethodModifier::SetBackgroundBlurStyleImpl,
             CommonMethodModifier::SetBackgroundEffect1Impl,
             CommonMethodModifier::SetForegroundBlurStyleImpl,
