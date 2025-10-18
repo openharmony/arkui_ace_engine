@@ -493,13 +493,13 @@ void impl_AlphabetIndexerAttribute_setItemBorderRadius(Ark_NativePointer thisPtr
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Number valueValueTempTmpBuf = {};
+        Opt_Float64 valueValueTempTmpBuf = {};
         valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            valueValueTempTmpBuf.value = static_cast<Ark_Number>(thisDeserializer.readNumber());
+            valueValueTempTmpBuf.value = thisDeserializer.readFloat64();
         }
-        Opt_Number valueValueTemp = valueValueTempTmpBuf;;
-        GetNodeModifiers()->getAlphabetIndexerModifier()->setItemBorderRadius(self, static_cast<Opt_Number*>(&valueValueTemp));
+        Opt_Float64 valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getAlphabetIndexerModifier()->setItemBorderRadius(self, static_cast<Opt_Float64*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(AlphabetIndexerAttribute_setItemBorderRadius, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_AlphabetIndexerAttribute_setPopupBackgroundBlurStyle(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
@@ -32352,7 +32352,7 @@ void impl_PixelMapMock_release(Ark_NativePointer thisPtr) {
         GetAccessors()->getPixelMapMockAccessor()->release(self);
 }
 KOALA_INTEROP_DIRECT_V1(PixelMapMock_release, Ark_NativePointer)
-Ark_NativePointer impl_ProgressMask_construct(KInteropNumber value, KInteropNumber total, KSerializerBuffer thisArray, int32_t thisLength) {
+Ark_NativePointer impl_ProgressMask_construct(KDouble value, KDouble total, KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const Ark_Int8 colorValueTempTmpBufUnionSelector = thisDeserializer.readInt8();
         Ark_ResourceColor colorValueTempTmpBuf = {};
@@ -32373,18 +32373,18 @@ Ark_NativePointer impl_ProgressMask_construct(KInteropNumber value, KInteropNumb
             INTEROP_FATAL("One of the branches for colorValueTempTmpBuf has to be chosen through deserialisation.");
         }
         Ark_ResourceColor colorValueTemp = static_cast<Ark_ResourceColor>(colorValueTempTmpBuf);;
-        return GetAccessors()->getProgressMaskAccessor()->construct((const Ark_Number*) (&value), (const Ark_Number*) (&total), static_cast<Ark_ResourceColor*>(&colorValueTemp));
+        return GetAccessors()->getProgressMaskAccessor()->construct(value, total, static_cast<Ark_ResourceColor*>(&colorValueTemp));
 }
-KOALA_INTEROP_DIRECT_4(ProgressMask_construct, Ark_NativePointer, KInteropNumber, KInteropNumber, KSerializerBuffer, int32_t)
+KOALA_INTEROP_4(ProgressMask_construct, Ark_NativePointer, KDouble, KDouble, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_ProgressMask_getFinalizer() {
         return GetAccessors()->getProgressMaskAccessor()->getFinalizer();
 }
 KOALA_INTEROP_DIRECT_0(ProgressMask_getFinalizer, Ark_NativePointer)
-void impl_ProgressMask_updateProgress(Ark_NativePointer thisPtr, KInteropNumber value) {
+void impl_ProgressMask_updateProgress(Ark_NativePointer thisPtr, KDouble value) {
         Ark_ProgressMask self = reinterpret_cast<Ark_ProgressMask>(thisPtr);
-        GetAccessors()->getProgressMaskAccessor()->updateProgress(self, (const Ark_Number*) (&value));
+        GetAccessors()->getProgressMaskAccessor()->updateProgress(self, value);
 }
-KOALA_INTEROP_DIRECT_V2(ProgressMask_updateProgress, Ark_NativePointer, KInteropNumber)
+KOALA_INTEROP_V2(ProgressMask_updateProgress, Ark_NativePointer, KDouble)
 void impl_ProgressMask_updateColor(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_ProgressMask self = reinterpret_cast<Ark_ProgressMask>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);

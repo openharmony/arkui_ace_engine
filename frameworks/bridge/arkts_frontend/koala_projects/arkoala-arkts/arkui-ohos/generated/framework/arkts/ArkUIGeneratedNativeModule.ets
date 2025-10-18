@@ -4949,12 +4949,12 @@ export class ArkUIGeneratedNativeModule {
     native static _PixelMapMock_getFinalizer(): KPointer
     @ani.unsafe.Direct
     native static _PixelMapMock_release(ptr: KPointer): void
-    @ani.unsafe.Direct
-    native static _ProgressMask_construct(value: number, total: number, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Quick
+    native static _ProgressMask_construct(value: KDouble, total: KDouble, thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
     native static _ProgressMask_getFinalizer(): KPointer
-    @ani.unsafe.Direct
-    native static _ProgressMask_updateProgress(ptr: KPointer, value: number): void
+    @ani.unsafe.Quick
+    native static _ProgressMask_updateProgress(ptr: KPointer, value: KDouble): void
     @ani.unsafe.Direct
     native static _ProgressMask_updateColor(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
