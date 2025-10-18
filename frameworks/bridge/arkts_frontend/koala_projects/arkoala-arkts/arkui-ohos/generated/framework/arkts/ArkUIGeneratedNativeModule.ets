@@ -3316,7 +3316,6 @@ export class ArkUIGeneratedNativeModule {
     native static _BuilderNodeOps_construct(): KPointer
     @ani.unsafe.Direct
     native static _BuilderNodeOps_getFinalizer(): KPointer
-    @ani.unsafe.Direct
     native static _BuilderNodeOps_create(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _BuilderNodeOps_disposeNode(ptr: KPointer): void
