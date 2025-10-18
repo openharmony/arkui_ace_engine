@@ -560,6 +560,10 @@ void ContainerPickerPattern::HandleDragUpdate(const GestureEvent& info)
 {
     isAllowPlayHaptic_ = (info.GetSourceTool() == SourceTool::MOUSE) ? false : true;
     if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::MOUSE) {
+        if (totalItemCount_ == 0) {
+            return;
+        }
+
         int32_t index = 0;
         if (LessNotEqual(info.GetDelta().GetY(), 0.0)) {
             index = (totalItemCount_ + selectedIndex_ + 1) % totalItemCount_;
@@ -753,7 +757,7 @@ double ContainerPickerPattern::GetDragDeltaLessThanJumpInterval(
         }
         for (int32_t i = 0; i < shiftDistanceCount; i++) {
             PickerMarkDirty();
-            InnerHandleScroll(dragDelta < 0);
+            InnerHandleScroll(LessNotEqual(dragDelta, 0.0));
         }
         dragDelta = additionalShift;
     }

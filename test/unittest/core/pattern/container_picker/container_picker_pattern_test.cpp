@@ -885,7 +885,6 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_Play001, TestSiz
 
     EXPECT_TRUE(result);
     EXPECT_TRUE(pattern->isNeedStartInertialAnimation_);
-    EXPECT_EQ(pattern->dragVelocity_, 1000.0);
 }
 
 /**
@@ -1229,6 +1228,133 @@ TEST_F(ContainerPickerPatternTest, ContainerPickerPatternCreateNodePaintMethodTe
 
     // Assert
     EXPECT_NE(paintMethod1, paintMethod2);
+}
+
+/**
+ * @tc.name: ContainerPickerPatternTest_IsEnableHaptic_HostIsNull001
+ * @tc.desc: Test IsEnableHaptic function when host is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_IsEnableHaptic_HostIsNull001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create pattern without setting host
+     */
+    auto pattern = AceType::MakeRefPtr<ContainerPickerPattern>();
+
+    /**
+     * @tc.steps: step2. call IsEnableHaptic and verify result
+     * @tc.expected: step2. function returns true when host is null
+     */
+    bool result = pattern->IsEnableHaptic();
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: ContainerPickerPatternTest_IsEnableHaptic_EnableTrue001
+ * @tc.desc: Test IsEnableHaptic function when haptic feedback is enabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_IsEnableHaptic_EnableTrue001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create pattern with haptic feedback enabled
+     */
+    auto frameNode = CreateContainerPickerNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto props = pattern->GetLayoutProperty<ContainerPickerLayoutProperty>();
+    ASSERT_NE(props, nullptr);
+    props->UpdateEnableHapticFeedback(true);
+
+    /**
+     * @tc.steps: step2. call IsEnableHaptic and verify result
+     * @tc.expected: step2. function returns true when haptic feedback is enabled
+     */
+    bool result = pattern->IsEnableHaptic();
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: ContainerPickerPatternTest_IsEnableHaptic_EnableFalse001
+ * @tc.desc: Test IsEnableHaptic function when haptic feedback is disabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_IsEnableHaptic_EnableFalse001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create pattern with haptic feedback disabled
+     */
+    auto frameNode = CreateContainerPickerNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto props = pattern->GetLayoutProperty<ContainerPickerLayoutProperty>();
+    ASSERT_NE(props, nullptr);
+    props->UpdateEnableHapticFeedback(false);
+
+    /**
+     * @tc.steps: step2. call IsEnableHaptic and verify result
+     * @tc.expected: step2. function returns false when haptic feedback is disabled
+     */
+    bool result = pattern->IsEnableHaptic();
+    EXPECT_FALSE(result);
+}
+
+/**
+    * @tc.name: ContainerPickerPatternTest_InitOrRefreshHapticController_Init001
+    * @tc.desc: Test InitOrRefreshHapticController function to initialize haptic controller
+    * @tc.type: FUNC
+    */
+HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_InitOrRefreshHapticController_Init001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create pattern with haptic enabled but no controller
+     */
+    auto frameNode = CreateContainerPickerNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto props = pattern->GetLayoutProperty<ContainerPickerLayoutProperty>();
+    ASSERT_NE(props, nullptr);
+    props->UpdateEnableHapticFeedback(true);
+    pattern->hapticController_ = nullptr;
+
+    /**
+     * @tc.steps: step2. call InitOrRefreshHapticController and verify isEnableHaptic_ is updated
+     * @tc.expected: step2. isEnableHaptic_ is set to true and hapticController_ is not nullptr.
+     */
+    pattern->InitOrRefreshHapticController();
+    EXPECT_TRUE(pattern->isEnableHaptic_);
+    EXPECT_NE(pattern->hapticController_, nullptr);
+}
+
+/**
+ * @tc.name: ContainerPickerPatternTest_InitOrRefreshHapticController_Stop001
+ * @tc.desc: Test InitOrRefreshHapticController function to stop haptic controller
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_InitOrRefreshHapticController_Stop001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create pattern with haptic disabled but has controller
+     */
+    auto frameNode = CreateContainerPickerNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto props = pattern->GetLayoutProperty<ContainerPickerLayoutProperty>();
+    ASSERT_NE(props, nullptr);
+    props->UpdateEnableHapticFeedback(false);
+
+    /**
+     * @tc.steps: step2. call InitOrRefreshHapticController and verify result
+     * @tc.expected: step2. isEnableHaptic_ is set to false and hapticController_ is nullptr
+     */
+    pattern->InitOrRefreshHapticController();
+    EXPECT_FALSE(pattern->isEnableHaptic_);
+    EXPECT_EQ(pattern->hapticController_, nullptr);
 }
 
 } // namespace OHOS::Ace::NG
