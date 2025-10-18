@@ -938,7 +938,7 @@ void ViewAbstractModelStatic::SetPadding(FrameNode* frameNode, const std::option
 {
     CHECK_NULL_VOID(frameNode);
     if (value) {
-        ViewAbstract::SetPadding(frameNode, value.value());
+        ViewAbstract::SetPadding(frameNode, ConstraintPaddingPropertyNonNegative(value.value()));
     } else {
         PaddingProperty padding;
         padding.SetEdges(CalcLength(0.0));
@@ -950,7 +950,7 @@ void ViewAbstractModelStatic::SetMargin(FrameNode* frameNode, const std::optiona
 {
     CHECK_NULL_VOID(frameNode);
     if (value) {
-        ViewAbstract::SetMargin(frameNode, ConstraintPaddingPropertyNonNegative(value.value()));
+        ViewAbstract::SetMargin(frameNode, value.value());
     } else {
         PaddingProperty padding;
         padding.SetEdges(CalcLength(0.0));
