@@ -466,6 +466,9 @@ void NavigationModelStatic::SetBackButtonIcon(FrameNode* frameNode,
     auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
     CHECK_NULL_VOID(titleBarLayoutProperty);
     ImageSourceInfo imageSourceInfo(src, nameList[0], nameList[1]);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, NoPixMap, imageOption.noPixMap, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, ImageSource, imageSourceInfo, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, PixelMap, pixMap, frameNode);
     titleBarLayoutProperty->UpdateImageSource(imageSourceInfo);
     titleBarLayoutProperty->UpdateNoPixMap(imageOption.noPixMap);
     titleBarLayoutProperty->UpdatePixelMap(pixMap);
