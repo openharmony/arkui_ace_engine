@@ -1093,7 +1093,6 @@ HWTEST_F(TextInputAreaTest, testStroke001, TestSize.Level1)
 
     textFieldModelNG.SetStrokeWidth(Dimension(2.0));
     textFieldModelNG.SetStrokeColor(STORKE_COLOR_VALUE_1);
-
     EXPECT_EQ(layoutProperty->GetStrokeWidth(), Dimension(2.0));
     EXPECT_EQ(layoutProperty->GetStrokeColor(), STORKE_COLOR_VALUE_1);
 
