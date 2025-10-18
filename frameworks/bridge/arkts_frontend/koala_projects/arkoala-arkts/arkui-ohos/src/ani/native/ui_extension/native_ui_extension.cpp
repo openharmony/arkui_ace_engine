@@ -20,7 +20,7 @@
 #include "../utils/ani_utils.h"
 #include "base/log/log_wrapper.h"
 #ifdef WINDOW_SCENE_SUPPORTED
-#include "frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_model_adapter.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_model_static.h"
 #include "frameworks/core/interfaces/native/ani/frame_node_peer_impl.h"
 #include "frameworks/core/interfaces/native/implementation/ui_extension_proxy_peer.h"
 #include "frameworks/core/interfaces/native/implementation/ui_extension_proxy_peer_base.h"
@@ -199,7 +199,8 @@ ani_status NativeUiExtension::SetUiextensionOption(
         isTransferringCaller, dpiFollowStrategy, isWindowModeFollowHost, static_cast<int32_t>(placeholderMap.size()));
 #ifdef WINDOW_SCENE_SUPPORTED
     bool densityDpi = (dpiFollowStrategy == FOLLOW_HOST_DPI) ? true : false;
-    NG::UIExtensionAdapter::UpdateUecConfig(frameNode, isTransferringCaller, densityDpi);
+    NG::UIExtensionStatic::UpdateUecConfig(
+        frameNode, isTransferringCaller, densityDpi, isWindowModeFollowHost, placeholderMap);
 #endif
     return ANI_OK;
 }
@@ -232,7 +233,7 @@ ani_status NativeUiExtension::SetUiextensionWant(
     }
 
 #ifdef WINDOW_SCENE_SUPPORTED
-    NG::UIExtensionAdapter::UpdateWant(frameNode, want);
+    NG::UIExtensionStatic::UpdateWant(frameNode, want);
 #endif //WINDOW_SCENE_SUPPORTED
     return ANI_OK;
 }
@@ -250,7 +251,7 @@ ani_status NativeUiExtension::SetOnResult(
     if (IsNullishObject(env, callbackObj)) {
         TAG_LOGW(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT, "unset the OnResult callback.");
     #ifdef WINDOW_SCENE_SUPPORTED
-        NG::UIExtensionAdapter::SetOnResult(frameNode, nullptr);
+        NG::UIExtensionStatic::SetOnResult(frameNode, nullptr);
     #endif //WINDOW_SCENE_SUPPORTED
         return ANI_OK;
     }
@@ -298,7 +299,7 @@ ani_status NativeUiExtension::SetOnResult(
         env->FunctionalObject_Call(fnObj, tmp.size(), tmp.data(), &result);
     };
 #ifdef WINDOW_SCENE_SUPPORTED
-    NG::UIExtensionAdapter::SetOnResult(frameNode, std::move(onResultCallback));
+    NG::UIExtensionStatic::SetOnResult(frameNode, std::move(onResultCallback));
 #endif //WINDOW_SCENE_SUPPORTED
     return ANI_OK;
 }
@@ -316,7 +317,7 @@ ani_status NativeUiExtension::SetOnRelease(
     if (IsNullishObject(env, callbackObj)) {
         TAG_LOGW(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT, "unset the OnRelease callback.");
     #ifdef WINDOW_SCENE_SUPPORTED
-        NG::UIExtensionAdapter::SetOnRelease(frameNode, nullptr);
+        NG::UIExtensionStatic::SetOnRelease(frameNode, nullptr);
     #endif //WINDOW_SCENE_SUPPORTED
         return ANI_OK;
     }
@@ -358,7 +359,7 @@ ani_status NativeUiExtension::SetOnRelease(
     };
 
 #ifdef WINDOW_SCENE_SUPPORTED
-    NG::UIExtensionAdapter::SetOnRelease(frameNode, std::move(onReleaseCallback));
+    NG::UIExtensionStatic::SetOnRelease(frameNode, std::move(onReleaseCallback));
 #endif //WINDOW_SCENE_SUPPORTED
     return ANI_OK;
 }
@@ -402,7 +403,7 @@ ani_status NativeUiExtension::SetOnDrawReady(
     };
 
 #ifdef WINDOW_SCENE_SUPPORTED
-    NG::UIExtensionAdapter::SetOnDrawReady(frameNode, std::move(onDrawReadyCallback));
+    NG::UIExtensionStatic::SetOnDrawReady(frameNode, std::move(onDrawReadyCallback));
 #endif //WINDOW_SCENE_SUPPORTED
     return ANI_OK;
 }
@@ -420,7 +421,7 @@ ani_status NativeUiExtension::SetOnError(
     if (IsNullishObject(env, callbackObj)) {
         TAG_LOGW(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT, "unset the OnError callback.");
     #ifdef WINDOW_SCENE_SUPPORTED
-        NG::UIExtensionAdapter::SetOnError(frameNode, nullptr);
+        NG::UIExtensionStatic::SetOnError(frameNode, nullptr);
     #endif //WINDOW_SCENE_SUPPORTED
         return ANI_OK;
     }
@@ -470,7 +471,7 @@ ani_status NativeUiExtension::SetOnError(
     };
 
 #ifdef WINDOW_SCENE_SUPPORTED
-    NG::UIExtensionAdapter::SetOnError(frameNode, std::move(onErrorCallback));
+    NG::UIExtensionStatic::SetOnError(frameNode, std::move(onErrorCallback));
 #endif //WINDOW_SCENE_SUPPORTED
     return ANI_OK;
 }
@@ -488,7 +489,7 @@ ani_status NativeUiExtension::SetOnRecive(
     if (IsNullishObject(env, callbackObj)) {
         TAG_LOGW(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT, "unset the OnReceive callback.");
     #ifdef WINDOW_SCENE_SUPPORTED
-        NG::UIExtensionAdapter::SetOnReceive(frameNode, nullptr);
+        NG::UIExtensionStatic::SetOnReceive(frameNode, nullptr);
     #endif //WINDOW_SCENE_SUPPORTED
         return ANI_OK;
     }
@@ -530,7 +531,7 @@ ani_status NativeUiExtension::SetOnRecive(
     };
 
 #ifdef WINDOW_SCENE_SUPPORTED
-    NG::UIExtensionAdapter::SetOnReceive(frameNode, std::move(onReciveCallback));
+    NG::UIExtensionStatic::SetOnReceive(frameNode, std::move(onReciveCallback));
 #endif //WINDOW_SCENE_SUPPORTED
     return ANI_OK;
 }
@@ -548,7 +549,7 @@ ani_status NativeUiExtension::SetOnTerminate(
     if (IsNullishObject(env, callbackObj)) {
         TAG_LOGW(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT, "unset the OnTerminated callback.");
     #ifdef WINDOW_SCENE_SUPPORTED
-        NG::UIExtensionAdapter::SetOnTerminated(frameNode, nullptr);
+        NG::UIExtensionStatic::SetOnTerminated(frameNode, nullptr);
     #endif //WINDOW_SCENE_SUPPORTED
         return ANI_OK;
     }
@@ -599,7 +600,7 @@ ani_status NativeUiExtension::SetOnTerminate(
             env->FunctionalObject_Call(fnObj, tmp.size(), tmp.data(), &result);
         };
 #ifdef WINDOW_SCENE_SUPPORTED
-    NG::UIExtensionAdapter::SetOnTerminated(frameNode, std::move(onTerminateCallback));
+    NG::UIExtensionStatic::SetOnTerminated(frameNode, std::move(onTerminateCallback));
 #endif //WINDOW_SCENE_SUPPORTED
     return ANI_OK;
 }
