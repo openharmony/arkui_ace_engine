@@ -62,6 +62,7 @@ public:
     static void SetLayoutOptions(FrameNode* frameNode, GridLayoutOptions& options);
     static void SetOnScrollBarUpdate(FrameNode* frameNode, ScrollBarUpdateFunc&& value);
     static void SetOnItemDragStart(FrameNode* frameNode, std::function<void(const ItemDragInfo&, int32_t)>&& value);
+    static void ResetOnItemDragStart(FrameNode* frameNode);
     static void SetOnItemDragEnter(FrameNode* frameNode, ItemDragEnterFunc&& value);
     static void SetOnItemDragMove(FrameNode* frameNode, ItemDragMoveFunc&& value);
     static void SetOnItemDragLeave(FrameNode* frameNode, ItemDragLeaveFunc&& value);
@@ -82,6 +83,8 @@ public:
 private:
     static void AddDragFrameNodeToManager(FrameNode* frameNode);
     static void AddDragFrameNodeToManagerMultiThread(FrameNode* frameNode);
+    static void RemoveDragFrameNodeToManager(FrameNode* frameNode);
+    static void RemoveDragFrameNodeToManagerMultiThread(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GRID_GRID_MODEL_STATIC_H

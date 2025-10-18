@@ -287,6 +287,18 @@ void GridModelStatic::SetOnItemDragStart(
     AddDragFrameNodeToManager(frameNode);
 }
 
+void GridModelStatic::ResetOnItemDragStart(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnItemDragStart(nullptr);
+    auto gestureEventHub = eventHub->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureEventHub);
+    gestureEventHub->RemoveDragEvent();
+    RemoveDragFrameNodeToManager(frameNode);
+}
+
 void GridModelStatic::SetOnItemDragEnter(FrameNode* frameNode, ItemDragEnterFunc&& value)
 {
     CHECK_NULL_VOID(frameNode);
@@ -353,6 +365,32 @@ void GridModelStatic::AddDragFrameNodeToManagerMultiThread(FrameNode* frameNode)
     });
 }
 
+
+void GridModelStatic::RemoveDragFrameNodeToManager(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    FREE_NODE_CHECK(frameNode, RemoveDragFrameNodeToManager, frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+
+    dragDropManager->RemoveDragFrameNode(frameNode->GetId());
+}
+
+void GridModelStatic::RemoveDragFrameNodeToManagerMultiThread(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->PostAfterAttachMainTreeTask([weak = AceType::WeakClaim(frameNode)]() {
+        auto node = weak.Upgrade();
+        CHECK_NULL_VOID(node);
+        auto pipeline = node->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto dragDropManager = pipeline->GetDragDropManager();
+        CHECK_NULL_VOID(dragDropManager);
+        dragDropManager->RemoveDragFrameNode(node->GetId());
+    });
+}
 void GridModelStatic::SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameBeginEvent&& onScrollFrameBegin)
 {
     CHECK_NULL_VOID(frameNode);
