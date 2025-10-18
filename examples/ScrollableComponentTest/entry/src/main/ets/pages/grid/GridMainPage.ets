@@ -54,11 +54,7 @@ struct WaterFlowMainPage {
     new TextList(20, 'GridModifierIndex', 'pages/grid/GridModifierIndex'),
     new TextList(21, 'scrollBarColor', 'pages/grid/scrollBarColor'),
     new TextList(22, 'ScrollableGrid', 'pages/grid/CAPI/ScrollableGrid'),
-    new TextList(26, 'OneItem', 'pages/grid/LayoutConstraints/OneItem'),
-    new TextList(27, 'TwoItem', 'pages/grid/LayoutConstraints/TwoItem'),
-    new TextList(28, 'WidthOneItem', 'pages/grid/LayoutConstraints/WidthOneItem'),
-    new TextList(29, 'WidthTwoItem', 'pages/grid/LayoutConstraints/WidthTwoItem'),
-    new TextList(30, 'OriOneItem', 'pages/grid/LayoutConstraints/OriOneItem')
+    new TextList(23, 'LayoutConstraints', 'pages/grid/LayoutConstraints/LayoutConstraints_MainPage')
   ]
   @State fontSize: Resource | undefined = undefined
 
