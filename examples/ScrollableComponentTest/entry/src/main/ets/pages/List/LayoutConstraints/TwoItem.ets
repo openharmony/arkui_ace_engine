@@ -22,8 +22,8 @@
 struct ListTwoItem {
   
   /*
-   * 用例描述：测试List组件中ListItem组件的布局约束
-   * 关键结构：List、ListItem
+   * 用例描述：List组件内设置多个ListItem的height为不同值，验证ListItem的布局是否正确
+   * 关键结构：List、ListItem、height
    */
 
   @State realName: string[][] = [];

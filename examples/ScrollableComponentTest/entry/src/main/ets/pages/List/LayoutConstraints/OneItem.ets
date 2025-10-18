@@ -22,8 +22,8 @@
 struct ListOneItem {
 
   /* 
-   * 用例描述：List组件中ListItem组件的布局约束 
-   * 关键结构：List、ListItem、Column、Text、Button、Scroller、@State、@Builder、@Component
+   * 用例描述：List组件内设置ListItem的height为不同值，验证ListItem的布局是否正确
+   * 关键结构：List、ListItem、height
    */
 
   @State realName: string[][] = [];

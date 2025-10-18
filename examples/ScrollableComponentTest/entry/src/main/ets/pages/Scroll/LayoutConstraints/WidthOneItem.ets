@@ -22,8 +22,8 @@
 struct ScrollWidthOneItem {
 
   /*
-   * 用例描述：Scroll组件内的子组件的高度设置成不同数值
-   * 关键结构：Scroll
+   * 用例描述：Scroll组件内的子组件的宽度设置成不同数值
+   * 关键结构：Scroll、width
    */
    
   @State realName: string[][] = [];

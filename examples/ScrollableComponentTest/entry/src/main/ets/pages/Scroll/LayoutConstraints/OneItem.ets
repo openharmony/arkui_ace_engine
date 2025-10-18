@@ -23,7 +23,7 @@ struct ScrollOneItem {
 
   /*
    * 用例描述：Scroll组件内的子组件的高度设置成不同数值
-   * 关键结构：Scroll
+   * 关键结构：Scroll、height
    */
 
   @State realName: string[][] = [];

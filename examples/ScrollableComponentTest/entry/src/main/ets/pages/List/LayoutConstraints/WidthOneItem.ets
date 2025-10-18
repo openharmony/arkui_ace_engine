@@ -22,7 +22,7 @@
 struct ListWidthOneItem {
 
   /* 
-   * 用例描述：测试宽度为不同数值的列表项
+   * 用例描述：List组件内设置ListItem的width为不同值，验证ListItem的布局是否正确
    * 关键结构：List、ListItem、width
    */
 

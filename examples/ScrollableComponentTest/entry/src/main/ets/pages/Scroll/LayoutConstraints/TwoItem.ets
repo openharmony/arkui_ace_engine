@@ -23,7 +23,7 @@ struct ScrollTwoItem {
 
   /*
    * 用例描述：Scroll组件内包含多个子组件，子组件的高度设置成不同数值，点击按钮切换数值
-   * 关键结构：Scroll
+   * 关键结构：Scroll、height
    */
 
   @State realName: string[][] = [];
