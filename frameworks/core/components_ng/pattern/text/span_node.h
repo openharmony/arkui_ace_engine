@@ -1070,6 +1070,12 @@ public:
         return customSpanNode;
     }
 
+    void InitializePatternAndContext() override
+    {
+        auto pattern = GetPattern();
+        pattern->AttachToFrameNode(WeakClaim(this));
+    }
+
     CustomSpanNode(const std::string& tag, int32_t nodeId) : FrameNode(tag, nodeId, AceType::MakeRefPtr<Pattern>())
     {
         if (customSpanItem_) {
