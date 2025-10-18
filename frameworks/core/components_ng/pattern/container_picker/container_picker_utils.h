@@ -33,8 +33,11 @@ struct PickerItemInfo {
 };
 
 namespace {
-const Dimension PICKER_DEFAULT_HEIGHT = 280.0_vp;
-const Dimension PICKER_ITEM_DEFAULT_HEIGHT = 40.0_vp;
+const Dimension PICKER_DEFAULT_HEIGHT = 200.0_vp;
+const Dimension PICKER_HEIGHT_BEFORE_ROTATE = 280.0_vp;
+const Dimension PICKER_ITEM_HEIGHT = 40.0_vp;
+const Dimension MAX_OVERSCROLL_OFFSET = 120.0_vp;
+const float HALF = 2.0;
 } // namespace
 class ContainerPickerUtils {
 public:
@@ -57,7 +60,7 @@ public:
                 layoutConstraint.maxSize.SetWidth(widthOpt.value());
             }
         }
-        auto maxHeight = static_cast<float>(PICKER_ITEM_DEFAULT_HEIGHT.ConvertToPx());
+        auto maxHeight = static_cast<float>(PICKER_ITEM_HEIGHT.ConvertToPx());
         layoutConstraint.maxSize.SetHeight(maxHeight);
         childSelfIdealSize.SetHeight(maxHeight);
         layoutConstraint.selfIdealSize = childSelfIdealSize;
@@ -107,6 +110,20 @@ public:
         }
         return std::make_pair(GetLoopIndex(itemPosition.begin()->first, totalItemCount),
             PickerItemInfo { itemPosition.begin()->second.startPos, itemPosition.begin()->second.endPos });
+    }
+
+    static float CalculateFriction(float gamma)
+    {
+        if (LessOrEqual(gamma, 0.0f)) {
+            return 1.0f;
+        }
+        if (GreatOrEqual(gamma, 1.0f)) {
+            gamma = 1.0f;
+        }
+        constexpr float scrollRatio = 0.72f;
+        const float coefficient = ACE_E / (1.0f - ACE_E);
+        auto fx = (gamma + coefficient) * (log(ACE_E - (ACE_E - 1.0f) * gamma) - 1.0f);
+        return scrollRatio * fx / gamma;
     }
 };
 } // namespace OHOS::Ace::NG

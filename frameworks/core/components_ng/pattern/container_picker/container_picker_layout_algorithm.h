@@ -123,6 +123,21 @@ public:
         return height_;
     }
 
+    void SetPickerHeight(float height)
+    {
+        pickerDefaultHeight_ = height;
+    }
+
+    void SetPickerHeightBeforeRotate(float height)
+    {
+        pickerHeightBeforeRotate_ = height;
+    }
+
+    void SetItemHeight(float height)
+    {
+        pickerItemHeight_ = height;
+    }
+
     void CalcMainAndMiddlePos();
 
     const LayoutConstraintF& GetLayoutConstraint() const
@@ -171,6 +186,7 @@ private:
 
     int32_t totalItemCount_ = 0;
     int32_t selectedIndex_ = 0;
+
     float startMainPos_ = 0.0f;
     float endMainPos_ = 0.0f;
     float topPadding_ = 0.0f;
@@ -180,11 +196,15 @@ private:
     float middleItemEndPos_ = 0.0f;
     float currentDelta_ = 0.0f;
     float currentOffset_ = 0.0f;
+
+    float pickerItemHeight_ = 0.0f;
+    float pickerDefaultHeight_ = 0.0f;
+    float pickerHeightBeforeRotate_ = 0.0f;
+
     bool crossMatchChild_ = false;
     bool measured_ = false;
     bool isLoop_ = false;
-    bool overScrollFeature_ = false;
-    bool canOverScroll_ = false;
+    bool canOverScroll_ = true;
 
     std::mutex pickerMutex_;
 };
