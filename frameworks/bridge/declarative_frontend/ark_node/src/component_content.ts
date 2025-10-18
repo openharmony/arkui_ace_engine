@@ -12,18 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-class ComponentContent extends Content implements IDisposable {
+class ComponentContentCommonBase extends Content implements IDisposable {
   // the name of "builderNode_" is used in ace_engine/interfaces/native/node/native_node_napi.cpp.
-  private builderNode_: BuilderNode;
+  protected builderNode_: BuilderNode | ReactiveBuilderNode;
   private attachNodeRef_: NativeStrongRef;
   private parentWeak_: WeakRef<FrameNode> | undefined;
   private disposable_: Disposable;
-  constructor(uiContext: UIContext, builder: WrappedBuilder<[]> | WrappedBuilder<[Object]>, params?: Object, options?: BuildOptions) {
+  constructor() {
     super();
-    let builderNode = new BuilderNode(uiContext, {});
-    this.builderNode_ = builderNode;
-    this.builderNode_.build(builder, params ?? undefined, options);
     this.disposable_ = new Disposable();
   }
 
@@ -68,7 +64,7 @@ class ComponentContent extends Content implements IDisposable {
   public isDisposed(): boolean {
     return this.disposable_.isDisposed() && (this.builderNode_ ? this.builderNode_.isDisposed() : true);
   }
-  
+
   public detachFromParent() {
     if (this.parentWeak_ === undefined) {
       return;
@@ -97,5 +93,28 @@ class ComponentContent extends Content implements IDisposable {
 
   public inheritFreezeOptions(enable: boolean): void {
     this.builderNode_.inheritFreezeOptions(enable);
+  }
+}
+
+class ComponentContent extends ComponentContentCommonBase {
+  constructor(uiContext: UIContext, builder: WrappedBuilder<[]> | WrappedBuilder<[Object]>, params?: Object, options?: BuildOptions) {
+    super();
+    let builderNode = new BuilderNode(uiContext, {});
+    this.builderNode_ = builderNode;
+    this.builderNode_.build(builder, params ?? undefined, options);
+  }
+}
+
+class ReactiveComponentContent extends ComponentContentCommonBase {
+  constructor(uiContext: UIContext, builder: WrappedBuilder<[]> | WrappedBuilder<[Object]>, options?: BuildOptions, ...params: Object[]) {
+    super();
+    let reactiveBuilderNode = new ReactiveBuilderNode(uiContext, {});
+    this.builderNode_ = reactiveBuilderNode;
+    this.builderNode_.build(builder, options, ...params);
+  }
+  public flushState(): void {
+    if (this.builderNode_ instanceof ReactiveBuilderNode) {
+      (this.builderNode_ as ReactiveBuilderNode)?.flushState();
+    }
   }
 }

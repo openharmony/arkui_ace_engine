@@ -15,24 +15,15 @@
 /// <reference path="../../state_mgmt/src/lib/common/ifelse_native.d.ts" />
 /// <reference path="../../state_mgmt/src/lib/puv2_common/puv2_viewstack_processor.d.ts" />
 /// <reference path="./disposable.ts" />
-class BuilderNode extends Disposable {
-  private _JSBuilderNode: JSBuilderNode;
+class BuilderNodeCommonBase extends Disposable {
+  protected _JSBuilderNode: JSBuilderNode | ReactiveBuilderNodeBase;
   // the name of "nodePtr_" is used in ace_engine/interfaces/native/node/native_node_napi.cpp.
-  private nodePtr_: NodePtr;
-  constructor(uiContext: UIContext, options: RenderOptions) {
+  protected nodePtr_: NodePtr;
+  constructor() {
     super();
-    let jsBuilderNode = new JSBuilderNode(uiContext, options);
-    this._JSBuilderNode = jsBuilderNode;
-    let id = Symbol('BuilderRootFrameNode');
-    BuilderNodeFinalizationRegisterProxy.ElementIdToOwningBuilderNode_.set(id, jsBuilderNode);
-    BuilderNodeFinalizationRegisterProxy.register(this, { name: 'BuilderRootFrameNode', idOfNode: id });
   }
   public update(params: Object) {
     this._JSBuilderNode.update(params);
-  }
-  public build(builder: WrappedBuilder<Object[]>, params?: Object, options?: BuildOptions,): void {
-    this._JSBuilderNode.build(builder, params, options);
-    this.nodePtr_ = this._JSBuilderNode.getNodePtr();
   }
   public getNodePtr(): NodePtr {
     return this._JSBuilderNode.getValidNodePtr();
@@ -63,7 +54,7 @@ class BuilderNode extends Disposable {
     this._JSBuilderNode.dispose();
   }
   public isDisposed(): boolean {
-    return super.isDisposed() && (this._JSBuilderNode ? this._JSBuilderNode.isDisposed() : true);
+    return super.isDisposed() && (this._JSBuilderNode?.isDisposed() ?? true);
   }
   public reuse(param?: Object): void {
     this._JSBuilderNode.reuse(param);
@@ -84,20 +75,34 @@ class BuilderNode extends Disposable {
     this._JSBuilderNode.inheritFreezeOptions(enable);
   }
 }
+class BuilderNode extends BuilderNodeCommonBase {
+  constructor(uiContext: UIContext, options: RenderOptions) {
+    super();
+    let jsBuilderNode = new JSBuilderNode(uiContext, options);
+    this._JSBuilderNode = jsBuilderNode;
+    let id = Symbol('BuilderRootFrameNode');
+    BuilderNodeFinalizationRegisterProxy.ElementIdToOwningBuilderNode_.set(id, jsBuilderNode);
+    BuilderNodeFinalizationRegisterProxy.register(this, { name: 'BuilderRootFrameNode', idOfNode: id });
+  }
+  public build(builder: WrappedBuilder<Object[]>, params?: Object, options?: BuildOptions,): void {
+    this._JSBuilderNode.build(builder, params, options);
+    this.nodePtr_ = this._JSBuilderNode.getNodePtr();
+  }
+}
 
 class JSBuilderNode extends BaseNode implements IDisposable {
-  private params_: Object;
+  protected params_: Object;
   private uiContext_: UIContext;
   private frameNode_: FrameNode;
   private _nativeRef: NativeStrongRef;
   private _supportNestingBuilder: boolean;
   private _proxyObjectParam: Object;
-  private bindedViewOfBuilderNode:ViewPU;
+  private bindedViewOfBuilderNode: ViewPU;
   private disposable_: Disposable;
   private inheritFreeze: boolean;
   private allowFreezeWhenInactive: boolean;
   private parentallowFreeze: boolean;
-  private isFreeze: boolean;
+  protected isFreeze: boolean;
   public __parentViewOfBuildNode?: WeakRef<ViewBuildNodeBase>;
   private updateParams_: Object;
   private activeCount_: number;
@@ -204,7 +209,7 @@ class JSBuilderNode extends BaseNode implements IDisposable {
       return false;
     }
   }
-  private buildWithNestingBuilder(builder: WrappedBuilder<Object[]>, supportLazyBuild: boolean): void {
+  protected buildWithNestingBuilder(builder: WrappedBuilder<Object[]>, supportLazyBuild: boolean): void {
     if (this._supportNestingBuilder && this.isObject(this.params_)) {
       this._proxyObjectParam = new Proxy(this.params_, {
         set(target, property, val): boolean {
@@ -231,8 +236,8 @@ class JSBuilderNode extends BaseNode implements IDisposable {
   }
   public build(builder: WrappedBuilder<Object[]>, params?: Object, options?: BuildOptions): void {
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
-    this.clearChildBuilderNodeWeakMap();
     this._supportNestingBuilder = options?.nestingBuilderSupported ? options.nestingBuilderSupported : false;
+    this.clearChildBuilderNodeWeakMap();
     const supportLazyBuild = options?.lazyBuildSupported ? options.lazyBuildSupported : false;
     this.bindedViewOfBuilderNode = options?.bindedViewOfBuilderNode;
     this.__enableBuilderNodeConsume__ = (options?.enableProvideConsumeCrossing) ? (options?.enableProvideConsumeCrossing) : false;
@@ -307,7 +312,7 @@ class JSBuilderNode extends BaseNode implements IDisposable {
     this.updateEnd();
     __JSScopeUtil__.restoreInstanceId();
   }
-  private UpdateElement(elmtId: number): void {
+  protected UpdateElement(elmtId: number): void {
     // do not process an Element that has been marked to be deleted
     const obj: UpdateFunc | UpdateFuncRecord | undefined = this.updateFuncByElmtId.get(elmtId);
     const updateFunc = (typeof obj === 'object') ? obj.getUpdateFunc() : null;
@@ -393,7 +398,7 @@ class JSBuilderNode extends BaseNode implements IDisposable {
         // update + initial render calls, like in if and ForEach case, convert to stack as well
         ObserveV2.getObserve().startRecordDependencies(this, elmtId, true);
       }
-      if (this._supportNestingBuilder) {
+      if (this._supportNestingBuilder || this.__isReactiveBuilderNode__ViewBuildNodeBase__Internal()) {
         compilerAssignedUpdateFunc(elmtId, isFirstRender);
       } else {
         compilerAssignedUpdateFunc(elmtId, isFirstRender, this.params_);
@@ -512,10 +517,11 @@ class JSBuilderNode extends BaseNode implements IDisposable {
     return this._nativeRef?.getNativeHandle();
   }
   public dispose(): void {
-    if (this.nodePtr_) {
-      getUINativeModule().frameNode.fireArkUIObjectLifecycleCallback(new WeakRef(this), 'BuilderNode', this.getFrameNode()?.getNodeType() || 'BuilderNode', this.nodePtr_);
-    }
     this.disposable_.dispose();
+    if (this.nodePtr_) {
+      getUINativeModule().frameNode.fireArkUIObjectLifecycleCallback(new WeakRef(this),
+        'BuilderNode', this.getFrameNode()?.getNodeType() || 'BuilderNode', this.nodePtr_);
+    }
     this.frameNode_?.dispose();
   }
   public isDisposed(): boolean {
@@ -528,11 +534,11 @@ class JSBuilderNode extends BaseNode implements IDisposable {
     this.frameNode_?.resetNodePtr();
   }
   updateInstance(uiContext: UIContext): void {
-      this.uiContext_ = uiContext;
-      this.instanceId_ = uiContext.instanceId_;
-      if (this.frameNode_ !== undefined && this.frameNode_ !== null) {
-          this.frameNode_.updateInstance(uiContext);
-      }
+    this.uiContext_ = uiContext;
+    this.instanceId_ = uiContext.instanceId_;
+    if (this.frameNode_ !== undefined && this.frameNode_ !== null) {
+      this.frameNode_.updateInstance(uiContext);
+    }
   }
 
   private updateNodePtr(nodePtr: NodePtr): void {
@@ -556,7 +562,70 @@ class JSBuilderNode extends BaseNode implements IDisposable {
   public observeRecycleComponentCreation(name: string, recycleUpdateFunc: RecycleUpdateFunc): void {
     throw new Error('custom component in @Builder used by BuilderNode does not support @Reusable');
   }
-  public ifElseBranchUpdateFunctionDirtyRetaken(): void {}
-  public forceCompleteRerender(deep: boolean): void {}
-  public forceRerenderNode(elmtId: number): void {}
+  public ifElseBranchUpdateFunctionDirtyRetaken(): void { }
+  public forceCompleteRerender(deep: boolean): void { }
+  public forceRerenderNode(elmtId: number): void { }
+}
+
+class ReactiveBuilderNode extends BuilderNodeCommonBase {
+  constructor(uiContext: UIContext, options: RenderOptions) {
+    super();
+    let jsBuilderNode = new ReactiveBuilderNodeBase(uiContext, options);
+    this._JSBuilderNode = jsBuilderNode;
+    let id = Symbol('BuilderRootFrameNode');
+    BuilderNodeFinalizationRegisterProxy.ElementIdToOwningBuilderNode_.set(id, jsBuilderNode);
+    BuilderNodeFinalizationRegisterProxy.register(this, { name: 'BuilderRootFrameNode', idOfNode: id });
+  }
+  public build(builder: WrappedBuilder<Object[]>, options?: BuildOptions, ...params: Object[]): void {
+    this._JSBuilderNode.build(builder, params, options);
+    this.nodePtr_ = this._JSBuilderNode.getNodePtr();
+  }
+  public flushState() {
+    if (this._JSBuilderNode instanceof ReactiveBuilderNodeBase) {
+      (this._JSBuilderNode as ReactiveBuilderNodeBase)?.flushState();
+    }
+
+  }
+}
+
+class ReactiveBuilderNodeBase extends JSBuilderNode {
+  constructor(uiContext: UIContext, options?: RenderOptions) {
+    super(uiContext, options);
+  }
+  protected buildWithNestingBuilder(builder: WrappedBuilder<Object[]>, supportLazyBuild: boolean): void {
+    if (this.isArray(this.params_)) {
+      this.nodePtr_ = super.createReactive(builder.builder?.bind(this), this.params_ as Array<Object>, this.updateNodeFromNative, this.updateConfiguration, supportLazyBuild);
+    }
+  }
+  public __isReactiveBuilderNode__ViewBuildNodeBase__Internal(): boolean {
+    return true;
+  }
+  private isArray(param: Object): boolean {
+    const typeName = Object.prototype.toString.call(param);
+    const objectName = `[object Array]`;
+    if (typeName === objectName) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+  public flushState(): void {
+    if (this.isFreeze) {
+      return;
+    }
+    __JSScopeUtil__.syncInstanceId(this.instanceId_);
+    this.updateStart();
+    try {
+      this.purgeDeletedElmtIds();
+      Array.from(this.updateFuncByElmtId.keys()).sort((a: number, b: number): number => {
+        return (a < b) ? -1 : (a > b) ? 1 : 0;
+      }).forEach(elmtId => this.UpdateElement(elmtId));
+    } catch (err) {
+      this.updateEnd();
+      __JSScopeUtil__.restoreInstanceId();
+      throw err;
+    }
+    this.updateEnd();
+    __JSScopeUtil__.restoreInstanceId();
+  }
 }
