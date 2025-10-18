@@ -77,7 +77,6 @@ import {
   ColumnOptions,
   RowOptions,
   SizeChangeCallback,
-  ButtonOptions,
   HoverEvent,
   OverlayOptions,
   CustomBuilder,
@@ -91,19 +90,19 @@ import util from '@ohos.util';
 import { LengthMetrics } from '@ohos.arkui.node';
 import I18n from '@ohos.i18n';
 
-const MIN_ITEM_COUNT: number = 2.0
-const MAX_ITEM_COUNT: number = 5.0
-const DEFAULT_MAX_FONT_SCALE: number = 1.0
-const MAX_MAX_FONT_SCALE: number = 2.0
-const MIN_MAX_FONT_SCALE: number = 1.0
+const MIN_ITEM_COUNT: int = 2;
+const MAX_ITEM_COUNT: int = 5;
+const DEFAULT_MAX_FONT_SCALE: number = 1.0;
+const MAX_MAX_FONT_SCALE: number = 2.0;
+const MIN_MAX_FONT_SCALE: number = 1.0;
 const RESOURCE_TYPE_FLOAT: int = 10002;
 const RESOURCE_TYPE_INTEGER: int = 10007;
 
 interface SegmentButtonThemeInterface {
-  SEGMENT_TEXT_VERTICAL_PADDING: Resource;
-  SEGMENT_TEXT_HORIZONTAL_PADDING: Resource;
-  SEGMENT_TEXT_CAPSULE_VERTICAL_PADDING: Resource;
-  SEGMENT_BUTTON_FOCUS_CUSTOMIZED_BG_COLOR: ResourceColor;
+  SEGMENT_TEXT_VERTICAL_PADDING: Resource,
+  SEGMENT_TEXT_HORIZONTAL_PADDING: Resource,
+  SEGMENT_TEXT_CAPSULE_VERTICAL_PADDING: Resource,
+  SEGMENT_BUTTON_FOCUS_CUSTOMIZED_BG_COLOR: ResourceColor,
   FONT_COLOR: ResourceColor,
   TAB_SELECTED_FONT_COLOR: ResourceColor,
   CAPSULE_SELECTED_FONT_COLOR: ResourceColor,
@@ -152,7 +151,7 @@ const segmentButtonTheme: SegmentButtonThemeInterface = {
 }
 
 interface Point {
-  x: number
+  x: number,
   y: number
 }
 
@@ -161,47 +160,47 @@ function nearEqual(first: number, second: number): boolean {
 }
 
 export interface SegmentButtonTextItem {
-  text: ResourceStr
-  accessibilityLevel?: string
+  text: ResourceStr,
+  accessibilityLevel?: string,
   accessibilityDescription?: ResourceStr
 }
 
 export interface SegmentButtonIconItem {
   icon: ResourceStr,
-  iconAccessibilityText?: ResourceStr
-  selectedIcon: ResourceStr
-  selectedIconAccessibilityText?: ResourceStr
-  accessibilityLevel?: string
+  iconAccessibilityText?: ResourceStr,
+  selectedIcon: ResourceStr,
+  selectedIconAccessibilityText?: ResourceStr,
+  accessibilityLevel?: string,
   accessibilityDescription?: ResourceStr
 }
 
 export interface SegmentButtonIconTextItem {
   icon: ResourceStr,
-  iconAccessibilityText?: ResourceStr
+  iconAccessibilityText?: ResourceStr,
   selectedIcon: ResourceStr,
-  selectedIconAccessibilityText?: ResourceStr
-  text: ResourceStr
-  accessibilityLevel?: string
+  selectedIconAccessibilityText?: ResourceStr,
+  text: ResourceStr,
+  accessibilityLevel?: string,
   accessibilityDescription?: ResourceStr
 }
 
 type DimensionNoPercentage = PX | VP | FP | LPX | Resource
 
 interface CommonSegmentButtonOptions {
-  fontColor?: ResourceColor
-  selectedFontColor?: ResourceColor
-  fontSize?: DimensionNoPercentage
-  selectedFontSize?: DimensionNoPercentage
-  fontWeight?: FontWeight
-  selectedFontWeight?: FontWeight
-  backgroundColor?: ResourceColor
-  selectedBackgroundColor?: ResourceColor
-  imageSize?: SizeOptions
-  buttonPadding?: Padding | Dimension
-  textPadding?: Padding | Dimension
-  localizedTextPadding?: LocalizedPadding
-  localizedButtonPadding?: LocalizedPadding
-  backgroundBlurStyle?: BlurStyle
+  fontColor?: ResourceColor,
+  selectedFontColor?: ResourceColor,
+  fontSize?: DimensionNoPercentage,
+  selectedFontSize?: DimensionNoPercentage,
+  fontWeight?: FontWeight,
+  selectedFontWeight?: FontWeight,
+  backgroundColor?: ResourceColor,
+  selectedBackgroundColor?: ResourceColor,
+  imageSize?: SizeOptions,
+  buttonPadding?: Padding | Dimension,
+  textPadding?: Padding | Dimension,
+  localizedTextPadding?: LocalizedPadding,
+  localizedButtonPadding?: LocalizedPadding,
+  backgroundBlurStyle?: BlurStyle,
   direction?: Direction
 }
 export type ItemRestriction<T> = Array<T>
@@ -213,12 +212,12 @@ export interface TabSegmentButtonConstructionOptions extends CommonSegmentButton
 }
 
 export interface CapsuleSegmentButtonConstructionOptions extends CommonSegmentButtonOptions {
-  buttons: SegmentButtonItemTuple
+  buttons: SegmentButtonItemTuple,
   multiply?: boolean
 }
 
 export interface TabSegmentButtonOptions extends TabSegmentButtonConstructionOptions {
-  type: 'tab',
+  type: 'tab'
 }
 
 export interface CapsuleSegmentButtonOptions extends CapsuleSegmentButtonConstructionOptions {
@@ -226,33 +225,32 @@ export interface CapsuleSegmentButtonOptions extends CapsuleSegmentButtonConstru
 }
 
 interface SegmentButtonItemOptionsConstructorOptions {
-  icon?: ResourceStr
-  iconAccessibilityText?: ResourceStr
-  selectedIcon?: ResourceStr
-  selectedIconAccessibilityText?: ResourceStr
-  text?: ResourceStr
-  accessibilityLevel?: string
+  icon?: ResourceStr,
+  iconAccessibilityText?: ResourceStr,
+  selectedIcon?: ResourceStr,
+  selectedIconAccessibilityText?: ResourceStr,
+  text?: ResourceStr,
+  accessibilityLevel?: string,
   accessibilityDescription?: ResourceStr
 }
 
 @Observed
-class SegmentButtonItemOptions {
-  public icon?: ResourceStr
-  public iconAccessibilityText?: ResourceStr
-  public selectedIcon?: ResourceStr
-  public selectedIconAccessibilityText?: ResourceStr
-  public text?: ResourceStr
-
-  public accessibilityLevel?: string
+export class SegmentButtonItemOptions {
+  public icon?: ResourceStr;
+  public iconAccessibilityText?: ResourceStr;
+  public selectedIcon?: ResourceStr;
+  public selectedIconAccessibilityText?: ResourceStr;
+  public text?: ResourceStr;
+  public accessibilityLevel?: string;
   public accessibilityDescription?: ResourceStr
-
+  
   constructor(options: SegmentButtonItemOptionsConstructorOptions) {
-    this.icon = options.icon
-    this.selectedIcon = options.selectedIcon
-    this.text = options.text
-    this.iconAccessibilityText = options.iconAccessibilityText
-    this.selectedIconAccessibilityText = options.selectedIconAccessibilityText
-    this.accessibilityLevel = options.accessibilityLevel
+    this.icon = options.icon;
+    this.selectedIcon = options.selectedIcon;
+    this.text = options.text;
+    this.iconAccessibilityText = options.iconAccessibilityText;
+    this.selectedIconAccessibilityText = options.selectedIconAccessibilityText;
+    this.accessibilityLevel = options.accessibilityLevel;
     this.accessibilityDescription = options.accessibilityDescription
   }
 }
@@ -271,7 +269,7 @@ export class SegmentButtonItemOptionsArray extends Array<SegmentButtonItemOption
       for (let i = 0;i < elementsOrLength as number; i++) {
         this._wrappedArray.push(new SegmentButtonItemOptions({}))
       }
-    } else if (Array.isArray(elementsOrLength) && elementsOrLength !== undefined) {
+    } else if (Array.isArray(elementsOrLength)) {
       // 如果传入的是元素数组，添加元素
       const elements = elementsOrLength as Any as Array<Any>;
       elements.forEach((options: Any) => {
@@ -337,198 +335,196 @@ export class SegmentButtonItemOptionsArray extends Array<SegmentButtonItemOption
       throw new Error('Unsupported item type')
     }
   }
-  push(item1: SegmentButtonTextItem | SegmentButtonIconItem | SegmentButtonIconTextItem): number {
+  push(item1: SegmentButtonTextItem | SegmentButtonIconItem | SegmentButtonIconTextItem): int {
     if (this.length + 1 > MAX_ITEM_COUNT) {
-      console.warn('Exceeded the maximum number of elements (5).')
-      return this.length
+      console.warn('Exceeded the maximum number of elements (5).');
+      return this.length;
     }
-    this.changeStartIndex = this.length
-    this.deleteCount = 0
-    this.addLength = 1
-    let option: SegmentButtonItemOptions = this.createOptions(item1)
-    return this._wrappedArray.push(option)
+    this.changeStartIndex = this.length;
+    this.deleteCount = 0;
+    this.addLength = 1;
+    let option: SegmentButtonItemOptions = this.createOptions(item1);
+    return this._wrappedArray.push(option).toInt();
   }
-  push(item1: SegmentButtonTextItem | SegmentButtonIconItem | SegmentButtonIconTextItem,item2: SegmentButtonTextItem | SegmentButtonIconItem | SegmentButtonIconTextItem): number {
+  push(item1: SegmentButtonTextItem | SegmentButtonIconItem | SegmentButtonIconTextItem, item2: SegmentButtonTextItem | SegmentButtonIconItem | SegmentButtonIconTextItem): int {
     if (this.length + 2 > MAX_ITEM_COUNT) {
-      console.warn('Exceeded the maximum number of elements (5).')
-      return this.length
+      console.warn('Exceeded the maximum number of elements (5).');
+      return this.length;
     }
-    this.changeStartIndex = this.length
-    this.deleteCount = 0
-    this.addLength = 2
-    let option1: SegmentButtonItemOptions = this.createOptions(item1)
-    let option2: SegmentButtonItemOptions = this.createOptions(item2)
-    return this._wrappedArray.push(option1,option2)
+    this.changeStartIndex = this.length;
+    this.deleteCount = 0;
+    this.addLength = 2;
+    let option1: SegmentButtonItemOptions = this.createOptions(item1);
+    let option2: SegmentButtonItemOptions = this.createOptions(item2);
+    return this._wrappedArray.push(option1,option2).toInt();
   }
-  push(item1: SegmentButtonTextItem | SegmentButtonIconItem | SegmentButtonIconTextItem,item2: SegmentButtonTextItem | SegmentButtonIconItem | SegmentButtonIconTextItem,item3: SegmentButtonTextItem | SegmentButtonIconItem | SegmentButtonIconTextItem): number {
+  push(item1: SegmentButtonTextItem | SegmentButtonIconItem | SegmentButtonIconTextItem, item2: SegmentButtonTextItem | SegmentButtonIconItem | SegmentButtonIconTextItem,item3: SegmentButtonTextItem | SegmentButtonIconItem | SegmentButtonIconTextItem): int {
     if (this.length + 3 > MAX_ITEM_COUNT) {
-      console.warn('Exceeded the maximum number of elements (5).')
-      return this.length
+      console.warn('Exceeded the maximum number of elements (5).');
+      return this.length;
     }
-    this.changeStartIndex = this.length
-    this.deleteCount = 0
-    this.addLength = 3
-    let option1: SegmentButtonItemOptions = this.createOptions(item1)
-    let option2: SegmentButtonItemOptions = this.createOptions(item2)
-    let option3: SegmentButtonItemOptions = this.createOptions(item3)
-    return this._wrappedArray.push(option1,option2,option3)
+    this.changeStartIndex = this.length;
+    this.deleteCount = 0;
+    this.addLength = 3;
+    let option1: SegmentButtonItemOptions = this.createOptions(item1);
+    let option2: SegmentButtonItemOptions = this.createOptions(item2);
+    let option3: SegmentButtonItemOptions = this.createOptions(item3);
+    return this._wrappedArray.push(option1,option2,option3).toInt();
   }
 
   pop(): SegmentButtonItemOptions | undefined {
     if (this.length <= MIN_ITEM_COUNT) {
-      console.warn('Below the minimum number of elements (2).')
-      return undefined
+      console.warn('Below the minimum number of elements (2).');
+      return undefined;
     }
-    this.changeStartIndex = this.length - 1
-    this.deleteCount = 1
-    this.addLength = 0
-    return this._wrappedArray.pop()
+    this.changeStartIndex = this.length - 1;
+    this.deleteCount = 1;
+    this.addLength = 0;
+    return this._wrappedArray.pop();
   }
 
   shift(): SegmentButtonItemOptions | undefined {
     if (this.length <= MIN_ITEM_COUNT) {
-      console.warn('Below the minimum number of elements (2).')
-      return undefined
+      console.warn('Below the minimum number of elements (2).');
+      return undefined;
     }
-    this.changeStartIndex = 0
-    this.deleteCount = 1
-    this.addLength = 0
-    return this._wrappedArray.shift()
+    this.changeStartIndex = 0;
+    this.deleteCount = 1;
+    this.addLength = 0;
+    return this._wrappedArray.shift();
   }
 
-  unshift(item1: SegmentButtonTextItem | SegmentButtonIconItem | SegmentButtonIconTextItem): number {
+  unshift(item1: SegmentButtonTextItem | SegmentButtonIconItem | SegmentButtonIconTextItem): int {
     if (this.length + 1 > MAX_ITEM_COUNT) {
-      console.warn('Exceeded the maximum number of elements (5).')
-      return this.length
+      console.warn('Exceeded the maximum number of elements (5).');
+      return this.length;
     }
-    this.changeStartIndex = 0
-    this.deleteCount = 0
-    this.addLength = 1
+    this.changeStartIndex = 0;
+    this.deleteCount = 0;
+    this.addLength = 1;
 
-    let option: SegmentButtonItemOptions = this.createOptions(item1)
-    return this._wrappedArray.unshift(option)
+    let option: SegmentButtonItemOptions = this.createOptions(item1);
+    return this._wrappedArray.unshift(option).toInt();
   }
-  unshift(item1: SegmentButtonTextItem | SegmentButtonIconItem | SegmentButtonIconTextItem,item2: SegmentButtonTextItem | SegmentButtonIconItem | SegmentButtonIconTextItem): number {
+  unshift(item1: SegmentButtonTextItem | SegmentButtonIconItem | SegmentButtonIconTextItem,item2: SegmentButtonTextItem | SegmentButtonIconItem | SegmentButtonIconTextItem): int {
     if (this.length + 2 > MAX_ITEM_COUNT) {
-      console.warn('Exceeded the maximum number of elements (5).')
-      return this.length
+      console.warn('Exceeded the maximum number of elements (5).');
+      return this.length;
     }
-    this.changeStartIndex = 0
-    this.deleteCount = 0
-    this.addLength = 2
+    this.changeStartIndex = 0;
+    this.deleteCount = 0;
+    this.addLength = 2;
 
-    let option1: SegmentButtonItemOptions = this.createOptions(item1)
-    let option2: SegmentButtonItemOptions = this.createOptions(item2)
-    return this._wrappedArray.unshift(option1,option2)
+    let option1: SegmentButtonItemOptions = this.createOptions(item1);
+    let option2: SegmentButtonItemOptions = this.createOptions(item2);
+    return this._wrappedArray.unshift(option1,option2).toInt();
   }
-  unshift(item1: SegmentButtonTextItem | SegmentButtonIconItem | SegmentButtonIconTextItem,item2: SegmentButtonTextItem | SegmentButtonIconItem | SegmentButtonIconTextItem,item3: SegmentButtonTextItem | SegmentButtonIconItem | SegmentButtonIconTextItem): number {
+  unshift(item1: SegmentButtonTextItem | SegmentButtonIconItem | SegmentButtonIconTextItem,item2: SegmentButtonTextItem | SegmentButtonIconItem | SegmentButtonIconTextItem,item3: SegmentButtonTextItem | SegmentButtonIconItem | SegmentButtonIconTextItem): int {
     if (this.length + 3 > MAX_ITEM_COUNT) {
-      console.warn('Exceeded the maximum number of elements (5).')
-      return this.length
+      console.warn('Exceeded the maximum number of elements (5).');
+      return this.length;
     }
-    this.changeStartIndex = 0
-    this.deleteCount = 0
-    this.addLength = 3
+    this.changeStartIndex = 0;
+    this.deleteCount = 0;
+    this.addLength = 3;
 
-    let option1: SegmentButtonItemOptions = this.createOptions(item1)
-    let option2: SegmentButtonItemOptions = this.createOptions(item2)
-    let option3: SegmentButtonItemOptions = this.createOptions(item3)
-    return this._wrappedArray.unshift(option1,option2,option3)
+    let option1: SegmentButtonItemOptions = this.createOptions(item1);
+    let option2: SegmentButtonItemOptions = this.createOptions(item2);
+    let option3: SegmentButtonItemOptions = this.createOptions(item3);
+    return this._wrappedArray.unshift(option1,option2,option3).toInt();
   }
   splice(start: int, deleteCount: int, ...items: SegmentButtonItemOptions[]): SegmentButtonItemOptions[] {
-    let length: int = (this.length - deleteCount) < 0 ? 0 : (this.length - deleteCount)
-    length += items.length
+    let length: int = (this.length - deleteCount) < 0 ? 0 : (this.length - deleteCount);
+    length += items.length;
     if (length < MIN_ITEM_COUNT) {
-      console.warn('Below the minimum number of elements (2).')
-      return []
+      console.warn('Below the minimum number of elements (2).');
+      return [];
     }
     if (length > MAX_ITEM_COUNT) {
-      console.warn('Exceeded the maximum number of elements (5).')
-      return []
+      console.warn('Exceeded the maximum number of elements (5).');
+      return [];
     }
-    this.changeStartIndex = start
-    this.deleteCount = deleteCount
-    this.addLength = items.length
-    return this._wrappedArray.splice(start, deleteCount, ...items)
+    this.changeStartIndex = start;
+    this.deleteCount = deleteCount;
+    this.addLength = items.length;
+    return this._wrappedArray.splice(start.toDouble(), deleteCount.toDouble(), ...items);
   }
 
   static create(elements: SegmentButtonItemTuple): SegmentButtonItemOptionsArray {
-    return new SegmentButtonItemOptionsArray(elements)
+    return new SegmentButtonItemOptionsArray(elements);
   }
 }
 
 @Observed
 export class SegmentButtonOptions {
-  public type: 'tab' | 'capsule' = 'tab'
-  public multiply: boolean = false
-  public fontColor: ResourceColor = Color.Black
-  public selectedFontColor: ResourceColor = Color.Blue
-  public fontSize: DimensionNoPercentage = 16
-  public selectedFontSize: DimensionNoPercentage = 16
-  public fontWeight: FontWeight = FontWeight.Regular
-  public selectedFontWeight: FontWeight = FontWeight.Medium
-  public backgroundColor: ResourceColor = Color.White
-  public selectedBackgroundColor: ResourceColor = Color.Gray
-  public imageSize: SizeOptions = {} as SizeOptions
-  public buttonPadding: Padding | Dimension | undefined
-  public textPadding: Padding | Dimension | undefined
-  public componentPadding: Padding | Dimension = 0
-  public localizedTextPadding?: LocalizedPadding
-  public localizedButtonPadding?: LocalizedPadding
-  public showText: boolean = false
-  public showIcon: boolean = false
-  public iconTextRadius?: number
-  public iconTextBackgroundRadius?: number
-  public backgroundBlurStyle: BlurStyle = BlurStyle.Thick
-  public direction?: Direction
-  private _buttons: SegmentButtonItemOptionsArray | undefined = undefined;
+  public type: 'tab' | 'capsule' = 'tab';
+  public multiply: boolean = false;
+  public fontColor: ResourceColor = Color.Black;
+  public selectedFontColor: ResourceColor = Color.Blue;
+  public fontSize: DimensionNoPercentage = 16;
+  public selectedFontSize: DimensionNoPercentage = 16;
+  public fontWeight: FontWeight = FontWeight.Regular;
+  public selectedFontWeight: FontWeight = FontWeight.Medium;
+  public backgroundColor: ResourceColor = Color.White;
+  public selectedBackgroundColor: ResourceColor = Color.Gray;
+  public imageSize: SizeOptions = {} as SizeOptions;
+  public buttonPadding: Padding | Dimension | undefined;
+  public textPadding: Padding | Dimension | undefined;
+  public componentPadding: Padding | Dimension = 0;
+  public localizedTextPadding?: LocalizedPadding;
+  public localizedButtonPadding?: LocalizedPadding;
+  public showText: boolean = false;
+  public showIcon: boolean = false;
+  public iconTextRadius?: number;
+  public iconTextBackgroundRadius?: number;
+  public backgroundBlurStyle: BlurStyle = BlurStyle.Thick;
+  public direction?: Direction;
+  private _buttons: SegmentButtonItemOptionsArray | undefined = undefined
 
   get buttons(): SegmentButtonItemOptionsArray | undefined {
-    return this._buttons
+    return this._buttons;
   }
 
   set buttons(val: SegmentButtonItemOptionsArray | undefined) {
     if (this._buttons !== undefined && this._buttons !== val) {
-      this.onButtonsChange?.()
+      this.onButtonsChange?.();
     }
-    this._buttons = val
+    this._buttons = val;
   }
 
   public onButtonsChange?: () => void
 
   constructor(options: TabSegmentButtonOptions | CapsuleSegmentButtonOptions) {
-    this.fontColor = options.fontColor ?? segmentButtonTheme.FONT_COLOR
-    this.selectedFontColor = options.selectedFontColor ?? segmentButtonTheme.TAB_SELECTED_FONT_COLOR
-    this.fontSize = options.fontSize ?? segmentButtonTheme.FONT_SIZE
-    this.selectedFontSize = options.selectedFontSize ?? segmentButtonTheme.SELECTED_FONT_SIZE
-    this.fontWeight = options.fontWeight ?? FontWeight.Regular
-    this.selectedFontWeight = options.selectedFontWeight ?? FontWeight.Medium
-    this.backgroundColor = options.backgroundColor ?? segmentButtonTheme.BACKGROUND_COLOR
-    this.selectedBackgroundColor = options.selectedBackgroundColor ?? segmentButtonTheme.TAB_SELECTED_BACKGROUND_COLOR
-    this.imageSize = options.imageSize ?? { width: 24.0, height: 24.0 } as SizeOptions
-    this.buttonPadding = options.buttonPadding
-    this.textPadding = options.textPadding
-    this.type = options instanceof TabSegmentButtonOptions ? (options as TabSegmentButtonOptions).type : (options as CapsuleSegmentButtonOptions).type
+    this.fontColor = options.fontColor ?? segmentButtonTheme.FONT_COLOR;
+    this.selectedFontColor = options.selectedFontColor ?? segmentButtonTheme.TAB_SELECTED_FONT_COLOR;
+    this.fontSize = options.fontSize ?? segmentButtonTheme.FONT_SIZE;
+    this.selectedFontSize = options.selectedFontSize ?? segmentButtonTheme.SELECTED_FONT_SIZE;
+    this.fontWeight = options.fontWeight ?? FontWeight.Regular;
+    this.selectedFontWeight = options.selectedFontWeight ?? FontWeight.Medium;
+    this.backgroundColor = options.backgroundColor ?? segmentButtonTheme.BACKGROUND_COLOR;
+    this.selectedBackgroundColor = options.selectedBackgroundColor ?? segmentButtonTheme.TAB_SELECTED_BACKGROUND_COLOR;
+    this.imageSize = options.imageSize ?? { width: 24.0, height: 24.0 } as SizeOptions;
+    this.buttonPadding = options.buttonPadding;
+    this.textPadding = options.textPadding;
+    this.type = options instanceof TabSegmentButtonOptions ? (options as TabSegmentButtonOptions).type : (options as CapsuleSegmentButtonOptions).type;
     if (options.backgroundBlurStyle) {
-      this.backgroundBlurStyle = options.backgroundBlurStyle as BlurStyle
+      this.backgroundBlurStyle = options.backgroundBlurStyle as BlurStyle;
     } else {
-      this.backgroundBlurStyle = BlurStyle.NONE
+      this.backgroundBlurStyle = BlurStyle.NONE;
     }
-    //LengthMetrics资源获取异常，暂时注释
-    // this.backgroundBlurStyle = options.backgroundBlurStyle ?? LengthMetrics.resource(segmentButtonTheme.BACKGROUND_BLUR_STYLE).value as BlurStyle;
-    this.localizedTextPadding = options.localizedTextPadding
-    this.localizedButtonPadding = options.localizedButtonPadding
-    this.direction = options.direction ?? Direction.Auto
+    this.localizedTextPadding = options.localizedTextPadding;
+    this.localizedButtonPadding = options.localizedButtonPadding;
+    this.direction = options.direction ?? Direction.Auto;
     this.buttons = new SegmentButtonItemOptionsArray(options instanceof TabSegmentButtonOptions ?
       (options as TabSegmentButtonOptions).buttons : (options as CapsuleSegmentButtonOptions).buttons)
     if (this.type === 'capsule') {
-      this.multiply = (options as CapsuleSegmentButtonOptions).multiply ?? false
+      this.multiply = (options as CapsuleSegmentButtonOptions).multiply ?? false;
       this.onButtonsUpdated();
-      this.selectedFontColor = options.selectedFontColor ?? segmentButtonTheme.CAPSULE_SELECTED_FONT_COLOR
+      this.selectedFontColor = options.selectedFontColor ?? segmentButtonTheme.CAPSULE_SELECTED_FONT_COLOR;
       this.selectedBackgroundColor = options.selectedBackgroundColor ??
-      segmentButtonTheme.CAPSULE_SELECTED_BACKGROUND_COLOR
+      segmentButtonTheme.CAPSULE_SELECTED_BACKGROUND_COLOR;
     } else {
-      this.showText = true
+      this.showText = true;
     }
     let themePadding: number = LengthMetrics.resource($r('sys.float.segment_button_baseplate_padding')).value;
     this.componentPadding = this.multiply ? 0.0 : themePadding;
@@ -827,7 +823,7 @@ struct SegmentButtonItem {
 
   build() {
     Column({ space: 2.0 } as ColumnOptions) {
-      if (this.options.showIcon) {
+      if (this.itemOptions.icon) {
         Image(this.property.isSelected ? this.itemOptions.selectedIcon as ResourceStr :
           this.itemOptions.icon as ResourceStr)
           .direction(this.options.direction)
@@ -837,11 +833,9 @@ struct SegmentButtonItem {
           .accessibilityText(this.getAccessibilityText())
       }
       if (this.options.showText) {
-        const currentFontColor = this.getFontColor();
-
         Text(this.itemOptions.text)
           .direction(this.options.direction)
-          .fontColor(currentFontColor)
+          .fontColor(this.getFontColor())
           .fontWeight(this.property.fontWeight)
           .fontSize(this.property.fontSize)
           .minFontSize(this.isSegmentFocusStyleCustomized ? this.property.fontSize : 9.0)
@@ -968,7 +962,7 @@ struct SegmentButtonItemArrayComponent {
   @State isMarqueeAndFadeout: boolean = false;
   @State buttonItemsRealHeight: number[] = new Array<number>(MAX_ITEM_COUNT).fill(0)
   private groupId: string = util.generateRandomUUID(true)
-  public onItemClicked?: Callback<number>
+  public onItemClicked?: Callback<int>
   @State isSegmentFocusStyleCustomized: boolean = false;
 
   onButtonItemsSizeChange(a: string) {
@@ -1283,7 +1277,7 @@ struct SegmentButtonItemArrayComponent {
               })
                .gesture(TapGesture().onAction(() => {
                  if (this.onItemClicked) {
-                   this.onItemClicked?.(index)
+                   this.onItemClicked?.(index as int)
                  }
                  if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
                    const currentIndex = this.selectedIndexes.indexOf(index as int);
@@ -1392,7 +1386,7 @@ class ItemProperty {
 export struct SegmentButton {
   @ObjectLink @Watch('onOptionsChange') options: SegmentButtonOptions
   @Link @Watch('onSelectedChange') selectedIndexes: int[]
-  public onItemClicked?: Callback<number>
+  public onItemClicked?: Callback<int>
   @State maxFontScale: number | Resource = DEFAULT_MAX_FONT_SCALE
   @Provide componentSize: SizeOptions = { width: 0.0, height: 0.0 } as SizeOptions
   @Provide buttonBorderRadius: LocalizedBorderRadiuses[] = (() => {
@@ -1473,7 +1467,9 @@ export struct SegmentButton {
         this.buttonItemsSelected[index as int] = true
       })
     } else {
-      this.buttonItemsSelected[this.selectedIndexes[0] ?? 0 ] = true
+      if(this.selectedIndexes.length !== 0) {
+        this.buttonItemsSelected[this.selectedIndexes[0]] = true
+      }
     }
   }
 
@@ -1719,7 +1715,7 @@ export struct SegmentButton {
 
               let realClickIndex: number = this.isShouldMirror() ? buttonLength - 1 - i : i
               if (this.onItemClicked) {
-                this.onItemClicked?.(realClickIndex)
+                this.onItemClicked?.(realClickIndex.toInt())
               }
               if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
 
@@ -1727,7 +1723,7 @@ export struct SegmentButton {
                 if (selectedIndex === -1.0) {
                   this.selectedIndexes.push(realClickIndex.toInt())
                 } else {
-                  this.selectedIndexes.splice(selectedIndex, 1)
+                  this.selectedIndexes = this.selectedIndexes.filter((_,index) =>index !== selectedIndex)
                 }
               } else {
                 // 单选模式，确保数组有足够的元素
