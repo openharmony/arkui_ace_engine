@@ -15,5 +15,8 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("custom_test_ng") {
   type = "new"
-  sources = [ "custom_test_ng.cpp" ]
+  sources = [
+    "custom_test_ng_first_part.cpp",
+    "custom_test_ng_second_part.cpp",
+  ]
 }

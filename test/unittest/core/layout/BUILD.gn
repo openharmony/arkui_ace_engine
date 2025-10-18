@@ -30,7 +30,8 @@ ace_unittest("layout_wrapper_test_ng") {
   module_name = "Component-Layout"
   module_output = "layout"
   sources = [
-    "layout_wrapper_test_ng.cpp",
+    "layout_wrapper_test_ng_first_part.cpp",
+    "layout_wrapper_test_ng_second_part.cpp",
     "layout_wrapper_testtwo_ng.cpp",
   ]
 }
