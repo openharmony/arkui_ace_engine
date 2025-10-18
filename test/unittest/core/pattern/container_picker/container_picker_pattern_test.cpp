@@ -1011,7 +1011,6 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_CreateAnimation0
 
     EXPECT_TRUE(pattern->animationCreated_);
     EXPECT_NE(pattern->scrollProperty_, nullptr);
-    EXPECT_NE(pattern->aroundClickProperty_, nullptr);
 }
 
 /**

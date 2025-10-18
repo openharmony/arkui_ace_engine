@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/container_picker/container_picker_paint_method.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "adapter/ohos/entrance/picker/picker_haptic_factory.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -230,6 +231,7 @@ void ContainerPickerPattern::OnModifyDone()
     containerPickerId_ = host->GetId();
     totalItemCount_ = host->TotalChildCount();
     isLoop_ = IsLoop();
+    InitOrRefreshHapticController();
 
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     PickerMarkDirty();
@@ -398,6 +400,8 @@ RefPtr<TouchEventImpl> ContainerPickerPattern::CreateItemTouchEventListener()
             return;
         }
 
+        pattern->isAllowPlayHaptic_ = (info.GetSourceTool() == SourceTool::MOUSE) ? false : true;
+
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
             if (pattern->isInertialRolling) {
                 pattern->touchBreak_ = true;
@@ -414,6 +418,7 @@ RefPtr<TouchEventImpl> ContainerPickerPattern::CreateItemTouchEventListener()
             pattern->touchBreak_ = false;
             if (pattern->animationBreak_) {
                 pattern->PlayResetAnimation();
+                pattern->yOffset_ = 0.0;
             }
         }
     };
@@ -493,14 +498,8 @@ GestureEventFunc ContainerPickerPattern::ActionUpdateTask()
     return [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        auto infoChecked = info;
-        if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::MOUSE) {
-            if (pattern->isFirstAxisAction_) {
-                pattern->isFirstAxisAction_ = false;
-            }
-        } else {
-            pattern->HandleDragUpdate(infoChecked);
-        }
+        pattern->HandleDragUpdate(info);
+        pattern->dragVelocity_ = info.GetMainVelocity();
     };
 }
 
@@ -528,7 +527,7 @@ GestureEventNoParameter ContainerPickerPattern::ActionCancelTask()
         if (pattern) {
             TAG_LOGI(AceLogTag::ACE_CONTAINER_PICKER, "containerPicker drag cancel id:%{public}d",
                 pattern->containerPickerId_);
-            pattern->HandleDragEnd(0.0);
+            pattern->HandleDragEnd(pattern->dragVelocity_);
         }
     };
 }
@@ -559,6 +558,21 @@ void ContainerPickerPattern::ProcessDelta(float& delta, float mainSize, float de
 
 void ContainerPickerPattern::HandleDragUpdate(const GestureEvent& info)
 {
+    isAllowPlayHaptic_ = (info.GetSourceTool() == SourceTool::MOUSE) ? false : true;
+    if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::MOUSE) {
+        int32_t index = 0;
+        if (LessNotEqual(info.GetDelta().GetY(), 0.0)) {
+            index = (totalItemCount_ + selectedIndex_ + 1) % totalItemCount_;
+        } else {
+            int32_t totalCountAndIndex = totalItemCount_ + selectedIndex_ - 1;
+            index = (totalCountAndIndex ? totalCountAndIndex : 0) % totalItemCount_;
+        }
+        SwipeTo(index);
+        selectedIndex_ = index;
+        FireScrollStopEvent();
+        return;
+    }
+
     auto velocity = info.GetMainVelocity();
     UpdateDragFRCSceneInfo(velocity, SceneStatus::RUNNING);
     animationBreak_ = false;
@@ -566,6 +580,7 @@ void ContainerPickerPattern::HandleDragUpdate(const GestureEvent& info)
     auto offsetY =
         info.GetGlobalPoint().GetY() + (info.GetInputEventType() == InputEventType::AXIS ? info.GetOffsetY() : 0.0);
     if (NearEqual(offsetY, yLast_, MOVE_THRESHOLD)) {
+        StopHapticController();
         return;
     }
 
@@ -581,6 +596,7 @@ void ContainerPickerPattern::HandleDragUpdate(const GestureEvent& info)
 
 void ContainerPickerPattern::HandleDragEnd(double dragVelocity, float mainDelta)
 {
+    StopHapticController();
     UpdateDragFRCSceneInfo(dragVelocity, SceneStatus::END);
     isDragging_ = false;
 
@@ -589,9 +605,12 @@ void ContainerPickerPattern::HandleDragEnd(double dragVelocity, float mainDelta)
     }
 
     // Throw and slide
-    if (Play(dragVelocity)) {
+    if (Play(dragVelocity_)) {
         return;
     }
+
+    yOffset_ = 0.0;
+    yLast_ = 0.0;
 
     // Drag and slide
     if (!animationCreated_) {
@@ -637,7 +656,6 @@ bool ContainerPickerPattern::Play(double dragVelocity)
     }
 
     isNeedStartInertialAnimation_ = true;
-    dragVelocity_ = dragVelocity;
     PickerMarkDirty();
     return true;
 }
@@ -668,6 +686,7 @@ void ContainerPickerPattern::StartInertialAnimation()
         }
         pattern->isInertialRolling = false;
         pattern->FireScrollStopEvent();
+        pattern->StopHapticController();
     };
     snapOffsetProperty_->AnimateWithVelocity(option, -endOffset, dragVelocity_, finishCallback);
     isNeedStartInertialAnimation_ = false;
@@ -734,6 +753,7 @@ double ContainerPickerPattern::GetDragDeltaLessThanJumpInterval(
         }
         for (int32_t i = 0; i < shiftDistanceCount; i++) {
             PickerMarkDirty();
+            InnerHandleScroll(dragDelta < 0);
         }
         dragDelta = additionalShift;
     }
@@ -770,20 +790,10 @@ void ContainerPickerPattern::CreateAnimation()
         pattern->lastAnimationScroll_ = value;
         pattern->animationOffset_ = value;
         pattern->PickerMarkDirty();
+        pattern->UpdateColumnChildPosition(value);
     };
     scrollProperty_ = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
     renderContext->AttachNodeAnimatableProperty(scrollProperty_);
-
-    auto aroundClickCallback = [weak = AceType::WeakClaim(this)](float value) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->currentDelta_ = value - pattern->lastAnimationScroll_;
-        pattern->lastAnimationScroll_ = value;
-        pattern->animationOffset_ = value;
-        pattern->PickerMarkDirty();
-    };
-    aroundClickProperty_ = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(aroundClickCallback));
-    renderContext->AttachNodeAnimatableProperty(aroundClickProperty_);
     animationCreated_ = true;
 }
 
@@ -809,6 +819,7 @@ void ContainerPickerPattern::CreateSnapProperty()
         pattern->animationOffset_ += pattern->currentDelta_;
         pattern->isInertialRolling = true;
         pattern->PickerMarkDirty();
+        pattern->UpdateColumnChildPosition(position);
     };
     snapOffsetProperty_ = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
     AttachNodeAnimatableProperty(snapOffsetProperty_);
@@ -865,6 +876,8 @@ void ContainerPickerPattern::CreateSwipeToTargetAnimation(double from, double to
             pattern->animationOffset_ = 0.0f;
             pattern->FireScrollStopEvent();
             pattern->isTargetAnimationRunning_ = false;
+            pattern->yOffset_ = 0.0;
+            pattern->yLast_ = 0.0;
         },
         nullptr, context);
 }
@@ -908,6 +921,9 @@ void ContainerPickerPattern::PlayResetAnimation()
 {
     float totalOffset = (-animationOffset_) + (-dragOffsetForAnimation_);
     float resetOffset = CalculateResetOffset(totalOffset);
+    if (std::abs(resetOffset) >= (ITEM_HEIGHT_PX * 0.5f)) {
+        InnerHandleScroll(LessNotEqual(resetOffset, 0.0));
+    }
     CreateAnimation(0.0f, resetOffset);
 }
 
@@ -938,6 +954,65 @@ float ContainerPickerPattern::CalculateResetOffset(float totalOffset)
         resetOffset = distance * (dir == ContainerPickerDirection::UP ? -1 : 1);
     }
     return resetOffset;
+}
+
+bool ContainerPickerPattern::IsEnableHaptic() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, true);
+    auto props = GetLayoutProperty<ContainerPickerLayoutProperty>();
+    CHECK_NULL_RETURN(props, true);
+    return props->GetEnableHapticFeedbackValue(true);
+}
+
+void ContainerPickerPattern::InitOrRefreshHapticController()
+{
+    if (IsEnableHaptic() && !hapticController_) {
+        TAG_LOGI(AceLogTag::ACE_CONTAINER_PICKER, "init haptic controller");
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto context = host->GetContext();
+        CHECK_NULL_VOID(context);
+        context->AddAfterLayoutTask([weak = WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->hapticController_ = PickerAudioHapticFactory::GetInstance();
+        });
+    } else if (!IsEnableHaptic() && hapticController_) {
+        TAG_LOGI(AceLogTag::ACE_CONTAINER_PICKER, "stop haptic controller");
+        hapticController_->Stop();
+    }
+    isEnableHaptic_ = IsEnableHaptic();
+}
+
+void ContainerPickerPattern::StopHapticController()
+{
+    if (hapticController_) {
+        hapticController_->Stop();
+    }
+}
+
+void ContainerPickerPattern::PlayHaptic(float offset)
+{
+    if (isEnableHaptic_ && hapticController_ && isAllowPlayHaptic_) {
+        hapticController_->HandleDelta(offset);
+    }
+}
+
+bool ContainerPickerPattern::InnerHandleScroll(bool isDown)
+{
+    if (totalItemCount_ == 0) {
+        return false;
+    }
+
+    if (!IsLoop() && ((isDown && targetIndex_ == totalItemCount_ - 1) || (!isDown && targetIndex_ == 0))) {
+        return false;
+    }
+
+    if (isEnableHaptic_ && hapticController_ && isAllowPlayHaptic_) {
+        hapticController_->PlayOnce();
+    }
+    return true;
 }
 
 } // namespace OHOS::Ace::NG
