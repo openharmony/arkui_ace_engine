@@ -57,12 +57,7 @@ struct IndexPage {
     new TextList(23, 'scrollBarColor', 'pages/Scroll/scrollBarColor'),
     new TextList(24, 'scrollBarColor(ScrollModifier)', 'pages/Scroll/ScrollModifier/scrollBarColor'),
     new TextList(25, 'ScrollableInfiniteScroll', 'pages/Scroll/CAPI/ScrollableInfiniteScroll'),
-    new TextList(26, 'OneItem', 'pages/Scroll/LayoutConstraints/OneItem'),
-    new TextList(27, 'TwoItem', 'pages/Scroll/LayoutConstraints/TwoItem'),
-    new TextList(28, 'WidthOneItem', 'pages/Scroll/LayoutConstraints/WidthOneItem'),
-    new TextList(29, 'WidthTwoItem', 'pages/Scroll/LayoutConstraints/WidthTwoItem'),
-    new TextList(30, 'OriOneItem', 'pages/Scroll/LayoutConstraints/OriOneItem'),
-    new TextList(31, 'LayoutConstraints', 'pages/Scroll/LayoutConstraints/LayoutConstraints_MainPage')
+    new TextList(26, 'LayoutConstraints', 'pages/Scroll/LayoutConstraints/LayoutConstraints_MainPage')
   ]
   @State fontSize: Resource | undefined = undefined
   build() {
