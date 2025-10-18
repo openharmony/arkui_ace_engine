@@ -29,7 +29,7 @@ import { AutoCapitalizationMode, KeyboardAppearance, LayoutManager, PositionWith
 import { BadgePosition, BadgeStyle, BadgeParamWithNumber, BadgeParam, BadgeParamWithString } from "./../../component/badge"
 import { BarrierDirection, LocalizedBarrierDirection, BarrierStyle, GuideLinePosition, GuideLineStyle } from "./../../component/relativeContainer"
 import { BarStyle, LaunchMode, NavBarPosition, NavigationMode, NavigationOperation, NavigationTitleMode, NavPathInfo, NavPathStack, NavigationOptions, PopInfo, NavigationInterception, ToolbarItemStatus, NavContentInfo, NavigationAnimatedTransition, NavigationTransitionProxy, InterceptionShowCallback, NavBar, InterceptionModeCallback, NavigationModuleInfo, NavigationCommonTitle, NavigationMenuItem, UpdateTransitionCallback, ToolbarItem, MoreButtonOptions, NavigationCustomTitle, NavigationTitleOptions, NavigationMenuOptions, NavigationToolbarOptions } from "./../../component/navigation"
-import { BaseShape, BuilderNodeOps, BuilderNodeOptions, CommonShape, CustomDialogControllerExtender, CustomDialogControllerOptionsExtender, CustomDialogControllerExternalOptionsExtender, Offset_componentutils, PerfMonitorActionType, PerfMonitorSourceType, RotateResult, ScaleResult, TranslateResult, DoubleAnimationParam, Callback_Extender_OnProgress, Callback_Extender_OnFinish, ErrorEvent, Event, LengthMetricsCustom, MessageEvents, PostMessageOptions, SnapshotOptions, WorkerOptions, ComponentInfo, Matrix4Result, PageRouterOptions, RestrictedWorker, RestrictedWorker_onexit_Callback, RestrictedWorker_onerror_Callback, RestrictedWorker_onmessage_Callback, WorkerEventListener } from "./../../component/idlize"
+import { BaseShape, BuilderNodeOps, BuilderNodeOptions, CommonShape, CustomDialogControllerExtender, CustomDialogControllerOptionsExtender, CustomDialogControllerExternalOptionsExtender, Offset_componentutils, PerfMonitorActionType, PerfMonitorSourceType, PositionNumberInner, RotateResult, ScaleResult, SizeNumberInner, TranslateResult, DisturbanceFieldOptionsInner, DoubleAnimationParam, Callback_Extender_OnProgress, Callback_Extender_OnFinish, ErrorEvent, Event, LengthMetricsCustom, MessageEvents, ParticlePropertyAnimationNumberInner, ParticleOptionsInner, ParticlesInner, PositionLengthMetricsInner, PostMessageOptions, SnapshotOptions, WorkerOptions, ComponentInfo, Matrix4Result, PageRouterOptions, ParticleAnnulusRegionInner, ParticlePropertyAnimationColorInner, ParticleColorUpdaterOptionsInner, ParticleColorPropertyUpdaterConfigsInner, ParticleUpdaterOptionsInner, ParticlePropertyUpdaterConfigsInner, RestrictedWorker, RestrictedWorker_onexit_Callback, RestrictedWorker_onerror_Callback, RestrictedWorker_onmessage_Callback, WorkerEventListener, EmitterPropertyInner, ParticleColorPropertyOptionsInner, ParticlePropertyOptionsInner, AccelerationOptionsInner, EmitterOptionsInner } from "./../../component/idlize"
 import { Length, SizeOptions, ColorFilter, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, VoidCallback, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, Bias, DirectionalEdgesT, VP, DividerStyleOptions, LengthConstrain, Offset, PX, LPX, MarkStyle } from "./../../component/units"
 import { Resource } from "global.resource"
 import { BreakpointsReference, GridRowDirection, BreakPoints, GridRowColumnOption, GridRowSizeOption, GutterOption, GridRowOptions } from "./../../component/gridRow"
@@ -63,7 +63,7 @@ import { CustomDialogController, CustomDialogControllerOptions, CustomDialogCont
 import { DataPanelType, ColorStop, LinearGradient, DataPanelConfiguration, DataPanelOptions, DataPanelShadowOptions } from "./../../component/dataPanel"
 import { DatePickerDialog, DatePickerMode, DatePickerDialogOptions, DatePickerOptions } from "./../../component/datePicker"
 import { DialogAlignment, DialogButtonDirection, AlertDialogParamWithConfirm, AlertDialogParamWithButtons, AlertDialogParamWithOptions, AlertDialogTextStyleOptions, AlertDialogButtonBaseOptions, AlertDialogButtonOptions, AlertDialogParam } from "./../../component/alertDialog"
-import { DistributionType, DisturbanceFieldShape, ParticleEmitterShape, ParticleType, ParticleUpdater, ParticlePropertyAnimation } from "./../../component/particle"
+import { DistributionType, DisturbanceFieldShape, ParticleEmitterShape, ParticleType, ParticleUpdater, VelocityOptions, ParticleColorOptions, PointParticleParameters, ImageParticleParameters, EmitterParticleOptions, ParticleConfigs, ParticlePropertyAnimation } from "./../../component/particle"
 import { DpiFollowStrategy, UIExtensionProxy, WindowModeFollowStrategy, UIExtensionOptions } from "./../../component/uiExtensionComponent"
 import { DrawableDescriptor } from "@ohos.arkui.drawableDescriptor"
 import { default as drawing } from "@ohos.graphics.drawing"
@@ -202,6 +202,9 @@ export class TypeChecker {
     }
     static isAbilityInfo(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean, arg10: boolean, arg11: boolean, arg12: boolean, arg13: boolean, arg14: boolean, arg15: boolean, arg16: boolean, arg17: boolean, arg18: boolean, arg19: boolean, arg20: boolean, arg21: boolean, arg22: boolean, arg23: boolean): boolean {
         return value instanceof AbilityInfo
+    }
+    static isAccelerationOptionsInner(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof AccelerationOptionsInner
     }
     static isAccessibilityHoverEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean): boolean {
         return value instanceof AccessibilityHoverEvent
@@ -863,6 +866,9 @@ export class TypeChecker {
     static isDistributionType(value: Object | string | number | undefined): boolean {
         return value instanceof DistributionType
     }
+    static isDisturbanceFieldOptionsInner(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean): boolean {
+        return value instanceof DisturbanceFieldOptionsInner
+    }
     static isDisturbanceFieldShape(value: Object | string | number | undefined): boolean {
         return value instanceof DisturbanceFieldShape
     }
@@ -1000,6 +1006,15 @@ export class TypeChecker {
     }
     static isEmbedOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
         return value instanceof EmbedOptions
+    }
+    static isEmitterOptionsInner(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean): boolean {
+        return value instanceof EmitterOptionsInner
+    }
+    static isEmitterParticleOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean): boolean {
+        return value instanceof EmitterParticleOptions
+    }
+    static isEmitterPropertyInner(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean): boolean {
+        return value instanceof EmitterPropertyInner
     }
     static isEnterKeyType(value: Object | string | number | undefined): boolean {
         return value instanceof EnterKeyType
@@ -1390,6 +1405,9 @@ export class TypeChecker {
     }
     static isImageLoadResult(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean): boolean {
         return value instanceof ImageLoadResult
+    }
+    static isImageParticleParameters(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
+        return value instanceof ImageParticleParameters
     }
     static isImageRenderMode(value: Object | string | number | undefined): boolean {
         return value instanceof ImageRenderMode
@@ -2096,14 +2114,44 @@ export class TypeChecker {
     static isParagraphStyleInterface(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean): boolean {
         return value instanceof ParagraphStyleInterface
     }
+    static isParticleAnnulusRegionInner(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean): boolean {
+        return value instanceof ParticleAnnulusRegionInner
+    }
+    static isParticleColorOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean): boolean {
+        return value instanceof ParticleColorOptions
+    }
+    static isParticleColorPropertyOptionsInner(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
+        return value instanceof ParticleColorPropertyOptionsInner
+    }
+    static isParticleColorUpdaterOptionsInner(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof ParticleColorUpdaterOptionsInner
+    }
     static isParticleEmitterShape(value: Object | string | number | undefined): boolean {
         return value instanceof ParticleEmitterShape
+    }
+    static isParticleOptionsInner(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean): boolean {
+        return value instanceof ParticleOptionsInner
+    }
+    static isParticlePropertyAnimationColorInner(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean): boolean {
+        return value instanceof ParticlePropertyAnimationColorInner
+    }
+    static isParticlePropertyAnimationNumberInner(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean): boolean {
+        return value instanceof ParticlePropertyAnimationNumberInner
+    }
+    static isParticlePropertyOptionsInner(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof ParticlePropertyOptionsInner
+    }
+    static isParticlesInner(value: Object | string | number | undefined, arg0: boolean): boolean {
+        return value instanceof ParticlesInner
     }
     static isParticleType(value: Object | string | number | undefined): boolean {
         return value instanceof ParticleType
     }
     static isParticleUpdater(value: Object | string | number | undefined): boolean {
         return value instanceof ParticleUpdater
+    }
+    static isParticleUpdaterOptionsInner(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof ParticleUpdaterOptionsInner
     }
     static isPasswordIcon(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
         return value instanceof PasswordIcon
@@ -2204,6 +2252,9 @@ export class TypeChecker {
     static isPointLightStyle(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
         return value instanceof PointLightStyle
     }
+    static isPointParticleParameters(value: Object | string | number | undefined, arg0: boolean): boolean {
+        return value instanceof PointParticleParameters
+    }
     static isPolygonOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
         return value instanceof PolygonOptions
     }
@@ -2233,6 +2284,12 @@ export class TypeChecker {
     }
     static isPosition(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
         return value instanceof Position
+    }
+    static isPositionLengthMetricsInner(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof PositionLengthMetricsInner
+    }
+    static isPositionNumberInner(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof PositionNumberInner
     }
     static isPositionWithAffinity(value: Object | string | number | undefined, arg0: boolean): boolean {
         return value instanceof PositionWithAffinity
@@ -2704,6 +2761,9 @@ export class TypeChecker {
     }
     static isSize(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
         return value instanceof Size
+    }
+    static isSizeNumberInner(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof SizeNumberInner
     }
     static isSizeOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
         return value instanceof SizeOptions
@@ -3241,6 +3301,9 @@ export class TypeChecker {
     }
     static isVec4(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean): boolean {
         return value instanceof Vec4
+    }
+    static isVelocityOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof VelocityOptions
     }
     static isVerticalAlign(value: Object | string | number | undefined): boolean {
         return value instanceof VerticalAlign
@@ -5531,6 +5594,9 @@ export class TypeChecker {
     static isArray_Buffer(value: Object | string | number | undefined): boolean {
         return value instanceof Array
     }
+    static isArray_ParticleOptionsInner(value: Object | string | number | undefined): boolean {
+        return value instanceof Array
+    }
     static isArray_Union_String_I32_I64_F64_Resource(value: Object | string | number | undefined): boolean {
         return value instanceof Array
     }
@@ -5559,6 +5625,12 @@ export class TypeChecker {
         return value instanceof Array
     }
     static isArray_DragPreviewMode(value: Object | string | number | undefined): boolean {
+        return value instanceof Array
+    }
+    static isArray_ParticlePropertyAnimationColorInner(value: Object | string | number | undefined): boolean {
+        return value instanceof Array
+    }
+    static isArray_ParticlePropertyAnimationNumberInner(value: Object | string | number | undefined): boolean {
         return value instanceof Array
     }
     static isArray_RichEditorTextSpanResult(value: Object | string | number | undefined): boolean {
@@ -5664,6 +5736,12 @@ export class TypeChecker {
         return value instanceof Array
     }
     static isArray_ScriptItem(value: Object | string | number | undefined): boolean {
+        return value instanceof Array
+    }
+    static isArray_DisturbanceFieldOptionsInner(value: Object | string | number | undefined): boolean {
+        return value instanceof Array
+    }
+    static isArray_EmitterPropertyInner(value: Object | string | number | undefined): boolean {
         return value instanceof Array
     }
 }

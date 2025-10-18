@@ -32295,6 +32295,54 @@ KInteropReturnBuffer impl_ParagraphStyle_getParagraphSpacing(Ark_NativePointer t
         return _retSerializer.toReturnBuffer();
 }
 KOALA_INTEROP_1(ParagraphStyle_getParagraphSpacing, KInteropReturnBuffer, Ark_NativePointer)
+void impl_ParticleHelper_SetDisturbanceFields(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto disturbanceFieldsValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Array_DisturbanceFieldOptionsInner disturbanceFieldsValueTempTmpBuf = {};
+        disturbanceFieldsValueTempTmpBuf.tag = disturbanceFieldsValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((disturbanceFieldsValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            const Ark_Int32 disturbanceFieldsValueTempTmpBuf_Length = thisDeserializer.readInt32();
+            Array_DisturbanceFieldOptionsInner disturbanceFieldsValueTempTmpBuf_ = {};
+            thisDeserializer.resizeArray<std::decay<decltype(disturbanceFieldsValueTempTmpBuf_)>::type,
+        std::decay<decltype(*disturbanceFieldsValueTempTmpBuf_.array)>::type>(&disturbanceFieldsValueTempTmpBuf_, disturbanceFieldsValueTempTmpBuf_Length);
+            for (int disturbanceFieldsValueTempTmpBuf_BufCounterI = 0; disturbanceFieldsValueTempTmpBuf_BufCounterI < disturbanceFieldsValueTempTmpBuf_Length; disturbanceFieldsValueTempTmpBuf_BufCounterI++) {
+                disturbanceFieldsValueTempTmpBuf_.array[disturbanceFieldsValueTempTmpBuf_BufCounterI] = DisturbanceFieldOptionsInner_serializer::read(thisDeserializer);
+            }
+            disturbanceFieldsValueTempTmpBuf.value = disturbanceFieldsValueTempTmpBuf_;
+        }
+        Opt_Array_DisturbanceFieldOptionsInner disturbanceFieldsValueTemp = disturbanceFieldsValueTempTmpBuf;;
+        GetAccessors()->getParticleHelperAccessor()->SetDisturbanceFields(node, static_cast<Opt_Array_DisturbanceFieldOptionsInner*>(&disturbanceFieldsValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(ParticleHelper_SetDisturbanceFields, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_ParticleHelper_SetEmitterProperty(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto emitterValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Array_EmitterPropertyInner emitterValueTempTmpBuf = {};
+        emitterValueTempTmpBuf.tag = emitterValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((emitterValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            const Ark_Int32 emitterValueTempTmpBuf_Length = thisDeserializer.readInt32();
+            Array_EmitterPropertyInner emitterValueTempTmpBuf_ = {};
+            thisDeserializer.resizeArray<std::decay<decltype(emitterValueTempTmpBuf_)>::type,
+        std::decay<decltype(*emitterValueTempTmpBuf_.array)>::type>(&emitterValueTempTmpBuf_, emitterValueTempTmpBuf_Length);
+            for (int emitterValueTempTmpBuf_BufCounterI = 0; emitterValueTempTmpBuf_BufCounterI < emitterValueTempTmpBuf_Length; emitterValueTempTmpBuf_BufCounterI++) {
+                emitterValueTempTmpBuf_.array[emitterValueTempTmpBuf_BufCounterI] = EmitterPropertyInner_serializer::read(thisDeserializer);
+            }
+            emitterValueTempTmpBuf.value = emitterValueTempTmpBuf_;
+        }
+        Opt_Array_EmitterPropertyInner emitterValueTemp = emitterValueTempTmpBuf;;
+        GetAccessors()->getParticleHelperAccessor()->SetEmitterProperty(node, static_cast<Opt_Array_EmitterPropertyInner*>(&emitterValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(ParticleHelper_SetEmitterProperty, Ark_NativePointer, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_ParticleHelper_ParticleConstruct(Ark_Int32 id, Ark_Int32 flags) {
+        return GetAccessors()->getParticleHelperAccessor()->ParticleConstruct(id, flags);
+}
+KOALA_INTEROP_DIRECT_2(ParticleHelper_ParticleConstruct, Ark_NativePointer, Ark_Int32, Ark_Int32)
+void impl_ParticleHelper_SetParticleOptions(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        Ark_ParticlesInner particlesValueTemp = ParticlesInner_serializer::read(thisDeserializer);;
+        GetAccessors()->getParticleHelperAccessor()->SetParticleOptions(node, static_cast<Ark_ParticlesInner*>(&particlesValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(ParticleHelper_SetParticleOptions, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_Path2D_construct0() {
         return GetAccessors()->getPath2DAccessor()->construct0();
 }
