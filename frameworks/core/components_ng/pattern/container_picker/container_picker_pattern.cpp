@@ -36,7 +36,6 @@ constexpr int32_t DEFAULT_FONT_SIZE = 20;
 constexpr int32_t CLICK_ANIMATION_DURATION = 300;
 constexpr uint32_t CUSTOM_SPRING_ANIMATION_DURATION = 1000;
 const std::string SPRING_PROPERTY_NAME = "spring";
-const std::string TARGET_PROPERTY_NAME = "target";
 } // namespace
 
 RefPtr<LayoutAlgorithm> ContainerPickerPattern::CreateLayoutAlgorithm()
@@ -113,6 +112,7 @@ bool ContainerPickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper
     GetLayoutProperties(pickerAlgorithm);
     PostIdleTask(GetHost());
     SetDefaultTextStyle();
+    SetDefaultAlignment();
     HandleTargetIndex();
 
     if (isNeedPlayInertialAnimation_) {
@@ -146,9 +146,9 @@ void ContainerPickerPattern::HandleTargetIndex()
         targetIndex_.reset();
         return;
     }
-    mainDeltaSum_ = 0.0f;
-    springOffset_ = 0.0f;
-    StopTargetAnimation();
+    if (isTargetAnimationRunning_) {	
+        return;	
+    }
     PlayTargetAnimation();
 }
 
@@ -269,6 +269,19 @@ bool ContainerPickerPattern::IsLoop() const
     return props->GetCanLoopValue(true);
 }
 
+void ContainerPickerPattern::SetDefaultAlignment() const
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    for (const auto& item : itemPosition_) {
+        auto index = ContainerPickerUtils::GetLoopIndex(item.first, totalItemCount_);
+        auto child = DynamicCast<FrameNode>(host->GetOrCreateChildByIndex(index));
+        auto layoutProperty = child->GetLayoutProperty<LayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        layoutProperty->UpdateAlignment(Alignment::CENTER);
+    }
+}
+
 void ContainerPickerPattern::SetDefaultTextStyle() const
 {
     auto host = GetHost();
@@ -315,7 +328,7 @@ void ContainerPickerPattern::SetDefaultTextStyle(RefPtr<FrameNode> node) const
 void ContainerPickerPattern::SwipeTo(int32_t targetIndex)
 {
     // If animation is still running, stop it before play new animation.
-    if (selectedIndex_ == targetIndex) {
+    if (selectedIndex_ == targetIndex || isTargetAnimationRunning_) {
         return;
     }
 
@@ -537,7 +550,6 @@ void ContainerPickerPattern::HandleDragStart(const GestureEvent& info)
     yLast_ = info.GetGlobalPoint().GetY();
     dragStartTime_ = GetCurrentTime();
 
-    StopInertialRollingAnimation();
     StopSpringAnimation();
 }
 
@@ -596,21 +608,13 @@ void ContainerPickerPattern::StopSpringAnimation()
     isSpringAnimationRunning_ = false;
 }
 
-void ContainerPickerPattern::StopTargetAnimation()
-{
-    CHECK_NULL_VOID(targetAnimation_);
-    CHECK_NULL_VOID(isTargetAnimationRunning_);
-    AnimationUtils::StopAnimation(targetAnimation_);
-    isTargetAnimationRunning_ = false;
-}
-
 void ContainerPickerPattern::ProcessDelta(float& delta, float mainSize, float deltaSum)
 {
-    if (std::abs(delta) > mainSize) {
+    if (GreatNotEqual(std::abs(delta), mainSize)) {
         delta = delta > 0 ? mainSize : -mainSize;
     }
 
-    if ((std::abs(deltaSum + delta)) > mainSize) {
+    if (GreatNotEqual(std::abs(deltaSum + delta), mainSize)) {
         delta = GreatNotEqual((deltaSum + delta), 0) ? (mainSize - deltaSum) : (-deltaSum - mainSize);
     }
 }
@@ -740,16 +744,22 @@ void ContainerPickerPattern::PlaySpringAnimation()
     auto trailing = mainDeltaSum_ + middlePos - itemPosition_.begin()->second.startPos - halfOfItemHeight;
     CreateSpringProperty();
     host->UpdateAnimatablePropertyFloat(SPRING_PROPERTY_NAME, mainDeltaSum_);
-    auto delta = mainDeltaSum_ < 0.0f ? leading : trailing;
+    auto delta = Negative(mainDeltaSum_) ? leading : trailing;
 
-    CreateSpringtAnimation(delta);
+    CreateSpringAnimation(delta);
 }
 
 void ContainerPickerPattern::PlayTargetAnimation()
 {
+    float targetPos = ShortestDistanceBetweenCurrentAndTarget(targetIndex_.value_or(0));
+    isTargetAnimationRunning_ = true;
     auto context = GetContext();
     if (context) {
-        CreateTargetAnimation(targetIndex_.value());
+        context->AddAfterLayoutTask([weak = WeakClaim(this), targetPos]() {
+            auto picker = weak.Upgrade();
+            CHECK_NULL_VOID(picker);
+            picker->CreateTargetAnimation(targetPos);
+        });
     }
     targetIndex_.reset();
 }
@@ -1015,24 +1025,20 @@ void ContainerPickerPattern::CreateAnimation(double from, double to)
         nullptr, context);
 }
 
-void ContainerPickerPattern::CreateTargetAnimation(int32_t targetIndex)
+void ContainerPickerPattern::CreateTargetAnimation(float delta)
 {
     lastAnimationScroll_ = 0.0f;
     AnimationOption option;
     option.SetCurve(Curves::FAST_OUT_SLOW_IN);
     option.SetDuration(CLICK_ANIMATION_DURATION);
+    scrollProperty_->Set(0.0f);
     auto host = GetHost();
     auto context = host ? host->GetContextRefPtr() : nullptr;
-    isTargetAnimationRunning_ = true;
-
-    targetAnimation_ = AnimationUtils::StartAnimation(
+    AnimationUtils::Animate(
         option,
-        [weak = AceType::WeakClaim(this), targetIndex]() {
+        [weak = AceType::WeakClaim(this), delta]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            auto host = pattern->GetHost();
-            CHECK_NULL_VOID(host);
-            float delta = pattern->ShortestDistanceBetweenCurrentAndTarget(targetIndex);
             pattern->scrollProperty_->Set(delta);
         },
         [weak = AceType::WeakClaim(this)]() {
@@ -1044,7 +1050,7 @@ void ContainerPickerPattern::CreateTargetAnimation(int32_t targetIndex)
         nullptr, context);
 }
 
-void ContainerPickerPattern::CreateSpringtAnimation(float delta)
+void ContainerPickerPattern::CreateSpringAnimation(float delta)
 {
     auto host = GetHost();
     auto context = host ? host->GetContextRefPtr() : nullptr;

@@ -72,6 +72,10 @@ RefPtr<FrameNode> ContainerPickerPatternTest::CreateContainerPickerNode()
     picker.Create();
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
     EXPECT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    EXPECT_NE(pattern, nullptr);
+    pattern->InitDefaultParams();
+    pattern->isLoop_ = true;
     return frameNode;
 }
 
@@ -570,8 +574,7 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_OnDirtyLayoutWra
      * @tc.expected: step2. function processes correctly and returns false.
      */
     pattern->currentDelta_ = 10.0f;
-    pattern->dragOffset_ = 20.0f;
-    pattern->isNeedStartInertialAnimation_ = false;
+    pattern->isNeedPlayInertialAnimation_ = false;
 
     DirtySwapConfig config;
     config.skipMeasure = false;
@@ -580,7 +583,6 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_OnDirtyLayoutWra
     bool result = pattern->OnDirtyLayoutWrapperSwap(dirty, config);
     EXPECT_FALSE(result);
     EXPECT_EQ(pattern->currentDelta_, 0.0f);
-    EXPECT_EQ(pattern->dragOffset_, 30.0f);
 }
 
 /**
@@ -604,7 +606,7 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_OnDirtyLayoutWra
      * @tc.steps: step2. setup test data with skip flags and call OnDirtyLayoutWrapperSwap.
      * @tc.expected: step2. function returns false when all skip flags are true and no animation.
      */
-    pattern->isNeedStartInertialAnimation_ = false;
+    pattern->isNeedPlayInertialAnimation_ = false;
 
     DirtySwapConfig config;
     config.skipMeasure = true;
@@ -639,8 +641,6 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_HandleDragStart0
     pattern->HandleDragStart(info);
     EXPECT_TRUE(pattern->isDragging_);
     EXPECT_EQ(pattern->mainDeltaSum_, 0.0f);
-    EXPECT_EQ(pattern->currentIndexOffset_, 0.0f);
-    EXPECT_EQ(pattern->dragOffset_, 0.0f);
     EXPECT_EQ(pattern->yLast_, 200.0f);
 }
 
@@ -674,38 +674,6 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_ProcessDelta001,
     float delta3 = 70.0f;
     pattern->ProcessDelta(delta3, 100.0f, 80.0f);
     EXPECT_EQ(delta3, 20.0f); // Should be adjusted to not exceed mainSize when summed with deltaSum
-}
-
-/**
- * @tc.name: ContainerPickerPatternTest_CalculateResetOffset001
- * @tc.desc: Test CalculateResetOffset function
- * @tc.type: FUNC
- */
-HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_CalculateResetOffset001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create picker and get pattern.
-     */
-    auto frameNode = CreateContainerPickerNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
-    ASSERT_NE(pattern, nullptr);
-
-    /**
-     * @tc.steps: step2. test CalculateResetOffset with different totalOffset values.
-     * @tc.expected: step2. reset offset is calculated correctly.
-     */
-    // Test with offset less than half item height (should snap back)
-    pattern->animationOffset_ = 50.0f;
-    pattern->dragOffsetForAnimation_ = 0.0f;
-    float resetOffset1 = pattern->CalculateResetOffset(50.0f);
-    EXPECT_TRUE(NearEqual(resetOffset1, -50.0f));
-
-    // Test with offset more than half item height (should snap forward)
-    pattern->animationOffset_ = -90.0f;
-    pattern->dragOffsetForAnimation_ = 0.0f;
-    float resetOffset2 = pattern->CalculateResetOffset(-90.0f);
-    EXPECT_TRUE(NearEqual(resetOffset2, -40.0f));
 }
 
 /**
@@ -752,7 +720,7 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_Play001, TestSiz
 
     /**
      * @tc.steps: step2. setup test data and call Play with valid velocity.
-     * @tc.expected: step2. function returns true and sets isNeedStartInertialAnimation_.
+     * @tc.expected: step2. function returns true and sets isNeedPlayInertialAnimation_.
      */
     pattern->dragStartTime_ = pattern->GetCurrentTime() - 2.0; // More than MIN_TIME
     pattern->dragEndTime_ = pattern->GetCurrentTime();
@@ -760,7 +728,7 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_Play001, TestSiz
     bool result = pattern->Play(1000.0); // Velocity above threshold
 
     EXPECT_TRUE(result);
-    EXPECT_TRUE(pattern->isNeedStartInertialAnimation_);
+    EXPECT_TRUE(pattern->isNeedPlayInertialAnimation_);
     EXPECT_EQ(pattern->dragVelocity_, 1000.0);
 }
 
@@ -849,6 +817,7 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_HandleDragUpdate
     pattern->mainDeltaSum_ = 0.0f;
     pattern->currentDelta_ = 0.0f;
     pattern->contentMainSize_ = 200.0f;
+    pattern->itemPosition_[0] = { 0.0f, 100.0f, nullptr };
 
     GestureEvent info;
     info.SetGlobalPoint(Point(50.0f, 150.0f));
@@ -887,7 +856,6 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_CreateAnimation0
 
     EXPECT_TRUE(pattern->animationCreated_);
     EXPECT_NE(pattern->scrollProperty_, nullptr);
-    EXPECT_NE(pattern->aroundClickProperty_, nullptr);
 }
 
 /**
@@ -909,40 +877,13 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_StopInertialRoll
      * @tc.steps: step2. setup snapOffsetProperty_ and call StopInertialRollingAnimation.
      * @tc.expected: step2. toss status is stopped and animation is reset.
      */
-    pattern->isInertialRolling = true;
+    pattern->isInertialRollingAnimationRunning_ = true;
     pattern->lastAnimationScroll_ = 100.0f;
     pattern->CreateSnapProperty();
 
     pattern->StopInertialRollingAnimation();
 
-    EXPECT_FALSE(pattern->isInertialRolling);
-}
-
-/**
- * @tc.name: ContainerPickerPatternTest_PlayResetAnimation001
- * @tc.desc: Test PlayResetAnimation function
- * @tc.type: FUNC
- */
-HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_PlayResetAnimation001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create picker and get pattern.
-     */
-    auto frameNode = CreateContainerPickerNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
-    ASSERT_NE(pattern, nullptr);
-
-    /**
-     * @tc.steps: step2. setup animation properties and call PlayResetAnimation.
-     * @tc.expected: step2. reset animation is played.
-     */
-    pattern->animationOffset_ = 50.0f;
-    pattern->dragOffsetForAnimation_ = 0.0f;
-    pattern->CreateAnimation();
-
-    // We can't directly verify the animation is played, but we check the function completes
-    pattern->PlayResetAnimation();
+    EXPECT_FALSE(pattern->isInertialRollingAnimationRunning_);
 }
 
 /**

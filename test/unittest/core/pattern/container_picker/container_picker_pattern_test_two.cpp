@@ -48,6 +48,7 @@ public:
     void TearDown() override;
     RefPtr<FrameNode> CreateContainerPickerNode();
     RefPtr<FrameNode> CreateChildNode(const std::string& tag, const RefPtr<Pattern>& pattern);
+    void CreateItemPosition() const;
 };
 
 void ContainerPickerPatternTestTwo::SetUpTestSuite()
@@ -73,7 +74,25 @@ RefPtr<FrameNode> ContainerPickerPatternTestTwo::CreateContainerPickerNode()
     picker.Create();
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
     EXPECT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    EXPECT_NE(pattern, nullptr);
+    pattern->InitDefaultParams();
+    pattern->isLoop_ = true;
     return frameNode;
+}
+
+void ContainerPickerPatternTestTwo::CreateItemPosition() const
+{
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    EXPECT_NE(frameNode, nullptr);
+
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->itemPosition_[0] = { 0.0f, 100.0f, nullptr };
+    pattern->itemPosition_[1] = { 100.0f, 200.0f, nullptr };
+    pattern->itemPosition_[2] = { 200.0f, 300.0f, nullptr };
+    pattern->itemPosition_[3] = { 300.0f, 400.0f, nullptr };
+    pattern->itemPosition_[4] = { 400.0f, 500.0f, nullptr };
 }
 
 RefPtr<FrameNode> ContainerPickerPatternTestTwo::CreateChildNode(const std::string& tag, const RefPtr<Pattern>& pattern)
@@ -103,12 +122,12 @@ HWTEST_F(ContainerPickerPatternTestTwo, ContainerPickerPatternTest_HandleTargetI
      */
     pattern->selectedIndex_ = 1;
     pattern->totalItemCount_ = 5;
-    pattern->itemHeight_ = 100.0f;
-    pattern->middleItemOffset_ = 250.0f;
+    pattern->pickerItemHeight_ = 100.0f;
+    CreateItemPosition();
     pattern->currentOffset_ = 150.0f;
-
-    pattern->HandleTargetIndex(3);
-    EXPECT_EQ(pattern->targetIndex_, 3);
+    pattern->targetIndex_ = 3;
+    pattern->HandleTargetIndex();
+    EXPECT_FALSE(pattern->targetIndex_.has_value());
     EXPECT_FALSE(pattern->isDragging_);
 }
 
@@ -134,16 +153,16 @@ HWTEST_F(ContainerPickerPatternTestTwo, ContainerPickerPatternTest_ShortestDista
     // Test with non-loop mode
     pattern->totalItemCount_ = 5;
     pattern->isLoop_ = false;
-    EXPECT_EQ(pattern->ShortestDistanceBetweenCurrentAndTarget(1, 3), 2);
-    EXPECT_EQ(pattern->ShortestDistanceBetweenCurrentAndTarget(3, 1), -2);
+    pattern->pickerItemHeight_ = 100.0f;
+    pattern->height_ = 500.0f;
+    CreateItemPosition();
+    pattern->selectedIndex_ = 3;
+    EXPECT_EQ(pattern->ShortestDistanceBetweenCurrentAndTarget(4), 100.0f);
+    EXPECT_EQ(pattern->ShortestDistanceBetweenCurrentAndTarget(0), -300.0f);
 
     // Test with loop mode
     pattern->isLoop_ = true;
-    EXPECT_EQ(pattern->ShortestDistanceBetweenCurrentAndTarget(1, 3), 2);
-    EXPECT_EQ(pattern->ShortestDistanceBetweenCurrentAndTarget(3, 1), -2);
-    // Test shorter path in loop mode
-    EXPECT_EQ(pattern->ShortestDistanceBetweenCurrentAndTarget(0, 4), -1);
-    EXPECT_EQ(pattern->ShortestDistanceBetweenCurrentAndTarget(4, 0), 1);
+    EXPECT_EQ(pattern->ShortestDistanceBetweenCurrentAndTarget(0), 200.f);
 }
 
 /**
@@ -164,36 +183,11 @@ HWTEST_F(ContainerPickerPatternTestTwo, ContainerPickerPatternTest_StopSpringAni
      * @tc.steps: step2. setup spring animation and call StopSpringAnimation.
      * @tc.expected: step2. spring animation is stopped correctly.
      */
-    pattern->springAnimation_ = AceType::MakeRefPtr<SpringAnimation>();
+    pattern->CreateSpringAnimation(0.0f);
     pattern->isSpringAnimationRunning_ = true;
 
     pattern->StopSpringAnimation();
     EXPECT_FALSE(pattern->isSpringAnimationRunning_);
-}
-
-/**
- * @tc.name: ContainerPickerPatternTest_StopTargetAnimation001
- * @tc.desc: Test StopTargetAnimation function
- * @tc.type: FUNC
- */
-HWTEST_F(ContainerPickerPatternTestTwo, ContainerPickerPatternTest_StopTargetAnimation001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create picker and get pattern.
-     */
-    auto frameNode = CreateContainerPickerNode();
-    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
-    ASSERT_NE(pattern, nullptr);
-
-    /**
-     * @tc.steps: step2. setup target animation and call StopTargetAnimation.
-     * @tc.expected: step2. target animation is stopped correctly.
-     */
-    pattern->targetAnimation_ = AceType::MakeRefPtr<Animator>();
-    pattern->isTargetAnimationRunning_ = true;
-
-    pattern->StopTargetAnimation();
-    EXPECT_FALSE(pattern->isTargetAnimationRunning_);
 }
 
 /**
@@ -209,6 +203,7 @@ HWTEST_F(ContainerPickerPatternTestTwo, ContainerPickerPatternTest_UpdateCurrent
     auto frameNode = CreateContainerPickerNode();
     auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
     ASSERT_NE(pattern, nullptr);
+    CreateItemPosition();
 
     /**
      * @tc.steps: step2. test UpdateCurrentOffset with different delta values.
@@ -216,10 +211,10 @@ HWTEST_F(ContainerPickerPatternTestTwo, ContainerPickerPatternTest_UpdateCurrent
      */
     pattern->currentOffset_ = 100.0f;
     pattern->UpdateCurrentOffset(50.0f);
-    EXPECT_EQ(pattern->currentOffset_, 150.0f);
+    EXPECT_EQ(pattern->mainDeltaSum_, 50.0f);
 
     pattern->UpdateCurrentOffset(-70.0f);
-    EXPECT_EQ(pattern->currentOffset_, 80.0f);
+    EXPECT_EQ(pattern->mainDeltaSum_, -20.0f);
 }
 
 /**
@@ -240,20 +235,20 @@ HWTEST_F(ContainerPickerPatternTestTwo, ContainerPickerPatternTest_IsOutOfBounda
      * @tc.steps: step2. test IsOutOfBoundary with different positions.
      * @tc.expected: step2. function correctly identifies boundary conditions.
      */
-    pattern->itemHeight_ = 100.0f;
+    pattern->height_ = 500.0f;
+    pattern->pickerItemHeight_ = 100.0f;
     pattern->totalItemCount_ = 5;
-    pattern->displayCount_ = 3;
-    pattern->middleItemOffset_ = 200.0f;
-    pattern->selectedIndex_ = 2;
+    pattern->isLoop_ = false;
+    CreateItemPosition();
 
     // Test within boundary
-    EXPECT_FALSE(pattern->IsOutOfBoundary(200.0f, 0.0f));
+    EXPECT_FALSE(pattern->IsOutOfBoundary(0.0f));
 
     // Test out of start boundary
-    EXPECT_TRUE(pattern->IsOutOfBoundary(200.0f, -150.0f));
+    EXPECT_TRUE(pattern->IsOutOfBoundary(251.0f));
 
     // Test out of end boundary
-    EXPECT_TRUE(pattern->IsOutOfBoundary(200.0f, 150.0f));
+    EXPECT_TRUE(pattern->IsOutOfBoundary(-251.0f));
 }
 
 /**
@@ -274,17 +269,17 @@ HWTEST_F(ContainerPickerPatternTestTwo, ContainerPickerPatternTest_IsOutOfStart0
      * @tc.steps: step2. test IsOutOfStart with different positions.
      * @tc.expected: step2. function correctly identifies start boundary conditions.
      */
-    pattern->itemHeight_ = 100.0f;
+    pattern->height_ = 500.0f;
+    pattern->pickerItemHeight_ = 100.0f;
     pattern->totalItemCount_ = 5;
-    pattern->displayCount_ = 3;
-    pattern->middleItemOffset_ = 200.0f;
-    pattern->selectedIndex_ = 2;
+    pattern->isLoop_ = false;
+    CreateItemPosition();
 
     // Test within boundary
-    EXPECT_FALSE(pattern->IsOutOfStart(200.0f, 0.0f));
+    EXPECT_FALSE(pattern->IsOutOfStart(0.0f));
 
     // Test out of start boundary
-    EXPECT_TRUE(pattern->IsOutOfStart(200.0f, -150.0f));
+    EXPECT_TRUE(pattern->IsOutOfStart(251.0f));
 }
 
 /**
@@ -305,17 +300,17 @@ HWTEST_F(ContainerPickerPatternTestTwo, ContainerPickerPatternTest_IsOutOfEnd001
      * @tc.steps: step2. test IsOutOfEnd with different positions.
      * @tc.expected: step2. function correctly identifies end boundary conditions.
      */
-    pattern->itemHeight_ = 100.0f;
+    pattern->height_ = 500.0f;
+    pattern->pickerItemHeight_ = 100.0f;
     pattern->totalItemCount_ = 5;
-    pattern->displayCount_ = 3;
-    pattern->middleItemOffset_ = 200.0f;
-    pattern->selectedIndex_ = 2;
+    pattern->isLoop_ = false;
+    CreateItemPosition();
 
     // Test within boundary
-    EXPECT_FALSE(pattern->IsOutOfEnd(200.0f, 0.0f));
+    EXPECT_FALSE(pattern->IsOutOfEnd(0.0f));
 
     // Test out of end boundary
-    EXPECT_TRUE(pattern->IsOutOfEnd(200.0f, 150.0f));
+    EXPECT_TRUE(pattern->IsOutOfEnd(-251.0f));
 }
 
 /**
@@ -336,24 +331,24 @@ HWTEST_F(ContainerPickerPatternTestTwo, ContainerPickerPatternTest_SpringOverScr
      * @tc.steps: step2. test SpringOverScroll with different delta values.
      * @tc.expected: step2. function processes overscroll with spring effect correctly.
      */
-    pattern->springFactor_ = 0.5f;
-    pattern->middleItemOffset_ = 200.0f;
-    pattern->itemHeight_ = 100.0f;
+    pattern->height_ = 500.0f;
+    pattern->pickerItemHeight_ = 100.0f;
     pattern->totalItemCount_ = 5;
-    pattern->displayCount_ = 3;
+    pattern->isLoop_ = false;
+    CreateItemPosition();
 
-    float delta1 = -200.0f; // Over scroll to start
-    pattern->SpringOverScroll(delta1, 0, 0);
-    EXPECT_LT(delta1, 0); // Should be adjusted but still negative
+    float delta1 = -301.0f; // Over scroll
+    pattern->SpringOverScroll(delta1);
+    EXPECT_TRUE(pattern->SpringOverScroll(delta1));
 
-    float delta2 = 200.0f; // Over scroll to end
-    pattern->SpringOverScroll(delta2, 4, 0);
-    EXPECT_GT(delta2, 0); // Should be adjusted but still positive
+    float delta2 = 0.0f; // Not over scroll
+    pattern->SpringOverScroll(delta2);
+    EXPECT_FALSE(pattern->SpringOverScroll(delta2));
 }
 
 /**
  * @tc.name: ContainerPickerPatternTest_CheckDragOutOfBoundary001
- * @tc.desc: Test CheckDragOutOfBoundary function with different drag positions
+ * @tc.desc: Test CheckDragOutOfBoundary not out of boundary
  * @tc.type: FUNC
  */
 HWTEST_F(ContainerPickerPatternTestTwo, ContainerPickerPatternTest_CheckDragOutOfBoundary001, TestSize.Level1)
@@ -366,46 +361,15 @@ HWTEST_F(ContainerPickerPatternTestTwo, ContainerPickerPatternTest_CheckDragOutO
     ASSERT_NE(pattern, nullptr);
 
     /**
-     * @tc.steps: step2. test CheckDragOutOfBoundary with different drag positions.
-     * @tc.expected: step2. function correctly checks for drag out of boundary conditions.
+     * @tc.steps: step2. test CheckDragOutOfBoundary.
+     * @tc.expected: step2. Not out of boundary.
      */
-    pattern->itemHeight_ = 100.0f;
+    pattern->pickerItemHeight_ = 100.0f;
     pattern->totalItemCount_ = 5;
-    pattern->displayCount_ = 3;
-    pattern->middleItemOffset_ = 200.0f;
+    CreateItemPosition();
 
     // Test drag within boundary
-    EXPECT_FALSE(pattern->CheckDragOutOfBoundary(0, 200.0f, 0.0f));
-    EXPECT_FALSE(pattern->CheckDragOutOfBoundary(4, 200.0f, 0.0f));
-
-    // Test drag out of start boundary
-    EXPECT_TRUE(pattern->CheckDragOutOfBoundary(0, 200.0f, -50.0f));
-
-    // Test drag out of end boundary
-    EXPECT_TRUE(pattern->CheckDragOutOfBoundary(4, 200.0f, 50.0f));
-}
-
-/**
- * @tc.name: ContainerPickerPatternTest_CreateSpringProperty001
- * @tc.desc: Test CreateSpringProperty function
- * @tc.type: FUNC
- */
-HWTEST_F(ContainerPickerPatternTestTwo, ContainerPickerPatternTest_CreateSpringProperty001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create picker and get pattern.
-     */
-    auto frameNode = CreateContainerPickerNode();
-    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
-    ASSERT_NE(pattern, nullptr);
-
-    /**
-     * @tc.steps: step2. call CreateSpringProperty and verify springProperty_ is created.
-     * @tc.expected: step2. springProperty_ is not null after creation.
-     */
-    pattern->springProperty_ = nullptr;
-    pattern->CreateSpringProperty();
-    EXPECT_NE(pattern->springProperty_, nullptr);
+    EXPECT_FALSE(pattern->CheckDragOutOfBoundary());
 }
 
 /**
@@ -427,7 +391,7 @@ HWTEST_F(ContainerPickerPatternTestTwo, ContainerPickerPatternTest_PlaySpringAni
      * @tc.expected: step2. spring animation is played.
      */
     pattern->CreateSpringProperty();
-    pattern->springAnimation_ = AceType::MakeRefPtr<SpringAnimation>();
+    pattern->CreateSpringAnimation(0.0f);
     pattern->isSpringAnimationRunning_ = false;
 
     // We can't directly verify the animation is played, but we check the function completes
@@ -454,9 +418,9 @@ HWTEST_F(ContainerPickerPatternTestTwo, ContainerPickerPatternTest_PlayTargetAni
      */
     pattern->selectedIndex_ = 1;
     pattern->targetIndex_ = 3;
-    pattern->itemHeight_ = 100.0f;
+    pattern->pickerItemHeight_ = 100.0f;
     pattern->currentOffset_ = 100.0f;
-    pattern->middleItemOffset_ = 200.0f;
+    CreateItemPosition();
     pattern->totalItemCount_ = 5;
 
     // We can't directly verify the animation is played, but we check the function completes
@@ -481,22 +445,24 @@ HWTEST_F(ContainerPickerPatternTestTwo, ContainerPickerPatternTest_CalcEndOffset
      * @tc.steps: step2. test CalcEndOffset with different parameters.
      * @tc.expected: step2. end offset is calculated correctly.
      */
-    pattern->itemHeight_ = 100.0f;
-    pattern->middleItemOffset_ = 200.0f;
+    pattern->pickerItemHeight_ = 100.0f;
+    CreateItemPosition();
 
-    float endOffset1 = pattern->CalcEndOffset(100.0f, 3);
-    EXPECT_TRUE(NearEqual(endOffset1, 400.0f));
+    float endOffset1 = 100.0f;
+    pattern->CalcEndOffset(endOffset1, 3);
+    EXPECT_EQ(endOffset1, 50);
 
-    float endOffset2 = pattern->CalcEndOffset(150.0f, 2);
-    EXPECT_TRUE(NearEqual(endOffset2, 350.0f));
+    float endOffset2 = 150.0f;
+    pattern->CalcEndOffset(endOffset2, 2);
+    EXPECT_EQ(endOffset2, 50);
 }
 
 /**
- * @tc.name: ContainerPickerPatternTest_CreateTargetAnimation001
- * @tc.desc: Test CreateTargetAnimation function
+ * @tc.name: ContainerPickerPatternTest_CreateSpringAnimation001
+ * @tc.desc: Test CreateSpringAnimation function
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerPickerPatternTestTwo, ContainerPickerPatternTest_CreateTargetAnimation001, TestSize.Level1)
+HWTEST_F(ContainerPickerPatternTestTwo, ContainerPickerPatternTest_CreateSpringAnimation001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create picker and get pattern.
@@ -506,36 +472,12 @@ HWTEST_F(ContainerPickerPatternTestTwo, ContainerPickerPatternTest_CreateTargetA
     ASSERT_NE(pattern, nullptr);
 
     /**
-     * @tc.steps: step2. call CreateTargetAnimation and verify targetAnimation_ is created.
-     * @tc.expected: step2. targetAnimation_ is not null after creation.
-     */
-    pattern->targetAnimation_ = nullptr;
-    pattern->CreateTargetAnimation();
-    EXPECT_NE(pattern->targetAnimation_, nullptr);
-}
-
-/**
- * @tc.name: ContainerPickerPatternTest_CreateSpringtAnimation001
- * @tc.desc: Test CreateSpringtAnimation function
- * @tc.type: FUNC
- */
-HWTEST_F(ContainerPickerPatternTestTwo, ContainerPickerPatternTest_CreateSpringtAnimation001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create picker and get pattern.
-     */
-    auto frameNode = CreateContainerPickerNode();
-    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
-    ASSERT_NE(pattern, nullptr);
-
-    /**
-     * @tc.steps: step2. call CreateSpringtAnimation and verify springAnimation_ is created.
+     * @tc.steps: step2. call CreateSpringAnimation and verify springAnimation_ is created.
      * @tc.expected: step2. springAnimation_ is not null after creation.
      */
     pattern->springAnimation_ = nullptr;
-    pattern->springProperty_ = nullptr;
     pattern->CreateSpringProperty();
-    pattern->CreateSpringtAnimation();
+    pattern->CreateSpringAnimation(0.0f);
     EXPECT_NE(pattern->springAnimation_, nullptr);
 }
 
@@ -558,14 +500,12 @@ HWTEST_F(ContainerPickerPatternTestTwo, ContainerPickerPatternTest_CalculateMidd
      * @tc.steps: step2. test CalculateMiddleLineOffset with different parameters.
      * @tc.expected: step2. middle line offset is calculated correctly.
      */
-    pattern->itemHeight_ = 100.0f;
-    pattern->displayCount_ = 3;
+    pattern->height_ = 500.0f;
+    pattern->pickerItemHeight_ = 100.0f;
+    CreateItemPosition();
 
-    float offset1 = pattern->CalculateMiddleLineOffset(0, 0.0f);
-    EXPECT_TRUE(NearEqual(offset1, 150.0f));
-
-    float offset2 = pattern->CalculateMiddleLineOffset(2, 50.0f);
-    EXPECT_TRUE(NearEqual(offset2, 350.0f));
+    float offset1 = pattern->CalculateMiddleLineOffset();
+    EXPECT_EQ(offset1, 0);
 }
 
 } // namespace OHOS::Ace::NG

@@ -158,8 +158,8 @@ void ContainerPickerLayoutAlgorithm::MeasureWidth(LayoutWrapper* layoutWrapper, 
 
 void ContainerPickerLayoutAlgorithm::CalcMainAndMiddlePos()
 {
-    startMainPos_ = std::max((height_ - pickerDefaultHeight_) / HALF, 0.0f);
-    endMainPos_ = startMainPos_ + std::min(height_, pickerDefaultHeight_);
+    startMainPos_ = std::max((height_ - pickerHeightBeforeRotate_) / HALF, 0.0f);
+    endMainPos_ = startMainPos_ + std::min(height_, pickerHeightBeforeRotate_);
     middleItemStartPos_ = (height_ - pickerItemHeight_) / HALF;
     middleItemEndPos_ = (height_ + pickerItemHeight_) / HALF;
 }
