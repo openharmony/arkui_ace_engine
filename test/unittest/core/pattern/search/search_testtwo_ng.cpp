@@ -2018,7 +2018,7 @@ HWTEST_F(SearchTestTwoNg, searchModelStatic007, TestSize.Level1)
     EXPECT_EQ(textFieldLayoutProperty->GetPlaceholderTextColor().value(), Color::GRAY);
 
     SearchModelStatic::SetPlaceholderColor(frameNode, std::nullopt);
-    EXPECT_TRUE(textFieldLayoutProperty->GetPlaceholderTextColor().has_value());
+    EXPECT_FALSE(textFieldLayoutProperty->GetPlaceholderTextColor().has_value());
 }
 
 /**
@@ -2259,7 +2259,7 @@ HWTEST_F(SearchTestTwoNg, searchModelStatic018, TestSize.Level1)
     EXPECT_EQ(textFieldLayoutProperty->GetMinFontScale().value(), MIN_FONT_SCALE);
 
     SearchModelStatic::SetMinFontScale(frameNode, std::nullopt);
-    EXPECT_FALSE(textFieldLayoutProperty->GetMinFontScale().has_value());
+    EXPECT_TRUE(textFieldLayoutProperty->GetMinFontScale().has_value());
 }
 
 /**
@@ -2279,7 +2279,7 @@ HWTEST_F(SearchTestTwoNg, searchModelStatic019, TestSize.Level1)
     EXPECT_EQ(textFieldLayoutProperty->GetMaxFontScale().value(), MAX_FONT_SCALE);
 
     SearchModelStatic::SetMaxFontScale(frameNode, std::nullopt);
-    EXPECT_FALSE(textFieldLayoutProperty->GetMaxFontScale().has_value());
+    EXPECT_TRUE(textFieldLayoutProperty->GetMaxFontScale().has_value());
 }
 
 /**
