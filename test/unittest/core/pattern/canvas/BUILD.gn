@@ -17,6 +17,7 @@ ace_unittest("canvas_test_ng") {
   type = "new"
   sources = [
     "canvas_custom_paint_method_test_ng.cpp",
+    "canvas_custom_paint_method_test_ng_2.cpp",
     "canvas_custom_paint_method_testtwo_ng.cpp",
     "canvas_test_ng.cpp",
   ]
