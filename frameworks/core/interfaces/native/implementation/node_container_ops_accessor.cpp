@@ -137,6 +137,27 @@ void SetOnTouchEventImpl(Ark_NativePointer self, const Opt_Callback_TouchEvent_V
     };
     ViewAbstract::SetOnTouch(frameNode, std::move(onEvent));
 }
+void SetOnDestoryEventImpl(Ark_NativePointer self,
+                           const Callback_OnDestory_Void* value)
+{
+    auto nodeContainer = reinterpret_cast<FrameNode *>(self);
+    CHECK_NULL_VOID(nodeContainer);
+    auto nodeContainerEventHub = nodeContainer->GetEventHub<NodeContainerEventHub>();
+    CHECK_NULL_VOID(nodeContainerEventHub);
+    auto weakEventHub = AceType::WeakClaim(AceType::RawPtr(nodeContainerEventHub));
+    auto* context = nodeContainer->GetContext();
+    CHECK_NULL_VOID(context);
+    auto onNodeDestroyCallback = [callback = CallbackHelper(*value), weakEventHub,
+                                     instanceId = context->GetInstanceId()](int32_t nodeId) -> void {
+        ContainerScope scope(instanceId);
+        auto eventHub = weakEventHub.Upgrade();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->FireOnWillUnbind(nodeId);
+        eventHub->FireOnUnbind(nodeId);
+        callback.InvokeSync(Converter::ArkValue<Ark_Float64>(nodeId));
+    };
+    nodeContainer->SetOnNodeDestroyCallback(onNodeDestroyCallback);
+}
 } // NodeContainerOpsAccessor
 const GENERATED_ArkUINodeContainerOpsAccessor* GetNodeContainerOpsAccessor()
 {
@@ -150,6 +171,7 @@ const GENERATED_ArkUINodeContainerOpsAccessor* GetNodeContainerOpsAccessor()
         NodeContainerOpsAccessor::SetOnAttachImpl,
         NodeContainerOpsAccessor::SetOnDetachImpl,
         NodeContainerOpsAccessor::SetOnTouchEventImpl,
+        NodeContainerOpsAccessor::SetOnDestoryEventImpl,
     };
     return &NodeContainerOpsAccessorImpl;
 }

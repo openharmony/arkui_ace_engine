@@ -2112,6 +2112,12 @@ export class NodeContainerOps {
         ArkUIGeneratedNativeModule._NodeContainerOps_setOnTouchEvent(self, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    static setOnDestoryEvent_serialize(self: KPointer, value: Callback_OnDestory_Void): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(value)
+        ArkUIGeneratedNativeModule._NodeContainerOps_setOnDestoryEvent(self, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     public static nodeContainerOpsConstruct(id: int32, flags: int32): KPointer {
         const id_casted = id as (int32)
         const flags_casted = flags as (int32)
@@ -2163,6 +2169,12 @@ export class NodeContainerOps {
         const self_casted = self as (KPointer)
         const value_casted = value as (((event: TouchEvent) => void) | undefined)
         NodeContainerOps.setOnTouchEvent_serialize(self_casted, value_casted)
+        return
+    }
+    public static setOnDestoryEvent(self: KPointer, value: Callback_OnDestory_Void): void {
+        const self_casted = self as (KPointer)
+        const value_casted = value as (Callback_OnDestory_Void)
+        NodeContainerOps.setOnDestoryEvent_serialize(self_casted, value_casted)
         return
     }
 }
@@ -3959,6 +3971,7 @@ export interface BuilderNodeOptions {
     surfaceId?: string;
 }
 export type Callback_Size_Void = (size: Size) => void;
+export type Callback_OnDestory_Void = (nodeId: int64) => void;
 export interface WebHeader {
     headerKey: string;
     headerValue: string;

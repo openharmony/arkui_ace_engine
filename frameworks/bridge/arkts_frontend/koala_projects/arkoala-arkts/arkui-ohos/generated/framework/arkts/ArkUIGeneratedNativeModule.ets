@@ -4782,6 +4782,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _NodeContainerOps_setOnTouchEvent(self: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _NodeContainerOps_setOnDestoryEvent(self: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _NodeContentExtender_constructorNodeContent(): KPointer
     @ani.unsafe.Direct
     native static _NodeContentExtender_getDestroy(): KPointer

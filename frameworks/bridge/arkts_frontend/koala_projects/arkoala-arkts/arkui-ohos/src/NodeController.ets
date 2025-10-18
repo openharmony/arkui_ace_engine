@@ -26,9 +26,16 @@ export abstract class NodeController {
     setNodeContainer(nodeContainer: ArkNodeContainerComponent) {
         this._nodeContainer = nodeContainer;
     }
-    resetInternalField() {
-        this._nodeContainer = null;
-        this._rootNodeOfNodeController = null;
+    resetInternalField(containerId: long) {
+        if(containerId > 0){
+            this.onWillUnbind(containerId);
+            this._nodeContainer = null;
+            this._rootNodeOfNodeController = null;
+            this.onUnbind(containerId);
+        } else {
+            this._nodeContainer = null;
+            this._rootNodeOfNodeController = null;
+        }
     }
     abstract makeNode(UIContext: UIContext): FrameNode | null;
     __makeNode__(uiContext: UIContext): FrameNode | null {
