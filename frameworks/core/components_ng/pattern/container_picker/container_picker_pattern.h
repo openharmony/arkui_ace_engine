@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
 #include "core/gestures/gesture_event.h"
+#include "adapter/ohos/entrance/picker/picker_haptic_interface.h"
 
 namespace OHOS::Ace::NG {
 class ContainerPickerEventParam : public virtual AceType {
@@ -197,6 +198,11 @@ private:
     void PlayResetAnimation();
     double GetCurrentTime() const;
     float CalculateResetOffset(float totalOffset);
+    bool IsEnableHaptic() const;
+    void InitOrRefreshHapticController();
+    void StopHapticController();
+    void PlayHaptic(float offset);
+    bool InnerHandleScroll(bool isDown);
 
     int32_t containerPickerId_ = -1;
     int32_t displayCount_ = 7;
@@ -230,7 +236,6 @@ private:
     double yOffset_ = 0.0;
 
     RefPtr<NodeAnimatablePropertyFloat> scrollProperty_;
-    RefPtr<NodeAnimatablePropertyFloat> aroundClickProperty_;
     RefPtr<NodeAnimatablePropertyFloat> snapOffsetProperty_;
 
     double dragStartTime_ = 0.0;
@@ -247,6 +252,10 @@ private:
     float currentDelta_ = 0.0f;
     bool isNeedStartInertialAnimation_ = false;
     double dragVelocity_ = 0.0f;
+
+    std::shared_ptr<IPickerAudioHaptic> hapticController_ = nullptr;
+    bool isAllowPlayHaptic_ = true;
+    bool isEnableHaptic_ = true;
 };
 } // namespace OHOS::Ace::NG
 

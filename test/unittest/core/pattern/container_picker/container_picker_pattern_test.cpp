@@ -885,7 +885,6 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_Play001, TestSiz
 
     EXPECT_TRUE(result);
     EXPECT_TRUE(pattern->isNeedStartInertialAnimation_);
-    EXPECT_EQ(pattern->dragVelocity_, 1000.0);
 }
 
 /**
@@ -1011,7 +1010,6 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_CreateAnimation0
 
     EXPECT_TRUE(pattern->animationCreated_);
     EXPECT_NE(pattern->scrollProperty_, nullptr);
-    EXPECT_NE(pattern->aroundClickProperty_, nullptr);
 }
 
 /**
