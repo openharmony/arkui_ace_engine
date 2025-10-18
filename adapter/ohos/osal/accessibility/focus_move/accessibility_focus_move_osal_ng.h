@@ -40,8 +40,12 @@ public:
     bool UpdateElementInfo(
         const std::shared_ptr<FocusRulesCheckNode>& resultNode, Accessibility::AccessibilityElementInfo& info) override;
     bool DetectElementInfoFocusableThroughAncestor(
-        const Accessibility::AccessibilityElementInfo& info, const int64_t parentId);
+        const Accessibility::AccessibilityElementInfo& info, const int64_t parentId,
+        Accessibility::AccessibilityElementInfo& targetInfo);
 private:
+    bool CheckAndGetReadableInfoToRoot(
+        const RefPtr<NG::FrameNode>& currentFrameNode, Accessibility::AccessibilityElementInfo& targetInfo);
+
     WeakPtr<JsAccessibilityManager> jsAccessibilityManager_;
     WeakPtr<PipelineBase> context_;
     WeakPtr<PipelineBase> mainContext_;
