@@ -2150,6 +2150,29 @@ HWTEST_F(SwiperPatternTestNg, PropertyPrefMonitor001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PropertyPrefMonitor002
+ * @tc.desc: Test PropertyPrefMonitor
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, PropertyPrefMonitor002, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    EXPECT_FALSE(pattern_->isAutoPlayAnimationRunning_);
+
+    pattern_->isInAutoPlay_ = true;
+    pattern_->PropertyPrefMonitor(false);
+    EXPECT_FALSE(pattern_->isInAutoPlay_);
+    EXPECT_FALSE(pattern_->isAutoPlayAnimationRunning_);
+
+    pattern_->isInAutoPlay_ = false;
+    pattern_->PropertyPrefMonitor(false);
+    EXPECT_FALSE(pattern_->isInAutoPlay_);
+    EXPECT_FALSE(pattern_->isAutoPlayAnimationRunning_);
+}
+
+/**
  * @tc.name: FillType001
  * @tc.desc: Test FillType
  * @tc.type: FUNC

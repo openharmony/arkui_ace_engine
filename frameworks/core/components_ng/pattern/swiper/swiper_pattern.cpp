@@ -3869,6 +3869,8 @@ void SwiperPattern::PropertyPrefMonitor(bool isBeginPerf)
 #ifdef OHOS_PLATFORM
         if (isInAutoPlay_) {
             ResSchedReport::GetInstance().ResSchedDataReport("auto_play_off");
+        } else {
+            ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
         }
 #endif
         isInAutoPlay_ = false;
