@@ -61,7 +61,8 @@ struct IndexPage {
     new TextList(27, 'TwoItem', 'pages/Scroll/LayoutConstraints/TwoItem'),
     new TextList(28, 'WidthOneItem', 'pages/Scroll/LayoutConstraints/WidthOneItem'),
     new TextList(29, 'WidthTwoItem', 'pages/Scroll/LayoutConstraints/WidthTwoItem'),
-    new TextList(30, 'OriOneItem', 'pages/Scroll/LayoutConstraints/OriOneItem')
+    new TextList(30, 'OriOneItem', 'pages/Scroll/LayoutConstraints/OriOneItem'),
+    new TextList(31, 'LayoutConstraints', 'pages/Scroll/LayoutConstraints/LayoutConstraints_MainPage')
   ]
   @State fontSize: Resource | undefined = undefined
   build() {

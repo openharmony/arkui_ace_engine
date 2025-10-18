@@ -36,11 +36,6 @@
     "pages/waterflow/demo01/scrollBarColor",
     "pages/waterflow/waterFlowModifier/scrollBarColor",
     "pages/waterflow/CAPI/WaterFlowInfiniteScrollingEarly",
-    "pages/waterflow/LayoutConstraints/OneItem",
-    "pages/waterflow/LayoutConstraints/TwoItem",
-    "pages/waterflow/LayoutConstraints/WidthOneItem",
-    "pages/waterflow/LayoutConstraints/WidthTwoItem",
-    "pages/waterflow/LayoutConstraints/OriOneItem",
     "pages/Swiper/SwiperMainPage",
     "pages/Swiper/OnContentWillScrollNormal",
     "pages/Swiper/OnContentWillScrollNestList",
@@ -112,6 +107,7 @@
     "pages/List/LayoutConstraints/OriOneItem",
     "pages/List/LayoutConstraints/ListItemMoveHeight",
     "pages/List/LayoutConstraints/ListItemMoveWidth",
+    "pages/List/LayoutConstraints/LayoutConstraints_MainPage",
     "pages/alphabetIndexer/AlphabetIndexerMainPage",
     "pages/alphabetIndexer/AutoCollapse",
     "pages/alphabetIndexer/PopupPosition",
@@ -180,6 +176,7 @@
     "pages/Scroll/LayoutConstraints/WidthOneItem",
     "pages/Scroll/LayoutConstraints/WidthTwoItem",
     "pages/Scroll/LayoutConstraints/OriOneItem",
+    "pages/List/LayoutConstraints/LayoutConstraints_MainPage",
     "pages/LazyVGridLayout/LazyVGridLayoutMainPage",
     "pages/LazyVGridLayout/LazyVGridLayoutAttribute"
   ]
