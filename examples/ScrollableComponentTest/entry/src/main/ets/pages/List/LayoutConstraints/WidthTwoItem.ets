@@ -22,7 +22,7 @@
 struct ListWidthTwoItem {
 
   /* 
-   * 用例描述：List组件内设置多个ListItem的height为不同值，验证ListItem的布局是否正确
+   * 用例描述：List组件内设置多个ListItem的width为不同值，验证ListItem的布局是否正确
    * 关键结构：List、ListItem、width
    */
 
