@@ -108,6 +108,8 @@ public:
     void OnModifyDone() override;
     void FireChangeEvent();
     void FireScrollStopEvent();
+    bool SpringOverScroll(float offset);
+    void UpdateCurrentOffset(float offset);
 
 protected:
     bool ChildPreMeasureHelperEnabled() override
@@ -136,6 +138,7 @@ protected:
         LayoutSafeAreaType ignoreType = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM) override;
 
 private:
+    inline bool RunningTranslateAnimation() const;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
     // NestableScrollContainer implementations
@@ -167,10 +170,14 @@ private:
     void ProcessDelta(float& delta, float mainSize, float deltaSum);
     void HandleDragUpdate(const GestureEvent& info);
     void HandleDragEnd(double dragVelocity, float mainDelta = 0.0f);
-    void HandleTargetIndex(const RefPtr<LayoutWrapper>& dirty, const RefPtr<ContainerPickerLayoutAlgorithm>& algo);
+    void HandleTargetIndex();
     void CalcEndOffset(float& endOffset, double velocity);
     bool Play(double dragVelocity);
     void UpdateDragFRCSceneInfo(float speed, SceneStatus sceneStatus);
+    bool IsOutOfBoundary(float mainOffset = 0.0f) const;
+    bool IsOutOfStart(float mainOffset = 0.0f) const;
+    bool IsOutOfEnd(float mainOffset = 0.0f) const;
+    bool CheckDragOutOfBoundary();
     bool SpringCurveTailMoveProcess(bool useRebound, double& dragDelta);
     void SpringCurveTailEndProcess(bool useRebound, bool stopMove);
     double GetDragDeltaLessThanJumpInterval(
@@ -182,71 +189,89 @@ private:
     void CreateAnimation();
     void AttachNodeAnimatableProperty(const RefPtr<NodeAnimatablePropertyFloat>& property);
     void CreateSnapProperty();
+    void CreateSpringProperty();
     void CreateAnimation(double from, double to);
-    void CreateSwipeToTargetAnimation(double from, double to);
+    void CreateTargetAnimation(int32_t targetIndex);
+    void CreateSpringtAnimation(float delta);
     void PickerMarkDirty();
     void PostIdleTask(const RefPtr<FrameNode>& frameNode);
     void SwipeTo(int32_t index);
     void UpdateClipEdge();
-    float ShortestDistanceBetweenCurrentAndTarget();
+    float ShortestDistanceBetweenCurrentAndTarget(int32_t targetIndex);
     std::pair<int32_t, PickerItemInfo> CalcCurrentMiddleItem() const;
     void CreateChildrenClickEvent(RefPtr<UINode>& host);
     RefPtr<TouchEventImpl> CreateItemTouchEventListener();
-    void StartInertialAnimation();
-    void StopInertialRollingAnimation();
+    void PlayInertialAnimation();
+    void PlaySpringAnimation();
+    void PlayTargetAnimation();
     void PlayResetAnimation();
+    void StopInertialRollingAnimation();
+    void StopSpringAnimation();
+    void StopTargetAnimation();
     double GetCurrentTime() const;
     float CalculateResetOffset(float totalOffset);
+    float CalculateMiddleLineOffset();
+    void InitDefaultParams()
+    {
+        pickerItemHeight_ = static_cast<float>(PICKER_ITEM_HEIGHT.ConvertToPx());
+        pickerDefaultHeight_ = static_cast<float>(PICKER_DEFAULT_HEIGHT.ConvertToPx());
+        pickerHeightBeforeRotate_ = static_cast<float>(PICKER_HEIGHT_BEFORE_ROTATE.ConvertToPx());
+        maxOverscrollOffset_ = static_cast<float>(MAX_OVERSCROLL_OFFSET.ConvertToPx());
+    }
 
-    int32_t containerPickerId_ = -1;
-    int32_t displayCount_ = 7;
-    int32_t totalItemCount_ = 0;
-    bool isDragging_ = false;
-    bool isItemClickEventCreated_ = false;
     RefPtr<PanEvent> panEvent_;
     PanDirection panDirection_;
     LayoutConstraintF layoutConstraint_;
-    bool isFirstAxisAction_ = true;
     std::vector<RefPtr<ScrollingListener>> scrollingListener_;
     std::vector<int32_t> offScreenItemsIndex_;
-    int32_t selectedIndex_ = 0;
     std::optional<int32_t> targetIndex_ = 0;
-    std::optional<int32_t> runningTargetIndex_ = 0;
-
-    bool crossMatchChild_ = false;
-    float currentOffset_ = 0.0f;
-    float currentIndexOffset_ = 0.0f;
-    float height_ = 0.0f;
-    float contentMainSize_ = 0.0f;
-    float mainDeltaSum_ = 0.0f;
 
     ContainerPickerUtils::PositionMap itemPosition_;
 
-    bool animationCreated_ = false;
-    bool isTargetAnimationRunning_ = false;
-    bool requestLongPredict_ = true;
-    bool isLoop_ = true;
-    double yLast_ = 0.0;
-    double yOffset_ = 0.0;
-
     RefPtr<NodeAnimatablePropertyFloat> scrollProperty_;
-    RefPtr<NodeAnimatablePropertyFloat> aroundClickProperty_;
     RefPtr<NodeAnimatablePropertyFloat> snapOffsetProperty_;
 
-    double dragStartTime_ = 0.0;
-    double dragEndTime_ = 0.0;
-    bool isInertialRolling = false;
+    std::shared_ptr<AnimationUtils::Animation> springAnimation_;
+    std::shared_ptr<AnimationUtils::Animation> targetAnimation_;
+
+    bool isFirstAxisAction_ = true;
+    bool isDragging_ = false;
+    bool isItemClickEventCreated_ = false;
+    bool crossMatchChild_ = false;
+    bool animationCreated_ = false;
+    bool isTargetAnimationRunning_ = false;
+    bool isSpringAnimationRunning_ = false;
+    bool isInertialRollingAnimationRunning_ = false;
+    bool requestLongPredict_ = true;
+    bool isLoop_ = true;
+    bool isNeedPlayInertialAnimation_ = false;
     bool clickBreak_ = false;
     bool touchBreak_ = false;
     bool animationBreak_ = false;
 
-    float dragOffset_ = 0.0f;
-    float animationOffset_ = 0.0f;
-    float lastAnimationScroll_ = 0.0f;
-    float dragOffsetForAnimation_ = 0.0f;
-    float currentDelta_ = 0.0f;
-    bool isNeedStartInertialAnimation_ = false;
+    int32_t containerPickerId_ = -1;
+    int32_t displayCount_ = 7;
+    int32_t totalItemCount_ = 0;
+    int32_t selectedIndex_ = 0;
+
+    double yLast_ = 0.0;
+    double yOffset_ = 0.0;
+    double dragStartTime_ = 0.0;
+    double dragEndTime_ = 0.0;
     double dragVelocity_ = 0.0f;
+
+    float lastAnimationScroll_ = 0.0f;
+    float currentDelta_ = 0.0f;
+    float currentOffset_ = 0.0f;
+    float height_ = 0.0f;
+    float contentMainSize_ = 0.0f;
+    float mainDeltaSum_ = 0.0f;
+    float springOffset_ = 0.0f;
+
+    float pickerItemHeight_ = 0.0f;
+    float pickerDefaultHeight_ = 0.0f;
+    float pickerHeightBeforeRotate_ = 0.0f;
+    float maxOverscrollOffset_ = 0.0f;
 };
 } // namespace OHOS::Ace::NG
 
