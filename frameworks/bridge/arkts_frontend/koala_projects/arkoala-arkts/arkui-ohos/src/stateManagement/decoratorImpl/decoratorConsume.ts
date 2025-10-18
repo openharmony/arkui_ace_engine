@@ -46,7 +46,7 @@ export class ConsumeDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
     public set(newValue: T): void {
         const oldValue = this.sourceProvide_!.get();
         if (oldValue !== newValue) {
-            const value = uiUtils.makeObserved(newValue);
+            const value = uiUtils.makeV1Observed(newValue);
             this.unregisterWatchFromObservedObjectChanges(oldValue);
             this.registerWatchForObservedObjectChanges(value);
             this.sourceProvide_!.set(value);
