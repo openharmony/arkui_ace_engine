@@ -3289,6 +3289,7 @@ frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani
 frameworks/core/interfaces/native/implementation/overlay_accessor.cpp @ArkUI_Event
 frameworks/core/interfaces/native/implementation/drag_event_accessor.cpp @ArkUI_Event
 frameworks/core/interfaces/native/implementation/drag_drop_accessor.cpp @ArkUI_Event
+frameworks/core/interfaces/native/implementation/accessibility_hover_event_accessor.cpp @ArkUI_Event
 frameworks/core/interfaces/native/implementation/drag_event_peer.h @ArkUI_Event
 frameworks/core/interfaces/native/ani/drag_ani_modifier.cpp @ArkUI_Event
 frameworks/core/interfaces/native/ani/drag_ani_modifier.h @ArkUI_Event
