@@ -35508,6 +35508,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SetOnDestoryEventImpl(Ark_NativePointer self,
+                               const Callback_OnDestory_Void* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setOnDestoryEvent(");
+        WriteToString(&out, self);
+        out.append(", ");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     } // NodeContainerOpsAccessor
     namespace OffscreenCanvasAccessor {
     void DestroyPeerImpl(Ark_OffscreenCanvas peer)
@@ -45808,6 +45822,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             NodeContainerOpsAccessor::SetOnAttachImpl,
             NodeContainerOpsAccessor::SetOnDetachImpl,
             NodeContainerOpsAccessor::SetOnTouchEventImpl,
+            NodeContainerOpsAccessor::SetOnDestoryEventImpl,
         };
         return &NodeContainerOpsAccessorImpl;
     }
