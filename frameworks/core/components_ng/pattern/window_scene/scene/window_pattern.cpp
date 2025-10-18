@@ -673,6 +673,7 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
         ImageRotateOrientation rotate;
         auto lastRotation = session_->GetLastOrientation();
         auto windowRotation = session_->GetWindowSnapshotOrientation();
+        bool needRotate = (!freeMultiWindow) && (!matchSnapshot);
         if (isSavingSnapshot) {
             auto snapshotPixelMap = session_->GetSnapshotPixelMap();
             CHECK_NULL_VOID(snapshotPixelMap);
@@ -689,7 +690,7 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
             TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
                 "lastRotation: %{public}d windowRotation: %{public}d, snapshotRotation: %{public}d",
                 lastRotation, windowRotation, snapshotRotation);
-            if (!freeMultiWindow) {
+            if (needRotate) {
                 auto orientation = TransformOrientationForDisMatchSnapshot(lastRotation,
                     windowRotation, snapshotRotation);
                 pattern->SetOrientation(orientation);
