@@ -19,10 +19,12 @@ ace_unittest("flex_test_ng") {
   module_output = ""
   sources = [
     "flex_base_test_ng.cpp",
-    "flex_new_test_ng.cpp",
+    "flex_new_test_ng_first_part.cpp",
+    "flex_new_test_ng_second_part.cpp",
     "old_cases/flex_test_ng.cpp",
     "old_cases/flex_testthree_ng.cpp",
-    "old_cases/flex_testtwo_ng.cpp",
+    "old_cases/flex_testtwo_ng_first_part.cpp",
+    "old_cases/flex_testtwo_ng_second_part.cpp",
     "old_cases/flex_wrap_layout_algorithm_test.cpp",
   ]
 }
