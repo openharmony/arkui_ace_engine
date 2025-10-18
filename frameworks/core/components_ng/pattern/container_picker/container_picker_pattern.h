@@ -104,12 +104,92 @@ public:
         return requestLongPredict_;
     }
 
+    // Lifecycle methods
     void OnAttachToFrameNode() override;
     void OnModifyDone() override;
+
+    // Event firing methods
     void FireChangeEvent();
     void FireScrollStopEvent();
+
+    // Layout related methods
     bool SpringOverScroll(float offset);
     void UpdateCurrentOffset(float offset);
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    void GetLayoutProperties(const RefPtr<ContainerPickerLayoutAlgorithm>& pickerAlgorithm);
+    void UpdateClipEdge();
+    float CalculateMiddleLineOffset();
+    float CalculateResetOffset(float totalOffset);
+
+    // Drag and scroll handling methods
+    void HandleDragStart(const GestureEvent& info);
+    void HandleDragUpdate(const GestureEvent& info);
+    void HandleDragEnd(double dragVelocity, float mainDelta = 0.0f);
+    void ProcessDelta(float& delta, float mainSize, float deltaSum);
+    bool CheckDragOutOfBoundary();
+    bool IsOutOfBoundary(float mainOffset = 0.0f) const;
+    bool IsOutOfStart(float mainOffset = 0.0f) const;
+    bool IsOutOfEnd(float mainOffset = 0.0f) const;
+    bool SpringCurveTailMoveProcess(bool useRebound, double& dragDelta);
+    void SpringCurveTailEndProcess(bool useRebound, bool stopMove);
+    double GetDragDeltaLessThanJumpInterval(
+        double offsetY, float originalDragDelta, bool useRebound, float shiftDistance);
+    void UpdateColumnChildPosition(double offsetY);
+    void HandleTargetIndex();
+    void CalcEndOffset(float& endOffset, double velocity);
+    bool Play(double dragVelocity);
+    void UpdateDragFRCSceneInfo(float speed, SceneStatus sceneStatus);
+
+    // Item and selection methods
+    std::pair<int32_t, PickerItemInfo> CalcCurrentMiddleItem() const;
+    float ShortestDistanceBetweenCurrentAndTarget(int32_t targetIndex);
+    void SwipeTo(int32_t index);
+    void OnAroundButtonClick(RefPtr<ContainerPickerEventParam> param);
+
+    // Event listener creation methods
+    RefPtr<ClickEvent> CreateItemClickEventListener(RefPtr<ContainerPickerEventParam> param);
+    void InitMouseAndPressEvent();
+    void UpdatePanEvent();
+    void AddPanEvent(const RefPtr<GestureEventHub>& gestureHub, GestureEventFunc&& actionStart,
+        GestureEventFunc&& actionUpdate, GestureEventFunc&& actionEnd, GestureEventNoParameter&& actionCancel);
+    GestureEventFunc ActionStartTask();
+    GestureEventFunc ActionUpdateTask();
+    GestureEventFunc ActionEndTask();
+    GestureEventNoParameter ActionCancelTask();
+    void CreateChildrenClickEvent(RefPtr<UINode>& host);
+    RefPtr<TouchEventImpl> CreateItemTouchEventListener();
+
+    // Animation methods
+    void CreateAnimation();
+    void AttachNodeAnimatableProperty(const RefPtr<NodeAnimatablePropertyFloat>& property);
+    void CreateSnapProperty();
+    void CreateSpringProperty();
+    void CreateAnimation(double from, double to);
+    void CreateTargetAnimation(int32_t targetIndex);
+    void CreateSpringtAnimation(float delta);
+    void PlayInertialAnimation();
+    void PlaySpringAnimation();
+    void PlayTargetAnimation();
+    void PlayResetAnimation();
+    void StopInertialRollingAnimation();
+    void StopSpringAnimation();
+    void StopTargetAnimation();
+
+    // Helper methods
+    inline bool RunningTranslateAnimation() const;
+    bool IsLoop() const;
+    void SetDefaultTextStyle() const;
+    void SetDefaultTextStyle(RefPtr<FrameNode> node) const;
+    void PickerMarkDirty();
+    void PostIdleTask(const RefPtr<FrameNode>& frameNode);
+    double GetCurrentTime() const;
+    void InitDefaultParams()
+    {
+        pickerItemHeight_ = static_cast<float>(PICKER_ITEM_HEIGHT.ConvertToPx());
+        pickerDefaultHeight_ = static_cast<float>(PICKER_DEFAULT_HEIGHT.ConvertToPx());
+        pickerHeightBeforeRotate_ = static_cast<float>(PICKER_HEIGHT_BEFORE_ROTATE.ConvertToPx());
+        maxOverscrollOffset_ = static_cast<float>(MAX_OVERSCROLL_OFFSET.ConvertToPx());
+    }
 
 protected:
     bool ChildPreMeasureHelperEnabled() override
@@ -138,9 +218,6 @@ protected:
         LayoutSafeAreaType ignoreType = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM) override;
 
 private:
-    inline bool RunningTranslateAnimation() const;
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
-
     // NestableScrollContainer implementations
     Axis GetAxis() const override
     {
@@ -155,70 +232,7 @@ private:
 
     ACE_DISALLOW_COPY_AND_MOVE(ContainerPickerPattern);
 
-    void GetLayoutProperties(const RefPtr<ContainerPickerLayoutAlgorithm>& pickerAlgorithm);
-    void OnAroundButtonClick(RefPtr<ContainerPickerEventParam> param);
-    RefPtr<ClickEvent> CreateItemClickEventListener(RefPtr<ContainerPickerEventParam> param);
-    void InitMouseAndPressEvent();
-    void UpdatePanEvent();
-    void AddPanEvent(const RefPtr<GestureEventHub>& gestureHub, GestureEventFunc&& actionStart,
-        GestureEventFunc&& actionUpdate, GestureEventFunc&& actionEnd, GestureEventNoParameter&& actionCancel);
-    GestureEventFunc ActionStartTask();
-    GestureEventFunc ActionUpdateTask();
-    GestureEventFunc ActionEndTask();
-    GestureEventNoParameter ActionCancelTask();
-    void HandleDragStart(const GestureEvent& info);
-    void ProcessDelta(float& delta, float mainSize, float deltaSum);
-    void HandleDragUpdate(const GestureEvent& info);
-    void HandleDragEnd(double dragVelocity, float mainDelta = 0.0f);
-    void HandleTargetIndex();
-    void CalcEndOffset(float& endOffset, double velocity);
-    bool Play(double dragVelocity);
-    void UpdateDragFRCSceneInfo(float speed, SceneStatus sceneStatus);
-    bool IsOutOfBoundary(float mainOffset = 0.0f) const;
-    bool IsOutOfStart(float mainOffset = 0.0f) const;
-    bool IsOutOfEnd(float mainOffset = 0.0f) const;
-    bool CheckDragOutOfBoundary();
-    bool SpringCurveTailMoveProcess(bool useRebound, double& dragDelta);
-    void SpringCurveTailEndProcess(bool useRebound, bool stopMove);
-    double GetDragDeltaLessThanJumpInterval(
-        double offsetY, float originalDragDelta, bool useRebound, float shiftDistance);
-    void UpdateColumnChildPosition(double offsetY);
-    bool IsLoop() const;
-    void SetDefaultTextStyle() const;
-    void SetDefaultTextStyle(RefPtr<FrameNode> node) const;
-    void CreateAnimation();
-    void AttachNodeAnimatableProperty(const RefPtr<NodeAnimatablePropertyFloat>& property);
-    void CreateSnapProperty();
-    void CreateSpringProperty();
-    void CreateAnimation(double from, double to);
-    void CreateTargetAnimation(int32_t targetIndex);
-    void CreateSpringtAnimation(float delta);
-    void PickerMarkDirty();
-    void PostIdleTask(const RefPtr<FrameNode>& frameNode);
-    void SwipeTo(int32_t index);
-    void UpdateClipEdge();
-    float ShortestDistanceBetweenCurrentAndTarget(int32_t targetIndex);
-    std::pair<int32_t, PickerItemInfo> CalcCurrentMiddleItem() const;
-    void CreateChildrenClickEvent(RefPtr<UINode>& host);
-    RefPtr<TouchEventImpl> CreateItemTouchEventListener();
-    void PlayInertialAnimation();
-    void PlaySpringAnimation();
-    void PlayTargetAnimation();
-    void PlayResetAnimation();
-    void StopInertialRollingAnimation();
-    void StopSpringAnimation();
-    void StopTargetAnimation();
-    double GetCurrentTime() const;
-    float CalculateResetOffset(float totalOffset);
-    float CalculateMiddleLineOffset();
-    void InitDefaultParams()
-    {
-        pickerItemHeight_ = static_cast<float>(PICKER_ITEM_HEIGHT.ConvertToPx());
-        pickerDefaultHeight_ = static_cast<float>(PICKER_DEFAULT_HEIGHT.ConvertToPx());
-        pickerHeightBeforeRotate_ = static_cast<float>(PICKER_HEIGHT_BEFORE_ROTATE.ConvertToPx());
-        maxOverscrollOffset_ = static_cast<float>(MAX_OVERSCROLL_OFFSET.ConvertToPx());
-    }
-
+    // Member variables
     RefPtr<PanEvent> panEvent_;
     PanDirection panDirection_;
     LayoutConstraintF layoutConstraint_;
