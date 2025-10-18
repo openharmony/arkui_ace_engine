@@ -1597,4 +1597,20 @@ HWTEST_F(CalendarPickerTestUpdate, CalendarPickerPatternTest057, TestSize.Level1
     calendarPickerModel.SetSelectDateWithNode(Referenced::RawPtr(frameNode), 2000, 1, 1);
     calendarPickerModel.SetSelectDateWithNode(Referenced::RawPtr(frameNode), 0, 0, 0);
 }
+
+/**
+ * @tc.name: CalendarPickerCreateAndSetMarkTodayTest
+ * @tc.desc: CalendarPickerCreateAndSetMarkTodayTest function test.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerTestUpdate, CalendarPickerCreateAndSetMarkTodayTest, TestSize.Level1)
+{
+    CalendarSettingData settingData;
+    CalendarPickerModelNG::GetInstance()->Create(settingData);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    CalendarPickerModelNG::SetMarkToday(frameNode, false);
+    EXPECT_EQ(CalendarPickerModelNG::GetMarkToday(frameNode), false);
+}
 } // namespace OHOS::Ace::NG
