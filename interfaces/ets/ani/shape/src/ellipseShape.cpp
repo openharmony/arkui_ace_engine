@@ -31,7 +31,7 @@ void ANICreateEllipseShape(ani_env* env, [[maybe_unused]] ani_object object)
     shapePeer->ellipseShape = ellipse;
 
     if (ANI_OK !=
-        env->Object_SetPropertyByName_Long(object, "ellipseShapeResult", reinterpret_cast<ani_long>(shapePeer))) {
+        env->Object_SetPropertyByName_Long(object, "basicShapeResult", reinterpret_cast<ani_long>(shapePeer))) {
         return;
     }
 }
@@ -62,7 +62,7 @@ void ANICreateEllipseShapeWithParam(
     }
     shapePeer->ellipseShape = ellipse;
     if (ANI_OK !=
-        env->Object_SetPropertyByName_Long(object, "ellipseShapeResult", reinterpret_cast<ani_long>(shapePeer))) {
+        env->Object_SetPropertyByName_Long(object, "basicShapeResult", reinterpret_cast<ani_long>(shapePeer))) {
         return;
     }
 }
@@ -70,7 +70,7 @@ void ANICreateEllipseShapeWithParam(
 EllipsePeer* GetEllipseShape(ani_env* env, ani_object obj)
 {
     ani_long ellipseAni;
-    if (ANI_OK != env->Object_GetFieldByName_Long(obj, "ellipseShapeResult", &ellipseAni)) {
+    if (ANI_OK != env->Object_GetFieldByName_Long(obj, "basicShapeResult", &ellipseAni)) {
         return nullptr;
     }
 
@@ -210,7 +210,7 @@ ani_object ANIEllipseShapeColor(ani_env* env, ani_object object, [[maybe_unused]
 
 ani_object EllipseShape::ANIEllipseShapeFromPtr(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr)
 {
-    return ANIShapeFromPtr<EllipsePeer>(env, ptr, ANI_SHAPE_NAME, "ellipseShapeResult");
+    return ANIShapeFromPtr<EllipsePeer>(env, ptr, ANI_SHAPE_NAME, "basicShapeResult");
 }
 
 ani_status EllipseShape::BindEllipseShape(ani_env* env)

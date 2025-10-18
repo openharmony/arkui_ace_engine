@@ -31,7 +31,7 @@ void ANICreatePathShape(ani_env* env, [[maybe_unused]] ani_object object)
     shapePeer->pathShape = path;
 
     if (ANI_OK !=
-        env->Object_SetPropertyByName_Long(object, "pathShapeResult", reinterpret_cast<ani_long>(shapePeer))) {
+        env->Object_SetPropertyByName_Long(object, "basicShapeResult", reinterpret_cast<ani_long>(shapePeer))) {
         return;
     }
 }
@@ -52,7 +52,7 @@ void ANICreatePathShapeWithParam(
     shapePeer->pathShape = path;
 
     if (ANI_OK !=
-        env->Object_SetPropertyByName_Long(object, "pathShapeResult", reinterpret_cast<ani_long>(shapePeer))) {
+        env->Object_SetPropertyByName_Long(object, "basicShapeResult", reinterpret_cast<ani_long>(shapePeer))) {
         return;
     }
 }
@@ -60,7 +60,7 @@ void ANICreatePathShapeWithParam(
 PathPeer* GetPathShape(ani_env* env, ani_object obj)
 {
     ani_long pathAni;
-    if (ANI_OK != env->Object_GetFieldByName_Long(obj, "pathShapeResult", &pathAni)) {
+    if (ANI_OK != env->Object_GetFieldByName_Long(obj, "basicShapeResult", &pathAni)) {
         return nullptr;
     }
 
@@ -153,7 +153,7 @@ ani_object ANIPathShapeCommands(ani_env* env, [[maybe_unused]] ani_object object
 
 ani_object PathShape::ANIPathShapeFromPtr(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr)
 {
-    return ANIShapeFromPtr<PathPeer>(env, ptr, ANI_SHAPE_NAME, "pathShapeResult");
+    return ANIShapeFromPtr<PathPeer>(env, ptr, ANI_SHAPE_NAME, "basicShapeResult");
 }
 
 ani_status PathShape::BindPathShape(ani_env* env)
