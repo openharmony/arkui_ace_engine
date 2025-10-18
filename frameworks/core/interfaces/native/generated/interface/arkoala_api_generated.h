@@ -23757,6 +23757,8 @@ typedef struct GENERATED_ArkUIVideoModifier {
                               const Opt_ImageAnalyzerConfig* value);
     void (*setEnableShortcutKey)(Ark_NativePointer node,
                                  const Opt_Boolean* value);
+    void (*setSurfaceBackgroundColor)(Ark_NativePointer node,
+                                      const Opt_ColorMetrics* value);
 } GENERATED_ArkUIVideoModifier;
 
 typedef struct GENERATED_ArkUIWaterFlowModifier {

@@ -20,6 +20,7 @@ import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
+import { ColorMetrics_serializer } from "./../Graphics"
 import { ImageAnalyzerConfig_serializer, ImageAnalyzerConfig, ImageAIOptions, ImageAIOptions_serializer } from "./imageCommon"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
@@ -29,6 +30,7 @@ import { VoidCallback } from "./units"
 import { ErrorCallback } from "@ohos.base"
 import { AttributeModifier, extractors, hookVideoAttributeModifier, AttributeUpdater } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
+import { ColorMetrics } from "arkui.Graphics"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { Resource } from "global.resource"
@@ -364,6 +366,18 @@ export class ArkVideoPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._VideoAttribute_setEnableShortcutKey(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setSurfaceBackgroundColorAttribute(value: ColorMetrics | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            ColorMetrics_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._VideoAttribute_setSurfaceBackgroundColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export enum SeekMode {
     PREVIOUS_KEYFRAME = 0,
@@ -465,6 +479,9 @@ export interface VideoAttribute extends CommonMethod {
     enableShortcutKey(value: boolean | undefined): this {
         throw new Error("Unimplemented method enableShortcutKey")
     }
+    surfaceBackgroundColor(value: ColorMetrics | undefined): this {
+        throw new Error("Unimplemented method surfaceBackgroundColor")
+    }
     attributeModifier(value: AttributeModifier<VideoAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Unimplemented method attributeModifier")
     }
@@ -488,6 +505,7 @@ export class ArkVideoStyle extends ArkCommonMethodStyle implements VideoAttribut
     enableAnalyzer_value?: boolean | undefined
     analyzerConfig_value?: ImageAnalyzerConfig | undefined
     enableShortcutKey_value?: boolean | undefined
+    surfaceBackgroundColor_value?: ColorMetrics | undefined
     attributeModifier_value?: AttributeModifier<VideoAttribute> | AttributeModifier<CommonMethod> | undefined
     setVideoOptions(value: VideoOptions): this {
         return this
@@ -544,6 +562,9 @@ export class ArkVideoStyle extends ArkCommonMethodStyle implements VideoAttribut
         return this
     }
     enableShortcutKey(value: boolean | undefined): this {
+        return this
+    }
+    surfaceBackgroundColor(value: ColorMetrics | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<VideoAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -706,6 +727,14 @@ export class ArkVideoComponent extends ArkCommonMethodComponent implements Video
         if (this.checkPriority("enableShortcutKey")) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setEnableShortcutKeyAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public surfaceBackgroundColor(value: ColorMetrics | undefined): this {
+        if (this.checkPriority("surfaceBackgroundColor")) {
+            const value_casted = value as (ColorMetrics | undefined)
+            this.getPeer()?.setSurfaceBackgroundColorAttribute(value_casted)
             return this
         }
         return this

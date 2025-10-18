@@ -378,8 +378,9 @@ void SetSurfaceBackgroundColorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto optValue = Converter::OptConvertPtr<Color>(value);
-    VideoModelStatic::SetSurfaceBackgroundColor(frameNode, optValue);
+    auto colorValue = Converter::OptConvertPtr<Color>(value);
+    auto color = colorValue.value_or(Color::BLACK);
+    VideoModelNG::SetSurfaceBackgroundColor(frameNode, (color == Color::BLACK ? color : Color::TRANSPARENT));
 }
 void SetEnableShortcutKeyImpl(Ark_NativePointer node,
                               const Opt_Boolean* value)
@@ -417,6 +418,7 @@ const GENERATED_ArkUIVideoModifier* GetVideoModifier()
         VideoAttributeModifier::SetEnableAnalyzerImpl,
         VideoAttributeModifier::SetAnalyzerConfigImpl,
         VideoAttributeModifier::SetEnableShortcutKeyImpl,
+        VideoAttributeModifier::SetSurfaceBackgroundColorImpl,
     };
     return &ArkUIVideoModifierImpl;
 }
