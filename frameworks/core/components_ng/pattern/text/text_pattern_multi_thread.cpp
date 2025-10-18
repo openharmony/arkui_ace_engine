@@ -96,7 +96,9 @@ void TextPattern::OnAttachToMainTreeMultiThread()
     if (!textLayoutProperty->HasTextAlign()) {
         textLayoutProperty->UpdateTextAlign(theme->GetTextStyle().GetTextAlign());
     }
-    textLayoutProperty->UpdateAlignment(Alignment::CENTER_LEFT);
+    if (textLayoutProperty->GetPositionProperty() && !(textLayoutProperty->GetPositionProperty()->HasAlignment())) {
+        textLayoutProperty->UpdateAlignment(Alignment::CENTER_LEFT);
+    }
     isDetachFromMainTree_ = false;
     MultiThreadDelayedExecution(); // Delayed operation
 }
