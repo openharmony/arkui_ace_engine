@@ -27,7 +27,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 const float UNDEFINED_SIZE = -1.0f;
-const float HALF = 2.0;
 const int32_t ITEM_COUNTS = 10;
 const float HORIZONTAL_ANGLE = 180.0f;
 const float VERTICAL_ANGLE = 90.0f;
@@ -100,10 +99,10 @@ void ContainerPickerLayoutAlgorithm::MeasureHeight(LayoutWrapper* layoutWrapper,
     if (layoutPolicy.has_value() && layoutPolicy->IsHeightMatch()) {
         auto parentMainSize =
             CreateIdealSizeByPercentRef(contentConstraint, axis_, MeasureType::MATCH_PARENT_MAIN_AXIS).MainSize(axis_);
-        height = parentMainSize.value_or(static_cast<float>(PICKER_DEFAULT_HEIGHT.ConvertToPx()));
+        height = parentMainSize.value_or(pickerDefaultHeight_);
     } else {
         if (Negative(height)) {
-            height = static_cast<float>(PICKER_DEFAULT_HEIGHT.ConvertToPx());
+            height = pickerDefaultHeight_;
         }
     }
 
@@ -159,11 +158,10 @@ void ContainerPickerLayoutAlgorithm::MeasureWidth(LayoutWrapper* layoutWrapper, 
 
 void ContainerPickerLayoutAlgorithm::CalcMainAndMiddlePos()
 {
-    auto defaultItemHeight = static_cast<float>(PICKER_ITEM_DEFAULT_HEIGHT.ConvertToPx());
-    startMainPos_ = std::max((height_ - static_cast<float>(PICKER_DEFAULT_HEIGHT.ConvertToPx())) / HALF, 0.0f);
-    endMainPos_ = startMainPos_ + std::min(height_, static_cast<float>(PICKER_DEFAULT_HEIGHT.ConvertToPx()));
-    middleItemStartPos_ = (height_ - defaultItemHeight) / HALF;
-    middleItemEndPos_ = (height_ + defaultItemHeight) / HALF;
+    startMainPos_ = std::max((height_ - pickerHeightBeforeRotate_) / HALF, 0.0f);
+    endMainPos_ = startMainPos_ + std::min(height_, pickerHeightBeforeRotate_);
+    middleItemStartPos_ = (height_ - pickerItemHeight_) / HALF;
+    middleItemEndPos_ = (height_ + pickerItemHeight_) / HALF;
 }
 
 float ContainerPickerLayoutAlgorithm::GetChildMaxWidth(LayoutWrapper* layoutWrapper) const
@@ -242,7 +240,7 @@ void ContainerPickerLayoutAlgorithm::ResetOffscreenItemPosition(LayoutWrapper* l
     CHECK_NULL_VOID(childGeometryNode);
 
     OffsetF offset(0.0f, 0.0f);
-    offset.SetY(-static_cast<float>(PICKER_ITEM_DEFAULT_HEIGHT.ConvertToPx()));
+    offset.SetY(-pickerItemHeight_);
 
     childGeometryNode->SetMarginFrameOffset(offset);
     childWrapper->Layout();
@@ -431,9 +429,8 @@ void ContainerPickerLayoutAlgorithm::TranslateAndRotate(RefPtr<FrameNode> node, 
 {
     float offsetY = offset.GetY() - middleItemStartPos_ - topPadding_;
     const float pi = 3.14159;
-    double itemHeight = PICKER_ITEM_DEFAULT_HEIGHT.ConvertToPx();
-    float radius = itemHeight * ITEM_COUNTS / (HALF * pi);
-    float yScale = (pi * radius) / static_cast<float>(PICKER_DEFAULT_HEIGHT.ConvertToPx());
+    float radius = pickerItemHeight_ * ITEM_COUNTS / (HALF * pi);
+    float yScale = (pi * radius) / pickerHeightBeforeRotate_;
     float radian = (offsetY * yScale) / radius;
     float angle = radian * (HORIZONTAL_ANGLE / pi);
     float correctFactor = angle > 0 ? 1.0 : -1.0;

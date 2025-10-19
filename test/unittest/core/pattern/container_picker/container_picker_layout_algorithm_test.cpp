@@ -94,6 +94,13 @@ void ContainerPickerLayoutAlgorithmTest::SetUp()
     pickerTheme_ = AceType::MakeRefPtr<PickerTheme>();
     algorithm_ = AceType::MakeRefPtr<ContainerPickerLayoutAlgorithm>();
 
+    float itemHeight = 40.0f;
+    float pickerHeight = 200.0f;
+    float pickerHeightBeforeRotate = 280.0f;
+    algorithm_->SetItemHeight(itemHeight);
+    algorithm_->SetPickerHeight(pickerHeight);
+    algorithm_->SetPickerHeightBeforeRotate(pickerHeightBeforeRotate);
+
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 
@@ -864,7 +871,7 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
 
 /**
  * @tc.name: ContainerPickerLayoutAlgorithm_MeasureBelowTest002
- * @tc.desc: Test MeasureBelow method with overScrollFeature enabled
+ * @tc.desc: Test MeasureBelow method with canOverScroll enabled
  * @tc.type: FUNC
  */
 HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_MeasureBelowTest002, TestSize.Level0)
@@ -883,12 +890,12 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
     layoutProperty->contentConstraint_ = layoutConstraintF;
 
     /**
-     * @tc.steps: step2. Set up algorithm with overScrollFeature and call MeasureBelow
+     * @tc.steps: step2. Set up algorithm with canOverScroll and call MeasureBelow
      */
     algorithm_->SetHeight(500.0f);
     algorithm_->CalcMainAndMiddlePos();
     algorithm_->totalItemCount_ = 5;
-    algorithm_->overScrollFeature_ = true;
+    algorithm_->canOverScroll_ = true;
 
     LayoutConstraintF layoutConstraint;
     layoutConstraint.selfIdealSize = { 300.0f, 500.0f };
@@ -933,7 +940,7 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
 
 /**
  * @tc.name: ContainerPickerLayoutAlgorithm_MeasureAboveTest002
- * @tc.desc: Test MeasureAbove method with overScrollFeature enabled
+ * @tc.desc: Test MeasureAbove method with canOverScroll enabled
  * @tc.type: FUNC
  */
 HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_MeasureAboveTest002, TestSize.Level0)
@@ -952,12 +959,12 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
     layoutProperty->contentConstraint_ = layoutConstraintF;
 
     /**
-     * @tc.steps: step2. Set up algorithm with overScrollFeature and call MeasureAbove
+     * @tc.steps: step2. Set up algorithm with canOverScroll and call MeasureAbove
      */
     algorithm_->SetHeight(500.0f);
     algorithm_->CalcMainAndMiddlePos();
     algorithm_->totalItemCount_ = 5;
-    algorithm_->overScrollFeature_ = true;
+    algorithm_->canOverScroll_ = true;
 
     LayoutConstraintF layoutConstraint;
     layoutConstraint.selfIdealSize = { 300.0f, 500.0f };
@@ -985,8 +992,8 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Need
     EXPECT_TRUE(algorithm_->NeedMeasureBelow(0, 100.0f, 500.0f, false));
     EXPECT_FALSE(algorithm_->NeedMeasureBelow(0, 600.0f, 500.0f, false));
 
-    // Test with overScrollFeature
-    algorithm_->overScrollFeature_ = true;
+    // Test with canOverScroll
+    algorithm_->canOverScroll_ = true;
     EXPECT_FALSE(algorithm_->NeedMeasureBelow(0, 600.0f, 500.0f, false));
 }
 
