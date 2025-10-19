@@ -5621,6 +5621,9 @@ void RichEditorPattern::UpdateCaretInfoToController()
     TextEditingValue editingValue;
     editingValue.text = UtfUtils::Str16ToStr8(text);
     editingValue.hint = "";
+#ifdef ANDROID_PLATFORM
+    editingValue.stopBackPress = IsStopBackPress();
+#endif
     editingValue.selection.Update(start, end);
     InputMethodManager::GetInstance()->SetEditingState(editingValue, GetInstanceId());
 #else
@@ -6769,20 +6772,20 @@ bool RichEditorPattern::OnBackPressed()
     }
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
     if (!imeShown_ && !isCustomKeyboardAttached_) {
-#else
-    if (!isCustomKeyboardAttached_) {
-#endif
         return false;
     }
+#else
+#ifndef ANDROID_PLATFORM
+    if (!isCustomKeyboardAttached_) {
+        return false;
+    }
+#endif
+#endif
     MarkContentNodeForRender();
     ResetSelection();
     CloseKeyboard(false);
     FocusHub::LostFocusToViewRoot();
-#if defined(ANDROID_PLATFORM)
-    return false;
-#else
     return isStopBackPress_;
-#endif
 }
 
 void RichEditorPattern::SetInputMethodStatus(bool keyboardShown)
@@ -7306,6 +7309,26 @@ bool RichEditorPattern::HandleOnEscape()
     CloseSelectOverlay();
     return true;
 }
+
+#ifdef ANDROID_PLATFORM
+bool RichEditorPattern::HandleOnKeyBack()
+{
+    if (isCustomKeyboardAttached_ && HasFocus()) {
+        StopTwinkling();
+        auto focusHub = GetFocusHub();
+        CHECK_NULL_RETURN(focusHub, true);
+        focusHub->LostFocusToViewRoot();
+        if (!IsStopBackPress()) {
+            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
+                "return key handling is blocked while the custom keyboard is active and "
+                "stopBackPress is false, to ensure OnBackPressed can be triggered properly.");
+            HandleOnEscape();
+            return false;
+        }
+    }
+    return HandleOnEscape();
+}
+#endif
 
 void RichEditorPattern::HandleOnUndoAction()
 {

@@ -53,6 +53,7 @@ public:
     void CloseKeyboard(int32_t instanceId);
     void Attach(const WeakPtr<TextInputClient>& client, const TextInputConfiguration& config,
         const RefPtr<TaskExecutor>& taskExecutor, int32_t instanceId);
+    void FinishComposing(int32_t instanceId);
 #endif
 private:
     InputMethodManager() = default;

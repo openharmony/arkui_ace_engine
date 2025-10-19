@@ -181,6 +181,7 @@ public:
     MOCK_METHOD(void, SetEditingState, (const TextEditingValue& value, int32_t instanceId, bool needFireChangeEvent),
         (override));
     MOCK_METHOD(void, Close, (int32_t instanceId), (override));
+    MOCK_METHOD(void, FinishComposing, (int32_t instanceId), (override));
 };
 
 class MockTextInputClient : public TextInputClient {
