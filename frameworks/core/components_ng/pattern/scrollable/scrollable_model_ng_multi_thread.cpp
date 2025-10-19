@@ -35,4 +35,17 @@ void ScrollableModelNG::SetBackToTopMultiThread(FrameNode* frameNode, bool backT
 
     pattern->UseDefaultBackToTop(false);
 }
+
+void ScrollableModelNG::ResetBackToTopMultiThread(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_VOID(pattern);
+    frameNode->PostAfterAttachMainTreeTask([weak = AceType::WeakClaim(AceType::RawPtr(pattern))]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->ResetBackToTop();
+    });
+    pattern->UseDefaultBackToTop(true);
+}
 } // namespace OHOS::Ace::NG

@@ -29,6 +29,7 @@ public:
     static RefPtr<ScrollProxy> GetOrCreateScrollBarProxy(FrameNode* frameNode);
 
     static void SetAxis(FrameNode* frameNode, const std::optional<Axis>& axis);
+    static void SetAxisMultiThread(FrameNode* frameNode, const std::optional<Axis>& axis);
     static void SetScrollBar(FrameNode* frameNode, const std::optional<DisplayMode> barState);
     static void SetScrollBarColor(FrameNode* frameNode, const std::optional<Color>& color);
     static void SetScrollBarWidth(FrameNode* frameNode, const std::optional<Dimension>& dimension);

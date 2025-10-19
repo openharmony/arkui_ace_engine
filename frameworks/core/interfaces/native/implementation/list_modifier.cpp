@@ -238,11 +238,9 @@ void SetDividerImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto divider = Converter::OptConvertPtr<V2::ItemDivider>(value);
-    ListModelStatic::SetDivider(frameNode, divider);
-
     auto options = value ? Converter::OptConvert<Ark_ListDividerOptions>(*value) : std::nullopt;
     V2::ItemDivider dividerAns;
+    bool needGetThemeColor = false;
     if (options.has_value()) {
         auto widthOpt = Converter::OptConvert<Dimension>(options->strokeWidth);
         dividerAns.strokeWidth = widthOpt.value_or(0.0_vp);
@@ -254,13 +252,12 @@ void SetDividerImpl(Ark_NativePointer node,
         if (colorOpt.has_value()) {
             dividerAns.color = colorOpt.value();
         } else {
-            auto listTheme = ListModifier::GetListTheme(frameNode);
-            if (listTheme) {
-                dividerAns.color = listTheme->GetDividerColor();
-            }
+            needGetThemeColor = true;
         }
+        ListModelStatic::SetDivider(frameNode, dividerAns, needGetThemeColor);
+    } else {
+        ListModelStatic::SetDivider(frameNode, std::nullopt);
     }
-    ListModelStatic::SetDivider(frameNode, dividerAns);
 }
 void SetMultiSelectableImpl(Ark_NativePointer node,
                             const Opt_Boolean* value)

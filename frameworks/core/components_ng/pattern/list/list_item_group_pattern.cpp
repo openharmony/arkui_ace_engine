@@ -308,11 +308,35 @@ RefPtr<ListChildrenMainSize> ListItemGroupPattern::GetOrCreateListChildrenMainSi
         context->RequestFrame();
     };
     childrenSize_->SetOnDataChange(callback);
+    UpdateChildrenMainSizeRoundingMode();
+    return childrenSize_;
+}
+
+void ListItemGroupPattern::UpdateChildrenMainSizeRoundingModeMultiThread()
+{
+    auto node = GetHost();
+    CHECK_NULL_VOID(node);
+    node->PostAfterAttachMainTreeTask([weak = AceType::WeakClaim(AceType::RawPtr(node))]() {
+        auto node = weak.Upgrade();
+        CHECK_NULL_VOID(node);
+        auto pattern = node->GetPattern<ListItemGroupPattern>();
+        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID(pattern->childrenSize_);
+        auto pipeline = node->GetContext();
+        if (pipeline && pipeline->GetPixelRoundMode() == PixelRoundMode::PIXEL_ROUND_AFTER_MEASURE) {
+            pattern->childrenSize_->SetIsRoundingMode();
+        }
+    });
+}
+
+void ListItemGroupPattern::UpdateChildrenMainSizeRoundingMode()
+{
+    auto node = GetHost();
+    FREE_NODE_CHECK(node, UpdateChildrenMainSizeRoundingMode);
     auto pipeline = GetContext();
     if (pipeline && pipeline->GetPixelRoundMode() == PixelRoundMode::PIXEL_ROUND_AFTER_MEASURE) {
         childrenSize_->SetIsRoundingMode();
     }
-    return childrenSize_;
 }
 
 void ListItemGroupPattern::SetListChildrenMainSize(

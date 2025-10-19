@@ -31,13 +31,19 @@ public:
     static void SetScrollBarMode(FrameNode* frameNode, const std::optional<DisplayMode>& value);
     static void SetScrollBarColor(FrameNode* frameNode, const std::optional<Color>& value);
     static void SetScrollBarWidth(FrameNode* frameNode, const std::optional<Dimension>& value);
+    static void UpdateScrollBarColorWithTheme(FrameNode* frameNode);
+    static void UpdateScrollBarWidthWithTheme(FrameNode* frameNode);
+    static void SetScrollBarColorMultiThread(FrameNode* frameNode, const std::optional<Color>& value);
+    static void SetScrollBarWidthMultiThread(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetNestedScroll(FrameNode* frameNode,
         const std::optional<NestedScrollMode>& forward, const std::optional<NestedScrollMode>& backward);
     static void SetFriction(FrameNode* frameNode, const std::optional<double>& friction);
     static void SetMaxFlingSpeed(FrameNode* frameNode,  const std::optional<double>& max);
     static void SetContentClip(FrameNode* frameNode, ContentClipMode mode, const RefPtr<ShapeRect>& rect);
     static void SetBackToTop(FrameNode* frameNode, bool backToTop);
+    static void SetBackToTopMultiThread(FrameNode* frameNode, bool backToTop);
     static void ResetBackToTop(FrameNode* frameNode);
+    static void ResetBackToTopMultiThread(FrameNode* frameNode);
     static void SetEdgeEffect(
         FrameNode* frameNode, const std::optional<EdgeEffect>& edgeEffect, const std::optional<bool>& alwaysEnabled,
         EffectEdge effectEdge = EffectEdge::ALL);
