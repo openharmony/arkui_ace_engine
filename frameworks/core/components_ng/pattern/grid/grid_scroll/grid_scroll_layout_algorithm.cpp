@@ -948,6 +948,7 @@ void GridScrollLayoutAlgorithm::LargeItemLineHeight(const RefPtr<LayoutWrapper>&
     if (mainSpan > 1) {
         cellAveLength_ =
             std::max((GetMainAxisSize(itemSize, info_.axis_) - (mainGap_ * (mainSpan - 1))) / mainSpan, cellAveLength_);
+        cellAveLength_ = std::max(cellAveLength_, 0.0f);
     }
 }
 

@@ -513,5 +513,26 @@ HWTEST_F(GridScrollLayoutTestNg, ChangeItemNumber002, TestSize.Level1)
     FlushUITasks();
     EXPECT_EQ(pattern_->info_.lineHeightMap_[1], ITEM_MAIN_SIZE);
 }
+
+/**
+ * @tc.name: BigItemWithZeroHeight
+ * @tc.desc: Test BigItemWithZeroHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollLayoutTestNg, BigItemWithZeroHeight, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetRowsGap(Dimension(5));
+    CreateBigItem(0, 1, 0, 2, NULL_VALUE, 0.0f);
+    CreateFixedItems(15);
+    CreateDone();
+
+    EXPECT_EQ(pattern_->info_.lineHeightMap_[0], 0.0f);
+    EXPECT_EQ(pattern_->info_.startMainLineIndex_, 0);
+    EXPECT_EQ(pattern_->info_.endMainLineIndex_, 5);
+    EXPECT_EQ(pattern_->info_.startIndex_, 0);
+    EXPECT_EQ(pattern_->info_.endIndex_, 12);
+}
 } // namespace OHOS::Ace::NG
  
