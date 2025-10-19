@@ -28,6 +28,7 @@
 #include "syntax/lazy_for_each_module.h"
 #include "syntax/syntax_module.h"
 #include "syntax/for_each_module.h"
+#include "syntax/parallelize_ui_module.h"
 #include "drag_and_drop/native_drag_drop_global.h"
 #include "dragController/drag_controller_module.h"
 #include "styled_string/styled_string_module.h"
@@ -1383,6 +1384,21 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_CommonInterface_setCommonOptions",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetCommonOptions)
+        },
+        ani_native_function {
+            "_ParallelizeUIAdapterNode_Construct",
+            "i:l",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ParallelizeUIAdapterNodeConstruct)
+        },
+        ani_native_function {
+            "_ParallelizeUIAdapterNode_Reset",
+            "l:",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ParallelizeUIReset)
+        },
+        ani_native_function {
+            "_ParallelizeUIAdapterNode_RegisterCallback",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ParallelizeUIRegisterCallback)
         },
     };
 

@@ -340,6 +340,7 @@ export class Application {
             preState = undefined;
         }
         ObserveSingleton.instance.updateDirty();
+        this.uiContext!.flushCallback()
         this.updateStates(this.manager!, rootState, preState);
         ObserveSingleton.instance.makeDelayedMutableStateChanges();
         while (StateUpdateLoop.len) {
@@ -375,6 +376,7 @@ export class Application {
         }
         updateLazyItems()
         // flushBuilderRootNode()
+        this.uiContext!.updateParallelizeItemNode()
         if (partialUpdates.length > 0) {
             // If there are pending partial updates - we apply them one by one and provide update context.
             for (let update of partialUpdates) {

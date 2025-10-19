@@ -385,4 +385,9 @@ export class ArkUIAniModule {
 
     native static _Common_construct(id: KInt, flags: KInt): KPointer
     native static _CommonInterface_setCommonOptions(ptr: KPointer): void
+
+    // for ParallelizeUIAdapter
+    native static _ParallelizeUIAdapterNode_Construct(id: KInt): KPointer
+    native static _ParallelizeUIAdapterNode_Reset(ptr: KPointer): void
+    native static _ParallelizeUIAdapterNode_RegisterCallback(ptr: KPointer, getCount: (() => KInt), getFrame: ((index:KInt, needBuild:KInt, isCache:KInt) =>KPointer)): void
 }

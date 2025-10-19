@@ -32,6 +32,7 @@
 #include "lazy_for_each_node_ani_modifier.h"
 #include "list_ani_modifier.h"
 #include "node_adapter_ani_modifier.h"
+#include "parallelize_ui_ani_modifier.h"
 #include "rich_editor_ani_modifier.h"
 #include "text_based_ani_modifier.h"
 #include "shape_ani_modifier.h"
@@ -85,6 +86,7 @@ const ArkUIAniModifiers* GetArkUIAniModifiers()
         .getComponent3DModifier = OHOS::Ace::NG::GetComponent3DModifier,
         .getXBarAniModifier = OHOS::Ace::NG::GetXBarAniModifier,
         .getCommonNodeAniModifier = OHOS::Ace::NG::GetCommonNodeAniModifier,
+        .getParallelizeUIModifier = OHOS::Ace::NG::GetParallelizeUIAniModifier,
     };
     return &impl;
 }
