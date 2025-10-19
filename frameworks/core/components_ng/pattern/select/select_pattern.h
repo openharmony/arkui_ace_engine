@@ -282,6 +282,14 @@ private:
     void SetArrowModifierByUser(const RefPtr<SelectTheme>& theme, const RefPtr<SelectPaintProperty>& props);
     void SetSelectedOptionBgColorByUser(const RefPtr<SelectTheme>& theme, const RefPtr<SelectPaintProperty>& props,
         const RefPtr<SelectLayoutProperty>& layoutProps);
+
+    // multi-thread
+    void OnAttachToMainTree() override;
+    void OnAttachToFrameNodeMultiThread();
+    void OnAttachToMainTreeMultiThread();
+    void ResetParamsMultiThread();
+    void ResetOptionPropsMultiThread();
+
     bool HasRowNode() const
     {
         return rowId_.has_value();

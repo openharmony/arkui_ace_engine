@@ -497,6 +497,8 @@ public:
 
     void ExpandWithSafeAreaPadding(const RefPtr<LayoutWrapper>& layoutWrapper);
 
+    static int32_t GetListLanesByFillType(PresetFillType fillType, WidthBreakpoint point);
+
 protected:
     virtual void UpdateListItemConstraint(
         Axis axis, const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);

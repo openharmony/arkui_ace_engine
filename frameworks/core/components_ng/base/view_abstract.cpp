@@ -3754,8 +3754,9 @@ void ViewAbstract::SetTransform3DMatrix(const Matrix4& matrix)
 void ViewAbstract::BindPopup(
     const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode, const RefPtr<UINode>& customNode)
 {
-    TAG_LOGD(AceLogTag::ACE_DIALOG, "bind popup enter");
     CHECK_NULL_VOID(targetNode);
+    FREE_NODE_CHECK(targetNode, BindPopup, param, targetNode, customNode);
+    TAG_LOGD(AceLogTag::ACE_DIALOG, "bind popup enter");
     auto targetId = targetNode->GetId();
     auto targetTag = targetNode->GetTag();
     auto context = targetNode->GetContext();
@@ -3906,6 +3907,7 @@ void ViewAbstract::BindTips(
 {
     CHECK_NULL_VOID(param);
     CHECK_NULL_VOID(targetNode);
+    FREE_NODE_CHECK(targetNode, BindTips, param, targetNode, spanString);
     auto targetId = targetNode->GetId();
     auto targetTag = targetNode->GetTag();
     auto context = targetNode->GetContext();
@@ -5644,7 +5646,6 @@ void ViewAbstract::AddOverlayToFrameNode(const RefPtr<NG::FrameNode>& overlayNod
     layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     layoutProperty->UpdateAlignment(align.value_or(Alignment::TOP_LEFT));
     layoutProperty->SetOverlayOffset(offsetX, offsetY);
-    layoutProperty->UpdateLayoutDirection(direction);
     auto renderContext = overlayNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateZIndex(INT32_MAX);
@@ -6538,7 +6539,6 @@ void ViewAbstract::SetOverlayNode(FrameNode* frameNode, FrameNode* node, const N
     layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     layoutProperty->UpdateAlignment(overlay.align);
     layoutProperty->SetOverlayOffset(overlay.x, overlay.y);
-    layoutProperty->UpdateLayoutDirection(overlay.direction);
     auto renderContext = overlayNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateZIndex(INT32_MAX);

@@ -116,8 +116,8 @@ class ObserveV2 {
   // to make sure the callback function will be executed only once
   public monitorFuncsToRun_: Set<number> = new Set();
 
-  // ViewV2s Grouped by instance id (container id)
-  private viewV2NeedUpdateMap_: Map<number, Map<ViewV2 | ViewPU, Array<number>>> = new Map();
+  // ViewV2s Grouped by instance id (container id), contains ReactiveBuilderNode.
+  private viewV2NeedUpdateMap_: Map<number, Map<ViewBuildNodeBase, Array<number>>> = new Map();
 
   // To avoid multiple schedules on the same container
   private scheduledContainerIds_: Set<number> = new Set();
@@ -660,13 +660,14 @@ class ObserveV2 {
     this.elmtIdsChanged_.clear();
 
     // Cache for view -> instanceId
-    const viewInstanceIdCache = new Map<ViewV2 | ViewPU, number>();
+    const viewInstanceIdCache = new Map<ViewBuildNodeBase, number>();
 
     for (const elmtId of elmtIds) {
         const view = this.id2cmp_[elmtId]?.deref();
 
         // Early continue for invalid views
-        if (!(view instanceof ViewV2 || view instanceof ViewPU)) {
+        if (!(view instanceof ViewV2 || view instanceof ViewPU ||
+            (view instanceof ViewBuildNodeBase && view?.__isReactiveBuilderNode__ViewBuildNodeBase__Internal()))) {
             continue;
         }
 
@@ -680,7 +681,7 @@ class ObserveV2 {
         // Get or create viewMap
         let viewMap = this.viewV2NeedUpdateMap_.get(instanceId);
         if (!viewMap) {
-          viewMap = new Map<ViewV2 | ViewPU, Array<number>>();
+          viewMap = new Map<ViewBuildNodeBase, Array<number>>();
           this.viewV2NeedUpdateMap_.set(instanceId, viewMap);
         }
 
@@ -1017,7 +1018,7 @@ class ObserveV2 {
    * @param elmtIds
    *
    */
-  private updateUINodesSynchronously(elmtIds: Array<number>, inView?: ViewPU | ViewV2): void {
+  private updateUINodesSynchronously(elmtIds: Array<number>, inView?: ViewBuildNodeBase): void {
     stateMgmtConsole.debug(`ObserveV2.updateUINodesSynchronously: ${elmtIds.length} elmtIds: ${JSON.stringify(elmtIds)} ...`);
     aceDebugTrace.begin(`ObserveV2.updateUINodesSynchronously: ${elmtIds.length} elmtId`);
 
@@ -1032,6 +1033,9 @@ class ObserveV2 {
           view.scheduleDelayedUpdate(elmtId);
         }
       } // if ViewV2 or ViewPU
+      else if (view instanceof ViewBuildNodeBase && view?.__isReactiveBuilderNode__ViewBuildNodeBase__Internal()) {
+        view.UpdateElement(elmtId);
+      }
     });
     aceDebugTrace.end();
   }

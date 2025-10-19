@@ -1,3 +1,4 @@
+import { int32 } from "@koalaui/common";
 import { KPointer } from "@koalaui/interop";
 import { default as image } from "@ohos.multimedia.image";
 import { ColorMetrics, DrawContext, LengthMetrics, Size } from "arkui.Graphics";
@@ -216,13 +217,13 @@ export namespace extractors {
   export function toUnifiedDataChannelUnifiedDataPtr(
     value: unifiedDataChannel.UnifiedData
   ): KPointer {
-    return 123;
+    return ArkUIAniModule._Extractors_toUnifiedDataChannelUnifiedDataPtr(value);
   }
   export function fromUnifiedDataChannelUnifiedDataPtr(
     ptr: KPointer
   ): unifiedDataChannel.UnifiedData {
     const x: Object = {};
-    return x as unifiedDataChannel.UnifiedData;
+    return ArkUIAniModule._Extractors_fromUnifiedDataChannelUnifiedDataPtr(ptr);
   }
 
   export function toUnifiedDataChannelSummaryPtr(

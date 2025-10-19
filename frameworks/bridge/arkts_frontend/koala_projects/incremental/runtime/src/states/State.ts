@@ -162,8 +162,8 @@ export interface StateContext {
         reuseKey?: string
     ): InternalScope<Value>
     controlledScope(id: KoalaCallsiteKey, invalidate: () => void): ControlledScope
-    fork(builder: (manager: StateContext) => void, complete: () => void): StateContext
-    merge<Value>(main: StateContext, rootNode: ComputableState<Value>, compute: () => void): void
+    fork(): StateContext
+    merge<Value>(main: StateContext, rootNode: ComputableState<Value>): void
     terminate<Value>(rootScope: ComputableState<Value>): void
 }
 
@@ -883,40 +883,21 @@ export class StateManagerImpl implements StateManager {
         this.childManager = this.childManager.filter(item => item !== child)
     }
 
-    fork(builder: (manager: StateContext) => void, complete: () => void): StateContext {
-        let context = new StateManagerImpl();
+    fork(): StateContext {
+        let context = new StateManagerImpl()
         context.parentManager = this
         context.contextData = this.contextData
-        const task = () => {
-            RuntimeProfiler.startTrace(`Do parallel task`);
-            const old = GlobalStateManager.GetLocalManager();
-            GlobalStateManager.SetLocalManager(context);
-            builder(context);
-            GlobalStateManager.SetLocalManager(old);
-            context.current = undefined
-            if (complete) {
-                complete();
-            }
-            RuntimeProfiler.endTrace();
-            return undefined
-        }
-        //@ts-ignore
-        taskpool.execute(task).then(() => { }).catch((err: Error) => {
-            console.error('parallel run in taskpool error :', err);
-            console.error(err.stack);
-        })
-        return context;
+        return context
     }
 
-    merge<Value>(main: StateContext, rootScope: ComputableState<Value>, compute: () => void): void {
-        const mainContext = main as StateManagerImpl
-        RuntimeProfiler.startTrace(`merge`)
-        mainContext.childManager.push(this)
+    merge<Value>(main: StateContext, rootScope: ComputableState<Value>): void {
         const current = rootScope as ScopeImpl<Value>
-        const scope = main!.scope<void>(0, 1, () => {
+        const mainContext = main as StateManagerImpl
+        const scope = mainContext!.scopeEx<void>(9999, 0, () => {
+            mainContext.childManager.push(this)
             return current.nodeRef!
         }) as ScopeImpl<void>
-        compute()
+
         if (scope.unchanged) {
             scope.cached
             RuntimeProfiler.endTrace()
@@ -1215,10 +1196,7 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
         const current = this.manager?.current // parameters can update snapshot during recomposition
         let scope: ManagedScope = this
         while (true) {
-            if (scope === current) {
-                scope.getCascadeParent()?.states?.invalidate();
-                break // parameters should not invalidate whole hierarchy
-            }
+            if (scope === current) break // parameters should not invalidate whole hierarchy
             if (!scope.recomputeNeeded) RuntimeProfiler.instance?.invalidation()
             else if (current === undefined) break // all parent scopes were already invalidated
             scope.recomputeNeeded = true

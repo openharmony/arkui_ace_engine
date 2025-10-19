@@ -19,6 +19,7 @@
 #include "animation/animation_ani_impl.h"
 #include "canvas/canvas_module.h"
 #include "common/common_module.h"
+#include "common_node/common_node_module.h"
 #include "component3d/component3d_module_methods.h"
 #include "componentSnapshot/componentSnapshot_module.h"
 #include "content_slot/content_slot_module.h"
@@ -975,6 +976,16 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::TransferScrollableTargetInfoPointer)
         },
         ani_native_function {
+            "_Extractors_toUnifiedDataChannelUnifiedDataPtr",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorFromUnifiedDataToPtr)
+        },
+        ani_native_function {
+            "_Extractors_fromUnifiedDataChannelUnifiedDataPtr",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorFromPtrToUnifiedData)
+        },
+        ani_native_function {
             "_createDragEventAccessorWithPointer",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::CreateDragEventAccessorWithPointer)
@@ -1362,6 +1373,16 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_Extractors_FromDrawingCanvasPtr",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsFromDrawingCanvasPtr)
+        },
+        ani_native_function {
+            "_Common_construct",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::Commonconstruct)
+        },
+        ani_native_function {
+            "_CommonInterface_setCommonOptions",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetCommonOptions)
         },
     };
 

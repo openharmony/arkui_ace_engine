@@ -14,10 +14,12 @@
  */
 
 #include "bridge/declarative_frontend/jsview/js_scrollable.h"
+#include <optional>
 
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "core/components/common/layout/constants.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
@@ -120,6 +122,18 @@ void JSScrollable::JsClip(const JSCallbackInfo& info)
         ViewAbstractModel::GetInstance()->SetClipShape(clipShape->GetBasicShape());
     } else if (info[0]->IsBoolean()) {
         ViewAbstractModel::GetInstance()->SetClipEdge(info[0]->ToBoolean());
+    }
+}
+
+std::optional<PresetFillType> JSScrollable::ParsePresetFillType(const JSRef<JSVal>& jsValue)
+{
+    int32_t presetFillType = 0;
+    if (JSViewAbstract::ParseJsInt32(jsValue, presetFillType) &&
+        InRegion(static_cast<int32_t>(PresetFillType::BREAKPOINT_DEFAULT),
+            static_cast<int32_t>(PresetFillType::BREAKPOINT_SM2MD3LG5), presetFillType)) {
+        return static_cast<PresetFillType>(presetFillType);
+    } else {
+        return std::nullopt;
     }
 }
 } // namespace OHOS::Ace::Framework

@@ -24,7 +24,11 @@ declare interface ArkTsUtil {
     getHash(object: object): number;
 }
 
-declare class UIContext {}
+declare class UIContext {
+  instanceId_: number;
+  isAvailable(): boolean;
+  getId(): number;
+}
 
 declare function requireInternal<K extends keyof InternalModuleMap>(
   moduleName: K

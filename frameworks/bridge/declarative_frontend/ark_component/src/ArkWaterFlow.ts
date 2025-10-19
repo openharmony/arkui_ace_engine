@@ -38,8 +38,8 @@ class ItemConstraintSizeModifier extends ModifierWithKey<ArkConstraintSizeOption
   }
 }
 
-class ColumnsTemplateModifier extends ModifierWithKey<string> {
-  constructor(value: string) {
+class ColumnsTemplateModifier extends ModifierWithKey<string | ItemFillPolicy> {
+  constructor(value: string | ItemFillPolicy) {
     super(value);
   }
   static identity: Symbol = Symbol('columnsTemplate');
@@ -402,7 +402,7 @@ class ArkWaterFlowComponent extends ArkScrollable<WaterFlowAttribute> implements
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
-  columnsTemplate(value: string): this {
+  columnsTemplate(value: string | ItemFillPolicy): this {
     modifierWithKey(this._modifiersWithKeys, ColumnsTemplateModifier.identity, ColumnsTemplateModifier, value);
     return this;
   }

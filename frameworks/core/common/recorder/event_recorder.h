@@ -96,12 +96,15 @@ public:
     std::string ToString() const;
 
 private:
+    void FillImageNodeInfo(const RefPtr<NG::FrameNode>& host);
+
     std::shared_ptr<std::unordered_map<std::string, std::string>> params_;
     EventType eventType_ = EventType::INVALID;
     EventCategory category_ = EventCategory::CATEGORY_COMPONENT;
 };
 
 std::string MapToString(const std::shared_ptr<std::unordered_map<std::string, std::string>>& input);
+RefPtr<NG::FrameNode> GetFirstImageNodeChild(const RefPtr<NG::UINode>& parent);
 
 class ACE_FORCE_EXPORT EventRecorder final {
 public:

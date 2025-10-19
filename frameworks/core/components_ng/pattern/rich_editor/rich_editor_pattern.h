@@ -1413,6 +1413,10 @@ public:
     RefPtr<TextOverlayModifier> GetOverlayModifier() const { return overlayMod_; };
 
 protected:
+    RefPtr<TextSelectOverlay> GetSelectOverlay() override
+    {
+        return selectOverlay_;
+    }
     bool CanStartAITask() const override;
     std::vector<RectF> GetSelectedRects(int32_t start, int32_t end) override;
     PointF GetTextOffset(const Offset& localLocation, const RectF& contentRect) override;

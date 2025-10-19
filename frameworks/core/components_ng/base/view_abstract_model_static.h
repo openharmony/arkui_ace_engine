@@ -348,6 +348,7 @@ public:
     static void SetDragPreview(FrameNode* frameNode, const std::optional<DragDropInfo>& DragDropInfo);
     static void SetBackgroundImage(FrameNode* frameNode, const std::optional<ImageSourceInfo>& src);
     static void SetBackgroundImageRepeat(FrameNode* frameNode, const std::optional<ImageRepeat>& imageRepeat);
+    static void SetBackgroundImageSyncMode(FrameNode* frameNode, bool syncMode);
     static void SetClipShape(FrameNode* frameNode, const RefPtr<BasicShape>& basicShape);
     static void SetMask(FrameNode* frameNode, const RefPtr<BasicShape>& basicShape);
     static void SetBackgroundImagePosition(FrameNode* frameNode, BackgroundImagePosition& bgImgPosition, bool isReset);
@@ -373,6 +374,10 @@ void SetBackgroundEffectMultiThread(FrameNode* frameNode,
 void SetTranslateMultiThread(FrameNode* frameNode, const NG::TranslateOptions& value);
 void SetGeometryTransitionMultiThread(FrameNode* frameNode, const std::string& id,
     bool followWithoutTransition, bool doRegisterSharedTransition);
+void BindMenuMultiThread(FrameNode* frameNode, std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc,
+    const MenuParam& menuParam);
+void BindContextMenuStaticMultiThread(const RefPtr<FrameNode>& targetNode, ResponseType type,
+    std::function<void()>&& buildFunc, const NG::MenuParam& menuParam, std::function<void()>&& previewBuildFunc);
 // multi thread function end
 } // namespace OHOS::Ace::NG
 

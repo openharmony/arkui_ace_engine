@@ -609,8 +609,10 @@ HWTEST_F(ToggleButtonTestNg, ToggleButtonPatternTest014, TestSize.Level1)
     // set toggleTheme to themeManager before using themeManager to get toggleTheme
     auto themeManagerSecond = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerSecond);
-    EXPECT_CALL(*themeManagerSecond, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<ToggleTheme>()));
-    EXPECT_CALL(*themeManagerSecond, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<ToggleTheme>()));
+    auto toggleTheme = AceType::MakeRefPtr<ToggleTheme>();
+    toggleTheme->scaleHoverOrFocus_ = 1.05;
+    EXPECT_CALL(*themeManagerSecond, GetTheme(_)).WillRepeatedly(Return(toggleTheme));
+    EXPECT_CALL(*themeManagerSecond, GetTheme(_, _)).WillRepeatedly(Return(toggleTheme));
 
     /**
      * @tc.steps: step3. Creat child node but not set font size.
@@ -712,8 +714,10 @@ HWTEST_F(ToggleButtonTestNg, ToggleButtonPatternTest016, TestSize.Level1)
     // set toggleTheme to themeManager before using themeManager to get toggleTheme
     auto themeManagerSecond = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerSecond);
-    EXPECT_CALL(*themeManagerSecond, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<ToggleTheme>()));
-    EXPECT_CALL(*themeManagerSecond, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<ToggleTheme>()));
+    auto toggleTheme = AceType::MakeRefPtr<ToggleTheme>();
+    toggleTheme->scaleHoverOrFocus_ = 1.05;
+    EXPECT_CALL(*themeManagerSecond, GetTheme(_)).WillRepeatedly(Return(toggleTheme));
+    EXPECT_CALL(*themeManagerSecond, GetTheme(_, _)).WillRepeatedly(Return(toggleTheme));
 
     /**
      * @tc.steps: step3. Creat child node but not set font size.
@@ -825,6 +829,62 @@ HWTEST_F(ToggleButtonTestNg, ToggleButtonPatternTest017, TestSize.Level1)
     togglePattern->SetIsFocus(true);
     togglePattern->OnClick();
     EXPECT_EQ(togglePattern->isbgColorFocus_, false);
+}
+
+/**
+ * @tc.name: ToggleButtonPatternTest018
+ * @tc.desc: test ToggleButtonPattern::UpdateButtonStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleButtonTestNg, ToggleButtonPatternTest018, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create bubble and get frameNode.
+     */
+    TestProperty testProperty;
+    testProperty.isOn = std::make_optional(IS_ON);
+    RefPtr<FrameNode> frameNode = CreateToggleButtonFrameNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get pattern and update frameNode.
+     * @tc.expected: step2. related function is called.
+     */
+    auto togglePattern = AceType::DynamicCast<ToggleButtonPattern>(frameNode->GetPattern());
+    ASSERT_NE(togglePattern, nullptr);
+
+    // set toggleTheme to themeManager before using themeManager to get toggleTheme
+    auto themeManagerSecond = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerSecond);
+    auto toggleTheme = AceType::MakeRefPtr<ToggleTheme>();
+    toggleTheme->scaleHoverOrFocus_ = 1.0;
+    EXPECT_CALL(*themeManagerSecond, GetTheme(_)).WillRepeatedly(Return(toggleTheme));
+    EXPECT_CALL(*themeManagerSecond, GetTheme(_, _)).WillRepeatedly(Return(toggleTheme));
+
+    /**
+     * @tc.steps: step3. Creat child node but not set font size.
+     * @tc.expected: step3. Child frame node's font size synchronized with parent.
+     */
+    RefPtr<FrameNode> childrenNode =
+        FrameNode::GetOrCreateFrameNode("childTag", 1, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    frameNode->children_.emplace_back(childrenNode);
+    togglePattern->OnModifyDone();
+    auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
+    ASSERT_NE(textNode, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. ToggleButtonPattern UpdateButtonStyle
+     * @tc.expected: Check the param value
+     */
+    togglePattern->SetIsFocus(true);
+    togglePattern->HandleFocusEvent();
+    togglePattern->AddIsFocusActiveUpdateEvent();
+    togglePattern->UpdateButtonStyle();
+    EXPECT_EQ(togglePattern->isScale_, false);
+    EXPECT_EQ(togglePattern->isCheckedShadow_, true);
+    EXPECT_EQ(togglePattern->isbgColorFocus_, true);
 }
 
 /**

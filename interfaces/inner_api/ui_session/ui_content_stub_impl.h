@@ -16,8 +16,6 @@
 #ifndef FOUNDATION_ACE_INTERFACE_UI_CONTENT_STUB_IMPL_H
 #define FOUNDATION_ACE_INTERFACE_UI_CONTENT_STUB_IMPL_H
 
-#include <singleton.h>
-
 #include "iremote_object.h"
 #include "ui_content_errors.h"
 #include "ui_content_stub.h"

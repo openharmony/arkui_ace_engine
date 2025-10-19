@@ -91,7 +91,7 @@ private:
      *
      * @param frameSize of WaterFlow component.
      */
-    void Init(const SizeF& frameSize);
+    void Init(const SizeF& frameSize, double originalWidth);
 
     /**
      * @brief check if any items in view have changed height.
@@ -105,7 +105,7 @@ private:
      *
      * @param frameSize
      */
-    void RegularInit(const SizeF& frameSize);
+    void RegularInit(const SizeF& frameSize, double originalWidth);
     void InitFooter(float crossSize);
 
     /**

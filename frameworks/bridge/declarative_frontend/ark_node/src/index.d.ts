@@ -13,12 +13,6 @@
  * limitations under the License.
  */
 
-declare class UIContext {
-  instanceId_: number;
-  isAvailable(): boolean;
-  getId(): number;
-}
-
 declare interface TouchEvent {
 }
 
@@ -80,7 +74,7 @@ declare interface RegisterParams {
 
 declare class FinalizationRegistry {
   constructor(fun: (arg0: RegisterParams | number) => void);
-  register(target: BuilderNode | FrameNode, heldValue: RegisterParams | number): undefined;
+  register(target: BuilderNodeCommonBase | FrameNode, heldValue: RegisterParams | number): undefined;
 }
 
 declare function getUINativeModule(): any;

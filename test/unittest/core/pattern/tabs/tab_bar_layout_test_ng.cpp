@@ -1383,7 +1383,6 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmMeasureSubTabBarImageIndicator
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::FIXED);
     tabBarLayoutProperty_->UpdateAxis(Axis::HORIZONTAL);
     tabBarPattern_->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
-    tabBarPattern_->SetIndicator(0);
     auto itemWidth = 800.0f;
     IndicatorStyle indicatorStyle;
     for (int32_t index = 0; index < TABCONTENT_NUMBER; index++) {
@@ -1418,6 +1417,7 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmMeasureSubTabBarImageIndicator
     indicatorProp->UpdateUserDefinedIdealSize(
         CalcSize(NG::CalcLength(indicatorStyle.width), NG::CalcLength(indicatorStyle.height)));
     tabBarPattern_->visibleItemPosition_.clear();
+    tabBarLayoutProperty_->UpdateIndicator(0);
     tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushUITasks();
 
@@ -1448,7 +1448,6 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmMeasureSubTabBarImageIndicator
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::FIXED);
     tabBarLayoutProperty_->UpdateAxis(Axis::HORIZONTAL);
     tabBarPattern_->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
-    tabBarPattern_->SetIndicator(1);
     auto itemWidth = 800.0f;
     IndicatorStyle indicatorStyle;
     for (int32_t index = 0; index < TABCONTENT_NUMBER; index++) {
@@ -1480,6 +1479,7 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmMeasureSubTabBarImageIndicator
      * @tc.steps: steps3. Switch to other tab which is not TabBarStyle::SUBTABBATSTYLE.
      * @tc.expected: steps3. Verify width, height and offset of image indicator.
      */
+    tabBarLayoutProperty_->UpdateIndicator(1);
     tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushUITasks();
     auto indicatorIndex = tabBarNode_->GetTotalChildCount() - 1;
@@ -1514,7 +1514,6 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmMeasureSubTabBarImageIndicator
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::FIXED);
     tabBarLayoutProperty_->UpdateAxis(Axis::HORIZONTAL);
     tabBarPattern_->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
-    tabBarPattern_->SetIndicator(2);
     auto itemWidth = 800.0f;
     IndicatorStyle indicatorStyle;
     ImageInfoConfig indicatorConfig;
@@ -1547,6 +1546,7 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmMeasureSubTabBarImageIndicator
      * @tc.steps: steps3. Switch to other tab which is TabBarStyle::SUBTABBATSTYLE and indicatorStyle.width is 0.
      * @tc.expected: steps3. Verify image indicator is not 0.
      */
+    tabBarLayoutProperty_->UpdateIndicator(2);
     tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushUITasks();
     auto indicatorIndex = tabBarNode_->GetTotalChildCount() - 1;

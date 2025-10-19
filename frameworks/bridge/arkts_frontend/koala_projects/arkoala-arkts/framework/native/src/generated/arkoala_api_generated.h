@@ -2296,6 +2296,8 @@ typedef struct Ark_Union_Color_String_Resource Ark_Union_Color_String_Resource;
 typedef struct Opt_Union_Color_String_Resource Opt_Union_Color_String_Resource;
 typedef struct Ark_Union_Color_String_Resource_ColoringStrategy Ark_Union_Color_String_Resource_ColoringStrategy;
 typedef struct Opt_Union_Color_String_Resource_ColoringStrategy Opt_Union_Color_String_Resource_ColoringStrategy;
+typedef struct Ark_Union_ResourceColor_ColorMetrics Ark_Union_ResourceColor_ColorMetrics;
+typedef struct Opt_Union_ResourceColor_ColorMetrics Opt_Union_ResourceColor_ColorMetrics;
 typedef struct Ark_Union_Color_String_Resource_Number Ark_Union_Color_String_Resource_Number;
 typedef struct Opt_Union_Color_String_Resource_Number Opt_Union_Color_String_Resource_Number;
 typedef struct Ark_Union_ColumnOptions_ColumnOptionsV2 Ark_Union_ColumnOptions_ColumnOptionsV2;
@@ -4207,6 +4209,7 @@ typedef struct Opt_DragPreviewMode {
     Ark_DragPreviewMode value;
 } Opt_DragPreviewMode;
 typedef enum Ark_DragResult {
+    ARK_DRAG_RESULT_UNKNOWN = -1,
     ARK_DRAG_RESULT_DRAG_SUCCESSFUL = 0,
     ARK_DRAG_RESULT_DRAG_FAILED = 1,
     ARK_DRAG_RESULT_DRAG_CANCELED = 2,
@@ -15561,6 +15564,18 @@ typedef struct Opt_Union_ResourceColor_ColoringStrategy {
     Ark_Tag tag;
     Ark_Union_ResourceColor_ColoringStrategy value;
 } Opt_Union_ResourceColor_ColoringStrategy;
+typedef struct Ark_Union_ResourceColor_ColorMetrics {
+    /* kind: UnionType */
+    Ark_Int32 selector;
+    union {
+        Ark_ResourceColor value0;
+        Ark_ColorMetrics value1;
+    };
+} Ark_Union_ResourceColor_ColorMetrics;
+typedef struct Opt_Union_ResourceColor_ColorMetrics {
+    Ark_Tag tag;
+    Ark_Union_ResourceColor_ColorMetrics value;
+} Opt_Union_ResourceColor_ColorMetrics;
 typedef struct Ark_Union_ResourceColor_LinearGradient {
     /* kind: UnionType */
     Ark_Int32 selector;
@@ -20541,7 +20556,7 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
     void (*setMargin)(Ark_NativePointer node,
                       const Opt_Union_Margin_Length_LocalizedMargin* value);
     void (*setBackgroundColor)(Ark_NativePointer node,
-                               const Opt_ResourceColor* value);
+                               const Opt_Union_ResourceColor_ColorMetrics* value);
     void (*setPixelRound)(Ark_NativePointer node,
                           const Opt_PixelRoundPolicy* value);
     void (*setBackgroundImageSize)(Ark_NativePointer node,
@@ -20728,8 +20743,6 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                        const Opt_Callback_DragEvent_Opt_String_Void* value);
     void (*setOnDragEnd)(Ark_NativePointer node,
                          const Opt_Callback_DragEvent_Opt_String_Void* value);
-    void (*setAllowDrop)(Ark_NativePointer node,
-                         const Opt_Array_uniformTypeDescriptor_UniformDataType* value);
     void (*setDraggable)(Ark_NativePointer node,
                          const Opt_Boolean* value);
     void (*setDragPreview0)(Ark_NativePointer node,
@@ -20831,11 +20844,13 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                           const Opt_CustomNodeBuilder* builder,
                           const Opt_BackgroundOptions* options);
     void (*setBackgroundImage0)(Ark_NativePointer node,
-                                const Opt_Union_ResourceStr_PixelMap* src,
-                                const Opt_ImageRepeat* repeat);
+                                const Opt_Union_ResourceStr_PixelMap* value);
     void (*setBackgroundImage1)(Ark_NativePointer node,
                                 const Opt_Union_ResourceStr_PixelMap* src,
                                 const Opt_BackgroundImageOptions* options);
+    void (*setBackgroundImage2)(Ark_NativePointer node,
+                                const Opt_Union_ResourceStr_PixelMap* src,
+                                const Opt_ImageRepeat* repeat);
     void (*setBackgroundBlurStyle)(Ark_NativePointer node,
                                    const Opt_BlurStyle* style,
                                    const Opt_BackgroundBlurStyleOptions* options,
@@ -20887,9 +20902,6 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
     void (*setDragPreview1)(Ark_NativePointer node,
                             const Opt_Union_CustomBuilder_DragItemInfo_String* preview,
                             const Opt_PreviewConfiguration* config);
-    void (*setDragPreviewOptions)(Ark_NativePointer node,
-                                  const Opt_DragPreviewOptions* value,
-                                  const Opt_DragInteractionOptions* options);
     void (*setOverlay)(Ark_NativePointer node,
                        const Opt_Union_String_CustomBuilder_ComponentContent* value,
                        const Opt_OverlayOptions* options);

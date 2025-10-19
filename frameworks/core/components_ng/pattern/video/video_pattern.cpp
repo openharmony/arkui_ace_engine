@@ -25,6 +25,7 @@
 #include "base/thread/task_executor.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/system_properties.h"
+#include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
 #include "core/common/ai/image_analyzer_manager.h"
@@ -972,11 +973,12 @@ bool VideoPattern::PrepareSurface()
 
 void VideoPattern::OnAttachToFrameNode()
 {
+    auto host = GetHost();
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode, host);
     // full screen node is not supposed to register js controller event
     if (!InstanceOf<VideoFullScreenPattern>(this)) {
         SetMethodCall();
     }
-    auto host = GetHost();
     CHECK_NULL_VOID(host);
     hostId_ = host->GetId();
     auto pipeline = host->GetContext();
@@ -1009,18 +1011,40 @@ void VideoPattern::OnAttachToFrameNode()
 void VideoPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
+    CHECK_EQUAL_VOID(frameNode->IsThreadSafeNode(), true);
     auto id = frameNode->GetId();
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowStateChangedCallback(id);
 }
 
+void VideoPattern::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    CHECK_EQUAL_VOID(host->IsThreadSafeNode(), false);
+    // full screen node is not supposed to register js controller event
+    if (!InstanceOf<VideoFullScreenPattern>(this)) {
+        SetMethodCall();
+    }
+    hostId_ = host->GetId();
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddWindowStateChangedCallback(hostId_);
+}
+
 void VideoPattern::OnDetachFromMainTree()
 {
     auto host = GetHost();
-    if (host && host->GetNodeStatus() == NodeStatus::BUILDER_NODE_OFF_MAINTREE) {
+    CHECK_NULL_VOID(host);
+    if (host->GetNodeStatus() == NodeStatus::BUILDER_NODE_OFF_MAINTREE) {
         Pause();
     }
+    CHECK_EQUAL_VOID(host->IsThreadSafeNode(), false);
+    auto id = host->GetId();
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RemoveWindowStateChangedCallback(id);
 }
 
 void VideoPattern::RegisterRenderContextCallBack()
@@ -2421,5 +2445,32 @@ void VideoPattern::UpdateBackgroundColor()
 {
     CHECK_NULL_VOID(renderContextForMediaPlayer_);
     renderContextForMediaPlayer_->UpdateBackgroundColor(surfaceBgColor_);
+}
+
+void VideoPattern::OnAttachToFrameNodeMultiThread(const RefPtr<FrameNode>& host)
+{
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+
+#ifdef RENDER_EXTRACT_SUPPORTED
+    CHECK_NULL_VOID(renderSurface_);
+    auto contextType = renderSurface_->IsTexture() ?
+        RenderContext::ContextType::HARDWARE_TEXTURE : RenderContext::ContextType::HARDWARE_SURFACE;
+    static RenderContext::ContextParam param = { contextType, "MediaPlayerSurface",
+                                                 RenderContext::PatternType::VIDEO };
+#else
+    static RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE, "MediaPlayerSurface",
+                                                 RenderContext::PatternType::VIDEO };
+#endif
+    renderContextForMediaPlayer_->InitContext(false, param);
+
+    if (SystemProperties::GetExtSurfaceEnabled()) {
+        RegisterRenderContextCallBack();
+    }
+
+    renderContext->UpdateBackgroundColor(Color::BLACK);
+    renderContextForMediaPlayer_->UpdateBackgroundColor(Color::BLACK);
+    renderContext->SetClipToBounds(true);
 }
 } // namespace OHOS::Ace::NG

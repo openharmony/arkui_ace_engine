@@ -3422,6 +3422,8 @@ frameworks/core/interfaces/native/implementation/swiper_modifier.cpp @arkui_navi
 frameworks/core/interfaces/native/implementation/select_modifier.cpp @arkuipopupwindow_all
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/@ohos.arkui.inspector.ts @arkui-idlize
 
+interfaces/ets/ani/observer @arkui_framework_resource
+
 [Test source]
 test/mock/base @arkui_framework_xnode
 test/mock/core/event/ @ArkUI_Event
@@ -3433,6 +3435,8 @@ test/mock/core/manager/mock_display_manager.h @arkuilayout1
 test/mock/core/svg/ @arkui001
 test/mock/core/pipeline/ @arkui_framework_xnode
 test/mock/core/common/mock_container.h @arkui_framework_xnode
+test/mock/ohos_mock/ @arkui_framework_xnode
+
 test/mock/core/render/mock_font_collection.cpp @huawei_g_five
 test/mock/interfaces/ @arkui_architecture
 
@@ -3441,7 +3445,7 @@ test/mock/core/animation/mock_animation_manager.cpp @arkuiscroll
 test/mock/core/animation/mock_animation_proxy.h @arkuiscroll
 test/mock/core/animation/mock_implicit_animation.h @arkuiscroll
 test/mock/core/animation/mock_implicit_animation.cpp @arkuiscroll
-
+test/unittest/adapter/ @arkui_framework_xnode
 test/unittest/core/accessibility/ @ArkUI_ability_group
 test/unittest/core/animation/ @arkuicodepulse
 test/unittest/core/base/ @arkui_framework_xnode
@@ -3566,7 +3570,7 @@ test/unittest/core/pattern/progress/ @arkui001
 test/unittest/core/pattern/qrcode/ @arkui001
 test/unittest/core/pattern/radio/ @arkuipopupwindow_all
 test/unittest/core/pattern/rating/ @arkuipopupwindow_all
-test/unittest/core/pattern/recycle_node/ 
+test/unittest/core/pattern/recycle_node/
 test/unittest/core/pattern/refresh/ @arkuiscroll
 test/unittest/core/pattern/relative_container/
 test/unittest/core/pattern/render_node/ @arkui_framework_xnode

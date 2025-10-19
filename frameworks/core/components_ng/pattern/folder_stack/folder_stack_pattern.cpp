@@ -30,8 +30,8 @@ const RefPtr<Curve> FOLDER_STACK_ANIMATION_CURVE =
 
 void FolderStackPattern::OnAttachToFrameNode()
 {
-    Pattern::OnAttachToFrameNode();
     auto host = GetHost();
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode);  // call OnAttachToFrameNodeMultiThread() by multi thread
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
@@ -49,6 +49,7 @@ void FolderStackPattern::OnAttachToFrameNode()
 void FolderStackPattern::OnDetachFromFrameNode(FrameNode* node)
 {
     CHECK_NULL_VOID(node);
+    THREAD_SAFE_NODE_CHECK(node, OnDetachFromFrameNode, node); // call OnDetachFromFrameNodeMultiThread()
     auto pipeline = node->GetContext();
     CHECK_NULL_VOID(pipeline);
     if (HasFoldStatusChangedCallbackId()) {
@@ -57,6 +58,18 @@ void FolderStackPattern::OnDetachFromFrameNode(FrameNode* node)
     Pattern::OnDetachFromFrameNode(node);
 }
 
+void FolderStackPattern::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);  // call OnAttachToMainTreeMultiThread() by multi thread
+}
+void FolderStackPattern::OnDetachFromMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree);  // call OnDetachFromMainTreeMultiThread() by multi thread
+}
 void FolderStackPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();

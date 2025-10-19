@@ -22,7 +22,9 @@ import {
   SelectionMenuOptions,
   ColorMetrics,
   promptAction,
-  curves
+  curves,
+  TextModifier,
+  SymbolGlyphModifier
 } from '@kit.ArkUI';
 
 import { common2D, uiEffect } from '@kit.ArkGraphics2D';
@@ -125,6 +127,14 @@ export struct SelectBootcamp {
   @State value: string = '下拉按钮'
   @State enableSelected: boolean = false;
   @State selected: number = -1;
+  @State enableTextModifier: boolean = false;
+  @State enableArrowModifier: boolean = false;
+  @State enableOptionTextModifier: boolean = false;
+  @State enableSelectedOptionTextModifier: boolean = false;
+  @State textModifierBool: boolean = false;
+  @State arrowModifierBool: boolean = false;
+  @State optionTextModifierBool: boolean = false;
+  @State selectedOptionTextModifierBool: boolean = false;
   @State enableControlSize: boolean = false;
   @State controlSize: ControlSize = ControlSize.NORMAL;
   @State enableDividerStrokeWidth: boolean = false;
@@ -671,9 +681,37 @@ export struct SelectBootcamp {
   @State listEventTriggeredTagsTemp: Array<BlockTag> = [];
   @State selection: string | null = null;
   scroller: Scroller = new Scroller()
+  textModifier: TextModifier = new TextModifier()
+  symbolGlyphModifier: SymbolGlyphModifier = new SymbolGlyphModifier()
+  optiontextModifier: TextModifier = new TextModifier()
+  selectedOptiontextModifier: TextModifier = new TextModifier()
 
   aboutToAppear() {
     AppStorage.setOrCreate('scroller', this.scroller)
+    this.textModifier
+      .maxLines(2)
+      .fontSize(25)
+      .textAlign(TextAlign.Center)
+      .fontColor('#999999')
+      .fontWeight(FontWeight.Bold)
+      .textOverflow({overflow:TextOverflow.Clip})
+    this.symbolGlyphModifier
+      .fontSize(25)
+      .fontColor(['#999999'])
+    this.optiontextModifier
+      .maxLines(1)
+      .fontSize(16)
+      .textAlign(TextAlign.Start)
+      .fontColor('#999999')
+      .fontWeight(FontWeight.Bold)
+      .width(200)
+    this.selectedOptiontextModifier
+      .maxLines(1)
+      .fontSize(18)
+      .textAlign(TextAlign.Start)
+      .fontColor('#999999')
+      .fontWeight(FontWeight.Bold)
+      .width(200)
   }
 
   compMaskColorChange() {
@@ -1430,6 +1468,10 @@ export struct SelectBootcamp {
           this.compEventTriggeredLog('自定义事件拦截onChildTouchTest触发')
           return HitTestMode.Default;
         })
+        .textModifier(useEnabled(this.enableTextModifier, this.textModifier))
+        .arrowModifier(useEnabled(this.enableArrowModifier, this.symbolGlyphModifier))
+        .optionTextModifier(useEnabled(this.enableOptionTextModifier, this.optiontextModifier))
+        .selectedOptionTextModifier(useEnabled(this.enableSelectedOptionTextModifier, this.selectedOptiontextModifier))
     }
   }
 
@@ -1698,6 +1740,30 @@ export struct SelectBootcamp {
           title: 'menuBackgroundColor',
           isEnabled: $enableMenuBackgroundColor,
           color: $menuBackgroundColor
+        })
+
+        RadioBlock({
+          title: 'TextModifier',
+          isEnabled: $enableTextModifier,
+          value: $textModifierBool
+        })
+
+        RadioBlock({
+          title: 'ArrowModifier',
+          isEnabled: $enableArrowModifier,
+          value: $arrowModifierBool
+        })
+
+        RadioBlock({
+          title: 'OptionTextModifier',
+          isEnabled: $enableOptionTextModifier,
+          value: $optionTextModifierBool
+        })
+
+        RadioBlock({
+          title: 'SelectedOptionTextModifier',
+          isEnabled: $enableSelectedOptionTextModifier,
+          value: $selectedOptionTextModifierBool
         })
 
         RadioBlock({

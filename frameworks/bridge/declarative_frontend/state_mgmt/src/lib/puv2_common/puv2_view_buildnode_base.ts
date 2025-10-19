@@ -66,6 +66,13 @@ abstract class ViewBuildNodeBase {
         return `ViewBuildNodeBase '${this.constructor.name}'[${this.id__()}]`;
     }
 
+    public abstract UpdateElement(elmtId: number): void;
+    public abstract getInstanceId(): number;
+
+    public __isReactiveBuilderNode__ViewBuildNodeBase__Internal(): boolean {
+        return false;
+    }
+
     public debugInfoElmtId(elmtId: number, isProfiler: boolean = false): string | ElementType {
         return isProfiler ? {
             elementId: elmtId,

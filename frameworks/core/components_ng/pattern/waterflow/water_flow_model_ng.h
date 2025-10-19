@@ -38,6 +38,7 @@ public:
     void SetItemMinHeight(const Dimension& minHeight) override;
     void SetItemMaxWidth(const Dimension& maxWidth) override;
     void SetItemMaxHeight(const Dimension& maxHeight) override;
+    void SetItemFillPolicy(PresetFillType policy) override;
 
     void SetColumnsGap(const Dimension& value) override;
     void SetRowsGap(const Dimension& value) override;
@@ -70,6 +71,8 @@ public:
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static RefPtr<ScrollControllerBase> GetOrCreateController(FrameNode* frameNode);
     static void SetColumnsTemplate(FrameNode* frameNode, const std::string& value);
+    static void SetItemFillPolicy(FrameNode* frameNode, PresetFillType fillType);
+    static void ResetItemFillPolicy(FrameNode* frameNode);
     static void SetRowsTemplate(FrameNode* frameNode, const std::string& value);
     static void SetScrollEnabled(FrameNode* frameNode, bool scrollEnabled);
     static void SetColumnsGap(FrameNode* frameNode, const Dimension& value);
@@ -85,6 +88,7 @@ public:
     static void SetFriction(FrameNode* frameNode, const std::optional<double>& friction);
     static FlexDirection GetLayoutDirection(FrameNode* frameNode);
     static std::string GetColumnsTemplate(FrameNode* frameNode);
+    static PresetFillType GetItemFillPolicy(FrameNode* frameNode);
     static std::string GetRowsTemplate(FrameNode* frameNode);
     static float GetColumnsGap(FrameNode* frameNode);
     static float GetRowsGap(FrameNode* frameNode);

@@ -3585,6 +3585,52 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern022, TestSize.Level0)
 }
 
 /**
+ * @tc.name: TimePickerColumnPattern023
+ * @tc.desc: Test TimePickerColumnPattern AddHotZoneRectToText.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern023, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create columnPattern and clear optionProperties_.
+     */
+    CreateTimePickerColumnNode();
+    ASSERT_NE(columnPattern_, nullptr);
+    ASSERT_NE(columnNode_, nullptr);
+    for (int32_t i = 0; i < SHOW_COUNT; i++) {
+        columnNode_->RemoveChildAtIndex(0);
+    }
+    /**
+     * @tc.steps: step2. Call AddHotZoneRectToText.
+     * @tc.expected: No crash.
+     */
+    columnPattern_->AddHotZoneRectToText();
+
+    /**
+     * @tc.steps: step3. Create columnPattern and clear optionProperties_.
+     */
+    CreateTimePickerColumnNode();
+    ASSERT_NE(columnPattern_, nullptr);
+    ASSERT_NE(columnNode_, nullptr);
+    constexpr float height = 100.0f;
+    auto childSize = static_cast<int32_t>(columnNode_->GetChildren().size());
+    auto midSize = childSize / MIDDLE_OF_COUNTS;
+
+    /**
+     * @tc.steps: step4. Call AddHotZoneRectToText.
+     * @tc.expected: No crash.
+     */
+    columnPattern_->size_.SetHeight(height);
+    columnPattern_->optionProperties_.clear();
+    columnPattern_->AddHotZoneRectToText();
+    auto childNode = AceType::DynamicCast<FrameNode>(columnNode_->GetChildAtIndex(midSize));
+    ASSERT_NE(childNode, nullptr);
+    auto gestureEventHub = childNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+    EXPECT_TRUE(gestureEventHub->GetResponseRegion().empty());
+}
+
+/**
  * @tc.name: OnColorConfigurationUpdate001
  * @tc.desc: Test TimePickerRowPattern OnColorConfigurationUpdate().
  * @tc.type: FUNC

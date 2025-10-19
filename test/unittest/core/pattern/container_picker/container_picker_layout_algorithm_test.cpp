@@ -94,9 +94,12 @@ void ContainerPickerLayoutAlgorithmTest::SetUp()
     pickerTheme_ = AceType::MakeRefPtr<PickerTheme>();
     algorithm_ = AceType::MakeRefPtr<ContainerPickerLayoutAlgorithm>();
 
-    algorithm_->SetItemHeight(40);
-    algorithm_->SetPickerHeight(200);
-    algorithm_->SetPickerHeightBeforeRotate(280);
+    float itemHeight = 40.0f;
+    float pickerHeight = 200.0f;
+    float pickerHeightBeforeRotate = 280.0f;
+    algorithm_->SetItemHeight(itemHeight);
+    algorithm_->SetPickerHeight(pickerHeight);
+    algorithm_->SetPickerHeightBeforeRotate(pickerHeightBeforeRotate);
 
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);

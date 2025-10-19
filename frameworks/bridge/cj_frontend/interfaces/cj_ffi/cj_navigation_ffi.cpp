@@ -180,6 +180,10 @@ void FfiOHOSAceFrameworkNavigationCreateWithPathInfos(int64_t pathInfos)
         NavigationModel::GetInstance()->SetNavigationStackProvided(true);
         auto cjStack = AceType::DynamicCast<CJNavigationStack>(stack);
         CHECK_NULL_VOID(cjStack);
+        auto oldObjId = cjStack->GetDataSourceObjId();
+        if (pathInfos == oldObjId) {
+            return;
+        }
         cjStack->SetDataSourceObj(pathInfos);
     };
     NavigationModel::GetInstance()->SetNavigationStackWithCreatorAndUpdater(stackCreator, stackUpdater);

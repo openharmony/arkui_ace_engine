@@ -39,6 +39,7 @@ public:
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetAllowScale(FrameNode* frameNode, const bool allowScale);
+    static void ResetAllowScale(FrameNode* frameNode);
     static void SetFontWeight(FrameNode* frameNode, const std::optional<FontWeight>& fontWeight);
     static void SetFontFamily(FrameNode* frameNode, const std::optional<std::vector<std::string>>& fontFamilies);
     static void SetFontSize(FrameNode* frameNode, const std::optional<Dimension>& fontSize);
@@ -46,8 +47,11 @@ public:
     static void SetMarqueeUpdateStrategy(FrameNode* frameNode,
         const std::optional<MarqueeUpdateStrategy>& marqueeUpdateStrategy);
     static void SetOnStart(FrameNode* frameNode, std::function<void()>&& onChange);
+    static void ResetOnStart(FrameNode* frameNode);
     static void SetOnBounce(FrameNode* frameNode, std::function<void()>&& onChange);
+    static void ResetOnBounce(FrameNode* frameNode);
     static void SetOnFinish(FrameNode* frameNode, std::function<void()>&& onChange);
+    static void ResetOnFinish(FrameNode* frameNode);
     static void SetMarqueeFrameRateRange(
         FrameNode* frameNode, const RefPtr<FrameRateRange>& rateRange, MarqueeDynamicSyncSceneType type);
     static void SetValue(FrameNode* frameNode, const std::optional<std::string>& value);

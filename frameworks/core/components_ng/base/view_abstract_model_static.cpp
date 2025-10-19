@@ -210,6 +210,7 @@ void ViewAbstractModelStatic::BindMenu(FrameNode* frameNode,
 {
     auto targetNode = AceType::Claim(frameNode);
     CHECK_NULL_VOID(targetNode);
+    FREE_NODE_CHECK(frameNode, BindMenu, frameNode, std::move(params), std::move(buildFunc), menuParam);
     auto targetId = targetNode->GetId();
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true, frameNode);
     if (CheckMenuIsShow(menuParam, targetId, targetNode)) {
@@ -339,6 +340,8 @@ void ViewAbstractModelStatic::BindContextMenuStatic(const RefPtr<FrameNode>& tar
     std::function<void()>&& buildFunc, const NG::MenuParam& menuParam, std::function<void()>&& previewBuildFunc)
 {
     CHECK_NULL_VOID(targetNode);
+    FREE_NODE_CHECK(targetNode, BindContextMenuStatic, targetNode, type, std::move(buildFunc), menuParam,
+        std::move(previewBuildFunc));
     auto targetId = targetNode->GetId();
     auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId());
     if (subwindow) {
@@ -1649,6 +1652,11 @@ void ViewAbstractModelStatic::SetBackgroundImageRepeat(FrameNode* frameNode,
         ImageRepeat repeat = ImageRepeat::NO_REPEAT;
         renderContext->OnBackgroundImageRepeatUpdate(repeat);
     }
+}
+
+void ViewAbstractModelStatic::SetBackgroundImageSyncMode(FrameNode* frameNode, bool syncMode)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImageSyncMode, syncMode, frameNode);
 }
 
 int32_t ViewAbstractModelStatic::GetMenuParam(NG::MenuParam& menuParam, const RefPtr<NG::UINode>& node)

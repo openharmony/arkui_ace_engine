@@ -100,12 +100,6 @@ void callManagedAsyncCallback_Void(Ark_Int32 resourceId, Opt_BusinessError err, 
     } else {
         argsSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
     }
-    // if (runtimeType(data) != INTEROP_RUNTIME_UNDEFINED) {
-    //     argsSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
-    //     const auto dataTmpValue = data.value;
-    // } else {
-    //     argsSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
-    // }
     enqueueCallback(10, &callbackBuffer);
 }
 void callManagedAsyncCallback_VoidSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Opt_BusinessError err, Opt_void data)
@@ -122,12 +116,6 @@ void callManagedAsyncCallback_VoidSync(Ark_VMContext vmContext, Ark_Int32 resour
     } else {
         argsSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
     }
-    // if (runtimeType(data) != INTEROP_RUNTIME_UNDEFINED) {
-    //     argsSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
-    //     const auto dataTmpValue = data.value;
-    // } else {
-    //     argsSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
-    // }
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
 }
 void callManagedButtonModifierBuilder(Ark_Int32 resourceId, Ark_NativePointer parentNode, Ark_ButtonConfiguration config, Callback_Pointer_Void continuation)

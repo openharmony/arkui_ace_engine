@@ -70,8 +70,8 @@ void WaterFlowSegmentedLayout::Measure(LayoutWrapper* wrapper)
     syncLoad_ = props_->GetSyncLoad().value_or(!FeatureParam::IsSyncLoadEnabled()) || matchChildren ||
                 info_->targetIndex_.has_value() || !NearEqual(info_->currentOffset_, prevOffset);
     GetExpandArea(props_, info_);
-
-    Init(idealSize);
+    double originalWidth = WaterFlowLayoutUtils::GetOriginalWidth();
+    Init(idealSize, originalWidth);
 
     mainSize_ = GetMainAxisSize(idealSize, axis_);
     CalcContentOffset(wrapper, info_, mainSize_);
@@ -194,7 +194,7 @@ int32_t WaterFlowSegmentedLayout::CheckDirtyItem() const
     return -1;
 }
 
-void WaterFlowSegmentedLayout::Init(const SizeF& frameSize)
+void WaterFlowSegmentedLayout::Init(const SizeF& frameSize, double originalWidth)
 {
     if (sections_) {
         const auto& sections = sections_->GetSectionInfo();
@@ -207,7 +207,7 @@ void WaterFlowSegmentedLayout::Init(const SizeF& frameSize)
         }
         SegmentedInit(sections, info_->margins_, frameSize);
     } else {
-        RegularInit(frameSize);
+        RegularInit(frameSize, originalWidth);
         if (info_->footerIndex_ >= 0) {
             InitFooter(frameSize.CrossSize(axis_));
         }
@@ -267,10 +267,10 @@ void WaterFlowSegmentLayoutBase::SegmentedInit(const std::vector<WaterFlowSectio
     }
 }
 
-void WaterFlowSegmentedLayout::RegularInit(const SizeF& frameSize)
+void WaterFlowSegmentedLayout::RegularInit(const SizeF& frameSize, double originalWidth)
 {
     auto rowsTemplate = props_->GetRowsTemplate().value_or("1fr");
-    auto columnsTemplate = props_->GetColumnsTemplate().value_or("1fr");
+    auto columnsTemplate = props_->GetFinalColumnsTemplate(originalWidth).value_or("");
     auto scale = props_->GetLayoutConstraint()->scaleProperty;
     auto rowsGap = ConvertToPx(props_->GetRowsGap().value_or(0.0_vp), scale, frameSize.Height()).value_or(0);
     auto columnsGap = ConvertToPx(props_->GetColumnsGap().value_or(0.0_vp), scale, frameSize.Width()).value_or(0);

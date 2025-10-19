@@ -179,10 +179,10 @@ HWTEST_F(GridLayoutTestNg, GridLayout001, TestSize.Level1)
      */
     auto pattern = frameNode_->GetPattern<GridPattern>();
     auto algorithm = AceType::MakeRefPtr<GridLayoutAlgorithm>(GridLayoutInfo {});
-    algorithm->InitGridCeils(AceType::RawPtr(frameNode_), { 0.0f, 0.0f });
+    algorithm->InitGridCeils(AceType::RawPtr(frameNode_), { 0.0f, 0.0f }, 0.0f);
     algorithm->crossCount_ = 5;
     algorithm->mainCount_ = 5;
-    algorithm->InitGridCeils(AceType::RawPtr(frameNode_), { 0.0f, 0.0f });
+    algorithm->InitGridCeils(AceType::RawPtr(frameNode_), { 0.0f, 0.0f }, 0.0f);
     EXPECT_NE(pattern->GetLayoutProperty<GridLayoutProperty>(), nullptr);
 }
 
@@ -205,10 +205,10 @@ HWTEST_F(GridLayoutTestNg, GridLayout002, TestSize.Level1)
      */
     auto pattern = frameNode_->GetPattern<GridPattern>();
     auto algorithm = AceType::MakeRefPtr<GridLayoutAlgorithm>(GridLayoutInfo {});
-    algorithm->InitGridCeils(AceType::RawPtr(frameNode_), { 0.0f, 0.0f });
+    algorithm->InitGridCeils(AceType::RawPtr(frameNode_), { 0.0f, 0.0f }, 0.0f);
     algorithm->crossCount_ = 5;
     algorithm->mainCount_ = 5;
-    algorithm->InitGridCeils(AceType::RawPtr(frameNode_), { 0.0f, 0.0f });
+    algorithm->InitGridCeils(AceType::RawPtr(frameNode_), { 0.0f, 0.0f }, 0.0f);
     EXPECT_NE(pattern->GetLayoutProperty<GridLayoutProperty>(), nullptr);
 }
 
@@ -234,10 +234,10 @@ HWTEST_F(GridLayoutTestNg, GridLayout003, TestSize.Level1)
     auto algorithm = AceType::MakeRefPtr<GridLayoutAlgorithm>(GridLayoutInfo {});
     algorithm->info_.currentOffset_ = 0.0f;
     auto layoutProperty = pattern->CreateLayoutProperty();
-    algorithm->InitGridCeils(AceType::RawPtr(frameNode_), { 0.0f, 0.0f });
+    algorithm->InitGridCeils(AceType::RawPtr(frameNode_), { 0.0f, 0.0f }, 0.0f);
     algorithm->crossCount_ = 5;
     algorithm->mainCount_ = 5;
-    algorithm->InitGridCeils(AceType::RawPtr(frameNode_), { 0.0f, 0.0f });
+    algorithm->InitGridCeils(AceType::RawPtr(frameNode_), { 0.0f, 0.0f }, 0.0f);
     EXPECT_NE(layoutProperty, nullptr);
 }
 

@@ -16,11 +16,13 @@
 
 #include <sys/time.h>
 
+#include "adapter/ohos/entrance/picker/picker_haptic_factory.h"
 #include "base/log/dump_log.h"
 #include "core/animation/spring_curve.h"
 #include "core/components_ng/pattern/container_picker/container_picker_paint_method.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
+
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -146,8 +148,8 @@ void ContainerPickerPattern::HandleTargetIndex()
         targetIndex_.reset();
         return;
     }
-    if (isTargetAnimationRunning_) {	
-        return;	
+    if (isTargetAnimationRunning_) {
+        return;
     }
     PlayTargetAnimation();
 }
@@ -223,6 +225,7 @@ void ContainerPickerPattern::OnModifyDone()
     containerPickerId_ = host->GetId();
     totalItemCount_ = host->TotalChildCount();
     isLoop_ = IsLoop();
+    InitOrRefreshHapticController();
 
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     PickerMarkDirty();
@@ -404,6 +407,8 @@ RefPtr<TouchEventImpl> ContainerPickerPattern::CreateItemTouchEventListener()
             return;
         }
 
+        pattern->isAllowPlayHaptic_ = (info.GetSourceTool() == SourceTool::MOUSE) ? false : true;
+
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
             if (pattern->isInertialRollingAnimationRunning_) {
                 pattern->touchBreak_ = true;
@@ -420,6 +425,7 @@ RefPtr<TouchEventImpl> ContainerPickerPattern::CreateItemTouchEventListener()
             pattern->touchBreak_ = false;
             if (pattern->animationBreak_) {
                 pattern->PlayResetAnimation();
+                pattern->yOffset_ = 0.0;
             }
         }
     };
@@ -499,14 +505,8 @@ GestureEventFunc ContainerPickerPattern::ActionUpdateTask()
     return [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        auto infoChecked = info;
-        if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::MOUSE) {
-            if (pattern->isFirstAxisAction_) {
-                pattern->isFirstAxisAction_ = false;
-            }
-        } else {
-            pattern->HandleDragUpdate(infoChecked);
-        }
+        pattern->HandleDragUpdate(info);
+        pattern->dragVelocity_ = info.GetMainVelocity();
     };
 }
 
@@ -534,7 +534,7 @@ GestureEventNoParameter ContainerPickerPattern::ActionCancelTask()
         if (pattern) {
             TAG_LOGI(AceLogTag::ACE_CONTAINER_PICKER, "containerPicker drag cancel id:%{public}d",
                 pattern->containerPickerId_);
-            pattern->HandleDragEnd(0.0);
+            pattern->HandleDragEnd(pattern->dragVelocity_);
         }
     };
 }
@@ -555,6 +555,25 @@ void ContainerPickerPattern::HandleDragStart(const GestureEvent& info)
 
 void ContainerPickerPattern::HandleDragUpdate(const GestureEvent& info)
 {
+    isAllowPlayHaptic_ = (info.GetSourceTool() == SourceTool::MOUSE) ? false : true;
+    if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::MOUSE) {
+        if (totalItemCount_ == 0) {
+            return;
+        }
+
+        int32_t index = 0;
+        if (LessNotEqual(info.GetDelta().GetY(), 0.0)) {
+            index = (totalItemCount_ + selectedIndex_ + 1) % totalItemCount_;
+        } else {
+            int32_t totalCountAndIndex = totalItemCount_ + selectedIndex_ - 1;
+            index = (totalCountAndIndex ? totalCountAndIndex : 0) % totalItemCount_;
+        }
+        SwipeTo(index);
+        selectedIndex_ = index;
+        FireScrollStopEvent();
+        return;
+    }
+
     auto velocity = info.GetMainVelocity();
     UpdateDragFRCSceneInfo(velocity, SceneStatus::RUNNING);
     animationBreak_ = false;
@@ -562,6 +581,7 @@ void ContainerPickerPattern::HandleDragUpdate(const GestureEvent& info)
     auto offsetY =
         info.GetGlobalPoint().GetY() + (info.GetInputEventType() == InputEventType::AXIS ? info.GetOffsetY() : 0.0);
     if (NearEqual(offsetY, yLast_, MOVE_THRESHOLD)) {
+        StopHapticController();
         return;
     }
 
@@ -575,6 +595,7 @@ void ContainerPickerPattern::HandleDragUpdate(const GestureEvent& info)
 
 void ContainerPickerPattern::HandleDragEnd(double dragVelocity, float mainDelta)
 {
+    StopHapticController();
     UpdateDragFRCSceneInfo(dragVelocity, SceneStatus::END);
     isDragging_ = false;
 
@@ -584,9 +605,12 @@ void ContainerPickerPattern::HandleDragEnd(double dragVelocity, float mainDelta)
     }
 
     // Throw and slide
-    if (Play(dragVelocity)) {
+    if (Play(dragVelocity_)) {
         return;
     }
+
+    yOffset_ = 0.0;
+    yLast_ = 0.0;
 
     // Drag and slide
     if (!animationCreated_) {
@@ -728,7 +752,7 @@ void ContainerPickerPattern::CreateSpringProperty()
 
 void ContainerPickerPattern::PlaySpringAnimation()
 {
-    if (RunningTranslateAnimation()) {
+    if (isSpringAnimationRunning_) {
         return;
     }
     auto host = GetHost();
@@ -762,12 +786,6 @@ void ContainerPickerPattern::PlayTargetAnimation()
         });
     }
     targetIndex_.reset();
-}
-
-inline bool ContainerPickerPattern::RunningTranslateAnimation() const
-{
-    // TODO 添加其他动画类型
-    return isSpringAnimationRunning_;
 }
 
 void ContainerPickerPattern::CalcEndOffset(float& endOffset, double velocity)
@@ -836,7 +854,6 @@ bool ContainerPickerPattern::Play(double dragVelocity)
     }
 
     isNeedPlayInertialAnimation_ = true;
-    dragVelocity_ = dragVelocity;
     PickerMarkDirty();
     return true;
 }
@@ -868,6 +885,7 @@ void ContainerPickerPattern::PlayInertialAnimation()
         } else {
             pattern->FireScrollStopEvent();
         }
+        pattern->StopHapticController();
     };
     snapOffsetProperty_->AnimateWithVelocity(option, -endOffset, dragVelocity_, finishCallback);
     isNeedPlayInertialAnimation_ = false;
@@ -934,6 +952,7 @@ double ContainerPickerPattern::GetDragDeltaLessThanJumpInterval(
         }
         for (int32_t i = 0; i < shiftDistanceCount; i++) {
             PickerMarkDirty();
+            InnerHandleScroll(LessNotEqual(dragDelta, 0.0));
         }
         dragDelta = additionalShift;
     }
@@ -969,6 +988,7 @@ void ContainerPickerPattern::CreateAnimation()
         pattern->currentDelta_ = value - pattern->lastAnimationScroll_;
         pattern->lastAnimationScroll_ = value;
         pattern->PickerMarkDirty();
+        pattern->UpdateColumnChildPosition(value);
     };
     scrollProperty_ = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
     renderContext->AttachNodeAnimatableProperty(scrollProperty_);
@@ -996,6 +1016,7 @@ void ContainerPickerPattern::CreateSnapProperty()
         pattern->lastAnimationScroll_ = position;
         pattern->isInertialRollingAnimationRunning_ = true;
         pattern->PickerMarkDirty();
+        pattern->UpdateColumnChildPosition(position);
     };
     snapOffsetProperty_ = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
     AttachNodeAnimatableProperty(snapOffsetProperty_);
@@ -1045,6 +1066,8 @@ void ContainerPickerPattern::CreateTargetAnimation(float delta)
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->isTargetAnimationRunning_ = false;
+            pattern->yOffset_ = 0.0;
+            pattern->yLast_ = 0.0;
             pattern->FireScrollStopEvent();
         },
         nullptr, context);
@@ -1073,6 +1096,8 @@ void ContainerPickerPattern::CreateSpringAnimation(float delta)
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->isSpringAnimationRunning_ = false;
+            pattern->yOffset_ = 0.0;
+            pattern->yLast_ = 0.0;
             pattern->FireScrollStopEvent();
         },
         nullptr, context);
@@ -1120,6 +1145,9 @@ void ContainerPickerPattern::PlayResetAnimation()
 {
     float currentOffsetFromMiddle = CalculateMiddleLineOffset();
     float resetOffset = CalculateResetOffset(currentOffsetFromMiddle);
+    if (std::abs(resetOffset) >= (pickerItemHeight_ * 0.5f)) {
+        InnerHandleScroll(LessNotEqual(resetOffset, 0.0));
+    }
     CreateAnimation(0.0f, resetOffset);
 }
 
@@ -1156,6 +1184,65 @@ float ContainerPickerPattern::CalculateMiddleLineOffset()
     auto currentMiddleItem =
         ContainerPickerUtils::CalcCurrentMiddleItem(itemPosition_, height_, totalItemCount_, isLoop_);
     return (currentMiddleItem.second.startPos + currentMiddleItem.second.endPos) / HALF - height_ / HALF;
+}
+
+bool ContainerPickerPattern::IsEnableHaptic() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, true);
+    auto props = GetLayoutProperty<ContainerPickerLayoutProperty>();
+    CHECK_NULL_RETURN(props, true);
+    return props->GetEnableHapticFeedbackValue(true);
+}
+
+void ContainerPickerPattern::InitOrRefreshHapticController()
+{
+    if (IsEnableHaptic() && !hapticController_) {
+        TAG_LOGI(AceLogTag::ACE_CONTAINER_PICKER, "init haptic controller");
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto context = host->GetContext();
+        CHECK_NULL_VOID(context);
+        context->AddAfterLayoutTask([weak = WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->hapticController_ = PickerAudioHapticFactory::GetInstance();
+        });
+    } else if (!IsEnableHaptic() && hapticController_) {
+        TAG_LOGI(AceLogTag::ACE_CONTAINER_PICKER, "stop haptic controller");
+        hapticController_->Stop();
+    }
+    isEnableHaptic_ = IsEnableHaptic();
+}
+
+void ContainerPickerPattern::StopHapticController()
+{
+    if (hapticController_) {
+        hapticController_->Stop();
+    }
+}
+
+void ContainerPickerPattern::PlayHaptic(float offset)
+{
+    if (isEnableHaptic_ && hapticController_ && isAllowPlayHaptic_) {
+        hapticController_->HandleDelta(offset);
+    }
+}
+
+bool ContainerPickerPattern::InnerHandleScroll(bool isDown)
+{
+    if (totalItemCount_ == 0) {
+        return false;
+    }
+
+    if (!IsLoop() && ((isDown && targetIndex_ == totalItemCount_ - 1) || (!isDown && targetIndex_ == 0))) {
+        return false;
+    }
+
+    if (isEnableHaptic_ && hapticController_ && isAllowPlayHaptic_) {
+        hapticController_->PlayOnce();
+    }
+    return true;
 }
 
 } // namespace OHOS::Ace::NG

@@ -540,6 +540,7 @@ private:
     bool loadFailed_ = false;
     bool isLoadAlt_ = false;
     ImageType imageType_ = ImageType::BASE;
+    ContentTransitionType contentTransitionType_ = ContentTransitionType::IDENTITY;
 
     ACE_DISALLOW_COPY_AND_MOVE(ImagePattern);
 };

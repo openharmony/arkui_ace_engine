@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,9 +18,11 @@
 
 #include <string>
 #include <vector>
+#include "core/components/common/layout/constants.h"
 
 namespace OHOS::Ace::NG {
 std::pair<std::vector<double>, double> ParseTemplateArgs(
     const std::string& args, double size, double gap, int32_t childrenCount);
+std::optional<std::string> BuildItemFillPolicyColumns(PresetFillType policy, float width, double density);
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PROPERTY_TEMPLATES_PARSER_H

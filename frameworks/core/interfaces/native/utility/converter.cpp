@@ -30,6 +30,7 @@
 #include "core/components/theme/shadow_theme.h"
 #include "core/interfaces/native/implementation/color_metrics_peer.h"
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
+#include "core/interfaces/native/implementation/symbol_glyph_modifier_peer.h"
 #include "core/interfaces/native/implementation/transition_effect_peer_impl.h"
 #include "core/interfaces/native/implementation/i_curve_peer_impl.h"
 #include "core/interfaces/native/implementation/length_metrics_peer.h"
@@ -107,11 +108,10 @@ namespace {
     std::string GetReplaceContentStr(int32_t pos, const std::string& type,
         std::vector<Converter::ResourceConverter::ParamType>& params, size_t containCount)
     {
-        auto index = pos + containCount;
-        if (index < 0 || index >= params.size()) {
+        auto index = static_cast<size_t>(pos) + containCount;
+        if (index >= params.size()) {
             return std::string();
         }
-        //return params.at(index);
         return ""; // TODO: Correct formatting for all types
     }
     void ReplaceHolder(std::optional<std::string>& originStr,
@@ -500,6 +500,13 @@ std::optional<Dimension> ResourceConverter::ToDimension()
             return resWrapper_->GetDimensionByName(*name);
         } else {
             LOGE("ResourceConverter::ToDimension Unknown resource value");
+        }
+    } else if (type_ == ResourceType::STRING) {
+        auto strValue = GetStringResource();
+        if (strValue.has_value()) {
+            return StringUtils::StringToDimensionWithUnit(strValue.value(), DimensionUnit::VP);
+        } else {
+            LOGE("ResourceConverter::ToDimension parse string type error");
         }
     }
     return std::nullopt;
@@ -1780,8 +1787,12 @@ OptionParam Convert(const Ark_MenuElement& src)
         arkCallback.Invoke();
     };
     param.icon = Converter::OptConvert<std::string>(src.icon).value_or(param.icon);
-    LOGE("Ark_MenuElement Converter: SymbolGlyphModifier is not supported yet");
     param.enabled = Converter::OptConvert<bool>(src.enabled).value_or(param.enabled);
+    auto symbolIcon = Converter::OptConvert<Ark_SymbolGlyphModifier>(src.symbolIcon);
+    if (symbolIcon && *symbolIcon) {
+        param.symbol = (*symbolIcon)->symbolApply;
+        PeerUtils::DestroyPeer(*symbolIcon);
+    }
     return param;
 }
 
@@ -2117,7 +2128,8 @@ std::optional<Dimension> OptConvertFromArkNumStrRes(const T& src, DimensionUnit 
 }
 template std::optional<Dimension> OptConvertFromArkNumStrRes<Ark_Union_F64_String_Resource, Ark_Int32>(
     const Ark_Union_F64_String_Resource&, DimensionUnit);
-template std::optional<Dimension> OptConvertFromArkNumStrRes<Ark_Dimension, Ark_Number>(const Ark_Dimension&, DimensionUnit);
+template std::optional<Dimension> OptConvertFromArkNumStrRes<Ark_Dimension, Ark_Number>(
+    const Ark_Dimension&, DimensionUnit);
 template std::optional<Dimension> OptConvertFromArkNumStrRes<Ark_Length, Ark_Number>(const Ark_Length&, DimensionUnit);
 template std::optional<Dimension> OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(const Opt_Length&, DimensionUnit);
 

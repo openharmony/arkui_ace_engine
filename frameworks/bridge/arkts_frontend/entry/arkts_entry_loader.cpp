@@ -22,6 +22,8 @@
 #include <algorithm>
 #include <regex>
 
+#include <algorithm>
+
 namespace OHOS::Ace {
 
 static const std::string ENTRY_PREFIX = "/src/main/ets/";
@@ -41,6 +43,7 @@ ani_object EntryLoader::GetPageEntryObj()
         const auto moduleName = container->GetModuleName();
         entryPointName.reserve(moduleName.size() + ENTRY_PREFIX.size() + url_.size() + ENTRY_SUFFIX.size());
         entryPointName.append(moduleName).append(ENTRY_PREFIX).append(url_).append(ENTRY_SUFFIX);
+        std::replace(entryPointName.begin(), entryPointName.end(), '/', '.');
     } else {
         std::regex regex(ENTRY_PREFIX_REGEX);
         std::smatch prefixMatch;

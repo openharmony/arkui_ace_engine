@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
 #include "core/gestures/gesture_event.h"
+#include "adapter/ohos/entrance/picker/picker_haptic_interface.h"
 
 namespace OHOS::Ace::NG {
 class ContainerPickerEventParam : public virtual AceType {
@@ -113,7 +114,6 @@ public:
     void FireScrollStopEvent();
     bool SpringOverScroll(float offset);
     void UpdateCurrentOffset(float offset);
-    inline bool RunningTranslateAnimation() const;
 
 protected:
     bool ChildPreMeasureHelperEnabled() override
@@ -217,6 +217,13 @@ private:
     void PickerMarkDirty();
     void PostIdleTask(const RefPtr<FrameNode>& frameNode);
     double GetCurrentTime() const;
+    
+    bool IsEnableHaptic() const;
+    void InitOrRefreshHapticController();
+    void StopHapticController();
+    void PlayHaptic(float offset);
+    bool InnerHandleScroll(bool isDown);
+
     void InitDefaultParams()
     {
         pickerItemHeight_ = static_cast<float>(PICKER_ITEM_HEIGHT.ConvertToPx());
@@ -238,6 +245,7 @@ private:
     RefPtr<NodeAnimatablePropertyFloat> snapOffsetProperty_;
 
     std::shared_ptr<AnimationUtils::Animation> springAnimation_;
+    std::shared_ptr<IPickerAudioHaptic> hapticController_ = nullptr;
 
     bool isFirstAxisAction_ = true;
     bool isDragging_ = false;
@@ -253,6 +261,8 @@ private:
     bool clickBreak_ = false;
     bool touchBreak_ = false;
     bool animationBreak_ = false;
+    bool isAllowPlayHaptic_ = true;
+    bool isEnableHaptic_ = true;
 
     int32_t containerPickerId_ = -1;
     int32_t displayCount_ = 7;

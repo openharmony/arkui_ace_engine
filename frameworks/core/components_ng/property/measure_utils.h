@@ -29,7 +29,7 @@
 #include "core/components_ng/property/layout_policy_property.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/magic_layout_property.h"
-
+#include "frameworks/core/common/window.h"
 namespace OHOS::Ace::NG {
 ACE_FORCE_EXPORT std::optional<float> ConvertToPx(const CalcLength& value, const ScaleProperty& scaleProperty,
     float percentReference = -1.0f, const std::vector<std::string>& rpnexp = std::vector<std::string>());
@@ -190,6 +190,8 @@ void CreateChildrenConstraint(SizeF& size, const PaddingPropertyF& padding);
  */
 OptionalSizeF UpdateOptionSizeByCalcLayoutConstraint(const OptionalSize<float>& frameSize,
     const std::unique_ptr<MeasureProperty>& calcLayoutConstraint, const SizeT<float> percentReference);
+
+WidthBreakpoint GetCommonWidthBreakpoint(double width, double density);
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PROPERTIES_MEASURE_UTILS_H

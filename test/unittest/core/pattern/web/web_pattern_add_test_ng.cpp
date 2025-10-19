@@ -1321,7 +1321,7 @@ HWTEST_F(WebPatternAddTestNg, HandleTouchUpResetDragState001, TestSize.Level1)
     webPattern->isReceivedArkDrag_ = true;
     EXPECT_CALL(
         *(AceType::DynamicCast<MockInteractionInterface>(MockInteractionInterface::GetInstance())), IsDragStart())
-        .WillOnce(testing::Return(false));
+        .WillRepeatedly(testing::Return(false));
     webPattern->HandleTouchUp(info, true);
     EXPECT_FALSE(webPattern->isDragging_);
 
@@ -1329,7 +1329,7 @@ HWTEST_F(WebPatternAddTestNg, HandleTouchUpResetDragState001, TestSize.Level1)
     webPattern->isReceivedArkDrag_ = true;
     EXPECT_CALL(
         *(AceType::DynamicCast<MockInteractionInterface>(MockInteractionInterface::GetInstance())), IsDragStart())
-        .WillOnce(testing::Return(true));
+        .WillRepeatedly(testing::Return(true));
     webPattern->HandleTouchUp(info, true);
     EXPECT_TRUE(webPattern->isDragging_);
 
@@ -1345,6 +1345,9 @@ HWTEST_F(WebPatternAddTestNg, HandleTouchUpResetDragState001, TestSize.Level1)
     webPattern->isReceivedArkDrag_ = true;
     webPattern->HandleTouchUp(info, true);
     EXPECT_FALSE(webPattern->isDragging_);
+    EXPECT_CALL(
+        *(AceType::DynamicCast<MockInteractionInterface>(MockInteractionInterface::GetInstance())), IsDragStart())
+        .WillRepeatedly(testing::Return(false));
 #endif
 }
 } // namespace OHOS::Ace::NG

@@ -596,6 +596,16 @@ void SpanModelNG::SetTextBackgroundStyleByBaseSpan(UINode* uiNode, const TextBac
     spanNode->AddResObj(key, resObj, std::move(updateFunc));
 }
 
+void SpanModelNG::ResetTextBackgroundStyleByBaseSpan(UINode* uiNode)
+{
+    auto spanNode = AceType::DynamicCast<SpanNode>(uiNode);
+    CHECK_NULL_VOID(spanNode);
+    auto spanItem = spanNode->GetSpanItem();
+    CHECK_NULL_VOID(spanItem);
+    spanItem->backgroundStyle = std::nullopt;
+    spanNode->RequestTextFlushDirty();
+}
+
 std::u16string SpanModelNG::GetContent(UINode* uiNode)
 {
     auto spanNode = AceType::DynamicCast<SpanNode>(uiNode);

@@ -153,6 +153,7 @@ constexpr uint8_t TLV_SUPERSCRIPT_TAG = 0xA0;
 constexpr uint8_t TLV_SPAN_TEXT_LINE_STYLE_TEXTVERTICALALIGN = 0xA1;
 constexpr uint8_t TLV_TEXTVERTICALALIGN_TAG = 0xA2;
 
+constexpr uint8_t TLV_IMAGESPANATTRIBUTE_SUPPORTSVG2_TAG = 0xA3;
 
 #define TLV_DEFINE_ENUM_TYPE(type, tag) \
 public:                                                                     \
@@ -209,6 +210,19 @@ public:
             shift += TLV_VARINT_BITS;
         } while ((item & TLV_VARINT_MORE) != 0);
         return static_cast<int32_t>(value);
+    }
+
+    static void WriteBool(std::vector<uint8_t>& buff, bool value)
+    {
+        buff.push_back(value ? 0x01 : 0x00);
+    }
+
+    static bool ReadBool(std::vector<uint8_t>& buff, int32_t& cursor)
+    {
+        if (static_cast<size_t>(cursor) >= buff.size()) {
+            return false;
+        }
+        return buff[cursor++] != 0;
     }
 
     TLV_DEFINE_ENUM_TYPE(FontStyle, TLV_ITALICSFONTSTYLE_TAG);

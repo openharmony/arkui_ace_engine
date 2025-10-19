@@ -17,5 +17,7 @@ ace_unittest("folder_stack_test_ng") {
   type = "new"
   module_name = "Component-Layout"
   module_output = ""
-  sources = [ "folder_stack_test_ng.cpp" ]
+  sources = [ "folder_stack_test_ng.cpp",
+              "folder_stack_multithread_test_ng.cpp"
+            ]
 }

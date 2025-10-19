@@ -970,6 +970,33 @@ HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest138, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NativeRenderNodeTest139
+ * @tc.desc: Test SetClip function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest139, TestSize.Level1)
+{
+    auto renderNode = OH_ArkUI_RenderNodeUtils_CreateNode();
+    ASSERT_NE(renderNode, nullptr);
+
+    auto rectShape = OH_ArkUI_RenderNodeUtils_CreateRectShapeOption();
+    ASSERT_NE(rectShape, nullptr);
+    OH_ArkUI_RenderNodeUtils_SetRectShapeOptionEdgeValue(rectShape, 50.0f, ARKUI_EDGE_DIRECTION_ALL);
+    auto result = OH_ArkUI_RenderNodeUtils_SetClip(renderNode, nullptr);
+    ASSERT_EQ(result, ERROR_CODE_PARAM_INVALID);
+
+    auto clipOption = OH_ArkUI_RenderNodeUtils_CreateRenderNodeClipOptionFromOvalShape(rectShape);
+    ASSERT_NE(clipOption, nullptr);
+
+    result = OH_ArkUI_RenderNodeUtils_SetClip(renderNode, clipOption);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+
+    OH_ArkUI_RenderNodeUtils_DisposeRenderNodeClipOption(clipOption);
+    OH_ArkUI_RenderNodeUtils_DisposeRectShapeOption(rectShape);
+    OH_ArkUI_RenderNodeUtils_DisposeNode(renderNode);
+}
+
+/**
  * @tc.name: NativeRenderNodeTest201
  * @tc.desc: Test renderNode function.
  * @tc.type: FUNC

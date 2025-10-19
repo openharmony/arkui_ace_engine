@@ -1192,6 +1192,24 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPatternInitOnKeyEvent001
 }
 
 /**
+ * @tc.name: SecurityComponentPatternOnAttachToMainTree001
+ * @tc.desc: Test security component OnAttachToMainTreeMultiThread
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPatternOnAttachToMainTree001, TestSize.Level0)
+{
+    RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0,
+        BUTTON_TYPE_NULL, V2::LOCATION_BUTTON_ETS_TAG);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SecurityComponentPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    // Call OnAttachToMainTreeMultiThread.
+    pattern->OnAttachToMainTreeMultiThread();
+}
+
+/**
  * @tc.name: SecurityComponentPatternIsParentMenu001
  * @tc.desc: Test security component IsParentMenu
  * @tc.type: FUNC

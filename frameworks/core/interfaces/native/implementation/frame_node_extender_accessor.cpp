@@ -444,10 +444,6 @@ void SetLayoutPositionImpl(Ark_FrameNode peer,
     CHECK_NULL_VOID(position);
     auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
     CHECK_NULL_VOID(peerNode);
-    // auto xValue = Converter::Convert<OHOS::Ace::Dimension>(position->x.value);
-    // auto yValue = Converter::Convert<OHOS::Ace::Dimension>(position->y.value);
-    // peerNode->GetGeometryNode()->SetMarginFrameOffsetX(xValue.Value());
-    // peerNode->GetGeometryNode()->SetMarginFrameOffsetY(yValue.Value());
 }
 void MeasureImpl(Ark_FrameNode peer,
                  const Ark_LayoutConstraint* constraint)
@@ -494,11 +490,6 @@ void LayoutImpl(Ark_FrameNode peer,
     CHECK_NULL_VOID(position);
     auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
     CHECK_NULL_VOID(peerNode);
-    // auto xValue = Converter::Convert<Dimension>(position->x.value);
-    // auto yValue = Converter::Convert<Dimension>(position->y.value);
-    // peerNode->SetActive(true);
-    // peerNode->GetGeometryNode()->SetMarginFrameOffsetX(xValue.Value());
-    // peerNode->GetGeometryNode()->SetMarginFrameOffsetY(yValue.Value());
     peerNode->Layout();
 }
 void SetNeedsLayoutImpl(Ark_FrameNode peer)

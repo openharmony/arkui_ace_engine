@@ -41,7 +41,8 @@ void DynamicComponentRendererImpl::DestroyContent() {}
 void DynamicComponentRendererImpl::UpdateViewportConfig(const SizeF& size, float density,
     int32_t orientation, AnimationOption animationOpt, const OffsetF& offset) {}
 
-void DynamicComponentRendererImpl::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) {}
+void DynamicComponentRendererImpl::TransferPointerEvent(
+    const std::shared_ptr<MMI::PointerEvent>& pointerEvent) {}
 
 bool DynamicComponentRendererImpl::TransferKeyEvent(const KeyEvent& event)
 {
@@ -94,7 +95,8 @@ bool DynamicComponentRendererImpl::NotifyExecuteAction(int64_t elementId,
     return true;
 }
 
-void DynamicComponentRendererImpl::TransferAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType,
+void DynamicComponentRendererImpl::TransferAccessibilityHoverEvent(
+    float pointX, float pointY, int32_t sourceType,
     int32_t eventType, int64_t timeMs) {}
 
 void DynamicComponentRendererImpl::InitializeDynamicAccessibility() {}

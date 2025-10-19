@@ -101,6 +101,7 @@ public:
     void SetTextBackgroundStyle(const TextBackgroundStyle& style) override;
     static void SetTextBackgroundStyle(UINode* uiNode, const TextBackgroundStyle& style);
     static void SetTextBackgroundStyleByBaseSpan(UINode* uiNode, const TextBackgroundStyle& style);
+    static void ResetTextBackgroundStyleByBaseSpan(UINode* uiNode);
     static TextBackgroundStyle GetSpanTextBackgroundStyle(UINode* uiNode);
     static void SetTextShadow(UINode* uiNode, const std::vector<Shadow>& value);
     static void ResetTextShadow(UINode* uiNode);

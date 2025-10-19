@@ -15,20 +15,21 @@
 
 #include "interfaces/inner_api/ui_session/ui_content_stub.h"
 
-#include "ipc_skeleton.h"
 #include "accesstoken_kit.h"
+#include "ipc_skeleton.h"
 
-#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#include "adapter/ohos/entrance/ui_session/ui_session_manager_ohos.h"
 #include "ui_content_errors.h"
 
-#include "adapter/ohos/entrance/ui_session/include/ui_service_hilog.h"
+#include "adapter/ohos/entrance/ui_session/include/ui_session_log.h"
 
 namespace OHOS::Ace {
 bool UiContentStub::IsSACalling() const
 {
+    using namespace Security::AccessToken;
     const auto tokenId = IPCSkeleton::GetCallingTokenID();
-    const auto flag = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(tokenId);
-    if (flag == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE) {
+    const auto flag = AccessTokenKit::GetTokenTypeFlag(tokenId);
+    if (flag == ATokenTypeEnum::TOKEN_NATIVE) {
         LOGD("SA called, tokenId:%{private}u, flag:%{public}u", tokenId, flag);
         return true;
     }
@@ -189,8 +190,9 @@ int32_t UiContentStub::ConnectInner(MessageParcel& data, MessageParcel& reply, M
         return FAILED;
     }
     int32_t processId = data.ReadInt32();
-    UiSessionManager::GetInstance()->SaveReportStub(report, processId);
-    UiSessionManager::GetInstance()->SendBaseInfo(processId);
+    UiSessionManagerOhos* uisession = reinterpret_cast<UiSessionManagerOhos*>(UiSessionManager::GetInstance());
+    uisession->SaveReportStub(report, processId);
+    uisession->SendBaseInfo(processId);
     return NO_ERROR;
 }
 

@@ -22,6 +22,7 @@
 #include "core/common/recorder/event_controller.h"
 #include "core/common/recorder/event_definition.h"
 #include "core/common/recorder/node_data_cache.h"
+#include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "ui/base/utils/utils.h"
 
@@ -31,10 +32,17 @@ constexpr char IGNORE_WINDOW_NAME[] = "$HA_FLOAT_WINDOW$";
 
 void FillExtraTextIfNeed(EventType eventType, EventParamsBuilder& builder, const RefPtr<NG::FrameNode>& host)
 {
-    if (eventType != EventType::CLICK || !builder.GetValue(KEY_TEXT).empty()) {
+    if (eventType != EventType::CLICK) {
         return;
     }
     if (!EventRecorder::Get().IsRecordEnable(Recorder::EventCategory::CATEGORY_PARENT_TEXT)) {
+        return;
+    }
+    auto property = host->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    if (property) {
+        builder.SetExtra("accessilityText", property->GetGroupPreferAccessibilityText(true));
+    }
+    if (!builder.GetValue(KEY_TEXT).empty()) {
         return;
     }
     if (!host->GetChildren().empty()) {
@@ -42,7 +50,7 @@ void FillExtraTextIfNeed(EventType eventType, EventParamsBuilder& builder, const
     }
     auto parent = host->GetParentFrameNode();
     CHECK_NULL_VOID(parent);
-    auto property = parent->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    property = parent->GetAccessibilityProperty<NG::AccessibilityProperty>();
     CHECK_NULL_VOID(property);
     builder.SetExtra(KEY_EXTRA_TEXT, property->GetGroupText(true));
 }
@@ -161,12 +169,32 @@ EventParamsBuilder& EventParamsBuilder::SetHost(const RefPtr<NG::FrameNode>& nod
     SetPageUrl(GetPageUrlByNode(node));
     SetNavDst(GetNavDstNameByNode(node));
     FillExtraTextIfNeed(eventType_, *this, node);
+    FillImageNodeInfo(node);
     auto parent = node->GetParent();
     if (parent) {
         auto index = parent->GetFrameNodeIndex(node);
         params_->emplace("nodeIndex", std::to_string(index));
     }
     return *this;
+}
+
+void EventParamsBuilder::FillImageNodeInfo(const RefPtr<NG::FrameNode>& host)
+{
+    if (eventType_ != EventType::CLICK) {
+        return;
+    }
+    if (!EventRecorder::Get().IsRecordEnable(EventCategory::CATEGORY_IMAGE_INFO)) {
+        return;
+    }
+    auto imgNode = GetFirstImageNodeChild(host);
+    CHECK_NULL_VOID(imgNode);
+    SetExtra("imgId", std::to_string(imgNode->GetId()));
+    auto pattern = imgNode->GetPattern<NG::Pattern>();
+    CHECK_NULL_VOID(pattern);
+    auto layoutProp = pattern->GetLayoutProperty<NG::ImageLayoutProperty>();
+    CHECK_NULL_VOID(layoutProp);
+    auto src = layoutProp->GetImageSourceInfo().value_or(ImageSourceInfo(""));
+    SetExtra("imgInfo", src.ToString());
 }
 
 EventParamsBuilder& EventParamsBuilder::SetExtra(const std::string& key, const std::string& value)
@@ -232,6 +260,28 @@ std::string MapToString(const std::shared_ptr<std::unordered_map<std::string, st
     }
     ss << "}";
     return ss.str();
+}
+
+RefPtr<NG::FrameNode> GetFirstImageNodeChild(const RefPtr<NG::UINode>& parent)
+{
+    std::queue<RefPtr<NG::UINode>> elements;
+    elements.push(parent);
+    while (!elements.empty()) {
+        auto current = elements.front();
+        elements.pop();
+        if (current == nullptr) {
+            continue;
+        }
+        if (current->GetTag() == V2::IMAGE_ETS_TAG) {
+            return AceType::DynamicCast<NG::FrameNode>(current);
+        }
+
+        const auto& children = current->GetChildrenForInspector(false);
+        for (const auto& child : children) {
+            elements.push(child);
+        }
+    }
+    return nullptr;
 }
 
 EventRecorder& EventRecorder::Get()

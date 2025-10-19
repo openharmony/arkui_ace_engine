@@ -21,6 +21,7 @@ import { ObserveSingleton } from "./stateManagement/base/observeSingleton";
 import { OBSERVE } from "./stateManagement";
 import { PeerNode } from "./PeerNode"
 import { RecordData } from "@ohos.base"
+import { ArkCommonMethodComponent, ArkCommonPeer, CommonMethod } from 'arkui/component/common';
 
 /** base class for user's structs */
 export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent {
@@ -66,6 +67,15 @@ export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent 
         receiver._buildWrapper(content, initializers);
     }
 
+    /** @memo:intrinsic */
+    callStyles(): void {}
+ 
+    applyStyles(instance: CommonMethod): void {}
+ 
+    get hasCommonStyles(): boolean {
+        return false;
+    }
+
     protected __initializeStruct(
         /** @memo */
         content?: () => void,
@@ -74,19 +84,17 @@ export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent 
         console.log("__initializeStruct()")
     }
 
-    /** @memo */
-    _buildWrapper(
-        /** @memo */
-        content?: () => void,
-        initializers?: T_Options
-    ): void {
+    /** @memo:intrinsic */
+    buildArkComponentRoot(initializers?: T_Options) {
         ArkComponentRoot(this, (node: PeerNode) => {
             this.__updateStruct(initializers);
+            const savedRenderingComponent = OBSERVE.renderingComponent
+            OBSERVE.renderingComponent = 
             this.isV2()
-                ? OBSERVE.renderingComponent = ObserveSingleton.RenderingComponentV2
-                : OBSERVE.renderingComponent = ObserveSingleton.RenderingComponentV1;
+                ? ObserveSingleton.RenderingComponentV2
+                : ObserveSingleton.RenderingComponentV1;
             this.build();
-            OBSERVE.renderingComponent = ObserveSingleton.RenderingComponent;
+            OBSERVE.renderingComponent = savedRenderingComponent
             remember(() => {
                 this.onDidBuild();
             });
@@ -102,6 +110,25 @@ export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent 
         })
     }
 
+    /** @memo */
+    _buildWrapper(
+        /** @memo */
+        content?: () => void,
+        initializers?: T_Options
+    ): void {
+        this.callStyles();
+        const hasCommonStyles = remember(() => this.hasCommonStyles)
+ 
+        if (hasCommonStyles) {
+            const receiver = remember(() => new ArkCommonMethodComponent());
+            NodeAttach(() => ArkCommonPeer.create(receiver), (_: ArkCommonPeer) => {
+                this.applyStyles(receiver);
+                this.buildArkComponentRoot(initializers);
+            })
+        } else {
+            this.buildArkComponentRoot(initializers);
+        }
+    }
 
     /** @memo */
     static _instantiateReusable<T extends ArkStructBase<T, T_Options>, T_Options>(

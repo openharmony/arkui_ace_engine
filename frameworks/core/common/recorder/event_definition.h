@@ -31,6 +31,7 @@ enum class EventCategory: int32_t {
     CATEGORY_TEXT_INPUT,
     CATEGORY_POINT,
     CATEGORY_PARENT_TEXT,
+    CATEGORY_IMAGE_INFO,
     CATEGORY_END,
 };
 

@@ -191,7 +191,8 @@ public:
     {
         return nullptr;
     };
-    virtual void PushNamedRouteExtender(const PageRouterOptions& options, std::function<void()>&& finishCallback, void* jsNode)
+    virtual void PushNamedRouteExtender(const PageRouterOptions& options,
+        std::function<void()>&& finishCallback, void* jsNode)
     {
         return;
     }
@@ -200,7 +201,8 @@ public:
     {
         return nullptr;
     };
-    virtual void ReplaceNamedRouteExtender(const PageRouterOptions& options, std::function<void()>&& finishCallback, void* jsNode)
+    virtual void ReplaceNamedRouteExtender(const PageRouterOptions& options,
+        std::function<void()>&& finishCallback, void* jsNode)
     {
         return;
     }

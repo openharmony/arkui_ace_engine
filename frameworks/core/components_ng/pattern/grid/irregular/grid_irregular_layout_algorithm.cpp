@@ -30,8 +30,9 @@ GridIrregularFiller::FillParameters GetFillParameters(const RefPtr<FrameNode>& h
     auto props = AceType::DynamicCast<GridLayoutProperty>(host->GetLayoutProperty());
     auto crossGap = GridUtils::GetCrossGap(props, contentSize, info.axis_);
     auto mainGap = GridUtils::GetMainGap(props, contentSize, info.axis_);
-    std::string args =
-        info.axis_ == Axis::VERTICAL ? props->GetColumnsTemplate().value_or("") : props->GetRowsTemplate().value_or("");
+    std::string args = info.axis_ == Axis::VERTICAL
+                           ? props->GetFinalColumnsTemplate(GridLayoutUtils::GetOriginalWidth()).value_or("")
+                           : props->GetRowsTemplate().value_or("");
     const float crossSize = contentSize.CrossSize(info.axis_);
     auto res = ParseTemplateArgs(GridUtils::ParseArgs(args), crossSize, crossGap, info.GetChildrenCount());
     auto crossLens = std::vector<float>(res.first.begin(), res.first.end());
@@ -127,6 +128,8 @@ float GridIrregularLayoutAlgorithm::MeasureSelf(const RefPtr<GridLayoutProperty>
 {
     // set self size
     frameSize_ = CreateIdealSize(props->GetLayoutConstraint().value(), info_.axis_, props->GetMeasureType(), true);
+    double originalWidth = frameSize_.Width();
+    GridLayoutUtils::SetOriginalWidth(originalWidth);
     wrapper_->GetGeometryNode()->SetFrameSize(frameSize_);
 
     // set content size
@@ -152,7 +155,7 @@ void GridIrregularLayoutAlgorithm::Init(const RefPtr<GridLayoutProperty>& props)
         args = props->GetRowsTemplate().value_or("");
     } else {
         info_.axis_ = Axis::VERTICAL;
-        args = props->GetColumnsTemplate().value_or("");
+        args = props->GetFinalColumnsTemplate(GridLayoutUtils::GetOriginalWidth()).value_or("");
     }
 
     const float crossSize = contentSize.CrossSize(info_.axis_);

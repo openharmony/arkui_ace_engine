@@ -17,16 +17,25 @@
 
 #include <memory>
 
-#include "core/components/scroll/scroll_controller_base.h"
 #if !defined(CROSS_PLATFORM) && defined(WEB_SUPPORTED)
 #include "core/components_ng/pattern/web/web_pattern.h"
 #endif
+
+#include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/inspector_tree_collector.h"
+#include "core/components/scroll/scroll_controller_base.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/text/span_node.h"
+#include "core/components_ng/render/adapter/component_snapshot.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "interfaces/inner_api/ace/ui_event_observer.h"
+
+namespace OHOS {
+namespace Media {
+class PixelMap;
+}  // namespace Media
+}  // namespace OHOS
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -57,6 +66,10 @@ constexpr int32_t ERR_OK = 0;
 constexpr int32_t ERR_INVALID_PARAM = 101;
 constexpr int32_t ERR_NOT_FOUND_TARGET_NODE = 102;
 constexpr int32_t ERR_NOT_FOUND_SCROLLABLE_NODE = 103;
+
+constexpr int32_t MODE_IMAGE_PIXELMAP = 1;
+constexpr int32_t MODE_COMPONENT_SNAPSHOT = 2;
+constexpr int32_t MODE_IMAGE_SNAPSHOT = 3;
 
 enum class TargetType {
     UNKNOWN = 0,
@@ -97,7 +110,7 @@ bool ParseCommandParam(const std::string& commandParams, ScrollCommand& command)
     return true;
 }
 
-RefPtr<UINode> GetNodeById(const RefPtr<FrameNode>& root, int32_t id)
+RefPtr<UINode> GetNodeById(const RefPtr<FrameNode>& root, int32_t id, bool needCacheNode = true)
 {
     std::queue<RefPtr<UINode>> elements;
     elements.push(root);
@@ -112,7 +125,7 @@ RefPtr<UINode> GetNodeById(const RefPtr<FrameNode>& root, int32_t id)
             return current;
         }
 
-        const auto& children = current->GetChildrenForInspector(true);
+        const auto& children = current->GetChildrenForInspector(needCacheNode);
         for (const auto& child : children) {
             elements.push(child);
         }
@@ -236,6 +249,10 @@ SimplifiedInspector::SimplifiedInspector(int32_t containerId, const TreeParams& 
 
 SimplifiedInspector::SimplifiedInspector(int32_t containerId, const UICommandParams& params)
     : containerId_(containerId), commandParams_(params)
+{}
+
+SimplifiedInspector::SimplifiedInspector(int32_t containerId, const ComponentParams& params)
+    : containerId_(containerId), componentParams_(params)
 {}
 
 RefPtr<NG::UINode> GetOverlayNode(const RefPtr<NG::UINode>& pageNode)
@@ -733,5 +750,71 @@ int32_t SimplifiedInspector::ExecuteWebScrollCommand(
 #else
     return ERR_NOT_FOUND_TARGET_NODE;
 #endif
+}
+
+void SimplifiedInspector::GetComponentImageInfo(std::shared_ptr<ComponentResult>& result)
+{
+    LOGD("get img start %{public}d", componentParams_.aceId);
+    CHECK_NULL_VOID(result->callback);
+    ContainerScope scope(Container::CurrentIdSafely());
+
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    CHECK_NULL_VOID(context->GetStageManager());
+    auto pageRootNode = context->GetStageManager()->GetLastPage();
+    CHECK_NULL_VOID(pageRootNode);
+    if (componentParams_.mode == MODE_IMAGE_PIXELMAP) {
+        auto node = GetNodeById(pageRootNode, componentParams_.aceId, false);
+        CHECK_NULL_VOID(node);
+        auto pixelMap = GetImagePixelMap(node);
+        CHECK_NULL_VOID(pixelMap);
+        result->isOk = true;
+        result->callback(std::make_pair(node->GetId(), pixelMap));
+    } else if (componentParams_.mode == MODE_COMPONENT_SNAPSHOT || componentParams_.mode == MODE_IMAGE_SNAPSHOT) {
+        GetComponentSnapshot(pageRootNode, result);
+    } else {
+        LOGD("unknown img mode");
+    }
+}
+
+std::shared_ptr<Media::PixelMap> SimplifiedInspector::GetImagePixelMap(const RefPtr<UINode>& node)
+{
+    if (node->GetTag() != V2::IMAGE_ETS_TAG) {
+        return nullptr;
+    }
+    auto frameNode = AceType::DynamicCast<NG::FrameNode>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    auto canvasImg = pattern->GetCanvasImage();
+    CHECK_NULL_RETURN(canvasImg, nullptr);
+    auto acePixelMap = canvasImg->GetPixelMap();
+    CHECK_NULL_RETURN(acePixelMap, nullptr);
+    return acePixelMap->GetPixelMapSharedPtr();
+}
+
+void SimplifiedInspector::GetComponentSnapshot(
+    const RefPtr<FrameNode>& rootNode, std::shared_ptr<ComponentResult>& result)
+{
+    auto node = GetNodeById(rootNode, componentParams_.aceId, false);
+    CHECK_NULL_VOID(node);
+    auto frameNode = AceType::DynamicCast<NG::FrameNode>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefPtr<FrameNode> target = nullptr;
+    if (componentParams_.mode == MODE_COMPONENT_SNAPSHOT) {
+        target = frameNode;
+    } else if (componentParams_.mode == MODE_IMAGE_SNAPSHOT) {
+        auto imageNode = Recorder::GetFirstImageNodeChild(node);
+        CHECK_NULL_VOID(imageNode);
+        target = imageNode;
+    }
+    CHECK_NULL_VOID(target);
+    ComponentSnapshot::GetNormalCapture(
+        target, [aceId = target->GetId(), result](std::shared_ptr<Media::PixelMap> pixelMap) {
+            if (result && result->callback) {
+                result->callback(std::make_pair(aceId, pixelMap));
+            }
+        });
+    result->isOk = true;
 }
 } // namespace OHOS::Ace::NG

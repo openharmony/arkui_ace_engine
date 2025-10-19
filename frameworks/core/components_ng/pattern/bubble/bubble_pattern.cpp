@@ -16,6 +16,7 @@
 
 #include "base/subwindow/subwindow.h"
 #include "base/subwindow/subwindow_manager.h"
+#include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "base/log/dump_log.h"
@@ -106,6 +107,14 @@ void BubblePattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode);
+    OnAttachToFrameNodeImpl();
+}
+
+void BubblePattern::OnAttachToFrameNodeImpl()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToFrame(true);
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetNodeId_);
     CHECK_NULL_VOID(targetNode);
@@ -147,6 +156,14 @@ void BubblePattern::OnAttachToFrameNode()
 
 void BubblePattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnDetachFromFrameNode, frameNode);
+    OnDetachFromFrameNodeImpl(frameNode);
+}
+
+void BubblePattern::OnDetachFromFrameNodeImpl(FrameNode* frameNode)
+{
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowSizeChangeCallback(frameNode->GetId());
@@ -157,6 +174,20 @@ void BubblePattern::OnDetachFromFrameNode(FrameNode* frameNode)
         pipeline->RemoveOnAreaChangeNode(targetNode->GetId());
     }
     pipeline->UnRegisterHalfFoldHoverChangedCallback(halfFoldHoverCallbackId_);
+}
+
+void BubblePattern::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
+}
+
+void BubblePattern::OnDetachFromMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree);
 }
 
 void BubblePattern::InitTouchEvent()

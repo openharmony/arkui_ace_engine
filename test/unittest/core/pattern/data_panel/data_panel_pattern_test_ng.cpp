@@ -28,6 +28,7 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/data_panel/data_panel_model_ng.h"
+#include "core/components_ng/pattern/data_panel/data_panel_model_static.h"
 #include "core/components_ng/pattern/data_panel/data_panel_modifier.h"
 #include "core/components_ng/pattern/data_panel/data_panel_paint_property.h"
 #include "core/components_ng/pattern/data_panel/data_panel_pattern.h"
@@ -340,5 +341,40 @@ HWTEST_F(DataPanelTestNg, DataPanelSetValuesTest003, TestSize.Level0)
     std::vector<double> VALUES = { 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f, 9.0f, 10.0f };
     dataPanelModifier.SetValues(VALUES);
     EXPECT_EQ(dataPanelModifier.GetValuesCount(), 9.0f);
+}
+
+/**
+ * @tc.name: DataPanelLayoutStaticTest001
+ * @tc.desc: Test DataPanel Static Create
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelTestNg, DataPanelStaticTest001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create datapnel and get frameNode.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    DataPanelModelStatic dataPanel;
+    dataPanel.CreateFrameNode(nodeId);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. create frameNode to get layout properties and paint properties.
+     * @tc.expected: step2. related function is called.
+     */
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    EXPECT_NE(layoutProperty, nullptr);
+    auto dataPanelPaintProperty = frameNode->GetPaintProperty<DataPanelPaintProperty>();
+    EXPECT_NE(dataPanelPaintProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. get value from dataPanelPaintProperty.
+     * @tc.expected: step3. the value is the same with setting.
+     */
+    EXPECT_EQ(dataPanelPaintProperty->GetMaxValue(), MAX);
+    EXPECT_EQ(dataPanelPaintProperty->GetValuesValue(), VALUES);
+    EXPECT_EQ(dataPanelPaintProperty->GetDataPanelTypeValue(), TYPE_CYCLE);
 }
 } // namespace OHOS::Ace::NG

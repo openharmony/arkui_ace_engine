@@ -22,6 +22,7 @@
 namespace OHOS::Ace::NG {
 class ACE_EXPORT DataPanelModelStatic {
 public:
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetValues(FrameNode* frameNode, const std::optional<std::vector<double>>& values);
     static void SetMax(FrameNode* frameNode, const std::optional<double>& max);
     static void SetType(FrameNode* frameNode, const std::optional<int32_t>& type);

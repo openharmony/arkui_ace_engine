@@ -56,9 +56,6 @@ namespace PasteButtonModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    if (MultiThreadBuildManager::IsParallelScope()) {
-        LOGF_ABORT("Unsupported UI components PasteButton used in ParallelizeUI");
-    }
     auto frameNode = PasteButtonModelNG::CreateFrameNode(id);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();

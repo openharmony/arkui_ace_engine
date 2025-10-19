@@ -19,7 +19,6 @@ ace_unittest("container_picker_test") {
     "container_picker_event_hub_test.cpp",
     "container_picker_layout_algorithm_test.cpp",
     "container_picker_pattern_test.cpp",
-    "container_picker_pattern_test_two.cpp",
     "container_picker_test.cpp",
   ]
 }

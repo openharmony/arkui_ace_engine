@@ -278,13 +278,101 @@ public:
                      holder.end());
     }
 
-    void UnRegisterWillDrawCallback(ani_env* env, int32_t uiContextInstanceId, ani_ref& cb) {}
+    void RegisterDidLayoutCallback(int32_t uiContextInstanceId, ani_ref& cb)
+    {
+        id_ = uiContextInstanceId;
+        if (uiContextInstanceId == 0) {
+            uiContextInstanceId = Container::CurrentId();
+        }
+        auto iter = specifiedDidLayoutCbMap_.find(uiContextInstanceId);
+        if (iter == specifiedDidLayoutCbMap_.end()) {
+            specifiedDidLayoutCbMap_.emplace(uiContextInstanceId, std::list<ani_ref>({ cb }));
+            return;
+        }
+        auto& holder = iter->second;
+        if (std::find(holder.begin(), holder.end(), cb) != holder.end()) {
+            return;
+        }
+        holder.emplace_back(cb);
+    }
 
-    void RegisterWillDrawCallback(int32_t uiContextInstanceId, ani_ref& cb) {}
+    void UnRegisterDidLayoutCallback(ani_env* env, int32_t uiContextInstanceId, ani_ref& cb)
+    {
+        if (uiContextInstanceId == 0) {
+            uiContextInstanceId = Container::CurrentId();
+        }
+        auto iter = specifiedDidLayoutCbMap_.find(uiContextInstanceId);
+        if (iter == specifiedDidLayoutCbMap_.end()) {
+            return;
+        }
+        auto& holder = iter->second;
+        if (cb == nullptr) {
+            holder.clear();
+            return;
+        }
+        holder.erase(std::remove_if(
+                         holder.begin(), holder.end(), [env, cb, this](ani_ref cb1) { return AniEqual(env, cb, cb1); }),
+            holder.end());
+    }
 
-    void UnRegisterDidLayoutCallback(ani_env* env, int32_t uiContextInstanceId, ani_ref& cb) {}
+    void RegisterWillDrawCallback(int32_t uiContextInstanceId, ani_ref& cb)
+    {
+        id_ = uiContextInstanceId;
+        if (uiContextInstanceId == 0) {
+            uiContextInstanceId = Container::CurrentId();
+        }
+        auto iter = specifiedWillDrawCbMap_.find(uiContextInstanceId);
+        if (iter == specifiedWillDrawCbMap_.end()) {
+            specifiedWillDrawCbMap_.emplace(uiContextInstanceId, std::list<ani_ref>({ cb }));
+            return;
+        }
+        auto& holder = iter->second;
+        if (std::find(holder.begin(), holder.end(), cb) != holder.end()) {
+            return;
+        }
+        holder.emplace_back(cb);
+    }
 
-    void RegisterDidLayoutCallback(int32_t uiContextInstanceId, ani_ref& cb) {}
+    void UnRegisterWillDrawCallback(ani_env* env, int32_t uiContextInstanceId, ani_ref& cb)
+    {
+        if (uiContextInstanceId == 0) {
+            uiContextInstanceId = Container::CurrentId();
+        }
+        auto iter = specifiedWillDrawCbMap_.find(uiContextInstanceId);
+        if (iter == specifiedWillDrawCbMap_.end()) {
+            return;
+        }
+        auto& holder = iter->second;
+        if (cb == nullptr) {
+            holder.clear();
+            return;
+        }
+        holder.erase(std::remove_if(
+                         holder.begin(), holder.end(), [env, cb, this](ani_ref cb1) { return AniEqual(env, cb, cb1); }),
+            holder.end());
+    }
+
+    void HandleWillDraw(ani_env* env)
+    {
+        auto currentId = Container::CurrentId();
+        auto iter = specifiedWillDrawCbMap_.find(currentId);
+        if (iter == specifiedWillDrawCbMap_.end()) {
+            return;
+        }
+        auto& holder = iter->second;
+        CallJsFunction(env, holder);
+    }
+
+    void HandleDidLayout(ani_env* env)
+    {
+        auto currentId = Container::CurrentId();
+        auto iter = specifiedDidLayoutCbMap_.find(currentId);
+        if (iter == specifiedDidLayoutCbMap_.end()) {
+            return;
+        }
+        auto& holder = iter->second;
+        CallJsFunction(env, holder);
+    }
 
     void RegisterDidClickCallback(int32_t uiContextInstanceId, ani_ref& cb)
     {
@@ -661,6 +749,8 @@ private:
     std::list<ani_ref> unspecifiedNavigationListeners_;
     std::unordered_map<std::string, std::list<ani_ref>> specifiedCNavigationListeners_;
     std::unordered_map<int32_t, std::list<ani_ref>> specifiedRouterPageListeners_;
+    std::unordered_map<int32_t, std::list<ani_ref>> specifiedWillDrawCbMap_;
+    std::unordered_map<int32_t, std::list<ani_ref>> specifiedDidLayoutCbMap_;
 };
 
 static UiObserver* Unwrapp(ani_env* env, ani_object object)
@@ -721,8 +811,12 @@ static void On([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object
     } else if (typeStr == NAVDESTINATION_UPDATE) {
         observer->RegisterNavigationCallback(fnObjGlobalRef);
     } else if (typeStr == "willDraw") {
+        auto willDrawCallback = [observer, env]() { observer->HandleWillDraw(env); };
+        NG::UIObserverHandler::GetInstance().SetDrawCommandSendHandleFunc(willDrawCallback);
         observer->RegisterWillDrawCallback(idMs, fnObjGlobalRef);
     } else if (typeStr == "didLayout") {
+        auto didLayoutCallback = [observer, env]() { observer->HandleDidLayout(env); };
+        NG::UIObserverHandler::GetInstance().SetLayoutDoneHandleFunc(didLayoutCallback);
         observer->RegisterDidLayoutCallback(idMs, fnObjGlobalRef);
     } else if (typeStr == ROUTER_UPDATE) {
         observer->RegisterRouterPageCallback(idMs, fnObjGlobalRef);

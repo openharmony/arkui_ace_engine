@@ -2339,13 +2339,14 @@ void TabBarPattern::UpdateImageColor(int32_t indicator)
     CHECK_NULL_VOID(pipelineContext);
     auto tabTheme = pipelineContext->GetTheme<TabTheme>();
     CHECK_NULL_VOID(tabTheme);
-    int32_t index = 0;
-    for (const auto& columnNode : tabBarNode->GetChildren()) {
+    auto childCount = tabBarNode->TotalChildCount() - IMAGE_INDICATOR_COUNT;
+    CHECK_NULL_VOID(childCount >= 0);
+    for (int32_t index = 0; index < childCount; index++) {
+        auto columnNode = DynamicCast<FrameNode>(tabBarNode->GetChildAtIndex(index));
         CHECK_NULL_VOID(columnNode && !columnNode->GetChildren().empty());
         auto imageNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().front());
         CHECK_NULL_VOID(imageNode);
         if (imageNode->GetTag() != V2::IMAGE_ETS_TAG) {
-            index++;
             continue;
         }
         auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
@@ -2366,7 +2367,6 @@ void TabBarPattern::UpdateImageColor(int32_t indicator)
         imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
         imageNode->MarkModifyDone();
         imageNode->MarkDirtyNode();
-        index++;
     }
     SetImageColorOnIndex(indicator);
 }
@@ -3498,8 +3498,8 @@ bool TabBarPattern::ContentWillChange(int32_t currentIndex, int32_t comingIndex)
 bool TabBarPattern::IsValidIndex(int32_t index)
 {
     if (index < 0 || index >= static_cast<int32_t>(tabBarStyles_.size()) ||
-        tabBarStyles_[index] != TabBarStyle::SUBTABBATSTYLE || index >= static_cast<int32_t>(selectedModes_.size()) ||
-        selectedModes_[index] != SelectedMode::INDICATOR) {
+        tabBarStyles_[index] != TabBarStyle::SUBTABBATSTYLE || isDrawableIndicators_[index] ||
+        index >= static_cast<int32_t>(selectedModes_.size()) || selectedModes_[index] != SelectedMode::INDICATOR) {
         return false;
     }
     return true;
@@ -3817,15 +3817,19 @@ void TabBarPattern::UpdateSubTabBarImageIndicator()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     CHECK_NULL_VOID(!indicatorStyles_.empty());
-    auto indicatorStyle = indicatorStyles_[indicator_];
-    if (!NeedShowImageIndicator(indicator_)) {
+    auto layoutProperty = host->GetLayoutProperty<TabBarLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto index = layoutProperty->GetIndicatorValue(0);
+    CHECK_NE_VOID((index >= 0 && index < static_cast<int32_t>(indicatorStyles_.size())), true);
+    auto indicatorStyle = indicatorStyles_[index];
+    if (!NeedShowImageIndicator(index)) {
         return;
     }
     auto indicatorNode = DynamicCast<FrameNode>(host->GetChildren().back());
     CHECK_NULL_VOID(indicatorNode);
     auto indicatorPattern = indicatorNode->GetPattern<ImagePattern>();
     CHECK_NULL_VOID(indicatorPattern);
-    auto imageInfoConfig = GetDrawableIndicatorConfigByIndex(indicator_);
+    auto imageInfoConfig = GetDrawableIndicatorConfigByIndex(index);
     indicatorPattern->SetImageType(imageInfoConfig.type);
     indicatorPattern->UpdateDrawableDescriptor(imageInfoConfig.drawable);
 

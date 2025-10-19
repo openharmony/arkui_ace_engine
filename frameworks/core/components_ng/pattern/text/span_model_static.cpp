@@ -15,7 +15,6 @@
 
 #include "core/components_ng/pattern/text/span_model_static.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
-#include "core/interfaces/native/node/node_utils.h"
 #include "core/text/text_emoji_processor.h"
 
 #define ACE_UPDATE_NODE_SPAN_PROPERTY(name, value, frameNode)                                                    \
@@ -148,10 +147,6 @@ void SpanModelStatic::SetTextColor(UINode* uiNode, const std::optional<Color>& v
         ACE_UPDATE_NODE_SPAN_PROPERTY(SpanTextColor, value.value(), uiNode);
     } else {
         ACE_RESET_NODE_SPAN_PROPERTY(TextColor, uiNode);
-        auto theme = GetTheme<TextTheme>();
-        CHECK_NULL_VOID(theme);
-        auto textColor = theme->GetTextStyle().GetTextColor();
-        SpanModelNG::SetTextColor(uiNode, textColor);
     }
 }
 

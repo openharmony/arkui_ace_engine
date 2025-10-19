@@ -15,6 +15,7 @@
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_pattern.h"
 
 #include "base/log/dump_log.h"
+#include "base/utils/multi_thread.h"
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -41,9 +42,22 @@ void CheckBoxGroupPattern::OnAttachToFrameNode()
     host->GetLayoutProperty()->UpdateAlignment(Alignment::CENTER);
 }
 
+void CheckBoxGroupPattern::OnDetachFromMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree);
+}
+
 void CheckBoxGroupPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
+    THREAD_SAFE_NODE_CHECK(frameNode, OnDetachFromFrameNode);
+    OnDetachFromFrameNodeImpl(frameNode);
+}
+
+void CheckBoxGroupPattern::OnDetachFromFrameNodeImpl(FrameNode* frameNode)
+{
     auto groupManager = GetGroupManager();
     CHECK_NULL_VOID(groupManager);
     std::string group = "";
@@ -786,6 +800,13 @@ void CheckBoxGroupPattern::DumpInfo()
 void CheckBoxGroupPattern::OnAttachToMainTree()
 {
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
+    OnAttachToMainTreeImpl(host);
+}
+
+void CheckBoxGroupPattern::OnAttachToMainTreeImpl(const RefPtr<FrameNode>& host)
+{
     CHECK_NULL_VOID(host);
     auto groupManager = GetGroupManager();
     CHECK_NULL_VOID(groupManager);

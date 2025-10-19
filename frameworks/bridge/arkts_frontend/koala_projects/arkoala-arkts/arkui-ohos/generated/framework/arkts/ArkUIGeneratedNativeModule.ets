@@ -443,8 +443,6 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _CommonMethod_setOnDragEnd(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _CommonMethod_setAllowDrop(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
     native static _CommonMethod_setDraggable(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _CommonMethod_setDragPreview0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
@@ -547,6 +545,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _CommonMethod_setBackgroundImage1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _CommonMethod_setBackgroundImage2(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _CommonMethod_setBackgroundBlurStyle(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _CommonMethod_setBackgroundEffect1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
@@ -578,8 +578,6 @@ export class ArkUIGeneratedNativeModule {
     native static _CommonMethod_setOnDrop1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _CommonMethod_setDragPreview1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
-    native static _CommonMethod_setDragPreviewOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _CommonMethod_setOverlay(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
@@ -3320,7 +3318,6 @@ export class ArkUIGeneratedNativeModule {
     native static _BuilderNodeOps_construct(): KPointer
     @ani.unsafe.Direct
     native static _BuilderNodeOps_getFinalizer(): KPointer
-    @ani.unsafe.Direct
     native static _BuilderNodeOps_create(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _BuilderNodeOps_disposeNode(ptr: KPointer): void

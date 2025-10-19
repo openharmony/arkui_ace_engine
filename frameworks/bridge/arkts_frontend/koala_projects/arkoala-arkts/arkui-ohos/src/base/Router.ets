@@ -285,7 +285,7 @@ class RouterImpl implements Router {
             } else {
                 runtimeLinker = getNearestNonBootRuntimeLinker();
             }
-            let entryClass = runtimeLinker?.loadClass(url, false);
+            let entryClass = runtimeLinker?.loadClass(url.replaceChar(c'/', c'.'), false);
             if (!entryClass) {
                 InteropNativeModule._NativeLog("AceRouter: load entryClass failed")
             } else {

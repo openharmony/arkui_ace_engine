@@ -21,9 +21,32 @@
 #include "core/common/container_scope.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+void BindPopupMultiThread(
+    const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode, const RefPtr<UINode>& customNode)
+{
+    CHECK_NULL_VOID(targetNode);
+    targetNode->PostAfterAttachMainTreeTask([param, weakTarget = WeakPtr<FrameNode>(targetNode), customNode]() {
+        auto targetNode = weakTarget.Upgrade();
+        CHECK_NULL_VOID(targetNode);
+        ViewAbstract::BindPopup(param, targetNode, customNode);
+    });
+}
+
+void BindTipsMultiThread(
+    const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode, const RefPtr<SpanString>& spanString)
+{
+    CHECK_NULL_VOID(targetNode);
+    targetNode->PostAfterAttachMainTreeTask([param, weakTarget = WeakPtr<FrameNode>(targetNode), spanString]() {
+        auto targetNode = weakTarget.Upgrade();
+        CHECK_NULL_VOID(targetNode);
+        ViewAbstract::BindTips(param, targetNode, spanString);
+    });
+}
+
 void SetInspectorIdMultiThread(FrameNode* frameNode, const std::string& inspectorId)
 {
     CHECK_NULL_VOID(frameNode);

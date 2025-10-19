@@ -29,6 +29,8 @@ constexpr int32_t CALL_ARG_0 = 0;
 constexpr int32_t CALL_ARG_1 = 1;
 constexpr int32_t CALL_ARG_2 = 2;
 constexpr int32_t DEFAULT_CACHED_COUNT = 1;
+constexpr int32_t BREAKPOINT_DEFAULT = 0;
+constexpr int32_t BREAKPOINT_SM2MD3LG5 = 2;
 constexpr size_t GRID_ITEM_SIZE_RESULT_LENGTH = 2;
 constexpr size_t GRID_ITEM_RECT_RESULT_LENGTH = 4;
 namespace {
@@ -127,7 +129,17 @@ ArkUINativeModuleValue GridBridge::SetColumnsTemplate(ArkUIRuntimeCallInfo* runt
     Local<JSValueRef> arg_columnsTemplate = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
     CHECK_NULL_RETURN(node->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
-    if (arg_columnsTemplate->IsUndefined() || !arg_columnsTemplate->IsString(vm)) {
+    if (arg_columnsTemplate->IsObject(vm)) {
+        auto value = BREAKPOINT_DEFAULT;
+        GetArkUINodeModifiers()->getGridModifier()->resetGridColumnsTemplate(nativeNode);
+        GetArkUINodeModifiers()->getGridModifier()->setItemFillPolicy(nativeNode, value);
+        JSRef<JSVal> fillTypeArg = JSRef<JSObject>::Make(arg_columnsTemplate)->GetProperty("fillType");
+        if (!fillTypeArg->IsNull() && JSViewAbstract::ParseJsInt32(fillTypeArg, value)) {
+            if (InRegion(BREAKPOINT_DEFAULT, BREAKPOINT_SM2MD3LG5, value)) {
+                GetArkUINodeModifiers()->getGridModifier()->setItemFillPolicy(nativeNode, value);
+            }
+        }
+    } else if (arg_columnsTemplate->IsUndefined() || !arg_columnsTemplate->IsString(vm)) {
         GetArkUINodeModifiers()->getGridModifier()->resetGridColumnsTemplate(nativeNode);
     } else {
         std::string columnsTemplate = arg_columnsTemplate->ToString(vm)->ToString(vm);
@@ -1173,7 +1185,7 @@ ArkUINativeModuleValue GridBridge::SetOnGridItemDrop(ArkUIRuntimeCallInfo* runti
 ArkUINativeModuleValue GridBridge::ResetOnGridItemDrop(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());

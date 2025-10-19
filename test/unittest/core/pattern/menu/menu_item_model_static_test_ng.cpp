@@ -27,6 +27,7 @@
 #include "test/mock/core/rosen/mock_canvas.h"
 #include "test/mock/core/rosen/testing_canvas.h"
  
+#include "core/common/multi_thread_build_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/select/select_theme.h"
@@ -276,6 +277,57 @@ HWTEST_F(MenuItemModelStaticTestNg, AddRowChild001, TestSize.Level1)
      * @tc.expected: step6. frameNode has two child
      */
     EXPECT_EQ(frameNode->GetChildren().size(), 2);
+}
+
+/**
+ * @tc.name: AddRowChild002
+ * @tc.desc: Test AddRowChild002
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemModelStaticTestNg, AddRowChild002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Simulate non-UI thread environment and create a thread-safe select node.
+     */
+    MultiThreadBuildManager::SetIsThreadSafeNodeScope(true);
+    bool isUIThread = MultiThreadBuildManager::isUIThread_;
+    MultiThreadBuildManager::isUIThread_ = false;
+
+    auto frameNode = MenuItemModelStatic::CreateFrameNode(1);
+    ASSERT_NE(frameNode, nullptr);
+    auto node = AceType::RawPtr(frameNode);
+    ASSERT_NE(node, nullptr);
+
+    auto initialTaskCount = frameNode->afterAttachMainTreeTasks_.size();
+    /**
+     * @tc.steps: step2. call AddRowChild when node has no child
+     */
+    MenuItemProperties itemOption;
+    itemOption.content = "test content";
+    MenuItemModelStatic::AddRowChild(node, itemOption);
+    /**
+     * @tc.steps: step3. do assert
+     * @tc.expected: step3. frameNode has 0 child, task count +1
+     */
+    EXPECT_EQ(frameNode->GetChildren().size(), 0);
+
+    // Verify that exactly one task has been added.
+    EXPECT_EQ(frameNode->afterAttachMainTreeTasks_.size(), initialTaskCount + 1);
+
+    frameNode->ExecuteAfterAttachMainTreeTasks();
+
+    /**
+     * @tc.steps: step4. do assert
+     * @tc.expected: step3. frameNode has 2 child, task count = 0
+     */
+    EXPECT_EQ(frameNode->GetChildren().size(), 2);
+    EXPECT_EQ(frameNode->afterAttachMainTreeTasks_.size(), 0);
+
+    /**
+     * @tc.steps: step5. Restore environment.
+     */
+    MultiThreadBuildManager::isUIThread_ = isUIThread;
+    MultiThreadBuildManager::SetIsThreadSafeNodeScope(false);
 }
 
  /**
@@ -758,12 +810,13 @@ HWTEST_F(MenuItemModelStaticTestNg, SetSelectIconSymbol001, TestSize.Level1)
     auto menuProperty = frameNode->GetLayoutProperty<MenuItemLayoutProperty>();
     ASSERT_NE(menuProperty, nullptr);
 
-    std::function<void(WeakPtr<NG::FrameNode>)> symbolApply;
-    MenuItemModelStatic::SetSelectIconSymbol(node, std::move(symbolApply));
     /**
-    * @tc.steps: step2. set MenuItem selectIconSymbol
-    */
-    MenuItemModelStatic::SetSelectIconSymbol(node, [](WeakPtr<NG::FrameNode> weakPtr = nullptr) {});
+     * @tc.steps: step2. set MenuItem selectIconSymbol
+     */
+    std::function<void(WeakPtr<NG::FrameNode>)> symbolApply;
+    MenuItemModelStatic::SetSelectIconSymbol(node, symbolApply);
+    symbolApply = [](WeakPtr<NG::FrameNode>) {};
+    MenuItemModelStatic::SetSelectIconSymbol(node, symbolApply);
     /**
      * @tc.steps: step3. do assert
      * @tc.expected: step3. Menuitem selectSymbol not null
@@ -798,5 +851,47 @@ HWTEST_F(MenuItemModelStaticTestNg, SetOnChange001, TestSize.Level1)
      * @tc.expected: step3. Menuitem onChange event not null
      */
     ASSERT_NE(eventHub->GetOnChange(), nullptr);
+}
+
+ /**
+ * @tc.name: SetSymbolStartIcon001
+ * @tc.desc: Test SetSymbolStartIcon001
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemModelStaticTestNg, SetSymbolStartIcon001, TestSize.Level1)
+{
+    auto frameNode = MenuItemModelStatic::CreateFrameNode(1);
+    ASSERT_NE(frameNode, nullptr);
+    auto node = AceType::RawPtr(frameNode);
+    ASSERT_NE(node, nullptr);
+
+    std::function<void(OHOS::Ace::WeakPtr<OHOS::Ace::NG::FrameNode>)> symbolApply =
+        [](OHOS::Ace::WeakPtr<OHOS::Ace::NG::FrameNode>) {};
+    MenuItemModelStatic::SetSymbolStartIcon(node, symbolApply);
+
+    auto menuProperty = frameNode->GetLayoutProperty<MenuItemLayoutProperty>();
+    ASSERT_NE(menuProperty, nullptr);
+    ASSERT_NE(menuProperty->GetStartSymbol(), nullptr);
+}
+
+ /**
+ * @tc.name: SetSymbolEndIcon001
+ * @tc.desc: Test SetSymbolEndIcon001
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemModelStaticTestNg, SetSymbolEndIcon001, TestSize.Level1)
+{
+    auto frameNode = MenuItemModelStatic::CreateFrameNode(1);
+    ASSERT_NE(frameNode, nullptr);
+    auto node = AceType::RawPtr(frameNode);
+    ASSERT_NE(node, nullptr);
+
+    std::function<void(OHOS::Ace::WeakPtr<OHOS::Ace::NG::FrameNode>)> symbolApply =
+        [](OHOS::Ace::WeakPtr<OHOS::Ace::NG::FrameNode>) {};
+    MenuItemModelStatic::SetSymbolEndIcon(node, symbolApply);
+
+    auto menuProperty = frameNode->GetLayoutProperty<MenuItemLayoutProperty>();
+    ASSERT_NE(menuProperty, nullptr);
+    ASSERT_NE(menuProperty->GetEndSymbol(), nullptr);
 }
 } // namespace OHOS::Ace::NG

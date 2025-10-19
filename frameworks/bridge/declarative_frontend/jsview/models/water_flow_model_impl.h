@@ -31,6 +31,7 @@ public:
 
     void SetColumnsTemplate(const std::string& value) override;
     void SetRowsTemplate(const std::string& value) override;
+    void SetItemFillPolicy(PresetFillType policy) override {};
 
     void SetItemMinWidth(const Dimension& minWidth) override;
     void SetItemMinHeight(const Dimension& minHeight) override;

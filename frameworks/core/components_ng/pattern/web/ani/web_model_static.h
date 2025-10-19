@@ -121,6 +121,9 @@ public:
     static void SetRenderExitedId(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
     static void SetOnFileSelectorShow(
         FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& callback);
+    static void SetOnDetectedBlankScreen(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetBlankScreenDetectionConfig(FrameNode* frameNode, const BlankScreenDetectionConfig& detectConfig);
     static void SetResourceLoadId(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
     static void SetOnFullScreenExit(
         FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
@@ -189,6 +192,10 @@ public:
         FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
     static void SetOnOverrideUrlLoading(
         FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& callback);
+    static void SetOnPdfScrollAtBottom(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetOnPdfLoadEvent(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
     static void SetRenderProcessNotRespondingId(
         FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
     static void SetRenderProcessRespondingId(
@@ -199,11 +206,13 @@ public:
         FrameNode* frameNode, std::function<WebKeyboardOption(const BaseEventInfo* info)>&& callback);
     static void SetAdsBlockedEventId(
         FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetBackToTop(FrameNode* frameNode, bool isEnabled);
     static void NotifyPopupWindowResultStatic(int32_t webId, bool result);
     static void SetJsEnabled(FrameNode* frameNode, bool isJsEnabled);
     static void SetFileAccessEnabled(FrameNode* frameNode, bool isFileAccessEnabled);
     static void SetDomStorageAccessEnabled(FrameNode* frameNode, bool isDomStorageAccessEnabled);
     static void SetZoomAccessEnabled(FrameNode* frameNode, bool isZoomAccessEnabled);
+    static void SetZoomControlAccess(FrameNode* frameNode, bool zoomControlAccess);
     static void SetGestureFocusMode(FrameNode* frameNode, const GestureFocusMode& mode);
     static void SetMultiWindowAccessEnabled(FrameNode* frameNode, bool isMultiWindowAccessEnable);
     static void SetAllowWindowOpenMethod(FrameNode* frameNode, bool isAllowWindowOpenMethod);

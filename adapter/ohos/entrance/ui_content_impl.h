@@ -582,7 +582,7 @@ protected:
     std::string restoreNavDestinationInfo_;
 
     VMType vmType_ = VMType::NORMAL;
-    NG::WindowSizeBreakpoint lastBreakpoint_;
+    NG::WindowSizeBreakpoint lastBreakpoint_ = { WidthBreakpoint::UNDEFINED, HeightBreakpoint::HEIGHT_SM };
 
 private:
     void ProcessWindowSizeLayoutBreakPointChange();

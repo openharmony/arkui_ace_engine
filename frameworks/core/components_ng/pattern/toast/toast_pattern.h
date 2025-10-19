@@ -175,6 +175,15 @@ private:
 
     void AdjustOffsetForKeyboard(Dimension& offsetY, double toastBottom, float textHeight, bool& needResizeBottom);
 
+    void OnAttachToFrameNodeMultiThread();
+    void OnAttachToFrameNodeImpl();
+    void OnDetachFromFrameNodeMultiThread(FrameNode* node);
+    void OnDetachFromFrameNodeImpl(FrameNode* node);
+    void OnAttachToMainTree() override;
+    void OnAttachToMainTreeMultiThread();
+    void OnDetachFromMainTree() override;
+    void OnDetachFromMainTreeMultiThread();
+
     RefPtr<FrameNode> textNode_;
     std::optional<int32_t> foldDisplayModeChangedCallbackId_;
     std::optional<int32_t> halfFoldHoverChangedCallbackId_;

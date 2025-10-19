@@ -26,6 +26,7 @@ namespace OHOS::Ace {
 struct ModalUIExtensionCallbacks;
 } // namespace OHOS::Ace
 
+// For Arkts Dynamic
 namespace OHOS::Ace::NG {
 class ACE_FORCE_EXPORT UIExtensionAdapter {
 public:

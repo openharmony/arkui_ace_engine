@@ -1387,6 +1387,21 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_ResourceColor_ColorMetrics& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Union_ResourceColor_LinearGradient& src)
 {
     switch (src.selector) {
@@ -4464,8 +4479,10 @@ ASSIGN_OPT(Opt_Union_PX_VP_LPX_Resource)
 ASSIGN_OPT(Opt_Union_Resource_String)
 ASSIGN_OPT(Opt_Union_ResourceColor_ColorContent_ColorMetrics)
 ASSIGN_OPT(Opt_Union_ResourceColor_ColoringStrategy)
+ASSIGN_OPT(Opt_Union_ResourceColor_ColorMetrics)
 ASSIGN_OPT(Opt_Union_ResourceColor_LinearGradient)
-ASSIGN_OPT(Opt_Union_ResourceColor_LinearGradient_Array_Tuple_Union_ResourceColor_LinearGradient_Number)
+ASSIGN_OPT(
+    Opt_Union_ResourceColor_LinearGradient_Array_Tuple_Union_ResourceColor_LinearGradient_Number)
 ASSIGN_OPT(Opt_Union_ResourceStr_ComponentContent)
 ASSIGN_OPT(Opt_Union_ResourceStr_CustomBuilder)
 ASSIGN_OPT(Opt_Union_ResourceStr_PixelMap)

@@ -52,28 +52,27 @@ namespace PatternLockModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    // auto frameNode = PatternLockModelNG::CreateFrameNode(id);
-    // CHECK_NULL_RETURN(frameNode, nullptr);
-    // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
-    return nullptr;
+    auto frameNode = PatternLockModelStatic::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 } // PatternLockModifier
 namespace PatternLockInterfaceModifier {
 void SetPatternLockOptionsImpl(Ark_NativePointer node,
                                const Opt_PatternLockController* controller)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
 
-    // auto controllerPtr = Converter::OptConvertPtr<Ark_PatternLockController>(controller);
-    // if (controllerPtr.has_value()) {
-    //     auto internalController = PatternLockModelNG::GetController(frameNode);
-    //     auto peerImplPtr = reinterpret_cast<PatternLockControllerPeerImpl *>(controllerPtr.value());
-    //     CHECK_NULL_VOID(peerImplPtr);
-    //     // pass the internal controller to external management
-    //     peerImplPtr->SetHandler(internalController);
-    // }
+    auto controllerPtr = Converter::OptConvertPtr<Ark_PatternLockController>(controller);
+    if (controllerPtr.has_value()) {
+        auto internalController = PatternLockModelStatic::GetController(frameNode);
+        auto peerImplPtr = reinterpret_cast<PatternLockControllerPeerImpl *>(controllerPtr.value());
+        CHECK_NULL_VOID(peerImplPtr);
+        // pass the internal controller to external management
+        peerImplPtr->SetHandler(internalController);
+    }
 }
 } // PatternLockInterfaceModifier
 namespace PatternLockAttributeModifier {

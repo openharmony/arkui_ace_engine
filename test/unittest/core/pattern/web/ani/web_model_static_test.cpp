@@ -232,6 +232,27 @@ HWTEST_F(WebModelStaticTest, SetZoomAccessEnabled002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetZoomControlAccess001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetZoomControlAccess001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    WebModelStatic::SetZoomControlAccess(AccessibilityManager::RawPtr(frameNode), true);
+    auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
+    ASSERT_NE(webPatternStatic, nullptr);
+    EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckZoomControlAccess(true), true);
+#endif
+}
+
+/**
  * @tc.name: SetCacheMode001
  * @tc.desc: Test web_model_static.cpp
  * @tc.type: FUNC
@@ -1404,6 +1425,54 @@ HWTEST_F(WebModelStaticTest, SetOnPageVisible001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetOnPdfScrollAtBottom001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetOnPdfScrollAtBottom001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    bool callbackCalled = false;
+    auto mockEventInfo = std::make_shared<MockBaseEventInfo>();
+    auto jsCallback = [&callbackCalled](const BaseEventInfo* info) { callbackCalled = true; };
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    WebModelStatic::SetOnPdfScrollAtBottom(AccessibilityManager::RawPtr(frameNode), jsCallback);
+    ASSERT_NE(webEventHub, nullptr);
+    webEventHub->FireOnPdfScrollAtBottomEvent(mockEventInfo);
+    EXPECT_TRUE(callbackCalled);
+#endif
+}
+
+/**
+ * @tc.name: SetOnPdfLoadEvent001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetOnPdfLoadEvent001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    bool callbackCalled = false;
+    auto mockEventInfo = std::make_shared<MockBaseEventInfo>();
+    auto jsCallback = [&callbackCalled](const BaseEventInfo* info) { callbackCalled = true; };
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    WebModelStatic::SetOnPdfLoadEvent(AccessibilityManager::RawPtr(frameNode), jsCallback);
+    ASSERT_NE(webEventHub, nullptr);
+    webEventHub->FireOnPdfLoadEvent(mockEventInfo);
+    EXPECT_TRUE(callbackCalled);
+#endif
+}
+
+/**
  * @tc.name: JavaScriptOnDocumentStart024
  * @tc.desc: Test web_model_static.cpp
  * @tc.type: FUNC
@@ -2140,6 +2209,37 @@ HWTEST_F(WebModelStaticTest, SetOnFileSelectorShow001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetOnDetectedBlankScreen
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetOnDetectedBlankScreen, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    auto callback = [&callCount](const BaseEventInfo* info) {
+        callCount++;
+        return true;
+    };
+    BlankScreenDetectionConfig detectConfig;
+    WebModelStatic::SetBlankScreenDetectionConfig(AccessibilityManager::RawPtr(frameNode), detectConfig);
+    WebModelStatic::SetOnDetectedBlankScreen(AccessibilityManager::RawPtr(frameNode), callback);
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+
+    auto mockEventInfo = std::make_shared<MockBaseEventInfo>();
+    webEventHub->FireOnDetectedBlankScreenEvent(mockEventInfo);
+    EXPECT_NE(callCount, 0);
+#endif
+}
+
+/**
  * @tc.name: SetOnHttpAuthRequest001
  * @tc.desc: Test web_model_static.cpp
  * @tc.type: FUNC
@@ -2688,6 +2788,7 @@ HWTEST_F(WebModelStaticTest, SetBackToTop001, TestSize.Level1)
     auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
     ASSERT_NE(frameNode, nullptr);
     stack->Push(frameNode);
+
     auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
     ASSERT_NE(webPatternStatic, nullptr);
 

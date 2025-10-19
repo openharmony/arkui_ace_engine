@@ -33,6 +33,8 @@ constexpr int32_t NUM_2 = 2;
 constexpr int32_t NUM_3 = 3;
 constexpr int32_t NUM_4 = 4;
 constexpr int32_t NUM_5 = 5;
+constexpr int32_t BREAKPOINT_DEFAULT = 0;
+constexpr int32_t BREAKPOINT_SM2MD3LG5 = 2;
 const std::vector<FlexDirection> LAYOUT_DIRECTION = { FlexDirection::ROW, FlexDirection::COLUMN,
     FlexDirection::ROW_REVERSE, FlexDirection::COLUMN_REVERSE };
 
@@ -64,8 +66,24 @@ ArkUINativeModuleValue WaterFlowBridge::SetColumnsTemplate(ArkUIRuntimeCallInfo*
     Local<JSValueRef> columnsTemplateArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-    std::string columnsTemplateValue = columnsTemplateArg->ToString(vm)->ToString(vm);
-    GetArkUINodeModifiers()->getWaterFlowModifier()->setColumnsTemplate(nativeNode, columnsTemplateValue.c_str());
+    if (columnsTemplateArg->IsObject(vm)) {
+        auto value = BREAKPOINT_DEFAULT;
+        GetArkUINodeModifiers()->getWaterFlowModifier()->resetColumnsTemplate(nativeNode);
+        GetArkUINodeModifiers()->getWaterFlowModifier()->setItemFillPolicy(nativeNode, value);
+        Framework::JSRef<Framework::JSVal> fillTypeArg =
+            Framework::JSRef<Framework::JSObject>::Make(columnsTemplateArg)->GetProperty("fillType");
+        if (!fillTypeArg->IsNull() && Framework::JSViewAbstract::ParseJsInt32(fillTypeArg, value)) {
+            if (InRegion(BREAKPOINT_DEFAULT, BREAKPOINT_SM2MD3LG5, value)) {
+                GetArkUINodeModifiers()->getWaterFlowModifier()->setItemFillPolicy(nativeNode, value);
+            }
+        }
+    } else if (columnsTemplateArg->IsUndefined() || !columnsTemplateArg->IsString(vm)) {
+        GetArkUINodeModifiers()->getWaterFlowModifier()->resetColumnsTemplate(nativeNode);
+    } else {
+        std::string columnsTemplateValue = columnsTemplateArg->ToString(vm)->ToString(vm);
+        GetArkUINodeModifiers()->getWaterFlowModifier()->resetItemFillPolicy(nativeNode);
+        GetArkUINodeModifiers()->getWaterFlowModifier()->setColumnsTemplate(nativeNode, columnsTemplateValue.c_str());
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 

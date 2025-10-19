@@ -78,10 +78,6 @@ void SetVerticalAlignImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<VerticalAlign>(value);
-    if (!convValue) {
-        ImageSpanViewStatic::SetVerticalAlign(frameNode, VerticalAlign::BOTTOM);
-        return;
-    }
     ImageSpanViewStatic::SetVerticalAlign(frameNode, convValue);
 }
 void SetColorFilterImpl(Ark_NativePointer node,
@@ -95,10 +91,6 @@ void SetObjectFitImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<ImageFit>(value);
-    if (!convValue) {
-        ImageSpanViewStatic::SetObjectFit(frameNode, ImageFit::COVER);
-        return;
-    }
     ImageSpanViewStatic::SetObjectFit(frameNode, convValue);
 }
 void SetOnCompleteImpl(Ark_NativePointer node,

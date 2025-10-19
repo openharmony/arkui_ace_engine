@@ -2466,24 +2466,6 @@ HWTEST_F(NavigationPatternTestFourNg, CheckIfNoNeedAnimationForForceSplit003, Te
 }
 
 /**
- * @tc.name: CheckNeedCreate001
- * @tc.desc: Branch: navigationStack_->IsFromRecovery(index) false
- *              
- * @tc.type: FUNC
- */
-HWTEST_F(NavigationPatternTestFourNg, CheckNeedCreate001, TestSize.Level1)
-{
-    NavigationPatternTestFourNg::SetUpTestSuite();
-    auto pattern = AceType::MakeRefPtr<NavigationPattern>();
-    ASSERT_NE(pattern, nullptr);
-    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
-    pattern->SetNavigationStack(navigationStack);
-    bool res = pattern->CheckNeedCreate(0);
-    EXPECT_TRUE(res);
-    NavigationPatternTestFourNg::TearDownTestSuite();
-}
-
-/**
  * @tc.name: FireHomeDestinationLifeCycleIfNeeded001
  * @tc.desc: Branch: FireHomeDestinationLifeCycleIfNeeded destNode is true
  * @tc.type: FUNC

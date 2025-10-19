@@ -21,6 +21,14 @@
 #include "core/components_ng/pattern/gauge/gauge_pattern.h"
 
 namespace OHOS::Ace::NG {
+RefPtr<FrameNode> GaugeModelStatic::CreateFrameNode(int32_t nodeId)
+{
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::GAUGE_ETS_TAG, nodeId);
+    return FrameNode::GetOrCreateFrameNode(
+        V2::GAUGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<GaugePattern>(); }
+    );
+}
+
 void GaugeModelStatic::SetValue(FrameNode* frameNode, const std::optional<float>& value)
 {
     if (value) {
@@ -87,5 +95,10 @@ void GaugeModelStatic::SetDescription(FrameNode* frameNode, const RefPtr<AceType
     gaugePattern->SetDescriptionNode(customDescriptionNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(GaugeLayoutProperty, IsShowDescription, true, frameNode);
     frameNode->MarkModifyDone();
+}
+
+void GaugeModelStatic::SetIsShowLimitValue(FrameNode* frameNode, bool isShowLimitValue)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GaugeLayoutProperty, IsShowLimitValue, isShowLimitValue, frameNode);
 }
 } // namespace OHOS::Ace::NG

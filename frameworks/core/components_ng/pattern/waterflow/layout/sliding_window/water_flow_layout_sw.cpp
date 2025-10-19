@@ -44,7 +44,8 @@ void WaterFlowLayoutSW::Measure(LayoutWrapper* wrapper)
     auto [size, matchChildren] = WaterFlowLayoutUtils::PreMeasureSelf(wrapper_, axis_);
     syncLoad_ = props_->GetSyncLoad().value_or(!FeatureParam::IsSyncLoadEnabled()) || matchChildren ||
                 !NearZero(info_->delta_) || info_->targetIndex_.has_value();
-    Init(size);
+    double originalWidth = WaterFlowLayoutUtils::GetOriginalWidth();
+    Init(size, originalWidth);
 
     if (!IsSectionValid(info_, itemCnt_) || !CheckData()) {
         info_->isDataValid_ = false;
@@ -136,7 +137,7 @@ void WaterFlowLayoutSW::Layout(LayoutWrapper* wrapper)
     isLayouted_ = true;
 }
 
-void WaterFlowLayoutSW::Init(const SizeF& frameSize)
+void WaterFlowLayoutSW::Init(const SizeF& frameSize, double originalWidth)
 {
     mainLen_ = frameSize.MainSize(axis_);
     CalcContentOffset(wrapper_, info_, mainLen_);
@@ -168,11 +169,11 @@ void WaterFlowLayoutSW::Init(const SizeF& frameSize)
         }
         SegmentedInit(sections, info_->margins_, frameSize);
     } else {
-        SingleInit(frameSize);
+        SingleInit(frameSize, originalWidth);
     }
 }
 
-void WaterFlowLayoutSW::SingleInit(const SizeF& frameSize)
+void WaterFlowLayoutSW::SingleInit(const SizeF& frameSize, double originalWidth)
 {
     info_->lanes_.resize(1);
     info_->segmentTails_ = { itemCnt_ - 1 };
@@ -190,7 +191,7 @@ void WaterFlowLayoutSW::SingleInit(const SizeF& frameSize)
     float crossSize = frameSize.CrossSize(axis_);
     std::pair<std::vector<double>, double> cross;
     auto rowsTemplate = props_->GetRowsTemplate().value_or("1fr");
-    auto columnsTemplate = props_->GetColumnsTemplate().value_or("1fr");
+    auto columnsTemplate = props_->GetFinalColumnsTemplate(originalWidth).value_or("");
     if (axis_ == Axis::VERTICAL) {
         cross =
             ParseTemplateArgs(WaterFlowLayoutUtils::PreParseArgs(columnsTemplate), crossSize, crossGaps_[0], itemCnt_);

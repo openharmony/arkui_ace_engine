@@ -560,9 +560,9 @@ void CheckBoxPattern::UpdateGroupStatus(FrameNode* frameNode)
     pipeline->RemoveVisibleAreaChangeNode(frameNode->GetId());
 }
 
-
 void CheckBoxPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
+    CHECK_NULL_VOID(frameNode);
     THREAD_SAFE_NODE_CHECK(frameNode, OnDetachFromFrameNode);
     UpdateGroupStatus(frameNode);
 }
@@ -570,6 +570,7 @@ void CheckBoxPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 void CheckBoxPattern::OnDetachFromMainTree()
 {
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree, host);
 }
 

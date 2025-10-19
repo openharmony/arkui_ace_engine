@@ -182,7 +182,7 @@ ani_object LegacyLoadPage(ani_env* env)
             break;
         }
 
-        std::string entryPath = "entry/src/main/ets/pages/Index/ComExampleTrivialApplication";
+        std::string entryPath = "entry.src.main.ets.pages.Index.ComExampleTrivialApplication";
         ani_string entryClassStr;
         env->String_NewUTF8(entryPath.c_str(), entryPath.length(), &entryClassStr);
         ani_class entryClass = nullptr;
@@ -405,7 +405,9 @@ UIContentErrorCode ArktsFrontend::RunPage(const std::string& url, const std::str
     env->GetUndefined(&optionalEntry);
     auto entryPointObj = entryLoader.GetPageEntryObj();
     auto legacyEntryPointObj = LegacyLoadPage(env);
-    std::string moduleName = Container::Current()->GetModuleName();
+    auto currentContainer = Container::Current();
+    CHECK_NULL_RETURN(currentContainer, UIContentErrorCode::NULL_POINTER);
+    std::string moduleName = currentContainer->GetModuleName();
     ani_string module;
     env->String_NewUTF8(moduleName.c_str(), moduleName.size(), &module);
     if (env->Class_CallStaticMethod_Ref(appClass, create, &appLocal, aniUrl, aniParams, false, module,

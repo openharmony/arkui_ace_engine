@@ -14,7 +14,7 @@
  */
 
 #include "core/components_ng/pattern/text/symbol_span_model_ng.h"
-#include "core/interfaces/native/node/node_utils.h"
+
 #include "core/components_ng/pattern/text/symbol_span_model_static.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 
@@ -32,6 +32,15 @@
         spanNode->Reset##name();                                                                                 \
     } while (false)
 
+#define ACE_RESET_NODE_SYMBOL_SPAN_PROPERTY(name, frameNode)                                                     \
+    do {                                                                                                         \
+        CHECK_NULL_VOID(frameNode);                                                                              \
+        auto spanNode = AceType::DynamicCast<SpanNode>(frameNode);                                               \
+        CHECK_NULL_VOID(spanNode);                                                                               \
+        spanNode->Reset##name();                                                                                 \
+        spanNode->RequestTextFlushDirty();                                                                       \
+    } while (false)
+
 namespace OHOS::Ace::NG {
 RefPtr<UINode> SymbolSpanModelStatic::CreateFrameNode(int32_t nodeId)
 {
@@ -45,11 +54,7 @@ void SymbolSpanModelStatic::SetFontSize(FrameNode* frameNode, const std::optiona
         SymbolSpanModelNG::SetFontSize(frameNode, valueOpt.value());
         return;
     }
-    ACE_RESET_NODE_SPAN_PROPERTY(FontSize, frameNode);
-    auto theme = GetTheme<TextTheme>();
-    CHECK_NULL_VOID(theme);
-    CalcDimension fontSize = theme->GetTextStyle().GetFontSize();
-    SymbolSpanModelNG::SetFontSize(frameNode, fontSize);
+    ACE_RESET_NODE_SYMBOL_SPAN_PROPERTY(FontSize, frameNode);
 }
 
 void SymbolSpanModelStatic::SetFontWeight(FrameNode* frameNode, const std::optional<FontWeight>& valueOpt)
@@ -58,11 +63,7 @@ void SymbolSpanModelStatic::SetFontWeight(FrameNode* frameNode, const std::optio
         SymbolSpanModelNG::SetFontWeight(frameNode, valueOpt.value());
         return;
     }
-    ACE_RESET_NODE_SPAN_PROPERTY(FontWeight, frameNode);
-    auto theme = GetTheme<TextTheme>();
-    CHECK_NULL_VOID(theme);
-    FontWeight fontWeight = theme->GetTextStyle().GetFontWeight();
-    SymbolSpanModelNG::SetFontWeight(frameNode, fontWeight);
+    ACE_RESET_NODE_SYMBOL_SPAN_PROPERTY(FontWeight, frameNode);
 }
 
 void SymbolSpanModelStatic::SetSymbolRenderingStrategy(FrameNode* frameNode,
@@ -72,11 +73,7 @@ void SymbolSpanModelStatic::SetSymbolRenderingStrategy(FrameNode* frameNode,
         SymbolSpanModelNG::SetSymbolRenderingStrategy(frameNode, renderingStrategy.value());
         return;
     }
-    ACE_RESET_NODE_SPAN_PROPERTY(SymbolRenderingStrategy, frameNode);
-    auto theme = GetTheme<TextTheme>();
-    CHECK_NULL_VOID(theme);
-    auto symbolSpanRenderingStrategy = theme->GetTextStyle().GetRenderStrategy();
-    SymbolSpanModelNG::SetSymbolRenderingStrategy(frameNode, symbolSpanRenderingStrategy);
+    ACE_RESET_NODE_SYMBOL_SPAN_PROPERTY(SymbolRenderingStrategy, frameNode);
 }
 
 void SymbolSpanModelStatic::SetSymbolEffect(FrameNode* frameNode, const std::optional<uint32_t>& effectStrategy)

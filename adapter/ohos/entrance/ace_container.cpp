@@ -254,7 +254,7 @@ void InitResourceAndThemeManager(const RefPtr<PipelineBase>& pipelineContext, co
         bundleMgrProxy->GetBundleInfoForSelf(
             static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE), bundleInfo);
         bundleName = bundleInfo.name;
-        moduleName = bundleInfo.entryModuleName;                
+        moduleName = bundleInfo.entryModuleName;
     }
     int32_t instanceId = pipelineContext->GetInstanceId();
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
@@ -3468,10 +3468,6 @@ void AceContainer::ProcessColorModeUpdate(
     ResourceConfiguration& resConfig, ConfigurationChange& configurationChange, const ParsedConfig& parsedConfig)
 {
     configurationChange.colorModeUpdate = true;
-    if (!SystemProperties::ConfigChangePerform() || !configurationChange.OnlyColorModeChange()) {
-        // clear cache of ark theme instances when configuration updates
-        NG::TokenThemeStorage::GetInstance()->CacheClear();
-    }
     if (parsedConfig.colorMode == "dark") {
         SetColorMode(ColorMode::DARK);
         SetColorScheme(ColorScheme::SCHEME_DARK);
