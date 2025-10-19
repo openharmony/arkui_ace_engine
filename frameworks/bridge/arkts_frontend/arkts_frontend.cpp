@@ -182,7 +182,7 @@ ani_object LegacyLoadPage(ani_env* env)
             break;
         }
 
-        std::string entryPath = "entry/src/main/ets/pages/Index/ComExampleTrivialApplication";
+        std::string entryPath = "entry.src.main.ets.pages.Index.ComExampleTrivialApplication";
         ani_string entryClassStr;
         env->String_NewUTF8(entryPath.c_str(), entryPath.length(), &entryClassStr);
         ani_class entryClass = nullptr;
