@@ -66,6 +66,7 @@ public:
         const TextEditingValue& value, int32_t instanceId, bool needFireChangeEvent),
         (override));
     MOCK_METHOD(void, Close, (int32_t instanceId), (override));
+    MOCK_METHOD(void, FinishComposing, (int32_t instanceId), (override));
 };
 
 class TextFieldPatternTestNine : public TextInputBases {
@@ -1348,6 +1349,7 @@ HWTEST_F(TextFieldPatternTestNine, GetMaxIndent, TestSize.Level0)
         LayoutWrapperNode(frameNode_, AceType::MakeRefPtr<GeometryNode>(), layoutProperty_);
     auto width = textFieldLayoutAlgorithm->GetMaxIndent(&layoutWrapper, 100.0f);
     EXPECT_EQ(width, 100.0f);
+    ASSERT_NE(layoutProperty_, nullptr);
     layoutProperty_->UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, true);
     LayoutConstraintF contentConstraint;
     contentConstraint.maxSize.SetWidth(200.0f);
