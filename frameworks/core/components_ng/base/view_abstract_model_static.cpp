@@ -1438,6 +1438,8 @@ void ViewAbstractModelStatic::SetFocusBoxStyle(FrameNode* frameNode, const std::
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     if (!style.has_value()) {
+        FocusBoxStyle paintStyle;
+        focusHub->GetFocusBox().SetStyle(paintStyle);
         return;
     }
     focusHub->GetFocusBox().SetStyle(style.value());
