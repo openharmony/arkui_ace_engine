@@ -488,7 +488,7 @@ HWTEST_F(ImageModifierTest, setFillColorTestFillColorValidValues, TestSize.Level
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
         checkValue(input, expected,
             ArkUnion<Opt_Union_ResourceColor_ColorContent_ColorMetrics, Ark_ResourceColor>(
-                ArkUnion<Ark_ResourceColor, Ark_Number>(value)));
+                ArkUnion<Ark_ResourceColor, Ark_Float64>(value)));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
         checkValue(input, expected,

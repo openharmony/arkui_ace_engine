@@ -900,9 +900,9 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setForegroundColor, TestSize.Level1
         { ArkUnion<Opt_Union_ResourceColor_ColoringStrategy, Ark_ResourceColor>(
             ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE)), "#FFFFFFFF" },
         { ArkUnion<Opt_Union_ResourceColor_ColoringStrategy, Ark_ResourceColor>(
-            ArkUnion<Ark_ResourceColor, Ark_Number>(0x123456)), "#FF123456" },
+            ArkUnion<Ark_ResourceColor, Ark_Float64>(0x123456)), "#FF123456" },
         { ArkUnion<Opt_Union_ResourceColor_ColoringStrategy, Ark_ResourceColor>(
-            ArkUnion<Ark_ResourceColor, Ark_Number>(0.5f)), "#00000000" },
+            ArkUnion<Ark_ResourceColor, Ark_Float64>(0.5f)), "#00000000" },
         { ArkUnion<Opt_Union_ResourceColor_ColoringStrategy, Ark_ResourceColor>(
             ArkUnion<Ark_ResourceColor, Ark_String>("#11223344")), "#11223344" },
         { ArkUnion<Opt_Union_ResourceColor_ColoringStrategy, Ark_ResourceColor>(

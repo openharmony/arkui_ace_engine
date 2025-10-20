@@ -1338,7 +1338,7 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setRadialGradientTestValidValues, Te
     // color stops
     std::vector<ColorStep> colorSteps {
         { ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE), 0.1 },
-        { ArkUnion<Ark_ResourceColor, Ark_Number>(0x123456), 0.25 },
+        { ArkUnion<Ark_ResourceColor, Ark_Float64>(0x123456), 0.25 },
         { ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"), 0.5 },
     };
     inputValue.colors = Converter::ArkValue<Array_Tuple_ResourceColor_F64>(colorSteps, Converter::FC);

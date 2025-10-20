@@ -139,7 +139,7 @@ HWTEST_F(ImageModifierTest, setFillColorTestValidValues, TestSize.Level1)
             Ark_String>(std::get<1>(value)), OPACITY_COLOR);
     }
     for (auto&& value : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(std::get<0>(value), ArkUnion<Ark_ResourceColor, Ark_Number>(std::get<1>(value)),
+        checkValue(std::get<0>(value), ArkUnion<Ark_ResourceColor, Ark_Float64>(std::get<1>(value)),
             std::get<2>(value));
     }
     for (auto&& value : Fixtures::testFixtureColorsResValidValues) {

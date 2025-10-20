@@ -431,7 +431,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setColorTestColorValidValues, TestSize.L
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
         checkValue(input, expected,
             ArkUnion<Opt_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(
-                ArkUnion<Ark_ResourceColor, Ark_Number>(value)));
+                ArkUnion<Ark_ResourceColor, Ark_Float64>(value)));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
         checkValue(input, expected,

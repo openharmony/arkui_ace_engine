@@ -304,8 +304,8 @@ HWTEST_F(SwiperModifierTest, DISABLED_setIndicatorTestDotColor, TestSize.Level1)
         Color::RED.ToString(); // Color::RED is result of stubs for ThemeConstants::GetColorByName
     static const std::vector<OneTestStep> testPlan = {
         { ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE), "#FFFFFFFF" },
-        { ArkUnion<Ark_ResourceColor, Ark_Number>(0x123456), "#FF123456" },
-        { ArkUnion<Ark_ResourceColor, Ark_Number>(0.5f), "#00000000" },
+        { ArkUnion<Ark_ResourceColor, Ark_Float64>(0x123456), "#FF123456" },
+        { ArkUnion<Ark_ResourceColor, Ark_Float64>(0.5f), "#00000000" },
         { ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"), "#11223344" },
         { ArkUnion<Ark_ResourceColor, Ark_String>("65535"), "#FF00FFFF" },
         { CreateResourceUnion<Ark_ResourceColor>(RES_NAME), EXPECTED_RESOURCE_COLOR },
@@ -529,8 +529,8 @@ HWTEST_F(SwiperModifierTest, DISABLED_setIndicatorTestDigitFontColor, TestSize.L
         Color::RED.ToString(); // Color::RED is result of stubs for ThemeConstants::GetColorByName
     static const std::vector<OneTestStep> testPlan = {
         { ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE), "#FFFFFFFF" },
-        { ArkUnion<Ark_ResourceColor, Ark_Number>(0x123456), "#FF123456" },
-        { ArkUnion<Ark_ResourceColor, Ark_Number>(0.5f), "#00000000" },
+        { ArkUnion<Ark_ResourceColor, Ark_Float64>(0x123456), "#FF123456" },
+        { ArkUnion<Ark_ResourceColor, Ark_Float64>(0.5f), "#00000000" },
         { ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"), "#11223344" },
         { ArkUnion<Ark_ResourceColor, Ark_String>("65535"), "#FF00FFFF" },
         { CreateResourceUnion<Ark_ResourceColor>(RES_NAME), EXPECTED_RESOURCE_COLOR },
@@ -767,8 +767,8 @@ HWTEST_F(SwiperModifierTest, DISABLED_setDisplayArrowTestStyleColor, TestSize.Le
         Color::RED.ToString(); // Color::RED is result of stubs for ThemeConstants::GetColorByName
     static const std::vector<OneTestStep> testPlan = {
         { ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE), "#FFFFFFFF" },
-        { ArkUnion<Ark_ResourceColor, Ark_Number>(0x123456), "#FF123456" },
-        { ArkUnion<Ark_ResourceColor, Ark_Number>(0.5f), "#00000000" },
+        { ArkUnion<Ark_ResourceColor, Ark_Float64>(0x123456), "#FF123456" },
+        { ArkUnion<Ark_ResourceColor, Ark_Float64>(0.5f), "#00000000" },
         { ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"), "#11223344" },
         { ArkUnion<Ark_ResourceColor, Ark_String>("65535"), "#FF00FFFF" },
         { CreateResourceUnion<Ark_ResourceColor>(RES_NAME), EXPECTED_RESOURCE_COLOR },

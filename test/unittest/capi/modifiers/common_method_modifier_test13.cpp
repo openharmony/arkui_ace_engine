@@ -1199,7 +1199,7 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_bindPopupPopupOptionsMessageOption
 {
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
     auto color = Converter::ArkValue<Ark_Number>(TEST_COLOR_BLUE_NUM);
-    auto arkUnionColor = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(color);
+    auto arkUnionColor = Converter::ArkUnion<Ark_ResourceColor, Ark_Float64>(color);
 
     Ark_PopupMessageOptions arkMessageOptions = {
         .textColor = Converter::ArkValue<Opt_ResourceColor>(arkUnionColor)
