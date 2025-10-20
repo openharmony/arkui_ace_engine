@@ -14,6 +14,7 @@
  */
 #include "test/unittest/core/base/frame_node_test_ng.h"
 
+#include "core/common/recorder/exposure_processor.h"
 #include "core/event/touch_event.h"
 
 using namespace testing;
