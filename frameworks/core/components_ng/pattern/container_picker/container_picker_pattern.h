@@ -211,7 +211,6 @@ private:
     void StopSpringAnimation();
 
     bool IsLoop() const;
-    void SetDefaultAlignment() const;
     void SetDefaultTextStyle() const;
     void SetDefaultTextStyle(RefPtr<FrameNode> node) const;
     void PickerMarkDirty();
@@ -280,6 +279,7 @@ private:
     float currentOffset_ = 0.0f;
     float height_ = 0.0f;
     float contentMainSize_ = 0.0f;
+    float contentCrossSize_ = 0.0f;
     float mainDeltaSum_ = 0.0f;
     float springOffset_ = 0.0f;
 

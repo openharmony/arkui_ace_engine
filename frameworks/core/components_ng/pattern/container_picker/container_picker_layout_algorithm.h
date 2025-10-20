@@ -113,6 +113,11 @@ public:
         return contentMainSize_;
     }
 
+    float GetContentCrossSize() const
+    {
+        return contentCrossSize_;
+    }
+
     void SetHeight(float height)
     {
         height_ = height;
@@ -171,7 +176,6 @@ private:
     bool NeedMeasureAbove(int32_t currentIndex, float currentEndPos, float startMainPos, bool cachedLayout) const;
     void AdjustOffsetOnBelow(float currentEndPos);
     void AdjustOffsetOnAbove(float currentStartPos);
-    float GetChildMainAxisSize(const RefPtr<LayoutWrapper>& childWrapper);
     std::pair<int32_t, PickerItemInfo> CalcCurrentMiddleItem() const;
     void TranslateAndRotate(RefPtr<FrameNode> node, OffsetF& offset);
 
@@ -179,6 +183,7 @@ private:
     ContainerPickerUtils::PositionMap itemPosition_;
     ContainerPickerUtils::PositionMap prevItemPosition_;
     Axis axis_ = Axis::VERTICAL;
+    Alignment align_ = Alignment::CENTER;
 
     std::optional<int32_t> targetIndex_;
     std::set<int32_t> measuredItems_;
@@ -192,6 +197,7 @@ private:
     float topPadding_ = 0.0f;
     float height_ = 0.0f;          // usage: record picker real height
     float contentMainSize_ = 0.0f; // usage: picker content area height
+    float contentCrossSize_ = 0.0f; // usage: picker content area width
     float middleItemStartPos_ = 0.0f;
     float middleItemEndPos_ = 0.0f;
     float currentDelta_ = 0.0f;
