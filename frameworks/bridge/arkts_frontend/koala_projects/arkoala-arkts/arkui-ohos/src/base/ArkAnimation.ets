@@ -16,7 +16,7 @@
 import {addPartialUpdate} from '../ArkUIEntry'
 import {AnimationExtender, AnimateParam} from '../framework'
 import { int32 } from "@koalaui/common"
-import { runtimeType, RuntimeType } from "@koalaui/interop"
+import { runtimeType, RuntimeType, KPointer } from "@koalaui/interop"
 
 export function _animateTo(param: AnimateParam, event: (() => void)): void {
     if (!event) {
@@ -33,37 +33,18 @@ export function _animateTo(param: AnimateParam, event: (() => void)): void {
     })
 }
 
-export function _animationStart(param: AnimateParam | undefined, isFirstBuild: boolean) {
-    if (isFirstBuild) {
+export function _animationStart(node: KPointer | undefined, param: AnimateParam | undefined, isFirstBuild: boolean) {
+    if (isFirstBuild || node === undefined) {
         return
     }
-    let value_type : int32 = RuntimeType.UNDEFINED
-    value_type = runtimeType(param)
-    if ((RuntimeType.UNDEFINED) != (value_type)) {
-        const value_value  = (param as AnimateParam)
-        AnimationExtender.OpenImplicitAnimation(value_value);
-    }
+    let ptr: KPointer = node as KPointer;
+    AnimationExtender.OpenImplicitAnimationForAnimation(ptr, param);
 }
 
-export function _animationStop(value: AnimateParam | undefined, isFirstBuild: boolean, update: (() => void)): void {
-    let value_type : int32 = RuntimeType.UNDEFINED
-    value_type = runtimeType(value)
-    if ((RuntimeType.UNDEFINED) == (value_type)) {
-        if (isFirstBuild) {
-            update();
-        }
-        return;
+export function _animationStop(node: KPointer | undefined, value: AnimateParam | undefined, isFirstBuild: boolean): void {
+    if (isFirstBuild || node === undefined) {
+        return
     }
-
-    let param: AnimateParam = {}
-    addPartialUpdate(() => {}, param, (before: boolean) => {
-        if (before) {
-            return
-        }
-        if (isFirstBuild) {
-            update();
-            return;
-        }
-        AnimationExtender.CloseImplicitAnimation()
-    })
+    let ptr: KPointer = node as KPointer;
+    AnimationExtender.CloseImplicitAnimationForAnimation(ptr);
 }

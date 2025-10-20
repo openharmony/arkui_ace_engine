@@ -3157,12 +3157,15 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _AnimationExtender_CloseImplicitAnimation(): void
     @ani.unsafe.Direct
+    native static _AnimationExtender_OpenImplicitAnimationForAnimation(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _AnimationExtender_CloseImplicitAnimationForAnimation(node: KPointer): void
+    @ani.unsafe.Direct
     native static _AnimationExtender_StartDoubleAnimation(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _AnimationExtender_AnimationTranslate(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _AnimationExtender_AnimateToImmediatelyImpl(thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
     native static _AnimationExtender_KeyframeAnimationImpl(thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _AppearSymbolEffect_construct(thisArray: KSerializerBuffer, thisLength: int32): KPointer
