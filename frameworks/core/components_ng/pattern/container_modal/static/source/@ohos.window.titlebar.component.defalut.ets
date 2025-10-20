@@ -675,6 +675,16 @@ struct System__Reserved_$$$__UI__ButtonBar__Component {
             this.onCancelMenuTimer()
             this.menuDisappearTimer(MENU_MOUSEOUT_DISAPPEAR_TIME)
           }
+          let context = UIContext.getFocusedUIContext()
+          if (context) {
+            context.animateTo({ duration: 0 } as AnimateParam, () => {
+              if (isHover) {
+                this.maximizeScale = 1.1
+              } else {
+                this.maximizeScale = 1.0
+              }
+            })
+          }
         })
 
         Stack() {
@@ -706,7 +716,16 @@ struct System__Reserved_$$$__UI__ButtonBar__Component {
           this.onHoverMinimizeButton(isHover)
           if (isHover) {
           }
-          
+          let context = UIContext.getFocusedUIContext()
+          if (context) {
+            context.animateTo({ duration: 0 } as AnimateParam, () => {
+              if (isHover) {
+                this.minimizeScale = 1.1
+              } else {
+                this.minimizeScale = 1.0
+              }
+            })
+          }     
         })
 
         Stack() {
@@ -742,9 +761,9 @@ struct System__Reserved_$$$__UI__ButtonBar__Component {
           if (context) {
             context.animateTo({ duration: 0 } as AnimateParam, () => {
               if (isHover) {
-                this.maximizeScale = 1.1
+                this.closeScale = 1.1
               } else {
-                this.maximizeScale = 1.0
+                this.closeScale = 1.0
               }
             })
           }
