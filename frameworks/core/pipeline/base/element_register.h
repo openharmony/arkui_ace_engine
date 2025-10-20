@@ -126,7 +126,7 @@ public:
 
     RefPtr<NG::FrameNode> GetAttachedFrameNodeById(const std::string& key, bool willGetAll = false);
 
-    void AddFrameNodeByInspectorId(const std::string& key, const WeakPtr<NG::FrameNode>& node);
+    void AddFrameNodeByInspectorId(const std::string& key, const WeakPtr<NG::FrameNode>& node, int32_t nodeId);
 
     void RemoveFrameNodeByInspectorId(const std::string& key, int32_t nodeId);
 
