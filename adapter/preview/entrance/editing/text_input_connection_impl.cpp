@@ -45,6 +45,8 @@ void TextInputConnectionImpl::Close(int32_t instanceId)
     }
 }
 
+void TextInputConnectionImpl::FinishComposing(int32_t instanceId) {}
+
 bool TextInputConnectionImpl::Attached()
 {
     return TextInputClientMgr::GetInstance().IsCurrentConnection(this);

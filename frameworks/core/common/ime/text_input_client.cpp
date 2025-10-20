@@ -25,6 +25,9 @@ using tic = TextInputClient; // give it a shorter name to maintain a good code l
 // Here declares function keys which can be handled by TextInputClient.
 std::map<KeyComb, std::function<bool(TextInputClient*)>> TextInputClient::functionKeys_ = {
     { KeyComb(KeyCode::KEY_ESCAPE), &tic::HandleOnEscape },
+#ifdef ANDROID_PLATFORM
+    { KeyComb(KeyCode::KEY_BACK), &tic::HandleOnKeyBack },
+#endif
     { KeyComb(KeyCode::KEY_TAB), [](tic* c) -> bool { return c->HandleOnTab(false); } },
     { KeyComb(KeyCode::KEY_TAB, KEY_SHIFT), [](tic* c) -> bool { return c->HandleOnTab(true); } },
 };

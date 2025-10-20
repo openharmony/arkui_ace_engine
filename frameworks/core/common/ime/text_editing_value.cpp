@@ -30,8 +30,11 @@ const char IS_DELETE[] = "isDelete";
 const char APPEND_TEXT[] = "appendText";
 #if defined(IOS_PLATFORM)
 const char UNMARK_TEXT[] = "unmarkText";
+const char DISCARDED_MARKED_TEXT[] = "discardedMarkedText";
 #endif
-
+#if defined(ANDROID_PLATFORM)
+const char STOP_BACK_PRESS[] = "stopBackPress";
+#endif
 } // namespace
 
 void TextEditingValue::ParseFromJson(const JsonValue& json)
@@ -42,6 +45,7 @@ void TextEditingValue::ParseFromJson(const JsonValue& json)
     appendText = json.GetString(APPEND_TEXT);
 #if defined(IOS_PLATFORM)
     unmarkText = json.GetBool(UNMARK_TEXT);
+    discardedMarkedText = json.GetBool(DISCARDED_MARKED_TEXT);
 #endif
     selection.baseOffset = json.GetInt(SELECTION_START, -1);
     selection.extentOffset = json.GetInt(SELECTION_END, -1);
@@ -54,6 +58,9 @@ std::string TextEditingValue::ToJsonString() const
     json->Put(HINT, hint.c_str());
     json->Put(SELECTION_START, selection.baseOffset);
     json->Put(SELECTION_END, selection.extentOffset);
+#if defined(ANDROID_PLATFORM)
+    json->Put(STOP_BACK_PRESS, stopBackPress);
+#endif
     return json->ToString();
 }
 

@@ -84,6 +84,11 @@ struct TextEditingValue {
     TextCompose compose;
     bool unmarkText;
 #endif
+
+#if defined(CROSS_PLATFORM)
+    bool discardedMarkedText;
+    bool stopBackPress;
+#endif
 };
 
 } // namespace OHOS::Ace

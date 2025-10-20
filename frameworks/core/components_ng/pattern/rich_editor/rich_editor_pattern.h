@@ -689,6 +689,9 @@ public:
     void AddOperationRecord(const OperationRecord& record);
     void UpdateShiftFlag(const KeyEvent& keyEvent)override;
     bool HandleOnEscape() override;
+#ifdef ANDROID_PLATFORM
+    bool HandleOnKeyBack() override;
+#endif
     void HandleOnUndoAction() override;
 
     void HandleOnExtendUndoAction() override

@@ -540,7 +540,11 @@ bool KeyEventManager::OnKeyEvent(const KeyEvent& event)
     }
 
     // process drag cancel
+#ifdef ANDROID_PLATFORM
+    if (event.code == KeyCode::KEY_ESCAPE || event.code == KeyCode::KEY_BACK) {
+#else
     if (event.code == KeyCode::KEY_ESCAPE) {
+#endif
         auto dragDropMgr = GetDragDropManager(GetInstanceId());
         if (dragDropMgr && dragDropMgr->IsMSDPDragging()) {
             return true;

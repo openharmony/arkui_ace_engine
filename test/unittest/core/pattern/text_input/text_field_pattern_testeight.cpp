@@ -56,6 +56,7 @@ class MockTextInputConnection : public TextInputConnection {
             const TextEditingValue& value, int32_t instanceId, bool needFireChangeEvent),
             (override));
         MOCK_METHOD(void, Close, (int32_t instanceId), (override));
+        MOCK_METHOD(void, FinishComposing, (int32_t instanceId), (override));
     };
     
  
@@ -1930,7 +1931,9 @@ HWTEST_F(TextFieldPatternTestEight, ScrollToSafeArea001, TestSize.Level0)
     GetFocus();
 
     auto host = pattern_->GetHost();
+    ASSERT_NE(host, nullptr);
     auto pipeline = host->GetContext();
+    ASSERT_NE(pipeline, nullptr);
     pipeline->safeAreaManager_->keyboardAvoidMode_ = KeyBoardAvoidMode::OFFSET_WITH_CARET;
     pattern_->ScrollToSafeArea();
     EXPECT_TRUE(pipeline->UsingCaretAvoidMode());

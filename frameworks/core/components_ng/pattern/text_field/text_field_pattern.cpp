@@ -851,6 +851,32 @@ void TextFieldPattern::UpdateCaretInfoToController(bool forceUpdate)
 {
     CHECK_NULL_VOID(HasFocus());
 #if defined(ENABLE_STANDARD_INPUT)
+    UpdateCaretInfoStandard(forceUpdate);
+#else
+#ifdef CROSS_PLATFORM
+    TextEditingValue value;
+    value.text = contentController_->GetTextValue();
+    value.hint = UtfUtils::Str16DebugToStr8(GetPlaceHolder());
+#ifdef ANDROID_PLATFORM
+    value.stopBackPress = IsStopBackPress();
+#endif
+    value.selection.Update(selectController_->GetStartIndex(), selectController_->GetEndIndex());
+    InputMethodManager::GetInstance()->SetEditingState(value, GetInstanceId());
+#else
+    if (HasConnection()) {
+        TextEditingValue value;
+        value.text = contentController_->GetTextValue();
+        value.hint = UtfUtils::Str16DebugToStr8(GetPlaceHolder());
+        value.selection.Update(selectController_->GetStartIndex(), selectController_->GetEndIndex());
+        connection_->SetEditingState(value, GetInstanceId());
+    }
+#endif
+#endif
+}
+
+#if defined(ENABLE_STANDARD_INPUT)
+void TextFieldPattern::UpdateCaretInfoStandard(bool forceUpdate)
+{
     CHECK_NULL_VOID(CheckAttachInput());
     auto miscTextConfig = GetMiscTextConfig();
     CHECK_NULL_VOID(miscTextConfig.has_value());
@@ -879,24 +905,8 @@ void TextFieldPattern::UpdateCaretInfoToController(bool forceUpdate)
         "%{public}d, end %{public}d",
         cursorInfo.left, cursorInfo.top, cursorInfo.width, cursorInfo.height, selectController_->GetStartIndex(),
         selectController_->GetEndIndex());
-#else
-#ifdef CROSS_PLATFORM
-    TextEditingValue value;
-    value.text = contentController_->GetTextValue();
-    value.hint = UtfUtils::Str16DebugToStr8(GetPlaceHolder());
-    value.selection.Update(selectController_->GetStartIndex(), selectController_->GetEndIndex());
-    InputMethodManager::GetInstance()->SetEditingState(value, GetInstanceId());
-#else
-    if (HasConnection()) {
-        TextEditingValue value;
-        value.text = contentController_->GetTextValue();
-        value.hint = UtfUtils::Str16DebugToStr8(GetPlaceHolder());
-        value.selection.Update(selectController_->GetStartIndex(), selectController_->GetEndIndex());
-        connection_->SetEditingState(value, GetInstanceId());
-    }
-#endif
-#endif
 }
+#endif
 
 void TextFieldPattern::UpdateCaretRect(bool isEditorValueChanged)
 {
@@ -1673,6 +1683,20 @@ bool TextFieldPattern::HandleOnEscape()
     }
     return true;
 }
+
+#ifdef ANDROID_PLATFORM
+bool TextFieldPattern::HandleOnKeyBack()
+{
+    if (isCustomKeyboardAttached_ && !IsStopBackPress()) {
+        TAG_LOGI(
+            AceLogTag::ACE_TEXT_FIELD, "return key handling is blocked while the custom keyboard is active and "
+                                       "stopBackPress is false, to ensure OnBackPressed can be triggered properly.");
+        HandleOnEscape();
+        return false;
+    }
+    return HandleOnEscape();
+}
+#endif
 
 bool TextFieldPattern::HandleOnTab(bool backward)
 {
@@ -5315,6 +5339,14 @@ void TextFieldPattern::NotifyImfFinishTextPreview()
     MiscServices::InputMethodController::GetInstance()->OnSelectionChange(
         u"", 0, 0);
     TAG_LOGD(AceLogTag::ACE_TEXT_FIELD, "notify imf that textfield exit textPreview");
+#else
+#ifdef CROSS_PLATFORM
+    InputMethodManager::GetInstance()->FinishComposing(GetInstanceId());
+#else
+    if (HasConnection()) {
+        connection_->FinishComposing(GetInstanceId());
+    }
+#endif
 #endif
 }
 
@@ -6233,22 +6265,7 @@ void TextFieldPattern::UpdateEditingValue(const std::shared_ptr<TextEditingValue
             value->selection.baseOffset -= deleteSize;
         }
     }
-#ifdef CROSS_PLATFORM
-    if (value->isDelete) {
-        HandleOnDelete(true);
-        return;
-    } else {
-#ifdef IOS_PLATFORM
-        compose_ = value->compose;
-        unmarkText_ = value->unmarkText;
-#endif
-        if (value->appendText.empty()) {
-            return;
-        }
-        InsertValue(UtfUtils::Str8DebugToStr16(value->appendText), true);
-        return;
-    }
-#endif
+    HandleEditingEventCrossPlatform(value);
 #endif
     UpdateEditingValueToRecord();
     contentController_->SetTextValue(result);
@@ -6260,6 +6277,34 @@ void TextFieldPattern::UpdateEditingValue(const std::shared_ptr<TextEditingValue
     CHECK_NULL_VOID(host);
 
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+}
+
+void TextFieldPattern::HandleEditingEventCrossPlatform(const std::shared_ptr<TextEditingValue>& value)
+{
+#ifdef CROSS_PLATFORM
+#ifdef IOS_PLATFORM
+    if (value->isDelete && !value->discardedMarkedText) {
+        HandleOnDelete(true);
+        return;
+    }
+#else
+    if (value->isDelete) {
+        HandleOnDelete(true);
+        return;
+    }
+#endif
+#ifdef IOS_PLATFORM
+    compose_ = value->compose;
+    unmarkText_ = value->unmarkText;
+    if (value->discardedMarkedText) {
+        return;
+    }
+#endif
+    if (value->appendText.empty()) {
+        return;
+    }
+    InsertValue(UtfUtils::Str8DebugToStr16(value->appendText), true);
+#endif // CROSS_PLATFORM
 }
 
 void TextFieldPattern::UpdateInputFilterErrorText(const std::u16string& errorText)
@@ -7143,19 +7188,19 @@ bool TextFieldPattern::OnBackPressed()
     }
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
     if (!imeShown_ && !isCustomKeyboardAttached_) {
-#else
-    if (!isCustomKeyboardAttached_) {
-#endif
         return false;
     }
+#else
+#ifndef ANDROID_PLATFORM
+    if (!isCustomKeyboardAttached_) {
+        return false;
+    }
+#endif
+#endif
 
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     HandleCloseKeyboard(true);
-#if defined(ANDROID_PLATFORM)
-    return false;
-#else
     return IsStopBackPress();
-#endif
 }
 
 bool TextFieldPattern::IsStopBackPress() const
