@@ -215,7 +215,7 @@ public:
 
     void GetState(int32_t& index, std::string& name, std::string& path);
     void GetStateByIndex(int32_t index, std::string& name, std::string& path, std::string& params);
-    void GetStateByUrl(std::string& url, std::vector<Framework::StateInfo>& stateArray);
+    void GetStateByUrl(std::string& url, std::vector<StateInfo>& stateArray);
 
     void GetPageNameAndPath(const std::string& url, std::string& name, std::string& path);
     int32_t GetPageIndex(const WeakPtr<FrameNode>& page);
@@ -354,7 +354,7 @@ protected:
     // ArkTS1.2 push ArkTS1.1
     bool LoadDynamicPageExtender(
         const RefPtr<FrameNode>& pageNode, bool needHideLast = true, bool needTransition = true);
-    bool CreateDynamicPagePath(const std::string& url, std::string& path);
+    bool CreateDynamicPageOhmUrl(const std::string& url, std::string& ohmUrl);
 
     UIContentErrorCode LoadCard(int32_t pageId, const RouterPageInfo& target, const std::string& params, int64_t cardId,
         bool isRestore = false, bool needHideLast = true, const std::string& entryPoint = "");

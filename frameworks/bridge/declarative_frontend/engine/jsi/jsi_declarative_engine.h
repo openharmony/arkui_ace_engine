@@ -577,6 +577,7 @@ private:
     std::string pluginBundleName_;
     std::string pluginModuleName_;
     static thread_local std::unordered_map<std::string, NamedRouterProperty> namedRouterRegisterMap_;
+    static thread_local std::unordered_map<std::string, NamedRouterProperty> emptyNamedRouterRegisterMap_;
     static thread_local std::unordered_map<std::string, std::string> routerPathInfoMap_;
     static thread_local std::unordered_map<std::string, panda::Global<panda::ObjectRef>> builderMap_;
     bool isFirstCallShow_ = true;
