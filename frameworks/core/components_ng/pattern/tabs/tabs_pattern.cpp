@@ -122,6 +122,8 @@ void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& e
         pattern->FireTabContentStateCallback(preIndex, currentIndex);
         /* TabChange callback */
         pattern->FireTabChangeCallback(preIndex, currentIndex);
+        /* TabChange performanceCheck */
+        pattern->PerformanceCheckTabChange(pattern, tabsNode, currentIndex);
 
         /* js callback */
         if (jsEvent && tabsNode->IsOnMainTree()) {
@@ -135,8 +137,6 @@ void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& e
                     TabContentChangeEvent eventInfo(currentIndex);
                     jsEvent(&eventInfo);
                 }, true);
-            
-            pattern->PerformanceCheckTabChange(pattern, tabsNode, currentIndex);
         }
     });
 
