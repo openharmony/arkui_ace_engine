@@ -288,6 +288,8 @@ public:
         return GetHostInstanceId();
     }
 
+    std::string GetInspectorId() const;
+
     // TextField needs softkeyboard, override function.
     bool NeedSoftKeyboard() const override
     {
