@@ -122,7 +122,11 @@ bool FrameNodeRulesCheckNode::GetPropIsEnable(Accessibility::PropValue& value)
     auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
     CHECK_NULL_RETURN(accessibilityProperty, false);
     value.valueType = Accessibility::ValueType::BOOL;
-    value.valueBool = !accessibilityProperty->IsUserDisabled();
+    auto enable = node->GetFocusHub() ? node->GetFocusHub()->IsEnabled() : true;
+    if (accessibilityProperty->HasUserDisabled()) {
+        enable = !accessibilityProperty->IsUserDisabled();
+    }
+    value.valueBool = enable;
     return true;
 }
 
