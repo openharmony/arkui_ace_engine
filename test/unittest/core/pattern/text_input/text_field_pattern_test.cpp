@@ -30,7 +30,7 @@ public:
 
 /**
  * @tc.name: TextPattern001
- * @tc.desc: Test TextPattern UpdateCaretRect
+ * @tc.desc: Test TextPattern UpdateCaretRect.
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTest, TextPattern001, TestSize.Level1)
