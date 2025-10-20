@@ -68,6 +68,7 @@ import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { default as curves } from "@ohos.curves"
 import { CustomDialogController } from "./customDialogController"
 import { LevelMode, ImmersiveMode, LevelOrder } from "@ohos.promptAction"
+import { ParticleUpdater, ParticleColorOptions, VelocityOptions, EmitterParticleOptions, ParticleEmitterShape, DistributionType, DisturbanceFieldShape, ParticleColorOptions_serializer, EmitterParticleOptions_serializer, VelocityOptions_serializer } from "./particle"
 import { RootModifier } from "./../RootModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ComponentRootModifier } from "./../ComponentRootModifier"
@@ -2189,6 +2190,73 @@ export class NodeContainerOps {
         return
     }
 }
+export class ParticleHelper {
+    static SetDisturbanceFields_serialize(node: KPointer, disturbanceFields: Array<DisturbanceFieldOptionsInner> | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (disturbanceFields !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const disturbanceFieldsTmpValue  = disturbanceFields!
+            thisSerializer.writeInt32((disturbanceFieldsTmpValue.length).toInt())
+            for (let disturbanceFieldsTmpValueCounterI = 0; disturbanceFieldsTmpValueCounterI < disturbanceFieldsTmpValue.length; disturbanceFieldsTmpValueCounterI++) {
+                const disturbanceFieldsTmpValueTmpElement : DisturbanceFieldOptionsInner = disturbanceFieldsTmpValue[disturbanceFieldsTmpValueCounterI]
+                DisturbanceFieldOptionsInner_serializer.write(thisSerializer, disturbanceFieldsTmpValueTmpElement)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ParticleHelper_SetDisturbanceFields(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static SetEmitterProperty_serialize(node: KPointer, emitter: Array<EmitterPropertyInner> | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (emitter !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const emitterTmpValue  = emitter!
+            thisSerializer.writeInt32((emitterTmpValue.length).toInt())
+            for (let emitterTmpValueCounterI = 0; emitterTmpValueCounterI < emitterTmpValue.length; emitterTmpValueCounterI++) {
+                const emitterTmpValueTmpElement : EmitterPropertyInner = emitterTmpValue[emitterTmpValueCounterI]
+                EmitterPropertyInner_serializer.write(thisSerializer, emitterTmpValueTmpElement)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ParticleHelper_SetEmitterProperty(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static ParticleConstruct_serialize(id: int32, flags: int32): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._ParticleHelper_ParticleConstruct(id, flags)
+        return retval
+    }
+    static SetParticleOptions_serialize(node: KPointer, particles: ParticlesInner): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        ParticlesInner_serializer.write(thisSerializer, particles)
+        ArkUIGeneratedNativeModule._ParticleHelper_SetParticleOptions(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    public static SetDisturbanceFields(node: KPointer, disturbanceFields: Array<DisturbanceFieldOptionsInner> | undefined): void {
+        const node_casted = node as (KPointer)
+        const disturbanceFields_casted = disturbanceFields as (Array<DisturbanceFieldOptionsInner> | undefined)
+        ParticleHelper.SetDisturbanceFields_serialize(node_casted, disturbanceFields_casted)
+        return
+    }
+    public static SetEmitterProperty(node: KPointer, emitter: Array<EmitterPropertyInner> | undefined): void {
+        const node_casted = node as (KPointer)
+        const emitter_casted = emitter as (Array<EmitterPropertyInner> | undefined)
+        ParticleHelper.SetEmitterProperty_serialize(node_casted, emitter_casted)
+        return
+    }
+    public static ParticleConstruct(id: int32, flags: int32): KPointer {
+        const id_casted = id as (int32)
+        const flags_casted = flags as (int32)
+        return ParticleHelper.ParticleConstruct_serialize(id_casted, flags_casted)
+    }
+    public static SetParticleOptions(node: KPointer, particles: ParticlesInner): void {
+        const node_casted = node as (KPointer)
+        const particles_casted = particles as (ParticlesInner)
+        ParticleHelper.SetParticleOptions_serialize(node_casted, particles_casted)
+        return
+    }
+}
 export class PromptActionExtender {
     static openPopup_serialize(content: KPointer, target: TargetInfo, options?: PopupCommonOptions): Promise<void> {
         const thisSerializer : SerializerBase = SerializerBase.hold()
@@ -3612,6 +3680,99 @@ export interface IndicatorStyle {
 export type CustomNodeBuilder = (parentNode: KPointer) => KPointer;
 export type NavExtender_OnUpdateStack = () => void;
 export type NavExtender_CreateNavDestination = (index: int32) => KPointer;
+export interface SizeNumberInner {
+    width: number;
+    height: number;
+}
+export interface PositionNumberInner {
+    x: number;
+    y: number;
+}
+export interface PositionLengthMetricsInner {
+    x: LengthMetrics;
+    y: LengthMetrics;
+}
+export interface ParticlePropertyAnimationNumberInner {
+    from: number;
+    to: number;
+    startMillis: number;
+    endMillis: number;
+    curve?: curves.Curve | curves.ICurve;
+}
+export interface ParticlePropertyAnimationColorInner {
+    from: ResourceColor;
+    to: ResourceColor;
+    startMillis: number;
+    endMillis: number;
+    curve?: curves.Curve | curves.ICurve;
+}
+export type ParticlePropertyUpdaterConfigsInner = [ number, number ] | Array<ParticlePropertyAnimationNumberInner> | undefined;
+export interface ParticleUpdaterOptionsInner {
+    type: ParticleUpdater;
+    config: ParticlePropertyUpdaterConfigsInner;
+}
+export interface ParticlePropertyOptionsInner {
+    range: [ number, number ];
+    updater?: ParticleUpdaterOptionsInner;
+}
+export interface ParticleColorUpdaterOptionsInner {
+    type: ParticleUpdater;
+    config: ParticleColorPropertyUpdaterConfigsInner;
+}
+export type ParticleColorPropertyUpdaterConfigsInner = ParticleColorOptions | Array<ParticlePropertyAnimationColorInner> | undefined;
+export interface AccelerationOptionsInner {
+    speed?: ParticlePropertyOptionsInner;
+    angle?: ParticlePropertyOptionsInner;
+}
+export interface ParticleOptionsInner {
+    emitter: EmitterOptionsInner;
+    color?: ParticleColorPropertyOptionsInner;
+    opacity?: ParticlePropertyOptionsInner;
+    scale?: ParticlePropertyOptionsInner;
+    velocity?: VelocityOptions;
+    acceleration?: AccelerationOptionsInner;
+    spin?: ParticlePropertyOptionsInner;
+}
+export interface ParticleAnnulusRegionInner {
+    center?: PositionLengthMetricsInner;
+    outerRadius: LengthMetrics;
+    innerRadius: LengthMetrics;
+    startAngle?: number;
+    endAngle?: number;
+}
+export interface EmitterPropertyInner {
+    index: number;
+    emitRate?: number;
+    position?: PositionNumberInner;
+    size?: SizeNumberInner;
+    annulusRegion?: ParticleAnnulusRegionInner;
+}
+export interface EmitterOptionsInner {
+    particle: EmitterParticleOptions;
+    emitRate?: number;
+    shape?: ParticleEmitterShape;
+    position?: [ Dimension, Dimension ];
+    size?: [ Dimension, Dimension ];
+    annulusRegion?: ParticleAnnulusRegionInner;
+}
+export interface ParticleColorPropertyOptionsInner {
+    range: [ ResourceColor, ResourceColor ];
+    distributionType?: DistributionType;
+    updater?: ParticleColorUpdaterOptionsInner;
+}
+export interface ParticlesInner {
+    particles: Array<ParticleOptionsInner>;
+}
+export interface DisturbanceFieldOptionsInner {
+    strength?: number;
+    shape?: DisturbanceFieldShape;
+    size?: SizeNumberInner;
+    position?: PositionNumberInner;
+    feather?: number;
+    noiseScale?: number;
+    noiseFrequency?: number;
+    noiseAmplitude?: number;
+}
 export interface Root {
     attributeModifier(value: AttributeModifier<Root> | undefined): this {
         throw new Error("Unimplemented method attributeModifier")
@@ -3814,6 +3975,22 @@ export class Offset_componentutils_serializer {
         return value
     }
 }
+export class PositionNumberInner_serializer {
+    public static write(buffer: SerializerBase, value: PositionNumberInner): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForX  = value.x
+        valueSerializer.writeNumber(valueHolderForX)
+        const valueHolderForY  = value.y
+        valueSerializer.writeNumber(valueHolderForY)
+    }
+    public static read(buffer: DeserializerBase): PositionNumberInner {
+        let valueDeserializer : DeserializerBase = buffer
+        const xTmpResult : number = (valueDeserializer.readNumber() as number)
+        const yTmpResult : number = (valueDeserializer.readNumber() as number)
+        let value : PositionNumberInner = ({x: xTmpResult, y: yTmpResult} as PositionNumberInner)
+        return value
+    }
+}
 export class RotateResult_serializer {
     public static write(buffer: SerializerBase, value: RotateResult): void {
         let valueSerializer : SerializerBase = buffer
@@ -3864,6 +4041,22 @@ export class ScaleResult_serializer {
         const centerXTmpResult : number = (valueDeserializer.readNumber() as number)
         const centerYTmpResult : number = (valueDeserializer.readNumber() as number)
         let value : ScaleResult = ({x: xTmpResult, y: yTmpResult, z: zTmpResult, centerX: centerXTmpResult, centerY: centerYTmpResult} as ScaleResult)
+        return value
+    }
+}
+export class SizeNumberInner_serializer {
+    public static write(buffer: SerializerBase, value: SizeNumberInner): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForWidth  = value.width
+        valueSerializer.writeNumber(valueHolderForWidth)
+        const valueHolderForHeight  = value.height
+        valueSerializer.writeNumber(valueHolderForHeight)
+    }
+    public static read(buffer: DeserializerBase): SizeNumberInner {
+        let valueDeserializer : DeserializerBase = buffer
+        const widthTmpResult : number = (valueDeserializer.readNumber() as number)
+        const heightTmpResult : number = (valueDeserializer.readNumber() as number)
+        let value : SizeNumberInner = ({width: widthTmpResult, height: heightTmpResult} as SizeNumberInner)
         return value
     }
 }
@@ -3959,6 +4152,128 @@ export class CustomDialogControllerExternalOptionsExtender_serializer {
         }
         const customStyleTmpResult : boolean | undefined = customStyleTmpBuf
         let value : CustomDialogControllerExternalOptionsExtender = ({customStyle: customStyleTmpResult} as CustomDialogControllerExternalOptionsExtender)
+        return value
+    }
+}
+export class DisturbanceFieldOptionsInner_serializer {
+    public static write(buffer: SerializerBase, value: DisturbanceFieldOptionsInner): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForStrength  = value.strength
+        if (valueHolderForStrength !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForStrengthTmpValue  = valueHolderForStrength!
+            valueSerializer.writeNumber(valueHolderForStrengthTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForShape  = value.shape
+        if (valueHolderForShape !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForShapeTmpValue  = (valueHolderForShape as DisturbanceFieldShape)
+            valueSerializer.writeInt32(valueHolderForShapeTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForSize  = value.size
+        if (valueHolderForSize !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForSizeTmpValue  = valueHolderForSize!
+            SizeNumberInner_serializer.write(valueSerializer, valueHolderForSizeTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForPosition  = value.position
+        if (valueHolderForPosition !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForPositionTmpValue  = valueHolderForPosition!
+            PositionNumberInner_serializer.write(valueSerializer, valueHolderForPositionTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForFeather  = value.feather
+        if (valueHolderForFeather !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForFeatherTmpValue  = valueHolderForFeather!
+            valueSerializer.writeNumber(valueHolderForFeatherTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForNoiseScale  = value.noiseScale
+        if (valueHolderForNoiseScale !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForNoiseScaleTmpValue  = valueHolderForNoiseScale!
+            valueSerializer.writeNumber(valueHolderForNoiseScaleTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForNoiseFrequency  = value.noiseFrequency
+        if (valueHolderForNoiseFrequency !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForNoiseFrequencyTmpValue  = valueHolderForNoiseFrequency!
+            valueSerializer.writeNumber(valueHolderForNoiseFrequencyTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForNoiseAmplitude  = value.noiseAmplitude
+        if (valueHolderForNoiseAmplitude !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForNoiseAmplitudeTmpValue  = valueHolderForNoiseAmplitude!
+            valueSerializer.writeNumber(valueHolderForNoiseAmplitudeTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): DisturbanceFieldOptionsInner {
+        let valueDeserializer : DeserializerBase = buffer
+        const strengthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let strengthTmpBuf : number | undefined = undefined
+        if ((strengthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            strengthTmpBuf = (valueDeserializer.readNumber() as number)
+        }
+        const strengthTmpResult : number | undefined = strengthTmpBuf
+        const shapeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let shapeTmpBuf : DisturbanceFieldShape | undefined = undefined
+        if ((shapeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            shapeTmpBuf = DisturbanceFieldShape.fromValue(valueDeserializer.readInt32())
+        }
+        const shapeTmpResult : DisturbanceFieldShape | undefined = shapeTmpBuf
+        const sizeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let sizeTmpBuf : SizeNumberInner | undefined = undefined
+        if ((sizeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            sizeTmpBuf = SizeNumberInner_serializer.read(valueDeserializer)
+        }
+        const sizeTmpResult : SizeNumberInner | undefined = sizeTmpBuf
+        const positionTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let positionTmpBuf : PositionNumberInner | undefined = undefined
+        if ((positionTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            positionTmpBuf = PositionNumberInner_serializer.read(valueDeserializer)
+        }
+        const positionTmpResult : PositionNumberInner | undefined = positionTmpBuf
+        const featherTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let featherTmpBuf : number | undefined = undefined
+        if ((featherTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            featherTmpBuf = (valueDeserializer.readNumber() as number)
+        }
+        const featherTmpResult : number | undefined = featherTmpBuf
+        const noiseScaleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let noiseScaleTmpBuf : number | undefined = undefined
+        if ((noiseScaleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            noiseScaleTmpBuf = (valueDeserializer.readNumber() as number)
+        }
+        const noiseScaleTmpResult : number | undefined = noiseScaleTmpBuf
+        const noiseFrequencyTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let noiseFrequencyTmpBuf : number | undefined = undefined
+        if ((noiseFrequencyTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            noiseFrequencyTmpBuf = (valueDeserializer.readNumber() as number)
+        }
+        const noiseFrequencyTmpResult : number | undefined = noiseFrequencyTmpBuf
+        const noiseAmplitudeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let noiseAmplitudeTmpBuf : number | undefined = undefined
+        if ((noiseAmplitudeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            noiseAmplitudeTmpBuf = (valueDeserializer.readNumber() as number)
+        }
+        const noiseAmplitudeTmpResult : number | undefined = noiseAmplitudeTmpBuf
+        let value : DisturbanceFieldOptionsInner = ({strength: strengthTmpResult, shape: shapeTmpResult, size: sizeTmpResult, position: positionTmpResult, feather: featherTmpResult, noiseScale: noiseScaleTmpResult, noiseFrequency: noiseFrequencyTmpResult, noiseAmplitude: noiseAmplitudeTmpResult} as DisturbanceFieldOptionsInner)
         return value
     }
 }
@@ -4143,6 +4458,97 @@ export class MessageEvents_serializer {
         const timeStampTmpResult : int64 = valueDeserializer.readInt64()
         const dataTmpResult : object = (valueDeserializer.readObject() as object)
         let value : MessageEvents = ({type: typeTmpResult, timeStamp: timeStampTmpResult, data: dataTmpResult} as MessageEvents)
+        return value
+    }
+}
+export class ParticlePropertyAnimationNumberInner_serializer {
+    public static write(buffer: SerializerBase, value: ParticlePropertyAnimationNumberInner): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForFrom  = value.from
+        valueSerializer.writeNumber(valueHolderForFrom)
+        const valueHolderForTo  = value.to
+        valueSerializer.writeNumber(valueHolderForTo)
+        const valueHolderForStartMillis  = value.startMillis
+        valueSerializer.writeNumber(valueHolderForStartMillis)
+        const valueHolderForEndMillis  = value.endMillis
+        valueSerializer.writeNumber(valueHolderForEndMillis)
+        const valueHolderForCurve  = value.curve
+        if (valueHolderForCurve !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForCurveTmpValue  = valueHolderForCurve!
+            if (valueHolderForCurveTmpValue instanceof curves.Curve) {
+                valueSerializer.writeInt8((0).toChar())
+                const valueHolderForCurveTmpValueForIdx0  = valueHolderForCurveTmpValue as curves.Curve
+                valueSerializer.writeInt32(valueHolderForCurveTmpValueForIdx0.valueOf())
+            } else if (valueHolderForCurveTmpValue instanceof curves.ICurve) {
+                valueSerializer.writeInt8((1).toChar())
+                const valueHolderForCurveTmpValueForIdx1  = valueHolderForCurveTmpValue as curves.ICurve
+                curves_ICurve_serializer.write(valueSerializer, valueHolderForCurveTmpValueForIdx1)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): ParticlePropertyAnimationNumberInner {
+        let valueDeserializer : DeserializerBase = buffer
+        const fromTmpResult : number = (valueDeserializer.readNumber() as number)
+        const toTmpResult : number = (valueDeserializer.readNumber() as number)
+        const startMillisTmpResult : number = (valueDeserializer.readNumber() as number)
+        const endMillisTmpResult : number = (valueDeserializer.readNumber() as number)
+        const curveTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let curveTmpBuf : curves.Curve | curves.ICurve | undefined = undefined
+        if ((curveTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const curveTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let curveTmpBuf_ : curves.Curve | curves.ICurve | undefined
+            if (curveTmpBuf_UnionSelector == (0).toChar()) {
+                curveTmpBuf_ = curves.Curve.fromValue(valueDeserializer.readInt32())
+            } else if (curveTmpBuf_UnionSelector == (1).toChar()) {
+                curveTmpBuf_ = (curves_ICurve_serializer.read(valueDeserializer) as curves.ICurve)
+            } else {
+                throw new Error("One of the branches for curveTmpBuf_ has to be chosen through deserialisation.")
+            }
+            curveTmpBuf = (curveTmpBuf_ as curves.Curve | curves.ICurve)
+        }
+        const curveTmpResult : curves.Curve | curves.ICurve | undefined = curveTmpBuf
+        let value : ParticlePropertyAnimationNumberInner = ({from: fromTmpResult, to: toTmpResult, startMillis: startMillisTmpResult, endMillis: endMillisTmpResult, curve: curveTmpResult} as ParticlePropertyAnimationNumberInner)
+        return value
+    }
+}
+export class ParticlesInner_serializer {
+    public static write(buffer: SerializerBase, value: ParticlesInner): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForParticles  = value.particles
+        valueSerializer.writeInt32((valueHolderForParticles.length).toInt())
+        for (let valueHolderForParticlesCounterI = 0; valueHolderForParticlesCounterI < valueHolderForParticles.length; valueHolderForParticlesCounterI++) {
+            const valueHolderForParticlesTmpElement : ParticleOptionsInner = valueHolderForParticles[valueHolderForParticlesCounterI]
+            ParticleOptionsInner_serializer.write(valueSerializer, valueHolderForParticlesTmpElement)
+        }
+    }
+    public static read(buffer: DeserializerBase): ParticlesInner {
+        let valueDeserializer : DeserializerBase = buffer
+        const particlesTmpBufLength : int32 = valueDeserializer.readInt32()
+        let particlesTmpBuf : Array<ParticleOptionsInner> = new Array<ParticleOptionsInner>(particlesTmpBufLength)
+        for (let particlesTmpBufBufCounterI = 0; particlesTmpBufBufCounterI < particlesTmpBufLength; particlesTmpBufBufCounterI++) {
+            particlesTmpBuf[particlesTmpBufBufCounterI] = ParticleOptionsInner_serializer.read(valueDeserializer)
+        }
+        const particlesTmpResult : Array<ParticleOptionsInner> = particlesTmpBuf
+        let value : ParticlesInner = ({particles: particlesTmpResult} as ParticlesInner)
+        return value
+    }
+}
+export class PositionLengthMetricsInner_serializer {
+    public static write(buffer: SerializerBase, value: PositionLengthMetricsInner): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForX  = value.x
+        LengthMetrics_serializer.write(valueSerializer, valueHolderForX)
+        const valueHolderForY  = value.y
+        LengthMetrics_serializer.write(valueSerializer, valueHolderForY)
+    }
+    public static read(buffer: DeserializerBase): PositionLengthMetricsInner {
+        let valueDeserializer : DeserializerBase = buffer
+        const xTmpResult : LengthMetrics = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+        const yTmpResult : LengthMetrics = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+        let value : PositionLengthMetricsInner = ({x: xTmpResult, y: yTmpResult} as PositionLengthMetricsInner)
         return value
     }
 }
@@ -4377,6 +4783,286 @@ export class PageRouterOptions_serializer {
         return value
     }
 }
+export class ParticleAnnulusRegionInner_serializer {
+    public static write(buffer: SerializerBase, value: ParticleAnnulusRegionInner): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForCenter  = value.center
+        if (valueHolderForCenter !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForCenterTmpValue  = valueHolderForCenter!
+            PositionLengthMetricsInner_serializer.write(valueSerializer, valueHolderForCenterTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForOuterRadius  = value.outerRadius
+        LengthMetrics_serializer.write(valueSerializer, valueHolderForOuterRadius)
+        const valueHolderForInnerRadius  = value.innerRadius
+        LengthMetrics_serializer.write(valueSerializer, valueHolderForInnerRadius)
+        const valueHolderForStartAngle  = value.startAngle
+        if (valueHolderForStartAngle !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForStartAngleTmpValue  = valueHolderForStartAngle!
+            valueSerializer.writeNumber(valueHolderForStartAngleTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForEndAngle  = value.endAngle
+        if (valueHolderForEndAngle !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForEndAngleTmpValue  = valueHolderForEndAngle!
+            valueSerializer.writeNumber(valueHolderForEndAngleTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): ParticleAnnulusRegionInner {
+        let valueDeserializer : DeserializerBase = buffer
+        const centerTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let centerTmpBuf : PositionLengthMetricsInner | undefined = undefined
+        if ((centerTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            centerTmpBuf = PositionLengthMetricsInner_serializer.read(valueDeserializer)
+        }
+        const centerTmpResult : PositionLengthMetricsInner | undefined = centerTmpBuf
+        const outerRadiusTmpResult : LengthMetrics = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+        const innerRadiusTmpResult : LengthMetrics = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+        const startAngleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let startAngleTmpBuf : number | undefined = undefined
+        if ((startAngleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            startAngleTmpBuf = (valueDeserializer.readNumber() as number)
+        }
+        const startAngleTmpResult : number | undefined = startAngleTmpBuf
+        const endAngleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let endAngleTmpBuf : number | undefined = undefined
+        if ((endAngleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            endAngleTmpBuf = (valueDeserializer.readNumber() as number)
+        }
+        const endAngleTmpResult : number | undefined = endAngleTmpBuf
+        let value : ParticleAnnulusRegionInner = ({center: centerTmpResult, outerRadius: outerRadiusTmpResult, innerRadius: innerRadiusTmpResult, startAngle: startAngleTmpResult, endAngle: endAngleTmpResult} as ParticleAnnulusRegionInner)
+        return value
+    }
+}
+export class ParticleColorUpdaterOptionsInner_serializer {
+    public static write(buffer: SerializerBase, value: ParticleColorUpdaterOptionsInner): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForType  = value.type
+        valueSerializer.writeInt32(valueHolderForType.getOrdinal())
+        const valueHolderForConfig  = value.config
+        if (valueHolderForConfig !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForConfigTmpValue  = valueHolderForConfig!
+            if (valueHolderForConfigTmpValue instanceof ParticleColorOptions) {
+                valueSerializer.writeInt8((0).toChar())
+                const valueHolderForConfigTmpValueForIdx0  = valueHolderForConfigTmpValue as ParticleColorOptions
+                ParticleColorOptions_serializer.write(valueSerializer, valueHolderForConfigTmpValueForIdx0)
+            } else if (TypeChecker.isArray_ParticlePropertyAnimationColorInner(valueHolderForConfigTmpValue)) {
+                valueSerializer.writeInt8((1).toChar())
+                const valueHolderForConfigTmpValueForIdx1  = valueHolderForConfigTmpValue as Array<ParticlePropertyAnimationColorInner>
+                valueSerializer.writeInt32((valueHolderForConfigTmpValueForIdx1.length).toInt())
+                for (let valueHolderForConfigTmpValueForIdx1CounterI = 0; valueHolderForConfigTmpValueForIdx1CounterI < valueHolderForConfigTmpValueForIdx1.length; valueHolderForConfigTmpValueForIdx1CounterI++) {
+                    const valueHolderForConfigTmpValueForIdx1TmpElement : ParticlePropertyAnimationColorInner = valueHolderForConfigTmpValueForIdx1[valueHolderForConfigTmpValueForIdx1CounterI]
+                    ParticlePropertyAnimationColorInner_serializer.write(valueSerializer, valueHolderForConfigTmpValueForIdx1TmpElement)
+                }
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): ParticleColorUpdaterOptionsInner {
+        let valueDeserializer : DeserializerBase = buffer
+        const typeTmpResult : ParticleUpdater = ParticleUpdater.values()[valueDeserializer.readInt32()]
+        const configTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let configTmpBuf : ParticleColorOptions | Array<ParticlePropertyAnimationColorInner> | undefined = undefined
+        if ((configTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const configTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let configTmpBuf_ : ParticleColorOptions | Array<ParticlePropertyAnimationColorInner> | undefined
+            if (configTmpBuf_UnionSelector == (0).toChar()) {
+                configTmpBuf_ = ParticleColorOptions_serializer.read(valueDeserializer)
+            } else if (configTmpBuf_UnionSelector == (1).toChar()) {
+                const configTmpBuf_BufULength : int32 = valueDeserializer.readInt32()
+                let configTmpBuf_BufU : Array<ParticlePropertyAnimationColorInner> = new Array<ParticlePropertyAnimationColorInner>(configTmpBuf_BufULength)
+                for (let configTmpBuf_BufUBufCounterI = 0; configTmpBuf_BufUBufCounterI < configTmpBuf_BufULength; configTmpBuf_BufUBufCounterI++) {
+                    configTmpBuf_BufU[configTmpBuf_BufUBufCounterI] = ParticlePropertyAnimationColorInner_serializer.read(valueDeserializer)
+                }
+                configTmpBuf_ = configTmpBuf_BufU
+            } else {
+                throw new Error("One of the branches for configTmpBuf_ has to be chosen through deserialisation.")
+            }
+            configTmpBuf = (configTmpBuf_ as ParticleColorOptions | Array<ParticlePropertyAnimationColorInner>)
+        }
+        const configTmpResult : ParticleColorPropertyUpdaterConfigsInner = configTmpBuf
+        let value : ParticleColorUpdaterOptionsInner = ({type: typeTmpResult, config: configTmpResult} as ParticleColorUpdaterOptionsInner)
+        return value
+    }
+}
+export class ParticlePropertyAnimationColorInner_serializer {
+    public static write(buffer: SerializerBase, value: ParticlePropertyAnimationColorInner): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForFrom  = value.from
+        if (valueHolderForFrom instanceof Color) {
+            valueSerializer.writeInt8((0).toChar())
+            const valueHolderForFromForIdx0  = valueHolderForFrom as Color
+            valueSerializer.writeInt32(valueHolderForFromForIdx0.getOrdinal())
+        } else if (valueHolderForFrom instanceof number) {
+            valueSerializer.writeInt8((1).toChar())
+            const valueHolderForFromForIdx1  = valueHolderForFrom as number
+            valueSerializer.writeNumber(valueHolderForFromForIdx1)
+        } else if (valueHolderForFrom instanceof string) {
+            valueSerializer.writeInt8((2).toChar())
+            const valueHolderForFromForIdx2  = valueHolderForFrom as string
+            valueSerializer.writeString(valueHolderForFromForIdx2)
+        } else if (valueHolderForFrom instanceof Resource) {
+            valueSerializer.writeInt8((3).toChar())
+            const valueHolderForFromForIdx3  = valueHolderForFrom as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForFromForIdx3)
+        }
+        const valueHolderForTo  = value.to
+        if (valueHolderForTo instanceof Color) {
+            valueSerializer.writeInt8((0).toChar())
+            const valueHolderForToForIdx0  = valueHolderForTo as Color
+            valueSerializer.writeInt32(valueHolderForToForIdx0.getOrdinal())
+        } else if (valueHolderForTo instanceof number) {
+            valueSerializer.writeInt8((1).toChar())
+            const valueHolderForToForIdx1  = valueHolderForTo as number
+            valueSerializer.writeNumber(valueHolderForToForIdx1)
+        } else if (valueHolderForTo instanceof string) {
+            valueSerializer.writeInt8((2).toChar())
+            const valueHolderForToForIdx2  = valueHolderForTo as string
+            valueSerializer.writeString(valueHolderForToForIdx2)
+        } else if (valueHolderForTo instanceof Resource) {
+            valueSerializer.writeInt8((3).toChar())
+            const valueHolderForToForIdx3  = valueHolderForTo as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForToForIdx3)
+        }
+        const valueHolderForStartMillis  = value.startMillis
+        valueSerializer.writeNumber(valueHolderForStartMillis)
+        const valueHolderForEndMillis  = value.endMillis
+        valueSerializer.writeNumber(valueHolderForEndMillis)
+        const valueHolderForCurve  = value.curve
+        if (valueHolderForCurve !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForCurveTmpValue  = valueHolderForCurve!
+            if (valueHolderForCurveTmpValue instanceof curves.Curve) {
+                valueSerializer.writeInt8((0).toChar())
+                const valueHolderForCurveTmpValueForIdx0  = valueHolderForCurveTmpValue as curves.Curve
+                valueSerializer.writeInt32(valueHolderForCurveTmpValueForIdx0.valueOf())
+            } else if (valueHolderForCurveTmpValue instanceof curves.ICurve) {
+                valueSerializer.writeInt8((1).toChar())
+                const valueHolderForCurveTmpValueForIdx1  = valueHolderForCurveTmpValue as curves.ICurve
+                curves_ICurve_serializer.write(valueSerializer, valueHolderForCurveTmpValueForIdx1)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): ParticlePropertyAnimationColorInner {
+        let valueDeserializer : DeserializerBase = buffer
+        const fromTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let fromTmpBuf : Color | number | string | Resource | undefined
+        if (fromTmpBufUnionSelector == (0).toChar()) {
+            fromTmpBuf = Color.values()[valueDeserializer.readInt32()]
+        } else if (fromTmpBufUnionSelector == (1).toChar()) {
+            fromTmpBuf = (valueDeserializer.readNumber() as number)
+        } else if (fromTmpBufUnionSelector == (2).toChar()) {
+            fromTmpBuf = (valueDeserializer.readString() as string)
+        } else if (fromTmpBufUnionSelector == (3).toChar()) {
+            fromTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for fromTmpBuf has to be chosen through deserialisation.")
+        }
+        const fromTmpResult : ResourceColor = (fromTmpBuf as Color | number | string | Resource)
+        const toTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let toTmpBuf : Color | number | string | Resource | undefined
+        if (toTmpBufUnionSelector == (0).toChar()) {
+            toTmpBuf = Color.values()[valueDeserializer.readInt32()]
+        } else if (toTmpBufUnionSelector == (1).toChar()) {
+            toTmpBuf = (valueDeserializer.readNumber() as number)
+        } else if (toTmpBufUnionSelector == (2).toChar()) {
+            toTmpBuf = (valueDeserializer.readString() as string)
+        } else if (toTmpBufUnionSelector == (3).toChar()) {
+            toTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for toTmpBuf has to be chosen through deserialisation.")
+        }
+        const toTmpResult : ResourceColor = (toTmpBuf as Color | number | string | Resource)
+        const startMillisTmpResult : number = (valueDeserializer.readNumber() as number)
+        const endMillisTmpResult : number = (valueDeserializer.readNumber() as number)
+        const curveTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let curveTmpBuf : curves.Curve | curves.ICurve | undefined = undefined
+        if ((curveTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const curveTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let curveTmpBuf_ : curves.Curve | curves.ICurve | undefined
+            if (curveTmpBuf_UnionSelector == (0).toChar()) {
+                curveTmpBuf_ = curves.Curve.fromValue(valueDeserializer.readInt32())
+            } else if (curveTmpBuf_UnionSelector == (1).toChar()) {
+                curveTmpBuf_ = (curves_ICurve_serializer.read(valueDeserializer) as curves.ICurve)
+            } else {
+                throw new Error("One of the branches for curveTmpBuf_ has to be chosen through deserialisation.")
+            }
+            curveTmpBuf = (curveTmpBuf_ as curves.Curve | curves.ICurve)
+        }
+        const curveTmpResult : curves.Curve | curves.ICurve | undefined = curveTmpBuf
+        let value : ParticlePropertyAnimationColorInner = ({from: fromTmpResult, to: toTmpResult, startMillis: startMillisTmpResult, endMillis: endMillisTmpResult, curve: curveTmpResult} as ParticlePropertyAnimationColorInner)
+        return value
+    }
+}
+export class ParticleUpdaterOptionsInner_serializer {
+    public static write(buffer: SerializerBase, value: ParticleUpdaterOptionsInner): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForType  = value.type
+        valueSerializer.writeInt32(valueHolderForType.getOrdinal())
+        const valueHolderForConfig  = value.config
+        if (valueHolderForConfig !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForConfigTmpValue  = valueHolderForConfig!
+            if (valueHolderForConfigTmpValue instanceof [ number, number ]) {
+                valueSerializer.writeInt8((0).toChar())
+                const valueHolderForConfigTmpValueForIdx0  = valueHolderForConfigTmpValue as [ number, number ]
+                const valueHolderForConfigTmpValueForIdx0_0  = valueHolderForConfigTmpValueForIdx0[0]
+                valueSerializer.writeNumber(valueHolderForConfigTmpValueForIdx0_0)
+                const valueHolderForConfigTmpValueForIdx0_1  = valueHolderForConfigTmpValueForIdx0[1]
+                valueSerializer.writeNumber(valueHolderForConfigTmpValueForIdx0_1)
+            } else if (TypeChecker.isArray_ParticlePropertyAnimationNumberInner(valueHolderForConfigTmpValue)) {
+                valueSerializer.writeInt8((1).toChar())
+                const valueHolderForConfigTmpValueForIdx1  = valueHolderForConfigTmpValue as Array<ParticlePropertyAnimationNumberInner>
+                valueSerializer.writeInt32((valueHolderForConfigTmpValueForIdx1.length).toInt())
+                for (let valueHolderForConfigTmpValueForIdx1CounterI = 0; valueHolderForConfigTmpValueForIdx1CounterI < valueHolderForConfigTmpValueForIdx1.length; valueHolderForConfigTmpValueForIdx1CounterI++) {
+                    const valueHolderForConfigTmpValueForIdx1TmpElement : ParticlePropertyAnimationNumberInner = valueHolderForConfigTmpValueForIdx1[valueHolderForConfigTmpValueForIdx1CounterI]
+                    ParticlePropertyAnimationNumberInner_serializer.write(valueSerializer, valueHolderForConfigTmpValueForIdx1TmpElement)
+                }
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): ParticleUpdaterOptionsInner {
+        let valueDeserializer : DeserializerBase = buffer
+        const typeTmpResult : ParticleUpdater = ParticleUpdater.values()[valueDeserializer.readInt32()]
+        const configTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let configTmpBuf : [ number, number ] | Array<ParticlePropertyAnimationNumberInner> | undefined = undefined
+        if ((configTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const configTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let configTmpBuf_ : [ number, number ] | Array<ParticlePropertyAnimationNumberInner> | undefined
+            if (configTmpBuf_UnionSelector == (0).toChar()) {
+                const configTmpBuf_BufUValue0 : number = (valueDeserializer.readNumber() as number)
+                const configTmpBuf_BufUValue1 : number = (valueDeserializer.readNumber() as number)
+                configTmpBuf_ = ([configTmpBuf_BufUValue0, configTmpBuf_BufUValue1] as [ number, number ])
+            } else if (configTmpBuf_UnionSelector == (1).toChar()) {
+                const configTmpBuf_BufULength : int32 = valueDeserializer.readInt32()
+                let configTmpBuf_BufU : Array<ParticlePropertyAnimationNumberInner> = new Array<ParticlePropertyAnimationNumberInner>(configTmpBuf_BufULength)
+                for (let configTmpBuf_BufUBufCounterI = 0; configTmpBuf_BufUBufCounterI < configTmpBuf_BufULength; configTmpBuf_BufUBufCounterI++) {
+                    configTmpBuf_BufU[configTmpBuf_BufUBufCounterI] = ParticlePropertyAnimationNumberInner_serializer.read(valueDeserializer)
+                }
+                configTmpBuf_ = configTmpBuf_BufU
+            } else {
+                throw new Error("One of the branches for configTmpBuf_ has to be chosen through deserialisation.")
+            }
+            configTmpBuf = (configTmpBuf_ as [ number, number ] | Array<ParticlePropertyAnimationNumberInner>)
+        }
+        const configTmpResult : ParticlePropertyUpdaterConfigsInner = configTmpBuf
+        let value : ParticleUpdaterOptionsInner = ({type: typeTmpResult, config: configTmpResult} as ParticleUpdaterOptionsInner)
+        return value
+    }
+}
 export class RestrictedWorker_serializer {
     public static write(buffer: SerializerBase, value: RestrictedWorker): void {
         let valueSerializer : SerializerBase = buffer
@@ -4386,6 +5072,249 @@ export class RestrictedWorker_serializer {
         let valueDeserializer : DeserializerBase = buffer
         let ptr : KPointer = valueDeserializer.readPointer()
         return RestrictedWorkerInternal.fromPtr(ptr)
+    }
+}
+export class EmitterPropertyInner_serializer {
+    public static write(buffer: SerializerBase, value: EmitterPropertyInner): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForIndex  = value.index
+        valueSerializer.writeNumber(valueHolderForIndex)
+        const valueHolderForEmitRate  = value.emitRate
+        if (valueHolderForEmitRate !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForEmitRateTmpValue  = valueHolderForEmitRate!
+            valueSerializer.writeNumber(valueHolderForEmitRateTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForPosition  = value.position
+        if (valueHolderForPosition !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForPositionTmpValue  = valueHolderForPosition!
+            PositionNumberInner_serializer.write(valueSerializer, valueHolderForPositionTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForSize  = value.size
+        if (valueHolderForSize !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForSizeTmpValue  = valueHolderForSize!
+            SizeNumberInner_serializer.write(valueSerializer, valueHolderForSizeTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForAnnulusRegion  = value.annulusRegion
+        if (valueHolderForAnnulusRegion !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForAnnulusRegionTmpValue  = valueHolderForAnnulusRegion!
+            ParticleAnnulusRegionInner_serializer.write(valueSerializer, valueHolderForAnnulusRegionTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): EmitterPropertyInner {
+        let valueDeserializer : DeserializerBase = buffer
+        const indexTmpResult : number = (valueDeserializer.readNumber() as number)
+        const emitRateTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let emitRateTmpBuf : number | undefined = undefined
+        if ((emitRateTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            emitRateTmpBuf = (valueDeserializer.readNumber() as number)
+        }
+        const emitRateTmpResult : number | undefined = emitRateTmpBuf
+        const positionTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let positionTmpBuf : PositionNumberInner | undefined = undefined
+        if ((positionTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            positionTmpBuf = PositionNumberInner_serializer.read(valueDeserializer)
+        }
+        const positionTmpResult : PositionNumberInner | undefined = positionTmpBuf
+        const sizeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let sizeTmpBuf : SizeNumberInner | undefined = undefined
+        if ((sizeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            sizeTmpBuf = SizeNumberInner_serializer.read(valueDeserializer)
+        }
+        const sizeTmpResult : SizeNumberInner | undefined = sizeTmpBuf
+        const annulusRegionTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let annulusRegionTmpBuf : ParticleAnnulusRegionInner | undefined = undefined
+        if ((annulusRegionTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            annulusRegionTmpBuf = ParticleAnnulusRegionInner_serializer.read(valueDeserializer)
+        }
+        const annulusRegionTmpResult : ParticleAnnulusRegionInner | undefined = annulusRegionTmpBuf
+        let value : EmitterPropertyInner = ({index: indexTmpResult, emitRate: emitRateTmpResult, position: positionTmpResult, size: sizeTmpResult, annulusRegion: annulusRegionTmpResult} as EmitterPropertyInner)
+        return value
+    }
+}
+export class ParticleColorPropertyOptionsInner_serializer {
+    public static write(buffer: SerializerBase, value: ParticleColorPropertyOptionsInner): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForRange  = value.range
+        const valueHolderForRange_0  = valueHolderForRange[0]
+        if (valueHolderForRange_0 instanceof Color) {
+            valueSerializer.writeInt8((0).toChar())
+            const valueHolderForRange_0ForIdx0  = valueHolderForRange_0 as Color
+            valueSerializer.writeInt32(valueHolderForRange_0ForIdx0.getOrdinal())
+        } else if (valueHolderForRange_0 instanceof number) {
+            valueSerializer.writeInt8((1).toChar())
+            const valueHolderForRange_0ForIdx1  = valueHolderForRange_0 as number
+            valueSerializer.writeNumber(valueHolderForRange_0ForIdx1)
+        } else if (valueHolderForRange_0 instanceof string) {
+            valueSerializer.writeInt8((2).toChar())
+            const valueHolderForRange_0ForIdx2  = valueHolderForRange_0 as string
+            valueSerializer.writeString(valueHolderForRange_0ForIdx2)
+        } else if (valueHolderForRange_0 instanceof Resource) {
+            valueSerializer.writeInt8((3).toChar())
+            const valueHolderForRange_0ForIdx3  = valueHolderForRange_0 as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForRange_0ForIdx3)
+        }
+        const valueHolderForRange_1  = valueHolderForRange[1]
+        if (valueHolderForRange_1 instanceof Color) {
+            valueSerializer.writeInt8((0).toChar())
+            const valueHolderForRange_1ForIdx0  = valueHolderForRange_1 as Color
+            valueSerializer.writeInt32(valueHolderForRange_1ForIdx0.getOrdinal())
+        } else if (valueHolderForRange_1 instanceof number) {
+            valueSerializer.writeInt8((1).toChar())
+            const valueHolderForRange_1ForIdx1  = valueHolderForRange_1 as number
+            valueSerializer.writeNumber(valueHolderForRange_1ForIdx1)
+        } else if (valueHolderForRange_1 instanceof string) {
+            valueSerializer.writeInt8((2).toChar())
+            const valueHolderForRange_1ForIdx2  = valueHolderForRange_1 as string
+            valueSerializer.writeString(valueHolderForRange_1ForIdx2)
+        } else if (valueHolderForRange_1 instanceof Resource) {
+            valueSerializer.writeInt8((3).toChar())
+            const valueHolderForRange_1ForIdx3  = valueHolderForRange_1 as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForRange_1ForIdx3)
+        }
+        const valueHolderForDistributionType  = value.distributionType
+        if (valueHolderForDistributionType !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForDistributionTypeTmpValue  = (valueHolderForDistributionType as DistributionType)
+            valueSerializer.writeInt32(valueHolderForDistributionTypeTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForUpdater  = value.updater
+        if (valueHolderForUpdater !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForUpdaterTmpValue  = valueHolderForUpdater!
+            ParticleColorUpdaterOptionsInner_serializer.write(valueSerializer, valueHolderForUpdaterTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): ParticleColorPropertyOptionsInner {
+        let valueDeserializer : DeserializerBase = buffer
+        const rangeTmpBufValue0TempBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let rangeTmpBufValue0TempBuf : Color | number | string | Resource | undefined
+        if (rangeTmpBufValue0TempBufUnionSelector == (0).toChar()) {
+            rangeTmpBufValue0TempBuf = Color.values()[valueDeserializer.readInt32()]
+        } else if (rangeTmpBufValue0TempBufUnionSelector == (1).toChar()) {
+            rangeTmpBufValue0TempBuf = (valueDeserializer.readNumber() as number)
+        } else if (rangeTmpBufValue0TempBufUnionSelector == (2).toChar()) {
+            rangeTmpBufValue0TempBuf = (valueDeserializer.readString() as string)
+        } else if (rangeTmpBufValue0TempBufUnionSelector == (3).toChar()) {
+            rangeTmpBufValue0TempBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for rangeTmpBufValue0TempBuf has to be chosen through deserialisation.")
+        }
+        const rangeTmpBufValue0 : ResourceColor = (rangeTmpBufValue0TempBuf as Color | number | string | Resource)
+        const rangeTmpBufValue1TempBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let rangeTmpBufValue1TempBuf : Color | number | string | Resource | undefined
+        if (rangeTmpBufValue1TempBufUnionSelector == (0).toChar()) {
+            rangeTmpBufValue1TempBuf = Color.values()[valueDeserializer.readInt32()]
+        } else if (rangeTmpBufValue1TempBufUnionSelector == (1).toChar()) {
+            rangeTmpBufValue1TempBuf = (valueDeserializer.readNumber() as number)
+        } else if (rangeTmpBufValue1TempBufUnionSelector == (2).toChar()) {
+            rangeTmpBufValue1TempBuf = (valueDeserializer.readString() as string)
+        } else if (rangeTmpBufValue1TempBufUnionSelector == (3).toChar()) {
+            rangeTmpBufValue1TempBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for rangeTmpBufValue1TempBuf has to be chosen through deserialisation.")
+        }
+        const rangeTmpBufValue1 : ResourceColor = (rangeTmpBufValue1TempBuf as Color | number | string | Resource)
+        const rangeTmpResult : [ ResourceColor, ResourceColor ] = ([rangeTmpBufValue0, rangeTmpBufValue1] as [ ResourceColor, ResourceColor ])
+        const distributionTypeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let distributionTypeTmpBuf : DistributionType | undefined = undefined
+        if ((distributionTypeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            distributionTypeTmpBuf = DistributionType.fromValue(valueDeserializer.readInt32())
+        }
+        const distributionTypeTmpResult : DistributionType | undefined = distributionTypeTmpBuf
+        const updaterTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let updaterTmpBuf : ParticleColorUpdaterOptionsInner | undefined = undefined
+        if ((updaterTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            updaterTmpBuf = ParticleColorUpdaterOptionsInner_serializer.read(valueDeserializer)
+        }
+        const updaterTmpResult : ParticleColorUpdaterOptionsInner | undefined = updaterTmpBuf
+        let value : ParticleColorPropertyOptionsInner = ({range: rangeTmpResult, distributionType: distributionTypeTmpResult, updater: updaterTmpResult} as ParticleColorPropertyOptionsInner)
+        return value
+    }
+}
+export class ParticlePropertyOptionsInner_serializer {
+    public static write(buffer: SerializerBase, value: ParticlePropertyOptionsInner): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForRange  = value.range
+        const valueHolderForRange_0  = valueHolderForRange[0]
+        valueSerializer.writeNumber(valueHolderForRange_0)
+        const valueHolderForRange_1  = valueHolderForRange[1]
+        valueSerializer.writeNumber(valueHolderForRange_1)
+        const valueHolderForUpdater  = value.updater
+        if (valueHolderForUpdater !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForUpdaterTmpValue  = valueHolderForUpdater!
+            ParticleUpdaterOptionsInner_serializer.write(valueSerializer, valueHolderForUpdaterTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): ParticlePropertyOptionsInner {
+        let valueDeserializer : DeserializerBase = buffer
+        const rangeTmpBufValue0 : number = (valueDeserializer.readNumber() as number)
+        const rangeTmpBufValue1 : number = (valueDeserializer.readNumber() as number)
+        const rangeTmpResult : [ number, number ] = ([rangeTmpBufValue0, rangeTmpBufValue1] as [ number, number ])
+        const updaterTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let updaterTmpBuf : ParticleUpdaterOptionsInner | undefined = undefined
+        if ((updaterTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            updaterTmpBuf = ParticleUpdaterOptionsInner_serializer.read(valueDeserializer)
+        }
+        const updaterTmpResult : ParticleUpdaterOptionsInner | undefined = updaterTmpBuf
+        let value : ParticlePropertyOptionsInner = ({range: rangeTmpResult, updater: updaterTmpResult} as ParticlePropertyOptionsInner)
+        return value
+    }
+}
+export class AccelerationOptionsInner_serializer {
+    public static write(buffer: SerializerBase, value: AccelerationOptionsInner): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForSpeed  = value.speed
+        if (valueHolderForSpeed !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForSpeedTmpValue  = valueHolderForSpeed!
+            ParticlePropertyOptionsInner_serializer.write(valueSerializer, valueHolderForSpeedTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForAngle  = value.angle
+        if (valueHolderForAngle !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForAngleTmpValue  = valueHolderForAngle!
+            ParticlePropertyOptionsInner_serializer.write(valueSerializer, valueHolderForAngleTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): AccelerationOptionsInner {
+        let valueDeserializer : DeserializerBase = buffer
+        const speedTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let speedTmpBuf : ParticlePropertyOptionsInner | undefined = undefined
+        if ((speedTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            speedTmpBuf = ParticlePropertyOptionsInner_serializer.read(valueDeserializer)
+        }
+        const speedTmpResult : ParticlePropertyOptionsInner | undefined = speedTmpBuf
+        const angleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let angleTmpBuf : ParticlePropertyOptionsInner | undefined = undefined
+        if ((angleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            angleTmpBuf = ParticlePropertyOptionsInner_serializer.read(valueDeserializer)
+        }
+        const angleTmpResult : ParticlePropertyOptionsInner | undefined = angleTmpBuf
+        let value : AccelerationOptionsInner = ({speed: speedTmpResult, angle: angleTmpResult} as AccelerationOptionsInner)
+        return value
     }
 }
 export class CustomDialogControllerOptionsExtender_serializer {
@@ -5258,6 +6187,288 @@ export class CustomDialogControllerOptionsExtender_serializer {
         }
         const focusableTmpResult : boolean | undefined = focusableTmpBuf
         let value : CustomDialogControllerOptionsExtender = ({builder: builderTmpResult, cancel: cancelTmpResult, autoCancel: autoCancelTmpResult, alignment: alignmentTmpResult, offset: offsetTmpResult, customStyle: customStyleTmpResult, gridCount: gridCountTmpResult, maskColor: maskColorTmpResult, maskRect: maskRectTmpResult, openAnimation: openAnimationTmpResult, closeAnimation: closeAnimationTmpResult, showInSubWindow: showInSubWindowTmpResult, backgroundColor: backgroundColorTmpResult, cornerRadius: cornerRadiusTmpResult, isModal: isModalTmpResult, onWillDismiss: onWillDismissTmpResult, width: widthTmpResult, height: heightTmpResult, borderWidth: borderWidthTmpResult, borderColor: borderColorTmpResult, borderStyle: borderStyleTmpResult, shadow: shadowTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, backgroundBlurStyleOptions: backgroundBlurStyleOptionsTmpResult, backgroundEffect: backgroundEffectTmpResult, keyboardAvoidMode: keyboardAvoidModeTmpResult, enableHoverMode: enableHoverModeTmpResult, hoverModeArea: hoverModeAreaTmpResult, onDidAppear: onDidAppearTmpResult, onDidDisappear: onDidDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, keyboardAvoidDistance: keyboardAvoidDistanceTmpResult, levelMode: levelModeTmpResult, levelUniqueId: levelUniqueIdTmpResult, immersiveMode: immersiveModeTmpResult, levelOrder: levelOrderTmpResult, focusable: focusableTmpResult} as CustomDialogControllerOptionsExtender)
+        return value
+    }
+}
+export class EmitterOptionsInner_serializer {
+    public static write(buffer: SerializerBase, value: EmitterOptionsInner): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForParticle  = value.particle
+        EmitterParticleOptions_serializer.write(valueSerializer, valueHolderForParticle)
+        const valueHolderForEmitRate  = value.emitRate
+        if (valueHolderForEmitRate !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForEmitRateTmpValue  = valueHolderForEmitRate!
+            valueSerializer.writeNumber(valueHolderForEmitRateTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForShape  = value.shape
+        if (valueHolderForShape !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForShapeTmpValue  = (valueHolderForShape as ParticleEmitterShape)
+            valueSerializer.writeInt32(valueHolderForShapeTmpValue.getOrdinal())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForPosition  = value.position
+        if (valueHolderForPosition !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForPositionTmpValue  = valueHolderForPosition!
+            const valueHolderForPositionTmpValue_0  = valueHolderForPositionTmpValue[0]
+            if (valueHolderForPositionTmpValue_0 instanceof string) {
+                valueSerializer.writeInt8((0).toChar())
+                const valueHolderForPositionTmpValue_0ForIdx0  = valueHolderForPositionTmpValue_0 as string
+                valueSerializer.writeString(valueHolderForPositionTmpValue_0ForIdx0)
+            } else if (valueHolderForPositionTmpValue_0 instanceof number) {
+                valueSerializer.writeInt8((1).toChar())
+                const valueHolderForPositionTmpValue_0ForIdx1  = valueHolderForPositionTmpValue_0 as number
+                valueSerializer.writeNumber(valueHolderForPositionTmpValue_0ForIdx1)
+            } else if (valueHolderForPositionTmpValue_0 instanceof Resource) {
+                valueSerializer.writeInt8((2).toChar())
+                const valueHolderForPositionTmpValue_0ForIdx2  = valueHolderForPositionTmpValue_0 as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForPositionTmpValue_0ForIdx2)
+            }
+            const valueHolderForPositionTmpValue_1  = valueHolderForPositionTmpValue[1]
+            if (valueHolderForPositionTmpValue_1 instanceof string) {
+                valueSerializer.writeInt8((0).toChar())
+                const valueHolderForPositionTmpValue_1ForIdx0  = valueHolderForPositionTmpValue_1 as string
+                valueSerializer.writeString(valueHolderForPositionTmpValue_1ForIdx0)
+            } else if (valueHolderForPositionTmpValue_1 instanceof number) {
+                valueSerializer.writeInt8((1).toChar())
+                const valueHolderForPositionTmpValue_1ForIdx1  = valueHolderForPositionTmpValue_1 as number
+                valueSerializer.writeNumber(valueHolderForPositionTmpValue_1ForIdx1)
+            } else if (valueHolderForPositionTmpValue_1 instanceof Resource) {
+                valueSerializer.writeInt8((2).toChar())
+                const valueHolderForPositionTmpValue_1ForIdx2  = valueHolderForPositionTmpValue_1 as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForPositionTmpValue_1ForIdx2)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForSize  = value.size
+        if (valueHolderForSize !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForSizeTmpValue  = valueHolderForSize!
+            const valueHolderForSizeTmpValue_0  = valueHolderForSizeTmpValue[0]
+            if (valueHolderForSizeTmpValue_0 instanceof string) {
+                valueSerializer.writeInt8((0).toChar())
+                const valueHolderForSizeTmpValue_0ForIdx0  = valueHolderForSizeTmpValue_0 as string
+                valueSerializer.writeString(valueHolderForSizeTmpValue_0ForIdx0)
+            } else if (valueHolderForSizeTmpValue_0 instanceof number) {
+                valueSerializer.writeInt8((1).toChar())
+                const valueHolderForSizeTmpValue_0ForIdx1  = valueHolderForSizeTmpValue_0 as number
+                valueSerializer.writeNumber(valueHolderForSizeTmpValue_0ForIdx1)
+            } else if (valueHolderForSizeTmpValue_0 instanceof Resource) {
+                valueSerializer.writeInt8((2).toChar())
+                const valueHolderForSizeTmpValue_0ForIdx2  = valueHolderForSizeTmpValue_0 as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForSizeTmpValue_0ForIdx2)
+            }
+            const valueHolderForSizeTmpValue_1  = valueHolderForSizeTmpValue[1]
+            if (valueHolderForSizeTmpValue_1 instanceof string) {
+                valueSerializer.writeInt8((0).toChar())
+                const valueHolderForSizeTmpValue_1ForIdx0  = valueHolderForSizeTmpValue_1 as string
+                valueSerializer.writeString(valueHolderForSizeTmpValue_1ForIdx0)
+            } else if (valueHolderForSizeTmpValue_1 instanceof number) {
+                valueSerializer.writeInt8((1).toChar())
+                const valueHolderForSizeTmpValue_1ForIdx1  = valueHolderForSizeTmpValue_1 as number
+                valueSerializer.writeNumber(valueHolderForSizeTmpValue_1ForIdx1)
+            } else if (valueHolderForSizeTmpValue_1 instanceof Resource) {
+                valueSerializer.writeInt8((2).toChar())
+                const valueHolderForSizeTmpValue_1ForIdx2  = valueHolderForSizeTmpValue_1 as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForSizeTmpValue_1ForIdx2)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForAnnulusRegion  = value.annulusRegion
+        if (valueHolderForAnnulusRegion !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForAnnulusRegionTmpValue  = valueHolderForAnnulusRegion!
+            ParticleAnnulusRegionInner_serializer.write(valueSerializer, valueHolderForAnnulusRegionTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): EmitterOptionsInner {
+        let valueDeserializer : DeserializerBase = buffer
+        const particleTmpResult : EmitterParticleOptions = EmitterParticleOptions_serializer.read(valueDeserializer)
+        const emitRateTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let emitRateTmpBuf : number | undefined = undefined
+        if ((emitRateTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            emitRateTmpBuf = (valueDeserializer.readNumber() as number)
+        }
+        const emitRateTmpResult : number | undefined = emitRateTmpBuf
+        const shapeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let shapeTmpBuf : ParticleEmitterShape | undefined = undefined
+        if ((shapeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            shapeTmpBuf = ParticleEmitterShape.values()[valueDeserializer.readInt32()]
+        }
+        const shapeTmpResult : ParticleEmitterShape | undefined = shapeTmpBuf
+        const positionTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let positionTmpBuf : [ Dimension, Dimension ] | undefined = undefined
+        if ((positionTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const positionTmpBuf_Value0TempBufUnionSelector : int32 = valueDeserializer.readInt8()
+            let positionTmpBuf_Value0TempBuf : string | number | Resource | undefined
+            if (positionTmpBuf_Value0TempBufUnionSelector == (0).toChar()) {
+                positionTmpBuf_Value0TempBuf = (valueDeserializer.readString() as string)
+            } else if (positionTmpBuf_Value0TempBufUnionSelector == (1).toChar()) {
+                positionTmpBuf_Value0TempBuf = (valueDeserializer.readNumber() as number)
+            } else if (positionTmpBuf_Value0TempBufUnionSelector == (2).toChar()) {
+                positionTmpBuf_Value0TempBuf = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for positionTmpBuf_Value0TempBuf has to be chosen through deserialisation.")
+            }
+            const positionTmpBuf_Value0 : Dimension = (positionTmpBuf_Value0TempBuf as string | number | Resource)
+            const positionTmpBuf_Value1TempBufUnionSelector : int32 = valueDeserializer.readInt8()
+            let positionTmpBuf_Value1TempBuf : string | number | Resource | undefined
+            if (positionTmpBuf_Value1TempBufUnionSelector == (0).toChar()) {
+                positionTmpBuf_Value1TempBuf = (valueDeserializer.readString() as string)
+            } else if (positionTmpBuf_Value1TempBufUnionSelector == (1).toChar()) {
+                positionTmpBuf_Value1TempBuf = (valueDeserializer.readNumber() as number)
+            } else if (positionTmpBuf_Value1TempBufUnionSelector == (2).toChar()) {
+                positionTmpBuf_Value1TempBuf = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for positionTmpBuf_Value1TempBuf has to be chosen through deserialisation.")
+            }
+            const positionTmpBuf_Value1 : Dimension = (positionTmpBuf_Value1TempBuf as string | number | Resource)
+            positionTmpBuf = ([positionTmpBuf_Value0, positionTmpBuf_Value1] as [ Dimension, Dimension ])
+        }
+        const positionTmpResult : [ Dimension, Dimension ] | undefined = positionTmpBuf
+        const sizeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let sizeTmpBuf : [ Dimension, Dimension ] | undefined = undefined
+        if ((sizeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const sizeTmpBuf_Value0TempBufUnionSelector : int32 = valueDeserializer.readInt8()
+            let sizeTmpBuf_Value0TempBuf : string | number | Resource | undefined
+            if (sizeTmpBuf_Value0TempBufUnionSelector == (0).toChar()) {
+                sizeTmpBuf_Value0TempBuf = (valueDeserializer.readString() as string)
+            } else if (sizeTmpBuf_Value0TempBufUnionSelector == (1).toChar()) {
+                sizeTmpBuf_Value0TempBuf = (valueDeserializer.readNumber() as number)
+            } else if (sizeTmpBuf_Value0TempBufUnionSelector == (2).toChar()) {
+                sizeTmpBuf_Value0TempBuf = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for sizeTmpBuf_Value0TempBuf has to be chosen through deserialisation.")
+            }
+            const sizeTmpBuf_Value0 : Dimension = (sizeTmpBuf_Value0TempBuf as string | number | Resource)
+            const sizeTmpBuf_Value1TempBufUnionSelector : int32 = valueDeserializer.readInt8()
+            let sizeTmpBuf_Value1TempBuf : string | number | Resource | undefined
+            if (sizeTmpBuf_Value1TempBufUnionSelector == (0).toChar()) {
+                sizeTmpBuf_Value1TempBuf = (valueDeserializer.readString() as string)
+            } else if (sizeTmpBuf_Value1TempBufUnionSelector == (1).toChar()) {
+                sizeTmpBuf_Value1TempBuf = (valueDeserializer.readNumber() as number)
+            } else if (sizeTmpBuf_Value1TempBufUnionSelector == (2).toChar()) {
+                sizeTmpBuf_Value1TempBuf = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for sizeTmpBuf_Value1TempBuf has to be chosen through deserialisation.")
+            }
+            const sizeTmpBuf_Value1 : Dimension = (sizeTmpBuf_Value1TempBuf as string | number | Resource)
+            sizeTmpBuf = ([sizeTmpBuf_Value0, sizeTmpBuf_Value1] as [ Dimension, Dimension ])
+        }
+        const sizeTmpResult : [ Dimension, Dimension ] | undefined = sizeTmpBuf
+        const annulusRegionTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let annulusRegionTmpBuf : ParticleAnnulusRegionInner | undefined = undefined
+        if ((annulusRegionTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            annulusRegionTmpBuf = ParticleAnnulusRegionInner_serializer.read(valueDeserializer)
+        }
+        const annulusRegionTmpResult : ParticleAnnulusRegionInner | undefined = annulusRegionTmpBuf
+        let value : EmitterOptionsInner = ({particle: particleTmpResult, emitRate: emitRateTmpResult, shape: shapeTmpResult, position: positionTmpResult, size: sizeTmpResult, annulusRegion: annulusRegionTmpResult} as EmitterOptionsInner)
+        return value
+    }
+}
+export class ParticleOptionsInner_serializer {
+    public static write(buffer: SerializerBase, value: ParticleOptionsInner): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForEmitter  = value.emitter
+        EmitterOptionsInner_serializer.write(valueSerializer, valueHolderForEmitter)
+        const valueHolderForColor  = value.color
+        if (valueHolderForColor !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForColorTmpValue  = valueHolderForColor!
+            ParticleColorPropertyOptionsInner_serializer.write(valueSerializer, valueHolderForColorTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForOpacity  = value.opacity
+        if (valueHolderForOpacity !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForOpacityTmpValue  = valueHolderForOpacity!
+            ParticlePropertyOptionsInner_serializer.write(valueSerializer, valueHolderForOpacityTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForScale  = value.scale
+        if (valueHolderForScale !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForScaleTmpValue  = valueHolderForScale!
+            ParticlePropertyOptionsInner_serializer.write(valueSerializer, valueHolderForScaleTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForVelocity  = value.velocity
+        if (valueHolderForVelocity !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForVelocityTmpValue  = valueHolderForVelocity!
+            VelocityOptions_serializer.write(valueSerializer, valueHolderForVelocityTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForAcceleration  = value.acceleration
+        if (valueHolderForAcceleration !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForAccelerationTmpValue  = valueHolderForAcceleration!
+            AccelerationOptionsInner_serializer.write(valueSerializer, valueHolderForAccelerationTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForSpin  = value.spin
+        if (valueHolderForSpin !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForSpinTmpValue  = valueHolderForSpin!
+            ParticlePropertyOptionsInner_serializer.write(valueSerializer, valueHolderForSpinTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): ParticleOptionsInner {
+        let valueDeserializer : DeserializerBase = buffer
+        const emitterTmpResult : EmitterOptionsInner = EmitterOptionsInner_serializer.read(valueDeserializer)
+        const colorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let colorTmpBuf : ParticleColorPropertyOptionsInner | undefined = undefined
+        if ((colorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            colorTmpBuf = ParticleColorPropertyOptionsInner_serializer.read(valueDeserializer)
+        }
+        const colorTmpResult : ParticleColorPropertyOptionsInner | undefined = colorTmpBuf
+        const opacityTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let opacityTmpBuf : ParticlePropertyOptionsInner | undefined = undefined
+        if ((opacityTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            opacityTmpBuf = ParticlePropertyOptionsInner_serializer.read(valueDeserializer)
+        }
+        const opacityTmpResult : ParticlePropertyOptionsInner | undefined = opacityTmpBuf
+        const scaleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let scaleTmpBuf : ParticlePropertyOptionsInner | undefined = undefined
+        if ((scaleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            scaleTmpBuf = ParticlePropertyOptionsInner_serializer.read(valueDeserializer)
+        }
+        const scaleTmpResult : ParticlePropertyOptionsInner | undefined = scaleTmpBuf
+        const velocityTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let velocityTmpBuf : VelocityOptions | undefined = undefined
+        if ((velocityTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            velocityTmpBuf = VelocityOptions_serializer.read(valueDeserializer)
+        }
+        const velocityTmpResult : VelocityOptions | undefined = velocityTmpBuf
+        const accelerationTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let accelerationTmpBuf : AccelerationOptionsInner | undefined = undefined
+        if ((accelerationTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            accelerationTmpBuf = AccelerationOptionsInner_serializer.read(valueDeserializer)
+        }
+        const accelerationTmpResult : AccelerationOptionsInner | undefined = accelerationTmpBuf
+        const spinTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let spinTmpBuf : ParticlePropertyOptionsInner | undefined = undefined
+        if ((spinTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            spinTmpBuf = ParticlePropertyOptionsInner_serializer.read(valueDeserializer)
+        }
+        const spinTmpResult : ParticlePropertyOptionsInner | undefined = spinTmpBuf
+        let value : ParticleOptionsInner = ({emitter: emitterTmpResult, color: colorTmpResult, opacity: opacityTmpResult, scale: scaleTmpResult, velocity: velocityTmpResult, acceleration: accelerationTmpResult, spin: spinTmpResult} as ParticleOptionsInner)
         return value
     }
 }
