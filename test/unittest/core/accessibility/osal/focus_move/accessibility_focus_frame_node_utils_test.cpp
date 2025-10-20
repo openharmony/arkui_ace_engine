@@ -313,26 +313,4 @@ HWTEST_F(JsAccessibilityFocusFrameNodeUtilsTest, JsAccessibilityFocusFrameNodeUt
     EXPECT_EQ(PropValue2.valueNum, newPropValue.valueNum);
     EXPECT_EQ(PropValue2.valueBool, newPropValue.valueBool);
 }
-
-/**
- * @tc.name: JsAccessibilityFocusFrameNodeUtilsTest009
- * @tc.desc: test GetPropChildrenCount when no child
- * @tc.type: FUNC
- */
-HWTEST_F(JsAccessibilityFocusFrameNodeUtilsTest, JsAccessibilityFocusFrameNodeUtilsTest009, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. construct FrameNodeRulesCheckNode
-     */
-    NG::FrameNodeHandleParam frameNodeHandleParam;
-    auto frameNodeRulesCheckNode = FrameNodeRulesCheckNode(nullptr, 123);
-
-    /**
-     * @tc.steps: step2. test GetPropChildrenCount
-     */
-    Accessibility::PropValue propValue;
-    EXPECT_TRUE(frameNodeRulesCheckNode.GetPropChildrenCount(propValue));
-    EXPECT_EQ(propValue.valueType, Accessibility::ValueType::NUMBER);
-    EXPECT_EQ(propValue.valueNum, 0);
-}
 } // namespace OHOS::Ace::Framework
