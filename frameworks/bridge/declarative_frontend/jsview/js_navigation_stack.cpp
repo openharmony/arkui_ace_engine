@@ -868,8 +868,7 @@ std::vector<std::string> JSNavigationStack::DumpStackInfo() const
 }
 
 void JSNavigationStack::FireNavigationInterceptionBeforeLifeCycle(const RefPtr<NavigationStack>& navigationStack,
-    const RefPtr<NG::NavDestinationContext>& from, const int32_t index, NG::NavigationOperation operation,
-    bool isAnimated)
+    const RefPtr<NG::NavDestinationContext>& from, const int32_t index, bool isAnimated)
 {
     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
     JSRef<JSFunc> beforeFunc;
@@ -901,6 +900,14 @@ void JSNavigationStack::FireNavigationInterceptionBeforeLifeCycle(const RefPtr<N
         }
     }
     const uint8_t operationIndex = 3;
+    auto replaceValue = GetReplaceValue();
+    auto isPush = IsPushOperation();
+    NG::NavigationOperation operation;
+    if (replaceValue != 0) {
+        operation = NG::NavigationOperation::REPLACE;
+    } else {
+        operation = isPush ? NG::NavigationOperation::PUSH : NG::NavigationOperation::POP;
+    }
     params[operationIndex] = JSRef<JSVal>::Make(ToJSValue(static_cast<int32_t>(operation)));
     const uint8_t animatedIndex = 4;
     params[animatedIndex] = JSRef<JSVal>::Make(ToJSValue(isAnimated));
@@ -1616,5 +1623,34 @@ void JSNavigationStack::PushIntentNavDestination(
     arg[1] = JSRef<JSVal>::Make(ToJSValue(params));
     arg[2] = JSRef<JSVal>::Make(ToJSValue(needTransition));
     func->Call(dataSourceObj_, 3, arg);
+}
+
+void JSNavigationStack::UpdatePreTopInfo()
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
+    if (dataSourceObj_->IsEmpty()) {
+        return;
+    }
+    auto onSyncStackStartFunc = dataSourceObj_->GetProperty("updatePreTopInfo");
+    if (!onSyncStackStartFunc->IsFunction()) {
+        return;
+    }
+    auto func = JSRef<JSFunc>::Cast(onSyncStackStartFunc);
+    func->Call(dataSourceObj_);
+}
+
+bool JSNavigationStack::IsPushOperation()
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, 0);
+    if (dataSourceObj_->IsEmpty()) {
+        return 0;
+    }
+    auto indexes = dataSourceObj_->GetProperty("isPushOperation");
+    if (!indexes->IsFunction()) {
+        return true;
+    }
+    auto func = JSRef<JSFunc>::Cast(indexes);
+    auto result = func->Call(dataSourceObj_, {});
+    return result->ToBoolean();
 }
 } // namespace OHOS::Ace::Framework
