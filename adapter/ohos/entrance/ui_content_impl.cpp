@@ -4623,9 +4623,9 @@ void UIContentImpl::SetFormViewScale(float width, float height, float formViewSc
     float viewScale = (formViewScale <= DEFAULT_VIEW_SCALE) ? DEFAULT_VIEW_SCALE :
         ((formViewScale >= MAX_FORM_VIEW_SCALE) ? MAX_FORM_VIEW_SCALE : formViewScale);
 
-    TAG_LOGD(AceLogTag::ACE_FORM, "SetFormViewScale viewScale: %{public}f", viewScale);
-    pipelineContext->SetViewScale(viewScale);
-    auto density = pipelineContext->GetDensity();
+    auto density = SystemProperties::GetResolution() / viewScale;
+    TAG_LOGD(AceLogTag::ACE_FORM, "SetFormViewScale viewScale: %{public}f, density: %{public}f.", viewScale, density);
+    pipelineContext->OnSurfaceDensityChanged(density);
     pipelineContext->SetRootSize(density, width, height);
 }
 
