@@ -80,9 +80,13 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
      * otherwise it inherits from its parent instance if its freezeState is true
      */
     protected finalizeConstruction(freezeState?: boolean | undefined): void {
-
-        ObserveV2.getObserve().constructComputed(this, this.constructor.name);
-        ObserveV2.getObserve().constructMonitor(this, this.constructor.name);
+        try {
+            ObserveV2.getObserve().constructComputed(this, this.constructor.name);
+            ObserveV2.getObserve().constructMonitor(this, this.constructor.name);
+        } catch (error) {
+            stateMgmtConsole.applicationError(`Exception occurred when constructor @Computed or @Monitor`, error.message);
+            _arkUIUncaughtPromiseError(error);
+        }
 
         // Always use ID_REFS in ViewV2
         this[ObserveV2.ID_REFS] = {};
