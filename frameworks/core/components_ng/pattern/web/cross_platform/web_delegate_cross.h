@@ -495,6 +495,10 @@ private:
     void OnGeolocationPermissionsShowPrompt(void* object);
     void RecordWebEvent(Recorder::EventType eventType, const std::string& param) const;
     void RunJsProxyCallback();
+    void RegisterWebInerceptAndOverrideEvent();
+    void UnRegisterWebObjectEvent();
+    void InitWebStatus();
+    void HandleCreateError();
     RefPtr<WebResponse> OnInterceptRequest(void* object);
 
     WeakPtr<NG::WebPattern> webPattern_;
@@ -549,6 +553,7 @@ private:
     Method updateVerticalScrollBarAccess_;
     Method updateBackgroundColor_;
     Method updateMediaPlayGestureAccess_;
+    Method updateTextZoomRatioMethod_;
 
     EventCallbackV2 onPageFinishedV2_;
     EventCallbackV2 onPageStartedV2_;

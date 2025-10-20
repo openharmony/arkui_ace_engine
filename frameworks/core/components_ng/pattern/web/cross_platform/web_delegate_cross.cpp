@@ -16,6 +16,7 @@
 #include "web_delegate_cross.h"
 
 #include "bridge/js_frontend/frontend_delegate_impl.h"
+#include <atomic>
 
 namespace OHOS::Ace {
 namespace {
@@ -153,6 +154,8 @@ constexpr char WEB_CACHE_MODE[] = "cacheMode";
 constexpr char NTC_CACHE_MODE[] = "cacheMode";
 constexpr char WEB_IMAGE_ACCESS[] = "imageAccess";
 constexpr char NTC_IMAGE_ACCESS[] = "imageAccess";
+constexpr char WEB_TEXT_ZOOM_RATIO[] = "textZoomRatio";
+constexpr char NTC_TEXT_ZOOM_RATIO[] = "textZoomRatio";
 
 const char WEB_PARAM_NONE[] = "";
 const char WEB_PARAM_AND[] = "#HWJS-&-#";
@@ -171,9 +174,18 @@ constexpr int RESOURCESID_ONE = 1;
 constexpr int RESOURCESID_TWO = 2;
 constexpr int RESOURCESID_THREE = 3;
 
+constexpr int TIMEOUT_DURATION_MS = 15000;
+constexpr int POLLING_INTERVAL_MS = 50;
+constexpr int HTTP_STATUS_GATEWAY_TIMEOUT = 504;
+
 const std::string RESOURCE_VIDEO_CAPTURE = "TYPE_VIDEO_CAPTURE";
 const std::string RESOURCE_AUDIO_CAPTURE = "TYPE_AUDIO_CAPTURE";
 }
+#if defined(IOS_PLATFORM)
+static std::atomic<int64_t> g_atomicId{0};
+#else
+static std::atomic<int64_t> g_atomicId{-1};
+#endif
 
 std::map<std::string, std::string> WebResourceRequsetImpl::GetRequestHeader() const
 {
@@ -804,7 +816,9 @@ void WebDelegateCross::CreatePluginResource(
         std::string pageUrl;
         int32_t pageId;
         OHOS::Ace::Framework::DelegateClient::GetInstance().GetWebPageUrl(pageUrl, pageId);
-
+        webDelegate->id_ = g_atomicId.fetch_add(1) + 1;
+        webDelegate->InitWebStatus();
+        webDelegate->RegisterWebInerceptAndOverrideEvent();
         std::stringstream paramStream;
         paramStream << NTC_PARAM_WEB << WEB_PARAM_EQUALS << webDelegate->id_ << WEB_PARAM_AND << NTC_PARAM_WIDTH
                     << WEB_PARAM_EQUALS << size.Width() * context->GetViewScale() << WEB_PARAM_AND << NTC_PARAM_HEIGHT
@@ -820,14 +834,26 @@ void WebDelegateCross::CreatePluginResource(
         webDelegate->id_ = resRegister->CreateResource(WEB_CREATE, param);
 
         if (webDelegate->id_ == INVALID_ID) {
-            webDelegate->OnError(WEB_ERROR_CODE_CREATEFAIL, WEB_ERROR_MSG_CREATEFAIL);
+            webDelegate->HandleCreateError();
             return;
         }
-        webDelegate->state_ = State::CREATED;
-        webDelegate->hash_ = webDelegate->MakeResourceHash();
+        webDelegate->InitWebStatus();
         webDelegate->RegisterWebEvent();
         webDelegate->RegisterWebObjectEvent();
         }, "ArkUIWebCreatePluginResource");
+}
+
+void WebDelegateCross::HandleCreateError()
+{
+    OnError(WEB_ERROR_CODE_CREATEFAIL, WEB_ERROR_MSG_CREATEFAIL);
+    UnRegisterWebObjectEvent();
+    state_ = State::CREATEFAILED;
+}
+
+void WebDelegateCross::InitWebStatus()
+{
+    state_ = State::CREATED;
+    hash_ = MakeResourceHash();
 }
 
 int WebDelegateCross::GetWebId()
@@ -931,15 +957,6 @@ void WebDelegateCross::RegisterWebObjectEvent()
             }
             return false;
         });
-    WebObjectEventManager::GetInstance().RegisterObjectEventWithResponseReturn(
-        MakeEventHash(WEB_EVENT_ONINTERCEPTREQUEST),
-        [weak = WeakClaim(this)](const std::string& param, void* object) -> RefPtr<WebResponse> {
-            auto delegate = weak.Upgrade();
-            if (delegate) {
-                return delegate->OnInterceptRequest(object);
-            }
-            return nullptr;
-        });
     WebObjectEventManager::GetInstance().RegisterObjectEvent(
         MakeEventHash(WEB_EVENT_REFRESH_HISTORY),
         [weak = WeakClaim(this)](const std::string& param, void* object) {
@@ -1033,6 +1050,25 @@ void WebDelegateCross::RegisterWebObjectEvent()
             }
             return false;
         });
+}
+
+void WebDelegateCross::RegisterWebInerceptAndOverrideEvent()
+{
+    WebObjectEventManager::GetInstance().RegisterObjectEventWithResponseReturn(
+        MakeEventHash(WEB_EVENT_ONINTERCEPTREQUEST),
+        [weak = WeakClaim(this)](const std::string& param, void* object) -> RefPtr<WebResponse> {
+            auto delegate = weak.Upgrade();
+            if (delegate) {
+                return delegate->OnInterceptRequest(object);
+            }
+            return nullptr;
+        });
+}
+
+void WebDelegateCross::UnRegisterWebObjectEvent()
+{
+    WebObjectEventManager::GetInstance().UnRegisterObjectEventWithResponseReturn(
+        MakeEventHash(WEB_EVENT_ONINTERCEPTREQUEST));
 }
 
 void WebDelegateCross::HandleTouchDown(
@@ -1435,6 +1471,37 @@ bool WebDelegateCross::OnLoadIntercept(void* object)
     return result;
 }
 
+auto WaitForReady(std::function<bool()> checkFunc, int timeoutMs) -> bool
+{
+    const auto start = std::chrono::steady_clock::now();
+    const auto timeout = std::chrono::milliseconds(timeoutMs);
+
+    while (!checkFunc()) {
+        if (std::chrono::steady_clock::now() - start >= timeout) {
+            return false;
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(POLLING_INTERVAL_MS));
+    }
+    return true;
+}
+
+RefPtr<WebResponse> TimeoutResponse()
+{
+    TAG_LOGE(AceLogTag::ACE_WEB, "OnInterceptRequest request has timed out.");
+    auto timeoutResponse = AceType::MakeRefPtr<WebResponse>();
+    std::string errorHtml = "<html><body><h1>Response Timeout</h1><p>The request has timed out.</p></body></html>";
+    std::string mimeType = "text/html";
+    std::string encoding = "utf-8";
+    std::string reason = "Response timed out";
+    timeoutResponse->SetData(errorHtml);
+    timeoutResponse->SetMimeType(mimeType);
+    timeoutResponse->SetEncoding(encoding);
+    timeoutResponse->SetStatusCode(HTTP_STATUS_GATEWAY_TIMEOUT);
+    timeoutResponse->SetReason(reason);
+    CHECK_NULL_RETURN(timeoutResponse, nullptr);
+    return timeoutResponse;
+}
+
 RefPtr<WebResponse> WebDelegateCross::OnInterceptRequest(void* object)
 {
     ContainerScope scope(instanceId_);
@@ -1469,6 +1536,18 @@ RefPtr<WebResponse> WebDelegateCross::OnInterceptRequest(void* object)
             }
         },
         "ArkUIWebInterceptRequest");
+#ifdef ANDROID_PLATFORM
+    if (!result) {
+        return nullptr;
+    }
+    auto isReady = result->GetResponseStatus();
+    if (!isReady) {
+        isReady = WaitForReady([&] { return result->GetResponseStatus(); }, TIMEOUT_DURATION_MS);
+        if (!isReady) {
+            result = TimeoutResponse();
+        }
+    }
+#endif
     return result;
 }
 
@@ -1921,7 +2000,18 @@ void WebDelegateCross::UpdateDatabaseEnabled(const bool& isDatabaseAccessEnabled
 {}
 
 void WebDelegateCross::UpdateTextZoomRatio(const int32_t& textZoomRatioNum)
-{}
+{
+    if (textZoomRatioNum <= 0 || textZoomRatioNum > INT32_MAX) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "textZoomRatioNum is out of range");
+        return;
+    }
+    hash_ = MakeResourceHash();
+    updateTextZoomRatioMethod_ = MakeMethodHash(WEB_TEXT_ZOOM_RATIO);
+    std::stringstream paramStream;
+    paramStream << NTC_TEXT_ZOOM_RATIO << WEB_PARAM_EQUALS << textZoomRatioNum;
+    std::string param = paramStream.str();
+    CallResRegisterMethod(updateTextZoomRatioMethod_, param, nullptr);
+}
 
 void WebDelegateCross::UpdateWebDebuggingAccess(bool isWebDebuggingAccessEnabled)
 {}
