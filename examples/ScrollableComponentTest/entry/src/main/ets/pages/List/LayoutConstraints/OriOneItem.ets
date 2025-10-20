@@ -11,9 +11,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
+ */
+
+ /*
  * SR: SR20250724533130
- * Description: Improved scroll component layout constraints
+ * Description: 滚动组件布局约束范围提升
  * Writer: renxiaowen
  */
 
