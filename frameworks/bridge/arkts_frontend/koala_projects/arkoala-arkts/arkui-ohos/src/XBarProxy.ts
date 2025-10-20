@@ -21,9 +21,9 @@ import { DetachedRootEntryImpl, UIContextImpl } from 'arkui/base/UIContextImpl';
 import {
     GlobalStateManager,
     IncrementalNode,
-    StateContext,
     memoEntry
 } from '@koalaui/runtime';
+import { StateContext } from 'arkui.incremental.runtime.state';
 import { ArkUIAniModule } from "arkui.ani"
 import { OBSERVE } from "./stateManagement";
 import { ObserveSingleton } from '@ohos.arkui.stateManagement';

@@ -14,7 +14,8 @@
  */
 
 import { __id, NodeAttach, ComputableState, GlobalStateManager, Disposable, memoEntry2, remember,
-    rememberDisposable, rememberMutableState, StateContext, scheduleCallback } from '@koalaui/runtime'
+    rememberDisposable, rememberMutableState, scheduleCallback } from '@koalaui/runtime'
+import { StateContext } from 'arkui.incremental.runtime.state';
 import { InteropNativeModule, nullptr, pointer } from '@koalaui/interop'
 import { int32 } from '@koalaui/common'
 import { PeerNode } from '../PeerNode'

@@ -16,7 +16,8 @@
 import { KoalaCallsiteKey, KoalaCallsiteKeys } from "@koalaui/common"
 import { RuntimeProfiler } from "../common/RuntimeProfiler"
 import { GlobalStateManager } from "../states/GlobalStateManager"
-import { ComputableState, StateContext, StateManager } from "../states/State"
+import { ComputableState, StateManager } from "../states/State"
+import { StateContext } from 'arkui.incremental.runtime.state';
 import { IncrementalNode } from "../tree/IncrementalNode"
 
 /**

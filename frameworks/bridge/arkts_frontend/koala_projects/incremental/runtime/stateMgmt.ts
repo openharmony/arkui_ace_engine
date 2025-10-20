@@ -13,5 +13,4 @@
  * limitations under the License.
  */
 
-export { __memo_context_type, __memo_id_type} from "./ets-processed/internals"
 export { memo } from "./annotations"
