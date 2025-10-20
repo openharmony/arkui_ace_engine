@@ -483,6 +483,7 @@ private:
     DialogProperties ParsePropertiesFromAttr(const PromptDialogAttr &dialogAttr);
 
     std::unique_ptr<JsonValue> GetNavigationJsonInfo();
+    bool GetCurrentPageIndexForStaticIfNeeded(int32_t& index) const;
 
     std::atomic<uint64_t> pageIdPool_ = 0;
     int32_t callbackCnt_ = 0;
