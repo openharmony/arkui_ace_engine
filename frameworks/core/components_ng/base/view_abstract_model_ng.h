@@ -924,6 +924,11 @@ public:
         ViewAbstract::SetRenderFit(renderFit);
     }
 
+    void SetCornerApplyType(CornerApplyType cornerApplyType) override
+    {
+        ViewAbstract::SetCornerApplyType(cornerApplyType);
+    }
+
     void SetFlexBasis(const Dimension& value) override
     {
         ViewAbstract::SetFlexBasis(value);
