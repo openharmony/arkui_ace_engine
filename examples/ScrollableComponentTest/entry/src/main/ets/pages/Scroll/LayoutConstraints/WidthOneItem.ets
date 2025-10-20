@@ -57,7 +57,7 @@ struct ScrollWidthOneItem {
           }
           .borderRadius(1000)
           .borderColor(Color.Black)
-          .height('100%') //TODO 疑问：子组件像素是否需要width也设置
+          .height('100%')
           // 测试点：子组件宽度设置成不同数值
           // 预期结果：width属性设置在一定范围内，Scroll组件的整体布局正常
           .width(this.changeList[this.changeIndex])

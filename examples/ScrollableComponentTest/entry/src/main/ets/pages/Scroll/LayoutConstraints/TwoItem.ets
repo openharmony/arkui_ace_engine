@@ -57,7 +57,7 @@ struct ScrollTwoItem {
           }
           .borderRadius(1000)
           .borderColor(Color.Black)
-          .width('100%') //TODO 疑问：子组件像素是否需要width也设置
+          .width('100%')
           // 测试点：子组件高度设置成不同数值
           .height(this.changeList[this.changeIndex])
           .backgroundColor(Color.Yellow)
@@ -68,7 +68,7 @@ struct ScrollTwoItem {
           }
           .borderRadius(1000)
           .borderColor(Color.Black)
-          .width('100%') //TODO 疑问：子组件像素是否需要width也设置
+          .width('100%')
           // 测试点：子组件高度设置成不同数值
           .height(this.changeList[this.changeIndex])
           .backgroundColor(Color.Orange)
@@ -79,7 +79,7 @@ struct ScrollTwoItem {
           }
           .borderRadius(1000)
           .borderColor(Color.Black)
-          .width('100%') //TODO 疑问：子组件像素是否需要width也设置
+          .width('100%')
           // 测试点：子组件高度设置成不同数值
           .height(this.changeList[this.changeIndex])
           .backgroundColor(Color.Green)
@@ -90,7 +90,7 @@ struct ScrollTwoItem {
           }
           .borderRadius(1000)
           .borderColor(Color.Black)
-          .width('100%') //TODO 疑问：子组件像素是否需要width也设置
+          .width('100%')
           // 测试点：子组件高度设置成不同数值
           .height(this.changeList[this.changeIndex])
           .backgroundColor(Color.Green)
@@ -101,7 +101,7 @@ struct ScrollTwoItem {
           }
           .borderRadius(1000)
           .borderColor(Color.Black)
-          .width('100%') //TODO 疑问：子组件像素是否需要width也设置
+          .width('100%')
           // 测试点：子组件高度设置成不同数值
           .height(this.changeList[this.changeIndex])
           .backgroundColor(Color.Gray)
@@ -112,7 +112,7 @@ struct ScrollTwoItem {
           }
           .borderRadius(1000)
           .borderColor(Color.Black)
-          .width('100%') //TODO 疑问：子组件像素是否需要width也设置
+          .width('100%')
           // 测试点：子组件高度设置成不同数值
           .height(this.changeList[this.changeIndex])
           .backgroundColor(Color.Brown)
@@ -123,7 +123,7 @@ struct ScrollTwoItem {
           }
           .borderRadius(1000)
           .borderColor(Color.Black)
-          .width('100%') //TODO 疑问：子组件像素是否需要width也设置
+          .width('100%')
           // 测试点：子组件高度设置成不同数值
           .height(this.changeList[this.changeIndex])
           .backgroundColor(Color.Blue)
@@ -134,7 +134,7 @@ struct ScrollTwoItem {
           }
           .borderRadius(1000)
           .borderColor(Color.Black)
-          .width('100%') //TODO 疑问：子组件像素是否需要width也设置
+          .width('100%')
           // 测试点：子组件高度设置成不同数值
           .height(this.changeList[this.changeIndex])
           .backgroundColor(Color.Red)
@@ -145,7 +145,7 @@ struct ScrollTwoItem {
           }
           .borderRadius(1000)
           .borderColor(Color.Black)
-          .width('100%') //TODO 疑问：子组件像素是否需要width也设置
+          .width('100%')
           // 测试点：子组件高度设置成不同数值
           .height(this.changeList[this.changeIndex])
           .backgroundColor(Color.Black)
@@ -156,7 +156,7 @@ struct ScrollTwoItem {
           }
           .borderRadius(1000)
           .borderColor(Color.Black)
-          .width('100%') //TODO 疑问：子组件像素是否需要width也设置
+          .width('100%')
           // 测试点：子组件高度设置成不同数值
           .height(this.changeList[this.changeIndex])
           .backgroundColor(Color.Grey)

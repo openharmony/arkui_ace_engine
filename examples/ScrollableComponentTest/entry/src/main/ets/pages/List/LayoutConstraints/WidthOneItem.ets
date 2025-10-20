@@ -57,7 +57,7 @@ struct ListWidthOneItem {
             }
             .borderRadius(1000)
             .borderColor(Color.Black)
-            .height('100%') //TODO 疑问：子组件像素是否需要width也设置
+            .height('100%')
             .backgroundColor(Color.Yellow)
             // 测试点：ListItem组件的width属性设置不同值。验证ListItem的布局是否正确
             // 预期结果：width属性设置在一定范围内，ListItem组件可拖拽

@@ -73,7 +73,7 @@ struct ListItemMoveHeight {
             }
             .borderRadius(1000)
             .borderColor(Color.Black)
-            .width('100%') //TODO 疑问：子组件像素是否需要width也设置
+            .width('100%')
             .backgroundColor(Color.Yellow)
             // 测试点：ListItem组件的height属性设置不同值，ListItem组件是否可拖拽
             // 预期结果：height属性设置在一定范围内，ListItem组件可拖拽            

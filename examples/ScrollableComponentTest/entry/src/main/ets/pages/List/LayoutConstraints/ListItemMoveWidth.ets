@@ -76,7 +76,7 @@ struct ListItemMoveWidth {
               .borderColor(Color.Black)
               // 测试点：ListItem组件的width属性设置不同值，ListItem组件是否可拖拽。
               // 预期结果：width属性设置在一定范围内，ListItem组件可拖拽
-              .width(this.changeList[this.changeIndex]) //TODO 疑问：子组件像素是否需要width也设置
+              .width(this.changeList[this.changeIndex])
               .backgroundColor(Color.Yellow)
               .height('80%')
             }
