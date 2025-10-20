@@ -313,7 +313,11 @@ void JsDrawableDescriptor::LoadComplete(napi_env env, napi_status status, void* 
     if (context->errorCode == 0) {
         result[1] = CreateLoadResult(env, context->width, context->height);
     } else {
-        napi_create_string_utf8(env, "resource loading failed.", NAPI_AUTO_LENGTH, &result[0]);
+        napi_value errorMsg;
+        napi_value errorCode;
+        napi_create_int32(env, context->errorCode, &errorCode);
+        napi_create_string_utf8(env, "resource loading failed.", NAPI_AUTO_LENGTH, &errorMsg);
+        napi_create_error(env, errorCode, errorMsg, &result[0]);
     }
     if (context->deferred) {
         if (context->errorCode == 0) {
@@ -390,7 +394,7 @@ napi_value JsDrawableDescriptor::LoadSync(napi_env env, napi_callback_info info)
         int32_t errorCode = 0;
         AnimatedLoadSync(native, width, height, errorCode);
         if (errorCode != 0) {
-            napi_throw_error(env, std::to_string(errorCode).c_str(), "resource loading failed");
+            napi_throw_error(env, std::to_string(errorCode).c_str(), "resource loading failed.");
             napi_close_escapable_handle_scope(env, scope);
             return nullptr;
         }
