@@ -62,6 +62,10 @@ let partialUpdates = new Array<PartialUpdateRecord>()
 let _currentPartialUpdateContext: Object | undefined = undefined
 let _undefinedInstanceId : int32 = -1000
 
+export enum MessageType {
+    DELETE_DETACHED_ROOT = 1,
+}
+
 /**
  * Provide partial update lambda and context.
  *
@@ -311,6 +315,22 @@ export class Application {
             }
         }
         return root!.peer.ptr
+    }
+
+    handleMessage(ptr: KPointer, type: int32, param : string) : boolean {
+        let result : boolean = false
+        switch (type as MessageType) {
+            case MessageType.DELETE_DETACHED_ROOT: {
+                result = destroyUiDetachedRoot(ptr, this.instanceId);
+                break
+            }
+            default: {
+                InteropNativeModule._NativeLog(`[${this.instanceId}] ARKTS: [handleMessage] type = ${type} is unknown.`)
+                break
+            }
+        }
+        InteropNativeModule._NativeLog(`[${this.instanceId}] ARKTS: [handleMessage] ptr: ${ptr}, type: ${type}, param: ${param}`);
+        return result;
     }
 
     private checkEvents(what: int32) {

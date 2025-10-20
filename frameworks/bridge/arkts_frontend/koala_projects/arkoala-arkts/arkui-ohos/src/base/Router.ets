@@ -172,6 +172,15 @@ export class RouterPage {
 export type PageTransition = () => void
 export type PageClassNameResolver = (page:string) => string | undefined
 
+class NamedRouterInfo {
+    entryPoint: EntryPoint;
+    pagePath: string;
+    constructor(pagePath: string, entryPoint: EntryPoint) {
+        this.pagePath = pagePath;
+        this.entryPoint = entryPoint;
+    }
+}
+
 export interface Router {
     push(options: router.RouterOptions): void
 
@@ -195,7 +204,7 @@ export interface Router {
 
     getState(): router.RouterState
 
-    getStateByIndex(index: int): router.RouterState | undefined
+    getStateByIndex(index: number): router.RouterState | undefined
 
     getStateByUrl(url: string): Array<router.RouterState>
 
@@ -239,7 +248,7 @@ class RouterImpl implements Router {
     // list of container node to contain jsViewNode
     private rootState: Array<ComputableState<IncrementalNode>> = new Array<ComputableState<IncrementalNode>>()
     // map of namedRouter
-    private namedRouter: Map<string, EntryPoint> = new Map<string, EntryPoint>
+    private namedRouter: Map<string, NamedRouterInfo> = new Map<string, NamedRouterInfo>
     private runtimeLinker: RuntimeLinker | undefined = undefined;
 
     constructor(moduleName: string) {
@@ -321,7 +330,8 @@ class RouterImpl implements Router {
     }
 
     registerNamedRouter(routerName: string, instance: EntryPoint, param: NavInterface): void {
-        this.namedRouter.set(routerName, instance)
+        let info: NamedRouterInfo = new NamedRouterInfo(param.pagePath, instance);
+        this.namedRouter.set(routerName, info);
     }
 
     UpdateVisiblePagePeerNode(node: PeerNode, index: int = -1): void {
@@ -445,7 +455,8 @@ class RouterImpl implements Router {
             return RouterExtender.pushNamedRoute(jsViewNodePtr!, pageOptions, pagePushTransitionCallback);
         }
         let className = options.name;
-        let entryObject = this.namedRouter.get(className);
+        let entryInfo = this.namedRouter.get(className);
+        let entryObject = entryInfo?.entryPoint;
         if (entryObject) {
             let manager = GlobalStateManager.instance
             let stateNode = manager.updatableNode<IncrementalNode>(new IncrementalNode(), (context: StateContext) => {
@@ -486,7 +497,7 @@ class RouterImpl implements Router {
                     this.showingPageIndex = this.showingPageIndex - 1;
                 }
             };
-            let newPage = new VisiblePage(entryObject.entry, this.getFileInfo(options.name), this.getPathInfo(options.name), options.params);
+            let newPage = new VisiblePage(entryObject.entry, this.getFileInfo(entryInfo!.pagePath), this.getPathInfo(entryInfo!.pagePath), options.params);
             this.visiblePages.splice(this.showingPageIndex + 1, 0, newPage);
             this.showingPageIndex += 1;
             let pageOptions: PageRouterOptions = { options: {
@@ -525,7 +536,8 @@ class RouterImpl implements Router {
             return;
         }
         let className = options.name;
-        let entryObject = this.namedRouter.get(className);
+        let entryInfo = this.namedRouter.get(className);
+        let entryObject = entryInfo?.entryPoint;
         if (entryObject) {
             let manager = GlobalStateManager.instance
             let stateNode = manager.updatableNode<IncrementalNode>(new IncrementalNode(), (context: StateContext) => {
@@ -564,7 +576,7 @@ class RouterImpl implements Router {
                     this.showingPageIndex = this.showingPageIndex - 1;
                 }
             };
-            let newPage = new VisiblePage(entryObject.entry, this.getFileInfo(options.name), this.getPathInfo(options.name), options.params);
+            let newPage = new VisiblePage(entryObject.entry, this.getFileInfo(entryInfo!.pagePath), this.getPathInfo(entryInfo!.pagePath), options.params);
             this.visiblePages.splice(this.showingPageIndex + 1, 0, newPage);
             this.showingPageIndex += 1;
             let pageOptions: PageRouterOptions = { options: {
@@ -685,7 +697,8 @@ class RouterImpl implements Router {
             return RouterExtender.replaceNamedRoute(jsViewNodePtr!, pageOptions, pagePushTransitionCallback);
         }
         let className = options.name;
-        let entryObject = this.namedRouter.get(className);
+        let entryInfo = this.namedRouter.get(className);
+        let entryObject = entryInfo?.entryPoint;
         if (entryObject) {
             let manager = GlobalStateManager.instance
             let stateNode = manager.updatableNode<IncrementalNode>(new IncrementalNode(), (context: StateContext) => {
@@ -727,7 +740,7 @@ class RouterImpl implements Router {
                     this.showingPageIndex = this.showingPageIndex - 1;
                 }
             };
-            let newPage = new VisiblePage(entryObject.entry, this.getFileInfo(options.name), this.getPathInfo(options.name), options.params);
+            let newPage = new VisiblePage(entryObject.entry, this.getFileInfo(entryInfo!.pagePath), this.getPathInfo(entryInfo!.pagePath), options.params);
             this.visiblePages.push(newPage)
             this.showingPageIndex += 1
             let pageOptions: PageRouterOptions = { options: {
@@ -769,7 +782,8 @@ class RouterImpl implements Router {
             return;
         }
         let className = options.name;
-        let entryObject = this.namedRouter.get(className);
+        let entryInfo = this.namedRouter.get(className);
+        let entryObject = entryInfo?.entryPoint;
         if (entryObject) {
             let manager = GlobalStateManager.instance
             let stateNode = manager.updatableNode<IncrementalNode>(new IncrementalNode(), (context: StateContext) => {
@@ -809,7 +823,7 @@ class RouterImpl implements Router {
                     this.showingPageIndex = this.showingPageIndex - 1;
                 }
             };
-            let newPage = new VisiblePage(entryObject.entry, this.getFileInfo(options.name), this.getPathInfo(options.name), options.params);
+            let newPage = new VisiblePage(entryObject.entry, this.getFileInfo(entryInfo!.pagePath), this.getPathInfo(entryInfo!.pagePath), options.params);
             this.visiblePages.push(newPage)
             this.showingPageIndex += 1
             let pageOptions: PageRouterOptions = { options: {
@@ -863,11 +877,11 @@ class RouterImpl implements Router {
         return state
     }
 
-    getStateByIndex(index: int): router.RouterState | undefined {
+    getStateByIndex(index: number): router.RouterState | undefined {
         if (index > this.showingPageIndex + 1 || index <= 0) {
             return undefined
         }
-        let page = this.visiblePages.at(index - 1);
+        let page = this.visiblePages.at(index.toInt() - 1);
         let state: router.RouterState = {
             index: index,
             name: page.url,
@@ -880,7 +894,7 @@ class RouterImpl implements Router {
     getStateByUrl(url: string): Array<router.RouterState> {
         let retVal: Array<router.RouterState> = new Array<router.RouterState>()
         this.visiblePages.value.forEach((element, index) => {
-            if (element.url === url) {
+            if ((element.path + element.url) === url) {
                 // routerState index is started from 1. 
                 let state: router.RouterState = {
                     index: index + 1,
@@ -949,8 +963,7 @@ class RouterImpl implements Router {
         let newPage = new VisiblePage(builder, this.getFileInfo(options.url), this.getPathInfo(options.url), options.params)
         this.entryPage = newPage;
         this.visiblePages.splice(0, 0, newPage)
-        let pageNode = RouterExtender.runPage(jsViewNodePtr, options.url, options.recoverable, pagePushTransitionCallback)
-        this.peerNodeList.splice(this.peerNodeList.length, 0, pageNode)
+        RouterExtender.runPage(jsViewNodePtr, options.url, options.recoverable, pagePushTransitionCallback);
     }
 
     showAlertBeforeBackPage(options: router.EnableAlertOptions): void {
