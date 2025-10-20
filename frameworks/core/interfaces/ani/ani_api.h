@@ -697,6 +697,7 @@ struct ArkUIAniCanvasModifier {
 };
 
 struct ArkUIAniTraceModifier {
+    bool (*getAttributeSetTraceEnabled)();
     void (*traceBegin)(const std::string& traceName);
     void (*traceEnd)();
     void (*asyncTraceBegin)(const std::string& traceName, int taskId);
