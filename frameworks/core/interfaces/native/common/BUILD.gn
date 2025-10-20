@@ -61,6 +61,7 @@ template("ace_core_interfaces_native") {
       external_deps += [
         "ability_runtime:app_context",
         "webview:libnweb",
+        "webview:libarkweb_utils",
       ]
     }
     if (include_generated_sources && !is_arkui_x) {
