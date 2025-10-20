@@ -23,7 +23,6 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
-
 namespace OHOS::Ace::NG {
 namespace {
 const std::string CONTAINER_PICKER_DRAG_SCENE = "container_picker_drag_scene";
@@ -114,7 +113,6 @@ bool ContainerPickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper
     GetLayoutProperties(pickerAlgorithm);
     PostIdleTask(GetHost());
     SetDefaultTextStyle();
-    SetDefaultAlignment();
     HandleTargetIndex();
 
     if (isNeedPlayInertialAnimation_) {
@@ -206,6 +204,13 @@ void ContainerPickerPattern::GetLayoutProperties(const RefPtr<ContainerPickerLay
     contentMainSize_ = algo->GetContentMainSize();
     height_ = algo->GetHeight();
     crossMatchChild_ = algo->IsCrossMatchChild();
+    auto contentCrossSize = algo->GetContentCrossSize();
+    if (!NearEqual(contentCrossSize, contentCrossSize_)) {
+        contentCrossSize_ = contentCrossSize;
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
 }
 
 void ContainerPickerPattern::OnAttachToFrameNode()
@@ -248,6 +253,9 @@ void ContainerPickerPattern::FireScrollStopEvent()
 {
     auto pickerEventHub = GetEventHub<ContainerPickerEventHub>();
     CHECK_NULL_VOID(pickerEventHub);
+    if (animationBreak_) {
+        return;
+    }
     pickerEventHub->FireScrollStopEvent(selectedIndex_);
 }
 
@@ -270,19 +278,6 @@ bool ContainerPickerPattern::IsLoop() const
     auto props = GetLayoutProperty<ContainerPickerLayoutProperty>();
     CHECK_NULL_RETURN(props, true);
     return props->GetCanLoopValue(true);
-}
-
-void ContainerPickerPattern::SetDefaultAlignment() const
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    for (const auto& item : itemPosition_) {
-        auto index = ContainerPickerUtils::GetLoopIndex(item.first, totalItemCount_);
-        auto child = DynamicCast<FrameNode>(host->GetOrCreateChildByIndex(index));
-        auto layoutProperty = child->GetLayoutProperty<LayoutProperty>();
-        CHECK_NULL_VOID(layoutProperty);
-        layoutProperty->UpdateAlignment(Alignment::CENTER);
-    }
 }
 
 void ContainerPickerPattern::SetDefaultTextStyle() const
@@ -630,16 +625,17 @@ void ContainerPickerPattern::StopSpringAnimation()
     CHECK_NULL_VOID(isSpringAnimationRunning_);
     AnimationUtils::StopAnimation(springAnimation_);
     isSpringAnimationRunning_ = false;
+    animationBreak_ = true;
 }
 
 void ContainerPickerPattern::ProcessDelta(float& delta, float mainSize, float deltaSum)
 {
     if (GreatNotEqual(std::abs(delta), mainSize)) {
-        delta = delta > 0 ? mainSize : -mainSize;
+        delta = GreatNotEqual(delta, 0.0f) ? mainSize : -mainSize;
     }
 
     if (GreatNotEqual(std::abs(deltaSum + delta), mainSize)) {
-        delta = GreatNotEqual((deltaSum + delta), 0) ? (mainSize - deltaSum) : (-deltaSum - mainSize);
+        delta = GreatNotEqual((deltaSum + delta), 0.0f) ? (mainSize - deltaSum) : (-deltaSum - mainSize);
     }
 }
 
