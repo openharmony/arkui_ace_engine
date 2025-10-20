@@ -406,11 +406,7 @@ JsiFunction::JsiFunction(const EcmaVM *vm, panda::Local<panda::FunctionRef> val)
 
 JsiRef<JsiValue> JsiFunction::Call(JsiRef<JsiValue> thisVal, int argc, JsiRef<JsiValue> argv[]) const
 {
-    int32_t id = -1;
-    if (SystemProperties::GetAcePerformanceMonitorEnabled()) {
-        id = Container::CurrentId();
-    }
-    JS_CALLBACK_DURATION(id);
+    JS_CALLBACK_DURATION();
     auto vm = GetEcmaVM();
     panda::JsiFastNativeScope fastNativeScope(vm);
     LocalScope scope(vm);

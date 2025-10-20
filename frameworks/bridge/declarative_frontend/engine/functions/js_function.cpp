@@ -72,11 +72,7 @@ void JsFunctionBase::Execute(const std::vector<std::string>& keys, const std::st
 
 JSRef<JSVal> JsFunctionBase::ExecuteJS(int argc, JSRef<JSVal> argv[])
 {
-    int32_t id = -1;
-    if (SystemProperties::GetAcePerformanceMonitorEnabled()) {
-        id = Container::CurrentId();
-    }
-    JS_CALLBACK_DURATION(id);
+    JS_CALLBACK_DURATION();
     JAVASCRIPT_EXECUTION_SCOPE_STATIC;
     ACE_FUNCTION_TRACE();
     auto jsFunction = GetFunction();
