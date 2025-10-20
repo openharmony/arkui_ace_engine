@@ -1236,4 +1236,7 @@ export class ArkSecurityComponentMethodComponent extends ComponentBase implement
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
     }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
+    }
 }

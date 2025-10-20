@@ -337,6 +337,7 @@ export class ArkImageAnimatorComponent extends ArkCommonMethodComponent implemen
     public setImageAnimatorOptions(): this {
         if (this.checkPriority("setImageAnimatorOptions")) {
             this.getPeer()?.setImageAnimatorOptionsAttribute()
+            this.applyOptionsFinish('ImageAnimatorAttribute');
             return this
         }
         return this
@@ -452,6 +453,9 @@ export class ArkImageAnimatorComponent extends ArkCommonMethodComponent implemen
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

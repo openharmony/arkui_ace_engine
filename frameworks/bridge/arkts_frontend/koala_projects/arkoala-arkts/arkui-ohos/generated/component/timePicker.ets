@@ -368,6 +368,7 @@ export class ArkTimePickerComponent extends ArkCommonMethodComponent implements 
         if (this.checkPriority("setTimePickerOptions")) {
             const options_casted = options as (TimePickerOptions | undefined)
             this.getPeer()?.setTimePickerOptionsAttribute(options_casted)
+            this.applyOptionsFinish('TimePickerAttribute');
             return this
         }
         return this
@@ -467,6 +468,9 @@ export class ArkTimePickerComponent extends ArkCommonMethodComponent implements 
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

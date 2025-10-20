@@ -205,6 +205,7 @@ export class ArkListItemComponent extends ArkCommonMethodComponent implements Li
         if (this.checkPriority("setListItemOptions")) {
             const value_casted = value as (ListItemOptions | undefined)
             this.getPeer()?.setListItemOptionsAttribute(value_casted)
+            this.applyOptionsFinish('ListItemAttribute');
             return this
         }
         return this
@@ -248,6 +249,9 @@ export class ArkListItemComponent extends ArkCommonMethodComponent implements Li
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 export class ListItemOptions_serializer {

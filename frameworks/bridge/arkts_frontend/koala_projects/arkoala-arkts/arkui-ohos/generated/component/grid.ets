@@ -762,6 +762,7 @@ export class ArkGridComponent extends ArkScrollableCommonMethodComponent impleme
             const scroller_casted = scroller as (Scroller | undefined)
             const layoutOptions_casted = layoutOptions as (GridLayoutOptions | undefined)
             this.getPeer()?.setGridOptionsAttribute(scroller_casted, layoutOptions_casted)
+            this.applyOptionsFinish('GridAttribute');
             return this
         }
         return this
@@ -1023,6 +1024,9 @@ export class ArkGridComponent extends ArkScrollableCommonMethodComponent impleme
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

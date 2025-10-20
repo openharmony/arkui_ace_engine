@@ -280,6 +280,7 @@ export class ArkSaveButtonComponent extends ArkSecurityComponentMethodComponent 
         if (this.checkPriority("setSaveButtonOptions")) {
             const options_casted = options as (SaveButtonOptions | undefined)
             this.getPeer()?.setSaveButtonOptionsAttribute(options_casted)
+            this.applyOptionsFinish('SaveButtonAttribute');
             return this
         }
         return this
@@ -339,6 +340,9 @@ export class ArkSaveButtonComponent extends ArkSecurityComponentMethodComponent 
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

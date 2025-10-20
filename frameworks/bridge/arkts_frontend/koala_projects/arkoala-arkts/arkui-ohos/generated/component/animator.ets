@@ -450,6 +450,7 @@ export class ArkAnimatorComponent extends ArkCommonMethodComponent implements An
         if (this.checkPriority("setAnimatorOptions")) {
             const value_casted = value as (string)
             this.getPeer()?.setAnimatorOptionsAttribute(value_casted)
+            this.applyOptionsFinish('AnimatorAttribute');
             return this
         }
         return this
@@ -573,6 +574,9 @@ export class ArkAnimatorComponent extends ArkCommonMethodComponent implements An
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

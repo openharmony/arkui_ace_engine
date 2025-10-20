@@ -702,6 +702,7 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
         if (this.checkPriority("setListOptions")) {
             const options_casted = options as (ListOptions | undefined)
             this.getPeer()?.setListOptionsAttribute(options_casted)
+            this.applyOptionsFinish('ListAttribute');
             return this
         }
         return this
@@ -931,6 +932,9 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

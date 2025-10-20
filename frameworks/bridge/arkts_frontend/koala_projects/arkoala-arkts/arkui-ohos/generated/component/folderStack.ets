@@ -195,6 +195,7 @@ export class ArkFolderStackComponent extends ArkCommonMethodComponent implements
         if (this.checkPriority("setFolderStackOptions")) {
             const options_casted = options as (FolderStackOptions | undefined)
             this.getPeer()?.setFolderStackOptionsAttribute(options_casted)
+            this.applyOptionsFinish('FolderStackAttribute');
             return this
         }
         return this
@@ -246,6 +247,9 @@ export class ArkFolderStackComponent extends ArkCommonMethodComponent implements
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

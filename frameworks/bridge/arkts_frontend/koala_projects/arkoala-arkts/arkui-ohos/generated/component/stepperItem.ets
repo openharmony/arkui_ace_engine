@@ -139,6 +139,7 @@ export class ArkStepperItemComponent extends ArkCommonMethodComponent implements
     public setStepperItemOptions(): this {
         if (this.checkPriority("setStepperItemOptions")) {
             this.getPeer()?.setStepperItemOptionsAttribute()
+            this.applyOptionsFinish('StepperItemAttribute');
             return this
         }
         return this
@@ -174,6 +175,9 @@ export class ArkStepperItemComponent extends ArkCommonMethodComponent implements
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

@@ -85,6 +85,7 @@ export class ArkFormLinkComponent extends ArkCommonMethodComponent implements Fo
         if (this.checkPriority("setFormLinkOptions")) {
             const options_casted = options as (FormLinkOptions)
             this.getPeer()?.setFormLinkOptionsAttribute(options_casted)
+            this.applyOptionsFinish('FormLinkAttribute');
             return this
         }
         return this
@@ -96,6 +97,9 @@ export class ArkFormLinkComponent extends ArkCommonMethodComponent implements Fo
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

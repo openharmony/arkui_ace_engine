@@ -155,6 +155,7 @@ export class ArkRowComponent extends ArkCommonMethodComponent implements RowAttr
         if (this.checkPriority("setRowOptions")) {
             const options_casted = options as (RowOptions | RowOptionsV2 | undefined)
             this.getPeer()?.setRowOptionsAttribute(options_casted)
+            this.applyOptionsFinish('RowAttribute');
             return this
         }
         return this
@@ -190,6 +191,9 @@ export class ArkRowComponent extends ArkCommonMethodComponent implements RowAttr
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

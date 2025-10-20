@@ -73,6 +73,7 @@ export class ArkEffectComponentComponent extends ArkCommonMethodComponent implem
     public setEffectComponentOptions(): this {
         if (this.checkPriority("setEffectComponentOptions")) {
             this.getPeer()?.setEffectComponentOptionsAttribute()
+            this.applyOptionsFinish('EffectComponentAttribute');
             return this
         }
         return this
@@ -84,6 +85,9 @@ export class ArkEffectComponentComponent extends ArkCommonMethodComponent implem
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

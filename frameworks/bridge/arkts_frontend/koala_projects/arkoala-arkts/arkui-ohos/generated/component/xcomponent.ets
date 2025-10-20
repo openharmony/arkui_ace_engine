@@ -362,6 +362,7 @@ export class ArkXComponentComponent extends ArkCommonMethodComponent implements 
             hookSetXComponentOptions(this, params)
             const params_casted = params as (XComponentParameters | XComponentOptions | NativeXComponentParameters)
             this.getPeer()?.setXComponentOptionsAttribute(params_casted)
+            this.applyOptionsFinish('XComponentAttribute');
             return this
         }
         return this
@@ -413,6 +414,9 @@ export class ArkXComponentComponent extends ArkCommonMethodComponent implements 
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

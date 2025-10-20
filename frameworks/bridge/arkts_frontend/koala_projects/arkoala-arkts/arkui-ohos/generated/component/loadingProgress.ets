@@ -149,6 +149,7 @@ export class ArkLoadingProgressComponent extends ArkCommonMethodComponent implem
     public setLoadingProgressOptions(): this {
         if (this.checkPriority("setLoadingProgressOptions")) {
             this.getPeer()?.setLoadingProgressOptionsAttribute()
+            this.applyOptionsFinish('LoadingProgressAttribute');
             return this
         }
         return this
@@ -182,6 +183,9 @@ export class ArkLoadingProgressComponent extends ArkCommonMethodComponent implem
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 
