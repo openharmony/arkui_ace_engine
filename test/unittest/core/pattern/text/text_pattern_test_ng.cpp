@@ -191,7 +191,7 @@ HWTEST_F(TextPatternTestNg, GetTextContentLength002, TestSize.Level1)
 
 /**
  * @tc.name: GetSelectedText001
- * @tc.desc: Test GetSelectedText
+ * @tc.desc: Test GetSelectedText with selectionStart > selectionEnd
  * @tc.type: FUNC
  */
 HWTEST_F(TextPatternTestNg, GetSelectedText001, TestSize.Level1)
@@ -212,7 +212,7 @@ HWTEST_F(TextPatternTestNg, GetSelectedText001, TestSize.Level1)
 
 /**
  * @tc.name: GetSelectedText002
- * @tc.desc: Test GetSelectedText
+ * @tc.desc: Test GetSelectedText with selectionStart = selectionEnd
  * @tc.type: FUNC
  */
 HWTEST_F(TextPatternTestNg, GetSelectedText002, TestSize.Level1)
