@@ -108,7 +108,7 @@ export class StorageBase {
     }
 
     public createAndSet<T>(key: string, value: T): boolean {
-        const sp = new StorageProperty<T>(key, uiUtils.makeObserved(value));
+        const sp = new StorageProperty<T>(key, uiUtils.makeV1Observed(value));
         this.repoAllTypes.set(key, sp);
         return true;
     }

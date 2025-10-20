@@ -340,7 +340,7 @@ export function registerCreateWatchFuncCallback(): void {
 
 export function registerCreateStaticObservedCallback(): void {
     const makeObservedcallback = (value: Object): Object => {
-        return uiUtils.makeObserved(value) as Object;
+        return uiUtils.makeV1Observed(value) as Object;
     }
     const global = ESValue.getGlobal();
     const registerCallback = global.getProperty('registerCallbackForMakeObserved');
@@ -609,7 +609,7 @@ export class InteropExtendableComponent extends ExtendableComponent {
         }
         const getProxy = value.invokeMethod('getProxy').unwrap();
         if (getProxy === undefined && ExtendableComponent.current) {
-            const provideVar = new ProvideDecoratedVariable<T>(ExtendableComponent.current as ExtendableComponent, providedPropName, providedPropName, uiUtils.makeObserved(value.invokeMethod('get').unwrap()) as T, false);
+            const provideVar = new ProvideDecoratedVariable<T>(ExtendableComponent.current as ExtendableComponent, providedPropName, providedPropName, uiUtils.makeV1Observed(value.invokeMethod('get').unwrap()) as T, false);
             value.invokeMethod('setProxy', ESValue.wrap(provideVar));
             const setProxyValue = ((newVal: T): void => {
                 value.invokeMethod('set', ESValue.wrap(newVal));
