@@ -51,8 +51,8 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
     private monitorIdsDelayedUpdateForAddMonitor_: Set<number> = new Set();
     private computedIdsDelayedUpdate: Set<number> = new Set();
 
-    public defaultConsumer: any = undefined;
-    public defaultVal: any = undefined;
+    public defaultConsumerV2__: Map<string, string> = new Map();
+    public connectConsumerV2__: Map<string, string> = new Map();
 
     private recyclePoolV2_: RecyclePoolV2 | undefined = undefined;
 
@@ -352,6 +352,9 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
             ArkUIObjectFinalizationRegisterProxy.call(new WeakRef(this),
                 `${this.debugInfo__()} is in the process of destruction`);
         }
+
+        this.defaultConsumerV2__.clear();
+        this.connectConsumerV2__.clear();
     }
 
     public initialRenderView(): void {
@@ -392,16 +395,27 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         refs[name].resetComputed(name);
      }
 
-    public reconnectToConsumerV2<T>(varName: string, consumerVal: T): void {
-        let providerInfo = ProviderConsumerUtilV2.findProvider(this, varName);
-        if (providerInfo && providerInfo[0] && providerInfo[1]) {
-            this[varName] = providerInfo[0][providerInfo[1]];
-            ProviderConsumerUtilV2.connectConsumer2Provider(this, varName, providerInfo[0], providerInfo[1]);
-        }
-        if (!providerInfo) {
-          ProviderConsumerUtilV2.defineConsumerWithoutProvider(this, varName, consumerVal);
-          ObserveV2.getObserve().fireChange(this, varName);
-        }
+    // The Consumer uses providerName when findProvider
+    // but uses varName when connect or disconnect.
+    public __reconnectToConsumer__ViewV2__Internal<T>(): void {
+        this.defaultConsumerV2__.forEach((value: string, varName: string) => {
+            const providerInfo = ProviderConsumerUtilV2.findProvider(this, value);
+            if (providerInfo && providerInfo[0] && providerInfo[1]) {
+                ProviderConsumerUtilV2.connectConsumer2Provider(this, varName, providerInfo[0], providerInfo[1]);
+                ObserveV2.getObserve().fireChange(this, varName);
+                this.connectConsumerV2__.set(varName, value);
+            }
+        })
+    }
+    public __disconnectToConsumer__ViewV2__Internal<T>(): void {
+        this.connectConsumerV2__.forEach((value: string, varName: string) => {
+            const providerInfo = ProviderConsumerUtilV2.findProvider(this, value);
+            if (!providerInfo) {
+                ProviderConsumerUtilV2.defineConsumerWithoutProvider(this, varName, this[ObserveV2.OB_PREFIX + varName]);
+                ObserveV2.getObserve().fireChange(this, varName);
+                this.connectConsumerV2__.delete(varName);
+            }
+        })
     }
 
     // Resets the consumer value when the component is reinitialized on reuse
