@@ -1876,11 +1876,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetRotateImpl(Ark_NativePointer node,
-                       const Opt_RotateOptions* value)
+                       const Opt_Union_RotateOptions_RotateAngleOptions* value)
     {
     }
     void SetTransformImpl(Ark_NativePointer node,
                           const Opt_matrix4_Matrix4Transit* value)
+    {
+    }
+    void SetTransform3DImpl(Ark_NativePointer node,
+                            const Opt_matrix4_Matrix4Transit* value)
     {
     }
     void SetOnAppearImpl(Ark_NativePointer node,
@@ -6144,8 +6148,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                          const Opt_Length* value)
     {
     }
-    void SetBarHeightImpl(Ark_NativePointer node,
-                          const Opt_Length* value)
+    void SetAnimationCurveImpl(Ark_NativePointer node,
+                               const Opt_Union_Curve_ICurve* value)
     {
     }
     void SetAnimationDurationImpl(Ark_NativePointer node,
@@ -6231,6 +6235,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     void SetBarModeImpl(Ark_NativePointer node,
                         const Opt_BarMode* value,
                         const Opt_ScrollableBarModeOptions* options)
+    {
+    }
+    void SetBarHeightImpl(Ark_NativePointer node,
+                          const Opt_Length* height,
+                          const Opt_Boolean* noMinHeightLimit)
     {
     }
     void SetBarBackgroundBlurStyle1Impl(Ark_NativePointer node,
@@ -8387,6 +8396,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetScaleImpl,
             CommonMethodModifier::SetRotateImpl,
             CommonMethodModifier::SetTransformImpl,
+            CommonMethodModifier::SetTransform3DImpl,
             CommonMethodModifier::SetOnAppearImpl,
             CommonMethodModifier::SetOnDisAppearImpl,
             CommonMethodModifier::SetOnAttachImpl,
@@ -9873,7 +9883,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TabsAttributeModifier::SetBarPositionImpl,
             TabsAttributeModifier::SetScrollableImpl,
             TabsAttributeModifier::SetBarWidthImpl,
-            TabsAttributeModifier::SetBarHeightImpl,
+            TabsAttributeModifier::SetAnimationCurveImpl,
             TabsAttributeModifier::SetAnimationDurationImpl,
             TabsAttributeModifier::SetAnimationModeImpl,
             TabsAttributeModifier::SetEdgeEffectImpl,
@@ -9895,6 +9905,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TabsAttributeModifier::SetBarBackgroundEffectImpl,
             TabsAttributeModifier::SetOnContentWillChangeImpl,
             TabsAttributeModifier::SetBarModeImpl,
+            TabsAttributeModifier::SetBarHeightImpl,
             TabsAttributeModifier::SetBarBackgroundBlurStyle1Impl,
             TabsAttributeModifier::SetCachedMaxCountImpl,
         };
@@ -13024,6 +13035,24 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void RecycleImpl(Ark_FrameNode peer)
     {
+    }
+    Ark_Boolean CreateAnimationImpl(Ark_FrameNode peer,
+                                    Ark_AnimationPropertyType property,
+                                    const Opt_Array_Float64* startValue,
+                                    const Array_Float64* endValue,
+                                    const Ark_AnimateParam* param)
+    {
+        return {};
+    }
+    Ark_Boolean CancelAnimationsImpl(Ark_FrameNode peer,
+                                     const Array_AnimationPropertyType* properties)
+    {
+        return {};
+    }
+    Array_Float64 GetNodePropertyValueImpl(Ark_FrameNode peer,
+                                           Ark_AnimationPropertyType property)
+    {
+        return {};
     }
     Ark_NativePointer GetFrameNodePtrImpl(Ark_FrameNode node)
     {
@@ -19235,6 +19264,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             FrameNodeExtenderAccessor::GetFrameNodeByUniqueIdImpl,
             FrameNodeExtenderAccessor::ReuseImpl,
             FrameNodeExtenderAccessor::RecycleImpl,
+            FrameNodeExtenderAccessor::CreateAnimationImpl,
+            FrameNodeExtenderAccessor::CancelAnimationsImpl,
+            FrameNodeExtenderAccessor::GetNodePropertyValueImpl,
             FrameNodeExtenderAccessor::GetFrameNodePtrImpl,
             FrameNodeExtenderAccessor::CreateTypedFrameNodeImpl,
             FrameNodeExtenderAccessor::CreateByRawPtrImpl,

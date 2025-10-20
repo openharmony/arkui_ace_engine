@@ -26,7 +26,7 @@ import { AnimateParam_serializer, TranslateOptions_serializer, KeyframeAnimatePa
 import { Resource_serializer } from "./../framework/resource"
 import { SizeOptions_serializer, Length, SizeOptions, Position_serializer, Position, ResourceColor, ConstraintSizeOptions, Offset, Dimension, BorderRadiuses, EdgeWidths, EdgeColors, EdgeStyles, Offset_serializer, BorderRadiuses_serializer, EdgeWidths_serializer, EdgeColors_serializer, EdgeStyles_serializer } from "./units"
 import { Resource } from "global.resource"
-import { Color, BorderStyle } from "./enums"
+import { Color, BorderStyle, AnimationPropertyType } from "./enums"
 import { ContentModifier, extractors, hookRootAttributeModifier, AttributeModifier, AttributeUpdater, hookComponentRootAttributeModifier, hookCustomBuilderRootAttributeModifier, hookCustomLayoutRootAttributeModifier } from "#handwritten"
 import { ButtonConfiguration } from "./button"
 import { CheckBoxConfiguration } from "./checkbox"
@@ -1055,6 +1055,51 @@ export class FrameNodeExtender {
     static recycle_serialize(peer: FrameNode): void {
         ArkUIGeneratedNativeModule._FrameNodeExtender_recycle(extractors.toFrameNodePtr(peer))
     }
+    static createAnimation_serialize(peer: FrameNode, property: AnimationPropertyType, startValue: Array<double> | undefined, endValue: Array<double>, param: AnimateParam): boolean {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (startValue !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const startValueTmpValue  = startValue!
+            thisSerializer.writeInt32((startValueTmpValue.length).toInt())
+            for (let startValueTmpValueCounterI = 0; startValueTmpValueCounterI < startValueTmpValue.length; startValueTmpValueCounterI++) {
+                const startValueTmpValueTmpElement : double = startValueTmpValue[startValueTmpValueCounterI]
+                thisSerializer.writeFloat64(startValueTmpValueTmpElement)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        thisSerializer.writeInt32((endValue.length).toInt())
+        for (let endValueCounterI = 0; endValueCounterI < endValue.length; endValueCounterI++) {
+            const endValueTmpElement : double = endValue[endValueCounterI]
+            thisSerializer.writeFloat64(endValueTmpElement)
+        }
+        AnimateParam_serializer.write(thisSerializer, param)
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_createAnimation(extractors.toFrameNodePtr(peer), property.valueOf(), thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    static cancelAnimations_serialize(peer: FrameNode, properties: Array<AnimationPropertyType>): boolean {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.writeInt32((properties.length).toInt())
+        for (let propertiesCounterI = 0; propertiesCounterI < properties.length; propertiesCounterI++) {
+            const propertiesTmpElement : AnimationPropertyType = properties[propertiesCounterI]
+            thisSerializer.writeInt32(propertiesTmpElement.valueOf())
+        }
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_cancelAnimations(extractors.toFrameNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    static getNodePropertyValue_serialize(peer: FrameNode, property: AnimationPropertyType): Array<double> {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getNodePropertyValue(extractors.toFrameNodePtr(peer), property.valueOf())
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const bufferLength : int32 = retvalDeserializer.readInt32()
+        let buffer : Array<double> = new Array<double>(bufferLength)
+        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
+            buffer[bufferBufCounterI] = retvalDeserializer.readFloat64()
+        }
+        const returnResult : Array<double> = buffer
+        return returnResult
+    }
     static getFrameNodePtr_serialize(node: FrameNode): KPointer {
         const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getFrameNodePtr(extractors.toFrameNodePtr(node))
         return retval
@@ -1317,6 +1362,24 @@ export class FrameNodeExtender {
         const peer_casted = peer as (FrameNode)
         FrameNodeExtender.recycle_serialize(peer_casted)
         return
+    }
+    public static createAnimation(peer: FrameNode, property: AnimationPropertyType, startValue: Array<double> | undefined, endValue: Array<double>, param: AnimateParam): boolean {
+        const peer_casted = peer as (FrameNode)
+        const property_casted = property as (AnimationPropertyType)
+        const startValue_casted = startValue as (Array<double> | undefined)
+        const endValue_casted = endValue as (Array<double>)
+        const param_casted = param as (AnimateParam)
+        return FrameNodeExtender.createAnimation_serialize(peer_casted, property_casted, startValue_casted, endValue_casted, param_casted)
+    }
+    public static cancelAnimations(peer: FrameNode, properties: Array<AnimationPropertyType>): boolean {
+        const peer_casted = peer as (FrameNode)
+        const properties_casted = properties as (Array<AnimationPropertyType>)
+        return FrameNodeExtender.cancelAnimations_serialize(peer_casted, properties_casted)
+    }
+    public static getNodePropertyValue(peer: FrameNode, property: AnimationPropertyType): Array<double> {
+        const peer_casted = peer as (FrameNode)
+        const property_casted = property as (AnimationPropertyType)
+        return FrameNodeExtender.getNodePropertyValue_serialize(peer_casted, property_casted)
     }
     public static getFrameNodePtr(node: FrameNode): KPointer {
         const node_casted = node as (FrameNode)

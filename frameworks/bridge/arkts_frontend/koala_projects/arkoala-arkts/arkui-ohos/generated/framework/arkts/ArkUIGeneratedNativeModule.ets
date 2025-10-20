@@ -387,6 +387,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _CommonMethod_setTransform(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _CommonMethod_setTransform3D(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _CommonMethod_setOnAppear(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _CommonMethod_setOnDisAppear(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
@@ -2187,7 +2189,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _TabsAttribute_setBarWidth(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _TabsAttribute_setBarHeight(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _TabsAttribute_setAnimationCurve(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _TabsAttribute_setAnimationDuration(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
@@ -2230,6 +2232,8 @@ export class ArkUIGeneratedNativeModule {
     native static _TabsAttribute_setOnContentWillChange(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _TabsAttribute_setBarMode(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _TabsAttribute_setBarHeight(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _TabsAttribute_setBarBackgroundBlurStyle1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
@@ -4059,6 +4063,12 @@ export class ArkUIGeneratedNativeModule {
     native static _FrameNodeExtender_reuse(peer: KPointer): void
     @ani.unsafe.Direct
     native static _FrameNodeExtender_recycle(peer: KPointer): void
+    @ani.unsafe.Direct
+    native static _FrameNodeExtender_createAnimation(peer: KPointer, property: KInt, thisArray: KSerializerBuffer, thisLength: int32): boolean
+    @ani.unsafe.Direct
+    native static _FrameNodeExtender_cancelAnimations(peer: KPointer, thisArray: KSerializerBuffer, thisLength: int32): boolean
+    @ani.unsafe.Quick
+    native static _FrameNodeExtender_getNodePropertyValue(peer: KPointer, property: KInt): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _FrameNodeExtender_getFrameNodePtr(node: KPointer): KPointer
     @ani.unsafe.Quick

@@ -17,7 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
-import { AttributeModifier } from "#handwritten"
+import { AttributeModifier, extractors } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkTabsPeer, BarPosition, AnimationMode, OnTabsAnimationStartCallback, TabsAnimationEvent, OnTabsAnimationEndCallback, OnTabsGestureSwipeCallback, BarGridColumnOptions, TabsCustomContentTransitionCallback, OnTabsContentWillChangeCallback, TabsAttribute, BarMode, ScrollableBarModeOptions, TabsCacheMode } from "./component/tabs"
@@ -25,6 +25,7 @@ import { int32 } from "@koalaui/common"
 import { CommonMethod, DividerStyle, BlurStyle, BackgroundEffectOptions, BackgroundBlurStyleOptions } from "./component/common"
 import { Length, ResourceColor } from "./component/units"
 import { Resource } from "global.resource"
+import { default as curves } from "@ohos.curves"
 import { EdgeEffect, Color, PageFlipMode } from "./component/enums"
 export class TabsModifier extends CommonMethodModifier implements TabsAttribute,AttributeModifier<TabsAttribute> {
     _instanceId: number = -1;
@@ -45,8 +46,8 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
     _scrollable_0_0value?: boolean | undefined
     _barWidth_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _barWidth_0_0value?: Length | undefined
-    _barHeight_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _barHeight_0_0value?: Length | undefined
+    _animationCurve_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _animationCurve_0_0value?: curves.Curve | curves.ICurve | undefined
     _animationDuration_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _animationDuration_0_0value?: number | undefined
     _animationMode_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -90,6 +91,9 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
     _barMode_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _barMode_0_0value?: BarMode | undefined
     _barMode_0_1value?: ScrollableBarModeOptions | undefined
+    _barHeight_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _barHeight_0_0value?: Length | undefined
+    _barHeight_0_1value?: boolean | undefined
     _barBackgroundBlurStyle_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _barBackgroundBlurStyle_1_0value?: BlurStyle | undefined
     _barBackgroundBlurStyle_1_1value?: BackgroundBlurStyleOptions | undefined
@@ -171,21 +175,21 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
                 }
             }
         }
-        if (this._barHeight_0_flag != AttributeUpdaterFlag.INITIAL)
+        if (this._animationCurve_0_flag != AttributeUpdaterFlag.INITIAL)
         {
-            switch (this._barHeight_0_flag) {
+            switch (this._animationCurve_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setBarHeightAttribute((this._barHeight_0_0value as Length | undefined));
-                    this._barHeight_0_flag = AttributeUpdaterFlag.RESET;
+                    peer.setAnimationCurveAttribute((this._animationCurve_0_0value as curves.Curve | curves.ICurve | undefined));
+                    this._animationCurve_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
                 case AttributeUpdaterFlag.SKIP: {
-                    this._barHeight_0_flag = AttributeUpdaterFlag.RESET;
+                    this._animationCurve_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
                 default: {
-                    this._barHeight_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setBarHeightAttribute((undefined as Length | undefined));
+                    this._animationCurve_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setAnimationCurveAttribute((undefined as curves.Curve | curves.ICurve | undefined));
                 }
             }
         }
@@ -567,6 +571,24 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
                 }
             }
         }
+        if (this._barHeight_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._barHeight_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setBarHeightAttribute((this._barHeight_0_0value as Length | undefined), (this._barHeight_0_1value as boolean | undefined));
+                    this._barHeight_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._barHeight_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._barHeight_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setBarHeightAttribute((undefined as Length | undefined), (undefined as boolean | undefined));
+                }
+            }
+        }
         if (this._barBackgroundBlurStyle_1_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._barBackgroundBlurStyle_1_flag) {
@@ -658,16 +680,16 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
                 }
             }
         }
-        if (modifier._barHeight_0_flag != AttributeUpdaterFlag.INITIAL)
+        if (modifier._animationCurve_0_flag != AttributeUpdaterFlag.INITIAL)
         {
-            switch (modifier._barHeight_0_flag) {
+            switch (modifier._animationCurve_0_flag) {
                 case AttributeUpdaterFlag.UPDATE:
                 case AttributeUpdaterFlag.SKIP: {
-                    this.barHeight(modifier._barHeight_0_0value);
+                    this.animationCurve(modifier._animationCurve_0_0value);
                     break;
                 }
                 default: {
-                    this.barHeight((undefined as Length | undefined));
+                    this.animationCurve((undefined as curves.Curve | curves.ICurve | undefined));
                 }
             }
         }
@@ -944,6 +966,19 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
                 }
             }
         }
+        if (modifier._barHeight_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._barHeight_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.barHeight(modifier._barHeight_0_0value, modifier._barHeight_0_1value);
+                    break;
+                }
+                default: {
+                    this.barHeight((undefined as Length | undefined), (undefined as boolean | undefined));
+                }
+            }
+        }
         if (modifier._barBackgroundBlurStyle_1_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._barBackgroundBlurStyle_1_flag) {
@@ -1015,14 +1050,14 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
         }
         return this
     }
-    barHeight(value: Length | undefined): this {
-        if (((this._barHeight_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+    animationCurve(value: curves.Curve | curves.ICurve | undefined): this {
+        if (((this._animationCurve_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
-            this._barHeight_0_flag = AttributeUpdaterFlag.UPDATE
-            this._barHeight_0_0value = value
+            this._animationCurve_0_flag = AttributeUpdaterFlag.UPDATE
+            this._animationCurve_0_0value = value
         } else
         {
-            this._barHeight_0_flag = AttributeUpdaterFlag.SKIP
+            this._animationCurve_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
@@ -1255,6 +1290,18 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
         } else
         {
             this._barMode_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    barHeight(height: Length | undefined, noMinHeightLimit: boolean | undefined): this {
+        if (((this._barHeight_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || ((this._barHeight_0_1value) !== (noMinHeightLimit)))
+        {
+            this._barHeight_0_flag = AttributeUpdaterFlag.UPDATE
+            this._barHeight_0_0value = height
+            this._barHeight_0_1value = noMinHeightLimit
+        } else
+        {
+            this._barHeight_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

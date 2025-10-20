@@ -25,7 +25,7 @@ import { ArkUIAniModule } from "arkui.ani"
 import { RenderNode } from "./RenderNode"
 import {
     CommonAttribute, ArkCommonMethodPeer, CommonMethod, UIGestureEvent, UICommonEvent, UICommonEventInternal,
-    CustomProperty
+    CustomProperty, AnimateParam
 } from './component/common'
 import { ArkButtonNode } from './typedNode/ArkButtonNode'
 import { ButtonOptions, ButtonAttribute, ArkButtonPeer} from './component/button'
@@ -112,7 +112,7 @@ import { TextOptions, TextAttribute, ArkTextPeer } from './component/text'
 import { MarqueeOptions, MarqueeAttribute, ArkMarqueePeer } from './component/marquee'
 import { SymbolGlyphAttribute, ArkSymbolGlyphPeer } from './component/symbolglyph'
 import { XComponentParameters, XComponentOptions, NativeXComponentParameters, XComponentAttribute, TypedXComponentPeerInternal } from "./component/xcomponent"
-import { XComponentType } from './component/enums'
+import { XComponentType, AnimationPropertyType } from './component/enums'
 import { ComponentContent } from './ComponentContent';
 import { DrawContext } from './Graphics';
 import { JSBuilderNode } from "./BuilderNode"
@@ -630,6 +630,21 @@ export class FrameNode implements MaterializedBase {
     public recycle(): void {
         FrameNodeExtender.recycle(this)
         return
+    }
+    public createAnimation(property: AnimationPropertyType, startValue: Array<double> | undefined, endValue: Array<double>, param: AnimateParam): boolean {
+        const property_casted = property as (AnimationPropertyType)
+        const startValue_casted = startValue as (Array<double> | undefined)
+        const endValue_casted = endValue as (Array<double>)
+        const param_casted = param as (AnimateParam)
+        return FrameNodeExtender.createAnimation(this, property_casted, startValue_casted, endValue_casted, param_casted);
+    }
+    public cancelAnimations(properties: Array<AnimationPropertyType>): boolean {
+        const properties_casted = properties as (Array<AnimationPropertyType>)
+        return FrameNodeExtender.cancelAnimations(this, properties_casted);
+    }
+    public getNodePropertyValue(property: AnimationPropertyType): Array<double> {
+        const property_casted = property as (AnimationPropertyType)
+        return FrameNodeExtender.getNodePropertyValue(this, property_casted);
     }
     public getRenderNode(): RenderNode | null {
         return this.renderNode_ ? this.renderNode_! : null;
