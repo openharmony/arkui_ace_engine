@@ -340,6 +340,7 @@ export class ArkUIAniModule {
     native static _Extractors_FromDrawingCanvasPtr(ptr: KPointer): drawing.Canvas
 
     native static _FrameNode_MarkDirtyNode(ptr: KPointer): void
+    native static _GetAttributeSetTraceEnabled(): boolean
     native static _TraceBegin(traceName: string): void
     native static _TraceEnd(): void
     native static _AsyncTraceBegin(traceName: string, taskId: KInt): void

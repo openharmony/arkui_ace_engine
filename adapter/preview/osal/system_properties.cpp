@@ -44,6 +44,7 @@ void Swap(int32_t& deviceWidth, int32_t& deviceHeight)
 bool SystemProperties::svgTraceEnable_ = false;
 bool SystemProperties::developerModeOn_ = false;
 std::atomic<bool> SystemProperties::layoutTraceEnable_(false);
+std::atomic<bool> SystemProperties::attributeSetTraceEnable_(false);
 std::atomic<bool> SystemProperties::traceInputEventEnable_(false);
 std::atomic<bool> SystemProperties::stateManagerEnable_(false);
 bool SystemProperties::buildTraceEnable_ = false;

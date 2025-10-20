@@ -253,6 +253,7 @@ export class Application {
     start(plugin: boolean): pointer {
         InteropNativeModule._NativeLog("ArkTS Application.start plugin: " + plugin)
         this.plugin = plugin
+        AceTrace.updateAttributeSetTraceEnabled()
         RuntimeProfiler.initTrace(AceTrace.begin, AceTrace.end)
         RuntimeProfiler.initNativeLog(InteropNativeModule._NativeLog)
         if (this.withLog) UserView.startNativeLog(1)
