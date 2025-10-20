@@ -28347,6 +28347,41 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     } // DecorationStyleAccessor
+    namespace DialogExtenderAccessor {
+    void ShowTimePickerDialogImpl(const Ark_TimePickerDialogOptions* options)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("showTimePickerDialog(");
+        WriteToString(&out, options);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void ShowTextPickerDialogImpl(const Ark_TextPickerDialogOptions* options)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("showTextPickerDialog(");
+        WriteToString(&out, options);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void ShowDatePickerDialogImpl(const Ark_DatePickerDialogOptions* options)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("showDatePickerDialog(");
+        WriteToString(&out, options);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    } // DialogExtenderAccessor
     namespace DisappearSymbolEffectAccessor {
     void DestroyPeerImpl(Ark_DisappearSymbolEffect peer)
     {
@@ -44634,6 +44669,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct DecorationStylePeer {
         virtual ~DecorationStylePeer() = default;
     };
+    const GENERATED_ArkUIDialogExtenderAccessor* GetDialogExtenderAccessor()
+    {
+        static const GENERATED_ArkUIDialogExtenderAccessor DialogExtenderAccessorImpl {
+            DialogExtenderAccessor::ShowTimePickerDialogImpl,
+            DialogExtenderAccessor::ShowTextPickerDialogImpl,
+            DialogExtenderAccessor::ShowDatePickerDialogImpl,
+        };
+        return &DialogExtenderAccessorImpl;
+    }
+
     const GENERATED_ArkUIDisappearSymbolEffectAccessor* GetDisappearSymbolEffectAccessor()
     {
         static const GENERATED_ArkUIDisappearSymbolEffectAccessor DisappearSymbolEffectAccessorImpl {
@@ -47333,6 +47378,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetDataResubmissionHandlerAccessor,
             GetDatePickerDialogAccessor,
             GetDecorationStyleAccessor,
+            GetDialogExtenderAccessor,
             GetDisappearSymbolEffectAccessor,
             GetDismissDialogActionAccessor,
             GetDismissPopupActionAccessor,

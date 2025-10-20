@@ -2561,6 +2561,8 @@ typedef struct Ark_LocalizedPadding Ark_LocalizedPadding;
 typedef struct Opt_LocalizedPadding Opt_LocalizedPadding;
 typedef struct Ark_LocalizedPosition Ark_LocalizedPosition;
 typedef struct Opt_LocalizedPosition Opt_LocalizedPosition;
+typedef struct Ark_LunarSwitchStyle Ark_LunarSwitchStyle;
+typedef struct Opt_LunarSwitchStyle Opt_LunarSwitchStyle;
 typedef struct Ark_MeasureOptions Ark_MeasureOptions;
 typedef struct Opt_MeasureOptions Opt_MeasureOptions;
 typedef struct Ark_MenuElement Ark_MenuElement;
@@ -3142,6 +3144,8 @@ typedef struct Opt_CalendarDialogOptions Opt_CalendarDialogOptions;
 typedef struct ClickEventPeer ClickEventPeer;
 typedef struct ClickEventPeer* Ark_ClickEvent;
 typedef struct Opt_ClickEvent Opt_ClickEvent;
+typedef struct Ark_DatePickerDialogOptions Ark_DatePickerDialogOptions;
+typedef struct Opt_DatePickerDialogOptions Opt_DatePickerDialogOptions;
 typedef struct Ark_GridRowOptions Ark_GridRowOptions;
 typedef struct Opt_GridRowOptions Opt_GridRowOptions;
 typedef struct ImageAttachmentPeer ImageAttachmentPeer;
@@ -3179,6 +3183,10 @@ typedef struct Ark_StyleOptions Ark_StyleOptions;
 typedef struct Opt_StyleOptions Opt_StyleOptions;
 typedef struct Ark_SubTabBarStyle Ark_SubTabBarStyle;
 typedef struct Opt_SubTabBarStyle Opt_SubTabBarStyle;
+typedef struct Ark_TextPickerDialogOptions Ark_TextPickerDialogOptions;
+typedef struct Opt_TextPickerDialogOptions Opt_TextPickerDialogOptions;
+typedef struct Ark_TimePickerDialogOptions Ark_TimePickerDialogOptions;
+typedef struct Opt_TimePickerDialogOptions Opt_TimePickerDialogOptions;
 typedef struct Ark_Union_ComponentContent_SubTabBarStyle_BottomTabBarStyle_String_Resource_CustomBuilder_TabBarOptions Ark_Union_ComponentContent_SubTabBarStyle_BottomTabBarStyle_String_Resource_CustomBuilder_TabBarOptions;
 typedef struct Opt_Union_ComponentContent_SubTabBarStyle_BottomTabBarStyle_String_Resource_CustomBuilder_TabBarOptions Opt_Union_ComponentContent_SubTabBarStyle_BottomTabBarStyle_String_Resource_CustomBuilder_TabBarOptions;
 typedef struct Ark_Union_PopupOptions_CustomPopupOptions Ark_Union_PopupOptions_CustomPopupOptions;
@@ -16590,6 +16598,16 @@ typedef struct Opt_LocalizedPosition {
     Ark_Tag tag;
     Ark_LocalizedPosition value;
 } Opt_LocalizedPosition;
+typedef struct Ark_LunarSwitchStyle {
+    /* kind: Interface */
+    Opt_ResourceColor selectedColor;
+    Opt_ResourceColor unselectedColor;
+    Opt_ResourceColor strokeColor;
+} Ark_LunarSwitchStyle;
+typedef struct Opt_LunarSwitchStyle {
+    Ark_Tag tag;
+    Ark_LunarSwitchStyle value;
+} Opt_LunarSwitchStyle;
 typedef struct Ark_MeasureOptions {
     /* kind: Interface */
     Ark_Union_String_Resource textContent;
@@ -19860,6 +19878,46 @@ typedef struct Opt_ClickEvent {
     Ark_Tag tag;
     Ark_ClickEvent value;
 } Opt_ClickEvent;
+typedef struct Ark_DatePickerDialogOptions {
+    /* kind: Interface */
+    Opt_Date start;
+    Opt_Date end;
+    Opt_Union_Date_Bindable selected;
+    Opt_DatePickerMode mode;
+    Opt_Boolean lunar;
+    Opt_Boolean lunarSwitch;
+    Opt_LunarSwitchStyle lunarSwitchStyle;
+    Opt_Boolean showTime;
+    Opt_Boolean useMilitaryTime;
+    Opt_PickerTextStyle disappearTextStyle;
+    Opt_PickerTextStyle textStyle;
+    Opt_PickerDialogButtonStyle acceptButtonStyle;
+    Opt_PickerDialogButtonStyle cancelButtonStyle;
+    Opt_PickerTextStyle selectedTextStyle;
+    Opt_Rectangle maskRect;
+    Opt_DialogAlignment alignment;
+    Opt_Offset offset;
+    Opt_VoidCallback onCancel;
+    Opt_Callback_Date_Void onDateAccept;
+    Opt_Callback_Date_Void onDateChange;
+    Opt_ResourceColor backgroundColor;
+    Opt_BlurStyle backgroundBlurStyle;
+    Opt_BackgroundBlurStyleOptions backgroundBlurStyleOptions;
+    Opt_BackgroundEffectOptions backgroundEffect;
+    Opt_VoidCallback onDidAppear;
+    Opt_VoidCallback onDidDisappear;
+    Opt_VoidCallback onWillAppear;
+    Opt_VoidCallback onWillDisappear;
+    Opt_Union_ShadowOptions_ShadowStyle shadow;
+    Opt_intl_DateTimeOptions dateTimeOptions;
+    Opt_Boolean enableHoverMode;
+    Opt_HoverModeAreaType hoverModeArea;
+    Opt_Boolean enableHapticFeedback;
+} Ark_DatePickerDialogOptions;
+typedef struct Opt_DatePickerDialogOptions {
+    Ark_Tag tag;
+    Ark_DatePickerDialogOptions value;
+} Opt_DatePickerDialogOptions;
 typedef struct Ark_GridRowOptions {
     /* kind: Interface */
     Opt_Union_Length_GutterOption gutter;
@@ -20104,6 +20162,84 @@ typedef struct Opt_SubTabBarStyle {
     Ark_Tag tag;
     Ark_SubTabBarStyle value;
 } Opt_SubTabBarStyle;
+typedef struct Ark_TextPickerDialogOptions {
+    /* kind: Interface */
+    Ark_Union_Array_String_Array_Array_String_Resource_Array_TextPickerRangeContent_Array_TextCascadePickerRangeContent range;
+    Opt_Union_ResourceStr_Array_ResourceStr_Bindable_Bindable value;
+    Opt_Union_Number_Array_Number_Bindable_Bindable selected;
+    Opt_Array_LengthMetrics columnWidths;
+    Opt_Union_Number_String defaultPickerItemHeight;
+    Opt_Boolean canLoop;
+    Opt_PickerTextStyle disappearTextStyle;
+    Opt_PickerTextStyle textStyle;
+    Opt_PickerDialogButtonStyle acceptButtonStyle;
+    Opt_PickerDialogButtonStyle cancelButtonStyle;
+    Opt_PickerTextStyle selectedTextStyle;
+    Opt_Boolean disableTextStyleAnimation;
+    Opt_TextPickerTextStyle defaultTextStyle;
+    Opt_Callback_TextPickerResult_Void onAccept;
+    Opt_Callback_Void onCancel;
+    Opt_Callback_TextPickerResult_Void onChange;
+    Opt_Callback_TextPickerResult_Void onScrollStop;
+    Opt_Callback_TextPickerResult_Void onEnterSelectedArea;
+    Opt_Rectangle maskRect;
+    Opt_DialogAlignment alignment;
+    Opt_Offset offset;
+    Opt_ResourceColor backgroundColor;
+    Opt_BlurStyle backgroundBlurStyle;
+    Opt_BackgroundBlurStyleOptions backgroundBlurStyleOptions;
+    Opt_BackgroundEffectOptions backgroundEffect;
+    Opt_Callback_Void onDidAppear;
+    Opt_Callback_Void onDidDisappear;
+    Opt_Callback_Void onWillAppear;
+    Opt_Callback_Void onWillDisappear;
+    Opt_Union_ShadowOptions_ShadowStyle shadow;
+    Opt_Boolean enableHoverMode;
+    Opt_HoverModeAreaType hoverModeArea;
+    Opt_Boolean enableHapticFeedback;
+} Ark_TextPickerDialogOptions;
+typedef struct Opt_TextPickerDialogOptions {
+    Ark_Tag tag;
+    Ark_TextPickerDialogOptions value;
+} Opt_TextPickerDialogOptions;
+typedef struct Ark_TimePickerDialogOptions {
+    /* kind: Interface */
+    Opt_Union_Date_Bindable selected;
+    Opt_TimePickerFormat format;
+    Opt_Date start;
+    Opt_Date end;
+    Opt_Boolean useMilitaryTime;
+    Opt_PickerTextStyle disappearTextStyle;
+    Opt_PickerTextStyle textStyle;
+    Opt_PickerDialogButtonStyle acceptButtonStyle;
+    Opt_PickerDialogButtonStyle cancelButtonStyle;
+    Opt_PickerTextStyle selectedTextStyle;
+    Opt_Rectangle maskRect;
+    Opt_DialogAlignment alignment;
+    Opt_Offset offset;
+    Opt_Callback_TimePickerResult_Void onAccept;
+    Opt_Callback_Void onCancel;
+    Opt_Callback_TimePickerResult_Void onChange;
+    Opt_Callback_TimePickerResult_Void onEnterSelectedArea;
+    Opt_ResourceColor backgroundColor;
+    Opt_BlurStyle backgroundBlurStyle;
+    Opt_BackgroundBlurStyleOptions backgroundBlurStyleOptions;
+    Opt_BackgroundEffectOptions backgroundEffect;
+    Opt_Boolean enableCascade;
+    Opt_Callback_Void onDidAppear;
+    Opt_Callback_Void onDidDisappear;
+    Opt_Callback_Void onWillAppear;
+    Opt_Callback_Void onWillDisappear;
+    Opt_Union_ShadowOptions_ShadowStyle shadow;
+    Opt_intl_DateTimeOptions dateTimeOptions;
+    Opt_Boolean enableHoverMode;
+    Opt_HoverModeAreaType hoverModeArea;
+    Opt_Boolean enableHapticFeedback;
+} Ark_TimePickerDialogOptions;
+typedef struct Opt_TimePickerDialogOptions {
+    Ark_Tag tag;
+    Ark_TimePickerDialogOptions value;
+} Opt_TimePickerDialogOptions;
 typedef struct Ark_Union_ComponentContent_SubTabBarStyle_BottomTabBarStyle_String_Resource_CustomBuilder_TabBarOptions {
     /* kind: UnionType */
     Ark_Int32 selector;
@@ -24558,6 +24694,12 @@ typedef struct GENERATED_ArkUIDecorationStyleAccessor {
     Opt_TextDecorationStyle (*getStyle)(Ark_DecorationStyle peer);
 } GENERATED_ArkUIDecorationStyleAccessor;
 
+typedef struct GENERATED_ArkUIDialogExtenderAccessor {
+    void (*showTimePickerDialog)(const Ark_TimePickerDialogOptions* options);
+    void (*showTextPickerDialog)(const Ark_TextPickerDialogOptions* options);
+    void (*showDatePickerDialog)(const Ark_DatePickerDialogOptions* options);
+} GENERATED_ArkUIDialogExtenderAccessor;
+
 typedef struct GENERATED_ArkUIDisappearSymbolEffectAccessor {
     void (*destroyPeer)(Ark_DisappearSymbolEffect peer);
     Ark_DisappearSymbolEffect (*construct)(const Opt_EffectScope* scope);
@@ -27006,6 +27148,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIDataResubmissionHandlerAccessor* (*getDataResubmissionHandlerAccessor)();
     const GENERATED_ArkUIDatePickerDialogAccessor* (*getDatePickerDialogAccessor)();
     const GENERATED_ArkUIDecorationStyleAccessor* (*getDecorationStyleAccessor)();
+    const GENERATED_ArkUIDialogExtenderAccessor* (*getDialogExtenderAccessor)();
     const GENERATED_ArkUIDisappearSymbolEffectAccessor* (*getDisappearSymbolEffectAccessor)();
     const GENERATED_ArkUIDismissDialogActionAccessor* (*getDismissDialogActionAccessor)();
     const GENERATED_ArkUIDismissPopupActionAccessor* (*getDismissPopupActionAccessor)();

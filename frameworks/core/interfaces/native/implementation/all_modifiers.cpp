@@ -226,6 +226,7 @@ const GENERATED_ArkUICustomSpanAccessor* GetCustomSpanAccessor();
 const GENERATED_ArkUIDataResubmissionHandlerAccessor* GetDataResubmissionHandlerAccessor();
 const GENERATED_ArkUIDatePickerDialogAccessor* GetDatePickerDialogAccessor();
 const GENERATED_ArkUIDecorationStyleAccessor* GetDecorationStyleAccessor();
+const GENERATED_ArkUIDialogExtenderAccessor* GetDialogExtenderAccessor();
 const GENERATED_ArkUIDisappearSymbolEffectAccessor* GetDisappearSymbolEffectAccessor();
 const GENERATED_ArkUIDismissDialogActionAccessor* GetDismissDialogActionAccessor();
 const GENERATED_ArkUIDismissPopupActionAccessor* GetDismissPopupActionAccessor();
@@ -529,6 +530,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetDataResubmissionHandlerAccessor,
         GetDatePickerDialogAccessor,
         GetDecorationStyleAccessor,
+        GetDialogExtenderAccessor,
         GetDisappearSymbolEffectAccessor,
         GetDismissDialogActionAccessor,
         GetDismissPopupActionAccessor,
