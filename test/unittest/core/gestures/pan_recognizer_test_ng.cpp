@@ -1547,6 +1547,7 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerHandleTouchDownEventTest004, TestSize
     panRecognizerPtr->isAllowMouse_ = false;
     panRecognizerPtr->HandleTouchDownEvent(touchEvent);
     EXPECT_EQ(panRecognizerPtr->globalPoint_.GetX(), 0);
+    EXPECT_EQ(panRecognizerPtr->fingersId_.size(), 1);
 }
 
 /**

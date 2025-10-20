@@ -261,6 +261,10 @@ void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     direction_ = newDirection_;
     distanceMap_ = newDistanceMap_;
 
+    if (fingersId_.find(event.id) == fingersId_.end()) {
+        fingersId_.insert(event.id);
+    }
+
     if (direction_.type == PanDirection::NONE) {
         auto node = GetAttachedNode().Upgrade();
         TAG_LOGI(AceLogTag::ACE_GESTURE, "Pan recognizer direction is none, "
@@ -275,10 +279,6 @@ void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         Adjudicate(Claim(this), GestureDisposal::REJECT);
         extraInfo_ += "mouse event is not allowed.";
         return;
-    }
-
-    if (fingersId_.find(event.id) == fingersId_.end()) {
-        fingersId_.insert(event.id);
     }
 
     deviceId_ = event.deviceId;
