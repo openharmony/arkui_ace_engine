@@ -860,7 +860,7 @@ bool EnvelopedDragData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
         asyncCtx->dragPointerEvent.displayX, asyncCtx->dragPointerEvent.displayY,
         asyncCtx->dragPointerEvent.displayId, windowId, true, false, dragSummaryInfo.summary, false,
         dragSummaryInfo.detailedSummary, dragSummaryInfo.summaryFormat, dragSummaryInfo.version,
-        dragSummaryInfo.totalSize };
+        dragSummaryInfo.totalSize, dragSummaryInfo.tag };
     return true;
 }
 
@@ -901,7 +901,8 @@ int32_t StartDrag(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, const Msdp::
     OHOS::Ace::DragDataCore dragDataCore { {}, {}, dragData.udKey, dragData.extraInfo, dragData.filterInfo,
         MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, dragData.dragNum, dragData.pointerId,
         dragData.displayX, dragData.displayY, dragData.displayId, dragData.mainWindow, dragData.hasCanceledAnimation,
-        dragData.hasCoordinateCorrected, dragData.summarys };
+        dragData.hasCoordinateCorrected, dragData.summarys, dragData.isDragDelay, dragData.detailedSummarys,
+        dragData.summaryFormat, dragData.summaryVersion, dragData.summaryTotalSize, dragData.summaryTag };
     for (const auto& shadowInfo : dragData.shadowInfos) {
         auto pixelMap = shadowInfo.pixelMap;
         if (pixelMap) {
@@ -1218,7 +1219,7 @@ bool PrepareDragData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
         asyncCtx->dragPointerEvent.pointerId, asyncCtx->dragPointerEvent.displayX,
         asyncCtx->dragPointerEvent.displayY, asyncCtx->dragPointerEvent.displayId,
         windowId, true, false, dragSummaryInfo.summary, false, dragSummaryInfo.detailedSummary,
-        dragSummaryInfo.summaryFormat, dragSummaryInfo.version, dragSummaryInfo.totalSize };
+        dragSummaryInfo.summaryFormat, dragSummaryInfo.version, dragSummaryInfo.totalSize, dragSummaryInfo.tag };
     return true;
 }
 
