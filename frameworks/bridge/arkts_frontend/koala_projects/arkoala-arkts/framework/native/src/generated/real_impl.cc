@@ -1620,7 +1620,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetBackgroundColorImpl(Ark_NativePointer node,
-                                const Opt_ResourceColor* value)
+                                const Opt_Union_ResourceColor_ColorMetrics* value)
     {
     }
     void SetPixelRoundImpl(Ark_NativePointer node,
@@ -2198,13 +2198,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetBackgroundImage0Impl(Ark_NativePointer node,
-                                 const Opt_Union_ResourceStr_PixelMap* src,
-                                 const Opt_ImageRepeat* repeat)
+                                 const Opt_Union_ResourceStr_PixelMap* value)
     {
     }
     void SetBackgroundImage1Impl(Ark_NativePointer node,
                                  const Opt_Union_ResourceStr_PixelMap* src,
                                  const Opt_BackgroundImageOptions* options)
+    {
+    }
+    void SetBackgroundImage2Impl(Ark_NativePointer node,
+                                 const Opt_Union_ResourceStr_PixelMap* src,
+                                 const Opt_ImageRepeat* repeat)
     {
     }
     void SetBackgroundBlurStyleImpl(Ark_NativePointer node,
@@ -8426,6 +8430,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetBackgroundImpl,
             CommonMethodModifier::SetBackgroundImage0Impl,
             CommonMethodModifier::SetBackgroundImage1Impl,
+            CommonMethodModifier::SetBackgroundImage2Impl,
             CommonMethodModifier::SetBackgroundBlurStyleImpl,
             CommonMethodModifier::SetBackgroundEffect1Impl,
             CommonMethodModifier::SetForegroundBlurStyleImpl,
