@@ -69,6 +69,21 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
 
     std::array staticMethods = {
         ani_native_function {
+            "_Extractors_ToDrawableDescriptorPtr",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsToDrawableDescriptorPtr)
+        },
+        ani_native_function {
+            "_Extractors_ToDrawingColorFilterPtr",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsToDrawingColorFilterPtr)
+        },
+        ani_native_function {
+            "_Extractors_ToDrawingLatticePtr",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsToDrawingLatticePtr)
+        },
+        ani_native_function {
             "_Extractors_FromImagePixelMapPtr",
             "J:L@ohos/multimedia/image/image/PixelMap;",
             reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsFromImagePixelMapPtr)
