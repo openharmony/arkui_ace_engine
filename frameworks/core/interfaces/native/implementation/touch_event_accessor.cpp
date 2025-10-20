@@ -126,40 +126,19 @@ void SetChangedTouchesImpl(Ark_TouchEvent peer,
     auto touchList = Converter::Convert<std::list<TouchLocationInfo>>(*changedTouches);
     info->SetChangedTouches(std::move(touchList));
 }
-Callback_Void GetStopPropagationImpl(Ark_TouchEvent peer)
+void StopPropagationImpl(Ark_TouchEvent peer)
 {
-    CHECK_NULL_RETURN(peer, {});
-    auto callback = CallbackKeeper::DefineReverseCallback<Callback_Void>([peer]() {
-        TouchEventInfo* info = peer->GetEventInfo();
-        CHECK_NULL_VOID(info);
-        info->SetStopPropagation(true);
-    });
-    return callback;
+    CHECK_NULL_VOID(peer);
+    TouchEventInfo* info = peer->GetEventInfo();
+    CHECK_NULL_VOID(info);
+    info->SetStopPropagation(true);
 }
-void SetStopPropagationImpl(Ark_TouchEvent peer,
-                            const Callback_Void* stopPropagation)
+void PreventDefaultImpl(Ark_TouchEvent peer)
 {
-    LOGE("TouchEventAccessor::SetStopPropagationImpl wen can only GET stopPropagation callback");
-}
-Callback_Void GetPreventDefaultImpl(Ark_TouchEvent peer)
-{
-    CHECK_NULL_RETURN(peer, {});
-    auto callback = CallbackKeeper::DefineReverseCallback<Callback_Void>([peer]() {
-        TouchEventInfo* info = peer->GetEventInfo();
-        CHECK_NULL_VOID(info);
-        auto patternName = info->GetPatternName();
-        if (g_touchPreventDefPattern.find(patternName.c_str()) == g_touchPreventDefPattern.end()) {
-            LOGE("ARKOALA Component does not support prevent function.");
-            return;
-        }
-        info->SetPreventDefault(true);
-    });
-    return callback;
-}
-void SetPreventDefaultImpl(Ark_TouchEvent peer,
-                           const Callback_Void* preventDefault)
-{
-    LOGE("TouchEventAccessor::SetPreventDefaultImpl wen can only GET preventDefault callback");
+    CHECK_NULL_VOID(peer);
+    TouchEventInfo* info = peer->GetEventInfo();
+    CHECK_NULL_VOID(info);
+    info->SetPreventDefault(true);
 }
 } // TouchEventAccessor
 const GENERATED_ArkUITouchEventAccessor* GetTouchEventAccessor()
@@ -175,10 +154,8 @@ const GENERATED_ArkUITouchEventAccessor* GetTouchEventAccessor()
         TouchEventAccessor::SetTouchesImpl,
         TouchEventAccessor::GetChangedTouchesImpl,
         TouchEventAccessor::SetChangedTouchesImpl,
-        TouchEventAccessor::GetStopPropagationImpl,
-        TouchEventAccessor::SetStopPropagationImpl,
-        TouchEventAccessor::GetPreventDefaultImpl,
-        TouchEventAccessor::SetPreventDefaultImpl,
+        TouchEventAccessor::StopPropagationImpl,
+        TouchEventAccessor::PreventDefaultImpl,
     };
     return &TouchEventAccessorImpl;
 }

@@ -27680,20 +27680,11 @@ void impl_ClickEvent_setHand(Ark_NativePointer thisPtr, KSerializerBuffer thisAr
         GetAccessors()->getClickEventAccessor()->setHand(self, static_cast<Opt_InteractionHand*>(&handValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(ClickEvent_setHand, Ark_NativePointer, KSerializerBuffer, int32_t)
-Ark_NativePointer impl_ClickEvent_getPreventDefault(Ark_NativePointer thisPtr) {
+void impl_ClickEvent_preventDefault(Ark_NativePointer thisPtr) {
         Ark_ClickEvent self = reinterpret_cast<Ark_ClickEvent>(thisPtr);
-        [[maybe_unused]] const auto &_api_call_result = GetAccessors()->getClickEventAccessor()->getPreventDefault(self);
-        // TODO: Value serialization needs to be implemented
-        return {};
+        GetAccessors()->getClickEventAccessor()->preventDefault(self);
 }
-KOALA_INTEROP_DIRECT_1(ClickEvent_getPreventDefault, Ark_NativePointer, Ark_NativePointer)
-void impl_ClickEvent_setPreventDefault(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
-        Ark_ClickEvent self = reinterpret_cast<Ark_ClickEvent>(thisPtr);
-        DeserializerBase thisDeserializer(thisArray, thisLength);
-        Callback_Void preventDefaultValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Void))))};;
-        GetAccessors()->getClickEventAccessor()->setPreventDefault(self, static_cast<Callback_Void*>(&preventDefaultValueTemp));
-}
-KOALA_INTEROP_DIRECT_V3(ClickEvent_setPreventDefault, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_DIRECT_V1(ClickEvent_preventDefault, Ark_NativePointer)
 Ark_NativePointer impl_ClientAuthenticationHandler_construct() {
         return GetAccessors()->getClientAuthenticationHandlerAccessor()->construct();
 }
@@ -29659,20 +29650,11 @@ void impl_HoverEvent_setDisplayY(Ark_NativePointer thisPtr, KSerializerBuffer th
         GetAccessors()->getHoverEventAccessor()->setDisplayY(self, static_cast<Opt_Float64*>(&displayYValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(HoverEvent_setDisplayY, Ark_NativePointer, KSerializerBuffer, int32_t)
-Ark_NativePointer impl_HoverEvent_getStopPropagation(Ark_NativePointer thisPtr) {
+void impl_HoverEvent_stopPropagation(Ark_NativePointer thisPtr) {
         Ark_HoverEvent self = reinterpret_cast<Ark_HoverEvent>(thisPtr);
-        [[maybe_unused]] const auto &_api_call_result = GetAccessors()->getHoverEventAccessor()->getStopPropagation(self);
-        // TODO: Value serialization needs to be implemented
-        return {};
+        GetAccessors()->getHoverEventAccessor()->stopPropagation(self);
 }
-KOALA_INTEROP_DIRECT_1(HoverEvent_getStopPropagation, Ark_NativePointer, Ark_NativePointer)
-void impl_HoverEvent_setStopPropagation(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
-        Ark_HoverEvent self = reinterpret_cast<Ark_HoverEvent>(thisPtr);
-        DeserializerBase thisDeserializer(thisArray, thisLength);
-        Callback_Void stopPropagationValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Void))))};;
-        GetAccessors()->getHoverEventAccessor()->setStopPropagation(self, static_cast<Callback_Void*>(&stopPropagationValueTemp));
-}
-KOALA_INTEROP_DIRECT_V3(HoverEvent_setStopPropagation, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_DIRECT_V1(HoverEvent_stopPropagation, Ark_NativePointer)
 Ark_NativePointer impl_HttpAuthHandler_construct() {
         return GetAccessors()->getHttpAuthHandlerAccessor()->construct();
 }
@@ -35623,34 +35605,16 @@ void impl_TouchEvent_setChangedTouches(Ark_NativePointer thisPtr, KSerializerBuf
         GetAccessors()->getTouchEventAccessor()->setChangedTouches(self, static_cast<Array_TouchObject*>(&changedTouchesValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(TouchEvent_setChangedTouches, Ark_NativePointer, KSerializerBuffer, int32_t)
-Ark_NativePointer impl_TouchEvent_getStopPropagation(Ark_NativePointer thisPtr) {
+void impl_TouchEvent_stopPropagation(Ark_NativePointer thisPtr) {
         Ark_TouchEvent self = reinterpret_cast<Ark_TouchEvent>(thisPtr);
-        [[maybe_unused]] const auto &_api_call_result = GetAccessors()->getTouchEventAccessor()->getStopPropagation(self);
-        // TODO: Value serialization needs to be implemented
-        return {};
+        GetAccessors()->getTouchEventAccessor()->stopPropagation(self);
 }
-KOALA_INTEROP_DIRECT_1(TouchEvent_getStopPropagation, Ark_NativePointer, Ark_NativePointer)
-void impl_TouchEvent_setStopPropagation(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+KOALA_INTEROP_DIRECT_V1(TouchEvent_stopPropagation, Ark_NativePointer)
+void impl_TouchEvent_preventDefault(Ark_NativePointer thisPtr) {
         Ark_TouchEvent self = reinterpret_cast<Ark_TouchEvent>(thisPtr);
-        DeserializerBase thisDeserializer(thisArray, thisLength);
-        Callback_Void stopPropagationValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Void))))};;
-        GetAccessors()->getTouchEventAccessor()->setStopPropagation(self, static_cast<Callback_Void*>(&stopPropagationValueTemp));
+        GetAccessors()->getTouchEventAccessor()->preventDefault(self);
 }
-KOALA_INTEROP_DIRECT_V3(TouchEvent_setStopPropagation, Ark_NativePointer, KSerializerBuffer, int32_t)
-Ark_NativePointer impl_TouchEvent_getPreventDefault(Ark_NativePointer thisPtr) {
-        Ark_TouchEvent self = reinterpret_cast<Ark_TouchEvent>(thisPtr);
-        [[maybe_unused]] const auto &_api_call_result = GetAccessors()->getTouchEventAccessor()->getPreventDefault(self);
-        // TODO: Value serialization needs to be implemented
-        return {};
-}
-KOALA_INTEROP_DIRECT_1(TouchEvent_getPreventDefault, Ark_NativePointer, Ark_NativePointer)
-void impl_TouchEvent_setPreventDefault(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
-        Ark_TouchEvent self = reinterpret_cast<Ark_TouchEvent>(thisPtr);
-        DeserializerBase thisDeserializer(thisArray, thisLength);
-        Callback_Void preventDefaultValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Void))))};;
-        GetAccessors()->getTouchEventAccessor()->setPreventDefault(self, static_cast<Callback_Void*>(&preventDefaultValueTemp));
-}
-KOALA_INTEROP_DIRECT_V3(TouchEvent_setPreventDefault, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_DIRECT_V1(TouchEvent_preventDefault, Ark_NativePointer)
 Ark_NativePointer impl_TransitionEffect_construct0(const KStringPtr& type) {
         return GetAccessors()->getTransitionEffectAccessor()->construct0((const Ark_String*) (&type));
 }
