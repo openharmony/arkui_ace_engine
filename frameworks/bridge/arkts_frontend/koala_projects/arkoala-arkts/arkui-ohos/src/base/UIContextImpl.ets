@@ -626,7 +626,7 @@ export class RouterImpl extends Router {
         return result;
     }
 
-    public getStateByIndex(index: int): router.RouterState | undefined {
+    public getStateByIndex(index: number): router.RouterState | undefined {
         if (this.router_ === undefined) {
             throw Error("router set in uiContext is empty");
         }
