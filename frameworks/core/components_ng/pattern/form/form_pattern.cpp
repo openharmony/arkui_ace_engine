@@ -691,6 +691,14 @@ void FormPattern::OnVisibleChange(bool isVisible)
     isVisible_ = isVisible;
 }
 
+void FormPattern::OnColorConfigurationUpdate()
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    OnModifyDone();
+}
+
 void FormPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();

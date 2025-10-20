@@ -1565,4 +1565,19 @@ HWTEST_F(FormTestNg, CheckFormBundleForbidden, TestSize.Level1)
     bool isForbidden = pattern->CheckFormBundleForbidden("MyBundleName");
     ASSERT_EQ(isForbidden, false);
 }
+
+/**
+ * @tc.name: OnColorConfigurationUpdate
+ * @tc.desc: Test OnColorConfigurationUpdate in Form Pattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormTestNg, OnColorConfigurationUpdate, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnColorConfigurationUpdate();
+    bool isForbidden = pattern->CheckFormBundleForbidden("MyBundleName");
+    ASSERT_EQ(isForbidden, false);
+}
 } // namespace OHOS::Ace::NG
