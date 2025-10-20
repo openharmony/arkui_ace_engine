@@ -137,20 +137,15 @@ void SetOnChangeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(frameNode);
-    if (auto optCallback = Converter::OptConvertPtr<Callback_I32_Void>(value); optCallback) {
-        auto onChange = [arkCallback = CallbackHelper(*optCallback), node = targetNode](const BaseEventInfo* info) {
-            const auto* swiperInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
-            if (!swiperInfo) {
-                return;
-            }
-            PipelineContext::SetCallBackNode(node);
-            arkCallback.Invoke(Converter::ArkValue<Ark_Int32>(swiperInfo->GetIndex()));
-        };
-        IndicatorModelStatic::SetOnChange(frameNode, std::move(onChange));
-    } else {
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
         IndicatorModelStatic::SetOnChange(frameNode, nullptr);
+        return;
     }
+    auto onEvent = [arkCallback = CallbackHelper(*optValue)](int32_t index) {
+        arkCallback.Invoke(Converter::ArkValue<Ark_Int32>(index));
+    };
+    IndicatorModelStatic::SetOnChange(frameNode, onEvent);
 }
 } // IndicatorComponentAttributeModifier
 const GENERATED_ArkUIIndicatorComponentModifier* GetIndicatorComponentModifier()

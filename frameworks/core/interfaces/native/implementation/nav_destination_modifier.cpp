@@ -74,7 +74,7 @@ void SetOnShownImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        NavDestinationModelStatic::SetOnShown(frameNode, nullptr);
         return;
     }
     auto onShownEvent = [arkCallback = CallbackHelper(*optValue)]() {
@@ -89,7 +89,7 @@ void SetOnHiddenImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        NavDestinationModelStatic::SetOnHidden(frameNode, nullptr);
         return;
     }
     auto onHiddenEvent = [arkCallback = CallbackHelper(*optValue)]() { arkCallback.InvokeSync(); };
@@ -102,7 +102,7 @@ void SetOnBackPressedImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        NavDestinationModelStatic::SetOnBackPressed(frameNode, nullptr);
         return;
     }
     auto onBackPressedEvent = [arkCallback = CallbackHelper(*optValue)]() -> bool {
@@ -131,6 +131,7 @@ void SetOnReadyImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     if (value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+        NavDestinationModelStatic::SetOnReady(frameNode, nullptr);
         return;
     }
     auto onReady = [readyCallback = CallbackHelper(value->value)](RefPtr<NG::NavDestinationContext> context) {
@@ -146,7 +147,7 @@ void SetOnWillAppearImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        NavDestinationModelStatic::SetOnWillAppear(frameNode, nullptr);
         return;
     }
     auto onWillAppearEvent = [arkCallback = CallbackHelper(*optValue)]() {
@@ -161,7 +162,7 @@ void SetOnWillDisappearImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        NavDestinationModelStatic::SetOnWillDisAppear(frameNode, nullptr);
         return;
     }
     auto onWillDisappearEvent = [arkCallback = CallbackHelper(*optValue)]() {
@@ -176,7 +177,7 @@ void SetOnWillShowImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        NavDestinationModelStatic::SetOnWillShow(frameNode, nullptr);
         return;
     }
     auto onWillShowEvent = [arkCallback = CallbackHelper(*optValue)]() {
@@ -191,7 +192,7 @@ void SetOnWillHideImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        NavDestinationModelStatic::SetOnWillHide(frameNode, nullptr);
         return;
     }
     auto onWillHideEvent = [arkCallback = CallbackHelper(*optValue)]() {
@@ -221,6 +222,7 @@ void SetSystemTransitionImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     if (value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+        NavDestinationModelStatic::SetSystemTransitionType(frameNode, NG::NavigationSystemTransitionType::DEFAULT);
         return;
     }
 
@@ -314,6 +316,7 @@ void SetCustomTransitionImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     if (value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+        NavDestinationModelStatic::SetCustomTransition(frameNode, nullptr);
         return;
     }
     auto onNavigationAnimation = [callback = CallbackHelper(value->value)](NG::NavigationOperation operation,
