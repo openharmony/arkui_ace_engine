@@ -11,11 +11,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
- * SR: SR20250724533130
- * Description: Improved scroll component layout constraints
- * Writer: renxiaowen
  */
+
+ /*
+  * SR: SR20250724533130
+  * Description: 滚动组件布局约束范围提升
+  * Writer: renxiaowen
+  */
 
 @Entry
 @Component
@@ -23,7 +25,10 @@ struct WaterflowWidthTwoItem {
 
   /*
    * 用例描述：WaterFlow组件内设置多个FlowItem的width为不同值，验证FlowItem的布局是否正确
-   * 关键结构：WaterFlow、FlowItem、width
+   * 关键结构：
+   * |-> WaterFlow
+   *    |-> FlowItem
+   *       |-> Text
    */
 
   @State realName: string[][] = [];
@@ -50,8 +55,9 @@ struct WaterflowWidthTwoItem {
           }
           .borderRadius(1000)
           .borderColor(Color.Black)
-          .height('50%') //TODO 疑问：子组件像素是否需要width也设置
+          .height('50%')
           .backgroundColor(Color.Yellow)
+          // 测试点：FlowItem组件的width属性设置不同值。验证FlowItem的布局是否正确
           .width(this.changeList[this.changeIndex])
         }
 
@@ -61,8 +67,9 @@ struct WaterflowWidthTwoItem {
           }
           .borderRadius(1000)
           .borderColor(Color.Black)
-          .height('50%') //TODO 疑问：子组件像素是否需要width也设置
+          .height('50%')
           .backgroundColor(Color.Orange)
+          // 测试点：FlowItem组件的width属性设置不同值。验证FlowItem的布局是否正确
           .width(this.changeList[this.changeIndex])
         }
 
@@ -72,8 +79,9 @@ struct WaterflowWidthTwoItem {
           }
           .borderRadius(1000)
           .borderColor(Color.Black)
-          .height('50%') //TODO 疑问：子组件像素是否需要width也设置
+          .height('50%')
           .backgroundColor(Color.Pink)
+          // 测试点：FlowItem组件的width属性设置不同值。验证FlowItem的布局是否正确
           .width(this.changeList[this.changeIndex])
         }
 
@@ -83,8 +91,9 @@ struct WaterflowWidthTwoItem {
           }
           .borderRadius(1000)
           .borderColor(Color.Black)
-          .height('50%') //TODO 疑问：子组件像素是否需要width也设置
+          .height('50%')
           .backgroundColor(Color.Gray)
+          // 测试点：FlowItem组件的width属性设置不同值。验证FlowItem的布局是否正确
           .width(this.changeList[this.changeIndex])
         }
 
@@ -94,8 +103,9 @@ struct WaterflowWidthTwoItem {
           }
           .borderRadius(1000)
           .borderColor(Color.Black)
-          .height('50%') //TODO 疑问：子组件像素是否需要width也设置
+          .height('50%')
           .backgroundColor(Color.Green)
+          // 测试点：FlowItem组件的width属性设置不同值。验证FlowItem的布局是否正确
           .width(this.changeList[this.changeIndex])
         }
 
@@ -105,8 +115,9 @@ struct WaterflowWidthTwoItem {
           }
           .borderRadius(1000)
           .borderColor(Color.Black)
-          .height('50%') //TODO 疑问：子组件像素是否需要width也设置
+          .height('50%')
           .backgroundColor(Color.Brown)
+          // 测试点：FlowItem组件的width属性设置不同值。验证FlowItem的布局是否正确
           .width(this.changeList[this.changeIndex])
         }
 
@@ -116,8 +127,9 @@ struct WaterflowWidthTwoItem {
           }
           .borderRadius(1000)
           .borderColor(Color.Black)
-          .height('50%') //TODO 疑问：子组件像素是否需要width也设置
+          .height('50%')
           .backgroundColor(Color.Blue)
+          // 测试点：FlowItem组件的width属性设置不同值。验证FlowItem的布局是否正确
           .width(this.changeList[this.changeIndex])
         }
 
@@ -127,8 +139,9 @@ struct WaterflowWidthTwoItem {
           }
           .borderRadius(1000)
           .borderColor(Color.Black)
-          .height('50%') //TODO 疑问：子组件像素是否需要width也设置
+          .height('50%')
           .backgroundColor(Color.Black)
+          // 测试点：FlowItem组件的width属性设置不同值。验证FlowItem的布局是否正确
           .width(this.changeList[this.changeIndex])
         }
 
@@ -138,8 +151,9 @@ struct WaterflowWidthTwoItem {
           }
           .borderRadius(1000)
           .borderColor(Color.Black)
-          .height('50%') //TODO 疑问：子组件像素是否需要width也设置
+          .height('50%')
           .backgroundColor(Color.Red)
+          // 测试点：FlowItem组件的width属性设置不同值。验证FlowItem的布局是否正确
           .width(this.changeList[this.changeIndex])
         }
 
@@ -149,8 +163,9 @@ struct WaterflowWidthTwoItem {
           }
           .borderRadius(1000)
           .borderColor(Color.Black)
-          .height('50%') //TODO 疑问：子组件像素是否需要width也设置
+          .height('50%')
           .backgroundColor(Color.Grey)
+          // 测试点：FlowItem组件的width属性设置不同值。验证FlowItem的布局是否正确
           .width(this.changeList[this.changeIndex])
         }
 

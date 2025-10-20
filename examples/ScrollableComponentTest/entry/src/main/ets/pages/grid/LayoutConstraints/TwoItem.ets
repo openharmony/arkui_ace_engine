@@ -11,11 +11,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
- * SR: SR20250724533130
- * Description: Improved scroll component layout constraints
- * Writer: renxiaowen
  */
+
+ /*
+  * SR: SR20250724533130
+  * Description: 滚动组件布局约束范围提升
+  * Writer: renxiaowen
+  */
  
 @Entry
 @Component
@@ -23,7 +25,10 @@ struct GridTwoItem {
 
   /*
    * 用例描述：Grid组件内设置多个GridItem的height为不同值，验证GridItem的布局是否正确
-   * 关键结构：Grid、GridItem、height
+   * 关键结构：
+   * |-> Grid
+   *    |-> GridItem
+   *       |-> Text
    */
 
   @State realName: string[][] = [];
@@ -50,7 +55,7 @@ struct GridTwoItem {
           }
           .borderRadius(1000)
           .borderColor(Color.Black)
-          .width('100%') //TODO 疑问：子组件像素是否需要width也设置
+          .width('100%')
           .backgroundColor(Color.Yellow)
           .height(this.changeList[this.changeIndex])
         }
@@ -61,7 +66,7 @@ struct GridTwoItem {
           }
           .borderRadius(1000)
           .borderColor(Color.Black)
-          .width('100%') //TODO 疑问：子组件像素是否需要width也设置
+          .width('100%')
           .backgroundColor(Color.Orange)
           .height(this.changeList[this.changeIndex])
         }
@@ -72,7 +77,7 @@ struct GridTwoItem {
           }
           .borderRadius(1000)
           .borderColor(Color.Black)
-          .width('100%') //TODO 疑问：子组件像素是否需要width也设置
+          .width('100%')
           .backgroundColor(Color.Pink)
           .height(this.changeList[this.changeIndex])
         }
@@ -83,7 +88,7 @@ struct GridTwoItem {
           }
           .borderRadius(1000)
           .borderColor(Color.Black)
-          .width('100%') //TODO 疑问：子组件像素是否需要width也设置
+          .width('100%')
           .backgroundColor(Color.Green)
           .height(this.changeList[this.changeIndex])
         }
@@ -94,7 +99,7 @@ struct GridTwoItem {
           }
           .borderRadius(1000)
           .borderColor(Color.Black)
-          .width('100%') //TODO 疑问：子组件像素是否需要width也设置
+          .width('100%')
           .backgroundColor(Color.Blue)
           .height(this.changeList[this.changeIndex])
         }
@@ -105,7 +110,7 @@ struct GridTwoItem {
           }
           .borderRadius(1000)
           .borderColor(Color.Black)
-          .width('100%') //TODO 疑问：子组件像素是否需要width也设置
+          .width('100%')
           .backgroundColor(Color.Black)
           .height(this.changeList[this.changeIndex])
         }
@@ -116,7 +121,7 @@ struct GridTwoItem {
           }
           .borderRadius(1000)
           .borderColor(Color.Black)
-          .width('100%') //TODO 疑问：子组件像素是否需要width也设置
+          .width('100%')
           .backgroundColor(Color.Brown)
           .height(this.changeList[this.changeIndex])
         }
@@ -127,7 +132,7 @@ struct GridTwoItem {
           }
           .borderRadius(1000)
           .borderColor(Color.Black)
-          .width('100%') //TODO 疑问：子组件像素是否需要width也设置
+          .width('100%')
           .backgroundColor(Color.Gray)
           .height(this.changeList[this.changeIndex])
         }
@@ -138,7 +143,7 @@ struct GridTwoItem {
           }
           .borderRadius(1000)
           .borderColor(Color.Black)
-          .width('100%') //TODO 疑问：子组件像素是否需要width也设置
+          .width('100%')
           .backgroundColor(Color.Red)
           .height(this.changeList[this.changeIndex])
         }
@@ -149,7 +154,7 @@ struct GridTwoItem {
           }
           .borderRadius(1000)
           .borderColor(Color.Black)
-          .width('100%') //TODO 疑问：子组件像素是否需要width也设置
+          .width('100%')
           .backgroundColor(Color.Grey)
           .height(this.changeList[this.changeIndex])
         }

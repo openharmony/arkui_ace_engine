@@ -11,11 +11,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
- * SR: SR20250724533130
- * Description: Improved scroll component layout constraints
- * Writer: renxiaowen
  */
+
+ /*
+  * SR: SR20250724533130
+  * Description: 滚动组件布局约束范围提升
+  * Writer: renxiaowen
+  */
  
 @Entry
 @Component
@@ -23,7 +25,10 @@ struct GridOriOneItem {
 
   /* 
    * 用例描述：列表组件中，单个GridItem的布局约束
-   * 关键结构：Grid、GridItem、Column、Text、Image
+   * 关键结构：
+   * |-> Grid
+   *    |-> GridItem
+   *       |-> TextArea
    */
 
   @State realName: string[][] = [];
@@ -197,6 +202,7 @@ struct GridOriOneItem {
       Grid(this.scroller) {
         GridItem() {
           Column() {
+            // 测试点：多行文本输入框
             TextArea({
               text: this.textContent + this.textContent + this.textContent + this.textContent + this.textContent +
               this.textContent + this.textContent + this.textContent + this.textContent + this.textContent
@@ -204,8 +210,10 @@ struct GridOriOneItem {
           }
           .borderRadius(5000)
           .borderColor(Color.Black)
-          .width('100%') //TODO 疑问：子组件像素是否需要width也设置
+          .width('100%')
           .backgroundColor(Color.Yellow)
+          // 测试点：GridItem组件的height属性设置不同值。验证GridItem的布局是否正确
+          // 预期结果：height属性设置在一定范围内，GridItem组件的布局正常
           .height(this.changeList[this.changeIndex])
         }
 
