@@ -501,6 +501,7 @@ void CheckMinMaxLineHeight(const TextStyle& textStyle, Rosen::TextStyle& txtStyl
         }
         txtStyle.lineHeightStyle = Rosen::LineHeightStyle::kFontHeight;
         txtStyle.heightScale = info.lineHeightMultiply;
+        txtStyle.heightOnly = true;
     }
 }
 
