@@ -32,6 +32,7 @@ using DisplayCountVariantType = std::variant<int32_t, std::string, Ark_SwiperAut
 const static int32_t DEFAULT_DURATION = 400;
 const static int32_t DEFAULT_DISPLAY_COUNT = 1;
 const static int32_t DEFAULT_CACHED_COUNT = 1;
+const auto DEFAULT_CURVE = AceType::MakeRefPtr<InterpolatingSpring>(-1, 1, 328, 34);
 
 namespace {
 std::optional<int32_t> ProcessBindableIndex(FrameNode* frameNode, const Opt_Union_I32_Bindable *value)
@@ -478,6 +479,12 @@ void SetCurveImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    auto curveVal = Converter::OptConvert<RefPtr<Curve>>(*value);
+    if (!curveVal) {
+        SwiperModelStatic::SetCurve(frameNode, DEFAULT_CURVE);
+        return;
+    }
+    SwiperModelStatic::SetCurve(frameNode, *curveVal);
 }
 void SetOnChangeImpl(Ark_NativePointer node,
                      const Opt_Callback_I32_Void* value)
