@@ -29,9 +29,9 @@ import {
     uiUtils,
     IObservedObject,
     OBSERVE,
-    ObserveSingleton,
     IStateDecoratedVariable
 } from '../stateManagement';
+import { ObserveSingleton } from "arkui/stateManagement/base/observeSingleton";
 import { IDecoratedV1Variable, WatchFuncType, WatchIdType } from '../stateManagement/decorator';
 import { UIContextUtil } from 'arkui/base/UIContextUtil';
 import { DetachedRootEntryImpl, UIContextImpl } from 'arkui/base/UIContextImpl';
