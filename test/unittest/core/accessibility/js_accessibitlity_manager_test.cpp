@@ -94,6 +94,18 @@ public:
     }
 };
 
+class MockScreenReaderCallback : public AccessibilityScreenReaderObserverCallback {
+public:
+    explicit MockScreenReaderCallback(int64_t accessibilityId)
+        : AccessibilityScreenReaderObserverCallback(accessibilityId)
+    {}
+    ~MockScreenReaderCallback() override = default;
+    bool OnState(bool state) override
+    {
+        return true;
+    }
+};
+
 class MockStageManager : public StageManager {
 public:
     explicit MockStageManager(const RefPtr<FrameNode>& stage)
@@ -4105,6 +4117,42 @@ HWTEST_F(JsAccessibilityManagerTest, GetAccessibilityPrevFocusNode001, TestSize.
     ASSERT_EQ(prevNode, nullptr);
 }
 
+/**
+ * @tc.name: RegisterScreenReaderObserverCallback
+ * @tc.desc: Test UIExtensionManager RegisterScreenReaderObserverCallback/DeregisterScreenReaderObserverCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, RegisterScreenReaderObserverCallback, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    EXPECT_EQ(0, jsAccessibilityManager->componentScreenReaderCallbackMap_.size());
+
+    /**
+     * @tc.steps: step2. test RegisterScreenReaderObserverCallback
+     */
+    int64_t elementId0 = 0;
+    auto callback0 = std::make_shared<MockScreenReaderCallback>(0);
+    jsAccessibilityManager->RegisterScreenReaderObserverCallback(elementId0, callback0);
+    EXPECT_EQ(1, jsAccessibilityManager->componentScreenReaderCallbackMap_.size());
+    EXPECT_EQ(callback0, jsAccessibilityManager->componentScreenReaderCallbackMap_[elementId0]);
+    int64_t elementId1 = 1;
+    auto callback1 = std::make_shared<MockScreenReaderCallback>(1);
+    jsAccessibilityManager->RegisterScreenReaderObserverCallback(elementId1, callback1);
+    EXPECT_EQ(2, jsAccessibilityManager->componentScreenReaderCallbackMap_.size());
+    EXPECT_EQ(callback1, jsAccessibilityManager->componentScreenReaderCallbackMap_[elementId1]);
+
+    /**
+     * @tc.steps: step3. test DeregisterScreenReaderObserverCallback
+     */
+    jsAccessibilityManager->DeregisterScreenReaderObserverCallback(elementId1);
+    EXPECT_EQ(1, jsAccessibilityManager->componentScreenReaderCallbackMap_.size());
+    EXPECT_EQ(callback0, jsAccessibilityManager->componentScreenReaderCallbackMap_[elementId0]);
+    jsAccessibilityManager->DeregisterScreenReaderObserverCallback(elementId0);
+    EXPECT_EQ(0, jsAccessibilityManager->componentScreenReaderCallbackMap_.size());
+}
 
 /**
  * @tc.name: JsAccessibilityManager021

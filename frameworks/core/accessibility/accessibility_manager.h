@@ -140,6 +140,21 @@ struct AccessibilityCallbackEvent {
     }
 };
 
+class AccessibilityScreenReaderObserverCallback {
+public:
+    explicit AccessibilityScreenReaderObserverCallback(int64_t accessibilityId) : accessibilityId_(accessibilityId) {}
+    virtual ~AccessibilityScreenReaderObserverCallback() = default;
+    virtual bool OnState(bool state) = 0;
+
+    int64_t GetAccessibilityId() const
+    {
+        return accessibilityId_;
+    }
+
+private:
+    int64_t accessibilityId_ = -1;
+};
+
 class AccessibilitySAObserverCallback {
 public:
     explicit AccessibilitySAObserverCallback(int64_t accessibilityId) : accessibilityId_(accessibilityId)
@@ -388,6 +403,9 @@ public:
 
     virtual void AddHoverTransparentCallback(const RefPtr<NG::FrameNode>& node) {};
     virtual bool CheckHoverTransparentCallbackListEmpty(int32_t containerId) {return true;};
+    virtual void RegisterScreenReaderObserverCallback(
+        int64_t elementId, const std::shared_ptr<AccessibilityScreenReaderObserverCallback>& callback) {};
+    virtual void DeregisterScreenReaderObserverCallback(int64_t elementId) {};
 
     virtual bool NeedChangeToReadableNode(const RefPtr<NG::FrameNode>& curFrameNode,
         RefPtr<NG::FrameNode>& readableNode)

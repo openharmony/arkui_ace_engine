@@ -7434,6 +7434,19 @@ void JsAccessibilityManager::DeregisterAccessibilitySAObserverCallback(int64_t e
     componentSACallbackMap_.erase(elementId);
 }
 
+void JsAccessibilityManager::RegisterScreenReaderObserverCallback(
+    int64_t elementId, const std::shared_ptr<AccessibilityScreenReaderObserverCallback>& callback)
+{
+    std::lock_guard<std::mutex> lock(componentScreenReaderCallbackMutex_);
+    componentScreenReaderCallbackMap_[elementId] = callback;
+}
+
+void JsAccessibilityManager::DeregisterScreenReaderObserverCallback(int64_t elementId)
+{
+    std::lock_guard<std::mutex> lock(componentScreenReaderCallbackMutex_);
+    componentScreenReaderCallbackMap_.erase(elementId);
+}
+
 void JsAccessibilityManager::NotifyAccessibilitySAStateChange(bool state)
 {
     std::lock_guard<std::mutex> lock(componentSACallbackMutex_);
@@ -7484,6 +7497,15 @@ void JsAccessibilityManager::NotifySetChildTreeIdAndWinId(
     CHECK_NULL_VOID(callback);
     callback->SetChildTreeId(treeId);
     callback->OnSetChildTree(childWindowId, treeId);
+}
+
+void JsAccessibilityManager::NotifyScreenReaderObserverStateChange(bool state)
+{
+    std::lock_guard<std::mutex> lock(componentScreenReaderCallbackMutex_);
+    for (auto &item : componentScreenReaderCallbackMap_) {
+        CHECK_NULL_CONTINUE(item.second);
+        item.second->OnState(state);
+    }
 }
 
 bool JsAccessibilityManager::CheckIsChildElement(
@@ -7888,6 +7910,7 @@ void JsAccessibilityManager::JsAccessibilityStateObserver::OnStateChanged(const 
                 jsAccessibilityManager->isScreenReaderEnabledInitialized_ = true;
                 jsAccessibilityManager->isScreenReaderEnabled_ = state;
                 AceApplicationInfo::GetInstance().SetAccessibilityScreenReadEnabled(state);
+                jsAccessibilityManager->NotifyScreenReaderObserverStateChange(state);
             } else if (eventType == AccessibilityStateEventType::EVENT_CONFIG_EVENT_CHANGED) {
                 std::vector<uint32_t> needEvents;
                 auto client = AccessibilitySystemAbilityClient::GetInstance();
