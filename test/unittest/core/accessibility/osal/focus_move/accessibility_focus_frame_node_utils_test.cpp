@@ -331,7 +331,7 @@ HWTEST_F(JsAccessibilityFocusFrameNodeUtilsTest, JsAccessibilityFocusFrameNodeUt
      * @tc.steps: step2. test GetPropChildrenCount
      */
     Accessibility::PropValue propValue;
-    EXPECT_TRUE(frameNodeRulesCheckNode.GetPropIsEnable(propValue));
+    EXPECT_TRUE(frameNodeRulesCheckNode.GetPropChildrenCount(propValue));
     EXPECT_EQ(propValue.valueType, Accessibility::ValueType::NUMBER);
     EXPECT_EQ(propValue.valueNum, 0);
 }
