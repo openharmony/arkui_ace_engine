@@ -668,7 +668,7 @@ export class PersistenceV2Impl {
             throw new Error(PersistenceV2Impl.NOT_SUPPORT_TYPE_MESSAGE_);
         }
 
-        return new StoragePropertyV2<T>(key, uiUtils.autoProxyObject(value, true));
+        return new StoragePropertyV2<T>(key, uiUtils.autoProxyObject(value));
     }
 
     private static getTargetClassName<T extends object>(value: T): string {
@@ -720,7 +720,7 @@ export class PersistenceV2Impl {
             if (newValue === undefined) {
                 throw new Error("unable to deserialize object for the key: " + key);
             }
-            let newObservedValue = uiUtils.autoProxyObject(newValue!, true);
+            let newObservedValue = uiUtils.autoProxyObject(newValue!);
             property.set(newObservedValue);
 
             // Collect dependencies

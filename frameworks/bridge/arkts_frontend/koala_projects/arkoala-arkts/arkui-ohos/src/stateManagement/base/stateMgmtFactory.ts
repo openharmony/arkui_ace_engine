@@ -72,18 +72,18 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
         return new SubscribedWatches();
     }
     makeLocal<T>(owningView: ExtendableComponent, varName: string, initValue: T): ILocalDecoratedVariable<T> {
-        return new LocalDecoratedVariable<T>(owningView, varName, uiUtils.autoProxyObject(initValue, true) as T);
+        return new LocalDecoratedVariable<T>(owningView, varName, uiUtils.autoProxyObject(initValue) as T);
     }
     makeStaticLocal<T>(varName: string, initValue: T): ILocalDecoratedVariable<T> {
-        return new LocalDecoratedVariable<T>(null, varName, uiUtils.autoProxyObject(initValue, true) as T);
+        return new LocalDecoratedVariable<T>(null, varName, uiUtils.autoProxyObject(initValue) as T);
     }
 
     makeParam<T>(owningView: ExtendableComponent, varName: string, initValue: T): IParamDecoratedVariable<T> {
-        return new ParamDecoratedVariable<T>(owningView, varName, uiUtils.autoProxyObject(initValue, true) as T);
+        return new ParamDecoratedVariable<T>(owningView, varName, uiUtils.autoProxyObject(initValue) as T);
     }
 
     makeParamOnce<T>(owningView: ExtendableComponent, varName: string, initValue: T): IParamOnceDecoratedVariable<T> {
-        return new ParamOnceDecoratedVariable<T>(owningView, varName, uiUtils.autoProxyObject(initValue, true) as T);
+        return new ParamOnceDecoratedVariable<T>(owningView, varName, uiUtils.autoProxyObject(initValue) as T);
     }
 
     makeProvider<T>(
@@ -96,7 +96,7 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
             owningView,
             varName,
             provideAlias,
-            uiUtils.autoProxyObject(initValue, true) as T
+            uiUtils.autoProxyObject(initValue) as T
         );
     }
 
@@ -110,7 +110,7 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
             owningView,
             varName,
             provideAlias,
-            uiUtils.autoProxyObject(initValue, true) as T
+            uiUtils.autoProxyObject(initValue) as T
         );
     }
 
@@ -485,7 +485,7 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
             propertyNameInAppStorage,
             varName,
             '@StorageLink',
-            UIUtils.makeObserved(defaultValue) as T,
+            uiUtils.makeV1Observed(defaultValue) as T,
             watchFunc
         );
         if (result === undefined) {
@@ -507,7 +507,7 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
             propertyNameInAppStorage,
             varName,
             '@LocalStorageLink',
-            UIUtils.makeObserved(defaultValue) as T,
+            uiUtils.makeV1Observed(defaultValue) as T,
             watchFunc
         );
         if (result === undefined) {
@@ -526,7 +526,7 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
         initValue: T,
         watchFunc?: WatchFuncType
     ): IStoragePropRefDecoratedVariable<T> {
-        const ref = AppStorage.setAndRef<T>(propName, UIUtils.makeObserved(initValue));
+        const ref = AppStorage.setAndRef<T>(propName, uiUtils.makeV1Observed(initValue));
         if (ref === undefined) {
             throw new TypeError(`@StoragePropRef('${propName}') ${varName} failed to makeStoragePropRef`);
         }
@@ -547,7 +547,7 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
         initValue: T,
         watchFunc?: WatchFuncType
     ): ILocalStoragePropRefDecoratedVariable<T> {
-        const ref = owningView.localStorage_.setAndRef<T>(propName, UIUtils.makeObserved(initValue));
+        const ref = owningView.localStorage_.setAndRef<T>(propName, uiUtils.makeV1Observed(initValue));
         if (ref === undefined) {
             throw new TypeError(`@LocalStoragePropRef('${propName}') ${varName} makeLocalStoragePropRef`);
         }

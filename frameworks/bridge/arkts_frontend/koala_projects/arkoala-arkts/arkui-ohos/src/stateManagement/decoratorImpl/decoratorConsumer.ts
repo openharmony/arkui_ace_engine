@@ -53,7 +53,6 @@ export class ConsumerDecoratedVariable<T> extends DecoratedV2VariableBase implem
         if (value === newValue) {
             return;
         }
-        if (this.backing_!.set(uiUtils.autoProxyObject(newValue, true) as T)) {
-        }
+        this.backing_!.setNoCheck(uiUtils.autoProxyObject(newValue) as T);
     }
 }
