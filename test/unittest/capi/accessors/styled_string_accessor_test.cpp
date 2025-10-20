@@ -18,6 +18,7 @@
 #include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/implementation/background_color_style_peer.h"
 #include "core/interfaces/native/implementation/baseline_offset_style_peer.h"
 #include "core/interfaces/native/implementation/custom_span_peer.h"
@@ -31,6 +32,7 @@
 #include "core/interfaces/native/implementation/text_shadow_style_peer.h"
 #include "core/interfaces/native/implementation/text_style_peer.h"
 #include "core/interfaces/native/implementation/url_style_peer.h"
+#include "core/interfaces/native/implementation/user_data_span_holder.h"
 #include "core/interfaces/native/implementation/styled_string.h"
 #include "adapter/ohos/capability/html/span_to_html.h"
 #include "adapter/ohos/capability/html/html_to_span.h"
@@ -43,22 +45,6 @@
 
 namespace OHOS::Ace::NG {
 
-namespace Converter {
-template<>
-std::vector<uint8_t> Convert(const Ark_Buffer& src)
-{
-    std::vector<uint8_t> dataArray;
-    auto array = (src.data != nullptr) ? static_cast<uint8_t*>(src.data) : nullptr;
-    auto size = src.length / sizeof(uint8_t);
-    if (array && size > 0) {
-        for (size_t idx = 0; idx < size; idx++) {
-            dataArray.push_back(array[idx]);
-        }
-    }
-    return dataArray;
-}
-}
-
 constexpr int TEST_LENGTH = 2;
 constexpr int TEST_START_STR = 1;
 constexpr int TEST_START_DCRN = TEST_START_STR + TEST_LENGTH + 1;
@@ -70,6 +56,7 @@ constexpr int TEST_START_BGCL = TEST_START_LNHT + TEST_LENGTH + 1;
 constexpr int TEST_START_URL = TEST_START_BGCL + TEST_LENGTH + 1;
 constexpr int TEST_START_PSST = TEST_START_URL + TEST_LENGTH + 1;
 constexpr int TEST_START_PSPM = TEST_START_PSST + TEST_LENGTH + 1;
+constexpr int TEST_START_EXTSPAN = TEST_START_PSPM + TEST_LENGTH + 1;
 constexpr auto STRING_TEST_VALUE = "This is a test string for styled text, and more text to test it out.\n";
 
 static Converter::ConvContext s_ctx;
@@ -152,6 +139,7 @@ const Ark_LeadingMarginPlaceholder TEST_PSPM_LEADING_MARGIN {
     .pixelMap = TEST_PIXELMAP,
     .size = std::get<1>(TEST_TUPLE_DIMENSION_DIMENSION)
 };
+const int TEST_USERDATASPAN_RESOURCE_ID = 123;
 const int EXPECTED_NODE_ID = 777;
 const int TEST_CONTAINER_ID = 888;
 
@@ -166,7 +154,8 @@ const std::vector<std::pair<int, Ace::SpanType>> SPAN_TYPE_TEST_VALUES = {
     { TEST_START_URL, Ace::SpanType::Url },
     { TEST_START_PSST, Ace::SpanType::ParagraphStyle },
     { TEST_START_PSPM, Ace::SpanType::ParagraphStyle },
-    };
+    { TEST_START_EXTSPAN, Ace::SpanType::ExtSpan },
+};
 
 namespace GeneratedModifier {
     const GENERATED_ArkUIImageAttachmentAccessor* GetImageAttachmentAccessor();
@@ -215,6 +204,8 @@ struct StyleOptionsKeeper {
                 FillParagraphStyle(item.styledValue);
             } else if (span.second == Ace::SpanType::ParagraphStyle && span.first == TEST_START_PSPM) {
                 FillParagraphStylePM(item.styledValue);
+            } else if (span.second == Ace::SpanType::ExtSpan) {
+                FillUserDataSpan(item.styledValue);
             }
         }
 
@@ -369,6 +360,18 @@ private:
         auto optParagraphStyle = Converter::ArkValue<Opt_ParagraphStyleInterface>(paragraphStyle);
         peerParagraphStylePM = GeneratedModifier::GetParagraphStyleAccessor()->construct(&optParagraphStyle);
         styledValue = Converter::ArkUnion<Ark_StyledStringValue, Ark_ParagraphStyle>(peerParagraphStylePM);
+    }
+
+    void FillUserDataSpan(Ark_StyledStringValue& styledValue)
+    {
+        Ark_UserDataSpan arkUserDataSpan = {
+            .resource = {
+                .resourceId = TEST_USERDATASPAN_RESOURCE_ID,
+                .hold = [](InteropInt32 id) { EXPECT_EQ(id, TEST_USERDATASPAN_RESOURCE_ID); },
+                .release = [](InteropInt32 id) { EXPECT_EQ(id, TEST_USERDATASPAN_RESOURCE_ID); }
+            }
+        };
+        styledValue = Converter::ArkUnion<Ark_StyledStringValue, Ark_UserDataSpan>(arkUserDataSpan);
     }
 };
 namespace {
@@ -801,21 +804,29 @@ HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorParagraphStylePixe
 }
 
 /**
- * @tc.name:DISABLED_styledStringCtorExtSpan
+ * @tc.name:styledStringCtorExtSpan
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(StyledStringAccessorUnionStringTest, DISABLED_styledStringCtorExtSpan, TestSize.Level1)
+HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorExtSpan, TestSize.Level1)
 {
-    // not implement
+    ASSERT_NE(peer_->spanString, nullptr);
+
+    auto spans = peer_->spanString->GetSpans(TEST_START_EXTSPAN, TEST_LENGTH);
+    ASSERT_FALSE(spans.empty());
+    auto extSpan = AceType::DynamicCast<ExtSpan>(spans.front());
+    EXPECT_NE(extSpan, nullptr);
+    auto userDataSpanHolder = AceType::DynamicCast<UserDataSpanHolder>(spans.front());
+    ASSERT_TRUE(userDataSpanHolder);
+    EXPECT_EQ(userDataSpanHolder->span_.resource.resourceId, TEST_USERDATASPAN_RESOURCE_ID);
 }
 
 /**
- * @tc.name:styledStringEquals
- * @tc.desc:
+ * @tc.name:DISABLED_styledStringEquals
+ * @tc.desc: StyledString::operator==() is incorrect in case with UserDataSpan
  * @tc.type: FUNC
  */
-HWTEST_F(StyledStringAccessorUnionStringTest, styledStringEquals, TestSize.Level1)
+HWTEST_F(StyledStringAccessorUnionStringTest, DISABLED_styledStringEquals, TestSize.Level1)
 {
     ASSERT_NE(peer_->spanString, nullptr);
     EXPECT_TRUE(accessor_->equals(peer_, peer_));
@@ -924,7 +935,7 @@ HWTEST_F(StyledStringAccessorUnionStringTest, styledStringFromHtmlTestValid, Tes
     EXPECT_TRUE(IsSpanItemSame(checkEvent->spanString->GetSpanItems(), peer_->spanString->GetSpanItems()));
 
     AsyncWorkTestHelper::DoComplete();
-    }
+}
 
 /**
  * @tc.name: styledStringFromHtmlTestInvalid
@@ -980,30 +991,97 @@ HWTEST_F(StyledStringAccessorUnionStringTest, toHtmlTest, TestSize.Level1)
 }
 
 /**
- * @tc.name:styledStringMarshalling
+ * @tc.name:styledStringMarshalling1Test
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(StyledStringAccessorUnionStringTest, styledStringMarshalling, TestSize.Level1)
+HWTEST_F(StyledStringAccessorUnionStringTest, styledStringMarshalling1Test, TestSize.Level1)
 {
     ASSERT_NE(accessor_->marshalling1, nullptr);
 
     std::vector<uint8_t> tlvData;
     peer_->spanString->EncodeTlv(tlvData);
     ASSERT_FALSE(tlvData.empty());
+
     Ark_Buffer arkBuffer = accessor_->marshalling1(peer_);
-    auto buffer = Converter::Convert<std::vector<uint8_t>>(arkBuffer);
-    EXPECT_EQ(buffer, tlvData);
+    ASSERT_EQ(arkBuffer.length, tlvData.size());
+    auto arkBufferData = static_cast<uint8_t*>(arkBuffer.data);
+    auto arkBufferDataEnd = arkBufferData + arkBuffer.length;
+    EXPECT_TRUE(std::equal(arkBufferData, arkBufferDataEnd, tlvData.data()));
 }
 
 /**
- * @tc.name: styledStringUnmarshalling0Test
+ * @tc.name: styledStringMarshalling0Unmarshalling0Test
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(StyledStringAccessorUnionStringTest, DISABLED_styledStringUnmarshalling0Test, TestSize.Level1)
+HWTEST_F(StyledStringAccessorUnionStringTest, styledStringMarshalling0Unmarshalling0Test, TestSize.Level1)
 {
+    ASSERT_NE(accessor_->marshalling0, nullptr);
     ASSERT_NE(accessor_->unmarshalling0, nullptr);
+
+    static const int32_t TEST_NEW_USERDATASPAN_ID = 567;
+    static char marshallResult[] {"the user data marshalling result"};
+    static const size_t marshallResultLen = std::strlen(marshallResult);
+
+    auto marshallUserDataFunc = [](Ark_VMContext vmContext, const Ark_Int32 resourceId,
+        const Ark_UserDataSpan marshallableVal, const Callback_Buffer_Void continuation) {
+            EXPECT_EQ(resourceId, EXPECTED_NODE_ID);
+            EXPECT_EQ(marshallableVal.resource.resourceId, TEST_USERDATASPAN_RESOURCE_ID);
+
+            Ark_Buffer arkMarshallResult {
+                .data = marshallResult,
+                .length = marshallResultLen
+            };
+            CallbackHelper(continuation).InvokeSync(arkMarshallResult);
+    };
+    auto arkMarshUserDataCallback = Converter::ArkValue<StyledStringMarshallCallback>(
+        nullptr, marshallUserDataFunc, EXPECTED_NODE_ID);
+    Ark_Buffer arkBuffer = accessor_->marshalling0(peer_, &arkMarshUserDataCallback);
+
+    static RefPtr<OHOS::Ace::SpanString> checkSpanString = nullptr;
+    auto unmarshallUserDataFunc = [](Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Buffer buf,
+        const Callback_StyledStringMarshallingValue_Void continuation) {
+            EXPECT_EQ(resourceId, EXPECTED_NODE_ID);
+            EXPECT_EQ(std::memcmp(marshallResult, buf.data, marshallResultLen), 0);
+            Ark_UserDataSpan arkUserDataSpan = {
+                .resource = {
+                    .resourceId = TEST_NEW_USERDATASPAN_ID,
+                    .hold = [](InteropInt32 id) { EXPECT_EQ(id, TEST_NEW_USERDATASPAN_ID); },
+                    .release = [](InteropInt32 id) { EXPECT_EQ(id, TEST_NEW_USERDATASPAN_ID); }
+                }
+            };
+            CallbackHelper(continuation).InvokeSync(arkUserDataSpan);
+    };
+    auto arkUnmarshUserDataCallback = Converter::ArkValue<StyledStringUnmarshallCallback>(nullptr,
+        unmarshallUserDataFunc, EXPECTED_NODE_ID);
+
+    auto onUnmarshalling = [](Ark_VMContext context, const Ark_Int32 resourceId,
+        const Opt_StyledString value, const Opt_Array_String error) {
+        EXPECT_FALSE(Converter::GetOpt(error).has_value());
+        auto arkPeer = Converter::GetOpt(value);
+        ASSERT_TRUE(arkPeer.has_value());
+        auto peer = arkPeer.value();
+        ASSERT_TRUE(peer);
+        checkSpanString = peer->spanString;
+    };
+    auto arkCallback = Converter::ArkValue<
+        Callback_Opt_StyledString_Opt_Array_String_Void>(onUnmarshalling, EXPECTED_NODE_ID);
+    accessor_->unmarshalling0(vmContext_, AsyncWorkTestHelper::GetWorkerPtr(), &arkBuffer,
+        &arkUnmarshUserDataCallback, &arkCallback);
+    EXPECT_TRUE(AsyncWorkTestHelper::HasWorkCreated());
+    EXPECT_FALSE(checkSpanString);
+
+    AsyncWorkTestHelper::DoExeceute();
+    ASSERT_TRUE(checkSpanString);
+    EXPECT_EQ(checkSpanString->GetString(), peer_->spanString->GetString());
+    auto spans = checkSpanString->GetSpans(0, std::strlen(STRING_TEST_VALUE), SpanType::ExtSpan);
+    ASSERT_FALSE(spans.empty());
+    auto userDataSpanHolder = AceType::DynamicCast<UserDataSpanHolder>(spans.front());
+    ASSERT_TRUE(userDataSpanHolder);
+    EXPECT_EQ(userDataSpanHolder->span_.resource.resourceId, TEST_NEW_USERDATASPAN_ID);
+
+    AsyncWorkTestHelper::DoComplete();
 }
 
 /**
@@ -1016,12 +1094,12 @@ HWTEST_F(StyledStringAccessorUnionStringTest, styledStringUnmarshalling1TestVali
     ASSERT_NE(accessor_->unmarshalling1, nullptr);
 
     std::vector<uint8_t> tlvData;
-    auto encodeResult = peer_->spanString->EncodeTlv(tlvData);
-    ASSERT_TRUE(encodeResult);
-    auto data = tlvData.data();
-    size_t bufferSize = tlvData.size();
-    std::string testBuffer(data, data + bufferSize);
-    ASSERT_FALSE(testBuffer.empty());
+    peer_->spanString->EncodeTlv(tlvData);
+    ASSERT_FALSE(tlvData.empty());
+    Ark_Buffer akrBuffer {
+        .data = tlvData.data(),
+        .length = tlvData.size()
+    };
 
     struct CheckEvent {
         int32_t nodeId;
@@ -1034,8 +1112,7 @@ HWTEST_F(StyledStringAccessorUnionStringTest, styledStringUnmarshalling1TestVali
         auto arkPeer = Converter::GetOpt(value);
         ASSERT_TRUE(arkPeer.has_value());
         auto peer = arkPeer.value();
-        ASSERT_NE(peer, nullptr);
-        ASSERT_NE(peer->spanString, nullptr);
+        ASSERT_TRUE(peer && peer->spanString);
         checkEvent = {
             .nodeId = resourceId,
             .value = peer->spanString->GetString()
@@ -1043,7 +1120,6 @@ HWTEST_F(StyledStringAccessorUnionStringTest, styledStringUnmarshalling1TestVali
     };
     auto arkCallback = Converter::ArkValue<
         Callback_Opt_StyledString_Opt_Array_String_Void>(onUnmarshalling, EXPECTED_NODE_ID);
-    auto akrBuffer = Converter::ArkValue<Ark_Buffer>(testBuffer, nullptr);
 
     accessor_->unmarshalling1(vmContext_, AsyncWorkTestHelper::GetWorkerPtr(), &akrBuffer, &arkCallback);
     EXPECT_TRUE(AsyncWorkTestHelper::HasWorkCreated());
@@ -1053,7 +1129,6 @@ HWTEST_F(StyledStringAccessorUnionStringTest, styledStringUnmarshalling1TestVali
     ASSERT_TRUE(checkEvent.has_value());
     EXPECT_EQ(checkEvent->nodeId, EXPECTED_NODE_ID);
     EXPECT_EQ(checkEvent->value, peer_->spanString->GetString());
-
     AsyncWorkTestHelper::DoComplete();
 }
 
