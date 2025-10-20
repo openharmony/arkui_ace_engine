@@ -22,6 +22,7 @@ import { WrappedBuilder } from "#generated"
 import { RecordData } from "@ohos.base"
 
 export interface ComponentContentBase extends Content {
+    getNodePtr(): KPointer | undefined;
 }
 
 export class ComponentContent<T = undefined> implements ComponentContentBase {
