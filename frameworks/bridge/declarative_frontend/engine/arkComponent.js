@@ -10410,6 +10410,20 @@ class RichEditorOnDidIMEInputModifier extends ModifierWithKey {
 }
 RichEditorOnDidIMEInputModifier.identity = Symbol('richEditorOnDidIMEInput');
 
+class RichEditorOnWillAttachIMEModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().richEditor.resetOnWillAttachIME(node);
+    } else {
+      getUINativeModule().richEditor.setOnWillAttachIME(node, this.value);
+    }
+  }
+}
+RichEditorOnWillAttachIMEModifier.identity = Symbol('richEditorOnWillAttachIME');
+
 class RichEditorEnableHapticFeedbackModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -10621,6 +10635,10 @@ class ArkRichEditorComponent extends ArkComponent {
   }
   onDidIMEInput(callback) {
     modifierWithKey(this._modifiersWithKeys, RichEditorOnDidIMEInputModifier.identity, RichEditorOnDidIMEInputModifier, callback);
+    return this;
+  }
+  onWillAttachIME(callback) {
+    modifierWithKey(this._modifiersWithKeys, RichEditorOnWillAttachIMEModifier.identity, RichEditorOnWillAttachIMEModifier, callback);
     return this;
   }
   enableHapticFeedback(value) {

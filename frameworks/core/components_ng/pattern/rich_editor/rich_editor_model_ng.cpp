@@ -503,6 +503,14 @@ void RichEditorModelNG::SetOnWillAttachIME(IMEAttachCallback&& func)
     eventHub->SetOnWillAttachIME(std::move(func));
 }
 
+void RichEditorModelNG::SetOnWillAttachIME(FrameNode* frameNode, IMEAttachCallback&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillAttachIME(std::move(func));
+}
+
 void RichEditorModelNG::SetSelectionMenuOptions(const OnCreateMenuCallback&& onCreateMenuCallback,
     const OnMenuItemClickCallback&& onMenuItemClick, const OnPrepareMenuCallback&& onPrepareMenuCallback)
 {
