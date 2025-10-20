@@ -6002,7 +6002,7 @@ HWTEST_F(WebSelectOverlayTest, CloseSelectOverlay_001, TestSize.Level1)
     EXPECT_NE(frameNode, nullptr);
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
-    EXPECT_NE(webPattern, nullptr);
+    ASSERT_NE(webPattern, nullptr);
     MockPipelineContext::SetUp();
     std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params =
         std::make_shared<OHOS::NWeb::NWebQuickMenuParamsSelectImpl>();
