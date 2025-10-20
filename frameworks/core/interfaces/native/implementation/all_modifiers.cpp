@@ -197,6 +197,9 @@ const GENERATED_ArkUIActionSheetAccessor* GetActionSheetAccessor();
 const GENERATED_ArkUIAlertDialogAccessor* GetAlertDialogAccessor();
 const GENERATED_ArkUIAnimationExtenderAccessor* GetAnimationExtenderAccessor();
 const GENERATED_ArkUIAppearSymbolEffectAccessor* GetAppearSymbolEffectAccessor();
+const GENERATED_ArkUIArcListExtenderAccessor* GetArcListExtenderAccessor();
+const GENERATED_ArkUIArcListItemExtenderAccessor* GetArcListItemExtenderAccessor();
+const GENERATED_ArkUIArcScrollBarExtenderAccessor* GetArcScrollBarExtenderAccessor();
 const GENERATED_ArkUIAxisEventAccessor* GetAxisEventAccessor();
 const GENERATED_ArkUIBackgroundColorStyleAccessor* GetBackgroundColorStyleAccessor();
 const GENERATED_ArkUIBaseEventAccessor* GetBaseEventAccessor();
@@ -500,6 +503,9 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetAlertDialogAccessor,
         GetAnimationExtenderAccessor,
         GetAppearSymbolEffectAccessor,
+        GetArcListExtenderAccessor,
+        GetArcListItemExtenderAccessor,
+        GetArcScrollBarExtenderAccessor,
         GetAxisEventAccessor,
         GetBackgroundColorStyleAccessor,
         GetBaseEventAccessor,

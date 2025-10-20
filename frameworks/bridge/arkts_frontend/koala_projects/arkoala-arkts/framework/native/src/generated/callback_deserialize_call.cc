@@ -58,6 +58,28 @@ void deserializeAndCallSyncAccessibilityFocusCallback(Ark_VMContext vmContext, K
     Ark_Boolean isFocus = thisDeserializer.readBoolean();
     callSyncMethod(vmContext, resourceId, isFocus);
 }
+void deserializeAndCallArcScrollIndexHandler(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Int32 start, const Ark_Int32 end, const Ark_Int32 center)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_ArcScrollIndexHandler))));
+    thisDeserializer.readPointer();
+    Ark_Int32 start = thisDeserializer.readInt32();
+    Ark_Int32 end = thisDeserializer.readInt32();
+    Ark_Int32 center = thisDeserializer.readInt32();
+    _call(_resourceId, start, end, center);
+}
+void deserializeAndCallSyncArcScrollIndexHandler(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 start, const Ark_Int32 end, const Ark_Int32 center)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_ArcScrollIndexHandler))));
+    Ark_Int32 start = thisDeserializer.readInt32();
+    Ark_Int32 end = thisDeserializer.readInt32();
+    Ark_Int32 center = thisDeserializer.readInt32();
+    callSyncMethod(vmContext, resourceId, start, end, center);
+}
 void deserializeAndCallAsyncCallback_image_PixelMap_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
@@ -6789,6 +6811,7 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
     switch (static_cast<CallbackKind>(kind)) {
         case Kind_AccessibilityCallback: return deserializeAndCallAccessibilityCallback(thisArray, thisLength);
         case Kind_AccessibilityFocusCallback: return deserializeAndCallAccessibilityFocusCallback(thisArray, thisLength);
+        case Kind_ArcScrollIndexHandler: return deserializeAndCallArcScrollIndexHandler(thisArray, thisLength);
         case Kind_AsyncCallback_image_PixelMap_Void: return deserializeAndCallAsyncCallback_image_PixelMap_Void(thisArray, thisLength);
         case Kind_AsyncCallback_Void: return deserializeAndCallAsyncCallback_Void(thisArray, thisLength);
         case Kind_ButtonModifierBuilder: return deserializeAndCallButtonModifierBuilder(thisArray, thisLength);
@@ -7099,6 +7122,7 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
     switch (kind) {
         case Kind_AccessibilityCallback: return deserializeAndCallSyncAccessibilityCallback(vmContext, thisArray, thisLength);
         case Kind_AccessibilityFocusCallback: return deserializeAndCallSyncAccessibilityFocusCallback(vmContext, thisArray, thisLength);
+        case Kind_ArcScrollIndexHandler: return deserializeAndCallSyncArcScrollIndexHandler(vmContext, thisArray, thisLength);
         case Kind_AsyncCallback_image_PixelMap_Void: return deserializeAndCallSyncAsyncCallback_image_PixelMap_Void(vmContext, thisArray, thisLength);
         case Kind_AsyncCallback_Void: return deserializeAndCallSyncAsyncCallback_Void(vmContext, thisArray, thisLength);
         case Kind_ButtonModifierBuilder: return deserializeAndCallSyncButtonModifierBuilder(vmContext, thisArray, thisLength);

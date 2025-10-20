@@ -3180,6 +3180,58 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _AppearSymbolEffect_setScope(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _ArcListExtender_arcListConstructor(id: KInt): KPointer
+    @ani.unsafe.Direct
+    native static _ArcListExtender_setArkListOptions(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcListExtender_digitalCrownSensitivity(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcListExtender_space(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcListExtender_scrollBar(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcListExtender_scrollBarColor(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcListExtender_scrollBarWidth(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcListExtender_cachedCount(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcListExtender_chainAnimation(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcListExtender_childrenMainSize(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcListExtender_enableScrollInteraction(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcListExtender_fadingEdge(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcListExtender_friction(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcListExtender_flingSpeedLimit(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcListExtender_onScrollIndex(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcListExtender_onReachStart(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcListExtender_onReachEnd(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcListExtender_onScrollStart(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcListExtender_onScrollStop(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcListExtender_onWillScroll(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcListExtender_onDidScroll(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcListItemExtender_arcListItemConstructor(id: KInt): KPointer
+    @ani.unsafe.Direct
+    native static _ArcListItemExtender_autoScale(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcListItemExtender_swipeAction(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcScrollBarExtender_arcScrollBarConstructor(id: KInt): KPointer
+    @ani.unsafe.Direct
+    native static _ArcScrollBarExtender_setArcScrollBarOptions(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _AxisEvent_construct(): KPointer
     @ani.unsafe.Direct
     native static _AxisEvent_getFinalizer(): KPointer
