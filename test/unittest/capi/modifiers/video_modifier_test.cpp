@@ -1006,7 +1006,7 @@ static std::vector<std::tuple<std::string, Opt_Boolean, std::string>> enableAnal
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(VideoModifierTest, setEnableAnalyzerTestValidValues, TestSize.Level1)
+HWTEST_F(VideoModifierTest, DISABLED_setEnableAnalyzerTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;

@@ -24,11 +24,6 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
-#ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_TEST_UNITTEST_CAPI_MODIFIERS_ACCESSOR_TEST_BASE_H
-#include "test/unittest/capi/modifiers/modifier_test_base.h"
-#endif
-
-
 namespace OHOS::Ace::NG {
 class ICustomNodeBuilderTestHelper {
 public:

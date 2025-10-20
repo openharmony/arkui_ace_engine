@@ -20,6 +20,20 @@
 #include "core/components_ng/pattern/form/form_pattern.h"
 
 namespace OHOS::Ace::NG {
+RefPtr<FrameNode> FormModelStatic::CreateFrameNode(int32_t nodeId)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    if (stack == nullptr) {
+        LOGE("stack is nullptr");
+        return nullptr;
+    }
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::FORM_ETS_TAG, nodeId);
+    auto frameNode =
+        FormNode::GetOrCreateFormNode(V2::FORM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<FormPattern>(); });
+    stack->Push(frameNode);
+    return frameNode;
+}
+
 void FormModelStatic::UpdateProperty(const RequestFormInfo& formInfo)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(FormLayoutProperty, RequestFormInfo, formInfo);

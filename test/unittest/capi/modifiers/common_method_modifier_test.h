@@ -18,13 +18,19 @@
 
 #include <utility>
 
-#include "arkoala_api_generated.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG::Converter {
-inline void AssignArkValue(Ark_Tuple_ResourceColor_Number& dst, const std::pair<Ark_ResourceColor, Ark_Number>& src)
+using ColorStep = std::pair<Ark_ResourceColor, double>;
+inline void AssignArkValue(Ark_Tuple_ResourceColor_F64& dst, const ColorStep& src, ConvContext *ctx)
 {
     dst.value0 = src.first;
-    dst.value1 = src.second;
+    dst.value1 = ArkValue<Ark_Float64>(src.second);
+}
+inline void AssignArkValue(Ark_Tuple_ResourceColor_Number& dst, const ColorStep& src, ConvContext *ctx)
+{
+    dst.value0 = src.first;
+    dst.value1 = ArkValue<Ark_Number>(src.second);
 }
 } // namespace OHOS::Ace::NG::Converter
 

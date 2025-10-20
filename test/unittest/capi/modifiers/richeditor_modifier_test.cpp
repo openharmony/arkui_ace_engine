@@ -368,7 +368,7 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setPlaceholderTest, TestSize.Level1)
     Ark_ResourceStr value = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(TEST_VALUE, &ctx);
     Ark_Font label;
     label.size = Converter::ArkValue<Opt_Length>("30px");
-    label.weight = Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_Number>(TEST_FONT_WEIGHT);
+    label.weight = Converter::ArkUnion<Opt_Union_FontWeight_I32_String, Ark_Int32>(TEST_FONT_WEIGHT);
     label.style = Converter::ArkValue<Opt_FontStyle>(ARK_FONT_STYLE_NORMAL);
     Ark_PlaceholderStyle style;
     style.font = Converter::ArkValue<Opt_Font>(label);
@@ -544,7 +544,7 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setBindSelectionMenuTest, TestSize.Lev
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(modifier_->setBindSelectionMenu, nullptr);
     // Prepare callbacks
-    auto onAppearCallback = [](const Ark_Int32 resourceId, const Ark_Number start, const Ark_Number end) {
+    auto onAppearCallback = [](const Ark_Int32 resourceId, const Ark_Int32 start, const Ark_Int32 end) {
         g_onAppear = true;
     };
     auto onDisappearCallback = [](const Ark_Int32 resourceId) {
@@ -650,10 +650,10 @@ HWTEST_F(RichEditorModifierTest, setMaxLengthTestValidValues, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     int32_t resultValue;
 
-    using OneTestStep = std::tuple<Opt_Number, int32_t>;
+    using OneTestStep = std::tuple<Opt_Int32, int32_t>;
     static const std::vector<OneTestStep> testPlan = {
-        {Converter::ArkValue<Opt_Number>(123321), 123321},
-        {Converter::ArkValue<Opt_Number>(321123), 321123},
+        {Converter::ArkValue<Opt_Int32>(123321), 123321},
+        {Converter::ArkValue<Opt_Int32>(321123), 321123},
     };
 
     for (auto [inputValue, expectedValue]: testPlan) {
@@ -677,12 +677,14 @@ HWTEST_F(RichEditorModifierTest, setMaxLengthTestInvalidValues, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     int32_t resultValue;
 
-    using OneTestStep = std::tuple<Opt_Number, int32_t>;
+    auto validValue = Converter::ArkValue<Opt_Int32>(100);
+    using OneTestStep = std::tuple<Opt_Int32, int32_t>;
     static const std::vector<OneTestStep> testPlan = {
-        {Opt_Number{.tag = Ark_Tag::INTEROP_TAG_UNDEFINED}, ATTRIBUTE_MAX_LENGTH_DEFAULT_VALUE},
-        {Converter::ArkValue<Opt_Number>(-1), ATTRIBUTE_MAX_LENGTH_DEFAULT_VALUE},
+        {Converter::ArkValue<Opt_Int32>(), ATTRIBUTE_MAX_LENGTH_DEFAULT_VALUE},
+        {Converter::ArkValue<Opt_Int32>(-1), ATTRIBUTE_MAX_LENGTH_DEFAULT_VALUE},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
+        modifier_->setMaxLength(node_, &validValue);
         modifier_->setMaxLength(node_, &inputValue);
         resultValue = pattern->GetMaxLength();
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
@@ -716,10 +718,10 @@ HWTEST_F(RichEditorModifierTest, setMaxLinesTestValidValues, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     int32_t resultValue;
 
-    using OneTestStep = std::tuple<Opt_Number, uint32_t>;
+    using OneTestStep = std::tuple<Opt_Int32, uint32_t>;
     static const std::vector<OneTestStep> testPlan = {
-        {Converter::ArkValue<Opt_Number>(123321), 123321},
-        {Converter::ArkValue<Opt_Number>(321123), 321123},
+        {Converter::ArkValue<Opt_Int32>(123321), 123321},
+        {Converter::ArkValue<Opt_Int32>(321123), 321123},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
         modifier_->setMaxLines(node_, &inputValue);
@@ -742,12 +744,14 @@ HWTEST_F(RichEditorModifierTest, setMaxLinesTestInvalidValues, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     int32_t resultValue;
 
-    using OneTestStep = std::tuple<Opt_Number, uint32_t>;
+    auto validValue = Converter::ArkValue<Opt_Int32>(100);
+    using OneTestStep = std::tuple<Opt_Int32, uint32_t>;
     static const std::vector<OneTestStep> testPlan = {
-        {Opt_Number{.tag = Ark_Tag::INTEROP_TAG_UNDEFINED}, ATTRIBUTE_MAX_LINES_DEFAULT_UINT_VALUE},
-        {Converter::ArkValue<Opt_Number>(-1), ATTRIBUTE_MAX_LINES_DEFAULT_UINT_VALUE},
+        {Converter::ArkValue<Opt_Int32>(), ATTRIBUTE_MAX_LINES_DEFAULT_UINT_VALUE},
+        {Converter::ArkValue<Opt_Int32>(-1), ATTRIBUTE_MAX_LINES_DEFAULT_UINT_VALUE},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
+        modifier_->setMaxLines(node_, &validValue);
         modifier_->setMaxLines(node_, &inputValue);
         resultValue = pattern->GetMaxLines();
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;

@@ -53,14 +53,14 @@ std::vector<FontTestStep> getFontSizeTestPlan(const std::string& defaultValue)
 
 std::vector<FontTestStep> getFontWeightTestPlan(const std::string& defaultValue)
 {
-    using FontWeightT = Opt_Union_FontWeight_Number_String;
+    using FontWeightT = Opt_Union_FontWeight_I32_String;
     const std::vector<FontTestStep> testPlan = {
         { {.weight = ArkUnion<FontWeightT, Ark_FontWeight>(ARK_FONT_WEIGHT_BOLD)}, "FontWeight.Bold" },
         { {.weight = ArkUnion<FontWeightT, Ark_FontWeight>(ARK_FONT_WEIGHT_REGULAR)}, "FontWeight.Regular" },
-        { {.weight = ArkUnion<FontWeightT, Ark_Number>(100)}, "100" },
-        { {.weight = ArkUnion<FontWeightT, Ark_Number>(-111)}, defaultValue },
-        { {.weight = ArkUnion<FontWeightT, Ark_Number>(300.00f)}, "300" },
-        { {.weight = ArkUnion<FontWeightT, Ark_Number>(-123.456f)}, defaultValue },
+        { {.weight = ArkUnion<FontWeightT, Ark_Int32>(100)}, "100" },
+        { {.weight = ArkUnion<FontWeightT, Ark_Int32>(-111)}, defaultValue },
+        { {.weight = ArkUnion<FontWeightT, Ark_Int32>(300.00f)}, "300" },
+        { {.weight = ArkUnion<FontWeightT, Ark_Int32>(-123.456f)}, defaultValue },
         { {.weight = ArkUnion<FontWeightT, Ark_String>("700")}, "700" },
         { {.weight = ArkUnion<FontWeightT, Ark_String>("bold")}, "FontWeight.Bold" },
         { {.weight = ArkUnion<FontWeightT, Ark_String>("InvalidData!")}, defaultValue },

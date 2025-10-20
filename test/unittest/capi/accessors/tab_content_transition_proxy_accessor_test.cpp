@@ -75,8 +75,8 @@ HWTEST_F(TabContentTransitionProxyAccessorTest, getFromAndSetFromTest, TestSize.
 {
     ASSERT_NE(accessor_->setFrom, nullptr);
     ASSERT_NE(accessor_->getFrom, nullptr);
-    Ark_Number from = Converter::ArkValue<Ark_Number>(TEST_IDX1);
-    accessor_->setFrom(peer_, &from);
+    auto from = Converter::ArkValue<Ark_Int32>(TEST_IDX1);
+    accessor_->setFrom(peer_, from);
     Ark_Int32 idx = Converter::Convert<int32_t>(accessor_->getFrom(peer_));
     ASSERT_EQ(Converter::Convert<int32_t>(idx), TEST_IDX1);
 }
@@ -90,8 +90,8 @@ HWTEST_F(TabContentTransitionProxyAccessorTest, getToAndSetToTest, TestSize.Leve
 {
     ASSERT_NE(accessor_->setTo, nullptr);
     ASSERT_NE(accessor_->getTo, nullptr);
-    Ark_Number to = Converter::ArkValue<Ark_Number>(TEST_IDX2);
-    accessor_->setTo(peer_, &to);
+    auto to = Converter::ArkValue<Ark_Int32>(TEST_IDX2);
+    accessor_->setTo(peer_, to);
     Ark_Int32 idx = Converter::Convert<int32_t>(accessor_->getTo(peer_));
     ASSERT_EQ(Converter::Convert<int32_t>(idx), TEST_IDX2);
 }

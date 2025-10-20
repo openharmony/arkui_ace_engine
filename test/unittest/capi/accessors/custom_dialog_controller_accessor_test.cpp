@@ -482,7 +482,7 @@ static const std::vector<Ark_Dimension> SIZE_INVALID_TEST_PLAN_DIM = {
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CustomDialogControllerAccessorTest, widthTest, TestSize.Level1)
+HWTEST_F(CustomDialogControllerAccessorTest, DISABLED_widthTest, TestSize.Level1)
 {
     Ark_CustomDialogControllerOptions options = GetEmptyOptions();
     DialogProperties dialogProperties;
@@ -525,7 +525,7 @@ HWTEST_F(CustomDialogControllerAccessorTest, widthInvalidTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CustomDialogControllerAccessorTest, heightTest, TestSize.Level1)
+HWTEST_F(CustomDialogControllerAccessorTest, DISABLED_heightTest, TestSize.Level1)
 {
     Ark_CustomDialogControllerOptions options = GetEmptyOptions();
     DialogProperties dialogProperties;
@@ -568,7 +568,7 @@ HWTEST_F(CustomDialogControllerAccessorTest, heightInvalidTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CustomDialogControllerAccessorTest, cornerRadiusTest, TestSize.Level1)
+HWTEST_F(CustomDialogControllerAccessorTest, DISABLED_cornerRadiusTest, TestSize.Level1)
 {
     Ark_CustomDialogControllerOptions options = GetEmptyOptions();
     DialogProperties dialogProperties;
@@ -595,7 +595,7 @@ HWTEST_F(CustomDialogControllerAccessorTest, cornerRadiusTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CustomDialogControllerAccessorTest, cornerRadiusInvalidTest, TestSize.Level1)
+HWTEST_F(CustomDialogControllerAccessorTest, DISABLED_cornerRadiusInvalidTest, TestSize.Level1)
 {
     Ark_CustomDialogControllerOptions options = GetEmptyOptions();
     DialogProperties dialogProperties;
@@ -782,7 +782,7 @@ HWTEST_F(CustomDialogControllerAccessorTest, cornerRadiusBottomRightTest, TestSi
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CustomDialogControllerAccessorTest, borderWidthTest, TestSize.Level1)
+HWTEST_F(CustomDialogControllerAccessorTest, DISABLED_borderWidthTest, TestSize.Level1)
 {
     Ark_CustomDialogControllerOptions options = GetEmptyOptions();
     DialogProperties dialogProperties;

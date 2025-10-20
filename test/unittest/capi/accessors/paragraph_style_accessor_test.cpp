@@ -44,21 +44,12 @@ class ParagraphStyleAccessorTest
     : public AccessorTestCtorBase<GENERATED_ArkUIParagraphStyleAccessor,
         &GENERATED_ArkUIAccessors::getParagraphStyleAccessor, ParagraphStylePeer> {
 public:
-    ~ParagraphStyleAccessorTest() override
-    {
-        auto& interface = TypeHelper::WriteTo(param_);
-        auto& lengthMetrics = TypeHelper::WriteTo(interface.textIndent);
-        if (lengthMetrics) {
-            delete lengthMetrics;
-            lengthMetrics = nullptr;
-        }
-    }
     void* CreatePeerInstance() override
     {
         auto& interface = TypeHelper::WriteTo(param_);
         interface.textAlign = Converter::ArkValue<Opt_TextAlign>(TEST_TEXT_ALIGN);
         interface.textIndent.value = Converter::ArkValue<Ark_LengthMetrics>(Dimension(TEST_MARGIN));
-        interface.maxLines = Converter::ArkValue<Opt_Number>(TEST_LINES_NUM);
+        interface.maxLines = Converter::ArkValue<Opt_Int32>(TEST_LINES_NUM);
         interface.overflow = Converter::ArkValue<Opt_TextOverflow>(TEST_TEXT_OVERFLOW);
         interface.wordBreak = Converter::ArkValue<Opt_WordBreak>(TEST_WORD_BREAK);
 
@@ -154,7 +145,7 @@ HWTEST_F(ParagraphStyleAccessorTest, DISABLED_getLeadingMarginTest, TestSize.Lev
     ASSERT_NE(accessor_->getLeadingMargin, nullptr);
     auto testVal = accessor_->getLeadingMargin(peer_);
     Converter::VisitUnion(testVal,
-        [](const Ark_Number& metrics) {
+        [](const Ark_Float64& metrics) {
             EXPECT_EQ(Converter::Convert<int>(metrics), TEST_MARGIN);
         },
         [](const Ark_LeadingMarginPlaceholder& inMargin) {

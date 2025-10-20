@@ -32,16 +32,16 @@ std::vector<std::tuple<std::string, Ark_String, std::string>> testWeightStringVa
     { "\"ARK_FONT_WEIGHT_BOLDER\"", Converter::ArkValue<Ark_String>("bolder"), "FontWeight.Bolder" },
 };
 
-std::vector<std::tuple<std::string, Ark_Number, std::string>> testWeightNumberValidValues = {
-    { "\"100\"", Converter::ArkValue<Ark_Number>(100), "100" },
-    { "\"200\"", Converter::ArkValue<Ark_Number>(200), "200" },
-    { "\"300\"", Converter::ArkValue<Ark_Number>(300), "300" },
-    { "\"400\"", Converter::ArkValue<Ark_Number>(400), "400" },
-    { "\"500\"", Converter::ArkValue<Ark_Number>(500), "500" },
-    { "\"600\"", Converter::ArkValue<Ark_Number>(600), "600" },
-    { "\"700\"", Converter::ArkValue<Ark_Number>(700), "700" },
-    { "\"800\"", Converter::ArkValue<Ark_Number>(800), "800" },
-    { "\"900\"", Converter::ArkValue<Ark_Number>(900), "900" },
+std::vector<std::tuple<std::string, Ark_Int32, std::string>> testWeightNumberValidValues = {
+    { "\"100\"", Converter::ArkValue<Ark_Int32>(100), "100" },
+    { "\"200\"", Converter::ArkValue<Ark_Int32>(200), "200" },
+    { "\"300\"", Converter::ArkValue<Ark_Int32>(300), "300" },
+    { "\"400\"", Converter::ArkValue<Ark_Int32>(400), "400" },
+    { "\"500\"", Converter::ArkValue<Ark_Int32>(500), "500" },
+    { "\"600\"", Converter::ArkValue<Ark_Int32>(600), "600" },
+    { "\"700\"", Converter::ArkValue<Ark_Int32>(700), "700" },
+    { "\"800\"", Converter::ArkValue<Ark_Int32>(800), "800" },
+    { "\"900\"", Converter::ArkValue<Ark_Int32>(900), "900" },
 };
 
 std::vector<std::tuple<std::string, Ark_Resource, std::string>> testIntResValidValues = {
@@ -209,7 +209,7 @@ HWTEST_F(SelectModifierTest, setFontTestFontSizeValidValues, TestSize.Level1)
     // Initial setup
     WriteTo(initValueFont).size =
         ArkUnion<Opt_Length, Ark_String>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteTo(initValueFont).weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
+    WriteTo(initValueFont).weight = ArkUnion<Opt_Union_FontWeight_I32_String, Ark_FontWeight>(
         std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
     WriteTo(initValueFont).family =
         ArkUnion<Opt_Union_String_Resource, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
@@ -245,7 +245,7 @@ HWTEST_F(SelectModifierTest, DISABLED_setFontTestFontSizeInvalidValues, TestSize
     // Initial setup
     WriteTo(initValueFont).size =
         ArkUnion<Opt_Length, Ark_String>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteTo(initValueFont).weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
+    WriteTo(initValueFont).weight = ArkUnion<Opt_Union_FontWeight_I32_String, Ark_FontWeight>(
         std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
     WriteTo(initValueFont).family =
         ArkUnion<Opt_Union_String_Resource, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
@@ -284,7 +284,7 @@ HWTEST_F(SelectModifierTest, setFontTestFontWeightValidValues, TestSize.Level1)
     // Initial setup
     WriteTo(initValueFont).size =
         ArkUnion<Opt_Length, Ark_String>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteTo(initValueFont).weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
+    WriteTo(initValueFont).weight = ArkUnion<Opt_Union_FontWeight_I32_String, Ark_FontWeight>(
         std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
     WriteTo(initValueFont).family =
         ArkUnion<Opt_Union_String_Resource, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
@@ -292,7 +292,7 @@ HWTEST_F(SelectModifierTest, setFontTestFontWeightValidValues, TestSize.Level1)
         ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
 
     auto checkValue = [this, &initValueFont](const std::string& input, const std::string& expectedStr,
-                          const Opt_Union_FontWeight_Number_String& value) {
+                          const Opt_Union_FontWeight_I32_String& value) {
         Opt_Font inputValueFont = initValueFont;
 
         WriteTo(inputValueFont).weight = value;
@@ -305,13 +305,13 @@ HWTEST_F(SelectModifierTest, setFontTestFontWeightValidValues, TestSize.Level1)
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumFontWeightValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_FontWeight_I32_String, Ark_FontWeight>(value));
     }
     for (auto& [input, value, expected] : testWeightNumberValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_Union_FontWeight_Number_String, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_FontWeight_I32_String, Ark_Int32>(value));
     }
     for (auto& [input, value, expected] : testWeightStringValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_Union_FontWeight_Number_String, Ark_String>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_FontWeight_I32_String, Ark_String>(value));
     }
 }
 
@@ -327,7 +327,7 @@ HWTEST_F(SelectModifierTest, DISABLED_setFontTestFontWeightInvalidValues, TestSi
     // Initial setup
     WriteTo(initValueFont).size =
         ArkUnion<Opt_Length, Ark_String>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteTo(initValueFont).weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
+    WriteTo(initValueFont).weight = ArkUnion<Opt_Union_FontWeight_I32_String, Ark_FontWeight>(
         std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
     WriteTo(initValueFont).family =
         ArkUnion<Opt_Union_String_Resource, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
@@ -335,7 +335,7 @@ HWTEST_F(SelectModifierTest, DISABLED_setFontTestFontWeightInvalidValues, TestSi
         ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
 
     auto checkValue = [this, &initValueFont](
-                          const std::string& input, const Opt_Union_FontWeight_Number_String& value) {
+                          const std::string& input, const Opt_Union_FontWeight_I32_String& value) {
         Opt_Font inputValueFont = initValueFont;
 
         modifier_->setFont(node_, &inputValueFont);
@@ -349,12 +349,12 @@ HWTEST_F(SelectModifierTest, DISABLED_setFontTestFontWeightInvalidValues, TestSi
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumFontWeightInvalidValues) {
-        checkValue(input, ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(value));
+        checkValue(input, ArkUnion<Opt_Union_FontWeight_I32_String, Ark_FontWeight>(value));
     }
     // Check invalid union
-    checkValue("invalid union", ArkUnion<Opt_Union_FontWeight_Number_String, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Opt_Union_FontWeight_I32_String, Ark_Empty>(nullptr));
     // Check empty optional
-    checkValue("undefined", ArkValue<Opt_Union_FontWeight_Number_String>());
+    checkValue("undefined", ArkValue<Opt_Union_FontWeight_I32_String>());
 }
 
 /*
@@ -369,7 +369,7 @@ HWTEST_F(SelectModifierTest, setFontTestFontFamilyValidValues, TestSize.Level1)
     // Initial setup
     WriteTo(initValueFont).size =
         ArkUnion<Opt_Length, Ark_String>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteTo(initValueFont).weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
+    WriteTo(initValueFont).weight = ArkUnion<Opt_Union_FontWeight_I32_String, Ark_FontWeight>(
         std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
     WriteTo(initValueFont).family =
         ArkUnion<Opt_Union_String_Resource, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
@@ -409,7 +409,7 @@ HWTEST_F(SelectModifierTest, setFontTestFontFamilyInvalidValues, TestSize.Level1
     // Initial setup
     WriteTo(initValueFont).size =
         ArkUnion<Opt_Length, Ark_String>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteTo(initValueFont).weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
+    WriteTo(initValueFont).weight = ArkUnion<Opt_Union_FontWeight_I32_String, Ark_FontWeight>(
         std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
     WriteTo(initValueFont).family =
         ArkUnion<Opt_Union_String_Resource, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
@@ -446,7 +446,7 @@ HWTEST_F(SelectModifierTest, setFontTestFontStyleValidValues, TestSize.Level1)
     // Initial setup
     WriteTo(initValueFont).size =
         ArkUnion<Opt_Length, Ark_String>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteTo(initValueFont).weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
+    WriteTo(initValueFont).weight = ArkUnion<Opt_Union_FontWeight_I32_String, Ark_FontWeight>(
         std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
     WriteTo(initValueFont).family =
         ArkUnion<Opt_Union_String_Resource, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
@@ -482,7 +482,7 @@ HWTEST_F(SelectModifierTest, setFontTestFontStyleInvalidValues, TestSize.Level1)
     // Initial setup
     WriteTo(initValueFont).size =
         ArkUnion<Opt_Length, Ark_String>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteTo(initValueFont).weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
+    WriteTo(initValueFont).weight = ArkUnion<Opt_Union_FontWeight_I32_String, Ark_FontWeight>(
         std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
     WriteTo(initValueFont).family =
         ArkUnion<Opt_Union_String_Resource, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
@@ -724,7 +724,7 @@ HWTEST_F(SelectModifierTest, setSelectedOptionFontTestSelectedOptionFontSizeVali
     Opt_Font initValueSelectedOptionFont;
     WriteTo(initValueSelectedOptionFont).size =
         ArkUnion<Opt_Length, Ark_String>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteTo(initValueSelectedOptionFont).weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
+    WriteTo(initValueSelectedOptionFont).weight = ArkUnion<Opt_Union_FontWeight_I32_String, Ark_FontWeight>(
         std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
     WriteTo(initValueSelectedOptionFont).family =
         ArkUnion<Opt_Union_String_Resource, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
@@ -763,7 +763,7 @@ HWTEST_F(SelectModifierTest, DISABLED_setSelectedOptionFontTestSelectedOptionFon
     // Initial setup
     WriteTo(initValueSelectedOptionFont).size =
         ArkUnion<Opt_Length, Ark_String>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteTo(initValueSelectedOptionFont).weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
+    WriteTo(initValueSelectedOptionFont).weight = ArkUnion<Opt_Union_FontWeight_I32_String, Ark_FontWeight>(
         std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
     WriteTo(initValueSelectedOptionFont).family =
         ArkUnion<Opt_Union_String_Resource, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
@@ -802,7 +802,7 @@ HWTEST_F(SelectModifierTest, setSelectedOptionFontTestSelectedOptionFontWeightVa
     Opt_Font initValueSelectedOptionFont;
     WriteTo(initValueSelectedOptionFont).size =
         ArkUnion<Opt_Length, Ark_String>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteTo(initValueSelectedOptionFont).weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
+    WriteTo(initValueSelectedOptionFont).weight = ArkUnion<Opt_Union_FontWeight_I32_String, Ark_FontWeight>(
         std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
     WriteTo(initValueSelectedOptionFont).family =
         ArkUnion<Opt_Union_String_Resource, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
@@ -810,7 +810,7 @@ HWTEST_F(SelectModifierTest, setSelectedOptionFontTestSelectedOptionFontWeightVa
         ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
 
     auto checkValue = [this, &initValueSelectedOptionFont](const std::string& input, const std::string& expectedStr,
-                          const Opt_Union_FontWeight_Number_String& value) {
+                          const Opt_Union_FontWeight_I32_String& value) {
         Opt_Font inputValueSelectedOptionFont = initValueSelectedOptionFont;
 
         WriteTo(inputValueSelectedOptionFont).weight = value;
@@ -824,13 +824,13 @@ HWTEST_F(SelectModifierTest, setSelectedOptionFontTestSelectedOptionFontWeightVa
             "Input value is: " << input << ", method: setSelectedOptionFont, attribute: selectedOptionFont.weight";
     };
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumFontWeightValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_FontWeight_I32_String, Ark_FontWeight>(value));
     }
     for (auto& [input, value, expected] : testWeightNumberValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_Union_FontWeight_Number_String, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_FontWeight_I32_String, Ark_Int32>(value));
     }
     for (auto& [input, value, expected] : testWeightStringValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_Union_FontWeight_Number_String, Ark_String>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_FontWeight_I32_String, Ark_String>(value));
     }
 }
 
@@ -844,7 +844,7 @@ HWTEST_F(SelectModifierTest, DISABLED_setSelectedOptionFontTestSelectedOptionFon
     Opt_Font initValueSelectedOptionFont;
     WriteTo(initValueSelectedOptionFont).size =
         ArkUnion<Opt_Length, Ark_String>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteTo(initValueSelectedOptionFont).weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
+    WriteTo(initValueSelectedOptionFont).weight = ArkUnion<Opt_Union_FontWeight_I32_String, Ark_FontWeight>(
         std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
     WriteTo(initValueSelectedOptionFont).family =
         ArkUnion<Opt_Union_String_Resource, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
@@ -852,7 +852,7 @@ HWTEST_F(SelectModifierTest, DISABLED_setSelectedOptionFontTestSelectedOptionFon
         ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
 
     auto checkValue = [this, &initValueSelectedOptionFont](
-                          const std::string& input, const Opt_Union_FontWeight_Number_String& value) {
+                          const std::string& input, const Opt_Union_FontWeight_I32_String& value) {
         Opt_Font inputValueSelectedOptionFont = initValueSelectedOptionFont;
 
         modifier_->setSelectedOptionFont(node_, &inputValueSelectedOptionFont);
@@ -868,12 +868,12 @@ HWTEST_F(SelectModifierTest, DISABLED_setSelectedOptionFontTestSelectedOptionFon
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumFontWeightInvalidValues) {
-        checkValue(input, ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(value));
+        checkValue(input, ArkUnion<Opt_Union_FontWeight_I32_String, Ark_FontWeight>(value));
     }
     // Check invalid union
-    checkValue("invalid union", ArkUnion<Opt_Union_FontWeight_Number_String, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Opt_Union_FontWeight_I32_String, Ark_Empty>(nullptr));
     // Check empty optional
-    checkValue("undefined", ArkValue<Opt_Union_FontWeight_Number_String>());
+    checkValue("undefined", ArkValue<Opt_Union_FontWeight_I32_String>());
 }
 
 /*
@@ -886,7 +886,7 @@ HWTEST_F(SelectModifierTest, setSelectedOptionFontTestSelectedOptionFontFamilyVa
     Opt_Font initValueSelectedOptionFont;
     WriteTo(initValueSelectedOptionFont).size =
         ArkUnion<Opt_Length, Ark_String>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteTo(initValueSelectedOptionFont).weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
+    WriteTo(initValueSelectedOptionFont).weight = ArkUnion<Opt_Union_FontWeight_I32_String, Ark_FontWeight>(
         std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
     WriteTo(initValueSelectedOptionFont).family =
         ArkUnion<Opt_Union_String_Resource, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
@@ -926,7 +926,7 @@ HWTEST_F(SelectModifierTest, setSelectedOptionFontTestSelectedOptionFontFamilyIn
     Opt_Font initValueSelectedOptionFont;
     WriteTo(initValueSelectedOptionFont).size =
         ArkUnion<Opt_Length, Ark_String>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteTo(initValueSelectedOptionFont).weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
+    WriteTo(initValueSelectedOptionFont).weight = ArkUnion<Opt_Union_FontWeight_I32_String, Ark_FontWeight>(
         std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
     WriteTo(initValueSelectedOptionFont).family =
         ArkUnion<Opt_Union_String_Resource, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
@@ -966,7 +966,7 @@ HWTEST_F(SelectModifierTest, setSelectedOptionFontTestSelectedOptionFontStyleVal
     // Initial setup
     WriteTo(initValueSelectedOptionFont).size =
         ArkUnion<Opt_Length, Ark_String>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteTo(initValueSelectedOptionFont).weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
+    WriteTo(initValueSelectedOptionFont).weight = ArkUnion<Opt_Union_FontWeight_I32_String, Ark_FontWeight>(
         std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
     WriteTo(initValueSelectedOptionFont).family =
         ArkUnion<Opt_Union_String_Resource, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
@@ -1005,7 +1005,7 @@ HWTEST_F(SelectModifierTest, setSelectedOptionFontTestSelectedOptionFontStyleInv
     // Initial setup
     WriteTo(initValueSelectedOptionFont).size =
         ArkUnion<Opt_Length, Ark_String>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteTo(initValueSelectedOptionFont).weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
+    WriteTo(initValueSelectedOptionFont).weight = ArkUnion<Opt_Union_FontWeight_I32_String, Ark_FontWeight>(
         std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
     WriteTo(initValueSelectedOptionFont).family =
         ArkUnion<Opt_Union_String_Resource, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));

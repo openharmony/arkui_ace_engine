@@ -35,9 +35,8 @@ class LineHeightStyleAccessorTest
 public:
     void* CreatePeerInstance() override
     {
-        Ark_LengthMetrics metrics = new LengthMetricsPeer();
-        metrics->value = Dimension(TEST_HEIGHT);
-        return accessor_->construct(metrics);
+        auto metrics = Converter::ArkValue<Ark_LengthMetrics>(Dimension(TEST_HEIGHT));
+        return accessor_->construct(&metrics);
     }
 };
 
@@ -49,7 +48,7 @@ public:
 HWTEST_F(LineHeightStyleAccessorTest, getLineHeightTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getLineHeight, nullptr);
-    Ark_Number retHeight = accessor_->getLineHeight(peer_);
+    auto retHeight = accessor_->getLineHeight(peer_);
     int ret = Converter::Convert<int>(retHeight);
     EXPECT_EQ(ret, TEST_HEIGHT);
 }

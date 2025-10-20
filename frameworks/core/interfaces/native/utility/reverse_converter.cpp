@@ -199,7 +199,7 @@ void AssignArkValue(Ark_LengthMetrics& dst, const Dimension& src)
 {
     auto value = static_cast<float>(src.Value());
     auto unit = static_cast<int32_t>(src.Unit());
-    
+
     dst.unit = static_cast<Ark_LengthUnit>(unit);
     dst.value = Converter::ArkValue<Ark_Number>(value);
 }
@@ -509,10 +509,8 @@ void AssignArkValue(Ark_KeyboardOptions& dst, const KeyboardOptions& src, ConvCo
 template<>
 Ark_LengthMetrics ArkCreate(Ark_LengthUnit unit, float value)
 {
-    DimensionUnit du = OptConvert<DimensionUnit>(unit).value_or(DimensionUnit::INVALID);
-    auto duUnit = static_cast<int32_t>(du);
     return {
-        .unit = static_cast<Ark_LengthUnit>(duUnit),
+        .unit = unit,
         .value = ArkValue<Ark_Number>(value),
     };
 }

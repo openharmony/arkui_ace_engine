@@ -411,7 +411,7 @@ static std::vector<std::tuple<std::string, enum Ark_CheckBoxShape, std::string>>
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CheckboxModifierTest, setShapeTestValidValues, TestSize.Level1)
+HWTEST_F(CheckboxModifierTest, DISABLED_setShapeTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;

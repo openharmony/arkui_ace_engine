@@ -80,19 +80,19 @@ namespace {
         { Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(static_cast<Ark_Color>(-1)), "#00000000" },
         { Converter::ArkUnion<Opt_ResourceColor, Ark_Empty>(nullptr), "#00000000" },
     };
-    std::vector<std::pair<Opt_Union_Number_String, double>> arkUnionNumberTestPlan = {
-        { Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(100), 100 },
-        { Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(0), 0 },
-        { Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(-100), -100 },
-        { Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(12.34), 12.34 },
-        { Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(-56.73), -56.73 }
+    std::vector<std::pair<Opt_Union_F64_String, double>> arkUnionNumberTestPlan = {
+        { Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(100), 100 },
+        { Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(0), 0 },
+        { Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(-100), -100 },
+        { Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(12.34), 12.34 },
+        { Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(-56.73), -56.73 }
     };
-    std::vector<std::pair<Opt_Number, double>> arkNumberTestPlan = {
-        { Converter::ArkValue<Opt_Number>(100), 100 },
-        { Converter::ArkValue<Opt_Number>(0), 0 },
-        { Converter::ArkValue<Opt_Number>(-100), -100 },
-        { Converter::ArkValue<Opt_Number>(12.34), 12.34 },
-        { Converter::ArkValue<Opt_Number>(-56.73), -56.73 }
+    std::vector<std::pair<Opt_Float64, double>> arkNumberTestPlan = {
+        { Converter::ArkValue<Opt_Float64>(100), 100 },
+        { Converter::ArkValue<Opt_Float64>(0), 0 },
+        { Converter::ArkValue<Opt_Float64>(-100), -100 },
+        { Converter::ArkValue<Opt_Float64>(12.34), 12.34 },
+        { Converter::ArkValue<Opt_Float64>(-56.73), -56.73 }
     };
     std::vector<std::pair<Opt_Union_String_FunctionKey, bool>> arkShortcutKeyTestPlan = {
         { Converter::ArkUnion<Opt_Union_String_FunctionKey, Ark_String>("A"), true },

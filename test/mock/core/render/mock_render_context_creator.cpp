@@ -13,11 +13,13 @@
  * limitations under the License.
  */
 
+#include <gmock/gmock.h>
+
 #include "test/mock/core/render/mock_render_context.h"
 
 namespace OHOS::Ace::NG {
 RefPtr<RenderContext> RenderContext::Create()
 {
-    return MakeRefPtr<MockRenderContext>();
+    return MakeRefPtr<::testing::NiceMock<MockRenderContext>>();
 }
 } // namespace OHOS::Ace::NG

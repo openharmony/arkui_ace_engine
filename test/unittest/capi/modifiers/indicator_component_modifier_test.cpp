@@ -46,11 +46,11 @@ static const Dimension THEME_SWIPER_FONT_SIZE(321, DimensionUnit::PX);
 static const Color THEME_SWIPER_INDICATOR_COLOR(Color::BLUE);
 static const Color THEME_SWIPER_ARROW_COLOR(Color::GREEN);
 
-static const std::vector<std::pair<Opt_Number, std::string>> TEST_POSITIVE_INTEGER_PLAN {
-    {ArkValue<Opt_Number>(1234), "1234"},
-    {ArkValue<Opt_Number>(5.67f), "5"},
-    {ArkValue<Opt_Number>(INT32_MIN), "0"},
-    {ArkValue<Opt_Number>(-123434.435f), "0"},
+static const std::vector<std::pair<Opt_Int32, std::string>> TEST_POSITIVE_INTEGER_PLAN {
+    {ArkValue<Opt_Int32>(1234), "1234"},
+    {ArkValue<Opt_Int32>(5), "5"},
+    {ArkValue<Opt_Int32>(INT32_MIN), "0"},
+    {ArkValue<Opt_Int32>(-123434), "0"},
 };
 } // namespace
 
@@ -441,10 +441,10 @@ HWTEST_F(IndicatorComponentModifierTests, setStyleTestDigitPaintValid, TestSize.
         ._selectedFontColor = ArkValue<Opt_ResourceColor>(ArkUnion<Ark_ResourceColor, Ark_String>("#11223344")),
         ._digitFont = ArkValue<Opt_Font>(Ark_Font {
             .size = ArkValue<Opt_Length>(123.4f),
-            .weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(ARK_FONT_WEIGHT_REGULAR)}),
+            .weight = ArkUnion<Opt_Union_FontWeight_I32_String, Ark_FontWeight>(ARK_FONT_WEIGHT_REGULAR)}),
         ._selectedDigitFont = ArkValue<Opt_Font>(Ark_Font {
             .size = ArkValue<Opt_Length>(43.21f),
-            .weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_String>("bold")})
+            .weight = ArkUnion<Opt_Union_FontWeight_I32_String, Ark_String>("bold")})
     };
 
     ASSERT_NE(modifier_->setStyle, nullptr);
@@ -488,10 +488,10 @@ HWTEST_F(IndicatorComponentModifierTests, DISABLED_setStyleTestDigitPaintInvalid
         ._selectedFontColor = ArkValue<Opt_ResourceColor>(ArkUnion<Ark_ResourceColor, Ark_String>("WrongColor")),
         ._digitFont = ArkValue<Opt_Font>(Ark_Font {
             .size = ArkValue<Opt_Length>(Ark_Empty()),
-            .weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_Number>(-111)}),
+            .weight = ArkUnion<Opt_Union_FontWeight_I32_String, Ark_Int32>(-111)}),
         ._selectedDigitFont = ArkValue<Opt_Font>(Ark_Font {
             .size = ArkValue<Opt_Length>(-111.11f),
-            .weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_String>("InvalidData!")})
+            .weight = ArkUnion<Opt_Union_FontWeight_I32_String, Ark_String>("InvalidData!")})
     };
 
     ASSERT_NE(modifier_->setStyle, nullptr);

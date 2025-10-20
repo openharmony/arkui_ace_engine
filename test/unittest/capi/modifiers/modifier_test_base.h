@@ -193,7 +193,7 @@ public:
         MockThemeStyle::GetInstance()->SetAttr(key, { .type = type, .value = value });
     }
 
-    static void AddResource(uint32_t key, const ResRawValue& value)
+    static void AddResource(int64_t key, const ResRawValue& value)
     {
         AddResource(std::to_string(key), value);
     }

@@ -60,7 +60,6 @@ const auto OPT_LEN_NUM_NEG = Converter::ArkValue<Opt_Length>("-1234.00px");
 const auto OPT_LEN_NUM_ZERO = Converter::ArkValue<Opt_Length>("0.00px");
 const auto OPT_LEN_NUM_VALID = Converter::ArkValue<Opt_Length>("1234.00px");
 
-const std::string EXPECTED_NUM_DEF("32.000000");
 const std::string EXPECTED_NUM_NEG("-1234.000000");
 const std::string EXPECTED_NUM_VILID("1234.000000");
 const std::string EXPECTED_NUM_ZERO("0.000000");
@@ -99,17 +98,14 @@ const auto ATTRIBUTE_CONTROL_BUTTON_LEFT_DEFAULT_VALUE = "16.00vp";
 const auto ATTRIBUTE_CONTROL_BUTTON_TOP_NAME = "top";
 const auto ATTRIBUTE_CONTROL_BUTTON_TOP_DEFAULT_VALUE = "48.00vp";
 const auto ATTRIBUTE_CONTROL_BUTTON_WIDTH_NAME = "width";
-const auto ATTRIBUTE_CONTROL_BUTTON_WIDTH_DEFAULT_VALUE = EXPECTED_NUM_DEF;
+const auto ATTRIBUTE_CONTROL_BUTTON_WIDTH_DEFAULT_VALUE = "32.000000";
 const auto ATTRIBUTE_CONTROL_BUTTON_HEIGHT_NAME = "height";
-const auto ATTRIBUTE_CONTROL_BUTTON_HEIGHT_DEFAULT_VALUE = EXPECTED_NUM_DEF;
+const auto ATTRIBUTE_CONTROL_BUTTON_HEIGHT_DEFAULT_VALUE = "32.000000";
 const auto ATTRIBUTE_CONTROL_BUTTON_ICONS_NAME = "icon";
 const auto ATTRIBUTE_CONTROL_BUTTON_ICONS_DEFAULT_VALUE = "";
 const auto ATTRIBUTE_CONTROL_BUTTON_ICONS_SHOWN_NAME = "shown";
-const auto ATTRIBUTE_CONTROL_BUTTON_ICONS_SHOWN_DEFAULT_VALUE = ICON_STRING_DEF;
 const auto ATTRIBUTE_CONTROL_BUTTON_ICONS_HIDDEN_NAME = "hidden";
-const auto ATTRIBUTE_CONTROL_BUTTON_ICONS_HIDDEN_DEFAULT_VALUE = ICON_STRING_DEF;
 const auto ATTRIBUTE_CONTROL_BUTTON_ICONS_SWITCH_NAME = "switching";
-const auto ATTRIBUTE_CONTROL_BUTTON_ICONS_SWITCH_DEFAULT_VALUE = ICON_STRING_DEF;
 const auto ATTRIBUTE_SHOW_CONTROL_BUTTON_NAME = "showControlButton";
 const auto ATTRIBUTE_SHOW_CONTROL_BUTTON_DEFAULT_VALUE = "true";
 const auto ATTRIBUTE_SIDE_BAR_WIDTH_NAME = "sideBarWidth";
@@ -145,7 +141,7 @@ public:
         AddResource(RES_SRC_TEST, ICON_STRING);
     }
 
-    void checkControlButtonAttr(std::vector<std::tuple<std::string, Opt_Number, std::string>> styleArray,
+    void checkControlButtonAttr(std::vector<std::tuple<std::string, Opt_Float64, std::string>> styleArray,
         std::string attribute)
     {
         std::unique_ptr<JsonValue> jsonValue;
@@ -170,7 +166,7 @@ public:
             jsonValue = GetJsonValue(node_);
             cbJson = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CONTROL_BUTTON_NAME);
             resultStr = GetAttrValue<std::string>(cbJson, attribute);
-            EXPECT_EQ(resultStr, expected) << "Passed value is: " << passed;
+            EXPECT_EQ(resultStr, expected) << "Passed value is: " << passed << " Attribute: " << attribute;
         }
     }
 
@@ -183,7 +179,7 @@ public:
         Ark_DividerStyle inputValue;
         for (auto [passed, checkVal, expected]: styleArray) {
             if (attribute == ATTRIBUTE_DIVIDER_STROKE_WIDTH) {
-                inputValue.strokeWidth = checkVal.value;
+                inputValue.strokeWidth = checkVal;
             }
             if (attribute == ATTRIBUTE_DIVIDER_START_MARGIN) {
                 inputValue.startMargin = checkVal;
@@ -315,34 +311,6 @@ HWTEST_F(SideBarContainerModifierTest, DISABLED_setControlButtonTestDefaultValue
     EXPECT_EQ(resultStr, ATTRIBUTE_CONTROL_BUTTON_ICONS_DEFAULT_VALUE);
 }
 
-// Valid values for attribute 'left' of method 'controlButton'
-static std::vector<std::tuple<std::string, Opt_Number, std::string>> controlButtonLeftValidValues = {
-    {EXPECTED_NUM_NEG, OPT_NUM_NEG, EXPECTED_NUM_NEG},
-    {EXPECTED_NUM_ZERO, OPT_NUM_ZERO, EXPECTED_NUM_ZERO},
-    {EXPECTED_NUM_VILID, OPT_NUM_VALID, EXPECTED_NUM_VILID},
-};
-
-// Valid values for attribute 'top' of method 'controlButton'
-static std::vector<std::tuple<std::string, Opt_Number, std::string>> controlButtonTopValidValues = {
-    {EXPECTED_NUM_NEG, OPT_NUM_NEG, EXPECTED_NUM_NEG},
-    {EXPECTED_NUM_ZERO, OPT_NUM_ZERO, EXPECTED_NUM_ZERO},
-    {EXPECTED_NUM_VILID, OPT_NUM_VALID, EXPECTED_NUM_VILID},
-};
-
-// Valid values for attribute 'width' of method 'controlButton'
-static std::vector<std::tuple<std::string, Opt_Number, std::string>> controlButtonWidthValidValues = {
-    {EXPECTED_NUM_NEG, OPT_NUM_NEG, EXPECTED_NUM_DEF},
-    {EXPECTED_NUM_ZERO, OPT_NUM_ZERO, EXPECTED_NUM_ZERO},
-    {EXPECTED_NUM_VILID, OPT_NUM_VALID, EXPECTED_NUM_VILID},
-};
-
-// Valid values for attribute 'height' of method 'controlButton'
-static std::vector<std::tuple<std::string, Opt_Number, std::string>> controlButtonHeightValidValues = {
-    {EXPECTED_NUM_NEG, OPT_NUM_NEG, EXPECTED_NUM_DEF},
-    {EXPECTED_NUM_ZERO, OPT_NUM_ZERO, EXPECTED_NUM_ZERO},
-    {EXPECTED_NUM_VILID, OPT_NUM_VALID, EXPECTED_NUM_VILID},
-};
-
 /*
  * @tc.name: setControlButtonTestValidValues
  * @tc.desc:
@@ -350,10 +318,30 @@ static std::vector<std::tuple<std::string, Opt_Number, std::string>> controlButt
  */
 HWTEST_F(SideBarContainerModifierTest, setControlButtonTestValidValues, TestSize.Level1)
 {
-    checkControlButtonAttr(controlButtonLeftValidValues, ATTRIBUTE_CONTROL_BUTTON_LEFT_NAME);
-    checkControlButtonAttr(controlButtonTopValidValues, ATTRIBUTE_CONTROL_BUTTON_TOP_NAME);
-    checkControlButtonAttr(controlButtonWidthValidValues, ATTRIBUTE_CONTROL_BUTTON_WIDTH_NAME);
-    checkControlButtonAttr(controlButtonHeightValidValues, ATTRIBUTE_CONTROL_BUTTON_HEIGHT_NAME);
+    static std::vector<std::tuple<std::string, Opt_Float64, std::string>> leftValues = {
+        {"-1234", Converter::ArkValue<Opt_Float64>(-1234), "-1234.000000"},
+        {"0", Converter::ArkValue<Opt_Float64>(0), "0.000000"},
+        {"1234", Converter::ArkValue<Opt_Float64>(1234), "1234.000000"},
+    };
+    static std::vector<std::tuple<std::string, Opt_Float64, std::string>> topValues = {
+        {"-1234", Converter::ArkValue<Opt_Float64>(-1234), "-1234.000000"},
+        {"0", Converter::ArkValue<Opt_Float64>(0), "0.000000"},
+        {"1234", Converter::ArkValue<Opt_Float64>(1234), "1234.000000"},
+    };
+    static std::vector<std::tuple<std::string, Opt_Float64, std::string>> widthValues = {
+        {"-1234", Converter::ArkValue<Opt_Float64>(-1234), ATTRIBUTE_CONTROL_BUTTON_WIDTH_DEFAULT_VALUE},
+        {"0", Converter::ArkValue<Opt_Float64>(0), "0.000000"},
+        {"1234", Converter::ArkValue<Opt_Float64>(1234), "1234.000000"},
+    };
+    static std::vector<std::tuple<std::string, Opt_Float64, std::string>> heightValues = {
+        {"-1234", Converter::ArkValue<Opt_Float64>(-1234), ATTRIBUTE_CONTROL_BUTTON_HEIGHT_DEFAULT_VALUE},
+        {"0", Converter::ArkValue<Opt_Float64>(0), "0.000000"},
+        {"1234", Converter::ArkValue<Opt_Float64>(1234), "1234.000000"},
+    };
+    checkControlButtonAttr(leftValues, ATTRIBUTE_CONTROL_BUTTON_LEFT_NAME);
+    checkControlButtonAttr(topValues, ATTRIBUTE_CONTROL_BUTTON_TOP_NAME);
+    checkControlButtonAttr(widthValues, ATTRIBUTE_CONTROL_BUTTON_WIDTH_NAME);
+    checkControlButtonAttr(heightValues, ATTRIBUTE_CONTROL_BUTTON_HEIGHT_NAME);
 }
 
 
@@ -366,10 +354,10 @@ static std::vector<std::tuple<std::string, Ark_String, std::string>> controlButt
 Ark_ButtonStyle GetButtonStyle()
 {
     Ark_ButtonStyle style;
-    style.left = OPT_NUM_VALID;
-    style.top = OPT_NUM_VALID;
-    style.width = OPT_NUM_VALID;
-    style.height = OPT_NUM_VALID;
+    style.left = Converter::ArkValue<Opt_Float64>();
+    style.top = Converter::ArkValue<Opt_Float64>();
+    style.width = Converter::ArkValue<Opt_Float64>();
+    style.height = Converter::ArkValue<Opt_Float64>();
     WriteTo(style.icons).shown = Converter::ArkUnion<Ark_Union_String_PixelMap_Resource, Ark_String>(
         ICON_STRING_DEF);
     WriteTo(style.icons).hidden = Converter::ArkUnion<Ark_Union_String_PixelMap_Resource, Ark_String>(
@@ -536,7 +524,7 @@ HWTEST_F(SideBarContainerModifierTest, DISABLED_setOnChangeTest, TestSize.Level1
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SideBarContainerModifierTest, setSideBarWidth0TestDefaultValues, TestSize.Level1)
+HWTEST_F(SideBarContainerModifierTest, setSideBarWidthTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -557,7 +545,7 @@ static std::vector<std::tuple<std::string, float, std::string>> mSideBarWidthVal
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SideBarContainerModifierTest, setSideBarWidth0TestValidValues, TestSize.Level1)
+HWTEST_F(SideBarContainerModifierTest, setSideBarWidthTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
@@ -575,7 +563,7 @@ HWTEST_F(SideBarContainerModifierTest, setSideBarWidth0TestValidValues, TestSize
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SideBarContainerModifierTest, setMinSideBarWidth0TestDefaultValues, TestSize.Level1)
+HWTEST_F(SideBarContainerModifierTest, setMinSideBarWidthTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -584,10 +572,10 @@ HWTEST_F(SideBarContainerModifierTest, setMinSideBarWidth0TestDefaultValues, Tes
     EXPECT_EQ(resultStr, ATTRIBUTE_MIN_SIDE_BAR_WIDTH_DEFAULT_VALUE);
 }
 
-static std::vector<std::tuple<std::string, Ark_Number, std::string>> mMinSideBarWidthValidValues1 = {
-    {EXPECTED_NUM_NEG, NUM_NEG, ATTRIBUTE_SIDE_BAR_WIDTH_DEFAULT_VALUE},
-    {EXPECTED_NUM_ZERO, NUM_ZERO, EXPECTED_NUM_ZERO},
-    {EXPECTED_NUM_VILID, NUM_VALID, EXPECTED_NUM_VILID},
+static std::vector<std::tuple<std::string, Opt_Length, std::string>> mMinSideBarWidthValidValues1 = {
+    {"0", Converter::ArkValue<Opt_Length>("0"), "0.000000"},
+    {"-123", Converter::ArkValue<Opt_Length>("-123"), ATTRIBUTE_MIN_SIDE_BAR_WIDTH_DEFAULT_VALUE},
+    {"123", Converter::ArkValue<Opt_Length>("123"), "123.000000"},
 };
 
 /*
@@ -595,16 +583,13 @@ static std::vector<std::tuple<std::string, Ark_Number, std::string>> mMinSideBar
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SideBarContainerModifierTest, setMinSideBarWidth0TestValidValues, TestSize.Level1)
+HWTEST_F(SideBarContainerModifierTest, setMinSideBarWidthTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    Ark_Number inputValueMinSideBarWidth;
-    for (auto [passed, checkVal, expected]: mMinSideBarWidthValidValues1) {
-        inputValueMinSideBarWidth = checkVal;
-        auto width = Converter::ArkValue<Opt_Number>(inputValueMinSideBarWidth);
-        modifier_->setMinSideBarWidth0(node_, &width);
+    for (auto [passed, width, expected]: mMinSideBarWidthValidValues1) {
+        modifier_->setMinSideBarWidth(node_, &width);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MIN_SIDE_BAR_WIDTH_NAME);
         EXPECT_EQ(resultStr, expected) << "Passed value is: " << passed;
@@ -616,7 +601,7 @@ HWTEST_F(SideBarContainerModifierTest, setMinSideBarWidth0TestValidValues, TestS
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SideBarContainerModifierTest, setMaxSideBarWidth0TestDefaultValues, TestSize.Level1)
+HWTEST_F(SideBarContainerModifierTest, setMaxSideBarWidthTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -626,10 +611,10 @@ HWTEST_F(SideBarContainerModifierTest, setMaxSideBarWidth0TestDefaultValues, Tes
 }
 
 // Valid values for attribute 'maxSideBarWidth' of method 'maxSideBarWidth'
-static std::vector<std::tuple<std::string, Ark_Number, std::string>> maxSideBarWidthValidValues1 = {
-    {EXPECTED_NUM_NEG, NUM_NEG, ATTRIBUTE_MAX_SIDE_BAR_WIDTH_DEFAULT_VALUE},
-    {EXPECTED_NUM_ZERO, NUM_ZERO, EXPECTED_NUM_ZERO},
-    {EXPECTED_NUM_VILID, NUM_VALID, EXPECTED_NUM_VILID},
+static std::vector<std::tuple<std::string, Opt_Length, std::string>> maxSideBarWidthValidValues1 = {
+    {"0", Converter::ArkValue<Opt_Length>("0"), "0.000000"},
+    {"-123", Converter::ArkValue<Opt_Length>("-123"), ATTRIBUTE_MAX_SIDE_BAR_WIDTH_DEFAULT_VALUE},
+    {"123", Converter::ArkValue<Opt_Length>("123"), "123.000000"},
 };
 
 /*
@@ -637,15 +622,12 @@ static std::vector<std::tuple<std::string, Ark_Number, std::string>> maxSideBarW
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SideBarContainerModifierTest, setMaxSideBarWidth0TestValidValues, TestSize.Level1)
+HWTEST_F(SideBarContainerModifierTest, setMaxSideBarWidthTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
-    Ark_Number inputValueMaxSideBarWidth;
-    for (auto [passed, checkVal, expected]: maxSideBarWidthValidValues1) {
-        inputValueMaxSideBarWidth = checkVal;
-        auto width = Converter::ArkValue<Opt_Number>(inputValueMaxSideBarWidth);
-        modifier_->setMaxSideBarWidth0(node_, &width);
+    for (auto [passed, width, expected]: maxSideBarWidthValidValues1) {
+        modifier_->setMaxSideBarWidth(node_, &width);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MAX_SIDE_BAR_WIDTH_NAME);
         EXPECT_EQ(resultStr, expected) << "Passed value is: " << passed;
@@ -658,81 +640,6 @@ static std::vector<std::tuple<std::string, Ark_Length, std::string>> sideBarWidt
     {EXPECTED_NUM_ZERO, LEN_NUM_ZERO, EXPECTED_NUM_ZERO},
     {EXPECTED_NUM_VILID, LEN_NUM_VALID, EXPECTED_NUM_VILID},
 };
-
-/*
- * @tc.name: setSideBarWidth1TestValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(SideBarContainerModifierTest, setSideBarWidth1TestValidValues, TestSize.Level1)
-{
-    std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
-    Ark_Length inputValueSideBarWidth;
-    for (auto [passed, checkVal, expected]: sideBarWidthValidValues2) {
-        inputValueSideBarWidth = checkVal;
-        auto width = Converter::ArkUnion<Opt_Union_Length_Bindable, Ark_Length>(inputValueSideBarWidth);
-        modifier_->setSideBarWidth(node_, &width);
-        jsonValue = GetJsonValue(node_);
-        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SIDE_BAR_WIDTH_NAME);
-        EXPECT_EQ(resultStr, expected) << "Passed value is: " << passed;
-    }
-}
-
-// Valid values for attribute 'minSideBarWidth' of method 'minSideBarWidth'
-static std::vector<std::tuple<std::string, Ark_Length, std::string>> mMinSideBarWidthValidValues2 = {
-    {EXPECTED_NUM_NEG, LEN_NUM_NEG, ATTRIBUTE_MIN_SIDE_BAR_WIDTH_DEFAULT_VALUE},
-    {EXPECTED_NUM_ZERO, LEN_NUM_ZERO, EXPECTED_NUM_ZERO},
-    {EXPECTED_NUM_VILID, LEN_NUM_VALID, EXPECTED_NUM_VILID},
-};
-
-/*
- * @tc.name: setMinSideBarWidth1TestValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(SideBarContainerModifierTest, setMinSideBarWidth1TestValidValues, TestSize.Level1)
-{
-    std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
-    std::string expectedStr;
-    Ark_Length inputValueMinSideBarWidth;
-    for (auto [passed, checkVal, expected]: mMinSideBarWidthValidValues2) {
-        inputValueMinSideBarWidth = checkVal;
-        auto width = Converter::ArkValue<Opt_Length>(inputValueMinSideBarWidth);
-        modifier_->setMinSideBarWidth1(node_, &width);
-        jsonValue = GetJsonValue(node_);
-        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MIN_SIDE_BAR_WIDTH_NAME);
-        EXPECT_EQ(resultStr, expected) << "Passed value is: " << passed;
-    }
-}
-
-// Valid values for attribute 'maxSideBarWidth' of method 'maxSideBarWidth'
-static std::vector<std::tuple<std::string, Ark_Length, std::string>> mMaxSideBarWidthValidValues2 = {
-    {EXPECTED_NUM_NEG, LEN_NUM_NEG, ATTRIBUTE_MAX_SIDE_BAR_WIDTH_DEFAULT_VALUE},
-    {EXPECTED_NUM_ZERO, LEN_NUM_ZERO, EXPECTED_NUM_ZERO},
-    {EXPECTED_NUM_VILID, LEN_NUM_VALID, EXPECTED_NUM_VILID},
-};
-
-/*
- * @tc.name: setMaxSideBarWidth1TestValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(SideBarContainerModifierTest, setMaxSideBarWidth1TestValidValues, TestSize.Level1)
-{
-    std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
-    Ark_Length inputValue;
-    for (auto [passed, checkVal, expected]: mMaxSideBarWidthValidValues2) {
-        inputValue = checkVal;
-        auto width = Converter::ArkValue<Opt_Length>(inputValue);
-        modifier_->setMaxSideBarWidth1(node_, &width);
-        jsonValue = GetJsonValue(node_);
-        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MAX_SIDE_BAR_WIDTH_NAME);
-        EXPECT_EQ(resultStr, expected) << "Passed value is: " << passed;
-    }
-}
 
 /*
  * @tc.name: setAutoHideTestDefaultValues

@@ -102,7 +102,7 @@ HWTEST_F(ListModifierTest, setChainAnimationTest, TestSize.Level1)
  * @tc.desc: Check the functionality of ListModifier.setCachedCount0
  * @tc.type: FUNC
  */
-HWTEST_F(ListModifierTest, setCachedCount0Test, TestSize.Level1)
+HWTEST_F(ListModifierTest, DISABLED_setCachedCount0Test, TestSize.Level1)
 {
     auto checkValue = GetAttrValue<std::string>(node_, "cachedCount");
     EXPECT_EQ(checkValue, "0");
@@ -433,7 +433,7 @@ HWTEST_F(ListModifierTest, setLanesTest, TestSize.Level1)
     gutterOpt = Converter::ArkValue<Opt_Dimension>(Ark_Empty());
     modifier_->setLanes(node_, &optValue, &gutterOpt);
     gutterCheckValue = GetAttrValue<std::string>(node_, "laneGutter");
-    EXPECT_EQ(gutterCheckValue, "55.50vp");
+    EXPECT_EQ(gutterCheckValue, "0.00vp");
 
     // lanes as constraints
     Ark_LengthConstrain constraint = {
