@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+        "package": "@koalaui/public",
+        "outDir": "build/abc",
+        "baseUrl": "./src",
+        "paths": {
+            "@koalaui/compat": ["../../compat/src/arkts"]
+        }
+    },
+    "include": ["src/**/*.ets"],
+    "references": [
+        { "path": "../compat" }
+    ]
+}

@@ -14,4 +14,3 @@
  */
 
 export { memo, memo_intrinsic, memo_entry, memo_stable, memo_skip } from '@koalaui/runtime/annotations';
-export { __memo_id_type, __memo_context_type } from '@koalaui/runtime';

@@ -1149,7 +1149,10 @@ Font Convert(const Ark_Font& src)
         font.fontFamilies = fontfamiliesOpt->families;
         font.fontFamiliesNG = std::optional<std::vector<std::string>>(fontfamiliesOpt->families);
     }
-    auto fontSize = OptConvert<Dimension>(src.size);
+    std::optional<Dimension> fontSize = std::nullopt;
+    if (src.size.tag != INTEROP_TAG_UNDEFINED) {
+        fontSize = Converter::OptConvertFromArkNumStrRes<Ark_Length, Ark_Number>(src.size.value, DimensionUnit::FP);
+    }
     if (fontSize) {
         Validator::ValidateNonNegative(fontSize);
         Validator::ValidateNonPercent(fontSize);
@@ -1590,6 +1593,7 @@ template<>
 OverlayOptions Convert(const Ark_OverlayOptions& src)
 {
     OverlayOptions dst;
+    dst.align = Alignment::TOP_LEFT;
     auto align = Converter::OptConvert<Alignment>(src.align);
     if (align) {
         dst.align = align.value();

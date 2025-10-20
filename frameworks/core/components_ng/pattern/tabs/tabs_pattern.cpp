@@ -37,7 +37,7 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/components_ng/pattern/tabs/tabs_node.h"
+#include "base/log/ace_checker.h"
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t CHILDREN_MIN_SIZE = 2;
@@ -52,6 +52,47 @@ void TabsPattern::OnAttachToFrameNode()
     // expand to navigation bar by default
     host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(
         { .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_BOTTOM });
+}
+
+void TabsPattern::PerformanceCheckTabChange(
+    RefPtr<OHOS::Ace::NG::TabsPattern> pattern, RefPtr<OHOS::Ace::NG::TabsNode> tabsNode, bool currentIndex)
+{
+    if (!AceChecker::IsPerformanceCheckEnabled()) {
+        return;
+    }
+    int64_t startTime = GetSysTimestamp();
+    auto pipeline = pattern->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto stageManager_ = pipeline->GetStageManager();
+    CHECK_NULL_VOID(stageManager_);
+    auto swiperNode_ = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_VOID(swiperNode_);
+    pipeline->AddAfterLayoutTask([weakStage = WeakPtr<StageManager>(stageManager_),
+                                     weakNode = WeakPtr<FrameNode>(swiperNode_), startTime, currentIndex]() {
+        auto stageManager = weakStage.Upgrade();
+        CHECK_NULL_VOID(stageManager);
+        auto swiperNode = weakNode.Upgrade();
+        CHECK_NULL_VOID(swiperNode);
+        auto currentTabContentNode = AceType::DynamicCast<TabContentNode>(swiperNode->GetChildByIndex(currentIndex));
+        CHECK_NULL_VOID(currentTabContentNode);
+        auto current = AceType::DynamicCast<UINode>(currentTabContentNode);
+        while (current) {
+            if (current->GetTag() == V2::PAGE_ETS_TAG) {
+                break;
+            }
+            current = current->GetParent();
+        }
+        CHECK_NULL_VOID(current);
+        auto routerPage = AceType::DynamicCast<FrameNode>(current);
+        CHECK_NULL_VOID(routerPage);
+        auto pagePattern = routerPage->GetPattern<NG::PagePattern>();
+        CHECK_NULL_VOID(pagePattern);
+        auto pageInfo = pagePattern->GetPageInfo();
+        CHECK_NULL_VOID(pageInfo);
+        auto pagePath = pageInfo->GetFullPath();
+        int64_t endTime = GetSysTimestamp();
+        stageManager->PerformanceCheck(routerPage, endTime - startTime, pagePath);
+    });
 }
 
 void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& event)
@@ -94,6 +135,8 @@ void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& e
                     TabContentChangeEvent eventInfo(currentIndex);
                     jsEvent(&eventInfo);
                 }, true);
+            
+            pattern->PerformanceCheckTabChange(pattern, tabsNode, currentIndex);
         }
     });
 

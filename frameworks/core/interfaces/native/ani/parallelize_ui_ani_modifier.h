@@ -13,4 +13,14 @@
  * limitations under the License.
  */
 
-export { __memo_id_type, __memo_context_type } from '@koalaui/runtime';
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_ANI_PARALLELIZE_UI_ANI_MODIFIER_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_ANI_PARALLELIZE_UI_ANI_MODIFIER_H
+
+#include "core/interfaces/ani/ani_api.h"
+
+namespace OHOS::Ace::NG {
+
+const ArkUIAniParallelizeUIModifier* GetParallelizeUIAniModifier();
+} // namespace OHOS::Ace::NG
+
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_ANI_PARALLELIZE_UI_ANI_MODIFIER_H

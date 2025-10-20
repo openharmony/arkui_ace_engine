@@ -51,6 +51,8 @@ public:
 
     void PageChangeCloseKeyboard();
     void UpdateColorModeForPage(const RefPtr<FrameNode>& page);
+    // ace performance check
+    void PerformanceCheck(const RefPtr<FrameNode>& pageNode, int64_t vsyncTimeout, std::string path);
 
     static void FirePageHide(const RefPtr<UINode>& node, PageTransitionType transitionType = PageTransitionType::NONE);
     static void FirePageShow(const RefPtr<UINode>& node, PageTransitionType transitionType = PageTransitionType::NONE,
@@ -154,8 +156,6 @@ public:
     }
 
 protected:
-    // ace performance check
-    void PerformanceCheck(const RefPtr<FrameNode>& pageNode, int64_t vsyncTimeout, std::string path);
     void FireAutoSave(const RefPtr<FrameNode>& outPageNode, const RefPtr<FrameNode>& inPageNode);
     void AddPageTransitionTrace(const RefPtr<FrameNode>& srcPage, const RefPtr<FrameNode>& destPage);
     std::string GetSrcPageInfo(const RefPtr<FrameNode>& srcPage);

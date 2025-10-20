@@ -25,6 +25,7 @@
 namespace OHOS::Ace::NG {
 namespace {
     constexpr int32_t SHAPE_POINT_DIM = 2;
+    constexpr ShapePoint DEFAULT_POINT = ShapePoint(0.0, 0.0);
 } // namespace
 struct LineOptions {
     std::optional<Dimension> width;
@@ -92,7 +93,7 @@ void SetStartPointImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<ShapePoint>(value);
-    LineModelNG::StartPoint(frameNode, *convValue);
+    LineModelNG::StartPoint(frameNode, convValue.value_or(DEFAULT_POINT));
 }
 void SetEndPointImpl(Ark_NativePointer node,
                      const Opt_ShapePoint* value)
@@ -100,7 +101,7 @@ void SetEndPointImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<ShapePoint>(value);
-    LineModelNG::EndPoint(frameNode, *convValue);
+    LineModelNG::EndPoint(frameNode, convValue.value_or(DEFAULT_POINT));
 }
 } // LineAttributeModifier
 const GENERATED_ArkUILineModifier* GetLineModifier()

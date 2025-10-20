@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,6 +38,64 @@ using namespace testing::ext;
 using namespace OHOS::Ace::Recorder;
 
 namespace OHOS::Ace {
+namespace {
+const char* const DEFAULT_CONFIG =
+    "{\"enable\":true,\"switch\":{\"page\":true,\"component\":true,\"exposure\":true},\"config\":[{\"pageUrl\":"
+    "\"pages/"
+    "Index\",\"shareNode\":[\"hahaha\",\"btn_TitleExpand\",\"btn_OpenSelf\",\"btn_Screenshot\",\"btn_inspect\","
+    "\"btn_xxx\",\"\"],\"exposureCfg\":[{\"id\":\"btn_Grid\",\"ratio\":0.75,\"duration\":5000},{\"id\":\"btn_"
+    "TitleExpand\",\"ratio\":0.9,\"duration\":1000}]},{\"pageUrl\":\"pages/"
+    "ScrollPage\",\"shareNode\":[\"scroll_item_1\"],\"exposureCfg\":[{\"id\":\"scroll_item_2\",\"ratio\":0.85,"
+    "\"duration\":5000},{\"id\":\"scroll_item_12\",\"ratio\":0.4,\"duration\":3000}]}]}";
+const char* const DISABLE_CONFIG =
+    "{\"enable\":false,\"switch\":{\"page\":true,\"component\":true,\"exposure\":true},\"config\":[{\"pageUrl\":"
+    "\"pages/"
+    "Index\",\"shareNode\":[\"hahaha\",\"btn_TitleExpand\",\"btn_OpenSelf\",\"btn_Screenshot\",\"btn_inspect\","
+    "\"btn_xxx\",\"\"],\"exposureCfg\":[{\"id\":\"btn_Grid\",\"ratio\":0.75,\"duration\":5000},{\"id\":\"btn_"
+    "TitleExpand\",\"ratio\":0.9,\"duration\":1000}]},{\"pageUrl\":\"pages/"
+    "ScrollPage\",\"shareNode\":[\"scroll_item_1\"],\"exposureCfg\":[{\"id\":\"scroll_item_2\",\"ratio\":0.85,"
+    "\"duration\":5000},{\"id\":\"scroll_item_12\",\"ratio\":0.4,\"duration\":3000}]}]}";
+const char* const TEST_CONFIG =
+    "{\"enable\":false,\"switch\":{\"page\":true,\"component\":true,\"exposure\":true},\"x\":[{\"pageUrl\":"
+    "\"pages/"
+    "Index\",\"shareNode\":[\"hahaha\",\"btn_TitleExpand\",\"btn_OpenSelf\",\"btn_Screenshot\",\"btn_inspect\","
+    "\"btn_xxx\",\"\"],\"exposureCfg\":[{\"id\":\"btn_Grid\",\"ratio\":0.75,\"duration\":5000},{\"id\":\"btn_"
+    "TitleExpand\",\"ratio\":0.9,\"duration\":1000}]},{\"pageUrl\":\"pages/"
+    "ScrollPage\",\"shareNode\":[\"scroll_item_1\"],\"exposureCfg\":[{\"id\":\"scroll_item_2\",\"ratio\":0.85,"
+    "\"duration\":5000},{\"id\":\"scroll_item_12\",\"ratio\":0.4,\"duration\":3000}]}]}";
+const char* const TEST_CONFIG2 =
+    "{\"enable\":true,\"switch\":{\"page\":true,\"component\":true,\"exposure\":true},\"config\":[{"
+    "\"shareNode\":[\"hahaha\",\"btn_TitleExpand\",\"btn_OpenSelf\",\"btn_Screenshot\",\"btn_inspect\","
+    "\"btn_xxx\",\"\"],\"exposureCfg\":[{\"id\":\"btn_Grid\",\"ratio\":0.75,\"duration\":5000},{\"id\":\"btn_"
+    "TitleExpand\",\"ratio\":0.9,\"duration\":1000}]},{\"shareNode\":[\"scroll_item_1\"],\"exposureCfg\":[{"
+    "\"id\":\"scroll_item_2\",\"ratio\":0.85,"
+    "\"duration\":5000},{\"id\":\"scroll_item_12\",\"ratio\":0.4,\"duration\":3000}]}]}";
+
+const char* const TEST_CONFIG3 =
+    "{\"enable\":true,\"switch\":{\"page\":true,\"component\":true,\"exposure\":true},\"config\":[{\"pageUrl\":"
+    "\"pages/"
+    "Index\"},{\"pageUrl\":\"pages/"
+    "ScrollPage\"}]}";
+const char* const TEST_CONFIG4 =
+    "{\"enable\":true,\"globalSwitch\":{\"page\":true,\"component\":true,\"exposure\":true},\"config\":[{"
+    "\"pageUrl\":"
+    "\"pages/"
+    "Index\",\"shareNode\":[\"hahaha\",\"btn_TitleExpand\",\"btn_OpenSelf\",\"btn_Screenshot\",\"btn_inspect\","
+    "\"btn_xxx\",\"\"],\"exposureCfg\":[{\"id\":\"btn_Grid\",\"ratio\":0.75,\"duration\":5000},{\"id\":\"btn_"
+    "TitleExpand\",\"ratio\":0.9,\"duration\":1000}]},{\"pageUrl\":\"pages/"
+    "ScrollPage\",\"shareNode\":[\"scroll_item_1\"],\"exposureCfg\":[{\"id\":\"scroll_item_2\",\"ratio\":0.85,"
+    "\"duration\":5000},{\"id\":\"scroll_item_12\",\"ratio\":0.4,\"duration\":3000}]}]}";
+
+const char* const TEST_CONFIG5 =
+    "{\"enable\":true,\"switch\":{\"page\":true,\"component\":true,\"exposure\":true,\"pageParam\":true,"
+    "\"scroll\":true,\"animation\":true,\"rect\":true,\"web\":true,\"textInput\":true,\"clickGesture\":true},"
+    "\"webCategory\":\"test\",\"webIdentifier\":\"abc\",\"webActionJs\":\"hello\"}";
+
+const std::string DEFAULT_CONFIG5 =
+    "{\"enable\":true,\"switch\":{\"page\":true,\"component\":true,\"exposure\":true,\"pageParam\":true,"
+    "\"scroll\":true,\"animation\":true,\"rect\":true,\"web\":true,\"textInput\":true,\"clickGesture\":true},"
+    "\"webCategory\":\"test\",\"webIdentifier\":\"abc\",\"webActionJs\":\"hello\"}";
+} // namespace
 class DemoUIEventObserver : public UIEventObserver {
 public:
     DemoUIEventObserver() = default;
@@ -73,81 +131,6 @@ public:
     void TearDown() {}
 };
 
-void GetConfig(std::string& config)
-{
-    config =
-        "{\"enable\":true,\"switch\":{\"page\":true,\"component\":true,\"exposure\":true},\"config\":[{\"pageUrl\":"
-        "\"pages/"
-        "Index\",\"shareNode\":[\"hahaha\",\"btn_TitleExpand\",\"btn_OpenSelf\",\"btn_Screenshot\",\"btn_inspect\","
-        "\"btn_xxx\",\"\"],\"exposureCfg\":[{\"id\":\"btn_Grid\",\"ratio\":0.75,\"duration\":5000},{\"id\":\"btn_"
-        "TitleExpand\",\"ratio\":0.9,\"duration\":1000}]},{\"pageUrl\":\"pages/"
-        "ScrollPage\",\"shareNode\":[\"scroll_item_1\"],\"exposureCfg\":[{\"id\":\"scroll_item_2\",\"ratio\":0.85,"
-        "\"duration\":5000},{\"id\":\"scroll_item_12\",\"ratio\":0.4,\"duration\":3000}]}]}";
-}
-
-void GetConfigDisable(std::string& config)
-{
-    config =
-        "{\"enable\":false,\"switch\":{\"page\":true,\"component\":true,\"exposure\":true},\"config\":[{\"pageUrl\":"
-        "\"pages/"
-        "Index\",\"shareNode\":[\"hahaha\",\"btn_TitleExpand\",\"btn_OpenSelf\",\"btn_Screenshot\",\"btn_inspect\","
-        "\"btn_xxx\",\"\"],\"exposureCfg\":[{\"id\":\"btn_Grid\",\"ratio\":0.75,\"duration\":5000},{\"id\":\"btn_"
-        "TitleExpand\",\"ratio\":0.9,\"duration\":1000}]},{\"pageUrl\":\"pages/"
-        "ScrollPage\",\"shareNode\":[\"scroll_item_1\"],\"exposureCfg\":[{\"id\":\"scroll_item_2\",\"ratio\":0.85,"
-        "\"duration\":5000},{\"id\":\"scroll_item_12\",\"ratio\":0.4,\"duration\":3000}]}]}";
-}
-
-void GetConfigTest(std::string& config)
-{
-    config =
-        "{\"enable\":false,\"switch\":{\"page\":true,\"component\":true,\"exposure\":true},\"x\":[{\"pageUrl\":"
-        "\"pages/"
-        "Index\",\"shareNode\":[\"hahaha\",\"btn_TitleExpand\",\"btn_OpenSelf\",\"btn_Screenshot\",\"btn_inspect\","
-        "\"btn_xxx\",\"\"],\"exposureCfg\":[{\"id\":\"btn_Grid\",\"ratio\":0.75,\"duration\":5000},{\"id\":\"btn_"
-        "TitleExpand\",\"ratio\":0.9,\"duration\":1000}]},{\"pageUrl\":\"pages/"
-        "ScrollPage\",\"shareNode\":[\"scroll_item_1\"],\"exposureCfg\":[{\"id\":\"scroll_item_2\",\"ratio\":0.85,"
-        "\"duration\":5000},{\"id\":\"scroll_item_12\",\"ratio\":0.4,\"duration\":3000}]}]}";
-}
-
-void GetConfigTest2(std::string& config)
-{
-    config = "{\"enable\":true,\"switch\":{\"page\":true,\"component\":true,\"exposure\":true},\"config\":[{"
-             "\"shareNode\":[\"hahaha\",\"btn_TitleExpand\",\"btn_OpenSelf\",\"btn_Screenshot\",\"btn_inspect\","
-             "\"btn_xxx\",\"\"],\"exposureCfg\":[{\"id\":\"btn_Grid\",\"ratio\":0.75,\"duration\":5000},{\"id\":\"btn_"
-             "TitleExpand\",\"ratio\":0.9,\"duration\":1000}]},{\"shareNode\":[\"scroll_item_1\"],\"exposureCfg\":[{"
-             "\"id\":\"scroll_item_2\",\"ratio\":0.85,"
-             "\"duration\":5000},{\"id\":\"scroll_item_12\",\"ratio\":0.4,\"duration\":3000}]}]}";
-}
-
-void GetConfigTest3(std::string& config)
-{
-    config =
-        "{\"enable\":true,\"switch\":{\"page\":true,\"component\":true,\"exposure\":true},\"config\":[{\"pageUrl\":"
-        "\"pages/"
-        "Index\"},{\"pageUrl\":\"pages/"
-        "ScrollPage\"}]}";
-}
-
-void GetConfigTest4(std::string& config)
-{
-    config =
-        "{\"enable\":true,\"globalSwitch\":{\"page\":true,\"component\":true,\"exposure\":true},\"config\":[{"
-        "\"pageUrl\":"
-        "\"pages/"
-        "Index\",\"shareNode\":[\"hahaha\",\"btn_TitleExpand\",\"btn_OpenSelf\",\"btn_Screenshot\",\"btn_inspect\","
-        "\"btn_xxx\",\"\"],\"exposureCfg\":[{\"id\":\"btn_Grid\",\"ratio\":0.75,\"duration\":5000},{\"id\":\"btn_"
-        "TitleExpand\",\"ratio\":0.9,\"duration\":1000}]},{\"pageUrl\":\"pages/"
-        "ScrollPage\",\"shareNode\":[\"scroll_item_1\"],\"exposureCfg\":[{\"id\":\"scroll_item_2\",\"ratio\":0.85,"
-        "\"duration\":5000},{\"id\":\"scroll_item_12\",\"ratio\":0.4,\"duration\":3000}]}]}";
-}
-
-void GetConfigTest5(std::string& config)
-{
-    config = "{\"enable\":true,\"switch\":{\"page\":true,\"component\":true,\"exposure\":true,\"pageParam\":true,"
-             "\"scroll\":true,\"animation\":true,\"rect\":true,\"web\":true,\"textInput\":true,\"clickGesture\":true},"
-             "\"webCategory\":\"test\",\"webIdentifier\":\"abc\",\"webActionJs\":\"hello\"}";
-}
-
 RefPtr<NG::FrameNode> CreatePageNode(const std::string pageUrl)
 {
     auto pageNodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -167,10 +150,8 @@ HWTEST_F(EventRecorderTest, EventRecorderTest001, TestSize.Level1)
      * @tc.steps: step1. call the Register first.
      * @tc.expected: step1. register success.
      */
-    std::string config;
-    GetConfig(config);
     auto observer = std::make_shared<DemoUIEventObserver>();
-    Recorder::EventController::Get().Register(config, observer);
+    Recorder::EventController::Get().Register(DEFAULT_CONFIG, observer);
 
     Recorder::NodeDataCache::Get().OnPageShow("pages/Index");
 
@@ -220,10 +201,8 @@ HWTEST_F(EventRecorderTest, EventRecorderTest001, TestSize.Level1)
  */
 HWTEST_F(EventRecorderTest, EventRecorderTest002, TestSize.Level1)
 {
-    std::string config;
-    GetConfig(config);
     auto observer = std::make_shared<DemoUIEventObserver>();
-    Recorder::EventController::Get().Register(config, observer);
+    Recorder::EventController::Get().Register(DEFAULT_CONFIG, observer);
 
     /**
      * @tc.steps: step1. test index page.
@@ -284,10 +263,8 @@ HWTEST_F(EventRecorderTest, EventRecorderTest002, TestSize.Level1)
  */
 HWTEST_F(EventRecorderTest, EventRecorderTest003, TestSize.Level1)
 {
-    std::string config;
-    GetConfig(config);
     auto observer = std::make_shared<DemoUIEventObserver>();
-    Recorder::EventController::Get().Register(config, observer);
+    Recorder::EventController::Get().Register(DEFAULT_CONFIG, observer);
 
     Recorder::NodeDataCache::Get().OnPageShow("pages/Index");
     auto pageNode = CreatePageNode("pages/Index");
@@ -330,10 +307,8 @@ HWTEST_F(EventRecorderTest, EventRecorderTest003, TestSize.Level1)
  */
 HWTEST_F(EventRecorderTest, EventRecorderTest004, TestSize.Level1)
 {
-    std::string config;
-    GetConfig(config);
     auto observer = std::make_shared<DemoUIEventObserver>();
-    Recorder::EventController::Get().Register(config, observer);
+    Recorder::EventController::Get().Register(DEFAULT_CONFIG, observer);
 
     Recorder::NodeDataCache::Get().OnPageShow("pages/Index");
     auto pageNode = CreatePageNode("pages/Index");
@@ -379,10 +354,8 @@ HWTEST_F(EventRecorderTest, EventRecorderTest004, TestSize.Level1)
  */
 HWTEST_F(EventRecorderTest, EventRecorderTest005, TestSize.Level1)
 {
-    std::string config;
-    GetConfig(config);
     auto observer = std::make_shared<DemoUIEventObserver>();
-    Recorder::EventController::Get().Register(config, observer);
+    Recorder::EventController::Get().Register(DEFAULT_CONFIG, observer);
 
     /**
      * @tc.steps: step1. test index page.
@@ -436,10 +409,8 @@ HWTEST_F(EventRecorderTest, EventRecorderTest005, TestSize.Level1)
  */
 HWTEST_F(EventRecorderTest, EventRecorderTest006, TestSize.Level1)
 {
-    std::string config;
-    GetConfig(config);
     auto observer = std::make_shared<DemoUIEventObserver>();
-    Recorder::EventController::Get().Register(config, observer);
+    Recorder::EventController::Get().Register(DEFAULT_CONFIG, observer);
 
     /**
      * @tc.steps: step1. test index page.
@@ -487,8 +458,7 @@ HWTEST_F(EventRecorderTest, EventRecorderTest006, TestSize.Level1)
  */
 HWTEST_F(EventRecorderTest, EventRecorderTest007, TestSize.Level1)
 {
-    std::string config;
-    GetConfig(config);
+    auto config = DEFAULT_CONFIG;
     auto observer = std::make_shared<DemoUIEventObserver>();
     Recorder::EventController::Get().Register(config, observer);
 
@@ -533,10 +503,8 @@ HWTEST_F(EventRecorderTest, EventRecorderTest007, TestSize.Level1)
  */
 HWTEST_F(EventRecorderTest, EventRecorderTest008, TestSize.Level1)
 {
-    std::string config;
-    GetConfig(config);
     auto observer = std::make_shared<DemoUIEventObserver>();
-    Recorder::EventController::Get().Register(config, observer);
+    Recorder::EventController::Get().Register(DEFAULT_CONFIG, observer);
     Recorder::NodeDataCache::Get().OnPageShow("pages/Index");
     auto exposure = AceType::MakeRefPtr<Recorder::ExposureProcessor>("pages/Index", "btn_TitleExpand");
     EXPECT_TRUE(exposure->IsNeedRecord());
@@ -557,10 +525,8 @@ HWTEST_F(EventRecorderTest, EventRecorderTest008, TestSize.Level1)
  */
 HWTEST_F(EventRecorderTest, EventRecorderTest009, TestSize.Level1)
 {
-    std::string config;
-    GetConfig(config);
     auto observer = std::make_shared<DemoUIEventObserver>();
-    Recorder::EventController::Get().Register(config, observer);
+    Recorder::EventController::Get().Register(DEFAULT_CONFIG, observer);
 
     Recorder::EventParamsBuilder builder1;
     builder1.SetId("hello").SetPageUrl("pages/Index").SetText("world");
@@ -763,11 +729,9 @@ HWTEST_F(EventRecorderTest, Init001, TestSize.Level1)
  */
 HWTEST_F(EventRecorderTest, Init002, TestSize.Level1)
 {
-    std::string str;
-    GetConfigTest(str);
     Recorder::EventConfig* config = new Recorder::EventConfig();
-    config->Init(str);
-    EXPECT_NE(str, "");
+    config->Init(TEST_CONFIG);
+    EXPECT_NE(TEST_CONFIG, "");
     delete config;
 }
 
@@ -778,11 +742,9 @@ HWTEST_F(EventRecorderTest, Init002, TestSize.Level1)
  */
 HWTEST_F(EventRecorderTest, Init003, TestSize.Level1)
 {
-    std::string str;
-    GetConfigTest2(str);
     Recorder::EventConfig* config = new Recorder::EventConfig();
-    config->Init(str);
-    EXPECT_NE(str, "");
+    config->Init(TEST_CONFIG2);
+    EXPECT_NE(TEST_CONFIG2, "");
     delete config;
 }
 
@@ -793,11 +755,9 @@ HWTEST_F(EventRecorderTest, Init003, TestSize.Level1)
  */
 HWTEST_F(EventRecorderTest, Init004, TestSize.Level1)
 {
-    std::string str;
-    GetConfigTest3(str);
     Recorder::EventConfig* config = new Recorder::EventConfig();
-    config->Init(str);
-    EXPECT_NE(str, "");
+    config->Init(TEST_CONFIG3);
+    EXPECT_NE(TEST_CONFIG3, "");
     delete config;
 }
 
@@ -808,11 +768,9 @@ HWTEST_F(EventRecorderTest, Init004, TestSize.Level1)
  */
 HWTEST_F(EventRecorderTest, Init005, TestSize.Level1)
 {
-    std::string str;
-    GetConfigTest4(str);
     Recorder::EventConfig* config = new Recorder::EventConfig();
-    config->Init(str);
-    EXPECT_NE(str, "");
+    config->Init(TEST_CONFIG4);
+    EXPECT_NE(TEST_CONFIG4, "");
     delete config;
 }
 
@@ -991,10 +949,8 @@ HWTEST_F(EventRecorderTest, PutString002, TestSize.Level1)
  */
 HWTEST_F(EventRecorderTest, PutString003, TestSize.Level1)
 {
-    std::string config;
-    GetConfig(config);
     auto observer = std::make_shared<DemoUIEventObserver>();
-    Recorder::EventController::Get().Register(config, observer);
+    Recorder::EventController::Get().Register(DEFAULT_CONFIG, observer);
     Recorder::NodeDataCache::Get().OnPageShow("pages/Index");
     auto pageNode = CreatePageNode("pages/Index");
     Recorder::NodeDataCache::Get().mergedConfig_->shareNodes["element"] = { "element1", "element2", "element3" };
@@ -1009,10 +965,8 @@ HWTEST_F(EventRecorderTest, PutString003, TestSize.Level1)
  */
 HWTEST_F(EventRecorderTest, PutString004, TestSize.Level1)
 {
-    std::string config;
-    GetConfig(config);
     auto observer = std::make_shared<DemoUIEventObserver>();
-    Recorder::EventController::Get().Register(config, observer);
+    Recorder::EventController::Get().Register(DEFAULT_CONFIG, observer);
     Recorder::NodeDataCache::Get().OnPageShow("pages/Index");
     auto pageNode = CreatePageNode("pages/Index");
     Recorder::NodeDataCache::Get().mergedConfig_->shareNodes.clear();
@@ -1181,10 +1135,8 @@ HWTEST_F(EventRecorderTest, IsCategoryEnable001, TestSize.Level1)
  */
 HWTEST_F(EventRecorderTest, Register001, TestSize.Level1)
 {
-    std::string config;
-    GetConfigDisable(config);
     auto observer = std::make_shared<DemoUIEventObserver>();
-    Recorder::EventController::Get().Register(config, observer);
+    Recorder::EventController::Get().Register(DISABLE_CONFIG, observer);
     Recorder::EventController::Get().NotifyConfigChange();
     EXPECT_FALSE(Recorder::EventController::Get().clientList_.empty());
 }
@@ -1287,10 +1239,8 @@ HWTEST_F(EventRecorderTest, IsPageParamRecordEnable001, TestSize.Level1)
     EventRecorder::Get().eventSwitch_[index] = true;
     EXPECT_FALSE(EventRecorder::Get().IsComponentRecordEnable());
 
-    std::string str;
-    GetConfigTest5(str);
     EventConfig* config = new EventConfig();
-    config->Init(str);
+    config->Init(TEST_CONFIG5);
     EXPECT_FALSE(config->GetWebJsCode().empty());
     EXPECT_FALSE(config->GetWebCategory().empty());
     EXPECT_TRUE(config->IsCategoryEnable(index));
@@ -1307,10 +1257,8 @@ HWTEST_F(EventRecorderTest, FillWebJsCode001, TestSize.Level1)
     int32_t index = static_cast<int32_t>(EventCategory::CATEGORY_WEB);
     EventRecorder::Get().globalSwitch_[index] = true;
     EventRecorder::Get().eventSwitch_[index] = true;
-    std::string config;
-    GetConfigTest5(config);
     auto observer = std::make_shared<DemoUIEventObserver>();
-    EventController::Get().Register(config, observer);
+    EventController::Get().Register(TEST_CONFIG5, observer);
     std::optional<WebJsItem> scriptItems = std::nullopt;
     EventRecorder::Get().FillWebJsCode(scriptItems);
     EXPECT_TRUE(scriptItems.has_value());
@@ -1508,5 +1456,368 @@ HWTEST_F(EventRecorderTest, EventRecorderTest021, TestSize.Level1)
 
     auto ret = GetFirstImageNodeChild(pageNode);
     EXPECT_TRUE(ret != nullptr);
+}
+/**
+ * @tc.name: ApplyExposureCfgInner001
+ * @tc.desc: Test ApplyExposureCfgInner.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, ApplyExposureCfgInner001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize configuration and observer.
+     * @tc.expected: Configuration is loaded and observer is created successfully.
+     */
+    auto observer = std::make_shared<DemoUIEventObserver>();
+    
+    /**
+     * @tc.steps: step2. Set up UI event client with configuration and observer.
+     * @tc.expected: Client is properly configured and added to controller.
+     */
+    UIEventClient client;
+    client.config.Init(DEFAULT_CONFIG);
+    ASSERT_TRUE(client.config.IsEnable());
+    client.observer = observer;
+    Recorder::EventController::Get().clientList_.emplace_back(client);
+    EventRecorder::Get().focusContainerId_ = 1;
+    EventRecorder::Get().containerId_ = 1;
+
+    /**
+     * @tc.steps: step3. Apply exposure configuration.
+     * @tc.expected: Exposure configuration is applied successfully.
+     */
+    bool isExposureChanged = false;
+    auto configPtr = Recorder::EventController::Get().clientList_.back().config.GetConfig();
+    Recorder::EventController::Get().ApplyExposureCfgInner(configPtr, isExposureChanged);
+
+    /**
+     * @tc.steps: step4. Create event manager and test key event.
+     * @tc.expected: Event manager is created and key event is processed.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    KeyEvent touchPoint;
+    auto container = Container::GetContainer(eventManager->instanceId_);
+}
+
+/**
+ * @tc.name: GetWebJsCodeList001
+ * @tc.desc: Test GetWebJsCodeList.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, GetWebJsCodeList001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Clear client list and initialize configuration.
+     * @tc.expected: Client list is cleared and configuration is loaded.
+     */
+    Recorder::EventController::Get().clientList_.clear();
+    auto observer = std::make_shared<DemoUIEventObserver>();
+
+    /**
+     * @tc.steps: step2. Configure client with alternating switch settings.
+     * @tc.expected: Client switches are set with alternating true/false values.
+     */
+    UIEventClient client;
+    client.config.Init(DEFAULT_CONFIG);
+    ASSERT_TRUE(client.config.IsEnable());
+    for (int i = 0; i < 5; i++) {
+        if (i % 2 == 0) {
+            client.config.switches_[i] = true;
+        } else {
+            client.config.switches_[i] = false;
+        }
+    }
+
+    /**
+     * @tc.steps: step3. Register observer and get web JS code list.
+     * @tc.expected: Web JS code list is empty as no code is configured.
+     */
+    client.observer = observer;
+    Recorder::EventController::Get().clientList_.emplace_back(client);
+    std::vector<std::string> codeList;
+    Recorder::EventController::Get().ApplyNewestConfig(false);
+    codeList = Recorder::EventController::Get().GetWebJsCodeList();
+    EXPECT_TRUE(codeList.empty());
+}
+
+/**
+ * @tc.name: GetWebJsCodeList002
+ * @tc.desc: Test GetWebJsCodeList.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, GetWebJsCodeList002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Clear client list and initialize configuration.
+     * @tc.expected: Client list is cleared and configuration is loaded.
+     */
+    Recorder::EventController::Get().clientList_.clear();
+    auto observer = std::make_shared<DemoUIEventObserver>();
+
+    /**
+     * @tc.steps: step2. Configure client with alternating switch settings.
+     * @tc.expected: Client switches are set with alternating true/false values.
+     */
+    UIEventClient client;
+    client.config.Init(DEFAULT_CONFIG);
+    ASSERT_TRUE(client.config.IsEnable());
+    for (int i = 0; i < 10; i++) {
+        client.config.switches_[i] = i % 2;
+    }
+
+    /**
+     * @tc.steps: step3. Set empty web JS code and get code list.
+     * @tc.expected: Web JS code list is empty as code string is empty.
+     */
+    client.config.webJsCode_ = "";
+    client.observer = observer;
+    Recorder::EventController::Get().clientList_.emplace_back(client);
+    std::vector<std::string> codeList;
+    Recorder::EventController::Get().ApplyNewestConfig(false);
+    codeList = Recorder::EventController::Get().GetWebJsCodeList();
+    EXPECT_TRUE(codeList.empty());
+}
+
+/**
+ * @tc.name: GetWebJsCodeList003
+ * @tc.desc: Test GetWebJsCodeList.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, GetWebJsCodeList003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Clear client list and initialize configuration.
+     * @tc.expected: Client list is cleared and configuration is loaded.
+     */
+    Recorder::EventController::Get().clientList_.clear();
+    auto observer = std::make_shared<DemoUIEventObserver>();
+
+    /**
+     * @tc.steps: step2. Configure client with alternating switch settings.
+     * @tc.expected: Client switches are set with alternating true/false values.
+     */
+    UIEventClient client;
+    client.config.Init(DEFAULT_CONFIG);
+    ASSERT_TRUE(client.config.IsEnable());
+    for (int i = 0; i < 10; i++) {
+        client.config.switches_[i] = i % 2;
+    }
+
+    /**
+     * @tc.steps: step3. Set valid web JS code and get code list.
+     * @tc.expected: Web JS code list contains the configured code.
+     */
+    client.config.webJsCode_ = "GetWebJsCode";
+    client.observer = observer;
+    Recorder::EventController::Get().clientList_.emplace_back(client);
+    std::vector<std::string> codeList;
+    Recorder::EventController::Get().ApplyNewestConfig(false);
+    codeList = Recorder::EventController::Get().GetWebJsCodeList();
+    EXPECT_FALSE(codeList.empty());
+}
+
+/**
+ * @tc.name: FillWebJsCode002
+ * @tc.desc: Test FillWebJsCode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, FillWebJsCode002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Clear client list and initialize configuration.
+     * @tc.expected: Client list is cleared and configuration is loaded.
+     */
+    Recorder::EventController::Get().clientList_.clear();
+    auto observer = std::make_shared<DemoUIEventObserver>();
+
+     /**
+     * @tc.steps: step2. Configure client with alternating switch settings.
+     * @tc.expected: Client switches are set with alternating true/false values.
+     */
+    UIEventClient client;
+    client.config.Init(DEFAULT_CONFIG);
+    ASSERT_TRUE(client.config.IsEnable());
+    for (int i = 0; i < 10; i++) {
+        client.config.switches_[i] = i % 2;
+    }
+
+    /**
+     * @tc.steps: step3. Set empty web JS code and fill web JS code.
+     * @tc.expected: Script items remain unchanged as web JS code is empty.
+     */
+    client.config.webJsCode_ = "";
+    client.observer = observer;
+    Recorder::EventController::Get().clientList_.emplace_back(client);
+    std::vector<std::string> codeList;
+    std::optional<WebJsItem> scriptItems = std::nullopt;
+    EventRecorder::Get().FillWebJsCode(scriptItems);
+    EXPECT_FALSE(scriptItems.has_value());
+}
+
+/**
+ * @tc.name: ExposureProcessor001
+ * @tc.desc: Test ExposureProcessor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, ExposureProcessor001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize configuration and register observer.
+     * @tc.expected: Configuration is loaded and observer is registered.
+     */
+    auto observer = std::make_shared<DemoUIEventObserver>();
+    Recorder::EventController::Get().Register(DEFAULT_CONFIG, observer);
+    Recorder::NodeDataCache::Get().OnPageShow("pages/Index");
+
+    /**
+     * @tc.steps: step2. Create exposure processor and test basic functionality.
+     * @tc.expected: Exposure processor indicates recording is not needed and observer event type is invalid.
+     */
+    auto exposure = AceType::MakeRefPtr<Recorder::ExposureProcessor>("pages/Index", "");
+    EXPECT_FALSE(exposure->IsNeedRecord());
+    EXPECT_EQ(observer->GetEventType(), static_cast<int32_t>(Recorder::EventType::INVALID));
+    Recorder::EventController::Get().Unregister(observer);
+}
+
+/**
+ * @tc.name: OnVisibleChange001
+ * @tc.desc: Test OnVisibleChange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, OnVisibleChange001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize configuration and register observer.
+     * @tc.expected: Configuration is loaded and observer is registered.
+     */
+    auto observer = std::make_shared<DemoUIEventObserver>();
+    Recorder::EventController::Get().Register(DEFAULT_CONFIG, observer);
+    Recorder::NodeDataCache::Get().OnPageShow("pages/Index");
+
+    /**
+     * @tc.steps: step2. Create exposure processor and test visibility changes.
+     * @tc.expected: Exposure processing occurs correctly with visibility changes.
+     */
+    auto exposure = AceType::MakeRefPtr<Recorder::ExposureProcessor>("pages/Index", "btn_TitleExpand");
+    exposure->cfg_.duration = 5000;
+    EXPECT_TRUE(exposure->IsNeedRecord());
+    EXPECT_NEAR(exposure->GetRatio(), 0.9, 0.00001f);
+    exposure->OnVisibleChange(true);
+    sleep(2);
+    exposure->OnVisibleChange(false);
+
+    sleep(1);
+    EXPECT_NE(observer->GetEventType(), static_cast<int32_t>(Recorder::EventType::EXPOSURE));
+    Recorder::EventController::Get().Unregister(observer);
+}
+
+/**
+ * @tc.name: PutString005
+ * @tc.desc: Test PutString.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, PutString005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize configuration and register observer.
+     * @tc.expected: Configuration is loaded and observer is registered.
+     */
+    auto observer = std::make_shared<DemoUIEventObserver>();
+    Recorder::EventController::Get().Register(DEFAULT_CONFIG, observer);
+    Recorder::NodeDataCache::Get().OnPageShow("pages/Index");
+
+    /**
+     * @tc.steps: step2. Create page node and test PutString with empty ID.
+     * @tc.expected: PutString returns false as ID is empty.
+     */
+    auto pageNode = CreatePageNode("pages/Index");
+    Recorder::NodeDataCache::Get().mergedConfig_->shareNodes.clear();
+    std::string id = "";
+    std::string value = "value";
+    bool result = Recorder::NodeDataCache::Get().PutString(pageNode, id, value);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: PutString006
+ * @tc.desc: Test PutString.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, PutString006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize configuration and register observer.
+     * @tc.expected: Configuration is loaded and observer is registered.
+     */
+    auto observer = std::make_shared<DemoUIEventObserver>();
+    Recorder::EventController::Get().Register(DEFAULT_CONFIG, observer);
+    Recorder::NodeDataCache::Get().OnPageShow("pages/Index");
+
+    /**
+     * @tc.steps: step2. Create page node and test PutString with empty value.
+     * @tc.expected: PutString returns false as value is empty.
+     */
+    auto pageNode = CreatePageNode("pages/Index");
+    Recorder::NodeDataCache::Get().mergedConfig_->shareNodes.clear();
+    std::string id = "id";
+    std::string value = "";
+    bool result = Recorder::NodeDataCache::Get().PutString(pageNode, id, value);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: PutString007
+ * @tc.desc: Test PutString.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, PutString007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize configuration and register observer.
+     * @tc.expected: Configuration is loaded and observer is registered.
+     */
+    auto observer = std::make_shared<DemoUIEventObserver>();
+    Recorder::EventController::Get().Register(DEFAULT_CONFIG, observer);
+    Recorder::NodeDataCache::Get().OnPageShow("pages/Index");
+
+    /**
+     * @tc.steps: step2. Create page node and test PutString with oversized value.
+     * @tc.expected: PutString returns false as value exceeds maximum allowed length.
+     */
+    auto pageNode = CreatePageNode("pages/Index");
+    Recorder::NodeDataCache::Get().mergedConfig_->shareNodes.clear();
+    std::string id = "id";
+    std::string value(101, 'a');
+    bool result = Recorder::NodeDataCache::Get().PutString(pageNode, id, value);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: PutString009
+ * @tc.desc: Test PutString.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, PutString009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize configuration and register observer.
+     * @tc.expected: Configuration is loaded and observer is registered.
+     */
+    auto observer = std::make_shared<DemoUIEventObserver>();
+    Recorder::EventController::Get().Register(DEFAULT_CONFIG, observer);
+    Recorder::NodeDataCache::Get().OnPageShow("pages/Index");
+
+    /**
+     * @tc.steps: step2. Create page node and test PutString with mismatched configuration.
+     * @tc.expected: PutString returns false as page node doesn't match configuration.
+     */
+    auto pageNode = CreatePageNode("123");
+    Recorder::NodeDataCache::Get().mergedConfig_->shareNodes["abc"] = { "element1", "element2", "element3" };
+    Recorder::NodeDataCache::Get().shouldCollectFull_ = false;
+    std::string id = "id";
+    std::string value = "value";
+    bool result = Recorder::NodeDataCache::Get().PutString(pageNode, id, value);
+    EXPECT_FALSE(result);
 }
 } // namespace OHOS::Ace

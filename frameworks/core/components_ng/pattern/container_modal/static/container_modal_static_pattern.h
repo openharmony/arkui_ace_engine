@@ -42,40 +42,40 @@ public:
     void SetMaximizeIconIsRecover() override;
     void OnContainerModalEvent(const std::string& name, const std::string& value) override;
 
-    std::shared_ptr<XbarComponent> GetCustomTitle()
+    RefPtr<XbarComponent> GetCustomTitle()
     {
         return customTitle_;
     }
 
-    std::shared_ptr<XbarComponent> GetCustomFloatingTitle()
+    RefPtr<XbarComponent> GetCustomFloatingTitle()
     {
         return customFloatingTitle_;
     }
 
-    std::shared_ptr<XbarComponent> GetCustomButton()
+    RefPtr<XbarComponent> GetCustomButton()
     {
         return customButton_;
     }
 
-    void SetCustomTitle(const std::shared_ptr<XbarComponent>& component)
+    void SetCustomTitle(const RefPtr<XbarComponent>& component)
     {
         customTitle_ = component;
     }
 
-    void SetCustomFloatingTitle(const std::shared_ptr<XbarComponent>& component)
+    void SetCustomFloatingTitle(const RefPtr<XbarComponent>& component)
     {
         customFloatingTitle_ = component;
     }
 
-    void SetCustomButton(const std::shared_ptr<XbarComponent>& component)
+    void SetCustomButton(const RefPtr<XbarComponent>& component)
     {
         customButton_ = component;
     }
 
 private:
-    std::shared_ptr<XbarComponent> customTitle_;
-    std::shared_ptr<XbarComponent> customFloatingTitle_;
-    std::shared_ptr<XbarComponent> customButton_;
+    RefPtr<XbarComponent> customTitle_;
+    RefPtr<XbarComponent> customFloatingTitle_;
+    RefPtr<XbarComponent> customButton_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_MODAL_CONTAINER_MODAL_STATIC_PATTERN_H

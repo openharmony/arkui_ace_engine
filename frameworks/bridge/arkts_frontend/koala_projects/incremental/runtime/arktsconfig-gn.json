@@ -7,7 +7,8 @@
             "@koalaui/common": ["../../common/src"],
             "@koalaui/compat": ["../../compat/src/arkts"],
             "@koalaui/runtime/annotations": ["../annotations"],
-            "arkui.stateManagement.runtime": ["../stateMgmt.ts"]
+            "arkui.stateManagement.runtime": ["../stateMgmt.ts"],
+            "arkui.incremental.runtime.state": ["../../public/src/state.ets"]
         }
     },
     "include": ["ets-processed/**/*.ets"]

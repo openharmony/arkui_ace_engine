@@ -3389,7 +3389,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetRotateImpl(Ark_NativePointer node,
-                       const Opt_RotateOptions* value)
+                       const Opt_Union_RotateOptions_RotateAngleOptions* value)
     {
         if (!needGroupedLog(1))
         {
@@ -3408,6 +3408,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             return;
         }
         string out("setTransform(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetTransform3DImpl(Ark_NativePointer node,
+                            const Opt_matrix4_Matrix4Transit* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setTransform3D(");
         WriteToString(&out, value);
         out.append(") \n");
         appendGroupedLog(1, out);
@@ -15406,14 +15418,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void SetBarHeightImpl(Ark_NativePointer node,
-                          const Opt_Length* value)
+    void SetAnimationCurveImpl(Ark_NativePointer node,
+                               const Opt_Union_Curve_ICurve* value)
     {
         if (!needGroupedLog(1))
         {
             return;
         }
-        string out("setBarHeight(");
+        string out("setAnimationCurve(");
         WriteToString(&out, value);
         out.append(") \n");
         appendGroupedLog(1, out);
@@ -15670,6 +15682,21 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         WriteToString(&out, value);
         out.append(", ");
         WriteToString(&out, options);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetBarHeightImpl(Ark_NativePointer node,
+                          const Opt_Length* height,
+                          const Opt_Boolean* noMinHeightLimit)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setBarHeight(");
+        WriteToString(&out, height);
+        out.append(", ");
+        WriteToString(&out, noMinHeightLimit);
         out.append(") \n");
         appendGroupedLog(1, out);
     }
@@ -21407,6 +21434,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetScaleImpl,
             CommonMethodModifier::SetRotateImpl,
             CommonMethodModifier::SetTransformImpl,
+            CommonMethodModifier::SetTransform3DImpl,
             CommonMethodModifier::SetOnAppearImpl,
             CommonMethodModifier::SetOnDisAppearImpl,
             CommonMethodModifier::SetOnAttachImpl,
@@ -22893,7 +22921,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TabsAttributeModifier::SetBarPositionImpl,
             TabsAttributeModifier::SetScrollableImpl,
             TabsAttributeModifier::SetBarWidthImpl,
-            TabsAttributeModifier::SetBarHeightImpl,
+            TabsAttributeModifier::SetAnimationCurveImpl,
             TabsAttributeModifier::SetAnimationDurationImpl,
             TabsAttributeModifier::SetAnimationModeImpl,
             TabsAttributeModifier::SetEdgeEffectImpl,
@@ -22915,6 +22943,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TabsAttributeModifier::SetBarBackgroundEffectImpl,
             TabsAttributeModifier::SetOnContentWillChangeImpl,
             TabsAttributeModifier::SetBarModeImpl,
+            TabsAttributeModifier::SetBarHeightImpl,
             TabsAttributeModifier::SetBarBackgroundBlurStyle1Impl,
             TabsAttributeModifier::SetCachedMaxCountImpl,
         };
@@ -24229,27 +24258,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Callback_Void GetPropagationImpl(Ark_AxisEvent peer)
-    {
-        if (!needGroupedLog(1))
-        {
-            return {};
-        }
-        string out("getPropagation(");
-        out.append(") \n");
-        out.append("[return {}] \n");
-        appendGroupedLog(1, out);
-        return {};
-    }
-    void SetPropagationImpl(Ark_AxisEvent peer,
-                            const Callback_Void* propagation)
+    void PropagationImpl(Ark_AxisEvent peer)
     {
         if (!needGroupedLog(1))
         {
             return;
         }
-        string out("setPropagation(");
-        WriteToString(&out, propagation);
+        string out("propagation(");
         out.append(") \n");
         appendGroupedLog(1, out);
     }
@@ -27169,27 +27184,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Callback_Void GetPreventDefaultImpl(Ark_ClickEvent peer)
-    {
-        if (!needGroupedLog(1))
-        {
-            return {};
-        }
-        string out("getPreventDefault(");
-        out.append(") \n");
-        out.append("[return {}] \n");
-        appendGroupedLog(1, out);
-        return {};
-    }
-    void SetPreventDefaultImpl(Ark_ClickEvent peer,
-                               const Callback_Void* preventDefault)
+    void PreventDefaultImpl(Ark_ClickEvent peer)
     {
         if (!needGroupedLog(1))
         {
             return;
         }
-        string out("setPreventDefault(");
-        WriteToString(&out, preventDefault);
+        string out("preventDefault(");
         out.append(") \n");
         appendGroupedLog(1, out);
     }
@@ -29459,27 +29460,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Callback_Void GetStopPropagationImpl(Ark_FocusAxisEvent peer)
-    {
-        if (!needGroupedLog(1))
-        {
-            return {};
-        }
-        string out("getStopPropagation(");
-        out.append(") \n");
-        out.append("[return {}] \n");
-        appendGroupedLog(1, out);
-        return {};
-    }
-    void SetStopPropagationImpl(Ark_FocusAxisEvent peer,
-                                const Callback_Void* stopPropagation)
+    void StopPropagationImpl(Ark_FocusAxisEvent peer)
     {
         if (!needGroupedLog(1))
         {
             return;
         }
-        string out("setStopPropagation(");
-        WriteToString(&out, stopPropagation);
+        string out("stopPropagation(");
         out.append(") \n");
         appendGroupedLog(1, out);
     }
@@ -30152,6 +30139,63 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         WriteToString(&out, peer);
         out.append(") \n");
         appendGroupedLog(1, out);
+    }
+    Ark_Boolean CreateAnimationImpl(Ark_FrameNode peer,
+                                    Ark_AnimationPropertyType property,
+                                    const Opt_Array_Float64* startValue,
+                                    const Array_Float64* endValue,
+                                    const Ark_AnimateParam* param)
+    {
+        if (!needGroupedLog(1))
+        {
+            return 0;
+        }
+        string out("createAnimation(");
+        WriteToString(&out, peer);
+        out.append(", ");
+        WriteToString(&out, property);
+        out.append(", ");
+        WriteToString(&out, startValue);
+        out.append(", ");
+        WriteToString(&out, endValue);
+        out.append(", ");
+        WriteToString(&out, param);
+        out.append(") \n");
+        out.append("[return 0] \n");
+        appendGroupedLog(1, out);
+        return 0;
+    }
+    Ark_Boolean CancelAnimationsImpl(Ark_FrameNode peer,
+                                     const Array_AnimationPropertyType* properties)
+    {
+        if (!needGroupedLog(1))
+        {
+            return 0;
+        }
+        string out("cancelAnimations(");
+        WriteToString(&out, peer);
+        out.append(", ");
+        WriteToString(&out, properties);
+        out.append(") \n");
+        out.append("[return 0] \n");
+        appendGroupedLog(1, out);
+        return 0;
+    }
+    Array_Float64 GetNodePropertyValueImpl(Ark_FrameNode peer,
+                                           Ark_AnimationPropertyType property)
+    {
+        if (!needGroupedLog(1))
+        {
+            return {};
+        }
+        string out("getNodePropertyValue(");
+        WriteToString(&out, peer);
+        out.append(", ");
+        WriteToString(&out, property);
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
     }
     Ark_NativePointer GetFrameNodePtrImpl(Ark_FrameNode node)
     {
@@ -31383,27 +31427,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Callback_Void GetStopPropagationImpl(Ark_HoverEvent peer)
-    {
-        if (!needGroupedLog(1))
-        {
-            return {};
-        }
-        string out("getStopPropagation(");
-        out.append(") \n");
-        out.append("[return {}] \n");
-        appendGroupedLog(1, out);
-        return {};
-    }
-    void SetStopPropagationImpl(Ark_HoverEvent peer,
-                                const Callback_Void* stopPropagation)
+    void StopPropagationImpl(Ark_HoverEvent peer)
     {
         if (!needGroupedLog(1))
         {
             return;
         }
-        string out("setStopPropagation(");
-        WriteToString(&out, stopPropagation);
+        string out("stopPropagation(");
         out.append(") \n");
         appendGroupedLog(1, out);
     }
@@ -35521,6 +35551,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             return;
         }
         string out("setOnTouchEvent(");
+        WriteToString(&out, self);
+        out.append(", ");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetOnDestoryEventImpl(Ark_NativePointer self,
+                               const Callback_OnDestory_Void* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setOnDestoryEvent(");
         WriteToString(&out, self);
         out.append(", ");
         WriteToString(&out, value);
@@ -41804,51 +41848,23 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Callback_Void GetStopPropagationImpl(Ark_TouchEvent peer)
-    {
-        if (!needGroupedLog(1))
-        {
-            return {};
-        }
-        string out("getStopPropagation(");
-        out.append(") \n");
-        out.append("[return {}] \n");
-        appendGroupedLog(1, out);
-        return {};
-    }
-    void SetStopPropagationImpl(Ark_TouchEvent peer,
-                                const Callback_Void* stopPropagation)
+    void StopPropagationImpl(Ark_TouchEvent peer)
     {
         if (!needGroupedLog(1))
         {
             return;
         }
-        string out("setStopPropagation(");
-        WriteToString(&out, stopPropagation);
+        string out("stopPropagation(");
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Callback_Void GetPreventDefaultImpl(Ark_TouchEvent peer)
-    {
-        if (!needGroupedLog(1))
-        {
-            return {};
-        }
-        string out("getPreventDefault(");
-        out.append(") \n");
-        out.append("[return {}] \n");
-        appendGroupedLog(1, out);
-        return {};
-    }
-    void SetPreventDefaultImpl(Ark_TouchEvent peer,
-                               const Callback_Void* preventDefault)
+    void PreventDefaultImpl(Ark_TouchEvent peer)
     {
         if (!needGroupedLog(1))
         {
             return;
         }
-        string out("setPreventDefault(");
-        WriteToString(&out, preventDefault);
+        string out("preventDefault(");
         out.append(") \n");
         appendGroupedLog(1, out);
     }
@@ -44074,8 +44090,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             AxisEventAccessor::SetYImpl,
             AxisEventAccessor::GetScrollStepImpl,
             AxisEventAccessor::SetScrollStepImpl,
-            AxisEventAccessor::GetPropagationImpl,
-            AxisEventAccessor::SetPropagationImpl,
+            AxisEventAccessor::PropagationImpl,
         };
         return &AxisEventAccessorImpl;
     }
@@ -44441,8 +44456,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             ClickEventAccessor::SetYImpl,
             ClickEventAccessor::GetHandImpl,
             ClickEventAccessor::SetHandImpl,
-            ClickEventAccessor::GetPreventDefaultImpl,
-            ClickEventAccessor::SetPreventDefaultImpl,
+            ClickEventAccessor::PreventDefaultImpl,
         };
         return &ClickEventAccessorImpl;
     }
@@ -44905,8 +44919,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             FocusAxisEventAccessor::GetFinalizerImpl,
             FocusAxisEventAccessor::GetAxisMapImpl,
             FocusAxisEventAccessor::SetAxisMapImpl,
-            FocusAxisEventAccessor::GetStopPropagationImpl,
-            FocusAxisEventAccessor::SetStopPropagationImpl,
+            FocusAxisEventAccessor::StopPropagationImpl,
         };
         return &FocusAxisEventAccessorImpl;
     }
@@ -44975,6 +44988,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             FrameNodeExtenderAccessor::GetFrameNodeByUniqueIdImpl,
             FrameNodeExtenderAccessor::ReuseImpl,
             FrameNodeExtenderAccessor::RecycleImpl,
+            FrameNodeExtenderAccessor::CreateAnimationImpl,
+            FrameNodeExtenderAccessor::CancelAnimationsImpl,
+            FrameNodeExtenderAccessor::GetNodePropertyValueImpl,
             FrameNodeExtenderAccessor::GetFrameNodePtrImpl,
             FrameNodeExtenderAccessor::CreateTypedFrameNodeImpl,
             FrameNodeExtenderAccessor::CreateByRawPtrImpl,
@@ -45202,8 +45218,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             HoverEventAccessor::SetDisplayXImpl,
             HoverEventAccessor::GetDisplayYImpl,
             HoverEventAccessor::SetDisplayYImpl,
-            HoverEventAccessor::GetStopPropagationImpl,
-            HoverEventAccessor::SetStopPropagationImpl,
+            HoverEventAccessor::StopPropagationImpl,
         };
         return &HoverEventAccessorImpl;
     }
@@ -45837,6 +45852,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             NodeContainerOpsAccessor::SetOnAttachImpl,
             NodeContainerOpsAccessor::SetOnDetachImpl,
             NodeContainerOpsAccessor::SetOnTouchEventImpl,
+            NodeContainerOpsAccessor::SetOnDestoryEventImpl,
         };
         return &NodeContainerOpsAccessorImpl;
     }
@@ -46998,10 +47014,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TouchEventAccessor::SetTouchesImpl,
             TouchEventAccessor::GetChangedTouchesImpl,
             TouchEventAccessor::SetChangedTouchesImpl,
-            TouchEventAccessor::GetStopPropagationImpl,
-            TouchEventAccessor::SetStopPropagationImpl,
-            TouchEventAccessor::GetPreventDefaultImpl,
-            TouchEventAccessor::SetPreventDefaultImpl,
+            TouchEventAccessor::StopPropagationImpl,
+            TouchEventAccessor::PreventDefaultImpl,
         };
         return &TouchEventAccessorImpl;
     }

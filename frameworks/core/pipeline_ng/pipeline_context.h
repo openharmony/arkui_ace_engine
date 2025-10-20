@@ -911,7 +911,7 @@ public:
     // for frontend animation interface.
     void OpenFrontendAnimation(
         const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& finishCallback);
-    void CloseFrontendAnimation();
+    void CloseFrontendAnimation(bool forceClose = false);
 
     bool IsDragging() const override;
     void SetIsDragging(bool isDragging) override;

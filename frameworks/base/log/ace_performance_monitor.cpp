@@ -34,36 +34,22 @@ void GetTimePoint(TimePoint& now)
 }
 } // namespace
 
-ScopedMonitor::ScopedMonitor(MonitorTag tag, int32_t instanceId) : tag_(tag), instanceId_(instanceId)
+ScopedMonitor::ScopedMonitor(MonitorTag tag) : tag_(tag)
 {
-    if (instanceId == -1) {
-        return;
-    }
     GetTimePoint(begin_);
-    ArkUIPerfMonitor::GetPerfMonitor(instanceId)->SetRecordingStatus(tag_, MonitorStatus::RUNNING);
+    ArkUIPerfMonitor::GetInstance().SetRecordingStatus(tag_, MonitorStatus::RUNNING);
 }
 
 ScopedMonitor::~ScopedMonitor()
 {
-    if (instanceId_ == -1) {
-        return;
-    }
     GetTimePoint(end_);
-    ArkUIPerfMonitor::GetPerfMonitor(instanceId_)->RecordTimeSlice(
-        tag_, duration_cast<nanoseconds>(end_ - begin_).count());
+    ArkUIPerfMonitor::GetInstance().RecordTimeSlice(tag_, duration_cast<nanoseconds>(end_ - begin_).count());
 }
 
-std::shared_ptr<ArkUIPerfMonitor> ArkUIPerfMonitor::GetPerfMonitor(int32_t instanceId)
+ArkUIPerfMonitor& ArkUIPerfMonitor::GetInstance()
 {
-    auto container = Container::GetContainer(instanceId);
-    if (!container) {
-        return std::make_shared<ArkUIPerfMonitor>();
-    }
-    auto pipeline = container->GetPipelineContext();
-    if (!pipeline) {
-        return std::make_shared<ArkUIPerfMonitor>();
-    }
-    return pipeline->GetPerfMonitor();
+    static ArkUIPerfMonitor instance;
+    return instance;
 }
 
 ArkUIPerfMonitor::ArkUIPerfMonitor()

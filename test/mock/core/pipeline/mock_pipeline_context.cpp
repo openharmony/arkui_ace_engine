@@ -1010,7 +1010,7 @@ std::string PipelineContext::GetCurrentExtraInfo()
     return std::string();
 }
 
-void PipelineContext::CloseFrontendAnimation() {}
+void PipelineContext::CloseFrontendAnimation(bool forceClose) {}
 
 void PipelineContext::OpenFrontendAnimation(
     const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& finishCallback)

@@ -198,7 +198,7 @@ public:
         return frameChildren_;
     }
 
-    void InitializePatternAndContext();
+    virtual void InitializePatternAndContext();
 
     virtual void MarkModifyDone();
 

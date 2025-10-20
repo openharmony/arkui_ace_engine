@@ -766,11 +766,17 @@ HWTEST_F(RichEditorStyledStringTestNg, CopySpanStyle003, TestSize.Level1)
 
     LeadingMargin leadingMargin;
     source->textLineStyle->UpdateLeadingMargin(leadingMargin);
+
+    DrawableLeadingMargin drawableLeadingMargin;
+    drawableLeadingMargin.onDraw_ = [](NG::DrawingContext& context, NG::LeadingMarginSpanOptions options) {};
+    source->textLineStyle->UpdateDrawableLeadingMargin(drawableLeadingMargin);
+
     source->fontStyle->UpdateFontSize(FONT_SIZE_VALUE);
     source->textLineStyle->UpdateLineHeight(LINE_HEIGHT_VALUE);
 
     layoutAlgorithm->CopySpanStyle(source, target);
     EXPECT_EQ(target->fontStyle->GetFontSize(), FONT_SIZE_VALUE);
+    EXPECT_TRUE(target->textLineStyle->HasDrawableLeadingMargin());
 }
 
 /**

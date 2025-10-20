@@ -734,11 +734,11 @@ HWTEST_F(RichEditorEventTestNg, RichEditorEventHub005, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnWillAttachIME
- * @tc.desc: test OnWillAttachIME.
+ * @tc.name: OnWillAttachIME001
+ * @tc.desc: test OnWillAttachIME001.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEventTestNg, OnWillAttachIME, TestSize.Level1)
+HWTEST_F(RichEditorEventTestNg, OnWillAttachIME001, TestSize.Level1)
 {
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
@@ -768,6 +768,45 @@ HWTEST_F(RichEditorEventTestNg, OnWillAttachIME, TestSize.Level1)
     auto parsedConfig = *reinterpret_cast<ExtraConfig*>(clientInfo.extraInfo->GetExtraInfo());
     EXPECT_EQ(parsedConfig.key, "name");
     EXPECT_EQ(parsedConfig.value, "test");
+    richEditorModel.SetOnWillAttachIME(nullptr);
+    ASSERT_EQ(eventHub->onWillAttachIME_, nullptr);
+}
+
+/**
+ * @tc.name: OnWillAttachIME002
+ * @tc.desc: test OnWillAttachIME002.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEventTestNg, OnWillAttachIME002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    struct ExtraConfig {
+        std::string key;
+        std::string value;
+    };
+    IMEAttachCallback attach = [](IMEClient& client) {
+        ExtraConfig* extraConfig = new ExtraConfig();
+        extraConfig->key = "name";
+        extraConfig->value = "test";
+        client.extraInfo = AceType::MakeRefPtr<IMEExtraInfo>(extraConfig, [extraConfig]() {
+            delete extraConfig;
+        });
+    };
+    RichEditorModelNG::SetOnWillAttachIME(AceType::RawPtr(richEditorNode_), std::move(attach));
+    ASSERT_NE(eventHub->onWillAttachIME_, nullptr);
+    auto clientInfo = richEditorPattern->GetIMEClientInfo();
+    richEditorPattern->FireOnWillAttachIME(clientInfo);
+    ASSERT_NE(clientInfo.extraInfo, nullptr);
+    ASSERT_NE(clientInfo.extraInfo->GetExtraInfo(), nullptr);
+    auto parsedConfig = *reinterpret_cast<ExtraConfig*>(clientInfo.extraInfo->GetExtraInfo());
+    EXPECT_EQ(parsedConfig.key, "name");
+    EXPECT_EQ(parsedConfig.value, "test");
+    RichEditorModelNG::SetOnWillAttachIME(AceType::RawPtr(richEditorNode_), nullptr);
+    ASSERT_EQ(eventHub->onWillAttachIME_, nullptr);
 }
 
 /**

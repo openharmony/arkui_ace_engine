@@ -25,8 +25,9 @@ import { UIContext, MeasureUtils, TextMenuController, Font, FocusController, Con
     FrameCallback, UIInspector, UIObserver, OverlayManager, PromptAction, AtomicServiceBar, Router, CursorController,
     MediaQuery, ComponentSnapshot, OverlayManagerOptions, DragController, TargetInfo, CustomBuilderWithId,
     KeyboardAvoidMode } from '@ohos/arkui/UIContext';
-import { StateManager, ComputableState, GlobalStateManager, StateContext, memoEntry, memoEntry1,
+import { StateManager, ComputableState, GlobalStateManager, memoEntry, memoEntry1,
     IncrementalNode } from '@koalaui/runtime';
+import { StateContext } from 'arkui.incremental.runtime.state';
 import { Context, PointerStyle, PixelMap } from '#external';
 import { Nullable,  WidthBreakpoint, HeightBreakpoint } from 'arkui/component/enums';
 import { KeyEvent, PopupCommonOptions, MenuOptions } from 'arkui/component/common';
@@ -630,7 +631,7 @@ export class RouterImpl extends Router {
         return result;
     }
 
-    public getStateByIndex(index: int): router.RouterState | undefined {
+    public getStateByIndex(index: number): router.RouterState | undefined {
         if (this.router_ === undefined) {
             throw Error("router set in uiContext is empty");
         }
@@ -1277,6 +1278,9 @@ export class UIContextImpl extends UIContext {
     textMenuController_: TextMenuControllerImpl;
     detachedRootEntryManager_: DetachedRootEntryManager;
     isDebugMode_: boolean = false;
+    updateParallelizeItemNodeCallback_?:() => void;
+    callbacks: Array<() => void>;
+
 
     bufferSize = 4096
     buffer: KBuffer = new KBuffer(this.bufferSize)
@@ -1299,6 +1303,7 @@ export class UIContextImpl extends UIContext {
         this.detachedRootEntryManager_ = new DetachedRootEntryManager(this);
         this.isDebugMode_ = ArkUIAniModule._IsDebugMode(instanceId) !== 0;
         this.router_ = new RouterImpl(instanceId);
+        this.callbacks = new Array<() => void>();
     }
     public getInstanceId() : int32 {
         return this.instanceId_;
@@ -1717,5 +1722,17 @@ export class UIContextImpl extends UIContext {
 
     public setImageRawDataCacheSize(value: int): void {
         ArkUIAniModule._Common_SetImageRawDataCacheSize(value, this.instanceId_);
+    }
+    public updateParallelizeItemNode() {
+        this.updateParallelizeItemNodeCallback_?.()
+    }
+    public scheduleCallback(callback: () => void) {
+        this.callbacks.push(callback)
+    }
+    public flushCallback() {
+        for(const callback of this.callbacks ) {
+            callback?.()
+        }
+        this.callbacks.length = 0
     }
 }

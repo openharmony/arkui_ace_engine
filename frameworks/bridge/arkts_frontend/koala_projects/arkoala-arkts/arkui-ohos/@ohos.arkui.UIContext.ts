@@ -164,7 +164,7 @@ export class Router {
         throw Error("getState not implemented in Router!");
     }
 
-    public getStateByIndex(index: int): router.RouterState | undefined {
+    public getStateByIndex(index: number): router.RouterState | undefined {
         throw Error("getStateByIndex not implemented in Router!");
     }
 

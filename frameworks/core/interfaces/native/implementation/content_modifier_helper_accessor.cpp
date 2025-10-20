@@ -336,7 +336,7 @@ void ResetContentModifierMenuItemImpl(Ark_NativePointer node)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    SelectModelNG::SetBuilderFunc(frameNode, nullptr);
+    SelectModelNG::ResetBuilderFunc(frameNode);
 }
 void ContentModifierSliderImpl(Ark_NativePointer node,
                                const Ark_Object* contentModifier,

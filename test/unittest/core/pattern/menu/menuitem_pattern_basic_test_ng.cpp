@@ -369,6 +369,44 @@ HWTEST_F(MenuItemPatternBasicTestNg, AddSelectIcon004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: AddSelectIcon005
+ * @tc.desc: Verify AddSelectIcon On TV.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternBasicTestNg, AddSelectIcon005, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    selectTheme->isTV_ = true;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(selectTheme));
+
+    MenuItemModelNG MenuItemModelInstance;
+    MenuItemProperties itemOption;
+    itemOption.content = "content";
+    MenuItemModelInstance.Create(itemOption);
+    MenuItemModelInstance.SetSelectIcon(true);
+    MenuItemModelInstance.SetSelectIconSrc("selectIcon.png");
+    MenuItemModelInstance.SetSelected(true);
+    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(itemNode, nullptr);
+    auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(itemPattern, nullptr);
+
+    ASSERT_EQ(itemNode->GetChildren().size(), 2u);
+    auto leftRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(0));
+    EXPECT_EQ(leftRow->GetChildren().size(), 1u);
+    auto rightRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(1));
+    EXPECT_EQ(rightRow->GetChildren().size(), 1u);
+    // call AddSelectIcon
+    itemPattern->OnModifyDone();
+    EXPECT_EQ(rightRow->GetChildren().size(), 1u);
+    auto selectIconNode = AceType::DynamicCast<FrameNode>(rightRow->GetChildAtIndex(0));
+    ASSERT_NE(selectIconNode, nullptr);
+    EXPECT_EQ(selectIconNode->GetTag(), V2::IMAGE_ETS_TAG);
+}
+
+/**
  * @tc.name: UpdateIcon001
  * @tc.desc: Verify UpdateIcon.
  * @tc.type: FUNC

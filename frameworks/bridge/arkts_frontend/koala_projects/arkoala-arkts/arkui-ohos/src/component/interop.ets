@@ -17,7 +17,8 @@ import { ArkUIAniModule } from 'arkui.ani'
 import { KPointer } from '@koalaui/interop';
 import { PeerNode, findPeerNode } from '../PeerNode';
 import { int32 } from '@koalaui/common';
-import { __context, __id, GlobalStateManager, IncrementalNode, memoEntry, memoEntry1, mutableState, MutableState, NodeAttach, StateContext } from '@koalaui/runtime';
+import { __context, __id, GlobalStateManager, IncrementalNode, memoEntry, memoEntry1, mutableState, MutableState, NodeAttach } from '@koalaui/runtime';
+import { StateContext } from 'arkui.incremental.runtime.state';
 import { ExtendableComponent } from './extendableComponent';
 import { 
     StateDecoratedVariable, 
@@ -29,9 +30,9 @@ import {
     uiUtils,
     IObservedObject,
     OBSERVE,
-    ObserveSingleton,
     IStateDecoratedVariable
 } from '../stateManagement';
+import { ObserveSingleton } from "arkui/stateManagement/base/observeSingleton";
 import { IDecoratedV1Variable, WatchFuncType, WatchIdType } from '../stateManagement/decorator';
 import { UIContextUtil } from 'arkui/base/UIContextUtil';
 import { DetachedRootEntryImpl, UIContextImpl } from 'arkui/base/UIContextImpl';
@@ -440,14 +441,36 @@ export function compatibleWrappedBuilderInternal(builder: Any, ...args: FixedArr
         if (param.typeOf() !== 'object') {
             return;
         }
-        let it = param.keys();
         const stateParam = instance.getProperty('arg1') as ESValue;
-        while (true) {
-            const result = it.next()
-            if (result.done) {
-                break;
+        const rawValue = param.unwrap()!;
+        if (isDynamicObject(rawValue)) {
+            let it = param.keys();
+            while (true) {
+                const result = it.next();
+                if (result.done) {
+                    break;
+                }
+                stateParam.setProperty(result.value as ESValue, param.getProperty(result.value as ESValue));
             }
-            stateParam.setProperty(result.value as ESValue, param.getProperty(result.value as ESValue));
+        }
+        else {
+            const target = (reflect.Value.of(rawValue) as ClassValue).getFieldByName('@target').getData() as Object;
+            const keys = Object.keys(target);
+            if (rawValue instanceof IObservedObject) {
+                const PREFIX = '__backing_';
+                keys.forEach((key)=>{
+                    if(key.startsWith(PREFIX)){
+                        const value = (reflect.Value.of(target) as ClassValue).getFieldByName(key).getData() as Object;
+                        stateParam.setProperty(key.slice(PREFIX.length), value);
+                    }
+                })
+            }
+            else {
+                keys.forEach((key)=>{
+                    const value = (reflect.Value.of(target) as ClassValue).getFieldByName(key).getData() as Object;
+                    stateParam.setProperty(key, value);
+                })
+            }
         }
         const global = ESValue.getGlobal();
         const runPendingJobs = global.getProperty('runPendingJobs');

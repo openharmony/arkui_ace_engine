@@ -296,6 +296,7 @@ const GENERATED_ArkUIPanGestureEventAccessor* GetPanGestureEventAccessor();
 const GENERATED_ArkUIPanGestureOptionsAccessor* GetPanGestureOptionsAccessor();
 const GENERATED_ArkUIPanRecognizerAccessor* GetPanRecognizerAccessor();
 const GENERATED_ArkUIParagraphStyleAccessor* GetParagraphStyleAccessor();
+const GENERATED_ArkUIParticleHelperAccessor* GetParticleHelperAccessor();
 const GENERATED_ArkUIPath2DAccessor* GetPath2DAccessor();
 const GENERATED_ArkUIPatternLockControllerAccessor* GetPatternLockControllerAccessor();
 const GENERATED_ArkUIPermissionRequestAccessor* GetPermissionRequestAccessor();
@@ -600,6 +601,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetPanGestureOptionsAccessor,
         GetPanRecognizerAccessor,
         GetParagraphStyleAccessor,
+        GetParticleHelperAccessor,
         GetPath2DAccessor,
         GetPatternLockControllerAccessor,
         GetPermissionRequestAccessor,

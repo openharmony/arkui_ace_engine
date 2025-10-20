@@ -209,6 +209,11 @@ struct RotateOpt {
     std::vector<std::optional<float>> vec5f;
 };
 
+struct RotateAngleOpt {
+    std::optional<DimensionOffset> center;
+    std::vector<std::optional<float>> vec4f;
+};
+
 struct TranslateOpt {
     std::optional<Dimension> x;
     std::optional<Dimension> y;
@@ -1256,6 +1261,33 @@ RotateOpt Convert(const Ark_RotateOptions& src)
 }
 
 template<>
+RotateAngleOpt Convert(const Ark_RotateAngleOptions& src)
+{
+    RotateAngleOpt options;
+    options.vec4f.emplace_back(OptConvert<float>(src.angleX));
+    options.vec4f.emplace_back(OptConvert<float>(src.angleY));
+    options.vec4f.emplace_back(OptConvert<float>(src.angleZ));
+    options.vec4f.emplace_back(OptConvert<float>(src.perspective));
+
+    auto centerX =  OptConvert<Dimension>(src.centerX);
+    auto centerY =  OptConvert<Dimension>(src.centerY);
+    auto center = DimensionOffset(Dimension(0.5f, DimensionUnit::PERCENT), Dimension(0.5f, DimensionUnit::PERCENT));
+    center.SetZ(Dimension(0.5f, DimensionUnit::PERCENT));
+    if (centerX.has_value()) {
+        center.SetX(centerX.value());
+    }
+    if (centerY.has_value()) {
+        center.SetY(centerY.value());
+    }
+    auto centerZ =  OptConvert<Dimension>(src.centerZ);
+    if (centerZ.has_value()) {
+        center.SetZ(centerZ.value());
+    }
+    options.center = center;
+    return options;
+}
+
+template<>
 void AssignCast(std::optional<TransitionType>& dst, const Ark_TransitionType& src)
 {
     switch (src) {
@@ -1302,6 +1334,45 @@ ScaleOptions Convert(const Ark_ScaleOptions& src)
         scaleOptions.centerY = center.value();
     }
     return scaleOptions;
+}
+
+RotateAngleOptions Convert(const Ark_RotateAngleOptions& src)
+{
+    RotateAngleOptions rotateOptions(0.0f, 0.0f, 0.0f, 0.5_pct, 0.5_pct, 0.5_pct);
+    // The value of centerZ is 50%, which is equivalent to 0 when finally set to the RS because not support percent.
+    auto coordX = OptConvert<float>(src.angleX);
+    auto coordY = OptConvert<float>(src.angleY);
+    auto coordZ = OptConvert<float>(src.angleZ);
+    if (!coordX && !coordY && !coordZ) {
+        rotateOptions.angleZ = 1.0f;
+    } else {
+        if (coordX.has_value()) {
+            rotateOptions.angleX = coordX.value();
+        }
+        if (coordY.has_value()) {
+            rotateOptions.angleY = coordY.value();
+        }
+        if (coordZ.has_value()) {
+            rotateOptions.angleZ = coordZ.value();
+        }
+    }
+    auto perspective = OptConvert<float>(src.perspective);
+    if (perspective.has_value()) {
+        rotateOptions.perspective = perspective.value();
+    }
+    auto center = OptConvert<Dimension>(src.centerX);
+    if (center.has_value()) {
+        rotateOptions.centerX = center.value();
+    }
+    center = OptConvert<Dimension>(src.centerY);
+    if (center.has_value()) {
+        rotateOptions.centerY = center.value();
+    }
+    center = OptConvert<Dimension>(src.centerZ);
+    if (center.has_value()) {
+        rotateOptions.centerZ = center.value();
+    }
+    return rotateOptions;
 }
 
 template<>
@@ -1906,7 +1977,7 @@ void SetMouseResponseRegionImpl(Ark_NativePointer node,
     if (auto convArray = Converter::OptConvertPtr<std::vector<DimensionRect>>(value); convArray) {
         ViewAbstract::SetMouseResponseRegion(frameNode, *convArray);
     } else {
-        ViewAbstract::SetMouseResponseRegion(frameNode, { DimensionRect() });
+        ViewAbstract::SetMouseResponseRegion(frameNode, {});
     }
 }
 void SetSizeImpl(Ark_NativePointer node,
@@ -3168,7 +3239,7 @@ void SetUseShadowBatchingImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        ViewAbstractModelNG::SetUseShadowBatching(frameNode, false);
+        ViewAbstractModelStatic::SetUseShadowBatching(frameNode, false);
         return;
     }
     ViewAbstractModelStatic::SetUseShadowBatching(frameNode, convValue);
@@ -3229,52 +3300,80 @@ void SetScaleImpl(Ark_NativePointer node,
     ViewAbstractModelStatic::SetPivot(frameNode, DimensionOffset(centerX, centerY));
 }
 void SetRotateImpl(Ark_NativePointer node,
-                   const Opt_RotateOptions* value)
+                   const Opt_Union_RotateOptions_RotateAngleOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<RotateOpt>(value);
-    if (!convValue) {
-        std::vector<std::optional<float>> EMPTY_ROTATE_VECTOR(NUM_5, std::nullopt);
-        ViewAbstractModelStatic::SetRotate(frameNode, EMPTY_ROTATE_VECTOR);
-        return;
-    }
-    auto xValue = Converter::GetOptPtr(&(value->value.centerX));
-    if (xValue.has_value()) {
+    if (value->value.selector == 0) {
+        auto convValue = Converter::OptConvert<RotateOpt>(value->value.value0);
+        if (!convValue) {
+            std::vector<std::optional<float>> EMPTY_ROTATE_VECTOR(NUM_5, std::nullopt);
+            ViewAbstractModelStatic::SetRotate(frameNode, EMPTY_ROTATE_VECTOR);
+            return;
+        }
+        auto xValue = Converter::GetOptPtr(&(value->value.value0.centerX));
+        if (xValue.has_value()) {
+            Converter::VisitUnion(
+                xValue.value(),
+                [&convValue](const Ark_String& val) {
+                    std::string degreeStr = Converter::Convert<std::string>(val);
+                    auto dim = StringUtils::StringToCalcDimension(degreeStr);
+                    convValue->center->SetX(dim);
+                },
+                [](const Ark_Number& val) {}, []() {});
+        }
+        auto yValue = Converter::GetOptPtr(&(value->value.value0.centerY));
+        if (yValue.has_value()) {
+            Converter::VisitUnion(
+                yValue.value(),
+                [&convValue](const Ark_String& val) {
+                    std::string degreeStr = Converter::Convert<std::string>(val);
+                    auto dim = StringUtils::StringToCalcDimension(degreeStr);
+                    convValue->center->SetY(dim);
+                },
+                [](const Ark_Number& val) {}, []() {});
+        }
+        auto angleValue = value->value.value0.angle;
         Converter::VisitUnion(
-            xValue.value(),
-            [&convValue](const Ark_String& val) {
-                std::string degreeStr = Converter::Convert<std::string>(val);
-                auto dim = StringUtils::StringToCalcDimension(degreeStr);
-                convValue->center->SetX(dim);
+            angleValue,
+            [&convValue](const Ark_String& str) {
+                std::string degreeStr = Converter::Convert<std::string>(str);
+                float angle = static_cast<float>(StringUtils::StringToDegree(degreeStr));
+                int32_t indA = 3;
+                if (convValue->vec5f.size() > static_cast<size_t>(indA)) {
+                    convValue->vec5f[indA] = angle;
+                }
             },
             [](const Ark_Number& val) {}, []() {});
+        ViewAbstractModelStatic::SetRotate(frameNode, convValue->vec5f);
+        ViewAbstractModelStatic::SetPivot(frameNode, convValue->center);
+    } else {
+        auto convValue = Converter::OptConvert<RotateAngleOpt>(value->value.value1);
+        auto xValue = Converter::GetOptPtr(&(value->value.value1.centerX));
+        if (xValue.has_value()) {
+            Converter::VisitUnion(
+                xValue.value(),
+                [&convValue](const Ark_String& val) {
+                    std::string degreeStr = Converter::Convert<std::string>(val);
+                    auto dim = StringUtils::StringToCalcDimension(degreeStr);
+                    convValue->center->SetX(dim);
+                },
+                [](const Ark_Number& val) {}, []() {});
+        }
+        auto yValue = Converter::GetOptPtr(&(value->value.value1.centerY));
+        if (yValue.has_value()) {
+            Converter::VisitUnion(
+                yValue.value(),
+                [&convValue](const Ark_String& val) {
+                    std::string degreeStr = Converter::Convert<std::string>(val);
+                    auto dim = StringUtils::StringToCalcDimension(degreeStr);
+                    convValue->center->SetY(dim);
+                },
+                [](const Ark_Number& val) {}, []() {});
+        }
+        ViewAbstractModelStatic::SetRotateAngle(frameNode, convValue->vec4f);
+        ViewAbstractModelStatic::SetPivot(frameNode, convValue->center);
     }
-    auto yValue = Converter::GetOptPtr(&(value->value.centerY));
-    if (yValue.has_value()) {
-        Converter::VisitUnion(
-            yValue.value(),
-            [&convValue](const Ark_String& val) {
-                std::string degreeStr = Converter::Convert<std::string>(val);
-                auto dim = StringUtils::StringToCalcDimension(degreeStr);
-                convValue->center->SetY(dim);
-            },
-            [](const Ark_Number& val) {}, []() {});
-    }
-    auto angleValue = value->value.angle;
-    Converter::VisitUnion(
-        angleValue,
-        [&convValue](const Ark_String& str) {
-            std::string degreeStr = Converter::Convert<std::string>(str);
-            float angle = static_cast<float>(StringUtils::StringToDegree(degreeStr));
-            int32_t indA = 3;
-            if (convValue->vec5f.size() > indA) {
-                convValue->vec5f[indA] = angle;
-            }
-        },
-        [](const Ark_Number& val) {}, []() {});
-    ViewAbstractModelStatic::SetRotate(frameNode, convValue->vec5f);
-    ViewAbstractModelStatic::SetPivot(frameNode, convValue->center);
 }
 void SetTransformImpl(Ark_NativePointer node, const Opt_matrix4_Matrix4Transit* value)
 {
@@ -3286,6 +3385,17 @@ void SetTransformImpl(Ark_NativePointer node, const Opt_matrix4_Matrix4Transit* 
         return;
     }
     ViewAbstract::SetTransformMatrix(frameNode, matrixOpt.value());
+}
+void SetTransform3DImpl(Ark_NativePointer node, const Opt_matrix4_Matrix4Transit* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto matrixOpt = OptConvertPtr<Matrix4>(value);
+    if (!matrixOpt.has_value()) {
+        ViewAbstract::SetTransform3DMatrix(frameNode, Matrix4::CreateIdentity());
+        return;
+    }
+    ViewAbstractModelStatic::SetTransform3DMatrix(frameNode, matrixOpt.value());
 }
 void SetOnAppearImpl(Ark_NativePointer node,
                      const Opt_Callback_Void* value)
@@ -4000,7 +4110,8 @@ void SetKeyImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<std::string>(value);
     if (!convValue) {
-        // keep the same processing
+        std::string defaultStr = "";
+        ViewAbstract::SetInspectorId(frameNode, defaultStr);
         return;
     }
     ViewAbstract::SetInspectorId(frameNode, *convValue);
@@ -4036,7 +4147,8 @@ void SetRestoreIdImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<int32_t>(value);
     if (!convValue) {
-        // Implement Reset value
+        int32_t index = -1;
+        ViewAbstract::SetRestoreId(frameNode, index);
         return;
     }
     ViewAbstract::SetRestoreId(frameNode, *convValue);
@@ -4984,7 +5096,8 @@ void SetBindTipsImpl(Ark_NativePointer node,
         [] (const Ark_StyledString& value) {
             return;
         },
-        [] () {
+        [frameNode, popupParam, styledString] () {
+            ViewAbstractModelStatic::BindTips(frameNode, popupParam, styledString);
             return;
         });
 }
@@ -5019,9 +5132,7 @@ void SetBindPopupImpl(Ark_NativePointer node,
             auto popupParam = Converter::Convert<RefPtr<PopupParam>>(value);
             CHECK_NULL_VOID(popupParam);
             onWillDismissPopup(value.onWillDismiss, popupParam);
-            if (optShow) {
-                popupParam->SetIsShow(*optShow);
-            }
+            popupParam->SetIsShow(optShow.value_or(false));
            ViewAbstractModelStatic::BindPopup(frameNode, popupParam, nullptr);
         },
         [frameNode, node, optShow, onWillDismissPopup](const Ark_CustomPopupOptions& value) {
@@ -5029,24 +5140,18 @@ void SetBindPopupImpl(Ark_NativePointer node,
             CHECK_NULL_VOID(popupParam);
             onWillDismissPopup(value.onWillDismiss, popupParam);
             if (popupParam->IsShow() && !g_isPopupCreated(frameNode)) {
-                if (optShow) {
-                    popupParam->SetIsShow(*optShow);
-                }
+                popupParam->SetIsShow(optShow.value_or(false));
                 CallbackHelper(value.builder).BuildAsync([frameNode, popupParam](const RefPtr<UINode>& uiNode) {
                     ViewAbstractModelStatic::BindPopup(frameNode, popupParam, uiNode);
                     }, node);
             } else {
-                if (optShow) {
-                    popupParam->SetIsShow(*optShow);
-                }
+                popupParam->SetIsShow(optShow.value_or(false));
                 ViewAbstractModelStatic::BindPopup(frameNode, popupParam, nullptr);
             }
         },
         [frameNode, optShow]() {
             auto popupParam = AceType::MakeRefPtr<PopupParam>();
-            if (optShow) {
-                popupParam->SetIsShow(*optShow);
-            }
+            popupParam->SetIsShow(optShow.value_or(false));
             ViewAbstractModelStatic::BindPopup(frameNode, popupParam, nullptr);
         });
 }
@@ -5125,24 +5230,31 @@ void BindContextMenuBase(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(content);
-    if (!optValue) {
-        // Implement Reset value
-        return;
-    }
     menuParam.type = NG::MenuType::CONTEXT_MENU;
     auto type = Converter::OptConvertPtr<ResponseType>(responseType).value_or(ResponseType::LONG_PRESS);
-    auto contentBuilder = [callback = CallbackHelper(*optValue), node, frameNode, type](
-                              MenuParam menuParam, std::function<void()>&& previewBuildFunc) {
-        callback.BuildAsync([frameNode, type, menuParam, previewBuildFunc](const RefPtr<UINode>& uiNode) mutable {
-            auto builder = [frameNode, uiNode]() {
-                PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
-                ViewStackProcessor::GetInstance()->Push(uiNode);
-            };
+    std::function<void(MenuParam, std::function<void()> &&)> contentBuilder;
+    if (!optValue) {
+        contentBuilder = [node, frameNode, type](MenuParam menuParam, std::function<void()>&& previewBuildFunc) {
             ViewAbstractModelStatic::BindContextMenuStatic(
-                AceType::Claim(frameNode), type, std::move(builder), menuParam, std::move(previewBuildFunc));
+                AceType::Claim(frameNode), type, nullptr, menuParam, std::move(previewBuildFunc));
             ViewAbstractModelStatic::BindDragWithContextMenuParamsStatic(frameNode, menuParam);
-            }, node);
-    };
+        };
+    } else {
+        contentBuilder = [callback = CallbackHelper(*optValue), node, frameNode, type](
+                             MenuParam menuParam, std::function<void()>&& previewBuildFunc) {
+            callback.BuildAsync(
+                [frameNode, type, menuParam, previewBuildFunc](const RefPtr<UINode>& uiNode) mutable {
+                    auto builder = [frameNode, uiNode]() {
+                        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+                        ViewStackProcessor::GetInstance()->Push(uiNode);
+                    };
+                    ViewAbstractModelStatic::BindContextMenuStatic(
+                        AceType::Claim(frameNode), type, std::move(builder), menuParam, std::move(previewBuildFunc));
+                    ViewAbstractModelStatic::BindDragWithContextMenuParamsStatic(frameNode, menuParam);
+                },
+                node);
+        };
+    }
     menuParam.previewMode = MenuPreviewMode::NONE;
     auto menuOption = Converter::GetOptPtr(options);
     Converter::VisitUnion(menuOption->preview,
@@ -5253,6 +5365,7 @@ void SetBindContentCover1Impl(Ark_NativePointer node,
         modalStyle.backgroundColor = Converter::OptConvert<Color>(coverOption->backgroundColor);
         contentCoverParam.transitionEffect = OptConvert<RefPtr<NG::ChainedTransitionEffect>>(coverOption->transition)
             .value_or(contentCoverParam.transitionEffect);
+        contentCoverParam.enableSafeArea = Converter::OptConvert<bool>(coverOption->enableSafeArea).value();
     }
     contentCoverParam.onWillDismiss = std::move(onWillDismissFunc);
 
@@ -5296,6 +5409,7 @@ void SetBindSheetImpl(Ark_NativePointer node,
     sheetStyle.showDragBar = true;
     sheetStyle.showCloseIcon = true;
     sheetStyle.showInPage = false;
+    sheetStyle.enableFloatingDragBar = false;
     BindSheetUtil::SheetCallbacks cbs;
     auto sheetOptions = Converter::OptConvertPtr<Ark_SheetOptions>(options);
     if (sheetOptions) {
@@ -5597,6 +5711,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetScaleImpl,
         CommonMethodModifier::SetRotateImpl,
         CommonMethodModifier::SetTransformImpl,
+        CommonMethodModifier::SetTransform3DImpl,
         CommonMethodModifier::SetOnAppearImpl,
         CommonMethodModifier::SetOnDisAppearImpl,
         CommonMethodModifier::SetOnAttachImpl,

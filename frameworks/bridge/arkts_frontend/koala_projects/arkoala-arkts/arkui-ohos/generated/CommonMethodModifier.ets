@@ -19,7 +19,7 @@
 import { AttributeModifier, extractors, GestureModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
-import { ArkCommonMethodPeer, LayoutPolicy, DrawModifier, Rectangle, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, BorderImageOption, OutlineStyle, ClickEvent, HoverEvent, AccessibilityCallback, AccessibilityHoverEvent, MouseEvent, TouchEvent, KeyEvent, CrownEvent, FocusAxisEvent, AxisEvent, FocusMovement, AnimateParam, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, DragEvent, DragItemInfo, PreDragStatus, LinearGradientOptions, SweepGradientOptions, RadialGradientOptions, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, AccessibilitySamePageMode, AccessibilityRoleType, AccessibilityFocusCallback, ReuseOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, CustomProperty, SafeAreaType, SafeAreaEdge, BackgroundOptions, BackgroundImageOptions, BlurStyle, BackgroundBlurStyleOptions, SystemAdaptiveOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, OnDragEventCallback, DropOptions, PreviewConfiguration, DragPreviewOptions, DragInteractionOptions, OverlayOptions, BlendMode, BlendApplyType, GeometryTransitionOptions, TipsMessageType, TipsOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, Bindable, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, VisibleAreaEventOptions, CommonMethod } from "./component/common"
+import { ArkCommonMethodPeer, LayoutPolicy, DrawModifier, Rectangle, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, BorderImageOption, OutlineStyle, ClickEvent, HoverEvent, AccessibilityCallback, AccessibilityHoverEvent, MouseEvent, TouchEvent, KeyEvent, CrownEvent, FocusAxisEvent, AxisEvent, FocusMovement, AnimateParam, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, RotateAngleOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, DragEvent, DragItemInfo, PreDragStatus, LinearGradientOptions, SweepGradientOptions, RadialGradientOptions, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, AccessibilitySamePageMode, AccessibilityRoleType, AccessibilityFocusCallback, ReuseOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, CustomProperty, SafeAreaType, SafeAreaEdge, BackgroundOptions, BackgroundImageOptions, BlurStyle, BackgroundBlurStyleOptions, SystemAdaptiveOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, OnDragEventCallback, DropOptions, PreviewConfiguration, DragPreviewOptions, DragInteractionOptions, OverlayOptions, BlendMode, BlendApplyType, GeometryTransitionOptions, TipsMessageType, TipsOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, Bindable, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, VisibleAreaEventOptions, CommonMethod } from "./component/common"
 import { int32 } from "@koalaui/common"
 import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, VoidCallback, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions } from "./component/units"
 import { Resource } from "global.resource"
@@ -199,9 +199,11 @@ export class CommonMethodModifier implements CommonMethod {
     _scale_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _scale_0_0value?: ScaleOptions | undefined
     _rotate_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _rotate_0_0value?: RotateOptions | undefined
+    _rotate_0_0value?: RotateOptions | RotateAngleOptions | undefined
     _transform_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _transform_0_0value?: matrix4.Matrix4Transit | undefined
+    _transform3D_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _transform3D_0_0value?: matrix4.Matrix4Transit | undefined
     _onAppear_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onAppear_0_0value?: (() => void) | undefined
     _onDisAppear_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -1888,7 +1890,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (this._rotate_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setRotateAttribute((this._rotate_0_0value as RotateOptions | undefined));
+                    peer.setRotateAttribute((this._rotate_0_0value as RotateOptions | RotateAngleOptions | undefined));
                     this._rotate_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -1898,7 +1900,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     this._rotate_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setRotateAttribute((undefined as RotateOptions | undefined));
+                    peer.setRotateAttribute((undefined as RotateOptions | RotateAngleOptions | undefined));
                 }
             }
         }
@@ -1917,6 +1919,24 @@ export class CommonMethodModifier implements CommonMethod {
                 default: {
                     this._transform_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.setTransformAttribute((undefined as matrix4.Matrix4Transit | undefined));
+                }
+            }
+        }
+        if (this._transform3D_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._transform3D_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setTransform3DAttribute((this._transform3D_0_0value as matrix4.Matrix4Transit | undefined));
+                    this._transform3D_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._transform3D_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._transform3D_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setTransform3DAttribute((undefined as matrix4.Matrix4Transit | undefined));
                 }
             }
         }
@@ -4996,6 +5016,19 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
+        if (modifier._transform3D_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._transform3D_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.transform3D(modifier._transform3D_0_0value);
+                    break;
+                }
+                default: {
+                    this.transform3D((undefined as matrix4.Matrix4Transit | undefined));
+                }
+            }
+        }
         if (modifier._onAppear_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._onAppear_0_flag) {
@@ -7324,7 +7357,7 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    rotate(value: RotateOptions | undefined): this {
+    rotate(value: RotateOptions | RotateAngleOptions | undefined): this {
         if (((this._rotate_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._rotate_0_flag = AttributeUpdaterFlag.UPDATE
@@ -7343,6 +7376,17 @@ export class CommonMethodModifier implements CommonMethod {
         } else
         {
             this._transform_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    transform3D(value: matrix4.Matrix4Transit | undefined): this {
+        if (((this._transform3D_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._transform3D_0_flag = AttributeUpdaterFlag.UPDATE
+            this._transform3D_0_0value = value
+        } else
+        {
+            this._transform3D_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

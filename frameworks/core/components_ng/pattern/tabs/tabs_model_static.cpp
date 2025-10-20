@@ -417,6 +417,29 @@ void TabsModelStatic::SetTabBarHeight(FrameNode* frameNode, const std::optional<
     }
 }
 
+void TabsModelStatic::SetAnimationCurve(FrameNode* frameNode, const RefPtr<Curve>& curve)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
+    CHECK_NULL_VOID(tabsNode);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    CHECK_NULL_VOID(tabBarNode);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    CHECK_NULL_VOID(tabBarPattern);
+    tabBarPattern->SetAnimationCurve(curve);
+    auto swiperPaintProperty = GetSwiperPaintProperty(frameNode);
+    CHECK_NULL_VOID(swiperPaintProperty);
+    swiperPaintProperty->UpdateCurve(tabBarPattern->GetAnimationCurve(TabBarPhysicalCurve));
+}
+
+void TabsModelStatic::SetNoMinHeightLimit(FrameNode* frameNode, bool noMinHeightLimit)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto tabBarLayoutProperty = GetTabBarLayoutProperty(frameNode);
+    CHECK_NULL_VOID(tabBarLayoutProperty);
+    tabBarLayoutProperty->UpdateNoMinHeightLimit(noMinHeightLimit);
+}
+
 RefPtr<SwiperPaintProperty> TabsModelStatic::GetSwiperPaintProperty(FrameNode* frameNode)
 {
     auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);

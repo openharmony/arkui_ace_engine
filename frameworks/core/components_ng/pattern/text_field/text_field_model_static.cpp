@@ -33,7 +33,6 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr uint32_t MAX_LINES = 3;
 constexpr double DEFAULT_OPACITY = 0.2;
-constexpr float MAX_FONT_SCALE = 2.0;
 constexpr int32_t DEFAULT_ALPHA = 255;
 }
 
@@ -724,20 +723,20 @@ void TextFieldModelStatic::SetEllipsisMode(FrameNode* frameNode, const std::opti
 
 void TextFieldModelStatic::SetMinFontScale(FrameNode* frameNode, const std::optional<float>& optValue)
 {
-    float minFontScale = 0.0f;
-    if (optValue.has_value()) {
-        minFontScale = std::clamp(optValue.value(), 0.0f, 1.0f);
+    if (optValue) {
+        TextFieldModelNG::SetMinFontScale(frameNode, optValue.value());
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MinFontScale, frameNode);
     }
-    TextFieldModelNG::SetMinFontScale(frameNode, minFontScale);
 }
 
 void TextFieldModelStatic::SetMaxFontScale(FrameNode* frameNode, const std::optional<float>& optValue)
 {
-    float maxFontScale = MAX_FONT_SCALE;
-    if (optValue.has_value()) {
-        maxFontScale = std::max(optValue.value(), 1.0f);
+    if (optValue) {
+        TextFieldModelNG::SetMaxFontScale(frameNode, optValue.value());
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MaxFontScale, frameNode);
     }
-    TextFieldModelNG::SetMaxFontScale(frameNode, maxFontScale);
 }
 
 void TextFieldModelStatic::SetHalfLeading(FrameNode* frameNode, const std::optional<bool>& valueOpt)

@@ -453,6 +453,7 @@ declare class ArkRichEditorComponent extends ArkComponent implements CommonMetho
     onIMEInputComplete(callback: (value: RichEditorTextSpanResult) => void): RichEditorAttribute;
     aboutToDelete(callback: (value: RichEditorDeleteValue) => boolean): RichEditorAttribute;
     onDeleteComplete(callback: () => void): RichEditorAttribute;
+    onWillAttachIME(callback: (Callback<IMEClient> | undefined)): RichEditorAttribute;
     bindSelectionMenu(spanType: RichEditorSpanType, content: CustomBuilder, responseType: ResponseType, options?: SelectionMenuOptions): RichEditorAttribute;
     customKeyboard(value: CustomBuilder): RichEditorAttribute;
     barState(value: BarState): RichEditorAttribute;

@@ -6933,6 +6933,8 @@ struct ArkUIRichEditorModifier {
     void (*resetRichEditorKeyboardAppearance)(ArkUINodeHandle node);
     void (*setRichEditorOnDidIMEInput)(ArkUINodeHandle node, void* callback);
     void (*resetRichEditorOnDidIMEInput)(ArkUINodeHandle node);
+    void (*setRichEditorOnWillAttachIME)(ArkUINodeHandle node, void* callback);
+    void (*resetRichEditorOnWillAttachIME)(ArkUINodeHandle node);
     void (*setRichEditorEnableHapticFeedback)(ArkUINodeHandle node, ArkUI_Uint32 value);
     void (*resetRichEditorEnableHapticFeedback)(ArkUINodeHandle node);
     void (*setRichEditorEnableAutoSpacing)(ArkUINodeHandle node, ArkUI_Bool value);

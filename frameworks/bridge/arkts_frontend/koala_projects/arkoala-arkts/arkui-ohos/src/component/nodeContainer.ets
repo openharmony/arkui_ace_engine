@@ -74,6 +74,9 @@ export class ArkNodeContainerPeer extends ArkCommonMethodPeer {
     onTouchEventAttribute(value: ((event: TouchEvent) => void)) {
         NodeContainerOps.setOnTouchEvent(this.peer.ptr, value);
     }
+    resetNodeControllerFunc(value: ((containerId: long) => void)) {
+        NodeContainerOps.setOnDestoryEvent(this.peer.ptr, value);
+    }
 }
 export type NodeContainerInterface = (controller: NodeController) => NodeContainerAttribute;
 export interface NodeContainerAttribute extends CommonMethod {
@@ -98,14 +101,18 @@ export class ArkNodeContainerComponent extends ArkCommonMethodComponent implemen
     public setNodeContainerOptions(controller: NodeController): this {
         if (this.checkPriority("setNodeContainerOptions")) {
             if (this.controller) {
-                this.controller!.onWillUnbind(this.getPeer().getId())
-                this.controller!.resetInternalField()
-                this.controller!.onUnbind(this.getPeer().getId())
-                this.controller = null
+                if (this.controller !== controller) {
+                    this.controller!.resetInternalField(this.getPeer().getId())
+                } else {
+                    return this;
+                }
             }
-            controller.onWillBind(this.getPeer().getId())
+
+            let nodeId = controller?._nodeContainer?.getPeer()?.getId();
+            if(nodeId && nodeId! > 0){
+                controller!.resetInternalField(nodeId);
+            }
             this.controller = controller
-            this.controller!.setNodeContainer(this)
             // aboutToAppear
             const aboutToAppearFunc = controller.aboutToAppear
             this.getPeer().aboutToAppearAttribute(aboutToAppearFunc)
@@ -125,7 +132,12 @@ export class ArkNodeContainerComponent extends ArkCommonMethodComponent implemen
             const onDetach = controller.onDetach
             this.getPeer().onDetachAttribute(onDetach)
 
-            controller.onBind(this.getPeer().getId())
+            // resetInternalField
+            this.getPeer().resetNodeControllerFunc(this.controller!.resetInternalField)
+            this.controller!.onWillBind(this.getPeer().getId())
+            this.controller!.setNodeContainer(this)
+            this.controller!.onBind(this.getPeer().getId());
+
             // makeNode
             const makeNodeFunc = controller.__makeNode__
             const child = makeNodeFunc(this.uiContext)

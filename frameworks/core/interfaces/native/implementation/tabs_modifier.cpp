@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/tabs/tabs_model_static.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
+#include "core/interfaces/native/implementation/i_curve_peer_impl.h"
 #include "core/interfaces/native/implementation/tabs_controller_modifier_peer_impl.h"
 #include "core/interfaces/native/implementation/tab_content_transition_proxy_peer_impl.h"
 #include "core/interfaces/native/implementation/tab_content_transition_proxy_peer.h"
@@ -231,14 +232,22 @@ void SetBarWidthImpl(Ark_NativePointer node,
     Validator::ValidateNonNegative(valueOpt);
     TabsModelStatic::SetTabBarWidth(frameNode, valueOpt);
 }
-void SetBarHeightImpl(Ark_NativePointer node,
-                      const Opt_Length* value)
+void SetAnimationCurveImpl(Ark_NativePointer node,
+                           const Opt_Union_Curve_ICurve* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto valueOpt = Converter::OptConvertPtr<Dimension>(value);
-    Validator::ValidateNonNegative(valueOpt);
-    TabsModelStatic::SetTabBarHeight(frameNode, valueOpt);
+    CHECK_NULL_VOID(value);
+    RefPtr<Curve> curve = nullptr;
+    if (value->value.selector == 1) {
+        curve = value->value.value1->handler;
+    } else if (value->value.selector == 0) {
+        curve = CreateCurve(static_cast<int>(value->value.value0), true);
+    }
+    if (!curve) {
+        curve = Framework::CreateCurve(std::string(), true);
+    }
+    TabsModelStatic::SetAnimationCurve(frameNode, curve);
 }
 void SetAnimationDurationImpl(Ark_NativePointer node,
                               const Opt_Number* value)
@@ -600,6 +609,18 @@ void SetBarModeImpl(Ark_NativePointer node,
     }
     TabsModelStatic::SetTabBarMode(frameNode, mode);
 }
+void SetBarHeightImpl(Ark_NativePointer node,
+                      const Opt_Length* height,
+                      const Opt_Boolean* noMinHeightLimit)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto valueOpt = Converter::OptConvert<Dimension>(*height);
+    Validator::ValidateNonNegative(valueOpt);
+    TabsModelStatic::SetTabBarHeight(frameNode, valueOpt);
+    auto noMinHeightLimitOpt = Converter::OptConvert<bool>(*noMinHeightLimit);
+    TabsModelStatic::SetNoMinHeightLimit(frameNode, *noMinHeightLimitOpt);
+}
 void SetBarBackgroundBlurStyle1Impl(Ark_NativePointer node,
                                     const Opt_BlurStyle* style,
                                     const Opt_BackgroundBlurStyleOptions* options)
@@ -637,7 +658,7 @@ const GENERATED_ArkUITabsModifier* GetTabsModifier()
         TabsAttributeModifier::SetBarPositionImpl,
         TabsAttributeModifier::SetScrollableImpl,
         TabsAttributeModifier::SetBarWidthImpl,
-        TabsAttributeModifier::SetBarHeightImpl,
+        TabsAttributeModifier::SetAnimationCurveImpl,
         TabsAttributeModifier::SetAnimationDurationImpl,
         TabsAttributeModifier::SetAnimationModeImpl,
         TabsAttributeModifier::SetEdgeEffectImpl,
@@ -659,6 +680,7 @@ const GENERATED_ArkUITabsModifier* GetTabsModifier()
         TabsAttributeModifier::SetBarBackgroundEffectImpl,
         TabsAttributeModifier::SetOnContentWillChangeImpl,
         TabsAttributeModifier::SetBarModeImpl,
+        TabsAttributeModifier::SetBarHeightImpl,
         TabsAttributeModifier::SetBarBackgroundBlurStyle1Impl,
         TabsAttributeModifier::SetCachedMaxCountImpl,
     };

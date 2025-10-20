@@ -1876,11 +1876,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetRotateImpl(Ark_NativePointer node,
-                       const Opt_RotateOptions* value)
+                       const Opt_Union_RotateOptions_RotateAngleOptions* value)
     {
     }
     void SetTransformImpl(Ark_NativePointer node,
                           const Opt_matrix4_Matrix4Transit* value)
+    {
+    }
+    void SetTransform3DImpl(Ark_NativePointer node,
+                            const Opt_matrix4_Matrix4Transit* value)
     {
     }
     void SetOnAppearImpl(Ark_NativePointer node,
@@ -6144,8 +6148,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                          const Opt_Length* value)
     {
     }
-    void SetBarHeightImpl(Ark_NativePointer node,
-                          const Opt_Length* value)
+    void SetAnimationCurveImpl(Ark_NativePointer node,
+                               const Opt_Union_Curve_ICurve* value)
     {
     }
     void SetAnimationDurationImpl(Ark_NativePointer node,
@@ -6231,6 +6235,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     void SetBarModeImpl(Ark_NativePointer node,
                         const Opt_BarMode* value,
                         const Opt_ScrollableBarModeOptions* options)
+    {
+    }
+    void SetBarHeightImpl(Ark_NativePointer node,
+                          const Opt_Length* height,
+                          const Opt_Boolean* noMinHeightLimit)
     {
     }
     void SetBarBackgroundBlurStyle1Impl(Ark_NativePointer node,
@@ -8387,6 +8396,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetScaleImpl,
             CommonMethodModifier::SetRotateImpl,
             CommonMethodModifier::SetTransformImpl,
+            CommonMethodModifier::SetTransform3DImpl,
             CommonMethodModifier::SetOnAppearImpl,
             CommonMethodModifier::SetOnDisAppearImpl,
             CommonMethodModifier::SetOnAttachImpl,
@@ -9873,7 +9883,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TabsAttributeModifier::SetBarPositionImpl,
             TabsAttributeModifier::SetScrollableImpl,
             TabsAttributeModifier::SetBarWidthImpl,
-            TabsAttributeModifier::SetBarHeightImpl,
+            TabsAttributeModifier::SetAnimationCurveImpl,
             TabsAttributeModifier::SetAnimationDurationImpl,
             TabsAttributeModifier::SetAnimationModeImpl,
             TabsAttributeModifier::SetEdgeEffectImpl,
@@ -9895,6 +9905,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TabsAttributeModifier::SetBarBackgroundEffectImpl,
             TabsAttributeModifier::SetOnContentWillChangeImpl,
             TabsAttributeModifier::SetBarModeImpl,
+            TabsAttributeModifier::SetBarHeightImpl,
             TabsAttributeModifier::SetBarBackgroundBlurStyle1Impl,
             TabsAttributeModifier::SetCachedMaxCountImpl,
         };
@@ -10798,12 +10809,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                            const Opt_Number* scrollStep)
     {
     }
-    Callback_Void GetPropagationImpl(Ark_AxisEvent peer)
-    {
-        return {};
-    }
-    void SetPropagationImpl(Ark_AxisEvent peer,
-                            const Callback_Void* propagation)
+    void PropagationImpl(Ark_AxisEvent peer)
     {
     }
     } // AxisEventAccessor
@@ -11855,12 +11861,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                      const Opt_InteractionHand* hand)
     {
     }
-    Callback_Void GetPreventDefaultImpl(Ark_ClickEvent peer)
-    {
-        return {};
-    }
-    void SetPreventDefaultImpl(Ark_ClickEvent peer,
-                               const Callback_Void* preventDefault)
+    void PreventDefaultImpl(Ark_ClickEvent peer)
     {
     }
     } // ClickEventAccessor
@@ -12814,12 +12815,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                         const Map_AxisModel_Number* axisMap)
     {
     }
-    Callback_Void GetStopPropagationImpl(Ark_FocusAxisEvent peer)
-    {
-        return {};
-    }
-    void SetStopPropagationImpl(Ark_FocusAxisEvent peer,
-                                const Callback_Void* stopPropagation)
+    void StopPropagationImpl(Ark_FocusAxisEvent peer)
     {
     }
     } // FocusAxisEventAccessor
@@ -13035,6 +13031,24 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void RecycleImpl(Ark_FrameNode peer)
     {
+    }
+    Ark_Boolean CreateAnimationImpl(Ark_FrameNode peer,
+                                    Ark_AnimationPropertyType property,
+                                    const Opt_Array_Float64* startValue,
+                                    const Array_Float64* endValue,
+                                    const Ark_AnimateParam* param)
+    {
+        return {};
+    }
+    Ark_Boolean CancelAnimationsImpl(Ark_FrameNode peer,
+                                     const Array_AnimationPropertyType* properties)
+    {
+        return {};
+    }
+    Array_Float64 GetNodePropertyValueImpl(Ark_FrameNode peer,
+                                           Ark_AnimationPropertyType property)
+    {
+        return {};
     }
     Ark_NativePointer GetFrameNodePtrImpl(Ark_FrameNode node)
     {
@@ -13491,12 +13505,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                          const Opt_Number* displayY)
     {
     }
-    Callback_Void GetStopPropagationImpl(Ark_HoverEvent peer)
-    {
-        return {};
-    }
-    void SetStopPropagationImpl(Ark_HoverEvent peer,
-                                const Callback_Void* stopPropagation)
+    void StopPropagationImpl(Ark_HoverEvent peer)
     {
     }
     } // HoverEventAccessor
@@ -15032,6 +15041,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void SetOnTouchEventImpl(Ark_NativePointer self,
                              const Opt_Callback_TouchEvent_Void* value)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void SetOnDestoryEventImpl(Ark_NativePointer self,
+                               const Callback_OnDestory_Void* value)
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
@@ -17477,20 +17492,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                const Array_TouchObject* changedTouches)
     {
     }
-    Callback_Void GetStopPropagationImpl(Ark_TouchEvent peer)
-    {
-        return {};
-    }
-    void SetStopPropagationImpl(Ark_TouchEvent peer,
-                                const Callback_Void* stopPropagation)
+    void StopPropagationImpl(Ark_TouchEvent peer)
     {
     }
-    Callback_Void GetPreventDefaultImpl(Ark_TouchEvent peer)
-    {
-        return {};
-    }
-    void SetPreventDefaultImpl(Ark_TouchEvent peer,
-                               const Callback_Void* preventDefault)
+    void PreventDefaultImpl(Ark_TouchEvent peer)
     {
     }
     } // TouchEventAccessor
@@ -18355,8 +18360,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             AxisEventAccessor::SetYImpl,
             AxisEventAccessor::GetScrollStepImpl,
             AxisEventAccessor::SetScrollStepImpl,
-            AxisEventAccessor::GetPropagationImpl,
-            AxisEventAccessor::SetPropagationImpl,
+            AxisEventAccessor::PropagationImpl,
         };
         return &AxisEventAccessorImpl;
     }
@@ -18722,8 +18726,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             ClickEventAccessor::SetYImpl,
             ClickEventAccessor::GetHandImpl,
             ClickEventAccessor::SetHandImpl,
-            ClickEventAccessor::GetPreventDefaultImpl,
-            ClickEventAccessor::SetPreventDefaultImpl,
+            ClickEventAccessor::PreventDefaultImpl,
         };
         return &ClickEventAccessorImpl;
     }
@@ -19186,8 +19189,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             FocusAxisEventAccessor::GetFinalizerImpl,
             FocusAxisEventAccessor::GetAxisMapImpl,
             FocusAxisEventAccessor::SetAxisMapImpl,
-            FocusAxisEventAccessor::GetStopPropagationImpl,
-            FocusAxisEventAccessor::SetStopPropagationImpl,
+            FocusAxisEventAccessor::StopPropagationImpl,
         };
         return &FocusAxisEventAccessorImpl;
     }
@@ -19256,6 +19258,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             FrameNodeExtenderAccessor::GetFrameNodeByUniqueIdImpl,
             FrameNodeExtenderAccessor::ReuseImpl,
             FrameNodeExtenderAccessor::RecycleImpl,
+            FrameNodeExtenderAccessor::CreateAnimationImpl,
+            FrameNodeExtenderAccessor::CancelAnimationsImpl,
+            FrameNodeExtenderAccessor::GetNodePropertyValueImpl,
             FrameNodeExtenderAccessor::GetFrameNodePtrImpl,
             FrameNodeExtenderAccessor::CreateTypedFrameNodeImpl,
             FrameNodeExtenderAccessor::CreateByRawPtrImpl,
@@ -19483,8 +19488,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             HoverEventAccessor::SetDisplayXImpl,
             HoverEventAccessor::GetDisplayYImpl,
             HoverEventAccessor::SetDisplayYImpl,
-            HoverEventAccessor::GetStopPropagationImpl,
-            HoverEventAccessor::SetStopPropagationImpl,
+            HoverEventAccessor::StopPropagationImpl,
         };
         return &HoverEventAccessorImpl;
     }
@@ -20118,6 +20122,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             NodeContainerOpsAccessor::SetOnAttachImpl,
             NodeContainerOpsAccessor::SetOnDetachImpl,
             NodeContainerOpsAccessor::SetOnTouchEventImpl,
+            NodeContainerOpsAccessor::SetOnDestoryEventImpl,
         };
         return &NodeContainerOpsAccessorImpl;
     }
@@ -21279,10 +21284,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TouchEventAccessor::SetTouchesImpl,
             TouchEventAccessor::GetChangedTouchesImpl,
             TouchEventAccessor::SetChangedTouchesImpl,
-            TouchEventAccessor::GetStopPropagationImpl,
-            TouchEventAccessor::SetStopPropagationImpl,
-            TouchEventAccessor::GetPreventDefaultImpl,
-            TouchEventAccessor::SetPreventDefaultImpl,
+            TouchEventAccessor::StopPropagationImpl,
+            TouchEventAccessor::PreventDefaultImpl,
         };
         return &TouchEventAccessorImpl;
     }
