@@ -1840,7 +1840,7 @@ export class NodeAdapter implements MaterializedBase {
         this.count_ = count;
     }
 
-    get totalNodeCount() {
+    get totalNodeCount(): int {
         return this.count_;
     }
 

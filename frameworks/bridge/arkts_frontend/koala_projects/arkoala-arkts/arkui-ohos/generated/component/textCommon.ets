@@ -761,10 +761,10 @@ export class DecorationStyleResult_serializer {
             valueSerializer.writeInt8((0).toChar())
             const valueHolderForColorForIdx0  = valueHolderForColor as Color
             valueSerializer.writeInt32(valueHolderForColorForIdx0.getOrdinal())
-        } else if (valueHolderForColor instanceof number) {
+        } else if (valueHolderForColor instanceof int32) {
             valueSerializer.writeInt8((1).toChar())
-            const valueHolderForColorForIdx1  = valueHolderForColor as number
-            valueSerializer.writeNumber(valueHolderForColorForIdx1)
+            const valueHolderForColorForIdx1  = valueHolderForColor as int32
+            valueSerializer.writeInt32(valueHolderForColorForIdx1)
         } else if (valueHolderForColor instanceof string) {
             valueSerializer.writeInt8((2).toChar())
             const valueHolderForColorForIdx2  = valueHolderForColor as string
@@ -968,10 +968,10 @@ export class CaretStyle_serializer {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForWidthTmpValueForIdx0  = valueHolderForWidthTmpValue as string
                 valueSerializer.writeString(valueHolderForWidthTmpValueForIdx0)
-            } else if (valueHolderForWidthTmpValue instanceof number) {
+            } else if (valueHolderForWidthTmpValue instanceof double) {
                 valueSerializer.writeInt8((1).toChar())
-                const valueHolderForWidthTmpValueForIdx1  = valueHolderForWidthTmpValue as number
-                valueSerializer.writeNumber(valueHolderForWidthTmpValueForIdx1)
+                const valueHolderForWidthTmpValueForIdx1  = valueHolderForWidthTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForWidthTmpValueForIdx1)
             } else if (valueHolderForWidthTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toChar())
                 const valueHolderForWidthTmpValueForIdx2  = valueHolderForWidthTmpValue as Resource
@@ -988,10 +988,10 @@ export class CaretStyle_serializer {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForColorTmpValue instanceof number) {
+            } else if (valueHolderForColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toChar())
-                const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForColorTmpValueForIdx1)
+                const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx1)
             } else if (valueHolderForColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toChar())
                 const valueHolderForColorTmpValueForIdx2  = valueHolderForColorTmpValue as string
@@ -1011,17 +1011,17 @@ export class CaretStyle_serializer {
         let widthTmpBuf : Length | undefined = undefined
         if ((widthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const widthTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let widthTmpBuf_ : string | number | Resource | undefined
+            let widthTmpBuf_ : string | double | Resource | undefined
             if (widthTmpBuf_UnionSelector == (0).toChar()) {
                 widthTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (widthTmpBuf_UnionSelector == (1).toChar()) {
-                widthTmpBuf_ = (valueDeserializer.readNumber() as number)
+                widthTmpBuf_ = valueDeserializer.readFloat64()
             } else if (widthTmpBuf_UnionSelector == (2).toChar()) {
                 widthTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for widthTmpBuf_ has to be chosen through deserialisation.")
             }
-            widthTmpBuf = (widthTmpBuf_ as string | number | Resource)
+            widthTmpBuf = (widthTmpBuf_ as string | double | Resource)
         }
         const widthTmpResult : Length | undefined = widthTmpBuf
         const colorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -1119,10 +1119,10 @@ export class TextDataDetectorConfig_serializer {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForColorTmpValue instanceof number) {
+            } else if (valueHolderForColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toChar())
-                const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForColorTmpValueForIdx1)
+                const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx1)
             } else if (valueHolderForColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toChar())
                 const valueHolderForColorTmpValueForIdx2  = valueHolderForColorTmpValue as string

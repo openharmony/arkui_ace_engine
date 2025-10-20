@@ -78,10 +78,10 @@ export class ArkProgressPeer extends ArkCommonMethodPeer {
                     thisSerializer.writeInt8((0).toChar())
                     const valueTmpValueForIdx0ForIdx0  = valueTmpValueForIdx0 as Color
                     thisSerializer.writeInt32(valueTmpValueForIdx0ForIdx0.getOrdinal())
-                } else if (valueTmpValueForIdx0 instanceof number) {
+                } else if (valueTmpValueForIdx0 instanceof int32) {
                     thisSerializer.writeInt8((1).toChar())
-                    const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as number
-                    thisSerializer.writeNumber(valueTmpValueForIdx0ForIdx1)
+                    const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as int32
+                    thisSerializer.writeInt32(valueTmpValueForIdx0ForIdx1)
                 } else if (valueTmpValueForIdx0 instanceof string) {
                     thisSerializer.writeInt8((2).toChar())
                     const valueTmpValueForIdx0ForIdx2  = valueTmpValueForIdx0 as string
@@ -434,10 +434,10 @@ export class LinearStyleOptions_serializer {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForStrokeWidthTmpValueForIdx0  = valueHolderForStrokeWidthTmpValue as string
                 valueSerializer.writeString(valueHolderForStrokeWidthTmpValueForIdx0)
-            } else if (valueHolderForStrokeWidthTmpValue instanceof number) {
+            } else if (valueHolderForStrokeWidthTmpValue instanceof double) {
                 valueSerializer.writeInt8((1).toChar())
-                const valueHolderForStrokeWidthTmpValueForIdx1  = valueHolderForStrokeWidthTmpValue as number
-                valueSerializer.writeNumber(valueHolderForStrokeWidthTmpValueForIdx1)
+                const valueHolderForStrokeWidthTmpValueForIdx1  = valueHolderForStrokeWidthTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForStrokeWidthTmpValueForIdx1)
             } else if (valueHolderForStrokeWidthTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toChar())
                 const valueHolderForStrokeWidthTmpValueForIdx2  = valueHolderForStrokeWidthTmpValue as Resource
@@ -454,10 +454,10 @@ export class LinearStyleOptions_serializer {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForStrokeRadiusTmpValueForIdx0  = valueHolderForStrokeRadiusTmpValue as string
                 valueSerializer.writeString(valueHolderForStrokeRadiusTmpValueForIdx0)
-            } else if (valueHolderForStrokeRadiusTmpValue instanceof number) {
+            } else if (valueHolderForStrokeRadiusTmpValue instanceof double) {
                 valueSerializer.writeInt8((1).toChar())
-                const valueHolderForStrokeRadiusTmpValueForIdx1  = valueHolderForStrokeRadiusTmpValue as number
-                valueSerializer.writeNumber(valueHolderForStrokeRadiusTmpValueForIdx1)
+                const valueHolderForStrokeRadiusTmpValueForIdx1  = valueHolderForStrokeRadiusTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForStrokeRadiusTmpValueForIdx1)
             } else if (valueHolderForStrokeRadiusTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toChar())
                 const valueHolderForStrokeRadiusTmpValueForIdx2  = valueHolderForStrokeRadiusTmpValue as Resource
@@ -479,34 +479,34 @@ export class LinearStyleOptions_serializer {
         let strokeWidthTmpBuf : Length | undefined = undefined
         if ((strokeWidthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const strokeWidthTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let strokeWidthTmpBuf_ : string | number | Resource | undefined
+            let strokeWidthTmpBuf_ : string | double | Resource | undefined
             if (strokeWidthTmpBuf_UnionSelector == (0).toChar()) {
                 strokeWidthTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (strokeWidthTmpBuf_UnionSelector == (1).toChar()) {
-                strokeWidthTmpBuf_ = (valueDeserializer.readNumber() as number)
+                strokeWidthTmpBuf_ = valueDeserializer.readFloat64()
             } else if (strokeWidthTmpBuf_UnionSelector == (2).toChar()) {
                 strokeWidthTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for strokeWidthTmpBuf_ has to be chosen through deserialisation.")
             }
-            strokeWidthTmpBuf = (strokeWidthTmpBuf_ as string | number | Resource)
+            strokeWidthTmpBuf = (strokeWidthTmpBuf_ as string | double | Resource)
         }
         const strokeWidthTmpResult : Length | undefined = strokeWidthTmpBuf
         const strokeRadiusTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let strokeRadiusTmpBuf : string | number | Resource | undefined = undefined
+        let strokeRadiusTmpBuf : string | double | Resource | undefined = undefined
         if ((strokeRadiusTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const strokeRadiusTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let strokeRadiusTmpBuf_ : string | number | Resource | undefined
+            let strokeRadiusTmpBuf_ : string | double | Resource | undefined
             if (strokeRadiusTmpBuf_UnionSelector == (0).toChar()) {
                 strokeRadiusTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (strokeRadiusTmpBuf_UnionSelector == (1).toChar()) {
-                strokeRadiusTmpBuf_ = (valueDeserializer.readNumber() as number)
+                strokeRadiusTmpBuf_ = valueDeserializer.readFloat64()
             } else if (strokeRadiusTmpBuf_UnionSelector == (2).toChar()) {
                 strokeRadiusTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for strokeRadiusTmpBuf_ has to be chosen through deserialisation.")
             }
-            strokeRadiusTmpBuf = (strokeRadiusTmpBuf_ as string | number | Resource)
+            strokeRadiusTmpBuf = (strokeRadiusTmpBuf_ as string | double | Resource)
         }
         const strokeRadiusTmpResult : PX | VP | LPX | Resource | undefined = strokeRadiusTmpBuf
         let value : LinearStyleOptions = ({enableScanEffect: enableScanEffectTmpResult, strokeWidth: strokeWidthTmpResult, strokeRadius: strokeRadiusTmpResult} as LinearStyleOptions)
@@ -532,10 +532,10 @@ export class ProgressStyleOptions_serializer {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForStrokeWidthTmpValueForIdx0  = valueHolderForStrokeWidthTmpValue as string
                 valueSerializer.writeString(valueHolderForStrokeWidthTmpValueForIdx0)
-            } else if (valueHolderForStrokeWidthTmpValue instanceof number) {
+            } else if (valueHolderForStrokeWidthTmpValue instanceof double) {
                 valueSerializer.writeInt8((1).toChar())
-                const valueHolderForStrokeWidthTmpValueForIdx1  = valueHolderForStrokeWidthTmpValue as number
-                valueSerializer.writeNumber(valueHolderForStrokeWidthTmpValueForIdx1)
+                const valueHolderForStrokeWidthTmpValueForIdx1  = valueHolderForStrokeWidthTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForStrokeWidthTmpValueForIdx1)
             } else if (valueHolderForStrokeWidthTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toChar())
                 const valueHolderForStrokeWidthTmpValueForIdx2  = valueHolderForStrokeWidthTmpValue as Resource
@@ -560,10 +560,10 @@ export class ProgressStyleOptions_serializer {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForScaleWidthTmpValueForIdx0  = valueHolderForScaleWidthTmpValue as string
                 valueSerializer.writeString(valueHolderForScaleWidthTmpValueForIdx0)
-            } else if (valueHolderForScaleWidthTmpValue instanceof number) {
+            } else if (valueHolderForScaleWidthTmpValue instanceof double) {
                 valueSerializer.writeInt8((1).toChar())
-                const valueHolderForScaleWidthTmpValueForIdx1  = valueHolderForScaleWidthTmpValue as number
-                valueSerializer.writeNumber(valueHolderForScaleWidthTmpValueForIdx1)
+                const valueHolderForScaleWidthTmpValueForIdx1  = valueHolderForScaleWidthTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForScaleWidthTmpValueForIdx1)
             } else if (valueHolderForScaleWidthTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toChar())
                 const valueHolderForScaleWidthTmpValueForIdx2  = valueHolderForScaleWidthTmpValue as Resource
@@ -585,17 +585,17 @@ export class ProgressStyleOptions_serializer {
         let strokeWidthTmpBuf : Length | undefined = undefined
         if ((strokeWidthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const strokeWidthTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let strokeWidthTmpBuf_ : string | number | Resource | undefined
+            let strokeWidthTmpBuf_ : string | double | Resource | undefined
             if (strokeWidthTmpBuf_UnionSelector == (0).toChar()) {
                 strokeWidthTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (strokeWidthTmpBuf_UnionSelector == (1).toChar()) {
-                strokeWidthTmpBuf_ = (valueDeserializer.readNumber() as number)
+                strokeWidthTmpBuf_ = valueDeserializer.readFloat64()
             } else if (strokeWidthTmpBuf_UnionSelector == (2).toChar()) {
                 strokeWidthTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for strokeWidthTmpBuf_ has to be chosen through deserialisation.")
             }
-            strokeWidthTmpBuf = (strokeWidthTmpBuf_ as string | number | Resource)
+            strokeWidthTmpBuf = (strokeWidthTmpBuf_ as string | double | Resource)
         }
         const strokeWidthTmpResult : Length | undefined = strokeWidthTmpBuf
         const scaleCountTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -608,17 +608,17 @@ export class ProgressStyleOptions_serializer {
         let scaleWidthTmpBuf : Length | undefined = undefined
         if ((scaleWidthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const scaleWidthTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let scaleWidthTmpBuf_ : string | number | Resource | undefined
+            let scaleWidthTmpBuf_ : string | double | Resource | undefined
             if (scaleWidthTmpBuf_UnionSelector == (0).toChar()) {
                 scaleWidthTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (scaleWidthTmpBuf_UnionSelector == (1).toChar()) {
-                scaleWidthTmpBuf_ = (valueDeserializer.readNumber() as number)
+                scaleWidthTmpBuf_ = valueDeserializer.readFloat64()
             } else if (scaleWidthTmpBuf_UnionSelector == (2).toChar()) {
                 scaleWidthTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for scaleWidthTmpBuf_ has to be chosen through deserialisation.")
             }
-            scaleWidthTmpBuf = (scaleWidthTmpBuf_ as string | number | Resource)
+            scaleWidthTmpBuf = (scaleWidthTmpBuf_ as string | double | Resource)
         }
         const scaleWidthTmpResult : Length | undefined = scaleWidthTmpBuf
         let value : ProgressStyleOptions = ({enableSmoothEffect: enableSmoothEffectTmpResult, strokeWidth: strokeWidthTmpResult, scaleCount: scaleCountTmpResult, scaleWidth: scaleWidthTmpResult} as ProgressStyleOptions)
@@ -644,10 +644,10 @@ export class RingStyleOptions_serializer {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForStrokeWidthTmpValueForIdx0  = valueHolderForStrokeWidthTmpValue as string
                 valueSerializer.writeString(valueHolderForStrokeWidthTmpValueForIdx0)
-            } else if (valueHolderForStrokeWidthTmpValue instanceof number) {
+            } else if (valueHolderForStrokeWidthTmpValue instanceof double) {
                 valueSerializer.writeInt8((1).toChar())
-                const valueHolderForStrokeWidthTmpValueForIdx1  = valueHolderForStrokeWidthTmpValue as number
-                valueSerializer.writeNumber(valueHolderForStrokeWidthTmpValueForIdx1)
+                const valueHolderForStrokeWidthTmpValueForIdx1  = valueHolderForStrokeWidthTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForStrokeWidthTmpValueForIdx1)
             } else if (valueHolderForStrokeWidthTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toChar())
                 const valueHolderForStrokeWidthTmpValueForIdx2  = valueHolderForStrokeWidthTmpValue as Resource
@@ -685,17 +685,17 @@ export class RingStyleOptions_serializer {
         let strokeWidthTmpBuf : Length | undefined = undefined
         if ((strokeWidthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const strokeWidthTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let strokeWidthTmpBuf_ : string | number | Resource | undefined
+            let strokeWidthTmpBuf_ : string | double | Resource | undefined
             if (strokeWidthTmpBuf_UnionSelector == (0).toChar()) {
                 strokeWidthTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (strokeWidthTmpBuf_UnionSelector == (1).toChar()) {
-                strokeWidthTmpBuf_ = (valueDeserializer.readNumber() as number)
+                strokeWidthTmpBuf_ = valueDeserializer.readFloat64()
             } else if (strokeWidthTmpBuf_UnionSelector == (2).toChar()) {
                 strokeWidthTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for strokeWidthTmpBuf_ has to be chosen through deserialisation.")
             }
-            strokeWidthTmpBuf = (strokeWidthTmpBuf_ as string | number | Resource)
+            strokeWidthTmpBuf = (strokeWidthTmpBuf_ as string | double | Resource)
         }
         const strokeWidthTmpResult : Length | undefined = strokeWidthTmpBuf
         const shadowTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -733,10 +733,10 @@ export class CapsuleStyleOptions_serializer {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForBorderColorTmpValueForIdx0  = valueHolderForBorderColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForBorderColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForBorderColorTmpValue instanceof number) {
+            } else if (valueHolderForBorderColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toChar())
-                const valueHolderForBorderColorTmpValueForIdx1  = valueHolderForBorderColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForBorderColorTmpValueForIdx1)
+                const valueHolderForBorderColorTmpValueForIdx1  = valueHolderForBorderColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForBorderColorTmpValueForIdx1)
             } else if (valueHolderForBorderColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toChar())
                 const valueHolderForBorderColorTmpValueForIdx2  = valueHolderForBorderColorTmpValue as string
@@ -757,10 +757,10 @@ export class CapsuleStyleOptions_serializer {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForBorderWidthTmpValueForIdx0  = valueHolderForBorderWidthTmpValue as string
                 valueSerializer.writeString(valueHolderForBorderWidthTmpValueForIdx0)
-            } else if (valueHolderForBorderWidthTmpValue instanceof number) {
+            } else if (valueHolderForBorderWidthTmpValue instanceof double) {
                 valueSerializer.writeInt8((1).toChar())
-                const valueHolderForBorderWidthTmpValueForIdx1  = valueHolderForBorderWidthTmpValue as number
-                valueSerializer.writeNumber(valueHolderForBorderWidthTmpValueForIdx1)
+                const valueHolderForBorderWidthTmpValueForIdx1  = valueHolderForBorderWidthTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForBorderWidthTmpValueForIdx1)
             } else if (valueHolderForBorderWidthTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toChar())
                 const valueHolderForBorderWidthTmpValueForIdx2  = valueHolderForBorderWidthTmpValue as Resource
@@ -793,10 +793,10 @@ export class CapsuleStyleOptions_serializer {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForFontColorTmpValueForIdx0  = valueHolderForFontColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForFontColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForFontColorTmpValue instanceof number) {
+            } else if (valueHolderForFontColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toChar())
-                const valueHolderForFontColorTmpValueForIdx1  = valueHolderForFontColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForFontColorTmpValueForIdx1)
+                const valueHolderForFontColorTmpValueForIdx1  = valueHolderForFontColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForFontColorTmpValueForIdx1)
             } else if (valueHolderForFontColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toChar())
                 const valueHolderForFontColorTmpValueForIdx2  = valueHolderForFontColorTmpValue as string
@@ -857,17 +857,17 @@ export class CapsuleStyleOptions_serializer {
         let borderWidthTmpBuf : Length | undefined = undefined
         if ((borderWidthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const borderWidthTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let borderWidthTmpBuf_ : string | number | Resource | undefined
+            let borderWidthTmpBuf_ : string | double | Resource | undefined
             if (borderWidthTmpBuf_UnionSelector == (0).toChar()) {
                 borderWidthTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (borderWidthTmpBuf_UnionSelector == (1).toChar()) {
-                borderWidthTmpBuf_ = (valueDeserializer.readNumber() as number)
+                borderWidthTmpBuf_ = valueDeserializer.readFloat64()
             } else if (borderWidthTmpBuf_UnionSelector == (2).toChar()) {
                 borderWidthTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for borderWidthTmpBuf_ has to be chosen through deserialisation.")
             }
-            borderWidthTmpBuf = (borderWidthTmpBuf_ as string | number | Resource)
+            borderWidthTmpBuf = (borderWidthTmpBuf_ as string | double | Resource)
         }
         const borderWidthTmpResult : Length | undefined = borderWidthTmpBuf
         const contentTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()

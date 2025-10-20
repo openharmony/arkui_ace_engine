@@ -44,7 +44,7 @@ import { CircleShape, ShapeSize, EllipseShape, PathShape, RectShape, CommonShape
 import { ColorContent, ResizableOptions, DynamicRangeMode, ImageContent, ImageInterpolation, ImageRenderMode, ImageRotateOrientation, ImageSourceSize, ImageCompleteEvent, ImageError } from "./../../component/image"
 import { default as uniformTypeDescriptor } from "@ohos.data.uniformTypeDescriptor"
 import { GestureRecognizer, GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureType, Gesture, GestureGroup, GestureMask, EventTargetInfo, GestureControl, GestureMode, GesturePriority, GestureRecognizerState, LongPressRecognizer, PanDirection, PanGestureOptions, PanGestureHandlerOptions, PanRecognizer, PinchRecognizer, RotationGesture, RotationGestureHandlerOptions, GestureEvent, RotationRecognizer, ScrollableTargetInfo, SwipeDirection, SwipeGesture, SwipeGestureHandlerOptions, SwipeRecognizer, TapRecognizer, GestureHandler, FingerInfo, BaseHandlerOptions, LongPressGestureEvent, PanGestureEvent, PinchGestureEvent, RotationGestureEvent, SwipeGestureEvent, TapGestureEvent } from "./../../component/gesture"
-import { LengthMetrics, LengthMetricsUnit, LengthUnit, Size, ColorMetrics, DrawContext, Frame, Vector2, SizeT } from "arkui.Graphics"
+import { ColorMetrics, LengthMetrics, Frame, LengthMetricsUnit, LengthUnit, Size, NodeEdges, ShapeClip, RoundRect, Circle, CommandPath, ShapeMask, Vector2, Vector3, Corners, DrawContext, SizeT, Matrix4 } from "arkui.Graphics"
 import { default as uiEffect } from "@ohos.graphics.uiEffect"
 import { FocusBoxStyle, FocusPriority, KeyProcessingMode } from "./../../component/focus"
 import { default as matrix4 } from "@ohos.matrix4"
@@ -5288,14 +5288,8 @@ export class TypeChecker {
     static XComponentType_FromNumeric(ordinal: int32): XComponentType {
         return XComponentType.fromValue(ordinal)
     }
-    static isArray_Number(value: Object | string | number | undefined): boolean {
-        if (Array.isArray(value)) {
-            const array = value as Array<Object>
-            if (array.length == 0) return true
-            const e = array[0]
-            return e instanceof number
-        }
-        return false
+    static isArray_Float64(value: Object | string | number | undefined): boolean {
+        return value instanceof Array
     }
     static isArray_Rectangle(value: Object | string | number | undefined): boolean {
         if (Array.isArray(value)) {
@@ -5375,15 +5369,6 @@ export class TypeChecker {
             if (array.length == 0) return true
             const e = array[0]
             return e instanceof ModifierKey
-        }
-        return false
-    }
-    static isArray_Float64(value: Object | string | number | undefined): boolean {
-        if (Array.isArray(value)) {
-            const array = value as Array<Object>
-            if (array.length == 0) return true
-            const e = array[0]
-            return e instanceof double
         }
         return false
     }
@@ -5480,7 +5465,7 @@ export class TypeChecker {
         }
         return false
     }
-    static isArray_Union_Number_String(value: Object | string | number | undefined): boolean {
+    static isArray_Union_F64_String(value: Object | string | number | undefined): boolean {
         return value instanceof Array
     }
     static isArray_Union_String_F64(value: Object | string | number | undefined): boolean {
@@ -5617,6 +5602,9 @@ export class TypeChecker {
             return e instanceof webview.OfflineResourceMap
         }
         return false
+    }
+    static isArray_Number(value: Object | string | number | undefined): boolean {
+        return value instanceof Array
     }
     static isArray_TextMenuItem(value: Object | string | number | undefined): boolean {
         if (Array.isArray(value)) {

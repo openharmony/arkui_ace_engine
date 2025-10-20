@@ -293,7 +293,7 @@ void AssignArkValue(Ark_String& dst, const CalcDimension& src, ConvContext *ctx)
 
 void AssignArkValue(Ark_Length& dst, const double& src)
 {
-    dst = ArkUnion<Ark_Length, Ark_Number>(src);
+    dst = ArkUnion<Ark_Length, Ark_Float64>(src);
 }
 
 void AssignArkValue(Ark_Length& dst, const Dimension& src, ConvContext *ctx)
@@ -318,7 +318,7 @@ void AssignArkValue(Ark_Length& dst, const CalcLength& src, ConvContext *ctx)
 
 void AssignArkValue(Ark_Length& dst, const float& src)
 {
-    dst = ArkUnion<Ark_Length, Ark_Number>(src);
+    dst = ArkUnion<Ark_Length, Ark_Float64>(src);
 }
 
 void AssignArkValue(Ark_Dimension& dst, const float& src)
@@ -598,8 +598,8 @@ void AssignArkValue(Ark_SpanStyle& dst, const RefPtr<OHOS::Ace::SpanBase>& src)
 
 void AssignArkValue(Ark_Size& dst, const SizeF& src)
 {
-    dst.width = ArkValue<Ark_Number>(src.Width());
-    dst.height = ArkValue<Ark_Number>(src.Height());
+    dst.width = ArkValue<Ark_Float64>(src.Width());
+    dst.height = ArkValue<Ark_Float64>(src.Height());
 }
 
 void AssignArkValue(Ark_String& dst, const Color& src, ConvContext *ctx)

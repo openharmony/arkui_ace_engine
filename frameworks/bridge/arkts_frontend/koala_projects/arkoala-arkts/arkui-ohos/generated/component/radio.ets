@@ -341,10 +341,10 @@ export class RadioStyle_serializer {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForCheckedBackgroundColorTmpValueForIdx0  = valueHolderForCheckedBackgroundColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForCheckedBackgroundColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForCheckedBackgroundColorTmpValue instanceof number) {
+            } else if (valueHolderForCheckedBackgroundColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toChar())
-                const valueHolderForCheckedBackgroundColorTmpValueForIdx1  = valueHolderForCheckedBackgroundColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForCheckedBackgroundColorTmpValueForIdx1)
+                const valueHolderForCheckedBackgroundColorTmpValueForIdx1  = valueHolderForCheckedBackgroundColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForCheckedBackgroundColorTmpValueForIdx1)
             } else if (valueHolderForCheckedBackgroundColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toChar())
                 const valueHolderForCheckedBackgroundColorTmpValueForIdx2  = valueHolderForCheckedBackgroundColorTmpValue as string
@@ -365,10 +365,10 @@ export class RadioStyle_serializer {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForUncheckedBorderColorTmpValueForIdx0  = valueHolderForUncheckedBorderColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForUncheckedBorderColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForUncheckedBorderColorTmpValue instanceof number) {
+            } else if (valueHolderForUncheckedBorderColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toChar())
-                const valueHolderForUncheckedBorderColorTmpValueForIdx1  = valueHolderForUncheckedBorderColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForUncheckedBorderColorTmpValueForIdx1)
+                const valueHolderForUncheckedBorderColorTmpValueForIdx1  = valueHolderForUncheckedBorderColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForUncheckedBorderColorTmpValueForIdx1)
             } else if (valueHolderForUncheckedBorderColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toChar())
                 const valueHolderForUncheckedBorderColorTmpValueForIdx2  = valueHolderForUncheckedBorderColorTmpValue as string
@@ -389,10 +389,10 @@ export class RadioStyle_serializer {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForIndicatorColorTmpValueForIdx0  = valueHolderForIndicatorColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForIndicatorColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForIndicatorColorTmpValue instanceof number) {
+            } else if (valueHolderForIndicatorColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toChar())
-                const valueHolderForIndicatorColorTmpValueForIdx1  = valueHolderForIndicatorColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForIndicatorColorTmpValueForIdx1)
+                const valueHolderForIndicatorColorTmpValueForIdx1  = valueHolderForIndicatorColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForIndicatorColorTmpValueForIdx1)
             } else if (valueHolderForIndicatorColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toChar())
                 const valueHolderForIndicatorColorTmpValueForIdx2  = valueHolderForIndicatorColorTmpValue as string

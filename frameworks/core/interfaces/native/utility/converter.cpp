@@ -756,7 +756,7 @@ SheetHeight Convert(const Ark_String& src)
 }
 
 template<>
-SheetHeight Convert(const Ark_Number& src)
+SheetHeight Convert(const Ark_Float64& src)
 {
     return SheetHeightFromDimension(OptConvert<Dimension>(src));
 }
@@ -949,6 +949,12 @@ CalcDimension Convert(const Ark_Float64& src)
 
 template<>
 CalcLength Convert(const Ark_Number& src)
+{
+    return CalcLength(Convert<Dimension>(src));
+}
+
+template<>
+CalcLength Convert(const Ark_Float64& src)
 {
     return CalcLength(Convert<Dimension>(src));
 }
@@ -2100,6 +2106,18 @@ void AssignCast(std::optional<double>& dst, const Ark_String& src)
     }
 }
 
+template<>
+void AssignCast(std::optional<double>& dst, const Ark_Float64& src)
+{
+    dst = Convert<double>(src);
+}
+
+template<>
+void AssignCast(std::optional<float>& dst, const Ark_Float64& src)
+{
+    dst = Convert<float>(src);
+}
+
 Dimension ConvertFromString(const std::string& str, DimensionUnit unit)
 {
     static const int32_t percentUnit = 100;
@@ -2261,14 +2279,14 @@ std::optional<Dimension> OptConvertFromArkNumStrRes(const T& src, DimensionUnit 
 template std::optional<Dimension> OptConvertFromArkNumStrRes<Ark_Union_F64_String_Resource, Ark_Int32>(
     const Ark_Union_F64_String_Resource&, DimensionUnit);
 template std::optional<Dimension> OptConvertFromArkNumStrRes<Ark_Dimension, Ark_Number>(const Ark_Dimension&, DimensionUnit);
-template std::optional<Dimension> OptConvertFromArkNumStrRes<Ark_Length, Ark_Number>(const Ark_Length&, DimensionUnit);
-template std::optional<Dimension> OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(const Opt_Length&, DimensionUnit);
+template std::optional<Dimension> OptConvertFromArkNumStrRes<Ark_Length, Ark_Float64>(const Ark_Length&, DimensionUnit);
+template std::optional<Dimension> OptConvertFromArkNumStrRes<Opt_Length, Ark_Float64>(const Opt_Length&, DimensionUnit);
 
 std::optional<Dimension> OptConvertFromArkLength(const Ark_Length& src, DimensionUnit defaultUnit)
 {
     std::optional<Dimension> dimension = std::nullopt;
     Converter::VisitUnion(src,
-        [&dimension](const Ark_Number& value) {
+        [&dimension](const Ark_Float64& value) {
             dimension = Converter::Convert<Dimension>(value);
         },
         [&dimension](const Ark_String& value) {
@@ -2432,6 +2450,12 @@ PaddingProperty Convert(const Ark_LengthMetrics& src)
 
 template<>
 PaddingProperty Convert(const Ark_Number& src)
+{
+    return PaddingPropertyFromCalcLength(OptConvert<CalcLength>(src));
+}
+
+template<>
+PaddingProperty Convert(const Ark_Float64& src)
 {
     return PaddingPropertyFromCalcLength(OptConvert<CalcLength>(src));
 }
@@ -2619,6 +2643,12 @@ BorderRadiusProperty Convert(const Ark_Number& src)
 }
 
 template<>
+BorderRadiusProperty Convert(const Ark_Float64& src)
+{
+    return BorderRadiusPropertyFromDimension(OptConvert<Dimension>(src));
+}
+
+template<>
 BorderRadiusProperty Convert(const Ark_String& src)
 {
     return BorderRadiusPropertyFromDimension(OptConvert<Dimension>(src));
@@ -2681,6 +2711,12 @@ BorderWidthProperty Convert(const Ark_LengthMetrics& src)
 
 template<>
 BorderWidthProperty Convert(const Ark_Number& src)
+{
+    return BorderWidthPropertyFromDimension(OptConvert<Dimension>(src));
+}
+
+template<>
+BorderWidthProperty Convert(const Ark_Float64& src)
 {
     return BorderWidthPropertyFromDimension(OptConvert<Dimension>(src));
 }

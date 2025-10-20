@@ -309,10 +309,10 @@ export class BaseShape implements MaterializedBase {
             thisSerializer.writeInt8((0).toChar())
             const widthForIdx0  = width as string
             thisSerializer.writeString(widthForIdx0)
-        } else if (width instanceof number) {
+        } else if (width instanceof double) {
             thisSerializer.writeInt8((1).toChar())
-            const widthForIdx1  = width as number
-            thisSerializer.writeNumber(widthForIdx1)
+            const widthForIdx1  = width as double
+            thisSerializer.writeFloat64(widthForIdx1)
         } else if (width instanceof Resource) {
             thisSerializer.writeInt8((2).toChar())
             const widthForIdx2  = width as Resource
@@ -329,10 +329,10 @@ export class BaseShape implements MaterializedBase {
             thisSerializer.writeInt8((0).toChar())
             const heightForIdx0  = height as string
             thisSerializer.writeString(heightForIdx0)
-        } else if (height instanceof number) {
+        } else if (height instanceof double) {
             thisSerializer.writeInt8((1).toChar())
-            const heightForIdx1  = height as number
-            thisSerializer.writeNumber(heightForIdx1)
+            const heightForIdx1  = height as double
+            thisSerializer.writeFloat64(heightForIdx1)
         } else if (height instanceof Resource) {
             thisSerializer.writeInt8((2).toChar())
             const heightForIdx2  = height as Resource
@@ -481,10 +481,10 @@ export class CommonShape implements MaterializedBase {
             thisSerializer.writeInt8((0).toChar())
             const colorForIdx0  = color as Color
             thisSerializer.writeInt32(colorForIdx0.getOrdinal())
-        } else if (color instanceof number) {
+        } else if (color instanceof int32) {
             thisSerializer.writeInt8((1).toChar())
-            const colorForIdx1  = color as number
-            thisSerializer.writeNumber(colorForIdx1)
+            const colorForIdx1  = color as int32
+            thisSerializer.writeInt32(colorForIdx1)
         } else if (color instanceof string) {
             thisSerializer.writeInt8((2).toChar())
             const colorForIdx2  = color as string
@@ -2380,37 +2380,37 @@ export class RenderNodeExtender {
     static setTransform_serialize(peer: RenderNode, transform: Matrix4): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         const transform_0  = transform[0]
-        thisSerializer.writeNumber(transform_0)
+        thisSerializer.writeFloat64(transform_0)
         const transform_1  = transform[1]
-        thisSerializer.writeNumber(transform_1)
+        thisSerializer.writeFloat64(transform_1)
         const transform_2  = transform[2]
-        thisSerializer.writeNumber(transform_2)
+        thisSerializer.writeFloat64(transform_2)
         const transform_3  = transform[3]
-        thisSerializer.writeNumber(transform_3)
+        thisSerializer.writeFloat64(transform_3)
         const transform_4  = transform[4]
-        thisSerializer.writeNumber(transform_4)
+        thisSerializer.writeFloat64(transform_4)
         const transform_5  = transform[5]
-        thisSerializer.writeNumber(transform_5)
+        thisSerializer.writeFloat64(transform_5)
         const transform_6  = transform[6]
-        thisSerializer.writeNumber(transform_6)
+        thisSerializer.writeFloat64(transform_6)
         const transform_7  = transform[7]
-        thisSerializer.writeNumber(transform_7)
+        thisSerializer.writeFloat64(transform_7)
         const transform_8  = transform[8]
-        thisSerializer.writeNumber(transform_8)
+        thisSerializer.writeFloat64(transform_8)
         const transform_9  = transform[9]
-        thisSerializer.writeNumber(transform_9)
+        thisSerializer.writeFloat64(transform_9)
         const transform_10  = transform[10]
-        thisSerializer.writeNumber(transform_10)
+        thisSerializer.writeFloat64(transform_10)
         const transform_11  = transform[11]
-        thisSerializer.writeNumber(transform_11)
+        thisSerializer.writeFloat64(transform_11)
         const transform_12  = transform[12]
-        thisSerializer.writeNumber(transform_12)
+        thisSerializer.writeFloat64(transform_12)
         const transform_13  = transform[13]
-        thisSerializer.writeNumber(transform_13)
+        thisSerializer.writeFloat64(transform_13)
         const transform_14  = transform[14]
-        thisSerializer.writeNumber(transform_14)
+        thisSerializer.writeFloat64(transform_14)
         const transform_15  = transform[15]
-        thisSerializer.writeNumber(transform_15)
+        thisSerializer.writeFloat64(transform_15)
         ArkUIGeneratedNativeModule._RenderNodeExtender_setTransform(extractors.toRenderNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
@@ -4920,10 +4920,10 @@ export class CustomDialogControllerOptionsExtender_serializer {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForMaskColorTmpValueForIdx0  = valueHolderForMaskColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForMaskColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForMaskColorTmpValue instanceof number) {
+            } else if (valueHolderForMaskColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toChar())
-                const valueHolderForMaskColorTmpValueForIdx1  = valueHolderForMaskColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForMaskColorTmpValueForIdx1)
+                const valueHolderForMaskColorTmpValueForIdx1  = valueHolderForMaskColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForMaskColorTmpValueForIdx1)
             } else if (valueHolderForMaskColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toChar())
                 const valueHolderForMaskColorTmpValueForIdx2  = valueHolderForMaskColorTmpValue as string
@@ -4976,10 +4976,10 @@ export class CustomDialogControllerOptionsExtender_serializer {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForBackgroundColorTmpValueForIdx0  = valueHolderForBackgroundColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForBackgroundColorTmpValue instanceof number) {
+            } else if (valueHolderForBackgroundColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toChar())
-                const valueHolderForBackgroundColorTmpValueForIdx1  = valueHolderForBackgroundColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForBackgroundColorTmpValueForIdx1)
+                const valueHolderForBackgroundColorTmpValueForIdx1  = valueHolderForBackgroundColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx1)
             } else if (valueHolderForBackgroundColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toChar())
                 const valueHolderForBackgroundColorTmpValueForIdx2  = valueHolderForBackgroundColorTmpValue as string
@@ -5115,10 +5115,10 @@ export class CustomDialogControllerOptionsExtender_serializer {
                     valueSerializer.writeInt8((0).toChar())
                     const valueHolderForBorderColorTmpValueForIdx0ForIdx0  = valueHolderForBorderColorTmpValueForIdx0 as Color
                     valueSerializer.writeInt32(valueHolderForBorderColorTmpValueForIdx0ForIdx0.getOrdinal())
-                } else if (valueHolderForBorderColorTmpValueForIdx0 instanceof number) {
+                } else if (valueHolderForBorderColorTmpValueForIdx0 instanceof int32) {
                     valueSerializer.writeInt8((1).toChar())
-                    const valueHolderForBorderColorTmpValueForIdx0ForIdx1  = valueHolderForBorderColorTmpValueForIdx0 as number
-                    valueSerializer.writeNumber(valueHolderForBorderColorTmpValueForIdx0ForIdx1)
+                    const valueHolderForBorderColorTmpValueForIdx0ForIdx1  = valueHolderForBorderColorTmpValueForIdx0 as int32
+                    valueSerializer.writeInt32(valueHolderForBorderColorTmpValueForIdx0ForIdx1)
                 } else if (valueHolderForBorderColorTmpValueForIdx0 instanceof string) {
                     valueSerializer.writeInt8((2).toChar())
                     const valueHolderForBorderColorTmpValueForIdx0ForIdx2  = valueHolderForBorderColorTmpValueForIdx0 as string

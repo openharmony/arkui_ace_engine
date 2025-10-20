@@ -72,10 +72,10 @@ export class ArkTogglePeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toChar())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toChar())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toChar())
                 const valueTmpValueForIdx2  = valueTmpValue as string
@@ -100,10 +100,10 @@ export class ArkTogglePeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toChar())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toChar())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toChar())
                 const valueTmpValueForIdx2  = valueTmpValue as string
@@ -353,10 +353,10 @@ export class SwitchStyle_serializer {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForUnselectedColorTmpValueForIdx0  = valueHolderForUnselectedColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForUnselectedColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForUnselectedColorTmpValue instanceof number) {
+            } else if (valueHolderForUnselectedColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toChar())
-                const valueHolderForUnselectedColorTmpValueForIdx1  = valueHolderForUnselectedColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForUnselectedColorTmpValueForIdx1)
+                const valueHolderForUnselectedColorTmpValueForIdx1  = valueHolderForUnselectedColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForUnselectedColorTmpValueForIdx1)
             } else if (valueHolderForUnselectedColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toChar())
                 const valueHolderForUnselectedColorTmpValueForIdx2  = valueHolderForUnselectedColorTmpValue as string
@@ -377,10 +377,10 @@ export class SwitchStyle_serializer {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForPointColorTmpValueForIdx0  = valueHolderForPointColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForPointColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForPointColorTmpValue instanceof number) {
+            } else if (valueHolderForPointColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toChar())
-                const valueHolderForPointColorTmpValueForIdx1  = valueHolderForPointColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForPointColorTmpValueForIdx1)
+                const valueHolderForPointColorTmpValueForIdx1  = valueHolderForPointColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForPointColorTmpValueForIdx1)
             } else if (valueHolderForPointColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toChar())
                 const valueHolderForPointColorTmpValueForIdx2  = valueHolderForPointColorTmpValue as string

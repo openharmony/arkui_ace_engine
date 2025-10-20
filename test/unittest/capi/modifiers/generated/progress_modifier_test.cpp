@@ -500,7 +500,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleLinearStyleOptionsStrok
     WriteToUnion<Ark_LinearStyleOptions>(WriteTo(initValueStyle)).strokeWidth =
         ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteToUnion<Ark_LinearStyleOptions>(WriteTo(initValueStyle)).strokeRadius =
-        ArkUnion<Opt_Union_String_Number_Resource, Ark_Number>(
+        ArkUnion<Opt_Union_String_F64_Resource, Ark_Number>(
             std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
 
     auto checkValue = [this, &initValueStyle](
@@ -541,7 +541,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleLinearStyleOptionsStrok
     WriteToUnion<Ark_LinearStyleOptions>(WriteTo(initValueStyle)).strokeWidth =
         ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteToUnion<Ark_LinearStyleOptions>(WriteTo(initValueStyle)).strokeRadius =
-        ArkUnion<Opt_Union_String_Number_Resource, Ark_Number>(
+        ArkUnion<Opt_Union_String_F64_Resource, Ark_Number>(
             std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
 
     auto checkValue = [this, &initValueStyle](const std::string& input, const Opt_Length& value) {
@@ -586,10 +586,10 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleLinearStyleOptionsStrok
     WriteToUnion<Ark_LinearStyleOptions>(WriteTo(initValueStyle)).strokeWidth =
         ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteToUnion<Ark_LinearStyleOptions>(WriteTo(initValueStyle)).strokeRadius =
-        ArkUnion<Opt_Union_String_Number_Resource, Ark_Number>(
+        ArkUnion<Opt_Union_String_F64_Resource, Ark_Number>(
             std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
 
-    auto checkValue = [this, &initValueStyle](const std::string& input, const Opt_Union_String_Number_Resource& value) {
+    auto checkValue = [this, &initValueStyle](const std::string& input, const Opt_Union_String_F64_Resource& value) {
         Opt_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions inputValueStyle =
             initValueStyle;
 
@@ -605,9 +605,9 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleLinearStyleOptionsStrok
 
     ADD_FAILURE() << "No fixture is defined for type Ark_Resource";
     // Check invalid union
-    checkValue("invalid union", ArkUnion<Opt_Union_String_Number_Resource, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Opt_Union_String_F64_Resource, Ark_Empty>(nullptr));
     // Check empty optional
-    checkValue("undefined", ArkValue<Opt_Union_String_Number_Resource>());
+    checkValue("undefined", ArkValue<Opt_Union_String_F64_Resource>());
 }
 
 /*

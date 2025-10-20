@@ -1116,10 +1116,10 @@ export class ChainAnimationOptions_serializer {
             valueSerializer.writeInt8((0).toChar())
             const valueHolderForMinSpaceForIdx0  = valueHolderForMinSpace as string
             valueSerializer.writeString(valueHolderForMinSpaceForIdx0)
-        } else if (valueHolderForMinSpace instanceof number) {
+        } else if (valueHolderForMinSpace instanceof double) {
             valueSerializer.writeInt8((1).toChar())
-            const valueHolderForMinSpaceForIdx1  = valueHolderForMinSpace as number
-            valueSerializer.writeNumber(valueHolderForMinSpaceForIdx1)
+            const valueHolderForMinSpaceForIdx1  = valueHolderForMinSpace as double
+            valueSerializer.writeFloat64(valueHolderForMinSpaceForIdx1)
         } else if (valueHolderForMinSpace instanceof Resource) {
             valueSerializer.writeInt8((2).toChar())
             const valueHolderForMinSpaceForIdx2  = valueHolderForMinSpace as Resource
@@ -1130,10 +1130,10 @@ export class ChainAnimationOptions_serializer {
             valueSerializer.writeInt8((0).toChar())
             const valueHolderForMaxSpaceForIdx0  = valueHolderForMaxSpace as string
             valueSerializer.writeString(valueHolderForMaxSpaceForIdx0)
-        } else if (valueHolderForMaxSpace instanceof number) {
+        } else if (valueHolderForMaxSpace instanceof double) {
             valueSerializer.writeInt8((1).toChar())
-            const valueHolderForMaxSpaceForIdx1  = valueHolderForMaxSpace as number
-            valueSerializer.writeNumber(valueHolderForMaxSpaceForIdx1)
+            const valueHolderForMaxSpaceForIdx1  = valueHolderForMaxSpace as double
+            valueSerializer.writeFloat64(valueHolderForMaxSpaceForIdx1)
         } else if (valueHolderForMaxSpace instanceof Resource) {
             valueSerializer.writeInt8((2).toChar())
             const valueHolderForMaxSpaceForIdx2  = valueHolderForMaxSpace as Resource
@@ -1183,29 +1183,29 @@ export class ChainAnimationOptions_serializer {
     public static read(buffer: DeserializerBase): ChainAnimationOptions {
         let valueDeserializer : DeserializerBase = buffer
         const minSpaceTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
-        let minSpaceTmpBuf : string | number | Resource | undefined
+        let minSpaceTmpBuf : string | double | Resource | undefined
         if (minSpaceTmpBufUnionSelector == (0).toChar()) {
             minSpaceTmpBuf = (valueDeserializer.readString() as string)
         } else if (minSpaceTmpBufUnionSelector == (1).toChar()) {
-            minSpaceTmpBuf = (valueDeserializer.readNumber() as number)
+            minSpaceTmpBuf = valueDeserializer.readFloat64()
         } else if (minSpaceTmpBufUnionSelector == (2).toChar()) {
             minSpaceTmpBuf = Resource_serializer.read(valueDeserializer)
         } else {
             throw new Error("One of the branches for minSpaceTmpBuf has to be chosen through deserialisation.")
         }
-        const minSpaceTmpResult : Length = (minSpaceTmpBuf as string | number | Resource)
+        const minSpaceTmpResult : Length = (minSpaceTmpBuf as string | double | Resource)
         const maxSpaceTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
-        let maxSpaceTmpBuf : string | number | Resource | undefined
+        let maxSpaceTmpBuf : string | double | Resource | undefined
         if (maxSpaceTmpBufUnionSelector == (0).toChar()) {
             maxSpaceTmpBuf = (valueDeserializer.readString() as string)
         } else if (maxSpaceTmpBufUnionSelector == (1).toChar()) {
-            maxSpaceTmpBuf = (valueDeserializer.readNumber() as number)
+            maxSpaceTmpBuf = valueDeserializer.readFloat64()
         } else if (maxSpaceTmpBufUnionSelector == (2).toChar()) {
             maxSpaceTmpBuf = Resource_serializer.read(valueDeserializer)
         } else {
             throw new Error("One of the branches for maxSpaceTmpBuf has to be chosen through deserialisation.")
         }
-        const maxSpaceTmpResult : Length = (maxSpaceTmpBuf as string | number | Resource)
+        const maxSpaceTmpResult : Length = (maxSpaceTmpBuf as string | double | Resource)
         const conductivityTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let conductivityTmpBuf : double | undefined = undefined
         if ((conductivityTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -1248,10 +1248,10 @@ export class ListDividerOptions_serializer {
             valueSerializer.writeInt8((0).toChar())
             const valueHolderForStrokeWidthForIdx0  = valueHolderForStrokeWidth as string
             valueSerializer.writeString(valueHolderForStrokeWidthForIdx0)
-        } else if (valueHolderForStrokeWidth instanceof number) {
+        } else if (valueHolderForStrokeWidth instanceof double) {
             valueSerializer.writeInt8((1).toChar())
-            const valueHolderForStrokeWidthForIdx1  = valueHolderForStrokeWidth as number
-            valueSerializer.writeNumber(valueHolderForStrokeWidthForIdx1)
+            const valueHolderForStrokeWidthForIdx1  = valueHolderForStrokeWidth as double
+            valueSerializer.writeFloat64(valueHolderForStrokeWidthForIdx1)
         } else if (valueHolderForStrokeWidth instanceof Resource) {
             valueSerializer.writeInt8((2).toChar())
             const valueHolderForStrokeWidthForIdx2  = valueHolderForStrokeWidth as Resource
@@ -1265,10 +1265,10 @@ export class ListDividerOptions_serializer {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForColorTmpValue instanceof number) {
+            } else if (valueHolderForColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toChar())
-                const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForColorTmpValueForIdx1)
+                const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx1)
             } else if (valueHolderForColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toChar())
                 const valueHolderForColorTmpValueForIdx2  = valueHolderForColorTmpValue as string
@@ -1289,10 +1289,10 @@ export class ListDividerOptions_serializer {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForStartMarginTmpValueForIdx0  = valueHolderForStartMarginTmpValue as string
                 valueSerializer.writeString(valueHolderForStartMarginTmpValueForIdx0)
-            } else if (valueHolderForStartMarginTmpValue instanceof number) {
+            } else if (valueHolderForStartMarginTmpValue instanceof double) {
                 valueSerializer.writeInt8((1).toChar())
-                const valueHolderForStartMarginTmpValueForIdx1  = valueHolderForStartMarginTmpValue as number
-                valueSerializer.writeNumber(valueHolderForStartMarginTmpValueForIdx1)
+                const valueHolderForStartMarginTmpValueForIdx1  = valueHolderForStartMarginTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForStartMarginTmpValueForIdx1)
             } else if (valueHolderForStartMarginTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toChar())
                 const valueHolderForStartMarginTmpValueForIdx2  = valueHolderForStartMarginTmpValue as Resource
@@ -1309,10 +1309,10 @@ export class ListDividerOptions_serializer {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForEndMarginTmpValueForIdx0  = valueHolderForEndMarginTmpValue as string
                 valueSerializer.writeString(valueHolderForEndMarginTmpValueForIdx0)
-            } else if (valueHolderForEndMarginTmpValue instanceof number) {
+            } else if (valueHolderForEndMarginTmpValue instanceof double) {
                 valueSerializer.writeInt8((1).toChar())
-                const valueHolderForEndMarginTmpValueForIdx1  = valueHolderForEndMarginTmpValue as number
-                valueSerializer.writeNumber(valueHolderForEndMarginTmpValueForIdx1)
+                const valueHolderForEndMarginTmpValueForIdx1  = valueHolderForEndMarginTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForEndMarginTmpValueForIdx1)
             } else if (valueHolderForEndMarginTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toChar())
                 const valueHolderForEndMarginTmpValueForIdx2  = valueHolderForEndMarginTmpValue as Resource
@@ -1325,17 +1325,17 @@ export class ListDividerOptions_serializer {
     public static read(buffer: DeserializerBase): ListDividerOptions {
         let valueDeserializer : DeserializerBase = buffer
         const strokeWidthTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
-        let strokeWidthTmpBuf : string | number | Resource | undefined
+        let strokeWidthTmpBuf : string | double | Resource | undefined
         if (strokeWidthTmpBufUnionSelector == (0).toChar()) {
             strokeWidthTmpBuf = (valueDeserializer.readString() as string)
         } else if (strokeWidthTmpBufUnionSelector == (1).toChar()) {
-            strokeWidthTmpBuf = (valueDeserializer.readNumber() as number)
+            strokeWidthTmpBuf = valueDeserializer.readFloat64()
         } else if (strokeWidthTmpBufUnionSelector == (2).toChar()) {
             strokeWidthTmpBuf = Resource_serializer.read(valueDeserializer)
         } else {
             throw new Error("One of the branches for strokeWidthTmpBuf has to be chosen through deserialisation.")
         }
-        const strokeWidthTmpResult : Length = (strokeWidthTmpBuf as string | number | Resource)
+        const strokeWidthTmpResult : Length = (strokeWidthTmpBuf as string | double | Resource)
         const colorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let colorTmpBuf : ResourceColor | undefined = undefined
         if ((colorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -1359,34 +1359,34 @@ export class ListDividerOptions_serializer {
         let startMarginTmpBuf : Length | undefined = undefined
         if ((startMarginTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const startMarginTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let startMarginTmpBuf_ : string | number | Resource | undefined
+            let startMarginTmpBuf_ : string | double | Resource | undefined
             if (startMarginTmpBuf_UnionSelector == (0).toChar()) {
                 startMarginTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (startMarginTmpBuf_UnionSelector == (1).toChar()) {
-                startMarginTmpBuf_ = (valueDeserializer.readNumber() as number)
+                startMarginTmpBuf_ = valueDeserializer.readFloat64()
             } else if (startMarginTmpBuf_UnionSelector == (2).toChar()) {
                 startMarginTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for startMarginTmpBuf_ has to be chosen through deserialisation.")
             }
-            startMarginTmpBuf = (startMarginTmpBuf_ as string | number | Resource)
+            startMarginTmpBuf = (startMarginTmpBuf_ as string | double | Resource)
         }
         const startMarginTmpResult : Length | undefined = startMarginTmpBuf
         const endMarginTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let endMarginTmpBuf : Length | undefined = undefined
         if ((endMarginTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const endMarginTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let endMarginTmpBuf_ : string | number | Resource | undefined
+            let endMarginTmpBuf_ : string | double | Resource | undefined
             if (endMarginTmpBuf_UnionSelector == (0).toChar()) {
                 endMarginTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (endMarginTmpBuf_UnionSelector == (1).toChar()) {
-                endMarginTmpBuf_ = (valueDeserializer.readNumber() as number)
+                endMarginTmpBuf_ = valueDeserializer.readFloat64()
             } else if (endMarginTmpBuf_UnionSelector == (2).toChar()) {
                 endMarginTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for endMarginTmpBuf_ has to be chosen through deserialisation.")
             }
-            endMarginTmpBuf = (endMarginTmpBuf_ as string | number | Resource)
+            endMarginTmpBuf = (endMarginTmpBuf_ as string | double | Resource)
         }
         const endMarginTmpResult : Length | undefined = endMarginTmpBuf
         let value : ListDividerOptions = ({strokeWidth: strokeWidthTmpResult, color: colorTmpResult, startMargin: startMarginTmpResult, endMargin: endMarginTmpResult} as ListDividerOptions)

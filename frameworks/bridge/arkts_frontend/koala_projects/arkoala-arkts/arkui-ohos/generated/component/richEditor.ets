@@ -366,10 +366,10 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toChar())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toChar())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toChar())
                 const valueTmpValueForIdx2  = valueTmpValue as string
@@ -394,10 +394,10 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toChar())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toChar())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toChar())
                 const valueTmpValueForIdx2  = valueTmpValue as string
@@ -2089,10 +2089,10 @@ export class RichEditorSymbolSpanStyle_serializer {
                     valueSerializer.writeInt8((0).toChar())
                     const valueHolderForFontColorTmpValueTmpElementForIdx0  = valueHolderForFontColorTmpValueTmpElement as Color
                     valueSerializer.writeInt32(valueHolderForFontColorTmpValueTmpElementForIdx0.getOrdinal())
-                } else if (valueHolderForFontColorTmpValueTmpElement instanceof number) {
+                } else if (valueHolderForFontColorTmpValueTmpElement instanceof int32) {
                     valueSerializer.writeInt8((1).toChar())
-                    const valueHolderForFontColorTmpValueTmpElementForIdx1  = valueHolderForFontColorTmpValueTmpElement as number
-                    valueSerializer.writeNumber(valueHolderForFontColorTmpValueTmpElementForIdx1)
+                    const valueHolderForFontColorTmpValueTmpElementForIdx1  = valueHolderForFontColorTmpValueTmpElement as int32
+                    valueSerializer.writeInt32(valueHolderForFontColorTmpValueTmpElementForIdx1)
                 } else if (valueHolderForFontColorTmpValueTmpElement instanceof string) {
                     valueSerializer.writeInt8((2).toChar())
                     const valueHolderForFontColorTmpValueTmpElementForIdx2  = valueHolderForFontColorTmpValueTmpElement as string
@@ -2569,10 +2569,10 @@ export class PlaceholderStyle_serializer {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForFontColorTmpValueForIdx0  = valueHolderForFontColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForFontColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForFontColorTmpValue instanceof number) {
+            } else if (valueHolderForFontColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toChar())
-                const valueHolderForFontColorTmpValueForIdx1  = valueHolderForFontColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForFontColorTmpValueForIdx1)
+                const valueHolderForFontColorTmpValueForIdx1  = valueHolderForFontColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForFontColorTmpValueForIdx1)
             } else if (valueHolderForFontColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toChar())
                 const valueHolderForFontColorTmpValueForIdx2  = valueHolderForFontColorTmpValue as string
@@ -3083,10 +3083,10 @@ export class RichEditorTextStyle_serializer {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForFontColorTmpValueForIdx0  = valueHolderForFontColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForFontColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForFontColorTmpValue instanceof number) {
+            } else if (valueHolderForFontColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toChar())
-                const valueHolderForFontColorTmpValueForIdx1  = valueHolderForFontColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForFontColorTmpValueForIdx1)
+                const valueHolderForFontColorTmpValueForIdx1  = valueHolderForFontColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForFontColorTmpValueForIdx1)
             } else if (valueHolderForFontColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toChar())
                 const valueHolderForFontColorTmpValueForIdx2  = valueHolderForFontColorTmpValue as string
@@ -3281,7 +3281,7 @@ export class RichEditorTextStyle_serializer {
             if (fontSizeTmpBuf_UnionSelector == (0).toChar()) {
                 fontSizeTmpBuf_ = (valueDeserializer.readString() as string)
             } else if (fontSizeTmpBuf_UnionSelector == (1).toChar()) {
-                fontSizeTmpBuf_ = (valueDeserializer.readFloat64() as double)
+                fontSizeTmpBuf_ = valueDeserializer.readFloat64()
             } else if (fontSizeTmpBuf_UnionSelector == (2).toChar()) {
                 fontSizeTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else {
@@ -3416,10 +3416,10 @@ export class RichEditorTextStyleResult_serializer {
             valueSerializer.writeInt8((0).toChar())
             const valueHolderForFontColorForIdx0  = valueHolderForFontColor as Color
             valueSerializer.writeInt32(valueHolderForFontColorForIdx0.getOrdinal())
-        } else if (valueHolderForFontColor instanceof number) {
+        } else if (valueHolderForFontColor instanceof int32) {
             valueSerializer.writeInt8((1).toChar())
-            const valueHolderForFontColorForIdx1  = valueHolderForFontColor as number
-            valueSerializer.writeNumber(valueHolderForFontColorForIdx1)
+            const valueHolderForFontColorForIdx1  = valueHolderForFontColor as int32
+            valueSerializer.writeInt32(valueHolderForFontColorForIdx1)
         } else if (valueHolderForFontColor instanceof string) {
             valueSerializer.writeInt8((2).toChar())
             const valueHolderForFontColorForIdx2  = valueHolderForFontColor as string
