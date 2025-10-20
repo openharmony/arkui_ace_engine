@@ -352,8 +352,8 @@ Ark_Boolean IsVisibleImpl(Ark_FrameNode peer)
         auto parentFrameNode = AceType::DynamicCast<FrameNode>(parentNode);
         if (parentFrameNode) {
             isVisible = isVisible && parentFrameNode->IsVisible();
-            parentNode = parentNode->GetParent();
         }
+        parentNode = parentNode->GetParent();
     }
     return isVisible;
 }
@@ -610,7 +610,7 @@ Ark_Number GetFirstChildIndexWithoutExpandImpl(Ark_FrameNode peer)
     CHECK_NULL_RETURN(child, errValue);
     auto* childNode = reinterpret_cast<FrameNode*>(child);
     auto childRef = Referenced::Claim<FrameNode>(childNode);
-    auto index = peer->node->GetFrameNodeIndex(childRef, true);
+    auto index = peerNode->GetFrameNodeIndex(childRef, true);
     return Converter::ArkValue<Ark_Number>(index);
 }
 Ark_Number GetLastChildIndexWithoutExpandImpl(Ark_FrameNode peer)
