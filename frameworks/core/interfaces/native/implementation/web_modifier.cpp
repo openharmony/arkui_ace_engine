@@ -2032,7 +2032,7 @@ void SelectionMenuOptionsImpl(Ark_NativePointer node,
             }
             Ark_Literal_String_plainText parameter;
             parameter.plainText = Converter::ArkValue<Ark_String>(selectInfo);
-            arkCallback.Invoke(parameter);
+            arkCallback.InvokeSync(parameter);
         };
         option.action = std::move(action);
         optionParam.menuOption.push_back(option);
@@ -2277,7 +2277,7 @@ void InitCallbackParams_(FrameNode* frameNode,
     if (arkOnDisappear) {
         auto onDisappear = [arkCallback = CallbackHelper(arkOnDisappear.value()), weakNode]() {
             PipelineContext::SetCallBackNode(weakNode);
-            arkCallback.Invoke();
+            arkCallback.InvokeSync();
         };
         dst->menuParam.onDisappear = std::move(onDisappear);
     }
@@ -2285,22 +2285,22 @@ void InitCallbackParams_(FrameNode* frameNode,
     if (arkOnAppear) {
         auto onAppear = [arkCallback = CallbackHelper(arkOnAppear.value()), weakNode]() {
             PipelineContext::SetCallBackNode(weakNode);
-            arkCallback.Invoke();
+            arkCallback.InvokeSync();
         };
         dst->menuParam.onAppear = std::move(onAppear);
     }
-    auto arkOnMenuSHow = Converter::OptConvert<Callback_Void>(options.onMenuShow);
-    if (arkOnMenuSHow) {
-        dst->onMenuShow = [arkCallback = CallbackHelper(arkOnMenuSHow.value()), weakNode]() {
+    auto arkOnMenuShow = Converter::OptConvert<Callback_Void>(options.onMenuShow);
+    if (arkOnMenuShow) {
+        dst->onMenuShow = [arkCallback = CallbackHelper(arkOnMenuShow.value()), weakNode]() {
             PipelineContext::SetCallBackNode(weakNode);
-            arkCallback.Invoke();
+            arkCallback.InvokeSync();
         };
     }
     auto arkOnMenuHide = Converter::OptConvert<Callback_Void>(options.onMenuHide);
     if (arkOnMenuHide) {
         dst->onMenuHide = [arkCallback = CallbackHelper(arkOnMenuHide.value()), weakNode]() {
             PipelineContext::SetCallBackNode(weakNode);
-            arkCallback.Invoke();
+            arkCallback.InvokeSync();
         };
     }
 }
@@ -2325,7 +2325,6 @@ std::function<void(const std::shared_ptr<WebPreviewSelectionMenuParam>&)> GetPre
 }
 
 bool InitSelectMenuParam(const std::shared_ptr<WebPreviewSelectionMenuParam>& selectMenuParam,
-
     const Opt_WebElementType* elementType, const Opt_WebResponseType* responseType)
 {
     auto elType = Converter::OptConvert<WebElementType>(*elementType);
