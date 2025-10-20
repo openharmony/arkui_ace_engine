@@ -413,6 +413,9 @@ typedef struct Ark_ImageLoadResult Ark_ImageLoadResult;
 typedef struct Opt_ImageLoadResult Opt_ImageLoadResult;
 typedef struct Ark_ImageSourceSize Ark_ImageSourceSize;
 typedef struct Opt_ImageSourceSize Opt_ImageSourceSize;
+typedef struct ImageModifierPeer ImageModifierPeer;
+typedef struct ImageModifierPeer* Ark_ImageModifier;
+typedef struct Opt_ImageModifier Opt_ImageModifier;
 typedef struct IndicatorComponentControllerPeer IndicatorComponentControllerPeer;
 typedef struct IndicatorComponentControllerPeer* Ark_IndicatorComponentController;
 typedef struct Opt_IndicatorComponentController Opt_IndicatorComponentController;
@@ -7128,6 +7131,10 @@ typedef struct Opt_ImageSourceSize {
     Ark_Tag tag;
     Ark_ImageSourceSize value;
 } Opt_ImageSourceSize;
+typedef struct Opt_ImageModifier {
+    Ark_Tag tag;
+    Ark_ImageModifier value;
+} Opt_ImageModifier;
 typedef struct Opt_IndicatorComponentController {
     Ark_Tag tag;
     Ark_IndicatorComponentController value;
@@ -16485,6 +16492,7 @@ typedef struct Opt_DividerStyleOptions {
 typedef struct Ark_DragPreviewOptions {
     /* kind: Interface */
     Opt_Union_DragPreviewMode_Array_DragPreviewMode mode;
+    Opt_ImageModifier modifier;
     Opt_Union_Boolean_I64 numberBadge;
     Opt_DraggingSizeChangeEffect sizeChangeEffect;
 } Ark_DragPreviewOptions;

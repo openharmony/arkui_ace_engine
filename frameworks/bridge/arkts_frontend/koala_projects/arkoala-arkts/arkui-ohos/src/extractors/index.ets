@@ -48,6 +48,7 @@ import { default as resourceManager } from "@ohos.resourceManager";
 import { LevelOrder } from "@ohos.promptAction";
 import { SymbolGlyphModifier } from "../SymbolGlyphModifier";
 import { TextModifier } from "../TextModifier";
+import { ImageModifier } from "../ImageModifier";
 import { default as EventHub } from "application.EventHub";
 import { default as UIAbilityContext } from "application.UIAbilityContext";
 import { CommonMethod, StateStyles } from "#generated";
@@ -161,6 +162,13 @@ export namespace extractors {
   }
   export function fromTextModifierPtr(ptr: KPointer): TextModifier {
     return ArkUIAniModule._Extractors_FromTextModifierPtr(ptr);
+  }
+
+  export function toImageModifierPtr(value: ImageModifier): KPointer {
+    throw new Error("toImageModifierPtr is not implemented.")
+  }
+  export function fromImageModifierPtr(ptr: KPointer): ImageModifier {
+    throw new Error("fromImageModifierPtr is not implemented.")
   }
   // end
 
