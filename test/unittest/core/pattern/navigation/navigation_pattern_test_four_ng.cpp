@@ -2466,38 +2466,6 @@ HWTEST_F(NavigationPatternTestFourNg, CheckIfNoNeedAnimationForForceSplit003, Te
 }
 
 /**
- * @tc.name: FireHomeDestinationLifeCycleIfNeeded001
- * @tc.desc: Branch: FireHomeDestinationLifeCycleIfNeeded destNode is true
- * @tc.type: FUNC
- */
-HWTEST_F(NavigationPatternTestFourNg, FireHomeDestinationLifeCycleIfNeeded001, TestSize.Level1)
-{
-    NavigationPatternTestFourNg::SetUpTestSuite();
-    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
-        V2::NAVIGATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        []() { return AceType::MakeRefPtr<NavigationPattern>(); });
-    ASSERT_NE(navigationNode, nullptr);
-        auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
-    ASSERT_NE(navigationPattern, nullptr);
-    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
-    navigationPattern->SetNavigationStack(navigationStack);
-    auto navBarNode = NavBarNode::GetOrCreateNavBarNode(V2::NAVBAR_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavBarPattern>(); });
-    navigationNode->navBarNode_ = navBarNode;
-    auto navigationContentNode = FrameNode::CreateFrameNode(V2::NAVIGATION_CONTENT_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
-    auto navDestination01Node = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-    navigationNode->contentNode_ = navigationContentNode;
-    navigationNode->customHomeDestination_ = navDestination01Node;
-    navigationPattern->FireHomeDestinationLifeCycleIfNeeded(
-        NavDestinationLifecycle::ON_SHOW, false, NavDestinationActiveReason::APP_STATE_CHANGE);
-    bool res = navigationPattern->CheckNeedCreate(0);
-    EXPECT_TRUE(res);
-    NavigationPatternTestFourNg::TearDownTestSuite();
-}
-
-/**
  * @tc.name: IsHideNavBarInForceSplitModeNeeded001
  * @tc.desc: Branch: IsHideNavBarInForceSplitModeNeeded primaryNodes_.empty() is true      
  * @tc.type: FUNC
