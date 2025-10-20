@@ -34,7 +34,7 @@ export function ConditionBranch(
 }
 
 export function makeBuilderParameterProxy<T extends Object>(instance: T, source: Map<string, () => Any>, initializer?: (t: T) => void): T {
-    if (isDynamicObject) {
+    if (isDynamicObject(instance)) {
         initializer!(instance);
         return instance;
     }
