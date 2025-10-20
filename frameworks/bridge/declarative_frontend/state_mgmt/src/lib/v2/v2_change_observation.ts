@@ -1423,6 +1423,11 @@ class ObserveV2 {
       throw new BusinessError(FUNC_CALLED_IN_COMPUTED_ILLEGAL, message);
     }
 
+    if (this.applySyncRunningCount_) {
+      stateMgmtConsole.warn('UIUtils.applySync will be skipped when called within another UIUtils.applySync. The inner UIUtils.applySync will return undefined');
+      return undefined;
+    }
+
     this.applySyncRunningCount_++;
 
     const names = [
