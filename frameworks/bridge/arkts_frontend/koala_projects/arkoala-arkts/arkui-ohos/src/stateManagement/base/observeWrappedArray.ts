@@ -40,13 +40,11 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
     private ____V1RenderId: RenderIdType = 0;
     @JSONStringifyIgnore
     private allowDeep_: boolean;
-    private isAPI_: boolean;
 
-    constructor(src: Array<T>, allowDeep: boolean = false, isAPI: boolean = false) {
+    constructor(src: Array<T>, allowDeep: boolean = false) {
         super();
         this.store_ = src;
         this.allowDeep_ = allowDeep;
-        this.isAPI_ = isAPI;
         this.meta_ = FactoryInternal.mkMutableKeyedStateMeta('WrappedArray');
     }
 
@@ -102,9 +100,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
             this.meta_.addRef(CONSTANT.OB_LENGTH);
             this.meta_.addRef(String(idx as Object | undefined | null));
         }
-        const makeobserved = uiUtils.makeObservedEntrance(this.store_[idx], this.allowDeep_, this.isAPI_);
-        this.store_[idx] = makeobserved;
-        return this.store_[idx];
+        return uiUtils.makeObserved(this.store_[idx], this.allowDeep_);
     }
 
     // [] operator
