@@ -23,7 +23,11 @@ struct ScrollOneItem {
 
   /*
    * 用例描述：Scroll组件内的子组件的高度设置成不同数值
-   * 关键结构：Scroll、height
+   * 关键结构：
+   * |-> Scroll
+   *    |-> Column
+   *      |-> Column
+   *          |-> Text
    */
 
   @State realName: string[][] = [];
@@ -52,6 +56,8 @@ struct ScrollOneItem {
           .borderRadius(1000)
           .borderColor(Color.Black)
           .width('100%') //TODO 疑问：子组件像素是否需要width也设置
+          // 测试点：子组件高度设置成不同数值
+          // 预期结果：height属性设置在一定范围内，Scroll组件的整体布局正常
           .height(this.changeList[this.changeIndex])
           .backgroundColor(Color.Yellow)
 

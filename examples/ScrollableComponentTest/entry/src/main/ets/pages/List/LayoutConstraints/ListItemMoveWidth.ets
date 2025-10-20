@@ -23,7 +23,10 @@ struct ListItemMoveWidth {
   
   /* 
    * 用例描述：List组件中ListItem组件的width属性设置不同值，ListItem组件可拖动
-   * 关键结构：List、ListItem、width
+   * 关键结构：
+   * |-> List
+   *    |-> ListItem
+   *       |-> Text
    */
 
   @State realName: string[][] = [];
@@ -69,26 +72,33 @@ struct ListItemMoveWidth {
               }
               .borderRadius(1000)
               .borderColor(Color.Black)
+              // 测试点：ListItem组件的width属性设置不同值，ListItem组件是否可拖拽。
+              // 预期结果：width属性设置在一定范围内，ListItem组件可拖拽
               .width(this.changeList[this.changeIndex]) //TODO 疑问：子组件像素是否需要width也设置
               .backgroundColor(Color.Yellow)
               .height('80%')
             }
           }
         }, (item: string) => item)
+        //测试点：当元素被移动时触发，记录拖拽元素的原始位置索引和目标位置索引。
           .onMove((from1: number, to1: number) => {
             let temp = this.arr.splice(from1, 1);
             this.arr.splice(to1, 0, temp[0]);
           },
             {
+              // 测试点：当元素被长按时触发，记录被长按元素的索引。
               onLongPress: (index: number) => {
                 this.press3 = index;
               },
+              // 测试点：放下触发，记录放下的目标位置索引
               onDrop: (index: number) => {
                 this.drop3 = index;
               },
+              // 测试点：开始拖拽时触发，记录起始位置
               onDragStart: (index: number) => {
                 this.start3 = index;
               },
+              // 测试点：拖拽经过其他元素时触发，记录当前位置和经过的位置索引。
               onMoveThrough: (from: number, Through: number) => {
                 this.from3 = from;
                 this.to3 = Through;

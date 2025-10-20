@@ -23,7 +23,10 @@ struct ListOriOneItem {
 
   /* 
    * 用例描述：列表组件中，单个列表项的布局约束
-   * 关键结构：List、ListItem、Column、Text、Image
+   * 关键结构：
+   * |-> List
+   *    |-> ListItem
+   *       |-> TextArea
    */
    
   @State realName: string[][] = [];
@@ -197,6 +200,7 @@ struct ListOriOneItem {
       List() {
         ListItem() {
           Column() {
+            // 测试点：多行文本输入框
             TextArea({
               text: this.textContent + this.textContent + this.textContent + this.textContent + this.textContent +
               this.textContent + this.textContent + this.textContent + this.textContent + this.textContent
@@ -206,6 +210,8 @@ struct ListOriOneItem {
           .borderColor(Color.Black)
           .width('100%') //TODO 疑问：子组件像素是否需要width也设置
           .backgroundColor(Color.Yellow)
+          // 测试点：ListItem组件的height属性设置不同值。验证ListItem的布局是否正确
+          // 预期结果：height属性设置在一定范围内，ListItem组件的布局正常
           .height(this.changeList[this.changeIndex])
         }
 

@@ -23,7 +23,10 @@ struct ListWidthOneItem {
 
   /* 
    * 用例描述：List组件内设置ListItem的width为不同值，验证ListItem的布局是否正确
-   * 关键结构：List、ListItem、width
+   * 关键结构：
+   * |-> List
+   *    |-> ListItem
+   *       |-> Text
    */
 
   @State realName: string[][] = [];
@@ -54,6 +57,8 @@ struct ListWidthOneItem {
             .borderColor(Color.Black)
             .height('100%') //TODO 疑问：子组件像素是否需要width也设置
             .backgroundColor(Color.Yellow)
+            // 测试点：ListItem组件的width属性设置不同值。验证ListItem的布局是否正确
+            // 预期结果：width属性设置在一定范围内，ListItem组件可拖拽
             .width(this.changeList[this.changeIndex])
           }
 

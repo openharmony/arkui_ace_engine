@@ -23,7 +23,10 @@ struct ListWidthTwoItem {
 
   /* 
    * 用例描述：List组件内设置多个ListItem的width为不同值，验证ListItem的布局是否正确
-   * 关键结构：List、ListItem、width
+   * 关键结构：
+   * |-> List
+   *    |-> ListItem
+   *       |-> Text
    */
 
   @State realName: string[][] = [];
@@ -61,6 +64,7 @@ struct ListWidthTwoItem {
             .borderColor(Color.Black)
             .height('70%') //TODO 疑问：子组件像素是否需要width也设置
             .backgroundColor(Color.Yellow)
+            // 测试点：ListItem组件的width属性设置不同值。验证ListItem的布局是否正确
             .width(this.changeList[this.changeIndex])
           }
         }
@@ -74,6 +78,7 @@ struct ListWidthTwoItem {
             .borderColor(Color.Black)
             .height('70%') //TODO 疑问：子组件像素是否需要width也设置
             .backgroundColor(Color.Orange)
+            // 测试点：ListItem组件的width属性设置不同值。验证ListItem的布局是否正确
             .width(this.changeList[this.changeIndex])
           }
         }
@@ -87,6 +92,7 @@ struct ListWidthTwoItem {
             .borderColor(Color.Black)
             .height('70%') //TODO 疑问：子组件像素是否需要width也设置
             .backgroundColor(Color.Pink)
+            // 测试点：ListItem组件的width属性设置不同值。验证ListItem的布局是否正确
             .width(this.changeList[this.changeIndex])
           }
         }
@@ -100,6 +106,7 @@ struct ListWidthTwoItem {
             .borderColor(Color.Black)
             .height('70%') //TODO 疑问：子组件像素是否需要width也设置
             .backgroundColor(Color.Black)
+            // 测试点：ListItem组件的width属性设置不同值。验证ListItem的布局是否正确
             .width(this.changeList[this.changeIndex])
           }
         }
@@ -113,6 +120,7 @@ struct ListWidthTwoItem {
             .borderColor(Color.Black)
             .height('70%') //TODO 疑问：子组件像素是否需要width也设置
             .backgroundColor(Color.Blue)
+            // 测试点：ListItem组件的width属性设置不同值。验证ListItem的布局是否正确
             .width(this.changeList[this.changeIndex])
           }
         }
@@ -126,6 +134,7 @@ struct ListWidthTwoItem {
             .borderColor(Color.Black)
             .height('70%') //TODO 疑问：子组件像素是否需要width也设置
             .backgroundColor(Color.Brown)
+            // 测试点：ListItem组件的width属性设置不同值。验证ListItem的布局是否正确
             .width(this.changeList[this.changeIndex])
           }
         }
@@ -139,6 +148,7 @@ struct ListWidthTwoItem {
             .borderColor(Color.Black)
             .height('70%') //TODO 疑问：子组件像素是否需要width也设置
             .backgroundColor(Color.Gray)
+            // 测试点：ListItem组件的width属性设置不同值。验证ListItem的布局是否正确
             .width(this.changeList[this.changeIndex])
           }
         }
@@ -152,6 +162,7 @@ struct ListWidthTwoItem {
             .borderColor(Color.Black)
             .height('70%') //TODO 疑问：子组件像素是否需要width也设置
             .backgroundColor(Color.Green)
+            // 测试点：ListItem组件的width属性设置不同值。验证ListItem的布局是否正确
             .width(this.changeList[this.changeIndex])
           }
         }
@@ -165,6 +176,7 @@ struct ListWidthTwoItem {
             .borderColor(Color.Black)
             .height('70%') //TODO 疑问：子组件像素是否需要width也设置
             .backgroundColor(Color.Red)
+            // 测试点：ListItem组件的width属性设置不同值。验证ListItem的布局是否正确
             .width(this.changeList[this.changeIndex])
           }
         }
@@ -178,6 +190,7 @@ struct ListWidthTwoItem {
             .borderColor(Color.Black)
             .height('70%') //TODO 疑问：子组件像素是否需要width也设置
             .backgroundColor(Color.Grey)
+            // 测试点：ListItem组件的width属性设置不同值。验证ListItem的布局是否正确
             .width(this.changeList[this.changeIndex])
           }
         }
