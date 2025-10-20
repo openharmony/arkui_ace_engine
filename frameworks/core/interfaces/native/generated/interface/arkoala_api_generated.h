@@ -274,6 +274,8 @@ typedef struct AccessibilityCallback AccessibilityCallback;
 typedef struct Opt_AccessibilityCallback Opt_AccessibilityCallback;
 typedef struct AccessibilityFocusCallback AccessibilityFocusCallback;
 typedef struct Opt_AccessibilityFocusCallback Opt_AccessibilityFocusCallback;
+typedef struct ArcScrollIndexHandler ArcScrollIndexHandler;
+typedef struct Opt_ArcScrollIndexHandler Opt_ArcScrollIndexHandler;
 typedef struct AttributeModifierPeer AttributeModifierPeer;
 typedef struct AttributeModifierPeer* Ark_AttributeModifier;
 typedef struct Opt_AttributeModifier Opt_AttributeModifier;
@@ -314,6 +316,9 @@ typedef struct Opt_CommonMethod Opt_CommonMethod;
 typedef struct CommonShapePeer CommonShapePeer;
 typedef struct CommonShapePeer* Ark_CommonShape;
 typedef struct Opt_CommonShape Opt_CommonShape;
+typedef struct ComponentContentBasePeer ComponentContentBasePeer;
+typedef struct ComponentContentBasePeer* Ark_ComponentContentBase;
+typedef struct Opt_ComponentContentBase Opt_ComponentContentBase;
 typedef struct ConsoleMessagePeer ConsoleMessagePeer;
 typedef struct ConsoleMessagePeer* Ark_ConsoleMessage;
 typedef struct Opt_ConsoleMessage Opt_ConsoleMessage;
@@ -1680,6 +1685,10 @@ typedef struct Opt_AnimationNumberRange Opt_AnimationNumberRange;
 typedef struct AppearSymbolEffectPeer AppearSymbolEffectPeer;
 typedef struct AppearSymbolEffectPeer* Ark_AppearSymbolEffect;
 typedef struct Opt_AppearSymbolEffect Opt_AppearSymbolEffect;
+typedef struct Ark_ArcScrollBarOptions Ark_ArcScrollBarOptions;
+typedef struct Opt_ArcScrollBarOptions Opt_ArcScrollBarOptions;
+typedef struct Ark_ArkListOptions Ark_ArkListOptions;
+typedef struct Opt_ArkListOptions Opt_ArkListOptions;
 typedef struct Ark_ASTCResource Ark_ASTCResource;
 typedef struct Opt_ASTCResource Opt_ASTCResource;
 typedef struct Ark_AsymmetricTransitionOption Ark_AsymmetricTransitionOption;
@@ -6948,6 +6957,16 @@ typedef struct Opt_AccessibilityFocusCallback {
     Ark_Tag tag;
     AccessibilityFocusCallback value;
 } Opt_AccessibilityFocusCallback;
+typedef struct ArcScrollIndexHandler {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_Int32 start, const Ark_Int32 end, const Ark_Int32 center);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 start, const Ark_Int32 end, const Ark_Int32 center);
+} ArcScrollIndexHandler;
+typedef struct Opt_ArcScrollIndexHandler {
+    Ark_Tag tag;
+    ArcScrollIndexHandler value;
+} Opt_ArcScrollIndexHandler;
 typedef struct Opt_AttributeModifier {
     Ark_Tag tag;
     Ark_AttributeModifier value;
@@ -7012,6 +7031,10 @@ typedef struct Opt_CommonShape {
     Ark_Tag tag;
     Ark_CommonShape value;
 } Opt_CommonShape;
+typedef struct Opt_ComponentContentBase {
+    Ark_Tag tag;
+    Ark_ComponentContentBase value;
+} Opt_ComponentContentBase;
 typedef struct Opt_ConsoleMessage {
     Ark_Tag tag;
     Ark_ConsoleMessage value;
@@ -12517,6 +12540,25 @@ typedef struct Opt_AppearSymbolEffect {
     Ark_Tag tag;
     Ark_AppearSymbolEffect value;
 } Opt_AppearSymbolEffect;
+typedef struct Ark_ArcScrollBarOptions {
+    /* kind: Interface */
+    Ark_Scroller scroller;
+    Opt_BarState state;
+} Ark_ArcScrollBarOptions;
+typedef struct Opt_ArcScrollBarOptions {
+    Ark_Tag tag;
+    Ark_ArcScrollBarOptions value;
+} Opt_ArcScrollBarOptions;
+typedef struct Ark_ArkListOptions {
+    /* kind: Interface */
+    Opt_Int32 initialIndex;
+    Opt_Scroller scroller;
+    Opt_ComponentContentBase header;
+} Ark_ArkListOptions;
+typedef struct Opt_ArkListOptions {
+    Ark_Tag tag;
+    Ark_ArkListOptions value;
+} Opt_ArkListOptions;
 typedef struct Ark_ASTCResource {
     /* kind: Interface */
     Array_String sources;
@@ -24326,6 +24368,63 @@ typedef struct GENERATED_ArkUIAppearSymbolEffectAccessor {
     void (*setScope)(Ark_AppearSymbolEffect peer,
                      const Opt_EffectScope* scope);
 } GENERATED_ArkUIAppearSymbolEffectAccessor;
+typedef struct GENERATED_ArkUIArcListExtenderAccessor {
+    Ark_NativePointer (*arcListConstructor)(Ark_Int32 id);
+    void (*setArkListOptions)(Ark_NativePointer node,
+                              const Opt_ArkListOptions* options);
+    void (*digitalCrownSensitivity)(Ark_NativePointer node,
+                                    const Opt_CrownSensitivity* sensitivity);
+    void (*space)(Ark_NativePointer node,
+                  const Opt_LengthMetrics* space);
+    void (*scrollBar)(Ark_NativePointer node,
+                      const Opt_BarState* status);
+    void (*scrollBarColor)(Ark_NativePointer node,
+                           const Opt_ColorMetrics* color);
+    void (*scrollBarWidth)(Ark_NativePointer node,
+                           const Opt_LengthMetrics* width);
+    void (*cachedCount)(Ark_NativePointer node,
+                        const Opt_Int32* count);
+    void (*chainAnimation)(Ark_NativePointer node,
+                           const Opt_Boolean* enable);
+    void (*childrenMainSize)(Ark_NativePointer node,
+                             const Opt_ChildrenMainSize* size);
+    void (*enableScrollInteraction)(Ark_NativePointer node,
+                                    const Opt_Boolean* enable);
+    void (*fadingEdge)(Ark_NativePointer node,
+                       const Opt_Boolean* enable);
+    void (*friction)(Ark_NativePointer node,
+                     const Opt_Float64* friction);
+    void (*flingSpeedLimit)(Ark_NativePointer node,
+                            const Opt_Float64* speed);
+    void (*onScrollIndex)(Ark_NativePointer node,
+                          const Opt_ArcScrollIndexHandler* handler);
+    void (*onReachStart)(Ark_NativePointer node,
+                         const Opt_VoidCallback* handler);
+    void (*onReachEnd)(Ark_NativePointer node,
+                       const Opt_VoidCallback* handler);
+    void (*onScrollStart)(Ark_NativePointer node,
+                          const Opt_VoidCallback* handler);
+    void (*onScrollStop)(Ark_NativePointer node,
+                         const Opt_VoidCallback* handler);
+    void (*onWillScroll)(Ark_NativePointer node,
+                         const Opt_OnWillScrollCallback* handler);
+    void (*onDidScroll)(Ark_NativePointer node,
+                        const Opt_OnScrollCallback* handler);
+} GENERATED_ArkUIArcListExtenderAccessor;
+
+typedef struct GENERATED_ArkUIArcListItemExtenderAccessor {
+    Ark_NativePointer (*arcListItemConstructor)(Ark_Int32 id);
+    void (*autoScale)(Ark_NativePointer node,
+                      const Opt_Boolean* enable);
+    void (*swipeAction)(Ark_NativePointer node,
+                        const Opt_SwipeActionOptions* options);
+} GENERATED_ArkUIArcListItemExtenderAccessor;
+
+typedef struct GENERATED_ArkUIArcScrollBarExtenderAccessor {
+    Ark_NativePointer (*arcScrollBarConstructor)(Ark_Int32 id);
+    void (*setArcScrollBarOptions)(Ark_NativePointer node,
+                                   const Ark_ArcScrollBarOptions* options);
+} GENERATED_ArkUIArcScrollBarExtenderAccessor;
 
 typedef struct GENERATED_ArkUIAxisEventAccessor {
     void (*destroyPeer)(Ark_AxisEvent peer);
@@ -27438,6 +27537,9 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIAlertDialogAccessor* (*getAlertDialogAccessor)();
     const GENERATED_ArkUIAnimationExtenderAccessor* (*getAnimationExtenderAccessor)();
     const GENERATED_ArkUIAppearSymbolEffectAccessor* (*getAppearSymbolEffectAccessor)();
+    const GENERATED_ArkUIArcListExtenderAccessor* (*getArcListExtenderAccessor)();
+    const GENERATED_ArkUIArcListItemExtenderAccessor* (*getArcListItemExtenderAccessor)();
+    const GENERATED_ArkUIArcScrollBarExtenderAccessor* (*getArcScrollBarExtenderAccessor)();
     const GENERATED_ArkUIAxisEventAccessor* (*getAxisEventAccessor)();
     const GENERATED_ArkUIBackgroundColorStyleAccessor* (*getBackgroundColorStyleAccessor)();
     const GENERATED_ArkUIBaseEventAccessor* (*getBaseEventAccessor)();

@@ -565,6 +565,8 @@ arkui_path_keys = [
   "arkui.UserView",
   "@ohos.arkui.component",
   "@ohos.arkui.stateManagement",
+  "@ohos.arkui.ArcList",
+  "@ohos.arkui.ArcScrollBar",
 ]
 
 arkui_path_values = [
@@ -610,4 +612,6 @@ arkui_path_values = [
   "arkui-preprocessed/arkui/UserView.ets",
   "arkui-preprocessed/arkui/framework",
   "arkui-preprocessed/arkui/stateManagement",
+  "arkui-preprocessed/@ohos.arkui.ArcList.ets",
+  "arkui-preprocessed/@ohos.arkui.ArcScrollBar.ets",
 ]

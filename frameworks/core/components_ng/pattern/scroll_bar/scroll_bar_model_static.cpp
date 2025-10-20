@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_model_static.h"
+#include "core/components_ng/pattern/arc_scroll_bar/arc_scroll_bar_pattern.h"
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -22,6 +23,13 @@ RefPtr<FrameNode> ScrollBarModelStatic::CreateFrameNode(int32_t nodeId)
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::SCROLL_BAR_ETS_TAG, nodeId);
     return FrameNode::GetOrCreateFrameNode(
         V2::SCROLL_BAR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ScrollBarPattern>(); });
+}
+
+RefPtr<FrameNode> ScrollBarModelStatic::CreateArcScrollBarFrameNode(int32_t nodeId)
+{
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::ARC_SCROLL_BAR_ETS_TAG, nodeId);
+    return FrameNode::GetOrCreateFrameNode(
+        V2::ARC_SCROLL_BAR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ArcScrollBarPattern>(); });
 }
 
 RefPtr<ScrollProxy> ScrollBarModelStatic::SetScrollBarProxy(FrameNode* frameNode, const RefPtr<ScrollProxy>& proxy)

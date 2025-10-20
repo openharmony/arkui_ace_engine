@@ -42,6 +42,7 @@ public:
     static void SetSwiperAction(FrameNode* frameNode, std::function<void()>&& startAction,
         std::function<void()>&& endAction, OnOffsetChangeFunc&& onOffsetChangeFunc,
         const std::optional<V2::SwipeEdgeEffect>& edgeEffect);
+    static void SetAutoScale(FrameNode* frameNode, const std::optional<bool>& autoScale);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_LIST_ITEM_MODEL_STATIC_H

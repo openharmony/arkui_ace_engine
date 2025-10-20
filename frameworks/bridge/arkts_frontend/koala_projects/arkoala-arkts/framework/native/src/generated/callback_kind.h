@@ -21,6 +21,7 @@
 typedef enum CallbackKind {
     Kind_AccessibilityCallback = 589030517,
     Kind_AccessibilityFocusCallback = 1715445305,
+    Kind_ArcScrollIndexHandler = -274386039,
     Kind_AsyncCallback_image_PixelMap_Void = 1289587365,
     Kind_AsyncCallback_Void = 1075219926,
     Kind_ButtonModifierBuilder = -2004118094,

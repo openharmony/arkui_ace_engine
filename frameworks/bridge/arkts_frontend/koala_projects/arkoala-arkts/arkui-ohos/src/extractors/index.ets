@@ -76,6 +76,7 @@ import { UIContextImpl } from 'arkui/base/UIContextImpl';
 import { int32 } from '@koalaui/common';
 import { FrameNodeUtils, FrameNodeInternal } from './../FrameNode';
 import { toPeerPtr } from '@koalaui/interop';
+import { ComponentContentBase } from 'arkui/ComponentContent';
 import { applySymbolGlyphModifierToNode, applyTextModifierToNode } from "./../ApplyModifierToNode"
 
 export namespace extractors {
@@ -92,6 +93,14 @@ export namespace extractors {
   export function fromColorMetricsPtr(ptr: KPointer): ColorMetrics {
     const x: Object = {};
     return x as ColorMetrics;
+  }
+
+  export function toComponentContentBasePtr(value: ComponentContentBase): KPointer {
+    return 123;
+  }
+  export function fromComponentContentBasePtr(ptr: KPointer): ComponentContentBase {
+    const x: Object = {};
+    return x as ComponentContentBase;
   }
 
   export function toDrawContextPtr(ptr: DrawContext): KPointer {

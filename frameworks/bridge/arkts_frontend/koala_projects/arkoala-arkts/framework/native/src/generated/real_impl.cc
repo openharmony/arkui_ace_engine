@@ -10721,6 +10721,162 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     } // AppearSymbolEffectAccessor
+    namespace ArcListExtenderAccessor {
+    Ark_NativePointer ConstructorImpl()
+    {
+        return {};
+    }
+    void SetArkListOptionsImpl(Ark_NativePointer node,
+                               const Opt_ArkListOptions* options)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void DigitalCrownSensitivityImpl(Ark_NativePointer node,
+                                     const Opt_CrownSensitivity* sensitivity)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void SpaceImpl(Ark_NativePointer node,
+                   const Opt_LengthMetrics* space)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void ScrollBarImpl(Ark_NativePointer node,
+                       const Opt_BarState* status)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void ScrollBarColorImpl(Ark_NativePointer node,
+                            const Opt_ColorMetrics* color)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void ScrollBarWidthImpl(Ark_NativePointer node,
+                            const Opt_LengthMetrics* width)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void CachedCountImpl(Ark_NativePointer node,
+                         const Opt_Int32* count)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void ChainAnimationImpl(Ark_NativePointer node,
+                            const Opt_Boolean* enable)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void ChildrenMainSizeImpl(Ark_NativePointer node,
+                              const Opt_ChildrenMainSize* size)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void EnableScrollInteractionImpl(Ark_NativePointer node,
+                                     const Opt_Boolean* enable)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void FadingEdgeImpl(Ark_NativePointer node,
+                        const Opt_Boolean* enable)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void FrictionImpl(Ark_NativePointer node,
+                      const Opt_Float64* friction)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void FlingSpeedLimitImpl(Ark_NativePointer node,
+                             const Opt_Float64* speed)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void OnScrollIndexImpl(Ark_NativePointer node,
+                           const Opt_ArcScrollIndexHandler* handler)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void OnReachStartImpl(Ark_NativePointer node,
+                          const Opt_VoidCallback* handler)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void OnReachEndImpl(Ark_NativePointer node,
+                        const Opt_VoidCallback* handler)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void OnScrollStartImpl(Ark_NativePointer node,
+                           const Opt_VoidCallback* handler)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void OnScrollStopImpl(Ark_NativePointer node,
+                          const Opt_VoidCallback* handler)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void OnWillScrollImpl(Ark_NativePointer node,
+                          const Opt_OnWillScrollCallback* handler)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void OnDidScrollImpl(Ark_NativePointer node,
+                         const Opt_OnScrollCallback* handler)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    } // ArcListExtenderAccessor
+    namespace ArcListItemExtenderAccessor {
+    Ark_NativePointer ConstructorImpl()
+    {
+        return {};
+    }
+    void AutoScaleImpl(Ark_NativePointer node,
+                       const Opt_Boolean* enable)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void SwipeActionImpl(Ark_NativePointer node,
+                         const Opt_SwipeActionOptions* options)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    } // ArcListItemExtenderAccessor
+    namespace ArcScrollBarExtenderAccessor {
+    Ark_NativePointer ConstructorImpl()
+    {
+        return {};
+    }
+    void SetArcScrollBarOptionsImpl(Ark_NativePointer node,
+                                    const Ark_ArcScrollBarOptions* options)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    } // ArcScrollBarExtenderAccessor
     namespace AxisEventAccessor {
     void DestroyPeerImpl(Ark_AxisEvent peer)
     {
@@ -18325,6 +18481,53 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct AppearSymbolEffectPeer {
         virtual ~AppearSymbolEffectPeer() = default;
     };
+    const GENERATED_ArkUIArcListExtenderAccessor* GetArcListExtenderAccessor()
+    {
+        static const GENERATED_ArkUIArcListExtenderAccessor ArcListExtenderAccessorImpl {
+            ArcListExtenderAccessor::ConstructorImpl,
+            ArcListExtenderAccessor::SetArkListOptionsImpl,
+            ArcListExtenderAccessor::DigitalCrownSensitivityImpl,
+            ArcListExtenderAccessor::SpaceImpl,
+            ArcListExtenderAccessor::ScrollBarImpl,
+            ArcListExtenderAccessor::ScrollBarColorImpl,
+            ArcListExtenderAccessor::ScrollBarWidthImpl,
+            ArcListExtenderAccessor::CachedCountImpl,
+            ArcListExtenderAccessor::ChainAnimationImpl,
+            ArcListExtenderAccessor::ChildrenMainSizeImpl,
+            ArcListExtenderAccessor::EnableScrollInteractionImpl,
+            ArcListExtenderAccessor::FadingEdgeImpl,
+            ArcListExtenderAccessor::FrictionImpl,
+            ArcListExtenderAccessor::FlingSpeedLimitImpl,
+            ArcListExtenderAccessor::OnScrollIndexImpl,
+            ArcListExtenderAccessor::OnReachStartImpl,
+            ArcListExtenderAccessor::OnReachEndImpl,
+            ArcListExtenderAccessor::OnScrollStartImpl,
+            ArcListExtenderAccessor::OnScrollStopImpl,
+            ArcListExtenderAccessor::OnWillScrollImpl,
+            ArcListExtenderAccessor::OnDidScrollImpl,
+        };
+        return &ArcListExtenderAccessorImpl;
+    }
+
+    const GENERATED_ArkUIArcListItemExtenderAccessor* GetArcListItemExtenderAccessor()
+    {
+        static const GENERATED_ArkUIArcListItemExtenderAccessor ArcListItemExtenderAccessorImpl {
+            ArcListItemExtenderAccessor::ConstructorImpl,
+            ArcListItemExtenderAccessor::AutoScaleImpl,
+            ArcListItemExtenderAccessor::SwipeActionImpl,
+        };
+        return &ArcListItemExtenderAccessorImpl;
+    }
+
+    const GENERATED_ArkUIArcScrollBarExtenderAccessor* GetArcScrollBarExtenderAccessor()
+    {
+        static const GENERATED_ArkUIArcScrollBarExtenderAccessor ArcScrollBarExtenderAccessorImpl {
+            ArcScrollBarExtenderAccessor::ConstructorImpl,
+            ArcScrollBarExtenderAccessor::SetArcScrollBarOptionsImpl,
+        };
+        return &ArcScrollBarExtenderAccessorImpl;
+    }
+
     const GENERATED_ArkUIAxisEventAccessor* GetAxisEventAccessor()
     {
         static const GENERATED_ArkUIAxisEventAccessor AxisEventAccessorImpl {
@@ -21612,6 +21815,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetAlertDialogAccessor,
             GetAnimationExtenderAccessor,
             GetAppearSymbolEffectAccessor,
+            GetArcListExtenderAccessor,
+            GetArcListItemExtenderAccessor,
+            GetArcScrollBarExtenderAccessor,
             GetAxisEventAccessor,
             GetBackgroundColorStyleAccessor,
             GetBaseEventAccessor,

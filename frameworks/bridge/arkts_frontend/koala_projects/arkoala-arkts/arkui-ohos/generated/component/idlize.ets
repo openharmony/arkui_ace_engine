@@ -22,11 +22,16 @@ import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { AlertDialogParamWithConfirm_serializer, AlertDialogParamWithButtons_serializer, AlertDialogParamWithOptions_serializer, AlertDialogParamWithConfirm, AlertDialogParamWithButtons, AlertDialogParamWithOptions, DialogAlignment } from "./alertDialog"
-import { AnimateParam_serializer, TranslateOptions_serializer, KeyframeAnimateParam_serializer, KeyframeState_serializer, AnimateParam, TranslateOptions, KeyframeAnimateParam, KeyframeState, TouchEvent, TouchEventInternal, ClickEvent, ClickEventInternal, UICommonEvent, UICommonEventInternal, ItemDragEventHandler_serializer, OnMoveHandler, ItemDragEventHandler, PopupCommonOptions_serializer, MenuOptions_serializer, PopupCommonOptions, MenuOptions, ThemeColorMode, GeometryInfo, Measurable, Layoutable, Rectangle, ShadowOptions, ShadowStyle, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, KeyboardAvoidMode, HoverModeAreaType, SizeResult, TouchObject, KeyEvent, KeyEventInternal, MouseEvent, MouseEventInternal, SourceTool, Rectangle_serializer, ShadowOptions_serializer, BackgroundBlurStyleOptions_serializer, BackgroundEffectOptions_serializer } from "./common"
+import { AnimateParam_serializer, TranslateOptions_serializer, KeyframeAnimateParam_serializer, KeyframeState_serializer, AnimateParam, TranslateOptions, KeyframeAnimateParam, KeyframeState, TouchEvent, TouchEventInternal, ClickEvent, ClickEventInternal, UICommonEvent, UICommonEventInternal, ItemDragEventHandler_serializer, OnMoveHandler, ItemDragEventHandler, PopupCommonOptions_serializer, MenuOptions_serializer, PopupCommonOptions, MenuOptions, ThemeColorMode, GeometryInfo, Measurable, Layoutable, Rectangle, ShadowOptions, ShadowStyle, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, KeyboardAvoidMode, HoverModeAreaType, SizeResult, TouchObject, KeyEvent, KeyEventInternal, MouseEvent, MouseEventInternal, SourceTool, Rectangle_serializer, ShadowOptions_serializer, BackgroundBlurStyleOptions_serializer, BackgroundEffectOptions_serializer, ChildrenMainSize_serializer, ChildrenMainSize, ChildrenMainSizeInternal, OnWillScrollCallback, OnScrollCallback } from "./common"
+import { ArkListOptions_serializer } from "./../framework/ohos.arkui.ArcList"
+import { ArkListOptions, ArcScrollIndexHandler } from "@ohos.arkui.ArcList"
+import { SwipeActionOptions_serializer, SwipeActionOptions } from "./listItem"
+import { ArcScrollBarOptions_serializer } from "./../framework/ohos.arkui.ArcScrollBar"
+import { ArcScrollBarOptions } from "@ohos.arkui.ArcScrollBar"
 import { Resource_serializer } from "./../framework/resource"
-import { SizeOptions_serializer, Length, SizeOptions, Position_serializer, Position, ResourceColor, ConstraintSizeOptions, Offset, Dimension, BorderRadiuses, EdgeWidths, EdgeColors, EdgeStyles, Offset_serializer, BorderRadiuses_serializer, EdgeWidths_serializer, EdgeColors_serializer, EdgeStyles_serializer } from "./units"
+import { VoidCallback, SizeOptions_serializer, Length, SizeOptions, Position_serializer, Position, ResourceColor, ConstraintSizeOptions, Offset, Dimension, BorderRadiuses, EdgeWidths, EdgeColors, EdgeStyles, Offset_serializer, BorderRadiuses_serializer, EdgeWidths_serializer, EdgeColors_serializer, EdgeStyles_serializer } from "./units"
 import { Resource } from "global.resource"
-import { Color, BorderStyle, AnimationPropertyType } from "./enums"
+import { CrownSensitivity, BarState, Color, BorderStyle, AnimationPropertyType } from "./enums"
 import { ContentModifier, extractors, hookRootAttributeModifier, AttributeModifier, AttributeUpdater, hookComponentRootAttributeModifier, hookCustomBuilderRootAttributeModifier, hookCustomLayoutRootAttributeModifier } from "#handwritten"
 import { ButtonConfiguration } from "./button"
 import { CheckBoxConfiguration } from "./checkbox"
@@ -41,10 +46,10 @@ import { SliderConfiguration } from "./slider"
 import { TextClockConfiguration } from "./textClock"
 import { TextTimerConfiguration } from "./textTimer"
 import { ToggleConfiguration } from "./toggle"
-import { Size_serializer, Frame_serializer, LengthMetrics_serializer, Vector2_serializer } from "./../Graphics"
+import { Size_serializer, Frame_serializer, LengthMetrics_serializer, ColorMetrics_serializer, Vector2_serializer } from "./../Graphics"
 import { LayoutConstraint_serializer } from "./../FrameNode"
 import { FrameNode, LayoutConstraint } from "arkui.FrameNode"
-import { Size, Frame, LengthMetrics, Vector2 } from "arkui.Graphics"
+import { Size, Frame, LengthMetrics, ColorMetrics, Vector2 } from "arkui.Graphics"
 import { PanDirection, SwipeDirection, GestureMode, GestureEvent, GestureEventInternal, GestureMask } from "./gesture"
 import { default as image } from "@ohos.multimedia.image"
 import { font_FontOptions_serializer, font_FontInfo_serializer } from "./../framework/ohos.font"
@@ -66,6 +71,8 @@ import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { default as curves } from "@ohos.curves"
+import { Scroller, Scroller_serializer } from "./scroll"
+import { ComponentContentBase } from "arkui.ComponentContent"
 import { CustomDialogController } from "./customDialogController"
 import { LevelMode, ImmersiveMode, LevelOrder } from "@ohos.promptAction"
 import { ParticleUpdater, ParticleColorOptions, VelocityOptions, EmitterParticleOptions, ParticleEmitterShape, DistributionType, DisturbanceFieldShape, ParticleColorOptions_serializer, EmitterParticleOptions_serializer, VelocityOptions_serializer } from "./particle"
@@ -75,6 +82,7 @@ import { ComponentRootModifier } from "./../ComponentRootModifier"
 import { CustomBuilderRootModifier } from "./../CustomBuilderRootModifier"
 import { CustomLayoutRootModifier } from "./../CustomLayoutRootModifier"
 import { GlobalScope } from "./../framework/GlobalScope"
+import { ComponentContentBase_serializer } from "./../ComponentContent"
 import { curves_ICurve_serializer } from "./../framework/ohos.curves"
 import { LevelOrder_serializer } from "./../framework/ohos.promptAction"
 export class ActionSheet {
@@ -227,6 +235,445 @@ export class AnimationExtender {
         return
     }
 }
+export class ArcListExtender {
+    static arcListConstructor_serialize(id: int32): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._ArcListExtender_arcListConstructor(id)
+        return retval
+    }
+    static setArkListOptions_serialize(node: KPointer, options?: ArkListOptions): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue  = options!
+            ArkListOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ArcListExtender_setArkListOptions(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static digitalCrownSensitivity_serialize(node: KPointer, sensitivity?: CrownSensitivity): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (sensitivity !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const sensitivityTmpValue  = (sensitivity as CrownSensitivity)
+            thisSerializer.writeInt32(sensitivityTmpValue.valueOf())
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ArcListExtender_digitalCrownSensitivity(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static space_serialize(node: KPointer, space?: LengthMetrics): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (space !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const spaceTmpValue  = space!
+            LengthMetrics_serializer.write(thisSerializer, spaceTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ArcListExtender_space(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static scrollBar_serialize(node: KPointer, status?: BarState): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (status !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const statusTmpValue  = (status as BarState)
+            thisSerializer.writeInt32(statusTmpValue.valueOf())
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ArcListExtender_scrollBar(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static scrollBarColor_serialize(node: KPointer, color?: ColorMetrics): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (color !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const colorTmpValue  = color!
+            ColorMetrics_serializer.write(thisSerializer, colorTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ArcListExtender_scrollBarColor(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static scrollBarWidth_serialize(node: KPointer, width?: LengthMetrics): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (width !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const widthTmpValue  = width!
+            LengthMetrics_serializer.write(thisSerializer, widthTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ArcListExtender_scrollBarWidth(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static cachedCount_serialize(node: KPointer, count?: int32): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (count !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const countTmpValue  = count!
+            thisSerializer.writeInt32(countTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ArcListExtender_cachedCount(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static chainAnimation_serialize(node: KPointer, enable?: boolean): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (enable !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const enableTmpValue  = enable!
+            thisSerializer.writeBoolean(enableTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ArcListExtender_chainAnimation(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static childrenMainSize_serialize(node: KPointer, size?: ChildrenMainSize): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (size !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const sizeTmpValue  = size!
+            ChildrenMainSize_serializer.write(thisSerializer, sizeTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ArcListExtender_childrenMainSize(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static enableScrollInteraction_serialize(node: KPointer, enable?: boolean): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (enable !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const enableTmpValue  = enable!
+            thisSerializer.writeBoolean(enableTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ArcListExtender_enableScrollInteraction(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static fadingEdge_serialize(node: KPointer, enable?: boolean): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (enable !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const enableTmpValue  = enable!
+            thisSerializer.writeBoolean(enableTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ArcListExtender_fadingEdge(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static friction_serialize(node: KPointer, friction?: double): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (friction !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const frictionTmpValue  = friction!
+            thisSerializer.writeFloat64(frictionTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ArcListExtender_friction(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static flingSpeedLimit_serialize(node: KPointer, speed?: double): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (speed !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const speedTmpValue  = speed!
+            thisSerializer.writeFloat64(speedTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ArcListExtender_flingSpeedLimit(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static onScrollIndex_serialize(node: KPointer, handler?: ArcScrollIndexHandler): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (handler !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const handlerTmpValue  = handler!
+            thisSerializer.holdAndWriteCallback(handlerTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ArcListExtender_onScrollIndex(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static onReachStart_serialize(node: KPointer, handler?: VoidCallback): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (handler !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const handlerTmpValue  = handler!
+            thisSerializer.holdAndWriteCallback(handlerTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ArcListExtender_onReachStart(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static onReachEnd_serialize(node: KPointer, handler?: VoidCallback): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (handler !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const handlerTmpValue  = handler!
+            thisSerializer.holdAndWriteCallback(handlerTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ArcListExtender_onReachEnd(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static onScrollStart_serialize(node: KPointer, handler?: VoidCallback): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (handler !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const handlerTmpValue  = handler!
+            thisSerializer.holdAndWriteCallback(handlerTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ArcListExtender_onScrollStart(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static onScrollStop_serialize(node: KPointer, handler?: VoidCallback): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (handler !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const handlerTmpValue  = handler!
+            thisSerializer.holdAndWriteCallback(handlerTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ArcListExtender_onScrollStop(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static onWillScroll_serialize(node: KPointer, handler?: OnWillScrollCallback): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (handler !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const handlerTmpValue  = handler!
+            thisSerializer.holdAndWriteCallback(handlerTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ArcListExtender_onWillScroll(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static onDidScroll_serialize(node: KPointer, handler?: OnScrollCallback): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (handler !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const handlerTmpValue  = handler!
+            thisSerializer.holdAndWriteCallback(handlerTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ArcListExtender_onDidScroll(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    public static arcListConstructor(id: int32): KPointer {
+        const id_casted = id as (int32)
+        return ArcListExtender.arcListConstructor_serialize(id_casted)
+    }
+    public static setArkListOptions(node: KPointer, options?: ArkListOptions): void {
+        const node_casted = node as (KPointer)
+        const options_casted = options as (ArkListOptions | undefined)
+        ArcListExtender.setArkListOptions_serialize(node_casted, options_casted)
+        return
+    }
+    public static digitalCrownSensitivity(node: KPointer, sensitivity?: CrownSensitivity): void {
+        const node_casted = node as (KPointer)
+        const sensitivity_casted = sensitivity as (CrownSensitivity | undefined)
+        ArcListExtender.digitalCrownSensitivity_serialize(node_casted, sensitivity_casted)
+        return
+    }
+    public static space(node: KPointer, space?: LengthMetrics): void {
+        const node_casted = node as (KPointer)
+        const space_casted = space as (LengthMetrics | undefined)
+        ArcListExtender.space_serialize(node_casted, space_casted)
+        return
+    }
+    public static scrollBar(node: KPointer, status?: BarState): void {
+        const node_casted = node as (KPointer)
+        const status_casted = status as (BarState | undefined)
+        ArcListExtender.scrollBar_serialize(node_casted, status_casted)
+        return
+    }
+    public static scrollBarColor(node: KPointer, color?: ColorMetrics): void {
+        const node_casted = node as (KPointer)
+        const color_casted = color as (ColorMetrics | undefined)
+        ArcListExtender.scrollBarColor_serialize(node_casted, color_casted)
+        return
+    }
+    public static scrollBarWidth(node: KPointer, width?: LengthMetrics): void {
+        const node_casted = node as (KPointer)
+        const width_casted = width as (LengthMetrics | undefined)
+        ArcListExtender.scrollBarWidth_serialize(node_casted, width_casted)
+        return
+    }
+    public static cachedCount(node: KPointer, count?: int32): void {
+        const node_casted = node as (KPointer)
+        const count_casted = count as (int32 | undefined)
+        ArcListExtender.cachedCount_serialize(node_casted, count_casted)
+        return
+    }
+    public static chainAnimation(node: KPointer, enable?: boolean): void {
+        const node_casted = node as (KPointer)
+        const enable_casted = enable as (boolean | undefined)
+        ArcListExtender.chainAnimation_serialize(node_casted, enable_casted)
+        return
+    }
+    public static childrenMainSize(node: KPointer, size?: ChildrenMainSize): void {
+        const node_casted = node as (KPointer)
+        const size_casted = size as (ChildrenMainSize | undefined)
+        ArcListExtender.childrenMainSize_serialize(node_casted, size_casted)
+        return
+    }
+    public static enableScrollInteraction(node: KPointer, enable?: boolean): void {
+        const node_casted = node as (KPointer)
+        const enable_casted = enable as (boolean | undefined)
+        ArcListExtender.enableScrollInteraction_serialize(node_casted, enable_casted)
+        return
+    }
+    public static fadingEdge(node: KPointer, enable?: boolean): void {
+        const node_casted = node as (KPointer)
+        const enable_casted = enable as (boolean | undefined)
+        ArcListExtender.fadingEdge_serialize(node_casted, enable_casted)
+        return
+    }
+    public static friction(node: KPointer, friction?: double): void {
+        const node_casted = node as (KPointer)
+        const friction_casted = friction as (double | undefined)
+        ArcListExtender.friction_serialize(node_casted, friction_casted)
+        return
+    }
+    public static flingSpeedLimit(node: KPointer, speed?: double): void {
+        const node_casted = node as (KPointer)
+        const speed_casted = speed as (double | undefined)
+        ArcListExtender.flingSpeedLimit_serialize(node_casted, speed_casted)
+        return
+    }
+    public static onScrollIndex(node: KPointer, handler?: ArcScrollIndexHandler): void {
+        const node_casted = node as (KPointer)
+        const handler_casted = handler as (ArcScrollIndexHandler | undefined)
+        ArcListExtender.onScrollIndex_serialize(node_casted, handler_casted)
+        return
+    }
+    public static onReachStart(node: KPointer, handler?: VoidCallback): void {
+        const node_casted = node as (KPointer)
+        const handler_casted = handler as (VoidCallback | undefined)
+        ArcListExtender.onReachStart_serialize(node_casted, handler_casted)
+        return
+    }
+    public static onReachEnd(node: KPointer, handler?: VoidCallback): void {
+        const node_casted = node as (KPointer)
+        const handler_casted = handler as (VoidCallback | undefined)
+        ArcListExtender.onReachEnd_serialize(node_casted, handler_casted)
+        return
+    }
+    public static onScrollStart(node: KPointer, handler?: VoidCallback): void {
+        const node_casted = node as (KPointer)
+        const handler_casted = handler as (VoidCallback | undefined)
+        ArcListExtender.onScrollStart_serialize(node_casted, handler_casted)
+        return
+    }
+    public static onScrollStop(node: KPointer, handler?: VoidCallback): void {
+        const node_casted = node as (KPointer)
+        const handler_casted = handler as (VoidCallback | undefined)
+        ArcListExtender.onScrollStop_serialize(node_casted, handler_casted)
+        return
+    }
+    public static onWillScroll(node: KPointer, handler?: OnWillScrollCallback): void {
+        const node_casted = node as (KPointer)
+        const handler_casted = handler as (OnWillScrollCallback | undefined)
+        ArcListExtender.onWillScroll_serialize(node_casted, handler_casted)
+        return
+    }
+    public static onDidScroll(node: KPointer, handler?: OnScrollCallback): void {
+        const node_casted = node as (KPointer)
+        const handler_casted = handler as (OnScrollCallback | undefined)
+        ArcListExtender.onDidScroll_serialize(node_casted, handler_casted)
+        return
+    }
+}
+export class ArcListItemExtender {
+    static arcListItemConstructor_serialize(id: int32): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._ArcListItemExtender_arcListItemConstructor(id)
+        return retval
+    }
+    static autoScale_serialize(node: KPointer, enable?: boolean): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (enable !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const enableTmpValue  = enable!
+            thisSerializer.writeBoolean(enableTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ArcListItemExtender_autoScale(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static swipeAction_serialize(node: KPointer, options?: SwipeActionOptions): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue  = options!
+            SwipeActionOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ArcListItemExtender_swipeAction(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    public static arcListItemConstructor(id: int32): KPointer {
+        const id_casted = id as (int32)
+        return ArcListItemExtender.arcListItemConstructor_serialize(id_casted)
+    }
+    public static autoScale(node: KPointer, enable?: boolean): void {
+        const node_casted = node as (KPointer)
+        const enable_casted = enable as (boolean | undefined)
+        ArcListItemExtender.autoScale_serialize(node_casted, enable_casted)
+        return
+    }
+    public static swipeAction(node: KPointer, options?: SwipeActionOptions): void {
+        const node_casted = node as (KPointer)
+        const options_casted = options as (SwipeActionOptions | undefined)
+        ArcListItemExtender.swipeAction_serialize(node_casted, options_casted)
+        return
+    }
+}
+export class ArcScrollBarExtender {
+    static arcScrollBarConstructor_serialize(id: int32): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._ArcScrollBarExtender_arcScrollBarConstructor(id)
+        return retval
+    }
+    static setArcScrollBarOptions_serialize(node: KPointer, options: ArcScrollBarOptions): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        ArcScrollBarOptions_serializer.write(thisSerializer, options)
+        ArkUIGeneratedNativeModule._ArcScrollBarExtender_setArcScrollBarOptions(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    public static arcScrollBarConstructor(id: int32): KPointer {
+        const id_casted = id as (int32)
+        return ArcScrollBarExtender.arcScrollBarConstructor_serialize(id_casted)
+    }
+    public static setArcScrollBarOptions(node: KPointer, options: ArcScrollBarOptions): void {
+        const node_casted = node as (KPointer)
+        const options_casted = options as (ArcScrollBarOptions)
+        ArcScrollBarExtender.setArcScrollBarOptions_serialize(node_casted, options_casted)
+        return
+    }
+}
+
 export class BaseShapeInternal {
     public static fromPtr(ptr: KPointer): BaseShape {
         return new BaseShape(ptr)

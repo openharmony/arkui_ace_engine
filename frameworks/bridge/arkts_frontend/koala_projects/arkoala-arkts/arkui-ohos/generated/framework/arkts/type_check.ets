@@ -144,6 +144,8 @@ import { default as cert } from "@ohos.security.cert"
 import { default as print } from "@ohos.print"
 import { default as window } from "@ohos.window"
 import { WindowSize, AbilityInfo } from "bundleManager.AbilityInfo"
+import { ArcScrollBarOptions } from "@ohos.arkui.ArcScrollBar"
+import { ArkListOptions } from "@ohos.arkui.ArcList"
 import { ASTCResource } from "./../../component/mediaCachedImage"
 import { Initializer } from "./../../AttributeUpdater"
 import { CheckBoxConfiguration, CheckboxOptions } from "./../../component/checkbox"
@@ -287,8 +289,14 @@ export class TypeChecker {
     static isAppRotation(value: Object | string | number | undefined): boolean {
         return value instanceof AppRotation
     }
+    static isArcScrollBarOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof ArcScrollBarOptions
+    }
     static isArea(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean): boolean {
         return value instanceof Area
+    }
+    static isArkListOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
+        return value instanceof ArkListOptions
     }
     static isArrowPointPosition(value: Object | string | number | undefined): boolean {
         return value instanceof ArrowPointPosition
