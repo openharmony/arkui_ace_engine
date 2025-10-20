@@ -83,15 +83,12 @@ void IndicatorModelStatic::SetDotIndicatorStyle(FrameNode* frameNode, const Swip
     pattern->SetSwiperParameters(swiperParameters);
 }
 
-void IndicatorModelStatic::SetOnChange(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& onChange)
+void IndicatorModelStatic::SetOnChange(FrameNode* frameNode, ChangeEvent&& onChange)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<IndicatorPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->UpdateChangeEvent([event = std::move(onChange)](int32_t index) {
-        SwiperChangeEvent eventInfo(index);
-        event(&eventInfo);
-    });
+    pattern->UpdateChangeEvent(std::move(onChange));
 }
 
 void IndicatorModelStatic::SetIsIndicatorCustomSize(FrameNode* frameNode, bool isCustomSize)

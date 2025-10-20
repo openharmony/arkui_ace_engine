@@ -1386,6 +1386,8 @@ void ViewAbstractModelStatic::SetFocusBoxStyle(FrameNode* frameNode, const std::
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     if (!style.has_value()) {
+        FocusBoxStyle paintStyle;
+        focusHub->GetFocusBox().SetStyle(paintStyle);
         return;
     }
     focusHub->GetFocusBox().SetStyle(style.value());
@@ -1494,12 +1496,9 @@ void ViewAbstractModelStatic::SetClickEffectLevel(FrameNode* frameNode,
         }
         ACE_UPDATE_NODE_RENDER_CONTEXT(ClickEffectLevel, clickEffectInfo, frameNode);
     } else {
-        CHECK_NULL_VOID(frameNode);
-        auto renderContext = frameNode->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        renderContext->ResetClickEffectLevel();
-        ClickEffectInfo info;
-        renderContext->OnClickEffectLevelUpdate(info);
+        ClickEffectInfo clickEffectInfo;
+        clickEffectInfo.level = ClickEffectLevel::UNDEFINED;
+        ACE_UPDATE_NODE_RENDER_CONTEXT(ClickEffectLevel, clickEffectInfo, frameNode);
     }
 }
 
@@ -1657,6 +1656,11 @@ void ViewAbstractModelStatic::SetBackgroundImageRepeat(FrameNode* frameNode,
         ImageRepeat repeat = ImageRepeat::NO_REPEAT;
         renderContext->OnBackgroundImageRepeatUpdate(repeat);
     }
+}
+
+void ViewAbstractModelStatic::SetBackgroundImageSyncMode(FrameNode* frameNode, bool syncMode)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImageSyncMode, syncMode, frameNode);
 }
 
 void ViewAbstractModelStatic::SetSystemBarEffect(FrameNode* frameNode, bool systemBarEffect)

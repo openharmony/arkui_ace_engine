@@ -88,7 +88,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern003, TestSize.Level1)
 
 /**
  * @tc.name: TextPattern004
- * @tc.desc: Test TextPattern HandleExtendAction
+ * @tc.desc: Test TextPattern HandleExtendAction.
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTest, TextPattern004, TestSize.Level1)

@@ -294,7 +294,8 @@ void SetCustomNavContentTransitionImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // Implement Reset value
+        NavigationModelStatic::SetIsCustomAnimation(frameNode, false);
+        NavigationModelStatic::SetCustomTransition(frameNode, nullptr);
         return;
     }
     auto onNavigationAnimation = [callback = CallbackHelper(*optValue)](RefPtr<NG::NavDestinationContext> from,
@@ -517,6 +518,9 @@ void SetMenusImpl(Ark_NativePointer node,
                 NavigationModelStatic::SetCustomMenu(frameNode, std::move(uiNode));
             }, node);
         }
+    } else {
+        std::vector<NG::BarItem> emptyVector;
+        NavigationModelStatic::SetMenuItems(frameNode, std::move(emptyVector));
     }
     if (options->tag != InteropTag::INTEROP_TAG_UNDEFINED &&
         options->value.moreButtonOptions.tag != InteropTag::INTEROP_TAG_UNDEFINED) {

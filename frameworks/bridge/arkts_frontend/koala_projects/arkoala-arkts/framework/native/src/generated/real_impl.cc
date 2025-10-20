@@ -1154,7 +1154,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetItemBorderRadiusImpl(Ark_NativePointer node,
-                                 const Opt_Number* value)
+                                 const Opt_Float64* value)
     {
     }
     void SetPopupBackgroundBlurStyleImpl(Ark_NativePointer node,
@@ -1620,7 +1620,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetBackgroundColorImpl(Ark_NativePointer node,
-                                const Opt_ResourceColor* value)
+                                const Opt_Union_ResourceColor_ColorMetrics* value)
     {
     }
     void SetPixelRoundImpl(Ark_NativePointer node,
@@ -2198,13 +2198,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetBackgroundImage0Impl(Ark_NativePointer node,
-                                 const Opt_Union_ResourceStr_PixelMap* src,
-                                 const Opt_ImageRepeat* repeat)
+                                 const Opt_Union_ResourceStr_PixelMap* value)
     {
     }
     void SetBackgroundImage1Impl(Ark_NativePointer node,
                                  const Opt_Union_ResourceStr_PixelMap* src,
                                  const Opt_BackgroundImageOptions* options)
+    {
+    }
+    void SetBackgroundImage2Impl(Ark_NativePointer node,
+                                 const Opt_Union_ResourceStr_PixelMap* src,
+                                 const Opt_ImageRepeat* repeat)
     {
     }
     void SetBackgroundBlurStyleImpl(Ark_NativePointer node,
@@ -8426,6 +8430,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetBackgroundImpl,
             CommonMethodModifier::SetBackgroundImage0Impl,
             CommonMethodModifier::SetBackgroundImage1Impl,
+            CommonMethodModifier::SetBackgroundImage2Impl,
             CommonMethodModifier::SetBackgroundBlurStyleImpl,
             CommonMethodModifier::SetBackgroundEffect1Impl,
             CommonMethodModifier::SetForegroundBlurStyleImpl,
@@ -11818,12 +11823,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                      const Opt_InteractionHand* hand)
     {
     }
-    Callback_Void GetPreventDefaultImpl(Ark_ClickEvent peer)
-    {
-        return {};
-    }
-    void SetPreventDefaultImpl(Ark_ClickEvent peer,
-                               const Callback_Void* preventDefault)
+    void PreventDefaultImpl(Ark_ClickEvent peer)
     {
     }
     } // ClickEventAccessor
@@ -13404,12 +13404,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                          const Opt_Float64* displayY)
     {
     }
-    Callback_Void GetStopPropagationImpl(Ark_HoverEvent peer)
-    {
-        return {};
-    }
-    void SetStopPropagationImpl(Ark_HoverEvent peer,
-                                const Callback_Void* stopPropagation)
+    void StopPropagationImpl(Ark_HoverEvent peer)
     {
     }
     } // HoverEventAccessor
@@ -15414,8 +15409,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             delete peerImpl;
         }
     }
-    Ark_ProgressMask ConstructImpl(const Ark_Number* value,
-                                   const Ark_Number* total,
+    Ark_ProgressMask ConstructImpl(Ark_Float64 value,
+                                   Ark_Float64 total,
                                    const Ark_ResourceColor* color)
     {
         return {};
@@ -15425,7 +15420,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
     void UpdateProgressImpl(Ark_ProgressMask peer,
-                            const Ark_Number* value)
+                            Ark_Float64 value)
     {
     }
     void UpdateColorImpl(Ark_ProgressMask peer,
@@ -17403,20 +17398,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                const Array_TouchObject* changedTouches)
     {
     }
-    Callback_Void GetStopPropagationImpl(Ark_TouchEvent peer)
-    {
-        return {};
-    }
-    void SetStopPropagationImpl(Ark_TouchEvent peer,
-                                const Callback_Void* stopPropagation)
+    void StopPropagationImpl(Ark_TouchEvent peer)
     {
     }
-    Callback_Void GetPreventDefaultImpl(Ark_TouchEvent peer)
-    {
-        return {};
-    }
-    void SetPreventDefaultImpl(Ark_TouchEvent peer,
-                               const Callback_Void* preventDefault)
+    void PreventDefaultImpl(Ark_TouchEvent peer)
     {
     }
     } // TouchEventAccessor
@@ -18635,8 +18620,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             ClickEventAccessor::SetYImpl,
             ClickEventAccessor::GetHandImpl,
             ClickEventAccessor::SetHandImpl,
-            ClickEventAccessor::GetPreventDefaultImpl,
-            ClickEventAccessor::SetPreventDefaultImpl,
+            ClickEventAccessor::PreventDefaultImpl,
         };
         return &ClickEventAccessorImpl;
     }
@@ -19367,8 +19351,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             HoverEventAccessor::SetDisplayXImpl,
             HoverEventAccessor::GetDisplayYImpl,
             HoverEventAccessor::SetDisplayYImpl,
-            HoverEventAccessor::GetStopPropagationImpl,
-            HoverEventAccessor::SetStopPropagationImpl,
+            HoverEventAccessor::StopPropagationImpl,
         };
         return &HoverEventAccessorImpl;
     }
@@ -21167,10 +21150,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TouchEventAccessor::SetTouchesImpl,
             TouchEventAccessor::GetChangedTouchesImpl,
             TouchEventAccessor::SetChangedTouchesImpl,
-            TouchEventAccessor::GetStopPropagationImpl,
-            TouchEventAccessor::SetStopPropagationImpl,
-            TouchEventAccessor::GetPreventDefaultImpl,
-            TouchEventAccessor::SetPreventDefaultImpl,
+            TouchEventAccessor::StopPropagationImpl,
+            TouchEventAccessor::PreventDefaultImpl,
         };
         return &TouchEventAccessorImpl;
     }

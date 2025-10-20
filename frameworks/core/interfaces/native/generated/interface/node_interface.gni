@@ -278,6 +278,7 @@ generated_sources = [
   "implementation/text_content_controller_base_accessor.cpp",
   "implementation/text_controller_accessor.cpp",
   "implementation/text_edit_controller_ex_accessor.cpp",
+  "implementation/text_field_modifier.cpp",
   "implementation/text_field_ops_accessor.cpp",
   "implementation/text_input_controller_accessor.cpp",
   "implementation/text_input_modifier.cpp",

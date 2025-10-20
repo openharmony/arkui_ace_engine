@@ -158,20 +158,12 @@ void SetDisplayYImpl(Ark_HoverEvent peer,
     location.SetY(value, location.GetYAnimationOption());
     info->SetScreenLocation(location);
 }
-Callback_Void GetStopPropagationImpl(Ark_HoverEvent peer)
+void StopPropagationImpl(Ark_HoverEvent peer)
 {
-    CHECK_NULL_RETURN(peer, {});
-    auto callback = CallbackKeeper::DefineReverseCallback<Callback_Void>([peer]() {
-        HoverInfo* info = peer->GetEventInfo();
-        CHECK_NULL_VOID(info);
-        info->SetStopPropagation(true);
-    });
-    return callback;
-}
-void SetStopPropagationImpl(Ark_HoverEvent peer,
-                            const Callback_Void* stopPropagation)
-{
-    LOGE("HoverEventAccessor::SetStopPropagationImpl we can only GET stopPropagation callback");
+    CHECK_NULL_VOID(peer);
+    HoverInfo* info = peer->GetEventInfo();
+    CHECK_NULL_VOID(info);
+    info->SetStopPropagation(true);
 }
 } // HoverEventAccessor
 const GENERATED_ArkUIHoverEventAccessor* GetHoverEventAccessor()
@@ -192,8 +184,7 @@ const GENERATED_ArkUIHoverEventAccessor* GetHoverEventAccessor()
         HoverEventAccessor::SetDisplayXImpl,
         HoverEventAccessor::GetDisplayYImpl,
         HoverEventAccessor::SetDisplayYImpl,
-        HoverEventAccessor::GetStopPropagationImpl,
-        HoverEventAccessor::SetStopPropagationImpl,
+        HoverEventAccessor::StopPropagationImpl,
     };
     return &HoverEventAccessorImpl;
 }

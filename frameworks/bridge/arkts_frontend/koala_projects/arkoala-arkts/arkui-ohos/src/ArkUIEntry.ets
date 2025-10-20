@@ -13,31 +13,31 @@
  * limitations under the License.
  */
 
-import { memo } from "@koalaui/runtime/annotations"
-import { ComputableState, IncrementalNode, GlobalStateManager, StateManager, memoEntry, MutableState, createAnimationTimer, callScheduledCallbacks, RuntimeProfiler } from "@koalaui/runtime"
+import { memo } from '@koalaui/runtime/annotations';
+import { ComputableState, IncrementalNode, GlobalStateManager, StateManager, memoEntry, MutableState, createAnimationTimer, callScheduledCallbacks, RuntimeProfiler } from '@koalaui/runtime';
 import { StateContext } from 'arkui.incremental.runtime.state';
-import { int32, int64 } from "@koalaui/common"
-import { DeserializerBase, pointer, nullptr, KPointer, InteropNativeModule, registerNativeModuleLibraryName, KSerializerBuffer, wrapSystemApiHandlerCallback, loadNativeModuleLibrary } from "@koalaui/interop"
-import { PeerNode } from "./PeerNode"
-import { ArkUINativeModule } from "#components"
-import { EventEmulator } from "#generated"
-import { UserView, UserViewBuilder } from "./UserView"
+import { int32, int64 } from '@koalaui/common';
+import { DeserializerBase, pointer, nullptr, KPointer, InteropNativeModule, registerNativeModuleLibraryName, KSerializerBuffer, wrapSystemApiHandlerCallback, loadNativeModuleLibrary } from '@koalaui/interop';
+import { PeerNode } from './PeerNode';
+import { ArkUINativeModule } from '#components';
+import { EventEmulator } from '#generated';
+import { UserView, UserViewBuilder } from './UserView';
 import { EntryPoint } from './component/customComponent';
-import { ClickEvent, ClickEventInternal } from "#generated"
-import { setCustomEventsChecker } from "./Events"
-import { checkArkoalaCallbacks } from "./CallbacksChecker"
-import { setUIDetachedRootCreator } from "./CallbackTransformer"
-import { enterForeignContext, leaveForeignContext } from "./base"
-import { checkEvents, wrapSystemCallback, KUint8ArrayPtr } from "@koalaui/interop"
-import { Routed } from "./base"
-import router from "@ohos/router"
-import { updateLazyItems } from "arkui/base/LazyForEachImpl"
-import { UIContextImpl, ContextRecord, DetachedRootEntryManager, DetachedRootEntry } from "arkui/base/UIContextImpl"
-import { UIContextUtil } from "arkui/base/UIContextUtil"
-import { registerArkuiApiHandler } from "./framework/peers/CallbackDeserializeCall"
-import { ObserveSingleton } from './stateManagement/base/observeSingleton'
-import { StateUpdateLoop } from './stateManagement'
-import { AceTrace } from 'arkui/base/AceTrace'
+import { ClickEvent, ClickEventInternal } from '#generated';
+import { setCustomEventsChecker } from './Events';
+import { checkArkoalaCallbacks } from './CallbacksChecker';
+import { setUIDetachedRootCreator } from './CallbackTransformer';
+import { enterForeignContext, leaveForeignContext } from './base';
+import { checkEvents, wrapSystemCallback, KUint8ArrayPtr } from '@koalaui/interop';
+import { Routed } from './base';
+import router from '@ohos/router';
+import { updateLazyItems } from "arkui/base/LazyForEachImpl";
+import { UIContextImpl, ContextRecord, DetachedRootEntryManager, DetachedRootEntry } from 'arkui/base/UIContextImpl';
+import { UIContextUtil } from 'arkui/base/UIContextUtil';
+import { registerArkuiApiHandler } from './framework/peers/CallbackDeserializeCall';
+import { ObserveSingleton } from './stateManagement/base/observeSingleton';
+import { StateUpdateLoop } from './stateManagement';
+import { AceTrace } from 'arkui/base/AceTrace';
 
 setCustomEventsChecker(checkArkoalaCallbacks)
 

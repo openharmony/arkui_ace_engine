@@ -65,6 +65,7 @@
 #include "core/interfaces/native/implementation/swipe_recognizer_peer.h"
 #include "core/interfaces/native/implementation/tap_gesture_event_peer.h"
 #include "core/interfaces/native/implementation/tap_recognizer_peer.h"
+#include "core/interfaces/native/implementation/text_field_modifier.h"
 #include "core/interfaces/native/implementation/transition_effect_peer_impl.h"
 #include "frameworks/core/interfaces/native/implementation/bind_sheet_utils.h"
 #include "base/log/log_wrapper.h"
@@ -1849,6 +1850,10 @@ void SetWidthImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetTag() == V2::TEXTINPUT_ETS_TAG || frameNode->GetTag() == V2::TEXTAREA_ETS_TAG) {
+        TextFieldModifier::SetWidthImpl(node, value);
+        return;
+    }
     Converter::VisitUnionPtr(value,
         [frameNode](const Ark_Length& src) {
             auto result = Converter::OptConvert<CalcDimension>(src);
@@ -1883,6 +1888,10 @@ void SetHeightImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetTag() == V2::TEXTINPUT_ETS_TAG || frameNode->GetTag() == V2::TEXTAREA_ETS_TAG) {
+        TextFieldModifier::SetHeightImpl(node, value);
+        return;
+    }
     Converter::VisitUnionPtr(value,
         [frameNode](const Ark_Length& src) {
             auto result = Converter::OptConvert<CalcDimension>(src);
@@ -1934,7 +1943,7 @@ void SetMouseResponseRegionImpl(Ark_NativePointer node,
     if (auto convArray = Converter::OptConvertPtr<std::vector<DimensionRect>>(value); convArray) {
         ViewAbstract::SetMouseResponseRegion(frameNode, *convArray);
     } else {
-        ViewAbstract::SetMouseResponseRegion(frameNode, { DimensionRect() });
+        ViewAbstract::SetMouseResponseRegion(frameNode, {});
     }
 }
 void SetSizeImpl(Ark_NativePointer node,
@@ -2049,7 +2058,11 @@ void SetPaddingImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstractModelStatic::SetPadding(frameNode, Converter::OptConvertPtr<PaddingProperty>(value));
+    if (frameNode->GetTag() == V2::TEXTINPUT_ETS_TAG || frameNode->GetTag() == V2::TEXTAREA_ETS_TAG) {
+        TextFieldModifier::SetPaddingImpl(node, value);
+    } else {
+        ViewAbstractModelStatic::SetPadding(frameNode, Converter::OptConvertPtr<PaddingProperty>(value));
+    }
 }
 void SetSafeAreaPaddingImpl(Ark_NativePointer node,
                             const Opt_Union_Padding_LengthMetrics_LocalizedPadding* value)
@@ -2078,10 +2091,14 @@ void SetMarginImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstractModelStatic::SetMargin(frameNode, Converter::OptConvertPtr<PaddingProperty>(value));
+    if (frameNode->GetTag() == V2::TEXTINPUT_ETS_TAG || frameNode->GetTag() == V2::TEXTAREA_ETS_TAG) {
+        TextFieldModifier::SetMarginImpl(node, value);
+    } else {
+        ViewAbstractModelStatic::SetMargin(frameNode, Converter::OptConvertPtr<PaddingProperty>(value));
+    }
 }
 void SetBackgroundColorImpl(Ark_NativePointer node,
-                            const Opt_ResourceColor* value)
+                            const Opt_Union_ResourceColor_ColorMetrics* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -2091,6 +2108,8 @@ void SetBackgroundColorImpl(Ark_NativePointer node,
     }
     if (frameNode->GetTag() == V2::SELECT_ETS_TAG) {
         SelectModelStatic::SetBackgroundColor(frameNode, colorValue);
+    } else if (frameNode->GetTag() == V2::TEXTINPUT_ETS_TAG || frameNode->GetTag() == V2::TEXTAREA_ETS_TAG) {
+        TextFieldModifier::SetBackgroundColorImpl(node, value);
     } else {
         ViewAbstractModelStatic::SetBackgroundColor(frameNode, colorValue);
     }
@@ -2264,6 +2283,10 @@ void SetBorderImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetTag() == V2::TEXTINPUT_ETS_TAG || frameNode->GetTag() == V2::TEXTAREA_ETS_TAG) {
+        TextFieldModifier::SetBorderImpl(node, value);
+        return;
+    }
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
         ViewAbstract::SetBorderWidth(frameNode, Dimension(0));
@@ -2299,6 +2322,10 @@ void SetBorderStyleImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetTag() == V2::TEXTINPUT_ETS_TAG || frameNode->GetTag() == V2::TEXTAREA_ETS_TAG) {
+        TextFieldModifier::SetBorderStyleImpl(node, value);
+        return;
+    }
     auto style = Converter::OptConvertPtr<BorderStyleProperty>(value);
     if (!style) {
         ViewAbstract::SetBorderStyle(frameNode, BorderStyle::SOLID);
@@ -2311,6 +2338,10 @@ void SetBorderWidthImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetTag() == V2::TEXTINPUT_ETS_TAG || frameNode->GetTag() == V2::TEXTAREA_ETS_TAG) {
+        TextFieldModifier::SetBorderWidthImpl(node, value);
+        return;
+    }
     auto width = Converter::OptConvertPtr<BorderWidthProperty>(value);
     if (!width) {
         ViewAbstract::SetBorderWidth(frameNode, Dimension(0));
@@ -2323,6 +2354,10 @@ void SetBorderColorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetTag() == V2::TEXTINPUT_ETS_TAG || frameNode->GetTag() == V2::TEXTAREA_ETS_TAG) {
+        TextFieldModifier::SetBorderColorImpl(node, value);
+        return;
+    }
     auto color = Converter::OptConvertPtr<BorderColorProperty>(value);
     if (color) {
         ViewAbstractModelStatic::SetBorderColor(frameNode, color.value());
@@ -2333,6 +2368,10 @@ void SetBorderRadiusImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetTag() == V2::TEXTINPUT_ETS_TAG || frameNode->GetTag() == V2::TEXTAREA_ETS_TAG) {
+        TextFieldModifier::SetBorderRadiusImpl(node, value);
+        return;
+    }
     auto radiuses = Converter::OptConvertPtr<BorderRadiusProperty>(value);
     if (radiuses) {
         if (frameNode->GetTag() == V2::BUTTON_ETS_TAG) {
@@ -2880,7 +2919,10 @@ void SetFocusableImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        // Implement Reset value
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        auto focusable = pattern->GetFocusPattern().GetFocusable();
+        ViewAbstract::SetFocusable(frameNode, focusable);
         return;
     }
     ViewAbstract::SetFocusable(frameNode, *convValue);
@@ -3196,7 +3238,7 @@ void SetUseShadowBatchingImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        ViewAbstractModelNG::SetUseShadowBatching(frameNode, false);
+        ViewAbstractModelStatic::SetUseShadowBatching(frameNode, false);
         return;
     }
     ViewAbstractModelStatic::SetUseShadowBatching(frameNode, convValue);
@@ -4025,7 +4067,8 @@ void SetKeyImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<std::string>(value);
     if (!convValue) {
-        // keep the same processing
+        std::string defaultStr = "";
+        ViewAbstract::SetInspectorId(frameNode, defaultStr);
         return;
     }
     ViewAbstract::SetInspectorId(frameNode, *convValue);
@@ -4061,7 +4104,8 @@ void SetRestoreIdImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<int32_t>(value);
     if (!convValue) {
-        // Implement Reset value
+        int32_t index = -1;
+        ViewAbstract::SetRestoreId(frameNode, index);
         return;
     }
     ViewAbstract::SetRestoreId(frameNode, *convValue);
@@ -4590,6 +4634,34 @@ void SetBackgroundImpl(Ark_NativePointer node,
         }, node);
 }
 void SetBackgroundImage0Impl(Ark_NativePointer node,
+                             const Opt_Union_ResourceStr_PixelMap* src)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+
+    std::optional<ImageSourceInfo> sourceInfo = Converter::OptConvertPtr<ImageSourceInfo>(src);
+    ViewAbstractModelStatic::SetBackgroundImage(frameNode, sourceInfo);
+}
+void SetBackgroundImage1Impl(Ark_NativePointer node,
+                             const Opt_Union_ResourceStr_PixelMap* src,
+                             const Opt_BackgroundImageOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+
+    std::optional<ImageSourceInfo> sourceInfo = Converter::OptConvertPtr<ImageSourceInfo>(src);
+    ViewAbstractModelStatic::SetBackgroundImage(frameNode, sourceInfo);
+    CHECK_NULL_VOID(options);
+
+    auto syncLoad = static_cast<bool>(options->value.syncLoad.value);
+    ViewAbstractModelStatic::SetBackgroundImageSyncMode(frameNode, syncLoad);
+
+    auto imageRepeat = Converter::OptConvertPtr<ImageRepeat>(&options->value.repeat);
+    if (imageRepeat.has_value()) {
+        ViewAbstractModelStatic::SetBackgroundImageRepeat(frameNode, imageRepeat.value());
+    }
+}
+void SetBackgroundImage2Impl(Ark_NativePointer node,
                              const Opt_Union_ResourceStr_PixelMap* src,
                              const Opt_ImageRepeat* repeat)
 {
@@ -4601,13 +4673,6 @@ void SetBackgroundImage0Impl(Ark_NativePointer node,
 
     auto imageRepeat = Converter::OptConvertPtr<ImageRepeat>(repeat);
     ViewAbstractModelStatic::SetBackgroundImageRepeat(frameNode, imageRepeat);
-}
-void SetBackgroundImage1Impl(Ark_NativePointer node,
-                             const Opt_Union_ResourceStr_PixelMap* src,
-                             const Opt_BackgroundImageOptions* options)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
 }
 void SetBackgroundBlurStyleImpl(Ark_NativePointer node,
                                 const Opt_BlurStyle* style,
@@ -5363,10 +5428,24 @@ void SetOnVisibleAreaChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(event);
+    auto optEvent = Converter::GetOptPtr(event);
+    if (!optEvent) {
+        std::vector<double> ratioList;
+        ViewAbstract::SetOnVisibleChange(frameNode, nullptr, ratioList);
+        return;
+    }
+    auto weakNode = AceType::WeakClaim(frameNode);
+    auto onVisibleAreaChange =
+        [arkCallback = CallbackHelper(*optEvent), node = weakNode](bool visible, double ratio) {
+            Ark_Boolean isExpanding = Converter::ArkValue<Ark_Boolean>(visible);
+            Ark_Float64 currentRatio = Converter::ArkValue<Ark_Float64>(static_cast<float>(ratio));
+            PipelineContext::SetCallBackNode(node);
+            arkCallback.InvokeSync(isExpanding, currentRatio);
+        };
     auto rawRatioVec = Converter::OptConvertPtr<std::vector<double>>(ratios);
     if (!rawRatioVec) {
         std::vector<double> ratioList;
-        ViewAbstract::SetOnVisibleChange(frameNode, nullptr, ratioList);
+        ViewAbstract::SetOnVisibleChange(frameNode, std::move(onVisibleAreaChange), ratioList);
         return;
     }
     size_t size = rawRatioVec->size();
@@ -5382,19 +5461,6 @@ void SetOnVisibleAreaChangeImpl(Ark_NativePointer node,
         }
         ratioVec.push_back(ratio);
     }
-    auto optEvent = Converter::GetOptPtr(event);
-    if (!optEvent) {
-        ViewAbstract::SetOnVisibleChange(frameNode, nullptr, ratioVec);
-        return;
-    }
-    auto weakNode = AceType::WeakClaim(frameNode);
-    auto onVisibleAreaChange =
-        [arkCallback = CallbackHelper(*optEvent), node = weakNode](bool visible, double ratio) {
-            Ark_Boolean isExpanding = Converter::ArkValue<Ark_Boolean>(visible);
-            Ark_Float64 currentRatio = Converter::ArkValue<Ark_Float64>(static_cast<float>(ratio));
-            PipelineContext::SetCallBackNode(node);
-            arkCallback.InvokeSync(isExpanding, currentRatio);
-        };
     ViewAbstract::SetOnVisibleChange(frameNode, std::move(onVisibleAreaChange), ratioVec);
 }
 void SetOnVisibleAreaApproximateChangeImpl(Ark_NativePointer node,
@@ -5405,8 +5471,31 @@ void SetOnVisibleAreaApproximateChangeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
     CHECK_NULL_VOID(event);
+    auto expectedUpdateInterval =
+        Converter::OptConvert<int32_t>(options->value.expectedUpdateInterval).value_or(DEFAULT_DURATION);
+    if (expectedUpdateInterval < 0) {
+        expectedUpdateInterval = DEFAULT_DURATION;
+    }
+    auto optEvent = Converter::GetOptPtr(event);
+    if (!optEvent) {
+        std::vector<double> ratioList;
+        ViewAbstract::SetOnVisibleAreaApproximateChange(
+            frameNode, nullptr, ratioList, expectedUpdateInterval);
+        return;
+    }
+    auto weakNode = AceType::WeakClaim(frameNode);
+    auto onVisibleAreaChange =
+        [arkCallback = CallbackHelper(*optEvent), node = weakNode](bool visible, double ratio) {
+            Ark_Boolean isExpanding = Converter::ArkValue<Ark_Boolean>(visible);
+            Ark_Float64 currentRatio = Converter::ArkValue<Ark_Float64>(static_cast<float>(ratio));
+            PipelineContext::SetCallBackNode(node);
+            arkCallback.InvokeSync(isExpanding, currentRatio);
+        };
     auto rawRatioVec = Converter::OptConvert<std::vector<float>>(options->value.ratios);
-    if (!rawRatioVec.has_value()) {
+    if (!rawRatioVec.has_value() || rawRatioVec->empty()) {
+        std::vector<double> ratioList;
+        ViewAbstract::SetOnVisibleAreaApproximateChange(
+            frameNode, std::move(onVisibleAreaChange), ratioList, expectedUpdateInterval);
         return;
     }
     std::vector<float> floatArray = rawRatioVec.value();
@@ -5422,18 +5511,6 @@ void SetOnVisibleAreaApproximateChangeImpl(Ark_NativePointer node,
             ratio = VISIBLE_RATIO_MAX;
         }
         ratioVec.push_back(ratio);
-    }
-    auto expectedUpdateInterval =
-        Converter::OptConvert<int32_t>(options->value.expectedUpdateInterval).value_or(DEFAULT_DURATION);
-    if (expectedUpdateInterval < 0) {
-        expectedUpdateInterval = DEFAULT_DURATION;
-    }
-    std::function<void(bool, double)> onVisibleAreaChange = nullptr;
-    auto optEvent = Converter::GetOptPtr(event);
-    if (!optEvent) {
-        ViewAbstract::SetOnVisibleAreaApproximateChange(
-            frameNode, nullptr, ratioVec, expectedUpdateInterval);
-        return;
     }
     ViewAbstract::SetOnVisibleAreaApproximateChange(
         frameNode, std::move(onVisibleAreaChange), ratioVec, expectedUpdateInterval);
@@ -5698,6 +5775,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetBackgroundImpl,
         CommonMethodModifier::SetBackgroundImage0Impl,
         CommonMethodModifier::SetBackgroundImage1Impl,
+        CommonMethodModifier::SetBackgroundImage2Impl,
         CommonMethodModifier::SetBackgroundBlurStyleImpl,
         CommonMethodModifier::SetBackgroundEffect1Impl,
         CommonMethodModifier::SetForegroundBlurStyleImpl,

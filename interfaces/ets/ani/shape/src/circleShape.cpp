@@ -31,7 +31,7 @@ void ANICreateCircleShape(ani_env* env, [[maybe_unused]] ani_object object)
     shapePeer->circleShape = circle;
 
     if (ANI_OK !=
-        env->Object_SetPropertyByName_Long(object, "circleShapeResult", reinterpret_cast<ani_long>(shapePeer))) {
+        env->Object_SetPropertyByName_Long(object, "basicShapeResult", reinterpret_cast<ani_long>(shapePeer))) {
         return;
     }
 }
@@ -60,7 +60,7 @@ void ANICreateCircleShapeWithParam(ani_env* env, [[maybe_unused]] ani_object obj
     shapePeer->circleShape = circle;
 
     if (ANI_OK !=
-        env->Object_SetPropertyByName_Long(object, "circleShapeResult", reinterpret_cast<ani_long>(shapePeer))) {
+        env->Object_SetPropertyByName_Long(object, "basicShapeResult", reinterpret_cast<ani_long>(shapePeer))) {
         return;
     }
 }
@@ -68,7 +68,7 @@ void ANICreateCircleShapeWithParam(ani_env* env, [[maybe_unused]] ani_object obj
 CirclePeer* GetCircleShape(ani_env* env, ani_object obj)
 {
     ani_long circleAni;
-    if (ANI_OK != env->Object_GetFieldByName_Long(obj, "circleShapeResult", &circleAni)) {
+    if (ANI_OK != env->Object_GetFieldByName_Long(obj, "basicShapeResult", &circleAni)) {
         return nullptr;
     }
 
@@ -206,7 +206,7 @@ ani_object ANICircleShapeColor(ani_env* env, ani_object object, [[maybe_unused]]
 
 ani_object CircleShape::ANICircleShapeFromPtr(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr)
 {
-    return ANIShapeFromPtr<CirclePeer>(env, ptr, ANI_SHAPE_NAME, "circleShapeResult");
+    return ANIShapeFromPtr<CirclePeer>(env, ptr, ANI_SHAPE_NAME, "basicShapeResult");
 }
 
 ani_status CircleShape::BindCircleShape(ani_env* env)
