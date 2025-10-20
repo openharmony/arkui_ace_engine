@@ -4422,6 +4422,9 @@ void AceContainer::NotifyDensityUpdate(double density)
     UpdateResourceDensity(density, fullUpdate);
     ConfigurationChange configurationChange { .dpiUpdate = true };
     pipelineContext_->FlushReload(configurationChange, fullUpdate);
+    if (fullUpdate) {
+        NotifyArkoalaConfigurationChange(configurationChange);
+    }
 }
 
 void AceContainer::NotifyDirectionUpdate()
@@ -4430,6 +4433,9 @@ void AceContainer::NotifyDirectionUpdate()
     if (fullUpdate) {
         ConfigurationChange configurationChange { .directionUpdate = true };
         pipelineContext_->FlushReload(configurationChange, fullUpdate);
+        if (fullUpdate) {
+            NotifyArkoalaConfigurationChange(configurationChange);
+        }
     }
 }
 
