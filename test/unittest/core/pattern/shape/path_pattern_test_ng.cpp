@@ -37,6 +37,9 @@ namespace OHOS::Ace::NG {
 namespace {
 
 const std::string PATH_CMD = "M150 0 L300 300 L0 300 Z";
+const std::string UPDATE_PATH_CMD = "M0 0 L0 0";
+const float CONTENT_WIDTH = 100.0f;
+const float CONTENT_HEIGHT = 200.0f;
 
 } // namespace
 
@@ -153,10 +156,10 @@ HWTEST_F(PathPatternTestNg, MeasureContent001, TestSize.Level1)
      * @tc.steps2: contentConstraint.selfIdealSize is (100, 200)
      * @tc.expected: the return value of MeasureContent is (100, 200)
      */
-    contentConstraint.selfIdealSize = OptionalSizeF(100, 200);
+    contentConstraint.selfIdealSize = OptionalSizeF(CONTENT_WIDTH, CONTENT_HEIGHT);
     auto size = layoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
     ASSERT_TRUE(size.has_value());
-    EXPECT_EQ(size.value(), SizeF(100, 200));
+    EXPECT_EQ(size.value(), SizeF(CONTENT_WIDTH, CONTENT_HEIGHT));
     contentConstraint.selfIdealSize.Reset();
 
     /**
@@ -165,7 +168,7 @@ HWTEST_F(PathPatternTestNg, MeasureContent001, TestSize.Level1)
      */
     auto paintProperty = frameNode->GetPaintProperty<PathPaintProperty>();
     ASSERT_TRUE(paintProperty);
-    paintProperty->UpdateCommands("M0 0 L0 0");
+    paintProperty->UpdateCommands(UPDATE_PATH_CMD);
     size = layoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
     ASSERT_TRUE(size.has_value());
     EXPECT_EQ(size.value(), SizeF(0, 0));
