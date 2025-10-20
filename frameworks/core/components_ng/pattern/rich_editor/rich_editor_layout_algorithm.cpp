@@ -226,6 +226,11 @@ void RichEditorLayoutAlgorithm::CopySpanStyle(RefPtr<SpanItem> source, RefPtr<Sp
     if (source) {
         target->fontStyle->UpdateFontSize(source->fontStyle->GetFontSize());
         target->textLineStyle->UpdateLineHeight(source->textLineStyle->GetLineHeight());
+        if (source->textLineStyle->HasDrawableLeadingMargin()) {
+            auto drawableLeadingMargin = source->textLineStyle->GetDrawableLeadingMarginValue();
+            drawableLeadingMargin.onDraw_ = nullptr;
+            target->textLineStyle->UpdateDrawableLeadingMargin(drawableLeadingMargin);
+        }
         if (source->textLineStyle->HasLeadingMargin()) {
             auto leadingMargin = source->textLineStyle->GetLeadingMarginValue();
             leadingMargin.pixmap.Reset();
