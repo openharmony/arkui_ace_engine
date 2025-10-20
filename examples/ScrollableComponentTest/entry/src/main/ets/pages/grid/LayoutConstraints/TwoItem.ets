@@ -57,6 +57,7 @@ struct GridTwoItem {
           .borderColor(Color.Black)
           .width('100%')
           .backgroundColor(Color.Yellow)
+          // 测试点：GridItem组件的height属性设置不同值。验证GridItem的布局是否正确
           .height(this.changeList[this.changeIndex])
         }
 
@@ -68,6 +69,7 @@ struct GridTwoItem {
           .borderColor(Color.Black)
           .width('100%')
           .backgroundColor(Color.Orange)
+          // 测试点：GridItem组件的height属性设置不同值。验证GridItem的布局是否正确
           .height(this.changeList[this.changeIndex])
         }
 
@@ -79,6 +81,7 @@ struct GridTwoItem {
           .borderColor(Color.Black)
           .width('100%')
           .backgroundColor(Color.Pink)
+          // 测试点：GridItem组件的height属性设置不同值。验证GridItem的布局是否正确
           .height(this.changeList[this.changeIndex])
         }
 
@@ -90,6 +93,7 @@ struct GridTwoItem {
           .borderColor(Color.Black)
           .width('100%')
           .backgroundColor(Color.Green)
+          // 测试点：GridItem组件的height属性设置不同值。验证GridItem的布局是否正确
           .height(this.changeList[this.changeIndex])
         }
 
@@ -101,6 +105,7 @@ struct GridTwoItem {
           .borderColor(Color.Black)
           .width('100%')
           .backgroundColor(Color.Blue)
+          // 测试点：GridItem组件的height属性设置不同值。验证GridItem的布局是否正确
           .height(this.changeList[this.changeIndex])
         }
 
@@ -112,6 +117,7 @@ struct GridTwoItem {
           .borderColor(Color.Black)
           .width('100%')
           .backgroundColor(Color.Black)
+          // 测试点：GridItem组件的height属性设置不同值。验证GridItem的布局是否正确
           .height(this.changeList[this.changeIndex])
         }
 
@@ -123,6 +129,7 @@ struct GridTwoItem {
           .borderColor(Color.Black)
           .width('100%')
           .backgroundColor(Color.Brown)
+          // 测试点：GridItem组件的height属性设置不同值。验证GridItem的布局是否正确
           .height(this.changeList[this.changeIndex])
         }
 
@@ -134,6 +141,7 @@ struct GridTwoItem {
           .borderColor(Color.Black)
           .width('100%')
           .backgroundColor(Color.Gray)
+          // 测试点：GridItem组件的height属性设置不同值。验证GridItem的布局是否正确
           .height(this.changeList[this.changeIndex])
         }
 
@@ -145,6 +153,7 @@ struct GridTwoItem {
           .borderColor(Color.Black)
           .width('100%')
           .backgroundColor(Color.Red)
+          // 测试点：GridItem组件的height属性设置不同值。验证GridItem的布局是否正确
           .height(this.changeList[this.changeIndex])
         }
 
@@ -156,6 +165,7 @@ struct GridTwoItem {
           .borderColor(Color.Black)
           .width('100%')
           .backgroundColor(Color.Grey)
+          // 测试点：GridItem组件的height属性设置不同值。验证GridItem的布局是否正确
           .height(this.changeList[this.changeIndex])
         }
 
