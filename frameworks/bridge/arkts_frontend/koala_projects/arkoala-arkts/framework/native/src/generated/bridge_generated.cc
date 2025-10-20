@@ -2093,9 +2093,9 @@ void impl_CommonMethod_setBackgroundColor(Ark_NativePointer thisPtr, KSerializer
                 if (valueValueTempTmpBuf_BufUUnionSelector == 0) {
                     valueValueTempTmpBuf_BufU.selector = 0;
                     valueValueTempTmpBuf_BufU.value0 = static_cast<Ark_Color>(thisDeserializer.readInt32());
-                } else if (valueValueTempTmpBuf_UnionSelector == 1) {
-                    valueValueTempTmpBuf_.selector = 1;
-                    valueValueTempTmpBuf_.value1 = thisDeserializer.readInt32();
+                } else if (valueValueTempTmpBuf_BufUUnionSelector == 1) {
+                    valueValueTempTmpBuf_BufU.selector = 1;
+                    valueValueTempTmpBuf_BufU.value1 = thisDeserializer.readInt32();
                 } else if (valueValueTempTmpBuf_BufUUnionSelector == 2) {
                     valueValueTempTmpBuf_BufU.selector = 2;
                     valueValueTempTmpBuf_BufU.value2 = static_cast<Ark_String>(thisDeserializer.readString());

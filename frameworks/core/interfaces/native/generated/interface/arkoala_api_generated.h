@@ -7045,6 +7045,15 @@ typedef struct Opt_FormSize {
     Ark_Tag tag;
     Ark_FormSize value;
 } Opt_FormSize;
+typedef struct Ark_FractionStop {
+    /* kind: Interface */
+    Ark_Float64 value0;
+    Ark_Float64 value1;
+} Ark_FractionStop;
+typedef struct Opt_FractionStop {
+    Ark_Tag tag;
+    Ark_FractionStop value;
+} Opt_FractionStop;
 typedef struct Ark_Frame {
     /* kind: Interface */
     Ark_Float64 x;
@@ -13453,15 +13462,6 @@ typedef struct Opt_FormLinkOptions {
     Ark_Tag tag;
     Ark_FormLinkOptions value;
 } Opt_FormLinkOptions;
-typedef struct Ark_FractionStop {
-    /* kind: Interface */
-    Ark_Number value0;
-    Ark_Number value1;
-} Ark_FractionStop;
-typedef struct Opt_FractionStop {
-    Ark_Tag tag;
-    Ark_FractionStop value;
-} Opt_FractionStop;
 typedef struct Opt_FrameNode {
     Ark_Tag tag;
     Ark_FrameNode value;

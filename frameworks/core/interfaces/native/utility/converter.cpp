@@ -1207,7 +1207,7 @@ Font Convert(const Ark_Font& src)
         font.fontFamilies = fontfamiliesOpt->families;
         font.fontFamiliesNG = std::optional<std::vector<std::string>>(fontfamiliesOpt->families);
     }
-    auto fontSize = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(src.size);
+    auto fontSize = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Float64>(src.size);
     if (fontSize) {
         Validator::ValidateNonNegative(fontSize);
         Validator::ValidateNonPercent(fontSize);
@@ -1476,7 +1476,7 @@ CaretStyle Convert(const Ark_CaretStyle& src)
 {
     CaretStyle caretStyle;
     caretStyle.color = OptConvert<Color> (src.color);
-    caretStyle.width = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(src.width, DimensionUnit::VP);
+    caretStyle.width = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Float64>(src.width, DimensionUnit::VP);
     return caretStyle;
 }
 
