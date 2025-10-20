@@ -40,7 +40,8 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
     auto contentCreator = []() {
         // empty content creator to be done
     };
-    frameNode = NavDestinationModelStatic::CreateFrameNode(id, std::move(contentCreator));
+    auto navPathInfo = AceType::MakeRefPtr<NavigationContext::JSNavPathInfoStatic>();
+    frameNode = NavDestinationModelStatic::CreateFrameNode(id, navPathInfo, std::move(contentCreator));
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
