@@ -105,6 +105,7 @@
     "pages/List/SwipeAction/Page1",
     "pages/List/SwipeAction/PageRepeat",
     "pages/List/SwipeAction/SwipeAction_MainPage",
+    "pages/List/ListDataSource/ListDataSource1",
     "pages/alphabetIndexer/AlphabetIndexerMainPage",
     "pages/alphabetIndexer/AutoCollapse",
     "pages/alphabetIndexer/PopupPosition",
