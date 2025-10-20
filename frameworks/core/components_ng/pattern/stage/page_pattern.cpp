@@ -243,6 +243,26 @@ void PagePattern::OnDetachFromFrameNode(FrameNode* frameNode)
     pipelineContext->GetMemoryManager()->RemoveRecyclePageNode(frameNode->GetId());
 }
 
+void PagePattern::OnWindowSizeChanged(int32_t /*width*/, int32_t /*height*/, WindowSizeChangeReason type)
+{
+    if (type != WindowSizeChangeReason::ROTATION) {
+        return;
+    }
+    if (!isPageInTransition_) {
+        return;
+    }
+    if (isCustomTransition_) {
+        return;
+    }
+    auto hostNode = AceType::DynamicCast<FrameNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto pipelineContext = hostNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto stageManager = pipelineContext->GetStageManager();
+    CHECK_NULL_VOID(stageManager);
+    stageManager->AbortAnimation();
+}
+
 void PagePattern::OnShow(bool isFromWindow)
 {
     // Do not invoke onPageShow unless the initialRender function has been executed.
@@ -983,6 +1003,7 @@ void PagePattern::TriggerDefaultTransition(const std::function<void()>& onFinish
     CHECK_NULL_VOID(pipelineContext);
     auto stageManager = pipelineContext->GetStageManager();
     CHECK_NULL_VOID(stageManager);
+    isCustomTransition_ = onFinish ? false : true;
     if (transitionIn) {
         InitTransitionIn(effect, type);
         auto animation = AnimationUtils::StartAnimation(option, [weakPattern = WeakClaim(this), effect, type]() {
