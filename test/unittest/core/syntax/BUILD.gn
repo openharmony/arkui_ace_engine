@@ -22,7 +22,10 @@ ace_unittest("lazy_for_each_syntax_test_ng") {
 ace_unittest("lazy_for_each_builder_syntax_test_ng") {
   type = "new"
   module_output = "syntaxs"
-  sources = [ "lazy_for_each_builder_syntax_test_ng.cpp" ]
+  sources = [
+    "lazy_for_each_builder_syntax_test_ng.cpp",
+    "lazy_for_each_builder_syntax_test_ng_2.cpp"
+  ]
 }
 
 ace_unittest("for_each_syntax_test_ng") {
