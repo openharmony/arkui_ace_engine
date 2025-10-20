@@ -768,6 +768,7 @@ export class ArkAlphabetIndexerComponent extends ArkCommonMethodComponent implem
         if (this.checkPriority("setAlphabetIndexerOptions")) {
             const options_casted = options as (AlphabetIndexerOptions)
             this.getPeer()?.setAlphabetIndexerOptionsAttribute(options_casted)
+            this.applyOptionsFinish('AlphabetIndexerAttribute');
             return this
         }
         return this
@@ -988,6 +989,9 @@ export class ArkAlphabetIndexerComponent extends ArkCommonMethodComponent implem
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

@@ -226,6 +226,7 @@ export class ArkLinearIndicatorComponent extends ArkCommonMethodComponent implem
             const count_casted = count as (number | undefined)
             const controller_casted = controller as (LinearIndicatorController | undefined)
             this.getPeer()?.setLinearIndicatorOptionsAttribute(count_casted, controller_casted)
+            this.applyOptionsFinish('LinearIndicatorAttribute');
             return this
         }
         return this
@@ -261,6 +262,9 @@ export class ArkLinearIndicatorComponent extends ArkCommonMethodComponent implem
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

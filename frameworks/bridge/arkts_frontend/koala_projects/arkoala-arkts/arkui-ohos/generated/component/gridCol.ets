@@ -177,6 +177,7 @@ export class ArkGridColComponent extends ArkCommonMethodComponent implements Gri
         if (this.checkPriority("setGridColOptions")) {
             const option_casted = option as (GridColOptions | undefined)
             this.getPeer()?.setGridColOptionsAttribute(option_casted)
+            this.applyOptionsFinish('GridColAttribute');
             return this
         }
         return this
@@ -212,6 +213,9 @@ export class ArkGridColComponent extends ArkCommonMethodComponent implements Gri
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

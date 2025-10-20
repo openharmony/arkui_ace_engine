@@ -784,6 +784,7 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements Image
             const src_casted = src as (image.PixelMap | ResourceStr | DrawableDescriptor | ImageContent)
             const imageAIOptions_casted = imageAIOptions as (ImageAIOptions | undefined)
             this.getPeer()?.setImageOptionsAttribute(src_casted, imageAIOptions_casted)
+            this.applyOptionsFinish('ImageAttribute');
             return this
         }
         return this
@@ -1011,6 +1012,9 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements Image
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

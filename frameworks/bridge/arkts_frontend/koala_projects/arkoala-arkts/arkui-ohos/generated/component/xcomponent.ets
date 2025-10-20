@@ -359,6 +359,7 @@ export class ArkXComponentComponent extends ArkCommonMethodComponent implements 
     public setXComponentOptions(params: XComponentParameters | XComponentOptions | NativeXComponentParameters): this {
         if (this.checkPriority("setXComponentOptions")) {
             hookSetXComponentOptions(this, params);
+            this.applyOptionsFinish('XComponentAttribute');
             return this
         }
         return this
@@ -410,6 +411,9 @@ export class ArkXComponentComponent extends ArkCommonMethodComponent implements 
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

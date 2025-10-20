@@ -120,6 +120,7 @@ export class ArkPasteButtonComponent extends ArkSecurityComponentMethodComponent
         if (this.checkPriority("setPasteButtonOptions")) {
             const options_casted = options as (PasteButtonOptions | undefined)
             this.getPeer()?.setPasteButtonOptionsAttribute(options_casted)
+            this.applyOptionsFinish('PasteButtonAttribute');
             return this
         }
         return this
@@ -139,6 +140,9 @@ export class ArkPasteButtonComponent extends ArkSecurityComponentMethodComponent
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

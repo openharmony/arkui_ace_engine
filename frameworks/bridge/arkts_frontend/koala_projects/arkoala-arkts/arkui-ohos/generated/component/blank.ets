@@ -130,6 +130,7 @@ export class ArkBlankComponent extends ArkCommonMethodComponent implements Blank
         if (this.checkPriority("setBlankOptions")) {
             const min_casted = min as (number | string | undefined)
             this.getPeer()?.setBlankOptionsAttribute(min_casted)
+            this.applyOptionsFinish('BlankAttribute');
             return this
         }
         return this
@@ -149,6 +150,9 @@ export class ArkBlankComponent extends ArkCommonMethodComponent implements Blank
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

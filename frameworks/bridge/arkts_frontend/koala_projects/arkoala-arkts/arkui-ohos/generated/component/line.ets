@@ -186,6 +186,7 @@ export class ArkLineComponent extends ArkCommonShapeMethodComponent implements L
         if (this.checkPriority("setLineOptions")) {
             const options_casted = options as (LineOptions | undefined)
             this.getPeer()?.setLineOptionsAttribute(options_casted)
+            this.applyOptionsFinish('LineAttribute');
             return this
         }
         return this
@@ -213,6 +214,9 @@ export class ArkLineComponent extends ArkCommonShapeMethodComponent implements L
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

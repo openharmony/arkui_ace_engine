@@ -10527,6 +10527,9 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
     }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
+    }
 }
 export class ArkCommonShapeMethodComponent extends ArkCommonMethodComponent implements CommonShapeMethod {
     getPeer(): ArkCommonShapeMethodPeer {
@@ -10630,6 +10633,9 @@ export class ArkCommonShapeMethodComponent extends ArkCommonMethodComponent impl
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 export class ArkScrollableCommonMethodComponent extends ArkCommonMethodComponent implements ScrollableCommonMethod {
@@ -10776,6 +10782,9 @@ export class ArkScrollableCommonMethodComponent extends ArkCommonMethodComponent
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 export function postCardAction(component: Object, action: Object): void {

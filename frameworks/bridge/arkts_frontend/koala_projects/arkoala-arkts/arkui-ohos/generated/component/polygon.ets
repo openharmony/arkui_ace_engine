@@ -141,6 +141,7 @@ export class ArkPolygonComponent extends ArkCommonShapeMethodComponent implement
         if (this.checkPriority("setPolygonOptions")) {
             const options_casted = options as (PolygonOptions | undefined)
             this.getPeer()?.setPolygonOptionsAttribute(options_casted)
+            this.applyOptionsFinish('PolygonAttribute');
             return this
         }
         return this
@@ -160,6 +161,9 @@ export class ArkPolygonComponent extends ArkCommonShapeMethodComponent implement
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

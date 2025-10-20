@@ -154,6 +154,7 @@ export class ArkRelativeContainerComponent extends ArkCommonMethodComponent impl
     public setRelativeContainerOptions(): this {
         if (this.checkPriority("setRelativeContainerOptions")) {
             this.getPeer()?.setRelativeContainerOptionsAttribute()
+            this.applyOptionsFinish('RelativeContainerAttribute');
             return this
         }
         return this
@@ -181,6 +182,9 @@ export class ArkRelativeContainerComponent extends ArkCommonMethodComponent impl
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

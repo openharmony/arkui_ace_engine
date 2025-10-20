@@ -87,6 +87,7 @@ export class ArkEllipseComponent extends ArkCommonShapeMethodComponent implement
         if (this.checkPriority("setEllipseOptions")) {
             const options_casted = options as (EllipseOptions | undefined)
             this.getPeer()?.setEllipseOptionsAttribute(options_casted)
+            this.applyOptionsFinish('EllipseAttribute');
             return this
         }
         return this
@@ -98,6 +99,9 @@ export class ArkEllipseComponent extends ArkCommonShapeMethodComponent implement
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

@@ -299,6 +299,7 @@ export class ArkDatePickerComponent extends ArkCommonMethodComponent implements 
         if (this.checkPriority("setDatePickerOptions")) {
             const options_casted = options as (DatePickerOptions | undefined)
             this.getPeer()?.setDatePickerOptionsAttribute(options_casted)
+            this.applyOptionsFinish('DatePickerAttribute');
             return this
         }
         return this
@@ -366,6 +367,9 @@ export class ArkDatePickerComponent extends ArkCommonMethodComponent implements 
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

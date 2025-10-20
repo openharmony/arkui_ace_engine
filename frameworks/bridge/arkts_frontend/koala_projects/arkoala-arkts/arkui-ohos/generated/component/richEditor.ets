@@ -1169,6 +1169,7 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
         if (this.checkPriority("setRichEditorOptions")) {
             const options_casted = options as (RichEditorOptions | RichEditorStyledStringOptions)
             this.getPeer()?.setRichEditorOptionsAttribute(options_casted)
+            this.applyOptionsFinish('RichEditorAttribute');
             return this
         }
         return this
@@ -1449,6 +1450,9 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

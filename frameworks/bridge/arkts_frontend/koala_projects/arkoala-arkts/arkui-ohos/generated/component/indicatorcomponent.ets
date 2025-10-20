@@ -268,6 +268,7 @@ export class ArkIndicatorComponentComponent extends ArkCommonMethodComponent imp
         if (this.checkPriority("setIndicatorComponentOptions")) {
             const controller_casted = controller as (IndicatorComponentController | undefined)
             this.getPeer()?.setIndicatorComponentOptionsAttribute(controller_casted)
+            this.applyOptionsFinish('IndicatorComponentAttribute');
             return this
         }
         return this
@@ -327,6 +328,9 @@ export class ArkIndicatorComponentComponent extends ArkCommonMethodComponent imp
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

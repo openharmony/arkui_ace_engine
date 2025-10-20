@@ -221,6 +221,7 @@ export class ArkSymbolSpanComponent extends ArkCommonMethodComponent implements 
         if (this.checkPriority("setSymbolSpanOptions")) {
             const value_casted = value as (Resource)
             this.getPeer()?.setSymbolSpanOptionsAttribute(value_casted)
+            this.applyOptionsFinish('SymbolSpanAttribute');
             return this
         }
         return this
@@ -272,6 +273,9 @@ export class ArkSymbolSpanComponent extends ArkCommonMethodComponent implements 
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

@@ -232,6 +232,7 @@ export class ArkMenuComponent extends ArkCommonMethodComponent implements MenuAt
     public setMenuOptions(): this {
         if (this.checkPriority("setMenuOptions")) {
             this.getPeer()?.setMenuOptionsAttribute()
+            this.applyOptionsFinish('MenuAttribute');
             return this
         }
         return this
@@ -291,6 +292,9 @@ export class ArkMenuComponent extends ArkCommonMethodComponent implements MenuAt
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

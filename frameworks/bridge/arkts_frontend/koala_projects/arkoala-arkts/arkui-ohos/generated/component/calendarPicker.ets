@@ -241,6 +241,7 @@ export class ArkCalendarPickerComponent extends ArkCommonMethodComponent impleme
         if (this.checkPriority("setCalendarPickerOptions")) {
             const options_casted = options as (CalendarOptions | undefined)
             this.getPeer()?.setCalendarPickerOptionsAttribute(options_casted)
+            this.applyOptionsFinish('CalendarPickerAttribute');
             return this
         }
         return this
@@ -285,6 +286,9 @@ export class ArkCalendarPickerComponent extends ArkCommonMethodComponent impleme
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

@@ -125,6 +125,7 @@ export class ArkEmbeddedComponentComponent extends ArkCommonMethodComponent impl
             const loader_casted = loader as (Want)
             const type_casted = type as (EmbeddedType | undefined)
             this.getPeer()?.setEmbeddedComponentOptionsAttribute(loader_casted, type_casted)
+            this.applyOptionsFinish('EmbeddedComponentAttribute');
             return this
         }
         return this
@@ -152,6 +153,9 @@ export class ArkEmbeddedComponentComponent extends ArkCommonMethodComponent impl
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

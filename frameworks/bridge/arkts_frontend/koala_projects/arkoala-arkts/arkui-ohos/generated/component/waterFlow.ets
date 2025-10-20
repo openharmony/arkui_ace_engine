@@ -369,6 +369,7 @@ export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent im
         if (this.checkPriority("setWaterFlowOptions")) {
             const options_casted = options as (WaterFlowOptions | undefined)
             hookWaterFlowOptionsImpl(this, options);
+            this.applyOptionsFinish('WaterFlowAttribute');
             return this
         }
         return this
@@ -477,6 +478,9 @@ export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent im
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 
