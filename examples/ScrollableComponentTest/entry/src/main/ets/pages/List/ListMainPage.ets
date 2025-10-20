@@ -82,7 +82,8 @@ struct IndexPage {
     new TextList(48, 'ListIndex', 'pages/List/ListIndex'),
     new TextList(49, 'scrollBarColor', 'pages/List/scrollBarColor'),
     new TextList(50, 'scrollBarColor(ListModifier)', 'pages/List/ListModifier/scrollBarColor'),
-    new TextList(51, 'ListModifierIndex', 'pages/List/ListModifier/ListModifierIndex')
+    new TextList(51, 'ListModifierIndex', 'pages/List/ListModifier/ListModifierIndex'),
+    new TextList(52, 'SwipeAction', 'pages/List/SwipeAction/SwipeAction_MainPage')
   ]
   @State fontSize: Resource | undefined = undefined
   build() {

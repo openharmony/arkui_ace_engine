@@ -1,9 +1,42 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+ /*
+  * SR: SR20250724533255
+  * Description: List支持展开指定ListItem的swipeAction
+  * Writer: renxiaowen
+  */
+
 import { BusinessError } from '@ohos.base';
 import { ListDataSource } from './ListDataSource/ListDataSource1';
 
 @Entry
 @Component
 struct ListItemExample1 {
+
+  /* 用例描述：动态控制列表项和列表项分组的展开/收起
+   * 关键结构：
+   * |-> List
+   *    |-> LazyForEach
+   *       |-> ListItem
+   *          |-> Text
+   *    |-> LazyForEach
+   *       |-> ListItemGroup
+   *          |-> Text
+   */
+   
   private arr: ListDataSource = new ListDataSource([]);
   @State arr2: number[] = [0, 1, 2, 3, 4];
   @State enterEndDeleteAreaString: string = 'not enterEndDeleteArea';
@@ -79,6 +112,8 @@ struct ListItemExample1 {
         Button("expand inList")
           .onClick(() => {
             try {
+              // 测试点：观察指定列表项是否展开
+              // 预期结果：指定列表项展开
               ListItemSwipeActionManager.expand(this.getList()?.getChild(Number(this.text)),
                 this.directions[this.dirIndex])
             } catch (error) {
@@ -89,6 +124,8 @@ struct ListItemExample1 {
         Button("collapse inList")
           .onClick(() => {
             try {
+              // 测试点：观察指定列表项是否收起
+              // 预期结果：指定列表项收起
               ListItemSwipeActionManager.collapse(this.getList()?.getChild(Number(this.text)))
             } catch (error) {
               console.error("CXN Error expanding item:", (error as BusinessError).code,
@@ -99,6 +136,8 @@ struct ListItemExample1 {
           .onClick(() => {
             try {
               let group = this.getListItemGroup(this.listItemGroupIndex, this.getList() ?? undefined);
+              // 测试点：观察指定列表项分组是否展开
+              // 预期结果：指定列表项分组展开
               ListItemSwipeActionManager.expand(group?.getChild(Number(this.text)), this.directions[this.dirIndex])
             } catch (error) {
               console.error("CXN Error expanding item:", (error as BusinessError).code,
@@ -109,6 +148,8 @@ struct ListItemExample1 {
           .onClick(() => {
             try {
               let group = this.getListItemGroup(this.listItemGroupIndex, this.getList() ?? undefined);
+              // 测试点：观察指定列表项分组是否收起
+              // 预期结果：指定列表项分组收起
               ListItemSwipeActionManager.collapse(group?.getChild(Number(this.text)))
             } catch (error) {
               console.error("CXN Error expanding item:", (error as BusinessError).code,
