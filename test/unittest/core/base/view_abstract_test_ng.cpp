@@ -4011,9 +4011,9 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractResourceObjectTest015, TestSize.Level1)
     ViewAbstract::SetColorBlend(frameNode, colorBlend, resObj);
     Color result;
     ResourceParseUtils::ParseResColor(resObj, result);
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
     colorStr = pattern->GetResCacheMapByKey("viewAbstract.colorBlend");
     EXPECT_EQ(colorStr, result.ToString());
-    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
     g_isConfigChangePerform = false;
 }
 
