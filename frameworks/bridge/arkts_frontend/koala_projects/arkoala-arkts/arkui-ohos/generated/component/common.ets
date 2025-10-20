@@ -20,7 +20,7 @@ import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
-import { extractors, DrawModifier, GestureModifier, WrappedBuilder, hookId, hookStateStyleImpl, hookGesture, hookPriorityGesture, hookParallelGesture, hookGestureModifier, hookCustomPropertyImpl, hookDrawModifier, CustomStyles, ContentModifier, hookCommonMethodAttributeModifier, AttributeModifier, AttributeUpdater, hookCommonShapeMethodAttributeModifier, hookScrollableCommonMethodAttributeModifier, hookAllowDropAttribute, hookDragPreviewOptions, hookDragEventStartDataLoading, hookDragEventGetSummary } from "#handwritten"
+import { extractors, DrawModifier, GestureModifier, WrappedBuilder, hookId, hookStateStyleImpl, hookGesture, hookPriorityGesture, hookParallelGesture, hookGestureModifier, hookCustomPropertyImpl, hookDrawModifier, CustomStyles, ContentModifier, hookCommonMethodAttributeModifier, AttributeModifier, AttributeUpdater, hookCommonShapeMethodAttributeModifier, hookScrollableCommonMethodAttributeModifier, hookAllowDrop, hookDragPreviewOptions, hookDragEventStartDataLoading, hookDragEventGetSummary } from "#handwritten"
 import { default as unifiedDataChannel } from "@ohos.data.unifiedDataChannel"
 import { DrawContext, LengthMetrics, ColorMetrics } from "arkui.Graphics"
 import { KeyType, KeySource, Color, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, InteractionHand, GradientDirection, SharedTransitionEffectType, ArrowPointPosition, Placement, LineCapStyle, LineJoinStyle, BarState, CrownSensitivity, EdgeEffect, TextDecorationType, TextDecorationStyle, PlayMode, VerticalAlign, HorizontalAlign, FontWeight, FontStyle, TouchType, CrownAction, ClickEffectLevel, NestedScrollMode, PixelRoundCalcPolicy, ScrollSource, IlluminatedType, AccessibilityHoverType, AxisAction, AxisType, AxisModel, MouseButton, MouseAction } from "./enums"
@@ -53,6 +53,8 @@ import { default as rpc } from "@ohos.rpc"
 import { default as curves } from "@ohos.curves"
 import { UIContext } from "@ohos.arkui.UIContext"
 import { BuildOptions } from "arkui.BuilderNode"
+import { ImageModifier } from "./../ImageModifier"
+import { ImageModifier_serializer } from "./../ImageModifier"
 import { SymbolGlyphModifier } from "arkui.SymbolGlyphModifier"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -7035,6 +7037,7 @@ export enum MenuPolicy {
 }
 export interface DragPreviewOptions {
     mode?: DragPreviewMode | Array<DragPreviewMode>;
+    modifier?: ImageModifier;
     numberBadge?: boolean | number;
     sizeChangeEffect?: DraggingSizeChangeEffect;
 }
@@ -9716,7 +9719,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public allowDrop(value: Array<uniformTypeDescriptor.UniformDataType> | null | undefined): this {
         if (this.checkPriority("allowDrop")) {
-            hookAllowDropAttribute(this, value)
+            hookAllowDrop(this, value)
             return this
         }
         return this
@@ -14470,6 +14473,14 @@ export class DragPreviewOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForModifier  = value.modifier
+        if (valueHolderForModifier !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForModifierTmpValue  = valueHolderForModifier!
+            ImageModifier_serializer.write(valueSerializer, valueHolderForModifierTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
         const valueHolderForNumberBadge  = value.numberBadge
         if (valueHolderForNumberBadge !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
@@ -14517,6 +14528,12 @@ export class DragPreviewOptions_serializer {
             modeTmpBuf = (modeTmpBuf_ as DragPreviewMode | Array<DragPreviewMode>)
         }
         const modeTmpResult : DragPreviewMode | Array<DragPreviewMode> | undefined = modeTmpBuf
+        const modifierTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let modifierTmpBuf : ImageModifier | undefined = undefined
+        if ((modifierTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            modifierTmpBuf = (ImageModifier_serializer.read(valueDeserializer) as ImageModifier)
+        }
+        const modifierTmpResult : ImageModifier | undefined = modifierTmpBuf
         const numberBadgeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let numberBadgeTmpBuf : boolean | number | undefined = undefined
         if ((numberBadgeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -14538,7 +14555,7 @@ export class DragPreviewOptions_serializer {
             sizeChangeEffectTmpBuf = DraggingSizeChangeEffect.fromValue(valueDeserializer.readInt32())
         }
         const sizeChangeEffectTmpResult : DraggingSizeChangeEffect | undefined = sizeChangeEffectTmpBuf
-        let value : DragPreviewOptions = ({mode: modeTmpResult, numberBadge: numberBadgeTmpResult, sizeChangeEffect: sizeChangeEffectTmpResult} as DragPreviewOptions)
+        let value : DragPreviewOptions = ({mode: modeTmpResult, modifier: modifierTmpResult, numberBadge: numberBadgeTmpResult, sizeChangeEffect: sizeChangeEffectTmpResult} as DragPreviewOptions)
         return value
     }
 }

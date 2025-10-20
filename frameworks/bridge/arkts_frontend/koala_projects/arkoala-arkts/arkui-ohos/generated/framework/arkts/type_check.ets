@@ -41,7 +41,7 @@ import { CanvasGradient, CanvasPath, CanvasPattern, OffscreenCanvas, ImageBitmap
 import { Matrix2D } from "./../../component/matrix2d"
 import { ChainEdgeEffect, ListItemAlign, ListItemGroupArea, ListScroller, CloseSwipeActionOptions, VisibleListContentInfo, ScrollSnapAlign, ScrollState, StickyStyle, ListOptions, ChainAnimationOptions, ListDividerOptions } from "./../../component/list"
 import { CircleShape, ShapeSize, EllipseShape, PathShape, RectShape, CommonShapeMethod, PathShapeOptions, RectShapeOptions, RoundRectShapeOptions } from "@ohos.arkui.shape"
-import { ColorContent, ResizableOptions, DynamicRangeMode, ImageContent, ImageInterpolation, ImageRenderMode, ImageRotateOrientation, ImageCompleteEvent, ImageSourceSize, ImageError } from "./../../component/image"
+import { ColorContent, ResizableOptions, DynamicRangeMode, ImageContent, ImageInterpolation, ImageAttribute, ImageRenderMode, ImageRotateOrientation, ImageCompleteEvent, ImageSourceSize, ImageError } from "./../../component/image"
 import { default as uniformTypeDescriptor } from "@ohos.data.uniformTypeDescriptor"
 import { GestureRecognizer, GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureType, Gesture, GestureGroup, GestureMask, EventTargetInfo, GestureControl, GestureMode, GesturePriority, GestureRecognizerState, LongPressRecognizer, PanDirection, PanGestureOptions, PanGestureHandlerOptions, PanRecognizer, PinchRecognizer, RotationGesture, RotationGestureHandlerOptions, GestureEvent, RotationRecognizer, ScrollableTargetInfo, SwipeDirection, SwipeGesture, SwipeGestureHandlerOptions, SwipeRecognizer, TapRecognizer, GestureHandler, FingerInfo, BaseHandlerOptions, LongPressGestureEvent, PanGestureEvent, PinchGestureEvent, RotationGestureEvent, SwipeGestureEvent, TapGestureEvent } from "./../../component/gesture"
 import { LengthMetrics, LengthMetricsUnit, LengthUnit, Size, ColorMetrics, DrawContext, Frame, Vector2, SizeT } from "arkui.Graphics"
@@ -83,6 +83,7 @@ import { default as colorSpaceManager } from "@ohos.graphics.colorSpaceManager"
 import { default as rpc } from "@ohos.rpc"
 import { ImageAnalyzerType, ImageAnalyzerController, ImageAIOptions, ImageAnalyzerConfig } from "./../../component/imageCommon"
 import { ImageLoadResult } from "./../../component/imageSpan"
+import { ImageModifier } from "./../../ImageModifier"
 import { ImmersiveMode, LevelMode, LevelOrder } from "@ohos.promptAction"
 import { IndexerAlign, AlphabetIndexerOptions } from "./../../component/alphabetIndexer"
 import { IndicatorComponentController } from "./../../component/indicatorcomponent"
@@ -928,7 +929,7 @@ export class TypeChecker {
     static isDragPreviewMode(value: Object | string | number | undefined): boolean {
         return value instanceof DragPreviewMode
     }
-    static isDragPreviewOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
+    static isDragPreviewOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean): boolean {
         return value instanceof DragPreviewOptions
     }
     static isDragResult(value: Object | string | number | undefined): boolean {
@@ -1425,6 +1426,9 @@ export class TypeChecker {
     }
     static isImageParticleParameters(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
         return value instanceof ImageParticleParameters
+    }
+    static isImageModifier(value: Object | string | number | undefined): boolean {
+        return value instanceof ImageModifier
     }
     static isImageRenderMode(value: Object | string | number | undefined): boolean {
         return value instanceof ImageRenderMode
