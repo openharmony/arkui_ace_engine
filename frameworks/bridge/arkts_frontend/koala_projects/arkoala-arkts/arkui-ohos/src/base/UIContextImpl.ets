@@ -1273,6 +1273,9 @@ export class UIContextImpl extends UIContext {
     textMenuController_: TextMenuControllerImpl;
     detachedRootEntryManager_: DetachedRootEntryManager;
     isDebugMode_: boolean = false;
+    updateParallelizeItemNodeCallback_?:() => void;
+    callbacks: Array<() => void>;
+
 
     bufferSize = 4096
     buffer: KBuffer = new KBuffer(this.bufferSize)
@@ -1295,6 +1298,7 @@ export class UIContextImpl extends UIContext {
         this.detachedRootEntryManager_ = new DetachedRootEntryManager(this);
         this.isDebugMode_ = ArkUIAniModule._IsDebugMode(instanceId) !== 0;
         this.router_ = new RouterImpl(instanceId);
+        this.callbacks = new Array<() => void>();
     }
     public getInstanceId() : int32 {
         return this.instanceId_;
@@ -1695,5 +1699,17 @@ export class UIContextImpl extends UIContext {
 
     public setImageRawDataCacheSize(value: int): void {
         ArkUIAniModule._Common_SetImageRawDataCacheSize(value, this.instanceId_);
+    }
+    public updateParallelizeItemNode() {
+        this.updateParallelizeItemNodeCallback_?.()
+    }
+    public scheduleCallback(callback: () => void) {
+        this.callbacks.push(callback)
+    }
+    public flushCallback() {
+        for(const callback of this.callbacks ) {
+            callback?.()
+        }
+        this.callbacks.length = 0
     }
 }

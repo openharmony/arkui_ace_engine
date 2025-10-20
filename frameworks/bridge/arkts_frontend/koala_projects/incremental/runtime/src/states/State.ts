@@ -900,12 +900,10 @@ export class StateManagerImpl implements StateManager {
 
         if (scope.unchanged) {
             scope.cached
-            RuntimeProfiler.endTrace()
             return
         }
         current.cascadeParent = scope
         scope.recache()
-        RuntimeProfiler.endTrace()
     }
 
     terminate<Value>(rootScope: ComputableState<Value>): void {

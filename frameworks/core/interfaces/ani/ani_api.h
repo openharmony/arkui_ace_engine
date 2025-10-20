@@ -456,6 +456,12 @@ struct ArkUIAniXBarModifier {
     void (*setSetCustomCallbackFunc)(int64_t ptr, std::function<void(const std::string&, const std::string&)>&& fn);
     void (*callNative)(const int32_t& xBarType, const std::string callType, const std::string message);
 };
+struct ArkUIAniParallelizeUIModifier {
+    ani_long (*constructAdapterNode)(ani_int);
+    void (*reset)(ArkUINodeHandle);
+    void (*registerCallback)(
+        ArkUINodeHandle, std::function<int32_t()>&&, std::function<ArkUINodeHandle(int32_t, int32_t, int32_t)>&&);
+};
 struct ArkUIAniCommonModifier {
     ani_ref* (*getHostContext)(ArkUI_Int32 key);
     void (*setFrameRateRange)(ani_env* env, ani_long peerPtr, ani_object value, ArkUI_Int32 type);
@@ -774,6 +780,7 @@ struct ArkUIAniModifiers {
     const ArkUIAniComponent3DModifier* (*getComponent3DModifier)();
     const ArkUIAniXBarModifier* (*getXBarAniModifier)();
     const ArkUIAniCommonNodeAniModifier* (*getCommonNodeAniModifier)();
+    const ArkUIAniParallelizeUIModifier* (*getParallelizeUIModifier)();
 };
 
 __attribute__((visibility("default"))) const ArkUIAniModifiers* GetArkUIAniModifiers(void);
