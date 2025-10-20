@@ -28,6 +28,19 @@ using namespace testing;
 using namespace testing::ext;
 using namespace Converter;
 
+const auto CASHED_COUNT_ATTRIBUTE_NAME = "cachedCount";
+const auto CASHED_COUNT_ATTRIBUTE_DEFAULT_VALUE = "1"
+
+typedef std::tuple<Ark_Number, std::string> ArkNumberTestStep;
+static const std::vector<ArkNumberTestStep> CASHED_COUNT_TEST_PLAN = {
+    { ArkValue<Ark_Number>(10), "10"},
+    { ArkValue<Ark_Number>(-10), "1"},
+    { ArkValue<Ark_Number>(12.5), "12"},
+    { ArkValue<Ark_Number>(-5.5), "1"},
+    { ArkValue<Ark_Number>(832), "832"},
+    { ArkValue<Ark_Number>(1.0f), "1"}
+};
+
 namespace Converter {
 inline void AssignArkValue(Ark_OnScrollFrameBeginHandlerResult& dst, const ScrollFrameResult& src,
     ConvContext *ctx)
@@ -148,5 +161,25 @@ HWTEST_F(WaterFlowModifierTest, setOnScrollFrameBeginTest, TestSize.Level1)
     ScrollState state = ScrollState::SCROLL;
     ScrollFrameResult result = eventHub->GetOnScrollFrameBegin()(dimension, state);
     EXPECT_EQ(result.offset.ConvertToPx(), dimension.ConvertToPx());
+}
+
+/*
+ * @tc.name: setCashedCountTest
+ * @tc.desc: test function of SetCachedCount
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowModifierTest, setCashedCountTest, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    ASSERT_NE(modifier_->setCashedCount, nullptr);
+    auto checkval = GetAttrValue<std::string>(node_, CASHED_COUNT_ATTRIBUTE_NAME);
+    EXPECT_EQ(checkVal, CASHED_COUNT_ATTRIBUTE_DEFAULT_VALUE);
+    for (const auto& [value, expectVal] : CASHED_COUNT_TEST_PLAN) {
+        auto optValue = Converter::ArkValue<Opt_Number>(value);
+        modifier_->setCashedCount(node_, &optValue);
+        checkVal = GetAttrValue<std::string>(node_, CASHED_COUNT_ATTRIBUTE_NAME);
+        EXPECT_EQ(checkVal, expectVal);
+    }
 }
 } // namespace OHOS::Ace::NG
