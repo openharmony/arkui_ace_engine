@@ -507,6 +507,7 @@ void FfiOHOSShowAlertDialogParamWithOptionsShadowStyle(NativeAlertDialogParamV2 
     auto colorMode = Container::CurrentColorMode();
     if (style != ShadowStyle::None) {
         auto container = Container::Current();
+        CHECK_NULL_VOID(container);
         auto pipelineContext = container->GetPipelineContext();
         auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
         if (shadowTheme) {

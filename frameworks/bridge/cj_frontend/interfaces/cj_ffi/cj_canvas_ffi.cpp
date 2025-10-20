@@ -1146,6 +1146,7 @@ void FfiOHOSAceFrameworkRenderingContextPutImageDataWithDirty(int64_t contextId,
     if (context == nullptr) {
         LOGE("NativeCanvasRenderer GetImageData error, Cannot get NativeCanvasRenderer by id: %{public}" PRId64,
             contextId);
+        return;
     }
     auto nativeImagedata = FFIData::GetData<NativeImageData>(dataId);
     if (nativeImagedata == nullptr) {
@@ -1161,6 +1162,7 @@ void FfiOHOSAceFrameworkRenderingContextPutImageData(int64_t contextId, int64_t 
     if (context == nullptr) {
         LOGE("NativeCanvasRenderer GetImageData error, Cannot get NativeCanvasRenderer by id: %{public}" PRId64,
             contextId);
+        return;
     }
     auto nativeImagedata = FFIData::GetData<NativeImageData>(dataId);
     if (nativeImagedata == nullptr) {
@@ -1202,6 +1204,7 @@ void FfiOHOSAceFrameworkRenderingContextTransferFromImageBitmap(int64_t contextI
         LOGE("NativeCanvasRenderer TransferFromImageBitmap error, Cannot get NativeCanvasRenderer by id: "
              "%{public}" PRId64,
             contextId);
+        return;
     }
     auto renderImage = FFIData::GetData<CJRenderImage>(imageId);
     if (renderImage == nullptr) {
