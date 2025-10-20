@@ -17,7 +17,10 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CONTAINER_PICKER_CONTAINER_PICKER_PAINT_METHOD_H
 
 #include "base/memory/ace_type.h"
+#include "core/components_ng/pattern/container_picker/container_picker_layout_property.h"
+#include "core/components_ng/pattern/container_picker/container_picker_utils.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_method.h"
+#include "core/components_ng/render/divider_painter.h"
 #include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
@@ -30,13 +33,20 @@ public:
     ~ContainerPickerPaintMethod() override = default;
 
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
+    CanvasDrawFunction GetForegroundDrawFunction(PaintWrapper* paintWrapper) override;
 
     void SetSafeAreaPadding(PaddingPropertyF& value)
     {
         safeAreaPadding_ = value;
     }
+
 private:
     void ClipPadding(PaintWrapper* paintWrapper, RSCanvas& canvas) const;
+    void PaintSelectionIndicatorBackground(PaintWrapper* paintWrapper, RSCanvas& canvas) const;
+    void PaintSelectionIndicatorDivider(PaintWrapper* paintWrapper, RSCanvas& canvas) const;
+
+    void CheckMarginAndLength(float& length, double& startMargin, double& endMargin) const;
+
     PaddingPropertyF safeAreaPadding_;
 };
 } // namespace OHOS::Ace::NG
