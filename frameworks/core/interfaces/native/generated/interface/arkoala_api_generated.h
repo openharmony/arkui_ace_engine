@@ -1222,6 +1222,8 @@ typedef struct Callback_OnContextMenuShowEvent_Boolean Callback_OnContextMenuSho
 typedef struct Opt_Callback_OnContextMenuShowEvent_Boolean Opt_Callback_OnContextMenuShowEvent_Boolean;
 typedef struct Callback_OnDataResubmittedEvent_Void Callback_OnDataResubmittedEvent_Void;
 typedef struct Opt_Callback_OnDataResubmittedEvent_Void Opt_Callback_OnDataResubmittedEvent_Void;
+typedef struct Callback_OnDestory_Void Callback_OnDestory_Void;
+typedef struct Opt_Callback_OnDestory_Void Opt_Callback_OnDestory_Void;
 typedef struct Callback_OnDownloadStartEvent_Void Callback_OnDownloadStartEvent_Void;
 typedef struct Opt_Callback_OnDownloadStartEvent_Void Opt_Callback_OnDownloadStartEvent_Void;
 typedef struct Callback_OnErrorReceiveEvent_Void Callback_OnErrorReceiveEvent_Void;
@@ -10191,6 +10193,16 @@ typedef struct Opt_Callback_OnDataResubmittedEvent_Void {
     Ark_Tag tag;
     Callback_OnDataResubmittedEvent_Void value;
 } Opt_Callback_OnDataResubmittedEvent_Void;
+typedef struct Callback_OnDestory_Void {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_Int64 nodeId);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int64 nodeId);
+} Callback_OnDestory_Void;
+typedef struct Opt_Callback_OnDestory_Void {
+    Ark_Tag tag;
+    Callback_OnDestory_Void value;
+} Opt_Callback_OnDestory_Void;
 typedef struct Callback_OnDownloadStartEvent_Void {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -25857,6 +25869,8 @@ typedef struct GENERATED_ArkUINodeContainerOpsAccessor {
                         const Callback_Void* value);
     void (*setOnTouchEvent)(Ark_NativePointer self,
                             const Opt_Callback_TouchEvent_Void* value);
+    void (*setOnDestoryEvent)(Ark_NativePointer self,
+                              const Callback_OnDestory_Void* value);
 } GENERATED_ArkUINodeContainerOpsAccessor;
 
 typedef struct GENERATED_ArkUINodeContentExtenderAccessor {

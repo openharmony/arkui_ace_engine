@@ -31817,6 +31817,12 @@ void impl_NodeContainerOps_setOnTouchEvent(Ark_NativePointer self, KSerializerBu
         GetAccessors()->getNodeContainerOpsAccessor()->setOnTouchEvent(self, static_cast<Opt_Callback_TouchEvent_Void*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(NodeContainerOps_setOnTouchEvent, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_NodeContainerOps_setOnDestoryEvent(Ark_NativePointer self, KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        Callback_OnDestory_Void valueValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Int64 nodeId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_OnDestory_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int64 nodeId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_OnDestory_Void))))};;
+        GetAccessors()->getNodeContainerOpsAccessor()->setOnDestoryEvent(self, static_cast<Callback_OnDestory_Void*>(&valueValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(NodeContainerOps_setOnDestoryEvent, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_NodeContentExtender_constructorNodeContent() {
         return GetAccessors()->getNodeContentExtenderAccessor()->constructorNodeContent();
 }
