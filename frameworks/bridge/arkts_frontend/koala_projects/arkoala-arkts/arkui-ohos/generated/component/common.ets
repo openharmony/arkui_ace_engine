@@ -6419,9 +6419,9 @@ export enum SourceTool {
     Finger = 1,
     PEN = 2,
     Pen = 2,
-    MOUSE = 3,
-    TOUCHPAD = 4,
-    JOYSTICK = 5
+    MOUSE = 7,
+    TOUCHPAD = 9,
+    JOYSTICK = 10
 }
 export enum RepeatMode {
     REPEAT = 0,
