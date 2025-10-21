@@ -1093,7 +1093,7 @@ export class ScrollToIndexOptions_serializer {
         const extraOffsetTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let extraOffsetTmpBuf : LengthMetrics | undefined = undefined
         if ((extraOffsetTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            extraOffsetTmpBuf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+            extraOffsetTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
         }
         const extraOffsetTmpResult : LengthMetrics | undefined = extraOffsetTmpBuf
         let value : ScrollToIndexOptions = ({extraOffset: extraOffsetTmpResult} as ScrollToIndexOptions)

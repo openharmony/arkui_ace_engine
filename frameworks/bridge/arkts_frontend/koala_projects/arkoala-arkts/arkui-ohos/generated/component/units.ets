@@ -582,7 +582,7 @@ export class DividerStyleOptions_serializer {
         const strokeWidthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let strokeWidthTmpBuf : LengthMetrics | undefined = undefined
         if ((strokeWidthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            strokeWidthTmpBuf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+            strokeWidthTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
         }
         const strokeWidthTmpResult : LengthMetrics | undefined = strokeWidthTmpBuf
         const colorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -607,13 +607,13 @@ export class DividerStyleOptions_serializer {
         const startMarginTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let startMarginTmpBuf : LengthMetrics | undefined = undefined
         if ((startMarginTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            startMarginTmpBuf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+            startMarginTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
         }
         const startMarginTmpResult : LengthMetrics | undefined = startMarginTmpBuf
         const endMarginTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let endMarginTmpBuf : LengthMetrics | undefined = undefined
         if ((endMarginTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            endMarginTmpBuf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+            endMarginTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
         }
         const endMarginTmpResult : LengthMetrics | undefined = endMarginTmpBuf
         const modeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -911,25 +911,25 @@ export class LocalizedBorderRadiuses_serializer {
         const topStartTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let topStartTmpBuf : LengthMetrics | undefined = undefined
         if ((topStartTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            topStartTmpBuf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+            topStartTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
         }
         const topStartTmpResult : LengthMetrics | undefined = topStartTmpBuf
         const topEndTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let topEndTmpBuf : LengthMetrics | undefined = undefined
         if ((topEndTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            topEndTmpBuf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+            topEndTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
         }
         const topEndTmpResult : LengthMetrics | undefined = topEndTmpBuf
         const bottomStartTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let bottomStartTmpBuf : LengthMetrics | undefined = undefined
         if ((bottomStartTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            bottomStartTmpBuf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+            bottomStartTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
         }
         const bottomStartTmpResult : LengthMetrics | undefined = bottomStartTmpBuf
         const bottomEndTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let bottomEndTmpBuf : LengthMetrics | undefined = undefined
         if ((bottomEndTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            bottomEndTmpBuf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+            bottomEndTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
         }
         const bottomEndTmpResult : LengthMetrics | undefined = bottomEndTmpBuf
         let value : LocalizedBorderRadiuses = ({topStart: topStartTmpResult, topEnd: topEndTmpResult, bottomStart: bottomStartTmpResult, bottomEnd: bottomEndTmpResult} as LocalizedBorderRadiuses)
@@ -1159,25 +1159,25 @@ export class LocalizedEdges_serializer {
         const topTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let topTmpBuf : LengthMetrics | undefined = undefined
         if ((topTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            topTmpBuf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+            topTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
         }
         const topTmpResult : LengthMetrics | undefined = topTmpBuf
         const startTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let startTmpBuf : LengthMetrics | undefined = undefined
         if ((startTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            startTmpBuf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+            startTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
         }
         const startTmpResult : LengthMetrics | undefined = startTmpBuf
         const bottomTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let bottomTmpBuf : LengthMetrics | undefined = undefined
         if ((bottomTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            bottomTmpBuf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+            bottomTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
         }
         const bottomTmpResult : LengthMetrics | undefined = bottomTmpBuf
         const endTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let endTmpBuf : LengthMetrics | undefined = undefined
         if ((endTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            endTmpBuf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+            endTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
         }
         const endTmpResult : LengthMetrics | undefined = endTmpBuf
         let value : LocalizedEdges = ({top: topTmpResult, start: startTmpResult, bottom: bottomTmpResult, end: endTmpResult} as LocalizedEdges)
@@ -1225,25 +1225,25 @@ export class LocalizedEdgeWidths_serializer {
         const topTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let topTmpBuf : LengthMetrics | undefined = undefined
         if ((topTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            topTmpBuf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+            topTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
         }
         const topTmpResult : LengthMetrics | undefined = topTmpBuf
         const endTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let endTmpBuf : LengthMetrics | undefined = undefined
         if ((endTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            endTmpBuf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+            endTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
         }
         const endTmpResult : LengthMetrics | undefined = endTmpBuf
         const bottomTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let bottomTmpBuf : LengthMetrics | undefined = undefined
         if ((bottomTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            bottomTmpBuf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+            bottomTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
         }
         const bottomTmpResult : LengthMetrics | undefined = bottomTmpBuf
         const startTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let startTmpBuf : LengthMetrics | undefined = undefined
         if ((startTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            startTmpBuf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+            startTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
         }
         const startTmpResult : LengthMetrics | undefined = startTmpBuf
         let value : LocalizedEdgeWidths = ({top: topTmpResult, end: endTmpResult, bottom: bottomTmpResult, start: startTmpResult} as LocalizedEdgeWidths)
@@ -1291,25 +1291,25 @@ export class LocalizedPadding_serializer {
         const topTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let topTmpBuf : LengthMetrics | undefined = undefined
         if ((topTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            topTmpBuf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+            topTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
         }
         const topTmpResult : LengthMetrics | undefined = topTmpBuf
         const endTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let endTmpBuf : LengthMetrics | undefined = undefined
         if ((endTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            endTmpBuf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+            endTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
         }
         const endTmpResult : LengthMetrics | undefined = endTmpBuf
         const bottomTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let bottomTmpBuf : LengthMetrics | undefined = undefined
         if ((bottomTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            bottomTmpBuf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+            bottomTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
         }
         const bottomTmpResult : LengthMetrics | undefined = bottomTmpBuf
         const startTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let startTmpBuf : LengthMetrics | undefined = undefined
         if ((startTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            startTmpBuf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+            startTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
         }
         const startTmpResult : LengthMetrics | undefined = startTmpBuf
         let value : LocalizedPadding = ({top: topTmpResult, end: endTmpResult, bottom: bottomTmpResult, start: startTmpResult} as LocalizedPadding)
@@ -1341,13 +1341,13 @@ export class LocalizedPosition_serializer {
         const startTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let startTmpBuf : LengthMetrics | undefined = undefined
         if ((startTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            startTmpBuf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+            startTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
         }
         const startTmpResult : LengthMetrics | undefined = startTmpBuf
         const topTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let topTmpBuf : LengthMetrics | undefined = undefined
         if ((topTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            topTmpBuf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+            topTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
         }
         const topTmpResult : LengthMetrics | undefined = topTmpBuf
         let value : LocalizedPosition = ({start: startTmpResult, top: topTmpResult} as LocalizedPosition)
@@ -3293,7 +3293,7 @@ export class BorderOptions_serializer {
             if (dashGapTmpBuf_UnionSelector == (0).toChar()) {
                 dashGapTmpBuf_ = EdgeWidths_serializer.read(valueDeserializer)
             } else if (dashGapTmpBuf_UnionSelector == (1).toChar()) {
-                dashGapTmpBuf_ = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+                dashGapTmpBuf_ = LengthMetrics_serializer.read(valueDeserializer)
             } else if (dashGapTmpBuf_UnionSelector == (2).toChar()) {
                 dashGapTmpBuf_ = LocalizedEdgeWidths_serializer.read(valueDeserializer)
             } else {
@@ -3310,7 +3310,7 @@ export class BorderOptions_serializer {
             if (dashWidthTmpBuf_UnionSelector == (0).toChar()) {
                 dashWidthTmpBuf_ = EdgeWidths_serializer.read(valueDeserializer)
             } else if (dashWidthTmpBuf_UnionSelector == (1).toChar()) {
-                dashWidthTmpBuf_ = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+                dashWidthTmpBuf_ = LengthMetrics_serializer.read(valueDeserializer)
             } else if (dashWidthTmpBuf_UnionSelector == (2).toChar()) {
                 dashWidthTmpBuf_ = LocalizedEdgeWidths_serializer.read(valueDeserializer)
             } else {

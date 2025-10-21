@@ -881,7 +881,11 @@ Ark_UICommonEvent GetCommonEventImpl(Ark_FrameNode peer)
     ret->node = peer->node;
     return ret;
 }
-
+Ark_NativePointer GetRenderNodeImpl(Ark_NativePointer peer)
+{
+    auto nodePeer = reinterpret_cast<FrameNodePeer*>(peer);
+    return nodePeer->GetRenderNodePeer();
+}
 void ParseArrayFailNumber(std::vector<float>& indexes)
 {
     indexes.clear();
@@ -980,6 +984,7 @@ const GENERATED_ArkUIFrameNodeExtenderAccessor* GetFrameNodeExtenderAccessor()
         FrameNodeExtenderAccessor::CreateByRawPtrImpl,
         FrameNodeExtenderAccessor::UnWrapRawPtrImpl,
         FrameNodeExtenderAccessor::GetCommonEventImpl,
+        FrameNodeExtenderAccessor::GetRenderNodeImpl,
         FrameNodeExtenderAccessor::ConvertPointImpl,
     };
     return &FrameNodeExtenderAccessorImpl;

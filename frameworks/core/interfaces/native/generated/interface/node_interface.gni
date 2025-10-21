@@ -207,6 +207,7 @@ generated_sources = [
   "implementation/refresh_modifier.cpp",
   "implementation/relative_container_modifier.cpp",
   "implementation/remote_window_modifier.cpp",
+  "implementation/render_node_extender_accessor.cpp",
   "implementation/render_service_node_accessor.cpp",
   "implementation/rendering_context_settings_accessor.cpp",
   "implementation/replace_symbol_effect_accessor.cpp",
