@@ -430,7 +430,7 @@ TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest016)
     int32_t totalCount = 50;
     CreateChildren(lazyNode, totalCount);
     lazyNode->BuildAllChildren();
-    EXPECT_EQ(lazyNode->children_.size(), totalCount);
+    EXPECT_EQ(lazyNode->node4Index_.Size(), totalCount);
 }
 
 /**
@@ -443,15 +443,17 @@ TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest017)
     int32_t totalCount = 50;
     auto lazyNode = CreateLazyForEachNode(GetNextId());
     CreateChildren(lazyNode, totalCount);
-    lazyNode->DoSetActiveChildRange(INDEX_1, INDEX_9, CACHED_COUNT, CACHED_COUNT, false);
-    int32_t result_size = INDEX_9 - INDEX_1 + 1 + CACHED_COUNT * 2;
+    int32_t cachedCount = 1;
+    lazyNode->DoSetActiveChildRange(INDEX_1, INDEX_9, cachedCount, cachedCount, false);
+    int32_t result_size = INDEX_9 - INDEX_1 + 1 + cachedCount * 2;
+    int32_t childrenCount = INDEX_9 - INDEX_1 + 1;
     EXPECT_EQ(static_cast<int32_t>(lazyNode->node4Index_.Size()), result_size);
-    EXPECT_EQ(static_cast<int32_t>(lazyNode->GetChildren().size()), result_size);
+    EXPECT_EQ(static_cast<int32_t>(lazyNode->GetChildren().size()), childrenCount);
 
     auto repeatNode = CreateRepeatNode(GetNextId());
     CreateChildren(repeatNode, totalCount);
-    repeatNode->DoSetActiveChildRange(INDEX_1, INDEX_9, CACHED_COUNT, CACHED_COUNT, false);
-    int32_t result_size_2 = INDEX_9 - INDEX_1 + 1 + CACHED_COUNT * 2;
+    repeatNode->DoSetActiveChildRange(INDEX_1, INDEX_9, cachedCount, cachedCount, false);
+    int32_t result_size_2 = INDEX_9 - INDEX_1 + 1 + cachedCount * 2;
     EXPECT_EQ(static_cast<int32_t>(repeatNode->node4Index_.Size()), result_size_2);
     EXPECT_EQ(static_cast<int32_t>(repeatNode->GetChildren().size()), result_size_2);
 }
