@@ -2210,7 +2210,7 @@ void ResetEnableSelectedDataDetector(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    WebModelNG::SetEnableSelectedDataDetector(frameNode, DEFAULT_ENABLE_DATA_DETECTOR);
+    WebModelNG::SetEnableSelectedDataDetector(frameNode, DEFAULT_ENABLE_SELECTED_DATA_DETECTOR);
 }
 
 void SetSelectedDataDetectorConfigWithEvent(

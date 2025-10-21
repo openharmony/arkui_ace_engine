@@ -4683,9 +4683,9 @@ HWTEST_F(WebModelTestNg, SetEnableSelectedDataDetector001, TestSize.Level1)
     ASSERT_NE(webPattern, nullptr);
     WebModelNG webModelNG;
     webModelNG.SetEnableSelectedDataDetector(true);
-    EXPECT_TRUE(webPattern->GetOrCreateWebProperty()->UpdateEnableSelectedDataDetector(true));
+    EXPECT_TRUE(webPattern->GetOrCreateWebProperty()->CheckEnableSelectedDataDetector(true));
     webModelNG.SetEnableSelectedDataDetector(AccessibilityManager::RawPtr(frameNode), false);
-    EXPECT_TRUE(webPattern->GetOrCreateWebProperty()->UpdateEnableSelectedDataDetector(false));
+    EXPECT_TRUE(webPattern->GetOrCreateWebProperty()->CheckEnableSelectedDataDetector(false));
 #endif
 }
 
@@ -4709,11 +4709,11 @@ HWTEST_F(WebModelTestNg, SetSelectedDataDetectorConfig001, TestSize.Level1)
     ASSERT_NE(webPattern, nullptr);
     WebModelNG webModelNG;
     webModelNG.SetEnableSelectedDataDetector(true);
-    EXPECT_TRUE(webPattern->GetOrCreateWebProperty()->UpdateEnableSelectedDataDetector(true));
+    EXPECT_TRUE(webPattern->GetOrCreateWebProperty()->CheckEnableSelectedDataDetector(true));
     TextDetectConfig config;
     webModelNG.SetSelectedDataDetectorConfig(config);
     webModelNG.SetSelectedDataDetectorConfig(AccessibilityManager::RawPtr(frameNode), config);
-    EXPECT_TRUE(webPattern->GetOrCreateWebProperty()->UpdateEnableSelectedDataDetector(false));
+    EXPECT_TRUE(webPattern->GetOrCreateWebProperty()->CheckEnableSelectedDataDetector(true));
 #endif
 }
 

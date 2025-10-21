@@ -32236,8 +32236,8 @@ class ArkWebComponent extends ArkComponent {
     return this;
   }
   selectedDataDetectorConfig(config) {
-    if (config !== undefined || config !== null) {
-      let detectorConfig = new TextDataDetectorConfig();
+    let detectorConfig = new TextDataDetectorConfig();
+    if (config !== undefined && config !== null) {
       detectorConfig.types = config.types;
     }
     modifierWithKey(this._modifiersWithKeys, WebSelectedDataDetectorConfigModifier.identity, WebSelectedDataDetectorConfigModifier, detectorConfig);
