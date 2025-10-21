@@ -3527,13 +3527,13 @@ export enum PdfLoadResult {
     PARSE_ERROR_HANDLER = 4
 }
 export interface SelectionMenuOptionsExt {
-    onAppear?: (() => void);
-    onDisappear?: (() => void);
+    onAppear?: VoidCallback;
+    onDisappear?: VoidCallback;
     preview?: CustomBuilder;
     menuType?: MenuType;
     previewMenuOptions?: PreviewMenuOptions;
-    onMenuShow?: (() => void);
-    onMenuHide?: (() => void);
+    onMenuShow?: VoidCallback;
+    onMenuHide?: VoidCallback;
 }
 export interface BlankScreenDetails {
     detectedContentfulNodesCount?: int32;
@@ -7711,7 +7711,7 @@ export class SelectionMenuOptionsExt_serializer {
     public static read(buffer: DeserializerBase): SelectionMenuOptionsExt {
         let valueDeserializer : DeserializerBase = buffer
         const onAppearTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let onAppearTmpBuf : (() => void) | undefined = undefined
+        let onAppearTmpBuf : VoidCallback | undefined = undefined
         if ((onAppearTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const onAppearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onAppearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
@@ -7721,14 +7721,14 @@ export class SelectionMenuOptionsExt_serializer {
                 onAppearTmpBuf_BufArgsSerializer.writeInt32(onAppearTmpBuf_BufResource.resourceId);
                 onAppearTmpBuf_BufArgsSerializer.writePointer(onAppearTmpBuf_BufCall);
                 onAppearTmpBuf_BufArgsSerializer.writePointer(onAppearTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallbackSync(10, -1867723152, onAppearTmpBuf_BufArgsSerializer.asBuffer(), onAppearTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -2038961969, onAppearTmpBuf_BufArgsSerializer.asBuffer(), onAppearTmpBuf_BufArgsSerializer.length());
                 onAppearTmpBuf_BufArgsSerializer.release();
                 return;
             }
         }
-        const onAppearTmpResult : (() => void) | undefined = onAppearTmpBuf
+        const onAppearTmpResult : VoidCallback | undefined = onAppearTmpBuf
         const onDisappearTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let onDisappearTmpBuf : (() => void) | undefined = undefined
+        let onDisappearTmpBuf : VoidCallback | undefined = undefined
         if ((onDisappearTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const onDisappearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onDisappearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
@@ -7738,12 +7738,12 @@ export class SelectionMenuOptionsExt_serializer {
                 onDisappearTmpBuf_BufArgsSerializer.writeInt32(onDisappearTmpBuf_BufResource.resourceId);
                 onDisappearTmpBuf_BufArgsSerializer.writePointer(onDisappearTmpBuf_BufCall);
                 onDisappearTmpBuf_BufArgsSerializer.writePointer(onDisappearTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallbackSync(10, -1867723152, onDisappearTmpBuf_BufArgsSerializer.asBuffer(), onDisappearTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -2038961969, onDisappearTmpBuf_BufArgsSerializer.asBuffer(), onDisappearTmpBuf_BufArgsSerializer.length());
                 onDisappearTmpBuf_BufArgsSerializer.release();
                 return;
             }
         }
-        const onDisappearTmpResult : (() => void) | undefined = onDisappearTmpBuf
+        const onDisappearTmpResult : VoidCallback | undefined = onDisappearTmpBuf
         const previewTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let previewTmpBuf : CustomBuilder | undefined = undefined
         if ((previewTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -7774,7 +7774,7 @@ export class SelectionMenuOptionsExt_serializer {
         }
         const previewMenuOptionsTmpResult : PreviewMenuOptions | undefined = previewMenuOptionsTmpBuf
         const onMenuShowTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let onMenuShowTmpBuf : (() => void) | undefined = undefined
+        let onMenuShowTmpBuf : VoidCallback | undefined = undefined
         if ((onMenuShowTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const onMenuShowTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onMenuShowTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
@@ -7784,14 +7784,14 @@ export class SelectionMenuOptionsExt_serializer {
                 onMenuShowTmpBuf_BufArgsSerializer.writeInt32(onMenuShowTmpBuf_BufResource.resourceId);
                 onMenuShowTmpBuf_BufArgsSerializer.writePointer(onMenuShowTmpBuf_BufCall);
                 onMenuShowTmpBuf_BufArgsSerializer.writePointer(onMenuShowTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallbackSync(10, -1867723152, onMenuShowTmpBuf_BufArgsSerializer.asBuffer(), onMenuShowTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -2038961969, onMenuShowTmpBuf_BufArgsSerializer.asBuffer(), onMenuShowTmpBuf_BufArgsSerializer.length());
                 onMenuShowTmpBuf_BufArgsSerializer.release();
                 return;
             }
         }
-        const onMenuShowTmpResult : (() => void) | undefined = onMenuShowTmpBuf
+        const onMenuShowTmpResult : VoidCallback | undefined = onMenuShowTmpBuf
         const onMenuHideTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let onMenuHideTmpBuf : (() => void) | undefined = undefined
+        let onMenuHideTmpBuf : VoidCallback | undefined = undefined
         if ((onMenuHideTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const onMenuHideTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onMenuHideTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
@@ -7801,12 +7801,12 @@ export class SelectionMenuOptionsExt_serializer {
                 onMenuHideTmpBuf_BufArgsSerializer.writeInt32(onMenuHideTmpBuf_BufResource.resourceId);
                 onMenuHideTmpBuf_BufArgsSerializer.writePointer(onMenuHideTmpBuf_BufCall);
                 onMenuHideTmpBuf_BufArgsSerializer.writePointer(onMenuHideTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallbackSync(10, -1867723152, onMenuHideTmpBuf_BufArgsSerializer.asBuffer(), onMenuHideTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -2038961969, onMenuHideTmpBuf_BufArgsSerializer.asBuffer(), onMenuHideTmpBuf_BufArgsSerializer.length());
                 onMenuHideTmpBuf_BufArgsSerializer.release();
                 return;
             }
         }
-        const onMenuHideTmpResult : (() => void) | undefined = onMenuHideTmpBuf
+        const onMenuHideTmpResult : VoidCallback | undefined = onMenuHideTmpBuf
         let value : SelectionMenuOptionsExt = ({onAppear: onAppearTmpResult, onDisappear: onDisappearTmpResult, preview: previewTmpResult, menuType: menuTypeTmpResult, previewMenuOptions: previewMenuOptionsTmpResult, onMenuShow: onMenuShowTmpResult, onMenuHide: onMenuHideTmpResult} as SelectionMenuOptionsExt)
         return value
     }

@@ -2273,7 +2273,7 @@ void InitCallbackParams_(FrameNode* frameNode,
     const std::shared_ptr<WebPreviewSelectionMenuParam>& dst, const Ark_SelectionMenuOptionsExt& options)
 {
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto arkOnDisappear = Converter::OptConvert<Callback_Void>(options.onDisappear);
+    auto arkOnDisappear = Converter::OptConvert<VoidCallback>(options.onDisappear);
     if (arkOnDisappear) {
         auto onDisappear = [arkCallback = CallbackHelper(arkOnDisappear.value()), weakNode]() {
             PipelineContext::SetCallBackNode(weakNode);
@@ -2281,7 +2281,7 @@ void InitCallbackParams_(FrameNode* frameNode,
         };
         dst->menuParam.onDisappear = std::move(onDisappear);
     }
-    auto arkOnAppear = Converter::OptConvert<Callback_Void>(options.onAppear);
+    auto arkOnAppear = Converter::OptConvert<VoidCallback>(options.onAppear);
     if (arkOnAppear) {
         auto onAppear = [arkCallback = CallbackHelper(arkOnAppear.value()), weakNode]() {
             PipelineContext::SetCallBackNode(weakNode);
@@ -2289,14 +2289,14 @@ void InitCallbackParams_(FrameNode* frameNode,
         };
         dst->menuParam.onAppear = std::move(onAppear);
     }
-    auto arkOnMenuShow = Converter::OptConvert<Callback_Void>(options.onMenuShow);
+    auto arkOnMenuShow = Converter::OptConvert<VoidCallback>(options.onMenuShow);
     if (arkOnMenuShow) {
         dst->onMenuShow = [arkCallback = CallbackHelper(arkOnMenuShow.value()), weakNode]() {
             PipelineContext::SetCallBackNode(weakNode);
             arkCallback.InvokeSync();
         };
     }
-    auto arkOnMenuHide = Converter::OptConvert<Callback_Void>(options.onMenuHide);
+    auto arkOnMenuHide = Converter::OptConvert<VoidCallback>(options.onMenuHide);
     if (arkOnMenuHide) {
         dst->onMenuHide = [arkCallback = CallbackHelper(arkOnMenuHide.value()), weakNode]() {
             PipelineContext::SetCallBackNode(weakNode);
