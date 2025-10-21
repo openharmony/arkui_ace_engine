@@ -85,6 +85,9 @@ import { GlobalScope } from "./../framework/GlobalScope"
 import { ComponentContentBase_serializer } from "./../ComponentContent"
 import { curves_ICurve_serializer } from "./../framework/ohos.curves"
 import { LevelOrder_serializer } from "./../framework/ohos.promptAction"
+import { TimePickerDialogOptions_serializer, TimePickerDialogOptions } from "./timePicker"
+import { TextPickerDialogOptions_serializer, TextPickerDialogOptions } from "./textPicker"
+import { DatePickerDialogOptions_serializer, DatePickerDialogOptions } from "./datePicker"
 export class ActionSheet {
     static show_serialize(options: ActionSheetOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
@@ -120,6 +123,41 @@ export class AlertDialog {
     public static show(options: AlertDialogParamWithConfirm | AlertDialogParamWithButtons | AlertDialogParamWithOptions): void {
         const options_casted = options as (AlertDialogParamWithConfirm | AlertDialogParamWithButtons | AlertDialogParamWithOptions)
         AlertDialog.show_serialize(options_casted)
+        return
+    }
+}
+export class DialogExtender {
+    static showTimePickerDialog_serialize(options: TimePickerDialogOptions): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        TimePickerDialogOptions_serializer.write(thisSerializer, options)
+        ArkUIGeneratedNativeModule._DialogExtender_showTimePickerDialog(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static showTextPickerDialog_serialize(options: TextPickerDialogOptions): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        TextPickerDialogOptions_serializer.write(thisSerializer, options)
+        ArkUIGeneratedNativeModule._DialogExtender_showTextPickerDialog(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static showDatePickerDialog_serialize(options: DatePickerDialogOptions): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        DatePickerDialogOptions_serializer.write(thisSerializer, options)
+        ArkUIGeneratedNativeModule._DialogExtender_showDatePickerDialog(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    public static showTimePickerDialog(options: TimePickerDialogOptions): void {
+        const options_casted = options as (TimePickerDialogOptions)
+        DialogExtender.showTimePickerDialog_serialize(options_casted)
+        return
+    }
+    public static showTextPickerDialog(options: TextPickerDialogOptions): void {
+        const options_casted = options as (TextPickerDialogOptions)
+        DialogExtender.showTextPickerDialog_serialize(options_casted)
+        return
+    }
+    public static showDatePickerDialog(options: DatePickerDialogOptions): void {
+        const options_casted = options as (DatePickerDialogOptions)
+        DialogExtender.showDatePickerDialog_serialize(options_casted)
         return
     }
 }

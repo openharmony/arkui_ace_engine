@@ -3832,6 +3832,12 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _DecorationStyle_getStyle(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
+    native static _DialogExtender_showTimePickerDialog(thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _DialogExtender_showTextPickerDialog(thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _DialogExtender_showDatePickerDialog(thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _DisappearSymbolEffect_construct(thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
     native static _DisappearSymbolEffect_getFinalizer(): KPointer

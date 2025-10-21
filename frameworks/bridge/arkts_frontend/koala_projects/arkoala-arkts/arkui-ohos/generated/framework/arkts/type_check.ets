@@ -61,7 +61,7 @@ import { default as webview } from "@ohos.web.webview"
 import { default as curves } from "@ohos.curves"
 import { CustomDialogController, CustomDialogControllerOptions, CustomDialogControllerExternalOptions } from "./../../component/customDialogController"
 import { DataPanelType, ColorStop, LinearGradient, DataPanelConfiguration, DataPanelOptions, DataPanelShadowOptions } from "./../../component/dataPanel"
-import { DatePickerDialog, DatePickerMode, DatePickerDialogOptions, DatePickerOptions } from "./../../component/datePicker"
+import { DatePickerDialog, DatePickerMode, DatePickerDialogOptions, DatePickerOptions, LunarSwitchStyle } from "./../../component/datePicker"
 import { DialogAlignment, DialogButtonDirection, AlertDialogParamWithConfirm, AlertDialogParamWithButtons, AlertDialogParamWithOptions, AlertDialogTextStyleOptions, AlertDialogButtonBaseOptions, AlertDialogButtonOptions, AlertDialogParam } from "./../../component/alertDialog"
 import { DistributionType, DisturbanceFieldShape, ParticleEmitterShape, ParticleType, ParticleUpdater, VelocityOptions, ParticleColorOptions, PointParticleParameters, ImageParticleParameters, EmitterParticleOptions, ParticleConfigs, ParticlePropertyAnimation } from "./../../component/particle"
 import { DpiFollowStrategy, UIExtensionProxy, WindowModeFollowStrategy, UIExtensionOptions } from "./../../component/uiExtensionComponent"
@@ -810,6 +810,9 @@ export class TypeChecker {
     }
     static isDatePickerDialog(value: Object | string | number | undefined): boolean {
         return value instanceof DatePickerDialog
+    }
+    static isDatePickerDialogOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean, arg10: boolean, arg11: boolean, arg12: boolean, arg13: boolean, arg14: boolean, arg15: boolean, arg16: boolean, arg17: boolean, arg18: boolean, arg19: boolean, arg20: boolean, arg21: boolean, arg22: boolean, arg23: boolean, arg24: boolean, arg25: boolean, arg26: boolean, arg27: boolean, arg28: boolean): boolean {
+        return value instanceof DatePickerDialogOptions
     }
     static isDatePickerMode(value: Object | string | number | undefined): boolean {
         return value instanceof DatePickerMode
@@ -1689,6 +1692,9 @@ export class TypeChecker {
     }
     static isLongPressRecognizer(value: Object | string | number | undefined): boolean {
         return value instanceof LongPressRecognizer
+    }
+    static isLunarSwitchStyle(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
+        return value instanceof LunarSwitchStyle
     }
     static isMarkStyle(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
         return value instanceof MarkStyle
@@ -3130,6 +3136,9 @@ export class TypeChecker {
     static isTextPickerDialog(value: Object | string | number | undefined): boolean {
         return value instanceof TextPickerDialog
     }
+    static isTextPickerDialogOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean, arg10: boolean, arg11: boolean, arg12: boolean, arg13: boolean, arg14: boolean, arg15: boolean, arg16: boolean, arg17: boolean, arg18: boolean, arg19: boolean, arg20: boolean, arg21: boolean, arg22: boolean, arg23: boolean, arg24: boolean, arg25: boolean, arg26: boolean, arg27: boolean, arg28: boolean): boolean {
+        return value instanceof TextPickerDialogOptions
+    }
     static isTextPickerOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean): boolean {
         return value instanceof TextPickerOptions
     }
@@ -3180,6 +3189,9 @@ export class TypeChecker {
     }
     static isTimePickerDialog(value: Object | string | number | undefined): boolean {
         return value instanceof TimePickerDialog
+    }
+    static isTimePickerDialogOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean, arg10: boolean, arg11: boolean, arg12: boolean, arg13: boolean, arg14: boolean, arg15: boolean, arg16: boolean, arg17: boolean, arg18: boolean, arg19: boolean, arg20: boolean, arg21: boolean, arg22: boolean, arg23: boolean, arg24: boolean, arg25: boolean, arg26: boolean): boolean {
+        return value instanceof TimePickerDialogOptions
     }
     static isTimePickerFormat(value: Object | string | number | undefined): boolean {
         return value instanceof TimePickerFormat

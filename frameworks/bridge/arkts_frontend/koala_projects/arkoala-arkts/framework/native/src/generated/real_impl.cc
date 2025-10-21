@@ -12498,6 +12498,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     } // DecorationStyleAccessor
+    namespace DialogExtenderAccessor {
+    void ShowTimePickerDialogImpl(const Ark_TimePickerDialogOptions* options)
+    {
+    }
+    void ShowTextPickerDialogImpl(const Ark_TextPickerDialogOptions* options)
+    {
+    }
+    void ShowDatePickerDialogImpl(const Ark_DatePickerDialogOptions* options)
+    {
+    }
+    } // DialogExtenderAccessor
     namespace DisappearSymbolEffectAccessor {
     void DestroyPeerImpl(Ark_DisappearSymbolEffect peer)
     {
@@ -19145,6 +19156,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct DecorationStylePeer {
         virtual ~DecorationStylePeer() = default;
     };
+    const GENERATED_ArkUIDialogExtenderAccessor* GetDialogExtenderAccessor()
+    {
+        static const GENERATED_ArkUIDialogExtenderAccessor DialogExtenderAccessorImpl {
+            DialogExtenderAccessor::ShowTimePickerDialogImpl,
+            DialogExtenderAccessor::ShowTextPickerDialogImpl,
+            DialogExtenderAccessor::ShowDatePickerDialogImpl,
+        };
+        return &DialogExtenderAccessorImpl;
+    }
+
     const GENERATED_ArkUIDisappearSymbolEffectAccessor* GetDisappearSymbolEffectAccessor()
     {
         static const GENERATED_ArkUIDisappearSymbolEffectAccessor DisappearSymbolEffectAccessorImpl {
@@ -21847,6 +21868,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetDataResubmissionHandlerAccessor,
             GetDatePickerDialogAccessor,
             GetDecorationStyleAccessor,
+            GetDialogExtenderAccessor,
             GetDisappearSymbolEffectAccessor,
             GetDismissDialogActionAccessor,
             GetDismissPopupActionAccessor,
