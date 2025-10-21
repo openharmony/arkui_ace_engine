@@ -21,17 +21,21 @@ import { ExtendableComponent } from '../../component/extendableComponent';
 
 export class MonitorFunctionDecorator implements IMonitorDecoratedVariable, IMonitor {
     public static readonly MIN_MONITOR_ID: RenderIdType = 0x20000000;
+    public static readonly MIN_SYNC_MONITOR_ID: RenderIdType = 0x25000000;
     public static nextWatchId_ = MonitorFunctionDecorator.MIN_MONITOR_ID;
+    public static nextSyncWatchId_ = MonitorFunctionDecorator.MIN_SYNC_MONITOR_ID;
     public readonly decorator: string;
     private readonly monitorFunction_: (m: IMonitor) => void;
     private readonly values_: MonitorValueInternal[] = new Array<MonitorValueInternal>();
     private readonly owningComponent_?: ExtendableComponent;
 
-    constructor(pathLambda: IMonitorPathInfo[], monitorFunction: (m: IMonitor) => void, owningView?: ExtendableComponent) {
+    constructor(pathLambda: IMonitorPathInfo[], monitorFunction: (m: IMonitor) => void, owningView?: ExtendableComponent, isSynchronous?: boolean) {
         this.monitorFunction_ = monitorFunction;
         this.owningComponent_ = owningView;
+        const isSync = isSynchronous ?? false;
+
         pathLambda.forEach((info: IMonitorPathInfo) => {
-            this.values_.push(new MonitorValueInternal(info.path, info.valueCallback, this));
+            this.values_.push(new MonitorValueInternal(info.path, info.valueCallback, this, isSync));
         });
         this.decorator = '@Monitor';
         this.readInitialMonitorValues();
@@ -112,6 +116,18 @@ export class MonitorFunctionDecorator implements IMonitorDecoratedVariable, IMon
         ObserveSingleton.instance.renderingComponentRef = renderingComponentRefBefore;
         return dirty;
     }
+
+    public unbindAllInternalValues(): void {
+        this.values_.forEach((value: MonitorValueInternal): void => {
+            ObserveSingleton.instance.finalizeComputedAndMonitorPath(value.weakThis);
+        });
+    }
+
+    get path(): string[] {
+        return this.values_.map(
+            (value: MonitorValueInternal): string => value.path
+        );
+    }
 }
 
 export class MonitorValueInternal implements IMonitorValue<Any>, ITrackedDecoratorRef {
@@ -126,8 +142,8 @@ export class MonitorValueInternal implements IMonitorValue<Any>, ITrackedDecorat
     private dirty_: boolean = false;
     private readonly lambda: () => Any;
 
-    constructor(path: string, lambda: () => Any, monitor: MonitorFunctionDecorator) {
-        this.id = MonitorFunctionDecorator.nextWatchId_++;
+    constructor(path: string, lambda: () => Any, monitor: MonitorFunctionDecorator, isSync: boolean) {
+        this.id = isSync ? MonitorFunctionDecorator.nextSyncWatchId_++ : MonitorFunctionDecorator.nextWatchId_++;
         this.path = path;
         this.lambda = lambda;
         this.weakThis = new WeakRef<ITrackedDecoratorRef>(this);
