@@ -237,7 +237,9 @@ export interface IMonitor {
     value<T>(path?: string): IMonitorValue<T> | undefined;
 }
 
-export interface IMonitorDecoratedVariable {}
+export interface IMonitorDecoratedVariable {
+    get path(): string[];
+}
 
 export interface IMonitorPathInfo {
     path: string;
