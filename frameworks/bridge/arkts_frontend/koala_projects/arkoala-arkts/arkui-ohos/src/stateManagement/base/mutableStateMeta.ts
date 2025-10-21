@@ -56,6 +56,7 @@ export class MutableStateMeta extends MutableStateMetaBase implements IMutableSt
     private bindingRefs_: Set<WeakRef<ITrackedDecoratorRef>>;
     weakThis: WeakRef<IBindingSource>;
     metaValue: int32;
+    private hasFired: boolean;
 
     constructor(info: string, metaDependency?: MutableState<int32>) {
         super(info);
@@ -63,18 +64,25 @@ export class MutableStateMeta extends MutableStateMetaBase implements IMutableSt
         this.bindingRefs_ = new Set<WeakRef<ITrackedDecoratorRef>>();
         this.weakThis = new WeakRef<IBindingSource>(this);
         this.metaValue = 0;
+        this.hasFired = false;
     }
 
     public addRef(): void {
+        const renderingComponent = ObserveSingleton.instance.renderingComponent;
+        if (renderingComponent <= ObserveSingleton.RenderingComponent) {
+            return;
+        }
+        // >= RenderingMonitor means Monitor/Computed/PersistentStorage
         if (
-            ObserveSingleton.instance.renderingComponent === ObserveSingleton.RenderingMonitor ||
-            ObserveSingleton.instance.renderingComponent === ObserveSingleton.RenderingComputed ||
-            ObserveSingleton.instance.renderingComponent === ObserveSingleton.RenderingPersistentStorage
+            renderingComponent >= ObserveSingleton.RenderingMonitor
         ) {
             this.bindingRefs_.add(ObserveSingleton.instance.renderingComponentRef!.weakThis);
             ObserveSingleton.instance.renderingComponentRef!.reverseBindings.add(this.weakThis);
         } else {
             this.__metaDependency!.value;
+        }
+        if (this.hasFired) {
+            this.hasFired = false;
         }
     }
 
@@ -92,8 +100,9 @@ export class MutableStateMeta extends MutableStateMetaBase implements IMutableSt
                 }
             });
         }
-        if (this.shouldFireChange()) {
+        if (!this.hasFired && this.shouldFireChange()) {
             ObserveSingleton.instance.changeMutableState(this);
+            this.hasFired = true;
             if (StateUpdateLoop.canRequestFrame) {
                 ArkUIAniModule._CustomNode_RequestFrame();
                 StateUpdateLoop.canRequestFrame = false;

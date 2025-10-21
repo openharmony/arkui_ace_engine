@@ -36,7 +36,6 @@ export class ParamOnceDecoratedVariable<T> extends DecoratedV2VariableBase imple
         if (value === newValue) {
             return;
         }
-        if (this.backing_.set(uiUtils.autoProxyObject(newValue, true) as T)) {
-        }
+        this.backing_.setNoCheck(uiUtils.autoProxyObject(newValue) as T);
     }
 }

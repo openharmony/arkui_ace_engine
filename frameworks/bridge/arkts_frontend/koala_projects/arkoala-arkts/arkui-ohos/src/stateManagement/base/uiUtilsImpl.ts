@@ -121,11 +121,10 @@ export class UIUtilsImpl {
         if (!allowDeep) {
             return this.makeV1Observed(value);
         } else if (!isAPI) {
-            return this.autoProxyObject(value, allowDeep, isAPI);
+            return this.autoProxyObject(value);
         } else {
-            return this.makeObserved(value, allowDeep, isAPI);
+            return this.makeObserved(value);
         }
-        
     }
 
     private static makeObservedWrappedBaseMap: Map<string, (value: object, allowDeep: boolean, isAPI: boolean) => object> = 
@@ -137,66 +136,72 @@ export class UIUtilsImpl {
         ]);
 
     public makeV1Observed<T>(value: T): T {
-        const valueType: Type = Type.of(value);
-        if (!value || valueType.isPrimitive()) {
-            return value;
+        if (!value || typeof value !== 'object') {
+            return value as T;
         }
         if (isDynamicObject(value)) {
             value = getRawObject(value);
         }
-        if (value instanceof ObserveWrappedBase) {
+        const isProxy = StateMgmtTool.isObjectLiteral(value);
+        if (value instanceof ObserveWrappedBase || !(UIUtilsImpl.checkIsBuitInType(value) || isProxy)) {
             return value as T;
         }
+        const valueTypeName = Type.of(value).getName();
         const makeObservedWrappedBase: ((value: object, allowDeep: boolean, isAPI: boolean) => object) | undefined = 
-            UIUtilsImpl.makeObservedWrappedBaseMap.get(valueType.getName());
+            UIUtilsImpl.makeObservedWrappedBaseMap.get(valueTypeName);
         if (makeObservedWrappedBase) {
             return makeObservedWrappedBase!(value as object, false, false) as T;
         }
-        if (value && StateMgmtTool.isObjectLiteral(value)) {
+        if (isProxy) {
             return UIUtilsImpl.makeObservedProxyNoCheck(value as Object, false, false) as T;
         }
         return value;
     }
 
-    public autoProxyObject<T>(value: T, allowDeep: boolean = false, isAPI: boolean = false): T {
-        const valueType: Type = Type.of(value);
-        if (!value || valueType.isPrimitive()) {
+    public autoProxyObject<T>(value: T): T {
+        if (!value || typeof value !== 'object') {
             return value as T;
         }
         if (isDynamicObject(value)) {
             value = getRawObject(value);
         }
-        if (value instanceof ObserveWrappedBase) {
+        if (value instanceof ObserveWrappedBase || !(UIUtilsImpl.checkIsBuitInType(value))) {
             return value as T;
         }
+        const valueTypeName = Type.of(value).getName();
         const makeObservedWrappedBase: ((value: object, allowDeep: boolean, isAPI: boolean) => object) | undefined = 
-            UIUtilsImpl.makeObservedWrappedBaseMap.get(valueType.getName());
+            UIUtilsImpl.makeObservedWrappedBaseMap.get(valueTypeName);
         if (makeObservedWrappedBase) {
-            return makeObservedWrappedBase!(value as object, allowDeep, isAPI) as T;
+            return makeObservedWrappedBase!(value as object, true, false) as T;
         }
         return value;
     }
 
-    public makeObserved<T>(value: T, allowDeep: boolean = false, isAPI: boolean = false): T {
-        const valueType: Type = Type.of(value);
-        if (!value || valueType.isPrimitive()) {
+    public makeObserved<T>(value: T): T {
+        if (!value || typeof value !== 'object') {
             return value as T;
         }
         if (isDynamicObject(value)) {
             value = getRawObject(value);
         }
-        if (value instanceof ObserveWrappedBase) {
+        const isProxy = StateMgmtTool.isObjectLiteral(value);
+        if (value instanceof ObserveWrappedBase || !(UIUtilsImpl.checkIsBuitInType(value) || isProxy)) {
             return value as T;
         }
+        const valueTypeName = Type.of(value).getName();
         const makeObservedWrappedBase: ((value: object, allowDeep: boolean, isAPI: boolean) => object) | undefined = 
-            UIUtilsImpl.makeObservedWrappedBaseMap.get(valueType.getName());
+            UIUtilsImpl.makeObservedWrappedBaseMap.get(valueTypeName);
         if (makeObservedWrappedBase) {
-            return makeObservedWrappedBase!(value as object, allowDeep, isAPI) as T;
+            return makeObservedWrappedBase!(value as object, true, true) as T;
         }
-        if (value && StateMgmtTool.isObjectLiteral(value)) {
-            return UIUtilsImpl.makeObservedProxyNoCheck(value as Object, allowDeep, isAPI) as T;
+        if (isProxy) {
+            return UIUtilsImpl.makeObservedProxyNoCheck(value as Object, true, true) as T;
         }
         return value;
+    }
+
+    public static checkIsBuitInType<T>(value: T): boolean {
+        return value instanceof Array || value instanceof Map || value instanceof Set || value instanceof Date;
     }
 
     public getTarget<T>(source: T): T {

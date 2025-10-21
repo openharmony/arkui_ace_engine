@@ -694,7 +694,7 @@ function createCompatibleStaticState<T>(dynamicValue: Object): IStateDecoratedVa
     const value = ESValue.wrap(dynamicValue);
     const getProxy = value.invokeMethod('getProxy').unwrap();
     if (getProxy === undefined) {
-        const stateVar = new StateDecoratedVariable<T>(null, 'proxy', uiUtils.makeObserved(value.invokeMethod('get').unwrap()) as T);
+        const stateVar = new StateDecoratedVariable<T>(null, 'proxy', uiUtils.makeV1Observed(value.invokeMethod('get').unwrap()) as T);
         value.invokeMethod('setProxy', ESValue.wrap(stateVar));
         const setProxyValue = ((newVal: T): void => {
             value.invokeMethod('set', ESValue.wrap(newVal));
