@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { NodeAttach, remember } from "@koalaui/runtime"
+import { NodeAttach, remember, IncrementalNode } from "@koalaui/runtime"
 import { ArkCustomComponent } from "./ArkCustomComponent"
 import { ArkComponentRoot } from "./ArkComponentRoot"
 import { ArkColumnPeer } from "#generated";
@@ -114,20 +114,12 @@ export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent 
         initializers?: T_Options,
     ): void {
         /* need to wrap both states and build() of @Component */
-        NodeAttach(() => ArkColumnPeer.create(undefined), (node: ArkColumnPeer) => { // replace with Frontend Node later
+        NodeAttach(() => new IncrementalNode(), (node: IncrementalNode) => { // replace with Frontend Node later
             const component = remember(() => {
                 const instance = factory()
                 instance.__initializeStruct(content, initializers);
-                node.setOnRecycle(() =>
-                    instance.aboutToRecycle()
-                )
                 return instance
             });
-            node.setOnReuse(
-                (param?: RecordData) => {
-                    component.aboutToReuse(param, initializers)
-                }
-            )
             component._buildWrapper(content, initializers);
         }, reuseId)
     }

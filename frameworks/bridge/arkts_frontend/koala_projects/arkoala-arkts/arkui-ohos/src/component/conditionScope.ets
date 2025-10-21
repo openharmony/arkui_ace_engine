@@ -17,7 +17,7 @@ import { KoalaCallsiteKey, int32 } from '@koalaui/common'
 import { KPointer } from "@koalaui/interop"
 import { __context, __id, Disposable, IncrementalNode, NodeAttach } from '@koalaui/runtime';
 import { ArkUIAniModule } from "arkui.ani"
-import { PeerNode } from '../PeerNode';
+import { PeerNode, PeerNodeType, findPeerNode } from '../PeerNode';
 import { IncrementalScope } from 'arkui.incremental.runtime.state';
 
 class ConditionScopePeer extends PeerNode {
@@ -122,6 +122,45 @@ class ConditionBranchNode extends IncrementalNode {
     ) {
         super();
         this.builder = builder;
+        this.onChildInserted = (node: IncrementalNode) => {
+            let peerNode = findPeerNode(node)
+            if (!peerNode) {
+                return
+            }
+            const peer = peerNode as PeerNode
+            if (peer.reusable) {
+                peer.onReuse(false)
+            } else {
+                peer.reusable = true
+            } 
+        }
+        this.onChildRemoved = (node: IncrementalNode) => {
+            let peerNode = findPeerNode(node)
+            if (!peerNode) {
+                return
+            }
+            const peer = peerNode as PeerNode
+            if (!peer.disposed) {
+                peer.onRecycle()
+            }
+        }
+    }
+
+    /**
+     * Supports Reusable through redirecting requests to the parent node.
+     */
+    reuse(reuseKey: string, id: KoalaCallsiteKey): Disposable | undefined {
+        if (this.parent) {
+            return this.parent!.reuse(reuseKey, id)
+        }
+        return undefined;
+    }
+
+    recycle(reuseKey: string, child: Disposable, id: KoalaCallsiteKey): boolean {
+        if (this.parent) {
+            return this.parent!.recycle(reuseKey, child, id)
+        }
+        return false;
     }
 }
 
