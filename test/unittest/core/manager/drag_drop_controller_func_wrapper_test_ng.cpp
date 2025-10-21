@@ -358,6 +358,7 @@ HWTEST_F(DragControllerFuncWrapperTestNg, DragControllerFuncWrapperTest008, Test
     NG::PreparedAsyncCtxForAnimate asyncCtxData = { containerId, hasTouchPoint, dragPointerEvent, previewOption,
         touchPoint, pixelMapList };
     RefPtr<FrameNode> imageNode = nullptr;
+
     NG::DragControllerFuncWrapper::CreatePreviewNode(imageNode, data, asyncCtxData);
     ASSERT_NE(imageNode, nullptr);
     auto textNode = NG::DragAnimationHelper::CreateBadgeTextNode(data.badgeNumber);
