@@ -435,7 +435,7 @@ AceFocusMoveResult AccessibilityFocusStrategy::FindPrevReadableNodeToHigherLevel
         parent = GetParentNodeStopByRootType(oldCurrent);
         if (parent && parent->IsEmbededTarget()) {   // embededTarget can not find higher node
             HILOG_INFO_FOCUS("result: find higher Embeded");
-            targetNode = currentNode;
+            targetNode = parent;
             return AceFocusMoveResult::FIND_EMBED_TARGET;
         }
     }
