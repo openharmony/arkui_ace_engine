@@ -116,7 +116,7 @@ void SetStrokeDashOffsetImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto strokeDashOffset = Converter::OptConvertPtr<Dimension>(value);
-    Validator::ValidateNonNegative(strokeDashOffset);
+    Validator::ValidatePositive(strokeDashOffset);
     Validator::ValidateNonPercent(strokeDashOffset);
     ShapeModelStatic::SetStrokeDashOffset(frameNode, strokeDashOffset);
 }
