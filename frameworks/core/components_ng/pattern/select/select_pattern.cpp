@@ -958,12 +958,23 @@ void SelectPattern::SetFontSize(const Dimension& value)
     if (value.IsNegative()) {
         return;
     }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    FREE_NODE_CHECK(host, SetFontSize, value);
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
     props->UpdateFontSize(value);
 }
 
 void SelectPattern::SetItalicFontStyle(const Ace::FontStyle& value)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    FREE_NODE_CHECK(host, SetItalicFontStyle, value);
+    SetItalicFontStyleImpl(value);
+}
+
+void SelectPattern::SetItalicFontStyleImpl(const Ace::FontStyle& value)
 {
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
@@ -972,6 +983,14 @@ void SelectPattern::SetItalicFontStyle(const Ace::FontStyle& value)
 
 void SelectPattern::SetFontWeight(const FontWeight& value)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    FREE_NODE_CHECK(host, SetFontWeight, value);
+    SetFontWeightImpl(value);
+}
+
+void SelectPattern::SetFontWeightImpl(const FontWeight& value)
+{
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
     props->UpdateFontWeight(value);
@@ -979,12 +998,28 @@ void SelectPattern::SetFontWeight(const FontWeight& value)
 
 void SelectPattern::SetFontFamily(const std::vector<std::string>& value)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    FREE_NODE_CHECK(host, SetFontFamily, value);
+    SetFontFamilyImpl(value);
+}
+
+void SelectPattern::SetFontFamilyImpl(const std::vector<std::string>& value)
+{
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
     props->UpdateFontFamily(value);
 }
 
 void SelectPattern::SetFontColor(const Color& color)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    FREE_NODE_CHECK(host, SetFontColor, color);
+    SetFontColorImpl(color);
+}
+
+void SelectPattern::SetFontColorImpl(const Color& color)
 {
     fontColor_ = color;
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
@@ -1010,6 +1045,14 @@ void SelectPattern::SetOptionBgColor(const Color& color)
 }
 
 void SelectPattern::SetOptionFontSize(const Dimension& value)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    FREE_NODE_CHECK(host, SetOptionFontSize, value);
+    SetOptionFontSizeImpl(value);
+}
+
+void SelectPattern::SetOptionFontSizeImpl(const Dimension& value)
 {
     optionFont_.FontSize = value;
     for (size_t i = 0; i < options_.size(); ++i) {
@@ -2355,11 +2398,12 @@ void SelectPattern::SetDivider(const SelectDivider& divider)
 
 void SelectPattern::ResetFontColor()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    FREE_NODE_CHECK(host, ResetFontColor);
     if (fontColor_.has_value()) {
         fontColor_.reset();
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     auto pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto selectTheme = pipeline->GetTheme<SelectTheme>(host->GetThemeScopeId());
