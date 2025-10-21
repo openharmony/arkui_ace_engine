@@ -53,7 +53,7 @@ export class PeerNode extends IncrementalNode {
     private _reusePool?: Map<string, ReusablePool>
     public reusable: boolean = false
     private _uiStateStyle?: MutableState<int32>;
-    private _disabledStateUpdates: MutableState<boolean> = mutableState<boolean>(false);
+    private _disabledStateUpdates: MutableState<boolean> = GlobalStateManager.instance.mutableState<boolean>(false, true);
 
     getPeerPtr(): pointer {
         return this.peer.ptr
