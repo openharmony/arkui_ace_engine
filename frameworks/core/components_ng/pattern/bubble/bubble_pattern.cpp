@@ -156,9 +156,8 @@ void BubblePattern::OnAttachToFrameNodeImpl()
 
 void BubblePattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    THREAD_SAFE_NODE_CHECK(host, OnDetachFromFrameNode, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    THREAD_SAFE_NODE_CHECK(frameNode, OnDetachFromFrameNode, frameNode);
     OnDetachFromFrameNodeImpl(frameNode);
 }
 
