@@ -472,8 +472,8 @@ void AssignArkValue(Ark_RichEditorParagraphStyle& dst, const ParagraphInfo& src,
     std::pair<const Dimension, const Dimension> pair = { Dimension::FromString(src.leadingMarginSize[0]),
         Dimension::FromString(src.leadingMarginSize[1]) };
     Ark_LeadingMarginPlaceholder arkLeadingMargin = {
-        .size = Converter::ArkValue<Ark_Tuple_Dimension_Dimension>(pair, ctx),
-        .pixelMap = image_PixelMapPeer::Create(src.leadingMarginPixmap)
+        .pixelMap = image_PixelMapPeer::Create(src.leadingMarginPixmap),
+        .size = Converter::ArkValue<Ark_Tuple_Dimension_Dimension>(pair, ctx)
     };
     dst.leadingMargin = Converter::ArkUnion<
         Opt_Union_Dimension_LeadingMarginPlaceholder, Ark_LeadingMarginPlaceholder>(arkLeadingMargin, ctx);

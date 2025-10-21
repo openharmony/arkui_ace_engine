@@ -880,6 +880,7 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnCopyTest, TestSize.Level1)
 HWTEST_F(RichEditorModifierCallbacksTest, OnCutTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
     struct CheckEvent {
         int32_t resourceId;
     };
