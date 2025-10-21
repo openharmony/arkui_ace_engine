@@ -215,9 +215,7 @@ public:
             return false;
         }
         int32_t fillType = property->GetFillTypeValue(0);
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_RETURN(pipeline, false);
-        auto breakpoint = pipeline->GetCalcWidthBreakpoint(contentWidth);
+        WidthBreakpoint breakpoint = GetWidthBreakpoint(property, contentWidth);
         auto calculatedCount = 1;
         // BREAKPOINT_DEFAULT = 0, BREAKPOINT_SM1MD2LG3= 1, BREAKPOINT_SM2MD3LG5= 2
         if (fillType <= 1) {
@@ -256,6 +254,18 @@ private:
             return true;
         }
         return false;
+    }
+
+    static WidthBreakpoint GetWidthBreakpoint(const RefPtr<SwiperLayoutProperty>& property, float contentWidth)
+    {
+        const auto& padding = property->CreatePaddingAndBorder();
+        auto axis = property->GetDirectionValue(Axis::VERTICAL);
+        auto leftPadding = axis == Axis::HORIZONTAL ? padding.top.value_or(0) : padding.left.value_or(0);
+        auto rightPadding = axis == Axis::HORIZONTAL ? padding.bottom.value_or(0) : padding.right.value_or(0);
+        auto contentConstraintOps = property->GetContentLayoutConstraint();
+        CHECK_NULL_RETURN(contentConstraintOps, WidthBreakpoint::WIDTH_SM);
+        auto density = contentConstraintOps.value().scaleProperty.vpScale;
+        return GetCommonWidthBreakpoint(contentWidth + leftPadding + rightPadding, density);
     }
 };
 

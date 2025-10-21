@@ -1656,7 +1656,6 @@ public:
     {
         asyncEventsHookListener_ = asyncEventsExecution;
     }
-    WidthBreakpoint GetCalcWidthBreakpoint(double width);
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()
