@@ -17348,13 +17348,13 @@ typedef struct Opt_SelectionMenuOptions {
 } Opt_SelectionMenuOptions;
 typedef struct Ark_SelectionMenuOptionsExt {
     /* kind: Interface */
-    Opt_Callback_Void onAppear;
-    Opt_Callback_Void onDisappear;
+    Opt_VoidCallback onAppear;
+    Opt_VoidCallback onDisappear;
     Opt_CustomNodeBuilder preview;
     Opt_MenuType menuType;
     Opt_PreviewMenuOptions previewMenuOptions;
-    Opt_Callback_Void onMenuShow;
-    Opt_Callback_Void onMenuHide;
+    Opt_VoidCallback onMenuShow;
+    Opt_VoidCallback onMenuHide;
 } Ark_SelectionMenuOptionsExt;
 typedef struct Opt_SelectionMenuOptionsExt {
     Ark_Tag tag;
