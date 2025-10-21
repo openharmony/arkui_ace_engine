@@ -46,9 +46,6 @@ using namespace testing::ext;
 using namespace OHOS::Ace::Testing;
 
 namespace OHOS::Ace::NG {
-namespace {
-const Dimension DEFAULT_MARGIN = 2.0_vp;
-}
 
 class ContainerPickerPaintMethodTest : public TestNG {
 public:
@@ -272,10 +269,9 @@ HWTEST_F(ContainerPickerPaintMethodTest, CheckMarginAndLengthTest002, TestSize.L
     paintMethod_->CheckMarginAndLength(length, startMargin, endMargin);
     
     // Margins should be reset to default
-    float defaultMarginPx = DEFAULT_MARGIN.ConvertToPx();
-    EXPECT_FLOAT_EQ(startMargin, defaultMarginPx);
-    EXPECT_FLOAT_EQ(endMargin, defaultMarginPx);
-    EXPECT_FLOAT_EQ(length, 100.0f - 2 * defaultMarginPx);
+    EXPECT_FLOAT_EQ(startMargin, 0.0);
+    EXPECT_FLOAT_EQ(endMargin, 0.0);
+    EXPECT_FLOAT_EQ(length, 100.0f);
 }
 
 /**

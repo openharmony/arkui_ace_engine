@@ -1062,6 +1062,7 @@ void ContainerPickerPattern::CreateTargetAnimation(float delta)
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->isTargetAnimationRunning_ = false;
+            pattern->lastAnimationScroll_ = 0.0f;
             pattern->yOffset_ = 0.0;
             pattern->yLast_ = 0.0;
             pattern->FireScrollStopEvent();
