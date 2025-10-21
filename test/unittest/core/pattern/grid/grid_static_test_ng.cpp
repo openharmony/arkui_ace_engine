@@ -201,4 +201,42 @@ HWTEST_F(GridModelStaticTestNg, SetScrollEnabled, TestSize.Level1)
     GridModelStatic::SetScrollEnabled(AceType::RawPtr(frameNode_), scrollEnabled);
     EXPECT_FALSE(layoutProperty_->GetScrollEnabled().has_value());
 }
+
+/**
+ * @tc.name: SetColumnsGap
+ * @tc.desc: Test SetColumnsGap
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridModelStaticTestNg, SetColumnsGap, TestSize.Level1)
+{
+    CreateGrid();
+    std::optional<Dimension> columnsGap = Dimension(20);
+    GridModelStatic::SetColumnsGap(AceType::RawPtr(frameNode_), columnsGap);
+    ASSERT_NE(layoutProperty_, nullptr);
+    auto ret = layoutProperty_->GetColumnsGapValue();
+    EXPECT_EQ(ret, columnsGap.value());
+
+    columnsGap.reset();
+    GridModelStatic::SetColumnsGap(AceType::RawPtr(frameNode_), columnsGap);
+    EXPECT_FALSE(layoutProperty_->GetColumnsGap().has_value());
+}
+
+/**
+ * @tc.name: SetRowsGap
+ * @tc.desc: Test SetRowsGap
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridModelStaticTestNg, SetRowsGap, TestSize.Level1)
+{
+    CreateGrid();
+    std::optional<Dimension> rowsGap = Dimension(20);
+    GridModelStatic::SetRowsGap(AceType::RawPtr(frameNode_), rowsGap);
+    ASSERT_NE(layoutProperty_, nullptr);
+    auto ret = layoutProperty_->GetRowsGapValue();
+    EXPECT_EQ(ret, rowsGap.value());
+
+    rowsGap.reset();
+    GridModelStatic::SetRowsGap(AceType::RawPtr(frameNode_), rowsGap);
+    EXPECT_FALSE(layoutProperty_->GetRowsGap().has_value());
+}
 } // namespace OHOS::Ace::NG

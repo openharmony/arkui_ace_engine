@@ -1940,9 +1940,6 @@ void SetDrawModifierImpl(Ark_NativePointer node,
         return;
     }
     auto convValue = Converter::OptConvertPtr<Ark_DrawModifier>(value);
-    if (!convValue) {
-        return;
-    }
     auto peer = convValue.value();
     CHECK_NULL_VOID(peer);
     if (!peer->drawModifier) {
@@ -4104,7 +4101,7 @@ void SetIdImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto id = Converter::OptConvertPtr<std::string>(value);
-    ViewAbstract::SetInspectorId(frameNode, *id);
+    ViewAbstract::SetInspectorId(frameNode, id.value_or(""));
 }
 void SetGeometryTransition0Impl(Ark_NativePointer node,
                                 const Opt_String* value)

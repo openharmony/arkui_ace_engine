@@ -121,7 +121,7 @@ void SetEnableAnalyzerImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        // Implement Reset value
+        CanvasModelNG::SetOnReady(frameNode, nullptr);
         return;
     }
     CanvasModelNG::EnableAnalyzer(frameNode, *convValue);
