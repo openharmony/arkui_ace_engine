@@ -2950,7 +2950,13 @@ bool PipelineContext::OnBackPressed()
                 return;
             }
             CHECK_NULL_VOID(stageManager);
-            auto lastPage = stageManager->GetLastPage();
+            RefPtr<FrameNode> lastPage = nullptr;
+            // adapter router serial animation
+            if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+                lastPage = stageManager->GetLastPage();
+            } else {
+                lastPage = stageManager->GetLastPageWithTransition();
+            }
             CHECK_NULL_VOID(lastPage);
             bool isEntry = false;
             auto pagePattern = lastPage->GetPattern<NG::PagePattern>();
