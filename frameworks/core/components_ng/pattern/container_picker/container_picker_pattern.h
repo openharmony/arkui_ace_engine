@@ -108,6 +108,7 @@ public:
     // Lifecycle methods
     void OnAttachToFrameNode() override;
     void OnModifyDone() override;
+    void OnColorConfigurationUpdate() override;
 
     // Event firing methods
     void FireChangeEvent();
@@ -211,8 +212,9 @@ private:
     void StopSpringAnimation();
 
     bool IsLoop() const;
-    void SetDefaultTextStyle() const;
-    void SetDefaultTextStyle(RefPtr<FrameNode> node) const;
+    void SetDefaultTextStyle(bool isUpdateTextStyle);
+    void SetDefaultTextStyle(RefPtr<FrameNode> node, Color defaultColor);
+    void UpdateDefaultTextStyle(RefPtr<FrameNode> node, Color defaultColor);
     void PickerMarkDirty();
     void PostIdleTask(const RefPtr<FrameNode>& frameNode);
     double GetCurrentTime() const;
@@ -262,6 +264,8 @@ private:
     bool animationBreak_ = false;
     bool isAllowPlayHaptic_ = true;
     bool isEnableHaptic_ = true;
+    bool isUseDefaultFontColor_ = false;
+    bool isModified_ = false;
 
     int32_t containerPickerId_ = -1;
     int32_t displayCount_ = 7;
