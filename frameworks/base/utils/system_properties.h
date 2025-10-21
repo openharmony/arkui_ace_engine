@@ -354,6 +354,11 @@ public:
         return layoutTraceEnable_.load();
     }
 
+    static bool GetAttributeSetTraceEnabled()
+    {
+        return attributeSetTraceEnable_.load();
+    }
+
     static bool GetSyncDebugTraceEnabled()
     {
         return syncDebugTraceEnable_;
@@ -782,6 +787,7 @@ private:
     static bool developerModeOn_;
     static bool svgTraceEnable_;
     static std::atomic<bool> layoutTraceEnable_;
+    static std::atomic<bool> attributeSetTraceEnable_;
     static std::atomic<bool> traceInputEventEnable_;
     static bool buildTraceEnable_;
     static bool cacheNavigationNodeEnable_;

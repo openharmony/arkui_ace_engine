@@ -16,10 +16,16 @@
 #include "trace_ani_modifier.h"
 
 #include "base/log/ace_trace.h"
+#include "frameworks/base/utils/system_properties.h"
 
 namespace OHOS::Ace::NG {
 
 namespace TraceAniModifier {
+
+bool GetAttributeSetTraceEnabled()
+{
+    return SystemProperties::GetAttributeSetTraceEnabled();
+}
 
 void TraceBegin(const std::string& traceName)
 {
@@ -46,6 +52,7 @@ void AsyncTraceEnd(const std::string& traceName, int taskId)
 const ArkUIAniTraceModifier* GetTraceAniModifier()
 {
     static ArkUIAniTraceModifier impl = {
+        .getAttributeSetTraceEnabled = TraceAniModifier::GetAttributeSetTraceEnabled,
         .traceBegin = TraceAniModifier::TraceBegin,
         .traceEnd = TraceAniModifier::TraceEnd,
         .asyncTraceBegin = TraceAniModifier::AsyncTraceBegin,
