@@ -3618,7 +3618,7 @@ frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/com
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/lazyForEach.ets @arkuieco3
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/repeat.ets @arkuieco3
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/base/LazyForEachImpl.ets @arkuieco3
-frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/base/LazyItemNode.ets @arkuieco3
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/base/SyntaxNodeBase.ets @arkuieco3
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/base/RepeatImpl.ets @arkuieco3
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/base/DataChangeListener.ets @arkuieco3
 
