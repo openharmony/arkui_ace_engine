@@ -450,6 +450,16 @@ HWTEST_F(LongPressRecognizerTestNg, LongPressRecognizerTest006, TestSize.Level1)
     longPressRecognizer->priorityMask_ = GestureMask::End;
     result = longPressRecognizer->ReconcileFrom(longPressRecognizerPtr);
     EXPECT_EQ(result, false);
+
+    /**
+     * @tc.steps: step2. call ReconcileFrom function and compare result.
+     * @tc.steps: case6: recognizerPtr, repeat same, priorityMask not same
+     * @tc.expected: step2. result equals.
+     */
+    longPressRecognizer->priorityMask_ = longPressRecognizerPtr->priorityMask_;
+    longPressRecognizer->allowableMovement_ = longPressRecognizerPtr->allowableMovement_ + 1;
+    result = longPressRecognizer->ReconcileFrom(longPressRecognizerPtr);
+    EXPECT_EQ(result, false);
 }
 
 /**

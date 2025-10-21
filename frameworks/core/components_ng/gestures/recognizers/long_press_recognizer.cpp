@@ -490,7 +490,7 @@ bool LongPressRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recog
     }
 
     if (curr->duration_ != duration_ || curr->fingers_ != fingers_ || curr->repeat_ != repeat_ ||
-        curr->priorityMask_ != priorityMask_) {
+        curr->priorityMask_ != priorityMask_ || curr->allowableMovement_ != allowableMovement_) {
         if (refereeState_ == RefereeState::SUCCEED && static_cast<int32_t>(touchPoints_.size()) > 0) {
             ACE_SCOPED_TRACE("LongPressRecognizer onActionCancel");
             SendCallbackMsg(onActionCancel_, false, GestureCallbackType::CANCEL);
