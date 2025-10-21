@@ -48,7 +48,7 @@ ScopedMonitor::~ScopedMonitor()
 
 ArkUIPerfMonitor& ArkUIPerfMonitor::GetInstance()
 {
-    static ArkUIPerfMonitor instance;
+    static thread_local ArkUIPerfMonitor instance;
     return instance;
 }
 
