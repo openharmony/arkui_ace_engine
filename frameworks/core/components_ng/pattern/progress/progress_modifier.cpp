@@ -301,6 +301,11 @@ void ProgressModifier::SetSmoothEffect(bool value)
 {
     CHECK_NULL_VOID(smoothEffect_);
     smoothEffect_->Set(value);
+    if (!value) {
+        if (animation_) {
+            AnimationUtils::StopAnimation(animation_);
+        }
+    }
 }
 
 void ProgressModifier::StartRingLoadingAnimation()
