@@ -18,10 +18,10 @@
 
 import { CommonMethod, ShadowOptions } from "./component/common"
 import { TextBackgroundStyle, BaseSpan, ArkSpanPeer, SpanAttribute } from "./component/span"
-import { extractors, AttributeModifier } from "#handwritten"
 import { LengthMetrics } from "arkui.Graphics"
 import { BaseSpanModifier } from "./BaseSpanModifier"
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { int32 } from "@koalaui/common"

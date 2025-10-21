@@ -11144,7 +11144,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             delete peerImpl;
         }
     }
-    Ark_BaselineOffsetStyle ConstructImpl(Ark_LengthMetrics value)
+    Ark_BaselineOffsetStyle ConstructImpl(const Ark_LengthMetrics* value)
     {
         return {};
     }
@@ -14179,7 +14179,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             delete peerImpl;
         }
     }
-    Ark_LetterSpacingStyle ConstructImpl(Ark_LengthMetrics value)
+    Ark_LetterSpacingStyle ConstructImpl(const Ark_LengthMetrics* value)
     {
         return {};
     }
@@ -14278,7 +14278,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             delete peerImpl;
         }
     }
-    Ark_LineHeightStyle ConstructImpl(Ark_LengthMetrics lineHeight)
+    Ark_LineHeightStyle ConstructImpl(const Ark_LengthMetrics* lineHeight)
     {
         return {};
     }

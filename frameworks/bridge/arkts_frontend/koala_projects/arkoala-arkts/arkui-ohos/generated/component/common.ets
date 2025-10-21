@@ -14670,7 +14670,7 @@ export class FadingEdgeOptions_serializer {
         const fadingEdgeLengthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let fadingEdgeLengthTmpBuf : LengthMetrics | undefined = undefined
         if ((fadingEdgeLengthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            fadingEdgeLengthTmpBuf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+            fadingEdgeLengthTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
         }
         const fadingEdgeLengthTmpResult : LengthMetrics | undefined = fadingEdgeLengthTmpBuf
         let value : FadingEdgeOptions = ({fadingEdgeLength: fadingEdgeLengthTmpResult} as FadingEdgeOptions)
@@ -21251,7 +21251,7 @@ export class SheetOptions_serializer {
             const radiusTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let radiusTmpBuf_ : LengthMetrics | BorderRadiuses | LocalizedBorderRadiuses | undefined
             if (radiusTmpBuf_UnionSelector == (0).toChar()) {
-                radiusTmpBuf_ = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+                radiusTmpBuf_ = LengthMetrics_serializer.read(valueDeserializer)
             } else if (radiusTmpBuf_UnionSelector == (1).toChar()) {
                 radiusTmpBuf_ = BorderRadiuses_serializer.read(valueDeserializer)
             } else if (radiusTmpBuf_UnionSelector == (2).toChar()) {

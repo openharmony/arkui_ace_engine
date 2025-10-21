@@ -22,7 +22,7 @@ import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { AttributeModifier, extractors, hookFlexAttributeModifier, AttributeUpdater } from "#handwritten"
+import { AttributeModifier, hookFlexAttributeModifier, AttributeUpdater } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -155,13 +155,13 @@ export class FlexSpaceOptions_serializer {
         const mainTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let mainTmpBuf : LengthMetrics | undefined = undefined
         if ((mainTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            mainTmpBuf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+            mainTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
         }
         const mainTmpResult : LengthMetrics | undefined = mainTmpBuf
         const crossTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let crossTmpBuf : LengthMetrics | undefined = undefined
         if ((crossTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            crossTmpBuf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+            crossTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
         }
         const crossTmpResult : LengthMetrics | undefined = crossTmpBuf
         let value : FlexSpaceOptions = ({main: mainTmpResult, cross: crossTmpResult} as FlexSpaceOptions)

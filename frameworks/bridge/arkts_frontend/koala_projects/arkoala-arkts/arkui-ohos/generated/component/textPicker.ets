@@ -1248,7 +1248,7 @@ export class TextPickerOptions_serializer {
             const columnWidthsTmpBuf_Length : int32 = valueDeserializer.readInt32()
             let columnWidthsTmpBuf_ : Array<LengthMetrics> = new Array<LengthMetrics>(columnWidthsTmpBuf_Length)
             for (let columnWidthsTmpBuf_BufCounterI = 0; columnWidthsTmpBuf_BufCounterI < columnWidthsTmpBuf_Length; columnWidthsTmpBuf_BufCounterI++) {
-                columnWidthsTmpBuf_[columnWidthsTmpBuf_BufCounterI] = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+                columnWidthsTmpBuf_[columnWidthsTmpBuf_BufCounterI] = LengthMetrics_serializer.read(valueDeserializer)
             }
             columnWidthsTmpBuf = columnWidthsTmpBuf_
         }

@@ -23,7 +23,7 @@ import { CallbackTransformer } from "./../CallbackTransformer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { AttributeModifier, extractors, hookLinearIndicatorAttributeModifier, AttributeUpdater } from "#handwritten"
+import { AttributeModifier, hookLinearIndicatorAttributeModifier, AttributeUpdater } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
@@ -380,31 +380,31 @@ export class LinearIndicatorStyle_serializer {
         const spaceTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let spaceTmpBuf : LengthMetrics | undefined = undefined
         if ((spaceTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            spaceTmpBuf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+            spaceTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
         }
         const spaceTmpResult : LengthMetrics | undefined = spaceTmpBuf
         const strokeWidthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let strokeWidthTmpBuf : LengthMetrics | undefined = undefined
         if ((strokeWidthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            strokeWidthTmpBuf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+            strokeWidthTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
         }
         const strokeWidthTmpResult : LengthMetrics | undefined = strokeWidthTmpBuf
         const strokeRadiusTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let strokeRadiusTmpBuf : LengthMetrics | undefined = undefined
         if ((strokeRadiusTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            strokeRadiusTmpBuf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+            strokeRadiusTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
         }
         const strokeRadiusTmpResult : LengthMetrics | undefined = strokeRadiusTmpBuf
         const trackBackgroundColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let trackBackgroundColorTmpBuf : ColorMetrics | undefined = undefined
         if ((trackBackgroundColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            trackBackgroundColorTmpBuf = (ColorMetrics_serializer.read(valueDeserializer) as ColorMetrics)
+            trackBackgroundColorTmpBuf = ColorMetrics_serializer.read(valueDeserializer)
         }
         const trackBackgroundColorTmpResult : ColorMetrics | undefined = trackBackgroundColorTmpBuf
         const trackColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let trackColorTmpBuf : ColorMetrics | undefined = undefined
         if ((trackColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            trackColorTmpBuf = (ColorMetrics_serializer.read(valueDeserializer) as ColorMetrics)
+            trackColorTmpBuf = ColorMetrics_serializer.read(valueDeserializer)
         }
         const trackColorTmpResult : ColorMetrics | undefined = trackColorTmpBuf
         let value : LinearIndicatorStyle = ({space: spaceTmpResult, strokeWidth: strokeWidthTmpResult, strokeRadius: strokeRadiusTmpResult, trackBackgroundColor: trackBackgroundColorTmpResult, trackColor: trackColorTmpResult} as LinearIndicatorStyle)
