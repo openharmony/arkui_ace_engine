@@ -88,7 +88,7 @@ public:
     static void SetFriction(FrameNode* frameNode, const std::optional<double>& friction);
     static FlexDirection GetLayoutDirection(FrameNode* frameNode);
     static std::string GetColumnsTemplate(FrameNode* frameNode);
-    static PresetFillType GetItemFillPolicy(FrameNode* frameNode);
+    static int32_t GetItemFillPolicy(FrameNode* frameNode);
     static std::string GetRowsTemplate(FrameNode* frameNode);
     static float GetColumnsGap(FrameNode* frameNode);
     static float GetRowsGap(FrameNode* frameNode);

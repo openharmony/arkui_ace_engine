@@ -662,7 +662,7 @@ void ResetItemFillPolicy(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    GridModelNG::SetItemFillPolicy(frameNode, PresetFillType::BREAKPOINT_DEFAULT);
+    GridModelNG::ResetItemFillPolicy(frameNode);
 }
 
 ArkUI_Int32 GetItemFillPolicy(ArkUINodeHandle node)

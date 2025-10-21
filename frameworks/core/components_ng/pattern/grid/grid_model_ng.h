@@ -157,7 +157,8 @@ public:
     static void SetOnScroll(FrameNode* frameNode, OnScrollEvent&& onScroll);
     static void CreateWithResourceObjScrollBarColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
     static void SetItemFillPolicy(FrameNode* frameNode, PresetFillType policy);
-    static PresetFillType GetItemFillPolicy(FrameNode* frameNode);
+    static void ResetItemFillPolicy(FrameNode* frameNode);
+    static int32_t GetItemFillPolicy(FrameNode* frameNode);
 private:
     static void AddDragFrameNodeToManager(FrameNode* frameNode);
 };

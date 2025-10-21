@@ -454,6 +454,11 @@ void GridModelNG::SetItemFillPolicy(FrameNode* frameNode, PresetFillType policy)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, ItemFillPolicy, policy, frameNode);
 }
 
+void GridModelNG::ResetItemFillPolicy(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(GridLayoutProperty, ItemFillPolicy, PROPERTY_UPDATE_MEASURE, frameNode);
+}
+
 void GridModelNG::SetRowsTemplate(FrameNode* frameNode, const std::string& rowsTemplate)
 {
     if (rowsTemplate.empty()) {
@@ -716,13 +721,15 @@ std::string GridModelNG::GetColumnsTemplate(FrameNode* frameNode)
     return value;
 }
 
-PresetFillType GridModelNG::GetItemFillPolicy(FrameNode* frameNode)
+int32_t GridModelNG::GetItemFillPolicy(FrameNode* frameNode)
 {
-    PresetFillType type = PresetFillType::BREAKPOINT_DEFAULT;
-    CHECK_NULL_RETURN(frameNode, type);
-    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
-        GridLayoutProperty, ItemFillPolicy, type, frameNode, PresetFillType::BREAKPOINT_DEFAULT);
-    return type;
+    CHECK_NULL_RETURN(frameNode, -1);
+    auto layoutProperty = frameNode->GetLayoutProperty<GridLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, -1);
+    if (layoutProperty->GetItemFillPolicy().has_value()) {
+        return static_cast<int32_t>(layoutProperty->GetItemFillPolicy().value());
+    }
+    return -1;
 }
 
 std::string GridModelNG::GetRowsTemplate(FrameNode* frameNode)
