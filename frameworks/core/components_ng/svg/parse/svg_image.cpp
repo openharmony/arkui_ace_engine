@@ -106,6 +106,9 @@ std::shared_ptr<RSData> SvgImage::LoadLocalImage(const std::string& uri)
     std::string svgPath = GetImagePath();
     auto realPath = uri;
     auto dotPos = realPath.find_last_of('.');
+    if (dotPos == std::string::npos) {
+        return nullptr;
+    }
     auto format = realPath.substr(dotPos + 1);
     if (format == "svg" || format == "gif") {
         LOGW("Svg image format is not supported");
