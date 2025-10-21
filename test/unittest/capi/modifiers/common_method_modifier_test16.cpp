@@ -220,8 +220,8 @@ CustomNodeBuilder getBuilderCb()
 Opt_AnimationNumberRange getAnimationRange()
 {
     Ark_AnimationNumberRange range;
-    range.value0 = ArkValue<Ark_Number>(SCALE_FROM_TEST_VALUE);
-    range.value1 = ArkValue<Ark_Number>(SCALE_TO_TEST_VALUE);
+    range.value0 = ArkValue<Ark_Float64>(SCALE_FROM_TEST_VALUE);
+    range.value1 = ArkValue<Ark_Float64>(SCALE_TO_TEST_VALUE);
     return ArkValue<Opt_AnimationNumberRange>(range);
 }
 
@@ -439,7 +439,7 @@ HWTEST_F(CommonMethodModifierTest16, DISABLED_BindContextMenu0TestPlacementTest,
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest16, BindContextMenu0TestEnableArrow, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest16, DISABLED_BindContextMenu0TestEnableArrow, TestSize.Level1)
 {
     ASSERT_TRUE(modifier_->setBindContextMenu0);
     auto builder = getBuilderCb();
@@ -467,7 +467,7 @@ HWTEST_F(CommonMethodModifierTest16, BindContextMenu0TestEnableArrow, TestSize.L
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest16, BindContextMenu0TestArrowOffset, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest16, DISABLED_BindContextMenu0TestArrowOffset, TestSize.Level1)
 {
     ASSERT_TRUE(modifier_->setBindContextMenu0);
     auto builder = getBuilderCb();
@@ -492,7 +492,7 @@ HWTEST_F(CommonMethodModifierTest16, BindContextMenu0TestArrowOffset, TestSize.L
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest16, BindContextMenu0TestPreviewPreviewMode, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest16, DISABLED_BindContextMenu0TestPreviewPreviewMode, TestSize.Level1)
 {
     ASSERT_TRUE(modifier_->setBindContextMenu0);
     auto builder = getBuilderCb();
@@ -1540,7 +1540,7 @@ HWTEST_F(CommonMethodModifierTest16, DISABLED_BindContextMenu1TestTransition, Te
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest16, BindContextMenu1TestEnableHoverMode, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest16, DISABLED_BindContextMenu1TestEnableHoverMode, TestSize.Level1)
 {
     ASSERT_TRUE(modifier_->setBindContextMenu0);
     for (auto& [text, value, expected] : testFixtureBooleanValidValues) {

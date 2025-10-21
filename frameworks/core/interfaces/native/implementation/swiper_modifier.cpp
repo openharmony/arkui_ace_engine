@@ -32,6 +32,7 @@ using DisplayCountVariantType = std::variant<int32_t, std::string, Ark_SwiperAut
 const static int32_t DEFAULT_DURATION = 400;
 const static int32_t DEFAULT_DISPLAY_COUNT = 1;
 const static int32_t DEFAULT_CACHED_COUNT = 1;
+const auto DEFAULT_CURVE = AceType::MakeRefPtr<InterpolatingSpring>(-1, 1, 328, 34);
 
 namespace {
 std::optional<int32_t> ProcessBindableIndex(FrameNode* frameNode, const Opt_Union_I32_Bindable *value)
@@ -365,7 +366,14 @@ void SetIndicatorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    Converter::VisitUnion(*value, [frameNode](const auto& value) { SetIndicator(frameNode, value); }, []() {});
+    Converter::VisitUnion(*value, [frameNode](const auto& value) { SetIndicator(frameNode, value); },
+        [frameNode]() {
+            SwiperModelStatic::SetIndicatorIsBoolean(frameNode, true);
+            SwiperModelStatic::SetDotIndicatorStyle(frameNode, SwiperParameters());
+            SwiperModelStatic::SetIsIndicatorCustomSize(frameNode, false);
+            SwiperModelStatic::SetIndicatorType(frameNode, SwiperIndicatorType::DOT);
+            SwiperModelStatic::SetShowIndicator(frameNode, true);
+        });
 }
 void SetLoopImpl(Ark_NativePointer node,
                  const Opt_Boolean* value)
@@ -471,6 +479,12 @@ void SetCurveImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    auto curveVal = Converter::OptConvert<RefPtr<Curve>>(*value);
+    if (!curveVal) {
+        SwiperModelStatic::SetCurve(frameNode, DEFAULT_CURVE);
+        return;
+    }
+    SwiperModelStatic::SetCurve(frameNode, *curveVal);
 }
 void SetOnChangeImpl(Ark_NativePointer node,
                      const Opt_Callback_I32_Void* value)
@@ -609,7 +623,10 @@ void SetCustomContentTransitionImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     SwiperContentAnimatedTransition transitionInfo;
     auto optValue = Converter::GetOptPtr(value);
-    CHECK_NULL_VOID(optValue);
+    if (!optValue) {
+        SwiperModelStatic::SetCustomContentTransition(frameNode, transitionInfo);
+        return;
+    }
     auto optTimeout = Converter::OptConvert<Ark_Int32>(optValue->timeout);
     if (optTimeout) {
         transitionInfo.timeout = *optTimeout;
@@ -737,11 +754,7 @@ void SetCachedCount1Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convCount = Converter::OptConvertPtr<int32_t>(count);
-    if (!convCount) {
-        SwiperModelStatic::SetCachedCount(frameNode, DEFAULT_CACHED_COUNT);
-        return;
-    }
-    SwiperModelStatic::SetCachedCount(frameNode, *convCount);
+    SwiperModelStatic::SetCachedCount(frameNode, convCount.value_or(DEFAULT_CACHED_COUNT));
     auto convIsShown = Converter::OptConvertPtr<bool>(isShown);
     if (!convIsShown) {
         SwiperModelStatic::SetCachedIsShown(frameNode, false);

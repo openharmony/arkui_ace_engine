@@ -13,18 +13,37 @@
  * limitations under the License.
  */
 
-import { __id, NodeAttach, Disposable, remember, rememberDisposable, rememberMutableState,
-    scheduleCallback } from '@koalaui/runtime'
+import { __id, NodeAttach, ComputableState, GlobalStateManager, Disposable, memoEntry2, remember,
+    rememberDisposable, rememberMutableState, scheduleCallback } from '@koalaui/runtime'
+import { StateContext } from 'arkui.incremental.runtime.state'
 import { InteropNativeModule, nullptr, pointer } from '@koalaui/interop'
 import { int32 } from '@koalaui/common'
 import { PeerNode } from '../PeerNode'
 import { InternalListener } from './DataChangeListener'
+import { setNeedCreate } from '../ArkComponentRoot'
 import { IDataSource } from '../component/lazyForEach'
 import { OnMoveHandler, ItemDragEventHandler, LazyForEachOps } from '#generated'
-import { SyntaxItemPeer, LazyNodePeer, NodeHolder } from './SyntaxNodeBase'
-import { createUiDetachedRoot } from 'arkui/ArkUIEntry'
+import { LazyNodePeer, LazyItemNode, NodeHolder } from './SyntaxNodeBase'
+import { CustomComponent } from '../component/customComponent'
 import { ObserveSingleton } from '../stateManagement/base/observeSingleton'
 import { ExtendableComponent } from '../component/extendableComponent'
+
+let globalLazyItems = new Map<ComputableState<LazyItemNode>, int32>() // V: age
+
+export function updateLazyItems() {
+    let postponed = false
+    globalLazyItems.forEach((age, node, map) => {
+        if (age === 0) {
+            postponed = true
+            map.set(node, 1)
+        } else {
+            node.value
+        }
+    })
+    if (postponed) {
+        // requestFrame()
+    }
+}
 
 /** @memo:intrinsic */
 export function LazyForEachImplForOptions<T>(dataSource: IDataSource<T>,
@@ -37,7 +56,9 @@ export function LazyForEachImplForOptions<T>(dataSource: IDataSource<T>,
 ) {
     const node = createLazyNode(isRepeat)
 
-    let pool = rememberDisposable(() => new LazyItemPool(), (pool?: LazyItemPool) => pool?.dispose())
+    let pool = rememberDisposable(() => new LazyItemPool(node, CustomComponent.current), (pool?: LazyItemPool) => {
+        pool?.dispose()
+    })
     let changeCounter = rememberMutableState(0)
     changeCounter.value //subscribe
     let listener = remember(() => {
@@ -52,16 +73,16 @@ export function LazyForEachImplForOptions<T>(dataSource: IDataSource<T>,
         })
     }
 
-    const currentRenderingComponent = ObserveSingleton.instance.renderingComponent;
-    const currentExtendableComponent = ExtendableComponent.current;
+    const currentRenderingComponent = ObserveSingleton.instance.renderingComponent
+    const currentExtendableComponent = ExtendableComponent.current
     /**
      * provide totalCount and callbacks to the backend
      */
     let createCallback = (index: int32) => {
-        const lastRenderingComponent = ObserveSingleton.instance.renderingComponent;
-        const lastExtendableComponent = ExtendableComponent.current;
-        ObserveSingleton.instance.renderingComponent = currentRenderingComponent;
-        ExtendableComponent.current = currentExtendableComponent;
+        const lastRenderingComponent = ObserveSingleton.instance.renderingComponent
+        const lastExtendableComponent = ExtendableComponent.current
+        ObserveSingleton.instance.renderingComponent = currentRenderingComponent
+        ExtendableComponent.current = currentExtendableComponent
         try {
             return pool.getOrCreate(index, dataSource.getData(index), itemGenerator,
                 currentRenderingComponent, currentExtendableComponent)
@@ -69,8 +90,8 @@ export function LazyForEachImplForOptions<T>(dataSource: IDataSource<T>,
             InteropNativeModule._NativeLog(`error during createLazyItem: ${error}`)
             return nullptr
         } finally {
-            ObserveSingleton.instance.renderingComponent = lastRenderingComponent;
-            ExtendableComponent.current = lastExtendableComponent;
+            ObserveSingleton.instance.renderingComponent = lastRenderingComponent
+            ExtendableComponent.current = lastExtendableComponent
         }
     }
     LazyForEachOps.Sync(node.getPeerPtr(), dataSource.totalCount() as int32, createCallback, pool.updateActiveRange)
@@ -95,10 +116,43 @@ function createLazyNode(isRepeat: boolean): PeerNode {
     return nodeHolder.node!
 }
 
+class LazyItemCompositionContext {
+    private prevFrozen: boolean
+    private prevNeedCreate: boolean
+    private prevCurrent?: Object
+
+    constructor(parentComponent?: Object) {
+        const manager = GlobalStateManager.instance
+        this.prevFrozen = manager.frozen
+        manager.frozen = true
+        this.prevNeedCreate = setNeedCreate(true) // ensure synchronous creation of all inner CustomComponent
+        this.prevCurrent = CustomComponent.current
+        CustomComponent.current = parentComponent // setup CustomComponent context to link with @Provide variables
+    }
+
+    exit(): void {
+        CustomComponent.current = this.prevCurrent
+        setNeedCreate(this.prevNeedCreate)
+        GlobalStateManager.instance.frozen = this.prevFrozen
+    }
+}
+
 class LazyItemPool implements Disposable {
-    private _activeItems = new Map<int32, SyntaxItemPeer>()
+    private _activeItems = new Map<int32, ComputableState<LazyItemNode>>()
+    private _parent: PeerNode
+    private _componentRoot?: Object
     private _moveFromTo?: [int32, int32] = undefined // used to track moveFromTo in onMove event
     disposed: boolean = false
+
+    /**
+     * 
+     * @param parent direct parent node (should be the scroll container node)
+     * @param root root object of the current CustomComponent
+     */
+    constructor(parent: PeerNode, root?: Object) {
+        this._parent = parent
+        this._componentRoot = root
+    }
 
     dispose(): void {
         if (this.disposed) {
@@ -119,25 +173,35 @@ class LazyItemPool implements Disposable {
         /** @memo */
         itemGenerator: (item: T, index: int32) => void,
         currentRenderingComponent: int32,
-        currentExtendableComponent: object | undefined,
+        currentExtendableComponent: object | undefined
     ): pointer {
         if (this._activeItems.has(index)) {
             const node = this._activeItems.get(index)!
-            return node.getPeerPtr()
+            return node.value.getPeerPtr()
         }
 
-        const node = createUiDetachedRoot((): PeerNode => SyntaxItemPeer.create(), (): void => {
-            const lastRenderingComponent = ObserveSingleton.instance.renderingComponent;
-            const lastExtendableComponent = ExtendableComponent.current;
-            ObserveSingleton.instance.renderingComponent = currentRenderingComponent;
-            ExtendableComponent.current = currentExtendableComponent;
-            itemGenerator(data, index);
-            ObserveSingleton.instance.renderingComponent = lastRenderingComponent;
-            ExtendableComponent.current = lastExtendableComponent;
+        const manager = GlobalStateManager.instance
+        const node = manager.updatableNode<LazyItemNode>(new LazyItemNode(this._parent), (context: StateContext) => {
+            let scope = new LazyItemCompositionContext(this._componentRoot)
+            const lastRenderingComponent = ObserveSingleton.instance.renderingComponent
+            const lastExtendableComponent = ExtendableComponent.current
+            ObserveSingleton.instance.renderingComponent = currentRenderingComponent
+            ExtendableComponent.current = currentExtendableComponent
+            memoEntry2<T, int32, void>(
+                context,
+                0,
+                itemGenerator,
+                data,
+                index
+            )
+            ObserveSingleton.instance.renderingComponent = lastRenderingComponent
+            ExtendableComponent.current = lastExtendableComponent
+            scope.exit()
         })
 
-        this._activeItems.set(index, node as SyntaxItemPeer)
-        return node.peer.ptr
+        this._activeItems.set(index, node)
+        globalLazyItems.set(node, 0)
+        return node.value.getPeerPtr()
     }
 
     /**
@@ -149,6 +213,7 @@ class LazyItemPool implements Disposable {
             if (criteria(index)) {
                 node.dispose()
                 this._activeItems.delete(index)
+                globalLazyItems.delete(node)
             }
         })
     }
@@ -209,7 +274,7 @@ class LazyItemPool implements Disposable {
         if (fromIndex === toIndex) {
             return;
         }
-        let tempActiveItems = new Map<int32, SyntaxItemPeer>();
+        let tempActiveItems = new Map<int32, ComputableState<LazyItemNode>>();
         this._activeItems.forEach((node, index) => {
             if (index < fromIndex || index > toIndex) {
                 tempActiveItems.set(index, node);

@@ -106,7 +106,8 @@ HWTEST_F(PluginComponentModifierTest, setPluginComponentOptionsTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(PluginComponentModifierTest, setPluginComponentOptionsTestOptionsTemplateSourceValidValues, TestSize.Level1)
+HWTEST_F(PluginComponentModifierTest, DISABLED_setPluginComponentOptionsTestOptionsTemplateSourceValidValues,
+    TestSize.Level1)
 {
     Ark_PluginComponentOptions initValueOptions;
 

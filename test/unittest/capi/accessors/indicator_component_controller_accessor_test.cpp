@@ -98,8 +98,8 @@ HWTEST_F(IndicatorComponentControllerAccessorTest, DISABLED_changeIndexTest, Tes
 
     ASSERT_NE(accessor_->changeIndex, nullptr);
 
-    auto arkNumValid = ArkValue<Ark_Number>(indexValidValue);
-    auto arkNumInvalid = ArkValue<Ark_Number>(INT_MIN);
+    auto arkNumValid = ArkValue<Opt_Int32>(indexValidValue);
+    auto arkNumInvalid = ArkValue<Opt_Int32>(INT_MIN);
     auto optBoolTrue = ArkValue<Opt_Boolean>(true);
     auto optBoolFalse = ArkValue<Opt_Boolean>(false);
     auto optBoolUndef = ArkValue<Opt_Boolean>();

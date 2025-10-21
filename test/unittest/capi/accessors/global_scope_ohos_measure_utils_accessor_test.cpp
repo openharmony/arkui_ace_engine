@@ -60,19 +60,19 @@ Ark_MeasureOptions GetOptions()
 {
     return Ark_MeasureOptions {
         .textContent = Converter::ArkUnion<Ark_Union_String_Resource, Ark_String>(TEST_TEXT),
-        .constraintWidth = Converter::ArkUnion<Opt_Union_Number_String_Resource, Ark_String>(TEST_DIM_14),
-        .fontSize = Converter::ArkUnion<Opt_Union_Number_String_Resource, Ark_String>(TEST_DIM_15),
-        .fontStyle = Converter::ArkUnion<Opt_Union_Number_FontStyle, Ark_FontStyle>(TEST_FONT_STYLE),
+        .constraintWidth = Converter::ArkUnion<Opt_Union_F64_String_Resource, Ark_String>(TEST_DIM_14),
+        .fontSize = Converter::ArkUnion<Opt_Union_F64_String_Resource, Ark_String>(TEST_DIM_15),
+        .fontStyle = Converter::ArkUnion<Opt_Union_I32_FontStyle, Ark_FontStyle>(TEST_FONT_STYLE),
         .fontWeight = Converter::ArkUnion<Opt_Union_I32_String_FontWeight, Ark_FontWeight>(TEST_FONT_WEIGHT),
         .fontFamily = Converter::ArkUnion<Opt_Union_String_Resource, Ark_String>(TEST_FONT_FAMILY),
-        .letterSpacing = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>(TEST_DIM_16),
-        .textAlign = Converter::ArkUnion<Opt_Union_Number_TextAlign, Ark_TextAlign>(ARK_TEST_ALIGN),
-        .overflow =  Converter::ArkUnion<Opt_Union_Number_TextOverflow, Ark_TextOverflow>(TEST_OVERFLOW),
-        .maxLines = Converter::ArkValue<Opt_Number>(TEST_MAX_LINES),
-        .lineHeight = Converter::ArkUnion<Opt_Union_Number_String_Resource, Ark_String>(TEST_DIM_17),
-        .baselineOffset = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>(TEST_DIM_18),
-        .textCase = Converter::ArkUnion<Opt_Union_Number_TextCase, Ark_Number>(TEST_TEXT_CASE),
-        .textIndent = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>(TEST_DIM_19),
+        .letterSpacing = Converter::ArkUnion<Opt_Union_F64_String, Ark_String>(TEST_DIM_16),
+        .textAlign = Converter::ArkUnion<Opt_Union_I32_TextAlign, Ark_TextAlign>(ARK_TEST_ALIGN),
+        .overflow =  Converter::ArkUnion<Opt_Union_I32_TextOverflow, Ark_TextOverflow>(TEST_OVERFLOW),
+        .maxLines = Converter::ArkValue<Opt_Int32>(TEST_MAX_LINES),
+        .lineHeight = Converter::ArkUnion<Opt_Union_F64_String_Resource, Ark_String>(TEST_DIM_17),
+        .baselineOffset = Converter::ArkUnion<Opt_Union_F64_String, Ark_String>(TEST_DIM_18),
+        .textCase = Converter::ArkUnion<Opt_Union_I32_TextCase, Ark_Int32>(TEST_TEXT_CASE),
+        .textIndent = Converter::ArkUnion<Opt_Union_F64_String, Ark_String>(TEST_DIM_19),
         .wordBreak = Converter::ArkValue<Opt_WordBreak>(ARK_TEST_WORD_BREAK),
     };
 }
@@ -88,7 +88,7 @@ HWTEST_F(GlobalScopeOhosMeasureUtilsAccessorTest, DISABLED_measureTextTest, Test
     ASSERT_NE(accessor_->measureText, nullptr);
 
     auto options = GetOptions();
-    Ark_Number value = accessor_->measureText(&options);
+    auto value = accessor_->measureText(&options);
     auto testValue = Converter::Convert<int32_t>(value);
     EXPECT_EQ(testValue, TEST_SIZE_VALUE);
 

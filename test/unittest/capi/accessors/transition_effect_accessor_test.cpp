@@ -50,14 +50,14 @@ HWTEST_F(TransitionEffectAccessorTest, getRotateTest, TestSize.Level1)
     ASSERT_NE(accessor_->rotate, nullptr);
 
     Ark_RotateOptions value;
-    value.x = Converter::ArkValue<Opt_Number>(2);
-    value.y = Converter::ArkValue<Opt_Number>(3);
-    value.z = Converter::ArkValue<Opt_Number>(4);
-    value.centerX = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(3);
-    value.centerY = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(3);
-    value.centerZ = Converter::ArkValue<Opt_Number>(3);
-    value.perspective = Converter::ArkValue<Opt_Number>(6);
-    value.angle = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(45);
+    value.x = Converter::ArkValue<Opt_Float64>(2);
+    value.y = Converter::ArkValue<Opt_Float64>(3);
+    value.z = Converter::ArkValue<Opt_Float64>(4);
+    value.centerX = Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(3);
+    value.centerY = Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(3);
+    value.centerZ = Converter::ArkValue<Opt_Float64>(3);
+    value.perspective = Converter::ArkValue<Opt_Float64>(6);
+    value.angle = Converter::ArkUnion<Ark_Union_F64_String, Ark_Float64>(45);
 
     auto peer = accessor_->rotate(&value);
     ASSERT_NE(peer, nullptr);
@@ -87,9 +87,9 @@ HWTEST_F(TransitionEffectAccessorTest, getTranslateTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->translate, nullptr);
     Ark_TranslateOptions value;
-    value.x = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(2);
-    value.y = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(3);
-    value.z = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(4);
+    value.x = Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(2);
+    value.y = Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(3);
+    value.z = Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(4);
     auto peer = accessor_->translate(&value);
     ASSERT_NE(peer, nullptr);
 
@@ -113,11 +113,11 @@ HWTEST_F(TransitionEffectAccessorTest, getScaleTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->scale, nullptr);
     Ark_ScaleOptions value;
-    value.x = Converter::ArkValue<Opt_Number>(2);
-    value.y = Converter::ArkValue<Opt_Number>(3);
-    value.z = Converter::ArkValue<Opt_Number>(4);
-    value.centerX = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(3);
-    value.centerY = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(3);
+    value.x = Converter::ArkValue<Opt_Float64>(2);
+    value.y = Converter::ArkValue<Opt_Float64>(3);
+    value.z = Converter::ArkValue<Opt_Float64>(4);
+    value.centerX = Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(3);
+    value.centerY = Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(3);
     auto peer = accessor_->scale(&value);
     ASSERT_NE(peer, nullptr);
 
@@ -143,18 +143,15 @@ HWTEST_F(TransitionEffectAccessorTest, getOpacityTest, TestSize.Level1)
 {
     const int testValue = 330;
     ASSERT_NE(accessor_->opacity, nullptr);
-    Ark_Number value = Converter::ArkValue<Ark_Number>(testValue);
+    auto value = Converter::ArkValue<Ark_Float64>(testValue);
 
-    auto peer = accessor_->opacity(&value);
+    auto peer = accessor_->opacity(value);
     ASSERT_NE(peer, nullptr);
 
     auto effect = AceType::DynamicCast<ChainedOpacityEffect>(peer->handler);
     ASSERT_NE(effect, nullptr);
     ASSERT_EQ(effect->GetEffect(), testValue);
     GeneratedModifier::GetTransitionEffectAccessor()->destroyPeer(peer);
-
-    peer = accessor_->opacity(nullptr);
-    ASSERT_EQ(peer, nullptr);
 }
 
 /**
@@ -200,8 +197,8 @@ HWTEST_F(TransitionEffectAccessorTest, getAnimationTest, TestSize.Level1)
     const int testValue = 333;
     ASSERT_NE(accessor_->animation, nullptr);
     Ark_AnimateParam animParam;
-    animParam.duration = Converter::ArkValue<Opt_Number>(testValue);
-    animParam.tempo =  Converter::ArkValue<Opt_Number>(0.5);
+    animParam.duration = Converter::ArkValue<Opt_Int32>(testValue);
+    animParam.tempo =  Converter::ArkValue<Opt_Float64>(0.5);
     TransitionEffectPeer* peer = PeerUtils::CreatePeer<TransitionEffectPeer>();
     peer->handler = AceType::MakeRefPtr<ChainedOpacityEffect>(33);
 
@@ -282,9 +279,6 @@ HWTEST_F(TransitionEffectAccessorTest, getOPACITYTest, TestSize.Level1)
     ASSERT_NE(effect, nullptr);
     ASSERT_EQ(effect->GetEffect(), testValue);
     GeneratedModifier::GetTransitionEffectAccessor()->destroyPeer(peer);
-
-    peer = accessor_->opacity(nullptr);
-    ASSERT_EQ(peer, nullptr);
 }
 
 /**

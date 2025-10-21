@@ -22,6 +22,7 @@ namespace OHOS::Ace::Ani {
 
 class AniTrace {
 public:
+    static bool GetAttributeSetTraceEnabled(ani_env* env, [[maybe_unused]] ani_object aniClass);
     static void TraceBegin(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_string aniTraceName);
     static void TraceEnd(ani_env* env, [[maybe_unused]] ani_object aniClass);
     static void AsyncTraceBegin(ani_env* env, [[maybe_unused]] ani_object aniClass,

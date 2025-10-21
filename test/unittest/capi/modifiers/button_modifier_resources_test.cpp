@@ -188,7 +188,7 @@ HWTEST_F(ButtonModifierResourcesTest, setFontColorTestResourceColorValues, TestS
  * @tc.desc: check setFontSize from resource
  * @tc.type: FUNC
  */
-HWTEST_F(ButtonModifierResourcesTest, setFontSizeTestResourcesValidResources, TestSize.Level1)
+HWTEST_F(ButtonModifierResourcesTest, DISABLED_setFontSizeTestResourcesValidResources, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string result;

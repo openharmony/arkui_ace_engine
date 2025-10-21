@@ -23,7 +23,7 @@ import { Area_serializer, ConstraintSizeOptions_serializer, SizeOptions_serializ
 import { TextMenuItem_serializer, DeleteValue_serializer, EditableTextChangeValue_serializer, InsertValue_serializer, StyledStringChangeValue_serializer, TextRange_serializer, PreviewText_serializer, TextChangeOptions_serializer, TextMenuItem, DeleteValue, EditableTextChangeValue, InsertValue, StyledStringChangeValue, TextRange, EditableTextOnChangeCallback, PreviewText, TextChangeOptions, OnCreateMenuCallback, OnDidChangeCallback, OnMenuItemClickCallback } from "./../../component/textCommon"
 import { ComputedBarAttribute_serializer, ComputedBarAttribute } from "./../../component/grid"
 import { CopyEvent_serializer, CutEvent_serializer, RichEditorChangeValue_serializer, RichEditorDeleteValue_serializer, RichEditorInsertValue_serializer, RichEditorRange_serializer, RichEditorSelection_serializer, RichEditorTextSpanResult_serializer, PasteEvent_serializer, CopyEvent, CutEvent, RichEditorChangeValue, RichEditorDeleteValue, RichEditorInsertValue, RichEditorRange, RichEditorSelection, RichEditorTextSpanResult, PasteEvent, MenuCallback, MenuOnAppearCallback, OnHoverCallback, PasteEventCallback, SubmitCallback } from "./../../component/richEditor"
-import { CustomSpanMeasureInfo_serializer, CustomSpanMetrics_serializer, CustomSpanDrawInfo_serializer, StyledString_serializer, UserDataSpan_serializer, CustomSpanMeasureInfo, CustomSpanMetrics, CustomSpanDrawInfo, StyledString, UserDataSpan, StyledStringMarshallCallback, StyledStringUnmarshallCallback } from "./../../component/styledString"
+import { CustomSpanMeasureInfo_serializer, CustomSpanMetrics_serializer, CustomSpanDrawInfo_serializer, StyledString_serializer, CustomSpanMeasureInfo, CustomSpanMetrics, CustomSpanDrawInfo, StyledString, UserDataSpan, StyledStringMarshallCallback, StyledStringUnmarshallCallback } from "./../../component/styledString"
 import { DismissDialogAction_serializer, DismissDialogAction } from "./../../component/actionSheet"
 import { DrawContext_serializer, Size_serializer } from "./../../Graphics"
 import { ErrorInformation_serializer, FormCallbackInfo_serializer, ErrorInformation, FormCallbackInfo } from "./../../component/formComponent"
@@ -56,7 +56,7 @@ import { PluginErrorData_serializer, RecordData, PluginErrorCallback, PluginErro
 import { ProgressConfiguration_serializer, ProgressConfiguration } from "./../../component/progress"
 import { RadioConfiguration_serializer, OnRadioChangeCallback, RadioConfiguration } from "./../../component/radio"
 import { RatingConfiguration_serializer, OnRatingChangeCallback, RatingConfiguration } from "./../../component/rating"
-import { ErrorEvent_serializer, MessageEvents_serializer, Event_serializer, Callback_CreateItem, Callback_Extender_OnFinish, Callback_Extender_OnProgress, Callback_onMeasureSize_SizeResult, Callback_OnMoveFromTo, Callback_onPlaceChildren_Void, Callback_RangeUpdate, Callback_Size_Void, Callback_StateStylesChange, CustomNodeBuilder, NavExtender_OnUpdateStack, RestrictedWorker_onerror_Callback, ErrorEvent, RestrictedWorker_onexit_Callback, RestrictedWorker_onmessage_Callback, MessageEvents, RouterFinishCallback, WorkerEventListener, Event } from "./../../component/idlize"
+import { ErrorEvent_serializer, MessageEvents_serializer, Event_serializer, Callback_CreateItem, Callback_Extender_OnFinish, Callback_Extender_OnProgress, Callback_OnDestory_Void, Callback_onMeasureSize_SizeResult, Callback_OnMoveFromTo, Callback_onPlaceChildren_Void, Callback_RangeUpdate, Callback_Size_Void, Callback_StateStylesChange, CustomNodeBuilder, NavExtender_OnUpdateStack, RestrictedWorker_onerror_Callback, ErrorEvent, RestrictedWorker_onexit_Callback, RestrictedWorker_onmessage_Callback, MessageEvents, RouterFinishCallback, WorkerEventListener, Event } from "./../../component/idlize"
 import { SliderConfiguration_serializer, SliderChangeMode, SliderConfiguration, SliderTriggerChangeCallback } from "./../../component/slider"
 import { TextClockConfiguration_serializer, TextClockConfiguration } from "./../../component/textClock"
 import { TextTimerConfiguration_serializer, TextTimerConfiguration, TimerCallback } from "./../../component/textTimer"
@@ -988,6 +988,12 @@ export function deserializeAndCallCallback_OnDataResubmittedEvent_Void(thisDeser
     let value0 : OnDataResubmittedEvent = OnDataResubmittedEvent_serializer.read(thisDeserializer)
     _call(value0)
 }
+export function deserializeAndCallCallback_OnDestory_Void(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as Callback_OnDestory_Void)
+    let nodeId : int64 = thisDeserializer.readInt64()
+    _call(nodeId)
+}
 export function deserializeAndCallCallback_OnDownloadStartEvent_Void(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: OnDownloadStartEvent) => void))
@@ -1611,7 +1617,7 @@ export function deserializeAndCallCallback_StyledStringChangeValue_Boolean(thisD
 export function deserializeAndCallCallback_StyledStringMarshallingValue_Void(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((value: UserDataSpan) => void))
-    let value : UserDataSpan = (UserDataSpan_serializer.read(thisDeserializer) as UserDataSpan)
+    let value : UserDataSpan = (thisDeserializer.readObject() as UserDataSpan)
     _call(value)
 }
 export function deserializeAndCallCallback_SwipeActionState_Void(thisDeserializer: DeserializerBase): void {
@@ -3050,7 +3056,8 @@ export function deserializeAndCallSliderTriggerChangeCallback(thisDeserializer: 
 export function deserializeAndCallStyledStringMarshallCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as StyledStringMarshallCallback)
-    let marshallableVal : UserDataSpan = (UserDataSpan_serializer.read(thisDeserializer) as UserDataSpan)
+    let marshallableVal : UserDataSpan = (thisDeserializer.readObject() as UserDataSpan)
+
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
@@ -3079,7 +3086,8 @@ export function deserializeAndCallStyledStringUnmarshallCallback(thisDeserialize
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
-        UserDataSpan_serializer.write(continuationBufferBufArgsSerializer, value);
+        const valueHolderForUserDataSpan  = value;
+        continuationBufferBufArgsSerializer.holdAndWriteObject(valueHolderForUserDataSpan);
         InteropNativeModule._CallCallbackSync(10, -1198150682, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
@@ -3493,6 +3501,7 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.Kind_Callback_OnConsoleEvent_Boolean: return deserializeAndCallCallback_OnConsoleEvent_Boolean(thisDeserializer);
         case CallbackKind.Kind_Callback_OnContextMenuShowEvent_Boolean: return deserializeAndCallCallback_OnContextMenuShowEvent_Boolean(thisDeserializer);
         case CallbackKind.Kind_Callback_OnDataResubmittedEvent_Void: return deserializeAndCallCallback_OnDataResubmittedEvent_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_OnDestory_Void: return deserializeAndCallCallback_OnDestory_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_OnDownloadStartEvent_Void: return deserializeAndCallCallback_OnDownloadStartEvent_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_OnErrorReceiveEvent_Void: return deserializeAndCallCallback_OnErrorReceiveEvent_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_OnFaviconReceivedEvent_Void: return deserializeAndCallCallback_OnFaviconReceivedEvent_Void(thisDeserializer);

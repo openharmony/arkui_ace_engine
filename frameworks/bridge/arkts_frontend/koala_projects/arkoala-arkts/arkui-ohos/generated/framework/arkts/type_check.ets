@@ -329,7 +329,7 @@ export class TypeChecker {
     static isAxisAction(value: Object | string | number | undefined): boolean {
         return value instanceof AxisAction
     }
-    static isAxisEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean): boolean {
+    static isAxisEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean): boolean {
         return value instanceof AxisEvent
     }
     static isAxisModel(value: Object | string | number | undefined): boolean {
@@ -596,7 +596,7 @@ export class TypeChecker {
     static isClickEffectLevel(value: Object | string | number | undefined): boolean {
         return value instanceof ClickEffectLevel
     }
-    static isClickEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean): boolean {
+    static isClickEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean): boolean {
         return value instanceof ClickEvent
     }
     static isClientAuthenticationHandler(value: Object | string | number | undefined): boolean {
@@ -1064,7 +1064,7 @@ export class TypeChecker {
     static isFlexWrap(value: Object | string | number | undefined): boolean {
         return value instanceof FlexWrap
     }
-    static isFocusAxisEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+    static isFocusAxisEvent(value: Object | string | number | undefined, arg0: boolean): boolean {
         return value instanceof FocusAxisEvent
     }
     static isFocusBoxStyle(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
@@ -1307,7 +1307,7 @@ export class TypeChecker {
     static isHoverEffect(value: Object | string | number | undefined): boolean {
         return value instanceof HoverEffect
     }
-    static isHoverEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean): boolean {
+    static isHoverEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean): boolean {
         return value instanceof HoverEvent
     }
     static isHoverEventParam(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean): boolean {
@@ -3113,7 +3113,7 @@ export class TypeChecker {
     static isToolbarItemStatus(value: Object | string | number | undefined): boolean {
         return value instanceof ToolbarItemStatus
     }
-    static isTouchEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean): boolean {
+    static isTouchEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
         return value instanceof TouchEvent
     }
     static isTouchObject(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean, arg10: boolean, arg11: boolean, arg12: boolean): boolean {

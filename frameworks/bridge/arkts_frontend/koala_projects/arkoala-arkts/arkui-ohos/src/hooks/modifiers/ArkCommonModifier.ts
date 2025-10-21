@@ -21,6 +21,9 @@ import { int32} from "@koalaui/common"
 import { PeerNode } from '../../PeerNode';
 import { CommonMethodModifier } from '../../CommonMethodModifier';
 import { ComponentBase } from '../../ComponentBase';
+import { SerializerBase } from '@koalaui/interop';
+import { ArkUIGeneratedNativeModule } from '#components';
+import { ArkUIAniModule } from 'arkui.ani';
 
 const UI_STATE_NORMAL = 0;
 const UI_STATE_PRESSED = 1;
@@ -82,6 +85,7 @@ export function applyAttributeModifierNoCommonMethod<T, MethodSet extends T, Met
             attributeUpdater.peerNode_ = node;
             let receiver = updaterReceiver();
             receiver.setPeer(node);
+            receiver.setAttributeHook(setFrameCallback);
             attributeUpdater.attribute = receiver as Object as T;
             attributeUpdater.updateConstructorParams = (...params: FixedArray<Object>) => {
                 func(receiver, ...params);
@@ -136,3 +140,13 @@ export function applyCommonModifier(peerNode: ArkCommonMethodPeer, modifier: Att
     };
     applyAttributeModifierBase(modifier, attributeSet, constructParam, updaterReceiver, peerNode);
 }
+
+function setFrameCallback(peer?: PeerNode): void {
+    ArkUIAniModule._FrameNode_MarkDirtyNode(peer!.getPeerPtr());
+    const thisSerializer: SerializerBase = SerializerBase.hold()
+    thisSerializer.holdAndWriteCallback((index: number) => { })
+    thisSerializer.holdAndWriteCallback((index: number) => { })
+    ArkUIGeneratedNativeModule._SystemOps_setFrameCallback(thisSerializer.asBuffer(),
+        thisSerializer.length(), 0);
+    thisSerializer.release()
+}   

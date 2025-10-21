@@ -65,6 +65,7 @@
 #include "core/interfaces/native/implementation/swipe_recognizer_peer.h"
 #include "core/interfaces/native/implementation/tap_gesture_event_peer.h"
 #include "core/interfaces/native/implementation/tap_recognizer_peer.h"
+#include "core/interfaces/native/implementation/text_field_modifier.h"
 #include "core/interfaces/native/implementation/transition_effect_peer_impl.h"
 #include "frameworks/core/interfaces/native/implementation/bind_sheet_utils.h"
 #include "base/log/log_wrapper.h"
@@ -74,7 +75,6 @@
 using namespace OHOS::Ace::NG::Converter;
 
 namespace {
-constexpr double PERCENT_100 = 100.0;
 constexpr double FULL_DIMENSION = 100.0;
 constexpr double HALF_DIMENSION = 50.0;
 constexpr double VISIBLE_RATIO_MIN = 0.0;
@@ -93,8 +93,8 @@ constexpr int NUM_3 = 3;
 constexpr int NUM_5 = 5;
 constexpr float DEFAULT_SCALE_LIGHT = 0.9f;
 constexpr float DEFAULT_SCALE_MIDDLE_OR_HEAVY = 0.95f;
-constexpr float MIN_ANGEL = 0.0f;
-constexpr float MAX_ANGEL = 360.0f;
+constexpr float MIN_ANGLE = 0.0f;
+constexpr float MAX_ANGLE = 360.0f;
 const uint32_t FOCUS_PRIORITY_AUTO = 0;
 const uint32_t FOCUS_PRIORITY_PRIOR = 2000;
 const uint32_t FOCUS_PRIORITY_PREVIOUS = 3000;
@@ -192,6 +192,35 @@ Ark_BaseGestureEvent CreateArkBaseGestureEvent(const std::shared_ptr<BaseGesture
     CHECK_NULL_RETURN(peer, nullptr);
     peer->SetRecognizerType(typeName);
     return peer;
+}
+void CheckAngle(std::optional<float>& angle)
+{
+    if (angle.has_value()) {
+        angle = std::clamp(angle.value(), MIN_ANGLE, MAX_ANGLE);
+    }
+}
+void ParseSweepGradientCenter(NG::Gradient& gradient, const Ark_Tuple_Length_Length& center)
+{
+    auto centerX = Converter::OptConvert<Dimension>(center.value0);
+    if (centerX) {
+        if (centerX->Unit() == DimensionUnit::PERCENT) {
+            // [0,1] -> [0, 100]
+            gradient.GetSweepGradient()->centerX =
+                CalcDimension(centerX->Value() * Converter::PERCENT_100, DimensionUnit::PERCENT);
+        } else {
+            gradient.GetSweepGradient()->centerX = CalcDimension(*centerX);
+        }
+    }
+    auto centerY = Converter::OptConvert<Dimension>(center.value1);
+    if (centerY) {
+        if (centerY->Unit() == DimensionUnit::PERCENT) {
+            // [0,1] -> [0, 100]
+            gradient.GetSweepGradient()->centerY =
+                CalcDimension(centerY->Value() * Converter::PERCENT_100, DimensionUnit::PERCENT);
+        } else {
+            gradient.GetSweepGradient()->centerY = CalcDimension(*centerY);
+        }
+    }
 }
 } // namespace
 
@@ -794,10 +823,7 @@ Gradient Convert(const Ark_RadialGradientOptions& src)
     }
 
     // color stops
-    std::vector<GradientColor> colorStops = Converter::Convert<std::vector<GradientColor>>(src.colors);
-    for (GradientColor gradientColor : colorStops) {
-        gradient.AddColor(gradientColor);
-    }
+    Converter::AssignGradientColors(&gradient, &(src.colors));
 
     return gradient;
 }
@@ -1262,13 +1288,15 @@ RotateOpt Convert(const Ark_RotateOptions& src)
     options.vec5f.emplace_back(OptConvert<float>(src.x));
     options.vec5f.emplace_back(OptConvert<float>(src.y));
     options.vec5f.emplace_back(OptConvert<float>(src.z));
-    options.vec5f.emplace_back(OptConvert<float>(src.angle));
+    std::optional<float> angle;
+    ConvertAngleWithDefault(src.angle, angle, 0.0f);
+    options.vec5f.emplace_back(angle);
     options.vec5f.emplace_back(OptConvert<float>(src.perspective));
 
     auto centerX =  OptConvert<Dimension>(src.centerX);
     auto centerY =  OptConvert<Dimension>(src.centerY);
     auto center = DimensionOffset(Dimension(0.5f, DimensionUnit::PERCENT), Dimension(0.5f, DimensionUnit::PERCENT));
-    center.SetZ(Dimension(0.5f, DimensionUnit::PERCENT));
+    center.SetZ(Dimension(0, DimensionUnit::VP));
     if (centerX.has_value()) {
         center.SetX(centerX.value());
     }
@@ -1335,8 +1363,7 @@ ScaleOptions Convert(const Ark_ScaleOptions& src)
 template<>
 RotateOptions Convert(const Ark_RotateOptions& src)
 {
-    RotateOptions rotateOptions(0.0f, 0.0f, 0.0f, 0.0f, 0.5_pct, 0.5_pct, 0.5_pct);
-    // The value of centerZ is 50%, which is equivalent to 0 when finally set to the RS because not support percent.
+    RotateOptions rotateOptions(0.0f, 0.0f, 0.0f, 0.0f, 0.5_pct, 0.5_pct);
     auto coordX = OptConvert<float>(src.x);
     auto coordY = OptConvert<float>(src.y);
     auto coordZ = OptConvert<float>(src.z);
@@ -1353,7 +1380,8 @@ RotateOptions Convert(const Ark_RotateOptions& src)
             rotateOptions.zDirection = coordZ.value();
         }
     }
-    auto angle = OptConvert<float>(src.angle);
+    std::optional<float> angle;
+    ConvertAngleWithDefault(src.angle, angle, 0.0f);
     if (angle.has_value()) {
         rotateOptions.angle = angle.value();
     }
@@ -1849,6 +1877,10 @@ void SetWidthImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetTag() == V2::TEXTINPUT_ETS_TAG || frameNode->GetTag() == V2::TEXTAREA_ETS_TAG) {
+        TextFieldModifier::SetWidthImpl(node, value);
+        return;
+    }
     Converter::VisitUnionPtr(value,
         [frameNode](const Ark_Length& src) {
             auto result = Converter::OptConvert<CalcDimension>(src);
@@ -1883,6 +1915,10 @@ void SetHeightImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetTag() == V2::TEXTINPUT_ETS_TAG || frameNode->GetTag() == V2::TEXTAREA_ETS_TAG) {
+        TextFieldModifier::SetHeightImpl(node, value);
+        return;
+    }
     Converter::VisitUnionPtr(value,
         [frameNode](const Ark_Length& src) {
             auto result = Converter::OptConvert<CalcDimension>(src);
@@ -1934,7 +1970,7 @@ void SetMouseResponseRegionImpl(Ark_NativePointer node,
     if (auto convArray = Converter::OptConvertPtr<std::vector<DimensionRect>>(value); convArray) {
         ViewAbstract::SetMouseResponseRegion(frameNode, *convArray);
     } else {
-        ViewAbstract::SetMouseResponseRegion(frameNode, { DimensionRect() });
+        ViewAbstract::SetMouseResponseRegion(frameNode, {});
     }
 }
 void SetSizeImpl(Ark_NativePointer node,
@@ -2049,7 +2085,11 @@ void SetPaddingImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstractModelStatic::SetPadding(frameNode, Converter::OptConvertPtr<PaddingProperty>(value));
+    if (frameNode->GetTag() == V2::TEXTINPUT_ETS_TAG || frameNode->GetTag() == V2::TEXTAREA_ETS_TAG) {
+        TextFieldModifier::SetPaddingImpl(node, value);
+    } else {
+        ViewAbstractModelStatic::SetPadding(frameNode, Converter::OptConvertPtr<PaddingProperty>(value));
+    }
 }
 void SetSafeAreaPaddingImpl(Ark_NativePointer node,
                             const Opt_Union_Padding_LengthMetrics_LocalizedPadding* value)
@@ -2078,10 +2118,14 @@ void SetMarginImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstractModelStatic::SetMargin(frameNode, Converter::OptConvertPtr<PaddingProperty>(value));
+    if (frameNode->GetTag() == V2::TEXTINPUT_ETS_TAG || frameNode->GetTag() == V2::TEXTAREA_ETS_TAG) {
+        TextFieldModifier::SetMarginImpl(node, value);
+    } else {
+        ViewAbstractModelStatic::SetMargin(frameNode, Converter::OptConvertPtr<PaddingProperty>(value));
+    }
 }
 void SetBackgroundColorImpl(Ark_NativePointer node,
-                            const Opt_ResourceColor* value)
+                            const Opt_Union_ResourceColor_ColorMetrics* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -2091,6 +2135,8 @@ void SetBackgroundColorImpl(Ark_NativePointer node,
     }
     if (frameNode->GetTag() == V2::SELECT_ETS_TAG) {
         SelectModelStatic::SetBackgroundColor(frameNode, colorValue);
+    } else if (frameNode->GetTag() == V2::TEXTINPUT_ETS_TAG || frameNode->GetTag() == V2::TEXTAREA_ETS_TAG) {
+        TextFieldModifier::SetBackgroundColorImpl(node, value);
     } else {
         ViewAbstractModelStatic::SetBackgroundColor(frameNode, colorValue);
     }
@@ -2264,6 +2310,10 @@ void SetBorderImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetTag() == V2::TEXTINPUT_ETS_TAG || frameNode->GetTag() == V2::TEXTAREA_ETS_TAG) {
+        TextFieldModifier::SetBorderImpl(node, value);
+        return;
+    }
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
         ViewAbstract::SetBorderWidth(frameNode, Dimension(0));
@@ -2299,6 +2349,10 @@ void SetBorderStyleImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetTag() == V2::TEXTINPUT_ETS_TAG || frameNode->GetTag() == V2::TEXTAREA_ETS_TAG) {
+        TextFieldModifier::SetBorderStyleImpl(node, value);
+        return;
+    }
     auto style = Converter::OptConvertPtr<BorderStyleProperty>(value);
     if (!style) {
         ViewAbstract::SetBorderStyle(frameNode, BorderStyle::SOLID);
@@ -2311,6 +2365,10 @@ void SetBorderWidthImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetTag() == V2::TEXTINPUT_ETS_TAG || frameNode->GetTag() == V2::TEXTAREA_ETS_TAG) {
+        TextFieldModifier::SetBorderWidthImpl(node, value);
+        return;
+    }
     auto width = Converter::OptConvertPtr<BorderWidthProperty>(value);
     if (!width) {
         ViewAbstract::SetBorderWidth(frameNode, Dimension(0));
@@ -2323,6 +2381,10 @@ void SetBorderColorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetTag() == V2::TEXTINPUT_ETS_TAG || frameNode->GetTag() == V2::TEXTAREA_ETS_TAG) {
+        TextFieldModifier::SetBorderColorImpl(node, value);
+        return;
+    }
     auto color = Converter::OptConvertPtr<BorderColorProperty>(value);
     if (color) {
         ViewAbstractModelStatic::SetBorderColor(frameNode, color.value());
@@ -2333,6 +2395,10 @@ void SetBorderRadiusImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetTag() == V2::TEXTINPUT_ETS_TAG || frameNode->GetTag() == V2::TEXTAREA_ETS_TAG) {
+        TextFieldModifier::SetBorderRadiusImpl(node, value);
+        return;
+    }
     auto radiuses = Converter::OptConvertPtr<BorderRadiusProperty>(value);
     if (radiuses) {
         if (frameNode->GetTag() == V2::BUTTON_ETS_TAG) {
@@ -2660,6 +2726,18 @@ void SetOnHoverMoveImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        ViewAbstract::DisableOnHoverMove(frameNode);
+        return;
+    }
+    auto weakNode = AceType::WeakClaim(frameNode);
+    auto onHoverMove = [arkCallback = CallbackHelper(*optValue), node = weakNode](HoverInfo& hoverInfo) {
+        PipelineContext::SetCallBackNode(node);
+        const auto event = Converter::ArkHoverEventSync(hoverInfo);
+        arkCallback.InvokeSync(event.ArkValue());
+    };
+    ViewAbstract::SetOnHoverMove(frameNode, std::move(onHoverMove));
 }
 void SetOnAccessibilityHoverImpl(Ark_NativePointer node,
                                  const Opt_AccessibilityCallback* value)
@@ -2880,7 +2958,10 @@ void SetFocusableImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        // Implement Reset value
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        auto focusable = pattern->GetFocusPattern().GetFocusable();
+        ViewAbstract::SetFocusable(frameNode, focusable);
         return;
     }
     ViewAbstract::SetFocusable(frameNode, *convValue);
@@ -3196,7 +3277,7 @@ void SetUseShadowBatchingImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        ViewAbstractModelNG::SetUseShadowBatching(frameNode, false);
+        ViewAbstractModelStatic::SetUseShadowBatching(frameNode, false);
         return;
     }
     ViewAbstractModelStatic::SetUseShadowBatching(frameNode, convValue);
@@ -3246,14 +3327,17 @@ void SetScaleImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ScaleOpt scaleOptions = Converter::OptConvertPtr<ScaleOpt>(value).value_or(ScaleOpt{});
-
-    float scaleX = scaleOptions.x.value_or(1.0f);
-    float scaleY = scaleOptions.y.value_or(1.0f);
+    std::optional<ScaleOpt> scaleOptions = Converter::OptConvertPtr<ScaleOpt>(value);
+    if (!scaleOptions) {
+        ViewAbstract::SetScale(frameNode, VectorF(1.0f, 1.0f));
+        return;
+    }
+    float scaleX = scaleOptions->x.value_or(1.0f);
+    float scaleY = scaleOptions->y.value_or(1.0f);
     ViewAbstract::SetScale(frameNode, VectorF(scaleX, scaleY));
 
-    CalcDimension centerX = scaleOptions.centerX.value_or(0.5_pct);
-    CalcDimension centerY = scaleOptions.centerY.value_or(0.5_pct);
+    CalcDimension centerX = scaleOptions->centerX.value_or(0.5_pct);
+    CalcDimension centerY = scaleOptions->centerY.value_or(0.5_pct);
     ViewAbstractModelStatic::SetPivot(frameNode, DimensionOffset(centerX, centerY));
 }
 void SetRotateImpl(Ark_NativePointer node,
@@ -3267,40 +3351,6 @@ void SetRotateImpl(Ark_NativePointer node,
         ViewAbstractModelStatic::SetRotate(frameNode, EMPTY_ROTATE_VECTOR);
         return;
     }
-    auto xValue = Converter::GetOptPtr(&(value->value.centerX));
-    if (xValue.has_value()) {
-        Converter::VisitUnion(
-            xValue.value(),
-            [&convValue](const Ark_String& val) {
-                std::string degreeStr = Converter::Convert<std::string>(val);
-                auto dim = StringUtils::StringToCalcDimension(degreeStr);
-                convValue->center->SetX(dim);
-            },
-            [](const Ark_Float64& val) {}, []() {});
-    }
-    auto yValue = Converter::GetOptPtr(&(value->value.centerY));
-    if (yValue.has_value()) {
-        Converter::VisitUnion(
-            yValue.value(),
-            [&convValue](const Ark_String& val) {
-                std::string degreeStr = Converter::Convert<std::string>(val);
-                auto dim = StringUtils::StringToCalcDimension(degreeStr);
-                convValue->center->SetY(dim);
-            },
-            [](const Ark_Float64& val) {}, []() {});
-    }
-    auto angleValue = value->value.angle;
-    Converter::VisitUnion(
-        angleValue,
-        [&convValue](const Ark_String& str) {
-            std::string degreeStr = Converter::Convert<std::string>(str);
-            float angle = static_cast<float>(StringUtils::StringToDegree(degreeStr));
-            int32_t indA = 3;
-            if (convValue->vec5f.size() > indA) {
-                convValue->vec5f[indA] = angle;
-            }
-        },
-        [](const Ark_Float64& val) {}, []() {});
     ViewAbstractModelStatic::SetRotate(frameNode, convValue->vec5f);
     ViewAbstractModelStatic::SetPivot(frameNode, convValue->center);
 }
@@ -3888,6 +3938,7 @@ void SetLinearGradientImpl(Ark_NativePointer node,
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
         Gradient defaultGradient;
+        defaultGradient.CreateGradientWithType(NG::GradientType::LINEAR);
         ViewAbstract::SetLinearGradient(frameNode, defaultGradient);
         return;
     }
@@ -3898,7 +3949,12 @@ void SetLinearGradientImpl(Ark_NativePointer node,
         gradient.SetRepeat(repeat.value());
     }
     auto linear = gradient.GetLinearGradient();
-    linear->angle = Converter::OptConvert<Dimension>(optValue->angle);
+    std::optional<float> degreeOpt;
+    constexpr float DEFAULT_ANGLE = 180.0f;
+    Converter::ConvertAngleWithDefault(optValue->angle, degreeOpt, DEFAULT_ANGLE);
+    if (degreeOpt) {
+        linear->angle = CalcDimension(degreeOpt.value(), DimensionUnit::PX);
+    }
     auto direction = Converter::OptConvert<GradientDirection>(optValue->direction);
     if (direction) {
         Converter::AssignLinearGradientDirection(linear, direction.value());
@@ -3914,6 +3970,7 @@ void SetSweepGradientImpl(Ark_NativePointer node,
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
         Gradient defaultGradient;
+        defaultGradient.CreateGradientWithType(NG::GradientType::SWEEP);
         ViewAbstract::SetSweepGradient(frameNode, defaultGradient);
         return;
     }
@@ -3924,16 +3981,25 @@ void SetSweepGradientImpl(Ark_NativePointer node,
         gradient.SetRepeat(repeat.value());
     }
     auto sweep = gradient.GetSweepGradient();
-    auto centerX = Converter::OptConvert<Dimension>(optValue->center.value0);
-    auto centerY = Converter::OptConvert<Dimension>(optValue->center.value1);
-    auto startAngle = Converter::OptConvert<Dimension>(optValue->start);
-    auto endAngle = Converter::OptConvert<Dimension>(optValue->end);
-    auto rotation = Converter::OptConvert<Dimension>(optValue->rotation);
-    sweep->startAngle = ClampAngleDimension(Converter::OptConvert<Dimension>(optValue->start), MIN_ANGEL, MAX_ANGEL);
-    sweep->endAngle = ClampAngleDimension(Converter::OptConvert<Dimension>(optValue->end), MIN_ANGEL, MAX_ANGEL);
-    sweep->rotation = ClampAngleDimension(Converter::OptConvert<Dimension>(optValue->rotation), MIN_ANGEL, MAX_ANGEL);
-    if (centerX) sweep->centerX = centerX.value();
-    if (centerY) sweep->centerY = centerY.value();
+    ParseSweepGradientCenter(gradient, optValue->center);
+    std::optional<float> degreeStart;
+    std::optional<float> degreeEnd;
+    std::optional<float> degreeRotation;
+    Converter::ConvertAngleWithDefault(optValue->start, degreeStart, 0.0f);
+    Converter::ConvertAngleWithDefault(optValue->end, degreeEnd, 0.0f);
+    Converter::ConvertAngleWithDefault(optValue->rotation, degreeRotation, 0.0f);
+    if (degreeStart) {
+        CheckAngle(degreeStart);
+        sweep->startAngle = CalcDimension(degreeStart.value(), DimensionUnit::PX);
+    }
+    if (degreeEnd) {
+        CheckAngle(degreeEnd);
+        sweep->endAngle = CalcDimension(degreeEnd.value(), DimensionUnit::PX);
+    }
+    if (degreeRotation) {
+        CheckAngle(degreeRotation);
+        sweep->rotation = CalcDimension(degreeRotation.value(), DimensionUnit::PX);
+    }
     Converter::AssignGradientColors(&gradient, &optValue->colors);
     ViewAbstract::SetSweepGradient(frameNode, gradient);
 }
@@ -3945,6 +4011,7 @@ void SetRadialGradientImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvertPtr<Gradient>(value);
     if (!convValue) {
         Gradient defaultGradient;
+        defaultGradient.CreateGradientWithType(NG::GradientType::RADIAL);
         ViewAbstract::SetRadialGradient(frameNode, defaultGradient);
         return;
     }
@@ -4025,7 +4092,8 @@ void SetKeyImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<std::string>(value);
     if (!convValue) {
-        // keep the same processing
+        std::string defaultStr = "";
+        ViewAbstract::SetInspectorId(frameNode, defaultStr);
         return;
     }
     ViewAbstract::SetInspectorId(frameNode, *convValue);
@@ -4061,7 +4129,8 @@ void SetRestoreIdImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<int32_t>(value);
     if (!convValue) {
-        // Implement Reset value
+        int32_t index = -1;
+        ViewAbstract::SetRestoreId(frameNode, index);
         return;
     }
     ViewAbstract::SetRestoreId(frameNode, *convValue);
@@ -4590,6 +4659,34 @@ void SetBackgroundImpl(Ark_NativePointer node,
         }, node);
 }
 void SetBackgroundImage0Impl(Ark_NativePointer node,
+                             const Opt_Union_ResourceStr_PixelMap* src)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+
+    std::optional<ImageSourceInfo> sourceInfo = Converter::OptConvertPtr<ImageSourceInfo>(src);
+    ViewAbstractModelStatic::SetBackgroundImage(frameNode, sourceInfo);
+}
+void SetBackgroundImage1Impl(Ark_NativePointer node,
+                             const Opt_Union_ResourceStr_PixelMap* src,
+                             const Opt_BackgroundImageOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+
+    std::optional<ImageSourceInfo> sourceInfo = Converter::OptConvertPtr<ImageSourceInfo>(src);
+    ViewAbstractModelStatic::SetBackgroundImage(frameNode, sourceInfo);
+    CHECK_NULL_VOID(options);
+
+    auto syncLoad = static_cast<bool>(options->value.syncLoad.value);
+    ViewAbstractModelStatic::SetBackgroundImageSyncMode(frameNode, syncLoad);
+
+    auto imageRepeat = Converter::OptConvertPtr<ImageRepeat>(&options->value.repeat);
+    if (imageRepeat.has_value()) {
+        ViewAbstractModelStatic::SetBackgroundImageRepeat(frameNode, imageRepeat.value());
+    }
+}
+void SetBackgroundImage2Impl(Ark_NativePointer node,
                              const Opt_Union_ResourceStr_PixelMap* src,
                              const Opt_ImageRepeat* repeat)
 {
@@ -4601,13 +4698,6 @@ void SetBackgroundImage0Impl(Ark_NativePointer node,
 
     auto imageRepeat = Converter::OptConvertPtr<ImageRepeat>(repeat);
     ViewAbstractModelStatic::SetBackgroundImageRepeat(frameNode, imageRepeat);
-}
-void SetBackgroundImage1Impl(Ark_NativePointer node,
-                             const Opt_Union_ResourceStr_PixelMap* src,
-                             const Opt_BackgroundImageOptions* options)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
 }
 void SetBackgroundBlurStyleImpl(Ark_NativePointer node,
                                 const Opt_BlurStyle* style,
@@ -5363,10 +5453,24 @@ void SetOnVisibleAreaChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(event);
+    auto optEvent = Converter::GetOptPtr(event);
+    if (!optEvent) {
+        std::vector<double> ratioList;
+        ViewAbstract::SetOnVisibleChange(frameNode, nullptr, ratioList);
+        return;
+    }
+    auto weakNode = AceType::WeakClaim(frameNode);
+    auto onVisibleAreaChange =
+        [arkCallback = CallbackHelper(*optEvent), node = weakNode](bool visible, double ratio) {
+            Ark_Boolean isExpanding = Converter::ArkValue<Ark_Boolean>(visible);
+            Ark_Float64 currentRatio = Converter::ArkValue<Ark_Float64>(static_cast<float>(ratio));
+            PipelineContext::SetCallBackNode(node);
+            arkCallback.InvokeSync(isExpanding, currentRatio);
+        };
     auto rawRatioVec = Converter::OptConvertPtr<std::vector<double>>(ratios);
     if (!rawRatioVec) {
         std::vector<double> ratioList;
-        ViewAbstract::SetOnVisibleChange(frameNode, nullptr, ratioList);
+        ViewAbstract::SetOnVisibleChange(frameNode, std::move(onVisibleAreaChange), ratioList);
         return;
     }
     size_t size = rawRatioVec->size();
@@ -5382,19 +5486,6 @@ void SetOnVisibleAreaChangeImpl(Ark_NativePointer node,
         }
         ratioVec.push_back(ratio);
     }
-    auto optEvent = Converter::GetOptPtr(event);
-    if (!optEvent) {
-        ViewAbstract::SetOnVisibleChange(frameNode, nullptr, ratioVec);
-        return;
-    }
-    auto weakNode = AceType::WeakClaim(frameNode);
-    auto onVisibleAreaChange =
-        [arkCallback = CallbackHelper(*optEvent), node = weakNode](bool visible, double ratio) {
-            Ark_Boolean isExpanding = Converter::ArkValue<Ark_Boolean>(visible);
-            Ark_Float64 currentRatio = Converter::ArkValue<Ark_Float64>(static_cast<float>(ratio));
-            PipelineContext::SetCallBackNode(node);
-            arkCallback.InvokeSync(isExpanding, currentRatio);
-        };
     ViewAbstract::SetOnVisibleChange(frameNode, std::move(onVisibleAreaChange), ratioVec);
 }
 void SetOnVisibleAreaApproximateChangeImpl(Ark_NativePointer node,
@@ -5405,8 +5496,31 @@ void SetOnVisibleAreaApproximateChangeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
     CHECK_NULL_VOID(event);
+    auto expectedUpdateInterval =
+        Converter::OptConvert<int32_t>(options->value.expectedUpdateInterval).value_or(DEFAULT_DURATION);
+    if (expectedUpdateInterval < 0) {
+        expectedUpdateInterval = DEFAULT_DURATION;
+    }
+    auto optEvent = Converter::GetOptPtr(event);
+    if (!optEvent) {
+        std::vector<double> ratioList;
+        ViewAbstract::SetOnVisibleAreaApproximateChange(
+            frameNode, nullptr, ratioList, expectedUpdateInterval);
+        return;
+    }
+    auto weakNode = AceType::WeakClaim(frameNode);
+    auto onVisibleAreaChange =
+        [arkCallback = CallbackHelper(*optEvent), node = weakNode](bool visible, double ratio) {
+            Ark_Boolean isExpanding = Converter::ArkValue<Ark_Boolean>(visible);
+            Ark_Float64 currentRatio = Converter::ArkValue<Ark_Float64>(static_cast<float>(ratio));
+            PipelineContext::SetCallBackNode(node);
+            arkCallback.InvokeSync(isExpanding, currentRatio);
+        };
     auto rawRatioVec = Converter::OptConvert<std::vector<float>>(options->value.ratios);
-    if (!rawRatioVec.has_value()) {
+    if (!rawRatioVec.has_value() || rawRatioVec->empty()) {
+        std::vector<double> ratioList;
+        ViewAbstract::SetOnVisibleAreaApproximateChange(
+            frameNode, std::move(onVisibleAreaChange), ratioList, expectedUpdateInterval);
         return;
     }
     std::vector<float> floatArray = rawRatioVec.value();
@@ -5422,18 +5536,6 @@ void SetOnVisibleAreaApproximateChangeImpl(Ark_NativePointer node,
             ratio = VISIBLE_RATIO_MAX;
         }
         ratioVec.push_back(ratio);
-    }
-    auto expectedUpdateInterval =
-        Converter::OptConvert<int32_t>(options->value.expectedUpdateInterval).value_or(DEFAULT_DURATION);
-    if (expectedUpdateInterval < 0) {
-        expectedUpdateInterval = DEFAULT_DURATION;
-    }
-    std::function<void(bool, double)> onVisibleAreaChange = nullptr;
-    auto optEvent = Converter::GetOptPtr(event);
-    if (!optEvent) {
-        ViewAbstract::SetOnVisibleAreaApproximateChange(
-            frameNode, nullptr, ratioVec, expectedUpdateInterval);
-        return;
     }
     ViewAbstract::SetOnVisibleAreaApproximateChange(
         frameNode, std::move(onVisibleAreaChange), ratioVec, expectedUpdateInterval);
@@ -5698,6 +5800,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetBackgroundImpl,
         CommonMethodModifier::SetBackgroundImage0Impl,
         CommonMethodModifier::SetBackgroundImage1Impl,
+        CommonMethodModifier::SetBackgroundImage2Impl,
         CommonMethodModifier::SetBackgroundBlurStyleImpl,
         CommonMethodModifier::SetBackgroundEffect1Impl,
         CommonMethodModifier::SetForegroundBlurStyleImpl,

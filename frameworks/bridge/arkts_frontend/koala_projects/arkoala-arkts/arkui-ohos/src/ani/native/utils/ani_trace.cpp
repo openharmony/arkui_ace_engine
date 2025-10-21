@@ -20,6 +20,15 @@
 
 namespace OHOS::Ace::Ani {
 
+bool AniTrace::GetAttributeSetTraceEnabled(ani_env* env, [[maybe_unused]] ani_object aniClass)
+{
+    const auto* modifier = GetNodeAniModifier();
+    CHECK_NULL_RETURN(modifier, false);
+    auto* traceModifier = modifier->getTraceAniModifier();
+    CHECK_NULL_RETURN(traceModifier, false);
+    return traceModifier->getAttributeSetTraceEnabled();
+}
+
 void AniTrace::TraceBegin(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_string aniTraceName)
 {
     const auto* modifier = GetNodeAniModifier();

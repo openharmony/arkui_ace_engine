@@ -62,7 +62,7 @@ Ark_Float64 GetXImpl(Ark_AccessibilityHoverEvent peer)
     CHECK_NULL_RETURN(info, DefaultValueArkNumber);
     const auto& localLocation = info->GetLocalLocation();
     const auto value = PipelineBase::Px2VpWithCurrentDensity(localLocation.GetX());
-    return Converter::ArkValue<Ark_Float64>(static_cast<int32_t>(value));
+    return Converter::ArkValue<Ark_Float64>(value);
 }
 void SetXImpl(Ark_AccessibilityHoverEvent peer,
               const Ark_Float64* x)
@@ -85,7 +85,7 @@ Ark_Float64 GetYImpl(Ark_AccessibilityHoverEvent peer)
     CHECK_NULL_RETURN(info, DefaultValueArkNumber);
     const auto& localLocation = info->GetLocalLocation();
     const auto value = PipelineBase::Px2VpWithCurrentDensity(localLocation.GetY());
-    return Converter::ArkValue<Ark_Float64>(static_cast<int32_t>(value));
+    return Converter::ArkValue<Ark_Float64>(value);
 }
 void SetYImpl(Ark_AccessibilityHoverEvent peer,
               const Ark_Float64* y)
@@ -109,7 +109,7 @@ Ark_Float64 GetDisplayXImpl(Ark_AccessibilityHoverEvent peer)
     const auto& screenLocation = info->GetScreenLocation();
     LOGE("Arkoala method AccessibilityHoverEventAccessor.GetDisplayXImpl return int32_t value");
     const auto value = PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetX());
-    return Converter::ArkValue<Ark_Float64>(static_cast<int32_t>(value));
+    return Converter::ArkValue<Ark_Float64>(value);
 }
 void SetDisplayXImpl(Ark_AccessibilityHoverEvent peer,
                      const Ark_Float64* displayX)
@@ -133,7 +133,7 @@ Ark_Float64 GetDisplayYImpl(Ark_AccessibilityHoverEvent peer)
     const auto& screenLocation = info->GetScreenLocation();
     LOGE("Arkoala method AccessibilityHoverEventAccessor.GetDisplayYImpl return int32_t value");
     const auto value = PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetY());
-    return Converter::ArkValue<Ark_Float64>(static_cast<int32_t>(value));
+    return Converter::ArkValue<Ark_Float64>(value);
 }
 void SetDisplayYImpl(Ark_AccessibilityHoverEvent peer,
                      const Ark_Float64* displayY)
@@ -157,7 +157,7 @@ Ark_Float64 GetWindowXImpl(Ark_AccessibilityHoverEvent peer)
     const auto& globalLocation = info->GetGlobalLocation();
     LOGE("Arkoala method AccessibilityHoverEventAccessor.GetWindowXImpl return int32_t value");
     const auto value = PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetX());
-    return Converter::ArkValue<Ark_Float64>(static_cast<int32_t>(value));
+    return Converter::ArkValue<Ark_Float64>(value);
 }
 void SetWindowXImpl(Ark_AccessibilityHoverEvent peer,
                     const Ark_Float64* windowX)
@@ -181,7 +181,7 @@ Ark_Float64 GetWindowYImpl(Ark_AccessibilityHoverEvent peer)
     const auto& globalLocation = info->GetGlobalLocation();
     LOGE("Arkoala method AccessibilityHoverEventAccessor.GetWindowYImpl return int32_t value");
     const auto value = PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetY());
-    return Converter::ArkValue<Ark_Float64>(static_cast<int32_t>(value));
+    return Converter::ArkValue<Ark_Float64>(value);
 }
 void SetWindowYImpl(Ark_AccessibilityHoverEvent peer,
                     const Ark_Float64* windowY)

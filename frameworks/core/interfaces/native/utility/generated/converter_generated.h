@@ -1449,6 +1449,21 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_ResourceColor_ColorMetrics& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Union_ResourceColor_LinearGradient& src)
 {
     switch (src.selector) {
@@ -3772,7 +3787,6 @@ ASSIGN_OPT(Opt_Union_String_Number)
 ASSIGN_OPT(Opt_Union_SwiperAnimationMode_Boolean)
 ASSIGN_OPT(Opt_Union_TextInputStyle_TextContentStyle)
 ASSIGN_OPT(Opt_UrlStyle)
-ASSIGN_OPT(Opt_UserDataSpan)
 ASSIGN_OPT(Opt_Vec4)
 ASSIGN_OPT(Opt_VerticalAlign)
 ASSIGN_OPT(Opt_VideoController)
@@ -3984,6 +3998,7 @@ ASSIGN_OPT(Opt_Callback_OnConfirmEvent_Boolean)
 ASSIGN_OPT(Opt_Callback_OnConsoleEvent_Boolean)
 ASSIGN_OPT(Opt_Callback_OnContextMenuShowEvent_Boolean)
 ASSIGN_OPT(Opt_Callback_OnDataResubmittedEvent_Void)
+ASSIGN_OPT(Opt_Callback_OnDestory_Void)
 ASSIGN_OPT(Opt_Callback_OnDownloadStartEvent_Void)
 ASSIGN_OPT(Opt_Callback_OnErrorReceiveEvent_Void)
 ASSIGN_OPT(Opt_Callback_OnFaviconReceivedEvent_Void)
@@ -4543,6 +4558,7 @@ ASSIGN_OPT(Opt_Union_PX_VP_LPX_Resource)
 ASSIGN_OPT(Opt_Union_Resource_String)
 ASSIGN_OPT(Opt_Union_ResourceColor_ColorContent_ColorMetrics)
 ASSIGN_OPT(Opt_Union_ResourceColor_ColoringStrategy)
+ASSIGN_OPT(Opt_Union_ResourceColor_ColorMetrics)
 ASSIGN_OPT(Opt_Union_ResourceColor_LinearGradient)
 ASSIGN_OPT(Opt_Union_ResourceColor_LinearGradient_Array_Tuple_Union_ResourceColor_LinearGradient_F64)
 ASSIGN_OPT(Opt_Union_ResourceStr_ComponentContent)

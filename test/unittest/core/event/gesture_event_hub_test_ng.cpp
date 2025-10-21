@@ -163,7 +163,6 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest003, TestSize.Level1)
      * @tc.steps: step2. construct scrollableActuator_ and other actuators
      *                   then set them to gestureEventHub
      */
-
     // set touchEventActuator_
     auto touchCallback = [](TouchEventInfo& info) {};
     auto touchEvent = AceType::MakeRefPtr<TouchEventImpl>(std::move(touchCallback));

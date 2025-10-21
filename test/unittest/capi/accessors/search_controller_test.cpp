@@ -73,21 +73,20 @@ HWTEST_F(SearchControllerAccessorTest, caretPositionTest, TestSize.Level1)
     constexpr int validValue2 = 55;
     constexpr int invalidValue = -10;
 
-    auto arkValid1 = ArkValue<Ark_Number>(validValue1);
-    auto arkValid2 = ArkValue<Ark_Number>(validValue2);
-    auto arkInvalid = ArkValue<Ark_Number>(invalidValue);
+    auto arkValid1 = ArkValue<Ark_Int32>(validValue1);
+    auto arkValid2 = ArkValue<Ark_Int32>(validValue2);
+    auto arkInvalid = ArkValue<Ark_Int32>(invalidValue);
 
     ASSERT_NE(accessor_->caretPosition, nullptr);
 
     EXPECT_CALL(*mockSearchController_, CaretPosition(validValue1)).Times(1);
-    accessor_->caretPosition(peer_, &arkValid1);
+    accessor_->caretPosition(peer_, arkValid1);
 
     EXPECT_CALL(*mockSearchController_, CaretPosition(validValue2)).Times(1);
+    accessor_->caretPosition(peer_, arkValid2);
 
-    accessor_->caretPosition(peer_, &arkValid2);
     EXPECT_CALL(*mockSearchController_, CaretPosition(0)).Times(1);
-    accessor_->caretPosition(peer_, &arkInvalid);
-    accessor_->caretPosition(peer_, nullptr);
+    accessor_->caretPosition(peer_, arkInvalid);
 }
 
 /**
@@ -118,8 +117,8 @@ HWTEST_F(SearchControllerAccessorTest, SetTextSelectionTest, TestSize.Level1)
     int32_t valid1 = 10;
     int32_t valid2 = 55;
 
-    auto arkValid1 = ArkValue<Ark_Number>(valid1);
-    auto arkValid2 = ArkValue<Ark_Number>(valid2);
+    auto arkValid1 = ArkValue<Ark_Int32>(valid1);
+    auto arkValid2 = ArkValue<Ark_Int32>(valid2);
 
     const std::vector<MenuPolicy> menuPolicies = {
         MenuPolicy::DEFAULT,
@@ -128,8 +127,6 @@ HWTEST_F(SearchControllerAccessorTest, SetTextSelectionTest, TestSize.Level1)
         static_cast<MenuPolicy>(-1)
     };
 
-    EXPECT_CALL(*mockSearchController_, SetTextSelection(0, 0, Eq(std::nullopt))).Times(0);
-    accessor_->setTextSelection(peer_, nullptr, nullptr, nullptr);
     EXPECT_CALL(*mockSearchController_, SetTextSelection(valid1, valid2, _))
         .WillRepeatedly([&test](int32_t arg1, int32_t arg2, std::optional<SelectionOptions> arg3) {
             auto input = test ? std::to_string(std::underlying_type_t<MenuPolicy>(test->menuPolicy)) : "nullopt";
@@ -145,9 +142,9 @@ HWTEST_F(SearchControllerAccessorTest, SetTextSelectionTest, TestSize.Level1)
         test->menuPolicy = (menuPolicy == static_cast<MenuPolicy>(-1)) ? MenuPolicy::DEFAULT : menuPolicy;
         menuOptions.menuPolicy = ArkValue<Opt_MenuPolicy>(menuPolicy);
         auto optMenuOptions = ArkValue<Opt_SelectionOptions>(menuOptions);
-        accessor_->setTextSelection(peer_, &arkValid1, &arkValid2, &optMenuOptions);
+        accessor_->setTextSelection(peer_, arkValid1, arkValid2, &optMenuOptions);
     }
     test = std::nullopt;
-    accessor_->setTextSelection(peer_, &arkValid1, &arkValid2, nullptr);
+    accessor_->setTextSelection(peer_, arkValid1, arkValid2, nullptr);
 }
 } // namespace OHOS::Ace::NG

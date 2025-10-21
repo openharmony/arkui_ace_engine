@@ -12,14 +12,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <gmock/gmock.h>
+
 #include "richeditor_accessor_test.h"
-#include "core/interfaces/native/implementation/rich_editor_base_controller_peer_impl.h"
 #include "accessor_test_base.h"
-#include "node_api.h"
+
 #include "core/components_ng/pattern/text/span/span_string.h"
+#include "core/interfaces/native/implementation/rich_editor_base_controller_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "gmock/gmock.h"
 
 namespace OHOS::Ace {
 bool operator==(const std::optional<OHOS::Ace::SelectionOptions>& lhs,
@@ -221,7 +222,7 @@ HWTEST_F(RichEditorBaseControllerAccessorTest, setCaretOffsetTest, TestSize.Leve
     ASSERT_NE(accessor_->getCaretOffset, nullptr);
 
     EXPECT_CALL(*mockRichEditorController_, SetCaretOffset(TEST_IDX_2)).Times(1);
-    Ark_Number offset = Converter::ArkValue<Ark_Number>(TEST_IDX_2);
+    auto offset = Converter::ArkValue<Ark_Int32>(TEST_IDX_2);
     bool result = accessor_->setCaretOffset(peer_, &offset);
     ASSERT_FALSE(result);
 }
@@ -279,8 +280,8 @@ HWTEST_F(RichEditorBaseControllerAccessorTest, setSelectionTest, TestSize.Level1
     opts.menuPolicy = MenuPolicy::SHOW;
     std::optional<SelectionOptions> checkOpts = opts;
     EXPECT_CALL(*mockRichEditorController_, SetSelection(TEST_START, TEST_END, checkOpts, true)).Times(1);
-    auto start = Converter::ArkValue<Ark_Number>(TEST_START);
-    auto end = Converter::ArkValue<Ark_Number>(TEST_END);
+    auto start = Converter::ArkValue<Ark_Int32>(TEST_START);
+    auto end = Converter::ArkValue<Ark_Int32>(TEST_END);
     Opt_SelectionOptions optsOpt;
     optsOpt.value.menuPolicy.value = Ark_MenuPolicy::ARK_MENU_POLICY_SHOW;
     accessor_->setSelection(peer_, &start, &end, &optsOpt);

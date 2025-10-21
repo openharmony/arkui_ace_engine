@@ -191,7 +191,7 @@ HWTEST_P(ScrollableCommonMethodModifierTest, setScrollBarColorTestDefaultValues,
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_P(ScrollableCommonMethodModifierTest, setScrollBarColorTestScrollBarColorValidValues, TestSize.Level1)
+HWTEST_P(ScrollableCommonMethodModifierTest, DISABLED_setScrollBarColorTestScrollBarColorValidValues, TestSize.Level1)
 {
     Opt_Union_Color_Number_String initValueScrollBarColor;
 

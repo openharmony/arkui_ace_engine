@@ -40,7 +40,7 @@ void RatingModelStatic::SetStepSize(FrameNode* frameNode, const std::optional<do
 }
 
 void RatingModelStatic::SetRatingOptions(
-    FrameNode* frameNode, const std::optional<double>& rating, const std::optional<bool>& indicator)
+    FrameNode* frameNode, const double& rating, const std::optional<bool>& indicator)
 {
     if (indicator.has_value()) {
         bool bIndicator = indicator.value();
@@ -48,12 +48,7 @@ void RatingModelStatic::SetRatingOptions(
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(RatingLayoutProperty, Indicator, frameNode);
     }
-    if (rating.has_value()) {
-        double dRating =  rating.value();
-        ACE_UPDATE_NODE_PAINT_PROPERTY(RatingRenderProperty, RatingScore, dRating, frameNode);
-    } else {
-        ACE_RESET_NODE_PAINT_PROPERTY(RatingRenderProperty, RatingScore, frameNode);
-    }
+    ACE_UPDATE_NODE_PAINT_PROPERTY(RatingRenderProperty, RatingScore, rating, frameNode);
 }
 
 void RatingModelStatic::SetOnChange(FrameNode* frameNode, RatingChangeEvent&& onChange)

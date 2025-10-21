@@ -13,12 +13,14 @@
  * limitations under the License.
  */
 
+#include <gmock/gmock.h>
+
 #include "test/mock/core/common/mock_interaction_interface.h"
 
 namespace OHOS::Ace {
 InteractionInterface* InteractionInterface::GetInstance()
 {
-    static MockInteractionInterface instance;
+    static ::testing::NiceMock<MockInteractionInterface> instance;
     return &instance;
 };
 } // namespace OHOS::Ace

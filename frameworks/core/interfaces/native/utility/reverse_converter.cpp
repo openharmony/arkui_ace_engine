@@ -33,6 +33,7 @@
 #include "core/interfaces/native/implementation/text_shadow_style_peer.h"
 #include "core/interfaces/native/implementation/text_style_peer.h"
 #include "core/interfaces/native/implementation/url_style_peer.h"
+#include "core/interfaces/native/implementation/user_data_span_holder.h"
 #include "core/interfaces/native/utility/peer_utils.h"
 #include "converter.h"
 #include "validators.h"
@@ -199,7 +200,7 @@ void AssignArkValue(Ark_LengthMetrics& dst, const Dimension& src)
 {
     auto value = static_cast<float>(src.Value());
     auto unit = static_cast<int32_t>(src.Unit());
-    
+
     dst.unit = static_cast<Ark_LengthUnit>(unit);
     dst.value = Converter::ArkValue<Ark_Number>(value);
 }
@@ -509,10 +510,8 @@ void AssignArkValue(Ark_KeyboardOptions& dst, const KeyboardOptions& src, ConvCo
 template<>
 Ark_LengthMetrics ArkCreate(Ark_LengthUnit unit, float value)
 {
-    DimensionUnit du = OptConvert<DimensionUnit>(unit).value_or(DimensionUnit::INVALID);
-    auto duUnit = static_cast<int32_t>(du);
     return {
-        .unit = static_cast<Ark_LengthUnit>(duUnit),
+        .unit = unit,
         .value = ArkValue<Ark_Number>(value),
     };
 }
@@ -588,7 +587,9 @@ void AssignArkValue(Ark_SpanStyle& dst, const RefPtr<OHOS::Ace::SpanBase>& src)
             CreateStylePeer<CustomSpanPeer, OHOS::Ace::NG::CustomSpanImpl>(dst, src);
             break;
         case Ace::SpanType::ExtSpan: {
-            LOGW("Converter::AssignArkValue(Ark_SpanStyle) the Ark_UserDataSpan is not implemented.");
+            auto userDataSpanHolder = AceType::DynamicCast<UserDataSpanHolder>(src);
+            CHECK_NULL_VOID(userDataSpanHolder);
+            dst.styledValue = Converter::ArkUnion<Ark_StyledStringValue, Ark_UserDataSpan>(userDataSpanHolder->span_);
             break;
         }
         default: LOGE("Unexpected enum value in SpanType: %{public}d", src->GetSpanType());

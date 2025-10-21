@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-import { mutableState, MutableState, NodeAttach, rememberDisposable, RunEffect, scheduleCallback } from "@koalaui/runtime"
-import { PeerNode } from "./PeerNode";
-import { ArkCustomComponentRootPeer } from "#generated";
-import { ArkCustomComponent } from "./ArkCustomComponent"
-import { InteropNativeModule } from "@koalaui/interop"
-import { __context, GlobalStateManager, StateManager } from "@koalaui/runtime"
+import { mutableState, MutableState, NodeAttach, rememberDisposable, RunEffect, scheduleCallback } from '@koalaui/runtime';
+import { PeerNode } from './PeerNode';
+import { ArkCustomComponentRootPeer } from '#generated';
+import { ArkCustomComponent } from './ArkCustomComponent';
+import { InteropNativeModule } from '@koalaui/interop';
+import { __context, GlobalStateManager, StateManager } from '@koalaui/runtime';
 
 export function setNeedCreate(isNeedCreate: boolean): boolean
 {

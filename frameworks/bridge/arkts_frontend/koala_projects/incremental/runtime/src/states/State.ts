@@ -1173,6 +1173,7 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
             if (!scope.recomputeNeeded) RuntimeProfiler.instance?.invalidation()
             else if (current === undefined) break // all parent scopes were already invalidated
             scope.recomputeNeeded = true
+            if (scope.node?.disabledStateUpdates) break // do not invalidate parent scope
             const parent = scope.parent
             if (parent) {
                 // Improve:/DEBUG: investigate a case when invalid node has valid parent
@@ -1228,12 +1229,12 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
         } catch (cause) {
             error = cause as Error
         }
-        this.node?.dispose() // dispose parent before its children
         for (let child = this.child; child; child = child!.next) {
             this.recycleOrDispose(child!!)
         }
         this.child = undefined
         this.parentScope = undefined
+        this.node?.dispose()
         this.node = undefined
         this.nodeRef = undefined
         this.scopeInternal = undefined

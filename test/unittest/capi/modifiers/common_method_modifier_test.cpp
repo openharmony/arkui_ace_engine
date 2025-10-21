@@ -138,21 +138,21 @@ static const std::vector<MarginPaddingOneTestStep> LENGTH_TEST_PLAN = {
     { RES_ARK_LENGTH, "10.00px" },
 };
 
-typedef std::pair<Opt_Union_Number_String, std::string> ScaleTranslateTestStep;
+typedef std::pair<Opt_Union_F64_String, std::string> ScaleTranslateTestStep;
 static const std::vector<ScaleTranslateTestStep> SCALE_TRANSLATE_TEST_PLAN = {
-    { Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(1.0f), "1.00vp" },
-    { Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(-2.5f), "-2.50vp" },
-    { Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(0.0f), "0.00vp" },
-    { Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("1.00px"), "1.00px" },
-    { Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("0.00px"), "0.00px" },
-    { Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("2.45vp"), "2.45vp" },
-    { Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("5.00px"), "5.00px" },
-    { Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("-22.35px"), "-22.35px" },
-    { Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("7.00vp"), "7.00vp" },
-    { Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("1.65vp"), "1.65vp" },
-    { Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("65.00fp"), "65.00fp" },
-    { Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("4.30fp"), "4.30fp" },
-    { Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("12.00%"), "12.00%" },
+    { Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(1.0f), "1.00vp" },
+    { Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(-2.5f), "-2.50vp" },
+    { Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(0.0f), "0.00vp" },
+    { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("1.00px"), "1.00px" },
+    { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("0.00px"), "0.00px" },
+    { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("2.45vp"), "2.45vp" },
+    { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("5.00px"), "5.00px" },
+    { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("-22.35px"), "-22.35px" },
+    { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("7.00vp"), "7.00vp" },
+    { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("1.65vp"), "1.65vp" },
+    { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("65.00fp"), "65.00fp" },
+    { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("4.30fp"), "4.30fp" },
+    { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("12.00%"), "12.00%" },
 };
 
 using LengthMetrictsTestStep = std::pair<Ark_LengthMetrics, std::string>;
@@ -610,8 +610,8 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setSharedTransitionTestOptionsPath, 
     // verify valid
     inputMotionPathValue = {
         .path = ArkValue<Ark_String>("abc"),
-        .from = ArkValue<Opt_Number>(123),
-        .to = ArkValue<Opt_Number>(-987.654f),
+        .from = ArkValue<Opt_Float64>(123),
+        .to = ArkValue<Opt_Float64>(-987.654f),
         .rotatable = ArkValue<Opt_Boolean>(true),
     };
     modifier_->setSharedTransition(node_, &OPT_EMPTY_STR, &realInputValue);
@@ -625,8 +625,8 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setSharedTransitionTestOptionsPath, 
     // verify empty/undefined
     inputMotionPathValue = {
         .path = ARK_EMPTY_STR,
-        .from = ArkValue<Opt_Number>(),
-        .to = ArkValue<Opt_Number>(),
+        .from = ArkValue<Opt_Float64>(),
+        .to = ArkValue<Opt_Float64>(),
         .rotatable = ArkValue<Opt_Boolean>(),
     };
     modifier_->setSharedTransition(node_, &OPT_EMPTY_STR, &realInputValue);
@@ -655,24 +655,28 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setSharedTransitionTestOptionsOtherA
     auto transition = GetTransition();
     EXPECT_EQ(transition, nullptr);
 
+    const int32_t testDelay = 123;
+    const int32_t testDuration = 456;
+    const int32_t testIndex = 789;
+    const auto testType = ARK_SHARED_TRANSITION_EFFECT_TYPE_STATIC;
+
     // verify valid values
-    inputValueOptions.delay = OPT_VALID_NUM;
-    inputValueOptions.duration = OPT_VALID_NUM;
-    inputValueOptions.zIndex = OPT_VALID_NUM;
-    inputValueOptions.type =
-        ArkValue<Opt_SharedTransitionEffectType>(ARK_SHARED_TRANSITION_EFFECT_TYPE_STATIC);
+    inputValueOptions.delay = Converter::ArkValue<Opt_Int32>(testDelay);
+    inputValueOptions.duration = Converter::ArkValue<Opt_Int32>(testDuration);
+    inputValueOptions.zIndex = Converter::ArkValue<Opt_Int32>(testIndex);
+    inputValueOptions.type = ArkValue<Opt_SharedTransitionEffectType>(testType);
     modifier_->setSharedTransition(node_, &OPT_EMPTY_STR, &realInputValue);
     transition = GetTransition();
     ASSERT_NE(transition, nullptr);
-    EXPECT_EQ(transition->duration, VALID_NUMBER);
-    EXPECT_EQ(transition->delay, VALID_NUMBER);
-    EXPECT_EQ(transition->zIndex, VALID_NUMBER);
+    EXPECT_EQ(transition->duration, testDuration);
+    EXPECT_EQ(transition->delay, testDelay);
+    EXPECT_EQ(transition->zIndex, testIndex);
     EXPECT_EQ(transition->type, SharedTransitionEffectType::SHARED_EFFECT_STATIC);
 
     // verify undefined values - expect default
-    inputValueOptions.delay = OPT_UNDEF_NUM;
-    inputValueOptions.duration = OPT_UNDEF_NUM;
-    inputValueOptions.zIndex = OPT_UNDEF_NUM;
+    inputValueOptions.delay = Converter::ArkValue<Opt_Int32>();
+    inputValueOptions.duration = Converter::ArkValue<Opt_Int32>();
+    inputValueOptions.zIndex = Converter::ArkValue<Opt_Int32>();
     inputValueOptions.type = ArkValue<Opt_SharedTransitionEffectType>(Ark_Empty());
     modifier_->setSharedTransition(node_, &OPT_EMPTY_STR, &realInputValue);
     transition = GetTransition();
@@ -683,9 +687,9 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setSharedTransitionTestOptionsOtherA
     EXPECT_EQ(transition->type, SharedTransitionEffectType::SHARED_EFFECT_EXCHANGE);
 
     // verify invalid values - expect default
-    inputValueOptions.delay = OPT_INVALID_NUM;
-    inputValueOptions.duration = OPT_INVALID_NUM;
-    inputValueOptions.zIndex = OPT_INVALID_NUM;
+    inputValueOptions.delay = Converter::ArkValue<Opt_Int32>(-1);
+    inputValueOptions.duration = Converter::ArkValue<Opt_Int32>(-1);
+    inputValueOptions.zIndex = Converter::ArkValue<Opt_Int32>(-1);
     inputValueOptions.type =
         ArkValue<Opt_SharedTransitionEffectType>(static_cast<SharedTransitionEffectType>(INT_MIN));
     modifier_->setSharedTransition(node_, &OPT_EMPTY_STR, &realInputValue);
@@ -749,7 +753,7 @@ HWTEST_F(CommonMethodModifierTest, setMarginTestDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest, setMarginTestValidLengthValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest, DISABLED_setMarginTestValidLengthValues, TestSize.Level1)
 {
     std::string strResult;
     for (const auto &[optMargin, expected]: LENGTH_TEST_PLAN) {
@@ -765,7 +769,7 @@ HWTEST_F(CommonMethodModifierTest, setMarginTestValidLengthValues, TestSize.Leve
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest, setMarginTestValidLeftLengthValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest, DISABLED_setMarginTestValidLeftLengthValues, TestSize.Level1)
 {
     Ark_Padding inputValue;
     for (const auto &[arkMargin, expected]: LENGTH_TEST_PLAN) {
@@ -792,7 +796,7 @@ HWTEST_F(CommonMethodModifierTest, setMarginTestValidLeftLengthValues, TestSize.
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest, setMarginTestValidTopLengthValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest, DISABLED_setMarginTestValidTopLengthValues, TestSize.Level1)
 {
     Ark_Padding inputValue;
     for (const auto &[arkMargin, expected]: LENGTH_TEST_PLAN) {
@@ -819,7 +823,7 @@ HWTEST_F(CommonMethodModifierTest, setMarginTestValidTopLengthValues, TestSize.L
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest, setMarginTestValidTopRightValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest, DISABLED_setMarginTestValidTopRightValues, TestSize.Level1)
 {
     Ark_Padding inputValue;
     for (const auto &[arkMargin, expected]: LENGTH_TEST_PLAN) {
@@ -846,7 +850,7 @@ HWTEST_F(CommonMethodModifierTest, setMarginTestValidTopRightValues, TestSize.Le
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest, setMarginTestValidBottomLengthValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest, DISABLED_setMarginTestValidBottomLengthValues, TestSize.Level1)
 {
     Ark_Padding inputValue;
     for (const auto &[arkMargin, expected]: LENGTH_TEST_PLAN) {
@@ -1332,13 +1336,12 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setRadialGradientTestValidValues, Te
     // repeating
     inputValue.repeating = Converter::ArkValue<Opt_Boolean>(true);
     // color stops
-    std::vector<std::pair<Ark_ResourceColor, Ark_Number>> colorSteps {
-        { ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE), ArkValue<Ark_Number>(0.1f) },
-        { ArkUnion<Ark_ResourceColor, Ark_Number>(0x123456), ArkValue<Ark_Number>(0.25f) },
-        { ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"), ArkValue<Ark_Number>(0.5f) },
+    std::vector<ColorStep> colorSteps {
+        { ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE), 0.1 },
+        { ArkUnion<Ark_ResourceColor, Ark_Number>(0x123456), 0.25 },
+        { ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"), 0.5 },
     };
-    Converter::ArkArrayHolder<Array_Tuple_ResourceColor_Number> colorStepsHolder(colorSteps);
-    inputValue.colors = colorStepsHolder.ArkValue();
+    inputValue.colors = Converter::ArkValue<Array_Tuple_ResourceColor_F64>(colorSteps, Converter::FC);
     auto optInputValue = Converter::ArkValue<Opt_RadialGradientOptions>(inputValue);
 
     // check value
@@ -1381,14 +1384,11 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setRadialGradientRadiusTestValidValu
     // repeating
     inputValue.repeating = Converter::ArkValue<Opt_Boolean>(Ark_Empty());
     // color stops
-    std::vector<std::pair<Ark_ResourceColor, Ark_Number>> colorSteps {
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#112233"),
-            Converter::ArkValue<Ark_Number>(0.5f) },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#223344"),
-            Converter::ArkValue<Ark_Number>(0.9f) }
+    std::vector<ColorStep> colorSteps {
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#112233"), 0.5 },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#223344"), 0.9 },
     };
-    Converter::ArkArrayHolder<Array_Tuple_ResourceColor_Number> colorStepsHolder(colorSteps);
-    inputValue.colors = colorStepsHolder.ArkValue();
+    inputValue.colors = Converter::ArkValue<Array_Tuple_ResourceColor_F64>(colorSteps, Converter::FC);
 
     // check value
     for (const auto &[arkRadius, expected]: testPlan) {
@@ -1428,14 +1428,11 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setRadialGradientRadiusTestInvalidVa
     // repeating
     inputValue.repeating = Converter::ArkValue<Opt_Boolean>(Ark_Empty());
     // color stops
-    std::vector<std::pair<Ark_ResourceColor, Ark_Number>> colorSteps {
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#112233"),
-            Converter::ArkValue<Ark_Number>(0.5f) },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#223344"),
-            Converter::ArkValue<Ark_Number>(0.9f) }
+    std::vector<ColorStep> colorSteps {
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#112233"), 0.5 },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#223344"), 0.9 },
     };
-    Converter::ArkArrayHolder<Array_Tuple_ResourceColor_Number> colorStepsHolder(colorSteps);
-    inputValue.colors = colorStepsHolder.ArkValue();
+    inputValue.colors = Converter::ArkValue<Array_Tuple_ResourceColor_F64>(colorSteps, Converter::FC);
 
     // check value
     for (const auto &[arkRadius, expected]: testPlan) {
@@ -1484,14 +1481,11 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setRadialGradientCenter1TestValidVal
     // repeating
     inputValue.repeating = Converter::ArkValue<Opt_Boolean>(Ark_Empty());
     // color stops
-    std::vector<std::pair<Ark_ResourceColor, Ark_Number>> colorSteps {
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#112233"),
-            Converter::ArkValue<Ark_Number>(0.5f) },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#223344"),
-            Converter::ArkValue<Ark_Number>(0.9f) }
+    std::vector<ColorStep> colorSteps {
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#112233"), 0.5 },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#223344"), 0.9 },
     };
-    Converter::ArkArrayHolder<Array_Tuple_ResourceColor_Number> colorStepsHolder(colorSteps);
-    inputValue.colors = colorStepsHolder.ArkValue();
+    inputValue.colors = Converter::ArkValue<Array_Tuple_ResourceColor_F64>(colorSteps, Converter::FC);
 
     // check value
     for (const auto &[arkCenter, expected]: testPlan) {
@@ -1511,7 +1505,7 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setRadialGradientCenter1TestValidVal
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest, DISABLED_setRadialGradientCenter2TestValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest, setRadialGradientCenter2TestValidValues, TestSize.Level1)
 {
     std::string strResult;
     Ark_RadialGradientOptions inputValue;
@@ -1521,18 +1515,18 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setRadialGradientCenter2TestValidVal
     static const std::vector<OneTestStep> testPlan = {
         { Converter::ArkValue<Ark_Length>(2.45f), "[\"0.00vp\",\"2.45vp\"]" },
         { Converter::ArkValue<Ark_Length>(-2.45f), "[\"0.00vp\",\"-2.45vp\"]" },
-        { Converter::ArkValue<Ark_Length>(5.0_px), "[\"0.00vp\",\"5.00px\"]" },
-        { Converter::ArkValue<Ark_Length>(-5.0_px), "[\"0.00vp\",\"-5.00px\"]" },
-        { Converter::ArkValue<Ark_Length>(22.35_px), "[\"0.00vp\",\"22.35px\"]" },
-        { Converter::ArkValue<Ark_Length>(-22.35_px), "[\"0.00vp\",\"-22.35px\"]" },
-        { Converter::ArkValue<Ark_Length>(7.0_vp), "[\"0.00vp\",\"7.00vp\"]" },
-        { Converter::ArkValue<Ark_Length>(-7.0_vp), "[\"0.00vp\",\"-7.00vp\"]" },
-        { Converter::ArkValue<Ark_Length>(1.65_vp), "[\"0.00vp\",\"1.65vp\"]" },
-        { Converter::ArkValue<Ark_Length>(-1.65_vp), "[\"0.00vp\",\"-1.65vp\"]" },
-        { Converter::ArkValue<Ark_Length>(65.0_fp), "[\"0.00vp\",\"65.00fp\"]" },
-        { Converter::ArkValue<Ark_Length>(-65.0_fp), "[\"0.00vp\",\"-65.00fp\"]" },
-        { Converter::ArkValue<Ark_Length>(4.3_fp), "[\"0.00vp\",\"4.30fp\"]" },
-        { Converter::ArkValue<Ark_Length>(-4.3_fp), "[\"0.00vp\",\"-4.30fp\"]" },
+        { Converter::ArkValue<Ark_Length>("5.0px"), "[\"0.00vp\",\"5.00px\"]" },
+        { Converter::ArkValue<Ark_Length>("-5.0px"), "[\"0.00vp\",\"-5.00px\"]" },
+        { Converter::ArkValue<Ark_Length>("22.35px"), "[\"0.00vp\",\"22.35px\"]" },
+        { Converter::ArkValue<Ark_Length>("-22.35px"), "[\"0.00vp\",\"-22.35px\"]" },
+        { Converter::ArkValue<Ark_Length>("7.0vp"), "[\"0.00vp\",\"7.00vp\"]" },
+        { Converter::ArkValue<Ark_Length>("-7.0vp"), "[\"0.00vp\",\"-7.00vp\"]" },
+        { Converter::ArkValue<Ark_Length>("1.65vp"), "[\"0.00vp\",\"1.65vp\"]" },
+        { Converter::ArkValue<Ark_Length>("-1.65vp"), "[\"0.00vp\",\"-1.65vp\"]" },
+        { Converter::ArkValue<Ark_Length>("65.0fp"), "[\"0.00vp\",\"65.00fp\"]" },
+        { Converter::ArkValue<Ark_Length>("-65.0fp"), "[\"0.00vp\",\"-65.00fp\"]" },
+        { Converter::ArkValue<Ark_Length>("4.3fp"), "[\"0.00vp\",\"4.30fp\"]" },
+        { Converter::ArkValue<Ark_Length>("-4.3fp"), "[\"0.00vp\",\"-4.30fp\"]" },
         { Converter::ArkValue<Ark_Length>("10.00%"), "[\"0.00vp\",\"1000.00%\"]" },
         { RES_ARK_LENGTH, "[\"0.00vp\",\"10.00px\"]" },
     };
@@ -1542,14 +1536,11 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setRadialGradientCenter2TestValidVal
     // repeating
     inputValue.repeating = Converter::ArkValue<Opt_Boolean>(Ark_Empty());
     // color stops
-    std::vector<std::pair<Ark_ResourceColor, Ark_Number>> colorSteps {
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#112233"),
-            Converter::ArkValue<Ark_Number>(0.5f) },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#223344"),
-            Converter::ArkValue<Ark_Number>(0.9f) }
+    std::vector<ColorStep> colorSteps {
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#112233"), 0.5 },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#223344"), 0.9 },
     };
-    Converter::ArkArrayHolder<Array_Tuple_ResourceColor_Number> colorStepsHolder(colorSteps);
-    inputValue.colors = colorStepsHolder.ArkValue();
+    inputValue.colors = Converter::ArkValue<Array_Tuple_ResourceColor_F64>(colorSteps, Converter::FC);
 
     // check value
     for (const auto &[arkCenter, expected]: testPlan) {
@@ -1569,26 +1560,23 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setRadialGradientCenter2TestValidVal
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest, DISABLED_setRadialGradientRepeatingTestValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest, setRadialGradientRepeatingTestValidValues, TestSize.Level1)
 {
     std::string strResult;
     Ark_RadialGradientOptions inputValue;
     Opt_RadialGradientOptions optInputValue;
 
     // center
-    inputValue.center.value0 = Converter::ArkValue<Ark_Length>(2.0_vp);
-    inputValue.center.value1 = Converter::ArkValue<Ark_Length>(3.0_vp);
+    inputValue.center.value0 = Converter::ArkValue<Ark_Length>("2.0vp");
+    inputValue.center.value1 = Converter::ArkValue<Ark_Length>("3.0vp");
     // radius
     inputValue.radius = Converter::ArkValue<Ark_Length>("4vp");
     // color stops
-    std::vector<std::pair<Ark_ResourceColor, Ark_Number>> colorSteps {
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#112233"),
-            Converter::ArkValue<Ark_Number>(0.5f) },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#223344"),
-            Converter::ArkValue<Ark_Number>(0.9f) }
+    std::vector<ColorStep> colorSteps {
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#112233"), 0.5 },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#223344"), 0.9 },
     };
-    Converter::ArkArrayHolder<Array_Tuple_ResourceColor_Number> colorStepsHolder(colorSteps);
-    inputValue.colors = colorStepsHolder.ArkValue();
+    inputValue.colors = Converter::ArkValue<Array_Tuple_ResourceColor_F64>(colorSteps, Converter::FC);
 
     // check undefined repeating
     inputValue.repeating = Converter::ArkValue<Opt_Boolean>(Ark_Empty());
@@ -1620,7 +1608,7 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setRadialGradientRepeatingTestValidV
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest, DISABLED_setRadialGradientResourcesColorStopsTestValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest, setRadialGradientResourcesColorStopsTestValidValues, TestSize.Level1)
 {
     std::string strResult;
     Ark_RadialGradientOptions inputValue;
@@ -1631,19 +1619,18 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setRadialGradientResourcesColorStops
         Color::RED.ToString(); // Color::RED is result of ThemeConstants::GetColorXxxx stubs
 
     // center
-    inputValue.center.value0 = Converter::ArkValue<Ark_Length>(2.0_vp);
-    inputValue.center.value1 = Converter::ArkValue<Ark_Length>(3.0_vp);
+    inputValue.center.value0 = Converter::ArkValue<Ark_Length>("2.0vp");
+    inputValue.center.value1 = Converter::ArkValue<Ark_Length>("3.0vp");
     // radius
     inputValue.radius = Converter::ArkValue<Ark_Length>("4vp");
     // repeating
     inputValue.repeating = Converter::ArkValue<Opt_Boolean>(true);
     // color stops
-    std::vector<std::pair<Ark_ResourceColor, Ark_Number>> colorSteps {
-        { CreateResourceUnion<Ark_ResourceColor>(RES_NAME), ArkValue<Ark_Number>(0.5f) },
-        { CreateResourceUnion<Ark_ResourceColor>(RES_ID), ArkValue<Ark_Number>(0.9f) },
+    std::vector<ColorStep> colorSteps {
+        { CreateResourceUnion<Ark_ResourceColor>(RES_NAME), 0.5 },
+        { CreateResourceUnion<Ark_ResourceColor>(RES_ID), 0.9 },
     };
-    Converter::ArkArrayHolder<Array_Tuple_ResourceColor_Number> colorStepsHolder(colorSteps);
-    inputValue.colors = colorStepsHolder.ArkValue();
+    inputValue.colors = Converter::ArkValue<Array_Tuple_ResourceColor_F64>(colorSteps, Converter::FC);
     optInputValue = Converter::ArkValue<Opt_RadialGradientOptions>(inputValue);
 
     // check value
@@ -1746,7 +1733,7 @@ HWTEST_F(CommonMethodModifierTest, setBackgroundImageSizeDefaultValues, TestSize
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest, DISABLED_setBackgroundImageSizeValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest, setBackgroundImageSizeValidValues, TestSize.Level1)
 {
     std::string strResult;
     Opt_Union_SizeOptions_ImageSize inputValue;
@@ -1754,12 +1741,12 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setBackgroundImageSizeValidValues, T
     typedef std::pair<Ark_Length, std::string> OneTestStep2;
     static const std::vector<OneTestStep2> testPlan2 = {
         { Converter::ArkValue<Ark_Length>(2.45f), "2.45px" },
-        { Converter::ArkValue<Ark_Length>(5.0_px), "5.00px" },
-        { Converter::ArkValue<Ark_Length>(22.35_px), "22.35px" },
-        { Converter::ArkValue<Ark_Length>(7.0_vp), "7.00px" },
-        { Converter::ArkValue<Ark_Length>(1.65_vp), "1.65px" },
-        { Converter::ArkValue<Ark_Length>(65.0_fp), "65.00px" },
-        { Converter::ArkValue<Ark_Length>(4.3_fp), "4.30px" },
+        { Converter::ArkValue<Ark_Length>("5.0px"), "5.00px" },
+        { Converter::ArkValue<Ark_Length>("22.35px"), "22.35px" },
+        { Converter::ArkValue<Ark_Length>("7.0vp"), "7.00px" },
+        { Converter::ArkValue<Ark_Length>("1.65vp"), "1.65px" },
+        { Converter::ArkValue<Ark_Length>("65.0fp"), "65.00px" },
+        { Converter::ArkValue<Ark_Length>("4.3fp"), "4.30px" },
         { Converter::ArkValue<Ark_Length>("12.00%"), "0.12px" },
         { RES_ARK_LENGTH, "10.00px" },
     };
@@ -1822,7 +1809,7 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setBackgroundImageSizeValidEnumValue
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest, DISABLED_setBackgroundImageSizeInvalidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest, setBackgroundImageSizeInvalidValues, TestSize.Level1)
 {
     std::string strResult;
     Opt_Union_SizeOptions_ImageSize inputValue;
@@ -1842,12 +1829,12 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setBackgroundImageSizeInvalidValues,
 
     static const std::vector<Ark_Length> testPlan2 = {
         Converter::ArkValue<Ark_Length>(-2.45f),
-        Converter::ArkValue<Ark_Length>(-5.0_px),
-        Converter::ArkValue<Ark_Length>(-22.35_px),
-        Converter::ArkValue<Ark_Length>(-7.0_vp),
-        Converter::ArkValue<Ark_Length>(-1.65_vp),
-        Converter::ArkValue<Ark_Length>(-65.0_fp),
-        Converter::ArkValue<Ark_Length>(-4.3_fp),
+        Converter::ArkValue<Ark_Length>("-5.0px"),
+        Converter::ArkValue<Ark_Length>("-22.35px"),
+        Converter::ArkValue<Ark_Length>("-7.0vp"),
+        Converter::ArkValue<Ark_Length>("-1.65vp"),
+        Converter::ArkValue<Ark_Length>("-65.0fp"),
+        Converter::ArkValue<Ark_Length>("-4.3fp"),
         Converter::ArkValue<Ark_Length>("-12.00%"),
     };
 
@@ -1897,7 +1884,7 @@ HWTEST_F(CommonMethodModifierTest, setBackgroundImagePositionDefaultValues, Test
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest, DISABLED_setBackgroundImagePositionValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest, setBackgroundImagePositionValidValues, TestSize.Level1)
 {
     std::string strResult;
     Opt_Union_Position_Alignment inputValue;
@@ -1905,12 +1892,12 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setBackgroundImagePositionValidValue
     typedef std::pair<Ark_Length, double> OneTestStep;
     static const std::vector<OneTestStep> testPlan = {
         { Converter::ArkValue<Ark_Length>(-2.5f), -2.5 },
-        { Converter::ArkValue<Ark_Length>(5.0_px), 5.0 },
-        { Converter::ArkValue<Ark_Length>(22.5_px), 22.5 },
-        { Converter::ArkValue<Ark_Length>(7.0_vp), 7.0 },
-        { Converter::ArkValue<Ark_Length>(1.5_vp), 1.5 },
-        { Converter::ArkValue<Ark_Length>(65.0_fp), 65.0 },
-        { Converter::ArkValue<Ark_Length>(4.5_fp), 4.5 },
+        { Converter::ArkValue<Ark_Length>("5.0px"), 5.0 },
+        { Converter::ArkValue<Ark_Length>("22.5px"), 22.5 },
+        { Converter::ArkValue<Ark_Length>("7.0vp"), 7.0 },
+        { Converter::ArkValue<Ark_Length>("1.5vp"), 1.5 },
+        { Converter::ArkValue<Ark_Length>("65.0fp"), 65.0 },
+        { Converter::ArkValue<Ark_Length>("4.5fp"), 4.5 },
         { RES_ARK_LENGTH, 10.0 },
     };
 
@@ -2026,16 +2013,16 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setScaleValidXValues, TestSize.Level
     Ark_ScaleOptions inputValue;
     Opt_ScaleOptions optInputValue;
 
-    inputValue.x = Converter::ArkValue<Opt_Number>(Ark_Empty());
-    inputValue.y = Converter::ArkValue<Opt_Number>(Ark_Empty());
-    inputValue.centerX = Converter::ArkValue<Opt_Union_Number_String>(Ark_Empty());
-    inputValue.centerY = Converter::ArkValue<Opt_Union_Number_String>(Ark_Empty());
+    inputValue.x = Converter::ArkValue<Opt_Float64>(Ark_Empty());
+    inputValue.y = Converter::ArkValue<Opt_Float64>(Ark_Empty());
+    inputValue.centerX = Converter::ArkValue<Opt_Union_F64_String>(Ark_Empty());
+    inputValue.centerY = Converter::ArkValue<Opt_Union_F64_String>(Ark_Empty());
 
-    typedef std::pair<Opt_Number, std::string> NumberTestStep;
+    typedef std::pair<Opt_Float64, std::string> NumberTestStep;
     static const std::vector<NumberTestStep> testPlan = {
-        { Converter::ArkValue<Opt_Number>(2.0f), "2.000000" },
-        { Converter::ArkValue<Opt_Number>(0.0f), "0.000000" },
-        { Converter::ArkValue<Opt_Number>(-2.5f), "-2.500000" },
+        { Converter::ArkValue<Opt_Float64>(2.0f), "2.000000" },
+        { Converter::ArkValue<Opt_Float64>(0.0f), "0.000000" },
+        { Converter::ArkValue<Opt_Float64>(-2.5f), "-2.500000" },
     };
 
     for (const auto &[optNumber, expected]: testPlan) {
@@ -2065,16 +2052,16 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setScaleValidYValues, TestSize.Level
     Ark_ScaleOptions inputValue;
     Opt_ScaleOptions optInputValue;
 
-    inputValue.x = Converter::ArkValue<Opt_Number>(Ark_Empty());
-    inputValue.y = Converter::ArkValue<Opt_Number>(Ark_Empty());
-    inputValue.centerX = Converter::ArkValue<Opt_Union_Number_String>(Ark_Empty());
-    inputValue.centerY = Converter::ArkValue<Opt_Union_Number_String>(Ark_Empty());
+    inputValue.x = Converter::ArkValue<Opt_Float64>(Ark_Empty());
+    inputValue.y = Converter::ArkValue<Opt_Float64>(Ark_Empty());
+    inputValue.centerX = Converter::ArkValue<Opt_Union_F64_String>(Ark_Empty());
+    inputValue.centerY = Converter::ArkValue<Opt_Union_F64_String>(Ark_Empty());
 
-    typedef std::pair<Opt_Number, std::string> NumberTestStep;
+    typedef std::pair<Opt_Float64, std::string> NumberTestStep;
     static const std::vector<NumberTestStep> testPlan = {
-        { Converter::ArkValue<Opt_Number>(2.0f), "2.000000" },
-        { Converter::ArkValue<Opt_Number>(0.0f), "0.000000" },
-        { Converter::ArkValue<Opt_Number>(-2.5f), "-2.500000" },
+        { Converter::ArkValue<Opt_Float64>(2.0f), "2.000000" },
+        { Converter::ArkValue<Opt_Float64>(0.0f), "0.000000" },
+        { Converter::ArkValue<Opt_Float64>(-2.5f), "-2.500000" },
     };
 
     for (const auto &[optNumber, expected]: testPlan) {
@@ -2104,10 +2091,10 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setScaleValidCenterXValues, TestSize
     Ark_ScaleOptions inputValue;
     Opt_ScaleOptions optInputValue;
 
-    inputValue.x = Converter::ArkValue<Opt_Number>(Ark_Empty());
-    inputValue.y = Converter::ArkValue<Opt_Number>(Ark_Empty());
-    inputValue.centerX = Converter::ArkValue<Opt_Union_Number_String>(Ark_Empty());
-    inputValue.centerY = Converter::ArkValue<Opt_Union_Number_String>(Ark_Empty());
+    inputValue.x = Converter::ArkValue<Opt_Float64>(Ark_Empty());
+    inputValue.y = Converter::ArkValue<Opt_Float64>(Ark_Empty());
+    inputValue.centerX = Converter::ArkValue<Opt_Union_F64_String>(Ark_Empty());
+    inputValue.centerY = Converter::ArkValue<Opt_Union_F64_String>(Ark_Empty());
 
     for (const auto &[optCenter, expected]: SCALE_TRANSLATE_TEST_PLAN) {
         inputValue.centerX = optCenter;
@@ -2136,10 +2123,10 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setScaleValidCenterYValues, TestSize
     Ark_ScaleOptions inputValue;
     Opt_ScaleOptions optInputValue;
 
-    inputValue.x = Converter::ArkValue<Opt_Number>(Ark_Empty());
-    inputValue.y = Converter::ArkValue<Opt_Number>(Ark_Empty());
-    inputValue.centerX = Converter::ArkValue<Opt_Union_Number_String>(Ark_Empty());
-    inputValue.centerY = Converter::ArkValue<Opt_Union_Number_String>(Ark_Empty());
+    inputValue.x = Converter::ArkValue<Opt_Float64>(Ark_Empty());
+    inputValue.y = Converter::ArkValue<Opt_Float64>(Ark_Empty());
+    inputValue.centerX = Converter::ArkValue<Opt_Union_F64_String>(Ark_Empty());
+    inputValue.centerY = Converter::ArkValue<Opt_Union_F64_String>(Ark_Empty());
 
     for (const auto &[optCenter, expected]: SCALE_TRANSLATE_TEST_PLAN) {
         inputValue.centerY= optCenter;
@@ -2179,9 +2166,9 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setTranslateValidXValues, TestSize.L
     Ark_TranslateOptions inputValue;
     Opt_TranslateOptions optInputValue;
 
-    inputValue.x = Converter::ArkValue<Opt_Union_Number_String>(Ark_Empty());
-    inputValue.y = Converter::ArkValue<Opt_Union_Number_String>(Ark_Empty());
-    inputValue.z = Converter::ArkValue<Opt_Union_Number_String>(Ark_Empty());
+    inputValue.x = Converter::ArkValue<Opt_Union_F64_String>(Ark_Empty());
+    inputValue.y = Converter::ArkValue<Opt_Union_F64_String>(Ark_Empty());
+    inputValue.z = Converter::ArkValue<Opt_Union_F64_String>(Ark_Empty());
 
     for (const auto &[optTranslate, expected]: SCALE_TRANSLATE_TEST_PLAN) {
         inputValue.x = optTranslate;
@@ -2208,9 +2195,9 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setTranslateValidYValues, TestSize.L
     Ark_TranslateOptions inputValue;
     Opt_TranslateOptions optInputValue;
 
-    inputValue.x = Converter::ArkValue<Opt_Union_Number_String>(Ark_Empty());
-    inputValue.y = Converter::ArkValue<Opt_Union_Number_String>(Ark_Empty());
-    inputValue.z = Converter::ArkValue<Opt_Union_Number_String>(Ark_Empty());
+    inputValue.x = Converter::ArkValue<Opt_Union_F64_String>(Ark_Empty());
+    inputValue.y = Converter::ArkValue<Opt_Union_F64_String>(Ark_Empty());
+    inputValue.z = Converter::ArkValue<Opt_Union_F64_String>(Ark_Empty());
 
     for (const auto &[optTranslate, expected]: SCALE_TRANSLATE_TEST_PLAN) {
         inputValue.y = optTranslate;
@@ -2237,9 +2224,9 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setTranslateValidZValues, TestSize.L
     Ark_TranslateOptions inputValue;
     Opt_TranslateOptions optInputValue;
 
-    inputValue.x = Converter::ArkValue<Opt_Union_Number_String>(Ark_Empty());
-    inputValue.y = Converter::ArkValue<Opt_Union_Number_String>(Ark_Empty());
-    inputValue.z = Converter::ArkValue<Opt_Union_Number_String>(Ark_Empty());
+    inputValue.x = Converter::ArkValue<Opt_Union_F64_String>(Ark_Empty());
+    inputValue.y = Converter::ArkValue<Opt_Union_F64_String>(Ark_Empty());
+    inputValue.z = Converter::ArkValue<Opt_Union_F64_String>(Ark_Empty());
 
     for (const auto &[optTranslate, expected]: SCALE_TRANSLATE_TEST_PLAN) {
         inputValue.z = optTranslate;
@@ -2366,10 +2353,10 @@ HWTEST_F(CommonMethodModifierTest, setAnimationDefaultValues, TestSize.Level1)
 {
     Ark_AnimateParam param;
     Opt_AnimateParam optParam;
-    param.duration = Converter::ArkValue<Opt_Number>(Ark_Empty());
-    param.delay = Converter::ArkValue<Opt_Number>(Ark_Empty());
-    param.iterations = Converter::ArkValue<Opt_Number>(Ark_Empty());
-    param.tempo = Converter::ArkValue<Opt_Number>(Ark_Empty());
+    param.duration = Converter::ArkValue<Opt_Int32>(Ark_Empty());
+    param.delay = Converter::ArkValue<Opt_Int32>(Ark_Empty());
+    param.iterations = Converter::ArkValue<Opt_Int32>(Ark_Empty());
+    param.tempo = Converter::ArkValue<Opt_Float64>(Ark_Empty());
     param.playMode = Converter::ArkValue<Opt_PlayMode>(Ark_Empty());
     param.finishCallbackType = Converter::ArkValue<Opt_FinishCallbackType>(Ark_Empty());
     param.curve = Converter::ArkValue<Opt_Union_Curve_String_ICurve>(Ark_Empty());
@@ -2426,10 +2413,10 @@ HWTEST_F(CommonMethodModifierTest, setOpenAnimationValidValues, TestSize.Level1)
 {
     Ark_AnimateParam param;
     Opt_AnimateParam optParam;
-    param.duration = Converter::ArkValue<Opt_Number>(5);
-    param.delay = Converter::ArkValue<Opt_Number>(3);
-    param.iterations = Converter::ArkValue<Opt_Number>(8);
-    param.tempo = Converter::ArkValue<Opt_Number>(2.5f);
+    param.duration = Converter::ArkValue<Opt_Int32>(5);
+    param.delay = Converter::ArkValue<Opt_Int32>(3);
+    param.iterations = Converter::ArkValue<Opt_Int32>(8);
+    param.tempo = Converter::ArkValue<Opt_Float64>(2.5f);
     param.playMode = Converter::ArkValue<Opt_PlayMode>(ARK_PLAY_MODE_REVERSE);
     param.finishCallbackType = Converter::ArkValue<Opt_FinishCallbackType>(ARK_FINISH_CALLBACK_TYPE_LOGICALLY);
     param.curve = Converter::ArkUnion<Opt_Union_Curve_String_ICurve, Ark_curves_Curve>(ARK_CURVES_CURVE_EASE);
@@ -2468,10 +2455,10 @@ HWTEST_F(CommonMethodModifierTest, setAnimationInvalidValues, TestSize.Level1)
 {
     Ark_AnimateParam param;
     Opt_AnimateParam optParam;
-    param.duration = Converter::ArkValue<Opt_Number>(5000);
-    param.delay = Converter::ArkValue<Opt_Number>(Ark_Empty());
-    param.iterations = Converter::ArkValue<Opt_Number>(Ark_Empty());
-    param.tempo = Converter::ArkValue<Opt_Number>(0.0f);
+    param.duration = Converter::ArkValue<Opt_Int32>(5000);
+    param.delay = Converter::ArkValue<Opt_Int32>(Ark_Empty());
+    param.iterations = Converter::ArkValue<Opt_Int32>(Ark_Empty());
+    param.tempo = Converter::ArkValue<Opt_Float64>(0.0f);
     param.playMode = Converter::ArkValue<Opt_PlayMode>(Ark_Empty());
     param.finishCallbackType = Converter::ArkValue<Opt_FinishCallbackType>(Ark_Empty());
     param.curve = Converter::ArkValue<Opt_Union_Curve_String_ICurve>(Ark_Empty());

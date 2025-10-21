@@ -429,14 +429,21 @@ HWTEST_F(GridModifierTest, setColumnsTemplateTestValidValues, TestSize.Level1)
 HWTEST_F(GridModifierTest, setColumnsTemplateTestInvalidValues, TestSize.Level1)
 {
     std::string strResult;
-    Ark_String inputValue;
+    Opt_String inputValue;
+    auto initValue = Converter::ArkValue<Opt_String>("1fr");
 
     // check empty template
-    inputValue = Converter::ArkValue<Ark_String>("");
-    auto optInputValue = Converter::ArkValue<Opt_String>(inputValue);
-    modifier_->setColumnsTemplate(node_, &optInputValue);
+    inputValue = Converter::ArkValue<Opt_String>("");
+    modifier_->setColumnsTemplate(node_, &initValue);
+    modifier_->setColumnsTemplate(node_, &inputValue);
     strResult = GetStringAttribute(node_, ATTRIBUTE_COLUMNS_TEMPLATE_NAME);
-    EXPECT_EQ(strResult, "1fr");
+    EXPECT_EQ(strResult, ATTRIBUTE_COLUMNS_TEMPLATE_DEFAULT_VALUE);
+
+    inputValue = Converter::ArkValue<Opt_String>();
+    modifier_->setColumnsTemplate(node_, &initValue);
+    modifier_->setColumnsTemplate(node_, &inputValue);
+    strResult = GetStringAttribute(node_, ATTRIBUTE_COLUMNS_TEMPLATE_NAME);
+    EXPECT_EQ(strResult, ATTRIBUTE_COLUMNS_TEMPLATE_DEFAULT_VALUE);
 }
 
 /*
@@ -485,14 +492,21 @@ HWTEST_F(GridModifierTest, setRowsTemplateTestValidValues, TestSize.Level1)
 HWTEST_F(GridModifierTest, setRowsTemplateTestInvalidValues, TestSize.Level1)
 {
     std::string strResult;
-    Ark_String inputValue;
+    Opt_String inputValue;
+    auto initValue = Converter::ArkValue<Opt_String>("1fr");
 
     // check empty template
-    inputValue = Converter::ArkValue<Ark_String>("");
-    auto optInputValue = Converter::ArkValue<Opt_String>(inputValue);
-    modifier_->setRowsTemplate(node_, &optInputValue);
+    inputValue = Converter::ArkValue<Opt_String>("");
+    modifier_->setRowsTemplate(node_, &initValue);
+    modifier_->setRowsTemplate(node_, &inputValue);
     strResult = GetStringAttribute(node_, ATTRIBUTE_ROWS_TEMPLATE_NAME);
-    EXPECT_EQ(strResult, "1fr");
+    EXPECT_EQ(strResult, ATTRIBUTE_ROWS_TEMPLATE_DEFAULT_VALUE);
+
+    inputValue = Converter::ArkValue<Opt_String>();
+    modifier_->setRowsTemplate(node_, &initValue);
+    modifier_->setRowsTemplate(node_, &inputValue);
+    strResult = GetStringAttribute(node_, ATTRIBUTE_ROWS_TEMPLATE_NAME);
+    EXPECT_EQ(strResult, ATTRIBUTE_ROWS_TEMPLATE_DEFAULT_VALUE);
 }
 
 /*

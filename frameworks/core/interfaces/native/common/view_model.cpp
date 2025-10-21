@@ -118,7 +118,7 @@
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_static.h"
 #ifdef FORM_SUPPORTED
-#include "core/components_ng/pattern/form/form_model_ng.h"
+#include "core/components_ng/pattern/form/form_model_static_ng.h"
 #endif
 #ifdef MODEL_COMPONENT_SUPPORTED
 #include "core/components_ng/pattern/model/model_view_ng.h"
@@ -726,7 +726,7 @@ void* createFolderStackNode(ArkUI_Int32 nodeId)
 void* createFormComponentNode(ArkUI_Int32 nodeId)
 {
 #ifdef FORM_SUPPORTED
-    auto frameNode = FormModelNG::CreateFrameNode(nodeId);
+    auto frameNode = FormModelStatic::CreateFrameNode(nodeId);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);

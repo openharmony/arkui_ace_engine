@@ -16,7 +16,7 @@
 import { IncrementalNode, Disposable } from '@koalaui/runtime'
 import { int32, KoalaCallsiteKey } from '@koalaui/common'
 import { nullptr, pointer, KPointer } from '@koalaui/interop'
-import { PeerNode, LazyItemNodeType, PeerNodeType } from '../PeerNode'
+import { PeerNode, LazyItemNodeType, PeerNodeType, findPeerNode } from '../PeerNode'
 import { ArkUIAniModule } from '../ani/arkts/ArkUIAniModule'
 
 export class NodeHolder {
@@ -77,10 +77,11 @@ export class LazyItemNode extends IncrementalNode {
         super(LazyItemNodeType)
         this._container = parent
         this.onChildInserted = (node: IncrementalNode) => {
-            if (!node.isKind(PeerNodeType)) {
+            let peerNode = findPeerNode(node)
+            if (!peerNode) {
                 return
             }
-            const peer = node as PeerNode
+            const peer = peerNode as PeerNode
             if (peer.reusable) {
                 peer.onReuse(false)
             } else {
@@ -88,10 +89,11 @@ export class LazyItemNode extends IncrementalNode {
             } 
         }
         this.onChildRemoved = (node: IncrementalNode) => {
-            if (!node.isKind(PeerNodeType)) {
+            let peerNode = findPeerNode(node)
+            if (!peerNode) {
                 return
             }
-            const peer = node as PeerNode
+            const peer = peerNode as PeerNode
             if (!peer.disposed) {
                 peer.onRecycle()
             }
@@ -111,7 +113,10 @@ export class LazyItemNode extends IncrementalNode {
     }
 
     getPeerPtr(): pointer {
-        const peer = this.firstChild
+        if (!this.firstChild) {
+            return nullptr
+        }
+        const peer = findPeerNode(this.firstChild!)
         return peer?.isKind(PeerNodeType) ? (peer as PeerNode).getPeerPtr() : nullptr
     }
 }

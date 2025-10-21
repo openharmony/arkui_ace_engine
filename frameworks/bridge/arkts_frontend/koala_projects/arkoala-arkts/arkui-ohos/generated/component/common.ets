@@ -28,7 +28,7 @@ import { Position_serializer, DirectionalEdgesT_serializer, Position, Directiona
 import { Resource_serializer } from "./../framework/resource"
 import { Resource } from "global.resource"
 import { TextRange_serializer, TextRange } from "./textCommon"
-import { LengthMetrics_serializer } from "./../Graphics"
+import { LengthMetrics_serializer, ColorMetrics_serializer } from "./../Graphics"
 import { ResizableOptions_serializer, ResizableOptions } from "./image"
 import { uiEffect_VisualEffect_serializer, uiEffect_Filter_serializer, uiEffect_BrightnessBlender_serializer } from "./../framework/ohos.graphics.uiEffect"
 import { FocusBoxStyle_serializer, FocusBoxStyle, FocusPriority } from "./focus"
@@ -38,7 +38,7 @@ import { image_PixelMap_serializer } from "./../framework/ohos.multimedia.image"
 import { StyledString_serializer, StyledString, ImageAttachment, CustomSpan, StyleOptions, StyledStringKey, SpanStyle, StyledStringMarshallCallback, UserDataSpan, StyledStringUnmarshallCallback } from "./styledString"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { LengthMetrics, DrawContext } from "arkui.Graphics"
+import { LengthMetrics, DrawContext, ColorMetrics } from "arkui.Graphics"
 import { default as uiEffect } from "@ohos.graphics.uiEffect"
 import { default as matrix4 } from "@ohos.matrix4"
 import { CustomBuilder, CustomBuilderT } from "./builder"
@@ -1559,10 +1559,10 @@ export class ProgressMask implements MaterializedBase {
     constructor(_0: boolean, _1: boolean, _2: boolean, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, ProgressMask.getFinalizer())
     }
-    constructor(value: number, total: number, color: ResourceColor) {
+    constructor(value: double, total: double, color: ResourceColor) {
         this(false, false, false, ProgressMask.construct(value, total, color))
     }
-    static construct(value: number, total: number, color: ResourceColor): KPointer {
+    static construct(value: double, total: double, color: ResourceColor): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (color instanceof Color) {
             thisSerializer.writeInt8((0).toChar())
@@ -1588,8 +1588,8 @@ export class ProgressMask implements MaterializedBase {
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._ProgressMask_getFinalizer()
     }
-    public updateProgress(value: number): void {
-        const value_casted = value as (number)
+    public updateProgress(value: double): void {
+        const value_casted = value as (double)
         this.updateProgress_serialize(value_casted)
         return
     }
@@ -1603,7 +1603,7 @@ export class ProgressMask implements MaterializedBase {
         this.enableBreathingAnimation_serialize(value_casted)
         return
     }
-    updateProgress_serialize(value: number): void {
+    updateProgress_serialize(value: double): void {
         ArkUIGeneratedNativeModule._ProgressMask_updateProgress(this.peer!.ptr, value)
     }
     updateColor_serialize(value: ResourceColor): void {
@@ -2567,30 +2567,38 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setMargin(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setBackgroundColorAttribute(value: ResourceColor | undefined): void {
+    setBackgroundColorAttribute(value: ResourceColor | ColorMetrics | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof Color) {
+            if (valueTmpValue instanceof ResourceColor) {
                 thisSerializer.writeInt8((0).toChar())
-                const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
-            } else if (valueTmpValue instanceof number) {
+                const valueTmpValueForIdx0  = valueTmpValue as ResourceColor
+                if (valueTmpValueForIdx0 instanceof Color) {
+                    thisSerializer.writeInt8((0).toChar())
+                    const valueTmpValueForIdx0ForIdx0  = valueTmpValueForIdx0 as Color
+                    thisSerializer.writeInt32(valueTmpValueForIdx0ForIdx0.getOrdinal())
+                } else if (valueTmpValueForIdx0 instanceof number) {
+                    thisSerializer.writeInt8((1).toChar())
+                    const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as number
+                    thisSerializer.writeNumber(valueTmpValueForIdx0ForIdx1)
+                } else if (valueTmpValueForIdx0 instanceof string) {
+                    thisSerializer.writeInt8((2).toChar())
+                    const valueTmpValueForIdx0ForIdx2  = valueTmpValueForIdx0 as string
+                    thisSerializer.writeString(valueTmpValueForIdx0ForIdx2)
+                } else if (valueTmpValueForIdx0 instanceof Resource) {
+                    thisSerializer.writeInt8((3).toChar())
+                    const valueTmpValueForIdx0ForIdx3  = valueTmpValueForIdx0 as Resource
+                    Resource_serializer.write(thisSerializer, valueTmpValueForIdx0ForIdx3)
+                }
+            } else if (valueTmpValue instanceof ColorMetrics) {
                 thisSerializer.writeInt8((1).toChar())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
-            } else if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((2).toChar())
-                const valueTmpValueForIdx2  = valueTmpValue as string
-                thisSerializer.writeString(valueTmpValueForIdx2)
-            } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((3).toChar())
-                const valueTmpValueForIdx3  = valueTmpValue as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
+                const valueTmpValueForIdx1  = valueTmpValue as ColorMetrics
+                ColorMetrics_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
         } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._CommonMethod_setBackgroundColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -4665,7 +4673,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setBackground(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setBackgroundImage0Attribute(src: ResourceStr | image.PixelMap | undefined, repeat?: ImageRepeat): void {
+    setBackgroundImage0Attribute(src: ResourceStr | image.PixelMap | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (src !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -4687,13 +4695,6 @@ export class ArkCommonMethodPeer extends PeerNode {
                 const srcTmpValueForIdx1  = srcTmpValue as image.PixelMap
                 image_PixelMap_serializer.write(thisSerializer, srcTmpValueForIdx1)
             }
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        if (repeat !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const repeatTmpValue  = (repeat as ImageRepeat)
-            thisSerializer.writeInt32(repeatTmpValue.valueOf())
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -4733,6 +4734,41 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._CommonMethod_setBackgroundImage1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setBackgroundImage2Attribute(src: ResourceStr | image.PixelMap | undefined, repeat?: ImageRepeat): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (src !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const srcTmpValue  = src!
+            if (srcTmpValue instanceof ResourceStr) {
+                thisSerializer.writeInt8((0).toChar())
+                const srcTmpValueForIdx0  = srcTmpValue as ResourceStr
+                if (srcTmpValueForIdx0 instanceof string) {
+                    thisSerializer.writeInt8((0).toChar())
+                    const srcTmpValueForIdx0ForIdx0  = srcTmpValueForIdx0 as string
+                    thisSerializer.writeString(srcTmpValueForIdx0ForIdx0)
+                } else if (srcTmpValueForIdx0 instanceof Resource) {
+                    thisSerializer.writeInt8((1).toChar())
+                    const srcTmpValueForIdx0ForIdx1  = srcTmpValueForIdx0 as Resource
+                    Resource_serializer.write(thisSerializer, srcTmpValueForIdx0ForIdx1)
+                }
+            } else if (srcTmpValue instanceof image.PixelMap) {
+                thisSerializer.writeInt8((1).toChar())
+                const srcTmpValueForIdx1  = srcTmpValue as image.PixelMap
+                image_PixelMap_serializer.write(thisSerializer, srcTmpValueForIdx1)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (repeat !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const repeatTmpValue  = (repeat as ImageRepeat)
+            thisSerializer.writeInt32(repeatTmpValue.valueOf())
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setBackgroundImage0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setBackgroundBlurStyleAttribute(style: BlurStyle | undefined, options?: BackgroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): void {
@@ -6095,9 +6131,9 @@ export interface Rectangle {
     height?: Length;
 }
 export interface ExpectedFrameRateRange {
-    min: number;
-    max: number;
-    expected: number;
+    min: int32;
+    max: int32;
+    expected: int32;
 }
 export enum AccessibilitySamePageMode {
     SEMI_SILENT = 0,
@@ -6419,9 +6455,9 @@ export enum SourceTool {
     Finger = 1,
     PEN = 2,
     Pen = 2,
-    MOUSE = 3,
-    TOUCHPAD = 4,
-    JOYSTICK = 5
+    MOUSE = 7,
+    TOUCHPAD = 9,
+    JOYSTICK = 10
 }
 export enum RepeatMode {
     REPEAT = 0,
@@ -6485,7 +6521,7 @@ export interface SystemAdaptiveOptions {
 export interface BlurStyleOptions {
     colorMode?: ThemeColorMode;
     adaptiveColor?: AdaptiveColor;
-    scale?: number;
+    scale?: double;
     blurOptions?: BlurOptions;
 }
 export interface BackgroundEffectOptions {
@@ -6540,8 +6576,8 @@ export enum ShadowStyle {
 }
 export interface MultiShadowOptions {
     radius?: number | Resource;
-    offsetX?: number | Resource;
-    offsetY?: number | Resource;
+    offsetX?: double | Resource;
+    offsetY?: double | Resource;
 }
 export enum SafeAreaType {
     SYSTEM = 0,
@@ -7057,7 +7093,7 @@ export interface CommonMethod {
     margin(value: Padding | Length | LocalizedPadding | undefined): this {
         throw new Error("Unimplemented method margin")
     }
-    backgroundColor(value: ResourceColor | undefined): this {
+    backgroundColor(value: ResourceColor | ColorMetrics | undefined): this {
         throw new Error("Unimplemented method backgroundColor")
     }
     pixelRound(value: PixelRoundPolicy | undefined): this {
@@ -7508,10 +7544,13 @@ export interface CommonMethod {
     background(builder: CustomBuilder | undefined, options?: BackgroundOptions): this {
         throw new Error("Unimplemented method background")
     }
-    backgroundImage(src: ResourceStr | image.PixelMap | undefined, repeat?: ImageRepeat): this {
+    backgroundImage(value: ResourceStr | image.PixelMap | undefined): this {
         throw new Error("Unimplemented method backgroundImage")
     }
     backgroundImage(src: ResourceStr | image.PixelMap | undefined, options?: BackgroundImageOptions): this {
+        throw new Error("Unimplemented method backgroundImage")
+    }
+    backgroundImage(src: ResourceStr | image.PixelMap | undefined, repeat?: ImageRepeat): this {
         throw new Error("Unimplemented method backgroundImage")
     }
     backgroundBlurStyle(style: BlurStyle | undefined, options?: BackgroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this {
@@ -7657,8 +7696,9 @@ export class ArkCommonMethodStyle implements CommonMethod {
     padding_value?: Padding | Length | LocalizedPadding | undefined
     safeAreaPadding_value?: Padding | LengthMetrics | LocalizedPadding | undefined
     margin_value?: Padding | Length | LocalizedPadding | undefined
-    backgroundColor_value?: ResourceColor | undefined
+    backgroundColor_value?: ResourceColor | ColorMetrics | undefined
     pixelRound_value?: PixelRoundPolicy | undefined
+    backgroundImage_value?: ResourceStr | image.PixelMap | undefined
     backgroundImageSize_value?: SizeOptions | ImageSize | undefined
     backgroundImagePosition_value?: Position | Alignment | undefined
     backgroundEffect_value?: BackgroundEffectOptions | undefined
@@ -7841,7 +7881,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     margin(value: Padding | Length | LocalizedPadding | undefined): this {
         return this
     }
-    backgroundColor(value: ResourceColor | undefined): this {
+    backgroundColor(value: ResourceColor | ColorMetrics | undefined): this {
         return this
     }
     pixelRound(value: PixelRoundPolicy | undefined): this {
@@ -8292,10 +8332,13 @@ export class ArkCommonMethodStyle implements CommonMethod {
     background(builder: CustomBuilder | undefined, options?: BackgroundOptions): this {
         return this
     }
-    backgroundImage(src: ResourceStr | image.PixelMap | undefined, repeat?: ImageRepeat): this {
+    backgroundImage(value: ResourceStr | image.PixelMap | undefined): this {
         return this
     }
-    backgroundImage(src: ResourceStr | image.PixelMap | undefined, options?: BackgroundImageOptions): this {
+    backgroundImage(src: ResourceStr | image.PixelMap | undefined, options: BackgroundImageOptions): this {
+        return this
+    }
+    backgroundImage(src: ResourceStr | image.PixelMap | undefined, repeat: ImageRepeat): this {
         return this
     }
     backgroundBlurStyle(style: BlurStyle | undefined, options?: BackgroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this {
@@ -8426,8 +8469,8 @@ export interface OverlayOffset {
     y?: double;
 }
 export type FractionStop = [
-    number,
-    number
+    double,
+    double
 ]
 export interface CommonShapeMethod extends CommonMethod {
     stroke(value: ResourceColor | undefined): this {
@@ -8698,8 +8741,8 @@ export enum EffectEdge {
     END = 2
 }
 export interface BackgroundBrightnessOptions {
-    rate: number;
-    lightUpDegree: number;
+    rate: double;
+    lightUpDegree: double;
 }
 export interface PointLightStyle {
     lightSource?: LightSource;
@@ -8882,9 +8925,9 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public backgroundColor(value: ResourceColor | undefined): this {
+    public backgroundColor(value: ResourceColor | ColorMetrics | undefined): this {
         if (this.checkPriority("backgroundColor")) {
-            const value_casted = value as (ResourceColor | undefined)
+            const value_casted = value as (ResourceColor | ColorMetrics | undefined)
             this.getPeer()?.setBackgroundColorAttribute(value_casted)
             return this
         }
@@ -10100,20 +10143,28 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public backgroundImage(src: ResourceStr | image.PixelMap | undefined, repeat?: ImageRepeat): this {
+    public backgroundImage(src: ResourceStr | image.PixelMap | undefined): this {
         if (this.checkPriority("backgroundImage")) {
             const src_casted = src as (ResourceStr | image.PixelMap | undefined)
-            const repeat_casted = repeat as (ImageRepeat | undefined)
-            this.getPeer()?.setBackgroundImage0Attribute(src_casted, repeat_casted)
+            this.getPeer()?.setBackgroundImage0Attribute(src_casted)
             return this
         }
         return this
     }
-    public backgroundImage(src: ResourceStr | image.PixelMap | undefined, options?: BackgroundImageOptions): this {
+    public backgroundImage(src: ResourceStr | image.PixelMap | undefined, options: BackgroundImageOptions): this {
         if (this.checkPriority("backgroundImage")) {
             const src_casted = src as (ResourceStr | image.PixelMap | undefined)
-            const options_casted = options as (BackgroundImageOptions | undefined)
+            const options_casted = options as (BackgroundImageOptions)
             this.getPeer()?.setBackgroundImage1Attribute(src_casted, options_casted)
+            return this
+        }
+        return this
+    }
+    public backgroundImage(src: ResourceStr | image.PixelMap | undefined, repeat: ImageRepeat): this {
+        if (this.checkPriority("backgroundImage")) {
+            const src_casted = src as (ResourceStr | image.PixelMap | undefined)
+            const repeat_casted = repeat as (ImageRepeat)
+            this.getPeer()?.setBackgroundImage2Attribute(src_casted, repeat_casted)
             return this
         }
         return this
@@ -11017,14 +11068,14 @@ export class BackgroundBrightnessOptions_serializer {
     public static write(buffer: SerializerBase, value: BackgroundBrightnessOptions): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForRate  = value.rate
-        valueSerializer.writeNumber(valueHolderForRate)
+        valueSerializer.writeFloat64(valueHolderForRate)
         const valueHolderForLightUpDegree  = value.lightUpDegree
-        valueSerializer.writeNumber(valueHolderForLightUpDegree)
+        valueSerializer.writeFloat64(valueHolderForLightUpDegree)
     }
     public static read(buffer: DeserializerBase): BackgroundBrightnessOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const rateTmpResult : number = (valueDeserializer.readNumber() as number)
-        const lightUpDegreeTmpResult : number = (valueDeserializer.readNumber() as number)
+        const rateTmpResult : double = valueDeserializer.readFloat64()
+        const lightUpDegreeTmpResult : double = valueDeserializer.readFloat64()
         let value : BackgroundBrightnessOptions = ({rate: rateTmpResult, lightUpDegree: lightUpDegreeTmpResult} as BackgroundBrightnessOptions)
         return value
     }
@@ -11830,17 +11881,17 @@ export class ExpectedFrameRateRange_serializer {
     public static write(buffer: SerializerBase, value: ExpectedFrameRateRange): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForMin  = value.min
-        valueSerializer.writeNumber(valueHolderForMin)
+        valueSerializer.writeInt32(valueHolderForMin)
         const valueHolderForMax  = value.max
-        valueSerializer.writeNumber(valueHolderForMax)
+        valueSerializer.writeInt32(valueHolderForMax)
         const valueHolderForExpected  = value.expected
-        valueSerializer.writeNumber(valueHolderForExpected)
+        valueSerializer.writeInt32(valueHolderForExpected)
     }
     public static read(buffer: DeserializerBase): ExpectedFrameRateRange {
         let valueDeserializer : DeserializerBase = buffer
-        const minTmpResult : number = (valueDeserializer.readNumber() as number)
-        const maxTmpResult : number = (valueDeserializer.readNumber() as number)
-        const expectedTmpResult : number = (valueDeserializer.readNumber() as number)
+        const minTmpResult : int32 = valueDeserializer.readInt32()
+        const maxTmpResult : int32 = valueDeserializer.readInt32()
+        const expectedTmpResult : int32 = valueDeserializer.readInt32()
         let value : ExpectedFrameRateRange = ({min: minTmpResult, max: maxTmpResult, expected: expectedTmpResult} as ExpectedFrameRateRange)
         return value
     }
@@ -12245,9 +12296,9 @@ export class LinearGradientBlurOptions_serializer {
         for (let valueHolderForFractionStopsCounterI = 0; valueHolderForFractionStopsCounterI < valueHolderForFractionStops.length; valueHolderForFractionStopsCounterI++) {
             const valueHolderForFractionStopsTmpElement : FractionStop = valueHolderForFractionStops[valueHolderForFractionStopsCounterI]
             const valueHolderForFractionStopsTmpElement_0  = valueHolderForFractionStopsTmpElement[0]
-            valueSerializer.writeNumber(valueHolderForFractionStopsTmpElement_0)
+            valueSerializer.writeFloat64(valueHolderForFractionStopsTmpElement_0)
             const valueHolderForFractionStopsTmpElement_1  = valueHolderForFractionStopsTmpElement[1]
-            valueSerializer.writeNumber(valueHolderForFractionStopsTmpElement_1)
+            valueSerializer.writeFloat64(valueHolderForFractionStopsTmpElement_1)
         }
         const valueHolderForDirection  = value.direction
         valueSerializer.writeInt32(valueHolderForDirection.valueOf())
@@ -12257,8 +12308,8 @@ export class LinearGradientBlurOptions_serializer {
         const fractionStopsTmpBufLength : int32 = valueDeserializer.readInt32()
         let fractionStopsTmpBuf : Array<FractionStop> = new Array<FractionStop>(fractionStopsTmpBufLength)
         for (let fractionStopsTmpBufBufCounterI = 0; fractionStopsTmpBufBufCounterI < fractionStopsTmpBufLength; fractionStopsTmpBufBufCounterI++) {
-            const fractionStopsTmpBufTempBufValue0 : number = (valueDeserializer.readNumber() as number)
-            const fractionStopsTmpBufTempBufValue1 : number = (valueDeserializer.readNumber() as number)
+            const fractionStopsTmpBufTempBufValue0 : double = valueDeserializer.readFloat64()
+            const fractionStopsTmpBufTempBufValue1 : double = valueDeserializer.readFloat64()
             fractionStopsTmpBuf[fractionStopsTmpBufBufCounterI] = ([fractionStopsTmpBufTempBufValue0, fractionStopsTmpBufTempBufValue1] as FractionStop)
         }
         const fractionStopsTmpResult : Array<FractionStop> = fractionStopsTmpBuf
@@ -13648,7 +13699,7 @@ export class BackgroundBlurStyleOptions_serializer {
         if (valueHolderForScale !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForScaleTmpValue  = valueHolderForScale!
-            valueSerializer.writeNumber(valueHolderForScaleTmpValue)
+            valueSerializer.writeFloat64(valueHolderForScaleTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -13708,11 +13759,11 @@ export class BackgroundBlurStyleOptions_serializer {
         }
         const adaptiveColorTmpResult : AdaptiveColor | undefined = adaptiveColorTmpBuf
         const scaleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let scaleTmpBuf : number | undefined = undefined
+        let scaleTmpBuf : double | undefined = undefined
         if ((scaleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            scaleTmpBuf = (valueDeserializer.readNumber() as number)
+            scaleTmpBuf = valueDeserializer.readFloat64()
         }
-        const scaleTmpResult : number | undefined = scaleTmpBuf
+        const scaleTmpResult : double | undefined = scaleTmpBuf
         const blurOptionsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let blurOptionsTmpBuf : BlurOptions | undefined = undefined
         if ((blurOptionsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -14409,7 +14460,7 @@ export class ForegroundBlurStyleOptions_serializer {
         if (valueHolderForScale !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForScaleTmpValue  = valueHolderForScale!
-            valueSerializer.writeNumber(valueHolderForScaleTmpValue)
+            valueSerializer.writeFloat64(valueHolderForScaleTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -14437,11 +14488,11 @@ export class ForegroundBlurStyleOptions_serializer {
         }
         const adaptiveColorTmpResult : AdaptiveColor | undefined = adaptiveColorTmpBuf
         const scaleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let scaleTmpBuf : number | undefined = undefined
+        let scaleTmpBuf : double | undefined = undefined
         if ((scaleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            scaleTmpBuf = (valueDeserializer.readNumber() as number)
+            scaleTmpBuf = valueDeserializer.readFloat64()
         }
-        const scaleTmpResult : number | undefined = scaleTmpBuf
+        const scaleTmpResult : double | undefined = scaleTmpBuf
         const blurOptionsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let blurOptionsTmpBuf : BlurOptions | undefined = undefined
         if ((blurOptionsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -21850,7 +21901,7 @@ export interface AxisEvent {
     x: double
     y: double
     scrollStep?: int32 | undefined
-    propagation: (() => void)
+    propagation(): void
     getHorizontalAxisValue(): double
     getVerticalAxisValue(): double
 }
@@ -21904,11 +21955,9 @@ export class AxisEventInternal extends BaseEventInternal implements Materialized
         const scrollStep_NonNull  = (scrollStep as int32)
         this.setScrollStep(scrollStep_NonNull)
     }
-    get propagation(): (() => void) {
-        return this.getPropagation()
-    }
-    set propagation(propagation: (() => void)) {
-        this.setPropagation(propagation)
+    public propagation(): void {
+        this.propagation_serialize()
+        return
     }
     constructor(peerPtr: KPointer) {
         super(peerPtr)
@@ -21996,14 +22045,6 @@ export class AxisEventInternal extends BaseEventInternal implements Materialized
         this.setScrollStep_serialize(scrollStep_casted)
         return
     }
-    private getPropagation(): (() => void) {
-        return this.getPropagation_serialize()
-    }
-    private setPropagation(propagation: (() => void)): void {
-        const propagation_casted = propagation as ((() => void))
-        this.setPropagation_serialize(propagation_casted)
-        return
-    }
     getHorizontalAxisValue_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._AxisEvent_getHorizontalAxisValue(this.peer!.ptr)
         return retval
@@ -22084,15 +22125,8 @@ export class AxisEventInternal extends BaseEventInternal implements Materialized
         ArkUIGeneratedNativeModule._AxisEvent_setScrollStep(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private getPropagation_serialize(): (() => void) {
-        const retval  = ArkUIGeneratedNativeModule._AxisEvent_getPropagation(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
-    }
-    private setPropagation_serialize(propagation: (() => void)): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        thisSerializer.holdAndWriteCallback(propagation)
-        ArkUIGeneratedNativeModule._AxisEvent_setPropagation(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
+    propagation_serialize(): void {
+        ArkUIGeneratedNativeModule._AxisEvent_propagation(this.peer!.ptr)
     }
 }
 export interface ClickEvent {
@@ -22103,7 +22137,7 @@ export interface ClickEvent {
     x: double
     y: double
     hand?: InteractionHand | undefined
-    preventDefault: (() => void)
+    preventDefault(): void
 }
 export class ClickEventInternal extends BaseEventInternal implements MaterializedBase,ClickEvent {
     get displayX(): double {
@@ -22149,11 +22183,9 @@ export class ClickEventInternal extends BaseEventInternal implements Materialize
         const hand_NonNull  = (hand as InteractionHand)
         this.setHand(hand_NonNull)
     }
-    get preventDefault(): (() => void) {
-        return this.getPreventDefault()
-    }
-    set preventDefault(preventDefault: (() => void)) {
-        this.setPreventDefault(preventDefault)
+    public preventDefault(): void {
+        this.preventDefault_serialize()
+        return
     }
     constructor(peerPtr: KPointer) {
         super(peerPtr)
@@ -22227,14 +22259,6 @@ export class ClickEventInternal extends BaseEventInternal implements Materialize
         this.setHand_serialize(hand_casted)
         return
     }
-    private getPreventDefault(): (() => void) {
-        return this.getPreventDefault_serialize()
-    }
-    private setPreventDefault(preventDefault: (() => void)): void {
-        const preventDefault_casted = preventDefault as ((() => void))
-        this.setPreventDefault_serialize(preventDefault_casted)
-        return
-    }
     private getDisplayX_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._ClickEvent_getDisplayX(this.peer!.ptr)
         return retval
@@ -22300,20 +22324,13 @@ export class ClickEventInternal extends BaseEventInternal implements Materialize
         ArkUIGeneratedNativeModule._ClickEvent_setHand(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private getPreventDefault_serialize(): (() => void) {
-        const retval  = ArkUIGeneratedNativeModule._ClickEvent_getPreventDefault(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
-    }
-    private setPreventDefault_serialize(preventDefault: (() => void)): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        thisSerializer.holdAndWriteCallback(preventDefault)
-        ArkUIGeneratedNativeModule._ClickEvent_setPreventDefault(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
+    preventDefault_serialize(): void {
+        ArkUIGeneratedNativeModule._ClickEvent_preventDefault(this.peer!.ptr)
     }
 }
 export interface FocusAxisEvent {
     axisMap: Map<AxisModel, double>
-    stopPropagation: (() => void)
+    stopPropagation(): void
 }
 export class FocusAxisEventInternal extends BaseEventInternal implements MaterializedBase,FocusAxisEvent {
     get axisMap(): Map<AxisModel, double> {
@@ -22322,11 +22339,9 @@ export class FocusAxisEventInternal extends BaseEventInternal implements Materia
     set axisMap(axisMap: Map<AxisModel, double>) {
         this.setAxisMap(axisMap)
     }
-    get stopPropagation(): (() => void) {
-        return this.getStopPropagation()
-    }
-    set stopPropagation(stopPropagation: (() => void)) {
-        this.setStopPropagation(stopPropagation)
+    public stopPropagation(): void {
+        this.stopPropagation_serialize()
+        return
     }
     constructor(peerPtr: KPointer) {
         super(peerPtr)
@@ -22350,14 +22365,6 @@ export class FocusAxisEventInternal extends BaseEventInternal implements Materia
     private setAxisMap(axisMap: Map<AxisModel, double>): void {
         const axisMap_casted = axisMap as (Map<AxisModel, double>)
         this.setAxisMap_serialize(axisMap_casted)
-        return
-    }
-    private getStopPropagation(): (() => void) {
-        return this.getStopPropagation_serialize()
-    }
-    private setStopPropagation(stopPropagation: (() => void)): void {
-        const stopPropagation_casted = stopPropagation as ((() => void))
-        this.setStopPropagation_serialize(stopPropagation_casted)
         return
     }
     private getAxisMap_serialize(): Map<AxisModel, double> {
@@ -22386,15 +22393,8 @@ export class FocusAxisEventInternal extends BaseEventInternal implements Materia
         ArkUIGeneratedNativeModule._FocusAxisEvent_setAxisMap(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private getStopPropagation_serialize(): (() => void) {
-        const retval  = ArkUIGeneratedNativeModule._FocusAxisEvent_getStopPropagation(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
-    }
-    private setStopPropagation_serialize(stopPropagation: (() => void)): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        thisSerializer.holdAndWriteCallback(stopPropagation)
-        ArkUIGeneratedNativeModule._FocusAxisEvent_setStopPropagation(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
+    stopPropagation_serialize(): void {
+        ArkUIGeneratedNativeModule._FocusAxisEvent_stopPropagation(this.peer!.ptr)
     }
 }
 export interface HoverEvent {
@@ -22404,7 +22404,7 @@ export interface HoverEvent {
     windowY?: double | undefined
     displayX?: double | undefined
     displayY?: double | undefined
-    stopPropagation: (() => void)
+    stopPropagation(): void
 }
 export class HoverEventInternal extends BaseEventInternal implements MaterializedBase,HoverEvent {
     get x(): double | undefined {
@@ -22449,11 +22449,9 @@ export class HoverEventInternal extends BaseEventInternal implements Materialize
         const displayY_NonNull  = (displayY as double)
         this.setDisplayY(displayY_NonNull)
     }
-    get stopPropagation(): (() => void) {
-        return this.getStopPropagation()
-    }
-    set stopPropagation(stopPropagation: (() => void)) {
-        this.setStopPropagation(stopPropagation)
+    public stopPropagation(): void {
+        this.stopPropagation_serialize()
+        return
     }
     constructor(peerPtr: KPointer) {
         super(peerPtr)
@@ -22517,14 +22515,6 @@ export class HoverEventInternal extends BaseEventInternal implements Materialize
     private setDisplayY(displayY: double | undefined): void {
         const displayY_casted = displayY as (double | undefined)
         this.setDisplayY_serialize(displayY_casted)
-        return
-    }
-    private getStopPropagation(): (() => void) {
-        return this.getStopPropagation_serialize()
-    }
-    private setStopPropagation(stopPropagation: (() => void)): void {
-        const stopPropagation_casted = stopPropagation as ((() => void))
-        this.setStopPropagation_serialize(stopPropagation_casted)
         return
     }
     private getX_serialize(): double | undefined {
@@ -22665,15 +22655,8 @@ export class HoverEventInternal extends BaseEventInternal implements Materialize
         ArkUIGeneratedNativeModule._HoverEvent_setDisplayY(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private getStopPropagation_serialize(): (() => void) {
-        const retval  = ArkUIGeneratedNativeModule._HoverEvent_getStopPropagation(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
-    }
-    private setStopPropagation_serialize(stopPropagation: (() => void)): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        thisSerializer.holdAndWriteCallback(stopPropagation)
-        ArkUIGeneratedNativeModule._HoverEvent_setStopPropagation(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
+    stopPropagation_serialize(): void {
+        ArkUIGeneratedNativeModule._HoverEvent_stopPropagation(this.peer!.ptr)
     }
 }
 export interface MouseEvent {
@@ -23027,8 +23010,8 @@ export interface TouchEvent {
     type: TouchType
     touches: Array<TouchObject>
     changedTouches: Array<TouchObject>
-    stopPropagation: (() => void)
-    preventDefault: (() => void)
+    stopPropagation(): void
+    preventDefault(): void
     getHistoricalPoints(): Array<HistoricalPoint>
 }
 export class TouchEventInternal extends BaseEventInternal implements MaterializedBase,TouchEvent {
@@ -23050,17 +23033,13 @@ export class TouchEventInternal extends BaseEventInternal implements Materialize
     set changedTouches(changedTouches: Array<TouchObject>) {
         this.setChangedTouches(changedTouches)
     }
-    get stopPropagation(): (() => void) {
-        return this.getStopPropagation()
+    public stopPropagation(): void {
+        this.stopPropagation_serialize()
+        return
     }
-    set stopPropagation(stopPropagation: (() => void)) {
-        this.setStopPropagation(stopPropagation)
-    }
-    get preventDefault(): (() => void) {
-        return this.getPreventDefault()
-    }
-    set preventDefault(preventDefault: (() => void)) {
-        this.setPreventDefault(preventDefault)
+    public preventDefault(): void {
+        this.preventDefault_serialize()
+        return
     }
     constructor(peerPtr: KPointer) {
         super(peerPtr)
@@ -23103,22 +23082,6 @@ export class TouchEventInternal extends BaseEventInternal implements Materialize
     private setChangedTouches(changedTouches: Array<TouchObject>): void {
         const changedTouches_casted = changedTouches as (Array<TouchObject>)
         this.setChangedTouches_serialize(changedTouches_casted)
-        return
-    }
-    private getStopPropagation(): (() => void) {
-        return this.getStopPropagation_serialize()
-    }
-    private setStopPropagation(stopPropagation: (() => void)): void {
-        const stopPropagation_casted = stopPropagation as ((() => void))
-        this.setStopPropagation_serialize(stopPropagation_casted)
-        return
-    }
-    private getPreventDefault(): (() => void) {
-        return this.getPreventDefault_serialize()
-    }
-    private setPreventDefault(preventDefault: (() => void)): void {
-        const preventDefault_casted = preventDefault as ((() => void))
-        this.setPreventDefault_serialize(preventDefault_casted)
         return
     }
     getHistoricalPoints_serialize(): Array<HistoricalPoint> {
@@ -23181,25 +23144,11 @@ export class TouchEventInternal extends BaseEventInternal implements Materialize
         ArkUIGeneratedNativeModule._TouchEvent_setChangedTouches(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private getStopPropagation_serialize(): (() => void) {
-        const retval  = ArkUIGeneratedNativeModule._TouchEvent_getStopPropagation(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+    stopPropagation_serialize(): void {
+        ArkUIGeneratedNativeModule._TouchEvent_stopPropagation(this.peer!.ptr)
     }
-    private setStopPropagation_serialize(stopPropagation: (() => void)): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        thisSerializer.holdAndWriteCallback(stopPropagation)
-        ArkUIGeneratedNativeModule._TouchEvent_setStopPropagation(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    private getPreventDefault_serialize(): (() => void) {
-        const retval  = ArkUIGeneratedNativeModule._TouchEvent_getPreventDefault(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
-    }
-    private setPreventDefault_serialize(preventDefault: (() => void)): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        thisSerializer.holdAndWriteCallback(preventDefault)
-        ArkUIGeneratedNativeModule._TouchEvent_setPreventDefault(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
+    preventDefault_serialize(): void {
+        ArkUIGeneratedNativeModule._TouchEvent_preventDefault(this.peer!.ptr)
     }
 }
 export namespace cursorControl {

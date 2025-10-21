@@ -47,11 +47,11 @@ HWTEST_F(StepperModifierTest, setStepperOptionsTestIndexDefaultValues, TestSize.
     EXPECT_EQ(resultStr, ATTRIBUTE_STEPPER_INDEX_DEFAULT_VALUE);
 }
 
-static std::vector<std::tuple<std::string, Opt_Union_Number_Bindable, std::string>> optionsIndexValidValues = {
-    {"0", Converter::ArkUnion<Opt_Union_Number_Bindable, Ark_Number>(0), "0"},
-    {"11.1", Converter::ArkUnion<Opt_Union_Number_Bindable, Ark_Number>(11.1), "11"},
-    {"77.7", Converter::ArkUnion<Opt_Union_Number_Bindable, Ark_Number>(77.7), "77"},
-    {"99", Converter::ArkUnion<Opt_Union_Number_Bindable, Ark_Number>(99), "99"},
+static std::vector<std::tuple<std::string, Opt_Union_I32_Bindable, std::string>> optionsIndexValidValues = {
+    {"0", Converter::ArkUnion<Opt_Union_I32_Bindable, Ark_Int32>(0), "0"},
+    {"11", Converter::ArkUnion<Opt_Union_I32_Bindable, Ark_Int32>(11), "11"},
+    {"77", Converter::ArkUnion<Opt_Union_I32_Bindable, Ark_Int32>(77), "77"},
+    {"99", Converter::ArkUnion<Opt_Union_I32_Bindable, Ark_Int32>(99), "99"},
 };
 
 /*
@@ -69,7 +69,7 @@ HWTEST_F(StepperModifierTest, DISABLED_setStepperOptionsTestIndexValidValues, Te
 
     for (auto&& value: optionsIndexValidValues) {
         inputValueStatus = std::get<1>(value);
-        modifier_-> setStepperOptions(node_, &realInputValue);
+        modifier_->setStepperOptions(node_, &realInputValue);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STEPPER_INDEX_NAME);
         expectedStr = std::get<2>(value);
@@ -77,9 +77,9 @@ HWTEST_F(StepperModifierTest, DISABLED_setStepperOptionsTestIndexValidValues, Te
     }
 }
 
-static std::vector<std::tuple<std::string, Opt_Union_Number_Bindable>> optionsIndexInvalidValues = {
-    {"-1", Converter::ArkUnion<Opt_Union_Number_Bindable, Ark_Number>(-1)},
-    {"", Converter::ArkValue<Opt_Union_Number_Bindable>()},
+static std::vector<std::tuple<std::string, Opt_Union_I32_Bindable>> optionsIndexInvalidValues = {
+    {"-1", Converter::ArkUnion<Opt_Union_I32_Bindable, Ark_Int32>(-1)},
+    {"", Converter::ArkValue<Opt_Union_I32_Bindable>()},
 };
 
 /*
@@ -97,7 +97,7 @@ HWTEST_F(StepperModifierTest, setStepperOptionsTestIndexInvalidValues, TestSize.
 
     for (auto&& value: optionsIndexInvalidValues) {
         inputValueStatus = std::get<1>(value);
-        modifier_-> setStepperOptions(node_, &realInputValue);
+        modifier_->setStepperOptions(node_, &realInputValue);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STEPPER_INDEX_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_STEPPER_INDEX_DEFAULT_VALUE) << "Passed value is: " << std::get<0>(value);
@@ -187,16 +187,16 @@ HWTEST_F(StepperModifierTest, DISABLED_setOnChangeTest, TestSize.Level1)
     const int32_t secondArg = 1;
 
     static std::optional<std::tuple<int32_t, int32_t, int32_t>> checkData;
-    void (*checkCallback)(const Ark_Int32 resourceId, const Ark_Number first, const Ark_Number last) =
-        [](const Ark_Int32 resourceId, const Ark_Number first, const Ark_Number last) {
+    auto checkCallback =
+        [](const Ark_Int32 resourceId, const Ark_Int32 first, const Ark_Int32 last) {
             checkData = { resourceId, Converter::Convert<int32_t>(first),
                 Converter::Convert<int32_t>(last) };
         };
     ASSERT_FALSE(checkData.has_value());
 
     // setup the callback object via C-API
-    auto arkCallback = Converter::ArkValue<Callback_Number_Number_Void>(checkCallback, contextId);
-    auto optCallback = Converter::ArkValue<Opt_Callback_Number_Number_Void>(arkCallback);
+    auto arkCallback = Converter::ArkValue<Callback_I32_I32_Void>(checkCallback, contextId);
+    auto optCallback = Converter::ArkValue<Opt_Callback_I32_I32_Void>(arkCallback);
     modifier_->setOnChange(node_, &optCallback);
 
     auto frameNode = reinterpret_cast<FrameNode *>(node_);
@@ -225,16 +225,16 @@ HWTEST_F(StepperModifierTest, DISABLED_setOnNextTest, TestSize.Level1)
     const int32_t secondArg = 1;
 
     static std::optional<std::tuple<int32_t, int32_t, int32_t>> checkData;
-    void (*checkCallback)(const Ark_Int32 resourceId, const Ark_Number first, const Ark_Number last) =
-        [](const Ark_Int32 resourceId, const Ark_Number first, const Ark_Number last) {
+    auto checkCallback =
+        [](const Ark_Int32 resourceId, const Ark_Int32 first, const Ark_Int32 last) {
             checkData = { resourceId, Converter::Convert<int32_t>(first),
                 Converter::Convert<int32_t>(last) };
         };
     ASSERT_FALSE(checkData.has_value());
 
     // setup the callback object via C-API
-    auto arkCallback = Converter::ArkValue<Callback_Number_Number_Void>(checkCallback, contextId);
-    auto optCallback = Converter::ArkValue<Opt_Callback_Number_Number_Void>(arkCallback);
+    auto arkCallback = Converter::ArkValue<Callback_I32_I32_Void>(checkCallback, contextId);
+    auto optCallback = Converter::ArkValue<Opt_Callback_I32_I32_Void>(arkCallback);
     modifier_->setOnNext(node_, &optCallback);
 
     auto frameNode = reinterpret_cast<FrameNode *>(node_);
@@ -263,16 +263,16 @@ HWTEST_F(StepperModifierTest, DISABLED_setOnPreviousTest, TestSize.Level1)
     const int32_t secondArg = 1;
 
     static std::optional<std::tuple<int32_t, int32_t, int32_t>> checkData;
-    void (*checkCallback)(const Ark_Int32 resourceId, const Ark_Number first, const Ark_Number last) =
-        [](const Ark_Int32 resourceId, const Ark_Number first, const Ark_Number last) {
+    auto checkCallback =
+        [](const Ark_Int32 resourceId, const Ark_Int32 first, const Ark_Int32 last) {
             checkData = { resourceId, Converter::Convert<int32_t>(first),
                 Converter::Convert<int32_t>(last) };
         };
     ASSERT_FALSE(checkData.has_value());
 
     // setup the callback object via C-API
-    auto arkCallback = Converter::ArkValue<Callback_Number_Number_Void>(checkCallback, contextId);
-    auto optCallback = Converter::ArkValue<Opt_Callback_Number_Number_Void>(arkCallback);
+    auto arkCallback = Converter::ArkValue<Callback_I32_I32_Void>(checkCallback, contextId);
+    auto optCallback = Converter::ArkValue<Opt_Callback_I32_I32_Void>(arkCallback);
     modifier_->setOnPrevious(node_, &optCallback);
 
     auto frameNode = reinterpret_cast<FrameNode *>(node_);

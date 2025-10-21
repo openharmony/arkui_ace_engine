@@ -30,6 +30,7 @@
 namespace OHOS::Ace::NG {
 class ACE_EXPORT FormModelStatic {
 public:
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void UpdateProperty(const RequestFormInfo& formInfo);
     static void SetVisibility(FrameNode* frameNode, VisibleType visible);
     static void AllowUpdate(FrameNode* frameNode, bool value);

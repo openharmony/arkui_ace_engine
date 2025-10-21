@@ -136,7 +136,7 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
 #ifdef FORM_SUPPORTED
-    auto frameNode = FormModelNG::CreateFrameNode(id);
+    auto frameNode = FormModelStatic::CreateFrameNode(id);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);

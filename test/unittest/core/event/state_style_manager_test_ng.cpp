@@ -386,6 +386,7 @@ HWTEST_F(StateStyleManagerTestNg, StateStyleTest008, TestSize.Level1)
 {
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
     auto stateStyleMgr = AceType::MakeRefPtr<StateStyleManager>(frameNode);
+    
     stateStyleMgr->PendingPressedState();
     EXPECT_EQ(true, stateStyleMgr->IsPressedStatePending());
     stateStyleMgr->SetSupportedStates(UI_STATE_PRESSED);

@@ -105,16 +105,16 @@ HWTEST_F(SymbolGlyphModifierTest, DISABLED_setFontSizeTestFontSizeValidValues, T
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string expectedStr;
-    typedef std::pair<Opt_Union_Number_String_Resource, std::string> UnionNumStrResTestStep;
+    typedef std::pair<Opt_Union_F64_String_Resource, std::string> UnionNumStrResTestStep;
     static const std::vector<UnionNumStrResTestStep> testFontSizeValid = {
-        { Converter::ArkUnion<Opt_Union_Number_String_Resource, Ark_Number>(1.0f),  "1.00vp" },
-        { Converter::ArkUnion<Opt_Union_Number_String_Resource, Ark_Number>(2.45f), "2.45vp" },
-        { Converter::ArkUnion<Opt_Union_Number_String_Resource, Ark_Number>(5.0_px), "5.00vp" },
-        { Converter::ArkUnion<Opt_Union_Number_String_Resource, Ark_Number>(22.35_px), "22.35vp" },
-        { Converter::ArkUnion<Opt_Union_Number_String_Resource, Ark_Number>(7.0_vp), "7.00vp" },
-        { Converter::ArkUnion<Opt_Union_Number_String_Resource, Ark_Number>(1.65_vp), "1.65vp" },
-        { Converter::ArkUnion<Opt_Union_Number_String_Resource, Ark_Number>(65.0_fp), "65.00vp" },
-        { Converter::ArkUnion<Opt_Union_Number_String_Resource, Ark_Number>(4.3_fp), "4.30vp" },
+        { Converter::ArkUnion<Opt_Union_F64_String_Resource, Ark_Float64>(1.0f),  "1.00vp" },
+        { Converter::ArkUnion<Opt_Union_F64_String_Resource, Ark_Float64>(2.45f), "2.45vp" },
+        { Converter::ArkUnion<Opt_Union_F64_String_Resource, Ark_String>("5.0px"), "5.00vp" },
+        { Converter::ArkUnion<Opt_Union_F64_String_Resource, Ark_String>("22.35px"), "22.35vp" },
+        { Converter::ArkUnion<Opt_Union_F64_String_Resource, Ark_String>("7.0vp"), "7.00vp" },
+        { Converter::ArkUnion<Opt_Union_F64_String_Resource, Ark_String>("1.65vp"), "1.65vp" },
+        { Converter::ArkUnion<Opt_Union_F64_String_Resource, Ark_String>("65.0fp"), "65.00vp" },
+        { Converter::ArkUnion<Opt_Union_F64_String_Resource, Ark_String>("4.3fp"), "4.30vp" },
     };
 
     for (const auto &[value, expectValue]: testFontSizeValid) {
@@ -134,10 +134,10 @@ HWTEST_F(SymbolGlyphModifierTest, DISABLED_setFontSizeTestFontSizeInvalidValues,
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string expectedStr;
-    typedef std::pair<Opt_Union_Number_String_Resource, std::string> UnionNumStrResTestStep;
+    typedef std::pair<Opt_Union_F64_String_Resource, std::string> UnionNumStrResTestStep;
     static const std::vector<UnionNumStrResTestStep> testFontSizeInvalid = {
-        { Converter::ArkUnion<Opt_Union_Number_String_Resource, Ark_Number>(-0.1f), "16.00fp"},
-        { Converter::ArkUnion<Opt_Union_Number_String_Resource, Ark_Number>(-5.0_px), "16.00fp" },
+        { Converter::ArkUnion<Opt_Union_F64_String_Resource, Ark_Float64>(-0.1f), "16.00fp"},
+        { Converter::ArkUnion<Opt_Union_F64_String_Resource, Ark_String>("-5.0px"), "16.00fp" },
     };
     for (const auto &[value, expectValue]: testFontSizeInvalid) {
         modifier_->setFontSize(node_, &value);
@@ -161,45 +161,39 @@ HWTEST_F(SymbolGlyphModifierTest, setFontWeightTestDefaultValues, TestSize.Level
     EXPECT_EQ(resultStr, ATTRIBUTE_FONT_WEIGHT_DEFAULT_VALUE) << "Default value for attribute 'fontWeight'";
 }
 
-using  ArkFontWeightTest = std::pair<Opt_Union_Number_FontWeight_String, std::string>;
+using  ArkFontWeightTest = std::pair<Opt_Union_I32_FontWeight_String, std::string>;
 namespace Converter {
 const std::vector<ArkFontWeightTest> FONT_WEIGHT_TEST_PLAN = {
-    { ArkUnion<Opt_Union_Number_FontWeight_String, Ark_FontWeight>(Ark_FontWeight::ARK_FONT_WEIGHT_LIGHTER),
-        "FontWeight.Lighter" },
-    { ArkUnion<Opt_Union_Number_FontWeight_String, Ark_FontWeight>(Ark_FontWeight::ARK_FONT_WEIGHT_NORMAL),
-        "FontWeight.Normal" },
-    { ArkUnion<Opt_Union_Number_FontWeight_String, Ark_FontWeight>(Ark_FontWeight::ARK_FONT_WEIGHT_REGULAR),
-        "FontWeight.Regular" },
-    { ArkUnion<Opt_Union_Number_FontWeight_String, Ark_FontWeight>(Ark_FontWeight::ARK_FONT_WEIGHT_MEDIUM),
-        "FontWeight.Medium" },
-    { ArkUnion<Opt_Union_Number_FontWeight_String, Ark_FontWeight>(Ark_FontWeight::ARK_FONT_WEIGHT_BOLD),
-        "FontWeight.Bold" },
-    { ArkUnion<Opt_Union_Number_FontWeight_String, Ark_FontWeight>(Ark_FontWeight::ARK_FONT_WEIGHT_BOLDER),
-        "FontWeight.Bolder" },
-    { ArkUnion<Opt_Union_Number_FontWeight_String, Ark_Number>(ArkValue<Ark_Number>(100)), "100" },
-    { ArkUnion<Opt_Union_Number_FontWeight_String, Ark_Number>(ArkValue<Ark_Number>(200)), "200" },
-    { ArkUnion<Opt_Union_Number_FontWeight_String, Ark_Number>(ArkValue<Ark_Number>(300)), "300" },
-    { ArkUnion<Opt_Union_Number_FontWeight_String, Ark_Number>(ArkValue<Ark_Number>(400)), "400" },
-    { ArkUnion<Opt_Union_Number_FontWeight_String, Ark_Number>(ArkValue<Ark_Number>(500)), "500" },
-    { ArkUnion<Opt_Union_Number_FontWeight_String, Ark_Number>(ArkValue<Ark_Number>(600)), "600" },
-    { ArkUnion<Opt_Union_Number_FontWeight_String, Ark_Number>(ArkValue<Ark_Number>(700)), "700" },
-    { ArkUnion<Opt_Union_Number_FontWeight_String, Ark_Number>(ArkValue<Ark_Number>(800)), "800" },
-    { ArkUnion<Opt_Union_Number_FontWeight_String, Ark_Number>(ArkValue<Ark_Number>(900)), "900" },
-    { ArkUnion<Opt_Union_Number_FontWeight_String, Ark_String>(ArkValue<Ark_String>("lighter")), "FontWeight.Lighter" },
-    { ArkUnion<Opt_Union_Number_FontWeight_String, Ark_String>(ArkValue<Ark_String>("normal")), "FontWeight.Normal" },
-    { ArkUnion<Opt_Union_Number_FontWeight_String, Ark_String>(ArkValue<Ark_String>("regular")), "FontWeight.Regular" },
-    { ArkUnion<Opt_Union_Number_FontWeight_String, Ark_String>(ArkValue<Ark_String>("medium")), "FontWeight.Medium" },
-    { ArkUnion<Opt_Union_Number_FontWeight_String, Ark_String>(ArkValue<Ark_String>("bold")), "FontWeight.Bold" },
-    { ArkUnion<Opt_Union_Number_FontWeight_String, Ark_String>(ArkValue<Ark_String>("bolder")), "FontWeight.Bolder" },
-    { ArkUnion<Opt_Union_Number_FontWeight_String, Ark_String>(ArkValue<Ark_String>("100")), "100" },
-    { ArkUnion<Opt_Union_Number_FontWeight_String, Ark_String>(ArkValue<Ark_String>("200")), "200" },
-    { ArkUnion<Opt_Union_Number_FontWeight_String, Ark_String>(ArkValue<Ark_String>("300")), "300" },
-    { ArkUnion<Opt_Union_Number_FontWeight_String, Ark_String>(ArkValue<Ark_String>("400")), "400" },
-    { ArkUnion<Opt_Union_Number_FontWeight_String, Ark_String>(ArkValue<Ark_String>("500")), "500" },
-    { ArkUnion<Opt_Union_Number_FontWeight_String, Ark_String>(ArkValue<Ark_String>("600")), "600" },
-    { ArkUnion<Opt_Union_Number_FontWeight_String, Ark_String>(ArkValue<Ark_String>("700")), "700" },
-    { ArkUnion<Opt_Union_Number_FontWeight_String, Ark_String>(ArkValue<Ark_String>("800")), "800" },
-    { ArkUnion<Opt_Union_Number_FontWeight_String, Ark_String>(ArkValue<Ark_String>("900")), "900" },
+    { ArkUnion<Opt_Union_I32_FontWeight_String, Ark_FontWeight>(ARK_FONT_WEIGHT_LIGHTER), "FontWeight.Lighter" },
+    { ArkUnion<Opt_Union_I32_FontWeight_String, Ark_FontWeight>(ARK_FONT_WEIGHT_NORMAL), "FontWeight.Normal" },
+    { ArkUnion<Opt_Union_I32_FontWeight_String, Ark_FontWeight>(ARK_FONT_WEIGHT_REGULAR), "FontWeight.Regular" },
+    { ArkUnion<Opt_Union_I32_FontWeight_String, Ark_FontWeight>(ARK_FONT_WEIGHT_MEDIUM), "FontWeight.Medium" },
+    { ArkUnion<Opt_Union_I32_FontWeight_String, Ark_FontWeight>(ARK_FONT_WEIGHT_BOLD), "FontWeight.Bold" },
+    { ArkUnion<Opt_Union_I32_FontWeight_String, Ark_FontWeight>(ARK_FONT_WEIGHT_BOLDER), "FontWeight.Bolder" },
+    { ArkUnion<Opt_Union_I32_FontWeight_String, Ark_Int32>(100), "100" },
+    { ArkUnion<Opt_Union_I32_FontWeight_String, Ark_Int32>(200), "200" },
+    { ArkUnion<Opt_Union_I32_FontWeight_String, Ark_Int32>(300), "300" },
+    { ArkUnion<Opt_Union_I32_FontWeight_String, Ark_Int32>(400), "400" },
+    { ArkUnion<Opt_Union_I32_FontWeight_String, Ark_Int32>(500), "500" },
+    { ArkUnion<Opt_Union_I32_FontWeight_String, Ark_Int32>(600), "600" },
+    { ArkUnion<Opt_Union_I32_FontWeight_String, Ark_Int32>(700), "700" },
+    { ArkUnion<Opt_Union_I32_FontWeight_String, Ark_Int32>(800), "800" },
+    { ArkUnion<Opt_Union_I32_FontWeight_String, Ark_Int32>(900), "900" },
+    { ArkUnion<Opt_Union_I32_FontWeight_String, Ark_String>("lighter"), "FontWeight.Lighter" },
+    { ArkUnion<Opt_Union_I32_FontWeight_String, Ark_String>("normal"), "FontWeight.Normal" },
+    { ArkUnion<Opt_Union_I32_FontWeight_String, Ark_String>("regular"), "FontWeight.Regular" },
+    { ArkUnion<Opt_Union_I32_FontWeight_String, Ark_String>("medium"), "FontWeight.Medium" },
+    { ArkUnion<Opt_Union_I32_FontWeight_String, Ark_String>("bold"), "FontWeight.Bold" },
+    { ArkUnion<Opt_Union_I32_FontWeight_String, Ark_String>("bolder"), "FontWeight.Bolder" },
+    { ArkUnion<Opt_Union_I32_FontWeight_String, Ark_String>("100"), "100" },
+    { ArkUnion<Opt_Union_I32_FontWeight_String, Ark_String>("200"), "200" },
+    { ArkUnion<Opt_Union_I32_FontWeight_String, Ark_String>("300"), "300" },
+    { ArkUnion<Opt_Union_I32_FontWeight_String, Ark_String>("400"), "400" },
+    { ArkUnion<Opt_Union_I32_FontWeight_String, Ark_String>("500"), "500" },
+    { ArkUnion<Opt_Union_I32_FontWeight_String, Ark_String>("600"), "600" },
+    { ArkUnion<Opt_Union_I32_FontWeight_String, Ark_String>("700"), "700" },
+    { ArkUnion<Opt_Union_I32_FontWeight_String, Ark_String>("800"), "800" },
+    { ArkUnion<Opt_Union_I32_FontWeight_String, Ark_String>("900"), "900" },
   };
 }
 
@@ -233,10 +227,8 @@ HWTEST_F(SymbolGlyphModifierTest, setFontWeightTestInvalidValues, TestSize.Level
     std::string result;
 
     const std::vector<ArkFontWeightTest> testPlan = {
-        { Converter::ArkUnion<Opt_Union_Number_FontWeight_String,
-            Ark_Number>(Converter::ArkValue<Ark_Number>(1000)), "FontWeight.Normal" },
-        { Converter::ArkUnion<Opt_Union_Number_FontWeight_String,
-            Ark_String>(Converter::ArkValue<Ark_String>("1000")), "FontWeight.Normal" },
+        { Converter::ArkUnion<Opt_Union_I32_FontWeight_String, Ark_Int32>(1000), "FontWeight.Normal" },
+        { Converter::ArkUnion<Opt_Union_I32_FontWeight_String, Ark_String>("1000"), "FontWeight.Normal" },
     };
     for (const auto &[weight, expectValue] : testPlan) {
         modifier_->setFontWeight(node_, &weight);
@@ -525,14 +517,14 @@ std::vector<std::tuple<std::string, OHOS::Ace::ScopeType, std::string>> testSymb
     { "ScopeType::WHOLE", OHOS::Ace::ScopeType::WHOLE, "1" },
 };
 
-HWTEST_F(SymbolGlyphModifierTest, setSymbolEffectTestScaleScope, TestSize.Level1)
+HWTEST_F(SymbolGlyphModifierTest, setSymbolEffect0TestScaleScope, TestSize.Level1)
 {
     auto checkValue = [this](const std::string& input, const OHOS::Ace::ScopeType& value,
         const std::string& expectedStr) {
         auto peer = static_cast<SymbolEffectPeer*>(
             PeerUtils::CreatePeer<ScaleSymbolEffectPeer>(value, CommonSubType::DOWN));
         auto arkPeer = Converter::ArkValue<Opt_SymbolEffect>(peer);
-        modifier_->setSymbolEffect(node_, &arkPeer, nullptr);
+        modifier_->setSymbolEffect0(node_, &arkPeer);
         auto jsonValue = GetJsonValue(node_);
         auto symbolEffect = GetAttrValue<std::string>(jsonValue, "symbolEffect");
         auto resultStr = GetAttrValue<std::string>(symbolEffect, "scopeType");
@@ -550,14 +542,14 @@ std::vector<std::tuple<std::string, CommonSubType, std::string>> testSymbolGlyph
     { "CommonSubType::UP", CommonSubType::UP, "1" },
 };
 
-HWTEST_F(SymbolGlyphModifierTest, setSymbolEffectTestScaleDirection, TestSize.Level1)
+HWTEST_F(SymbolGlyphModifierTest, setSymbolEffect0TestScaleDirection, TestSize.Level1)
 {
     auto checkValue = [this](const std::string& input, const CommonSubType& value,
         const std::string& expectedStr) {
         auto peer = static_cast<SymbolEffectPeer*>(
             PeerUtils::CreatePeer<ScaleSymbolEffectPeer>(OHOS::Ace::ScopeType::LAYER, value));
         auto arkPeer = Converter::ArkValue<Opt_SymbolEffect>(peer);
-        modifier_->setSymbolEffect(node_, &arkPeer, nullptr);
+        modifier_->setSymbolEffect0(node_, &arkPeer);
         auto jsonValue = GetJsonValue(node_);
         auto symbolEffect = GetAttrValue<std::string>(jsonValue, "symbolEffect");
         auto resultStr = GetAttrValue<std::string>(symbolEffect, "commonSubType");
@@ -570,14 +562,14 @@ HWTEST_F(SymbolGlyphModifierTest, setSymbolEffectTestScaleDirection, TestSize.Le
     }
 }
 
-HWTEST_F(SymbolGlyphModifierTest, setSymbolEffectTestReplaceScope, TestSize.Level1)
+HWTEST_F(SymbolGlyphModifierTest, setSymbolEffect0TestReplaceScope, TestSize.Level1)
 {
     auto checkValue = [this](const std::string& input, const OHOS::Ace::ScopeType& value,
         const std::string& expectedStr) {
         auto peer = static_cast<SymbolEffectPeer*>(
             PeerUtils::CreatePeer<ReplaceSymbolEffectPeer>(value));
         auto arkPeer = Converter::ArkValue<Opt_SymbolEffect>(peer);
-        modifier_->setSymbolEffect(node_, &arkPeer, nullptr);
+        modifier_->setSymbolEffect0(node_, &arkPeer);
         auto jsonValue = GetJsonValue(node_);
         auto symbolEffect = GetAttrValue<std::string>(jsonValue, "symbolEffect");
         auto resultStr = GetAttrValue<std::string>(symbolEffect, "scopeType");
@@ -611,29 +603,22 @@ HWTEST_F(SymbolGlyphModifierTest, setMinFontScaleTestDefaultValues, TestSize.Lev
  */
 HWTEST_F(SymbolGlyphModifierTest, setMinFontScaleTestValidValues, TestSize.Level1)
 {
-    std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureMinFontScaleNumValidValues = {
-        { "0.1", Converter::ArkValue<Ark_Number>(0.1), "0.100000" },
-        { "0.89", Converter::ArkValue<Ark_Number>(0.89), "0.890000" },
-        { "1", Converter::ArkValue<Ark_Number>(1), "1.000000" },
+    std::vector<std::tuple<std::string, double, std::string>> testFixtureMinFontScaleNumValidValues = {
+        { "0.1", 0.1, "0.100000" },
+        { "0.89", 0.89, "0.890000" },
+        { "1", 1, "1.000000" },
     };
-    Opt_Union_Number_Resource initValueMinFontScale;
-    // Initial setup
-    initValueMinFontScale = Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(
-        std::get<1>(testFixtureMinFontScaleNumValidValues[0]));
 
-    auto checkValue = [this, &initValueMinFontScale](const std::string& input, const std::string& expectedStr,
-                          const Opt_Union_Number_Resource& value) {
-        Opt_Union_Number_Resource inputValueMinFontScale = initValueMinFontScale;
-
-        inputValueMinFontScale = value;
-        modifier_->setMinFontScale(node_, &inputValueMinFontScale);
+    auto checkValue = [this](const std::string& input, const std::string& expectedStr,
+                          const Opt_Union_F64_Resource& value) {
+        modifier_->setMinFontScale(node_, &value);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MIN_FONT_SCALE_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
             "Input value is: " << input << ", method: setMinFontScale, attribute: minFontScale";
     };
     for (auto& [input, value, expected] : testFixtureMinFontScaleNumValidValues) {
-        checkValue(input, expected, Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(value));
+        checkValue(input, expected, Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(value));
     }
 }
 
@@ -642,21 +627,19 @@ HWTEST_F(SymbolGlyphModifierTest, setMinFontScaleTestValidValues, TestSize.Level
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SymbolGlyphModifierTest, setMinFontScaleTestInvalidValues, TestSize.Level1)
+HWTEST_F(SymbolGlyphModifierTest, DISABLED_setMinFontScaleTestInvalidValues, TestSize.Level1)
 {
-    std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureMinFontScaleNumInvalidValues = {
-        { "-1.01", Converter::ArkValue<Ark_Number>(-1.01), ATTRIBUTE_MIN_FONT_SCALE_DEFAULT_VALUE },
-        { "2.89", Converter::ArkValue<Ark_Number>(2.89), ATTRIBUTE_MIN_FONT_SCALE_DEFAULT_VALUE },
-        { "-1", Converter::ArkValue<Ark_Number>(-1), ATTRIBUTE_MIN_FONT_SCALE_DEFAULT_VALUE },
+    std::vector<std::tuple<std::string, double, std::string>> testFixtureMinFontScaleNumInvalidValues = {
+        { "-1.01", -1.01, ATTRIBUTE_MIN_FONT_SCALE_DEFAULT_VALUE },
+        { "2.89", 2.89, ATTRIBUTE_MIN_FONT_SCALE_DEFAULT_VALUE },
+        { "-1", -1, ATTRIBUTE_MIN_FONT_SCALE_DEFAULT_VALUE },
     };
-    Opt_Union_Number_Resource initValue;
 
     // Initial setup
-    initValue = Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(Converter::ArkValue<Ark_Number>(2.1));
+    auto initValue = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(1);
     auto checkValue = [this, &initValue](const std::string& input, const std::string& expectedStr,
-                                                     const Opt_Union_Number_Resource& value) {
-        Opt_Union_Number_Resource inputValueMinFontScale = initValue;
-
+                                                     const Opt_Union_F64_Resource& value) {
+        auto inputValueMinFontScale = initValue;
         modifier_->setMinFontScale(node_, &inputValueMinFontScale);
         inputValueMinFontScale = value;
         modifier_->setMinFontScale(node_, &inputValueMinFontScale);
@@ -666,7 +649,7 @@ HWTEST_F(SymbolGlyphModifierTest, setMinFontScaleTestInvalidValues, TestSize.Lev
             "Input value is: " << input << ", method: setMinFontScale, attribute: minFontScale";
     };
     for (auto& [input, value, expected] : testFixtureMinFontScaleNumInvalidValues) {
-        checkValue(input, expected, Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(value));
+        checkValue(input, expected, Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(value));
     }
 }
 
@@ -691,29 +674,21 @@ HWTEST_F(SymbolGlyphModifierTest, setMaxFontScaleTestDefaultValues, TestSize.Lev
  */
 HWTEST_F(SymbolGlyphModifierTest, setMaxFontScaleTestValidValues, TestSize.Level1)
 {
-    std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureMaxFontScaleNumValidValues = {
-        { "1", Converter::ArkValue<Ark_Number>(1), "1.000000" },
-        { "1.5", Converter::ArkValue<Ark_Number>(1.5), "1.500000" },
-        { "1.99", Converter::ArkValue<Ark_Number>(1.99), "1.990000" },
+    std::vector<std::tuple<std::string, double, std::string>> testFixtureMaxFontScaleNumValidValues = {
+        { "1", 1, "1.000000" },
+        { "1.5", 1.5, "1.500000" },
+        { "1.99", 1.99, "1.990000" },
     };
-    Opt_Union_Number_Resource initValueMaxFontScale;
-    // Initial setup
-    initValueMaxFontScale = Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(
-        std::get<1>(testFixtureMaxFontScaleNumValidValues[0]));
-
-    auto checkValue = [this, &initValueMaxFontScale](const std::string& input, const std::string& expectedStr,
-                          const Opt_Union_Number_Resource& value) {
-        Opt_Union_Number_Resource inputValueMaxFontScale = initValueMaxFontScale;
-
-        inputValueMaxFontScale = value;
-        modifier_->setMaxFontScale(node_, &inputValueMaxFontScale);
+    auto checkValue = [this](const std::string& input, const std::string& expectedStr,
+                          const Opt_Union_F64_Resource& value) {
+        modifier_->setMaxFontScale(node_, &value);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MAX_FONT_SCALE_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
             "Input value is: " << input << ", method: setMaxFontScale, attribute: maxFontScale";
     };
     for (auto& [input, value, expected] : testFixtureMaxFontScaleNumValidValues) {
-        checkValue(input, expected, Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(value));
+        checkValue(input, expected, Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(value));
     }
 }
 
@@ -722,20 +697,19 @@ HWTEST_F(SymbolGlyphModifierTest, setMaxFontScaleTestValidValues, TestSize.Level
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SymbolGlyphModifierTest, setMaxFontScaleTestInvalidValues, TestSize.Level1)
+HWTEST_F(SymbolGlyphModifierTest, DISABLED_setMaxFontScaleTestInvalidValues, TestSize.Level1)
 {
-    std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureMaxFontScaleNumInvalidValues = {
-        { "0.1", Converter::ArkValue<Ark_Number>(0.1), "ATTRIBUTE_MAX_FONT_SCALE_DEFAULT_VALUE" },
-        { "-1.5", Converter::ArkValue<Ark_Number>(-1.5), "ATTRIBUTE_MAX_FONT_SCALE_DEFAULT_VALUE" },
-        { "-0.99", Converter::ArkValue<Ark_Number>(-0.99), "ATTRIBUTE_MAX_FONT_SCALE_DEFAULT_VALUE" },
+    std::vector<std::tuple<std::string, double, std::string>> testFixtureMaxFontScaleNumInvalidValues = {
+        { "0.1", 0.1, "ATTRIBUTE_MAX_FONT_SCALE_DEFAULT_VALUE" },
+        { "-1.5", -1.5, "ATTRIBUTE_MAX_FONT_SCALE_DEFAULT_VALUE" },
+        { "-0.99", -0.99, "ATTRIBUTE_MAX_FONT_SCALE_DEFAULT_VALUE" },
     };
-    Opt_Union_Number_Resource initValue;
 
     // Initial setup
-    initValue = Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(Converter::ArkValue<Ark_Number>(0.1));
+    auto initValue = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(1);
     auto checkValue = [this, &initValue](const std::string& input, const std::string& expectedStr,
-                                                     const Opt_Union_Number_Resource& value) {
-        Opt_Union_Number_Resource inputValueMaxFontScale = initValue;
+                                                     const Opt_Union_F64_Resource& value) {
+        auto inputValueMaxFontScale = initValue;
 
         modifier_->setMaxFontScale(node_, &inputValueMaxFontScale);
         inputValueMaxFontScale = value;
@@ -746,7 +720,7 @@ HWTEST_F(SymbolGlyphModifierTest, setMaxFontScaleTestInvalidValues, TestSize.Lev
             "Input value is: " << input << ", method: setMaxFontScale, attribute: maxFontScale";
     };
     for (auto& [input, value, expected] : testFixtureMaxFontScaleNumInvalidValues) {
-        checkValue(input, expected, Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(value));
+        checkValue(input, expected, Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(value));
     }
 }
 

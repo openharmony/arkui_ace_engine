@@ -176,7 +176,7 @@ HWTEST_F(RatingStaticTestNg, RatingStaticTestNg003, TestSize.Level1)
      * @tc.steps: step3. test SetRatingOptions.
      * @tc.expected: step3. the property value meet expectations.
      */
-    std::optional<double> ratingValue = std::nullopt;
+    double ratingValue = 0.0;
     std::optional<bool> ratingIndicator = std::nullopt;
     RatingModelStatic::SetRatingOptions(frameNode, ratingValue, ratingIndicator);
     EXPECT_EQ(ratingRenderProperty->GetRatingScore().value_or(0.0), DEFAULT_RATING_SCORE);

@@ -14,7 +14,7 @@
  */
 
 import { int32, KoalaCallsiteKey } from "@koalaui/common"
-import { Disposable, IncrementalNode, scheduleCallback, GlobalStateManager, MutableState } from "@koalaui/runtime"
+import { Disposable, IncrementalNode, scheduleCallback, GlobalStateManager, MutableState, mutableState } from "@koalaui/runtime"
 import { NativePeerNode } from "./NativePeerNode"
 import { nullptr, pointer } from "@koalaui/interop"
 import { ArkRootPeer, StateStylesOps } from "#generated"
@@ -53,12 +53,19 @@ export class PeerNode extends IncrementalNode {
     private _reusePool?: Map<string, ReusablePool>
     public reusable: boolean = false
     private _uiStateStyle?: MutableState<int32>;
+    private _disabledStateUpdates: MutableState<boolean> = GlobalStateManager.instance.mutableState<boolean>(false, true);
 
     getPeerPtr(): pointer {
         return this.peer.ptr
     }
     public getStateStyleMutable(): MutableState<int32> | undefined {
         return this._uiStateStyle;
+    }
+    override get disabledStateUpdates(): boolean {
+        return this._disabledStateUpdates.value
+    }
+    set disabledStateUpdates(disabled: boolean) {
+        this._disabledStateUpdates.value = disabled
     }
     setId(id: int32) {
         PeerNode.updatePeerNodeMap()
@@ -103,7 +110,7 @@ export class PeerNode extends IncrementalNode {
     }
 
     /* reuse and recycle object on RootPeers */
-    override reuse(reuseKey: string | undefined, id: KoalaCallsiteKey): Disposable | undefined {
+    override reuse(reuseKey: string, id: KoalaCallsiteKey): Disposable | undefined {
         if (reuseKey === undefined) {
             return undefined;
         }
@@ -120,7 +127,7 @@ export class PeerNode extends IncrementalNode {
         return undefined;
     }
 
-    override recycle(reuseKey: string | undefined, child: Disposable, id: KoalaCallsiteKey): boolean {
+    override recycle(reuseKey: string, child: Disposable, id: KoalaCallsiteKey): boolean {
         if (reuseKey === undefined) {
             return false;
         }
@@ -233,10 +240,10 @@ export class PeerNode extends IncrementalNode {
             }
         }
         this.onChildRemoved = (child: IncrementalNode) => {
-            if (child.isKind(PeerNodeType) && !child.disposed) {
-                const peer = child as PeerNode
-                peer.onRecycle()
-                this.peer.removeChild(peer.peer.ptr)
+            let peer = findPeerNode(child)
+            if (peer && !peer!.disposed) {
+                peer!.onRecycle()
+                this.peer.removeChild(peer!.peer.ptr)
             }
         }
         this.name = name
@@ -271,7 +278,9 @@ export class PeerNode extends IncrementalNode {
             const manager = GlobalStateManager.instance
             this._uiStateStyle = manager.mutableState<int32>(0 as int32, true)
             StateStylesOps.onStateStyleChange(this.getPeerPtr(), (state: int32) => {
-                this._uiStateStyle!.value = state
+                StateUpdateLoop.add(() => {
+                    this._uiStateStyle!.value = state
+                })
             })
             return this._uiStateStyle!;
         }

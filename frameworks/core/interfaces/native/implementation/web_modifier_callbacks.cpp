@@ -391,8 +391,8 @@ void OnFullScreenEnter(const CallbackHelper<OnFullScreenEnterCallback>& arkCallb
     auto* eventInfo = TypeInfoHelper::DynamicCast<FullScreenEnterEvent>(info);
     CHECK_NULL_VOID(eventInfo);
     Ark_FullScreenEnterEvent parameter;
-    parameter.videoWidth = Converter::ArkValue<Opt_Number>(eventInfo->GetVideoNaturalWidth());
-    parameter.videoHeight = Converter::ArkValue<Opt_Number>(eventInfo->GetVideoNaturalHeight());
+    parameter.videoWidth = Converter::ArkValue<Opt_Int32>(eventInfo->GetVideoNaturalWidth());
+    parameter.videoHeight = Converter::ArkValue<Opt_Int32>(eventInfo->GetVideoNaturalHeight());
     auto peer = new FullScreenExitHandlerPeer();
     peer->handler = eventInfo->GetHandler();
     parameter.handler = peer;

@@ -3289,6 +3289,7 @@ frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani
 frameworks/core/interfaces/native/implementation/overlay_accessor.cpp @ArkUI_Event
 frameworks/core/interfaces/native/implementation/drag_event_accessor.cpp @ArkUI_Event
 frameworks/core/interfaces/native/implementation/drag_drop_accessor.cpp @ArkUI_Event
+frameworks/core/interfaces/native/implementation/accessibility_hover_event_accessor.cpp @ArkUI_Event
 frameworks/core/interfaces/native/implementation/drag_event_peer.h @ArkUI_Event
 frameworks/core/interfaces/native/ani/drag_ani_modifier.cpp @ArkUI_Event
 frameworks/core/interfaces/native/ani/drag_ani_modifier.h @ArkUI_Event
@@ -3365,6 +3366,8 @@ frameworks/core/interfaces/native/implementation/line_height_style_accessor.cpp 
 frameworks/core/interfaces/native/implementation/line_height_style_peer.h @huawei_g_five
 frameworks/core/interfaces/native/implementation/text_shadow_style_accessor.cpp @huawei_g_five
 frameworks/core/interfaces/native/implementation/text_shadow_style_peer.h @huawei_g_five
+frameworks/core/interfaces/native/implementation/text_field_modifier.cpp @huawei_g_five
+frameworks/core/interfaces/native/implementation/text_field_modifier.h @huawei_g_five
 frameworks/core/interfaces/native/implementation/letter_spacing_style_accessor.cpp @huawei_g_five
 frameworks/core/interfaces/native/implementation/letter_spacing_style_peer.h @huawei_g_five
 frameworks/core/interfaces/native/implementation/baseline_offset_style_accessor.cpp @huawei_g_five
@@ -3384,6 +3387,7 @@ frameworks/core/interfaces/native/implementation/indicator_component_modifier.cp
 frameworks/core/interfaces/native/implementation/nav_destination_modifier.cpp @arkui_navigation
 frameworks/core/interfaces/native/implementation/navigation_modifier.cpp @arkui_navigation
 frameworks/core/interfaces/native/implementation/side_bar_container_modifier.cpp @arkui_navigation
+frameworks/core/interfaces/native/implementation/stepper_modifier.cpp @arkui_navigation
 frameworks/core/interfaces/native/implementation/swiper_modifier.cpp @arkui_navigation
 
 [Web ArkTS1.2]
@@ -3596,6 +3600,7 @@ test/unittest/core/svg/ @arkui001
 test/unittest/core/syntax/ @arkuieco3
 test/unittest/core/base/observer_test_ng.cpp @arkui_framework_xnode
 test/unittest/interfaces/ @arkui_framework_xnode
+test/unittest/interfaces/drawable_descriptor_test.cpp @arkui001
 test/unittest/interfaces/ui_input_event_test.cpp @ArkUI_Event
 test/unittest/interfaces/ace_ui_input_event/ @ArkUI_Event
 test/unittest/interfaces/ace_gesture/ @ArkUI_Event
@@ -3613,7 +3618,7 @@ frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/com
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/lazyForEach.ets @arkuieco3
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/repeat.ets @arkuieco3
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/base/LazyForEachImpl.ets @arkuieco3
-frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/base/LazyItemNode.ets @arkuieco3
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/base/SyntaxNodeBase.ets @arkuieco3
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/base/RepeatImpl.ets @arkuieco3
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/base/DataChangeListener.ets @arkuieco3
 

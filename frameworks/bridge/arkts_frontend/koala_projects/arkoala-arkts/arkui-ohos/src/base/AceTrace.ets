@@ -19,6 +19,16 @@ import { ArkUIAniModule } from "../ani/arkts/ArkUIAniModule"
 
 export class AceTrace {
 
+    static attributeSetTraceEnabled: boolean = false
+
+    static GetAttributeSetTraceEnabled(): boolean {
+        return AceTrace.attributeSetTraceEnabled
+    }
+
+    static updateAttributeSetTraceEnabled() {
+        AceTrace.attributeSetTraceEnabled = ArkUIAniModule._GetAttributeSetTraceEnabled()
+    }
+
     static begin(traceName: string) {
         ArkUIAniModule._TraceBegin(traceName)
     }

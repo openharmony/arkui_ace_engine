@@ -1,19 +1,8 @@
 
 import { Color}  from './arkui.component.enums';
 
+import { Resource } from 'global.resource'
 export type Length = number | string | Resource;
-
-export interface Resource {
-    id: number;
-
-    bundleName: string;
-
-    moduleName: string;
-
-    params?: Array<String>;
-
-    type?: number;
-};
 
 export type ResourceColor = Color | number | string | Resource;
 

@@ -22,7 +22,6 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "core/interfaces/native/utility/ace_engine_types.h"
-#include "core/interfaces/native/implementation/drawing_color_filter_peer.h"
 #include "core/interfaces/native/implementation/drawing_lattice_peer.h"
 
 namespace OHOS::Ace::NG {

@@ -357,6 +357,11 @@ void TabsModelStatic::SetTabBarMode(FrameNode* frameNode, const std::optional<Ta
     } else {
         tabBarLayoutProperty->ResetTabBarMode();
     }
+    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
+    CHECK_NULL_VOID(tabsNode);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    CHECK_NULL_VOID(tabBarNode);
+    tabBarNode->MarkModifyDone();
 }
 
 void TabsModelStatic::SetTabBarWidth(FrameNode* frameNode, const std::optional<Dimension>& tabBarWidthOpt)

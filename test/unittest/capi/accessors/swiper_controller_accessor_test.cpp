@@ -131,8 +131,8 @@ HWTEST_F(SwiperControllerAccessorTest, changeIndexTest, TestSize.Level1)
 
     ASSERT_NE(accessor_->changeIndex, nullptr);
 
-    auto arkNumValid = ArkValue<Ark_Number>(indexValidValue);
-    auto arkNumInvalid = ArkValue<Ark_Number>(INT_MIN);
+    auto arkNumValid = ArkValue<Opt_Int32>(indexValidValue);
+    auto arkNumInvalid = ArkValue<Opt_Int32>(INT_MIN);
     auto optBoolTrue = ArkUnion<Opt_Union_SwiperAnimationMode_Boolean, Ark_Boolean>(true);
     auto optBoolFalse = ArkUnion<Opt_Union_SwiperAnimationMode_Boolean, Ark_Boolean>(false);
     auto optBoolUndef = ArkValue<Opt_Union_SwiperAnimationMode_Boolean>();
@@ -218,8 +218,7 @@ HWTEST_F(SwiperControllerAccessorTest, DISABLED_preloadItemsTest, TestSize.Level
     auto cont = Converter::ArkValue<Callback_Opt_Array_String_Void>(returnResFunc, expectedResourceId);
 
     // check of the work created
-    Converter::ArkArrayHolder<Array_Number> arrayHolder(indexList);
-    auto validValue = arrayHolder.OptValue<Opt_Array_Number>();
+    auto validValue = Converter::ArkValue<Opt_Array_Int32>(indexList, Converter::FC);
     accessor_->preloadItems(vmContext_, AsyncWorkTestHelper::GetWorkerPtr(), peer_, &validValue, &cont);
     ASSERT_TRUE(AsyncWorkTestHelper::HasWorkCreated());
     auto fireFinish = mockSwiperController_->GetPreloadFinishCallback();

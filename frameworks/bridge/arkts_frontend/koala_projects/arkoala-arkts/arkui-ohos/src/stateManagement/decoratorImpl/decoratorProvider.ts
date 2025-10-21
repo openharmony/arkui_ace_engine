@@ -39,7 +39,6 @@ export class ProviderDecoratedVariable<T> extends DecoratedV2VariableBase implem
         if (value === newValue) {
             return;
         }
-        if (this.backing_.set(uiUtils.makeObserved(newValue, true) as T)) {
-        }
+        this.backing_.setNoCheck(uiUtils.autoProxyObject(newValue) as T);
     }
 }

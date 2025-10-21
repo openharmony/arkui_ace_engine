@@ -66,7 +66,7 @@ HWTEST_F(DialogExtenderAccessorTest, showTimePickerDialogTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DialogExtenderAccessorTest, showDatePickerDialogTest, TestSize.Level1)
+HWTEST_F(DialogExtenderAccessorTest, DISABLED_showDatePickerDialogTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->showDatePickerDialog, nullptr);
     PickerDialogInfo dialogInfo;

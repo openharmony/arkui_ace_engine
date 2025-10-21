@@ -69,7 +69,7 @@ Opt_RichEditorImageSpanOptions GetImageSpanOptions(const Ark_RichEditorGesture& 
     Ark_RichEditorImageSpanOptions options = {
         .gesture = Converter::ArkValue<Opt_RichEditorGesture>(gesture),
         .imageStyle = Converter::ArkValue<Opt_RichEditorImageSpanStyle>(),
-        .offset = Converter::ArkValue<Opt_Number>(),
+        .offset = Converter::ArkValue<Opt_Int32>(),
         .onHover = Converter::ArkValue<Opt_OnHoverCallback>(),
     };
 
@@ -81,7 +81,7 @@ Opt_RichEditorImageSpanOptions GetImageSpanOptions(const ::OnHoverCallback& hove
     Ark_RichEditorImageSpanOptions options = {
         .gesture = Converter::ArkValue<Opt_RichEditorGesture>(),
         .imageStyle = Converter::ArkValue<Opt_RichEditorImageSpanStyle>(),
-        .offset = Converter::ArkValue<Opt_Number>(),
+        .offset = Converter::ArkValue<Opt_Int32>(),
         .onHover = Converter::ArkValue<Opt_OnHoverCallback>(hover),
     };
 
@@ -91,7 +91,7 @@ Opt_RichEditorImageSpanOptions GetImageSpanOptions(const ::OnHoverCallback& hove
 Opt_RichEditorTextSpanOptions GetTextSpanOptions(const Ark_RichEditorGesture& gesture)
 {
     Ark_RichEditorTextSpanOptions options = {
-        .offset = Converter::ArkValue<Opt_Number>(),
+        .offset = Converter::ArkValue<Opt_Int32>(),
         .style = Converter::ArkValue<Opt_RichEditorTextStyle>(),
         .paragraphStyle = Converter::ArkValue<Opt_RichEditorParagraphStyle>(),
         .gesture = Converter::ArkValue<Opt_RichEditorGesture>(gesture),

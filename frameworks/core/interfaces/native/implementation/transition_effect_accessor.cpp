@@ -52,7 +52,6 @@ Ark_TransitionEffect Construct1Impl(const Ark_Float64 effect)
 }
 Ark_TransitionEffect Construct2Impl(Ark_TransitionEdge effect)
 {
-    CHECK_NULL_RETURN(effect, nullptr);
     TransitionEffectPeer* peer = PeerUtils::CreatePeer<TransitionEffectPeer>();
     auto move = Converter::OptConvert<TransitionEdge>(effect).value_or(TransitionEdge::TOP);
     peer->handler = AceType::MakeRefPtr<ChainedMoveEffect>(move);

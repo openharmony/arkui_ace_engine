@@ -52,7 +52,7 @@ void ANICreateRectShape(ani_env* env, [[maybe_unused]] ani_object object)
     shapePeer->rectShape = rect;
 
     if (ANI_OK !=
-        env->Object_SetPropertyByName_Long(object, "rectShapeResult", reinterpret_cast<ani_long>(shapePeer))) {
+        env->Object_SetPropertyByName_Long(object, "basicShapeResult", reinterpret_cast<ani_long>(shapePeer))) {
         return;
     }
 }
@@ -100,7 +100,7 @@ void ANICreateRectShapeWithParam(
     ParseWidthAndHeight(env, aniOption, rect);
     shapePeer->rectShape = rect;
     if (ANI_OK !=
-        env->Object_SetPropertyByName_Long(object, "rectShapeResult", reinterpret_cast<ani_long>(shapePeer))) {
+        env->Object_SetPropertyByName_Long(object, "basicShapeResult", reinterpret_cast<ani_long>(shapePeer))) {
         return;
     }
 }
@@ -108,7 +108,7 @@ void ANICreateRectShapeWithParam(
 RectPeer* GetRectShape(ani_env* env, ani_object obj)
 {
     ani_long rectAni;
-    if (ANI_OK != env->Object_GetFieldByName_Long(obj, "rectShapeResult", &rectAni)) {
+    if (ANI_OK != env->Object_GetFieldByName_Long(obj, "basicShapeResult", &rectAni)) {
         return nullptr;
     }
 
@@ -304,7 +304,7 @@ ani_object ANIRectShapeRadius(ani_env* env, ani_object object, [[maybe_unused]] 
 
 ani_object RectShape::ANIRectShapeFromPtr(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr)
 {
-    return ANIShapeFromPtr<RectPeer>(env, ptr, ANI_SHAPE_NAME, "rectShapeResult");
+    return ANIShapeFromPtr<RectPeer>(env, ptr, ANI_SHAPE_NAME, "basicShapeResult");
 }
 
 ani_status RectShape::BindRectShape(ani_env* env)

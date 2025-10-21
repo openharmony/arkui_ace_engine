@@ -140,7 +140,7 @@ void SetComponent3DOptionsImpl(Ark_NativePointer node,
             [frameNode, surfaceType](const Ark_ResourceStr& value0) {
                 std::string bundleName = Converter::Convert<std::string>(value0.value1.bundleName);
                 std::string moduleName = Converter::Convert<std::string>(value0.value1.moduleName);
-                ModelViewNG::SetModelViewContext(frameNode, { bundleName, moduleName, surfaceType, nullptr });
+                ModelViewNG::SetModelViewContext(frameNode, { bundleName, moduleName, surfaceType });
                 if (auto srcPath = Converter::OptConvert<std::string>(value0)) {
                     std::string ohosPath("");
                     SetOhosPath(srcPath.value(), ohosPath);
@@ -157,7 +157,7 @@ void SetComponent3DOptionsImpl(Ark_NativePointer node,
 #endif
             },
             [frameNode, surfaceType]() {
-                ModelViewNG::SetModelViewContext(frameNode, { "", "", surfaceType, nullptr });
+                ModelViewNG::SetModelViewContext(frameNode, { "", "", surfaceType });
             });
     }
 #endif
@@ -221,15 +221,12 @@ void SetShaderInputBufferImpl(Ark_NativePointer node,
         // no need reset value
         return;
     }
-    int32_t length = shaderInputVec->size();
-    if (length <= 0) {
-        return;
-    }
+    uint32_t length = shaderInputVec->size();
     auto buffer = std::make_shared<OHOS::Render3D::ShaderInputBuffer>();
     if (!buffer->Alloc(length)) {
         return;
     }
-    for (int32_t i = 0; i < length; i++) {
+    for (uint32_t i = 0; i < length; i++) {
         buffer->Update(shaderInputVec->at(i), i);
     }
     ModelViewNG::AddShaderInputBuffer(frameNode, buffer);

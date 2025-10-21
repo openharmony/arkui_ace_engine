@@ -278,13 +278,13 @@ std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureStringV
     { "\"xyz\"", Converter::ArkValue<Ark_String>("xyz"), "xyz" },
 };
 
-// Fixture 'DimensionsNumAny' for type 'Ark_Number'
-std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureDimensionsNumAnyValidValues = {
-    { "123", Converter::ArkValue<Ark_Number>(123), "123.00vp" },
-    { "0", Converter::ArkValue<Ark_Number>(0), "0.00vp" },
-    { "1.23", Converter::ArkValue<Ark_Number>(1.23), "1.23vp" },
-    { "-2", Converter::ArkValue<Ark_Number>(-2), "-2.00vp" },
-    { "-3.45", Converter::ArkValue<Ark_Number>(-3.45), "-3.45vp" },
+// Fixture 'DimensionsNumAny' for type 'double'
+std::vector<std::tuple<std::string, double, std::string>> testFixtureDimensionsNumAnyValidValues = {
+    { "123", 123, "123.00vp" },
+    { "0", 0, "0.00vp" },
+    { "1.23", 1.23, "1.23vp" },
+    { "-2", -2, "-2.00vp" },
+    { "-3.45", -3.45, "-3.45vp" },
 };
 
 // Fixture 'DimensionsStrNonPerc' for type 'Ark_String'
@@ -294,11 +294,11 @@ std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureDimensi
     { "\"1.23_fp\"", Converter::ArkValue<Ark_String>("1.23fp"), "1.23fp" },
 };
 
-// Fixture 'DimensionsNumNonNeg' for type 'Ark_Number'
-std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureDimensionsNumNonNegValidValues = {
-    { "123", Converter::ArkValue<Ark_Number>(123), "123.00vp" },
-    { "0", Converter::ArkValue<Ark_Number>(0), "0.00vp" },
-    { "1.23", Converter::ArkValue<Ark_Number>(1.23), "1.23vp" },
+// Fixture 'DimensionsNumNonNeg' for type 'double'
+std::vector<std::tuple<std::string, double, std::string>> testFixtureDimensionsNumNonNegValidValues = {
+    { "123", 123, "123.00vp" },
+    { "0", 0, "0.00vp" },
+    { "1.23", 1.23, "1.23vp" },
 };
 
 // Fixture 'DimensionsStrNonNegNonPct' for type 'Ark_String'

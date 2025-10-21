@@ -881,4 +881,29 @@ HWTEST_F(DrawableDescriptorTest, DrawableDescTest0037, TestSize.Level1)
      */
     EXPECT_EQ(len, layeredDrawableDescriptor.len_);
 }
+
+/**
+ * @tc.name: DrawableDescTest0038
+ * @tc.desc: test LayeredDrawableDescriptor::GetMask()
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, DrawableDescTest0038, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create layeredDrawableDescriptor
+     */
+    size_t len = 1;
+    std::string path = "abc";
+    uint32_t iconType = 0;
+    Napi::DataInfo foregroundInfo = { std::make_unique<uint8_t[]>(512), 512 };
+    Napi::DataInfo backgroundInfo = { std::make_unique<uint8_t[]>(1024), 1024 };
+    const std::pair<int32_t, int32_t> decoderSize = { 10, 20 };
+    auto layeredDrawableDescriptor =
+        Napi::LayeredDrawableDescriptor(len, path, iconType, foregroundInfo, backgroundInfo, decoderSize);
+    /**
+     * @tc.steps: step2. EXPECT len
+     * @tc.expected: return rightly
+     */
+    EXPECT_EQ(len, layeredDrawableDescriptor.len_);
+}
 } // namespace OHOS::Ace
