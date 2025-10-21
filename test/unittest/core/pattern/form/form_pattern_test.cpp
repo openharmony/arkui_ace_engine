@@ -2164,5 +2164,8 @@ HWTEST_F(FormPatternTest, FormPatternTest_061, TestSize.Level0)
 
     pattern->SetAccessibilityState(false);
     EXPECT_FALSE(pattern->IsAccessibilityState());
+
+    pattern->SetAccessibilityState(true);
+    EXPECT_TRUE(pattern->IsAccessibilityState());
 }
 } // namespace OHOS::Ace::NG

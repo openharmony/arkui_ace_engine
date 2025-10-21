@@ -213,10 +213,8 @@ public:
         CHECK_NULL_RETURN(formNode, false);
         auto pattern = formNode->GetPattern<FormPattern>();
         CHECK_NULL_RETURN(pattern, false);
-        // focus only on the ScreenReadEnabled status
-        bool isScreenReadEnabled = AceApplicationInfo::GetInstance().IsAccessibilityScreenReadEnabled();
-        TAG_LOGD(AceLogTag::ACE_FORM, "state:%{public}d,isScreenReadEnabled:%{public}d", state, isScreenReadEnabled);
-        return pattern->OnAccessibilityStateChange(isScreenReadEnabled);
+
+        return pattern->OnAccessibilityStateChange(state);
     }
 private:
     WeakPtr<FormNode> weakFormNode_;
