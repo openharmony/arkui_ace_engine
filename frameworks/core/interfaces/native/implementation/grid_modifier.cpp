@@ -365,7 +365,7 @@ void SetOnItemDragStartImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        GridModelStatic::SetOnItemDragStart(frameNode, nullptr);
+        GridModelStatic::ResetOnItemDragStart(frameNode);
         return;
     }
     auto onItemDragStart = [callback = CallbackHelper(*optValue), frameNode, node](
@@ -467,7 +467,7 @@ void SetNestedScrollImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::GetOptPtr(value);
     if (!convValue) {
-        // Implement Reset value
+        ScrollableModelStatic::SetNestedScroll(frameNode, std::nullopt, std::nullopt);
         return;
     }
     auto forward = Converter::OptConvert<NestedScrollMode>(convValue->scrollForward);
@@ -481,7 +481,7 @@ void SetEnableScrollInteractionImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        // Implement Reset value
+        GridModelStatic::SetScrollEnabled(frameNode, std::nullopt);
         return;
     }
     auto scrollEnabled = *convValue;

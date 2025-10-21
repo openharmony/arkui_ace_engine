@@ -182,4 +182,23 @@ HWTEST_F(GridModelStaticTestNg, SetMaxCount, TestSize.Level1)
     GridModelStatic::SetMaxCount(AceType::RawPtr(frameNode_), maxCount);
     EXPECT_FALSE(layoutProperty_->GetMaxCount().has_value());
 }
+
+/**
+ * @tc.name: SetScrollEnabled
+ * @tc.desc: Test SetScrollEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridModelStaticTestNg, SetScrollEnabled, TestSize.Level1)
+{
+    CreateGrid();
+    std::optional<bool> scrollEnabled = true;
+    GridModelStatic::SetScrollEnabled(AceType::RawPtr(frameNode_), scrollEnabled);
+    ASSERT_NE(layoutProperty_, nullptr);
+    auto ret = layoutProperty_->GetScrollEnabledValue(false);
+    EXPECT_EQ(ret, scrollEnabled.value());
+
+    scrollEnabled.reset();
+    GridModelStatic::SetScrollEnabled(AceType::RawPtr(frameNode_), scrollEnabled);
+    EXPECT_FALSE(layoutProperty_->GetScrollEnabled().has_value());
+}
 } // namespace OHOS::Ace::NG
