@@ -16,8 +16,6 @@
 import { className, KoalaCallsiteKey, uint32 } from "@koalaui/common"
 import { Disposable } from "../states/Disposable"
 import { ReadonlyTreeNode } from "./ReadonlyTreeNode"
-import { mutableState } from "../states/GlobalStateManager"
-import { MutableState } from "../states/State"
 
 /**
  * This is a node implementation for a tree, which is represented as a pair of bidirectional lists.
@@ -30,15 +28,13 @@ export class IncrementalNode implements Disposable, ReadonlyTreeNode {
     private _next: IncrementalNode | undefined = undefined
     private _parent: IncrementalNode | undefined = undefined
     private _incremental: IncrementalNode | undefined = undefined
-    _disabledStateUpdates: MutableState<boolean> = mutableState<boolean>(false);
 
+    /**
+     * It disables parent nodes invalidation and node revalidation.
+     */
     get disabledStateUpdates(): boolean {
-        return this._disabledStateUpdates.value;
+        return false
     }
-
-    set disabledStateUpdates(newValue: boolean) {
-        this._disabledStateUpdates.value = newValue;
-    } 
 
     /**
      * This callback is called when a child node is added to this parent.
