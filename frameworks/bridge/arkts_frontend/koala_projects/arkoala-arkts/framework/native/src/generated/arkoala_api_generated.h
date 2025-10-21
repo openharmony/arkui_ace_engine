@@ -6148,6 +6148,8 @@ typedef enum Ark_SourceType {
     ARK_SOURCE_TYPE_UNKNOWN = 0,
     ARK_SOURCE_TYPE_MOUSE = 1,
     ARK_SOURCE_TYPE_TOUCH_SCREEN = 2,
+    ARK_SOURCE_TYPE_KEY = 4,
+    ARK_SOURCE_TYPE_JOYSTICK = 5,
 } Ark_SourceType;
 typedef struct Opt_SourceType {
     Ark_Tag tag;

@@ -361,7 +361,6 @@ HWTEST_F(ClickEventTestNg, ClickEventActuatorTest006, TestSize.Level1)
     auto clickEvent = AceType::MakeRefPtr<ClickEvent>(std::move(callback));
     clickEventActuator.AddClickAfterEvent(clickEvent);
     EXPECT_NE(clickEventActuator.clickAfterEvents_, nullptr);
-
     clickEventActuator.ClearClickAfterEvent();
     EXPECT_EQ(clickEventActuator.clickAfterEvents_, nullptr);
 }

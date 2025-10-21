@@ -806,6 +806,8 @@ void AssignArkValue(Ark_SourceType& dst, const SourceType& src)
         case SourceType::NONE: dst = Ark_SourceType::ARK_SOURCE_TYPE_UNKNOWN; break;
         case SourceType::MOUSE: dst = Ark_SourceType::ARK_SOURCE_TYPE_MOUSE; break;
         case SourceType::TOUCH: dst = Ark_SourceType::ARK_SOURCE_TYPE_TOUCH_SCREEN; break;
+        case SourceType::KEYBOARD: dst = Ark_SourceType::ARK_SOURCE_TYPE_KEY; break;
+        case SourceType::JOYSTICK: dst = Ark_SourceType::ARK_SOURCE_TYPE_JOYSTICK; break;
         default: dst = static_cast<Ark_SourceType>(-1);
             LOGE("Unexpected enum value in SourceType: %{public}d", src);
     }
