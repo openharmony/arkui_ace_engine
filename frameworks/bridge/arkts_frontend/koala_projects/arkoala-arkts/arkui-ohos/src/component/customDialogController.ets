@@ -36,7 +36,8 @@ export class CustomDialogController extends CustomDialogControllerExtender {
         }
     }
     public getExternalOptions(): CustomDialogControllerExternalOptions {
-        return super.getExternalOptions() as CustomDialogControllerExternalOptions
+        let options: CustomDialogControllerExternalOptionsExtender = super.getExternalOptions()
+        return {customStyle: options.customStyle} as CustomDialogControllerExternalOptions
     }
 }
 export interface CustomDialogControllerOptions extends CustomDialogControllerOptionsExtender {
