@@ -526,7 +526,7 @@ public:
         } else {
             return;
         }
- 
+
         if (result_) {
             result_->HandleConfirm(privateKeyFile, certChainFile);
         }
