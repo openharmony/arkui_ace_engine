@@ -25,8 +25,9 @@ import { UIContext, MeasureUtils, TextMenuController, Font, FocusController, Con
     FrameCallback, UIInspector, UIObserver, OverlayManager, PromptAction, AtomicServiceBar, Router, CursorController,
     MediaQuery, ComponentSnapshot, OverlayManagerOptions, DragController, TargetInfo, CustomBuilderWithId,
     KeyboardAvoidMode } from '@ohos/arkui/UIContext';
-import { StateManager, ComputableState, GlobalStateManager, StateContext, memoEntry, memoEntry1,
+import { StateManager, ComputableState, GlobalStateManager, memoEntry, memoEntry1,
     IncrementalNode } from '@koalaui/runtime';
+import { StateContext } from 'arkui.incremental.runtime.state';
 import { Context, PointerStyle, PixelMap } from '#external';
 import { Nullable,  WidthBreakpoint, HeightBreakpoint } from 'arkui/component/enums';
 import { KeyEvent, PopupCommonOptions, MenuOptions } from 'arkui/component/common';
@@ -35,6 +36,9 @@ import router from '@ohos/router';
 import { AlertDialogParamWithConfirm, AlertDialogParamWithButtons,
     AlertDialogParamWithOptions } from 'arkui/component/alertDialog';
 import { ActionSheetOptions } from 'arkui/component/actionSheet';
+import { TimePickerDialogOptions } from "arkui/component/timePicker"
+import { TextPickerDialogOptions } from "arkui/component/textPicker"
+import { DatePickerDialogOptions } from "arkui/component/datePicker"
 import inspector from '@ohos/arkui/inspector';
 import { ComponentContent } from 'arkui/ComponentContent';
 import overlayManager from '@ohos/overlayManager';
@@ -65,9 +69,10 @@ import { deserializeAndCallCallback } from 'arkui/framework/peers/CallbackDeseri
 import { InteropNativeModule } from '@koalaui/interop';
 import { LocalStorage } from '../stateManagement/storage/localStorage';
 import { Router as RouterExt } from 'arkui/base';
-import { PromptActionExtender, FrameNodeExtender, AlertDialog, ActionSheet, AnimationExtender } from '../framework';
-import { EntryPoint, NavInterface } from '../component/customComponent';
-import { AsyncCallback as routerAsyncCallback } from '@ohos.base';
+import { PromptActionExtender, FrameNodeExtender, AlertDialog, ActionSheet, AnimationExtender,
+    DialogExtender } from '../framework';
+import { EntryPoint, NavInterface } from "../component/customComponent"
+import { AsyncCallback as routerAsyncCallback } from "@ohos.base"
 
 export class ContextRecord {
     uiContext?: UIContext
@@ -1656,6 +1661,24 @@ export class UIContextImpl extends UIContext {
     public showActionSheet(options: ActionSheetOptions): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         ActionSheet.show(options);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
+    public showTimePickerDialog(options: TimePickerDialogOptions): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        DialogExtender.showTimePickerDialog(options);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
+    public showTextPickerDialog(options: TextPickerDialogOptions): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        DialogExtender.showTextPickerDialog(options);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
+    public showDatePickerDialog(options: DatePickerDialogOptions): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        DialogExtender.showDatePickerDialog(options);
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 

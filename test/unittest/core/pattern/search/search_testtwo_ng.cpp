@@ -4037,4 +4037,42 @@ HWTEST_F(SearchTestTwoNg, SearchOnWillAttachIME, TestSize.Level1)
     textFieldPattern->FireOnWillAttachIME(client);
     EXPECT_EQ(fireOnWillAttachIME, true);
 }
+
+/**
+ * @tc.name: GetInspectorIdTest001
+ * @tc.desc: GetInspectorId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, GetInspectorIdTest001, TestSize.Level1)
+{
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode = FrameNode::CreateFrameNode(V2::SEARCH_ETS_TAG,
+        nodeId, AceType::MakeRefPtr<TextFieldPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto searchPattern = AceType::DynamicCast<TextFieldPattern>(frameNode->GetPattern());
+    ASSERT_NE(searchPattern, nullptr);
+    std::string value = "test1";
+    frameNode->UpdateInspectorId(value);
+    auto result = searchPattern->GetInspectorId();
+    EXPECT_NE(result, value);
+}
+
+/**
+ * @tc.name: GetInspectorIdTest002
+ * @tc.desc: GetInspectorId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, GetInspectorIdTest002, TestSize.Level1)
+{
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode = FrameNode::CreateFrameNode(V2::SEARCH_Field_ETS_TAG,
+        nodeId, AceType::MakeRefPtr<TextFieldPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto searchPattern = AceType::DynamicCast<TextFieldPattern>(frameNode->GetPattern());
+    ASSERT_NE(searchPattern, nullptr);
+    std::string value = "test2";
+    frameNode->UpdateInspectorId(value);
+    auto result = searchPattern->GetInspectorId();
+    EXPECT_NE(result, value);
+}
 } // namespace OHOS::Ace::NG

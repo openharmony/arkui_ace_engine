@@ -43,6 +43,7 @@ import {
   PathShape,
 } from "@ohos.arkui.shape";
 import { FrameNode } from "arkui.FrameNode";
+import { RenderNode } from "arkui.RenderNode";
 import { default as resourceManager } from "@ohos.resourceManager";
 import { LevelOrder } from "@ohos.promptAction";
 import { SymbolGlyphModifier } from "../SymbolGlyphModifier";
@@ -76,6 +77,7 @@ import { UIContextImpl } from 'arkui/base/UIContextImpl';
 import { int32 } from '@koalaui/common';
 import { FrameNodeUtils, FrameNodeInternal } from './../FrameNode';
 import { toPeerPtr } from '@koalaui/interop';
+import { ComponentContentBase } from 'arkui/ComponentContent';
 import { applySymbolGlyphModifierToNode, applyTextModifierToNode } from "./../ApplyModifierToNode"
 
 export namespace extractors {
@@ -92,6 +94,14 @@ export namespace extractors {
   export function fromColorMetricsPtr(ptr: KPointer): ColorMetrics {
     const x: Object = {};
     return x as ColorMetrics;
+  }
+
+  export function toComponentContentBasePtr(value: ComponentContentBase): KPointer {
+    return 123;
+  }
+  export function fromComponentContentBasePtr(ptr: KPointer): ComponentContentBase {
+    const x: Object = {};
+    return x as ComponentContentBase;
   }
 
   export function toDrawContextPtr(ptr: DrawContext): KPointer {
@@ -115,6 +125,14 @@ export namespace extractors {
   export function fromNodeControllerPtr(ptr: KPointer): NodeController {
     const x: Object = {};
     return x as NodeController;
+  }
+
+  export function toRenderNodePtr(value: RenderNode): KPointer {
+    return value.getPeer()!.ptr;
+  }
+  export function fromRenderNodePtr(ptr: KPointer): RenderNode {
+    const x: Object = {};
+    return x as RenderNode;
   }
 
   export function toFrameNodePtr(value: FrameNode): KPointer {

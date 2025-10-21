@@ -1079,6 +1079,9 @@ class ObserveV2 {
           view.scheduleDelayedUpdate(elmtId);
         }
       }
+      else if (view instanceof ViewBuildNodeBase && view?.__isReactiveBuilderNode__ViewBuildNodeBase__Internal()) {
+        view.UpdateElement(elmtId);
+      }
     });
     aceDebugTrace.end();
   }
@@ -1421,6 +1424,11 @@ class ObserveV2 {
       const message = 'The function is not allowed to be called in @Computed';
       stateMgmtConsole.applicationError(message);
       throw new BusinessError(FUNC_CALLED_IN_COMPUTED_ILLEGAL, message);
+    }
+
+    if (this.applySyncRunningCount_) {
+      stateMgmtConsole.warn('UIUtils.applySync will be skipped when called within another UIUtils.applySync. The inner UIUtils.applySync will return undefined');
+      return undefined;
     }
 
     this.applySyncRunningCount_++;

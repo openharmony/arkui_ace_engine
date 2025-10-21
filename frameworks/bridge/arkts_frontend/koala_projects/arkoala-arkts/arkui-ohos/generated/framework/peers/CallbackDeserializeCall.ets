@@ -86,6 +86,7 @@ import { TextAreaSubmitCallback } from "./../../component/textArea"
 import { TextFieldValueCallback } from "./../textFieldOps"
 import { TypeChecker } from "#components"
 import { CallbackKind } from "./CallbackKind"
+import { ArcScrollIndexHandler } from "@ohos.arkui.ArcList"
 export function deserializeAndCallAccessibilityCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as AccessibilityCallback)
@@ -98,6 +99,14 @@ export function deserializeAndCallAccessibilityFocusCallback(thisDeserializer: D
     const _call  = (ResourceHolder.instance().get(_resourceId) as AccessibilityFocusCallback)
     let isFocus : boolean = thisDeserializer.readBoolean()
     _call(isFocus)
+}
+export function deserializeAndCallArcScrollIndexHandler(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ArcScrollIndexHandler)
+    let start : int32 = thisDeserializer.readInt32()
+    let end : int32 = thisDeserializer.readInt32()
+    let center : int32 = thisDeserializer.readInt32()
+    _call(start, end, center)
 }
 export function deserializeAndCallAsyncCallback_image_PixelMap_Void(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
@@ -3417,6 +3426,7 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
     switch ((kind as CallbackKind)) {
         case CallbackKind.Kind_AccessibilityCallback: return deserializeAndCallAccessibilityCallback(thisDeserializer);
         case CallbackKind.Kind_AccessibilityFocusCallback: return deserializeAndCallAccessibilityFocusCallback(thisDeserializer);
+        case CallbackKind.Kind_ArcScrollIndexHandler: return deserializeAndCallArcScrollIndexHandler(thisDeserializer);
         case CallbackKind.Kind_AsyncCallback_image_PixelMap_Void: return deserializeAndCallAsyncCallback_image_PixelMap_Void(thisDeserializer);
         case CallbackKind.Kind_AsyncCallback_Void: return deserializeAndCallAsyncCallback_Void(thisDeserializer);
         case CallbackKind.Kind_ButtonModifierBuilder: return deserializeAndCallButtonModifierBuilder(thisDeserializer);

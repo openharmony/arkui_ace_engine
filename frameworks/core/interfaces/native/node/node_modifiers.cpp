@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -111,6 +111,7 @@
 #include "core/interfaces/native/node/theme_modifier.h"
 #include "core/interfaces/native/node/video_modifier.h"
 #include "core/interfaces/native/node/water_flow_modifier.h"
+#include "core/interfaces/native/node/node_container_picker_modifier.h"
 
 #ifdef MODEL_COMPONENT_SUPPORTED
 #include "core/interfaces/native/node/node_component3d_modifier.h"
@@ -297,6 +298,7 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getCanvasModifier = NodeModifier::GetCanvasModifier,
         .getStepperModifier = NodeModifier::GetStepperModifier,
         .getNDKRenderNodeModifier = NodeModifier::GetNDKRenderNodeModifier,
+        .getContainerPickerModifier = NodeModifier::GetContainerPickerModifier,
     };
     CHECK_INITIALIZED_FIELDS_END(impl, MODIFIER_COUNTS, 0, 0); // don't move this line.
     return &impl;

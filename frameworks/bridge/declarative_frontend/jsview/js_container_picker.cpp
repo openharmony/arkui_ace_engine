@@ -113,9 +113,11 @@ void JSContainerPicker::SetDivider(const JSRef<JSObject>& paramObj, NG::PickerIn
     auto endMargin = paramObj->GetProperty("endMargin");
 
     if (!dividerWidth->IsUndefined() && !dividerWidth->IsNull()) {
-        Dimension dividerWidthVal;
-        if (ConvertFromJSValue(dividerWidth, dividerWidthVal)) {
-            indicatorStyle.dividerWidth = dividerWidthVal;
+        CalcDimension dividerWidthVal;
+        if (ParseLengthMetricsToDimension(dividerWidth, dividerWidthVal)) {
+            if (GreatOrEqual(dividerWidthVal.Value(), 0.0f)) {
+                indicatorStyle.dividerWidth = dividerWidthVal;
+            }
         }
     }
     if (!dividerColor->IsUndefined() && !dividerColor->IsNull()) {
@@ -125,15 +127,19 @@ void JSContainerPicker::SetDivider(const JSRef<JSObject>& paramObj, NG::PickerIn
         }
     }
     if (!startMargin->IsUndefined() && !startMargin->IsNull()) {
-        Dimension startMarginVal;
-        if (ConvertFromJSValue(startMargin, startMarginVal)) {
-            indicatorStyle.startMargin = startMarginVal;
+        CalcDimension startMarginVal;
+        if (ParseLengthMetricsToDimension(startMargin, startMarginVal)) {
+            if (GreatOrEqual(startMarginVal.Value(), 0.0f)) {
+                indicatorStyle.startMargin = startMarginVal;
+            }
         }
     }
     if (!endMargin->IsUndefined() && !endMargin->IsNull()) {
-        Dimension endMarginVal;
-        if (ConvertFromJSValue(endMargin, endMarginVal)) {
-            indicatorStyle.endMargin = endMarginVal;
+        CalcDimension endMarginVal;
+        if (ParseLengthMetricsToDimension(endMargin, endMarginVal)) {
+            if (GreatOrEqual(endMarginVal.Value(), 0.0f)) {
+                indicatorStyle.endMargin = endMarginVal;
+            }
         }
     }
 }

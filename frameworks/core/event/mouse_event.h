@@ -372,7 +372,7 @@ public:
     {
         rawDeltaX_ = rawDeltaX;
     }
-    float GetRawDeltaX()
+    float GetRawDeltaX() const
     {
         return rawDeltaX_;
     }
@@ -381,7 +381,7 @@ public:
     {
         rawDeltaY_ = rawDeltaY;
     }
-    float GetRawDeltaY()
+    float GetRawDeltaY() const
     {
         return rawDeltaY_;
     }

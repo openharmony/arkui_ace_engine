@@ -5940,6 +5940,14 @@ void ViewAbstract::SetRenderFit(RenderFit renderFit)
     ACE_UPDATE_RENDER_CONTEXT(RenderFit, renderFit);
 }
 
+void ViewAbstract::SetCornerApplyType(CornerApplyType cornerApplyType)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(CornerApplyType, cornerApplyType);
+}
+
 void ViewAbstract::SetAttractionEffect(const AttractionEffect& effect)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {

@@ -62,6 +62,7 @@ public:
         }
         auto maxHeight = static_cast<float>(PICKER_ITEM_HEIGHT.ConvertToPx());
         layoutConstraint.maxSize.SetHeight(maxHeight);
+        childSelfIdealSize.Reset();
         childSelfIdealSize.SetHeight(maxHeight);
         layoutConstraint.selfIdealSize = childSelfIdealSize;
         return layoutConstraint;

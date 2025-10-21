@@ -235,6 +235,7 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_column_split_bridge.cpp",
       "nativeModule/arkts_native_common_bridge.cpp",
       "nativeModule/arkts_native_common_shape_bridge.cpp",
+      "nativeModule/arkts_native_container_picker_bridge.cpp",
       "nativeModule/arkts_native_container_span_bridge.cpp",
       "nativeModule/arkts_native_counter_bridge.cpp",
       "nativeModule/arkts_native_data_panel_bridge.cpp",

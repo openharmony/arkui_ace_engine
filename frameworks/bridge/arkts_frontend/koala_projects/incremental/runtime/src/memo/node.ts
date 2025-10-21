@@ -17,6 +17,7 @@ import { className, uint32 } from "@koalaui/common"
 import { __context, __id } from "../internals"
 import { IncrementalNode } from "../tree/IncrementalNode"
 import { memoEntry } from "./entry"
+import { StateContext } from '../states/State';
 
 /**
  * @param create - the node constructor is invoked only once,
@@ -32,15 +33,15 @@ export function NodeAttach<Node extends IncrementalNode>(
     update: (node: Node) => void,
     reuseKey?: string
 ): void {
-    const scope = __context().scopeEx<undefined>(__id(), 0, create, undefined, undefined, undefined, reuseKey)
+    const scope = (__context() as StateContext).scopeEx<undefined>(__id(), 0, create, undefined, undefined, undefined, reuseKey)
     if (scope.unchanged) {
         scope.cached
     } else try {
         if (!reuseKey)
-            update(__context().node as Node)
+            update((__context() as StateContext).node as Node)
         else
             // reset ID addition to 0 to simplify the reuse process later
-            memoEntry(__context(), 0, () => { update(__context().node as Node) })
+            memoEntry(__context(), 0, () => { update((__context() as StateContext).node as Node) })
     } finally {
         scope.recache()
     }
@@ -55,7 +56,7 @@ export function NodeAttach<Node extends IncrementalNode>(
  */
 /** @memo:intrinsic */
 export function contextNode<T extends IncrementalNode>(kind: uint32 = 1, name?: string): T {
-    const node = __context().node
+    const node = (__context() as StateContext).node
     if (node?.isKind(kind) == true) return node as T
     throw new Error(name
         ? (name + " cannot be used in context of " + className(node))
@@ -79,12 +80,12 @@ export class DataNode<Data> extends IncrementalNode {
         data: Data,
         onDataChange?: () => void
     ): void {
-        const scope = __context().scopeEx<undefined>(__id(), 1, (): IncrementalNode => new DataNode<Data>(kind))
+        const scope = (__context() as StateContext).scopeEx<undefined>(__id(), 1, (): IncrementalNode => new DataNode<Data>(kind))
         const state = scope.param<Data>(0, data)
         if (scope.unchanged) {
             scope.cached
         } else try {
-            const node = __context().node as DataNode<Data>
+            const node = (__context() as StateContext).node as DataNode<Data>
             if (node.kind != kind) throw new Error("data node kind changed unexpectedly from " + node.kind + " to " + kind)
             node.data = state.value as Data // subscribe to the parameter change
             onDataChange?.()

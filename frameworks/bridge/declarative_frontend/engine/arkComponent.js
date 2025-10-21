@@ -32236,8 +32236,8 @@ class ArkWebComponent extends ArkComponent {
     return this;
   }
   selectedDataDetectorConfig(config) {
-    if (config !== undefined || config !== null) {
-      let detectorConfig = new TextDataDetectorConfig();
+    let detectorConfig = new TextDataDetectorConfig();
+    if (config !== undefined && config !== null) {
       detectorConfig.types = config.types;
     }
     modifierWithKey(this._modifiersWithKeys, WebSelectedDataDetectorConfigModifier.identity, WebSelectedDataDetectorConfigModifier, detectorConfig);
@@ -40787,6 +40787,148 @@ globalThis.LazyVGridLayout.attributeModifier = function (modifier) {
     return new modifierJS.LazyVGridLayoutModifier(nativePtr, classType);
   });
 };
+
+class ArkContainerPickerComponent extends ArkComponent {
+    constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+  }
+  onChange(callback) {
+    modifierWithKey(this._modifiersWithKeys, ContainerPickerOnChangeModifier.identity, ContainerPickerOnChangeModifier, callback);
+    return this;
+  }
+  onScrollStop(callback){
+    modifierWithKey(
+      this._modifiersWithKeys, ContainerPickerOnScrollStopModifier.identity, ContainerPickerOnScrollStopModifier, callback);
+    return this;
+  }
+  canLoop(isLoop) {
+    modifierWithKey(this._modifiersWithKeys, ContainerPickerCanLoopModifier.identity, ContainerPickerCanLoopModifier, isLoop);
+    return this;
+  }
+  enableHapticFeedback(enable) {
+    modifierWithKey(this._modifiersWithKeys, ContainerPickerEnableHapticFeedbackModifier.identity, ContainerPickerEnableHapticFeedbackModifier, enable);
+    return this;
+  }
+  selectionIndicator(style) {
+    modifierWithKey(this._modifiersWithKeys, ContainerPickerSelectionIndicatorModifier.identity, ContainerPickerSelectionIndicatorModifier, style);
+    return this;
+  }
+
+}
+
+class ContainerPickerOnChangeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().containerPicker.resetContainerPickerOnChange(node);
+    } else {
+      getUINativeModule().containerPicker.setContainerPickerOnChange(node, this.value);
+    }
+  }
+}
+ContainerPickerOnChangeModifier.identity = Symbol('containerPickerOnChange');
+
+class ContainerPickerOnScrollStopModifier extends ModifierWithKey{
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().containerPicker.resetContainerPickerOnScrollStop(node);
+    } else {
+      getUINativeModule().containerPicker.setContainerPickerOnScrollStop(node, this.value);
+    }
+  }
+}
+ContainerPickerOnScrollStopModifier.identity = Symbol('containerPickerOnScrollStop');
+
+class ContainerPickerCanLoopModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().containerPicker.resetContainerPickerCanLoop(node);
+    }
+    else {
+      getUINativeModule().containerPicker.setContainerPickerCanLoop(node, this.value);
+    }
+  }
+}
+ContainerPickerCanLoopModifier.identity = Symbol('containerPickerCanLoop');
+
+class ContainerPickerEnableHapticFeedbackModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().containerPicker.resetContainerPickerEnableHapticFeedback(node);
+    }
+    else {
+      getUINativeModule().containerPicker.setContainerPickerEnableHapticFeedback(node, this.value);
+    }
+  }
+}
+ContainerPickerEnableHapticFeedbackModifier.identity = Symbol('containerPickerEnableHapticFeedback');
+
+class ContainerPickerSelectionIndicatorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().containerPicker.resetContainerPickerSelectionIndicator(node);
+    } else if (this.value == null) {
+      getUINativeModule().containerPicker.setContainerPickerSelectionIndicator(node, undefined, undefined, undefined,
+        undefined, undefined, undefined, undefined, undefined,
+        undefined, undefined);
+    } else {
+      const { type, dividerWidth, dividerColor, startMargin, endMargin, backgroundColor, borderRadius } = this.value;
+      if (borderRadius != null) {
+        const borderRadiusKeys = Object.keys(borderRadius);
+        let topLeft;
+        let topRight;
+        let bottomLeft;
+        let bottomRight;
+        if (borderRadiusKeys.indexOf('value') >= 0) {
+          topLeft = topRight = bottomLeft = bottomRight = borderRadius;
+        } else if (borderRadiusKeys.indexOf('topLeft') >= 0) {
+          topLeft = borderRadius.topLeft;
+          topRight = borderRadius.topRight;
+          bottomLeft = borderRadius.bottomLeft;
+          bottomRight = borderRadius.bottomRight;
+        } else if (borderRadiusKeys.indexOf('topStart') >= 0) {
+          topLeft = borderRadius.topStart;
+          topRight = borderRadius.topEnd;
+          bottomLeft = borderRadius.bottomStart;
+          bottomRight = borderRadius.bottomEnd;
+        }
+        getUINativeModule().containerPicker.setContainerPickerSelectionIndicator(node, type, dividerWidth, dividerColor, startMargin, endMargin, backgroundColor, topLeft, topRight, bottomLeft,
+          bottomRight);
+      } else {
+        getUINativeModule().containerPicker.setContainerPickerSelectionIndicator(node, type, dividerWidth, dividerColor, startMargin, endMargin, backgroundColor, undefined, undefined,
+          undefined, undefined);
+      }
+    }
+  }
+  checkObjectDiff() {
+    return true;
+  }
+}
+ContainerPickerSelectionIndicatorModifier.identity = Symbol('containerPickerSelectionIndicator');
+// @ts-ignore
+if (globalThis.Picker !== undefined) {
+  globalThis.Picker.attributeModifier = function (modifier) {
+    attributeModifierFunc.call(this, modifier, (nativePtr) => {
+      return new ArkTextPickerComponent(nativePtr);
+    }, (nativePtr, classType, modifierJS) => {
+      return new modifierJS.ContainerPickerModifier(nativePtr, classType);
+    });
+  };
+}
 
 function getArkUINodeFromNapi() {
   if(globalThis.__XNode__ === undefined) {

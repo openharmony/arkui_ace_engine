@@ -1048,6 +1048,25 @@ struct ArkUIPickerTextStyleStruct {
     ArkUI_Bool textColorSetByUser;
 };
 
+struct ArkUIPickerIndicatorStyle {
+    ArkUI_Int32 type;
+    ArkUI_Int32 dividerWidthUnit;
+    ArkUI_Float32 dividerWidthValue;
+    ArkUI_Int32 startMarginUnit;
+    ArkUI_Float32 startMarginValue;
+    ArkUI_Int32 endMarginUnit;
+    ArkUI_Float32 endMarginValue;
+    ArkUI_Uint32 dividerColor;
+    ArkUI_Uint32 backgroundColor;
+    ArkUI_Float32* values;
+    ArkUI_Int32* units;
+    ArkUI_Int32 length;
+    void* topLeftRawPtr;
+    void* topRightRawPtr;
+    void* bottomLeftRawPtr;
+    void* bottomRightRawPtr;
+};
+
 struct ArkUIPickerDividerResObjStruct {
     void* strokeWidthRawPtr;
     void* colorRawPtr;
@@ -4390,6 +4409,20 @@ struct ArkUITabsControllerModifier {
     ArkUINodeHandle (*getTabsController)(ArkUINodeHandle node);
 };
 
+struct ArkUIContainerPickerModifier {
+    void (*setContainerPickerOnChange)(ArkUINodeHandle node, void* callback);
+    void (*resetContainerPickerOnChange)(ArkUINodeHandle node);
+    void (*setContainerPickerOnScrollStop)(ArkUINodeHandle node, void* callback);
+    void (*resetContainerPickerOnScrollStop)(ArkUINodeHandle node);
+    void (*setContainerPickerEnableHapticFeedback)(ArkUINodeHandle node, ArkUI_Bool enableHapticFeedback);
+    void (*resetContainerPickerEnableHapticFeedback)(ArkUINodeHandle node);
+    void (*setContainerPickerCanLoop)(ArkUINodeHandle node, ArkUI_Bool isLoop);
+    void (*resetContainerPickerCanLoop)(ArkUINodeHandle node);
+    void (*setContainerPickerSelectionIndicator)(
+        ArkUINodeHandle node, ArkUI_Bool* isHasValue, const struct ArkUIPickerIndicatorStyle* pickerIndicatorStyle);
+    void (*resetContainerPickerSelectionIndicator)(ArkUINodeHandle node);
+};
+
 struct ArkUIGesture;
 
 struct ArkUIGestureEventTargetInfo {
@@ -7701,6 +7734,7 @@ struct ArkUINodeModifiers {
     const ArkUICanvasModifier* (*getCanvasModifier)();
     const ArkUIStepperModifier* (*getStepperModifier)();
     const ArkUINDKRenderNodeModifier* (*getNDKRenderNodeModifier)();
+    const ArkUIContainerPickerModifier* (*getContainerPickerModifier)();
 };
 
 // same as inner defines in property.h

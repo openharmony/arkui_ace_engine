@@ -626,15 +626,21 @@ void MenuLayoutAlgorithm::UpdateWrapperRectForHoverMode(
     } else {
         offsetY = position_.GetY();
     }
-    auto isShowInSubWindow = canExpandCurrentWindow_ && isExpandDisplay_ && !isTargetNodeInSubwindow_;
-    auto windowsOffsetY = isShowInSubWindow ? param_.windowsOffsetY : 0;
+    auto left = wrapperRect_.Left();
+    auto top = wrapperRect_.Top();
+    auto bottom = wrapperRect_.Bottom();
+    auto width = wrapperRect_.Width();
+    // WrapperRect updated for hoverMode should be smaller
     if (LessNotEqual(offsetY, creaseTop)) {
-        wrapperRect_.SetRect(left_, top_ + windowsOffsetY, width_ - left_ - right_, creaseTop - top_);
+        // The creaseTop should be less than the wrapperRect bottom
+        if (LessNotEqual(creaseTop, wrapperRect_.Bottom())) {
+            wrapperRect_.SetRect(left, top, width, creaseTop - top);
+        }
     } else if (GreatNotEqual(offsetY, creaseBottom)) {
-        wrapperRect_.SetRect(left_, creaseBottom, width_ - left_ - right_,
-        windowsOffsetY + height_ - creaseBottom - bottom_);
-    } else {
-        wrapperRect_.SetRect(left_, top_ + windowsOffsetY, width_ - left_ - right_, height_ - top_ - bottom_);
+        // The creaseBottom should be greater than the wrapperRect top
+        if (GreatNotEqual(creaseBottom, wrapperRect_.Top())) {
+            wrapperRect_.SetRect(left, creaseBottom, width, bottom - creaseBottom);
+        }
     }
     dumpInfo_.wrapperRect = wrapperRect_;
     TAG_LOGI(AceLogTag::ACE_MENU, "Update wrapperRect for hoverMode : %{public}s", wrapperRect_.ToString().c_str());

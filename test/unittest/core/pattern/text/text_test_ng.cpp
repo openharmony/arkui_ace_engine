@@ -224,7 +224,7 @@ HWTEST_F(TextTestNg, SetTextDetectEnable003, TestSize.Level1)
 HWTEST_F(TextTestNg, SetTextContentWithStyledString001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create textModelNG and frameNode.
+     * @tc.steps: step1. create textModelNG and frameNode
      */
     TextModelNG textModelNG;
     textModelNG.Create(CREATE_VALUE_W);
@@ -3745,6 +3745,147 @@ HWTEST_F(TextTestNg, UpdateSelectOverlayOrCreate001, TestSize.Level1)
     textPattern->selectOverlayProxy_ = proxy;
     textPattern->UpdateSelectOverlayOrCreate(selectOverlayInfo, true);
     EXPECT_TRUE(textPattern->selectOverlayProxy_ && !textPattern->selectOverlayProxy_->IsClosed());
+}
+
+/**
+ * @tc.name: SetTextSelectDetectEnable001
+ * @tc.desc: Test SetTextSelectDetectEnable.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, SetTextSelectDetectEnable001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textModelNG and frameNode.
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. call GetSelectDetectEnable.
+     * @tc.expected: the default properties are default values(true).
+     */
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(pattern);
+    ASSERT_EQ(pattern->GetSelectDetectEnable(), true);
+
+    /**
+     * @tc.steps: step3. create selectDetectEnable and call SetSelectDetectEnable.
+     * @tc.expected: the properties are successfully set to default values.
+     */
+    bool selectDetectEnable = false;
+    textModelNG.SetSelectDetectEnable(selectDetectEnable);
+    ASSERT_EQ(pattern->GetSelectDetectEnable(), false);
+}
+
+/**
+ * @tc.name: SetTextSelectDetectConfig001
+ * @tc.desc: Test SetTextSelectDetectConfig.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, SetTextSelectDetectConfig001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textModelNG and frameNode.
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. create selectDetectConfig and call SetSelectDetectConfig.
+     * @tc.expected: the properties are successfully set to default values.
+     */
+    std::vector<TextDataDetectType> selectDetectConfig = { TextDataDetectType::PHONE_NUMBER,
+        TextDataDetectType::EMAIL };
+    textModelNG.SetSelectDetectConfig(selectDetectConfig);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(pattern);
+    ASSERT_EQ(pattern->GetSelectDetectConfig(), selectDetectConfig);
+}
+
+/**
+ * @tc.name: SetSelectUseSelectDetectConfigFollow001
+ * @tc.desc: Test SetSelectUseSelectDetectConfigFollow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, SetSelectUseSelectDetectConfigFollow001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textModelNG and frameNode.
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. create types and call UseSelectDetectConfigFollow.
+     * @tc.expected: the value are successfully set to all detect types.
+     */
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(pattern);
+    std::unordered_map<TextDataDetectType, bool> types;
+    pattern->UseSelectDetectConfigFollow(types);
+    ASSERT_EQ(types.size(), 5);
+
+    /**
+     * @tc.steps: step3. with dataDetectEnable true and set dataDetectConfig, call UseSelectDetectConfigFollow.
+     * @tc.expected: the value are successfully set to dataConfig detect types.
+     */
+    pattern->SetTextDetectEnable(true);
+    TextDetectConfig dataConfig;
+    dataConfig.types = "phoneNum,url";
+    pattern->SetTextDetectConfig(dataConfig);
+    types.clear();
+    pattern->UseSelectDetectConfigFollow(types);
+    ASSERT_EQ(types.size(), 2);
+}
+
+/**
+ * @tc.name: SetSelectUseSelectDetectConfigUserSet001
+ * @tc.desc: Test SetSelectUseSelectDetectConfigUserSet.
+ * @tc.type: FUNC
+ */
+
+HWTEST_F(TextTestNg, SetSelectUseSelectDetectConfigUserSet001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textModelNG and frameNode.
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. create types and call UseSelectDetectConfigUserSet.
+     * @tc.expected: the value are successfully set to all detect types.
+     */
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(pattern);
+    std::unordered_map<TextDataDetectType, bool> types;
+    pattern->SetSelectDetectEnable(true);
+    pattern->UseSelectDetectConfigUserSet(types);
+    ASSERT_EQ(types.size(), 5);
+
+    /**
+     * @tc.steps: step3. with selectDetectEnable true and set selectDetectConfig, call UseSelectDetectConfigUserSet.
+     * @tc.expected: the value are successfully set to selectDetectConfig detect types.
+     */
+    std::vector<TextDataDetectType> typesVector;
+    typesVector.push_back(TextDataDetectType::PHONE_NUMBER);
+    typesVector.push_back(TextDataDetectType::EMAIL);
+    pattern->SetTextDetectEnable(true);
+    pattern->SetSelectDetectConfig(typesVector);
+    types.clear();
+    pattern->UseSelectDetectConfigUserSet(types);
+    ASSERT_EQ(types.size(), 2);
+    pattern->SetSelectDetectEnable(false);
+    pattern->UseSelectDetectConfigUserSet(types);
+    ASSERT_EQ(types.size(), 0);
 }
 
 /**

@@ -1,6 +1,7 @@
 import { KPointer, InteropNativeModule } from "@koalaui/interop"
 import { int32} from "@koalaui/common"
-import { GlobalStateManager, MutableState, rememberDisposable, mutableState, __context, StateContext, memoEntry1, memoEntry, __id, StateManager, StateManagerImpl, ComputableState, memoize, NodeAttach, remember } from "@koalaui/runtime"
+import { GlobalStateManager, MutableState, rememberDisposable, mutableState, __context, memoEntry1, memoEntry, __id, StateManager, StateManagerImpl, ComputableState, memoize, NodeAttach, remember } from "@koalaui/runtime"
+import { StateContext } from 'arkui.incremental.runtime.state';
 import { PeerNode } from "arkui/PeerNode"
 import { ArkContentSlotPeer } from "arkui/component/contentSlot"
 import { ArkListPeer } from "arkui/component/list";
@@ -67,14 +68,14 @@ export class ParallelNode<T> {
         builder: (args: T) => void,  updateUseParallel?: boolean) {
         this._args = memoize<T>(paramCompute)
         if (this.needAttach && this.status === 2) {
-            this.manager!.merge(__context(), this.rootState!)
+            this.manager!.merge((__context() as StateManager), this.rootState!)
             this.update(updateUseParallel)
             this.options?.completed?.()
             this.status = 3 // is attached
             return
         }
         if (this.status === 0) {
-            this.manager = __context().fork() as StateManager
+            this.manager = (__context() as StateManager).fork() as StateManager
             let createFun = () => {
                 this.rootState = this.manager!.updatableNode<PeerNode>(this.peerNode!, (context: StateContext) => {
                     try {
@@ -93,7 +94,7 @@ export class ParallelNode<T> {
             return
         }
         if (this.status === 0) {
-            this.manager!.merge(__context(), this.rootState!)
+            this.manager!.merge(__context() as StateManager, this.rootState!)
             this.update(updateUseParallel)
         }
     }
@@ -103,14 +104,14 @@ export class ParallelNode<T> {
         /** @memo */
         builder: () => void,  updateUseParallel?: boolean) {
         if (this.needAttach && this.status === 2) {
-            this.manager!.merge(__context(), this.rootState!)
+            this.manager!.merge(__context() as StateManager, this.rootState!)
             this.update(updateUseParallel)
             this.options?.completed?.()
             this.status = 3 // is attached
             return
         }
         if (this.status === 0) {
-            this.manager = __context().fork() as StateManager
+            this.manager = (__context() as StateManager).fork() as StateManager
             let createFun = () => {
                 this.rootState = this.manager!.updatableNode<PeerNode>(this.peerNode!, (context: StateContext) => {
                     try {
@@ -129,7 +130,7 @@ export class ParallelNode<T> {
             return
         }
         if (this.status === 0) {
-            this.manager!.merge(__context(), this.rootState!)
+            this.manager!.merge(__context() as StateManager, this.rootState!)
             this.update(updateUseParallel)
         }
     }
@@ -142,14 +143,14 @@ export class ParallelNode<T> {
         content_: (param: T) => void) {
         this._args = memoize<T>(() => { return paramCreate(value, index) })
         if (this.needAttach && this.status === 2) {
-            this.manager!.merge(__context(), this.rootState!)
+            this.manager!.merge(__context() as StateManager, this.rootState!)
             this.update()
             this.options?.completed?.()
             this.status = 3 // is attached
             return
         }
         if (this.status === 0) {
-            this.manager = __context().fork() as StateManager
+            this.manager = (__context() as StateManager).fork() as StateManager
             let createFun = () => {
                 this.rootState = this.manager!.updatableNode<PeerNode>(this.peerNode!, (context: StateContext) => {
                     try {
@@ -168,7 +169,7 @@ export class ParallelNode<T> {
             return
         }
         if (this.status === 0) {
-            this.manager!.merge(__context(), this.rootState!)
+            this.manager!.merge(__context() as StateManager, this.rootState!)
             this.update()
         }
     }

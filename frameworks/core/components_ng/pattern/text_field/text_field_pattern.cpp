@@ -2114,7 +2114,9 @@ void TextFieldPattern::FireEventHubOnChange(const std::u16string& text)
     changeValueInfo.oldContent = callbackOldContent_;
     changeValueInfo.rangeBefore = callbackRangeBefore_;
     changeValueInfo.rangeAfter = callbackRangeAfter_;
-    auto inspectorId = host->GetInspectorId().value_or("");
+    auto pattern = host->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    std::string inspectorId = pattern->GetInspectorId();
     auto uniqueId = host->GetId();
     TextChangeEventInfo info(inspectorId, uniqueId, UtfUtils::Str16DebugToStr8(changeValueInfo.value));
     UIObserverHandler::GetInstance().NotifyTextChangeEvent(info);
@@ -3787,6 +3789,21 @@ void TextFieldPattern::AutoFillValueChanged()
     }
 }
 
+std::string TextFieldPattern::GetInspectorId() const
+{
+    std:: string inspectorId = "";
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, "");
+    auto parent = host->GetParent();
+    CHECK_NULL_RETURN(parent, "");
+    if (host->GetInspectorId()->find(INSPECTOR_PREFIX) != std::string::npos && parent->GetTag() == "Search") {
+        inspectorId = host->GetParent()->GetInspectorId().value_or("");
+    } else {
+        inspectorId = host->GetInspectorId().value_or("");
+    }
+    return inspectorId;
+}
+
 bool TextFieldPattern::FireOnTextChangeEvent()
 {
     auto host = GetHost();
@@ -3854,7 +3871,7 @@ void TextFieldPattern::AddTextFireOnChange()
         changeValueInfo.rangeBefore = pattern->callbackRangeBefore_;
         changeValueInfo.rangeAfter = pattern->callbackRangeAfter_;
         layoutProperty->UpdatePreviewText(changeValueInfo.previewText);
-        auto inspectorId = host->GetInspectorId().value_or("");
+        auto inspectorId = pattern->GetInspectorId();
         auto uniqueId = host->GetId();
         TextChangeEventInfo info(inspectorId, uniqueId, UtfUtils::Str16DebugToStr8(changeValueInfo.value));
         UIObserverHandler::GetInstance().NotifyTextChangeEvent(info);

@@ -24007,6 +24007,370 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     } // AppearSymbolEffectAccessor
+    namespace ArcListExtenderAccessor {
+    Ark_NativePointer ConstructorImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return nullptr;
+        }
+        string out("constructor(");
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    void SetArkListOptionsImpl(Ark_NativePointer node,
+                               const Opt_ArkListOptions* options)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setArkListOptions(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, options);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void DigitalCrownSensitivityImpl(Ark_NativePointer node,
+                                     const Opt_CrownSensitivity* sensitivity)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("digitalCrownSensitivity(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, sensitivity);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SpaceImpl(Ark_NativePointer node,
+                   const Opt_LengthMetrics* space)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("space(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, space);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void ScrollBarImpl(Ark_NativePointer node,
+                       const Opt_BarState* status)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("scrollBar(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, status);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void ScrollBarColorImpl(Ark_NativePointer node,
+                            const Opt_ColorMetrics* color)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("scrollBarColor(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, color);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void ScrollBarWidthImpl(Ark_NativePointer node,
+                            const Opt_LengthMetrics* width)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("scrollBarWidth(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, width);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void CachedCountImpl(Ark_NativePointer node,
+                         const Opt_Int32* count)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("cachedCount(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, count);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void ChainAnimationImpl(Ark_NativePointer node,
+                            const Opt_Boolean* enable)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("chainAnimation(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, enable);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void ChildrenMainSizeImpl(Ark_NativePointer node,
+                              const Opt_ChildrenMainSize* size)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("childrenMainSize(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, size);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void EnableScrollInteractionImpl(Ark_NativePointer node,
+                                     const Opt_Boolean* enable)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("enableScrollInteraction(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, enable);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void FadingEdgeImpl(Ark_NativePointer node,
+                        const Opt_Boolean* enable)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("fadingEdge(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, enable);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void FrictionImpl(Ark_NativePointer node,
+                      const Opt_Float64* friction)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("friction(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, friction);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void FlingSpeedLimitImpl(Ark_NativePointer node,
+                             const Opt_Float64* speed)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("flingSpeedLimit(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, speed);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void OnScrollIndexImpl(Ark_NativePointer node,
+                           const Opt_ArcScrollIndexHandler* handler)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("onScrollIndex(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, handler);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void OnReachStartImpl(Ark_NativePointer node,
+                          const Opt_VoidCallback* handler)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("onReachStart(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, handler);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void OnReachEndImpl(Ark_NativePointer node,
+                        const Opt_VoidCallback* handler)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("onReachEnd(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, handler);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void OnScrollStartImpl(Ark_NativePointer node,
+                           const Opt_VoidCallback* handler)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("onScrollStart(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, handler);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void OnScrollStopImpl(Ark_NativePointer node,
+                          const Opt_VoidCallback* handler)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("onScrollStop(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, handler);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void OnWillScrollImpl(Ark_NativePointer node,
+                          const Opt_OnWillScrollCallback* handler)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("onWillScroll(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, handler);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void OnDidScrollImpl(Ark_NativePointer node,
+                         const Opt_OnScrollCallback* handler)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("onDidScroll(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, handler);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    } // ArcListExtenderAccessor
+    namespace ArcListItemExtenderAccessor {
+    Ark_NativePointer ConstructorImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return nullptr;
+        }
+        string out("constructor(");
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    void AutoScaleImpl(Ark_NativePointer node,
+                       const Opt_Boolean* enable)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("autoScale(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, enable);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SwipeActionImpl(Ark_NativePointer node,
+                         const Opt_SwipeActionOptions* options)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("swipeAction(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, options);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    } // ArcListItemExtenderAccessor
+    namespace ArcScrollBarExtenderAccessor {
+    Ark_NativePointer ConstructorImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return nullptr;
+        }
+        string out("constructor(");
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    void SetArcScrollBarOptionsImpl(Ark_NativePointer node,
+                                    const Ark_ArcScrollBarOptions* options)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setArcScrollBarOptions(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, options);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    } // ArcScrollBarExtenderAccessor
     namespace AxisEventAccessor {
     void DestroyPeerImpl(Ark_AxisEvent peer)
     {
@@ -24737,7 +25101,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_BaselineOffsetStyle ConstructImpl(Ark_LengthMetrics value)
+    Ark_BaselineOffsetStyle ConstructImpl(const Ark_LengthMetrics* value)
     {
         if (!needGroupedLog(1))
         {
@@ -28348,6 +28712,41 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     } // DecorationStyleAccessor
+    namespace DialogExtenderAccessor {
+    void ShowTimePickerDialogImpl(const Ark_TimePickerDialogOptions* options)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("showTimePickerDialog(");
+        WriteToString(&out, options);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void ShowTextPickerDialogImpl(const Ark_TextPickerDialogOptions* options)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("showTextPickerDialog(");
+        WriteToString(&out, options);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void ShowDatePickerDialogImpl(const Ark_DatePickerDialogOptions* options)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("showDatePickerDialog(");
+        WriteToString(&out, options);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    } // DialogExtenderAccessor
     namespace DisappearSymbolEffectAccessor {
     void DestroyPeerImpl(Ark_DisappearSymbolEffect peer)
     {
@@ -32732,7 +33131,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_LetterSpacingStyle ConstructImpl(Ark_LengthMetrics value)
+    Ark_LetterSpacingStyle ConstructImpl(const Ark_LengthMetrics* value)
     {
         if (!needGroupedLog(1))
         {
@@ -32977,7 +33376,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_LineHeightStyle ConstructImpl(Ark_LengthMetrics lineHeight)
+    Ark_LineHeightStyle ConstructImpl(const Ark_LengthMetrics* lineHeight)
     {
         if (!needGroupedLog(1))
         {
@@ -44648,6 +45047,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct DecorationStylePeer {
         virtual ~DecorationStylePeer() = default;
     };
+    const GENERATED_ArkUIDialogExtenderAccessor* GetDialogExtenderAccessor()
+    {
+        static const GENERATED_ArkUIDialogExtenderAccessor DialogExtenderAccessorImpl {
+            DialogExtenderAccessor::ShowTimePickerDialogImpl,
+            DialogExtenderAccessor::ShowTextPickerDialogImpl,
+            DialogExtenderAccessor::ShowDatePickerDialogImpl,
+        };
+        return &DialogExtenderAccessorImpl;
+    }
+
     const GENERATED_ArkUIDisappearSymbolEffectAccessor* GetDisappearSymbolEffectAccessor()
     {
         static const GENERATED_ArkUIDisappearSymbolEffectAccessor DisappearSymbolEffectAccessorImpl {
@@ -44663,6 +45072,53 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct DisappearSymbolEffectPeer {
         virtual ~DisappearSymbolEffectPeer() = default;
     };
+    const GENERATED_ArkUIArcListExtenderAccessor* GetArcListExtenderAccessor()
+    {
+        static const GENERATED_ArkUIArcListExtenderAccessor ArcListExtenderAccessorImpl {
+            ArcListExtenderAccessor::ConstructorImpl,
+            ArcListExtenderAccessor::SetArkListOptionsImpl,
+            ArcListExtenderAccessor::DigitalCrownSensitivityImpl,
+            ArcListExtenderAccessor::SpaceImpl,
+            ArcListExtenderAccessor::ScrollBarImpl,
+            ArcListExtenderAccessor::ScrollBarColorImpl,
+            ArcListExtenderAccessor::ScrollBarWidthImpl,
+            ArcListExtenderAccessor::CachedCountImpl,
+            ArcListExtenderAccessor::ChainAnimationImpl,
+            ArcListExtenderAccessor::ChildrenMainSizeImpl,
+            ArcListExtenderAccessor::EnableScrollInteractionImpl,
+            ArcListExtenderAccessor::FadingEdgeImpl,
+            ArcListExtenderAccessor::FrictionImpl,
+            ArcListExtenderAccessor::FlingSpeedLimitImpl,
+            ArcListExtenderAccessor::OnScrollIndexImpl,
+            ArcListExtenderAccessor::OnReachStartImpl,
+            ArcListExtenderAccessor::OnReachEndImpl,
+            ArcListExtenderAccessor::OnScrollStartImpl,
+            ArcListExtenderAccessor::OnScrollStopImpl,
+            ArcListExtenderAccessor::OnWillScrollImpl,
+            ArcListExtenderAccessor::OnDidScrollImpl,
+        };
+        return &ArcListExtenderAccessorImpl;
+    }
+
+    const GENERATED_ArkUIArcListItemExtenderAccessor* GetArcListItemExtenderAccessor()
+    {
+        static const GENERATED_ArkUIArcListItemExtenderAccessor ArcListItemExtenderAccessorImpl {
+            ArcListItemExtenderAccessor::ConstructorImpl,
+            ArcListItemExtenderAccessor::AutoScaleImpl,
+            ArcListItemExtenderAccessor::SwipeActionImpl,
+        };
+        return &ArcListItemExtenderAccessorImpl;
+    }
+
+    const GENERATED_ArkUIArcScrollBarExtenderAccessor* GetArcScrollBarExtenderAccessor()
+    {
+        static const GENERATED_ArkUIArcScrollBarExtenderAccessor ArcScrollBarExtenderAccessorImpl {
+            ArcScrollBarExtenderAccessor::ConstructorImpl,
+            ArcScrollBarExtenderAccessor::SetArcScrollBarOptionsImpl,
+        };
+        return &ArcScrollBarExtenderAccessorImpl;
+    }
+
     const GENERATED_ArkUIDismissDialogActionAccessor* GetDismissDialogActionAccessor()
     {
         static const GENERATED_ArkUIDismissDialogActionAccessor DismissDialogActionAccessorImpl {
@@ -47318,6 +47774,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetAlertDialogAccessor,
             GetAnimationExtenderAccessor,
             GetAppearSymbolEffectAccessor,
+            GetArcListExtenderAccessor,
+            GetArcListItemExtenderAccessor,
+            GetArcScrollBarExtenderAccessor,
             GetAxisEventAccessor,
             GetBackgroundColorStyleAccessor,
             GetBaseEventAccessor,
@@ -47347,6 +47806,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetDataResubmissionHandlerAccessor,
             GetDatePickerDialogAccessor,
             GetDecorationStyleAccessor,
+            GetDialogExtenderAccessor,
             GetDisappearSymbolEffectAccessor,
             GetDismissDialogActionAccessor,
             GetDismissPopupActionAccessor,

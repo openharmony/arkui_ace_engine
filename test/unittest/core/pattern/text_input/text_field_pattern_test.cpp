@@ -2481,6 +2481,67 @@ HWTEST_F(TextFieldPatternTest, TextPattern108, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetSelectDetectEnable001
+ * @tc.desc: Test SetSelectDetectEnable.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTest, SetSelectDetectEnable001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFieldNode.
+     */
+    CreateTextField();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    textFieldNode->SetParent(frameNode_);
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call GetSelectDetectEnable.
+     * @tc.expected: the default properties are default values(true).
+     */
+    ASSERT_EQ(pattern->GetSelectDetectEnable(), true);
+
+    /**
+     * @tc.steps: step3. create selectDetectEnable and call SetSelectDetectEnable.
+     * @tc.expected: the properties are successfully set to false values.
+     */
+    bool selectDetectEnable = false;
+    pattern->SetSelectDetectEnable(selectDetectEnable);
+    ASSERT_EQ(pattern->GetSelectDetectEnable(), false);
+}
+
+/**
+ * @tc.name: SetSelectDetectConfig001
+ * @tc.desc: Test SetSelectDetectConfig.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTest, SetSelectDetectConfig001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFieldNode.
+     */
+    CreateTextField();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    textFieldNode->SetParent(frameNode_);
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. create selectDetectConfig and call SetSelectDetectConfig.
+     * @tc.expected: the properties are successfully set to config values.
+     */
+    std::vector<TextDataDetectType> selectDetectConfig = { TextDataDetectType::PHONE_NUMBER,
+        TextDataDetectType::EMAIL };
+    pattern->SetSelectDetectConfig(selectDetectConfig);
+    ASSERT_EQ(pattern->GetSelectDetectConfig(), selectDetectConfig);
+}
+
+/**
  * @tc.name: OnDragNodeDetachFromMainTree001
  * @tc.desc: Test OnDragNodeDetachFromMainTree
  * @tc.type: FUNC

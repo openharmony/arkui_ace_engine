@@ -686,6 +686,12 @@ enum class BorderStyle {
     NONE,
 };
 
+enum class CornerApplyType {
+    FAST = 0,
+    OFFSCREEN,
+    MAX
+};
+
 enum class BorderImageRepeat {
     SPACE,
     STRETCH,

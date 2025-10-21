@@ -197,6 +197,9 @@ const GENERATED_ArkUIActionSheetAccessor* GetActionSheetAccessor();
 const GENERATED_ArkUIAlertDialogAccessor* GetAlertDialogAccessor();
 const GENERATED_ArkUIAnimationExtenderAccessor* GetAnimationExtenderAccessor();
 const GENERATED_ArkUIAppearSymbolEffectAccessor* GetAppearSymbolEffectAccessor();
+const GENERATED_ArkUIArcListExtenderAccessor* GetArcListExtenderAccessor();
+const GENERATED_ArkUIArcListItemExtenderAccessor* GetArcListItemExtenderAccessor();
+const GENERATED_ArkUIArcScrollBarExtenderAccessor* GetArcScrollBarExtenderAccessor();
 const GENERATED_ArkUIAxisEventAccessor* GetAxisEventAccessor();
 const GENERATED_ArkUIBackgroundColorStyleAccessor* GetBackgroundColorStyleAccessor();
 const GENERATED_ArkUIBaseEventAccessor* GetBaseEventAccessor();
@@ -226,6 +229,7 @@ const GENERATED_ArkUICustomSpanAccessor* GetCustomSpanAccessor();
 const GENERATED_ArkUIDataResubmissionHandlerAccessor* GetDataResubmissionHandlerAccessor();
 const GENERATED_ArkUIDatePickerDialogAccessor* GetDatePickerDialogAccessor();
 const GENERATED_ArkUIDecorationStyleAccessor* GetDecorationStyleAccessor();
+const GENERATED_ArkUIDialogExtenderAccessor* GetDialogExtenderAccessor();
 const GENERATED_ArkUIDisappearSymbolEffectAccessor* GetDisappearSymbolEffectAccessor();
 const GENERATED_ArkUIDismissDialogActionAccessor* GetDismissDialogActionAccessor();
 const GENERATED_ArkUIDismissPopupActionAccessor* GetDismissPopupActionAccessor();
@@ -295,6 +299,7 @@ const GENERATED_ArkUIPanGestureEventAccessor* GetPanGestureEventAccessor();
 const GENERATED_ArkUIPanGestureOptionsAccessor* GetPanGestureOptionsAccessor();
 const GENERATED_ArkUIPanRecognizerAccessor* GetPanRecognizerAccessor();
 const GENERATED_ArkUIParagraphStyleAccessor* GetParagraphStyleAccessor();
+const GENERATED_ArkUIParticleHelperAccessor* GetParticleHelperAccessor();
 const GENERATED_ArkUIPath2DAccessor* GetPath2DAccessor();
 const GENERATED_ArkUIPatternLockControllerAccessor* GetPatternLockControllerAccessor();
 const GENERATED_ArkUIPermissionRequestAccessor* GetPermissionRequestAccessor();
@@ -306,6 +311,7 @@ const GENERATED_ArkUIProgressMaskAccessor* GetProgressMaskAccessor();
 const GENERATED_ArkUIPromptActionExtenderAccessor* GetPromptActionExtenderAccessor();
 const GENERATED_ArkUIPulseSymbolEffectAccessor* GetPulseSymbolEffectAccessor();
 const GENERATED_ArkUIRenderingContextSettingsAccessor* GetRenderingContextSettingsAccessor();
+const GENERATED_ArkUIRenderNodeExtenderAccessor* GetRenderNodeExtenderAccessor();
 const GENERATED_ArkUIRenderServiceNodeAccessor* GetRenderServiceNodeAccessor();
 const GENERATED_ArkUIReplaceSymbolEffectAccessor* GetReplaceSymbolEffectAccessor();
 const GENERATED_ArkUIRestrictedWorkerAccessor* GetRestrictedWorkerAccessor();
@@ -500,6 +506,9 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetAlertDialogAccessor,
         GetAnimationExtenderAccessor,
         GetAppearSymbolEffectAccessor,
+        GetArcListExtenderAccessor,
+        GetArcListItemExtenderAccessor,
+        GetArcScrollBarExtenderAccessor,
         GetAxisEventAccessor,
         GetBackgroundColorStyleAccessor,
         GetBaseEventAccessor,
@@ -529,6 +538,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetDataResubmissionHandlerAccessor,
         GetDatePickerDialogAccessor,
         GetDecorationStyleAccessor,
+        GetDialogExtenderAccessor,
         GetDisappearSymbolEffectAccessor,
         GetDismissDialogActionAccessor,
         GetDismissPopupActionAccessor,
@@ -598,6 +608,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetPanGestureOptionsAccessor,
         GetPanRecognizerAccessor,
         GetParagraphStyleAccessor,
+        GetParticleHelperAccessor,
         GetPath2DAccessor,
         GetPatternLockControllerAccessor,
         GetPermissionRequestAccessor,
@@ -609,6 +620,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetPromptActionExtenderAccessor,
         GetPulseSymbolEffectAccessor,
         GetRenderingContextSettingsAccessor,
+        GetRenderNodeExtenderAccessor,
         GetRenderServiceNodeAccessor,
         GetReplaceSymbolEffectAccessor,
         GetRestrictedWorkerAccessor,

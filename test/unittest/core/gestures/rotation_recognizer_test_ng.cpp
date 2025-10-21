@@ -1614,6 +1614,7 @@ HWTEST_F(RotationRecognizerTestNg, RotationRecognizerPtrHandleTouchUpEventTest00
     rotationRecognizerPtr->refereeState_ = RefereeState::SUCCEED;
     rotationRecognizerPtr->HandleTouchMoveEvent(touchEvent);
     EXPECT_EQ(rotationRecognizerPtr->cumulativeAngle_, 0.0);
+    
     rotationRecognizerPtr->isLimitFingerCount_ = false;
     rotationRecognizerPtr->fingers_ = 2;
     rotationRecognizerPtr->refereeState_ = RefereeState::SUCCEED;

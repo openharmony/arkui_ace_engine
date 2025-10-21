@@ -224,6 +224,8 @@ HWTEST_F(WebPatternEventTest, WebPatternTestNg_005, TestSize.Level1)
     ASSERT_NE(g_webPattern->delegate_, nullptr);
     g_webPattern->delegate_->SetIsFileSelectorShow(true);
     MouseInfo info;
+    info.SetRawDeltaX(1);
+    info.SetRawDeltaY(1);
     info.SetAction(MouseAction::HOVER_EXIT);
     g_webPattern->WebSendMouseEvent(info, 0);
     EXPECT_EQ(g_webPattern->delegate_->IsFileSelectorShow(), true);

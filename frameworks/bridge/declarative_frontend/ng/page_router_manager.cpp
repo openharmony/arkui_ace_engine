@@ -792,11 +792,11 @@ void PageRouterManager::GetStateByIndex(int32_t index, std::string& name, std::s
     }
 }
 
-void PageRouterManager::GetStateByUrl(std::string& url, std::vector<Framework::StateInfo>& stateArray)
+void PageRouterManager::GetStateByUrl(std::string& url, std::vector<StateInfo>& stateArray)
 {
     CHECK_RUN_ON(JS);
     int32_t counter = 1;
-    Framework::StateInfo stateInfo;
+    StateInfo stateInfo;
     GetPageNameAndPath(url, stateInfo.name, stateInfo.path);
 
     for (const auto& record : restorePageStack_) {
@@ -1529,7 +1529,7 @@ void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, b
         pageNode->GetAccessibilityId());
 }
 
-bool PageRouterManager::CreateDynamicPagePath(const std::string& url, std::string& path)
+bool PageRouterManager::CreateDynamicPageOhmUrl(const std::string& url, std::string& ohmUrl)
 {
     auto container = Container::CurrentSafelyWithCheck();
     CHECK_NULL_RETURN(container, false);
@@ -1538,9 +1538,9 @@ bool PageRouterManager::CreateDynamicPagePath(const std::string& url, std::strin
     /**
      * for example:
      * url: "pages/Index"
-     * path: "@normalized:N&entry&com.example.demoapp&entry/src/main/ets/pages/Index&1.0.0";
+     * ohmUrl: "@normalized:N&entry&com.example.demoapp&entry/src/main/ets/pages/Index&1.0.0";
      */
-    path = "@normalized:N&" + moduleName + "&" + bundleName + "&" +
+    ohmUrl = "@normalized:N&" + moduleName + "&" + bundleName + "&" +
         moduleName + "/src/main/ets/" + url + "&1.0.0";
     return true;
 }
@@ -1549,14 +1549,16 @@ RefPtr<FrameNode> PageRouterManager::CreateDynamicPage(int32_t pageId, const Rou
 {
     CHECK_NULL_RETURN(loadDynamicPage_, nullptr);
     RouterPageInfo target = info;
-    if (!CreateDynamicPagePath(target.url, target.path)) {
+    target.path = target.url + ".js";
+    std::string ohmUrl;
+    if (!CreateDynamicPageOhmUrl(target.url, ohmUrl)) {
         return nullptr;
     }
     ACE_SCOPED_TRACE("PageRouterManager::CreateDynamicPage");
     CHECK_RUN_ON(JS);
-    TAG_LOGI(AceLogTag::ACE_ROUTER, "Page router manager is creating dynamic page[%{public}d]: url: %{public}s path: "
+    TAG_LOGI(AceLogTag::ACE_ROUTER, "Page router manager is creating dynamic page[%{public}d]: url: %{public}s ohmUrl: "
         "%{public}s, recoverable: %{public}s, namedRouter: %{public}s", pageId, target.url.c_str(),
-        target.path.c_str(), (target.recoverable ? "yes" : "no"), (target.isNamedRouterMode ? "yes" : "no"));
+        ohmUrl.c_str(), (target.recoverable ? "yes" : "no"), (target.isNamedRouterMode ? "yes" : "no"));
     auto entryPageInfo = AceType::MakeRefPtr<EntryPageInfo>(
         pageId, target.url, target.path, target.params, target.recoverable, target.isNamedRouterMode);
     auto pagePattern = ViewAdvancedRegister::GetInstance()->CreatePagePattern(entryPageInfo);
@@ -1568,7 +1570,7 @@ RefPtr<FrameNode> PageRouterManager::CreateDynamicPage(int32_t pageId, const Rou
     // !!! must push_back first for UpdateRootComponent
     pageRouterStack_.emplace_back(pageNode);
 
-    loadDynamicPage_(target.path, target.errorCallback);
+    loadDynamicPage_(ohmUrl, target.errorCallback);
 
     // record full path info of every pageNode
     auto pageInfo = pagePattern->GetPageInfo();
