@@ -86,14 +86,14 @@ function registerResetInteropExtendableComponent(callback: () => void): void {
     InteropExtractorModule.resetInteropExtendableComponent = callback;
 }
 
-function registerTransferCompatibleBuilderCallback(callback: (builder: (...args: any[]) => void) => (...args: any[]) => void) {
+function registerTransferCompatibleBuilderCallback(callback: (builder: (...args: any[]) => void) => (...args: any[]) => void): void {
     InteropExtractorModule.transferCompatibleBuilder = callback;
 }
 
-function registerTransferCompatibleDynamicBuilderCallback(callback: (builder: (...args: any[]) => void) => (...args: any[]) => void) {
+function registerTransferCompatibleDynamicBuilderCallback(callback: (builder: (...args: any[]) => void) => (...args: any[]) => void): void {
     InteropExtractorModule.transferCompatibleDynamicBuilder = callback;
 }
 
-function registerCreateCompatibleStaticState(callback: (value: Object) => Object) {
+function registerCreateCompatibleStaticState(callback: (value: Object) => Object): void {
     InteropExtractorModule.createCompatibleStaticState = callback;
 }

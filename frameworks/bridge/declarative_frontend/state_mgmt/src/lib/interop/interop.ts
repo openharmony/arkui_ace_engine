@@ -150,21 +150,21 @@ function __Interop_ResetInteropExtendableComponent_Internal(): void {
 
 function __Interop_TransferCompatibleBuilder_Internal(builder: (...args: any[]) => void): (...args: any[]) => void {
     if(InteropExtractorModule.transferCompatibleBuilder === undefined) {
-        throw new Error("Non Method For Transfer CompatibleBuilder");
+        throw new Error('Non Method For Transfer CompatibleBuilder');
     }
     return InteropExtractorModule.transferCompatibleBuilder(builder);
 }
 
 function __Interop_transferCompatibleDynamicBuilder_Internal(builder: (...args: any[]) => void): (...args: any[]) => void {
     if(InteropExtractorModule.transferCompatibleDynamicBuilder === undefined) {
-        throw new Error("Non Method For Transfer Compatible Dynamic Builder");
+        throw new Error('Non Method For Transfer Compatible Dynamic Builder');
     }
     return InteropExtractorModule.transferCompatibleDynamicBuilder(builder);
 }
 
 function __Interop_createCompatibleStaticState_Internal(value: Object) {
     if(InteropExtractorModule.createCompatibleStaticState === undefined) {
-        throw new Error("Non Method For createCompatibleStaticState");
+        throw new Error('Non Method For createCompatibleStaticState');
     }
     return InteropExtractorModule.createCompatibleStaticState(value);
 }
