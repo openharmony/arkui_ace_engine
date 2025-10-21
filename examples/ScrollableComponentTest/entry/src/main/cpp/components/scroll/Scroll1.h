@@ -13,6 +13,11 @@
  * limitations under the License.
  */
 
+ /*
+  * Description: Grid组件高频接口CAPI补齐
+  * Writer: renxiaowen
+  */
+
 #ifndef CAPIDEMO_SCROLL_COMPONENT_H
 #define CAPIDEMO_SCROLL_COMPONENT_H
 
