@@ -737,7 +737,7 @@ class ACE_EXPORT WebVerifyPinEvent : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(WebVerifyPinEvent, BaseEventInfo);
  
 public:
-    WebVerifyPinEvent(const RefPtr<VerifyPinResult>& result,const std::string& identity)
+    WebVerifyPinEvent(const RefPtr<VerifyPinResult>& result, const std::string& identity)
         : BaseEventInfo("WebVerifyPinEvent"),
         result_(result), identity_(identity) {}
  

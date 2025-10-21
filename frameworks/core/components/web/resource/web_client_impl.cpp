@@ -1654,7 +1654,7 @@ void WebClientImpl::OnRemoveBlanklessFrameWithAnimation(int delayTime)
 }
 
 bool WebClientImpl::OnVerifyPinRequestByJS(
-        std::shared_ptr<NWeb::NWebJSVerifyPinResult> result, const std::string& identity)
+    std::shared_ptr<NWeb::NWebJSVerifyPinResult> result, const std::string& identity)
 {
     auto delegate = webDelegate_.Upgrade();
     CHECK_NULL_RETURN(delegate, false);
