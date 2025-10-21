@@ -14,7 +14,6 @@
  */
 
  /*
-  * SR: SR20250724533130
   * Description: 滚动组件布局约束范围提升
   * Writer: renxiaowen
   */
