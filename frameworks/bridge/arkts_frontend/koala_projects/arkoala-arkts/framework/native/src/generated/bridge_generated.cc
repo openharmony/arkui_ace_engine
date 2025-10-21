@@ -33539,7 +33539,7 @@ void impl_RouterExtender_back0(KSerializerBuffer thisArray, int32_t thisLength) 
         Opt_router_RouterOptions optionsValueTemp = optionsValueTempTmpBuf;;
         GetAccessors()->getRouterExtenderAccessor()->back0(static_cast<Opt_router_RouterOptions*>(&optionsValueTemp));
 }
-KOALA_INTEROP_DIRECT_V2(RouterExtender_back0, KSerializerBuffer, int32_t)
+KOALA_INTEROP_V2(RouterExtender_back0, KSerializerBuffer, int32_t)
 void impl_RouterExtender_back1(Ark_Int32 index, KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto paramsValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
@@ -33551,7 +33551,7 @@ void impl_RouterExtender_back1(Ark_Int32 index, KSerializerBuffer thisArray, int
         Opt_Object paramsValueTemp = paramsValueTempTmpBuf;;
         GetAccessors()->getRouterExtenderAccessor()->back1(index, static_cast<Opt_Object*>(&paramsValueTemp));
 }
-KOALA_INTEROP_DIRECT_V3(RouterExtender_back1, Ark_Int32, KSerializerBuffer, int32_t)
+KOALA_INTEROP_V3(RouterExtender_back1, Ark_Int32, KSerializerBuffer, int32_t)
 void impl_RouterExtender_runPage(Ark_NativePointer jsView, KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         Ark_PageRouterOptions optionsValueTemp = PageRouterOptions_serializer::read(thisDeserializer);;
