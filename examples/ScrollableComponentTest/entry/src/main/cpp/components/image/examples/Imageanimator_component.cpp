@@ -14,11 +14,11 @@
  */
 
  /*
-  * Description: List支持展开指定ListItem的swipeAction
+  * Description: Grid组件高频接口CAPI补齐
   * Writer: renxiaowen
   */
 
-#include "components/image/Imageanimator_component.h"
+#include "components/image/Imageanimator.h"
 
 namespace ArkUICApiDemo {
 void ImageAnimatorComponent::SetState(int32_t state)

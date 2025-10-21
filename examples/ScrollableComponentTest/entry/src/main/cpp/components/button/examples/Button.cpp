@@ -14,27 +14,17 @@
  */
 
  /*
-  * Description: List支持展开指定ListItem的swipeAction
+  * Description: Grid组件高频接口CAPI补齐
   * Writer: renxiaowen
   */
 
-#ifndef ARKUI_CAPI_DEMO_IMAGESPAN_COMPONENT_H
-#define ARKUI_CAPI_DEMO_IMAGESPAN_COMPONENT_H
-
-#include <cstdint>
-#include <string>
-
-#include "components/component.h"
+#include "components/button/Button.h"
 
 namespace ArkUICApiDemo {
-class ImageSpanComponent : public Component {
-public:
-    ImageSpanComponent() : Component(ARKUI_NODE_IMAGE_SPAN) {}
-    explicit ImageSpanComponent(ArkUI_NodeHandle handle) : Component(handle) {}
 
-    int32_t SetImageSpanSrc(const std::string& content);
-    int32_t SetImageSpanSrc(ArkUI_DrawableDescriptor* descriptors);
-    int32_t SetImageSpanAlt(const std::string& alt);
-};
+void ButtonComponent::SetLabel(const std::string& content)
+{
+    ArkUI_AttributeItem item = { nullptr, 0, content.c_str() };
+    _nodeAPI->setAttribute(_component, NODE_BUTTON_LABEL, &item);
+}
 } // namespace ArkUICApiDemo
-#endif // ARKUI_CAPI_DEMO_IMAGESPAN_COMPONENT_H

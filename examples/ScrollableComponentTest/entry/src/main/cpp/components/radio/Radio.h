@@ -14,29 +14,28 @@
  */
 
  /*
-  * Description: List支持展开指定ListItem的swipeAction
+  * Description: Grid组件高频接口CAPI补齐
   * Writer: renxiaowen
   */
 
-#ifndef ARKUI_CAPI_DEMO_IMAGEANIMATOR_COMPONENT_H
-#define ARKUI_CAPI_DEMO_IMAGEANIMATOR_COMPONENT_H
+#ifndef ARKUI_CAPI_DEMO_RADIO_COMPONENT_H
+#define ARKUI_CAPI_DEMO_RADIO_COMPONENT_H
 
+#include <cstdint>
 #include <string>
 
 #include "components/component.h"
 
 namespace ArkUICApiDemo {
-class ImageAnimatorComponent : public Component {
+class RadioComponent : public Component {
 public:
-    ImageAnimatorComponent() : Component(ARKUI_NODE_IMAGE_ANIMATOR) {}
-    explicit ImageAnimatorComponent(ArkUI_NodeHandle handle) : Component(handle) {}
-    void SetState(int32_t state);
-    void SetIteration(int32_t iteration);
-    void SetImage(std::vector<ArkUI_ImageAnimatorFrameInfo*>& vector);
-    void SetFixedSize(int32_t fixedSize);
-    void SetReverse(int32_t reverse);
-    void SetFillMode(int32_t mode);
-    void SetDuration(int32_t duration);
+    RadioComponent() : Component(ARKUI_NODE_RADIO) {}
+    explicit RadioComponent(ArkUI_NodeHandle handle) : Component(handle) {}
+
+    void SetChecked(const bool& isChecked);
+    void SetGroup(const std::string& group);
+    void SetStyled(const uint32_t* colorArray, size_t size);
+    void SetValue(const std::string& value);
 };
 } // namespace ArkUICApiDemo
-#endif // ARKUI_CAPI_DEMO_IMAGEANIMATOR_COMPONENT_H
+#endif // ARKUI_CAPI_DEMO_RADIO_COMPONENT_H

@@ -14,11 +14,11 @@
  */
 
  /*
-  * Description: List支持展开指定ListItem的swipeAction
+  * Description: Grid组件高频接口CAPI补齐
   * Writer: renxiaowen
   */
 
-#include "components/grid/Grid_component.h"
+#include "components/grid/Grid1.h"
 
 namespace ArkUICApiDemo {
 void GridComponent::SetGridColumnsTemplate(const std::string& str)

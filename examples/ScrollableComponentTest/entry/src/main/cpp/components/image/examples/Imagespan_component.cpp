@@ -14,11 +14,11 @@
  */
 
  /*
-  * Description: List支持展开指定ListItem的swipeAction
+  * Description: Grid组件高频接口CAPI补齐
   * Writer: renxiaowen
   */
 
-#include "components/image/Imagespan_component.h"
+#include "components/image/Imagespan.h"
 
 namespace ArkUICApiDemo {
 

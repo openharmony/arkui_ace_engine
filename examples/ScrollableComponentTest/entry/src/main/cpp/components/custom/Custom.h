@@ -14,23 +14,22 @@
  */
 
  /*
-  * Description: List支持展开指定ListItem的swipeAction
+  * Description: Grid组件高频接口CAPI补齐
   * Writer: renxiaowen
   */
 
 #ifndef ARKUI_CAPI_DEMO_BUTTON_COMPONENT_H
 #define ARKUI_CAPI_DEMO_BUTTON_COMPONENT_H
 
+#include "components/component.h"
+#include <cassert>
 #include <string>
 
-#include "components/component.h"
-
 namespace ArkUICApiDemo {
-class ButtonComponent : public Component {
+class CustomComponent : public Component {
 public:
-    ButtonComponent() : Component(ARKUI_NODE_BUTTON) {}
-    explicit ButtonComponent(ArkUI_NodeHandle handle) : Component(handle) {}
-    void SetLabel(const std::string& content);
+    CustomComponent() : Component(ARKUI_NODE_CUSTOM) {}
+    CustomComponent(ArkUI_NodeHandle handle) : Component(handle) {}
 };
-} // namespace ArkUICApiDemo
-#endif // ARKUI_CAPI_DEMO_BUTTON_COMPONENT_H
+}
+#endif //ARKUI_CAPI_DEMO_BUTTON_COMPONENT_H

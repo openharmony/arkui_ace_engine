@@ -14,11 +14,11 @@
  */
 
  /*
-  * Description: List支持展开指定ListItem的swipeAction
+  * Description: Grid组件高频接口CAPI补齐
   * Writer: renxiaowen
   */
  
-#include "components/radio/Radio_component.h"
+#include "components/radio/Radio.h"
 
 #include <cstdint>
 
