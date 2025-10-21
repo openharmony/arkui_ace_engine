@@ -525,7 +525,7 @@ HWTEST_F(MenuItemPatternOptionTestNg, CreatePasteButton001, TestSize.Level1)
             return nullptr;
         }
     });
-    MenuView::CreatePasteButton(false, option, row, []() {});
+    MenuView::CreatePasteButton({false, false}, option, row, []() {});
     auto PasteButtonNode = option->GetChildAtIndex(0)->GetChildren();
     EXPECT_FALSE(PasteButtonNode.empty());
 }
