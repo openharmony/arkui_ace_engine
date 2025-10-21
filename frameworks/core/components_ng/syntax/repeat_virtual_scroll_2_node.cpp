@@ -865,5 +865,9 @@ void RepeatVirtualScroll2Node::fireOnUpdateDirty()
 void RepeatVirtualScroll2Node::DumpInfo()
 {
     DumpLog::GetInstance().AddDesc("VirtualScroll: true");
+    DumpLog::GetInstance().AddDesc(std::string("Length of source data:")
+                                        .append(std::to_string(arrLen_).c_str()));
+    DumpLog::GetInstance().AddDesc(std::string("totalCount of source data:")
+                                        .append(std::to_string(totalCount_).c_str()));
 }
 } // namespace OHOS::Ace::NG
