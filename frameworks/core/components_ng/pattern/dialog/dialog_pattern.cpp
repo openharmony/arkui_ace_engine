@@ -1427,10 +1427,25 @@ void DialogPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(dialogTheme);
     dialogTheme_ = dialogTheme;
     UpdateTitleAndContentColor();
+    UpdateMaskColor();
     UpdateWrapperBackgroundStyle(host, dialogTheme);
     UpdateButtonsProperty();
     OnModifyDone();
     host->MarkDirtyNode();
+}
+
+void DialogPattern::UpdateMaskColor()
+{
+    if (!dialogProperties_.isModal || dialogProperties_.maskColor.has_value()) {
+        return;
+    }
+    if (!dialogProperties_.isShowInSubWindow || isUIExtensionSubWindow_ || dialogProperties_.isSceneBoardDialog) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->UpdateBackgroundColor(dialogTheme_->GetMaskColorEnd());
+    }
 }
 
 void DialogPattern::UpdateTitleAndContentColor()
