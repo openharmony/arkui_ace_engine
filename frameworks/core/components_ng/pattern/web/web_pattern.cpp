@@ -2143,11 +2143,9 @@ void WebPattern::WebSendMouseEvent(const MouseInfo& info, int32_t clickNum)
         pressedCodes.push_back(static_cast<int32_t>(pCode));
     }
 
-    std::shared_ptr<NWebMouseEventImpl> mouseEvent =
-        std::make_shared<NWebMouseEventImpl>(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY(),
-        info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY(),
-        static_cast<int32_t>(info.GetButton()), static_cast<int32_t>(info.GetAction()),
-        clickNum, pressedCodes);
+    std::shared_ptr<NWebMouseEventImpl> mouseEvent = std::make_shared<NWebMouseEventImpl>(
+        info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY(), info.GetRawDeltaX(), info.GetRawDeltaY(),
+        static_cast<int32_t>(info.GetButton()), static_cast<int32_t>(info.GetAction()), clickNum, pressedCodes);
     delegate_->WebOnMouseEvent(mouseEvent);
 }
 
