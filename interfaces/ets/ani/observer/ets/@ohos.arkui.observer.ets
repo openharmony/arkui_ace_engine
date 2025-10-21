@@ -75,6 +75,11 @@ import hilog from '@ohos.hilog'
 
         onDidLayout(callback: Callback<void>): void;
         offDidLayout(callback?: Callback<void>): void;
+
+        onTabContentUpdate(callback: Callback<TabContentInfo>): void;
+        offTabContentUpdate(callback?: Callback<TabContentInfo>): void;
+        onTabContentUpdate(options: ObserverOptions, callback: Callback<TabContentInfo>): void;
+        offTabContentUpdate(options: ObserverOptions, callback?: Callback<TabContentInfo>): void;
     }
     
     class UIObserverImpl implements UIObserver
@@ -129,6 +134,11 @@ import hilog from '@ohos.hilog'
         public native offWillDraw(callback?: Callback<void>): void;
         public native onDidLayout(callback: Callback<void>): void;
         public native offDidLayout(callback?: Callback<void>): void;
+
+        public native onTabContentUpdate(callback: Callback<TabContentInfo>): void;
+        public native offTabContentUpdate(callback?: Callback<TabContentInfo>): void;
+        public native onTabContentUpdate(options: ObserverOptions, callback: Callback<TabContentInfo>): void;
+        public native offTabContentUpdate(options: ObserverOptions, callback?: Callback<TabContentInfo>): void;
     }
 
     export interface NavigationInfo {
@@ -413,5 +423,17 @@ import hilog from '@ohos.hilog'
 
     export interface NavDestinationSwitchInfo {}
 
-    export interface TabContentInfo {}
+    export enum TabContentState {
+        ON_SHOW = 0,
+        ON_HIDE = 1
+    }
+
+    export class TabContentInfo {
+        tabContentId: string;
+        tabContentUniqueId: int;
+        state: TabContentState;
+        index: int;
+        id: string;
+        uniqueId: int;
+    }
  }
