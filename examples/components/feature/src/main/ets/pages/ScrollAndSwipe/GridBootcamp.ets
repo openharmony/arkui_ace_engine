@@ -628,6 +628,10 @@ export struct GridBootcamp {
   private controller: TabsController = new TabsController();
   @State enableBackToTop: boolean = true;
   @State backToTop: boolean = false;
+  @State enableUseFillType: boolean = true;
+  @State useFillType: boolean = false;
+  @State enableFillType: boolean = false;
+  @State fillType: PresetFillType = PresetFillType.BREAKPOINT_DEFAULT;
   @State enableColumnsTemplate: boolean = false;
   @State columnsTemplate: string = '1fr';
   @State enableRowsTemplate: boolean = false;
@@ -2070,7 +2074,10 @@ export struct GridBootcamp {
               this.getUIContext().getCursorController().restoreDefault()
             }
           })
-          .columnsTemplate(useEnabled(this.enableColumnsTemplate, this.columnsTemplate))
+          .columnsTemplate(
+            this.useFillType ?
+            useEnabled(this.enableColumnsTemplate, this.columnsTemplate) :
+              { fillType: useEnabled(this.enableFillType, this.fillType) })
           .columnsGap(useEnabled(this.enableColumnsGap, this.columnsGap))
           .rowsGap(useEnabled(this.enableRowsGap, this.rowsGap))
           .scrollBar(useEnabled(this.enableScrollBar, this.scrollBar))
@@ -2278,6 +2285,27 @@ export struct GridBootcamp {
           value: $columnsGap,
           min: 0,
           max: 20
+        })
+
+        RadioBlock({
+          title: 'useFillType',
+          isEnabled: $enableUseFillType,
+          value: $useFillType,
+          dataSource: [
+            { label: 'true', value: true },
+            { label: 'false', value: false }
+          ]
+        })
+
+        RadioBlock({
+          title: 'fillType',
+          isEnabled: $enableFillType,
+          value: $fillType,
+          dataSource: [
+            { label: 'BREAKPOINT_DEFAULT', value: PresetFillType.BREAKPOINT_DEFAULT },
+            { label: 'BREAKPOINT_SM1MD2LG3', value: PresetFillType.BREAKPOINT_SM1MD2LG3 },
+            { label: 'BREAKPOINT_SM2MD3LG5', value: PresetFillType.BREAKPOINT_SM2MD3LG5 }
+          ]
         })
 
         RadioBlock({
