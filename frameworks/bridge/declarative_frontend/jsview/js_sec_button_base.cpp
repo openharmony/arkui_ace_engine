@@ -241,6 +241,7 @@ void JSSecButtonBase::SetBackgroundBorderRadius(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
+    SetCornerApplyType(info);
     if (info[0]->IsObject()) {
         std::optional<CalcDimension> topLeft;
         std::optional<CalcDimension> topRight;

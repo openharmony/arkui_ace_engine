@@ -292,6 +292,7 @@ public:
     static void ParseBorderWidth(const JSRef<JSVal>& args);
     static void JsBorderRadius(const JSCallbackInfo& info);
     static void ParseBorderRadius(const JSRef<JSVal>& args);
+    static void SetCornerApplyType(const JSCallbackInfo& info);
     static void JsBorderStyle(const JSCallbackInfo& info);
     static void ParseBorderStyle(const JSRef<JSVal>& args);
     static void ParseDashGap(const JSRef<JSVal>& args);
@@ -620,7 +621,6 @@ public:
     static void JSUpdateAnimatableProperty(const JSCallbackInfo& info);
     static void JSRenderGroup(const JSCallbackInfo& info);
     static void JSRenderFit(const JSCallbackInfo& info);
-    static void JSCornerApplyType(const JSCallbackInfo& info);
     static void JsExpandSafeArea(const JSCallbackInfo& info);
     static void JsIgnoreLayoutSafeArea(const JSCallbackInfo& info);
     static void JsGestureModifier(const JSCallbackInfo& info);

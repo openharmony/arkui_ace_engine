@@ -5197,6 +5197,7 @@ void JSViewAbstract::ParseOuterBorderColor(const JSRef<JSVal>& args)
 void JSViewAbstract::JsBorderRadius(const JSCallbackInfo& info)
 {
     ViewAbstractModel::GetInstance()->ResetResObj("borderRadius");
+    SetCornerApplyType(info);
     static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER,
         JSCallbackInfoType::OBJECT };
     auto jsVal = info[0];
@@ -5205,6 +5206,23 @@ void JSViewAbstract::JsBorderRadius(const JSCallbackInfo& info)
         return;
     }
     ParseBorderRadius(jsVal);
+}
+
+void JSViewAbstract::SetCornerApplyType(const JSCallbackInfo& info)
+{
+    if (info.Length() < NUM2) {
+        return;
+    }
+    auto type = info[NUM1];
+    CornerApplyType cornerApplyType = CornerApplyType::FAST;
+    if (type->IsNumber()) {
+        int32_t typeNumber = type->ToNumber<int32_t>();
+        if (typeNumber >= static_cast<int32_t>(CornerApplyType::FAST) &&
+            typeNumber < static_cast<int32_t>(CornerApplyType::MAX)) {
+            cornerApplyType = static_cast<CornerApplyType>(typeNumber);
+        }
+    }
+    ViewAbstractModel::GetInstance()->SetCornerApplyType(cornerApplyType);
 }
 
 NG::BorderRadiusProperty JSViewAbstract::GetLocalizedBorderRadius(const std::optional<Dimension>& radiusTopStart,
@@ -9531,7 +9549,6 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("updateAnimatableProperty", &JSViewAbstract::JSUpdateAnimatableProperty);
     JSClass<JSViewAbstract>::StaticMethod("renderGroup", &JSViewAbstract::JSRenderGroup);
     JSClass<JSViewAbstract>::StaticMethod("renderFit", &JSViewAbstract::JSRenderFit);
-    JSClass<JSViewAbstract>::StaticMethod("cornerApplyType", &JSViewAbstract::JSCornerApplyType);
 
     JSClass<JSViewAbstract>::StaticMethod("freeze", &JSViewAbstract::JsSetFreeze);
 
@@ -11446,22 +11463,6 @@ void JSViewAbstract::JSRenderFit(const JSCallbackInfo& info)
     }
     // how content fills the node duration implicit animation
     ViewAbstractModel::GetInstance()->SetRenderFit(renderFit);
-}
-
-void JSViewAbstract::JSCornerApplyType(const JSCallbackInfo& info)
-{
-    if (info.Length() != 1) {
-        return;
-    }
-    CornerApplyType cornerApplyType = CornerApplyType::FAST;
-    if (info[0]->IsNumber()) {
-        int32_t typeNumber = info[0]->ToNumber<int32_t>();
-        if (typeNumber >= static_cast<int32_t>(CornerApplyType::FAST) &&
-            typeNumber <= static_cast<int32_t>(CornerApplyType::MAX)) {
-            cornerApplyType = static_cast<CornerApplyType>(typeNumber);
-        }
-    }
-    ViewAbstractModel::GetInstance()->SetCornerApplyType(cornerApplyType);
 }
 
 bool JSViewAbstract::GetJsMediaBundleInfo(const JSRef<JSVal>& jsValue, std::string& bundleName, std::string& moduleName)
