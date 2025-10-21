@@ -22,6 +22,14 @@ import hilog from '@ohos.hilog'
  export default namespace uiObserver {
     loadLibrary("observer_ani");
     export native function createUIObserver(id: number): UIObserver;
+    export native function onRouterPageUpdate(
+        context: UIAbilityContext | UIContext,
+        callback: Callback<RouterPageInfo>
+    ): void;
+    export native function offRouterPageUpdate(
+        context: UIAbilityContext | UIContext,
+        callback?: Callback<RouterPageInfo>
+    ): void;
     export class DensityInfo {
         density: number;
     }
@@ -310,7 +318,7 @@ import hilog from '@ohos.hilog'
 
     export class RouterPageInfo {
         context: UIAbilityContext | UIContext;
-        index: number;
+        index: int;
         name: string;
         path: string;
         state: RouterPageState;
@@ -346,7 +354,7 @@ import hilog from '@ohos.hilog'
             if (!index.isNumber()) {
                 throw Error("index in RouterPageInfo type Error");
             }
-            staticValue.index = index.toNumber();
+            staticValue.index = index.toNumber() as int;
 
             let name = dynamicValue.getProperty('name');
             if (!name.isString()) {
