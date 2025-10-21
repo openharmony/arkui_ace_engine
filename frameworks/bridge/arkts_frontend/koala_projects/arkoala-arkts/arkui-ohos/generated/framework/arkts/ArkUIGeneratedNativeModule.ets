@@ -5180,9 +5180,7 @@ export class ArkUIGeneratedNativeModule {
     native static _RouterExtender_replace0(jsView: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _RouterExtender_replace1(jsView: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
     native static _RouterExtender_back0(thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
     native static _RouterExtender_back1(index: KInt, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _RouterExtender_runPage(jsView: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
