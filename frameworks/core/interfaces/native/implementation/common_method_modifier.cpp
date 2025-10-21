@@ -5328,14 +5328,14 @@ void SetBindContentCover0Impl(Ark_NativePointer node,
                 return uiNode;
             };
             ContentCoverParam contentCoverParam;
-            // ViewAbstractModelNG::BindContentCover(frameNode, true, nullptr, std::move(buildFunc),
-                // modalStyle, nullptr, nullptr, nullptr, nullptr, contentCoverParam);
+            ViewAbstractModelStatic::BindContentCover(frameNode, true, nullptr, std::move(buildFunc), modalStyle,
+                nullptr, nullptr, nullptr, nullptr, contentCoverParam);
             }, node);
     } else {
         ContentCoverParam contentCoverParam;
         std::function<RefPtr<UINode>()> buildFunc = nullptr;
-        // ViewAbstractModelNG::BindContentCover(frameNode, false, nullptr, std::move(buildFunc),
-            // modalStyle, nullptr, nullptr, nullptr, nullptr, contentCoverParam);
+        ViewAbstractModelStatic::BindContentCover(frameNode, false, nullptr, std::move(buildFunc), modalStyle, nullptr,
+            nullptr, nullptr, nullptr, contentCoverParam);
     }
 }
 void SetBindContentCover1Impl(Ark_NativePointer node,
