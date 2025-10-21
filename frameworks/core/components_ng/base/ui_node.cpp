@@ -475,6 +475,15 @@ void UINode::MountToParent(const RefPtr<UINode>& parent,
     AfterMountToParent();
 }
 
+int32_t UINode::GetHostPageId() const
+{
+    if (tag_ == V2::PAGE_ETS_TAG) {
+        return hostPageId_;
+    }
+    auto parent = GetParent();
+    return parent ? parent->GetHostPageId() : hostPageId_;
+}
+
 void UINode::MountToParentAfter(const RefPtr<UINode>& parent, const RefPtr<UINode>& siblingNode)
 {
     CHECK_NULL_VOID(parent);

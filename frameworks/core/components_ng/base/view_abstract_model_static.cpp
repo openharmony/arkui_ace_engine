@@ -30,6 +30,7 @@
 #include "core/components_ng/pattern/overlay/sheet_style.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
+#include "core/components_ng/syntax/static/detached_free_root_proxy_node.h"
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
 #endif
@@ -712,6 +713,9 @@ void ViewAbstractModelStatic::SetAccessibilityVirtualNode(FrameNode* frameNode,
                 return;
             }
             auto virtualNode = buildFunc();
+            if (AceType::InstanceOf<NG::DetachedFreeRootProxyNode>(virtualNode)) {
+                virtualNode = virtualNode->GetFirstChild();
+            }
             auto virtualFrameNode = AceType::DynamicCast<NG::FrameNode>(virtualNode);
             CHECK_NULL_VOID(virtualFrameNode);
             virtualFrameNode->SetAccessibilityNodeVirtual();

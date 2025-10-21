@@ -349,6 +349,36 @@ HWTEST_F(UINodeTestNg, UINodeTestNg010, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UINodeTestGetHostPageId
+ * @tc.desc: Test ui node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, UINodeTestGetHostPageId, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. call the MountToParent and set hostPageId_ is 0
+     * @tc.expected: step2. mount failure
+     */
+    ZERO->hostPageId_ = 0;
+    ONE->MountToParent(ZERO, 1, false);
+    int retPageId = ONE->GetHostPageId();
+    EXPECT_EQ(retPageId, 0);
+    ONE->Clean();
+    /**
+     * @tc.steps: step2. call the MountToParent and set hostPageId_ is 0
+     * @tc.expected: mount sucess and pageid is 1
+     */
+    ZERO->hostPageId_ = 1;
+    ZERO->SetInDestroying();
+    ONE->MountToParent(ZERO, 1, false);
+    retPageId = ONE->GetHostPageId();
+    EXPECT_EQ(retPageId, 1);
+    ZERO->SetDestroying(false);
+    ONE->Clean();
+    ZERO->Clean();
+}
+
+/**
  * @tc.name: UINodeTestNg011
  * @tc.desc: Test ui node method
  * @tc.type: FUNC
