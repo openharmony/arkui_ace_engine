@@ -304,8 +304,8 @@ HWTEST_F(SwiperModifierTest, DISABLED_setIndicatorTestDotColor, TestSize.Level1)
         Color::RED.ToString(); // Color::RED is result of stubs for ThemeConstants::GetColorByName
     static const std::vector<OneTestStep> testPlan = {
         { ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE), "#FFFFFFFF" },
-        { ArkUnion<Ark_ResourceColor, Ark_Float64>(0x123456), "#FF123456" },
-        { ArkUnion<Ark_ResourceColor, Ark_Float64>(0.5f), "#00000000" },
+        { ArkUnion<Ark_ResourceColor, Ark_Int32>(0x123456), "#FF123456" },
+        { ArkUnion<Ark_ResourceColor, Ark_Int32>(0.5f), "#00000000" },
         { ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"), "#11223344" },
         { ArkUnion<Ark_ResourceColor, Ark_String>("65535"), "#FF00FFFF" },
         { CreateResourceUnion<Ark_ResourceColor>(RES_NAME), EXPECTED_RESOURCE_COLOR },
@@ -529,8 +529,8 @@ HWTEST_F(SwiperModifierTest, DISABLED_setIndicatorTestDigitFontColor, TestSize.L
         Color::RED.ToString(); // Color::RED is result of stubs for ThemeConstants::GetColorByName
     static const std::vector<OneTestStep> testPlan = {
         { ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE), "#FFFFFFFF" },
-        { ArkUnion<Ark_ResourceColor, Ark_Float64>(0x123456), "#FF123456" },
-        { ArkUnion<Ark_ResourceColor, Ark_Float64>(0.5f), "#00000000" },
+        { ArkUnion<Ark_ResourceColor, Ark_Int32>(0x123456), "#FF123456" },
+        { ArkUnion<Ark_ResourceColor, Ark_Int32>(0.5f), "#00000000" },
         { ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"), "#11223344" },
         { ArkUnion<Ark_ResourceColor, Ark_String>("65535"), "#FF00FFFF" },
         { CreateResourceUnion<Ark_ResourceColor>(RES_NAME), EXPECTED_RESOURCE_COLOR },
@@ -767,8 +767,8 @@ HWTEST_F(SwiperModifierTest, DISABLED_setDisplayArrowTestStyleColor, TestSize.Le
         Color::RED.ToString(); // Color::RED is result of stubs for ThemeConstants::GetColorByName
     static const std::vector<OneTestStep> testPlan = {
         { ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE), "#FFFFFFFF" },
-        { ArkUnion<Ark_ResourceColor, Ark_Float64>(0x123456), "#FF123456" },
-        { ArkUnion<Ark_ResourceColor, Ark_Float64>(0.5f), "#00000000" },
+        { ArkUnion<Ark_ResourceColor, Ark_Int32>(0x123456), "#FF123456" },
+        { ArkUnion<Ark_ResourceColor, Ark_Int32>(0.5f), "#00000000" },
         { ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"), "#11223344" },
         { ArkUnion<Ark_ResourceColor, Ark_String>("65535"), "#FF00FFFF" },
         { CreateResourceUnion<Ark_ResourceColor>(RES_NAME), EXPECTED_RESOURCE_COLOR },
@@ -1141,12 +1141,12 @@ HWTEST_F(SwiperModifierTest, DISABLED_setDisplayCountTestObj, TestSize.Level1)
     auto checkInitial = GetAttrValue<std::string>(node_, PROP_NAME);
     EXPECT_EQ(checkInitial, DEFAULT_VALUE);
 
-    auto intVal = ArkUnion<displayCountArgT, checkT>(ArkValue<checkT>(ArkUnion<Ark_VP, Ark_Number>(123)));
+    auto intVal = ArkUnion<displayCountArgT, checkT>(ArkValue<checkT>(ArkUnion<Ark_VP, Ark_Float64>(123)));
     modifier_->setDisplayCount(node_, &intVal, nullptr);
     auto checkInt = GetAttrValue<std::string>(node_, PROP_NAME);
     EXPECT_EQ(checkInt, "123.00vp");
 
-    auto floatVal = ArkUnion<displayCountArgT, checkT>(ArkValue<checkT>(ArkUnion<Ark_VP, Ark_Number>(1.23f)));
+    auto floatVal = ArkUnion<displayCountArgT, checkT>(ArkValue<checkT>(ArkUnion<Ark_VP, Ark_Float64>(1.23f)));
     modifier_->setDisplayCount(node_, &floatVal, nullptr);
     auto checkFloat = GetAttrValue<std::string>(node_, PROP_NAME);
     EXPECT_EQ(checkFloat, "1.23vp");
@@ -1161,12 +1161,12 @@ HWTEST_F(SwiperModifierTest, DISABLED_setDisplayCountTestObj, TestSize.Level1)
     auto checkStrVp = GetAttrValue<std::string>(node_, PROP_NAME);
     EXPECT_EQ(checkStrVp, "5.60vp");
 
-    auto intNegVal = ArkUnion<displayCountArgT, checkT>(ArkValue<checkT>(ArkUnion<Ark_VP, Ark_Number>(-123)));
+    auto intNegVal = ArkUnion<displayCountArgT, checkT>(ArkValue<checkT>(ArkUnion<Ark_VP, Ark_Float64>(-123)));
     modifier_->setDisplayCount(node_, &intNegVal, nullptr);
     auto checkIntNeg = GetAttrValue<std::string>(node_, PROP_NAME);
     EXPECT_EQ(checkIntNeg, DEFAULT_VALUE);
 
-    auto floatNegVal = ArkUnion<displayCountArgT, checkT>(ArkValue<checkT>(ArkUnion<Ark_VP, Ark_Number>(-1.23f)));
+    auto floatNegVal = ArkUnion<displayCountArgT, checkT>(ArkValue<checkT>(ArkUnion<Ark_VP, Ark_Float64>(-1.23f)));
     modifier_->setDisplayCount(node_, &floatNegVal, nullptr);
     auto checkFloatNeg = GetAttrValue<std::string>(node_, PROP_NAME);
     EXPECT_EQ(checkFloatNeg, DEFAULT_VALUE);

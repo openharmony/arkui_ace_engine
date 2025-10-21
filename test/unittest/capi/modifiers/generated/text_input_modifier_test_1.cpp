@@ -371,7 +371,7 @@ HWTEST_F(TextInputModifierTest, DISABLED_setPlaceholderColorTestPlaceholderColor
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Int32>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Resource>(value));
@@ -584,7 +584,7 @@ HWTEST_F(TextInputModifierTest, setPlaceholderFontTestPlaceholderFontSizeValidVa
 
     // Initial setup
     WriteTo(initValuePlaceholderFont).size =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(initValuePlaceholderFont).weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
         std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
     WriteTo(initValuePlaceholderFont).family = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
@@ -607,7 +607,7 @@ HWTEST_F(TextInputModifierTest, setPlaceholderFontTestPlaceholderFontSizeValidVa
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumNonNegValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_Length, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_Length, Ark_Float64>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsResNonNegNonPctValidValues) {
         checkValue(input, expected, ArkUnion<Opt_Length, Ark_Resource>(value));
@@ -628,7 +628,7 @@ HWTEST_F(TextInputModifierTest, setPlaceholderFontTestPlaceholderFontSizeInvalid
 
     // Initial setup
     WriteTo(initValuePlaceholderFont).size =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(initValuePlaceholderFont).weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
         std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
     WriteTo(initValuePlaceholderFont).family = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
@@ -657,7 +657,7 @@ HWTEST_F(TextInputModifierTest, setPlaceholderFontTestPlaceholderFontSizeInvalid
         checkValue(input, ArkUnion<Opt_Length, Ark_Resource>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureDimensionsNumNonNegInvalidValues) {
-        checkValue(input, ArkUnion<Opt_Length, Ark_Number>(value));
+        checkValue(input, ArkUnion<Opt_Length, Ark_Float64>(value));
     }
     // Check invalid union
     checkValue("invalid union", ArkUnion<Opt_Length, Ark_Empty>(nullptr));
@@ -676,7 +676,7 @@ HWTEST_F(TextInputModifierTest, setPlaceholderFontTestPlaceholderFontStyleValidV
 
     // Initial setup
     WriteTo(initValuePlaceholderFont).size =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(initValuePlaceholderFont).weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
         std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
     WriteTo(initValuePlaceholderFont).family = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
@@ -714,7 +714,7 @@ HWTEST_F(TextInputModifierTest, setPlaceholderFontTestPlaceholderFontStyleInvali
 
     // Initial setup
     WriteTo(initValuePlaceholderFont).size =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(initValuePlaceholderFont).weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
         std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
     WriteTo(initValuePlaceholderFont).family = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
@@ -858,7 +858,7 @@ HWTEST_F(TextInputModifierTest, setCaretColorTestCaretColorValidValues, TestSize
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Int32>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Resource>(value));
@@ -1019,7 +1019,7 @@ HWTEST_F(TextInputModifierTest, setFontColorTestFontColorValidValues, TestSize.L
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Int32>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Resource>(value));
@@ -1091,7 +1091,7 @@ HWTEST_F(TextInputModifierTest, setFontSizeTestFontSizeValidValues, TestSize.Lev
 
     // Initial setup
     initValueFontSize =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueFontSize](
                           const std::string& input, const std::string& expectedStr, const Opt_Length& value) {
@@ -1106,7 +1106,7 @@ HWTEST_F(TextInputModifierTest, setFontSizeTestFontSizeValidValues, TestSize.Lev
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumNonNegValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_Length, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_Length, Ark_Float64>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsResNonNegNonPctValidValues) {
         checkValue(input, expected, ArkUnion<Opt_Length, Ark_Resource>(value));
@@ -1127,7 +1127,7 @@ HWTEST_F(TextInputModifierTest, setFontSizeTestFontSizeInvalidValues, TestSize.L
 
     // Initial setup
     initValueFontSize =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueFontSize](const std::string& input, const Opt_Length& value) {
         Opt_Length inputValueFontSize = initValueFontSize;
@@ -1148,7 +1148,7 @@ HWTEST_F(TextInputModifierTest, setFontSizeTestFontSizeInvalidValues, TestSize.L
         checkValue(input, ArkUnion<Opt_Length, Ark_Resource>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureDimensionsNumNonNegInvalidValues) {
-        checkValue(input, ArkUnion<Opt_Length, Ark_Number>(value));
+        checkValue(input, ArkUnion<Opt_Length, Ark_Float64>(value));
     }
     // Check invalid union
     checkValue("invalid union", ArkUnion<Opt_Length, Ark_Empty>(nullptr));
@@ -1747,7 +1747,7 @@ HWTEST_F(TextInputModifierTest, setCaretStyleTestCaretStyleWidthValidValues, Tes
 
     // Initial setup
     WriteTo(initValueCaretStyle).width =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(initValueCaretStyle).color =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
@@ -1765,7 +1765,7 @@ HWTEST_F(TextInputModifierTest, setCaretStyleTestCaretStyleWidthValidValues, Tes
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumNonNegValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_Length, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_Length, Ark_Float64>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsResNonNegNonPctValidValues) {
         checkValue(input, expected, ArkUnion<Opt_Length, Ark_Resource>(value));
@@ -1786,7 +1786,7 @@ HWTEST_F(TextInputModifierTest, DISABLED_setCaretStyleTestCaretStyleWidthInvalid
 
     // Initial setup
     WriteTo(initValueCaretStyle).width =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(initValueCaretStyle).color =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
@@ -1810,7 +1810,7 @@ HWTEST_F(TextInputModifierTest, DISABLED_setCaretStyleTestCaretStyleWidthInvalid
         checkValue(input, ArkUnion<Opt_Length, Ark_Resource>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureDimensionsNumNonNegInvalidValues) {
-        checkValue(input, ArkUnion<Opt_Length, Ark_Number>(value));
+        checkValue(input, ArkUnion<Opt_Length, Ark_Float64>(value));
     }
     // Check invalid union
     checkValue("invalid union", ArkUnion<Opt_Length, Ark_Empty>(nullptr));
@@ -1829,7 +1829,7 @@ HWTEST_F(TextInputModifierTest, setCaretStyleTestCaretStyleColorValidValues, Tes
 
     // Initial setup
     WriteTo(initValueCaretStyle).width =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(initValueCaretStyle).color =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
@@ -1850,7 +1850,7 @@ HWTEST_F(TextInputModifierTest, setCaretStyleTestCaretStyleColorValidValues, Tes
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Int32>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Resource>(value));
@@ -1871,7 +1871,7 @@ HWTEST_F(TextInputModifierTest, setCaretStyleTestCaretStyleColorInvalidValues, T
 
     // Initial setup
     WriteTo(initValueCaretStyle).width =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(initValueCaretStyle).color =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
@@ -1944,7 +1944,7 @@ HWTEST_F(TextInputModifierTest, setSelectedBackgroundColorTestSelectedBackground
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsAlpha20NumValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Int32>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsAlpha20ResValidValues) {
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Resource>(value));

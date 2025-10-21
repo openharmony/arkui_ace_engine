@@ -683,7 +683,7 @@ HWTEST_F(SliderModifierTest, setBlockColorTestBlockColorValidValues, TestSize.Le
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Int32>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Resource>(value));
@@ -777,7 +777,7 @@ HWTEST_F(SliderModifierTest, DISABLED_setTrackColorTestTrackColorValidValues, Te
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
         checkValue(input, expected,
             ArkUnion<Opt_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(
-                ArkUnion<Ark_ResourceColor, Ark_Float64>(value)));
+                ArkUnion<Ark_ResourceColor, Ark_Int32>(value)));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
         checkValue(input, expected,
@@ -880,7 +880,7 @@ HWTEST_F(SliderModifierTest, setSelectedColorTestSelectedColorValidValues, TestS
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
         checkValue(input, expected,
             ArkUnion<Opt_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(
-                ArkUnion<Ark_ResourceColor, Ark_Float64>(value)));
+                ArkUnion<Ark_ResourceColor, Ark_Int32>(value)));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
         checkValue(input, expected,
@@ -1032,7 +1032,7 @@ HWTEST_F(SliderModifierTest, DISABLED_setTrackThicknessTestTrackThicknessValidVa
 
     // Initial setup
     initValueTrackThickness =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueTrackThickness](
                           const std::string& input, const std::string& expectedStr, const Opt_Length& value) {
@@ -1047,7 +1047,7 @@ HWTEST_F(SliderModifierTest, DISABLED_setTrackThicknessTestTrackThicknessValidVa
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumNonNegValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_Length, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_Length, Ark_Float64>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsResNonNegValidValues) {
         checkValue(input, expected, ArkUnion<Opt_Length, Ark_Resource>(value));
@@ -1068,7 +1068,7 @@ HWTEST_F(SliderModifierTest, setTrackThicknessTestTrackThicknessInvalidValues, T
 
     // Initial setup
     initValueTrackThickness =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueTrackThickness](const std::string& input, const Opt_Length& value) {
         Opt_Length inputValueTrackThickness = initValueTrackThickness;
@@ -1083,7 +1083,7 @@ HWTEST_F(SliderModifierTest, setTrackThicknessTestTrackThicknessInvalidValues, T
     };
 
     for (auto& [input, value] : Fixtures::testFixtureDimensionsNumNonNegInvalidValues) {
-        checkValue(input, ArkUnion<Opt_Length, Ark_Number>(value));
+        checkValue(input, ArkUnion<Opt_Length, Ark_Float64>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureDimensionsStrNonNegInvalidValues) {
         checkValue(input, ArkUnion<Opt_Length, Ark_String>(value));
@@ -1141,7 +1141,7 @@ HWTEST_F(SliderModifierTest, setBlockBorderColorTestBlockBorderColorValidValues,
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Int32>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Resource>(value));
@@ -1214,7 +1214,7 @@ HWTEST_F(SliderModifierTest, setBlockBorderWidthTestBlockBorderWidthValidValues,
 
     // Initial setup
     initValueBlockBorderWidth =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueBlockBorderWidth](
                           const std::string& input, const std::string& expectedStr, const Opt_Length& value) {
@@ -1229,7 +1229,7 @@ HWTEST_F(SliderModifierTest, setBlockBorderWidthTestBlockBorderWidthValidValues,
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumNonNegValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_Length, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_Length, Ark_Float64>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsResNonNegValidValues) {
         checkValue(input, expected, ArkUnion<Opt_Length, Ark_Resource>(value));
@@ -1250,7 +1250,7 @@ HWTEST_F(SliderModifierTest, setBlockBorderWidthTestBlockBorderWidthInvalidValue
 
     // Initial setup
     initValueBlockBorderWidth =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueBlockBorderWidth](const std::string& input, const Opt_Length& value) {
         Opt_Length inputValueBlockBorderWidth = initValueBlockBorderWidth;
@@ -1265,7 +1265,7 @@ HWTEST_F(SliderModifierTest, setBlockBorderWidthTestBlockBorderWidthInvalidValue
     };
 
     for (auto& [input, value] : Fixtures::testFixtureDimensionsNumNonNegInvalidValues) {
-        checkValue(input, ArkUnion<Opt_Length, Ark_Number>(value));
+        checkValue(input, ArkUnion<Opt_Length, Ark_Float64>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureDimensionsStrNonNegInvalidValues) {
         checkValue(input, ArkUnion<Opt_Length, Ark_String>(value));
@@ -1322,7 +1322,7 @@ HWTEST_F(SliderModifierTest, setStepColorTestStepColorValidValues, TestSize.Leve
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Int32>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Resource>(value));
@@ -1395,7 +1395,7 @@ HWTEST_F(SliderModifierTest, setTrackBorderRadiusTestTrackBorderRadiusValidValue
 
     // Initial setup
     initValueTrackBorderRadius =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueTrackBorderRadius](
                           const std::string& input, const std::string& expectedStr, const Opt_Length& value) {
@@ -1410,7 +1410,7 @@ HWTEST_F(SliderModifierTest, setTrackBorderRadiusTestTrackBorderRadiusValidValue
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumNonNegValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_Length, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_Length, Ark_Float64>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsResNonNegNonPctValidValues) {
         checkValue(input, expected, ArkUnion<Opt_Length, Ark_Resource>(value));
@@ -1431,7 +1431,7 @@ HWTEST_F(SliderModifierTest, setTrackBorderRadiusTestTrackBorderRadiusInvalidVal
 
     // Initial setup
     initValueTrackBorderRadius =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueTrackBorderRadius](const std::string& input, const Opt_Length& value) {
         Opt_Length inputValueTrackBorderRadius = initValueTrackBorderRadius;
@@ -1446,7 +1446,7 @@ HWTEST_F(SliderModifierTest, setTrackBorderRadiusTestTrackBorderRadiusInvalidVal
     };
 
     for (auto& [input, value] : Fixtures::testFixtureDimensionsNumNonNegInvalidValues) {
-        checkValue(input, ArkUnion<Opt_Length, Ark_Number>(value));
+        checkValue(input, ArkUnion<Opt_Length, Ark_Float64>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureDimensionsStrNonNegNonPctInvalidValues) {
         checkValue(input, ArkUnion<Opt_Length, Ark_String>(value));
@@ -1582,9 +1582,9 @@ HWTEST_F(SliderModifierTest, DISABLED_setBlockSizeTestBlockSizeWidthValidValues,
 
     // Initial setup
     WriteTo(initValueBlockSize).width =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(initValueBlockSize).height =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueBlockSize](
                           const std::string& input, const std::string& expectedStr, const Opt_Length& value) {
@@ -1600,7 +1600,7 @@ HWTEST_F(SliderModifierTest, DISABLED_setBlockSizeTestBlockSizeWidthValidValues,
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumNonNegValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_Length, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_Length, Ark_Float64>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsResNonNegValidValues) {
         checkValue(input, expected, ArkUnion<Opt_Length, Ark_Resource>(value));
@@ -1621,9 +1621,9 @@ HWTEST_F(SliderModifierTest, setBlockSizeTestBlockSizeWidthInvalidValues, TestSi
 
     // Initial setup
     WriteTo(initValueBlockSize).width =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(initValueBlockSize).height =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueBlockSize](const std::string& input, const Opt_Length& value) {
         Opt_SizeOptions inputValueBlockSize = initValueBlockSize;
@@ -1639,7 +1639,7 @@ HWTEST_F(SliderModifierTest, setBlockSizeTestBlockSizeWidthInvalidValues, TestSi
     };
 
     for (auto& [input, value] : Fixtures::testFixtureDimensionsNumNonNegInvalidValues) {
-        checkValue(input, ArkUnion<Opt_Length, Ark_Number>(value));
+        checkValue(input, ArkUnion<Opt_Length, Ark_Float64>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureDimensionsStrNonNegInvalidValues) {
         checkValue(input, ArkUnion<Opt_Length, Ark_String>(value));
@@ -1664,9 +1664,9 @@ HWTEST_F(SliderModifierTest, DISABLED_setBlockSizeTestBlockSizeHeightValidValues
 
     // Initial setup
     WriteTo(initValueBlockSize).width =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(initValueBlockSize).height =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueBlockSize](
                           const std::string& input, const std::string& expectedStr, const Opt_Length& value) {
@@ -1682,7 +1682,7 @@ HWTEST_F(SliderModifierTest, DISABLED_setBlockSizeTestBlockSizeHeightValidValues
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumNonNegValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_Length, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_Length, Ark_Float64>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsResNonNegValidValues) {
         checkValue(input, expected, ArkUnion<Opt_Length, Ark_Resource>(value));
@@ -1703,9 +1703,9 @@ HWTEST_F(SliderModifierTest, setBlockSizeTestBlockSizeHeightInvalidValues, TestS
 
     // Initial setup
     WriteTo(initValueBlockSize).width =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(initValueBlockSize).height =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueBlockSize](const std::string& input, const Opt_Length& value) {
         Opt_SizeOptions inputValueBlockSize = initValueBlockSize;
@@ -1721,7 +1721,7 @@ HWTEST_F(SliderModifierTest, setBlockSizeTestBlockSizeHeightInvalidValues, TestS
     };
 
     for (auto& [input, value] : Fixtures::testFixtureDimensionsNumNonNegInvalidValues) {
-        checkValue(input, ArkUnion<Opt_Length, Ark_Number>(value));
+        checkValue(input, ArkUnion<Opt_Length, Ark_Float64>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureDimensionsStrNonNegInvalidValues) {
         checkValue(input, ArkUnion<Opt_Length, Ark_String>(value));
@@ -1770,7 +1770,7 @@ HWTEST_F(SliderModifierTest, setStepSizeTestStepSizeValidValues, TestSize.Level1
 
     // Initial setup
     initValueStepSize =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueStepSize](
                           const std::string& input, const std::string& expectedStr, const Opt_Length& value) {
@@ -1785,7 +1785,7 @@ HWTEST_F(SliderModifierTest, setStepSizeTestStepSizeValidValues, TestSize.Level1
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumNonNegValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_Length, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_Length, Ark_Float64>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsResNonNegValidValues) {
         checkValue(input, expected, ArkUnion<Opt_Length, Ark_Resource>(value));
@@ -1806,7 +1806,7 @@ HWTEST_F(SliderModifierTest, setStepSizeTestStepSizeInvalidValues, TestSize.Leve
 
     // Initial setup
     initValueStepSize =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueStepSize](const std::string& input, const Opt_Length& value) {
         Opt_Length inputValueStepSize = initValueStepSize;
@@ -1821,7 +1821,7 @@ HWTEST_F(SliderModifierTest, setStepSizeTestStepSizeInvalidValues, TestSize.Leve
     };
 
     for (auto& [input, value] : Fixtures::testFixtureDimensionsNumNonNegInvalidValues) {
-        checkValue(input, ArkUnion<Opt_Length, Ark_Number>(value));
+        checkValue(input, ArkUnion<Opt_Length, Ark_Float64>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureDimensionsStrNonNegInvalidValues) {
         checkValue(input, ArkUnion<Opt_Length, Ark_String>(value));

@@ -2126,9 +2126,9 @@ HWTEST_P(CommonMethodModifierTest, setMarkAnchorTestMarkAnchorPositionXValidValu
 
     // Initial setup
     WriteToUnion<Ark_Position>(WriteTo(initValueMarkAnchor)).x =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumAnyValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumAnyValidValues[0]));
     WriteToUnion<Ark_Position>(WriteTo(initValueMarkAnchor)).y =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumAnyValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumAnyValidValues[0]));
 
     auto checkValue = [this, &initValueMarkAnchor](
                           const std::string& input, const std::string& expectedStr, const Opt_Length& value) {
@@ -2144,7 +2144,7 @@ HWTEST_P(CommonMethodModifierTest, setMarkAnchorTestMarkAnchorPositionXValidValu
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumAnyValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_Length, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_Length, Ark_Float64>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsResAnyValidValues) {
         checkValue(input, expected, ArkUnion<Opt_Length, Ark_Resource>(value));
@@ -2165,9 +2165,9 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setMarkAnchorTestMarkAnchorPositionX
 
     // Initial setup
     WriteToUnion<Ark_Position>(WriteTo(initValueMarkAnchor)).x =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumAnyValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumAnyValidValues[0]));
     WriteToUnion<Ark_Position>(WriteTo(initValueMarkAnchor)).y =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumAnyValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumAnyValidValues[0]));
 
     auto checkValue = [this, &initValueMarkAnchor](const std::string& input, const Opt_Length& value) {
         Opt_Union_Position_LocalizedPosition inputValueMarkAnchor = initValueMarkAnchor;
@@ -2199,9 +2199,9 @@ HWTEST_P(CommonMethodModifierTest, setMarkAnchorTestMarkAnchorPositionYValidValu
 
     // Initial setup
     WriteToUnion<Ark_Position>(WriteTo(initValueMarkAnchor)).x =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumAnyValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumAnyValidValues[0]));
     WriteToUnion<Ark_Position>(WriteTo(initValueMarkAnchor)).y =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumAnyValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumAnyValidValues[0]));
 
     auto checkValue = [this, &initValueMarkAnchor](
                           const std::string& input, const std::string& expectedStr, const Opt_Length& value) {
@@ -2217,7 +2217,7 @@ HWTEST_P(CommonMethodModifierTest, setMarkAnchorTestMarkAnchorPositionYValidValu
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumAnyValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_Length, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_Length, Ark_Float64>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsResAnyValidValues) {
         checkValue(input, expected, ArkUnion<Opt_Length, Ark_Resource>(value));

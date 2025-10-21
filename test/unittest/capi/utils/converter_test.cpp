@@ -59,7 +59,7 @@ HWTEST_F(ConvertorTest, OptArrayConversion, TestSize.Level1)
     std::vector<std::optional<Color>> testArray;
     std::transform(inputArray.begin(), inputArray.end(), std::back_inserter(testArray),
         [](auto val) {return Color(val);});
-    Converter::ArkArrayHolder<Array_ResourceColor, Ark_Number> holder(inputArray);
+    Converter::ArkArrayHolder<Array_ResourceColor, Ark_Int32> holder(inputArray);
 
     auto input = holder.ArkValue();
     auto result = Converter::Convert<std::vector<std::optional<Color>>>(input);

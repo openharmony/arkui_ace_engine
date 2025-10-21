@@ -341,17 +341,17 @@ std::vector<std::tuple<std::string, Ark_String>> testFixtureColorsAlpha20StrInva
     { "\"RgbA(255, 100, 255, 0.5)\"", Converter::ArkValue<Ark_String>("RgbA(255, 100, 255, 0.5)", &fixCtx) },
 };
 
-// Fixture 'ColorsNum' for type 'Ark_Number'
-std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureColorsNumValidValues = {
-    { "0", Converter::ArkValue<Ark_Number>(0, &fixCtx), "#00000000" },
-    { "1", Converter::ArkValue<Ark_Number>(1, &fixCtx), "#FF000001" },
-    { "65535", Converter::ArkValue<Ark_Number>(65535, &fixCtx), "#FF00FFFF" },
-    { "-1", Converter::ArkValue<Ark_Number>(-1, &fixCtx), "#FFFFFFFF" },
-    { "0xBE7AC0DE", Converter::ArkValue<Ark_Number>(0xBE7AC0DE, &fixCtx), "#BE7AC0DE" },
+// Fixture 'ColorsNum' for type 'Ark_Int32'
+std::vector<std::tuple<std::string, Ark_Int32, std::string>> testFixtureColorsNumValidValues = {
+    { "0", Converter::ArkValue<Ark_Int32>(0, &fixCtx), "#00000000" },
+    { "1", Converter::ArkValue<Ark_Int32>(1, &fixCtx), "#FF000001" },
+    { "65535", Converter::ArkValue<Ark_Int32>(65535, &fixCtx), "#FF00FFFF" },
+    { "-1", Converter::ArkValue<Ark_Int32>(-1, &fixCtx), "#FFFFFFFF" },
+    { "0xBE7AC0DE", Converter::ArkValue<Ark_Int32>(0xBE7AC0DE, &fixCtx), "#BE7AC0DE" },
     { "std::numeric_limits<float>::quiet_NaN()",
-        Converter::ArkValue<Ark_Number>(std::numeric_limits<float>::quiet_NaN(), &fixCtx), "#80000000" },
+        Converter::ArkValue<Ark_Int32>(std::numeric_limits<float>::quiet_NaN(), &fixCtx), "#80000000" },
     { "std::numeric_limits<float>::infinity()",
-        Converter::ArkValue<Ark_Number>(std::numeric_limits<float>::infinity(), &fixCtx), "#80000000" },
+        Converter::ArkValue<Ark_Int32>(std::numeric_limits<float>::infinity(), &fixCtx), "#80000000" },
 };
 
 // Fixture 'ColorsAlpha20Num' for type 'Ark_Number'
@@ -904,14 +904,14 @@ std::vector<std::tuple<std::string, Ark_ShadowType, std::string>> testFixtureSha
 };
 
 // Fixture 'DimensionsNumNonNeg' for type 'Ark_Number'
-std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureDimensionsNumNonNegValidValues = {
-    { "123", Converter::ArkValue<Ark_Number>(123, &fixCtx), "123.00vp" },
-    { "0", Converter::ArkValue<Ark_Number>(0, &fixCtx), "0.00vp" },
-    { "1.23", Converter::ArkValue<Ark_Number>(1.23, &fixCtx), "1.23vp" },
+std::vector<std::tuple<std::string, Ark_Float64, std::string>> testFixtureDimensionsNumNonNegValidValues = {
+    { "123", Converter::ArkValue<Ark_Float64>(123, &fixCtx), "123.00vp" },
+    { "0", Converter::ArkValue<Ark_Float64>(0, &fixCtx), "0.00vp" },
+    { "1.23", Converter::ArkValue<Ark_Float64>(1.23, &fixCtx), "1.23vp" },
 };
 
-std::vector<std::tuple<std::string, Ark_Number>> testFixtureDimensionsNumNonNegInvalidValues = {
-    { "-1", Converter::ArkValue<Ark_Number>(-1, &fixCtx) },
+std::vector<std::tuple<std::string, Ark_Float64>> testFixtureDimensionsNumNonNegInvalidValues = {
+    { "-1", Converter::ArkValue<Ark_Float64>(-1, &fixCtx) },
 };
 
 // Fixture 'DimensionsStrNonPerc' for type 'Ark_String'
