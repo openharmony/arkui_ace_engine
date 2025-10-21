@@ -182,6 +182,7 @@ public:
     ACE_WEB_EVENT_PROPERTY(OnPdfScrollAtBottom, void);
     ACE_WEB_EVENT_PROPERTY(OnPdfLoad, void);
     ACE_WEB_EVENT_PROPERTY(OnSafeBrowsingCheckFinish, void);
+    ACE_WEB_EVENT_PROPERTY(OnVerifyPinRequest, bool);
 
 private:
     std::function<void(KeyEventInfo& keyEventInfo)> propOnKeyEvent_;

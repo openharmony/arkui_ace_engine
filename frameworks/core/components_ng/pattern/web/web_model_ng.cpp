@@ -2708,4 +2708,16 @@ void WebModelNG::SetBackToTop(FrameNode* frameNode, bool isBackToTop)
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdateBackToTop(isBackToTop);
 }
+
+void WebModelNG::SetOnVerifyPinRequest(std::function<bool(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto func = jsCallback;
+    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo>& info) -> bool {
+        CHECK_NULL_RETURN(info, false);
+        return func(info.get());
+    };
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnVerifyPinRequestEvent(std::move(uiCallback));
+}
 } // namespace OHOS::Ace::NG
