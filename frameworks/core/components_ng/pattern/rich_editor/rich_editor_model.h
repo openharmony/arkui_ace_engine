@@ -393,7 +393,9 @@ public:
     virtual void SetTextDetectEnable(bool value) = 0;
     virtual void SetSupportPreviewText(bool value) = 0;
     virtual void SetSelectDetectEnable(const bool value) = 0;
+    virtual void ResetSelectDetectEnable() = 0;
     virtual void SetSelectDetectConfig(std::vector<TextDataDetectType>& types) = 0;
+    virtual void ResetSelectDetectConfig() = 0;
     virtual void SetTextDetectConfig(const TextDetectConfig& textDetectConfig) = 0;
     virtual void SetSelectedBackgroundColor(const Color& selectedColor) = 0;
     virtual void SetCaretColor(const Color& color) = 0;
