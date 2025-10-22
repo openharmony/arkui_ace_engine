@@ -18,22 +18,26 @@
 #ifndef SCROLLABLE_COMPONENT_LAZYTEXTLISTEXAMPLE_H
 #define SCROLLABLE_COMPONENT_LAZYTEXTLISTEXAMPLE_H
 
-#include "common/ArkUITextNode.h"
-#include "components/list/ListItemGroup.h"
-#include "components/list/ListItem.h"
-#include "components/list/List.h"
+#include "ArkUIBaseNode.h"
+#include "ArkUIListItemGroupNode.h"
+#include "ArkUIListItemNode.h"
+#include "ArkUIListNode.h"
+#include "ArkUITextNode.h"
 #include <cstdint>
 
-std::shared_ptr<BaseNode> CreateLazyTextListExample()
+namespace NativeModule {
+
+std::shared_ptr<ArkUIBaseNode> CreateLazyTextListExample()
 {
     // 使用智能指针创建List组件。
-    auto list = std::make_shared<List>();
+    auto list = std::make_shared<ArkUIListNode>();
     list->SetPercentWidth(1);
     list->SetPercentHeight(1);
 
-    auto adapter = std::make_shared<ArkUINodeAdapter>(100); /* 100: item count */
+    auto adapter = std::make_shared<ArkUIListItemAdapter>(100); /* 100: item count */
     list->SetLazyAdapter(adapter);
     return list;
 }
+} // namespace NativeModule
 
 #endif // SCROLLABLE_COMPONENT_LAZYTEXTLISTEXAMPLE_H
