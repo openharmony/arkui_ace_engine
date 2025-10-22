@@ -163,6 +163,7 @@ void GridPattern::OnModifyDone()
     auto focusHub = host->GetFocusHub();
     if (focusHub) {
         InitOnKeyEvent(focusHub);
+        InitFocusEvent(focusHub);
     }
     SetAccessibilityAction();
     Register2DragDropManager();
@@ -780,6 +781,25 @@ bool GridPattern::OnKeyEvent(const KeyEvent& event)
     return false;
 }
 
+void GridPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
+{
+    auto blurTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleBlurEvent();
+    };
+    focusHub->SetOnBlurInternal(blurTask);
+}
+void GridPattern::HandleBlurEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    if (focusHub->GetFocusDependence() != FocusDependence::AUTO) {
+        focusHub->SetFocusDependence(FocusDependence::AUTO);
+    }
+}
 void GridPattern::ScrollPage(bool reverse, bool smooth, AccessibilityScrollType scrollType)
 {
     float distance = reverse ? GetMainContentSize() : -GetMainContentSize();

@@ -391,4 +391,46 @@ HWTEST_F(GridPatternTestNg, GetContentStartOffsetWithInvalidValueTest, TestSize.
 
     EXPECT_FLOAT_EQ(pattern_->GetContentStartOffset(), 0.0f);
 }
+/**
+ * @tc.name: HandleBlurEvent
+ * @tc.desc: test GridPattern::HandleBlurEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridPatternTestNg, HandleBlurEventTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Test OnModifyDone
+     */
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    CreateFocusableGridItems(10, ITEM_MAIN_SIZE, ITEM_MAIN_SIZE);
+    CreateDone();
+    EXPECT_TRUE(frameNode_->GetFocusHub());
+    /**
+     * @tc.steps: step2. Call OnModifyDone
+     */
+    pattern_->OnModifyDone();
+    auto focusHub = frameNode_->GetFocusHub();
+    FlushUITasks();
+    EXPECT_TRUE(focusHub);
+    /**
+     * @tc.steps: step2. Handle item focus
+     */
+    RefPtr<FocusHub> currentFocusNode = GetChildFocusHub(frameNode_, 0);
+    currentFocusNode->RequestFocusImmediately();
+    FlushUITasks();
+    EXPECT_EQ(focusHub->GetFocusDependence(), FocusDependence::AUTO);
+
+    /**
+     * @tc.steps: step4. lostChild
+     */
+    focusHub->LostChildFocusToSelf();
+    EXPECT_EQ(focusHub->GetFocusDependence(), FocusDependence::SELF);
+
+    /**
+     * @tc.steps: step5. Call HandleBlurEvent
+     */
+    pattern_->HandleBlurEvent();
+    EXPECT_EQ(focusHub->GetFocusDependence(), FocusDependence::AUTO);
+}
 } // namespace OHOS::Ace::NG
