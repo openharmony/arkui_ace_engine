@@ -78,6 +78,7 @@ const int32_t NUMBER_THREE = 3;
 
 bool GetIsStringObject(ani_env* env, ani_ref object_ref);
 bool GetIsNumberObject(ani_env* env, ani_ref object_ref);
+bool GetIsIntObject(ani_env* env, ani_ref object_ref);
 bool GetIsUndefinedObject(ani_env* env, ani_ref object_ref);
 bool GetIsResourceObject(ani_env* env, ani_ref object_ref);
 bool GetIsArrayObject(ani_env* env, ani_ref object_ref);
