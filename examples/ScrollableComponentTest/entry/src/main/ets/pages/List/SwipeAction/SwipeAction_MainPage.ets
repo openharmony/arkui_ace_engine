@@ -14,7 +14,6 @@
  */
 
  /*
-  * SR: SR20250724533255
   * Description: List支持展开指定ListItem的swipeAction
   * Writer: renxiaowen
   */
@@ -38,9 +37,9 @@ class TextList {
 struct IndexPage {
   scroll: Scroller = new Scroller()
   @State arr: TextList[] = [
-    new TextList(1, 'children', 'pages/List/SwipeAction/children'),
-    new TextList(2, 'hIndex', 'pages/List/SwipeAction/hIndex'),
-    new TextList(3, 'Page1', 'pages/List/SwipeAction/Page1'),
+    new TextList(1, 'Children', 'pages/List/SwipeAction/Children'),
+    new TextList(2, 'PageSwipe', 'pages/List/SwipeAction/PageSwipe'),
+    new TextList(3, 'PageSwipe1', 'pages/List/SwipeAction/PageSwipe1'),
     new TextList(4, 'PageRepeat', 'pages/List/SwipeAction/PageRepeat')
   ]
   @State fontSize: Resource | undefined = undefined
