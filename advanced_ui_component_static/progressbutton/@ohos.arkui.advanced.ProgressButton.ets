@@ -48,7 +48,7 @@ const PROGRESS_BUTTON_EMPHASIZE_SECONDARY_BUTTON_KEY = 'progress_button_emphasiz
 
 @Component
 export struct ProgressButton {
-  @PropRef @Watch('getProgressContext') progress: double;
+  @PropRef @Watch('getProgressContext') progress: double = 0.0;
   @State textProgress: string = EMPTY_STRING as string;
   @PropRef content: ResourceStr = EMPTY_STRING as string;
   @State @Watch('getLoadingProgress') isLoading: boolean = false;
@@ -213,7 +213,7 @@ export struct ProgressButton {
           .height(this.textHeight)
           .constraintSize({ minHeight: BUTTON_NORMARL_HEIGHT })
           .borderRadius(this.progressButtonRadius ? this.toLengthString(this.getProgressButtonRadius()) :
-          this.buttonBorderRadius)
+            this.buttonBorderRadius)
           .width('100%')
       }
     }
