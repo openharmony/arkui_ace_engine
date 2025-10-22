@@ -1676,6 +1676,7 @@ void FormPattern::InitFormManagerDelegate()
     InitOtherCallback(instanceID);
     InitUpdateFormDoneCallback(instanceID);
     InitDueControlFormCallback(instanceID);
+    InitFormRenderDiedCallback();
     const std::function<void(bool isRotate, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)>& callback =
         [this](bool isRotate, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction) {
             FormManager::GetInstance().NotifyIsSizeChangeByRotate(isRotate, rsTransaction);
@@ -3045,6 +3046,7 @@ void FormPattern::InitializeFormAccessibility()
     CHECK_NULL_VOID(host);
     auto formNode = DynamicCast<FormNode>(host);
     CHECK_NULL_VOID(formNode);
+    SetFormAccessibilityAction();
     formNode->InitializeFormAccessibility();
     formNode->NotifyAccessibilityChildTreeRegister();
 }
@@ -3057,6 +3059,12 @@ void FormPattern::SetForbiddenRootNodeAccessibilityAction(RefPtr<FrameNode> &for
     auto formNode = DynamicCast<FormNode>(host);
     CHECK_NULL_VOID(formNode);
     formNode->ResetAccessibilityChildTreeCallbackAndDeregister();
+    if (!isDynamic_) {
+        auto hostAccessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+        CHECK_NULL_VOID(hostAccessibilityProperty);
+        hostAccessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
+    }
+
     auto accessibilityProperty = forbiddenRootNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
     accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::YES_STR);
@@ -3077,7 +3085,7 @@ void FormPattern::SetFormAccessibilityAction()
     CHECK_NULL_VOID(host);
     auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
-    if (isDynamic_) {
+    if (isDynamic_ || formSpecialStyle_.IsForbidden() || formSpecialStyle_.IsLocked()) {
         accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
     } else {
         accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::YES_STR);
@@ -3153,5 +3161,14 @@ bool FormPattern::IsFormDueControl(const std::string &bundleName, const std::str
     CHECK_NULL_RETURN(formManagerBridge_, false);
     return formManagerBridge_->CheckFormDueControl(
         bundleName, moduleName, abilityName, formName, dimension, isDisablePolicy);
+}
+
+void FormPattern::InitFormRenderDiedCallback()
+{
+    formManagerBridge_->AddFormRenderDiedCallback([weak = WeakClaim(this)] () {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnregisterAccessibility();
+    });
 }
 } // namespace OHOS::Ace::NG
