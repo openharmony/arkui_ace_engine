@@ -16,7 +16,7 @@
 import { KoalaCallsiteKey, uint32 } from "@koalaui/common"
 import { GlobalStateManager } from "../states/GlobalStateManager"
 import { ComputableState, StateManager } from "../states/State"
-import { State } from 'arkui.incremental.runtime.state';
+import { ReadableState as State } from 'arkui.incremental.runtime.state';
 import { IncrementalNode } from "../tree/IncrementalNode"
 import { Disposable } from "../states/Disposable"
 import { memoRoot } from "./entry"
