@@ -58,7 +58,7 @@ export class PatternLockModifier extends CommonMethodModifier implements Pattern
     _autoReset_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _autoReset_0_0value?: boolean | undefined
     _onDotConnect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onDotConnect_0_0value?: ((value0: number) => void) | undefined
+    _onDotConnect_0_0value?: ((value0: int32) => void) | undefined
     _activateCircleStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _activateCircleStyle_0_0value?: CircleStyleOptions | undefined
     _skipUnselectedPoint_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -250,7 +250,7 @@ export class PatternLockModifier extends CommonMethodModifier implements Pattern
         {
             switch (this._onDotConnect_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnDotConnectAttribute((this._onDotConnect_0_0value as ((value0: number) => void) | undefined));
+                    peer.setOnDotConnectAttribute((this._onDotConnect_0_0value as ((value0: int32) => void) | undefined));
                     this._onDotConnect_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -260,7 +260,7 @@ export class PatternLockModifier extends CommonMethodModifier implements Pattern
                 }
                 default: {
                     this._onDotConnect_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnDotConnectAttribute((undefined as ((value0: number) => void) | undefined));
+                    peer.setOnDotConnectAttribute((undefined as ((value0: int32) => void) | undefined));
                 }
             }
         }
@@ -442,7 +442,7 @@ export class PatternLockModifier extends CommonMethodModifier implements Pattern
                     break;
                 }
                 default: {
-                    this.onDotConnect((undefined as ((value0: number) => void) | undefined));
+                    this.onDotConnect((undefined as ((value0: int32) => void) | undefined));
                 }
             }
         }
@@ -583,7 +583,7 @@ export class PatternLockModifier extends CommonMethodModifier implements Pattern
         }
         return this
     }
-    onDotConnect(value: ((value0: number) => void) | undefined): this {
+    onDotConnect(value: ((value0: int32) => void) | undefined): this {
         if (((this._onDotConnect_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._onDotConnect_0_flag = AttributeUpdaterFlag.UPDATE

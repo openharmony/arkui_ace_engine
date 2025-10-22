@@ -16600,8 +16600,8 @@ typedef struct Opt_HistoricalPoint {
 } Opt_HistoricalPoint;
 typedef struct Ark_ImageError {
     /* kind: Interface */
-    Ark_Number componentWidth;
-    Ark_Number componentHeight;
+    Ark_Int32 componentWidth;
+    Ark_Int32 componentHeight;
     Ark_String message;
     Opt_BusinessError error;
 } Ark_ImageError;
@@ -22186,7 +22186,7 @@ typedef struct GENERATED_ArkUIPatternLockModifier {
     void (*setAutoReset)(Ark_NativePointer node,
                          const Opt_Boolean* value);
     void (*setOnDotConnect)(Ark_NativePointer node,
-                            const Opt_Callback_Number_Void* value);
+                            const Opt_Callback_I32_Void* value);
     void (*setActivateCircleStyle)(Ark_NativePointer node,
                                    const Opt_CircleStyleOptions* value);
     void (*setSkipUnselectedPoint)(Ark_NativePointer node,
