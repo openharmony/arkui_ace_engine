@@ -617,6 +617,8 @@ let MouseAction;
   MouseAction[MouseAction.Release = 2] = 'Release';
   MouseAction[MouseAction.Move = 3] = 'Move';
   MouseAction[MouseAction.Hover = 4] = 'Hover';
+  MouseAction[MouseAction.ENTER_WINDOW = 4] = 'ENTER_WINDOW';
+  MouseAction[MouseAction.LEAVE_WINDOW = 5] = 'LEAVE_WINDOW';
   MouseAction[MouseAction.CANCEL = 13] = 'CANCEL';
 })(MouseAction || (MouseAction = {}));
 
