@@ -246,9 +246,6 @@ void callManagedButtonTriggerClickCallbackSync(Ark_VMContext vmContext, Ark_Int3
     argsSerializer.writeInt32(resourceId);
     argsSerializer.writeFloat64(xPos);
     argsSerializer.writeFloat64(yPos);
-    // KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
-    // argsSerializer.writeNumber(xPos);
-    // argsSerializer.writeNumber(yPos);
     KInteropReturnBuffer callData = argsSerializer.toReturnBuffer();
     KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
     callData.dispose(callData.data, callData.length);
@@ -1123,14 +1120,15 @@ void callManagedCallback_F64_SliderChangeMode_Void(Ark_Int32 resourceId, Ark_Flo
 }
 void callManagedCallback_F64_SliderChangeMode_VoidSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Float64 value, Ark_SliderChangeMode mode)
 {
-    uint8_t dataBuffer[4096];
-    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&dataBuffer, sizeof(dataBuffer), nullptr);
+    SerializerBase argsSerializer = SerializerBase(nullptr);
     argsSerializer.writeInt32(10);
     argsSerializer.writeInt32(Kind_Callback_F64_SliderChangeMode_Void);
     argsSerializer.writeInt32(resourceId);
     argsSerializer.writeFloat64(value);
     argsSerializer.writeInt32(static_cast<Ark_SliderChangeMode>(mode));
-    KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
+    KInteropReturnBuffer callData = argsSerializer.toReturnBuffer();
+    KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
+    callData.dispose(callData.data, callData.length);
 }
 void callManagedCallback_FocusAxisEvent_Void(Ark_Int32 resourceId, Ark_FocusAxisEvent value0)
 {
@@ -1355,8 +1353,7 @@ void callManagedCallback_I32_F64_ComputedBarAttribute(Ark_Int32 resourceId, Ark_
 }
 void callManagedCallback_I32_F64_ComputedBarAttributeSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Int32 index, Ark_Float64 offset, Callback_ComputedBarAttribute_Void continuation)
 {
-    uint8_t dataBuffer[4096];
-    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&dataBuffer, sizeof(dataBuffer), nullptr);
+    SerializerBase argsSerializer = SerializerBase(nullptr);
     argsSerializer.writeInt32(10);
     argsSerializer.writeInt32(Kind_Callback_I32_F64_ComputedBarAttribute);
     argsSerializer.writeInt32(resourceId);
@@ -1365,7 +1362,9 @@ void callManagedCallback_I32_F64_ComputedBarAttributeSync(Ark_VMContext vmContex
     argsSerializer.writeCallbackResource(continuation.resource);
     argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.call));
     argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.callSync));
-    KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
+    KInteropReturnBuffer callData = argsSerializer.toReturnBuffer();
+    KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
+    callData.dispose(callData.data, callData.length);
 }
 void callManagedCallback_I32_I32_Boolean(Ark_Int32 resourceId, Ark_Int32 from, Ark_Int32 to, Callback_Boolean_Void continuation)
 {
@@ -1384,8 +1383,7 @@ void callManagedCallback_I32_I32_Boolean(Ark_Int32 resourceId, Ark_Int32 from, A
 }
 void callManagedCallback_I32_I32_BooleanSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Int32 from, Ark_Int32 to, Callback_Boolean_Void continuation)
 {
-    uint8_t dataBuffer[4096];
-    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&dataBuffer, sizeof(dataBuffer), nullptr);
+    SerializerBase argsSerializer = SerializerBase(nullptr);
     argsSerializer.writeInt32(10);
     argsSerializer.writeInt32(Kind_Callback_I32_I32_Boolean);
     argsSerializer.writeInt32(resourceId);
@@ -1394,7 +1392,9 @@ void callManagedCallback_I32_I32_BooleanSync(Ark_VMContext vmContext, Ark_Int32 
     argsSerializer.writeCallbackResource(continuation.resource);
     argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.call));
     argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.callSync));
-    KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
+    KInteropReturnBuffer callData = argsSerializer.toReturnBuffer();
+    KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
+    callData.dispose(callData.data, callData.length);
 }
 void callManagedCallback_I32_I32_I32_Void(Ark_Int32 resourceId, Ark_Int32 start, Ark_Int32 end, Ark_Int32 center)
 {
@@ -1411,15 +1411,16 @@ void callManagedCallback_I32_I32_I32_Void(Ark_Int32 resourceId, Ark_Int32 start,
 }
 void callManagedCallback_I32_I32_I32_VoidSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Int32 start, Ark_Int32 end, Ark_Int32 center)
 {
-    uint8_t dataBuffer[4096];
-    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&dataBuffer, sizeof(dataBuffer), nullptr);
+    SerializerBase argsSerializer = SerializerBase(nullptr);
     argsSerializer.writeInt32(10);
     argsSerializer.writeInt32(Kind_Callback_I32_I32_I32_Void);
     argsSerializer.writeInt32(resourceId);
     argsSerializer.writeInt32(start);
     argsSerializer.writeInt32(end);
     argsSerializer.writeInt32(center);
-    KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
+    KInteropReturnBuffer callData = argsSerializer.toReturnBuffer();
+    KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
+    callData.dispose(callData.data, callData.length);
 }
 void callManagedCallback_I32_I32_Void(Ark_Int32 resourceId, Ark_Int32 first, Ark_Int32 last)
 {
@@ -1645,9 +1646,6 @@ void callManagedCallback_ItemDragInfo_I32_I32_VoidSync(Ark_VMContext vmContext, 
     ItemDragInfo_serializer::write(argsSerializer, event);
     argsSerializer.writeInt32(itemIndex);
     argsSerializer.writeInt32(insertIndex);
-    // KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
-    // argsSerializer.writeNumber(itemIndex);
-    // argsSerializer.writeNumber(insertIndex);
     KInteropReturnBuffer callData = argsSerializer.toReturnBuffer();
     KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
     callData.dispose(callData.data, callData.length);
@@ -1672,8 +1670,6 @@ void callManagedCallback_ItemDragInfo_I32_VoidSync(Ark_VMContext vmContext, Ark_
     argsSerializer.writeInt32(resourceId);
     ItemDragInfo_serializer::write(argsSerializer, event);
     argsSerializer.writeInt32(itemIndex);
-    // KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
-    // argsSerializer.writeNumber(itemIndex);
     KInteropReturnBuffer callData = argsSerializer.toReturnBuffer();
     KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
     callData.dispose(callData.data, callData.length);
@@ -2036,9 +2032,6 @@ void callManagedCallback_Number_Number_VoidSync(Ark_VMContext vmContext, Ark_Int
     argsSerializer.writeInt32(resourceId);
     argsSerializer.writeNumber(prevIndex);
     argsSerializer.writeNumber(index);
-    // KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
-    // argsSerializer.writeNumber(first);
-    // argsSerializer.writeNumber(last);
     KInteropReturnBuffer callData = argsSerializer.toReturnBuffer();
     KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
     callData.dispose(callData.data, callData.length);
@@ -4439,13 +4432,14 @@ void callManagedCallback_T_Void_I32(Ark_Int32 resourceId, Ark_Int32 value0)
 }
 void callManagedCallback_T_Void_I32Sync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Int32 value0)
 {
-    uint8_t dataBuffer[4096];
-    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&dataBuffer, sizeof(dataBuffer), nullptr);
+    SerializerBase argsSerializer = SerializerBase(nullptr);
     argsSerializer.writeInt32(10);
     argsSerializer.writeInt32(Kind_Callback_T_Void_I32);
     argsSerializer.writeInt32(resourceId);
     argsSerializer.writeInt32(value0);
-    KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
+    KInteropReturnBuffer callData = argsSerializer.toReturnBuffer();
+    KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
+    callData.dispose(callData.data, callData.length);
 }
 void callManagedCallback_T_Void_Number(Ark_Int32 resourceId, Ark_Number value0)
 {
@@ -4669,15 +4663,6 @@ void callManagedCallback_TouchResult_VoidSync(Ark_VMContext vmContext, Ark_Int32
     argsSerializer.writeInt32(Kind_Callback_TouchResult_Void);
     argsSerializer.writeInt32(resourceId);
     TouchResult_serializer::write(argsSerializer, value);
-    // KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
-    // const auto value_0 = value.value0;
-    // argsSerializer.writeNumber(value_0);
-    // const auto value_1 = value.value1;
-    // argsSerializer.writeNumber(value_1);
-    // const auto value_2 = value.value2;
-    // argsSerializer.writeNumber(value_2);
-    // const auto value_3 = value.value3;
-    // argsSerializer.writeNumber(value_3);
     KInteropReturnBuffer callData = argsSerializer.toReturnBuffer();
     KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
     callData.dispose(callData.data, callData.length);
@@ -4734,7 +4719,6 @@ void callManagedCallback_Tuple_I32_I32_Void(Ark_Int32 resourceId, Ark_Tuple_I32_
 }
 void callManagedCallback_Tuple_I32_I32_VoidSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Tuple_I32_I32 value)
 {
-    // uint8_t dataBuffer[4096];
     SerializerBase argsSerializer = SerializerBase(nullptr);
     argsSerializer.writeInt32(10);
     argsSerializer.writeInt32(Kind_Callback_Tuple_I32_I32_Void);
@@ -4743,8 +4727,6 @@ void callManagedCallback_Tuple_I32_I32_VoidSync(Ark_VMContext vmContext, Ark_Int
     argsSerializer.writeInt32(value_0);
     const auto value_1 = value.value1;
     argsSerializer.writeInt32(value_1);
-    // KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
-    // argsSerializer.writeNumber(value_1);
     KInteropReturnBuffer callData = argsSerializer.toReturnBuffer();
     KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
     callData.dispose(callData.data, callData.length);
@@ -4971,11 +4953,6 @@ void callManagedContentDidScrollCallbackSync(Ark_VMContext vmContext, Ark_Int32 
     argsSerializer.writeInt32(index);
     argsSerializer.writeFloat64(position);
     argsSerializer.writeFloat64(mainAxisLength);
-    // KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
-    // argsSerializer.writeNumber(selectedIndex);
-    // argsSerializer.writeNumber(index);
-    // argsSerializer.writeNumber(position);
-    // argsSerializer.writeNumber(mainAxisLength);
     KInteropReturnBuffer callData = argsSerializer.toReturnBuffer();
     KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
     callData.dispose(callData.data, callData.length);
@@ -5026,8 +5003,6 @@ void callManagedCustomBuilderT_I32Sync(Ark_VMContext vmContext, Ark_Int32 resour
     argsSerializer.writeInt32(Kind_CustomBuilderT_I32);
     argsSerializer.writeInt32(resourceId);
     argsSerializer.writeInt32(t);
-    // KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
-    // argsSerializer.writeNumber(t);
     KInteropReturnBuffer callData = argsSerializer.toReturnBuffer();
     KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
     callData.dispose(callData.data, callData.length);
@@ -5494,9 +5469,6 @@ void callManagedMenuCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, 
     argsSerializer.writeInt32(resourceId);
     argsSerializer.writeInt32(start);
     argsSerializer.writeInt32(end);
-    // KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
-    // argsSerializer.writeNumber(start);
-    // argsSerializer.writeNumber(end);
     KInteropReturnBuffer callData = argsSerializer.toReturnBuffer();
     KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
     callData.dispose(callData.data, callData.length);
@@ -5551,9 +5523,6 @@ void callManagedMenuOnAppearCallbackSync(Ark_VMContext vmContext, Ark_Int32 reso
     argsSerializer.writeInt32(resourceId);
     argsSerializer.writeInt32(start);
     argsSerializer.writeInt32(end);
-    // KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
-    // argsSerializer.writeNumber(start);
-    // argsSerializer.writeNumber(end);
     KInteropReturnBuffer callData = argsSerializer.toReturnBuffer();
     KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
     callData.dispose(callData.data, callData.length);
@@ -5732,8 +5701,6 @@ void callManagedOnAlphabetIndexerPopupSelectCallbackSync(Ark_VMContext vmContext
     argsSerializer.writeInt32(Kind_OnAlphabetIndexerPopupSelectCallback);
     argsSerializer.writeInt32(resourceId);
     argsSerializer.writeInt32(index);
-    // KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
-    // argsSerializer.writeNumber(index);
     KInteropReturnBuffer callData = argsSerializer.toReturnBuffer();
     KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
     callData.dispose(callData.data, callData.length);
@@ -5784,8 +5751,6 @@ void callManagedOnAlphabetIndexerSelectCallbackSync(Ark_VMContext vmContext, Ark
     argsSerializer.writeInt32(Kind_OnAlphabetIndexerSelectCallback);
     argsSerializer.writeInt32(resourceId);
     argsSerializer.writeInt32(index);
-    // KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
-    // argsSerializer.writeNumber(index);
     KInteropReturnBuffer callData = argsSerializer.toReturnBuffer();
     KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
     callData.dispose(callData.data, callData.length);
@@ -6255,9 +6220,6 @@ void callManagedOnMoveHandlerSync(Ark_VMContext vmContext, Ark_Int32 resourceId,
     argsSerializer.writeInt32(resourceId);
     argsSerializer.writeInt32(from);
     argsSerializer.writeInt32(to);
-    // KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
-    // argsSerializer.writeNumber(from);
-    // argsSerializer.writeNumber(to);
     KInteropReturnBuffer callData = argsSerializer.toReturnBuffer();
     KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
     callData.dispose(callData.data, callData.length);
@@ -6446,8 +6408,6 @@ void callManagedOnRatingChangeCallbackSync(Ark_VMContext vmContext, Ark_Int32 re
     argsSerializer.writeInt32(Kind_OnRatingChangeCallback);
     argsSerializer.writeInt32(resourceId);
     argsSerializer.writeFloat64(rating);
-    // KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
-    // argsSerializer.writeNumber(rating);
     KInteropReturnBuffer callData = argsSerializer.toReturnBuffer();
     KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
     callData.dispose(callData.data, callData.length);
@@ -8120,14 +8080,15 @@ void callManagedTimerCallback(Ark_Int32 resourceId, Ark_Int64 utc, Ark_Int64 ela
 }
 void callManagedTimerCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Int64 utc, Ark_Int64 elapsedTime)
 {
-    uint8_t dataBuffer[4096];
-    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&dataBuffer, sizeof(dataBuffer), nullptr);
+    SerializerBase argsSerializer = SerializerBase(nullptr);
     argsSerializer.writeInt32(10);
     argsSerializer.writeInt32(Kind_TimerCallback);
     argsSerializer.writeInt32(resourceId);
     argsSerializer.writeInt64(utc);
     argsSerializer.writeInt64(elapsedTime);
-    KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
+    KInteropReturnBuffer callData = argsSerializer.toReturnBuffer();
+    KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
+    callData.dispose(callData.data, callData.length);
 }
 void callManagedToggleModifierBuilder(Ark_Int32 resourceId, Ark_NativePointer parentNode, Ark_ToggleConfiguration config, Callback_Pointer_Void continuation)
 {
@@ -8297,8 +8258,6 @@ void callManagedVisibleAreaChangeCallbackSync(Ark_VMContext vmContext, Ark_Int32
     argsSerializer.writeInt32(resourceId);
     argsSerializer.writeBoolean(isExpanding);
     argsSerializer.writeFloat64(currentRatio);
-    // KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
-    // argsSerializer.writeNumber(currentRatio);
     KInteropReturnBuffer callData = argsSerializer.toReturnBuffer();
     KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
     callData.dispose(callData.data, callData.length);
