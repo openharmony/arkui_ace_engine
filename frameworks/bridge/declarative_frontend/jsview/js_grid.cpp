@@ -312,6 +312,10 @@ void JSGrid::JsGridHeight(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
+    if (info[0]->IsNull() || info[0]->IsUndefined()) {
+        // null/undefined keep last grid height
+        return;
+    }
     JSViewAbstract::JsHeight(info);
 
     CalcDimension value;
