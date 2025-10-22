@@ -38,6 +38,7 @@ constexpr int32_t INVALID_DESTINATION_MODE = -1;
 constexpr char JS_STRINGIFIED_UNDEFINED[] = "undefined";
 constexpr char JS_NAV_PATH_STACK_GETNATIVESTACK_FUNC[] = "getNativeStack";
 constexpr char JS_NAV_PATH_STACK_SETPARENT_FUNC[] = "setParent";
+constexpr char JS_NAV_PATH_STACK_EXTENT_CLASS_NAME[] = "NavPathStackExtent";
 
 napi_env GetNapiEnv()
 {
@@ -67,6 +68,117 @@ void JSRouteInfo::SetParam(const JSRef<JSVal>& param)
 JSRef<JSVal> JSRouteInfo::GetParam() const
 {
     return param_;
+}
+
+JSNavigationStackExtend::JSNavigationStackExtend(napi_value navPathStackExtendObj)
+{
+    auto env = GetNapiEnv();
+    if (!env) {
+        return;
+    }
+    napi_create_reference(env, navPathStackExtendObj, 1, &navPathStackExtendObjRef_);
+}
+
+std::string JSNavigationStackExtend::GetSerializedParamByIndex(int32_t index)
+{
+    if (!navPathStackExtendObjRef_) {
+        return "";
+    }
+    auto env = GetNapiEnv();
+    if (!env) {
+        return "";
+    }
+    napi_handle_scope scope = nullptr;
+    napi_open_handle_scope(env, &scope);
+    if (!scope) {
+        return "";
+    }
+    napi_value navPathStackExtendObj = nullptr;
+    napi_get_reference_value(env, navPathStackExtendObjRef_, &navPathStackExtendObj);
+    if (!navPathStackExtendObj) {
+        return "";
+    }
+    napi_value getSerializedParamByIndex = nullptr;
+    napi_get_named_property(env, navPathStackExtendObj, "getSerializedParamByIndexInner", &getSerializedParamByIndex);
+    napi_value napiIndex = nullptr;
+    napi_create_int32(env, index, &napiIndex);
+    napi_value serializedParam = nullptr;
+    napi_call_function(env, navPathStackExtendObj, getSerializedParamByIndex, 1, &napiIndex, &serializedParam);
+
+    size_t len = 0;
+    napi_get_value_string_utf8(env, serializedParam, nullptr, 0, &len);
+    std::unique_ptr<char[]> paramChar = std::make_unique<char[]>(len + 1);
+    napi_get_value_string_utf8(env, serializedParam, paramChar.get(), len + 1, &len);
+
+    napi_close_handle_scope(env, scope);
+    return paramChar.get();
+}
+
+napi_value JSNavigationStackExtend::GetNavPathStackExtendObj()
+{
+    if (!navPathStackExtendObjRef_) {
+        return nullptr;
+    }
+    auto env = GetNapiEnv();
+    if (!env) {
+        return nullptr;
+    }
+    napi_value navPathStackExtendObj = nullptr;
+    napi_get_reference_value(env, navPathStackExtendObjRef_, &navPathStackExtendObj);
+    return navPathStackExtendObj;
+}
+
+RefPtr<JSNavigationStackExtend> JSNavigationStackExtend::GetOrCreateNavigationStackExtend(
+    const RefPtr<NG::NavigationStack>& stack)
+{
+    if (!stack || !stack->IsStaticStack()) {
+        return nullptr;
+    }
+    if (stack->GetNavigationStackExtend()) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "current stack already has extend obj");
+        return AceType::DynamicCast<JSNavigationStackExtend>(stack->GetNavigationStackExtend());
+    }
+    auto env = GetNapiEnv();
+    if (env == nullptr) {
+        return nullptr;
+    }
+    napi_handle_scope scope = nullptr;
+    napi_open_handle_scope(env, &scope);
+    if (scope == nullptr) {
+        return nullptr;
+    }
+    napi_value global;
+    napi_status ret = napi_get_global(env, &global);
+    if (ret != napi_ok) {
+        napi_close_handle_scope(env, scope);
+        return nullptr;
+    }
+    napi_value constructor;
+    ret = napi_get_named_property(env, global, JS_NAV_PATH_STACK_EXTENT_CLASS_NAME, &constructor);
+    if (ret != napi_ok) {
+        napi_close_handle_scope(env, scope);
+        return nullptr;
+    }
+    napi_value stackObj;
+    ret = napi_new_instance(env, constructor, 0, nullptr, &stackObj);
+    if (ret != napi_ok) {
+        napi_close_handle_scope(env, scope);
+        return nullptr;
+    }
+    napi_value setNativeStackFunc;
+    napi_get_named_property(env, stackObj, "setNativeStack", &setNativeStackFunc);
+    napi_value napiStackPtr;
+    napi_create_int64(env, reinterpret_cast<int64_t>(stack->GetStaticStackPtr()), &napiStackPtr);
+    ret = napi_call_function(env, stackObj, setNativeStackFunc, 1, &napiStackPtr, nullptr);
+    if (ret != napi_ok) {
+        napi_close_handle_scope(env, scope);
+        return nullptr;
+    }
+    napi_close_handle_scope(env, scope);
+    auto jsStackEntend = AceType::MakeRefPtr<JSNavigationStackExtend>(stackObj);
+    stack->SetNavigationStackExtend(jsStackEntend);
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "will create an extend obj");
+    return jsStackEntend;
 }
 
 void JSNavigationStack::RemoveByIndexes(const std::vector<int32_t>& indexes)
@@ -386,6 +498,7 @@ bool JSNavigationStack::CreateNodeByIndex(int32_t index, const WeakPtr<NG::UINod
         if (navDestinationPattern) {
             SetDestinationIdToJsStack(index, std::to_string(navDestinationPattern->GetNavDestinationId()));
         }
+        JSNavigationStackExtend::GetOrCreateNavigationStackExtend(AceType::Claim(this));
     }
     // isRemove true, set destination info, false, current destination create failed
     bool isRemove = RemoveDestinationIfNeeded(pathInfo, errorCode, index);
