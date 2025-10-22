@@ -710,8 +710,8 @@ DisplayMode GridModelNG::GetDisplayMode() const
 
 std::string GridModelNG::GetColumnsTemplate(FrameNode* frameNode)
 {
-    CHECK_NULL_RETURN(frameNode, nullptr);
     std::string value = "1fr";
+    CHECK_NULL_RETURN(frameNode, value);
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(GridLayoutProperty, ColumnsTemplate, value, frameNode, value);
     return value;
 }
@@ -728,7 +728,7 @@ PresetFillType GridModelNG::GetItemFillPolicy(FrameNode* frameNode)
 std::string GridModelNG::GetRowsTemplate(FrameNode* frameNode)
 {
     std::string value = "1fr";
-    CHECK_NULL_RETURN(frameNode, nullptr);
+    CHECK_NULL_RETURN(frameNode, value);
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(GridLayoutProperty, RowsTemplate, value, frameNode, value);
     return value;
 }

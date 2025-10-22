@@ -723,7 +723,9 @@ void GridIrregularLayoutAlgorithm::PreloadItems(int32_t cacheCnt)
     GridIrregularFiller filler(&info_, wrapper_);
     filler.FillMatrixOnly(std::min(info_.GetChildrenCount(), info_.endIndex_ + cacheCnt));
 
-    GridLayoutUtils::PreloadGridItems(wrapper_->GetHostNode()->GetPattern<GridPattern>(), std::move(itemsToPreload),
+    auto wrapper = wrapper_->GetHostNode();
+    CHECK_NULL_VOID(wrapper);
+    GridLayoutUtils::PreloadGridItems(wrapper->GetPattern<GridPattern>(), std::move(itemsToPreload),
         [](const RefPtr<FrameNode>& host, int32_t itemIdx) {
             CHECK_NULL_RETURN(host, false);
             auto pattern = host->GetPattern<GridPattern>();

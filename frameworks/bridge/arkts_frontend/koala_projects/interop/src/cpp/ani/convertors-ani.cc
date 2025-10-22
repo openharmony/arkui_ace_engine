@@ -123,6 +123,7 @@ const std::vector<std::tuple<std::string, std::string, void*, int>>& AniExports:
     auto it = implementations.find(module);
     if (it == implementations.end()) {
         LOGE("Module %s is not registered", module.c_str());
+        abort();
     }
     return it->second;
 }

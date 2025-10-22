@@ -391,6 +391,7 @@ void Scrollable::HandleDragStart(const OHOS::Ace::GestureEvent& info)
     double& offset, int32_t source, NestedState state)
 {
     auto parent = parent_.Upgrade();
+    CHECK_NULL_RETURN(parent, (ScrollResult{ 0, true }));
     ScrollState scrollState = source == SCROLL_FROM_ANIMATION ? ScrollState::FLING : ScrollState::SCROLL;
     if (state == NestedState::CHILD_OVER_SCROLL) {
         if (edgeEffect_ == EdgeEffect::NONE) {
@@ -431,6 +432,7 @@ void Scrollable::HandleDragStart(const OHOS::Ace::GestureEvent& info)
     double& offset, int32_t source, NestedState state)
 {
     auto parent = parent_.Upgrade();
+    CHECK_NULL_RETURN(parent, (ScrollResult{ 0, true }));
     ScrollState scrollState = source == SCROLL_FROM_ANIMATION ? ScrollState::FLING : ScrollState::SCROLL;
     if (state == NestedState::CHILD_OVER_SCROLL) {
         auto result = parent->HandleScroll(offset, source, NestedState::CHILD_OVER_SCROLL);
@@ -500,6 +502,7 @@ void Scrollable::HandleDragStart(const OHOS::Ace::GestureEvent& info)
 {
     auto remainOffset = 0.0;
     auto parent = parent_.Upgrade();
+    CHECK_NULL_RETURN(parent, (ScrollResult{ 0, true }));
     ScrollState scrollState = source == SCROLL_FROM_ANIMATION ? ScrollState::FLING : ScrollState::SCROLL;
     if (state == NestedState::CHILD_OVER_SCROLL) {
         if (edgeEffect_ == EdgeEffect::NONE) {

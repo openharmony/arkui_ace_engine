@@ -1797,6 +1797,7 @@ void ListPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, s
 bool ListPattern::CheckTargetValid(int32_t index, int32_t indexInGroup)
 {
     auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
     auto totalItemCount = host->GetTotalChildCount();
     if ((index < 0) || (index >= totalItemCount)) {
         return false;

@@ -326,6 +326,7 @@ void RenderWaterFlow::CallItemConstraintSize()
 {
     ItemConstraintSize size;
     auto pipelineContext = GetContext().Upgrade();
+    CHECK_NULL_VOID(pipelineContext);
     if (direction_ == FlexDirection::COLUMN || direction_ == FlexDirection::COLUMN_REVERSE) {
         size.maxCrossSize = std::max(NormalizePercentToPx(component_->GetMaxWidth(), false),
             NormalizePercentToPx(component_->GetMinWidth(), false));

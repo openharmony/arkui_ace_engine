@@ -155,8 +155,8 @@ void JSListItemGroup::SetChildrenMainSize(const JSRef<JSObject>& childrenSizeObj
     }
     auto getNativeMainSizeFunc = JSRef<JSFunc>::Cast(property);
     auto nativeMainSize = getNativeMainSizeFunc->Call(childrenSizeObj);
-    JSListChildrenMainSize* jsChildrenMainSize;
-    if (nativeMainSize->IsObject()) {
+    JSListChildrenMainSize* jsChildrenMainSize = nullptr;
+    if (!nativeMainSize->IsEmpty() && nativeMainSize->IsObject()) {
         auto nativeMainSizeObj = JSRef<JSObject>::Cast(nativeMainSize);
         jsChildrenMainSize = nativeMainSizeObj->Unwrap<JSListChildrenMainSize>();
     }

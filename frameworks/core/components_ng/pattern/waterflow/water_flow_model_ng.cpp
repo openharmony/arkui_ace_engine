@@ -599,8 +599,8 @@ FlexDirection WaterFlowModelNG::GetLayoutDirection(FrameNode* frameNode)
 
 std::string WaterFlowModelNG::GetColumnsTemplate(FrameNode* frameNode)
 {
-    CHECK_NULL_RETURN(frameNode, nullptr);
     std::string value = "1fr";
+    CHECK_NULL_RETURN(frameNode, value);
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(WaterFlowLayoutProperty, ColumnsTemplate, value, frameNode, value);
     return value;
 }
@@ -608,7 +608,7 @@ std::string WaterFlowModelNG::GetColumnsTemplate(FrameNode* frameNode)
 std::string WaterFlowModelNG::GetRowsTemplate(FrameNode* frameNode)
 {
     std::string value = "1fr";
-    CHECK_NULL_RETURN(frameNode, nullptr);
+    CHECK_NULL_RETURN(frameNode, value);
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(WaterFlowLayoutProperty, RowsTemplate, value, frameNode, value);
     return value;
 }
