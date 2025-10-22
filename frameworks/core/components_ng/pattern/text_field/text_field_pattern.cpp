@@ -6286,7 +6286,9 @@ void TextFieldPattern::UpdateEditingValue(const std::shared_ptr<TextEditingValue
             value->selection.baseOffset -= deleteSize;
         }
     }
-    HandleEditingEventCrossPlatform(value);
+    if (HandleEditingEventCrossPlatform(value)) {
+        return;
+    }
 #endif
     UpdateEditingValueToRecord();
     contentController_->SetTextValue(result);
@@ -6300,34 +6302,36 @@ void TextFieldPattern::UpdateEditingValue(const std::shared_ptr<TextEditingValue
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
-void TextFieldPattern::HandleEditingEventCrossPlatform(const std::shared_ptr<TextEditingValue>& value)
+bool TextFieldPattern::HandleEditingEventCrossPlatform(const std::shared_ptr<TextEditingValue>& value)
 {
 #ifdef CROSS_PLATFORM
 #ifdef IOS_PLATFORM
     if (value->isDelete && !value->discardedMarkedText) {
         HandleOnDelete(true);
-        return;
+        return true;
     }
 #else
     if (value->isDelete) {
         HandleOnDelete(true);
-        return;
+        return true;
     }
 #endif
 #ifdef IOS_PLATFORM
     compose_ = value->compose;
     unmarkText_ = value->unmarkText;
     if (value->discardedMarkedText) {
-        return;
+        return false;
     }
 #endif
 #ifdef ANDROID_PLATFORM
     if (value->appendText.empty()) {
-        return;
+        return true;
     }
 #endif
     InsertValue(UtfUtils::Str8DebugToStr16(value->appendText), true);
+    return true;
 #endif // CROSS_PLATFORM
+    return false;
 }
 
 void TextFieldPattern::UpdateInputFilterErrorText(const std::u16string& errorText)

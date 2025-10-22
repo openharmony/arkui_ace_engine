@@ -2117,7 +2117,7 @@ private:
     bool ShouldSkipUpdateParagraph();
     void UpdateParagraphForDragNode(bool skipUpdate);
     void UpdateMagnifierWithFloatingCaretPos();
-    void HandleEditingEventCrossPlatform(const std::shared_ptr<TextEditingValue>& value);
+    bool HandleEditingEventCrossPlatform(const std::shared_ptr<TextEditingValue>& value);
     void ApplyInnerBorderColor();
 #if defined(ENABLE_STANDARD_INPUT)
     void UpdateCaretInfoStandard(bool forceUpdate);
