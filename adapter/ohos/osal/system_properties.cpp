@@ -268,7 +268,7 @@ bool IsMouseTransformEnable()
 
 bool IsCompatibleInputTransEnabled()
 {
-    return (system::GetParameter("persist.ace.event.compatible.enable", "0") == "1");
+    return (system::GetParameter("const.arkui.mouseCompatibleConverting", "false") == "true");
 }
 
 float ReadScrollCoefficients()
