@@ -118,6 +118,48 @@ public:
     }
     void TearDown() override {}
 };
+class ViewAbstractTestFourNg : public testing::Test {
+public:
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
+    void SetUp() override
+    {
+        auto* stack = ViewStackProcessor::GetInstance();
+        auto nodeId = stack->ClaimNodeId();
+        auto frameNode =
+            FrameNode::GetOrCreateFrameNode("components", nodeId, []() { return AceType::MakeRefPtr<Pattern>(); });
+        stack->Push(frameNode);
+    }
+    void TearDown() override {}
+};
+class ViewAbstractTestThreeNg : public testing::Test {
+public:
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
+    void SetUp() override
+    {
+        auto* stack = ViewStackProcessor::GetInstance();
+        auto nodeId = stack->ClaimNodeId();
+        auto frameNode =
+            FrameNode::GetOrCreateFrameNode("components", nodeId, []() { return AceType::MakeRefPtr<Pattern>(); });
+        stack->Push(frameNode);
+    }
+    void TearDown() override {}
+};
+class ViewAbstractTestFiveNg : public testing::Test {
+public:
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
+    void SetUp() override
+    {
+        auto* stack = ViewStackProcessor::GetInstance();
+        auto nodeId = stack->ClaimNodeId();
+        auto frameNode =
+            FrameNode::GetOrCreateFrameNode("components", nodeId, []() { return AceType::MakeRefPtr<Pattern>(); });
+        stack->Push(frameNode);
+    }
+    void TearDown() override {}
+};
 } // namespace OHOS::Ace::NG
 
 #endif //TEST_UNITTEST_CORE_BASE_VIEW_ABSTRACT_TEST_NG_H

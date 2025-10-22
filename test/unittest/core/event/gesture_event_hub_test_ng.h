@@ -109,6 +109,16 @@ public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
 };
+class GestureEventHubTestFiveNg : public testing::Test {
+public:
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
+};
+class GestureEventHubTestSixNg : public testing::Test {
+public:
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
+};
 } // namespace OHOS::Ace::NG
 
 #endif //TEST_UNITTEST_CORE_EVENT_GESTURE_EVENT_HUB_TEST_NG_H
