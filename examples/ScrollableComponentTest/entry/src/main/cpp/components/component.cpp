@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-
 #include "components/component.h"
 #include <string>
 

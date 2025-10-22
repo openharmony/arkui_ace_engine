@@ -26,7 +26,6 @@
 #include <cstdint>
 #include <list>
 
-
 namespace ArkUICApiDemo {
 
 class Component {
