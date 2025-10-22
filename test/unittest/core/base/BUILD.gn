@@ -73,7 +73,10 @@ ace_unittest("ui_node_gc_test_ng") {
 ace_unittest("ui_node_test_ng") {
   type = "new"
   module_output = "basic"
-  sources = [ "ui_node_test_ng.cpp" ]
+  sources = [
+    "ui_node_test_ng.cpp",
+    "ui_node_test_ng_two.cpp",
+  ]
 }
 
 ace_unittest("view_abstract_test_ng") {
