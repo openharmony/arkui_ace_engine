@@ -100,7 +100,8 @@ private:
 class ListItemGroupAdapter : public ItemAdapter<ListItemGroupComponent> {
 public:
     ListItemGroupAdapter(std::vector<std::shared_ptr<Component>> &dataSource, const std::vector<int32_t> &groupList)
-        : ItemAdapter(dataSource) {
+        : ItemAdapter(dataSource) 
+    {
         OH_ArkUI_NodeAdapter_SetTotalNodeCount(_adapter, groupList.size());
         int32_t sum = 0;
         for (auto &item : groupList) {
@@ -137,13 +138,13 @@ public:
     // 引入懒加载模块。
     void SetLazyAdapter(const std::shared_ptr<ItemAdapter<ListItemComponent>> &adapter) 
     {
-        ArkUI_AttributeItem item{nullptr, 0, nullptr, adapter->GetAdapter()};
+        ArkUI_AttributeItem item{ nullptr, 0, nullptr, adapter->GetAdapter() };
         _nodeAPI->setAttribute(_component, NODE_LIST_NODE_ADAPTER, &item);
         _adapter = adapter;
     }
     void SetLazyAdapterByGroup(const std::shared_ptr<ListItemGroupAdapter> &adapter) 
     {
-        ArkUI_AttributeItem item{nullptr, 0, nullptr, adapter->GetAdapter()};
+        ArkUI_AttributeItem item{ nullptr, 0, nullptr, adapter->GetAdapter() };
         _nodeAPI->setAttribute(_component, NODE_LIST_NODE_ADAPTER, &item);
         _groupAdapter = adapter;
     }
