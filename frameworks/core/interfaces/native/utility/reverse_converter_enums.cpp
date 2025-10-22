@@ -1009,4 +1009,16 @@ void AssignArkValue(Ark_LengthMetricsUnit& dst, const OHOS::Ace::CanvasUnit& src
         default: dst = static_cast<Ark_LengthMetricsUnit>(-1);
     }
 }
+
+void AssignArkValue(Ark_NativeEmbedParamStatus& dst, const NativeEmbedParamStatus& src)
+{
+    switch (src) {
+        case NativeEmbedParamStatus::ADD: dst = ARK_NATIVE_EMBED_PARAM_STATUS_ADD; break;
+        case NativeEmbedParamStatus::UPDATE: dst = ARK_NATIVE_EMBED_PARAM_STATUS_UPDATE; break;
+        case NativeEmbedParamStatus::DELETE: dst = ARK_NATIVE_EMBED_PARAM_STATUS_DELETE; break;
+        default:
+            dst = static_cast<Ark_NativeEmbedParamStatus>(-1);
+            LOGE("Unexpected enum value in NativeEmbedParamStatus: %{public}d", src);
+    }
+}
 } // namespace OHOS::Ace::NG::Converter

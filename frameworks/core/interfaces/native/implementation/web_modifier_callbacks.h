@@ -134,6 +134,8 @@ void OnNativeEmbedDataInfo(const CallbackHelper<Callback_NativeEmbedDataInfo_Voi
     int32_t instanceId, const BaseEventInfo* info);
 void OnNativeEmbedVisibilityChange(const CallbackHelper<OnNativeEmbedVisibilityChangeCallback>& arkCallback,
     int32_t instanceId, const BaseEventInfo* info);
+void OnNativeEmbedObjectParamChange(const CallbackHelper<OnNativeEmbedObjectParamChangeCallback>& arkCallback,
+    int32_t instanceId, const BaseEventInfo* info);
 void OnNativeEmbedTouchInfo(const CallbackHelper<Callback_NativeEmbedTouchInfo_Void>& arkCallback,
     int32_t instanceId, const BaseEventInfo* info);
 void OnNativeEmbedMouseInfo(const CallbackHelper<MouseInfoCallback>& arkCallback,

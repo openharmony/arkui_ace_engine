@@ -67,6 +67,16 @@ void AssignCast(std::optional<AnimationDirection>& dst, const Ark_PlayMode& src)
 }
 
 template<>
+void AssignCast(std::optional<WebRotateEffect>& dst, const Ark_WebRotateEffect& src)
+{
+    switch (src) {
+        case ARK_WEB_ROTATE_EFFECT_TOPLEFT_EFFECT: dst = WebRotateEffect::TOPLEFT_EFFECT; break;
+        case ARK_WEB_ROTATE_EFFECT_RESIZE_COVER_EFFECT: dst = WebRotateEffect::RESIZE_COVER_EFFECT; break;
+        default: LOGE("Unexpected enum value in Ark_WebRotateEffect: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<BindSheetDismissReason>& dst, const Ark_DismissReason& src)
 {
     switch (src) {

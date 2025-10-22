@@ -863,6 +863,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<WebElementType>& dst, const Ark_WebElementType& src);
     template<> void AssignCast(std::optional<WebKeyboardAvoidMode>& dst, const Ark_WebKeyboardAvoidMode& src);
     template<> void AssignCast(std::optional<WebLayoutMode>& dst, const Ark_WebLayoutMode& src);
+    template<> void AssignCast(std::optional<WebRotateEffect>& dst, const Ark_WebRotateEffect& src);
     template<> void AssignCast(std::optional<WordBreak>& dst, const Ark_WordBreak& src);
     template<> void AssignCast(std::optional<XComponentType>& dst, const Ark_XComponentType& src);
     template<> void AssignCast(std::optional<double>& dst, const Ark_LevelOrder& src);

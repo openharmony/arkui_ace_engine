@@ -2798,4 +2798,55 @@ HWTEST_F(WebModelStaticTest, SetBackToTop001, TestSize.Level1)
     EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckBackToTop(true), true);
 #endif
 }
+
+/**
+ * @tc.name: SetRotateRenderEffect001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetRotateRenderEffect001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
+    ASSERT_NE(webPatternStatic, nullptr);
+
+    std::optional<WebRotateEffect> effect;
+    WebModelStatic::SetRotateRenderEffect(AccessibilityManager::RawPtr(frameNode), effect);
+
+    effect = WebRotateEffect::RESIZE_COVER_EFFECT;
+    WebModelStatic::SetRotateRenderEffect(AccessibilityManager::RawPtr(frameNode), effect);
+    EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->GetRotateRenderEffect(),
+        WebRotateEffect::RESIZE_COVER_EFFECT);
+#endif
+}
+
+/**
+ * @tc.name: SetNativeEmbedObjectParamChangeId001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetNativeEmbedObjectParamChangeId001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    auto callback = [&callCount](const BaseEventInfo* info) { callCount++; };
+    WebModelStatic::SetNativeEmbedObjectParamChangeId(AccessibilityManager::RawPtr(frameNode), callback);
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+    auto mockEventInfo = std::make_shared<MockBaseEventInfo>();
+    webEventHub->FireOnNativeEmbedObjectParamChangeEvent(mockEventInfo);
+    EXPECT_NE(callCount, 0);
+#endif
+}
 } // namespace OHOS::Ace::NG
