@@ -15,6 +15,7 @@
 
 #include "core/components_ng/render/adapter/form_render_window.h"
 
+#include "base/log/ace_performance_monitor.h"
 #include "base/log/frame_report.h"
 #include "core/common/container.h"
 #ifdef ENABLE_ROSEN_BACKEND
@@ -228,12 +229,15 @@ void FormRenderWindow::InitOnVsyncCallback()
 {
 #ifdef ENABLE_ROSEN_BACKEND
     int64_t refreshPeriod = static_cast<int64_t>(ONE_SECOND_IN_NANO / GetDisplayRefreshRate());
-    onVsyncCallback_ = [weakTask = taskExecutor_, id = id_, refreshPeriod](
+    onVsyncCallback_ = [weakTask = taskExecutor_, id = id_, refreshPeriod, uiContentType = uiContentType_](
                            int64_t timeStampNanos, int64_t frameCount, void* data) {
         auto taskExecutor = weakTask.Upgrade();
         CHECK_NULL_VOID(taskExecutor);
-        auto onVsync = [id, timeStampNanos, frameCount, refreshPeriod] {
+        auto onVsync = [id, timeStampNanos, frameCount, refreshPeriod, uiContentType] {
             int64_t ts = GetSysTimestamp();
+            if (uiContentType == UIContentType::DYNAMIC_COMPONENT) {
+                ArkUIPerfMonitor::GetInstance().StartPerf();
+            }
             ContainerScope scope(id);
             // use container to get window can make sure the window is valid
             auto container = Container::Current();
@@ -244,19 +248,20 @@ void FormRenderWindow::InitOnVsyncCallback()
                 isReportFrameEvent = containerHandler->GetHostConfig().isReportFrameEvent;
             }
             if (isReportFrameEvent) {
-                FrameReport::GetInstance().ReportSchedEvent(
-                    FrameSchedEvent::UI_SCB_WORKER_BEGIN, {});
+                FrameReport::GetInstance().ReportSchedEvent(FrameSchedEvent::UI_SCB_WORKER_BEGIN, {});
             }
             auto window = container->GetWindow();
             CHECK_NULL_VOID(window);
             window->OnVsync(static_cast<uint64_t>(timeStampNanos), static_cast<uint64_t>(frameCount));
+            if (uiContentType == UIContentType::DYNAMIC_COMPONENT) {
+                ArkUIPerfMonitor::GetInstance().FinishPerf();
+            }
             auto pipeline = container->GetPipelineContext();
             if (pipeline) {
                 pipeline->OnIdle(std::min(ts, timeStampNanos) + refreshPeriod);
             }
             if (isReportFrameEvent) {
-                FrameReport::GetInstance().ReportSchedEvent(
-                    FrameSchedEvent::UI_SCB_WORKER_END, {});
+                FrameReport::GetInstance().ReportSchedEvent(FrameSchedEvent::UI_SCB_WORKER_END, {});
             }
         };
 
