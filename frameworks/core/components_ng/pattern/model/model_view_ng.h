@@ -46,7 +46,7 @@ public:
     static void SetBackground(FrameNode* frameNode, const std::string& value);
     static void SetShader(FrameNode* frameNode, const std::string& path);
     static void SetRenderWidth(FrameNode* frameNode, const std::optional<Dimension>& width);
-    static void SetRenderHeight(FrameNode* frameNode, const std::optional<Dimension>& width);
+    static void SetRenderHeight(FrameNode* frameNode, const std::optional<Dimension>& height);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetModelViewContext(FrameNode* frameNode, const ModelViewContext& context);
 private:
