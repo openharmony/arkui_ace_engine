@@ -74,6 +74,7 @@ public:
     using LockFormCallback = std::function<void(const bool lock)>;
     using UpdateFormDoneCallback = std::function<void(const int64_t formId)>;
     using DueControlFormCallback = std::function<void(const bool isDisablePolicy, const bool isControl)>;
+    using FormRenderDiedCallback = std::function<void()>;
 
     enum class State : char {
         WAITINGFORSIZE,
@@ -126,7 +127,8 @@ public:
     void AddEnableFormCallback(EnableFormCallback&& callback);
     void AddLockFormCallback(LockFormCallback&& callback);
     void AddFormUpdateDoneCallback(UpdateFormDoneCallback&& callback);
-    void AddDueControlFormCallback(DueControlFormCallback &&callback);
+    void AddDueControlFormCallback(DueControlFormCallback&& callback);
+    void AddFormRenderDiedCallback(FormRenderDiedCallback&& callback);
     void OnActionEventHandle(const std::string& action);
     void SetAllowUpdate(bool allowUpdate);
     void OnActionEvent(const std::string& action);
@@ -219,6 +221,7 @@ private:
     LockFormCallback lockFormCallback_;
     UpdateFormDoneCallback updateFormDoneCallback_;
     DueControlFormCallback dueControlFormCallback_;
+    FormRenderDiedCallback onFormRenderDiedCallback_;
 
     State state_ { State::WAITINGFORSIZE };
     bool isDynamic_ = true;

@@ -45,6 +45,9 @@ RefPtr<LayoutAlgorithm> ContainerPickerPattern::CreateLayoutAlgorithm()
     CHECK_NULL_RETURN(layoutAlgorithm, nullptr);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
+    totalItemCount_ = host->TotalChildCount();
+    isLoop_ = IsLoop();
+
     layoutAlgorithm->SetTotalItemCount(host->TotalChildCount());
     layoutAlgorithm->SetCurrentDelta(currentDelta_);
 
@@ -112,13 +115,19 @@ bool ContainerPickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper
     CHECK_NULL_RETURN(pickerAlgorithm, false);
     GetLayoutProperties(pickerAlgorithm);
     PostIdleTask(GetHost());
-    SetDefaultTextStyle();
+    SetDefaultTextStyle(false);
     HandleTargetIndex();
 
     if (isNeedPlayInertialAnimation_) {
         PlayInertialAnimation();
     }
-    return false;
+    
+    if (isModified_) {
+        isModified_ = false;
+        return true;
+    } else {
+        return false;
+    }
 }
 
 float ContainerPickerPattern::ShortestDistanceBetweenCurrentAndTarget(int32_t targetIndex)
@@ -280,34 +289,43 @@ bool ContainerPickerPattern::IsLoop() const
     return props->GetCanLoopValue(true);
 }
 
-void ContainerPickerPattern::SetDefaultTextStyle() const
+void ContainerPickerPattern::SetDefaultTextStyle(bool isUpdateTextStyle)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(theme);
+    Color defaultColor = theme->GetDividerColor();
     for (const auto& item : itemPosition_) {
         auto index = ContainerPickerUtils::GetLoopIndex(item.first, totalItemCount_);
         auto child = DynamicCast<FrameNode>(host->GetOrCreateChildByIndex(index));
-        SetDefaultTextStyle(child);
+        if (isUpdateTextStyle) {
+            UpdateDefaultTextStyle(child, defaultColor);
+        } else {
+            SetDefaultTextStyle(child, defaultColor);
+        }
     }
 }
 
-void ContainerPickerPattern::SetDefaultTextStyle(RefPtr<FrameNode> node) const
+void ContainerPickerPattern::SetDefaultTextStyle(RefPtr<FrameNode> node, Color defaultColor)
 {
     CHECK_NULL_VOID(node);
     if (node->GetTag() == V2::TEXT_ETS_TAG) {
         auto textLayoutProperty = node->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
-        bool modified = false;
         if (!textLayoutProperty->GetFontSize().has_value()) {
             textLayoutProperty->UpdateFontSize(Dimension(DEFAULT_FONT_SIZE, DimensionUnit::FP));
-            modified = true;
+            isModified_ = true;
         }
         if (!textLayoutProperty->GetTextColor().has_value()) {
-            textLayoutProperty->UpdateTextColor(Color::FromString("#66182431"));
-            modified = true;
+            textLayoutProperty->UpdateTextColor(defaultColor);
+            isModified_ = true;
+            isUseDefaultFontColor_ = true;
         }
 
-        if (modified) {
+        if (isModified_) {
             node->MarkModifyDone();
             node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
@@ -318,7 +336,28 @@ void ContainerPickerPattern::SetDefaultTextStyle(RefPtr<FrameNode> node) const
                 continue;
             }
             auto childNode = DynamicCast<FrameNode>(child);
-            SetDefaultTextStyle(childNode);
+            SetDefaultTextStyle(childNode, defaultColor);
+        }
+    }
+}
+
+void ContainerPickerPattern::UpdateDefaultTextStyle(RefPtr<FrameNode> node, Color defaultColor)
+{
+    CHECK_NULL_VOID(node);
+    if (node->GetTag() == V2::TEXT_ETS_TAG) {
+        auto textLayoutProperty = node->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        if (isUseDefaultFontColor_) {
+            textLayoutProperty->UpdateTextColor(defaultColor);
+        }
+    } else {
+        auto& children = node->GetChildren();
+        for (const auto& child : children) {
+            if (!child) {
+                continue;
+            }
+            auto childNode = DynamicCast<FrameNode>(child);
+            UpdateDefaultTextStyle(childNode, defaultColor);
         }
     }
 }
@@ -1062,6 +1101,7 @@ void ContainerPickerPattern::CreateTargetAnimation(float delta)
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->isTargetAnimationRunning_ = false;
+            pattern->lastAnimationScroll_ = 0.0f;
             pattern->yOffset_ = 0.0;
             pattern->yLast_ = 0.0;
             pattern->FireScrollStopEvent();
@@ -1239,6 +1279,11 @@ bool ContainerPickerPattern::InnerHandleScroll(bool isDown)
         hapticController_->PlayOnce();
     }
     return true;
+}
+
+void ContainerPickerPattern::OnColorConfigurationUpdate()
+{
+    SetDefaultTextStyle(true);
 }
 
 } // namespace OHOS::Ace::NG

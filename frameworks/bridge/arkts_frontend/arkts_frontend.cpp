@@ -613,6 +613,12 @@ void* ArktsFrontend::PushDynamicExtender(const std::string& url, const std::stri
     CHECK_NULL_RETURN(pageRouterManager_, nullptr);
     auto pageNode = AceType::WeakClaim(static_cast<NG::FrameNode*>(pageNodeRawPtr)).Upgrade();
     CHECK_NULL_RETURN(pageNode, nullptr);
+    if (pageNode->RefCount() != 2) {
+        LOGE("AceRouter pageNode for PushDynamicExtender has wrong RefCount: %{public}d", pageNode->RefCount());
+    }
+    if (pageNode->RefCount() > 1) {
+        pageNode->DecRefCount();
+    }
     NG::RouterPageInfo routerPageInfo;
     routerPageInfo.url = url;
     routerPageInfo.params = params;
@@ -629,6 +635,12 @@ void* ArktsFrontend::ReplaceDynamicExtender(const std::string& url, const std::s
     CHECK_NULL_RETURN(pageRouterManager_, nullptr);
     auto pageNode = AceType::WeakClaim(static_cast<NG::FrameNode*>(pageNodeRawPtr)).Upgrade();
     CHECK_NULL_RETURN(pageNode, nullptr);
+    if (pageNode->RefCount() != 2) {
+        LOGE("AceRouter pageNode for ReplaceDynamicExtender has wrong RefCount: %{public}d", pageNode->RefCount());
+    }
+    if (pageNode->RefCount() > 1) {
+        pageNode->DecRefCount();
+    }
     NG::RouterPageInfo routerPageInfo;
     routerPageInfo.url = url;
     routerPageInfo.params = params;

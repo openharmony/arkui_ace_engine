@@ -54,7 +54,8 @@ RangeInfo GridLayoutRangeSolver::FindRangeOnJump(int32_t jumpIdx, int32_t jumpLi
         case ScrollAlign::START: {
             auto [startRow, startIdx] = CheckMultiRow(jumpLineIdx);
             float offset = -info_->GetHeightInRange(startRow, jumpLineIdx, mainGap);
-            auto [endLineIdx, endIdx] = SolveForwardForEndIdx(mainGap, mainSize, jumpLineIdx);
+            auto [endLineIdx, endIdx] =
+                SolveForwardForEndIdx(mainGap, mainSize - info_->contentStartOffset_, jumpLineIdx);
             return { startRow, startIdx, offset, endLineIdx, endIdx };
         }
         case ScrollAlign::CENTER: {
@@ -72,7 +73,12 @@ RangeInfo GridLayoutRangeSolver::FindRangeOnJump(int32_t jumpIdx, int32_t jumpLi
                 TAG_LOGW(AceLogTag::ACE_GRID, "line height at %{public}d not prepared during jump", jumpLineIdx);
                 return {};
             }
-            auto res = SolveBackward(mainGap, mainSize - it->second, jumpLineIdx);
+            Result res;
+            if (jumpLineIdx == info_->lineHeightMap_.rbegin()->first) {
+                res = SolveBackward(mainGap, mainSize - it->second - info_->contentEndOffset_, jumpLineIdx);
+            } else {
+                res = SolveBackward(mainGap, mainSize - it->second, jumpLineIdx);
+            }
             return { res.row, res.idx, res.pos, jumpLineIdx, info_->FindEndIdx(jumpLineIdx).itemIdx };
         }
         default:

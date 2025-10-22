@@ -77,7 +77,7 @@ export class AppStorageV2Impl {
             }
             let defaultValue = defaultCreator!();
             StorageHelper.checkTypeByInstanceOf(key!, ttype, defaultValue);
-            let observedValue = uiUtils.makeObserved(defaultValue, true);
+            let observedValue = uiUtils.autoProxyObject(defaultValue);
 
             this.memorizedValues_.set(key!, observedValue);
             return observedValue;

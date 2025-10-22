@@ -90,6 +90,8 @@ void FormManagerDelegate::AddEnableFormCallback(EnableFormCallback&& callback) {
 
 void FormManagerDelegate::AddLockFormCallback(LockFormCallback&& callback) {}
 
+void FormManagerDelegate::AddFormRenderDiedCallback(FormRenderDiedCallback&& callback) {}
+
 void FormManagerDelegate::ResetForm() {}
 
 void FormManagerDelegate::ReleaseForm() {}

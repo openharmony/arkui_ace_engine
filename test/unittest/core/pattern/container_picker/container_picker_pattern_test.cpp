@@ -632,6 +632,39 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_OnDirtyLayoutWra
 }
 
 /**
+ * @tc.name: ContainerPickerPatternTest_OnDirtyLayoutWrapperSwap003
+ * @tc.desc: Test OnDirtyLayoutWrapperSwap function when isModified_ is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_OnDirtyLayoutWrapperSwap003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<LayoutWrapper> layoutWrapper = frameNode->CreateLayoutWrapper(true, true);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    /**
+     * @tc.steps: step2. setup test data with skip flags and call OnDirtyLayoutWrapperSwap.
+     * @tc.expected: step2. function returns true when isModified_ is true.
+     */
+    pattern->isNeedPlayInertialAnimation_ = true;
+    pattern->isModified_ = true;
+
+    DirtySwapConfig config;
+    config.skipMeasure = false;
+    config.skipLayout = false;
+
+    bool result = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    EXPECT_TRUE(result);
+    EXPECT_FALSE(pattern->isModified_);
+}
+
+/**
  * @tc.name: ContainerPickerPatternTest_HandleDragStart001
  * @tc.desc: Test HandleDragStart function
  * @tc.type: FUNC
@@ -1594,6 +1627,136 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_CalculateMiddleL
 
     float offset1 = pattern->CalculateMiddleLineOffset();
     EXPECT_EQ(offset1, 0);
+}
+
+/**
+ * @tc.name: ContainerPickerPatternTest_SetDefaultTextStyle001
+ * @tc.desc: Test SetDefaultTextStyle function with defaultColor parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_SetDefaultTextStyle001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create picker and text node, setup testing environment.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    
+    auto textPattern = AceType::MakeRefPtr<TextPattern>();
+    auto textNode = CreateChildNode(V2::TEXT_ETS_TAG, textPattern);
+    ASSERT_NE(textNode, nullptr);
+    
+    // Add text node as child
+    frameNode->AddChild(textNode);
+    
+    /**
+     * @tc.steps: step2. call SetDefaultTextStyle with defaultColor and verify text color is set correctly.
+     * @tc.expected: step2. text color is updated to defaultColor and isUseDefaultFontColor_ is set to true.
+     */
+    Color defaultColor = Color::RED;
+    pattern->SetDefaultTextStyle(textNode, defaultColor);
+    
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    EXPECT_TRUE(textLayoutProperty->GetTextColor().has_value());
+    EXPECT_TRUE(textLayoutProperty->GetTextColor().value() == defaultColor);
+    EXPECT_TRUE(pattern->isUseDefaultFontColor_);
+    EXPECT_TRUE(pattern->isModified_);
+}
+
+/**
+ * @tc.name: ContainerPickerPatternTest_UpdateDefaultTextStyle001
+ * @tc.desc: Test UpdateDefaultTextStyle function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_UpdateDefaultTextStyle001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create picker and text node, setup testing environment.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    
+    auto textPattern = AceType::MakeRefPtr<TextPattern>();
+    auto textNode = CreateChildNode(V2::TEXT_ETS_TAG, textPattern);
+    ASSERT_NE(textNode, nullptr);
+    
+    // Add text node as child
+    frameNode->AddChild(textNode);
+    
+    /**
+     * @tc.steps: step2. set isUseDefaultFontColor_ to true and call UpdateDefaultTextStyle.
+     * @tc.expected: step2. text color is updated to new defaultColor.
+     */
+    pattern->isUseDefaultFontColor_ = true;
+    Color newDefaultColor = Color::BLUE;
+    pattern->UpdateDefaultTextStyle(textNode, newDefaultColor);
+    
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    EXPECT_TRUE(textLayoutProperty->GetTextColor().has_value());
+    EXPECT_TRUE(textLayoutProperty->GetTextColor().value() == newDefaultColor);
+    
+    /**
+     * @tc.steps: step3. set isUseDefaultFontColor_ to false and call UpdateDefaultTextStyle.
+     * @tc.expected: step3. text color is not updated when isUseDefaultFontColor_ is false.
+     */
+    pattern->isUseDefaultFontColor_ = false;
+    Color anotherColor = Color::GREEN;
+    pattern->UpdateDefaultTextStyle(textNode, anotherColor);
+    
+    // Color should remain BLUE
+    EXPECT_TRUE(textLayoutProperty->GetTextColor().value() == newDefaultColor);
+}
+
+/**
+ * @tc.name: ContainerPickerPatternTest_OnColorConfigurationUpdate001
+ * @tc.desc: Test OnColorConfigurationUpdate function when the value of isUseDefaultFontColor_ is different.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_OnColorConfigurationUpdate001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto textPattern = AceType::MakeRefPtr<TextPattern>();
+    auto textNode = CreateChildNode(V2::TEXT_ETS_TAG, textPattern);
+    ASSERT_NE(textNode, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    Color textColor = Color::RED;
+    textLayoutProperty->UpdateTextColor(textColor);
+
+    // Add text node as child
+    frameNode->AddChild(textNode);
+    pattern->itemPosition_[0] = { 0.0f, 100.0f, nullptr };
+
+    /**
+     * @tc.steps: step2. set isUseDefaultFontColor_ to false and call OnColorConfigurationUpdate.
+     * @tc.expected: step2. The value of textColor will not change.
+     */
+    pattern->isUseDefaultFontColor_ = false;
+    pattern->OnColorConfigurationUpdate();
+    EXPECT_TRUE(textLayoutProperty->GetTextColor().has_value());
+    EXPECT_TRUE(textLayoutProperty->GetTextColor().value() == textColor);
+
+    /**
+     * @tc.steps: step3. set isUseDefaultFontColor_ to true and call OnColorConfigurationUpdate.
+     * @tc.expected: step3. The value of textColor will be change.
+     */
+    pattern->isUseDefaultFontColor_ = true;
+    pattern->OnColorConfigurationUpdate();
+    EXPECT_TRUE(textLayoutProperty->GetTextColor().has_value());
+    EXPECT_FALSE(textLayoutProperty->GetTextColor().value() == textColor);
 }
 
 } // namespace OHOS::Ace::NG

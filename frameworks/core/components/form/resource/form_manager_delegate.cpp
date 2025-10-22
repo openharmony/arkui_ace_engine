@@ -502,6 +502,15 @@ void FormManagerDelegate::AddSnapshotCallback(SnapshotCallback&& callback)
     snapshotCallback_ = std::move(callback);
 }
 
+void FormManagerDelegate::AddFormRenderDiedCallback(FormRenderDiedCallback&& callback)
+{
+    if (!callback || state_ == State::RELEASED) {
+        return;
+    }
+
+    onFormRenderDiedCallback_ = std::move(callback);
+}
+
 bool FormManagerDelegate::ParseAction(const std::string& action, const std::string& type, AAFwk::Want& want)
 {
     auto eventAction = JsonUtil::ParseJsonString(action);
@@ -650,7 +659,7 @@ void FormManagerDelegate::OnActionEvent(const std::string& action)
     if (!eventAction->IsValid()) {
         return;
     }
-    
+
     auto actionType = eventAction->GetValue("action");
     if (!actionType->IsValid()) {
         return;
@@ -731,7 +740,7 @@ void FormManagerDelegate::DispatchPointerEvent(const
     if (pointerEvent->GetPointerAction() == OHOS::MMI::PointerEvent::POINTER_ACTION_DOWN) {
         TAG_LOGI(AceLogTag::ACE_FORM, "dispatch down event to renderer");
     }
-    
+
     bool disablePanGesture;
     {
         std::lock_guard<std::mutex> wantCacheLock(wantCacheMutex_);
@@ -897,6 +906,9 @@ void FormManagerDelegate::OnFormError(const std::string& code, const std::string
         code.c_str(), msg.c_str(), externalErrorCode, errorMsg.c_str());
     switch (externalErrorCode) {
         case RENDER_DEAD_CODE:
+            if (onFormRenderDiedCallback_) {
+                onFormRenderDiedCallback_();
+            }
             ReAddForm();
             break;
         case FORM_STATUS_TIME_OUT:

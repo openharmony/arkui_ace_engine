@@ -102,7 +102,7 @@ void SetNestedScrollImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::GetOptPtr(value);
     if (!convValue) {
-        // Implement Reset value
+        ScrollableModelStatic::SetNestedScroll(frameNode, std::nullopt, std::nullopt);
         return;
     }
     auto forward = Converter::OptConvert<NestedScrollMode>(convValue->scrollForward);
@@ -115,22 +115,17 @@ void SetEnableScrollInteractionImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
-    if (!convValue) {
-        // Implement Reset value
-        return;
-    }
-    auto scrollEnabled = *convValue;
     auto layoutProp = frameNode->GetLayoutPropertyPtr<LayoutProperty>();
     CHECK_NULL_VOID(layoutProp);
     const auto id = AceType::TypeId(layoutProp);
     if (GridLayoutProperty::TypeId() == id) {
-        GridModelNG::SetScrollEnabled(frameNode, scrollEnabled);
+        GridModelNG::SetScrollEnabled(frameNode, convValue.value_or(true));
     } else if (ListLayoutProperty::TypeId() == id) {
-        ListModelNG::SetScrollEnabled(frameNode, scrollEnabled);
+        ListModelNG::SetScrollEnabled(frameNode, convValue.value_or(true));
     } else if (ScrollLayoutProperty::TypeId() == id) {
-        ScrollModelStatic::SetScrollEnabled(frameNode, scrollEnabled);
+        ScrollModelStatic::SetScrollEnabled(frameNode, convValue.value_or(true));
     } else if (WaterFlowLayoutProperty::TypeId() == id) {
-        WaterFlowModelNG::SetScrollEnabled(frameNode, scrollEnabled);
+        WaterFlowModelNG::SetScrollEnabled(frameNode, convValue.value_or(true));
     }
 }
 void SetFrictionImpl(Ark_NativePointer node,

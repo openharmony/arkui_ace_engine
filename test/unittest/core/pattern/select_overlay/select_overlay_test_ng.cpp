@@ -5213,6 +5213,13 @@ HWTEST_F(SelectOverlayTestNg, CreateMenuNode001, TestSize.Level1)
         .WillRepeatedly(Return(selectTheme));
     auto menuWrapperNoShortCut = selectOverlayNode->CreateMenuNode(info_);
     EXPECT_NE(menuWrapperNoShortCut, nullptr);
+    textOverlayTheme->showShortcut_ = true;
+    EXPECT_CALL(*themeManager, GetTheme(_))
+        .WillOnce(Return(textOverlayTheme))
+        .WillOnce(Return(textOverlayTheme))
+        .WillRepeatedly(Return(selectTheme));
+    auto menuWrapperShortCut = selectOverlayNode->CreateMenuNode(info_);
+    EXPECT_NE(menuWrapperShortCut, nullptr);
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerBase);
 }
 

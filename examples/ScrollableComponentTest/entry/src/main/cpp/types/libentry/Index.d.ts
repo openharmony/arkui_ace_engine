@@ -13,15 +13,5 @@
  * limitations under the License.
  */
 
-import { NodeContent } from '@kit.ArkUI';
-
-export const CreateWaterFlowInfiniteScrollingEarly: (content: NodeContent) => void;
-export const CreateScrollableGrid: (content: NodeContent) => void;
-export const CreateAlphabetIndexedList: (content: NodeContent) => void;
-export const CreateRefreshList: (content: NodeContent) => void;
-export const CreateScrollableInfiniteScroll: (content: NodeContent) => void;
-
-export const createNormalTextListExample: (content: NodeContent) => void;
-export const createLazyTextListExample: (content: NodeContent) => void;
-export const createListItemGroupExample: (content: NodeContent) => void;
-export const destroyListExample: (content: NodeContent) => void;
+export const createNativeRoot: (content: Object, page: number) => void;
+export const destroyNativeRoot: () => void;

@@ -1993,7 +1993,7 @@ export class RichEditorBuilderSpanOptions_serializer {
         const dragBackgroundColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let dragBackgroundColorTmpBuf : ColorMetrics | undefined = undefined
         if ((dragBackgroundColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            dragBackgroundColorTmpBuf = (ColorMetrics_serializer.read(valueDeserializer) as ColorMetrics)
+            dragBackgroundColorTmpBuf = ColorMetrics_serializer.read(valueDeserializer)
         }
         const dragBackgroundColorTmpResult : ColorMetrics | undefined = dragBackgroundColorTmpBuf
         const isDragShadowNeededTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()

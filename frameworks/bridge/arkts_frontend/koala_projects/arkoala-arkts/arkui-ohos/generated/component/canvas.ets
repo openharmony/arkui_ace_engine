@@ -1996,7 +1996,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         const bufferUnionSelector : int32 = retvalDeserializer.readInt8()
         let buffer : LengthMetrics | string | undefined
         if (bufferUnionSelector == (0).toChar()) {
-            buffer = (LengthMetrics_serializer.read(retvalDeserializer) as LengthMetrics)
+            buffer = LengthMetrics_serializer.read(retvalDeserializer)
         } else if (bufferUnionSelector == (1).toChar()) {
             buffer = (retvalDeserializer.readString() as string)
         } else {

@@ -79,7 +79,7 @@ export class InteropExtendableComponent extends ExtendableComponent {
         }
         const getProxy = value.invokeMethod('getProxy').unwrap();
         if (getProxy === undefined && ExtendableComponent.current) {
-            const provideVar = new ProvideDecoratedVariable<T>(ExtendableComponent.current as ExtendableComponent, providedPropName, providedPropName, uiUtils.makeObserved(value.invokeMethod('get').unwrap()) as T, false);
+            const provideVar = new ProvideDecoratedVariable<T>(ExtendableComponent.current as ExtendableComponent, providedPropName, providedPropName, uiUtils.makeV1Observed(value.invokeMethod('get').unwrap()) as T, false);
             provideVar.setProxy(value);
             value.invokeMethod('setProxy', ESValue.wrap(provideVar));
             const setProxyValue = ((newVal: T): void => {

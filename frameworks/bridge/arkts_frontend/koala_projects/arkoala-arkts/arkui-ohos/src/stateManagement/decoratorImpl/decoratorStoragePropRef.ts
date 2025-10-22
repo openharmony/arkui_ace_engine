@@ -92,7 +92,7 @@ export class StoragePropRefDecoratedVariable<T>
             const value = getObservedObject(newValue);
             this.backing_.setNoCheck(value);
         } else {
-            const value = uiUtils.makeObserved(newValue);
+            const value = uiUtils.makeV1Observed(newValue);
             this.backing_.setNoCheck(value);
         }
         this.unregisterWatchFromObservedObjectChanges(oldValue);

@@ -415,7 +415,7 @@ void SetOnItemDragStartImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        ListModelStatic::SetOnItemDragStart(frameNode, nullptr);
+        ListModelStatic::ResetOnItemDragStart(frameNode);
         return;
     }
     auto onItemDragStart = [callback = CallbackHelper(*optValue), frameNode, node](
