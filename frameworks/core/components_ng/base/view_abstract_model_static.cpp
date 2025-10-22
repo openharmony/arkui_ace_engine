@@ -196,7 +196,8 @@ bool ViewAbstractModelStatic::CheckMenuIsShow(
         CHECK_NULL_RETURN(renderContext, false);
         renderContext->UpdateChainedTransition(menuParam.transition);
     }
-    if (wrapperPattern->IsShow() && menuParam.setShow && !menuParam.isShow && !wrapperPattern->GetIsOpenMenu()) {
+    if (wrapperPattern->IsShow() && !wrapperPattern->GetIsOpenMenu() &&
+        ((menuParam.setShow && !menuParam.isShow) || !menuParam.setShow)) {
         TAG_LOGI(AceLogTag::ACE_MENU, "execute hide menu.");
         overlayManager->HideMenu(menuNode, targetId, false);
     }
@@ -338,6 +339,9 @@ void ViewAbstractModelStatic::BindContextMenuStatic(const RefPtr<FrameNode>& tar
 {
     CHECK_NULL_VOID(targetNode);
     auto targetId = targetNode->GetId();
+    if (CheckMenuIsShow(menuParam, targetId, targetNode)) {
+        TAG_LOGI(AceLogTag::ACE_MENU, "hide menu done %{public}d %{public}d.", menuParam.isShowInSubWindow, targetId);
+    }
     auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId());
     if (subwindow) {
         auto childContainerId = subwindow->GetChildContainerId();
