@@ -90,6 +90,7 @@ generated_sources = [
   "implementation/ellipse_modifier.cpp",
   "implementation/embedded_component_modifier.cpp",
   "implementation/environment_backend_accessor.cpp",
+  "implementation/tabs_extender_accessor.cpp",
   "implementation/event_emulator_accessor.cpp",
   "implementation/event_result_accessor.cpp",
   "implementation/event_target_info_accessor.cpp",

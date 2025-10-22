@@ -403,6 +403,7 @@ arkui_files = [
   "arkui-preprocessed/arkui/handwritten/transfer/WebTransfer.ets",
   "arkui-preprocessed/arkui/hooks/NavigationOpsHandWritten.ets",
   "arkui-preprocessed/arkui/hooks/WaterFlowHandWritten.ets",
+  "arkui-preprocessed/arkui/hooks/TabsOpsHandWritten.ets",
   "arkui-preprocessed/arkui/hooks/XComponentOpsHandWritten.ets",
   "arkui-preprocessed/arkui/hooks/content_modifiers/ContentModifierHooks.ets",
   "arkui-preprocessed/arkui/hooks/ImageOpsHandWritten.ets",

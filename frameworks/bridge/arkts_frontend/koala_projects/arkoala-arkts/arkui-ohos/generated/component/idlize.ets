@@ -4433,6 +4433,16 @@ export class ThemeOps {
         return
     }
 }
+export class TabsExtender {
+    static ApplyAttributesFinish_serialize(node: KPointer): void {
+        ArkUIGeneratedNativeModule._TabsExtender_ApplyAttributesFinish(node)
+    }
+    public static ApplyAttributesFinish(node: KPointer): void {
+        const node_casted = node as (KPointer)
+        TabsExtender.ApplyAttributesFinish_serialize(node_casted)
+        return
+    }
+}
 export class UIContextAtomicServiceBar {
     static getBarRect_serialize(): Frame {
         const retval  = ArkUIGeneratedNativeModule._UIContextAtomicServiceBar_getBarRect()

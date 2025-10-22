@@ -346,6 +346,7 @@ const GENERATED_ArkUISystemOpsAccessor* GetSystemOpsAccessor();
 const GENERATED_ArkUITabBarSymbolAccessor* GetTabBarSymbolAccessor();
 const GENERATED_ArkUITabContentTransitionProxyAccessor* GetTabContentTransitionProxyAccessor();
 const GENERATED_ArkUITabsControllerAccessor* GetTabsControllerAccessor();
+const GENERATED_ArkUITabsExtenderAccessor* GetTabsExtenderAccessor();
 const GENERATED_ArkUITapGestureEventAccessor* GetTapGestureEventAccessor();
 const GENERATED_ArkUITapRecognizerAccessor* GetTapRecognizerAccessor();
 const GENERATED_ArkUITextAreaControllerAccessor* GetTextAreaControllerAccessor();
@@ -655,6 +656,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetTabBarSymbolAccessor,
         GetTabContentTransitionProxyAccessor,
         GetTabsControllerAccessor,
+        GetTabsExtenderAccessor,
         GetTapGestureEventAccessor,
         GetTapRecognizerAccessor,
         GetTextAreaControllerAccessor,
