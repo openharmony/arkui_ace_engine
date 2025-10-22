@@ -126,7 +126,7 @@ void ScrollComponent::SetScrollScrollDirection(int32_t direction)
 }
 void ScrollComponent::AddChildWithNumber(int32_t number, ArkUI_NodeType type)
 {
-    SetBorderWidth(2);
+    SetBorderWidth(number);
     auto node = std::make_shared<Component>(type);
     if (type == ARKUI_NODE_LIST) {
         ArkUI_NumberValue value[] = { { .i32 = ARKUI_AXIS_HORIZONTAL } };

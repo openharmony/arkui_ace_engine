@@ -135,12 +135,14 @@ public:
     ListComponent(ArkUI_NodeHandle handle) : Component(handle) {}
 
     // 引入懒加载模块。
-    void SetLazyAdapter(const std::shared_ptr<ItemAdapter<ListItemComponent>> &adapter) {
+    void SetLazyAdapter(const std::shared_ptr<ItemAdapter<ListItemComponent>> &adapter) 
+    {
         ArkUI_AttributeItem item{nullptr, 0, nullptr, adapter->GetAdapter()};
         _nodeAPI->setAttribute(_component, NODE_LIST_NODE_ADAPTER, &item);
         _adapter = adapter;
     }
-    void SetLazyAdapterByGroup(const std::shared_ptr<ListItemGroupAdapter> &adapter) {
+    void SetLazyAdapterByGroup(const std::shared_ptr<ListItemGroupAdapter> &adapter) 
+    {
         ArkUI_AttributeItem item{nullptr, 0, nullptr, adapter->GetAdapter()};
         _nodeAPI->setAttribute(_component, NODE_LIST_NODE_ADAPTER, &item);
         _groupAdapter = adapter;
