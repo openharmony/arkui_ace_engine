@@ -18,23 +18,37 @@
 #ifndef SCROLLABLE_COMPONENT_ARKUIBUTTONNODE_H
 #define SCROLLABLE_COMPONENT_ARKUIBUTTONNODE_H
 
+#include <memory>
+#include <string>
 #include "ArkUINode.h"
 
-#include <string>
-
-namespace NativeModule {
-class ArkUIButtonNode : public ArkUINode {
+class ArkUIButtonNode : public BaseNode {
 public:
     ArkUIButtonNode()
-        : ArkUINode((NativeModuleInstance::GetInstance()->GetNativeNodeAPI())->createNode(ARKUI_NODE_BUTTON))
+        : BaseNode(CreateButtonHandle())
     {
     }
-    void SetLabel(const std::string &label)
+
+    static std::shared_ptr<ArkUIButtonNode> Create()
     {
-        ArkUI_AttributeItem item = {nullptr, 0, label.c_str()};
-        nativeModule_->setAttribute(handle_, NODE_BUTTON_LABEL, &item);
+        return std::make_shared<ArkUIButtonNode>();
+    }
+
+    void SetLabel(const std::string& label)
+    {
+        if (!ValidateApiAndNode(nodeApi_, nodeHandle_, "ArkUIButtonNode::SetLabel")) {
+            return;
+        }
+        ArkUI_AttributeItem item { nullptr, 0, label.c_str() };
+        nodeApi_->setAttribute(nodeHandle_, NODE_BUTTON_LABEL, &item);
+    }
+
+private:
+    static ArkUI_NodeHandle CreateButtonHandle()
+    {
+        auto api = NodeApiInstance::GetInstance()->GetNativeNodeAPI();
+        return api ? api->createNode(ARKUI_NODE_BUTTON) : nullptr;
     }
 };
-} // namespace NativeModule
 
 #endif // SCROLLABLE_COMPONENT_ARKUIBUTTONNODE_H
