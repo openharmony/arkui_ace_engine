@@ -798,6 +798,7 @@ ani_object ANICreate(ani_env *env, [[maybe_unused]] ani_object object, [[maybe_u
     // bind end with front object
     if (ANI_OK != env->Object_New(cls, ctor, &animatorObj, reinterpret_cast<ani_long>(animatorResult))) {
         TAG_LOGI(AceLogTag::ACE_ANIMATION, "[ANI] create animatorResult fail");
+        delete animatorResult;
         return animatorObj;
     }
 
