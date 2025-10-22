@@ -397,7 +397,7 @@ static ani_object InterpolatingSpring(ani_env* env,
     return curve_object;
 }
 
-static ani_object StepsCurve(ani_env* env, ani_double count, ani_boolean end)
+static ani_object StepsCurve(ani_env* env, ani_int count, ani_boolean end)
 {
     ani_class cls;
     if (ANI_OK != env->FindClass(ICURVE_CLASS_NAME, &cls)) {
