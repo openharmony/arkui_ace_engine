@@ -49,6 +49,9 @@ ani_status NativeDynamicModule::BindNativeDynamicComponent(ani_env *env)
 
     std::array staticMethods = {
         ani_native_function {
+            "_Dynamic_Construct",
+            nullptr, reinterpret_cast<void*>(DynamicConstruct)},
+        ani_native_function {
             "_Dynamic_Set_Option",
             nullptr, reinterpret_cast<void*>(SetDynamicOption)},
         ani_native_function {
@@ -68,9 +71,25 @@ ani_status NativeDynamicModule::BindNativeDynamicComponent(ani_env *env)
     return ANI_OK;
 }
 
+ani_long NativeDynamicModule::DynamicConstruct(
+    [[maybe_unused]] ani_env* env,
+    [[maybe_unused]] ani_object object,
+    [[maybe_unused]] ani_int id,
+    [[maybe_unused]] ani_int flag)
+{
+#ifdef WINDOW_SCENE_SUPPORTED
+    auto frameNodePtr = NG::DynamicModelStatic::CreateFrameNodeByIncRefCount(id);
+    return reinterpret_cast<ani_long>(frameNodePtr);
+#else
+    return nullptr;
+#endif
+}
+
 ani_status NativeDynamicModule::SetDynamicOption(
-    [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
-    [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object obj)
+    [[maybe_unused]] ani_env* env,
+    [[maybe_unused]] ani_object object,
+    [[maybe_unused]] ani_long pointer,
+    [[maybe_unused]] ani_object obj)
 {
     auto frameNode = reinterpret_cast<NG::FrameNode *>(pointer);
     if (frameNode == nullptr) {
@@ -111,8 +130,10 @@ ani_status NativeDynamicModule::SetDynamicOption(
 }
 
 ani_status NativeDynamicModule::SetOnError(
-    [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
-    [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object callbackObj)
+    [[maybe_unused]] ani_env* env,
+    [[maybe_unused]] ani_object object,
+    [[maybe_unused]] ani_long pointer,
+    [[maybe_unused]] ani_object callbackObj)
 {
     auto frameNode = reinterpret_cast<NG::FrameNode *>(pointer);
     if (frameNode == nullptr) {
@@ -163,8 +184,10 @@ ani_status NativeDynamicModule::SetOnError(
 }
 
 ani_status NativeDynamicModule::SetIsReportFrameEvent(
-    [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
-    [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_boolean value)
+    [[maybe_unused]] ani_env* env,
+    [[maybe_unused]] ani_object object,
+    [[maybe_unused]] ani_long pointer,
+    [[maybe_unused]] ani_boolean value)
 {
     auto frameNode = reinterpret_cast<NG::FrameNode *>(pointer);
     if (frameNode == nullptr) {
