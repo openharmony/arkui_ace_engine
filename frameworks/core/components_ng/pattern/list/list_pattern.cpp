@@ -847,25 +847,12 @@ bool ListPattern::IsAtTop() const
            NonNegative(startMainPos - currentDelta_ + GetChainDelta(0) - contentStartOffset_);
 }
 
-bool ListPattern::IsAtBottom(bool considerRepeat, bool fromController) const
+bool ListPattern::IsAtBottom(bool considerRepeat) const
 {
     bool groupAtStart = true;
     bool groupAtEnd = true;
     GetListItemGroupEdge(groupAtStart, groupAtEnd);
     int32_t endIndex = endIndex_;
-    while (fromController && endIndex < maxListItemIndex_) {
-        if (!posMap_) {
-            break;
-        }
-        auto info = posMap_->GetPositionInfo(endIndex + 1);
-        if (!NearZero(info.mainSize)) {
-            break;
-        }
-        endIndex++;
-        if (!NearZero(spaceWidth_)) {
-            break;
-        }
-    }
     float endMainPos = endMainPos_;
     float startMainPos = startMainPos_;
     auto contentMainSize = contentMainSize_ - contentEndOffset_ - contentStartOffset_;

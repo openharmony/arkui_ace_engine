@@ -33,7 +33,7 @@ public:
     bool UpdateCurrentOffset(float delta, int32_t source) override;
     bool IsScrollable() const override;
     bool IsAtTop() const override;
-    bool IsAtBottom(bool considerRepeat = false, bool fromController = false) const override;
+    bool IsAtBottom(bool considerRepeat = false) const override;
     bool IsAtTopWithDelta() const override;
     bool IsAtBottomWithDelta() const override;
     bool IsReverse() const override;

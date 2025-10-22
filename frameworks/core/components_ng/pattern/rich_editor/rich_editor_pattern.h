@@ -1009,7 +1009,7 @@ public:
 
     void OnDetachFromFrameNode(FrameNode* node) override;
 
-    bool IsAtBottom(bool considerRepeat = false, bool fromController = false) const override
+    bool IsAtBottom(bool considerRepeat = false) const override
     {
         return true;
     }

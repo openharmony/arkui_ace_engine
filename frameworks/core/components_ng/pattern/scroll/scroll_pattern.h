@@ -157,7 +157,7 @@ public:
     ScrollOffsetAbility GetScrollOffsetAbility() override;
 
     bool IsAtTop() const override;
-    bool IsAtBottom(bool considerRepeat = false, bool fromController = false) const override;
+    bool IsAtBottom(bool considerRepeat = false) const override;
     bool IsOutOfBoundary(bool useCurrentDelta = true) override;
     OverScrollOffset GetOverScrollOffset(double delta) const override;
 

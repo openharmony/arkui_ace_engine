@@ -1342,5 +1342,13 @@ HWTEST_F(ListControllerTestNg, CheckIsAtEndWhenScrollToBottom, TestSize.Level1)
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushUITasks(frameNode_);
     EXPECT_TRUE(pattern_->positionController_->IsAtEnd());
+
+    /**
+     * @tc.steps: step3. remeasure.
+     * @tc.expected: IsAtEnd is true.
+     */
+    FlushUITasks(frameNode_);
+    EXPECT_EQ(pattern_->itemPosition_.count(10), 1);
+    EXPECT_TRUE(pattern_->positionController_->IsAtEnd());
 }
 } // namespace OHOS::Ace::NG
