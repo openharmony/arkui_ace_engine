@@ -63,7 +63,7 @@ export class PropRefDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
             const value = getObservedObject(newValue);
             this.localValue.setNoCheck(value);
         } else {
-            const value = uiUtils.makeObserved(newValue);
+            const value = uiUtils.makeV1Observed(newValue);
             this.localValue.setNoCheck(value);
             
         }
@@ -76,7 +76,7 @@ export class PropRefDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
         const sourceValue = this.sourceValue;
         if (sourceValue !== newValue || this.isForceRender) {
             this.isForceRender = false;
-            const value = uiUtils.makeObserved(newValue);
+            const value = uiUtils.makeV1Observed(newValue);
             this.unregisterWatchFromObservedObjectChanges(sourceValue);
             this.registerWatchForObservedObjectChanges(value);
             this.sourceValue = value;

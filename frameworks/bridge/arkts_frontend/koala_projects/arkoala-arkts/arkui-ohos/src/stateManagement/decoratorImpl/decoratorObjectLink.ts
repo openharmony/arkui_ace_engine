@@ -68,7 +68,7 @@ export class ObjectLinkDecoratedVariable<T>
         if (oldValue === newValue) {
             return;
         }
-        const value = uiUtils.makeObserved(newValue) as T;
+        const value = uiUtils.makeV1Observed(newValue) as T;
         StateUpdateLoop.add(() => {
             if (this.backing_.set(value)) {
                 this.unregisterWatchFromObservedObjectChanges(oldValue);

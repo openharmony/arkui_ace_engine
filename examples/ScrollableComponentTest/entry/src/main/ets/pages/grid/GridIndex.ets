@@ -21,7 +21,12 @@ interface routerInfo {
 }
 
 let routerData: routerInfo[] = [
-  { url: 'pages/Grid/friction/friction', info: 'friction' },
+  { url: 'pages/grid/friction/friction', info: 'friction' },
+  { url: "pages/grid/LayoutConstraints/OneItem", info: "高：单子组件" },
+  { url: "pages/grid/LayoutConstraints/TwoItem", info: "高：多子组件" },
+  { url: "pages/grid/LayoutConstraints/WidthOneItem", info: "宽：单子组件" },
+  { url: "pages/grid/LayoutConstraints/WidthTwoItem", info: "宽：多子组件" },
+  { url: "pages/grid/LayoutConstraints/OriOneItem", info: "文本10w+" }
 ]
 
 @Entry

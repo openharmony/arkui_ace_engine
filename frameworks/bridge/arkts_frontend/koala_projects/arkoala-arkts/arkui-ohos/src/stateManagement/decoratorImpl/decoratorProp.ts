@@ -99,7 +99,7 @@ export class PropDecoratedVariable<T> extends DecoratedV1VariableBase<T> impleme
             this.unregisterWatchFromObservedObjectChanges(value);
             this.registerWatchForObservedObjectChanges(newValue);
 
-            newValue = uiUtils.makeObserved(newValue);
+            newValue = uiUtils.makeV1Observed(newValue);
             // for interop
             if (isDynamicObject(newValue)) {
                 newValue = getObservedObject(newValue);
@@ -122,7 +122,7 @@ export class PropDecoratedVariable<T> extends DecoratedV1VariableBase<T> impleme
 
             this.__soruceValue.setSilently(newValue);
             StateUpdateLoop.add(() => {
-                if (this.__localValue.set(uiUtils.makeObserved(deepCopy<T>(newValue)) as T)) {
+                if (this.__localValue.set(uiUtils.makeV1Observed(deepCopy<T>(newValue)) as T)) {
                     this.execWatchFuncs();
                 }
             });
@@ -135,7 +135,7 @@ export class PropDecoratedVariable<T> extends DecoratedV1VariableBase<T> impleme
             this.unregisterWatchFromObservedObjectChanges(sourceValue);
             this.registerWatchForObservedObjectChanges(newValue);
             this.__soruceValue.setSilently(newValue);
-            this.__localValue.set(uiUtils.makeObserved(deepCopy<T>(newValue)) as T);
+            this.__localValue.set(uiUtils.makeV1Observed(deepCopy<T>(newValue)) as T);
             this.execWatchFuncs();
         }
     }

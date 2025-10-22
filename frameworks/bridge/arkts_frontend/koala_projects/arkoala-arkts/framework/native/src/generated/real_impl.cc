@@ -10901,6 +10901,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
+    Ark_Boolean HasAxisImpl(Ark_AxisEvent peer,
+                            Ark_AxisType axisType)
+    {
+        return {};
+    }
     Ark_AxisAction GetActionImpl(Ark_AxisEvent peer)
     {
         return {};
@@ -18547,6 +18552,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             AxisEventAccessor::GetFinalizerImpl,
             AxisEventAccessor::GetHorizontalAxisValueImpl,
             AxisEventAccessor::GetVerticalAxisValueImpl,
+            AxisEventAccessor::HasAxisImpl,
             AxisEventAccessor::GetActionImpl,
             AxisEventAccessor::SetActionImpl,
             AxisEventAccessor::GetDisplayXImpl,

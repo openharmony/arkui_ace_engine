@@ -59,7 +59,6 @@ void MenuItemGroupPattern::RemoveBottomDivider()
 void MenuItemGroupPattern::OnMountToParentDone()
 {
     ModifyFontSize();
-    ModifyDivider();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     bool needDivider = false;
@@ -219,6 +218,7 @@ void MenuItemGroupPattern::ModifyDivider()
         paintProperty->UpdateNeedFooterDivider(true);
     }
     paintProperty->UpdateDividerMode(menuProperty->GetItemGroupDividerModeValue(DividerMode::FLOATING_ABOVE_MENU));
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void MenuItemGroupPattern::OnExtItemPressed(bool press, bool beforeGroup)

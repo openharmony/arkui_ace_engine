@@ -502,7 +502,6 @@ export struct FoldSplitContainer {
   build() {
     Stack() {
       Column() {
-        Text(`position ${this.primaryLayout.position.y}`)
         if (this.primary) {
           this.primary();
         }
@@ -516,7 +515,6 @@ export struct FoldSplitContainer {
       .clip(true)
 
       Column() {
-        Text(`position ${this.secondaryLayout.position.y}`)
         if (this.secondary) {
           this.secondary();
         }
