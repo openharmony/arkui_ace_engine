@@ -25,6 +25,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr double MAX_COLOR_STOP = 100.0;
+constexpr double COLOR_STOPS_EPSILON = 0.000001f;
 } // namespace
 void GradientStyleModifier::Draw(RSDrawingContext& context) const
 {
@@ -92,8 +93,7 @@ Gradient GradientStyleModifier::GetGradient() const
         auto curColor = colors[index].ToColor();
         curColor.SetColorSpace(colorSpace_);
         color.SetColor(curColor);
-        auto colorStop =
-            stops[index].Value() > MAX_COLOR_STOP ? Dimension(MAX_COLOR_STOP, DimensionUnit::PERCENT) : stops[index];
+        auto colorStop = Dimension(std::clamp(stops[index].Value(), 0.0, MAX_COLOR_STOP), DimensionUnit::PERCENT);
         color.SetDimension(colorStop);
         gradient.AddColor(color);
     }
@@ -325,7 +325,7 @@ bool ColorStopAnimatableArithmetic::IsEqual(const ColorStopAnimatableArithmetic&
         return false;
     }
     for (size_t index = 0; index < srcColorStopSize; index++) {
-        if (!NearEqual(colorStops_[index].Value(), value.colorStops_[index].Value())) {
+        if (!NearEqual(colorStops_[index].Value(), value.colorStops_[index].Value(), COLOR_STOPS_EPSILON)) {
             return false;
         }
     }
