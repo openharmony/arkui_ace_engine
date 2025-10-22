@@ -60,6 +60,7 @@ public:
         OnScrollVisibleContentChangeEvent&& onScrollVisibleContentChange);
     static void SetOnItemMove(FrameNode* frameNode, OnItemMoveEvent&& onItemMove);
     static void SetOnItemDragStart(FrameNode* frameNode, OnItemDragStartFunc&& onItemDragStart);
+    static void ResetOnItemDragStart(FrameNode* frameNode);
     static void SetOnItemDragEnter(FrameNode* frameNode, OnItemDragEnterFunc&& onItemDragEnter);
     static void SetOnItemDragLeave(FrameNode* frameNode, OnItemDragLeaveFunc&& onItemDragLeave);
     static void SetOnItemDragMove(FrameNode* frameNode, OnItemDragMoveFunc&& onItemDragMove);
@@ -87,6 +88,8 @@ public:
 private:
     static void AddDragFrameNodeToManager(FrameNode* frameNode);
     static void AddDragFrameNodeToManagerMultiThread(FrameNode* frameNode);
+    static void RemoveDragFrameNodeToManager(FrameNode* frameNode);
+    static void RemoveDragFrameNodeToManagerMultiThread(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_LIST_MODEL_STATIC_H

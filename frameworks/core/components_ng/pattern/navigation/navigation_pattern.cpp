@@ -870,6 +870,12 @@ void NavigationPattern::OnLanguageConfigurationUpdate()
     }
 }
 
+void NavigationPattern::OnDpiConfigurationUpdate()
+{
+    // dpi change, recalculate mix/max navbarwidth and min contentwidth.
+    SetIfNeedInit(true);
+}
+
 int32_t NavigationPattern::GetFirstNewDestinationIndex(const NavPathList& preList, const NavPathList& curList)
 {
     struct Hash {

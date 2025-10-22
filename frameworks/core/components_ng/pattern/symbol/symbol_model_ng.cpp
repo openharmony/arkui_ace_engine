@@ -142,6 +142,7 @@ void SymbolModelNG::RegisterSymbolFontColorResource(FrameNode* frameNode, const 
                 colorVecArr[resObjIndex] = fontColor;
                 layoutProperty->UpdateSymbolColorList(colorVecArr);
             }
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         };
 
         pattern->AddResObj(storeKey, resObj, std::move(updateFunc));

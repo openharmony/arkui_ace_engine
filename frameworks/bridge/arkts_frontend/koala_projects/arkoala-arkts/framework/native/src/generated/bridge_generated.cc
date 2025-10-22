@@ -26394,6 +26394,11 @@ Ark_Number impl_AxisEvent_getVerticalAxisValue(Ark_NativePointer thisPtr) {
         return GetAccessors()->getAxisEventAccessor()->getVerticalAxisValue(self);
 }
 KOALA_INTEROP_DIRECT_1(AxisEvent_getVerticalAxisValue, KInteropNumber, Ark_NativePointer)
+Ark_Boolean impl_AxisEvent_hasAxis(Ark_NativePointer thisPtr, Ark_Int32 axisType) {
+        Ark_AxisEvent self = reinterpret_cast<Ark_AxisEvent>(thisPtr);
+        return GetAccessors()->getAxisEventAccessor()->hasAxis(self, static_cast<Ark_AxisType>(axisType));
+}
+KOALA_INTEROP_DIRECT_2(AxisEvent_hasAxis, Ark_Boolean, Ark_NativePointer, Ark_Int32)
 Ark_Int32 impl_AxisEvent_getAction(Ark_NativePointer thisPtr) {
         Ark_AxisEvent self = reinterpret_cast<Ark_AxisEvent>(thisPtr);
         return GetAccessors()->getAxisEventAccessor()->getAction(self);

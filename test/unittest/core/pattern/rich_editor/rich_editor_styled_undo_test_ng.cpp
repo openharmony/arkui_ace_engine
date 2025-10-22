@@ -73,6 +73,7 @@ HWTEST_F(RichEditorStyledUndoTestNg, RecordOperation001, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    ASSERT_NE(richEditorPattern->undoManager_, nullptr);
     auto& undoRecords = richEditorPattern->undoManager_->undoRecords_;
     // step1 insert value
     struct UpdateSpanStyle typingStyle;

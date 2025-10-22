@@ -15,14 +15,12 @@
 
 {
   "app": {
-    "signingConfigs": [
-    ],
+    "signingConfigs": [],
     "products": [
       {
         "name": "default",
         "signingConfig": "default",
-        "targetSdkVersion": "6.0.0(20)",
-        "compatibleSdkVersion": "6.0.0(20)",
+        "compatibleSdkVersion": "5.1.1(19)",
         "runtimeOS": "HarmonyOS",
         "buildOption": {
           "nativeCompiler": "BiSheng",
@@ -30,7 +28,7 @@
             "caseSensitiveCheck": true,
             "useNormalizedOHMUrl": true
           }
-        },
+        }
       }
     ],
     "buildModeSet": [

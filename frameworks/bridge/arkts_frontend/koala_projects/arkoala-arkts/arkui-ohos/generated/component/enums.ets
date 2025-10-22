@@ -733,3 +733,8 @@ export enum AnimationPropertyType {
     SCALE = 2,
     OPACITY = 3
 }
+export enum AxisType {
+    VERTICAL_AXIS = 0,
+    HORIZONTAL_AXIS = 1,
+    PINCH_AXIS = 2
+}

@@ -26,10 +26,10 @@ struct ListCAPIGroup {
   changeNativeFlag(): void {
     if (this.showNative) {
       // 传递NodeContent对象用于Native创建组件的挂载显示
-      nativeNode.createListItemGroupExample(this.rootSlot)
+      nativeNode.createNativeRoot(this.rootSlot, 2);
     } else {
       // 销毁NativeModule组件
-      nativeNode.destroyListExample(this.rootSlot)
+      nativeNode.destroyNativeRoot();
     }
   }
 

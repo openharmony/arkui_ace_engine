@@ -3614,6 +3614,15 @@ typedef struct Opt_AxisModel {
     Ark_Tag tag;
     Ark_AxisModel value;
 } Opt_AxisModel;
+typedef enum Ark_AxisType {
+    ARK_AXIS_TYPE_VERTICAL_AXIS = 0,
+    ARK_AXIS_TYPE_HORIZONTAL_AXIS = 1,
+    ARK_AXIS_TYPE_PINCH_AXIS = 2,
+} Ark_AxisType;
+typedef struct Opt_AxisType {
+    Ark_Tag tag;
+    Ark_AxisType value;
+} Opt_AxisType;
 typedef enum Ark_BadgePosition {
     ARK_BADGE_POSITION_RIGHT_TOP = 0,
     ARK_BADGE_POSITION_RIGHT = 1,
@@ -13576,7 +13585,7 @@ typedef struct Opt_GaugeConfiguration {
 } Opt_GaugeConfiguration;
 typedef struct Ark_GaugeOptions {
     /* kind: Interface */
-    Ark_Number value;
+    Opt_Number value;
     Opt_Number min;
     Opt_Number max;
 } Ark_GaugeOptions;
@@ -24719,6 +24728,8 @@ typedef struct GENERATED_ArkUIAxisEventAccessor {
     Ark_NativePointer (*getFinalizer)();
     Ark_Number (*getHorizontalAxisValue)(Ark_AxisEvent peer);
     Ark_Number (*getVerticalAxisValue)(Ark_AxisEvent peer);
+    Ark_Boolean (*hasAxis)(Ark_AxisEvent peer,
+                           Ark_AxisType axisType);
     Ark_AxisAction (*getAction)(Ark_AxisEvent peer);
     void (*setAction)(Ark_AxisEvent peer,
                       Ark_AxisAction action);

@@ -29,8 +29,7 @@ import {
     InteropWatchFunc,
     uiUtils,
     IObservedObject,
-    OBSERVE,
-    IStateDecoratedVariable
+    OBSERVE
 } from '../stateManagement';
 import { ObserveSingleton } from "arkui/stateManagement/base/observeSingleton";
 import { IDecoratedV1Variable, WatchFuncType, WatchIdType } from '../stateManagement/decorator';
@@ -318,7 +317,7 @@ export function registerCreateWatchFuncCallback(): void {
 
 export function registerCreateStaticObservedCallback(): void {
     const makeObservedcallback = (value: Object): Object => {
-        return uiUtils.makeObserved(value) as Object;
+        return uiUtils.makeV1Observed(value) as Object;
     }
     const global = ESValue.getGlobal();
     const registerCallback = global.getProperty('registerCallbackForMakeObserved');
@@ -629,11 +628,17 @@ export function registerCreateCompatibleStaticState(): void {
     registerCallback.invoke(createCompatibleStaticState);
 }
 
-function createCompatibleStaticState<T>(dynamicValue: Object): IStateDecoratedVariable<T> {
+function createCompatibleStaticState<T>(dynamicValue: Object): ProvideDecoratedVariable<T> {
     const value = ESValue.wrap(dynamicValue);
     const getProxy = value.invokeMethod('getProxy').unwrap();
     if (getProxy === undefined) {
-        const stateVar = new StateDecoratedVariable<T>(null, 'proxy', uiUtils.makeObserved(value.invokeMethod('get').unwrap()) as T);
+        const stateVar = new ProvideDecoratedVariable<T>(
+          ExtendableComponent.current as ExtendableComponent,
+          "proxy",
+          "proxy",
+          uiUtils.makeV1Observed(value.invokeMethod("get").unwrap()) as T,
+          false
+        );
         value.invokeMethod('setProxy', ESValue.wrap(stateVar));
         const setProxyValue = ((newVal: T): void => {
             value.invokeMethod('set', ESValue.wrap(newVal));
@@ -655,7 +660,7 @@ function createCompatibleStaticState<T>(dynamicValue: Object): IStateDecoratedVa
         return stateVar;
     }
     else {
-        return getProxy as IStateDecoratedVariable<T>
+        return getProxy as ProvideDecoratedVariable<T>;
     }
 }
 

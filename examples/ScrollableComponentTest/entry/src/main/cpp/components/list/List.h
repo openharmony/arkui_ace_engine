@@ -1,10 +1,10 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,554 +13,188 @@
  * limitations under the License.
  */
 
-#ifndef SCROLLABLE_COMPONENT_COMPONENTS_LIST_H
-#define SCROLLABLE_COMPONENT_COMPONENTS_LIST_H
+ /*
+  * Description: Grid组件高频接口CAPI补齐
+  * Writer: renxiaowen
+  */
+ 
+#ifndef CAPIDEMO_LIST_COMPONENT_H
+#define CAPIDEMO_LIST_COMPONENT_H
+#include "components/component.h"
+#include "components/node_adapter.h"
+#include <vector>
 
-#include <functional>
-#include <memory>
+namespace ArkUICApiDemo {
+//////////////////////////////////////ListItem///////////////////////////////////////
+typedef void (*OnOffsetChangeCallback)(float offset);
+typedef void (*OnOffsetChangeWithUserDataCallback)(float offset, void *userData);
+typedef void (*OnFinish)(void *userData);
 
-#include <arkui/native_node.h>
-#include <arkui/native_type.h>
-#include <hilog/log.h>
-
-#include "common/ArkUINode.h"
-#include "common/ArkUIUtils.h"
-#include "common/ArkUINodeAdapter.h"
-#include "common/ArkUIScrollEvents.h"
-#include "components/list/List.h"
-#include "components/list/ListItemSwipe.h"
-#include "components/list/ListItemGroup.h"
-
-#ifndef LOG_TAG
-#define LOG_TAG "List"
-#endif
-
-class List : public BaseNode {
+class ListItemSwipeActionOption {
 public:
-    static ArkUI_NodeHandle CreateAlphabetIndexedList();
+    ListItemSwipeActionOption() : _option(OH_ArkUI_ListItemSwipeActionOption_Create()) {}
+    ~ListItemSwipeActionOption() { OH_ArkUI_ListItemSwipeActionOption_Dispose(_option); }
 
-    // 嵌套滚动模式常量
-    static constexpr int32_t kNestedScrollParentFirst = 0;
-    static constexpr int32_t kNestedScrollChildFirst = 1;
-    static constexpr int32_t kNestedScrollSelfFirst = 2;
+    void SetStart(ArkUI_ListItemSwipeActionItem *item);
+    void SetEnd(ArkUI_ListItemSwipeActionItem *item);
+    // ArkUI_ListItemSwipeEdgeEffect
+    void SetEdgeEffect(ArkUI_ListItemSwipeEdgeEffect edgeEffect);
+    int32_t GetEdgeEffect();
+    void SetOnOffsetChange(OnOffsetChangeCallback callback);
+    void SetOnOffsetChangWithUserData(OnOffsetChangeWithUserDataCallback callback, void *userData);
 
-    // 组件事件数据数组索引常量
-    static constexpr int32_t kScrollIndexFirstDataIndex = 0;
-    static constexpr int32_t kScrollIndexLastDataIndex = 3;
+    ArkUI_ListItemSwipeActionOption *GetOption() { return _option; }
 
-    static constexpr int32_t kVisibleChangeFirstChildDataIndex = 0;
-    static constexpr int32_t kVisibleChangeStartAreaDataIndex = 1;
-    static constexpr int32_t kVisibleChangeStartIndexDataIndex = 2;
-    static constexpr int32_t kVisibleChangeLastChildDataIndex = 3;
-    static constexpr int32_t kVisibleChangeEndAreaDataIndex = 4;
-    static constexpr int32_t kVisibleChangeEndIndexDataIndex = 5;
+private:
+    ArkUI_ListItemSwipeActionOption *_option;
+};
 
-    static constexpr int32_t kScrollFrameBeginDataIndex = 0;
-
-    static constexpr uint32_t kColorTransparent = 0x00000000U;
-
-    // —— 可视内容变化事件数据 —— //
-    struct VisibleContentChange {
-        int32_t firstChildIndex = -1; // 可视区域首个“子组件”（item/header/footer）索引
-        ArkUI_ListItemGroupArea startArea = ARKUI_LIST_ITEM_GROUP_AREA_OUTSIDE; // 起点区
-        int32_t startItemIndex = -1;                                            // 若起点不是 item，则为 -1
-
-        int32_t lastChildIndex = -1; // 可视区域最后一个“子组件”索引
-        ArkUI_ListItemGroupArea endArea = ARKUI_LIST_ITEM_GROUP_AREA_OUTSIDE; // 终点区
-        int32_t endItemIndex = -1;                                            // 若终点不是 item，则为 -1
-
-        bool StartOnItem() const
-        {
-            return startArea == ARKUI_LIST_ITEM_SWIPE_AREA_ITEM && startItemIndex >= 0;
-        }
-        bool EndOnItem() const
-        {
-            return endArea == ARKUI_LIST_ITEM_SWIPE_AREA_ITEM && endItemIndex >= 0;
-        }
-    };
-
+class ListItemComponent : public Component {
 public:
-    List()
-        : BaseNode(NodeApiInstance::GetInstance()->GetNativeNodeAPI()->createNode(ARKUI_NODE_LIST)),
-          nodeApi_(NodeApiInstance::GetInstance()->GetNativeNodeAPI())
-    {
-        if (!IsNotNull(nodeApi_) || !IsNotNull(GetHandle())) {
-            return;
-        }
+    ListItemComponent() : Component(ARKUI_NODE_LIST_ITEM) {}
+    ListItemComponent(ArkUI_NodeHandle handle) : Component(handle) {}
+    void SetListItemSwiperAction(ListItemSwipeActionOption *option);
+    std::shared_ptr<ListItemSwipeActionOption> GetSwipeActionOption() const { return _swipeActionOption; }
+    void ReleaseSwipeActionOption() { _swipeActionOption.reset(); }
 
-        nodeApi_->addNodeEventReceiver(GetHandle(), &List::StaticEventReceiver);
-        const uint32_t scrollEventMask = SCROLL_EVT_FRAME_BEGIN | SCROLL_EVT_REACH_END;
-        scrollEventGuard_.Bind(nodeApi_, GetHandle(), this, scrollEventMask);
-    }
+private:
+    std::shared_ptr<ListItemSwipeActionOption> _swipeActionOption;
+};
 
-    ~List() override
-    {
-        scrollEventGuard_.Release();
 
-        if (!IsNotNull(nodeApi_)) {
-            return;
-        }
-        UnregisterSpecificEvents();
-        ResetListAdapter();
-        CleanupChildrenMainSizeOption();
-    }
+class ListChildrenMainSizeOption {
+public:
+    ListChildrenMainSizeOption() : _option(OH_ArkUI_ListChildrenMainSizeOption_Create()) {}
+    ~ListChildrenMainSizeOption() { OH_ArkUI_ListChildrenMainSizeOption_Dispose(_option); }
+    int32_t SetDefaultMainSize(float defaultMainSize);
+    float GetDefaultMainSize();
+    void Resize(int32_t totalSize);
+    
+    int32_t UpdateSize(int32_t index, float mainSize);
+    float GetMainSize(int32_t index);
+    int32_t Add(int32_t start, int32_t addCount, std::vector<float> childrenSize);
+    int32_t Delete(int32_t start, int32_t deleteCount);
+    int32_t Update(int32_t start, int32_t updateCount, std::vector<float> childrenSize);
+    ArkUI_ListChildrenMainSize *GetOption() { return _option; }
 
-    // ========================================
-    // 通用属性设置接口
-    // ========================================
-    void SetClipContent(bool clipEnabled)
-    {
-        SetAttributeInt32(nodeApi_, GetHandle(), NODE_SCROLL_CLIP_CONTENT, clipEnabled ? 1 : 0);
-    }
+private:
+    int32_t SpliceInline(int32_t index, int32_t deleteCount, int32_t addCount);
+    ArkUI_ListChildrenMainSize *_option;
+};
 
-    void SetEdgeEffectSpring(bool springEnabled)
-    {
-        int32_t effectValue = springEnabled ? ARKUI_EDGE_EFFECT_SPRING : ARKUI_EDGE_EFFECT_NONE;
-        SetAttributeInt32(nodeApi_, GetHandle(), NODE_SCROLL_EDGE_EFFECT, effectValue);
-    }
+///////////////////////////////////ListItemGroup///////////////////////////////////////
 
-    void SetScrollBarVisible(bool visible)
-    {
-        int32_t displayMode = visible ? ARKUI_SCROLL_BAR_DISPLAY_MODE_ON : ARKUI_SCROLL_BAR_DISPLAY_MODE_OFF;
-        SetAttributeInt32(nodeApi_, GetHandle(), NODE_SCROLL_BAR_DISPLAY_MODE, displayMode);
-    }
+class ListItemGroupComponent : public Component {
+public:
+    ListItemGroupComponent() : Component(ARKUI_NODE_LIST_ITEM_GROUP) {}
+    ListItemGroupComponent(ArkUI_NodeHandle handle) : Component(handle) {}
 
-    void SetItemSpacing(float spacing)
-    {
-        SetAttributeFloat32(nodeApi_, GetHandle(), NODE_LIST_SPACE, spacing);
-    }
+    void SetListItemGroupHeader(Component *node);
+    void SetListItemGroupFooter(Component *node);
+    void SetListItemGroupDivider(uint32_t color, float width, float distanceStart, float distanceEnd);
+    void SetListItemGroupChildrenMainSize(ListChildrenMainSizeOption *mainSize);
 
-    void SetScrollBarState(bool visible)
-    {
-        SetScrollBarVisible(visible);
-    }
-    void SetSpace(float spacing)
-    {
-        SetItemSpacing(spacing);
-    }
+    std::shared_ptr<ListChildrenMainSizeOption> GetSizeOption() const { return _childrenMainSize; }
+    void ReleaseSizeOption() { _childrenMainSize.reset(); }
 
-    void SetNestedScrollMode(int32_t mode)
-    {
-        SetAttributeInt32(nodeApi_, GetHandle(), NODE_SCROLL_NESTED_SCROLL, mode);
-    }
+private:
+    std::shared_ptr<ListChildrenMainSizeOption> _childrenMainSize;
+};
 
-    // ========================================
-    // 滚动控制接口
-    // ========================================
-    void ScrollToIndex(int32_t index)
-    {
-        ScrollToIndex(index, false, ARKUI_SCROLL_ALIGNMENT_START);
-    }
-
-    void ScrollToIndex(int32_t index, bool smooth, ArkUI_ScrollAlignment align)
-    {
-        ArkUI_NumberValue v[3];
-        v[0].i32 = index;                       // value[0]
-        v[1].i32 = smooth ? 1 : 0;              // value[1] (optional)
-        v[2].i32 = static_cast<int32_t>(align); // value[2] (optional)
-
-        ArkUI_AttributeItem it{v, 3};
-        nodeApi_->setAttribute(GetHandle(), NODE_LIST_SCROLL_TO_INDEX, &it);
-    }
-
-    void ScrollToIndexInGroup(int32_t groupIndex, int32_t itemIndex)
-    {
-        ArkUI_NumberValue values[] = {{.i32 = groupIndex}, {.i32 = itemIndex}};
-        ArkUI_AttributeItem item{values, 2};
-        nodeApi_->setAttribute(GetHandle(), NODE_LIST_SCROLL_TO_INDEX_IN_GROUP, &item);
-    }
-
-    // ========================================
-    // 适配器设置接口
-    // ========================================
-    void SetLazyAdapter(const std::shared_ptr<ArkUINodeAdapter> &adapter)
-    {
-        if (!IsNotNull(adapter)) {
-            nodeApi_->resetAttribute(GetHandle(), NODE_LIST_NODE_ADAPTER);
-            listAdapter_.reset();
-            return;
-        }
-        adapter->EnsurePlaceholderTypeOr(static_cast<int32_t>(ARKUI_NODE_LIST_ITEM));
-        ArkUI_AttributeItem item{nullptr, 0, nullptr, adapter->GetAdapter()};
-        nodeApi_->setAttribute(GetHandle(), NODE_LIST_NODE_ADAPTER, &item);
-        listAdapter_ = adapter;
-    }
-
-    // —— 扩展属性 —— //
-    void SetDirection(ArkUI_Axis axis)
-    {
-        ArkUI_NumberValue v0{};
-        v0.i32 = static_cast<int32_t>(axis);
-        ArkUI_AttributeItem it{&v0, 1};
-        nodeApi_->setAttribute(GetHandle(), NODE_LIST_DIRECTION, &it);
-    }
-
-    void SetSticky(ArkUI_StickyStyle sticky)
-    {
-        ArkUI_NumberValue v0{};
-        v0.i32 = static_cast<int32_t>(sticky);
-        ArkUI_AttributeItem it{&v0, 1};
-        nodeApi_->setAttribute(GetHandle(), NODE_LIST_STICKY, &it);
-    }
-
-    void SetCachedCount(int32_t count)
-    {
-        ArkUI_NumberValue v0{};
-        v0.i32 = count;
-        ArkUI_AttributeItem it{&v0, 1};
-        nodeApi_->setAttribute(GetHandle(), NODE_LIST_CACHED_COUNT, &it);
-    }
-
-    void SetInitialIndex(int32_t index)
-    {
-        ArkUI_NumberValue v0{};
-        v0.i32 = index;
-        ArkUI_AttributeItem it{&v0, 1};
-        nodeApi_->setAttribute(GetHandle(), NODE_LIST_INITIAL_INDEX, &it);
-    }
-
-    void SetDivider(float widthPx)
-    {
-        ArkUI_NumberValue v0{};
-        v0.f32 = widthPx;
-        ArkUI_AttributeItem it{&v0, 1};
-        nodeApi_->setAttribute(GetHandle(), NODE_LIST_DIVIDER, &it);
-    }
-
-    void SetAlignListItem(ArkUI_ListItemAlignment align)
-    {
-        ArkUI_NumberValue v0{};
-        v0.i32 = static_cast<int32_t>(align);
-        ArkUI_AttributeItem it{&v0, 1};
-        nodeApi_->setAttribute(GetHandle(), NODE_LIST_ALIGN_LIST_ITEM, &it);
-    }
-
-    void SetChildrenMainSizeOption(ArkUI_ListChildrenMainSize *opt)
-    {
-        ArkUI_AttributeItem it{nullptr, 0, nullptr, opt};
-        nodeApi_->setAttribute(GetHandle(), NODE_LIST_CHILDREN_MAIN_SIZE, &it);
-        childrenMainSizeOption_ = opt;
-    }
-
-    void SetFocusWrapMode(int mode)
-    {
-        ArkUI_NumberValue v0{};
-        v0.i32 = mode;
-        ArkUI_AttributeItem it{&v0, 1};
-        nodeApi_->setAttribute(GetHandle(), NODE_LIST_FOCUS_WRAP_MODE, &it);
-    }
-
-    void SetMaintainVisibleContentPosition(bool on)
-    {
-        ArkUI_NumberValue v0{};
-        v0.i32 = on ? 1 : 0;
-        ArkUI_AttributeItem it{&v0, 1};
-        nodeApi_->setAttribute(GetHandle(), NODE_LIST_MAINTAIN_VISIBLE_CONTENT_POSITION, &it);
-    }
-
-    void SetStackFromEnd(bool on)
-    {
-        ArkUI_NumberValue v0{};
-        v0.i32 = on ? 1 : 0;
-        ArkUI_AttributeItem it{&v0, 1};
-        nodeApi_->setAttribute(GetHandle(), NODE_LIST_STACK_FROM_END, &it);
-    }
-
-    void SetSyncLoad(bool on)
-    {
-        ArkUI_NumberValue v0{};
-        v0.i32 = on ? 1 : 0;
-        ArkUI_AttributeItem it{&v0, 1};
-        nodeApi_->setAttribute(GetHandle(), NODE_LIST_SYNC_LOAD, &it);
-    }
-
-    void SetScrollSnapAlign(int align /*ARKUI_SCROLL_SNAP_ALIGN_**/)
-    {
-        ArkUI_NumberValue v0{};
-        v0.i32 = align;
-        ArkUI_AttributeItem it{&v0, 1};
-        nodeApi_->setAttribute(GetHandle(), NODE_LIST_SCROLL_SNAP_ALIGN, &it);
-    }
-
-    void SetLanes(int lanes)
-    {
-        ArkUI_NumberValue v0{};
-        v0.i32 = lanes;
-        ArkUI_AttributeItem it{&v0, 1};
-        nodeApi_->setAttribute(GetHandle(), NODE_LIST_LANES, &it);
-    }
-
-    void SetContentOffsets(float startPx, float endPx)
-    {
-        ArkUI_NumberValue v0{};
-        v0.f32 = startPx;
-        ArkUI_AttributeItem it0{&v0, 1};
-        nodeApi_->setAttribute(GetHandle(), NODE_SCROLL_CONTENT_START_OFFSET, &it0);
-
-        ArkUI_NumberValue v1{};
-        v1.f32 = endPx;
-        ArkUI_AttributeItem it1{&v1, 1};
-        nodeApi_->setAttribute(GetHandle(), NODE_SCROLL_CONTENT_END_OFFSET, &it1);
-    }
-
-    // ========================================
-    // 事件注册接口
-    // ========================================
-    void RegisterOnScrollIndex(const std::function<void(int32_t, int32_t)> &callback)
-    {
-        onScrollIndexCallback_ = callback;
-        if (!isScrollIndexEventRegistered_) {
-            nodeApi_->registerNodeEvent(GetHandle(), NODE_LIST_ON_SCROLL_INDEX, 0, this);
-            isScrollIndexEventRegistered_ = true;
+///////////////////////////////////ListItemGroupAdapter///////////////////////////////////////
+class ListItemGroupAdapter : public ItemAdapter<ListItemGroupComponent> {
+public:
+    ListItemGroupAdapter(std::vector<std::shared_ptr<Component>> &dataSource, const std::vector<int32_t> &groupList)
+        : ItemAdapter(dataSource) {
+        OH_ArkUI_NodeAdapter_SetTotalNodeCount(_adapter, groupList.size());
+        int32_t sum = 0;
+        for (auto &item : groupList) {
+            sum += item;
+            _groupList.push_back(sum);
         }
     }
-
-    // 可视区域变化
-    void RegisterOnVisibleContentChange(const std::function<void(const VisibleContentChange &)> &callback)
-    {
-        onVisibleChangeCallback_ = callback;
-        if (!isVisibleChangeEventRegistered_) {
-            nodeApi_->registerNodeEvent(GetHandle(), NODE_LIST_ON_SCROLL_VISIBLE_CONTENT_CHANGE, 0, this);
-            isVisibleChangeEventRegistered_ = true;
-        }
-    }
-
-    void RegisterOnWillScroll(const std::function<void()> &callback)
-    {
-        onWillScrollCallback_ = callback;
-        if (!isWillScrollEventRegistered_) {
-            nodeApi_->registerNodeEvent(GetHandle(), NODE_LIST_ON_WILL_SCROLL, 0, this);
-            isWillScrollEventRegistered_ = true;
-        }
-    }
-
-    void RegisterOnDidScroll(const std::function<void()> &callback)
-    {
-        onDidScrollCallback_ = callback;
-        if (!isDidScrollEventRegistered_) {
-            nodeApi_->registerNodeEvent(GetHandle(), NODE_LIST_ON_DID_SCROLL, 0, this);
-            isDidScrollEventRegistered_ = true;
-        }
-    }
-
-    void RegisterOnReachEnd(const std::function<void()> &callback)
-    {
-        onReachEndCallback_ = callback;
-    }
-
-    void RegisterOnScrollFrameBegin(const std::function<void(float)> &callback)
-    {
-        onScrollFrameBeginCallback_ = callback;
+    virtual ~ListItemGroupAdapter() {}
+    std::unordered_map<ArkUI_NodeHandle, std::shared_ptr<ListItemGroupComponent>> &getGroup() {
+        return _items;
     }
 
 protected:
-    void OnNodeEvent(ArkUI_NodeEvent *event) override
-    {
-        BaseNode::OnNodeEvent(event);
-
-        ArkUI_NodeComponentEvent *componentEvent = OH_ArkUI_NodeEvent_GetNodeComponentEvent(event);
-        if (!IsNotNull(componentEvent)) {
-            return;
-        }
-
-        int32_t eventType = OH_ArkUI_NodeEvent_GetEventType(event);
-        HandleSpecificListEvent(eventType, componentEvent);
-    }
+    void OnNewItemAttached(ArkUI_NodeAdapterEvent *event) override;
+    void OnItemDetached(ArkUI_NodeAdapterEvent *event) override;
+    ArkUI_NodeHandle UpdateNewItemByGroup(int32_t start, int32_t end);
+    ArkUI_NodeHandle UpdateNewItem(int32_t start, int32_t end);
 
 private:
-    void UnregisterSpecificEvents()
-    {
-        if (isScrollIndexEventRegistered_) {
-            nodeApi_->unregisterNodeEvent(GetHandle(), NODE_LIST_ON_SCROLL_INDEX);
-        }
-        if (isVisibleChangeEventRegistered_) {
-            nodeApi_->unregisterNodeEvent(GetHandle(), NODE_LIST_ON_SCROLL_VISIBLE_CONTENT_CHANGE);
-        }
-        if (isWillScrollEventRegistered_) {
-            nodeApi_->unregisterNodeEvent(GetHandle(), NODE_LIST_ON_WILL_SCROLL);
-        }
-        if (isDidScrollEventRegistered_) {
-            nodeApi_->unregisterNodeEvent(GetHandle(), NODE_LIST_ON_DID_SCROLL);
-        }
-    }
-
-    void ResetListAdapter()
-    {
-        if (IsNotNull(listAdapter_)) {
-            nodeApi_->resetAttribute(GetHandle(), NODE_LIST_NODE_ADAPTER);
-            listAdapter_.reset();
-        }
-    }
-
-    void CleanupChildrenMainSizeOption()
-    {
-        if (IsNotNull(childrenMainSizeOption_)) {
-            nodeApi_->resetAttribute(GetHandle(), NODE_LIST_CHILDREN_MAIN_SIZE);
-            OH_ArkUI_ListChildrenMainSizeOption_Dispose(childrenMainSizeOption_);
-            childrenMainSizeOption_ = nullptr;
-        }
-    }
-
-    void OnScrollIndexEvt(const ArkUI_NodeComponentEvent *ev)
-    {
-        if (!onScrollIndexCallback_) {
-            return;
-        }
-        const int32_t firstIndex = ev->data[kScrollIndexFirstDataIndex].i32;
-        const int32_t lastIndex = ev->data[kScrollIndexLastDataIndex].i32;
-        onScrollIndexCallback_(firstIndex, lastIndex);
-    }
-
-    void OnVisibleChangeEvt(const ArkUI_NodeComponentEvent *ev)
-    {
-        if (!onVisibleChangeCallback_) {
-            return;
-        }
-        VisibleContentChange v{};
-        v.firstChildIndex = ev->data[kVisibleChangeFirstChildDataIndex].i32;
-        v.startArea = static_cast<ArkUI_ListItemGroupArea>(ev->data[kVisibleChangeStartAreaDataIndex].i32);
-        v.startItemIndex = ev->data[kVisibleChangeStartIndexDataIndex].i32;
-        v.lastChildIndex = ev->data[kVisibleChangeLastChildDataIndex].i32;
-        v.endArea = static_cast<ArkUI_ListItemGroupArea>(ev->data[kVisibleChangeEndAreaDataIndex].i32);
-        v.endItemIndex = ev->data[kVisibleChangeEndIndexDataIndex].i32;
-        onVisibleChangeCallback_(v);
-    }
-
-    void OnReachEndEvt()
-    {
-        if (onReachEndCallback_) {
-            onReachEndCallback_();
-        }
-    }
-
-    void OnScrollFrameBeginEvt(const ArkUI_NodeComponentEvent *ev)
-    {
-        if (onScrollFrameBeginCallback_) {
-            onScrollFrameBeginCallback_(ev->data[kScrollFrameBeginDataIndex].f32);
-        }
-    }
-
-    void OnWillScrollEvt()
-    {
-        if (onWillScrollCallback_) {
-            onWillScrollCallback_();
-        }
-    }
-
-    void OnDidScrollEvt()
-    {
-        if (onDidScrollCallback_) {
-            onDidScrollCallback_();
-        }
-    }
-
-    void HandleSpecificListEvent(int32_t eventType, ArkUI_NodeComponentEvent *ev)
-    {
-        switch (eventType) {
-            case NODE_LIST_ON_SCROLL_INDEX:
-                OnScrollIndexEvt(ev);
-                break;
-            case NODE_LIST_ON_SCROLL_VISIBLE_CONTENT_CHANGE:
-                OnVisibleChangeEvt(ev);
-                break;
-            case NODE_SCROLL_EVENT_ON_REACH_END:
-                OnReachEndEvt();
-                break;
-            case NODE_SCROLL_EVENT_ON_SCROLL_FRAME_BEGIN:
-                OnScrollFrameBeginEvt(ev);
-                break;
-            case NODE_LIST_ON_WILL_SCROLL:
-                OnWillScrollEvt();
-                break;
-            case NODE_LIST_ON_DID_SCROLL:
-                OnDidScrollEvt();
-                break;
-            default:
-                break;
-        }
-    }
-
-    ArkUI_ListChildrenMainSize *EnsureChildrenMainSizeOption()
-    {
-        if (!childrenMainSizeOption_) {
-            auto *opt = OH_ArkUI_ListChildrenMainSizeOption_Create();
-            SetChildrenMainSizeOption(opt);
-        }
-        return childrenMainSizeOption_;
-    }
-
-    void ChildrenMainSizeSetDefault(float mainSize)
-    {
-        auto *opt = EnsureChildrenMainSizeOption();
-        if (!opt) {
-            return;
-        }
-        OH_ArkUI_ListChildrenMainSizeOption_SetDefaultMainSize(opt, mainSize);
-    }
-
-    float ChildrenMainSizeGetDefault() const
-    {
-        if (!childrenMainSizeOption_) {
-            return 0.0f;
-        }
-        return OH_ArkUI_ListChildrenMainSizeOption_GetDefaultMainSize(childrenMainSizeOption_);
-    }
-
-    void ChildrenMainSizeResize(int32_t size)
-    {
-        auto *opt = EnsureChildrenMainSizeOption();
-        if (!opt) {
-            return;
-        }
-        OH_ArkUI_ListChildrenMainSizeOption_Resize(opt, size);
-    }
-
-    void ChildrenMainSizeSplice(int32_t index, int32_t deleteCount, int32_t addCount)
-    {
-        auto *opt = EnsureChildrenMainSizeOption();
-        if (!opt) {
-            return;
-        }
-        OH_ArkUI_ListChildrenMainSizeOption_Splice(opt, index, deleteCount, addCount);
-    }
-
-    void ChildrenMainSizeUpdate(int32_t index, float mainSize)
-    {
-        auto *opt = EnsureChildrenMainSizeOption();
-        if (!opt) {
-            return;
-        }
-        OH_ArkUI_ListChildrenMainSizeOption_UpdateSize(opt, index, mainSize);
-    }
-
-    float ChildrenMainSizeGet(int32_t index) const
-    {
-        if (!childrenMainSizeOption_) {
-            return 0.0f;
-        }
-        return OH_ArkUI_ListChildrenMainSizeOption_GetMainSize(childrenMainSizeOption_, index);
-    }
-
-private:
-    ArkUI_NativeNodeAPI_1 *nodeApi_ = nullptr;
-    std::shared_ptr<ArkUINodeAdapter> listAdapter_;
-    ArkUI_ListChildrenMainSize *childrenMainSizeOption_ = nullptr;
-
-    // 事件回调函数
-    std::function<void(int32_t, int32_t)> onScrollIndexCallback_;
-    std::function<void(const VisibleContentChange &)> onVisibleChangeCallback_;
-    std::function<void()> onReachEndCallback_;
-    std::function<void(float)> onScrollFrameBeginCallback_;
-    std::function<void()> onWillScrollCallback_;
-    std::function<void()> onDidScrollCallback_;
-
-    // 事件注册状态
-    bool isScrollIndexEventRegistered_ = false;
-    bool isVisibleChangeEventRegistered_ = false;
-    bool isWillScrollEventRegistered_ = false;
-    bool isDidScrollEventRegistered_ = false;
-
-    ScrollEventGuard scrollEventGuard_;
+    std::vector<int32_t> _groupList;
+    // 缓存listItemComponent
+    std::stack<std::shared_ptr<ListItemComponent>> _cachedListItems;
+    // 存储list嵌套的单个listItem
+    std::unordered_map<ArkUI_NodeHandle, std::shared_ptr<ListItemComponent>> _listItems;
 };
 
-#endif // SCROLLABLE_COMPONENT_COMPONENTS_LIST_H
+///////////////////////////////////List///////////////////////////////////////
+
+class ListComponent : public Component {
+public:
+    ListComponent() : Component(ARKUI_NODE_LIST) {}
+    ListComponent(ArkUI_NodeHandle handle) : Component(handle) {}
+
+    // 引入懒加载模块。
+    void SetLazyAdapter(const std::shared_ptr<ItemAdapter<ListItemComponent>> &adapter) {
+        ArkUI_AttributeItem item{nullptr, 0, nullptr, adapter->GetAdapter()};
+        _nodeAPI->setAttribute(_component, NODE_LIST_NODE_ADAPTER, &item);
+        _adapter = adapter;
+    }
+    void SetLazyAdapterByGroup(const std::shared_ptr<ListItemGroupAdapter> &adapter) {
+        ArkUI_AttributeItem item{nullptr, 0, nullptr, adapter->GetAdapter()};
+        _nodeAPI->setAttribute(_component, NODE_LIST_NODE_ADAPTER, &item);
+        _groupAdapter = adapter;
+    }
+    /**
+     * @param direction ArkUI_Axis
+     */
+    void SetListDirection(int32_t direction);
+    /**
+     * @param stickyStyle ArkUI_StickyStyle
+     */
+    void SetListSticky(int32_t stickyStyle);
+    void SetListSpace(float space);
+    void ResetListSpace();
+    void SetListCachedCount(int32_t count);
+    /**
+     * data[0].i32：The index value of the target element to be slid to in the current container.\n
+     * data[1]?.i32：Set whether there is an action when sliding to the index value of a list item in the list, where
+     * 1 indicates an action and 0 indicates no action. Default value: 0。\n
+     * data[2]?.i32：ArkUI_ScrollAlignment
+     */
+    void SetListScrollToIndex(const std::vector<int32_t> &data);
+    void SetScrollTo(float hOffset, float vOffset, const std::vector<int32_t> &optionalParams);
+    void SetScrollEdge(int32_t type);
+    void SetScrollEdgeEffect(int32_t edgeEffect, bool alwaysEnabled);
+    void SetScrollPage(int32_t next);
+    void SetScrollPage(int32_t next, int32_t animation);
+    void SetScrollBy(float hDistance, float vDistance);
+    /**
+     * @param align ArkUI_ListItemAlignment
+     */
+    void SetListAlignListItem(int32_t align);
+    void SetListChildrenMainSize(ListChildrenMainSizeOption *mainSize);
+    void SetListInitialIndex(int32_t index);
+    void SetListDivider(uint32_t color, float width, float distanceStart, float distanceEnd);
+    void SetScrollBarWidth(float width);
+    void SetScrollBarColor(uint32_t color);
+    void SetScrollBar(int32_t barState);
+    void SetNestedScroll(int32_t forward, int32_t backward);
+
+    std::shared_ptr<ItemAdapter<ListItemComponent>> GetAdapter() const { return _adapter; }
+    std::shared_ptr<ListItemGroupAdapter> GetGroupAdapter() const { return _groupAdapter; }
+    std::shared_ptr<ListChildrenMainSizeOption> GetSizeOption() const { return _childrenMainSize; }
+    void ReleaseSizeOption() { _childrenMainSize.reset(); }
+
+private:
+    std::shared_ptr<ItemAdapter<ListItemComponent>> _adapter;
+    std::shared_ptr<ListItemGroupAdapter> _groupAdapter;
+    std::shared_ptr<ListChildrenMainSizeOption> _childrenMainSize;
+};
+} // namespace ArkUICApiDemo
+#endif // CAPIDEMO_LIST_COMPONENT_H

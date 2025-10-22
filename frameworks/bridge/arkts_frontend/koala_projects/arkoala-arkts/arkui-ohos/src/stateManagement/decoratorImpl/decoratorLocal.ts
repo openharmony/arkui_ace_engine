@@ -36,7 +36,6 @@ export class LocalDecoratedVariable<T> extends DecoratedV2VariableBase implement
         if (value === newValue) {
             return;
         }
-        if (this.backing_.set(uiUtils.makeObserved(newValue, true) as T)) {
-        }
+        this.backing_.setNoCheck(uiUtils.autoProxyObject(newValue) as T);
     }
 }

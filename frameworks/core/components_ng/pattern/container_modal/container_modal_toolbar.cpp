@@ -167,6 +167,7 @@ void ContainerModalToolBar::ParsePlacementType(const RefPtr<FrameNode>& node)
         }
     }
     if (hasItem) {
+        AdjustTitleNodeWidth();
         AddToolbarItemToContainer();
         OnToolBarLayoutChange();
     }

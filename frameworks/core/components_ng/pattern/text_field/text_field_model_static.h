@@ -42,6 +42,7 @@ public:
     static void SetHeightAdaptivePolicy(FrameNode* frameNode, const std::optional<TextHeightAdaptivePolicy>& valueOpt);
     static void SetInputStyle(FrameNode* frameNode, const std::optional<InputStyle>& valueOpt);
     static void SetPasswordRules(FrameNode* frameNode, const std::optional<std::string>& passwordRules);
+    static void SetFontFeature(FrameNode* frameNode, const std::optional<FONT_FEATURES_LIST>& optValue);
     static void SetBarState(FrameNode* frameNode, const std::optional<OHOS::Ace::DisplayMode>& valueOpt);
     static void SetPasswordIcon(FrameNode* frameNode, const std::optional<PasswordIcon>& passwordIcon);
     static void SetSelectedBackgroundColor(FrameNode* frameNode, const std::optional<Color>& colorOpt);
@@ -80,6 +81,7 @@ public:
     static void SetCancelIconColor(FrameNode* frameNode, const std::optional<Color>& iconColor);
     static void SetBackgroundColor(FrameNode* frameNode, const std::optional<Color>& color);
     static void SetShowCounterBorder(FrameNode* frameNode, const std::optional<bool>& value);
+    static void SetShowCounter(FrameNode* frameNode, const std::optional<bool>& optValue);
     static void SetWordBreak(FrameNode* frameNode, const std::optional<Ace::WordBreak>& valueOpt);
     static void SetLineBreakStrategy(FrameNode* frameNode, const std::optional<LineBreakStrategy>& valueOpt);
     static void SetOnSecurityStateChange(FrameNode* frameNode, std::function<void(bool)>&& func);

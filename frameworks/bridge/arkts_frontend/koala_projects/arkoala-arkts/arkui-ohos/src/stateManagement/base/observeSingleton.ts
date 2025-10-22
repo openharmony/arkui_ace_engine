@@ -42,6 +42,7 @@ export class ObserveSingleton implements IObserve {
     public static readonly RenderingMonitor: int = 3;
     public static readonly RenderingComputed: int = 4;
     public static readonly RenderingPersistentStorage: int = 5;
+    // if add new to ths RenderingXXX, remember to change judgement when addRef
 
     public _renderingComponent: int = ObserveSingleton.RenderingComponent;
     private mutateMutableStateMode_: NotifyMutableStateMode = NotifyMutableStateMode.normal;
