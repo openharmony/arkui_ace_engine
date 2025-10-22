@@ -55,6 +55,7 @@ constexpr double ARC_RADIUS_TO_DIAMETER = 2.0;
 constexpr double TRANSPARENT_VAL = 0;
 constexpr float DEFAULT_VIEW_SCALE = 1.0f;
 constexpr float MAX_FORM_VIEW_SCALE = 1.0f / 0.85f;
+constexpr float LAYOUT_WIEDTH_FLOAT = 100.0f;
 } // namespace
 class FormPatternTest : public testing::Test {
 public:
@@ -2128,7 +2129,7 @@ HWTEST_F(FormPatternTest, FormPatternTest_060, TestSize.Level0)
     float result = DEFAULT_VIEW_SCALE;
     result = pattern->GetNumberFromParams(want, OHOS::AppExecFwk::Constants::PARAM_LAYOUT_WIDTH_KEY,
         DEFAULT_VIEW_SCALE);
-    EXPECT_TRUE(NearEqual(result, 100));
+    EXPECT_TRUE(NearEqual(result, LAYOUT_WIEDTH_FLOAT));
     float layoutWidthFloat = MAX_FORM_VIEW_SCALE;
     want.SetParam(OHOS::AppExecFwk::Constants::PARAM_LAYOUT_WIDTH_KEY, static_cast<double>(layoutWidthFloat));
     result = pattern->GetNumberFromParams(want, OHOS::AppExecFwk::Constants::PARAM_LAYOUT_WIDTH_KEY,
