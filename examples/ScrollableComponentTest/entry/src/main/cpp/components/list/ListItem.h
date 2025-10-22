@@ -13,57 +13,70 @@
  * limitations under the License.
  */
 
-// 提供列表项的封装类。
+#ifndef SCROLLABLE_COMPONENT_ARKUILISTITEM_H
+#define SCROLLABLE_COMPONENT_ARKUILISTITEM_H
 
-#ifndef SCROLLABLE_COMPONENT_ARKUILISTITEMNODE_H
-#define SCROLLABLE_COMPONENT_ARKUILISTITEMNODE_H
+#include <memory>
+#include "common/ArkUINode.h"
 
-#include "ArkUINode.h"
-
-namespace NativeModule {
-class ArkUIListItemNode : public ArkUINode {
+class ListItem : public BaseNode {
 public:
-    ArkUIListItemNode()
-        : ArkUINode((NativeModuleInstance::GetInstance()->GetNativeNodeAPI())->createNode(ARKUI_NODE_LIST_ITEM))
+    ListItem()
+        : BaseNode(CreateHandle())
     {
     }
 
-    ~ArkUIListItemNode() override
+    ~ListItem() override
     {
         if (swipeAction_) {
             OH_ArkUI_ListItemSwipeActionOption_Dispose(swipeAction_);
+            swipeAction_ = nullptr;
         }
         if (swipeItem_) {
             OH_ArkUI_ListItemSwipeActionItem_Dispose(swipeItem_);
+            swipeItem_ = nullptr;
         }
+        swipeContent_.reset();
     }
 
-    void SetSwiperAction(std::shared_ptr<ArkUINode> node)
+    // 适配：使用 BaseNode 指针，内部用 nodeApi_ 设置属性
+    void SetSwiperAction(const std::shared_ptr<BaseNode>& node)
     {
         swipeContent_ = node;
+
         if (!swipeItem_) {
             swipeItem_ = OH_ArkUI_ListItemSwipeActionItem_Create();
         }
         OH_ArkUI_ListItemSwipeActionItem_SetContent(swipeItem_, node ? node->GetHandle() : nullptr);
-        if (swipeAction_) {
+
+        if (!swipeAction_) {
             swipeAction_ = OH_ArkUI_ListItemSwipeActionOption_Create();
         }
         OH_ArkUI_ListItemSwipeActionOption_SetEnd(swipeAction_, swipeItem_);
-        ArkUI_AttributeItem Item = {.object = swipeAction_};
-        nativeModule_->setAttribute(handle_, NODE_LIST_ITEM_SWIPE_ACTION, &Item);
+
+        if (!ValidateApiAndNode(nodeApi_, nodeHandle_, "ArkUIListItemNode::SetSwiperAction")) {
+            return;
+        }
+        ArkUI_AttributeItem item{};
+        item.object = swipeAction_;
+        nodeApi_->setAttribute(nodeHandle_, NODE_LIST_ITEM_SWIPE_ACTION, &item);
     }
 
-    std::shared_ptr<ArkUINode> GetSwipeContent() const
+    std::shared_ptr<BaseNode> GetSwipeContent() const
     {
         return swipeContent_;
     }
 
 private:
-    ArkUI_ListItemSwipeActionOption *swipeAction_ = nullptr;
-    ArkUI_ListItemSwipeActionItem *swipeItem_ = nullptr;
-    std::shared_ptr<ArkUINode> swipeContent_ = nullptr;
+    static ArkUI_NodeHandle CreateHandle()
+    {
+        auto api = NodeApiInstance::GetInstance()->GetNativeNodeAPI();
+        return api ? api->createNode(ARKUI_NODE_LIST_ITEM) : nullptr;
+    }
+
+    ArkUI_ListItemSwipeActionOption* swipeAction_ = nullptr;
+    ArkUI_ListItemSwipeActionItem*   swipeItem_   = nullptr;
+    std::shared_ptr<BaseNode>        swipeContent_;
 };
 
-} // namespace NativeModule
-
-#endif // SCROLLABLE_COMPONENT_ARKUILISTITEMNODE_H
+#endif // SCROLLABLE_COMPONENT_ARKUILISTITEM_H

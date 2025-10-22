@@ -18,20 +18,18 @@
 #ifndef SCROLLABLE_COMPONENT_LISTITEMGROUPEXAMPLE_H
 #define SCROLLABLE_COMPONENT_LISTITEMGROUPEXAMPLE_H
 
-#include "ArkUIBaseNode.h"
-#include "ArkUIListItemGroupNode.h"
-#include "ArkUIListItemNode.h"
-#include "ArkUIListNode.h"
-#include "ArkUITextNode.h"
+#include "common/ArkUIBaseNode.h"
+#include "common/ArkUITextNode.h"
+#include "components/list/ListItemGroup.h"
+#include "components/list/ListItemGroup.h"
+#include "components/list/List.h"
 #include <cstdint>
 
-namespace NativeModule {
-
-std::shared_ptr<ArkUIBaseNode> CreateListItemGroupExample()
+std::shared_ptr<BaseNode> CreateListItemGroupExample()
 {
     // 创建组件并挂载
     // 1：使用智能指针创建List组件。
-    auto list = std::make_shared<ArkUIListNode>();
+    auto list = std::make_shared<List>();
     list->SetPercentWidth(1);
     list->SetPercentHeight(1);
     // 设置吸顶
@@ -45,14 +43,13 @@ std::shared_ptr<ArkUIBaseNode> CreateListItemGroupExample()
         textNode->SetHeight(50); /* 50: height */
         textNode->SetBackgroundColor(0xFFDCDCDC);
         textNode->SetTextAlign(ARKUI_TEXT_ALIGNMENT_CENTER);
-        auto listItemGroup = std::make_shared<ArkUIListItemGroupNode>();
+        auto listItemGroup = std::make_shared<ListItemGroupNode>();
         listItemGroup->SetHeader(textNode);
-        auto adapter = std::make_shared<ArkUIListItemAdapter>(4);
+        auto adapter = std::make_shared<ArkUINodeAdapter>(4);
         listItemGroup->SetLazyAdapter(adapter);
         list->AddChild(listItemGroup);
     }
     return list;
 }
-} // namespace NativeModule
 
 #endif // SCROLLABLE_COMPONENT_LAZYTEXTLISTEXAMPLE_H
