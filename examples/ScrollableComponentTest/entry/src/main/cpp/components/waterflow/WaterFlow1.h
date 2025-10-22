@@ -20,7 +20,7 @@
 #include <arkui/native_node.h>
 
 #include "components/component.h"
-#include "FlowItem.h"
+#include "components/waterflow/FlowItem.h"
 #include "components/node_adapter.h"
 
 namespace ArkUICApiDemo {
