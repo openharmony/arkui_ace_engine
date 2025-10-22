@@ -12,11 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
- /*
-  * Description: Grid组件高频接口CAPI补齐
-  * Writer: renxiaowen
-  */
  
 #include <cmath>
 #include <cstdint>
