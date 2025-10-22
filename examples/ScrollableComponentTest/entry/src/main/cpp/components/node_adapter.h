@@ -13,11 +13,6 @@
  * limitations under the License.
  */
 
- /*
-  * Description: Grid组件高频接口CAPI补齐
-  * Writer: renxiaowen
-  */
-
 #ifndef ARKUI_CAPI_DEMO_NODE_ADAPTER_H
 #define ARKUI_CAPI_DEMO_NODE_ADAPTER_H
 

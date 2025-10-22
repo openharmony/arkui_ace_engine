@@ -13,16 +13,10 @@
  * limitations under the License.
  */
 
- /*
-  * Description: List支持展开指定ListItem的swipeAction
-  * Writer: renxiaowen
-  */
-
 #ifndef ARKUI_CAPI_DEMO_COMMON_TEST_H
 #define ARKUI_CAPI_DEMO_COMMON_TEST_H
 
 namespace ArkUICApiDemo {
-
 #define PARAM_0 0
 #define PARAM_1 1
 #define PARAM_2 2
