@@ -27,7 +27,8 @@ import { PeerNode } from "./../PeerNode"
 import { Length, ResourceColor, Dimension } from "./units"
 import { Resource } from "global.resource"
 import { EdgeEffect, Color, PageFlipMode } from "./enums"
-import { AttributeModifier, hookTabsAttributeModifier, AttributeUpdater } from "#handwritten"
+import { AttributeModifier, hookTabsAttributeModifier, AttributeUpdater, hookTabsApplyAttributesFinish } from "#handwritten"
+import { TabsExtender } from '#generated'
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
@@ -1122,6 +1123,7 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements TabsAt
     }
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
+        hookTabsApplyAttributesFinish(this)
         super.applyAttributesFinish()
     }
 }
