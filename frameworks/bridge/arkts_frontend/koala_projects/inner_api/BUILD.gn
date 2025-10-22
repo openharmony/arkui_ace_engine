@@ -25,6 +25,9 @@ ohos_copy("copy_arkui_ets") {
     "./arkui/ArkUIEntry.d.ets",
   ]
   sources += [
+    "./arkui/base/UIContextUtil.d.ets",
+  ]
+  sources += [
     "./arkui/component.d.ets",
     "./arkui/component/common.d.ets",
     "./arkui/component/listItem.d.ets",
