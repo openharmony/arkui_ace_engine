@@ -82,32 +82,6 @@ std::string PropertyVectorToString(const std::vector<AnimationPropertyType>& vec
     return res;
 }
 
-RefPtr<FrameNode> GetFirstFrameNodeChild(const RefPtr<UINode>& node)
-{
-    CHECK_NULL_RETURN(node, nullptr);
-    std::list<RefPtr<UINode>> queue;
-    auto children = node->GetChildren();
-    for (const auto& child : children) {
-        queue.push_back(child);
-    }
-
-    while (!queue.empty()) {
-        auto current = queue.front();
-        queue.pop_front();
-
-        auto currentFrameNode = AceType::DynamicCast<FrameNode>(current);
-        if (currentFrameNode) {
-            return currentFrameNode;
-        }
-
-        auto currentChildren = current->GetChildren();
-        for (const auto& child : currentChildren) {
-            queue.push_back(child);
-        }
-    }
-
-    return nullptr;
-}
 } // namespace
 
 void ViewAbstract::RemoveResObj(const std::string& key)
@@ -5558,12 +5532,9 @@ void ViewAbstract::SetOverlayBuilder(std::function<void()>&& buildFunc,
         auto node = buildNodeFunc();
         auto overlayNode = AceType::DynamicCast<FrameNode>(node);
         if (!overlayNode && node) {
-            auto firstFrame = GetFirstFrameNodeChild(node);
-            CHECK_NULL_VOID(firstFrame);
             auto* stack = ViewStackProcessor::GetInstance();
             auto nodeId = stack->ClaimNodeId();
             auto stackNode = FrameNode::CreateFrameNode(V2::STACK_ETS_TAG, nodeId, AceType::MakeRefPtr<StackPattern>());
-            stackNode->SetHitTestMode(firstFrame->GetHitTestMode());
             stackNode->AddChild(node);
             overlayNode = stackNode;
         }
@@ -5583,13 +5554,10 @@ void ViewAbstract::SetOverlayBuilder(FrameNode* frameNode, const RefPtr<NG::UINo
     }
     auto overlayNode = AceType::DynamicCast<FrameNode>(customNode);
     if (!overlayNode && customNode) {
-        auto firstFrame = GetFirstFrameNodeChild(customNode);
-        CHECK_NULL_VOID(firstFrame);
         auto* stack = ViewStackProcessor::GetInstance();
         auto nodeId = stack->ClaimNodeId();
         auto stackNode = FrameNode::CreateFrameNode(V2::STACK_ETS_TAG, nodeId, AceType::MakeRefPtr<StackPattern>());
         if (stackNode) {
-            stackNode->SetHitTestMode(firstFrame->GetHitTestMode());
             stackNode->AddChild(customNode);
         }
         overlayNode = stackNode;
