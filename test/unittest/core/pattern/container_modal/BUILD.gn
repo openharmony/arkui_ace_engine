@@ -27,3 +27,13 @@ ace_unittest("container_modal_toolbar_test_ng") {
   type = "new"
   sources = [ "container_modal_toolbar_test_ng.cpp" ]
 }
+
+ace_unittest("container_modal_static_pattern_test") {
+  type = "new"
+  sources = [ "container_modal_static_pattern_test.cpp" ]
+}
+
+ace_unittest("container_modal_static_view_test") {
+  type = "new"
+  sources = [ "container_modal_static_view_test.cpp" ]
+}

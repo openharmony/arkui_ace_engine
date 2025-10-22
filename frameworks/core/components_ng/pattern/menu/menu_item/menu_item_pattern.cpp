@@ -259,23 +259,12 @@ void MenuItemPattern::OnModifyDone()
         RefPtr<FrameNode> leftRow =
             host->GetChildAtIndex(0) ? AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(0)) : nullptr;
         CHECK_NULL_VOID(leftRow);
-        AddSelectIcon(leftRow);
-        UpdateIcon(leftRow, true);
-        auto menuNode = GetMenu();
-        auto menuProperty = menuNode ? menuNode->GetLayoutProperty<MenuLayoutProperty>() : nullptr;
-        UpdateText(leftRow, menuProperty, false);
-
-        if (menuProperty) {
-            expandingMode_ = menuProperty->GetExpandingMode().value_or(SubMenuExpandingMode::SIDE);
-            expandingModeSet_ = true;
-        }
+        UpdateLeftRow(leftRow);
 
         RefPtr<FrameNode> rightRow =
             host->GetChildAtIndex(1) ? AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(1)) : nullptr;
         CHECK_NULL_VOID(rightRow);
-        UpdateText(rightRow, menuProperty, true);
-        UpdateIcon(rightRow, false);
-        AddExpandIcon(rightRow);
+        UpdateRightRow(rightRow);
         AddClickableArea();
         UpdateDisabledStyle();
         SetAccessibilityAction();
@@ -294,6 +283,38 @@ void MenuItemPattern::OnModifyDone()
             RegisterOnHover();
             RegisterOnClick();
         }
+    }
+}
+
+void MenuItemPattern::UpdateLeftRow(RefPtr<FrameNode>& leftRow)
+{
+    CHECK_NULL_VOID(leftRow);
+    auto selectTheme = GetCurrentSelectTheme();
+    if (!selectTheme || !selectTheme->IsTV()) {
+        AddSelectIcon(leftRow);
+    }
+    UpdateIcon(leftRow, true);
+    auto menuNode = GetMenu();
+    auto menuProperty = menuNode ? menuNode->GetLayoutProperty<MenuLayoutProperty>() : nullptr;
+    UpdateText(leftRow, menuProperty, false);
+
+    if (menuProperty) {
+        expandingMode_ = menuProperty->GetExpandingMode().value_or(SubMenuExpandingMode::SIDE);
+        expandingModeSet_ = true;
+    }
+}
+
+void MenuItemPattern::UpdateRightRow(RefPtr<FrameNode>& rightRow)
+{
+    CHECK_NULL_VOID(rightRow);
+    auto menuNode = GetMenu();
+    auto menuProperty = menuNode ? menuNode->GetLayoutProperty<MenuLayoutProperty>() : nullptr;
+    UpdateText(rightRow, menuProperty, true);
+    UpdateIcon(rightRow, false);
+    AddExpandIcon(rightRow);
+    auto selectTheme = GetCurrentSelectTheme();
+    if (selectTheme && selectTheme->IsTV()) {
+        AddSelectIcon(rightRow);
     }
 }
 
@@ -1977,7 +1998,13 @@ void MenuItemPattern::AddSelectIcon(RefPtr<FrameNode>& row)
     CHECK_NULL_VOID(renderContext);
     renderContext->SetVisible(isSelected_);
 
-    selectIcon_->MountToParent(row, 0);
+    auto selectTheme = GetCurrentSelectTheme();
+    if (selectTheme && selectTheme->IsTV()) {
+        // The select icon is displayed at the end of the row on TV.
+        selectIcon_->MountToParent(row);
+    } else {
+        selectIcon_->MountToParent(row, 0);
+    }
     selectIcon_->MarkModifyDone();
     selectIcon_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
@@ -3420,12 +3447,16 @@ void MenuItemPattern::ApplyOptionThemeStyles()
 
 RefPtr<SelectTheme> MenuItemPattern::GetCurrentSelectTheme()
 {
+    if (selectTheme_) {
+        return selectTheme_;
+    }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
     auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, nullptr);
+    selectTheme_ = theme;
     return theme;
 }
 

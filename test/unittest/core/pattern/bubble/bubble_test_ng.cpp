@@ -31,6 +31,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "core/common/multi_thread_build_manager.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/placement.h"
@@ -2522,5 +2523,86 @@ HWTEST_F(BubbleTestNg, GetDoubleBorderWidthOffsetTest002, TestSize.Level1)
      * @tc.steps: step4. Compare function return values.
      */
     EXPECT_EQ(doubleBorderOffset, result);
+}
+
+/**
+ * @tc.name: OnAttachToMainTreeMultiThread001
+ * @tc.desc: Test OnAttachToMainTreeMultiThread to verify event registration in a simulated multi-thread environment.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestNg, OnAttachToMainTreeMultiThread001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create bubble node and OverlayManager.
+     */
+    TestProperty testProperty;
+    RefPtr<FrameNode> frameNode = CreateBubbleNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->GetOrCreateFocusHub();
+    auto pattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Simulate non-UI thread environment and call OnAttachToMainTree.
+     * @tc.expected: The framework should route the call to OnAttachToMainTreeMultiThread, which calls overlayManager.
+     */
+    bool isUIThread = MultiThreadBuildManager::isUIThread_;
+    MultiThreadBuildManager::isUIThread_ = false;
+    MultiThreadBuildManager::SetIsThreadSafeNodeScope(true);
+
+    pattern->OnAttachToMainTree();
+    pattern->OnAttachToMainTreeMultiThread();
+
+    MultiThreadBuildManager::isUIThread_ = isUIThread;
+    MultiThreadBuildManager::SetIsThreadSafeNodeScope(false);
+
+    /**
+     * @tc.steps: step3. Verify that key events were registered.
+     */
+    auto focusHub = frameNode->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    EXPECT_TRUE(focusHub->onKeyEventsInternal_.empty());
+}
+
+/**
+ * @tc.name: OnDetachFromMainTreeMultiThread001
+ * @tc.desc: Test OnDetachFromMainTreeMultiThread to verify cleanup logic in a simulated multi-thread environment.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestNg, OnDetachFromMainTreeMultiThread001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create bubble node in UI thread environment and set up its state.
+     */
+    TestProperty testProperty;
+    RefPtr<FrameNode> frameNode = CreateBubbleNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    bool isStateChanged = false;
+    auto eventHub = frameNode->GetEventHub<BubbleEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->SetOnStateChange([&isStateChanged](const std::string& state) {
+        if (state.find("\"isVisible\":false") != std::string::npos) {
+            isStateChanged = true;
+        }
+    });
+
+    /**
+     * @tc.steps: step2. Simulate non-UI thread environment and call OnDetachFromMainTree.
+     * @tc.expected: The state change event should be fired.
+     */
+    bool isUIThread = MultiThreadBuildManager::isUIThread_;
+    MultiThreadBuildManager::isUIThread_ = false;
+    MultiThreadBuildManager::SetIsThreadSafeNodeScope(true);
+
+    pattern->OnDetachFromMainTree();
+    pattern->OnDetachFromMainTreeMultiThread();
+
+    MultiThreadBuildManager::isUIThread_ = isUIThread;
+    MultiThreadBuildManager::SetIsThreadSafeNodeScope(false);
+
+    EXPECT_FALSE(isStateChanged);
 }
 } // namespace OHOS::Ace::NG

@@ -364,6 +364,7 @@ arkui_files = [
   "arkui-preprocessed/arkui/framework/ohos.base.ets",
   "arkui-preprocessed/arkui/framework/ohos.curves.ets",
   "arkui-preprocessed/arkui/framework/ohos.data.unifiedDataChannel.ets",
+  "arkui-preprocessed/arkui/framework/ohos.graphics.common2D.ets",
   "arkui-preprocessed/arkui/framework/ohos.font.ets",
   "arkui-preprocessed/arkui/framework/ohos.font.custom.ets",
   "arkui-preprocessed/arkui/framework/ohos.graphics.drawing.ets",
@@ -392,6 +393,7 @@ arkui_files = [
   "arkui-preprocessed/arkui/handwritten/transfer/ShapeMaskTransfer.ets",
   "arkui-preprocessed/arkui/handwritten/transfer/TransferUtil.ets",
   "arkui-preprocessed/arkui/handwritten/transfer/UIContextTransfer.ets",
+  "arkui-preprocessed/arkui/handwritten/transfer/WebTransfer.ets",
   "arkui-preprocessed/arkui/hooks/NavigationOpsHandWritten.ets",
   "arkui-preprocessed/arkui/hooks/XComponentOpsHandWritten.ets",
   "arkui-preprocessed/arkui/hooks/content_modifiers/ContentModifierHooks.ets",
@@ -537,6 +539,7 @@ arkui_path_keys = [
   "@koalaui/runtime/annotations",
   "@koalaui/builderLambda",
   "arkui.stateManagement.runtime",
+  "arkui.incremental.runtime.state",
   "@ohos/animator",
   "@ohos/arkui/UIContext",
   "@ohos/measure",
@@ -564,6 +567,8 @@ arkui_path_keys = [
   "arkui.UserView",
   "@ohos.arkui.component",
   "@ohos.arkui.stateManagement",
+  "@ohos.arkui.ArcList",
+  "@ohos.arkui.ArcScrollBar",
 ]
 
 arkui_path_values = [
@@ -581,6 +586,7 @@ arkui_path_values = [
   "../incremental/runtime/annotations",
   "arkui-preprocessed/arkui/annotations",
   "arkui-preprocessed/arkui/stateManagement/runtime",
+  "../incremental/public/src/state.ets",
   "arkui-preprocessed/@ohos.animator.ets",
   "arkui-preprocessed/@ohos.arkui.UIContext.ets",
   "arkui-preprocessed/@ohos.measure.ets",
@@ -608,4 +614,6 @@ arkui_path_values = [
   "arkui-preprocessed/arkui/UserView.ets",
   "arkui-preprocessed/arkui/framework",
   "arkui-preprocessed/arkui/stateManagement",
+  "arkui-preprocessed/@ohos.arkui.ArcList.ets",
+  "arkui-preprocessed/@ohos.arkui.ArcScrollBar.ets",
 ]

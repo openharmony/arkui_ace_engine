@@ -22,6 +22,7 @@ import { OBSERVE } from "./stateManagement";
 import { PeerNode } from "./PeerNode"
 import { RecordData } from "@ohos.base"
 import { ArkCommonMethodComponent, ArkCommonPeer, CommonMethod } from 'arkui/component/common';
+import { memo_skip } from '@koalaui/runtime/annotations';
 
 /** base class for user's structs */
 export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent {
@@ -52,7 +53,7 @@ export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent 
         factory: () => T,
         /** @memo */
         content?: () => void,
-        initializers?: T_Options,
+        initializers?: () => T_Options,
         reuseKey?: string
     ): void {
         if (reuseKey) {
@@ -61,7 +62,7 @@ export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent 
         }
         const receiver = remember(() => {
             const instance = factory();
-            instance.__initializeStruct(content, initializers);
+            instance.__initializeStruct(content, initializers?.());
             return instance;
         });
         receiver._buildWrapper(content, initializers);
@@ -84,10 +85,17 @@ export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent 
         console.log("__initializeStruct()")
     }
 
+    /** @memo */
+    updateStructWithMemoParameter(
+        @memo_skip
+        initializers?: () => T_Options): void {
+            this.__updateStruct(initializers?.());
+    }
+
     /** @memo:intrinsic */
-    buildArkComponentRoot(initializers?: T_Options) {
+    buildArkComponentRoot(initializers?: () => T_Options) {
         ArkComponentRoot(this, (node: PeerNode) => {
-            this.__updateStruct(initializers);
+            this.updateStructWithMemoParameter(initializers);
             const savedRenderingComponent = OBSERVE.renderingComponent
             OBSERVE.renderingComponent = 
             this.isV2()
@@ -103,7 +111,7 @@ export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent 
             )
             node.setOnReuse(
                 (param?: RecordData) => {
-                    this.aboutToReuse(param, initializers)
+                    this.aboutToReuse(param, initializers?.())
                 }
             )
 
@@ -114,7 +122,7 @@ export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent 
     _buildWrapper(
         /** @memo */
         content?: () => void,
-        initializers?: T_Options
+        initializers?: () => T_Options
     ): void {
         this.callStyles();
         const hasCommonStyles = remember(() => this.hasCommonStyles)
@@ -136,13 +144,13 @@ export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent 
         factory: () => T,
         /** @memo */
         content?: () => void,
-        initializers?: T_Options,
+        initializers?: () => T_Options,
     ): void {
         /* need to wrap both states and build() of @Component */
         NodeAttach(() => ArkColumnPeer.create(undefined), (node: ArkColumnPeer) => { // replace with Frontend Node later
             const component = remember(() => {
                 const instance = factory()
-                instance.__initializeStruct(content, initializers);
+                instance.__initializeStruct(content, initializers?.());
                 node.setOnRecycle(() =>
                     instance.aboutToRecycle()
                 )
@@ -150,7 +158,7 @@ export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent 
             });
             node.setOnReuse(
                 (param?: RecordData) => {
-                    component.aboutToReuse(param, initializers)
+                    component.aboutToReuse(param, initializers?.())
                 }
             )
             component._buildWrapper(content, initializers);

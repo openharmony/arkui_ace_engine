@@ -14,6 +14,7 @@
  */
 #include "frameworks/core/interfaces/native/implementation/bind_sheet_utils.h"
 
+#include "core/components_ng/pattern/overlay/modal_style.h"
 #include "core/components_ng/pattern/overlay/sheet_theme.h"
 
 namespace OHOS::Ace::NG {
@@ -144,6 +145,8 @@ void BindSheetUtil::ParseSheetParams(SheetStyle& sheetStyle, const Ark_SheetOpti
     sheetStyle.showCloseIcon = OptConvert<bool>(sheetOptions.showClose);
     sheetStyle.interactive = OptConvert<bool>(sheetOptions.enableOutsideInteractive);
     sheetStyle.showDragBar = OptConvert<bool>(sheetOptions.dragBar);
+    sheetStyle.enableFloatingDragBar = OptConvert<bool>(sheetOptions.enableFloatingDragBar);
+    sheetStyle.modalTransition = OptConvert<ModalTransition>(sheetOptions.modalTransition);
     sheetStyle.sheetType = OptConvert<SheetType>(sheetOptions.preferType);
     sheetStyle.scrollSizeMode = OptConvert<ScrollSizeMode>(sheetOptions.scrollSizeMode);
     sheetStyle.sheetKeyboardAvoidMode = OptConvert<SheetKeyboardAvoidMode>(sheetOptions.keyboardAvoidMode);

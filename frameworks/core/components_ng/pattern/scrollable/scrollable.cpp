@@ -19,6 +19,7 @@
 #include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/ressched/ressched_report.h"
+#include "base/utils/multi_thread.h"
 #include "core/common/layout_inspector.h"
 #include "core/components_ng/pattern/scrollable/scrollable_animation_consts.h"
 #include "core/components_ng/pattern/scrollable/scrollable_theme.h"
@@ -1958,8 +1959,22 @@ void Scrollable::OnCollectTouchTarget(TouchTestResult& result, const RefPtr<Fram
 
 void Scrollable::SetMaxFlingVelocity(double max)
 {
+    auto frameNode = weakHost_.Upgrade();
+    FREE_NODE_CHECK(frameNode, SetMaxFlingVelocity, max);
     double density = PipelineBase::GetCurrentDensity();
     maxFlingVelocity_ = max * density;
+}
+
+void Scrollable::SetMaxFlingVelocityMultiThread(double max)
+{
+    auto frameNode = weakHost_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->PostAfterAttachMainTreeTask([weak = AceType::WeakClaim(this), max]() {
+        auto scrollable = weak.Upgrade();
+        CHECK_NULL_VOID(scrollable);
+        double density = PipelineBase::GetCurrentDensity();
+        scrollable->SetMaxFlingVelocityValue(max * density);
+    });
 }
 
 void Scrollable::HandleScrollBarOnDidStopDragging(bool isWillFling)

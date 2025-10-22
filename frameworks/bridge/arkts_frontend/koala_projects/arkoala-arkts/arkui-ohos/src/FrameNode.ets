@@ -17,15 +17,14 @@ import { UIContext } from "@ohos/arkui/UIContext"
 import { UIContextImpl } from "arkui/base/UIContextImpl"
 import { NodePosition, NodeEdges, Size, LengthMetrics, SizeT } from "./Graphics"
 import {
-    Finalizable, toPeerPtr, KPointer, MaterializedBase, nullptr, KSerializerBuffer, KUint8ArrayPtr, pointer,
-    NativeThunk, SerializerBase
+    Finalizable, toPeerPtr, KPointer, MaterializedBase, nullptr, pointer, NativeThunk
 } from "@koalaui/interop"
 import { finalizerRegister, int32 } from "@koalaui/common"
 import { ArkUIAniModule } from "arkui.ani"
 import { RenderNode } from "./RenderNode"
 import {
     CommonAttribute, ArkCommonMethodPeer, CommonMethod, UIGestureEvent, UICommonEvent, UICommonEventInternal,
-    CustomProperty
+    CustomProperty, AnimateParam
 } from './component/common'
 import { ArkButtonNode } from './typedNode/ArkButtonNode'
 import { ButtonOptions, ButtonAttribute, ArkButtonPeer} from './component/button'
@@ -112,7 +111,7 @@ import { TextOptions, TextAttribute, ArkTextPeer } from './component/text'
 import { MarqueeOptions, MarqueeAttribute, ArkMarqueePeer } from './component/marquee'
 import { SymbolGlyphAttribute, ArkSymbolGlyphPeer } from './component/symbolglyph'
 import { XComponentParameters, XComponentOptions, NativeXComponentParameters, XComponentAttribute, TypedXComponentPeerInternal } from "./component/xcomponent"
-import { XComponentType } from './component/enums'
+import { XComponentType, AnimationPropertyType } from './component/enums'
 import { ComponentContent } from './ComponentContent';
 import { DrawContext } from './Graphics';
 import { JSBuilderNode } from "./BuilderNode"
@@ -157,19 +156,6 @@ export class FrameNodeInternal {
         obj.peer = new Finalizable(ptr, FrameNode.getFinalizer())
         return obj
     }
-}
-
-// @ts-ignore
-function GetExactRetValue(data: KSerializerBuffer | KUint8ArrayPtr): Array<byte> {
-    // @ts-ignore
-    const retval = data as FixedArray<byte>;
-    // @ts-ignore
-    let exactRetValue: byte[] = new Array<byte>();
-    for (let i = 0; i < retval.length; i++) {
-        // @ts-ignore
-        exactRetValue.push(new Byte(retval[i]));
-    }
-    return exactRetValue;
 }
 
 export class FrameNode implements MaterializedBase {
@@ -224,14 +210,14 @@ export class FrameNode implements MaterializedBase {
                 return;
             }
             if (this.getType() === 'BuilderRootFrameNode') {
-                // this.renderNode_ = new RenderNode(this.getType());
-                // this.renderNode_!.setFrameNode(new WeakRef<FrameNode>(this));
+                this.renderNode_ = new RenderNode(this.getType());
+                this.renderNode_!.setFrameNode(new WeakRef<FrameNode>(this));
                 return;
             }
             const instanceId = this.instanceId_!.toInt();
             ArkUIAniModule._Common_Sync_InstanceId(instanceId);
             if (this.getType() === undefined || this.getType() === "CustomFrameNode") {
-                // this.renderNode_ = new RenderNode('CustomFrameNode')
+                this.renderNode_ = new RenderNode('CustomFrameNode')
                 const ctorPtr: KPointer = ptr ? ptr : FrameNodeExtender.constructorFrameNode()
                 this.peer = new Finalizable(ctorPtr, FrameNode.getFinalizer())
                 this.nodePtr_ = this.peer?.ptr
@@ -240,15 +226,15 @@ export class FrameNode implements MaterializedBase {
                 this.peer = new Finalizable(retval, FrameNode.getFinalizer());
                 this.nodePtr_ = this.peer?.ptr
             }
-            // this.renderNode_?.setFrameNode(new WeakRef<FrameNode>(this))
+            this.renderNode_?.setFrameNode(new WeakRef<FrameNode>(this))
             if (this.renderNode_ && this.getType() === "CustomFrameNode") {
-                // this.renderNode_!.peer = new Finalizable(ArkUIGeneratedNativeModule._FrameNode_getRenderNode(this.peer!.ptr), RenderNode.getFinalizer());
+                this.renderNode_!.peer = new Finalizable(FrameNodeExtender.getRenderNode(this.peer!.ptr), RenderNode.getFinalizer());
             }
             this._nodeId = FrameNodeExtender.getIdByFrameNode(this.peer!.ptr);
             ArkUIAniModule._Common_Restore_InstanceId();
             FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.set(this._nodeId, this);
             ArkUIAniModule._SetCustomCallback(this!.peer!.ptr, this.onMeasureInner, this.onLayoutInner);
-            // ArkUIAniModule._SetFrameNodeDrawCallback(this.peer!.ptr, this.onDraw);
+            ArkUIAniModule._SetFrameNodeDrawCallback(this.peer!.ptr, this.onDraw);
         }
     }
     static getFinalizer(): KPointer {
@@ -430,7 +416,7 @@ export class FrameNode implements MaterializedBase {
             this.peer?.close();
         }
         this.nodePtr_ = undefined;
-        // this.renderNode_?.resetNodePtr();
+        this.renderNode_?.resetNodePtr();
     }
     public resetNodePtr(): void {
         if (this.peer?.ptr) {
@@ -631,6 +617,21 @@ export class FrameNode implements MaterializedBase {
         FrameNodeExtender.recycle(this)
         return
     }
+    public createAnimation(property: AnimationPropertyType, startValue: Array<double> | undefined, endValue: Array<double>, param: AnimateParam): boolean {
+        const property_casted = property as (AnimationPropertyType)
+        const startValue_casted = startValue as (Array<double> | undefined)
+        const endValue_casted = endValue as (Array<double>)
+        const param_casted = param as (AnimateParam)
+        return FrameNodeExtender.createAnimation(this, property_casted, startValue_casted, endValue_casted, param_casted);
+    }
+    public cancelAnimations(properties: Array<AnimationPropertyType>): boolean {
+        const properties_casted = properties as (Array<AnimationPropertyType>)
+        return FrameNodeExtender.cancelAnimations(this, properties_casted);
+    }
+    public getNodePropertyValue(property: AnimationPropertyType): Array<double> {
+        const property_casted = property as (AnimationPropertyType)
+        return FrameNodeExtender.getNodePropertyValue(this, property_casted);
+    }
     public getRenderNode(): RenderNode | null {
         return this.renderNode_ ? this.renderNode_! : null;
     }
@@ -746,7 +747,7 @@ export class BuilderRootFrameNode<T> extends ImmutableFrameNode {
         this.peer = new Finalizable(ptr!, FrameNode.getFinalizer());
         this.nodePtr_ = this.peer?.ptr;
         if (this.renderNode_) {
-            // this.renderNode_!.peer = new Finalizable(ArkUIGeneratedNativeModule._FrameNode_getRenderNode(ptr), RenderNode.getFinalizer());
+            this.renderNode_!.peer = new Finalizable(FrameNodeExtender.getRenderNode(ptr), RenderNode.getFinalizer());
         }
     }
     getType(): string {
@@ -1303,7 +1304,7 @@ export namespace typeNode {
         createSearchNode, createTextAreaNode, createTextInputNode, createTextNode, createXComponentNodeDefault,
         createXComponentNodeWithOptions, createXComponentNodeWithNativeParameters, createSwiperNode, createBadgeNode,
         createQRCodeNode, createProgressNode, createLoadingProgressNode, createTextClockNode, createTextTimerNode,
-        createImageNode, createButtonNode, createCheckboxNode, createCheckboxGroupNode, createRadioNode, createRatingNode,
+        createButtonNode, createCheckboxNode, createCheckboxGroupNode, createRadioNode, createRatingNode,
         createSelectNode, createSliderNode, createToggleNode
     }
 
@@ -1621,7 +1622,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    function createImageNode(context: UIContext, type: 'Image'): ImageFrameNode {
+    function createImageNode(context: UIContext): ImageFrameNode {
         return new ImageFrameNode(context, 'Image', (node: FrameNode, type: ModifierType): ArkImageNode => {
             let arknode = new ArkImageNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);

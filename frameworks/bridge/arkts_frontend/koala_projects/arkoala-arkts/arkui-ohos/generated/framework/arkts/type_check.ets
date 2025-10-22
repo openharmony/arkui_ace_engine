@@ -18,8 +18,8 @@
 
 import { KBoolean, KStringPtr, MaterializedBase } from "@koalaui/interop"
 import { int32 } from "@koalaui/common"
-import { AccessibilityHoverType, Alignment, AnimationStatus, AppRotation, ArrowPointPosition, Axis, AxisAction, AxisModel, BarState, BorderStyle, CheckBoxShape, ClickEffectLevel, Color, ColoringStrategy, ObscuredReasons, ModifierKey, HitTestMode, ImageSize, HoverEffect, Visibility, ItemAlign, Direction, RenderFit, FocusDrawLevel, ImageRepeat, ResponseType, FunctionKey, CopyOptions, CrownAction, CrownSensitivity, DialogButtonStyle, DividerMode, Edge, EdgeEffect, EllipsisMode, EmbeddedType, FillMode, FlexAlign, FlexDirection, FlexWrap, FoldStatus, FontStyle, FontWeight, GradientDirection, HeightBreakpoint, HorizontalAlign, IlluminatedType, ImageFit, ImageSpanAlignment, InteractionHand, KeySource, KeyType, LineBreakStrategy, LineCapStyle, LineJoinStyle, MarqueeUpdateStrategy, MouseAction, MouseButton, NestedScrollMode, OptionWidthMode, PageFlipMode, PixelRoundCalcPolicy, PixelRoundMode, Placement, PlayMode, RelateType, ScrollSource, SharedTransitionEffectType, TextAlign, TextCase, TextContentStyle, TextDecorationStyle, TextDecorationType, TextHeightAdaptivePolicy, TextOverflow, TextSelectableMode, TitleHeight, TouchType, TransitionType, Nullable, WidthBreakpoint, VerticalAlign, Week, WordBreak, XComponentType } from "./../../component/enums"
-import { AccessibilityRoleType, AccessibilitySamePageMode, AdaptiveColor, BlendApplyType, BlendMode, BlurStyle, BlurStyleActivePolicy, TouchEvent, ChainStyle, Rectangle, TouchTestInfo, SafeAreaType, SafeAreaEdge, MenuElement, CommonMethod, LayoutPolicy, DrawModifier, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, BorderImageOption, OutlineStyle, ClickEvent, HoverEvent, AccessibilityCallback, AccessibilityHoverEvent, MouseEvent, KeyEvent, CrownEvent, FocusAxisEvent, AxisEvent, FocusMovement, AnimateParam, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, DragEvent, DragItemInfo, PreDragStatus, LinearGradientOptions, SweepGradientOptions, RadialGradientOptions, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, AccessibilityFocusCallback, ReuseOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, CustomProperty, BackgroundOptions, BackgroundImageOptions, BackgroundBlurStyleOptions, SystemAdaptiveOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, OnDragEventCallback, DropOptions, PreviewConfiguration, DragPreviewOptions, DragInteractionOptions, OverlayOptions, GeometryTransitionOptions, TipsMessageType, TipsOptions, PopupOptions, CustomPopupOptions, MenuOptions, ContextMenuOptions, Bindable, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, VisibleAreaEventOptions, ContentClipMode, DismissReason, DragBehavior, DraggingSizeChangeEffect, DragPreviewMode, DragResult, EffectEdge, FinishCallbackType, SourceTool, HapticFeedbackMode, HoverModeAreaType, KeyboardAvoidMode, LayoutSafeAreaEdge, LayoutSafeAreaType, RectResult, CommonConfiguration, MenuPolicy, MenuPreviewMode, NestedScrollOptions, PixelMapMock, PopupStateChangeParam, RepeatMode, SelectionOptions, ScrollResult, ScrollSizeMode, TextContentControllerBase, ShadowType, SheetKeyboardAvoidMode, SheetMode, SheetSize, SheetType, SizeResult, SourceType, CaretOffset, TextContentControllerOptions, ThemeColorMode, TouchTestStrategy, TransitionEdge, AsymmetricTransitionOption, TransitionHierarchyStrategy, UICommonEvent, HoverCallback, KeyframeState, KeyframeAnimateParam, VerticalAlignParam, Measurable, Layoutable, ChildrenMainSize, DateRange, DismissContentCoverAction, DismissPopupAction, DismissSheetAction, ModifierKeyStateGetter, EdgeEffectOptions, ExpectedFrameRateRange, HorizontalAlignParam, InputCounterOptions, ItemDragEventHandler, OnMoveHandler, ItemDragInfo, FractionStop, LocalizedHorizontalAlignParam, LocalizedVerticalAlignParam, MeasureResult, MotionBlurAnchor, OverlayOffset, PopupButton, SheetDismiss, SpringBackAction, TouchObject, BlurStyleOptions, BindOptions, ContextMenuAnimationOptions, AnimationNumberRange, MultiShadowOptions, FadingEdgeOptions, HistoricalPoint, LightSource, PopupMaskType, ReuseIdCallback, SheetTitleOptions, TerminationInfo, TextDecorationOptions, DividerStyle, PointLightStyle, BorderRadiusType, PopupStateChangeCallback, EventTarget, BaseEvent, GeometryInfo, PickerDialogButtonStyle, PickerTextStyle, PopupCommonOptions, PopupMessageOptions, TripleLengthDetents } from "./../../component/common"
+import { AccessibilityHoverType, Alignment, AnimationPropertyType, AnimationStatus, AppRotation, ArrowPointPosition, Axis, AxisAction, AxisModel, BarState, BorderStyle, CheckBoxShape, ClickEffectLevel, Color, ColoringStrategy, ObscuredReasons, ModifierKey, HitTestMode, ImageSize, HoverEffect, Visibility, ItemAlign, Direction, RenderFit, FocusDrawLevel, ImageRepeat, ResponseType, FunctionKey, CopyOptions, CrownAction, CrownSensitivity, DialogButtonStyle, DividerMode, Edge, EdgeEffect, EllipsisMode, EmbeddedType, FillMode, FlexAlign, FlexDirection, FlexWrap, FoldStatus, FontStyle, FontWeight, GradientDirection, HeightBreakpoint, HorizontalAlign, IlluminatedType, ImageFit, ImageSpanAlignment, InteractionHand, KeySource, KeyType, LineBreakStrategy, LineCapStyle, LineJoinStyle, MarqueeUpdateStrategy, MouseAction, MouseButton, NestedScrollMode, OptionWidthMode, PageFlipMode, PixelRoundCalcPolicy, PixelRoundMode, Placement, PlayMode, RelateType, ScrollSource, SharedTransitionEffectType, TextAlign, TextCase, TextContentStyle, TextDecorationStyle, TextDecorationType, TextHeightAdaptivePolicy, TextOverflow, TextSelectableMode, TitleHeight, TouchType, TransitionType, Nullable, WidthBreakpoint, VerticalAlign, Week, WordBreak, XComponentType } from "./../../component/enums"
+import { AccessibilityRoleType, AccessibilitySamePageMode, AdaptiveColor, BlendApplyType, BlendMode, BlurStyle, BlurStyleActivePolicy, TouchEvent, ChainStyle, Rectangle, TouchTestInfo, SafeAreaType, SafeAreaEdge, MenuElement, CommonMethod, LayoutPolicy, DrawModifier, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, BorderImageOption, OutlineStyle, ClickEvent, HoverEvent, AccessibilityCallback, AccessibilityHoverEvent, MouseEvent, KeyEvent, CrownEvent, FocusAxisEvent, AxisEvent, FocusMovement, AnimateParam, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, RotateAngleOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, DragEvent, DragItemInfo, PreDragStatus, LinearGradientOptions, SweepGradientOptions, RadialGradientOptions, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, AccessibilityFocusCallback, ReuseOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, CustomProperty, BackgroundOptions, BackgroundImageOptions, BackgroundBlurStyleOptions, SystemAdaptiveOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, OnDragEventCallback, DropOptions, PreviewConfiguration, DragPreviewOptions, DragInteractionOptions, OverlayOptions, GeometryTransitionOptions, TipsMessageType, TipsOptions, PopupOptions, CustomPopupOptions, MenuOptions, ContextMenuOptions, Bindable, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, VisibleAreaEventOptions, ContentClipMode, DismissReason, DragBehavior, DraggingSizeChangeEffect, DragPreviewMode, DragResult, EffectEdge, FinishCallbackType, HapticFeedbackMode, HoverModeAreaType, KeyboardAvoidMode, LayoutSafeAreaEdge, LayoutSafeAreaType, RectResult, CommonConfiguration, MenuPolicy, MenuPreviewMode, NestedScrollOptions, PixelMapMock, PopupStateChangeParam, RepeatMode, SelectionOptions, ScrollResult, ScrollSizeMode, TextContentControllerBase, ShadowType, SheetKeyboardAvoidMode, SheetMode, SheetSize, SheetType, SizeResult, SourceTool, SourceType, CaretOffset, TextContentControllerOptions, ThemeColorMode, TouchTestStrategy, TransitionEdge, AsymmetricTransitionOption, TransitionHierarchyStrategy, UICommonEvent, HoverCallback, KeyframeState, KeyframeAnimateParam, VerticalAlignParam, Measurable, Layoutable, ChildrenMainSize, DateRange, DismissContentCoverAction, DismissPopupAction, DismissSheetAction, ModifierKeyStateGetter, EdgeEffectOptions, ExpectedFrameRateRange, HorizontalAlignParam, InputCounterOptions, ItemDragEventHandler, OnMoveHandler, ItemDragInfo, FractionStop, LocalizedHorizontalAlignParam, LocalizedVerticalAlignParam, MeasureResult, MotionBlurAnchor, OverlayOffset, PopupButton, SheetDismiss, SpringBackAction, TouchObject, BlurStyleOptions, BindOptions, ContextMenuAnimationOptions, AnimationNumberRange, MultiShadowOptions, FadingEdgeOptions, HistoricalPoint, LightSource, PopupMaskType, ReuseIdCallback, SheetTitleOptions, TerminationInfo, TextDecorationOptions, DividerStyle, PointLightStyle, BorderRadiusType, PopupStateChangeCallback, EventTarget, BaseEvent, GeometryInfo, PickerDialogButtonStyle, PickerTextStyle, PopupCommonOptions, PopupMessageOptions, TripleLengthDetents } from "./../../component/common"
 import { AnimationMode, BarMode, BarPosition, LayoutStyle, TabContentTransitionProxy, TabsAnimationEvent, TabsCacheMode, TabsController, TabContentAnimatedTransition, TabsOptions, BarGridColumnOptions, ScrollableBarModeOptions } from "./../../component/tabs"
 import { ArrowPosition, AvoidanceMode, MenuAlignType, MenuItemConfiguration, SelectOption, MenuOutlineOptions } from "./../../component/select"
 import { AttributeModifier, extractors, GestureModifier, WrappedBuilder, ContentModifier, UIGestureEvent, LocalStorage, AttributeUpdater, CustomStyles } from "#handwritten"
@@ -29,7 +29,7 @@ import { AutoCapitalizationMode, KeyboardAppearance, LayoutManager, PositionWith
 import { BadgePosition, BadgeStyle, BadgeParamWithNumber, BadgeParam, BadgeParamWithString } from "./../../component/badge"
 import { BarrierDirection, LocalizedBarrierDirection, BarrierStyle, GuideLinePosition, GuideLineStyle } from "./../../component/relativeContainer"
 import { BarStyle, LaunchMode, NavBarPosition, NavigationMode, NavigationOperation, NavigationTitleMode, NavPathInfo, NavPathStack, NavigationOptions, PopInfo, NavigationInterception, ToolbarItemStatus, NavContentInfo, NavigationAnimatedTransition, NavigationTransitionProxy, InterceptionShowCallback, NavBar, InterceptionModeCallback, NavigationModuleInfo, NavigationCommonTitle, NavigationMenuItem, UpdateTransitionCallback, ToolbarItem, MoreButtonOptions, NavigationCustomTitle, NavigationTitleOptions, NavigationMenuOptions, NavigationToolbarOptions } from "./../../component/navigation"
-import { BaseShape, BuilderNodeOps, BuilderNodeOptions, CommonShape, CustomDialogControllerExtender, CustomDialogControllerOptionsExtender, CustomDialogControllerExternalOptionsExtender, Offset_componentutils, PerfMonitorActionType, PerfMonitorSourceType, RotateResult, ScaleResult, TranslateResult, DoubleAnimationParam, Callback_Extender_OnProgress, Callback_Extender_OnFinish, ErrorEvent, Event, LengthMetricsCustom, MessageEvents, PostMessageOptions, SnapshotOptions, WorkerOptions, ComponentInfo, Matrix4Result, PageRouterOptions, RestrictedWorker, RestrictedWorker_onexit_Callback, RestrictedWorker_onerror_Callback, RestrictedWorker_onmessage_Callback, WorkerEventListener } from "./../../component/idlize"
+import { BaseShape, BuilderNodeOps, BuilderNodeOptions, CommonShape, CustomDialogControllerExtender, CustomDialogControllerOptionsExtender, CustomDialogControllerExternalOptionsExtender, Offset_componentutils, PerfMonitorActionType, PerfMonitorSourceType, PositionNumberInner, RotateResult, ScaleResult, SizeNumberInner, TranslateResult, DisturbanceFieldOptionsInner, DoubleAnimationParam, Callback_Extender_OnProgress, Callback_Extender_OnFinish, ErrorEvent, Event, LengthMetricsCustom, MessageEvents, ParticlePropertyAnimationNumberInner, ParticleOptionsInner, ParticlesInner, PositionLengthMetricsInner, PostMessageOptions, SnapshotOptions, WorkerOptions, ComponentInfo, Matrix4Result, PageRouterOptions, ParticleAnnulusRegionInner, ParticlePropertyAnimationColorInner, ParticleColorUpdaterOptionsInner, ParticleColorPropertyUpdaterConfigsInner, ParticleUpdaterOptionsInner, ParticlePropertyUpdaterConfigsInner, RestrictedWorker, RestrictedWorker_onexit_Callback, RestrictedWorker_onerror_Callback, RestrictedWorker_onmessage_Callback, WorkerEventListener, EmitterPropertyInner, ParticleColorPropertyOptionsInner, ParticlePropertyOptionsInner, AccelerationOptionsInner, EmitterOptionsInner } from "./../../component/idlize"
 import { Length, SizeOptions, ColorFilter, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, VoidCallback, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, Bias, DirectionalEdgesT, VP, DividerStyleOptions, LengthConstrain, Offset, PX, LPX, MarkStyle } from "./../../component/units"
 import { Resource } from "global.resource"
 import { BreakpointsReference, GridRowDirection, BreakPoints, GridRowColumnOption, GridRowSizeOption, GutterOption, GridRowOptions } from "./../../component/gridRow"
@@ -61,9 +61,9 @@ import { default as webview } from "@ohos.web.webview"
 import { default as curves } from "@ohos.curves"
 import { CustomDialogController, CustomDialogControllerOptions, CustomDialogControllerExternalOptions } from "./../../component/customDialogController"
 import { DataPanelType, ColorStop, LinearGradient, DataPanelConfiguration, DataPanelOptions, DataPanelShadowOptions } from "./../../component/dataPanel"
-import { DatePickerDialog, DatePickerMode, DatePickerDialogOptions, DatePickerOptions } from "./../../component/datePicker"
+import { DatePickerDialog, DatePickerMode, DatePickerDialogOptions, DatePickerOptions, LunarSwitchStyle } from "./../../component/datePicker"
 import { DialogAlignment, DialogButtonDirection, AlertDialogParamWithConfirm, AlertDialogParamWithButtons, AlertDialogParamWithOptions, AlertDialogTextStyleOptions, AlertDialogButtonBaseOptions, AlertDialogButtonOptions, AlertDialogParam } from "./../../component/alertDialog"
-import { DistributionType, DisturbanceFieldShape, ParticleEmitterShape, ParticleType, ParticleUpdater, ParticlePropertyAnimation } from "./../../component/particle"
+import { DistributionType, DisturbanceFieldShape, ParticleEmitterShape, ParticleType, ParticleUpdater, VelocityOptions, ParticleColorOptions, PointParticleParameters, ImageParticleParameters, EmitterParticleOptions, ParticleConfigs, ParticlePropertyAnimation } from "./../../component/particle"
 import { DpiFollowStrategy, UIExtensionProxy, WindowModeFollowStrategy, UIExtensionOptions } from "./../../component/uiExtensionComponent"
 import { DrawableDescriptor } from "@ohos.arkui.drawableDescriptor"
 import { default as drawing } from "@ohos.graphics.drawing"
@@ -144,6 +144,8 @@ import { default as cert } from "@ohos.security.cert"
 import { default as print } from "@ohos.print"
 import { default as window } from "@ohos.window"
 import { WindowSize, AbilityInfo } from "bundleManager.AbilityInfo"
+import { ArcScrollBarOptions } from "@ohos.arkui.ArcScrollBar"
+import { ArkListOptions } from "@ohos.arkui.ArcList"
 import { ASTCResource } from "./../../component/mediaCachedImage"
 import { Initializer } from "./../../AttributeUpdater"
 import { CheckBoxConfiguration, CheckboxOptions } from "./../../component/checkbox"
@@ -202,6 +204,9 @@ export class TypeChecker {
     }
     static isAbilityInfo(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean, arg10: boolean, arg11: boolean, arg12: boolean, arg13: boolean, arg14: boolean, arg15: boolean, arg16: boolean, arg17: boolean, arg18: boolean, arg19: boolean, arg20: boolean, arg21: boolean, arg22: boolean, arg23: boolean): boolean {
         return value instanceof AbilityInfo
+    }
+    static isAccelerationOptionsInner(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof AccelerationOptionsInner
     }
     static isAccessibilityHoverEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean): boolean {
         return value instanceof AccessibilityHoverEvent
@@ -269,6 +274,9 @@ export class TypeChecker {
     static isAnimationMode(value: Object | string | number | undefined): boolean {
         return value instanceof AnimationMode
     }
+    static isAnimationPropertyType(value: Object | string | number | undefined): boolean {
+        return value instanceof AnimationPropertyType
+    }
     static isAnimationStatus(value: Object | string | number | undefined): boolean {
         return value instanceof AnimationStatus
     }
@@ -281,8 +289,14 @@ export class TypeChecker {
     static isAppRotation(value: Object | string | number | undefined): boolean {
         return value instanceof AppRotation
     }
+    static isArcScrollBarOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof ArcScrollBarOptions
+    }
     static isArea(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean): boolean {
         return value instanceof Area
+    }
+    static isArkListOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
+        return value instanceof ArkListOptions
     }
     static isArrowPointPosition(value: Object | string | number | undefined): boolean {
         return value instanceof ArrowPointPosition
@@ -326,7 +340,7 @@ export class TypeChecker {
     static isAxisAction(value: Object | string | number | undefined): boolean {
         return value instanceof AxisAction
     }
-    static isAxisEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean): boolean {
+    static isAxisEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean): boolean {
         return value instanceof AxisEvent
     }
     static isAxisModel(value: Object | string | number | undefined): boolean {
@@ -605,7 +619,7 @@ export class TypeChecker {
     static isClickEffectLevel(value: Object | string | number | undefined): boolean {
         return value instanceof ClickEffectLevel
     }
-    static isClickEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean): boolean {
+    static isClickEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean): boolean {
         return value instanceof ClickEvent
     }
     static isClientAuthenticationHandler(value: Object | string | number | undefined): boolean {
@@ -641,7 +655,7 @@ export class TypeChecker {
     static isColumnSplitDividerStyle(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
         return value instanceof ColumnSplitDividerStyle
     }
-    static isCommonMethod(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean, arg10: boolean, arg11: boolean, arg12: boolean, arg13: boolean, arg14: boolean, arg15: boolean, arg16: boolean, arg17: boolean, arg18: boolean, arg19: boolean, arg20: boolean, arg21: boolean, arg22: boolean, arg23: boolean, arg24: boolean, arg25: boolean, arg26: boolean, arg27: boolean, arg28: boolean, arg29: boolean, arg30: boolean, arg31: boolean, arg32: boolean, arg33: boolean, arg34: boolean, arg35: boolean, arg36: boolean, arg37: boolean, arg38: boolean, arg39: boolean, arg40: boolean, arg41: boolean, arg42: boolean, arg43: boolean, arg44: boolean, arg45: boolean, arg46: boolean, arg47: boolean, arg48: boolean, arg49: boolean, arg50: boolean, arg51: boolean, arg52: boolean, arg53: boolean, arg54: boolean, arg55: boolean, arg56: boolean, arg57: boolean, arg58: boolean, arg59: boolean, arg60: boolean, arg61: boolean, arg62: boolean, arg63: boolean, arg64: boolean, arg65: boolean, arg66: boolean, arg67: boolean, arg68: boolean, arg69: boolean, arg70: boolean, arg71: boolean, arg72: boolean, arg73: boolean, arg74: boolean, arg75: boolean, arg76: boolean, arg77: boolean, arg78: boolean, arg79: boolean, arg80: boolean, arg81: boolean, arg82: boolean, arg83: boolean, arg84: boolean, arg85: boolean, arg86: boolean, arg87: boolean, arg88: boolean, arg89: boolean, arg90: boolean, arg91: boolean, arg92: boolean, arg93: boolean, arg94: boolean, arg95: boolean, arg96: boolean, arg97: boolean, arg98: boolean, arg99: boolean, arg100: boolean, arg101: boolean, arg102: boolean, arg103: boolean, arg104: boolean, arg105: boolean, arg106: boolean, arg107: boolean, arg108: boolean, arg109: boolean, arg110: boolean, arg111: boolean, arg112: boolean, arg113: boolean, arg114: boolean, arg115: boolean, arg116: boolean, arg117: boolean, arg118: boolean, arg119: boolean, arg120: boolean, arg121: boolean, arg122: boolean, arg123: boolean, arg124: boolean, arg125: boolean, arg126: boolean, arg127: boolean, arg128: boolean, arg129: boolean, arg130: boolean, arg131: boolean, arg132: boolean, arg133: boolean, arg134: boolean, arg135: boolean, arg136: boolean, arg137: boolean, arg138: boolean, arg139: boolean, arg140: boolean, arg141: boolean, arg142: boolean, arg143: boolean, arg144: boolean, arg145: boolean, arg146: boolean, arg147: boolean, arg148: boolean, arg149: boolean, arg150: boolean, arg151: boolean, arg152: boolean, arg153: boolean, arg154: boolean): boolean {
+    static isCommonMethod(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean, arg10: boolean, arg11: boolean, arg12: boolean, arg13: boolean, arg14: boolean, arg15: boolean, arg16: boolean, arg17: boolean, arg18: boolean, arg19: boolean, arg20: boolean, arg21: boolean, arg22: boolean, arg23: boolean, arg24: boolean, arg25: boolean, arg26: boolean, arg27: boolean, arg28: boolean, arg29: boolean, arg30: boolean, arg31: boolean, arg32: boolean, arg33: boolean, arg34: boolean, arg35: boolean, arg36: boolean, arg37: boolean, arg38: boolean, arg39: boolean, arg40: boolean, arg41: boolean, arg42: boolean, arg43: boolean, arg44: boolean, arg45: boolean, arg46: boolean, arg47: boolean, arg48: boolean, arg49: boolean, arg50: boolean, arg51: boolean, arg52: boolean, arg53: boolean, arg54: boolean, arg55: boolean, arg56: boolean, arg57: boolean, arg58: boolean, arg59: boolean, arg60: boolean, arg61: boolean, arg62: boolean, arg63: boolean, arg64: boolean, arg65: boolean, arg66: boolean, arg67: boolean, arg68: boolean, arg69: boolean, arg70: boolean, arg71: boolean, arg72: boolean, arg73: boolean, arg74: boolean, arg75: boolean, arg76: boolean, arg77: boolean, arg78: boolean, arg79: boolean, arg80: boolean, arg81: boolean, arg82: boolean, arg83: boolean, arg84: boolean, arg85: boolean, arg86: boolean, arg87: boolean, arg88: boolean, arg89: boolean, arg90: boolean, arg91: boolean, arg92: boolean, arg93: boolean, arg94: boolean, arg95: boolean, arg96: boolean, arg97: boolean, arg98: boolean, arg99: boolean, arg100: boolean, arg101: boolean, arg102: boolean, arg103: boolean, arg104: boolean, arg105: boolean, arg106: boolean, arg107: boolean, arg108: boolean, arg109: boolean, arg110: boolean, arg111: boolean, arg112: boolean, arg113: boolean, arg114: boolean, arg115: boolean, arg116: boolean, arg117: boolean, arg118: boolean, arg119: boolean, arg120: boolean, arg121: boolean, arg122: boolean, arg123: boolean, arg124: boolean, arg125: boolean, arg126: boolean, arg127: boolean, arg128: boolean, arg129: boolean, arg130: boolean, arg131: boolean, arg132: boolean, arg133: boolean, arg134: boolean, arg135: boolean, arg136: boolean, arg137: boolean, arg138: boolean, arg139: boolean, arg140: boolean, arg141: boolean, arg142: boolean, arg143: boolean, arg144: boolean, arg145: boolean, arg146: boolean, arg147: boolean, arg148: boolean, arg149: boolean, arg150: boolean, arg151: boolean, arg152: boolean, arg153: boolean, arg154: boolean, arg155: boolean): boolean {
         return value instanceof CommonMethod
     }
     static isCommonShape(value: Object | string | number | undefined): boolean {
@@ -797,6 +811,9 @@ export class TypeChecker {
     static isDatePickerDialog(value: Object | string | number | undefined): boolean {
         return value instanceof DatePickerDialog
     }
+    static isDatePickerDialogOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean, arg10: boolean, arg11: boolean, arg12: boolean, arg13: boolean, arg14: boolean, arg15: boolean, arg16: boolean, arg17: boolean, arg18: boolean, arg19: boolean, arg20: boolean, arg21: boolean, arg22: boolean, arg23: boolean, arg24: boolean, arg25: boolean, arg26: boolean, arg27: boolean, arg28: boolean): boolean {
+        return value instanceof DatePickerDialogOptions
+    }
     static isDatePickerMode(value: Object | string | number | undefined): boolean {
         return value instanceof DatePickerMode
     }
@@ -862,6 +879,9 @@ export class TypeChecker {
     }
     static isDistributionType(value: Object | string | number | undefined): boolean {
         return value instanceof DistributionType
+    }
+    static isDisturbanceFieldOptionsInner(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean): boolean {
+        return value instanceof DisturbanceFieldOptionsInner
     }
     static isDisturbanceFieldShape(value: Object | string | number | undefined): boolean {
         return value instanceof DisturbanceFieldShape
@@ -1001,6 +1021,15 @@ export class TypeChecker {
     static isEmbedOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
         return value instanceof EmbedOptions
     }
+    static isEmitterOptionsInner(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean): boolean {
+        return value instanceof EmitterOptionsInner
+    }
+    static isEmitterParticleOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean): boolean {
+        return value instanceof EmitterParticleOptions
+    }
+    static isEmitterPropertyInner(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean): boolean {
+        return value instanceof EmitterPropertyInner
+    }
     static isEnterKeyType(value: Object | string | number | undefined): boolean {
         return value instanceof EnterKeyType
     }
@@ -1076,7 +1105,7 @@ export class TypeChecker {
     static isFlexWrap(value: Object | string | number | undefined): boolean {
         return value instanceof FlexWrap
     }
-    static isFocusAxisEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+    static isFocusAxisEvent(value: Object | string | number | undefined, arg0: boolean): boolean {
         return value instanceof FocusAxisEvent
     }
     static isFocusBoxStyle(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
@@ -1319,7 +1348,7 @@ export class TypeChecker {
     static isHoverEffect(value: Object | string | number | undefined): boolean {
         return value instanceof HoverEffect
     }
-    static isHoverEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean): boolean {
+    static isHoverEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean): boolean {
         return value instanceof HoverEvent
     }
     static isHoverEventParam(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean): boolean {
@@ -1390,6 +1419,9 @@ export class TypeChecker {
     }
     static isImageLoadResult(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean): boolean {
         return value instanceof ImageLoadResult
+    }
+    static isImageParticleParameters(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
+        return value instanceof ImageParticleParameters
     }
     static isImageRenderMode(value: Object | string | number | undefined): boolean {
         return value instanceof ImageRenderMode
@@ -1660,6 +1692,9 @@ export class TypeChecker {
     }
     static isLongPressRecognizer(value: Object | string | number | undefined): boolean {
         return value instanceof LongPressRecognizer
+    }
+    static isLunarSwitchStyle(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
+        return value instanceof LunarSwitchStyle
     }
     static isMarkStyle(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
         return value instanceof MarkStyle
@@ -2096,14 +2131,44 @@ export class TypeChecker {
     static isParagraphStyleInterface(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean): boolean {
         return value instanceof ParagraphStyleInterface
     }
+    static isParticleAnnulusRegionInner(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean): boolean {
+        return value instanceof ParticleAnnulusRegionInner
+    }
+    static isParticleColorOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean): boolean {
+        return value instanceof ParticleColorOptions
+    }
+    static isParticleColorPropertyOptionsInner(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
+        return value instanceof ParticleColorPropertyOptionsInner
+    }
+    static isParticleColorUpdaterOptionsInner(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof ParticleColorUpdaterOptionsInner
+    }
     static isParticleEmitterShape(value: Object | string | number | undefined): boolean {
         return value instanceof ParticleEmitterShape
+    }
+    static isParticleOptionsInner(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean): boolean {
+        return value instanceof ParticleOptionsInner
+    }
+    static isParticlePropertyAnimationColorInner(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean): boolean {
+        return value instanceof ParticlePropertyAnimationColorInner
+    }
+    static isParticlePropertyAnimationNumberInner(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean): boolean {
+        return value instanceof ParticlePropertyAnimationNumberInner
+    }
+    static isParticlePropertyOptionsInner(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof ParticlePropertyOptionsInner
+    }
+    static isParticlesInner(value: Object | string | number | undefined, arg0: boolean): boolean {
+        return value instanceof ParticlesInner
     }
     static isParticleType(value: Object | string | number | undefined): boolean {
         return value instanceof ParticleType
     }
     static isParticleUpdater(value: Object | string | number | undefined): boolean {
         return value instanceof ParticleUpdater
+    }
+    static isParticleUpdaterOptionsInner(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof ParticleUpdaterOptionsInner
     }
     static isPasswordIcon(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
         return value instanceof PasswordIcon
@@ -2204,6 +2269,9 @@ export class TypeChecker {
     static isPointLightStyle(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
         return value instanceof PointLightStyle
     }
+    static isPointParticleParameters(value: Object | string | number | undefined, arg0: boolean): boolean {
+        return value instanceof PointParticleParameters
+    }
     static isPolygonOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
         return value instanceof PolygonOptions
     }
@@ -2233,6 +2301,12 @@ export class TypeChecker {
     }
     static isPosition(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
         return value instanceof Position
+    }
+    static isPositionLengthMetricsInner(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof PositionLengthMetricsInner
+    }
+    static isPositionNumberInner(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof PositionNumberInner
     }
     static isPositionWithAffinity(value: Object | string | number | undefined, arg0: boolean): boolean {
         return value instanceof PositionWithAffinity
@@ -2483,6 +2557,9 @@ export class TypeChecker {
     static isRootSceneSession(value: Object | string | number | undefined): boolean {
         return value instanceof RootSceneSession
     }
+    static isRotateAngleOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean): boolean {
+        return value instanceof RotateAngleOptions
+    }
     static isRotateOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean): boolean {
         return value instanceof RotateOptions
     }
@@ -2684,7 +2761,7 @@ export class TypeChecker {
     static isSheetMode(value: Object | string | number | undefined): boolean {
         return value instanceof SheetMode
     }
-    static isSheetOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean, arg10: boolean, arg11: boolean, arg12: boolean, arg13: boolean, arg14: boolean, arg15: boolean, arg16: boolean, arg17: boolean, arg18: boolean, arg19: boolean, arg20: boolean, arg21: boolean, arg22: boolean, arg23: boolean, arg24: boolean, arg25: boolean, arg26: boolean, arg27: boolean, arg28: boolean, arg29: boolean, arg30: boolean, arg31: boolean, arg32: boolean, arg33: boolean): boolean {
+    static isSheetOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean, arg10: boolean, arg11: boolean, arg12: boolean, arg13: boolean, arg14: boolean, arg15: boolean, arg16: boolean, arg17: boolean, arg18: boolean, arg19: boolean, arg20: boolean, arg21: boolean, arg22: boolean, arg23: boolean, arg24: boolean, arg25: boolean, arg26: boolean, arg27: boolean, arg28: boolean, arg29: boolean, arg30: boolean, arg31: boolean, arg32: boolean, arg33: boolean, arg34: boolean, arg35: boolean): boolean {
         return value instanceof SheetOptions
     }
     static isSheetSize(value: Object | string | number | undefined): boolean {
@@ -2704,6 +2781,9 @@ export class TypeChecker {
     }
     static isSize(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
         return value instanceof Size
+    }
+    static isSizeNumberInner(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof SizeNumberInner
     }
     static isSizeOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
         return value instanceof SizeOptions
@@ -3056,6 +3136,9 @@ export class TypeChecker {
     static isTextPickerDialog(value: Object | string | number | undefined): boolean {
         return value instanceof TextPickerDialog
     }
+    static isTextPickerDialogOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean, arg10: boolean, arg11: boolean, arg12: boolean, arg13: boolean, arg14: boolean, arg15: boolean, arg16: boolean, arg17: boolean, arg18: boolean, arg19: boolean, arg20: boolean, arg21: boolean, arg22: boolean, arg23: boolean, arg24: boolean, arg25: boolean, arg26: boolean, arg27: boolean, arg28: boolean): boolean {
+        return value instanceof TextPickerDialogOptions
+    }
     static isTextPickerOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean): boolean {
         return value instanceof TextPickerOptions
     }
@@ -3107,6 +3190,9 @@ export class TypeChecker {
     static isTimePickerDialog(value: Object | string | number | undefined): boolean {
         return value instanceof TimePickerDialog
     }
+    static isTimePickerDialogOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean, arg10: boolean, arg11: boolean, arg12: boolean, arg13: boolean, arg14: boolean, arg15: boolean, arg16: boolean, arg17: boolean, arg18: boolean, arg19: boolean, arg20: boolean, arg21: boolean, arg22: boolean, arg23: boolean, arg24: boolean, arg25: boolean, arg26: boolean): boolean {
+        return value instanceof TimePickerDialogOptions
+    }
     static isTimePickerFormat(value: Object | string | number | undefined): boolean {
         return value instanceof TimePickerFormat
     }
@@ -3143,7 +3229,7 @@ export class TypeChecker {
     static isToolbarItemStatus(value: Object | string | number | undefined): boolean {
         return value instanceof ToolbarItemStatus
     }
-    static isTouchEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean): boolean {
+    static isTouchEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
         return value instanceof TouchEvent
     }
     static isTouchObject(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean, arg10: boolean, arg11: boolean, arg12: boolean): boolean {
@@ -3241,6 +3327,9 @@ export class TypeChecker {
     }
     static isVec4(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean): boolean {
         return value instanceof Vec4
+    }
+    static isVelocityOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof VelocityOptions
     }
     static isVerticalAlign(value: Object | string | number | undefined): boolean {
         return value instanceof VerticalAlign
@@ -3427,6 +3516,12 @@ export class TypeChecker {
     }
     static AnimationMode_FromNumeric(ordinal: int32): AnimationMode {
         return AnimationMode.fromValue(ordinal)
+    }
+    static AnimationPropertyType_ToNumeric(value: AnimationPropertyType): int32 {
+        return value.valueOf()
+    }
+    static AnimationPropertyType_FromNumeric(ordinal: int32): AnimationPropertyType {
+        return AnimationPropertyType.fromValue(ordinal)
     }
     static AnimationStatus_ToNumeric(value: AnimationStatus): int32 {
         return value.valueOf()
@@ -5486,6 +5581,9 @@ export class TypeChecker {
     static isArray_BlankScreenDetectionMethod(value: Object | string | number | undefined): boolean {
         return value instanceof Array
     }
+    static isArray_AnimationPropertyType(value: Object | string | number | undefined): boolean {
+        return value instanceof Array
+    }
     static isArray_font_UIFontGenericInfo(value: Object | string | number | undefined): boolean {
         return value instanceof Array
     }
@@ -5531,6 +5629,9 @@ export class TypeChecker {
     static isArray_Buffer(value: Object | string | number | undefined): boolean {
         return value instanceof Array
     }
+    static isArray_ParticleOptionsInner(value: Object | string | number | undefined): boolean {
+        return value instanceof Array
+    }
     static isArray_Union_String_I32_I64_F64_Resource(value: Object | string | number | undefined): boolean {
         return value instanceof Array
     }
@@ -5559,6 +5660,12 @@ export class TypeChecker {
         return value instanceof Array
     }
     static isArray_DragPreviewMode(value: Object | string | number | undefined): boolean {
+        return value instanceof Array
+    }
+    static isArray_ParticlePropertyAnimationColorInner(value: Object | string | number | undefined): boolean {
+        return value instanceof Array
+    }
+    static isArray_ParticlePropertyAnimationNumberInner(value: Object | string | number | undefined): boolean {
         return value instanceof Array
     }
     static isArray_RichEditorTextSpanResult(value: Object | string | number | undefined): boolean {
@@ -5664,6 +5771,12 @@ export class TypeChecker {
         return value instanceof Array
     }
     static isArray_ScriptItem(value: Object | string | number | undefined): boolean {
+        return value instanceof Array
+    }
+    static isArray_DisturbanceFieldOptionsInner(value: Object | string | number | undefined): boolean {
+        return value instanceof Array
+    }
+    static isArray_EmitterPropertyInner(value: Object | string | number | undefined): boolean {
         return value instanceof Array
     }
 }

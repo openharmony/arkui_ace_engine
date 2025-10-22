@@ -24,6 +24,7 @@
 
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/base/view_abstract_model_static.h"
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node.h"
 #include "core/components_ng/pattern/node_container/node_container_pattern.h"
@@ -351,8 +352,8 @@ Ark_Boolean IsVisibleImpl(Ark_FrameNode peer)
         auto parentFrameNode = AceType::DynamicCast<FrameNode>(parentNode);
         if (parentFrameNode) {
             isVisible = isVisible && parentFrameNode->IsVisible();
-            parentNode = parentNode->GetParent();
         }
+        parentNode = parentNode->GetParent();
     }
     return isVisible;
 }
@@ -609,7 +610,7 @@ Ark_Number GetFirstChildIndexWithoutExpandImpl(Ark_FrameNode peer)
     CHECK_NULL_RETURN(child, errValue);
     auto* childNode = reinterpret_cast<FrameNode*>(child);
     auto childRef = Referenced::Claim<FrameNode>(childNode);
-    auto index = peer->node->GetFrameNodeIndex(childRef, true);
+    auto index = peerNode->GetFrameNodeIndex(childRef, true);
     return Converter::ArkValue<Ark_Number>(index);
 }
 Ark_Number GetLastChildIndexWithoutExpandImpl(Ark_FrameNode peer)
@@ -686,6 +687,105 @@ void RecycleImpl(Ark_FrameNode peer)
     CHECK_NULL_VOID(currentUINodeRef);
 
     currentUINodeRef->OnRecycle();
+}
+bool CheckAnimationPropertyLength(AnimationPropertyType type, size_t size, bool allowEmpty)
+{
+    if (allowEmpty && size == 0) {
+        return true;
+    }
+    const static std::unordered_map<AnimationPropertyType, std::pair<size_t, const char*>> requiredLength = {
+        { AnimationPropertyType::ROTATION, { ROTATION_PARAM_SIZE, "rotation" } },
+        { AnimationPropertyType::TRANSLATION, { TRANSLATION_PARAM_SIZE, "translation" } },
+        { AnimationPropertyType::SCALE, { SCALE_PARAM_SIZE, "scale" } },
+        { AnimationPropertyType::OPACITY, { OPACITY_PARAM_SIZE, "opacity" } },
+    };
+    auto iter = requiredLength.find(type);
+    if (iter == requiredLength.end()) {
+        return false;
+    }
+    if (iter->second.first == size) {
+        return true;
+    }
+    return false;
+}
+void AdjustPropertyValue(AnimationPropertyType type, std::vector<float>& startValue, std::vector<float>& endValue)
+{
+    if (type == AnimationPropertyType::OPACITY) {
+        for (auto& opacityItem : startValue) {
+            opacityItem = std::clamp(opacityItem, 0.0f, 1.0f);
+        }
+        for (auto& opacityItem : endValue) {
+            opacityItem = std::clamp(opacityItem, 0.0f, 1.0f);
+        }
+    }
+}
+Ark_Boolean CreateAnimationImpl(Ark_FrameNode peer, Ark_AnimationPropertyType property,
+    const Opt_Array_Float64* startValue, const Array_Float64* endValue, const Ark_AnimateParam* param)
+{
+    auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_RETURN(peerNode, false);
+    auto frameNode = AceType::DynamicCast<OHOS::Ace::NG::FrameNode>(peerNode);
+    CHECK_NULL_RETURN(frameNode, false);
+    auto currentId = Container::CurrentIdSafelyWithCheck();
+    ContainerScope scope(currentId);
+    AnimationPropertyType propertyType = static_cast<AnimationPropertyType>(property);
+    std::vector<float> startValueVec;
+    if (startValue != nullptr) {
+        if (startValue->tag != INTEROP_TAG_UNDEFINED) {
+            startValueVec = Converter::Convert<std::vector<float>>(startValue->value);
+            if (!CheckAnimationPropertyLength(propertyType, startValueVec.size(), true)) {
+                return false;
+            }
+        }
+    }
+    CHECK_NULL_RETURN(endValue, false);
+    std::vector<float> endValueVec = Converter::Convert<std::vector<float>>(*endValue);
+    if (!CheckAnimationPropertyLength(propertyType, endValueVec.size(), false)) {
+        return false;
+    }
+    AdjustPropertyValue(propertyType, startValueVec, endValueVec);
+    CHECK_NULL_RETURN(param, false);
+    auto option = Converter::Convert<AnimationOption>(*param);
+    auto onFinish = Converter::OptConvert<Callback_Void>(param->onFinish);
+    std::optional<int32_t> finishCount;
+    if (onFinish) {
+        finishCount = GetAnimationFinishCount();
+        std::function<void()> onFinishEvent = [arkCallback = CallbackHelper(*onFinish), currentId]() mutable {
+            ContainerScope scope(currentId);
+            arkCallback.InvokeSync();
+        };
+        option.SetOnFinishEvent(onFinishEvent);
+    }
+    return ViewAbstractModelStatic::CreatePropertyAnimation(
+        frameNode.GetRawPtr(), propertyType, startValueVec, endValueVec, option);
+}
+Ark_Boolean CancelAnimationsImpl(Ark_FrameNode peer, const Array_AnimationPropertyType* properties)
+{
+    auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_RETURN(peerNode, false);
+    auto frameNode = AceType::DynamicCast<OHOS::Ace::NG::FrameNode>(peerNode);
+    CHECK_NULL_RETURN(frameNode, false);
+    auto containerId = Container::CurrentIdSafelyWithCheck();
+    ContainerScope scope(containerId);
+    CHECK_NULL_RETURN(properties, false);
+    std::vector<AnimationPropertyType> propertyVec;
+    for (uint32_t i = 0; i < properties->length; ++i) {
+        auto propertyType = static_cast<AnimationPropertyType>(properties->array[i]);
+        if (std::find(propertyVec.begin(), propertyVec.end(), propertyType) == propertyVec.end()) {
+            propertyVec.emplace_back(propertyType);
+        }
+    }
+    return ViewAbstractModelStatic::CancelPropertyAnimations(frameNode.GetRawPtr(), propertyVec);
+}
+Array_Float64 GetNodePropertyValueImpl(Ark_FrameNode peer, Ark_AnimationPropertyType property)
+{
+    auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_RETURN(peerNode, {});
+    auto frameNode = AceType::DynamicCast<FrameNode>(peerNode);
+    CHECK_NULL_RETURN(frameNode, {});
+    auto resultVector = ViewAbstractModelStatic::GetRenderNodePropertyValue(
+        frameNode.GetRawPtr(), static_cast<AnimationPropertyType>(property));
+    return Converter::ArkValue<Array_Float64>(resultVector, Converter::FC);
 }
 Ark_NativePointer GetFrameNodePtrImpl(Ark_FrameNode node)
 {
@@ -781,7 +881,11 @@ Ark_UICommonEvent GetCommonEventImpl(Ark_FrameNode peer)
     ret->node = peer->node;
     return ret;
 }
-
+Ark_NativePointer GetRenderNodeImpl(Ark_NativePointer peer)
+{
+    auto nodePeer = reinterpret_cast<FrameNodePeer*>(peer);
+    return nodePeer->GetRenderNodePeer();
+}
 void ParseArrayFailNumber(std::vector<float>& indexes)
 {
     indexes.clear();
@@ -872,11 +976,15 @@ const GENERATED_ArkUIFrameNodeExtenderAccessor* GetFrameNodeExtenderAccessor()
         FrameNodeExtenderAccessor::GetFrameNodeByUniqueIdImpl,
         FrameNodeExtenderAccessor::ReuseImpl,
         FrameNodeExtenderAccessor::RecycleImpl,
+        FrameNodeExtenderAccessor::CreateAnimationImpl,
+        FrameNodeExtenderAccessor::CancelAnimationsImpl,
+        FrameNodeExtenderAccessor::GetNodePropertyValueImpl,
         FrameNodeExtenderAccessor::GetFrameNodePtrImpl,
         FrameNodeExtenderAccessor::CreateTypedFrameNodeImpl,
         FrameNodeExtenderAccessor::CreateByRawPtrImpl,
         FrameNodeExtenderAccessor::UnWrapRawPtrImpl,
         FrameNodeExtenderAccessor::GetCommonEventImpl,
+        FrameNodeExtenderAccessor::GetRenderNodeImpl,
         FrameNodeExtenderAccessor::ConvertPointImpl,
     };
     return &FrameNodeExtenderAccessorImpl;

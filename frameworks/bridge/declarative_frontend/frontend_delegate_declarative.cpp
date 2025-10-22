@@ -1124,8 +1124,26 @@ int32_t FrontendDelegateDeclarative::GetStackSize() const
     return static_cast<int32_t>(pageRouteStack_.size());
 }
 
+bool FrontendDelegateDeclarative::GetCurrentPageIndexForStaticIfNeeded(int32_t& index) const
+{
+    auto container = Container::CurrentSafely();
+    CHECK_NULL_RETURN(container, false);
+    auto frontend = container->GetFrontend();
+    CHECK_NULL_RETURN(frontend, false);
+    auto type = frontend->GetType();
+    if (type != FrontendType::ARK_TS) {
+        return false;
+    }
+    index = frontend->GetCurrentPageIndex();
+    return true;
+}
+
 int32_t FrontendDelegateDeclarative::GetCurrentPageIndex() const
 {
+    int32_t index = -1;
+    if (GetCurrentPageIndexForStaticIfNeeded(index)) {
+        return index;
+    }
     if (Container::IsCurrentUseNewPipeline()) {
         CHECK_NULL_RETURN(pageRouterManager_, 0);
         auto currentId = GetEffectiveContainerId();

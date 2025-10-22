@@ -990,9 +990,9 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     const int32_t pointerId = info.GetPassThrough() ? info.GetPointerId() % PASS_THROUGH_EVENT_ID : info.GetPointerId();
     DragDataCore dragData { { shadowInfo }, {}, udKey, extraInfoLimited, arkExtraInfoJson->ToString(),
         static_cast<int32_t>(info.GetSourceDevice()), recordsSize, pointerId, screenX, screenY,
-        info.GetTargetDisplayId(), windowId, true, false, dragSummaryInfo.summary, false,
+        info.GetTargetDisplayId(), windowId, true, false, dragSummaryInfo.summary, dragEvent->IsUseDataLoadParams(),
         dragSummaryInfo.detailedSummary, dragSummaryInfo.summaryFormat, dragSummaryInfo.version,
-        dragSummaryInfo.totalSize };
+        dragSummaryInfo.totalSize, dragSummaryInfo.tag };
     if (AceApplicationInfo::GetInstance().IsMouseTransformEnable() && (info.GetSourceTool() == SourceTool::MOUSE) &&
         (info.GetSourceDevice() == SourceType::TOUCH)) {
         dragData.sourceType = static_cast<int32_t>(SourceType::MOUSE);
@@ -1004,10 +1004,11 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         "Start drag, frameNode is %{public}s, pixelMap width %{public}d height %{public}d, "
         "scale is %{public}f, udkey %{public}s, recordsSize %{public}d, extraInfo length %{public}d, "
         "pointerId %{public}d, displayId %{public}d, windowId %{public}d, summary %{public}s, "
-        "eventId %{public}d, detailedSummary %{public}s.",
+        "eventId %{public}d, detailedSummary %{public}s, summaryTag %{public}s, isDragDelay %{public}d",
         frameNode->GetTag().c_str(), width, height, scale, DragDropFuncWrapper::GetAnonyString(udKey).c_str(),
-        recordsSize, static_cast<int32_t>(extraInfoLimited.length()), pointerId, info.GetTargetDisplayId(),
-        windowId, summarys.c_str(), info.GetPointerEventId(), detailedSummarys.c_str());
+        recordsSize, static_cast<int32_t>(extraInfoLimited.length()), pointerId, info.GetTargetDisplayId(), windowId,
+        summarys.c_str(), info.GetPointerEventId(), detailedSummarys.c_str(), dragSummaryInfo.tag.c_str(),
+        dragData.isDragDelay);
     dragDropManager->GetGatherPixelMap(dragData, scale, width, height);
     {
         ACE_SCOPED_TRACE("drag: call msdp start drag");

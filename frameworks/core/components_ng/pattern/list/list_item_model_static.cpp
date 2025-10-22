@@ -53,8 +53,13 @@ RefPtr<FrameNode> ListItemModelStatic::CreateFrameNode(int32_t nodeId, bool isCr
                 []() { return AceType::MakeRefPtr<ArcListItemPattern>(nullptr, V2::ListItemStyle::NONE); });
         }
     } else {
-        frameNode = FrameNode::GetOrCreateFrameNode(V2::LIST_ITEM_ETS_TAG, nodeId,
-            []() { return AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE); });
+        if (!isCreateArc) {
+            frameNode = FrameNode::GetOrCreateFrameNode(V2::LIST_ITEM_ETS_TAG, nodeId,
+                []() { return AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE); });
+        } else {
+            frameNode = FrameNode::GetOrCreateFrameNode(V2::ARC_LIST_ITEM_ETS_TAG, nodeId,
+                []() { return AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE); });
+        }
     }
     return frameNode;
 }
@@ -158,6 +163,16 @@ void ListItemModelStatic::SetSwiperAction(FrameNode* frameNode, std::function<vo
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, EdgeEffect, edgeEffect.value(), frameNode);
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, EdgeEffect, frameNode);
+    }
+}
+
+void ListItemModelStatic::SetAutoScale(FrameNode* frameNode, const std::optional<bool>& autoScale)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (autoScale.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ArcListItemLayoutProperty, AutoScale, autoScale.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(ArcListItemLayoutProperty, AutoScale, frameNode);
     }
 }
 } // namespace OHOS::Ace::NG

@@ -28,6 +28,23 @@ constexpr Dimension DEFAULT_DRAG_REGION_HALF = 10.0_vp;
 constexpr double HALF_SPLIT_HEIGHT = 2.0;
 } // namespace
 
+bool LinearSplitLayoutAlgorithm::IsDynamicComponentEnv()
+{
+    auto container = Container::Current();
+    return container && container->IsDynamicRender() &&
+        container->GetUIContentType() == UIContentType::DYNAMIC_COMPONENT;
+}
+
+bool LinearSplitLayoutAlgorithm::IsRootSizeUnValid(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_RETURN(layoutWrapper, false);
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, false);
+    auto context = host->GetContext();
+    CHECK_NULL_RETURN(context, false);
+    return NearZero(context->GetCurrentRootWidth()) && NearZero(context->GetCurrentRootHeight());
+}
+
 void LinearSplitLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
@@ -259,6 +276,10 @@ void LinearSplitLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         LayoutBeforeAPI10(layoutWrapper);
         return;
     }
+    std::list<RefPtr<LayoutWrapper>> children = layoutWrapper->GetAllChildrenWithBuild();
+    if (!children.empty() && IsRootSizeUnValid(layoutWrapper) && IsDynamicComponentEnv()) {
+        return;
+    }
     const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     auto padding = layoutProperty->CreatePaddingAndBorder();
@@ -267,7 +288,7 @@ void LinearSplitLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     visibleChildCount_ = GetVisibleChildCount(layoutWrapper);
 
     childrenConstrains_ = std::vector<float>(visibleChildCount_, 0.0f);
-    for (const auto& item : layoutWrapper->GetAllChildrenWithBuild()) {
+    for (const auto& item : children) {
         const auto& childLayoutProperty = item->GetLayoutProperty();
         CHECK_NULL_CONTINUE(childLayoutProperty);
         if (childLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::GONE) {

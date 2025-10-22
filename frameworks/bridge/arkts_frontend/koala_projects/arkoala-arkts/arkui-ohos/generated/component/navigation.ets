@@ -3036,13 +3036,13 @@ export class NavigationTitleOptions_serializer {
         const paddingStartTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let paddingStartTmpBuf : LengthMetrics | undefined = undefined
         if ((paddingStartTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            paddingStartTmpBuf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+            paddingStartTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
         }
         const paddingStartTmpResult : LengthMetrics | undefined = paddingStartTmpBuf
         const paddingEndTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let paddingEndTmpBuf : LengthMetrics | undefined = undefined
         if ((paddingEndTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            paddingEndTmpBuf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+            paddingEndTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
         }
         const paddingEndTmpResult : LengthMetrics | undefined = paddingEndTmpBuf
         const mainTitleModifierTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()

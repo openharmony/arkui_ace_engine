@@ -3087,7 +3087,7 @@ HWTEST_F(WebPatternTestNg, InitSelectDataDetector_001, TestSize.Level1)
     webPattern->GetDataDetectorAdapter();
     webPattern->InitSelectDataDetector();
     TextDetectConfig config;
-    webPattern->UpdateEnableSelectDataDetector(true);
+    webPattern->UpdateEnableSelectedDataDetector(true);
     webPattern->UpdateSelectedDataDetectorConfig(config);
     ret = webPattern->GetDataDetectorEnable();
     ASSERT_EQ(ret, false);

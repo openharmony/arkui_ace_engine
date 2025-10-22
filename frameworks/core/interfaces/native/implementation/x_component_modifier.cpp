@@ -105,6 +105,7 @@ void SetOnLoadImpl(Ark_NativePointer node,
 #ifdef XCOMPONENT_SUPPORTED
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
+        XComponentModelNG::SetOnLoad(frameNode, nullptr);
         return;
     }
     auto onLoad =
@@ -123,6 +124,7 @@ void SetOnDestroyImpl(Ark_NativePointer node,
 #ifdef XCOMPONENT_SUPPORTED
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
+        XComponentModelNG::SetOnDestroy(frameNode, nullptr);
         return;
     }
     auto onDestroy =
@@ -150,6 +152,7 @@ void SetEnableSecureImpl(Ark_NativePointer node,
 #ifdef XCOMPONENT_SUPPORTED
     auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
+        XComponentModelNG::EnableSecure(frameNode, false);
         return;
     }
     XComponentModelNG::EnableSecure(frameNode, *convValue);

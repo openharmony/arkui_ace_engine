@@ -108,6 +108,37 @@ std::string GetErrorProperty(ani_env* aniEnv, ani_error aniError, const char* pr
     return propertyValue;
 }
 
+bool ParseRouterStateInfo(ani_env* env, ani_ref result, RouterStateInfo& state)
+{
+    ani_double index;
+    ani_status status;
+    ani_object stateObj = static_cast<ani_object>(result);
+    if ((status = env->Object_GetPropertyByName_Double(stateObj, "index", &index)) != ANI_OK) {
+        LOGE("AceRouter failed to get index of InnerRouterState, status:%{public}d", status);
+        return false;
+    }
+    ani_ref nameRef;
+    if ((status = env->Object_GetPropertyByName_Ref(stateObj, "name", &nameRef)) != ANI_OK) {
+        LOGE("AceRouter failed to get name of InnerRouterState, status:%{public}d", status);
+        return false;
+    }
+    ani_ref pathRef;
+    if ((status = env->Object_GetPropertyByName_Ref(stateObj, "path", &pathRef)) != ANI_OK) {
+        LOGE("AceRouter failed to get path of InnerRouterState, status:%{public}d", status);
+        return false;
+    }
+    ani_ref paramsRef;
+    if ((status = env->Object_GetPropertyByName_Ref(stateObj, "params", &paramsRef)) != ANI_OK) {
+        LOGE("AceRouter failed to get params of InnerRouterState, status:%{public}d", status);
+        return false;
+    }
+    state.index = (int32_t)index;
+    state.name = Ani::AniUtils::ANIStringToStdString(env, static_cast<ani_string>(nameRef));
+    state.path = Ani::AniUtils::ANIStringToStdString(env, static_cast<ani_string>(pathRef));
+    state.params = Ani::AniUtils::ANIStringToStdString(env, static_cast<ani_string>(paramsRef));
+    return true;
+}
+
 void RunArkoalaEventLoop(ani_env* env, ani_ref app)
 {
     ani_boolean errorExists;
@@ -182,7 +213,7 @@ ani_object LegacyLoadPage(ani_env* env)
             break;
         }
 
-        std::string entryPath = "entry/src/main/ets/pages/Index/ComExampleTrivialApplication";
+        std::string entryPath = "entry.src.main.ets.pages.Index.ComExampleTrivialApplication";
         ani_string entryClassStr;
         env->String_NewUTF8(entryPath.c_str(), entryPath.length(), &entryClassStr);
         ani_class entryClass = nullptr;
@@ -419,18 +450,35 @@ UIContentErrorCode ArktsFrontend::RunPage(const std::string& url, const std::str
 
     env->GlobalReference_Create(appLocal, &app_);
 
-    ani_method start;
-    if (env->Class_FindMethod(appClass, KOALA_APP_INFO.startMethodName, KOALA_APP_INFO.startMethodSig, &start) !=
-        ANI_OK) {
-        LOGE("find start method returned null");
-        return UIContentErrorCode::INVALID_URL;
+    if (taskExecutor_ == nullptr) {
+        LOGE("taskExecutor is nullptr");
+        return UIContentErrorCode::NULL_POINTER;
     }
+    taskExecutor_->PostTask([weak = WeakClaim(this)]() {
+        auto frontend = weak.Upgrade();
+        CHECK_NULL_VOID(frontend);
+        auto* env = Ani::AniUtils::GetAniEnv(frontend->GetVM());
+        CHECK_NULL_VOID(env);
+        ani_class appClass;
+        if (env->FindClass(KOALA_APP_INFO.className, &appClass) != ANI_OK) {
+            LOGE("Cannot load main class %{public}s", KOALA_APP_INFO.className);
+            return;
+        }
 
-    ani_long result;
-    if (env->Object_CallMethod_Long(static_cast<ani_object>(app_), start, &result, ANI_FALSE) != ANI_OK) {
-        LOGE("call start method returned null");
-        return UIContentErrorCode::INVALID_URL;
-    }
+        ani_method start;
+        if (env->Class_FindMethod(appClass, KOALA_APP_INFO.startMethodName, KOALA_APP_INFO.startMethodSig, &start) !=
+            ANI_OK) {
+            LOGE("find start method returned null");
+            return;
+        }
+
+        ani_long result;
+        if (env->Object_CallMethod_Long(static_cast<ani_object>(frontend->GetApp()), start, &result, ANI_FALSE) !=
+            ANI_OK) {
+            LOGE("call start method returned null");
+            return;
+        }
+        }, TaskExecutor::TaskType::JS, "ArkUIRunPageUrl");
 
     // TODO: init event loop
     CHECK_NULL_RETURN(pipeline_, UIContentErrorCode::NULL_POINTER);
@@ -509,6 +557,11 @@ void* ArktsFrontend::GetEnv()
     return Ani::AniUtils::GetAniEnv(vm_);
 }
 
+ani_ref ArktsFrontend::GetApp()
+{
+    return app_;
+}
+
 ani_vm *ArktsFrontend::GetVM()
 {
     return vm_;
@@ -560,6 +613,12 @@ void* ArktsFrontend::PushDynamicExtender(const std::string& url, const std::stri
     CHECK_NULL_RETURN(pageRouterManager_, nullptr);
     auto pageNode = AceType::WeakClaim(static_cast<NG::FrameNode*>(pageNodeRawPtr)).Upgrade();
     CHECK_NULL_RETURN(pageNode, nullptr);
+    if (pageNode->RefCount() != 2) {
+        LOGE("AceRouter pageNode for PushDynamicExtender has wrong RefCount: %{public}d", pageNode->RefCount());
+    }
+    if (pageNode->RefCount() > 1) {
+        pageNode->DecRefCount();
+    }
     NG::RouterPageInfo routerPageInfo;
     routerPageInfo.url = url;
     routerPageInfo.params = params;
@@ -576,6 +635,12 @@ void* ArktsFrontend::ReplaceDynamicExtender(const std::string& url, const std::s
     CHECK_NULL_RETURN(pageRouterManager_, nullptr);
     auto pageNode = AceType::WeakClaim(static_cast<NG::FrameNode*>(pageNodeRawPtr)).Upgrade();
     CHECK_NULL_RETURN(pageNode, nullptr);
+    if (pageNode->RefCount() != 2) {
+        LOGE("AceRouter pageNode for ReplaceDynamicExtender has wrong RefCount: %{public}d", pageNode->RefCount());
+    }
+    if (pageNode->RefCount() > 1) {
+        pageNode->DecRefCount();
+    }
     NG::RouterPageInfo routerPageInfo;
     routerPageInfo.url = url;
     routerPageInfo.params = params;
@@ -617,7 +682,7 @@ void ArktsFrontend::PushFromDynamicExtender(const std::string& url, const std::s
         LOGE("AceRouter failed to create params string, status:%{public}d", status);
         return;
     }
-    auto instanceId = Container::CurrentIdSafelyWithCheck();
+    auto instanceId = Container::CurrentIdSafely();
     if ((status = env->Class_CallStaticMethod_Void(routerUtilCls, pushFromDynamicMethod,
         static_cast<ani_int>(instanceId), urlStr, paramStr, (ani_object)linkerRef_)) != ANI_OK) {
         LOGE("AceRouter failed to call pushFromDynamic, status:%{public}d", status);
@@ -657,7 +722,7 @@ void ArktsFrontend::ReplaceFromDynamicExtender(const std::string& url, const std
         LOGE("AceRouter failed to create params string, status:%{public}d", status);
         return;
     }
-    auto instanceId = Container::CurrentIdSafelyWithCheck();
+    auto instanceId = Container::CurrentIdSafely();
     if ((status = env->Class_CallStaticMethod_Void(routerUtilCls, replaceFromDynamicMethod,
         static_cast<ani_int>(instanceId), urlStr, paramStr, (ani_object)linkerRef_)) != ANI_OK) {
         LOGE("AceRouter failed to call replaceFromDynamic, status:%{public}d", status);
@@ -696,7 +761,7 @@ void ArktsFrontend::BackFromDynamicExtender(const std::string& url, const std::s
         LOGE("AceRouter failed to create params string, status:%{public}d", status);
         return;
     }
-    auto instanceId = Container::CurrentIdSafelyWithCheck();
+    auto instanceId = Container::CurrentIdSafely();
     if ((status = env->Class_CallStaticMethod_Void(routerUtilCls, backFromDynamicMethod,
         static_cast<ani_int>(instanceId), urlStr, paramStr, (ani_object)linkerRef_)) != ANI_OK) {
         LOGE("AceRouter failed to call backFromDynamic, status:%{public}d", status);
@@ -725,7 +790,7 @@ void ArktsFrontend::ClearFromDynamicExtender()
         LOGE("AceRouter Cannot find method: %{public}s, status:%{public}d", methodName, status);
         return;
     }
-    auto instanceId = Container::CurrentIdSafelyWithCheck();
+    auto instanceId = Container::CurrentIdSafely();
     if ((status = env->Class_CallStaticMethod_Void(routerUtilCls, clearFromDynamicMethod,
         static_cast<ani_int>(instanceId), (ani_object)linkerRef_)) != ANI_OK) {
         LOGE("AceRouter failed to call clearFromDynamic, status:%{public}d", status);
@@ -754,7 +819,7 @@ int32_t ArktsFrontend::GetLengthFromDynamicExtender()
         return 0;
     }
     ani_ref resultStr;
-    auto instanceId = Container::CurrentIdSafelyWithCheck();
+    auto instanceId = Container::CurrentIdSafely();
     if ((status = env->Class_CallStaticMethod_Ref(routerUtilCls, getLengthFromDynamicMethod,
         &resultStr, static_cast<ani_int>(instanceId))) != ANI_OK) {
         LOGE("AceRouter failed to call getLengthFromDynamic, status:%{public}d", status);
@@ -763,6 +828,176 @@ int32_t ArktsFrontend::GetLengthFromDynamicExtender()
     auto lengthStr = Ani::AniUtils::ANIStringToStdString(env, reinterpret_cast<ani_string>(resultStr));
     int32_t length = std::atoi(lengthStr.c_str());
     return length;
+}
+
+std::string ArktsFrontend::GetParamsFromDynamicExtender()
+{
+    CHECK_NULL_RETURN(vm_, "");
+    auto* env = Ani::AniUtils::GetAniEnv(vm_);
+    CHECK_NULL_RETURN(env, "");
+    ani_status status;
+    ani_class routerUtilCls;
+    const char* clsMangling = "arkui.base.Router.RouterUtil";
+    if ((status = env->FindClass(clsMangling, &routerUtilCls)) != ANI_OK) {
+        LOGE("AceRouter Cannot find class: %{public}s, status:%{public}d", clsMangling, status);
+        return "";
+    }
+    ani_static_method getParamsFromDynamicMethod;
+    const char* methodName = "getParamsFromDynamic";
+    const char* methodMangling = "i:C{std.core.String}";
+    if ((status = env->Class_FindStaticMethod(
+        routerUtilCls, methodName, methodMangling, &getParamsFromDynamicMethod)) != ANI_OK) {
+        LOGE("AceRouter Cannot find method: %{public}s, status:%{public}d", methodName, status);
+        return "";
+    }
+    ani_ref resultStr;
+    auto instanceId = Container::CurrentIdSafely();
+    if ((status = env->Class_CallStaticMethod_Ref(routerUtilCls, getParamsFromDynamicMethod,
+        &resultStr, static_cast<ani_int>(instanceId))) != ANI_OK) {
+        LOGE("AceRouter failed to call %{public}s, status:%{public}d", methodName, status);
+        return "";
+    }
+    auto paramsStr = Ani::AniUtils::ANIStringToStdString(env, reinterpret_cast<ani_string>(resultStr));
+    return paramsStr;
+}
+
+bool ArktsFrontend::GetStateByUrlFromDynamicExtender(const std::string& url, std::vector<RouterStateInfo>& stateArray)
+{
+    CHECK_NULL_RETURN(vm_, false);
+    auto* env = Ani::AniUtils::GetAniEnv(vm_);
+    CHECK_NULL_RETURN(env, false);
+    ani_status status;
+    ani_class routerUtilCls;
+    const char* clsMangling = "arkui.base.Router.RouterUtil";
+    if ((status = env->FindClass(clsMangling, &routerUtilCls)) != ANI_OK) {
+        LOGE("AceRouter Cannot find class: %{public}s, status:%{public}d", clsMangling, status);
+        return false;
+    }
+    ani_static_method getStateByUrlFromDynamicMethod;
+    const char* methodName = "getStateByUrlFromDynamic";
+    const char* methodMangling = "iC{std.core.String}:C{escompat.Array}";
+    if ((status = env->Class_FindStaticMethod(
+        routerUtilCls, methodName, methodMangling, &getStateByUrlFromDynamicMethod)) != ANI_OK) {
+        LOGE("AceRouter Cannot find method: %{public}s, status:%{public}d", methodName, status);
+        return false;
+    }
+    ani_string urlStr;
+    if ((status = env->String_NewUTF8(url.c_str(), url.size(), &urlStr)) != ANI_OK) {
+        LOGE("AceRouter failed to create url string, status:%{public}d", status);
+        return false;
+    }
+    ani_ref resultArray;
+    auto instanceId = Container::CurrentIdSafely();
+    if ((status = env->Class_CallStaticMethod_Ref(routerUtilCls, getStateByUrlFromDynamicMethod,
+        &resultArray, static_cast<ani_int>(instanceId), urlStr)) != ANI_OK) {
+        LOGE("AceRouter failed to call %{public}s, status:%{public}d", methodName, status);
+        return false;
+    }
+    ani_size stateCount = 0;
+    if ((status = env->Array_GetLength(static_cast<ani_array>(resultArray), &stateCount)) != ANI_OK) {
+        LOGE("AceRouter failed to get Array length, status:%{public}d", status);
+        return false;
+    }
+    std::vector<RouterStateInfo> tempStates;
+    for (ani_size idx = 0; idx < stateCount; ++idx) {
+        ani_ref result;
+        if ((status = env->Array_Get(static_cast<ani_array>(resultArray), idx, &result)) != ANI_OK) {
+            LOGE("AceRouter failed to get Array item[%{public}d], status:%{public}d", (int32_t)idx, status);
+            return false;
+        }
+        RouterStateInfo state;
+        if (!ParseRouterStateInfo(env, result, state)) {
+            return false;
+        }
+        tempStates.push_back(state);
+    }
+    std::swap(tempStates, stateArray);
+    LOGE("AceRouter GetStateByUrlFromDynamicExtender 2");
+    return true;
+}
+
+bool ArktsFrontend::GetStateByIndexFromDynamicExtender(int32_t index, RouterStateInfo& state)
+{
+    CHECK_NULL_RETURN(vm_, false);
+    auto* env = Ani::AniUtils::GetAniEnv(vm_);
+    CHECK_NULL_RETURN(env, false);
+    ani_status status;
+    ani_class routerUtilCls;
+    const char* clsMangling = "arkui.base.Router.RouterUtil";
+    if ((status = env->FindClass(clsMangling, &routerUtilCls)) != ANI_OK) {
+        LOGE("AceRouter Cannot find class: %{public}s, status:%{public}d", clsMangling, status);
+        return false;
+    }
+    ani_static_method getStateByIndexFromDynamicMethod;
+    const char* methodName = "getStateByIndexFromDynamic";
+    const char* methodMangling = "ii:C{arkui.base.Router.InnerRouterState}";
+    if ((status = env->Class_FindStaticMethod(
+        routerUtilCls, methodName, methodMangling, &getStateByIndexFromDynamicMethod)) != ANI_OK) {
+        LOGE("AceRouter Cannot find method: %{public}s, status:%{public}d", methodName, status);
+        return false;
+    }
+    ani_ref result;
+    auto instanceId = Container::CurrentIdSafely();
+    if ((status = env->Class_CallStaticMethod_Ref(routerUtilCls, getStateByIndexFromDynamicMethod,
+        &result, static_cast<ani_int>(instanceId), static_cast<ani_int>(index))) != ANI_OK) {
+        LOGE("AceRouter failed to call %{public}s, status:%{public}d", methodName, status);
+        return false;
+    }
+    ani_boolean isUndefined;
+    if ((status = env->Reference_IsUndefined(result, &isUndefined)) != ANI_OK) {
+        LOGE("AceRouter failed to call Reference_IsUndefined, status:%{public}d", status);
+        return false;
+    }
+    if (isUndefined) {
+        LOGE("AceRouter GetStateByIndexFromDynamicExtender 1");
+        return false;
+    }
+    LOGE("AceRouter GetStateByIndexFromDynamicExtender 2");
+    return ParseRouterStateInfo(env, result, state);
+}
+
+bool ArktsFrontend::GetStateFromDynamicExtender(RouterStateInfo& state)
+{
+    CHECK_NULL_RETURN(vm_, false);
+    auto* env = Ani::AniUtils::GetAniEnv(vm_);
+    CHECK_NULL_RETURN(env, false);
+    ani_status status;
+    ani_class routerUtilCls;
+    const char* clsMangling = "arkui.base.Router.RouterUtil";
+    if ((status = env->FindClass(clsMangling, &routerUtilCls)) != ANI_OK) {
+        LOGE("AceRouter Cannot find class: %{public}s, status:%{public}d", clsMangling, status);
+        return false;
+    }
+    ani_static_method getStateFromDynamicMethod;
+    const char* methodName = "getStateFromDynamic";
+    const char* methodMangling = "i:C{arkui.base.Router.InnerRouterState}";
+    if ((status = env->Class_FindStaticMethod(
+        routerUtilCls, methodName, methodMangling, &getStateFromDynamicMethod)) != ANI_OK) {
+        LOGE("AceRouter Cannot find method: %{public}s, status:%{public}d", methodName, status);
+        return false;
+    }
+    ani_ref result;
+    auto instanceId = Container::CurrentIdSafely();
+    if ((status = env->Class_CallStaticMethod_Ref(routerUtilCls, getStateFromDynamicMethod,
+        &result, static_cast<ani_int>(instanceId))) != ANI_OK) {
+        LOGE("AceRouter failed to call %{public}s, status:%{public}d", methodName, status);
+        return false;
+    }
+    ani_boolean isUndefined;
+    if ((status = env->Reference_IsUndefined(result, &isUndefined)) != ANI_OK) {
+        LOGE("AceRouter failed to call Reference_IsUndefined, status:%{public}d", status);
+        return false;
+    }
+    if (isUndefined) {
+        return false;
+    }
+    return ParseRouterStateInfo(env, result, state);
+}
+
+int32_t ArktsFrontend::GetCurrentPageIndex() const
+{
+    CHECK_NULL_RETURN(pageRouterManager_, -1);
+    return pageRouterManager_->GetCurrentPageIndex();
 }
 
 void* ArktsFrontend::ReplaceExtender(const std::string& url, const std::string& params, bool recoverable,

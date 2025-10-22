@@ -106,6 +106,7 @@ private:
     int32_t totalDuration_ = -1;
     uint32_t frameCount_ = 0;
     int32_t iterations_ = 1;
+    bool isSetDurations_ = false;
     std::vector<int32_t> userDurations_;
     std::vector<int32_t> selfDurations_;
     MediaData rawData_;

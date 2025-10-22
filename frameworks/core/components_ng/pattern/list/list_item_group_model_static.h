@@ -29,7 +29,10 @@ namespace OHOS::Ace::NG {
 
 class ACE_EXPORT ListItemGroupModelStatic {
 public:
-    static void SetDivider(FrameNode* frameNode, const std::optional<V2::ItemDivider>& divider);
+    static void SetDivider(
+        FrameNode* frameNode, const std::optional<V2::ItemDivider>& divider, bool needGetThemeColor = false);
+    static void SetDividerMultiThread(
+        FrameNode* frameNode, const std::optional<V2::ItemDivider>& divider, bool needGetThemeColor = false);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetHeader(FrameNode* frameNode, std::function<RefPtr<UINode>()>&& builder);
     static void SetFooter(FrameNode* frameNode, std::function<RefPtr<UINode>()>&& builder);

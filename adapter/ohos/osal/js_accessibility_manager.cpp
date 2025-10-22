@@ -5571,7 +5571,7 @@ void JsAccessibilityManager::WebInteractionOperation::DetectElementInfoFocusable
     const AccessibilityElementInfo &info, const int64_t parentId, const int32_t requestId,
     AccessibilityElementOperatorCallback &callback)
 {
-    callback.SetDetectElementInfoFocusableThroughAncestorResult(true, requestId);
+    callback.SetDetectElementInfoFocusableThroughAncestorResult(true, requestId, info);
 }
 
 void JsAccessibilityManager::WebInteractionOperation::GetCursorPosition(
@@ -7748,12 +7748,12 @@ void JsAccessibilityManager::JsInteractionOperation::DetectElementInfoFocusableT
     AccessibilitySystemAbilityClient::GetTreeIdAndElementIdBySplitElementId(parentId, splitElementId, splitTreeId);
     auto jsAccessibilityManager = GetHandler().Upgrade();
     if (!jsAccessibilityManager) {
-        callback.SetDetectElementInfoFocusableThroughAncestorResult(true, requestId);
+        callback.SetDetectElementInfoFocusableThroughAncestorResult(true, requestId, info);
         return;
     }
     auto context = jsAccessibilityManager->GetPipelineContext().Upgrade();
     if (!context || !context->GetTaskExecutor()) {
-        callback.SetDetectElementInfoFocusableThroughAncestorResult(true, requestId);
+        callback.SetDetectElementInfoFocusableThroughAncestorResult(true, requestId, info);
         return;
     }
     auto windowId = windowId_;
@@ -7761,7 +7761,7 @@ void JsAccessibilityManager::JsInteractionOperation::DetectElementInfoFocusableT
         [weak = GetHandler(), info, splitElementId, requestId, &callback, windowId] {
             auto jsAccessibilityManager = weak.Upgrade();
             if (!jsAccessibilityManager) {
-                callback.SetDetectElementInfoFocusableThroughAncestorResult(true, requestId);
+                callback.SetDetectElementInfoFocusableThroughAncestorResult(true, requestId, info);
                 return;
             }
             ACE_SCOPED_TRACE("DetectElementInfoFocusableThroughAncestor");

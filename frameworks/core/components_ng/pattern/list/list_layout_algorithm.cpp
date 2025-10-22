@@ -2263,6 +2263,9 @@ int32_t ListLayoutAlgorithm::LayoutCachedForward(LayoutWrapper* layoutWrapper,
                 layoutWrapper, wrapper, cacheCount - cachedCount, -1, curIndex, true);
             if (res.forwardCachedCount < res.forwardCacheMax && res.forwardCachedCount < cacheCount - cachedCount) {
                 predictList.emplace_back(PredictLayoutItem { curIndex, cachedCount, -1, forceCache });
+                ExpandWithSafeAreaPadding(wrapper);
+                wrapper->SetActive(show);
+                SyncGeometry(wrapper, isDirty);
                 return res.forwardCachedCount > 0 ? curIndex : curIndex - 1;
             }
             cachedCount += std::max(res.forwardCacheMax, 1);
@@ -2314,6 +2317,9 @@ int32_t ListLayoutAlgorithm::LayoutCachedBackward(LayoutWrapper* layoutWrapper,
                 layoutWrapper, wrapper, -1, cacheCount - cachedCount, curIndex, true);
             if (res.backwardCachedCount < res.backwardCacheMax && res.backwardCachedCount < cacheCount - cachedCount) {
                 predictList.emplace_back(PredictLayoutItem { curIndex, -1, cachedCount, forceCache });
+                ExpandWithSafeAreaPadding(wrapper);
+                wrapper->SetActive(show);
+                SyncGeometry(wrapper, isDirty);
                 return res.backwardCachedCount > 0 ? curIndex : curIndex + 1;
             }
             cachedCount += std::max(res.backwardCacheMax, 1);

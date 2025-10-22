@@ -113,6 +113,7 @@ HWTEST_F(WebModelStaticTest, CreateFrameNode001, TestSize.Level1)
     WebModelStatic::SetPopup(AccessibilityManager::RawPtr(frameNode), true, 0);
     keyBoardMode = BlurOnKeyboardHideMode::BLUR;
     WebModelStatic::SetBlurOnKeyboardHideMode(AccessibilityManager::RawPtr(frameNode), keyBoardMode);
+
     auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
     ASSERT_NE(webPatternStatic, nullptr);
     auto webSrc = webPatternStatic->GetWebSrc();
@@ -1949,6 +1950,7 @@ HWTEST_F(WebModelStaticTest, SetSelectionMenuOptions001, TestSize.Level1)
     WebModelStatic::SetSelectionMenuOptions(AccessibilityManager::RawPtr(frameNode), webMenuOption);
     auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
     ASSERT_NE(webPatternStatic, nullptr);
+
     EXPECT_FALSE(webPatternStatic->menuOptionParam_.empty());
     EXPECT_EQ(webPatternStatic->menuOptionParam_.size(), 1);
     EXPECT_EQ(webPatternStatic->menuOptionParam_[0].id, "test");

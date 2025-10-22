@@ -220,13 +220,13 @@ const Consumer = (aliasName?: string) => {
         return undefined;
       },
       set(val) {
-        this.defaultConsumer = providerName;
-        this.defaultVal = val;
         let providerInfo = ProviderConsumerUtilV2.findProvider(this, providerName);
         if (providerInfo && providerInfo[0] && providerInfo[1]) {
           ProviderConsumerUtilV2.connectConsumer2Provider(this, varName, providerInfo[0], providerInfo[1]);
+          this.connectConsumerV2__.set(varName, providerName);
         } else {
           ProviderConsumerUtilV2.defineConsumerWithoutProvider(this, varName, val);
+          this.defaultConsumerV2__.set(varName, providerName);
         }
       },
       enumerable: true,

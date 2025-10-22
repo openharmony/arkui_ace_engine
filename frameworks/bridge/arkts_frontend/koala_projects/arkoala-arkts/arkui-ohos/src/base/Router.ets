@@ -28,10 +28,10 @@ import {
     memoEntry,
     scheduleCallback,
     GlobalStateManager,
-    StateContext,
     ComputableState,
     IncrementalNode
 } from "@koalaui/runtime"
+import { StateContext } from 'arkui.incremental.runtime.state';
 import { KPointer, runtimeType, RuntimeType } from "@koalaui/interop"
 import { UserViewBuilder, UserView } from "../UserView"
 import { EntryPoint, NavInterface } from '../component/customComponent';
@@ -172,6 +172,15 @@ export class RouterPage {
 export type PageTransition = () => void
 export type PageClassNameResolver = (page:string) => string | undefined
 
+class NamedRouterInfo {
+    entryPoint: EntryPoint;
+    pagePath: string;
+    constructor(pagePath: string, entryPoint: EntryPoint) {
+        this.pagePath = pagePath;
+        this.entryPoint = entryPoint;
+    }
+}
+
 export interface Router {
     push(options: router.RouterOptions): void
 
@@ -195,7 +204,7 @@ export interface Router {
 
     getState(): router.RouterState
 
-    getStateByIndex(index: int): router.RouterState | undefined
+    getStateByIndex(index: number): router.RouterState | undefined
 
     getStateByUrl(url: string): Array<router.RouterState>
 
@@ -239,7 +248,7 @@ class RouterImpl implements Router {
     // list of container node to contain jsViewNode
     private rootState: Array<ComputableState<IncrementalNode>> = new Array<ComputableState<IncrementalNode>>()
     // map of namedRouter
-    private namedRouter: Map<string, EntryPoint> = new Map<string, EntryPoint>
+    private namedRouter: Map<string, NamedRouterInfo> = new Map<string, NamedRouterInfo>
     private runtimeLinker: RuntimeLinker | undefined = undefined;
 
     constructor(moduleName: string) {
@@ -285,7 +294,7 @@ class RouterImpl implements Router {
             } else {
                 runtimeLinker = getNearestNonBootRuntimeLinker();
             }
-            let entryClass = runtimeLinker?.loadClass(url, false);
+            let entryClass = runtimeLinker?.loadClass(url.replaceChar(c'/', c'.'), false);
             if (!entryClass) {
                 InteropNativeModule._NativeLog("AceRouter: load entryClass failed")
             } else {
@@ -321,7 +330,8 @@ class RouterImpl implements Router {
     }
 
     registerNamedRouter(routerName: string, instance: EntryPoint, param: NavInterface): void {
-        this.namedRouter.set(routerName, instance)
+        let info: NamedRouterInfo = new NamedRouterInfo(param.pagePath, instance);
+        this.namedRouter.set(routerName, info);
     }
 
     UpdateVisiblePagePeerNode(node: PeerNode, index: int = -1): void {
@@ -338,6 +348,7 @@ class RouterImpl implements Router {
     pushDynamic(options: router.RouterOptions): void {
         let pageNode = RouterExtender.createDynamic(options.url, options.recoverable);
         if (!pageNode) {
+            InteropNativeModule._NativeLog(`AceRouter: failed to create dynamicPage in pushDynamic`);
             return;
         }
         let entryObject = new MockEntryPoint();
@@ -350,14 +361,16 @@ class RouterImpl implements Router {
             manager.frozen = frozen
         })
         this.rootState.push(stateNode)
-        let pagePushTransitionCallback = () => {
-            this.peerNodeList.pop();
-            this.visiblePages.pop();
-            let node = this.rootState.pop();
-            node?.dispose();
-            this.showingPageIndex = this.showingPageIndex - 1;
+        let pagePushTransitionCallback = (pageNode: KPointer) => {
+            let index = this.peerNodeList.indexOf(pageNode);
+            if (index !== -1) {
+                this.peerNodeList.splice(index, 1);
+                this.visiblePages.splice(index, 1);
+                this.rootState.splice(index, 1);
+                this.showingPageIndex = this.showingPageIndex - 1;
+            }
         };
-        let newPage = new VisiblePage(entryObject.entry, options.url, this.getPathInfo(options.url), options.params);
+        let newPage = new VisiblePage(entryObject.entry, this.getFileInfo(options.url), this.getPathInfo(options.url), options.params);
         this.visiblePages.splice(this.showingPageIndex + 1, 0, newPage);
         this.showingPageIndex += 1;
         pageNode = RouterExtender.pushDynamic(pageNode, options.url, options.recoverable, pagePushTransitionCallback);
@@ -419,6 +432,7 @@ class RouterImpl implements Router {
             RouterExtender.push(jsViewNodePtr, options.url, options.recoverable, pagePushTransitionCallback);
         } else {
             // maybe new page is arkts1.1 page
+            InteropNativeModule._NativeLog("AceRouter: try to push with DynamicPage");
             this.pushDynamic(options);
         }
     }
@@ -445,7 +459,8 @@ class RouterImpl implements Router {
             return RouterExtender.pushNamedRoute(jsViewNodePtr!, pageOptions, pagePushTransitionCallback);
         }
         let className = options.name;
-        let entryObject = this.namedRouter.get(className);
+        let entryInfo = this.namedRouter.get(className);
+        let entryObject = entryInfo?.entryPoint;
         if (entryObject) {
             let manager = GlobalStateManager.instance
             let stateNode = manager.updatableNode<IncrementalNode>(new IncrementalNode(), (context: StateContext) => {
@@ -486,7 +501,7 @@ class RouterImpl implements Router {
                     this.showingPageIndex = this.showingPageIndex - 1;
                 }
             };
-            let newPage = new VisiblePage(entryObject.entry, this.getFileInfo(options.name), this.getPathInfo(options.name), options.params);
+            let newPage = new VisiblePage(entryObject.entry, this.getFileInfo(entryInfo!.pagePath), this.getPathInfo(entryInfo!.pagePath), options.params);
             this.visiblePages.splice(this.showingPageIndex + 1, 0, newPage);
             this.showingPageIndex += 1;
             let pageOptions: PageRouterOptions = { options: {
@@ -525,7 +540,8 @@ class RouterImpl implements Router {
             return;
         }
         let className = options.name;
-        let entryObject = this.namedRouter.get(className);
+        let entryInfo = this.namedRouter.get(className);
+        let entryObject = entryInfo?.entryPoint;
         if (entryObject) {
             let manager = GlobalStateManager.instance
             let stateNode = manager.updatableNode<IncrementalNode>(new IncrementalNode(), (context: StateContext) => {
@@ -564,7 +580,7 @@ class RouterImpl implements Router {
                     this.showingPageIndex = this.showingPageIndex - 1;
                 }
             };
-            let newPage = new VisiblePage(entryObject.entry, this.getFileInfo(options.name), this.getPathInfo(options.name), options.params);
+            let newPage = new VisiblePage(entryObject.entry, this.getFileInfo(entryInfo!.pagePath), this.getPathInfo(entryInfo!.pagePath), options.params);
             this.visiblePages.splice(this.showingPageIndex + 1, 0, newPage);
             this.showingPageIndex += 1;
             let pageOptions: PageRouterOptions = { options: {
@@ -580,6 +596,7 @@ class RouterImpl implements Router {
     replaceDynamic(options: router.RouterOptions): void {
         let pageNode = RouterExtender.createDynamic(options.url, options.recoverable);
         if (!pageNode) {
+            InteropNativeModule._NativeLog(`AceRouter: failed to create dynamicPage in replaceDynamic`);
             return;
         }
         let entryObject = new MockEntryPoint();
@@ -604,7 +621,7 @@ class RouterImpl implements Router {
                 this.showingPageIndex = this.showingPageIndex - 1;
             }
         };
-        let newPage = new VisiblePage(entryObject.entry, options.url, this.getPathInfo(options.url), options.params)
+        let newPage = new VisiblePage(entryObject.entry, this.getFileInfo(options.url), this.getPathInfo(options.url), options.params);
         this.visiblePages.push(newPage)
         this.showingPageIndex += 1
         RouterExtender.replaceDynamic(pageNode, options.url, options.recoverable, pageEnterTransitionCallback)
@@ -626,7 +643,6 @@ class RouterImpl implements Router {
                 })
                 manager.frozen = frozen
             })
-            
             let peerNode: PeerNode | undefined = undefined;
             try {
                 const incNode = stateNode.value;
@@ -635,6 +651,7 @@ class RouterImpl implements Router {
                 console.log("AceRouter: create page failed, name: " + e.name + " message: " + e.message);
                 console.log(e.stack);
             }
+
             if (peerNode === undefined) {
                 InteropNativeModule._NativeLog("AceRouter:create jsView failed");
                 return;
@@ -659,6 +676,7 @@ class RouterImpl implements Router {
             RouterExtender.replace(jsViewNodePtr, options.url, options.recoverable, pageEnterTransitionCallback)
         } else {
             // maybe new page is arkts1.1 page
+            InteropNativeModule._NativeLog("AceRouter: try to replace with DynamicPage");
             this.replaceDynamic(options);
         }
     }
@@ -685,7 +703,8 @@ class RouterImpl implements Router {
             return RouterExtender.replaceNamedRoute(jsViewNodePtr!, pageOptions, pagePushTransitionCallback);
         }
         let className = options.name;
-        let entryObject = this.namedRouter.get(className);
+        let entryInfo = this.namedRouter.get(className);
+        let entryObject = entryInfo?.entryPoint;
         if (entryObject) {
             let manager = GlobalStateManager.instance
             let stateNode = manager.updatableNode<IncrementalNode>(new IncrementalNode(), (context: StateContext) => {
@@ -727,7 +746,7 @@ class RouterImpl implements Router {
                     this.showingPageIndex = this.showingPageIndex - 1;
                 }
             };
-            let newPage = new VisiblePage(entryObject.entry, this.getFileInfo(options.name), this.getPathInfo(options.name), options.params);
+            let newPage = new VisiblePage(entryObject.entry, this.getFileInfo(entryInfo!.pagePath), this.getPathInfo(entryInfo!.pagePath), options.params);
             this.visiblePages.push(newPage)
             this.showingPageIndex += 1
             let pageOptions: PageRouterOptions = { options: {
@@ -769,7 +788,8 @@ class RouterImpl implements Router {
             return;
         }
         let className = options.name;
-        let entryObject = this.namedRouter.get(className);
+        let entryInfo = this.namedRouter.get(className);
+        let entryObject = entryInfo?.entryPoint;
         if (entryObject) {
             let manager = GlobalStateManager.instance
             let stateNode = manager.updatableNode<IncrementalNode>(new IncrementalNode(), (context: StateContext) => {
@@ -809,7 +829,7 @@ class RouterImpl implements Router {
                     this.showingPageIndex = this.showingPageIndex - 1;
                 }
             };
-            let newPage = new VisiblePage(entryObject.entry, this.getFileInfo(options.name), this.getPathInfo(options.name), options.params);
+            let newPage = new VisiblePage(entryObject.entry, this.getFileInfo(entryInfo!.pagePath), this.getPathInfo(entryInfo!.pagePath), options.params);
             this.visiblePages.push(newPage)
             this.showingPageIndex += 1
             let pageOptions: PageRouterOptions = { options: {
@@ -863,11 +883,11 @@ class RouterImpl implements Router {
         return state
     }
 
-    getStateByIndex(index: int): router.RouterState | undefined {
+    getStateByIndex(index: number): router.RouterState | undefined {
         if (index > this.showingPageIndex + 1 || index <= 0) {
             return undefined
         }
-        let page = this.visiblePages.at(index - 1);
+        let page = this.visiblePages.at(index.toInt() - 1);
         let state: router.RouterState = {
             index: index,
             name: page.url,
@@ -880,7 +900,7 @@ class RouterImpl implements Router {
     getStateByUrl(url: string): Array<router.RouterState> {
         let retVal: Array<router.RouterState> = new Array<router.RouterState>()
         this.visiblePages.value.forEach((element, index) => {
-            if (element.url === url) {
+            if ((element.path + element.url) === url) {
                 // routerState index is started from 1. 
                 let state: router.RouterState = {
                     index: index + 1,
@@ -949,8 +969,7 @@ class RouterImpl implements Router {
         let newPage = new VisiblePage(builder, this.getFileInfo(options.url), this.getPathInfo(options.url), options.params)
         this.entryPage = newPage;
         this.visiblePages.splice(0, 0, newPage)
-        let pageNode = RouterExtender.runPage(jsViewNodePtr, options.url, options.recoverable, pagePushTransitionCallback)
-        this.peerNodeList.splice(this.peerNodeList.length, 0, pageNode)
+        RouterExtender.runPage(jsViewNodePtr, options.url, options.recoverable, pagePushTransitionCallback);
     }
 
     showAlertBeforeBackPage(options: router.EnableAlertOptions): void {
@@ -972,12 +991,29 @@ export function Routed(
     router.setRouter(routerImp)
 }
 
+export interface InnerRouterState {
+    index: number;
+    name: string;
+    path: string;
+    params: string;
+}
+
 export class RouterUtil {
+    static stringifyParams(params: Object): string {
+        try {
+            return JSON.stringify(params);
+        } catch (e: Error) {
+            console.log(`AceRouter: RouterUtil.stringifyParams failed`);
+            console.log(e.stack);
+            return "";
+        }
+    }
     static pushFromDynamic(instanceId: int32, url: string, params: string, linker?: RuntimeLinker): void {
         let context: UIContext = UIContextUtil.getOrCreateUIContextById(instanceId);
         let router = context.getRouter();
         let routerImpl = router.getRouter() as RouterImpl;
         if (!routerImpl) {
+            console.log(`AceRouter: failed to getRouter in pushFromDynamic with instanceId: ${instanceId}`)
             return;
         }
         let objParams: Object | undefined = undefined;
@@ -1009,6 +1045,7 @@ export class RouterUtil {
         let router = context.getRouter();
         let routerImpl = router.getRouter() as RouterImpl;
         if (!routerImpl) {
+            console.log(`AceRouter: failed to getRouter in replaceFromDynamic with instanceId: ${instanceId}`)
             return;
         }
         let objParams: Object | undefined = undefined;
@@ -1040,6 +1077,7 @@ export class RouterUtil {
         let router = context.getRouter();
         let routerImpl = router.getRouter() as RouterImpl;
         if (!routerImpl) {
+            console.log(`AceRouter: failed to getRouter in backFromDynamic with instanceId: ${instanceId}`)
             return;
         }
         let objParams: Object | undefined = undefined;
@@ -1071,6 +1109,7 @@ export class RouterUtil {
         let router = context.getRouter();
         let routerImpl = router.getRouter() as RouterImpl;
         if (!routerImpl) {
+            console.log(`AceRouter: failed to getRouter in clearFromDynamic with instanceId: ${instanceId}`)
             return;
         }
         let backupLinker = routerImpl.GetRuntimeLinker();
@@ -1086,14 +1125,120 @@ export class RouterUtil {
     }
 
     static getLengthFromDynamic(instanceId: int32): string {
-        let context: UIContext = UIContextUtil.getOrCreateUIContextById(instanceId);
-        let router = context.getRouter();
-        let routerImpl = router.getRouter() as RouterImpl;
-        if (!routerImpl) {
+        try {
+            let context: UIContext = UIContextUtil.getOrCreateUIContextById(instanceId);
+            let router = context.getRouter();
+            let routerImpl = router.getRouter() as RouterImpl;
+            if (!routerImpl) {
+                console.log(`AceRouter: failed to getRouter in getLengthFromDynamic with instanceId: ${instanceId}`)
+                return "0";
+            }
+            let len = routerImpl.getLength();
+            return len;
+        } catch (e: Error) {
+            console.log(`AceRouter: getLength error, name: ${e.name} message: ${e.message}`);
+            console.log(e.stack);
             return "0";
         }
-        let len = routerImpl.getLength();
-        return len;
+    }
+
+    static getParamsFromDynamic(instanceId: int32): string {
+        try {
+            let context: UIContext = UIContextUtil.getOrCreateUIContextById(instanceId);
+            let router = context.getRouter();
+            let routerImpl = router.getRouter() as RouterImpl;
+            if (!routerImpl) {
+                console.log(`AceRouter: failed to getRouter in getParamsFromDynamic with instanceId: ${instanceId}`)
+                return "";
+            }
+            let params = routerImpl.getParams();
+            let paramsStr = RouterUtil.stringifyParams(params);
+            return paramsStr;
+        } catch (e: Error) {
+            console.log(`AceRouter: getParams error, name: ${e.name} message: ${e.message}`);
+            console.log(e.stack);
+            return "";
+        }
+    }
+
+    static getStateByUrlFromDynamic(instanceId: int32, url: string): Array<InnerRouterState> {
+        try {
+            let context: UIContext = UIContextUtil.getOrCreateUIContextById(instanceId);
+            let router = context.getRouter();
+            let routerImpl = router.getRouter() as RouterImpl;
+            if (!routerImpl) {
+                console.log(`AceRouter: failed to getRouter in getStateByUrlFromDynamic with instanceId: ${instanceId}`)
+                return new Array<InnerRouterState>();
+            }
+            let result = new Array<InnerRouterState>();
+            let states: Array<router.RouterState> = routerImpl.getStateByUrl(url);
+            console.log(`AceRouter: states.length: ${states.length}`);
+            for (let i = 0; i < states.length; ++i) {
+                let innerState: InnerRouterState = {
+                    index: states[i].index,
+                    name: states[i].name,
+                    path: states[i].path,
+                    params: RouterUtil.stringifyParams(states[i].params)
+                } as InnerRouterState;
+                result.push(innerState);
+            }
+            return result;
+        } catch (e: Error) {
+            console.log(`AceRouter: getStateByUrl error, name: ${e.name} message: ${e.message}`);
+            console.log(e.stack);
+            return new Array<InnerRouterState>();
+        }
+    }
+
+    static getStateByIndexFromDynamic(instanceId: int32, index: int): InnerRouterState | undefined {
+        try {
+            let context: UIContext = UIContextUtil.getOrCreateUIContextById(instanceId);
+            let router = context.getRouter();
+            let routerImpl = router.getRouter() as RouterImpl;
+            if (!routerImpl) {
+                console.log(`AceRouter: failed to getRouter in getStateByIndexFromDynamic with instanceId: ${instanceId}`)
+                return undefined;
+            }
+            let state: router.RouterState | undefined = routerImpl.getStateByIndex(index);
+            if (!state) {
+                return undefined;
+            }
+            let innerState: InnerRouterState = {
+                index: state!.index,
+                name: state!.name,
+                path: state!.path,
+                params: RouterUtil.stringifyParams(state!.params)
+            } as InnerRouterState;
+            return innerState;
+        } catch (e: Error) {
+            console.log(`AceRouter: getStateByIndex error, name: ${e.name} message: ${e.message}`);
+            console.log(e.stack);
+            return undefined;
+        }
+    }
+
+    static getStateFromDynamic(instanceId: int32): InnerRouterState | undefined {
+        try {
+            let context: UIContext = UIContextUtil.getOrCreateUIContextById(instanceId);
+            let router = context.getRouter();
+            let routerImpl = router.getRouter() as RouterImpl;
+            if (!routerImpl) {
+                console.log(`AceRouter: failed to getRouter in getStateFromDynamic with instanceId: ${instanceId}`)
+                return undefined;
+            }
+            let state: router.RouterState = routerImpl.getState();
+            let innerState: InnerRouterState = {
+                index: state.index,
+                name: state.name,
+                path: state.path,
+                params: RouterUtil.stringifyParams(state.params)
+            } as InnerRouterState;
+            return innerState;
+        } catch (e: Error) {
+            console.log(`AceRouter: getState error, name: ${e.name} message: ${e.message}`);
+            console.log(e.stack);
+            return undefined;
+        }
     }
 }
 

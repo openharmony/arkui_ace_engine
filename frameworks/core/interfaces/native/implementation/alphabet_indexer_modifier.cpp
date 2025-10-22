@@ -254,7 +254,7 @@ void SetOnRequestPopupDataImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        IndexerModelStatic::SetOnRequestPopupData(frameNode, nullptr);
+        IndexerModelStatic::SetOnRequestPopupData(frameNode, [](const int32_t) { return std::vector<std::string> {}; });
         return;
     }
     auto onEvent = [callback = CallbackHelper(*optValue)](const int32_t selected) -> std::vector<std::string> {

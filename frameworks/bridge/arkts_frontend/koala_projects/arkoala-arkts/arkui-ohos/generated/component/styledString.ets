@@ -21,8 +21,9 @@ import { TextBackgroundStyle_serializer, TextBackgroundStyle } from "./span"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
-import { extractors } from "#handwritten"
+import { LengthMetrics_serializer } from "./../Graphics"
 import { LengthMetrics, DrawContext } from "arkui.Graphics"
+import { extractors } from "#handwritten"
 import { Resource_serializer } from "./../framework/resource"
 import { TextDecorationType, Color, TextDecorationStyle, ImageSpanAlignment, ImageFit, TextAlign, TextOverflow, WordBreak, FontStyle, FontWeight } from "./enums"
 import { ResourceColor, SizeOptions_serializer, ColorFilter_serializer, SizeOptions, ColorFilter, ColorFilterInternal, ResourceStr, Padding, BorderRadiuses, Padding_serializer, BorderRadiuses_serializer } from "./units"
@@ -35,7 +36,6 @@ import { ShadowOptions_serializer, ShadowOptions, ClickEvent, ClickEvent_seriali
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { GestureEvent, GestureEvent_serializer } from "./gesture"
-import { LengthMetrics_serializer } from "./../Graphics"
 import { image_PixelMap_serializer } from "./../framework/ohos.multimedia.image"
 export class BackgroundColorStyleInternal {
     public static fromPtr(ptr: KPointer): BackgroundColorStyle {
@@ -1638,7 +1638,7 @@ export class TextStyleInterface_serializer {
         const fontSizeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let fontSizeTmpBuf : LengthMetrics | undefined = undefined
         if ((fontSizeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            fontSizeTmpBuf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+            fontSizeTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
         }
         const fontSizeTmpResult : LengthMetrics | undefined = fontSizeTmpBuf
         const fontWeightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -1728,7 +1728,7 @@ export class ImageAttachmentLayoutStyle_serializer {
             const marginTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let marginTmpBuf_ : LengthMetrics | Padding | undefined
             if (marginTmpBuf_UnionSelector == (0).toChar()) {
-                marginTmpBuf_ = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+                marginTmpBuf_ = LengthMetrics_serializer.read(valueDeserializer)
             } else if (marginTmpBuf_UnionSelector == (1).toChar()) {
                 marginTmpBuf_ = Padding_serializer.read(valueDeserializer)
             } else {
@@ -1743,7 +1743,7 @@ export class ImageAttachmentLayoutStyle_serializer {
             const paddingTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let paddingTmpBuf_ : LengthMetrics | Padding | undefined
             if (paddingTmpBuf_UnionSelector == (0).toChar()) {
-                paddingTmpBuf_ = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+                paddingTmpBuf_ = LengthMetrics_serializer.read(valueDeserializer)
             } else if (paddingTmpBuf_UnionSelector == (1).toChar()) {
                 paddingTmpBuf_ = Padding_serializer.read(valueDeserializer)
             } else {
@@ -1758,7 +1758,7 @@ export class ImageAttachmentLayoutStyle_serializer {
             const borderRadiusTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let borderRadiusTmpBuf_ : LengthMetrics | BorderRadiuses | undefined
             if (borderRadiusTmpBuf_UnionSelector == (0).toChar()) {
-                borderRadiusTmpBuf_ = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+                borderRadiusTmpBuf_ = LengthMetrics_serializer.read(valueDeserializer)
             } else if (borderRadiusTmpBuf_UnionSelector == (1).toChar()) {
                 borderRadiusTmpBuf_ = BorderRadiuses_serializer.read(valueDeserializer)
             } else {
@@ -1861,7 +1861,7 @@ export class ParagraphStyleInterface_serializer {
         const textIndentTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let textIndentTmpBuf : LengthMetrics | undefined = undefined
         if ((textIndentTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            textIndentTmpBuf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+            textIndentTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
         }
         const textIndentTmpResult : LengthMetrics | undefined = textIndentTmpBuf
         const maxLinesTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -1888,7 +1888,7 @@ export class ParagraphStyleInterface_serializer {
             const leadingMarginTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let leadingMarginTmpBuf_ : LengthMetrics | LeadingMarginPlaceholder | undefined
             if (leadingMarginTmpBuf_UnionSelector == (0).toChar()) {
-                leadingMarginTmpBuf_ = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+                leadingMarginTmpBuf_ = LengthMetrics_serializer.read(valueDeserializer)
             } else if (leadingMarginTmpBuf_UnionSelector == (1).toChar()) {
                 leadingMarginTmpBuf_ = LeadingMarginPlaceholder_serializer.read(valueDeserializer)
             } else {
@@ -1900,7 +1900,7 @@ export class ParagraphStyleInterface_serializer {
         const paragraphSpacingTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let paragraphSpacingTmpBuf : LengthMetrics | undefined = undefined
         if ((paragraphSpacingTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            paragraphSpacingTmpBuf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+            paragraphSpacingTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
         }
         const paragraphSpacingTmpResult : LengthMetrics | undefined = paragraphSpacingTmpBuf
         let value : ParagraphStyleInterface = ({textAlign: textAlignTmpResult, textIndent: textIndentTmpResult, maxLines: maxLinesTmpResult, overflow: overflowTmpResult, wordBreak: wordBreakTmpResult, leadingMargin: leadingMarginTmpResult, paragraphSpacing: paragraphSpacingTmpResult} as ParagraphStyleInterface)

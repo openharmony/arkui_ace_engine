@@ -1353,4 +1353,54 @@ HWTEST_F(LinearSplitTestNg, RegisterResObj, TestSize.Level0)
     g_isConfigChangePerform = false;
     EXPECT_EQ(divider.resMap_.size(), 2);
 }
+
+/**
+ * @tc.name: IsRootSizeUnValidTest
+ * @tc.desc: Test IsRootSizeUnValid() function
+ * @tc.type: FUNC
+ */
+HWTEST_F(LinearSplitTestNg, IsRootSizeUnValidTest, TestSize.Level0)
+{
+    auto frameNode = CreateLinearSplit(SplitType::ROW_SPLIT, [this](LinearSplitModelNG model) {});
+    ASSERT_NE(frameNode, nullptr);
+    LinearSplitLayoutAlgorithm algorithm(SplitType::ROW_SPLIT, {}, {}, false);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    context->rootWidth_ = 100;
+    context->rootHeight_ = 100;
+    /**
+     * @tc.expected: rootSize is valid, so IsRootSizeUnvalid() returns false
+     */
+    EXPECT_FALSE(algorithm.IsRootSizeUnValid(AceType::RawPtr(frameNode)));
+    context->rootWidth_ = 0;
+    context->rootHeight_ = 0;
+    /**
+     * @tc.expected: rootSize is unvalid, so IsRootSizeUnvalid() returns true
+     */
+    EXPECT_TRUE(algorithm.IsRootSizeUnValid(AceType::RawPtr(frameNode)));
+}
+
+/**
+ * @tc.name: IsDynamicComponentEnvTest
+ * @tc.desc: Test IsDynamicComponentEnv() function
+ * @tc.type: FUNC
+ */
+HWTEST_F(LinearSplitTestNg, IsDynamicComponentEnvTest, TestSize.Level0)
+{
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    LinearSplitLayoutAlgorithm algorithm(SplitType::ROW_SPLIT, {}, {}, false);
+    container->SetIsDynamicRender(true);
+    container->SetUIContentType(UIContentType::DYNAMIC_COMPONENT);
+    /**
+     * @tc.expected: linearsplit components is displayed in DC
+     */
+    EXPECT_TRUE(algorithm.IsDynamicComponentEnv());
+    container->SetIsDynamicRender(false);
+    container->SetUIContentType(UIContentType::NORMA);
+    /**
+     * @tc.expected: linearsplit components is not displayed in DC
+     */
+    EXPECT_FALSE(algorithm.IsDynamicComponentEnv());
+}
 } // namespace OHOS::Ace::NG

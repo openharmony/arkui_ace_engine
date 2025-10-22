@@ -404,6 +404,8 @@ void AssignArkValue(Ark_MouseAction& dst, const MouseAction& src)
         case MouseAction::RELEASE: dst = ARK_MOUSE_ACTION_RELEASE; break;
         case MouseAction::MOVE: dst = ARK_MOUSE_ACTION_MOVE; break;
         case MouseAction::HOVER: dst = ARK_MOUSE_ACTION_HOVER; break;
+        case MouseAction::WINDOW_ENTER: dst = ARK_MOUSE_ACTION_WINDOW_ENTER; break;
+        case MouseAction::WINDOW_LEAVE: dst = ARK_MOUSE_ACTION_WINDOW_LEAVE; break;
         case MouseAction::CANCEL: dst = ARK_MOUSE_ACTION_CANCEL; break;
         default: {
             dst = static_cast<Ark_MouseAction>(-1);
@@ -804,6 +806,8 @@ void AssignArkValue(Ark_SourceType& dst, const SourceType& src)
         case SourceType::NONE: dst = Ark_SourceType::ARK_SOURCE_TYPE_UNKNOWN; break;
         case SourceType::MOUSE: dst = Ark_SourceType::ARK_SOURCE_TYPE_MOUSE; break;
         case SourceType::TOUCH: dst = Ark_SourceType::ARK_SOURCE_TYPE_TOUCH_SCREEN; break;
+        case SourceType::KEYBOARD: dst = Ark_SourceType::ARK_SOURCE_TYPE_KEY; break;
+        case SourceType::JOYSTICK: dst = Ark_SourceType::ARK_SOURCE_TYPE_JOYSTICK; break;
         default: dst = static_cast<Ark_SourceType>(-1);
             LOGE("Unexpected enum value in SourceType: %{public}d", src);
     }

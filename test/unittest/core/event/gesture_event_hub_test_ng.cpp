@@ -1125,6 +1125,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest018, TestSize.Level1)
     eventManager->SetLastMoveBeforeUp(true);
 
     auto pipeline = PipelineContext::GetCurrentContext();
+    EXPECT_TRUE(pipeline);
     pipeline->SetEventManager(eventManager);
 
     GestureEvent gestureEvent;

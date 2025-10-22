@@ -19,6 +19,7 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 
+#include "core/common/multi_thread_build_manager.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 
@@ -3853,5 +3854,30 @@ HWTEST_F(ListLayoutTestNg, BigJumpAccuracyTest001, TestSize.Level1)
     */
     UpdateCurrentOffset(-10000.f, SCROLL_FROM_BAR);
     EXPECT_EQ(pattern_->currentOffset_, 9600.f);
+}
+
+/**
+ * @tc.name: UpdateChildrenMainSizeRoundingMode001
+ * @tc.desc: Test UpdateChildrenMainSizeRoundingMode sets rounding mode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, UpdateChildrenMainSizeRoundingMode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create thread safe uinode
+     */
+    MultiThreadBuildManager::SetIsThreadSafeNodeScope(true);
+    auto listNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 1, AceType::MakeRefPtr<ListPattern>());
+    MultiThreadBuildManager::SetIsThreadSafeNodeScope(false);
+
+    /**
+     * @tc.steps: step2. thread safe uinode GetOrCreateListChildrenMainSize
+     * @tc.expected: afterAttachMainTreeTasks_ size + 1
+     */
+    int32_t taskSize = listNode->afterAttachMainTreeTasks_.size();
+    auto listPattern = listNode->GetPattern<ListPattern>();
+    ASSERT_NE(listPattern, nullptr);
+    listPattern->GetOrCreateListChildrenMainSize();
+    EXPECT_EQ(listNode->afterAttachMainTreeTasks_.size(), taskSize + 1);
 }
 } // namespace OHOS::Ace::NG

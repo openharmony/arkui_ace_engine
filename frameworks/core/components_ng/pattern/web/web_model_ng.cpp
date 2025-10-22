@@ -1485,7 +1485,7 @@ void WebModelNG::SetEnableSelectedDataDetector(bool isEnabled)
     RETURN_IF_CALLING_FROM_M114();
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
-    webPattern->UpdateEnableSelectDataDetector(isEnabled);
+    webPattern->UpdateEnableSelectedDataDetector(isEnabled);
 }
 
 void WebModelNG::SetSelectedDataDetectorConfig(const TextDetectConfig& config)
@@ -2492,7 +2492,7 @@ void WebModelNG::SetEnableSelectedDataDetector(FrameNode* frameNode, bool isEnab
     CHECK_NULL_VOID(frameNode);
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
-    webPattern->UpdateEnableDataDetector(isEnabled);
+    webPattern->UpdateEnableSelectedDataDetector(isEnabled);
 }
 
 void WebModelNG::SetSelectedDataDetectorConfig(FrameNode* frameNode, const TextDetectConfig& config)

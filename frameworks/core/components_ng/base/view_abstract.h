@@ -368,6 +368,8 @@ public:
     static void SetRenderGroup(bool isRenderGroup);
     // renderFit, i.e. gravity
     static void SetRenderFit(RenderFit renderFit);
+    // cornerApplyType
+    static void SetCornerApplyType(CornerApplyType cornerApplyType);
 
     // transform
     static void SetScale(const NG::VectorF &value);

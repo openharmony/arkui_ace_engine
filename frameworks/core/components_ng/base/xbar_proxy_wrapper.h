@@ -43,8 +43,8 @@ class ACE_FORCE_EXPORT XbarComponent : public AceType {
     DECLARE_ACE_TYPE(XbarComponent, AceType);
 
 public:
-    XbarComponent(int64_t pointer) : xBarPoint(pointer) {}
-    int64_t GetUINodePointFromXbar()
+    XbarComponent(intptr_t pointer) : xBarPoint(pointer) {}
+    intptr_t GetUINodePointFromXbar()
     {
         return xBarPoint;
     }
@@ -70,7 +70,7 @@ public:
     void SetSetCustomCallbackFunc(std::function<void(const std::string&, const std::string&)>&& setCustomCallbackFunc);
 
 private:
-    int64_t xBarPoint;
+    intptr_t xBarPoint;
     std::function<void()> onWindowFocusedFunc;
     std::function<void()> onWindowUnfocusedFunc;
     std::function<void(const std::string& content)> setAppTitleFunc;
@@ -83,7 +83,7 @@ class ACE_EXPORT XbarProxyWrapper : public AceType {
 public:
     ACE_FORCE_EXPORT static XbarProxyWrapper* GetInstance();
     virtual ~XbarProxyWrapper() = default;
-    std::shared_ptr<XbarComponent> CreateXBarComponent(const int32_t& xbarType, const int32_t& instanceId);
+    RefPtr<XbarComponent> CreateXBarComponent(const int32_t& xbarType, const int32_t& instanceId);
     void SetOnWindowFocusedFunc(int64_t ptr, std::function<void()>&& onWindowFocusedFun);
     void SetOnWindowUnFocusedFunc(int64_t ptr, std::function<void()>&& onWindowUnFocusedFun);
     void SetSetAppTitleFunc(int64_t ptr, std::function<void(const std::string&)>&& setAppTitleFunc);
@@ -94,7 +94,6 @@ public:
 
 private:
     std::function<int64_t(const int32_t&, const int32_t&)> componentCreateFunc_;
-    static XbarProxyWrapper* instance_;
     std::unordered_map<int64_t, XbarFuncInfo> xbarFuncMap_;
     XbarProxyWrapper() = default;
     ACE_DISALLOW_COPY_AND_MOVE(XbarProxyWrapper);

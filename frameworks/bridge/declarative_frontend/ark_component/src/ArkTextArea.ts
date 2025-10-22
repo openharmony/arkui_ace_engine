@@ -671,7 +671,8 @@ class TextAreaShowCounterModifier extends ModifierWithKey<ArkTextFieldShowCounte
     if (reset) {
       getUINativeModule().textArea.resetShowCounter(node);
     } else {
-      getUINativeModule().textArea.setShowCounter(node, this.value.value!, this.value.highlightBorder, this.value.thresholdPercentage, this.value.counterTextColor, this.value.counterTextOverflowColor);
+      getUINativeModule().textArea.setShowCounter(node, this.value.value!, this.value.highlightBorder,
+        this.value.thresholdPercentage, this.value.counterTextColor, this.value.counterTextOverflowColor);
     }
   }
   checkObjectDiff(): boolean {

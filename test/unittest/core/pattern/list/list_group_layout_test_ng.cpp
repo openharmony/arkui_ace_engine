@@ -1949,4 +1949,34 @@ HWTEST_F(ListItemGroupAlgorithmTestNg, TestGroupCacheRange, TestSize.Level1)
     EXPECT_EQ(groupPattern->cachedItemPosition_.count(1), 1);
     EXPECT_EQ(groupPattern->cachedItemPosition_.count(7), 1);
 }
+
+/**
+ * @tc.name: TestGroupCacheSyncGeometry
+ * @tc.desc: ListItemGroup in cache need sync geometry.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupAlgorithmTestNg, TestGroupCacheSyncGeometry, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetCachedCount(4);
+    CreateListItem(V2::ListItemStyle::NONE);
+    ViewAbstract::SetHeight(CalcLength(350));
+    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    CreateListItemGroup(V2::ListItemGroupStyle::NONE);
+    CreateItemsInLazyForEach(10, 100.0f, nullptr); /* 10: item count */
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. update item0 height, ListItemGroup out of view in cache.
+     * @tc.expected: ListItemGroup paint rect updated.
+     */
+    auto item0 = GetChildFrameNode(frameNode_, 0);
+    auto group1 = GetChildFrameNode(frameNode_, 1);
+    ViewAbstract::SetHeight(AceType::RawPtr(item0), CalcLength(1000));
+    FlushUITasks(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 1), 1000);
+    auto renderContext = group1->GetRenderContext();
+    EXPECT_EQ(renderContext->GetPaintRectWithoutTransform().GetY(), 1000);
+}
 } // namespace OHOS::Ace::NG

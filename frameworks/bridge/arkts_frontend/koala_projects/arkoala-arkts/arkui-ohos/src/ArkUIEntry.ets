@@ -14,7 +14,8 @@
  */
 
 import { memo } from "@koalaui/runtime/annotations"
-import { ComputableState, IncrementalNode, GlobalStateManager, StateManager, StateContext, memoEntry, MutableState, createAnimationTimer, callScheduledCallbacks, RuntimeProfiler } from "@koalaui/runtime"
+import { ComputableState, IncrementalNode, GlobalStateManager, StateManager, memoEntry, MutableState, createAnimationTimer, callScheduledCallbacks, RuntimeProfiler } from "@koalaui/runtime"
+import { StateContext } from 'arkui.incremental.runtime.state';
 import { int32, int64 } from "@koalaui/common"
 import { DeserializerBase, pointer, nullptr, KPointer, InteropNativeModule, registerNativeModuleLibraryName, KSerializerBuffer, wrapSystemApiHandlerCallback, loadNativeModuleLibrary } from "@koalaui/interop"
 import { PeerNode } from "./PeerNode"
@@ -61,6 +62,10 @@ class PartialUpdateRecord {
 let partialUpdates = new Array<PartialUpdateRecord>()
 let _currentPartialUpdateContext: Object | undefined = undefined
 let _undefinedInstanceId : int32 = -1000
+
+export enum MessageType {
+    DELETE_DETACHED_ROOT = 1,
+}
 
 /**
  * Provide partial update lambda and context.
@@ -313,6 +318,22 @@ export class Application {
         return root!.peer.ptr
     }
 
+    handleMessage(ptr: KPointer, type: int32, param : string) : boolean {
+        let result : boolean = false
+        switch (type as MessageType) {
+            case MessageType.DELETE_DETACHED_ROOT: {
+                result = destroyUiDetachedRoot(ptr, this.instanceId);
+                break
+            }
+            default: {
+                InteropNativeModule._NativeLog(`[${this.instanceId}] ARKTS: [handleMessage] type = ${type} is unknown.`)
+                break
+            }
+        }
+        InteropNativeModule._NativeLog(`[${this.instanceId}] ARKTS: [handleMessage] ptr: ${ptr}, type: ${type}, param: ${param}`);
+        return result;
+    }
+
     private checkEvents(what: int32) {
         checkEvents()
     }
@@ -340,6 +361,7 @@ export class Application {
             preState = undefined;
         }
         ObserveSingleton.instance.updateDirty();
+        this.uiContext!.flushCallback()
         this.updateStates(this.manager!, rootState, preState);
         ObserveSingleton.instance.makeDelayedMutableStateChanges();
         while (StateUpdateLoop.len) {
@@ -375,6 +397,7 @@ export class Application {
         }
         updateLazyItems()
         // flushBuilderRootNode()
+        this.uiContext!.updateParallelizeItemNode()
         if (partialUpdates.length > 0) {
             // If there are pending partial updates - we apply them one by one and provide update context.
             for (let update of partialUpdates) {

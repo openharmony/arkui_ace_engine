@@ -127,6 +127,11 @@ public:
     void BackFromDynamicExtender(const std::string& url, const std::string& params) override;
     void ClearFromDynamicExtender() override;
     int32_t GetLengthFromDynamicExtender() override;
+    std::string GetParamsFromDynamicExtender() override;
+    bool GetStateByUrlFromDynamicExtender(const std::string& url, std::vector<RouterStateInfo>& stateArray) override;
+    bool GetStateByIndexFromDynamicExtender(int32_t index, RouterStateInfo& state) override;
+    bool GetStateFromDynamicExtender(RouterStateInfo& state) override;
+    int32_t GetCurrentPageIndex() const override;
 
     RefPtr<AcePage> GetPage(int32_t /*pageId*/) const override
     {
@@ -395,6 +400,7 @@ public:
     }
 
     void* GetEnv() override;
+    ani_ref GetApp();
     ani_vm *GetVM() override;
     static void PreloadAceModule(void* aniEnv);
     static void* preloadArkTSRuntime;

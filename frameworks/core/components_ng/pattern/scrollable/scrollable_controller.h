@@ -38,6 +38,7 @@ public:
         return scroll_;
     }
     void ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, std::optional<float> extraOffset) override;
+    void ScrollToIndexMultiThread(int32_t index, bool smooth, ScrollAlign align, std::optional<float> extraOffset);
     bool AnimateTo(const Dimension& position, float duration, const RefPtr<Curve>& curve, bool smooth,
         bool canOverScroll = false) override;
     bool AnimateToMultiThread(const Dimension& position, float duration, const RefPtr<Curve>& curve, bool smooth,
@@ -50,7 +51,9 @@ public:
     void ScrollToEdge(ScrollEdgeType scrollEdgeType, float velocity) override;
     void ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth) override;
     void ScrollToEdgeMultiThread(ScrollEdgeType scrollEdgeType, bool smooth);
+    void ScrollToEdgeMultiThread(ScrollEdgeType scrollEdgeType, float velocity);
     void ScrollPage(bool reverse, bool smooth) override;
+    void ScrollPageMultiThread(bool reverse, bool smooth);
     void Fling(double flingVelocity) override;
     void FlingMultiThread(double flingVelocity);
     bool IsAtEnd() const override;

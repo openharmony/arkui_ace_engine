@@ -469,17 +469,13 @@ void JSTextField::SetSelectDetectConfig(const JSCallbackInfo& info)
         TextFieldModel::GetInstance()->ResetSelectDetectConfig();
         return;
     }
-    std::vector<TextDataDetectType> typesList;
-    if (!info[0]->IsObject()) {
-        return;
-    }
-    auto args = info[0];
-    auto paramObject = JSRef<JSObject>::Cast(args);
+    CHECK_NULL_VOID(info[0]->IsObject());
+    auto paramObject = JSRef<JSObject>::Cast(info[0]);
     auto getTypes = paramObject->GetProperty("types");
+    CHECK_NULL_VOID(getTypes->IsArray());
     JSRef<JSArray> array = JSRef<JSArray>::Cast(getTypes);
-    if (!array->IsArray()) {
-        return;
-    }
+    CHECK_NULL_VOID(array->IsArray());
+    std::vector<TextDataDetectType> typesList;
     for (size_t i = 0; i < array->Length(); ++i) {
         JSRef<JSVal> type = array->GetValueAt(i);
         if (type->IsNumber()) {

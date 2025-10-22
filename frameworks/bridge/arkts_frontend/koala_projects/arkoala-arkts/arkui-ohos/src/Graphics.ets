@@ -112,10 +112,10 @@ const MAX_ALPHA_VALUE = 1;
 const ERROR_CODE_RESOURCE_GET_FAILED = 180003;
 const ERROR_CODE_COLOR_PARAMETER_INCORRECT = 401;
 export class ColorMetrics {
-    private red_: number | undefined = undefined;
-    private green_: number | undefined = undefined;
-    private blue_: number | undefined = undefined;
-    private alpha_: number | undefined = undefined;
+    private red_: number;
+    private green_: number;
+    private blue_: number;
+    private alpha_: number;
     private resourceId_: number = -1;
     static readonly WHITE: int32 = 0xffffffff;
     static readonly BLACK: int32 = 0xff000000;
@@ -146,6 +146,12 @@ export class ColorMetrics {
     }
     private static clamp(value: number): number {
         return Math.min(Math.max(value, 0), MAX_CHANNEL_VALUE);
+    }
+    constructor(){
+        this.red_ = 0;
+        this.green_ = 0;
+        this.blue_ = 0;
+        this.alpha_ = MAX_CHANNEL_VALUE;
     }
     constructor(red: number, green: number, blue: number, alpha: number = MAX_CHANNEL_VALUE) {
         this.red_ = ColorMetrics.clamp(red);

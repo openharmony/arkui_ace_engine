@@ -32,7 +32,10 @@ public:
     static void SetListItemAlign(FrameNode* frameNode, const std::optional<V2::ListItemAlign>& listItemAlign);
     static void SetListDirection(FrameNode* frameNode, const std::optional<int32_t>& axis);
     static void SetListScrollBar(FrameNode* frameNode, const std::optional<int32_t>& barState);
-    static void SetDivider(FrameNode* frameNode, const std::optional<V2::ItemDivider>& divider);
+    static void SetDivider(
+        FrameNode* frameNode, const std::optional<V2::ItemDivider>& divider, bool needGetThemeColor = false);
+    static void SetDividerMultiThread(
+        FrameNode* frameNode, const std::optional<V2::ItemDivider>& divider, bool needGetThemeColor = false);
     static void SetSticky(FrameNode* frameNode, const std::optional<int32_t>& stickyStyle);
     static void SetScrollSnapAlign(FrameNode* frameNode, const std::optional<ScrollSnapAlign>& scrollSnapAlign);
     static void SetListFriction(FrameNode* frameNode, const std::optional<double>& friction);

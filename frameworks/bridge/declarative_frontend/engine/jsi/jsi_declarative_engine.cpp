@@ -1437,6 +1437,7 @@ napi_value JsiDeclarativeEngineInstance::GetFrameNodeValueByNodeId(int32_t nodeI
 }
 
 thread_local std::unordered_map<std::string, NamedRouterProperty> JsiDeclarativeEngine::namedRouterRegisterMap_;
+thread_local std::unordered_map<std::string, NamedRouterProperty> JsiDeclarativeEngine::emptyNamedRouterRegisterMap_;
 thread_local std::unordered_map<std::string, std::string> JsiDeclarativeEngine::routerPathInfoMap_;
 thread_local std::unordered_map<std::string, panda::Global<panda::ObjectRef>> JsiDeclarativeEngine::builderMap_;
 thread_local panda::Global<panda::ObjectRef> JsiDeclarativeEngine::obj_;
@@ -2132,10 +2133,22 @@ void JsiDeclarativeEngine::AddToNamedRouterMap(const EcmaVM* vm, panda::Global<p
     }
 
     NamedRouterProperty namedRouterProperty({ pageGenerator, bundleName, moduleName, pagePath, ohmUrl });
-    auto ret = namedRouterRegisterMap_.insert(std::make_pair(namedRoute, namedRouterProperty));
-    if (!ret.second) {
-        ret.first->second.pageGenerator.FreeGlobalHandleAddr();
-        namedRouterRegisterMap_[namedRoute] = namedRouterProperty;
+    auto container = Container::Current();
+    if (container && container->GetFrontendType() == FrontendType::STATIC_HYBRID_DYNAMIC && namedRoute.empty()) {
+        TAG_LOGI(AceLogTag::ACE_ROUTER, "Register empty name router for staticHybridDynamic bundleName:%{public}s "
+            "moduleName:%{public}s pagePath:%{public}s", bundleName.c_str(), moduleName.c_str(), pagePath.c_str());
+        std::string keyStr = bundleName + moduleName + pagePath;
+        auto it = emptyNamedRouterRegisterMap_.find(keyStr);
+        if (it != emptyNamedRouterRegisterMap_.end()) {
+            it->second.pageGenerator.FreeGlobalHandleAddr();
+        }
+        emptyNamedRouterRegisterMap_[keyStr] = namedRouterProperty;
+    } else {
+        auto ret = namedRouterRegisterMap_.insert(std::make_pair(namedRoute, namedRouterProperty));
+        if (!ret.second) {
+            ret.first->second.pageGenerator.FreeGlobalHandleAddr();
+            namedRouterRegisterMap_[namedRoute] = namedRouterProperty;
+        }
     }
     auto pagePathKey = moduleName + pagePath;
     auto pageRet = routerPathInfoMap_.insert(std::make_pair(pagePathKey, pageFullPath));
@@ -2161,7 +2174,9 @@ std::string JsiDeclarativeEngine::SearchRouterRegisterMap(const std::string& pag
 
 bool JsiDeclarativeEngine::LoadNamedRouterSource(const std::string& routeNameOrUrl, bool isNamedRoute)
 {
-    CHECK_NULL_RETURN(!namedRouterRegisterMap_.empty(), false);
+    if (namedRouterRegisterMap_.empty() && emptyNamedRouterRegisterMap_.empty()) {
+        return false;
+    }
     auto iter = namedRouterRegisterMap_.find(routeNameOrUrl);
     if (isNamedRoute && iter == namedRouterRegisterMap_.end()) {
         LOGW("named route %{public}s not found!", routeNameOrUrl.c_str());
@@ -2212,6 +2227,12 @@ bool JsiDeclarativeEngine::LoadNamedRouterSource(const std::string& routeNameOrU
                 return item.second.bundleName == bundleName && item.second.moduleName == moduleName &&
                        item.second.pagePath == url;
             });
+        auto container = Container::Current();
+        if (iter == namedRouterRegisterMap_.end() && container &&
+            container->GetFrontendType() == FrontendType::STATIC_HYBRID_DYNAMIC) {
+            std::string keyStr = bundleName + moduleName + url;
+            iter = emptyNamedRouterRegisterMap_.find(keyStr);
+        }
         if (iter == namedRouterRegisterMap_.end()) {
             LOGW("page not found! bundleName: %{public}s, moduleName: %{public}s, url: %{public}s",
                 bundleName.c_str(), moduleName.c_str(), url.c_str());

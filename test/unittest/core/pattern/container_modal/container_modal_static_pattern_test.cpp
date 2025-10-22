@@ -88,8 +88,8 @@ void ContainerModalStaticPatternTest::TearDownTestCase()
  */
 HWTEST_F(ContainerModalStaticPatternTest, ContainerModalStaticViewTestSetCustomTitle, TestSize.Level1)
 {
-    auto patternStatic = new ContainerModalStaticPattern();
-    auto xbarComponent = std::make_shared<XbarComponent>(1);
+    auto patternStatic = AceType::MakeRefPtr<ContainerModalStaticPattern>();
+    auto xbarComponent = AceType::MakeRefPtr<XbarComponent>(1);
 
     bool isExecuteAppTitleCallback = false;
     auto appTitleCallback = [&isExecuteAppTitleCallback](
@@ -109,8 +109,8 @@ HWTEST_F(ContainerModalStaticPatternTest, ContainerModalStaticViewTestSetCustomT
  */
 HWTEST_F(ContainerModalStaticPatternTest, ContainerModalStaticPatternTestSetCustomFloatingTitle, TestSize.Level1)
 {
-    auto patternStatic = new ContainerModalStaticPattern();
-    auto xbarComponent = std::make_shared<XbarComponent>(1);
+    auto patternStatic = AceType::MakeRefPtr<ContainerModalStaticPattern>();
+    auto xbarComponent = AceType::MakeRefPtr<XbarComponent>(1);
 
     bool isExecuteAppTitleCallback = false;
     auto appTitleCallback = [&isExecuteAppTitleCallback](
@@ -130,14 +130,13 @@ HWTEST_F(ContainerModalStaticPatternTest, ContainerModalStaticPatternTestSetCust
  */
 HWTEST_F(ContainerModalStaticPatternTest, ContainerModalStaticPatternTestSetCustomButton, TestSize.Level1)
 {
-    auto patternStatic = new ContainerModalStaticPattern();
-    auto xbarComponent = std::make_shared<XbarComponent>(1);
+    auto patternStatic = AceType::MakeRefPtr<ContainerModalStaticPattern>();
+    auto xbarComponent = AceType::MakeRefPtr<XbarComponent>(1);
 
     bool isExecuteAppTitleCallback = false;
     auto appTitleCallback = [&isExecuteAppTitleCallback](
                                 const std::string& content) { isExecuteAppTitleCallback = true; };
     xbarComponent->setAppTitleFunc = std::move(appTitleCallback);
-    ;
 
     patternStatic->SetCustomButton(xbarComponent);
 
@@ -152,17 +151,16 @@ HWTEST_F(ContainerModalStaticPatternTest, ContainerModalStaticPatternTestSetCust
  */
 HWTEST_F(ContainerModalStaticPatternTest, ContainerModalStaticViewTestSetAppTitle, TestSize.Level1)
 {
-    auto patternStatic = new ContainerModalStaticPattern();
-    auto xbarComponent = std::make_shared<XbarComponent>(1);
+    auto patternStatic = AceType::MakeRefPtr<ContainerModalStaticPattern>();
+    auto xbarComponent = AceType::MakeRefPtr<XbarComponent>(1);
 
     bool isExecute = false;
     auto appTitleCallback = [&isExecute](const std::string& content) { isExecute = true; };
     xbarComponent->setAppTitleFunc = std::move(appTitleCallback);
-    ;
 
     patternStatic->SetCustomTitle(xbarComponent);
     patternStatic->SetAppTitle("title");
-    EEXPECT_EQ(isExecute, true);
+    EXPECT_EQ(isExecute, true);
 }
 
 /**
@@ -172,17 +170,16 @@ HWTEST_F(ContainerModalStaticPatternTest, ContainerModalStaticViewTestSetAppTitl
  */
 HWTEST_F(ContainerModalStaticPatternTest, ContainerModalStaticPatternTestChangeCustomTitle001, TestSize.Level1)
 {
-    auto patternStatic = new ContainerModalStaticPattern();
-    auto xbarComponent = std::make_shared<XbarComponent>(1);
+    auto patternStatic = AceType::MakeRefPtr<ContainerModalStaticPattern>();
+    auto xbarComponent = AceType::MakeRefPtr<XbarComponent>(1);
 
     bool isExecute = false;
     auto callback = [&isExecute]() { isExecute = true; };
     xbarComponent->onWindowFocusedFunc = std::move(callback);
-    ;
 
     patternStatic->SetCustomTitle(xbarComponent);
     patternStatic->ChangeCustomTitle(true);
-    EEXPECT_EQ(isExecute, true);
+    EXPECT_EQ(isExecute, true);
 }
 
 /**
@@ -192,17 +189,16 @@ HWTEST_F(ContainerModalStaticPatternTest, ContainerModalStaticPatternTestChangeC
  */
 HWTEST_F(ContainerModalStaticPatternTest, ContainerModalStaticPatternTestChangeCustomTitle002, TestSize.Level1)
 {
-    auto patternStatic = new ContainerModalStaticPattern();
-    auto xbarComponent = std::make_shared<XbarComponent>(1);
+    auto patternStatic = AceType::MakeRefPtr<ContainerModalStaticPattern>();
+    auto xbarComponent = AceType::MakeRefPtr<XbarComponent>(1);
 
     bool isExecute = false;
     auto callback = [&isExecute]() { isExecute = true; };
     xbarComponent->onWindowUnfocusedFunc = std::move(callback);
-    ;
 
     patternStatic->SetCustomTitle(xbarComponent);
     patternStatic->ChangeCustomTitle(false);
-    EEXPECT_EQ(isExecute, true);
+    EXPECT_EQ(isExecute, true);
 }
 
 /**
@@ -212,17 +208,16 @@ HWTEST_F(ContainerModalStaticPatternTest, ContainerModalStaticPatternTestChangeC
  */
 HWTEST_F(ContainerModalStaticPatternTest, ContainerModalStaticPatternTestChangeControlButtons001, TestSize.Level1)
 {
-    auto patternStatic = new ContainerModalStaticPattern();
-    auto xbarComponent = std::make_shared<XbarComponent>(1);
+    auto patternStatic = AceType::MakeRefPtr<ContainerModalStaticPattern>();
+    auto xbarComponent = AceType::MakeRefPtr<XbarComponent>(1);
 
     bool isExecute = false;
     auto callback = [&isExecute]() { isExecute = true; };
     xbarComponent->onWindowFocusedFunc = std::move(callback);
-    ;
 
     patternStatic->SetCustomButton(xbarComponent);
     patternStatic->ChangeControlButtons(true);
-    EEXPECT_EQ(isExecute, true);
+    EXPECT_EQ(isExecute, true);
 }
 
 /**
@@ -232,17 +227,16 @@ HWTEST_F(ContainerModalStaticPatternTest, ContainerModalStaticPatternTestChangeC
  */
 HWTEST_F(ContainerModalStaticPatternTest, ContainerModalStaticPatternTestChangeControlButtons002, TestSize.Level1)
 {
-    auto patternStatic = new ContainerModalStaticPattern();
-    auto xbarComponent = std::make_shared<XbarComponent>(1);
+    auto patternStatic = AceType::MakeRefPtr<ContainerModalStaticPattern>();
+    auto xbarComponent = AceType::MakeRefPtr<XbarComponent>(1);
 
     bool isExecute = false;
     auto callback = [&isExecute]() { isExecute = true; };
     xbarComponent->onWindowUnfocusedFunc = std::move(callback);
-    ;
 
     patternStatic->SetCustomButton(xbarComponent);
     patternStatic->ChangeControlButtons(false);
-    EEXPECT_EQ(isExecute, true);
+    EXPECT_EQ(isExecute, true);
 }
 
 /**
@@ -252,17 +246,16 @@ HWTEST_F(ContainerModalStaticPatternTest, ContainerModalStaticPatternTestChangeC
  */
 HWTEST_F(ContainerModalStaticPatternTest, ContainerModalStaticPatternTestSetContainerButtonHide, TestSize.Level1)
 {
-    auto patternStatic = new ContainerModalStaticPattern();
-    auto xbarComponent = std::make_shared<XbarComponent>(1);
+    auto patternStatic = AceType::MakeRefPtr<ContainerModalStaticPattern>();
+    auto xbarComponent = AceType::MakeRefPtr<XbarComponent>(1);
 
     bool isExecute = false;
     auto callback = [&isExecute](const std::string& eventName, const std::string& param) { isExecute = true; };
     xbarComponent->setCustomCallbackFunc = std::move(callback);
-    ;
 
     patternStatic->SetCustomButton(xbarComponent);
     patternStatic->SetContainerButtonHide(true, false, true, false);
-    EEXPECT_EQ(isExecute, true);
+    EXPECT_EQ(isExecute, true);
 }
 
 /**
@@ -272,17 +265,19 @@ HWTEST_F(ContainerModalStaticPatternTest, ContainerModalStaticPatternTestSetCont
  */
 HWTEST_F(ContainerModalStaticPatternTest, ContainerModalStaticPatternTestSetColorConfigurationUpdate, TestSize.Level1)
 {
-    auto patternStatic = new ContainerModalStaticPattern();
-    auto xbarComponent = std::make_shared<XbarComponent>(1);
+    auto patternStatic = AceType::MakeRefPtr<ContainerModalStaticPattern>();
+    auto xbarComponent = AceType::MakeRefPtr<XbarComponent>(1);
+
+    auto frameNode = FrameNode::CreateFrameNode("ContainerModal", 1, patternStatic);
+    patternStatic->AttachToFrameNode(frameNode);
 
     bool isExecute = false;
     auto callback = [&isExecute](const std::string& eventName, const std::string& param) { isExecute = true; };
     xbarComponent->setCustomCallbackFunc = std::move(callback);
-    ;
 
     patternStatic->SetCustomButton(xbarComponent);
     patternStatic->SetColorConfigurationUpdate();
-    EEXPECT_EQ(isExecute, true);
+    EXPECT_EQ(isExecute, true);
 }
 
 /**
@@ -292,37 +287,16 @@ HWTEST_F(ContainerModalStaticPatternTest, ContainerModalStaticPatternTestSetColo
  */
 HWTEST_F(ContainerModalStaticPatternTest, ContainerModalStaticPatternTestSetCloseButtonStatus, TestSize.Level1)
 {
-    auto patternStatic = new ContainerModalStaticPattern();
-    auto xbarComponent = std::make_shared<XbarComponent>(1);
+    auto patternStatic = AceType::MakeRefPtr<ContainerModalStaticPattern>();
+    auto xbarComponent = AceType::MakeRefPtr<XbarComponent>(1);
 
     bool isExecute = false;
     auto callback = [&isExecute](const std::string& eventName, const std::string& param) { isExecute = true; };
     xbarComponent->setCustomCallbackFunc = std::move(callback);
-    ;
 
     patternStatic->SetCustomButton(xbarComponent);
-    patternStatic->SetCloseButtonStatus();
-    EEXPECT_EQ(isExecute, true);
-}
-
-/**
- * @tc.name: ContainerModalStaticPatternTestSetMaximizeIconIsRecover
- * @tc.desc: Test SetMaximizeIconIsRecover
- * @tc.type: FUNC
- */
-HWTEST_F(ContainerModalStaticPatternTest, ContainerModalStaticPatternTestSetMaximizeIconIsRecover, TestSize.Level1)
-{
-    auto patternStatic = new ContainerModalStaticPattern();
-    auto xbarComponent = std::make_shared<XbarComponent>(1);
-
-    bool isExecute = false;
-    auto callback = [&isExecute](const std::string& eventName, const std::string& param) { isExecute = true; };
-    xbarComponent->setCustomCallbackFunc = std::move(callback);
-    ;
-
-    patternStatic->SetCustomButton(xbarComponent);
-    patternStatic->SetMaximizeIconIsRecover();
-    EEXPECT_EQ(isExecute, true);
+    patternStatic->SetCloseButtonStatus(true);
+    EXPECT_EQ(isExecute, true);
 }
 
 /**
@@ -332,16 +306,15 @@ HWTEST_F(ContainerModalStaticPatternTest, ContainerModalStaticPatternTestSetMaxi
  */
 HWTEST_F(ContainerModalStaticPatternTest, ContainerModalStaticPatternTestOnContainerModalEvent, TestSize.Level1)
 {
-    auto patternStatic = new ContainerModalStaticPattern();
-    auto xbarComponent = std::make_shared<XbarComponent>(1);
+    auto patternStatic = AceType::MakeRefPtr<ContainerModalStaticPattern>();
+    auto xbarComponent = AceType::MakeRefPtr<XbarComponent>(1);
 
     bool isExecute = false;
     auto callback = [&isExecute](const std::string& eventName, const std::string& param) { isExecute = true; };
     xbarComponent->setCustomCallbackFunc = std::move(callback);
-    ;
 
     patternStatic->SetCustomButton(xbarComponent);
     patternStatic->OnContainerModalEvent("name", "value");
-    EEXPECT_EQ(isExecute, true);
+    EXPECT_EQ(isExecute, true);
 }
 } // namespace OHOS::Ace::NG

@@ -33,6 +33,7 @@ void ScrollableController::ScrollToIndex(
     CHECK_NULL_VOID(host);
     ACE_SCOPED_TRACE("ScrollToIndex, index:%d, smooth:%u, align:%d, id:%d, tag:%s", index, smooth, align,
         static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
+    FREE_NODE_CHECK(host, ScrollToIndex, index, smooth, align, extraOffset);
     pattern->ScrollToIndex(index, smooth, align, extraOffset);
 }
 
@@ -121,6 +122,8 @@ void ScrollableController::ScrollToEdge(ScrollEdgeType scrollEdgeType, float vel
     if (pattern->GetAxis() == Axis::FREE && pattern->FreeScrollToEdge(scrollEdgeType, true, velocity)) {
         return;
     }
+    auto host = pattern->GetHost();
+    FREE_NODE_CHECK(host, ScrollToEdge, scrollEdgeType, velocity);
     pattern->SetIsOverScroll(false);
     pattern->SetCanStayOverScroll(false);
     pattern->SetAnimateCanOverScroll(false);
@@ -173,12 +176,13 @@ void ScrollableController::ScrollPage(bool reverse, bool smooth)
     if (pattern->GetAxis() == Axis::FREE && pattern->FreeScrollPage(reverse, smooth)) {
         return;
     }
+    auto host = pattern->GetHost();
+    FREE_NODE_CHECK(host, ScrollPage, reverse, smooth);
     if (InstanceOf<WaterFlowPattern>(pattern)) {
         pattern->ScrollPage(reverse, smooth);
         return;
     }
     // todo: remove impl here, all types of ScrollablePattern should call ScrollPage directly
-    auto host = pattern->GetHost();
     CHECK_NULL_VOID(host);
     auto offset = reverse ? pattern->GetMainContentSize() : -pattern->GetMainContentSize();
     if (smooth) {

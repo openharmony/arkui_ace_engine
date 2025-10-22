@@ -14,7 +14,8 @@
  */
 
 import { __id, NodeAttach, ComputableState, GlobalStateManager, Disposable, memoEntry2, remember,
-    rememberDisposable, rememberMutableState, StateContext, scheduleCallback } from '@koalaui/runtime'
+    rememberDisposable, rememberMutableState, scheduleCallback } from '@koalaui/runtime'
+import { StateContext } from 'arkui.incremental.runtime.state';
 import { InteropNativeModule, nullptr, pointer } from '@koalaui/interop'
 import { int32 } from '@koalaui/common'
 import { PeerNode } from '../PeerNode'
@@ -25,6 +26,8 @@ import { OnMoveHandler, ItemDragEventHandler, LazyForEachOps } from '#generated'
 import { LazyItemNode } from './LazyItemNode'
 import { ArkUIAniModule } from '../ani/arkts/ArkUIAniModule'
 import { CustomComponent } from '../component/customComponent'
+import { ObserveSingleton } from '../stateManagement/base/observeSingleton'
+import { ExtendableComponent } from '../component/extendableComponent'
 
 let globalLazyItems = new Map<ComputableState<LazyItemNode>, int32>() // V: age
 
@@ -71,15 +74,25 @@ export function LazyForEachImplForOptions<T>(dataSource: IDataSource<T>,
         })
     }
 
+    const currentRenderingComponent = ObserveSingleton.instance.renderingComponent
+    const currentExtendableComponent = ExtendableComponent.current
     /**
      * provide totalCount and callbacks to the backend
      */
     let createCallback = (index: int32) => {
+        const lastRenderingComponent = ObserveSingleton.instance.renderingComponent
+        const lastExtendableComponent = ExtendableComponent.current
+        ObserveSingleton.instance.renderingComponent = currentRenderingComponent
+        ExtendableComponent.current = currentExtendableComponent
         try {
-            return pool.getOrCreate(index, dataSource.getData(index), itemGenerator)
+            return pool.getOrCreate(index, dataSource.getData(index), itemGenerator,
+                currentRenderingComponent, currentExtendableComponent)
         } catch (error) {
             InteropNativeModule._NativeLog(`error during createLazyItem: ${error}`)
             return nullptr
+        } finally {
+            ObserveSingleton.instance.renderingComponent = lastRenderingComponent
+            ExtendableComponent.current = lastExtendableComponent
         }
     }
     LazyForEachOps.Sync(node.getPeerPtr(), dataSource.totalCount() as int32, createCallback, pool.updateActiveRange)
@@ -175,6 +188,8 @@ class LazyItemPool implements Disposable {
         data: T,
         /** @memo */
         itemGenerator: (item: T, index: number) => void,
+        currentRenderingComponent: int32,
+        currentExtendableComponent: object | undefined
     ): pointer {
         if (this._activeItems.has(index)) {
             const node = this._activeItems.get(index)!
@@ -185,6 +200,10 @@ class LazyItemPool implements Disposable {
         const node = manager.updatableNode<LazyItemNode>(new LazyItemNode(this._parent),
             (context: StateContext) => {
                 let scope = new LazyItemCompositionContext(this._componentRoot)
+                const lastRenderingComponent = ObserveSingleton.instance.renderingComponent
+                const lastExtendableComponent = ExtendableComponent.current
+                ObserveSingleton.instance.renderingComponent = currentRenderingComponent
+                ExtendableComponent.current = currentExtendableComponent
                 memoEntry2<T, number, void>(
                     context,
                     0,
@@ -192,6 +211,8 @@ class LazyItemPool implements Disposable {
                     data,
                     index
                 )
+                ObserveSingleton.instance.renderingComponent = lastRenderingComponent
+                ExtendableComponent.current = lastExtendableComponent
                 scope.exit()
             }
         )

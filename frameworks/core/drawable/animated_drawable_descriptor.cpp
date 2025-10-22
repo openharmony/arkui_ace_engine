@@ -200,12 +200,13 @@ void AnimatedDrawableDescriptor::SetDurations(const std::vector<int32_t>& durati
         return;
     }
     userDurations_ = durations;
+    isSetDurations_ = true;
     totalDuration_ = std::accumulate(userDurations_.begin(), userDurations_.end(), 0);
 }
 
 void AnimatedDrawableDescriptor::SetTotalDuration(const int32_t totalDuration)
 {
-    if (totalDuration_ > 0 || totalDuration <= 0) {
+    if (isSetDurations_ || totalDuration <= 0) {
         return;
     }
     totalDuration_ = totalDuration;

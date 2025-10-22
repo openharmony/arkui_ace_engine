@@ -480,9 +480,8 @@ void ToastPattern::OnAttachToFrameNodeImpl()
 
 void ToastPattern::OnDetachFromFrameNode(FrameNode* node)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    THREAD_SAFE_NODE_CHECK(host, OnDetachFromFrameNode, node);
+    CHECK_NULL_VOID(node);
+    THREAD_SAFE_NODE_CHECK(node, OnDetachFromFrameNode, node);
     OnDetachFromFrameNodeImpl(node);
 }
 

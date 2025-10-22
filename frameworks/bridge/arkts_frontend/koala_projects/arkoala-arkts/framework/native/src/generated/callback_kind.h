@@ -21,6 +21,7 @@
 typedef enum CallbackKind {
     Kind_AccessibilityCallback = 589030517,
     Kind_AccessibilityFocusCallback = 1715445305,
+    Kind_ArcScrollIndexHandler = -274386039,
     Kind_AsyncCallback_image_PixelMap_Void = 1289587365,
     Kind_AsyncCallback_Void = 1075219926,
     Kind_ButtonModifierBuilder = -2004118094,
@@ -104,6 +105,7 @@ typedef enum CallbackKind {
     Kind_Callback_OnConsoleEvent_Boolean = 893367077,
     Kind_Callback_OnContextMenuShowEvent_Boolean = 332449533,
     Kind_Callback_OnDataResubmittedEvent_Void = 118631204,
+    Kind_Callback_OnDestory_Void = -969067380,
     Kind_Callback_OnDownloadStartEvent_Void = 1834611702,
     Kind_Callback_OnErrorReceiveEvent_Void = -1792851375,
     Kind_Callback_OnFaviconReceivedEvent_Void = -243916553,

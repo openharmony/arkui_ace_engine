@@ -867,11 +867,11 @@ private:
 
 class NWebMouseEventImpl : public OHOS::NWeb::NWebMouseEvent {
 public:
-    NWebMouseEventImpl(int32_t x, int32_t y, int32_t rawX, int32_t rawY,
-        int32_t buttton, int32_t action,
+    NWebMouseEventImpl(int32_t x, int32_t y, int32_t rawX, int32_t rawY, int32_t buttton, int32_t action,
         int32_t clickNum, std::vector<int32_t> pressedCodes)
-        : x_(x), y_(y), buttton_(buttton), action_(action),
-        clickNum_(clickNum), pressedCodes_(pressedCodes) {}
+        : x_(x), y_(y), raw_x_(rawX), raw_y_(rawY), buttton_(buttton), action_(action), clickNum_(clickNum),
+          pressedCodes_(pressedCodes)
+    {}
     ~NWebMouseEventImpl() = default;
 
     int32_t GetX() override

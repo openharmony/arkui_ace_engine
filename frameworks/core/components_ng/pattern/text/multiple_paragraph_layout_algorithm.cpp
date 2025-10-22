@@ -558,11 +558,7 @@ bool MultipleParagraphLayoutAlgorithm::ParagraphReLayout(const LayoutConstraintF
                     contentConstraint.ToString().c_str());
             }
             if (!NearEqual(paragraphNewWidth, paragraph->GetMaxWidth())) {
-                int32_t id = -1;
-                if (SystemProperties::GetAcePerformanceMonitorEnabled()) {
-                    id = Container::CurrentId();
-                }
-                OTHER_DURATION(id);
+                OTHER_DURATION();
                 paragraph->Layout(std::ceil(paragraphNewWidth));
             }
         }

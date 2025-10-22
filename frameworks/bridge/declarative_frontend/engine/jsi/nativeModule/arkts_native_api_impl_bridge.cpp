@@ -135,6 +135,7 @@
 #ifdef WEB_SUPPORTED
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_web_bridge.h"
 #endif
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_container_picker_bridge.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -2260,6 +2261,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetOnDidIMEInput));
     richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnDidIMEInput"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetOnDidIMEInput));
+    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnWillAttachIME"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetOnWillAttachIME));
+    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnWillAttachIME"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetOnWillAttachIME));
     richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableHapticFeedback"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetEnableHapticFeedback));
     richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableHapticFeedback"),
@@ -3356,6 +3361,7 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     RegisterEmbeddedComponentAttributes(object, vm);
 #endif
     RegisterStepperAttributes(object, vm);
+    RegisterContainerAttributes(object, vm);
     return object;
 }
 
@@ -7409,5 +7415,36 @@ void ArkUINativeModule::RegisterStepperAttributes(Local<panda::ObjectRef> object
     stepper->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnPrevious"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), StepperBridge::ResetOnPrevious));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "stepper"), stepper);
+}
+
+void ArkUINativeModule::RegisterContainerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
+{
+    auto containerPicker = panda::ObjectRef::New(vm);
+    containerPicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setContainerPickerCanLoop"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ContainerPickerBridge::SetContainerPickerCanLoop));
+    containerPicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetContainerPickerCanLoop"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ContainerPickerBridge::ResetContainerPickerCanLoop));
+    containerPicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setContainerPickerEnableHapticFeedback"),
+        panda::FunctionRef::New(
+            const_cast<panda::EcmaVM*>(vm), ContainerPickerBridge::SetContainerPickerEnableHapticFeedback));
+    containerPicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetContainerPickerEnableHapticFeedback"),
+        panda::FunctionRef::New(
+            const_cast<panda::EcmaVM*>(vm), ContainerPickerBridge::ResetContainerPickerEnableHapticFeedback));
+    containerPicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setContainerPickerSelectionIndicator"),
+        panda::FunctionRef::New(
+            const_cast<panda::EcmaVM*>(vm), ContainerPickerBridge::SetContainerPickerSelectionIndicator));
+    containerPicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetContainerPickerSelectionIndicator"),
+        panda::FunctionRef::New(
+            const_cast<panda::EcmaVM*>(vm), ContainerPickerBridge::ResetContainerPickerSelectionIndicator));
+    containerPicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setContainerPickerOnChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ContainerPickerBridge::SetContainerPickerOnChange));
+    containerPicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetContainerPickerOnChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ContainerPickerBridge::ResetContainerPickerOnChange));
+    containerPicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setContainerPickerOnScrollStop"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ContainerPickerBridge::SetContainerPickerOnScrollStop));
+    containerPicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetContainerPickerOnScrollStop"),
+        panda::FunctionRef::New(
+            const_cast<panda::EcmaVM*>(vm), ContainerPickerBridge::ResetContainerPickerOnScrollStop));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, ""), containerPicker);
 }
 } // namespace OHOS::Ace::NG

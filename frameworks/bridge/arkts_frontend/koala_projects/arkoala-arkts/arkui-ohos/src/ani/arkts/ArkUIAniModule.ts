@@ -45,6 +45,9 @@ export class ArkUIAniModule {
     static {
         loadLibrary('arkoala_native_ani')
     }
+    native static _Extractors_ToDrawableDescriptorPtr(value: DrawableDescriptor, type: int): KPointer;
+    native static _Extractors_ToDrawingColorFilterPtr(drawingColorFilter: drawing.ColorFilter): KPointer;
+    native static _Extractors_ToDrawingLatticePtr(drawingLattice: drawing.Lattice): KPointer;
     native static _Extractors_ToImagePixelMapPtr(pixelmap: image.PixelMap): KPointer;
     native static _Extractors_FromImagePixelMapPtr(ptr: KPointer): image.PixelMap;
     native static _Extractors_ToRectShapePtr(value: RectShape): KPointer;
@@ -385,4 +388,9 @@ export class ArkUIAniModule {
 
     native static _Common_construct(id: KInt, flags: KInt): KPointer
     native static _CommonInterface_setCommonOptions(ptr: KPointer): void
+
+    // for ParallelizeUIAdapter
+    native static _ParallelizeUIAdapterNode_Construct(id: KInt): KPointer
+    native static _ParallelizeUIAdapterNode_Reset(ptr: KPointer): void
+    native static _ParallelizeUIAdapterNode_RegisterCallback(ptr: KPointer, getCount: (() => KInt), getFrame: ((index:KInt, needBuild:KInt, isCache:KInt) =>KPointer)): void
 }

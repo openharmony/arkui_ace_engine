@@ -169,6 +169,13 @@ public:
         return false;
     }
 
+#ifdef ANDROID_PLATFORM
+    virtual bool HandleOnKeyBack()
+    {
+        return false;
+    }
+#endif
+
     virtual bool HandleOnTab(bool backward)
     {
         return false;

@@ -96,8 +96,10 @@ void SetOnChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optCallback = Converter::GetOptPtr(value);
-    // Implement Reset value
-    CHECK_NULL_VOID(optCallback);
+    if (!optCallback) {
+        CalendarPickerModelNG::SetOnChangeWithNode(frameNode, nullptr);
+        return;
+    }
     auto onChange = [arkCallback = CallbackHelper(*optCallback)](const std::string& selectedStr) {
         Ark_Date result = Converter::ArkValue<Ark_Date>(selectedStr);
         arkCallback.Invoke(result);

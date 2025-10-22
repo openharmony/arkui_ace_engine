@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Copyright (c) 2023-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -77,6 +77,7 @@ template("ace_core_interfaces_native_node") {
       "node/node_common_modifier_multi_thread.cpp",
       "node/node_container_modifier.cpp",
       "node/node_container_span_modifier.cpp",
+      "node/node_container_picker_modifier.cpp",
       "node/node_content_modifier.cpp",
       "node/node_custom_node_ext_modifier.cpp",
       "node/node_date_picker_modifier.cpp",
@@ -179,6 +180,7 @@ template("ace_core_interfaces_native_node") {
         "ani/web_ani_modifier.cpp",
         "ani/xbar_ani_modifier.cpp",
         "ani/xcomponent_ani_modifier.cpp",
+        "ani/parallelize_ui_ani_modifier.cpp",
       ]
       if (build_ohos_sdk) {
         sources -= [

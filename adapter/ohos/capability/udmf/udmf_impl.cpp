@@ -218,6 +218,7 @@ int32_t UdmfClientImpl::GetSummary(std::string& key, DragSummaryInfo& dragSummar
     dragSummaryInfo.summaryFormat = summary.summaryFormat;
     dragSummaryInfo.version = summary.version;
     dragSummaryInfo.totalSize = summary.totalSize;
+    dragSummaryInfo.tag = summary.tag;
     return ret;
 }
 

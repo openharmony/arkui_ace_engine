@@ -122,9 +122,11 @@ export class ObserveSingleton implements IObserve {
     public addDirtyRef(trackedRef: ITrackedDecoratorRef): void {
         if (trackedRef.id >= PersistenceV2Impl.MIN_PERSISTENCE_ID) {
             this.persistencePropRefsChanged_.add(trackedRef.weakThis);
-            return;
-        }
-        if (trackedRef.id >= MonitorFunctionDecorator.MIN_MONITOR_ID) {
+        } else if (trackedRef.id >= MonitorFunctionDecorator.MIN_SYNC_MONITOR_ID) {
+            const currentMonitor = (trackedRef as MonitorValueInternal).monitor;
+            currentMonitor.notifyChangesForPath(trackedRef);
+            currentMonitor.runMonitorFunction();
+        } else if (trackedRef.id >= MonitorFunctionDecorator.MIN_MONITOR_ID) {
             this.monitorPathRefsChanged_.add(trackedRef.weakThis);
         } else if (trackedRef.id >= ComputedDecoratedVariable.MIN_COMPUTED_ID) {
             this.computedPropRefsChanged_.add(trackedRef.weakThis);

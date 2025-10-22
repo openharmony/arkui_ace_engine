@@ -1368,6 +1368,10 @@ HWTEST_F(SpanTestNg, SpanOnClick002, TestSize.Level1)
 HWTEST_F(SpanTestNg, SpanOnClick003, TestSize.Level1)
 {
     auto node = CustomSpanNode::GetOrCreateSpanNode(V2::CUSTOM_SPAN_NODE_ETS_TAG, 1);
+    auto pattern = node->GetPattern();
+    ASSERT_NE(pattern, nullptr);
+    auto host = pattern->GetHost();
+    ASSERT_NE(host, nullptr);
     auto customSpanNode = AceType::DynamicCast<CustomSpanNode>(node);
     ASSERT_NE(customSpanNode, nullptr);
     auto customSpan = customSpanNode->GetSpanItem();
