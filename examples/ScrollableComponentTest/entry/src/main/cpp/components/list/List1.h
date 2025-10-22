@@ -99,8 +99,8 @@ private:
 ///////////////////////////////////ListItemGroupAdapter///////////////////////////////////////
 class ListItemGroupAdapter : public ItemAdapter<ListItemGroupComponent> {
 public:
-    ListItemGroupAdapter(std::vector<std::shared_ptr<Component>> &dataSource, const std::vector<int32_t> &groupList)
-        : ItemAdapter(dataSource) 
+    ListItemGroupAdapter(std::vector<std::shared_ptr<Component>>, const std::vector<int32_t> &groupList)
+        : ItemAdapter(dataSource)
     {
         OH_ArkUI_NodeAdapter_SetTotalNodeCount(_adapter, groupList.size());
         int32_t sum = 0;
@@ -110,7 +110,7 @@ public:
         }
     }
     virtual ~ListItemGroupAdapter() {}
-    std::unordered_map<ArkUI_NodeHandle, std::shared_ptr<ListItemGroupComponent>> &getGroup() 
+    std::unordered_map<ArkUI_NodeHandle, std::shared_ptr<ListItemGroupComponent>>& getGroup() 
     {
         return _items;
     }
@@ -137,13 +137,13 @@ public:
     ListComponent(ArkUI_NodeHandle handle) : Component(handle) {}
 
     // 引入懒加载模块。
-    void SetLazyAdapter(const std::shared_ptr<ItemAdapter<ListItemComponent>> &adapter) 
+    void SetLazyAdapter(const std::shared_ptr<ItemAdapter<ListItemComponent>>& adapter) 
     {
         ArkUI_AttributeItem item{ nullptr, 0, nullptr, adapter->GetAdapter() };
         _nodeAPI->setAttribute(_component, NODE_LIST_NODE_ADAPTER, &item);
         _adapter = adapter;
     }
-    void SetLazyAdapterByGroup(const std::shared_ptr<ListItemGroupAdapter> &adapter) 
+    void SetLazyAdapterByGroup(const std::shared_ptr<ListItemGroupAdapter>& adapter) 
     {
         ArkUI_AttributeItem item{ nullptr, 0, nullptr, adapter->GetAdapter() };
         _nodeAPI->setAttribute(_component, NODE_LIST_NODE_ADAPTER, &item);
