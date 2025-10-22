@@ -2303,7 +2303,8 @@ HWTEST_F(JsAccessibilityManagerTest, GetComponentTypeAndPageIdByNodeIdTest001, T
     /**
      * @tc.steps: step2. check get infos by nodeId
      */
-    jsAccessibilityManager->GetComponentTypeAndPageIdByNodeId(root->GetAccessibilityId(), root->GetContextRefPtr(), infoOfNode);
+    jsAccessibilityManager->GetComponentTypeAndPageIdByNodeId(
+        root->GetAccessibilityId(), root->GetContextRefPtr(), infoOfNode);
 
     EXPECT_EQ(infoOfNode.componentType, root->GetTag());
 }

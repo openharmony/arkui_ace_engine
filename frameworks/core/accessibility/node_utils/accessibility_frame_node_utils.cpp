@@ -111,7 +111,6 @@ void GetFrameNodeChildren(
     }
 
     if (frameNode) {
-        CHECK_NULL_VOID(frameNode->IsActive());
         if (uiNode->GetTag() == "page") {
             if (!handleParam.pageNodes.empty() && !IsInPageNodes(uiNode->GetPageId(), handleParam.pageNodes)) {
                 return;
