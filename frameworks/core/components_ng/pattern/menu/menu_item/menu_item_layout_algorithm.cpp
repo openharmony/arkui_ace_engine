@@ -557,10 +557,8 @@ void MenuItemLayoutAlgorithm::MeasureOption(LayoutWrapper* layoutWrapper, const 
     auto idealSize = CreateIdealSize(layoutConstraint.value_or(LayoutConstraintF()), Axis::HORIZONTAL,
         props->GetMeasureType(MeasureType::MATCH_CONTENT), true);
     float maxChildWidth = layoutConstraint->maxSize.Width() - horInterval_ * 2.0f;
-    // measure child
     auto childConstraint = props->CreateChildConstraint();
     childConstraint.maxSize.SetWidth(maxChildWidth);
-    // set self size based on childNode size;
     auto minOptionHeight = static_cast<float>(selectTheme->GetOptionMinHeight().ConvertToPx());
     auto child = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(child);
@@ -570,13 +568,14 @@ void MenuItemLayoutAlgorithm::MeasureOption(LayoutWrapper* layoutWrapper, const 
     if (rowChild && (rowChild->GetHostTag() == V2::PASTE_BUTTON_ETS_TAG) && textAlign != TextAlign::CENTER) {
         auto securityLayoutProperty = DynamicCast<SecurityComponentLayoutProperty>(rowChild->GetLayoutProperty());
         CHECK_NULL_VOID(securityLayoutProperty);
-        securityLayoutProperty->UpdateBackgroundLeftPadding(Dimension(horInterval_));
+        auto horPadding = securityLayoutProperty->GetPlaceholderIconSpace().value_or(Dimension(0.0));
+        securityLayoutProperty->UpdateBackgroundLeftPadding(Dimension(horInterval_ + horPadding.ConvertToPx()));
     }
     UpdateIconMargin(layoutWrapper);
     MeasureRow(layoutWrapper, child, childConstraint);
     auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
     childSize.AddWidth(horInterval_ * 2.0f);
-    idealSize.UpdateSizeWithCheck(childSize);
+    idealSize.UpdateSizeWithCheck(childSize); // set self size based on childNode size;
     auto idealWidth = GetIdealWidth(layoutWrapper);
     if (idealWidth.has_value()) {
         auto optionPaintProperty = optionNode->GetPaintProperty<MenuItemPaintProperty>();

@@ -880,6 +880,7 @@ void GetOptionsParamsHasSymbol(
         params.emplace_back(theme->GetAiMenuOptionName(info->menuInfo.aiMenuOptionType),
             GetMenuCallbackWithContainerId(inheritFunc), "", true);
         params.back().symbolId = theme->GetAIMenuSymbolId();
+        params.back().symbolColor = theme->GetAIMenuSymbolColor();
         params.back().isAIMenuOption = true;
     }
     if (TextSystemMenu::IsShowAskCelia() && info->menuInfo.isAskCeliaEnabled) {
@@ -1057,7 +1058,8 @@ std::string GetItemContent(const std::string& id, const std::string& content,
     return content;
 }
 
-void AddParams(const MenuOptionsParam& item, std::function<void()> callback, std::vector<OptionParam>& params)
+void AddParams(const MenuOptionsParam& item, std::function<void()> callback, std::vector<OptionParam>& params,
+               const std::shared_ptr<SelectOverlayInfo>& info)
 {
     params.emplace_back(
         GetItemContent(item.id, item.content.value_or("")), "", item.labelInfo.value_or(""), callback);
@@ -1065,6 +1067,17 @@ void AddParams(const MenuOptionsParam& item, std::function<void()> callback, std
         params.back().symbolId = item.symbolId.value();
     }
     params.back().disableSystemClick = true;
+    params.back().enabled = IsSystemMenuItemEnabled(info, item.id);
+    params.back().isAIMenuOption = IsAIMenuOption(item.id);
+    params.back().isAskCeliaOption = IsAskCeliaOption(item.id);
+    params.back().icon = item.icon.value_or("");
+    if ((params.back().isAIMenuOption || params.back().isAskCeliaOption) && params.back().symbolId != 0) {
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetTheme<TextOverlayTheme>();
+        CHECK_NULL_VOID(theme);
+        params.back().symbolColor = theme->GetAIMenuSymbolColor();
+    }
 }
 
 void CloseOverlayIfNecessary(const RefPtr<SelectOverlayManager>& overlayManager)
@@ -1119,11 +1132,7 @@ std::vector<OptionParam> GetCreateMenuOptionsParams(const std::vector<MenuOption
                 CloseOverlayIfNecessary(overlayManager);
             }
         };
-        AddParams(item, std::move(callback), params);
-        params.back().enabled = IsSystemMenuItemEnabled(info, item.id);
-        params.back().isAIMenuOption = IsAIMenuOption(item.id);
-        params.back().isAskCeliaOption = IsAskCeliaOption(item.id);
-        params.back().icon = item.icon.value_or("");
+        AddParams(item, std::move(callback), params, info);
         itemNum++;
     }
     return params;
