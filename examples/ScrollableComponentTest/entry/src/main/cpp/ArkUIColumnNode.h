@@ -20,19 +20,14 @@
 
 #include "ArkUINode.h"
 
-class ArkUIColumnNode : public BaseNode {
+namespace NativeModule {
+class ArkUIColumnNode : public ArkUINode {
 public:
     ArkUIColumnNode()
-        : BaseNode(CreateColumnHandle())
+        : ArkUINode((NativeModuleInstance::GetInstance()->GetNativeNodeAPI())->createNode(ARKUI_NODE_COLUMN))
     {
-    }
-
-private:
-    static ArkUI_NodeHandle CreateColumnHandle()
-    {
-        auto api = NodeApiInstance::GetInstance()->GetNativeNodeAPI();
-        return api ? api->createNode(ARKUI_NODE_COLUMN) : nullptr;
     }
 };
+} // namespace NativeModule
 
 #endif // SCROLLABLE_COMPONENT_ARKUICOLUMNNODE_H

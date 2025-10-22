@@ -76,7 +76,7 @@ class BasicDataSource implements IDataSource {
   }
 }
 
-class LoopScrollingDataSource extends BasicDataSource {
+class MyDataSource extends BasicDataSource {
   private dataArray: string[] = [];
 
   public totalCount(): number {
@@ -111,7 +111,7 @@ class LoopScrollingDataSource extends BasicDataSource {
 @Entry
 @Component
 struct Parent {
-  private data: LoopScrollingDataSource = new LoopScrollingDataSource();
+  private data: MyDataSource = new MyDataSource();
   private scroller: Scroller = new Scroller();
 
   build() {
