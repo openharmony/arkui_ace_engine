@@ -566,6 +566,28 @@ Dimension ClampAngleDimension(const std::optional<Dimension>& angle, float minAn
     return CalcDimension(value, DimensionUnit::PX);
 }
 
+void FixBorderWidthDimension(std::optional<Dimension>& dim, bool nonPercent, bool nonNegative, bool resetZero)
+{
+    bool hasValue = dim.has_value();
+    if (nonPercent) {
+        Validator::ValidateNonPercent(dim);
+    }
+    if (nonNegative) {
+        Validator::ValidateNonNegative(dim);
+    }
+    if (resetZero && hasValue) {
+        dim = dim.value_or(Dimension(0));
+    }
+}
+
+void FixBorderWidthProperty(BorderWidthProperty& prop, bool nonPercent, bool nonNegative, bool resetZero)
+{
+    FixBorderWidthDimension(prop.leftDimen, nonPercent, nonNegative, resetZero);
+    FixBorderWidthDimension(prop.topDimen, nonPercent, nonNegative, resetZero);
+    FixBorderWidthDimension(prop.rightDimen, nonPercent, nonNegative, resetZero);
+    FixBorderWidthDimension(prop.bottomDimen, nonPercent, nonNegative, resetZero);
+}
+
 namespace GeneratedModifier {
 namespace CommonMethodModifier {
 void SetBackgroundEffect1Impl(
@@ -1988,27 +2010,36 @@ void SetConstraintSizeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        ViewAbstractModelStatic::SetMinWidth(frameNode, CalcDimension(0.0, DimensionUnit::VP));
-        ViewAbstractModelStatic::SetMinHeight(frameNode, CalcDimension(0.0, DimensionUnit::VP));
-        ViewAbstractModelStatic::SetMaxWidth(frameNode, CalcDimension(std::numeric_limits<double>::infinity()));
-        ViewAbstractModelStatic::SetMaxHeight(frameNode, CalcDimension(std::numeric_limits<double>::infinity()));
+        ViewAbstract::ResetMinSize(frameNode, true);
+        ViewAbstract::ResetMaxSize(frameNode, true);
+        ViewAbstract::ResetMinSize(frameNode, false);
+        ViewAbstract::ResetMaxSize(frameNode, false);
         return;
     }
+    bool version10OrLarger = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN);
     auto minWidth = Converter::OptConvert<CalcDimension>(optValue->minWidth);
     if (minWidth) {
         ViewAbstractModelStatic::SetMinWidth(frameNode, minWidth.value());
+    } else if (version10OrLarger) {
+        ViewAbstract::ResetMinSize(frameNode, true);
     }
     auto minHeight = Converter::OptConvert<CalcDimension>(optValue->minHeight);
     if (minHeight) {
         ViewAbstractModelStatic::SetMinHeight(frameNode, minHeight.value());
+    } else if (version10OrLarger) {
+        ViewAbstract::ResetMinSize(frameNode, false);
     }
     auto maxWidth = Converter::OptConvert<CalcDimension>(optValue->maxWidth);
     if (maxWidth) {
         ViewAbstractModelStatic::SetMaxWidth(frameNode, maxWidth.value());
+    } else if (version10OrLarger) {
+        ViewAbstract::ResetMaxSize(frameNode, true);
     }
     auto maxHeight = Converter::OptConvert<CalcDimension>(optValue->maxHeight);
     if (maxHeight) {
         ViewAbstractModelStatic::SetMaxHeight(frameNode, maxHeight.value());
+    } else if (version10OrLarger) {
+        ViewAbstract::ResetMaxSize(frameNode, false);
     }
 }
 void SetHitTestBehaviorImpl(Ark_NativePointer node,
@@ -2313,32 +2344,52 @@ void SetBorderImpl(Ark_NativePointer node,
     }
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        ViewAbstract::SetBorderWidth(frameNode, Dimension(0));
+        ViewAbstract::SetBorderStyle(frameNode, BorderStyle::SOLID);
+        ViewAbstract::SetBorderWidth(frameNode, BorderWidthProperty {});
+        ViewAbstract::SetBorderColor(frameNode, Color::BLACK);
+        ViewAbstract::SetBorderRadius(frameNode, BorderRadiusProperty {});
+        ViewAbstract::SetDashGap(frameNode, Dimension(-1));
+        ViewAbstract::SetDashWidth(frameNode, Dimension(-1));
         return;
     }
     auto style = Converter::OptConvert<BorderStyleProperty>(optValue->style);
     if (style) {
         ViewAbstractModelStatic::SetBorderStyle(frameNode, style.value());
+    } else {
+        ViewAbstract::SetBorderStyle(frameNode, BorderStyle::SOLID);
     }
     auto width = Converter::OptConvert<BorderWidthProperty>(optValue->width);
     if (width) {
+        FixBorderWidthProperty(width.value(), true, true, true);
         ViewAbstractModelStatic::SetBorderWidth(frameNode, width.value());
+    } else {
+        //Maybe reset BorderWidth after 1.1 fixed.
     }
     auto color = Converter::OptConvert<BorderColorProperty>(optValue->color);
     if (color) {
         ViewAbstractModelStatic::SetBorderColor(frameNode, color.value());
+    } else {
+        ViewAbstract::SetBorderColor(frameNode, Color::BLACK);
     }
     auto radius = Converter::OptConvert<BorderRadiusProperty>(optValue->radius);
     if (radius) {
         ViewAbstractModelStatic::SetBorderRadius(frameNode, radius.value());
+    } else {
+        //BorderRadius should be reset, but 1.1 also not reset when undefined.
     }
     auto dashGap = Converter::OptConvert<BorderWidthProperty>(optValue->dashGap);
     if (dashGap) {
+        FixBorderWidthProperty(dashGap.value(), true, false, true);
         ViewAbstractModelStatic::SetDashGap(frameNode, dashGap.value());
+    } else {
+        //Maybe reset DashGap after 1.1 fixed.
     }
     auto dashWidth = Converter::OptConvert<BorderWidthProperty>(optValue->dashWidth);
     if (dashWidth) {
+        FixBorderWidthProperty(dashWidth.value(), true, false, true);
         ViewAbstractModelStatic::SetDashWidth(frameNode, dashWidth.value());
+    } else {
+        //Maybe reset DashWidth after 1.1 fixed.
     }
 }
 void SetBorderStyleImpl(Ark_NativePointer node,
@@ -2367,11 +2418,12 @@ void SetBorderWidthImpl(Ark_NativePointer node,
         return;
     }
     auto width = Converter::OptConvertPtr<BorderWidthProperty>(value);
-    if (!width) {
-        ViewAbstract::SetBorderWidth(frameNode, Dimension(0));
-        return;
+    if (width) {
+        FixBorderWidthProperty(width.value(), true, true, true);
+        ViewAbstractModelStatic::SetBorderWidth(frameNode, width.value());
+    } else {
+        ViewAbstract::SetBorderWidth(frameNode, BorderWidthProperty {});
     }
-    ViewAbstractModelStatic::SetBorderWidth(frameNode, width.value());
 }
 void SetBorderColorImpl(Ark_NativePointer node,
                         const Opt_Union_ResourceColor_EdgeColors_LocalizedEdgeColors* value)
@@ -2383,13 +2435,11 @@ void SetBorderColorImpl(Ark_NativePointer node,
         return;
     }
     auto color = Converter::OptConvertPtr<BorderColorProperty>(value);
-    if (!color) {
-        BorderColorProperty defaultColor;
-        defaultColor.SetColor(Color::BLACK);
-        ViewAbstractModelStatic::SetBorderColor(frameNode, defaultColor);
-        return;
+    if (color) {
+        ViewAbstractModelStatic::SetBorderColor(frameNode, color.value());
+    } else {
+        ViewAbstract::SetBorderColor(frameNode, Color::BLACK);
     }
-    ViewAbstractModelStatic::SetBorderColor(frameNode, color.value());
 }
 void SetBorderRadiusImpl(Ark_NativePointer node,
                          const Opt_Union_Length_BorderRadiuses_LocalizedBorderRadiuses* value)
@@ -3490,9 +3540,8 @@ void SetFlexGrowImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<float>(value);
-    if (!convValue) {
-        ViewAbstractModelStatic::SetFlexGrow(frameNode, 0.0);
-        return;
+    if (!convValue || (convValue.has_value() && convValue.value() < 0.0f)) {
+        convValue = 0.0f;
     }
     ViewAbstractModelStatic::SetFlexGrow(frameNode, *convValue);
 }
@@ -3502,6 +3551,9 @@ void SetFlexShrinkImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<float>(value);
+    if (convValue.has_value() && convValue.value() < 0.0f) {
+        convValue.reset();
+    }
     if (!convValue) {
         ViewAbstractModelStatic::ResetFlexShrink(frameNode);
         return;
@@ -3516,6 +3568,9 @@ void SetFlexBasisImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvertPtr<Dimension>(value);
     Validator::ValidateNonNegative(convValue);
     Validator::ValidateNonPercent(convValue);
+    if (!convValue) {
+        convValue = Dimension(0, DimensionUnit::AUTO);
+    }
     ViewAbstractModelStatic::SetFlexBasis(frameNode, convValue);
 }
 void SetAlignSelfImpl(Ark_NativePointer node,

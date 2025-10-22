@@ -1431,6 +1431,7 @@ HWTEST_F(SafeAreaManagerTest, IsModeResizeOrIsModeOffset, TestSize.Level1)
         { false, true },
         { false, false }
     };
+    
     for (int i= 0; i < modeArr.size(); ++i) {
         safeAreaManager_->SetKeyBoardAvoidMode(modeArr[i]);
         EXPECT_EQ(safeAreaManager_->IsModeOffset(), expectedRes[i].first);
