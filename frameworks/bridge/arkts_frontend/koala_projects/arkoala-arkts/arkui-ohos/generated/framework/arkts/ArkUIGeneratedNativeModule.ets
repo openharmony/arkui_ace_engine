@@ -3240,6 +3240,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _AxisEvent_getVerticalAxisValue(ptr: KPointer): number
     @ani.unsafe.Direct
+    native static _AxisEvent_hasAxis(ptr: KPointer, axisType: KInt): boolean    
+    @ani.unsafe.Direct
     native static _AxisEvent_getAction(ptr: KPointer): int32
     @ani.unsafe.Direct
     native static _AxisEvent_setAction(ptr: KPointer, action: KInt): void
