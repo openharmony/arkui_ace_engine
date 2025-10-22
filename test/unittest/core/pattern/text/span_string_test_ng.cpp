@@ -2453,7 +2453,7 @@ HWTEST_F(SpanStringTestNg, Tlv010, TestSize.Level1)
         0x46, 0x49, 0x2b, 0x20, 0x0, 0x24, 0x21, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x14, 0x40, 0x0, 0x4a, 0x2b, 0x20, 0x0,
         0x24, 0x21, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x14, 0x40, 0x0, 0x47, 0x2b, 0x20, 0x0, 0x24, 0x21, 0x0, 0x0, 0x0,
         0x0, 0x0, 0x0, 0x14, 0x40, 0x0, 0x48, 0x2b, 0x20, 0x0, 0x24, 0x21, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x14, 0x40,
-        0x0, 0x4b, 0x41 };
+        0x0, 0x4b, 0xa3, 0x00, 0x41 };
     TLVUtil::WriteImageSpanAttribute(buffer, writeImageSpanAttribute);
     EXPECT_TRUE(buffer == result);
 
@@ -2552,6 +2552,28 @@ HWTEST_F(SpanStringTestNg, Tlv015, TestSize.Level1)
     int32_t cursor = 0;
     std::list<std::pair<std::string, int32_t>> list = TLVUtil::ReadFontFeature(buffer, cursor);
     EXPECT_TRUE(list.empty());
+}
+
+/**
+ * @tc.name: Tlv016
+ * @tc.desc: Test basic function of TLV
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, Tlv016, TestSize.Level1)
+{
+    std::vector<uint8_t> buffer;
+    bool writeSupportSvg2 = true;
+    std::vector<uint8_t> result = { 0x01 };
+    TLVUtil::WriteBool(buffer, writeSupportSvg2);
+    EXPECT_EQ(buffer, result);
+
+    int32_t cursor = 0;
+    bool readSupportSvg2 = TLVUtil::ReadBool(buffer, cursor);
+    EXPECT_EQ(writeSupportSvg2, readSupportSvg2);
+    buffer.clear();
+    cursor = 0;
+    readSupportSvg2 = TLVUtil::ReadBool(buffer, cursor);
+    EXPECT_NE(writeSupportSvg2, readSupportSvg2);
 }
 
 /**

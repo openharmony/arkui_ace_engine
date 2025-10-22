@@ -113,6 +113,11 @@ public:
         return contentMainSize_;
     }
 
+    float GetContentCrossSize() const
+    {
+        return contentCrossSize_;
+    }
+
     void SetHeight(float height)
     {
         height_ = height;
@@ -121,6 +126,21 @@ public:
     float GetHeight() const
     {
         return height_;
+    }
+
+    void SetPickerHeight(float height)
+    {
+        pickerDefaultHeight_ = height;
+    }
+
+    void SetPickerHeightBeforeRotate(float height)
+    {
+        pickerHeightBeforeRotate_ = height;
+    }
+
+    void SetItemHeight(float height)
+    {
+        pickerItemHeight_ = height;
     }
 
     void CalcMainAndMiddlePos();
@@ -156,7 +176,6 @@ private:
     bool NeedMeasureAbove(int32_t currentIndex, float currentEndPos, float startMainPos, bool cachedLayout) const;
     void AdjustOffsetOnBelow(float currentEndPos);
     void AdjustOffsetOnAbove(float currentStartPos);
-    float GetChildMainAxisSize(const RefPtr<LayoutWrapper>& childWrapper);
     std::pair<int32_t, PickerItemInfo> CalcCurrentMiddleItem() const;
     void TranslateAndRotate(RefPtr<FrameNode> node, OffsetF& offset);
 
@@ -164,6 +183,7 @@ private:
     ContainerPickerUtils::PositionMap itemPosition_;
     ContainerPickerUtils::PositionMap prevItemPosition_;
     Axis axis_ = Axis::VERTICAL;
+    Alignment align_ = Alignment::CENTER;
 
     std::optional<int32_t> targetIndex_;
     std::set<int32_t> measuredItems_;
@@ -171,20 +191,26 @@ private:
 
     int32_t totalItemCount_ = 0;
     int32_t selectedIndex_ = 0;
+
     float startMainPos_ = 0.0f;
     float endMainPos_ = 0.0f;
     float topPadding_ = 0.0f;
     float height_ = 0.0f;          // usage: record picker real height
     float contentMainSize_ = 0.0f; // usage: picker content area height
+    float contentCrossSize_ = 0.0f; // usage: picker content area width
     float middleItemStartPos_ = 0.0f;
     float middleItemEndPos_ = 0.0f;
     float currentDelta_ = 0.0f;
     float currentOffset_ = 0.0f;
+
+    float pickerItemHeight_ = 0.0f;
+    float pickerDefaultHeight_ = 0.0f;
+    float pickerHeightBeforeRotate_ = 0.0f;
+
     bool crossMatchChild_ = false;
     bool measured_ = false;
     bool isLoop_ = false;
-    bool overScrollFeature_ = false;
-    bool canOverScroll_ = false;
+    bool canOverScroll_ = true;
 
     std::mutex pickerMutex_;
 };

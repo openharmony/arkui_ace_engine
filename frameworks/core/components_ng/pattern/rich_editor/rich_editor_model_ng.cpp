@@ -503,6 +503,14 @@ void RichEditorModelNG::SetOnWillAttachIME(IMEAttachCallback&& func)
     eventHub->SetOnWillAttachIME(std::move(func));
 }
 
+void RichEditorModelNG::SetOnWillAttachIME(FrameNode* frameNode, IMEAttachCallback&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillAttachIME(std::move(func));
+}
+
 void RichEditorModelNG::SetSelectionMenuOptions(const OnCreateMenuCallback&& onCreateMenuCallback,
     const OnMenuItemClickCallback&& onMenuItemClick, const OnPrepareMenuCallback&& onPrepareMenuCallback)
 {
@@ -703,7 +711,16 @@ bool RichEditorModelNG::GetSelectDetectEnable(FrameNode* frameNode)
     CHECK_NULL_RETURN(pattern, false);
     return pattern->GetSelectDetectEnable();
 }
- 
+
+void RichEditorModelNG::ResetSelectDetectEnable()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ResetSelectDetectEnable();
+}
+
 void RichEditorModelNG::ResetSelectDetectEnable(FrameNode* frameNode)
 {
     auto pattern = frameNode->GetPattern<RichEditorPattern>();
@@ -733,7 +750,16 @@ std::vector<TextDataDetectType> RichEditorModelNG::GetSelectDetectConfig(FrameNo
     CHECK_NULL_RETURN(pattern, std::vector<TextDataDetectType>());
     return pattern->GetSelectDetectConfig();
 }
- 
+
+void RichEditorModelNG::ResetSelectDetectConfig()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ResetSelectDetectConfig();
+}
+
 void RichEditorModelNG::ResetSelectDetectConfig(FrameNode* frameNode)
 {
     auto pattern = frameNode->GetPattern<RichEditorPattern>();

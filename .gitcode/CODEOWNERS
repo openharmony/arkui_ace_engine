@@ -112,7 +112,7 @@ adapter/ohos/osal/ace_checker.cpp @arkui_framework_xnode
 adapter/ohos/osal/ace_engine_ext.cpp @ArkUI_Event
 adapter/ohos/osal/ace_trace.cpp @arkui_framework_resource
 adapter/ohos/osal/anr_thread.cpp @arkui_framework_xnode
-adapter/ohos/osal/app_bar_helper_impl.cpp @ArkUI_Event
+adapter/ohos/osal/app_bar_helper_impl.cpp @ArkUI_ability_group
 adapter/ohos/osal/background_task_helper_ohos.cpp @arkui_framework_xnode
 adapter/ohos/osal/background_task_helper_ohos.h @arkui_framework_xnode
 adapter/ohos/osal/BUILD.gn @arkui_architecture
@@ -2060,7 +2060,7 @@ frameworks/core/components/common/properties/tween_option.h @arkui_framework_xno
 frameworks/core/components/common/properties/background_image.h @ArkUI_Event
 frameworks/core/components/common/rotation/ @arkui_navigation
 frameworks/core/components/components.gni @arkui_architecture
-frameworks/core/components/container_modal/ @ArkUI_Event
+frameworks/core/components/container_modal/ @ArkUI_ability_group
 frameworks/core/components/counter/ @arkui001
 frameworks/core/components/coverage/ @arkui_framework_xnode
 frameworks/core/components/custom_dialog/ @arkuipopupwindow_all
@@ -2455,7 +2455,7 @@ frameworks/core/components_ng/manager/toolbar/ @ArkUI_Event
 frameworks/core/components_ng/pattern/ability_component/ @arkuieco3
 frameworks/core/components_ng/pattern/action_sheet/ @arkuipopupwindow_all
 frameworks/core/components_ng/pattern/animator/ @arkuicodepulse
-frameworks/core/components_ng/pattern/app_bar/ @ArkUI_Event
+frameworks/core/components_ng/pattern/app_bar/ @ArkUI_ability_group
 frameworks/core/components_ng/pattern/badge/ @huawei_g_five
 frameworks/core/components_ng/pattern/blank/ @arkuilayout1
 frameworks/core/components_ng/pattern/bubble/ @arkuipopupwindow_all
@@ -2467,7 +2467,7 @@ frameworks/core/components_ng/pattern/canvas/ @arkuieco3
 frameworks/core/components_ng/pattern/checkbox/ @arkuipopupwindow_all
 frameworks/core/components_ng/pattern/checkboxgroup/ @arkuipopupwindow_all
 frameworks/core/components_ng/pattern/common_view/ @ArkUI_Event
-frameworks/core/components_ng/pattern/container_modal/ @ArkUI_Event
+frameworks/core/components_ng/pattern/container_modal/ @ArkUI_ability_group
 frameworks/core/components_ng/pattern/container_picker/ @arkui001
 frameworks/core/components_ng/pattern/counter/ @arkui001
 frameworks/core/components_ng/pattern/custom/ @arkuilayout1
@@ -3435,6 +3435,9 @@ test/mock/core/manager/mock_display_manager.h @arkuilayout1
 test/mock/core/svg/ @arkui001
 test/mock/core/pipeline/ @arkui_framework_xnode
 test/mock/core/common/mock_container.h @arkui_framework_xnode
+test/mock/core/common/mock_interaction_interface.h @ArkUI_Event
+test/mock/ohos_mock/ @arkui_framework_xnode
+
 test/mock/core/render/mock_font_collection.cpp @huawei_g_five
 test/mock/interfaces/ @arkui_architecture
 
@@ -3443,7 +3446,7 @@ test/mock/core/animation/mock_animation_manager.cpp @arkuiscroll
 test/mock/core/animation/mock_animation_proxy.h @arkuiscroll
 test/mock/core/animation/mock_implicit_animation.h @arkuiscroll
 test/mock/core/animation/mock_implicit_animation.cpp @arkuiscroll
-
+test/unittest/adapter/ @arkui_framework_xnode
 test/unittest/core/accessibility/ @ArkUI_ability_group
 test/unittest/core/animation/ @arkuicodepulse
 test/unittest/core/base/ @arkui_framework_xnode
@@ -3478,7 +3481,7 @@ test/unittest/core/manager/force_split_manager_test_ng.cpp  @arkui_navigation
 test/unittest/core/manager/safe_area_manager_test_ng.cpp  @arkuilayout1
 test/unittest/core/manager/navigation_manager_test_ng.cpp  @arkui_navigation
 test/unittest/core/pattern/animator/ @arkuicodepulse
-test/unittest/core/pattern/app_bar/ @ArkUI_Event
+test/unittest/core/pattern/app_bar/ @ArkUI_ability_group
 test/unittest/core/pattern/badge/ @huawei_g_five
 test/unittest/core/pattern/blank/ @arkuilayout1
 test/unittest/core/pattern/bubble/ @arkuipopupwindow_all
@@ -3489,7 +3492,7 @@ test/unittest/core/pattern/canvas/ @arkuieco3
 test/unittest/core/pattern/checkbox/ @arkuipopupwindow_all
 test/unittest/core/pattern/checkboxgroup/ @arkuipopupwindow_all
 test/unittest/core/pattern/common_view/ @arkui_statemgmt
-test/unittest/core/pattern/container_modal/ @ArkUI_Event
+test/unittest/core/pattern/container_modal/ @ArkUI_ability_group
 test/unittest/core/pattern/container_picker/ @arkui001
 test/unittest/core/pattern/counter/ @arkui001
 test/unittest/core/pattern/custom/ @arkuilayout1
@@ -3568,7 +3571,7 @@ test/unittest/core/pattern/progress/ @arkui001
 test/unittest/core/pattern/qrcode/ @arkui001
 test/unittest/core/pattern/radio/ @arkuipopupwindow_all
 test/unittest/core/pattern/rating/ @arkuipopupwindow_all
-test/unittest/core/pattern/recycle_node/ 
+test/unittest/core/pattern/recycle_node/
 test/unittest/core/pattern/refresh/ @arkuiscroll
 test/unittest/core/pattern/relative_container/
 test/unittest/core/pattern/render_node/ @arkui_framework_xnode

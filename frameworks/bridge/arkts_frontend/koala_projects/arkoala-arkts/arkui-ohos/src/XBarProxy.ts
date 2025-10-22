@@ -21,9 +21,9 @@ import { DetachedRootEntryImpl, UIContextImpl } from 'arkui/base/UIContextImpl';
 import {
     GlobalStateManager,
     IncrementalNode,
-    StateContext,
     memoEntry
 } from '@koalaui/runtime';
+import { StateContext } from 'arkui.incremental.runtime.state';
 import { ArkUIAniModule } from "arkui.ani"
 import { OBSERVE } from "./stateManagement";
 import { ObserveSingleton } from '@ohos.arkui.stateManagement';
@@ -103,7 +103,7 @@ export function createXBarCustomComponent<T extends CustomComponent<T, T_Options
     }
     console.log(`[createXBarCustomComponent]instantiateImpl11`)
     const instantiateImpl = /** @memo */ () => {
-        T._instantiateImpl(undefined, factory, undefined, undefined, undefined);
+        T._invokeImpl(undefined, factory, undefined, undefined, undefined);
     };
     console.log(`[createXBarCustomComponent]start getUIContextById ${instanceID}`)
     const uiContext = UIContextUtil.getOrCreateUIContextById(instanceID) as UIContextImpl;

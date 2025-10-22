@@ -20,8 +20,10 @@ ace_unittest("search_test_ng") {
   sources = [
     "search_base.cpp",
     "search_decoration_test_ng.cpp",
+    "search_model_static_test_ng.cpp",
     "search_test_ng.cpp",
     "search_test_update_ng.cpp",
+    "search_testthree_ng.cpp",
     "search_testtwo_ng.cpp",
   ]
 }

@@ -453,6 +453,7 @@ declare class ArkRichEditorComponent extends ArkComponent implements CommonMetho
     onIMEInputComplete(callback: (value: RichEditorTextSpanResult) => void): RichEditorAttribute;
     aboutToDelete(callback: (value: RichEditorDeleteValue) => boolean): RichEditorAttribute;
     onDeleteComplete(callback: () => void): RichEditorAttribute;
+    onWillAttachIME(callback: (Callback<IMEClient> | undefined)): RichEditorAttribute;
     bindSelectionMenu(spanType: RichEditorSpanType, content: CustomBuilder, responseType: ResponseType, options?: SelectionMenuOptions): RichEditorAttribute;
     customKeyboard(value: CustomBuilder): RichEditorAttribute;
     barState(value: BarState): RichEditorAttribute;
@@ -1042,6 +1043,16 @@ declare class ArkTextPickerComponent extends ArkComponent implements TextPickerA
     digitalCrownSensitivity(sensitivity: Optional<CrownSensitivity>): this;
     onScrollStop(callback: (value: string | string[], index: number | number[]) => void): this;
 }
+
+declare class ArkContainerPicker extends ArkComponent implements PickerAttribute {
+    constructor(nativePtr: KNode, classType?: ModifierType);
+    onChange(callback: Optional<OnPickerChangeCallback>): this;
+    onScrollStop(callback: Optional<OnPickerChangeCallback>): this;
+    canLoop(isLoop: Optional<boolean>): this;
+    enableHapticFeedback(enable: Optional<boolean>): this;
+    selectionIndicator(style: Optional<PickerIndicatorStyle>): this;
+}
+
 declare class ArkSliderComponent extends ArkComponent implements SliderAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
     onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this;

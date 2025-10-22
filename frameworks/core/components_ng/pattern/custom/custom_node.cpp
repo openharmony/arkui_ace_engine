@@ -55,11 +55,7 @@ bool CustomNode::Render(int64_t deadline)
             }
         }
         {
-            int32_t id = -1;
-            if (SystemProperties::GetAcePerformanceMonitorEnabled()) {
-                id = Container::CurrentId();
-            }
-            COMPONENT_CREATION_DURATION(id);
+            COMPONENT_CREATION_DURATION();
             std::string reuseId = GetReuseId().empty() ? "-1" : GetReuseId();
             std::string parentInfo = "-1";
             if (SystemProperties::GetDynamicDetectionTraceEnabled()) {

@@ -100,6 +100,13 @@ struct PageRouterOptions {
     bool isNamedRouterMode = false;
 };
 
+typedef struct RouterStateInfo {
+    int32_t index = -1;
+    std::string name;
+    std::string path;
+    std::string params;
+} StateInfo;
+
 class ACE_FORCE_EXPORT Frontend : public AceType {
     DECLARE_ACE_TYPE(Frontend, AceType);
 
@@ -191,7 +198,8 @@ public:
     {
         return nullptr;
     };
-    virtual void PushNamedRouteExtender(const PageRouterOptions& options, std::function<void()>&& finishCallback, void* jsNode)
+    virtual void PushNamedRouteExtender(const PageRouterOptions& options,
+        std::function<void()>&& finishCallback, void* jsNode)
     {
         return;
     }
@@ -200,7 +208,8 @@ public:
     {
         return nullptr;
     };
-    virtual void ReplaceNamedRouteExtender(const PageRouterOptions& options, std::function<void()>&& finishCallback, void* jsNode)
+    virtual void ReplaceNamedRouteExtender(const PageRouterOptions& options,
+        std::function<void()>&& finishCallback, void* jsNode)
     {
         return;
     }
@@ -491,6 +500,31 @@ public:
     virtual int32_t GetLengthFromDynamicExtender()
     {
         return 0;
+    }
+    // getParams from ArkTS1.1
+    virtual std::string GetParamsFromDynamicExtender()
+    {
+        return "";
+    }
+    // getStateByUrl from ArkTS1.1
+    virtual bool GetStateByUrlFromDynamicExtender(const std::string& url, std::vector<RouterStateInfo>& stateArray)
+    {
+        return false;
+    }
+    // getStateByIndex from ArkTS1.1
+    virtual bool GetStateByIndexFromDynamicExtender(int32_t index, RouterStateInfo& state)
+    {
+        return false;
+    }
+    // getState from ArkTS1.1
+    virtual bool GetStateFromDynamicExtender(RouterStateInfo& state)
+    {
+        return false;
+    }
+    // from pageIndex when ArkTS1.2 push ArkTS1.1
+    virtual int32_t GetCurrentPageIndex() const
+    {
+        return -1;
     }
 
     void SetSubFrontend(const WeakPtr<Frontend>& subFrontend)

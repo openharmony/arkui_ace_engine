@@ -21,13 +21,20 @@ interface routerInfo {
 }
 
 let routerData: routerInfo[] = [
-  { url: 'pages/List/divider/dividerColor', info: 'divider_Color' },
-  { url: 'pages/List/divider/dividerEndMargin', info: 'divider_EndMargin' },
-  { url: 'pages/List/divider/dividerStartMargin', info: 'divider_StartMargin' },
-  { url: 'pages/List/divider/dividerStrokeWidth', info: 'divider_StrokeWidth' },
-  { url: 'pages/List/friction/friction', info: 'friction' },
-  { url: 'pages/List/Lanes/lanesMaxLength', info: 'lanes_MaxLength' },
-  { url: 'pages/List/Lanes/lanesMinLength', info: 'lanes_MinLength' }
+  { url: 'pages/List/dividerColor', info: 'divider_Color' },
+  { url: 'pages/List/dividerEndMargin', info: 'divider_EndMargin' },
+  { url: 'pages/List/dividerStartMargin', info: 'divider_StartMargin' },
+  { url: 'pages/List/dividerStrokeWidth', info: 'divider_StrokeWidth' },
+  { url: 'pages/List/friction', info: 'friction' },
+  { url: 'pages/List/lanesMaxLength', info: 'lanes_MaxLength' },
+  { url: 'pages/List/lanesMinLength', info: 'lanes_MinLength' },
+  { url: "pages/List/LayoutConstraints/OneItem", info: "高：单子组件" },
+  { url: "pages/List/LayoutConstraints/TwoItem", info: "高：多子组件" },
+  { url: "pages/List/LayoutConstraints/WidthOneItem", info: "宽：单子组件" },
+  { url: "pages/List/LayoutConstraints/WidthTwoItem", info: "宽：多子组件" },
+  { url: "pages/List/LayoutConstraints/OriOneItem", info: "文本10w+" },
+  { url: "pages/List/LayoutConstraints/ListItemMoveHeight", info: "高：list拖拽" },
+  { url: "pages/List/LayoutConstraints/ListItemMoveWidth", info: "宽：list拖拽" }
 ]
 
 @Entry

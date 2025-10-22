@@ -23,6 +23,7 @@ class Want;
 class WantParams;
 } // namespace OHOS::AAFwk
 
+// For Arkts Dynamic
 namespace OHOS::Ace::NG {
 class ACE_EXPORT DynamicModelNG : public UIExtensionModelNG {
 public:

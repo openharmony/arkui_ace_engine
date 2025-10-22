@@ -50,7 +50,7 @@ declare enum EventQueryType {
 
 declare type UIStatesChangeHandler = (node: FrameNode, currentUIStates: number) => void;
 
-function getFrameNodeRawPtr(frameNode) {
+function getFrameNodeRawPtr(frameNode: FrameNode): number {
     return getUINativeModule().frameNode.getFrameNodeRawPtr(frameNode.nodePtr_);
 }
 
@@ -67,7 +67,7 @@ class FrameNode extends Disposable {
   protected baseNode_: BaseNode;
   protected builderNode_: JSBuilderNode;
   protected uiContext_: UIContext | undefined | null;
-  protected nodePtr_: NodePtr;
+  public nodePtr_: NodePtr;
   protected instanceId_?: number;
   private nodeAdapterRef_?: NodeAdapter;
   constructor(uiContext: UIContext, type: string, options?: object) {
@@ -793,14 +793,6 @@ class ProxyFrameNode extends ImmutableFrameNode {
       return null;
     }
     return this.nodePtr_;
-  }
-  dispose(): void {
-    this.isDisposed_ = true;
-    this.renderNode_?.dispose();
-    FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.delete(this._nodeId);
-    this._nodeId = -1;
-    this._nativeRef = undefined;
-    this.nodePtr_ = undefined;
   }
   moveTo(targetParent: FrameNode, index?: number): void {
     throw { message: 'The FrameNode is not modifiable.', code: 100021 };

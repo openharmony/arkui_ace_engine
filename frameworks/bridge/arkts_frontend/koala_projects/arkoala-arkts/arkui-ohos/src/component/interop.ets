@@ -17,7 +17,8 @@ import { ArkUIAniModule } from 'arkui.ani'
 import { KPointer } from '@koalaui/interop';
 import { PeerNode, findPeerNode } from '../PeerNode';
 import { int32 } from '@koalaui/common';
-import { __context, __id, GlobalStateManager, IncrementalNode, memoEntry, memoEntry1, mutableState, MutableState, NodeAttach, StateContext } from '@koalaui/runtime';
+import { __context, __id, GlobalStateManager, IncrementalNode, memoEntry, memoEntry1, mutableState, MutableState, NodeAttach } from '@koalaui/runtime';
+import { StateContext } from 'arkui.incremental.runtime.state';
 import { ExtendableComponent } from './extendableComponent';
 import { 
     StateDecoratedVariable, 
@@ -28,10 +29,9 @@ import {
     InteropWatchFunc,
     uiUtils,
     IObservedObject,
-    OBSERVE,
-    ObserveSingleton,
-    IStateDecoratedVariable
+    OBSERVE
 } from '../stateManagement';
+import { ObserveSingleton } from "arkui/stateManagement/base/observeSingleton";
 import { IDecoratedV1Variable, WatchFuncType, WatchIdType } from '../stateManagement/decorator';
 import { UIContextUtil } from 'arkui/base/UIContextUtil';
 import { DetachedRootEntryImpl, UIContextImpl } from 'arkui/base/UIContextImpl';
@@ -53,6 +53,7 @@ export class CompatiblePeerNode extends PeerNode {
     protected constructor(peerPtr: KPointer, id: int32, view: ESValue, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags);
         this.view = view;
+        this.view.setProperty('isCompFreezeAllowed_', ESValue.wrap(true));
     }
     public view: ESValue;
     public static create(_peerPtr: KPointer, view: ESValue, flags: int32 = 0): CompatiblePeerNode {
@@ -60,7 +61,23 @@ export class CompatiblePeerNode extends PeerNode {
         const _peer = new CompatiblePeerNode(_peerPtr, peerId, view, 'ComponentRoot', flags);
         return _peer;
     }
-} 
+    private staticParent?: ExtendableComponent;
+    private onActiveChange: (active: boolean, isReuse: boolean) => void = (active: boolean, isReuse: boolean): void => {
+        this.setActive(active);
+    };
+    public setStaticParent(parent: ExtendableComponent): void {
+        this.staticParent = parent;
+        this.staticParent!.addActiveChangeListenerForInterop(this.onActiveChange);
+    }
+    public setActive(active: boolean): void {
+        this.view.invokeMethod('setActiveInternal', ESValue.wrap(active));
+    }
+    public dispose(): void {
+        this.staticParent!.removeActiveChangeListenerForInterop(this.onActiveChange);
+        this.staticParent = undefined;
+        super.dispose();
+    }
+}
 
 export interface CompatibleComponentInfo {
     name: string,
@@ -92,7 +109,9 @@ export function compatibleComponent(
         const dynamicComponent = result.component;
         const nodePtr = ArkUIAniModule._PopViewStackProcessor();
         ArkUIAniModule._DeleteViewStackProcessor(ptr);
-        return CompatiblePeerNode.create(nodePtr, dynamicComponent);
+        const node = CompatiblePeerNode.create(nodePtr, dynamicComponent);
+        node.setStaticParent(staticComponent);
+        return node;
     }, (node: CompatiblePeerNode) => {
         update(node.view);
     });
@@ -101,11 +120,11 @@ export function compatibleComponent(
 function getInstantiateImplMethod(param: ClassType): Method {
     for (let methodIdx = 0; methodIdx < param.getMethodsNum(); ++methodIdx) {
         const method = param.getMethod(methodIdx);
-        if (method.getName() === '_instantiateImpl') {
+        if (method.getName() === '_invokeImpl') {
             return method;
         }
     }
-    throw new Error('cannot find method _instantiateImpl');
+    throw new Error('cannot find method _invokeImpl');
 }
 
 export function compatibleStaticComponent<T extends BaseCustomComponent<T_Options>, T_Options>(
@@ -116,7 +135,7 @@ export function compatibleStaticComponent<T extends BaseCustomComponent<T_Option
     const instantiateImpl = /** @memo */ (): void => {
         const instance = factory();
         const method = getInstantiateImplMethod(Type.of(instance) as ClassType);
-        method.invoke(null, [__context(), __id(), undefined, factory, options ? options() : undefined, undefined, content]);
+        method.invoke(null, [__context(), __id(), undefined, factory, options, undefined, content]);
     };
 
     const uiContext = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
@@ -421,14 +440,36 @@ export function compatibleWrappedBuilderInternal(builder: Any, ...args: FixedArr
         if (param.typeOf() !== 'object') {
             return;
         }
-        let it = param.keys();
         const stateParam = instance.getProperty('arg1') as ESValue;
-        while (true) {
-            const result = it.next()
-            if (result.done) {
-                break;
+        const rawValue = param.unwrap()!;
+        if (isDynamicObject(rawValue)) {
+            let it = param.keys();
+            while (true) {
+                const result = it.next();
+                if (result.done) {
+                    break;
+                }
+                stateParam.setProperty(result.value as ESValue, param.getProperty(result.value as ESValue));
             }
-            stateParam.setProperty(result.value as ESValue, param.getProperty(result.value as ESValue));
+        }
+        else {
+            const target = (reflect.Value.of(rawValue) as ClassValue).getFieldByName('@target').getData() as Object;
+            const keys = Object.keys(target);
+            if (rawValue instanceof IObservedObject) {
+                const PREFIX = '__backing_';
+                keys.forEach((key)=>{
+                    if(key.startsWith(PREFIX)){
+                        const value = (reflect.Value.of(target) as ClassValue).getFieldByName(key).getData() as Object;
+                        stateParam.setProperty(key.slice(PREFIX.length), value);
+                    }
+                })
+            }
+            else {
+                keys.forEach((key)=>{
+                    const value = (reflect.Value.of(target) as ClassValue).getFieldByName(key).getData() as Object;
+                    stateParam.setProperty(key, value);
+                })
+            }
         }
         const global = ESValue.getGlobal();
         const runPendingJobs = global.getProperty('runPendingJobs');
@@ -587,11 +628,17 @@ export function registerCreateCompatibleStaticState(): void {
     registerCallback.invoke(createCompatibleStaticState);
 }
 
-function createCompatibleStaticState<T>(dynamicValue: Object): IStateDecoratedVariable<T> {
+function createCompatibleStaticState<T>(dynamicValue: Object): ProvideDecoratedVariable<T> {
     const value = ESValue.wrap(dynamicValue);
     const getProxy = value.invokeMethod('getProxy').unwrap();
     if (getProxy === undefined) {
-        const stateVar = new StateDecoratedVariable<T>(null, 'proxy', uiUtils.makeObserved(value.invokeMethod('get').unwrap()) as T);
+        const stateVar = new ProvideDecoratedVariable<T>(
+          ExtendableComponent.current as ExtendableComponent,
+          "proxy",
+          "proxy",
+          uiUtils.makeObserved(value.invokeMethod("get").unwrap()) as T,
+          false
+        );
         value.invokeMethod('setProxy', ESValue.wrap(stateVar));
         const setProxyValue = ((newVal: T): void => {
             value.invokeMethod('set', ESValue.wrap(newVal));
@@ -613,7 +660,7 @@ function createCompatibleStaticState<T>(dynamicValue: Object): IStateDecoratedVa
         return stateVar;
     }
     else {
-        return getProxy as IStateDecoratedVariable<T>
+        return getProxy as ProvideDecoratedVariable<T>;
     }
 }
 

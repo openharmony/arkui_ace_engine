@@ -19,6 +19,7 @@ import image from '@ohos.multimedia.image';
 import webview from '@ohos.web.webview';
 import common from '@ohos.app.ability.common';
 import unifiedDataChannel from '@ohos.data.unifiedDataChannel';
+import uniformTypeDescriptor from '@ohos.data.uniformTypeDescriptor';
 import { LocalStorage } from '@ohos.arkui.stateManagement';
 import { DrawContext } from 'arkui.Graphics';
 import { AnimatableArithmetic, DrawModifier, AsyncCallback, Callback, DragItemInfo, ResourceColor, DragPreviewOptions, DragInteractionOptions, ExpectedFrameRateRange } from '#generated';
@@ -44,6 +45,9 @@ export class ArkUIAniModule {
     static {
         loadLibrary('arkoala_native_ani')
     }
+    native static _Extractors_ToDrawableDescriptorPtr(value: DrawableDescriptor, type: int): KPointer;
+    native static _Extractors_ToDrawingColorFilterPtr(drawingColorFilter: drawing.ColorFilter): KPointer;
+    native static _Extractors_ToDrawingLatticePtr(drawingLattice: drawing.Lattice): KPointer;
     native static _Extractors_ToImagePixelMapPtr(pixelmap: image.PixelMap): KPointer;
     native static _Extractors_FromImagePixelMapPtr(ptr: KPointer): image.PixelMap;
     native static _Extractors_ToRectShapePtr(value: RectShape): KPointer;
@@ -168,9 +172,11 @@ export class ArkUIAniModule {
     native static _DragEvent_Set_ExtraInfo(ptr: KLong, extraInfo: string) : void
     native static _DragEvent_Set_CustomNode(ptr: KLong, customNode: KPointer) : void
     native static _Drag_Set_AllowDrop_Null(ptr: KLong) : void
-    native static _Drag_Set_AllowDrop(ptr: KPointer, thisArray: Array<string>, thisLength: KInt): void
+    native static _Drag_Set_AllowDrop(ptr: KPointer, thisArray: Array<uniformTypeDescriptor.UniformDataType> | undefined): void
     native static _Drag_Set_DragPreview(ptr: KPointer, dragInfo: HookDragInfo): void
     native static _Drag_Set_DragPreviewOptions(ptr: KPointer, value: DragPreviewOptions | undefined, options?: DragInteractionOptions): void
+    native static _Extractors_toUnifiedDataChannelUnifiedDataPtr(value: unifiedDataChannel.UnifiedData) : KPointer
+    native static _Extractors_fromUnifiedDataChannelUnifiedDataPtr(ptr: KPointer) : unifiedDataChannel.UnifiedData
 
     native static _createDragEventAccessorWithPointer(input: KPointer) : KPointer
     native static _getDragEventPointer(input: KPointer): KPointer
@@ -379,4 +385,12 @@ export class ArkUIAniModule {
     native static _XBar_Set_ComponentCreateFunc(value: (isTitlebar: KInt, instanceID: KInt) => KLong): void;
     native static _XBar_Set_JsFunc(ptr: KLong, component: Any): void
     native static _XBar_Call_Native(xBarType: KInt, callType: string, message: string): void
+
+    native static _Common_construct(id: KInt, flags: KInt): KPointer
+    native static _CommonInterface_setCommonOptions(ptr: KPointer): void
+
+    // for ParallelizeUIAdapter
+    native static _ParallelizeUIAdapterNode_Construct(id: KInt): KPointer
+    native static _ParallelizeUIAdapterNode_Reset(ptr: KPointer): void
+    native static _ParallelizeUIAdapterNode_RegisterCallback(ptr: KPointer, getCount: (() => KInt), getFrame: ((index:KInt, needBuild:KInt, isCache:KInt) =>KPointer)): void
 }

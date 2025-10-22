@@ -21,11 +21,11 @@
 #include "base/log/log_wrapper.h"
 
 namespace OHOS::Ace::NG {
-XbarProxyWrapper* XbarProxyWrapper::instance_ = new (std::nothrow) XbarProxyWrapper();
 
 XbarProxyWrapper* XbarProxyWrapper::GetInstance()
 {
-    return instance_;
+    static XbarProxyWrapper instance;
+    return &instance;
 }
 
 void XbarProxyWrapper::InitXBarCreator(std::function<int64_t(const int32_t&, const int32_t&)>&& aniComponentCreateFunc_)
@@ -59,14 +59,14 @@ void XbarProxyWrapper::SetSetCustomCallbackFunc(
     xbarFuncMap_[ptr].setCustomCallbackFunc = std::move(setCustomCallbackFunc);
 }
 
-std::shared_ptr<XbarComponent> XbarProxyWrapper::CreateXBarComponent(const int32_t& xbarType, const int32_t& instanceID)
+RefPtr<XbarComponent> XbarProxyWrapper::CreateXBarComponent(const int32_t& xbarType, const int32_t& instanceID)
 {
     if (!componentCreateFunc_) {
         TAG_LOGE(AceLogTag::ACE_APPBAR, "component create func is empty");
         return nullptr;
     }
     int64_t componentPointLong = componentCreateFunc_(xbarType, instanceID);
-    auto xbarComponent = std::make_shared<XbarComponent>(componentPointLong);
+    auto xbarComponent = AceType::MakeRefPtr<XbarComponent>(static_cast<intptr_t>(componentPointLong));
     auto xbarFuncInfoIter = xbarFuncMap_.find(componentPointLong);
     if (xbarFuncInfoIter != xbarFuncMap_.end()) {
         xbarComponent->SetOnWindowFocusedFunc(std::move(xbarFuncInfoIter->second.onWindowFocusedFunc));
@@ -74,7 +74,7 @@ std::shared_ptr<XbarComponent> XbarProxyWrapper::CreateXBarComponent(const int32
         xbarComponent->SetSetAppTitleFunc(std::move(xbarFuncInfoIter->second.setAppTitleFunc));
         xbarComponent->SetSetAppIconFunc(std::move(xbarFuncInfoIter->second.setAppIconFunc));
         xbarComponent->SetSetCustomCallbackFunc(std::move(xbarFuncInfoIter->second.setCustomCallbackFunc));
-        instance_->xbarFuncMap_.erase(componentPointLong);
+        XbarProxyWrapper::GetInstance()->xbarFuncMap_.erase(componentPointLong);
     }
     return xbarComponent;
 }

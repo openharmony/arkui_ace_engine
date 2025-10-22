@@ -1,3 +1,4 @@
+import { int32 } from "@koalaui/common";
 import { KPointer } from "@koalaui/interop";
 import { default as image } from "@ohos.multimedia.image";
 import { ColorMetrics, DrawContext, LengthMetrics, Size } from "arkui.Graphics";
@@ -29,7 +30,12 @@ import {
 import { ExtensionAbilityInfo } from "bundleManager.ExtensionAbilityInfo";
 import { Metadata } from "bundleManager.Metadata";
 import { Skill, SkillUri } from "bundleManager.Skill";
-import { DrawableDescriptor } from "@ohos.arkui.drawableDescriptor";
+import {
+  DrawableDescriptor,
+  PixelMapDrawableDescriptor,
+  LayeredDrawableDescriptor,
+  AnimatedDrawableDescriptor
+} from "@ohos.arkui.drawableDescriptor";
 import {
   RectShape,
   CircleShape,
@@ -37,6 +43,7 @@ import {
   PathShape,
 } from "@ohos.arkui.shape";
 import { FrameNode } from "arkui.FrameNode";
+import { RenderNode } from "arkui.RenderNode";
 import { default as resourceManager } from "@ohos.resourceManager";
 import { LevelOrder } from "@ohos.promptAction";
 import { SymbolGlyphModifier } from "../SymbolGlyphModifier";
@@ -70,6 +77,7 @@ import { UIContextImpl } from 'arkui/base/UIContextImpl';
 import { int32 } from '@koalaui/common';
 import { FrameNodeUtils, FrameNodeInternal } from './../FrameNode';
 import { toPeerPtr } from '@koalaui/interop';
+import { ComponentContentBase } from 'arkui/ComponentContent';
 import { applySymbolGlyphModifierToNode, applyTextModifierToNode } from "./../ApplyModifierToNode"
 
 export namespace extractors {
@@ -86,6 +94,14 @@ export namespace extractors {
   export function fromColorMetricsPtr(ptr: KPointer): ColorMetrics {
     const x: Object = {};
     return x as ColorMetrics;
+  }
+
+  export function toComponentContentBasePtr(value: ComponentContentBase): KPointer {
+    return 123;
+  }
+  export function fromComponentContentBasePtr(ptr: KPointer): ComponentContentBase {
+    const x: Object = {};
+    return x as ComponentContentBase;
   }
 
   export function toDrawContextPtr(ptr: DrawContext): KPointer {
@@ -109,6 +125,14 @@ export namespace extractors {
   export function fromNodeControllerPtr(ptr: KPointer): NodeController {
     const x: Object = {};
     return x as NodeController;
+  }
+
+  export function toRenderNodePtr(value: RenderNode): KPointer {
+    return value.getPeer()!.ptr;
+  }
+  export function fromRenderNodePtr(ptr: KPointer): RenderNode {
+    const x: Object = {};
+    return x as RenderNode;
   }
 
   export function toFrameNodePtr(value: FrameNode): KPointer {
@@ -178,7 +202,7 @@ export namespace extractors {
   export function toDrawingColorFilterPtr(
     value: drawing.ColorFilter
   ): KPointer {
-    return 123;
+    return ArkUIAniModule._Extractors_ToDrawingColorFilterPtr(value);
   }
   export function fromDrawingColorFilterPtr(
     ptr: KPointer
@@ -188,7 +212,7 @@ export namespace extractors {
   }
 
   export function toDrawingLatticePtr(value: drawing.Lattice): KPointer {
-    return 123;
+    return ArkUIAniModule._Extractors_ToDrawingLatticePtr(value);
   }
   export function fromDrawingLatticePtr(ptr: KPointer): drawing.Lattice {
     const x: Object = {};
@@ -216,13 +240,13 @@ export namespace extractors {
   export function toUnifiedDataChannelUnifiedDataPtr(
     value: unifiedDataChannel.UnifiedData
   ): KPointer {
-    return 123;
+    return ArkUIAniModule._Extractors_toUnifiedDataChannelUnifiedDataPtr(value);
   }
   export function fromUnifiedDataChannelUnifiedDataPtr(
     ptr: KPointer
   ): unifiedDataChannel.UnifiedData {
     const x: Object = {};
-    return x as unifiedDataChannel.UnifiedData;
+    return ArkUIAniModule._Extractors_fromUnifiedDataChannelUnifiedDataPtr(ptr);
   }
 
   export function toUnifiedDataChannelSummaryPtr(
@@ -282,9 +306,22 @@ export namespace extractors {
   ): webview.WebviewController {
     return ArkUIAniModule._Extractors_FromWebviewWebviewControllerPtr(ptr);
   }
-
+  enum DrawableType {
+    BASE = 0,
+    LAYERED = 1,
+    ANIMATED = 2,
+    PIXELMAP = 3
+  };
   export function toDrawableDescriptorPtr(value: DrawableDescriptor): KPointer {
-    return 123;
+    let type: DrawableType = DrawableType.BASE;
+    if (value instanceof PixelMapDrawableDescriptor) {
+      type = DrawableType.PIXELMAP;
+    } else if (value instanceof LayeredDrawableDescriptor) {
+      type = DrawableType.LAYERED;
+    } else if (value instanceof AnimatedDrawableDescriptor) {
+      type = DrawableType.ANIMATED;
+    }
+    return ArkUIAniModule._Extractors_ToDrawableDescriptorPtr(value, type);
   }
   export function fromDrawableDescriptorPtr(ptr: KPointer): DrawableDescriptor {
     const x: Object = {};

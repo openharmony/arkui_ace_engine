@@ -83,6 +83,8 @@ struct TextEditingValue {
 #if defined(CROSS_PLATFORM)
     TextCompose compose;
     bool unmarkText;
+    bool discardedMarkedText;
+    bool stopBackPress;
 #endif
 };
 

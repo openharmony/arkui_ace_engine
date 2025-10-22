@@ -5646,7 +5646,6 @@ void ViewAbstract::AddOverlayToFrameNode(const RefPtr<NG::FrameNode>& overlayNod
     layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     layoutProperty->UpdateAlignment(align.value_or(Alignment::TOP_LEFT));
     layoutProperty->SetOverlayOffset(offsetX, offsetY);
-    layoutProperty->UpdateLayoutDirection(direction);
     auto renderContext = overlayNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateZIndex(INT32_MAX);
@@ -5939,6 +5938,14 @@ void ViewAbstract::SetRenderFit(RenderFit renderFit)
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(RenderFit, renderFit);
+}
+
+void ViewAbstract::SetCornerApplyType(CornerApplyType cornerApplyType)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(CornerApplyType, cornerApplyType);
 }
 
 void ViewAbstract::SetAttractionEffect(const AttractionEffect& effect)
@@ -6540,7 +6547,6 @@ void ViewAbstract::SetOverlayNode(FrameNode* frameNode, FrameNode* node, const N
     layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     layoutProperty->UpdateAlignment(overlay.align);
     layoutProperty->SetOverlayOffset(overlay.x, overlay.y);
-    layoutProperty->UpdateLayoutDirection(overlay.direction);
     auto renderContext = overlayNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateZIndex(INT32_MAX);

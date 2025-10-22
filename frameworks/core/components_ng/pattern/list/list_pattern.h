@@ -371,6 +371,8 @@ public:
     }
 
     RefPtr<ListChildrenMainSize> GetOrCreateListChildrenMainSize();
+    void UpdateChildrenMainSizeRoundingMode();
+    void UpdateChildrenMainSizeRoundingModeMultiThread();
     void SetListChildrenMainSize(float defaultSize, const std::vector<float>& mainSize);
     virtual void OnChildrenSizeChanged(std::tuple<int32_t, int32_t, int32_t> change, ListChangeFlag flag);
     void ResetChildrenSize();

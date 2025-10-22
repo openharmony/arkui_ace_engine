@@ -15,8 +15,6 @@
 
 #include "adapter/preview/entrance/ui_session/ui_session_manager_preview.h"
 namespace OHOS::Ace {
-std::mutex UiSessionManager::mutex_;
-std::shared_mutex UiSessionManager::reportObjectMutex_;
 UiSessionManager* UiSessionManager::GetInstance()
 {
     static UiSessionManagerPreview instance;

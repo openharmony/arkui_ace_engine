@@ -329,10 +329,10 @@ void SetSelectedOptionFontImpl(Ark_NativePointer node,
         SelectModelNG::SetSelectedOptionFontFamily(frameNode, arkVal->fontFamilies);
         SelectModelStatic::SetSelectedOptionItalicFontStyle(frameNode, arkVal->fontStyle);
     } else {
-        SelectModelStatic::SetFontSize(frameNode, std::nullopt);
-        SelectModelStatic::SetFontWeight(frameNode, std::nullopt);
-        SelectModelNG::SetFontFamily(frameNode, {});
-        SelectModelStatic::SetItalicFontStyle(frameNode, std::nullopt);
+        SelectModelStatic::SetSelectedOptionFontSize(frameNode, std::nullopt);
+        SelectModelStatic::SetSelectedOptionFontWeight(frameNode, std::nullopt);
+        SelectModelNG::SetSelectedOptionFontFamily(frameNode, {});
+        SelectModelStatic::SetSelectedOptionItalicFontStyle(frameNode, std::nullopt);
     }
 }
 void SetSelectedOptionFontColorImpl(Ark_NativePointer node,
@@ -361,10 +361,10 @@ void SetOptionFontImpl(Ark_NativePointer node,
         SelectModelNG::SetOptionFontFamily(frameNode, arkVal->fontFamilies);
         SelectModelStatic::SetOptionItalicFontStyle(frameNode, arkVal->fontStyle);
     } else {
-        SelectModelStatic::SetFontSize(frameNode, std::nullopt);
-        SelectModelStatic::SetFontWeight(frameNode, std::nullopt);
-        SelectModelNG::SetFontFamily(frameNode, {});
-        SelectModelStatic::SetItalicFontStyle(frameNode, std::nullopt);
+        SelectModelStatic::SetOptionFontSize(frameNode, std::nullopt);
+        SelectModelStatic::SetOptionFontWeight(frameNode, std::nullopt);
+        SelectModelNG::SetOptionFontFamily(frameNode, {});
+        SelectModelStatic::SetOptionItalicFontStyle(frameNode, std::nullopt);
     }
 }
 void SetOptionFontColorImpl(Ark_NativePointer node,

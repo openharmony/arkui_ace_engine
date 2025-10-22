@@ -2365,10 +2365,7 @@ std::optional<UITask> FrameNode::CreateRenderTask(bool forceUseMainThread)
         ACE_SCOPED_TRACE("FrameNode[%s][id:%d][parentId:%d]::RenderTask", self->GetTag().c_str(),
             self->GetId(), self->GetParent()? self->GetParent()->GetId() : -1);
         auto pipeline = PipelineContext::GetCurrentContext();
-        if (pipeline) {
-            auto id = pipeline->GetInstanceId();
-            ArkUIPerfMonitor::GetPerfMonitor(id)->RecordRenderNode();
-        }
+        ArkUIPerfMonitor::GetInstance().RecordRenderNode();
         wrapper->FlushRender();
         paintProperty->CleanDirty();
         auto eventHub = self->GetEventHub<NG::EventHub>();
@@ -4974,10 +4971,7 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
                                                        : "NA");
     }
     auto pipeline = GetContext();
-    if (pipeline) {
-        auto id = pipeline->GetInstanceId();
-        ArkUIPerfMonitor::GetPerfMonitor(id)->RecordLayoutNode();
-    }
+    ArkUIPerfMonitor::GetInstance().RecordLayoutNode();
     isLayoutComplete_ = false;
     if (!oldGeometryNode_) {
         oldGeometryNode_ = geometryNode_->Clone();
@@ -5655,7 +5649,13 @@ void FrameNode::LayoutOverlay()
     auto childLayoutProperty = overlayNode_->GetLayoutProperty();
     CHECK_NULL_VOID(childLayoutProperty);
     childLayoutProperty->GetOverlayOffset(offsetX, offsetY);
-    auto direction = childLayoutProperty->GetNonAutoLayoutDirection();
+    auto renderContext = GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto options = renderContext->GetOverlayTextValue(NG::OverlayOptions());
+    auto direction = options.direction;
+    if (direction == TextDirection::AUTO) {
+        direction = AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR;
+    }
     if (direction == TextDirection::RTL) {
         offsetX = -offsetX;
     }
@@ -5668,6 +5668,8 @@ void FrameNode::LayoutOverlay()
     auto translate = Alignment::GetAlignPositionWithDirection(size, childSize, align, direction) + offset;
     overlayNode_->GetGeometryNode()->SetMarginFrameOffset(translate);
     overlayNode_->Layout();
+    overlayNode_->SetActive(true);
+    overlayNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void FrameNode::DoRemoveChildInRenderTree(uint32_t index, bool isAll)
@@ -5704,7 +5706,7 @@ void FrameNode::DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheS
 void FrameNode::OnInspectorIdUpdate(const std::string& id)
 {
     renderContext_->UpdateNodeName(id);
-    ElementRegister::GetInstance()->AddFrameNodeByInspectorId(id, AceType::WeakClaim(this));
+    ElementRegister::GetInstance()->AddFrameNodeByInspectorId(id, AceType::WeakClaim(this), this->GetId());
     auto parent = GetAncestorNodeOfFrame(true);
     if (parent && parent->GetTag() == V2::RELATIVE_CONTAINER_ETS_TAG) {
         parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);

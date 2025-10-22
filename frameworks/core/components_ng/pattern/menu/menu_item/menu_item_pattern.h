@@ -464,6 +464,8 @@ friend class ServiceCollaborationMenuAceHelper;
 
     void RegisterWrapperMouseEvent();
 
+    void UpdateLeftRow(RefPtr<FrameNode>& leftRow);
+    void UpdateRightRow(RefPtr<FrameNode>& rightRow);
     void AddSelectIcon(RefPtr<FrameNode>& row);
     void UpdateIcon(RefPtr<FrameNode>& row, bool isStart);
     void AddExpandIcon(RefPtr<FrameNode>& row);

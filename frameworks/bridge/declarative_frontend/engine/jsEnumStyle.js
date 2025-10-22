@@ -206,6 +206,12 @@ let BorderStyle;
   BorderStyle[BorderStyle.Dotted = 2] = 'Dotted';
 })(BorderStyle || (BorderStyle = {}));
 
+let CornerApplyType;
+(function (CornerApplyType) {
+  CornerApplyType[CornerApplyType.FAST = 0] = 'FAST';
+  CornerApplyType[CornerApplyType.OFFSCREEN = 1] = 'OFFSCREEN';
+})(CornerApplyType || (CornerApplyType = {}));
+
 let LineCapStyle;
 (function (LineCapStyle) {
   LineCapStyle[LineCapStyle.Butt = 0] = 'Butt';
@@ -2563,12 +2569,28 @@ class NavPathStack {
     this.popArray = [];
     this.interception = undefined;
     this.hasSingletonMoved = false;
+    this.preTopInfo = undefined;
   }
   getPathStack() {
     return this.nativeStack?.getPathStack(this);
   }
   setPathStack(pathStack, animated) {
     this.nativeStack?.setPathStack(this, pathStack, animated);
+  }
+  updatePreTopInfo(preTopInfo) {
+    if (this.pathArray.length === undefined || this.pathArray.length === 0) {
+        this.preTopInfo = undefined;
+        return;
+    }
+    this.preTopInfo = this.pathArray[this.pathArray.length - 1];
+  }
+  isPushOperation() {
+    if (this.preTopInfo === undefined) {
+        return true;
+    }
+    return this.pathArray.findIndex((info)=>{ // If the top of the previous stack exists, the next stack operation is push.
+        return info === this.preTopInfo;
+    }) !== -1;
   }
   getJsIndexFromNativeIndex(index) {
     for (let i = 0; i < this.pathArray.length; i++) {

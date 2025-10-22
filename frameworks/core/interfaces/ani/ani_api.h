@@ -372,6 +372,9 @@ struct ArkUIAniImageModifier {
     void* (*getPixelMapPeer)(void* pixelMap);
     ani_long (*createColorFilterPeer)(ani_long colorFilter);
     ani_long (*getColorFilter)(ani_long colorFilterPeer);
+    void* (*getDrawingColorFilterPeer)(void* colorFilter);
+    void* (*getDrawingLatticePeer)(void* latticePeer);
+    void* (*getDrawableDescriptorPeer)(void* drawableDescriptorPeer, int32_t type);
 };
 
 struct ArkUIWaterFlowSectionGap {
@@ -440,10 +443,12 @@ struct ArkUIAniDragModifier {
     void (*setDragDropInfoCustomNode)(ani_ref event, ArkUINodeHandle node);
     void (*setDragDropInfoExtraInfo)(ani_ref event, const char* ptr);
     void (*setDragAllowDropNull)(ArkUINodeHandle node);
-    void (*setDragAllowDrop)(ArkUINodeHandle node, const char** allowDrops, ArkUI_Int32 length);
+    void (*setDragAllowDrop)(ArkUINodeHandle node, char** allowDrops, ArkUI_Int32 length);
     void (*setDragPreview)(ArkUINodeHandle node, ArkUIDragInfo dragInfo);
     void (*setDragPreviewOptions)(ArkUINodeHandle node, ArkUIDragPreviewOption options);
     const char* (*getUdKey)(ani_ref event);
+    ani_long (*createUnifiedDataPeer)(void* data);
+    ani_long (*getUnifiedData)(ani_long peer);
 };
 struct ArkUIAniXBarModifier {
     void (*setComponentCreateFunc)(std::function<int64_t(const int32_t&, const int32_t&)>&& fn);
@@ -453,6 +458,12 @@ struct ArkUIAniXBarModifier {
     void (*setSetAppIconFunc)(int64_t ptr, std::function<void(void*)>&& fn);
     void (*setSetCustomCallbackFunc)(int64_t ptr, std::function<void(const std::string&, const std::string&)>&& fn);
     void (*callNative)(const int32_t& xBarType, const std::string callType, const std::string message);
+};
+struct ArkUIAniParallelizeUIModifier {
+    ani_long (*constructAdapterNode)(ani_int);
+    void (*reset)(ArkUINodeHandle);
+    void (*registerCallback)(
+        ArkUINodeHandle, std::function<int32_t()>&&, std::function<ArkUINodeHandle(int32_t, int32_t, int32_t)>&&);
 };
 struct ArkUIAniCommonModifier {
     ani_ref* (*getHostContext)(ArkUI_Int32 key);
@@ -731,6 +742,11 @@ struct ArkUIAniComponent3DModifier {
     void (*setWidget)(ArkUINodeHandle node, const std::string& scenePath, int32_t modelType);
 };
 
+struct ArkUIAniCommonNodeAniModifier {
+    ani_long (*construct)(ani_int id, ani_int flags);
+    void (*setCommonOptions)(ani_long node);
+};
+
 struct ArkUIAniModifiers {
     ArkUI_Int32 version;
     const ArkUIAniImageModifier* (*getImageAniModifier)();
@@ -766,6 +782,8 @@ struct ArkUIAniModifiers {
     const ArkUIAniForEachNodeModifier* (*getForEachNodeAniModifier)();
     const ArkUIAniComponent3DModifier* (*getComponent3DModifier)();
     const ArkUIAniXBarModifier* (*getXBarAniModifier)();
+    const ArkUIAniCommonNodeAniModifier* (*getCommonNodeAniModifier)();
+    const ArkUIAniParallelizeUIModifier* (*getParallelizeUIModifier)();
 };
 
 __attribute__((visibility("default"))) const ArkUIAniModifiers* GetArkUIAniModifiers(void);

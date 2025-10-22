@@ -18,10 +18,10 @@
 
 import { CommonMethod } from "./component/common"
 import { TextBackgroundStyle, BaseSpan } from "./component/span"
-import { extractors, AttributeModifier } from "#handwritten"
 import { LengthMetrics } from "arkui.Graphics"
 import { BaseSpanModifier } from "./BaseSpanModifier"
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { AttributeModifier, extractors } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkImageSpanPeer, ImageCompleteCallback, ImageLoadResult, ImageSpanAttribute } from "./component/imageSpan"

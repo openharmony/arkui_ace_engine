@@ -83,6 +83,27 @@ void ScrollableController::ScrollToEdgeMultiThread(ScrollEdgeType scrollEdgeType
     });
 }
 
+void ScrollableController::ScrollToEdgeMultiThread(ScrollEdgeType scrollEdgeType, float velocity)
+{
+    auto pattern = scroll_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto host = pattern->GetHost();
+    CHECK_NULL_VOID(host);
+    host->PostAfterAttachMainTreeTask(
+        [weak = AceType::WeakClaim(AceType::RawPtr(pattern)), scrollEdgeType, velocity]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetIsOverScroll(false);
+        pattern->SetCanStayOverScroll(false);
+        pattern->SetAnimateCanOverScroll(false);
+        if (scrollEdgeType == ScrollEdgeType::SCROLL_TOP) {
+            pattern->ScrollAtFixedVelocity(velocity);
+        } else if (scrollEdgeType == ScrollEdgeType::SCROLL_BOTTOM) {
+            pattern->ScrollAtFixedVelocity(-velocity);
+        }
+    });
+}
+
 void ScrollableController::ScrollByMultiThread(double pixelX, double pixelY, bool /* smooth */)
 {
     auto pattern = scroll_.Upgrade();
@@ -128,4 +149,53 @@ void ScrollableController::FlingMultiThread(double flingVelocity)
     });
 }
 
+void ScrollableController::ScrollToIndexMultiThread(
+    int32_t index, bool smooth, ScrollAlign align, std::optional<float> extraOffset)
+{
+    auto pattern = scroll_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto host = pattern->GetHost();
+    CHECK_NULL_VOID(host);
+    host->PostAfterAttachMainTreeTask([weak = AceType::WeakClaim(AceType::RawPtr(pattern)),
+        index, smooth, align, extraOffset]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->ScrollToIndex(index, smooth, align, extraOffset);
+    });
+}
+
+void ScrollableController::ScrollPageMultiThread(bool reverse, bool smooth)
+{
+    auto pattern = scroll_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto host = pattern->GetHost();
+    CHECK_NULL_VOID(host);
+    host->PostAfterAttachMainTreeTask([weak = AceType::WeakClaim(AceType::RawPtr(pattern)),
+        reverse, smooth]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (pattern->GetAxis() == Axis::FREE && pattern->FreeScrollPage(reverse, smooth)) {
+            return;
+        }
+        if (InstanceOf<WaterFlowPattern>(pattern)) {
+            pattern->ScrollPage(reverse, smooth);
+            return;
+        }
+        // todo: remove impl here, all types of ScrollablePattern should call ScrollPage directly
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto offset = reverse ? pattern->GetMainContentSize() : -pattern->GetMainContentSize();
+        if (smooth) {
+            auto position = pattern->GetTotalOffset() - offset;
+            ACE_SCOPED_TRACE("ScrollPage with animation, position:%f, id:%d, tag:%s", position,
+                static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
+            pattern->AnimateTo(position, -1, nullptr, true, false, false);
+        } else {
+            pattern->StopAnimate();
+            ACE_SCOPED_TRACE("ScrollPage without animation, offset:%f, id:%d, tag:%s", offset,
+                static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
+            pattern->UpdateCurrentOffset(offset, SCROLL_FROM_JUMP);
+        }
+    });
+}
 } // namespace OHOS::Ace::NG

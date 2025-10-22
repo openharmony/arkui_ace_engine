@@ -1949,7 +1949,7 @@ HWTEST_F(TextInputAreaTest, testFieldModelStatic033, TestSize.Level1)
     TextFieldModelStatic::SetMinFontScale(frameNode, std::nullopt);
     EXPECT_FALSE(layoutProperty->GetMinFontScale().has_value());
 
-    std::optional<float> maxFontScale = 50.f;
+    std::optional<float> maxFontScale = 40.f;
     TextFieldModelStatic::SetMaxFontScale(frameNode, maxFontScale);
     EXPECT_EQ(layoutProperty->GetMaxFontScale().value(), maxFontScale);
     TextFieldModelStatic::SetMaxFontScale(frameNode, std::nullopt);

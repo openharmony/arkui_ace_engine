@@ -56,7 +56,7 @@ import { PluginErrorData_serializer, RecordData, PluginErrorCallback, PluginErro
 import { ProgressConfiguration_serializer, ProgressConfiguration } from "./../../component/progress"
 import { RadioConfiguration_serializer, OnRadioChangeCallback, RadioConfiguration } from "./../../component/radio"
 import { RatingConfiguration_serializer, OnRatingChangeCallback, RatingConfiguration } from "./../../component/rating"
-import { ErrorEvent_serializer, MessageEvents_serializer, Event_serializer, Callback_CreateItem, Callback_Extender_OnFinish, Callback_Extender_OnProgress, Callback_onMeasureSize_SizeResult, Callback_OnMoveFromTo, Callback_onPlaceChildren_Void, Callback_RangeUpdate, Callback_Size_Void, Callback_StateStylesChange, CustomNodeBuilder, NavExtender_CreateNavDestination, NavExtender_OnUpdateStack, RestrictedWorker_onerror_Callback, ErrorEvent, RestrictedWorker_onexit_Callback, RestrictedWorker_onmessage_Callback, MessageEvents, RouterFinishCallback, WorkerEventListener, Event } from "./../../component/idlize"
+import { ErrorEvent_serializer, MessageEvents_serializer, Event_serializer, Callback_CreateItem, Callback_Extender_OnFinish, Callback_Extender_OnProgress, Callback_OnDestory_Void, Callback_onMeasureSize_SizeResult, Callback_OnMoveFromTo, Callback_onPlaceChildren_Void, Callback_RangeUpdate, Callback_Size_Void, Callback_StateStylesChange, CustomNodeBuilder, NavExtender_CreateNavDestination, NavExtender_OnUpdateStack, RestrictedWorker_onerror_Callback, ErrorEvent, RestrictedWorker_onexit_Callback, RestrictedWorker_onmessage_Callback, MessageEvents, RouterFinishCallback, WorkerEventListener, Event } from "./../../component/idlize"
 import { SliderConfiguration_serializer, SliderChangeMode, SliderConfiguration, SliderTriggerChangeCallback } from "./../../component/slider"
 import { TextClockConfiguration_serializer, TextClockConfiguration } from "./../../component/textClock"
 import { TextTimerConfiguration_serializer, TextTimerConfiguration } from "./../../component/textTimer"
@@ -86,6 +86,7 @@ import { TextAreaSubmitCallback } from "./../../component/textArea"
 import { TextFieldValueCallback } from "./../textFieldOps"
 import { TypeChecker } from "#components"
 import { CallbackKind } from "./CallbackKind"
+import { ArcScrollIndexHandler } from "@ohos.arkui.ArcList"
 export function deserializeAndCallAccessibilityCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as AccessibilityCallback)
@@ -98,6 +99,14 @@ export function deserializeAndCallAccessibilityFocusCallback(thisDeserializer: D
     const _call  = (ResourceHolder.instance().get(_resourceId) as AccessibilityFocusCallback)
     let isFocus : boolean = thisDeserializer.readBoolean()
     _call(isFocus)
+}
+export function deserializeAndCallArcScrollIndexHandler(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ArcScrollIndexHandler)
+    let start : int32 = thisDeserializer.readInt32()
+    let end : int32 = thisDeserializer.readInt32()
+    let center : int32 = thisDeserializer.readInt32()
+    _call(start, end, center)
 }
 export function deserializeAndCallAsyncCallback_image_PixelMap_Void(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
@@ -942,6 +951,12 @@ export function deserializeAndCallCallback_OnDataResubmittedEvent_Void(thisDeser
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: OnDataResubmittedEvent) => void))
     let value0 : OnDataResubmittedEvent = OnDataResubmittedEvent_serializer.read(thisDeserializer)
     _call(value0)
+}
+export function deserializeAndCallCallback_OnDestory_Void(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as Callback_OnDestory_Void)
+    let nodeId : int64 = thisDeserializer.readInt64()
+    _call(nodeId)
 }
 export function deserializeAndCallCallback_OnDownloadStartEvent_Void(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
@@ -3411,6 +3426,7 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
     switch ((kind as CallbackKind)) {
         case CallbackKind.Kind_AccessibilityCallback: return deserializeAndCallAccessibilityCallback(thisDeserializer);
         case CallbackKind.Kind_AccessibilityFocusCallback: return deserializeAndCallAccessibilityFocusCallback(thisDeserializer);
+        case CallbackKind.Kind_ArcScrollIndexHandler: return deserializeAndCallArcScrollIndexHandler(thisDeserializer);
         case CallbackKind.Kind_AsyncCallback_image_PixelMap_Void: return deserializeAndCallAsyncCallback_image_PixelMap_Void(thisDeserializer);
         case CallbackKind.Kind_AsyncCallback_Void: return deserializeAndCallAsyncCallback_Void(thisDeserializer);
         case CallbackKind.Kind_ButtonModifierBuilder: return deserializeAndCallButtonModifierBuilder(thisDeserializer);
@@ -3494,6 +3510,7 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.Kind_Callback_OnConsoleEvent_Boolean: return deserializeAndCallCallback_OnConsoleEvent_Boolean(thisDeserializer);
         case CallbackKind.Kind_Callback_OnContextMenuShowEvent_Boolean: return deserializeAndCallCallback_OnContextMenuShowEvent_Boolean(thisDeserializer);
         case CallbackKind.Kind_Callback_OnDataResubmittedEvent_Void: return deserializeAndCallCallback_OnDataResubmittedEvent_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_OnDestory_Void: return deserializeAndCallCallback_OnDestory_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_OnDownloadStartEvent_Void: return deserializeAndCallCallback_OnDownloadStartEvent_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_OnErrorReceiveEvent_Void: return deserializeAndCallCallback_OnErrorReceiveEvent_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_OnFaviconReceivedEvent_Void: return deserializeAndCallCallback_OnFaviconReceivedEvent_Void(thisDeserializer);

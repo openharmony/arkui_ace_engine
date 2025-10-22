@@ -587,7 +587,7 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         return this
     }
     public backgroundImage(src: ResourceStr | PixelMap | undefined, repeat?: ImageRepeat | undefined): this {
-        this.getPeer().setBackgroundImage0Attribute(src, repeat);
+        this.getPeer().setBackgroundImage2Attribute(src, repeat);
         return this
     }
     public backgroundBlurStyle(style: BlurStyle | undefined, options?: BackgroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this {

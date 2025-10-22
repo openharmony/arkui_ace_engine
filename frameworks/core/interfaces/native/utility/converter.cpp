@@ -501,6 +501,13 @@ std::optional<Dimension> ResourceConverter::ToDimension()
         } else {
             LOGE("ResourceConverter::ToDimension Unknown resource value");
         }
+    } else if (type_ == ResourceType::STRING) {
+        auto strValue = GetStringResource();
+        if (strValue.has_value()) {
+            return StringUtils::StringToDimensionWithUnit(strValue.value(), DimensionUnit::VP);
+        } else {
+            LOGE("ResourceConverter::ToDimension parse string type error");
+        }
     }
     return std::nullopt;
 }
@@ -1142,7 +1149,10 @@ Font Convert(const Ark_Font& src)
         font.fontFamilies = fontfamiliesOpt->families;
         font.fontFamiliesNG = std::optional<std::vector<std::string>>(fontfamiliesOpt->families);
     }
-    auto fontSize = OptConvert<Dimension>(src.size);
+    std::optional<Dimension> fontSize = std::nullopt;
+    if (src.size.tag != INTEROP_TAG_UNDEFINED) {
+        fontSize = Converter::OptConvertFromArkNumStrRes<Ark_Length, Ark_Number>(src.size.value, DimensionUnit::FP);
+    }
     if (fontSize) {
         Validator::ValidateNonNegative(fontSize);
         Validator::ValidateNonPercent(fontSize);
@@ -1583,6 +1593,7 @@ template<>
 OverlayOptions Convert(const Ark_OverlayOptions& src)
 {
     OverlayOptions dst;
+    dst.align = Alignment::TOP_LEFT;
     auto align = Converter::OptConvert<Alignment>(src.align);
     if (align) {
         dst.align = align.value();
@@ -2595,6 +2606,18 @@ BorderStyleProperty Convert(const Ark_EdgeStyles& src)
 }
 
 template<>
+BorderStyleProperty Convert(const Ark_NodeEdgeStyles& src)
+{
+    BorderStyleProperty property;
+    property.styleLeft = OptConvert<BorderStyle>(src.left);
+    property.styleTop = OptConvert<BorderStyle>(src.top);
+    property.styleRight = OptConvert<BorderStyle>(src.right);
+    property.styleBottom = OptConvert<BorderStyle>(src.bottom);
+    property.multiValued = true;
+    return property;
+}
+
+template<>
 CalcDimension Convert(const Ark_LengthMetrics& src)
 {
     return CalcDimension(Convert<Dimension>(src));
@@ -3213,6 +3236,11 @@ std::set<std::string> Convert(const Array_uniformTypeDescriptor_UniformDataType&
     }
     return dst;
 }
+template<>
+std::string Convert(const Ark_CommandPath& src)
+{
+    return Converter::Convert<std::string>(src.commands);
+}
 
 template<>
 NavigationOptions Convert(const Ark_NavigationOptions& src)
@@ -3374,8 +3402,11 @@ void AssignCast(std::optional<double>& dst, const Ark_LevelOrder& src)
 template<>
 void AssignCast(std::optional<Color>& dst, const Ark_ColorMetrics& src)
 {
-    CHECK_NULL_VOID(src);
-    dst = Color(src->colorValue.value);
+    uint8_t red = static_cast<uint8_t>(Converter::Convert<uint32_t>(src.red_));
+    uint8_t green = static_cast<uint8_t>(Converter::Convert<uint32_t>(src.green_));
+    uint8_t blue = static_cast<uint8_t>(Converter::Convert<uint32_t>(src.blue_));
+    uint8_t alpha = static_cast<uint8_t>(Converter::Convert<uint32_t>(src.alpha_));
+    dst = Color::FromRGBO(red, green, blue, alpha);
 }
 
 template<>

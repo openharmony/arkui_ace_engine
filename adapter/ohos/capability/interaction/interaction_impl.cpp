@@ -72,7 +72,7 @@ int32_t InteractionImpl::StartDrag(const DragDataCore& dragData,
     dragData.filterInfo, dragData.sourceType, dragData.dragNum, dragData.pointerId, dragData.displayX,
     dragData.displayY, dragData.displayId, dragData.mainWindow, dragData.hasCanceledAnimation,
     dragData.hasCoordinateCorrected, dragData.summarys, dragData.isDragDelay, dragData.detailedSummarys,
-    dragData.summaryFormat, dragData.version, dragData.totalSize };
+    dragData.summaryFormat, dragData.version, dragData.totalSize, dragData.summaryTag };
     for (auto& shadowInfo: dragData.shadowInfos) {
         if (shadowInfo.pixelMap) {
             msdpDragData.shadowInfos.push_back({ shadowInfo.pixelMap->GetPixelMapSharedPtr(),
@@ -137,7 +137,7 @@ int32_t InteractionImpl::GetShadowOffset(ShadowOffsetData& shadowOffsetData)
 
 int32_t InteractionImpl::GetDragSummary(std::map<std::string, int64_t>& summary,
     std::map<std::string, int64_t>& detailedSummary, std::map<std::string, std::vector<int32_t>>& summaryFormat,
-    int32_t& version, int64_t& totalSize)
+    int32_t& version, int64_t& totalSize, std::string& tag)
 {
     Msdp::DeviceStatus::DragSummaryInfo dragSummary;
     auto ret = InteractionManager::GetInstance()->GetDragSummaryInfo(dragSummary);

@@ -189,9 +189,15 @@ void StateStyleManager::RemoveSupportedUIState(UIState state, bool isInner)
     }
     if (isInner) {
         innerStateStyleSubscribers_.first &= ~state;
+        if (innerStateStyleSubscribers_.first == UI_STATE_UNKNOWN) {
+            innerStateStyleSubscribers_.second = nullptr;
+        }
     } else {
         userStateStyleSubscribers_.first &= ~state;
         userSubscribersExcludeConfigs_ &= ~state;
+        if (userStateStyleSubscribers_.first == UI_STATE_UNKNOWN) {
+            userStateStyleSubscribers_.second = nullptr;
+        }
     }
     UIState temp = frontendSubscribers_ | innerStateStyleSubscribers_.first | userStateStyleSubscribers_.first;
     if ((temp & state) != state) {

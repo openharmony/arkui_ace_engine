@@ -1387,6 +1387,21 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_ResourceColor_ColorMetrics& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Union_ResourceColor_LinearGradient& src)
 {
     switch (src.selector) {
@@ -1510,6 +1525,21 @@ void AssignUnionTo(std::optional<T>& dst,
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Union_ResourceStr_Union_ResourceStr_ComponentContent& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_RotateOptions_RotateAngleOptions& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -3171,6 +3201,7 @@ void WithOptional(const name& src, T call) { \
 ASSIGN_OPT(Opt_Int32)
 ASSIGN_OPT(Opt_AccessibilityCallback)
 ASSIGN_OPT(Opt_AccessibilityFocusCallback)
+ASSIGN_OPT(Opt_ArcScrollIndexHandler)
 ASSIGN_OPT(Opt_AccessibilityHoverType)
 ASSIGN_OPT(Opt_AccessibilityRoleType)
 ASSIGN_OPT(Opt_AccessibilitySamePageMode)
@@ -3235,6 +3266,7 @@ ASSIGN_OPT(Opt_ColorFilter)
 ASSIGN_OPT(Opt_ColoringStrategy)
 ASSIGN_OPT(Opt_CommonMethod)
 ASSIGN_OPT(Opt_CommonShape)
+ASSIGN_OPT(Opt_ComponentContentBase)
 ASSIGN_OPT(Opt_ConfigurationConstant_ColorMode)
 ASSIGN_OPT(Opt_ConfigurationConstant_Direction)
 ASSIGN_OPT(Opt_ConfigurationConstant_ScreenDensity)
@@ -3432,6 +3464,7 @@ ASSIGN_OPT(Opt_NavPathStack)
 ASSIGN_OPT(Opt_NestedScrollMode)
 ASSIGN_OPT(Opt_NestedScrollOptions)
 ASSIGN_OPT(Opt_NodeController)
+ASSIGN_OPT(Opt_NodeEdgeStyles)
 ASSIGN_OPT(Opt_Number)
 ASSIGN_OPT(Opt_Object)
 ASSIGN_OPT(Opt_ObscuredReasons)
@@ -3894,6 +3927,7 @@ ASSIGN_OPT(Opt_Callback_OnConfirmEvent_Boolean)
 ASSIGN_OPT(Opt_Callback_OnConsoleEvent_Boolean)
 ASSIGN_OPT(Opt_Callback_OnContextMenuShowEvent_Boolean)
 ASSIGN_OPT(Opt_Callback_OnDataResubmittedEvent_Void)
+ASSIGN_OPT(Opt_Callback_OnDestory_Void)
 ASSIGN_OPT(Opt_Callback_OnDownloadStartEvent_Void)
 ASSIGN_OPT(Opt_Callback_OnErrorReceiveEvent_Void)
 ASSIGN_OPT(Opt_Callback_OnFaviconReceivedEvent_Void)
@@ -4130,6 +4164,8 @@ ASSIGN_OPT(Opt_AlignRuleOption)
 ASSIGN_OPT(Opt_Animation)
 ASSIGN_OPT(Opt_AnimationNumberRange)
 ASSIGN_OPT(Opt_AppearSymbolEffect)
+ASSIGN_OPT(Opt_ArcScrollBarOptions)
+ASSIGN_OPT(Opt_ArkListOptions)
 ASSIGN_OPT(Opt_ASTCResource)
 ASSIGN_OPT(Opt_AsymmetricTransitionOption)
 ASSIGN_OPT(Opt_AttributeUpdater)
@@ -4360,6 +4396,7 @@ ASSIGN_OPT(Opt_RichEditorInsertValue)
 ASSIGN_OPT(Opt_RichEditorRange)
 ASSIGN_OPT(Opt_RichEditorSelection)
 ASSIGN_OPT(Opt_RichEditorSpanPosition)
+ASSIGN_OPT(Opt_RotateAngleOptions)
 ASSIGN_OPT(Opt_RotateOptions)
 ASSIGN_OPT(Opt_RoundedRectOptions)
 ASSIGN_OPT(Opt_RouteMapConfig)
@@ -4464,6 +4501,7 @@ ASSIGN_OPT(Opt_Union_PX_VP_LPX_Resource)
 ASSIGN_OPT(Opt_Union_Resource_String)
 ASSIGN_OPT(Opt_Union_ResourceColor_ColorContent_ColorMetrics)
 ASSIGN_OPT(Opt_Union_ResourceColor_ColoringStrategy)
+ASSIGN_OPT(Opt_Union_ResourceColor_ColorMetrics)
 ASSIGN_OPT(Opt_Union_ResourceColor_LinearGradient)
 ASSIGN_OPT(
     Opt_Union_ResourceColor_LinearGradient_Array_Tuple_Union_ResourceColor_LinearGradient_Number)
@@ -4474,6 +4512,7 @@ ASSIGN_OPT(Opt_Union_ResourceStr_PixelMap_SymbolGlyphModifier)
 ASSIGN_OPT(Opt_Union_ResourceStr_Scene)
 ASSIGN_OPT(Opt_Union_ResourceStr_TabBarSymbol)
 ASSIGN_OPT(Opt_Union_ResourceStr_Union_ResourceStr_ComponentContent)
+ASSIGN_OPT(Opt_Union_RotateOptions_RotateAngleOptions)
 ASSIGN_OPT(Opt_Union_RowOptions_RowOptionsV2)
 ASSIGN_OPT(Opt_Union_ScrollAnimationOptions_Boolean)
 ASSIGN_OPT(Opt_Union_String_Array_String)
@@ -4557,6 +4596,7 @@ ASSIGN_OPT(Opt_LocalizedEdges)
 ASSIGN_OPT(Opt_LocalizedEdgeWidths)
 ASSIGN_OPT(Opt_LocalizedPadding)
 ASSIGN_OPT(Opt_LocalizedPosition)
+ASSIGN_OPT(Opt_LunarSwitchStyle)
 ASSIGN_OPT(Opt_MeasureOptions)
 ASSIGN_OPT(Opt_MenuElement)
 ASSIGN_OPT(Opt_MenuItemConfiguration)
@@ -4832,6 +4872,7 @@ ASSIGN_OPT(Opt_BaseGestureEvent)
 ASSIGN_OPT(Opt_BottomTabBarStyle)
 ASSIGN_OPT(Opt_CalendarDialogOptions)
 ASSIGN_OPT(Opt_ClickEvent)
+ASSIGN_OPT(Opt_DatePickerDialogOptions)
 ASSIGN_OPT(Opt_GridRowOptions)
 ASSIGN_OPT(Opt_ImageAttachment)
 ASSIGN_OPT(Opt_ImageAttachmentInterface)
@@ -4850,6 +4891,8 @@ ASSIGN_OPT(Opt_RichEditorUpdateTextSpanStyleOptions)
 ASSIGN_OPT(Opt_StyledStringValue)
 ASSIGN_OPT(Opt_StyleOptions)
 ASSIGN_OPT(Opt_SubTabBarStyle)
+ASSIGN_OPT(Opt_TextPickerDialogOptions)
+ASSIGN_OPT(Opt_TimePickerDialogOptions)
 ASSIGN_OPT(Opt_Union_ComponentContent_SubTabBarStyle_BottomTabBarStyle_String_Resource_CustomBuilder_TabBarOptions)
 ASSIGN_OPT(Opt_Union_PopupOptions_CustomPopupOptions)
 ASSIGN_OPT(Opt_Union_RichEditorUpdateTextSpanStyleOptions_RichEditorUpdateImageSpanStyleOptions_RichEditorUpdateSymbolSpanStyleOptions)

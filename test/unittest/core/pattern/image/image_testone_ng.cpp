@@ -61,7 +61,7 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest002, TestSize.Level0)
     EXPECT_EQ(imageRenderProperty->GetColorFilter().value(), COLOR_FILTER_DEFAULT);
     frameNode->MarkModifyDone();
     /**
-     * Creating a colorfilter through a graphical interface
+     * Creating a colorfilter through a graphical interface.
      * @tc.steps: step3. set drawingcolorFilter.
      */
     auto imagePattern = frameNode->GetPattern<ImagePattern>();
@@ -2141,5 +2141,26 @@ HWTEST_F(ImageTestOneNg, Matrix001, TestSize.Level1)
     double matrix[4][4] = {};
     value3.CopyMatrix(matrix);
     EXPECT_TRUE(value3 == matrix);
+}
+
+/**
+ * @tc.name: SetImageModelStaticSrc001
+ * @tc.desc: parse src
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestOneNg, SetImageModelStaticSrc001, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    ImageSourceInfo defaultInfo;
+    ImageSourceInfo info("pages/image.png");
+    ImageModelStatic::SetSrc(frameNode, info);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        ImageLayoutProperty, ImageSourceInfo, defaultInfo, frameNode, ImageSourceInfo());
+    ASSERT_EQ(defaultInfo.GetSrc(), "pages/image.png");
+    ImageModelStatic::SetSrc(frameNode, std::nullopt);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        ImageLayoutProperty, ImageSourceInfo, defaultInfo, frameNode, ImageSourceInfo());
+    ASSERT_EQ(defaultInfo.GetSrc(), "");
 }
 } // namespace OHOS::Ace::NG

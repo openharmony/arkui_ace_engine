@@ -5794,6 +5794,12 @@ void RosenRenderContext::SetRenderFit(RenderFit renderFit)
     }
 }
 
+void RosenRenderContext::OnCornerApplyTypeUpdate(CornerApplyType cornerApplyType)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetCornerApplyType(static_cast<Rosen::RSCornerApplyType>(cornerApplyType));
+}
+
 void RosenRenderContext::ClearDrawCommands()
 {
     StartRecording();
@@ -6869,6 +6875,7 @@ void RosenRenderContext::SetOpacityMultiplier(float opacity)
     CHECK_NULL_VOID(rsNode_);
     AddOrUpdateModifier<Rosen::ModifierNG::RSAlphaModifier, &Rosen::ModifierNG::RSAlphaModifier::SetAlpha, float>(
         alphaModifier_, opacity);
+    MarkNeedDrawNode(opacity < 1.0);
 }
 
 void RosenRenderContext::SetTranslate(float translateX, float translateY, float translateZ)

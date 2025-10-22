@@ -216,25 +216,12 @@ void SetHandImpl(Ark_ClickEvent peer,
 {
     LOGE("ClickEventAccessor::SetHandImpl we can only GET hand");
 }
-Callback_Void GetPreventDefaultImpl(Ark_ClickEvent peer)
+void PreventDefaultImpl(Ark_ClickEvent peer)
 {
-    CHECK_NULL_RETURN(peer, {});
-    auto callback = CallbackKeeper::DefineReverseCallback<Callback_Void>([peer]() {
-        GestureEvent* info = peer->GetEventInfo();
-        CHECK_NULL_VOID(info);
-        auto patternName = info->GetPatternName();
-        if (g_clickPreventDefPattern.find(patternName.c_str()) == g_clickPreventDefPattern.end()) {
-            LOGE("ARKOALA Component does not support prevent function.");
-            return;
-        }
-        info->SetPreventDefault(true);
-    });
-    return callback;
-}
-void SetPreventDefaultImpl(Ark_ClickEvent peer,
-                           const Callback_Void* preventDefault)
-{
-    LOGE("ClickEventAccessor::SetPreventDefaultImpl we can only GET preventDefault callback");
+    CHECK_NULL_VOID(peer);
+    GestureEvent* info = peer->GetEventInfo();
+    CHECK_NULL_VOID(info);
+    info->SetPreventDefault(true);
 }
 } // ClickEventAccessor
 const GENERATED_ArkUIClickEventAccessor* GetClickEventAccessor()
@@ -257,8 +244,7 @@ const GENERATED_ArkUIClickEventAccessor* GetClickEventAccessor()
         ClickEventAccessor::SetYImpl,
         ClickEventAccessor::GetHandImpl,
         ClickEventAccessor::SetHandImpl,
-        ClickEventAccessor::GetPreventDefaultImpl,
-        ClickEventAccessor::SetPreventDefaultImpl,
+        ClickEventAccessor::PreventDefaultImpl,
     };
     return &ClickEventAccessorImpl;
 }

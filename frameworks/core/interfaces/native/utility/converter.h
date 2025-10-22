@@ -76,7 +76,8 @@
 #include "converter_union.h"
 #include "generated/converter_generated.h"
 
-#define OPT_CONVERT_FIELD(type, src, field) ((src).has_value() ? Converter::OptConvert<type>((src)->field) : std::nullopt)
+#define OPT_CONVERT_FIELD(type, src, field) ((src).has_value() ? \
+            Converter::OptConvert<type>((src)->field) : std::nullopt)
 #define GET_OPT_FIELD(src, field) ((src).has_value() ? Converter::GetOpt((src)->field) : std::nullopt)
 
 namespace OHOS::Ace {
@@ -511,6 +512,7 @@ namespace Converter {
     template<> BorderRadiusProperty Convert(const Ark_BorderRadiuses& src);
     template<> BorderRadiusProperty Convert(const Ark_LengthMetrics& src);
     template<> BorderRadiusProperty Convert(const Ark_LocalizedBorderRadiuses& src);
+    template<> BorderStyleProperty Convert(const Ark_NodeEdgeStyles& src);
     template<> BorderRadiusProperty Convert(const Ark_Number& src);
     template<> BorderRadiusProperty Convert(const Ark_Resource& src);
     template<> BorderRadiusProperty Convert(const Ark_String& src);
@@ -651,6 +653,7 @@ namespace Converter {
     template<> std::pair<std::optional<Dimension>, std::optional<Dimension>> Convert(const Ark_Position& src);
     template<> std::set<SourceTool> Convert(const Array_SourceTool& src);
     template<> std::set<std::string> Convert(const Array_uniformTypeDescriptor_UniformDataType& src);
+    template<> std::string Convert(const Ark_CommandPath& src);
     template<> std::tuple<Ark_Float32, Ark_Int32> Convert(const Ark_String& src);
     template<> std::u16string Convert(const Ark_String& src);
     template<> std::vector<Dimension> Convert(const Array_Length& src);

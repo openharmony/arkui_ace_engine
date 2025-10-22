@@ -181,11 +181,12 @@ void EnvelopedDragData(
     arkExtraInfoJson->Put("dip_scale", dragAction->dipScale);
     arkExtraInfoJson->Put("event_id", dragAction->dragPointerEvent.pointerEventId);
     NG::DragDropFuncWrapper::UpdateExtraInfo(arkExtraInfoJson, dragAction->previewOption);
+    auto isDragDelay = (dragAction->dataLoadParams != nullptr);
     dragData = { shadowInfos, {}, udKey, dragAction->extraParams, arkExtraInfoJson->ToString(),
         dragAction->dragPointerEvent.sourceType, recordSize, pointerId, dragAction->dragPointerEvent.displayX,
         dragAction->dragPointerEvent.displayY, dragAction->dragPointerEvent.displayId, windowId, true, false,
-        dragSummaryInfo.summary, false, dragSummaryInfo.detailedSummary, dragSummaryInfo.summaryFormat,
-        dragSummaryInfo.version, dragSummaryInfo.totalSize };
+        dragSummaryInfo.summary, isDragDelay, dragSummaryInfo.detailedSummary, dragSummaryInfo.summaryFormat,
+        dragSummaryInfo.version, dragSummaryInfo.totalSize, dragSummaryInfo.tag };
 }
 
 void DragDropFuncWrapper::EnvelopedData(std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction,
@@ -1604,6 +1605,7 @@ void DragDropFuncWrapper::ProcessDragDropData(const RefPtr<OHOS::Ace::DragEvent>
     if (ret != 0) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "UDMF get summary failed, return value is %{public}d", ret);
     }
+    TAG_LOGD(AceLogTag::ACE_DRAG, "Get summary from udmf, tag is %{public}s", dragSummaryInfo.tag.c_str());
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto dragDropManager = pipeline->GetDragDropManager();

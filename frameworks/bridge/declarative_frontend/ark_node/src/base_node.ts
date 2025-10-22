@@ -18,8 +18,8 @@ enum LogTag {
   ARK_COMPONENT = 1,
 }
 class JSXNodeLogConsole {
-  static warn(...args:any) {
-      aceConsole.warn(LogTag.ARK_COMPONENT, ...args);
+  static warn(...args: any) {
+    aceConsole.warn(LogTag.ARK_COMPONENT, ...args);
   }
 }
 enum NodeRenderType {
@@ -38,6 +38,8 @@ declare type NodePtr = Object | null;
 declare class __JSBaseNode__ {
   constructor(options?: RenderOptions);
   create(builder: (...args: Object[]) => void, params: Object, update: (instanceId: number, nodePtr: NodePtr) => void,
+    updateConfiguration, supportLazyBuild: boolean, baseNode: BaseNode): NodePtr;
+  createReactive(builder: (...args: Object[]) => void, params: Array<Object>, update: (instanceId: number, nodePtr: NodePtr) => void,
     updateConfiguration, supportLazyBuild: boolean, baseNode: BaseNode): NodePtr;
   finishUpdateFunc(): void;
   postTouchEvent(touchEvent: TouchEvent): boolean;
@@ -72,12 +74,16 @@ abstract class BaseNode extends ViewBuildNodeBase {
     return this.instanceId_;
   }
   updateInstance(uiContext: UIContext): void {
-      this.instanceId_ = uiContext.instanceId_;
+    this.instanceId_ = uiContext.instanceId_;
   }
   create(builder: (...args: Object[]) => void, params: Object, update: (instanceId: number, nodePtr: NodePtr) => void,
-    updateConfiguration, supportLazyBuild: boolean): NodePtr {
-      return this.builderBaseNode_.create(builder.bind(this), params, update.bind(this), updateConfiguration.bind(this), supportLazyBuild, this);
-    }
+    updateConfiguration:()=>void, supportLazyBuild: boolean): NodePtr {
+    return this.builderBaseNode_.create(builder.bind(this), params, update.bind(this), updateConfiguration.bind(this), supportLazyBuild, this);
+  }
+  createReactive(builder: (...args: Object[]) => void, params: Array<Object>, update: (instanceId: number, nodePtr: NodePtr) => void,
+    updateConfiguration:()=>void, supportLazyBuild: boolean): NodePtr {
+    return this.builderBaseNode_.createReactive(builder.bind(this), params, update.bind(this), updateConfiguration.bind(this), supportLazyBuild, this)
+  }
   finishUpdateFunc(): void {
     return this.builderBaseNode_.finishUpdateFunc();
   }

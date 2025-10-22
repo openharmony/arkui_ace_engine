@@ -372,6 +372,7 @@ HWTEST_F(TransformUtilTest, TransformUtilTest013, TestSize.Level1)
     float INDEX_0_7071 = 0.7071;
     Matrix4 transform(0, INDEX_0_004, 0, 0, -INDEX_0_004, -INDEX_0_004, 0, -INDEX_0_008, 0, 0, 1, 0, 0, 0, 0, 1);
     TransformUtil::DecomposeTransform(out, transform);
+
     EXPECT_EQ(out.skew[0], 1);
     EXPECT_EQ(out.skew[1], 0);
     EXPECT_EQ(out.skew[2], 0);

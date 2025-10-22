@@ -186,6 +186,7 @@ HWTEST_F(IndexerTestNg, IndexerEnableHapticFeedback002, TestSize.Level1)
         CreateDone();
         EXPECT_EQ(pattern_->enableHapticFeedback_, testValue);
         auto indexerLayoutProperty = pattern_->GetLayoutProperty<IndexerLayoutProperty>();
+        ASSERT_NE(indexerLayoutProperty, nullptr);
         auto value = indexerLayoutProperty->GetEnableHapticFeedback().value_or(!testValue);
         EXPECT_EQ(value, testValue);
     }

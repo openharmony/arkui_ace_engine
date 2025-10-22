@@ -18,8 +18,10 @@ ace_unittest("layout_property_test_ng") {
   module_name = "Component-Layout"
   module_output = "layout"
   sources = [
-    "layout_property_test_ng.cpp",
-    "layout_property_test_ng_two.cpp",
+    "layout_property_test_ng_first_part.cpp",
+    "layout_property_test_ng_second_part.cpp",
+    "layout_property_test_ng_two_first_part.cpp",
+    "layout_property_test_ng_two_second_part.cpp"
   ]
 }
 
@@ -28,7 +30,8 @@ ace_unittest("layout_wrapper_test_ng") {
   module_name = "Component-Layout"
   module_output = "layout"
   sources = [
-    "layout_wrapper_test_ng.cpp",
+    "layout_wrapper_test_ng_first_part.cpp",
+    "layout_wrapper_test_ng_second_part.cpp",
     "layout_wrapper_testtwo_ng.cpp",
   ]
 }

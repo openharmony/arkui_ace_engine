@@ -254,7 +254,7 @@ void InitResourceAndThemeManager(const RefPtr<PipelineBase>& pipelineContext, co
         bundleMgrProxy->GetBundleInfoForSelf(
             static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE), bundleInfo);
         bundleName = bundleInfo.name;
-        moduleName = bundleInfo.entryModuleName;                
+        moduleName = bundleInfo.entryModuleName;
     }
     int32_t instanceId = pipelineContext->GetInstanceId();
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
@@ -4422,6 +4422,9 @@ void AceContainer::NotifyDensityUpdate(double density)
     UpdateResourceDensity(density, fullUpdate);
     ConfigurationChange configurationChange { .dpiUpdate = true };
     pipelineContext_->FlushReload(configurationChange, fullUpdate);
+    if (fullUpdate) {
+        NotifyArkoalaConfigurationChange(configurationChange);
+    }
 }
 
 void AceContainer::NotifyDirectionUpdate()
@@ -4430,6 +4433,9 @@ void AceContainer::NotifyDirectionUpdate()
     if (fullUpdate) {
         ConfigurationChange configurationChange { .directionUpdate = true };
         pipelineContext_->FlushReload(configurationChange, fullUpdate);
+        if (fullUpdate) {
+            NotifyArkoalaConfigurationChange(configurationChange);
+        }
     }
 }
 

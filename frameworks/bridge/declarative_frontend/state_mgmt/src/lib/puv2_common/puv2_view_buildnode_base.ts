@@ -66,6 +66,13 @@ abstract class ViewBuildNodeBase {
         return `ViewBuildNodeBase '${this.constructor.name}'[${this.id__()}]`;
     }
 
+    public abstract UpdateElement(elmtId: number): void;
+    public abstract getInstanceId(): number;
+
+    public __isReactiveBuilderNode__ViewBuildNodeBase__Internal(): boolean {
+        return false;
+    }
+
     public debugInfoElmtId(elmtId: number, isProfiler: boolean = false): string | ElementType {
         return isProfiler ? {
             elementId: elmtId,
@@ -130,8 +137,8 @@ abstract class ViewBuildNodeBase {
     propagateToChildrenToConnected(): void {
         if (this instanceof ViewPU && this.defaultConsume_.size > 0) {
             this.reconnectToConsume()
-        } else if (this instanceof ViewV2) {
-            this.reconnectToConsumerV2(this.defaultConsumer, this.defaultVal);
+        } else if (this instanceof ViewV2 && this.defaultConsumerV2__.size > 0) {
+            this.__reconnectToConsumer__ViewV2__Internal();
         }
 
         this.childrenWeakrefMap_.forEach((weakRefChild) => {
@@ -182,8 +189,8 @@ abstract class ViewBuildNodeBase {
     public propagateToChildrenToDisconnected(): void {
         if (this instanceof ViewPU && this.reconnectConsume_.size > 0) {
             this.disconnectedConsume();
-        } else if (this instanceof ViewV2) {
-            this.reconnectToConsumerV2(this.defaultConsumer, this.defaultVal);
+        } else if (this instanceof ViewV2 && this.connectConsumerV2__.size > 0) {
+            this.__disconnectToConsumer__ViewV2__Internal();
         }
         this.childrenWeakrefMap_.forEach((weakRefChild) => {
             const child = weakRefChild?.deref();

@@ -360,6 +360,8 @@ void ImageAnimatorPattern::OnModifyDone()
                                          status_ == ControlledAnimator::ControlStatus::STOPPED;
         auto imageFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front());
         AddImageLoadSuccessEvent(imageFrameNode);
+    } else if (isStatic_) {
+        UpdateEventCallback();
     }
     UpdateFormDurationByRemainder();
     RunAnimatorByStatus(index);

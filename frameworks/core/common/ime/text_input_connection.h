@@ -41,6 +41,7 @@ public:
     virtual void SetEditingState(
         const TextEditingValue& value, int32_t instanceId, bool needFireChangeEvent = true) = 0;
     virtual void Close(int32_t instanceId) = 0;
+    virtual void FinishComposing(int32_t instanceId) = 0;
 
     int32_t GetClientId() const
     {

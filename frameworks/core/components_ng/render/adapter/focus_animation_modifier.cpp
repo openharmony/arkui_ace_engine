@@ -196,7 +196,12 @@ void FocusAnimationModifier::StartFocusAnimation()
     option.SetCurve(curve);
     option.SetIteration(-1);
     focusAnimation_ = AnimationUtils::StartAnimation(
-        option, [&]() { focusProcessFloat_->Set(360.0f); }, [&]() {}, [&]() { isRise_ = !isRise_; });
+        option, [&]() { focusProcessFloat_->Set(360.0f); }, nullptr,
+        [weak = WeakClaim(this)]() {
+            auto animationModifier = weak.Upgrade();
+            CHECK_NULL_VOID(animationModifier);
+            animationModifier->isRise_ = !animationModifier->isRise_;
+        });
 }
 
 void FocusAnimationModifier::StopFocusAnimation()

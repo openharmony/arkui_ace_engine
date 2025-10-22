@@ -17,7 +17,7 @@
 
 #include "pixel_map.h"
 
-#include "adapter/ohos/entrance/ui_session/include/ui_service_hilog.h"
+#include "adapter/ohos/entrance/ui_session/include/ui_session_log.h"
 
 namespace OHOS::Ace {
 int32_t UiReportStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option)

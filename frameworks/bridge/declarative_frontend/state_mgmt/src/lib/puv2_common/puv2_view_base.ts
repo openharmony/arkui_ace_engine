@@ -113,6 +113,8 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
 
   private nativeViewPartialUpdate: NativeViewPartialUpdate;
 
+  private activeChangeListenerForInterop_: Set<(active: boolean) => void> = new Set<(active: boolean) => void>();
+
   constructor(parent: IView, elmtId: number = UINodeRegisterProxy.notRecordingDependencies, extraInfo: ExtraInfo = undefined) {
     super(true);
     this.nativeViewPartialUpdate = new NativeViewPartialUpdate(this);
@@ -915,6 +917,22 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
         }
         this.updateFuncByElmtId.get(retakenElmtId)?.setIsChanged(false);
       }
+    }
+  }
+
+  public addActiveChangeListenerForInterop(listener: (active: boolean) => void): void {
+    this.activeChangeListenerForInterop_.add(listener);
+  }
+
+  public removeActiveChangeListenerForInterop(listener: (active: boolean) => void): void {
+    this.activeChangeListenerForInterop_.delete(listener);
+  }
+
+  public handleActiveChangeForInterop(active: boolean): void {
+    if (this.activeChangeListenerForInterop_.size > 0) {
+      this.activeChangeListenerForInterop_.forEach((listener: (active: boolean) => void) => {
+        listener(active);
+      });
     }
   }
 } // class PUV2ViewBase

@@ -1646,14 +1646,14 @@ void DragDropManager::RequireSummary()
     DragSummaryInfo dragSummaryInfo;
     int32_t ret =
         InteractionInterface::GetInstance()->GetDragSummary(dragSummaryInfo.summary, dragSummaryInfo.detailedSummary,
-            dragSummaryInfo.summaryFormat, dragSummaryInfo.version, dragSummaryInfo.totalSize);
+            dragSummaryInfo.summaryFormat, dragSummaryInfo.version, dragSummaryInfo.totalSize, dragSummaryInfo.tag);
     if (ret != 0) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "RequireSummary: Interaction GetSummary failed: %{public}d", ret);
     } else {
         std::string summarys = DragDropFuncWrapper::GetSummaryString(dragSummaryInfo.summary);
         std::string detailedSummarys = DragDropFuncWrapper::GetSummaryString(dragSummaryInfo.detailedSummary);
-        TAG_LOGI(AceLogTag::ACE_DRAG, "require summary: %{public}s, detailedSummary:%{public}s", summarys.c_str(),
-            detailedSummarys.c_str());
+        TAG_LOGI(AceLogTag::ACE_DRAG, "require summary: %{public}s, detailedSummary:%{public}s, tag:%{public}s",
+            summarys.c_str(), detailedSummarys.c_str(), dragSummaryInfo.tag.c_str());
         DragDropBehaviorReporter::GetInstance().UpdateSummaryType(summarys);
     }
     std::string extraInfo;

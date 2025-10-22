@@ -165,9 +165,33 @@ bool FocusStrategyOsalNG::UpdateElementInfo(
     }
     return true;
 }
+bool FocusStrategyOsalNG::CheckAndGetReadableInfoToRoot(
+    const RefPtr<NG::FrameNode>& currentFrameNode, Accessibility::AccessibilityElementInfo& targetInfo)
+{
+    CHECK_NULL_RETURN(currentFrameNode, false);
+    bool isReadable = true;
+    auto client = Accessibility::AccessibilitySystemAbilityClient::GetInstance();
+    CHECK_NULL_RETURN(client, false);
+    auto inputNode = std::make_shared<FrameNodeRulesCheckNode>(
+        currentFrameNode, currentFrameNode->GetAccessibilityId());
+    std::shared_ptr<FocusRulesCheckNode> checkNode =
+        std::static_pointer_cast<FocusRulesCheckNode>(inputNode);
+    while (checkNode) {
+        auto checkResult = client->CheckNodeIsReadable(checkNode, isReadable);
+        CHECK_NE_RETURN(checkResult, Accessibility::RET_OK, false);
+        if (isReadable) {
+            UpdateOriginNodeInfo(checkNode->GetAccessibilityId());
+            UpdateElementInfo(checkNode, targetInfo);
+            return true;
+        }
+        checkNode = checkNode->GetAceParent();
+    }
+    return false;
+}
 
 bool FocusStrategyOsalNG::DetectElementInfoFocusableThroughAncestor(
-    const Accessibility::AccessibilityElementInfo& info, const int64_t parentId)
+    const Accessibility::AccessibilityElementInfo& info, const int64_t parentId,
+    Accessibility::AccessibilityElementInfo& targetInfo)
 {
     auto context = context_.Upgrade();
     CHECK_NULL_RETURN(context, false);
@@ -184,9 +208,18 @@ bool FocusStrategyOsalNG::DetectElementInfoFocusableThroughAncestor(
     auto checkNode = std::make_shared<DetectParentRulesCheckNode>(info, baseNode);
     bool isReadable = true;
     auto client = Accessibility::AccessibilitySystemAbilityClient::GetInstance();
-    CHECK_NULL_RETURN(client, true);
+    if (!client) {
+        targetInfo = info;
+        return true;
+    }
     auto checkResult = client->CheckNodeIsReadable(checkNode, isReadable);
-    CHECK_NE_RETURN(checkResult, Accessibility::RET_OK, true);
+    if (checkResult != Accessibility::RET_OK) {
+        targetInfo = info;
+        return true;
+    }
+    if (!isReadable) {
+        return CheckAndGetReadableInfoToRoot(baseNode, targetInfo);
+    }
     return isReadable;
 }
 } // OHOS::Ace::Framework

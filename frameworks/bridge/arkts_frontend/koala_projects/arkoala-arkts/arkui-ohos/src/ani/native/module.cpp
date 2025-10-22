@@ -19,6 +19,7 @@
 #include "animation/animation_ani_impl.h"
 #include "canvas/canvas_module.h"
 #include "common/common_module.h"
+#include "common_node/common_node_module.h"
 #include "component3d/component3d_module_methods.h"
 #include "componentSnapshot/componentSnapshot_module.h"
 #include "content_slot/content_slot_module.h"
@@ -27,6 +28,7 @@
 #include "syntax/lazy_for_each_module.h"
 #include "syntax/syntax_module.h"
 #include "syntax/for_each_module.h"
+#include "syntax/parallelize_ui_module.h"
 #include "drag_and_drop/native_drag_drop_global.h"
 #include "dragController/drag_controller_module.h"
 #include "styled_string/styled_string_module.h"
@@ -66,6 +68,21 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
     }
 
     std::array staticMethods = {
+        ani_native_function {
+            "_Extractors_ToDrawableDescriptorPtr",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsToDrawableDescriptorPtr)
+        },
+        ani_native_function {
+            "_Extractors_ToDrawingColorFilterPtr",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsToDrawingColorFilterPtr)
+        },
+        ani_native_function {
+            "_Extractors_ToDrawingLatticePtr",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsToDrawingLatticePtr)
+        },
         ani_native_function {
             "_Extractors_FromImagePixelMapPtr",
             "J:L@ohos/multimedia/image/image/PixelMap;",
@@ -975,6 +992,16 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::TransferScrollableTargetInfoPointer)
         },
         ani_native_function {
+            "_Extractors_toUnifiedDataChannelUnifiedDataPtr",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorFromUnifiedDataToPtr)
+        },
+        ani_native_function {
+            "_Extractors_fromUnifiedDataChannelUnifiedDataPtr",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorFromPtrToUnifiedData)
+        },
+        ani_native_function {
             "_createDragEventAccessorWithPointer",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::CreateDragEventAccessorWithPointer)
@@ -1362,6 +1389,31 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_Extractors_FromDrawingCanvasPtr",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsFromDrawingCanvasPtr)
+        },
+        ani_native_function {
+            "_Common_construct",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::Commonconstruct)
+        },
+        ani_native_function {
+            "_CommonInterface_setCommonOptions",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetCommonOptions)
+        },
+        ani_native_function {
+            "_ParallelizeUIAdapterNode_Construct",
+            "i:l",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ParallelizeUIAdapterNodeConstruct)
+        },
+        ani_native_function {
+            "_ParallelizeUIAdapterNode_Reset",
+            "l:",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ParallelizeUIReset)
+        },
+        ani_native_function {
+            "_ParallelizeUIAdapterNode_RegisterCallback",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ParallelizeUIRegisterCallback)
         },
     };
 

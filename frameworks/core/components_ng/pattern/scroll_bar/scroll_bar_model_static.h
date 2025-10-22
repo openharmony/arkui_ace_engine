@@ -22,6 +22,7 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT ScrollBarModelStatic {
 public:
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static RefPtr<FrameNode> CreateArcScrollBarFrameNode(int32_t nodeId);
     static RefPtr<ScrollProxy> SetScrollBarProxy(FrameNode* frameNode, const RefPtr<ScrollProxy>& proxy);
     static void SetDirection(FrameNode* frameNode, const std::optional<Axis>& direction);
     static void SetState(FrameNode* frameNode, const std::optional<DisplayMode>& state);

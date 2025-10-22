@@ -57,7 +57,7 @@ public:
 
     virtual int32_t GetDragSummary(std::map<std::string, int64_t>& summary,
         std::map<std::string, int64_t>& detailedSummary, std::map<std::string, std::vector<int32_t>>& summaryFormat,
-        int32_t& version, int64_t& totalSize) = 0;
+        int32_t& version, int64_t& totalSize, std::string& tag) = 0;
 
     virtual int32_t GetDragExtraInfo(std::string& extraInfo) = 0;
 

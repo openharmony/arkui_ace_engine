@@ -691,6 +691,14 @@ void FormPattern::OnVisibleChange(bool isVisible)
     isVisible_ = isVisible;
 }
 
+void FormPattern::OnColorConfigurationUpdate()
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    OnModifyDone();
+}
+
 void FormPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
@@ -913,7 +921,7 @@ void FormPattern::AddFormComponentTask(const RequestFormInfo& info, RefPtr<Pipel
         return;
     }
     bool isFormBundleForbidden = CheckFormBundleForbidden(info.bundleName);
-    bool isFormProtected = IsFormBundleProtected(info.bundleName, info.id);
+    bool isFormProtected = IsFormBundleProtected(info.bundleName, 0) && !IsFormBundleExempt(info.id);
     bool isShowDeveloperTips = false;
     if (!SystemProperties::GetDeveloperModeOn()) {
         isShowDeveloperTips = IsFormBundleDebugSignature(info.bundleName);

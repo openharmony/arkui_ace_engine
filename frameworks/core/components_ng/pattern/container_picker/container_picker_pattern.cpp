@@ -16,7 +16,9 @@
 
 #include <sys/time.h>
 
+#include "adapter/ohos/entrance/picker/picker_haptic_factory.h"
 #include "base/log/dump_log.h"
+#include "core/animation/spring_curve.h"
 #include "core/components_ng/pattern/container_picker/container_picker_paint_method.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -25,15 +27,16 @@ namespace OHOS::Ace::NG {
 namespace {
 const std::string CONTAINER_PICKER_DRAG_SCENE = "container_picker_drag_scene";
 constexpr double MOVE_THRESHOLD = 2.0;
-constexpr int32_t CLICK_ANIMATION_DURATION = 300;
-constexpr uint32_t CUSTOM_SPRING_ANIMATION_DURATION = 1000;
+constexpr float SPRING_DURATION = 600.0f;
 constexpr float DEFAULT_SPRING_RESPONSE = 0.416f;
 constexpr float DEFAULT_SPRING_DAMP = 0.99f;
-constexpr float ITEM_HEIGHT_PX = 40.0 * 3.25;
-constexpr int32_t VELOCITY_TRANS = 1000;
-constexpr float PICKER_SPEED_TH = 0.25f;
-constexpr int32_t DEFAULT_FONT_SIZE = 20;
 constexpr float MIN_TIME = 1.0f;
+constexpr float PICKER_SPEED_TH = 0.25f;
+constexpr int32_t VELOCITY_TRANS = 1000;
+constexpr int32_t DEFAULT_FONT_SIZE = 20;
+constexpr int32_t CLICK_ANIMATION_DURATION = 300;
+constexpr uint32_t CUSTOM_SPRING_ANIMATION_DURATION = 1000;
+const std::string SPRING_PROPERTY_NAME = "spring";
 } // namespace
 
 RefPtr<LayoutAlgorithm> ContainerPickerPattern::CreateLayoutAlgorithm()
@@ -44,10 +47,14 @@ RefPtr<LayoutAlgorithm> ContainerPickerPattern::CreateLayoutAlgorithm()
     CHECK_NULL_RETURN(host, nullptr);
     layoutAlgorithm->SetTotalItemCount(host->TotalChildCount());
     layoutAlgorithm->SetCurrentDelta(currentDelta_);
+
     layoutAlgorithm->SetSelectedIndex(selectedIndex_);
     layoutAlgorithm->SetItemPosition(itemPosition_);
     layoutAlgorithm->SetContentMainSize(contentMainSize_);
     layoutAlgorithm->SetHeight(height_);
+    layoutAlgorithm->SetPickerHeight(pickerDefaultHeight_);
+    layoutAlgorithm->SetItemHeight(pickerItemHeight_);
+    layoutAlgorithm->SetPickerHeightBeforeRotate(pickerHeightBeforeRotate_);
     layoutAlgorithm->SetIsLoop(isLoop_);
     return layoutAlgorithm;
 }
@@ -93,12 +100,11 @@ bool ContainerPickerPattern::AccumulatingTerminateHelper(
 
 bool ContainerPickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    if (config.skipMeasure && config.skipLayout && !isNeedStartInertialAnimation_) {
+    if (config.skipMeasure && config.skipLayout && !isNeedPlayInertialAnimation_) {
         return false;
     }
 
     FireChangeEvent();
-    dragOffset_ += currentDelta_;
     currentDelta_ = 0.0f;
     auto layoutAlgorithmWrapper = dirty->GetLayoutAlgorithm();
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
@@ -107,32 +113,31 @@ bool ContainerPickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper
     GetLayoutProperties(pickerAlgorithm);
     PostIdleTask(GetHost());
     SetDefaultTextStyle();
-    HandleTargetIndex(dirty, pickerAlgorithm);
+    HandleTargetIndex();
 
-    if (isNeedStartInertialAnimation_) {
-        StartInertialAnimation();
+    if (isNeedPlayInertialAnimation_) {
+        PlayInertialAnimation();
     }
     return false;
 }
 
-float ContainerPickerPattern::ShortestDistanceBetweenCurrentAndTarget()
+float ContainerPickerPattern::ShortestDistanceBetweenCurrentAndTarget(int32_t targetIndex)
 {
     if (totalItemCount_ <= 0) {
         return 0.0;
     }
-    auto defaultItemHeight = static_cast<float>(PICKER_ITEM_DEFAULT_HEIGHT.ConvertToPx());
-    int32_t targetIndex = targetIndex_.value();
     if (!isLoop_) {
         auto deltaIndex = targetIndex - selectedIndex_;
-        return defaultItemHeight * deltaIndex;
+        return pickerItemHeight_ * deltaIndex;
     }
-    auto forwardDelta = (targetIndex - selectedIndex_ + totalItemCount_) % totalItemCount_;
-    auto backwardDelta = (selectedIndex_ - targetIndex + totalItemCount_) % totalItemCount_;
-    return forwardDelta <= backwardDelta ? forwardDelta * defaultItemHeight : backwardDelta * defaultItemHeight * -1;
+    float currentOffsetFromMiddle = CalculateMiddleLineOffset();
+    auto downDelta = (targetIndex - selectedIndex_ + totalItemCount_) % totalItemCount_;
+    auto upDelta = (selectedIndex_ - targetIndex + totalItemCount_) % totalItemCount_;
+    return downDelta <= upDelta ? downDelta * pickerItemHeight_ - currentOffsetFromMiddle
+                                : upDelta * pickerItemHeight_ * -1 + currentOffsetFromMiddle;
 }
 
-void ContainerPickerPattern::HandleTargetIndex(
-    const RefPtr<LayoutWrapper>& dirty, const RefPtr<ContainerPickerLayoutAlgorithm>& algo)
+void ContainerPickerPattern::HandleTargetIndex()
 {
     if (!targetIndex_.has_value()) {
         return;
@@ -141,23 +146,10 @@ void ContainerPickerPattern::HandleTargetIndex(
         targetIndex_.reset();
         return;
     }
-    auto props = GetLayoutProperty<ContainerPickerLayoutProperty>();
-    CHECK_NULL_VOID(props);
     if (isTargetAnimationRunning_) {
         return;
     }
-    float targetPos = ShortestDistanceBetweenCurrentAndTarget();
-    isTargetAnimationRunning_ = true;
-    runningTargetIndex_ = targetIndex_;
-    auto context = GetContext();
-    if (context) {
-        context->AddAfterLayoutTask([weak = WeakClaim(this), targetPos]() {
-            auto picker = weak.Upgrade();
-            CHECK_NULL_VOID(picker);
-            picker->CreateSwipeToTargetAnimation(0.0, targetPos);
-        });
-    }
-    targetIndex_.reset();
+    PlayTargetAnimation();
 }
 
 void ContainerPickerPattern::PostIdleTask(const RefPtr<FrameNode>& frameNode)
@@ -212,6 +204,13 @@ void ContainerPickerPattern::GetLayoutProperties(const RefPtr<ContainerPickerLay
     contentMainSize_ = algo->GetContentMainSize();
     height_ = algo->GetHeight();
     crossMatchChild_ = algo->IsCrossMatchChild();
+    auto contentCrossSize = algo->GetContentCrossSize();
+    if (!NearEqual(contentCrossSize, contentCrossSize_)) {
+        contentCrossSize_ = contentCrossSize;
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
 }
 
 void ContainerPickerPattern::OnAttachToFrameNode()
@@ -219,6 +218,7 @@ void ContainerPickerPattern::OnAttachToFrameNode()
     CreateAnimation();
     UpdatePanEvent();
     UpdateClipEdge();
+    InitDefaultParams();
 }
 
 void ContainerPickerPattern::OnModifyDone()
@@ -230,6 +230,7 @@ void ContainerPickerPattern::OnModifyDone()
     containerPickerId_ = host->GetId();
     totalItemCount_ = host->TotalChildCount();
     isLoop_ = IsLoop();
+    InitOrRefreshHapticController();
 
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     PickerMarkDirty();
@@ -252,6 +253,9 @@ void ContainerPickerPattern::FireScrollStopEvent()
 {
     auto pickerEventHub = GetEventHub<ContainerPickerEventHub>();
     CHECK_NULL_VOID(pickerEventHub);
+    if (animationBreak_) {
+        return;
+    }
     pickerEventHub->FireScrollStopEvent(selectedIndex_);
 }
 
@@ -398,8 +402,10 @@ RefPtr<TouchEventImpl> ContainerPickerPattern::CreateItemTouchEventListener()
             return;
         }
 
+        pattern->isAllowPlayHaptic_ = (info.GetSourceTool() == SourceTool::MOUSE) ? false : true;
+
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
-            if (pattern->isInertialRolling) {
+            if (pattern->isInertialRollingAnimationRunning_) {
                 pattern->touchBreak_ = true;
                 pattern->animationBreak_ = true;
                 pattern->clickBreak_ = true;
@@ -414,6 +420,7 @@ RefPtr<TouchEventImpl> ContainerPickerPattern::CreateItemTouchEventListener()
             pattern->touchBreak_ = false;
             if (pattern->animationBreak_) {
                 pattern->PlayResetAnimation();
+                pattern->yOffset_ = 0.0;
             }
         }
     };
@@ -493,14 +500,8 @@ GestureEventFunc ContainerPickerPattern::ActionUpdateTask()
     return [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        auto infoChecked = info;
-        if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::MOUSE) {
-            if (pattern->isFirstAxisAction_) {
-                pattern->isFirstAxisAction_ = false;
-            }
-        } else {
-            pattern->HandleDragUpdate(infoChecked);
-        }
+        pattern->HandleDragUpdate(info);
+        pattern->dragVelocity_ = info.GetMainVelocity();
     };
 }
 
@@ -528,7 +529,7 @@ GestureEventNoParameter ContainerPickerPattern::ActionCancelTask()
         if (pattern) {
             TAG_LOGI(AceLogTag::ACE_CONTAINER_PICKER, "containerPicker drag cancel id:%{public}d",
                 pattern->containerPickerId_);
-            pattern->HandleDragEnd(0.0);
+            pattern->HandleDragEnd(pattern->dragVelocity_);
         }
     };
 }
@@ -538,27 +539,36 @@ void ContainerPickerPattern::HandleDragStart(const GestureEvent& info)
     UpdateDragFRCSceneInfo(info.GetMainVelocity(), SceneStatus::START);
     isDragging_ = true;
     mainDeltaSum_ = 0.0f;
-    currentIndexOffset_ = 0.0f;
+    currentDelta_ = 0.0f;
+    springOffset_ = 0.0f;
 
     yLast_ = info.GetGlobalPoint().GetY();
     dragStartTime_ = GetCurrentTime();
 
-    dragOffset_ = 0.0f;
-}
-
-void ContainerPickerPattern::ProcessDelta(float& delta, float mainSize, float deltaSum)
-{
-    if (std::abs(delta) > mainSize) {
-        delta = delta > 0 ? mainSize : -mainSize;
-    }
-
-    if ((std::abs(deltaSum + delta)) > mainSize) {
-        delta = GreatNotEqual((deltaSum + delta), 0) ? (mainSize - deltaSum) : (-deltaSum - mainSize);
-    }
+    StopSpringAnimation();
 }
 
 void ContainerPickerPattern::HandleDragUpdate(const GestureEvent& info)
 {
+    isAllowPlayHaptic_ = (info.GetSourceTool() == SourceTool::MOUSE) ? false : true;
+    if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::MOUSE) {
+        if (totalItemCount_ == 0) {
+            return;
+        }
+
+        int32_t index = 0;
+        if (LessNotEqual(info.GetDelta().GetY(), 0.0)) {
+            index = (totalItemCount_ + selectedIndex_ + 1) % totalItemCount_;
+        } else {
+            int32_t totalCountAndIndex = totalItemCount_ + selectedIndex_ - 1;
+            index = (totalCountAndIndex ? totalCountAndIndex : 0) % totalItemCount_;
+        }
+        SwipeTo(index);
+        selectedIndex_ = index;
+        FireScrollStopEvent();
+        return;
+    }
+
     auto velocity = info.GetMainVelocity();
     UpdateDragFRCSceneInfo(velocity, SceneStatus::RUNNING);
     animationBreak_ = false;
@@ -566,13 +576,12 @@ void ContainerPickerPattern::HandleDragUpdate(const GestureEvent& info)
     auto offsetY =
         info.GetGlobalPoint().GetY() + (info.GetInputEventType() == InputEventType::AXIS ? info.GetOffsetY() : 0.0);
     if (NearEqual(offsetY, yLast_, MOVE_THRESHOLD)) {
+        StopHapticController();
         return;
     }
 
     float mainDelta = static_cast<float>(info.GetMainDelta());
     ProcessDelta(mainDelta, contentMainSize_, mainDeltaSum_);
-    mainDeltaSum_ += mainDelta;
-    currentDelta_ -= mainDelta;
 
     HandleScroll(mainDelta, SCROLL_FROM_UPDATE, NestedState::GESTURE, velocity);
     UpdateColumnChildPosition(offsetY);
@@ -581,17 +590,22 @@ void ContainerPickerPattern::HandleDragUpdate(const GestureEvent& info)
 
 void ContainerPickerPattern::HandleDragEnd(double dragVelocity, float mainDelta)
 {
+    StopHapticController();
     UpdateDragFRCSceneInfo(dragVelocity, SceneStatus::END);
     isDragging_ = false;
 
-    if (!isLoop_) {
+    if (CheckDragOutOfBoundary()) {
         // spring back
+        return;
     }
 
     // Throw and slide
-    if (Play(dragVelocity)) {
+    if (Play(dragVelocity_)) {
         return;
     }
+
+    yOffset_ = 0.0;
+    yLast_ = 0.0;
 
     // Drag and slide
     if (!animationCreated_) {
@@ -600,10 +614,174 @@ void ContainerPickerPattern::HandleDragEnd(double dragVelocity, float mainDelta)
     }
 
     // Adjust the position to ensure it is centered.
-    dragOffsetForAnimation_ += dragOffset_;
-    float totalOffset = (-animationOffset_) + (-dragOffsetForAnimation_);
-    float resetOffset = CalculateResetOffset(totalOffset);
+    float currentOffsetFromMiddle = CalculateMiddleLineOffset();
+    float resetOffset = CalculateResetOffset(currentOffsetFromMiddle);
     CreateAnimation(0.0, resetOffset);
+}
+
+void ContainerPickerPattern::StopSpringAnimation()
+{
+    CHECK_NULL_VOID(springAnimation_);
+    CHECK_NULL_VOID(isSpringAnimationRunning_);
+    AnimationUtils::StopAnimation(springAnimation_);
+    isSpringAnimationRunning_ = false;
+    animationBreak_ = true;
+}
+
+void ContainerPickerPattern::ProcessDelta(float& delta, float mainSize, float deltaSum)
+{
+    if (GreatNotEqual(std::abs(delta), mainSize)) {
+        delta = GreatNotEqual(delta, 0.0f) ? mainSize : -mainSize;
+    }
+
+    if (GreatNotEqual(std::abs(deltaSum + delta), mainSize)) {
+        delta = GreatNotEqual((deltaSum + delta), 0.0f) ? (mainSize - deltaSum) : (-deltaSum - mainSize);
+    }
+}
+
+void ContainerPickerPattern::UpdateCurrentOffset(float offset)
+{
+    if (itemPosition_.empty()) {
+        PickerMarkDirty();
+        return;
+    }
+    if (!isLoop_ && isDragging_) {
+        // handle over scroll
+        if (SpringOverScroll(offset)) {
+            return;
+        }
+    }
+    mainDeltaSum_ += offset;
+    currentDelta_ -= offset;
+    PickerMarkDirty();
+}
+
+bool ContainerPickerPattern::IsOutOfBoundary(float mainOffset) const
+{
+    return IsOutOfStart(mainOffset) || IsOutOfEnd(mainOffset);
+}
+
+bool ContainerPickerPattern::IsOutOfStart(float mainOffset) const
+{
+    if (isLoop_ || itemPosition_.empty()) {
+        return false;
+    }
+
+    auto startPos = itemPosition_.begin()->second.startPos;
+    auto middlePos = height_ / HALF;
+    return itemPosition_.begin()->first == 0 && GreatNotEqual(startPos + mainOffset, middlePos);
+}
+
+bool ContainerPickerPattern::IsOutOfEnd(float mainOffset) const
+{
+    if (isLoop_ || itemPosition_.empty()) {
+        return false;
+    }
+
+    auto endPos = itemPosition_.rbegin()->second.endPos;
+    auto middlePos = height_ / HALF;
+    return itemPosition_.rbegin()->first == totalItemCount_ - 1 && LessNotEqual(endPos + mainOffset, middlePos);
+}
+
+bool ContainerPickerPattern::SpringOverScroll(float offset)
+{
+    bool outOfBounds = IsOutOfBoundary(offset);
+    if (!outOfBounds) {
+        springOffset_ = 0.0f;
+        return false;
+    }
+
+    auto visibleSize = pickerHeightBeforeRotate_;
+    auto currentRealOffset =
+        springOffset_ * ContainerPickerUtils::CalculateFriction(std::abs(springOffset_ / visibleSize));
+    auto delta = 0.0f;
+    auto middlePos = height_ / HALF;
+    if (IsOutOfBoundary()) {
+        springOffset_ += offset;
+    } else {
+        if (offset > 0) {
+            springOffset_ = itemPosition_.begin()->second.startPos - middlePos + offset;
+        } else {
+            springOffset_ = itemPosition_.rbegin()->second.endPos - middlePos + offset;
+        }
+        delta = offset - springOffset_;
+    }
+    if (std::abs(springOffset_) > visibleSize) {
+        springOffset_ = springOffset_ > 0 ? visibleSize : -visibleSize;
+    }
+    auto realOffset = springOffset_ * ContainerPickerUtils::CalculateFriction(std::abs(springOffset_ / visibleSize));
+    delta += (realOffset - currentRealOffset);
+    currentDelta_ -= delta;
+    mainDeltaSum_ += delta;
+    PickerMarkDirty();
+    return true;
+}
+
+bool ContainerPickerPattern::CheckDragOutOfBoundary()
+{
+    if (isLoop_) {
+        return false;
+    }
+    if (IsOutOfBoundary()) {
+        isDragging_ = false;
+        PlaySpringAnimation();
+        return true;
+    }
+
+    return false;
+}
+
+void ContainerPickerPattern::CreateSpringProperty()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->CreateAnimatablePropertyFloat(
+        SPRING_PROPERTY_NAME, 0,
+        [weak = AceType::WeakClaim(this)](float position) {
+            auto picker = weak.Upgrade();
+            CHECK_NULL_VOID(picker);
+            auto positionDelta = static_cast<float>(position) - picker->mainDeltaSum_;
+            picker->UpdateCurrentOffset(positionDelta);
+        },
+        PropertyUnit::PIXEL_POSITION);
+}
+
+void ContainerPickerPattern::PlaySpringAnimation()
+{
+    if (isSpringAnimationRunning_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto mainSize = std::min(pickerDefaultHeight_, height_);
+    if (LessOrEqual(mainSize, 0) || itemPosition_.empty()) {
+        return;
+    }
+
+    auto middlePos = height_ / HALF;
+    auto halfOfItemHeight = pickerItemHeight_ / HALF;
+    auto leading = mainDeltaSum_ + middlePos - itemPosition_.rbegin()->second.endPos + halfOfItemHeight;
+    auto trailing = mainDeltaSum_ + middlePos - itemPosition_.begin()->second.startPos - halfOfItemHeight;
+    CreateSpringProperty();
+    host->UpdateAnimatablePropertyFloat(SPRING_PROPERTY_NAME, mainDeltaSum_);
+    auto delta = Negative(mainDeltaSum_) ? leading : trailing;
+
+    CreateSpringAnimation(delta);
+}
+
+void ContainerPickerPattern::PlayTargetAnimation()
+{
+    float targetPos = ShortestDistanceBetweenCurrentAndTarget(targetIndex_.value_or(0));
+    isTargetAnimationRunning_ = true;
+    auto context = GetContext();
+    if (context) {
+        context->AddAfterLayoutTask([weak = WeakClaim(this), targetPos]() {
+            auto picker = weak.Upgrade();
+            CHECK_NULL_VOID(picker);
+            picker->CreateTargetAnimation(targetPos);
+        });
+    }
+    targetIndex_.reset();
 }
 
 void ContainerPickerPattern::CalcEndOffset(float& endOffset, double velocity)
@@ -620,9 +798,44 @@ void ContainerPickerPattern::CalcEndOffset(float& endOffset, double velocity)
     endOffset = realK / (4.2f * defaultY) * velocity * (1 - exp(-defaultY * CUSTOM_SPRING_ANIMATION_DURATION));
 
     // Adjust the position to ensure it is centered.
-    float totalOffset = endOffset + (-animationOffset_) + (-dragOffsetForAnimation_);
+    float currentOffsetFromMiddle = CalculateMiddleLineOffset();
+    float totalOffset = endOffset + currentOffsetFromMiddle;
     float resetOffset = CalculateResetOffset(totalOffset);
     endOffset -= resetOffset;
+
+    // handle over scroll
+    if (!isLoop_) {
+        auto maxOverScrollOffset = maxOverscrollOffset_;
+        auto middlePos = height_ / HALF;
+        auto currentMiddleItem =
+            ContainerPickerUtils::CalcCurrentMiddleItem(itemPosition_, height_, totalItemCount_, isLoop_);
+        if (GreatNotEqual(endOffset, 0.0f)) {
+            auto distanceToTop =
+                pickerItemHeight_ * currentMiddleItem.first + middlePos - currentMiddleItem.second.startPos;
+            if (GreatNotEqual(endOffset, distanceToTop + maxOverScrollOffset)) {
+                endOffset = distanceToTop + maxOverScrollOffset;
+            }
+            if (GreatNotEqual(endOffset, distanceToTop)) {
+                mainDeltaSum_ = endOffset - distanceToTop;
+            } else {
+                mainDeltaSum_ = 0.0f;
+            }
+        }
+        if (LessNotEqual(endOffset, 0.0f)) {
+            auto distanceToBottom = pickerItemHeight_ * (totalItemCount_ - currentMiddleItem.first - 1) +
+                                    currentMiddleItem.second.endPos - middlePos;
+            if (GreatNotEqual(std::abs(endOffset), distanceToBottom + maxOverScrollOffset)) {
+                endOffset = -distanceToBottom - maxOverScrollOffset;
+            }
+            if (GreatNotEqual(std::abs(endOffset), distanceToBottom)) {
+                mainDeltaSum_ = endOffset + distanceToBottom;
+            } else {
+                mainDeltaSum_ = 0.0f;
+            }
+        }
+    } else {
+        mainDeltaSum_ = 0.0f;
+    }
 }
 
 bool ContainerPickerPattern::Play(double dragVelocity)
@@ -636,13 +849,12 @@ bool ContainerPickerPattern::Play(double dragVelocity)
         return false;
     }
 
-    isNeedStartInertialAnimation_ = true;
-    dragVelocity_ = dragVelocity;
+    isNeedPlayInertialAnimation_ = true;
     PickerMarkDirty();
     return true;
 }
 
-void ContainerPickerPattern::StartInertialAnimation()
+void ContainerPickerPattern::PlayInertialAnimation()
 {
     AnimationOption option;
     option.SetDuration(CUSTOM_SPRING_ANIMATION_DURATION);
@@ -653,7 +865,6 @@ void ContainerPickerPattern::StartInertialAnimation()
     }
 
     float endOffset = 0.0f;
-    dragOffsetForAnimation_ += dragOffset_;
     CalcEndOffset(endOffset, dragVelocity_);
     snapOffsetProperty_->Set(0.0f);
     snapOffsetProperty_->SetPropertyUnit(PropertyUnit::PIXEL_POSITION);
@@ -662,15 +873,18 @@ void ContainerPickerPattern::StartInertialAnimation()
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         if (!pattern->animationBreak_) {
-            pattern->dragOffsetForAnimation_ = 0.0f;
             pattern->lastAnimationScroll_ = 0.0f;
-            pattern->animationOffset_ = 0.0f;
         }
-        pattern->isInertialRolling = false;
-        pattern->FireScrollStopEvent();
+        pattern->isInertialRollingAnimationRunning_ = false;
+        if (!NearZero(pattern->mainDeltaSum_)) {
+            pattern->PlaySpringAnimation();
+        } else {
+            pattern->FireScrollStopEvent();
+        }
+        pattern->StopHapticController();
     };
     snapOffsetProperty_->AnimateWithVelocity(option, -endOffset, dragVelocity_, finishCallback);
-    isNeedStartInertialAnimation_ = false;
+    isNeedPlayInertialAnimation_ = false;
 }
 
 void ContainerPickerPattern::UpdateDragFRCSceneInfo(float speed, SceneStatus sceneStatus)
@@ -682,7 +896,7 @@ void ContainerPickerPattern::UpdateDragFRCSceneInfo(float speed, SceneStatus sce
 
 ScrollResult ContainerPickerPattern::HandleScroll(float offset, int32_t source, NestedState state, float velocity)
 {
-    PickerMarkDirty();
+    UpdateCurrentOffset(offset);
     return { 0.0f, false };
 }
 
@@ -734,6 +948,7 @@ double ContainerPickerPattern::GetDragDeltaLessThanJumpInterval(
         }
         for (int32_t i = 0; i < shiftDistanceCount; i++) {
             PickerMarkDirty();
+            InnerHandleScroll(LessNotEqual(dragDelta, 0.0));
         }
         dragDelta = additionalShift;
     }
@@ -745,7 +960,7 @@ void ContainerPickerPattern::UpdateColumnChildPosition(double offsetY)
     double dragDelta = offsetY - yLast_;
     ContainerPickerDirection dir =
         GreatNotEqual(dragDelta, 0.0) ? ContainerPickerDirection::DOWN : ContainerPickerDirection::UP;
-    auto shiftDistance = (dir == ContainerPickerDirection::UP) ? -ITEM_HEIGHT_PX : ITEM_HEIGHT_PX;
+    auto shiftDistance = (dir == ContainerPickerDirection::UP) ? -pickerItemHeight_ : pickerItemHeight_;
     auto useRebound = !isLoop_;
     auto stopMove = SpringCurveTailMoveProcess(useRebound, dragDelta);
 
@@ -768,22 +983,11 @@ void ContainerPickerPattern::CreateAnimation()
         CHECK_NULL_VOID(pattern);
         pattern->currentDelta_ = value - pattern->lastAnimationScroll_;
         pattern->lastAnimationScroll_ = value;
-        pattern->animationOffset_ = value;
         pattern->PickerMarkDirty();
+        pattern->UpdateColumnChildPosition(value);
     };
     scrollProperty_ = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
     renderContext->AttachNodeAnimatableProperty(scrollProperty_);
-
-    auto aroundClickCallback = [weak = AceType::WeakClaim(this)](float value) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->currentDelta_ = value - pattern->lastAnimationScroll_;
-        pattern->lastAnimationScroll_ = value;
-        pattern->animationOffset_ = value;
-        pattern->PickerMarkDirty();
-    };
-    aroundClickProperty_ = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(aroundClickCallback));
-    renderContext->AttachNodeAnimatableProperty(aroundClickProperty_);
     animationCreated_ = true;
 }
 
@@ -806,9 +1010,9 @@ void ContainerPickerPattern::CreateSnapProperty()
         }
         pattern->currentDelta_ = position - pattern->lastAnimationScroll_;
         pattern->lastAnimationScroll_ = position;
-        pattern->animationOffset_ += pattern->currentDelta_;
-        pattern->isInertialRolling = true;
+        pattern->isInertialRollingAnimationRunning_ = true;
         pattern->PickerMarkDirty();
+        pattern->UpdateColumnChildPosition(position);
     };
     snapOffsetProperty_ = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
     AttachNodeAnimatableProperty(snapOffsetProperty_);
@@ -816,7 +1020,6 @@ void ContainerPickerPattern::CreateSnapProperty()
 
 void ContainerPickerPattern::CreateAnimation(double from, double to)
 {
-    dragOffsetForAnimation_ += dragOffset_;
     AnimationOption option;
     option.SetCurve(Curves::FAST_OUT_SLOW_IN);
     option.SetDuration(CLICK_ANIMATION_DURATION);
@@ -833,38 +1036,66 @@ void ContainerPickerPattern::CreateAnimation(double from, double to)
         [weak = AceType::WeakClaim(this)]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            pattern->dragOffsetForAnimation_ = 0.0f;
             pattern->lastAnimationScroll_ = 0.0f;
-            pattern->animationOffset_ = 0.0f;
             pattern->FireScrollStopEvent();
         },
         nullptr, context);
 }
 
-void ContainerPickerPattern::CreateSwipeToTargetAnimation(double from, double to)
+void ContainerPickerPattern::CreateTargetAnimation(float delta)
 {
     lastAnimationScroll_ = 0.0f;
     AnimationOption option;
     option.SetCurve(Curves::FAST_OUT_SLOW_IN);
     option.SetDuration(CLICK_ANIMATION_DURATION);
-    scrollProperty_->Set(from);
+    scrollProperty_->Set(0.0f);
     auto host = GetHost();
     auto context = host ? host->GetContextRefPtr() : nullptr;
     AnimationUtils::Animate(
         option,
-        [weak = AceType::WeakClaim(this), to]() {
+        [weak = AceType::WeakClaim(this), delta]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            pattern->scrollProperty_->Set(to);
+            pattern->scrollProperty_->Set(delta);
         },
         [weak = AceType::WeakClaim(this)]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            pattern->dragOffsetForAnimation_ = 0.0f;
-            pattern->lastAnimationScroll_ = 0.0f;
-            pattern->animationOffset_ = 0.0f;
-            pattern->FireScrollStopEvent();
             pattern->isTargetAnimationRunning_ = false;
+            pattern->lastAnimationScroll_ = 0.0f;
+            pattern->yOffset_ = 0.0;
+            pattern->yLast_ = 0.0;
+            pattern->FireScrollStopEvent();
+        },
+        nullptr, context);
+}
+
+void ContainerPickerPattern::CreateSpringAnimation(float delta)
+{
+    auto host = GetHost();
+    auto context = host ? host->GetContextRefPtr() : nullptr;
+    // spring curve: (velocity: 0.0, mass: 1.0, stiffness: 20.0, damping: 10.0)
+    auto springCurve = MakeRefPtr<SpringCurve>(0.0f, 1.0f, 20.0f, 10.0f);
+    AnimationOption option;
+    option.SetCurve(springCurve);
+    option.SetDuration(SPRING_DURATION);
+    isSpringAnimationRunning_ = true;
+    springAnimation_ = AnimationUtils::StartAnimation(
+        option,
+        [weak = AceType::WeakClaim(this), delta]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            auto host = pattern->GetHost();
+            CHECK_NULL_VOID(host);
+            host->UpdateAnimatablePropertyFloat(SPRING_PROPERTY_NAME, delta);
+        },
+        [weak = AceType::WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->isSpringAnimationRunning_ = false;
+            pattern->yOffset_ = 0.0;
+            pattern->yLast_ = 0.0;
+            pattern->FireScrollStopEvent();
         },
         nullptr, context);
 }
@@ -882,7 +1113,10 @@ void ContainerPickerPattern::PickerMarkDirty()
 
 void ContainerPickerPattern::StopInertialRollingAnimation()
 {
-    isInertialRolling = false;
+    CHECK_NULL_VOID(snapOffsetProperty_);
+    CHECK_NULL_VOID(isInertialRollingAnimationRunning_);
+
+    isInertialRollingAnimationRunning_ = false;
     AnimationOption option;
     option.SetCurve(Curves::LINEAR);
     option.SetDuration(0);
@@ -906,8 +1140,11 @@ void ContainerPickerPattern::StopInertialRollingAnimation()
 
 void ContainerPickerPattern::PlayResetAnimation()
 {
-    float totalOffset = (-animationOffset_) + (-dragOffsetForAnimation_);
-    float resetOffset = CalculateResetOffset(totalOffset);
+    float currentOffsetFromMiddle = CalculateMiddleLineOffset();
+    float resetOffset = CalculateResetOffset(currentOffsetFromMiddle);
+    if (std::abs(resetOffset) >= (pickerItemHeight_ * 0.5f)) {
+        InnerHandleScroll(LessNotEqual(resetOffset, 0.0));
+    }
     CreateAnimation(0.0f, resetOffset);
 }
 
@@ -926,18 +1163,83 @@ double ContainerPickerPattern::GetCurrentTime() const
 
 float ContainerPickerPattern::CalculateResetOffset(float totalOffset)
 {
-    ContainerPickerDirection dir = GreatNotEqual(animationOffset_ + dragOffsetForAnimation_, 0.0f)
-                                       ? ContainerPickerDirection::UP
-                                       : ContainerPickerDirection::DOWN;
-    int32_t n = std::trunc(totalOffset) / ITEM_HEIGHT_PX;
-    float distance = std::abs(totalOffset - ITEM_HEIGHT_PX * n);
+    ContainerPickerDirection dir =
+        LessOrEqual(totalOffset, 0.0f) ? ContainerPickerDirection::UP : ContainerPickerDirection::DOWN;
+    int32_t n = std::trunc(totalOffset) / pickerItemHeight_;
+    float distance = std::abs(totalOffset - pickerItemHeight_ * n);
     float resetOffset = 0.0f;
-    if (GreatNotEqual(distance, ITEM_HEIGHT_PX * 0.5f)) {
-        resetOffset = (ITEM_HEIGHT_PX - distance) * (dir == ContainerPickerDirection::UP ? 1 : -1);
-    } else if (LessNotEqual(distance, ITEM_HEIGHT_PX * 0.5f)) {
+    if (GreatNotEqual(distance, pickerItemHeight_ * 0.5f)) {
+        resetOffset = (pickerItemHeight_ - distance) * (dir == ContainerPickerDirection::UP ? 1 : -1);
+    } else if (LessNotEqual(distance, pickerItemHeight_ * 0.5f)) {
         resetOffset = distance * (dir == ContainerPickerDirection::UP ? -1 : 1);
     }
     return resetOffset;
+}
+
+float ContainerPickerPattern::CalculateMiddleLineOffset()
+{
+    auto currentMiddleItem =
+        ContainerPickerUtils::CalcCurrentMiddleItem(itemPosition_, height_, totalItemCount_, isLoop_);
+    return (currentMiddleItem.second.startPos + currentMiddleItem.second.endPos) / HALF - height_ / HALF;
+}
+
+bool ContainerPickerPattern::IsEnableHaptic() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, true);
+    auto props = GetLayoutProperty<ContainerPickerLayoutProperty>();
+    CHECK_NULL_RETURN(props, true);
+    return props->GetEnableHapticFeedbackValue(true);
+}
+
+void ContainerPickerPattern::InitOrRefreshHapticController()
+{
+    if (IsEnableHaptic() && !hapticController_) {
+        TAG_LOGI(AceLogTag::ACE_CONTAINER_PICKER, "init haptic controller");
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto context = host->GetContext();
+        CHECK_NULL_VOID(context);
+        context->AddAfterLayoutTask([weak = WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->hapticController_ = PickerAudioHapticFactory::GetInstance();
+        });
+    } else if (!IsEnableHaptic() && hapticController_) {
+        TAG_LOGI(AceLogTag::ACE_CONTAINER_PICKER, "stop haptic controller");
+        hapticController_->Stop();
+    }
+    isEnableHaptic_ = IsEnableHaptic();
+}
+
+void ContainerPickerPattern::StopHapticController()
+{
+    if (hapticController_) {
+        hapticController_->Stop();
+    }
+}
+
+void ContainerPickerPattern::PlayHaptic(float offset)
+{
+    if (isEnableHaptic_ && hapticController_ && isAllowPlayHaptic_) {
+        hapticController_->HandleDelta(offset);
+    }
+}
+
+bool ContainerPickerPattern::InnerHandleScroll(bool isDown)
+{
+    if (totalItemCount_ == 0) {
+        return false;
+    }
+
+    if (!IsLoop() && ((isDown && targetIndex_ == totalItemCount_ - 1) || (!isDown && targetIndex_ == 0))) {
+        return false;
+    }
+
+    if (isEnableHaptic_ && hapticController_ && isAllowPlayHaptic_) {
+        hapticController_->PlayOnce();
+    }
+    return true;
 }
 
 } // namespace OHOS::Ace::NG

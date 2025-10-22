@@ -22,6 +22,7 @@
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/list/list_children_main_size.h"
 #include "core/components_ng/pattern/list/list_item_group_layout_algorithm.h"
+#include "core/components_ng/pattern/list/list_height_offset_calculator.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_position_map.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -356,6 +357,36 @@ HWTEST_F(ListItemGroupAlgorithmTestNg, CheckJumpBackwardForBigOffset007, TestSiz
     EXPECT_EQ(endIndex, 2);
     EXPECT_EQ(endPos, 1.0f);
     EXPECT_FALSE(result);
+}
+
+
+/**
+ * @tc.name: CheckJumpForwardForBigOffset008
+ * @tc.desc: Test ListItemGroup BigOffsetWithScrollBar
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupAlgorithmTestNg, BigOffsetWithScrollBar, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    CreateListItemGroup(V2::ListItemGroupStyle::NONE);
+    CreateListItems(30000);
+    CreateDone();
+
+    FlushIdleTask(pattern_);
+    UpdateCurrentOffset(-200000, SCROLL_FROM_BAR);
+
+    auto calculateForward = ListHeightOffsetCalculator(pattern_->itemPosition_, 0, 1, Axis::VERTICAL, 0);
+    calculateForward.SetPosMap(pattern_->posMap_);
+    calculateForward.GetEstimateHeightAndOffset(frameNode_);
+    auto currentOffset = calculateForward.GetEstimateOffset();
+    EXPECT_EQ(currentOffset, 200000);
+
+    UpdateCurrentOffset(100000, SCROLL_FROM_BAR);
+    auto calculateBackward = ListHeightOffsetCalculator(pattern_->itemPosition_, 0, 1, Axis::VERTICAL, 0);
+    calculateBackward.SetPosMap(pattern_->posMap_);
+    calculateBackward.GetEstimateHeightAndOffset(frameNode_);
+    currentOffset = calculateBackward.GetEstimateOffset();
+    EXPECT_EQ(currentOffset, 100000);
 }
 
 /**
@@ -1917,5 +1948,35 @@ HWTEST_F(ListItemGroupAlgorithmTestNg, TestGroupCacheRange, TestSize.Level1)
     EXPECT_EQ(groupPattern->cachedItemPosition_.count(0), 1);
     EXPECT_EQ(groupPattern->cachedItemPosition_.count(1), 1);
     EXPECT_EQ(groupPattern->cachedItemPosition_.count(7), 1);
+}
+
+/**
+ * @tc.name: TestGroupCacheSyncGeometry
+ * @tc.desc: ListItemGroup in cache need sync geometry.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupAlgorithmTestNg, TestGroupCacheSyncGeometry, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetCachedCount(4);
+    CreateListItem(V2::ListItemStyle::NONE);
+    ViewAbstract::SetHeight(CalcLength(350));
+    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    CreateListItemGroup(V2::ListItemGroupStyle::NONE);
+    CreateItemsInLazyForEach(10, 100.0f, nullptr); /* 10: item count */
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. update item0 height, ListItemGroup out of view in cache.
+     * @tc.expected: ListItemGroup paint rect updated.
+     */
+    auto item0 = GetChildFrameNode(frameNode_, 0);
+    auto group1 = GetChildFrameNode(frameNode_, 1);
+    ViewAbstract::SetHeight(AceType::RawPtr(item0), CalcLength(1000));
+    FlushUITasks(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 1), 1000);
+    auto renderContext = group1->GetRenderContext();
+    EXPECT_EQ(renderContext->GetPaintRectWithoutTransform().GetY(), 1000);
 }
 } // namespace OHOS::Ace::NG

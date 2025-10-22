@@ -364,6 +364,11 @@ abstract class ViewPU extends PUV2ViewBase
     this.propagateToChildren(this.childrenWeakrefMap_, active, isReuse);
     // Propagate state to all child BuilderNode
     this.propagateToChildren(this.builderNodeWeakrefMap_, active, isReuse);
+
+    if (InteropConfigureStateMgmt.needsInterop()) {
+      this.handleActiveChangeForInterop(active);
+    }
+
     stateMgmtProfiler.end();
   }
 

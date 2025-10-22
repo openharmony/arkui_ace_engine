@@ -78,18 +78,21 @@ export class StateMgmtTool {
     }
     static tryGetHandler(value: Object): NullableObject {
         const objType = Type.of(value);
-        return objType instanceof ClassType && (objType as ClassType).getName().endsWith('@Proxy')
-            ? (proxy.Proxy.tryGetHandler(value) as NullableObject) // a very slow call so need to judge proxy first
+        return objType instanceof ClassType && (objType as ClassType).getName().startsWith('$Proxy')
+            ? ((value as reflect.Proxy).getHandler() as NullableObject) // a very slow call so need to judge proxy first
             : undefined;
     }
     static tryGetTarget(value: Object): NullableObject {
-        const objType = Type.of(value);
-        return objType instanceof ClassType && (objType as ClassType).getName().endsWith('@Proxy')
-            ? (proxy.Proxy.tryGetTarget(value as Object) as NullableObject)
-            : undefined;
+        const handler = StateMgmtTool.tryGetHandler(value);
+        if (handler && handler instanceof InterfaceProxyHandler) {
+            return (handler as InterfaceProxyHandler).target;
+        }
+        return undefined;
     }
     static createProxy<T extends Object>(value: T, allowDeep: boolean = false): T {
-        return proxy.Proxy.create(value, new InterfaceProxyHandler<T>(allowDeep)) as T;
+        const ifaces: FixedArray<Class> = Class.of(value).getInterfaces();
+        const linker = Class.current().getLinker();
+        return reflect.Proxy.create(linker, ifaces, new InterfaceProxyHandler(value, allowDeep)) as T;
     }
     static isObjectLiteral<T extends Object>(value: T): boolean {
         return Reflect.isLiteralInitializedInterface(value);

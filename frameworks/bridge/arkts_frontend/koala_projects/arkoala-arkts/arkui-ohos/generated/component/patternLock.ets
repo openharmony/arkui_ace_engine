@@ -27,7 +27,7 @@ import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonM
 import { Length, ResourceColor } from "./units"
 import { Resource } from "global.resource"
 import { Color } from "./enums"
-import { AttributeModifier, extractors, hookPatternLockAttributeModifier, AttributeUpdater } from "#handwritten"
+import { AttributeModifier, hookPatternLockAttributeModifier, AttributeUpdater } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
@@ -718,7 +718,7 @@ export class CircleStyleOptions_serializer {
         const radiusTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let radiusTmpBuf : LengthMetrics | undefined = undefined
         if ((radiusTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            radiusTmpBuf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+            radiusTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
         }
         const radiusTmpResult : LengthMetrics | undefined = radiusTmpBuf
         const enableWaveEffectTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()

@@ -15,7 +15,7 @@
 
 import { KoalaCallsiteKey } from "@koalaui/common"
 import { scheduleCallback } from "../states/GlobalStateManager"
-import { StateContext } from "../states/State"
+import { StateContext } from "arkui.incremental.runtime.state"
 import { __context, __id } from "../internals"
 
 /**

@@ -551,144 +551,6 @@ void ClearAllMenuPopup(int32_t instanceId, WindowChangeType type)
     SubwindowManager::GetInstance()->ClearAllMenuPopup(instanceId);
 }
 
-class OccupiedAreaChangeListener : public OHOS::Rosen::IOccupiedAreaChangeListener {
-public:
-    explicit OccupiedAreaChangeListener(int32_t instanceId) : instanceId_(instanceId) {}
-    ~OccupiedAreaChangeListener() = default;
-
-    void OnSizeChange(const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info,
-        const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction)
-    {
-        auto rect = info->rect_;
-        double positionY = info->textFieldPositionY_;
-        double height = info->textFieldHeight_;
-        Rect keyboardRect = Rect(rect.posX_, rect.posY_, rect.width_, rect.height_);
-        LOGI("OccupiedAreaChange rect:%{public}s type: %{public}d, positionY:%{public}f, height:%{public}f, "
-             "instanceId_ %{public}d", keyboardRect.ToString().c_str(), info->type_, positionY, height, instanceId_);
-        CHECK_NULL_VOID(info->type_ == OHOS::Rosen::OccupiedAreaType::TYPE_INPUT);
-        auto container = Platform::AceContainer::GetContainer(instanceId_);
-        CHECK_NULL_VOID(container);
-        auto taskExecutor = container->GetTaskExecutor();
-        CHECK_NULL_VOID(taskExecutor);
-        auto context = container->GetPipelineContext();
-        CHECK_NULL_VOID(context);
-        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(context);
-        if (pipeline) {
-            ContainerScope scope(instanceId_);
-            auto manager = pipeline->GetSafeAreaManager();
-            CHECK_NULL_VOID(manager);
-            manager->SetKeyboardInfo(keyboardRect.Height());
-            auto uiExtMgr = pipeline->GetUIExtensionManager();
-            if (uiExtMgr) {
-                SetUIExtensionImeShow(keyboardRect);
-            }
-            if (uiExtMgr && uiExtMgr->NotifyOccupiedAreaChangeInfo(info)) {
-                TAG_LOGI(AceLogTag::ACE_KEYBOARD, "uiExtension consumed");
-                taskExecutor->PostTask([id = instanceId_] {
-                        ContainerScope scope(id);
-                        auto container = Platform::AceContainer::GetContainer(id);
-                        CHECK_NULL_VOID(container);
-                        auto context = container->GetPipelineContext();
-                        CHECK_NULL_VOID(context);
-                        context->OnVirtualKeyboardAreaChange(Rect(), 0, 0);
-                    }, TaskExecutor::TaskType::UI, "ArkUIVirtualKeyboardAreaChange");
-                return;
-            }
-        }
-        if (container->IsSceneBoardWindow()) {
-            TAG_LOGD(AceLogTag::ACE_KEYBOARD, "SceneBoard window, no keyboard avoidance");
-            return;
-        }
-        auto curWindow = context->GetCurrentWindowRect();
-        positionY -= curWindow.Top();
-        ContainerScope scope(instanceId_);
-        if (LaterAvoid(keyboardRect, positionY, height)) {
-            return;
-        }
-        taskExecutor->PostSyncTask([context, keyboardRect, rsTransaction, positionY, height] {
-                CHECK_NULL_VOID(context);
-                context->OnVirtualKeyboardAreaChange(keyboardRect, positionY, height, rsTransaction);
-            }, TaskExecutor::TaskType::UI, "ArkUIVirtualKeyboardAreaChange");
-    }
-
-private:
-    bool LaterAvoid(const Rect& keyboardRect, double positionY, double height)
-    {
-        auto container = Platform::AceContainer::GetContainer(instanceId_);
-        CHECK_NULL_RETURN(container, false);
-        auto context = container->GetPipelineContext();
-        CHECK_NULL_RETURN(context, false);
-        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(context);
-        CHECK_NULL_RETURN(pipeline, false);
-        auto textFieldManager = AceType::DynamicCast<NG::TextFieldManagerNG>(pipeline->GetTextFieldManager());
-        CHECK_NULL_RETURN(textFieldManager, false);
-        auto windowManager = pipeline->GetWindowManager();
-        CHECK_NULL_RETURN(windowManager, false);
-        auto windowMode = windowManager->GetWindowMode();
-        if (windowMode == WindowMode::WINDOW_MODE_FLOATING || windowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
-            textFieldManager->SetLaterAvoid(false);
-            return false;
-        }
-        bool isRotate = false;
-        auto displayInfo = container->GetDisplayInfo();
-        if (displayInfo) {
-            auto dmRotation = static_cast<int32_t>(displayInfo->GetRotation());
-            isRotate = lastRotation != -1 && lastRotation != dmRotation;
-            lastRotation = dmRotation;
-        } else {
-            lastRotation = -1;
-        }
-        auto triggerAvoidTaskOrientation = textFieldManager->GetContextTriggerAvoidTaskOrientation();
-        textFieldManager->SetContextTriggerAvoidTaskOrientation(-1);
-        if ((isRotate && lastRotation == triggerAvoidTaskOrientation) ||
-            (textFieldManager->GetLaterAvoid() && NearEqual(0.0f, keyboardRect.Height()))) {
-            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "no need to later avoid, trigger avoid now");
-            textFieldManager->SetLaterAvoid(false);
-            return false;
-        }
-        auto laterRect = textFieldManager->GetLaterAvoidKeyboardRect();
-        if (textFieldManager->GetLaterAvoid() && NearEqual(laterRect.Height(), keyboardRect.Height())) {
-            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "will trigger avoid later, ignore this notify");
-            return true;
-        }
-        // do not avoid immediately when device is in rotation, trigger it after context trigger root rect update
-        if (textFieldManager->GetLaterAvoid() || isRotate) {
-            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "rotation change to %{public}d, later avoid %{public}s %{public}f"
-                "%{public}f", lastRotation, keyboardRect.ToString().c_str(), positionY, height);
-            NG::LaterAvoidInfo laterAvoidInfo = {true, keyboardRect, positionY, height, lastRotation };
-            textFieldManager->SetLaterAvoidArgs(laterAvoidInfo);
-            return true;
-        }
-        return false;
-    }
-
-    void SetUIExtensionImeShow(const Rect& keyboardRect)
-    {
-        auto container = Platform::AceContainer::GetContainer(instanceId_);
-        CHECK_NULL_VOID(container);
-        auto taskExecutor = container->GetTaskExecutor();
-        if (GreatNotEqual(keyboardRect.Height(), 0.0f)) {
-            taskExecutor->PostTask(
-                [id = instanceId_] {
-                    ContainerScope scope(id);
-                    auto pipeline = NG::PipelineContext::GetCurrentContext();
-                    CHECK_NULL_VOID(pipeline);
-                    pipeline->SetUIExtensionImeShow(true);
-                }, TaskExecutor::TaskType::UI, "ArkUISetUIExtensionImeShow");
-        } else {
-            taskExecutor->PostTask(
-                [id = instanceId_] {
-                    ContainerScope scope(id);
-                    auto pipeline = NG::PipelineContext::GetCurrentContext();
-                    CHECK_NULL_VOID(pipeline);
-                    pipeline->SetUIExtensionImeShow(false);
-                }, TaskExecutor::TaskType::UI, "ArkUISetUIExtensionImeHide");
-        }
-    }
-    int32_t instanceId_ = -1;
-    int32_t lastRotation = -1;
-};
-
 class AvoidAreaChangedListener : public OHOS::Rosen::IAvoidAreaChangedListener {
 public:
     explicit AvoidAreaChangedListener(int32_t instanceId) : instanceId_(instanceId) {}
@@ -1846,10 +1708,6 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
 
         dragWindowListener_ = new DragWindowListener(instanceId_);
         window_->RegisterDragListener(dragWindowListener_);
-        if (!container->IsSceneBoardEnabled()) {
-            occupiedAreaChangeListener_ = new OccupiedAreaChangeListener(instanceId_);
-            window_->RegisterOccupiedAreaChangeListener(occupiedAreaChangeListener_);
-        }
     }
 
     // create ace_view
@@ -2613,10 +2471,6 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     container->InitFoldStatusFromListener();
     dragWindowListener_ = new DragWindowListener(instanceId_);
     window_->RegisterDragListener(dragWindowListener_);
-    if (!container->IsSceneBoardEnabled()) {
-        occupiedAreaChangeListener_ = new OccupiedAreaChangeListener(instanceId_);
-        window_->RegisterOccupiedAreaChangeListener(occupiedAreaChangeListener_);
-    }
     waterfallModeChangeListener_ = new WaterfallModeChangeListener(instanceId_);
     window_->RegisterWaterfallModeChangeListener(waterfallModeChangeListener_);
     foldStatusListener_ = new FoldScreenListener(instanceId_);
@@ -4501,10 +4355,6 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
     window_->RegisterTouchOutsideListener(touchOutsideListener_);
     dragWindowListener_ = new DragWindowListener(instanceId_);
     window_->RegisterDragListener(dragWindowListener_);
-    if (!container->IsSceneBoardEnabled()) {
-        occupiedAreaChangeListener_ = new OccupiedAreaChangeListener(instanceId_);
-        window_->RegisterOccupiedAreaChangeListener(occupiedAreaChangeListener_);
-    }
     foldStatusListener_ = new FoldScreenListener(instanceId_);
     waterfallModeChangeListener_ = new WaterfallModeChangeListener(instanceId_);
     window_->RegisterWaterfallModeChangeListener(waterfallModeChangeListener_);
@@ -5590,7 +5440,7 @@ void UIContentImpl::SetStatusBarItemColor(uint32_t color)
     ContainerScope scope(instanceId_);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostSyncTask(
+    taskExecutor->PostTask(
         [instanceId = instanceId_, color] {
             auto container = Platform::AceContainer::GetContainer(instanceId);
             CHECK_NULL_VOID(container);

@@ -115,8 +115,6 @@ void ViewAbstractModelStatic::BindMenuGesture(FrameNode* targetNode,
             NG::ViewAbstract::BindMenuWithCustomNode(
                 std::move(builderFunc), targetNode, menuPosition, menuParam, std::move(previewBuildFunc));
         };
-    } else {
-        return;
     }
     auto gestureHub = targetNode->GetOrCreateGestureEventHub();
     gestureHub->BindMenu(std::move(showMenu));
@@ -639,6 +637,27 @@ void ViewAbstractModelStatic::SetGeometryTransition(FrameNode* frameNode, const 
     ViewAbstract::SetGeometryTransition(frameNode, id, followWithoutTransition, doRegisterSharedTransition);
 }
 
+bool ViewAbstractModelStatic::CreatePropertyAnimation(FrameNode* frameNode, AnimationPropertyType property,
+    const std::vector<float>& startValue, const std::vector<float>& endValue, const AnimationOption& option)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    return ViewAbstract::CreatePropertyAnimation(frameNode, property, startValue, endValue, option);
+}
+
+bool ViewAbstractModelStatic::CancelPropertyAnimations(
+    FrameNode* frameNode, const std::vector<AnimationPropertyType>& properties)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    return ViewAbstract::CancelPropertyAnimations(frameNode, properties);
+}
+
+std::vector<float> ViewAbstractModelStatic::GetRenderNodePropertyValue(
+    FrameNode* frameNode, AnimationPropertyType property)
+{
+    CHECK_NULL_RETURN(frameNode, {});
+    return ViewAbstract::GetRenderNodePropertyValue(frameNode, property);
+}
+
 void ViewAbstractModelStatic::DismissSheetStatic()
 {
     auto sheetId = SheetManager::GetInstance().GetDismissSheet();
@@ -1087,6 +1106,11 @@ void ViewAbstractModelStatic::SetPositionLocalizedEdges(FrameNode* frameNode, bo
     layoutProperty->UpdateNeedPositionLocalizedEdges(needLocalized);
 }
 
+void ViewAbstractModelStatic::SetTransform3DMatrix(FrameNode* frameNode, const Matrix4& matrix)
+{
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetTransform3DMatrix(frameNode, matrix);
+}
 
 void ViewAbstractModelStatic::SetMarkAnchorStart(FrameNode* frameNode, const std::optional<Dimension>& markAnchorStart)
 {
@@ -1276,6 +1300,29 @@ void  ViewAbstractModelStatic::SetRotate(FrameNode* frameNode, const std::vector
     ACE_UPDATE_NODE_RENDER_CONTEXT(TransformRotate, rotateVec, frameNode);
 }
 
+void  ViewAbstractModelStatic::SetRotateAngle(FrameNode* frameNode, const std::vector<std::optional<float>>& value)
+{
+    constexpr size_t requiredSize = 4;
+    if (value.size() != requiredSize) {
+        return;
+    }
+    NG::Vector4F rotateVec = { 0.0f, 0.0f, 0.0f, 0.0f };
+    const NG::Vector4F DEFAULT_ROTATE_VEC = { 0.0f, 0.0f, 0.0f, 0.0f };
+    constexpr int32_t indX = 0;
+    constexpr int32_t indY = 1;
+    constexpr int32_t indZ = 2;
+    constexpr int32_t indP = 3;
+    if (!value[indX] && !value[indY] && !value[indZ]) {
+        rotateVec.z = 1.0f;
+    } else {
+        rotateVec.x = value[indX].has_value() ? value[indX].value() : DEFAULT_ROTATE_VEC.x;
+        rotateVec.y = value[indY].has_value() ? value[indY].value() : DEFAULT_ROTATE_VEC.y;
+        rotateVec.z = value[indZ].has_value() ? value[indZ].value() : DEFAULT_ROTATE_VEC.z;
+    }
+    rotateVec.w = value[indP].has_value() ? value[indP].value() : DEFAULT_ROTATE_VEC.w;
+    ACE_UPDATE_NODE_RENDER_CONTEXT(TransformRotateAngle, rotateVec, frameNode);
+}
+
 void ViewAbstractModelStatic::SetBackdropBlur(FrameNode *frameNode, const std::optional<Dimension>& radius,
     const std::optional<BlurOption>& blurOption, const SysOptions& sysOptions)
 {
@@ -1391,6 +1438,8 @@ void ViewAbstractModelStatic::SetFocusBoxStyle(FrameNode* frameNode, const std::
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     if (!style.has_value()) {
+        FocusBoxStyle paintStyle;
+        focusHub->GetFocusBox().SetStyle(paintStyle);
         return;
     }
     focusHub->GetFocusBox().SetStyle(style.value());
@@ -1489,12 +1538,9 @@ void ViewAbstractModelStatic::SetClickEffectLevel(FrameNode* frameNode,
         }
         ACE_UPDATE_NODE_RENDER_CONTEXT(ClickEffectLevel, clickEffectInfo, frameNode);
     } else {
-        CHECK_NULL_VOID(frameNode);
-        auto renderContext = frameNode->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        renderContext->ResetClickEffectLevel();
-        ClickEffectInfo info;
-        renderContext->OnClickEffectLevelUpdate(info);
+        ClickEffectInfo clickEffectInfo;
+        clickEffectInfo.level = ClickEffectLevel::UNDEFINED;
+        ACE_UPDATE_NODE_RENDER_CONTEXT(ClickEffectLevel, clickEffectInfo, frameNode);
     }
 }
 
@@ -1652,6 +1698,11 @@ void ViewAbstractModelStatic::SetBackgroundImageRepeat(FrameNode* frameNode,
         ImageRepeat repeat = ImageRepeat::NO_REPEAT;
         renderContext->OnBackgroundImageRepeatUpdate(repeat);
     }
+}
+
+void ViewAbstractModelStatic::SetBackgroundImageSyncMode(FrameNode* frameNode, bool syncMode)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImageSyncMode, syncMode, frameNode);
 }
 
 int32_t ViewAbstractModelStatic::GetMenuParam(NG::MenuParam& menuParam, const RefPtr<NG::UINode>& node)

@@ -216,7 +216,8 @@ void ToggleButtonPattern::HandleBorderAndShadow()
     if (!layoutProperty->GetBorderWidthProperty()) {
         if (!renderContext->HasBorderWidth()) {
             BorderWidthProperty borderWidth;
-            borderWidth.SetBorderWidth(toggleTheme_->GetBorderWidth());
+            borderWidth.SetBorderWidth(paintProperty->GetIsOnValue(false) ?
+                toggleTheme_->GetBorderWidth() : toggleTheme_->GetBorderWidthUnchecked());
             layoutProperty->UpdateBorderWidth(borderWidth);
             renderContext->UpdateBorderWidth(borderWidth);
         }
@@ -305,7 +306,7 @@ void ToggleButtonPattern::SetBlurButtonStyle(RefPtr<FrameNode>& textNode,
         isShadow_ = false;
         renderContext->UpdateBackShadow(Shadow::CreateShadow(ShadowStyle::None));
     }
-    if (isScale_) {
+    if (isScale_ && !isHover_) {
         isScale_ = false;
         renderContext->SetScale(1.0, 1.0);
     }
@@ -416,7 +417,8 @@ void ToggleButtonPattern::SetToggleScale(RefPtr<RenderContext>& renderContext)
     CHECK_NULL_VOID(transform);
     float sacleHoverOrFocus = toggleTheme_->GetScaleHoverOrFocus();
     VectorF scale(sacleHoverOrFocus, sacleHoverOrFocus);
-    if (!transform->HasTransformScale() || transform->GetTransformScaleValue() == scale) {
+    if (!NearEqual(sacleHoverOrFocus, 1.0f) &&
+        (!transform->HasTransformScale() || transform->GetTransformScaleValue() == scale)) {
         isScale_ = true;
         renderContext->SetScale(sacleHoverOrFocus, sacleHoverOrFocus);
     }
@@ -536,6 +538,11 @@ void ToggleButtonPattern::OnTouchDown()
         AnimateTouchAndHover(renderContext, isNeedToHandleHoverOpacity ? TYPE_HOVER : TYPE_CANCEL, TYPE_TOUCH,
             TOUCH_DURATION, isNeedToHandleHoverOpacity ? Curves::SHARP : Curves::FRICTION);
     }
+    if (isScale_) {
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->SetScale(1.0f, 1.0f);
+    }
 }
 
 void ToggleButtonPattern::OnTouchUp()
@@ -562,6 +569,9 @@ void ToggleButtonPattern::OnTouchUp()
         } else {
             AnimateTouchAndHover(renderContext, TYPE_TOUCH, TYPE_CANCEL, TOUCH_DURATION, Curves::FRICTION);
         }
+    }
+    if (isScale_ && isHover_) {
+        HandleHoverEvent(true);
     }
 }
 
@@ -612,8 +622,8 @@ void ToggleButtonPattern::OnClick()
     auto buttonEventHub = GetEventHub<ToggleButtonEventHub>();
     CHECK_NULL_VOID(buttonEventHub);
     buttonEventHub->UpdateChangeEvent(!isLastSelected);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     HandleOnOffStyle(!isOn_.value(), isFocus_);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void ToggleButtonPattern::HandleOnOffStyle(bool isOnToOff, bool isFocus)
@@ -630,6 +640,22 @@ void ToggleButtonPattern::HandleOnOffStyle(bool isOnToOff, bool isFocus)
         BorderColorProperty color;
         color.SetColor(isOnToOff ? toggleTheme_->GetBorderColorUnchecked() : toggleTheme_->GetBorderColorChecked());
         renderContext->UpdateBorderColor(color);
+    }
+
+    if (NearEqual(toggleTheme_->GetBorderWidth().Value(), toggleTheme_->GetBorderWidthUnchecked().Value())) {
+        return;
+    }
+    BorderWidthProperty currentBorderWidth;
+    currentBorderWidth.SetBorderWidth(
+        isOnToOff ? toggleTheme_->GetBorderWidth() : toggleTheme_->GetBorderWidthUnchecked());
+    if (renderContext->HasBorderWidth() && renderContext->GetBorderWidth() == currentBorderWidth) {
+        BorderWidthProperty targetBorderWidth;
+        targetBorderWidth.SetBorderWidth(
+            isOnToOff ? toggleTheme_->GetBorderWidthUnchecked() : toggleTheme_->GetBorderWidth());
+        auto layoutProperty = GetLayoutProperty<ButtonLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        layoutProperty->UpdateBorderWidth(targetBorderWidth);
+        renderContext->UpdateBorderWidth(targetBorderWidth);
     }
 }
 

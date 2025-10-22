@@ -1614,7 +1614,7 @@ HWTEST_F(RotationRecognizerTestNg, RotationRecognizerPtrHandleTouchUpEventTest00
     rotationRecognizerPtr->refereeState_ = RefereeState::SUCCEED;
     rotationRecognizerPtr->HandleTouchMoveEvent(touchEvent);
     EXPECT_EQ(rotationRecognizerPtr->cumulativeAngle_, 0.0);
-
+    
     rotationRecognizerPtr->isLimitFingerCount_ = false;
     rotationRecognizerPtr->fingers_ = 2;
     rotationRecognizerPtr->refereeState_ = RefereeState::SUCCEED;
@@ -1890,7 +1890,6 @@ HWTEST_F(RotationRecognizerTestNg, RotationRecognizerPtrHandleTouchUpEventTest00
     rotationRecognizerPtr->currentFingers_ = 2;
     rotationRecognizerPtr->activeFingers_.push_back(1);
     rotationRecognizerPtr->activeFingers_.push_back(2);
-    
     rotationRecognizerPtr->initialAngle_ = 178.0;
     rotationRecognizerPtr->currentAngle_ = 178.0;
     rotationRecognizerPtr->lastAngle_ = 178.0;

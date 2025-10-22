@@ -46,13 +46,13 @@ constexpr int32_t PARTICLE_DEFAULT_EMITTER_RATE = 5;
 
 void ParseSize(std::pair<Dimension, Dimension>& size, const Ark_Tuple_Dimension_Dimension& value)
 {
-    auto width = Converter::Convert<Dimension>(value.value0);
-    auto height = Converter::Convert<Dimension>(value.value1);
-    if (GreatOrEqual(width.Value(), 0.0)) {
-        size.first = width;
+    std::optional<Dimension> width = Converter::OptConvert<Dimension>(value.value0);
+    std::optional<Dimension> height = Converter::OptConvert<Dimension>(value.value1);
+    if (width && GreatOrEqual(width->Value(), 0.0)) {
+        size.first = *width;
     }
-    if (GreatOrEqual(height.Value(), 0.0)) {
-        size.second = height;
+    if (height && GreatOrEqual(height->Value(), 0.0)) {
+        size.second = *height;
     }
 }
 int32_t ParseEmitRate(const Opt_Number& value)

@@ -497,6 +497,7 @@ void ScrollableModelNG::ResetBackToTop(FrameNode* frameNode)
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ScrollablePattern>();
     CHECK_NULL_VOID(pattern);
+    FREE_NODE_CHECK(frameNode, ResetBackToTop, frameNode);
     pattern->ResetBackToTop();
     pattern->UseDefaultBackToTop(true);
 }

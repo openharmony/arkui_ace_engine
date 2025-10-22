@@ -1516,4 +1516,26 @@ HWTEST_F(TextFieldPatternTestTwo, AddTextFireOnChange004, TestSize.Level0)
     pattern->AddTextFireOnChange();
     EXPECT_EQ(pattern->textCache_, "abcd");
 }
+
+/**
+ * @tc.name: RegisterFontCallback in form card.
+ * @tc.desc: test register form callback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestTwo, RegisterFormFontCallback, TestSize.Level0)
+{
+    auto fontManager = FontManager::Create();
+    ASSERT_NE(fontManager, nullptr);
+    CreateTextField(DEFAULT_TEXT);
+    EXPECT_TRUE(fontManager->formLoadCallbacks_.empty());
+    bool hasChanged = false;
+    auto fontChangeCallback = [&]() { hasChanged = true; };
+    fontManager->RegisterCallbackNG(WeakPtr(frameNode_), "myFont", fontChangeCallback);
+    std::map<std::string, FormLoadFontCallbackInfo> formMap;
+    FormLoadFontCallbackInfo formCallbackInfo = { fontChangeCallback, 12345 };
+    formMap.emplace("myFont", formCallbackInfo);
+    fontManager->formLoadCallbacks_.emplace(WeakPtr(frameNode_), formMap);
+    fontChangeCallback();
+    EXPECT_TRUE(hasChanged);
+}
 } // namespace OHOS::Ace::NG

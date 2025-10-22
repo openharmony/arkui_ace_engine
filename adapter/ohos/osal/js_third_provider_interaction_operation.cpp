@@ -730,7 +730,7 @@ void JsThirdProviderInteractionOperation::DetectElementInfoFocusableThroughAnces
     const AccessibilityElementInfo &info, const int64_t parentId, const int32_t requestId,
     AccessibilityElementOperatorCallback &callback)
 {
-    callback.SetDetectElementInfoFocusableThroughAncestorResult(true, requestId);
+    callback.SetDetectElementInfoFocusableThroughAncestorResult(true, requestId, info);
 }
 
 int32_t JsThirdProviderInteractionOperation::SendAccessibilityAsyncEventForThird(

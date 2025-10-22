@@ -198,7 +198,7 @@ inline void ResetLayoutRange(GridLayoutInfo& info)
     info.startMainLineIndex_ = 0;
     info.endMainLineIndex_ = -1;
     info.currentOffset_ = info.contentStartOffset_;
-    info.prevOffset_ = 0.0f;
+    info.prevOffset_ = info.contentStartOffset_;
 }
 } // namespace
 
@@ -309,7 +309,7 @@ void GridIrregularLayoutAlgorithm::MeasureForward(float mainSize)
             return;
         }
         info_.currentOffset_ += overDis;
-        if (GreatNotEqual(info_.currentOffset_, info_.contentEndOffset_)) {
+        if (Positive(info_.currentOffset_)) {
             MeasureBackward(mainSize, true);
         }
     }
@@ -368,6 +368,18 @@ void GridIrregularLayoutAlgorithm::MeasureOnJump(float mainSize)
         info_.currentOffset_ = postJumpOffset_;
         enableSkip_ = false;
         MeasureOnOffset(mainSize);
+        return;
+    }
+
+    if (info_.scrollAlign_ == ScrollAlign::START && !NearZero(info_.contentStartOffset_)) {
+        info_.currentOffset_ += info_.contentStartOffset_;
+        info_.prevOffset_ = info_.currentOffset_;
+        MeasureOnOffset(mainSize);
+    }
+    if (info_.scrollAlign_ == ScrollAlign::END && !NearZero(info_.contentEndOffset_)) {
+        info_.currentOffset_ -= info_.contentEndOffset_;
+        info_.prevOffset_ = info_.currentOffset_;
+        MeasureOnOffset(mainSize);
     }
 }
 
@@ -399,19 +411,14 @@ void GridIrregularLayoutAlgorithm::Jump(float mainSize, bool considerContentOffs
     GridLayoutRangeSolver solver(&info_, wrapper_);
     const auto res = solver.FindRangeOnJump(info_.jumpIndex_, jumpLineIdx, mainGap_);
     info_.currentOffset_ = res.pos;
+    if (considerContentOffset) {
+        info_.prevOffset_ = res.pos;
+    }
     info_.startMainLineIndex_ = res.startRow;
     info_.startIndex_ = res.startIdx;
     info_.endMainLineIndex_ = res.endRow;
     info_.endIndex_ = res.endIdx;
     info_.jumpIndex_ = EMPTY_JUMP_INDEX;
-    if (info_.scrollAlign_ == ScrollAlign::START && considerContentOffset && !NearZero(info_.contentStartOffset_)) {
-        info_.currentOffset_ += info_.contentStartOffset_;
-        MeasureOnOffset(mainSize);
-    }
-    if (info_.scrollAlign_ == ScrollAlign::END && !NearZero(info_.contentEndOffset_)) {
-        info_.currentOffset_ -= info_.contentEndOffset_;
-        MeasureOnOffset(mainSize);
-    }
 }
 
 void GridIrregularLayoutAlgorithm::UpdateLayoutInfo()
@@ -577,6 +584,7 @@ void GridIrregularLayoutAlgorithm::PrepareLineHeight(float mainSize, int32_t& ju
     const FillParams params { crossLens_, crossGap_, mainGap_ };
     switch (info_.scrollAlign_) {
         case ScrollAlign::START: {
+            mainSize = mainSize - info_.contentStartOffset_;
             // call this to ensure irregular items on the first line are measured, not skipped
             filler.MeasureLineWithIrregulars(params, jumpLineIdx);
 
@@ -584,6 +592,7 @@ void GridIrregularLayoutAlgorithm::PrepareLineHeight(float mainSize, int32_t& ju
             // condition [jumpLineIdx > 0] guarantees a finite call stack
             // Over scroll at bottom dose not need ScrollAlign::END
             if (LessNotEqual(len, mainSize) && jumpLineIdx > 0 && NonPositive(overscrollOffsetBeforeJump_)) {
+                mainSize = mainSize + info_.contentStartOffset_;
                 jumpLineIdx = info_.lineHeightMap_.rbegin()->first;
                 info_.scrollAlign_ = ScrollAlign::END;
                 PrepareLineHeight(mainSize, jumpLineIdx);
@@ -619,8 +628,10 @@ void GridIrregularLayoutAlgorithm::PrepareLineHeight(float mainSize, int32_t& ju
             break;
         }
         case ScrollAlign::END: {
+            mainSize = mainSize - info_.contentEndOffset_;
             float len = filler.MeasureBackward(params, mainSize, jumpLineIdx);
             if (LessNotEqual(len, mainSize)) {
+                mainSize += info_.contentEndOffset_;
                 jumpLineIdx = 0;
                 info_.scrollAlign_ = ScrollAlign::START;
                 PrepareLineHeight(mainSize, jumpLineIdx);

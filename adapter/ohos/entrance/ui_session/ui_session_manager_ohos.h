@@ -16,9 +16,16 @@
 #define FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_UI_SESSION_MANAGER_OHOS_H
 
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
+
+#include <map>
+#include <shared_mutex>
+
+#include "refbase.h"
+#include "iremote_object.h"
+
 #include "ui_report_proxy.h"
 
-#include "adapter/ohos/entrance/ui_session/include/ui_service_hilog.h"
+#include "adapter/ohos/entrance/ui_session/include/ui_session_log.h"
 #include "base/memory/ace_type.h"
 namespace OHOS::Ace {
 class UiSessionManagerOhos : public UiSessionManager {
@@ -33,7 +40,6 @@ public:
         int64_t accessibilityId, const std::string& data, const std::string& type = "") override;
     void ReportScrollEvent(const std::string& data) override;
     void ReportLifeCycleEvent(const std::string& data) override;
-    void SaveReportStub(sptr<IRemoteObject> reportStub, int32_t processId) override;
     void SetClickEventRegistered(bool status) override;
     void SetSearchEventRegistered(bool status) override;
     void SetRouterChangeEventRegistered(bool status) override;
@@ -87,6 +93,12 @@ public:
         std::function<uint32_t(const std::string& funcName, const std::string& params)>&& callback) override;
     void ExeAppAIFunction(const std::string& funcName, const std::string& params) override;
     void SendExeAppAIFunctionResult(uint32_t result) override;
+
+    void SaveReportStub(sptr<IRemoteObject> reportStub, int32_t processId);
+private:
+    std::mutex mutex_;
+    std::shared_mutex reportObjectMutex_;
+    std::map<int32_t, sptr<IRemoteObject>> reportObjectMap_;
 };
 
 } // namespace OHOS::Ace

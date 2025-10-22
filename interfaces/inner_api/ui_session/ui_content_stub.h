@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,8 +16,8 @@
 #ifndef FOUNDATION_ACE_INTERFACE_UI_CONTENT_STUB_H
 #define FOUNDATION_ACE_INTERFACE_UI_CONTENT_STUB_H
 
-#include <iremote_object.h>
-#include <iremote_stub.h>
+#include "iremote_object.h"
+#include "iremote_stub.h"
 
 #include "ui_content_service_interface.h"
 

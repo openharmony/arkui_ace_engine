@@ -14,12 +14,8 @@
  */
 
 import { KoalaCallsiteKey } from "@koalaui/common"
-import { StateContext } from "./states/State"
+import { StateContext } from 'arkui.incremental.runtime.state';
 
-// These are used for the hidden parameters inserted by the plugin.
-// Must only be used by compiler rewrite, do not use directly.
-export type __memo_context_type = StateContext
-export type __memo_id_type = KoalaCallsiteKey
 // References to this type will be changed to an incompatible type
 // so that typing expression `x extends __memo_transformed ? A : B`
 // can change its branch

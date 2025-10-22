@@ -46,6 +46,9 @@
             "arkui.stateManagement.runtime": [
                 "./arkui/stateManagement/runtime"
             ],
+            "arkui.incremental.runtime.state": [
+                "../../incremental/public/src/state.ets"
+            ],
             "@ohos/animator": [
                 "@ohos.animator.ets"
             ],
@@ -126,6 +129,12 @@
             ],
             "@ohos.arkui.stateManagement": [
                 "./arkui/stateManagement"
+            ],
+            "@ohos.arkui.ArcList": [
+                "./@ohos.arkui.ArcList.ets"
+            ],
+            "@ohos.arkui.ArcScrollBar": [
+                "./@ohos.arkui.ArcScrollBar.ets"
             ]
         }
     },

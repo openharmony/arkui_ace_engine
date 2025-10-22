@@ -168,8 +168,9 @@ void JsAccessibilityManager::DetectElementInfoFocusableThroughAncestor(
     auto mainContext = context_.Upgrade();
     auto context = GetPipelineByWindowId(windowId);
     FocusStrategyOsalNG strategy(jsAccessibilityManager, context, mainContext);
-    auto result = strategy.DetectElementInfoFocusableThroughAncestor(info, parentId);
-    callback.SetDetectElementInfoFocusableThroughAncestorResult(result, requestId);
+    Accessibility::AccessibilityElementInfo targetInfo;
+    auto result = strategy.DetectElementInfoFocusableThroughAncestor(info, parentId, targetInfo);
+    callback.SetDetectElementInfoFocusableThroughAncestorResult(result, requestId, targetInfo);
 }
 
 void JsAccessibilityManager::FocusMoveSearchWithCondition(
@@ -293,7 +294,15 @@ bool JsAccessibilityManager::NeedChangeToReadableNode(const RefPtr<NG::FrameNode
         }
         targetCheckNode = targetCheckNode->GetParentFrameNode();
     }
-    // true means using find result to send hover since rlues check enable
+    // if cannot find in childtree, need to continue to find readable in parent process
+    auto context = curFrameNode->GetContextRefPtr();
+    CHECK_NULL_RETURN(context, true);
+    const auto& accessibilityManager = context->GetAccessibilityManager();
+    CHECK_NULL_RETURN(accessibilityManager, true);
+    CHECK_EQUAL_RETURN(accessibilityManager->GetTreeId(), 0, true);
+    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
+    CHECK_NULL_RETURN(ngPipeline, true);
+    readableNode = ngPipeline->GetRootElement();
     return true;
 }
 } // OHOS::Ace::Framework

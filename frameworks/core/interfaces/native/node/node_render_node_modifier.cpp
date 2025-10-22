@@ -1241,7 +1241,7 @@ ArkUI_Int32 SetOvalClip(ArkUIRenderNodeHandle node, ArkUIRectShape shape)
     CHECK_NULL_RETURN(rsNodePtr, ERROR_CODE_PARAM_INVALID);
     RectF rectF(shape.left, shape.top, shape.right, shape.bottom);
     RSRecordingPath rsPath;
-    rsPath.AddOval({ rectF.GetX(), rectF.GetY(), rectF.GetX() + rectF.Width(), rectF.GetY() + rectF.Height() });
+    rsPath.AddOval({ rectF.GetX(), rectF.GetY(), rectF.Width(), rectF.Height() });
     rsNodePtr->SetClipBounds(Rosen::RSPath::CreateRSPath(rsPath));
     return ERROR_CODE_NO_ERROR;
 }

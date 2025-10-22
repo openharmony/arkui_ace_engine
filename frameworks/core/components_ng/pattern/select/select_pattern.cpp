@@ -2258,7 +2258,7 @@ void SelectPattern::ResetParams()
         paddings.left = NG::CalcLength(selectTheme->GetSelectLeftMargin(ControlSize::NORMAL));
         paddings.right = NG::CalcLength(selectTheme->GetSelectRightMargin(ControlSize::NORMAL));
     }
-    ViewAbstract::SetPadding(paddings);
+    ViewAbstract::SetPadding(RawPtr(select), paddings);
 }
 
 void SelectPattern::SetControlSize(const ControlSize& controlSize)

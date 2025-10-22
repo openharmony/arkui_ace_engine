@@ -94,6 +94,7 @@ void ConvertComponentCreateFunc(ani_vm* vm, std::function<int64_t(const int32_t&
 void XBarSetComponentCreateFunc(ani_env* env, ani_object aniClass, ani_fn_object xbarComponentCreateFunc)
 {
     HILOGI("[ACE_APPBAR]begin set component create func");
+    CHECK_NULL_VOID(env);
     ani_ref xbarComponentCreateFuncAniRef = static_cast<ani_ref>(xbarComponentCreateFunc);
     auto xbarComponentCreateFuncAni = std::make_shared<CommonModuleCallbackAni>(env, xbarComponentCreateFuncAniRef);
     ani_vm* vm = nullptr;
@@ -101,7 +102,7 @@ void XBarSetComponentCreateFunc(ani_env* env, ani_object aniClass, ani_fn_object
     std::function<int64_t(const int32_t&, const int32_t&)> componentCreateFunc = nullptr;
     ConvertComponentCreateFunc(vm, componentCreateFunc, xbarComponentCreateFuncAni);
     const auto* modifier = GetNodeAniModifier();
-    if (!modifier || !modifier->getXBarAniModifier() || !env || !componentCreateFunc) {
+    if (!modifier || !modifier->getXBarAniModifier() || !componentCreateFunc) {
         HILOGE("[ACE_APPBAR]GetNodeAniModifier failed");
         return;
     }
@@ -111,6 +112,7 @@ void XBarSetComponentCreateFunc(ani_env* env, ani_object aniClass, ani_fn_object
 void XBarSetOnWindowEventFunc(ani_env* env, const ani_type& type, ani_vm* vm, std::shared_ptr<ani_wref> weakRef,
     ani_long ptr, const std::string funcName)
 {
+    CHECK_NULL_VOID(env);
     ani_status status;
     ani_method onWindowMethod;
     if ((status = env->Class_FindMethod(static_cast<ani_class>(type), funcName.c_str(), nullptr, &onWindowMethod)) !=
@@ -144,7 +146,7 @@ void XBarSetOnWindowEventFunc(ani_env* env, const ani_type& type, ani_vm* vm, st
         HILOGI("[ACE_APPBAR]%{public}s call end", funcName.c_str());
     };
     const auto* modifier = GetNodeAniModifier();
-    if (!modifier || !modifier->getXBarAniModifier() || !env) {
+    if (!modifier || !modifier->getXBarAniModifier()) {
         HILOGE("[ACE_APPBAR]GetNodeAniModifier failed");
         return;
     }
@@ -159,6 +161,7 @@ void XBarSetOnWindowEventFunc(ani_env* env, const ani_type& type, ani_vm* vm, st
 void XBarSetAppTitleFunc(
     ani_env* env, const ani_type& type, ani_vm* vm, std::shared_ptr<ani_wref> weakRef, ani_long ptr)
 {
+    CHECK_NULL_VOID(env);
     ani_status status;
     ani_method setAppTitleMethod;
     if ((status = env->Class_FindMethod(static_cast<ani_class>(type), "setAppTitle", nullptr, &setAppTitleMethod)) !=
@@ -194,7 +197,7 @@ void XBarSetAppTitleFunc(
         HILOGI("[ACE_APPBAR]setAppTitle call end");
     };
     const auto* modifier = GetNodeAniModifier();
-    if (!modifier || !modifier->getXBarAniModifier() || !env) {
+    if (!modifier || !modifier->getXBarAniModifier()) {
         HILOGE("[ACE_APPBAR]GetNodeAniModifier failed");
         return;
     }
@@ -204,6 +207,7 @@ void XBarSetAppTitleFunc(
 
 void XBarSetAppIconFunc(ani_env* env, const ani_type& type, ani_vm* vm, std::shared_ptr<ani_wref> weakRef, ani_long ptr)
 {
+    CHECK_NULL_VOID(env);
     ani_status status;
     ani_method setAppIconMethod;
     if ((status = env->Class_FindMethod(static_cast<ani_class>(type), "setAppIcon", nullptr, &setAppIconMethod)) !=
@@ -248,7 +252,7 @@ void XBarSetAppIconFunc(ani_env* env, const ani_type& type, ani_vm* vm, std::sha
         HILOGI("[ACE_APPBAR]setAppIcon call end");
     };
     const auto* modifier = GetNodeAniModifier();
-    if (!modifier || !modifier->getXBarAniModifier() || !env) {
+    if (!modifier || !modifier->getXBarAniModifier()) {
         HILOGE("[ACE_APPBAR]GetNodeAniModifier failed");
         return;
     }
@@ -259,6 +263,7 @@ void XBarSetAppIconFunc(ani_env* env, const ani_type& type, ani_vm* vm, std::sha
 void XBarSetCustomCallbackFunc(
     ani_env* env, const ani_type& type, ani_vm* vm, std::shared_ptr<ani_wref> weakRef, ani_long ptr)
 {
+    CHECK_NULL_VOID(env);
     ani_status status;
     ani_method setCustomCallbackMethod;
     if ((status = env->Class_FindMethod(
@@ -296,7 +301,7 @@ void XBarSetCustomCallbackFunc(
         HILOGI("[ACE_APPBAR]setCustomCallback call end");
     };
     const auto* modifier = GetNodeAniModifier();
-    if (!modifier || !modifier->getXBarAniModifier() || !env) {
+    if (!modifier || !modifier->getXBarAniModifier()) {
         HILOGE("[ACE_APPBAR]GetNodeAniModifier failed");
         return;
     }
@@ -307,6 +312,7 @@ void XBarSetCustomCallbackFunc(
 void XBarSetJsFunc(ani_env* env, ani_object aniClass, ani_long ptr, ani_ref xBar)
 {
     HILOGE("[ACE_APPBAR]start XBarSetJsFunc");
+    CHECK_NULL_VOID(env);
     ani_vm* vm = nullptr;
     env->GetVM(&vm);
 
@@ -334,12 +340,13 @@ void XBarSetJsFunc(ani_env* env, ani_object aniClass, ani_long ptr, ani_ref xBar
 void XBarCallNative(ani_env* env, ani_object aniClass, ani_int xBarType, ani_string callType, ani_string message)
 {
     HILOGI("[ACE_APPBAR]start XBarCallNative");
+    CHECK_NULL_VOID(env);
     std::string eventName = AniUtils::ANIStringToStdString(env, callType);
     std::string param = AniUtils::ANIStringToStdString(env, message);
     HILOGI("[ACE_APPBAR]%{public}d call native, event name: %{public}s, param: %{public}s", xBarType, eventName.c_str(),
         param.c_str());
     const auto* modifier = GetNodeAniModifier();
-    if (!modifier || !modifier->getXBarAniModifier() || !env) {
+    if (!modifier || !modifier->getXBarAniModifier()) {
         HILOGE("[ACE_APPBAR]GetNodeAniModifier failed");
         return;
     }

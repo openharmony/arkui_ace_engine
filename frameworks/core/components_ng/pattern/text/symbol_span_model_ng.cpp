@@ -31,6 +31,15 @@
         spanNode->Update##name(value);                                                                           \
     } while (false)
 
+#define ACE_RESET_NODE_SYMBOL_SPAN_PROPERTY(name, frameNode)                                                     \
+    do {                                                                                                         \
+        CHECK_NULL_VOID(frameNode);                                                                              \
+        auto spanNode = AceType::DynamicCast<SpanNode>(frameNode);                                               \
+        CHECK_NULL_VOID(spanNode);                                                                               \
+        spanNode->Reset##name();                                                                                 \
+        spanNode->RequestTextFlushDirty();                                                                       \
+    } while (false)
+
 namespace OHOS::Ace::NG {
 void SymbolSpanModelNG::Create(const uint32_t& unicode)
 {
@@ -96,6 +105,12 @@ void SymbolSpanModelNG::SetFontColor(FrameNode* frameNode, std::vector<Color>& s
 {
     CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_SYMBOL_SPAN_PROPERTY(SymbolColorList, symbolColor, frameNode);
+}
+
+void SymbolSpanModelNG::ResetFontColor(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_RESET_NODE_SYMBOL_SPAN_PROPERTY(SymbolColorList, frameNode);
 }
 
 void SymbolSpanModelNG::SetSymbolRenderingStrategy(FrameNode* frameNode, const uint32_t renderingStrategy)

@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/list/list_model_static.h"
 
 #include "base/utils/multi_thread.h"
+#include "core/components/list/list_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
@@ -90,13 +91,35 @@ void ListModelStatic::SetListScrollBar(FrameNode* frameNode, const std::optional
     ScrollableModelNG::SetScrollBarMode(frameNode, displayNumber);
 }
 
-void ListModelStatic::SetDivider(FrameNode* frameNode, const std::optional<V2::ItemDivider>& divider)
+void ListModelStatic::SetDivider(
+    FrameNode* frameNode, const std::optional<V2::ItemDivider>& divider, bool needGetThemeColor)
 {
     if (divider.has_value()) {
+        FREE_NODE_CHECK(frameNode, SetDivider, frameNode, divider, needGetThemeColor);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, Divider, divider.value(), frameNode);
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(ListLayoutProperty, Divider, frameNode);
     }
+}
+
+void ListModelStatic::SetDividerMultiThread(
+    FrameNode* frameNode, const std::optional<V2::ItemDivider>& divider, bool needGetThemeColor)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->PostAfterAttachMainTreeTask([
+        weak = AceType::WeakClaim(frameNode), divider, needGetThemeColor]() {
+        auto node = weak.Upgrade();
+        CHECK_NULL_VOID(node);
+        V2::ItemDivider dividerValue = divider.value();
+        if (needGetThemeColor) {
+            auto context = node->GetContext();
+            CHECK_NULL_VOID(context);
+            auto listTheme = context->GetTheme<ListTheme>();
+            auto themeColor = listTheme ? listTheme->GetDividerColor() : Color::TRANSPARENT;
+            dividerValue.color = themeColor;
+        }
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, Divider, dividerValue, node);
+    });
 }
 
 void ListModelStatic::SetSticky(FrameNode* frameNode, const std::optional<int32_t>& stickyStyle)

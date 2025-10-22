@@ -35,6 +35,11 @@ public:
     static void SetOnScrollStop(ContainerPickerChangeEvent&& onScrollStop);
     static void SetIndicatorStyle(const PickerIndicatorStyle& style);
     static void SetSelectedIndex(int32_t index);
+    static void SetCanLoop(FrameNode* frameNode, bool isLoop);
+    static void SetEnableHapticFeedback(FrameNode* frameNode, bool isEnableHapticFeedback);
+    static void SetOnChange(FrameNode* frameNode, ContainerPickerChangeEvent&& onChange);
+    static void SetOnScrollStop(FrameNode* frameNode, ContainerPickerChangeEvent&& onScrollStop);
+    static void SetIndicatorStyle(FrameNode* frameNode, const PickerIndicatorStyle& style);
 };
 } // namespace OHOS::Ace::NG
 

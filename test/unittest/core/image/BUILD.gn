@@ -94,6 +94,7 @@ ohos_unittest("image_provider_test_ng") {
     "$ace_root/test/unittest/core/pattern/text/mock/mock_text_layout_adapter.cpp",
     "$ace_root/test/unittest/core/pipeline/mock_input_method_manager.cpp",
     "image_provider_test_ng.cpp",
+    "image_provider_test_ng_two.cpp",
   ]
 
   deps = [

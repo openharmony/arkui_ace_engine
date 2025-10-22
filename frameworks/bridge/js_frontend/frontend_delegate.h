@@ -39,13 +39,6 @@
 namespace OHOS::Ace::Framework {
 enum class AlertState { USER_CANCEL = 0, USER_CONFIRM, RECOVERY };
 
-typedef struct RouterStateInfo {
-    int32_t index = -1;
-    std::string name;
-    std::string path;
-    std::string params;
-} StateInfo;
-
 class JsAcePage;
 
 // A virtual interface which must be implemented as a backing for

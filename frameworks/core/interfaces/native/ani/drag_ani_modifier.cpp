@@ -22,6 +22,7 @@
 #include "core/gestures/drag_event.h"
 #include "core/interfaces/native/implementation/drag_event_peer.h"
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
+#include "core/interfaces/native/implementation/unified_data_peer.h"
 #if defined(PIXEL_MAP_SUPPORTED)
 #include "pixel_map.h"
 #include "base/image/pixel_map.h"
@@ -109,7 +110,7 @@ void SetDragAllowDropNull(ArkUINodeHandle node)
     frameNode->SetAllowDrop({});
 }
 
-void SetDragAllowDrop(ArkUINodeHandle node, const char** allowDrops, ArkUI_Int32 length)
+void SetDragAllowDrop(ArkUINodeHandle node, char** allowDrops, ArkUI_Int32 length)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -190,6 +191,28 @@ const char* GetUdKey(ani_ref event)
     return key.c_str();
 }
 
+ani_long CreateUnifiedDataPeer(void* data)
+{
+    CHECK_NULL_RETURN(data, 0);
+    RefPtr<UnifiedData> udData = UdmfClient::GetInstance()->TransformUnifiedDataFromANI(data);
+    CHECK_NULL_RETURN(udData, 0);
+    auto peerPtr = PeerUtils::CreatePeer<unifiedDataChannel_UnifiedDataPeer>();
+    CHECK_NULL_RETURN(peerPtr, 0);
+    peerPtr->unifiedData = udData;
+    return reinterpret_cast<ani_long>(peerPtr);
+}
+
+ani_long GetUnifiedData(ani_long peer)
+{
+    auto unifiedDataPeer = reinterpret_cast<unifiedDataChannel_UnifiedDataPeer*>(peer);
+    CHECK_NULL_RETURN(unifiedDataPeer, 0);
+    auto unifiedData = unifiedDataPeer->unifiedData;
+    CHECK_NULL_RETURN(unifiedData, 0);
+    auto unifiedDataPtr = UdmfClient::GetInstance()->TransformUnifiedDataPtr(unifiedData);
+    CHECK_NULL_RETURN(unifiedDataPtr, 0);
+    return reinterpret_cast<ani_long>(unifiedDataPtr);
+}
+
 const ArkUIAniDragModifier* GetDragAniModifier()
 {
     static const ArkUIAniDragModifier impl = {
@@ -204,6 +227,8 @@ const ArkUIAniDragModifier* GetDragAniModifier()
         .setDragPreview = OHOS::Ace::NG::SetDragPreview,
         .setDragPreviewOptions = OHOS::Ace::NG::SetDragPreviewOptions,
         .getUdKey = OHOS::Ace::NG::GetUdKey,
+        .createUnifiedDataPeer = OHOS::Ace::NG::CreateUnifiedDataPeer,
+        .getUnifiedData = OHOS::Ace::NG::GetUnifiedData
     };
     return &impl;
 }

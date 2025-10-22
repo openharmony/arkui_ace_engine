@@ -104,4 +104,68 @@ void ContainerPickerModel::SetIndicatorStyle(const PickerIndicatorStyle& style)
         TAG_LOGE(AceLogTag::ACE_CONTAINER_PICKER, "invalid type of PickerIndicatorStyle.");
     }
 }
+
+void ContainerPickerModel::SetCanLoop(FrameNode* frameNode, bool isLoop)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ContainerPickerLayoutProperty, CanLoop, isLoop, frameNode);
+}
+
+void ContainerPickerModel::SetEnableHapticFeedback(FrameNode* frameNode, bool isEnableHapticFeedback)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+        ContainerPickerLayoutProperty, EnableHapticFeedback, isEnableHapticFeedback, frameNode);
+}
+
+void ContainerPickerModel::SetOnChange(FrameNode* frameNode, ContainerPickerChangeEvent&& onChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ContainerPickerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnChange(std::move(onChange));
+}
+
+void ContainerPickerModel::SetOnScrollStop(FrameNode* frameNode, ContainerPickerChangeEvent&& onScrollStop)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ContainerPickerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnScrollStop(std::move(onScrollStop));
+}
+
+void ContainerPickerModel::SetIndicatorStyle(FrameNode* frameNode, const PickerIndicatorStyle& style)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ContainerPickerLayoutProperty, IndicatorType, style.type, frameNode);
+    if (style.type == static_cast<int32_t>(IndicatorType::DIVIDER)) {
+        if (style.dividerWidth.has_value()) {
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+                ContainerPickerLayoutProperty, IndicatorDividerWidth, style.dividerWidth.value(), frameNode);
+        }
+        if (style.dividerColor.has_value()) {
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+                ContainerPickerLayoutProperty, IndicatorDividerColor, style.dividerColor.value(), frameNode);
+        }
+        if (style.startMargin.has_value()) {
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+                ContainerPickerLayoutProperty, IndicatorStartMargin, style.startMargin.value(), frameNode);
+        }
+        if (style.endMargin.has_value()) {
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+                ContainerPickerLayoutProperty, IndicatorEndMargin, style.endMargin.value(), frameNode);
+        }
+    } else if (style.type == static_cast<int32_t>(IndicatorType::BACKGROUND)) {
+        if (style.backgroundColor.has_value()) {
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+                ContainerPickerLayoutProperty, IndicatorBackgroundColor, style.backgroundColor.value(), frameNode);
+        }
+        if (style.borderRadius.has_value()) {
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+                ContainerPickerLayoutProperty, IndicatorBorderRadius, style.borderRadius.value(), frameNode);
+        }
+    } else {
+        TAG_LOGE(AceLogTag::ACE_CONTAINER_PICKER, "invalid type of PickerIndicatorStyle.");
+    }
+}
 } // namespace OHOS::Ace::NG
