@@ -30,8 +30,6 @@ include_directories(${NATIVERENDER_ROOT_PATH}
 
 file(GLOB_RECURSE ENTRY_SOURCES CONFIGURE_DEPENDS
     "${NATIVERENDER_ROOT_PATH}/*.cpp"
-    "${NATIVERENDER_ROOT_PATH}/common/*.cpp"
-    "${NATIVERENDER_ROOT_PATH}/components/**/*.cpp"
 )
 
 add_library(entry SHARED ${ENTRY_SOURCES})
