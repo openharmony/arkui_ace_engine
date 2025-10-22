@@ -1715,13 +1715,8 @@ export function hookButtonAttributeModifier(component: ArkButtonComponent, modif
     applyAttributeModifierBase(modifier as Object as AttributeModifier<ButtonAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
 }
 
-export function hookSpanAttributeModifier(component: ArkSpanComponent, modifier: AttributeModifier<SpanAttribute> | AttributeModifier<BaseSpan> | AttributeModifier<CommonMethod> | undefined): void {
+export function hookSpanAttributeModifier(component: ArkSpanComponent, modifier: AttributeModifier<SpanAttribute> | undefined): void {
     if (modifier === undefined) {
-        return ;
-    }
-    let isCommonModifier: boolean = modifier instanceof CommonModifier;
-    if (isCommonModifier) {
-        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
         return ;
     }
     let attributeSet = (): SpanModifier => {
@@ -1737,7 +1732,7 @@ export function hookSpanAttributeModifier(component: ArkSpanComponent, modifier:
             return initModifier;
         }
     }
-    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+    let constructParam = (component: ArkSpanComponent, ...params: FixedArray<Object>): void => {
         if (params.length !== 1) {
             throw new Error('must only 1 parameter')
         }
@@ -1750,7 +1745,8 @@ export function hookSpanAttributeModifier(component: ArkSpanComponent, modifier:
         initComponent.setPeer(component.getPeer());
         return initComponent;
     };
-    applyAttributeModifierBase(modifier as Object as AttributeModifier<SpanAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer(), false);
+    let attributeSet_ = applyAttributeModifierNoCommonMethod(modifier as Object as AttributeModifier<SpanAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer(), false);
+    attributeSet_!.applyModifierPatch(component.getPeer());
 }
 
 export function hookImageSpanAttributeModifier(component: ArkImageSpanComponent, modifier: AttributeModifier<ImageSpanAttribute> | AttributeModifier<BaseSpan> | AttributeModifier<CommonMethod> | undefined): void {
@@ -1795,11 +1791,6 @@ export function hookSymbolSpanAttributeModifier(component: ArkSymbolSpanComponen
     if (modifier === undefined) {
         return ;
     }
-    let isCommonModifier: boolean = modifier instanceof CommonModifier;
-    if (isCommonModifier) {
-        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
-        return ;
-    }
     let attributeSet = (): SymbolSpanModifier => {
         let isSymbolSpanModifier: boolean = modifier instanceof SymbolSpanModifier;
         let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new SymbolSpanModifier();
@@ -1813,7 +1804,7 @@ export function hookSymbolSpanAttributeModifier(component: ArkSymbolSpanComponen
             return initModifier;
         }
     }
-    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+    let constructParam = (component: ArkSymbolSpanComponent, ...params: FixedArray<Object>): void => {
         if (params.length !== 1) {
             throw new Error('must only 1 parameter')
         }
@@ -1826,7 +1817,8 @@ export function hookSymbolSpanAttributeModifier(component: ArkSymbolSpanComponen
         initComponent.setPeer(component.getPeer());
         return initComponent;
     };
-    applyAttributeModifierBase(modifier as Object as AttributeModifier<SymbolSpanAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer(), false);
+    let attributeSet_ = applyAttributeModifierNoCommonMethod(modifier as Object as AttributeModifier<SymbolSpanAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer(), false);
+    attributeSet_!.applyModifierPatch(component.getPeer());
 }
 
 export function hookContainerSpanAttributeModifier(component: ArkContainerSpanComponent, modifier: AttributeModifier<ContainerSpanAttribute> | AttributeModifier<CommonMethod> | undefined): void {
@@ -1838,7 +1830,7 @@ export function hookContainerSpanAttributeModifier(component: ArkContainerSpanCo
         let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new ContainerSpanModifier();
         if (isContainerSpanModifier) {
             let containerSpanModifier = modifier as object as ContainerSpanModifier;
-         //   initModifier.mergeModifier(containerSpanModifier);
+            initModifier.mergeModifier(containerSpanModifier);
             component.getPeer().attributeSet = initModifier;
             return initModifier;
         } else {
