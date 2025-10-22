@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-
 #include "animator_option.h"
 
 namespace ArkUICApiDemo {

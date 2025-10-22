@@ -19,7 +19,7 @@
 
 #include <ace/xcomponent/native_interface_xcomponent.h>
 #include <arkui/native_node.h>
-#include "common/common.h"
+#include "common.h"
 
 #include <arkui/native_interface.h>
 #include <hilog/log.h>

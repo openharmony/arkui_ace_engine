@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-
 #ifndef CAPIDEMO_ANIMATOR_OPTION_H
 #define CAPIDEMO_ANIMATOR_OPTION_H
 

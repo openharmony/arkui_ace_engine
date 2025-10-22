@@ -14,7 +14,7 @@
  */
 
 
-#include "component.h"
+#include "components/component.h"
 #include <string>
 
 namespace ArkUICApiDemo {
