@@ -1843,4 +1843,54 @@ HWTEST_F(DialogPatternAdditionalTestNg, OnWindowShow, TestSize.Level1)
     pattern->OnWindowShow();
     EXPECT_FALSE(pattern->refreshOnWindowShow_);
 }
+
+/**
+ * @tc.name: DialogPatternTestUpdateMaskColor
+ * @tc.desc: Test UpdateMaskColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, UpdateMaskColor, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create dialogNode and dialogTheme instance.
+     * @tc.expected: The dialogNode and dialogNode created successfully.
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    /**
+     * @tc.steps: step2. Set dialogProperties.
+     * @tc.expected: the backgroundColor is same to theme.
+     */
+    pattern->isUIExtensionSubWindow_ = true;
+    pattern->dialogProperties_.isModal = false;
+    pattern->dialogProperties_.maskColor = Color::BLACK;
+    pattern->dialogProperties_.isShowInSubWindow = false;
+    pattern->dialogProperties_.isSceneBoardDialog = true;
+    pattern->UpdateMaskColor();
+    
+    pattern->dialogProperties_.maskColor = std::nullopt;
+    pattern->UpdateMaskColor();
+    
+    pattern->dialogProperties_.isModal = true;
+    pattern->UpdateMaskColor();
+    EXPECT_EQ(renderContext->GetBackgroundColor()->ColorToString(), dialogTheme->GetMaskColorEnd().ColorToString());
+
+    pattern->dialogProperties_.isSceneBoardDialog = false;
+    pattern->UpdateMaskColor();
+
+    pattern->isUIExtensionSubWindow_= false;
+    pattern->UpdateMaskColor();
+
+    pattern->dialogProperties_.isShowInSubWindow = true;
+    pattern->UpdateMaskColor();
+    EXPECT_EQ(renderContext->GetBackgroundColor()->ColorToString(), dialogTheme->GetMaskColorEnd().ColorToString());
+}
 } // namespace OHOS::Ace::NG

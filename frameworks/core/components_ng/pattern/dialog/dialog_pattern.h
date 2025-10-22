@@ -438,6 +438,7 @@ private:
     void UpdateButtonsProperty();
     void UpdateNodeContent(const RefPtr<FrameNode>& node, std::string& text);
     void UpdateTitleAndContentColor();
+    void UpdateMaskColor();
     void UpdateDialogTextColor(const RefPtr<FrameNode>& textNode, const TextStyle& textStyle);
     void UpdateAlignmentAndOffset();
     void DumpBoolProperty();
