@@ -21,7 +21,7 @@ import commonEventManager from '@ohos.commonEventManager';
 import { State } from '@ohos.arkui.stateManagement'
 import { $$ } from '@kit.ArkUI';
 import { ReceiveCallback, RecordData, Column, Text, Row, UIExtensionComponent, Component, BuilderParam, TerminationInfo, Builder, FlexAlign, ClickEvent, AlertDialogParamWithConfirm, memo, CustomBuilder, ContentCoverOptions } from '@ohos.arkui.component'
-import { bundleManager } from '@kit.AbilityKit';
+import bundleManager from "@ohos.bundle.bundleManager"
 
 const errCodeAbnormal: number = 100014;
 const API20: number = 20;
