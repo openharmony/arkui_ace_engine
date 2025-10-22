@@ -30,7 +30,7 @@ class InteropExtractorModule {
         return newValue;
     }
 
-    static setStaticValueForInterop<T>(state: ObservedPropertyPU<T>, newValue: T): void {
+    static setStaticValueForInterop<T>(state: ObservedPropertyPU<T> | SynchedPropertyOneWayPU<T>, newValue: T): void {
         if (state._setInteropValueForStaticState !== undefined &&
             typeof state._setInteropValueForStaticState === 'function') {
             state._setInteropValueForStaticState(newValue);
