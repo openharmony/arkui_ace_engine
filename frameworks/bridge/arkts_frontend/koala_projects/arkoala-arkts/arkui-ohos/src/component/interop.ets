@@ -317,7 +317,7 @@ export function registerCreateWatchFuncCallback(): void {
 
 export function registerCreateStaticObservedCallback(): void {
     const makeObservedcallback = (value: Object): Object => {
-        return uiUtils.makeObserved(value) as Object;
+        return uiUtils.makeV1Observed(value) as Object;
     }
     const global = ESValue.getGlobal();
     const registerCallback = global.getProperty('registerCallbackForMakeObserved');
@@ -636,7 +636,7 @@ function createCompatibleStaticState<T>(dynamicValue: Object): ProvideDecoratedV
           ExtendableComponent.current as ExtendableComponent,
           "proxy",
           "proxy",
-          uiUtils.makeObserved(value.invokeMethod("get").unwrap()) as T,
+          uiUtils.makeV1Observed(value.invokeMethod("get").unwrap()) as T,
           false
         );
         value.invokeMethod('setProxy', ESValue.wrap(stateVar));
