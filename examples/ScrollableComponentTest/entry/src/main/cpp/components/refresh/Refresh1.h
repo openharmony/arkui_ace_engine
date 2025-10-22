@@ -18,7 +18,7 @@
 
 #include <cstdint>
 
-#include "component.h"
+#include "components/component.h"
 
 namespace ArkUICApiDemo {
 class RefreshComponent : public Component {
