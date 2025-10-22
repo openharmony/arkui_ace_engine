@@ -23,7 +23,7 @@
 #include <string>
 #include <vector>
 
-#include "column_component.h"
+#include "components/column/Column.h"
 namespace ArkUICApiDemo {
 using AllItemCallBack = std::function<void(std::shared_ptr<Component>, uint32_t)>;
 

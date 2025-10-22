@@ -25,3 +25,6 @@ export const createNormalTextListExample: (content: NodeContent) => void;
 export const createLazyTextListExample: (content: NodeContent) => void;
 export const createListItemGroupExample: (content: NodeContent) => void;
 export const destroyListExample: (content: NodeContent) => void;
+export const gridTest: (a: string) => void;
+export const SwipeActionTest: (a: string) => void;
+export const SwipeActionTestWithDirection: (a: string, b: ListItemSwipeActionDirection) => void;
