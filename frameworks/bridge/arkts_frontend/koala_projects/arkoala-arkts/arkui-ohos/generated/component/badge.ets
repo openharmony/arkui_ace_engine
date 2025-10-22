@@ -117,6 +117,7 @@ export class ArkBadgeComponent extends ArkCommonMethodComponent implements Badge
         if (this.checkPriority("setBadgeOptions")) {
             const value_casted = value as (BadgeParamWithNumber | BadgeParamWithString)
             this.getPeer()?.setBadgeOptionsAttribute(value_casted)
+            this.applyOptionsFinish('BadgeAttribute');
             return this
         }
         return this
@@ -128,6 +129,9 @@ export class ArkBadgeComponent extends ArkCommonMethodComponent implements Badge
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

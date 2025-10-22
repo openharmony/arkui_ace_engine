@@ -385,6 +385,7 @@ export class ArkSideBarContainerComponent extends ArkCommonMethodComponent imple
         if (this.checkPriority("setSideBarContainerOptions")) {
             const type_casted = type as (SideBarContainerType | undefined)
             this.getPeer()?.setSideBarContainerOptionsAttribute(type_casted)
+            this.applyOptionsFinish('SideBarContainerAttribute');
             return this
         }
         return this
@@ -484,6 +485,9 @@ export class ArkSideBarContainerComponent extends ArkCommonMethodComponent imple
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

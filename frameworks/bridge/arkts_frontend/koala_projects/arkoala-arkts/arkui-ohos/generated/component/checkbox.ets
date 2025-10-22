@@ -260,6 +260,7 @@ export class ArkCheckboxComponent extends ArkCommonMethodComponent implements Ch
         if (this.checkPriority("setCheckboxOptions")) {
             const options_casted = options as (CheckboxOptions | undefined)
             this.getPeer()?.setCheckboxOptionsAttribute(options_casted)
+            this.applyOptionsFinish('CheckboxAttribute');
             return this
         }
         return this
@@ -325,6 +326,9 @@ export class ArkCheckboxComponent extends ArkCommonMethodComponent implements Ch
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

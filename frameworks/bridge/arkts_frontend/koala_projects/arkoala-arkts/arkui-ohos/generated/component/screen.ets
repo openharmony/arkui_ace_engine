@@ -74,6 +74,7 @@ export class ArkScreenComponent extends ArkCommonMethodComponent implements Scre
         if (this.checkPriority("setScreenOptions")) {
             const screenId_casted = screenId as (number)
             this.getPeer()?.setScreenOptionsAttribute(screenId_casted)
+            this.applyOptionsFinish('ScreenAttribute');
             return this
         }
         return this
@@ -85,6 +86,9 @@ export class ArkScreenComponent extends ArkCommonMethodComponent implements Scre
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

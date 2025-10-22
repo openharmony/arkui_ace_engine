@@ -606,6 +606,9 @@ export class ArkBaseSpanComponent extends ArkCommonMethodComponent implements Ba
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
     }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
+    }
 }
 export class ArkSpanComponent extends ComponentBase implements SpanAttribute {
     getPeer(): ArkSpanPeer {
@@ -618,6 +621,7 @@ export class ArkSpanComponent extends ComponentBase implements SpanAttribute {
         if (this.checkPriority("setSpanOptions")) {
             const value_casted = value as (string | Resource)
             this.getPeer()?.setSpanOptionsAttribute(value_casted)
+            this.applyOptionsFinish('SpanAttribute');
             return this
         }
         return this
@@ -774,6 +778,9 @@ export class ArkSpanComponent extends ComponentBase implements SpanAttribute {
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

@@ -145,6 +145,7 @@ export class ArkHyperlinkComponent extends ArkCommonMethodComponent implements H
             const address_casted = address as (string | Resource | undefined)
             const content_casted = content as (string | Resource | undefined)
             this.getPeer()?.setHyperlinkOptionsAttribute(address_casted, content_casted)
+            this.applyOptionsFinish('HyperlinkAttribute');
             return this
         }
         return this
@@ -164,6 +165,9 @@ export class ArkHyperlinkComponent extends ArkCommonMethodComponent implements H
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

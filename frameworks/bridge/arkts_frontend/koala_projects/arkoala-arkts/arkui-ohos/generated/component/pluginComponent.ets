@@ -130,6 +130,7 @@ export class ArkPluginComponentComponent extends ArkCommonMethodComponent implem
         if (this.checkPriority("setPluginComponentOptions")) {
             const options_casted = options as (PluginComponentOptions)
             this.getPeer()?.setPluginComponentOptionsAttribute(options_casted)
+            this.applyOptionsFinish('PluginComponentAttribute');
             return this
         }
         return this
@@ -157,6 +158,9 @@ export class ArkPluginComponentComponent extends ArkCommonMethodComponent implem
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

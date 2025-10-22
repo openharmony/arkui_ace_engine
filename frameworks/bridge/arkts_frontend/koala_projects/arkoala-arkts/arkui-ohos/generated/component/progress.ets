@@ -282,6 +282,7 @@ export class ArkProgressComponent extends ArkCommonMethodComponent implements Pr
         if (this.checkPriority("setProgressOptions")) {
             const options_casted = options as (ProgressOptions)
             this.getPeer()?.setProgressOptionsAttribute(options_casted)
+            this.applyOptionsFinish('ProgressAttribute');
             return this
         }
         return this
@@ -331,6 +332,9 @@ export class ArkProgressComponent extends ArkCommonMethodComponent implements Pr
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

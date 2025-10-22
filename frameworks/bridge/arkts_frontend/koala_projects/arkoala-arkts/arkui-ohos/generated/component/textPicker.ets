@@ -494,6 +494,7 @@ export class ArkTextPickerComponent extends ArkCommonMethodComponent implements 
         if (this.checkPriority("setTextPickerOptions")) {
             const options_casted = options as (TextPickerOptions | undefined)
             this.getPeer()?.setTextPickerOptionsAttribute(options_casted)
+            this.applyOptionsFinish('TextPickerAttribute');
             return this
         }
         return this
@@ -625,6 +626,9 @@ export class ArkTextPickerComponent extends ArkCommonMethodComponent implements 
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

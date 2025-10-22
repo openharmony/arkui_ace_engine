@@ -177,6 +177,7 @@ export class ArkDividerComponent extends ArkCommonMethodComponent implements Div
     public setDividerOptions(): this {
         if (this.checkPriority("setDividerOptions")) {
             this.getPeer()?.setDividerOptionsAttribute()
+            this.applyOptionsFinish('DividerAttribute');
             return this
         }
         return this
@@ -220,6 +221,9 @@ export class ArkDividerComponent extends ArkCommonMethodComponent implements Div
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

@@ -157,6 +157,7 @@ export class ArkColumnComponent extends ArkCommonMethodComponent implements Colu
         if (this.checkPriority("setColumnOptions")) {
             const options_casted = options as (ColumnOptions | ColumnOptionsV2 | undefined)
             this.getPeer()?.setColumnOptionsAttribute(options_casted)
+            this.applyOptionsFinish('ColumnAttribute');
             return this
         }
         return this
@@ -192,6 +193,9 @@ export class ArkColumnComponent extends ArkCommonMethodComponent implements Colu
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

@@ -106,6 +106,7 @@ export class ArkStackComponent extends ArkCommonMethodComponent implements Stack
         if (this.checkPriority("setStackOptions")) {
             const options_casted = options as (StackOptions | undefined)
             this.getPeer()?.setStackOptionsAttribute(options_casted)
+            this.applyOptionsFinish('StackAttribute');
             return this
         }
         return this
@@ -125,6 +126,9 @@ export class ArkStackComponent extends ArkCommonMethodComponent implements Stack
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

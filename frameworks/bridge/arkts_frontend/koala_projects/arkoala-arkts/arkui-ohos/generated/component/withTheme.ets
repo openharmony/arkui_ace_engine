@@ -82,6 +82,7 @@ export class ArkWithThemeComponent extends ComponentBase implements WithThemeAtt
         if (this.checkPriority("setWithThemeOptions")) {
             const options_casted = options as (WithThemeOptions)
             this.getPeer()?.setWithThemeOptionsAttribute(options_casted)
+	    this.applyOptionsFinish('WithThemeAttribute');
             return this
         }
         return this
@@ -93,6 +94,9 @@ export class ArkWithThemeComponent extends ComponentBase implements WithThemeAtt
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

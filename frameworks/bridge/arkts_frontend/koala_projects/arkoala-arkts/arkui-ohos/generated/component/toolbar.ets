@@ -88,6 +88,7 @@ export class ArkToolBarItemComponent extends ComponentBase implements ToolBarIte
         if (this.checkPriority("setToolBarItemOptions")) {
             const options_casted = options as (ToolBarItemOptions | undefined)
             this.getPeer()?.setToolBarItemOptionsAttribute(options_casted)
+            this.applyOptionsFinish('ToolBarItemAttribute');
             return this
         }
         return this
@@ -99,6 +100,9 @@ export class ArkToolBarItemComponent extends ComponentBase implements ToolBarIte
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

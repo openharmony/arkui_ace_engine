@@ -150,6 +150,7 @@ export class ArkCounterComponent extends ArkCommonMethodComponent implements Cou
     public setCounterOptions(): this {
         if (this.checkPriority("setCounterOptions")) {
             this.getPeer()?.setCounterOptionsAttribute()
+            this.applyOptionsFinish('CounterAttribute');
             return this
         }
         return this
@@ -193,6 +194,9 @@ export class ArkCounterComponent extends ArkCommonMethodComponent implements Cou
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

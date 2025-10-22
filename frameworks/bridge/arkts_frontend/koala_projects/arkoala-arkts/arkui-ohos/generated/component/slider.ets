@@ -700,6 +700,7 @@ export class ArkSliderComponent extends ArkCommonMethodComponent implements Slid
         if (this.checkPriority("setSliderOptions")) {
             const options_casted = options as (SliderOptions | undefined)
             this.getPeer()?.setSliderOptionsAttribute(options_casted)
+            this.applyOptionsFinish('SliderAttribute');
             return this
         }
         return this
@@ -878,6 +879,9 @@ export class ArkSliderComponent extends ArkCommonMethodComponent implements Slid
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

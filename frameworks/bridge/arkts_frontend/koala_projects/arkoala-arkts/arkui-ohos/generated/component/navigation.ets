@@ -1977,6 +1977,10 @@ export class ArkNavigationComponent extends ArkCommonMethodComponent implements 
         super.applyAttributesFinish()
     }
 
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
+    }
+
     // instructive change begin
     public updateNeedSync(needSync: boolean): void {
         this._needSync = needSync;

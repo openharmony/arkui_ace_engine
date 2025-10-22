@@ -90,6 +90,7 @@ export class ArkRemoteWindowComponent extends ArkCommonMethodComponent implement
         if (this.checkPriority("setRemoteWindowOptions")) {
             const target_casted = target as (WindowAnimationTarget)
             this.getPeer()?.setRemoteWindowOptionsAttribute(target_casted)
+            this.applyOptionsFinish('RemoteWindowAttribute');
             return this
         }
         return this
@@ -101,6 +102,9 @@ export class ArkRemoteWindowComponent extends ArkCommonMethodComponent implement
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

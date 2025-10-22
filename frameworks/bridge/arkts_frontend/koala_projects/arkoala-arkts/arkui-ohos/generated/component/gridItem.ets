@@ -231,6 +231,7 @@ export class ArkGridItemComponent extends ArkCommonMethodComponent implements Gr
         if (this.checkPriority("setGridItemOptions")) {
             const value_casted = value as (GridItemOptions | undefined)
             this.getPeer()?.setGridItemOptionsAttribute(value_casted)
+            this.applyOptionsFinish('GridItemAttribute');
             return this
         }
         return this
@@ -298,6 +299,9 @@ export class ArkGridItemComponent extends ArkCommonMethodComponent implements Gr
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

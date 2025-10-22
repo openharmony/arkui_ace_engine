@@ -257,6 +257,7 @@ export class ArkCheckboxGroupComponent extends ArkCommonMethodComponent implemen
         if (this.checkPriority("setCheckboxGroupOptions")) {
             const options_casted = options as (CheckboxGroupOptions | undefined)
             this.getPeer()?.setCheckboxGroupOptionsAttribute(options_casted)
+            this.applyOptionsFinish('CheckboxGroupAttribute');
             return this
         }
         return this
@@ -316,6 +317,9 @@ export class ArkCheckboxGroupComponent extends ArkCommonMethodComponent implemen
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

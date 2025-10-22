@@ -233,6 +233,7 @@ export class ArkRectComponent extends ArkCommonShapeMethodComponent implements R
         if (this.checkPriority("setRectOptions")) {
             const options_casted = options as (RectOptions | RoundedRectOptions | undefined)
             this.getPeer()?.setRectOptionsAttribute(options_casted)
+            this.applyOptionsFinish('RectAttribute');
             return this
         }
         return this
@@ -268,6 +269,9 @@ export class ArkRectComponent extends ArkCommonShapeMethodComponent implements R
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 
