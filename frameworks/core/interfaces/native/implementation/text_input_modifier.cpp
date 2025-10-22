@@ -752,12 +752,7 @@ void SetFontFeatureImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<std::string>(value);
-    if (!convValue) {
-        FONT_FEATURES_LIST fontFeatures;
-        TextFieldModelNG::SetFontFeature(frameNode, fontFeatures);
-        return;
-    }
-    TextFieldModelNG::SetFontFeature(frameNode, ParseFontFeatureSettings(*convValue));
+    TextFieldModelStatic::SetFontFeature(frameNode, ParseFontFeatureSettings(*convValue));
 }
 void SetShowPasswordImpl(Ark_NativePointer node,
                          const Opt_Boolean* value)
@@ -1011,13 +1006,10 @@ void SetShowCounterImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto counterOptions = Converter::OptConvertPtr<InputCounterOptions>(options);
     auto isShowCounter = Converter::OptConvertPtr<bool>(value);
-    const bool defaultShowCounter = false;
-    const int32_t defaultCounterType = -1;
-    const bool defaultCounterBorder = true;
     if (!isShowCounter) {
-        TextFieldModelNG::SetShowCounter(frameNode, defaultShowCounter);
-        TextFieldModelStatic::SetCounterType(frameNode, defaultCounterType);
-        TextFieldModelStatic::SetShowCounterBorder(frameNode, defaultCounterBorder);
+        TextFieldModelStatic::SetShowCounter(frameNode, std::nullopt);
+        TextFieldModelStatic::SetCounterType(frameNode, std::nullopt);
+        TextFieldModelStatic::SetShowCounterBorder(frameNode, std::nullopt);
         return;
     }
     if (counterOptions && counterOptions->thresholdPercentage.has_value()) {
@@ -1027,7 +1019,7 @@ void SetShowCounterImpl(Ark_NativePointer node,
             isShowCounter = false;
         }
     }
-    TextFieldModelNG::SetShowCounter(frameNode, *isShowCounter);
+    TextFieldModelStatic::SetShowCounter(frameNode, isShowCounter);
     TextFieldModelStatic::SetCounterType(frameNode, counterOptions->thresholdPercentage);
     TextFieldModelStatic::SetShowCounterBorder(frameNode, counterOptions->highlightBorder);
 }
