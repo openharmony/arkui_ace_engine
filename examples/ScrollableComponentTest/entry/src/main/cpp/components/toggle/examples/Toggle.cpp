@@ -13,11 +13,6 @@
  * limitations under the License.
  */
 
- /*
-  * Description: Grid组件高频接口CAPI补齐
-  * Writer: renxiaowen
-  */
- 
 #include "components/toggle/Toggle.h"
 
 namespace ArkUICApiDemo {

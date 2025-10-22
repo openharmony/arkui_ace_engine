@@ -13,11 +13,6 @@
  * limitations under the License.
  */
 
- /*
-  * Description: Grid组件高频接口CAPI补齐
-  * Writer: renxiaowen
-  */
- 
 #include "components/swiper/Swiper.h"
 
 namespace ArkUICApiDemo {
