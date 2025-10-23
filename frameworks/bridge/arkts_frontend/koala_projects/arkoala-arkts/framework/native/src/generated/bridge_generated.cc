@@ -8204,7 +8204,7 @@ void impl_ImageAttribute_setFillColor(Ark_NativePointer thisPtr, KSerializerBuff
                 valueValueTempTmpBuf_.value1 = static_cast<Ark_ColorContent>(ColorContent_serializer::read(thisDeserializer));
             } else if (valueValueTempTmpBuf_UnionSelector == 2) {
                 valueValueTempTmpBuf_.selector = 2;
-                valueValueTempTmpBuf_.value2 = static_cast<Ark_ColorMetrics>(ColorMetrics_serializer::read(thisDeserializer));
+                valueValueTempTmpBuf_.value2 = ColorMetrics_serializer::read(thisDeserializer);
             } else {
                 INTEROP_FATAL("One of the branches for valueValueTempTmpBuf_ has to be chosen through deserialisation.");
             }

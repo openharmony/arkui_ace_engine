@@ -533,7 +533,7 @@ export class UIContext {
     getFrameNodeByNodeId(id: number): FrameNode | null {
         throw Error("getFrameNodeByNodeId not implemented in UIContext!")
     }
-    getFrameNodeByUniqueId(id: number): FrameNode | null {
+    getFrameNodeByUniqueId(id: long): FrameNode | null {
         throw Error("getFrameNodeByUniqueId not implemented in UIContext!")
     }
     getHostContext(): Context | undefined {
