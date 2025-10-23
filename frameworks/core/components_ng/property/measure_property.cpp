@@ -68,12 +68,12 @@ bool CalcSize::ClearSize(bool clearWidth, bool clearHeight)
 
 bool CalcSize::WidthFixed(bool checkPercent) const
 {
-    return width_ && (!checkPercent || (checkPercent && width_->GetDimension().Unit() != DimensionUnit::PERCENT));
+    return width_ && (!checkPercent || width_->GetDimension().Unit() != DimensionUnit::PERCENT);
 }
 
 bool CalcSize::HeightFixed(bool checkPercent) const
 {
-    return height_ && (!checkPercent || (checkPercent && height_->GetDimension().Unit() != DimensionUnit::PERCENT));
+    return height_ && (!checkPercent || height_->GetDimension().Unit() != DimensionUnit::PERCENT);
 }
 
 bool CalcSize::PercentWidth() const
