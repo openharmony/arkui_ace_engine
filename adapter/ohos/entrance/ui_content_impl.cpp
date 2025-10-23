@@ -929,6 +929,25 @@ private:
     int32_t instanceId_ = -1;
 };
 
+class WindowRotationChangeListener : public OHOS::Rosen::IWindowRotationChangeListener {
+public:
+    explicit WindowRotationChangeListener(int32_t instanceId) : instanceId_(instanceId) {}
+    ~WindowRotationChangeListener() = default;
+
+    void OnRotationCHange(const OHOS::Rosen::RotationChangeInfo& rotationChangeInfo,
+        OHOS::Rosen::RotationChangeResult& rotationChangeResult)
+    {
+        TAG_LOGI(AceLogTag::ACE_WINDOW, "Window rotation changes.");
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindowById(instanceId_);
+        CHECK_NULL_VOID(subwindow);
+        auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(instanceId_);
+        subwindow->ResizeWindowForFoldStatus(parentContainerId);
+    }
+
+private:
+    int32_t instanceId_ = -1;
+};
+
 UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime, VMType vmType)
     : runtime_(runtime), vmType_(vmType)
 {
@@ -2864,6 +2883,9 @@ void UIContentImpl::Destroy()
             }
             windowRectChangeListener_ = nullptr;
         }
+        if (windowRotationChangeListener_) {
+            window_->UnregisterWindowRotationChangeListener(windowRotationChangeListener_);
+        }
     }
 }
 
@@ -4307,6 +4329,8 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
         AceApplicationInfo::GetInstance().SetLocale(locale.getLanguage(), locale.getCountry(), locale.getScript(), "");
         container = AceType::MakeRefPtr<Platform::DialogContainer>(instanceId_, FrontendType::DECLARATIVE_JS);
         UpdateDialogResourceConfiguration(container, context);
+        windowRotationChangeListener_ = new WindowRotationChangeListener(instanceId_);
+        window_->RegisterWindowRotationChangeListener(windowRotationChangeListener_);
     } else {
 #ifdef NG_BUILD
         container = AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, frontendType,
