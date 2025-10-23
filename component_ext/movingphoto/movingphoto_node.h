@@ -66,9 +66,13 @@ public:
     RefPtr<UINode> GetVideo(int32_t index)
     {
         auto childNode = GetChildAtIndex(index);
-        CHECK_NULL_VOID(childNode);
+        if (childNode == nullptr) {
+            return nullptr;
+        }
         auto videoNode = childNode->GetChildAtIndex(VIDEO_NODE_INDEX);
-        CHECK_NULL_VOID(videoNode);
+        if (videoNode == nullptr) {
+            return nullptr;
+        }
         return videoNode;
     }
 
