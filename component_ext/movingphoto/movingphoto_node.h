@@ -69,7 +69,7 @@ public:
         CHECK_NULL_VOID(childNode);
         auto videoNode = childNode->GetChildAtIndex(VIDEO_NODE_INDEX);
         CHECK_NULL_VOID(videoNode);
-        return videoNode
+        return videoNode;
     }
 
     bool HasVideoNode()
