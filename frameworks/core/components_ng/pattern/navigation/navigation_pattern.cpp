@@ -4746,7 +4746,7 @@ void NavigationPattern::UpdatePageViewportConfigIfNeeded(const RefPtr<NavDestina
 
     auto preNodeOri = preFirstVisibleNode->GetOrientation();
     auto curNodeOri = curFirstVisibleNode->GetOrientation();
-    if (curNodeOri == preNodeOri) {
+    if (!preNodeOri.has_value() && !curNodeOri.has_value()) {
         return;
     }
 
@@ -4763,6 +4763,13 @@ void NavigationPattern::UpdatePageViewportConfigIfNeeded(const RefPtr<NavDestina
         enableNavIndicator = navIndicatorConfig.value();
     }
     auto currConfig = manager->GetCurrentViewportConfig();
+    /**
+     * During the NavDestination transition with page-level orientation, the orientation should be locked.
+     * Calling the GetTargetViewportConfig marks the start of locking, while calling SetRequestedOrientation marks
+     * the end of the locking.
+     * @see SetRequestedOrientationIfNeeded
+     */
+    enableLockOrientation_ = true;
     auto config = manager->GetTargetViewportConfig(curNodeOri, enableStatusBar, statusBarAnimated, enableNavIndicator);
     if (!currConfig || !config) {
         return;
@@ -4810,7 +4817,7 @@ bool NavigationPattern::IsPageLevelConfigEnabled(bool considerSize)
         return false;
     }
 
-    if (!IsEquivalentToStackMode()) {
+    if (!IsRealStackDisplay()) {
         return false;
     }
     if (considerSize && !isFullPageNavigation_) {
@@ -4894,14 +4901,22 @@ void NavigationPattern::GetAllNodes(
 
 void NavigationPattern::OnAllTransitionAnimationFinish()
 {
+    ShowOrRestoreSystemBarIfNeeded();
+    SetRequestedOrientationIfNeeded();
+}
+
+void NavigationPattern::SetRequestedOrientationIfNeeded()
+{
+    bool enableLockOrientation = enableLockOrientation_;
+    enableLockOrientation_ = false;
     bool animationAborted = isTransitionAnimationAborted_;
     isTransitionAnimationAborted_ = false;
-    if (!IsPageLevelConfigEnabled()) {
+    if (!IsPageLevelConfigEnabled() || !enableLockOrientation) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "conditions are not met, don't set Orientation");
         ClearPageAndNavigationConfig();
         return;
     }
 
-    ShowOrRestoreSystemBarIfNeeded();
     std::vector<WeakPtr<NavDestinationNodeBase>> invisibleNodes;
     std::vector<WeakPtr<NavDestinationNodeBase>> visibleNodes;
     GetAllNodes(invisibleNodes, visibleNodes);
@@ -4927,6 +4942,7 @@ void NavigationPattern::OnAllTransitionAnimationFinish()
     CHECK_NULL_VOID(windowMgr);
     auto targetOrientation = firstVisibleNode->GetOrientation();
     auto restoreTask = [nodes = std::move(visibleNodes), weakPattern = WeakClaim(this), animationAborted]() {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "restore Navigation RenderContext");
         ACE_SCOPED_TRACE("NavigationPattern restoreTask");
         for (auto& weakNode : nodes) {
             auto node = weakNode.Upgrade();
@@ -4940,6 +4956,7 @@ void NavigationPattern::OnAllTransitionAnimationFinish()
         if (!animationAborted) {
             return;
         }
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "reset Page Constraint");
         auto pageNode = pattern->GetNavBasePageNode();
         CHECK_NULL_VOID(pageNode);
         auto geometryNode = pageNode->GetGeometryNode();
@@ -4948,9 +4965,16 @@ void NavigationPattern::OnAllTransitionAnimationFinish()
     };
     if (!windowMgr->IsSetOrientationNeeded(targetOrientation)) {
         restoreTask();
-        return;
+    } else {
+        navigationMgr->AddBeforeOrientationChangeTask(std::move(restoreTask));
     }
-    navigationMgr->AddBeforeOrientationChangeTask(std::move(restoreTask));
+    /**
+     * During the NavDestination transition with page-level orientation, the orientation should be locked.
+     * Calling the GetTargetViewportConfig marks the start of locking, while calling SetRequestedOrientation marks
+     * the end of the locking.
+     * GetTargetViewportConfig and SetRequestedOrientation have a one-to-one or multi-to-one relationship.
+     * @see GetTargetViewportConfig
+     */
     windowMgr->SetRequestedOrientation(targetOrientation, false);
 }
 
@@ -5122,7 +5146,7 @@ void NavigationPattern::ShowOrRestoreSystemBarIfNeeded()
     }
 }
 
-bool NavigationPattern::IsEquivalentToStackMode()
+bool NavigationPattern::IsRealStackDisplay()
 {
     auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_RETURN(navigationNode, false);
@@ -5130,20 +5154,23 @@ bool NavigationPattern::IsEquivalentToStackMode()
     CHECK_NULL_RETURN(property, false);
     auto userNavMode = property->GetUsrNavigationModeValue(NavigationMode::AUTO);
     auto hideNavBar = property->GetHideNavBarValue(false);
-    if (userNavMode == NavigationMode::STACK || hideNavBar) {
+    if (userNavMode == NavigationMode::SPLIT) {
+        return false;
+    }
+    if (userNavMode == NavigationMode::STACK || hideNavBar || navigationMode_ == NavigationMode::STACK) {
         return true;
     }
-    auto homeDest = AceType::DynamicCast<FrameNode>(navigationNode->GetHomeDestinationNode());
-    if (homeDest) {
-        return navigationMode_ == NavigationMode::STACK;
+    if (navigationMode_ == NavigationMode::AUTO) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "treat as stack display before firstTime layout.");
+        return true;
     }
-    auto navBarNode = AceType::DynamicCast<FrameNode>(navigationNode->GetNavBarNode());
-    CHECK_NULL_RETURN(navBarNode, false);
-    auto navBarProperty = navBarNode->GetLayoutProperty();
-    CHECK_NULL_RETURN(navBarProperty, false);
-    auto geometry = navBarNode->GetGeometryNode();
+    auto node = AceType::DynamicCast<FrameNode>(navigationNode->GetNavBarOrHomeDestinationNode());
+    CHECK_NULL_RETURN(node, false);
+    auto nodeProperty = node->GetLayoutProperty();
+    CHECK_NULL_RETURN(nodeProperty, false);
+    auto geometry = node->GetGeometryNode();
     CHECK_NULL_RETURN(geometry, false);
-    auto visibility = navBarProperty->GetVisibilityValue(VisibleType::VISIBLE);
+    auto visibility = nodeProperty->GetVisibilityValue(VisibleType::VISIBLE);
     auto size = geometry->GetFrameSize();
     return visibility != VisibleType::VISIBLE || NearEqual(size.Width(), 0.0f) || NearEqual(size.Height(), 0.0f);
 }
