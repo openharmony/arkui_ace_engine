@@ -808,6 +808,7 @@ public:
     void UpdateTitleTextColor();
     void UpdateSheetCloseIcon();
     void UpdateSheetBackgroundColor();
+    void UpdateSheetBackgroundBlurStyle();
 
     Color GetMaskBackgroundColor() const
     {

@@ -1530,11 +1530,28 @@ void SheetPresentationPattern::UpdateSheetBackgroundColor()
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
+void SheetPresentationPattern::UpdateSheetBackgroundBlurStyle()
+{
+    if (SystemProperties::ConfigChangePerform()) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        auto sheetStyle = layoutProperty->GetSheetStyleValue();
+        if (sheetStyle.backgroundBlurStyle.has_value()) {
+            renderContext->UpdateBackBlurStyle(sheetStyle.backgroundBlurStyle.value());
+        }
+    }
+}
+
 void SheetPresentationPattern::OnColorConfigurationUpdate()
 {
     UpdateTitleTextColor();
     UpdateSheetCloseIcon();
     UpdateSheetBackgroundColor();
+    UpdateSheetBackgroundBlurStyle();
 }
 
 float SheetPresentationPattern::GetWrapperHeight()
