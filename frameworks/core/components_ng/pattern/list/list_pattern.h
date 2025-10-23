@@ -149,7 +149,7 @@ public:
     void NotifyDataChange(int32_t index, int32_t count) override;
 
     bool IsAtTop() const override;
-    bool IsAtBottom(bool considerRepeat = false, bool fromController = false) const override;
+    bool IsAtBottom(bool considerRepeat = false) const override;
     void OnTouchDown(const TouchEventInfo& info) override;
     OverScrollOffset GetOutBoundaryOffset(float delta, bool useChainDelta = true) const;
     OverScrollOffset GetOverScrollOffset(double delta) const override;
@@ -638,6 +638,7 @@ private:
     void RequestFocusForItem(int32_t index, int32_t indexInGroup);
     RefPtr<FocusHub> GetChildFocusHubInGroup(int32_t indexInList, int32_t indexInListItemGroup) const;
     void ResetForExtScroll() override;
+    bool LayoutReachEnd(float currentEndPos, float endMainPos, int32_t currentIndex);
 
     std::optional<int32_t> focusIndex_;
     std::optional<int32_t> focusGroupIndex_;

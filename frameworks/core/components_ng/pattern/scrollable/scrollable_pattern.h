@@ -147,7 +147,7 @@ public:
         return false;
     }
     virtual bool IsAtTop() const = 0;
-    virtual bool IsAtBottom(bool considerRepeat = false, bool fromController = false) const = 0;
+    virtual bool IsAtBottom(bool considerRepeat = false) const = 0;
     virtual bool IsAtTopWithDelta() const
     {
         return IsAtTop();

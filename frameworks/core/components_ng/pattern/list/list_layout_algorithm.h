@@ -694,6 +694,7 @@ private:
     void FixPredictSnapOffsetAlignEnd();
 
     float GetStopOnScreenOffset(ScrollSnapAlign scrollSnapAlign) const;
+    bool LayoutReachEnd(float currentEndPos, float endMainPos, int32_t currentIndex);
 
     std::optional<int32_t> jumpIndexInGroup_;
     ScrollAlign scrollAlign_ = ScrollAlign::START;
