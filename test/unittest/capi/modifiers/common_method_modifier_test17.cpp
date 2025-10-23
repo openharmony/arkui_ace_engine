@@ -775,7 +775,7 @@ HWTEST_F(CommonMethodModifierTest17, DISABLED_bindPopupCustomPopupOptionsMaskCol
     EXPECT_EQ(checkValue, TEST_COLOR_BLUE_STR);
 
     // color as number
-    auto colorArkNumber = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(TEST_COLOR_BLUE_NUM);
+    auto colorArkNumber = Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(TEST_COLOR_BLUE_NUM);
     literalColor = { .color = colorArkNumber };
     TypeHelper::WriteToUnion<Ark_PopupMaskType>(arkUnionMask) = literalColor;
     arkOptions = {

@@ -1760,22 +1760,6 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
-                   const Ark_Union_String_Number_Resource& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Union_String_PixelMap_Resource& src)
 {
     switch (src.selector) {
@@ -2017,6 +2001,21 @@ void AssignUnionTo(std::optional<T>& dst,
         case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
         case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
         case SELECTOR_ID_3: AssignTo(dst, src.value3); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_Length_F64& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
         default:
         {
             LOGE("Unexpected src->selector: %{public}d\n", src.selector);
@@ -3410,6 +3409,7 @@ ASSIGN_OPT(Opt_FormDimension)
 ASSIGN_OPT(Opt_FormRenderingMode)
 ASSIGN_OPT(Opt_FormShape)
 ASSIGN_OPT(Opt_FormSize)
+ASSIGN_OPT(Opt_Frame)
 ASSIGN_OPT(Opt_FrictionMotion)
 ASSIGN_OPT(Opt_FullScreenExitHandler)
 ASSIGN_OPT(Opt_FullscreenInfo)
@@ -3529,6 +3529,8 @@ ASSIGN_OPT(Opt_NavPathStack)
 ASSIGN_OPT(Opt_NestedScrollMode)
 ASSIGN_OPT(Opt_NestedScrollOptions)
 ASSIGN_OPT(Opt_NodeController)
+ASSIGN_OPT(Opt_NodeEdges_F64)
+ASSIGN_OPT(Opt_NodeEdges_I32)
 ASSIGN_OPT(Opt_NodeEdgeStyles)
 ASSIGN_OPT(Opt_Number)
 ASSIGN_OPT(Opt_Object)
@@ -4273,6 +4275,7 @@ ASSIGN_OPT(Opt_ColumnOptions)
 ASSIGN_OPT(Opt_ColumnOptionsV2)
 ASSIGN_OPT(Opt_ComputedBarAttribute)
 ASSIGN_OPT(Opt_Configuration)
+ASSIGN_OPT(Opt_Corners_F64)
 ASSIGN_OPT(Opt_CrownEvent)
 ASSIGN_OPT(Opt_CustomDialogControllerExternalOptions)
 ASSIGN_OPT(Opt_CustomDialogControllerExternalOptionsExtender)
@@ -4327,7 +4330,6 @@ ASSIGN_OPT(Opt_FontSettingOptions)
 ASSIGN_OPT(Opt_FormCallbackInfo)
 ASSIGN_OPT(Opt_FormLinkOptions)
 ASSIGN_OPT(Opt_FractionStop)
-ASSIGN_OPT(Opt_Frame)
 ASSIGN_OPT(Opt_FrameNode)
 ASSIGN_OPT(Opt_FullScreenEnterEvent)
 ASSIGN_OPT(Opt_GaugeOptions)
@@ -4440,6 +4442,7 @@ ASSIGN_OPT(Opt_RadioConfiguration)
 ASSIGN_OPT(Opt_RadioOptions)
 ASSIGN_OPT(Opt_RatingConfiguration)
 ASSIGN_OPT(Opt_RenderingContextSettings)
+ASSIGN_OPT(Opt_RenderNode)
 ASSIGN_OPT(Opt_RenderProcessNotRespondingData)
 ASSIGN_OPT(Opt_ReplaceSymbolEffect)
 ASSIGN_OPT(Opt_Resource)
@@ -4574,11 +4577,10 @@ ASSIGN_OPT(Opt_Union_String_Array_String)
 ASSIGN_OPT(Opt_Union_String_Bindable)
 ASSIGN_OPT(Opt_Union_String_ColorMetrics)
 ASSIGN_OPT(Opt_Union_String_CustomBuilder_ComponentContent)
+ASSIGN_OPT(Opt_Union_String_F64_Resource)
 ASSIGN_OPT(Opt_Union_String_I32_Buffer_Resource)
 ASSIGN_OPT(Opt_Union_String_I32_I64_F64_Resource)
 ASSIGN_OPT(Opt_Union_String_I32_Resource_Buffer)
-ASSIGN_OPT(Opt_Union_String_F64_Resource)
-ASSIGN_OPT(Opt_Union_String_Number_Resource)
 ASSIGN_OPT(Opt_Union_String_PixelMap_Resource)
 ASSIGN_OPT(Opt_Union_String_PixelMap_Resource_SymbolGlyphModifier)
 ASSIGN_OPT(Opt_Union_String_Resource)
@@ -4728,6 +4730,7 @@ ASSIGN_OPT(Opt_Union_Dimension_OptionWidthMode)
 ASSIGN_OPT(Opt_Union_EdgeColors_ResourceColor_LocalizedEdgeColors)
 ASSIGN_OPT(Opt_Union_I32_Resource_Bindable_Bindable)
 ASSIGN_OPT(Opt_Union_I32_LengthConstrain)
+ASSIGN_OPT(Opt_Union_Length_F64)
 ASSIGN_OPT(Opt_Union_Length_Array_RadiusItem)
 ASSIGN_OPT(Opt_Union_Length_LayoutPolicy)
 ASSIGN_OPT(Opt_Union_Length_Number)

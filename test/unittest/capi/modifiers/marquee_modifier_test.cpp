@@ -172,7 +172,7 @@ HWTEST_F(MarqueeModifierTest, DISABLED_setFontColorTestInvalidValues, TestSize.L
     Ark_ResourceColor inputValueFontColor;
 
     // Verifying attribute's  values
-    inputValueFontColor = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xffffffff + 1);
+    inputValueFontColor = Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0xffffffff + 1);
     auto optInputValueFontColor = Converter::ArkValue<Opt_ResourceColor>(inputValueFontColor);
     modifier_->setFontColor(node_, &optInputValueFontColor);
     jsonValue = GetJsonValue(node_);

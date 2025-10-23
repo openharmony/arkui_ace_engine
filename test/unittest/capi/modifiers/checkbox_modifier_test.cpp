@@ -299,7 +299,7 @@ HWTEST_F(CheckboxModifierTest, DISABLED_setSelectedColorTestInvalidValues, TestS
 
     // Verifying attribute's  values
 
-    inputValueSelectedColor = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xffffffff + 1);
+    inputValueSelectedColor = Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0xffffffff + 1);
     auto optInputValueSelectedColor = Converter::ArkValue<Opt_ResourceColor>(inputValueSelectedColor);
     modifier_->setSelectedColor(node_, &optInputValueSelectedColor);
     jsonValue = GetJsonValue(node_);
@@ -375,7 +375,7 @@ HWTEST_F(CheckboxModifierTest, DISABLED_setUnselectedColorTestInvalidValues, Tes
 
     // Verifying attribute's  values
 
-    inputValueUnselectedColor = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xffffffff + 1);
+    inputValueUnselectedColor = Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0xffffffff + 1);
     auto optInputValueUnselectedColor = Converter::ArkValue<Opt_ResourceColor>(inputValueUnselectedColor);
     modifier_->setUnselectedColor(node_, &optInputValueUnselectedColor);
     jsonValue = GetJsonValue(node_);
@@ -508,7 +508,7 @@ HWTEST_F(CheckboxModifierTest, setMarkTestDefaultValues, TestSize.Level1)
 HWTEST_F(CheckboxModifierTest, DISABLED_setMarkTestValidValues, TestSize.Level1)
 {
     Ark_MarkStyle style;
-    Ark_ResourceColor color = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xFF123456);
+    Ark_ResourceColor color = Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0xFF123456);
     Ark_Length len1 = Converter::ArkValue<Ark_Length>(SIZE1);
     Ark_Length len2 = Converter::ArkValue<Ark_Length>(SIZE2);
     Opt_Length opt1 = Converter::ArkValue<Opt_Length>(len1);
@@ -551,7 +551,7 @@ HWTEST_F(CheckboxModifierTest, DISABLED_setMarkTestInvalidValues, TestSize.Level
     Ark_MarkStyle style;
     std::unique_ptr<JsonValue> resultMark;
     std::unique_ptr<JsonValue> jsonValue;
-    Ark_ResourceColor color = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0x00000000);
+    Ark_ResourceColor color = Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0x00000000);
     Ark_Length len1 = Converter::ArkValue<Ark_Length>(0.);
     Ark_Length len2 = Converter::ArkValue<Ark_Length>(0.);
     Opt_Length opt1 = Converter::ArkValue<Opt_Length>(len1);

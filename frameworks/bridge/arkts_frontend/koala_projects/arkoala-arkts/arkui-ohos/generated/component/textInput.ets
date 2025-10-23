@@ -148,10 +148,10 @@ export class ArkTextInputPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toChar())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toChar())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toChar())
                 const valueTmpValueForIdx2  = valueTmpValue as string
@@ -236,10 +236,10 @@ export class ArkTextInputPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toChar())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toChar())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toChar())
                 const valueTmpValueForIdx2  = valueTmpValue as string
@@ -336,10 +336,10 @@ export class ArkTextInputPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toChar())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toChar())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toChar())
                 const valueTmpValueForIdx2  = valueTmpValue as string
@@ -364,10 +364,10 @@ export class ArkTextInputPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toChar())
                 const valueTmpValueForIdx0  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx0)
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((1).toChar())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((2).toChar())
                 const valueTmpValueForIdx2  = valueTmpValue as Resource
@@ -548,10 +548,10 @@ export class ArkTextInputPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toChar())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
-            } else if (valueTmpValue instanceof number) {
+            } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toChar())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toChar())
                 const valueTmpValueForIdx2  = valueTmpValue as string
@@ -659,10 +659,10 @@ export class ArkTextInputPeer extends ArkCommonMethodPeer {
                     thisSerializer.writeInt8((0).toChar())
                     const valueTmpValueForIdx0ForIdx0  = valueTmpValueForIdx0 as Color
                     thisSerializer.writeInt32(valueTmpValueForIdx0ForIdx0.getOrdinal())
-                } else if (valueTmpValueForIdx0 instanceof number) {
+                } else if (valueTmpValueForIdx0 instanceof int32) {
                     thisSerializer.writeInt8((1).toChar())
-                    const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as number
-                    thisSerializer.writeNumber(valueTmpValueForIdx0ForIdx1)
+                    const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as int32
+                    thisSerializer.writeInt32(valueTmpValueForIdx0ForIdx1)
                 } else if (valueTmpValueForIdx0 instanceof string) {
                     thisSerializer.writeInt8((2).toChar())
                     const valueTmpValueForIdx0ForIdx2  = valueTmpValueForIdx0 as string
@@ -2562,10 +2562,10 @@ export class UnderlineColor_serializer {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForTypingTmpValueForIdx0  = valueHolderForTypingTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForTypingTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForTypingTmpValue instanceof number) {
+            } else if (valueHolderForTypingTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toChar())
-                const valueHolderForTypingTmpValueForIdx1  = valueHolderForTypingTmpValue as number
-                valueSerializer.writeNumber(valueHolderForTypingTmpValueForIdx1)
+                const valueHolderForTypingTmpValueForIdx1  = valueHolderForTypingTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForTypingTmpValueForIdx1)
             } else if (valueHolderForTypingTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toChar())
                 const valueHolderForTypingTmpValueForIdx2  = valueHolderForTypingTmpValue as string
@@ -2586,10 +2586,10 @@ export class UnderlineColor_serializer {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForNormalTmpValueForIdx0  = valueHolderForNormalTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForNormalTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForNormalTmpValue instanceof number) {
+            } else if (valueHolderForNormalTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toChar())
-                const valueHolderForNormalTmpValueForIdx1  = valueHolderForNormalTmpValue as number
-                valueSerializer.writeNumber(valueHolderForNormalTmpValueForIdx1)
+                const valueHolderForNormalTmpValueForIdx1  = valueHolderForNormalTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForNormalTmpValueForIdx1)
             } else if (valueHolderForNormalTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toChar())
                 const valueHolderForNormalTmpValueForIdx2  = valueHolderForNormalTmpValue as string
@@ -2610,10 +2610,10 @@ export class UnderlineColor_serializer {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForErrorTmpValueForIdx0  = valueHolderForErrorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForErrorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForErrorTmpValue instanceof number) {
+            } else if (valueHolderForErrorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toChar())
-                const valueHolderForErrorTmpValueForIdx1  = valueHolderForErrorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForErrorTmpValueForIdx1)
+                const valueHolderForErrorTmpValueForIdx1  = valueHolderForErrorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForErrorTmpValueForIdx1)
             } else if (valueHolderForErrorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toChar())
                 const valueHolderForErrorTmpValueForIdx2  = valueHolderForErrorTmpValue as string
@@ -2634,10 +2634,10 @@ export class UnderlineColor_serializer {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForDisableTmpValueForIdx0  = valueHolderForDisableTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForDisableTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForDisableTmpValue instanceof number) {
+            } else if (valueHolderForDisableTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toChar())
-                const valueHolderForDisableTmpValueForIdx1  = valueHolderForDisableTmpValue as number
-                valueSerializer.writeNumber(valueHolderForDisableTmpValueForIdx1)
+                const valueHolderForDisableTmpValueForIdx1  = valueHolderForDisableTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForDisableTmpValueForIdx1)
             } else if (valueHolderForDisableTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toChar())
                 const valueHolderForDisableTmpValueForIdx2  = valueHolderForDisableTmpValue as string

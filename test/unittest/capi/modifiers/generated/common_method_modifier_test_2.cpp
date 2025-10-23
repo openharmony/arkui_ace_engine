@@ -28,9 +28,9 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setMarkAnchorTestMarkAnchorPositionY
 
     // Initial setup
     WriteToUnion<Ark_Position>(WriteTo(initValueMarkAnchor)).x =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumAnyValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumAnyValidValues[0]));
     WriteToUnion<Ark_Position>(WriteTo(initValueMarkAnchor)).y =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumAnyValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumAnyValidValues[0]));
 
     auto checkValue = [this, &initValueMarkAnchor](const std::string& input, const Opt_Length& value) {
         Opt_Union_Position_LocalizedPosition inputValueMarkAnchor = initValueMarkAnchor;

@@ -24,18 +24,84 @@ import { CallbackTransformer } from "./CallbackTransformer"
 import { extractors } from "#handwritten"
 import { common2D_Rect_serializer } from "./framework/ohos.graphics.common2D"
 import { default as common2D } from "@ohos.graphics.common2D"
+export class Frame_serializer {
+    public static write(buffer: SerializerBase, value: Frame): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForX  = value.x
+        valueSerializer.writeFloat64(valueHolderForX)
+        const valueHolderForY  = value.y
+        valueSerializer.writeFloat64(valueHolderForY)
+        const valueHolderForWidth  = value.width
+        valueSerializer.writeFloat64(valueHolderForWidth)
+        const valueHolderForHeight  = value.height
+        valueSerializer.writeFloat64(valueHolderForHeight)
+    }
+    public static read(buffer: DeserializerBase): Frame {
+        let valueDeserializer : DeserializerBase = buffer
+        const xTmpResult : double = valueDeserializer.readFloat64()
+        const yTmpResult : double = valueDeserializer.readFloat64()
+        const widthTmpResult : double = valueDeserializer.readFloat64()
+        const heightTmpResult : double = valueDeserializer.readFloat64()
+        let value : Frame = ({x: xTmpResult, y: yTmpResult, width: widthTmpResult, height: heightTmpResult} as Frame)
+        return value
+    }
+}
+export class NodeEdges_F64_serializer {
+    public static write(buffer: SerializerBase, value: NodeEdges<double>): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForLeft  = value.left!
+        valueSerializer.writeFloat64(valueHolderForLeft)
+        const valueHolderForRight  = value.right!
+        valueSerializer.writeFloat64(valueHolderForRight)
+        const valueHolderForTop  = value.top!
+        valueSerializer.writeFloat64(valueHolderForTop)
+        const valueHolderForBottom  = value.bottom!
+        valueSerializer.writeFloat64(valueHolderForBottom)
+    }
+    public static read(buffer: DeserializerBase): NodeEdges<double> {
+        let valueDeserializer : DeserializerBase = buffer
+        const leftTmpResult : double = valueDeserializer.readFloat64()
+        const rightTmpResult : double = valueDeserializer.readFloat64()
+        const topTmpResult : double = valueDeserializer.readFloat64()
+        const bottomTmpResult : double = valueDeserializer.readFloat64()
+        let value : NodeEdges<double> = ({left: leftTmpResult, right: rightTmpResult, top: topTmpResult, bottom: bottomTmpResult} as NodeEdges<double>)
+        return value
+    }
+}
+export class NodeEdges_I32_serializer {
+    public static write(buffer: SerializerBase, value: NodeEdges<int32>): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForLeft  = value.left!
+        valueSerializer.writeInt32(valueHolderForLeft)
+        const valueHolderForRight  = value.right!
+        valueSerializer.writeInt32(valueHolderForRight)
+        const valueHolderForTop  = value.top!
+        valueSerializer.writeInt32(valueHolderForTop)
+        const valueHolderForBottom  = value.bottom!
+        valueSerializer.writeInt32(valueHolderForBottom)
+    }
+    public static read(buffer: DeserializerBase): NodeEdges<int32> {
+        let valueDeserializer : DeserializerBase = buffer
+        const leftTmpResult : int32 = valueDeserializer.readInt32()
+        const rightTmpResult : int32 = valueDeserializer.readInt32()
+        const topTmpResult : int32 = valueDeserializer.readInt32()
+        const bottomTmpResult : int32 = valueDeserializer.readInt32()
+        let value : NodeEdges<int32> = ({left: leftTmpResult, right: rightTmpResult, top: topTmpResult, bottom: bottomTmpResult} as NodeEdges<int32>)
+        return value
+    }
+}
 export class Size_serializer {
     public static write(buffer: SerializerBase, value: Size): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForWidth  = value.width
-        valueSerializer.writeNumber(valueHolderForWidth)
+        valueSerializer.writeFloat64(valueHolderForWidth)
         const valueHolderForHeight  = value.height
-        valueSerializer.writeNumber(valueHolderForHeight)
+        valueSerializer.writeFloat64(valueHolderForHeight)
     }
     public static read(buffer: DeserializerBase): Size {
         let valueDeserializer : DeserializerBase = buffer
-        const widthTmpResult : number = (valueDeserializer.readNumber() as number)
-        const heightTmpResult : number = (valueDeserializer.readNumber() as number)
+        const widthTmpResult : double = valueDeserializer.readFloat64()
+        const heightTmpResult : double = valueDeserializer.readFloat64()
         let value : Size = ({width: widthTmpResult, height: heightTmpResult} as Size)
         return value
     }
@@ -51,6 +117,28 @@ export class ColorMetrics_serializer {
         return extractors.fromColorMetricsPtr(ptr)
     }
 }
+export class Corners_F64_serializer {
+    public static write(buffer: SerializerBase, value: Corners<double>): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForTopLeft  = value.topLeft
+        valueSerializer.writeFloat64(valueHolderForTopLeft)
+        const valueHolderForTopRight  = value.topRight
+        valueSerializer.writeFloat64(valueHolderForTopRight)
+        const valueHolderForBottomLeft  = value.bottomLeft
+        valueSerializer.writeFloat64(valueHolderForBottomLeft)
+        const valueHolderForBottomRight  = value.bottomRight
+        valueSerializer.writeFloat64(valueHolderForBottomRight)
+    }
+    public static read(buffer: DeserializerBase): Corners<double> {
+        let valueDeserializer : DeserializerBase = buffer
+        const topLeftTmpResult : double = valueDeserializer.readFloat64()
+        const topRightTmpResult : double = valueDeserializer.readFloat64()
+        const bottomLeftTmpResult : double = valueDeserializer.readFloat64()
+        const bottomRightTmpResult : double = valueDeserializer.readFloat64()
+        let value : Corners<double> = ({topLeft: topLeftTmpResult, topRight: topRightTmpResult, bottomLeft: bottomLeftTmpResult, bottomRight: bottomRightTmpResult} as Corners<double>)
+        return value
+    }
+}
 export class DrawContext_serializer {
     public static write(buffer: SerializerBase, value: DrawContext): void {
         let valueSerializer : SerializerBase = buffer
@@ -62,40 +150,18 @@ export class DrawContext_serializer {
         return extractors.fromDrawContextPtr(ptr)
     }
 }
-export class Frame_serializer {
-    public static write(buffer: SerializerBase, value: Frame): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForX  = value.x
-        valueSerializer.writeNumber(valueHolderForX)
-        const valueHolderForY  = value.y
-        valueSerializer.writeNumber(valueHolderForY)
-        const valueHolderForWidth  = value.width
-        valueSerializer.writeNumber(valueHolderForWidth)
-        const valueHolderForHeight  = value.height
-        valueSerializer.writeNumber(valueHolderForHeight)
-    }
-    public static read(buffer: DeserializerBase): Frame {
-        let valueDeserializer : DeserializerBase = buffer
-        const xTmpResult : number = (valueDeserializer.readNumber() as number)
-        const yTmpResult : number = (valueDeserializer.readNumber() as number)
-        const widthTmpResult : number = (valueDeserializer.readNumber() as number)
-        const heightTmpResult : number = (valueDeserializer.readNumber() as number)
-        let value : Frame = ({x: xTmpResult, y: yTmpResult, width: widthTmpResult, height: heightTmpResult} as Frame)
-        return value
-    }
-}
 export class LengthMetrics_serializer {
     public static write(buffer: SerializerBase, value: LengthMetrics): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForUnit  = value.unit
         valueSerializer.writeInt32(valueHolderForUnit.valueOf())
         const valueHolderForValue  = value.value
-        valueSerializer.writeNumber(valueHolderForValue)
+        valueSerializer.writeFloat64(valueHolderForValue)
     }
     public static read(buffer: DeserializerBase): LengthMetrics {
         let valueDeserializer : DeserializerBase = buffer
         const unitTmpResult : LengthUnit = LengthUnit.fromValue(valueDeserializer.readInt32())
-        const valueTmpResult : number = (valueDeserializer.readNumber() as number)
+        const valueTmpResult : double = valueDeserializer.readFloat64()
         let value : LengthMetrics = ({unit: unitTmpResult, value: valueTmpResult} as LengthMetrics)
         return value
     }
@@ -104,14 +170,14 @@ export class Vector2_serializer {
     public static write(buffer: SerializerBase, value: Vector2): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForX  = value.x
-        valueSerializer.writeNumber(valueHolderForX)
+        valueSerializer.writeFloat64(valueHolderForX)
         const valueHolderForY  = value.y
-        valueSerializer.writeNumber(valueHolderForY)
+        valueSerializer.writeFloat64(valueHolderForY)
     }
     public static read(buffer: DeserializerBase): Vector2 {
         let valueDeserializer : DeserializerBase = buffer
-        const xTmpResult : number = (valueDeserializer.readNumber() as number)
-        const yTmpResult : number = (valueDeserializer.readNumber() as number)
+        const xTmpResult : double = valueDeserializer.readFloat64()
+        const yTmpResult : double = valueDeserializer.readFloat64()
         let value : Vector2 = ({x: xTmpResult, y: yTmpResult} as Vector2)
         return value
     }
@@ -120,17 +186,17 @@ export class Vector3_serializer {
     public static write(buffer: SerializerBase, value: Vector3): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForX  = value.x
-        valueSerializer.writeNumber(valueHolderForX)
+        valueSerializer.writeFloat64(valueHolderForX)
         const valueHolderForY  = value.y
-        valueSerializer.writeNumber(valueHolderForY)
+        valueSerializer.writeFloat64(valueHolderForY)
         const valueHolderForZ  = value.z
-        valueSerializer.writeNumber(valueHolderForZ)
+        valueSerializer.writeFloat64(valueHolderForZ)
     }
     public static read(buffer: DeserializerBase): Vector3 {
         let valueDeserializer : DeserializerBase = buffer
-        const xTmpResult : number = (valueDeserializer.readNumber() as number)
-        const yTmpResult : number = (valueDeserializer.readNumber() as number)
-        const zTmpResult : number = (valueDeserializer.readNumber() as number)
+        const xTmpResult : double = valueDeserializer.readFloat64()
+        const yTmpResult : double = valueDeserializer.readFloat64()
+        const zTmpResult : double = valueDeserializer.readFloat64()
         let value : Vector3 = ({x: xTmpResult, y: yTmpResult, z: zTmpResult} as Vector3)
         return value
     }
@@ -139,17 +205,17 @@ export class Circle_serializer {
     public static write(buffer: SerializerBase, value: Circle): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForCenterX  = value.centerX
-        valueSerializer.writeNumber(valueHolderForCenterX)
+        valueSerializer.writeFloat64(valueHolderForCenterX)
         const valueHolderForCenterY  = value.centerY
-        valueSerializer.writeNumber(valueHolderForCenterY)
+        valueSerializer.writeFloat64(valueHolderForCenterY)
         const valueHolderForRadius  = value.radius
-        valueSerializer.writeNumber(valueHolderForRadius)
+        valueSerializer.writeFloat64(valueHolderForRadius)
     }
     public static read(buffer: DeserializerBase): Circle {
         let valueDeserializer : DeserializerBase = buffer
-        const centerXTmpResult : number = (valueDeserializer.readNumber() as number)
-        const centerYTmpResult : number = (valueDeserializer.readNumber() as number)
-        const radiusTmpResult : number = (valueDeserializer.readNumber() as number)
+        const centerXTmpResult : double = valueDeserializer.readFloat64()
+        const centerYTmpResult : double = valueDeserializer.readFloat64()
+        const radiusTmpResult : double = valueDeserializer.readFloat64()
         let value : Circle = ({centerX: centerXTmpResult, centerY: centerYTmpResult, radius: radiusTmpResult} as Circle)
         return value
     }

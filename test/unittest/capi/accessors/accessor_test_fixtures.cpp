@@ -294,8 +294,8 @@ std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureDimensi
     { "\"1.23_fp\"", Converter::ArkValue<Ark_String>("1.23fp"), "1.23fp" },
 };
 
-// Fixture 'DimensionsNumNonNeg' for type 'double'
-std::vector<std::tuple<std::string, double, std::string>> testFixtureDimensionsNumNonNegValidValues = {
+// Fixture 'DimensionsNumNonNeg' for type 'Ark_Float64'
+std::vector<std::tuple<std::string, Ark_Float64, std::string>> testFixtureDimensionsNumNonNegValidValues = {
     { "123", 123, "123.00vp" },
     { "0", 0, "0.00vp" },
     { "1.23", 1.23, "1.23vp" },

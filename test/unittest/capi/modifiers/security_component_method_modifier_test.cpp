@@ -818,7 +818,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, setFontColorTestValidValues, TestS
         checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_String>(value), expectedStr);
     }
     for (const auto &[input, value, expectedStr]: Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(value), expectedStr);
+        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(value), expectedStr);
     }
     for (const auto &[input, value, expectedStr]: Fixtures::testFixtureColorsResValidValues) {
         checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(value), expectedStr);
@@ -909,7 +909,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, setIconColorTestValidValues, TestS
         checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_String>(value), expectedStr);
     }
     for (const auto &[input, value, expectedStr]: Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(value), expectedStr);
+        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(value), expectedStr);
     }
     for (const auto &[input, value, expectedStr]: Fixtures::testFixtureColorsResValidValues) {
         checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(value), expectedStr);
@@ -1036,7 +1036,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, setBackgroundColorTestValidValues,
         checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_String>(value), expectedStr);
     }
     for (const auto &[input, value, expectedStr]: backgroundColorNumValidValues) {
-        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(value), expectedStr);
+        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(value), expectedStr);
     }
     for (const auto &[input, value, expectedStr]: Fixtures::testFixtureColorsResValidValues) {
         checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(value), expectedStr);
@@ -1305,7 +1305,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, setBorderColorTestValidValues, Tes
         checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_String>(value), expectedStr);
     }
     for (const auto &[input, value, expectedStr]: Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(value), expectedStr);
+        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(value), expectedStr);
     }
     for (const auto &[input, value, expectedStr]: Fixtures::testFixtureColorsResValidValues) {
         checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(value), expectedStr);

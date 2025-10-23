@@ -147,7 +147,7 @@ HWTEST_F(LinearGradientAccessorTest, CtorColorArkNumberTest, TestSize.Level1)
     std::vector<Ark_ColorStop> vectorData;
     for (const auto& pairItem : validValues3) {
         auto colorStop = Ark_ColorStop {
-            .color = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(std::get<0>(pairItem)),
+            .color = Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(std::get<0>(pairItem)),
             .offset = Converter::ArkValue<Ark_Length>(std::get<1>(pairItem)),
         };
         vectorData.push_back(colorStop);

@@ -273,7 +273,7 @@ HWTEST_F(TextInputModifierTest, DISABLED_setUnderlineColorTestUnderlineColorUnde
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Int32>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Resource>(value));
@@ -366,7 +366,7 @@ HWTEST_F(TextInputModifierTest, DISABLED_setUnderlineColorTestUnderlineColorUnde
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Int32>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Resource>(value));
@@ -459,7 +459,7 @@ HWTEST_F(TextInputModifierTest, DISABLED_setUnderlineColorTestUnderlineColorUnde
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Int32>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Resource>(value));
@@ -552,7 +552,7 @@ HWTEST_F(TextInputModifierTest, DISABLED_setUnderlineColorTestUnderlineColorUnde
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Int32>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Resource>(value));
@@ -898,7 +898,7 @@ HWTEST_F(
     WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).style =
         ArkValue<Opt_CancelButtonStyle>(std::get<1>(Fixtures::testFixtureTextInputCancelButtonStyleValidValues[0]));
     WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).size =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).color =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).src =
@@ -936,7 +936,7 @@ HWTEST_F(TextInputModifierTest, setCancelButtonTestCancelButtonCancelButtonOptio
     WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).style =
         ArkValue<Opt_CancelButtonStyle>(std::get<1>(Fixtures::testFixtureTextInputCancelButtonStyleValidValues[0]));
     WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).size =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).color =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).src =
@@ -977,7 +977,7 @@ HWTEST_F(TextInputModifierTest, DISABLED_setCancelButtonTestCancelButtonCancelBu
     WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).style =
         ArkValue<Opt_CancelButtonStyle>(std::get<1>(Fixtures::testFixtureTextInputCancelButtonStyleValidValues[0]));
     WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).size =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).color =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).src =
@@ -1000,7 +1000,7 @@ HWTEST_F(TextInputModifierTest, DISABLED_setCancelButtonTestCancelButtonCancelBu
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumNonNegValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_Length, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_Length, Ark_Float64>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsResNonNegNonPctValidValues) {
         checkValue(input, expected, ArkUnion<Opt_Length, Ark_Resource>(value));
@@ -1024,7 +1024,7 @@ HWTEST_F(
     WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).style =
         ArkValue<Opt_CancelButtonStyle>(std::get<1>(Fixtures::testFixtureTextInputCancelButtonStyleValidValues[0]));
     WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).size =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).color =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).src =
@@ -1053,7 +1053,7 @@ HWTEST_F(
         checkValue(input, ArkUnion<Opt_Length, Ark_Resource>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureDimensionsNumNonNegInvalidValues) {
-        checkValue(input, ArkUnion<Opt_Length, Ark_Number>(value));
+        checkValue(input, ArkUnion<Opt_Length, Ark_Float64>(value));
     }
     // Check invalid union
     checkValue("invalid union", ArkUnion<Opt_Length, Ark_Empty>(nullptr));
@@ -1075,7 +1075,7 @@ HWTEST_F(TextInputModifierTest, DISABLED_setCancelButtonTestCancelButtonCancelBu
     WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).style =
         ArkValue<Opt_CancelButtonStyle>(std::get<1>(Fixtures::testFixtureTextInputCancelButtonStyleValidValues[0]));
     WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).size =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).color =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).src =
@@ -1101,7 +1101,7 @@ HWTEST_F(TextInputModifierTest, DISABLED_setCancelButtonTestCancelButtonCancelBu
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Int32>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Resource>(value));
@@ -1125,7 +1125,7 @@ HWTEST_F(
     WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).style =
         ArkValue<Opt_CancelButtonStyle>(std::get<1>(Fixtures::testFixtureTextInputCancelButtonStyleValidValues[0]));
     WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).size =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).color =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).src =
@@ -1173,7 +1173,7 @@ HWTEST_F(TextInputModifierTest, DISABLED_setCancelButtonTestCancelButtonCancelBu
     WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).style =
         ArkValue<Opt_CancelButtonStyle>(std::get<1>(Fixtures::testFixtureTextInputCancelButtonStyleValidValues[0]));
     WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).size =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).color =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).src =
@@ -1216,7 +1216,7 @@ HWTEST_F(TextInputModifierTest, setCancelButtonTestCancelButtonCancelButtonOptio
     WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).style =
         ArkValue<Opt_CancelButtonStyle>(std::get<1>(Fixtures::testFixtureTextInputCancelButtonStyleValidValues[0]));
     WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).size =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).color =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).src =
@@ -1993,7 +1993,7 @@ HWTEST_F(TextInputModifierTest, DISABLED_setDecorationTestDecorationColorValidVa
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Int32>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Resource>(value));

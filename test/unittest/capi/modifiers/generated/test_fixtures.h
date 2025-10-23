@@ -415,8 +415,8 @@ extern std::vector<std::tuple<std::string, Ark_String>> testFixtureColorsStrInva
 extern std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureColorsAlpha20StrValidValues;
 extern std::vector<std::tuple<std::string, Ark_String>> testFixtureColorsAlpha20StrInvalidValues;
 
-// Fixture 'ColorsNum' for type 'Ark_Number'
-extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureColorsNumValidValues;
+// Fixture 'ColorsNum' for type 'Ark_Int32'
+extern std::vector<std::tuple<std::string, Ark_Int32, std::string>> testFixtureColorsNumValidValues;
 
 // Fixture 'ColorsAlpha20Num' for type 'Ark_Number'
 extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureColorsAlpha20NumValidValues;
@@ -530,9 +530,9 @@ extern std::vector<std::tuple<std::string, Ark_ColoringStrategy, std::string>>
 // Fixture 'ShadowType' for type 'Ark_ShadowType'
 extern std::vector<std::tuple<std::string, Ark_ShadowType, std::string>> testFixtureShadowTypeValidValues;
 
-// Fixture 'DimensionsNumNonNeg' for type 'Ark_Number'
-extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureDimensionsNumNonNegValidValues;
-extern std::vector<std::tuple<std::string, Ark_Number>> testFixtureDimensionsNumNonNegInvalidValues;
+// Fixture 'DimensionsNumNonNeg' for type 'Ark_Float64'
+extern std::vector<std::tuple<std::string, Ark_Float64, std::string>> testFixtureDimensionsNumNonNegValidValues;
+extern std::vector<std::tuple<std::string, Ark_Float64>> testFixtureDimensionsNumNonNegInvalidValues;
 
 // Fixture 'DimensionsStrNonPerc' for type 'Ark_String'
 extern std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureDimensionsStrNonPercValidValues;

@@ -202,7 +202,7 @@ void AssignArkValue(Ark_LengthMetrics& dst, const Dimension& src)
     auto unit = static_cast<int32_t>(src.Unit());
 
     dst.unit = static_cast<Ark_LengthUnit>(unit);
-    dst.value = Converter::ArkValue<Ark_Number>(value);
+    dst.value = Converter::ArkValue<Ark_Float64>(value);
 }
 
 void AssignArkValue(Ark_VisibleListContentInfo& dst, const ListItemIndex& src)
@@ -293,7 +293,7 @@ void AssignArkValue(Ark_String& dst, const CalcDimension& src, ConvContext *ctx)
 
 void AssignArkValue(Ark_Length& dst, const double& src)
 {
-    dst = ArkUnion<Ark_Length, Ark_Number>(src);
+    dst = ArkUnion<Ark_Length, Ark_Float64>(src);
 }
 
 void AssignArkValue(Ark_Length& dst, const Dimension& src, ConvContext *ctx)
@@ -318,7 +318,7 @@ void AssignArkValue(Ark_Length& dst, const CalcLength& src, ConvContext *ctx)
 
 void AssignArkValue(Ark_Length& dst, const float& src)
 {
-    dst = ArkUnion<Ark_Length, Ark_Number>(src);
+    dst = ArkUnion<Ark_Length, Ark_Float64>(src);
 }
 
 void AssignArkValue(Ark_Dimension& dst, const float& src)
@@ -512,7 +512,7 @@ Ark_LengthMetrics ArkCreate(Ark_LengthUnit unit, float value)
 {
     return {
         .unit = unit,
-        .value = ArkValue<Ark_Number>(value),
+        .value = ArkValue<Ark_Float64>(value),
     };
 }
 
@@ -598,8 +598,8 @@ void AssignArkValue(Ark_SpanStyle& dst, const RefPtr<OHOS::Ace::SpanBase>& src)
 
 void AssignArkValue(Ark_Size& dst, const SizeF& src)
 {
-    dst.width = ArkValue<Ark_Number>(src.Width());
-    dst.height = ArkValue<Ark_Number>(src.Height());
+    dst.width = ArkValue<Ark_Float64>(src.Width());
+    dst.height = ArkValue<Ark_Float64>(src.Height());
 }
 
 void AssignArkValue(Ark_String& dst, const Color& src, ConvContext *ctx)

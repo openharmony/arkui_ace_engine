@@ -431,7 +431,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setColorTestColorValidValues, TestSize.L
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
         checkValue(input, expected,
             ArkUnion<Opt_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(
-                ArkUnion<Ark_ResourceColor, Ark_Number>(value)));
+                ArkUnion<Ark_ResourceColor, Ark_Int32>(value)));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
         checkValue(input, expected,
@@ -498,9 +498,9 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleLinearStyleOptionsStrok
 
     // Initial setup
     WriteToUnion<Ark_LinearStyleOptions>(WriteTo(initValueStyle)).strokeWidth =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteToUnion<Ark_LinearStyleOptions>(WriteTo(initValueStyle)).strokeRadius =
-        ArkUnion<Opt_Union_String_Number_Resource, Ark_Number>(
+        ArkUnion<Opt_Union_String_F64_Resource, Ark_Number>(
             std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
 
     auto checkValue = [this, &initValueStyle](
@@ -518,7 +518,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleLinearStyleOptionsStrok
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumNonNegValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_Length, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_Length, Ark_Float64>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsResNonNegNonPctValidValues) {
         checkValue(input, expected, ArkUnion<Opt_Length, Ark_Resource>(value));
@@ -539,9 +539,9 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleLinearStyleOptionsStrok
 
     // Initial setup
     WriteToUnion<Ark_LinearStyleOptions>(WriteTo(initValueStyle)).strokeWidth =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteToUnion<Ark_LinearStyleOptions>(WriteTo(initValueStyle)).strokeRadius =
-        ArkUnion<Opt_Union_String_Number_Resource, Ark_Number>(
+        ArkUnion<Opt_Union_String_F64_Resource, Ark_Number>(
             std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
 
     auto checkValue = [this, &initValueStyle](const std::string& input, const Opt_Length& value) {
@@ -565,7 +565,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleLinearStyleOptionsStrok
         checkValue(input, ArkUnion<Opt_Length, Ark_Resource>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureDimensionsNumNonNegInvalidValues) {
-        checkValue(input, ArkUnion<Opt_Length, Ark_Number>(value));
+        checkValue(input, ArkUnion<Opt_Length, Ark_Float64>(value));
     }
     // Check invalid union
     checkValue("invalid union", ArkUnion<Opt_Length, Ark_Empty>(nullptr));
@@ -584,12 +584,12 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleLinearStyleOptionsStrok
 
     // Initial setup
     WriteToUnion<Ark_LinearStyleOptions>(WriteTo(initValueStyle)).strokeWidth =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteToUnion<Ark_LinearStyleOptions>(WriteTo(initValueStyle)).strokeRadius =
-        ArkUnion<Opt_Union_String_Number_Resource, Ark_Number>(
+        ArkUnion<Opt_Union_String_F64_Resource, Ark_Number>(
             std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
 
-    auto checkValue = [this, &initValueStyle](const std::string& input, const Opt_Union_String_Number_Resource& value) {
+    auto checkValue = [this, &initValueStyle](const std::string& input, const Opt_Union_String_F64_Resource& value) {
         Opt_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions inputValueStyle =
             initValueStyle;
 
@@ -605,9 +605,9 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleLinearStyleOptionsStrok
 
     ADD_FAILURE() << "No fixture is defined for type Ark_Resource";
     // Check invalid union
-    checkValue("invalid union", ArkUnion<Opt_Union_String_Number_Resource, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Opt_Union_String_F64_Resource, Ark_Empty>(nullptr));
     // Check empty optional
-    checkValue("undefined", ArkValue<Opt_Union_String_Number_Resource>());
+    checkValue("undefined", ArkValue<Opt_Union_String_F64_Resource>());
 }
 
 /*
@@ -621,7 +621,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleRingStyleOptionsStrokeW
 
     // Initial setup
     WriteToUnion<Ark_RingStyleOptions>(WriteTo(initValueStyle)).strokeWidth =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteToUnion<Ark_RingStyleOptions>(WriteTo(initValueStyle)).shadow =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
     WriteToUnion<Ark_RingStyleOptions>(WriteTo(initValueStyle)).status =
@@ -642,7 +642,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleRingStyleOptionsStrokeW
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumNonNegValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_Length, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_Length, Ark_Float64>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsResNonNegNonPctValidValues) {
         checkValue(input, expected, ArkUnion<Opt_Length, Ark_Resource>(value));
@@ -663,7 +663,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleRingStyleOptionsStrokeW
 
     // Initial setup
     WriteToUnion<Ark_RingStyleOptions>(WriteTo(initValueStyle)).strokeWidth =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteToUnion<Ark_RingStyleOptions>(WriteTo(initValueStyle)).shadow =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
     WriteToUnion<Ark_RingStyleOptions>(WriteTo(initValueStyle)).status =
@@ -690,7 +690,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleRingStyleOptionsStrokeW
         checkValue(input, ArkUnion<Opt_Length, Ark_Resource>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureDimensionsNumNonNegInvalidValues) {
-        checkValue(input, ArkUnion<Opt_Length, Ark_Number>(value));
+        checkValue(input, ArkUnion<Opt_Length, Ark_Float64>(value));
     }
     // Check invalid union
     checkValue("invalid union", ArkUnion<Opt_Length, Ark_Empty>(nullptr));
@@ -709,7 +709,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleRingStyleOptionsShadowV
 
     // Initial setup
     WriteToUnion<Ark_RingStyleOptions>(WriteTo(initValueStyle)).strokeWidth =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteToUnion<Ark_RingStyleOptions>(WriteTo(initValueStyle)).shadow =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
     WriteToUnion<Ark_RingStyleOptions>(WriteTo(initValueStyle)).status =
@@ -745,7 +745,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleRingStyleOptionsShadowI
 
     // Initial setup
     WriteToUnion<Ark_RingStyleOptions>(WriteTo(initValueStyle)).strokeWidth =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteToUnion<Ark_RingStyleOptions>(WriteTo(initValueStyle)).shadow =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
     WriteToUnion<Ark_RingStyleOptions>(WriteTo(initValueStyle)).status =
@@ -780,7 +780,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleRingStyleOptionsStatusV
 
     // Initial setup
     WriteToUnion<Ark_RingStyleOptions>(WriteTo(initValueStyle)).strokeWidth =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteToUnion<Ark_RingStyleOptions>(WriteTo(initValueStyle)).shadow =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
     WriteToUnion<Ark_RingStyleOptions>(WriteTo(initValueStyle)).status =
@@ -816,7 +816,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleRingStyleOptionsStatusI
 
     // Initial setup
     WriteToUnion<Ark_RingStyleOptions>(WriteTo(initValueStyle)).strokeWidth =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteToUnion<Ark_RingStyleOptions>(WriteTo(initValueStyle)).shadow =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
     WriteToUnion<Ark_RingStyleOptions>(WriteTo(initValueStyle)).status =
@@ -854,9 +854,9 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsBord
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).borderColor =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).borderWidth =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).font).size =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).font).weight =
         ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
             std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
@@ -887,7 +887,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsBord
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Int32>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Resource>(value));
@@ -910,9 +910,9 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsBord
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).borderColor =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).borderWidth =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).font).size =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).font).weight =
         ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
             std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
@@ -964,9 +964,9 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsBord
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).borderColor =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).borderWidth =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).font).size =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).font).weight =
         ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
             std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
@@ -994,7 +994,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsBord
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumNonNegValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_Length, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_Length, Ark_Float64>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsResNonNegNonPctValidValues) {
         checkValue(input, expected, ArkUnion<Opt_Length, Ark_Resource>(value));
@@ -1017,9 +1017,9 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsBord
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).borderColor =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).borderWidth =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).font).size =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).font).weight =
         ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
             std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
@@ -1053,7 +1053,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsBord
         checkValue(input, ArkUnion<Opt_Length, Ark_Resource>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureDimensionsNumNonNegInvalidValues) {
-        checkValue(input, ArkUnion<Opt_Length, Ark_Number>(value));
+        checkValue(input, ArkUnion<Opt_Length, Ark_Float64>(value));
     }
     // Check invalid union
     checkValue("invalid union", ArkUnion<Opt_Length, Ark_Empty>(nullptr));
@@ -1074,9 +1074,9 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).borderColor =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).borderWidth =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).font).size =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).font).weight =
         ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
             std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
@@ -1105,7 +1105,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumNonNegValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_Length, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_Length, Ark_Float64>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsResNonNegNonPctValidValues) {
         checkValue(input, expected, ArkUnion<Opt_Length, Ark_Resource>(value));
@@ -1128,9 +1128,9 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).borderColor =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).borderWidth =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).font).size =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).font).weight =
         ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
             std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
@@ -1165,7 +1165,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
         checkValue(input, ArkUnion<Opt_Length, Ark_Resource>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureDimensionsNumNonNegInvalidValues) {
-        checkValue(input, ArkUnion<Opt_Length, Ark_Number>(value));
+        checkValue(input, ArkUnion<Opt_Length, Ark_Float64>(value));
     }
     // Check invalid union
     checkValue("invalid union", ArkUnion<Opt_Length, Ark_Empty>(nullptr));
@@ -1186,9 +1186,9 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).borderColor =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).borderWidth =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).font).size =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).font).weight =
         ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
             std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
@@ -1240,9 +1240,9 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).borderColor =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).borderWidth =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).font).size =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).font).weight =
         ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
             std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
@@ -1293,9 +1293,9 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).borderColor =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).borderWidth =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).font).size =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).font).weight =
         ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
             std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
@@ -1342,9 +1342,9 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).borderColor =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).borderWidth =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).font).size =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).font).weight =
         ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
             std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
@@ -1392,9 +1392,9 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).borderColor =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).borderWidth =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).font).size =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).font).weight =
         ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
             std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
@@ -1440,9 +1440,9 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).borderColor =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).borderWidth =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).font).size =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).font).weight =
         ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
             std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
@@ -1488,9 +1488,9 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).borderColor =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).borderWidth =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).font).size =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).font).weight =
         ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
             std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
@@ -1521,7 +1521,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Int32>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Resource>(value));
@@ -1544,9 +1544,9 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).borderColor =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).borderWidth =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).font).size =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).font).weight =
         ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
             std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
@@ -1599,9 +1599,9 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsShow
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).borderColor =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).borderWidth =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).font).size =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).font).weight =
         ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
             std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
@@ -1648,9 +1648,9 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsShow
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).borderColor =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).borderWidth =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).font).size =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(initValueStyle)).font).weight =
         ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
             std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
@@ -1693,11 +1693,11 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleProgressStyleOptionsStr
 
     // Initial setup
     WriteToUnion<Ark_ProgressStyleOptions>(WriteTo(initValueStyle)).strokeWidth =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteToUnion<Ark_ProgressStyleOptions>(WriteTo(initValueStyle)).scaleCount =
         ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberPosIntFloorValidValues[0]));
     WriteToUnion<Ark_ProgressStyleOptions>(WriteTo(initValueStyle)).scaleWidth =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueStyle](
                           const std::string& input, const std::string& expectedStr, const Opt_Length& value) {
@@ -1714,7 +1714,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleProgressStyleOptionsStr
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumNonNegValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_Length, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_Length, Ark_Float64>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsResNonNegNonPctValidValues) {
         checkValue(input, expected, ArkUnion<Opt_Length, Ark_Resource>(value));
@@ -1735,11 +1735,11 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleProgressStyleOptionsStr
 
     // Initial setup
     WriteToUnion<Ark_ProgressStyleOptions>(WriteTo(initValueStyle)).strokeWidth =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteToUnion<Ark_ProgressStyleOptions>(WriteTo(initValueStyle)).scaleCount =
         ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberPosIntFloorValidValues[0]));
     WriteToUnion<Ark_ProgressStyleOptions>(WriteTo(initValueStyle)).scaleWidth =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueStyle](const std::string& input, const Opt_Length& value) {
         Opt_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions inputValueStyle =
@@ -1762,7 +1762,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleProgressStyleOptionsStr
         checkValue(input, ArkUnion<Opt_Length, Ark_Resource>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureDimensionsNumNonNegInvalidValues) {
-        checkValue(input, ArkUnion<Opt_Length, Ark_Number>(value));
+        checkValue(input, ArkUnion<Opt_Length, Ark_Float64>(value));
     }
     // Check invalid union
     checkValue("invalid union", ArkUnion<Opt_Length, Ark_Empty>(nullptr));
@@ -1781,11 +1781,11 @@ HWTEST_F(ProgressModifierTest, setStyleTestStyleProgressStyleOptionsScaleCountVa
 
     // Initial setup
     WriteToUnion<Ark_ProgressStyleOptions>(WriteTo(initValueStyle)).strokeWidth =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteToUnion<Ark_ProgressStyleOptions>(WriteTo(initValueStyle)).scaleCount =
         ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberPosIntFloorValidValues[0]));
     WriteToUnion<Ark_ProgressStyleOptions>(WriteTo(initValueStyle)).scaleWidth =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueStyle](
                           const std::string& input, const std::string& expectedStr, const Opt_Number& value) {
@@ -1817,11 +1817,11 @@ HWTEST_F(ProgressModifierTest, setStyleTestStyleProgressStyleOptionsScaleCountIn
 
     // Initial setup
     WriteToUnion<Ark_ProgressStyleOptions>(WriteTo(initValueStyle)).strokeWidth =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteToUnion<Ark_ProgressStyleOptions>(WriteTo(initValueStyle)).scaleCount =
         ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberPosIntFloorValidValues[0]));
     WriteToUnion<Ark_ProgressStyleOptions>(WriteTo(initValueStyle)).scaleWidth =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueStyle](const std::string& input, const Opt_Number& value) {
         Opt_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions inputValueStyle =
@@ -1855,11 +1855,11 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleProgressStyleOptionsSca
 
     // Initial setup
     WriteToUnion<Ark_ProgressStyleOptions>(WriteTo(initValueStyle)).strokeWidth =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteToUnion<Ark_ProgressStyleOptions>(WriteTo(initValueStyle)).scaleCount =
         ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberPosIntFloorValidValues[0]));
     WriteToUnion<Ark_ProgressStyleOptions>(WriteTo(initValueStyle)).scaleWidth =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueStyle](
                           const std::string& input, const std::string& expectedStr, const Opt_Length& value) {
@@ -1876,7 +1876,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleProgressStyleOptionsSca
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumNonNegValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_Length, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_Length, Ark_Float64>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsResNonNegNonPctValidValues) {
         checkValue(input, expected, ArkUnion<Opt_Length, Ark_Resource>(value));
@@ -1897,11 +1897,11 @@ HWTEST_F(ProgressModifierTest, setStyleTestStyleProgressStyleOptionsScaleWidthIn
 
     // Initial setup
     WriteToUnion<Ark_ProgressStyleOptions>(WriteTo(initValueStyle)).strokeWidth =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteToUnion<Ark_ProgressStyleOptions>(WriteTo(initValueStyle)).scaleCount =
         ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberPosIntFloorValidValues[0]));
     WriteToUnion<Ark_ProgressStyleOptions>(WriteTo(initValueStyle)).scaleWidth =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueStyle](const std::string& input, const Opt_Length& value) {
         Opt_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions inputValueStyle =
@@ -1924,7 +1924,7 @@ HWTEST_F(ProgressModifierTest, setStyleTestStyleProgressStyleOptionsScaleWidthIn
         checkValue(input, ArkUnion<Opt_Length, Ark_Resource>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureDimensionsNumNonNegInvalidValues) {
-        checkValue(input, ArkUnion<Opt_Length, Ark_Number>(value));
+        checkValue(input, ArkUnion<Opt_Length, Ark_Float64>(value));
     }
     // Check invalid union
     checkValue("invalid union", ArkUnion<Opt_Length, Ark_Empty>(nullptr));

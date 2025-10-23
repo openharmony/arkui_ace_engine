@@ -66,10 +66,10 @@ export class ArkLinePeer extends ArkCommonShapeMethodPeer {
                 thisSerializer.writeInt8((0).toChar())
                 const valueTmpValue_0ForIdx0  = valueTmpValue_0 as string
                 thisSerializer.writeString(valueTmpValue_0ForIdx0)
-            } else if (valueTmpValue_0 instanceof number) {
+            } else if (valueTmpValue_0 instanceof double) {
                 thisSerializer.writeInt8((1).toChar())
-                const valueTmpValue_0ForIdx1  = valueTmpValue_0 as number
-                thisSerializer.writeNumber(valueTmpValue_0ForIdx1)
+                const valueTmpValue_0ForIdx1  = valueTmpValue_0 as double
+                thisSerializer.writeFloat64(valueTmpValue_0ForIdx1)
             } else if (valueTmpValue_0 instanceof Resource) {
                 thisSerializer.writeInt8((2).toChar())
                 const valueTmpValue_0ForIdx2  = valueTmpValue_0 as Resource
@@ -80,10 +80,10 @@ export class ArkLinePeer extends ArkCommonShapeMethodPeer {
                 thisSerializer.writeInt8((0).toChar())
                 const valueTmpValue_1ForIdx0  = valueTmpValue_1 as string
                 thisSerializer.writeString(valueTmpValue_1ForIdx0)
-            } else if (valueTmpValue_1 instanceof number) {
+            } else if (valueTmpValue_1 instanceof double) {
                 thisSerializer.writeInt8((1).toChar())
-                const valueTmpValue_1ForIdx1  = valueTmpValue_1 as number
-                thisSerializer.writeNumber(valueTmpValue_1ForIdx1)
+                const valueTmpValue_1ForIdx1  = valueTmpValue_1 as double
+                thisSerializer.writeFloat64(valueTmpValue_1ForIdx1)
             } else if (valueTmpValue_1 instanceof Resource) {
                 thisSerializer.writeInt8((2).toChar())
                 const valueTmpValue_1ForIdx2  = valueTmpValue_1 as Resource
@@ -105,10 +105,10 @@ export class ArkLinePeer extends ArkCommonShapeMethodPeer {
                 thisSerializer.writeInt8((0).toChar())
                 const valueTmpValue_0ForIdx0  = valueTmpValue_0 as string
                 thisSerializer.writeString(valueTmpValue_0ForIdx0)
-            } else if (valueTmpValue_0 instanceof number) {
+            } else if (valueTmpValue_0 instanceof double) {
                 thisSerializer.writeInt8((1).toChar())
-                const valueTmpValue_0ForIdx1  = valueTmpValue_0 as number
-                thisSerializer.writeNumber(valueTmpValue_0ForIdx1)
+                const valueTmpValue_0ForIdx1  = valueTmpValue_0 as double
+                thisSerializer.writeFloat64(valueTmpValue_0ForIdx1)
             } else if (valueTmpValue_0 instanceof Resource) {
                 thisSerializer.writeInt8((2).toChar())
                 const valueTmpValue_0ForIdx2  = valueTmpValue_0 as Resource
@@ -119,10 +119,10 @@ export class ArkLinePeer extends ArkCommonShapeMethodPeer {
                 thisSerializer.writeInt8((0).toChar())
                 const valueTmpValue_1ForIdx0  = valueTmpValue_1 as string
                 thisSerializer.writeString(valueTmpValue_1ForIdx0)
-            } else if (valueTmpValue_1 instanceof number) {
+            } else if (valueTmpValue_1 instanceof double) {
                 thisSerializer.writeInt8((1).toChar())
-                const valueTmpValue_1ForIdx1  = valueTmpValue_1 as number
-                thisSerializer.writeNumber(valueTmpValue_1ForIdx1)
+                const valueTmpValue_1ForIdx1  = valueTmpValue_1 as double
+                thisSerializer.writeFloat64(valueTmpValue_1ForIdx1)
             } else if (valueTmpValue_1 instanceof Resource) {
                 thisSerializer.writeInt8((2).toChar())
                 const valueTmpValue_1ForIdx2  = valueTmpValue_1 as Resource

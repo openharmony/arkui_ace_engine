@@ -910,10 +910,10 @@ export class ArkNavigationPeer extends ArkCommonMethodPeer {
                     thisSerializer.writeInt8((0).toChar())
                     const valueTmpValueForIdx0ForIdx0  = valueTmpValueForIdx0 as string
                     thisSerializer.writeString(valueTmpValueForIdx0ForIdx0)
-                } else if (valueTmpValueForIdx0 instanceof number) {
+                } else if (valueTmpValueForIdx0 instanceof double) {
                     thisSerializer.writeInt8((1).toChar())
-                    const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as number
-                    thisSerializer.writeNumber(valueTmpValueForIdx0ForIdx1)
+                    const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as double
+                    thisSerializer.writeFloat64(valueTmpValueForIdx0ForIdx1)
                 } else if (valueTmpValueForIdx0 instanceof Resource) {
                     thisSerializer.writeInt8((2).toChar())
                     const valueTmpValueForIdx0ForIdx2  = valueTmpValueForIdx0 as Resource
@@ -2800,10 +2800,10 @@ export class NavigationCustomTitle_serializer {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForHeightForIdx1ForIdx0  = valueHolderForHeightForIdx1 as string
                 valueSerializer.writeString(valueHolderForHeightForIdx1ForIdx0)
-            } else if (valueHolderForHeightForIdx1 instanceof number) {
+            } else if (valueHolderForHeightForIdx1 instanceof double) {
                 valueSerializer.writeInt8((1).toChar())
-                const valueHolderForHeightForIdx1ForIdx1  = valueHolderForHeightForIdx1 as number
-                valueSerializer.writeNumber(valueHolderForHeightForIdx1ForIdx1)
+                const valueHolderForHeightForIdx1ForIdx1  = valueHolderForHeightForIdx1 as double
+                valueSerializer.writeFloat64(valueHolderForHeightForIdx1ForIdx1)
             } else if (valueHolderForHeightForIdx1 instanceof Resource) {
                 valueSerializer.writeInt8((2).toChar())
                 const valueHolderForHeightForIdx1ForIdx2  = valueHolderForHeightForIdx1 as Resource
@@ -2831,17 +2831,17 @@ export class NavigationCustomTitle_serializer {
             heightTmpBuf = TitleHeight.fromValue(valueDeserializer.readInt32())
         } else if (heightTmpBufUnionSelector == (1).toChar()) {
             const heightTmpBufBufUUnionSelector : int32 = valueDeserializer.readInt8()
-            let heightTmpBufBufU : string | number | Resource | undefined
+            let heightTmpBufBufU : string | double | Resource | undefined
             if (heightTmpBufBufUUnionSelector == (0).toChar()) {
                 heightTmpBufBufU = (valueDeserializer.readString() as string)
             } else if (heightTmpBufBufUUnionSelector == (1).toChar()) {
-                heightTmpBufBufU = (valueDeserializer.readNumber() as number)
+                heightTmpBufBufU = valueDeserializer.readFloat64()
             } else if (heightTmpBufBufUUnionSelector == (2).toChar()) {
                 heightTmpBufBufU = Resource_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for heightTmpBufBufU has to be chosen through deserialisation.")
             }
-            heightTmpBuf = (heightTmpBufBufU as string | number | Resource)
+            heightTmpBuf = (heightTmpBufBufU as string | double | Resource)
         } else {
             throw new Error("One of the branches for heightTmpBuf has to be chosen through deserialisation.")
         }
@@ -2861,10 +2861,10 @@ export class NavigationTitleOptions_serializer {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForBackgroundColorTmpValueForIdx0  = valueHolderForBackgroundColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForBackgroundColorTmpValue instanceof number) {
+            } else if (valueHolderForBackgroundColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toChar())
-                const valueHolderForBackgroundColorTmpValueForIdx1  = valueHolderForBackgroundColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForBackgroundColorTmpValueForIdx1)
+                const valueHolderForBackgroundColorTmpValueForIdx1  = valueHolderForBackgroundColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx1)
             } else if (valueHolderForBackgroundColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toChar())
                 const valueHolderForBackgroundColorTmpValueForIdx2  = valueHolderForBackgroundColorTmpValue as string
@@ -3064,10 +3064,10 @@ export class NavigationToolbarOptions_serializer {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForBackgroundColorTmpValueForIdx0  = valueHolderForBackgroundColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForBackgroundColorTmpValue instanceof number) {
+            } else if (valueHolderForBackgroundColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toChar())
-                const valueHolderForBackgroundColorTmpValueForIdx1  = valueHolderForBackgroundColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForBackgroundColorTmpValueForIdx1)
+                const valueHolderForBackgroundColorTmpValueForIdx1  = valueHolderForBackgroundColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx1)
             } else if (valueHolderForBackgroundColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toChar())
                 const valueHolderForBackgroundColorTmpValueForIdx2  = valueHolderForBackgroundColorTmpValue as string

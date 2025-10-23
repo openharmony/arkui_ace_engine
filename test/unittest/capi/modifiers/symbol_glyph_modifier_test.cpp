@@ -424,7 +424,7 @@ static std::vector<std::tuple<std::string, std::string>> fontColorVectorValues =
 
 static std::vector<Ark_ResourceColor> fontColorVector = {
     Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_BLUE),
-    Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0x123456),
+    Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0x123456),
     Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"),
     Converter::ArkUnion<Ark_ResourceColor, Ark_String>("65535"),
 };

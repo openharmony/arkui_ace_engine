@@ -541,6 +541,7 @@ namespace Converter {
     template<> BorderRadiusProperty Convert(const Ark_LocalizedBorderRadiuses& src);
     template<> BorderStyleProperty Convert(const Ark_NodeEdgeStyles& src);
     template<> BorderRadiusProperty Convert(const Ark_Number& src);
+    template<> BorderRadiusProperty Convert(const Ark_Float64& src);
     template<> BorderRadiusProperty Convert(const Ark_Resource& src);
     template<> BorderRadiusProperty Convert(const Ark_String& src);
     template<> BorderStyleProperty Convert(const Ark_BorderStyle& src);
@@ -550,6 +551,7 @@ namespace Converter {
     template<> BorderWidthProperty Convert(const Ark_LengthMetrics& src);
     template<> BorderWidthProperty Convert(const Ark_LocalizedEdgeWidths& src);
     template<> BorderWidthProperty Convert(const Ark_Number& src);
+    template<> BorderWidthProperty Convert(const Ark_Float64& src);
     template<> BorderWidthProperty Convert(const Ark_Resource& src);
     template<> BorderWidthProperty Convert(const Ark_String& src);
     template<> ButtonInfo Convert(const Ark_AlertDialogButtonBaseOptions& src);
@@ -561,6 +563,7 @@ namespace Converter {
     template<> CalcDimension Convert(const Ark_String& src);
     template<> CalcLength Convert(const Ark_LengthMetrics& src);
     template<> CalcLength Convert(const Ark_Number& src);
+    template<> CalcLength Convert(const Ark_Float64& src);
     template<> CalcLength Convert(const Ark_String& src);
     template<> CaretStyle Convert(const Ark_CaretStyle& src);
     template<> Color Convert(const Ark_Number& src);
@@ -618,6 +621,7 @@ namespace Converter {
     template<> PaddingProperty Convert(const Ark_LengthMetrics& src);
     template<> PaddingProperty Convert(const Ark_LocalizedPadding& src);
     template<> PaddingProperty Convert(const Ark_Number& src);
+    template<> PaddingProperty Convert(const Ark_Float64& src);
     template<> PaddingProperty Convert(const Ark_Padding& src);
     template<> PaddingProperty Convert(const Ark_Resource& src);
     template<> PaddingProperty Convert(const Ark_String& src);
@@ -659,7 +663,7 @@ namespace Converter {
     template<> ShadowColorStrategy Convert(const Ark_Resource& src);
     template<> ShadowColorStrategy Convert(const Ark_String& src);
     template<> ShapePoint Convert(const Ark_ShapePoint& src);
-    template<> SheetHeight Convert(const Ark_Number& src);
+    template<> SheetHeight Convert(const Ark_Float64& src);
     template<> SheetHeight Convert(const Ark_Resource& src);
     template<> SheetHeight Convert(const Ark_SheetSize& src);
     template<> SheetHeight Convert(const Ark_String& src);
@@ -899,6 +903,8 @@ namespace Converter {
     template<> void AssignCast(std::optional<XComponentType>& dst, const Ark_XComponentType& src);
     template<> void AssignCast(std::optional<double>& dst, const Ark_LevelOrder& src);
     template<> void AssignCast(std::optional<double>& dst, const Ark_String& src);
+    template<> void AssignCast(std::optional<double>& dst, const Ark_Float64& src);
+    template<> void AssignCast(std::optional<float>& dst, const Ark_Float64& src);
     template<> void AssignCast(std::optional<float>& dst, const Ark_String& src);
     template<> void AssignCast(std::optional<int32_t>& dst, const Ark_PageFlipMode& src);
     template<> void AssignCast(std::optional<std::string>& dst, const Ark_FunctionKey& src);

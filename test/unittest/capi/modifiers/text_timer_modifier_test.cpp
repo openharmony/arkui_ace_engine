@@ -337,7 +337,7 @@ HWTEST_F(TextTimerModifierTest, DISABLED_setFontColorTestFontColorValidValues, T
         checkValue(input, ArkUnion<Ark_ResourceColor, Ark_Color>(value), expected);
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_Number>(value), expected);
+        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_Int32>(value), expected);
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
         checkValue(input, ArkUnion<Ark_ResourceColor, Ark_Resource>(value), expected);

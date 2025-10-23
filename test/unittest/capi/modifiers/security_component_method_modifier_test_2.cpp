@@ -43,8 +43,8 @@ static const std::vector<std::pair<Ark_Dimension, std::string>> DIMENSION_TEST_P
 };
 
 static const std::vector<std::pair<Ark_Length, std::string>> LENGTH_TEST_PLAN = {
-    { Converter::ArkUnion<Ark_Length, Ark_Number>(2.45f, &ctx), "2.45vp" },
-    { Converter::ArkUnion<Ark_Length, Ark_Number>(-2.45f, &ctx), "-2.45vp" },
+    { Converter::ArkUnion<Ark_Length, Ark_Float64>(2.45f, &ctx), "2.45vp" },
+    { Converter::ArkUnion<Ark_Length, Ark_Float64>(-2.45f, &ctx), "-2.45vp" },
     { Converter::ArkUnion<Ark_Length, Ark_String>("5.0px", &ctx), "5.00px" },
     { Converter::ArkUnion<Ark_Length, Ark_String>("-5.0px", &ctx), "-5.00px" },
     { Converter::ArkUnion<Ark_Length, Ark_String>("22.35px", &ctx), "22.35px" },

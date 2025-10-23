@@ -424,7 +424,7 @@ HWTEST_F(CommonMethodModifierTest3, DISABLED_setMaskValidValues, TestSize.Level1
         {
             Converter::ArkValue<Ark_Number>(20.5f), "20.5",
             Converter::ArkValue<Ark_Number>(200.25f), "200.25",
-            Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xff0000ff), Color(0xff0000ff).ToString(),
+            Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0xff0000ff), Color(0xff0000ff).ToString(),
             Converter::ArkValue<Ark_Boolean>(true), "true"
         },
         {
@@ -471,7 +471,7 @@ HWTEST_F(CommonMethodModifierTest3, setMask1PartForProgressMaskValidValues, Test
         {
             Converter::ArkValue<Ark_Number>(20.5f), "20.5",
             Converter::ArkValue<Ark_Number>(20.5f), "20.5",
-            Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xff123456), Color(0xff123456).ToString(),
+            Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0xff123456), Color(0xff123456).ToString(),
             Converter::ArkValue<Ark_Boolean>(false), "false"
         },
     };

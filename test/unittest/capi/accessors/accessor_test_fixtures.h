@@ -162,8 +162,8 @@ extern std::vector<std::tuple<std::string, double, std::string>> testFixtureDime
 // Fixture 'DimensionsStrNonPerc' for type 'Ark_String'
 extern std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureDimensionsStrNonPercValidValues;
 
-// Fixture 'DimensionsNumNonNeg' for type 'double'
-extern std::vector<std::tuple<std::string, double, std::string>> testFixtureDimensionsNumNonNegValidValues;
+// Fixture 'DimensionsNumNonNeg' for type 'Ark_Float64'
+extern std::vector<std::tuple<std::string, Ark_Float64, std::string>> testFixtureDimensionsNumNonNegValidValues;
 
 // Fixture 'DimensionsStrNonNegNonPct' for type 'Ark_String'
 extern std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureDimensionsStrNonNegNonPctValidValues;
