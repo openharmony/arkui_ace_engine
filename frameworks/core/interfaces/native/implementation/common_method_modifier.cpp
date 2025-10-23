@@ -848,11 +848,11 @@ BackgroundImageSize Convert(const Ark_SizeOptions& src)
     BackgroundImageSizeType typeHeight = BackgroundImageSizeType::LENGTH;
     if (width.Unit() == DimensionUnit::PERCENT) {
         typeWidth = BackgroundImageSizeType::PERCENT;
-        valueWidth = width.Value();
+        valueWidth = width.Value() * FULL_IMG_SIZE;
     }
     if (height.Unit() == DimensionUnit::PERCENT) {
         typeHeight = BackgroundImageSizeType::PERCENT;
-        valueHeight = height.Value();
+        valueHeight = height.Value() * FULL_IMG_SIZE;
     }
     imageSize.SetSizeTypeX(typeWidth);
     imageSize.SetSizeValueX(valueWidth);
