@@ -654,8 +654,6 @@ ArkUINativeModuleValue TextAreaBridge::SetShowCounter(ArkUIRuntimeCallInfo *runt
     Local<JSValueRef> showCounterArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     Local<JSValueRef> highlightBorderArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     Local<JSValueRef> thresholdArg = runtimeCallInfo->GetCallArgRef(NUM_3);
-    Local<JSValueRef> counterTextColorArg = runtimeCallInfo->GetCallArgRef(NUM_4);
-    Local<JSValueRef> counterTextOverflowColorArg = runtimeCallInfo->GetCallArgRef(NUM_5);
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     ArkUIShowCountOptions showCountOptions;
@@ -676,21 +674,10 @@ ArkUINativeModuleValue TextAreaBridge::SetShowCounter(ArkUIRuntimeCallInfo *runt
             showCountOptions.open = false;
         }
     }
-    Color counterTextColor;
-    Color counterTextOverflowColor;
     RefPtr<ResourceObject> resourceObjectTextColor;
     RefPtr<ResourceObject> resourceObjectTextOverflowColor;
-    auto textFieldTheme = ArkTSUtils::GetTheme<TextFieldTheme>();
-    CHECK_NULL_RETURN(textFieldTheme, panda::JSValueRef::Undefined(vm));
-    if (!ArkTSUtils::ParseColorMetricsToColor(vm, counterTextColorArg, counterTextColor, resourceObjectTextColor)) {
-        counterTextColor = textFieldTheme->GetCountTextStyle().GetTextColor();
-    }
-    if (!ArkTSUtils::ParseColorMetricsToColor(
-        vm, counterTextOverflowColorArg, counterTextOverflowColor, resourceObjectTextOverflowColor)) {
-        counterTextOverflowColor = textFieldTheme->GetOverCountTextStyle().GetTextColor();
-    }
-    showCountOptions.counterTextColor = counterTextColor.GetValue();
-    showCountOptions.counterTextOverflowColor = counterTextOverflowColor.GetValue();
+    TextInputBridge::ParseCounterTextColor(
+        runtimeCallInfo, &showCountOptions, resourceObjectTextColor, resourceObjectTextOverflowColor);
     GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaShowCounterOptions(nativeNode, &showCountOptions,
         AceType::RawPtr(resourceObjectTextColor), AceType::RawPtr(resourceObjectTextOverflowColor));
     return panda::JSValueRef::Undefined(vm);
