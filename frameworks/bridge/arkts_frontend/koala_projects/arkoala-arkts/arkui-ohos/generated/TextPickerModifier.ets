@@ -17,7 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
-import { AttributeModifier } from "#handwritten"
+import { AttributeModifier, hookTextPickerDivider } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkTextPickerPeer, TextPickerTextStyle, OnTextPickerChangeCallback, TextPickerScrollStopCallback, TextPickerEnterSelectedAreaCallback, DividerOptions, TextPickerAttribute } from "./component/textPicker"
@@ -272,7 +272,7 @@ export class TextPickerModifier extends CommonMethodModifier implements TextPick
         {
             switch (this._divider_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setDividerAttribute((this._divider_0_0value as DividerOptions | null | undefined));
+                    hookTextPickerDivider(peer, (this._divider_0_0value as DividerOptions | null | undefined));
                     this._divider_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -282,7 +282,7 @@ export class TextPickerModifier extends CommonMethodModifier implements TextPick
                 }
                 default: {
                     this._divider_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setDividerAttribute((undefined as DividerOptions | null | undefined));
+                     hookTextPickerDivider(peer, (undefined as DividerOptions | null | undefined));
                 }
             }
         }

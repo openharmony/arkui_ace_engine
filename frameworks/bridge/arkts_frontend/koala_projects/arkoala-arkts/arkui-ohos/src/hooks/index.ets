@@ -66,6 +66,7 @@ import { XComponentOpsHandWritten } from "./XComponentOpsHandWritten";
 import { PeerNode } from '../PeerNode';
 import { int32 } from "@koalaui/common";
 import { DrawModifier } from "arkui/component/common";
+import { ArkTextPickerComponent, ArkTextPickerPeer, DividerOptions } from "#generated";
 
 export function hookId(component: object, value?: string) {}
 
@@ -397,4 +398,26 @@ export function hookGetContext(peerPtr: OffscreenCanvas, contextType: string, op
 }
 export function hookWaterFlowOptionsImpl(node: ArkWaterFlowComponent, options: WaterFlowOptions | undefined): void {
     WaterFlowHandWritten.hookWaterFlowOptionsImpl(node, options)
+}
+export function hookTextPickerDivider(receiver: ArkTextPickerComponent | ArkTextPickerPeer,
+  value: DividerOptions | null | undefined): void {
+  const peer: ArkTextPickerPeer =
+    receiver instanceof ArkTextPickerComponent ? (receiver as ArkTextPickerComponent).getPeer() :
+      (receiver as ArkTextPickerPeer);
+  if (!peer) {
+    return;
+  }
+  if (value === null) {
+    const HIDDEN_DIVIDER: DividerOptions = {
+      strokeWidth: '0px',
+      startMargin: 0,
+      endMargin: 0,
+      color: '#00000000',
+    }
+    peer.setDividerAttribute(HIDDEN_DIVIDER)
+    return
+  }
+
+  const value_casted = value as (DividerOptions | null | undefined)
+  peer.setDividerAttribute(value_casted)
 }
