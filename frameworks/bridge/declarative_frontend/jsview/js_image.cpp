@@ -408,7 +408,7 @@ void JSImage::CreateImage(const JSCallbackInfo& info, bool isImageSpan)
     config.isImageSpan = isImageSpan;
     ImageModel::GetInstance()->Create(config);
     ParseImageAIOptions(info);
-    if (SystemProperties::ConfigChangePerform() && resObj) {
+    if (SystemProperties::ConfigChangePerform()) {
         ImageModel::GetInstance()->CreateWithResourceObj(ImageResourceType::SRC, resObj);
     }
 }
