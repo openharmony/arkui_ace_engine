@@ -2307,11 +2307,8 @@ ArkUINativeModuleValue FrameNodeBridge::AddSupportedStates(ArkUIRuntimeCallInfo*
                                                 containerId](int64_t currentState) {
         panda::LocalScope pandaScope(vm);
         ContainerScope scope(containerId);
-        auto container = Container::Current();
-        CHECK_NULL_VOID(container);
-        auto frontend = container->GetFrontend();
-        CHECK_NULL_VOID(frontend);
         auto function = func.Lock();
+        CHECK_NULL_VOID(!function.IsEmpty() && function->IsFunction(vm));
         Local<JSValueRef> stateValues = panda::NumberRef::New(vm, currentState);
         panda::Local<panda::JSValueRef> params[1] = { stateValues };
         function->Call(vm, function.ToLocal(), params, 1);
