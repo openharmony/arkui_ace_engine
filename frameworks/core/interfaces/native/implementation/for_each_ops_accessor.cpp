@@ -83,12 +83,6 @@ void SyncOnMoveOpsImpl(Ark_NativePointer node,
     ArkoalaForEachNode* forEachNode = AceType::DynamicCast<ArkoalaForEachNode>(uiNode);
     CHECK_NULL_VOID(forEachNode);
     CHECK_NULL_VOID(additionalChild);
-    for (int32_t i = 0; i < additionalChild->length; ++i) {
-        auto* childNode = reinterpret_cast<UINode*>(additionalChild->array[i]);
-        if (childNode) {
-            forEachNode->InitDragManager(AceType::DynamicCast<FrameNode>(childNode->GetFrameChildByIndex(0, true)));
-        }
-    }
     auto onMoveOpt = Converter::OptConvert<OnMoveHandler>(*onMoveOps);
     if (!onMoveOpt) {
         // enable user to disable onMove callback.
@@ -101,6 +95,12 @@ void SyncOnMoveOpsImpl(Ark_NativePointer node,
         auto arkTo = Converter::ArkValue<Ark_Int32>(to);
         callback.InvokeSync(arkFrom, arkTo);
     });
+    for (int32_t i = 0; i < additionalChild->length; ++i) {
+        auto* childNode = reinterpret_cast<UINode*>(additionalChild->array[i]);
+        if (childNode) {
+            forEachNode->InitDragManager(AceType::DynamicCast<FrameNode>(childNode->GetFrameChildByIndex(0, true)));
+        }
+    }
     // set drag event callback
     SyncItemDragEvent(forEachNode, onMoveDragEventOps);
 }
