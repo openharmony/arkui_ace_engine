@@ -13771,7 +13771,7 @@ typedef struct Opt_LayoutConstraint {
 typedef struct Ark_LengthMetrics {
     /* kind: Interface */
     Ark_LengthUnit unit;
-    Ark_Number value;
+    Ark_Float64 value;
 } Ark_LengthMetrics;
 typedef struct Opt_LengthMetrics {
     Ark_Tag tag;

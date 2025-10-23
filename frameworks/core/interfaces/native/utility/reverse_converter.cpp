@@ -202,7 +202,7 @@ void AssignArkValue(Ark_LengthMetrics& dst, const Dimension& src)
     auto unit = static_cast<int32_t>(src.Unit());
 
     dst.unit = static_cast<Ark_LengthUnit>(unit);
-    dst.value = Converter::ArkValue<Ark_Number>(value);
+    dst.value = Converter::ArkValue<Ark_Float64>(value);
 }
 
 void AssignArkValue(Ark_VisibleListContentInfo& dst, const ListItemIndex& src)
@@ -512,7 +512,7 @@ Ark_LengthMetrics ArkCreate(Ark_LengthUnit unit, float value)
 {
     return {
         .unit = unit,
-        .value = ArkValue<Ark_Number>(value),
+        .value = ArkValue<Ark_Float64>(value),
     };
 }
 
