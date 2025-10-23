@@ -369,8 +369,7 @@ OffsetF GestureEventHub::GetPixelMapOffset(const GestureEvent& info, const SizeF
         if (dragInfoData.isNeedCreateTiled) {
             result.SetX(-size.Width() / HALF_PIXELMAP);
             result.SetY(-size.Height() / HALF_PIXELMAP);
-        } else if (frameNode->GetDragPreviewOption().isTouchPointCalculationBasedOnFinalPreviewEnable ||
-            dragInfoData.isSceneBoardTouchDrag) {
+        } else if (frameNode->GetDragPreviewOption().isTouchPointCalculationBasedOnFinalPreviewEnable) {
             auto centerX = coordinateX + frameNodeSize_.Width() / HALF_PIXELMAP;
             auto centerY = coordinateY + frameNodeSize_.Height() / HALF_PIXELMAP;
             coordinateX = centerX - dragInfoData.dragPreviewRect.Width() / HALF_PIXELMAP;
@@ -379,6 +378,13 @@ OffsetF GestureEventHub::GetPixelMapOffset(const GestureEvent& info, const SizeF
             auto rateY = (info.GetGlobalLocation().GetY() - coordinateY) / dragInfoData.dragPreviewRect.Height();
             result.SetX(-rateX * size.Width());
             result.SetY(-rateY * size.Height());
+        } else if (dragInfoData.isSceneBoardTouchDrag) {
+            auto centerX = coordinateX + frameNodeSize_.Width() / HALF_PIXELMAP;
+            auto centerY = coordinateY + frameNodeSize_.Height() / HALF_PIXELMAP;
+            coordinateX = centerX - size.Width() / HALF_PIXELMAP;
+            coordinateY = centerY - size.Height() / HALF_PIXELMAP;
+            result.SetX(coordinateX - info.GetGlobalLocation().GetX());
+            result.SetY(coordinateY - info.GetGlobalLocation().GetY());
         } else {
             auto rateX = (info.GetGlobalLocation().GetX() - coordinateX) / frameNodeSize_.Width();
             auto rateY = (info.GetGlobalLocation().GetY() - coordinateY) / frameNodeSize_.Height();
