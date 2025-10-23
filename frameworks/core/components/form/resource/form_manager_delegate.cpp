@@ -193,10 +193,13 @@ int32_t FormManagerDelegate::OnSurfaceCreate(const AppExecFwk::FormJsInfo& formI
     bool needHandleCachedClick =
         want.GetBoolParam(OHOS::AppExecFwk::Constants::FORM_IS_RECOVER_FORM_TO_HANDLE_CLICK_EVENT, false);
     bool isRecover = recycleStatus_ != RecycleStatus::RECOVERED || needHandleCachedClick;
+    bool isStaticFormUpdateSize =
+        want.GetBoolParam(OHOS::AppExecFwk::Constants::FORM_IS_STATIC_FORM_UPDATE_SIZE, false);
     AAFwk::Want newWant;
     newWant.SetParam(OHOS::AppExecFwk::Constants::FORM_IS_DYNAMIC, formInfo.isDynamic);
     newWant.SetParam(OHOS::AppExecFwk::Constants::FORM_IS_RECOVER_FORM, isRecover);
     newWant.SetParam(OHOS::AppExecFwk::Constants::FORM_IS_RECOVER_FORM_TO_HANDLE_CLICK_EVENT, needHandleCachedClick);
+    newWant.SetParam(OHOS::AppExecFwk::Constants::FORM_IS_STATIC_FORM_UPDATE_SIZE, isStaticFormUpdateSize);
 
     std::lock_guard<std::mutex> lock(accessibilityChildTreeRegisterMutex_);
     onFormSurfaceNodeCallback_(rsSurfaceNode, newWant);

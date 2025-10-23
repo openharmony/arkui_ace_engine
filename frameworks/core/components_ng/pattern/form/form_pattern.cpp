@@ -1576,6 +1576,8 @@ void FormPattern::ProcDeleteImageNode(const AAFwk::Want& want)
     if (want.GetBoolParam(OHOS::AppExecFwk::Constants::FORM_IS_RECOVER_FORM, false)) {
         DelayDeleteImageNode(want.GetBoolParam(
             OHOS::AppExecFwk::Constants::FORM_IS_RECOVER_FORM_TO_HANDLE_CLICK_EVENT, false));
+    } else if (want.GetBoolParam(OHOS::AppExecFwk::Constants::FORM_IS_STATIC_FORM_UPDATE_SIZE, false)) {
+        RemoveFormChildNode(FormChildNodeType::FORM_STATIC_IMAGE_NODE);
     } else {
         DelayRemoveFormChildNode(FormChildNodeType::FORM_STATIC_IMAGE_NODE);
     }

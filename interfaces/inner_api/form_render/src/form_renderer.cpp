@@ -169,8 +169,7 @@ int32_t FormRenderer::AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppExec
         std::string statusData = want.GetStringParam(OHOS::AppExecFwk::Constants::FORM_STATUS_DATA);
         RecoverForm(statusData);
     }
-    return OnSurfaceCreate(formJsInfo, want.GetBoolParam(
-        OHOS::AppExecFwk::Constants::FORM_IS_RECOVER_FORM_TO_HANDLE_CLICK_EVENT, false));
+    return OnSurfaceCreate(formJsInfo, want);
 }
 
 void FormRenderer::PreInitAddForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
@@ -197,8 +196,7 @@ int32_t FormRenderer::RunFormPage(const OHOS::AAFwk::Want& want, const OHOS::App
         std::string statusData = want.GetStringParam(OHOS::AppExecFwk::Constants::FORM_STATUS_DATA);
         RecoverForm(statusData);
     }
-    return OnSurfaceCreate(formJsInfo, want.GetBoolParam(
-        OHOS::AppExecFwk::Constants::FORM_IS_RECOVER_FORM_TO_HANDLE_CLICK_EVENT, false));
+    return OnSurfaceCreate(formJsInfo, want);
 }
 
 void FormRenderer::ReloadForm(const std::string& url)
@@ -334,8 +332,7 @@ void FormRenderer::OnSurfaceChange(float width, float height, float borderWidth)
     borderWidth_ = borderWidth;
 }
 
-int32_t FormRenderer::OnSurfaceCreate(const OHOS::AppExecFwk::FormJsInfo& formJsInfo,
-    bool isRecoverFormToHandleClickEvent)
+int32_t FormRenderer::OnSurfaceCreate(const OHOS::AppExecFwk::FormJsInfo& formJsInfo, const OHOS::AAFwk::Want& want)
 {
     if (!formRendererDispatcherImpl_) {
         HILOG_ERROR("form renderer dispatcher is null!");
@@ -345,10 +342,16 @@ int32_t FormRenderer::OnSurfaceCreate(const OHOS::AppExecFwk::FormJsInfo& formJs
         HILOG_ERROR("form renderer delegate is null!");
         return ERR_APPEXECFWK_FORM_FORM_NODE_RELEASED;
     }
+    bool isRecoverFormToHandleClickEvent =
+        want.GetBoolParam(OHOS::AppExecFwk::Constants::FORM_IS_RECOVER_FORM_TO_HANDLE_CLICK_EVENT, false);
+    bool isStaticFormUpdateSize =
+        want.GetBoolParam(OHOS::AppExecFwk::Constants::FORM_IS_STATIC_FORM_UPDATE_SIZE, false);
     OHOS::AAFwk::Want newWant;
     newWant.SetParam(FORM_RENDERER_DISPATCHER, formRendererDispatcherImpl_->AsObject());
     newWant.SetParam(OHOS::AppExecFwk::Constants::FORM_IS_RECOVER_FORM_TO_HANDLE_CLICK_EVENT,
         isRecoverFormToHandleClickEvent);
+    newWant.SetParam(OHOS::AppExecFwk::Constants::FORM_IS_STATIC_FORM_UPDATE_SIZE,
+        isStaticFormUpdateSize);
 
     auto rsSurfaceNode = GetSurfaceNode();
     if (!rsSurfaceNode) {
