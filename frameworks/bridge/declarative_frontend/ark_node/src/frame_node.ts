@@ -724,6 +724,9 @@ class FrameNode extends Disposable {
     getUINativeModule().frameNode.removeSupportedStates(this.getNodePtr(), uiStates);
     __JSScopeUtil__.restoreInstanceId();
   }
+  isTransferred(): boolean {
+    return false;
+  }
 }
 
 class ImmutableFrameNode extends FrameNode {
