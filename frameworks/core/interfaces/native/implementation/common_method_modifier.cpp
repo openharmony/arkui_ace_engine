@@ -5196,6 +5196,7 @@ void SetBindPopupImpl(Ark_NativePointer node,
 }
 void BindMenuBase(Ark_NativePointer node,
     const Opt_Boolean *isShow,
+    const bool setShow,
     const Opt_Union_Array_MenuElement_CustomBuilder* content,
     const Opt_MenuOptions* options)
 {
@@ -5209,7 +5210,7 @@ void BindMenuBase(Ark_NativePointer node,
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     menuParam.isShowInSubWindow = theme->GetExpandDisplay();
-    menuParam.setShow = false;
+    menuParam.setShow = setShow;
     menuParam.isShow = Converter::OptConvertPtr<bool>(isShow).value_or(menuParam.isShow);
     auto menuOptions = Converter::OptConvertPtr<Ark_MenuOptions>(options);
     if (menuOptions) {
@@ -5233,21 +5234,23 @@ void BindMenuBase(Ark_NativePointer node,
                 ViewAbstractModelStatic::BindMenu(frameNode, {}, std::move(builder), menuParam);
                 }, node);
         },
-        []() {});
+        [frameNode, node, menuParam]() {
+            ViewAbstractModelStatic::BindMenu(frameNode, {}, nullptr, menuParam);
+        });
 }
 void SetBindMenu0Impl(Ark_NativePointer node,
                       const Opt_Union_Array_MenuElement_CustomBuilder* content,
                       const Opt_MenuOptions* options)
 {
     auto show = ArkValue<Opt_Boolean>(false);
-    BindMenuBase(node, &show, content, options);
+    BindMenuBase(node, &show, false, content, options);
 }
 void SetBindMenu1Impl(Ark_NativePointer node,
                       const Opt_Boolean* isShow,
                       const Opt_Union_Array_MenuElement_CustomBuilder* content,
                       const Opt_MenuOptions* options)
 {
-    BindMenuBase(node, isShow, content, options);
+    BindMenuBase(node, isShow, true, content, options);
 }
 void ParseContextMenuParam(MenuParam& menuParam, const std::optional<Ark_ContextMenuOptions>& menuOption,
     const ResponseType type, Ark_NativePointer node)
