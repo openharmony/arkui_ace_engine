@@ -322,7 +322,10 @@ NG::OffsetF FolderStackLayoutAlgorithm::CalculateStackAlignment(
 bool FolderStackLayoutAlgorithm::IsIntoFolderStack(
     SizeF& frameSize, const RefPtr<FolderStackLayoutProperty>& foldStackLayoutProperty, LayoutWrapper* layoutWrapper)
 {
-    auto pattern = layoutWrapper->GetHostNode()->GetPattern<FolderStackPattern>();
+    CHECK_NULL_RETURN(layoutWrapper, false);
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, false);
+    auto pattern = host->GetPattern<FolderStackPattern>();
     CHECK_NULL_RETURN(pattern, false);
     CHECK_NULL_RETURN(!pattern->HasFoldStatusDelayTask(), false);
     auto displayInfo = pattern->GetDisplayInfo();
@@ -349,15 +352,16 @@ bool FolderStackLayoutAlgorithm::IsIntoFolderStack(
 
 void FolderStackLayoutAlgorithm::OnHoverStatusChange(LayoutWrapper* layoutWrapper)
 {
-    auto pattern = layoutWrapper->GetHostNode()->GetPattern<FolderStackPattern>();
+    CHECK_NULL_VOID(layoutWrapper);
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern<FolderStackPattern>();
     CHECK_NULL_VOID(pattern);
     if (isIntoFolderStack_ == pattern->IsInHoverMode() ||
         (!OHOS::Ace::SystemProperties::IsBigFoldProduct() && !OHOS::Ace::SystemProperties::IsSmallFoldProduct())) {
         return;
     }
     auto eventHub = layoutWrapper->GetHostNode()->GetEventHub<FolderStackEventHub>();
-    auto host = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto windowManager = pipeline->GetWindowManager();
