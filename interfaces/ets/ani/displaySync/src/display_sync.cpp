@@ -165,21 +165,15 @@ void ParseExpectedFrameRateRange(ani_env* env, ani_object objOption,
         return;
     }
 
-    ani_double minAni;
-    ani_double maxAni;
-    ani_double expectedAni;
-    if (ANI_OK != env->Object_CallMethod_Double(objOption, gGetMin, &minAni)) {
+    if (ANI_OK != env->Object_CallMethod_Int(objOption, gGetMin, &frameRateRange.min_)) {
         return;
     }
-    if (ANI_OK != env->Object_CallMethod_Double(objOption, gGetMax, &maxAni)) {
+    if (ANI_OK != env->Object_CallMethod_Int(objOption, gGetMax, &frameRateRange.max_)) {
         return;
     }
-    if (ANI_OK != env->Object_CallMethod_Double(objOption, gGetExpected, &expectedAni)) {
+    if (ANI_OK != env->Object_CallMethod_Int(objOption, gGetExpected, &frameRateRange.preferred_)) {
         return;
     }
-    frameRateRange.min_ = static_cast<int32_t>(minAni);
-    frameRateRange.max_ = static_cast<int32_t>(maxAni);
-    frameRateRange.preferred_ = static_cast<int32_t>(expectedAni);
     if (!frameRateRange.IsValid()) {
         ani_object error = CreateError(env, EXPECTED_FRAME_RATE_RANGE_ERROR_CODE, "ExpectedFrameRateRange error");
         if (error != nullptr) {
@@ -220,11 +214,8 @@ ani_object createIntervalInfo(ani_env* env, int64_t timestamp, int64_t targetTim
     return intervalInfoObj;
 }
 
-static void JSOnFrame_On(ani_env* env, ani_object obj, ani_string callbackType, ani_object callbackObj)
+static void JSOnFrame_On(ani_env* env, ani_object obj, ani_object callbackObj)
 {
-    if (ANIUtils_ANIStringToStdString(env, callbackType) != "frame") {
-        return;
-    }
     auto displaySync = GetDisplaySync(env, obj);
     if (displaySync == nullptr) {
         return;
@@ -254,11 +245,8 @@ static void JSOnFrame_On(ani_env* env, ani_object obj, ani_string callbackType, 
     });
 }
 
-static void JSOnFrame_Off(ani_env* env, ani_object obj, ani_string callbackType, ani_object callbackObj)
+static void JSOnFrame_Off(ani_env* env, ani_object obj, ani_object callbackObj)
 {
-    if (ANIUtils_ANIStringToStdString(env, callbackType) != "frame") {
-        return;
-    }
     auto displaySync = GetDisplaySync(env, obj);
     if (displaySync == nullptr) {
         return;
@@ -346,8 +334,8 @@ ani_status BindDisplaySync(ani_env* env)
     }
 
     std::array methods = {
-        ani_native_function{"on", nullptr, reinterpret_cast<void*>(JSOnFrame_On)},
-        ani_native_function{"off", nullptr, reinterpret_cast<void*>(JSOnFrame_Off)},
+        ani_native_function{"onFrame", nullptr, reinterpret_cast<void*>(JSOnFrame_On)},
+        ani_native_function{"offFrame", nullptr, reinterpret_cast<void*>(JSOnFrame_Off)},
         ani_native_function{"start", nullptr, reinterpret_cast<void*>(JSStart)},
         ani_native_function{"stop", nullptr, reinterpret_cast<void*>(JSStop)},
         ani_native_function{"setExpectedFrameRateRange", nullptr,
