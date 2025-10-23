@@ -46,7 +46,7 @@ ani_long GetNativePtrFromMethod(ani_env* env, ani_object obj, const char* method
 }
 ani_long ExtractorsToRectShapePtr(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_object obj)
 {
-    return GetPropertyName(env, obj, "rectShapeResult");
+    return GetPropertyName(env, obj, "basicShapeResult");
 }
 
 ani_object ExtractorsFromRectShapePtr(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr)
@@ -56,7 +56,7 @@ ani_object ExtractorsFromRectShapePtr(ani_env* env, [[maybe_unused]] ani_object 
 
 ani_long ExtractorsToCircleShapePtr(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_object obj)
 {
-    return GetPropertyName(env, obj, "circleShapeResult");
+    return GetPropertyName(env, obj, "basicShapeResult");
 }
 
 ani_object ExtractorsFromCircleShapePtr(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr)
@@ -66,7 +66,7 @@ ani_object ExtractorsFromCircleShapePtr(ani_env* env, [[maybe_unused]] ani_objec
 
 ani_long ExtractorsToEllipseShapePtr(ani_env* env, ani_object aniClass, ani_object obj)
 {
-    return GetPropertyName(env, obj, "ellipseShapeResult");
+    return GetPropertyName(env, obj, "basicShapeResult");
 }
 ani_object ExtractorsFromEllipseShapePtr(ani_env* env, ani_object aniClass, ani_long ptr)
 {
@@ -74,7 +74,7 @@ ani_object ExtractorsFromEllipseShapePtr(ani_env* env, ani_object aniClass, ani_
 }
 ani_long ExtractorsToPathShapePtr(ani_env* env, ani_object aniClass, ani_object obj)
 {
-    return GetPropertyName(env, obj, "pathShapeResult");
+    return GetPropertyName(env, obj, "basicShapeResult");
 }
 ani_object ExtractorsFromPathShapePtr(ani_env* env, ani_object aniClass, ani_long ptr)
 {
