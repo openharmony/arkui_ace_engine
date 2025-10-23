@@ -5997,10 +5997,10 @@ typedef struct Opt_SideBarPosition {
     Ark_SideBarPosition value;
 } Opt_SideBarPosition;
 typedef enum Ark_SlideEffect {
-    ARK_SLIDE_EFFECT_LEFT = 0,
-    ARK_SLIDE_EFFECT_RIGHT = 1,
-    ARK_SLIDE_EFFECT_TOP = 2,
-    ARK_SLIDE_EFFECT_BOTTOM = 3,
+    ARK_SLIDE_EFFECT_LEFT = 1,
+    ARK_SLIDE_EFFECT_RIGHT = 2,
+    ARK_SLIDE_EFFECT_TOP = 3,
+    ARK_SLIDE_EFFECT_BOTTOM = 4,
     ARK_SLIDE_EFFECT_START = 5,
     ARK_SLIDE_EFFECT_END = 6,
 } Ark_SlideEffect;
