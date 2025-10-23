@@ -2521,6 +2521,7 @@ void TabBarPattern::PlayTabBarTranslateAnimation(AnimationOption option, float t
     auto host = GetHost();
 
     currentOffset_ = 0.0f;
+    CHECK_NULL_VOID(host);
     host->CreateAnimatablePropertyFloat(TAB_BAR_PROPERTY_NAME, 0, [weak](float value) {
         auto tabBarPattern = weak.Upgrade();
         CHECK_NULL_VOID(tabBarPattern);
