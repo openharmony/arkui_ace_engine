@@ -236,7 +236,7 @@ private:
     void FireMediaPlayerImageComplete();
     void FireMediaPlayerImageError();
     void OnMediaPlayerStatusChanged(PlaybackStatus status);
-    void OnMediaPlayerInitialized();S
+    void OnMediaPlayerInitialized();
     void OnMediaPlayerPrepared();
     void OnMediaPlayerStoped();
     void OnMediaPlayerCompletion();
