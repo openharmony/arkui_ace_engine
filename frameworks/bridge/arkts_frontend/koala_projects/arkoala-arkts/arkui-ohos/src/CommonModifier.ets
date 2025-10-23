@@ -16,16 +16,29 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { int32, int64, float32 } from "@koalaui/common"
-import {CommonAttribute, AttributeModifier } from  "./component/common"
-import { KInt, KPointer, KBoolean, NativeBuffer, KStringPtr } from "@koalaui/interop"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
+import { mutableState, MutableState } from '@koalaui/runtime'
+import {CommonAttribute, AttributeModifier } from  './component/common'
 import { CommonMethodModifier } from './CommonMethodModifier'
+
 export class CommonModifier extends CommonMethodModifier implements CommonAttribute,AttributeModifier<CommonAttribute> {
     applyNormalAttribute(instance: CommonAttribute): void {}
     applyPressedAttribute(instance: CommonAttribute): void {}
     applyFocusedAttribute(instance: CommonAttribute): void {}
     applyDisabledAttribute(instance: CommonAttribute): void {}
     applySelectedAttribute(instance: CommonAttribute): void {}
+}
+
+export interface IModifierState {
+    addRef(): void;
+    fireChange(): void;
+}
+
+export class ModifierState implements IModifierState {
+    _state: MutableState<int> = mutableState(0);
+    addRef(): void {
+        this._state.value;
+    }
+    fireChange(): void {
+        ++this._state.value;
+    }
 }
