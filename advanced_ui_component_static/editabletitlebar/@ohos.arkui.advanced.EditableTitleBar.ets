@@ -37,7 +37,6 @@ import { State, Observed, Prop, PropRef, StorageProp, StorageLink, Provide, Cons
 import { Configuration } from '@ohos.app.ability.Configuration';
 import AbilityConstant from '@ohos.app.ability.AbilityConstant';
 import ApplicationContext from 'application.ApplicationContext';
-import ApplicationContext from 'application.ApplicationContext';
 
 export enum EditableLeftIconType {
   Back,
@@ -206,11 +205,8 @@ export struct EditableTitleBar {
   private isFollowingSystemFontScale: boolean = false;
   private maxFontScale: number = 1;
   private systemFontScale?: number = 1;
-  @Observed
   @Provide editableTitleBarTheme: EditableTitleBarTheme = new EditableTitleBarTheme();
-  @Observed
-  @PropRef contentMargin?: LocalizedMargin;
-  @Observed
+  @PropRef contentMargin: LocalizedMargin | undefined = undefined;
   @State titleBarMargin: LocalizedMargin = {
     start: LengthMetrics.resource($r('sys.float.margin_left')),
     end: LengthMetrics.resource($r('sys.float.margin_right')),
@@ -431,8 +427,8 @@ struct EditableTitleBarMenuSection {
   onSave?: () => void;
   isSaveEnabled: boolean = true;
   saveIconDefaultFocus?: boolean = false;
-  @Prop fontSize: number = 1;
-  @Prop parentUniqueId?: number;
+  @PropRef fontSize: number = 1;
+  @PropRef parentUniqueId: number | undefined = undefined;
 
   build() {
     Column() {
@@ -497,7 +493,6 @@ struct ImageMenuItem {
   @State isOnHover: boolean = false;
   @State isOnClick: boolean = false;
   imageMenuItemId?: string;
-  @Observed
   @Consume editableTitleBarTheme: EditableTitleBarTheme = new EditableTitleBarTheme();
   dialogController: CustomDialogController | null = new CustomDialogController({
     builder: EditableTitleBarDialog({
@@ -908,7 +903,7 @@ struct EditableTitleBarDialog {
   }
   confirm: () => void = () => {
   }
-  @Prop fontSize: number = 1;
+  @PropRef fontSize: number = 1;
   @State maxLines: int = 1;
   @StorageProp('windowStandardHeight') windowStandardHeight: number = 0;
 
