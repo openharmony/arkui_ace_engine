@@ -38,6 +38,10 @@
 #include "core/components_ng/pattern/video/video_full_screen_pattern.h"
 #include "core/components_ng/property/gradient_property.h"
 
+#ifdef ENABLE_ROSEN_BACKEND
+#include "core/components_ng/render/adapter/rosen_render_context.h"
+#endif
+
 #ifdef RENDER_EXTRACT_SUPPORTED
 #include "core/common/ace_view.h"
 #endif
@@ -1031,6 +1035,18 @@ void VideoPattern::OnAttachToMainTree()
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddWindowStateChangedCallback(hostId_);
+#ifdef ENABLE_ROSEN_BACKEND
+    auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(renderContextForMediaPlayer_);
+    multiThreadModifier_ = multiThreadModifier_ == nullptr ?
+        std::make_shared<Rosen::ModifierNG::RSFrameClipModifier>() :
+        multiThreadModifier_;
+    CHECK_NULL_VOID(multiThreadModifier_);
+    multiThreadModifier_->SetFrameGravity(Rosen::Gravity::RESIZE);
+    multiThreadModifier_->SetClipToFrame(true);
+    std::shared_ptr<Rosen::RSNode> rsNode = rosenRenderContext->GetRSNode();
+    CHECK_NULL_VOID(rsNode);
+    rsNode->AddModifier(multiThreadModifier_);
+#endif
 }
 
 void VideoPattern::OnDetachFromMainTree()
