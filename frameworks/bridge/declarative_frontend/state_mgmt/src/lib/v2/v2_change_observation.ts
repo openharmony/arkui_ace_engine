@@ -1507,6 +1507,7 @@ class ObserveV2 {
     }
     const elmtIds = Array.from(this.elmtIdsChanged_).sort((id1, id2) => id1 - id2);
     this.updateUINodes(elmtIds);
+    this.elmtIdsChanged_.clear();
   }
 
 } // class ObserveV2
