@@ -32,10 +32,7 @@ void ImageAnimatorComponent::SetIteration(int32_t iteration)
 
 void ImageAnimatorComponent::SetImage(std::vector<ArkUI_ImageAnimatorFrameInfo*>& vector)
 {
-    ArkUI_AttributeItem item = { 
-        .size = static_cast<int32_t>(vector.size()), 
-        .object =_cast<void*>(vector.data()) 
-    };
+    ArkUI_AttributeItem item = { .size = static_cast<int32_t>(vector.size()), .object = _cast<void*>(vector.data()) };
     _nodeAPI->setAttribute(_component, NODE_IMAGE_ANIMATOR_IMAGES, &item);
 }
 

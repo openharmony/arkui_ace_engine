@@ -14,6 +14,7 @@
  */
 
 #include "components/component.h"
+
 #include <string>
 
 namespace ArkUICApiDemo {
@@ -79,10 +80,10 @@ void Component::SetPercentHeight(float percent)
     ArkUI_AttributeItem item = { value, 1 };
     _nodeAPI->setAttribute(_component, NODE_HEIGHT_PERCENT, &item);
 }
-void Component::SetLayoutRect(int32_t x, int32_t y, int32_t width, int32_t height) {
-    ArkUI_NumberValue layoutRect_value[] = {
-        {.i32 = x}, {.i32 = y}, {.i32 = width}, {.i32 = height}};
-    ArkUI_AttributeItem layoutRect_item = {layoutRect_value, 4};
+void Component::SetLayoutRect(int32_t x, int32_t y, int32_t width, int32_t height)
+{
+    ArkUI_NumberValue layoutRect_value[] = { { .i32 = x }, { .i32 = y }, { .i32 = width }, { .i32 = height } };
+    ArkUI_AttributeItem layoutRect_item = { layoutRect_value, 4 };
     _nodeAPI->setAttribute(_component, NODE_LAYOUT_RECT, &layoutRect_item);
 }
 void Component::SetBackgroundColor(uint32_t color)
@@ -293,7 +294,7 @@ void Component::ProcessNodeEvent(ArkUI_NodeEvent* event)
 
 void Component::RegisterOnClick(const std::function<void()>& onClick)
 {
-    auto onClickCallback = [onClick](ArkUI_NodeEvent*){
+    auto onClickCallback = [onClick](ArkUI_NodeEvent*) {
         if (onClick) {
             onClick();
         }
@@ -304,7 +305,7 @@ void Component::RegisterOnClick(const std::function<void()>& onClick)
 
 void Component::RegisterOnTouch(const std::function<void(ArkUI_NodeEvent* event)>& onTouch)
 {
-    auto onTouchCallback = [onTouch](ArkUI_NodeEvent* event){
+    auto onTouchCallback = [onTouch](ArkUI_NodeEvent* event) {
         if (onTouch) {
             onTouch(event);
         }
@@ -315,7 +316,7 @@ void Component::RegisterOnTouch(const std::function<void(ArkUI_NodeEvent* event)
 
 void Component::RegisterOnDisappear(const std::function<void()>& onDisappear)
 {
-    auto onDisappearCallback = [onDisappear](ArkUI_NodeEvent*){
+    auto onDisappearCallback = [onDisappear](ArkUI_NodeEvent*) {
         if (onDisappear) {
             onDisappear();
         }
@@ -326,8 +327,7 @@ void Component::RegisterOnDisappear(const std::function<void()>& onDisappear)
 
 void Component::RegisterOnAppear(const std::function<void()>& onAppear)
 {
-    auto onAppearCallback = [onAppear](ArkUI_NodeEvent*)
-    {
+    auto onAppearCallback = [onAppear](ArkUI_NodeEvent*) {
         if (onAppear) {
             onAppear();
         }
@@ -337,8 +337,7 @@ void Component::RegisterOnAppear(const std::function<void()>& onAppear)
 }
 void Component::RegisterOnHover(const std::function<void(bool isHover)>& onHover)
 {
-    auto onHoverCallback = [onHover](ArkUI_NodeEvent* event)
-    {
+    auto onHoverCallback = [onHover](ArkUI_NodeEvent* event) {
         if (onHover) {
             OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, "commonEvent", "NODE_ON_HOVER");
             ArkUI_NodeComponentEvent* result = OH_ArkUI_NodeEvent_GetNodeComponentEvent(event);
@@ -351,7 +350,7 @@ void Component::RegisterOnHover(const std::function<void(bool isHover)>& onHover
 }
 void Component::RegisterOnMouse(const std::function<void(ArkUI_NodeEvent* event)>& onMouse)
 {
-    auto onMouseCallback = [onMouse](ArkUI_NodeEvent* event){
+    auto onMouseCallback = [onMouse](ArkUI_NodeEvent* event) {
         if (onMouse) {
             onMouse(event);
         }
@@ -361,8 +360,7 @@ void Component::RegisterOnMouse(const std::function<void(ArkUI_NodeEvent* event)
 }
 void Component::RegisterOnTouchIntercept(const std::function<void(ArkUI_NodeEvent* event)>& onTouchIntercept)
 {
-    auto onTouchInterceptCallback = [onTouchIntercept](ArkUI_NodeEvent* event)
-    {
+    auto onTouchInterceptCallback = [onTouchIntercept](ArkUI_NodeEvent* event) {
         if (onTouchIntercept) {
             onTouchIntercept(event);
         }
@@ -372,7 +370,7 @@ void Component::RegisterOnTouchIntercept(const std::function<void(ArkUI_NodeEven
 }
 void Component::RegisterOnFocus(const std::function<void()>& onFocus)
 {
-    auto onFocusCallback = [onFocus](ArkUI_NodeEvent*){
+    auto onFocusCallback = [onFocus](ArkUI_NodeEvent*) {
         if (onFocus) {
             onFocus();
         }
@@ -391,8 +389,7 @@ void Component::RegisterOnVisibleAreaChange(
     }
     ArkUI_AttributeItem item = { value, static_cast<int32_t>(ratioArray.size()) };
 
-    auto onVisibleAreaChangeCallback = [onVisibleAreaChange](ArkUI_NodeEvent* event)
-    {
+    auto onVisibleAreaChangeCallback = [onVisibleAreaChange](ArkUI_NodeEvent* event) {
         if (onVisibleAreaChange) {
             OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, "commonEvent", "NODE_EVENT_ON_VISIBLE_AREA_CHANGE");
             ArkUI_NodeComponentEvent* result = OH_ArkUI_NodeEvent_GetNodeComponentEvent(event);
