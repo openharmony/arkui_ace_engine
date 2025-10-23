@@ -2,9 +2,9 @@
 import { Color}  from './arkui.component.enums';
 
 import { Resource } from 'global.resource'
-export type Length = number | string | Resource;
+export type Length = double | string | Resource;
 
-export type ResourceColor = Color | number | string | Resource;
+export type ResourceColor = Color | int | string | Resource;
 
 export interface SizeOptions {
 

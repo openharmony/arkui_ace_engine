@@ -57,6 +57,19 @@ bool GetIsNumberObject(ani_env* env, ani_ref object_ref)
     return (bool)isNumber;
 }
 
+bool GetIsIntObject(ani_env* env, ani_ref object_ref)
+{
+    ani_class intClass;
+    if (ANI_OK != env->FindClass("std.core.Int", &intClass)) {
+        return false;
+    }
+    ani_boolean result;
+    if (ANI_OK != env->Object_InstanceOf(static_cast<ani_object>(object_ref), intClass, &result)) {
+        return false;
+    }
+    return static_cast<bool>(result);
+}
+
 bool GetIsUndefinedObject(ani_env* env, ani_ref object_ref)
 {
     ani_boolean isUndefined;
@@ -829,12 +842,10 @@ bool ParseAniColor(ani_env* env, ani_ref resourceColor_ref, OHOS::Ace::Color& re
         }
         return true;
     }
-    if (GetIsNumberObject(env, resourceColor_ref)) {
-        ani_double resourceColorValue;
-        if (ANI_OK != env->Object_CallMethodByName_Double(static_cast<ani_object>(resourceColor_ref), 
-                                                          "toDouble", 
-                                                          ":d", 
-                                                          &resourceColorValue)) {
+    if (GetIsIntObject(env, resourceColor_ref)) {
+        ani_int resourceColorValue;
+        if (ANI_OK != env->Object_CallMethodByName_Int(
+                          static_cast<ani_object>(resourceColor_ref), "toInt", ":i", &resourceColorValue)) {
             return false;
         }
         resourceColor = static_cast<OHOS::Ace::Color>(resourceColorValue);

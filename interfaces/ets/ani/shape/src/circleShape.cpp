@@ -23,15 +23,19 @@ const char* ANI_SHAPE_NAME = "@ohos.arkui.shape.CircleShape";
 void ANICreateCircleShape(ani_env* env, [[maybe_unused]] ani_object object)
 {
     ani_class cls;
-    if (ANI_OK != env->FindClass(ANI_SHAPE_NAME, &cls)) {
+    ani_status status;
+    if ((status = env->FindClass(ANI_SHAPE_NAME, &cls)) != ANI_OK) {
+        LOGE("Not find CircleShape class, status:%{public}d", status);
         return;
     }
     CirclePeer* shapePeer = new CirclePeer();
     auto circle = AceType::MakeRefPtr<Circle>();
     shapePeer->circleShape = circle;
 
-    if (ANI_OK !=
-        env->Object_SetPropertyByName_Long(object, "basicShapeResult", reinterpret_cast<ani_long>(shapePeer))) {
+    if ((status = env->Object_SetPropertyByName_Long(
+             object, "basicShapeResult", reinterpret_cast<ani_long>(shapePeer))) != ANI_OK) {
+        LOGE("CircleShape set addr failed, status:%{public}d", status);
+        delete shapePeer;
         return;
     }
 }
@@ -59,8 +63,11 @@ void ANICreateCircleShapeWithParam(ani_env* env, [[maybe_unused]] ani_object obj
     }
     shapePeer->circleShape = circle;
 
-    if (ANI_OK !=
-        env->Object_SetPropertyByName_Long(object, "basicShapeResult", reinterpret_cast<ani_long>(shapePeer))) {
+    ani_status status;
+    if ((status = env->Object_SetPropertyByName_Long(
+             object, "basicShapeResult", reinterpret_cast<ani_long>(shapePeer))) != ANI_OK) {
+        LOGE("CircleShape set addr failed, status:%{public}d", status);
+        delete shapePeer;
         return;
     }
 }

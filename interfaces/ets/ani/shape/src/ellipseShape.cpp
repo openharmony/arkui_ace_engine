@@ -23,15 +23,19 @@ const char* ANI_SHAPE_NAME = "@ohos.arkui.shape.EllipseShape";
 void ANICreateEllipseShape(ani_env* env, [[maybe_unused]] ani_object object)
 {
     ani_class cls;
-    if (ANI_OK != env->FindClass(ANI_SHAPE_NAME, &cls)) {
+    ani_status status;
+    if ((status = env->FindClass(ANI_SHAPE_NAME, &cls)) != ANI_OK) {
+        LOGE("Not find EllipseShape class, status:%{public}d", status);
         return;
     }
     EllipsePeer* shapePeer = new EllipsePeer();
     auto ellipse = AceType::MakeRefPtr<Ellipse>();
     shapePeer->ellipseShape = ellipse;
 
-    if (ANI_OK !=
-        env->Object_SetPropertyByName_Long(object, "basicShapeResult", reinterpret_cast<ani_long>(shapePeer))) {
+    if ((status = env->Object_SetPropertyByName_Long(
+             object, "basicShapeResult", reinterpret_cast<ani_long>(shapePeer))) != ANI_OK) {
+        LOGE("EllipseShape set addr failed, status:%{public}d", status);
+        delete shapePeer;
         return;
     }
 }
@@ -61,8 +65,11 @@ void ANICreateEllipseShapeWithParam(
         ellipse->SetHeight(height.value());
     }
     shapePeer->ellipseShape = ellipse;
-    if (ANI_OK !=
-        env->Object_SetPropertyByName_Long(object, "basicShapeResult", reinterpret_cast<ani_long>(shapePeer))) {
+    ani_status status;
+    if ((status = env->Object_SetPropertyByName_Long(
+             object, "basicShapeResult", reinterpret_cast<ani_long>(shapePeer))) != ANI_OK) {
+        LOGE("EllipseShape set addr failed, status:%{public}d", status);
+        delete shapePeer;
         return;
     }
 }
