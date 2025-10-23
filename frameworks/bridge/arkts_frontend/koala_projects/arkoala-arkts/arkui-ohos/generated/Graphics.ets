@@ -109,12 +109,26 @@ export class Size_serializer {
 export class ColorMetrics_serializer {
     public static write(buffer: SerializerBase, value: ColorMetrics): void {
         let valueSerializer : SerializerBase = buffer
-        valueSerializer.writePointer(extractors.toColorMetricsPtr(value))
+        const valueHolderForRed_  = value.red_
+        valueSerializer.writeInt32(valueHolderForRed_)
+        const valueHolderForGreen_  = value.green_
+        valueSerializer.writeInt32(valueHolderForGreen_)
+        const valueHolderForBlue_  = value.blue_
+        valueSerializer.writeInt32(valueHolderForBlue_)
+        const valueHolderForAlpha_  = value.alpha_
+        valueSerializer.writeInt32(valueHolderForAlpha_)
+        const valueHolderForResourceId_  = value.resourceId_
+        valueSerializer.writeNumber(valueHolderForResourceId_)
     }
     public static read(buffer: DeserializerBase): ColorMetrics {
         let valueDeserializer : DeserializerBase = buffer
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return extractors.fromColorMetricsPtr(ptr)
+        const red_TmpResult : int32 = valueDeserializer.readInt32()
+        const green_TmpResult : int32 = valueDeserializer.readInt32()
+        const blue_TmpResult : int32 = valueDeserializer.readInt32()
+        const alpha_TmpResult : int32 = valueDeserializer.readInt32()
+        const resourceId_TmpResult : number = (valueDeserializer.readNumber() as number)
+        let value : ColorMetrics = ({red_: red_TmpResult, green_: green_TmpResult, blue_: blue_TmpResult, alpha_: alpha_TmpResult, resourceId_: resourceId_TmpResult} as ColorMetrics)
+        return value
     }
 }
 export class Corners_F64_serializer {

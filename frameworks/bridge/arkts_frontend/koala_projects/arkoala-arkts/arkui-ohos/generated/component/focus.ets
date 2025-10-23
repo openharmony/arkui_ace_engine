@@ -20,7 +20,6 @@ import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { KInt, KPointer, KBoolean, NativeBuffer, KStringPtr, SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, runtimeType, toPeerPtr, nullptr, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { extractors } from "#handwritten"
 import { LengthMetrics, ColorMetrics } from "arkui.Graphics"
 import { LengthMetrics_serializer, ColorMetrics_serializer } from "./../Graphics"
 import { TypeChecker } from "#components"
@@ -78,7 +77,7 @@ export class FocusBoxStyle_serializer {
         const strokeColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let strokeColorTmpBuf : ColorMetrics | undefined = undefined
         if ((strokeColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            strokeColorTmpBuf = (ColorMetrics_serializer.read(valueDeserializer) as ColorMetrics)
+            strokeColorTmpBuf = ColorMetrics_serializer.read(valueDeserializer)
         }
         const strokeColorTmpResult : ColorMetrics | undefined = strokeColorTmpBuf
         const strokeWidthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()

@@ -1781,8 +1781,7 @@ typedef struct Ark_CloseSwipeActionOptions Ark_CloseSwipeActionOptions;
 typedef struct Opt_CloseSwipeActionOptions Opt_CloseSwipeActionOptions;
 typedef struct Ark_ColorFilterType Ark_ColorFilterType;
 typedef struct Opt_ColorFilterType Opt_ColorFilterType;
-typedef struct ColorMetricsPeer ColorMetricsPeer;
-typedef struct ColorMetricsPeer* Ark_ColorMetrics;
+typedef struct Ark_ColorMetrics Ark_ColorMetrics;
 typedef struct Opt_ColorMetrics Opt_ColorMetrics;
 typedef struct Ark_ColumnOptions Ark_ColumnOptions;
 typedef struct Opt_ColumnOptions Opt_ColumnOptions;
@@ -12917,6 +12916,14 @@ typedef struct Opt_ColorFilterType {
     Ark_Tag tag;
     Ark_ColorFilterType value;
 } Opt_ColorFilterType;
+typedef struct Ark_ColorMetrics {
+    /* kind: Interface */
+    Ark_Int32 red_;
+    Ark_Int32 green_;
+    Ark_Int32 blue_;
+    Ark_Int32 alpha_;
+    Ark_Number resourceId_;
+} Ark_ColorMetrics;
 typedef struct Opt_ColorMetrics {
     Ark_Tag tag;
     Ark_ColorMetrics value;
