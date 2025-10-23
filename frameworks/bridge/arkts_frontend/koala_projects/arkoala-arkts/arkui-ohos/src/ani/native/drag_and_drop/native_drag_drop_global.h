@@ -45,8 +45,6 @@ void DragSetDragPreviewOptions([[maybe_unused]] ani_env* env, [[maybe_unused]] a
     [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object value, [[maybe_unused]] ani_object options);
 
 //utils
-ani_object CreateImagePeer(ani_env* env, void* ptr);
-ani_object CreateImageModifier(ani_env* env);
 void SetPropertyValueByName(ani_env* env, ani_object obj, std::string name, bool& target);
 bool ParsePreviewOptionMode(ani_env* env, ArkUIDragPreviewOption& previewOptions,
     ani_object dragPreviewMode, bool& isAuto);
