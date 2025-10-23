@@ -25,7 +25,7 @@
 namespace {
 // constexpr const char DENSITY_CHNAGE[] = "densityUpdate";
 const char ANI_OBSERVER_NS[] = "@ohos.arkui.observer.uiObserver";
-const char ANI_OBSERVER_CLS[] = "@ohos.arkui.observer.uiObserver.UIObserverImpl";
+const char ANI_OBSERVER_CLS[] = "@ohos.arkui.observer.uiObserver.UIObserver";
 constexpr char ANI_NAVDESTINATION_INFO_CLS[] = "@ohos.arkui.observer.uiObserver.NavDestinationInfoImpl";
 constexpr char ANI_NAVDESTINATION_STATE_TYPE[] = "@ohos.arkui.observer.uiObserver.NavDestinationState";
 constexpr char ANI_NAVDESTINATION_MODE_TYPE[] = "arkui.component.navDestination.NavDestinationMode";

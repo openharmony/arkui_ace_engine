@@ -33,56 +33,7 @@ import hilog from '@ohos.hilog'
     export class DensityInfo {
         density: number;
     }
-    export default interface UIObserver
-    {
-        on(type: string, callback: object) : void;
-        off(type: string, callback?: object) : void;
-        on(type: string, options: NavDestinationSwitchObserverOptions, callback: object): void;
-        off(type: string, options: NavDestinationSwitchObserverOptions, callback?: object): void;
-
-        onScrollEvent(options: ObserverOptions, callback: Callback<ScrollEventInfo>): void;
-        offScrollEvent(options: ObserverOptions, callback: Callback<ScrollEventInfo>): void;
-        onScrollEvent(callback: Callback<ScrollEventInfo>): void;
-        offScrollEvent(callback: Callback<ScrollEventInfo>): void;
-
-        onNavDestinationUpdate(callback: Callback<NavDestinationInfo>): void;
-        offNavDestinationUpdate(callback?: Callback<NavDestinationInfo>): void;
-        onNavDestinationUpdate(
-            options: NavDestinationSwitchObserverOptions,
-            callback: Callback<NavDestinationInfo>
-        ): void;
-        offNavDestinationUpdate(
-            options: NavDestinationSwitchObserverOptions,
-            callback?: Callback<NavDestinationInfo>
-        ): void;
-        onRouterPageUpdate(callback: Callback<RouterPageInfo>): void;
-        offRouterPageUpdate(callback?: Callback<RouterPageInfo>): void;
-        onNavDestinationSwitch(callback: Callback<NavDestinationSwitchInfo>): void;
-        offNavDestinationSwitch(callback?: Callback<NavDestinationSwitchInfo>): void;
-        onNavDestinationSwitch(
-            observerOptions: NavDestinationSwitchObserverOptions,
-            callback: Callback<NavDestinationSwitchInfo>
-          ): void;
-        offNavDestinationSwitch(
-            observerOptions: NavDestinationSwitchObserverOptions,
-            callback?: Callback<NavDestinationSwitchInfo>
-          ): void;
-        onDensityUpdate(callback: Callback<DensityInfo>): void;
-        offDensityUpdate(callback?: Callback<DensityInfo>): void;
-
-        onWillDraw(callback: Callback<void>): void;
-        offWillDraw(callback?: Callback<void>): void;
-
-        onDidLayout(callback: Callback<void>): void;
-        offDidLayout(callback?: Callback<void>): void;
-
-        onTabContentUpdate(callback: Callback<TabContentInfo>): void;
-        offTabContentUpdate(callback?: Callback<TabContentInfo>): void;
-        onTabContentUpdate(options: ObserverOptions, callback: Callback<TabContentInfo>): void;
-        offTabContentUpdate(options: ObserverOptions, callback?: Callback<TabContentInfo>): void;
-    }
-    
-    class UIObserverImpl implements UIObserver
+    export class UIObserver
     {
         private nativeObserverAddr:long = 0;
         
@@ -91,10 +42,10 @@ import hilog from '@ohos.hilog'
                 this.nativeObserverAddr = nativeAddr;
             }
         }
-        
+
         public native on(type: string, callback: object) : void;
         public native off(type: string, callback?: object) : void;
-        
+
         public native on(type: string, options: NavDestinationSwitchObserverOptions, callback: object): void;
         public native off(type: string, options: NavDestinationSwitchObserverOptions, callback?: object): void;
 

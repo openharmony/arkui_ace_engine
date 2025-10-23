@@ -11,7 +11,7 @@ declare namespace uiObserver {
     }
     type Callback<T,V = void> = (data: T) => V
       
-    export interface UIObserver {
+    export class UIObserver {
         on(type: string, callback: object): void;
         off(type: string, callback?: object): void;
 
