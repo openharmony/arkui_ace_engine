@@ -34747,6 +34747,10 @@ void impl_TabsController_setTabBarOpacity(Ark_NativePointer thisPtr, KDouble opa
         GetAccessors()->getTabsControllerAccessor()->setTabBarOpacity(self, opacity);
 }
 KOALA_INTEROP_V2(TabsController_setTabBarOpacity, Ark_NativePointer, KDouble)
+void impl_TabsExtender_ApplyAttributesFinish(Ark_NativePointer node) {
+        GetAccessors()->getTabsExtenderAccessor()->ApplyAttributesFinish(node);
+}
+KOALA_INTEROP_DIRECT_V1(TabsExtender_ApplyAttributesFinish, Ark_NativePointer)
 Ark_NativePointer impl_TapGestureEvent_construct() {
         return GetAccessors()->getTapGestureEventAccessor()->construct();
 }

@@ -26806,6 +26806,10 @@ typedef struct GENERATED_ArkUITabsControllerAccessor {
                              const Ark_Float64 opacity);
 } GENERATED_ArkUITabsControllerAccessor;
 
+typedef struct GENERATED_ArkUITabsExtenderAccessor {
+    void (*ApplyAttributesFinish)(Ark_NativePointer node);
+} GENERATED_ArkUITabsExtenderAccessor;
+
 typedef struct GENERATED_ArkUITapGestureEventAccessor {
     void (*destroyPeer)(Ark_TapGestureEvent peer);
     Ark_TapGestureEvent (*construct)();
@@ -27548,6 +27552,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUITabBarSymbolAccessor* (*getTabBarSymbolAccessor)();
     const GENERATED_ArkUITabContentTransitionProxyAccessor* (*getTabContentTransitionProxyAccessor)();
     const GENERATED_ArkUITabsControllerAccessor* (*getTabsControllerAccessor)();
+    const GENERATED_ArkUITabsExtenderAccessor* (*getTabsExtenderAccessor)();
     const GENERATED_ArkUITapGestureEventAccessor* (*getTapGestureEventAccessor)();
     const GENERATED_ArkUITapRecognizerAccessor* (*getTapRecognizerAccessor)();
     const GENERATED_ArkUITextAreaControllerAccessor* (*getTextAreaControllerAccessor)();
