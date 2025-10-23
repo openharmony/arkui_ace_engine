@@ -30,6 +30,26 @@ import hilog from '@ohos.hilog'
         context: UIAbilityContext | UIContext,
         callback?: Callback<RouterPageInfo>
     ): void;
+    export native function onNavDestinationUpdate(callback: Callback<NavDestinationInfo>): void;
+    export native function offNavDestinationUpdate(callback?: Callback<NavDestinationInfo>): void;
+    export native function onNavDestinationUpdate(
+        options: NavDestinationSwitchObserverOptions,
+        callback: Callback<NavDestinationInfo>
+    ): void;
+    export native function offNavDestinationUpdate(
+        options: NavDestinationSwitchObserverOptions,
+        callback?: Callback<NavDestinationInfo>
+    ): void;
+    export native function onNavDestinationSwitch(callback: Callback<NavDestinationSwitchInfo>): void;
+    export native function offNavDestinationSwitch(callback?: Callback<NavDestinationSwitchInfo>): void;
+    export native function onNavDestinationSwitch(
+        observerOptions: NavDestinationSwitchObserverOptions,
+        callback: Callback<NavDestinationSwitchInfo>
+    ): void;
+    export native function offNavDestinationSwitch(
+        observerOptions: NavDestinationSwitchObserverOptions,
+        callback?: Callback<NavDestinationSwitchInfo>
+    ): void;
     export class DensityInfo {
         density: number;
     }
@@ -151,10 +171,10 @@ import hilog from '@ohos.hilog'
         navigationId: ResourceStr;
         name: ResourceStr;
         state: NavDestinationState;
-        index: number;
+        index: int;
         param?: Object;
         navDestinationId: string;
-        uniqueId?: number;
+        uniqueId?: int;
         mode?: NavDestinationMode;
     }
 
@@ -162,10 +182,10 @@ import hilog from '@ohos.hilog'
         navigationId: ResourceStr;
         name: ResourceStr;
         state: NavDestinationState;
-        index: number;
+        index: int;
         param?: Object;
         navDestinationId: string;
-        uniqueId?: number;
+        uniqueId?: int;
         mode?: NavDestinationMode;
         static castToNavDestinationInfo(value: number): NavDestinationState {
             if (value === 0) {
@@ -228,7 +248,7 @@ import hilog from '@ohos.hilog'
             if (!index.isNumber()) {
                 throw Error("index in NavDestinationInfo type Error");
             }
-            staticValue.index = index.toNumber();
+            staticValue.index = index.toNumber() as int;
 
             let param = dynamicValue.getProperty("param");
             if (param.isString()) {
