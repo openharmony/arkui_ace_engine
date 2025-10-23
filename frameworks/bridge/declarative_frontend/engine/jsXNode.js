@@ -1639,6 +1639,9 @@ class FrameNode extends Disposable {
         __JSScopeUtil__.restoreInstanceId();
         return { x: offsetPosition[0], y: offsetPosition[1] };
     }
+    isTransferred() {
+        return false;
+    }
 }
 class ImmutableFrameNode extends FrameNode {
     isModifiable() {
