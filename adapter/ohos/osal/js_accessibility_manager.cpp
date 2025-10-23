@@ -3626,9 +3626,7 @@ int64_t JsAccessibilityManager::GetDelayTimeBeforeSendEvent(
 
 bool JsAccessibilityManager::IsEventIgnoredByWorkMode(const AccessibilityEvent& accessibilityEvent)
 {
-    CHECK_EQUAL_RETURN(IsScreenReaderEnabled(), true, false);
-    auto accessibilityWorkMode = GenerateAccessibilityWorkMode();
-    if (!accessibilityWorkMode.isTouchExplorationEnabled) {
+    if (!AceApplicationInfo::GetInstance().IsAccessibilityScreenReadEnabled()) {
         switch (accessibilityEvent.type) {
             case AccessibilityEventType::ELEMENT_INFO_CHANGE:
             case AccessibilityEventType::COMPONENT_CHANGE:
