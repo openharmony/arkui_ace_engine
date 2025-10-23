@@ -2575,6 +2575,7 @@ void SearchPattern::SetRightIconSrcPath(const std::string& src)
 
 void SearchPattern::SetCancelButtonStyle(const CancelButtonStyle& style)
 {
+    CHECK_NULL_VOID(GetSearchNode());
     auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(GetSearchNode()->GetChildAtIndex(TEXTFIELD_INDEX));
     CHECK_NULL_VOID(textFieldFrameNode);
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
