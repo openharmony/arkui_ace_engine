@@ -615,7 +615,7 @@ void MovingPhotoPattern::HandleImageCompleteEvent(const LoadImageSuccessEvent& i
 void MovingPhotoPattern::HandleImageErrorEvent(const LoadImageFailEvent& info)
 {
     auto errorStatus = info.GetErrorInfo();
-    if(errorStatus.errorCode == 0 && errorStatus.errorMessage.empty()) {
+    if (errorStatus.errorCode == 0 && errorStatus.errorMessage.empty()) {
         TAG_LOGE(AceLogTag::ACE_MOVING_PHOTO, "HandleImageErrorEvent errorStatus is empty.");
         return;
     }
