@@ -233,7 +233,7 @@ ani_object WrapBusinessError(ani_env* env, const char *msg, ani_int code)
         return nullptr;
     }
 
-    if ((status = env->Class_FindMethod(cls, "<ctor>", "dC{std.core.String}C{escompat.ErrorOptions}:", &method)) !=
+    if ((status = env->Class_FindMethod(cls, "<ctor>", "C{std.core.String}C{escompat.ErrorOptions}:", &method)) !=
         ANI_OK) {
         return nullptr;
     }
