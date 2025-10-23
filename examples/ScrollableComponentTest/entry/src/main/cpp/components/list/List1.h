@@ -110,7 +110,7 @@ public:
         }
     }
     virtual ~ListItemGroupAdapter() {}
-    std::unordered_map<ArkUI_NodeHandle, std::shared_ptr<ListItemGroupComponent>> &getGroup()
+    std::unordered_map<ArkUI_NodeHandle, std::shared_ptr<ListItemGroupComponent>>& getGroup()
     {
         return _items;
     }
