@@ -866,7 +866,6 @@ ani_object ANIGetDragPreview([[maybe_unused]] ani_env* env, [[maybe_unused]] ani
     CHECK_NULL_RETURN(dragPreview, nullptr);
     ani_object dragPreviewObj = {};
     dragPreview->AniSerializer(env, dragPreviewObj);
-    delete dragPreview;
     env->DestroyEscapeLocalScope(dragPreviewObj, &escapedObj);
     return dragPreviewObj;
 }
