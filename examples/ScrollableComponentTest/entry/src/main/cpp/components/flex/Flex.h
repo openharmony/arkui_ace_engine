@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,7 +25,8 @@ public:
     FlexComponent() : Component(ARKUI_NODE_COLUMN) {}
     explicit FlexComponent(ArkUI_NodeHandle handle) : Component(handle) {}
     
-    void SetOptions(int32_t *options) {
+    void SetOptions(int32_t *options)
+    {
     ArkUI_NumberValue options_value[] = {
         {.i32 = options[0]}, {.i32 = options[1]}, {.i32 = options[2]}, {.i32 = options[3]}, {.i32 = options[4]}};
     ArkUI_AttributeItem options_item = {options_value, sizeof(options_value) / sizeof(ArkUI_NumberValue)};

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,7 +32,10 @@ void ImageAnimatorComponent::SetIteration(int32_t iteration)
 
 void ImageAnimatorComponent::SetImage(std::vector<ArkUI_ImageAnimatorFrameInfo*>& vector)
 {
-    ArkUI_AttributeItem item = { .size = static_cast<int32_t>(vector.size()), .object = static_cast<void*>(vector.data()) };
+    ArkUI_AttributeItem item = { 
+        .size = static_cast<int32_t>(vector.size()), 
+        .object =_cast<void*>(vector.data()) 
+    };
     _nodeAPI->setAttribute(_component, NODE_IMAGE_ANIMATOR_IMAGES, &item);
 }
 

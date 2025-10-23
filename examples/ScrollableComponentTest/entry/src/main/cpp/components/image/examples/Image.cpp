@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -67,8 +67,8 @@ int32_t ImageComponent::SetImageFillColor(uint32_t color)
 }
 int32_t ImageComponent::SetGeometryTransition(int32_t type, const std::string &id)
 {
-    ArkUI_NumberValue value[] = {{.i32 = type}};
-    ArkUI_AttributeItem item = {value, 1, id.c_str()};
+    ArkUI_NumberValue value[] = { { .i32 = type } };
+    ArkUI_AttributeItem item = { value, 1, id.c_str() };
     return _nodeAPI->setAttribute(_component, NODE_GEOMETRY_TRANSITION, &item);    
 }
 } // namespace ArkUICApiDemo

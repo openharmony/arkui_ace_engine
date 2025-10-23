@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -326,7 +326,8 @@ void Component::RegisterOnDisappear(const std::function<void()>& onDisappear)
 
 void Component::RegisterOnAppear(const std::function<void()>& onAppear)
 {
-    auto onAppearCallback = [onAppear](ArkUI_NodeEvent*){
+    auto onAppearCallback = [onAppear](ArkUI_NodeEvent*)
+    {
         if (onAppear) {
             onAppear();
         }
@@ -336,7 +337,8 @@ void Component::RegisterOnAppear(const std::function<void()>& onAppear)
 }
 void Component::RegisterOnHover(const std::function<void(bool isHover)>& onHover)
 {
-    auto onHoverCallback = [onHover](ArkUI_NodeEvent* event){
+    auto onHoverCallback = [onHover](ArkUI_NodeEvent* event)
+    {
         if (onHover) {
             OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, "commonEvent", "NODE_ON_HOVER");
             ArkUI_NodeComponentEvent* result = OH_ArkUI_NodeEvent_GetNodeComponentEvent(event);
@@ -359,7 +361,8 @@ void Component::RegisterOnMouse(const std::function<void(ArkUI_NodeEvent* event)
 }
 void Component::RegisterOnTouchIntercept(const std::function<void(ArkUI_NodeEvent* event)>& onTouchIntercept)
 {
-    auto onTouchInterceptCallback = [onTouchIntercept](ArkUI_NodeEvent* event){
+    auto onTouchInterceptCallback = [onTouchIntercept](ArkUI_NodeEvent* event)
+    {
         if (onTouchIntercept) {
             onTouchIntercept(event);
         }
@@ -388,7 +391,8 @@ void Component::RegisterOnVisibleAreaChange(
     }
     ArkUI_AttributeItem item = { value, static_cast<int32_t>(ratioArray.size()) };
 
-    auto onVisibleAreaChangeCallback = [onVisibleAreaChange](ArkUI_NodeEvent* event){
+    auto onVisibleAreaChangeCallback = [onVisibleAreaChange](ArkUI_NodeEvent* event)
+    {
         if (onVisibleAreaChange) {
             OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, "commonEvent", "NODE_EVENT_ON_VISIBLE_AREA_CHANGE");
             ArkUI_NodeComponentEvent* result = OH_ArkUI_NodeEvent_GetNodeComponentEvent(event);
