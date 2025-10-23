@@ -31,12 +31,14 @@ export interface IDecoratedV1Variable<T> extends IDecoratedVariable {
 
 export interface IDecoratedV2Variable extends IDecoratedVariable {}
 
-export interface IDecoratedImmutableVariable<T> {
+export interface IDecoratedReadableVariable<T> {
     get(): T;
 }
 
-export interface IDecoratedMutableVariable<T> {
-    get(): T;
+export interface IDecoratedImmutableVariable<T> extends IDecoratedReadableVariable<T> {
+}
+
+export interface IDecoratedMutableVariable<T> extends IDecoratedReadableVariable<T> {
     set(newValue: T): void;
 }
 
