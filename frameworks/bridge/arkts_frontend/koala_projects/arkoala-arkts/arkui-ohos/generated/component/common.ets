@@ -77,6 +77,7 @@ import { UIContext_serializer } from "./../framework/ohos.arkui.UIContext"
 // instructive change start
 import { _animateTo, _animationStart, _animationStop } from "arkui/base/ArkAnimation"
 import { AnimationExtender } from '#generated';
+import { ArkUIAniModule } from "arkui.ani"
 // instructive change end
 export interface BaseEvent {
     target: EventTarget
@@ -7402,6 +7403,10 @@ export interface CommonMethod {
     animationStop(value: AnimateParam | undefined): this {
         throw new Error("Unimplemented method animationStop")
     }
+    __createOrSetAnimatableProperty<T>(functionName: string, value: number | AnimatableArithmetic<T>,
+        callback: (value: number | AnimatableArithmetic<T>) => void): void {
+        throw new Error("Unimplemented method __createOrSetAnimatableProperty")
+    }
     // instructive change end
 
     transition(value: TransitionEffect | undefined): this {
@@ -8176,6 +8181,8 @@ export class ArkCommonMethodStyle implements CommonMethod {
     public animationStop(value: AnimateParam | undefined): this {
         return this
     }
+    public __createOrSetAnimatableProperty<T>(functionName: string, value: number | AnimatableArithmetic<T>,
+        callback: (value: number | AnimatableArithmetic<T>) => void): void {}
     // instructive change end
 
     transition(value: TransitionEffect | undefined): this {
@@ -9463,6 +9470,24 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
             return this
         }
         return this
+    }
+    public __createOrSetAnimatableProperty<T>(functionName: string, value: number | AnimatableArithmetic<T>,
+        callback: (value: number | AnimatableArithmetic<T>) => void): void {
+        if (this.getPeer()) {
+            const peer = this.getPeer();
+            let isFirst = true;
+            const newCallback = (value: number | AnimatableArithmetic<T>): void => {
+                if (isFirst) {
+                    isFirst = false;
+                    callback(value);
+                    return;
+                }
+                this.setPeer(peer);
+                callback(value);
+                this.setPeer(undefined);
+            }
+            ArkUIAniModule._Animation_SetOrCreateAnimatableProperty(this.getPeer().getPeerPtr(), functionName, value, newCallback);
+        }
     }
     // instructive change end
 
