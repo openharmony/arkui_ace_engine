@@ -3188,6 +3188,7 @@ frameworks/core/interfaces/native/implementation/folder_stack_modifier.cpp @ArkU
 frameworks/core/interfaces/native/implementation/grid_item_modifier.cpp @arkuiscroll
 frameworks/core/interfaces/native/implementation/grid_modifier.cpp @arkuiscroll
 frameworks/core/interfaces/native/implementation/grid_row_modifier.cpp @ArkUI_Layout
+frameworks/core/interfaces/native/implementation/for_each_ops_accessor.cpp @arkuieco3
 frameworks/core/interfaces/native/implementation/level_order_accessor.cpp @arkuipopupwindow_all
 frameworks/core/interfaces/native/implementation/level_order_peer.h @arkuipopupwindow_all
 frameworks/core/interfaces/native/implementation/list_item_group_modifier.cpp @arkuiscroll
