@@ -65,10 +65,10 @@ int32_t ImageComponent::SetImageFillColor(uint32_t color)
     ArkUI_AttributeItem item = { value, 1 };
     return _nodeAPI->setAttribute(_component, NODE_IMAGE_FILL_COLOR, &item);
 }
-int32_t ImageComponent::SetGeometryTransition(int32_t type, const std::string &id)
+int32_t ImageComponent::SetGeometryTransition(int32_t type, const std::string& id)
 {
     ArkUI_NumberValue value[] = { { .i32 = type } };
     ArkUI_AttributeItem item = { value, 1, id.c_str() };
-    return _nodeAPI->setAttribute(_component, NODE_GEOMETRY_TRANSITION, &item);    
+    return _nodeAPI->setAttribute(_component, NODE_GEOMETRY_TRANSITION, &item);
 }
 } // namespace ArkUICApiDemo
