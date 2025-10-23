@@ -615,7 +615,10 @@ void MovingPhotoPattern::HandleImageCompleteEvent(const LoadImageSuccessEvent& i
 void MovingPhotoPattern::HandleImageErrorEvent(const LoadImageFailEvent& info)
 {
     auto errorStatus = info.GetErrorInfo();
-    CHECK_NULL_VOID(&errorStatus);
+    if(errorStatus.errorCode == 0 && errorStatus.errorMessage.empty()) {
+        TAG_LOGE(AceLogTag::ACE_MOVING_PHOTO, "HandleImageErrorEvent errorStatus is empty.");
+        return;
+    }
     TAG_LOGE(AceLogTag::ACE_MOVING_PHOTO, "HandleImageErrorEvent errorCode:%{public}d.  errorMessage:%{public}s.",
         errorStatus.errorCode, errorStatus.errorMessage.c_str());
     FireMediaPlayerImageError();
