@@ -930,6 +930,13 @@ void AssignArkValue(Ark_LengthMetricsCustom& dst, const CalcDimension& src)
     dst.unit = Converter::ArkValue<Ark_Number>(static_cast<int32_t>(src.Unit()));
 }
 
+void AssignArkValue(Ark_NavPathInfo& dst, const OHOS::Ace::NG::GeneratedModifier::NavigationContext::PathInfo& src)
+{
+    const auto peer = PeerUtils::CreatePeer<NavPathInfoPeer>();
+    peer->data = src;
+    dst = peer;
+}
+
 void AssignArkValue(Ark_NativeEmbedParamItem& dst, const NativeEmbedParamItem& src)
 {
     dst.status = Converter::ArkValue<Ark_NativeEmbedParamStatus>(src.status);
