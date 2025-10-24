@@ -413,6 +413,9 @@ typedef struct Ark_ImageLoadResult Ark_ImageLoadResult;
 typedef struct Opt_ImageLoadResult Opt_ImageLoadResult;
 typedef struct Ark_ImageSourceSize Ark_ImageSourceSize;
 typedef struct Opt_ImageSourceSize Opt_ImageSourceSize;
+typedef struct ImageModifierPeer ImageModifierPeer;
+typedef struct ImageModifierPeer* Ark_ImageModifier;
+typedef struct Opt_ImageModifier Opt_ImageModifier;
 typedef struct IndicatorComponentControllerPeer IndicatorComponentControllerPeer;
 typedef struct IndicatorComponentControllerPeer* Ark_IndicatorComponentController;
 typedef struct Opt_IndicatorComponentController Opt_IndicatorComponentController;
@@ -1778,8 +1781,7 @@ typedef struct Ark_CloseSwipeActionOptions Ark_CloseSwipeActionOptions;
 typedef struct Opt_CloseSwipeActionOptions Opt_CloseSwipeActionOptions;
 typedef struct Ark_ColorFilterType Ark_ColorFilterType;
 typedef struct Opt_ColorFilterType Opt_ColorFilterType;
-typedef struct ColorMetricsPeer ColorMetricsPeer;
-typedef struct ColorMetricsPeer* Ark_ColorMetrics;
+typedef struct Ark_ColorMetrics Ark_ColorMetrics;
 typedef struct Opt_ColorMetrics Opt_ColorMetrics;
 typedef struct Ark_ColumnOptions Ark_ColumnOptions;
 typedef struct Opt_ColumnOptions Opt_ColumnOptions;
@@ -7144,6 +7146,10 @@ typedef struct Opt_ImageSourceSize {
     Ark_Tag tag;
     Ark_ImageSourceSize value;
 } Opt_ImageSourceSize;
+typedef struct Opt_ImageModifier {
+    Ark_Tag tag;
+    Ark_ImageModifier value;
+} Opt_ImageModifier;
 typedef struct Opt_IndicatorComponentController {
     Ark_Tag tag;
     Ark_IndicatorComponentController value;
@@ -12910,6 +12916,14 @@ typedef struct Opt_ColorFilterType {
     Ark_Tag tag;
     Ark_ColorFilterType value;
 } Opt_ColorFilterType;
+typedef struct Ark_ColorMetrics {
+    /* kind: Interface */
+    Ark_Int32 red_;
+    Ark_Int32 green_;
+    Ark_Int32 blue_;
+    Ark_Int32 alpha_;
+    Ark_Number resourceId_;
+} Ark_ColorMetrics;
 typedef struct Opt_ColorMetrics {
     Ark_Tag tag;
     Ark_ColorMetrics value;
@@ -16535,6 +16549,7 @@ typedef struct Opt_DividerStyleOptions {
 typedef struct Ark_DragPreviewOptions {
     /* kind: Interface */
     Opt_Union_DragPreviewMode_Array_DragPreviewMode mode;
+    Opt_ImageModifier modifier;
     Opt_Union_Boolean_I64 numberBadge;
     Opt_DraggingSizeChangeEffect sizeChangeEffect;
 } Ark_DragPreviewOptions;
@@ -21071,10 +21086,8 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                       const Opt_Union_Position_Edges_LocalizedEdges* value);
     void (*setEnabled)(Ark_NativePointer node,
                        const Opt_Boolean* value);
-    void (*setAlignRulesWithAlignRuleOptionTypedValue)(Ark_NativePointer node,
-                                                       const Opt_AlignRuleOption* value);
-    void (*setAlignRulesWithLocalizedAlignRuleOptionsTypedValue)(Ark_NativePointer node,
-                                                                 const Opt_LocalizedAlignRuleOptions* value);
+    void (*setAlignRules)(Ark_NativePointer node,
+                          const Opt_Union_AlignRuleOption_LocalizedAlignRuleOptions* value);
     void (*setAspectRatio)(Ark_NativePointer node,
                            const Opt_Number* value);
     void (*setClickEffect)(Ark_NativePointer node,
@@ -25142,10 +25155,8 @@ typedef struct GENERATED_ArkUIFrameNodeExtenderAccessor {
     void (*recycle)(Ark_FrameNode peer);
     Ark_NativePointer (*getFrameNodePtr)(Ark_FrameNode node);
     Ark_NativePointer (*createTypedFrameNode)(const Ark_String* type);
-    Ark_NativePointer (*createByRawPtr)(Ark_FrameNode peer,
-                                        Ark_FrameNode pointer);
-    Ark_FrameNode (*unWrapRawPtr)(Ark_FrameNode peer,
-                                  Ark_NativePointer pointer);
+    Ark_NativePointer (*createByRawPtr)(Ark_NativePointer ptr);
+    Ark_NativePointer (*unWrapRawPtr)(Ark_NativePointer ptr);
     Ark_UICommonEvent (*getCommonEvent)(Ark_FrameNode peer);
     Ark_NativePointer (*getRenderNode)(Ark_NativePointer peer);
 } GENERATED_ArkUIFrameNodeExtenderAccessor;
@@ -25860,6 +25871,12 @@ typedef struct GENERATED_ArkUINavPathStackAccessor {
     void (*destroyPeer)(Ark_NavPathStack peer);
     Ark_NavPathStack (*construct)();
     Ark_NativePointer (*getFinalizer)();
+    void (*pushPath0)(Ark_NavPathStack peer,
+                      Ark_NavPathInfo info,
+                      const Opt_Boolean* animated);
+    void (*pushPath1)(Ark_NavPathStack peer,
+                      Ark_NavPathInfo info,
+                      const Opt_NavigationOptions* options);
     void (*pushDestination0)(Ark_VMContext vmContext,
                              Ark_AsyncWorkerPtr asyncWorker,
                              Ark_NavPathStack peer,
@@ -25872,6 +25889,15 @@ typedef struct GENERATED_ArkUINavPathStackAccessor {
                              Ark_NavPathInfo info,
                              const Opt_NavigationOptions* options,
                              const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise);
+    void (*pushPathByName0)(Ark_NavPathStack peer,
+                            const Ark_String* name,
+                            const Opt_Object* param,
+                            const Opt_Boolean* animated);
+    void (*pushPathByName1)(Ark_NavPathStack peer,
+                            const Ark_String* name,
+                            const Ark_Object* param,
+                            const Callback_PopInfo_Void* onPop,
+                            const Opt_Boolean* animated);
     void (*pushDestinationByName0)(Ark_VMContext vmContext,
                                    Ark_AsyncWorkerPtr asyncWorker,
                                    Ark_NavPathStack peer,
@@ -25887,18 +25913,47 @@ typedef struct GENERATED_ArkUINavPathStackAccessor {
                                    const Callback_PopInfo_Void* onPop,
                                    const Opt_Boolean* animated,
                                    const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise);
+    void (*replacePath0)(Ark_NavPathStack peer,
+                         Ark_NavPathInfo info,
+                         const Opt_Boolean* animated);
+    void (*replacePath1)(Ark_NavPathStack peer,
+                         Ark_NavPathInfo info,
+                         const Opt_NavigationOptions* options);
     void (*replaceDestination)(Ark_VMContext vmContext,
                                Ark_AsyncWorkerPtr asyncWorker,
                                Ark_NavPathStack peer,
                                Ark_NavPathInfo info,
                                const Opt_NavigationOptions* options,
                                const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise);
+    void (*replacePathByName)(Ark_NavPathStack peer,
+                              const Ark_String* name,
+                              const Ark_Object* param,
+                              const Opt_Boolean* animated);
     Ark_Int32 (*removeByIndexes)(Ark_NavPathStack peer,
                                  const Array_Int32* indexes);
     Ark_Int32 (*removeByName)(Ark_NavPathStack peer,
                               const Ark_String* name);
     Ark_Boolean (*removeByNavDestinationId)(Ark_NavPathStack peer,
                                             const Ark_String* navDestinationId);
+    Opt_NavPathInfo (*pop0)(Ark_NavPathStack peer,
+                            const Opt_Boolean* animated);
+    Opt_NavPathInfo (*pop1)(Ark_NavPathStack peer,
+                            const Ark_Object* result,
+                            const Opt_Boolean* animated);
+    Ark_Int32 (*popToName0)(Ark_NavPathStack peer,
+                            const Ark_String* name,
+                            const Opt_Boolean* animated);
+    Ark_Int32 (*popToName1)(Ark_NavPathStack peer,
+                            const Ark_String* name,
+                            const Ark_Object* result,
+                            const Opt_Boolean* animated);
+    void (*popToIndex0)(Ark_NavPathStack peer,
+                        Ark_Int32 index,
+                        const Opt_Boolean* animated);
+    void (*popToIndex1)(Ark_NavPathStack peer,
+                        Ark_Int32 index,
+                        const Ark_Object* result,
+                        const Opt_Boolean* animated);
     Ark_Int32 (*moveToTop)(Ark_NavPathStack peer,
                            const Ark_String* name,
                            const Opt_Boolean* animated);
@@ -25908,6 +25963,10 @@ typedef struct GENERATED_ArkUINavPathStackAccessor {
     void (*clear)(Ark_NavPathStack peer,
                   const Opt_Boolean* animated);
     Array_String (*getAllPathName)(Ark_NavPathStack peer);
+    Opt_Object (*getParamByIndex)(Ark_NavPathStack peer,
+                                  Ark_Int32 index);
+    Array_Opt_Object (*getParamByName)(Ark_NavPathStack peer,
+                                       const Ark_String* name);
     Array_Int32 (*getIndexByName)(Ark_NavPathStack peer,
                                   const Ark_String* name);
     Opt_NavPathStack (*getParent)(Ark_NavPathStack peer);
@@ -26806,6 +26865,11 @@ typedef struct GENERATED_ArkUITabsControllerAccessor {
                              const Ark_Float64 opacity);
 } GENERATED_ArkUITabsControllerAccessor;
 
+typedef struct GENERATED_ArkUITabsExtenderAccessor {
+    void (*ApplyAttributesFinish)(Ark_NativePointer node);
+} GENERATED_ArkUITabsExtenderAccessor;
+
+
 typedef struct GENERATED_ArkUITapGestureEventAccessor {
     void (*destroyPeer)(Ark_TapGestureEvent peer);
     Ark_TapGestureEvent (*construct)();
@@ -27548,6 +27612,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUITabBarSymbolAccessor* (*getTabBarSymbolAccessor)();
     const GENERATED_ArkUITabContentTransitionProxyAccessor* (*getTabContentTransitionProxyAccessor)();
     const GENERATED_ArkUITabsControllerAccessor* (*getTabsControllerAccessor)();
+    const GENERATED_ArkUITabsExtenderAccessor* (*getTabsExtenderAccessor)();
     const GENERATED_ArkUITapGestureEventAccessor* (*getTapGestureEventAccessor)();
     const GENERATED_ArkUITapRecognizerAccessor* (*getTapRecognizerAccessor)();
     const GENERATED_ArkUITextAreaControllerAccessor* (*getTextAreaControllerAccessor)();

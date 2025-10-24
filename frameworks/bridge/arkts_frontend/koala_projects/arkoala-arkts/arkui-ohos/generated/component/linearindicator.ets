@@ -23,7 +23,7 @@ import { CallbackTransformer } from "./../CallbackTransformer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { AttributeModifier, extractors, hookLinearIndicatorAttributeModifier, AttributeUpdater } from "#handwritten"
+import { AttributeModifier, hookLinearIndicatorAttributeModifier, AttributeUpdater } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
@@ -402,13 +402,13 @@ export class LinearIndicatorStyle_serializer {
         const trackBackgroundColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let trackBackgroundColorTmpBuf : ColorMetrics | undefined = undefined
         if ((trackBackgroundColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            trackBackgroundColorTmpBuf = (ColorMetrics_serializer.read(valueDeserializer) as ColorMetrics)
+            trackBackgroundColorTmpBuf = ColorMetrics_serializer.read(valueDeserializer)
         }
         const trackBackgroundColorTmpResult : ColorMetrics | undefined = trackBackgroundColorTmpBuf
         const trackColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let trackColorTmpBuf : ColorMetrics | undefined = undefined
         if ((trackColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            trackColorTmpBuf = (ColorMetrics_serializer.read(valueDeserializer) as ColorMetrics)
+            trackColorTmpBuf = ColorMetrics_serializer.read(valueDeserializer)
         }
         const trackColorTmpResult : ColorMetrics | undefined = trackColorTmpBuf
         let value : LinearIndicatorStyle = ({space: spaceTmpResult, strokeWidth: strokeWidthTmpResult, strokeRadius: strokeRadiusTmpResult, trackBackgroundColor: trackBackgroundColorTmpResult, trackColor: trackColorTmpResult} as LinearIndicatorStyle)

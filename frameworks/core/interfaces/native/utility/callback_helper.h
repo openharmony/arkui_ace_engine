@@ -54,7 +54,7 @@ template<typename CallbackType,
     std::enable_if_t<std::is_same_v<decltype(CallbackType().resource), Ark_CallbackResource>, bool> = true,
     std::enable_if_t<std::is_function_v<std::remove_pointer_t<decltype(CallbackType().call)>>, bool> = true
 >
-class CallbackHelper {
+class CallbackHelper : public virtual Referenced {
 public:
     CallbackHelper() = default;
 

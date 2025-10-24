@@ -16,7 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { AttributeModifier, DrawModifier, extractors, GestureModifier } from "#handwritten"
+import { AttributeModifier, DrawModifier, extractors, GestureModifier, hookAllowDrop, hookDragPreviewOptions } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkCommonMethodPeer, LayoutPolicy, Rectangle, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, BorderImageOption, OutlineStyle, ClickEvent, HoverEvent, AccessibilityCallback, AccessibilityHoverEvent, MouseEvent, TouchEvent, KeyEvent, CrownEvent, FocusAxisEvent, AxisEvent, FocusMovement, AnimateParam, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, DragEvent, DragItemInfo, PreDragStatus, LinearGradientOptions, SweepGradientOptions, RadialGradientOptions, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, AccessibilitySamePageMode, AccessibilityRoleType, AccessibilityFocusCallback, AccessibilityActionInterceptCallback, AccessibilityAction, ReuseOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, CustomProperty, SafeAreaType, SafeAreaEdge, BackgroundOptions, BackgroundImageOptions, BlurStyle, BackgroundBlurStyleOptions, SystemAdaptiveOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, OnDragEventCallback, DropOptions, PreviewConfiguration, DragPreviewOptions, DragInteractionOptions, OverlayOptions, BlendMode, BlendApplyType, GeometryTransitionOptions, TipsMessageType, TipsOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, Bindable, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, VisibleAreaEventOptions, CommonMethod } from "./component/common"
@@ -237,9 +237,7 @@ export class CommonMethodModifier implements CommonMethod {
     _enabled_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _enabled_0_0value?: boolean | undefined
     _alignRules_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _alignRules_0_0value?: AlignRuleOption | undefined
-    _alignRules_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _alignRules_1_0value?: LocalizedAlignRuleOptions | undefined
+    _alignRules_0_0value?: AlignRuleOption | LocalizedAlignRuleOptions | undefined
     _aspectRatio_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _aspectRatio_0_0value?: number | undefined
     _clickEffect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -256,6 +254,8 @@ export class CommonMethodModifier implements CommonMethod {
     _onDrop_0_0value?: ((event: DragEvent,extraParams?: string) => void) | undefined
     _onDragEnd_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onDragEnd_0_0value?: ((event: DragEvent,extraParams?: string) => void) | undefined
+    _allowDrop_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _allowDrop_0_0value?: Array<uniformTypeDescriptor.UniformDataType> | null | undefined
     _draggable_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _draggable_0_0value?: boolean | undefined
     _dragPreview_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -417,6 +417,9 @@ export class CommonMethodModifier implements CommonMethod {
     _dragPreview_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _dragPreview_1_0value?: CustomBuilder | DragItemInfo | string | undefined
     _dragPreview_1_1value?: PreviewConfiguration | undefined
+    _dragPreviewOptions_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _dragPreviewOptions_0_0value?: DragPreviewOptions | undefined
+    _dragPreviewOptions_0_1value?: DragInteractionOptions | undefined
     _overlay_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _overlay_0_0value?: string | CustomBuilder | ComponentContent | undefined
     _overlay_0_1value?: OverlayOptions | undefined
@@ -2230,7 +2233,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (this._alignRules_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setAlignRulesWithAlignRuleOptionTypedValueAttribute((this._alignRules_0_0value as AlignRuleOption | undefined));
+                    peer.setAlignRulesAttribute((this._alignRules_0_0value as AlignRuleOption | LocalizedAlignRuleOptions | undefined));
                     this._alignRules_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -2240,25 +2243,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     this._alignRules_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setAlignRulesWithAlignRuleOptionTypedValueAttribute((undefined as AlignRuleOption | undefined));
-                }
-            }
-        }
-        if (this._alignRules_1_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._alignRules_1_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setAlignRulesWithLocalizedAlignRuleOptionsTypedValueAttribute((this._alignRules_1_0value as LocalizedAlignRuleOptions | undefined));
-                    this._alignRules_1_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._alignRules_1_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._alignRules_1_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setAlignRulesWithLocalizedAlignRuleOptionsTypedValueAttribute((undefined as LocalizedAlignRuleOptions | undefined));
+                    peer.setAlignRulesAttribute((undefined as AlignRuleOption | LocalizedAlignRuleOptions | undefined));
                 }
             }
         }
@@ -2403,6 +2388,24 @@ export class CommonMethodModifier implements CommonMethod {
                 default: {
                     this._onDragEnd_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.setOnDragEndAttribute((undefined as ((event: DragEvent,extraParams?: string) => void) | undefined));
+                }
+            }
+        }
+        if (this._allowDrop_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._allowDrop_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    hookAllowDrop(peer, (this._allowDrop_0_0value as Array<uniformTypeDescriptor.UniformDataType> | null | undefined));
+                    this._allowDrop_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._allowDrop_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._allowDrop_0_flag = AttributeUpdaterFlag.INITIAL;
+                    hookAllowDrop(peer, (undefined as Array<uniformTypeDescriptor.UniformDataType> | null | undefined));
                 }
             }
         }
@@ -3645,6 +3648,24 @@ export class CommonMethodModifier implements CommonMethod {
                 default: {
                     this._dragPreview_1_flag = AttributeUpdaterFlag.INITIAL;
                     peer.setDragPreview1Attribute((undefined as CustomBuilder | DragItemInfo | string | undefined), (undefined as PreviewConfiguration | undefined | undefined));
+                }
+            }
+        }
+        if (this._dragPreviewOptions_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._dragPreviewOptions_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    hookDragPreviewOptions(peer, (this._dragPreviewOptions_0_0value as DragPreviewOptions | undefined), (this._dragPreviewOptions_0_1value as DragInteractionOptions | undefined | undefined));
+                    this._dragPreviewOptions_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._dragPreviewOptions_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._dragPreviewOptions_0_flag = AttributeUpdaterFlag.INITIAL;
+                    hookDragPreviewOptions(peer, (undefined as DragPreviewOptions | undefined), (undefined as DragInteractionOptions | undefined | undefined));
                 }
             }
         }
@@ -5226,20 +5247,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.alignRules((undefined as AlignRuleOption | undefined));
-                }
-            }
-        }
-        if (modifier._alignRules_1_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._alignRules_1_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.alignRules(modifier._alignRules_1_0value);
-                    break;
-                }
-                default: {
-                    this.alignRules((undefined as LocalizedAlignRuleOptions | undefined));
+                    this.alignRules((undefined as AlignRuleOption | LocalizedAlignRuleOptions | undefined));
                 }
             }
         }
@@ -5347,6 +5355,19 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
+        if (modifier._allowDrop_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._allowDrop_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.allowDrop(modifier._allowDrop_0_0value);
+                    break;
+                }
+                default: {
+                    this.allowDrop((undefined as Array<uniformTypeDescriptor.UniformDataType> | null | undefined));
+                }
+            }
+        }
         if (modifier._draggable_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._draggable_0_flag) {
@@ -5370,6 +5391,19 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     this.dragPreview((undefined as CustomBuilder | DragItemInfo | string | undefined));
+                }
+            }
+        }
+        if (modifier._dragPreviewOptions_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._dragPreviewOptions_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.dragPreviewOptions(modifier._dragPreviewOptions_0_0value, modifier._dragPreviewOptions_0_1value);
+                    break;
+                }
+                default: {
+                    this.dragPreviewOptions((undefined as DragPreviewOptions | undefined), (undefined as DragInteractionOptions | undefined | undefined));
                 }
             }
         }
@@ -7533,7 +7567,7 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    alignRules(value: AlignRuleOption | undefined): this {
+    alignRules(value: AlignRuleOption | LocalizedAlignRuleOptions | undefined): this {
         if (((this._alignRules_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._alignRules_0_flag = AttributeUpdaterFlag.UPDATE
@@ -7541,17 +7575,6 @@ export class CommonMethodModifier implements CommonMethod {
         } else
         {
             this._alignRules_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    alignRules(value: LocalizedAlignRuleOptions | undefined): this {
-        if (((this._alignRules_1_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._alignRules_1_flag = AttributeUpdaterFlag.UPDATE
-            this._alignRules_1_0value = value
-        } else
-        {
-            this._alignRules_1_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
@@ -7640,6 +7663,17 @@ export class CommonMethodModifier implements CommonMethod {
         } else
         {
             this._onDragEnd_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    allowDrop(value: Array<uniformTypeDescriptor.UniformDataType> | null | undefined): this {
+        if (((this._allowDrop_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._allowDrop_0_flag = AttributeUpdaterFlag.UPDATE
+            this._allowDrop_0_0value = value
+        } else
+        {
+            this._allowDrop_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
@@ -8444,6 +8478,18 @@ export class CommonMethodModifier implements CommonMethod {
         } else
         {
             this._dragPreview_1_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    dragPreviewOptions(value: DragPreviewOptions | undefined, options?: DragInteractionOptions): this {
+        if (((this._dragPreviewOptions_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || (true))
+        {
+            this._dragPreviewOptions_0_flag = AttributeUpdaterFlag.UPDATE
+            this._dragPreviewOptions_0_0value = value
+            this._dragPreviewOptions_0_1value = options
+        } else
+        {
+            this._dragPreviewOptions_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

@@ -36,7 +36,8 @@ public:
     static void SetMenuOptions(FrameNode* frameNode, NavigationMenuOptions&& opt);
     static void CreateBackButton(const RefPtr<NavDestinationGroupNode>& navDestinationNode);
     static void CreateImageButton(const RefPtr<NavDestinationGroupNode>& navDestinationNode);
-    static RefPtr<NG::FrameNode> CreateFrameNode(int32_t nodeId, std::function<void()>&& deepRenderFunc = nullptr);
+    static RefPtr<NG::FrameNode> CreateFrameNode(
+        int32_t nodeId, const RefPtr<NavPathInfo>& navPathInfo, std::function<void()>&& deepRenderFunc = nullptr);
     static void SetSystemTransitionType(FrameNode* frameNode, NG::NavigationSystemTransitionType type);
     static void SetOnActive(FrameNode* frameNode, std::function<void(int32_t)>&& onActive);
     static void SetOnInactive(FrameNode* frameNode, std::function<void(int32_t)>&& onInactive);

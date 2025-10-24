@@ -218,7 +218,6 @@ HWTEST_F(DragEventTestNg, DragEventActuatorOnCollectTouchTargetTest003, TestSize
      */
     dragEventActuator->OnCollectTouchTarget(
         COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult, responseLinkResult);
-
     EXPECT_NE(dragEventActuator->panRecognizer_->onActionStart_, nullptr);
     EXPECT_NE(dragEventActuator->panRecognizer_->onActionUpdate_, nullptr);
     EXPECT_NE(dragEventActuator->panRecognizer_->onActionEnd_, nullptr);

@@ -14,6 +14,7 @@
  */
 #include "test/unittest/core/base/view_abstract_test_ng.h"
 
+#include "core/common/ace_engine.h"
 #include "core/components_ng/base/view_abstract_model_static.h"
 
 using namespace testing;
@@ -111,5 +112,56 @@ HWTEST_F(ViewAbstractTestStatic, SetBackgroundImagePosition, TestSize.Level1)
      */
     ViewAbstractModelStatic::SetBackgroundImagePosition(frameNode, bgImgPosition, true);
     EXPECT_FALSE(renderContext->GetBackgroundImagePosition().has_value());
+}
+
+/**
+ * @tc.name: BindContextMenuStatic001
+ * @tc.desc: Test the BindContextMenuStatic
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestStatic, BindContextMenuStatic001, TestSize.Level1)
+{
+    const RefPtr<FrameNode> mainNode = FrameNode::CreateFrameNode("main", 6, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(mainNode, nullptr);
+    ViewStackProcessor::GetInstance()->Push(mainNode);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<SelectTheme>();
+    theme->expandDisplay_ = true;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    auto pipelineContext = container->GetPipelineContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto containerId = pipelineContext->GetInstanceId();
+    AceEngine& aceEngine = AceEngine::Get();
+    aceEngine.AddContainer(containerId, MockContainer::container_);
+    aceEngine.AddContainer(containerId, MockContainer::container_);
+    std::function<void()> flagFunc = []() { flag++; };
+    std::vector<NG::OptionParam> params = {};
+    std::function<void()> buildFunc;
+    MenuParam menuParam;
+    std::function<void()> previewBuildFunc = nullptr;
+    auto type = ResponseType::LONG_PRESS;
+    menuParam.isShowInSubWindow = false;
+    menuParam.previewMode = MenuPreviewMode::IMAGE;
+    buildFunc = []() { flag++; };
+    menuParam.isShowHoverImage = false;
+    menuParam.contextMenuRegisterType = ContextMenuRegisterType::CUSTOM_TYPE;
+    menuParam.isShow = true;
+
+    ViewAbstractModelStatic::BindContextMenuStatic(
+        mainNode, type, std::move(buildFunc), menuParam, std::move(previewBuildFunc));
+    menuParam.previewMode = MenuPreviewMode::CUSTOM;
+    ViewAbstractModelStatic::BindContextMenuStatic(
+        mainNode, type, std::move(buildFunc), menuParam, std::move(previewBuildFunc));
+    menuParam.isShow = false;
+    ViewAbstractModelStatic::BindContextMenuStatic(
+        mainNode, type, std::move(buildFunc), menuParam, std::move(previewBuildFunc));
+    menuParam.isShow = true;
+    buildFunc = nullptr;
+    ViewAbstractModelStatic::BindContextMenuStatic(
+        mainNode, type, std::move(buildFunc), menuParam, std::move(previewBuildFunc));
+    EXPECT_NE(mainNode, nullptr);
 }
 } // namespace OHOS::Ace::NG

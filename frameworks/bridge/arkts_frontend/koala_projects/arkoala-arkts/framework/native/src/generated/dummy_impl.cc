@@ -3628,26 +3628,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void SetAlignRulesWithAlignRuleOptionTypedValueImpl(Ark_NativePointer node,
-                                                        const Opt_AlignRuleOption* value)
+    void SetAlignRulesImpl(Ark_NativePointer node,
+                           const Opt_Union_AlignRuleOption_LocalizedAlignRuleOptions* value)
     {
         if (!needGroupedLog(1))
         {
             return;
         }
-        string out("setAlignRulesWithAlignRuleOptionTypedValue(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void SetAlignRulesWithLocalizedAlignRuleOptionsTypedValueImpl(Ark_NativePointer node,
-                                                                  const Opt_LocalizedAlignRuleOptions* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setAlignRulesWithLocalizedAlignRuleOptionsTypedValue(");
+        string out("setAlignRules(");
         WriteToString(&out, value);
         out.append(") \n");
         appendGroupedLog(1, out);
@@ -21413,8 +21401,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetMarkAnchorImpl,
             CommonMethodModifier::SetOffsetImpl,
             CommonMethodModifier::SetEnabledImpl,
-            CommonMethodModifier::SetAlignRulesWithAlignRuleOptionTypedValueImpl,
-            CommonMethodModifier::SetAlignRulesWithLocalizedAlignRuleOptionsTypedValueImpl,
+            CommonMethodModifier::SetAlignRulesImpl,
             CommonMethodModifier::SetAspectRatioImpl,
             CommonMethodModifier::SetClickEffectImpl,
             CommonMethodModifier::SetOnDragStartImpl,
@@ -30086,37 +30073,29 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return nullptr;
     }
-    Ark_NativePointer CreateByRawPtrImpl(Ark_FrameNode peer,
-                                         Ark_FrameNode pointer)
+    Ark_NativePointer CreateByRawPtrImpl(Ark_NativePointer ptr)
     {
-        if (!needGroupedLog(1))
-        {
+        if (!needGroupedLog(1)) {
             return nullptr;
         }
         string out("createByRawPtr(");
-        WriteToString(&out, peer);
-        out.append(", ");
-        WriteToString(&out, pointer);
+        WriteToString(&out, ptr);
         out.append(") \n");
         out.append("[return nullptr] \n");
         appendGroupedLog(1, out);
         return nullptr;
     }
-    Ark_FrameNode UnWrapRawPtrImpl(Ark_FrameNode peer,
-                                   Ark_NativePointer pointer)
+    Ark_NativePointer UnWrapRawPtrImpl(Ark_NativePointer ptr)
     {
-        if (!needGroupedLog(1))
-        {
-            return reinterpret_cast<Ark_FrameNode>(300);
+        if (!needGroupedLog(1)) {
+            return nullptr;
         }
         string out("unWrapRawPtr(");
-        WriteToString(&out, peer);
-        out.append(", ");
-        WriteToString(&out, pointer);
+        WriteToString(&out, ptr);
         out.append(") \n");
-        out.append("[return reinterpret_cast<Ark_FrameNode>(300)] \n");
+        out.append("[return nullptr] \n");
         appendGroupedLog(1, out);
-        return reinterpret_cast<Ark_FrameNode>(300);
+        return nullptr;
     }
     Ark_UICommonEvent GetCommonEventImpl(Ark_FrameNode peer)
     {
@@ -40274,6 +40253,19 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     } // TabsControllerAccessor
+    namespace TabsExtenderAccessor {
+    void ApplyAttributesFinishImpl(Ark_NativePointer node)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("ApplyAttributesFinish(");
+        WriteToString(&out, node);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    } // TabsExtenderAccessor
     namespace TapGestureEventAccessor {
     void DestroyPeerImpl(Ark_TapGestureEvent peer)
     {
@@ -46497,6 +46489,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct TabsControllerPeer {
         virtual ~TabsControllerPeer() = default;
     };
+    const GENERATED_ArkUITabsExtenderAccessor* GetTabsExtenderAccessor()
+    {
+        static const GENERATED_ArkUITabsExtenderAccessor TabsExtenderAccessorImpl {
+            TabsExtenderAccessor::ApplyAttributesFinishImpl,
+        };
+        return &TabsExtenderAccessorImpl;
+    }
+
     const GENERATED_ArkUITapGestureEventAccessor* GetTapGestureEventAccessor()
     {
         static const GENERATED_ArkUITapGestureEventAccessor TapGestureEventAccessorImpl {
@@ -47250,6 +47250,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetTabBarSymbolAccessor,
             GetTabContentTransitionProxyAccessor,
             GetTabsControllerAccessor,
+            GetTabsExtenderAccessor,
             GetTapGestureEventAccessor,
             GetTapRecognizerAccessor,
             GetTextAreaControllerAccessor,

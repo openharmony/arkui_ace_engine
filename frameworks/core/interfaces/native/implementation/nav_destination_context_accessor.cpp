@@ -15,6 +15,7 @@
 
 #include "base/memory/referenced.h"
 #include "core/interfaces/native/implementation/nav_destination_context_peer.h"
+#include "core/interfaces/native/implementation/nav_path_stack_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/components_ng/pattern/navigation/navigation_route.h"
@@ -68,21 +69,49 @@ Opt_RouteMapConfig GetConfigInRouteMapImpl(Ark_NavDestinationContext peer)
 }
 Ark_NavPathInfo GetPathInfoImpl(Ark_NavDestinationContext peer)
 {
-    return {};
+    CHECK_NULL_RETURN(peer, nullptr);
+    auto navDestination = peer->handler;
+    CHECK_NULL_RETURN(navDestination, nullptr);
+    auto tsPathInfo = AceType::DynamicCast<NavigationContext::JSNavPathInfoStatic>(navDestination->GetNavPathInfo());
+    CHECK_NULL_RETURN(tsPathInfo, nullptr);
+    NavigationContext::PathInfo pathInfo(
+        tsPathInfo->GetName(), tsPathInfo->GetParam(), tsPathInfo->GetOnPop(), tsPathInfo->GetIsEntry());
+    return Converter::ArkValue<Ark_NavPathInfo>(pathInfo);
 }
+
 void SetPathInfoImpl(Ark_NavDestinationContext peer,
                      Ark_NavPathInfo pathInfo)
 {
-    LOGE("NavDestinationContext doesn't support set path info");
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(pathInfo);
+    auto navDestination = peer->handler;
+    CHECK_NULL_VOID(navDestination);
+    auto tsPathInfo = AceType::DynamicCast<NavigationContext::JSNavPathInfoStatic>(navDestination->GetNavPathInfo());
+    CHECK_NULL_VOID(tsPathInfo);
+    auto info = Converter::Convert<NavigationContext::PathInfo>(pathInfo);
+    tsPathInfo->SetName(info.name_);
+    tsPathInfo->SetParam(info.param_);
+    tsPathInfo->SetOnPop(info.onPop_);
+    tsPathInfo->SetIsEntry(info.isEntry_);
 }
 Ark_NavPathStack GetPathStackImpl(Ark_NavDestinationContext peer)
 {
-    return {};
+    CHECK_NULL_RETURN(peer, nullptr);
+    auto navDestination = peer->handler;
+    CHECK_NULL_RETURN(navDestination, nullptr);
+    auto navPathStack =
+        AceType::DynamicCast<NavigationContext::NavigationStack>(navDestination->GetNavigationStack().Upgrade());
+    CHECK_NULL_RETURN(navPathStack, nullptr);
+    return Converter::ArkValue<Ark_NavPathStack>(navPathStack);
 }
 void SetPathStackImpl(Ark_NavDestinationContext peer,
                       Ark_NavPathStack pathStack)
 {
-    LOGE("NavDestinationContext doesn't support set nav path stack");
+    CHECK_NULL_VOID(peer && peer->handler);
+    CHECK_NULL_VOID(pathStack);
+    auto navPathStack = pathStack->GetNavPathStack();
+    CHECK_NULL_VOID(navPathStack);
+    peer->handler->SetNavigationStack(navPathStack);
 }
 Opt_String GetNavDestinationIdImpl(Ark_NavDestinationContext peer)
 {
@@ -94,7 +123,10 @@ Opt_String GetNavDestinationIdImpl(Ark_NavDestinationContext peer)
 void SetNavDestinationIdImpl(Ark_NavDestinationContext peer,
                              const Opt_String* navDestinationId)
 {
-    LOGE("NavDestinationContext doesn't support set nav destination id");
+    CHECK_NULL_VOID(peer && peer->handler);
+    CHECK_NULL_VOID(navDestinationId);
+    auto id = Converter::OptConvertPtr<std::string>(navDestinationId).value_or("");
+    peer->handler->SetNavDestinationId(std::atol(id.c_str()));
 }
 } // NavDestinationContextAccessor
 const GENERATED_ArkUINavDestinationContextAccessor* GetNavDestinationContextAccessor()

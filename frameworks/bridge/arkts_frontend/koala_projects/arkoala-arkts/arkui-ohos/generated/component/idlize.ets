@@ -1139,14 +1139,13 @@ export class FrameNodeExtender {
         const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_createTypedFrameNode(type)
         return retval
     }
-    static createByRawPtr_serialize(peer: FrameNode, pointer: FrameNode): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_createByRawPtr(extractors.toFrameNodePtr(peer), extractors.toFrameNodePtr(pointer))
+    static createByRawPtr_serialize(ptr: KPointer): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_createByRawPtr(ptr)
         return retval
     }
-    static unWrapRawPtr_serialize(peer: FrameNode, pointer: KPointer): FrameNode {
-        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_unWrapRawPtr(extractors.toFrameNodePtr(peer), pointer)
-        const obj : FrameNode = extractors.fromFrameNodePtr(retval)
-        return obj
+    static unWrapRawPtr_serialize(ptr: KPointer): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_unWrapRawPtr(ptr)
+        return retval
     }
     static getCommonEvent_serialize(peer: FrameNode): UICommonEvent {
         const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getCommonEvent(extractors.toFrameNodePtr(peer))
@@ -1392,15 +1391,11 @@ export class FrameNodeExtender {
         const type_casted = type as (string)
         return FrameNodeExtender.createTypedFrameNode_serialize(type_casted)
     }
-    public static createByRawPtr(peer: FrameNode, pointer: FrameNode): KPointer {
-        const peer_casted = peer as (FrameNode)
-        const pointer_casted = pointer as (FrameNode)
-        return FrameNodeExtender.createByRawPtr_serialize(peer_casted, pointer_casted)
+    public static createByRawPtr(ptr: KPointer): KPointer {
+        return FrameNodeExtender.createByRawPtr_serialize(ptr)
     }
-    public static unWrapRawPtr(peer: FrameNode, pointer: KPointer): FrameNode {
-        const peer_casted = peer as (FrameNode)
-        const pointer_casted = pointer as (KPointer)
-        return FrameNodeExtender.unWrapRawPtr_serialize(peer_casted, pointer_casted)
+    public static unWrapRawPtr(pointer: KPointer): KPointer {
+        return FrameNodeExtender.unWrapRawPtr_serialize(pointer)
     }
     public static getCommonEvent(peer: FrameNode): UICommonEvent {
         const peer_casted = peer as (FrameNode)
@@ -3682,6 +3677,16 @@ export class SystemOps {
         const color_casted = color as (number)
         const overlayColor_casted = overlayColor as (number)
         return SystemOps.blendColorByColorMetrics_serialize(color_casted, overlayColor_casted)
+    }
+}
+export class TabsExtender {
+    static ApplyAttributesFinish_serialize(node: KPointer): void {
+        ArkUIGeneratedNativeModule._TabsExtender_ApplyAttributesFinish(node)
+    }
+    public static ApplyAttributesFinish(node: KPointer): void {
+        const node_casted = node as (KPointer)
+        TabsExtender.ApplyAttributesFinish_serialize(node_casted)
+        return
     }
 }
 export class UIContextAtomicServiceBar {

@@ -43,7 +43,7 @@ import { SymbolGlyphModifier } from "../SymbolGlyphModifier";
 import { TextModifier } from "../TextModifier";
 import { default as EventHub } from "application.EventHub";
 import { default as UIAbilityContext } from "application.UIAbilityContext";
-import { CommonMethod, StateStyles, ArkCommonMethodComponent, CustomProperty, GestureMask, GestureType, Gesture, GestureGroup, UIGestureEvent, DragPreviewOptions, DragInteractionOptions, UniformDataType, DragEventInternal } from "#generated";
+import { CommonMethod, StateStyles, ArkCommonMethodComponent, ArkCommonMethodPeer, CustomProperty, GestureMask, GestureType, Gesture, GestureGroup, UIGestureEvent, DragPreviewOptions, DragInteractionOptions, UniformDataType, DragEventInternal } from "#generated";
 import { CommonMethodModifier } from "../CommonMethodModifier"
 import { ArkXComponentComponent, XComponentOptions, XComponentParameters, NativeXComponentParameters } from "#generated";
 
@@ -58,9 +58,10 @@ import { PathStackUtils } from "../base/ArkNavPathStack"
 import { PageMapBuilder } from "../component/builder";
 import { NavigationOpsHandWritten } from "./NavigationOpsHandWritten";
 import { int32 } from "@koalaui/common"
-import { ArkImageComponent, ResourceStr, ImageContent, ImageAIOptions } from "#generated";
+import { ArkImageComponent, ResourceStr, ImageContent, ImageAIOptions, ArkTabsComponent } from "#generated";
 import { ArkWaterFlowComponent, WaterFlowOptions } from "#generated";
 import { ImageOpsHandWritten } from "./ImageOpsHandWritten";
+import { TabsOpsHandWritten } from "./TabsOpsHandWritten";
 import { WaterFlowHandWritten } from "./WaterFlowHandWritten";
 import { XComponentOpsHandWritten } from "./XComponentOpsHandWritten";
 import { PeerNode } from '../PeerNode';
@@ -120,20 +121,38 @@ export function hookGestureModifier(commonMethod: ArkCommonMethodComponent, valu
     value_casted.applyGesture(gestureEvent as UIGestureEvent);
 }
 
-export function hookAllowDropAttribute(node: ArkCommonMethodComponent, value: Array<UniformDataType> | null | undefined) : void {
-    if (!node) {
-        return
+export function hookAllowDrop(node: ArkCommonMethodComponent | ArkCommonMethodPeer, value: Array<UniformDataType> | null | undefined) : void {
+  if (!node) {
+      return
+  }
+  if (value === null) {
+    if (node instanceof ArkCommonMethodComponent) {
+      let nodeComponent = node as ArkCommonMethodComponent
+      ArkUIAniModule._Drag_Set_AllowDrop_Null(nodeComponent.getPeer().getPeerPtr())
+    } else if (node instanceof ArkCommonMethodPeer) {
+      let nodePeer = node as ArkCommonMethodPeer
+      ArkUIAniModule._Drag_Set_AllowDrop_Null(nodePeer.getPeerPtr())
     }
-    if (value === null) {
-        ArkUIAniModule._Drag_Set_AllowDrop_Null(node.getPeer().getPeerPtr())
-        return
-    }
-    let array = value as (Array<UniformDataType> | undefined)
-    ArkUIAniModule._Drag_Set_AllowDrop(node.getPeer().getPeerPtr(), array)
+    return
+  }
+  let array = value as (Array<UniformDataType> | undefined)
+  if (node instanceof ArkCommonMethodComponent) {
+    let nodeComponent = node as ArkCommonMethodComponent
+    ArkUIAniModule._Drag_Set_AllowDrop(nodeComponent.getPeer().getPeerPtr(), array)
+  } else if (node instanceof ArkCommonMethodPeer) {
+    let nodePeer = node as ArkCommonMethodPeer
+    ArkUIAniModule._Drag_Set_AllowDrop(nodePeer.getPeerPtr(), array)
+  }
 }
 
-export function hookDragPreviewOptions(node: ArkCommonMethodComponent, value: DragPreviewOptions | undefined, options?: DragInteractionOptions) {
-    ArkUIAniModule._Drag_Set_DragPreviewOptions(node.getPeer().getPeerPtr(), value, options)
+export function hookDragPreviewOptions(node: ArkCommonMethodComponent | ArkCommonMethodPeer, value: DragPreviewOptions | undefined, options?: DragInteractionOptions) {
+  if (node instanceof ArkCommonMethodComponent) {
+    let nodeComponent = node as ArkCommonMethodComponent
+    ArkUIAniModule._Drag_Set_DragPreviewOptions(nodeComponent.getPeer().getPeerPtr(), value, options)
+  } else if (node instanceof ArkCommonMethodPeer) {
+    let nodePeer = node as ArkCommonMethodPeer
+    ArkUIAniModule._Drag_Set_DragPreviewOptions(nodePeer.getPeerPtr(), value, options)
+  }
 }
 
 export function hookDragEventStartDataLoading(event: DragEventInternal, options: unifiedDataChannel.GetDataParams) : string {
@@ -239,6 +258,10 @@ export * from "./content_modifiers/ContentModifierHooks";
 
 export function hookImageSetImageOptions(component: ArkImageComponent, src: image.PixelMap | ResourceStr | DrawableDescriptor | ImageContent, imageAIOptions?: ImageAIOptions): void {
     ImageOpsHandWritten.hookImageSetImageOptionsImpl(component, src, imageAIOptions);
+}
+
+export function hookTabsApplyAttributesFinish(node: ArkTabsComponent): void  {
+    TabsOpsHandWritten.hookTabsApplyAttributesFinish(node);
 }
 
 export function hookPushPathMethod(pathStack: NavPathStack, info: NavPathInfo, animated?: boolean | NavigationOptions | undefined): void {

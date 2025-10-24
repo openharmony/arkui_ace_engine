@@ -1260,10 +1260,11 @@ void AssignCast(std::optional<uint32_t>& dst, const Ark_FocusPriority& src)
 template<>
 OHOS::Ace::Color Convert(const Ark_ColorMetrics& src)
 {
-    if (src) {
-        return Color(src->colorValue.value);
-    }
-    return Color();
+    uint8_t red = static_cast<uint8_t>(src.red_);
+    uint8_t green = static_cast<uint8_t>(src.green_);
+    uint8_t blue = static_cast<uint8_t>(src.blue_);
+    uint8_t alpha = static_cast<uint8_t>(src.alpha_);
+    return Color::FromRGBO(red, green, blue, alpha);
 }
 
 template<>
@@ -3711,34 +3712,49 @@ void SetEnabledImpl(Ark_NativePointer node,
     }
     ViewAbstract::SetEnabled(frameNode, *convValue);
 }
-void SetAlignRulesWithAlignRuleOptionTypedValueImpl(Ark_NativePointer node,
-                                                    const Opt_AlignRuleOption* value)
+void SetAlignRulesInternal(FrameNode *frameNode, std::optional<std::map<AlignDirection, AlignRule>> convMapValue,
+                           std::optional<BiasOpt> convBiasValue)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convMapValue = Converter::OptConvertPtr<std::map<AlignDirection, AlignRule>>(value);
-    ViewAbstractModelStatic::SetAlignRules(frameNode, convMapValue);
-    auto optValue = Converter::GetOptPtr(value);
-    auto convBiasValue = optValue ? Converter::OptConvert<BiasOpt>(optValue->bias) : std::nullopt;
+    if (convMapValue) {
+        ViewAbstractModelStatic::SetAlignRules(frameNode, convMapValue);
+    } else {
+        ViewAbstractModelStatic::SetAlignRules(frameNode, std::map<AlignDirection, AlignRule>());
+    }
     if (convBiasValue.has_value()) {
         ViewAbstractModelStatic::SetBias(frameNode, convBiasValue.value().first, convBiasValue.value().second);
     } else {
         ViewAbstractModelStatic::SetBias(frameNode, std::nullopt);
     }
 }
-void SetAlignRulesWithLocalizedAlignRuleOptionsTypedValueImpl(Ark_NativePointer node,
-                                                              const Opt_LocalizedAlignRuleOptions* value)
+void SetAlignRulesImpl(Ark_NativePointer node,
+                       const Opt_Union_AlignRuleOption_LocalizedAlignRuleOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convMapValue = Converter::OptConvertPtr<std::map<AlignDirection, AlignRule>>(value);
-    ViewAbstractModelStatic::SetAlignRules(frameNode, convMapValue);
     auto optValue = Converter::GetOptPtr(value);
-    auto convBiasValue = optValue ? Converter::OptConvert<BiasOpt>(optValue->bias) : std::nullopt;
-    if (convBiasValue.has_value()) {
-        ViewAbstractModelStatic::SetBias(frameNode, convBiasValue.value().first, convBiasValue.value().second);
-    } else {
+    if (!optValue) {
+        ViewAbstractModelStatic::SetAlignRules(frameNode, std::map<AlignDirection, AlignRule>());
         ViewAbstractModelStatic::SetBias(frameNode, std::nullopt);
+        return;
+    }
+    switch (optValue->selector) {
+        case CASE_0: {
+            auto alignRulesvalue = optValue->value0;
+            auto convMapValue = Converter::OptConvert<std::map<AlignDirection, AlignRule>>(alignRulesvalue);
+            auto convBiasValue = optValue ? Converter::OptConvert<BiasOpt>(alignRulesvalue.bias) : std::nullopt;
+            SetAlignRulesInternal(frameNode, convMapValue, convBiasValue);
+            break;
+        }
+        case CASE_1: {
+            auto alignRulesvalue = optValue->value1;
+            auto convMapValue = Converter::OptConvert<std::map<AlignDirection, AlignRule>>(alignRulesvalue);
+            auto convBiasValue = optValue ? Converter::OptConvert<BiasOpt>(alignRulesvalue.bias) : std::nullopt;
+            SetAlignRulesInternal(frameNode, convMapValue, convBiasValue);
+            break;
+        }
+        default:
+            LOGE("ARKOALA:SetAlignRulesImpl: Unexpected value->selector: %{public}d\n", optValue->selector);
+            return;
     }
 }
 void SetAspectRatioImpl(Ark_NativePointer node,
@@ -5195,6 +5211,7 @@ void SetBindPopupImpl(Ark_NativePointer node,
 }
 void BindMenuBase(Ark_NativePointer node,
     const Opt_Boolean *isShow,
+    const bool setShow,
     const Opt_Union_Array_MenuElement_CustomBuilder* content,
     const Opt_MenuOptions* options)
 {
@@ -5208,7 +5225,7 @@ void BindMenuBase(Ark_NativePointer node,
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     menuParam.isShowInSubWindow = theme->GetExpandDisplay();
-    menuParam.setShow = false;
+    menuParam.setShow = setShow;
     menuParam.isShow = Converter::OptConvertPtr<bool>(isShow).value_or(menuParam.isShow);
     auto menuOptions = Converter::OptConvertPtr<Ark_MenuOptions>(options);
     if (menuOptions) {
@@ -5232,21 +5249,23 @@ void BindMenuBase(Ark_NativePointer node,
                 ViewAbstractModelStatic::BindMenu(frameNode, {}, std::move(builder), menuParam);
                 }, node);
         },
-        []() {});
+        [frameNode, node, menuParam]() {
+            ViewAbstractModelStatic::BindMenu(frameNode, {}, nullptr, menuParam);
+        });
 }
 void SetBindMenu0Impl(Ark_NativePointer node,
                       const Opt_Union_Array_MenuElement_CustomBuilder* content,
                       const Opt_MenuOptions* options)
 {
     auto show = ArkValue<Opt_Boolean>(false);
-    BindMenuBase(node, &show, content, options);
+    BindMenuBase(node, &show, false, content, options);
 }
 void SetBindMenu1Impl(Ark_NativePointer node,
                       const Opt_Boolean* isShow,
                       const Opt_Union_Array_MenuElement_CustomBuilder* content,
                       const Opt_MenuOptions* options)
 {
-    BindMenuBase(node, isShow, content, options);
+    BindMenuBase(node, isShow, true, content, options);
 }
 void ParseContextMenuParam(MenuParam& menuParam, const std::optional<Ark_ContextMenuOptions>& menuOption,
     const ResponseType type, Ark_NativePointer node)
@@ -5777,8 +5796,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetMarkAnchorImpl,
         CommonMethodModifier::SetOffsetImpl,
         CommonMethodModifier::SetEnabledImpl,
-        CommonMethodModifier::SetAlignRulesWithAlignRuleOptionTypedValueImpl,
-        CommonMethodModifier::SetAlignRulesWithLocalizedAlignRuleOptionsTypedValueImpl,
+        CommonMethodModifier::SetAlignRulesImpl,
         CommonMethodModifier::SetAspectRatioImpl,
         CommonMethodModifier::SetClickEffectImpl,
         CommonMethodModifier::SetOnDragStartImpl,
