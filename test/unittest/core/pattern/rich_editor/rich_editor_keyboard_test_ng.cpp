@@ -83,7 +83,7 @@ void RichEditorKeyboardTestNg::TearDownTestSuite()
  * @tc.desc: test NeedSoftKeyboard
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorKeyboardTestNg, NeedSoftKeyboard001, TestSize.Level1)
+HWTEST_F(RichEditorKeyboardTestNg, NeedSoftKeyboard001, TestSize.Level0)
 {
     /**
      * @tc.step: step1. Get frameNode and pattern.
@@ -103,7 +103,7 @@ HWTEST_F(RichEditorKeyboardTestNg, NeedSoftKeyboard001, TestSize.Level1)
  * @tc.desc: test OnVirtualKeyboardAreaChanged
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorKeyboardTestNg, VirtualKeyboardAreaChanged001, TestSize.Level1)
+HWTEST_F(RichEditorKeyboardTestNg, VirtualKeyboardAreaChanged001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. init and call function.
@@ -125,7 +125,7 @@ HWTEST_F(RichEditorKeyboardTestNg, VirtualKeyboardAreaChanged001, TestSize.Level
  * @tc.desc: test OnVirtualKeyboardAreaChanged
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorKeyboardTestNg, VirtualKeyboardAreaChanged002, TestSize.Level1)
+HWTEST_F(RichEditorKeyboardTestNg, VirtualKeyboardAreaChanged002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. init and call function.
@@ -151,7 +151,7 @@ HWTEST_F(RichEditorKeyboardTestNg, VirtualKeyboardAreaChanged002, TestSize.Level
  * @tc.desc: test KeyboardAppearance
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorKeyboardTestNg, KeyboardAppearance001, TestSize.Level1)
+HWTEST_F(RichEditorKeyboardTestNg, KeyboardAppearance001, TestSize.Level0)
 {
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
@@ -169,7 +169,7 @@ HWTEST_F(RichEditorKeyboardTestNg, KeyboardAppearance001, TestSize.Level1)
  * @tc.desc: test RequestKeyboard
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorKeyboardTestNg, RichEditorPatternTestRequestKeyboard001, TestSize.Level1)
+HWTEST_F(RichEditorKeyboardTestNg, RichEditorPatternTestRequestKeyboard001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -190,7 +190,7 @@ HWTEST_F(RichEditorKeyboardTestNg, RichEditorPatternTestRequestKeyboard001, Test
  * @tc.desc: test CloseCustomKeyboard
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorKeyboardTestNg, RichEditorPatternTestCloseCustomKeyboard001, TestSize.Level1)
+HWTEST_F(RichEditorKeyboardTestNg, RichEditorPatternTestCloseCustomKeyboard001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -219,7 +219,7 @@ HWTEST_F(RichEditorKeyboardTestNg, RichEditorPatternTestCloseCustomKeyboard001, 
  * @tc.desc: test RequestCustomKeyboard
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorKeyboardTestNg, RequestCustomKeyboard, TestSize.Level1)
+HWTEST_F(RichEditorKeyboardTestNg, RequestCustomKeyboard, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -250,7 +250,7 @@ HWTEST_F(RichEditorKeyboardTestNg, RequestCustomKeyboard, TestSize.Level1)
  * @tc.desc: test RequestKeyboard
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorKeyboardTestNg, RequestKeyboard001, TestSize.Level1)
+HWTEST_F(RichEditorKeyboardTestNg, RequestKeyboard001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -273,7 +273,7 @@ HWTEST_F(RichEditorKeyboardTestNg, RequestKeyboard001, TestSize.Level1)
  * @tc.desc: test CloseKeyboard
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorKeyboardTestNg, CloseKeyboard001, TestSize.Level1)
+HWTEST_F(RichEditorKeyboardTestNg, CloseKeyboard001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -288,7 +288,7 @@ HWTEST_F(RichEditorKeyboardTestNg, CloseKeyboard001, TestSize.Level1)
  * @tc.desc: test CloseKeyboard
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorKeyboardTestNg, CloseKeyboard002, TestSize.Level1)
+HWTEST_F(RichEditorKeyboardTestNg, CloseKeyboard002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -305,7 +305,7 @@ HWTEST_F(RichEditorKeyboardTestNg, CloseKeyboard002, TestSize.Level1)
  * @tc.desc: test CloseKeyboard
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorKeyboardTestNg, CloseKeyboard003, TestSize.Level1)
+HWTEST_F(RichEditorKeyboardTestNg, CloseKeyboard003, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -321,7 +321,7 @@ HWTEST_F(RichEditorKeyboardTestNg, CloseKeyboard003, TestSize.Level1)
  * @tc.desc: test RequestKeyboardToEdit
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorKeyboardTestNg, RequestKeyboardToEdit001, TestSize.Level1)
+HWTEST_F(RichEditorKeyboardTestNg, RequestKeyboardToEdit001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -340,7 +340,7 @@ HWTEST_F(RichEditorKeyboardTestNg, RequestKeyboardToEdit001, TestSize.Level1)
  * @tc.desc: test RequestKeyboardToEdit
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorKeyboardTestNg, RequestKeyboardToEdit002, TestSize.Level1)
+HWTEST_F(RichEditorKeyboardTestNg, RequestKeyboardToEdit002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -353,7 +353,7 @@ HWTEST_F(RichEditorKeyboardTestNg, RequestKeyboardToEdit002, TestSize.Level1)
  * @tc.desc: test ResetKeyboardIfNeed
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorKeyboardTestNg, ResetKeyboardIfNeed001, TestSize.Level1)
+HWTEST_F(RichEditorKeyboardTestNg, ResetKeyboardIfNeed001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -375,7 +375,7 @@ HWTEST_F(RichEditorKeyboardTestNg, ResetKeyboardIfNeed001, TestSize.Level1)
  * @tc.desc: test ResetKeyboardIfNeed
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorKeyboardTestNg, ResetKeyboardIfNeed002, TestSize.Level1)
+HWTEST_F(RichEditorKeyboardTestNg, ResetKeyboardIfNeed002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -399,7 +399,7 @@ HWTEST_F(RichEditorKeyboardTestNg, ResetKeyboardIfNeed002, TestSize.Level1)
  * @tc.desc: test ResetKeyboardIfNeed
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorKeyboardTestNg, ResetKeyboardIfNeed003, TestSize.Level1)
+HWTEST_F(RichEditorKeyboardTestNg, ResetKeyboardIfNeed003, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -423,7 +423,7 @@ HWTEST_F(RichEditorKeyboardTestNg, ResetKeyboardIfNeed003, TestSize.Level1)
  * @tc.desc: test ResetKeyboardIfNeed
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorKeyboardTestNg, ResetKeyboardIfNeed004, TestSize.Level1)
+HWTEST_F(RichEditorKeyboardTestNg, ResetKeyboardIfNeed004, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. init and call function.
@@ -450,7 +450,7 @@ HWTEST_F(RichEditorKeyboardTestNg, ResetKeyboardIfNeed004, TestSize.Level1)
  * @tc.desc: test PerformAction
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorKeyboardTestNg, PerformAction001, TestSize.Level1)
+HWTEST_F(RichEditorKeyboardTestNg, PerformAction001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -483,7 +483,7 @@ HWTEST_F(RichEditorKeyboardTestNg, PerformAction001, TestSize.Level1)
  * @tc.desc: test GetCrossOverHeight
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorKeyboardTestNg, GetCrossOverHeight001, TestSize.Level1)
+HWTEST_F(RichEditorKeyboardTestNg, GetCrossOverHeight001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -500,7 +500,7 @@ HWTEST_F(RichEditorKeyboardTestNg, GetCrossOverHeight001, TestSize.Level1)
  * @tc.desc: test GetCrossOverHeight
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorKeyboardTestNg, GetCrossOverHeight002, TestSize.Level1)
+HWTEST_F(RichEditorKeyboardTestNg, GetCrossOverHeight002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -523,7 +523,7 @@ HWTEST_F(RichEditorKeyboardTestNg, GetCrossOverHeight002, TestSize.Level1)
  * @tc.desc: test GetCrossOverHeight
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorKeyboardTestNg, GetCrossOverHeight003, TestSize.Level1)
+HWTEST_F(RichEditorKeyboardTestNg, GetCrossOverHeight003, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -546,7 +546,7 @@ HWTEST_F(RichEditorKeyboardTestNg, GetCrossOverHeight003, TestSize.Level1)
  * @tc.desc: test GetCrossOverHeight
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorKeyboardTestNg, GetCrossOverHeight004, TestSize.Level1)
+HWTEST_F(RichEditorKeyboardTestNg, GetCrossOverHeight004, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -575,7 +575,7 @@ HWTEST_F(RichEditorKeyboardTestNg, GetCrossOverHeight004, TestSize.Level1)
  * @tc.desc: test GetCrossOverHeight
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorKeyboardTestNg, GetCrossOverHeight005, TestSize.Level1)
+HWTEST_F(RichEditorKeyboardTestNg, GetCrossOverHeight005, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -604,7 +604,7 @@ HWTEST_F(RichEditorKeyboardTestNg, GetCrossOverHeight005, TestSize.Level1)
  * @tc.desc: test HandlePointWithTransform
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorKeyboardTestNg, HandlePointWithTransform001, TestSize.Level1)
+HWTEST_F(RichEditorKeyboardTestNg, HandlePointWithTransform001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -621,7 +621,7 @@ HWTEST_F(RichEditorKeyboardTestNg, HandlePointWithTransform001, TestSize.Level1)
  * @tc.desc: test HandlePointWithTransform
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorKeyboardTestNg, HandlePointWithTransform002, TestSize.Level1)
+HWTEST_F(RichEditorKeyboardTestNg, HandlePointWithTransform002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -638,7 +638,7 @@ HWTEST_F(RichEditorKeyboardTestNg, HandlePointWithTransform002, TestSize.Level1)
  * @tc.desc: test for keyboardAvoidance
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorKeyboardTestNg, KeyboardAvoidance001, TestSize.Level1)
+HWTEST_F(RichEditorKeyboardTestNg, KeyboardAvoidance001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. setCustomKeyboard
@@ -670,7 +670,7 @@ HWTEST_F(RichEditorKeyboardTestNg, KeyboardAvoidance001, TestSize.Level1)
  * @tc.desc: test whether the custom keyboard supports the collision avoidance function
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorKeyboardTestNg, SupportAvoidanceTest, TestSize.Level1)
+HWTEST_F(RichEditorKeyboardTestNg, SupportAvoidanceTest, TestSize.Level0)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     auto overlayManager = pipeline->GetOverlayManager();
@@ -692,7 +692,7 @@ HWTEST_F(RichEditorKeyboardTestNg, SupportAvoidanceTest, TestSize.Level1)
  * @tc.desc: test RichEditorGetCrossOverHeight
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorKeyboardTestNg, RichEditorGetCrossOverHeight001, TestSize.Level1)
+HWTEST_F(RichEditorKeyboardTestNg, RichEditorGetCrossOverHeight001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. init and call function.
