@@ -2229,6 +2229,9 @@ ArkUINativeModuleValue FrameNodeBridge::AddSupportedStates(ArkUIRuntimeCallInfo*
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     CHECK_NULL_RETURN(!firstArg.IsNull(), defaultReturnValue);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     CHECK_NULL_RETURN(secondArg->IsNumber(), defaultReturnValue);
     auto state = secondArg->ToNumber(vm)->Value();
@@ -2238,17 +2241,16 @@ ArkUINativeModuleValue FrameNodeBridge::AddSupportedStates(ArkUIRuntimeCallInfo*
     auto obj = thirdArg->ToObject(vm);
     auto containerId = Container::CurrentIdSafely();
     panda::Local<panda::FunctionRef> func = obj;
-    std::function<void(int64_t)> callback = [vm, func = panda::CopyableGlobal(vm, func), containerId](
-                                                int64_t currentState) {
+    auto flag = IsCustomFrameNode(frameNode);
+    std::function<void(int64_t)> callback = [vm, func = JSFuncObjRef(panda::CopyableGlobal(vm, func), flag),
+                                                containerId](int64_t currentState) {
         panda::LocalScope pandaScope(vm);
         ContainerScope scope(containerId);
-        auto container = Container::Current();
-        CHECK_NULL_VOID(container);
-        auto frontend = container->GetFrontend();
-        CHECK_NULL_VOID(frontend);
+        auto function = func.Lock();
+        CHECK_NULL_VOID(!function.IsEmpty() && function->IsFunction(vm));
         Local<JSValueRef> stateValues = panda::NumberRef::New(vm, currentState);
         panda::Local<panda::JSValueRef> params[1] = { stateValues };
-        func->Call(vm, func.ToLocal(), params, 1);
+        function->Call(vm, function.ToLocal(), params, 1);
     };
     int isExcludeInner = GetIsExcludeInner(runtimeCallInfo, 3);
     GetArkUINodeModifiers()->getUIStateModifier()->addSupportedUIState(
