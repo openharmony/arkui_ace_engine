@@ -182,16 +182,50 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_SetSelectedIndex
     pattern->totalItemCount_ = 5;
     pattern->selectedIndex_ = 1;
     pattern->SetSelectedIndex(3);
-    EXPECT_EQ(pattern->targetIndex_, 3);
+    EXPECT_EQ(pattern->selectedIndex_, 3);
 
     /**
      * @tc.steps: step3. test SetSelectedIndex with invalid index.
      * @tc.expected: step3. the selected index is set to 0.
      */
     pattern->SetSelectedIndex(-1);
-    EXPECT_EQ(pattern->targetIndex_, 0);
+    EXPECT_EQ(pattern->selectedIndex_, -1);
 
     pattern->SetSelectedIndex(10);
+    EXPECT_EQ(pattern->selectedIndex_, 10);
+}
+
+/**
+ * @tc.name: ContainerPickerPatternTest_SetTargetIndex001
+ * @tc.desc: Test SetTargetIndex function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_SetTargetIndex001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. set totalItemCount and test SetTargetIndex with valid index.
+     * @tc.expected: step2. the target index is set correctly.
+     */
+    pattern->totalItemCount_ = 5;
+    pattern->selectedIndex_ = 1;
+    pattern->SetTargetIndex(3);
+    EXPECT_EQ(pattern->targetIndex_, 3);
+
+    /**
+     * @tc.steps: step3. test SetTargetIndex with invalid index.
+     * @tc.expected: step3. the target index is set to 0.
+     */
+    pattern->SetTargetIndex(-1);
+    EXPECT_EQ(pattern->targetIndex_, 0);
+
+    pattern->SetTargetIndex(10);
     EXPECT_EQ(pattern->targetIndex_, 0);
 }
 
@@ -505,7 +539,7 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_SwipeTo001, Test
      * @tc.expected: step2. function sets targetIndex_ and marks as dirty.
      */
     pattern->selectedIndex_ = 1;
-    pattern->isTargetAnimationRunning_ = false;
+    pattern->isAnimationRunning_ = false;
 
     // Call function under test
     pattern->SwipeTo(3);
@@ -536,7 +570,7 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_SwipeTo002, Test
     // Test with same index as current selection
     pattern->selectedIndex_ = 2;
     pattern->targetIndex_ = 0; // Different initial targetIndex_
-    pattern->isTargetAnimationRunning_ = false;
+    pattern->isAnimationRunning_ = false;
 
     pattern->SwipeTo(2);
     EXPECT_EQ(pattern->targetIndex_, 0); // Should not change targetIndex_
@@ -544,7 +578,7 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_SwipeTo002, Test
     // Test with animation already running
     pattern->selectedIndex_ = 1;
     pattern->targetIndex_ = 0; // Different from selectedIndex_
-    pattern->isTargetAnimationRunning_ = true;
+    pattern->isAnimationRunning_ = true;
 
     pattern->SwipeTo(3);
     EXPECT_EQ(pattern->targetIndex_, 0); // Should not change targetIndex_ when animation is running
@@ -808,7 +842,7 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_Play002, TestSiz
     // Test with velocity below threshold
     pattern->dragStartTime_ = pattern->GetCurrentTime() - 2.0; // More than MIN_TIME
     pattern->dragEndTime_ = pattern->GetCurrentTime();
-    
+
     bool result2 = pattern->Play(100.0); // Velocity below threshold
     EXPECT_FALSE(result2);
 }
@@ -879,11 +913,11 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_HandleDragUpdate
 }
 
 /**
- * @tc.name: ContainerPickerPatternTest_CreateAnimation001
- * @tc.desc: Test CreateAnimation function for initial animation setup
+ * @tc.name: ContainerPickerPatternTest_CreateScrollProperty001
+ * @tc.desc: Test CreateScrollProperty function for initial animation setup
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_CreateAnimation001, TestSize.Level1)
+HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_CreateScrollProperty001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create picker and get pattern.
@@ -894,23 +928,23 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_CreateAnimation0
     ASSERT_NE(pattern, nullptr);
 
     /**
-     * @tc.steps: step2. ensure animationCreated_ is false and call CreateAnimation.
+     * @tc.steps: step2. ensure animationCreated_ is false and call CreateScrollProperty.
      * @tc.expected: step2. animation is created and animationCreated_ is set to true.
      */
     pattern->animationCreated_ = false;
 
-    pattern->CreateAnimation();
+    pattern->CreateScrollProperty();
 
     EXPECT_TRUE(pattern->animationCreated_);
     EXPECT_NE(pattern->scrollProperty_, nullptr);
 }
 
 /**
- * @tc.name: ContainerPickerPatternTest_StopInertialRollingAnimation001
- * @tc.desc: Test StopInertialRollingAnimation function
+ * @tc.name: ContainerPickerPatternTest_StopAnimation001
+ * @tc.desc: Test StopAnimation function
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_StopInertialRollingAnimation001, TestSize.Level1)
+HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_StopAnimation001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create picker and get pattern.
@@ -921,16 +955,17 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_StopInertialRoll
     ASSERT_NE(pattern, nullptr);
 
     /**
-     * @tc.steps: step2. setup snapOffsetProperty_ and call StopInertialRollingAnimation.
+     * @tc.steps: step2. setup snapOffsetProperty_ and call StopAnimation.
      * @tc.expected: step2. toss status is stopped and animation is reset.
      */
-    pattern->isInertialRollingAnimationRunning_ = true;
+    pattern->isAnimationRunning_ = true;
     pattern->lastAnimationScroll_ = 100.0f;
-    pattern->CreateSnapProperty();
+    pattern->CreateScrollProperty();
+    pattern->CreateSpringAnimation(0.0f);
 
-    pattern->StopInertialRollingAnimation();
+    pattern->StopAnimation();
 
-    EXPECT_FALSE(pattern->isInertialRollingAnimationRunning_);
+    EXPECT_FALSE(pattern->isAnimationRunning_);
 }
 
 /**
@@ -1005,7 +1040,7 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_AccumulatingTerm
      * @tc.expected: step2. Function returns true and updates totalExpand correctly.
      */
     frameNode->isScrollableAxis_ = false;
-    ExpandEdges padding {10, 20, 30, 40};
+    ExpandEdges padding { 10, 20, 30, 40 };
     RectF rect {};
 
     // Call function under test
@@ -1035,7 +1070,7 @@ HWTEST_F(ContainerPickerPatternTest,
      * @tc.expected: step2. Function returns false.
      */
     frameNode->isScrollableAxis_ = true;
-    ExpandEdges padding {10, 20, 30, 40};
+    ExpandEdges padding { 10, 20, 30, 40 };
     RectF rect {};
 
     // Call function under test
@@ -1169,10 +1204,10 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_IsEnableHaptic_E
 }
 
 /**
-    * @tc.name: ContainerPickerPatternTest_InitOrRefreshHapticController_Init001
-    * @tc.desc: Test InitOrRefreshHapticController function to initialize haptic controller
-    * @tc.type: FUNC
-    */
+ * @tc.name: ContainerPickerPatternTest_InitOrRefreshHapticController_Init001
+ * @tc.desc: Test InitOrRefreshHapticController function to initialize haptic controller
+ * @tc.type: FUNC
+ */
 HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_InitOrRefreshHapticController_Init001, TestSize.Level1)
 {
     /**
@@ -1257,8 +1292,8 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_HandleTargetInde
  * @tc.desc: Test ShortestDistanceBetweenCurrentAndTarget function with different indices
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_ShortestDistanceBetweenCurrentAndTarget001,
-    TestSize.Level1)
+HWTEST_F(
+    ContainerPickerPatternTest, ContainerPickerPatternTest_ShortestDistanceBetweenCurrentAndTarget001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create picker and get pattern.
@@ -1284,31 +1319,6 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_ShortestDistance
     // Test with loop mode
     pattern->isLoop_ = true;
     EXPECT_EQ(pattern->ShortestDistanceBetweenCurrentAndTarget(0), 200.f);
-}
-
-/**
- * @tc.name: ContainerPickerPatternTest_StopSpringAnimation001
- * @tc.desc: Test StopSpringAnimation function
- * @tc.type: FUNC
- */
-HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_StopSpringAnimation001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create picker and get pattern.
-     */
-    auto frameNode = CreateContainerPickerNode();
-    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
-    ASSERT_NE(pattern, nullptr);
-
-    /**
-     * @tc.steps: step2. setup spring animation and call StopSpringAnimation.
-     * @tc.expected: step2. spring animation is stopped correctly.
-     */
-    pattern->CreateSpringAnimation(0.0f);
-    pattern->isSpringAnimationRunning_ = true;
-
-    pattern->StopSpringAnimation();
-    EXPECT_FALSE(pattern->isSpringAnimationRunning_);
 }
 
 /**
@@ -1506,17 +1516,20 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_PlaySpringAnimat
     auto frameNode = CreateContainerPickerNode();
     auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
     ASSERT_NE(pattern, nullptr);
+    CreateItemPosition();
 
     /**
      * @tc.steps: step2. setup spring animation properties and call PlaySpringAnimation.
      * @tc.expected: step2. spring animation is played.
      */
-    pattern->CreateSpringProperty();
+    pattern->CreateScrollProperty();
     pattern->CreateSpringAnimation(0.0f);
-    pattern->isSpringAnimationRunning_ = false;
+    pattern->isAnimationRunning_ = false;
+    pattern->yLast_ = 100.0f;
+    pattern->height_ = 500.0f;
 
-    // We can't directly verify the animation is played, but we check the function completes
     pattern->PlaySpringAnimation();
+    EXPECT_TRUE(NearZero(pattern->yLast_));
 }
 
 /**
@@ -1537,15 +1550,16 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_PlayTargetAnimat
      * @tc.steps: step2. setup animation properties and call PlayTargetAnimation.
      * @tc.expected: step2. target animation is played.
      */
+    CreateItemPosition();
     pattern->selectedIndex_ = 1;
     pattern->targetIndex_ = 3;
     pattern->pickerItemHeight_ = 100.0f;
     pattern->currentOffset_ = 100.0f;
-    CreateItemPosition();
     pattern->totalItemCount_ = 5;
+    pattern->yLast_ = 100.0f;
 
-    // We can't directly verify the animation is played, but we check the function completes
     pattern->PlayTargetAnimation();
+    EXPECT_TRUE(NearZero(pattern->yLast_));
 }
 
 /**
@@ -1596,10 +1610,8 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_CreateSpringAnim
      * @tc.steps: step2. call CreateSpringAnimation and verify springAnimation_ is created.
      * @tc.expected: step2. springAnimation_ is not null after creation.
      */
-    pattern->springAnimation_ = nullptr;
-    pattern->CreateSpringProperty();
     pattern->CreateSpringAnimation(0.0f);
-    EXPECT_NE(pattern->springAnimation_, nullptr);
+    EXPECT_NE(pattern->scrollAnimation_, nullptr);
 }
 
 /**
@@ -1643,21 +1655,21 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_SetDefaultTextSt
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
     ASSERT_NE(pattern, nullptr);
-    
+
     auto textPattern = AceType::MakeRefPtr<TextPattern>();
     auto textNode = CreateChildNode(V2::TEXT_ETS_TAG, textPattern);
     ASSERT_NE(textNode, nullptr);
-    
+
     // Add text node as child
     frameNode->AddChild(textNode);
-    
+
     /**
      * @tc.steps: step2. call SetDefaultTextStyle with defaultColor and verify text color is set correctly.
      * @tc.expected: step2. text color is updated to defaultColor and isUseDefaultFontColor_ is set to true.
      */
     Color defaultColor = Color::RED;
     pattern->SetDefaultTextStyle(textNode, defaultColor);
-    
+
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
     EXPECT_TRUE(textLayoutProperty->GetTextColor().has_value());
@@ -1680,14 +1692,14 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_UpdateDefaultTex
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
     ASSERT_NE(pattern, nullptr);
-    
+
     auto textPattern = AceType::MakeRefPtr<TextPattern>();
     auto textNode = CreateChildNode(V2::TEXT_ETS_TAG, textPattern);
     ASSERT_NE(textNode, nullptr);
-    
+
     // Add text node as child
     frameNode->AddChild(textNode);
-    
+
     /**
      * @tc.steps: step2. set isUseDefaultFontColor_ to true and call UpdateDefaultTextStyle.
      * @tc.expected: step2. text color is updated to new defaultColor.
@@ -1695,12 +1707,12 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_UpdateDefaultTex
     pattern->isUseDefaultFontColor_ = true;
     Color newDefaultColor = Color::BLUE;
     pattern->UpdateDefaultTextStyle(textNode, newDefaultColor);
-    
+
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
     EXPECT_TRUE(textLayoutProperty->GetTextColor().has_value());
     EXPECT_TRUE(textLayoutProperty->GetTextColor().value() == newDefaultColor);
-    
+
     /**
      * @tc.steps: step3. set isUseDefaultFontColor_ to false and call UpdateDefaultTextStyle.
      * @tc.expected: step3. text color is not updated when isUseDefaultFontColor_ is false.
@@ -1708,7 +1720,7 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_UpdateDefaultTex
     pattern->isUseDefaultFontColor_ = false;
     Color anotherColor = Color::GREEN;
     pattern->UpdateDefaultTextStyle(textNode, anotherColor);
-    
+
     // Color should remain BLUE
     EXPECT_TRUE(textLayoutProperty->GetTextColor().value() == newDefaultColor);
 }

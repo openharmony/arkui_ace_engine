@@ -687,7 +687,7 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
 
     algorithm_->MeasureWidth(layoutWrapper, contentIdealSize);
     EXPECT_TRUE(contentIdealSize.Width().has_value());
-    EXPECT_TRUE(NearEqual(algorithm_->GetContentCrossSize(), 910.0f));
+    EXPECT_TRUE(NearEqual(algorithm_->GetContentCrossSize(), 200.0f));
 }
 
 /**
@@ -1359,6 +1359,7 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_SetG
      * @tc.steps: step1. Set various properties
      */
     algorithm_->SetIsLoop(true);
+    algorithm_->SetTotalItemCount(7);
     algorithm_->SetSelectedIndex(2);
     algorithm_->SetContentMainSize(500.0f);
     algorithm_->SetHeight(600.0f);
