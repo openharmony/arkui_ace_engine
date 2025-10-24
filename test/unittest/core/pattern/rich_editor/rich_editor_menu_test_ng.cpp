@@ -1187,7 +1187,7 @@ HWTEST_F(RichEditorMenuTestNg, UpdateAIMenuOptions001, TestSize.Level1)
 }
 
 /**
- * @tc.name: UpdateAIMenuOptions
+ * @tc.name: UpdateAIMenuOptions002
  * @tc.desc: test UpdateAIMenuOptions function with valid textSelector
  *           check multi ai entity in selection range
  * @tc.type: FUNC
