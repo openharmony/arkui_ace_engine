@@ -2039,6 +2039,7 @@ private:
     void UpdateBlurReason();
     AceAutoFillType TextContentTypeToAceAutoFillType(const TextContentType& type);
     bool CheckAutoFillType(const AceAutoFillType& aceAutoFillAllType, bool isFromKeyBoard = false);
+    void ToJsonValueForApi22(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     bool GetAutoFillTriggeredStateByType(const AceAutoFillType& autoFillType);
     void SetAutoFillTriggeredStateByType(const AceAutoFillType& autoFillType);
     AceAutoFillType GetAutoFillType(bool isNeedToHitType = true);

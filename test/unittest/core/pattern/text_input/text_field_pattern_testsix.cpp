@@ -562,4 +562,36 @@ HWTEST_F(TextFieldPatternTestSix, TestUpdateCounterContentAndStyle001, TestSize.
     textFieldLayoutProperty->UpdateCounterTextOverflowColor(Color::BLACK);
     EXPECT_EQ(textFieldLayoutProperty->GetCounterTextOverflowColor(), Color::BLACK);
 }
+
+/**
+ * @tc.name: ApplyInnerBorderColor
+ * @tc.desc: test ApplyInnerBorderColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestSix, ApplyInnerBorderColor001, TestSize.Level0)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    auto textFieldLayoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    auto paintProperty = pattern->GetPaintProperty<TextFieldPaintProperty>();
+    auto renderContext = textFieldNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    ASSERT_NE(textFieldLayoutProperty, nullptr);
+    ASSERT_NE(paintProperty, nullptr);
+    pattern->ApplyInnerBorderColor();
+    EXPECT_EQ(paintProperty->GetInnerBorderColor(), Color::BLACK);
+    textFieldLayoutProperty->UpdateCounterTextOverflowColor(Color::BLUE);
+    pattern->ApplyInnerBorderColor();
+    EXPECT_EQ(paintProperty->GetInnerBorderColor(), Color::BLUE);
+    BorderWidthProperty borderWidthProperty;
+    paintProperty->UpdateBorderWidthFlagByUser(borderWidthProperty);
+    pattern->ApplyInnerBorderColor();
+    EXPECT_EQ(renderContext->GetBorderColor().has_value(), true);
+    EXPECT_EQ(renderContext->GetBorderColor()->leftColor.value(), Color::BLUE);
+    textFieldLayoutProperty->ResetCounterTextOverflowColor();
+    pattern->ApplyInnerBorderColor();
+    EXPECT_EQ(renderContext->GetBorderColor()->leftColor.value(), Color::BLACK);
+}
 } // namespace OHOS::Ace::NG
