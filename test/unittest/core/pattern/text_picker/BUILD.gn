@@ -48,5 +48,7 @@ ace_unittest("text_picker_column_test_ng") {
     "text_picker_column_extend_test_ng.cpp",
     "text_picker_column_test_ng.cpp",
     "text_picker_column_test_one_ng.cpp",
+    "text_picker_column_test_three_ng.cpp",
+    "text_picker_column_test_two_ng.cpp",
   ]
 }
