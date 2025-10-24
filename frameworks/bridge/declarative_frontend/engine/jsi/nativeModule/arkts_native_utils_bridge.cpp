@@ -71,6 +71,8 @@ ArkUINativeModuleValue NativeUtilsBridge::CreateStrongRef(EcmaVM* vm, const RefP
     nativeStrongRef->SetConcurrentNativePointerField(vm, 0, nativeRef, &DestructorInterceptor<NativeStrongRef>);
     nativeStrongRef->Set(vm, panda::StringRef::NewFromUtf8(vm, "getNativeHandle"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NativeUtilsBridge::GetNativeHandleForStrong));
+    nativeStrongRef->Set(vm, panda::StringRef::NewFromUtf8(vm, "getNativeHandleVal"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NativeUtilsBridge::GetNativeHandleValForStrong));
     nativeStrongRef->Set(vm, panda::StringRef::NewFromUtf8(vm, "dispose"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NativeUtilsBridge::Dispose));
     return nativeStrongRef;
@@ -106,6 +108,18 @@ ArkUINativeModuleValue NativeUtilsBridge::GetNativeHandleForStrong(ArkUIRuntimeC
     auto* strong = GetPointerField<NativeStrongRef>(runtimeCallInfo);
     if (strong != nullptr && strong->strongRef) {
         return panda::NativePointerRef::New(vm, strong->RawPtr());
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue NativeUtilsBridge::GetNativeHandleValForStrong(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    auto* strong = GetPointerField<NativeStrongRef>(runtimeCallInfo);
+    if (strong != nullptr && strong->strongRef) {
+        int64_t ptrVal = reinterpret_cast<int64_t>(strong->RawPtr());
+        return panda::NumberRef::New(vm, ptrVal);
     }
     return panda::JSValueRef::Undefined(vm);
 }

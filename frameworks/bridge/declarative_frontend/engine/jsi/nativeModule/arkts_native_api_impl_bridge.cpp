@@ -143,6 +143,8 @@ void RegisterRenderNodeCommonAttributes(Local<panda::ObjectRef> renderNode, Ecma
 {
     renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "createRenderNode"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::CreateRenderNode));
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "createRenderNodeWithPtrVal"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::CreateRenderNodeWithPtrVal));
     renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "appendChild"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::AppendChild));
     renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "insertChildAfter"),

@@ -23,6 +23,7 @@ namespace OHOS::Ace::NG {
 class RenderNodeBridge {
 public:
     static ArkUINativeModuleValue CreateRenderNode(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue CreateRenderNodeWithPtrVal(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static void FireDrawCallback(EcmaVM* vm, JsWeak<panda::CopyableGlobal<panda::ObjectRef>> obj,
         NG::DrawingContext& context, Local<panda::StringRef> funcName);
     static void SetOnDraw(const RefPtr<FrameNode>& frameNode, ArkUIRuntimeCallInfo* runtimeCallInfo);
