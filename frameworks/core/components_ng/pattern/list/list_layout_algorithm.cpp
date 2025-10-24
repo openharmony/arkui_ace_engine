@@ -1328,6 +1328,18 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t st
         }
     } while (LayoutReachEnd(currentEndPos + chainOffset, endMainPos + endFixPos, currentIndex) || forwardFeature_);
     currentEndPos += chainOffset;
+
+    while (itemPosition_.size() > 1 && !targetIndex_) {
+        auto pos = itemPosition_.rbegin();
+        float chainDelta = GetChainOffset(pos->first);
+        if (GreatNotEqual(pos->second.endPos + chainDelta, endMainPos) &&
+            GreatOrEqual(pos->second.startPos + chainDelta, endMainPos)) {
+            recycledItemPosition_.emplace(pos->first, pos->second);
+            itemPosition_.erase(pos->first);
+        } else {
+            break;
+        }
+    }
     // adjust offset.
     UpdateSnapCenterContentOffset(layoutWrapper);
     if (LessNotEqual(currentEndPos, endMainPos - contentEndOffset_) && !itemPosition_.empty()) {
