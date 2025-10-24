@@ -242,6 +242,8 @@ void RepeatNode::InitAllChildrenDragManager(bool init)
 void RepeatNode::DumpInfo()
 {
     DumpLog::GetInstance().AddDesc("VirtualScroll: false");
+    DumpLog::GetInstance().AddDesc(std::string("length of source data:")
+                                        .append(std::to_string(ids_.size()).c_str()));
 }
 
 } // namespace OHOS::Ace::NG
