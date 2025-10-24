@@ -13007,13 +13007,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
-    Ark_NativePointer CreateByRawPtrImpl(Ark_FrameNode peer,
-                                         Ark_FrameNode pointer)
+    Ark_NativePointer CreateByRawPtrImpl(Ark_NativePointer ptr)
     {
         return {};
     }
-    Ark_FrameNode UnWrapRawPtrImpl(Ark_FrameNode peer,
-                                   Ark_NativePointer pointer)
+    Ark_NativePointer UnWrapRawPtrImpl(Ark_NativePointer ptr)
     {
         return {};
     }

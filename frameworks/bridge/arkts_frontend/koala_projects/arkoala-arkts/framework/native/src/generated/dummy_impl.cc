@@ -30073,37 +30073,29 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return nullptr;
     }
-    Ark_NativePointer CreateByRawPtrImpl(Ark_FrameNode peer,
-                                         Ark_FrameNode pointer)
+    Ark_NativePointer CreateByRawPtrImpl(Ark_NativePointer ptr)
     {
-        if (!needGroupedLog(1))
-        {
+        if (!needGroupedLog(1)) {
             return nullptr;
         }
         string out("createByRawPtr(");
-        WriteToString(&out, peer);
-        out.append(", ");
-        WriteToString(&out, pointer);
+        WriteToString(&out, ptr);
         out.append(") \n");
         out.append("[return nullptr] \n");
         appendGroupedLog(1, out);
         return nullptr;
     }
-    Ark_FrameNode UnWrapRawPtrImpl(Ark_FrameNode peer,
-                                   Ark_NativePointer pointer)
+    Ark_NativePointer UnWrapRawPtrImpl(Ark_NativePointer ptr)
     {
-        if (!needGroupedLog(1))
-        {
-            return reinterpret_cast<Ark_FrameNode>(300);
+        if (!needGroupedLog(1)) {
+            return nullptr;
         }
         string out("unWrapRawPtr(");
-        WriteToString(&out, peer);
-        out.append(", ");
-        WriteToString(&out, pointer);
+        WriteToString(&out, ptr);
         out.append(") \n");
-        out.append("[return reinterpret_cast<Ark_FrameNode>(300)] \n");
+        out.append("[return nullptr] \n");
         appendGroupedLog(1, out);
-        return reinterpret_cast<Ark_FrameNode>(300);
+        return nullptr;
     }
     Ark_UICommonEvent GetCommonEventImpl(Ark_FrameNode peer)
     {

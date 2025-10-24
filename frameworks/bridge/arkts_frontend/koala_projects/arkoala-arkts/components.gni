@@ -458,6 +458,7 @@ arkui_files = [
   "arkui-preprocessed/arkui/stateManagement/tools/stateMgmtDFX.ets",
   "arkui-preprocessed/arkui/stateManagement/utils.ets",
   "arkui-preprocessed/arkui/transfer/ColorFilterTransfer.ets",
+  "arkui-preprocessed/arkui/transfer/FrameNodeTransfer.ets",
   "arkui-preprocessed/arkui/typedNode/ArkBadgeNode.ets",
   "arkui-preprocessed/arkui/typedNode/ArkBaseNode.ets",
   "arkui-preprocessed/arkui/typedNode/ArkBlankNode.ets",
