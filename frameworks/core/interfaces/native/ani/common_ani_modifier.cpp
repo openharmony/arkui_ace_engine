@@ -82,6 +82,7 @@ constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
 const int32_t FLAG_DRAW_FRONT = 1;
 const int32_t FLAG_DRAW_CONTENT = 1 << 1;
 const int32_t FLAG_DRAW_BEHIND = 1 << 2;
+const int32_t FLAG_DRAW_FOREGROUND = 1 << 3;
 
 uint32_t ColorAlphaAdapt(uint32_t origin)
 {
@@ -981,8 +982,8 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
     return &impl;
 }
 
-void SetDrawModifier(ani_long ptr, uint32_t flag,
-    void* fnDrawBehindFun, void* fnDrawContentFun, void* fnDrawFrontFun)
+void SetDrawModifier(ani_long ptr, uint32_t flag, void* fnDrawBehindFun, void* fnDrawContentFun, void* fnDrawFrontFun,
+    void* fnDrawForegroundFun)
 {
     auto* frameNode = reinterpret_cast<NG::FrameNode*>(ptr);
     CHECK_NULL_VOID(frameNode && frameNode->IsSupportDrawModifier());
@@ -1001,6 +1002,11 @@ void SetDrawModifier(ani_long ptr, uint32_t flag,
         auto* fnDrawFrontFunPtr =
             static_cast<std::function<void(NG::DrawingContext & drawingContext)>*>(fnDrawFrontFun);
         drawModifier->drawFrontFunc = *fnDrawFrontFunPtr;
+    }
+    if (flag & FLAG_DRAW_FOREGROUND) {
+        auto* fnDrawForegroundFunPtr =
+            static_cast<std::function<void(NG::DrawingContext & drawingContext)>*>(fnDrawForegroundFun);
+        drawModifier->drawForegroundFunc = *fnDrawForegroundFunPtr;
     }
     frameNode->SetDrawModifier(drawModifier);
     if (frameNode) {

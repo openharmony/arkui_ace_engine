@@ -1,9 +1,11 @@
 // this file will be merged with component/xxx.ets by compiler pre-process script
 
+import { PeerNode } from "../PeerNode.ets"
 import { WrappedBuilder, CustomBuilderT } from "./builder"
 import { GestureGroupHandler, GestureHandler, GesturePriority } from "./gesture"
 import { GestureOps } from "./idlize"
 import { ArkUIAniModule } from "arkui.ani"
+import { DrawContext } from "arkui.Graphics"
 
 export interface AttributeModifier<T> {
     applyNormalAttribute(instance: T): void {}
@@ -22,6 +24,24 @@ export interface AnimatableArithmetic<T> {
 
 export interface ContentModifier<T = void> {
   applyContent(): WrappedBuilder<CustomBuilderT<T>>
+}
+
+export class DrawModifier {
+    weakRefOfPeerNode?: WeakRef<PeerNode>;
+    public drawBehind(drawContext: DrawContext): void { }
+
+    public drawContent(drawContext: DrawContext): void { }
+
+    public drawFront(drawContext: DrawContext): void { }
+
+    public drawForeground(drawContext: DrawContext): void { }
+
+    public invalidate(): void {
+        let peerNode: PeerNode | undefined = this.weakRefOfPeerNode?.deref();
+        if (peerNode && peerNode.peer.ptr) {
+            ArkUIAniModule._Invalidate(peerNode.peer.ptr)
+        }
+    }
 }
 
 export class UIGestureEvent {

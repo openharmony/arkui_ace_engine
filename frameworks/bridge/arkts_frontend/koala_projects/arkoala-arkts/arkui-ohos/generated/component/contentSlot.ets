@@ -23,5 +23,6 @@ import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { extractors } from "#handwritten"
 import { Content } from "arkui.Content"
 export interface ContentSlotAttribute {
+     setContentSlotOptions(content?: Content): this  {  throw new Error("Unimplemented method setContentSlotOptions") }
 }
 export type ContentSlotInterface = (content: Content) => ContentSlotAttribute;
