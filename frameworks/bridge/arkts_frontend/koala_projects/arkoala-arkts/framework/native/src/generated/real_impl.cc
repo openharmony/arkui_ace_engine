@@ -13839,6 +13839,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                            Ark_Boolean isFrozen)
     {
     }
+    Ark_Boolean DispatchKeyEventImpl(const Ark_Union_Number_String* node,
+                                     Ark_KeyEvent event)
+    {
+        return {};
+    }
     } // IUIContextAccessor
     namespace JsGeolocationAccessor {
     void DestroyPeerImpl(Ark_JsGeolocation peer)

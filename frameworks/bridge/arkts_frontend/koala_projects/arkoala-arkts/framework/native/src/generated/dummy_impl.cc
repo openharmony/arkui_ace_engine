@@ -32291,6 +32291,22 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    Ark_Boolean DispatchKeyEventImpl(const Ark_Union_Number_String* node,
+                                     Ark_KeyEvent event)
+    {
+        if (!needGroupedLog(1))
+        {
+            return 0;
+        }
+        string out("dispatchKeyEvent(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, event);
+        out.append(") \n");
+        out.append("[return 0] \n");
+        appendGroupedLog(1, out);
+        return 0;
+    }
     } // IUIContextAccessor
     namespace JsGeolocationAccessor {
     void DestroyPeerImpl(Ark_JsGeolocation peer)
@@ -45726,6 +45742,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIIUIContextAccessor IUIContextAccessorImpl {
             IUIContextAccessor::FreezeUINode0Impl,
             IUIContextAccessor::FreezeUINode1Impl,
+            IUIContextAccessor::DispatchKeyEventImpl,
         };
         return &IUIContextAccessorImpl;
     }
