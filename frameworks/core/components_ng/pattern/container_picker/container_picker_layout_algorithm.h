@@ -146,6 +146,11 @@ public:
         pickerItemHeight_ = height;
     }
 
+    float GetTopPadding() const
+    {
+        return topPadding_;
+    }
+
     void CalcMainAndMiddlePos();
 
     const LayoutConstraintF& GetLayoutConstraint() const

@@ -393,24 +393,12 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_CreateChildrenCl
     containerPickerNode->AddChild(textNode);
     containerPickerNode->AddChild(symbolNode);
 
-    RefPtr<UINode> rowUiNode = AceType::DynamicCast<UINode>(rowNode);
-    EXPECT_FALSE(rowUiNode->GetInteractionEventBindingInfo().builtInEventRegistered);
+    RefPtr<UINode> pickerUiNode = AceType::DynamicCast<UINode>(containerPickerNode);
+    ASSERT_NE(pickerUiNode, nullptr);
+    EXPECT_FALSE(pickerUiNode->GetInteractionEventBindingInfo().builtInEventRegistered);
 
-    RefPtr<UINode> imageUiNode = AceType::DynamicCast<UINode>(imageNode);
-    EXPECT_FALSE(imageUiNode->GetInteractionEventBindingInfo().builtInEventRegistered);
-
-    RefPtr<UINode> textUiNode = AceType::DynamicCast<UINode>(textNode);
-    EXPECT_FALSE(textUiNode->GetInteractionEventBindingInfo().builtInEventRegistered);
-
-    RefPtr<UINode> symbolUiNode = AceType::DynamicCast<UINode>(symbolNode);
-    EXPECT_FALSE(symbolUiNode->GetInteractionEventBindingInfo().builtInEventRegistered);
-
-    RefPtr<UINode> uiNode = AceType::DynamicCast<UINode>(containerPickerNode);
-    pattern->CreateChildrenClickEvent(uiNode);
-    EXPECT_TRUE(rowUiNode->GetInteractionEventBindingInfo().builtInEventRegistered);
-    EXPECT_TRUE(imageUiNode->GetInteractionEventBindingInfo().builtInEventRegistered);
-    EXPECT_TRUE(textUiNode->GetInteractionEventBindingInfo().builtInEventRegistered);
-    EXPECT_TRUE(symbolUiNode->GetInteractionEventBindingInfo().builtInEventRegistered);
+    pattern->CreateChildrenClickEvent();
+    EXPECT_TRUE(pickerUiNode->GetInteractionEventBindingInfo().builtInEventRegistered);
 }
 
 /**
@@ -438,46 +426,6 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_InitMouseAndPres
      */
     pattern->InitMouseAndPressEvent();
     EXPECT_TRUE(pattern->isItemClickEventCreated_);
-}
-
-/**
- * @tc.name: ContainerPickerPatternTest_CreateChildrenClickEvent_RecursiveProcessing001
- * @tc.desc: Verify that CreateChildrenClickEvent recursively processes nested container nodes.
- * @tc.type: FUNC
- */
-HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_CreateChildrenClickEvent_RecursiveProcessing001,
-    TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create container picker node and pattern.
-     */
-    auto containerPickerNode = CreateContainerPickerNode();
-    auto pattern = containerPickerNode->GetPattern<ContainerPickerPattern>();
-    ASSERT_NE(pattern, nullptr);
-
-    /**
-     * @tc.steps: step2. Create nested container nodes with FOR_EACH and ITEM tags.
-     */
-    auto forEachNode = CreateChildNode(V2::JS_FOR_EACH_ETS_TAG, AceType::MakeRefPtr<Pattern>());
-    auto itemNode = CreateChildNode(V2::JS_SYNTAX_ITEM_ETS_TAG, AceType::MakeRefPtr<Pattern>());
-    auto textNode = CreateChildNode(V2::TEXT_ETS_TAG, AceType::MakeRefPtr<TextPattern>());
-
-    containerPickerNode->AddChild(forEachNode);
-    forEachNode->AddChild(itemNode);
-    itemNode->AddChild(textNode);
-
-    /**
-     * @tc.steps: step3. Call CreateChildrenClickEvent and verify recursive processing.
-     */
-    RefPtr<UINode> uiNode = AceType::DynamicCast<UINode>(containerPickerNode);
-    // This should trigger recursive processing of the nested nodes
-    pattern->CreateChildrenClickEvent(uiNode);
-    RefPtr<UINode> forEachUiNode = AceType::DynamicCast<UINode>(forEachNode);
-    RefPtr<UINode> itemUiNode = AceType::DynamicCast<UINode>(itemNode);
-    RefPtr<UINode> textUiNode = AceType::DynamicCast<UINode>(textNode);
-    EXPECT_FALSE(forEachUiNode->GetInteractionEventBindingInfo().builtInEventRegistered);
-    EXPECT_FALSE(itemUiNode->GetInteractionEventBindingInfo().builtInEventRegistered);
-    EXPECT_TRUE(textUiNode->GetInteractionEventBindingInfo().builtInEventRegistered);
 }
 
 /**
@@ -724,38 +672,6 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_HandleDragStart0
     EXPECT_TRUE(pattern->isDragging_);
     EXPECT_EQ(pattern->mainDeltaSum_, 0.0f);
     EXPECT_EQ(pattern->yLast_, 200.0f);
-}
-
-/**
- * @tc.name: ContainerPickerPatternTest_ProcessDelta001
- * @tc.desc: Test ProcessDelta function with different delta values
- * @tc.type: FUNC
- */
-HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_ProcessDelta001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create picker and get pattern.
-     */
-    auto frameNode = CreateContainerPickerNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
-    ASSERT_NE(pattern, nullptr);
-
-    /**
-     * @tc.steps: step2. test ProcessDelta with different delta values.
-     * @tc.expected: step2. delta is processed correctly based on constraints.
-     */
-    float delta1 = 200.0f;
-    pattern->ProcessDelta(delta1, 100.0f, 0.0f);
-    EXPECT_EQ(delta1, 100.0f); // Should be clamped to mainSize
-
-    float delta2 = -150.0f;
-    pattern->ProcessDelta(delta2, 100.0f, 0.0f);
-    EXPECT_EQ(delta2, -100.0f); // Should be clamped to -mainSize
-
-    float delta3 = 70.0f;
-    pattern->ProcessDelta(delta3, 100.0f, 80.0f);
-    EXPECT_EQ(delta3, 20.0f); // Should be adjusted to not exceed mainSize when summed with deltaSum
 }
 
 /**
@@ -1769,6 +1685,420 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_OnColorConfigura
     pattern->OnColorConfigurationUpdate();
     EXPECT_TRUE(textLayoutProperty->GetTextColor().has_value());
     EXPECT_FALSE(textLayoutProperty->GetTextColor().value() == textColor);
+}
+
+/**
+ * @tc.name: ContainerPickerPatternTest_OnAroundButtonClick_ClickBreak001
+ * @tc.desc: Test OnAroundButtonClick function when clickBreak_ is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_OnAroundButtonClick_ClickBreak001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. set clickBreak_ to true and call OnAroundButtonClick.
+     * @tc.expected: step2. function returns immediately without any action.
+     */
+    pattern->clickBreak_ = true;
+    pattern->selectedIndex_ = 2;
+    pattern->targetIndex_ = std::nullopt;
+    pattern->OnAroundButtonClick(100.0f);
+    // Verify no action was taken
+    EXPECT_FALSE(pattern->targetIndex_.has_value());
+}
+
+/**
+ * @tc.name: ContainerPickerPatternTest_OnAroundButtonClick_ClickOutOfVisibleArea001
+ * @tc.desc: Test OnAroundButtonClick function when click is out of visible area
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_OnAroundButtonClick_ClickOutOfVisibleArea001,
+    TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. set up test data and call OnAroundButtonClick with click out of visible area.
+     * @tc.expected: step2. function returns immediately without any action.
+     */
+    pattern->clickBreak_ = false;
+    pattern->selectedIndex_ = 2;
+    pattern->targetIndex_ = std::nullopt;
+    pattern->height_ = 400.0f;
+    pattern->topPadding_ = 0.0f;
+
+    // Click position is outside the visible area (more than height_/2 away from middle)
+    float clickPosition = 500.0f; // Middle is at 200.0f, this is 300.0f away
+    pattern->OnAroundButtonClick(clickPosition);
+    // Verify no action was taken
+    EXPECT_FALSE(pattern->targetIndex_.has_value());
+}
+
+/**
+ * @tc.name: ContainerPickerPatternTest_OnAroundButtonClick_ClickMiddleItem001
+ * @tc.desc: Test OnAroundButtonClick function when click is on middle item
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_OnAroundButtonClick_ClickMiddleItem001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. set up test data and call OnAroundButtonClick with click on middle item.
+     * @tc.expected: step2. function returns immediately without any action.
+     */
+    pattern->clickBreak_ = false;
+    pattern->selectedIndex_ = 2;
+    pattern->targetIndex_ = std::nullopt;
+    pattern->height_ = 400.0f;
+    pattern->topPadding_ = 0.0f;
+    pattern->pickerItemHeight_ = 100.0f;
+
+    // Click position is on middle item (within pickerItemHeight_/2 of middle)
+    float clickPosition = 220.0f; // Middle is at 200.0f, this is 20.0f away (less than 50.0f)
+    pattern->OnAroundButtonClick(clickPosition);
+    // Verify no action was taken
+    EXPECT_FALSE(pattern->targetIndex_.has_value());
+}
+
+/**
+ * @tc.name: ContainerPickerPatternTest_OnAroundButtonClick_Level1Delta001
+ * @tc.desc: Test OnAroundButtonClick function with level 1 delta (click in level 1 area)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_OnAroundButtonClick_Level1Delta001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. set up test data and call OnAroundButtonClick with click in level 1 area.
+     * @tc.expected: step2. function sets target index with delta 1.
+     */
+    pattern->clickBreak_ = false;
+    pattern->selectedIndex_ = 2;
+    pattern->targetIndex_ = std::nullopt;
+    pattern->height_ = 400.0f;
+    pattern->topPadding_ = 0.0f;
+    pattern->pickerItemHeight_ = 100.0f;
+    pattern->firstAdjacentItemHeight_ = 50.0f;
+
+    // Click position is in level 1 area (between 50.0f and 100.0f away from middle)
+    float clickPosition = 270.0f; // Middle is at 200.0f, this is 70.0f away
+    pattern->OnAroundButtonClick(clickPosition);
+
+    // Verify target index is set correctly (selectedIndex_ + 1)
+    EXPECT_TRUE(pattern->targetIndex_.has_value());
+    EXPECT_EQ(pattern->targetIndex_.value(), 3);
+}
+
+/**
+ * @tc.name: ContainerPickerPatternTest_OnAroundButtonClick_Level1DeltaNegative001
+ * @tc.desc: Test OnAroundButtonClick function with negative level 1 delta (click above middle)
+ * @tc.type: FUNC
+ */
+HWTEST_F(
+    ContainerPickerPatternTest, ContainerPickerPatternTest_OnAroundButtonClick_Level1DeltaNegative001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. set up test data and call OnAroundButtonClick with click above middle in level 1 area.
+     * @tc.expected: step2. function sets target index with delta -1.
+     */
+    pattern->clickBreak_ = false;
+    pattern->selectedIndex_ = 2;
+    pattern->targetIndex_ = std::nullopt;
+    pattern->height_ = 400.0f;
+    pattern->topPadding_ = 0.0f;
+    pattern->pickerItemHeight_ = 100.0f;
+    pattern->firstAdjacentItemHeight_ = 50.0f;
+
+    float clickPosition = 130.0f; // Middle is at 200.0f, this is -70.0f away
+    pattern->OnAroundButtonClick(clickPosition);
+    // Verify target index is set correctly (selectedIndex_ - 1)
+    EXPECT_TRUE(pattern->targetIndex_.has_value());
+    EXPECT_EQ(pattern->targetIndex_.value(), 1);
+}
+
+/**
+ * @tc.name: ContainerPickerPatternTest_OnAroundButtonClick_Level2Delta001
+ * @tc.desc: Test OnAroundButtonClick function with level 2 delta (click in level 2 area)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_OnAroundButtonClick_Level2Delta001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. set up test data and call OnAroundButtonClick with click in level 2 area.
+     * @tc.expected: step2. function sets target index with delta 2.
+     */
+    pattern->clickBreak_ = false;
+    pattern->selectedIndex_ = 2;
+    pattern->targetIndex_ = std::nullopt;
+    pattern->height_ = 400.0f;
+    pattern->topPadding_ = 0.0f;
+    pattern->pickerItemHeight_ = 100.0f;
+    pattern->firstAdjacentItemHeight_ = 50.0f;
+    pattern->secondAdjacentItemHeight_ = 50.0f;
+
+    float clickPosition = 320.0f; // Middle is at 200.0f, this is 120.0f away
+    pattern->OnAroundButtonClick(clickPosition);
+    // Verify target index is set correctly (selectedIndex_ + 2)
+    EXPECT_TRUE(pattern->targetIndex_.has_value());
+    EXPECT_EQ(pattern->targetIndex_.value(), 4);
+}
+
+/**
+ * @tc.name: ContainerPickerPatternTest_OnAroundButtonClick_Level2DeltaNegative001
+ * @tc.desc: Test OnAroundButtonClick function with negative level 2 delta (click above middle in level 2 area)
+ * @tc.type: FUNC
+ */
+HWTEST_F(
+    ContainerPickerPatternTest, ContainerPickerPatternTest_OnAroundButtonClick_Level2DeltaNegative001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. set up test data and call OnAroundButtonClick with click above middle in level 2 area.
+     * @tc.expected: step2. function sets target index with delta -2.
+     */
+    pattern->clickBreak_ = false;
+    pattern->selectedIndex_ = 2;
+    pattern->targetIndex_ = std::nullopt;
+    pattern->height_ = 400.0f;
+    pattern->topPadding_ = 0.0f;
+    pattern->pickerItemHeight_ = 100.0f;
+    pattern->firstAdjacentItemHeight_ = 50.0f;
+    pattern->secondAdjacentItemHeight_ = 50.0f;
+
+    float clickPosition = 80.0f; // Middle is at 200.0f, this is -120.0f away
+    pattern->OnAroundButtonClick(clickPosition);
+    // Verify target index is set correctly (selectedIndex_ - 2)
+    EXPECT_TRUE(pattern->targetIndex_.has_value());
+    EXPECT_EQ(pattern->targetIndex_.value(), 0);
+}
+
+/**
+ * @tc.name: ContainerPickerPatternTest_OnAroundButtonClick_Level3Delta001
+ * @tc.desc: Test OnAroundButtonClick function with level 3 delta (click in level 3 area)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_OnAroundButtonClick_Level3Delta001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. set up test data and call OnAroundButtonClick with click in level 3 area.
+     * @tc.expected: step2. function sets target index with delta 3.
+     */
+    pattern->clickBreak_ = false;
+    pattern->selectedIndex_ = 2;
+    pattern->targetIndex_ = std::nullopt;
+    pattern->height_ = 400.0f;
+    pattern->topPadding_ = 0.0f;
+    pattern->pickerItemHeight_ = 100.0f;
+    pattern->firstAdjacentItemHeight_ = 50.0f;
+    pattern->secondAdjacentItemHeight_ = 50.0f;
+    pattern->thirdAdjacentItemHeight_ = 50.0f;
+
+    float clickPosition = 370.0f; // Middle is at 200.0f, this is 170.0f away
+    pattern->OnAroundButtonClick(clickPosition);
+    // Verify target index is set correctly (selectedIndex_ + 3)
+    EXPECT_TRUE(pattern->targetIndex_.has_value());
+    EXPECT_EQ(pattern->targetIndex_.value(), 5);
+}
+
+/**
+ * @tc.name: ContainerPickerPatternTest_OnAroundButtonClick_Level3DeltaNegative001
+ * @tc.desc: Test OnAroundButtonClick function with negative level 3 delta (click above middle in level 3 area)
+ * @tc.type: FUNC
+ */
+HWTEST_F(
+    ContainerPickerPatternTest, ContainerPickerPatternTest_OnAroundButtonClick_Level3DeltaNegative001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. set up test data and call OnAroundButtonClick with click above middle in level 3 area.
+     * @tc.expected: step2. function sets target index with delta -3.
+     */
+    pattern->clickBreak_ = false;
+    pattern->totalItemCount_ = 5;
+    pattern->selectedIndex_ = 2;
+    pattern->targetIndex_ = std::nullopt;
+    pattern->height_ = 400.0f;
+    pattern->topPadding_ = 0.0f;
+    pattern->pickerItemHeight_ = 100.0f;
+    pattern->firstAdjacentItemHeight_ = 50.0f;
+    pattern->secondAdjacentItemHeight_ = 50.0f;
+    pattern->thirdAdjacentItemHeight_ = 50.0f;
+
+    float clickPosition = 30.0f; // Middle is at 200.0f, this is -170.0f away
+    pattern->OnAroundButtonClick(clickPosition);
+    // Verify target index is set correctly (selectedIndex_ - 3)
+    EXPECT_TRUE(pattern->targetIndex_.has_value());
+    EXPECT_EQ(pattern->targetIndex_.value(), 4);
+}
+
+/**
+ * @tc.name: ContainerPickerPatternTest_OnAroundButtonClick_ClickBeyondAllLevels001
+ * @tc.desc: Test OnAroundButtonClick function when click is beyond all levels but still within visible area
+ * @tc.type: FUNC
+ */
+HWTEST_F(
+    ContainerPickerPatternTest, ContainerPickerPatternTest_OnAroundButtonClick_ClickBeyondAllLevels001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. set up test data and call OnAroundButtonClick with click beyond all levels but within visible
+     * area.
+     * @tc.expected: step2. function returns immediately without any action.
+     */
+    pattern->clickBreak_ = false;
+    pattern->selectedIndex_ = 2;
+    pattern->targetIndex_ = std::nullopt;
+    pattern->height_ = 500.0f;
+    pattern->topPadding_ = 0.0f;
+    pattern->pickerItemHeight_ = 100.0f;
+    pattern->firstAdjacentItemHeight_ = 50.0f;
+    pattern->secondAdjacentItemHeight_ = 50.0f;
+    pattern->thirdAdjacentItemHeight_ = 50.0f;
+
+    float clickPosition = 40.0f; // Middle is at 250.0f, this is -210.0f away (beyond 3 levels but within 250.0f)
+    pattern->OnAroundButtonClick(clickPosition);
+    EXPECT_FALSE(pattern->targetIndex_.has_value());
+}
+
+/**
+ * @tc.name: ContainerPickerPatternTest_OnAroundButtonClick_ClickBeyondAllLevels002
+ * @tc.desc: Test OnAroundButtonClick function when click is beyond all levels and isLoop is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(
+    ContainerPickerPatternTest, ContainerPickerPatternTest_OnAroundButtonClick_ClickBeyondAllLevels002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. set up test data and call OnAroundButtonClick with click beyond all levels and isLoop is false
+     * area.
+     * @tc.expected: step2. function returns immediately without any action.
+     */
+    pattern->clickBreak_ = false;
+    pattern->selectedIndex_ = 2;
+    pattern->totalItemCount_ = 5;
+    pattern->isLoop_ = false;
+    pattern->targetIndex_ = std::nullopt;
+    pattern->height_ = 400.0f;
+    pattern->topPadding_ = 0.0f;
+    pattern->pickerItemHeight_ = 100.0f;
+    pattern->firstAdjacentItemHeight_ = 50.0f;
+    pattern->secondAdjacentItemHeight_ = 50.0f;
+    pattern->thirdAdjacentItemHeight_ = 50.0f;
+
+    float clickPosition = 10.0f; // Middle is at 200.0f, this is -190.0f away (beyond 3 levels but within 200.0f)
+    pattern->OnAroundButtonClick(clickPosition);
+    // Verify no action was taken
+    EXPECT_FALSE(pattern->targetIndex_.has_value());
+
+    clickPosition = 390.0f; // Middle is at 200.0f, this is 190.0f away (beyond 3 levels but within 200.0f)
+    pattern->OnAroundButtonClick(clickPosition);
+    // Verify no action was taken
+    EXPECT_FALSE(pattern->targetIndex_.has_value());
+}
+
+/**
+ * @tc.name: ContainerPickerPatternTest_OnAroundButtonClick_WithTopPadding001
+ * @tc.desc: Test OnAroundButtonClick function with topPadding set
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_OnAroundButtonClick_WithTopPadding001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. set up test data with topPadding and call OnAroundButtonClick.
+     * @tc.expected: step2. function calculates middle position correctly with topPadding.
+     */
+    pattern->clickBreak_ = false;
+    pattern->selectedIndex_ = 2;
+    pattern->targetIndex_ = std::nullopt;
+    pattern->height_ = 400.0f;
+    pattern->topPadding_ = 50.0f;
+    pattern->pickerItemHeight_ = 100.0f;
+    pattern->firstAdjacentItemHeight_ = 50.0f;
+
+    // Click position is in level 1 area considering topPadding
+    // Middle is at height_/2 + topPadding = 200.0f + 50.0f = 250.0f
+    float clickPosition = 320.0f; // This is 70.0f away from middle (within level 1)
+    pattern->OnAroundButtonClick(clickPosition);
+
+    // Verify target index is set correctly (selectedIndex_ + 1)
+    EXPECT_TRUE(pattern->targetIndex_.has_value());
+    EXPECT_EQ(pattern->targetIndex_.value(), 3);
 }
 
 } // namespace OHOS::Ace::NG
