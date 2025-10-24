@@ -952,6 +952,23 @@ void* CreateDrawable(uint32_t type)
     return drawable;
 }
 
+void SetPixelMaps(void* object, std::vector<std::shared_ptr<OHOS::Media::PixelMap>> pixelMaps)
+{
+    void* module = FindModule();
+    if (!module) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get module");
+        return;
+    }
+    void (*setPixelMaps)(void* object, std::vector<std::shared_ptr<OHOS::Media::PixelMap>> pixelMaps) = nullptr;
+    setPixelMaps = reinterpret_cast<void (*)(void*, std::vector<std::shared_ptr<OHOS::Media::PixelMap>>)>(
+        FindFunction(module, "OHOS_ACE_AnimatedDrawableDescriptor_SetPixelMapList"));
+    if (!setPixelMaps) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Cannot find OHOS_ACE_AnimatedDrawableDescriptor_SetPixelMapList");
+        return;
+    }
+    setPixelMaps(object, pixelMaps);
+}
+
 void SetTotalDuration(void* object, int32_t duration)
 {
     void* module = FindModule();
