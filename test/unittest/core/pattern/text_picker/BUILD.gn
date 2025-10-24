@@ -39,6 +39,8 @@ ace_unittest("text_picker_extend_test_ng") {
     "text_picker_divider_test.cpp",
     "text_picker_Extend_test_ng.cpp",
     "text_picker_gradient_height_test_ng.cpp",
+    "text_picker_gradient_height_test_two_ng.cpp",
+    "text_picker_other_test_ng.cpp",
   ]
 }
 
