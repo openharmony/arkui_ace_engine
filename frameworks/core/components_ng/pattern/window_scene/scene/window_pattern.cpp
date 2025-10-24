@@ -210,14 +210,12 @@ void WindowPattern::OnAttachToFrameNode()
     auto state = session_->GetSessionState();
     auto key = Rosen::WSSnapshotHelper::GetInstance()->GetScreenStatus();
     TAG_LOGW(AceLogTag::ACE_WINDOW_SCENE, "OnAttachToFrameNode id: %{public}d, node id: %{public}d, "
-        "name: %{public}s, state: %{public}u, in recents: %{public}d", session_->GetPersistentId(), host->GetId(),
-        session_->GetSessionInfo().bundleName_.c_str(), state, session_->GetShowRecent());
+        "name: %{public}s, state: %{public}u, in recents: %{public}d, prelaunch: %{public}d",
+        session_->GetPersistentId(), host->GetId(), session_->GetSessionInfo().bundleName_.c_str(),
+        state, session_->GetShowRecent(), session_->GetSessionInfo().isPrelaunch_);
     if (state == Rosen::SessionState::STATE_DISCONNECT) {
         CHECK_EQUAL_VOID(HasStartingPage(), false);
-        if (session_->GetShowRecent() && session_->GetScenePersistence() &&
-            (session_->GetScenePersistence()->IsSnapshotExisted(key) ||
-            session_->GetScenePersistence()->IsSavingSnapshot(key) ||
-            session_->GetScenePersistence()->HasSnapshot() || session_->HasSnapshot())) {
+        if (session_->GetShowRecent() && CheckSnapshotWindow(key)) {
             CreateSnapshotWindow();
             AddChild(host, snapshotWindow_, snapshotWindowName_);
             return;
@@ -229,6 +227,7 @@ void WindowPattern::OnAttachToFrameNode()
 
     CHECK_EQUAL_VOID(CheckAndHandleRestartApp(), true);
     CHECK_EQUAL_VOID(CheckAndAddStartingWindowAboveLocked(), true);
+    CHECK_EQUAL_VOID(CheckAndAddStartingWindowForPrelaunch(), true);
 
     if (state == Rosen::SessionState::STATE_BACKGROUND && session_->GetScenePersistence() &&
         (session_->GetScenePersistence()->HasSnapshot() || session_->HasSnapshot())) {
@@ -258,6 +257,57 @@ void WindowPattern::OnAttachToFrameNode()
         return;
     }
     attachToFrameNodeFlag_ = true;
+}
+
+bool WindowPattern::CheckSnapshotWindow(uint32_t key)
+{
+    return session_->GetScenePersistence() &&
+        (session_->GetScenePersistence()->IsSnapshotExisted(key) ||
+        session_->GetScenePersistence()->IsSavingSnapshot(key) ||
+        session_->GetScenePersistence()->HasSnapshot() ||
+        session_->HasSnapshot());
+}
+
+bool WindowPattern::CheckAndAddStartingWindowForPrelaunch()
+{
+    CHECK_EQUAL_RETURN(session_->GetSessionInfo().isPrelaunch_, false, false);
+    auto state = session_->GetSessionState();
+    auto host = GetHost();
+    if (session_->GetScenePersistence() &&
+        (session_->GetScenePersistence()->HasSnapshot() || session_->HasSnapshot())) {
+        if (session_->GetShowRecent()) {
+            TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "CheckAndAddStartingWindowForPrelaunch CreateSnapshotWindow");
+            CreateSnapshotWindow();
+        } else {
+            AddChild(host, appWindow_, appWindowName_, 0);
+            TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "CheckAndAddStartingWindowForPrelaunch CreateBlankWindow");
+            CreateBlankWindow(snapshotWindow_);
+        }
+        AddChild(host, snapshotWindow_, snapshotWindowName_);
+        attachToFrameNodeFlag_ = true;
+        return true;
+    }
+
+    if (session_->GetShowRecent()) {
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "CheckAndAddStartingWindowForPrelaunch CreateStartingWindow");
+        CreateStartingWindow();
+        AddChild(host, startingWindow_, startingWindowName_);
+        return true;
+    }
+
+    AddChild(host, appWindow_, appWindowName_, 0);
+    auto surfaceNode = session_->GetSurfaceNode();
+    CHECK_NULL_RETURN(surfaceNode, true);
+    CHECK_EQUAL_RETURN(AddPersistentImage(surfaceNode, host), true, true);
+    if (!surfaceNode->IsBufferAvailable()) {
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "CheckForPrelaunch buffer no available CreateBlankWindow");
+        CreateBlankWindow(startingWindow_);
+        AddChild(host, startingWindow_, startingWindowName_);
+        surfaceNode->SetBufferAvailableCallback(callback_);
+        return true;
+    }
+    attachToFrameNodeFlag_ = true;
+    return true;
 }
 
 bool WindowPattern::AddPersistentImage(const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode,

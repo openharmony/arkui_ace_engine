@@ -63,6 +63,9 @@ WindowScene::WindowScene(const sptr<Rosen::Session>& session)
             session->SetBufferAvailable(true, false);
             Rosen::SceneSessionManager::GetInstance().NotifyCompleteFirstFrameDrawing(session->GetPersistentId());
         }
+        if (session->GetSessionInfo().isPrelaunch_) {
+            session->EditSessionInfo().isPrelaunch_ = false;
+        }
         // In a locked screen scenario, the lifetime of the session is larger than the lifetime of the object self
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);

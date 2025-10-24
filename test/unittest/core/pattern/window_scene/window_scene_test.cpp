@@ -839,6 +839,69 @@ HWTEST_F(WindowSceneTest, OnAttachToFrameNode, TestSize.Level0)
 }
 
 /**
+ * @tc.name: OnAttachToFrameNodeForPrelaunch01
+ * @tc.desc: OnAttachToFrameNodeForPrelaunch test snapshot
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneTest, OnAttachToFrameNodeForPrelaunch01, TestSize.Level0)
+{
+    Rosen::SessionInfo sessionInfo = {
+        .abilityName_ = "ABILITY_NAME",
+        .bundleName_ = "BUNDLE_NAME",
+        .moduleName_ = "MODULE_NAME",
+        .isPrelaunch_ = true,
+    };
+    auto session = ssm_->RequestSceneSession(sessionInfo);
+    ASSERT_NE(session, nullptr);
+    session->scenePersistence_ = sptr<Rosen::ScenePersistence>::MakeSptr("bundleName", 1);
+    auto windowScene = AceType::MakeRefPtr<WindowScene>(session);
+    ASSERT_NE(windowScene, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), windowScene);
+    windowScene->frameNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    ASSERT_NE(windowScene->GetHost(), nullptr);
+
+    session->state_ = Rosen::SessionState::STATE_BACKGROUND;
+    session->SetShowRecent(true);
+    auto key = Rosen::defaultStatus;
+    session->scenePersistence_->hasSnapshot_[key] = true;
+    windowScene->WindowPattern::OnAttachToFrameNode();
+    EXPECT_EQ(session->GetShowRecent(), true);
+}
+
+/**
+ * @tc.name: OnAttachToFrameNodeForPrelaunch02
+ * @tc.desc: OnAttachToFrameNodeForPrelaunch test buffer available
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneTest, OnAttachToFrameNodeForPrelaunch02, TestSize.Level0)
+{
+    Rosen::SessionInfo sessionInfo = {
+        .abilityName_ = "ABILITY_NAME",
+        .bundleName_ = "BUNDLE_NAME",
+        .moduleName_ = "MODULE_NAME",
+        .isPrelaunch_ = true,
+    };
+    auto session = ssm_->RequestSceneSession(sessionInfo);
+    ASSERT_NE(session, nullptr);
+    session->scenePersistence_ = sptr<Rosen::ScenePersistence>::MakeSptr("bundleName", 1);
+    auto windowScene = AceType::MakeRefPtr<WindowScene>(session);
+    ASSERT_NE(windowScene, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), windowScene);
+    windowScene->frameNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    ASSERT_NE(windowScene->GetHost(), nullptr);
+    Rosen::RSSurfaceNodeConfig config = {
+        .SurfaceNodeName = "SurfaceNode"
+    };
+    session->surfaceNode_ = Rosen::RSSurfaceNode::Create(config);
+
+    session->state_ = Rosen::SessionState::STATE_BACKGROUND;
+    windowScene->WindowPattern::OnAttachToFrameNode();
+    EXPECT_EQ(windowScene->session_->surfaceNode_->bufferAvailable_, false);
+}
+
+/**
  * @tc.name: OnBoundsChanged
  * @tc.desc: OnBoundsChanged Test
  * @tc.type: FUNC
