@@ -18,6 +18,8 @@ import("//foundation/arkui/ace_engine/build/ace_ext.gni")
 import("//foundation/arkui/ace_engine/build/ace_gen_obj.gni")
 import(
     "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/state_mgmt/files_to_watch.gni")
+import(
+    "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/ark_breakpoint/files_to_watch.gni")
 
 # declarative frontend source
 template("declarative_frontend") {
@@ -100,6 +102,7 @@ foreach(item, ace_platforms) {
 # js resources objects
 base_output_path = get_label_info(":gen_js_proxyclass", "target_out_dir")
 jsproxyclass_obj_path = base_output_path + "/js_proxy_class.o"
+jsproxyclass_obj_ark_breakpoint_path = base_output_path + "/js_proxy_class_ark_breakpoint.o"
 jsenumstyle_obj_path = base_output_path + "/js_enum_style.o"
 jsmocksystemplugin_obj_path = base_output_path + "/js_mock_system_plugin.o"
 ark_theme_obj_path = base_output_path + "/arkTheme.o"
@@ -127,6 +130,28 @@ gen_obj("js_proxyclass") {
   }
   output = jsproxyclass_obj_path
   snapshot_dep = [ ":run_state_mgmt_build" ]
+}
+
+action("run_ark_breakpoint_build") {
+  script = "ark_breakpoint/build.py"
+  inputs = ark_breakpoint_files_to_watch
+  outputs = [ "$target_out_dir/WindowSizeLayoutBreakpoint.js" ]
+  args = [
+  rebase_path("$ace_root/frameworks/bridge/declarative_frontend/ark_breakpoint"),
+  rebase_path(
+      "$ace_root/frameworks/bridge/declarative_frontend/ark_breakpoint/node_modules"),
+  rebase_path("$target_out_dir"),
+  "--release",
+  ]
+}
+
+gen_obj("js_proxyclass_ark_breakpoint") {
+  input = "$target_out_dir/WindowSizeLayoutBreakpoint.js"
+  if (use_mac || use_mingw_win || use_linux || target_os == "ios") {
+    jsproxyclass_obj_ark_breakpoint_path = base_output_path + "/js_proxy_class_ark_breakpoint.c"
+  }
+  output = jsproxyclass_obj_ark_breakpoint_path
+  snapshot_dep = [ ":run_ark_breakpoint_build" ]
 }
 
 gen_obj("js_enum_style") {
@@ -201,6 +226,7 @@ template("declarative_js_engine") {
       ":gen_obj_src_ark_theme",
       ":gen_obj_src_js_enum_style",
       ":gen_obj_src_js_proxyclass",
+      ":gen_obj_src_js_proxyclass_ark_breakpoint",
       ":mock",
       ":prefetcher",
       ":shape",
@@ -792,6 +818,7 @@ template("declarative_js_engine_ng") {
       ":gen_obj_src_ark_theme",
       ":gen_obj_src_js_enum_style",
       ":gen_obj_src_js_proxyclass",
+      ":gen_obj_src_js_proxyclass_ark_breakpoint",
       ":mock",
       ":prefetcher",
       ":shape",
@@ -1288,12 +1315,13 @@ ohos_abc("mock") {
 }
 
 ohos_abc("windowsizelayoutbreakpoint") {
-  sources = [ "engine/WindowSizeLayoutBreakpoint.js" ]
+  sources = [ "$target_out_dir/WindowSizeLayoutBreakpoint.js" ]
   output_name = "windowsizelayoutbreakpoint"
   install_images = [ "system" ]
   module_install_dir = "etc/abc/arkui"
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
+  deps = [ ":run_ark_breakpoint_build" ]
 }
 
 ohos_abc("x_node") {
