@@ -362,16 +362,14 @@ class ObserveV2 {
       }
       if (inStaticIntrop) {
           let staticCompatibleFunc = target['__staticCompatibleFunc__'];
-          if (!staticCompatibleFunc) {
-            return;
+          if (staticCompatibleFunc) {
+            let staticStatic = target['__staticStatic__' + attrName];
+            if (!staticStatic) {
+              staticStatic = staticCompatibleFunc[0]();
+              target['__staticStatic__' + attrName] = staticStatic;
+            }
+            staticCompatibleFunc[1](staticStatic);
           }
-          let staticStatic = target['__staticStatic__' + attrName];
-          if (!staticStatic) {
-            staticStatic = staticCompatibleFunc[0]();
-            target['__staticStatic__' + attrName] = staticStatic;
-          }
-          staticCompatibleFunc[1](staticStatic);
-          return;
       }
     }
     if (!bound) {
