@@ -95,6 +95,9 @@ public:
 
     void SetSelectedIndex(int32_t index)
     {
+        if (index < 0 || index >= totalItemCount_) {
+            index = 0;
+        }
         selectedIndex_ = index;
     }
 

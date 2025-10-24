@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_PICKER_CONTAINER_PICKER_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_PICKER_CONTAINER_PICKER_PATTERN_H
 
+#include "adapter/ohos/entrance/picker/picker_haptic_interface.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/event/event_hub.h"
@@ -28,7 +29,6 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
 #include "core/gestures/gesture_event.h"
-#include "adapter/ohos/entrance/picker/picker_haptic_interface.h"
 
 namespace OHOS::Ace::NG {
 class ContainerPickerEventParam : public virtual AceType {
@@ -75,14 +75,19 @@ public:
         contentMainSize_ = contentMainSize;
     }
 
-    void SetSelectedIndex(int32_t index)
+    void SetTargetIndex(int32_t index)
     {
         if (index < 0 || index >= totalItemCount_) {
             index = 0;
         }
         if (index != selectedIndex_) {
-            targetIndex_ = index;
+            SwipeTo(index);
         }
+    }
+
+    void SetSelectedIndex(int32_t index)
+    {
+        selectedIndex_ = index;
     }
 
     const std::vector<int32_t>& GetOffScreenItems() const
@@ -197,19 +202,16 @@ private:
     void CreateChildrenClickEvent(RefPtr<UINode>& host);
     RefPtr<TouchEventImpl> CreateItemTouchEventListener();
 
-    void CreateAnimation();
     void AttachNodeAnimatableProperty(const RefPtr<NodeAnimatablePropertyFloat>& property);
-    void CreateSnapProperty();
+    void CreateScrollProperty();
     void CreateSpringProperty();
-    void CreateAnimation(double from, double to);
     void CreateTargetAnimation(float delta);
     void CreateSpringAnimation(float delta);
     void PlayInertialAnimation();
     void PlaySpringAnimation();
     void PlayTargetAnimation();
     void PlayResetAnimation();
-    void StopInertialRollingAnimation();
-    void StopSpringAnimation();
+    void StopAnimation();
 
     bool IsLoop() const;
     void SetDefaultTextStyle(bool isUpdateTextStyle);
@@ -218,7 +220,7 @@ private:
     void PickerMarkDirty();
     void PostIdleTask(const RefPtr<FrameNode>& frameNode);
     double GetCurrentTime() const;
-    
+
     bool IsEnableHaptic() const;
     void InitOrRefreshHapticController();
     void StopHapticController();
@@ -243,9 +245,8 @@ private:
     ContainerPickerUtils::PositionMap itemPosition_;
 
     RefPtr<NodeAnimatablePropertyFloat> scrollProperty_;
-    RefPtr<NodeAnimatablePropertyFloat> snapOffsetProperty_;
+    std::shared_ptr<AnimationUtils::Animation> scrollAnimation_;
 
-    std::shared_ptr<AnimationUtils::Animation> springAnimation_;
     std::shared_ptr<IPickerAudioHaptic> hapticController_ = nullptr;
 
     bool isFirstAxisAction_ = true;
@@ -253,9 +254,7 @@ private:
     bool isItemClickEventCreated_ = false;
     bool crossMatchChild_ = false;
     bool animationCreated_ = false;
-    bool isTargetAnimationRunning_ = false;
-    bool isSpringAnimationRunning_ = false;
-    bool isInertialRollingAnimationRunning_ = false;
+    bool isAnimationRunning_ = false;
     bool requestLongPredict_ = true;
     bool isLoop_ = true;
     bool isNeedPlayInertialAnimation_ = false;
@@ -272,6 +271,7 @@ private:
     int32_t totalItemCount_ = 0;
     int32_t selectedIndex_ = 0;
 
+    // scroll params
     double yLast_ = 0.0;
     double yOffset_ = 0.0;
     double dragStartTime_ = 0.0;
@@ -280,17 +280,18 @@ private:
 
     float lastAnimationScroll_ = 0.0f;
     float currentDelta_ = 0.0f;
+    float mainDeltaSum_ = 0.0f;
+    float springOffset_ = 0.0f;
+    float maxOverscrollOffset_ = 0.0f;
+
+    // layout params
     float currentOffset_ = 0.0f;
     float height_ = 0.0f;
     float contentMainSize_ = 0.0f;
     float contentCrossSize_ = 0.0f;
-    float mainDeltaSum_ = 0.0f;
-    float springOffset_ = 0.0f;
-
     float pickerItemHeight_ = 0.0f;
     float pickerDefaultHeight_ = 0.0f;
     float pickerHeightBeforeRotate_ = 0.0f;
-    float maxOverscrollOffset_ = 0.0f;
 };
 } // namespace OHOS::Ace::NG
 

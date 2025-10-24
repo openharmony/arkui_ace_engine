@@ -126,11 +126,9 @@ void ContainerPickerLayoutAlgorithm::MeasureWidth(LayoutWrapper* layoutWrapper, 
     float width;
     if (layoutPolicy.has_value()) {
         auto parentCrossSize =
-            CreateIdealSizeByPercentRef(contentConstraint, axis_, MeasureType::MATCH_PARENT_CROSS_AXIS).MainSize(axis_);
+            CreateIdealSizeByPercentRef(contentConstraint, axis_, MeasureType::MATCH_PARENT_CROSS_AXIS)
+                .CrossSize(axis_);
         if (layoutPolicy->IsWidthWrap()) {
-            auto parentCrossSize =
-                CreateIdealSizeByPercentRef(contentConstraint, axis_, MeasureType::MATCH_PARENT_CROSS_AXIS)
-                    .CrossSize(axis_);
             width = GetChildMaxWidth(layoutWrapper);
             if (parentCrossSize.has_value()) {
                 width = std::min(width, parentCrossSize.value());

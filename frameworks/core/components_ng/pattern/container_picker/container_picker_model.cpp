@@ -49,7 +49,14 @@ void ContainerPickerModel::SetSelectedIndex(int32_t index)
     CHECK_NULL_VOID(frameNode);
     auto pickerPattern = frameNode->GetPattern<ContainerPickerPattern>();
     CHECK_NULL_VOID(pickerPattern);
-    pickerPattern->SetSelectedIndex(index);
+    auto layoutProperty = frameNode->GetLayoutProperty<ContainerPickerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (layoutProperty->HasSelectedIndex()) {
+        pickerPattern->SetTargetIndex(index);
+    } else {
+        pickerPattern->SetSelectedIndex(index);
+    }
+    
     ACE_UPDATE_LAYOUT_PROPERTY(ContainerPickerLayoutProperty, SelectedIndex, index);
 }
 

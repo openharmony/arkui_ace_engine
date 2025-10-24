@@ -28,6 +28,10 @@ namespace {
 const std::string CONTAINER_PICKER_DRAG_SCENE = "container_picker_drag_scene";
 constexpr double MOVE_THRESHOLD = 2.0;
 constexpr float SPRING_DURATION = 600.0f;
+constexpr float SPRING_CURVE_VELCOTY = 0.0f;
+constexpr float SPRING_CURVE_MASS = 1.0f;
+constexpr float SPRING_CURVE_STIFFNESS = 20.0f;
+constexpr float SPRING_CURVE_DAMPING = 10.0f;
 constexpr float DEFAULT_SPRING_RESPONSE = 0.416f;
 constexpr float DEFAULT_SPRING_DAMP = 0.99f;
 constexpr float MIN_TIME = 1.0f;
@@ -36,7 +40,6 @@ constexpr int32_t VELOCITY_TRANS = 1000;
 constexpr int32_t DEFAULT_FONT_SIZE = 20;
 constexpr int32_t CLICK_ANIMATION_DURATION = 300;
 constexpr uint32_t CUSTOM_SPRING_ANIMATION_DURATION = 1000;
-const std::string SPRING_PROPERTY_NAME = "spring";
 } // namespace
 
 RefPtr<LayoutAlgorithm> ContainerPickerPattern::CreateLayoutAlgorithm()
@@ -121,7 +124,7 @@ bool ContainerPickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper
     if (isNeedPlayInertialAnimation_) {
         PlayInertialAnimation();
     }
-    
+
     if (isModified_) {
         isModified_ = false;
         return true;
@@ -155,7 +158,7 @@ void ContainerPickerPattern::HandleTargetIndex()
         targetIndex_.reset();
         return;
     }
-    if (isTargetAnimationRunning_) {
+    if (isAnimationRunning_) {
         return;
     }
     PlayTargetAnimation();
@@ -224,7 +227,7 @@ void ContainerPickerPattern::GetLayoutProperties(const RefPtr<ContainerPickerLay
 
 void ContainerPickerPattern::OnAttachToFrameNode()
 {
-    CreateAnimation();
+    CreateScrollProperty();
     UpdatePanEvent();
     UpdateClipEdge();
     InitDefaultParams();
@@ -365,7 +368,7 @@ void ContainerPickerPattern::UpdateDefaultTextStyle(RefPtr<FrameNode> node, Colo
 void ContainerPickerPattern::SwipeTo(int32_t targetIndex)
 {
     // If animation is still running, stop it before play new animation.
-    if (selectedIndex_ == targetIndex || isTargetAnimationRunning_) {
+    if (selectedIndex_ == targetIndex || isAnimationRunning_) {
         return;
     }
 
@@ -444,15 +447,18 @@ RefPtr<TouchEventImpl> ContainerPickerPattern::CreateItemTouchEventListener()
         pattern->isAllowPlayHaptic_ = (info.GetSourceTool() == SourceTool::MOUSE) ? false : true;
 
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
-            if (pattern->isInertialRollingAnimationRunning_) {
+            if (pattern->isAnimationRunning_) {
                 pattern->touchBreak_ = true;
-                pattern->animationBreak_ = true;
                 pattern->clickBreak_ = true;
-                pattern->StopInertialRollingAnimation();
+                pattern->StopAnimation();
             } else {
                 pattern->animationBreak_ = false;
                 pattern->clickBreak_ = false;
             }
+            pattern->mainDeltaSum_ = 0.0f;
+            pattern->currentDelta_ = 0.0f;
+            pattern->springOffset_ = 0.0f;
+            pattern->lastAnimationScroll_ = 0.0f;
         }
 
         if (info.GetTouches().front().GetTouchType() == TouchType::UP) {
@@ -580,11 +586,10 @@ void ContainerPickerPattern::HandleDragStart(const GestureEvent& info)
     mainDeltaSum_ = 0.0f;
     currentDelta_ = 0.0f;
     springOffset_ = 0.0f;
+    StopAnimation();
 
     yLast_ = info.GetGlobalPoint().GetY();
     dragStartTime_ = GetCurrentTime();
-
-    StopSpringAnimation();
 }
 
 void ContainerPickerPattern::HandleDragUpdate(const GestureEvent& info)
@@ -655,16 +660,7 @@ void ContainerPickerPattern::HandleDragEnd(double dragVelocity, float mainDelta)
     // Adjust the position to ensure it is centered.
     float currentOffsetFromMiddle = CalculateMiddleLineOffset();
     float resetOffset = CalculateResetOffset(currentOffsetFromMiddle);
-    CreateAnimation(0.0, resetOffset);
-}
-
-void ContainerPickerPattern::StopSpringAnimation()
-{
-    CHECK_NULL_VOID(springAnimation_);
-    CHECK_NULL_VOID(isSpringAnimationRunning_);
-    AnimationUtils::StopAnimation(springAnimation_);
-    isSpringAnimationRunning_ = false;
-    animationBreak_ = true;
+    CreateTargetAnimation(resetOffset);
 }
 
 void ContainerPickerPattern::ProcessDelta(float& delta, float mainSize, float deltaSum)
@@ -770,25 +766,10 @@ bool ContainerPickerPattern::CheckDragOutOfBoundary()
     return false;
 }
 
-void ContainerPickerPattern::CreateSpringProperty()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->CreateAnimatablePropertyFloat(
-        SPRING_PROPERTY_NAME, 0,
-        [weak = AceType::WeakClaim(this)](float position) {
-            auto picker = weak.Upgrade();
-            CHECK_NULL_VOID(picker);
-            auto positionDelta = static_cast<float>(position) - picker->mainDeltaSum_;
-            picker->UpdateCurrentOffset(positionDelta);
-        },
-        PropertyUnit::PIXEL_POSITION);
-}
-
 void ContainerPickerPattern::PlaySpringAnimation()
 {
-    if (isSpringAnimationRunning_) {
-        return;
+    if (!scrollProperty_) {
+        CreateScrollProperty();
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -797,29 +778,17 @@ void ContainerPickerPattern::PlaySpringAnimation()
         return;
     }
 
-    auto middlePos = height_ / HALF;
-    auto halfOfItemHeight = pickerItemHeight_ / HALF;
-    auto leading = mainDeltaSum_ + middlePos - itemPosition_.rbegin()->second.endPos + halfOfItemHeight;
-    auto trailing = mainDeltaSum_ + middlePos - itemPosition_.begin()->second.startPos - halfOfItemHeight;
-    CreateSpringProperty();
-    host->UpdateAnimatablePropertyFloat(SPRING_PROPERTY_NAME, mainDeltaSum_);
-    auto delta = Negative(mainDeltaSum_) ? leading : trailing;
-
-    CreateSpringAnimation(delta);
+    auto currentOffsetFromMiddle = CalculateMiddleLineOffset();
+    CreateSpringAnimation(currentOffsetFromMiddle);
 }
 
 void ContainerPickerPattern::PlayTargetAnimation()
 {
-    float targetPos = ShortestDistanceBetweenCurrentAndTarget(targetIndex_.value_or(0));
-    isTargetAnimationRunning_ = true;
-    auto context = GetContext();
-    if (context) {
-        context->AddAfterLayoutTask([weak = WeakClaim(this), targetPos]() {
-            auto picker = weak.Upgrade();
-            CHECK_NULL_VOID(picker);
-            picker->CreateTargetAnimation(targetPos);
-        });
+    if (!scrollProperty_) {
+        CreateScrollProperty();
     }
+    float targetPos = ShortestDistanceBetweenCurrentAndTarget(targetIndex_.value_or(0));
+    CreateTargetAnimation(targetPos);
     targetIndex_.reset();
 }
 
@@ -895,34 +864,44 @@ bool ContainerPickerPattern::Play(double dragVelocity)
 
 void ContainerPickerPattern::PlayInertialAnimation()
 {
+    if (!scrollProperty_) {
+        CreateScrollProperty();
+    }
     AnimationOption option;
     option.SetDuration(CUSTOM_SPRING_ANIMATION_DURATION);
     auto curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(DEFAULT_SPRING_RESPONSE, DEFAULT_SPRING_DAMP, 0.0f);
     option.SetCurve(curve);
-    if (!snapOffsetProperty_) {
-        CreateSnapProperty();
-    }
 
     float endOffset = 0.0f;
     CalcEndOffset(endOffset, dragVelocity_);
-    snapOffsetProperty_->Set(0.0f);
-    snapOffsetProperty_->SetPropertyUnit(PropertyUnit::PIXEL_POSITION);
-    auto finishCallback = [weak = AceType::WeakClaim(this), id = Container::CurrentId()]() {
-        ContainerScope scope(id);
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        if (!pattern->animationBreak_) {
-            pattern->lastAnimationScroll_ = 0.0f;
-        }
-        pattern->isInertialRollingAnimationRunning_ = false;
-        if (!NearZero(pattern->mainDeltaSum_)) {
-            pattern->PlaySpringAnimation();
-        } else {
-            pattern->FireScrollStopEvent();
-        }
-        pattern->StopHapticController();
-    };
-    snapOffsetProperty_->AnimateWithVelocity(option, -endOffset, dragVelocity_, finishCallback);
+    scrollProperty_->Set(0.0f);
+    scrollProperty_->SetPropertyUnit(PropertyUnit::PIXEL_POSITION);
+    isAnimationRunning_ = true;
+    animationBreak_ = false;
+    auto host = GetHost();
+    auto context = host ? host->GetContextRefPtr() : nullptr;
+    scrollAnimation_ = AnimationUtils::StartAnimation(
+        option,
+        [weak = AceType::WeakClaim(this), endOffset]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->scrollProperty_->Set(-endOffset);
+        },
+        [weak = AceType::WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            if (!pattern->animationBreak_) {
+                pattern->lastAnimationScroll_ = 0.0f;
+            }
+            pattern->isAnimationRunning_ = false;
+            if (!NearZero(pattern->mainDeltaSum_)) {
+                pattern->PlaySpringAnimation();
+            } else {
+                pattern->FireScrollStopEvent();
+            }
+            pattern->StopHapticController();
+        },
+        nullptr, context);
     isNeedPlayInertialAnimation_ = false;
 }
 
@@ -1010,7 +989,7 @@ void ContainerPickerPattern::UpdateColumnChildPosition(double offsetY)
     SpringCurveTailEndProcess(useRebound, stopMove);
 }
 
-void ContainerPickerPattern::CreateAnimation()
+void ContainerPickerPattern::CreateScrollProperty()
 {
     CHECK_NULL_VOID(!animationCreated_);
     auto host = GetHost();
@@ -1039,50 +1018,9 @@ void ContainerPickerPattern::AttachNodeAnimatableProperty(const RefPtr<NodeAnima
     renderContext->AttachNodeAnimatableProperty(property);
 }
 
-void ContainerPickerPattern::CreateSnapProperty()
-{
-    auto propertyCallback = [weak = AceType::WeakClaim(this)](float position) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        if (pattern->touchBreak_) {
-            return;
-        }
-        pattern->currentDelta_ = position - pattern->lastAnimationScroll_;
-        pattern->lastAnimationScroll_ = position;
-        pattern->isInertialRollingAnimationRunning_ = true;
-        pattern->PickerMarkDirty();
-        pattern->UpdateColumnChildPosition(position);
-    };
-    snapOffsetProperty_ = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
-    AttachNodeAnimatableProperty(snapOffsetProperty_);
-}
-
-void ContainerPickerPattern::CreateAnimation(double from, double to)
-{
-    AnimationOption option;
-    option.SetCurve(Curves::FAST_OUT_SLOW_IN);
-    option.SetDuration(CLICK_ANIMATION_DURATION);
-    scrollProperty_->Set(from);
-    auto host = GetHost();
-    auto context = host ? host->GetContextRefPtr() : nullptr;
-    AnimationUtils::Animate(
-        option,
-        [weak = AceType::WeakClaim(this), to]() {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->scrollProperty_->Set(to);
-        },
-        [weak = AceType::WeakClaim(this)]() {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->lastAnimationScroll_ = 0.0f;
-            pattern->FireScrollStopEvent();
-        },
-        nullptr, context);
-}
-
 void ContainerPickerPattern::CreateTargetAnimation(float delta)
 {
+    animationBreak_ = false;
     lastAnimationScroll_ = 0.0f;
     AnimationOption option;
     option.SetCurve(Curves::FAST_OUT_SLOW_IN);
@@ -1090,7 +1028,8 @@ void ContainerPickerPattern::CreateTargetAnimation(float delta)
     scrollProperty_->Set(0.0f);
     auto host = GetHost();
     auto context = host ? host->GetContextRefPtr() : nullptr;
-    AnimationUtils::Animate(
+    isAnimationRunning_ = true;
+    scrollAnimation_ = AnimationUtils::StartAnimation(
         option,
         [weak = AceType::WeakClaim(this), delta]() {
             auto pattern = weak.Upgrade();
@@ -1100,38 +1039,40 @@ void ContainerPickerPattern::CreateTargetAnimation(float delta)
         [weak = AceType::WeakClaim(this)]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            pattern->isTargetAnimationRunning_ = false;
+            pattern->isAnimationRunning_ = false;
             pattern->lastAnimationScroll_ = 0.0f;
             pattern->yOffset_ = 0.0;
             pattern->yLast_ = 0.0;
             pattern->FireScrollStopEvent();
+            pattern->StopHapticController();
         },
         nullptr, context);
 }
 
 void ContainerPickerPattern::CreateSpringAnimation(float delta)
 {
+    animationBreak_ = false;
     auto host = GetHost();
     auto context = host ? host->GetContextRefPtr() : nullptr;
-    // spring curve: (velocity: 0.0, mass: 1.0, stiffness: 20.0, damping: 10.0)
-    auto springCurve = MakeRefPtr<SpringCurve>(0.0f, 1.0f, 20.0f, 10.0f);
+    auto springCurve =
+        MakeRefPtr<SpringCurve>(SPRING_CURVE_VELCOTY, SPRING_CURVE_MASS, SPRING_CURVE_STIFFNESS, SPRING_CURVE_DAMPING);
     AnimationOption option;
     option.SetCurve(springCurve);
     option.SetDuration(SPRING_DURATION);
-    isSpringAnimationRunning_ = true;
-    springAnimation_ = AnimationUtils::StartAnimation(
+    isAnimationRunning_ = true;
+    scrollProperty_->Set(0.0f);
+    scrollAnimation_ = AnimationUtils::StartAnimation(
         option,
         [weak = AceType::WeakClaim(this), delta]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            auto host = pattern->GetHost();
-            CHECK_NULL_VOID(host);
-            host->UpdateAnimatablePropertyFloat(SPRING_PROPERTY_NAME, delta);
+            pattern->scrollProperty_->Set(delta);
         },
         [weak = AceType::WeakClaim(this)]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            pattern->isSpringAnimationRunning_ = false;
+            pattern->isAnimationRunning_ = false;
+            pattern->lastAnimationScroll_ = 0.0f;
             pattern->yOffset_ = 0.0;
             pattern->yLast_ = 0.0;
             pattern->FireScrollStopEvent();
@@ -1150,31 +1091,18 @@ void ContainerPickerPattern::PickerMarkDirty()
     }
 }
 
-void ContainerPickerPattern::StopInertialRollingAnimation()
+void ContainerPickerPattern::StopAnimation()
 {
-    CHECK_NULL_VOID(snapOffsetProperty_);
-    CHECK_NULL_VOID(isInertialRollingAnimationRunning_);
+    CHECK_NULL_VOID(isAnimationRunning_);
+    CHECK_NULL_VOID(scrollProperty_);
+    CHECK_NULL_VOID(scrollAnimation_);
 
-    isInertialRollingAnimationRunning_ = false;
-    AnimationOption option;
-    option.SetCurve(Curves::LINEAR);
-    option.SetDuration(0);
-    option.SetDelay(0);
-    auto host = GetHost();
-    auto context = host ? host->GetContextRefPtr() : nullptr;
-
-    AnimationUtils::StartAnimation(
-        option,
-        [weak = AceType::WeakClaim(this)]() {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->snapOffsetProperty_->Set(0.0f);
-        },
-        [weak = AceType::WeakClaim(this)]() {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->lastAnimationScroll_ = 0.0f;
-        });
+    animationBreak_ = true;
+    AnimationUtils::StopAnimation(scrollAnimation_);
+    isAnimationRunning_ = false;
+    lastAnimationScroll_ = 0.0f;
+    yOffset_ = 0.0;
+    yLast_ = 0.0;
 }
 
 void ContainerPickerPattern::PlayResetAnimation()
@@ -1184,7 +1112,7 @@ void ContainerPickerPattern::PlayResetAnimation()
     if (std::abs(resetOffset) >= (pickerItemHeight_ * 0.5f)) {
         InnerHandleScroll(LessNotEqual(resetOffset, 0.0));
     }
-    CreateAnimation(0.0f, resetOffset);
+    CreateTargetAnimation(resetOffset);
 }
 
 double ContainerPickerPattern::GetCurrentTime() const
