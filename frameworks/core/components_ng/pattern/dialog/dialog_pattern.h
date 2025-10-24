@@ -465,6 +465,7 @@ private:
     void OnDetachFromMainTreeImpl();
     void AddFollowParentWindowLayoutNode();
     void RemoveFollowParentWindowLayoutNode();
+    void RegisterButtonOnKeyEvent(const ButtonInfo& params, RefPtr<FrameNode>& buttonNode, int32_t buttonIdx);
     bool InvertShadowColor();
     void OnWindowShow() override;
     RefPtr<DialogTheme> dialogTheme_;
