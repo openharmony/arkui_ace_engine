@@ -13,17 +13,17 @@
  * limitations under the License.
  */
 
-import { Rect, Circle, RoundRect, CommandPath, Size, Frame, Vector2, Vector3, Matrix4, NodeEdges, Corners, ShapeMask, ShapeClip, LengthMetricsUnit, DrawContext } from "../../Graphics"
-import { BorderStyle } from "../../component/enums"
-import { RenderNode } from "../../RenderNode"
+import { Rect, Circle, RoundRect, CommandPath, Size, Frame, Vector2, Vector3, Matrix4, NodeEdges, Corners, ShapeMask, ShapeClip, LengthMetricsUnit, DrawContext } from "../Graphics"
+import { BorderStyle } from "../component/enums"
+import { RenderNode } from "../RenderNode"
 import { ArkUIAniModule } from "arkui.ani"
 import hilog from '@ohos.hilog'
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, InteropNativeModule } from "@koalaui/interop"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { int16, uint32 } from "@koalaui/compat"
-import { ShapeClipTransfer } from "./ShapeClipTransfer"
-import { ShapeMaskTransfer } from "./ShapeMaskTransfer"
-import { TransferUtil } from "./TransferUtil"
+import { ShapeClipTransfer } from "../handwritten/transfer/ShapeClipTransfer"
+import { ShapeMaskTransfer } from "../handwritten/transfer/ShapeMaskTransfer"
+import { TransferUtil } from "../handwritten/transfer/TransferUtil"
 
 export class RenderNodeTransfer {
     private mapNodeStatic = new Map<int, RenderNode>();
