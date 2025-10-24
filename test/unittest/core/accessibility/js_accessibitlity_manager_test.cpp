@@ -1589,34 +1589,45 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager030, TestSize.Level1)
     MockJsAccessibilityManager mockJsManger;
     mockJsManger.SetPipelineContext(context);
     mockJsManger.Register(true);
-
     AccessibilityEvent event;
     event.nodeId = 1;
-    AccessibilityWorkMode accessibilityWorkMode;
-    accessibilityWorkMode.isTouchExplorationEnabled = false;
+
     /**
-     * @tc.steps: step2. test IsEventIgnoredByWorkMode return true
+     * @tc.steps: step2. test ScreenReadEnabled true
      */
-    event.type = AccessibilityEventType::FOCUS;
-    EXPECT_CALL(mockJsManger, GenerateAccessibilityWorkMode())
-        .WillRepeatedly(Return(accessibilityWorkMode));
-    EXPECT_TRUE(mockJsManger.IsEventIgnoredByWorkMode(event));
-    
+    AceApplicationInfo::GetInstance().SetAccessibilityScreenReadEnabled(true);
     event.type = AccessibilityEventType::ELEMENT_INFO_CHANGE;
-    EXPECT_TRUE(mockJsManger.IsEventIgnoredByWorkMode(event));
-
+    EXPECT_FALSE(mockJsManger.IsEventIgnoredByWorkMode(event));
+    event.type = AccessibilityEventType::COMPONENT_CHANGE;
+    EXPECT_FALSE(mockJsManger.IsEventIgnoredByWorkMode(event));
     event.type = AccessibilityEventType::TEXT_CHANGE;
-    EXPECT_TRUE(mockJsManger.IsEventIgnoredByWorkMode(event));
-
-    /**
-     * @tc.steps: step3. test IsEventIgnoredByWorkMode return false
-     */
+    EXPECT_FALSE(mockJsManger.IsEventIgnoredByWorkMode(event));
+    event.type = AccessibilityEventType::FOCUS;
+    EXPECT_FALSE(mockJsManger.IsEventIgnoredByWorkMode(event));
+    event.type = AccessibilityEventType::SCROLLING_EVENT;
+    EXPECT_FALSE(mockJsManger.IsEventIgnoredByWorkMode(event));
     event.type = AccessibilityEventType::CLICK;
     EXPECT_FALSE(mockJsManger.IsEventIgnoredByWorkMode(event));
+    event.type = AccessibilityEventType::KEYBOARD_SPACE;
+    EXPECT_FALSE(mockJsManger.IsEventIgnoredByWorkMode(event));
 
-    accessibilityWorkMode.isTouchExplorationEnabled = true;
-    EXPECT_CALL(mockJsManger, GenerateAccessibilityWorkMode())
-        .WillOnce(Return(accessibilityWorkMode));
+    /**
+     * @tc.steps: step3. test ScreenReadEnabled false
+     */
+    AceApplicationInfo::GetInstance().SetAccessibilityScreenReadEnabled(false);
+    event.type = AccessibilityEventType::ELEMENT_INFO_CHANGE;
+    EXPECT_TRUE(mockJsManger.IsEventIgnoredByWorkMode(event));
+    event.type = AccessibilityEventType::COMPONENT_CHANGE;
+    EXPECT_TRUE(mockJsManger.IsEventIgnoredByWorkMode(event));
+    event.type = AccessibilityEventType::TEXT_CHANGE;
+    EXPECT_TRUE(mockJsManger.IsEventIgnoredByWorkMode(event));
+    event.type = AccessibilityEventType::FOCUS;
+    EXPECT_TRUE(mockJsManger.IsEventIgnoredByWorkMode(event));
+    event.type = AccessibilityEventType::SCROLLING_EVENT;
+    EXPECT_TRUE(mockJsManger.IsEventIgnoredByWorkMode(event));
+    event.type = AccessibilityEventType::CLICK;
+    EXPECT_FALSE(mockJsManger.IsEventIgnoredByWorkMode(event));
+    event.type = AccessibilityEventType::KEYBOARD_SPACE;
     EXPECT_FALSE(mockJsManger.IsEventIgnoredByWorkMode(event));
 }
 
