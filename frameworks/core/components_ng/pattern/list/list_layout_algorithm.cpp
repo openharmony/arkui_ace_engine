@@ -2049,7 +2049,9 @@ void ListLayoutAlgorithm::SetListItemGroupParam(const RefPtr<LayoutWrapper>& lay
 
 ListItemInfo ListLayoutAlgorithm::GetListItemGroupPosition(const RefPtr<LayoutWrapper>& layoutWrapper, int32_t index)
 {
-    int32_t id = layoutWrapper->GetHostNode()->GetId();
+    auto wrapper = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(wrapper, (ListItemInfo{ -1, 0, 0, false }));
+    int32_t id = wrapper->GetId();
     ListItemInfo pos = { id, 0, 0, true };
     auto layoutAlgorithmWrapper = layoutWrapper->GetLayoutAlgorithm(true);
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, pos);

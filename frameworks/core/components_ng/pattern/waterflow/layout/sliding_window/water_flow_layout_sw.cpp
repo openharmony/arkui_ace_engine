@@ -228,6 +228,7 @@ bool WaterFlowLayoutSW::ItemHeightChanged() const
 
 int32_t WaterFlowLayoutSW::CheckReset()
 {
+    CHECK_NULL_RETURN(wrapper_, 0);
     int32_t updateIdx = GetUpdateIdx(wrapper_, info_->footerIndex_);
     if (info_->newStartIndex_ >= 0) {
         info_->UpdateLanesIndex(updateIdx);

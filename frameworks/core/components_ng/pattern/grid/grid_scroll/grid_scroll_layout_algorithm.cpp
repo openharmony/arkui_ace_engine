@@ -173,6 +173,7 @@ void GridScrollLayoutAlgorithm::UpdateUnlayoutedItems()
 
 void GridScrollLayoutAlgorithm::PreloadItems(LayoutWrapper* layoutWrapper)
 {
+    CHECK_NULL_VOID(layoutWrapper);
     GridLayoutUtils::PreloadGridItems(layoutWrapper->GetHostNode()->GetPattern<GridPattern>(),
         std::move(predictBuildList_),
         [param = GridPredictLayoutParam { cachedChildConstraint_, itemsCrossSize_, crossGap_ }](
@@ -600,6 +601,7 @@ void GridScrollLayoutAlgorithm::ReloadFromUpdateIdxToStartIndex(
     float mainSize, float crossSize, int32_t updateLineIndex, LayoutWrapper* layoutWrapper)
 {
     const int32_t currentItemIndex = info_.startIndex_;
+    CHECK_NULL_VOID(layoutWrapper);
     auto firstItem = layoutWrapper->GetHostNode()->GetChildrenUpdated();
     info_.startIndex_ = firstItem;
     // first "-1" means trying to fill from last line;second "-1" because it will fill next line in FillNewLineBackward
@@ -2460,6 +2462,7 @@ std::pair<bool, bool> GridScrollLayoutAlgorithm::GetResetMode(LayoutWrapper* lay
 
 void GridScrollLayoutAlgorithm::CheckReset(float mainSize, float crossSize, LayoutWrapper* layoutWrapper)
 {
+    CHECK_NULL_VOID(layoutWrapper);
     int32_t updateIdx = layoutWrapper->GetHostNode()->GetChildrenUpdated();
     // [resetFromStart,resetFromUpdate]
     std::pair<bool, bool> resetMode = GetResetMode(layoutWrapper, updateIdx);

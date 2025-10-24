@@ -644,7 +644,9 @@ void WaterFlowSegmentedLayout::MeasureRemainingLazyChild(int32_t startIdx, int32
 
 bool WaterFlowSegmentedLayout::IsForWard() const
 {
-    const float prevOffset = wrapper_->GetHostNode()->GetPattern<WaterFlowPattern>()->GetPrevOffset();
+    auto wrapper = wrapper_->GetHostNode();
+    CHECK_NULL_RETURN(wrapper, false);
+    const float prevOffset = wrapper->GetPattern<WaterFlowPattern>()->GetPrevOffset();
     return LessOrEqual(info_->currentOffset_, prevOffset) || info_->endIndex_ == -1;
 }
 

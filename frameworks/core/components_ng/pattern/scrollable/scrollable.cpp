@@ -107,7 +107,9 @@ Scrollable::~Scrollable()
             nodeTag_).c_str());
         if (!context_.Invalid()) {
             auto context = context_.Upgrade();
-            context->SetUiDvsyncSwitch(false);
+            if (context != nullptr) {
+                context->SetUiDvsyncSwitch(false);
+            }
         }
     }
     StopFrictionAnimation();

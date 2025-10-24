@@ -310,7 +310,7 @@ const std::vector<std::pair<std::string, napi_type_t>>& Exports::getMethods(cons
     auto it = implementations.find(module);
     if (it == implementations.end()) {
         LOGE("Module %s is not registered", module.c_str());
-        INTEROP_FATAL("Fatal error");
+        abort();
     }
     return it->second;
 }

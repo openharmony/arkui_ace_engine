@@ -1257,6 +1257,7 @@ Rect ScrollPattern::GetItemRect(int32_t index) const
 float ScrollPattern::GetSelectScrollWidth()
 {
     RefPtr<GridColumnInfo> columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::MENU);
+    CHECK_NULL_RETURN(columnInfo, 0.0f);
     auto parent = columnInfo->GetParent();
     CHECK_NULL_RETURN(parent, SELECT_SCROLL_MIN_WIDTH.ConvertToPx());
     parent->BuildColumnWidth();
