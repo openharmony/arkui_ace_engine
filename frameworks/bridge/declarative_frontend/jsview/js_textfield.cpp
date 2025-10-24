@@ -1227,6 +1227,7 @@ void JSTextField::ParseBorderRadius(const JSRef<JSVal>& args)
 
 void JSTextField::JsBorderRadius(const JSCallbackInfo& info)
 {
+    SetCornerApplyType(info);
     auto jsValue = info[0];
     static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING,
         JSCallbackInfoType::NUMBER, JSCallbackInfoType::OBJECT };
