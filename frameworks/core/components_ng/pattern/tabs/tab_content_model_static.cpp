@@ -433,6 +433,10 @@ void TabContentModelStatic::AddTabBarItem(const RefPtr<UINode>& tabContent, int3
 
     // Create tab bar with builder.
     if (tabBarParam.HasBuilder()) {
+        auto layoutProperty = columnNode->GetLayoutProperty();
+        CHECK_NULL_VOID(layoutProperty);
+        PaddingProperty initPadding;
+        layoutProperty->UpdatePadding(initPadding);
         ScopedViewStackProcessor builderViewStackProcessor;
         tabBarParam.ExecuteBuilder();
         auto builderNode = ViewStackProcessor::GetInstance()->Finish();
