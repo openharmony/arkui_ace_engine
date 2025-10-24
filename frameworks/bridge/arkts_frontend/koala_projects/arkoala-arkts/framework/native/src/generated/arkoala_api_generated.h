@@ -932,8 +932,6 @@ typedef struct Array_ImageFrameInfo Array_ImageFrameInfo;
 typedef struct Opt_Array_ImageFrameInfo Opt_Array_ImageFrameInfo;
 typedef struct Array_Int32 Array_Int32;
 typedef struct Opt_Array_Int32 Opt_Array_Int32;
-typedef struct Array_Int32 Array_Int32;
-typedef struct Opt_Array_Int32 Opt_Array_Int32;
 typedef struct Array_KeyframeState Array_KeyframeState;
 typedef struct Opt_Array_KeyframeState Opt_Array_KeyframeState;
 typedef struct Array_Layoutable Array_Layoutable;
@@ -25865,6 +25863,12 @@ typedef struct GENERATED_ArkUINavPathStackAccessor {
     void (*destroyPeer)(Ark_NavPathStack peer);
     Ark_NavPathStack (*construct)();
     Ark_NativePointer (*getFinalizer)();
+    void (*pushPath0)(Ark_NavPathStack peer,
+                      Ark_NavPathInfo info,
+                      const Opt_Boolean* animated);
+    void (*pushPath1)(Ark_NavPathStack peer,
+                      Ark_NavPathInfo info,
+                      const Opt_NavigationOptions* options);
     void (*pushDestination0)(Ark_VMContext vmContext,
                              Ark_AsyncWorkerPtr asyncWorker,
                              Ark_NavPathStack peer,
@@ -25877,6 +25881,15 @@ typedef struct GENERATED_ArkUINavPathStackAccessor {
                              Ark_NavPathInfo info,
                              const Opt_NavigationOptions* options,
                              const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise);
+    void (*pushPathByName0)(Ark_NavPathStack peer,
+                            const Ark_String* name,
+                            const Opt_Object* param,
+                            const Opt_Boolean* animated);
+    void (*pushPathByName1)(Ark_NavPathStack peer,
+                            const Ark_String* name,
+                            const Ark_Object* param,
+                            const Callback_PopInfo_Void* onPop,
+                            const Opt_Boolean* animated);
     void (*pushDestinationByName0)(Ark_VMContext vmContext,
                                    Ark_AsyncWorkerPtr asyncWorker,
                                    Ark_NavPathStack peer,
@@ -25892,18 +25905,47 @@ typedef struct GENERATED_ArkUINavPathStackAccessor {
                                    const Callback_PopInfo_Void* onPop,
                                    const Opt_Boolean* animated,
                                    const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise);
+    void (*replacePath0)(Ark_NavPathStack peer,
+                         Ark_NavPathInfo info,
+                         const Opt_Boolean* animated);
+    void (*replacePath1)(Ark_NavPathStack peer,
+                         Ark_NavPathInfo info,
+                         const Opt_NavigationOptions* options);
     void (*replaceDestination)(Ark_VMContext vmContext,
                                Ark_AsyncWorkerPtr asyncWorker,
                                Ark_NavPathStack peer,
                                Ark_NavPathInfo info,
                                const Opt_NavigationOptions* options,
                                const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise);
+    void (*replacePathByName)(Ark_NavPathStack peer,
+                              const Ark_String* name,
+                              const Ark_Object* param,
+                              const Opt_Boolean* animated);
     Ark_Int32 (*removeByIndexes)(Ark_NavPathStack peer,
                                  const Array_Int32* indexes);
     Ark_Int32 (*removeByName)(Ark_NavPathStack peer,
                               const Ark_String* name);
     Ark_Boolean (*removeByNavDestinationId)(Ark_NavPathStack peer,
                                             const Ark_String* navDestinationId);
+    Opt_NavPathInfo (*pop0)(Ark_NavPathStack peer,
+                            const Opt_Boolean* animated);
+    Opt_NavPathInfo (*pop1)(Ark_NavPathStack peer,
+                            const Ark_Object* result,
+                            const Opt_Boolean* animated);
+    Ark_Int32 (*popToName0)(Ark_NavPathStack peer,
+                            const Ark_String* name,
+                            const Opt_Boolean* animated);
+    Ark_Int32 (*popToName1)(Ark_NavPathStack peer,
+                            const Ark_String* name,
+                            const Ark_Object* result,
+                            const Opt_Boolean* animated);
+    void (*popToIndex0)(Ark_NavPathStack peer,
+                        Ark_Int32 index,
+                        const Opt_Boolean* animated);
+    void (*popToIndex1)(Ark_NavPathStack peer,
+                        Ark_Int32 index,
+                        const Ark_Object* result,
+                        const Opt_Boolean* animated);
     Ark_Int32 (*moveToTop)(Ark_NavPathStack peer,
                            const Ark_String* name,
                            const Opt_Boolean* animated);
@@ -25913,6 +25955,10 @@ typedef struct GENERATED_ArkUINavPathStackAccessor {
     void (*clear)(Ark_NavPathStack peer,
                   const Opt_Boolean* animated);
     Array_String (*getAllPathName)(Ark_NavPathStack peer);
+    Opt_Object (*getParamByIndex)(Ark_NavPathStack peer,
+                                  Ark_Int32 index);
+    Array_Opt_Object (*getParamByName)(Ark_NavPathStack peer,
+                                       const Ark_String* name);
     Array_Int32 (*getIndexByName)(Ark_NavPathStack peer,
                                   const Ark_String* name);
     Opt_NavPathStack (*getParent)(Ark_NavPathStack peer);
