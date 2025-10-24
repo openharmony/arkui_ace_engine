@@ -22,8 +22,11 @@ class RosenRenderContext;
 void RosenRenderParticle::UpdateDisturbance(
     const RefPtr<FrameNode>& frameNode, const std::vector<ParticleDisturbance>& disturbanceArray)
 {
+    CHECK_NULL_VOID(frameNode);
     auto renderContext = AceType::DynamicCast<NG::RosenRenderContext>(frameNode->GetRenderContext());
+    CHECK_NULL_VOID(renderContext);
     auto rsNode = renderContext->GetRSNode();
+    CHECK_NULL_VOID(rsNode);
     std::shared_ptr<Rosen::ParticleNoiseFields> fields = std::make_shared<Rosen::ParticleNoiseFields>();
     for (auto field : disturbanceArray) {
         double sizeWidthPx = Dimension(field.size[0], DimensionUnit::VP).ConvertToPx();
@@ -43,8 +46,11 @@ void RosenRenderParticle::UpdateDisturbance(
 void RosenRenderParticle::UpdateRippleFields(
     const RefPtr<FrameNode>& frameNode, const std::vector<ParticleRippleField>& rippleArray)
 {
+    CHECK_NULL_VOID(frameNode);
     auto renderContext = AceType::DynamicCast<NG::RosenRenderContext>(frameNode->GetRenderContext());
+    CHECK_NULL_VOID(renderContext);
     auto rsNode = renderContext->GetRSNode();
+    CHECK_NULL_VOID(rsNode);
     std::shared_ptr<Rosen::ParticleRippleFields> rippleFields = std::make_shared<Rosen::ParticleRippleFields>();
     for (const auto& ripple : rippleArray) {
         Rosen::Vector2f center = {ripple.center.first.ConvertToPx(), ripple.center.second.ConvertToPx()};
@@ -67,8 +73,11 @@ void RosenRenderParticle::UpdateRippleFields(
 void RosenRenderParticle::UpdateVelocityFields(
     const RefPtr<FrameNode>& frameNode, const std::vector<ParticleVelocityField>& velocityArray)
 {
+    CHECK_NULL_VOID(frameNode);
     auto renderContext = AceType::DynamicCast<NG::RosenRenderContext>(frameNode->GetRenderContext());
+    CHECK_NULL_VOID(renderContext);
     auto rsNode = renderContext->GetRSNode();
+    CHECK_NULL_VOID(rsNode);
     std::shared_ptr<Rosen::ParticleVelocityFields> velocityFields = std::make_shared<Rosen::ParticleVelocityFields>();
     for (const auto& velocityField : velocityArray) {
         Rosen::Vector2f velocity = {velocityField.velocity.first, velocityField.velocity.second};
@@ -93,6 +102,7 @@ void RosenRenderParticle::updateEmitterPosition(
     if (props.size() == 0) {
         return;
     }
+    CHECK_NULL_VOID(frameNode);
     auto renderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto rsNode = AceType::DynamicCast<NG::RosenRenderContext>(renderContext)->GetRSNode();

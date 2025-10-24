@@ -713,6 +713,7 @@ void SlidingPanelPattern::OnAnimationStop()
         if (!isShowQueue_.empty() && isShowQueue_.front()) {
             invisibleFlag_ = false;
             auto host = GetHost();
+            CHECK_NULL_VOID(host);
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
     }

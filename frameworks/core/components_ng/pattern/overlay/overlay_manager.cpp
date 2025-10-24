@@ -5728,6 +5728,7 @@ void OverlayManager::RemoveSheetNode(const RefPtr<FrameNode>& sheetNode)
 
 void OverlayManager::RemoveSheet(RefPtr<FrameNode> sheetNode)
 {
+    CHECK_NULL_VOID(sheetNode);
     const auto& layoutProp = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_VOID(layoutProp);
     auto showInSubWindow = layoutProp->GetSheetStyleValue(SheetStyle()).showInSubWindow.value_or(false);
@@ -5757,6 +5758,7 @@ void OverlayManager::RemoveSheet(RefPtr<FrameNode> sheetNode)
             parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
     }
+    CHECK_NULL_VOID(maskNode);
     // detele sheet wrapper in subwindow
     SubwindowManager::GetInstance()->DeleteHotAreas(sheetWrapperPattern->GetSubWindowId(),
         maskNode->GetId(), SubwindowType::TYPE_SHEET);
@@ -6229,6 +6231,7 @@ bool OverlayManager::CreateSheetKey(const RefPtr<NG::FrameNode>& sheetContentNod
 void OverlayManager::UpdateSheetMask(const RefPtr<FrameNode>& maskNode,
     const RefPtr<FrameNode>& sheetNode, const SheetStyle& sheetStyle, bool isPartialUpdate)
 {
+    CHECK_NULL_VOID(maskNode);
     auto maskRenderContext = maskNode->GetRenderContext();
     CHECK_NULL_VOID(maskRenderContext);
     auto pipeline = maskNode->GetContext();
