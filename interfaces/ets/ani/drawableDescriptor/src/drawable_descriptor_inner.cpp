@@ -36,7 +36,7 @@ namespace {
 constexpr char PIXEL_MAP_CONSTRUCTOR[] = "C{@ohos.multimedia.image.image.PixelMap}:";
 constexpr char PIXEL_MAP_DRAWABLE[] = "@ohos.arkui.drawableDescriptor.PixelMapDrawableDescriptor";
 constexpr char ARRAY_GET[] = "i:C{std.core.Object}";
-constexpr char ANIMATED_CONSTRUCTOR[] = "C{escompat.Array}C{@ohos.arkui.drawableDescriptor.AnimationOptions}:";
+constexpr char ANIMATED_CONSTRUCTOR[] = "C{std.core.Array}C{@ohos.arkui.drawableDescriptor.AnimationOptions}:";
 constexpr char ANIMATED_DRAWABLE[] = "@ohos.arkui.drawableDescriptor.AnimatedDrawableDescriptor";
 constexpr char LAYERED_CONSTRUCTOR[] =
     "C{@ohos.arkui.drawableDescriptor.DrawableDescriptor}C{@ohos.arkui.drawableDescriptor.DrawableDescriptor}C{@ohos."
@@ -210,7 +210,7 @@ void CreateAnimatedDrawable(ani_env* env, [[maybe_unused]] ani_class aniClass, a
     env->Array_GetLength(pixelmapsAni, &size);
     std::vector<RefPtr<PixelMap>> results;
     ani_class arrayClass;
-    env->FindClass("escompat.Array", &arrayClass);
+    env->FindClass("std.core.Array", &arrayClass);
     ani_method getDataMethod;
     env->Class_FindMethod(arrayClass, "$_get", ARRAY_GET, &getDataMethod);
     for (size_t index = 0; index < size; index++) {

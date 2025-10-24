@@ -431,10 +431,10 @@ bool ANI_ConstructorForAni(ani_env *env)
             reinterpret_cast<void *>(OHOS::Ace::AniSendEventByKey)},
         ani_native_function {"getInspectorTreeNative", ":C{std.core.String}",
             reinterpret_cast<void *>(OHOS::Ace::AniGetInspectorTree)},
-        ani_native_function {"getFilteredInspectorTree", "C{escompat.Array}:C{std.core.String}",
+        ani_native_function {"getFilteredInspectorTree", "C{std.core.Array}:C{std.core.String}",
             reinterpret_cast<void *>(OHOS::Ace::AniGetFilteredInspectorTree)},
         ani_native_function {"getFilteredInspectorTreeById",
-            "C{std.core.String}iC{escompat.Array}:C{std.core.String}",
+            "C{std.core.String}iC{std.core.Array}:C{std.core.String}",
             reinterpret_cast<void *>(OHOS::Ace::AniGetFilteredInspectorTreeById)},
     };
     

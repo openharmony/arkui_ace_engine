@@ -95,7 +95,7 @@ bool GetIsResourceObject(ani_env* env, ani_ref object_ref)
 bool GetIsArrayObject(ani_env* env, ani_ref object_ref)
 {
     ani_class arrayClass;
-    if (ANI_OK != env->FindClass("escompat.Array", &arrayClass)) {
+    if (ANI_OK != env->FindClass("std.core.Array", &arrayClass)) {
         return false;
     }
     ani_boolean isUndefined;

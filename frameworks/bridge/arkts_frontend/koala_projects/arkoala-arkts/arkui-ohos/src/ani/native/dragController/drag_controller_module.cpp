@@ -569,8 +569,8 @@ bool CheckAndParseFirstParams(ani_env* env, ArkUIDragControllerAsync& asyncCtx, 
         asyncCtx.customBuilderNode = builderNode;
         return true;
     }
-    if (AniUtils::IsClassObject(env, dragItemInfo, "escompat.Array") ||
-        AniUtils::IsClassObject(env, builderNodeArray, "escompat.Array")) {
+    if (AniUtils::IsClassObject(env, dragItemInfo, "std.core.Array") ||
+        AniUtils::IsClassObject(env, builderNodeArray, "std.core.Array")) {
         asyncCtx.isArray = true;
         HILOGI("AceDrag, drag controller is multi object drag.");
         return ParseDragItemListInfoParam(env, asyncCtx, dragItemInfo, builderNodeArray);

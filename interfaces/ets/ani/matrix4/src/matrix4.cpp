@@ -39,11 +39,11 @@ namespace {
 ani_class g_matrix4Class[2] = {nullptr};
 enum class MatrixClassName : int32_t {
     TRANSIT_INNER = 0, // "@ohos.matrix4.matrix4.Matrix4TransitInner"
-    ESCOMPAT = 1, // "escompat.Array"
+    ESCOMPAT = 1, // "std.core.Array"
 };
 const char* g_matrixClassName[2] = {
     "@ohos.matrix4.matrix4.Matrix4TransitInner",
-    "escompat.Array"
+    "std.core.Array"
 };
 ani_class GetOrCreateMatrix4Class(ani_env* env, MatrixClassName matrixClassName)
 {
@@ -137,7 +137,7 @@ ani_method GetOrCreateArrayGetMethod(ani_env* env)
     }
 
     ani_class arrayClass;
-    if (env->FindClass("escompat.Array", &arrayClass) != ANI_OK) {
+    if (env->FindClass("std.core.Array", &arrayClass) != ANI_OK) {
         return nullptr;
     }
 
@@ -421,8 +421,8 @@ void ParseArray([[maybe_unused]] ani_env* env, const char* property, ani_object 
     if (ANI_OK != env->Object_GetPropertyByName_Ref(options, property, &params_ref)) {
         return;
     }
-    ani_class arrayClass = GetOrCreateMatrix4Class(env, MatrixClassName::ESCOMPAT);
-    if (!arrayClass) {
+    ani_class arrayClass;
+    if (ANI_OK != env->FindClass("std.core.Array", &arrayClass)) {
         return;
     }
     ani_boolean isArray;
