@@ -35,6 +35,7 @@
 
 #include "base/log/dump_log.h"
 #include "base/subwindow/subwindow_manager.h"
+#include "core/common/multi_thread_build_manager.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/select/select_theme.h"
@@ -1809,6 +1810,89 @@ HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternTestSetDialogAccessibilityH
     DialogView::SetDialogAccessibilityHoverConsume(dialog);
     auto dialogAccessibilityProperty = dialog->GetAccessibilityProperty<DialogAccessibilityProperty>();
     ASSERT_NE(dialogAccessibilityProperty, nullptr);
+}
+
+/**
+ * @tc.name: OnAttachToMainTreeMultiThread001
+ * @tc.desc: Test OnAttachToMainTreeMultiThread in a simulated multi-thread environment.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, OnAttachToMainTreeMultiThread001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a dialog node in UI thread environment.
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Simulate non-UI thread environment and call OnAttachToMainTree.
+     * @tc.expected: The call is routed to OnAttachToMainTreeMultiThread, which registers callbacks.
+     */
+    bool isUIThread = MultiThreadBuildManager::isUIThread_;
+    MultiThreadBuildManager::isUIThread_ = false;
+    MultiThreadBuildManager::SetIsThreadSafeNodeScope(true);
+
+    pattern->OnAttachToMainTree();
+    pattern->OnAttachToMainTreeMultiThread();
+
+    MultiThreadBuildManager::isUIThread_ = isUIThread;
+    MultiThreadBuildManager::SetIsThreadSafeNodeScope(false);
+
+    /**
+     * @tc.steps: step3. Verify that the callbacks have been registered.
+     */
+    EXPECT_TRUE(pattern->foldDisplayModeChangedCallbackId_.has_value());
+    EXPECT_TRUE(pattern->hoverModeChangedCallbackId_.has_value());
+}
+
+/**
+ * @tc.name: OnDetachFromFrameNodeMultiThread001
+ * @tc.desc: Test OnDetachFromFrameNodeMultiThread in a simulated multi-thread environment.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, OnDetachFromFrameNodeMultiThread001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a dialog node, attach it to register callbacks.
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    // Attach to register callbacks and get valid IDs.
+    pattern->OnAttachToMainTree();
+    EXPECT_TRUE(pattern->foldDisplayModeChangedCallbackId_.has_value());
+    EXPECT_TRUE(pattern->hoverModeChangedCallbackId_.has_value());
+
+    /**
+     * @tc.steps: step2. Simulate non-UI thread environment and call OnDetachFromFrameNode.
+     * @tc.expected: The call is routed to OnDetachFromFrameNodeMultiThread, which unregisters callbacks.
+     */
+    bool isUIThread = MultiThreadBuildManager::isUIThread_;
+    MultiThreadBuildManager::isUIThread_ = false;
+    MultiThreadBuildManager::SetIsThreadSafeNodeScope(true);
+
+    pattern->OnDetachFromFrameNode(frameNode.GetRawPtr());
+    pattern->OnDetachFromFrameNodeMultiThread(frameNode.GetRawPtr());
+
+    MultiThreadBuildManager::isUIThread_ = isUIThread;
+    MultiThreadBuildManager::SetIsThreadSafeNodeScope(false);
+
+    /**
+     * @tc.steps: step3. Verify that the callbacks have been unregistered.
+     */
+    EXPECT_TRUE(pattern->foldDisplayModeChangedCallbackId_.has_value());
+    EXPECT_TRUE(pattern->hoverModeChangedCallbackId_.has_value());
 }
 
 /**

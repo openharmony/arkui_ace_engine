@@ -27,6 +27,7 @@
 #include "test/mock/core/rosen/testing_canvas.h"
 
 #include "core/common/ace_engine.h"
+#include "core/common/multi_thread_build_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/common/properties/shadow_config.h"
@@ -2320,5 +2321,86 @@ HWTEST_F(MenuWrapperTestNg, RegisterDetachCallbackTest001, TestSize.Level1)
     EXPECT_EQ(targetNode->destroyCallbacksMap_.size(), 1);
     wrapperPattern->OnDetachFromMainTree();
     EXPECT_EQ(targetNode->destroyCallbacksMap_.size(), 0);
+}
+
+/**
+ * @tc.name: RegisterDetachCallbackTest002
+ * @tc.desc: test OnAttachToMainTreeMultiThread and OnDetachFromMainTreeMultiThread
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuWrapperTestNg, RegisterDetachCallbackTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create the menuwrapper node and get its pattern.
+     */
+    RefPtr<FrameNode> targetNode;
+    RefPtr<FrameNode> wrapperNode;
+    CreateTargetAndMenuWrapper(targetNode, wrapperNode);
+    ASSERT_NE(targetNode, nullptr);
+    ASSERT_NE(wrapperNode, nullptr);
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+    EXPECT_EQ(targetNode->destroyCallbacksMap_.size(), 0);
+    /**
+     * @tc.steps: step2. Call OnAttachToMainTreeMultiThread.
+     * @tc.expected: The result is expected.
+     */
+    wrapperPattern->OnAttachToMainTreeMultiThread();
+    EXPECT_EQ(targetNode->destroyCallbacksMap_.size(), 1);
+    /**
+     * @tc.steps: step3. Call OnAttachToMainTreeMultiThread.
+     * @tc.expected: The targetNode->destroyCallbacksMap_.size() should be 0.
+     */
+    wrapperPattern->OnDetachFromMainTreeMultiThread();
+    EXPECT_EQ(targetNode->destroyCallbacksMap_.size(), 0);
+}
+
+/**
+ * @tc.name: MenuTransitionEffectMultiThreadTest001
+ * @tc.desc: Test MenuTransitionEffectMultiThread in multi-thread scenario.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuWrapperTestNg, MenuTransitionEffectMultiThreadTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Simulate non-UI thread environment and create a thread-safe select node.
+     */
+    MultiThreadBuildManager::SetIsThreadSafeNodeScope(true);
+    bool isUIThread = MultiThreadBuildManager::isUIThread_;
+    MultiThreadBuildManager::isUIThread_ = false;
+    /**
+     * @tc.steps: step2. Call SetMenuTransitionEffect and check if a task is posted.
+     * @tc.expected: A task should be added to afterAttachMainTreeTasks_.
+     */
+    MenuModelNG model;
+    model.Create();
+    auto wrapperNode = FrameNode::CreateFrameNode(
+        V2::MENU_WRAPPER_ETS_TAG, WRAPPER_ID, AceType::MakeRefPtr<MenuWrapperPattern>(TARGET_ID, V2::TEXT_ETS_TAG));
+    auto pattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step4. Execute SetMenuTransitionEffect.
+     * @tc.expected: The afterAttachMainTreeTasks_ size should be initialTaskCount + 1.
+     */
+    auto initialTaskCount = wrapperNode->afterAttachMainTreeTasks_.size();
+    MenuParam menuParam;
+    menuParam.type = MenuType::CONTEXT_MENU;
+    menuParam.previewMode = MenuPreviewMode::CUSTOM;
+    pattern->SetMenuTransitionEffect(wrapperNode, menuParam);
+    EXPECT_EQ(wrapperNode->afterAttachMainTreeTasks_.size(), initialTaskCount + 1);
+
+    /**
+     * @tc.steps: step4. Execute the posted task.
+     * @tc.expected: The afterAttachMainTreeTasks_ size should be 0.
+     */
+    wrapperNode->ExecuteAfterAttachMainTreeTasks();
+    EXPECT_EQ(wrapperNode->afterAttachMainTreeTasks_.size(), 0);
+
+    /**
+     * @tc.steps: step5. Restore environment.
+     */
+    MultiThreadBuildManager::isUIThread_ = isUIThread;
+    MultiThreadBuildManager::SetIsThreadSafeNodeScope(false);
 }
 } // namespace OHOS::Ace::NG
