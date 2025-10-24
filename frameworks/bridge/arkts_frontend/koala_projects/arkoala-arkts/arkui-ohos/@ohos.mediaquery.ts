@@ -21,8 +21,8 @@ declare namespace mediaquery {
         readonly media: string;
     }
     export interface MediaQueryListener {
-        on(type: 'change', callback: Callback<MediaQueryResult>): void;
-        off(type: 'change', callback?: Callback<MediaQueryResult>): void;
+        onChange(callback: Callback<MediaQueryResult>): void;
+        offChange(callback?: Callback<MediaQueryResult>): void;
     }
     export function matchMediaSync(condition: string): MediaQueryListener;
 }
