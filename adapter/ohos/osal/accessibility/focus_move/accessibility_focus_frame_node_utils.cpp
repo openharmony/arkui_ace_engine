@@ -245,15 +245,11 @@ std::shared_ptr<Accessibility::ReadableRulesNode> FrameNodeRulesCheckNode::GetPa
 
 bool FrameNodeRulesCheckNode::IsModal()
 {
-#ifdef SUPPORT_ACCESSIBILITY_FOCUS_MOVE
     auto node = weakNode_.Upgrade();
-    CHECK_NULL_RETURN(node, false);
+    CHECK_NULL_RETURN(node, true); // default value is true, means can not focus in lower component
     auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
-    CHECK_NULL_RETURN(accessibilityProperty, false);
-    return accessibilityProperty->GetAccessibilityIsModal();
-#else
-    return true;
-#endif
+    CHECK_NULL_RETURN(accessibilityProperty, true);
+    return accessibilityProperty->IsAccessibilityModal();
 }
 
 std::shared_ptr<FocusRulesCheckNode> FrameNodeRulesCheckNode::GetUserNextFocusNode()

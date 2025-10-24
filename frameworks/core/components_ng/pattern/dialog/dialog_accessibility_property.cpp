@@ -38,4 +38,13 @@ void DialogAccessibilityProperty::GetExtraElementInfo(Accessibility::ExtraElemen
     CHECK_NULL_VOID(dialogProperty);
     extraElementInfo.SetExtraElementInfo("isModal", dialogProperty->GetIsModal().value_or(true));
 }
+
+bool DialogAccessibilityProperty::IsAccessibilityModal() const
+{
+    auto frameNode = host_.Upgrade();
+    CHECK_NULL_RETURN(frameNode, true);
+    auto dialogProperty = frameNode->GetLayoutProperty<DialogLayoutProperty>();
+    CHECK_NULL_RETURN(dialogProperty, true);
+    return dialogProperty->GetIsModal().value_or(true);
+}
 } // namespace OHOS::Ace::NG

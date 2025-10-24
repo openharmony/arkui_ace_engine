@@ -48,6 +48,10 @@ struct AccessibilityGroupOptions {
     std::string actionControllerByInspector;
 };
 
+struct OverlayAccessibilityProperty {
+    bool isModal = true; // true means cannot focus lower component of dialog like components
+};
+
 using ActionNoParam = std::function<void()>;
 using ActionSetTextImpl = std::function<void(const std::string&)>;
 using ActionScrollForwardImpl = ActionNoParam;
@@ -667,6 +671,10 @@ public:
     AccessibilityGroupOptions GetAccessibilityGroupOptions();
     void ResetAccessibilityGroupOptions();
 
+    // used to indicate whether a dialog like component is modal
+    void SetIsAccessibilityModal(bool isModal);
+    virtual bool IsAccessibilityModal() const;
+
 private:
     // node should be not-null
     static bool HoverTestRecursive(
@@ -790,8 +798,10 @@ protected:
     // used to modify the hierarchical relation ship between sibling nodes the same level in barrierfree tree
     // only affects the barrierfree tree presentation, does not affect the zindex in barrierfree hover
     int32_t accessibilityZIndex_ = -1;
-    // used to maintain user accessibilityOptions
+    // used to maintain user accessibilityOptions, only for interface of accessibilityOptions
     std::optional<AccessibilityGroupOptions> accessibilityGroupOptions_;
+    // used to maintain overlay, dialog like components' options
+    std::optional<OverlayAccessibilityProperty> overlayProperty_;
 };
 } // namespace OHOS::Ace::NG
 
