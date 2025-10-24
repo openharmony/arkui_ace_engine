@@ -521,6 +521,7 @@ protected:
     OHOS::sptr<OHOS::Rosen::IWaterfallModeChangeListener> waterfallModeChangeListener_ = nullptr;
     OHOS::sptr<OHOS::Rosen::IWindowRectChangeListener> windowRectChangeListener_ = nullptr;
     OHOS::sptr<OHOS::Rosen::IDisplayIdChangeListener> displayIdChangeListener_ = nullptr;
+    OHOS::sptr<OHOS::Rosen::IWindowRotationChangeListener> windowRotationChangeListener_ = nullptr;
     OHOS::sptr<OHOS::Rosen::DisplayManager::IFoldStatusListener> foldStatusListener_ = nullptr;
     OHOS::sptr<OHOS::Rosen::DisplayManager::IDisplayModeListener> foldDisplayModeListener_ = nullptr;
     OHOS::sptr<OHOS::Rosen::DisplayManager::IAvailableAreaListener> availableAreaChangedListener_ = nullptr;
