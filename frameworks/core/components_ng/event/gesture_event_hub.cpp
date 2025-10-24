@@ -728,6 +728,16 @@ void GestureEventHub::AddClickEvent(const RefPtr<ClickEvent>& clickEvent)
     uiNode->SetBuiltInEventRegistrationState(true);
 }
 
+// replace last bindTips callback
+void GestureEventHub::AddClickEventForTips(GestureEventFunc&& tipsClickEventFunc)
+{
+    if (tipsClickEvent_) {
+        RemoveClickEvent(tipsClickEvent_);
+    }
+    tipsClickEvent_ = MakeRefPtr<ClickEvent>(std::move(tipsClickEventFunc));
+    AddClickEvent(tipsClickEvent_);
+}
+
 void GestureEventHub::AddClickAfterEvent(const RefPtr<ClickEvent>& clickEvent)
 {
     CheckClickActuator();
