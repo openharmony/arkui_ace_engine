@@ -1847,7 +1847,7 @@ void RosenRenderContext::OnDynamicRangeModeUpdate(DynamicRangeMode dynamicRangeM
         TAG_LOGD(AceLogTag::ACE_IMAGE, "Set HDRPresent True.");
         isHdr_ = true;
         rsCanvasNode->SetHDRPresent(true);
-    } else if (isHdr_) {
+    } else if (dynamicRangeMode == DynamicRangeMode::STANDARD && isHdr_) {
         TAG_LOGD(AceLogTag::ACE_IMAGE, "Set HDRPresent False.");
         isHdr_ = false;
         rsCanvasNode->SetHDRPresent(false);
