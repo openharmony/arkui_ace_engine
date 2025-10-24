@@ -183,4 +183,38 @@ HWTEST_F(XComponentStaticTestNg, MarkBindNative, TestSize.Level1)
     EXPECT_NE(pattern->id_, XCOMPONENT_ID);
     EXPECT_EQ(pattern->screenId_, std::nullopt);
 }
+
+/**
+ * @tc.name: OnModifyDoneTest
+ * @tc.desc: Test XComponentStaticPattern OnModifyDone func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentStaticTestNg, OnModifyDoneTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. call CreateXComponentNode
+     * @tc.expected: xcomponent frameNode create successfully
+     */
+    auto frameNode = CreateXComponentNode(false);
+    ASSERT_TRUE(frameNode);
+    EXPECT_EQ(frameNode->GetTag(), V2::XCOMPONENT_ETS_TAG);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    EXPECT_EQ(pattern->type_, XComponentType::UNKNOWN);
+    /**
+     * @tc.steps: step2. call InitParams
+     * @tc.expected: surface node is created
+     */
+    auto frameNodePtr = AceType::RawPtr(frameNode);
+    XComponentModelStatic::SetXComponentType(frameNodePtr, XCOMPONENT_SURFACE_TYPE_VALUE);
+    XComponentModelStatic::InitParams(frameNodePtr);
+    EXPECT_TRUE(pattern->renderContextForSurface_);
+    pattern->renderFit_ = RenderFit::TOP_LEFT;
+    /**
+     * @tc.steps: step3. call OnModifyDone
+     * @tc.expected: renderFit property is updated
+     */
+    pattern->OnModifyDone();
+    EXPECT_EQ(pattern->renderFit_, RenderFit::RESIZE_FILL);
+}
 } // namespace OHOS::Ace::NG
