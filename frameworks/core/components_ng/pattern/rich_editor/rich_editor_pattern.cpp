@@ -5480,7 +5480,9 @@ bool RichEditorPattern::UnableStandardInputCrossPlatform(bool isFocusViewChanged
             }
         }
     }
-    value.selection.Update(caretPosition_, caretPosition_);
+    auto start = textSelector_.IsValid() ? textSelector_.GetTextStart() : caretPosition_;
+    auto end = textSelector_.IsValid() ? textSelector_.GetTextEnd() : caretPosition_;
+    value.selection.Update(start, end);
     inputMethodManager->SetEditingState(value, GetInstanceId());
     inputMethodManager->ShowKeyboard(isFocusViewChanged, GetInstanceId());
     return true;
