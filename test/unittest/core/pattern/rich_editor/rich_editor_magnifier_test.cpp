@@ -102,7 +102,7 @@ void RichEditorMagnifierTest::InitMagnifierParams(const SizeF& frameSize)
  * @tc.desc: Test magnifier position.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorMagnifierTest, MagnifierTest001, TestSize.Level1)
+HWTEST_F(RichEditorMagnifierTest, MagnifierTest001, TestSize.Level2)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto frameSize = SizeF(600.f, 400.f);
@@ -149,7 +149,7 @@ HWTEST_F(RichEditorMagnifierTest, MagnifierTest001, TestSize.Level1)
  * @tc.desc: Test magnifier position.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorMagnifierTest, MagnifierTest002, TestSize.Level1)
+HWTEST_F(RichEditorMagnifierTest, MagnifierTest002, TestSize.Level2)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto frameSize = SizeF(600.f, 400.f);
@@ -236,7 +236,7 @@ void RichEditorMagnifierTest::TestMagnifier(const RefPtr<RichEditorPattern>& ric
  * @tc.desc: test UpdateMagnifierStateAfterLayout
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorMagnifierTest, UpdateMagnifierStateAfterLayout001, TestSize.Level1)
+HWTEST_F(RichEditorMagnifierTest, UpdateMagnifierStateAfterLayout001, TestSize.Level2)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -253,7 +253,7 @@ HWTEST_F(RichEditorMagnifierTest, UpdateMagnifierStateAfterLayout001, TestSize.L
  * @tc.desc: test UpdateMagnifierStateAfterLayout
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorMagnifierTest, UpdateMagnifierStateAfterLayout002, TestSize.Level1)
+HWTEST_F(RichEditorMagnifierTest, UpdateMagnifierStateAfterLayout002, TestSize.Level2)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -272,7 +272,7 @@ HWTEST_F(RichEditorMagnifierTest, UpdateMagnifierStateAfterLayout002, TestSize.L
  * @tc.desc: test HandleSurfaceChanged
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorMagnifierTest, HandleSurfaceChanged001, TestSize.Level1)
+HWTEST_F(RichEditorMagnifierTest, HandleSurfaceChanged001, TestSize.Level2)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -287,7 +287,7 @@ HWTEST_F(RichEditorMagnifierTest, HandleSurfaceChanged001, TestSize.Level1)
  * @tc.desc: test HandleSurfaceChanged
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorMagnifierTest, HandleSurfaceChanged002, TestSize.Level1)
+HWTEST_F(RichEditorMagnifierTest, HandleSurfaceChanged002, TestSize.Level2)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
