@@ -48,6 +48,7 @@ public:
     static void SetIconSize(const Dimension& value);
     static void SetIconSize(const NG::CalcSize& value);
     static void SetIconSize(FrameNode* frameNode, const std::optional<Dimension>& value);
+    static void SetIconSize(FrameNode* frameNode, const std::optional<NG::CalcSize>& value);
     static void SetIconColor(FrameNode* frameNode, const std::optional<Color>& value);
     static void SetSymbolIconSize(const Dimension& value);
     static void SetIconColor(const Color& value);
