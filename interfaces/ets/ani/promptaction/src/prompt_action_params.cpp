@@ -1042,13 +1042,11 @@ bool GetLengthParam(ani_env *env, ani_ref ref, OHOS::Ace::CalcDimension& result)
     return GetLengthParam(env, object, result);
 }
 
-bool GetColorParam(ani_env* env, ani_object object, PromptActionColor& result)
+bool GetColorParam(ani_env* env, ani_object object, std::string& result)
 {
-    int32_t resultInt;
-    if (!GetEnumInt(env, object, "arkui.component.enums.Color", resultInt)) {
+    if (!GetEnumString(env, object, "arkui.component.enums.Color", result)) {
         return false;
     }
-    result = static_cast<PromptActionColor>(resultInt);
     return true;
 }
 
@@ -1060,13 +1058,9 @@ bool GetResourceColorParam(ani_env *env, ani_object object, OHOS::Ace::Color& re
         return true;
     }
 
-    PromptActionColor resultColor;
-    if (GetColorParam(env, object, resultColor)) {
-        auto iter = colorMap.find(resultColor);
-        if (iter != colorMap.end()) {
-            result = OHOS::Ace::Color(iter->second);
-            return true;
-        }
+    if (GetColorParam(env, object, resultStr)) {
+        OHOS::Ace::Color::ParseColorString(resultStr, result);
+        return true;
     }
 
     double resultDouble;
