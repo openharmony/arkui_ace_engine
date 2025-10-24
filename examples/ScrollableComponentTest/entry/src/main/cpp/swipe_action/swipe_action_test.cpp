@@ -14,7 +14,7 @@
  */
 
 /*
- * Description: Grid组件高频接口CAPI补齐
+ * Description: List支持展开指定ListItem的swipeAction
  * Writer: renxiaowen
  */
 
