@@ -1520,6 +1520,7 @@ HWTEST_F(OverlayManagerTestOneNG, RemovePixelMapAnimation001, TestSize.Level1)
 HWTEST_F(OverlayManagerTestOneNG, RemoveAllModalInOverlay003, TestSize.Level1)
 {
     auto targetNode = CreateTargetNode();
+    ASSERT_NE(targetNode, nullptr);
     auto stageNode = FrameNode::CreateFrameNode(
         V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
     auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
