@@ -159,10 +159,10 @@ export class TransferUtil {
         return {x: x, y: y, z: z} as Vector3;
     }
 
-    static getPropBorderStyle(inVal: ESValue, name: string): Edges<BorderStyle> {
+    static getPropBorderStyle(inVal: ESValue, name: string): Edges<BorderStyle> | undefined {
         const borderVal = inVal.getProperty(name);
         if (borderVal.isUndefined() || borderVal.isNull()) {
-            return { left: undefined, top: undefined, right: undefined, bottom: undefined } as Edges<BorderStyle>;
+            return undefined;
         }
     
         const getStyle = (property: string): BorderStyle | undefined => {
@@ -179,10 +179,10 @@ export class TransferUtil {
     }
 
     // borderWidthValue: 1.1 -> 1.2(int)
-    static getPropBorderNoExcept(inVal: ESValue, name: string): Edges<number> {
+    static getPropBorderNoExcept(inVal: ESValue, name: string): Edges<number> | undefined {
         let borderVal = inVal.getProperty(name);
         if (borderVal.isUndefined() || borderVal.isNull()) {
-            return {left: undefined, top: undefined, right: undefined, bottom: undefined} as Edges<number>;
+            return undefined;
         }
         let left = TransferUtil.getPropNumberNoExcept(borderVal, "left");
         let top = TransferUtil.getPropNumberNoExcept(borderVal, "top");
@@ -193,10 +193,10 @@ export class TransferUtil {
     }
 
     // number color: 1.1(long) -> 1.2(int)
-    static getPropEdgesColor(inVal: ESValue, name: string): Edges<number> {
+    static getPropEdgesColor(inVal: ESValue, name: string): Edges<number> | undefined {
         let borderVal = inVal.getProperty(name);
         if (borderVal.isUndefined() || borderVal.isNull()) {
-            return {left: undefined, top: undefined, right: undefined, bottom: undefined} as Edges<number>;
+            return undefined;
         }
         let left = TransferUtil.getPropColorInt(borderVal, "left");
         let top = TransferUtil.getPropColorInt(borderVal, "top");
@@ -206,10 +206,10 @@ export class TransferUtil {
         return egVal;
     }
 
-    static getPropCornersNoExcept(inVal: ESValue, name: string): Corners<number> {
+    static getPropCornersNoExcept(inVal: ESValue, name: string): Corners<number> | undefined {
         let corVal = inVal.getProperty(name);
         if (corVal.isUndefined() || corVal.isNull()) {
-            return {topLeft: 0, topRight: 0, bottomLeft: 0, bottomRight: 0} as Corners<number>;
+            return undefined;
         }
         let r1 = corVal.getProperty("topLeft").toNumber();
         let r2 = corVal.getProperty("topRight").toNumber();
