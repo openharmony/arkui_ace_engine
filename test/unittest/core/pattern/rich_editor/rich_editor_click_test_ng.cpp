@@ -79,7 +79,7 @@ void RichEditorClickTestNg::TearDownTestSuite()
  * @tc.desc: test handle click event
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorClickTestNg, HandleClickEvent001, TestSize.Level1)
+HWTEST_F(RichEditorClickTestNg, HandleClickEvent001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -139,7 +139,7 @@ HWTEST_F(RichEditorClickTestNg, HandleClickEvent001, TestSize.Level1)
  * @tc.desc: test RichEditorPattern HandleClickEvent
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorClickTestNg, HandleClickEvent002, TestSize.Level1)
+HWTEST_F(RichEditorClickTestNg, HandleClickEvent002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -162,7 +162,7 @@ HWTEST_F(RichEditorClickTestNg, HandleClickEvent002, TestSize.Level1)
  * @tc.desc: test RichEditorPattern HandleClickEvent
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorClickTestNg, HandleClickEvent003, TestSize.Level1)
+HWTEST_F(RichEditorClickTestNg, HandleClickEvent003, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -185,7 +185,7 @@ HWTEST_F(RichEditorClickTestNg, HandleClickEvent003, TestSize.Level1)
  * @tc.desc: test double click
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorClickTestNg, DoubleHandleClickEvent001, TestSize.Level1)
+HWTEST_F(RichEditorClickTestNg, DoubleHandleClickEvent001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -221,7 +221,7 @@ HWTEST_F(RichEditorClickTestNg, DoubleHandleClickEvent001, TestSize.Level1)
  * @tc.desc: test HandleEnabled
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorClickTestNg, HandleEnabled, TestSize.Level1)
+HWTEST_F(RichEditorClickTestNg, HandleEnabled, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create richEditorPattern and renderContext.
@@ -264,7 +264,7 @@ HWTEST_F(RichEditorClickTestNg, HandleEnabled, TestSize.Level1)
  * @tc.desc: test MoveCaretOnLayoutSwap
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorClickTestNg, MoveCaretOnLayoutSwap, TestSize.Level1)
+HWTEST_F(RichEditorClickTestNg, MoveCaretOnLayoutSwap, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. get richEditor pattern
@@ -298,7 +298,7 @@ HWTEST_F(RichEditorClickTestNg, MoveCaretOnLayoutSwap, TestSize.Level1)
  * @tc.desc: test CreateAndShowSingleHandle
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorClickTestNg, CreateAndShowSingleHandle, TestSize.Level1)
+HWTEST_F(RichEditorClickTestNg, CreateAndShowSingleHandle, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create richEditorPattern
@@ -321,7 +321,7 @@ HWTEST_F(RichEditorClickTestNg, CreateAndShowSingleHandle, TestSize.Level1)
  * @tc.desc: test RichEditorPattern HandleSingleClickEvent
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorClickTestNg, HandleSingleClickEvent001, TestSize.Level1)
+HWTEST_F(RichEditorClickTestNg, HandleSingleClickEvent001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -367,7 +367,7 @@ HWTEST_F(RichEditorClickTestNg, HandleSingleClickEvent001, TestSize.Level1)
  * @tc.desc: test RichEditorPattern HandleSingleClickEvent
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorClickTestNg, HandleSingleClickEvent002, TestSize.Level1)
+HWTEST_F(RichEditorClickTestNg, HandleSingleClickEvent002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -384,7 +384,7 @@ HWTEST_F(RichEditorClickTestNg, HandleSingleClickEvent002, TestSize.Level1)
  * @tc.desc: test RichEditorPattern HandleSingleClickEvent
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorClickTestNg, HandleSingleClickEvent003, TestSize.Level1)
+HWTEST_F(RichEditorClickTestNg, HandleSingleClickEvent003, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -401,7 +401,7 @@ HWTEST_F(RichEditorClickTestNg, HandleSingleClickEvent003, TestSize.Level1)
  * @tc.desc: test RichEditorPattern HandleSingleClickEvent
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorClickTestNg, HandleSingleClickEvent004, TestSize.Level1)
+HWTEST_F(RichEditorClickTestNg, HandleSingleClickEvent004, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -436,7 +436,7 @@ HWTEST_F(RichEditorClickTestNg, HandleSingleClickEvent004, TestSize.Level1)
  * @tc.desc: test HandleTripleClickEvent
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorClickTestNg, TestRichEditorHandleTripleClickEvent001, TestSize.Level1)
+HWTEST_F(RichEditorClickTestNg, TestRichEditorHandleTripleClickEvent001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. declare and init variables and call function.
@@ -455,7 +455,7 @@ HWTEST_F(RichEditorClickTestNg, TestRichEditorHandleTripleClickEvent001, TestSiz
  * @tc.desc: test RichEditorPattern ClickAISpan
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorClickTestNg, ClickAISpan001, TestSize.Level1)
+HWTEST_F(RichEditorClickTestNg, ClickAISpan001, TestSize.Level0)
 {
     AISpan aiSpan;
     aiSpan.start = 0;
@@ -475,7 +475,7 @@ HWTEST_F(RichEditorClickTestNg, ClickAISpan001, TestSize.Level1)
  * @tc.desc: Test ClickAISpan function
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorClickTestNg, ClickAISpan002, TestSize.Level1)
+HWTEST_F(RichEditorClickTestNg, ClickAISpan002, TestSize.Level0)
 {
     PointF textOffset = {100.0, 100.0};
     AISpan aiSpan = {0, 10, "Test", TextDataDetectType::PHONE_NUMBER};
@@ -502,7 +502,7 @@ HWTEST_F(RichEditorClickTestNg, ClickAISpan002, TestSize.Level1)
  * @tc.desc: Test ClickAISpan function
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorClickTestNg, ClickAISpan003, TestSize.Level1)
+HWTEST_F(RichEditorClickTestNg, ClickAISpan003, TestSize.Level0)
 {
     PointF textOffset = {100.0, 100.0};
     AISpan aiSpan = {0, 10, "Test", TextDataDetectType::PHONE_NUMBER};
@@ -529,7 +529,7 @@ HWTEST_F(RichEditorClickTestNg, ClickAISpan003, TestSize.Level1)
  * @tc.desc: Test ClickAISpan function
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorClickTestNg, ClickAISpan004, TestSize.Level1)
+HWTEST_F(RichEditorClickTestNg, ClickAISpan004, TestSize.Level0)
 {
     PointF textOffset = {100.0, 100.0};
     AISpan aiSpan = {0, 10, "Test", TextDataDetectType::PHONE_NUMBER};
@@ -556,7 +556,7 @@ HWTEST_F(RichEditorClickTestNg, ClickAISpan004, TestSize.Level1)
  * @tc.desc: Test ClickAISpan function
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorClickTestNg, ClickAISpan005, TestSize.Level1)
+HWTEST_F(RichEditorClickTestNg, ClickAISpan005, TestSize.Level0)
 {
     PointF textOffset = {100.0, 100.0};
     AISpan aiSpan = {0, 10, "Test", TextDataDetectType::PHONE_NUMBER};
@@ -582,7 +582,7 @@ HWTEST_F(RichEditorClickTestNg, ClickAISpan005, TestSize.Level1)
  * @tc.desc: test HandleUserClickEvent
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorClickTestNg, HandleUserClickEvent001, TestSize.Level1)
+HWTEST_F(RichEditorClickTestNg, HandleUserClickEvent001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -620,7 +620,7 @@ HWTEST_F(RichEditorClickTestNg, HandleUserClickEvent001, TestSize.Level1)
  * @tc.desc: test HandleUserClickEvent
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorClickTestNg, HandleUserClickEvent002, TestSize.Level1)
+HWTEST_F(RichEditorClickTestNg, HandleUserClickEvent002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -656,7 +656,7 @@ HWTEST_F(RichEditorClickTestNg, HandleUserClickEvent002, TestSize.Level1)
  * @tc.desc: test HandleUserClickEvent
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorClickTestNg, HandleUserClickEvent003, TestSize.Level1)
+HWTEST_F(RichEditorClickTestNg, HandleUserClickEvent003, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -689,7 +689,7 @@ HWTEST_F(RichEditorClickTestNg, HandleUserClickEvent003, TestSize.Level1)
  * @tc.desc: test IsClickBoundary
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorClickTestNg, IsClickBoundary001, TestSize.Level1)
+HWTEST_F(RichEditorClickTestNg, IsClickBoundary001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. init and call function.
@@ -714,7 +714,7 @@ HWTEST_F(RichEditorClickTestNg, IsClickBoundary001, TestSize.Level1)
  * @tc.desc: test RichEditorScope
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorClickTestNg, RichEditorScopeTest, TestSize.Level1)
+HWTEST_F(RichEditorClickTestNg, RichEditorScopeTest, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();

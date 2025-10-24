@@ -200,7 +200,7 @@ void RichEditorBaseTestNg::TearDownTestSuite()
  * @tc.desc: test create
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorBaseTestNg, RichEditorModel001, TestSize.Level1)
+HWTEST_F(RichEditorBaseTestNg, RichEditorModel001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -218,7 +218,7 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel001, TestSize.Level1)
  * @tc.desc: test create
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorBaseTestNg, RichEditorModel002, TestSize.Level1)
+HWTEST_F(RichEditorBaseTestNg, RichEditorModel002, TestSize.Level0)
 {
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
@@ -234,7 +234,7 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel002, TestSize.Level1)
  * @tc.desc: test set on ready
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorBaseTestNg, RichEditorModel003, TestSize.Level1)
+HWTEST_F(RichEditorBaseTestNg, RichEditorModel003, TestSize.Level0)
 {
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
@@ -258,7 +258,7 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel003, TestSize.Level1)
  * @tc.desc: test set about to IME input
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorBaseTestNg, RichEditorModel004, TestSize.Level1)
+HWTEST_F(RichEditorBaseTestNg, RichEditorModel004, TestSize.Level0)
 {
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
@@ -285,7 +285,7 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel004, TestSize.Level1)
  * @tc.desc: test set on IME input complete
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorBaseTestNg, RichEditorModel005, TestSize.Level1)
+HWTEST_F(RichEditorBaseTestNg, RichEditorModel005, TestSize.Level0)
 {
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
@@ -310,7 +310,7 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel005, TestSize.Level1)
  * @tc.desc: test set about to delete
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorBaseTestNg, RichEditorModel006, TestSize.Level1)
+HWTEST_F(RichEditorBaseTestNg, RichEditorModel006, TestSize.Level0)
 {
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
@@ -337,7 +337,7 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel006, TestSize.Level1)
  * @tc.desc: test set on delete complete
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorBaseTestNg, RichEditorModel007, TestSize.Level1)
+HWTEST_F(RichEditorBaseTestNg, RichEditorModel007, TestSize.Level0)
 {
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
@@ -361,7 +361,7 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel007, TestSize.Level1)
  * @tc.desc: test set on select
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorBaseTestNg, RichEditorModel008, TestSize.Level1)
+HWTEST_F(RichEditorBaseTestNg, RichEditorModel008, TestSize.Level0)
 {
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
@@ -386,7 +386,7 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel008, TestSize.Level1)
  * @tc.desc: test set on text selection change
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorBaseTestNg, RichEditorModel009, TestSize.Level1)
+HWTEST_F(RichEditorBaseTestNg, RichEditorModel009, TestSize.Level0)
 {
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
@@ -445,7 +445,7 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel009, TestSize.Level1)
  * @tc.desc: test set on text/image/symbol selection change
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorBaseTestNg, RichEditorModel010, TestSize.Level1)
+HWTEST_F(RichEditorBaseTestNg, RichEditorModel010, TestSize.Level0)
 {
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
@@ -494,7 +494,7 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel010, TestSize.Level1)
  * @tc.desc: test placeholder appear and disappear
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorBaseTestNg, RichEditorModel011, TestSize.Level1)
+HWTEST_F(RichEditorBaseTestNg, RichEditorModel011, TestSize.Level0)
 {
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
@@ -554,7 +554,7 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel011, TestSize.Level1)
  * @tc.desc: test placeholder styel value
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorBaseTestNg, RichEditorModel012, TestSize.Level1)
+HWTEST_F(RichEditorBaseTestNg, RichEditorModel012, TestSize.Level0)
 {
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
@@ -598,7 +598,7 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel012, TestSize.Level1)
  * @tc.desc: test placeholder styel value
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorBaseTestNg, RichEditorModel013, TestSize.Level1)
+HWTEST_F(RichEditorBaseTestNg, RichEditorModel013, TestSize.Level0)
 {
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
@@ -637,7 +637,7 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel013, TestSize.Level1)
  * @tc.desc: test paragraph style wordBreak attribute
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorBaseTestNg, RichEditorModel014, TestSize.Level1)
+HWTEST_F(RichEditorBaseTestNg, RichEditorModel014, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -677,7 +677,7 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel014, TestSize.Level1)
  * @tc.desc: test textstyle Color
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorBaseTestNg, RichEditorModel015, TestSize.Level1)
+HWTEST_F(RichEditorBaseTestNg, RichEditorModel015, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -717,7 +717,7 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel015, TestSize.Level1)
  * @tc.desc: test paragraph style linebreakstrategy attribute
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorBaseTestNg, RichEditorModel016, TestSize.Level1)
+HWTEST_F(RichEditorBaseTestNg, RichEditorModel016, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -749,7 +749,7 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel016, TestSize.Level1)
  * @tc.desc: test GetRichEditorController、SetCustomKeyboard、BindSelectionMenu、SetPlaceholder.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorBaseTestNg, RichEditorModel017, TestSize.Level1)
+HWTEST_F(RichEditorBaseTestNg, RichEditorModel017, TestSize.Level0)
 {
     RichEditorModelNG richEditorModel;
     richEditorModel.Create(true);
@@ -785,7 +785,7 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel017, TestSize.Level1)
  * @tc.desc: test SetEnableHapticFeedback.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorBaseTestNg, RichEditorModel018, TestSize.Level1)
+HWTEST_F(RichEditorBaseTestNg, RichEditorModel018, TestSize.Level0)
 {
     RichEditorModelNG richEditorModel;
     richEditorModel.Create(true);
@@ -801,7 +801,7 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel018, TestSize.Level1)
  * @tc.desc: test SetEnableAutoSpacing.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorBaseTestNg, RichEditorModel019, TestSize.Level1)
+HWTEST_F(RichEditorBaseTestNg, RichEditorModel019, TestSize.Level0)
 {
     /**
      * @tc.steps: Create RichEditor node and Set EnableAutoSpacing True
@@ -841,7 +841,7 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel019, TestSize.Level1)
  * @tc.desc: test SetSupportStyledUndo.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorBaseTestNg, RichEditorModel020, TestSize.Level1)
+HWTEST_F(RichEditorBaseTestNg, RichEditorModel020, TestSize.Level0)
 {
     RichEditorModelNG richEditorModel;
     richEditorModel.Create(false);
@@ -861,7 +861,7 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel020, TestSize.Level1)
  * @tc.desc: test paragraph style textVerticalAlign attribute
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorBaseTestNg, RichEditorModel021, TestSize.Level1)
+HWTEST_F(RichEditorBaseTestNg, RichEditorModel021, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -897,7 +897,7 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel021, TestSize.Level1)
  * @tc.desc: test CreateImageSourceInfo
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorBaseTestNg, CreateImageSourceInfo001, TestSize.Level1)
+HWTEST_F(RichEditorBaseTestNg, CreateImageSourceInfo001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -912,7 +912,7 @@ HWTEST_F(RichEditorBaseTestNg, CreateImageSourceInfo001, TestSize.Level1)
  * @tc.desc: Verify the onDraw Magnifier.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorBaseTestNg, onDraw001, TestSize.Level1)
+HWTEST_F(RichEditorBaseTestNg, onDraw001, TestSize.Level0)
 {
     Offset localOffset(0, 0);
     SymbolSpanOptions symbolSpanOptions;
@@ -945,7 +945,7 @@ HWTEST_F(RichEditorBaseTestNg, onDraw001, TestSize.Level1)
  * @tc.desc: test GetRichEditorController
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorBaseTestNg, GetRichEditorController001, TestSize.Level1)
+HWTEST_F(RichEditorBaseTestNg, GetRichEditorController001, TestSize.Level0)
 {
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
