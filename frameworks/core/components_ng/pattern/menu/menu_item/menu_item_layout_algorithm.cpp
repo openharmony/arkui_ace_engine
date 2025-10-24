@@ -213,6 +213,18 @@ void MenuItemLayoutAlgorithm::MeasureItemViews(LayoutConstraintF& childConstrain
         // Cannot cover left icon
         ? maxRowWidth_ - middleSpace_ - static_cast<float>(iconSize_)
         : maxRowWidth_);
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
+    auto fontScale = menuTheme->GetFontScale();
+    if (NearEqual(fontScale, menuTheme->GetBigFontSizeScale()) ||
+        NearEqual(fontScale, menuTheme->GetLargeFontSizeScale()) ||
+        NearEqual(fontScale, menuTheme->GetMaxFontSizeScale())) {
+        childConstraint.maxSize.SetWidth((maxRowWidth_ - middleSpace_) / 3);
+    }
     // measure right row
     auto [rightRowWidth, rightRowHeight] = MeasureRightRow(layoutWrapper, childConstraint);
     
