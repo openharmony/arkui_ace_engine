@@ -64,7 +64,7 @@ void RichEditorParagraphManagetTestNg::TearDownTestSuite()
  * @tc.desc: test GetParagraphsRects
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorParagraphManagetTestNg, GetParagraphsRects001, TestSize.Level1)
+HWTEST_F(RichEditorParagraphManagetTestNg, GetParagraphsRects001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -82,7 +82,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, GetParagraphsRects001, TestSize.Level
  * @tc.desc: test GetParagraphsRects
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorParagraphManagetTestNg, GetParagraphsRects002, TestSize.Level1)
+HWTEST_F(RichEditorParagraphManagetTestNg, GetParagraphsRects002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -102,7 +102,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, GetParagraphsRects002, TestSize.Level
  * @tc.desc: test GetParagraphsRects
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorParagraphManagetTestNg, GetParagraphsRects003, TestSize.Level1)
+HWTEST_F(RichEditorParagraphManagetTestNg, GetParagraphsRects003, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -122,7 +122,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, GetParagraphsRects003, TestSize.Level
  * @tc.desc: test GetParagraphsRects
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorParagraphManagetTestNg, GetParagraphsRects004, TestSize.Level1)
+HWTEST_F(RichEditorParagraphManagetTestNg, GetParagraphsRects004, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -141,7 +141,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, GetParagraphsRects004, TestSize.Level
  * @tc.desc: test GetTextBoxesForSelect
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorParagraphManagetTestNg, GetTextBoxesForSelect001, TestSize.Level1)
+HWTEST_F(RichEditorParagraphManagetTestNg, GetTextBoxesForSelect001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -161,7 +161,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, GetTextBoxesForSelect001, TestSize.Le
  * @tc.desc: test GetTextBoxesForSelect
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorParagraphManagetTestNg, GetTextBoxesForSelect002, TestSize.Level1)
+HWTEST_F(RichEditorParagraphManagetTestNg, GetTextBoxesForSelect002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -181,7 +181,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, GetTextBoxesForSelect002, TestSize.Le
  * @tc.desc: test GetTextBoxesForSelect
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorParagraphManagetTestNg, GetTextBoxesForSelect003, TestSize.Level1)
+HWTEST_F(RichEditorParagraphManagetTestNg, GetTextBoxesForSelect003, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -201,7 +201,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, GetTextBoxesForSelect003, TestSize.Le
  * @tc.desc: test GetTextBoxesForSelect
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorParagraphManagetTestNg, GetTextBoxesForSelect004, TestSize.Level1)
+HWTEST_F(RichEditorParagraphManagetTestNg, GetTextBoxesForSelect004, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -220,7 +220,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, GetTextBoxesForSelect004, TestSize.Le
  * @tc.desc: test MakeBlankLineRectsInParagraph
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorParagraphManagetTestNg, MakeBlankLineRectsInParagraph001, TestSize.Level1)
+HWTEST_F(RichEditorParagraphManagetTestNg, MakeBlankLineRectsInParagraph001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -242,7 +242,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, MakeBlankLineRectsInParagraph001, Tes
  * @tc.desc: test MakeBlankLineRectsInParagraph
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorParagraphManagetTestNg, MakeBlankLineRectsInParagraph002, TestSize.Level1)
+HWTEST_F(RichEditorParagraphManagetTestNg, MakeBlankLineRectsInParagraph002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -264,7 +264,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, MakeBlankLineRectsInParagraph002, Tes
  * @tc.desc: test MakeBlankLineRectsInParagraph
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorParagraphManagetTestNg, MakeBlankLineRectsInParagraph003, TestSize.Level1)
+HWTEST_F(RichEditorParagraphManagetTestNg, MakeBlankLineRectsInParagraph003, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -283,7 +283,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, MakeBlankLineRectsInParagraph003, Tes
  * @tc.desc: test MakeBlankLineRectsInParagraph
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorParagraphManagetTestNg, MakeBlankLineRectsInParagraph004, TestSize.Level1)
+HWTEST_F(RichEditorParagraphManagetTestNg, MakeBlankLineRectsInParagraph004, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -304,7 +304,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, MakeBlankLineRectsInParagraph004, Tes
  * @tc.desc: test GetRichEditorBoxesForSelect
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorParagraphManagetTestNg, GetRichEditorBoxesForSelect001, TestSize.Level1)
+HWTEST_F(RichEditorParagraphManagetTestNg, GetRichEditorBoxesForSelect001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -324,7 +324,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, GetRichEditorBoxesForSelect001, TestS
  * @tc.desc: test GetRichEditorBoxesForSelect
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorParagraphManagetTestNg, GetRichEditorBoxesForSelect002, TestSize.Level1)
+HWTEST_F(RichEditorParagraphManagetTestNg, GetRichEditorBoxesForSelect002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -344,7 +344,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, GetRichEditorBoxesForSelect002, TestS
  * @tc.desc: test GetRichEditorBoxesForSelect
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorParagraphManagetTestNg, GetRichEditorBoxesForSelect003, TestSize.Level1)
+HWTEST_F(RichEditorParagraphManagetTestNg, GetRichEditorBoxesForSelect003, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -364,7 +364,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, GetRichEditorBoxesForSelect003, TestS
  * @tc.desc: test GetRichEditorBoxesForSelect
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorParagraphManagetTestNg, GetRichEditorBoxesForSelect004, TestSize.Level1)
+HWTEST_F(RichEditorParagraphManagetTestNg, GetRichEditorBoxesForSelect004, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -383,7 +383,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, GetRichEditorBoxesForSelect004, TestS
  * @tc.desc: test MakeBlankRectsInRichEditor
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorParagraphManagetTestNg, MakeBlankRectsInRichEditor001, TestSize.Level1)
+HWTEST_F(RichEditorParagraphManagetTestNg, MakeBlankRectsInRichEditor001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -405,7 +405,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, MakeBlankRectsInRichEditor001, TestSi
  * @tc.desc: test MakeBlankRectsInRichEditor
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorParagraphManagetTestNg, MakeBlankRectsInRichEditor002, TestSize.Level1)
+HWTEST_F(RichEditorParagraphManagetTestNg, MakeBlankRectsInRichEditor002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -427,7 +427,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, MakeBlankRectsInRichEditor002, TestSi
  * @tc.desc: test MakeBlankRectsInRichEditor
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorParagraphManagetTestNg, MakeBlankRectsInRichEditor003, TestSize.Level1)
+HWTEST_F(RichEditorParagraphManagetTestNg, MakeBlankRectsInRichEditor003, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -446,7 +446,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, MakeBlankRectsInRichEditor003, TestSi
  * @tc.desc: test MakeBlankRectsInRichEditor
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorParagraphManagetTestNg, MakeBlankRectsInRichEditor004, TestSize.Level1)
+HWTEST_F(RichEditorParagraphManagetTestNg, MakeBlankRectsInRichEditor004, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -467,7 +467,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, MakeBlankRectsInRichEditor004, TestSi
  * @tc.desc: test RemoveBlankLineRectByHandler
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorParagraphManagetTestNg, RemoveBlankLineRectByHandler001, TestSize.Level1)
+HWTEST_F(RichEditorParagraphManagetTestNg, RemoveBlankLineRectByHandler001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -483,7 +483,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, RemoveBlankLineRectByHandler001, Test
  * @tc.desc: test RemoveBlankLineRectByHandler
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorParagraphManagetTestNg, RemoveBlankLineRectByHandler002, TestSize.Level1)
+HWTEST_F(RichEditorParagraphManagetTestNg, RemoveBlankLineRectByHandler002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -501,7 +501,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, RemoveBlankLineRectByHandler002, Test
  * @tc.desc: test GetTextBoxes
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorParagraphManagetTestNg, GetTextBoxes001, TestSize.Level1)
+HWTEST_F(RichEditorParagraphManagetTestNg, GetTextBoxes001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -550,7 +550,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, GetTextBoxes001, TestSize.Level1)
  * @tc.desc: test GetTextBoxes
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorParagraphManagetTestNg, GetTextBoxes002, TestSize.Level1)
+HWTEST_F(RichEditorParagraphManagetTestNg, GetTextBoxes002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -587,7 +587,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, GetTextBoxes002, TestSize.Level1)
  * @tc.desc: test GetTextBoxes
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorParagraphManagetTestNg, GetTextBoxes003, TestSize.Level1)
+HWTEST_F(RichEditorParagraphManagetTestNg, GetTextBoxes003, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -621,7 +621,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, GetTextBoxes003, TestSize.Level1)
  * @tc.desc: test GetTextBoxes
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorParagraphManagetTestNg, GetTextBoxes004, TestSize.Level1)
+HWTEST_F(RichEditorParagraphManagetTestNg, GetTextBoxes004, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -656,7 +656,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, GetTextBoxes004, TestSize.Level1)
  * @tc.desc: test DidExceedMaxLinesInner
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorParagraphManagetTestNg, DidExceedMaxLinesInner001, TestSize.Level1)
+HWTEST_F(RichEditorParagraphManagetTestNg, DidExceedMaxLinesInner001, TestSize.Level0)
 {
     RefPtr<ParagraphManager> pManager_ = AceType::MakeRefPtr<ParagraphManager>();;
     ParagraphManager::ParagraphInfo paragraphInfo;
@@ -674,7 +674,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, DidExceedMaxLinesInner001, TestSize.L
  * @tc.desc: test GetDumpInfo
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorParagraphManagetTestNg, GetDumpInfo001, TestSize.Level1)
+HWTEST_F(RichEditorParagraphManagetTestNg, GetDumpInfo001, TestSize.Level0)
 {
     RefPtr<ParagraphManager> pManager_ = AceType::MakeRefPtr<ParagraphManager>();;
     ParagraphManager::ParagraphInfo paragraphInfo;
@@ -698,7 +698,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, GetDumpInfo001, TestSize.Level1)
  * @tc.desc: Test the paragraph manager GetHeight function.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorParagraphManagetTestNg, ParagraphManager001, TestSize.Level1)
+HWTEST_F(RichEditorParagraphManagetTestNg, ParagraphManager001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -727,7 +727,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, ParagraphManager001, TestSize.Level1)
  * @tc.desc: Test the paragraph manager GetMaxIntrinsicWidth function.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorParagraphManagetTestNg, ParagraphManager002, TestSize.Level1)
+HWTEST_F(RichEditorParagraphManagetTestNg, ParagraphManager002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -756,7 +756,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, ParagraphManager002, TestSize.Level1)
  * @tc.desc: Test the paragraph manager DidExceedMaxLines function.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorParagraphManagetTestNg, ParagraphManager003, TestSize.Level1)
+HWTEST_F(RichEditorParagraphManagetTestNg, ParagraphManager003, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -785,7 +785,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, ParagraphManager003, TestSize.Level1)
  * @tc.desc: Test the paragraph manager GetLongestLine function.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorParagraphManagetTestNg, ParagraphManager004, TestSize.Level1)
+HWTEST_F(RichEditorParagraphManagetTestNg, ParagraphManager004, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -814,7 +814,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, ParagraphManager004, TestSize.Level1)
  * @tc.desc: Test the paragraph manager GetMaxWidth function.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorParagraphManagetTestNg, ParagraphManager005, TestSize.Level1)
+HWTEST_F(RichEditorParagraphManagetTestNg, ParagraphManager005, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -843,7 +843,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, ParagraphManager005, TestSize.Level1)
  * @tc.desc: Test the paragraph manager GetTextWidth function.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorParagraphManagetTestNg, ParagraphManager006, TestSize.Level1)
+HWTEST_F(RichEditorParagraphManagetTestNg, ParagraphManager006, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -872,7 +872,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, ParagraphManager006, TestSize.Level1)
  * @tc.desc: Test the paragraph manager GetTextWidthIncludeIndent function.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorParagraphManagetTestNg, ParagraphManager007, TestSize.Level1)
+HWTEST_F(RichEditorParagraphManagetTestNg, ParagraphManager007, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -901,7 +901,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, ParagraphManager007, TestSize.Level1)
  * @tc.desc: Test the paragraph manager GetLineCount function.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorParagraphManagetTestNg, ParagraphManager008, TestSize.Level1)
+HWTEST_F(RichEditorParagraphManagetTestNg, ParagraphManager008, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -930,7 +930,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, ParagraphManager008, TestSize.Level1)
  * @tc.desc: Test the paragraph manager function.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorParagraphManagetTestNg, ParagraphManager009, TestSize.Level1)
+HWTEST_F(RichEditorParagraphManagetTestNg, ParagraphManager009, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -984,7 +984,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, ParagraphManager009, TestSize.Level1)
  * @tc.desc: Test the paragraph manager function.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorParagraphManagetTestNg, ParagraphManager010, TestSize.Level1)
+HWTEST_F(RichEditorParagraphManagetTestNg, ParagraphManager010, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1017,7 +1017,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, ParagraphManager010, TestSize.Level1)
  * @tc.desc: Test the paragraph manager function.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorParagraphManagetTestNg, ParagraphManager011, TestSize.Level1)
+HWTEST_F(RichEditorParagraphManagetTestNg, ParagraphManager011, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1040,7 +1040,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, ParagraphManager011, TestSize.Level1)
  * @tc.desc: Test the paragraph manager function.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorParagraphManagetTestNg, GetLineMetrics001, TestSize.Level1)
+HWTEST_F(RichEditorParagraphManagetTestNg, GetLineMetrics001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1074,7 +1074,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, GetLineMetrics001, TestSize.Level1)
  * @tc.desc: test GetLineMetrics
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorParagraphManagetTestNg, GetLineMetrics002, TestSize.Level1)
+HWTEST_F(RichEditorParagraphManagetTestNg, GetLineMetrics002, TestSize.Level0)
 {
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
@@ -1100,7 +1100,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, GetLineMetrics002, TestSize.Level1)
  * @tc.desc: Test the paragraph manager function.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorParagraphManagetTestNg, GetGlyphIndexByCoordinate001, TestSize.Level1)
+HWTEST_F(RichEditorParagraphManagetTestNg, GetGlyphIndexByCoordinate001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1127,7 +1127,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, GetGlyphIndexByCoordinate001, TestSiz
  * @tc.desc: Test the paragraph manager function.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorParagraphManagetTestNg, GetWordBoundary001, TestSize.Level1)
+HWTEST_F(RichEditorParagraphManagetTestNg, GetWordBoundary001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1151,7 +1151,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, GetWordBoundary001, TestSize.Level1)
  * @tc.desc: Test the paragraph manager function.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorParagraphManagetTestNg, GetLineMetricsByRectF001, TestSize.Level1)
+HWTEST_F(RichEditorParagraphManagetTestNg, GetLineMetricsByRectF001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1182,7 +1182,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, GetLineMetricsByRectF001, TestSize.Le
  * @tc.desc: Test the paragraph manager IsSelectLineHeadAndUseLeadingMargin function.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorParagraphManagetTestNg, IsSelectLineHeadAndUseLeadingMargin001, TestSize.Level1)
+HWTEST_F(RichEditorParagraphManagetTestNg, IsSelectLineHeadAndUseLeadingMargin001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1214,7 +1214,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, IsSelectLineHeadAndUseLeadingMargin00
  * @tc.desc: Test the paragraph manager IsSelectLineHeadAndUseLeadingMargin function.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorParagraphManagetTestNg, IsSelectLineHeadAndUseLeadingMargin002, TestSize.Level1)
+HWTEST_F(RichEditorParagraphManagetTestNg, IsSelectLineHeadAndUseLeadingMargin002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1252,7 +1252,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, IsSelectLineHeadAndUseLeadingMargin00
  * @tc.desc: Test the paragraph manager IsSelectLineHeadAndUseLeadingMargin function.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorParagraphManagetTestNg, IsSelectLineHeadAndUseLeadingMargin003, TestSize.Level1)
+HWTEST_F(RichEditorParagraphManagetTestNg, IsSelectLineHeadAndUseLeadingMargin003, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1289,7 +1289,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, IsSelectLineHeadAndUseLeadingMargin00
  * @tc.desc: Test the paragraph manager function.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorParagraphManagetTestNg, GetIndex001, TestSize.Level1)
+HWTEST_F(RichEditorParagraphManagetTestNg, GetIndex001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1323,7 +1323,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, GetIndex001, TestSize.Level1)
  * @tc.desc: Test the paragraph manager function.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorParagraphManagetTestNg, GetGlyphPositionAtCoordinate001, TestSize.Level1)
+HWTEST_F(RichEditorParagraphManagetTestNg, GetGlyphPositionAtCoordinate001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1354,7 +1354,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, GetGlyphPositionAtCoordinate001, Test
  * @tc.desc: test GetParagraphInfo
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorParagraphManagetTestNg, GetParagraphInfo001, TestSize.Level1)
+HWTEST_F(RichEditorParagraphManagetTestNg, GetParagraphInfo001, TestSize.Level0)
 {
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
@@ -1374,7 +1374,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, GetParagraphInfo001, TestSize.Level1)
  * @tc.desc: test RichEditorPattern GetParagraphLength
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorParagraphManagetTestNg, GetParagraphLength001, TestSize.Level1)
+HWTEST_F(RichEditorParagraphManagetTestNg, GetParagraphLength001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1389,7 +1389,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, GetParagraphLength001, TestSize.Level
  * @tc.desc: test RichEditorPattern CalcCaretMetricsByPosition
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorParagraphManagetTestNg, CalcCaretMetricsByPosition001, TestSize.Level1)
+HWTEST_F(RichEditorParagraphManagetTestNg, CalcCaretMetricsByPosition001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1406,7 +1406,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, CalcCaretMetricsByPosition001, TestSi
  * @tc.desc: test RichEditorPattern AdjustHandleByLineMetrics
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorParagraphManagetTestNg, AdjustHandleByLineMetrics001, TestSize.Level1)
+HWTEST_F(RichEditorParagraphManagetTestNg, AdjustHandleByLineMetrics001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1424,7 +1424,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, AdjustHandleByLineMetrics001, TestSiz
  * @tc.desc: test RichEditorPattern AdjustHandleByLineMetrics
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorParagraphManagetTestNg, AdjustHandleByLineMetrics002, TestSize.Level1)
+HWTEST_F(RichEditorParagraphManagetTestNg, AdjustHandleByLineMetrics002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();

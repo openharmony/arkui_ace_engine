@@ -74,7 +74,7 @@ void RichEditorDoubleClickOrLongPressTestNg::TearDownTestSuite()
  * @tc.desc: test Mouse Double Click
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleDoubleClickOrLongPress001, TestSize.Level1)
+HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleDoubleClickOrLongPress001, TestSize.Level0)
 {
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     AddSpan(TEST_INSERT_VALUE);
@@ -113,7 +113,7 @@ HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleDoubleClickOrLongPress001
  * @tc.desc: test HandleDoubleClickOrLongPress
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleDoubleClickOrLongPress002, TestSize.Level1)
+HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleDoubleClickOrLongPress002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -148,7 +148,7 @@ HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleDoubleClickOrLongPress002
  * @tc.desc: test HandleDoubleClickOrLongPress
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleDoubleClickOrLongPress003, TestSize.Level1)
+HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleDoubleClickOrLongPress003, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -182,7 +182,7 @@ HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleDoubleClickOrLongPress003
  * @tc.desc: test HandleDoubleClickOrLongPress
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleDoubleClickOrLongPress004, TestSize.Level1)
+HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleDoubleClickOrLongPress004, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     richEditorNode_->GetOrCreateFocusHub();
@@ -218,7 +218,7 @@ HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleDoubleClickOrLongPress004
  * @tc.desc: test HandleDoubleClickOrLongPress
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleDoubleClickOrLongPress005, TestSize.Level1)
+HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleDoubleClickOrLongPress005, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -256,7 +256,7 @@ HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleDoubleClickOrLongPress005
  * @tc.desc: test HandleDoubleClickOrLongPress
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleDoubleClickOrLongPress006, TestSize.Level1)
+HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleDoubleClickOrLongPress006, TestSize.Level0)
 {
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
@@ -277,7 +277,7 @@ HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleDoubleClickOrLongPress006
  * @tc.desc: test Long press edit status is keep false
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleDoubleClickOrLongPress007, TestSize.Level1)
+HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleDoubleClickOrLongPress007, TestSize.Level0)
 {
     /* *
      * @tc.steps: step1. get richEditor richEditorPattern
@@ -314,7 +314,7 @@ HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleDoubleClickOrLongPress007
  * @tc.desc: test touch Double Click
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleDoubleClickOrLongPress008, TestSize.Level1)
+HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleDoubleClickOrLongPress008, TestSize.Level0)
 {
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     richEditorPattern->selectOverlay_->handleLevelMode_ = HandleLevelMode::EMBED;
@@ -348,7 +348,7 @@ HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleDoubleClickOrLongPress008
  * @tc.desc: test touch Double Click
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleDoubleClickOrLongPress009, TestSize.Level1)
+HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleDoubleClickOrLongPress009, TestSize.Level0)
 {
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     richEditorPattern->selectOverlay_->handleLevelMode_ = HandleLevelMode::EMBED;
@@ -380,7 +380,7 @@ HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleDoubleClickOrLongPress009
  * @tc.desc: test RichEditorPattern HandleLongPress
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleLongPress001, TestSize.Level1)
+HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleLongPress001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -400,7 +400,7 @@ HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleLongPress001, TestSize.Le
  * @tc.desc: test
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleLongPress002, TestSize.Level1)
+HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleLongPress002, TestSize.Level0)
 {
     auto richEditorPattern = GetRichEditorPattern();
     ASSERT_NE(richEditorPattern, nullptr);
@@ -421,7 +421,7 @@ HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleLongPress002, TestSize.Le
  * @tc.desc: test HandleLongPress
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleLongPress003, TestSize.Level1)
+HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleLongPress003, TestSize.Level0)
 {
     auto richEditorPattern = GetRichEditorPattern();
     ASSERT_NE(richEditorPattern, nullptr);
@@ -440,7 +440,7 @@ HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleLongPress003, TestSize.Le
  * @tc.desc: test HandleLongPress
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleLongPress004, TestSize.Level1)
+HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleLongPress004, TestSize.Level0)
 {
     auto richEditorPattern = GetRichEditorPattern();
     ASSERT_NE(richEditorPattern, nullptr);
@@ -458,7 +458,7 @@ HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleLongPress004, TestSize.Le
  * @tc.desc: test HandleLongPress
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleLongPress005, TestSize.Level1)
+HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleLongPress005, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -477,7 +477,7 @@ HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleLongPress005, TestSize.Le
  * @tc.desc: test HandleLongPress
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleLongPress006, TestSize.Level1)
+HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleLongPress006, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -516,7 +516,7 @@ HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleLongPress006, TestSize.Le
  * @tc.desc: test HandleUserLongPressEvent
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleUserLongPressEvent001, TestSize.Level1)
+HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleUserLongPressEvent001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -553,7 +553,7 @@ HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleUserLongPressEvent001, Te
  * @tc.desc: test HandleUserLongPressEvent
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleUserLongPressEvent002, TestSize.Level1)
+HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleUserLongPressEvent002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -588,7 +588,7 @@ HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleUserLongPressEvent002, Te
  * @tc.desc: test HandleUserLongPressEvent
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleUserLongPressEvent003, TestSize.Level1)
+HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleUserLongPressEvent003, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
