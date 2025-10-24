@@ -1205,7 +1205,7 @@ struct CustomDialogContentComponent {
             top: { anchor: 'CustomDialogContentComponent', align: VerticalAlign.Top },
             bottom: { anchor: 'CustomDialogContentComponent', align: VerticalAlign.Bottom },
             end: { anchor: 'CustomDialogContentComponent', align: HorizontalAlign.End }
-          })
+          } as LocalizedAlignRuleOptions)
           .margin({
             top: $r('sys.float.alert_container_shape'),
             bottom: $r('sys.float.alert_container_shape')
