@@ -229,6 +229,9 @@ RefPtr<NG::FrameNode> AccessibilityFrameNodeUtils::GetFramenodeByAccessibilityId
             auto property = fnode->GetAccessibilityProperty<NG::AccessibilityProperty>();
             const auto& children = std::list<RefPtr<NG::UINode>> { property->GetAccessibilityVirtualNode() };
             if (FindFrameNodeByAccessibilityId(id, children, nodes, frameNodeResult)) {
+                CHECK_NULL_RETURN(frameNodeResult, nullptr);
+                frameNodeResult->SetAccessibilityNodeVirtual();
+                frameNodeResult->SetAccessibilityVirtualNodeParent(current);
                 return frameNodeResult;
             }
         } else {
