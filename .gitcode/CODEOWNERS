@@ -206,6 +206,7 @@ adapter/ohos/tools/raw_input_injector/ @ArkUI_Event
 
 [Preview adapter]
 adapter/preview/entrance/window_free_container.cpp @arkui_framework_xnode
+adapter/preview/osal/advance/data_detector_adapter.cpp @huawei_g_five
 adapter/preview/ @arkui_statemgmt
 
 [Advanced UI Components]
@@ -3439,6 +3440,7 @@ test/mock/core/manager/mock_display_manager.h @arkuilayout1
 test/mock/core/svg/ @arkui001
 test/mock/core/pipeline/ @arkui_framework_xnode
 test/mock/core/common/mock_container.h @arkui_framework_xnode
+test/mock/core/common/mock_data_detector_adapter.cpp @huawei_g_five
 test/mock/core/common/mock_interaction_interface.h @ArkUI_Event
 test/mock/ohos_mock/ @arkui_framework_xnode
 
