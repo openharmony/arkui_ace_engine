@@ -563,6 +563,8 @@ void RichEditorLayoutAlgorithm::UpdateFrameSizeWithLayoutPolicy(LayoutWrapper* l
 void RichEditorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     ACE_SCOPED_TRACE("RichEditorLayoutAlgorithm::Layout");
+    CHECK_NULL_VOID(layoutWrapper);
+    CHECK_NULL_VOID(layoutWrapper->GetHostNode());
     auto context = layoutWrapper->GetHostNode()->GetContext();
     CHECK_NULL_VOID(context);
     parentGlobalOffset_ = layoutWrapper->GetHostNode()->GetPaintRectOffsetNG() - context->GetRootRect().GetOffset();

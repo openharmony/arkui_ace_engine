@@ -758,11 +758,17 @@ HWTEST_F(RichEditorLayoutTestNg, RichEditorLayoutAlgorithmTest002, TestSize.Leve
 
     auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         richEditorNode_, AceType::MakeRefPtr<GeometryNode>(), richEditorNode_->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+
     SizeF textSize;
     ASSERT_EQ(textSize.Width(), 0.0f);
     layoutAlgorithm->allSpans_.clear();
     layoutAlgorithm->HandleTextSizeWhenEmpty(AceType::RawPtr(layoutWrapper), textSize);
     EXPECT_NE(textSize.Width(), 0.0f);
+
+    layoutWrapper = nullptr;
+    layoutAlgorithm->Layout(AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(layoutAlgorithm->parentGlobalOffset_.GetX(), 0.0f);
 }
 
 } // namespace OHOS::Ace::NG
