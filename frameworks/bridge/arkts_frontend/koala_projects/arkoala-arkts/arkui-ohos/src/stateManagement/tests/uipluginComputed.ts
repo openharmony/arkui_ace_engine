@@ -772,7 +772,7 @@ export function run_computed() : Boolean {
         d.setDate(d.getDate() + 1)
         // No test for modification of WrappedDate
         test(`Component.tomorrow = ${comp.tomorrow} === ??`, eq(comp.tomorrow.getDate(), d.getDate()));
-        //test(`Component.tomorrow = ${comp.tomorrow} === ??`, eq(Type.of(comp.tomorrow).getName(), "observeWrappedDate.WrappedDate"));
+        //test(`Component.tomorrow = ${comp.tomorrow} === ??`, eq(Class.of(comp.tomorrow).getName(), "observeWrappedDate.WrappedDate"));
         //test(`Component.tomorrow = ${comp.tomorrow} === ??`, eq(comp.tomorrow instanceof WrappedDate, true));
     })
 

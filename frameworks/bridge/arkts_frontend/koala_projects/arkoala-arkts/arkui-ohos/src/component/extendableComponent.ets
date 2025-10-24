@@ -281,7 +281,7 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
         const dumpInfo: DumpInfo = new DumpInfo();
         const isV2 = this instanceof CustomComponentV2;
         dumpInfo.viewinfo = {
-            componentName: Type.of(this).getName(),
+            componentName: Class.of(this).getName(),
             isV2: isV2
         };
         let ret: string = '';

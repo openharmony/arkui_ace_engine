@@ -427,7 +427,7 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
     }
     setSymbolGlyphOptions(value: Resource | undefined): this {
         if (this._setSymbolGlyphOptions_flag === AttributeUpdaterFlag.INITIAL ||
-            this._setSymbolGlyphOptions0_value !== value || !Type.of(value).isPrimitive()) {
+            this._setSymbolGlyphOptions0_value !== value || value != undefined) {
             this._setSymbolGlyphOptions0_value = value
             this._setSymbolGlyphOptions_flag = AttributeUpdaterFlag.UPDATE
             this._state.fireChange()

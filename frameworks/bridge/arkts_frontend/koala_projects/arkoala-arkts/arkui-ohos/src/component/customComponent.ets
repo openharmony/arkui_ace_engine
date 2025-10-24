@@ -62,7 +62,11 @@ export class ReuseObject {
         if (this._isRecord) {
             return this._recordValue[key];
         } else {
-            return ((reflect.Value.of(this._raw) as ClassValue).getFieldByName(key).getData() as RecordData);
+            const field = this.getRawField(key);
+            if (field != undefined) {
+                return field.getValue(this._raw as Object) as RecordData;
+            }
+            return undefined;
         }
     }
 
@@ -73,7 +77,7 @@ export class ReuseObject {
         if (this._isRecord) {
             return this._recordValue.has(key);
         } else {
-            return (Type.of(this._raw) as ClassType).hasField(key);
+            return (this.getRawField(key) !== undefined);
         }
     }
 
@@ -90,6 +94,17 @@ export class ReuseObject {
         } else {
             return Object.getOwnPropertyNames(this._raw!);
         }
+    }
+
+    getRawField(key: string): reflect.InstanceField | undefined {
+        let field: reflect.InstanceField | undefined = undefined;
+        for (let cls: Class | undefined = Class.ofAny(this._raw)!; cls != undefined; cls = cls!.getSuper()) {
+            field = cls!.getInstanceField(key);
+            if (field != undefined) {
+                break;
+            }
+        }
+        return field;
     }
 }
 

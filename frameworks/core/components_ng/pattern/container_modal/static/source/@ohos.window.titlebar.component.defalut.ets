@@ -352,34 +352,21 @@ struct System__Reserved_$$$__UI__ButtonBar__Component {
     return resource;
   }
 
-  getMethodByName(objType: ClassType, name: string): Method | undefined {
-    for (let methodIdx = 0; methodIdx < objType.getMethodsNum(); ++methodIdx) {
-      const method = objType.getMethod(methodIdx)
-      if (method.getName() == name) {
-        return method
-      }
-    }
-    return undefined
-  }
-
   callNative(xBarType: int, eventType: string, message: string) {
-    let reflectedType: Type | undefined = Type.resolve("arkui.XBarProxy.XBarProxy")
-    if (reflectedType === undefined) {
-      hilog.info(0x0000, 'testTag', "xBarType: " + xBarType);
-      hilog.info(0x0000, 'testTag', "eventType: " + eventType);
-      hilog.info(0x0000, 'testTag', "message: " + message);
-      return
-    }
     try {
-      let objType: ClassType = reflectedType as ClassType
-      let targetMethod: Method | undefined = this.getMethodByName(objType, "CallNative");
+      let linker = Class.ofCaller()!.getLinker()
+      let reflectedType = linker.loadClass("arkui.XBarProxy.XBarProxy");
+      let targetMethod = reflectedType.getStaticMethod("CallNative");
       if (targetMethod === undefined) {
         hilog.info(0x0000, 'testTag', "targetMethod === undefined");
         return;
       }
-      targetMethod.invoke(null, [xBarType, eventType, message]);
+      targetMethod.invoke([xBarType, eventType, message]);
     } catch (e) {
-      hilog.info(0x0000, 'testTag', "exception: " + e);
+      hilog.info(0x0000, 'testTag', "xBarType: " + xBarType);
+      hilog.info(0x0000, 'testTag', "eventType: " + eventType);
+      hilog.info(0x0000, 'testTag', "message: " + message);
+      return
     }
   }
 

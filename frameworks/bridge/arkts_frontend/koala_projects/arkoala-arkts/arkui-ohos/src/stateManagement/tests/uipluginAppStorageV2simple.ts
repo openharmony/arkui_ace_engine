@@ -33,10 +33,10 @@ interface InfB {
 }
 
 export function run_app_storage_v2_simple(): Boolean {
-    const ClassATypeValue = Type.of(new ClassA());
-    const ClassBTypeValue = Type.of(new ClassB());
-    const ClassIBTypeValue = Type.of(new ClassIB());
-    const InfBType = Type.of({ propB: 8 } as InfB)
+    const ClassATypeValue = Class.from<ClassA>();
+    const ClassBTypeValue = Class.from<ClassB>();
+    const ClassIBTypeValue = Class.from<ClassIB>();
+    const InfBType = Class.from<InfB>()
 
     const ttest = tsuite("AppStorageV2 API - simple") {
         tcase("connect, delete different ttypes") {

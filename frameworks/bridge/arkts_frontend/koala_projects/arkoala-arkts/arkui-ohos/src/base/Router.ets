@@ -1409,9 +1409,9 @@ export class RouterUtil {
         let objParams: Object | undefined = undefined;
         if (params.length != 0) {
             try {
-                let tempObj: Object | null | undefined = JSON.parse<Object>(params, Type.of(new Object()));	 
-                if (tempObj != null && tempObj != undefined) { 
-                    objParams = tempObj!; 
+                let tempObj: Object | null | undefined = JSON.parse<Object>(params, Class.from<Object>());
+                if (tempObj != null && tempObj != undefined) {
+                    objParams = tempObj!;
                 }
             } catch (error) {
                 InteropNativeModule._NativeLog(`AceRouter failed to parse params: ${params} error:` + error)
@@ -1441,9 +1441,9 @@ export class RouterUtil {
         let objParams: Object | undefined = undefined;
         if (params.length != 0) {
             try {
-                let tempObj: Object | null | undefined = JSON.parse<Object>(params, Type.of(new Object()));	 
-                if (tempObj != null && tempObj != undefined) { 
-                    objParams = tempObj!; 
+                let tempObj: Object | null | undefined = JSON.parse<Object>(params, Class.from<Object>());
+                if (tempObj != null && tempObj != undefined) {
+                    objParams = tempObj!;
                 }
             } catch (error) {
                 InteropNativeModule._NativeLog(`AceRouter failed to parse params: ${params} error:` + error)
@@ -1473,9 +1473,9 @@ export class RouterUtil {
         let objParams: Object | undefined = undefined;
         if (params.length != 0) {
             try {
-                let tempObj: Object | null | undefined = JSON.parse<Object>(params, Type.of(new Object()));	 
-                if (tempObj != null && tempObj != undefined) { 
-                    objParams = tempObj!; 
+                let tempObj: Object | null | undefined = JSON.parse<Object>(params, Class.from<Object>());
+                if (tempObj != null && tempObj != undefined) {
+                    objParams = tempObj!;
                 }
             } catch (error) {
                 InteropNativeModule._NativeLog(`AceRouter failed to parse params: ${params} error:` + error)

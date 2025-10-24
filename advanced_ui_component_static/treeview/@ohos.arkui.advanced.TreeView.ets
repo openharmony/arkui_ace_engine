@@ -1349,7 +1349,7 @@ export struct TreeView {
           let currentNodeIndex: number;
           let selectedIndexInterface: SelectedIndexInterface = new SelectedIndexInterface();
           if (extraParams != null) {
-            const params = JSON.parse<SelectedIndexInterface>(extraParams.toString(), Type.of(selectedIndexInterface));
+            const params = JSON.parse<SelectedIndexInterface>(extraParams.toString(), Class.of(selectedIndexInterface));
             if (params != null) {
               this.dropSelectedIndex = params.selectedIndex as number;
               currentNodeIndex = params.selectedIndex as number;
@@ -1440,7 +1440,7 @@ export struct TreeView {
         let index: number;
         let insertIndexInterface: InsertIndexInterface = new InsertIndexInterface();
         if (extraParams != null) {
-          let params = JSON.parse<InsertIndexInterface>(extraParams.toString(), Type.of(insertIndexInterface));
+          let params = JSON.parse<InsertIndexInterface>(extraParams.toString(), Class.of(insertIndexInterface));
           if (params != null) {
             index = params.insertIndex;
           }
@@ -1516,7 +1516,7 @@ export struct TreeView {
       let insertNodeIndex: number;
       let insertIndexInterface: InsertIndexInterface = new InsertIndexInterface();
       if (extraParams != null) {
-        let params = JSON.parse<InsertIndexInterface>(extraParams.toString(), Type.of(insertIndexInterface));
+        let params = JSON.parse<InsertIndexInterface>(extraParams.toString(), Class.of(insertIndexInterface));
         if (params != null) {
           insertNodeIndex = params.insertIndex
         }
