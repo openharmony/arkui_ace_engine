@@ -7091,10 +7091,6 @@ void ArkUINativeModule::RegisterWebAttributes(Local<panda::ObjectRef> object, Ec
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetEnableSelectedDataDetector));
     web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableSelectedDataDetector"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetEnableSelectedDataDetector));
-    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSelectedDataDetectorConfig"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetSelectedDataDetectorConfig));
-    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectedDataDetectorConfig"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetSelectedDataDetectorConfig));
     web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnSslErrorEventReceive"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnSslErrorEventReceive));
     web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnSslErrorEventReceive"),
