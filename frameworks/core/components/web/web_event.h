@@ -675,6 +675,7 @@ public:
     virtual void HandleConfirm(const std::string& privateKeyFile, const std::string& certChainFile) = 0;
     virtual void HandleCancel() = 0;
     virtual void HandleIgnore() = 0;
+    virtual void HandleConfirm(const std::string& identity, int32_t type) = 0;
 };
 
 class ACE_EXPORT WebSslSelectCertEvent : public BaseEventInfo {
@@ -721,6 +722,41 @@ private:
     int32_t port_ = -1;
     std::vector<std::string> keyTypes_;
     std::vector<std::string> issuers_;
+};
+
+class ACE_EXPORT VerifyPinResult : public AceType {
+    DECLARE_ACE_TYPE(VerifyPinResult, AceType);
+public:
+    VerifyPinResult() = default;
+    ~VerifyPinResult() = default;
+ 
+    virtual void HandleConfirm(int32_t verifyResult) = 0;
+};
+ 
+class ACE_EXPORT WebVerifyPinEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(WebVerifyPinEvent, BaseEventInfo);
+ 
+public:
+    WebVerifyPinEvent(const RefPtr<VerifyPinResult>& result, const std::string& identity)
+        : BaseEventInfo("WebVerifyPinEvent"),
+        result_(result), identity_(identity) {}
+ 
+    ~WebVerifyPinEvent() = default;
+ 
+    const RefPtr<VerifyPinResult>& GetResult() const
+    {
+        return result_;
+    }
+ 
+    const std::string& GetIdentity() const
+    {
+        return identity_;
+    }
+ 
+ 
+private:
+    RefPtr<VerifyPinResult> result_;
+    std::string identity_;
 };
 
 class ACE_EXPORT WebGeolocation : public AceType {

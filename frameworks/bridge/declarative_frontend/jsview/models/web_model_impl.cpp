@@ -762,4 +762,11 @@ void WebModelImpl::SetForceEnableZoom(bool isForceEnableZoom)
     CHECK_NULL_VOID(webComponent);
     webComponent->SetForceEnableZoom(isForceEnableZoom);
 }
+
+void WebModelImpl::SetOnVerifyPinRequest(std::function<bool(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    webComponent->SetOnVerifyPinRequestImpl(std::move(jsCallback));
+}
 } // namespace OHOS::Ace::Framework

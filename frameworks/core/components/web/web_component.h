@@ -1238,6 +1238,22 @@ public:
         isForceEnableZoom_ = isEnabled;
     }
 
+    using OnVerifyPinRequestImpl = std::function<bool(const BaseEventInfo* info)>;
+    bool OnVerifyPinRequest(const BaseEventInfo* info) const
+    {
+        if (onVerifyPinRequestImpl_) {
+            return onVerifyPinRequestImpl_(info);
+        }
+        return false;
+    }
+    void SetOnVerifyPinRequestImpl(OnVerifyPinRequestImpl && impl)
+    {
+        if (!impl) {
+            return;
+        }
+        onVerifyPinRequestImpl_ = std::move(impl);
+    }
+
 private:
     RefPtr<WebDeclaration> declaration_;
     CreatedCallback createdCallback_ = nullptr;
@@ -1268,6 +1284,7 @@ private:
     OnOverrideErrorPageImpl onOverrideErrorPageImpl_ = nullptr;
     OnProgressChangeImpl onProgressChangeImpl_ = nullptr;
     OnWindowNewImpl onWindowNewImpl_ = nullptr;
+    OnVerifyPinRequestImpl onVerifyPinRequestImpl_;
 
     std::string type_;
     bool incognitoMode_ = false;
