@@ -27,7 +27,7 @@ namespace OHOS::Ace::NG {
 namespace {
 static const Dimension& TrimToPositive(const Dimension& val)
 {
-    static Dimension zeroVp(0, DimensionUnit::VP);
+    static Dimension zeroVp(0.0);
     return val.IsNegative() ? zeroVp : val;
 }
 } // namespace

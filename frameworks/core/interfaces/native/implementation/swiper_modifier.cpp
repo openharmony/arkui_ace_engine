@@ -215,13 +215,13 @@ bool CheckSwiperParameters(SwiperParameters& p)
     ResetIfInvalid(p.dimEnd);
 
     ResetIfInvalid(p.itemWidth);
-    p.itemWidth = p.itemWidth ? std::max(6.0_vp, *p.itemWidth) : 6.0_vp;
+    p.itemWidth = p.itemWidth ? p.itemWidth : 6.0_vp;
     ResetIfInvalid(p.itemHeight);
-    p.itemHeight = p.itemHeight ? std::max(6.0_vp, *p.itemHeight) : 6.0_vp;
+    p.itemHeight = p.itemHeight ? p.itemHeight : 6.0_vp;
     ResetIfInvalid(p.selectedItemWidth);
-    p.selectedItemWidth = p.selectedItemWidth ? std::max(6.0_vp, *p.selectedItemWidth) : 6.0_vp;
+    p.selectedItemWidth = p.selectedItemWidth ? p.selectedItemWidth : 6.0_vp;
     ResetIfInvalid(p.selectedItemHeight);
-    p.selectedItemHeight = p.selectedItemHeight ? std::max(6.0_vp, *p.itemWidth) : 6.0_vp;
+    p.selectedItemHeight = p.selectedItemHeight ? p.itemWidth : 6.0_vp;
 
     if (p.maxDisplayCountVal && (*(p.maxDisplayCountVal) < 6 || *(p.maxDisplayCountVal) > 9)) {
         p.maxDisplayCountVal.reset();
@@ -241,9 +241,9 @@ void CheckSwiperDigitalParameters(SwiperDigitalParameters& p)
     ResetIfInvalid(p.dimEnd);
 
     ResetIfInvalid(p.fontSize);
-    p.fontSize = p.fontSize ? std::max(14.0_vp, *p.fontSize) : 14.0_vp;
+    p.fontSize = p.fontSize ? p.fontSize : 14.0_vp;
     ResetIfInvalid(p.selectedFontSize);
-    p.selectedFontSize = p.selectedFontSize ? std::max(14.0_vp, *p.selectedFontSize) : 14.0_vp;
+    p.selectedFontSize = p.selectedFontSize ? p.selectedFontSize : 14.0_vp;
 }
 } // namespace SwiperAttributeModifierInternal
 } // namespace OHOS::Ace::NG
