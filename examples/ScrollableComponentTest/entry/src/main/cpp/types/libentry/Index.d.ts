@@ -28,3 +28,5 @@ export const destroyListExample: (content: NodeContent) => void;
 export const gridTest: (a: string) => void;
 export const SwipeActionTest: (a: string) => void;
 export const SwipeActionTestWithDirection: (a: string, b: ListItemSwipeActionDirection) => void;
+export const SnapSpeedTest: (a: string) => void;
+export const SnapSpeedTestNoLazyForeach: (a:string) => void;
