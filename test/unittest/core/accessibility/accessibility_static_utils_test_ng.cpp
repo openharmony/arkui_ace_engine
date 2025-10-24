@@ -98,4 +98,19 @@ HWTEST_F(AccessibilityStaticUtilsTestNg, AccessibilityUtilsTest009, TestSize.Lev
     EXPECT_EQ(AccessibilityStaticUtils::GetFocusDrawLevel(INT_MAX), -1);
     EXPECT_EQ(AccessibilityStaticUtils::GetFocusDrawLevel(INT_MIN), -1);
 }
+
+/**
+ * @tc.name: AccessibilityUtilsTest010
+ * @tc.desc: GetFocusDrawLevel_AbnormalCases
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityStaticUtilsTestNg, AccessibilityUtilsTest010, TestSize.Level1)
+{
+    /**
+     * @tc.step1: use abnormal input to GetFocusDrawLevel.
+     * @tc.expected: GetFocusDrawLevel return 0 or 1.
+     */
+    EXPECT_EQ(AccessibilityStaticUtils::GetFocusDrawLevel(0), 0);
+    EXPECT_EQ(AccessibilityStaticUtils::GetFocusDrawLevel(1), 1);
+}
 } // namespace OHOS::Ace::NG
