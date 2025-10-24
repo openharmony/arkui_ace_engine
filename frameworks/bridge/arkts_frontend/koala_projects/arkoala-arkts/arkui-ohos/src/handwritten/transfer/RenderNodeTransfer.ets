@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { Position, Rect, Circle, RoundRect, CommandPath, Size, Frame, Vector2, Vector3, Matrix4, Edges, Corners, ShapeMask, ShapeClip, LengthMetricsUnit, DrawContext } from "../../Graphics"
+import { Rect, Circle, RoundRect, CommandPath, Size, Frame, Vector2, Vector3, Matrix4, NodeEdges, Corners, ShapeMask, ShapeClip, LengthMetricsUnit, DrawContext } from "../../Graphics"
 import { BorderStyle } from "../../component/enums"
 import { RenderNode } from "../../RenderNode"
 import { Utils } from "@ohos/arkui/graphics"
@@ -34,15 +34,15 @@ export class RenderNodeTransfer {
         rn.lengthMetricsUnit = TransferUtil.getPropNumber(inVal, "lengthMetricsUnitValue") as int as LengthMetricsUnit;
         let styleVal = TransferUtil.getPropBorderStyle(inVal, "borderStyleValue");
         if (styleVal) {
-            rn.borderStyle = styleVal as Edges<BorderStyle>;
+            rn.borderStyle = styleVal as NodeEdges<BorderStyle>;
         }
         let borderWidthVal = TransferUtil.getPropBorderNoExcept(inVal, "borderWidthValue");
         if (borderWidthVal) {
-            rn.borderWidth = borderWidthVal as Edges<number>;
+            rn.borderWidth = borderWidthVal as NodeEdges<number>;
         }
         let borderColorVal = TransferUtil.getPropEdgesColor(inVal, "borderColorValue");
         if (borderColorVal) {
-            rn.borderColor = borderColorVal as Edges<number>;
+            rn.borderColor = borderColorVal as NodeEdges<number>;
         }
         let borderRadiusVal = TransferUtil.getPropCornersNoExcept(inVal, "borderRadiusValue");
         if (borderRadiusVal) {
