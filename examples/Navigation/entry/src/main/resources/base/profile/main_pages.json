@@ -4,6 +4,11 @@
     "pages/removePageById/Index",
     "pages/titleStyle/Index",
     "pages/titleStyle/Test3",
-    "pages/titleStyle/Test4"
+    "pages/titleStyle/Test4",
+    "pages/titleStyle/Test5",
+    "pages/hmSymbol/Index",
+    "pages/hmSymbol/test1",
+    "pages/hmSymbol/test2",
+    "pages/hmSymbol/test4"
   ]
 }

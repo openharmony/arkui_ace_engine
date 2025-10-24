@@ -25,6 +25,7 @@ struct Index {
   private items : ListCategories[] = [
     {title:'Navigation-title enhanced',url:'pages/titleStyle/Index'},
     {title:'Navigation removePageById',url:'pages/removePageById/Index'},
+    {title:'Navigation symbol',url:'pages/hmSymbol/Index'},
   ]
 
   build() {
