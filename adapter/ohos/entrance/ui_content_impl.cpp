@@ -934,7 +934,7 @@ public:
     explicit WindowRotationChangeListener(int32_t instanceId) : instanceId_(instanceId) {}
     ~WindowRotationChangeListener() = default;
 
-    void OnRotationCHange(const OHOS::Rosen::RotationChangeInfo& rotationChangeInfo,
+    void OnRotationChange(const OHOS::Rosen::RotationChangeInfo& rotationChangeInfo,
         OHOS::Rosen::RotationChangeResult& rotationChangeResult)
     {
         TAG_LOGI(AceLogTag::ACE_WINDOW, "Window rotation changes.");

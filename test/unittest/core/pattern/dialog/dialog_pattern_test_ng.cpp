@@ -1967,6 +1967,11 @@ HWTEST_F(DialogPatternAdditionalTestNg, UpdateMaskColor, TestSize.Level1)
     pattern->UpdateMaskColor();
     EXPECT_EQ(renderContext->GetBackgroundColor()->ColorToString(), dialogTheme->GetMaskColorEnd().ColorToString());
 
+    pattern->extraMaskNode_ =
+        FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, INTONE, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    pattern->UpdateMaskColor();
+    pattern->extraMaskNode_ = nullptr;
+
     pattern->dialogProperties_.isSceneBoardDialog = false;
     pattern->UpdateMaskColor();
 
