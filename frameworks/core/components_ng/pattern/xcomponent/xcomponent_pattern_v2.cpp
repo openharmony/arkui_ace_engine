@@ -279,7 +279,7 @@ void XComponentPatternV2::InitSurface()
     std::string xComponentType = GetType() == XComponentType::SURFACE ? "s" : "t";
     renderSurface_->SetBufferTypeLeak(BUFFER_USAGE_XCOMPONENT + "-" + xComponentType + "-" + GetId());
     if (type_ == XComponentType::SURFACE) {
-        InitializeRenderContext();
+        InitializeRenderContext(host->IsThreadSafeNode());
         renderSurface_->SetRenderContext(renderContextForSurface_);
         renderContext->AddChild(renderContextForSurface_, 0);
     } else if (type_ == XComponentType::TEXTURE) {
@@ -500,7 +500,7 @@ void XComponentPatternV2::OnRebuildFrame()
     renderContext->AddChild(renderContextForSurface_, 0);
 }
 
-void XComponentPatternV2::InitializeRenderContext()
+void XComponentPatternV2::InitializeRenderContext(bool isThreadSafeNode)
 {
     if (renderContextForSurface_) {
         return;
@@ -508,6 +508,11 @@ void XComponentPatternV2::InitializeRenderContext()
     renderContextForSurface_ = RenderContext::Create();
     RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE, GetId() + "Surface",
         RenderContext::PatternType::XCOM };
+    if (isThreadSafeNode) {
+        TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "Create SurfaceNode[%{public}s] with SkipCheckInMultiInstance",
+            GetId().c_str());
+        param.isSkipCheckInMultiInstance = true;
+    }
     renderContextForSurface_->InitContext(false, param);
     if (!paintRect_.IsEmpty()) {
         renderContextForSurface_->SetBounds(

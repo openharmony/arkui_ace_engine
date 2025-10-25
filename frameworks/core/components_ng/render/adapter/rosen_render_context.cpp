@@ -586,6 +586,7 @@ std::shared_ptr<Rosen::RSNode> RosenRenderContext::CreateHardwareSurface(const s
 {
     Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param->surfaceName.value_or(""),
         .isTextureExportNode = isTextureExportNode, .isSync = true };
+    surfaceNodeConfig.isSkipCheckInMultiInstance = param->isSkipCheckInMultiInstance;
     std::shared_ptr<Rosen::RSSurfaceNode> surfaceNode;
     if (rsUIContext) {
         surfaceNode = Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false, rsUIContext);
