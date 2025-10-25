@@ -25940,7 +25940,7 @@ void impl_AnimationExtender_KeyframeAnimationImpl(KSerializerBuffer thisArray, i
         Array_KeyframeState keyfamesValueTemp = keyfamesValueTempTmpBuf;;
         GetAccessors()->getAnimationExtenderAccessor()->KeyframeAnimationImpl(static_cast<Ark_KeyframeAnimateParam*>(&paramValueTemp), static_cast<Array_KeyframeState*>(&keyfamesValueTemp));
 }
-KOALA_INTEROP_DIRECT_V2(AnimationExtender_KeyframeAnimationImpl, KSerializerBuffer, int32_t)
+KOALA_INTEROP_V2(AnimationExtender_KeyframeAnimationImpl, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_AppearSymbolEffect_construct(KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto scopeValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
