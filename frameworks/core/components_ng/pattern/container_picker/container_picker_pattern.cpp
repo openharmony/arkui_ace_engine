@@ -1214,13 +1214,20 @@ bool ContainerPickerPattern::InnerHandleScroll(bool isDown)
 void ContainerPickerPattern::OnColorConfigurationUpdate()
 {
     SetDefaultTextStyle(true);
+
+    if (SystemProperties::ConfigChangePerform()) {
+        // Proactively trigger PickerIndicatorStyle drawing.
+        auto frameNode = GetHost();
+        CHECK_NULL_VOID(frameNode);
+        frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
 }
 
 void ContainerPickerPattern::UpdateDividerWidthWithResObj(const RefPtr<ResourceObject>& resObj)
 {
     auto pickerNode = GetHost();
     CHECK_NULL_VOID(pickerNode);
-    auto property = pickerNode->GetLayoutProperty<ContainerPickerLayoutProperty>();
+    auto property = pickerNode->GetLayoutPropertyPtr<ContainerPickerLayoutProperty>();
     CHECK_NULL_VOID(property);
 
     CalcDimension strokeWidth;
@@ -1239,7 +1246,7 @@ void ContainerPickerPattern::UpdateDividerColorWithResObj(const RefPtr<ResourceO
 {
     auto pickerNode = GetHost();
     CHECK_NULL_VOID(pickerNode);
-    auto property = pickerNode->GetLayoutProperty<ContainerPickerLayoutProperty>();
+    auto property = pickerNode->GetLayoutPropertyPtr<ContainerPickerLayoutProperty>();
     CHECK_NULL_VOID(property);
 
     Color color;
@@ -1258,11 +1265,11 @@ void ContainerPickerPattern::UpdateStartMarginWithResObj(const RefPtr<ResourceOb
 {
     auto pickerNode = GetHost();
     CHECK_NULL_VOID(pickerNode);
-    auto property = pickerNode->GetLayoutProperty<ContainerPickerLayoutProperty>();
+    auto property = pickerNode->GetLayoutPropertyPtr<ContainerPickerLayoutProperty>();
     CHECK_NULL_VOID(property);
 
     CalcDimension startMargin;
-    if (resObj && ResourceParseUtils::ParseResColor(resObj, startMargin)) {
+    if (resObj && ResourceParseUtils::ParseResDimensionVp(resObj, startMargin)) {
         property->UpdateIndicatorStartMargin(startMargin);
     } else {
         property->UpdateIndicatorStartMargin(Dimension());
@@ -1273,11 +1280,11 @@ void ContainerPickerPattern::UpdateEndMarginWithResObj(const RefPtr<ResourceObje
 {
     auto pickerNode = GetHost();
     CHECK_NULL_VOID(pickerNode);
-    auto property = pickerNode->GetLayoutProperty<ContainerPickerLayoutProperty>();
+    auto property = pickerNode->GetLayoutPropertyPtr<ContainerPickerLayoutProperty>();
     CHECK_NULL_VOID(property);
 
     CalcDimension endMargin;
-    if (resObj && ResourceParseUtils::ParseResColor(resObj, endMargin)) {
+    if (resObj && ResourceParseUtils::ParseResDimensionVp(resObj, endMargin)) {
         property->UpdateIndicatorEndMargin(endMargin);
     } else {
         property->UpdateIndicatorEndMargin(Dimension());
@@ -1288,7 +1295,7 @@ void ContainerPickerPattern::UpdateBackgroundColorWithResObj(const RefPtr<Resour
 {
     auto pickerNode = GetHost();
     CHECK_NULL_VOID(pickerNode);
-    auto property = pickerNode->GetLayoutProperty<ContainerPickerLayoutProperty>();
+    auto property = pickerNode->GetLayoutPropertyPtr<ContainerPickerLayoutProperty>();
     CHECK_NULL_VOID(property);
 
     Color color;
@@ -1307,7 +1314,7 @@ void ContainerPickerPattern::UpdateBorderRadiusWithResObj(const RefPtr<ResourceO
 {
     auto pickerNode = GetHost();
     CHECK_NULL_VOID(pickerNode);
-    auto property = pickerNode->GetLayoutProperty<ContainerPickerLayoutProperty>();
+    auto property = pickerNode->GetLayoutPropertyPtr<ContainerPickerLayoutProperty>();
     CHECK_NULL_VOID(property);
 
     PickerIndicatorStyle style = GetIndicatorStyleVal();

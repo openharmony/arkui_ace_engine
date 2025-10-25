@@ -42,7 +42,7 @@ struct PickerIndicatorStyle {
     std::optional<Dimension> endMargin;
     std::optional<Color> backgroundColor;
     std::optional<BorderRadiusProperty> borderRadius;
-    bool isDefaultDividerWith = true;
+    bool isDefaultDividerWidth = true;
     bool isDefaultDividerColor = true;
     bool isDefaultStartMargin = true;
     bool isDefaultEndMargin = true;

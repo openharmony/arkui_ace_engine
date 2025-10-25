@@ -131,7 +131,7 @@ void JSContainerPicker::SetDivider(const JSRef<JSObject>& paramObj, NG::PickerIn
         if (ParseLengthMetricsToDimension(dividerWidth, dividerWidthVal, resObj) &&
             GreatOrEqual(dividerWidthVal.Value(), 0.0f)) {
             indicatorStyle.dividerWidth = dividerWidthVal;
-            indicatorStyle.isDefaultDividerWith = false;
+            indicatorStyle.isDefaultDividerWidth = false;
         }
         NG::ContainerPickerModel::ProcessResourceObj("containerPicker.dividerWidth", resObj);
     }
@@ -204,7 +204,6 @@ void JSContainerPicker::SetSelectedBackground(const JSRef<JSObject>& paramObj, N
         RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
         NG::ContainerPickerModel::ProcessResourceObj("containerPicker.borderRadius", resObj);
     }
-
 }
 
 void JSContainerPicker::JSBind(BindingTarget globalObj)

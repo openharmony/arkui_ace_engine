@@ -113,7 +113,7 @@ void ContainerPickerModel::SetIndicatorStyle(const PickerIndicatorStyle& style)
         return;
     }
 
-    auto frameNode = ViewStackProcessor::GetInstace()->GetMainFrameNode();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pickerPattern = frameNode->GetPattern<ContainerPickerPattern>();
     CHECK_NULL_VOID(pickerPattern);
@@ -191,14 +191,14 @@ void ContainerPickerModel::SetIndicatorStyle(FrameNode* frameNode, const PickerI
 void ContainerPickerModel::ProcessResourceObj(const std::string& key, const RefPtr<ResourceObject>& resObj)
 {
     CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
-    auto frameNode = ViewStackProcessor::GetInstace()->GetMainFrameNode();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pickerPattern = frameNode->GetPattern<ContainerPickerPattern>();
     CHECK_NULL_VOID(pickerPattern);
     CHECK_NULL_VOID(resObj);
 
-    using handler = sd::function<void(const RefPtr<ResourceObject>&)>;
-    const std::unordered_map<std::string, handler> handlers = {
+    using Handler = std::function<void(const RefPtr<ResourceObject>&)>;
+    const std::unordered_map<std::string, Handler> handlers = {
         {"containerPicker.dividerWidth", [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
                 auto pickerNode = weak.Upgrade();
                 CHECK_NULL_VOID(pickerNode);
@@ -231,7 +231,8 @@ void ContainerPickerModel::ProcessResourceObj(const std::string& key, const RefP
                 pickerPattern->UpdateEndMarginWithResObj(resObj);
             }
         },
-        {"containerPicker.backgroundColor", [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        {"containerPicker.backgroundColor",
+            [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
                 auto pickerNode = weak.Upgrade();
                 CHECK_NULL_VOID(pickerNode);
                 auto pickerPattern = pickerNode->GetPattern<ContainerPickerPattern>();
@@ -239,7 +240,8 @@ void ContainerPickerModel::ProcessResourceObj(const std::string& key, const RefP
                 pickerPattern->UpdateBackgroundColorWithResObj(resObj);
             }
         },
-        {"containerPicker.borderRadius", [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        {"containerPicker.borderRadius",
+            [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
                 auto pickerNode = weak.Upgrade();
                 CHECK_NULL_VOID(pickerNode);
                 auto pickerPattern = pickerNode->GetPattern<ContainerPickerPattern>();
