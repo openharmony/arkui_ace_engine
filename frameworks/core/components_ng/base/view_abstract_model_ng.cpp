@@ -1045,6 +1045,7 @@ void ViewAbstractModelNG::SetAccessibilityVirtualNode(std::function<void()>&& bu
     virtualFrameNode->SetFirstAccessibilityVirtualNode();
     frameNode->HasAccessibilityVirtualNode(true);
     accessibilityProperty->SaveAccessibilityVirtualNode(virtualNode);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
 }
 
 void ViewAbstractModelNG::SetAccessibilitySelected(bool selected, bool resetValue)

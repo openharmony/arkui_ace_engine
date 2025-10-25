@@ -5287,7 +5287,8 @@ void FrameNode::ProcessAccessibilityVirtualNode()
     if (virtualFrameNode) {
         auto constraint = GetLayoutConstraint();
         virtualFrameNode->ApplyConstraint(constraint);
-        ProcessOffscreenNode(virtualFrameNode);
+        virtualFrameNode->SetActive(true, false);
+        ProcessOffscreenNode(virtualFrameNode, true);
     }
 }
 

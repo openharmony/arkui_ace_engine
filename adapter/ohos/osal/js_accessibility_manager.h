@@ -748,6 +748,10 @@ private:
         const CommonProperty& commonProperty, Accessibility::AccessibilityElementInfo& nodeInfo,
         const RefPtr<NG::PipelineContext>& ngPipeline);
 
+    void UpdateElementInfo(
+        const RefPtr<NG::FrameNode>& node, const CommonProperty& commonProperty,
+        AccessibilityElementInfo& nodeInfo, const RefPtr<NG::PipelineContext>& ngPipeline);
+
     void UpdateCacheInfoNG(std::list<Accessibility::AccessibilityElementInfo>& infos, const RefPtr<NG::FrameNode>& node,
         CommonProperty& commonProperty, const RefPtr<NG::PipelineContext>& ngPipeline,
         const SearchParameter& searchParam);

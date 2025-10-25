@@ -4183,4 +4183,38 @@ HWTEST_F(JsAccessibilityManagerTest, sendAccessibilitEvent001, TestSize.Level1)
             AccessibilityEventType::CLICK, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID, true);
     AceApplicationInfo::GetInstance().SetAccessibilityEnabled(accessibilityEnableBackup);
 }
+
+/**
+ * @tc.name: JsAccessibilityManager021
+ * @tc.desc: dump event test  DumpProcessEventParameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, UpdateElementInfoTest001, TestSize.Level1)
+{
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+    auto frameNode1 = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode1, nullptr);
+    auto ngPipeline = NG::PipelineContext::GetCurrentContext();
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    accessibilityProperty->SetAccessibilityFocusState(true);
+
+    AccessibilityElementInfo nodeInfo;
+    Framework::CommonProperty commonProperty;
+    // not virtual
+    jsAccessibilityManager->UpdateElementInfo(frameNode, commonProperty, nodeInfo, ngPipeline);
+    ASSERT_FALSE(nodeInfo.HasAccessibilityFocus());
+    // is virtual，but no parent
+    AccessibilityElementInfo nodeInfo1;
+    frameNode->SetAccessibilityNodeVirtual();
+    jsAccessibilityManager->UpdateElementInfo(frameNode, commonProperty, nodeInfo1, ngPipeline);
+    ASSERT_FALSE(nodeInfo1.HasAccessibilityFocus());
+    // is virtual，with parent
+    frameNode->SetAccessibilityVirtualNodeParent(frameNode1);
+    jsAccessibilityManager->UpdateElementInfo(frameNode, commonProperty, nodeInfo1, ngPipeline);
+    ASSERT_TRUE(nodeInfo1.HasAccessibilityFocus());
+}
 } // namespace OHOS::Ace::NG
