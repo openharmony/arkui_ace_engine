@@ -81,7 +81,7 @@ void RichEditorSpanNodeTestNg::TearDownTestSuite()
  * @tc.desc: test CreateTextSpanNode
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSpanNodeTestNg, RichEditorPatternTestCreateTextSpanNode001, TestSize.Level1)
+HWTEST_F(RichEditorSpanNodeTestNg, RichEditorPatternTestCreateTextSpanNode001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -125,7 +125,7 @@ HWTEST_F(RichEditorSpanNodeTestNg, RichEditorPatternTestCreateTextSpanNode001, T
  * @tc.desc: test InsertValueToSpanNode
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSpanNodeTestNg, InsertValueToSpanNode001, TestSize.Level1)
+HWTEST_F(RichEditorSpanNodeTestNg, InsertValueToSpanNode001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -152,7 +152,7 @@ HWTEST_F(RichEditorSpanNodeTestNg, InsertValueToSpanNode001, TestSize.Level1)
  * @tc.desc: test RemoveEmptySpanNodes
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSpanNodeTestNg, RemoveEmptySpanNodes001, TestSize.Level1)
+HWTEST_F(RichEditorSpanNodeTestNg, RemoveEmptySpanNodes001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -185,7 +185,7 @@ HWTEST_F(RichEditorSpanNodeTestNg, RemoveEmptySpanNodes001, TestSize.Level1)
  * @tc.desc: test RichEditorPattern RemoveEmptySpanNodes
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSpanNodeTestNg, RemoveEmptySpanNodes002, TestSize.Level1)
+HWTEST_F(RichEditorSpanNodeTestNg, RemoveEmptySpanNodes002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -200,7 +200,7 @@ HWTEST_F(RichEditorSpanNodeTestNg, RemoveEmptySpanNodes002, TestSize.Level1)
  * @tc.desc: test RemoveEmptySpanNodes
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSpanNodeTestNg, RemoveEmptySpanNodes003, TestSize.Level1)
+HWTEST_F(RichEditorSpanNodeTestNg, RemoveEmptySpanNodes003, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -229,7 +229,7 @@ HWTEST_F(RichEditorSpanNodeTestNg, RemoveEmptySpanNodes003, TestSize.Level1)
  * @tc.desc: test RemoveEmptySpanNodes
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSpanNodeTestNg, RemoveEmptySpanNodes004, TestSize.Level1)
+HWTEST_F(RichEditorSpanNodeTestNg, RemoveEmptySpanNodes004, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();

@@ -69,7 +69,7 @@ void RichEditorThemeTestNg::TearDownTestSuite()
  * @tc.desc: test padding about rich editor theme
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorThemeTestNg, RichEditorThemePadding, TestSize.Level1)
+HWTEST_F(RichEditorThemeTestNg, RichEditorThemePadding, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();

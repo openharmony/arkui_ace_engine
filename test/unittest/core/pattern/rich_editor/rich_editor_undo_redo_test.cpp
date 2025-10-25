@@ -79,7 +79,7 @@ RefPtr<RichEditorPattern> RichEditorUndoRedoTest::GetRichEditorPattern()
  * @tc.desc: test RedoDrag
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorUndoRedoTest, RedoDrag001, TestSize.Level1)
+HWTEST_F(RichEditorUndoRedoTest, RedoDrag001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. init and call function.
@@ -100,7 +100,7 @@ HWTEST_F(RichEditorUndoRedoTest, RedoDrag001, TestSize.Level1)
  * @tc.desc: test UndoDrag
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorUndoRedoTest, UndoDrag001, TestSize.Level1)
+HWTEST_F(RichEditorUndoRedoTest, UndoDrag001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. init and call function.
@@ -122,7 +122,7 @@ HWTEST_F(RichEditorUndoRedoTest, UndoDrag001, TestSize.Level1)
  * @tc.desc: test RedoDrag
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorUndoRedoTest, RedoDrag002, TestSize.Level1)
+HWTEST_F(RichEditorUndoRedoTest, RedoDrag002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. init and call function.
@@ -157,7 +157,7 @@ HWTEST_F(RichEditorUndoRedoTest, RedoDrag002, TestSize.Level1)
  * @tc.desc: test UndoDrag
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorUndoRedoTest, UndoDrag003, TestSize.Level1)
+HWTEST_F(RichEditorUndoRedoTest, UndoDrag003, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -175,7 +175,7 @@ HWTEST_F(RichEditorUndoRedoTest, UndoDrag003, TestSize.Level1)
  * @tc.desc: test RedoDrag
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorUndoRedoTest, RedoDrag003, TestSize.Level1)
+HWTEST_F(RichEditorUndoRedoTest, RedoDrag003, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -246,7 +246,7 @@ HWTEST_F(RichEditorUndoRedoTest, HandleOnRedoAction001, TestSize.Level2)
  * @tc.desc: test UndoDrag
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorUndoRedoTest, UndoDrag002, TestSize.Level1)
+HWTEST_F(RichEditorUndoRedoTest, UndoDrag002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. init and call function.
@@ -361,7 +361,7 @@ HWTEST_F(RichEditorUndoRedoTest, InsertValueOperation, TestSize.Level2)
  * @tc.desc: test RichEditorPattern ClearOperationRecords
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorUndoRedoTest, ClearOperationRecords001, TestSize.Level1)
+HWTEST_F(RichEditorUndoRedoTest, ClearOperationRecords001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -384,7 +384,7 @@ HWTEST_F(RichEditorUndoRedoTest, ClearOperationRecords001, TestSize.Level1)
  * @tc.desc: test set UndoStyle
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorUndoRedoTest, SetUndoStyle001, TestSize.Level1)
+HWTEST_F(RichEditorUndoRedoTest, SetUndoStyle001, TestSize.Level0)
 {
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
@@ -411,7 +411,7 @@ HWTEST_F(RichEditorUndoRedoTest, SetUndoStyle001, TestSize.Level1)
  * @tc.desc: test BeforeRedo
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorUndoRedoTest, BeforeRedo001, TestSize.Level1)
+HWTEST_F(RichEditorUndoRedoTest, BeforeRedo001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. declare and init variables and call function.
@@ -447,7 +447,7 @@ HWTEST_F(RichEditorUndoRedoTest, BeforeRedo001, TestSize.Level1)
  * @tc.desc: test BeforeUndo
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorUndoRedoTest, BeforeUndo001, TestSize.Level1)
+HWTEST_F(RichEditorUndoRedoTest, BeforeUndo001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. declare and init variables and call function.
@@ -483,7 +483,7 @@ HWTEST_F(RichEditorUndoRedoTest, BeforeUndo001, TestSize.Level1)
  * @tc.desc: test AddInsertOperationRecord With PreviewInput
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorUndoRedoTest, AddInsertOperationRecord, TestSize.Level1)
+HWTEST_F(RichEditorUndoRedoTest, AddInsertOperationRecord, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();

@@ -92,7 +92,7 @@ void RichEditorTypingStyleTest::TearDownTestSuite()
  * @tc.desc: test UseTypingParaStyle
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorTypingStyleTest, UseTypingParaStyle001, TestSize.Level1)
+HWTEST_F(RichEditorTypingStyleTest, UseTypingParaStyle001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -120,7 +120,7 @@ HWTEST_F(RichEditorTypingStyleTest, UseTypingParaStyle001, TestSize.Level1)
  * @tc.desc: test UseTypingParaStyle
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorTypingStyleTest, UseTypingParaStyle002, TestSize.Level1)
+HWTEST_F(RichEditorTypingStyleTest, UseTypingParaStyle002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -158,7 +158,7 @@ HWTEST_F(RichEditorTypingStyleTest, UseTypingParaStyle002, TestSize.Level1)
  * @tc.desc: test UseTypingParaStyle
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorTypingStyleTest, UseStyleByTypingParagraphStyle001, TestSize.Level1)
+HWTEST_F(RichEditorTypingStyleTest, UseStyleByTypingParagraphStyle001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -196,7 +196,7 @@ HWTEST_F(RichEditorTypingStyleTest, UseStyleByTypingParagraphStyle001, TestSize.
  * @tc.desc: test UseTypingParaStyle
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorTypingStyleTest, UpdateTextStyleByTypingStyle001, TestSize.Level1)
+HWTEST_F(RichEditorTypingStyleTest, UpdateTextStyleByTypingStyle001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -231,7 +231,7 @@ HWTEST_F(RichEditorTypingStyleTest, UpdateTextStyleByTypingStyle001, TestSize.Le
  * @tc.desc: test GetTypingStyle
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorTypingStyleTest, GetTypingStyle001, TestSize.Level1)
+HWTEST_F(RichEditorTypingStyleTest, GetTypingStyle001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
