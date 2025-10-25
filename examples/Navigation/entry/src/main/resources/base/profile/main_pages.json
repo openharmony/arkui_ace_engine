@@ -9,6 +9,13 @@
     "pages/hmSymbol/Index",
     "pages/hmSymbol/test1",
     "pages/hmSymbol/test2",
-    "pages/hmSymbol/test4"
+    "pages/hmSymbol/test4",
+    "pages/newInstance/Index",
+    "pages/newInstance/pageOne",
+    "pages/newInstance/test1",
+    "pages/forcedNewInstance/DialogTest",
+    "pages/forcedNewInstance/InterceptionTest",
+    "pages/forcedNewInstance/NewInstance",
+    "pages/forcedNewInstance/tmp"
   ]
 }
