@@ -15,12 +15,12 @@
 
 import { ResourceColor } from 'arkui/component/units';
 import { Color } from 'arkui/component/enums';
-import { BrandColors, ArkThemeResource } from 'arkui/theme';
+import { BrandColors, ArkThemeResource, CustomColorsInner } from 'arkui/theme';
 import { Resource } from 'global.resource';
 import { ArkUIAniModule } from 'arkui.ani';
 import { Colors, CustomColors } from '@ohos/arkui/theme';
 import { _r } from 'arkui/component/resources';
-import { int32 } from "@koalaui/common"
+import { int32 } from '@koalaui/common';
 
 export class ArkColorsImpl implements Colors {
     brand: ResourceColor = _r(125830976, 10001, '', '');
@@ -215,22 +215,23 @@ export class ArkColorsImpl implements Colors {
     }
 
     static expandByBrandColor(colors: CustomColors) {
+        let colorsInner = new CustomColorsInner(colors);
         if (colors!.brand) {
             const brandColors: BrandColors = ArkColorsImpl.makeBrandColors(colors.brand);
-            colors.fontEmphasize = colors.fontEmphasize ?? brandColors.primary!;
+            colorsInner.fontEmphasize = colors.fontEmphasize ?? brandColors.primary!;
 
-            colors.iconEmphasize = colors.iconEmphasize ?? brandColors.primary!;
-            colors.iconSubEmphasize = colors.iconSubEmphasize ?? brandColors.tertiary!;
+            colorsInner.iconEmphasize = colors.iconEmphasize ?? brandColors.primary!;
+            colorsInner.iconSubEmphasize = colors.iconSubEmphasize ?? brandColors.tertiary!;
 
-            colors.backgroundEmphasize = colors.backgroundEmphasize ?? brandColors.primary!;
+            colorsInner.backgroundEmphasize = colors.backgroundEmphasize ?? brandColors.primary!;
 
-            colors.compBackgroundEmphasize = colors.compBackgroundEmphasize ?? brandColors.primary!;
+            colorsInner.compBackgroundEmphasize = colors.compBackgroundEmphasize ?? brandColors.primary!;
 
-            colors.compEmphasizeSecondary = colors.compEmphasizeSecondary ?? brandColors.fourth!;
-            colors.compEmphasizeTertiary = colors.compEmphasizeTertiary ?? brandColors.fifth!;
+            colorsInner.compEmphasizeSecondary = colors.compEmphasizeSecondary ?? brandColors.fourth!;
+            colorsInner.compEmphasizeTertiary = colors.compEmphasizeTertiary ?? brandColors.fifth!;
 
-            colors.interactiveFocus = colors.interactiveFocus ?? brandColors.primary!;
-            colors.interactiveActive = colors.interactiveActive ?? brandColors.primary!;
+            colorsInner.interactiveFocus = colors.interactiveFocus ?? brandColors.primary!;
+            colorsInner.interactiveActive = colors.interactiveActive ?? brandColors.primary!;
         }
     }
 

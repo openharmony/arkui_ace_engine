@@ -16,7 +16,7 @@
 import { FontWeight } from 'arkui/component/enums';
 import { Length, ResourceColor } from 'arkui/component/units';
 import { Resource } from 'global.resource';
-import { CustomTheme, Theme } from '@ohos/arkui/theme';
+import { CustomTheme, Theme, CustomColors } from '@ohos/arkui/theme';
 import { int32 } from "@koalaui/common"
 
 export type Dimension = Resource;
@@ -324,4 +324,116 @@ export interface ThemeInternal extends Theme {
 export interface CustomThemeInternal extends CustomTheme {
     shapes?: CustomShapes;
     typography?: CustomTypography;
+}
+
+export class CustomColorsInner implements CustomColors {
+    brand?: ResourceColor;
+    warning?: ResourceColor;
+    alert?: ResourceColor;
+    confirm?: ResourceColor;
+    fontPrimary?: ResourceColor;
+    fontSecondary?: ResourceColor;
+    fontTertiary?: ResourceColor;
+    fontFourth?: ResourceColor;
+    fontEmphasize?: ResourceColor;
+    fontOnPrimary?: ResourceColor;
+    fontOnSecondary?: ResourceColor;
+    fontOnTertiary?: ResourceColor;
+    fontOnFourth?: ResourceColor;
+    iconPrimary?: ResourceColor;
+    iconSecondary?: ResourceColor;
+    iconTertiary?: ResourceColor;
+    iconFourth?: ResourceColor;
+    iconEmphasize?: ResourceColor;
+    iconSubEmphasize?: ResourceColor;
+    iconOnPrimary?: ResourceColor;
+    iconOnSecondary?: ResourceColor;
+    iconOnTertiary?: ResourceColor;
+    iconOnFourth?: ResourceColor;
+    backgroundPrimary?: ResourceColor;
+    backgroundSecondary?: ResourceColor;
+    backgroundTertiary?: ResourceColor;
+    backgroundFourth?: ResourceColor;
+    backgroundEmphasize?: ResourceColor;
+    compForegroundPrimary?: ResourceColor;
+    compBackgroundPrimary?: ResourceColor;
+    compBackgroundPrimaryTran?: ResourceColor;
+    compBackgroundPrimaryContrary?: ResourceColor;
+    compBackgroundGray?: ResourceColor;
+    compBackgroundSecondary?: ResourceColor;
+    compBackgroundTertiary?: ResourceColor;
+    compBackgroundEmphasize?: ResourceColor;
+    compBackgroundNeutral?: ResourceColor;
+    compEmphasizeSecondary?: ResourceColor;
+    compEmphasizeTertiary?: ResourceColor;
+    compDivider?: ResourceColor;
+    compCommonContrary?: ResourceColor;
+    compBackgroundFocus?: ResourceColor;
+    compFocusedPrimary?: ResourceColor;
+    compFocusedSecondary?: ResourceColor;
+    compFocusedTertiary?: ResourceColor;
+    interactiveHover?: ResourceColor;
+    interactivePressed?: ResourceColor;
+    interactiveFocus?: ResourceColor;
+    interactiveActive?: ResourceColor;
+    interactiveSelect?: ResourceColor;
+    interactiveClick?: ResourceColor;
+
+    static assign(dst: CustomColors, src: CustomColors) {
+        dst.brand = src.brand;
+        dst.warning = src.warning;
+        dst.alert = src.alert;
+        dst.confirm = src.confirm;
+        dst.fontPrimary = src.fontPrimary;
+        dst.fontSecondary = src.fontSecondary;
+        dst.fontTertiary = src.fontTertiary;
+        dst.fontFourth = src.fontFourth;
+        dst.fontEmphasize = src.fontEmphasize;
+        dst.fontOnPrimary = src.fontOnPrimary;
+        dst.fontOnSecondary = src.fontOnSecondary;
+        dst.fontOnTertiary = src.fontOnTertiary;
+        dst.fontOnFourth = src.fontOnFourth;
+        dst.iconPrimary = src.iconPrimary;
+        dst.iconSecondary = src.iconSecondary;
+        dst.iconTertiary = src.iconTertiary;
+        dst.iconFourth = src.iconFourth;
+        dst.iconEmphasize = src.iconEmphasize;
+        dst.iconSubEmphasize = src.iconSubEmphasize;
+        dst.iconOnPrimary = src.iconOnPrimary;
+        dst.iconOnSecondary = src.iconOnSecondary;
+        dst.iconOnTertiary = src.iconOnTertiary;
+        dst.iconOnFourth = src.iconOnFourth;
+        dst.backgroundPrimary = src.backgroundPrimary;
+        dst.backgroundSecondary = src.backgroundSecondary;
+        dst.backgroundTertiary = src.backgroundTertiary;
+        dst.backgroundFourth = src.backgroundFourth;
+        dst.backgroundEmphasize = src.backgroundEmphasize;
+        dst.compForegroundPrimary = src.compForegroundPrimary;
+        dst.compBackgroundPrimary = src.compBackgroundPrimary;
+        dst.compBackgroundPrimaryTran = src.compBackgroundPrimaryTran;
+        dst.compBackgroundPrimaryContrary = src.compBackgroundPrimaryContrary;
+        dst.compBackgroundGray = src.compBackgroundGray;
+        dst.compBackgroundSecondary = src.compBackgroundSecondary;
+        dst.compBackgroundTertiary = src.compBackgroundTertiary;
+        dst.compBackgroundEmphasize = src.compBackgroundEmphasize;
+        dst.compBackgroundNeutral = src.compBackgroundNeutral;
+        dst.compEmphasizeSecondary = src.compEmphasizeSecondary;
+        dst.compEmphasizeTertiary = src.compEmphasizeTertiary;
+        dst.compDivider = src.compDivider;
+        dst.compCommonContrary = src.compCommonContrary;
+        dst.compBackgroundFocus = src.compBackgroundFocus;
+        dst.compFocusedPrimary = src.compFocusedPrimary;
+        dst.compFocusedSecondary = src.compFocusedSecondary;
+        dst.compFocusedTertiary = src.compFocusedTertiary;
+        dst.interactiveHover = src.interactiveHover;
+        dst.interactivePressed = src.interactivePressed;
+        dst.interactiveFocus = src.interactiveFocus;
+        dst.interactiveActive = src.interactiveActive;
+        dst.interactiveSelect = src.interactiveSelect;
+        dst.interactiveClick = src.interactiveClick;
+    }
+
+    constructor(src: CustomColors) {
+        CustomColorsInner.assign(this, src);
+    }
 }
