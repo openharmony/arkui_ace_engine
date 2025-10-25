@@ -135,6 +135,8 @@ private:
         Color &color, ImageSourceInfo &sourceInfo);
     bool CheckAndHandleRestartApp();
     bool CheckAndAddStartingWindowAboveLocked();
+    bool CheckSnapshotWindow(uint32_t key);
+    bool CheckAndAddStartingWindowForPrelaunch();
     void HideStartingWindow();
     void AddBackgroundColorDelayed();
     CancelableCallback<void()> interruptStartingTask_;
