@@ -111,8 +111,16 @@ namespace {
         if (index >= params.size()) {
             return std::string();
         }
-        //return params.at(index);
-        return ""; // TODO: Correct formatting for all types
+        if (auto* value = std::get_if<std::string>(&params.at(index).value())) {
+            return *value;
+        } else if (auto* value = std::get_if<int64_t>(&params.at(index).value())) {
+            return std::to_string(*value);
+        } else if (auto* value = std::get_if<double>(&params.at(index).value())) {
+            return std::to_string(*value);
+        } else if (auto* value = std::get_if<Converter::ResourceConverter>(&params.at(index).value())) {
+            return value->ToString().value_or("");
+        }
+        return "";
     }
     void ReplaceHolder(std::optional<std::string>& originStr,
         std::vector<Converter::ResourceConverter::ParamType>& params, size_t containCount)
