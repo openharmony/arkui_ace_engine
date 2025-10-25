@@ -285,6 +285,7 @@ ohos_unittest("rs_adapter_test") {
 
   external_deps = [
     "ability_base:configuration",
+    "ability_runtime:ability_connect_callback_stub",
     "ability_runtime:ability_context_native",
     "ability_runtime:ability_manager",
     "googletest:gmock_main",
