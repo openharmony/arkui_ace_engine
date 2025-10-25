@@ -61,7 +61,7 @@ template("link_abc_files") {
 
     # Build arguments for the link command
     args = [
-      rebase_path("${static_linker_build_path}"),
+      rebase_path("${ark_link_target_out_path}"),
       "--output",
       rebase_path(output_file, root_build_dir),
       "--",
