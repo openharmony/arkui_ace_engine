@@ -638,4 +638,20 @@ HWTEST_F(AccessibilityFocusStrategyTest, FindNextReadableNodeToCheckUserNext001,
     ASSERT_EQ(result, AceFocusMoveResult::FIND_CHILDTREE);
 }
 
+/**
+ * @tc.name: AccessibilityPropertyTest020
+ * @tc.desc: Test the method SetAccessibilityLevel.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFocusStrategyTest, IsAccessibilityModalTest001, TestSize.Level1)
+{
+    NG::AccessibilityProperty accessibilityProperty;
+    EXPECT_FALSE(accessibilityProperty.overlayProperty_.has_value());
+    // default value is true
+    EXPECT_TRUE(accessibilityProperty.IsAccessibilityModal());
+    accessibilityProperty.SetIsAccessibilityModal(false);
+    EXPECT_FALSE(accessibilityProperty.IsAccessibilityModal());
+    accessibilityProperty.SetIsAccessibilityModal(true);
+    EXPECT_TRUE(accessibilityProperty.IsAccessibilityModal());
+}
 } // namespace OHOS::Ace::NG
