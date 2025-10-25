@@ -289,7 +289,7 @@ export class BadgeStyle_serializer {
             } else if (valueHolderForFontWeightTmpValue instanceof FontWeight) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForFontWeightTmpValueForIdx1  = valueHolderForFontWeightTmpValue as FontWeight
-                valueSerializer.writeInt32(valueHolderForFontWeightTmpValueForIdx1.getOrdinal())
+                valueSerializer.writeInt32(valueHolderForFontWeightTmpValueForIdx1.valueOf())
             } else if (valueHolderForFontWeightTmpValue instanceof ResourceStr) {
                 valueSerializer.writeInt8((2).toChar())
                 const valueHolderForFontWeightTmpValueForIdx2  = valueHolderForFontWeightTmpValue as ResourceStr
@@ -471,7 +471,7 @@ export class BadgeParamWithNumber_serializer {
             if (valueHolderForPositionTmpValue instanceof BadgePosition) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForPositionTmpValueForIdx0  = valueHolderForPositionTmpValue as BadgePosition
-                valueSerializer.writeInt32(valueHolderForPositionTmpValueForIdx0.getOrdinal())
+                valueSerializer.writeInt32(valueHolderForPositionTmpValueForIdx0.valueOf())
             } else if (valueHolderForPositionTmpValue instanceof Position) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForPositionTmpValueForIdx1  = valueHolderForPositionTmpValue as Position
@@ -532,7 +532,7 @@ export class BadgeParamWithString_serializer {
             if (valueHolderForPositionTmpValue instanceof BadgePosition) {
                 valueSerializer.writeInt8((0).toChar())
                 const valueHolderForPositionTmpValueForIdx0  = valueHolderForPositionTmpValue as BadgePosition
-                valueSerializer.writeInt32(valueHolderForPositionTmpValueForIdx0.getOrdinal())
+                valueSerializer.writeInt32(valueHolderForPositionTmpValueForIdx0.valueOf())
             } else if (valueHolderForPositionTmpValue instanceof Position) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForPositionTmpValueForIdx1  = valueHolderForPositionTmpValue as Position
