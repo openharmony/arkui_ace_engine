@@ -1975,6 +1975,7 @@ void MovingPhotoPattern::DetachFirstImageFromFrameNode()
     TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphoto DetachFirstImageFromFrameNode.");
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(movingPhoto->GetTotalChildCount() > NODE_COUNT);
     auto movingPhoto = AceType::DynamicCast<MovingPhotoNode>(host);
     CHECK_NULL_RETURN(movingPhoto, nullptr);
     CHECK_NULL_VOID(movingPhoto->GetTotalChildCount() > NODE_COUNT);
