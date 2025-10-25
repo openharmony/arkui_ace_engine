@@ -31,14 +31,10 @@
 #include "base/thread/task_executor.h"
 #include "base/utils/macros.h"
 #include "base/utils/utils.h"
-#include "core/accessibility/accessibility_utils.h"
-#include "core/common/recorder/exposure_processor.h"
 #include "core/common/resource/resource_configuration.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/extension_handler.h"
 #include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/base/geometry_node.h"
-#include "core/components_ng/base/modifier.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/focus_hub.h"
@@ -51,7 +47,6 @@
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paint_property.h"
-#include "core/components_ng/render/paint_wrapper.h"
 #include "core/components_ng/render/render_context.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_v2/inspector/inspector_node.h"
@@ -67,6 +62,10 @@ namespace OHOS::Ace::Kit {
 class FrameNode;
 }
 
+namespace OHOS::Ace::Recorder {
+class ExposureProcessor;
+}
+
 namespace OHOS::Ace::NG {
 class InspectorFilter;
 class PipelineContext;
@@ -75,6 +74,8 @@ class StateModifyTask;
 class UITask;
 struct DirtySwapConfig;
 class DragDropRelatedConfigurations;
+class ExtensionHandler;
+class PaintWrapper;
 
 struct CacheVisibleRectResult {
     OffsetF windowOffset = OffsetF();
@@ -776,14 +777,7 @@ public:
         return allowDrop_;
     }
 
-    void SetDrawModifier(const RefPtr<NG::DrawModifier>& drawModifier)
-    {
-        if (!extensionHandler_) {
-            extensionHandler_ = MakeRefPtr<ExtensionHandler>();
-            extensionHandler_->AttachFrameNode(this);
-        }
-        extensionHandler_->SetDrawModifier(drawModifier);
-    }
+    void SetDrawModifier(const RefPtr<NG::DrawModifier>& drawModifier);
 
     bool IsSupportDrawModifier();
 
@@ -1059,18 +1053,9 @@ public:
     RefPtr<FrameNode> GetNodeContainer();
     RefPtr<ContentModifier> GetContentModifier();
 
-    ExtensionHandler* GetExtensionHandler() const
-    {
-        return RawPtr(extensionHandler_);
-    }
+    ExtensionHandler* GetExtensionHandler() const;
 
-    void SetExtensionHandler(const RefPtr<ExtensionHandler>& handler)
-    {
-        extensionHandler_ = handler;
-        if (extensionHandler_) {
-            extensionHandler_->AttachFrameNode(this);
-        }
-    }
+    void SetExtensionHandler(const RefPtr<ExtensionHandler>& handler);
 
     void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
         RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType);

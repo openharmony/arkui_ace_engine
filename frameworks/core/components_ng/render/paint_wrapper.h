@@ -42,7 +42,9 @@ class PaintWrapper : public virtual AceType {
 
 public:
     PaintWrapper(WeakPtr<RenderContext> renderContext, RefPtr<GeometryNode> geometryNode,
-        RefPtr<PaintProperty> paintProperty, RefPtr<ExtensionHandler> handler = nullptr);
+        RefPtr<PaintProperty> paintProperty);
+    PaintWrapper(WeakPtr<RenderContext> renderContext, RefPtr<GeometryNode> geometryNode,
+        RefPtr<PaintProperty> paintProperty, RefPtr<ExtensionHandler> handler);
     ~PaintWrapper() override;
 
     void SetNodePaintMethod(const RefPtr<NodePaintMethod>& nodePaintImpl);

@@ -15,8 +15,9 @@
 #include "test/unittest/core/base/frame_node_test_ng.h"
 
 #include "core/event/touch_event.h"
+#include "core/common/recorder/exposure_processor.h"
 #include "core/common/resource/resource_parse_utils.h"
-#include "frameworks/core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "core/components_ng/pattern/text_field/text_field_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
