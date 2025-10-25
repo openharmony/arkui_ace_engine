@@ -119,7 +119,7 @@ void RichEditorSpanOneTest::ConstructSpans(RefPtr<RichEditorPattern> pattern, T 
  * @tc.desc: test AddTextSpan
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSpanOneTest, AddTextSpan001, TestSize.Level1)
+HWTEST_F(RichEditorSpanOneTest, AddTextSpan001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -139,7 +139,7 @@ HWTEST_F(RichEditorSpanOneTest, AddTextSpan001, TestSize.Level1)
  * @tc.desc: test AddTextSpan
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSpanOneTest, PlaceholderSpanNodeTest001, TestSize.Level1)
+HWTEST_F(RichEditorSpanOneTest, PlaceholderSpanNodeTest001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -167,7 +167,7 @@ HWTEST_F(RichEditorSpanOneTest, PlaceholderSpanNodeTest001, TestSize.Level1)
  * @tc.desc: test delete span
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSpanOneTest, SpanAddAndClear001, TestSize.Level1)
+HWTEST_F(RichEditorSpanOneTest, SpanAddAndClear001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -209,7 +209,7 @@ HWTEST_F(RichEditorSpanOneTest, SpanAddAndClear001, TestSize.Level1)
  * @tc.desc: test delete span
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSpanOneTest, SpanAddAndClear002, TestSize.Level1)
+HWTEST_F(RichEditorSpanOneTest, SpanAddAndClear002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -258,7 +258,7 @@ HWTEST_F(RichEditorSpanOneTest, SpanAddAndClear002, TestSize.Level1)
  * @tc.desc: test update symbol span
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSpanOneTest, SymbolTest001, TestSize.Level1)
+HWTEST_F(RichEditorSpanOneTest, SymbolTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. get richEditor controller

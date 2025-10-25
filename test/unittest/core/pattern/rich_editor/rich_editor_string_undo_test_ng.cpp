@@ -63,7 +63,7 @@ void RichEditorStringUndoTestNg::TearDownTestSuite()
  * @tc.desc: Test GetStringFromOptionsList.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStringUndoTestNg, GetStringFromOptionsList, TestSize.Level1)
+HWTEST_F(RichEditorStringUndoTestNg, GetStringFromOptionsList, TestSize.Level0)
 {
     OptionsList optionsList;
     optionsList.push_back(TextSpanOptions{ .value = INIT_VALUE_1 });
@@ -80,7 +80,7 @@ HWTEST_F(RichEditorStringUndoTestNg, GetStringFromOptionsList, TestSize.Level1)
  * @tc.desc: Test ProcessDragDeleteRecord.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStringUndoTestNg, ProcessDragDeleteRecord, TestSize.Level1)
+HWTEST_F(RichEditorStringUndoTestNg, ProcessDragDeleteRecord, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -125,7 +125,7 @@ HWTEST_F(RichEditorStringUndoTestNg, ProcessDragDeleteRecord, TestSize.Level1)
  * @tc.desc: Test ProcessStringUndo.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStringUndoTestNg, ProcessStringUndo, TestSize.Level1)
+HWTEST_F(RichEditorStringUndoTestNg, ProcessStringUndo, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -184,7 +184,7 @@ HWTEST_F(RichEditorStringUndoTestNg, ProcessStringUndo, TestSize.Level1)
  * @tc.desc: Test BeforeChangeByRecord.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStringUndoTestNg, BeforeChangeByRecord, TestSize.Level1)
+HWTEST_F(RichEditorStringUndoTestNg, BeforeChangeByRecord, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();

@@ -35,7 +35,7 @@ class RichEditorStyledStringOneTestNg : public RichEditorStyledStringCommonTestN
  * @tc.desc: test InsertValueInStyledString
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyledStringOneTestNg, InsertValueInStyledString002, TestSize.Level1)
+HWTEST_F(RichEditorStyledStringOneTestNg, InsertValueInStyledString002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -53,7 +53,7 @@ HWTEST_F(RichEditorStyledStringOneTestNg, InsertValueInStyledString002, TestSize
  * @tc.desc: test RichEditorPattern InsertValueInStyledString
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyledStringOneTestNg, InsertValueInStyledString003, TestSize.Level1)
+HWTEST_F(RichEditorStyledStringOneTestNg, InsertValueInStyledString003, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -80,7 +80,7 @@ HWTEST_F(RichEditorStyledStringOneTestNg, InsertValueInStyledString003, TestSize
  * @tc.desc: test CreatePasteCallback
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyledStringOneTestNg, CreatePasteCallback001, TestSize.Level1)
+HWTEST_F(RichEditorStyledStringOneTestNg, CreatePasteCallback001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -120,7 +120,7 @@ HWTEST_F(RichEditorStyledStringOneTestNg, CreatePasteCallback001, TestSize.Level
  * @tc.desc: test ProcessStyledString
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyledStringOneTestNg, ProcessStyledString001, TestSize.Level1)
+HWTEST_F(RichEditorStyledStringOneTestNg, ProcessStyledString001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -143,7 +143,7 @@ HWTEST_F(RichEditorStyledStringOneTestNg, ProcessStyledString001, TestSize.Level
  * @tc.desc: test ProcessStyledString
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyledStringOneTestNg, ProcessStyledString002, TestSize.Level1)
+HWTEST_F(RichEditorStyledStringOneTestNg, ProcessStyledString002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -166,7 +166,7 @@ HWTEST_F(RichEditorStyledStringOneTestNg, ProcessStyledString002, TestSize.Level
  * @tc.desc: test ProcessStyledString
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyledStringOneTestNg, ProcessStyledString003, TestSize.Level1)
+HWTEST_F(RichEditorStyledStringOneTestNg, ProcessStyledString003, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -188,7 +188,7 @@ HWTEST_F(RichEditorStyledStringOneTestNg, ProcessStyledString003, TestSize.Level
  * @tc.desc: test ProcessStyledString
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyledStringOneTestNg, StyledStringCreateTest, TestSize.Level1)
+HWTEST_F(RichEditorStyledStringOneTestNg, StyledStringCreateTest, TestSize.Level0)
 {
     RefPtr<RichEditorPattern> pattern;
     bool isStyledStringMode;
