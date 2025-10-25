@@ -25,6 +25,7 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/common/resource/resource_object.h"
 
 namespace OHOS::Ace::NG {
 
@@ -41,6 +42,13 @@ struct PickerIndicatorStyle {
     std::optional<Dimension> endMargin;
     std::optional<Color> backgroundColor;
     std::optional<BorderRadiusProperty> borderRadius;
+    bool isDefaultDividerWidth = true;
+    bool isDefaultDividerColor = true;
+    bool isDefaultStartMargin = true;
+    bool isDefaultEndMargin = true;
+    bool isDefaultBackgroundColor = true;
+    bool isDefaultBorderRadius = true;
+    RefPtr<ResourceObject> borderRadiusResObj;
 };
 
 class ACE_EXPORT ContainerPickerLayoutProperty : public LayoutProperty {

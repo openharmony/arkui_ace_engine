@@ -18,6 +18,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/container_picker/container_picker_event_hub.h"
 #include "core/components_ng/pattern/container_picker/container_picker_pattern.h"
+#include "core/common/resource/resource_object.h"
 
 namespace OHOS::Ace::NG {
 
@@ -109,7 +110,14 @@ void ContainerPickerModel::SetIndicatorStyle(const PickerIndicatorStyle& style)
         }
     } else {
         TAG_LOGE(AceLogTag::ACE_CONTAINER_PICKER, "invalid type of PickerIndicatorStyle.");
+        return;
     }
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pickerPattern = frameNode->GetPattern<ContainerPickerPattern>();
+    CHECK_NULL_VOID(pickerPattern);
+    pickerPattern->SetIndicatorStyleVal(style);
 }
 
 void ContainerPickerModel::SetCanLoop(FrameNode* frameNode, bool isLoop)
@@ -173,6 +181,81 @@ void ContainerPickerModel::SetIndicatorStyle(FrameNode* frameNode, const PickerI
         }
     } else {
         TAG_LOGE(AceLogTag::ACE_CONTAINER_PICKER, "invalid type of PickerIndicatorStyle.");
+        return;
+    }
+    auto pickerPattern = frameNode->GetPattern<ContainerPickerPattern>();
+    CHECK_NULL_VOID(pickerPattern);
+    pickerPattern->SetIndicatorStyleVal(style);
+}
+
+void ContainerPickerModel::ProcessResourceObj(const std::string& key, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pickerPattern = frameNode->GetPattern<ContainerPickerPattern>();
+    CHECK_NULL_VOID(pickerPattern);
+    CHECK_NULL_VOID(resObj);
+
+    using Handler = std::function<void(const RefPtr<ResourceObject>&)>;
+    const std::unordered_map<std::string, Handler> handlers = {
+        {"containerPicker.dividerWidth", [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+                auto pickerNode = weak.Upgrade();
+                CHECK_NULL_VOID(pickerNode);
+                auto pickerPattern = pickerNode->GetPattern<ContainerPickerPattern>();
+                CHECK_NULL_VOID(pickerPattern);
+                pickerPattern->UpdateDividerWidthWithResObj(resObj);
+            }
+        },
+        {"containerPicker.dividerColor", [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+                auto pickerNode = weak.Upgrade();
+                CHECK_NULL_VOID(pickerNode);
+                auto pickerPattern = pickerNode->GetPattern<ContainerPickerPattern>();
+                CHECK_NULL_VOID(pickerPattern);
+                pickerPattern->UpdateDividerColorWithResObj(resObj);
+            }
+        },
+        {"containerPicker.startMargin", [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+                auto pickerNode = weak.Upgrade();
+                CHECK_NULL_VOID(pickerNode);
+                auto pickerPattern = pickerNode->GetPattern<ContainerPickerPattern>();
+                CHECK_NULL_VOID(pickerPattern);
+                pickerPattern->UpdateStartMarginWithResObj(resObj);
+            }
+        },
+        {"containerPicker.endMargin", [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+                auto pickerNode = weak.Upgrade();
+                CHECK_NULL_VOID(pickerNode);
+                auto pickerPattern = pickerNode->GetPattern<ContainerPickerPattern>();
+                CHECK_NULL_VOID(pickerPattern);
+                pickerPattern->UpdateEndMarginWithResObj(resObj);
+            }
+        },
+        {"containerPicker.backgroundColor",
+            [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+                auto pickerNode = weak.Upgrade();
+                CHECK_NULL_VOID(pickerNode);
+                auto pickerPattern = pickerNode->GetPattern<ContainerPickerPattern>();
+                CHECK_NULL_VOID(pickerPattern);
+                pickerPattern->UpdateBackgroundColorWithResObj(resObj);
+            }
+        },
+        {"containerPicker.borderRadius",
+            [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+                auto pickerNode = weak.Upgrade();
+                CHECK_NULL_VOID(pickerNode);
+                auto pickerPattern = pickerNode->GetPattern<ContainerPickerPattern>();
+                CHECK_NULL_VOID(pickerPattern);
+                pickerPattern->UpdateBorderRadiusWithResObj(resObj);
+            }
+        }
+    };
+
+    auto it = handlers.find(key);
+    if (it != handlers.end()) {
+        auto updateFunc = handlers.at(key);
+        pickerPattern->AddResObj(key, resObj, std::move(updateFunc));
     }
 }
+
 } // namespace OHOS::Ace::NG
