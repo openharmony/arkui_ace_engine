@@ -24,6 +24,7 @@ import { unsafeCast } from "@koalaui/common"
 export class ComponentBase implements UICommonBase {
     protected peer?: PeerNode
     protected isFirstBuild: boolean = true
+    public isFirstRender: boolean = true
     protected gestureEvent: UIGestureEvent | undefined = undefined
     private attributeHook_: (peer?: PeerNode)=>void = ()=>{}
     setPeer(peer: PeerNode | undefined) {

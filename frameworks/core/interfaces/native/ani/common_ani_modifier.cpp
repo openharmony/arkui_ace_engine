@@ -816,7 +816,8 @@ void SetDefaultTheme(ani_env* env, const std::vector<Ark_ResourceColor>& colorAr
 {
     auto isDarkValue = static_cast<bool>(isDark);
     std::vector<uint32_t> colors;
-    AniThemeModule::ConvertToColorArray(colorArray, colors);
+    std::vector<RefPtr<ResourceObject>> resObjs;
+    AniThemeModule::ConvertToColorArray(colorArray, colors, resObjs);
     NodeModifier::GetThemeModifier()->setDefaultTheme(colors.data(), isDarkValue);
 }
 
@@ -850,7 +851,7 @@ void CreateAndBindTheme(ani_env* env, ani_int themeScopeId, ani_int themeId,
 
     std::vector<uint32_t> colors;
     std::vector<RefPtr<ResourceObject>> resObjs;
-    AniThemeModule::ConvertToColorArray(colorArray, colors);
+    AniThemeModule::ConvertToColorArray(colorArray, colors, resObjs);
 
     if (!func) {
         return;

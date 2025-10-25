@@ -39,6 +39,7 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { TextModifier } from "./../TextModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ArkThemeScopeManager } from "arkui/theme/ArkThemeScopeManager.ets";
 export class TextControllerInternal {
     public static fromPtr(ptr: KPointer): TextController {
         return new TextController(ptr)
@@ -99,6 +100,10 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setTextOptionsAttribute(content?: string | Resource, value?: TextOptions): void {
+        // instructive change begin
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
+        // instructive change end
+
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (content !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)

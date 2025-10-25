@@ -22,7 +22,7 @@ import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { AlertDialogParamWithConfirm_serializer, AlertDialogParamWithButtons_serializer, AlertDialogParamWithOptions_serializer, AlertDialogParamWithConfirm, AlertDialogParamWithButtons, AlertDialogParamWithOptions, DialogAlignment } from "./alertDialog"
-import { AnimateParam_serializer, TranslateOptions_serializer, KeyframeAnimateParam_serializer, KeyframeState_serializer, AnimateParam, TranslateOptions, KeyframeAnimateParam, KeyframeState, TouchEvent, TouchEventInternal, ClickEvent, ClickEventInternal, ItemDragEventHandler_serializer, OnMoveHandler, ItemDragEventHandler, UICommonEvent, UICommonEventInternal, PopupCommonOptions_serializer, MenuOptions_serializer, PopupCommonOptions, MenuOptions, GeometryInfo, Measurable, Layoutable, Rectangle, ShadowOptions, ShadowStyle, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, KeyboardAvoidMode, HoverModeAreaType, SizeResult, TouchObject, KeyEvent, KeyEventInternal, MouseEvent, MouseEventInternal, SourceTool, Rectangle_serializer, ShadowOptions_serializer, BackgroundBlurStyleOptions_serializer, BackgroundEffectOptions_serializer } from "./common"
+import { AnimateParam_serializer, TranslateOptions_serializer, KeyframeAnimateParam_serializer, KeyframeState_serializer, AnimateParam, TranslateOptions, KeyframeAnimateParam, KeyframeState, TouchEvent, TouchEventInternal, ClickEvent, ClickEventInternal, ItemDragEventHandler_serializer, OnMoveHandler, ItemDragEventHandler, UICommonEvent, UICommonEventInternal, PopupCommonOptions_serializer, MenuOptions_serializer, PopupCommonOptions, MenuOptions, ThemeColorMode, GeometryInfo, Measurable, Layoutable, Rectangle, ShadowOptions, ShadowStyle, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, KeyboardAvoidMode, HoverModeAreaType, SizeResult, TouchObject, KeyEvent, KeyEventInternal, MouseEvent, MouseEventInternal, SourceTool, Rectangle_serializer, ShadowOptions_serializer, BackgroundBlurStyleOptions_serializer, BackgroundEffectOptions_serializer } from "./common"
 import { Resource_serializer } from "./../framework/resource"
 import { SizeOptions_serializer, Length, SizeOptions, Position_serializer, Position, ResourceColor, ConstraintSizeOptions, Offset, Dimension, BorderRadiuses, EdgeWidths, EdgeColors, EdgeStyles, Offset_serializer, BorderRadiuses_serializer, EdgeWidths_serializer, EdgeColors_serializer, EdgeStyles_serializer } from "./units"
 import { Resource } from "global.resource"
@@ -3686,6 +3686,117 @@ export class TabsExtender {
     public static ApplyAttributesFinish(node: KPointer): void {
         const node_casted = node as (KPointer)
         TabsExtender.ApplyAttributesFinish_serialize(node_casted)
+    }
+}
+
+export class ThemeOps {
+    static sendThemeToNative_serialize(colorArray: Array<ResourceColor>, elmtId: int32): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.writeInt32((colorArray.length).toInt())
+        for (let colorArrayCounterI = 0; colorArrayCounterI < colorArray.length; colorArrayCounterI++) {
+            const colorArrayTmpElement : ResourceColor = colorArray[colorArrayCounterI]
+            if (colorArrayTmpElement instanceof Color) {
+                thisSerializer.writeInt8((0).toChar())
+                const colorArrayTmpElementForIdx0  = colorArrayTmpElement as Color
+                thisSerializer.writeInt32(colorArrayTmpElementForIdx0.getOrdinal())
+            } else if (colorArrayTmpElement instanceof int32) {
+                thisSerializer.writeInt8((1).toChar())
+                const colorArrayTmpElementForIdx1  = colorArrayTmpElement as int32
+                thisSerializer.writeInt32(colorArrayTmpElementForIdx1)
+            } else if (colorArrayTmpElement instanceof string) {
+                thisSerializer.writeInt8((2).toChar())
+                const colorArrayTmpElementForIdx2  = colorArrayTmpElement as string
+                thisSerializer.writeString(colorArrayTmpElementForIdx2)
+            } else if (colorArrayTmpElement instanceof Resource) {
+                thisSerializer.writeInt8((3).toChar())
+                const colorArrayTmpElementForIdx3  = colorArrayTmpElement as Resource
+                Resource_serializer.write(thisSerializer, colorArrayTmpElementForIdx3)
+            }
+        }
+        ArkUIGeneratedNativeModule._ThemeOps_sendThemeToNative(thisSerializer.asBuffer(), thisSerializer.length(), elmtId)
+        thisSerializer.release()
+    }
+    static setDefaultTheme_serialize(colorArray: Array<ResourceColor>, isDark: boolean): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.writeInt32((colorArray.length).toInt())
+        for (let colorArrayCounterI = 0; colorArrayCounterI < colorArray.length; colorArrayCounterI++) {
+            const colorArrayTmpElement : ResourceColor = colorArray[colorArrayCounterI]
+            if (colorArrayTmpElement instanceof Color) {
+                thisSerializer.writeInt8((0).toChar())
+                const colorArrayTmpElementForIdx0  = colorArrayTmpElement as Color
+                thisSerializer.writeInt32(colorArrayTmpElementForIdx0.getOrdinal())
+            } else if (colorArrayTmpElement instanceof int32) {
+                thisSerializer.writeInt8((1).toChar())
+                const colorArrayTmpElementForIdx1  = colorArrayTmpElement as int32
+                thisSerializer.writeInt32(colorArrayTmpElementForIdx1)
+            } else if (colorArrayTmpElement instanceof string) {
+                thisSerializer.writeInt8((2).toChar())
+                const colorArrayTmpElementForIdx2  = colorArrayTmpElement as string
+                thisSerializer.writeString(colorArrayTmpElementForIdx2)
+            } else if (colorArrayTmpElement instanceof Resource) {
+                thisSerializer.writeInt8((3).toChar())
+                const colorArrayTmpElementForIdx3  = colorArrayTmpElement as Resource
+                Resource_serializer.write(thisSerializer, colorArrayTmpElementForIdx3)
+            }
+        }
+        ArkUIGeneratedNativeModule._ThemeOps_setDefaultTheme(thisSerializer.asBuffer(), thisSerializer.length(), isDark ? 1 : 0)
+        thisSerializer.release()
+    }
+    static createAndBindTheme_serialize(themeScopeId: int32, themeId: int32, colorArray: Array<ResourceColor>, colorMode: ThemeColorMode, onThemeScopeDestroy: (() => void)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.writeInt32((colorArray.length).toInt())
+        for (let colorArrayCounterI = 0; colorArrayCounterI < colorArray.length; colorArrayCounterI++) {
+            const colorArrayTmpElement : ResourceColor = colorArray[colorArrayCounterI]
+            if (colorArrayTmpElement instanceof Color) {
+                thisSerializer.writeInt8((0).toChar())
+                const colorArrayTmpElementForIdx0  = colorArrayTmpElement as Color
+                thisSerializer.writeInt32(colorArrayTmpElementForIdx0.getOrdinal())
+            } else if (colorArrayTmpElement instanceof int32) {
+                thisSerializer.writeInt8((1).toChar())
+                const colorArrayTmpElementForIdx1  = colorArrayTmpElement as int32
+                thisSerializer.writeInt32(colorArrayTmpElementForIdx1)
+            } else if (colorArrayTmpElement instanceof string) {
+                thisSerializer.writeInt8((2).toChar())
+                const colorArrayTmpElementForIdx2  = colorArrayTmpElement as string
+                thisSerializer.writeString(colorArrayTmpElementForIdx2)
+            } else if (colorArrayTmpElement instanceof Resource) {
+                thisSerializer.writeInt8((3).toChar())
+                const colorArrayTmpElementForIdx3  = colorArrayTmpElement as Resource
+                Resource_serializer.write(thisSerializer, colorArrayTmpElementForIdx3)
+            }
+        }
+        thisSerializer.holdAndWriteCallback(onThemeScopeDestroy)
+        ArkUIGeneratedNativeModule._ThemeOps_createAndBindTheme(themeScopeId, themeId, thisSerializer.asBuffer(), thisSerializer.length(), colorMode.valueOf())
+        thisSerializer.release()
+    }
+    static applyThemeScopeIdToNode_serialize(ptr: KPointer, themeScopeId: int32): void {
+        ArkUIGeneratedNativeModule._ThemeOps_applyThemeScopeIdToNode(ptr, themeScopeId)
+    }
+    public static sendThemeToNative(colorArray: Array<ResourceColor>, elmtId: int32): void {
+        const colorArray_casted = colorArray as (Array<ResourceColor>)
+        const elmtId_casted = elmtId as (int32)
+        ThemeOps.sendThemeToNative_serialize(colorArray_casted, elmtId_casted)
+        return
+    }
+    public static setDefaultTheme(colorArray: Array<ResourceColor>, isDark: boolean): void {
+        const colorArray_casted = colorArray as (Array<ResourceColor>)
+        const isDark_casted = isDark as (boolean)
+        ThemeOps.setDefaultTheme_serialize(colorArray_casted, isDark_casted)
+        return
+    }
+    public static createAndBindTheme(themeScopeId: int32, themeId: int32, colorArray: Array<ResourceColor>, colorMode: ThemeColorMode, onThemeScopeDestroy: (() => void)): void {
+        const themeScopeId_casted = themeScopeId as (int32)
+        const themeId_casted = themeId as (int32)
+        const colorArray_casted = colorArray as (Array<ResourceColor>)
+        const colorMode_casted = colorMode as (ThemeColorMode)
+        const onThemeScopeDestroy_casted = onThemeScopeDestroy as ((() => void))
+        ThemeOps.createAndBindTheme_serialize(themeScopeId_casted, themeId_casted, colorArray_casted, colorMode_casted, onThemeScopeDestroy_casted)
+        return
+    }
+    public static applyThemeScopeIdToNode(ptr: int64, themeScopeId: int32): void {
+        const ptr_casted = ptr as (int64)
+        const themeScopeId_casted = themeScopeId as (int32)
+        ThemeOps.applyThemeScopeIdToNode_serialize(ptr_casted, themeScopeId_casted)
         return
     }
 }

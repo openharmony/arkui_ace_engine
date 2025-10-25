@@ -3392,6 +3392,9 @@ frameworks/core/interfaces/native/implementation/stepper_modifier.cpp @arkui_nav
 frameworks/core/interfaces/native/implementation/swiper_modifier.cpp @arkui_navigation
 
 interfaces/ets/ani/observer @arkui_framework_xnode
+frameworks/core/interfaces/native/implementation/theme_ops_accessor.cpp @arkui_framework_xnode
+frameworks/core/interfaces/native/ani/ani_theme_module.h @arkui_framework_xnode
+frameworks/core/interfaces/native/ani/ani_theme_module.cpp @arkui_framework_xnode
 
 [Web ArkTS1.2]
 frameworks/core/interfaces/native/ani/web_ani_modifier.cpp @arkwebinarkuireview
