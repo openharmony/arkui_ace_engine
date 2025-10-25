@@ -915,6 +915,7 @@ HWTEST_F(MenuItemTestOneNg, MeasureItemViews001, TestSize.Level1)
     layoutWrapper->AppendChild(childWrapper);
     layoutWrapper->hostNode_ = menuItemNode;
     std::optional<LayoutConstraintF> layoutConstraint;
-    algorithm->MeasureItemViews(props->CreateChildConstraint(), layoutConstraint, AceType::RawPtr(layoutWrapper));
+    auto childConstraint = props->CreateChildConstraint();
+    algorithm->MeasureItemViews(childConstraint, layoutConstraint, AceType::RawPtr(layoutWrapper));
 }
 } // namespace OHOS::Ace::NG
