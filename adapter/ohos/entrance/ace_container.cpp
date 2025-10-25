@@ -2932,6 +2932,11 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
             declarativeFrontend->AttachSubPipelineContext(pipelineContext_);
         }
         return;
+    } else if (frontend_->GetType() == FrontendType::ARK_TS ||
+               frontend_->GetType() == FrontendType::DYNAMIC_HYBRID_STATIC ||
+               frontend_->GetType() == FrontendType::STATIC_HYBRID_DYNAMIC) {
+        frontend_->AttachSubPipelineContext(pipelineContext_);
+        return;
     }
 
     auto dataAbilityHelperImpl = [ability = GetAbilityInner(), runtimeContext = runtimeContext_,
