@@ -20,6 +20,8 @@
 #include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
+// The maximum width of the right row is 1/3 of content area width
+constexpr float RIGHT_ROW_MAX_WIDTH_WEIGHT = 3;
 void MenuItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
@@ -219,11 +221,11 @@ void MenuItemLayoutAlgorithm::MeasureItemViews(LayoutConstraintF& childConstrain
     CHECK_NULL_VOID(pipeline);
     auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
     CHECK_NULL_VOID(menuTheme);
-    auto fontScale = menuTheme->GetFontScale();
+    auto fontScale = pipeline->GetFontScale();
     if (NearEqual(fontScale, menuTheme->GetBigFontSizeScale()) ||
         NearEqual(fontScale, menuTheme->GetLargeFontSizeScale()) ||
         NearEqual(fontScale, menuTheme->GetMaxFontSizeScale())) {
-        childConstraint.maxSize.SetWidth((maxRowWidth_ - middleSpace_) / 3);
+        childConstraint.maxSize.SetWidth((maxRowWidth_ - middleSpace_) / RIGHT_ROW_MAX_WIDTH_WEIGHT);
     }
     // measure right row
     auto [rightRowWidth, rightRowHeight] = MeasureRightRow(layoutWrapper, childConstraint);
