@@ -21,8 +21,10 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkToolBarItemPeer, ToolBarItemAttribute } from "./component/toolbar"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 export class ToolBarItemModifier implements ToolBarItemAttribute,AttributeModifier<ToolBarItemAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -33,6 +35,7 @@ export class ToolBarItemModifier implements ToolBarItemAttribute,AttributeModifi
     applyDisabledAttribute(instance: ToolBarItemAttribute): void { }
     applySelectedAttribute(instance: ToolBarItemAttribute): void { }
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         const peer = node as ArkToolBarItemPeer;
     }
     mergeModifier(modifier: ToolBarItemModifier): void {

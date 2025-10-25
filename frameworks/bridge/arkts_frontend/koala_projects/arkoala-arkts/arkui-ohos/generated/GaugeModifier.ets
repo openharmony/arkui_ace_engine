@@ -22,6 +22,7 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkGaugePeer, GaugeShadowOptions, GaugeIndicatorOptions, GaugeConfiguration, GaugeAttribute } from "./component/gauge"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 import { CommonMethod } from "./component/common"
 import { ResourceColor, Length } from "./component/units"
 import { Color } from "./component/enums"
@@ -30,6 +31,7 @@ import { LinearGradient } from "./component/dataPanel"
 import { CustomBuilder } from "./component/builder"
 export class GaugeModifier extends CommonMethodModifier implements GaugeAttribute,AttributeModifier<GaugeAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -60,6 +62,7 @@ export class GaugeModifier extends CommonMethodModifier implements GaugeAttribut
     _contentModifier_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _contentModifier_0_0value?: ContentModifier<GaugeConfiguration> | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkGaugePeer;
         if (this._value_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -381,6 +384,7 @@ export class GaugeModifier extends CommonMethodModifier implements GaugeAttribut
         {
             this._value_0_flag = AttributeUpdaterFlag.UPDATE
             this._value_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._value_0_flag = AttributeUpdaterFlag.SKIP
@@ -392,6 +396,7 @@ export class GaugeModifier extends CommonMethodModifier implements GaugeAttribut
         {
             this._startAngle_0_flag = AttributeUpdaterFlag.UPDATE
             this._startAngle_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._startAngle_0_flag = AttributeUpdaterFlag.SKIP
@@ -403,6 +408,7 @@ export class GaugeModifier extends CommonMethodModifier implements GaugeAttribut
         {
             this._endAngle_0_flag = AttributeUpdaterFlag.UPDATE
             this._endAngle_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._endAngle_0_flag = AttributeUpdaterFlag.SKIP
@@ -414,6 +420,7 @@ export class GaugeModifier extends CommonMethodModifier implements GaugeAttribut
         {
             this._colors_0_flag = AttributeUpdaterFlag.UPDATE
             this._colors_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._colors_0_flag = AttributeUpdaterFlag.SKIP
@@ -425,6 +432,7 @@ export class GaugeModifier extends CommonMethodModifier implements GaugeAttribut
         {
             this._strokeWidth_0_flag = AttributeUpdaterFlag.UPDATE
             this._strokeWidth_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._strokeWidth_0_flag = AttributeUpdaterFlag.SKIP
@@ -436,6 +444,7 @@ export class GaugeModifier extends CommonMethodModifier implements GaugeAttribut
         {
             this._description_0_flag = AttributeUpdaterFlag.UPDATE
             this._description_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._description_0_flag = AttributeUpdaterFlag.SKIP
@@ -447,6 +456,7 @@ export class GaugeModifier extends CommonMethodModifier implements GaugeAttribut
         {
             this._trackShadow_0_flag = AttributeUpdaterFlag.UPDATE
             this._trackShadow_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._trackShadow_0_flag = AttributeUpdaterFlag.SKIP
@@ -458,6 +468,7 @@ export class GaugeModifier extends CommonMethodModifier implements GaugeAttribut
         {
             this._indicator_0_flag = AttributeUpdaterFlag.UPDATE
             this._indicator_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._indicator_0_flag = AttributeUpdaterFlag.SKIP
@@ -469,6 +480,7 @@ export class GaugeModifier extends CommonMethodModifier implements GaugeAttribut
         {
             this._privacySensitive_0_flag = AttributeUpdaterFlag.UPDATE
             this._privacySensitive_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._privacySensitive_0_flag = AttributeUpdaterFlag.SKIP
@@ -476,10 +488,11 @@ export class GaugeModifier extends CommonMethodModifier implements GaugeAttribut
         return this
     }
     contentModifier(value: ContentModifier<GaugeConfiguration> | undefined): this {
-        if (((this._contentModifier_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._contentModifier_0_0value) !== (value)))
+        if (((this._contentModifier_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._contentModifier_0_flag = AttributeUpdaterFlag.UPDATE
             this._contentModifier_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._contentModifier_0_flag = AttributeUpdaterFlag.SKIP

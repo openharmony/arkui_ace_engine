@@ -16,11 +16,12 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { AttributeModifier, extractors } from "#handwritten"
+import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkSpanPeer, TextBackgroundStyle, SpanAttribute } from "./component/span"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 import { Font, ResourceColor, Length } from "./component/units"
 import { Color, FontStyle, FontWeight, TextCase } from "./component/enums"
 import { Resource } from "global.resource"
@@ -29,6 +30,7 @@ import { ShadowOptions, ClickEvent, HoverCallback, HoverEvent } from "./componen
 import { LengthMetrics } from "arkui.Graphics"
 export class SpanModifier implements SpanAttribute,AttributeModifier<SpanAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -76,6 +78,7 @@ export class SpanModifier implements SpanAttribute,AttributeModifier<SpanAttribu
     _onClick_1_0value?: ((value0: ClickEvent) => void) | undefined
     _onClick_1_1value?: double | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         const peer = node as ArkSpanPeer;
         if (this._font_0_flag != AttributeUpdaterFlag.INITIAL)
         {
@@ -643,6 +646,7 @@ export class SpanModifier implements SpanAttribute,AttributeModifier<SpanAttribu
         {
             this._font_0_flag = AttributeUpdaterFlag.UPDATE
             this._font_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._font_0_flag = AttributeUpdaterFlag.SKIP
@@ -654,6 +658,7 @@ export class SpanModifier implements SpanAttribute,AttributeModifier<SpanAttribu
         {
             this._fontColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._fontColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fontColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -665,6 +670,7 @@ export class SpanModifier implements SpanAttribute,AttributeModifier<SpanAttribu
         {
             this._fontSize_0_flag = AttributeUpdaterFlag.UPDATE
             this._fontSize_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fontSize_0_flag = AttributeUpdaterFlag.SKIP
@@ -676,6 +682,7 @@ export class SpanModifier implements SpanAttribute,AttributeModifier<SpanAttribu
         {
             this._fontStyle_0_flag = AttributeUpdaterFlag.UPDATE
             this._fontStyle_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fontStyle_0_flag = AttributeUpdaterFlag.SKIP
@@ -687,6 +694,7 @@ export class SpanModifier implements SpanAttribute,AttributeModifier<SpanAttribu
         {
             this._fontWeight_0_flag = AttributeUpdaterFlag.UPDATE
             this._fontWeight_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fontWeight_0_flag = AttributeUpdaterFlag.SKIP
@@ -698,6 +706,7 @@ export class SpanModifier implements SpanAttribute,AttributeModifier<SpanAttribu
         {
             this._fontFamily_0_flag = AttributeUpdaterFlag.UPDATE
             this._fontFamily_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fontFamily_0_flag = AttributeUpdaterFlag.SKIP
@@ -709,6 +718,7 @@ export class SpanModifier implements SpanAttribute,AttributeModifier<SpanAttribu
         {
             this._decoration_0_flag = AttributeUpdaterFlag.UPDATE
             this._decoration_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._decoration_0_flag = AttributeUpdaterFlag.SKIP
@@ -720,6 +730,7 @@ export class SpanModifier implements SpanAttribute,AttributeModifier<SpanAttribu
         {
             this._letterSpacing_0_flag = AttributeUpdaterFlag.UPDATE
             this._letterSpacing_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._letterSpacing_0_flag = AttributeUpdaterFlag.SKIP
@@ -731,6 +742,7 @@ export class SpanModifier implements SpanAttribute,AttributeModifier<SpanAttribu
         {
             this._textCase_0_flag = AttributeUpdaterFlag.UPDATE
             this._textCase_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._textCase_0_flag = AttributeUpdaterFlag.SKIP
@@ -742,6 +754,7 @@ export class SpanModifier implements SpanAttribute,AttributeModifier<SpanAttribu
         {
             this._lineHeight_0_flag = AttributeUpdaterFlag.UPDATE
             this._lineHeight_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._lineHeight_0_flag = AttributeUpdaterFlag.SKIP
@@ -753,6 +766,7 @@ export class SpanModifier implements SpanAttribute,AttributeModifier<SpanAttribu
         {
             this._textShadow_0_flag = AttributeUpdaterFlag.UPDATE
             this._textShadow_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._textShadow_0_flag = AttributeUpdaterFlag.SKIP
@@ -764,6 +778,7 @@ export class SpanModifier implements SpanAttribute,AttributeModifier<SpanAttribu
         {
             this._textBackgroundStyle_0_flag = AttributeUpdaterFlag.UPDATE
             this._textBackgroundStyle_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._textBackgroundStyle_0_flag = AttributeUpdaterFlag.SKIP
@@ -775,6 +790,7 @@ export class SpanModifier implements SpanAttribute,AttributeModifier<SpanAttribu
         {
             this._baselineOffset_0_flag = AttributeUpdaterFlag.UPDATE
             this._baselineOffset_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._baselineOffset_0_flag = AttributeUpdaterFlag.SKIP
@@ -786,6 +802,7 @@ export class SpanModifier implements SpanAttribute,AttributeModifier<SpanAttribu
         {
             this._key_0_flag = AttributeUpdaterFlag.UPDATE
             this._key_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._key_0_flag = AttributeUpdaterFlag.SKIP
@@ -797,6 +814,7 @@ export class SpanModifier implements SpanAttribute,AttributeModifier<SpanAttribu
         {
             this._id_0_flag = AttributeUpdaterFlag.UPDATE
             this._id_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._id_0_flag = AttributeUpdaterFlag.SKIP
@@ -808,6 +826,7 @@ export class SpanModifier implements SpanAttribute,AttributeModifier<SpanAttribu
         {
             this._onClick_0_flag = AttributeUpdaterFlag.UPDATE
             this._onClick_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onClick_0_flag = AttributeUpdaterFlag.SKIP
@@ -819,6 +838,7 @@ export class SpanModifier implements SpanAttribute,AttributeModifier<SpanAttribu
         {
             this._onHover_0_flag = AttributeUpdaterFlag.UPDATE
             this._onHover_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onHover_0_flag = AttributeUpdaterFlag.SKIP
@@ -831,6 +851,7 @@ export class SpanModifier implements SpanAttribute,AttributeModifier<SpanAttribu
             this._onClick_1_flag = AttributeUpdaterFlag.UPDATE
             this._onClick_1_0value = event
             this._onClick_1_1value = distanceThreshold
+            this._state.fireChange()
         } else
         {
             this._onClick_1_flag = AttributeUpdaterFlag.SKIP

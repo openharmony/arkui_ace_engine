@@ -22,6 +22,7 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkTabContentPeer, SubTabBarStyle, BottomTabBarStyle, TabBarOptions, TabContentAttribute } from "./component/tabContent"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 import { CommonMethod } from "./component/common"
 import { ComponentContent } from "arkui.ComponentContent"
 import { Resource } from "global.resource"
@@ -29,6 +30,7 @@ import { CustomBuilder } from "./component/builder"
 import { VoidCallback } from "./component/units"
 export class TabContentModifier extends CommonMethodModifier implements TabContentAttribute,AttributeModifier<TabContentAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -45,6 +47,7 @@ export class TabContentModifier extends CommonMethodModifier implements TabConte
     _onWillHide_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onWillHide_0_0value?: VoidCallback | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkTabContentPeer;
         if (this._tabBar_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -149,6 +152,7 @@ export class TabContentModifier extends CommonMethodModifier implements TabConte
         {
             this._tabBar_0_flag = AttributeUpdaterFlag.UPDATE
             this._tabBar_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._tabBar_0_flag = AttributeUpdaterFlag.SKIP
@@ -160,6 +164,7 @@ export class TabContentModifier extends CommonMethodModifier implements TabConte
         {
             this._onWillShow_0_flag = AttributeUpdaterFlag.UPDATE
             this._onWillShow_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onWillShow_0_flag = AttributeUpdaterFlag.SKIP
@@ -171,6 +176,7 @@ export class TabContentModifier extends CommonMethodModifier implements TabConte
         {
             this._onWillHide_0_flag = AttributeUpdaterFlag.UPDATE
             this._onWillHide_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onWillHide_0_flag = AttributeUpdaterFlag.SKIP

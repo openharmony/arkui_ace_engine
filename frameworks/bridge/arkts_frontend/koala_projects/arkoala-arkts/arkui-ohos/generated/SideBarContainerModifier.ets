@@ -22,13 +22,13 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkSideBarContainerPeer, ButtonStyle, SideBarPosition, SideBarContainerAttribute } from "./component/sidebar"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 import { CommonMethod, Bindable, DividerStyle } from "./component/common"
 import { Length, Dimension } from "./component/units"
 import { Resource } from "global.resource"
-import { PeerNode } from "./PeerNode"
-
 export class SideBarContainerModifier extends CommonMethodModifier implements SideBarContainerAttribute,AttributeModifier<SideBarContainerAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -61,6 +61,7 @@ export class SideBarContainerModifier extends CommonMethodModifier implements Si
     _minContentWidth_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _minContentWidth_0_0value?: Dimension | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkSideBarContainerPeer;
         if (this._showSideBar_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -413,6 +414,7 @@ export class SideBarContainerModifier extends CommonMethodModifier implements Si
         {
             this._showSideBar_0_flag = AttributeUpdaterFlag.UPDATE
             this._showSideBar_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._showSideBar_0_flag = AttributeUpdaterFlag.SKIP
@@ -424,6 +426,7 @@ export class SideBarContainerModifier extends CommonMethodModifier implements Si
         {
             this._controlButton_0_flag = AttributeUpdaterFlag.UPDATE
             this._controlButton_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._controlButton_0_flag = AttributeUpdaterFlag.SKIP
@@ -435,6 +438,7 @@ export class SideBarContainerModifier extends CommonMethodModifier implements Si
         {
             this._showControlButton_0_flag = AttributeUpdaterFlag.UPDATE
             this._showControlButton_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._showControlButton_0_flag = AttributeUpdaterFlag.SKIP
@@ -446,6 +450,7 @@ export class SideBarContainerModifier extends CommonMethodModifier implements Si
         {
             this._onChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onChange_0_flag = AttributeUpdaterFlag.SKIP
@@ -457,6 +462,7 @@ export class SideBarContainerModifier extends CommonMethodModifier implements Si
         {
             this._sideBarWidth_0_flag = AttributeUpdaterFlag.UPDATE
             this._sideBarWidth_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._sideBarWidth_0_flag = AttributeUpdaterFlag.SKIP
@@ -468,6 +474,7 @@ export class SideBarContainerModifier extends CommonMethodModifier implements Si
         {
             this._minSideBarWidth_0_flag = AttributeUpdaterFlag.UPDATE
             this._minSideBarWidth_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._minSideBarWidth_0_flag = AttributeUpdaterFlag.SKIP
@@ -479,6 +486,7 @@ export class SideBarContainerModifier extends CommonMethodModifier implements Si
         {
             this._maxSideBarWidth_0_flag = AttributeUpdaterFlag.UPDATE
             this._maxSideBarWidth_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._maxSideBarWidth_0_flag = AttributeUpdaterFlag.SKIP
@@ -490,6 +498,7 @@ export class SideBarContainerModifier extends CommonMethodModifier implements Si
         {
             this._autoHide_0_flag = AttributeUpdaterFlag.UPDATE
             this._autoHide_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._autoHide_0_flag = AttributeUpdaterFlag.SKIP
@@ -501,6 +510,7 @@ export class SideBarContainerModifier extends CommonMethodModifier implements Si
         {
             this._sideBarPosition_0_flag = AttributeUpdaterFlag.UPDATE
             this._sideBarPosition_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._sideBarPosition_0_flag = AttributeUpdaterFlag.SKIP
@@ -512,6 +522,7 @@ export class SideBarContainerModifier extends CommonMethodModifier implements Si
         {
             this._divider_0_flag = AttributeUpdaterFlag.UPDATE
             this._divider_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._divider_0_flag = AttributeUpdaterFlag.SKIP
@@ -523,6 +534,7 @@ export class SideBarContainerModifier extends CommonMethodModifier implements Si
         {
             this._minContentWidth_0_flag = AttributeUpdaterFlag.UPDATE
             this._minContentWidth_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._minContentWidth_0_flag = AttributeUpdaterFlag.SKIP

@@ -22,6 +22,7 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkImagePeer, ColorContent, ImageRenderMode, DynamicRangeMode, ImageInterpolation, ImageSourceSize, ImageOnCompleteCallback, ImageCompleteEvent, ImageErrorCallback, ImageError, ResizableOptions, ImageRotateOrientation, ImageAttribute } from "./component/image"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 import { CommonMethod, PointLightStyle } from "./component/common"
 import { Resource } from "global.resource"
 import { default as image } from "@ohos.multimedia.image"
@@ -36,6 +37,7 @@ import { TypeChecker } from "#components"
 import { CallbackTransformer } from "./CallbackTransformer"
 export class ImageModifier extends CommonMethodModifier implements ImageAttribute,AttributeModifier<ImageAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -100,6 +102,7 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
     _orientation_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _orientation_0_0value?: ImageRotateOrientation | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkImagePeer;
         if (this._alt_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -948,6 +951,7 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
         {
             this._alt_0_flag = AttributeUpdaterFlag.UPDATE
             this._alt_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._alt_0_flag = AttributeUpdaterFlag.SKIP
@@ -959,6 +963,7 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
         {
             this._matchTextDirection_0_flag = AttributeUpdaterFlag.UPDATE
             this._matchTextDirection_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._matchTextDirection_0_flag = AttributeUpdaterFlag.SKIP
@@ -970,6 +975,7 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
         {
             this._fitOriginalSize_0_flag = AttributeUpdaterFlag.UPDATE
             this._fitOriginalSize_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fitOriginalSize_0_flag = AttributeUpdaterFlag.SKIP
@@ -981,6 +987,7 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
         {
             this._fillColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._fillColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fillColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -992,6 +999,7 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
         {
             this._objectFit_0_flag = AttributeUpdaterFlag.UPDATE
             this._objectFit_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._objectFit_0_flag = AttributeUpdaterFlag.SKIP
@@ -1003,6 +1011,7 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
         {
             this._imageMatrix_0_flag = AttributeUpdaterFlag.UPDATE
             this._imageMatrix_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._imageMatrix_0_flag = AttributeUpdaterFlag.SKIP
@@ -1014,6 +1023,7 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
         {
             this._objectRepeat_0_flag = AttributeUpdaterFlag.UPDATE
             this._objectRepeat_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._objectRepeat_0_flag = AttributeUpdaterFlag.SKIP
@@ -1025,6 +1035,7 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
         {
             this._autoResize_0_flag = AttributeUpdaterFlag.UPDATE
             this._autoResize_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._autoResize_0_flag = AttributeUpdaterFlag.SKIP
@@ -1036,6 +1047,7 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
         {
             this._renderMode_0_flag = AttributeUpdaterFlag.UPDATE
             this._renderMode_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._renderMode_0_flag = AttributeUpdaterFlag.SKIP
@@ -1047,6 +1059,7 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
         {
             this._dynamicRangeMode_0_flag = AttributeUpdaterFlag.UPDATE
             this._dynamicRangeMode_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._dynamicRangeMode_0_flag = AttributeUpdaterFlag.SKIP
@@ -1058,6 +1071,7 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
         {
             this._interpolation_0_flag = AttributeUpdaterFlag.UPDATE
             this._interpolation_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._interpolation_0_flag = AttributeUpdaterFlag.SKIP
@@ -1069,6 +1083,7 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
         {
             this._sourceSize_0_flag = AttributeUpdaterFlag.UPDATE
             this._sourceSize_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._sourceSize_0_flag = AttributeUpdaterFlag.SKIP
@@ -1080,6 +1095,7 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
         {
             this._syncLoad_0_flag = AttributeUpdaterFlag.UPDATE
             this._syncLoad_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._syncLoad_0_flag = AttributeUpdaterFlag.SKIP
@@ -1091,6 +1107,7 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
         {
             this._colorFilter_0_flag = AttributeUpdaterFlag.UPDATE
             this._colorFilter_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._colorFilter_0_flag = AttributeUpdaterFlag.SKIP
@@ -1102,6 +1119,7 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
         {
             this._copyOption_0_flag = AttributeUpdaterFlag.UPDATE
             this._copyOption_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._copyOption_0_flag = AttributeUpdaterFlag.SKIP
@@ -1113,6 +1131,7 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
         {
             this._draggable_0_flag = AttributeUpdaterFlag.UPDATE
             this._draggable_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._draggable_0_flag = AttributeUpdaterFlag.SKIP
@@ -1124,6 +1143,7 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
         {
             this._pointLight_0_flag = AttributeUpdaterFlag.UPDATE
             this._pointLight_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._pointLight_0_flag = AttributeUpdaterFlag.SKIP
@@ -1135,6 +1155,7 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
         {
             this._edgeAntialiasing_0_flag = AttributeUpdaterFlag.UPDATE
             this._edgeAntialiasing_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._edgeAntialiasing_0_flag = AttributeUpdaterFlag.SKIP
@@ -1146,6 +1167,7 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
         {
             this._onComplete_0_flag = AttributeUpdaterFlag.UPDATE
             this._onComplete_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onComplete_0_flag = AttributeUpdaterFlag.SKIP
@@ -1157,6 +1179,7 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
         {
             this._onError_0_flag = AttributeUpdaterFlag.UPDATE
             this._onError_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onError_0_flag = AttributeUpdaterFlag.SKIP
@@ -1168,6 +1191,7 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
         {
             this._onFinish_0_flag = AttributeUpdaterFlag.UPDATE
             this._onFinish_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onFinish_0_flag = AttributeUpdaterFlag.SKIP
@@ -1179,6 +1203,7 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
         {
             this._enableAnalyzer_0_flag = AttributeUpdaterFlag.UPDATE
             this._enableAnalyzer_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enableAnalyzer_0_flag = AttributeUpdaterFlag.SKIP
@@ -1190,6 +1215,7 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
         {
             this._analyzerConfig_0_flag = AttributeUpdaterFlag.UPDATE
             this._analyzerConfig_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._analyzerConfig_0_flag = AttributeUpdaterFlag.SKIP
@@ -1201,6 +1227,7 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
         {
             this._resizable_0_flag = AttributeUpdaterFlag.UPDATE
             this._resizable_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._resizable_0_flag = AttributeUpdaterFlag.SKIP
@@ -1212,6 +1239,7 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
         {
             this._privacySensitive_0_flag = AttributeUpdaterFlag.UPDATE
             this._privacySensitive_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._privacySensitive_0_flag = AttributeUpdaterFlag.SKIP
@@ -1223,6 +1251,7 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
         {
             this._enhancedImageQuality_0_flag = AttributeUpdaterFlag.UPDATE
             this._enhancedImageQuality_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enhancedImageQuality_0_flag = AttributeUpdaterFlag.SKIP
@@ -1234,6 +1263,7 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
         {
             this._orientation_0_flag = AttributeUpdaterFlag.UPDATE
             this._orientation_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._orientation_0_flag = AttributeUpdaterFlag.SKIP

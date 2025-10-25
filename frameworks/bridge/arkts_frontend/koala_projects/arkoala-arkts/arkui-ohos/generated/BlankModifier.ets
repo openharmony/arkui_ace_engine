@@ -22,12 +22,14 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkBlankPeer, BlankAttribute } from "./component/blank"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 import { CommonMethod } from "./component/common"
 import { ResourceColor } from "./component/units"
 import { Color } from "./component/enums"
 import { Resource } from "global.resource"
 export class BlankModifier extends CommonMethodModifier implements BlankAttribute,AttributeModifier<BlankAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -40,6 +42,7 @@ export class BlankModifier extends CommonMethodModifier implements BlankAttribut
     _color_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _color_0_0value?: ResourceColor | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkBlankPeer;
         if (this._color_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -82,6 +85,7 @@ export class BlankModifier extends CommonMethodModifier implements BlankAttribut
         {
             this._color_0_flag = AttributeUpdaterFlag.UPDATE
             this._color_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._color_0_flag = AttributeUpdaterFlag.SKIP

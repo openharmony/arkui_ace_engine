@@ -22,10 +22,12 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkXComponentPeer, XComponentAttribute } from "./component/xcomponent"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 import { CommonMethod } from "./component/common"
 import { VoidCallback } from "./component/units"
 export class XComponentModifier extends CommonMethodModifier implements XComponentAttribute,AttributeModifier<XComponentAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -46,6 +48,7 @@ export class XComponentModifier extends CommonMethodModifier implements XCompone
     _hdrBrightness_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _hdrBrightness_0_0value?: double | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkXComponentPeer;
         if (this._onLoad_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -212,6 +215,7 @@ export class XComponentModifier extends CommonMethodModifier implements XCompone
         {
             this._onLoad_0_flag = AttributeUpdaterFlag.UPDATE
             this._onLoad_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onLoad_0_flag = AttributeUpdaterFlag.SKIP
@@ -223,6 +227,7 @@ export class XComponentModifier extends CommonMethodModifier implements XCompone
         {
             this._onDestroy_0_flag = AttributeUpdaterFlag.UPDATE
             this._onDestroy_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onDestroy_0_flag = AttributeUpdaterFlag.SKIP
@@ -234,6 +239,7 @@ export class XComponentModifier extends CommonMethodModifier implements XCompone
         {
             this._enableAnalyzer_0_flag = AttributeUpdaterFlag.UPDATE
             this._enableAnalyzer_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enableAnalyzer_0_flag = AttributeUpdaterFlag.SKIP
@@ -245,6 +251,7 @@ export class XComponentModifier extends CommonMethodModifier implements XCompone
         {
             this._enableSecure_0_flag = AttributeUpdaterFlag.UPDATE
             this._enableSecure_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enableSecure_0_flag = AttributeUpdaterFlag.SKIP
@@ -256,6 +263,7 @@ export class XComponentModifier extends CommonMethodModifier implements XCompone
         {
             this._hdrBrightness_0_flag = AttributeUpdaterFlag.UPDATE
             this._hdrBrightness_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._hdrBrightness_0_flag = AttributeUpdaterFlag.SKIP

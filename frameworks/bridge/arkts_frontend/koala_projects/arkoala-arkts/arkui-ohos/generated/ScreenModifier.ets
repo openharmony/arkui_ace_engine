@@ -22,9 +22,11 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkScreenPeer, ScreenAttribute } from "./component/screen"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 import { CommonMethod } from "./component/common"
 export class ScreenModifier extends CommonMethodModifier implements ScreenAttribute,AttributeModifier<ScreenAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -35,6 +37,7 @@ export class ScreenModifier extends CommonMethodModifier implements ScreenAttrib
     applyDisabledAttribute(instance: ScreenAttribute): void { }
     applySelectedAttribute(instance: ScreenAttribute): void { }
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkScreenPeer;
     }

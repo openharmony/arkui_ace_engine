@@ -22,10 +22,12 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkEmbeddedComponentPeer, EmbeddedComponentAttribute } from "./component/embeddedComponent"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 import { CommonMethod, TerminationInfo } from "./component/common"
 import { ErrorCallback, BusinessError } from "@ohos.base"
 export class EmbeddedComponentModifier extends CommonMethodModifier implements EmbeddedComponentAttribute,AttributeModifier<EmbeddedComponentAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -40,6 +42,7 @@ export class EmbeddedComponentModifier extends CommonMethodModifier implements E
     _onError_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onError_0_0value?: ErrorCallback<BusinessError> | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkEmbeddedComponentPeer;
         if (this._onTerminated_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -113,6 +116,7 @@ export class EmbeddedComponentModifier extends CommonMethodModifier implements E
         {
             this._onTerminated_0_flag = AttributeUpdaterFlag.UPDATE
             this._onTerminated_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onTerminated_0_flag = AttributeUpdaterFlag.SKIP
@@ -124,6 +128,7 @@ export class EmbeddedComponentModifier extends CommonMethodModifier implements E
         {
             this._onError_0_flag = AttributeUpdaterFlag.UPDATE
             this._onError_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onError_0_flag = AttributeUpdaterFlag.SKIP

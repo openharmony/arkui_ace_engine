@@ -18,14 +18,15 @@
 
 import { CommonMethod } from "./component/common"
 import { TextBackgroundStyle, BaseSpan } from "./component/span"
-import { extractors, AttributeModifier } from "#handwritten"
 import { LengthMetrics } from "arkui.Graphics"
 import { BaseSpanModifier } from "./BaseSpanModifier"
 import { CommonMethodModifier } from "./CommonMethodModifier"
+import { AttributeModifier, extractors } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkImageSpanPeer, ImageCompleteCallback, ImageLoadResult, ImageSpanAttribute } from "./component/imageSpan"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 import { ImageSpanAlignment, ImageFit } from "./component/enums"
 import { ColorFilter } from "./component/units"
 import { default as drawing } from "@ohos.graphics.drawing"
@@ -33,6 +34,7 @@ import { ImageErrorCallback, ImageError } from "./component/image"
 import { default as image } from "@ohos.multimedia.image"
 export class ImageSpanModifier extends CommonMethodModifier implements ImageSpanAttribute,AttributeModifier<ImageSpanAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -59,6 +61,7 @@ export class ImageSpanModifier extends CommonMethodModifier implements ImageSpan
     _baselineOffset_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _baselineOffset_0_0value?: LengthMetrics | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkImageSpanPeer;
         if (this._verticalAlign_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -318,6 +321,7 @@ export class ImageSpanModifier extends CommonMethodModifier implements ImageSpan
         {
             this._verticalAlign_0_flag = AttributeUpdaterFlag.UPDATE
             this._verticalAlign_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._verticalAlign_0_flag = AttributeUpdaterFlag.SKIP
@@ -329,6 +333,7 @@ export class ImageSpanModifier extends CommonMethodModifier implements ImageSpan
         {
             this._colorFilter_0_flag = AttributeUpdaterFlag.UPDATE
             this._colorFilter_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._colorFilter_0_flag = AttributeUpdaterFlag.SKIP
@@ -340,6 +345,7 @@ export class ImageSpanModifier extends CommonMethodModifier implements ImageSpan
         {
             this._objectFit_0_flag = AttributeUpdaterFlag.UPDATE
             this._objectFit_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._objectFit_0_flag = AttributeUpdaterFlag.SKIP
@@ -351,6 +357,7 @@ export class ImageSpanModifier extends CommonMethodModifier implements ImageSpan
         {
             this._onComplete_0_flag = AttributeUpdaterFlag.UPDATE
             this._onComplete_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onComplete_0_flag = AttributeUpdaterFlag.SKIP
@@ -362,6 +369,7 @@ export class ImageSpanModifier extends CommonMethodModifier implements ImageSpan
         {
             this._onError_0_flag = AttributeUpdaterFlag.UPDATE
             this._onError_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onError_0_flag = AttributeUpdaterFlag.SKIP
@@ -373,6 +381,7 @@ export class ImageSpanModifier extends CommonMethodModifier implements ImageSpan
         {
             this._alt_0_flag = AttributeUpdaterFlag.UPDATE
             this._alt_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._alt_0_flag = AttributeUpdaterFlag.SKIP
@@ -384,6 +393,7 @@ export class ImageSpanModifier extends CommonMethodModifier implements ImageSpan
         {
             this._textBackgroundStyle_0_flag = AttributeUpdaterFlag.UPDATE
             this._textBackgroundStyle_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._textBackgroundStyle_0_flag = AttributeUpdaterFlag.SKIP
@@ -395,6 +405,7 @@ export class ImageSpanModifier extends CommonMethodModifier implements ImageSpan
         {
             this._baselineOffset_0_flag = AttributeUpdaterFlag.UPDATE
             this._baselineOffset_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._baselineOffset_0_flag = AttributeUpdaterFlag.SKIP

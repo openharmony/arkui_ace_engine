@@ -22,12 +22,14 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkTogglePeer, ToggleConfiguration, SwitchStyle, ToggleAttribute } from "./component/toggle"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 import { CommonMethod } from "./component/common"
 import { ResourceColor } from "./component/units"
 import { Color } from "./component/enums"
 import { Resource } from "global.resource"
 export class ToggleModifier extends CommonMethodModifier implements ToggleAttribute,AttributeModifier<ToggleAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -46,6 +48,7 @@ export class ToggleModifier extends CommonMethodModifier implements ToggleAttrib
     _switchStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _switchStyle_0_0value?: SwitchStyle | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkTogglePeer;
         if (this._onChange_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -181,6 +184,7 @@ export class ToggleModifier extends CommonMethodModifier implements ToggleAttrib
         {
             this._onChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onChange_0_flag = AttributeUpdaterFlag.SKIP
@@ -192,6 +196,7 @@ export class ToggleModifier extends CommonMethodModifier implements ToggleAttrib
         {
             this._selectedColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._selectedColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._selectedColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -203,6 +208,7 @@ export class ToggleModifier extends CommonMethodModifier implements ToggleAttrib
         {
             this._switchPointColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._switchPointColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._switchPointColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -214,6 +220,7 @@ export class ToggleModifier extends CommonMethodModifier implements ToggleAttrib
         {
             this._switchStyle_0_flag = AttributeUpdaterFlag.UPDATE
             this._switchStyle_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._switchStyle_0_flag = AttributeUpdaterFlag.SKIP

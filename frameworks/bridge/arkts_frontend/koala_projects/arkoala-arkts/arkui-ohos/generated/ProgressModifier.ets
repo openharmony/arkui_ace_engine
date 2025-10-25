@@ -22,6 +22,7 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkProgressPeer, LinearStyleOptions, RingStyleOptions, CapsuleStyleOptions, ProgressStyleOptions, ProgressConfiguration, ProgressAttribute } from "./component/progress"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 import { CommonMethod } from "./component/common"
 import { ResourceColor } from "./component/units"
 import { Color } from "./component/enums"
@@ -29,6 +30,7 @@ import { Resource } from "global.resource"
 import { LinearGradient } from "./component/dataPanel"
 export class ProgressModifier extends CommonMethodModifier implements ProgressAttribute,AttributeModifier<ProgressAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -49,6 +51,7 @@ export class ProgressModifier extends CommonMethodModifier implements ProgressAt
     _contentModifier_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _contentModifier_0_0value?: ContentModifier<ProgressConfiguration> | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkProgressPeer;
         if (this._value_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -215,6 +218,7 @@ export class ProgressModifier extends CommonMethodModifier implements ProgressAt
         {
             this._value_0_flag = AttributeUpdaterFlag.UPDATE
             this._value_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._value_0_flag = AttributeUpdaterFlag.SKIP
@@ -226,6 +230,7 @@ export class ProgressModifier extends CommonMethodModifier implements ProgressAt
         {
             this._color_0_flag = AttributeUpdaterFlag.UPDATE
             this._color_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._color_0_flag = AttributeUpdaterFlag.SKIP
@@ -237,6 +242,7 @@ export class ProgressModifier extends CommonMethodModifier implements ProgressAt
         {
             this._style_0_flag = AttributeUpdaterFlag.UPDATE
             this._style_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._style_0_flag = AttributeUpdaterFlag.SKIP
@@ -248,6 +254,7 @@ export class ProgressModifier extends CommonMethodModifier implements ProgressAt
         {
             this._privacySensitive_0_flag = AttributeUpdaterFlag.UPDATE
             this._privacySensitive_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._privacySensitive_0_flag = AttributeUpdaterFlag.SKIP
@@ -255,10 +262,11 @@ export class ProgressModifier extends CommonMethodModifier implements ProgressAt
         return this
     }
     contentModifier(value: ContentModifier<ProgressConfiguration> | undefined): this {
-        if (((this._contentModifier_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._contentModifier_0_0value) !== (value)))
+        if (((this._contentModifier_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._contentModifier_0_flag = AttributeUpdaterFlag.UPDATE
             this._contentModifier_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._contentModifier_0_flag = AttributeUpdaterFlag.SKIP

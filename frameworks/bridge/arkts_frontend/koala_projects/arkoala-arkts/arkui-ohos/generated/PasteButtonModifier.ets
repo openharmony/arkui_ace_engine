@@ -22,11 +22,13 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkPasteButtonPeer, PasteButtonCallback, PasteButtonOnClickResult, PasteButtonAttribute } from "./component/pasteButton"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 import { SecurityComponentMethod } from "./component/securityComponent"
 import { ClickEvent } from "./component/common"
 import { BusinessError } from "@ohos.base"
 export class PasteButtonModifier extends SecurityComponentMethodModifier implements PasteButtonAttribute,AttributeModifier<PasteButtonAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -39,6 +41,7 @@ export class PasteButtonModifier extends SecurityComponentMethodModifier impleme
     _onClick_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onClick_0_0value?: PasteButtonCallback | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkPasteButtonPeer;
         if (this._onClick_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -81,6 +84,7 @@ export class PasteButtonModifier extends SecurityComponentMethodModifier impleme
         {
             this._onClick_0_flag = AttributeUpdaterFlag.UPDATE
             this._onClick_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onClick_0_flag = AttributeUpdaterFlag.SKIP

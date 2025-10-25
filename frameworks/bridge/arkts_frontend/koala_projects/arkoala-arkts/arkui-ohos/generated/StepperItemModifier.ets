@@ -22,9 +22,11 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkStepperItemPeer, ItemState, StepperItemAttribute } from "./component/stepperItem"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 import { CommonMethod } from "./component/common"
 export class StepperItemModifier extends CommonMethodModifier implements StepperItemAttribute,AttributeModifier<StepperItemAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -41,6 +43,7 @@ export class StepperItemModifier extends CommonMethodModifier implements Stepper
     _status_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _status_0_0value?: ItemState | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkStepperItemPeer;
         if (this._prevLabel_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -145,6 +148,7 @@ export class StepperItemModifier extends CommonMethodModifier implements Stepper
         {
             this._prevLabel_0_flag = AttributeUpdaterFlag.UPDATE
             this._prevLabel_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._prevLabel_0_flag = AttributeUpdaterFlag.SKIP
@@ -156,6 +160,7 @@ export class StepperItemModifier extends CommonMethodModifier implements Stepper
         {
             this._nextLabel_0_flag = AttributeUpdaterFlag.UPDATE
             this._nextLabel_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._nextLabel_0_flag = AttributeUpdaterFlag.SKIP
@@ -167,6 +172,7 @@ export class StepperItemModifier extends CommonMethodModifier implements Stepper
         {
             this._status_0_flag = AttributeUpdaterFlag.UPDATE
             this._status_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._status_0_flag = AttributeUpdaterFlag.SKIP

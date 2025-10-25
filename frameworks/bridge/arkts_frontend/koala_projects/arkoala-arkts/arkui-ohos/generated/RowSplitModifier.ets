@@ -22,9 +22,11 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkRowSplitPeer, RowSplitAttribute } from "./component/rowSplit"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 import { CommonMethod } from "./component/common"
 export class RowSplitModifier extends CommonMethodModifier implements RowSplitAttribute,AttributeModifier<RowSplitAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -37,6 +39,7 @@ export class RowSplitModifier extends CommonMethodModifier implements RowSplitAt
     _resizeable_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _resizeable_0_0value?: boolean | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkRowSplitPeer;
         if (this._resizeable_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -79,6 +82,7 @@ export class RowSplitModifier extends CommonMethodModifier implements RowSplitAt
         {
             this._resizeable_0_flag = AttributeUpdaterFlag.UPDATE
             this._resizeable_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._resizeable_0_flag = AttributeUpdaterFlag.SKIP

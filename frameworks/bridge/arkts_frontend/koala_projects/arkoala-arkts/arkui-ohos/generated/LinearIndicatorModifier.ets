@@ -22,9 +22,11 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkLinearIndicatorPeer, LinearIndicatorStyle, OnLinearIndicatorChangeCallback, LinearIndicatorAttribute } from "./component/linearindicator"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 import { CommonMethod } from "./component/common"
 export class LinearIndicatorModifier extends CommonMethodModifier implements LinearIndicatorAttribute,AttributeModifier<LinearIndicatorAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -41,6 +43,7 @@ export class LinearIndicatorModifier extends CommonMethodModifier implements Lin
     _onChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onChange_0_0value?: OnLinearIndicatorChangeCallback | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkLinearIndicatorPeer;
         if (this._indicatorStyle_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -145,6 +148,7 @@ export class LinearIndicatorModifier extends CommonMethodModifier implements Lin
         {
             this._indicatorStyle_0_flag = AttributeUpdaterFlag.UPDATE
             this._indicatorStyle_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._indicatorStyle_0_flag = AttributeUpdaterFlag.SKIP
@@ -156,6 +160,7 @@ export class LinearIndicatorModifier extends CommonMethodModifier implements Lin
         {
             this._indicatorLoop_0_flag = AttributeUpdaterFlag.UPDATE
             this._indicatorLoop_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._indicatorLoop_0_flag = AttributeUpdaterFlag.SKIP
@@ -167,6 +172,7 @@ export class LinearIndicatorModifier extends CommonMethodModifier implements Lin
         {
             this._onChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onChange_0_flag = AttributeUpdaterFlag.SKIP

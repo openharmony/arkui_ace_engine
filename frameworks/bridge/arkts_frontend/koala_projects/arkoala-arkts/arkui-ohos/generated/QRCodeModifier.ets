@@ -22,12 +22,14 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkQRCodePeer, QRCodeAttribute } from "./component/qrcode"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 import { CommonMethod } from "./component/common"
 import { ResourceColor } from "./component/units"
 import { Color } from "./component/enums"
 import { Resource } from "global.resource"
 export class QRCodeModifier extends CommonMethodModifier implements QRCodeAttribute,AttributeModifier<QRCodeAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -44,6 +46,7 @@ export class QRCodeModifier extends CommonMethodModifier implements QRCodeAttrib
     _contentOpacity_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _contentOpacity_0_0value?: double | Resource | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkQRCodePeer;
         if (this._color_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -148,6 +151,7 @@ export class QRCodeModifier extends CommonMethodModifier implements QRCodeAttrib
         {
             this._color_0_flag = AttributeUpdaterFlag.UPDATE
             this._color_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._color_0_flag = AttributeUpdaterFlag.SKIP
@@ -159,6 +163,7 @@ export class QRCodeModifier extends CommonMethodModifier implements QRCodeAttrib
         {
             this._backgroundColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._backgroundColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._backgroundColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -170,6 +175,7 @@ export class QRCodeModifier extends CommonMethodModifier implements QRCodeAttrib
         {
             this._contentOpacity_0_flag = AttributeUpdaterFlag.UPDATE
             this._contentOpacity_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._contentOpacity_0_flag = AttributeUpdaterFlag.SKIP

@@ -22,10 +22,12 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkFolderStackPeer, OnFoldStatusChangeCallback, OnFoldStatusChangeInfo, OnHoverStatusChangeCallback, HoverEventParam, FolderStackAttribute } from "./component/folderStack"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 import { CommonMethod } from "./component/common"
 import { Alignment } from "./component/enums"
 export class FolderStackModifier extends CommonMethodModifier implements FolderStackAttribute,AttributeModifier<FolderStackAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -46,6 +48,7 @@ export class FolderStackModifier extends CommonMethodModifier implements FolderS
     _autoHalfFold_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _autoHalfFold_0_0value?: boolean | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkFolderStackPeer;
         if (this._alignContent_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -212,6 +215,7 @@ export class FolderStackModifier extends CommonMethodModifier implements FolderS
         {
             this._alignContent_0_flag = AttributeUpdaterFlag.UPDATE
             this._alignContent_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._alignContent_0_flag = AttributeUpdaterFlag.SKIP
@@ -223,6 +227,7 @@ export class FolderStackModifier extends CommonMethodModifier implements FolderS
         {
             this._onFolderStateChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onFolderStateChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onFolderStateChange_0_flag = AttributeUpdaterFlag.SKIP
@@ -234,6 +239,7 @@ export class FolderStackModifier extends CommonMethodModifier implements FolderS
         {
             this._onHoverStatusChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onHoverStatusChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onHoverStatusChange_0_flag = AttributeUpdaterFlag.SKIP
@@ -245,6 +251,7 @@ export class FolderStackModifier extends CommonMethodModifier implements FolderS
         {
             this._enableAnimation_0_flag = AttributeUpdaterFlag.UPDATE
             this._enableAnimation_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enableAnimation_0_flag = AttributeUpdaterFlag.SKIP
@@ -256,6 +263,7 @@ export class FolderStackModifier extends CommonMethodModifier implements FolderS
         {
             this._autoHalfFold_0_flag = AttributeUpdaterFlag.UPDATE
             this._autoHalfFold_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._autoHalfFold_0_flag = AttributeUpdaterFlag.SKIP

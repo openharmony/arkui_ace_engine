@@ -22,10 +22,12 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkCalendarPickerPeer, CalendarPickerAttribute, CalendarAlign } from "./component/calendarPicker"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 import { CommonMethod, PickerTextStyle } from "./component/common"
 import { Offset } from "./component/units"
 export class CalendarPickerModifier extends CommonMethodModifier implements CalendarPickerAttribute,AttributeModifier<CalendarPickerAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -45,6 +47,7 @@ export class CalendarPickerModifier extends CommonMethodModifier implements Cale
     _edgeAlign_0_0value?: CalendarAlign | undefined
     _edgeAlign_0_1value?: Offset | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkCalendarPickerPeer;
         if (this._textStyle_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -180,6 +183,7 @@ export class CalendarPickerModifier extends CommonMethodModifier implements Cale
         {
             this._textStyle_0_flag = AttributeUpdaterFlag.UPDATE
             this._textStyle_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._textStyle_0_flag = AttributeUpdaterFlag.SKIP
@@ -191,6 +195,7 @@ export class CalendarPickerModifier extends CommonMethodModifier implements Cale
         {
             this._onChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onChange_0_flag = AttributeUpdaterFlag.SKIP
@@ -202,6 +207,7 @@ export class CalendarPickerModifier extends CommonMethodModifier implements Cale
         {
             this._markToday_0_flag = AttributeUpdaterFlag.UPDATE
             this._markToday_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._markToday_0_flag = AttributeUpdaterFlag.SKIP
@@ -214,6 +220,7 @@ export class CalendarPickerModifier extends CommonMethodModifier implements Cale
             this._edgeAlign_0_flag = AttributeUpdaterFlag.UPDATE
             this._edgeAlign_0_0value = alignType
             this._edgeAlign_0_1value = offset
+            this._state.fireChange()
         } else
         {
             this._edgeAlign_0_flag = AttributeUpdaterFlag.SKIP

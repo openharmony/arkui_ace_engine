@@ -22,12 +22,14 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkLoadingProgressPeer, LoadingProgressConfiguration, LoadingProgressAttribute } from "./component/loadingProgress"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 import { CommonMethod } from "./component/common"
 import { ResourceColor } from "./component/units"
 import { Color } from "./component/enums"
 import { Resource } from "global.resource"
 export class LoadingProgressModifier extends CommonMethodModifier implements LoadingProgressAttribute,AttributeModifier<LoadingProgressAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -44,6 +46,7 @@ export class LoadingProgressModifier extends CommonMethodModifier implements Loa
     _contentModifier_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _contentModifier_0_0value?: ContentModifier<LoadingProgressConfiguration> | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkLoadingProgressPeer;
         if (this._color_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -148,6 +151,7 @@ export class LoadingProgressModifier extends CommonMethodModifier implements Loa
         {
             this._color_0_flag = AttributeUpdaterFlag.UPDATE
             this._color_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._color_0_flag = AttributeUpdaterFlag.SKIP
@@ -159,6 +163,7 @@ export class LoadingProgressModifier extends CommonMethodModifier implements Loa
         {
             this._enableLoading_0_flag = AttributeUpdaterFlag.UPDATE
             this._enableLoading_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enableLoading_0_flag = AttributeUpdaterFlag.SKIP
@@ -166,10 +171,11 @@ export class LoadingProgressModifier extends CommonMethodModifier implements Loa
         return this
     }
     contentModifier(value: ContentModifier<LoadingProgressConfiguration> | undefined): this {
-        if (((this._contentModifier_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._contentModifier_0_0value) !== (value)))
+        if (((this._contentModifier_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._contentModifier_0_flag = AttributeUpdaterFlag.UPDATE
             this._contentModifier_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._contentModifier_0_flag = AttributeUpdaterFlag.SKIP

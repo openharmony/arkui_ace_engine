@@ -22,10 +22,12 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkCanvasPeer, CanvasAttribute } from "./component/canvas"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 import { CommonMethod } from "./component/common"
 import { VoidCallback } from "./component/units"
 export class CanvasModifier extends CommonMethodModifier implements CanvasAttribute,AttributeModifier<CanvasAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -40,6 +42,7 @@ export class CanvasModifier extends CommonMethodModifier implements CanvasAttrib
     _enableAnalyzer_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _enableAnalyzer_0_0value?: boolean | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkCanvasPeer;
         if (this._onReady_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -113,6 +116,7 @@ export class CanvasModifier extends CommonMethodModifier implements CanvasAttrib
         {
             this._onReady_0_flag = AttributeUpdaterFlag.UPDATE
             this._onReady_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onReady_0_flag = AttributeUpdaterFlag.SKIP
@@ -124,6 +128,7 @@ export class CanvasModifier extends CommonMethodModifier implements CanvasAttrib
         {
             this._enableAnalyzer_0_flag = AttributeUpdaterFlag.UPDATE
             this._enableAnalyzer_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enableAnalyzer_0_flag = AttributeUpdaterFlag.SKIP

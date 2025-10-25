@@ -27,11 +27,13 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkGridPeer, ComputedBarAttribute, GridDirection, GridItemAlignment, GridAttribute } from "./component/grid"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 import { Length } from "./component/units"
 import { OnScrollFrameBeginCallback } from "./component/scroll"
 import { ScrollState } from "./component/list"
 export class GridModifier extends CommonMethodModifier implements GridAttribute,AttributeModifier<GridAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -114,7 +116,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
     _onScrollStop_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onScrollStop_0_0value?: (() => void) | undefined
     _flingSpeedLimit_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _flingSpeedLimit_0_0value?: number | undefined
+    _flingSpeedLimit_0_0value?: double | undefined
     _clipContent_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _clipContent_0_0value?: ContentClipMode | RectShape | undefined
     _digitalCrownSensitivity_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -125,6 +127,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
     _fadingEdge_0_0value?: boolean | undefined
     _fadingEdge_0_1value?: FadingEdgeOptions | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkGridPeer;
         if (this._columnsTemplate_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -761,7 +764,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             switch (this._flingSpeedLimit_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setFlingSpeedLimitAttribute((this._flingSpeedLimit_0_0value as number | undefined));
+                    peer.setFlingSpeedLimitAttribute((this._flingSpeedLimit_0_0value as double | undefined));
                     this._flingSpeedLimit_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -771,7 +774,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
                 }
                 default: {
                     this._flingSpeedLimit_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setFlingSpeedLimitAttribute((undefined as number | undefined));
+                    peer.setFlingSpeedLimitAttribute((undefined as double | undefined));
                 }
             }
         }
@@ -1314,7 +1317,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
                     break;
                 }
                 default: {
-                    this.flingSpeedLimit((undefined as number | undefined));
+                    this.flingSpeedLimit((undefined as double | undefined));
                 }
             }
         }
@@ -1376,6 +1379,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._columnsTemplate_0_flag = AttributeUpdaterFlag.UPDATE
             this._columnsTemplate_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._columnsTemplate_0_flag = AttributeUpdaterFlag.SKIP
@@ -1387,6 +1391,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._rowsTemplate_0_flag = AttributeUpdaterFlag.UPDATE
             this._rowsTemplate_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._rowsTemplate_0_flag = AttributeUpdaterFlag.SKIP
@@ -1398,6 +1403,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._columnsGap_0_flag = AttributeUpdaterFlag.UPDATE
             this._columnsGap_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._columnsGap_0_flag = AttributeUpdaterFlag.SKIP
@@ -1409,6 +1415,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._rowsGap_0_flag = AttributeUpdaterFlag.UPDATE
             this._rowsGap_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._rowsGap_0_flag = AttributeUpdaterFlag.SKIP
@@ -1420,6 +1427,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._scrollBarWidth_0_flag = AttributeUpdaterFlag.UPDATE
             this._scrollBarWidth_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._scrollBarWidth_0_flag = AttributeUpdaterFlag.SKIP
@@ -1431,6 +1439,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._scrollBarColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._scrollBarColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._scrollBarColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -1442,6 +1451,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._scrollBar_0_flag = AttributeUpdaterFlag.UPDATE
             this._scrollBar_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._scrollBar_0_flag = AttributeUpdaterFlag.SKIP
@@ -1453,6 +1463,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._onScrollBarUpdate_0_flag = AttributeUpdaterFlag.UPDATE
             this._onScrollBarUpdate_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onScrollBarUpdate_0_flag = AttributeUpdaterFlag.SKIP
@@ -1464,6 +1475,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._onScrollIndex_0_flag = AttributeUpdaterFlag.UPDATE
             this._onScrollIndex_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onScrollIndex_0_flag = AttributeUpdaterFlag.SKIP
@@ -1475,6 +1487,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._cachedCount_0_flag = AttributeUpdaterFlag.UPDATE
             this._cachedCount_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._cachedCount_0_flag = AttributeUpdaterFlag.SKIP
@@ -1486,6 +1499,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._editMode_0_flag = AttributeUpdaterFlag.UPDATE
             this._editMode_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._editMode_0_flag = AttributeUpdaterFlag.SKIP
@@ -1497,6 +1511,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._multiSelectable_0_flag = AttributeUpdaterFlag.UPDATE
             this._multiSelectable_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._multiSelectable_0_flag = AttributeUpdaterFlag.SKIP
@@ -1508,6 +1523,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._maxCount_0_flag = AttributeUpdaterFlag.UPDATE
             this._maxCount_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._maxCount_0_flag = AttributeUpdaterFlag.SKIP
@@ -1519,6 +1535,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._minCount_0_flag = AttributeUpdaterFlag.UPDATE
             this._minCount_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._minCount_0_flag = AttributeUpdaterFlag.SKIP
@@ -1530,6 +1547,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._cellLength_0_flag = AttributeUpdaterFlag.UPDATE
             this._cellLength_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._cellLength_0_flag = AttributeUpdaterFlag.SKIP
@@ -1541,6 +1559,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._layoutDirection_0_flag = AttributeUpdaterFlag.UPDATE
             this._layoutDirection_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._layoutDirection_0_flag = AttributeUpdaterFlag.SKIP
@@ -1552,6 +1571,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._supportAnimation_0_flag = AttributeUpdaterFlag.UPDATE
             this._supportAnimation_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._supportAnimation_0_flag = AttributeUpdaterFlag.SKIP
@@ -1563,6 +1583,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._onItemDragStart_0_flag = AttributeUpdaterFlag.UPDATE
             this._onItemDragStart_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onItemDragStart_0_flag = AttributeUpdaterFlag.SKIP
@@ -1574,6 +1595,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._onItemDragEnter_0_flag = AttributeUpdaterFlag.UPDATE
             this._onItemDragEnter_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onItemDragEnter_0_flag = AttributeUpdaterFlag.SKIP
@@ -1585,6 +1607,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._onItemDragMove_0_flag = AttributeUpdaterFlag.UPDATE
             this._onItemDragMove_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onItemDragMove_0_flag = AttributeUpdaterFlag.SKIP
@@ -1596,6 +1619,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._onItemDragLeave_0_flag = AttributeUpdaterFlag.UPDATE
             this._onItemDragLeave_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onItemDragLeave_0_flag = AttributeUpdaterFlag.SKIP
@@ -1607,6 +1631,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._onItemDrop_0_flag = AttributeUpdaterFlag.UPDATE
             this._onItemDrop_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onItemDrop_0_flag = AttributeUpdaterFlag.SKIP
@@ -1618,6 +1643,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._nestedScroll_0_flag = AttributeUpdaterFlag.UPDATE
             this._nestedScroll_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._nestedScroll_0_flag = AttributeUpdaterFlag.SKIP
@@ -1629,6 +1655,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._enableScrollInteraction_0_flag = AttributeUpdaterFlag.UPDATE
             this._enableScrollInteraction_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enableScrollInteraction_0_flag = AttributeUpdaterFlag.SKIP
@@ -1640,6 +1667,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._friction_0_flag = AttributeUpdaterFlag.UPDATE
             this._friction_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._friction_0_flag = AttributeUpdaterFlag.SKIP
@@ -1651,6 +1679,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._alignItems_0_flag = AttributeUpdaterFlag.UPDATE
             this._alignItems_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._alignItems_0_flag = AttributeUpdaterFlag.SKIP
@@ -1662,6 +1691,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._onScrollFrameBegin_0_flag = AttributeUpdaterFlag.UPDATE
             this._onScrollFrameBegin_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onScrollFrameBegin_0_flag = AttributeUpdaterFlag.SKIP
@@ -1673,6 +1703,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._onWillScroll_0_flag = AttributeUpdaterFlag.UPDATE
             this._onWillScroll_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onWillScroll_0_flag = AttributeUpdaterFlag.SKIP
@@ -1684,6 +1715,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._onDidScroll_0_flag = AttributeUpdaterFlag.UPDATE
             this._onDidScroll_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onDidScroll_0_flag = AttributeUpdaterFlag.SKIP
@@ -1696,6 +1728,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
             this._cachedCount_1_flag = AttributeUpdaterFlag.UPDATE
             this._cachedCount_1_0value = count
             this._cachedCount_1_1value = show
+            this._state.fireChange()
         } else
         {
             this._cachedCount_1_flag = AttributeUpdaterFlag.SKIP
@@ -1708,6 +1741,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
             this._edgeEffect_0_flag = AttributeUpdaterFlag.UPDATE
             this._edgeEffect_0_0value = value
             this._edgeEffect_0_1value = options
+            this._state.fireChange()
         } else
         {
             this._edgeEffect_0_flag = AttributeUpdaterFlag.SKIP
@@ -1719,6 +1753,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._onReachStart_0_flag = AttributeUpdaterFlag.UPDATE
             this._onReachStart_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onReachStart_0_flag = AttributeUpdaterFlag.SKIP
@@ -1730,6 +1765,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._onReachEnd_0_flag = AttributeUpdaterFlag.UPDATE
             this._onReachEnd_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onReachEnd_0_flag = AttributeUpdaterFlag.SKIP
@@ -1741,6 +1777,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._onScrollStart_0_flag = AttributeUpdaterFlag.UPDATE
             this._onScrollStart_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onScrollStart_0_flag = AttributeUpdaterFlag.SKIP
@@ -1752,17 +1789,19 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._onScrollStop_0_flag = AttributeUpdaterFlag.UPDATE
             this._onScrollStop_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onScrollStop_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
-    flingSpeedLimit(value: number | undefined): this {
+    flingSpeedLimit(value: double | undefined): this {
         if (((this._flingSpeedLimit_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._flingSpeedLimit_0_0value) !== (value)))
         {
             this._flingSpeedLimit_0_flag = AttributeUpdaterFlag.UPDATE
             this._flingSpeedLimit_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flingSpeedLimit_0_flag = AttributeUpdaterFlag.SKIP
@@ -1774,6 +1813,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._clipContent_0_flag = AttributeUpdaterFlag.UPDATE
             this._clipContent_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._clipContent_0_flag = AttributeUpdaterFlag.SKIP
@@ -1785,6 +1825,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._digitalCrownSensitivity_0_flag = AttributeUpdaterFlag.UPDATE
             this._digitalCrownSensitivity_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._digitalCrownSensitivity_0_flag = AttributeUpdaterFlag.SKIP
@@ -1796,6 +1837,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._backToTop_0_flag = AttributeUpdaterFlag.UPDATE
             this._backToTop_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._backToTop_0_flag = AttributeUpdaterFlag.SKIP
@@ -1808,6 +1850,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
             this._fadingEdge_0_flag = AttributeUpdaterFlag.UPDATE
             this._fadingEdge_0_0value = enabled
             this._fadingEdge_0_1value = options
+            this._state.fireChange()
         } else
         {
             this._fadingEdge_0_flag = AttributeUpdaterFlag.SKIP
