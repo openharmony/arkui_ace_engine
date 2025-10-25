@@ -20,7 +20,7 @@ generate_static_abc("segmentbutton_ets_abc") {
   ui_enable = "True"
   is_boot_abc = "True"
   device_dst_file = "/system/framework/segmentbutton_ets_abc.abc"
-  dst_file = target_out_dir + "/segmentbutton_ets_abc"
+  dst_file = target_out_dir + "/segmentbutton_ets_abc/modules_static.abc"
   out_puts = [ target_out_dir + "/segmentbutton_ets_abc/modules_static.abc" ]
 }
 
