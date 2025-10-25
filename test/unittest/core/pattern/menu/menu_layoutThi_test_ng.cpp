@@ -615,12 +615,11 @@ HWTEST_F(MenuLayout3TestNg, Measure001, TestSize.Level1)
 }
 
 /**
- * @tc.name: MenuLayoutAlgorithmTestNg049
- * @tc.desc: Verify menu component is in the upper area of the screen in the hover state.
+ * @tc.name: UpdateWrapperRectForHoverMode001
+ * @tc.desc: The test click area is on the upper half screen.
  * @tc.type: FUNC
  */
-
-HWTEST_F(MenuLayout3TestNg, MenuLayoutAlgorithmTestNg049, TestSize.Level1)
+HWTEST_F(MenuLayout3TestNg, UpdateWrapperRectForHoverMode001, TestSize.Level1)
 {
     MockPipelineContextGetTheme();
     std::vector<OptionParam> optionParams;
@@ -657,35 +656,30 @@ HWTEST_F(MenuLayout3TestNg, MenuLayoutAlgorithmTestNg049, TestSize.Level1)
     displayInfo->SetCurrentFoldCreaseRegion(rects);
     auto foldCreaseRects = displayInfo->GetCurrentFoldCreaseRegion();
     
+    auto wraperRect = Rect(0, 0, CREASE_WIDTH, CREASE_WIDTH);
+    layoutAlgorithm->wrapperRect_ = wraperRect;
     int32_t creaseYTop = CREASE_Y;
     layoutAlgorithm->targetOffset_ = OffsetF(MENU_X, MENU_Y_TOP);
     layoutAlgorithm->position_ = OffsetF(MENU_X, MENU_Y_TOP);
     layoutAlgorithm->UpdateWrapperRectForHoverMode(property, menuPattern, 0.0);
 
-    auto top = layoutAlgorithm->top_;
-    auto left = layoutAlgorithm->left_;
-    auto right = layoutAlgorithm->right_;
-    auto width = layoutAlgorithm->width_;
-
+    auto left = wraperRect.Left();
+    auto top = wraperRect.Top();
+    auto width = wraperRect.Width();
+ 
     /**
      * @tc.steps: menu component is located in the upper half of the screen.
      * @tc.expected: menu wrapperRect is equal to the size of the security box on the upper half screen.
      */
-    EXPECT_EQ(layoutAlgorithm->wrapperRect_, Rect(left, top, width - left - right, creaseYTop - top));
-
-    float windowsOffsetY = 0.0f;
-    layoutAlgorithm->canExpandCurrentWindow_= true;
-    layoutAlgorithm->param_.windowsOffsetY = windowsOffsetY;
-    EXPECT_EQ(layoutAlgorithm->wrapperRect_, Rect(left, top + windowsOffsetY, width - left - right, creaseYTop - top));
+    EXPECT_EQ(layoutAlgorithm->wrapperRect_, Rect(left, top, width, creaseYTop - top));
 }
 
 /**
- * @tc.name: MenuLayoutAlgorithmTestNg050
- * @tc.desc: Verify menu component is in the lower area of the screen in the hover state.
+ * @tc.name: UpdateWrapperRectForHoverMode002
+ * @tc.desc: Test the click area in the lower half of the screen.
  * @tc.type: FUNC
  */
-
-HWTEST_F(MenuLayout3TestNg, MenuLayoutAlgorithmTestNg050, TestSize.Level1)
+HWTEST_F(MenuLayout3TestNg, UpdateWrapperRectForHoverMode002, TestSize.Level1)
 {
     MockPipelineContextGetTheme();
     std::vector<OptionParam> optionParams;
@@ -722,33 +716,31 @@ HWTEST_F(MenuLayout3TestNg, MenuLayoutAlgorithmTestNg050, TestSize.Level1)
     displayInfo->SetCurrentFoldCreaseRegion(rects);
     auto foldCreaseRects = displayInfo->GetCurrentFoldCreaseRegion();
 
+    auto wraperRect = Rect(0, 0, CREASE_WIDTH, CREASE_WIDTH);
+    layoutAlgorithm->wrapperRect_ = wraperRect;
     int32_t creaseYBottom = CREASE_BOTTOM;
 
     layoutAlgorithm->targetOffset_ = OffsetF(MENU_X, MENU_Y_BOTTOM);
     layoutAlgorithm->position_ = OffsetF(MENU_X, MENU_Y_BOTTOM);
     layoutAlgorithm->UpdateWrapperRectForHoverMode(property, menuPattern, 0.0);
 
-    auto bottom = layoutAlgorithm->bottom_;
-    auto left = layoutAlgorithm->left_;
-    auto right = layoutAlgorithm->right_;
-    auto width = layoutAlgorithm->width_;
-    auto height = layoutAlgorithm->height_;
+    auto left = wraperRect.Left();
+    auto bottom = wraperRect.Bottom();
+    auto width = wraperRect.Width();
 
     /**
-     * @tc.steps: menu component is located in the lowwer half of the screen.
-     * @tc.expected: menu wrapperRect is equal to the size of the security box on the lowwer half screen.
+     * @tc.steps: menu component is located in the upper half of the screen.
+     * @tc.expected: menu wrapperRect is equal to the size of the security box on the lower half of the screen.
      */
-    EXPECT_EQ(layoutAlgorithm->wrapperRect_, Rect(left, creaseYBottom, width - left - right,
-        height - creaseYBottom - bottom));
+    EXPECT_EQ(layoutAlgorithm->wrapperRect_, Rect(left, creaseYBottom, width, bottom - creaseYBottom));
 }
 
 /**
- * @tc.name: MenuLayoutAlgorithmTestNg051
- * @tc.desc: Verify Initialize and Measure when DeviceOrientation is not PORTRAIT.
+ * @tc.name: UpdateWrapperRectForHoverMode003
+ * @tc.desc: Test the click area on the central axis
  * @tc.type: FUNC
  */
-
-HWTEST_F(MenuLayout3TestNg, MenuLayoutAlgorithmTestNg051, TestSize.Level1)
+HWTEST_F(MenuLayout3TestNg, UpdateWrapperRectForHoverMode003, TestSize.Level1)
 {
     MockPipelineContextGetTheme();
     std::vector<OptionParam> optionParams;
@@ -786,22 +778,75 @@ HWTEST_F(MenuLayout3TestNg, MenuLayoutAlgorithmTestNg051, TestSize.Level1)
     displayInfo->SetCurrentFoldCreaseRegion(rects);
     auto foldCreaseRects = displayInfo->GetCurrentFoldCreaseRegion();
 
+    auto wraperRect = Rect(0, 0, CREASE_WIDTH, CREASE_WIDTH);
+    layoutAlgorithm->wrapperRect_ = wraperRect;
     layoutAlgorithm->targetOffset_ = OffsetF(MENU_X, MENU_Y_MIDDLE);
     layoutAlgorithm->position_ = OffsetF(MENU_X, MENU_Y_MIDDLE);
     layoutAlgorithm->UpdateWrapperRectForHoverMode(property, menuPattern, 0.0);
-
-    auto top = layoutAlgorithm->top_;
-    auto bottom = layoutAlgorithm->bottom_;
-    auto left = layoutAlgorithm->left_;
-    auto right = layoutAlgorithm->right_;
-    auto width = layoutAlgorithm->width_;
-    auto height = layoutAlgorithm->height_;
 
     /**
      * @tc.steps: menu component is located in the crease area of the screen.
      * @tc.expected: menu wrapperRect is equal to the size of the security box on whole screen.
      */
-    EXPECT_EQ(layoutAlgorithm->wrapperRect_, Rect(left, top, width - left - right, height - top - bottom));
+    EXPECT_EQ(layoutAlgorithm->wrapperRect_, wraperRect);
+}
+
+/**
+ * @tc.name: UpdateWrapperRectForHoverMode004
+ * @tc.desc: To test the handling of abnormal Y-axis coordinate of warpRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayout3TestNg, UpdateWrapperRectForHoverMode004, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    std::vector<OptionParam> optionParams;
+    MenuParam menuParam;
+ 
+    // create menuWrapperNode to get main menu
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), 1, "", MenuType::MENU, menuParam);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    ASSERT_EQ(menuWrapperNode->GetChildren().size(), 1);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+ 
+    // get menuPattern and property
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(menuWrapperPattern, nullptr);
+    menuWrapperPattern->enableFold_ = true;
+
+    auto property = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    ASSERT_TRUE(property->GetPositionOffset().has_value());
+    EXPECT_EQ(property->GetPositionOffset().value(), OffsetF());
+ 
+    RefPtr<MenuLayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    auto displayInfo = container->GetDisplayInfo();
+    ASSERT_NE(displayInfo, nullptr);
+    std::vector<Rect> rects;
+    Rect rect;
+    rect.SetRect(CREASE_X, CREASE_Y, CREASE_WIDTH, CREASE_HEIGHT);
+    rects.insert(rects.end(), rect);
+    displayInfo->SetCurrentFoldCreaseRegion(rects);
+ 
+    // test click top
+    layoutAlgorithm->targetOffset_ = OffsetF(MENU_X, MENU_Y_TOP);
+    layoutAlgorithm->position_ = OffsetF(MENU_X, MENU_Y_TOP);
+    auto wrapperRectTop = Rect(CREASE_X, 0, CREASE_WIDTH, rect.Top());
+    layoutAlgorithm->wrapperRect_ = wrapperRectTop;
+    layoutAlgorithm->UpdateWrapperRectForHoverMode(property, menuPattern, 0.0);
+    EXPECT_EQ(layoutAlgorithm->wrapperRect_, wrapperRectTop);
+
+    // test click bottom
+    layoutAlgorithm->targetOffset_ = OffsetF(MENU_X, MENU_Y_BOTTOM);
+    layoutAlgorithm->position_ = OffsetF(MENU_X, MENU_Y_BOTTOM);
+    auto wrapperRectBottom = Rect(CREASE_X, rect.Bottom(), CREASE_WIDTH, CREASE_HEIGHT);
+    layoutAlgorithm->wrapperRect_ = wrapperRectBottom;
+    layoutAlgorithm->UpdateWrapperRectForHoverMode(property, menuPattern, 0.0);
+    EXPECT_EQ(layoutAlgorithm->wrapperRect_, wrapperRectBottom);
 }
 
 /**
