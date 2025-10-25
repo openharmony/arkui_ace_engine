@@ -568,6 +568,7 @@ HWTEST_F(FrameNodeTestNg, FindSameParentComponentTest, TestSize.Level1)
     frameNode->SetActive(true);
 
     auto child = FrameNode::CreateFrameNode("column", 3, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(child, nullptr);
     child->SetActive(true);
     frameNode->AddChild(child);
 
