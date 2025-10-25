@@ -88,7 +88,7 @@ constexpr int32_t DEFAULT_TAP_COUNT = 1;
 constexpr double DEFAULT_TAP_DISTANCE = std::numeric_limits<double>::infinity();
 constexpr int32_t DEFAULT_LONG_PRESS_FINGER = 1;
 constexpr int32_t DEFAULT_LONG_PRESS_DURATION = 500;
-constexpr int32_t DEFAULT_LONG_PRESS_ALLOWABLE_MOVEMENT = 15;
+constexpr double DEFAULT_LONG_PRESS_ALLOWABLE_MOVEMENT = 15.0;
 constexpr int32_t DEFAULT_PINCH_FINGER = 2;
 constexpr int32_t DEFAULT_MAX_PINCH_FINGER = 5;
 constexpr double DEFAULT_PINCH_DISTANCE = 5.0;
@@ -8139,7 +8139,7 @@ void CommonBridge::GetTapGestureValue(ArkUIRuntimeCallInfo* runtimeCallInfo, int
 
 void CommonBridge::GetLongPressGestureValue(
     ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t& fingers, bool& repeat, int32_t& duration,
-    bool& limitFingerCount, int32_t& allowableMovement, uint32_t argNumber)
+    bool& limitFingerCount, double& allowableMovement, uint32_t argNumber)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_VOID(vm);
@@ -8165,8 +8165,9 @@ void CommonBridge::GetLongPressGestureValue(
     }
     Local<JSValueRef> allowableMovementArg = runtimeCallInfo->GetCallArgRef(argNumber + NUM_4);
     if (!allowableMovementArg.IsNull() && !allowableMovementArg->IsUndefined()) {
-        auto allowableMovementValue = static_cast<int32_t>(allowableMovementArg->ToNumber(vm)->Value());
-        allowableMovement = allowableMovementValue <= 0 ? DEFAULT_LONG_PRESS_ALLOWABLE_MOVEMENT : allowableMovementValue;
+        auto allowableMovementValue = static_cast<double>(allowableMovementArg->ToNumber(vm)->Value());
+        allowableMovement =
+            LessOrEqual(allowableMovementValue, 0.0) ? DEFAULT_LONG_PRESS_ALLOWABLE_MOVEMENT : allowableMovementValue;
     }
 }
 
@@ -9795,7 +9796,7 @@ ArkUINativeModuleValue CommonBridge::AddLongPressGesture(ArkUIRuntimeCallInfo* r
     bool repeat = false;
     int32_t duration = DEFAULT_LONG_PRESS_DURATION;
     bool limitFingerCount = false;
-    int32_t allowableMovement = DEFAULT_LONG_PRESS_ALLOWABLE_MOVEMENT;
+    double allowableMovement = DEFAULT_LONG_PRESS_ALLOWABLE_MOVEMENT;
     GetLongPressGestureValue(runtimeCallInfo, fingers, repeat, duration, limitFingerCount, allowableMovement, NUM_5);
     auto* gesture = GetArkUINodeModifiers()->getGestureModifier()->createLongPressGesture(
         fingers, repeat, duration, limitFingerCount, nullptr);
@@ -9962,7 +9963,7 @@ ArkUINativeModuleValue CommonBridge::AddLongPressGestureToGroup(ArkUIRuntimeCall
     bool repeat = false;
     int32_t duration = DEFAULT_LONG_PRESS_DURATION;
     bool limitFingerCount = false;
-    int32_t allowableMovement = DEFAULT_LONG_PRESS_ALLOWABLE_MOVEMENT;
+    double allowableMovement = DEFAULT_LONG_PRESS_ALLOWABLE_MOVEMENT;
     GetLongPressGestureValue(runtimeCallInfo, fingers, repeat, duration, limitFingerCount, allowableMovement, NUM_3);
     auto* gesture = GetArkUINodeModifiers()->getGestureModifier()->createLongPressGesture(
         fingers, repeat, duration, limitFingerCount, nullptr);

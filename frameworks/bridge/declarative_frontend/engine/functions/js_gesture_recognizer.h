@@ -345,7 +345,7 @@ private:
         }
     }
 
-    int32_t allowableMovement_ = 15;
+    double allowableMovement_ = 15.0;
     int32_t duration_ = 500;
     bool repeat_ = false;
 };

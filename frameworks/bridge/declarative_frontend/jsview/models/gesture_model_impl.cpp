@@ -73,7 +73,7 @@ void TapGestureModelImpl::Create(
 }
 
 void LongPressGestureModelImpl::Create(
-    int32_t fingersNum, bool repeatResult, int32_t durationNum, bool isLimitFingerCount, int32_t allowableMovementNum)
+    int32_t fingersNum, bool repeatResult, int32_t durationNum, bool isLimitFingerCount, double allowableMovementNum)
 {
     RefPtr<GestureProcessor> gestureProcessor;
     gestureProcessor = ViewStackProcessor::GetInstance()->GetGestureComponent();

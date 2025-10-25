@@ -61,7 +61,7 @@ public:
     virtual ~LongPressGestureModel() = default;
 
     virtual void Create(int32_t fingersNum, bool repeatResult, int32_t durationNum, bool isLimitFingerCount,
-        int32_t allowableMovementNum) = 0;
+        double allowableMovementNum) = 0;
 
 private:
     static std::unique_ptr<LongPressGestureModel> instance_;

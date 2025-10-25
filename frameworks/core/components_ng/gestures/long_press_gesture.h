@@ -33,7 +33,7 @@ class ACE_FORCE_EXPORT LongPressGesture : public Gesture {
 public:
     LongPressGesture(
         int32_t fingers, bool repeat, int32_t duration, bool isForDrag = false, bool isDisableMouseLeft = false,
-        bool isLimitFingerCount = false, int32_t allowableMovement = 15)
+        bool isLimitFingerCount = false, double allowableMovement = 15.0)
         : Gesture(fingers, isLimitFingerCount), repeat_(repeat), duration_(duration), isForDrag_(isForDrag),
           isDisableMouseLeft_(isDisableMouseLeft), allowableMovement_(allowableMovement)
     {
@@ -47,12 +47,12 @@ public:
     }
     ~LongPressGesture() override = default;
 
-    void SetAllowableMovement(int32_t allowableMovement)
+    void SetAllowableMovement(double allowableMovement)
     {
         allowableMovement_ = allowableMovement;
     }
 
-    int32_t GetAllowableMovement() const
+    double GetAllowableMovement() const
     {
         return allowableMovement_;
     }
@@ -76,7 +76,7 @@ private:
     int32_t duration_ = 500;
     bool isForDrag_ = false;
     bool isDisableMouseLeft_ = false;
-    int32_t allowableMovement_ = 15;
+    double allowableMovement_ = 15.0;
 };
 
 } // namespace OHOS::Ace::NG
