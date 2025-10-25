@@ -28,7 +28,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ThemeOpsAccessor {
 void SendThemeToNativeImpl(const Array_ResourceColor* colorArray, Ark_Int32 elmtId)
 {
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && !defined(ARKUI_CAPI_UNITTEST)
     CHECK_NULL_VOID(colorArray);
     std::vector<Ark_ResourceColor> colorArrayVec;
     for (int32_t i = 0; i < colorArray->length; i++) {
@@ -52,7 +52,7 @@ void SendThemeToNativeImpl(const Array_ResourceColor* colorArray, Ark_Int32 elmt
 }
 void SetDefaultThemeImpl(const Array_ResourceColor* colorArray, Ark_Boolean isDark)
 {
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && !defined(ARKUI_CAPI_UNITTEST)
     CHECK_NULL_VOID(colorArray);
     std::vector<Ark_ResourceColor> colorArrayVec;
     for (int32_t i = 0; i < colorArray->length; i++) {
@@ -68,7 +68,7 @@ void SetDefaultThemeImpl(const Array_ResourceColor* colorArray, Ark_Boolean isDa
 void CreateAndBindThemeImpl(Ark_Int32 themeScopeId, Ark_Int32 themeId, const Array_ResourceColor* colorArray,
     Ark_ThemeColorMode colorMode, const Callback_Void* onThemeScopeDestroy)
 {
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && !defined(ARKUI_CAPI_UNITTEST)
     CHECK_NULL_VOID(colorArray);
     std::vector<Ark_ResourceColor> colorArrayVec;
     for (int32_t i = 0; i < colorArray->length; i++) {
