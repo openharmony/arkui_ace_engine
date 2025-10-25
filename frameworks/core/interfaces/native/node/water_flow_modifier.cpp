@@ -110,7 +110,8 @@ void SetWaterFlowEnableScrollInteraction(ArkUINodeHandle node, ArkUI_Bool value)
     WaterFlowModelNG::SetScrollEnabled(frameNode, value);
 }
 
-void SetColumnsGap(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue)
+void SetColumnsGap(
+    ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue, void* columnsGapRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -122,6 +123,12 @@ void SetColumnsGap(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, 
         columnsGapDimension = Dimension(value, unitEnum);
     }
     WaterFlowModelNG::SetColumnsGap(frameNode, columnsGapDimension);
+
+    if (SystemProperties::ConfigChangePerform()) {
+        auto* columnsGap = reinterpret_cast<ResourceObject*>(columnsGapRawPtr);
+        auto columnsGapResObj = AceType::Claim(columnsGap);
+        WaterFlowModelNG::ParseResObjColumnsGap(frameNode, columnsGapResObj);
+    }
 }
 
 void ResetColumnsGap(ArkUINodeHandle node)
@@ -129,9 +136,14 @@ void ResetColumnsGap(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     WaterFlowModelNG::SetColumnsGap(frameNode, CalcDimension(DIMENSION_DEFAULT));
+
+    if (SystemProperties::ConfigChangePerform()) {
+        WaterFlowModelNG::ParseResObjColumnsGap(frameNode, nullptr);
+    }
 }
 
-void SetRowsGap(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue)
+void SetRowsGap(
+    ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue, void* rowsGapRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -143,6 +155,12 @@ void SetRowsGap(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, Ark
         rowsGapDimension = Dimension(value, unitEnum);
     }
     WaterFlowModelNG::SetRowsGap(frameNode, rowsGapDimension);
+
+    if (SystemProperties::ConfigChangePerform()) {
+        auto* rowsGap = reinterpret_cast<ResourceObject*>(rowsGapRawPtr);
+        auto rowsGapResObj = AceType::Claim(rowsGap);
+        WaterFlowModelNG::ParseResObjRowsGap(frameNode, rowsGapResObj);
+    }
 }
 
 void ResetRowsGap(ArkUINodeHandle node)
@@ -150,9 +168,14 @@ void ResetRowsGap(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     WaterFlowModelNG::SetRowsGap(frameNode, CalcDimension(DIMENSION_DEFAULT));
+
+    if (SystemProperties::ConfigChangePerform()) {
+        WaterFlowModelNG::ParseResObjRowsGap(frameNode, nullptr);
+    }
 }
 
-void SetItemMinWidth(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue)
+void SetItemMinWidth(
+    ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue, void* itemMinWidthRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -164,11 +187,18 @@ void SetItemMinWidth(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit
         minWidthDimension = Dimension(value, unitEnum);
     }
     WaterFlowModelNG::SetItemMinWidth(frameNode, minWidthDimension);
+
+    if (SystemProperties::ConfigChangePerform()) {
+        auto* itemMinWidth = reinterpret_cast<ResourceObject*>(itemMinWidthRawPtr);
+        auto itemMinWidthResObj = AceType::Claim(itemMinWidth);
+        WaterFlowModelNG::ParseResObjItemMinWidth(frameNode, itemMinWidthResObj);
+    }
 }
 
 void ResetItemMinWidth(ArkUINodeHandle node) {}
 
-void SetItemMinHeight(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue)
+void SetItemMinHeight(
+    ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue, void* itemMinHeightRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -180,11 +210,18 @@ void SetItemMinHeight(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 uni
         minHeightDimension = Dimension(value, unitEnum);
     }
     WaterFlowModelNG::SetItemMinHeight(frameNode, minHeightDimension);
+
+    if (SystemProperties::ConfigChangePerform()) {
+        auto* itemMinHeight = reinterpret_cast<ResourceObject*>(itemMinHeightRawPtr);
+        auto itemMinHeightResObj = AceType::Claim(itemMinHeight);
+        WaterFlowModelNG::ParseResObjItemMinHeight(frameNode, itemMinHeightResObj);
+    }
 }
 
 void ResetItemMinHeight(ArkUINodeHandle node) {}
 
-void SetItemMaxWidth(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue)
+void SetItemMaxWidth(
+    ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue, void* itemMaxWidthRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -196,11 +233,18 @@ void SetItemMaxWidth(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit
         maxWidthDimension = Dimension(value, unitEnum);
     }
     WaterFlowModelNG::SetItemMaxWidth(frameNode, maxWidthDimension);
+
+    if (SystemProperties::ConfigChangePerform()) {
+        auto* itemMaxWidth = reinterpret_cast<ResourceObject*>(itemMaxWidthRawPtr);
+        auto itemMaxWidthResObj = AceType::Claim(itemMaxWidth);
+        WaterFlowModelNG::ParseResObjItemMaxWidth(frameNode, itemMaxWidthResObj);
+    }
 }
 
 void ResetItemMaxWidth(ArkUINodeHandle node) {}
 
-void SetItemMaxHeight(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue)
+void SetItemMaxHeight(
+    ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue, void* itemMaxHeightRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -212,6 +256,12 @@ void SetItemMaxHeight(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 uni
         maxHeightDimension = Dimension(value, unitEnum);
     }
     WaterFlowModelNG::SetItemMaxHeight(frameNode, maxHeightDimension);
+
+    if (SystemProperties::ConfigChangePerform()) {
+        auto* itemMaxHeight = reinterpret_cast<ResourceObject*>(itemMaxHeightRawPtr);
+        auto itemMaxHeightResObj = AceType::Claim(itemMaxHeight);
+        WaterFlowModelNG::ParseResObjItemMaxHeight(frameNode, itemMaxHeightResObj);
+    }
 }
 
 void ResetItemMaxHeight(ArkUINodeHandle node) {}

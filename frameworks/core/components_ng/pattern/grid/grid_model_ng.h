@@ -76,6 +76,8 @@ public:
     void SetSyncLoad(bool syncLoad) override;
     RefPtr<ScrollControllerBase> CreatePositionController() override;
     RefPtr<ScrollProxy> CreateScrollBarProxy() override;
+    void ParseResObjRowsGap(const RefPtr<ResourceObject>& resObj) override;
+    void ParseResObjColumnsGap(const RefPtr<ResourceObject>& resObj) override;
     void CreateWithResourceObjFriction(const RefPtr<ResourceObject>& resObj) override;
     void CreateWithResourceObjScrollBarColor(const RefPtr<ResourceObject>& resObj) override;
 
@@ -138,6 +140,8 @@ public:
     static void SetOnItemDragLeave(FrameNode* frameNode, ItemDragLeaveFunc&& value);
     static void SetOnItemDrop(FrameNode* frameNode, ItemDropFunc&& value);
     static void CreateWithResourceObjFriction(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void ParseResObjRowsGap(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void ParseResObjColumnsGap(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
 
     static void SetSyncLoad(FrameNode* frameNode, bool syncLoad);
     static bool GetSyncLoad(FrameNode* frameNode);

@@ -3979,9 +3979,10 @@ struct ArkUIGridModifier {
     void (*resetGridColumnsTemplate)(ArkUINodeHandle node);
     void (*setGridRowsTemplate)(ArkUINodeHandle node, ArkUI_CharPtr rowsTemplate);
     void (*resetGridRowsTemplate)(ArkUINodeHandle node);
-    void (*setGridColumnsGap)(ArkUINodeHandle node, const struct ArkUIResourceLength* columnsGap);
+    void (*setGridColumnsGap)(
+        ArkUINodeHandle node, const struct ArkUIResourceLength* columnsGap, void* columnGapRawPtr);
     void (*resetGridColumnsGap)(ArkUINodeHandle node);
-    void (*setGridRowsGap)(ArkUINodeHandle node, const struct ArkUIResourceLength* rowsGap);
+    void (*setGridRowsGap)(ArkUINodeHandle node, const struct ArkUIResourceLength* rowsGap, void* rowsGapRawPtr);
     void (*resetGridRowsGap)(ArkUINodeHandle node);
     void (*setGridScrollBar)(ArkUINodeHandle node, ArkUI_Int32 scrollBar);
     void (*resetGridScrollBar)(ArkUINodeHandle node);
@@ -5649,17 +5650,23 @@ struct ArkUIWaterFlowModifier {
     void (*setRowsTemplate)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*resetWaterFlowEnableScrollInteraction)(ArkUINodeHandle node);
     void (*setWaterFlowEnableScrollInteraction)(ArkUINodeHandle node, ArkUI_Bool value);
-    void (*setColumnsGap)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue);
+    void (*setColumnsGap)(
+        ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue, void* columnGapRawPtr);
     void (*resetColumnsGap)(ArkUINodeHandle node);
-    void (*setRowsGap)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue);
+    void (*setRowsGap)(
+        ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue, void* rowsGapRawPtr);
     void (*resetRowsGap)(ArkUINodeHandle node);
-    void (*setItemMinWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue);
+    void (*setItemMinWidth)(
+        ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue, void* itemMinWidthRawPtr);
     void (*resetItemMinWidth)(ArkUINodeHandle node);
-    void (*setItemMaxWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue);
+    void (*setItemMaxWidth)(
+        ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue, void* itemMaxWidthRawPtr);
     void (*resetItemMaxWidth)(ArkUINodeHandle node);
-    void (*setItemMinHeight)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue);
+    void (*setItemMinHeight)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue,
+        void* itemMinHeightRawPtr);
     void (*resetItemMinHeight)(ArkUINodeHandle node);
-    void (*setItemMaxHeight)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue);
+    void (*setItemMaxHeight)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue,
+        void* itemMaxHeightRawPtr);
     void (*resetItemMaxHeight)(ArkUINodeHandle node);
     void (*setLayoutDirection)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetLayoutDirection)(ArkUINodeHandle node);

@@ -293,7 +293,13 @@ void JSWaterFlow::SetColumnsGap(const JSCallbackInfo& info)
         return;
     }
     CalcDimension colGap;
-    if (!ParseJsDimensionVp(info[0], colGap) || colGap.Value() < 0) {
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj;
+        if (!JSViewAbstract::ParseJsDimensionVp(info[0], colGap, resObj) || colGap.Value() < 0) {
+            colGap.SetValue(0.0);
+        }
+        WaterFlowModel::GetInstance()->ParseResObjColumnsGap(resObj);
+    } else if (!ParseJsDimensionVp(info[0], colGap) || colGap.Value() < 0) {
         colGap.SetValue(0.0);
     }
     WaterFlowModel::GetInstance()->SetColumnsGap(colGap);
@@ -305,7 +311,13 @@ void JSWaterFlow::SetRowsGap(const JSCallbackInfo& info)
         return;
     }
     CalcDimension rowGap;
-    if (!ParseJsDimensionVp(info[0], rowGap) || rowGap.Value() < 0) {
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj;
+        if (!JSViewAbstract::ParseJsDimensionVp(info[0], rowGap, resObj) || rowGap.Value() < 0) {
+            rowGap.SetValue(0.0);
+        }
+        WaterFlowModel::GetInstance()->ParseResObjRowsGap(resObj);
+    } else if (!ParseJsDimensionVp(info[0], rowGap) || rowGap.Value() < 0) {
         rowGap.SetValue(0.0);
     }
     WaterFlowModel::GetInstance()->SetRowsGap(rowGap);
@@ -355,28 +367,39 @@ void JSWaterFlow::SetItemConstraintSize(const JSCallbackInfo& info)
 
     JSRef<JSObject> sizeObj = JSRef<JSObject>::Cast(info[0]);
 
+    RefPtr<ResourceObject> resObjMinWidth;
+    RefPtr<ResourceObject> resObjMaxWidth;
+    RefPtr<ResourceObject> resObjMinHeight;
+    RefPtr<ResourceObject> resObjMaxHeight;
     JSRef<JSVal> minWidthValue = sizeObj->GetProperty("minWidth");
     CalcDimension minWidth;
-    if (ParseJsDimensionVp(minWidthValue, minWidth)) {
+    if (ParseJsDimensionVp(minWidthValue, minWidth, resObjMinWidth)) {
         WaterFlowModel::GetInstance()->SetItemMinWidth(minWidth);
     }
 
     JSRef<JSVal> maxWidthValue = sizeObj->GetProperty("maxWidth");
     CalcDimension maxWidth;
-    if (ParseJsDimensionVp(maxWidthValue, maxWidth)) {
+    if (ParseJsDimensionVp(maxWidthValue, maxWidth, resObjMaxWidth)) {
         WaterFlowModel::GetInstance()->SetItemMaxWidth(maxWidth);
     }
 
     JSRef<JSVal> minHeightValue = sizeObj->GetProperty("minHeight");
     CalcDimension minHeight;
-    if (ParseJsDimensionVp(minHeightValue, minHeight)) {
+    if (ParseJsDimensionVp(minHeightValue, minHeight, resObjMinHeight)) {
         WaterFlowModel::GetInstance()->SetItemMinHeight(minHeight);
     }
 
     JSRef<JSVal> maxHeightValue = sizeObj->GetProperty("maxHeight");
     CalcDimension maxHeight;
-    if (ParseJsDimensionVp(maxHeightValue, maxHeight)) {
+    if (ParseJsDimensionVp(maxHeightValue, maxHeight, resObjMaxHeight)) {
         WaterFlowModel::GetInstance()->SetItemMaxHeight(maxHeight);
+    }
+
+    if (SystemProperties::ConfigChangePerform()) {
+        WaterFlowModel::GetInstance()->ParseResObjItemMinWidth(resObjMinWidth);
+        WaterFlowModel::GetInstance()->ParseResObjItemMaxWidth(resObjMaxWidth);
+        WaterFlowModel::GetInstance()->ParseResObjItemMinHeight(resObjMinHeight);
+        WaterFlowModel::GetInstance()->ParseResObjItemMaxHeight(resObjMaxHeight);
     }
 }
 

@@ -161,19 +161,22 @@ ArkUINativeModuleValue WaterFlowBridge::SetColumnsGap(ArkUIRuntimeCallInfo* runt
 
     CalcDimension columnsGap;
     std::string calcStr;
-    if (columnsGapArg->IsUndefined() || !ArkTSUtils::ParseJsDimensionVpNG(vm, columnsGapArg, columnsGap)) {
+    RefPtr<ResourceObject> columnGapResObj;
+    if (columnsGapArg->IsUndefined() ||
+        !ArkTSUtils::ParseJsDimensionVpNG(vm, columnsGapArg, columnsGap, columnGapResObj)) {
         GetArkUINodeModifiers()->getWaterFlowModifier()->resetColumnsGap(nativeNode);
     } else {
         if (LessNotEqual(columnsGap.Value(), DIMENSION_DEFAULT)) {
             columnsGap.SetValue(DIMENSION_DEFAULT);
         }
 
+        auto columnGapRawPtr = AceType::RawPtr(columnGapResObj);
         if (columnsGap.Unit() == DimensionUnit::CALC) {
-            GetArkUINodeModifiers()->getWaterFlowModifier()->setColumnsGap(
-                nativeNode, NUM_0, static_cast<int32_t>(columnsGap.Unit()), columnsGap.CalcValue().c_str());
+            GetArkUINodeModifiers()->getWaterFlowModifier()->setColumnsGap(nativeNode, NUM_0,
+                static_cast<int32_t>(columnsGap.Unit()), columnsGap.CalcValue().c_str(), columnGapRawPtr);
         } else {
-            GetArkUINodeModifiers()->getWaterFlowModifier()->setColumnsGap(
-                nativeNode, columnsGap.Value(), static_cast<int32_t>(columnsGap.Unit()), calcStr.c_str());
+            GetArkUINodeModifiers()->getWaterFlowModifier()->setColumnsGap(nativeNode, columnsGap.Value(),
+                static_cast<int32_t>(columnsGap.Unit()), calcStr.c_str(), columnGapRawPtr);
         }
     }
     return panda::JSValueRef::Undefined(vm);
@@ -201,18 +204,21 @@ ArkUINativeModuleValue WaterFlowBridge::SetRowsGap(ArkUIRuntimeCallInfo* runtime
 
     CalcDimension rowGap;
     std::string calcStr;
-    if (rowsGapArg->IsUndefined() || !ArkTSUtils::ParseJsDimensionVpNG(vm, rowsGapArg, rowGap)) {
+    RefPtr<ResourceObject> rowGapResObj;
+    if (rowsGapArg->IsUndefined() || !ArkTSUtils::ParseJsDimensionVpNG(vm, rowsGapArg, rowGap, rowGapResObj)) {
         GetArkUINodeModifiers()->getWaterFlowModifier()->resetRowsGap(nativeNode);
     } else {
         if (LessNotEqual(rowGap.Value(), DIMENSION_DEFAULT)) {
             rowGap.SetValue(DIMENSION_DEFAULT);
         }
+
+        auto rowGapRawPtr = AceType::RawPtr(rowGapResObj);
         if (rowGap.Unit() == DimensionUnit::CALC) {
             GetArkUINodeModifiers()->getWaterFlowModifier()->setRowsGap(
-                nativeNode, 0, static_cast<int32_t>(rowGap.Unit()), rowGap.CalcValue().c_str());
+                nativeNode, 0, static_cast<int32_t>(rowGap.Unit()), rowGap.CalcValue().c_str(), rowGapRawPtr);
         } else {
             GetArkUINodeModifiers()->getWaterFlowModifier()->setRowsGap(
-                nativeNode, rowGap.Value(), static_cast<int32_t>(rowGap.Unit()), calcStr.c_str());
+                nativeNode, rowGap.Value(), static_cast<int32_t>(rowGap.Unit()), calcStr.c_str(), rowGapRawPtr);
         }
     }
     return panda::JSValueRef::Undefined(vm);
@@ -237,33 +243,45 @@ ArkUINativeModuleValue WaterFlowBridge::SetItemConstraintSize(ArkUIRuntimeCallIn
     std::string calcMaxWidthStr;
     std::string calcMinHeightStr;
     std::string calcMaxHeightStr;
-    if (minWidthValue->IsUndefined() || !ArkTSUtils::ParseJsDimensionVp(vm, minWidthValue, minWidth, false)) {
+    RefPtr<ResourceObject> itemMinWidthResObj;
+    RefPtr<ResourceObject> itemMaxWidthResObj;
+    RefPtr<ResourceObject> itemMinHeightResObj;
+    RefPtr<ResourceObject> itemMaxHeightResObj;
+    if (minWidthValue->IsUndefined() ||
+        !ArkTSUtils::ParseJsDimensionVp(vm, minWidthValue, minWidth, itemMinWidthResObj, false)) {
         GetArkUINodeModifiers()->getWaterFlowModifier()->resetItemMinWidth(nativeNode);
     } else {
+        auto itemMinWidthRawPtr = AceType::RawPtr(itemMinWidthResObj);
         SetItemConstraintSizeSendParams(minWidth, calcMinWidthStr);
-        GetArkUINodeModifiers()->getWaterFlowModifier()->setItemMinWidth(
-            nativeNode, minWidth.Value(), static_cast<int32_t>(minWidth.Unit()), calcMinWidthStr.c_str());
+        GetArkUINodeModifiers()->getWaterFlowModifier()->setItemMinWidth(nativeNode, minWidth.Value(),
+            static_cast<int32_t>(minWidth.Unit()), calcMinWidthStr.c_str(), itemMinWidthRawPtr);
     }
-    if (maxWidthValue->IsUndefined() || !ArkTSUtils::ParseJsDimensionVp(vm, maxWidthValue, maxWidth, false)) {
+    if (maxWidthValue->IsUndefined() ||
+        !ArkTSUtils::ParseJsDimensionVp(vm, maxWidthValue, maxWidth, itemMaxWidthResObj, false)) {
         GetArkUINodeModifiers()->getWaterFlowModifier()->resetItemMaxWidth(nativeNode);
     } else {
+        auto itemMaxWidthRawPtr = AceType::RawPtr(itemMaxWidthResObj);
         SetItemConstraintSizeSendParams(maxWidth, calcMaxWidthStr);
-        GetArkUINodeModifiers()->getWaterFlowModifier()->setItemMaxWidth(
-            nativeNode, maxWidth.Value(), static_cast<int32_t>(maxWidth.Unit()), calcMaxWidthStr.c_str());
+        GetArkUINodeModifiers()->getWaterFlowModifier()->setItemMaxWidth(nativeNode, maxWidth.Value(),
+            static_cast<int32_t>(maxWidth.Unit()), calcMaxWidthStr.c_str(), itemMaxWidthRawPtr);
     }
-    if (minHeightValue->IsUndefined() || !ArkTSUtils::ParseJsDimensionVp(vm, minHeightValue, minHeight, false)) {
+    if (minHeightValue->IsUndefined() ||
+        !ArkTSUtils::ParseJsDimensionVp(vm, minHeightValue, minHeight, itemMinHeightResObj, false)) {
         GetArkUINodeModifiers()->getWaterFlowModifier()->resetItemMinHeight(nativeNode);
     } else {
+        auto itemMinHeightRawPtr = AceType::RawPtr(itemMinHeightResObj);
         SetItemConstraintSizeSendParams(minHeight, calcMinHeightStr);
-        GetArkUINodeModifiers()->getWaterFlowModifier()->setItemMinHeight(
-            nativeNode, minHeight.Value(), static_cast<int32_t>(minHeight.Unit()), calcMinHeightStr.c_str());
+        GetArkUINodeModifiers()->getWaterFlowModifier()->setItemMinHeight(nativeNode, minHeight.Value(),
+            static_cast<int32_t>(minHeight.Unit()), calcMinHeightStr.c_str(), itemMinHeightRawPtr);
     }
-    if (maxHeightValue->IsUndefined() || !ArkTSUtils::ParseJsDimensionVp(vm, maxHeightValue, maxHeight, false)) {
+    if (maxHeightValue->IsUndefined() ||
+        !ArkTSUtils::ParseJsDimensionVp(vm, maxHeightValue, maxHeight, itemMaxHeightResObj, false)) {
         GetArkUINodeModifiers()->getWaterFlowModifier()->resetItemMaxHeight(nativeNode);
     } else {
+        auto itemMaxHeightRawPtr = AceType::RawPtr(itemMaxHeightResObj);
         SetItemConstraintSizeSendParams(maxHeight, calcMaxHeightStr);
-        GetArkUINodeModifiers()->getWaterFlowModifier()->setItemMaxHeight(
-            nativeNode, maxHeight.Value(), static_cast<int32_t>(maxHeight.Unit()), calcMaxHeightStr.c_str());
+        GetArkUINodeModifiers()->getWaterFlowModifier()->setItemMaxHeight(nativeNode, maxHeight.Value(),
+            static_cast<int32_t>(maxHeight.Unit()), calcMaxHeightStr.c_str(), itemMaxHeightRawPtr);
     }
     return panda::JSValueRef::Undefined(vm);
 }
