@@ -418,7 +418,7 @@ void ContainerPickerLayoutAlgorithm::LayoutItem(
     CHECK_NULL_VOID(wrapper);
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-    auto size = geometryNode->GetFrameSize();
+    auto size = geometryNode->GetPaddingSize();
     auto translate = Alignment::GetAlignPosition(size, wrapper->GetGeometryNode()->GetMarginFrameSize(), align_);
     offset += OffsetF(translate.GetX(), pos.second.startPos);
     CHECK_NULL_VOID(wrapper->GetGeometryNode());

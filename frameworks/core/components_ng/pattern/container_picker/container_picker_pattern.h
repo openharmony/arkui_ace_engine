@@ -187,7 +187,6 @@ private:
     void HandleDragStart(const GestureEvent& info);
     void HandleDragUpdate(const GestureEvent& info);
     void HandleDragEnd(double dragVelocity, float mainDelta = 0.0f);
-    void ProcessDelta(float& delta, float mainSize, float deltaSum);
     bool CheckDragOutOfBoundary();
     bool IsOutOfBoundary(float mainOffset = 0.0f) const;
     bool IsOutOfStart(float mainOffset = 0.0f) const;
@@ -205,9 +204,9 @@ private:
     std::pair<int32_t, PickerItemInfo> CalcCurrentMiddleItem() const;
     float ShortestDistanceBetweenCurrentAndTarget(int32_t targetIndex);
     void SwipeTo(int32_t index);
-    void OnAroundButtonClick(RefPtr<ContainerPickerEventParam> param);
+    void OnAroundButtonClick(float offsetY);
 
-    RefPtr<ClickEvent> CreateItemClickEventListener(RefPtr<ContainerPickerEventParam> param);
+    RefPtr<ClickEvent> CreateItemClickEventListener();
     void InitMouseAndPressEvent();
     void UpdatePanEvent();
     void AddPanEvent(const RefPtr<GestureEventHub>& gestureHub, GestureEventFunc&& actionStart,
@@ -216,7 +215,7 @@ private:
     GestureEventFunc ActionUpdateTask();
     GestureEventFunc ActionEndTask();
     GestureEventNoParameter ActionCancelTask();
-    void CreateChildrenClickEvent(RefPtr<UINode>& host);
+    void CreateChildrenClickEvent();
     RefPtr<TouchEventImpl> CreateItemTouchEventListener();
 
     void AttachNodeAnimatableProperty(const RefPtr<NodeAnimatablePropertyFloat>& property);
@@ -250,6 +249,10 @@ private:
         pickerDefaultHeight_ = static_cast<float>(PICKER_DEFAULT_HEIGHT.ConvertToPx());
         pickerHeightBeforeRotate_ = static_cast<float>(PICKER_HEIGHT_BEFORE_ROTATE.ConvertToPx());
         maxOverscrollOffset_ = static_cast<float>(MAX_OVERSCROLL_OFFSET.ConvertToPx());
+
+        firstAdjacentItemHeight_ = static_cast<float>(FIRST_ADJACENT_ITEM_HEIGHT.ConvertToPx());
+        secondAdjacentItemHeight_ = static_cast<float>(SECOND_ADJACENT_ITEM_HEIGHT.ConvertToPx());
+        thirdAdjacentItemHeight_ = static_cast<float>(THIRD_ADJACENT_ITEM_HEIGHT.ConvertToPx());
     }
 
     RefPtr<PanEvent> panEvent_;
@@ -301,11 +304,16 @@ private:
     float springOffset_ = 0.0f;
     float maxOverscrollOffset_ = 0.0f;
 
+    float firstAdjacentItemHeight_ = 0.0f;  // the height of the first item above and below selected item
+    float secondAdjacentItemHeight_ = 0.0f; // the height of the second item above and below selected item
+    float thirdAdjacentItemHeight_ = 0.0f;  // the height of the third item above and below selected item
+
     // layout params
     float currentOffset_ = 0.0f;
     float height_ = 0.0f;
     float contentMainSize_ = 0.0f;
     float contentCrossSize_ = 0.0f;
+    float topPadding_ = 0.0f;
     float pickerItemHeight_ = 0.0f;
     float pickerDefaultHeight_ = 0.0f;
     float pickerHeightBeforeRotate_ = 0.0f;

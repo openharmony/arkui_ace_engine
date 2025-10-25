@@ -30,7 +30,7 @@ namespace {
 const std::string CONTAINER_PICKER_DRAG_SCENE = "container_picker_drag_scene";
 constexpr double MOVE_THRESHOLD = 2.0;
 constexpr float SPRING_DURATION = 600.0f;
-constexpr float SPRING_CURVE_VELCOTY = 0.0f;
+constexpr float SPRING_CURVE_VELOCITY = 0.0f;
 constexpr float SPRING_CURVE_MASS = 1.0f;
 constexpr float SPRING_CURVE_STIFFNESS = 20.0f;
 constexpr float SPRING_CURVE_DAMPING = 10.0f;
@@ -41,6 +41,9 @@ constexpr float PICKER_SPEED_TH = 0.25f;
 constexpr int32_t VELOCITY_TRANS = 1000;
 constexpr int32_t DEFAULT_FONT_SIZE = 20;
 constexpr int32_t CLICK_ANIMATION_DURATION = 300;
+constexpr int32_t DELTA_INDEX_1 = 1;
+constexpr int32_t DELTA_INDEX_2 = 2;
+constexpr int32_t DELTA_INDEX_3 = 3;
 constexpr uint32_t CUSTOM_SPRING_ANIMATION_DURATION = 1000;
 } // namespace
 
@@ -147,8 +150,8 @@ float ContainerPickerPattern::ShortestDistanceBetweenCurrentAndTarget(int32_t ta
     float currentOffsetFromMiddle = CalculateMiddleLineOffset();
     auto downDelta = (targetIndex - selectedIndex_ + totalItemCount_) % totalItemCount_;
     auto upDelta = (selectedIndex_ - targetIndex + totalItemCount_) % totalItemCount_;
-    return downDelta <= upDelta ? downDelta * pickerItemHeight_ - currentOffsetFromMiddle
-                                : upDelta * pickerItemHeight_ * -1 + currentOffsetFromMiddle;
+    return downDelta <= upDelta ? downDelta * pickerItemHeight_ + currentOffsetFromMiddle
+                                : upDelta * pickerItemHeight_ * -1 - currentOffsetFromMiddle;
 }
 
 void ContainerPickerPattern::HandleTargetIndex()
@@ -217,6 +220,7 @@ void ContainerPickerPattern::GetLayoutProperties(const RefPtr<ContainerPickerLay
     offScreenItemsIndex_ = algo->GetOffScreenItems();
     contentMainSize_ = algo->GetContentMainSize();
     height_ = algo->GetHeight();
+    topPadding_ = algo->GetTopPadding();
     crossMatchChild_ = algo->IsCrossMatchChild();
     auto contentCrossSize = algo->GetContentCrossSize();
     if (!NearEqual(contentCrossSize, contentCrossSize_)) {
@@ -378,7 +382,7 @@ void ContainerPickerPattern::SwipeTo(int32_t targetIndex)
     PickerMarkDirty();
 }
 
-void ContainerPickerPattern::OnAroundButtonClick(RefPtr<ContainerPickerEventParam> param)
+void ContainerPickerPattern::OnAroundButtonClick(float offsetY)
 {
     if (clickBreak_) {
         return;
@@ -387,54 +391,58 @@ void ContainerPickerPattern::OnAroundButtonClick(RefPtr<ContainerPickerEventPara
     auto host = GetHost();
     CHECK_NULL_VOID(host);
 
-    for (auto& pos : itemPosition_) {
-        if (param->itemNodeId == pos.second.node->GetId()) {
-            int32_t realIndex = ContainerPickerUtils::GetLoopIndex(pos.first, totalItemCount_);
-            SwipeTo(realIndex);
-            break;
-        }
+    auto middlePos = height_ / HALF + topPadding_;
+    auto delta = offsetY - middlePos;
+    auto halfOfMiddleItem = pickerItemHeight_ / HALF;
+    auto direction = Positive(delta) ? 1 : -1;
+    int32_t deltaIndex = 0;
+    if (GreatNotEqual(std::abs(delta), height_ / HALF)) {
+        // click out of visiable area
+        return;
+    } else if (LessOrEqual(std::abs(delta), halfOfMiddleItem)) {
+        // click at middle item
+        return;
+    } else if (LessOrEqual(std::abs(delta), halfOfMiddleItem + firstAdjacentItemHeight_)) {
+        deltaIndex = DELTA_INDEX_1 * direction;
+    } else if (LessOrEqual(std::abs(delta), halfOfMiddleItem + firstAdjacentItemHeight_ + secondAdjacentItemHeight_)) {
+        deltaIndex = DELTA_INDEX_2 * direction;
+    } else if (LessOrEqual(std::abs(delta), halfOfMiddleItem + firstAdjacentItemHeight_ + secondAdjacentItemHeight_ +
+                                                thirdAdjacentItemHeight_)) {
+        deltaIndex = DELTA_INDEX_3 * direction;
+    } else {
+        // click within visiable area but there is no item
+        return;
     }
+    auto targetIndex = selectedIndex_ + deltaIndex;
+    if (!isLoop_ && (targetIndex < 0 || targetIndex >= totalItemCount_)) {
+        return;
+    }
+    SwipeTo(ContainerPickerUtils::GetLoopIndex(targetIndex, totalItemCount_));
 }
 
-RefPtr<ClickEvent> ContainerPickerPattern::CreateItemClickEventListener(RefPtr<ContainerPickerEventParam> param)
+RefPtr<ClickEvent> ContainerPickerPattern::CreateItemClickEventListener()
 {
-    auto clickEventHandler = [param, weak = WeakClaim(this)](const GestureEvent& /* info */) {
+    auto clickEventHandler = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->OnAroundButtonClick(param);
+        pattern->OnAroundButtonClick(info.GetLocalLocation().GetY());
     };
 
     auto listener = AceType::MakeRefPtr<NG::ClickEvent>(clickEventHandler);
     return listener;
 }
 
-void ContainerPickerPattern::CreateChildrenClickEvent(RefPtr<UINode>& host)
+void ContainerPickerPattern::CreateChildrenClickEvent()
 {
+    auto host = GetHost();
     CHECK_NULL_VOID(host);
-    const auto& children = host->GetChildren();
-    for (auto child : children) {
-        auto tag = child->GetTag();
-        if (tag == V2::JS_FOR_EACH_ETS_TAG || tag == V2::JS_SYNTAX_ITEM_ETS_TAG || tag == V2::JS_IF_ELSE_ETS_TAG) {
-            CreateChildrenClickEvent(child);
-        } else if (tag == V2::ROW_ETS_TAG || tag == V2::IMAGE_ETS_TAG || tag == V2::TEXT_ETS_TAG ||
-                   tag == V2::SYMBOL_ETS_TAG) {
-            RefPtr<ContainerPickerEventParam> param = MakeRefPtr<ContainerPickerEventParam>();
-            param->itemNodeId = child->GetId();
-            RefPtr<FrameNode> childNode = AceType::DynamicCast<FrameNode>(child);
-            CHECK_NULL_VOID(childNode);
-            auto eventHub = childNode->GetEventHub<EventHub>();
-            CHECK_NULL_VOID(eventHub);
-            RefPtr<ClickEvent> clickListener = CreateItemClickEventListener(param);
-            CHECK_NULL_VOID(clickListener);
-            auto gesture = eventHub->GetOrCreateGestureEventHub();
-            CHECK_NULL_VOID(gesture);
-            gesture->AddClickEvent(clickListener);
-        } else {
-            TAG_LOGI(AceLogTag::ACE_CONTAINER_PICKER,
-                "CreateChildrenClickEvent does not support this type of the node. id: %{public}d, tag: %{public}s",
-                host->GetId(), tag.c_str());
-        }
-    }
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    RefPtr<ClickEvent> clickListener = CreateItemClickEventListener();
+    CHECK_NULL_VOID(clickListener);
+    auto gesture = eventHub->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    gesture->AddClickEvent(clickListener);
 }
 
 RefPtr<TouchEventImpl> ContainerPickerPattern::CreateItemTouchEventListener()
@@ -492,8 +500,7 @@ void ContainerPickerPattern::InitMouseAndPressEvent()
     CHECK_NULL_VOID(pickerGesture);
     pickerGesture->AddTouchEvent(touchListener);
 
-    auto uiNode = AceType::DynamicCast<UINode>(host);
-    CreateChildrenClickEvent(uiNode);
+    CreateChildrenClickEvent();
     isItemClickEventCreated_ = true;
 }
 
@@ -611,7 +618,6 @@ void ContainerPickerPattern::HandleDragUpdate(const GestureEvent& info)
         }
         SwipeTo(index);
         selectedIndex_ = index;
-        FireScrollStopEvent();
         return;
     }
 
@@ -627,7 +633,6 @@ void ContainerPickerPattern::HandleDragUpdate(const GestureEvent& info)
     }
 
     float mainDelta = static_cast<float>(info.GetMainDelta());
-    ProcessDelta(mainDelta, contentMainSize_, mainDeltaSum_);
 
     HandleScroll(mainDelta, SCROLL_FROM_UPDATE, NestedState::GESTURE, velocity);
     UpdateColumnChildPosition(offsetY);
@@ -663,17 +668,6 @@ void ContainerPickerPattern::HandleDragEnd(double dragVelocity, float mainDelta)
     float currentOffsetFromMiddle = CalculateMiddleLineOffset();
     float resetOffset = CalculateResetOffset(currentOffsetFromMiddle);
     CreateTargetAnimation(resetOffset);
-}
-
-void ContainerPickerPattern::ProcessDelta(float& delta, float mainSize, float deltaSum)
-{
-    if (GreatNotEqual(std::abs(delta), mainSize)) {
-        delta = GreatNotEqual(delta, 0.0f) ? mainSize : -mainSize;
-    }
-
-    if (GreatNotEqual(std::abs(deltaSum + delta), mainSize)) {
-        delta = GreatNotEqual((deltaSum + delta), 0.0f) ? (mainSize - deltaSum) : (-deltaSum - mainSize);
-    }
 }
 
 void ContainerPickerPattern::UpdateCurrentOffset(float offset)
@@ -1057,7 +1051,7 @@ void ContainerPickerPattern::CreateSpringAnimation(float delta)
     auto host = GetHost();
     auto context = host ? host->GetContextRefPtr() : nullptr;
     auto springCurve =
-        MakeRefPtr<SpringCurve>(SPRING_CURVE_VELCOTY, SPRING_CURVE_MASS, SPRING_CURVE_STIFFNESS, SPRING_CURVE_DAMPING);
+        MakeRefPtr<SpringCurve>(SPRING_CURVE_VELOCITY, SPRING_CURVE_MASS, SPRING_CURVE_STIFFNESS, SPRING_CURVE_DAMPING);
     AnimationOption option;
     option.SetCurve(springCurve);
     option.SetDuration(SPRING_DURATION);
@@ -1149,7 +1143,7 @@ float ContainerPickerPattern::CalculateMiddleLineOffset()
 {
     auto currentMiddleItem =
         ContainerPickerUtils::CalcCurrentMiddleItem(itemPosition_, height_, totalItemCount_, isLoop_);
-    return (currentMiddleItem.second.startPos + currentMiddleItem.second.endPos) / HALF - height_ / HALF;
+    return (currentMiddleItem.second.startPos + currentMiddleItem.second.endPos - height_) / HALF;
 }
 
 bool ContainerPickerPattern::IsEnableHaptic() const
