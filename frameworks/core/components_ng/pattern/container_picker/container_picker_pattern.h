@@ -29,6 +29,7 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
 #include "core/gestures/gesture_event.h"
+#include "core/common/resource/resource_object.h"
 
 namespace OHOS::Ace::NG {
 class ContainerPickerEventParam : public virtual AceType {
@@ -121,6 +122,22 @@ public:
     bool SpringOverScroll(float offset);
     void UpdateCurrentOffset(float offset);
 
+    void SetIndicatorStyleVal(const PickerIndicatorStyle& style)
+    {
+        indicatorStyle_ = style;
+    }
+
+    PickerIndicatorStyle GetIndicatorStyleVal()
+    {
+        return indicatorStyle_;
+    }
+
+    void UpdateDividerWidthWithResObj(const RefPtr<ResourceObject>& resObj);
+    void UpdateDividerColorWithResObj(const RefPtr<ResourceObject>& resObj);
+    void UpdateStartMarginWithResObj(const RefPtr<ResourceObject>& resObj);
+    void UpdateEndMarginWithResObj(const RefPtr<ResourceObject>& resObj);
+    void UpdateBackgroundColorWithResObj(const RefPtr<ResourceObject>& resObj);
+    void UpdateBorderRadiusWithResObj(const RefPtr<ResourceObject>& resObj);
 protected:
     bool ChildPreMeasureHelperEnabled() override
     {
@@ -292,6 +309,7 @@ private:
     float pickerItemHeight_ = 0.0f;
     float pickerDefaultHeight_ = 0.0f;
     float pickerHeightBeforeRotate_ = 0.0f;
+    PickerIndicatorStyle indicatorStyle_;
 };
 } // namespace OHOS::Ace::NG
 

@@ -22,6 +22,8 @@
 #include "core/components_ng/pattern/container_picker/container_picker_paint_method.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/common/resource/resource_object.h"
+#include "core/common/resource/resource_parse_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -1212,6 +1214,121 @@ bool ContainerPickerPattern::InnerHandleScroll(bool isDown)
 void ContainerPickerPattern::OnColorConfigurationUpdate()
 {
     SetDefaultTextStyle(true);
+}
+
+void ContainerPickerPattern::UpdateDividerWidthWithResObj(const RefPtr<ResourceObject>& resObj)
+{
+    auto pickerNode = GetHost();
+    CHECK_NULL_VOID(pickerNode);
+    auto property = pickerNode->GetLayoutProperty<ContainerPickerLayoutProperty>();
+    CHECK_NULL_VOID(property);
+
+    CalcDimension strokeWidth;
+    if (resObj && ResourceParseUtils::ParseResDimensionVp(resObj, strokeWidth)) {
+        property->UpdateIndicatorDividerWidth(strokeWidth);
+    } else {
+        auto context = pickerNode->GetContext();
+        CHECK_NULL_VOID(context);
+        auto theme = context->GetTheme<PickerTheme>();
+        CHECK_NULL_VOID(theme);
+        property->UpdateIndicatorDividerWidth(theme->GetDividerThickness());
+    }
+}
+
+void ContainerPickerPattern::UpdateDividerColorWithResObj(const RefPtr<ResourceObject>& resObj)
+{
+    auto pickerNode = GetHost();
+    CHECK_NULL_VOID(pickerNode);
+    auto property = pickerNode->GetLayoutProperty<ContainerPickerLayoutProperty>();
+    CHECK_NULL_VOID(property);
+
+    Color color;
+    if (resObj && ResourceParseUtils::ParseResColor(resObj, color)) {
+        property->UpdateIndicatorDividerColor(color);
+    } else {
+        auto context = pickerNode->GetContext();
+        CHECK_NULL_VOID(context);
+        auto theme = context->GetTheme<PickerTheme>();
+        CHECK_NULL_VOID(theme);
+        property->UpdateIndicatorDividerColor(theme->GetDividerColor());
+    }
+}
+
+void ContainerPickerPattern::UpdateStartMarginWithResObj(const RefPtr<ResourceObject>& resObj)
+{
+    auto pickerNode = GetHost();
+    CHECK_NULL_VOID(pickerNode);
+    auto property = pickerNode->GetLayoutProperty<ContainerPickerLayoutProperty>();
+    CHECK_NULL_VOID(property);
+
+    CalcDimension startMargin;
+    if (resObj && ResourceParseUtils::ParseResColor(resObj, startMargin)) {
+        property->UpdateIndicatorStartMargin(startMargin);
+    } else {
+        property->UpdateIndicatorStartMargin(Dimension());
+    }
+}
+
+void ContainerPickerPattern::UpdateEndMarginWithResObj(const RefPtr<ResourceObject>& resObj)
+{
+    auto pickerNode = GetHost();
+    CHECK_NULL_VOID(pickerNode);
+    auto property = pickerNode->GetLayoutProperty<ContainerPickerLayoutProperty>();
+    CHECK_NULL_VOID(property);
+
+    CalcDimension endMargin;
+    if (resObj && ResourceParseUtils::ParseResColor(resObj, endMargin)) {
+        property->UpdateIndicatorEndMargin(endMargin);
+    } else {
+        property->UpdateIndicatorEndMargin(Dimension());
+    }
+}
+
+void ContainerPickerPattern::UpdateBackgroundColorWithResObj(const RefPtr<ResourceObject>& resObj)
+{
+    auto pickerNode = GetHost();
+    CHECK_NULL_VOID(pickerNode);
+    auto property = pickerNode->GetLayoutProperty<ContainerPickerLayoutProperty>();
+    CHECK_NULL_VOID(property);
+
+    Color color;
+    if (resObj && ResourceParseUtils::ParseResColor(resObj, color)) {
+        property->UpdateIndicatorBackgroundColor(color);
+    } else {
+        auto context = pickerNode->GetContext();
+        CHECK_NULL_VOID(context);
+        auto theme = context->GetTheme<PickerTheme>();
+        CHECK_NULL_VOID(theme);
+        property->UpdateIndicatorBackgroundColor(theme->GetSelectedBackgroundColor());
+    }
+}
+
+void ContainerPickerPattern::UpdateBorderRadiusWithResObj(const RefPtr<ResourceObject>& resObj)
+{
+    auto pickerNode = GetHost();
+    CHECK_NULL_VOID(pickerNode);
+    auto property = pickerNode->GetLayoutProperty<ContainerPickerLayoutProperty>();
+    CHECK_NULL_VOID(property);
+
+    PickerIndicatorStyle style = GetIndicatorStyleVal();
+    if (style.borderRadius->HasResources()) {
+        style.borderRadius->ReloadResources();
+        NG::BorderRadiusProperty& borderRadiusValue = style.borderRadius.value();
+        property->UpdateIndicatorBorderRadius(borderRadiusValue);
+    } else if (style.borderRadiusResObj) {
+        CalcDimension calcDimension;
+        ResourceParseUtils::ParseResDimensionVpNG(style.borderRadiusResObj, calcDimension);
+        if (GreatOrEqual(calcDimension.Value(), 0.0f)) {
+            NG::BorderRadiusProperty borderRadiusValue = NG::BorderRadiusProperty(calcDimension);
+            property->UpdateIndicatorBorderRadius(borderRadiusValue);
+        }
+    } else {
+        auto context = pickerNode->GetContext();
+        CHECK_NULL_VOID(context);
+        auto theme = context->GetTheme<PickerTheme>();
+        CHECK_NULL_VOID(theme);
+        property->UpdateIndicatorBorderRadius(BorderRadiusProperty(*theme->GetSelectedBorderRadius().radiusTopLeft));
+    }
 }
 
 } // namespace OHOS::Ace::NG

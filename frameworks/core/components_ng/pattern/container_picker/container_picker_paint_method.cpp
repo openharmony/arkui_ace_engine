@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/container_picker/container_picker_paint_method.h"
+#include "core/components_ng/pattern/container_picker/container_picker_pattern.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -84,6 +85,18 @@ void ContainerPickerPaintMethod::PaintSelectionIndicatorBackground(PaintWrapper*
             layoutProperty->GetIndicatorBackgroundColor().value_or(theme->GetSelectedBackgroundColor());
     BorderRadiusProperty borderRadius = layoutProperty->GetIndicatorBorderRadius().value_or(
         BorderRadiusProperty(*theme->GetSelectedBorderRadius().radiusTopLeft));
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pickerPattern = pickerNode->GetPattern<ContainerPickerPattern>();
+        CHECK_NULL_VOID(pickerPattern);
+        PickerIndicatorStyle style = pickerPattern->GetIndicatorStyleVal();
+        if (style.isDefaultBackgroundColor) {
+            backgroundColor = theme->GetSelectedBackgroundColor();
+        }
+        if (style.isDefaultBorderRadius) {
+            borderRadius = BorderRadiusProperty(*theme->GetSelectedBorderRadius().radiusTopLeft);
+        }
+    }
+
     auto height = PICKER_ITEM_HEIGHT.ConvertToPx() - DEFAULT_MARGIN.ConvertToPx() * 2;
     auto width = pickerRect.Width() - DEFAULT_MARGIN.ConvertToPx() * 2;
     auto maxRadius = std::min(height, width) / 2;
@@ -135,6 +148,23 @@ void ContainerPickerPaintMethod::PaintSelectionIndicatorDivider(PaintWrapper* pa
     auto dividerColor = layoutProperty->GetIndicatorDividerColor().value_or(theme->GetDividerColor());
     auto startMargin = layoutProperty->GetIndicatorStartMargin().value_or(Dimension()).ConvertToPx();
     auto endMargin = layoutProperty->GetIndicatorEndMargin().value_or(Dimension()).ConvertToPx();
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pickerPattern = pickerNode->GetPattern<ContainerPickerPattern>();
+        CHECK_NULL_VOID(pickerPattern);
+        PickerIndicatorStyle style = pickerPattern->GetIndicatorStyleVal();
+        if (style.isDefaultDividerWith) {
+            strokeWidth = theme->GetDividerThickness().ConvertToPx();
+        }
+        if (style.isDefaultDividerColor) {
+            dividerColor = theme->GetDividerColor();
+        }
+        if (style.isDefaultStartMargin) {
+            startMargin = Dimension().ConvertToPx();
+        }
+        if (style.isDefaultEndMargin) {
+            endMargin = Dimension().ConvertToPx();
+        }
+    }
 
     PaddingPropertyF padding = layoutProperty->CreatePaddingAndBorder();
     RectF contentRect = { padding.left.value_or(0), padding.top.value_or(0),

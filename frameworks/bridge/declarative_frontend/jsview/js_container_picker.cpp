@@ -20,6 +20,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "frameworks/core/components_ng/pattern/container_picker/container_picker_model.h"
 #include "frameworks/core/components_ng/pattern/picker/picker_type_define.h"
+#include "core/common/resource/resource_object.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -107,65 +108,103 @@ void JSContainerPicker::SetSelectionIndicator(const JSCallbackInfo& info)
 
 void JSContainerPicker::SetDivider(const JSRef<JSObject>& paramObj, NG::PickerIndicatorStyle& indicatorStyle)
 {
+    auto pickerTheme = GetTheme<PickerTheme>();
+    if (pickerTheme) {
+        indicatorStyle.dividerWidth = pickerTheme->GetDividerThickness();
+        indicatorStyle.dividerColor = pickerTheme->GetDividerColor();
+        indicatorStyle.startMargin = Dimension();
+        indicatorStyle.endMargin = Dimension();
+    }
+    UnRegisterResource("containerPicker.dividerWidth");
+    UnRegisterResource("containerPicker.dividerColor");
+    UnRegisterResource("containerPicker.startMargin");
+    UnRegisterResource("containerPicker.endMargin");
+
     auto dividerWidth = paramObj->GetProperty("dividerWidth");
     auto dividerColor = paramObj->GetProperty("dividerColor");
     auto startMargin = paramObj->GetProperty("startMargin");
     auto endMargin = paramObj->GetProperty("endMargin");
 
     if (!dividerWidth->IsUndefined() && !dividerWidth->IsNull()) {
-        CalcDimension dividerWidthVal;
-        if (ParseLengthMetricsToDimension(dividerWidth, dividerWidthVal)) {
-            if (GreatOrEqual(dividerWidthVal.Value(), 0.0f)) {
-                indicatorStyle.dividerWidth = dividerWidthVal;
-            }
+        CalcDimension dividerWidthVal = pickerTheme->GetDividerThickness();
+        RefPtr<ResourceObject> resObj;
+        if (ParseLengthMetricsToDimension(dividerWidth, dividerWidthVal, resObj) &&
+            GreatOrEqual(dividerWidthVal.Value(), 0.0f)) {
+            indicatorStyle.dividerWidth = dividerWidthVal;
+            indicatorStyle.isDefaultDividerWith = false;
         }
+        NG::ContainerPickerModel::ProcessResourceObj("containerPicker.dividerWidth", resObj);
     }
     if (!dividerColor->IsUndefined() && !dividerColor->IsNull()) {
-        Color color;
-        if (ParseJsColor(dividerColor, color)) {
+        Color color = pickerTheme->GetDividerColor();
+        RefPtr<ResourceObject> resObj;
+        if (ParseJsColor(dividerColor, color, resObj)) {
             indicatorStyle.dividerColor = color;
+            indicatorStyle.isDefaultDividerColor = false;
         }
+        NG::ContainerPickerModel::ProcessResourceObj("containerPicker.dividerColor", resObj);
     }
     if (!startMargin->IsUndefined() && !startMargin->IsNull()) {
-        CalcDimension startMarginVal;
-        if (ParseLengthMetricsToDimension(startMargin, startMarginVal)) {
-            if (GreatOrEqual(startMarginVal.Value(), 0.0f)) {
-                indicatorStyle.startMargin = startMarginVal;
-            }
+        CalcDimension startMarginVal = Dimension();
+        RefPtr<ResourceObject> resObj;
+        if (ParseLengthMetricsToDimension(startMargin, startMarginVal, resObj) &&
+            GreatOrEqual(startMarginVal.Value(), 0.0f)) {
+            indicatorStyle.startMargin = startMarginVal;
+            indicatorStyle.isDefaultStartMargin = false;
         }
+        NG::ContainerPickerModel::ProcessResourceObj("containerPicker.startMargin", resObj);
     }
     if (!endMargin->IsUndefined() && !endMargin->IsNull()) {
-        CalcDimension endMarginVal;
-        if (ParseLengthMetricsToDimension(endMargin, endMarginVal)) {
-            if (GreatOrEqual(endMarginVal.Value(), 0.0f)) {
-                indicatorStyle.endMargin = endMarginVal;
-            }
+        CalcDimension endMarginVal = Dimension();
+        RefPtr<ResourceObject> resObj;
+        if (ParseLengthMetricsToDimension(endMargin, endMarginVal, resObj) &&
+            GreatOrEqual(endMarginVal.Value(), 0.0f)) {
+            indicatorStyle.endMargin = endMarginVal;
+            indicatorStyle.isDefaultEndMargin = false;
         }
+        NG::ContainerPickerModel::ProcessResourceObj("containerPicker.endMargin", resObj);
     }
 }
 
 void JSContainerPicker::SetSelectedBackground(const JSRef<JSObject>& paramObj, NG::PickerIndicatorStyle& indicatorStyle)
 {
+    auto pickerTheme = GetTheme<PickerTheme>();
+    if (pickerTheme) {
+        indicatorStyle.backgroundColor = pickerTheme->GetSelectedBackgroundColor();
+        indicatorStyle.borderRadius = NG::BorderRadiusProperty(*pickerTheme->GetSelectedBorderRadius().radiusTopLeft);
+    }
+    UnRegisterResource("containerPicker.backgroundColor");
+    UnRegisterResource("containerPicker.borderRadius");
+
     auto color = paramObj->GetProperty("backgroundColor");
     auto borderRadius = paramObj->GetProperty("borderRadius");
 
     if (!color->IsUndefined() && !color->IsNull()) {
-        Color BgColor;
-        if (ParseJsColor(color, BgColor)) {
+        Color BgColor = pickerTheme->GetSelectedBackgroundColor();
+        RefPtr<ResourceObject> resObj;
+        if (ParseJsColor(color, BgColor, resObj)) {
             indicatorStyle.backgroundColor = BgColor;
+            indicatorStyle.isDefaultBackgroundColor = false;
         }
+        NG::ContainerPickerModel::ProcessResourceObj("containerPicker.backgroundColor", resObj);
     }
     if (!borderRadius->IsUndefined() && !borderRadius->IsNull()) {
         CalcDimension calcDimension;
-        NG::BorderRadiusProperty borderRadiusProperty;
-        if (ParseLengthMetricsToDimension(borderRadius, calcDimension)) {
+        NG::BorderRadiusProperty borderRadiusProperty =
+            NG::BorderRadiusProperty(*pickerTheme->GetSelectedBorderRadius().radiusTopLeft);
+        if (ParseLengthMetricsToDimension(borderRadius, calcDimension, indicatorStyle.borderRadiusResObj)) {
             if (GreatOrEqual(calcDimension.Value(), 0.0f)) {
                 indicatorStyle.borderRadius = NG::BorderRadiusProperty(calcDimension);
+                indicatorStyle.isDefaultBorderRadius = false;
             }
         } else if (ParseBindSheetBorderRadiusProps(borderRadius, borderRadiusProperty)) {
             SetBorderRadiusWithCheck(indicatorStyle.borderRadius, borderRadiusProperty);
+            indicatorStyle.isDefaultBorderRadius = false;
         }
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
+        NG::ContainerPickerModel::ProcessResourceObj("containerPicker.borderRadius", resObj);
     }
+
 }
 
 void JSContainerPicker::JSBind(BindingTarget globalObj)
