@@ -1810,6 +1810,21 @@ export class IUIContext {
     static freezeUINode1_serialize(id: number, isFrozen: boolean): void {
         ArkUIGeneratedNativeModule._IUIContext_freezeUINode1(id, isFrozen ? 1 : 0)
     }
+    static dispatchKeyEvent_serialize(node: number | string, event: KeyEvent): boolean {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (node instanceof number) {
+            thisSerializer.writeInt8((0).toChar())
+            const nodeForIdx0  = node as number
+            thisSerializer.writeNumber(nodeForIdx0)
+        } else if (node instanceof string) {
+            thisSerializer.writeInt8((1).toChar())
+            const nodeForIdx1  = node as string
+            thisSerializer.writeString(nodeForIdx1)
+        }
+        const retval  = ArkUIGeneratedNativeModule._IUIContext_dispatchKeyEvent(thisSerializer.asBuffer(), thisSerializer.length(), toPeerPtr(event))
+        thisSerializer.release()
+        return retval
+    }
     public static freezeUINode(id: string, isFrozen: boolean): void {
         const id_casted = id as (string)
         const isFrozen_casted = isFrozen as (boolean)
@@ -1821,6 +1836,11 @@ export class IUIContext {
         const isFrozen_casted = isFrozen as (boolean)
         IUIContext.freezeUINode1_serialize(id_casted, isFrozen_casted)
         return
+    }
+    public static dispatchKeyEvent(node: number | string, event: KeyEvent): boolean {
+        const node_casted = node as (number | string)
+        const event_casted = event as (KeyEvent)
+        return IUIContext.dispatchKeyEvent_serialize(node_casted, event_casted)
     }
 }
 export class LazyBuild {
