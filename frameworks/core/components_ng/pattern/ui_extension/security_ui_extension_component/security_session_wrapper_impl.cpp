@@ -881,6 +881,11 @@ int32_t SecuritySessionWrapperImpl::GetInstanceIdFromHost() const
     return instanceId;
 }
 
+int32_t SecuritySessionWrapperImpl::GetInstanceId() const
+{
+    return instanceId_;
+}
+
 bool SecuritySessionWrapperImpl::SendBusinessData(
     UIContentBusinessCode code, const  AAFwk::Want& data, BusinessDataSendType type, RSSubsystemId subSystemId)
 {
@@ -988,7 +993,7 @@ bool SecuritySessionWrapperImpl::RegisterDataConsumer()
         (Rosen::SubSystemId id, uint32_t customId, AAFwk::Want&& data, std::optional<AAFwk::Want>& reply) ->int32_t {
         auto sessionWrapper = wrapperWeak.Upgrade();
         CHECK_NULL_RETURN(sessionWrapper, false);
-        auto instanceId = sessionWrapper->GetInstanceIdFromHost();
+        auto instanceId = sessionWrapper->GetInstanceId();
         ContainerScope scope(instanceId);
         if (id != subSystemId) {
             return false;
