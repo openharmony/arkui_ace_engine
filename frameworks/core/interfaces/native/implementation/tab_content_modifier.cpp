@@ -34,6 +34,13 @@ namespace {
         Ark_TabBarOptions
     >;
 
+void TabbarAddTabBarItem(const WeakPtr<NG::FrameNode>& weakNode)
+{
+    auto contentNode = weakNode.Upgrade();
+    CHECK_NULL_VOID(contentNode);
+    TabContentModelStatic::AddTabBarItem(contentNode, DEFAULT_NODE_SLOT, true);
+}
+
 void SetTabBarCustomBuilder(FrameNode* frameNode, const CustomNodeBuilder& arkBuilder)
 {
     auto weakNode = AceType::WeakClaim(frameNode);
@@ -123,6 +130,7 @@ auto g_setSubTabBarStyle = [](FrameNode* frameNode, const Ark_SubTabBarStyle& st
 
     TabContentModelStatic::SetTabBarStyle(frameNode, TabBarStyle::SUBTABBATSTYLE);
     TabContentModelStatic::SetTabBar(frameNode, content, std::nullopt, nullptr);
+    TabbarAddTabBarItem(AceType::WeakClaim(frameNode));
 };
 
 auto g_setBottomTabBarStyle = [](FrameNode* frameNode, const Ark_BottomTabBarStyle& style) {
@@ -174,6 +182,7 @@ auto g_setBottomTabBarStyle = [](FrameNode* frameNode, const Ark_BottomTabBarSty
 
     TabContentModelStatic::SetTabBarStyle(frameNode, TabBarStyle::BOTTOMTABBATSTYLE);
     TabContentModelStatic::SetTabBar(frameNode, text, icon, nullptr);
+    TabbarAddTabBarItem(AceType::WeakClaim(frameNode));
 };
 
 namespace Converter {
@@ -344,11 +353,13 @@ void SetTabBarImpl(Ark_NativePointer node,
             auto text = Converter::OptConvert<std::string>(arkContent);
             TabContentModelStatic::SetTabBarStyle(frameNode, TabBarStyle::NOSTYLE);
             TabContentModelStatic::SetTabBar(frameNode, text, std::nullopt, nullptr);
+            TabbarAddTabBarItem(AceType::WeakClaim(frameNode));
         },
         [frameNode](const Ark_Resource& arkContent) {
             auto text = Converter::OptConvert<std::string>(arkContent);
             TabContentModelStatic::SetTabBarStyle(frameNode, TabBarStyle::NOSTYLE);
             TabContentModelStatic::SetTabBar(frameNode, text, std::nullopt, nullptr);
+            TabbarAddTabBarItem(AceType::WeakClaim(frameNode));
         },
         [frameNode](const CustomNodeBuilder& arkBuilder) {
             SetTabBarCustomBuilder(frameNode, arkBuilder);
@@ -362,6 +373,7 @@ void SetTabBarImpl(Ark_NativePointer node,
             }
             TabContentModelStatic::SetTabBarStyle(frameNode, TabBarStyle::NOSTYLE);
             TabContentModelStatic::SetTabBar(frameNode, label, icon, nullptr);
+            TabbarAddTabBarItem(AceType::WeakClaim(frameNode));
         },
         []() {});
 }
