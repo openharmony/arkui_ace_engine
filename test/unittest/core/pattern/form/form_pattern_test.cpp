@@ -338,6 +338,13 @@ HWTEST_F(FormPatternTest, FormPatternTest_007, TestSize.Level0)
     GetCurrentTimestamp();
     taskNum1 = taskExecutor->GetTotalTaskNum(TaskExecutor::TaskType::UI);
     EXPECT_EQ(taskNum, taskNum1);
+
+    pattern->isDynamic_ = false;
+    pattern->SetAccessibilityState(true);
+    pattern->isStaticFormSnaping_ = false;
+    pattern->HandleSnapshot(delayTime, "1");
+
+    EXPECT_EQ(pattern->isStaticFormSnaping_, false);
 }
 
 /**

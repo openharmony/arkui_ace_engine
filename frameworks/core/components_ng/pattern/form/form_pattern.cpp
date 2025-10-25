@@ -415,6 +415,10 @@ void FormPattern::TakeSurfaceCaptureForUI()
     }
     UpdateChildNodeOpacity(FormChildNodeType::FORM_SURFACE_NODE, NON_TRANSPARENT_VAL);
     host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+    if (!isDynamic_ && IsAccessibilityState()) {
+        TAG_LOGW(AceLogTag::ACE_FORM, "IsAccessibilityState, static form not recycled");
+        return;
+    }
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
