@@ -936,6 +936,8 @@ typedef struct Array_Length Array_Length;
 typedef struct Opt_Array_Length Opt_Array_Length;
 typedef struct Array_LengthMetrics Array_LengthMetrics;
 typedef struct Opt_Array_LengthMetrics Opt_Array_LengthMetrics;
+typedef struct Array_LocalizedBarrierStyle Array_LocalizedBarrierStyle;
+typedef struct Opt_Array_LocalizedBarrierStyle Opt_Array_LocalizedBarrierStyle;
 typedef struct Array_Measurable Array_Measurable;
 typedef struct Opt_Array_Measurable Opt_Array_Measurable;
 typedef struct Array_MenuElement Array_MenuElement;
@@ -2019,6 +2021,8 @@ typedef struct Ark_ListOptions Ark_ListOptions;
 typedef struct Opt_ListOptions Opt_ListOptions;
 typedef struct Ark_LoadCommittedDetails Ark_LoadCommittedDetails;
 typedef struct Opt_LoadCommittedDetails Opt_LoadCommittedDetails;
+typedef struct Ark_LocalizedBarrierStyle Ark_LocalizedBarrierStyle;
+typedef struct Opt_LocalizedBarrierStyle Opt_LocalizedBarrierStyle;
 typedef struct Ark_LocalizedHorizontalAlignParam Ark_LocalizedHorizontalAlignParam;
 typedef struct Opt_LocalizedHorizontalAlignParam Opt_LocalizedHorizontalAlignParam;
 typedef struct Ark_LocalizedVerticalAlignParam Ark_LocalizedVerticalAlignParam;
@@ -2335,6 +2339,8 @@ typedef struct Opt_uiObserver_NavDestinationInfo Opt_uiObserver_NavDestinationIn
 typedef struct unifiedDataChannel_SummaryPeer unifiedDataChannel_SummaryPeer;
 typedef struct unifiedDataChannel_SummaryPeer* Ark_unifiedDataChannel_Summary;
 typedef struct Opt_unifiedDataChannel_Summary Opt_unifiedDataChannel_Summary;
+typedef struct Ark_Union_Array_BarrierStyle_Array_LocalizedBarrierStyle Ark_Union_Array_BarrierStyle_Array_LocalizedBarrierStyle;
+typedef struct Opt_Union_Array_BarrierStyle_Array_LocalizedBarrierStyle Opt_Union_Array_BarrierStyle_Array_LocalizedBarrierStyle;
 typedef struct Ark_Union_Array_MenuElement_CustomBuilder Ark_Union_Array_MenuElement_CustomBuilder;
 typedef struct Opt_Union_Array_MenuElement_CustomBuilder Opt_Union_Array_MenuElement_CustomBuilder;
 typedef struct Ark_Union_Array_NavigationMenuItem_CustomBuilder Ark_Union_Array_NavigationMenuItem_CustomBuilder;
@@ -8912,6 +8918,15 @@ typedef struct Opt_Array_LengthMetrics {
     Ark_Tag tag;
     Array_LengthMetrics value;
 } Opt_Array_LengthMetrics;
+typedef struct Array_LocalizedBarrierStyle {
+    /* kind: ContainerType */
+    Ark_LocalizedBarrierStyle* array;
+    Ark_Int32 length;
+} Array_LocalizedBarrierStyle;
+typedef struct Opt_Array_LocalizedBarrierStyle {
+    Ark_Tag tag;
+    Array_LocalizedBarrierStyle value;
+} Opt_Array_LocalizedBarrierStyle;
 typedef struct Array_Measurable {
     /* kind: ContainerType */
     Ark_Measurable* array;
@@ -14007,6 +14022,16 @@ typedef struct Opt_LoadCommittedDetails {
     Ark_Tag tag;
     Ark_LoadCommittedDetails value;
 } Opt_LoadCommittedDetails;
+typedef struct Ark_LocalizedBarrierStyle {
+    /* kind: Interface */
+    Ark_String id;
+    Ark_LocalizedBarrierDirection localizedDirection;
+    Array_String referencedId;
+} Ark_LocalizedBarrierStyle;
+typedef struct Opt_LocalizedBarrierStyle {
+    Ark_Tag tag;
+    Ark_LocalizedBarrierStyle value;
+} Opt_LocalizedBarrierStyle;
 typedef struct Ark_LocalizedHorizontalAlignParam {
     /* kind: Interface */
     Ark_String anchor;
@@ -15424,6 +15449,18 @@ typedef struct Opt_unifiedDataChannel_Summary {
     Ark_Tag tag;
     Ark_unifiedDataChannel_Summary value;
 } Opt_unifiedDataChannel_Summary;
+typedef struct Ark_Union_Array_BarrierStyle_Array_LocalizedBarrierStyle {
+    /* kind: UnionType */
+    Ark_Int32 selector;
+    union {
+        Array_BarrierStyle value0;
+        Array_LocalizedBarrierStyle value1;
+    };
+} Ark_Union_Array_BarrierStyle_Array_LocalizedBarrierStyle;
+typedef struct Opt_Union_Array_BarrierStyle_Array_LocalizedBarrierStyle {
+    Ark_Tag tag;
+    Ark_Union_Array_BarrierStyle_Array_LocalizedBarrierStyle value;
+} Opt_Union_Array_BarrierStyle_Array_LocalizedBarrierStyle;
 typedef struct Ark_Union_Array_MenuElement_CustomBuilder {
     /* kind: UnionType */
     Ark_Int32 selector;
@@ -22824,7 +22861,7 @@ typedef struct GENERATED_ArkUIRelativeContainerModifier {
     void (*setGuideLine)(Ark_NativePointer node,
                          const Opt_Array_GuideLineStyle* value);
     void (*setBarrier)(Ark_NativePointer node,
-                       const Opt_Array_BarrierStyle* value);
+                       const Opt_Union_Array_BarrierStyle_Array_LocalizedBarrierStyle* value);
 } GENERATED_ArkUIRelativeContainerModifier;
 
 typedef struct GENERATED_ArkUIRemoteWindowModifier {

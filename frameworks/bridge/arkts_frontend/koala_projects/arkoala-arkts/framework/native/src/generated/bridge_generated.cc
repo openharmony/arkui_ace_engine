@@ -12674,20 +12674,39 @@ void impl_RelativeContainerAttribute_setBarrier(Ark_NativePointer thisPtr, KSeri
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Array_BarrierStyle valueValueTempTmpBuf = {};
+        Opt_Union_Array_BarrierStyle_Array_LocalizedBarrierStyle valueValueTempTmpBuf = {};
         valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            const Ark_Int32 valueValueTempTmpBuf_Length = thisDeserializer.readInt32();
-            Array_BarrierStyle valueValueTempTmpBuf_ = {};
-            thisDeserializer.resizeArray<std::decay<decltype(valueValueTempTmpBuf_)>::type,
-        std::decay<decltype(*valueValueTempTmpBuf_.array)>::type>(&valueValueTempTmpBuf_, valueValueTempTmpBuf_Length);
-            for (int valueValueTempTmpBuf_BufCounterI = 0; valueValueTempTmpBuf_BufCounterI < valueValueTempTmpBuf_Length; valueValueTempTmpBuf_BufCounterI++) {
-                valueValueTempTmpBuf_.array[valueValueTempTmpBuf_BufCounterI] = BarrierStyle_serializer::read(thisDeserializer);
+            const Ark_Int8 valueValueTempTmpBuf_UnionSelector = thisDeserializer.readInt8();
+            Ark_Union_Array_BarrierStyle_Array_LocalizedBarrierStyle valueValueTempTmpBuf_ = {};
+            valueValueTempTmpBuf_.selector = valueValueTempTmpBuf_UnionSelector;
+            if (valueValueTempTmpBuf_UnionSelector == 0) {
+                valueValueTempTmpBuf_.selector = 0;
+                const Ark_Int32 valueValueTempTmpBuf_BufULength = thisDeserializer.readInt32();
+                Array_BarrierStyle valueValueTempTmpBuf_BufU = {};
+                thisDeserializer.resizeArray<std::decay<decltype(valueValueTempTmpBuf_BufU)>::type,
+        std::decay<decltype(*valueValueTempTmpBuf_BufU.array)>::type>(&valueValueTempTmpBuf_BufU, valueValueTempTmpBuf_BufULength);
+                for (int valueValueTempTmpBuf_BufUBufCounterI = 0; valueValueTempTmpBuf_BufUBufCounterI < valueValueTempTmpBuf_BufULength; valueValueTempTmpBuf_BufUBufCounterI++) {
+                    valueValueTempTmpBuf_BufU.array[valueValueTempTmpBuf_BufUBufCounterI] = BarrierStyle_serializer::read(thisDeserializer);
+                }
+                valueValueTempTmpBuf_.value0 = valueValueTempTmpBuf_BufU;
+            } else if (valueValueTempTmpBuf_UnionSelector == 1) {
+                valueValueTempTmpBuf_.selector = 1;
+                const Ark_Int32 valueValueTempTmpBuf_BufULength = thisDeserializer.readInt32();
+                Array_LocalizedBarrierStyle valueValueTempTmpBuf_BufU = {};
+                thisDeserializer.resizeArray<std::decay<decltype(valueValueTempTmpBuf_BufU)>::type,
+        std::decay<decltype(*valueValueTempTmpBuf_BufU.array)>::type>(&valueValueTempTmpBuf_BufU, valueValueTempTmpBuf_BufULength);
+                for (int valueValueTempTmpBuf_BufUBufCounterI = 0; valueValueTempTmpBuf_BufUBufCounterI < valueValueTempTmpBuf_BufULength; valueValueTempTmpBuf_BufUBufCounterI++) {
+                    valueValueTempTmpBuf_BufU.array[valueValueTempTmpBuf_BufUBufCounterI] = LocalizedBarrierStyle_serializer::read(thisDeserializer);
+                }
+                valueValueTempTmpBuf_.value1 = valueValueTempTmpBuf_BufU;
+            } else {
+                INTEROP_FATAL("One of the branches for valueValueTempTmpBuf_ has to be chosen through deserialisation.");
             }
-            valueValueTempTmpBuf.value = valueValueTempTmpBuf_;
+            valueValueTempTmpBuf.value = static_cast<Ark_Union_Array_BarrierStyle_Array_LocalizedBarrierStyle>(valueValueTempTmpBuf_);
         }
-        Opt_Array_BarrierStyle valueValueTemp = valueValueTempTmpBuf;;
-        GetNodeModifiers()->getRelativeContainerModifier()->setBarrier(self, static_cast<Opt_Array_BarrierStyle*>(&valueValueTemp));
+        Opt_Union_Array_BarrierStyle_Array_LocalizedBarrierStyle valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getRelativeContainerModifier()->setBarrier(self, static_cast<Opt_Union_Array_BarrierStyle_Array_LocalizedBarrierStyle*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(RelativeContainerAttribute_setBarrier, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_RemoteWindow_construct(Ark_Int32 id, Ark_Int32 flags) {

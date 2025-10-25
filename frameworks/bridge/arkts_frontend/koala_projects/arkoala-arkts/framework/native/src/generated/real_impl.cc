@@ -4517,7 +4517,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetBarrierImpl(Ark_NativePointer node,
-                        const Opt_Array_BarrierStyle* value)
+                        const Opt_Union_Array_BarrierStyle_Array_LocalizedBarrierStyle* value)
     {
     }
     } // RelativeContainerAttributeModifier
