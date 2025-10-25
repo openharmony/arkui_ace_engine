@@ -1569,6 +1569,7 @@ void XComponentPattern::AddAfterLayoutTaskForExportTexture()
 bool XComponentPattern::ExportTextureAvailable()
 {
     auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
     auto parnetNodeContainer = host->GetNodeContainer();
     CHECK_NULL_RETURN(parnetNodeContainer, false);
     auto parent = parnetNodeContainer->GetAncestorNodeOfFrame(false);
@@ -2091,7 +2092,9 @@ void XComponentPattern::CreateAnalyzerOverlay()
 
 void XComponentPattern::UpdateAnalyzerOverlay()
 {
-    auto context = GetHost()->GetRenderContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetRenderContext();
     CHECK_NULL_VOID(context);
     auto pixelMap = context->GetThumbnailPixelMap();
     CHECK_NULL_VOID(pixelMap);

@@ -1632,7 +1632,9 @@ RefPtr<FrameNode> VideoPattern::CreateText(uint32_t time)
 
 RefPtr<FrameNode> VideoPattern::CreateSVG()
 {
-    auto pipelineContext = GetHost()->GetContext();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto pipelineContext = host->GetContext();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     auto videoTheme = pipelineContext->GetTheme<VideoTheme>();
     CHECK_NULL_RETURN(videoTheme, nullptr);
