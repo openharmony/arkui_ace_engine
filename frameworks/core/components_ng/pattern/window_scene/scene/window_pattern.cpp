@@ -481,6 +481,7 @@ void WindowPattern::UpdateStartingWindowProperty(const Rosen::SessionInfo& sessi
 bool WindowPattern::CheckAndHandleRestartApp()
 {
     CHECK_EQUAL_RETURN(session_->GetSessionInfo().isRestartApp_, false, false);
+    CHECK_EQUAL_RETURN(session_->GetSessionInfo().isRestartInSameProcess_, false, false);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "CheckAndHandleRestartApp id: %{public}d, node id: %{public}d",

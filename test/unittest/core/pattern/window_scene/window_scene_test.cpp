@@ -522,6 +522,7 @@ HWTEST_F(WindowSceneTest, OnRestart, TestSize.Level1)
         .abilityName_ = ABILITY_NAME,
         .bundleName_ = BUNDLE_NAME,
         .moduleName_ = MODULE_NAME,
+        .isRestartInSameProcess_ = false,
     };
     auto windowScene = CreateWindowSceneForStartingWindowTest(sessionInfo);
     ASSERT_NE(windowScene, nullptr);
@@ -529,10 +530,15 @@ HWTEST_F(WindowSceneTest, OnRestart, TestSize.Level1)
         ElementRegister::GetInstance()->MakeUniqueId(), windowScene);
     windowScene->frameNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
     ASSERT_NE(windowScene->GetHost(), nullptr);
+    ASSERT_NE(windowScene->startingWindow_, nullptr);
+    ASSERT_EQ(windowScene->snapshotWindow_, nullptr);
 
     windowScene->OnRestart();
+    sessionInfo.isRestartInSameProcess_ = true;
+    windowScene->session_->SetSessionInfo(sessionInfo);
+    windowScene->OnRestart();
     usleep(WAIT_SYNC_IN_NS);
-    ASSERT_NE(windowScene->startingWindow_, nullptr);
+    ASSERT_EQ(windowScene->snapshotWindow_, nullptr);
 }
 
 /**
