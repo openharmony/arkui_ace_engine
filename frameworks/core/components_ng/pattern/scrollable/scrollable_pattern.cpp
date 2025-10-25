@@ -3753,6 +3753,9 @@ void ScrollablePattern::HotZoneScroll(const float offsetPct)
  */
 void ScrollablePattern::StopHotzoneScroll()
 {
+    if (!animator_) {
+        return;
+    }
     if (!AnimateStoped()) {
         animator_->Stop();
     }
