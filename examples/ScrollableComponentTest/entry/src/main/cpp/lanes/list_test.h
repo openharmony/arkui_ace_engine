@@ -22,9 +22,9 @@
 #define CAPIDEMO_LIST_TEST_H
 
 #include <ace/xcomponent/native_interface_xcomponent.h>
+#include <arkui/native_dialog.h>
 #include <arkui/native_interface.h>
 #include <arkui/native_node.h>
-#include <arkui/native_dialog.h>
 #include <arkui/native_type.h>
 
 #include "../common/common.h"
@@ -38,4 +38,4 @@ public:
 };
 } // namespace ArkUICApiDemo
 
-#endif //CAPIDEMO_LIST_TEST_H
+#endif // CAPIDEMO_LIST_TEST_H
