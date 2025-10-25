@@ -4159,6 +4159,7 @@ void SetMaskShapeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<RefPtr<BasicShape>>(value);
     if (!convValue) {
+        ViewAbstract::SetProgressMask(frameNode, nullptr);
         return;
     }
     ViewAbstract::SetMask(frameNode, convValue.value());
