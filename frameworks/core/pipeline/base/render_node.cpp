@@ -382,7 +382,7 @@ void RenderNode::RenderWithContext(RenderContext& context, const Offset& offset)
             context.SetNeedRestoreHole(false);
             context.SetClipHole(Rect());
         }
-    } else {
+    } else if (context_.Upgrade()) {
         context.SetClipHole(context_.Upgrade()->GetTransparentHole());
     }
     Paint(context, offset);
@@ -2018,8 +2018,10 @@ bool RenderNode::IsPaintOutOfParent()
 void RenderNode::UpdatePosition()
 {
     if (isPaintGeometryTransition_) {
-        nonStrictPaintRect_.SetLeft(paintX_.Value() - GetParent().Upgrade()->GetTransitionGlobalOffset().GetX());
-        nonStrictPaintRect_.SetTop(paintY_.Value() - GetParent().Upgrade()->GetTransitionGlobalOffset().GetY());
+        auto parentNode = GetParent().Upgrade();
+        CHECK_NULL_VOID(parentNode);
+        nonStrictPaintRect_.SetLeft(paintX_.Value() - parentNode->GetTransitionGlobalOffset().GetX());
+        nonStrictPaintRect_.SetTop(paintY_.Value() - parentNode->GetTransitionGlobalOffset().GetY());
     }
 }
 
