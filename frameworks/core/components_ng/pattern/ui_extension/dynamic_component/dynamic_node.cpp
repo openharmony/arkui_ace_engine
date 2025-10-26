@@ -59,9 +59,9 @@ RefPtr<DynamicNode> DynamicNode::GetOrCreateDynamicNode(
     return dynamicNode;
 }
 
-void DynamicNode::DumpTree(int32_t depth, bool hasJson)
+void DynamicNode::DumpTree(int32_t depth, bool hasJson, const std::string& desc)
 {
-    UINode::DumpTree(depth, hasJson);
+    UINode::DumpTree(depth, hasJson, desc);
     auto pattern = GetPattern<DynamicPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->DumpDynamicRenderer(depth + DC_DEPTH, hasJson);
