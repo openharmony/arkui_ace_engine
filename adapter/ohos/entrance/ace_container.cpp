@@ -4721,7 +4721,8 @@ void AceContainer::SetIsFocusActive(bool isFocusActive)
         auto pipelineContext = DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->SetIsFocusActive(isFocusActive);
-    }, TaskExecutor::TaskType::UI, "ArkUISetIsFocusActive");
+    },
+    TaskExecutor::TaskType::UI, "ArkUISetIsFocusActive");
 }
 
 bool AceContainer::CloseWindow(int32_t instanceId)
