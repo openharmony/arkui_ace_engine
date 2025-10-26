@@ -119,7 +119,7 @@ void processResourceType(ani_env* env, ani_object value, ani_ref params_ref, siz
         ani_ref stringEntryRef;
         if (ANI_OK != env->Object_CallMethodByName_Ref(static_cast<ani_object>(params_ref), 
                                                        "$_get",
-                                                       "i:C{std.core.Object}", 
+                                                       "i:Y",
                                                        &stringEntryRef, 
                                                        (ani_int)i)) {
             break;
@@ -140,7 +140,7 @@ void processResourceType(ani_env* env, ani_object value, ani_ref params_ref, siz
     if (ANI_OK == env->String_NewUTF8(resName.c_str(), resName.size(), &ani_first_str)) {
         if (ANI_OK != env->Object_CallMethodByName_Void(static_cast<ani_object>(params_ref),
                                                         "$_set", 
-                                                        "iC{std.core.Object}:", 
+                                                        "iY:",
                                                         index, 
                                                         ani_first_str)) {
             return;
@@ -154,7 +154,7 @@ void processResourceType(ani_env* env, ani_object value, ani_ref params_ref, siz
         }
         if (ANI_OK != env->Object_CallMethodByName_Void(static_cast<ani_object>(params_ref), 
                                                         "$_set", 
-                                                        "iC{std.core.Object}:", 
+                                                        "iY:",
                                                         index, 
                                                         ani_str)) {
             break;
@@ -516,7 +516,7 @@ bool ParseResourceParamName(ani_env* env, ani_object objects, ResourceInfo& info
         ani_ref stringEntryRef;
         if (ANI_OK != env->Object_CallMethodByName_Ref(static_cast<ani_object>(params_ref), 
                                                        "$_get",
-                                                       "i:C{std.core.Object}", 
+                                                       "i:Y",
                                                        &stringEntryRef, 
                                                        (ani_int)i)) {
             return false;
@@ -914,7 +914,7 @@ void ParseArray([[maybe_unused]] ani_env* env,
         ani_ref pointRef;
         if (ANI_OK != env->Object_CallMethodByName_Ref(static_cast<ani_object>(options), 
                                                        "$_get", 
-                                                       "i:C{std.core.Object}", 
+                                                       "i:Y",
                                                        &pointRef, 
                                                        (ani_int)i)) {
             break;
