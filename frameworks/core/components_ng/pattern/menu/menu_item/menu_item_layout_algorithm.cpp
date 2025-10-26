@@ -17,11 +17,10 @@
 
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/security_component/security_component_layout_property.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
-// The maximum width of the right row is 1/3 of content area width
-constexpr float RIGHT_ROW_MAX_WIDTH_WEIGHT = 3;
 void MenuItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
@@ -143,7 +142,7 @@ std::pair<float, float> MenuItemLayoutAlgorithm::MeasureRightRow(LayoutWrapper* 
     rightRow->Measure(childConstraint);
     float rowWidth = 0.0f;
     float rowHeight = 0.0f;
-    if (isOption_ && showDefaultSelectedIcon_) {
+    if ((isOption_ && showDefaultSelectedIcon_) || GreatNotEqual(GetLeftRowMinWidth(layoutWrapper), 0.0f)) {
         auto children = rightRow->GetAllChildrenWithBuild();
         CHECK_EQUAL_RETURN(children.empty(), true, defaultPair);
         auto itemNode = layoutWrapper->GetHostNode();
@@ -206,6 +205,80 @@ void MenuItemLayoutAlgorithm::CalcContentExpandWidth(std::optional<LayoutConstra
     }
 }
 
+float MenuItemLayoutAlgorithm::GetLeftRowMinWidth(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_RETURN(layoutWrapper, 0.0f);
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, 0.0f);
+    auto pattern = host->GetPattern<MenuItemPattern>();
+    CHECK_NULL_RETURN(pattern, 0.0f);
+    return pattern->GetLeftRowMinWidth();
+}
+
+bool MenuItemLayoutAlgorithm::NeedLimitRightRowWidth(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_RETURN(layoutWrapper, false);
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, false);
+    auto itemPattern = host->GetPattern<MenuItemPattern>();
+    CHECK_NULL_RETURN(itemPattern, false);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
+    CHECK_NULL_RETURN(menuTheme, false);
+    auto fontScale = pipeline->GetFontScale();
+    bool largeFontScale = NearEqual(fontScale, menuTheme->GetBigFontSizeScale()) ||
+        NearEqual(fontScale, menuTheme->GetLargeFontSizeScale()) ||
+        NearEqual(fontScale, menuTheme->GetMaxFontSizeScale());
+    TAG_LOGD(AceLogTag::ACE_MENU, "MenuItem measure, fontScale:%{public}f", fontScale);
+    return largeFontScale && itemPattern->GetContentNode() && itemPattern->GetLabelNode();
+}
+
+void MenuItemLayoutAlgorithm::CalcLeftRowMinWidth(LayoutWrapper* layoutWrapper)
+{
+    if (!NeedLimitRightRowWidth(layoutWrapper)) {
+        return;
+    }
+    auto leftRow = layoutWrapper->GetOrCreateChildByIndex(0);
+    CHECK_NULL_VOID(leftRow);
+    auto children = leftRow->GetAllChildrenWithBuild();
+    auto itemNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(itemNode);
+    auto pipeline = itemNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    float iconContentPadding = 0.0f;
+    if (!isOption_) {
+        iconContentPadding = static_cast<float>(theme->GetIconContentPadding().ConvertToPx());
+    }
+    float leftRowMinWidth = 0.0f;
+    for (const auto& child : children) {
+        if (child != children.back()) {
+            // not content node
+            leftRowMinWidth += child->GetGeometryNode()->GetMarginFrameSize().Width() + iconContentPadding;
+        } else {
+            float geometryNodeWidth = child->GetGeometryNode()->GetMarginFrameSize().Width();
+            auto textNode = child->GetHostNode();
+            auto textPattern = textNode->GetPattern<TextPattern>();
+            auto pManager = textPattern->GetParagraphManager();
+            auto textLongestLineWidth = pManager->GetLongestLineWithIndent();
+            if (GreatNotEqual(textLongestLineWidth, geometryNodeWidth)) {
+                leftRowMinWidth += textLongestLineWidth;
+            } else {
+                return;
+            }
+        }
+    }
+    CHECK_NULL_VOID(layoutWrapper);
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern<MenuItemPattern>();
+    CHECK_NULL_VOID(pattern);
+    TAG_LOGD(AceLogTag::ACE_MENU, "MenuItem measure, leftRowMinWidth:%{public}f when largeFontScale", leftRowMinWidth);
+    pattern->SetLeftRowMinWidth(leftRowMinWidth);
+}
+
 void MenuItemLayoutAlgorithm::MeasureItemViews(LayoutConstraintF& childConstraint,
     std::optional<LayoutConstraintF>& layoutConstraint, LayoutWrapper* layoutWrapper)
 {
@@ -215,17 +288,10 @@ void MenuItemLayoutAlgorithm::MeasureItemViews(LayoutConstraintF& childConstrain
         // Cannot cover left icon
         ? maxRowWidth_ - middleSpace_ - static_cast<float>(iconSize_)
         : maxRowWidth_);
-    auto host = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
-    CHECK_NULL_VOID(menuTheme);
-    auto fontScale = pipeline->GetFontScale();
-    if (NearEqual(fontScale, menuTheme->GetBigFontSizeScale()) ||
-        NearEqual(fontScale, menuTheme->GetLargeFontSizeScale()) ||
-        NearEqual(fontScale, menuTheme->GetMaxFontSizeScale())) {
-        childConstraint.maxSize.SetWidth((maxRowWidth_ - middleSpace_) / RIGHT_ROW_MAX_WIDTH_WEIGHT);
+    auto leftRowMinWidth = GetLeftRowMinWidth(layoutWrapper);
+    if (GreatNotEqual(leftRowMinWidth, 0.0f)) {
+        //limit rightRow maxWidth
+        childConstraint.maxSize.SetWidth(maxRowWidth_ - middleSpace_ -leftRowMinWidth);
     }
     // measure right row
     auto [rightRowWidth, rightRowHeight] = MeasureRightRow(layoutWrapper, childConstraint);
@@ -239,6 +305,7 @@ void MenuItemLayoutAlgorithm::MeasureItemViews(LayoutConstraintF& childConstrain
     float contentWidth = 0.0f;
     contentWidth = leftRowWidth + rightRowWidth + padding_.Width() + middleSpace_;
 
+    CalcLeftRowMinWidth(layoutWrapper);
     CalcContentExpandWidth(layoutConstraint, contentWidth, leftRowWidth, rightRowWidth);
 
     auto width = std::max(minRowWidth_, contentWidth);
