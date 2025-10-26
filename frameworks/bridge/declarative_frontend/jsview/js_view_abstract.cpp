@@ -8793,13 +8793,15 @@ void JSViewAbstract::JsFocusBox(const JSCallbackInfo& info)
 
     CalcDimension margin;
     RefPtr<ResourceObject> resObjMargin;
-    if (ParseLengthMetricsToDimension(obj->GetProperty("margin"), margin, resObjMargin) && LessOrEqual(margin.Value(), FLT_MAX)) {
+    if (ParseLengthMetricsToDimension(obj->GetProperty("margin"), margin, resObjMargin) &&
+        LessOrEqual(margin.Value(), FLT_MAX)) {
         ViewAbstractModel::GetInstance()->SetFocusBoxStyleUpdateFunc(style, resObjMargin, "focusBoxStyleMargin");
         style.margin = margin;
     }
     CalcDimension strokeWidth;
     RefPtr<ResourceObject> resObjWidth;
-    if (ParseLengthMetricsToPositiveDimension(obj->GetProperty("strokeWidth"), strokeWidth, resObjWidth) && LessOrEqual(strokeWidth.Value(), FLT_MAX)) {
+    if (ParseLengthMetricsToPositiveDimension(obj->GetProperty("strokeWidth"), strokeWidth, resObjWidth) &&
+        LessOrEqual(strokeWidth.Value(), FLT_MAX)) {
         ViewAbstractModel::GetInstance()->SetFocusBoxStyleUpdateFunc(style, resObjWidth, "focusBoxStyleWidth");
         style.strokeWidth = strokeWidth;
     }
