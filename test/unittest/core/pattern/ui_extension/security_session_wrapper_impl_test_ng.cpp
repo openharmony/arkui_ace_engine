@@ -824,4 +824,26 @@ HWTEST_F(SecuritySessionWrapperImplTestNg, SecuritySessionWrapperImplTestNg018, 
     EXPECT_TRUE(sessionWrapper->NotifyFocusStateAsync(false));
 #endif
 }
+
+/**
+ * @tc.name: SecuritySessionWrapperImplTestNg019
+ * @tc.desc: Test the method UpdateInstanceId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecuritySessionWrapperImplTestNg, SecuritySessionWrapperImplTestNg019, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a SecuritySessionWrapperImpl
+     */
+    auto sessionWrapper = GenerateSecuritySessionWrapperImpl();
+    EXPECT_EQ(sessionWrapper->session_, nullptr);
+
+    /**
+     * @tc.steps: step2. test UpdateInstanceId
+     */
+    sessionWrapper->UpdateInstanceId(10);
+    EXPECT_EQ(sessionWrapper->patternInstanceId_, 10);
+#endif
+}
 } // namespace OHOS::Ace::NG
