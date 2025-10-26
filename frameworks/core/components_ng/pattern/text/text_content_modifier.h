@@ -101,6 +101,8 @@ public:
 
     bool NeedMeasureUpdate(PropertyChangeFlag& flag);
 
+    float AdjustParagraphX(const ParagraphManager::ParagraphInfo& info, const RectF& contentRect);
+
     void SetClip(bool clip);
 
     void SetFontReady(bool value);
