@@ -385,6 +385,10 @@ void WebPattern::JavaScriptOnDocumentEnd(const ScriptItems&)
 {
 }
 
+void WebPattern::JavaScriptOnHeadReadyByOrder(const ScriptItems&, const ScriptItemsByOrder&)
+{
+}
+
 void WebPattern::SetWebController(const RefPtr<WebController>& webController)
 {
     webController_ = webController;

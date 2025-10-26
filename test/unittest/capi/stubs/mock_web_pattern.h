@@ -110,6 +110,7 @@ public:
 
     void JavaScriptOnDocumentStart(const ScriptItems&);
     void JavaScriptOnDocumentEnd(const ScriptItems&);
+    void JavaScriptOnHeadReadyByOrder(const ScriptItems& scriptItems, const ScriptItemsByOrder& scriptItemsByOrder);
 
     void SetWebController(const RefPtr<WebController>& webController);
     RefPtr<WebController> GetWebController() const;

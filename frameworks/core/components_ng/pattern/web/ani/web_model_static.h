@@ -56,7 +56,8 @@ public:
     static void SetWebMediaAVSessionEnabled(FrameNode *frameNode, const std::optional<bool>& enable);
     static void JavaScriptOnDocumentStart(FrameNode* frameNode, const ScriptItems& scriptItems);
     static void JavaScriptOnDocumentEnd(FrameNode* frameNode, const ScriptItems& scriptItems);
-    static void JavaScriptOnHeadEnd(FrameNode *frameNode, const ScriptItems& scriptItems);
+    static void JavaScriptOnHeadEnd(
+        FrameNode* frameNode, const ScriptItems& scriptItems, const ScriptItemsByOrder& scriptItemsByOrder);
     static void SetNativeEmbedOptions(FrameNode *frameNode, bool supportDefaultIntrinsicSize);
     static void SetMixedMode(FrameNode* frameNode, const std::optional<MixedModeContent>& mixedMode);
     static void SetCacheMode(FrameNode* frameNode, const std::optional<WebCacheMode>& cacheMode);
