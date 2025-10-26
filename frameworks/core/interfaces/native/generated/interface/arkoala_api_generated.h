@@ -16477,7 +16477,7 @@ typedef struct Opt_CutEvent {
 } Opt_CutEvent;
 typedef struct Ark_DataPanelShadowOptions {
     /* kind: Interface */
-    Opt_Union_Number_Resource radius;
+    Opt_Union_F64_Resource radius;
     Opt_Union_F64_Resource offsetX;
     Opt_Union_F64_Resource offsetY;
     Opt_Array_Union_ResourceColor_LinearGradient colors;
@@ -16634,7 +16634,7 @@ typedef struct Opt_FormInfo {
 } Opt_FormInfo;
 typedef struct Ark_GaugeShadowOptions {
     /* kind: Interface */
-    Opt_Union_Number_Resource radius;
+    Opt_Union_F64_Resource radius;
     Opt_Union_F64_Resource offsetX;
     Opt_Union_F64_Resource offsetY;
 } Ark_GaugeShadowOptions;

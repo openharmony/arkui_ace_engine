@@ -6573,7 +6573,7 @@ export enum ShadowStyle {
     OUTER_FLOATING_MD = 5
 }
 export interface MultiShadowOptions {
-    radius?: number | Resource;
+    radius?: double | Resource;
     offsetX?: double | Resource;
     offsetY?: double | Resource;
 }
