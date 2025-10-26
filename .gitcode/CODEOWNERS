@@ -256,6 +256,7 @@ component_ext/movingphoto/ @arkuiadvancedcomponent
 examples/TextComponentTest/entry/src/main/ets/pages/05-RichEditorSample/ @arkui_rich_editor
 examples/ @arkuipopupwindow_all
 examples/Image/ @arkui001
+examples/DrawableDescriptor/ @arkui001
 examples/Dialog_C/ @arkui001
 examples/Info/ @arkui001
 examples/ImageAnimator/ @arkui001
