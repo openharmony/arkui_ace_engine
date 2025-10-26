@@ -562,7 +562,6 @@ HWTEST_F(FocusManagerTestNg, FocusManagerTest016, TestSize.Level1)
 
     std::unordered_map<int32_t, std::pair<WeakPtr<FocusView>, std::list<WeakPtr<FocusView>>>> focusViewMap;
     focusViewMap[1] = std::make_pair(pageFouceView, focusManager->focusViewStack_);
-
     focusManager->GetFocusViewMap(focusViewMap);
     EXPECT_FALSE(focusViewMap[1].second.empty());
 }
