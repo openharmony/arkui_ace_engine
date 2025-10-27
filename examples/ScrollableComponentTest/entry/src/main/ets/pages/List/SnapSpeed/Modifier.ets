@@ -168,7 +168,7 @@ struct ListOriExample {
         Button(`更改排列方向`).onClick(() => {
           this.listDirectionIndex = this.listDirectionIndex + 1;
           if (this.listDirectionIndex >= this.listDirection.length) {
-            this.listDirectionIndex = 0
+            this.listDirectionIndex = 0;
           }
 
           if (this.listDirection[this.listDirectionIndex] == Axis.Vertical) {
@@ -191,7 +191,7 @@ struct ListOriExample {
 
         Button('删除ListItem')
           .onClick(() => {
-            this.editFlag = !this.editFlag
+            this.editFlag = !this.editFlag;
           }).margin({ top: 5, left: 20 })
       }
     }

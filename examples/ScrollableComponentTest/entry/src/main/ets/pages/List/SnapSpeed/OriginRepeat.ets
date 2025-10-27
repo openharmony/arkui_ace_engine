@@ -17,7 +17,7 @@
   * Description: List组件限位滚动支持设置动画速度档位
   * Writer: renxiaowen
   */
-  
+
 import common from '@ohos.app.ability.common';
 import window from '@ohos.window';
 import { LengthMetrics } from '@kit.ArkUI';
@@ -80,8 +80,8 @@ struct ListOriExample {
                       }.width('30%').height(40)
                       .onClick(() => {
                         if (ri.index != undefined) {
-                          this.repeatArr.splice(ri.index, 1)
-                          this.editFlag = false
+                          this.repeatArr.splice(ri.index, 1);
+                          this.editFlag = false;
                         }
                       }).stateEffect(true)
                     }
@@ -102,8 +102,8 @@ struct ListOriExample {
                       }.width('30%').height(40)
                       .onClick(() => {
                         if (ri.index != undefined) {
-                          this.repeatArr.splice(ri.index, 1)
-                          this.editFlag = false
+                          this.repeatArr.splice(ri.index, 1);
+                          this.editFlag = false;
                         }
                       }).stateEffect(true)
                     }
@@ -135,7 +135,7 @@ struct ListOriExample {
         Button(`更改Speed${this.speedIndex + 1}/${this.speedList.length}`).onClick(() => {
           this.speedIndex = this.speedIndex + 1;
           if (this.speedIndex >= this.speedList.length) {
-            this.speedIndex = 0
+            this.speedIndex = 0;
           }
         })
         Row({space: 10}) {

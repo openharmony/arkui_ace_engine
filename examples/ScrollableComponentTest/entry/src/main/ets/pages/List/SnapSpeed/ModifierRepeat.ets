@@ -95,8 +95,8 @@ struct ListOriExample {
                     }.width('30%').height(40)
                     .onClick(() => {
                       if (ri.index != undefined) {
-                        this.repeatArr.splice(ri.index, 1)
-                        this.editFlag = false
+                        this.repeatArr.splice(ri.index, 1);
+                        this.editFlag = false;
                       }
                     }).stateEffect(true)
                   }
@@ -118,8 +118,8 @@ struct ListOriExample {
                     }.width('30%').height(40)
                     .onClick(() => {
                       if (ri.index != undefined) {
-                        this.repeatArr.splice(ri.index, 1)
-                        this.editFlag = false
+                        this.repeatArr.splice(ri.index, 1);
+                        this.editFlag = false;
                       }
                     }).stateEffect(true)
                   }
@@ -152,7 +152,7 @@ struct ListOriExample {
           .onClick(() => {
             this.snapSpeedModifier.speedIndex = this.snapSpeedModifier.speedIndex + 1;
             if (this.snapSpeedModifier.speedIndex >= this.snapSpeedModifier.speedList.length) {
-              this.snapSpeedModifier.speedIndex = 0
+              this.snapSpeedModifier.speedIndex = 0;
             }
           })
         Row({ space: 10 }) {

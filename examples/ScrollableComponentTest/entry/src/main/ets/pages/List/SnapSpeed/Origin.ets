@@ -85,8 +85,8 @@ struct ListOriExample {
                   }.width('30%').height(40)
                   .onClick(() => {
                     if (index != undefined) {
-                      this.arr.splice(index, 1)
-                      this.editFlag = false
+                      this.arr.splice(index, 1);
+                      this.editFlag = false;
                     }
                   }).stateEffect(true)
                 }
@@ -108,8 +108,8 @@ struct ListOriExample {
                   }.width('30%').height(40)
                   .onClick(() => {
                     if (index != undefined) {
-                      this.arr.splice(index, 1)
-                      this.editFlag = false
+                      this.arr.splice(index, 1);
+                      this.editFlag = false;
                     }
                   }).stateEffect(true)
                 }
@@ -141,7 +141,7 @@ struct ListOriExample {
         Button(`更改Speed${this.speedIndex + 1}/${this.speedList.length}`).onClick(() => {
           this.speedIndex = this.speedIndex + 1;
           if (this.speedIndex >= this.speedList.length) {
-            this.speedIndex = 0
+            this.speedIndex = 0;
           }
         })
         Row({ space: 10 }) {
@@ -156,7 +156,7 @@ struct ListOriExample {
         Button(`更改排列方向`).onClick(() => {
           this.listDirectionIndex = this.listDirectionIndex + 1;
           if (this.listDirectionIndex >= this.listDirection.length) {
-            this.listDirectionIndex = 0
+            this.listDirectionIndex = 0;
           }
 
           if (this.listDirection[this.listDirectionIndex] == Axis.Vertical) {
@@ -179,7 +179,7 @@ struct ListOriExample {
 
         Button('删除ListItem')
           .onClick(() => {
-            this.editFlag = !this.editFlag
+            this.editFlag = !this.editFlag;
           }).margin({ top: 5, left: 20 })
       }
     }
