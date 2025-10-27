@@ -393,6 +393,7 @@ HWTEST_F(EventDumpTestNg, EventDumpTestNg010, TestSize.Level1)
     eventTreeRecord->AddTouchPoint(event);
     auto frameNodeSnapshotInstance = CreateFrameNodeSnapshotWithInitValue();
     ASSERT_NE(frameNodeSnapshotInstance, nullptr);
+
     eventTreeRecord->AddFrameNodeSnapshot(std::move(*frameNodeSnapshotInstance));
     auto gestureSnapshot = AceType::MakeRefPtr<GestureSnapshot>();
     int32_t finger = 0;
