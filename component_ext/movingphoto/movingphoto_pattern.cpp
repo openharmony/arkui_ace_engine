@@ -1977,6 +1977,7 @@ void MovingPhotoPattern::DetachFirstImageFromFrameNode()
     CHECK_NULL_VOID(host);
     auto movingPhoto = AceType::DynamicCast<MovingPhotoNode>(host);
     CHECK_NULL_VOID(movingPhoto);
+    CHECK_NULL_VOID(movingPhoto->GetTotalChildCount() > NODE_COUNT);
     auto image = AceType::DynamicCast<FrameNode>(movingPhoto->GetImage());
     CHECK_NULL_VOID(image);
     host->RemoveChild(image);
