@@ -4591,11 +4591,11 @@ let ReplaceEffectType;
   ReplaceEffectType[ReplaceEffectType.SLASH_OVERLAY = 2] = 'SLASH_OVERLAY';
 })(ReplaceEffectType || (ReplaceEffectType = {}));
 
-let IndicatorType;
-(function (IndicatorType) {
-  IndicatorType[IndicatorType.DIVIDER = 0] = 'DIVIDER';
-  IndicatorType[IndicatorType.BACKGROUND = 1] = 'BACKGROUND';
-})(IndicatorType || (IndicatorType = {}));
+let PickerIndicatorType;
+(function (PickerIndicatorType) {
+  PickerIndicatorType[PickerIndicatorType.BACKGROUND = 0] = 'BACKGROUND';
+  PickerIndicatorType[PickerIndicatorType.DIVIDER = 1] = 'DIVIDER';
+})(PickerIndicatorType || (PickerIndicatorType = {}));
 
 let BlankScreenDetectionMethod;
 (function (BlankScreenDetectionMethod) {

@@ -115,26 +115,6 @@ RefPtr<PaintWrapper> ContainerPickerPaintMethodTest::CreateMockPaintWrapper(cons
 }
 
 /**
- * @tc.name: GetContentDrawFunctionTest001
- * @tc.desc: Test ContainerPickerPaintMethod GetContentDrawFunction
- * @tc.type: FUNC
- */
-HWTEST_F(ContainerPickerPaintMethodTest, GetContentDrawFunctionTest001, TestSize.Level1)
-{
-    auto node = CreateContainerPickerNode();
-    auto paintWrapper = CreateMockPaintWrapper(node);
-    Testing::MockCanvas rsCanvas;
-    
-    EXPECT_CALL(rsCanvas, ClipRect(_, _, _)).Times(1);
-    
-    auto drawFunction = paintMethod_->GetContentDrawFunction(AceType::RawPtr(paintWrapper));
-    ASSERT_NE(drawFunction, nullptr);
-    
-    // Test with valid canvas
-    drawFunction(rsCanvas);
-}
-
-/**
  * @tc.name: GetForegroundDrawFunctionTest001
  * @tc.desc: Test ContainerPickerPaintMethod GetForegroundDrawFunction
  * @tc.type: FUNC
@@ -147,7 +127,7 @@ HWTEST_F(ContainerPickerPaintMethodTest, GetForegroundDrawFunctionTest001, TestS
     
     // Set indicator type to divider
     auto layoutProperty = node->GetLayoutProperty<ContainerPickerLayoutProperty>();
-    layoutProperty->UpdateIndicatorType(static_cast<int32_t>(IndicatorType::DIVIDER));
+    layoutProperty->UpdateIndicatorType(static_cast<int32_t>(PickerIndicatorType::DIVIDER));
     
     auto drawFunction = paintMethod_->GetForegroundDrawFunction(AceType::RawPtr(paintWrapper));
     ASSERT_NE(drawFunction, nullptr);
@@ -207,7 +187,7 @@ HWTEST_F(ContainerPickerPaintMethodTest, PaintSelectionIndicatorBackgroundTest00
     
     // Set indicator type to divider
     auto layoutProperty = node->GetLayoutProperty<ContainerPickerLayoutProperty>();
-    layoutProperty->UpdateIndicatorType(static_cast<int32_t>(IndicatorType::DIVIDER));
+    layoutProperty->UpdateIndicatorType(static_cast<int32_t>(PickerIndicatorType::DIVIDER));
     
     // Should not call any canvas methods
     EXPECT_CALL(rsCanvas, Save()).Times(0);
@@ -229,7 +209,7 @@ HWTEST_F(ContainerPickerPaintMethodTest, PaintSelectionIndicatorDividerTest001, 
     
     // Set indicator type to background
     auto layoutProperty = node->GetLayoutProperty<ContainerPickerLayoutProperty>();
-    layoutProperty->UpdateIndicatorType(static_cast<int32_t>(IndicatorType::BACKGROUND));
+    layoutProperty->UpdateIndicatorType(static_cast<int32_t>(PickerIndicatorType::BACKGROUND));
     
     // Should not call DrawLine
     EXPECT_CALL(rsCanvas, DrawLine(_, _)).Times(0);

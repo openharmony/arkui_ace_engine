@@ -250,6 +250,10 @@ void ContainerPickerPattern::OnModifyDone()
     isLoop_ = IsLoop();
     InitOrRefreshHapticController();
 
+    auto focusHub = host->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    InitOnKeyEvent(focusHub);
+
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     PickerMarkDirty();
 }
@@ -1330,6 +1334,98 @@ void ContainerPickerPattern::UpdateBorderRadiusWithResObj(const RefPtr<ResourceO
         CHECK_NULL_VOID(theme);
         property->UpdateIndicatorBorderRadius(BorderRadiusProperty(*theme->GetSelectedBorderRadius().radiusTopLeft));
     }
+}
+
+void ContainerPickerPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
+{
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetFocusType(FocusType::NODE);
+    focusHub->SetFocusable(true);
+    focusHub->SetFocusStyleType(FocusStyleType::CUSTOM_REGION);
+
+    auto getInnerPaintRectCallback = [wp = WeakClaim(this)](RoundRect& paintRect) {
+        auto pattern = wp.Upgrade();
+        if (pattern) {
+            pattern->GetInnerFocusPaintRect(paintRect);
+        }
+    };
+    focusHub->SetInnerFocusPaintRectCallback(getInnerPaintRectCallback);
+
+    auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
+        auto pattern = wp.Upgrade();
+        if (pattern) {
+            return pattern->OnKeyEvent(event);
+        }
+        return false;
+    };
+    focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
+}
+
+bool ContainerPickerPattern::OnKeyEvent(const KeyEvent& event)
+{
+    if (event.action != KeyAction::DOWN) {
+        return false;
+    }
+
+    if (event.code == KeyCode::KEY_DPAD_UP || event.code == KeyCode::KEY_DPAD_DOWN) {
+        return HandleDirectionKey(event.code);
+    }
+    return false;
+}
+
+bool ContainerPickerPattern::HandleDirectionKey(KeyCode code)
+{
+    bool result = true;
+    if (totalItemCount_ == 0) {
+        return false;
+    }
+    switch (code) {
+        case KeyCode::KEY_DPAD_UP: {
+            int32_t totalCountAndIndex = totalItemCount_ + selectedIndex_ - 1;
+            int32_t upIndex = (totalCountAndIndex ? totalCountAndIndex : 0) % totalItemCount_;
+            SwipeTo(upIndex);
+            selectedIndex_ = upIndex;
+            FireScrollStopEvent();
+            break;
+        }
+        
+        case KeyCode::KEY_DPAD_DOWN: {
+            int32_t downIndex = (totalItemCount_ + selectedIndex_ + 1) % totalItemCount_;
+            SwipeTo(downIndex);
+            selectedIndex_ = downIndex;
+            FireScrollStopEvent();
+            break;
+        }
+
+        default:
+            result = false;
+            break;
+    }
+    return result;
+}
+
+void ContainerPickerPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto frameRect = geometryNode->GetFrameRect();
+    
+    float paintRectWidth = frameRect.Width() - FOCUS_DEFAULT_STROCK_WIDTH.ConvertToPx();
+    float paintRectHeight = PICKER_ITEM_HEIGHT.ConvertToPx() - FOCUS_DEFAULT_STROCK_WIDTH.ConvertToPx();
+    float offsetX = FOCUS_DEFAULT_STROCK_WIDTH.ConvertToPx() / 2;
+    float offsetY = frameRect.Height() / 2 - paintRectHeight / 2;
+    paintRect.SetRect(RectF(offsetX, offsetY, paintRectWidth, paintRectHeight));
+
+    paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS,
+        static_cast<RSScalar>(DEFAULT_RADIUS.ConvertToPx()), static_cast<RSScalar>(DEFAULT_RADIUS.ConvertToPx()));
+    paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS,
+        static_cast<RSScalar>(DEFAULT_RADIUS.ConvertToPx()), static_cast<RSScalar>(DEFAULT_RADIUS.ConvertToPx()));
+    paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_LEFT_POS,
+        static_cast<RSScalar>(DEFAULT_RADIUS.ConvertToPx()), static_cast<RSScalar>(DEFAULT_RADIUS.ConvertToPx()));
+    paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS,
+        static_cast<RSScalar>(DEFAULT_RADIUS.ConvertToPx()), static_cast<RSScalar>(DEFAULT_RADIUS.ConvertToPx()));
 }
 
 } // namespace OHOS::Ace::NG

@@ -423,6 +423,7 @@ void ContainerPickerLayoutAlgorithm::LayoutItem(
     offset += OffsetF(translate.GetX(), pos.second.startPos);
     CHECK_NULL_VOID(wrapper->GetGeometryNode());
     TranslateAndRotate(wrapper->GetHostNode(), offset);
+    UpdateFadeItems(wrapper->GetHostNode(), pos);
     wrapper->GetGeometryNode()->SetMarginFrameOffset(offset);
     wrapper->Layout();
 }
@@ -450,6 +451,20 @@ void ContainerPickerLayoutAlgorithm::TranslateAndRotate(RefPtr<FrameNode> node, 
         offset.AddY(translateY);
     }
     NG::ViewAbstract::SetRotate(node.GetRawPtr(), NG::Vector5F(1.0f, 0.0f, 0.0f, -angle, 0.0f));
+}
+
+void ContainerPickerLayoutAlgorithm::UpdateFadeItems(RefPtr<FrameNode> node, std::pair<int32_t, PickerItemInfo> pos)
+{
+    CHECK_NULL_VOID(node);
+    auto middleItem = ContainerPickerUtils::CalcCurrentMiddleItem(itemPosition_, height_, totalItemCount_, isLoop_);
+    auto middleIndex = middleItem.first;
+    auto renderContext = node->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (pos.first != middleIndex) {
+        renderContext->UpdateOpacity(FADE_OPACITY);
+    } else {
+        renderContext->UpdateOpacity(1);
+    }
 }
 
 } // namespace OHOS::Ace::NG
