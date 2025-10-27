@@ -7022,6 +7022,13 @@ void TextPattern::UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValu
         DEFINE_PROP_HANDLER(LineHeightMultiply, double, UpdateLineHeightMultiply),
         DEFINE_PROP_HANDLER(MinimumLineHeight, CalcDimension, UpdateMinimumLineHeight),
         DEFINE_PROP_HANDLER(MaximumLineHeight, CalcDimension, UpdateMaximumLineHeight),
+        {"ColorShaderStyle", [](TextLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto realValue = std::get_if<Color>(&(value->GetValue()))) {
+                    auto shaderStyleColor = Color(*realValue);
+                    prop->UpdateColorShaderStyle(shaderStyleColor);
+                }
+            }
+        },
     };
     auto it = handlers.find(key);
     if (it != handlers.end()) {

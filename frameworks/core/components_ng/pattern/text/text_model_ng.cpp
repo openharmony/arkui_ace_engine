@@ -1758,6 +1758,16 @@ void TextModelNG::SetColorShaderStyle(FrameNode* frameNode, const Color& value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, ColorShaderStyle, value, frameNode);
 }
 
+Color TextModelNG::GetColorShaderStyle(FrameNode* frameNode)
+{
+    auto themeScopeId = frameNode ? frameNode->GetThemeScopeId() : 0;
+    auto defaultColor = GetDefaultColor(themeScopeId);
+    CHECK_NULL_RETURN(frameNode, defaultColor);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, defaultColor);
+    return layoutProperty->GetColorShaderStyle().value_or(defaultColor);
+}
+
 NG::Gradient TextModelNG::GetGradientStyle(FrameNode* frameNode)
 {
     NG::Gradient value;

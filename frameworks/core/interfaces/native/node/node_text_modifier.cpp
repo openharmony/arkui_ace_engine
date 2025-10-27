@@ -2145,6 +2145,11 @@ void ResetTextGradient(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     ViewAbstractModelNG::RemoveResObj(frameNode, "TextGradient.gradient");
     TextModelNG::ResetTextGradient(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("ColorShaderStyle");
+    }
 }
 
 ArkUI_Int32 GetTextRadialGradient(ArkUINodeHandle node, ArkUI_Float32 (*values)[4], ArkUI_Uint32 (*colors)[10],
@@ -2175,11 +2180,37 @@ ArkUI_Int32 GetTextRadialGradient(ArkUINodeHandle node, ArkUI_Float32 (*values)[
     return index;
 }
 
-void SetColorShaderColor(ArkUINodeHandle node, ArkUI_Uint32 color)
+void SetColorShaderColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* colorShaderColorRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    Color result = Color(color);
     TextModelNG::SetColorShaderStyle(frameNode, Color(color));
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        RefPtr<ResourceObject> resObj;
+        if (!colorShaderColorRawPtr) {
+            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+        } else {
+            resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorShaderColorRawPtr));
+        }
+        if (resObj) {
+            pattern->RegisterResource<Color>("ColorShaderStyle", resObj, result);
+        }
+    }
+}
+
+void ResetColorShaderColor(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::ResetTextGradient(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("ColorShaderStyle");
+    }
 }
 
 void SetTextVerticalAlign(ArkUINodeHandle node, ArkUI_Uint32 textVerticalAlign)
@@ -2390,6 +2421,7 @@ const ArkUITextModifier* GetTextModifier()
         .resetTextVerticalAlign = ResetTextVerticalAlign,
         .getTextVerticalAlign = GetTextVerticalAlign,
         .setColorShaderColor = SetColorShaderColor,
+        .resetColorShaderColor = ResetColorShaderColor,
         .setTextContentTransition = SetTextContentTransition,
         .resetTextContentTransition = ResetTextContentTransition,
     };
