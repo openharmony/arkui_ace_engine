@@ -27,27 +27,21 @@
 #include "frameworks/core/components_ng/pattern/navigation/navigation_route.h"
 
 namespace OHOS::Ace::Framework {
+JSNavPathInfoScope::JSNavPathInfoScope(const EcmaVM* vm)
+{
+    if (vm) {
+        scope_ = std::make_shared<LocalScope>(vm);
+    }
+}
+
 napi_value JSNavPathInfo::GetParamObj() const
 {
     return JsConverter::ConvertJsValToNapiValue(param_);
 }
 
-void JSNavPathInfo::OpenScope()
+std::shared_ptr<NG::NavPathInfoScope> JSNavPathInfo::Scope()
 {
-    if (param_->IsEmpty()) {
-        return;
-    }
-    if (!scope_) {
-        scope_ = new LocalScope(param_->GetEcmaVM());
-    }
-}
-
-void JSNavPathInfo::CloseScope()
-{
-    if (scope_) {
-        delete scope_;
-        scope_ = nullptr;
-    }
+    return std::make_shared<JSNavPathInfoScope>(param_->GetEcmaVM());
 }
 
 void JSNavDestinationContext::GetPathInfo(const JSCallbackInfo& info)

@@ -3410,8 +3410,9 @@ void NavigationPattern::NotifyNavDestinationSwitch(RefPtr<NavDestinationContext>
     } else if (to) {
         pathInfo = to->GetNavPathInfo();
     }
+    std::shared_ptr<NavPathInfoScope> scope = nullptr;
     if (pathInfo) {
-        pathInfo->OpenScope();
+        scope = pathInfo->Scope();
     }
     auto state = NavDestinationState::ON_HIDDEN;
     auto context = host->GetContextRefPtr();
@@ -3425,9 +3426,6 @@ void NavigationPattern::NotifyNavDestinationSwitch(RefPtr<NavDestinationContext>
     BuildNavDestinationInfoFromContext(navigationId, NavDestinationState::ON_SHOWN, to, false, toInfo);
     UIObserverHandler::GetInstance().NotifyNavDestinationSwitch(
         std::move(fromInfo), std::move(toInfo), operation);
-    if (pathInfo) {
-        pathInfo->CloseScope();
-    }
 }
 
 void NavigationPattern::AppendFilterNodesFromHideNodes(std::set<RefPtr<NavDestinationGroupNode>>& filterNodes)

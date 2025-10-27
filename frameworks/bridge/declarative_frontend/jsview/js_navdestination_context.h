@@ -27,6 +27,13 @@
 #include "core/components_ng/pattern/navrouter/navdestination_context.h"
 
 namespace OHOS::Ace::Framework {
+class JSNavPathInfoScope : public NG::NavPathInfoScope {
+public:
+    JSNavPathInfoScope(const EcmaVM* vm);
+private:
+    std::shared_ptr<LocalScope> scope_ = nullptr;
+};
+
 class JSNavPathInfo : public NG::NavPathInfo {
     DECLARE_ACE_TYPE(JSNavPathInfo, NG::NavPathInfo);
 public:
@@ -70,14 +77,12 @@ public:
 
     void UpdateNavPathInfo(const RefPtr<NG::NavPathInfo>& info) override;
 
-    virtual void OpenScope() override;
-    virtual void CloseScope() override;
+    virtual std::shared_ptr<NG::NavPathInfoScope> Scope() override;
 
 private:
     JSRef<JSVal> param_;
     JSRef<JSVal> onPop_;
     JSRef<JSFunc> navDestinationPopCallback_;
-    LocalScope* scope_ = nullptr;
 };
 
 class JSNavDestinationContext : public Referenced {
