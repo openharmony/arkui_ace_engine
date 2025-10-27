@@ -20,26 +20,29 @@
 
 import { WaterFlowDataSource } from '../../WaterFlowDataSource';
 
-class waterFlowModifier implements AttributeModifier<WaterFlowAttribute> {
-  index: number = 0;
-  columnList: (string | ItemFillPolicy | undefined | null)[] = [
-    '1fr 2fr 1fr',
-    { fillType: PresetFillType.BREAKPOINT_DEFAULT },
-    { fillType: PresetFillType.BREAKPOINT_SM2MD3LG5 },
-    { fillType: PresetFillType.BREAKPOINT_SM1MD2LG3 },
-    undefined,
-    null
-  ]
-
-  applyNormalAttribute(instance: WaterFlowAttribute): void {
-    instance.columnsTemplate(this.columnList[this.index])
-  }
-}
-
 @Entry
 @Component
 struct WaterFlowDemo {
-  @State waterFlowMod: waterFlowModifier = new waterFlowModifier()
+  @State columnIndex: number = 0;
+  @State columnList: (string | ItemFillPolicy | undefined | null)[] = [
+    '1fr 2fr 1fr',
+    { fillType: PresetFillType.BREAKPOINT_DEFAULT },
+    { fillType: PresetFillType.BREAKPOINT_SM1MD2LG3 },
+    { fillType: PresetFillType.BREAKPOINT_SM2MD3LG5 },
+    undefined,
+    null
+  ]
+  @State widthIndex: number = 0;
+  @State widthList: (string)[] = [
+    '100%', '80%', '60%', '20%'
+  ]
+  @State directionIndex: number = 0;
+  @State directionList: (FlexDirection)[] = [
+    FlexDirection.Row,
+    FlexDirection.Column,
+    FlexDirection.RowReverse,
+    FlexDirection.ColumnReverse
+  ]
   minSize: number = 80;
   maxSize: number = 180;
   colors: number[] = [0xFFC0CB, 0xDA70D6, 0x6B8E23, 0x6A5ACD, 0x00FFFF, 0x00FF7F];
@@ -53,7 +56,12 @@ struct WaterFlowDemo {
   // 分组管理：WaterFlow的核心特性，支持不同区域使用不同列数
   @State sections: WaterFlowSections = new WaterFlowSections();
   // 分组边距配置：统一的外边距设置
-
+  sectionMargin: Margin = {
+    top: 10,
+    left: 5,
+    bottom: 10,
+    right: 5
+  };
   oneColumnSection: SectionOptions = {
     itemsCount: 4, // 该分组包含4个FlowItem
     crossCount: 1, // 使用1列布局
@@ -127,11 +135,33 @@ struct WaterFlowDemo {
 
   build() {
     Column({ space: 2 }) {
+
       Row() {
-        Button('column: ' + this.waterFlowMod.columnList[this.waterFlowMod.index]).onClick(() => {
-          this.waterFlowMod.index++;
-          this.waterFlowMod.index = this.waterFlowMod.index % this.waterFlowMod.columnList.length;
-        })
+        Button('column' + this.columnIndex)
+          .onClick(() => {
+            this.columnIndex++;
+            if (this.columnIndex > this.columnList.length - 1) {
+              this.columnIndex = 0;
+            }
+          })
+        Button('width' + this.widthIndex)
+          .onClick(() => {
+            this.widthIndex++;
+            if (this.widthIndex > this.widthList.length - 1) {
+              this.widthIndex = 0;
+            }
+          })
+        Button('direction' + this.directionIndex)
+          .onClick(() => {
+            this.directionIndex++;
+            if (this.directionIndex > this.directionList.length - 1) {
+              this.directionIndex = 0;
+            }
+          })
+      }
+
+      Row() {
+
         Button('splice')
           .height('5%')
           .onClick(() => {
@@ -154,22 +184,22 @@ struct WaterFlowDemo {
         .fontColor(Color.Red)
         .height(15)
 
-      WaterFlow({ layoutMode: WaterFlowLayoutMode.SLIDING_WINDOW, scroller: this.scroller, sections: this.sections }) {
-        Repeat<number>(this.dataSource.dataArray)
-          .each((ri: RepeatItem<number>) => {
-            FlowItem() {
-              // 使用可复用组件，提升性能
-              Column() {
-                Text('R' + ri.item).fontSize(12).height('16')
-              }
-              .height(ri.item * 11)
+      WaterFlow({ scroller: this.scroller, layoutMode: WaterFlowLayoutMode.ALWAYS_TOP_DOWN, sections: this.sections }) {
+        ForEach(this.dataSource.dataArray, (item: number) => {
+          FlowItem() {
+            // 使用可复用组件，提升性能
+            Column() {
+              Text('F' + item).fontSize(12).height('16')
             }
-            .width('100%')
-            //.aspectRatio(this.itemHeightArray[ri.item % 100] / this.itemWidthArray[ri.item%100])
-            .backgroundColor(this.colors[ri.item % this.colors.length])
-          })
+            .height(item * 11)
+          }
+          .width('100%')
+          //.aspectRatio(this.itemHeightArray[item % 100] / this.itemWidthArray[item%100])
+          .backgroundColor(this.colors[item % this.colors.length])
+        }, (item: string) => item)
       }
-      .attributeModifier(this.waterFlowMod)
+      .columnsTemplate(this.columnList[this.columnIndex])
+      .layoutDirection(this.directionList[this.directionIndex])
       .columnsGap(10)
       .backgroundColor(0xFAEEE0)
       .width('100%')

@@ -13,33 +13,35 @@
  * limitations under the License.
  */
 
-/*
- * Description: WaterFlow组件支持基于断点自适应列数
- * Writer: renxiaowen
- */
-
+ /*
+  * Description: WaterFlow组件支持基于断点自适应列数
+  * Writer: renxiaowen
+  */
 import { WaterFlowDataSource } from '../../WaterFlowDataSource';
-
-class waterFlowModifier implements AttributeModifier<WaterFlowAttribute> {
-  index: number = 0;
-  columnList: (string | ItemFillPolicy | undefined | null)[] = [
-    '1fr 2fr 1fr',
-    { fillType: PresetFillType.BREAKPOINT_DEFAULT },
-    { fillType: PresetFillType.BREAKPOINT_SM2MD3LG5 },
-    { fillType: PresetFillType.BREAKPOINT_SM1MD2LG3 },
-    undefined,
-    null
-  ]
-
-  applyNormalAttribute(instance: WaterFlowAttribute): void {
-    instance.columnsTemplate(this.columnList[this.index])
-  }
-}
 
 @Entry
 @Component
 struct WaterFlowDemo {
-  @State waterFlowMod: waterFlowModifier = new waterFlowModifier()
+  @State columnIndex: number = 0;
+  @State columnList:(string| ItemFillPolicy|undefined|null)[]=[
+    '1fr 2fr 1fr',
+    {fillType:PresetFillType.BREAKPOINT_DEFAULT},
+    {fillType:PresetFillType.BREAKPOINT_SM1MD2LG3},
+    {fillType:PresetFillType.BREAKPOINT_SM2MD3LG5},
+    undefined,
+    null
+  ]
+  @State widthIndex:number = 0;
+  @State widthList:(string )[]=[
+    '100%','80%','60%','20%'
+  ]
+  @State directionIndex:number = 0;
+  @State directionList:(FlexDirection)[]=[
+    FlexDirection.Row,
+    FlexDirection.Column,
+    FlexDirection.RowReverse,
+    FlexDirection.ColumnReverse
+  ]
   minSize: number = 80;
   maxSize: number = 180;
   colors: number[] = [0xFFC0CB, 0xDA70D6, 0x6B8E23, 0x6A5ACD, 0x00FFFF, 0x00FF7F];
@@ -53,28 +55,31 @@ struct WaterFlowDemo {
   // 分组管理：WaterFlow的核心特性，支持不同区域使用不同列数
   @State sections: WaterFlowSections = new WaterFlowSections();
   // 分组边距配置：统一的外边距设置
+  sectionMargin: Margin = { top: 10, left: 5, bottom: 10, right: 5 };
 
   oneColumnSection: SectionOptions = {
-    itemsCount: 4, // 该分组包含4个FlowItem
-    crossCount: 1, // 使用1列布局
+    itemsCount: 4,                     // 该分组包含4个FlowItem
+    crossCount: 1,                     // 使用1列布局
     // 回调函数：动态设置每个item的高度
     onGetItemMainSizeByIndex: (index: number) => {
       return this.itemHeightArray[index % 100];
     }
   };
+
   // 第二种分组：双列布局，适合展示列表内容
   twoColumnSection: SectionOptions = {
-    itemsCount: 2, // 该分组包含2个FlowItem
-    crossCount: 2, // 使用2列布局
+    itemsCount: 2,                     // 该分组包含2个FlowItem
+    crossCount: 2,                     // 使用2列布局
     // 回调函数：固定高度100px
     onGetItemMainSizeByIndex: (index: number) => {
       return 100;
     }
   };
+
   // 最后一个分组：用于处理剩余数据
   lastSection: SectionOptions = {
-    itemsCount: 20, // 该分组包含20个FlowItem
-    crossCount: 2, // 使用2列布局
+    itemsCount: 20,                    // 该分组包含20个FlowItem
+    crossCount: 2,                     // 使用2列布局
     // 回调函数：使用随机高度
     onGetItemMainSizeByIndex: (index: number) => {
       return this.itemHeightArray[index % 100];
@@ -100,8 +105,8 @@ struct WaterFlowDemo {
 
     // 初始化瀑布流分组信息：交替使用单列和双列布局
     let sectionOptions: SectionOptions[] = [];
-    let count = 0; // 已分配的FlowItem数量计数
-    let oneOrTwo = 0; // 用于交替选择分组类型
+    let count = 0;                     // 已分配的FlowItem数量计数
+    let oneOrTwo = 0;                  // 用于交替选择分组类型
 
     while (count < this.dataCount) {
       // 剩余数据不足20个时，使用最后一个分组处理
@@ -127,11 +132,32 @@ struct WaterFlowDemo {
 
   build() {
     Column({ space: 2 }) {
+
+      Row(){
+        Button('column' + this.columnIndex)
+          .onClick(() => {
+            this.columnIndex++
+            if (this.columnIndex > this.columnList.length - 1) {
+              this.columnIndex = 0
+            }
+          })
+        Button('width' + this.widthIndex)
+          .onClick(() => {
+            this.widthIndex++
+            if (this.widthIndex > this.widthList.length - 1) {
+              this.widthIndex = 0
+            }
+          })
+        Button('direction' + this.directionIndex)
+          .onClick(() => {
+            this.directionIndex++
+            if (this.directionIndex > this.directionList.length - 1) {
+              this.directionIndex = 0
+            }
+          })
+      }
       Row() {
-        Button('column: ' + this.waterFlowMod.columnList[this.waterFlowMod.index]).onClick(() => {
-          this.waterFlowMod.index++;
-          this.waterFlowMod.index = this.waterFlowMod.index % this.waterFlowMod.columnList.length;
-        })
+
         Button('splice')
           .height('5%')
           .onClick(() => {
@@ -145,22 +171,21 @@ struct WaterFlowDemo {
               }
             };
             let oldLength: number = this.sections.length();
-            this.sections.splice(0, oldLength, [newSection]); // 替换所有分组
+            this.sections.splice(0, oldLength, [newSection]);  // 替换所有分组
           })
           .margin({ top: 10, left: 20 })
       }.margin({ bottom: 20 })
-
-      Text('Width：' + this.contentWidth + '，Height：' + this.contentHeight)
+      Text('Width：'+ this.contentWidth+'，Height：'+ this.contentHeight)
         .fontColor(Color.Red)
         .height(15)
 
-      WaterFlow({ layoutMode: WaterFlowLayoutMode.SLIDING_WINDOW, scroller: this.scroller, sections: this.sections }) {
+      WaterFlow({ layoutMode: WaterFlowLayoutMode.ALWAYS_TOP_DOWN,scroller:this.scroller,sections: this.sections }) {
         Repeat<number>(this.dataSource.dataArray)
           .each((ri: RepeatItem<number>) => {
             FlowItem() {
               // 使用可复用组件，提升性能
               Column() {
-                Text('R' + ri.item).fontSize(12).height('16')
+                Text("R" + ri.item).fontSize(12).height('16')
               }
               .height(ri.item * 11)
             }
@@ -169,7 +194,8 @@ struct WaterFlowDemo {
             .backgroundColor(this.colors[ri.item % this.colors.length])
           })
       }
-      .attributeModifier(this.waterFlowMod)
+      .columnsTemplate(this.columnList[this.columnIndex])
+      .layoutDirection(this.directionList[this.directionIndex])
       .columnsGap(10)
       .backgroundColor(0xFAEEE0)
       .width('100%')
