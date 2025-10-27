@@ -436,7 +436,7 @@ bool OnHttpAuthRequest(const CallbackHelper<Callback_OnHttpAuthRequestEvent_Bool
 }
 
 RefPtr<WebResponse> OnInterceptRequest(
-    const CallbackHelper<Callback_OnInterceptRequestEvent_WebResourceResponse>& arkCallback,
+    const CallbackHelper<Type_WebAttribute_onInterceptRequest>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     const auto refNode = weakNode.Upgrade();
@@ -451,10 +451,11 @@ RefPtr<WebResponse> OnInterceptRequest(
     auto peer = new WebResourceRequestPeer();
     peer->webRequest = eventInfo->GetRequest();
     parameter.request = peer;
-    const auto arkResult = arkCallback.InvokeWithObtainResult<Ark_WebResourceResponse,
-        Callback_WebResourceResponse_Void>(parameter);
-    CHECK_NULL_RETURN(arkResult, nullptr);
-    return arkResult->handler;
+    const auto arkResult = arkCallback.InvokeWithObtainResult<Opt_WebResourceResponse,
+        Callback_Opt_WebResourceResponse_Void>(parameter);
+    CHECK_NULL_RETURN(arkResult.value, nullptr);
+    Ark_WebResourceResponse value = arkResult.value;
+    return value->handler;
 }
 
 void OnPermissionRequest(const CallbackHelper<Callback_OnPermissionRequestEvent_Void>& arkCallback,

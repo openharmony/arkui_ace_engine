@@ -1799,7 +1799,7 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setOnHttpAuthRequest(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnInterceptRequestAttribute(value: ((value0: OnInterceptRequestEvent) => WebResourceResponse) | undefined): void {
+    setOnInterceptRequestAttribute(value: ((value0: OnInterceptRequestEvent) => WebResourceResponse | null) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -3371,7 +3371,7 @@ export interface WebAttribute extends CommonMethod {
     onHttpAuthRequest(value: ((value0: OnHttpAuthRequestEvent) => boolean) | undefined): this {
         throw new Error("Unimplemented method onHttpAuthRequest")
     }
-    onInterceptRequest(value: ((value0: OnInterceptRequestEvent) => WebResourceResponse) | undefined): this {
+    onInterceptRequest(value: ((value0: OnInterceptRequestEvent) => WebResourceResponse | null) | undefined): this {
         throw new Error("Unimplemented method onInterceptRequest")
     }
     onPermissionRequest(value: ((value0: OnPermissionRequestEvent) => void) | undefined): this {
@@ -3646,7 +3646,7 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     onFullScreenEnter_value?: OnFullScreenEnterCallback | undefined
     onScaleChange_value?: ((value0: OnScaleChangeEvent) => void) | undefined
     onHttpAuthRequest_value?: ((value0: OnHttpAuthRequestEvent) => boolean) | undefined
-    onInterceptRequest_value?: ((value0: OnInterceptRequestEvent) => WebResourceResponse) | undefined
+    onInterceptRequest_value?: ((value0: OnInterceptRequestEvent) => WebResourceResponse | null) | undefined
     onPermissionRequest_value?: ((value0: OnPermissionRequestEvent) => void) | undefined
     onScreenCaptureRequest_value?: ((value0: OnScreenCaptureRequestEvent) => void) | undefined
     onContextMenuShow_value?: ((value0: OnContextMenuShowEvent) => boolean) | undefined
@@ -3858,7 +3858,7 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     onHttpAuthRequest(value: ((value0: OnHttpAuthRequestEvent) => boolean) | undefined): this {
         return this
     }
-    onInterceptRequest(value: ((value0: OnInterceptRequestEvent) => WebResourceResponse) | undefined): this {
+    onInterceptRequest(value: ((value0: OnInterceptRequestEvent) => WebResourceResponse | null) | undefined): this {
         return this
     }
     onPermissionRequest(value: ((value0: OnPermissionRequestEvent) => void) | undefined): this {
@@ -4482,9 +4482,9 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         }
         return this
     }
-    public onInterceptRequest(value: ((value0: OnInterceptRequestEvent) => WebResourceResponse) | undefined): this {
+    public onInterceptRequest(value: ((value0: OnInterceptRequestEvent) => WebResourceResponse | null) | undefined): this {
         if (this.checkPriority("onInterceptRequest")) {
-            const value_casted = value as (((value0: OnInterceptRequestEvent) => WebResourceResponse) | undefined)
+            const value_casted = value as (((value0: OnInterceptRequestEvent) => WebResourceResponse | null) | undefined)
             this.getPeer()?.setOnInterceptRequestAttribute(value_casted)
             return this
         }
