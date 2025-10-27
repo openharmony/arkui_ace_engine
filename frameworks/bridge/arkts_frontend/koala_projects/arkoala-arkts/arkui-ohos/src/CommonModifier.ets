@@ -16,7 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { mutableState, MutableState } from '@koalaui/runtime'
+import { MutableState, GlobalStateManager } from '@koalaui/runtime'
 import { CommonAttribute, AttributeModifier } from  './component/common'
 import { CommonMethodModifier } from './CommonMethodModifier'
 
@@ -34,11 +34,8 @@ export interface IModifierState {
 }
 
 export class ModifierState implements IModifierState {
-    _state: MutableState<int> = mutableState(0);
     addRef(): void {
-        this._state.value;
     }
     fireChange(): void {
-        ++this._state.value;
     }
 }
