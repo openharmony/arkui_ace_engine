@@ -142,7 +142,7 @@ std::shared_ptr<GridComponent> GridTest::CreatGrid1(int32_t type)
     auto grid = std::make_shared<GridComponent>();
     grid->SetWidth(SIZE_300);
     grid->SetHeight(SIZE_300);
-    grid->SetMargin(20, 0, 0, 0);
+    grid->SetMargin(PARAM_20, PARAM_0, PARAM_0, PARAM_0);
     grid->SetPadding(PARAM_10, PARAM_10, PARAM_10, PARAM_10);
     grid->SetBackgroundColor(COLOR_BLUE);
     std::string message = "A";
@@ -178,7 +178,6 @@ std::shared_ptr<GridComponent> GridTest::CreatGrid2(int32_t type)
     grid->SetGridColumnsTemplate("1fr 1fr 1fr 1fr 1fr");
     // 设置columnsGap:NODE_GRID_COLUMN_GAP
     grid->SetGridColumnsGap(SIZE_10);
-    // 设置rowGap:NODE_GRID_ROW_GAP
     grid->SetGridRowsGap(PARAM_10);
     grid->SetBorderWidth(SIZE_5);
     grid->SetMargin(SIZE_5);
@@ -187,7 +186,6 @@ std::shared_ptr<GridComponent> GridTest::CreatGrid2(int32_t type)
         ArkUI_AttributeItem item = { value, 1 };
         nodeAPI->setAttribute(grid->GetComponent(), NODE_GRID_FOCUS_WRAP_MODE, &item);
     }
-
     for (int i = 0; i < GRID_ITEM_COUNT; i++) {
         auto gridItem = new Component(ARKUI_NODE_GRID_ITEM);
         auto text = new TextComponent();
@@ -353,7 +351,7 @@ std::shared_ptr<GridComponent> GridTest::CreatGrid4(int32_t type)
     return grid;
 }
 
-//napi_value GridTest::CreateNativeNode(napi_env env, napi_callback_info info)
+// napi_value GridTest::CreateNativeNode(napi_env env, napi_callback_info info)
 void GridTest::InitializeGrid(napi_env env, napi_callback_info info)
 {
     OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, "GridTest", "CreateNativeNode");
@@ -375,7 +373,7 @@ void GridTest::InitializeGrid(napi_env env, napi_callback_info info)
     OH_ArkUI_GetModuleInterface(ARKUI_NATIVE_NODE, ArkUI_NativeNodeAPI_1, nodeAPI);
 }
 
-static std::shared_ptr<GridComponent> CreateBaseGrid() 
+static std::shared_ptr<GridComponent> CreateBaseGrid()
 {
     // 创建grid
     auto grid = CreatGrid(0);
@@ -426,7 +424,7 @@ static std::shared_ptr<GridComponent> CreateBaseGrid()
     return grid;
 }
 
-static std::shared_ptr<ColumnComponent> CreateModeControls(std::shared_ptr<GridComponent> grid) 
+static std::shared_ptr<ColumnComponent> CreateModeControls(std::shared_ptr<GridComponent> grid)
 {
     // mode属性
     auto modeColumn = std::make_shared<ColumnComponent>();
@@ -472,12 +470,12 @@ static std::shared_ptr<ColumnComponent> CreateModeControls(std::shared_ptr<GridC
     return modeColumn;
 }
 
-static std::shared_ptr<ColumnComponent> CreateWidthControls(std::shared_ptr<GridComponent> grid) 
+static std::shared_ptr<ColumnComponent> CreateWidthControls(std::shared_ptr<GridComponent> grid)
 {
     // width属性
     auto widthColumn = std::make_shared<ColumnComponent>();
     auto scrollWidthText = std::make_shared<TextComponent>();
-    scrollWidthText->SetTextContent("scrollWidth:,");
+    scrollWidthText->SetTextContent("scrollWidth:, ");
     auto getScrollWidthText = std::make_shared<TextComponent>();
     getScrollWidthText->SetTextContent("GetScrollWidth:");
 
@@ -517,7 +515,7 @@ static std::shared_ptr<ColumnComponent> CreateWidthControls(std::shared_ptr<Grid
     return widthColumn;
 }
 
-static std::shared_ptr<ColumnComponent> CreateColorControls(std::shared_ptr<GridComponent> grid) 
+static std::shared_ptr<ColumnComponent> CreateColorControls(std::shared_ptr<GridComponent> grid)
 {
     // color属性
     auto colorColumn = std::make_shared<ColumnComponent>();
@@ -562,12 +560,12 @@ static std::shared_ptr<ColumnComponent> CreateColorControls(std::shared_ptr<Grid
     return colorColumn;
 }
 
-static std::shared_ptr<ColumnComponent> CreateEnableScrollControls(std::shared_ptr<GridComponent> grid) 
+static std::shared_ptr<ColumnComponent> CreateEnableScrollControls(std::shared_ptr<GridComponent> grid)
 {
     // enableScroll属性
     auto enableScrollColumn = std::make_shared<ColumnComponent>();
     auto enableScrollText = std::make_shared<TextComponent>();
-    enableScrollText->SetTextContent("enableScroll:,");
+    enableScrollText->SetTextContent("enableScroll:, ");
     auto getEnableScrollText = std::make_shared<TextComponent>();
     getEnableScrollText->SetTextContent("GetEnableScroll:");
 
@@ -579,7 +577,7 @@ static std::shared_ptr<ColumnComponent> CreateEnableScrollControls(std::shared_p
     enableScrollButton->RegisterOnClick([grid, enableScrollText, getEnableScrollText]() {
         enableScrollIndex_ = (enableScrollIndex_ + 1) % enableScrollPool.size();
         auto value = enableScrollPool[enableScrollIndex_];
-        enableScrollText->SetTextContent("enableScroll:" + std::to_string(value) + " ,");
+        enableScrollText->SetTextContent("enableScroll:" + std::to_string(value));
         ArkUI_NumberValue value_number[] = { { .i32 = value } };
         ArkUI_AttributeItem attribute_item = { value_number, sizeof(value_number) / sizeof(ArkUI_NumberValue) };
         grid->setAttribute(NODE_SCROLL_ENABLE_SCROLL_INTERACTION, &attribute_item);
@@ -606,12 +604,12 @@ static std::shared_ptr<ColumnComponent> CreateEnableScrollControls(std::shared_p
     return enableScrollColumn;
 }
 
-static std::shared_ptr<ColumnComponent> CreateRowsGapControls(std::shared_ptr<GridComponent> grid) 
+static std::shared_ptr<ColumnComponent> CreateRowsGapControls(std::shared_ptr<GridComponent> grid)
 {
     // rowsGap属性
     auto rowsGapColumn = std::make_shared<ColumnComponent>();
     auto rowsGapText = std::make_shared<TextComponent>();
-    rowsGapText->SetTextContent("rowsGap:,");
+    rowsGapText->SetTextContent("rowsGap:, ");
     auto getRowsGapText = std::make_shared<TextComponent>();
     getRowsGapText->SetTextContent("GetRowsGap:");
 
@@ -651,12 +649,12 @@ static std::shared_ptr<ColumnComponent> CreateRowsGapControls(std::shared_ptr<Gr
     return rowsGapColumn;
 }
 
-static std::shared_ptr<ColumnComponent> CreateAlignItemsControls(std::shared_ptr<GridComponent> grid) 
+static std::shared_ptr<ColumnComponent> CreateAlignItemsControls(std::shared_ptr<GridComponent> grid)
 {
     // alignItems属性
     auto alignItemsColumn = std::make_shared<ColumnComponent>();
     auto alignItemsText = std::make_shared<TextComponent>();
-    alignItemsText->SetTextContent("alignItems:,");
+    alignItemsText->SetTextContent("alignItems:, ");
     auto getAlignItemsText = std::make_shared<TextComponent>();
     getAlignItemsText->SetTextContent("GetAlignItems:");
 
@@ -696,12 +694,12 @@ static std::shared_ptr<ColumnComponent> CreateAlignItemsControls(std::shared_ptr
     return alignItemsColumn;
 }
 
-static std::shared_ptr<ColumnComponent> CreateFlingSpeedLimitControls(std::shared_ptr<GridComponent> grid) 
+static std::shared_ptr<ColumnComponent> CreateFlingSpeedLimitControls(std::shared_ptr<GridComponent> grid)
 {
     // flingSpeedLimit属性
     auto flingSpeedLimitColumn = std::make_shared<ColumnComponent>();
     auto flingSpeedLimitText = std::make_shared<TextComponent>();
-    flingSpeedLimitText->SetTextContent("flingSpeedLimit:,");
+    flingSpeedLimitText->SetTextContent("flingSpeedLimit:, ");
     auto getFlingSpeedLimitText = std::make_shared<TextComponent>();
     getFlingSpeedLimitText->SetTextContent("GetFlingSpeedLimit:");
 
@@ -723,7 +721,7 @@ static std::shared_ptr<ColumnComponent> CreateFlingSpeedLimitControls(std::share
     });
 
     auto resetFlingSpeedLimitButton = std::make_shared<ButtonComponent>();
-    resetFlingSpeedLimitButton->SetWidth(120);
+    resetFlingSpeedLimitButton->SetWidth(SIZE_120);
     resetFlingSpeedLimitButton->SetHeight(SIZE_50);
     resetFlingSpeedLimitButton->SetId("resetFlingSpeedLimit");
     resetFlingSpeedLimitButton->SetLable("resetFlingSpeedLimit");
@@ -740,12 +738,12 @@ static std::shared_ptr<ColumnComponent> CreateFlingSpeedLimitControls(std::share
     return flingSpeedLimitColumn;
 }
 
-static std::shared_ptr<ColumnComponent> CreateFrictionControls(std::shared_ptr<GridComponent> grid) 
+static std::shared_ptr<ColumnComponent> CreateFrictionControls(std::shared_ptr<GridComponent> grid)
 {
     // friction属性
     auto frictionColumn = std::make_shared<ColumnComponent>();
     auto frictionText = std::make_shared<TextComponent>();
-    frictionText->SetTextContent("friction:,");
+    frictionText->SetTextContent("friction:, ");
     auto getFrictionText = std::make_shared<TextComponent>();
     getFrictionText->SetTextContent("GetFriction:");
 
@@ -783,11 +781,11 @@ static std::shared_ptr<ColumnComponent> CreateFrictionControls(std::shared_ptr<G
     frictionColumn->AddChild(resetFrictionButton);
 }
 
-static std::shared_ptr<ColumnComponent> CreateNestedScrollControls(std::shared_ptr<GridComponent> grid) 
+static std::shared_ptr<ColumnComponent> CreateNestedScrollControls(std::shared_ptr<GridComponent> grid)
 {
     auto nestedScrollColumn = std::make_shared<ColumnComponent>();
     auto nestedScrollText = std::make_shared<TextComponent>();
-    nestedScrollText->SetTextContent("nestedScroll:,");
+    nestedScrollText->SetTextContent("nestedScroll:, ");
     auto getNestedScrollText = std::make_shared<TextComponent>();
     getNestedScrollText->SetTextContent("getNestedScroll:");
     auto nestedScrollButton = std::make_shared<ButtonComponent>();
@@ -811,7 +809,8 @@ static std::shared_ptr<ColumnComponent> CreateNestedScrollControls(std::shared_p
             getNestedScrollText->SetTextContent("getNestedScroll" + std::to_string(forward) + std::to_string(back));
         } else {
             getNestedScrollText->SetTextContent("空");
-        }});
+        }
+    });
     auto resetNestedScrollButton = std::make_shared<ButtonComponent>();
     resetNestedScrollButton->SetWidth(SIZE_120);
     resetNestedScrollButton->SetHeight(SIZE_50);
@@ -827,7 +826,8 @@ static std::shared_ptr<ColumnComponent> CreateNestedScrollControls(std::shared_p
             getNestedScrollText->SetTextContent("getNestedScroll" + std::to_string(forward) + std::to_string(back));
         } else {
             getNestedScrollText->SetTextContent("空");
-        }});
+        }
+    });
     nestedScrollColumn->AddChild(nestedScrollText);
     nestedScrollColumn->AddChild(getNestedScrollText);
     nestedScrollColumn->AddChild(nestedScrollButton);
@@ -840,7 +840,7 @@ static std::shared_ptr<ColumnComponent> CreateFadingEdgeControls(std::shared_ptr
     // fadingEdge
     auto fadingEdgeColumn = std::make_shared<ColumnComponent>();
     auto fadingEdgeText = std::make_shared<TextComponent>();
-    fadingEdgeText->SetTextContent("fadingEdge:,");
+    fadingEdgeText->SetTextContent("fadingEdge:, ");
     auto getFadingEdgeText = std::make_shared<TextComponent>();
     getFadingEdgeText->SetTextContent("getFadingEdge:");
     auto fadingEdgeButton = std::make_shared<ButtonComponent>();
@@ -886,9 +886,9 @@ static std::shared_ptr<ColumnComponent> CreateFadingEdgeControls(std::shared_ptr
     fadingEdgeColumn->AddChild(resetEdgeButton);
     return fadingEdgeColumn;
 }
-    
+
 static std::shared_ptr<GridComponent> CreateBaseGrid2()
-{     
+{
     // 创建grid2
     auto grid2 = CreatGrid2(0);
     // 测试 SetOnGridScrollFrameBegin
@@ -939,7 +939,7 @@ static std::shared_ptr<ColumnComponent> CreateClipModeControls(std::shared_ptr<G
     // clipMode
     auto clipModeColumn = std::make_shared<ColumnComponent>();
     auto clipModeText = std::make_shared<TextComponent>();
-    clipModeText->SetTextContent("clipMode:,");
+    clipModeText->SetTextContent("clipMode:, ");
     auto getClipModeText = std::make_shared<TextComponent>();
     getClipModeText->SetTextContent("GetClipMode:");
 
@@ -1040,13 +1040,12 @@ static std::shared_ptr<ScrollComponent> AssembleFinalLayout()
     return scroll;
 }
 
-napi_value GridTest::CreateNativeNode(napi_env env, napi_callback_info info) 
+napi_value GridTest::CreateNativeNode(napi_env env, napi_callback_info info)
 {
     auto scroll = AssembleFinalLayout();
     std::string id(xComponentID);
     if (OH_NativeXComponent_AttachNativeRootNode(
-            PluginManager::GetInstance()->GetNativeXComponent(id), 
-            scroll->GetComponent()) == INVALID_PARAM) {
+            PluginManager::GetInstance()->GetNativeXComponent(id), scroll->GetComponent()) == INVALID_PARAM) {
         OH_LOG_Print(
             LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, "GridTest", "OH_NativeXComponent_AttachNativeRootNode failed");
     }

@@ -32,6 +32,7 @@ namespace ArkUICApiDemo {
 #define PARAM_12 12
 #define PARAM_13 13
 #define PARAM_16 16
+#define PARAM_20 20
 #define PARAM_32 32
 #define PARAM_64 64
 #define DEFAULT_MARGIN 10
