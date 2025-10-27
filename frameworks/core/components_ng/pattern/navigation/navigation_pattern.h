@@ -742,12 +742,13 @@ private:
         std::vector<WeakPtr<NavDestinationNodeBase>>& invisibleNodes,
         std::vector<WeakPtr<NavDestinationNodeBase>>& visibleNodes);
     void OnAllTransitionAnimationFinish();
+    void SetRequestedOrientationIfNeeded();
     void UpdatePageLevelConfigForSizeChanged();
     void UpdatePageLevelConfigForSizeChangedWhenNoAnimation();
     RefPtr<NavDestinationNodeBase> GetLastStandardNodeOrNavBar();
     void HideSystemBarIfNeeded();
     void ShowOrRestoreSystemBarIfNeeded();
-    bool IsEquivalentToStackMode();
+    bool IsRealStackDisplay();
     void ClearPageAndNavigationConfig();
     bool CustomizeExpandSafeArea() override;
 
@@ -870,6 +871,7 @@ private:
     int32_t runningTransitionCount_ = 0;
     bool isTransitionAnimationAborted_ = false;
     bool enableVisibilityLifecycleWithContentCover_ = true;
+    bool enableLockOrientation_ = false;
 
     //-------for force split------- begin------
     bool forceSplitSuccess_ = false;
