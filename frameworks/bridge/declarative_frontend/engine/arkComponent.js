@@ -32235,14 +32235,6 @@ class ArkWebComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, WebEnableSelectedDataDetectorModifier.identity, WebEnableSelectedDataDetectorModifier, enable);
     return this;
   }
-  selectedDataDetectorConfig(config) {
-    let detectorConfig = new TextDataDetectorConfig();
-    if (config !== undefined && config !== null) {
-      detectorConfig.types = config.types;
-    }
-    modifierWithKey(this._modifiersWithKeys, WebSelectedDataDetectorConfigModifier.identity, WebSelectedDataDetectorConfigModifier, detectorConfig);
-    return this;
-  }
   gestureFocusMode(mode) {
     modifierWithKey(this._modifiersWithKeys, WebGestureFocusModeModifier.identity, WebGestureFocusModeModifier, mode);
     return this;
@@ -33719,20 +33711,6 @@ class WebEnableSelectedDataDetectorModifier extends ModifierWithKey {
   }
 }
 WebEnableSelectedDataDetectorModifier.identity = Symbol('webEnableSelectedDataDetectorModifier');
-
-class WebSelectedDataDetectorConfigModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().web.resetSelectedDataDetectorConfig(node);
-    } else {
-      getUINativeModule().web.setSelectedDataDetectorConfig(node, this.value.types);
-    }
-  }
-}
-WebSelectedDataDetectorConfigModifier.identity = Symbol('webSelectedDataDetectorConfigModifier');
 
 class WebGestureFocusModeModifier extends ModifierWithKey {
   constructor(value) {

@@ -3866,53 +3866,6 @@ ArkUINativeModuleValue WebBridge::ResetEnableSelectedDataDetector(ArkUIRuntimeCa
     return panda::JSValueRef::Undefined(vm);
 }
 
-ArkUINativeModuleValue WebBridge::SetSelectedDataDetectorConfig(ArkUIRuntimeCallInfo* runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
-    Local<JSValueRef> typesArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
-    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
-    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
-    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
-    auto nodeModifiers = GetArkUINodeModifiers();
-    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    if (!typesArg->IsArray(vm)) {
-        nodeModifiers->getWebModifier()->resetSelectedDataDetectorConfigWithEvent(nativeNode);
-        return panda::JSValueRef::Undefined(vm);
-    }
-
-    struct ArkUITextDetectConfigStruct arkUITextDetectConfig;
-    std::string types;
-    auto array = panda::Local<panda::ArrayRef>(typesArg);
-    for (size_t i = 0; i < array->Length(vm); i++) {
-        auto value = panda::ArrayRef::GetValueAt(vm, array, i);
-        auto index = value->Int32Value(vm);
-        if (index < 0 || index >= static_cast<int32_t>(TEXT_DETECT_TYPES.size())) {
-            return panda::JSValueRef::Undefined(vm);
-        }
-        if (i != 0) {
-            types.append(",");
-        }
-        types.append(TEXT_DETECT_TYPES[index]);
-    }
-    arkUITextDetectConfig.types = types.c_str();
-    nodeModifiers->getWebModifier()->setSelectedDataDetectorConfigWithEvent(nativeNode, &arkUITextDetectConfig);
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue WebBridge::ResetSelectedDataDetectorConfig(ArkUIRuntimeCallInfo* runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
-    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
-    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    GetArkUINodeModifiers()->getWebModifier()->resetSelectedDataDetectorConfigWithEvent(nativeNode);
-    return panda::JSValueRef::Undefined(vm);
-}
-
 auto ConvertCertChainDataToArray(EcmaVM* vm, const std::vector<std::string>& certChainData)
 {
     auto certChainArray = panda::ArrayRef::New(vm, certChainData.size());
