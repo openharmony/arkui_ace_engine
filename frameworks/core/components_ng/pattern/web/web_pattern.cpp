@@ -1382,6 +1382,7 @@ void WebPattern::InitConfigChangeCallback(const RefPtr<PipelineContext> &context
         CHECK_NULL_VOID(WebPattern);
         WebPattern->UpdateLocale();
     };
+    CHECK_NULL_VOID(GetHost());
     context->SetConfigChangedCallback(GetHost()->GetId(), std::move(langTask));
 }
 
@@ -3980,7 +3981,7 @@ void WebPattern::OnForceEnableZoomUpdate(bool isEnabled)
 
 void WebPattern::RegistVirtualKeyBoardListener(const RefPtr<PipelineContext> &pipelineContext)
 {
-    if (!needUpdateWeb_) {
+    if (!needUpdateWeb_ || !GetHost()) {
         return;
     }
     pipelineContext->SetVirtualKeyBoardCallback(GetHost()->GetId(),
