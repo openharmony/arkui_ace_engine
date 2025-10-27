@@ -2829,7 +2829,7 @@ void SetOnTouchImpl(Ark_NativePointer node,
     ViewAbstract::SetOnTouch(frameNode, std::move(onEvent));
 }
 void SetOnKeyEventImpl(Ark_NativePointer node,
-                       const Opt_Callback_KeyEvent_Void* value)
+                       const Opt_Callback_KeyEvent_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -2842,29 +2842,11 @@ void SetOnKeyEventImpl(Ark_NativePointer node,
         auto onKeyEvent = [arkCallback = CallbackHelper(*optValue), node = weakNode](KeyEventInfo& info) -> bool {
             PipelineContext::SetCallBackNode(node);
             const auto event = Converter::ArkKeyEventSync(info);
-            arkCallback.InvokeSync(event.ArkValue());
-            return false;
-        };
-        ViewAbstract::SetOnKeyEvent(frameNode, std::move(onKeyEvent));
-    }
-#ifdef WRONG_GEN
-    // this code for Opt_Callback_KeyEvent_Boolean* value
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto optValue = Converter::GetOptPtr(value);
-    if (!optValue) {
-        ViewAbstract::DisableOnKeyEvent(frameNode);
-    } else {
-        auto weakNode = AceType::WeakClaim(frameNode);
-        auto onKeyEvent = [arkCallback = CallbackHelper(*optValue), node = weakNode](KeyEventInfo& info) -> bool {
-            PipelineContext::SetCallBackNode(node);
-            const auto event = Converter::ArkKeyEventSync(info);
             auto arkResult = arkCallback.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(event.ArkValue());
             return Converter::Convert<bool>(arkResult);
         };
         ViewAbstract::SetOnKeyEvent(frameNode, std::move(onKeyEvent));
     }
-#endif
 }
 void SetOnDigitalCrownImpl(Ark_NativePointer node,
                            const Opt_Callback_CrownEvent_Void* value)

@@ -1740,7 +1740,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetOnKeyEventImpl(Ark_NativePointer node,
-                           const Opt_Callback_KeyEvent_Void* value)
+                           const Opt_Callback_KeyEvent_Boolean* value)
     {
     }
     void SetOnDigitalCrownImpl(Ark_NativePointer node,
