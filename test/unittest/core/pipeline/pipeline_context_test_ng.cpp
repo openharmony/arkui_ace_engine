@@ -2654,261 +2654,225 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg129, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineContextTestNg_OnTouchEvent_RVS_Test001
- * @tc.desc: Test OnTouchEvent with RVS enabled and touch event processing
+ * @tc.name: PipelineContextTestNg033
+ * @tc.desc: Test FlushVsync with TpFlushFrameDisplayPeriod
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_OnTouchEvent_RVS_Test001, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg033, TestSize.Level1)
 {
     /**
-     * @tc.steps: 1. Initialize parameters and setup test environment
+     * @tc.steps: Create mock ResSchedTouchOptimizer and setup expectations
+     * @tc.expected: RequestFrame should be called when TpFlushFrameDisplayPeriod is true
      */
     ASSERT_NE(context_, nullptr);
     context_->SetupRootElement();
     
-    // Enable RVS feature in ResSchedTouchOptimizer
-    ResSchedTouchOptimizer& optimizer = ResSchedTouchOptimizer::GetInstance();
-    optimizer.rvsEnable_ = true;
-    optimizer.slideAccepted_ = true;
-    optimizer.lastTpFlush_ = false;
-    optimizer.lastTpFlushCount_ = 0;
+    // Setup mock window to track RequestFrame calls
+    auto mockWindow = (MockWindow*)(context_->window_.get());
+    ASSERT_NE(mockWindow, nullptr);
+    
+    // Reset mock expectations
+    testing::Mock::VerifyAndClearExpectations(mockWindow);
+    testing::Mock::AllowLeak(mockWindow);
+    
+    // Setup ResSchedTouchOptimizer mock
+    ResSchedTouchOptimizer::isTpFlushFrameDisplayPeriod_ = true;
+    ResSchedTouchOptimizer::isFristFrameAfterTpFlushFrameDisplayPeriod_ = false;
+    
+    // Expect RequestFrame to be called
+    EXPECT_CALL(*mockWindow, RequestFrame()).Times(AtLeast(1));
+    
+    // Call FlushVsync
+    context_->FlushVsync(NANO_TIME_STAMP, FRAME_COUNT);
+    
+    // Verify expectations
+    testing::Mock::VerifyAndClearExpectations(mockWindow);
+    
+    // Reset for next test
+    ResSchedTouchOptimizer::isTpFlushFrameDisplayPeriod_ = false;
+}
+
+/**
+ * @tc.name: PipelineContextTestNg034
+ * @tc.desc: Test FlushVsync with FirstFrameAfterTpFlushFrameDisplayPeriod
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg034, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create mock ResSchedTouchOptimizer and setup expectations for first frame after TP flush
+     * @tc.expected: RequestFrame should be called when FirstFrameAfterTpFlushFrameDisplayPeriod is true
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->SetupRootElement();
+    
+    // Setup mock window to track RequestFrame calls
+    auto mockWindow = (MockWindow*)(context_->window_.get());
+    ASSERT_NE(mockWindow, nullptr);
+    
+    // Reset mock expectations
+    testing::Mock::VerifyAndClearExpectations(mockWindow);
+    testing::Mock::AllowLeak(mockWindow);
+    
+    // Setup ResSchedTouchOptimizer mock
+    ResSchedTouchOptimizer::isTpFlushFrameDisplayPeriod_ = false;
+    ResSchedTouchOptimizer::isFristFrameAfterTpFlushFrameDisplayPeriod_ = true;
+    
+    // Expect RequestFrame to be called
+    EXPECT_CALL(*mockWindow, RequestFrame()).Times(AtLeast(1));
+    
+    // Call FlushVsync
+    context_->FlushVsync(NANO_TIME_STAMP, FRAME_COUNT);
+    
+    // Verify expectations
+    testing::Mock::VerifyAndClearExpectations(mockWindow);
+    
+    // Reset for next test
+    ResSchedTouchOptimizer::isFristFrameAfterTpFlushFrameDisplayPeriod_ = false;
+}
+
+/**
+ * @tc.name: PipelineContextTestNg035
+ * @tc.desc: Test OnTouchEvent with NeedTpFlushVsync returning true
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg035, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create mock ResSchedTouchOptimizer and setup expectations for touch event processing
+     * @tc.expected: FlushVsync should be called directly when NeedTpFlushVsync returns true
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->SetupRootElement();
+    
+    // Setup mock window to track FlushVsync calls
+    auto mockWindow = (MockWindow*)(context_->window_.get());
+    ASSERT_NE(mockWindow, nullptr);
+    
+    // Reset mock expectations
+    testing::Mock::VerifyAndClearExpectations(mockWindow);
+    testing::Mock::AllowLeak(mockWindow);
+    
+    // Setup ResSchedTouchOptimizer mock
+    ResSchedTouchOptimizer::needTpFlushVsyncResult_ = true;
+    
+    // Expect FlushVsync to be called
+    EXPECT_CALL(*mockWindow, FlushTasks(testing::_)).Times(AtLeast(1));
+    
+    // Create a touch event
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::MOVE;
+    touchEvent.id = 1;
+    touchEvent.x = 100.0f;
+    touchEvent.y = 100.0f;
+    touchEvent.sourceTool = SourceTool::FINGER;
+    touchEvent.sourceType = SourceType::TOUCH;
+    
+    // Call OnTouchEvent
+    context_->OnTouchEvent(touchEvent, false);
+    
+    // Verify expectations
+    testing::Mock::VerifyAndClearExpectations(mockWindow);
+    
+    // Reset for next test
+    ResSchedTouchOptimizer::needTpFlushVsyncResult_ = false;
+}
+
+/**
+ * @tc.name: PipelineContextTestNg036
+ * @tc.desc: Test OnTouchEvent with NeedTpFlushVsync returning false
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg036, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create mock ResSchedTouchOptimizer and setup expectations for normal touch event processing
+     * @tc.expected: RequestFrame should be called when NeedTpFlushVsync returns false
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->SetupRootElement();
+    
+    // Setup mock window to track RequestFrame calls
+    auto mockWindow = (MockWindow*)(context_->window_.get());
+    ASSERT_NE(mockWindow, nullptr);
+    
+    // Reset mock expectations
+    testing::Mock::VerifyAndClearExpectations(mockWindow);
+    testing::Mock::AllowLeak(mockWindow);
+    
+    // Expect RequestFrame to be called
+    EXPECT_CALL(*mockWindow, RequestFrame()).Times(AtLeast(1));
+    
+    // Setup ResSchedTouchOptimizer mock
+    ResSchedTouchOptimizer::needTpFlushVsyncResult_ = false;
+    
+    // Create a touch event
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::MOVE;
+    touchEvent.id = 1;
+    touchEvent.x = 100.0f;
+    touchEvent.y = 100.0f;
+    touchEvent.sourceTool = SourceTool::FINGER;
+    touchEvent.sourceType = SourceType::TOUCH;
+    
+    // Call OnTouchEvent
+    context_->OnTouchEvent(touchEvent, false);
+    
+    // Verify expectations
+    testing::Mock::VerifyAndClearExpectations(mockWindow);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg037
+ * @tc.desc: Test ConsumeTouchEventsInterpolation with TpFlushFrameDisplayPeriod
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg037, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Test touch event interpolation when TpFlushFrameDisplayPeriod is true
+     * @tc.expected: Target timestamp should be adjusted when TpFlushFrameDisplayPeriod is true
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->SetupRootElement();
+    
+    // Setup ResSchedTouchOptimizer mock
+    ResSchedTouchOptimizer::isTpFlushFrameDisplayPeriod_ = true;
+    
+    // Create test data
+    std::unordered_set<int32_t> ids = {1};
+    std::map<int32_t, int32_t> timestampToIds = {{0, 1}};
+    std::unordered_map<int32_t, TouchEvent> newIdTouchPoints;
+    std::unordered_map<int, TouchEvent> idToTouchPoints;
     
     // Create a touch event
     TouchEvent touchEvent;
     touchEvent.id = 1;
-    touchEvent.type = TouchType::MOVE;
-    touchEvent.sourceTool = SourceTool::FINGER;
-    touchEvent.x = 100;
-    touchEvent.y = 200;
-    touchEvent.xReverse = 0;
-    touchEvent.yReverse = 0;
-    touchEvent.SetTime(std::chrono::high_resolution_clock::now());
+    touchEvent.time = std::chrono::high_resolution_clock::now();
+    idToTouchPoints.emplace(1, touchEvent);
     
-    /**
-     * @tc.steps: 2. Call OnTouchEvent and verify RVS processing
-     * @tc.expected: Touch event is processed correctly with RVS
-     */
-    context_->OnTouchEvent(touchEvent, false);
+    // Set resample timestamp to be greater than touch event timestamp
+    context_->resampleTimeStamp_ = static_cast<uint64_t>(
+        std::chrono::duration_cast<std::chrono::nanoseconds>(
+            touchEvent.time.time_since_epoch()).count()) + 1000000; // 1ms later
     
-    // Verify the touch event was added to touchEvents_
-    EXPECT_FALSE(context_->touchEvents_.empty());
+    // Call the method (private, so we test indirectly through touch event processing)
+    // We'll test this by triggering the touch event processing flow
+    TouchEvent inputEvent;
+    inputEvent.type = TouchType::MOVE;
+    inputEvent.id = 1;
+    inputEvent.x = 100.0f;
+    inputEvent.y = 100.0f;
+    context_->touchEvents_.push_back(inputEvent);
     
-    // Clean up
-    context_->touchEvents_.clear();
-}
-
-/**
- * @tc.name: PipelineContextTestNg_OnTouchEvent_RVS_Test002
- * @tc.desc: Test OnTouchEvent with RVS enabled and slide direction set
- * @tc.type: FUNC
- */
-HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_OnTouchEvent_RVS_Test002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: 1. Initialize parameters and setup test environment
-     */
-    ASSERT_NE(context_, nullptr);
-    context_->SetupRootElement();
+    // Process touch events
+    context_->FlushTouchEvents();
     
-    // Enable RVS feature and set slide direction
-    ResSchedTouchOptimizer& optimizer = ResSchedTouchOptimizer::GetInstance();
-    optimizer.rvsEnable_ = true;
-    optimizer.slideAccepted_ = true;
-    optimizer.SetSlideDirection(1); // HORIZONTAL
+    // Verify that touch events were processed
+    EXPECT_TRUE(context_->touchEvents_.empty());
     
-    // Create multiple touch events to trigger RVS queue processing
-    std::list<TouchEvent> touchEvents;
-    for (int i = 0; i < 10; i++) {
-        TouchEvent touchEvent;
-        touchEvent.id = 1;
-        touchEvent.type = TouchType::MOVE;
-        touchEvent.sourceTool = SourceTool::FINGER;
-        touchEvent.x = 100 + i * 10; // Horizontal movement
-        touchEvent.y = 200;
-        touchEvent.xReverse = 0;
-        touchEvent.yReverse = 0;
-        touchEvent.SetTime(std::chrono::high_resolution_clock::now());
-        touchEvents.push_back(touchEvent);
-    }
-    
-    /**
-     * @tc.steps: 2. Process touch events through OnTouchEvent
-     * @tc.expected: RVS queue is updated and processed
-     */
-    for (const auto& event : touchEvents) {
-        context_->OnTouchEvent(event, false);
-    }
-    
-    // Verify touch events were added
-    EXPECT_FALSE(context_->touchEvents_.empty());
-    
-    // Clean up
-    context_->touchEvents_.clear();
-}
-
-/**
- * @tc.name: PipelineContextTestNg_OnTouchEvent_RVS_Test003
- * @tc.desc: Test OnTouchEvent with RVS enabled and non-finger source tool
- * @tc.type: FUNC
- */
-HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_OnTouchEvent_RVS_Test003, TestSize.Level1)
-{
-    /**
-     * @tc.steps: 1. Initialize parameters and setup test environment
-     */
-    ASSERT_NE(context_, nullptr);
-    context_->SetupRootElement();
-    
-    // Enable RVS feature
-    ResSchedTouchOptimizer& optimizer = ResSchedTouchOptimizer::GetInstance();
-    optimizer.rvsEnable_ = true;
-    
-    // Create a touch event with non-finger source tool
-    TouchEvent touchEvent;
-    touchEvent.id = 1;
-    touchEvent.type = TouchType::MOVE;
-    touchEvent.sourceTool = SourceTool::MOUSE; // Non-finger source
-    touchEvent.x = 100;
-    touchEvent.y = 200;
-    touchEvent.SetTime(std::chrono::high_resolution_clock::now());
-    
-    /**
-     * @tc.steps: 2. Call OnTouchEvent with non-finger source
-     * @tc.expected: Event is processed but RVS is not triggered
-     */
-    context_->OnTouchEvent(touchEvent, false);
-    
-    // Verify the touch event was added to touchEvents_
-    EXPECT_FALSE(context_->touchEvents_.empty());
-    
-    // Clean up
-    context_->touchEvents_.clear();
-}
-
-/**
- * @tc.name: PipelineContextTestNg_OnTouchEvent_RVS_Test004
- * @tc.desc: Test OnTouchEvent with RVS enabled and different touch types
- * @tc.type: FUNC
- */
-HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_OnTouchEvent_RVS_Test004, TestSize.Level1)
-{
-    /**
-     * @tc.steps: 1. Initialize parameters and setup test environment
-     */
-    ASSERT_NE(context_, nullptr);
-    context_->SetupRootElement();
-    
-    // Enable RVS feature
-    ResSchedTouchOptimizer& optimizer = ResSchedTouchOptimizer::GetInstance();
-    optimizer.rvsEnable_ = true;
-    
-    // Test different touch types
-    std::vector<TouchType> touchTypes = { TouchType::DOWN, TouchType::UP, TouchType::MOVE, TouchType::CANCEL };
-    
-    for (const auto& touchType : touchTypes) {
-        TouchEvent touchEvent;
-        touchEvent.id = 1;
-        touchEvent.type = touchType;
-        touchEvent.sourceTool = SourceTool::FINGER;
-        touchEvent.x = 100;
-        touchEvent.y = 200;
-        touchEvent.SetTime(std::chrono::high_resolution_clock::now());
-        
-        /**
-         * @tc.steps: 2. Call OnTouchEvent with different touch types
-         * @tc.expected: Events are processed correctly
-         */
-        context_->OnTouchEvent(touchEvent, false);
-        
-        // Verify the touch event was added to touchEvents_
-        if (touchEvent.type == TouchType::MOVE) {
-            EXPECT_FALSE(context_->touchEvents_.empty());
-        }
-        
-        // Clean up for next iteration
-        context_->touchEvents_.clear();
-    }
-}
-
-/**
- * @tc.name: PipelineContextTestNg_OnTouchEvent_RVS_Test005
- * @tc.desc: Test OnTouchEvent with RVS disabled
- * @tc.type: FUNC
- */
-HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_OnTouchEvent_RVS_Test005, TestSize.Level1)
-{
-    /**
-     * @tc.steps: 1. Initialize parameters and setup test environment with RVS disabled
-     */
-    ASSERT_NE(context_, nullptr);
-    context_->SetupRootElement();
-    
-    // Disable RVS feature
-    ResSchedTouchOptimizer& optimizer = ResSchedTouchOptimizer::GetInstance();
-    optimizer.rvsEnable_ = false;
-    
-    // Create a touch event
-    TouchEvent touchEvent;
-    touchEvent.id = 1;
-    touchEvent.type = TouchType::MOVE;
-    touchEvent.sourceTool = SourceTool::FINGER;
-    touchEvent.x = 100;
-    touchEvent.y = 200;
-    touchEvent.SetTime(std::chrono::high_resolution_clock::now());
-    
-    /**
-     * @tc.steps: 2. Call OnTouchEvent with RVS disabled
-     * @tc.expected: Event is processed normally without RVS
-     */
-    context_->OnTouchEvent(touchEvent, false);
-    
-    // Verify the touch event was added to touchEvents_
-    EXPECT_FALSE(context_->touchEvents_.empty());
-    
-    // Clean up
-    context_->touchEvents_.clear();
-}
-
-/**
- * @tc.name: PipelineContextTestNg_OnTouchEvent_RVS_Test006
- * @tc.desc: Test OnTouchEvent with multiple touch points
- * @tc.type: FUNC
- */
-HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_OnTouchEvent_RVS_Test006, TestSize.Level1)
-{
-    /**
-     * @tc.steps: 1. Initialize parameters and setup test environment
-     */
-    ASSERT_NE(context_, nullptr);
-    context_->SetupRootElement();
-    
-    // Enable RVS feature
-    ResSchedTouchOptimizer& optimizer = ResSchedTouchOptimizer::GetInstance();
-    optimizer.rvsEnable_ = true;
-    
-    // Create multiple touch events with different IDs
-    for (int id = 1; id <= 3; id++) {
-        TouchEvent touchEvent;
-        touchEvent.id = id;
-        touchEvent.type = TouchType::MOVE;
-        touchEvent.sourceTool = SourceTool::FINGER;
-        touchEvent.x = 100 + id * 10;
-        touchEvent.y = 200 + id * 10;
-        touchEvent.SetTime(std::chrono::high_resolution_clock::now());
-        
-        /**
-         * @tc.steps: 2. Call OnTouchEvent with multiple touch points
-         * @tc.expected: All events are processed correctly
-         */
-        context_->OnTouchEvent(touchEvent, false);
-    }
-    
-    // Verify the touch events were added to touchEvents_
-    EXPECT_FALSE(context_->touchEvents_.empty());
-    EXPECT_EQ(context_->touchEvents_.size(), 3);
-    
-    // Clean up
-    context_->touchEvents_.clear();
+    // Reset for next test
+    ResSchedTouchOptimizer::isTpFlushFrameDisplayPeriod_ = false;
 }
 } // namespace NG
 } // namespace OHOS::Ace

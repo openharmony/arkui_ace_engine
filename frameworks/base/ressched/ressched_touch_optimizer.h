@@ -27,26 +27,36 @@ public:
     // basic getter adns setters
     void SetSlideAccepted(bool accept);
     void SetLastTpFlush(bool lastTpFlush);
-    void SetLastTpFlushCount(uint32_t lastVsyncCount);
     void SetSlideDirection(int32_t direction);
+    void SetLastVsyncTimeStamp(uint64_t lastVsyncTimeStamp);
+    void SetVsyncPeriod(uint64_t vSyncPeriod);
+    bool GetIsTpFlushFrameDisplayPeriod() const;
+    bool GetIsFristFrameAfterTpFlushFrameDisplayPeriod() const;
+
     // TP driven drawing
-    bool NeedTpFlushVsync(TouchEvent touchEvent, uint32_t currentVsyncCount);
+    bool NeedTpFlushVsync(const& touchEvent);
 
     // RVS Dispatch funcs
     void DispatchPointSelect(bool resampleEnable, TouchEvent& point,
         TouchEvent& resamplePoint, TouchEvent& resultPoint);
-    void SelectSinglePoint(std::list<TouchEvent>& touchEvents);
-    void RVSQueueUpdate(std::list<TouchEvent>& touchEvents);
-
+    TouchEvent SetPointReverseSignal(cosnt TouchEvent& point);
     // Dynamic effect chasing
     void SetSlideAcceptOffset(Offset offset);
     double HandleMainDelta(double& mainDelta, const double& touchPointsSize,
         const std::map<int32_t, TouchEvent>& touchPoints);
     bool RVSEnableCheck();
 
+    void SetHisAvgPointTimeStamp(const int32_t pointId,
+        const std::unordered_map<int32_t, std::vector<TouchEvent>>& historyPointsById);
+    
+    uint64_t FineTuneTimeStampDuringTpFlushPeriod(uint64_t timeStamp);
+    void FineTuneTimeStampWhenFirstFrameAfterTpFlushPeriod(const int32_t pointId,
+        std::unordered_map<int32_t, std::vector<TouchEvent>>& historyPointsById);
+
 private:
     // RVS Dispatch funcs
     void RVSPointReset(const int32_t pointId, const int32_t info);
+    void RVSQueueUpdate(std::list<TouchEvent>& touchEvents);
     void UpdateDptHistory(const TouchEvent& event);
     void UpdateState(const int32_t id, const int32_t newState, const int32_t axis);
     bool RVSSingleAxisUpdate(TouchEvent& point, TouchEvent& resamplePoint, const bool resampleEnable,
@@ -57,6 +67,9 @@ private:
     bool RVSPointCheckWithoutSignal(TouchEvent& touchPoint, const int32_t axis);
     bool RVSPointCheckWithSignal(TouchEvent& touchPoint, const int32_t axis);
     bool RVSDirectionStateCheck(uint32_t rvsDirection);
+
+    // tpFlush related funcs
+    bool NeedTpFlushVsyncInner(const TouchEvent& touchEvent);
 
     // revord tp report point and dispatch point;
     std::unordered_map<int32_t, double> dptGapX_;
@@ -78,15 +91,23 @@ private:
     std::atomic_bool slideAccepted_ = true;
     // Whether the last frame drawing was triggered by TP
     std::atomic_bool lastTpFlush_ = false;
-    // Record the last VSync count to determine if current TP falls between
-    // the last TP triggered early drawing and the next VSync
+    // Record the last Vsync count to determine if current TP falls between
+    // the last TP triggered early drawing and the next Vsync
     uint32_t lastTpFlushCount_ = 0;
 
     // Dynamic effect chasing
     Offset slideAcceptOffset_{0.0, 0.0};
     float accumulatedDistance_ = 0.0;
 
-    std::atomic<int32_t> slideDirection_ = 0;
+    int32_t slideDirection_ = 0;
+
+    uint64_t vSyncPeriod_ = std::numeric_limits<uint64_t>::max();
+    uint64_t lastVsyncTimeStamp_ = 0;
+    uint64_t hisAvgPointTimeStamp_ = 0;
+    bool vSyncTimeReportExemption_ = false;
+    bool isTpFlushFrameDisplayPeriod_ = false;
+    bool isFristFrameAfterTpFlushFrameDisplayPeriod_ = false;
+    bool vSyncFlushed_ = false;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_RESSCHED_RESSCHED_TOUCH_OPTIMIZER_H

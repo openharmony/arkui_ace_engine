@@ -86,42 +86,10 @@ HWTEST_F(ResSchedTouchOptimizerTest, SetterTest001, TestSize.Level1)
     EXPECT_TRUE(ResSchedTouchOptimizer::GetInstance().slideAccepted_);
     ResSchedTouchOptimizer::GetInstance().SetLastTpFlush(true);
     EXPECT_TRUE(ResSchedTouchOptimizer::GetInstance().lastTpFlush_);
-    ResSchedTouchOptimizer::GetInstance().SetLastTpFlushCount(100);
-    EXPECT_EQ(ResSchedTouchOptimizer::GetInstance().lastTpFlushCount_, 100);
     ResSchedTouchOptimizer::GetInstance().SetSlideAccepted(false);
     EXPECT_FALSE(ResSchedTouchOptimizer::GetInstance().slideAccepted_);
     ResSchedTouchOptimizer::GetInstance().SetLastTpFlush(false);
     EXPECT_FALSE(ResSchedTouchOptimizer::GetInstance().lastTpFlush_);
-}
-
-/**
- * @tc.name: NeedTpFlushVsync001
- * @tc.desc: test NeedTpFlushVsync
- * @tc.type: FUNC
- */
-HWTEST_F(ResSchedTouchOptimizerTest, NeedTpFlushVsync001, TestSize.Level1)
-{
-    TouchEvent touchEvent;
-    touchEvent.sourceTool = SourceTool::FINGER;
-    ResSchedTouchOptimizer::GetInstance().rvsEnable_ = false;
-    EXPECT_FALSE(ResSchedTouchOptimizer::GetInstance().NeedTpFlushVsync(touchEvent, 0));
-    touchEvent.sourceTool = SourceTool::MOUSE;
-    EXPECT_FALSE(ResSchedTouchOptimizer::GetInstance().NeedTpFlushVsync(touchEvent, 0));
-    ResSchedTouchOptimizer::GetInstance().rvsEnable_ = true;
-    touchEvent.sourceTool = SourceTool::FINGER;
-    ResSchedTouchOptimizer::GetInstance().slideAccepted_ = false;
-    EXPECT_TRUE(ResSchedTouchOptimizer::GetInstance().NeedTpFlushVsync(touchEvent, 0));
-    ResSchedTouchOptimizer::GetInstance().slideAccepted_ = true;
-    ResSchedTouchOptimizer::GetInstance().lastTpFlushCount_ = 100;
-    EXPECT_TRUE(ResSchedTouchOptimizer::GetInstance().NeedTpFlushVsync(touchEvent, 101));
-    ResSchedTouchOptimizer::GetInstance().lastTpFlush_ = false;
-    touchEvent.xReverse = true;
-    EXPECT_FALSE(ResSchedTouchOptimizer::GetInstance().NeedTpFlushVsync(touchEvent, 100));
-    touchEvent.xReverse = false;
-    touchEvent.yReverse = false;
-    EXPECT_FALSE(ResSchedTouchOptimizer::GetInstance().NeedTpFlushVsync(touchEvent, 100));
-    ResSchedTouchOptimizer::GetInstance().lastTpFlush_ = true;
-    EXPECT_FALSE(ResSchedTouchOptimizer::GetInstance().NeedTpFlushVsync(touchEvent, 100));
 }
 
 /**
@@ -387,38 +355,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, DispatchPointSelect001, TestSize.Level1)
     EXPECT_FALSE(optimizer.dptHistoryPointY_[1].empty());
 }
 
-/**
- * @tc.name: SelectSinglePoint001
- * @tc.desc: test SelectSinglePoint functionality
- * @tc.type: FUNC
- */
-HWTEST_F(ResSchedTouchOptimizerTest, SelectSinglePoint001, TestSize.Level1)
-{
-    ResSchedTouchOptimizer& optimizer = ResSchedTouchOptimizer::GetInstance();
-    optimizer.rvsEnable_ = true;
-
-    TouchEvent touchEvent1;
-    touchEvent1.id = 1;
-    touchEvent1.type = TouchType::MOVE;
-    touchEvent1.xReverse = RVS_DIRECTION::RVS_DOWN_LEFT;
-    touchEvent1.sourceTool = SourceTool::FINGER;
-
-    TouchEvent touchEvent2;
-    touchEvent2.id = 2;
-    touchEvent2.sourceTool = SourceTool::FINGER;
-
-    std::list<TouchEvent> touchEvents = {touchEvent1, touchEvent2};
-
-    optimizer.SelectSinglePoint(touchEvents);
-
-    EXPECT_EQ(touchEvents.front().id, touchEvent1.id);
-    EXPECT_EQ(touchEvents.front().xReverse, RVS_DIRECTION::RVS_DOWN_LEFT);
-
-    touchEvents.clear();
-    touchEvents = {touchEvent2};
-    optimizer.SelectSinglePoint(touchEvents);
-    EXPECT_EQ(touchEvents.front().id, touchEvent2.id);
-}
 
 /**
  * @tc.name: UpdateDepHistory001
@@ -762,55 +698,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithoutSignal002, TestSize.Lev
     optimizer.rvsDequeX_[1] = xDeque;
     
     EXPECT_FALSE(optimizer.RVSPointCheckWithoutSignal(touchEvent, RVS_AXIS::RVS_AXIS_X));
-}
-
-/**
- * @tc.name: SelectSinglePoint002
- * @tc.desc: test SelectSinglePoint with no reverse signal
- * @tc.type: FUNC
- */
-HWTEST_F(ResSchedTouchOptimizerTest, SelectSinglePoint002, TestSize.Level1)
-{
-    ResSchedTouchOptimizer& optimizer = ResSchedTouchOptimizer::GetInstance();
-    optimizer.rvsEnable_ = true;
-    
-    TouchEvent touchEvent1;
-    touchEvent1.id = 1;
-    touchEvent1.type = TouchType::MOVE;
-    touchEvent1.xReverse = RVS_DIRECTION::RVS_NOT_APPLY; // No reverse
-    touchEvent1.sourceTool = SourceTool::FINGER;
-    touchEvent1.x = 100;
-    touchEvent1.y = 200;
-    
-    std::list<TouchEvent> touchEvents = {touchEvent1};
-    
-    optimizer.SelectSinglePoint(touchEvents);
-    
-    // Should still contain the point as it's the last one
-    EXPECT_FALSE(touchEvents.empty());
-}
-
-/**
- * @tc.name: NeedTpFlushVsync002
- * @tc.desc: test NeedTpFlushVsync with non-finger source tool
- * @tc.type: FUNC
- */
-HWTEST_F(ResSchedTouchOptimizerTest, NeedTpFlushVsync002, TestSize.Level1)
-{
-    TouchEvent touchEvent;
-    touchEvent.sourceTool = SourceTool::MOUSE;
-    ResSchedTouchOptimizer::GetInstance().rvsEnable_ = true;
-    
-    // Test with MOUSE source tool, should return false
-    EXPECT_FALSE(ResSchedTouchOptimizer::GetInstance().NeedTpFlushVsync(touchEvent, 0));
-    
-    // Test with PEN source tool, should return false
-    touchEvent.sourceTool = SourceTool::PEN;
-    EXPECT_FALSE(ResSchedTouchOptimizer::GetInstance().NeedTpFlushVsync(touchEvent, 0));
-    
-    // Test with TOUCH_PAD source tool, should return false
-    touchEvent.sourceTool = SourceTool::TOUCHPAD;
-    EXPECT_FALSE(ResSchedTouchOptimizer::GetInstance().NeedTpFlushVsync(touchEvent, 0));
 }
 
 /**
@@ -1830,29 +1717,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, SetSlideDirection001, TestSize.Level1)
 }
 
 /**
- * @tc.name: NeedTpFlushVsync003
- * @tc.desc: Test NeedTpFlushVsync lastTpFlushCount_ reset branch
- * @tc.type: FUNC
- */
-HWTEST_F(ResSchedTouchOptimizerTest, NeedTpFlushVsync003, TestSize.Level1)
-{
-    ResSchedTouchOptimizer& optimizer = ResSchedTouchOptimizer::GetInstance();
-    optimizer.rvsEnable_ = true;
-    optimizer.slideAccepted_ = true;
-    optimizer.lastTpFlush_ = false;
-    optimizer.lastTpFlushCount_ = 100;
-    
-    TouchEvent touchEvent;
-    touchEvent.sourceTool = SourceTool::FINGER;
-    touchEvent.xReverse = RVS_DIRECTION::RVS_NOT_APPLY;
-    touchEvent.yReverse = RVS_DIRECTION::RVS_NOT_APPLY;
-    
-    // Test the branch where lastTpFlushCount_ != 0 && lastTpFlushCount_ == currentVsyncCount
-    EXPECT_FALSE(optimizer.NeedTpFlushVsync(touchEvent, 100));
-    EXPECT_EQ(optimizer.lastTpFlushCount_, 0); // Should be reset to 0
-}
-
-/**
  * @tc.name: RVSDirectionStateCheck001
  * @tc.desc: Test RVSDirectionStateCheck with different directions
  * @tc.type: FUNC
@@ -2010,5 +1874,436 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate014, TestSize.Level1)
     
     // Queue should now have RVS_QUEUE_SIZE elements
     EXPECT_EQ(optimizer.rvsDequeX_[1].size(), 6);
+}
+
+/**
+ * @tc.name: NeedTpFlushVsync001
+ * @tc.desc: Test NeedTpFlushVsync functionality when RVS is disabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedTouchOptimizerTest, NeedTpFlushVsync001, TestSize.Level1)
+{
+    ResSchedTouchOptimizer& optimizer = ResSchedTouchOptimizer::GetInstance();
+    optimizer.rvsEnable_ = false;
+    
+    TouchEvent touchEvent;
+    touchEvent.sourceTool = SourceTool::FINGER;
+    
+    // When RVS is disabled, should return false
+    EXPECT_FALSE(optimizer.NeedTpFlushVsync(touchEvent));
+    EXPECT_FALSE(optimizer.isFristFrameAfterTpFlushFrameDisplayPeriod_);
+}
+
+/**
+ * @tc.name: NeedTpFlushVsync002
+ * @tc.desc: Test NeedTpFlushVsync functionality with different conditions
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedTouchOptimizerTest, NeedTpFlushVsync002, TestSize.Level1)
+{
+    ResSchedTouchOptimizer& optimizer = ResSchedTouchOptimizer::GetInstance();
+    optimizer.rvsEnable_ = true;
+    optimizer.hisAvgPointTimeStamp_ = 1000;
+    optimizer.slideAccepted_ = false;
+    optimizer.isTpFlushFrameDisplayPeriod_ = true;
+    
+    TouchEvent touchEvent;
+    touchEvent.sourceTool = SourceTool::FINGER;
+    
+    // When slide is not accepted, should return true
+    EXPECT_TRUE(optimizer.NeedTpFlushVsync(touchEvent));
+    
+    // Test the transition to first frame after TP flush
+    optimizer.slideAccepted_ = true;
+    optimizer.isTpFlushFrameDisplayPeriod_ = true;
+    optimizer.lastTpFlush_ = false;
+    optimizer.NeedTpFlushVsyncInner(touchEvent); // Call inner function to set up state
+    optimizer.NeedTpFlushVsync(touchEvent);
+    EXPECT_TRUE(optimizer.isFristFrameAfterTpFlushFrameDisplayPeriod_);
+}
+
+/**
+ * @tc.name: NeedTpFlushVsyncInner001
+ * @tc.desc: Test NeedTpFlushVsyncInner with various conditions
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedTouchOptimizerTest, NeedTpFlushVsyncInner001, TestSize.Level1)
+{
+    ResSchedTouchOptimizer& optimizer = ResSchedTouchOptimizer::GetInstance();
+    
+    // Test when RVS is disabled
+    optimizer.rvsEnable_ = false;
+    TouchEvent touchEvent;
+    touchEvent.sourceTool = SourceTool::FINGER;
+    EXPECT_FALSE(optimizer.NeedTpFlushVsyncInner(touchEvent));
+    
+    // Test when hisAvgPointTimeStamp_ is zero
+    optimizer.rvsEnable_ = true;
+    optimizer.hisAvgPointTimeStamp_ = 0;
+    EXPECT_FALSE(optimizer.NeedTpFlushVsyncInner(touchEvent));
+    
+    // Test with non-finger source tool
+    optimizer.hisAvgPointTimeStamp_ = 1000;
+    touchEvent.sourceTool = SourceTool::MOUSE;
+    EXPECT_FALSE(optimizer.NeedTpFlushVsyncInner(touchEvent));
+}
+
+/**
+ * @tc.name: NeedTpFlushVsyncInner002
+ * @tc.desc: Test NeedTpFlushVsyncInner with slide acceptance conditions
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedTouchOptimizerTest, NeedTpFlushVsyncInner002, TestSize.Level1)
+{
+    ResSchedTouchOptimizer& optimizer = ResSchedTouchOptimizer::GetInstance();
+    optimizer.rvsEnable_ = true;
+    optimizer.hisAvgPointTimeStamp_ = 1000;
+    optimizer.slideAccepted_ = false;
+    
+    TouchEvent touchEvent;
+    touchEvent.sourceTool = SourceTool::FINGER;
+    
+    // When slide is not accepted, should trigger TP flush for first frame
+    EXPECT_TRUE(optimizer.NeedTpFlushVsyncInner(touchEvent));
+    
+    // Test when slide is accepted
+    optimizer.slideAccepted_ = true;
+    EXPECT_FALSE(optimizer.NeedTpFlushVsyncInner(touchEvent));
+}
+
+/**
+ * @tc.name: NeedTpFlushVsyncInner003
+ * @tc.desc: Test NeedTpFlushVsyncInner with last TP flush conditions
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedTouchOptimizerTest, NeedTpFlushVsyncInner003, TestSize.Level1)
+{
+    ResSchedTouchOptimizer& optimizer = ResSchedTouchOptimizer::GetInstance();
+    optimizer.rvsEnable_ = true;
+    optimizer.hisAvgPointTimeStamp_ = 1000;
+    optimizer.slideAccepted_ = true;
+    optimizer.lastTpFlush_ = true;
+    optimizer.vSyncFlushed_ = true;
+    
+    TouchEvent touchEvent;
+    touchEvent.sourceTool = SourceTool::FINGER;
+    
+    // When last frame was TP triggered and current Vsync count differs, should continue TP flush
+    EXPECT_TRUE(optimizer.NeedTpFlushVsyncInner(touchEvent));
+}
+
+/**
+ * @tc.name: NeedTpFlushVsyncInner004
+ * @tc.desc: Test NeedTpFlushVsyncInner with reverse direction conditions
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedTouchOptimizerTest, NeedTpFlushVsyncInner004, TestSize.Level1)
+{
+    ResSchedTouchOptimizer& optimizer = ResSchedTouchOptimizer::GetInstance();
+    optimizer.rvsEnable_ = true;
+    optimizer.hisAvgPointTimeStamp_ = 1000;
+    optimizer.slideAccepted_ = true;
+    optimizer.lastTpFlush_ = false;
+    
+    TouchEvent touchEvent;
+    touchEvent.sourceTool = SourceTool::FINGER;
+    touchEvent.xReverse = RVS_DIRECTION::RVS_DOWN_LEFT;
+    touchEvent.yReverse = RVS_DIRECTION::RVS_NOT_APPLY;
+    
+    // When current direction is reversed and last frame wasn't TP triggered, should trigger TP flush
+    EXPECT_TRUE(optimizer.NeedTpFlushVsyncInner(touchEvent));
+    
+    // Test with Y axis reverse
+    touchEvent.xReverse = RVS_DIRECTION::RVS_NOT_APPLY;
+    touchEvent.yReverse = RVS_DIRECTION::RVS_UP_RIGHT;
+    EXPECT_TRUE(optimizer.NeedTpFlushVsyncInner(touchEvent));
+    
+    // Test with no reverse direction
+    touchEvent.xReverse = RVS_DIRECTION::RVS_NOT_APPLY;
+    touchEvent.yReverse = RVS_DIRECTION::RVS_NOT_APPLY;
+    EXPECT_FALSE(optimizer.NeedTpFlushVsyncInner(touchEvent));
+}
+
+/**
+ * @tc.name: SetLastVsyncTimeStamp001
+ * @tc.desc: Test SetLastVsyncTimeStamp functionality
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedTouchOptimizerTest, SetLastVsyncTimeStamp001, TestSize.Level1)
+{
+    ResSchedTouchOptimizer& optimizer = ResSchedTouchOptimizer::GetInstance();
+    optimizer.vSyncTimeReportExemption_ = false;
+    optimizer.vSyncFlushed_ = false;
+    optimizer.lastVsyncTimeStamp_ = 0;
+    
+    uint64_t testTimeStamp = 123456789;
+    optimizer.SetLastVsyncTimeStamp(testTimeStamp);
+    
+    EXPECT_TRUE(optimizer.vSyncFlushed_);
+    EXPECT_EQ(optimizer.lastVsyncTimeStamp_, testTimeStamp);
+    EXPECT_FALSE(optimizer.vSyncTimeReportExemption_);
+}
+
+/**
+ * @tc.name: SetLastVsyncTimeStamp002
+ * @tc.desc: Test SetLastVsyncTimeStamp with exemption
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedTouchOptimizerTest, SetLastVsyncTimeStamp002, TestSize.Level1)
+{
+    ResSchedTouchOptimizer& optimizer = ResSchedTouchOptimizer::GetInstance();
+    optimizer.vSyncTimeReportExemption_ = true;
+    optimizer.vSyncFlushed_ = false;
+    optimizer.lastVsyncTimeStamp_ = 0;
+    
+    uint64_t testTimeStamp = 123456789;
+    optimizer.SetLastVsyncTimeStamp(testTimeStamp);
+    
+    // When exemption is true, should not update vSyncFlushed_ and lastVsyncTimeStamp_
+    EXPECT_FALSE(optimizer.vSyncFlushed_);
+    EXPECT_EQ(optimizer.lastVsyncTimeStamp_, 0);
+    EXPECT_FALSE(optimizer.vSyncTimeReportExemption_);
+}
+
+/**
+ * @tc.name: SetVsyncPeriod001
+ * @tc.desc: Test SetVsyncPeriod functionality
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedTouchOptimizerTest, SetVsyncPeriod001, TestSize.Level1)
+{
+    ResSchedTouchOptimizer& optimizer = ResSchedTouchOptimizer::GetInstance();
+    optimizer.vsyncPeriod_ = std::numeric_limits<uint64_t>::max();
+    
+    uint64_t testPeriod = 16666666; // ~60Hz
+    optimizer.SetVsyncPeriod(testPeriod);
+    
+    EXPECT_EQ(optimizer.vsyncPeriod_, testPeriod);
+}
+
+/**
+ * @tc.name: GetIsTpFlushFrameDisplayPeriod001
+ * @tc.desc: Test GetIsTpFlushFrameDisplayPeriod functionality
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedTouchOptimizerTest, GetIsTpFlushFrameDisplayPeriod001, TestSize.Level1)
+{
+    ResSchedTouchOptimizer& optimizer = ResSchedTouchOptimizer::GetInstance();
+    optimizer.isTpFlushFrameDisplayPeriod_ = false;
+    EXPECT_FALSE(optimizer.GetIsTpFlushFrameDisplayPeriod());
+    
+    optimizer.isTpFlushFrameDisplayPeriod_ = true;
+    EXPECT_TRUE(optimizer.GetIsTpFlushFrameDisplayPeriod());
+}
+
+/**
+ * @tc.name: GetIsFristFrameAfterTpFlushFrameDisplayPeriod001
+ * @tc.desc: Test GetIsFristFrameAfterTpFlushFrameDisplayPeriod functionality
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedTouchOptimizerTest, GetIsFristFrameAfterTpFlushFrameDisplayPeriod001, TestSize.Level1)
+{
+    ResSchedTouchOptimizer& optimizer = ResSchedTouchOptimizer::GetInstance();
+    optimizer.isFristFrameAfterTpFlushFrameDisplayPeriod_ = false;
+    EXPECT_FALSE(optimizer.GetIsFristFrameAfterTpFlushFrameDisplayPeriod());
+    
+    optimizer.isFristFrameAfterTpFlushFrameDisplayPeriod_ = true;
+    EXPECT_TRUE(optimizer.GetIsFristFrameAfterTpFlushFrameDisplayPeriod());
+}
+
+/**
+ * @tc.name: SetHisAvgPointTimeStamp001
+ * @tc.desc: Test SetHisAvgPointTimeStamp with empty history points
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedTouchOptimizerTest, SetHisAvgPointTimeStamp001, TestSize.Level1)
+{
+    ResSchedTouchOptimizer& optimizer = ResSchedTouchOptimizer::GetInstance();
+    optimizer.hisAvgPointTimeStamp_ = 1000;
+    
+    std::unordered_map<int32_t, std::vector<TouchEvent>> historyPointsById;
+    int32_t pointId = 1;
+    
+    optimizer.SetHisAvgPointTimeStamp(pointId, historyPointsById);
+    EXPECT_EQ(optimizer.hisAvgPointTimeStamp_, 0);
+}
+
+/**
+ * @tc.name: SetHisAvgPointTimeStamp002
+ * @tc.desc: Test SetHisAvgPointTimeStamp with valid history points
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedTouchOptimizerTest, SetHisAvgPointTimeStamp002, TestSize.Level1)
+{
+    ResSchedTouchOptimizer& optimizer = ResSchedTouchOptimizer::GetInstance();
+    optimizer.hisAvgPointTimeStamp_ = 0;
+    
+    std::unordered_map<int32_t, std::vector<TouchEvent>> historyPointsById;
+    int32_t pointId = 1;
+    
+    TouchEvent event1, event2;
+    auto time1 = std::chrono::high_resolution_clock::now();
+    auto time2 = time1 + std::chrono::milliseconds(10);
+    
+    event1.time = time1;
+    event2.time = time2;
+    
+    historyPointsById[pointId].push_back(event1);
+    historyPointsById[pointId].push_back(event2);
+    
+    optimizer.SetHisAvgPointTimeStamp(pointId, historyPointsById);
+    // Should calculate average timestamp
+    EXPECT_NE(optimizer.hisAvgPointTimeStamp_, 0);
+}
+
+/**
+ * @tc.name: FineTuneTimeStampDuringTpFlushPeriod001
+ * @tc.desc: Test FineTuneTimeStampDuringTpFlushPeriod functionality
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedTouchOptimizerTest, FineTuneTimeStampDuringTpFlushPeriod001, TestSize.Level1)
+{
+    ResSchedTouchOptimizer& optimizer = ResSchedTouchOptimizer::GetInstance();
+    optimizer.hisAvgPointTimeStamp_ = 0;
+    optimizer.lastTpFlush_ = false;
+    optimizer.vSyncTimeReportExemption_ = false;
+    optimizer.vSyncPeriod_ = 16666666;
+    
+    uint64_t testTimeStamp = 123456789;
+    uint64_t result = optimizer.FineTuneTimeStampDuringTpFlushPeriod(testTimeStamp);
+    
+    // When hisAvgPointTimeStamp_ is 0, should return the original timestamp
+    EXPECT_EQ(result, testTimeStamp);
+    EXPECT_TRUE(optimizer.lastTpFlush_);
+    EXPECT_TRUE(optimizer.vSyncTimeReportExemption_);
+}
+
+/**
+ * @tc.name: FineTuneTimeStampDuringTpFlushPeriod002
+ * @tc.desc: Test FineTuneTimeStampDuringTpFlushPeriod with valid hisAvgPointTimeStamp
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedTouchOptimizerTest, FineTuneTimeStampDuringTpFlushPeriod002, TestSize.Level1)
+{
+    ResSchedTouchOptimizer& optimizer = ResSchedTouchOptimizer::GetInstance();
+    optimizer.hisAvgPointTimeStamp_ = 100000000;
+    optimizer.lastTpFlush_ = false;
+    optimizer.vSyncTimeReportExemption_ = false;
+    optimizer.vSyncPeriod_ = 16666666;
+    
+    uint64_t testTimeStamp = 123456789;
+    uint64_t result = optimizer.FineTuneTimeStampDuringTpFlushPeriod(testTimeStamp);
+    
+    // Should calculate fictional Vsync time based on hisAvgPointTimeStamp_
+    EXPECT_NE(result, testTimeStamp);
+    EXPECT_TRUE(optimizer.lastTpFlush_);
+    EXPECT_TRUE(optimizer.vSyncTimeReportExemption_);
+}
+
+/**
+ * @tc.name: FineTuneTimeStampWhenFirstFrameAfterTpFlushPeriod001
+ * @tc.desc: Test FineTuneTimeStampWhenFirstFrameAfterTpFlushPeriod with invalid conditions
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedTouchOptimizerTest, FineTuneTimeStampWhenFirstFrameAfterTpFlushPeriod001, TestSize.Level1)
+{
+    ResSchedTouchOptimizer& optimizer = ResSchedTouchOptimizer::GetInstance();
+    optimizer.isFristFrameAfterTpFlushFrameDisplayPeriod_ = false;
+    optimizer.hisAvgPointTimeStamp_ = 0;
+    optimizer.lastVsyncTimeStamp_ = 0;
+    optimizer.lastTpFlush_ = true;
+    optimizer.vSyncTimeReportExemption_ = true;
+    
+    std::unordered_map<int32_t, std::vector<TouchEvent>> historyPointsById;
+    int32_t pointId = 1;
+    
+    optimizer.FineTuneTimeStampWhenFirstFrameAfterTpFlushPeriod(pointId, historyPointsById);
+    
+    // Should not change lastTpFlush_ and vSyncTimeReportExemption_ since conditions are not met
+    EXPECT_TRUE(optimizer.lastTpFlush_);
+    EXPECT_TRUE(optimizer.vSyncTimeReportExemption_);
+}
+
+/**
+ * @tc.name: FineTuneTimeStampWhenFirstFrameAfterTpFlushPeriod002
+ * @tc.desc: Test FineTuneTimeStampWhenFirstFrameAfterTpFlushPeriod with valid conditions
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedTouchOptimizerTest, FineTuneTimeStampWhenFirstFrameAfterTpFlushPeriod002, TestSize.Level1)
+{
+    ResSchedTouchOptimizer& optimizer = ResSchedTouchOptimizer::GetInstance();
+    optimizer.isFristFrameAfterTpFlushFrameDisplayPeriod_ = true;
+    optimizer.hisAvgPointTimeStamp_ = 200000000;
+    optimizer.lastVsyncTimeStamp_ = 100000000;
+    optimizer.lastTpFlush_ = true;
+    optimizer.vSyncTimeReportExemption_ = true;
+    
+    std::unordered_map<int32_t, std::vector<TouchEvent>> historyPointsById;
+    int32_t pointId = 1;
+    
+    // Add a test event to history
+    TouchEvent testEvent;
+    testEvent.time = std::chrono::high_resolution_clock::time_point(std::chrono::nanoseconds(150000000));
+    historyPointsById[pointId].push_back(testEvent);
+    
+    optimizer.FineTuneTimeStampWhenFirstFrameAfterTpFlushPeriod(pointId, historyPointsById);
+    
+    // Should reset lastTpFlush_ and vSyncTimeReportExemption_
+    EXPECT_FALSE(optimizer.lastTpFlush_);
+    EXPECT_FALSE(optimizer.vSyncTimeReportExemption_);
+}
+
+/**
+ * @tc.name: SetPointReverseSignal001
+ * @tc.desc: Test SetPointReverseSignal when RVS is disabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedTouchOptimizerTest, SetPointReverseSignal001, TestSize.Level1)
+{
+    ResSchedTouchOptimizer& optimizer = ResSchedTouchOptimizer::GetInstance();
+    optimizer.rvsEnable_ = false;
+    
+    TouchEvent inputEvent;
+    inputEvent.id = 1;
+    inputEvent.x = 100;
+    inputEvent.y = 200;
+    inputEvent.xReverse = RVS_DIRECTION::RVS_NOT_APPLY;
+    inputEvent.yReverse = RVS_DIRECTION::RVS_NOT_APPLY;
+    
+    TouchEvent resultEvent = optimizer.SetPointReverseSignal(inputEvent);
+    
+    // When RVS is disabled, should return the same event
+    EXPECT_EQ(resultEvent.id, inputEvent.id);
+    EXPECT_EQ(resultEvent.x, inputEvent.x);
+    EXPECT_EQ(resultEvent.y, inputEvent.y);
+    EXPECT_EQ(resultEvent.xReverse, inputEvent.xReverse);
+    EXPECT_EQ(resultEvent.yReverse, inputEvent.yReverse);
+}
+
+/**
+ * @tc.name: SetPointReverseSignal002
+ * @tc.desc: Test SetPointReverseSignal when RVS is enabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedTouchOptimizerTest, SetPointReverseSignal002, TestSize.Level1)
+{
+    ResSchedTouchOptimizer& optimizer = ResSchedTouchOptimizer::GetInstance();
+    optimizer.rvsEnable_ = true;
+    
+    TouchEvent inputEvent;
+    inputEvent.id = 1;
+    inputEvent.x = 100;
+    inputEvent.y = 200;
+    inputEvent.sourceTool = SourceTool::FINGER;
+    inputEvent.type = TouchType::MOVE;
+    inputEvent.xReverse = RVS_DIRECTION::RVS_NOT_APPLY;
+    inputEvent.yReverse = RVS_DIRECTION::RVS_NOT_APPLY;
+    
+    TouchEvent resultEvent = optimizer.SetPointReverseSignal(inputEvent);
+    
+    // When RVS is enabled, should process the event through RVSQueueUpdate
+    EXPECT_EQ(resultEvent.id, inputEvent.id);
+    EXPECT_EQ(resultEvent.x, inputEvent.x);
+    EXPECT_EQ(resultEvent.y, inputEvent.y);
 }
 } // namespace OHOS::Ace

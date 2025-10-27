@@ -784,6 +784,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
         return;
     }
     SetVsyncTime(nanoTimestamp);
+    ResSchedTouchOptimizer::GetInstance().SetLastVsyncTimeStamp(nanoTimestamp);
     ACE_SCOPED_TRACE_COMMERCIAL("UIVsyncTask[timestamp:%" PRIu64 "][vsyncID:%" PRIu64 "][instanceID:%d]",
         nanoTimestamp, frameCount, instanceId_);
     window_->Lock();
@@ -923,6 +924,11 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
 #ifdef COMPONENT_TEST_ENABLED
     ComponentTest::UpdatePipelineStatus();
 #endif // COMPONENT_TEST_ENABLED
+    if (ResSchedTouchOptimizer::GetInstance().GetIsTpFlushFrameDisplayPeriod() ||
+        ResSchedTouchOptimizer::GetInstamce().GetIsFirstFrameAfterTpFlushFrameDisplayPeriod()) {
+        ACE_SCOPED_TRAC("TpFlush RequestFrame");
+        RequestFrame();
+    }
 }
 
 void PipelineContext::FlushMouseEventVoluntarily()
@@ -3271,34 +3277,22 @@ void PipelineContext::OnTouchEvent(
             formEventMgr->RemoveEtsCardTouchEventCallback(mockPoint.id);
         }
         NotifyDragTouchEvent(scalePoint, node);
-        if (ResSchedTouchOptimizer::GetInstance().RVSEnableCheck()) {
-            std::list<TouchEvent> touchEvents;
-            touchEvents.push_back(point);
-            ResSchedTouchOptimizer::GetInstance().RVSQueueUpdate(touchEvents);
-            touchEvents_.emplace_back(touchEvents.back());
-        } else {
-            touchEvents_.emplace_back(point);
-        }
-
         hasIdleTasks_ = true;
-        if (ResSchedTouchOptimizer::GetInstance().NeedTpFlushVsync(touchEvents_.back(), GetFrameCount()) &&
-            historyPointsById_.find(touchEvents_.back().id) != historyPointsById_.end()) {
+        ResSchedTouchOptimizer& optimizer = ResSchedTouchOptimizer::GetInstance();
+        uint64_t vsyncPeriod = static_cast<uint64_t>(window_->GetVSyncPeriod());
+        optimizer.SetVsyncPeriod(vsyncPeriod);
+        TouchEvent pointWithReverseSignal = optimizer.SetPointReverseSignal(point);
+        touchEvents_.push_back(pointWithReverseSignal);
+        optimizer.SetHisAvgPointTimeStamp(touchEvents_.back().id, historyPointsById_);
+
+        if (optimizer.NeedTpFlushVsync(touchEvents_.back())) {
             //Fine-tuning fictional vsync timestamp
-            uint64_t intime = static_cast<uint64_t>(GetSysTimestamp());
-            auto hisAvgPoint = ResampleAlgo::GetAvgPoint(
-                std::vector<PointerEvent>(historyPointsById_[touchEvents_.back().id].begin(),
-                    historyPointsById_[touchEvents_.back().id].end()), CoordinateType::NORMAL);
-            if (hisAvgPoint.time != 0) {
-                uint64_t historyTime = hisAvgPoint.time;
-                uint64_t vsyncPeriod = static_cast<uint64_t>(window_->GetVSyncPeriod());
-                intime = intime - vsyncPeriod + ONE_MS_IN_NS > historyTime ? intime : historyTime + vsyncPeriod;
-            }
-            FlushVsync(intime, GetFrameCount());
-            ResSchedTouchOptimizer::GetInstance().SetLastTpFlush(true);
-            ResSchedTouchOptimizer::GetInstance().SetLastTpFlushCount(GetFrameCount());
+            uint64_t fictionalVsyncTime =
+                optimizer.FineTuneTimeStampDuringTpFlushPeriod(static_cast<uint64_t>(GetSysTimestamp()));
+            FlushVsync(fictionalVsyncTime, GetFrameCount());
         } else {
+            optimizer.FineTuneTimeStampWhenFirstFrameAfterTpFlushPeriod(touchEvents_.back().id, historyPointsById_);
             RequestFrame();
-            ResSchedTouchOptimizer::GetInstance().SetLastTpFlush(false);
         }
         return;
     }
@@ -3847,7 +3841,7 @@ void PipelineContext::FlushTouchEvents()
         canUseLongPredictTask_ = false;
         eventManager_->FlushTouchEventsBegin(touchEvents_);
         std::unordered_map<int, TouchEvent> idToTouchPoints;
-        if (touchAccelarate_) {
+        if (touchAccelarate_) {fConsumeTouchEvents
             AccelerateConsumeTouchEvents(touchEvents, idToTouchPoints);
         } else {
             ConsumeTouchEvents(touchEvents, idToTouchPoints);
@@ -3888,7 +3882,11 @@ void PipelineContext::ConsumeTouchEventsInterpolation(
         auto stamp = std::chrono::duration_cast<std::chrono::nanoseconds>(
             touchIter->second.time.time_since_epoch()).count();
         if (targetTimeStamp > static_cast<uint64_t>(stamp)) {
-            continue;
+            if (ResSchedTouchOptimizer::GetInstance().GetIsTpFlushFrameDisplayPeriod()) {
+                targetTimeStamp = static_cast<uint64_t>(stamp) - ONE_MS_IN_NS;
+            } else {
+                continue;
+            }
         }
         TouchEvent newTouchEvent;
         if (eventManager_->GetResampleTouchEvent(
@@ -3908,9 +3906,6 @@ void PipelineContext::ConsumeTouchEvents(
     std::unordered_set<int32_t> ids;
     bool needInterpolation = true;
     std::unordered_map<int32_t, TouchEvent> newIdTouchPoints;
-    if (ResSchedTouchOptimizer::GetInstance().RVSEnableCheck()) {
-        ResSchedTouchOptimizer::GetInstance().SelectSinglePoint(touchEvents);
-    }
     int32_t inputIndex = static_cast<int32_t>(touchEvents.size()) - 1;
     for (auto iter = touchEvents.rbegin(); iter != touchEvents.rend(); ++iter, --inputIndex) {
         auto scalePoint = (*iter).CreateScalePoint(GetViewScale());
