@@ -13,47 +13,44 @@
  * limitations under the License.
  */
 
- /*
-  * Description: WaterFlow组件支持基于断点自适应列数
-  * Writer: renxiaowen
-  */
-  
+/*
+ * Description: WaterFlow组件支持基于断点自适应列数
+ * Writer: renxiaowen
+ */
+
 // Index.ets
 import { WaterFlowDataSource } from '../../WaterFlowDataSource';
 import { image } from '@kit.ImageKit';
-class waterFlowModifier implements AttributeModifier<WaterFlowAttribute>{
-  index: number = 0;
-  columnList:(string| ItemFillPolicy|undefined|null)[]=[
 
-    // {fillType:PresetFillType.BREAKPOINT_DEFAULT},
-    // undefined,
-    // {fillType:PresetFillType.BREAKPOINT_SM2MD3LG5},
-    // {fillType:PresetFillType.BREAKPOINT_SM1MD2LG3},
-    // {fillType:undefined},
+class waterFlowModifier implements AttributeModifier<WaterFlowAttribute> {
+  index: number = 0;
+  columnList: (string | ItemFillPolicy | undefined | null)[] = [
     '1fr',
-    "2fr,1fr",
+    '2fr,1fr',
     null,
     '1fr 2fr 1fr',
   ]
+
   applyNormalAttribute(instance: WaterFlowAttribute): void {
     instance.columnsTemplate(this.columnList[this.index])
   }
 }
+
 // 可复用组件：优化性能，减少组件创建销毁开销
 @Reusable
 @Component
 struct ReusableFlowItem {
   @State columnIndex: number = 0;
-  @State columnList:(PresetFillType|undefined|null)[]=[
+  @State columnList: (PresetFillType | undefined | null)[] = [
     PresetFillType.BREAKPOINT_DEFAULT,
     PresetFillType.BREAKPOINT_SM1MD2LG3,
     PresetFillType.BREAKPOINT_SM2MD3LG5,
     undefined,
     null
   ]
-  @State widthIndex:number = 0;
-  @State widthList:(string )[]=[
-    '100%','80%','60%','20%'
+  @State widthIndex: number = 0;
+  @State widthList: (string)[] = [
+    '100%', '80%', '60%', '20%'
   ]
   @State item: number = 0;
 
@@ -64,7 +61,7 @@ struct ReusableFlowItem {
 
   build() {
     Column() {
-      Text("N" + this.item).fontSize(12).height('16')
+      Text('N' + this.item).fontSize(12).height('16')
       // 注意：需要确保对应的jpg文件存在才会正常显示
       Image('res/waterFlow(' + this.item % 5 + ').jpg')
         .objectFit(ImageFit.Fill)
@@ -143,6 +140,7 @@ struct WaterFlowDemo11 {
       return this.itemHeightArray[index % 100];
     }
   };
+
   @Builder
   itemFoot() {
     Column() {
@@ -155,6 +153,7 @@ struct WaterFlowDemo11 {
       // .margin({ top: 20,bottom:5 })
     }
   }
+
   // 计算FlowItem宽/高
   getSize() {
     let ret = Math.floor(Math.random() * this.maxSize);
@@ -224,18 +223,20 @@ struct WaterFlowDemo11 {
             }
           })
       }
-      Row(){
-        Button('padding' )
-          .onClick(()=> {
+
+      Row() {
+        Button('padding')
+          .onClick(() => {
             this.paddingIndex = (this.paddingIndex + 1) % this.paddings.length;
           })
-        Button("column: " + this.waterFlowMod.columnList[this.waterFlowMod.index]).onClick(()=>{
+        Button('column: ' + this.waterFlowMod.columnList[this.waterFlowMod.index]).onClick(() => {
           this.waterFlowMod.index++
           this.waterFlowMod.index = this.waterFlowMod.index % this.waterFlowMod.columnList.length
         })
 
       }
-      Text('Width：'+ this.contentWidth+'，Height：'+ this.contentHeight)
+
+      Text('Width：' + this.contentWidth + '，Height：' + this.contentHeight)
         .fontColor(Color.Red)
         .height(15)
       Text('Index：' + this.changeCachedCountIndex + '，CachedCount数值：' +
@@ -246,10 +247,10 @@ struct WaterFlowDemo11 {
       this.changeCachedCountBolList[this.changeCachedCountBolIndex])
         .fontColor(Color.Orange)
         .height(15)
-      Text('gap：'+ this.gaps[this.gapIndex])
+      Text('gap：' + this.gaps[this.gapIndex])
         .fontColor(Color.Blue)
         .height(15)
-      Text('padding：'+ this.paddings[this.paddingIndex])
+      Text('padding：' + this.paddings[this.paddingIndex])
         .fontColor(Color.Green)
         .height(15)
       Stack() {
@@ -264,12 +265,16 @@ struct WaterFlowDemo11 {
             centerY: 0
           })
 
-        WaterFlow({ scroller:this.scroller,layoutMode: WaterFlowLayoutMode.SLIDING_WINDOW,footer: this.itemFoot() }) {
+        WaterFlow({
+          scroller: this.scroller,
+          layoutMode: WaterFlowLayoutMode.SLIDING_WINDOW,
+          footer: this.itemFoot()
+        }) {
           LazyForEach(this.dataSource, (item: number) => {
             FlowItem() {
               // 使用可复用组件，提升性能
               Column() {
-                Text("L" + item).fontSize(12).height('16')
+                Text('L' + item).fontSize(12).height('16')
               }
               .height(item * 11)
             }
