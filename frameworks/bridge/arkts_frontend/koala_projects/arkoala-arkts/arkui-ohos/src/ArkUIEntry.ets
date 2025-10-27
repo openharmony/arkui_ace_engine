@@ -28,13 +28,13 @@ import { setCustomEventsChecker } from "./Events"
 import { checkArkoalaCallbacks } from "./CallbacksChecker"
 import { setUIDetachedRootCreator } from "./CallbackTransformer"
 import { enterForeignContext, leaveForeignContext } from "./base"
-import { checkEvents, wrapSystemCallback, KUint8ArrayPtr } from "@koalaui/interop"
+import { checkEvents, registerApiEventHandler, wrapSystemCallback, KUint8ArrayPtr } from '@koalaui/interop'
 import { Routed } from "./base"
 import router from "@ohos/router"
 import { UIContextImpl, ContextRecord, DetachedRootEntryManager, DetachedRootEntry } from "arkui/base/UIContextImpl"
 import { updateLazyItems } from "arkui/base/LazyForEachImpl"
 import { UIContextUtil } from "arkui/base/UIContextUtil"
-import { registerArkuiApiHandler } from "./framework/peers/CallbackDeserializeCall"
+import { deserializeAndCallCallback, registerArkuiApiHandler } from './framework/peers/CallbackDeserializeCall'
 import { ObserveSingleton } from './stateManagement/base/observeSingleton'
 import { StateUpdateLoop } from './stateManagement'
 import { AceTrace } from 'arkui/base/AceTrace'
@@ -535,7 +535,11 @@ export class Application {
         registerNativeModuleLibraryName("TestNativeModule", "ArkoalaNative_ark.z")
         wrapSystemApiHandlerCallback()
         if (Application.firstRegisterArkuiApiHandler) {
-            registerArkuiApiHandler()
+            registerApiEventHandler(10, (thisDeserializer: DeserializerBase): void => {
+                ObserveSingleton.instance.applyTaskDelayMutableStateChange(() => {
+                    deserializeAndCallCallback(thisDeserializer);
+                });
+            });
             Application.firstRegisterArkuiApiHandler = false
         }
         return new Application(useNativeLog, moduleName, startUrl, startParams, userView, entryPoint)
