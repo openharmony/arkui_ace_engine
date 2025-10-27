@@ -4142,7 +4142,7 @@ void RosenRenderContext::PaintFocusState(const RoundRect& paintRect, const Color
         }
         rsNode_->AddModifier(accessibilityFocusStateModifier_);
         accessibilityFocusStateModifier_->AttachAnimationRectProperty();
-        RequestNextFrame();
+        RequestNextFrame(true);
         return;
     }
     if (!isFocusBoxGlow_) {

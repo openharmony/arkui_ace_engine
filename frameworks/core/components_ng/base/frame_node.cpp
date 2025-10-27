@@ -716,11 +716,16 @@ void FrameNode::InitializePatternAndContext()
 {
     pattern_->AttachToFrameNode(WeakClaim(this));
     accessibilityProperty_->SetHost(WeakClaim(this));
-    renderContext_->SetRequestFrame([weak = WeakClaim(this)] {
+    renderContext_->SetRequestFrame([weak = WeakClaim(this)](bool isOffScreenNode) {
         auto frameNode = weak.Upgrade();
         CHECK_NULL_VOID(frameNode);
         if (frameNode->IsOnMainTree()) {
             auto context = frameNode->GetContext();
+            CHECK_NULL_VOID(context);
+            context->RequestFrame();
+            return;
+        } else if (isOffScreenNode) {
+            auto context = frameNode->GetOffMainTreeNodeContext();
             CHECK_NULL_VOID(context);
             context->RequestFrame();
             return;
@@ -732,6 +737,25 @@ void FrameNode::InitializePatternAndContext()
     if (pattern_->GetFocusPattern().GetFocusType() != FocusType::DISABLE) {
         GetOrCreateFocusHub();
     }
+}
+
+PipelineContext* FrameNode::GetOffMainTreeNodeContext()
+{
+    bool isOverlayNode = false;
+    RefPtr<FrameNode> checkNode;
+    auto parentNode = GetParent();
+    while (parentNode) {
+        checkNode = AceType::DynamicCast<FrameNode>(parentNode);
+        if (checkNode && checkNode->GetOverlayNode()) {
+            isOverlayNode = true;
+            break;
+        }
+        parentNode = parentNode->GetParent();
+    }
+    if (isOverlayNode && checkNode && checkNode->IsOnMainTree()) {
+        return checkNode->GetContext();
+    }
+    return nullptr;
 }
 
 void FrameNode::DumpLayoutInfo()

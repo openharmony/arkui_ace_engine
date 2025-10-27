@@ -38,18 +38,18 @@ std::string UseEffectTypeToString(EffectType effectType)
 
 } // namespace
 
-void RenderContext::SetRequestFrame(const std::function<void()>& requestFrame)
+void RenderContext::SetRequestFrame(const std::function<void(bool)>& requestFrame)
 {
     requestFrame_ = requestFrame;
 }
 
-void RenderContext::RequestNextFrame() const
+void RenderContext::RequestNextFrame(bool isOffScreenNode) const
 {
     auto node = GetHost();
     // This function has a mirror function (XxxMultiThread) and needs to be modified synchronously.
-    FREE_NODE_CHECK(node, RequestNextFrame);
+    FREE_NODE_CHECK(node, RequestNextFrame, isOffScreenNode);
     if (requestFrame_) {
-        requestFrame_();
+        requestFrame_(isOffScreenNode);
         CHECK_NULL_VOID(node);
         auto eventHub = node->GetEventHub<NG::EventHub>();
         if (node->GetInspectorId().has_value() || (eventHub && eventHub->HasNDKDrawCompletedCallback())) {
