@@ -2253,6 +2253,8 @@ typedef struct Ark_SelectionOptions Ark_SelectionOptions;
 typedef struct Opt_SelectionOptions Opt_SelectionOptions;
 typedef struct Ark_SheetDismiss Ark_SheetDismiss;
 typedef struct Opt_SheetDismiss Opt_SheetDismiss;
+typedef struct Ark_SizeTLengthMetrics Ark_SizeTLengthMetrics;
+typedef struct Opt_SizeTLengthMetrics Opt_SizeTLengthMetrics;
 typedef struct SkillPeer SkillPeer;
 typedef struct SkillPeer* Ark_Skill;
 typedef struct Opt_Skill Opt_Skill;
@@ -2657,6 +2659,8 @@ typedef struct Opt_NavigationMenuItem Opt_NavigationMenuItem;
 typedef struct NavigationTransitionProxyPeer NavigationTransitionProxyPeer;
 typedef struct NavigationTransitionProxyPeer* Ark_NavigationTransitionProxy;
 typedef struct Opt_NavigationTransitionProxy Opt_NavigationTransitionProxy;
+typedef struct Ark_NodeEdgesLengthMetrics Ark_NodeEdgesLengthMetrics;
+typedef struct Opt_NodeEdgesLengthMetrics Opt_NodeEdgesLengthMetrics;
 typedef struct OffscreenCanvasRenderingContext2DPeer OffscreenCanvasRenderingContext2DPeer;
 typedef struct OffscreenCanvasRenderingContext2DPeer* Ark_OffscreenCanvasRenderingContext2D;
 typedef struct Opt_OffscreenCanvasRenderingContext2D Opt_OffscreenCanvasRenderingContext2D;
@@ -15059,6 +15063,15 @@ typedef struct Opt_SheetDismiss {
     Ark_Tag tag;
     Ark_SheetDismiss value;
 } Opt_SheetDismiss;
+typedef struct Ark_SizeTLengthMetrics {
+    /* kind: Interface */
+    Ark_LengthMetrics width;
+    Ark_LengthMetrics height;
+} Ark_SizeTLengthMetrics;
+typedef struct Opt_SizeTLengthMetrics {
+    Ark_Tag tag;
+    Ark_SizeTLengthMetrics value;
+} Opt_SizeTLengthMetrics;
 typedef struct Opt_Skill {
     Ark_Tag tag;
     Ark_Skill value;
@@ -17222,6 +17235,17 @@ typedef struct Opt_NavigationTransitionProxy {
     Ark_Tag tag;
     Ark_NavigationTransitionProxy value;
 } Opt_NavigationTransitionProxy;
+typedef struct Ark_NodeEdgesLengthMetrics {
+    /* kind: Interface */
+    Opt_LengthMetrics top;
+    Opt_LengthMetrics left;
+    Opt_LengthMetrics bottom;
+    Opt_LengthMetrics right;
+} Ark_NodeEdgesLengthMetrics;
+typedef struct Opt_NodeEdgesLengthMetrics {
+    Ark_Tag tag;
+    Ark_NodeEdgesLengthMetrics value;
+} Opt_NodeEdgesLengthMetrics;
 typedef struct Opt_OffscreenCanvasRenderingContext2D {
     Ark_Tag tag;
     Ark_OffscreenCanvasRenderingContext2D value;
@@ -17582,6 +17606,7 @@ typedef struct Ark_SliderBlockStyle {
     /* kind: Interface */
     Ark_SliderBlockType type;
     Opt_ResourceStr image;
+    Opt_Union_CircleShape_EllipseShape_PathShape_RectShape shape;
 } Ark_SliderBlockStyle;
 typedef struct Opt_SliderBlockStyle {
     Ark_Tag tag;
@@ -25586,10 +25611,10 @@ typedef struct GENERATED_ArkUIFrameNodeExtenderAccessor {
     Ark_NativePointer (*getParent)(Ark_FrameNode peer);
     Ark_Int32 (*getChildrenCount)(Ark_FrameNode peer);
     void (*dispose)(Ark_FrameNode peer);
-    Ark_Position (*getPositionToWindow)(Ark_FrameNode peer);
-    Ark_Position (*getPositionToParent)(Ark_FrameNode peer);
+    Ark_Vector2 (*getPositionToWindow)(Ark_FrameNode peer);
+    Ark_Vector2 (*getPositionToParent)(Ark_FrameNode peer);
     Ark_Size (*getMeasuredSize)(Ark_FrameNode peer);
-    Ark_Position (*getLayoutPosition)(Ark_FrameNode peer);
+    Ark_Vector2 (*getLayoutPosition)(Ark_FrameNode peer);
     Ark_String (*getId)(Ark_FrameNode peer);
     Ark_Number (*getUniqueId)(Ark_FrameNode peer);
     Ark_String (*getNodeType)(Ark_FrameNode peer);
@@ -25606,16 +25631,20 @@ typedef struct GENERATED_ArkUIFrameNodeExtenderAccessor {
     void (*setMeasuredSize)(Ark_FrameNode peer,
                             const Ark_Size* size);
     void (*setLayoutPosition)(Ark_FrameNode peer,
-                              const Ark_Position* position);
+                              const Ark_Vector2* position);
     void (*measure)(Ark_FrameNode peer,
                     const Ark_LayoutConstraint* constraint);
     void (*layout)(Ark_FrameNode peer,
-                   const Ark_Position* position);
+                   const Ark_Vector2* position);
     void (*setNeedsLayout)(Ark_FrameNode peer);
-    Ark_Position (*getPositionToScreen)(Ark_FrameNode peer);
-    Ark_Position (*getPositionToWindowWithTransform)(Ark_FrameNode peer);
-    Ark_Position (*getPositionToParentWithTransform)(Ark_FrameNode peer);
-    Ark_Position (*getPositionToScreenWithTransform)(Ark_FrameNode peer);
+    Ark_Vector2 (*getPositionToScreen)(Ark_FrameNode peer);
+    Ark_Vector2 (*getPositionToWindowWithTransform)(Ark_FrameNode peer);
+    Ark_Vector2 (*getPositionToParentWithTransform)(Ark_FrameNode peer);
+    Ark_Vector2 (*getPositionToScreenWithTransform)(Ark_FrameNode peer);
+    Ark_NodeEdgesLengthMetrics (*getUserConfigBorderWidth)(Ark_FrameNode peer);
+    Ark_NodeEdgesLengthMetrics (*getUserConfigPadding)(Ark_FrameNode peer);
+    Ark_NodeEdgesLengthMetrics (*getUserConfigMargin)(Ark_FrameNode peer);
+    Ark_SizeTLengthMetrics (*getUserConfigSize)(Ark_FrameNode peer);
     Ark_NativePointer (*getFrameNodeByKey)(const Ark_String* name);
     Ark_Number (*getIdByFrameNode)(Ark_NativePointer node);
     void (*moveTo)(Ark_FrameNode peer,

@@ -2702,6 +2702,16 @@ void SetZoomControlAccessImpl(Ark_NativePointer node,
 void SetEnableSelectedDataDetectorImpl(Ark_NativePointer node,
                                        const Opt_Boolean* value)
 {
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvert<bool>(*value);
+    if (!convValue) {
+        WebModelStatic::SetEnableSelectedDataDetector(frameNode, true);
+        return;
+    }
+    WebModelStatic::SetEnableSelectedDataDetector(frameNode, *convValue);
+#endif // WEB_SUPPORTED
 }
 } // WebAttributeModifier
 const GENERATED_ArkUIWebModifier* GetWebModifier()

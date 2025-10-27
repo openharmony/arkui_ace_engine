@@ -1391,6 +1391,14 @@ void WebModelStatic::SetBackToTop(FrameNode* frameNode, bool isEnabled)
     webPatternStatic->UpdateBackToTop(isEnabled);
 }
 
+void WebModelStatic::SetEnableSelectedDataDetector(FrameNode* frameNode, bool isEnabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateEnableSelectedDataDetector(isEnabled);
+}
+
 void WebModelStatic::NotifyPopupWindowResultStatic(int32_t webId, bool result)
 {
 #if !defined(IOS_PLATFORM) && !defined(ANDROID_PLATFORM)
