@@ -139,6 +139,9 @@
     {
       "name": "minContentWidth1",
       "value": 300
+    }, {
+      "name": "integer_30",
+      "value": 30
     }
   ]
 }

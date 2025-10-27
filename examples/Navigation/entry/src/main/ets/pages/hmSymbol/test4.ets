@@ -22,11 +22,11 @@ struct test1 {
 
   @State fontSize:number|string|Resource|null|undefined = 30
 
-  @State fontColor: null|undefined|(Color|string|Resource)[]  = [Color.Blue]
+  @State fontColor: null|undefined|(Color|string|Resource)[] = [Color.Blue]
   @State fontColorIndex1:number = 0
   @State text2:string = 'Color.Blue'
 
-  @State fontWeight: null|undefined|number|string|FontWeight   = 100
+  @State fontWeight: null|undefined|number|string|FontWeight = 100
   @State fontWeightIndex1:number = 0
   @State text3:string = '100'
 
