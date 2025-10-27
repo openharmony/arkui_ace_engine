@@ -491,6 +491,11 @@
       "buildFunction": "SliderLevel15Builder"
     },
     {
+      "name": "SliderPrefixSuffix",
+      "pageSourceFile": "src/main/ets/pages/components/slider/SliderPrefixSuffix.ets",
+      "buildFunction": "SliderPrefixSuffixBuilder"
+    },
+    {
       "name": "RadioIndex",
       "pageSourceFile": "src/main/ets/pages/components/radio/Index.ets",
       "buildFunction": "RadioIndexBuilder"
