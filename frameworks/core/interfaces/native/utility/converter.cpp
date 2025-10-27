@@ -497,6 +497,16 @@ std::optional<StringArray> ResourceConverter::ToFontFamilies()
 
 std::optional<Dimension> ResourceConverter::ToDimension()
 {
+    return GetDimensionInner();
+}
+
+std::optional<CalcDimension> ResourceConverter::ToCalcDimension()
+{
+    return GetDimensionInner();
+}
+
+std::optional<CalcDimension> ResourceConverter::GetDimensionInner()
+{
     CHECK_NULL_RETURN(resWrapper_, std::nullopt);
     if (type_ == ResourceType::INTEGER) {
         auto resource = GetIntegerResource();
@@ -508,14 +518,13 @@ std::optional<Dimension> ResourceConverter::ToDimension()
         } else if (auto name = GetResourceName(); name) {
             return resWrapper_->GetDimensionByName(*name);
         } else {
-            LOGE("ResourceConverter::ToDimension Unknown resource value");
+            LOGE("ResourceConverter::ToCalcDimension Unknown resource value");
         }
     } else if (type_ == ResourceType::STRING) {
-        auto strValue = GetStringResource();
-        if (strValue.has_value()) {
-            return StringUtils::StringToDimensionWithUnit(strValue.value(), DimensionUnit::VP);
+        if (auto str = GetStringResource(); str) {
+            return StringUtils::StringToCalcDimension(*str, true);
         } else {
-            LOGE("ResourceConverter::ToDimension parse string type error");
+            LOGE("ResourceConverter::GetDimensionInner Unknown string value");
         }
     }
     return std::nullopt;
@@ -645,7 +654,7 @@ template<>
 void AssignCast(std::optional<CalcDimension>& dst, const Ark_Resource& src)
 {
     ResourceConverter converter(src);
-    dst = converter.ToDimension();
+    dst = converter.ToCalcDimension();
 }
 
 template<>
