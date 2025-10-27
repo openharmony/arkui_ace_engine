@@ -195,9 +195,5 @@ void getKoalaANICallbackDispatcher(ani_class* clazz, ani_static_method* method) 
 }
 
 ani_env* getKoalaANIContext(void* hint) {
-    if (hint) {
-        return reinterpret_cast<ani_env*>(hint);
-    } else {
-        return currentContext;
-    }
+    return reinterpret_cast<ani_env*>(hint);
 }
