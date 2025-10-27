@@ -22,10 +22,12 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkImageAnimatorPeer, ImageFrameInfo, ImageAnimatorAttribute } from "./component/imageAnimator"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 import { CommonMethod } from "./component/common"
 import { AnimationStatus, FillMode } from "./component/enums"
 export class ImageAnimatorModifier extends CommonMethodModifier implements ImageAnimatorAttribute,AttributeModifier<ImageAnimatorAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -62,6 +64,7 @@ export class ImageAnimatorModifier extends CommonMethodModifier implements Image
     _onFinish_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onFinish_0_0value?: (() => void) | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkImageAnimatorPeer;
         if (this._images_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -476,6 +479,7 @@ export class ImageAnimatorModifier extends CommonMethodModifier implements Image
         {
             this._images_0_flag = AttributeUpdaterFlag.UPDATE
             this._images_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._images_0_flag = AttributeUpdaterFlag.SKIP
@@ -487,6 +491,7 @@ export class ImageAnimatorModifier extends CommonMethodModifier implements Image
         {
             this._state_0_flag = AttributeUpdaterFlag.UPDATE
             this._state_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._state_0_flag = AttributeUpdaterFlag.SKIP
@@ -498,6 +503,7 @@ export class ImageAnimatorModifier extends CommonMethodModifier implements Image
         {
             this._duration_0_flag = AttributeUpdaterFlag.UPDATE
             this._duration_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._duration_0_flag = AttributeUpdaterFlag.SKIP
@@ -509,6 +515,7 @@ export class ImageAnimatorModifier extends CommonMethodModifier implements Image
         {
             this._reverse_0_flag = AttributeUpdaterFlag.UPDATE
             this._reverse_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._reverse_0_flag = AttributeUpdaterFlag.SKIP
@@ -520,6 +527,7 @@ export class ImageAnimatorModifier extends CommonMethodModifier implements Image
         {
             this._fixedSize_0_flag = AttributeUpdaterFlag.UPDATE
             this._fixedSize_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fixedSize_0_flag = AttributeUpdaterFlag.SKIP
@@ -531,6 +539,7 @@ export class ImageAnimatorModifier extends CommonMethodModifier implements Image
         {
             this._fillMode_0_flag = AttributeUpdaterFlag.UPDATE
             this._fillMode_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fillMode_0_flag = AttributeUpdaterFlag.SKIP
@@ -542,6 +551,7 @@ export class ImageAnimatorModifier extends CommonMethodModifier implements Image
         {
             this._iterations_0_flag = AttributeUpdaterFlag.UPDATE
             this._iterations_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._iterations_0_flag = AttributeUpdaterFlag.SKIP
@@ -553,6 +563,7 @@ export class ImageAnimatorModifier extends CommonMethodModifier implements Image
         {
             this._monitorInvisibleArea_0_flag = AttributeUpdaterFlag.UPDATE
             this._monitorInvisibleArea_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._monitorInvisibleArea_0_flag = AttributeUpdaterFlag.SKIP
@@ -564,6 +575,7 @@ export class ImageAnimatorModifier extends CommonMethodModifier implements Image
         {
             this._onStart_0_flag = AttributeUpdaterFlag.UPDATE
             this._onStart_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onStart_0_flag = AttributeUpdaterFlag.SKIP
@@ -575,6 +587,7 @@ export class ImageAnimatorModifier extends CommonMethodModifier implements Image
         {
             this._onPause_0_flag = AttributeUpdaterFlag.UPDATE
             this._onPause_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onPause_0_flag = AttributeUpdaterFlag.SKIP
@@ -586,6 +599,7 @@ export class ImageAnimatorModifier extends CommonMethodModifier implements Image
         {
             this._onRepeat_0_flag = AttributeUpdaterFlag.UPDATE
             this._onRepeat_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onRepeat_0_flag = AttributeUpdaterFlag.SKIP
@@ -597,6 +611,7 @@ export class ImageAnimatorModifier extends CommonMethodModifier implements Image
         {
             this._onCancel_0_flag = AttributeUpdaterFlag.UPDATE
             this._onCancel_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onCancel_0_flag = AttributeUpdaterFlag.SKIP
@@ -608,6 +623,7 @@ export class ImageAnimatorModifier extends CommonMethodModifier implements Image
         {
             this._onFinish_0_flag = AttributeUpdaterFlag.UPDATE
             this._onFinish_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onFinish_0_flag = AttributeUpdaterFlag.SKIP

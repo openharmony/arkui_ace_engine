@@ -17,7 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { mutableState, MutableState } from '@koalaui/runtime'
-import {CommonAttribute, AttributeModifier } from  './component/common'
+import { CommonAttribute, AttributeModifier } from  './component/common'
 import { CommonMethodModifier } from './CommonMethodModifier'
 
 export class CommonModifier extends CommonMethodModifier implements CommonAttribute,AttributeModifier<CommonAttribute> {

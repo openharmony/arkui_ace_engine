@@ -27,8 +27,10 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkEllipsePeer, EllipseAttribute } from "./component/ellipse"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 export class EllipseModifier extends CommonMethodModifier implements EllipseAttribute,AttributeModifier<EllipseAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -61,6 +63,7 @@ export class EllipseModifier extends CommonMethodModifier implements EllipseAttr
     _strokeDashArray_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _strokeDashArray_0_0value?: Array<Length> | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkEllipsePeer;
         if (this._stroke_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -413,6 +416,7 @@ export class EllipseModifier extends CommonMethodModifier implements EllipseAttr
         {
             this._stroke_0_flag = AttributeUpdaterFlag.UPDATE
             this._stroke_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._stroke_0_flag = AttributeUpdaterFlag.SKIP
@@ -424,6 +428,7 @@ export class EllipseModifier extends CommonMethodModifier implements EllipseAttr
         {
             this._fill_0_flag = AttributeUpdaterFlag.UPDATE
             this._fill_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fill_0_flag = AttributeUpdaterFlag.SKIP
@@ -435,6 +440,7 @@ export class EllipseModifier extends CommonMethodModifier implements EllipseAttr
         {
             this._strokeDashOffset_0_flag = AttributeUpdaterFlag.UPDATE
             this._strokeDashOffset_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._strokeDashOffset_0_flag = AttributeUpdaterFlag.SKIP
@@ -446,6 +452,7 @@ export class EllipseModifier extends CommonMethodModifier implements EllipseAttr
         {
             this._strokeLineCap_0_flag = AttributeUpdaterFlag.UPDATE
             this._strokeLineCap_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._strokeLineCap_0_flag = AttributeUpdaterFlag.SKIP
@@ -457,6 +464,7 @@ export class EllipseModifier extends CommonMethodModifier implements EllipseAttr
         {
             this._strokeLineJoin_0_flag = AttributeUpdaterFlag.UPDATE
             this._strokeLineJoin_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._strokeLineJoin_0_flag = AttributeUpdaterFlag.SKIP
@@ -468,6 +476,7 @@ export class EllipseModifier extends CommonMethodModifier implements EllipseAttr
         {
             this._strokeMiterLimit_0_flag = AttributeUpdaterFlag.UPDATE
             this._strokeMiterLimit_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._strokeMiterLimit_0_flag = AttributeUpdaterFlag.SKIP
@@ -479,6 +488,7 @@ export class EllipseModifier extends CommonMethodModifier implements EllipseAttr
         {
             this._strokeOpacity_0_flag = AttributeUpdaterFlag.UPDATE
             this._strokeOpacity_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._strokeOpacity_0_flag = AttributeUpdaterFlag.SKIP
@@ -490,6 +500,7 @@ export class EllipseModifier extends CommonMethodModifier implements EllipseAttr
         {
             this._fillOpacity_0_flag = AttributeUpdaterFlag.UPDATE
             this._fillOpacity_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fillOpacity_0_flag = AttributeUpdaterFlag.SKIP
@@ -501,6 +512,7 @@ export class EllipseModifier extends CommonMethodModifier implements EllipseAttr
         {
             this._strokeWidth_0_flag = AttributeUpdaterFlag.UPDATE
             this._strokeWidth_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._strokeWidth_0_flag = AttributeUpdaterFlag.SKIP
@@ -512,6 +524,7 @@ export class EllipseModifier extends CommonMethodModifier implements EllipseAttr
         {
             this._antiAlias_0_flag = AttributeUpdaterFlag.UPDATE
             this._antiAlias_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._antiAlias_0_flag = AttributeUpdaterFlag.SKIP
@@ -523,6 +536,7 @@ export class EllipseModifier extends CommonMethodModifier implements EllipseAttr
         {
             this._strokeDashArray_0_flag = AttributeUpdaterFlag.UPDATE
             this._strokeDashArray_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._strokeDashArray_0_flag = AttributeUpdaterFlag.SKIP

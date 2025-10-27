@@ -22,9 +22,11 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkEffectComponentPeer, EffectComponentAttribute } from "./component/effectComponent"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 import { CommonMethod } from "./component/common"
 export class EffectComponentModifier extends CommonMethodModifier implements EffectComponentAttribute,AttributeModifier<EffectComponentAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -35,6 +37,7 @@ export class EffectComponentModifier extends CommonMethodModifier implements Eff
     applyDisabledAttribute(instance: EffectComponentAttribute): void { }
     applySelectedAttribute(instance: EffectComponentAttribute): void { }
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkEffectComponentPeer;
     }

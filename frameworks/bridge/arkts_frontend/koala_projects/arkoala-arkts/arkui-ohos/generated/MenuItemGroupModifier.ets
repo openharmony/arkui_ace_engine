@@ -22,9 +22,11 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkMenuItemGroupPeer, MenuItemGroupAttribute } from "./component/menuItemGroup"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 import { CommonMethod } from "./component/common"
 export class MenuItemGroupModifier extends CommonMethodModifier implements MenuItemGroupAttribute,AttributeModifier<MenuItemGroupAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -35,6 +37,7 @@ export class MenuItemGroupModifier extends CommonMethodModifier implements MenuI
     applyDisabledAttribute(instance: MenuItemGroupAttribute): void { }
     applySelectedAttribute(instance: MenuItemGroupAttribute): void { }
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkMenuItemGroupPeer;
     }

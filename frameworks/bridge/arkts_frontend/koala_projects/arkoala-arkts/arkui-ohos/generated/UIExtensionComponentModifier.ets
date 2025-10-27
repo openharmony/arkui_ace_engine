@@ -22,11 +22,14 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkUIExtensionComponentPeer, UIExtensionProxy, UIExtensionComponentAttribute } from "./component/uiExtensionComponent"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 import { CommonMethod, TerminationInfo } from "./component/common"
 import { RecordData } from "./component/pluginComponent"
 import { ErrorCallback, BusinessError } from "@ohos.base"
+import { VoidCallback } from "./component/units"
 export class UIExtensionComponentModifier extends CommonMethodModifier implements UIExtensionComponentAttribute,AttributeModifier<UIExtensionComponentAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -45,8 +48,9 @@ export class UIExtensionComponentModifier extends CommonMethodModifier implement
     _onTerminated_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onTerminated_0_0value?: ((value0: TerminationInfo) => void) | undefined
     _onDrawReady_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onDrawReady_0_0value?: (() => void) | undefined
+    _onDrawReady_0_0value?: VoidCallback | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkUIExtensionComponentPeer;
         if (this._onRemoteReady_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -125,7 +129,7 @@ export class UIExtensionComponentModifier extends CommonMethodModifier implement
         {
             switch (this._onDrawReady_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnDrawReadyAttribute((this._onDrawReady_0_0value as (() => void) | undefined));
+                    peer.setOnDrawReadyAttribute((this._onDrawReady_0_0value as VoidCallback | undefined));
                     this._onDrawReady_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -135,7 +139,7 @@ export class UIExtensionComponentModifier extends CommonMethodModifier implement
                 }
                 default: {
                     this._onDrawReady_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnDrawReadyAttribute((undefined as (() => void) | undefined));
+                    peer.setOnDrawReadyAttribute((undefined as VoidCallback | undefined));
                 }
             }
         }
@@ -203,7 +207,7 @@ export class UIExtensionComponentModifier extends CommonMethodModifier implement
                     break;
                 }
                 default: {
-                    this.onDrawReady((undefined as (() => void) | undefined));
+                    this.onDrawReady((undefined as VoidCallback | undefined));
                 }
             }
         }
@@ -213,6 +217,7 @@ export class UIExtensionComponentModifier extends CommonMethodModifier implement
         {
             this._onRemoteReady_0_flag = AttributeUpdaterFlag.UPDATE
             this._onRemoteReady_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onRemoteReady_0_flag = AttributeUpdaterFlag.SKIP
@@ -224,6 +229,7 @@ export class UIExtensionComponentModifier extends CommonMethodModifier implement
         {
             this._onReceive_0_flag = AttributeUpdaterFlag.UPDATE
             this._onReceive_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onReceive_0_flag = AttributeUpdaterFlag.SKIP
@@ -235,6 +241,7 @@ export class UIExtensionComponentModifier extends CommonMethodModifier implement
         {
             this._onError_0_flag = AttributeUpdaterFlag.UPDATE
             this._onError_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onError_0_flag = AttributeUpdaterFlag.SKIP
@@ -246,17 +253,19 @@ export class UIExtensionComponentModifier extends CommonMethodModifier implement
         {
             this._onTerminated_0_flag = AttributeUpdaterFlag.UPDATE
             this._onTerminated_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onTerminated_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
-    onDrawReady(value: (() => void) | undefined): this {
+    onDrawReady(value: VoidCallback | undefined): this {
         if (((this._onDrawReady_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._onDrawReady_0_flag = AttributeUpdaterFlag.UPDATE
             this._onDrawReady_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onDrawReady_0_flag = AttributeUpdaterFlag.SKIP

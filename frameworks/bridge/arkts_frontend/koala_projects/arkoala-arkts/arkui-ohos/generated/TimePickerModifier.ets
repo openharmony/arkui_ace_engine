@@ -22,11 +22,13 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkTimePickerPeer, OnTimePickerChangeCallback, TimePickerResult, TimePickerAttribute } from "./component/timePicker"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 import { CommonMethod, PickerTextStyle } from "./component/common"
 import { default as intl } from "@ohos.intl"
 import { CrownSensitivity } from "./component/enums"
 export class TimePickerModifier extends CommonMethodModifier implements TimePickerAttribute,AttributeModifier<TimePickerAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -59,6 +61,7 @@ export class TimePickerModifier extends CommonMethodModifier implements TimePick
     _enableCascade_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _enableCascade_0_0value?: boolean | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkTimePickerPeer;
         if (this._useMilitaryTime_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -411,6 +414,7 @@ export class TimePickerModifier extends CommonMethodModifier implements TimePick
         {
             this._useMilitaryTime_0_flag = AttributeUpdaterFlag.UPDATE
             this._useMilitaryTime_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._useMilitaryTime_0_flag = AttributeUpdaterFlag.SKIP
@@ -422,6 +426,7 @@ export class TimePickerModifier extends CommonMethodModifier implements TimePick
         {
             this._loop_0_flag = AttributeUpdaterFlag.UPDATE
             this._loop_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._loop_0_flag = AttributeUpdaterFlag.SKIP
@@ -433,6 +438,7 @@ export class TimePickerModifier extends CommonMethodModifier implements TimePick
         {
             this._disappearTextStyle_0_flag = AttributeUpdaterFlag.UPDATE
             this._disappearTextStyle_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._disappearTextStyle_0_flag = AttributeUpdaterFlag.SKIP
@@ -444,6 +450,7 @@ export class TimePickerModifier extends CommonMethodModifier implements TimePick
         {
             this._textStyle_0_flag = AttributeUpdaterFlag.UPDATE
             this._textStyle_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._textStyle_0_flag = AttributeUpdaterFlag.SKIP
@@ -455,6 +462,7 @@ export class TimePickerModifier extends CommonMethodModifier implements TimePick
         {
             this._selectedTextStyle_0_flag = AttributeUpdaterFlag.UPDATE
             this._selectedTextStyle_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._selectedTextStyle_0_flag = AttributeUpdaterFlag.SKIP
@@ -466,6 +474,7 @@ export class TimePickerModifier extends CommonMethodModifier implements TimePick
         {
             this._dateTimeOptions_0_flag = AttributeUpdaterFlag.UPDATE
             this._dateTimeOptions_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._dateTimeOptions_0_flag = AttributeUpdaterFlag.SKIP
@@ -477,6 +486,7 @@ export class TimePickerModifier extends CommonMethodModifier implements TimePick
         {
             this._onChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onChange_0_flag = AttributeUpdaterFlag.SKIP
@@ -488,6 +498,7 @@ export class TimePickerModifier extends CommonMethodModifier implements TimePick
         {
             this._onEnterSelectedArea_0_flag = AttributeUpdaterFlag.UPDATE
             this._onEnterSelectedArea_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onEnterSelectedArea_0_flag = AttributeUpdaterFlag.SKIP
@@ -499,6 +510,7 @@ export class TimePickerModifier extends CommonMethodModifier implements TimePick
         {
             this._enableHapticFeedback_0_flag = AttributeUpdaterFlag.UPDATE
             this._enableHapticFeedback_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enableHapticFeedback_0_flag = AttributeUpdaterFlag.SKIP
@@ -510,6 +522,7 @@ export class TimePickerModifier extends CommonMethodModifier implements TimePick
         {
             this._digitalCrownSensitivity_0_flag = AttributeUpdaterFlag.UPDATE
             this._digitalCrownSensitivity_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._digitalCrownSensitivity_0_flag = AttributeUpdaterFlag.SKIP
@@ -521,6 +534,7 @@ export class TimePickerModifier extends CommonMethodModifier implements TimePick
         {
             this._enableCascade_0_flag = AttributeUpdaterFlag.UPDATE
             this._enableCascade_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enableCascade_0_flag = AttributeUpdaterFlag.SKIP

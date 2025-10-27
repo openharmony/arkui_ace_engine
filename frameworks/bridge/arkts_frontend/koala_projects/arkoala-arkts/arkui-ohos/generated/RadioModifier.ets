@@ -22,9 +22,11 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkRadioPeer, OnRadioChangeCallback, RadioStyle, RadioConfiguration, RadioAttribute } from "./component/radio"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 import { CommonMethod, Bindable } from "./component/common"
 export class RadioModifier extends CommonMethodModifier implements RadioAttribute,AttributeModifier<RadioAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -41,6 +43,7 @@ export class RadioModifier extends CommonMethodModifier implements RadioAttribut
     _radioStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _radioStyle_0_0value?: RadioStyle | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkRadioPeer;
         if (this._checked_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -145,6 +148,7 @@ export class RadioModifier extends CommonMethodModifier implements RadioAttribut
         {
             this._checked_0_flag = AttributeUpdaterFlag.UPDATE
             this._checked_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._checked_0_flag = AttributeUpdaterFlag.SKIP
@@ -156,6 +160,7 @@ export class RadioModifier extends CommonMethodModifier implements RadioAttribut
         {
             this._onChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onChange_0_flag = AttributeUpdaterFlag.SKIP
@@ -167,6 +172,7 @@ export class RadioModifier extends CommonMethodModifier implements RadioAttribut
         {
             this._radioStyle_0_flag = AttributeUpdaterFlag.UPDATE
             this._radioStyle_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._radioStyle_0_flag = AttributeUpdaterFlag.SKIP

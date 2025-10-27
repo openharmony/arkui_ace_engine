@@ -22,10 +22,12 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkColumnPeer, ColumnAttribute } from "./component/column"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 import { CommonMethod } from "./component/common"
 import { HorizontalAlign, FlexAlign } from "./component/enums"
 export class ColumnModifier extends CommonMethodModifier implements ColumnAttribute,AttributeModifier<ColumnAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -42,6 +44,7 @@ export class ColumnModifier extends CommonMethodModifier implements ColumnAttrib
     _reverse_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _reverse_0_0value?: boolean | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkColumnPeer;
         if (this._alignItems_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -146,6 +149,7 @@ export class ColumnModifier extends CommonMethodModifier implements ColumnAttrib
         {
             this._alignItems_0_flag = AttributeUpdaterFlag.UPDATE
             this._alignItems_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._alignItems_0_flag = AttributeUpdaterFlag.SKIP
@@ -157,6 +161,7 @@ export class ColumnModifier extends CommonMethodModifier implements ColumnAttrib
         {
             this._justifyContent_0_flag = AttributeUpdaterFlag.UPDATE
             this._justifyContent_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._justifyContent_0_flag = AttributeUpdaterFlag.SKIP
@@ -168,6 +173,7 @@ export class ColumnModifier extends CommonMethodModifier implements ColumnAttrib
         {
             this._reverse_0_flag = AttributeUpdaterFlag.UPDATE
             this._reverse_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._reverse_0_flag = AttributeUpdaterFlag.SKIP

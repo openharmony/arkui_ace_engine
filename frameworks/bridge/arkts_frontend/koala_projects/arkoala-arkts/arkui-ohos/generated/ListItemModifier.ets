@@ -22,9 +22,11 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkListItemPeer, SwipeActionOptions, ListItemAttribute } from "./component/listItem"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 import { CommonMethod, Bindable } from "./component/common"
 export class ListItemModifier extends CommonMethodModifier implements ListItemAttribute,AttributeModifier<ListItemAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -43,6 +45,7 @@ export class ListItemModifier extends CommonMethodModifier implements ListItemAt
     _onSelect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onSelect_0_0value?: ((isSelected: boolean) => void) | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkListItemPeer;
         if (this._selectable_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -178,6 +181,7 @@ export class ListItemModifier extends CommonMethodModifier implements ListItemAt
         {
             this._selectable_0_flag = AttributeUpdaterFlag.UPDATE
             this._selectable_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._selectable_0_flag = AttributeUpdaterFlag.SKIP
@@ -189,6 +193,7 @@ export class ListItemModifier extends CommonMethodModifier implements ListItemAt
         {
             this._selected_0_flag = AttributeUpdaterFlag.UPDATE
             this._selected_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._selected_0_flag = AttributeUpdaterFlag.SKIP
@@ -200,6 +205,7 @@ export class ListItemModifier extends CommonMethodModifier implements ListItemAt
         {
             this._swipeAction_0_flag = AttributeUpdaterFlag.UPDATE
             this._swipeAction_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._swipeAction_0_flag = AttributeUpdaterFlag.SKIP
@@ -211,6 +217,7 @@ export class ListItemModifier extends CommonMethodModifier implements ListItemAt
         {
             this._onSelect_0_flag = AttributeUpdaterFlag.UPDATE
             this._onSelect_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onSelect_0_flag = AttributeUpdaterFlag.SKIP

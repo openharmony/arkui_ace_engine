@@ -22,6 +22,7 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkMenuItemPeer, MenuItemAttribute } from "./component/menuItem"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 import { CommonMethod, Bindable } from "./component/common"
 import { ResourceStr, Font, ResourceColor } from "./component/units"
 import { Resource } from "global.resource"
@@ -29,6 +30,7 @@ import { SymbolGlyphModifier } from "arkui.SymbolGlyphModifier"
 import { Color } from "./component/enums"
 export class MenuItemModifier extends CommonMethodModifier implements MenuItemAttribute,AttributeModifier<MenuItemAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -53,6 +55,7 @@ export class MenuItemModifier extends CommonMethodModifier implements MenuItemAt
     _labelFontColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _labelFontColor_0_0value?: ResourceColor | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkMenuItemPeer;
         if (this._selected_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -281,6 +284,7 @@ export class MenuItemModifier extends CommonMethodModifier implements MenuItemAt
         {
             this._selected_0_flag = AttributeUpdaterFlag.UPDATE
             this._selected_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._selected_0_flag = AttributeUpdaterFlag.SKIP
@@ -292,6 +296,7 @@ export class MenuItemModifier extends CommonMethodModifier implements MenuItemAt
         {
             this._selectIcon_0_flag = AttributeUpdaterFlag.UPDATE
             this._selectIcon_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._selectIcon_0_flag = AttributeUpdaterFlag.SKIP
@@ -303,6 +308,7 @@ export class MenuItemModifier extends CommonMethodModifier implements MenuItemAt
         {
             this._onChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onChange_0_flag = AttributeUpdaterFlag.SKIP
@@ -314,6 +320,7 @@ export class MenuItemModifier extends CommonMethodModifier implements MenuItemAt
         {
             this._contentFont_0_flag = AttributeUpdaterFlag.UPDATE
             this._contentFont_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._contentFont_0_flag = AttributeUpdaterFlag.SKIP
@@ -325,6 +332,7 @@ export class MenuItemModifier extends CommonMethodModifier implements MenuItemAt
         {
             this._contentFontColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._contentFontColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._contentFontColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -336,6 +344,7 @@ export class MenuItemModifier extends CommonMethodModifier implements MenuItemAt
         {
             this._labelFont_0_flag = AttributeUpdaterFlag.UPDATE
             this._labelFont_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._labelFont_0_flag = AttributeUpdaterFlag.SKIP
@@ -347,6 +356,7 @@ export class MenuItemModifier extends CommonMethodModifier implements MenuItemAt
         {
             this._labelFontColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._labelFontColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._labelFontColor_0_flag = AttributeUpdaterFlag.SKIP

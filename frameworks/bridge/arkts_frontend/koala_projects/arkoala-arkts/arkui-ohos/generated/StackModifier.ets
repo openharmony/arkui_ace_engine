@@ -22,10 +22,12 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkStackPeer, StackAttribute } from "./component/stack"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 import { CommonMethod } from "./component/common"
 import { Alignment } from "./component/enums"
 export class StackModifier extends CommonMethodModifier implements StackAttribute,AttributeModifier<StackAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -38,6 +40,7 @@ export class StackModifier extends CommonMethodModifier implements StackAttribut
     _alignContent_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _alignContent_0_0value?: Alignment | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkStackPeer;
         if (this._alignContent_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -80,6 +83,7 @@ export class StackModifier extends CommonMethodModifier implements StackAttribut
         {
             this._alignContent_0_flag = AttributeUpdaterFlag.UPDATE
             this._alignContent_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._alignContent_0_flag = AttributeUpdaterFlag.SKIP

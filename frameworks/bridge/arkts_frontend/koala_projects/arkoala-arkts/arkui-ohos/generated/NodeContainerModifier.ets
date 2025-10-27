@@ -22,9 +22,11 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkNodeContainerPeer, NodeContainerAttribute } from "./component/nodeContainer"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 import { CommonMethod } from "./component/common"
 export class NodeContainerModifier extends CommonMethodModifier implements NodeContainerAttribute,AttributeModifier<NodeContainerAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -35,6 +37,7 @@ export class NodeContainerModifier extends CommonMethodModifier implements NodeC
     applyDisabledAttribute(instance: NodeContainerAttribute): void { }
     applySelectedAttribute(instance: NodeContainerAttribute): void { }
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkNodeContainerPeer;
     }

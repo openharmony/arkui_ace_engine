@@ -22,9 +22,11 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkRichTextPeer, RichTextAttribute } from "./component/richText"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 import { CommonMethod } from "./component/common"
 export class RichTextModifier extends CommonMethodModifier implements RichTextAttribute,AttributeModifier<RichTextAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -39,6 +41,7 @@ export class RichTextModifier extends CommonMethodModifier implements RichTextAt
     _onComplete_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onComplete_0_0value?: (() => void) | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkRichTextPeer;
         if (this._onStart_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -112,6 +115,7 @@ export class RichTextModifier extends CommonMethodModifier implements RichTextAt
         {
             this._onStart_0_flag = AttributeUpdaterFlag.UPDATE
             this._onStart_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onStart_0_flag = AttributeUpdaterFlag.SKIP
@@ -123,6 +127,7 @@ export class RichTextModifier extends CommonMethodModifier implements RichTextAt
         {
             this._onComplete_0_flag = AttributeUpdaterFlag.UPDATE
             this._onComplete_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onComplete_0_flag = AttributeUpdaterFlag.SKIP

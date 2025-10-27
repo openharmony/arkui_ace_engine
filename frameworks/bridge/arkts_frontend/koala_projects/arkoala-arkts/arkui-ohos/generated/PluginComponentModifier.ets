@@ -22,10 +22,12 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkPluginComponentPeer, PluginErrorCallback, PluginErrorData, PluginComponentAttribute } from "./component/pluginComponent"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 import { CommonMethod } from "./component/common"
 import { VoidCallback } from "./component/units"
 export class PluginComponentModifier extends CommonMethodModifier implements PluginComponentAttribute,AttributeModifier<PluginComponentAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -40,6 +42,7 @@ export class PluginComponentModifier extends CommonMethodModifier implements Plu
     _onError_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onError_0_0value?: PluginErrorCallback | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkPluginComponentPeer;
         if (this._onComplete_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -113,6 +116,7 @@ export class PluginComponentModifier extends CommonMethodModifier implements Plu
         {
             this._onComplete_0_flag = AttributeUpdaterFlag.UPDATE
             this._onComplete_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onComplete_0_flag = AttributeUpdaterFlag.SKIP
@@ -124,6 +128,7 @@ export class PluginComponentModifier extends CommonMethodModifier implements Plu
         {
             this._onError_0_flag = AttributeUpdaterFlag.UPDATE
             this._onError_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onError_0_flag = AttributeUpdaterFlag.SKIP

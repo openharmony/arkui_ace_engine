@@ -22,12 +22,14 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkDataPanelPeer, LinearGradient, DataPanelShadowOptions, DataPanelConfiguration, DataPanelAttribute } from "./component/dataPanel"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 import { CommonMethod } from "./component/common"
 import { ResourceColor, Length } from "./component/units"
 import { Color } from "./component/enums"
 import { Resource } from "global.resource"
 export class DataPanelModifier extends CommonMethodModifier implements DataPanelAttribute,AttributeModifier<DataPanelAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -50,6 +52,7 @@ export class DataPanelModifier extends CommonMethodModifier implements DataPanel
     _contentModifier_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _contentModifier_0_0value?: ContentModifier<DataPanelConfiguration> | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkDataPanelPeer;
         if (this._closeEffect_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -156,7 +159,7 @@ export class DataPanelModifier extends CommonMethodModifier implements DataPanel
                 }
                 default: {
                     this._contentModifier_0_flag = AttributeUpdaterFlag.INITIAL;
-                    hookDataPanelContentModifier(peer, (this._contentModifier_0_0value as ContentModifier<DataPanelConfiguration> | undefined));
+                    hookDataPanelContentModifier(peer, (undefined as ContentModifier<DataPanelConfiguration> | undefined));
                 }
             }
         }
@@ -247,6 +250,7 @@ export class DataPanelModifier extends CommonMethodModifier implements DataPanel
         {
             this._closeEffect_0_flag = AttributeUpdaterFlag.UPDATE
             this._closeEffect_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._closeEffect_0_flag = AttributeUpdaterFlag.SKIP
@@ -258,6 +262,7 @@ export class DataPanelModifier extends CommonMethodModifier implements DataPanel
         {
             this._valueColors_0_flag = AttributeUpdaterFlag.UPDATE
             this._valueColors_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._valueColors_0_flag = AttributeUpdaterFlag.SKIP
@@ -269,6 +274,7 @@ export class DataPanelModifier extends CommonMethodModifier implements DataPanel
         {
             this._trackBackgroundColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._trackBackgroundColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._trackBackgroundColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -280,6 +286,7 @@ export class DataPanelModifier extends CommonMethodModifier implements DataPanel
         {
             this._strokeWidth_0_flag = AttributeUpdaterFlag.UPDATE
             this._strokeWidth_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._strokeWidth_0_flag = AttributeUpdaterFlag.SKIP
@@ -291,6 +298,7 @@ export class DataPanelModifier extends CommonMethodModifier implements DataPanel
         {
             this._trackShadow_0_flag = AttributeUpdaterFlag.UPDATE
             this._trackShadow_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._trackShadow_0_flag = AttributeUpdaterFlag.SKIP
@@ -298,10 +306,11 @@ export class DataPanelModifier extends CommonMethodModifier implements DataPanel
         return this
     }
     contentModifier(value: ContentModifier<DataPanelConfiguration> | undefined): this {
-        if (((this._contentModifier_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._contentModifier_0_0value) !== (value)))
+        if (((this._contentModifier_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._contentModifier_0_flag = AttributeUpdaterFlag.UPDATE
             this._contentModifier_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._contentModifier_0_flag = AttributeUpdaterFlag.SKIP

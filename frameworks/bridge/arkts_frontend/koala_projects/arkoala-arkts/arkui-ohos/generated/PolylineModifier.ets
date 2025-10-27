@@ -27,9 +27,11 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkPolylinePeer, PolylineAttribute } from "./component/polyline"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 import { ShapePoint } from "./component/line"
 export class PolylineModifier extends CommonMethodModifier implements PolylineAttribute,AttributeModifier<PolylineAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -64,6 +66,7 @@ export class PolylineModifier extends CommonMethodModifier implements PolylineAt
     _strokeDashArray_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _strokeDashArray_0_0value?: Array<Length> | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkPolylinePeer;
         if (this._points_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -447,6 +450,7 @@ export class PolylineModifier extends CommonMethodModifier implements PolylineAt
         {
             this._points_0_flag = AttributeUpdaterFlag.UPDATE
             this._points_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._points_0_flag = AttributeUpdaterFlag.SKIP
@@ -458,6 +462,7 @@ export class PolylineModifier extends CommonMethodModifier implements PolylineAt
         {
             this._stroke_0_flag = AttributeUpdaterFlag.UPDATE
             this._stroke_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._stroke_0_flag = AttributeUpdaterFlag.SKIP
@@ -469,6 +474,7 @@ export class PolylineModifier extends CommonMethodModifier implements PolylineAt
         {
             this._fill_0_flag = AttributeUpdaterFlag.UPDATE
             this._fill_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fill_0_flag = AttributeUpdaterFlag.SKIP
@@ -480,6 +486,7 @@ export class PolylineModifier extends CommonMethodModifier implements PolylineAt
         {
             this._strokeDashOffset_0_flag = AttributeUpdaterFlag.UPDATE
             this._strokeDashOffset_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._strokeDashOffset_0_flag = AttributeUpdaterFlag.SKIP
@@ -491,6 +498,7 @@ export class PolylineModifier extends CommonMethodModifier implements PolylineAt
         {
             this._strokeLineCap_0_flag = AttributeUpdaterFlag.UPDATE
             this._strokeLineCap_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._strokeLineCap_0_flag = AttributeUpdaterFlag.SKIP
@@ -502,6 +510,7 @@ export class PolylineModifier extends CommonMethodModifier implements PolylineAt
         {
             this._strokeLineJoin_0_flag = AttributeUpdaterFlag.UPDATE
             this._strokeLineJoin_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._strokeLineJoin_0_flag = AttributeUpdaterFlag.SKIP
@@ -513,6 +522,7 @@ export class PolylineModifier extends CommonMethodModifier implements PolylineAt
         {
             this._strokeMiterLimit_0_flag = AttributeUpdaterFlag.UPDATE
             this._strokeMiterLimit_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._strokeMiterLimit_0_flag = AttributeUpdaterFlag.SKIP
@@ -524,6 +534,7 @@ export class PolylineModifier extends CommonMethodModifier implements PolylineAt
         {
             this._strokeOpacity_0_flag = AttributeUpdaterFlag.UPDATE
             this._strokeOpacity_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._strokeOpacity_0_flag = AttributeUpdaterFlag.SKIP
@@ -535,6 +546,7 @@ export class PolylineModifier extends CommonMethodModifier implements PolylineAt
         {
             this._fillOpacity_0_flag = AttributeUpdaterFlag.UPDATE
             this._fillOpacity_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fillOpacity_0_flag = AttributeUpdaterFlag.SKIP
@@ -546,6 +558,7 @@ export class PolylineModifier extends CommonMethodModifier implements PolylineAt
         {
             this._strokeWidth_0_flag = AttributeUpdaterFlag.UPDATE
             this._strokeWidth_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._strokeWidth_0_flag = AttributeUpdaterFlag.SKIP
@@ -557,6 +570,7 @@ export class PolylineModifier extends CommonMethodModifier implements PolylineAt
         {
             this._antiAlias_0_flag = AttributeUpdaterFlag.UPDATE
             this._antiAlias_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._antiAlias_0_flag = AttributeUpdaterFlag.SKIP
@@ -568,6 +582,7 @@ export class PolylineModifier extends CommonMethodModifier implements PolylineAt
         {
             this._strokeDashArray_0_flag = AttributeUpdaterFlag.UPDATE
             this._strokeDashArray_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._strokeDashArray_0_flag = AttributeUpdaterFlag.SKIP

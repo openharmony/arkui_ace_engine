@@ -22,10 +22,12 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkCounterPeer, CounterAttribute } from "./component/counter"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 import { CommonMethod } from "./component/common"
 import { VoidCallback } from "./component/units"
 export class CounterModifier extends CommonMethodModifier implements CounterAttribute,AttributeModifier<CounterAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -44,6 +46,7 @@ export class CounterModifier extends CommonMethodModifier implements CounterAttr
     _enableInc_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _enableInc_0_0value?: boolean | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkCounterPeer;
         if (this._onInc_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -179,6 +182,7 @@ export class CounterModifier extends CommonMethodModifier implements CounterAttr
         {
             this._onInc_0_flag = AttributeUpdaterFlag.UPDATE
             this._onInc_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onInc_0_flag = AttributeUpdaterFlag.SKIP
@@ -190,6 +194,7 @@ export class CounterModifier extends CommonMethodModifier implements CounterAttr
         {
             this._onDec_0_flag = AttributeUpdaterFlag.UPDATE
             this._onDec_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onDec_0_flag = AttributeUpdaterFlag.SKIP
@@ -201,6 +206,7 @@ export class CounterModifier extends CommonMethodModifier implements CounterAttr
         {
             this._enableDec_0_flag = AttributeUpdaterFlag.UPDATE
             this._enableDec_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enableDec_0_flag = AttributeUpdaterFlag.SKIP
@@ -212,6 +218,7 @@ export class CounterModifier extends CommonMethodModifier implements CounterAttr
         {
             this._enableInc_0_flag = AttributeUpdaterFlag.UPDATE
             this._enableInc_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enableInc_0_flag = AttributeUpdaterFlag.SKIP

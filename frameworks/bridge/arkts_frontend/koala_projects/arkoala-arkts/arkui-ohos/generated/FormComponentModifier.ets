@@ -22,11 +22,13 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkFormComponentPeer, FormSize, FormDimension, FormCallbackInfo, ErrorInformation, FormComponentAttribute } from "./component/formComponent"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 import { CommonMethod } from "./component/common"
 import { Visibility } from "./component/enums"
 import { VoidCallback } from "./component/units"
 export class FormComponentModifier extends CommonMethodModifier implements FormComponentAttribute,AttributeModifier<FormComponentAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -59,6 +61,7 @@ export class FormComponentModifier extends CommonMethodModifier implements FormC
     _onUpdate_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onUpdate_0_0value?: ((value0: FormCallbackInfo) => void) | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkFormComponentPeer;
         if (this._size_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -411,6 +414,7 @@ export class FormComponentModifier extends CommonMethodModifier implements FormC
         {
             this._size_0_flag = AttributeUpdaterFlag.UPDATE
             this._size_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._size_0_flag = AttributeUpdaterFlag.SKIP
@@ -422,6 +426,7 @@ export class FormComponentModifier extends CommonMethodModifier implements FormC
         {
             this._moduleName_0_flag = AttributeUpdaterFlag.UPDATE
             this._moduleName_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._moduleName_0_flag = AttributeUpdaterFlag.SKIP
@@ -433,6 +438,7 @@ export class FormComponentModifier extends CommonMethodModifier implements FormC
         {
             this._dimension_0_flag = AttributeUpdaterFlag.UPDATE
             this._dimension_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._dimension_0_flag = AttributeUpdaterFlag.SKIP
@@ -444,6 +450,7 @@ export class FormComponentModifier extends CommonMethodModifier implements FormC
         {
             this._allowUpdate_0_flag = AttributeUpdaterFlag.UPDATE
             this._allowUpdate_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._allowUpdate_0_flag = AttributeUpdaterFlag.SKIP
@@ -455,6 +462,7 @@ export class FormComponentModifier extends CommonMethodModifier implements FormC
         {
             this._visibility_0_flag = AttributeUpdaterFlag.UPDATE
             this._visibility_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._visibility_0_flag = AttributeUpdaterFlag.SKIP
@@ -466,6 +474,7 @@ export class FormComponentModifier extends CommonMethodModifier implements FormC
         {
             this._onAcquired_0_flag = AttributeUpdaterFlag.UPDATE
             this._onAcquired_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onAcquired_0_flag = AttributeUpdaterFlag.SKIP
@@ -477,6 +486,7 @@ export class FormComponentModifier extends CommonMethodModifier implements FormC
         {
             this._onError_0_flag = AttributeUpdaterFlag.UPDATE
             this._onError_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onError_0_flag = AttributeUpdaterFlag.SKIP
@@ -488,6 +498,7 @@ export class FormComponentModifier extends CommonMethodModifier implements FormC
         {
             this._onRouter_0_flag = AttributeUpdaterFlag.UPDATE
             this._onRouter_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onRouter_0_flag = AttributeUpdaterFlag.SKIP
@@ -499,6 +510,7 @@ export class FormComponentModifier extends CommonMethodModifier implements FormC
         {
             this._onUninstall_0_flag = AttributeUpdaterFlag.UPDATE
             this._onUninstall_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onUninstall_0_flag = AttributeUpdaterFlag.SKIP
@@ -510,6 +522,7 @@ export class FormComponentModifier extends CommonMethodModifier implements FormC
         {
             this._onLoad_0_flag = AttributeUpdaterFlag.UPDATE
             this._onLoad_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onLoad_0_flag = AttributeUpdaterFlag.SKIP
@@ -521,6 +534,7 @@ export class FormComponentModifier extends CommonMethodModifier implements FormC
         {
             this._onUpdate_0_flag = AttributeUpdaterFlag.UPDATE
             this._onUpdate_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onUpdate_0_flag = AttributeUpdaterFlag.SKIP

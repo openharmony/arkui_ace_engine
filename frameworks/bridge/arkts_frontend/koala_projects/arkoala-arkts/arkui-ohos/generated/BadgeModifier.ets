@@ -22,9 +22,11 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkBadgePeer, BadgeAttribute } from "./component/badge"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 import { CommonMethod } from "./component/common"
 export class BadgeModifier extends CommonMethodModifier implements BadgeAttribute,AttributeModifier<BadgeAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -35,6 +37,7 @@ export class BadgeModifier extends CommonMethodModifier implements BadgeAttribut
     applyDisabledAttribute(instance: BadgeAttribute): void { }
     applySelectedAttribute(instance: BadgeAttribute): void { }
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkBadgePeer;
     }

@@ -27,8 +27,10 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkPathPeer, PathAttribute } from "./component/path"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 export class PathModifier extends CommonMethodModifier implements PathAttribute,AttributeModifier<PathAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -63,6 +65,7 @@ export class PathModifier extends CommonMethodModifier implements PathAttribute,
     _strokeDashArray_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _strokeDashArray_0_0value?: Array<Length> | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkPathPeer;
         if (this._commands_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -446,6 +449,7 @@ export class PathModifier extends CommonMethodModifier implements PathAttribute,
         {
             this._commands_0_flag = AttributeUpdaterFlag.UPDATE
             this._commands_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._commands_0_flag = AttributeUpdaterFlag.SKIP
@@ -457,6 +461,7 @@ export class PathModifier extends CommonMethodModifier implements PathAttribute,
         {
             this._stroke_0_flag = AttributeUpdaterFlag.UPDATE
             this._stroke_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._stroke_0_flag = AttributeUpdaterFlag.SKIP
@@ -468,6 +473,7 @@ export class PathModifier extends CommonMethodModifier implements PathAttribute,
         {
             this._fill_0_flag = AttributeUpdaterFlag.UPDATE
             this._fill_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fill_0_flag = AttributeUpdaterFlag.SKIP
@@ -479,6 +485,7 @@ export class PathModifier extends CommonMethodModifier implements PathAttribute,
         {
             this._strokeDashOffset_0_flag = AttributeUpdaterFlag.UPDATE
             this._strokeDashOffset_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._strokeDashOffset_0_flag = AttributeUpdaterFlag.SKIP
@@ -490,6 +497,7 @@ export class PathModifier extends CommonMethodModifier implements PathAttribute,
         {
             this._strokeLineCap_0_flag = AttributeUpdaterFlag.UPDATE
             this._strokeLineCap_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._strokeLineCap_0_flag = AttributeUpdaterFlag.SKIP
@@ -501,6 +509,7 @@ export class PathModifier extends CommonMethodModifier implements PathAttribute,
         {
             this._strokeLineJoin_0_flag = AttributeUpdaterFlag.UPDATE
             this._strokeLineJoin_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._strokeLineJoin_0_flag = AttributeUpdaterFlag.SKIP
@@ -512,6 +521,7 @@ export class PathModifier extends CommonMethodModifier implements PathAttribute,
         {
             this._strokeMiterLimit_0_flag = AttributeUpdaterFlag.UPDATE
             this._strokeMiterLimit_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._strokeMiterLimit_0_flag = AttributeUpdaterFlag.SKIP
@@ -523,6 +533,7 @@ export class PathModifier extends CommonMethodModifier implements PathAttribute,
         {
             this._strokeOpacity_0_flag = AttributeUpdaterFlag.UPDATE
             this._strokeOpacity_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._strokeOpacity_0_flag = AttributeUpdaterFlag.SKIP
@@ -534,6 +545,7 @@ export class PathModifier extends CommonMethodModifier implements PathAttribute,
         {
             this._fillOpacity_0_flag = AttributeUpdaterFlag.UPDATE
             this._fillOpacity_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fillOpacity_0_flag = AttributeUpdaterFlag.SKIP
@@ -545,6 +557,7 @@ export class PathModifier extends CommonMethodModifier implements PathAttribute,
         {
             this._strokeWidth_0_flag = AttributeUpdaterFlag.UPDATE
             this._strokeWidth_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._strokeWidth_0_flag = AttributeUpdaterFlag.SKIP
@@ -556,6 +569,7 @@ export class PathModifier extends CommonMethodModifier implements PathAttribute,
         {
             this._antiAlias_0_flag = AttributeUpdaterFlag.UPDATE
             this._antiAlias_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._antiAlias_0_flag = AttributeUpdaterFlag.SKIP
@@ -567,6 +581,7 @@ export class PathModifier extends CommonMethodModifier implements PathAttribute,
         {
             this._strokeDashArray_0_flag = AttributeUpdaterFlag.UPDATE
             this._strokeDashArray_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._strokeDashArray_0_flag = AttributeUpdaterFlag.SKIP

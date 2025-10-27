@@ -22,11 +22,13 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkHyperlinkPeer, HyperlinkAttribute } from "./component/hyperlink"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 import { CommonMethod } from "./component/common"
 import { Color } from "./component/enums"
 import { Resource } from "global.resource"
 export class HyperlinkModifier extends CommonMethodModifier implements HyperlinkAttribute,AttributeModifier<HyperlinkAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -39,6 +41,7 @@ export class HyperlinkModifier extends CommonMethodModifier implements Hyperlink
     _color_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _color_0_0value?: Color | int32 | string | Resource | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkHyperlinkPeer;
         if (this._color_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -81,6 +84,7 @@ export class HyperlinkModifier extends CommonMethodModifier implements Hyperlink
         {
             this._color_0_flag = AttributeUpdaterFlag.UPDATE
             this._color_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._color_0_flag = AttributeUpdaterFlag.SKIP

@@ -21,6 +21,7 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkCommonMethodPeer, LayoutPolicy, Rectangle, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, BorderImageOption, OutlineStyle, ClickEvent, HoverEvent, AccessibilityCallback, AccessibilityHoverEvent, MouseEvent, TouchEvent, KeyEvent, CrownEvent, FocusAxisEvent, AxisEvent, FocusMovement, AnimateParam, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, DragEvent, DragItemInfo, PreDragStatus, LinearGradientOptions, SweepGradientOptions, RadialGradientOptions, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, AccessibilitySamePageMode, AccessibilityRoleType, AccessibilityFocusCallback, AccessibilityActionInterceptCallback, AccessibilityAction, ReuseOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, CustomProperty, SafeAreaType, SafeAreaEdge, BackgroundOptions, BackgroundImageOptions, BlurStyle, BackgroundBlurStyleOptions, SystemAdaptiveOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, OnDragEventCallback, DropOptions, PreviewConfiguration, DragPreviewOptions, DragInteractionOptions, OverlayOptions, BlendMode, BlendApplyType, GeometryTransitionOptions, TipsMessageType, TipsOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, Bindable, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, VisibleAreaEventOptions, CommonMethod } from "./component/common"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, VoidCallback, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions } from "./component/units"
 import { Resource } from "global.resource"
 import { HitTestMode, Color, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey } from "./component/enums"
@@ -38,6 +39,7 @@ import { ComponentContent } from "arkui.ComponentContent"
 import { StyledString } from "./component/styledString"
 export class CommonMethodModifier implements CommonMethod {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -482,6 +484,7 @@ export class CommonMethodModifier implements CommonMethod {
     _onGestureRecognizerJudgeBegin_1_0value?: GestureRecognizerJudgeBeginCallback | undefined
     _onGestureRecognizerJudgeBegin_1_1value?: boolean | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         const peer = node as ArkCommonMethodPeer;
         if (this._width_0_flag != AttributeUpdaterFlag.INITIAL)
         {
@@ -6505,6 +6508,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._width_0_flag = AttributeUpdaterFlag.UPDATE
             this._width_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._width_0_flag = AttributeUpdaterFlag.SKIP
@@ -6516,6 +6520,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._height_0_flag = AttributeUpdaterFlag.UPDATE
             this._height_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._height_0_flag = AttributeUpdaterFlag.SKIP
@@ -6527,6 +6532,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._responseRegion_0_flag = AttributeUpdaterFlag.UPDATE
             this._responseRegion_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._responseRegion_0_flag = AttributeUpdaterFlag.SKIP
@@ -6538,6 +6544,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._mouseResponseRegion_0_flag = AttributeUpdaterFlag.UPDATE
             this._mouseResponseRegion_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._mouseResponseRegion_0_flag = AttributeUpdaterFlag.SKIP
@@ -6560,6 +6567,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._constraintSize_0_flag = AttributeUpdaterFlag.UPDATE
             this._constraintSize_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._constraintSize_0_flag = AttributeUpdaterFlag.SKIP
@@ -6571,6 +6579,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._hitTestBehavior_0_flag = AttributeUpdaterFlag.UPDATE
             this._hitTestBehavior_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._hitTestBehavior_0_flag = AttributeUpdaterFlag.SKIP
@@ -6582,6 +6591,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._onChildTouchTest_0_flag = AttributeUpdaterFlag.UPDATE
             this._onChildTouchTest_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onChildTouchTest_0_flag = AttributeUpdaterFlag.SKIP
@@ -6593,6 +6603,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._layoutWeight_0_flag = AttributeUpdaterFlag.UPDATE
             this._layoutWeight_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._layoutWeight_0_flag = AttributeUpdaterFlag.SKIP
@@ -6604,6 +6615,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._chainWeight_0_flag = AttributeUpdaterFlag.UPDATE
             this._chainWeight_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._chainWeight_0_flag = AttributeUpdaterFlag.SKIP
@@ -6615,6 +6627,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._padding_0_flag = AttributeUpdaterFlag.UPDATE
             this._padding_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._padding_0_flag = AttributeUpdaterFlag.SKIP
@@ -6626,6 +6639,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._safeAreaPadding_0_flag = AttributeUpdaterFlag.UPDATE
             this._safeAreaPadding_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._safeAreaPadding_0_flag = AttributeUpdaterFlag.SKIP
@@ -6637,6 +6651,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._margin_0_flag = AttributeUpdaterFlag.UPDATE
             this._margin_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._margin_0_flag = AttributeUpdaterFlag.SKIP
@@ -6648,6 +6663,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._backgroundColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._backgroundColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._backgroundColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -6659,6 +6675,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._pixelRound_0_flag = AttributeUpdaterFlag.UPDATE
             this._pixelRound_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._pixelRound_0_flag = AttributeUpdaterFlag.SKIP
@@ -6670,6 +6687,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._backgroundImageSize_0_flag = AttributeUpdaterFlag.UPDATE
             this._backgroundImageSize_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._backgroundImageSize_0_flag = AttributeUpdaterFlag.SKIP
@@ -6681,6 +6699,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._backgroundImagePosition_0_flag = AttributeUpdaterFlag.UPDATE
             this._backgroundImagePosition_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._backgroundImagePosition_0_flag = AttributeUpdaterFlag.SKIP
@@ -6692,6 +6711,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._backgroundEffect_0_flag = AttributeUpdaterFlag.UPDATE
             this._backgroundEffect_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._backgroundEffect_0_flag = AttributeUpdaterFlag.SKIP
@@ -6703,6 +6723,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._backgroundImageResizable_0_flag = AttributeUpdaterFlag.UPDATE
             this._backgroundImageResizable_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._backgroundImageResizable_0_flag = AttributeUpdaterFlag.SKIP
@@ -6714,6 +6735,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._foregroundEffect_0_flag = AttributeUpdaterFlag.UPDATE
             this._foregroundEffect_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._foregroundEffect_0_flag = AttributeUpdaterFlag.SKIP
@@ -6725,6 +6747,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._visualEffect_0_flag = AttributeUpdaterFlag.UPDATE
             this._visualEffect_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._visualEffect_0_flag = AttributeUpdaterFlag.SKIP
@@ -6736,6 +6759,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._backgroundFilter_0_flag = AttributeUpdaterFlag.UPDATE
             this._backgroundFilter_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._backgroundFilter_0_flag = AttributeUpdaterFlag.SKIP
@@ -6747,6 +6771,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._foregroundFilter_0_flag = AttributeUpdaterFlag.UPDATE
             this._foregroundFilter_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._foregroundFilter_0_flag = AttributeUpdaterFlag.SKIP
@@ -6758,6 +6783,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._compositingFilter_0_flag = AttributeUpdaterFlag.UPDATE
             this._compositingFilter_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._compositingFilter_0_flag = AttributeUpdaterFlag.SKIP
@@ -6769,6 +6795,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._opacity_0_flag = AttributeUpdaterFlag.UPDATE
             this._opacity_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._opacity_0_flag = AttributeUpdaterFlag.SKIP
@@ -6780,6 +6807,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._border_0_flag = AttributeUpdaterFlag.UPDATE
             this._border_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._border_0_flag = AttributeUpdaterFlag.SKIP
@@ -6791,6 +6819,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._borderStyle_0_flag = AttributeUpdaterFlag.UPDATE
             this._borderStyle_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._borderStyle_0_flag = AttributeUpdaterFlag.SKIP
@@ -6802,6 +6831,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._borderWidth_0_flag = AttributeUpdaterFlag.UPDATE
             this._borderWidth_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._borderWidth_0_flag = AttributeUpdaterFlag.SKIP
@@ -6813,6 +6843,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._borderColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._borderColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._borderColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -6824,6 +6855,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._borderRadius_0_flag = AttributeUpdaterFlag.UPDATE
             this._borderRadius_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._borderRadius_0_flag = AttributeUpdaterFlag.SKIP
@@ -6835,6 +6867,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._borderImage_0_flag = AttributeUpdaterFlag.UPDATE
             this._borderImage_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._borderImage_0_flag = AttributeUpdaterFlag.SKIP
@@ -6846,6 +6879,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._outline_0_flag = AttributeUpdaterFlag.UPDATE
             this._outline_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._outline_0_flag = AttributeUpdaterFlag.SKIP
@@ -6857,6 +6891,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._outlineStyle_0_flag = AttributeUpdaterFlag.UPDATE
             this._outlineStyle_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._outlineStyle_0_flag = AttributeUpdaterFlag.SKIP
@@ -6868,6 +6903,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._outlineWidth_0_flag = AttributeUpdaterFlag.UPDATE
             this._outlineWidth_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._outlineWidth_0_flag = AttributeUpdaterFlag.SKIP
@@ -6879,6 +6915,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._outlineColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._outlineColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._outlineColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -6890,6 +6927,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._outlineRadius_0_flag = AttributeUpdaterFlag.UPDATE
             this._outlineRadius_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._outlineRadius_0_flag = AttributeUpdaterFlag.SKIP
@@ -6901,6 +6939,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._foregroundColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._foregroundColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._foregroundColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -6912,6 +6951,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._onClick_0_flag = AttributeUpdaterFlag.UPDATE
             this._onClick_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onClick_0_flag = AttributeUpdaterFlag.SKIP
@@ -6923,6 +6963,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._onHover_0_flag = AttributeUpdaterFlag.UPDATE
             this._onHover_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onHover_0_flag = AttributeUpdaterFlag.SKIP
@@ -6934,6 +6975,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._onHoverMove_0_flag = AttributeUpdaterFlag.UPDATE
             this._onHoverMove_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onHoverMove_0_flag = AttributeUpdaterFlag.SKIP
@@ -6945,6 +6987,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._onAccessibilityHover_0_flag = AttributeUpdaterFlag.UPDATE
             this._onAccessibilityHover_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onAccessibilityHover_0_flag = AttributeUpdaterFlag.SKIP
@@ -6956,6 +6999,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._hoverEffect_0_flag = AttributeUpdaterFlag.UPDATE
             this._hoverEffect_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._hoverEffect_0_flag = AttributeUpdaterFlag.SKIP
@@ -6967,6 +7011,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._onMouse_0_flag = AttributeUpdaterFlag.UPDATE
             this._onMouse_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onMouse_0_flag = AttributeUpdaterFlag.SKIP
@@ -6978,6 +7023,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._onTouch_0_flag = AttributeUpdaterFlag.UPDATE
             this._onTouch_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onTouch_0_flag = AttributeUpdaterFlag.SKIP
@@ -6989,6 +7035,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._onKeyEvent_0_flag = AttributeUpdaterFlag.UPDATE
             this._onKeyEvent_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onKeyEvent_0_flag = AttributeUpdaterFlag.SKIP
@@ -7000,6 +7047,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._onDigitalCrown_0_flag = AttributeUpdaterFlag.UPDATE
             this._onDigitalCrown_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onDigitalCrown_0_flag = AttributeUpdaterFlag.SKIP
@@ -7011,6 +7059,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._onKeyPreIme_0_flag = AttributeUpdaterFlag.UPDATE
             this._onKeyPreIme_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onKeyPreIme_0_flag = AttributeUpdaterFlag.SKIP
@@ -7022,6 +7071,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._onKeyEventDispatch_0_flag = AttributeUpdaterFlag.UPDATE
             this._onKeyEventDispatch_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onKeyEventDispatch_0_flag = AttributeUpdaterFlag.SKIP
@@ -7033,6 +7083,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._onFocusAxisEvent_0_flag = AttributeUpdaterFlag.UPDATE
             this._onFocusAxisEvent_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onFocusAxisEvent_0_flag = AttributeUpdaterFlag.SKIP
@@ -7044,6 +7095,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._onAxisEvent_0_flag = AttributeUpdaterFlag.UPDATE
             this._onAxisEvent_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onAxisEvent_0_flag = AttributeUpdaterFlag.SKIP
@@ -7055,6 +7107,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._focusable_0_flag = AttributeUpdaterFlag.UPDATE
             this._focusable_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._focusable_0_flag = AttributeUpdaterFlag.SKIP
@@ -7066,6 +7119,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._nextFocus_0_flag = AttributeUpdaterFlag.UPDATE
             this._nextFocus_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._nextFocus_0_flag = AttributeUpdaterFlag.SKIP
@@ -7077,6 +7131,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._tabStop_0_flag = AttributeUpdaterFlag.UPDATE
             this._tabStop_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._tabStop_0_flag = AttributeUpdaterFlag.SKIP
@@ -7088,6 +7143,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._onFocus_0_flag = AttributeUpdaterFlag.UPDATE
             this._onFocus_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onFocus_0_flag = AttributeUpdaterFlag.SKIP
@@ -7099,6 +7155,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._onBlur_0_flag = AttributeUpdaterFlag.UPDATE
             this._onBlur_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onBlur_0_flag = AttributeUpdaterFlag.SKIP
@@ -7110,6 +7167,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._tabIndex_0_flag = AttributeUpdaterFlag.UPDATE
             this._tabIndex_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._tabIndex_0_flag = AttributeUpdaterFlag.SKIP
@@ -7121,6 +7179,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._defaultFocus_0_flag = AttributeUpdaterFlag.UPDATE
             this._defaultFocus_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._defaultFocus_0_flag = AttributeUpdaterFlag.SKIP
@@ -7132,6 +7191,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._groupDefaultFocus_0_flag = AttributeUpdaterFlag.UPDATE
             this._groupDefaultFocus_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._groupDefaultFocus_0_flag = AttributeUpdaterFlag.SKIP
@@ -7143,6 +7203,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._focusOnTouch_0_flag = AttributeUpdaterFlag.UPDATE
             this._focusOnTouch_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._focusOnTouch_0_flag = AttributeUpdaterFlag.SKIP
@@ -7154,6 +7215,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._focusBox_0_flag = AttributeUpdaterFlag.UPDATE
             this._focusBox_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._focusBox_0_flag = AttributeUpdaterFlag.SKIP
@@ -7165,6 +7227,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._animation_0_flag = AttributeUpdaterFlag.UPDATE
             this._animation_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._animation_0_flag = AttributeUpdaterFlag.SKIP
@@ -7176,6 +7239,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._transition_0_flag = AttributeUpdaterFlag.UPDATE
             this._transition_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._transition_0_flag = AttributeUpdaterFlag.SKIP
@@ -7187,6 +7251,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._motionBlur_0_flag = AttributeUpdaterFlag.UPDATE
             this._motionBlur_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._motionBlur_0_flag = AttributeUpdaterFlag.SKIP
@@ -7198,6 +7263,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._brightness_0_flag = AttributeUpdaterFlag.UPDATE
             this._brightness_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._brightness_0_flag = AttributeUpdaterFlag.SKIP
@@ -7209,6 +7275,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._contrast_0_flag = AttributeUpdaterFlag.UPDATE
             this._contrast_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._contrast_0_flag = AttributeUpdaterFlag.SKIP
@@ -7220,6 +7287,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._grayscale_0_flag = AttributeUpdaterFlag.UPDATE
             this._grayscale_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._grayscale_0_flag = AttributeUpdaterFlag.SKIP
@@ -7231,6 +7299,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._colorBlend_0_flag = AttributeUpdaterFlag.UPDATE
             this._colorBlend_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._colorBlend_0_flag = AttributeUpdaterFlag.SKIP
@@ -7242,6 +7311,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._saturate_0_flag = AttributeUpdaterFlag.UPDATE
             this._saturate_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._saturate_0_flag = AttributeUpdaterFlag.SKIP
@@ -7253,6 +7323,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._sepia_0_flag = AttributeUpdaterFlag.UPDATE
             this._sepia_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._sepia_0_flag = AttributeUpdaterFlag.SKIP
@@ -7264,6 +7335,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._invert_0_flag = AttributeUpdaterFlag.UPDATE
             this._invert_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._invert_0_flag = AttributeUpdaterFlag.SKIP
@@ -7275,6 +7347,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._hueRotate_0_flag = AttributeUpdaterFlag.UPDATE
             this._hueRotate_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._hueRotate_0_flag = AttributeUpdaterFlag.SKIP
@@ -7286,6 +7359,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._useShadowBatching_0_flag = AttributeUpdaterFlag.UPDATE
             this._useShadowBatching_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._useShadowBatching_0_flag = AttributeUpdaterFlag.SKIP
@@ -7297,6 +7371,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._useEffect_0_flag = AttributeUpdaterFlag.UPDATE
             this._useEffect_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._useEffect_0_flag = AttributeUpdaterFlag.SKIP
@@ -7308,6 +7383,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._renderGroup_0_flag = AttributeUpdaterFlag.UPDATE
             this._renderGroup_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._renderGroup_0_flag = AttributeUpdaterFlag.SKIP
@@ -7319,6 +7395,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._freeze_0_flag = AttributeUpdaterFlag.UPDATE
             this._freeze_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._freeze_0_flag = AttributeUpdaterFlag.SKIP
@@ -7330,6 +7407,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._translate_0_flag = AttributeUpdaterFlag.UPDATE
             this._translate_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._translate_0_flag = AttributeUpdaterFlag.SKIP
@@ -7341,6 +7419,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._scale_0_flag = AttributeUpdaterFlag.UPDATE
             this._scale_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._scale_0_flag = AttributeUpdaterFlag.SKIP
@@ -7352,6 +7431,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._rotate_0_flag = AttributeUpdaterFlag.UPDATE
             this._rotate_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._rotate_0_flag = AttributeUpdaterFlag.SKIP
@@ -7363,6 +7443,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._transform_0_flag = AttributeUpdaterFlag.UPDATE
             this._transform_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._transform_0_flag = AttributeUpdaterFlag.SKIP
@@ -7374,6 +7455,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._onAppear_0_flag = AttributeUpdaterFlag.UPDATE
             this._onAppear_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onAppear_0_flag = AttributeUpdaterFlag.SKIP
@@ -7385,6 +7467,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._onDisAppear_0_flag = AttributeUpdaterFlag.UPDATE
             this._onDisAppear_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onDisAppear_0_flag = AttributeUpdaterFlag.SKIP
@@ -7396,6 +7479,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._onAttach_0_flag = AttributeUpdaterFlag.UPDATE
             this._onAttach_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onAttach_0_flag = AttributeUpdaterFlag.SKIP
@@ -7407,6 +7491,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._onDetach_0_flag = AttributeUpdaterFlag.UPDATE
             this._onDetach_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onDetach_0_flag = AttributeUpdaterFlag.SKIP
@@ -7418,6 +7503,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._onAreaChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onAreaChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onAreaChange_0_flag = AttributeUpdaterFlag.SKIP
@@ -7429,6 +7515,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._visibility_0_flag = AttributeUpdaterFlag.UPDATE
             this._visibility_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._visibility_0_flag = AttributeUpdaterFlag.SKIP
@@ -7440,6 +7527,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flexGrow_0_flag = AttributeUpdaterFlag.UPDATE
             this._flexGrow_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flexGrow_0_flag = AttributeUpdaterFlag.SKIP
@@ -7451,6 +7539,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flexShrink_0_flag = AttributeUpdaterFlag.UPDATE
             this._flexShrink_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flexShrink_0_flag = AttributeUpdaterFlag.SKIP
@@ -7462,6 +7551,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flexBasis_0_flag = AttributeUpdaterFlag.UPDATE
             this._flexBasis_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flexBasis_0_flag = AttributeUpdaterFlag.SKIP
@@ -7473,6 +7563,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._alignSelf_0_flag = AttributeUpdaterFlag.UPDATE
             this._alignSelf_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._alignSelf_0_flag = AttributeUpdaterFlag.SKIP
@@ -7484,6 +7575,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._displayPriority_0_flag = AttributeUpdaterFlag.UPDATE
             this._displayPriority_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._displayPriority_0_flag = AttributeUpdaterFlag.SKIP
@@ -7495,6 +7587,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._zIndex_0_flag = AttributeUpdaterFlag.UPDATE
             this._zIndex_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._zIndex_0_flag = AttributeUpdaterFlag.SKIP
@@ -7506,6 +7599,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._direction_0_flag = AttributeUpdaterFlag.UPDATE
             this._direction_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._direction_0_flag = AttributeUpdaterFlag.SKIP
@@ -7517,6 +7611,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._align_0_flag = AttributeUpdaterFlag.UPDATE
             this._align_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._align_0_flag = AttributeUpdaterFlag.SKIP
@@ -7528,6 +7623,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._position_0_flag = AttributeUpdaterFlag.UPDATE
             this._position_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._position_0_flag = AttributeUpdaterFlag.SKIP
@@ -7539,6 +7635,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._markAnchor_0_flag = AttributeUpdaterFlag.UPDATE
             this._markAnchor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._markAnchor_0_flag = AttributeUpdaterFlag.SKIP
@@ -7550,6 +7647,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._offset_0_flag = AttributeUpdaterFlag.UPDATE
             this._offset_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._offset_0_flag = AttributeUpdaterFlag.SKIP
@@ -7561,6 +7659,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._enabled_0_flag = AttributeUpdaterFlag.UPDATE
             this._enabled_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enabled_0_flag = AttributeUpdaterFlag.SKIP
@@ -7572,6 +7671,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._alignRules_0_flag = AttributeUpdaterFlag.UPDATE
             this._alignRules_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._alignRules_0_flag = AttributeUpdaterFlag.SKIP
@@ -7583,6 +7683,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._aspectRatio_0_flag = AttributeUpdaterFlag.UPDATE
             this._aspectRatio_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._aspectRatio_0_flag = AttributeUpdaterFlag.SKIP
@@ -7594,6 +7695,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._clickEffect_0_flag = AttributeUpdaterFlag.UPDATE
             this._clickEffect_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._clickEffect_0_flag = AttributeUpdaterFlag.SKIP
@@ -7605,6 +7707,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._onDragStart_0_flag = AttributeUpdaterFlag.UPDATE
             this._onDragStart_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onDragStart_0_flag = AttributeUpdaterFlag.SKIP
@@ -7616,6 +7719,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._onDragEnter_0_flag = AttributeUpdaterFlag.UPDATE
             this._onDragEnter_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onDragEnter_0_flag = AttributeUpdaterFlag.SKIP
@@ -7627,6 +7731,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._onDragMove_0_flag = AttributeUpdaterFlag.UPDATE
             this._onDragMove_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onDragMove_0_flag = AttributeUpdaterFlag.SKIP
@@ -7638,6 +7743,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._onDragLeave_0_flag = AttributeUpdaterFlag.UPDATE
             this._onDragLeave_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onDragLeave_0_flag = AttributeUpdaterFlag.SKIP
@@ -7649,6 +7755,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._onDrop_0_flag = AttributeUpdaterFlag.UPDATE
             this._onDrop_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onDrop_0_flag = AttributeUpdaterFlag.SKIP
@@ -7660,6 +7767,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._onDragEnd_0_flag = AttributeUpdaterFlag.UPDATE
             this._onDragEnd_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onDragEnd_0_flag = AttributeUpdaterFlag.SKIP
@@ -7671,6 +7779,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._allowDrop_0_flag = AttributeUpdaterFlag.UPDATE
             this._allowDrop_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._allowDrop_0_flag = AttributeUpdaterFlag.SKIP
@@ -7682,6 +7791,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._draggable_0_flag = AttributeUpdaterFlag.UPDATE
             this._draggable_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._draggable_0_flag = AttributeUpdaterFlag.SKIP
@@ -7693,6 +7803,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._dragPreview_0_flag = AttributeUpdaterFlag.UPDATE
             this._dragPreview_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._dragPreview_0_flag = AttributeUpdaterFlag.SKIP
@@ -7704,6 +7815,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._onPreDrag_0_flag = AttributeUpdaterFlag.UPDATE
             this._onPreDrag_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onPreDrag_0_flag = AttributeUpdaterFlag.SKIP
@@ -7715,6 +7827,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._linearGradient_0_flag = AttributeUpdaterFlag.UPDATE
             this._linearGradient_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._linearGradient_0_flag = AttributeUpdaterFlag.SKIP
@@ -7726,6 +7839,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._sweepGradient_0_flag = AttributeUpdaterFlag.UPDATE
             this._sweepGradient_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._sweepGradient_0_flag = AttributeUpdaterFlag.SKIP
@@ -7737,6 +7851,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._radialGradient_0_flag = AttributeUpdaterFlag.UPDATE
             this._radialGradient_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._radialGradient_0_flag = AttributeUpdaterFlag.SKIP
@@ -7748,6 +7863,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._motionPath_0_flag = AttributeUpdaterFlag.UPDATE
             this._motionPath_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._motionPath_0_flag = AttributeUpdaterFlag.SKIP
@@ -7759,6 +7875,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._shadow_0_flag = AttributeUpdaterFlag.UPDATE
             this._shadow_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._shadow_0_flag = AttributeUpdaterFlag.SKIP
@@ -7770,6 +7887,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._clip_0_flag = AttributeUpdaterFlag.UPDATE
             this._clip_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._clip_0_flag = AttributeUpdaterFlag.SKIP
@@ -7781,6 +7899,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._clipShape_0_flag = AttributeUpdaterFlag.UPDATE
             this._clipShape_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._clipShape_0_flag = AttributeUpdaterFlag.SKIP
@@ -7792,6 +7911,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._mask_0_flag = AttributeUpdaterFlag.UPDATE
             this._mask_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._mask_0_flag = AttributeUpdaterFlag.SKIP
@@ -7803,6 +7923,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._maskShape_0_flag = AttributeUpdaterFlag.UPDATE
             this._maskShape_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._maskShape_0_flag = AttributeUpdaterFlag.SKIP
@@ -7814,6 +7935,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._key_0_flag = AttributeUpdaterFlag.UPDATE
             this._key_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._key_0_flag = AttributeUpdaterFlag.SKIP
@@ -7825,6 +7947,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._id_0_flag = AttributeUpdaterFlag.UPDATE
             this._id_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._id_0_flag = AttributeUpdaterFlag.SKIP
@@ -7836,6 +7959,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._geometryTransition_0_flag = AttributeUpdaterFlag.UPDATE
             this._geometryTransition_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._geometryTransition_0_flag = AttributeUpdaterFlag.SKIP
@@ -7847,6 +7971,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._restoreId_0_flag = AttributeUpdaterFlag.UPDATE
             this._restoreId_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._restoreId_0_flag = AttributeUpdaterFlag.SKIP
@@ -7858,6 +7983,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._sphericalEffect_0_flag = AttributeUpdaterFlag.UPDATE
             this._sphericalEffect_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._sphericalEffect_0_flag = AttributeUpdaterFlag.SKIP
@@ -7869,6 +7995,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._lightUpEffect_0_flag = AttributeUpdaterFlag.UPDATE
             this._lightUpEffect_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._lightUpEffect_0_flag = AttributeUpdaterFlag.SKIP
@@ -7880,6 +8007,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._pixelStretchEffect_0_flag = AttributeUpdaterFlag.UPDATE
             this._pixelStretchEffect_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._pixelStretchEffect_0_flag = AttributeUpdaterFlag.SKIP
@@ -7913,6 +8041,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._accessibilityNextFocusId_0_flag = AttributeUpdaterFlag.UPDATE
             this._accessibilityNextFocusId_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._accessibilityNextFocusId_0_flag = AttributeUpdaterFlag.SKIP
@@ -7924,6 +8053,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._accessibilityDefaultFocus_0_flag = AttributeUpdaterFlag.UPDATE
             this._accessibilityDefaultFocus_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._accessibilityDefaultFocus_0_flag = AttributeUpdaterFlag.SKIP
@@ -7935,6 +8065,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._accessibilityUseSamePage_0_flag = AttributeUpdaterFlag.UPDATE
             this._accessibilityUseSamePage_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._accessibilityUseSamePage_0_flag = AttributeUpdaterFlag.SKIP
@@ -7946,6 +8077,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._accessibilityScrollTriggerable_0_flag = AttributeUpdaterFlag.UPDATE
             this._accessibilityScrollTriggerable_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._accessibilityScrollTriggerable_0_flag = AttributeUpdaterFlag.SKIP
@@ -7979,6 +8111,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._accessibilityRole_0_flag = AttributeUpdaterFlag.UPDATE
             this._accessibilityRole_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._accessibilityRole_0_flag = AttributeUpdaterFlag.SKIP
@@ -7990,6 +8123,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._onAccessibilityFocus_0_flag = AttributeUpdaterFlag.UPDATE
             this._onAccessibilityFocus_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onAccessibilityFocus_0_flag = AttributeUpdaterFlag.SKIP
@@ -8001,6 +8135,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._onAccessibilityActionIntercept_0_flag = AttributeUpdaterFlag.UPDATE
             this._onAccessibilityActionIntercept_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onAccessibilityActionIntercept_0_flag = AttributeUpdaterFlag.SKIP
@@ -8012,6 +8147,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._accessibilityTextHint_0_flag = AttributeUpdaterFlag.UPDATE
             this._accessibilityTextHint_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._accessibilityTextHint_0_flag = AttributeUpdaterFlag.SKIP
@@ -8023,6 +8159,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._accessibilityDescription_0_flag = AttributeUpdaterFlag.UPDATE
             this._accessibilityDescription_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._accessibilityDescription_0_flag = AttributeUpdaterFlag.SKIP
@@ -8056,6 +8193,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._accessibilityLevel_0_flag = AttributeUpdaterFlag.UPDATE
             this._accessibilityLevel_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._accessibilityLevel_0_flag = AttributeUpdaterFlag.SKIP
@@ -8067,6 +8205,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._accessibilityVirtualNode_0_flag = AttributeUpdaterFlag.UPDATE
             this._accessibilityVirtualNode_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._accessibilityVirtualNode_0_flag = AttributeUpdaterFlag.SKIP
@@ -8078,6 +8217,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._accessibilityChecked_0_flag = AttributeUpdaterFlag.UPDATE
             this._accessibilityChecked_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._accessibilityChecked_0_flag = AttributeUpdaterFlag.SKIP
@@ -8089,6 +8229,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._accessibilitySelected_0_flag = AttributeUpdaterFlag.UPDATE
             this._accessibilitySelected_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._accessibilitySelected_0_flag = AttributeUpdaterFlag.SKIP
@@ -8100,6 +8241,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._obscured_0_flag = AttributeUpdaterFlag.UPDATE
             this._obscured_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._obscured_0_flag = AttributeUpdaterFlag.SKIP
@@ -8111,6 +8253,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._reuseId_0_flag = AttributeUpdaterFlag.UPDATE
             this._reuseId_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._reuseId_0_flag = AttributeUpdaterFlag.SKIP
@@ -8122,6 +8265,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._reuse_0_flag = AttributeUpdaterFlag.UPDATE
             this._reuse_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._reuse_0_flag = AttributeUpdaterFlag.SKIP
@@ -8133,6 +8277,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._renderFit_0_flag = AttributeUpdaterFlag.UPDATE
             this._renderFit_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._renderFit_0_flag = AttributeUpdaterFlag.SKIP
@@ -8144,6 +8289,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._backgroundBrightness_0_flag = AttributeUpdaterFlag.UPDATE
             this._backgroundBrightness_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._backgroundBrightness_0_flag = AttributeUpdaterFlag.SKIP
@@ -8155,6 +8301,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._onGestureJudgeBegin_0_flag = AttributeUpdaterFlag.UPDATE
             this._onGestureJudgeBegin_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onGestureJudgeBegin_0_flag = AttributeUpdaterFlag.SKIP
@@ -8166,6 +8313,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._onGestureRecognizerJudgeBegin_0_flag = AttributeUpdaterFlag.UPDATE
             this._onGestureRecognizerJudgeBegin_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onGestureRecognizerJudgeBegin_0_flag = AttributeUpdaterFlag.SKIP
@@ -8177,6 +8325,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._shouldBuiltInRecognizerParallelWith_0_flag = AttributeUpdaterFlag.UPDATE
             this._shouldBuiltInRecognizerParallelWith_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._shouldBuiltInRecognizerParallelWith_0_flag = AttributeUpdaterFlag.SKIP
@@ -8188,6 +8337,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._monopolizeEvents_0_flag = AttributeUpdaterFlag.UPDATE
             this._monopolizeEvents_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._monopolizeEvents_0_flag = AttributeUpdaterFlag.SKIP
@@ -8199,6 +8349,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._onTouchIntercept_0_flag = AttributeUpdaterFlag.UPDATE
             this._onTouchIntercept_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onTouchIntercept_0_flag = AttributeUpdaterFlag.SKIP
@@ -8210,6 +8361,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._onSizeChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onSizeChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onSizeChange_0_flag = AttributeUpdaterFlag.SKIP
@@ -8221,6 +8373,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._accessibilityFocusDrawLevel_0_flag = AttributeUpdaterFlag.UPDATE
             this._accessibilityFocusDrawLevel_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._accessibilityFocusDrawLevel_0_flag = AttributeUpdaterFlag.SKIP
@@ -8233,6 +8386,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._expandSafeArea_0_flag = AttributeUpdaterFlag.UPDATE
             this._expandSafeArea_0_0value = types
             this._expandSafeArea_0_1value = edges
+            this._state.fireChange()
         } else
         {
             this._expandSafeArea_0_flag = AttributeUpdaterFlag.SKIP
@@ -8245,6 +8399,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._background_0_flag = AttributeUpdaterFlag.UPDATE
             this._background_0_0value = builder
             this._background_0_1value = options
+            this._state.fireChange()
         } else
         {
             this._background_0_flag = AttributeUpdaterFlag.SKIP
@@ -8268,6 +8423,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._backgroundImage_1_flag = AttributeUpdaterFlag.UPDATE
             this._backgroundImage_1_0value = src
             this._backgroundImage_1_1value = options
+            this._state.fireChange()
         } else
         {
             this._backgroundImage_1_flag = AttributeUpdaterFlag.SKIP
@@ -8293,6 +8449,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._backgroundBlurStyle_0_0value = style
             this._backgroundBlurStyle_0_1value = options
             this._backgroundBlurStyle_0_2value = sysOptions
+            this._state.fireChange()
         } else
         {
             this._backgroundBlurStyle_0_flag = AttributeUpdaterFlag.SKIP
@@ -8305,6 +8462,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._backgroundEffect_1_flag = AttributeUpdaterFlag.UPDATE
             this._backgroundEffect_1_0value = options
             this._backgroundEffect_1_1value = sysOptions
+            this._state.fireChange()
         } else
         {
             this._backgroundEffect_1_flag = AttributeUpdaterFlag.SKIP
@@ -8318,6 +8476,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._foregroundBlurStyle_0_0value = style
             this._foregroundBlurStyle_0_1value = options
             this._foregroundBlurStyle_0_2value = sysOptions
+            this._state.fireChange()
         } else
         {
             this._foregroundBlurStyle_0_flag = AttributeUpdaterFlag.SKIP
@@ -8330,6 +8489,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._onClick_1_flag = AttributeUpdaterFlag.UPDATE
             this._onClick_1_0value = event
             this._onClick_1_1value = distanceThreshold
+            this._state.fireChange()
         } else
         {
             this._onClick_1_flag = AttributeUpdaterFlag.SKIP
@@ -8343,6 +8503,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._focusScopeId_0_0value = id
             this._focusScopeId_0_1value = isGroup
             this._focusScopeId_0_2value = arrowStepOut
+            this._state.fireChange()
         } else
         {
             this._focusScopeId_0_flag = AttributeUpdaterFlag.SKIP
@@ -8355,6 +8516,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._focusScopePriority_0_flag = AttributeUpdaterFlag.UPDATE
             this._focusScopePriority_0_0value = scopeId
             this._focusScopePriority_0_1value = priority
+            this._state.fireChange()
         } else
         {
             this._focusScopePriority_0_flag = AttributeUpdaterFlag.SKIP
@@ -8367,6 +8529,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._transition_1_flag = AttributeUpdaterFlag.UPDATE
             this._transition_1_0value = effect
             this._transition_1_1value = onFinish
+            this._state.fireChange()
         } else
         {
             this._transition_1_flag = AttributeUpdaterFlag.SKIP
@@ -8392,6 +8555,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._linearGradientBlur_0_flag = AttributeUpdaterFlag.UPDATE
             this._linearGradientBlur_0_0value = value
             this._linearGradientBlur_0_1value = options
+            this._state.fireChange()
         } else
         {
             this._linearGradientBlur_0_flag = AttributeUpdaterFlag.SKIP
@@ -8402,6 +8566,7 @@ export class CommonMethodModifier implements CommonMethod {
         if ((this._systemBarEffect_0_flag) == (AttributeUpdaterFlag.INITIAL))
         {
             this._systemBarEffect_0_flag = AttributeUpdaterFlag.UPDATE
+            this._state.fireChange()
         } else
         {
             this._systemBarEffect_0_flag = AttributeUpdaterFlag.SKIP
@@ -8414,6 +8579,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._useEffect_1_flag = AttributeUpdaterFlag.UPDATE
             this._useEffect_1_0value = useEffect
             this._useEffect_1_1value = effectType
+            this._state.fireChange()
         } else
         {
             this._useEffect_1_flag = AttributeUpdaterFlag.SKIP
@@ -8439,6 +8605,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._sharedTransition_0_flag = AttributeUpdaterFlag.UPDATE
             this._sharedTransition_0_0value = id
             this._sharedTransition_0_1value = options
+            this._state.fireChange()
         } else
         {
             this._sharedTransition_0_flag = AttributeUpdaterFlag.SKIP
@@ -8451,6 +8618,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._chainMode_0_flag = AttributeUpdaterFlag.UPDATE
             this._chainMode_0_0value = direction
             this._chainMode_0_1value = style
+            this._state.fireChange()
         } else
         {
             this._chainMode_0_flag = AttributeUpdaterFlag.SKIP
@@ -8463,6 +8631,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._onDrop_1_flag = AttributeUpdaterFlag.UPDATE
             this._onDrop_1_0value = eventCallback
             this._onDrop_1_1value = dropOptions
+            this._state.fireChange()
         } else
         {
             this._onDrop_1_flag = AttributeUpdaterFlag.SKIP
@@ -8475,6 +8644,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._dragPreview_1_flag = AttributeUpdaterFlag.UPDATE
             this._dragPreview_1_0value = preview
             this._dragPreview_1_1value = config
+            this._state.fireChange()
         } else
         {
             this._dragPreview_1_flag = AttributeUpdaterFlag.SKIP
@@ -8487,6 +8657,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._dragPreviewOptions_0_flag = AttributeUpdaterFlag.UPDATE
             this._dragPreviewOptions_0_0value = value
             this._dragPreviewOptions_0_1value = options
+            this._state.fireChange()
         } else
         {
             this._dragPreviewOptions_0_flag = AttributeUpdaterFlag.SKIP
@@ -8499,6 +8670,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._overlay_0_flag = AttributeUpdaterFlag.UPDATE
             this._overlay_0_0value = value
             this._overlay_0_1value = options
+            this._state.fireChange()
         } else
         {
             this._overlay_0_flag = AttributeUpdaterFlag.SKIP
@@ -8511,6 +8683,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._blendMode_0_flag = AttributeUpdaterFlag.UPDATE
             this._blendMode_0_0value = value
             this._blendMode_0_1value = type
+            this._state.fireChange()
         } else
         {
             this._blendMode_0_flag = AttributeUpdaterFlag.SKIP
@@ -8526,6 +8699,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._geometryTransition_1_flag = AttributeUpdaterFlag.UPDATE
             this._geometryTransition_1_0value = id
             this._geometryTransition_1_1value = options
+            this._state.fireChange()
         } else
         {
             this._geometryTransition_1_flag = AttributeUpdaterFlag.SKIP
@@ -8538,6 +8712,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._bindTips_0_flag = AttributeUpdaterFlag.UPDATE
             this._bindTips_0_0value = message
             this._bindTips_0_1value = options
+            this._state.fireChange()
         } else
         {
             this._bindTips_0_flag = AttributeUpdaterFlag.SKIP
@@ -8550,6 +8725,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._bindPopup_0_flag = AttributeUpdaterFlag.UPDATE
             this._bindPopup_0_0value = show
             this._bindPopup_0_1value = popup
+            this._state.fireChange()
         } else
         {
             this._bindPopup_0_flag = AttributeUpdaterFlag.SKIP
@@ -8562,6 +8738,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._bindMenu_0_flag = AttributeUpdaterFlag.UPDATE
             this._bindMenu_0_0value = content
             this._bindMenu_0_1value = options
+            this._state.fireChange()
         } else
         {
             this._bindMenu_0_flag = AttributeUpdaterFlag.SKIP
@@ -8575,6 +8752,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._bindMenu_1_0value = isShow
             this._bindMenu_1_1value = content
             this._bindMenu_1_2value = options
+            this._state.fireChange()
         } else
         {
             this._bindMenu_1_flag = AttributeUpdaterFlag.SKIP
@@ -8588,6 +8766,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._bindContextMenu_0_0value = content
             this._bindContextMenu_0_1value = responseType
             this._bindContextMenu_0_2value = options
+            this._state.fireChange()
         } else
         {
             this._bindContextMenu_0_flag = AttributeUpdaterFlag.SKIP
@@ -8601,6 +8780,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._bindContextMenu_1_0value = isShown
             this._bindContextMenu_1_1value = content
             this._bindContextMenu_1_2value = options
+            this._state.fireChange()
         } else
         {
             this._bindContextMenu_1_flag = AttributeUpdaterFlag.SKIP
@@ -8614,6 +8794,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._bindContentCover_0_0value = isShow
             this._bindContentCover_0_1value = builder
             this._bindContentCover_0_2value = type
+            this._state.fireChange()
         } else
         {
             this._bindContentCover_0_flag = AttributeUpdaterFlag.SKIP
@@ -8627,6 +8808,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._bindContentCover_1_0value = isShow
             this._bindContentCover_1_1value = builder
             this._bindContentCover_1_2value = options
+            this._state.fireChange()
         } else
         {
             this._bindContentCover_1_flag = AttributeUpdaterFlag.SKIP
@@ -8640,6 +8822,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._bindSheet_0_0value = isShow
             this._bindSheet_0_1value = builder
             this._bindSheet_0_2value = options
+            this._state.fireChange()
         } else
         {
             this._bindSheet_0_flag = AttributeUpdaterFlag.SKIP
@@ -8652,6 +8835,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._onVisibleAreaChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onVisibleAreaChange_0_0value = ratios
             this._onVisibleAreaChange_0_1value = event
+            this._state.fireChange()
         } else
         {
             this._onVisibleAreaChange_0_flag = AttributeUpdaterFlag.SKIP
@@ -8664,6 +8848,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._onVisibleAreaApproximateChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onVisibleAreaApproximateChange_0_0value = options
             this._onVisibleAreaApproximateChange_0_1value = event
+            this._state.fireChange()
         } else
         {
             this._onVisibleAreaApproximateChange_0_flag = AttributeUpdaterFlag.SKIP
@@ -8677,6 +8862,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._keyboardShortcut_0_0value = value
             this._keyboardShortcut_0_1value = keys
             this._keyboardShortcut_0_2value = action
+            this._state.fireChange()
         } else
         {
             this._keyboardShortcut_0_flag = AttributeUpdaterFlag.SKIP
@@ -8701,6 +8887,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._onGestureRecognizerJudgeBegin_1_flag = AttributeUpdaterFlag.UPDATE
             this._onGestureRecognizerJudgeBegin_1_0value = callback_
             this._onGestureRecognizerJudgeBegin_1_1value = exposeInnerGesture
+            this._state.fireChange()
         } else
         {
             this._onGestureRecognizerJudgeBegin_1_flag = AttributeUpdaterFlag.SKIP

@@ -22,9 +22,11 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkFlowItemPeer, FlowItemAttribute } from "./component/flowItem"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 import { CommonMethod } from "./component/common"
 export class FlowItemModifier extends CommonMethodModifier implements FlowItemAttribute,AttributeModifier<FlowItemAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -35,6 +37,7 @@ export class FlowItemModifier extends CommonMethodModifier implements FlowItemAt
     applyDisabledAttribute(instance: FlowItemAttribute): void { }
     applySelectedAttribute(instance: FlowItemAttribute): void { }
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkFlowItemPeer;
     }

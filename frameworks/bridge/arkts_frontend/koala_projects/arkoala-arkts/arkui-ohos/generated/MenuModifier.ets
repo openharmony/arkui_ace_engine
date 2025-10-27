@@ -22,12 +22,14 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkMenuPeer, SubMenuExpandingMode, MenuAttribute } from "./component/menu"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 import { CommonMethod } from "./component/common"
 import { Font, ResourceColor, Dimension, BorderRadiuses, DividerStyleOptions } from "./component/units"
 import { Color } from "./component/enums"
 import { Resource } from "global.resource"
 export class MenuModifier extends CommonMethodModifier implements MenuAttribute,AttributeModifier<MenuAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -50,6 +52,7 @@ export class MenuModifier extends CommonMethodModifier implements MenuAttribute,
     _subMenuExpandingMode_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _subMenuExpandingMode_0_0value?: SubMenuExpandingMode | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkMenuPeer;
         if (this._font_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -247,6 +250,7 @@ export class MenuModifier extends CommonMethodModifier implements MenuAttribute,
         {
             this._font_0_flag = AttributeUpdaterFlag.UPDATE
             this._font_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._font_0_flag = AttributeUpdaterFlag.SKIP
@@ -258,6 +262,7 @@ export class MenuModifier extends CommonMethodModifier implements MenuAttribute,
         {
             this._fontColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._fontColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fontColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -269,6 +274,7 @@ export class MenuModifier extends CommonMethodModifier implements MenuAttribute,
         {
             this._radius_0_flag = AttributeUpdaterFlag.UPDATE
             this._radius_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._radius_0_flag = AttributeUpdaterFlag.SKIP
@@ -280,6 +286,7 @@ export class MenuModifier extends CommonMethodModifier implements MenuAttribute,
         {
             this._menuItemDivider_0_flag = AttributeUpdaterFlag.UPDATE
             this._menuItemDivider_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._menuItemDivider_0_flag = AttributeUpdaterFlag.SKIP
@@ -291,6 +298,7 @@ export class MenuModifier extends CommonMethodModifier implements MenuAttribute,
         {
             this._menuItemGroupDivider_0_flag = AttributeUpdaterFlag.UPDATE
             this._menuItemGroupDivider_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._menuItemGroupDivider_0_flag = AttributeUpdaterFlag.SKIP
@@ -302,6 +310,7 @@ export class MenuModifier extends CommonMethodModifier implements MenuAttribute,
         {
             this._subMenuExpandingMode_0_flag = AttributeUpdaterFlag.UPDATE
             this._subMenuExpandingMode_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._subMenuExpandingMode_0_flag = AttributeUpdaterFlag.SKIP

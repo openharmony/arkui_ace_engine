@@ -22,10 +22,12 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkDatePickerPeer, DatePickerAttribute } from "./component/datePicker"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 import { CommonMethod, PickerTextStyle } from "./component/common"
 import { CrownSensitivity } from "./component/enums"
 export class DatePickerModifier extends CommonMethodModifier implements DatePickerAttribute,AttributeModifier<DatePickerAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -50,6 +52,7 @@ export class DatePickerModifier extends CommonMethodModifier implements DatePick
     _enableHapticFeedback_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _enableHapticFeedback_0_0value?: boolean | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkDatePickerPeer;
         if (this._lunar_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -278,6 +281,7 @@ export class DatePickerModifier extends CommonMethodModifier implements DatePick
         {
             this._lunar_0_flag = AttributeUpdaterFlag.UPDATE
             this._lunar_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._lunar_0_flag = AttributeUpdaterFlag.SKIP
@@ -289,6 +293,7 @@ export class DatePickerModifier extends CommonMethodModifier implements DatePick
         {
             this._disappearTextStyle_0_flag = AttributeUpdaterFlag.UPDATE
             this._disappearTextStyle_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._disappearTextStyle_0_flag = AttributeUpdaterFlag.SKIP
@@ -300,6 +305,7 @@ export class DatePickerModifier extends CommonMethodModifier implements DatePick
         {
             this._textStyle_0_flag = AttributeUpdaterFlag.UPDATE
             this._textStyle_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._textStyle_0_flag = AttributeUpdaterFlag.SKIP
@@ -311,6 +317,7 @@ export class DatePickerModifier extends CommonMethodModifier implements DatePick
         {
             this._selectedTextStyle_0_flag = AttributeUpdaterFlag.UPDATE
             this._selectedTextStyle_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._selectedTextStyle_0_flag = AttributeUpdaterFlag.SKIP
@@ -322,6 +329,7 @@ export class DatePickerModifier extends CommonMethodModifier implements DatePick
         {
             this._onDateChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onDateChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onDateChange_0_flag = AttributeUpdaterFlag.SKIP
@@ -333,6 +341,7 @@ export class DatePickerModifier extends CommonMethodModifier implements DatePick
         {
             this._digitalCrownSensitivity_0_flag = AttributeUpdaterFlag.UPDATE
             this._digitalCrownSensitivity_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._digitalCrownSensitivity_0_flag = AttributeUpdaterFlag.SKIP
@@ -344,6 +353,7 @@ export class DatePickerModifier extends CommonMethodModifier implements DatePick
         {
             this._enableHapticFeedback_0_flag = AttributeUpdaterFlag.UPDATE
             this._enableHapticFeedback_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enableHapticFeedback_0_flag = AttributeUpdaterFlag.SKIP

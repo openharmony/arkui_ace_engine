@@ -22,9 +22,11 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkRelativeContainerPeer, GuideLineStyle, BarrierStyle, RelativeContainerAttribute } from "./component/relativeContainer"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 import { CommonMethod } from "./component/common"
 export class RelativeContainerModifier extends CommonMethodModifier implements RelativeContainerAttribute,AttributeModifier<RelativeContainerAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -39,6 +41,7 @@ export class RelativeContainerModifier extends CommonMethodModifier implements R
     _barrier_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _barrier_0_0value?: Array<BarrierStyle> | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkRelativeContainerPeer;
         if (this._guideLine_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -112,6 +115,7 @@ export class RelativeContainerModifier extends CommonMethodModifier implements R
         {
             this._guideLine_0_flag = AttributeUpdaterFlag.UPDATE
             this._guideLine_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._guideLine_0_flag = AttributeUpdaterFlag.SKIP
@@ -123,6 +127,7 @@ export class RelativeContainerModifier extends CommonMethodModifier implements R
         {
             this._barrier_0_flag = AttributeUpdaterFlag.UPDATE
             this._barrier_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._barrier_0_flag = AttributeUpdaterFlag.SKIP

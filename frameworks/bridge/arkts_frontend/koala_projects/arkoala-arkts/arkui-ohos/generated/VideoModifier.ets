@@ -22,13 +22,16 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkVideoPeer, FullscreenInfo, PreparedInfo, PlaybackInfo, VideoAttribute } from "./component/video"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 import { CommonMethod } from "./component/common"
 import { ImageFit } from "./component/enums"
 import { VoidCallback } from "./component/units"
+import { ErrorCallback } from "@ohos.base"
 import { ImageAnalyzerConfig } from "./component/imageCommon"
 import { ColorMetrics } from "arkui.Graphics"
 export class VideoModifier extends CommonMethodModifier implements VideoAttribute,AttributeModifier<VideoAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -65,7 +68,7 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
     _onUpdate_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onUpdate_0_0value?: ((value0: PlaybackInfo) => void) | undefined
     _onError_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onError_0_0value?: (() => void) | undefined
+    _onError_0_0value?: VoidCallback | ErrorCallback | undefined
     _onStop_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onStop_0_0value?: VoidCallback | undefined
     _enableAnalyzer_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -77,6 +80,7 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
     _surfaceBackgroundColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _surfaceBackgroundColor_0_0value?: ColorMetrics | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkVideoPeer;
         if (this._muted_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -317,7 +321,7 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
         {
             switch (this._onError_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnErrorAttribute((this._onError_0_0value as (() => void) | undefined));
+                    peer.setOnErrorAttribute((this._onError_0_0value as VoidCallback | ErrorCallback | undefined));
                     this._onError_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -327,7 +331,7 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
                 }
                 default: {
                     this._onError_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnErrorAttribute((undefined as (() => void) | undefined));
+                    peer.setOnErrorAttribute((undefined as VoidCallback | ErrorCallback | undefined));
                 }
             }
         }
@@ -602,7 +606,7 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
                     break;
                 }
                 default: {
-                    this.onError((undefined as (() => void) | undefined));
+                    this.onError((undefined as VoidCallback | ErrorCallback | undefined));
                 }
             }
         }
@@ -677,6 +681,7 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
         {
             this._muted_0_flag = AttributeUpdaterFlag.UPDATE
             this._muted_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._muted_0_flag = AttributeUpdaterFlag.SKIP
@@ -688,6 +693,7 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
         {
             this._autoPlay_0_flag = AttributeUpdaterFlag.UPDATE
             this._autoPlay_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._autoPlay_0_flag = AttributeUpdaterFlag.SKIP
@@ -699,6 +705,7 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
         {
             this._controls_0_flag = AttributeUpdaterFlag.UPDATE
             this._controls_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._controls_0_flag = AttributeUpdaterFlag.SKIP
@@ -710,6 +717,7 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
         {
             this._loop_0_flag = AttributeUpdaterFlag.UPDATE
             this._loop_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._loop_0_flag = AttributeUpdaterFlag.SKIP
@@ -721,6 +729,7 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
         {
             this._objectFit_0_flag = AttributeUpdaterFlag.UPDATE
             this._objectFit_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._objectFit_0_flag = AttributeUpdaterFlag.SKIP
@@ -732,6 +741,7 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
         {
             this._onStart_0_flag = AttributeUpdaterFlag.UPDATE
             this._onStart_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onStart_0_flag = AttributeUpdaterFlag.SKIP
@@ -743,6 +753,7 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
         {
             this._onPause_0_flag = AttributeUpdaterFlag.UPDATE
             this._onPause_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onPause_0_flag = AttributeUpdaterFlag.SKIP
@@ -754,6 +765,7 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
         {
             this._onFinish_0_flag = AttributeUpdaterFlag.UPDATE
             this._onFinish_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onFinish_0_flag = AttributeUpdaterFlag.SKIP
@@ -765,6 +777,7 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
         {
             this._onFullscreenChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onFullscreenChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onFullscreenChange_0_flag = AttributeUpdaterFlag.SKIP
@@ -776,6 +789,7 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
         {
             this._onPrepared_0_flag = AttributeUpdaterFlag.UPDATE
             this._onPrepared_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onPrepared_0_flag = AttributeUpdaterFlag.SKIP
@@ -787,6 +801,7 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
         {
             this._onSeeking_0_flag = AttributeUpdaterFlag.UPDATE
             this._onSeeking_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onSeeking_0_flag = AttributeUpdaterFlag.SKIP
@@ -798,6 +813,7 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
         {
             this._onSeeked_0_flag = AttributeUpdaterFlag.UPDATE
             this._onSeeked_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onSeeked_0_flag = AttributeUpdaterFlag.SKIP
@@ -809,17 +825,19 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
         {
             this._onUpdate_0_flag = AttributeUpdaterFlag.UPDATE
             this._onUpdate_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onUpdate_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
-    onError(value: (() => void) | undefined): this {
+    onError(value: VoidCallback | ErrorCallback | undefined): this {
         if (((this._onError_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._onError_0_flag = AttributeUpdaterFlag.UPDATE
             this._onError_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onError_0_flag = AttributeUpdaterFlag.SKIP
@@ -831,6 +849,7 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
         {
             this._onStop_0_flag = AttributeUpdaterFlag.UPDATE
             this._onStop_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onStop_0_flag = AttributeUpdaterFlag.SKIP
@@ -842,6 +861,7 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
         {
             this._enableAnalyzer_0_flag = AttributeUpdaterFlag.UPDATE
             this._enableAnalyzer_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enableAnalyzer_0_flag = AttributeUpdaterFlag.SKIP
@@ -853,6 +873,7 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
         {
             this._analyzerConfig_0_flag = AttributeUpdaterFlag.UPDATE
             this._analyzerConfig_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._analyzerConfig_0_flag = AttributeUpdaterFlag.SKIP
@@ -864,6 +885,7 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
         {
             this._enableShortcutKey_0_flag = AttributeUpdaterFlag.UPDATE
             this._enableShortcutKey_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enableShortcutKey_0_flag = AttributeUpdaterFlag.SKIP
@@ -875,6 +897,7 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
         {
             this._surfaceBackgroundColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._surfaceBackgroundColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._surfaceBackgroundColor_0_flag = AttributeUpdaterFlag.SKIP

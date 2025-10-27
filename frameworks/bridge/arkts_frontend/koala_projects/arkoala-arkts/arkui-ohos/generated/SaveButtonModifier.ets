@@ -22,6 +22,7 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkSaveButtonPeer, SaveButtonCallback, SaveButtonOnClickResult, SaveButtonAttribute } from "./component/saveButton"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 import { SecurityComponentMethod } from "./component/securityComponent"
 import { ClickEvent } from "./component/common"
 import { BusinessError } from "@ohos.base"
@@ -29,6 +30,7 @@ import { Resource } from "global.resource"
 import { Dimension, SizeOptions, BorderRadiuses } from "./component/units"
 export class SaveButtonModifier extends SecurityComponentMethodModifier implements SaveButtonAttribute,AttributeModifier<SaveButtonAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -51,6 +53,7 @@ export class SaveButtonModifier extends SecurityComponentMethodModifier implemen
     _stateEffect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _stateEffect_0_0value?: boolean | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkSaveButtonPeer;
         if (this._onClick_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -248,6 +251,7 @@ export class SaveButtonModifier extends SecurityComponentMethodModifier implemen
         {
             this._onClick_0_flag = AttributeUpdaterFlag.UPDATE
             this._onClick_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onClick_0_flag = AttributeUpdaterFlag.SKIP
@@ -259,6 +263,7 @@ export class SaveButtonModifier extends SecurityComponentMethodModifier implemen
         {
             this._setIcon_0_flag = AttributeUpdaterFlag.UPDATE
             this._setIcon_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._setIcon_0_flag = AttributeUpdaterFlag.SKIP
@@ -270,6 +275,7 @@ export class SaveButtonModifier extends SecurityComponentMethodModifier implemen
         {
             this._setText_0_flag = AttributeUpdaterFlag.UPDATE
             this._setText_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._setText_0_flag = AttributeUpdaterFlag.SKIP
@@ -281,6 +287,7 @@ export class SaveButtonModifier extends SecurityComponentMethodModifier implemen
         {
             this._iconSize_0_flag = AttributeUpdaterFlag.UPDATE
             this._iconSize_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._iconSize_0_flag = AttributeUpdaterFlag.SKIP
@@ -292,6 +299,7 @@ export class SaveButtonModifier extends SecurityComponentMethodModifier implemen
         {
             this._iconBorderRadius_0_flag = AttributeUpdaterFlag.UPDATE
             this._iconBorderRadius_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._iconBorderRadius_0_flag = AttributeUpdaterFlag.SKIP
@@ -303,6 +311,7 @@ export class SaveButtonModifier extends SecurityComponentMethodModifier implemen
         {
             this._stateEffect_0_flag = AttributeUpdaterFlag.UPDATE
             this._stateEffect_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._stateEffect_0_flag = AttributeUpdaterFlag.SKIP

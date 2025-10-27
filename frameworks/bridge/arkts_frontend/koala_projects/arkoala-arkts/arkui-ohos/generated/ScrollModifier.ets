@@ -27,10 +27,12 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkScrollPeer, ScrollDirection, ScrollOnWillScrollCallback, ScrollOnScrollCallback, OnScrollEdgeCallback, OnScrollFrameBeginCallback, ScrollSnapOptions, OffsetOptions, ScrollAttribute } from "./component/scroll"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 import { ScrollState } from "./component/list"
 import { VoidCallback } from "./component/units"
 export class ScrollModifier extends CommonMethodModifier implements ScrollAttribute,AttributeModifier<ScrollAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -80,7 +82,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
     _onReachEnd_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onReachEnd_0_0value?: (() => void) | undefined
     _flingSpeedLimit_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _flingSpeedLimit_0_0value?: number | undefined
+    _flingSpeedLimit_0_0value?: double | undefined
     _clipContent_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _clipContent_0_0value?: ContentClipMode | RectShape | undefined
     _digitalCrownSensitivity_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -91,6 +93,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
     _fadingEdge_0_0value?: boolean | undefined
     _fadingEdge_0_1value?: FadingEdgeOptions | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkScrollPeer;
         if (this._scrollable_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -439,7 +442,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
         {
             switch (this._flingSpeedLimit_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setFlingSpeedLimitAttribute((this._flingSpeedLimit_0_0value as number | undefined));
+                    peer.setFlingSpeedLimitAttribute((this._flingSpeedLimit_0_0value as double | undefined));
                     this._flingSpeedLimit_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -449,7 +452,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
                 }
                 default: {
                     this._flingSpeedLimit_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setFlingSpeedLimitAttribute((undefined as number | undefined));
+                    peer.setFlingSpeedLimitAttribute((undefined as double | undefined));
                 }
             }
         }
@@ -784,7 +787,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
                     break;
                 }
                 default: {
-                    this.flingSpeedLimit((undefined as number | undefined));
+                    this.flingSpeedLimit((undefined as double | undefined));
                 }
             }
         }
@@ -846,6 +849,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
         {
             this._scrollable_0_flag = AttributeUpdaterFlag.UPDATE
             this._scrollable_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._scrollable_0_flag = AttributeUpdaterFlag.SKIP
@@ -857,6 +861,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
         {
             this._onWillScroll_0_flag = AttributeUpdaterFlag.UPDATE
             this._onWillScroll_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onWillScroll_0_flag = AttributeUpdaterFlag.SKIP
@@ -868,6 +873,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
         {
             this._onDidScroll_0_flag = AttributeUpdaterFlag.UPDATE
             this._onDidScroll_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onDidScroll_0_flag = AttributeUpdaterFlag.SKIP
@@ -879,6 +885,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
         {
             this._onScrollEdge_0_flag = AttributeUpdaterFlag.UPDATE
             this._onScrollEdge_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onScrollEdge_0_flag = AttributeUpdaterFlag.SKIP
@@ -890,6 +897,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
         {
             this._onScrollStart_0_flag = AttributeUpdaterFlag.UPDATE
             this._onScrollStart_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onScrollStart_0_flag = AttributeUpdaterFlag.SKIP
@@ -901,6 +909,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
         {
             this._onScrollStop_0_flag = AttributeUpdaterFlag.UPDATE
             this._onScrollStop_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onScrollStop_0_flag = AttributeUpdaterFlag.SKIP
@@ -912,6 +921,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
         {
             this._scrollBar_0_flag = AttributeUpdaterFlag.UPDATE
             this._scrollBar_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._scrollBar_0_flag = AttributeUpdaterFlag.SKIP
@@ -923,6 +933,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
         {
             this._scrollBarColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._scrollBarColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._scrollBarColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -934,6 +945,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
         {
             this._scrollBarWidth_0_flag = AttributeUpdaterFlag.UPDATE
             this._scrollBarWidth_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._scrollBarWidth_0_flag = AttributeUpdaterFlag.SKIP
@@ -945,6 +957,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
         {
             this._onScrollFrameBegin_0_flag = AttributeUpdaterFlag.UPDATE
             this._onScrollFrameBegin_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onScrollFrameBegin_0_flag = AttributeUpdaterFlag.SKIP
@@ -956,6 +969,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
         {
             this._nestedScroll_0_flag = AttributeUpdaterFlag.UPDATE
             this._nestedScroll_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._nestedScroll_0_flag = AttributeUpdaterFlag.SKIP
@@ -967,6 +981,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
         {
             this._enableScrollInteraction_0_flag = AttributeUpdaterFlag.UPDATE
             this._enableScrollInteraction_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enableScrollInteraction_0_flag = AttributeUpdaterFlag.SKIP
@@ -978,6 +993,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
         {
             this._friction_0_flag = AttributeUpdaterFlag.UPDATE
             this._friction_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._friction_0_flag = AttributeUpdaterFlag.SKIP
@@ -989,6 +1005,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
         {
             this._scrollSnap_0_flag = AttributeUpdaterFlag.UPDATE
             this._scrollSnap_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._scrollSnap_0_flag = AttributeUpdaterFlag.SKIP
@@ -1000,6 +1017,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
         {
             this._enablePaging_0_flag = AttributeUpdaterFlag.UPDATE
             this._enablePaging_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enablePaging_0_flag = AttributeUpdaterFlag.SKIP
@@ -1011,6 +1029,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
         {
             this._initialOffset_0_flag = AttributeUpdaterFlag.UPDATE
             this._initialOffset_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._initialOffset_0_flag = AttributeUpdaterFlag.SKIP
@@ -1023,6 +1042,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
             this._edgeEffect_0_flag = AttributeUpdaterFlag.UPDATE
             this._edgeEffect_0_0value = edgeEffect
             this._edgeEffect_0_1value = options
+            this._state.fireChange()
         } else
         {
             this._edgeEffect_0_flag = AttributeUpdaterFlag.SKIP
@@ -1034,6 +1054,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
         {
             this._onReachStart_0_flag = AttributeUpdaterFlag.UPDATE
             this._onReachStart_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onReachStart_0_flag = AttributeUpdaterFlag.SKIP
@@ -1045,17 +1066,19 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
         {
             this._onReachEnd_0_flag = AttributeUpdaterFlag.UPDATE
             this._onReachEnd_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onReachEnd_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
-    flingSpeedLimit(value: number | undefined): this {
+    flingSpeedLimit(value: double | undefined): this {
         if (((this._flingSpeedLimit_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._flingSpeedLimit_0_0value) !== (value)))
         {
             this._flingSpeedLimit_0_flag = AttributeUpdaterFlag.UPDATE
             this._flingSpeedLimit_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flingSpeedLimit_0_flag = AttributeUpdaterFlag.SKIP
@@ -1067,6 +1090,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
         {
             this._clipContent_0_flag = AttributeUpdaterFlag.UPDATE
             this._clipContent_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._clipContent_0_flag = AttributeUpdaterFlag.SKIP
@@ -1078,6 +1102,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
         {
             this._digitalCrownSensitivity_0_flag = AttributeUpdaterFlag.UPDATE
             this._digitalCrownSensitivity_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._digitalCrownSensitivity_0_flag = AttributeUpdaterFlag.SKIP
@@ -1089,6 +1114,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
         {
             this._backToTop_0_flag = AttributeUpdaterFlag.UPDATE
             this._backToTop_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._backToTop_0_flag = AttributeUpdaterFlag.SKIP
@@ -1101,6 +1127,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
             this._fadingEdge_0_flag = AttributeUpdaterFlag.UPDATE
             this._fadingEdge_0_0value = enabled
             this._fadingEdge_0_1value = options
+            this._state.fireChange()
         } else
         {
             this._fadingEdge_0_flag = AttributeUpdaterFlag.SKIP

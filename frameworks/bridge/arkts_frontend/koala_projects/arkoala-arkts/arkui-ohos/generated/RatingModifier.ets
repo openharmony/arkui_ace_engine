@@ -22,9 +22,11 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkRatingPeer, StarStyleOptions, OnRatingChangeCallback, RatingConfiguration, RatingAttribute } from "./component/rating"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 import { CommonMethod } from "./component/common"
 export class RatingModifier extends CommonMethodModifier implements RatingAttribute,AttributeModifier<RatingAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -43,6 +45,7 @@ export class RatingModifier extends CommonMethodModifier implements RatingAttrib
     _onChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onChange_0_0value?: OnRatingChangeCallback | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkRatingPeer;
         if (this._stars_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -178,6 +181,7 @@ export class RatingModifier extends CommonMethodModifier implements RatingAttrib
         {
             this._stars_0_flag = AttributeUpdaterFlag.UPDATE
             this._stars_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._stars_0_flag = AttributeUpdaterFlag.SKIP
@@ -189,6 +193,7 @@ export class RatingModifier extends CommonMethodModifier implements RatingAttrib
         {
             this._stepSize_0_flag = AttributeUpdaterFlag.UPDATE
             this._stepSize_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._stepSize_0_flag = AttributeUpdaterFlag.SKIP
@@ -200,6 +205,7 @@ export class RatingModifier extends CommonMethodModifier implements RatingAttrib
         {
             this._starStyle_0_flag = AttributeUpdaterFlag.UPDATE
             this._starStyle_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._starStyle_0_flag = AttributeUpdaterFlag.SKIP
@@ -211,6 +217,7 @@ export class RatingModifier extends CommonMethodModifier implements RatingAttrib
         {
             this._onChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onChange_0_flag = AttributeUpdaterFlag.SKIP

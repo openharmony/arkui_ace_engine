@@ -22,9 +22,11 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkStepperPeer, StepperAttribute } from "./component/stepper"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 import { CommonMethod } from "./component/common"
 export class StepperModifier extends CommonMethodModifier implements StepperAttribute,AttributeModifier<StepperAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -45,6 +47,7 @@ export class StepperModifier extends CommonMethodModifier implements StepperAttr
     _onPrevious_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onPrevious_0_0value?: ((prevIndex: int32,index: int32) => void) | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkStepperPeer;
         if (this._onFinish_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -211,6 +214,7 @@ export class StepperModifier extends CommonMethodModifier implements StepperAttr
         {
             this._onFinish_0_flag = AttributeUpdaterFlag.UPDATE
             this._onFinish_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onFinish_0_flag = AttributeUpdaterFlag.SKIP
@@ -222,6 +226,7 @@ export class StepperModifier extends CommonMethodModifier implements StepperAttr
         {
             this._onSkip_0_flag = AttributeUpdaterFlag.UPDATE
             this._onSkip_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onSkip_0_flag = AttributeUpdaterFlag.SKIP
@@ -233,6 +238,7 @@ export class StepperModifier extends CommonMethodModifier implements StepperAttr
         {
             this._onChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onChange_0_flag = AttributeUpdaterFlag.SKIP
@@ -244,6 +250,7 @@ export class StepperModifier extends CommonMethodModifier implements StepperAttr
         {
             this._onNext_0_flag = AttributeUpdaterFlag.UPDATE
             this._onNext_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onNext_0_flag = AttributeUpdaterFlag.SKIP
@@ -255,6 +262,7 @@ export class StepperModifier extends CommonMethodModifier implements StepperAttr
         {
             this._onPrevious_0_flag = AttributeUpdaterFlag.UPDATE
             this._onPrevious_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onPrevious_0_flag = AttributeUpdaterFlag.SKIP

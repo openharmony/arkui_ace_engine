@@ -22,12 +22,14 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkWebPeer, MixedMode, JavaScriptProxy, CacheMode, WebDarkMode, WebMediaOptions, OverScrollMode, BlurOnKeyboardHideMode, OnPageEndEvent, OnPageBeginEvent, OnLoadStartedEvent, OnLoadFinishedEvent, OnProgressChangeEvent, OnTitleReceiveEvent, OnGeolocationShowEvent, OnAlertEvent, OnBeforeUnloadEvent, OnConfirmEvent, OnPromptEvent, OnConsoleEvent, OnErrorReceiveEvent, OnHttpErrorReceiveEvent, OnDownloadStartEvent, OnRefreshAccessedHistoryEvent, OnRenderExitedEvent, OnShowFileSelectorEvent, OnResourceLoadEvent, OnFullScreenEnterCallback, FullScreenEnterEvent, OnScaleChangeEvent, OnHttpAuthRequestEvent, OnInterceptRequestEvent, WebResourceResponse, OnPermissionRequestEvent, OnScreenCaptureRequestEvent, OnContextMenuShowEvent, OnContextMenuHideCallback, OnSearchResultReceiveEvent, OnScrollEvent, OnSslErrorEventReceiveEvent, OnSslErrorEventCallback, SslErrorEvent, OnClientAuthenticationEvent, OnWindowNewEvent, OnTouchIconUrlReceivedEvent, OnFaviconReceivedEvent, OnPageVisibleEvent, OnDataResubmittedEvent, OnAudioStateChangedEvent, OnFirstContentfulPaintEvent, OnFirstMeaningfulPaintCallback, FirstMeaningfulPaint, OnLargestContentfulPaintCallback, LargestContentfulPaint, OnLoadInterceptEvent, OnOverScrollEvent, OnSafeBrowsingCheckResultCallback, ThreatType, OnNavigationEntryCommittedCallback, LoadCommittedDetails, OnIntelligentTrackingPreventionCallback, IntelligentTrackingPreventionDetails, ScriptItem, WebLayoutMode, NestedScrollOptionsExt, NativeEmbedDataInfo, OnNativeEmbedVisibilityChangeCallback, NativeEmbedVisibilityInfo, NativeEmbedTouchInfo, OnOverrideUrlLoadingCallback, WebResourceRequest, NativeMediaPlayerConfig, OnRenderProcessNotRespondingCallback, RenderProcessNotRespondingData, OnRenderProcessRespondingCallback, OnViewportFitChangedCallback, ViewportFit, WebKeyboardCallback, WebKeyboardCallbackInfo, OnAdsBlockedCallback, AdsBlockedDetails, WebKeyboardAvoidMode, EmbedOptions, WebAttribute, WebElementType, WebResponseType, SelectionMenuOptionsExt } from "./component/web"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 import { CommonMethod, KeyEvent, NestedScrollOptions } from "./component/common"
 import { CopyOptions } from "./component/enums"
 import { EditMenuOptions } from "./component/textCommon"
 import { CustomBuilder } from "./component/builder"
 export class WebModifier extends CommonMethodModifier implements WebAttribute,AttributeModifier<WebAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -282,6 +284,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
     _bindSelectionMenu_0_2value?: WebResponseType | undefined
     _bindSelectionMenu_0_3value?: SelectionMenuOptionsExt | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkWebPeer;
         if (this._javaScriptAccess_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -4013,6 +4016,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._javaScriptAccess_0_flag = AttributeUpdaterFlag.UPDATE
             this._javaScriptAccess_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._javaScriptAccess_0_flag = AttributeUpdaterFlag.SKIP
@@ -4024,6 +4028,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._fileAccess_0_flag = AttributeUpdaterFlag.UPDATE
             this._fileAccess_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fileAccess_0_flag = AttributeUpdaterFlag.SKIP
@@ -4035,6 +4040,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._onlineImageAccess_0_flag = AttributeUpdaterFlag.UPDATE
             this._onlineImageAccess_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onlineImageAccess_0_flag = AttributeUpdaterFlag.SKIP
@@ -4046,6 +4052,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._domStorageAccess_0_flag = AttributeUpdaterFlag.UPDATE
             this._domStorageAccess_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._domStorageAccess_0_flag = AttributeUpdaterFlag.SKIP
@@ -4057,6 +4064,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._imageAccess_0_flag = AttributeUpdaterFlag.UPDATE
             this._imageAccess_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._imageAccess_0_flag = AttributeUpdaterFlag.SKIP
@@ -4068,6 +4076,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._mixedMode_0_flag = AttributeUpdaterFlag.UPDATE
             this._mixedMode_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._mixedMode_0_flag = AttributeUpdaterFlag.SKIP
@@ -4079,6 +4088,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._zoomAccess_0_flag = AttributeUpdaterFlag.UPDATE
             this._zoomAccess_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._zoomAccess_0_flag = AttributeUpdaterFlag.SKIP
@@ -4090,6 +4100,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._geolocationAccess_0_flag = AttributeUpdaterFlag.UPDATE
             this._geolocationAccess_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._geolocationAccess_0_flag = AttributeUpdaterFlag.SKIP
@@ -4101,6 +4112,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._javaScriptProxy_0_flag = AttributeUpdaterFlag.UPDATE
             this._javaScriptProxy_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._javaScriptProxy_0_flag = AttributeUpdaterFlag.SKIP
@@ -4112,6 +4124,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._cacheMode_0_flag = AttributeUpdaterFlag.UPDATE
             this._cacheMode_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._cacheMode_0_flag = AttributeUpdaterFlag.SKIP
@@ -4123,6 +4136,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._darkMode_0_flag = AttributeUpdaterFlag.UPDATE
             this._darkMode_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._darkMode_0_flag = AttributeUpdaterFlag.SKIP
@@ -4134,6 +4148,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._forceDarkAccess_0_flag = AttributeUpdaterFlag.UPDATE
             this._forceDarkAccess_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._forceDarkAccess_0_flag = AttributeUpdaterFlag.SKIP
@@ -4145,6 +4160,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._mediaOptions_0_flag = AttributeUpdaterFlag.UPDATE
             this._mediaOptions_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._mediaOptions_0_flag = AttributeUpdaterFlag.SKIP
@@ -4156,6 +4172,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._overviewModeAccess_0_flag = AttributeUpdaterFlag.UPDATE
             this._overviewModeAccess_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._overviewModeAccess_0_flag = AttributeUpdaterFlag.SKIP
@@ -4167,6 +4184,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._overScrollMode_0_flag = AttributeUpdaterFlag.UPDATE
             this._overScrollMode_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._overScrollMode_0_flag = AttributeUpdaterFlag.SKIP
@@ -4178,6 +4196,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._blurOnKeyboardHideMode_0_flag = AttributeUpdaterFlag.UPDATE
             this._blurOnKeyboardHideMode_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._blurOnKeyboardHideMode_0_flag = AttributeUpdaterFlag.SKIP
@@ -4189,6 +4208,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._textZoomRatio_0_flag = AttributeUpdaterFlag.UPDATE
             this._textZoomRatio_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._textZoomRatio_0_flag = AttributeUpdaterFlag.SKIP
@@ -4200,6 +4220,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._databaseAccess_0_flag = AttributeUpdaterFlag.UPDATE
             this._databaseAccess_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._databaseAccess_0_flag = AttributeUpdaterFlag.SKIP
@@ -4211,6 +4232,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._initialScale_0_flag = AttributeUpdaterFlag.UPDATE
             this._initialScale_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._initialScale_0_flag = AttributeUpdaterFlag.SKIP
@@ -4222,6 +4244,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._metaViewport_0_flag = AttributeUpdaterFlag.UPDATE
             this._metaViewport_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._metaViewport_0_flag = AttributeUpdaterFlag.SKIP
@@ -4233,6 +4256,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._onPageEnd_0_flag = AttributeUpdaterFlag.UPDATE
             this._onPageEnd_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onPageEnd_0_flag = AttributeUpdaterFlag.SKIP
@@ -4244,6 +4268,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._onPageBegin_0_flag = AttributeUpdaterFlag.UPDATE
             this._onPageBegin_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onPageBegin_0_flag = AttributeUpdaterFlag.SKIP
@@ -4255,6 +4280,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._onLoadStarted_0_flag = AttributeUpdaterFlag.UPDATE
             this._onLoadStarted_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onLoadStarted_0_flag = AttributeUpdaterFlag.SKIP
@@ -4266,6 +4292,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._onLoadFinished_0_flag = AttributeUpdaterFlag.UPDATE
             this._onLoadFinished_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onLoadFinished_0_flag = AttributeUpdaterFlag.SKIP
@@ -4277,6 +4304,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._onProgressChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onProgressChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onProgressChange_0_flag = AttributeUpdaterFlag.SKIP
@@ -4288,6 +4316,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._onTitleReceive_0_flag = AttributeUpdaterFlag.UPDATE
             this._onTitleReceive_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onTitleReceive_0_flag = AttributeUpdaterFlag.SKIP
@@ -4299,6 +4328,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._onGeolocationHide_0_flag = AttributeUpdaterFlag.UPDATE
             this._onGeolocationHide_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onGeolocationHide_0_flag = AttributeUpdaterFlag.SKIP
@@ -4310,6 +4340,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._onGeolocationShow_0_flag = AttributeUpdaterFlag.UPDATE
             this._onGeolocationShow_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onGeolocationShow_0_flag = AttributeUpdaterFlag.SKIP
@@ -4321,6 +4352,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._onRequestSelected_0_flag = AttributeUpdaterFlag.UPDATE
             this._onRequestSelected_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onRequestSelected_0_flag = AttributeUpdaterFlag.SKIP
@@ -4332,6 +4364,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._onAlert_0_flag = AttributeUpdaterFlag.UPDATE
             this._onAlert_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onAlert_0_flag = AttributeUpdaterFlag.SKIP
@@ -4343,6 +4376,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._onBeforeUnload_0_flag = AttributeUpdaterFlag.UPDATE
             this._onBeforeUnload_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onBeforeUnload_0_flag = AttributeUpdaterFlag.SKIP
@@ -4354,6 +4388,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._onConfirm_0_flag = AttributeUpdaterFlag.UPDATE
             this._onConfirm_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onConfirm_0_flag = AttributeUpdaterFlag.SKIP
@@ -4365,6 +4400,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._onPrompt_0_flag = AttributeUpdaterFlag.UPDATE
             this._onPrompt_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onPrompt_0_flag = AttributeUpdaterFlag.SKIP
@@ -4376,6 +4412,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._onConsole_0_flag = AttributeUpdaterFlag.UPDATE
             this._onConsole_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onConsole_0_flag = AttributeUpdaterFlag.SKIP
@@ -4387,6 +4424,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._onErrorReceive_0_flag = AttributeUpdaterFlag.UPDATE
             this._onErrorReceive_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onErrorReceive_0_flag = AttributeUpdaterFlag.SKIP
@@ -4398,6 +4436,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._onHttpErrorReceive_0_flag = AttributeUpdaterFlag.UPDATE
             this._onHttpErrorReceive_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onHttpErrorReceive_0_flag = AttributeUpdaterFlag.SKIP
@@ -4409,6 +4448,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._onDownloadStart_0_flag = AttributeUpdaterFlag.UPDATE
             this._onDownloadStart_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onDownloadStart_0_flag = AttributeUpdaterFlag.SKIP
@@ -4420,6 +4460,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._onRefreshAccessedHistory_0_flag = AttributeUpdaterFlag.UPDATE
             this._onRefreshAccessedHistory_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onRefreshAccessedHistory_0_flag = AttributeUpdaterFlag.SKIP
@@ -4431,6 +4472,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._onRenderExited_0_flag = AttributeUpdaterFlag.UPDATE
             this._onRenderExited_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onRenderExited_0_flag = AttributeUpdaterFlag.SKIP
@@ -4442,6 +4484,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._onShowFileSelector_0_flag = AttributeUpdaterFlag.UPDATE
             this._onShowFileSelector_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onShowFileSelector_0_flag = AttributeUpdaterFlag.SKIP
@@ -4453,6 +4496,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._onResourceLoad_0_flag = AttributeUpdaterFlag.UPDATE
             this._onResourceLoad_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onResourceLoad_0_flag = AttributeUpdaterFlag.SKIP
@@ -4464,6 +4508,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._onFullScreenExit_0_flag = AttributeUpdaterFlag.UPDATE
             this._onFullScreenExit_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onFullScreenExit_0_flag = AttributeUpdaterFlag.SKIP
@@ -4475,6 +4520,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._onFullScreenEnter_0_flag = AttributeUpdaterFlag.UPDATE
             this._onFullScreenEnter_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onFullScreenEnter_0_flag = AttributeUpdaterFlag.SKIP
@@ -4486,6 +4532,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._onScaleChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onScaleChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onScaleChange_0_flag = AttributeUpdaterFlag.SKIP
@@ -4497,6 +4544,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._onHttpAuthRequest_0_flag = AttributeUpdaterFlag.UPDATE
             this._onHttpAuthRequest_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onHttpAuthRequest_0_flag = AttributeUpdaterFlag.SKIP
@@ -4508,6 +4556,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._onInterceptRequest_0_flag = AttributeUpdaterFlag.UPDATE
             this._onInterceptRequest_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onInterceptRequest_0_flag = AttributeUpdaterFlag.SKIP
@@ -4519,6 +4568,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._onPermissionRequest_0_flag = AttributeUpdaterFlag.UPDATE
             this._onPermissionRequest_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onPermissionRequest_0_flag = AttributeUpdaterFlag.SKIP
@@ -4530,6 +4580,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._onScreenCaptureRequest_0_flag = AttributeUpdaterFlag.UPDATE
             this._onScreenCaptureRequest_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onScreenCaptureRequest_0_flag = AttributeUpdaterFlag.SKIP
@@ -4541,6 +4592,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._onContextMenuShow_0_flag = AttributeUpdaterFlag.UPDATE
             this._onContextMenuShow_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onContextMenuShow_0_flag = AttributeUpdaterFlag.SKIP
@@ -4552,6 +4604,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._onContextMenuHide_0_flag = AttributeUpdaterFlag.UPDATE
             this._onContextMenuHide_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onContextMenuHide_0_flag = AttributeUpdaterFlag.SKIP
@@ -4563,6 +4616,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._mediaPlayGestureAccess_0_flag = AttributeUpdaterFlag.UPDATE
             this._mediaPlayGestureAccess_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._mediaPlayGestureAccess_0_flag = AttributeUpdaterFlag.SKIP
@@ -4574,6 +4628,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._onSearchResultReceive_0_flag = AttributeUpdaterFlag.UPDATE
             this._onSearchResultReceive_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onSearchResultReceive_0_flag = AttributeUpdaterFlag.SKIP
@@ -4585,6 +4640,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._onScroll_0_flag = AttributeUpdaterFlag.UPDATE
             this._onScroll_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onScroll_0_flag = AttributeUpdaterFlag.SKIP
@@ -4596,6 +4652,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._onSslErrorEventReceive_0_flag = AttributeUpdaterFlag.UPDATE
             this._onSslErrorEventReceive_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onSslErrorEventReceive_0_flag = AttributeUpdaterFlag.SKIP
@@ -4607,6 +4664,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._onSslErrorEvent_0_flag = AttributeUpdaterFlag.UPDATE
             this._onSslErrorEvent_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onSslErrorEvent_0_flag = AttributeUpdaterFlag.SKIP
@@ -4618,6 +4676,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._onClientAuthenticationRequest_0_flag = AttributeUpdaterFlag.UPDATE
             this._onClientAuthenticationRequest_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onClientAuthenticationRequest_0_flag = AttributeUpdaterFlag.SKIP
@@ -4629,6 +4688,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._onWindowNew_0_flag = AttributeUpdaterFlag.UPDATE
             this._onWindowNew_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onWindowNew_0_flag = AttributeUpdaterFlag.SKIP
@@ -4640,6 +4700,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._onWindowExit_0_flag = AttributeUpdaterFlag.UPDATE
             this._onWindowExit_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onWindowExit_0_flag = AttributeUpdaterFlag.SKIP
@@ -4651,6 +4712,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._multiWindowAccess_0_flag = AttributeUpdaterFlag.UPDATE
             this._multiWindowAccess_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._multiWindowAccess_0_flag = AttributeUpdaterFlag.SKIP
@@ -4662,6 +4724,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._onInterceptKeyEvent_0_flag = AttributeUpdaterFlag.UPDATE
             this._onInterceptKeyEvent_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onInterceptKeyEvent_0_flag = AttributeUpdaterFlag.SKIP
@@ -4673,6 +4736,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._webStandardFont_0_flag = AttributeUpdaterFlag.UPDATE
             this._webStandardFont_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._webStandardFont_0_flag = AttributeUpdaterFlag.SKIP
@@ -4684,6 +4748,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._webSerifFont_0_flag = AttributeUpdaterFlag.UPDATE
             this._webSerifFont_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._webSerifFont_0_flag = AttributeUpdaterFlag.SKIP
@@ -4695,6 +4760,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._webSansSerifFont_0_flag = AttributeUpdaterFlag.UPDATE
             this._webSansSerifFont_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._webSansSerifFont_0_flag = AttributeUpdaterFlag.SKIP
@@ -4706,6 +4772,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._webFixedFont_0_flag = AttributeUpdaterFlag.UPDATE
             this._webFixedFont_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._webFixedFont_0_flag = AttributeUpdaterFlag.SKIP
@@ -4717,6 +4784,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._webFantasyFont_0_flag = AttributeUpdaterFlag.UPDATE
             this._webFantasyFont_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._webFantasyFont_0_flag = AttributeUpdaterFlag.SKIP
@@ -4728,6 +4796,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._webCursiveFont_0_flag = AttributeUpdaterFlag.UPDATE
             this._webCursiveFont_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._webCursiveFont_0_flag = AttributeUpdaterFlag.SKIP
@@ -4739,6 +4808,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._defaultFixedFontSize_0_flag = AttributeUpdaterFlag.UPDATE
             this._defaultFixedFontSize_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._defaultFixedFontSize_0_flag = AttributeUpdaterFlag.SKIP
@@ -4750,6 +4820,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._defaultFontSize_0_flag = AttributeUpdaterFlag.UPDATE
             this._defaultFontSize_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._defaultFontSize_0_flag = AttributeUpdaterFlag.SKIP
@@ -4761,6 +4832,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._minFontSize_0_flag = AttributeUpdaterFlag.UPDATE
             this._minFontSize_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._minFontSize_0_flag = AttributeUpdaterFlag.SKIP
@@ -4772,6 +4844,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._minLogicalFontSize_0_flag = AttributeUpdaterFlag.UPDATE
             this._minLogicalFontSize_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._minLogicalFontSize_0_flag = AttributeUpdaterFlag.SKIP
@@ -4783,6 +4856,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._defaultTextEncodingFormat_0_flag = AttributeUpdaterFlag.UPDATE
             this._defaultTextEncodingFormat_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._defaultTextEncodingFormat_0_flag = AttributeUpdaterFlag.SKIP
@@ -4794,6 +4868,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._forceDisplayScrollBar_0_flag = AttributeUpdaterFlag.UPDATE
             this._forceDisplayScrollBar_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._forceDisplayScrollBar_0_flag = AttributeUpdaterFlag.SKIP
@@ -4805,6 +4880,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._blockNetwork_0_flag = AttributeUpdaterFlag.UPDATE
             this._blockNetwork_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._blockNetwork_0_flag = AttributeUpdaterFlag.SKIP
@@ -4816,6 +4892,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._horizontalScrollBarAccess_0_flag = AttributeUpdaterFlag.UPDATE
             this._horizontalScrollBarAccess_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._horizontalScrollBarAccess_0_flag = AttributeUpdaterFlag.SKIP
@@ -4827,6 +4904,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._verticalScrollBarAccess_0_flag = AttributeUpdaterFlag.UPDATE
             this._verticalScrollBarAccess_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._verticalScrollBarAccess_0_flag = AttributeUpdaterFlag.SKIP
@@ -4838,6 +4916,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._onTouchIconUrlReceived_0_flag = AttributeUpdaterFlag.UPDATE
             this._onTouchIconUrlReceived_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onTouchIconUrlReceived_0_flag = AttributeUpdaterFlag.SKIP
@@ -4849,6 +4928,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._onFaviconReceived_0_flag = AttributeUpdaterFlag.UPDATE
             this._onFaviconReceived_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onFaviconReceived_0_flag = AttributeUpdaterFlag.SKIP
@@ -4860,6 +4940,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._onPageVisible_0_flag = AttributeUpdaterFlag.UPDATE
             this._onPageVisible_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onPageVisible_0_flag = AttributeUpdaterFlag.SKIP
@@ -4871,6 +4952,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._onDataResubmitted_0_flag = AttributeUpdaterFlag.UPDATE
             this._onDataResubmitted_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onDataResubmitted_0_flag = AttributeUpdaterFlag.SKIP
@@ -4882,6 +4964,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._pinchSmooth_0_flag = AttributeUpdaterFlag.UPDATE
             this._pinchSmooth_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._pinchSmooth_0_flag = AttributeUpdaterFlag.SKIP
@@ -4893,6 +4976,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._allowWindowOpenMethod_0_flag = AttributeUpdaterFlag.UPDATE
             this._allowWindowOpenMethod_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._allowWindowOpenMethod_0_flag = AttributeUpdaterFlag.SKIP
@@ -4904,6 +4988,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._onAudioStateChanged_0_flag = AttributeUpdaterFlag.UPDATE
             this._onAudioStateChanged_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onAudioStateChanged_0_flag = AttributeUpdaterFlag.SKIP
@@ -4915,6 +5000,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._onFirstContentfulPaint_0_flag = AttributeUpdaterFlag.UPDATE
             this._onFirstContentfulPaint_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onFirstContentfulPaint_0_flag = AttributeUpdaterFlag.SKIP
@@ -4926,6 +5012,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._onFirstMeaningfulPaint_0_flag = AttributeUpdaterFlag.UPDATE
             this._onFirstMeaningfulPaint_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onFirstMeaningfulPaint_0_flag = AttributeUpdaterFlag.SKIP
@@ -4937,6 +5024,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._onLargestContentfulPaint_0_flag = AttributeUpdaterFlag.UPDATE
             this._onLargestContentfulPaint_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onLargestContentfulPaint_0_flag = AttributeUpdaterFlag.SKIP
@@ -4948,6 +5036,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._onLoadIntercept_0_flag = AttributeUpdaterFlag.UPDATE
             this._onLoadIntercept_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onLoadIntercept_0_flag = AttributeUpdaterFlag.SKIP
@@ -4959,6 +5048,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._onControllerAttached_0_flag = AttributeUpdaterFlag.UPDATE
             this._onControllerAttached_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onControllerAttached_0_flag = AttributeUpdaterFlag.SKIP
@@ -4970,6 +5060,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._onOverScroll_0_flag = AttributeUpdaterFlag.UPDATE
             this._onOverScroll_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onOverScroll_0_flag = AttributeUpdaterFlag.SKIP
@@ -4981,6 +5072,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._onSafeBrowsingCheckResult_0_flag = AttributeUpdaterFlag.UPDATE
             this._onSafeBrowsingCheckResult_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onSafeBrowsingCheckResult_0_flag = AttributeUpdaterFlag.SKIP
@@ -4992,6 +5084,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._onNavigationEntryCommitted_0_flag = AttributeUpdaterFlag.UPDATE
             this._onNavigationEntryCommitted_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onNavigationEntryCommitted_0_flag = AttributeUpdaterFlag.SKIP
@@ -5003,6 +5096,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._onIntelligentTrackingPreventionResult_0_flag = AttributeUpdaterFlag.UPDATE
             this._onIntelligentTrackingPreventionResult_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onIntelligentTrackingPreventionResult_0_flag = AttributeUpdaterFlag.SKIP
@@ -5014,6 +5108,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._javaScriptOnDocumentStart_0_flag = AttributeUpdaterFlag.UPDATE
             this._javaScriptOnDocumentStart_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._javaScriptOnDocumentStart_0_flag = AttributeUpdaterFlag.SKIP
@@ -5025,6 +5120,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._javaScriptOnDocumentEnd_0_flag = AttributeUpdaterFlag.UPDATE
             this._javaScriptOnDocumentEnd_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._javaScriptOnDocumentEnd_0_flag = AttributeUpdaterFlag.SKIP
@@ -5036,6 +5132,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._layoutMode_0_flag = AttributeUpdaterFlag.UPDATE
             this._layoutMode_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._layoutMode_0_flag = AttributeUpdaterFlag.SKIP
@@ -5047,6 +5144,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._nestedScroll_0_flag = AttributeUpdaterFlag.UPDATE
             this._nestedScroll_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._nestedScroll_0_flag = AttributeUpdaterFlag.SKIP
@@ -5058,6 +5156,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._enableNativeEmbedMode_0_flag = AttributeUpdaterFlag.UPDATE
             this._enableNativeEmbedMode_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enableNativeEmbedMode_0_flag = AttributeUpdaterFlag.SKIP
@@ -5069,6 +5168,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._onNativeEmbedLifecycleChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onNativeEmbedLifecycleChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onNativeEmbedLifecycleChange_0_flag = AttributeUpdaterFlag.SKIP
@@ -5080,6 +5180,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._onNativeEmbedVisibilityChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onNativeEmbedVisibilityChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onNativeEmbedVisibilityChange_0_flag = AttributeUpdaterFlag.SKIP
@@ -5091,6 +5192,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._onNativeEmbedGestureEvent_0_flag = AttributeUpdaterFlag.UPDATE
             this._onNativeEmbedGestureEvent_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onNativeEmbedGestureEvent_0_flag = AttributeUpdaterFlag.SKIP
@@ -5102,6 +5204,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._copyOptions_0_flag = AttributeUpdaterFlag.UPDATE
             this._copyOptions_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._copyOptions_0_flag = AttributeUpdaterFlag.SKIP
@@ -5113,6 +5216,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._onOverrideUrlLoading_0_flag = AttributeUpdaterFlag.UPDATE
             this._onOverrideUrlLoading_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onOverrideUrlLoading_0_flag = AttributeUpdaterFlag.SKIP
@@ -5124,6 +5228,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._textAutosizing_0_flag = AttributeUpdaterFlag.UPDATE
             this._textAutosizing_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._textAutosizing_0_flag = AttributeUpdaterFlag.SKIP
@@ -5135,6 +5240,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._enableNativeMediaPlayer_0_flag = AttributeUpdaterFlag.UPDATE
             this._enableNativeMediaPlayer_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enableNativeMediaPlayer_0_flag = AttributeUpdaterFlag.SKIP
@@ -5146,6 +5252,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._onRenderProcessNotResponding_0_flag = AttributeUpdaterFlag.UPDATE
             this._onRenderProcessNotResponding_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onRenderProcessNotResponding_0_flag = AttributeUpdaterFlag.SKIP
@@ -5157,6 +5264,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._onRenderProcessResponding_0_flag = AttributeUpdaterFlag.UPDATE
             this._onRenderProcessResponding_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onRenderProcessResponding_0_flag = AttributeUpdaterFlag.SKIP
@@ -5168,6 +5276,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._onViewportFitChanged_0_flag = AttributeUpdaterFlag.UPDATE
             this._onViewportFitChanged_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onViewportFitChanged_0_flag = AttributeUpdaterFlag.SKIP
@@ -5179,6 +5288,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._onInterceptKeyboardAttach_0_flag = AttributeUpdaterFlag.UPDATE
             this._onInterceptKeyboardAttach_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onInterceptKeyboardAttach_0_flag = AttributeUpdaterFlag.SKIP
@@ -5190,6 +5300,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._onAdsBlocked_0_flag = AttributeUpdaterFlag.UPDATE
             this._onAdsBlocked_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onAdsBlocked_0_flag = AttributeUpdaterFlag.SKIP
@@ -5201,6 +5312,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._keyboardAvoidMode_0_flag = AttributeUpdaterFlag.UPDATE
             this._keyboardAvoidMode_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._keyboardAvoidMode_0_flag = AttributeUpdaterFlag.SKIP
@@ -5212,6 +5324,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._editMenuOptions_0_flag = AttributeUpdaterFlag.UPDATE
             this._editMenuOptions_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._editMenuOptions_0_flag = AttributeUpdaterFlag.SKIP
@@ -5223,6 +5336,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._enableHapticFeedback_0_flag = AttributeUpdaterFlag.UPDATE
             this._enableHapticFeedback_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enableHapticFeedback_0_flag = AttributeUpdaterFlag.SKIP
@@ -5234,6 +5348,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._optimizeParserBudget_0_flag = AttributeUpdaterFlag.UPDATE
             this._optimizeParserBudget_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._optimizeParserBudget_0_flag = AttributeUpdaterFlag.SKIP
@@ -5245,6 +5360,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._enableFollowSystemFontWeight_0_flag = AttributeUpdaterFlag.UPDATE
             this._enableFollowSystemFontWeight_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enableFollowSystemFontWeight_0_flag = AttributeUpdaterFlag.SKIP
@@ -5256,6 +5372,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._enableWebAVSession_0_flag = AttributeUpdaterFlag.UPDATE
             this._enableWebAVSession_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enableWebAVSession_0_flag = AttributeUpdaterFlag.SKIP
@@ -5267,6 +5384,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._runJavaScriptOnDocumentStart_0_flag = AttributeUpdaterFlag.UPDATE
             this._runJavaScriptOnDocumentStart_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._runJavaScriptOnDocumentStart_0_flag = AttributeUpdaterFlag.SKIP
@@ -5278,6 +5396,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._runJavaScriptOnDocumentEnd_0_flag = AttributeUpdaterFlag.UPDATE
             this._runJavaScriptOnDocumentEnd_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._runJavaScriptOnDocumentEnd_0_flag = AttributeUpdaterFlag.SKIP
@@ -5289,6 +5408,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._runJavaScriptOnHeadEnd_0_flag = AttributeUpdaterFlag.UPDATE
             this._runJavaScriptOnHeadEnd_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._runJavaScriptOnHeadEnd_0_flag = AttributeUpdaterFlag.SKIP
@@ -5300,6 +5420,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         {
             this._nativeEmbedOptions_0_flag = AttributeUpdaterFlag.UPDATE
             this._nativeEmbedOptions_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._nativeEmbedOptions_0_flag = AttributeUpdaterFlag.SKIP
@@ -5312,6 +5433,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
             this._registerNativeEmbedRule_0_flag = AttributeUpdaterFlag.UPDATE
             this._registerNativeEmbedRule_0_0value = tag
             this._registerNativeEmbedRule_0_1value = type
+            this._state.fireChange()
         } else
         {
             this._registerNativeEmbedRule_0_flag = AttributeUpdaterFlag.SKIP
@@ -5326,6 +5448,7 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
             this._bindSelectionMenu_0_1value = content
             this._bindSelectionMenu_0_2value = responseType
             this._bindSelectionMenu_0_3value = options
+            this._state.fireChange()
         } else
         {
             this._bindSelectionMenu_0_flag = AttributeUpdaterFlag.SKIP

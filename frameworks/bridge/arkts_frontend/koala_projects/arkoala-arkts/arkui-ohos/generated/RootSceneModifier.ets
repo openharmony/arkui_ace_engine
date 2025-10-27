@@ -22,9 +22,11 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkRootScenePeer, RootSceneAttribute } from "./component/rootScene"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 import { CommonMethod } from "./component/common"
 export class RootSceneModifier extends CommonMethodModifier implements RootSceneAttribute,AttributeModifier<RootSceneAttribute> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -35,6 +37,7 @@ export class RootSceneModifier extends CommonMethodModifier implements RootScene
     applyDisabledAttribute(instance: RootSceneAttribute): void { }
     applySelectedAttribute(instance: RootSceneAttribute): void { }
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkRootScenePeer;
     }
