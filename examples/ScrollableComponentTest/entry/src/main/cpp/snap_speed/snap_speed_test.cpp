@@ -45,9 +45,9 @@ int32_t ConvertSnapSpeed(const std::string& label)
     } else if (label == "SLOW") {
         return ArkUI_ScrollSnapAnimationSpeed::ARKUI_SCROLL_SNAP_ANIMATION_SLOW;
     } else if (label == "2") {
-        return 2;
+        return PARAM_2;
     } else {
-        return 3;
+        return PARAM_3;
     }
 }
 
@@ -74,24 +74,24 @@ static std::shared_ptr<ListComponent> CreateList()
     //    auto col = std::make_shared<ColumnComponent>();
     auto list = std::make_shared<ListComponent>();
     list->SetListDirection(direction);
-    list->SetBorderWidth(1);
+    list->SetBorderWidth(PARAM_1);
     list->SetBorderColor(COLOR_BLACK, COLOR_BLACK, COLOR_BLACK, COLOR_BLACK);
-    list->SetWidth(100);
-    list->SetHeight(300);
+    list->SetWidth(SIZE_100);
+    list->SetHeight(SIZE_300);
     int32_t align_center = ArkUI_ScrollSnapAlign::ARKUI_SCROLL_SNAP_ALIGN_CENTER;
     list->SetScrollSnapAlign(align_center);
     std::vector<std::shared_ptr<Component>> input;
     for (int i = 0; i < size; i++) {
         auto column = std::make_shared<ColumnComponent>();
-        column->SetWidth(100);
-        column->SetHeight(50);
+        column->SetWidth(SIZE_100);
+        column->SetHeight(SIZE_50);
         // 调试时应开启这段代码显示编号
         auto text = std::make_shared<TextComponent>();
         text->SetAlign(ARKUI_ALIGNMENT_CENTER);
         text->SetTextContent("Text" + std::to_string(i));
         column->AddChild(text);
         column->SetBackgroundColor(COLOR_LIGHT_BLUE);
-        column->SetBorderWidth(2);
+        column->SetBorderWidth(PARAM_2);
         column->SetBorderColor(COLOR_BLACK, COLOR_BLACK, COLOR_BLACK, COLOR_BLACK);
         input.push_back(column);
     }
@@ -99,7 +99,7 @@ static std::shared_ptr<ListComponent> CreateList()
     list->SetLazyAdapter(adapter);
     auto childrenMainSize = new ListChildrenMainSizeOption();
     childrenMainSize->Resize(size);
-    childrenMainSize->SetDefaultMainSize(50);
+    childrenMainSize->SetDefaultMainSize(SIZE_50);
     return list;
 }
 
@@ -108,29 +108,29 @@ static std::shared_ptr<ListComponent> CreateListNoLazyForeachs()
 {
     auto list = std::make_shared<ListComponent>();
     list->SetListDirection(direction);
-    list->SetBorderWidth(1);
+    list->SetBorderWidth(PARAM_1);
     list->SetBorderColor(COLOR_BLACK, COLOR_BLACK, COLOR_BLACK, COLOR_BLACK);
-    list->SetWidth(100);
-    list->SetHeight(300);
+    list->SetWidth(SIZE_100);
+    list->SetHeight(SIZE_300);
     int32_t align = ArkUI_ScrollSnapAlign::ARKUI_SCROLL_SNAP_ALIGN_CENTER;
     list->SetScrollSnapAlign(align);
     for (int i = 0; i < size; i++) {
         auto column = std::make_shared<ColumnComponent>();
-        column->SetWidth(100);
-        column->SetHeight(50);
+        column->SetWidth(SIZE_100);
+        column->SetHeight(SIZE_50);
         // 调试时应开启这段代码显示编号
         auto text = std::make_shared<TextComponent>();
         text->SetAlign(ARKUI_ALIGNMENT_CENTER);
         text->SetTextContent("Text" + std::to_string(i));
         column->AddChild(text);
         column->SetBackgroundColor(COLOR_LIGHT_BLUE);
-        column->SetBorderWidth(2);
+        column->SetBorderWidth(PARAM_2);
         column->SetBorderColor(COLOR_BLACK, COLOR_BLACK, COLOR_BLACK, COLOR_BLACK);
         list->AddChild(column);
     }
     auto childrenMainSize = new ListChildrenMainSizeOption();
     childrenMainSize->Resize(size);
-    childrenMainSize->SetDefaultMainSize(50);
+    childrenMainSize->SetDefaultMainSize(SIZE_50);
     return list;
 }
 
