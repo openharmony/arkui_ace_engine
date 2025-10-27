@@ -13,14 +13,15 @@
  * limitations under the License.
  */
 
- /*
-  * Description: List组件限位滚动支持设置动画速度档位
-  * Writer: renxiaowen
-  */
-  
+/*
+ * Description: List组件限位滚动支持设置动画速度档位
+ * Writer: renxiaowen
+ */
+
 import common from '@ohos.app.ability.common';
 import window from '@ohos.window';
 import { LengthMetrics } from '@kit.ArkUI';
+
 interface Speed {
   scrollSnapAnimationSpeed: string;
 }
@@ -28,10 +29,13 @@ interface Speed {
 interface InspectorInfo {
   $attrs: Speed;
 }
+
 @Entry
 @Component
 struct ListOriExample {
-  @State arr: number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46]
+  @State arr: number[] =
+    [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
+      31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46]
   @State arrIndex: number = 46;
   @State groupArr: number[] = []
   private repeatArr: Array<string> = []; // 数据源
@@ -51,8 +55,8 @@ struct ListOriExample {
   ]
   @State listDirectionIndex: number = 0;
   @State listDirection: Axis[] = [Axis.Vertical, Axis.Horizontal];
-  @State itemHeight:Length = 40;
-  @State itemWidth:Length = '100%';
+  @State itemHeight: Length = 40;
+  @State itemWidth: Length = '100%';
 
   private changeOrientation(isLandscape: boolean) {
     let context = getContext(this) as common.UIAbilityContext;
@@ -65,7 +69,7 @@ struct ListOriExample {
     Column() {
       List({ space: 20, initialIndex: 0 }) {
         ForEach(this.arr, (item: number, index?: number) => {
-          ListItemGroup(){
+          ListItemGroup() {
             ListItem() {
               Flex({ direction: FlexDirection.Row, alignItems: ItemAlign.Center }) {
                 Text('' + item)
@@ -77,7 +81,7 @@ struct ListOriExample {
                   .backgroundColor(0xFFFFFF)
                 if (this.editFlag) {
                   Button() {
-                    Text("delete").fontSize(16)
+                    Text('delete').fontSize(16)
                   }.width('30%').height(40)
                   .onClick(() => {
                     if (index != undefined) {
@@ -88,6 +92,7 @@ struct ListOriExample {
                 }
               }
             }.backgroundColor(Color.Blue)
+
             ListItem() {
               Flex({ direction: FlexDirection.Row, alignItems: ItemAlign.Center }) {
                 Text('' + item)
@@ -99,7 +104,7 @@ struct ListOriExample {
                   .backgroundColor(0xFFFFFF)
                 if (this.editFlag) {
                   Button() {
-                    Text("delete").fontSize(16)
+                    Text('delete').fontSize(16)
                   }.width('30%').height(40)
                   .onClick(() => {
                     if (index != undefined) {
@@ -139,28 +144,29 @@ struct ListOriExample {
             this.speedIndex = 0
           }
         })
-        Row({space: 10}) {
-          Button("getInspectorByKey")
+        Row({ space: 10 }) {
+          Button('getInspectorByKey')
             .onClick(() => {
-              let msg = getInspectorByKey("list");
+              let msg = getInspectorByKey('list');
               let a: InspectorInfo = JSON.parse(msg) as InspectorInfo;
-              console.log("CXN ", a?.$attrs?.scrollSnapAnimationSpeed);
+              console.log('CXN ', a?.$attrs?.scrollSnapAnimationSpeed);
             })
         }.alignItems(VerticalAlign.Center)
+
         Button(`更改排列方向`).onClick(() => {
           this.listDirectionIndex = this.listDirectionIndex + 1;
           if (this.listDirectionIndex >= this.listDirection.length) {
             this.listDirectionIndex = 0
           }
 
-          if(this.listDirection[this.listDirectionIndex] == Axis.Vertical){
-            let val:Length = this.itemHeight;
+          if (this.listDirection[this.listDirectionIndex] == Axis.Vertical) {
+            let val: Length = this.itemHeight;
             this.itemHeight = this.itemWidth;
             this.itemWidth = val;
           }
 
-          if(this.listDirection[this.listDirectionIndex] == Axis.Horizontal){
-            let val:Length = this.itemHeight;
+          if (this.listDirection[this.listDirectionIndex] == Axis.Horizontal) {
+            let val: Length = this.itemHeight;
             this.itemHeight = this.itemWidth;
             this.itemWidth = val;
           }

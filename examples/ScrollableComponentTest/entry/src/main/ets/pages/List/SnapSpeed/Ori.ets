@@ -13,16 +13,17 @@
  * limitations under the License.
  */
 
- /*
-  * Description: List组件限位滚动支持设置动画速度档位
-  * Writer: renxiaowen
-  */
-  
+/*
+ * Description: List组件限位滚动支持设置动画速度档位
+ * Writer: renxiaowen
+ */
+
 // xxx.ets
 import { ListDataSource } from './ListDataSource';
 
 class SnapSpeedModifier implements AttributeModifier<ListAttribute> {
   snapSpeed: ScrollSnapAnimationSpeed | null | undefined;
+
   applyNormalAttribute(instance: ListAttribute): void {
     instance.scrollSnapAnimationSpeed(this.snapSpeed);
   }
@@ -31,7 +32,7 @@ class SnapSpeedModifier implements AttributeModifier<ListAttribute> {
 @Entry
 @Component
 struct ListExample {
-  private arr: ListDataSource=new ListDataSource([]);
+  private arr: ListDataSource = new ListDataSource([]);
   private scrollerForList: Scroller = new Scroller();
   @State snapSpeedModifier: SnapSpeedModifier = new SnapSpeedModifier();
   scrollSnap: (ScrollSnapAnimationSpeed | null | undefined)[] = [
@@ -61,9 +62,10 @@ struct ListExample {
           LazyForEach(this.arr, (item: number) => {
             ListItem() {
               Text('' + item)
-                .width('100%').height("100%").fontSize(16)
+                .width('100%').height('100%').fontSize(16)
                 .textAlign(TextAlign.Center)
-            }.backgroundColor(0xFFFFFF)
+            }
+            .backgroundColor(0xFFFFFF)
             .width(30)
             .height('80%')
             .borderWidth(2)
@@ -90,9 +92,10 @@ struct ListExample {
           LazyForEach(this.arr, (item: number) => {
             ListItem() {
               Text('' + item)
-                .width('100%').height("100%").fontSize(16)
+                .width('100%').height('100%').fontSize(16)
                 .textAlign(TextAlign.Center)
-            }.backgroundColor(0xFFFFFF)
+            }
+            .backgroundColor(0xFFFFFF)
             .width(30)
             .height('80%')
             .borderWidth(2)
@@ -113,21 +116,23 @@ struct ListExample {
       .width('100%')
       .backgroundColor(0xDCDCDC)
       .padding({ top: 10 })
-      Column({space: 10}) {
-        Row({space: 10}) {
-          Button("change js")
+
+      Column({ space: 10 }) {
+        Row({ space: 10 }) {
+          Button('change js')
             .onClick(() => {
               this.jsIndex = (this.jsIndex + 1) % this.scrollSnap.length;
             })
-          Text("current js: " + this.scrollSnap[this.jsIndex])
+          Text('current js: ' + this.scrollSnap[this.jsIndex])
         }.alignItems(VerticalAlign.Center)
-        Row({space: 10}) {
-          Button("change modifier")
+
+        Row({ space: 10 }) {
+          Button('change modifier')
             .onClick(() => {
               this.modifierIndex = (this.modifierIndex + 1) % this.scrollSnap.length;
               this.snapSpeedModifier.snapSpeed = this.scrollSnap[this.modifierIndex];
             })
-          Text("current modifier: " + this.scrollSnap[this.modifierIndex])
+          Text('current modifier:' + this.scrollSnap[this.modifierIndex])
         }.alignItems(VerticalAlign.Center)
       }
     }

@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
- /*
-  * Description: List组件限位滚动支持设置动画速度档位
-  * Writer: renxiaowen
-  */
-  
+/*
+ * Description: List组件限位滚动支持设置动画速度档位
+ * Writer: renxiaowen
+ */
+
 import entry from 'libentry.so';
 
 @Entry
