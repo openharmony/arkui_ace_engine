@@ -25,13 +25,13 @@ class GridTest {
 public:
     ~GridTest();
     static napi_value CreateNativeNode(napi_env env, napi_callback_info info);
-    
+
 private:
     static std::shared_ptr<GridComponent> CreatGrid(int32_t type);
     static std::shared_ptr<GridComponent> CreatGrid1(int32_t type);
     static std::shared_ptr<GridComponent> CreatGrid2(int32_t type);
     static std::shared_ptr<GridComponent> CreatGrid3(int32_t type);
-    static std::shared_ptr<GridComponent> CreatGrid4(int32_t type); 
+    static std::shared_ptr<GridComponent> CreatGrid4(int32_t type);
     static int32_t edgeEffectIndex_;
     static int32_t modeIndex_;
     static int32_t widthIndex_;
@@ -49,4 +49,4 @@ private:
 };
 } // namespace ArkUICApiDemo
 
-#endif //CAPIDEMO_GRID_TEST_H
+#endif // CAPIDEMO_GRID_TEST_H

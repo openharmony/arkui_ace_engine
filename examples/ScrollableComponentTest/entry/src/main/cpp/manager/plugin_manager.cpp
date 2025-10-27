@@ -17,9 +17,9 @@
 
 #include <arkui/native_interface.h>
 #include <cstdint>
+#include <hilog/log.h>
 #include <string>
 
-#include <hilog/log.h>
 #include "common.h"
 
 namespace ArkUICApiDemo {

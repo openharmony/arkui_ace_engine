@@ -26,13 +26,13 @@
 #include <sys/types.h>
 #include <vector>
 
-#include "../manager/plugin_manager.h"
 #include "common.h"
 #include "components/button/Button.h"
 #include "components/grid/Grid1.h"
 #include "components/row/Row.h"
 #include "components/scroll/Scroll1.h"
 #include "components/text/Text.h"
+#include "manager/plugin_manager.h"
 
 /*
  * 测试总结：测试grid组件的属性设置和获取，包括：edgeEffect、scrollSize、scrollMode、scrollColor、rowGap、enableScroll、
