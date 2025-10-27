@@ -29989,7 +29989,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Position GetPositionToWindowImpl(Ark_FrameNode peer)
+    Ark_Vector2 GetPositionToWindowImpl(Ark_FrameNode peer)
     {
         if (!needGroupedLog(1))
         {
@@ -30002,7 +30002,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {};
     }
-    Ark_Position GetPositionToParentImpl(Ark_FrameNode peer)
+    Ark_Vector2 GetPositionToParentImpl(Ark_FrameNode peer)
     {
         if (!needGroupedLog(1))
         {
@@ -30028,7 +30028,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {};
     }
-    Ark_Position GetLayoutPositionImpl(Ark_FrameNode peer)
+    Ark_Vector2 GetLayoutPositionImpl(Ark_FrameNode peer)
     {
         if (!needGroupedLog(1))
         {
@@ -30211,7 +30211,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetLayoutPositionImpl(Ark_FrameNode peer,
-                               const Ark_Position* position)
+                               const Ark_Vector2* position)
     {
         if (!needGroupedLog(1))
         {
@@ -30239,7 +30239,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void LayoutImpl(Ark_FrameNode peer,
-                    const Ark_Position* position)
+                    const Ark_Vector2* position)
     {
         if (!needGroupedLog(1))
         {
@@ -30263,7 +30263,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Position GetPositionToScreenImpl(Ark_FrameNode peer)
+    Ark_Vector2 GetPositionToScreenImpl(Ark_FrameNode peer)
     {
         if (!needGroupedLog(1))
         {
@@ -30276,7 +30276,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {};
     }
-    Ark_Position GetPositionToWindowWithTransformImpl(Ark_FrameNode peer)
+    Ark_Vector2 GetPositionToWindowWithTransformImpl(Ark_FrameNode peer)
     {
         if (!needGroupedLog(1))
         {
@@ -30289,7 +30289,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {};
     }
-    Ark_Position GetPositionToParentWithTransformImpl(Ark_FrameNode peer)
+    Ark_Vector2 GetPositionToParentWithTransformImpl(Ark_FrameNode peer)
     {
         if (!needGroupedLog(1))
         {
@@ -30302,13 +30302,65 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {};
     }
-    Ark_Position GetPositionToScreenWithTransformImpl(Ark_FrameNode peer)
+    Ark_Vector2 GetPositionToScreenWithTransformImpl(Ark_FrameNode peer)
     {
         if (!needGroupedLog(1))
         {
             return {};
         }
         string out("getPositionToScreenWithTransform(");
+        WriteToString(&out, peer);
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
+    Ark_NodeEdgesLengthMetrics GetUserConfigBorderWidthImpl(Ark_FrameNode peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return {};
+        }
+        string out("getUserConfigBorderWidth(");
+        WriteToString(&out, peer);
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
+    Ark_NodeEdgesLengthMetrics GetUserConfigPaddingImpl(Ark_FrameNode peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return {};
+        }
+        string out("getUserConfigPadding(");
+        WriteToString(&out, peer);
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
+    Ark_NodeEdgesLengthMetrics GetUserConfigMarginImpl(Ark_FrameNode peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return {};
+        }
+        string out("getUserConfigMargin(");
+        WriteToString(&out, peer);
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
+    Ark_SizeTLengthMetrics GetUserConfigSizeImpl(Ark_FrameNode peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return {};
+        }
+        string out("getUserConfigSize(");
         WriteToString(&out, peer);
         out.append(") \n");
         out.append("[return {}] \n");
@@ -45371,6 +45423,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             FrameNodeExtenderAccessor::GetPositionToWindowWithTransformImpl,
             FrameNodeExtenderAccessor::GetPositionToParentWithTransformImpl,
             FrameNodeExtenderAccessor::GetPositionToScreenWithTransformImpl,
+            FrameNodeExtenderAccessor::GetUserConfigBorderWidthImpl,
+            FrameNodeExtenderAccessor::GetUserConfigPaddingImpl,
+            FrameNodeExtenderAccessor::GetUserConfigMarginImpl,
+            FrameNodeExtenderAccessor::GetUserConfigSizeImpl,
             FrameNodeExtenderAccessor::GetFrameNodeByKeyImpl,
             FrameNodeExtenderAccessor::GetIdByFrameNodeImpl,
             FrameNodeExtenderAccessor::MoveToImpl,

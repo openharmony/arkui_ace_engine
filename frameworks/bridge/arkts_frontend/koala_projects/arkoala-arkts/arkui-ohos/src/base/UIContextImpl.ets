@@ -70,7 +70,7 @@ import { InteropNativeModule } from '@koalaui/interop';
 import { LocalStorage } from '../stateManagement/storage/localStorage';
 import { Router as RouterExt } from 'arkui/base';
 import { PromptActionExtender, FrameNodeExtender, AlertDialog, ActionSheet, AnimationExtender,
-    DialogExtender } from '../framework';
+    DialogExtender, IUIContext } from '../framework';
 import { EntryPoint, NavInterface } from "../component/customComponent"
 import { AsyncCallback as routerAsyncCallback } from "@ohos.base"
 
@@ -1685,14 +1685,14 @@ export class UIContextImpl extends UIContext {
     // @ts-ignore
     public freezeUINode(id: number, isFrozen: boolean): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_)
-        // ArkUIGeneratedNativeModule._IUIContext_freezeUINode1(id, isFrozen ? 1 : 0);
+        IUIContext.freezeUINode(id, isFrozen);
         ArkUIAniModule._Common_Restore_InstanceId()
     }
 
     // @ts-ignore
     public freezeUINode(id: string, isFrozen: boolean): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_)
-        // ArkUIGeneratedNativeModule._IUIContext_freezeUINode0(id, isFrozen ? 1 : 0);
+        IUIContext.freezeUINode(id, isFrozen);
         ArkUIAniModule._Common_Restore_InstanceId()
     }
 
