@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 
+
 #include "gtest/gtest.h"
+
 
 #define private public
 #define protected public
@@ -44,6 +46,7 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/image/image_source_info.h"
 
+
 #include "component_ext/movingphoto/movingphoto_styles.h"
 #include "component_ext/movingphoto/movingphoto_pattern.h"
 #include "component_ext/movingphoto/movingphoto_node.h"
@@ -51,6 +54,7 @@
 #include "component_ext/movingphoto/movingphoto_layout_property.h"
 #include "component_ext/movingphoto/movingphoto_layout_algorithm.h"
 #include "component_ext/movingphoto/movingphoto_utils.h"
+
 
 using namespace testing;
 using namespace testing::ext;
