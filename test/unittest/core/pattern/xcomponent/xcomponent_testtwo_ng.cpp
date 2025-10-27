@@ -81,7 +81,7 @@ constexpr float OFFSET_X = 10;
 constexpr float OFFSET_Y = 10;
 const SizeF MAX_SIZE(MAX_WIDTH, MAX_HEIGHT);
 const RectF MAX_SURFACE_RECT(0, 0, MAX_WIDTH, MAX_HEIGHT);
-ArkUI_XComponent_Params params;
+ArkUI_XComponent_Params g_params;
 TestProperty g_testProperty;
 } // namespace
 
@@ -829,13 +829,13 @@ HWTEST_F(XComponentTestTwoNg, GetGlobalPositionTestTwo, TestSize.Level1)
 HWTEST_F(XComponentTestTwoNg, SetScreenIdShouldCallPatternSetFuncTest, TestSize.Level1)
 {
     // type is surface
-    params.type = XCOMPONENT_SURFACE_TYPE_VALUE;
-    params.id = XCOMPONENT_ID;
-    params.controller = std::make_shared<XComponentControllerNG>();
-    params.screenId = XCOMPONENT_SCREEN_ID;
+    g_params.type = XCOMPONENT_SURFACE_TYPE_VALUE;
+    g_params.id = XCOMPONENT_ID;
+    g_params.controller = std::make_shared<XComponentControllerNG>();
+    g_params.screenId = XCOMPONENT_SCREEN_ID;
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    auto frameNode = AceType::DynamicCast<FrameNode>(XComponentModelNG().CreateTypeNode(nodeId, &params));
+    auto frameNode = AceType::DynamicCast<FrameNode>(XComponentModelNG().CreateTypeNode(nodeId, &g_params));
     ASSERT_TRUE(frameNode);
     auto pattern = frameNode->GetPattern<XComponentPattern>();
     ASSERT_TRUE(pattern);
@@ -850,13 +850,13 @@ HWTEST_F(XComponentTestTwoNg, SetScreenIdShouldCallPatternSetFuncTest, TestSize.
 HWTEST_F(XComponentTestTwoNg, SetScreenIdShouldNotCallPatternSetFuncTest, TestSize.Level1)
 {
     // type is component
-    params.type = XCOMPONENT_COMPONENT_TYPE_VALUE;
-    params.id = XCOMPONENT_ID;
-    params.controller = std::make_shared<XComponentControllerNG>();
-    params.screenId = XCOMPONENT_SCREEN_ID;
+    g_params.type = XCOMPONENT_COMPONENT_TYPE_VALUE;
+    g_params.id = XCOMPONENT_ID;
+    g_params.controller = std::make_shared<XComponentControllerNG>();
+    g_params.screenId = XCOMPONENT_SCREEN_ID;
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    auto frameNode = AceType::DynamicCast<FrameNode>(XComponentModelNG().CreateTypeNode(nodeId, &params));
+    auto frameNode = AceType::DynamicCast<FrameNode>(XComponentModelNG().CreateTypeNode(nodeId, &g_params));
     ASSERT_TRUE(frameNode);
     auto pattern = frameNode->GetPattern<XComponentPattern>();
     ASSERT_TRUE(pattern);
