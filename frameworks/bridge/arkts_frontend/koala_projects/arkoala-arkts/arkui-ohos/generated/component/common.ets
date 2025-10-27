@@ -4431,6 +4431,18 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setOnAccessibilityFocus(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setOnAccessibilityActionInterceptAttribute(value: AccessibilityActionInterceptCallback | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setOnAccessibilityActionIntercept(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setAccessibilityTextHintAttribute(value: string | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -6303,6 +6315,16 @@ export enum AccessibilityRoleType {
     ROLE_NONE = 124
 }
 export type AccessibilityFocusCallback = (isFocus: boolean) => void;
+export enum AccessibilityAction {
+    UNDEFINED_ACTION = 0,
+    ACCESSIBILITY_CLICK = 1
+}
+export enum AccessibilityActionInterceptResult {
+    ACTION_INTERCEPT = 0,
+    ACTION_CONTINUE = 1,
+    ACTION_RISE = 2
+}
+export type AccessibilityActionInterceptCallback = (action: AccessibilityAction) => AccessibilityActionInterceptResult;
 export enum FinishCallbackType {
     REMOVED = 0,
     LOGICALLY = 1
@@ -7520,6 +7542,9 @@ export interface CommonMethod {
     onAccessibilityFocus(value: AccessibilityFocusCallback | undefined): this {
         throw new Error("Unimplemented method onAccessibilityFocus")
     }
+    onAccessibilityActionIntercept(value: AccessibilityActionInterceptCallback | undefined): this {
+        throw new Error("Unimplemented method onAccessibilityActionIntercept")
+    }
     accessibilityTextHint(value: string | undefined): this {
         throw new Error("Unimplemented method accessibilityTextHint")
     }
@@ -7865,6 +7890,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     accessibilityScrollTriggerable_value?: boolean | undefined
     accessibilityRole_value?: AccessibilityRoleType | undefined
     onAccessibilityFocus_value?: AccessibilityFocusCallback | undefined
+    onAccessibilityActionIntercept_value?: AccessibilityActionInterceptCallback | undefined
     accessibilityTextHint_value?: string | undefined
     accessibilityDescription_value?: string | undefined
     accessibilityLevel_value?: string | undefined
@@ -8308,6 +8334,9 @@ export class ArkCommonMethodStyle implements CommonMethod {
         return this
     }
     onAccessibilityFocus(value: AccessibilityFocusCallback | undefined): this {
+        return this
+    }
+    onAccessibilityActionIntercept(value: AccessibilityActionInterceptCallback | undefined): this {
         return this
     }
     accessibilityTextHint(value: string | undefined): this {
@@ -10011,6 +10040,14 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         if (this.checkPriority("onAccessibilityFocus")) {
             const value_casted = value as (AccessibilityFocusCallback | undefined)
             this.getPeer()?.setOnAccessibilityFocusAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onAccessibilityActionIntercept(value: AccessibilityActionInterceptCallback | undefined): this {
+        if (this.checkPriority("onAccessibilityActionIntercept")) {
+            const value_casted = value as (AccessibilityActionInterceptCallback | undefined)
+            this.getPeer()?.setOnAccessibilityActionInterceptAttribute(value_casted)
             return this
         }
         return this
