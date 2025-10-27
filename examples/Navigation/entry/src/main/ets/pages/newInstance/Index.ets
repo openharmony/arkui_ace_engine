@@ -35,7 +35,7 @@ struct Index {
       console.log('[observer] ' + info.name + '[' + info.index + ']' + ' state: ' + info.state)
     })
     this.getUIContext().getUIObserver().on('navDestinationUpdate', (info: uiObserver.NavDestinationInfo) => {
-      console.log(printPathStack(info, 'ssasdadsadsa'));
+      console.log(JSON.stringify(info));
     })
   }
 

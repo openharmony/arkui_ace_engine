@@ -16,6 +16,10 @@
     "pages/forcedNewInstance/DialogTest",
     "pages/forcedNewInstance/InterceptionTest",
     "pages/forcedNewInstance/NewInstance",
-    "pages/forcedNewInstance/tmp"
+    "pages/forcedNewInstance/tmp",
+    "pages/navigationPc/NavDestinationPage",
+    "pages/modifier/Index",
+    "pages/modifier/page1",
+    "pages/modifier/page2"
   ]
 }
