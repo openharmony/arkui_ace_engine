@@ -253,7 +253,6 @@ component_ext/ext_common/
 component_ext/movingphoto/ @arkuiadvancedcomponent
 
 [Examples]
-examples/TextComponentTest/entry/src/main/ets/pages/05-RichEditorSample/ @arkui_rich_editor
 examples/ @arkuipopupwindow_all
 examples/Image/ @arkui001
 examples/DrawableDescriptor/ @arkui001
@@ -265,6 +264,7 @@ examples/PickDialog/ @arkui001
 examples/ScrollableComponentTest/ @arkuiscroll
 examples/ScrollableComponentStatic/ @arkuiscroll
 examples/UIExtension @ArkUI_ability_group
+examples/TextComponentTest/entry/src/main/ets/pages/05-RichEditorSample/ @arkui_rich_editor
 
 [Frameworks Base]
 frameworks/base/background_task_helper/background_task_helper.h @arkui_framework_xnode
