@@ -59,6 +59,7 @@
 using namespace testing;
 using namespace testing::ext;
 
+
 namespace OHOS::Ace::NG {
 struct TestProperty {
     std::optional<std::string> imageSrc;
