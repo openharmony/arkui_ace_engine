@@ -177,6 +177,8 @@ void AssignArkValue(Ark_ThreatType& dst, const ThreatType& src)
         case ThreatType::FRAUD: dst = Ark_ThreatType::ARK_THREAT_TYPE_THREAT_FRAUD; break;
         case ThreatType::RISK: dst = Ark_ThreatType::ARK_THREAT_TYPE_THREAT_RISK; break;
         case ThreatType::WARNING: dst = Ark_ThreatType::ARK_THREAT_TYPE_THREAT_WARNING; break;
+        case ThreatType::NONE: dst = Ark_ThreatType::ARK_THREAT_TYPE_THREAT_NONE; break;
+        case ThreatType::UNPROCESSED: dst = Ark_ThreatType::ARK_THREAT_TYPE_THREAT_UNPROCESSED; break;
         default: dst = static_cast<Ark_ThreatType>(-1);
             LOGE("Unexpected enum value in ThreatType: %{public}d", src);
     }
@@ -2475,6 +2477,22 @@ void SetOnPdfLoadEventImpl(Ark_NativePointer node,
 void SetOnSafeBrowsingCheckFinishImpl(Ark_NativePointer node,
                                       const Opt_OnSafeBrowsingCheckResultCallback* value)
 {
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // Implement Reset value
+        return;
+    }
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onSafeBrowsingCheckFinish = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const std::shared_ptr<BaseEventInfo>& info) {
+        OnSafeBrowsingCheckFinish(callback, weakNode, instanceId, info);
+    };
+    WebModelStatic::SetSafeBrowsingCheckFinishId(frameNode, std::move(onSafeBrowsingCheckFinish));
+#endif // WEB_SUPPORTED
 }
 
 void SetOnNativeEmbedMouseEventImpl(Ark_NativePointer node,

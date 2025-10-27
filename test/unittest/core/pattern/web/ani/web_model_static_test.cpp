@@ -2870,4 +2870,31 @@ HWTEST_F(WebModelStaticTest, SetNativeEmbedObjectParamChangeId001, TestSize.Leve
     EXPECT_NE(callCount, 0);
 #endif
 }
+
+/**
+ * @tc.name: SetSafeBrowsingCheckFinishId001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetSafeBrowsingCheckFinishId001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    bool callbackCalled = false;
+    auto mockEventInfo = std::make_shared<MockBaseEventInfo>();
+    auto callback = [&callbackCalled](const std::shared_ptr<BaseEventInfo> info) {
+        callbackCalled = true;
+    };
+    WebModelStatic::SetSafeBrowsingCheckFinishId(AccessibilityManager::RawPtr(frameNode), callback);
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+    webEventHub->FireOnSafeBrowsingCheckFinishEvent(mockEventInfo);
+    EXPECT_TRUE(callbackCalled);
+#endif
+}
 } // namespace OHOS::Ace::NG

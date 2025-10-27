@@ -6479,6 +6479,8 @@ typedef enum Ark_ThreatType {
     ARK_THREAT_TYPE_THREAT_FRAUD = 1,
     ARK_THREAT_TYPE_THREAT_RISK = 2,
     ARK_THREAT_TYPE_THREAT_WARNING = 3,
+    ARK_THREAT_TYPE_THREAT_NONE = 4,
+    ARK_THREAT_TYPE_THREAT_UNPROCESSED = 5,
 } Ark_ThreatType;
 typedef struct Opt_ThreatType {
     Ark_Tag tag;
