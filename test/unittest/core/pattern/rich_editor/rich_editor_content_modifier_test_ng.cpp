@@ -200,6 +200,7 @@ HWTEST_F(RichEditorContentModifierTestNg, SetRichTextRectX001, TestSize.Level2)
     ASSERT_EQ(TEXTRICHTEXTRECTX, testContentModifier->richTextRectX_->GetStagingValue());
 }
 
+
 /**
  * @tc.name: SetRichTextRectY001
  * @tc.desc: Test FromStyledString.

@@ -671,6 +671,7 @@ HWTEST_F(RichEditorEditOneTestNg, AfterContentChange001, TestSize.Level0)
     EXPECT_EQ(richEditorNode_, nullptr);
 }
 
+
 /**
  * @tc.name: ReportAfterContentChangeEvent001
  * @tc.desc: Test ReportAfterContentChangeEvent non-span string mode with content added

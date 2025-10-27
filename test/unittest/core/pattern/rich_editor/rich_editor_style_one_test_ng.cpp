@@ -380,4 +380,5 @@ HWTEST_F(RichEditorStyleOneTestNg, UpdateParagraphStyle001, TestSize.Level0)
     EXPECT_EQ(textStyle.paragraphSpacing.value().Value(), 10.0f);
 }
 
+
 }

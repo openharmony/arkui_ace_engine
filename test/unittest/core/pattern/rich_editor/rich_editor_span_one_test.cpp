@@ -334,4 +334,5 @@ HWTEST_F(RichEditorSpanOneTest, SymbolTest001, TestSize.Level0)
     ClearSpan();
 }
 
+
 } // namespace OHOS::Ace::NG

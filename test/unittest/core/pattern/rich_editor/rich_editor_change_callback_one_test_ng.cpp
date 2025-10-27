@@ -334,6 +334,7 @@ HWTEST_F(RichEditorChangeCallbackOneTestNg, HandleSurfaceChanged001, TestSize.Le
     }
 }
 
+
 /**
  * @tc.name: IsStopBackPress001
  * @tc.desc: test IsStopBackPress
