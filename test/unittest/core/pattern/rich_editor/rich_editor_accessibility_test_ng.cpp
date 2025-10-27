@@ -59,6 +59,12 @@ void ConstructUserGestureOptions(UserGestureOptions& gestureOption)
 }
 } // namespace
 
+
+
+
+
+
+
 class RichEditorAccessibilityTestNg : public TestNG {
 public:
     void SetUp() override;
