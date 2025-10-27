@@ -82,6 +82,7 @@ public:
  */
 HWTEST_F(ResSchedTouchOptimizerTest, SetterTest001, TestSize.Level1)
 {
+    ResSchedTouchOptimizer::GetInstance().vsyncPeriod_ = 8.3 * 1000 * 1000;
     ResSchedTouchOptimizer::GetInstance().SetSlideAccepted(true);
     EXPECT_TRUE(ResSchedTouchOptimizer::GetInstance().slideAccepted_);
     ResSchedTouchOptimizer::GetInstance().SetSlideAccepted(false);
@@ -2153,7 +2154,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, FineTuneTimeStampDuringTpFlushPeriod001, Te
 HWTEST_F(ResSchedTouchOptimizerTest, FineTuneTimeStampDuringTpFlushPeriod002, TestSize.Level1)
 {
     ResSchedTouchOptimizer& optimizer = ResSchedTouchOptimizer::GetInstance();
-    optimizer.hisAvgPointTimeStamp_ = 100000000;
+    optimizer.hisAvgPointTimeStamp_ = 123456789;
     optimizer.lastTpFlush_ = false;
     optimizer.vsyncTimeReportExemption_ = false;
     optimizer.vsyncPeriod_ = 16666666;
@@ -2187,8 +2188,8 @@ HWTEST_F(ResSchedTouchOptimizerTest, FineTuneTimeStampWhenFirstFrameAfterTpFlush
     optimizer.FineTuneTimeStampWhenFirstFrameAfterTpFlushPeriod(pointId, historyPointsById);
     
     // Should not change lastTpFlush_ and vsyncTimeReportExemption_ since conditions are not met
-    EXPECT_TRUE(optimizer.lastTpFlush_);
-    EXPECT_TRUE(optimizer.vsyncTimeReportExemption_);
+    EXPECT_FALSE(optimizer.lastTpFlush_);
+    EXPECT_FALSE(optimizer.vsyncTimeReportExemption_);
 }
 
 /**

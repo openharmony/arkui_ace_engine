@@ -2654,11 +2654,11 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg129, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineContextTestNg033
+ * @tc.name: FlushVsync_TpFlushFrameDisplayPeriod_Test033
  * @tc.desc: Test FlushVsync with TpFlushFrameDisplayPeriod
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTestNg, PipelineContextTestNg033, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, FlushVsync_TpFlushFrameDisplayPeriod_Test033, TestSize.Level1)
 {
     /**
      * @tc.steps: Create mock ResSchedTouchOptimizer and setup expectations
@@ -2693,11 +2693,11 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg033, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineContextTestNg034
+ * @tc.name: FlushVsync_FirstFrameAfterTpFlush_Test034
  * @tc.desc: Test FlushVsync with FirstFrameAfterTpFlushFrameDisplayPeriod
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTestNg, PipelineContextTestNg034, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, FlushVsync_FirstFrameAfterTpFlush_Test034, TestSize.Level1)
 {
     /**
      * @tc.steps: Create mock ResSchedTouchOptimizer and setup expectations for first frame after TP flush
@@ -2732,11 +2732,11 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg034, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineContextTestNg035
+ * @tc.name: OnTouchEvent_NeedTpFlushVsyncTrue_Test035
  * @tc.desc: Test OnTouchEvent with NeedTpFlushVsync returning true
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTestNg, PipelineContextTestNg035, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, OnTouchEvent_NeedTpFlushVsyncTrue_Test035, TestSize.Level1)
 {
     /**
      * @tc.steps: Create mock ResSchedTouchOptimizer and setup expectations for touch event processing
@@ -2779,11 +2779,11 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg035, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineContextTestNg036
+ * @tc.name: OnTouchEvent_NeedTpFlushVsyncFalse_Test036
  * @tc.desc: Test OnTouchEvent with NeedTpFlushVsync returning false
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTestNg, PipelineContextTestNg036, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, OnTouchEvent_NeedTpFlushVsyncFalse_Test036, TestSize.Level1)
 {
     /**
      * @tc.steps: Create mock ResSchedTouchOptimizer and setup expectations for normal touch event processing
@@ -2823,11 +2823,11 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg036, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineContextTestNg037
+ * @tc.name: ConsumeTouchEventsInterpolation_TpFlushFrameDisplay_Test037
  * @tc.desc: Test ConsumeTouchEventsInterpolation with TpFlushFrameDisplayPeriod
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTestNg, PipelineContextTestNg037, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, ConsumeTouchEventsInterpolation_TpFlushFrameDisplay_Test037, TestSize.Level1)
 {
     /**
      * @tc.steps: Test touch event interpolation when TpFlushFrameDisplayPeriod is true

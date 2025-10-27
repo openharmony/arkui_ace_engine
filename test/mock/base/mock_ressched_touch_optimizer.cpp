@@ -17,14 +17,6 @@
 #include "base/ressched/ressched_touch_optimizer.h"
 
 namespace OHOS::Ace {
-// 添加测试用的状态变量
-bool ResSchedTouchOptimizer::isTpFlushFrameDisplayPeriod_ = false;
-bool ResSchedTouchOptimizer::isFristFrameAfterTpFlushFrameDisplayPeriod_ = false;
-bool ResSchedTouchOptimizer::isTpFlushFrameDisplayPeriod_ = false;
-bool ResSchedTouchOptimizer::rvsEnableCheckResult_ = false;
-TouchEvent ResSchedTouchOptimizer::setPointReverseSignalResult_;
-uint64_t ResSchedTouchOptimizer::fineTuneTimeStampDuringTpFlushPeriodResult_ = 0;
-
 ResSchedTouchOptimizer& ResSchedTouchOptimizer::GetInstance()
 {
     thread_local ResSchedTouchOptimizer instance;
@@ -66,20 +58,6 @@ bool ResSchedTouchOptimizer::GetIsFirstFrameAfterTpFlushFrameDisplayPeriod() con
     return isFristFrameAfterTpFlushFrameDisplayPeriod_;
 }
 
-bool ResSchedTouchOptimizer::GetVsyncTimeReportExemption() const
-{
-    return false;
-}
-
-void ResSchedTouchOptimizer::SetVsyncTimeReportExemption(bool exemption)
-{
-}
-
-uint64_t ResSchedTouchOptimizer::GetLastVsyncTimeStamp() const
-{
-    return 0;
-}
-
 bool ResSchedTouchOptimizer::NeedTpFlushVsync(const TouchEvent& touchEvent)
 {
     return isTpFlushFrameDisplayPeriod_;
@@ -87,7 +65,6 @@ bool ResSchedTouchOptimizer::NeedTpFlushVsync(const TouchEvent& touchEvent)
 
 TouchEvent ResSchedTouchOptimizer::SetPointReverseSignal(const TouchEvent& inputEvent)
 {
-    return setPointReverseSignalResult_;
 }
 
 void ResSchedTouchOptimizer::SetHisAvgPointTimeStamp(int32_t pointId,
@@ -97,12 +74,16 @@ void ResSchedTouchOptimizer::SetHisAvgPointTimeStamp(int32_t pointId,
 
 uint64_t ResSchedTouchOptimizer::FineTuneTimeStampDuringTpFlushPeriod(uint64_t timeStamp)
 {
-    return fineTuneTimeStampDuringTpFlushPeriodResult_;
+    // only Mock Behavior
+    isTpFlushFrameDisplayPeriod_ = false;
+    return timeStamp;
 }
 
-void ResSchedTouchOptimizer::FineTuneTimeStampWhenFirstFrameAfterTpFlushPeriod(int32_t pointId,
-    const std::unordered_map<int32_t, std::vector<TouchEvent>>& historyPointsById)
+void ResSchedTouchOptimizer::FineTuneTimeStampWhenFirstFrameAfterTpFlushPeriod(const int32_t pointId,
+    std::unordered_map<int32_t, std::vector<TouchEvent>>& historyPointsById)
 {
+    // only Mock Behavior
+    historyPointsById.clear();
 }
 
 void ResSchedTouchOptimizer::SetLastVsyncTimeStamp(uint64_t timeStamp)
@@ -111,11 +92,11 @@ void ResSchedTouchOptimizer::SetLastVsyncTimeStamp(uint64_t timeStamp)
 
 bool ResSchedTouchOptimizer::RVSEnableCheck()
 {
-    return rvsEnableCheckResult_;
+    return rvsEnable_;
 }
 
-void ResSchedTouchOptimizer::DispatchPointSelect(bool hasResamplePoint, const TouchEvent& tpPoint,
-    const TouchEvent& resamplePoint, TouchEvent& resultPoint)
+void ResSchedTouchOptimizer::DispatchPointSelect(bool hasResamplePoint, TouchEvent& tpPoint,
+    TouchEvent& resamplePoint, TouchEvent& resultPoint)
 {
     resultPoint = hasResamplePoint ? resamplePoint : tpPoint;
 }
