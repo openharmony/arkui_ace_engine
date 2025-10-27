@@ -2101,4 +2101,55 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_OnAroundButtonCl
     EXPECT_EQ(pattern->targetIndex_.value(), 3);
 }
 
+/**
+ * @tc.name: ContainerPickerPatternHandleDirectionKeyTest001
+ * @tc.desc: Test HandleDirectionKey method with Arrow Up key
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternHandleDirectionKeyTest001, TestSize.Level1)
+{
+    // Create picker and get pattern.
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->totalItemCount_ = 5;
+    
+    // Test Arrow Up key
+    EXPECT_TRUE(pattern->HandleDirectionKey(KeyCode::KEY_DPAD_UP));
+}
+
+/**
+ * @tc.name: ContainerPickerPatternHandleDirectionKeyTest002
+ * @tc.desc: Test HandleDirectionKey method with Arrow Down key
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternHandleDirectionKeyTest002, TestSize.Level1)
+{
+    // Create picker and get pattern.
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->totalItemCount_ = 5;
+    
+    // Test Arrow Down key
+    EXPECT_TRUE(pattern->HandleDirectionKey(KeyCode::KEY_DPAD_DOWN));
+}
+
+/**
+ * @tc.name: ContainerPickerPatternHandleDirectionKeyTest003
+ * @tc.desc: Test HandleDirectionKey method with invalid key
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternHandleDirectionKeyTest003, TestSize.Level1)
+{
+    // Create picker and get pattern.
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->totalItemCount_ = 5;
+    
+    // Test invalid key
+    EXPECT_FALSE(pattern->HandleDirectionKey(KeyCode::KEY_0));
+}
+
 } // namespace OHOS::Ace::NG

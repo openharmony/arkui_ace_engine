@@ -17,9 +17,6 @@
 #include "core/components_ng/pattern/container_picker/container_picker_pattern.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-const Dimension DEFAULT_MARGIN = 2.0_vp;
-} // namespace
 
 CanvasDrawFunction ContainerPickerPaintMethod::GetContentDrawFunction(PaintWrapper* paintWrapper)
 {
@@ -75,7 +72,7 @@ void ContainerPickerPaintMethod::PaintSelectionIndicatorBackground(PaintWrapper*
     auto layoutProperty = pickerNode->GetLayoutProperty<ContainerPickerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
 
-    if (layoutProperty->GetIndicatorType() != static_cast<int32_t>(IndicatorType::BACKGROUND)) {
+    if (layoutProperty->GetIndicatorType() == static_cast<int32_t>(PickerIndicatorType::DIVIDER)) {
         return;
     }
     auto pickerGeometryNode = pickerNode->GetGeometryNode();
@@ -84,14 +81,14 @@ void ContainerPickerPaintMethod::PaintSelectionIndicatorBackground(PaintWrapper*
     Color backgroundColor =
             layoutProperty->GetIndicatorBackgroundColor().value_or(theme->GetSelectedBackgroundColor());
     BorderRadiusProperty borderRadius = layoutProperty->GetIndicatorBorderRadius().value_or(
-        BorderRadiusProperty(*theme->GetSelectedBorderRadius().radiusTopLeft));
+        BorderRadiusProperty(DEFAULT_RADIUS));
     SetDefaultIndicatorBackground(pickerNode, backgroundColor, borderRadius);
 
-    auto height = PICKER_ITEM_HEIGHT.ConvertToPx() - DEFAULT_MARGIN.ConvertToPx() * 2;
-    auto width = pickerRect.Width() - DEFAULT_MARGIN.ConvertToPx() * 2;
-    auto maxRadius = std::min(height, width) / 2;
-    auto left = DEFAULT_MARGIN.ConvertToPx();
-    auto top = pickerRect.Height() / 2 - height / 2;
+    float height = PICKER_ITEM_HEIGHT.ConvertToPx();
+    float width = pickerRect.Width();
+    float maxRadius = std::min(height, width) / 2;
+    float left = 0.0f;
+    float top = pickerRect.Height() / 2 - height / 2;
     auto topLeft = GreatNotEqual(borderRadius.radiusTopLeft->ConvertToPx(), maxRadius) ?
         maxRadius : borderRadius.radiusTopLeft->ConvertToPx();
     auto topRight = GreatNotEqual(borderRadius.radiusTopRight->ConvertToPx(), maxRadius) ?
@@ -128,13 +125,16 @@ void ContainerPickerPaintMethod::PaintSelectionIndicatorDivider(PaintWrapper* pa
     auto layoutProperty = pickerNode->GetLayoutProperty<ContainerPickerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
 
-    if (layoutProperty->GetIndicatorType() == static_cast<int32_t>(IndicatorType::BACKGROUND)) {
+    if (layoutProperty->GetIndicatorType() != static_cast<int32_t>(PickerIndicatorType::DIVIDER)) {
         return;
     }
     auto pickerGeometryNode = pickerNode->GetGeometryNode();
     CHECK_NULL_VOID(pickerGeometryNode);
     auto pickerRect = pickerGeometryNode->GetFrameRect();
     auto strokeWidth = layoutProperty->GetIndicatorDividerWidth().value_or(theme->GetDividerThickness()).ConvertToPx();
+    if (GreatOrEqual(strokeWidth, PICKER_ITEM_HEIGHT.ConvertToPx() / HALF)) {
+        strokeWidth = theme->GetDividerThickness().ConvertToPx();
+    }
     auto dividerColor = layoutProperty->GetIndicatorDividerColor().value_or(theme->GetDividerColor());
     auto startMargin = layoutProperty->GetIndicatorStartMargin().value_or(Dimension()).ConvertToPx();
     auto endMargin = layoutProperty->GetIndicatorEndMargin().value_or(Dimension()).ConvertToPx();
@@ -186,7 +186,7 @@ void ContainerPickerPaintMethod::SetDefaultIndicatorBackground(RefPtr<FrameNode>
         backgroundColor = theme->GetSelectedBackgroundColor();
     }
     if (style.isDefaultBorderRadius) {
-        borderRadius = BorderRadiusProperty(*theme->GetSelectedBorderRadius().radiusTopLeft);
+        borderRadius = BorderRadiusProperty(DEFAULT_RADIUS);
     }
 }
 

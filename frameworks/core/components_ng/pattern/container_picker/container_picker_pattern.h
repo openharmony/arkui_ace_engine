@@ -255,6 +255,11 @@ private:
         thirdAdjacentItemHeight_ = static_cast<float>(THIRD_ADJACENT_ITEM_HEIGHT.ConvertToPx());
     }
 
+    void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
+    bool OnKeyEvent(const KeyEvent& event);
+    bool HandleDirectionKey(KeyCode code);
+    void GetInnerFocusPaintRect(RoundRect& paintRect);
+
     RefPtr<PanEvent> panEvent_;
     PanDirection panDirection_;
     LayoutConstraintF layoutConstraint_;

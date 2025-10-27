@@ -29,14 +29,14 @@
 
 namespace OHOS::Ace::NG {
 
-enum class IndicatorType {
-    DIVIDER = 0,
-    BACKGROUND,
+enum class PickerIndicatorType {
+    BACKGROUND = 0,
+    DIVIDER
 };
 
 struct PickerIndicatorStyle {
     int32_t type;
-    std::optional<Dimension> dividerWidth;
+    std::optional<Dimension> strokeWidth;
     std::optional<Color> dividerColor;
     std::optional<Dimension> startMargin;
     std::optional<Dimension> endMargin;
@@ -89,11 +89,11 @@ public:
         Dimension defaultDividerWidth = pickerTheme->GetDividerThickness();
         Color defaultDividerColor = pickerTheme->GetDividerColor();
         Color defaultIndicatorBackgroundColor = pickerTheme->GetSelectedBackgroundColor();
-        Dimension defaultIndicatorBorderRadius = *pickerTheme->GetSelectedBorderRadius().radiusTopLeft;
+        Dimension defaultIndicatorBorderRadius = 12.0_vp;
 
         auto pickerIndicatorStyle = JsonUtil::Create(true);
         pickerIndicatorStyle->Put("type", std::to_string(GetIndicatorType().value_or(0)).c_str());
-        pickerIndicatorStyle->Put("dividerWidth",
+        pickerIndicatorStyle->Put("strokeWidth",
             GetIndicatorDividerWidth().value_or(defaultDividerWidth).ToString().c_str());
         pickerIndicatorStyle->Put("dividerColor",
             GetIndicatorDividerColor().value_or(defaultDividerColor).ColorToString().c_str());
