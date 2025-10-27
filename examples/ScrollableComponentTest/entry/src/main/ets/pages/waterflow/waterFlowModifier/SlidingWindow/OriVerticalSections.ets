@@ -134,8 +134,8 @@ struct WaterFlowDemo {
     Column({ space: 2 }) {
       Row() {
         Button('column: ' + this.waterFlowMod.columnList[this.waterFlowMod.index]).onClick(() => {
-          this.waterFlowMod.index++
-          this.waterFlowMod.index = this.waterFlowMod.index % this.waterFlowMod.columnList.length
+          this.waterFlowMod.index++;
+          this.waterFlowMod.index = this.waterFlowMod.index % this.waterFlowMod.columnList.length;
         })
         Button('splice')
           .height('5%')

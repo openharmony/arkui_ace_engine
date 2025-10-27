@@ -193,23 +193,23 @@ struct WaterFlowDemo33 {
       Row() {
         Button('CachedCount')
           .onClick(() => {
-            this.changeCachedCountIndex++
+            this.changeCachedCountIndex++;
             if (this.changeCachedCountIndex > this.changeCachedCountList.length - 1) {
-              this.changeCachedCountIndex = 0
+              this.changeCachedCountIndex = 0;
             }
           })
         Button('CachedCountBol')
           .onClick(() => {
-            this.changeCachedCountBolIndex++
+            this.changeCachedCountBolIndex++;
             if (this.changeCachedCountBolIndex > this.changeCachedCountBolList.length - 1) {
-              this.changeCachedCountBolIndex = 0
+              this.changeCachedCountBolIndex = 0;
             }
           })
         Button('rowGap')
           .onClick(() => {
-            this.gapIndex++
+            this.gapIndex++;
             if (this.gapIndex > this.gaps.length - 1) {
-              this.gapIndex = 0
+              this.gapIndex = 0;
             }
           })
       }
@@ -220,8 +220,8 @@ struct WaterFlowDemo33 {
             this.paddingIndex = (this.paddingIndex + 1) % this.paddings.length;
           })
         Button('column: ' + this.waterFlowMod.columnList[this.waterFlowMod.index]).onClick(() => {
-          this.waterFlowMod.index++
-          this.waterFlowMod.index = this.waterFlowMod.index % this.waterFlowMod.columnList.length
+          this.waterFlowMod.index++;
+          this.waterFlowMod.index = this.waterFlowMod.index % this.waterFlowMod.columnList.length;
         })
       }
 

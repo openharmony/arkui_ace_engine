@@ -17,7 +17,7 @@
   * Description: WaterFlow组件支持基于断点自适应列数
   * Writer: renxiaowen
   */
-  
+
 import { WaterFlowDataSource } from '../../WaterFlowDataSource';
 class waterFlowModifier implements AttributeModifier<WaterFlowAttribute>{
   index: number = 0;
@@ -128,8 +128,8 @@ struct WaterFlowDemo {
     Column({ space: 2 }) {
       Row() {
         Button("column: " + this.waterFlowMod.columnList[this.waterFlowMod.index]).onClick(()=>{
-          this.waterFlowMod.index++
-          this.waterFlowMod.index = this.waterFlowMod.index % this.waterFlowMod.columnList.length
+          this.waterFlowMod.index++;
+          this.waterFlowMod.index = this.waterFlowMod.index % this.waterFlowMod.columnList.length;
         })
         Button('splice')
           .height('5%')
