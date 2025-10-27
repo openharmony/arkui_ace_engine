@@ -1865,7 +1865,6 @@ bool setKoalaANICallbackDispatcher(
     const char* dispactherMethodSig
 );
 void getKoalaANICallbackDispatcher(ani_class* clazz, ani_static_method* method);
-ani_env* getKoalaANIContext(void* hint);
 
 // Improve: maybe use CreateArrayBufferExternal here instead, no need for allocations.
 #define KOALA_INTEROP_CALL_VOID(venv, id, length, args)                                                 \
@@ -1873,7 +1872,7 @@ ani_env* getKoalaANIContext(void* hint);
   ani_class clazz = nullptr;                                                                            \
   ani_static_method method = nullptr;                                                                   \
   getKoalaANICallbackDispatcher(&clazz, &method);                                                       \
-  ani_env* env = getKoalaANIContext(venv);                                                              \
+  ani_env* env = reinterpret_cast<ani_env*>(venv);                                                      \
   ani_int result = 0;                                                                                   \
   long long args_casted = reinterpret_cast<long long>(args);                                            \
   CHECK_ANI_FATAL(env->Class_CallStaticMethod_Int(clazz, method, &result, id, args_casted, length));    \
@@ -1884,7 +1883,7 @@ ani_env* getKoalaANIContext(void* hint);
     ani_class clazz = nullptr;                                                                          \
     ani_static_method method = nullptr;                                                                 \
     getKoalaANICallbackDispatcher(&clazz, &method);                                                     \
-    ani_env* env = getKoalaANIContext(venv);                                                            \
+    ani_env* env = reinterpret_cast<ani_env*>(venv);                                                    \
     ani_int result = 0;                                                                                 \
     long long args_casted = reinterpret_cast<long long>(args);                                          \
     CHECK_ANI_FATAL(env->Class_CallStaticMethod_Int(clazz, method, &result, id, args_casted, length));  \
