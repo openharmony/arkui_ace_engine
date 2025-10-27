@@ -1264,7 +1264,7 @@ OHOS::Ace::Color Convert(const Ark_ColorMetrics& src)
     uint8_t green = static_cast<uint8_t>(src.green_);
     uint8_t blue = static_cast<uint8_t>(src.blue_);
     uint8_t alpha = static_cast<uint8_t>(src.alpha_);
-    return Color::FromRGBO(red, green, blue, alpha);
+    return Color::FromARGB(alpha, red, green, blue);
 }
 
 template<>
