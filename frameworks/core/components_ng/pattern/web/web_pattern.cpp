@@ -5007,6 +5007,13 @@ void WebPattern::UpdateClippedSelectionBounds(int32_t x, int32_t y, int32_t w, i
     }
 }
 
+void WebPattern::OnClippedSelectionBoundsChanged(int32_t x, int32_t y, int32_t width, int32_t height)
+{
+    if (webSelectOverlay_) {
+        webSelectOverlay_->OnClippedSelectionBoundsChanged(x, y, width, height);
+    }
+}
+
 void WebPattern::SelectCancel() const
 {
     if (isReceivedArkDrag_) {

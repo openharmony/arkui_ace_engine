@@ -6979,6 +6979,13 @@ void WebDelegate::UpdateClippedSelectionBounds(int32_t x, int32_t y, int32_t w, 
     webPattern->UpdateClippedSelectionBounds(x, y, w, h);
 }
 
+void WebDelegate::OnClippedSelectionBoundsChanged(int32_t x, int32_t y, int32_t width, int32_t height)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->OnClippedSelectionBoundsChanged(x, y, width, height);
+}
+
 bool WebDelegate::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
     std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback)
 {

@@ -630,6 +630,7 @@ public:
         return isFullScreen_;
     }
     void UpdateClippedSelectionBounds(int32_t x, int32_t y, int32_t w, int32_t h);
+    void OnClippedSelectionBoundsChanged(int32_t x, int32_t y, int32_t width, int32_t height);
     bool RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
         std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback);
     void OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info, bool isRichtext = true, bool result = false);
