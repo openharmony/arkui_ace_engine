@@ -57,14 +57,9 @@ napi_value ListTest::CreateNativeNode(napi_env env, napi_callback_info info)
     OH_ArkUI_GetModuleInterface(ARKUI_NATIVE_NODE, ArkUI_NativeNodeAPI_1, nodeAPI);
 
     auto column = nodeAPI->createNode(ARKUI_NODE_COLUMN);
-
-    //    ArkUI_NumberValue color_value[] = {{.u32 = 0xFF00FF00}};
-    //    ArkUI_AttributeItem color_item = {color_value, sizeof(color_value) / sizeof(ArkUI_NumberValue)};
-    //    nodeAPI->setAttribute(column, NODE_BACKGROUND_COLOR, &color_item);
-
     auto list = CreateNodeWithSize(nodeAPI, nodeAPI->createNode(ARKUI_NODE_LIST), 400, 500);
     nodeAPI->addChild(column, list);
-    for (auto i = 0; i < 20; i++) {
+    for (auto i = 0; i < PARAM_20; i++) {
         auto listItem = CreateNodeWithSize(nodeAPI, nodeAPI->createNode(ARKUI_NODE_LIST_ITEM), 100, 100);
         auto text = CreateNodeWithSize(nodeAPI, nodeAPI->createNode(ARKUI_NODE_TEXT), 100, 100);
         ArkUI_AttributeItem content_item = {};
@@ -75,9 +70,6 @@ napi_value ListTest::CreateNativeNode(napi_env env, napi_callback_info info)
         ArkUI_AttributeItem text_align_item = { text_align_value,
             sizeof(text_align_value) / sizeof(ArkUI_NumberValue) };
         nodeAPI->setAttribute(text, NODE_TEXT_ALIGN, &text_align_item);
-
-        //        color_value[0] = {.u32 = 0xFF00FF00};
-
         ArkUI_NumberValue color_value1[] = { { .u32 = 0xFF00FF00 } };
         ArkUI_AttributeItem color_item1 = { color_value1, sizeof(color_value1) / sizeof(ArkUI_NumberValue) };
         nodeAPI->setAttribute(listItem, NODE_BACKGROUND_COLOR, &color_item1);
@@ -98,10 +90,6 @@ napi_value ListTest::CreateNativeNode(napi_env env, napi_callback_info info)
     content_item1.string = std::to_string(b).c_str();
     nodeAPI->setAttribute(text1, NODE_TEXT_CONTENT, &content_item1);
     nodeAPI->addChild(column, text1);
-
-    //    ArkUI_NumberValue lane_value[] = {{.i32 = 2}};
-    //    ArkUI_AttributeItem lane_item = {lane_value, sizeof(lane_value) / sizeof(ArkUI_NumberValue)};
-    //    nodeAPI->setAttribute(list, NODE_LIST_LANES,&lane_item);
 
     // 所有组件挂载到XComponent
     std::string id(xComponentID);

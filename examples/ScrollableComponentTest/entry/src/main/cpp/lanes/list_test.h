@@ -27,7 +27,7 @@
 #include <arkui/native_node.h>
 #include <arkui/native_type.h>
 
-#include "../common/common.h"
+#include "common.h"
 
 namespace ArkUICApiDemo {
 
