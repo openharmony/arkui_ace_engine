@@ -71,9 +71,6 @@ constexpr XComponentType XCOMPONENT_SURFACE_TYPE_VALUE = XComponentType::SURFACE
 constexpr XComponentType XCOMPONENT_COMPONENT_TYPE_VALUE = XComponentType::COMPONENT;
 constexpr XComponentType XCOMPONENT_TEXTURE_TYPE_VALUE = XComponentType::TEXTURE;
 constexpr XComponentType XCOMPONENT_NODE_TYPE_VALUE = XComponentType::NODE;
-const float CONTAINER_WIDTH = 300.0f;
-const float CONTAINER_HEIGHT = 300.0f;
-const SizeF CONTAINER_SIZE(CONTAINER_WIDTH, CONTAINER_HEIGHT);
 const uint32_t XCOMPONENT_ID_LEN_MAX = 10;
 const uint64_t XCOMPONENT_SCREEN_ID = 12345u;
 const float MAX_WIDTH = 400.0f;
@@ -89,16 +86,7 @@ TestProperty testProperty;
 bool g_isFocus = false;
 const float SURFACE_WIDTH = 250.0f;
 const float SURFACE_HEIGHT = 150.0f;
-bool g_isAxis = false;
-bool g_isLock = true;
 bool g_isDestroyed = false;
-
-class XComponentMockRenderContext : public RenderContext {
-    void SetRenderFit(RenderFit renderFit) override
-    {
-        propRenderFit_ = renderFit;
-    }
-};
 
 TouchType ConvertXComponentTouchType(const OH_NativeXComponent_TouchEventType& type)
 {
@@ -159,9 +147,7 @@ public:
         testProperty.surfaceChangedEvent = std::nullopt;
         testProperty.surfaceDestroyedEvent = std::nullopt;
         g_isDestroyed = false;
-        g_isAxis = false;
         g_isFocus = false;
-        g_isLock = true;
     }
 
 protected:
@@ -189,7 +175,6 @@ RefPtr<FrameNode> XComponentTestNg::CreateXComponentNode(TestProperty& testPrope
     auto libraryName = testProperty.libraryName;
     auto xcomponentController = std::make_shared<XComponentControllerNG>();
     XComponentModelNG().Create(xcId, xcType, libraryName, xcomponentController);
-
     if (testProperty.soPath.has_value()) {
         XComponentModelNG().SetSoPath(testProperty.soPath.value());
     }
@@ -1478,5 +1463,36 @@ HWTEST_F(XComponentTestNg, XComponentPropertyTest025, TestSize.Level1)
     EXPECT_FALSE(xComponentPattern2->IsAtomicNode());
     EXPECT_EQ(xComponentLayoutProperty2->GetXComponentType().value_or(XComponentType::SURFACE),
         XCOMPONENT_COMPONENT_TYPE_VALUE);
+}
+
+/**
+ * @tc.name: XComponentImageAnalyzerTest
+ * @tc.desc: Test Enable Image Analyzer
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestNg, XComponentImageAnalyzerTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set type = XCOMPONENT_SURFACE_TYPE and call CreateXComponentNode
+     * @tc.expected: xcomponent frameNode create successfully
+     */
+    testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    /**
+     * @tc.steps: step2. call EnableImageAnalyzer
+     * @tc.expected: IsSupportImageAnalyzerFeature() return right value
+     */
+    pattern->EnableAnalyzer(true);
+    EXPECT_TRUE(pattern->isEnableAnalyzer_);
+    if (ImageAnalyzerMgr::GetInstance().IsImageAnalyzerSupported()) {
+        EXPECT_TRUE(pattern->IsSupportImageAnalyzerFeature());
+    } else {
+        EXPECT_FALSE(pattern->IsSupportImageAnalyzerFeature());
+    }
+    pattern->imageAnalyzerManager_ = nullptr;
+    EXPECT_FALSE(pattern->IsSupportImageAnalyzerFeature());
 }
 } // namespace OHOS::Ace::NG
