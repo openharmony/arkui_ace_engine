@@ -32,6 +32,7 @@ bool ShapeContainerPattern::OnDirtyLayoutWrapperSwap(
 void ShapeContainerPattern::ViewPortTransform()
 {
     auto curFrameNode = GetHost();
+    CHECK_NULL_VOID(curFrameNode);
     auto renderContext = curFrameNode->GetRenderContext();
     auto geoNode = curFrameNode->GetGeometryNode();
     CHECK_NULL_VOID(geoNode);
