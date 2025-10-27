@@ -930,6 +930,7 @@ public:
 
     void UpdateStyledStringByColorMode();
     virtual void MarkContentNodeForRender() {};
+    float TextContentAlignOffsetY();
 
 protected:
     virtual RefPtr<TextSelectOverlay> GetSelectOverlay();
