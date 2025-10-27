@@ -173,7 +173,7 @@ export struct ToolBar {
   controller: TabsController = new TabsController();
   @PropRef activateIndex: int = -1;
   @Observed
-  @PropRef dividerModifier: DividerModifier;
+  @PropRef dividerModifier: DividerModifier | undefined;
   @Observed
   @PropRef toolBarModifier: ToolBarModifier = new ToolBarModifier();
   @Observed
