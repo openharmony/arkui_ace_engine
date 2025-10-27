@@ -2199,9 +2199,6 @@ struct CJUIWebModifier {
     void (*resetDataDetectorConfigWithEvent)(ArkUINodeHandle node);
     void (*setEnableSelectedDataDetector)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetEnableSelectedDataDetector)(ArkUINodeHandle node);
-    void (*setSelectedDataDetectorConfigWithEvent)(
-        ArkUINodeHandle node, const struct ArkUITextDetectConfigStruct* arkUITextDetectConfig);
-    void (*resetSelectedDataDetectorConfigWithEvent)(ArkUINodeHandle node);
     void (*setOnSslErrorEventReceive)(ArkUINodeHandle node, void* callback);
     void (*resetOnSslErrorEventReceive)(ArkUINodeHandle node);
     void (*setOnClientAuthenticationRequest)(ArkUINodeHandle node, void* callback);

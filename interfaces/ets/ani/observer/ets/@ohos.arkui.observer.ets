@@ -12,7 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { NavPathStack, NavigationOperation, NavBar, ResourceStr, Resource, NavDestinationMode } from "@ohos.arkui.component"
+import { NavPathStack, NavigationOperation, NavBar, ResourceStr, Resource, NavDestinationMode,
+HeightBreakpoint, WidthBreakpoint } from "@ohos.arkui.component"
 import { UIContext } from "@ohos.arkui.UIContext"
 import UIAbilityContext from 'application.UIAbilityContext';
 import transfer from '@ohos.transfer';
@@ -53,6 +54,10 @@ import hilog from '@ohos.hilog'
     export interface NavigationInfo {
         navigationId: string;
         pathStack: NavPathStack;
+    }
+    export class WindowSizeLayoutBreakpointInfo {
+        widthBreakpoint: WidthBreakpoint;
+        heightBreakpoint: HeightBreakpoint;
     }
 
     export class NavigationInfoImpl implements NavigationInfo {

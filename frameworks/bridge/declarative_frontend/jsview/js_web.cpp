@@ -2339,7 +2339,6 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("enableDataDetector", &JSWeb::EnableDataDetector);
     JSClass<JSWeb>::StaticMethod("dataDetectorConfig", &JSWeb::DataDetectorConfig);
     JSClass<JSWeb>::StaticMethod("enableSelectedDataDetector", &JSWeb::EnableSelectedDataDetector);
-    JSClass<JSWeb>::StaticMethod("selectedDataDetectorConfig", &JSWeb::SelectedDataDetectorConfig);
     JSClass<JSWeb>::StaticMethod("bypassVsyncCondition", &JSWeb::BypassVsyncCondition);
     JSClass<JSWeb>::StaticMethod("enableFollowSystemFontWeight", &JSWeb::EnableFollowSystemFontWeight);
     JSClass<JSWeb>::StaticMethod("onLoadStarted", &JSWeb::OnLoadStarted);
@@ -6781,18 +6780,6 @@ void JSWeb::EnableSelectedDataDetector(const JSCallbackInfo& args)
     }
     bool isEnabled = args[0]->ToBoolean();
     WebModel::GetInstance()->SetEnableSelectedDataDetector(isEnabled);
-}
-
-void JSWeb::SelectedDataDetectorConfig(const JSCallbackInfo& args)
-{
-    RETURN_IF_CALLING_FROM_M114();
-    TextDetectConfig textDetectConfig;
-    if (args.Length() < 1 || !JSViewAbstract::ParseDataDetectorConfig(args, textDetectConfig)) {
-        TextDetectConfig defaultTextDetectConfig;
-        WebModel::GetInstance()->SetSelectedDataDetectorConfig(defaultTextDetectConfig);
-        return;
-    }
-    WebModel::GetInstance()->SetSelectedDataDetectorConfig(textDetectConfig);
 }
 
 void JSWeb::BypassVsyncCondition(int32_t webBypassVsyncCondition)

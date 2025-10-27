@@ -119,9 +119,10 @@ import { BusinessError } from '#external';
 import { Resource } from 'global.resource';
 import { ElementIdToCustomProperties } from "#handwritten"
 import { ObjectLinkDecoratedVariable } from "./stateManagement/decoratorImpl/decoratorObjectLink"
-import { FrameNodeExtender } from './framework';
+import { FrameNodeExtender, SizeTLengthMetrics, NodeEdgesLengthMetrics } from './framework';
 import { extractors } from "#handwritten";
 import hilog from '@ohos.hilog';
+import { Vector2 } from "./Graphics.ets"
 
 export interface CrossLanguageOptions {
     attributeSetting?: boolean;
@@ -427,58 +428,54 @@ export class FrameNode implements MaterializedBase {
         return FrameNodeExtender.getOpacity(this);
     }
     public getPositionToWindowWithTransform(): NodePosition {
-        // return FrameNodeExtender.getPositionToWindowWithTransform(this);
-        return { x: 0, y: 0 } as NodePosition;
+        return FrameNodeExtender.getPositionToWindowWithTransform(this);
     }
     public getPositionToParent(): NodePosition {
-        // return FrameNodeExtender.getPositionToParent(this)
-        return { x: 0, y: 0 } as NodePosition;
+        return FrameNodeExtender.getPositionToParent(this);
     }
     public getPositionToScreen(): NodePosition {
-        // return FrameNodeExtender.getPositionToScreen(this)
-        return { x: 0, y: 0 } as NodePosition;
+        return FrameNodeExtender.getPositionToScreen(this);
     }
     public getPositionToWindow(): NodePosition {
-        // return FrameNodeExtender.getPositionToWindow(this)
-        return { x: 0, y: 0 } as NodePosition;
+        return FrameNodeExtender.getPositionToWindow(this);
     }
     public getPositionToParentWithTransform(): NodePosition {
-        // return FrameNodeExtender.getPositionToParentWithTransform(this)
-        return { x: 0, y: 0 } as NodePosition;
+        return FrameNodeExtender.getPositionToParentWithTransform(this);
     }
     public getPositionToScreenWithTransform(): NodePosition {
-        // return FrameNodeExtender.getPositionToScreenWithTransform(this)
-        return { x: 0, y: 0 } as NodePosition;
+        return FrameNodeExtender.getPositionToScreenWithTransform(this);
     }
     public getMeasuredSize(): Size {
         return FrameNodeExtender.getMeasuredSize(this)
     }
     public getLayoutPosition(): NodePosition {
-        // return FrameNodeExtender.getLayoutPosition(this)
-        return { x: 0, y: 0 } as NodePosition;
+        return FrameNodeExtender.getLayoutPosition(this);
     }
    public getUserConfigBorderWidth(): NodeEdges<LengthMetrics> {
-        // return FrameNodeExtender.getUserConfigBorderWidth()
-        let lengthMetrics: LengthMetrics = new LengthMetrics(0);
-        return { top: lengthMetrics, left: lengthMetrics,
-          bottom: lengthMetrics, right: lengthMetrics };
+        let nodeEdgesLengthMetrics: NodeEdgesLengthMetrics = FrameNodeExtender.getUserConfigBorderWidth(this);
+        let result: NodeEdges<LengthMetrics> = { top: nodeEdgesLengthMetrics.top, left: nodeEdgesLengthMetrics.left,
+          bottom: nodeEdgesLengthMetrics.bottom, right: nodeEdgesLengthMetrics.right };
+        return result;
     }
     public getUserConfigPadding(): NodeEdges<LengthMetrics> {
-        // return FrameNodeExtender.getUserConfigPadding()
-        let lengthMetrics: LengthMetrics = new LengthMetrics(0);
-        return { top: lengthMetrics, left: lengthMetrics,
-          bottom: lengthMetrics, right: lengthMetrics }
+        let nodeEdgesLengthMetrics: NodeEdgesLengthMetrics = FrameNodeExtender.getUserConfigPadding(this);
+        let result: NodeEdges<LengthMetrics> = { top: nodeEdgesLengthMetrics.top, left: nodeEdgesLengthMetrics.left,
+          bottom: nodeEdgesLengthMetrics.bottom, right: nodeEdgesLengthMetrics.right };
+        return result;
     }
     public getUserConfigMargin(): NodeEdges<LengthMetrics> {
-        // return FrameNodeExtender.getUserConfigMargin()
-        let lengthMetrics: LengthMetrics = new LengthMetrics(0);
-        return { top: lengthMetrics, left: lengthMetrics,
-          bottom: lengthMetrics, right: lengthMetrics }
+        let nodeEdgesLengthMetrics: NodeEdgesLengthMetrics = FrameNodeExtender.getUserConfigMargin(this);
+        let result: NodeEdges<LengthMetrics> = { top: nodeEdgesLengthMetrics.top, left: nodeEdgesLengthMetrics.left,
+          bottom: nodeEdgesLengthMetrics.bottom, right: nodeEdgesLengthMetrics.right };
+        return result;
     }
     public getUserConfigSize(): SizeT<LengthMetrics> {
-        // return FrameNodeExtender.getUserConfigSize()
-        let lengthMetrics: LengthMetrics = new LengthMetrics(0);
-        return { width: lengthMetrics, height: lengthMetrics }
+        let sizeTLengthMetrics: SizeTLengthMetrics = FrameNodeExtender.getUserConfigSize(this);
+        let result: SizeT<LengthMetrics> = {
+            width: sizeTLengthMetrics.width,
+            height: sizeTLengthMetrics.height
+        };
+        return result;
     }
     public getId(): string {
         return FrameNodeExtender.getId(this);
@@ -526,8 +523,7 @@ export class FrameNode implements MaterializedBase {
         return;
     }
     public setLayoutPosition(position: NodePosition): void {
-        // const position_casted = position as (NodePosition);
-        // FrameNodeExtender.setLayoutPosition_serialize(this, position_casted);
+        FrameNodeExtender.setLayoutPosition(this, position);
         return;
     }
     public measure(constraint: LayoutConstraint): void {
@@ -539,10 +535,9 @@ export class FrameNode implements MaterializedBase {
         return;
     }
     public layout(position: NodePosition): void {
-        const position_casted = position as (NodePosition);
         const instanceId = this.instanceId_!.toInt();
         ArkUIAniModule._Common_Sync_InstanceId(instanceId);
-        // FrameNodeExtender.layout_serialize(this, position_casted);
+        FrameNodeExtender.layout(this, position);
         ArkUIAniModule._Common_Restore_InstanceId();
         return;
     }

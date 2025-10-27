@@ -13013,11 +13013,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     void DisposeImpl(Ark_FrameNode peer)
     {
     }
-    Ark_Position GetPositionToWindowImpl(Ark_FrameNode peer)
+    Ark_Vector2 GetPositionToWindowImpl(Ark_FrameNode peer)
     {
         return {};
     }
-    Ark_Position GetPositionToParentImpl(Ark_FrameNode peer)
+    Ark_Vector2 GetPositionToParentImpl(Ark_FrameNode peer)
     {
         return {};
     }
@@ -13025,7 +13025,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
-    Ark_Position GetLayoutPositionImpl(Ark_FrameNode peer)
+    Ark_Vector2 GetLayoutPositionImpl(Ark_FrameNode peer)
     {
         return {};
     }
@@ -13081,7 +13081,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetLayoutPositionImpl(Ark_FrameNode peer,
-                               const Ark_Position* position)
+                               const Ark_Vector2* position)
     {
     }
     void MeasureImpl(Ark_FrameNode peer,
@@ -13089,25 +13089,41 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void LayoutImpl(Ark_FrameNode peer,
-                    const Ark_Position* position)
+                    const Ark_Vector2* position)
     {
     }
     void SetNeedsLayoutImpl(Ark_FrameNode peer)
     {
     }
-    Ark_Position GetPositionToScreenImpl(Ark_FrameNode peer)
+    Ark_Vector2 GetPositionToScreenImpl(Ark_FrameNode peer)
     {
         return {};
     }
-    Ark_Position GetPositionToWindowWithTransformImpl(Ark_FrameNode peer)
+    Ark_Vector2 GetPositionToWindowWithTransformImpl(Ark_FrameNode peer)
     {
         return {};
     }
-    Ark_Position GetPositionToParentWithTransformImpl(Ark_FrameNode peer)
+    Ark_Vector2 GetPositionToParentWithTransformImpl(Ark_FrameNode peer)
     {
         return {};
     }
-    Ark_Position GetPositionToScreenWithTransformImpl(Ark_FrameNode peer)
+    Ark_Vector2 GetPositionToScreenWithTransformImpl(Ark_FrameNode peer)
+    {
+        return {};
+    }
+    Ark_NodeEdgesLengthMetrics GetUserConfigBorderWidthImpl(Ark_FrameNode peer)
+    {
+        return {};
+    }
+    Ark_NodeEdgesLengthMetrics GetUserConfigPaddingImpl(Ark_FrameNode peer)
+    {
+        return {};
+    }
+    Ark_NodeEdgesLengthMetrics GetUserConfigMarginImpl(Ark_FrameNode peer)
+    {
+        return {};
+    }
+    Ark_SizeTLengthMetrics GetUserConfigSizeImpl(Ark_FrameNode peer)
     {
         return {};
     }
@@ -19422,6 +19438,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             FrameNodeExtenderAccessor::GetPositionToWindowWithTransformImpl,
             FrameNodeExtenderAccessor::GetPositionToParentWithTransformImpl,
             FrameNodeExtenderAccessor::GetPositionToScreenWithTransformImpl,
+            FrameNodeExtenderAccessor::GetUserConfigBorderWidthImpl,
+            FrameNodeExtenderAccessor::GetUserConfigPaddingImpl,
+            FrameNodeExtenderAccessor::GetUserConfigMarginImpl,
+            FrameNodeExtenderAccessor::GetUserConfigSizeImpl,
             FrameNodeExtenderAccessor::GetFrameNodeByKeyImpl,
             FrameNodeExtenderAccessor::GetIdByFrameNodeImpl,
             FrameNodeExtenderAccessor::MoveToImpl,
