@@ -95,10 +95,29 @@ void RegisterPageCallback(const RefPtr<FrameNode>& frameNode, void* jsViewNode)
 #endif
     curPageNode->MarkDirtyNode();
 }
+
+void ExitToDesktop()
+{
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [] {
+            auto pipeline = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            AccessibilityEvent event;
+            event.type = AccessibilityEventType::PAGE_CHANGE;
+            pipeline->SendEventToAccessibility(event);
+            pipeline->Finish(false);
+        },
+        TaskExecutor::TaskType::UI, "ArkUIPageRouterExitToDesktop",
+        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+}
 } // namespace
 
 void PageRouterManager::PushExtender(
-    const RouterPageInfo& target, std::function<void()>&& finishCallback, void* jsNode)
+    const RouterPageInfo& target, const std::function<void()>&& finishCallback, void* jsNode)
 {
     CHECK_RUN_ON(JS);
     if (inRouterOpt_) {
@@ -171,7 +190,7 @@ void PageRouterManager::PushExtender(
 }
 
 void PageRouterManager::PushNamedRouteExtender(
-    const RouterPageInfo& target, std::function<void()>&& finishCallback, void* jsNode)
+    const RouterPageInfo& target, const std::function<void()>&& finishCallback, void* jsNode)
 {
     CHECK_RUN_ON(JS);
     if (inRouterOpt_) {
@@ -228,7 +247,7 @@ void PageRouterManager::PushNamedRouteExtender(
 }
 
 void PageRouterManager::ReplaceExtender(const RouterPageInfo& target,
-    std::function<void()>&& enterFinishCallback, void* jsNode)
+    const std::function<void()>&& enterFinishCallback, void* jsNode)
 {
     CHECK_RUN_ON(JS);
     if (inRouterOpt_) {
@@ -363,7 +382,7 @@ void PageRouterManager::ReplaceExtender(const RouterPageInfo& target,
 }
 
 void PageRouterManager::ReplaceNamedRouteExtender(
-    const RouterPageInfo& target, std::function<void()>&& enterFinishCallback, void* jsNode)
+    const RouterPageInfo& target, const std::function<void()>&& enterFinishCallback, void* jsNode)
 {
     CHECK_RUN_ON(JS);
     if (inRouterOpt_) {
@@ -484,7 +503,7 @@ void PageRouterManager::ReplaceNamedRouteExtender(
 }
 
 void PageRouterManager::RunPageExtender(
-    const RouterPageInfo& target, std::function<void()>&& finishCallback, void* jsNode)
+    const RouterPageInfo& target, const std::function<void()>&& finishCallback, void* jsNode)
 {
     PerfMonitor::GetPerfMonitor()->SetAppStartStatus();
     ACE_SCOPED_TRACE("PageRouterManager::RunPage");
@@ -611,5 +630,139 @@ RefPtr<FrameNode> PageRouterManager::CreatePageExtender(int32_t pageId, const Ro
 
     pageRouterStack_.pop_back();
     return pageNode;
+}
+
+void PageRouterManager::StartBackExtender(const RouterPageInfo& target)
+{
+    CleanPageOverlay();
+    UpdateSrcPage();
+    if (target.url.empty()) {
+        size_t pageRouteSize = pageRouterStack_.size();
+        if (pageRouteSize <= 1) {
+            if (!restorePageStack_.empty()) {
+                auto newInfo = RouterPageInfo();
+                newInfo.params = target.params;
+                StartRestore(newInfo);
+                return;
+            }
+            TAG_LOGI(AceLogTag::ACE_ROUTER, "Router back start ExitToDesktop");
+            ExitToDesktop();
+            return;
+        }
+        TAG_LOGI(AceLogTag::ACE_ROUTER, "Router back start PopPage");
+        PopPage(target.params, true, true);
+        return;
+    }
+
+    auto pageInfo = FindPageInStack(target.url, true);
+    if (pageInfo.second) {
+        // find page in stack, pop to specified index.
+        RouterPageInfo info = target;
+#if !defined(PREVIEW)
+        if (info.url.substr(0, strlen(BUNDLE_TAG)) == BUNDLE_TAG) {
+            info.path = info.url + ".js";
+            PopPageToIndex(pageInfo.first, info.params, true, true);
+            return;
+        }
+#endif
+        PopPageToIndex(pageInfo.first, info.params, true, true);
+        return;
+    }
+
+    auto index = FindPageInRestoreStack(target.url);
+    if (index == INVALID_PAGE_INDEX) {
+        return;
+    }
+
+    RestorePageWithTarget(index, true, target, RestorePageDestination::BOTTOM);
+}
+
+void PageRouterManager::BackWithTargetExtender(const RouterPageInfo& target)
+{
+    CHECK_RUN_ON(JS);
+    TAG_LOGI(AceLogTag::ACE_ROUTER, "Router back path:%{public}s", target.url.c_str());
+    if (inRouterOpt_) {
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        context->PostAsyncEvent(
+            [weak = WeakClaim(this), target]() {
+                auto router = weak.Upgrade();
+                CHECK_NULL_VOID(router);
+                router->BackWithTarget(target);
+            },
+            "ArkUIPageRouterBackWithTarget", TaskExecutor::TaskType::JS);
+        return;
+    }
+    RouterOptScope scope(this);
+    if (pageRouterStack_.empty()) {
+        TAG_LOGW(AceLogTag::ACE_ROUTER, "Page router stack size is zero, can not back");
+        return;
+    }
+    auto currentPage = GetCurrentPageNode();
+    CHECK_NULL_VOID(currentPage);
+    auto pagePattern = currentPage->GetPattern<PagePattern>();
+    CHECK_NULL_VOID(pagePattern);
+    auto pageInfo = DynamicCast<EntryPageInfo>(pagePattern->GetPageInfo());
+    CHECK_NULL_VOID(pageInfo);
+    if (pageInfo->GetAlertCallback()) {
+        ngBackTarget_ = target;
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto overlayManager = pipelineContext ? pipelineContext->GetOverlayManager() : nullptr;
+        CHECK_NULL_VOID(overlayManager);
+        overlayManager->ShowDialog(
+            pageInfo->GetDialogProperties(), nullptr, AceApplicationInfo::GetInstance().IsRightToLeft());
+        return;
+    }
+    StartBackExtender(target);
+}
+
+void PageRouterManager::BackToIndexWithTargetExtender(int32_t index, const std::string& params)
+{
+    CHECK_RUN_ON(JS);
+    if (!CheckIndexValid(index)) {
+        return;
+    }
+    if (inRouterOpt_) {
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        context->PostAsyncEvent(
+            [weak = WeakClaim(this), index, params]() {
+                auto router = weak.Upgrade();
+                CHECK_NULL_VOID(router);
+                router->BackToIndexWithTarget(index, params);
+            },
+            "ArkUIPageRouterBackToIndex", TaskExecutor::TaskType::JS);
+        return;
+    }
+    RouterOptScope scope(this);
+    if (pageRouterStack_.empty()) {
+        return;
+    }
+    RouterPageInfo target = GetPageInfoByIndex(index, params);
+    auto currentPage = GetCurrentPageNode();
+    CHECK_NULL_VOID(currentPage);
+    auto pagePattern = currentPage->GetPattern<PagePattern>();
+    CHECK_NULL_VOID(pagePattern);
+    auto pageInfo = DynamicCast<EntryPageInfo>(pagePattern->GetPageInfo());
+    CHECK_NULL_VOID(pageInfo);
+    if (pageInfo->GetAlertCallback()) {
+        ngBackTarget_ = target;
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto overlayManager = pipelineContext ? pipelineContext->GetOverlayManager() : nullptr;
+        CHECK_NULL_VOID(overlayManager);
+        overlayManager->ShowDialog(
+            pageInfo->GetDialogProperties(), nullptr, AceApplicationInfo::GetInstance().IsRightToLeft());
+        return;
+    }
+    UpdateSrcPage();
+    CleanPageOverlay();
+    if (index > static_cast<int32_t>(restorePageStack_.size())) {
+        PopPageToIndex(index - static_cast<int32_t>(restorePageStack_.size()) - 1, params, true, true);
+        return;
+    }
+
+    RouterPageInfo info;
+    info.params = params;
+    RestorePageWithTarget(index - 1, true, info, RestorePageDestination::BOTTOM);
 }
 } // namespace OHOS::Ace::NG
