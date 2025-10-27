@@ -3818,9 +3818,14 @@ void SetOnDragStartImpl(Ark_NativePointer node,
                 result.customNode = CallbackHelper(val).BuildSync(Referenced::RawPtr(fnode));
             }
         };
-        auto parseDragI = [&result](const Ark_DragItemInfo& value) {
+        auto parseDragI = [&result, weakNode](const Ark_DragItemInfo& value) {
             result.pixelMap = Converter::OptConvert<RefPtr<PixelMap>>(value.pixelMap).value_or(nullptr);
             result.extraInfo = Converter::OptConvert<std::string>(value.extraInfo).value_or(std::string());
+            auto fnode = weakNode.Upgrade();
+            auto builder = Converter::OptConvert<CustomNodeBuilder>(value.builder);
+            if (builder && fnode) {
+                result.customNode = CallbackHelper(builder.value()).BuildSync(Referenced::RawPtr(fnode));
+            }
         };
         auto handler = [custB = std::move(parseCustBuilder), dragI = std::move(parseDragI)](const void *rawResultPtr) {
             auto arkResultPtr = reinterpret_cast<const Ark_Union_CustomBuilder_DragItemInfo*>(rawResultPtr);
@@ -4823,11 +4828,13 @@ void SetOnClick1Impl(Ark_NativePointer node,
         callback.InvokeSync(event.ArkValue());
     };
     auto convValue = Converter::OptConvertPtr<float>(distanceThreshold);
-    if (!convValue) {
-        ViewAbstract::DisableOnClick(frameNode);
-        return;
+    double threshold = convValue.value_or(std::numeric_limits<double>::infinity());
+    if (threshold != std::numeric_limits<double>::infinity() && threshold >= 0) {
+        threshold = Dimension(threshold, DimensionUnit::VP).ConvertToPx();
+    } else {
+        threshold = std::numeric_limits<double>::infinity();
     }
-    ViewAbstract::SetOnClick(frameNode, std::move(onEvent), *convValue);
+    ViewAbstract::SetOnClick(frameNode, std::move(onEvent), threshold);
 }
 void SetFocusScopeIdImpl(Ark_NativePointer node,
                          const Opt_String* id,
@@ -5032,8 +5039,7 @@ void SetDragPreview1Impl(Ark_NativePointer node,
                     ViewAbstract::SetDragPreview(frameNode, info);
                     }, node);
             } else {
-                ViewAbstract::SetDragPreview(frameNode, DragDropInfo {
-                    .onlyForLifting = onlyForLifting, .delayCreating = delayCreating });
+                ViewAbstract::SetDragPreview(frameNode, dragDropInfo);
             }
         },
         [frameNode]() {
