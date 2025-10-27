@@ -798,4 +798,32 @@ HWTEST_F(StateStyleManagerTestNg, StateStyleTest025, TestSize.Level1)
     stateStyleMgr->RemoveSupportedUIState(UI_STATE_SELECTED, false);
     EXPECT_EQ(UI_STATE_NORMAL, stateStyleMgr->supportedStates_);
 }
+
+/**
+ * @tc.name: StateStyleTest026
+ * @tc.desc: test RemoveSupportedUIState
+ * @tc.type: FUNC
+ */
+HWTEST_F(StateStyleManagerTestNg, StateStyleTest026, TestSize.Level1)
+{
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto stateStyleMgr = AceType::MakeRefPtr<StateStyleManager>(frameNode);
+
+    std::function<void(UIState)> callback = [](UIState state) {};
+    stateStyleMgr->AddSupportedUIStateWithCallback(UI_STATE_PRESSED | UI_STATE_FOCUSED, callback, false);
+    stateStyleMgr->AddSupportedUIStateWithCallback(UI_STATE_PRESSED | UI_STATE_FOCUSED, callback, true);
+    EXPECT_TRUE(stateStyleMgr->HasStateStyle(UI_STATE_PRESSED | UI_STATE_FOCUSED));
+
+    stateStyleMgr->RemoveSupportedUIState(UI_STATE_PRESSED, false);
+    EXPECT_FALSE(stateStyleMgr->userStateStyleSubscribers_.second == nullptr);
+
+    stateStyleMgr->RemoveSupportedUIState(UI_STATE_FOCUSED, false);
+    EXPECT_TRUE(stateStyleMgr->userStateStyleSubscribers_.second == nullptr);
+
+    stateStyleMgr->RemoveSupportedUIState(UI_STATE_PRESSED, true);
+    EXPECT_FALSE(stateStyleMgr->innerStateStyleSubscribers_.second == nullptr);
+
+    stateStyleMgr->RemoveSupportedUIState(UI_STATE_FOCUSED, true);
+    EXPECT_TRUE(stateStyleMgr->innerStateStyleSubscribers_.second == nullptr);
+}
 } // namespace OHOS::Ace::NG
