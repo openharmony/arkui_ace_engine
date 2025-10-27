@@ -42,7 +42,7 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
 constexpr XComponentType XCOMPONENT_SURFACE_TYPE_VALUE = XComponentType::SURFACE;
-ArkUI_XComponent_Params params;
+ArkUI_XComponent_Params g_params;
 bool g_isCreated = false;
 bool g_isChanged = false;
 bool g_isDestroyed = false;
@@ -85,10 +85,10 @@ void XComponentV2TestNg::TearDownTestSuite()
 
 RefPtr<FrameNode> XComponentV2TestNg::CreateXComponentNode()
 {
-    params.type = XCOMPONENT_SURFACE_TYPE_VALUE;
+    g_params.type = XCOMPONENT_SURFACE_TYPE_VALUE;
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    auto frameNode = AceType::DynamicCast<FrameNode>(XComponentModelNG().CreateTypeNode(nodeId, &params));
+    auto frameNode = AceType::DynamicCast<FrameNode>(XComponentModelNG().CreateTypeNode(nodeId, &g_params));
     return frameNode;
 }
 
