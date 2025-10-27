@@ -912,4 +912,5 @@ HWTEST_F(RichEditorSelectionOneTestNg, MarkContentNodeForRender001, TestSize.Lev
     auto changeFlag = paintProp->GetPropertyChangeFlag() | NG::PROPERTY_UPDATE_RENDER;
     EXPECT_EQ(paintProp->GetPropertyChangeFlag(), changeFlag);
 }
+
 } // namespace OHOS::Ace::NG
