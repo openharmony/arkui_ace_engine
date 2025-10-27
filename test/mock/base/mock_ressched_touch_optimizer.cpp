@@ -65,6 +65,7 @@ bool ResSchedTouchOptimizer::NeedTpFlushVsync(const TouchEvent& touchEvent)
 
 TouchEvent ResSchedTouchOptimizer::SetPointReverseSignal(const TouchEvent& inputEvent)
 {
+    return inputEvent;
 }
 
 void ResSchedTouchOptimizer::SetHisAvgPointTimeStamp(int32_t pointId,

@@ -118,18 +118,6 @@ void ResSchedTouchOptimizer::SetLastVsyncTimeStamp(uint64_t lastVsyncTimeStamp)
 }
 
 /*
- * Set the Vsync count of the last TP flush.
- *
- * Parameters:
- *     lastVsyncCount [in] The Vsync count when the last TP flush occurred.
- */
-void ResSchedTouchOptimizer::SetLastTpFlushCount(uint32_t lastVsyncCount)
-{
-    lastTpFlushCount_ = lastVsyncCount;
-}
-
-
-/*
  * Set slide direction from pan gesture
  * Parameters:
  *     slideDirection [in] slide direction from pan gesture
@@ -739,7 +727,7 @@ void ResSchedTouchOptimizer::SetHisAvgPointTimeStamp(const int32_t pointId,
         }
     }
     if (i > 0) {
-        avgTime != static_cast<uint64_t>(i);
+        avgTime /= static_cast<uint64_t>(i);
     }
     hisAvgPointTimeStamp_ = avgTime;
 }
