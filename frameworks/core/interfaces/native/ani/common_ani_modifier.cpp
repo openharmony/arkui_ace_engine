@@ -605,6 +605,16 @@ ani_double Px2lpx(ani_double value, ani_int instanceId)
     return value / windowConfig.designWidthScale;
 }
 
+ani_int GetWindowWidthBreakpoint()
+{
+    return ViewAbstract::GetWindowWidthBreakpoint();
+}
+
+ani_int GetWindowHeightBreakpoint()
+{
+    return ViewAbstract::GetWindowHeightBreakpoint();
+}
+
 void* TransferKeyEventPointer(ani_long nativePtr)
 {
     CHECK_NULL_RETURN(nativePtr, nullptr);
@@ -945,6 +955,8 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .px2fp = OHOS::Ace::NG::Px2fp,
         .lpx2px = OHOS::Ace::NG::Lpx2px,
         .px2lpx = OHOS::Ace::NG::Px2lpx,
+        .getWindowHeightBreakpoint =  OHOS::Ace::NG::GetWindowHeightBreakpoint,
+        .getWindowWidthBreakpoint = OHOS::Ace::NG::GetWindowWidthBreakpoint,
         .transferKeyEventPointer = OHOS::Ace::NG::TransferKeyEventPointer,
         .createKeyEventAccessorWithPointer = OHOS::Ace::NG::CreateKeyEventAccessorWithPointer,
         .createEventTargetInfoAccessor = OHOS::Ace::NG::CreateEventTargetInfoAccessor,

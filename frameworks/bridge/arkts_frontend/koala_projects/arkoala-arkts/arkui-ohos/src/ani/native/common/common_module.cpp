@@ -956,6 +956,23 @@ ani_double Px2lpx(ani_env* env, ani_object obj, ani_double value, ani_int instan
     }
     return modifier->getCommonAniModifier()->px2lpx(value, instanceId);
 }
+ani_int getWindowWidthBreakpoint(ani_env* env, ani_object obj)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return -1;
+    }
+    return modifier->getCommonAniModifier()->getWindowWidthBreakpoint();
+}
+
+ani_int getWindowHeightBreakpoint(ani_env* env, ani_object obj)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return -1;
+    }
+    return modifier->getCommonAniModifier()->getWindowHeightBreakpoint();
+}
 void* TransferKeyEventPointer(ani_env* env, ani_object obj, ani_long pointer)
 {
     const auto* modifier = GetNodeAniModifier();
