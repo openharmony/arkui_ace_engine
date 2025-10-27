@@ -51,12 +51,12 @@ static void SetAction(std::shared_ptr<ListItemComponent> listItem,
 {
     auto option = new ListItemSwipeActionOption();
     auto col1 = std::make_shared<ColumnComponent>();
-    col1->SetWidth(50);
-    col1->SetHeight(50);
+    col1->SetWidth(SIZE_50);
+    col1->SetHeight(SIZE_50);
     col1->SetBackgroundColor(COLOR_GREEN);
     auto col2 = std::make_shared<ColumnComponent>();
-    col2->SetWidth(50);
-    col2->SetHeight(50);
+    col2->SetWidth(SIZE_50);
+    col2->SetHeight(SIZE_50);
     col2->SetBackgroundColor(COLOR_YELLOW);
 
     auto item1 = OH_ArkUI_ListItemSwipeActionItem_Create();
@@ -76,8 +76,8 @@ static std::shared_ptr<RowComponent> CreateButton(std::vector<std::shared_ptr<Li
     for (int i = 0; i < list.size(); i++) {
         auto eachList = list[i];
         auto button1 = std::make_shared<ButtonComponent>();
-        button1->SetWidth(50);
-        button1->SetHeight(50);
+        button1->SetWidth(SIZE_50);
+        button1->SetHeight(SIZE_50);
         button1->SetId("callbackButton" + std::to_string(i + 1));
         button1->SetBackgroundColor(COLOR_TRANSPARENT);
         button1->RegisterOnClick([eachList]() {
@@ -89,8 +89,8 @@ static std::shared_ptr<RowComponent> CreateButton(std::vector<std::shared_ptr<Li
             });
         });
         auto button2 = std::make_shared<ButtonComponent>();
-        button2->SetWidth(50);
-        button2->SetHeight(50);
+        button2->SetWidth(SIZE_50);
+        button2->SetHeight(SIZE_50);
         button2->SetId("nullCallbackButton" + std::to_string(i + 1));
         button2->SetBackgroundColor(COLOR_TRANSPARENT);
         button2->RegisterOnClick(
@@ -113,18 +113,18 @@ static std::shared_ptr<ListComponent> CreateListWithAction(int32_t listItemCount
 {
     auto list = std::make_shared<ListComponent>();
     constexpr int32_t width = 150;
-    list->SetMargin(10);
+    list->SetMargin(PARAM_10);
     list->SetWidth(width);
-    list->SetHeight(400);
+    list->SetHeight(SIZE_400);
     list->SetListDirection(vertical);
-    list->SetListDivider(COLOR_BLACK, 2, 0, 0);
+    list->SetListDivider(COLOR_BLACK, PARAM_2, PARAM_0, PARAM_0);
     for (int i = 0; i < listItemCount; i++) {
         auto listItem = std::make_shared<ListItemComponent>();
         if (i == 0) {
             listItem->SetId(firstItemId);
         }
         listItem->SetWidth(width);
-        listItem->SetHeight(100);
+        listItem->SetHeight(SIZE_100);
         listItem->SetBackgroundColor(COLOR_BLUE);
         SetAction(listItem);
         listItem->AddChild(CreateText("listItem " + std::to_string(i)));
@@ -135,7 +135,7 @@ static std::shared_ptr<ListComponent> CreateListWithAction(int32_t listItemCount
         for (int j = 0; j < listItemCountInGroup; j++) {
             auto listItem = std::make_shared<ListItemComponent>();
             listItem->SetWidth(width);
-            listItem->SetHeight(100);
+            listItem->SetHeight(SIZE_100);
             listItem->SetBackgroundColor(COLOR_RED);
             SetAction(listItem);
             listItem->AddChild(CreateText("listItemGroup" + std::to_string(i) + "组" + std::to_string(j)));
@@ -200,7 +200,7 @@ static std::shared_ptr<ColumnComponent> CreateSwipeActionController(std::shared_
     column->AddChild(expandListBtn);
     column->AddChild(collapseListBtn);
     directionBtn->RegisterOnClick([directionBtn]() {
-        SwipeActionTest::direction = (SwipeActionTest::direction + 1) % 4; // Cycle through 0-3
+        SwipeActionTest::direction = (SwipeActionTest::direction + 1) % PARAM_4; // Cycle through 0-3
         directionBtn->SetLabel("direction " + std::to_string(SwipeActionTest::direction));
     });
     listIndexBtn->RegisterOnClick([listIndexBtn]() {
@@ -245,7 +245,8 @@ napi_value SwipeActionTest::CreateNativeNode(napi_env env, napi_callback_info in
     rootRow->AddChild(CreateSwipeActionController(list));
     std::string id(xComponentID);
     if (OH_NativeXComponent_AttachNativeRootNode(
-            PluginManager::GetInstance()->GetNativeXComponent(id), rootRow->GetComponent()) == INVALID_PARAM) {
+            PluginManager::GetInstance()->GetNativeXComponent(id), 
+            rootRow->GetComponent()) == INVALID_PARAM) {
         OH_LOG_Print(
             LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, "SwipeActionTest", "OH_NativeXComponent_AttachNativeRootNode failed");
     }

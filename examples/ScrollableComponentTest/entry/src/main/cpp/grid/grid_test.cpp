@@ -118,7 +118,7 @@ std::shared_ptr<GridComponent> GridTest::CreatGrid(int32_t type)
         auto gridItem = new Component(ARKUI_NODE_GRID_ITEM);
         auto text = new TextComponent();
         gridItem->SetBackgroundColor(COLOR_YELLOW);
-        gridItem->SetBorderWidth(3);
+        gridItem->SetBorderWidth(PARAM_3);
         gridItem->SetBorderColor(COLOR_GRAY, COLOR_GRAY, COLOR_GRAY, COLOR_GRAY);
         showMessage += message;
         text->SetTextContent(showMessage);
@@ -143,18 +143,18 @@ std::shared_ptr<GridComponent> GridTest::CreatGrid1(int32_t type)
     grid->SetWidth(SIZE_300);
     grid->SetHeight(SIZE_300);
     grid->SetMargin(20, 0, 0, 0);
-    grid->SetPadding(10, 10, 10, 10);
+    grid->SetPadding(PARAM_10, PARAM_10, PARAM_10, PARAM_10);
     grid->SetBackgroundColor(COLOR_BLUE);
     std::string message = "A";
-    for (int i = 0; i < 13; i++) {
+    for (int i = 0; i < PARAM_13; i++) {
         auto gridItem = new Component(ARKUI_NODE_GRID_ITEM);
         auto text = new TextComponent();
         gridItem->SetBackgroundColor(COLOR_YELLOW);
-        gridItem->SetBorderWidth(3);
+        gridItem->SetBorderWidth(PARAM_3);
         gridItem->SetBorderColor(COLOR_GRAY, COLOR_GRAY, COLOR_GRAY, COLOR_GRAY);
         text->SetTextContent(message);
-        text->SetWidth(300);
-        text->SetHeight(80);
+        text->SetWidth(SIZE_300);
+        text->SetHeight(SIZE_80);
         text->SetTextAlign(ARKUI_TEXT_ALIGNMENT_CENTER);
         text->SetBackgroundColor(COLOR_GRAY);
 
@@ -169,10 +169,8 @@ std::shared_ptr<GridComponent> GridTest::CreatGrid1(int32_t type)
 std::shared_ptr<GridComponent> GridTest::CreatGrid2(int32_t type)
 {
     OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, "GridTest", "CreatGrid2");
-
     ArkUI_NativeNodeAPI_1* nodeAPI = nullptr;
     OH_ArkUI_GetModuleInterface(ARKUI_NATIVE_NODE, ArkUI_NativeNodeAPI_1, nodeAPI);
-
     auto grid = std::make_shared<GridComponent>();
     grid->SetWidth(SIZE_450);
     grid->SetHeight(SIZE_300);
@@ -181,7 +179,7 @@ std::shared_ptr<GridComponent> GridTest::CreatGrid2(int32_t type)
     // 设置columnsGap:NODE_GRID_COLUMN_GAP
     grid->SetGridColumnsGap(SIZE_10);
     // 设置rowGap:NODE_GRID_ROW_GAP
-    grid->SetGridRowsGap(10);
+    grid->SetGridRowsGap(PARAM_10);
     grid->SetBorderWidth(SIZE_5);
     grid->SetMargin(SIZE_5);
     if (type == 1) {
@@ -194,7 +192,7 @@ std::shared_ptr<GridComponent> GridTest::CreatGrid2(int32_t type)
         auto gridItem = new Component(ARKUI_NODE_GRID_ITEM);
         auto text = new TextComponent();
         gridItem->SetBackgroundColor(COLOR_YELLOW);
-        gridItem->SetBorderWidth(3);
+        gridItem->SetBorderWidth(PARAM_3);
         gridItem->SetBorderColor(COLOR_GRAY, COLOR_GRAY, COLOR_GRAY, COLOR_GRAY);
         gridItem->SetWidth(SIZE_50);
         gridItem->SetHeight(SIZE_50);
@@ -203,7 +201,6 @@ std::shared_ptr<GridComponent> GridTest::CreatGrid2(int32_t type)
         nodeAPI->addChild(gridItem->GetComponent(), text->GetComponent());
         nodeAPI->addChild(grid->GetComponent(), gridItem->GetComponent());
     }
-
     auto option = OH_ArkUI_GridLayoutOptions_Create();
     uint32_t irregularIndexes[] = { 0, 7 };
     auto ret = OH_ArkUI_GridLayoutOptions_SetIrregularIndexes(option, irregularIndexes, 2);
@@ -249,11 +246,11 @@ std::shared_ptr<GridComponent> GridTest::CreatGrid3(int32_t type)
         nodeAPI->setAttribute(grid->GetComponent(), NODE_GRID_FOCUS_WRAP_MODE, &item);
     }
 
-    for (int i = 0; i < 6; i++) {
+    for (int i = 0; i < PARAM_6; i++) {
         auto gridItem = new Component(ARKUI_NODE_GRID_ITEM);
         auto text = new TextComponent();
         gridItem->SetBackgroundColor(COLOR_YELLOW);
-        gridItem->SetBorderWidth(3);
+        gridItem->SetBorderWidth(PARAM_3);
         gridItem->SetBorderColor(COLOR_GRAY, COLOR_GRAY, COLOR_GRAY, COLOR_GRAY);
         gridItem->SetWidth(SIZE_50);
         gridItem->SetHeight(SIZE_50);
@@ -281,15 +278,15 @@ std::shared_ptr<GridComponent> GridTest::CreatGrid3(int32_t type)
                 OH_LOG_Print(LOG_APP, LOG_INFO, LOG_PRINT_DOMAIN, "GridTest", "CreatGrid3 grid userData:%{public}s",
                     str->c_str());
             }
-            if (itemIndex == 0) {
+            if (itemIndex == PARAM_0) {
                 return ArkUI_GridItemRect { 0, 0, 1, 1 };
-            } else if (itemIndex == 1) {
+            } else if (itemIndex == PARAM_1) {
                 return ArkUI_GridItemRect { 0, 1, 2, 2 };
-            } else if (itemIndex == 2) {
+            } else if (itemIndex == PARAM_2) {
                 return ArkUI_GridItemRect { 0, 3, 3, 3 };
-            } else if (itemIndex == 3) {
+            } else if (itemIndex == PARAM_3) {
                 return ArkUI_GridItemRect { 3, 0, 3, 3 };
-            } else if (itemIndex == 4) {
+            } else if (itemIndex == PARAM_4) {
                 return ArkUI_GridItemRect { 4, 3, 2, 2 };
             } else {
                 return ArkUI_GridItemRect { 5, 5, 1, 1 };
@@ -322,7 +319,7 @@ std::shared_ptr<GridComponent> GridTest::CreatGrid4(int32_t type)
         nodeAPI->setAttribute(grid->GetComponent(), NODE_GRID_FOCUS_WRAP_MODE, &item);
     }
 
-    for (int i = 0; i < 6; i++) {
+    for (int i = 0; i < PARAM_6; i++) {
         auto gridItem = new Component(ARKUI_NODE_GRID_ITEM);
         auto text = new TextComponent();
         gridItem->SetBackgroundColor(COLOR_YELLOW);
@@ -356,7 +353,8 @@ std::shared_ptr<GridComponent> GridTest::CreatGrid4(int32_t type)
     return grid;
 }
 
-napi_value GridTest::CreateNativeNode(napi_env env, napi_callback_info info)
+//napi_value GridTest::CreateNativeNode(napi_env env, napi_callback_info info)
+void GridTest::InitializeGrid(napi_env env, napi_callback_info info)
 {
     OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, "GridTest", "CreateNativeNode");
 
@@ -375,6 +373,10 @@ napi_value GridTest::CreateNativeNode(napi_env env, napi_callback_info info)
 
     ArkUI_NativeNodeAPI_1* nodeAPI = nullptr;
     OH_ArkUI_GetModuleInterface(ARKUI_NATIVE_NODE, ArkUI_NativeNodeAPI_1, nodeAPI);
+}
+
+static std::shared_ptr<GridComponent> CreateBaseGrid() 
+{
     // 创建grid
     auto grid = CreatGrid(0);
     // 测试 onReachStart
@@ -382,53 +384,50 @@ napi_value GridTest::CreateNativeNode(napi_env env, napi_callback_info info)
         OH_LOG_Print(LOG_APP, LOG_INFO, LOG_PRINT_DOMAIN, "GridTest", "OnGridReachStart");
         grid->SetBackgroundColor(COLOR_RED);
     });
-
     // 测试 SetOnReachEnd
     grid->SetOnGridReachEnd([grid]() {
         OH_LOG_Print(LOG_APP, LOG_INFO, LOG_PRINT_DOMAIN, "GridTest", "OnReachEnd");
         grid->SetBackgroundColor(COLOR_YELLOW);
     });
-
     // 测试 SetOnGridScrollStop
     grid->SetOnGridScrollStop([grid]() {
         OH_LOG_Print(LOG_APP, LOG_INFO, LOG_PRINT_DOMAIN, "GridTest", "OnScrollStop");
         grid->SetBackgroundColor(COLOR_GREEN);
     });
-
     // 测试 SetOnGridScrollStart
     grid->SetOnGridScrollStart([grid]() {
         OH_LOG_Print(LOG_APP, LOG_INFO, LOG_PRINT_DOMAIN, "GridTest", "OnScrollStart");
         grid->SetBackgroundColor(COLOR_GRAY);
     });
-
     // 测试 SetOnGridWillScroll
     grid->SetOnGridWillScroll([grid](float offset, int32_t state, int32_t source) {
         OH_LOG_Print(LOG_APP, LOG_INFO, LOG_PRINT_DOMAIN, "GridTest",
             "OnWillScroll offset: %{public}f, state: %{public}d, source: %{public}d", offset, state, source);
         grid->SetBackgroundColor(COLOR_PINK);
     });
-
     // 测试 SetOnGridDidScroll
     grid->SetOnGridDidScroll([grid](float offset, int32_t state) {
         OH_LOG_Print(LOG_APP, LOG_INFO, LOG_PRINT_DOMAIN, "GridTest",
             "OnGridDidScroll offset: %{public}f, state: %{public}d", offset, state);
         grid->SetBackgroundColor(COLOR_PURPLE);
     });
-
     // 测试 SetOnGridWillStopDragging
     grid->SetOnGridWillStopDragging([grid](float velocity) {
         OH_LOG_Print(
             LOG_APP, LOG_INFO, LOG_PRINT_DOMAIN, "GridTest", "OnGridWillStopDragging velocity: %{public}f", velocity);
         grid->SetBackgroundColor(COLOR_WHITE);
     });
-
     // 测试 SetOnGridScrollIndex
     grid->SetOnGridScrollIndex([grid](int32_t first, int32_t last) {
         OH_LOG_Print(LOG_APP, LOG_INFO, LOG_PRINT_DOMAIN, "GridTest",
             "OnGridScrollIndex first: %{public}d, last: %{public}d", first, last);
         grid->SetBackgroundColor(COLOR_BLACK);
     });
+    return grid;
+}
 
+static std::shared_ptr<ColumnComponent> CreateModeControls(std::shared_ptr<GridComponent> grid) 
+{
     // mode属性
     auto modeColumn = std::make_shared<ColumnComponent>();
     auto scrollModeText = std::make_shared<TextComponent>();
@@ -438,8 +437,8 @@ napi_value GridTest::CreateNativeNode(napi_env env, napi_callback_info info)
     getScrollModeText->SetTextContent("getScrollMode:");
 
     auto scrollModeButton = std::make_shared<ButtonComponent>();
-    scrollModeButton->SetWidth(120);
-    scrollModeButton->SetHeight(50);
+    scrollModeButton->SetWidth(SIZE_120);
+    scrollModeButton->SetHeight(SIZE_50);
     scrollModeButton->SetId("scrollMode");
     scrollModeButton->SetLable("scrollMode");
     scrollModeButton->RegisterOnClick([grid, scrollModeText, getScrollModeText]() {
@@ -455,8 +454,8 @@ napi_value GridTest::CreateNativeNode(napi_env env, napi_callback_info info)
     });
 
     auto resetScrollModeButton = std::make_shared<ButtonComponent>();
-    resetScrollModeButton->SetWidth(120);
-    resetScrollModeButton->SetHeight(50);
+    resetScrollModeButton->SetWidth(SIZE_120);
+    resetScrollModeButton->SetHeight(SIZE_50);
     resetScrollModeButton->SetId("resetScrollMode");
     resetScrollModeButton->SetLable("resetScrollMode");
     resetScrollModeButton->RegisterOnClick([grid, getScrollModeText]() {
@@ -470,7 +469,11 @@ napi_value GridTest::CreateNativeNode(napi_env env, napi_callback_info info)
     modeColumn->AddChild(getScrollModeText);
     modeColumn->AddChild(scrollModeButton);
     modeColumn->AddChild(resetScrollModeButton);
+    return modeColumn;
+}
 
+static std::shared_ptr<ColumnComponent> CreateWidthControls(std::shared_ptr<GridComponent> grid) 
+{
     // width属性
     auto widthColumn = std::make_shared<ColumnComponent>();
     auto scrollWidthText = std::make_shared<TextComponent>();
@@ -479,8 +482,8 @@ napi_value GridTest::CreateNativeNode(napi_env env, napi_callback_info info)
     getScrollWidthText->SetTextContent("GetScrollWidth:");
 
     auto scrollWidthButton = std::make_shared<ButtonComponent>();
-    scrollWidthButton->SetWidth(120);
-    scrollWidthButton->SetHeight(50);
+    scrollWidthButton->SetWidth(SIZE_120);
+    scrollWidthButton->SetHeight(SIZE_50);
     scrollWidthButton->SetId("scrollWidth");
     scrollWidthButton->SetLable("scrollWidth");
     scrollWidthButton->RegisterOnClick([grid, scrollWidthText, getScrollWidthText]() {
@@ -496,8 +499,8 @@ napi_value GridTest::CreateNativeNode(napi_env env, napi_callback_info info)
     });
 
     auto resetScrollWidthButton = std::make_shared<ButtonComponent>();
-    resetScrollWidthButton->SetWidth(120);
-    resetScrollWidthButton->SetHeight(50);
+    resetScrollWidthButton->SetWidth(SIZE_120);
+    resetScrollWidthButton->SetHeight(SIZE_50);
     resetScrollWidthButton->SetId("resetScrollWidth");
     resetScrollWidthButton->SetLable("resetScrollWidth");
     resetScrollWidthButton->RegisterOnClick([grid, getScrollWidthText]() {
@@ -511,7 +514,11 @@ napi_value GridTest::CreateNativeNode(napi_env env, napi_callback_info info)
     widthColumn->AddChild(getScrollWidthText);
     widthColumn->AddChild(scrollWidthButton);
     widthColumn->AddChild(resetScrollWidthButton);
+    return widthColumn;
+}
 
+static std::shared_ptr<ColumnComponent> CreateColorControls(std::shared_ptr<GridComponent> grid) 
+{
     // color属性
     auto colorColumn = std::make_shared<ColumnComponent>();
     auto scrollColorText = std::make_shared<TextComponent>();
@@ -520,8 +527,9 @@ napi_value GridTest::CreateNativeNode(napi_env env, napi_callback_info info)
     getScrollColorText->SetTextContent("GetScrollColor:");
 
     auto scrollColorButton = std::make_shared<ButtonComponent>();
-    scrollColorButton->SetWidth(120);
-    scrollColorButton->SetHeight(50);
+    const int SIZE_120 = 120;
+    scrollColorButton->SetWidth(SIZE_120);
+    resetFrictionButton->SetHeight(SIZE_50);
     scrollColorButton->SetId("scrollColor");
     scrollColorButton->SetLable("scrollColor");
     scrollColorButton->RegisterOnClick([grid, scrollColorText, getScrollColorText]() {
@@ -537,8 +545,8 @@ napi_value GridTest::CreateNativeNode(napi_env env, napi_callback_info info)
     });
 
     auto resetScrollColorButton = std::make_shared<ButtonComponent>();
-    resetScrollColorButton->SetWidth(120);
-    resetScrollColorButton->SetHeight(50);
+    resetScrollColorButton->SetWidth(SIZE_120);
+    resetScrollColorButton->SetHeight(SIZE_50);
     resetScrollColorButton->SetId("resetScrollColor");
     resetScrollColorButton->SetLable("resetScrollColor");
     resetScrollColorButton->RegisterOnClick([grid, getScrollColorText]() {
@@ -551,7 +559,11 @@ napi_value GridTest::CreateNativeNode(napi_env env, napi_callback_info info)
     colorColumn->AddChild(getScrollColorText);
     colorColumn->AddChild(scrollColorButton);
     colorColumn->AddChild(resetScrollColorButton);
+    return colorColumn;
+}
 
+static std::shared_ptr<ColumnComponent> CreateEnableScrollControls(std::shared_ptr<GridComponent> grid) 
+{
     // enableScroll属性
     auto enableScrollColumn = std::make_shared<ColumnComponent>();
     auto enableScrollText = std::make_shared<TextComponent>();
@@ -560,8 +572,8 @@ napi_value GridTest::CreateNativeNode(napi_env env, napi_callback_info info)
     getEnableScrollText->SetTextContent("GetEnableScroll:");
 
     auto enableScrollButton = std::make_shared<ButtonComponent>();
-    enableScrollButton->SetWidth(120);
-    enableScrollButton->SetHeight(50);
+    enableScrollButton->SetWidth(SIZE_120);
+    enableScrollButton->SetHeight(SIZE_50);
     enableScrollButton->SetId("enableScroll");
     enableScrollButton->SetLable("enableScroll");
     enableScrollButton->RegisterOnClick([grid, enableScrollText, getEnableScrollText]() {
@@ -577,8 +589,8 @@ napi_value GridTest::CreateNativeNode(napi_env env, napi_callback_info info)
     });
 
     auto resetEnableScrollButton = std::make_shared<ButtonComponent>();
-    resetEnableScrollButton->SetWidth(120);
-    resetEnableScrollButton->SetHeight(50);
+    resetEnableScrollButton->SetWidth(SIZE_120);
+    resetEnableScrollButton->SetHeight(SIZE_50);
     resetEnableScrollButton->SetId("resetEnableScroll");
     resetEnableScrollButton->SetLable("resetEnableScroll");
     resetEnableScrollButton->RegisterOnClick([grid, getEnableScrollText]() {
@@ -591,7 +603,11 @@ napi_value GridTest::CreateNativeNode(napi_env env, napi_callback_info info)
     enableScrollColumn->AddChild(getEnableScrollText);
     enableScrollColumn->AddChild(enableScrollButton);
     enableScrollColumn->AddChild(resetEnableScrollButton);
+    return enableScrollColumn;
+}
 
+static std::shared_ptr<ColumnComponent> CreateRowsGapControls(std::shared_ptr<GridComponent> grid) 
+{
     // rowsGap属性
     auto rowsGapColumn = std::make_shared<ColumnComponent>();
     auto rowsGapText = std::make_shared<TextComponent>();
@@ -600,8 +616,8 @@ napi_value GridTest::CreateNativeNode(napi_env env, napi_callback_info info)
     getRowsGapText->SetTextContent("GetRowsGap:");
 
     auto rowsGapButton = std::make_shared<ButtonComponent>();
-    rowsGapButton->SetWidth(120);
-    rowsGapButton->SetHeight(50);
+    rowsGapButton->SetWidth(SIZE_120);
+    rowsGapButton->SetHeight(SIZE_50);
     rowsGapButton->SetId("rowGap");
     rowsGapButton->SetLable("rowGap");
     rowsGapButton->RegisterOnClick([grid, rowsGapText, getRowsGapText]() {
@@ -617,8 +633,8 @@ napi_value GridTest::CreateNativeNode(napi_env env, napi_callback_info info)
     });
 
     auto resetRowsGapButton = std::make_shared<ButtonComponent>();
-    resetRowsGapButton->SetWidth(120);
-    resetRowsGapButton->SetHeight(50);
+    resetRowsGapButton->SetWidth(SIZE_120);
+    resetRowsGapButton->SetHeight(SIZE_50);
     resetRowsGapButton->SetId("resetRowsGap");
     resetRowsGapButton->SetLable("resetRowsGap");
     resetRowsGapButton->RegisterOnClick([grid, getRowsGapText]() {
@@ -632,7 +648,11 @@ napi_value GridTest::CreateNativeNode(napi_env env, napi_callback_info info)
     rowsGapColumn->AddChild(getRowsGapText);
     rowsGapColumn->AddChild(rowsGapButton);
     rowsGapColumn->AddChild(resetRowsGapButton);
+    return rowsGapColumn;
+}
 
+static std::shared_ptr<ColumnComponent> CreateAlignItemsControls(std::shared_ptr<GridComponent> grid) 
+{
     // alignItems属性
     auto alignItemsColumn = std::make_shared<ColumnComponent>();
     auto alignItemsText = std::make_shared<TextComponent>();
@@ -641,8 +661,8 @@ napi_value GridTest::CreateNativeNode(napi_env env, napi_callback_info info)
     getAlignItemsText->SetTextContent("GetAlignItems:");
 
     auto alignItemsButton = std::make_shared<ButtonComponent>();
-    alignItemsButton->SetWidth(120);
-    alignItemsButton->SetHeight(50);
+    alignItemsButton->SetWidth(SIZE_120);
+    alignItemsButton->SetHeight(SIZE_50);
     alignItemsButton->SetId("alignItems");
     alignItemsButton->SetLable("alignItems");
     alignItemsButton->RegisterOnClick([grid, alignItemsText, getAlignItemsText]() {
@@ -658,8 +678,8 @@ napi_value GridTest::CreateNativeNode(napi_env env, napi_callback_info info)
     });
 
     auto resetAlignItemsButton = std::make_shared<ButtonComponent>();
-    resetAlignItemsButton->SetWidth(120);
-    resetAlignItemsButton->SetHeight(50);
+    resetAlignItemsButton->SetWidth(SIZE_120);
+    resetAlignItemsButton->SetHeight(SIZE_50);
     resetAlignItemsButton->SetId("resetAlignItems");
     resetAlignItemsButton->SetLable("resetAlignItems");
     resetAlignItemsButton->RegisterOnClick([grid, getAlignItemsText]() {
@@ -673,7 +693,11 @@ napi_value GridTest::CreateNativeNode(napi_env env, napi_callback_info info)
     alignItemsColumn->AddChild(getAlignItemsText);
     alignItemsColumn->AddChild(alignItemsButton);
     alignItemsColumn->AddChild(resetAlignItemsButton);
+    return alignItemsColumn;
+}
 
+static std::shared_ptr<ColumnComponent> CreateFlingSpeedLimitControls(std::shared_ptr<GridComponent> grid) 
+{
     // flingSpeedLimit属性
     auto flingSpeedLimitColumn = std::make_shared<ColumnComponent>();
     auto flingSpeedLimitText = std::make_shared<TextComponent>();
@@ -682,8 +706,8 @@ napi_value GridTest::CreateNativeNode(napi_env env, napi_callback_info info)
     getFlingSpeedLimitText->SetTextContent("GetFlingSpeedLimit:");
 
     auto flingSpeedLimitButton = std::make_shared<ButtonComponent>();
-    flingSpeedLimitButton->SetWidth(120);
-    alignItemsButton->SetHeight(50);
+    flingSpeedLimitButton->SetWidth(SIZE_120);
+    alignItemsButton->SetHeight(SIZE_50);
     flingSpeedLimitButton->SetId("flingSpeedLimit");
     flingSpeedLimitButton->SetLable("flingSpeedLimit");
     flingSpeedLimitButton->RegisterOnClick([grid, flingSpeedLimitText, getFlingSpeedLimitText]() {
@@ -700,7 +724,7 @@ napi_value GridTest::CreateNativeNode(napi_env env, napi_callback_info info)
 
     auto resetFlingSpeedLimitButton = std::make_shared<ButtonComponent>();
     resetFlingSpeedLimitButton->SetWidth(120);
-    resetFlingSpeedLimitButton->SetHeight(50);
+    resetFlingSpeedLimitButton->SetHeight(SIZE_50);
     resetFlingSpeedLimitButton->SetId("resetFlingSpeedLimit");
     resetFlingSpeedLimitButton->SetLable("resetFlingSpeedLimit");
     resetFlingSpeedLimitButton->RegisterOnClick([grid, getFlingSpeedLimitText]() {
@@ -713,7 +737,11 @@ napi_value GridTest::CreateNativeNode(napi_env env, napi_callback_info info)
     flingSpeedLimitColumn->AddChild(getFlingSpeedLimitText);
     flingSpeedLimitColumn->AddChild(flingSpeedLimitButton);
     flingSpeedLimitColumn->AddChild(resetFlingSpeedLimitButton);
+    return flingSpeedLimitColumn;
+}
 
+static std::shared_ptr<ColumnComponent> CreateFrictionControls(std::shared_ptr<GridComponent> grid) 
+{
     // friction属性
     auto frictionColumn = std::make_shared<ColumnComponent>();
     auto frictionText = std::make_shared<TextComponent>();
@@ -722,8 +750,8 @@ napi_value GridTest::CreateNativeNode(napi_env env, napi_callback_info info)
     getFrictionText->SetTextContent("GetFriction:");
 
     auto frictionButton = std::make_shared<ButtonComponent>();
-    frictionButton->SetWidth(120);
-    frictionButton->SetHeight(50);
+    frictionButton->SetWidth(SIZE_120);
+    frictionButton->SetHeight(SIZE_50);
     frictionButton->SetId("friction");
     frictionButton->SetLable("friction");
     frictionButton->RegisterOnClick([grid, frictionText, getFrictionText]() {
@@ -739,8 +767,8 @@ napi_value GridTest::CreateNativeNode(napi_env env, napi_callback_info info)
     });
 
     auto resetFrictionButton = std::make_shared<ButtonComponent>();
-    resetFrictionButton->SetWidth(120);
-    resetFrictionButton->SetHeight(50);
+    resetFrictionButton->SetWidth(SIZE_120);
+    resetFrictionButton->SetHeight(SIZE_50);
     resetFrictionButton->SetId("resetFriction");
     resetFrictionButton->SetLable("resetFriction");
     resetFrictionButton->RegisterOnClick([grid, getFrictionText]() {
@@ -753,79 +781,71 @@ napi_value GridTest::CreateNativeNode(napi_env env, napi_callback_info info)
     frictionColumn->AddChild(getFrictionText);
     frictionColumn->AddChild(frictionButton);
     frictionColumn->AddChild(resetFrictionButton);
+}
 
-    // nestedScroll
+static std::shared_ptr<ColumnComponent> CreateNestedScrollControls(std::shared_ptr<GridComponent> grid) 
+{
     auto nestedScrollColumn = std::make_shared<ColumnComponent>();
     auto nestedScrollText = std::make_shared<TextComponent>();
     nestedScrollText->SetTextContent("nestedScroll:,");
     auto getNestedScrollText = std::make_shared<TextComponent>();
     getNestedScrollText->SetTextContent("getNestedScroll:");
-
     auto nestedScrollButton = std::make_shared<ButtonComponent>();
-    nestedScrollButton->SetWidth(120);
-    nestedScrollButton->SetHeight(50);
+    nestedScrollButton->SetWidth(SIZE_120);
+    nestedScrollButton->SetHeight(SIZE_50);
     nestedScrollButton->SetId("nestedScroll");
     nestedScrollButton->SetLable("nestedScroll");
     nestedScrollButton->RegisterOnClick([grid, nestedScrollText, getNestedScrollText]() {
         nestedModeIndex_ = (nestedModeIndex_ + 1) % nestedModePool.size();
         auto forwardValue = nestedModePool[nestedModeIndex_];
         auto backValue = nestedModePool[nestedModeIndex_];
-        nestedScrollText->SetTextContent(
-            "nestedScroll forward:" + std::to_string(forwardValue) + " ,back:" + std::to_string(backValue) + ",");
+        nestedScrollText->SetTextContent("nestedScroll" + std::to_string(forwardValue) + std::to_string(backValue));
         ArkUI_NumberValue value_number[] = { { .i32 = forwardValue }, { .i32 = backValue } };
         ArkUI_AttributeItem attribute_item = { value_number, sizeof(value_number) / sizeof(ArkUI_NumberValue) };
         grid->setAttribute(NODE_SCROLL_NESTED_SCROLL, &attribute_item);
-
         auto getValue = grid->getAttribute(NODE_SCROLL_NESTED_SCROLL);
         if (getValue != nullptr) {
             auto size = getValue->size;
-            OH_LOG_Print(
-                LOG_APP, LOG_INFO, LOG_PRINT_DOMAIN, "GridTest nestedScroll", "nestedScroll size: %{public}d", size);
             auto forward = getValue->value[0].i32;
             auto back = getValue->value[1].i32;
-            getNestedScrollText->SetTextContent(
-                "getNestedScroll: forward:" + std::to_string(forward) + ",back:" + std::to_string(back));
+            getNestedScrollText->SetTextContent("getNestedScroll" + std::to_string(forward) + std::to_string(back));
         } else {
             getNestedScrollText->SetTextContent("空");
-        }
-    });
-
+        }});
     auto resetNestedScrollButton = std::make_shared<ButtonComponent>();
-    resetNestedScrollButton->SetWidth(120);
-    resetNestedScrollButton->SetHeight(50);
+    resetNestedScrollButton->SetWidth(SIZE_120);
+    resetNestedScrollButton->SetHeight(SIZE_50);
     resetNestedScrollButton->SetId("resetNestedScroll");
     resetNestedScrollButton->SetLable("resetNestedScroll");
     resetNestedScrollButton->RegisterOnClick([grid, getNestedScrollText]() {
         grid->resetAttribute(NODE_SCROLL_NESTED_SCROLL);
-
         auto getValue = grid->getAttribute(NODE_SCROLL_NESTED_SCROLL);
         if (getValue != nullptr) {
             auto size = getValue->size;
-            OH_LOG_Print(
-                LOG_APP, LOG_INFO, LOG_PRINT_DOMAIN, "GridTest nestedScroll", "nestedScroll size: %{public}d", size);
             auto forward = getValue->value[0].i32;
             auto back = getValue->value[1].i32;
-            getNestedScrollText->SetTextContent(
-                "getNestedScroll: forward:" + std::to_string(forward) + ",back:" + std::to_string(back));
+            getNestedScrollText->SetTextContent("getNestedScroll" + std::to_string(forward) + std::to_string(back));
         } else {
             getNestedScrollText->SetTextContent("空");
-        }
-    });
+        }});
     nestedScrollColumn->AddChild(nestedScrollText);
     nestedScrollColumn->AddChild(getNestedScrollText);
     nestedScrollColumn->AddChild(nestedScrollButton);
     nestedScrollColumn->AddChild(resetNestedScrollButton);
+    return nestedScrollColumn;
+}
 
+static std::shared_ptr<ColumnComponent> CreateFadingEdgeControls(std::shared_ptr<GridComponent> grid)
+{
     // fadingEdge
     auto fadingEdgeColumn = std::make_shared<ColumnComponent>();
     auto fadingEdgeText = std::make_shared<TextComponent>();
     fadingEdgeText->SetTextContent("fadingEdge:,");
     auto getFadingEdgeText = std::make_shared<TextComponent>();
     getFadingEdgeText->SetTextContent("getFadingEdge:");
-
     auto fadingEdgeButton = std::make_shared<ButtonComponent>();
-    fadingEdgeButton->SetWidth(120);
-    fadingEdgeButton->SetHeight(50);
+    fadingEdgeButton->SetWidth(SIZE_120);
+    fadingEdgeButton->SetHeight(SIZE_50);
     fadingEdgeButton->SetId("fadingEdge");
     fadingEdgeButton->SetLable("fadingEdge");
     fadingEdgeButton->RegisterOnClick([grid, fadingEdgeText, getFadingEdgeText]() {
@@ -835,7 +855,6 @@ napi_value GridTest::CreateNativeNode(napi_env env, napi_callback_info info)
         ArkUI_NumberValue value_number[] = { { .i32 = 1 }, { .f32 = value } };
         ArkUI_AttributeItem attribute_item = { value_number, sizeof(value_number) / sizeof(ArkUI_NumberValue) };
         grid->setAttribute(NODE_SCROLL_FADING_EDGE, &attribute_item);
-
         auto getValue = grid->getAttribute(NODE_SCROLL_FADING_EDGE);
         if (getValue != nullptr) {
             auto effect = getValue->value[0].i32;
@@ -845,15 +864,13 @@ napi_value GridTest::CreateNativeNode(napi_env env, napi_callback_info info)
             getFadingEdgeText->SetTextContent("空");
         }
     });
-
     auto resetEdgeButton = std::make_shared<ButtonComponent>();
-    resetEdgeButton->SetWidth(120);
-    resetEdgeButton->SetHeight(50);
+    resetEdgeButton->SetWidth(SIZE_120);
+    resetEdgeButton->SetHeight(SIZE_50);
     resetEdgeButton->SetId("resetFadingEdge");
     resetEdgeButton->SetLable("resetFadingEdge");
     resetEdgeButton->RegisterOnClick([grid, fadingEdgeText, getFadingEdgeText]() {
         grid->resetAttribute(NODE_SCROLL_FADING_EDGE);
-
         auto getValue = grid->getAttribute(NODE_SCROLL_FADING_EDGE);
         if (getValue != nullptr) {
             auto effect = getValue->value[0].i32;
@@ -867,39 +884,11 @@ napi_value GridTest::CreateNativeNode(napi_env env, napi_callback_info info)
     fadingEdgeColumn->AddChild(getFadingEdgeText);
     fadingEdgeColumn->AddChild(fadingEdgeButton);
     fadingEdgeColumn->AddChild(resetEdgeButton);
-
-    // firstRow
-    auto firstRow = std::make_shared<RowComponent>();
-    firstRow->AddChild(modeColumn);
-    firstRow->AddChild(widthColumn);
-
-    auto firstRow1 = std::make_shared<RowComponent>();
-    firstRow1->AddChild(colorColumn);
-
-    // secondRow
-    auto secondRow = std::make_shared<RowComponent>();
-    secondRow->AddChild(rowsGapColumn);
-    secondRow->AddChild(enableScrollColumn);
-    secondRow->AddChild(alignItemsColumn);
-
-    // third
-    auto thirdRow = std::make_shared<RowComponent>();
-    thirdRow->AddChild(flingSpeedLimitColumn);
-    thirdRow->AddChild(frictionColumn);
-
-    // forth
-    auto forthRow = std::make_shared<RowComponent>();
-    forthRow->AddChild(nestedScrollColumn);
-    forthRow->AddChild(fadingEdgeColumn);
-
-    auto column = std::make_shared<ColumnComponent>();
-    column->AddChild(grid);
-    column->AddChild(firstRow);
-    column->AddChild(firstRow1);
-    column->AddChild(secondRow);
-    column->AddChild(thirdRow);
-    column->AddChild(forthRow);
-
+    return fadingEdgeColumn;
+}
+    
+static std::shared_ptr<GridComponent> CreateBaseGrid2()
+{     
     // 创建grid2
     auto grid2 = CreatGrid2(0);
     // 测试 SetOnGridScrollFrameBegin
@@ -907,9 +896,9 @@ napi_value GridTest::CreateNativeNode(napi_env env, napi_callback_info info)
         OH_LOG_Print(LOG_APP, LOG_INFO, LOG_PRINT_DOMAIN, "GridTest",
             "OnScrollFrameBegin offset: %{public}f, state: %{public}d", offset, state);
         grid->SetBackgroundColor(COLOR_BLUE);
-        return 10;
+        return PARAM_10;
     });
-    grid->SetMargin(0, 50, 0, 50);
+    grid->SetMargin(PARAM_0, SIZE_50, PARAM_0, SIZE_50);
     auto option2 = grid2->GetGridLayoutOptions();
     uint32_t irregularIndexes2[] = { 3, 6 };
     auto ret = OH_ArkUI_GridLayoutOptions_SetIrregularIndexes(option2, irregularIndexes2, 2);
@@ -942,15 +931,11 @@ napi_value GridTest::CreateNativeNode(napi_env env, napi_callback_info info)
         "CreateNativeNode Option ret: %{public}d, size:%{public}d, index[0]:%{public}d, index[1]:%{public}d", ret, size,
         irregularIndexes[0], irregularIndexes[1]);
     OH_ArkUI_GridLayoutOptions_Dispose(option2);
+    return grid2;
+}
 
-    // 创建grid3
-    auto grid3 = CreatGrid3(0);
-    column->AddChild(grid3);
-
-    auto grid4 = CreatGrid4(0);
-    column->AddChild(grid4);
-
-    auto grid1 = CreatGrid1(0);
+static std::shared_ptr<ColumnComponent> CreateClipModeControls(std::shared_ptr<GridComponent> grid)
+{
     // clipMode
     auto clipModeColumn = std::make_shared<ColumnComponent>();
     auto clipModeText = std::make_shared<TextComponent>();
@@ -959,8 +944,8 @@ napi_value GridTest::CreateNativeNode(napi_env env, napi_callback_info info)
     getClipModeText->SetTextContent("GetClipMode:");
 
     auto clipModeButton = std::make_shared<ButtonComponent>();
-    clipModeButton->SetWidth(120);
-    clipModeButton->SetHeight(50);
+    clipModeButton->SetWidth(SIZE_120);
+    clipModeButton->SetHeight(SIZE_50);
     clipModeButton->SetId("clipMode");
     clipModeButton->SetLable("clipMode");
     clipModeButton->RegisterOnClick([grid1, clipModeText, getClipModeText]() {
@@ -976,8 +961,8 @@ napi_value GridTest::CreateNativeNode(napi_env env, napi_callback_info info)
     });
 
     auto resetClipModeButton = std::make_shared<ButtonComponent>();
-    resetClipModeButton->SetWidth(120);
-    resetClipModeButton->SetHeight(50);
+    resetClipModeButton->SetWidth(SIZE_120);
+    resetClipModeButton->SetHeight(SIZE_50);
     resetClipModeButton->SetId("resetClipMode");
     resetClipModeButton->SetLable("resetClipMode");
     resetClipModeButton->RegisterOnClick([grid1, clipModeText, getClipModeText]() {
@@ -990,19 +975,78 @@ napi_value GridTest::CreateNativeNode(napi_env env, napi_callback_info info)
     clipModeColumn->AddChild(getClipModeText);
     clipModeColumn->AddChild(clipModeButton);
     clipModeColumn->AddChild(resetClipModeButton);
-    column->AddChild(grid1);
-    column->AddChild(clipModeColumn);
+    return clipModeColumn;
+}
 
+static std::shared_ptr<ColumnComponent> CreateColumn(std::shared_ptr<GridComponent> grid)
+{
+    // firstRow
+    auto firstRow = std::make_shared<RowComponent>();
+    auto modeControls = CreateModeControls(grid);
+    auto widthControls = CreateWidthControls(grid);
+    firstRow->AddChild(modeColumn);
+    firstRow->AddChild(widthColumn);
+
+    auto colorControls = CreateColorControls(grid);
+    auto firstRow1 = std::make_shared<RowComponent>();
+    firstRow1->AddChild(colorColumn);
+
+    // secondRow
+    auto secondRow = std::make_shared<RowComponent>();
+    auto rowsGapColumn = CreateRowsGapControls(grid);
+    auto enableScrollColumn = CreateEnableScrollControls(grid);
+    auto alignItemsColumn = CreateAlignItemsControls(grid);
+    secondRow->AddChild(rowsGapColumn);
+    secondRow->AddChild(enableScrollColumn);
+    secondRow->AddChild(alignItemsColumn);
+
+    // third
+    auto thirdRow = std::make_shared<RowComponent>();
+    auto flingSpeedLimitColumn = CreateFlingSpeedLimitControls(grid);
+    auto frictionColumn = CreateFrictionControls(grid);
+    thirdRow->AddChild(flingSpeedLimitColumn);
+    thirdRow->AddChild(frictionColumn);
+
+    // forth
+    auto forthRow = std::make_shared<RowComponent>();
+    auto nestedScrollColumn = CreateNestedScrollControls(grid);
+    auto fadingEdgeColumn = CreateFadingEdgeControls(grid);
+    forthRow->AddChild(nestedScrollColumn);
+    forthRow->AddChild(fadingEdgeColumn);
+
+    auto column = std::make_shared<ColumnComponent>();
+    auto grid4 = CreatGrid(0);
+    column->AddChild(grid4);
+    column->AddChild(firstRow);
+    column->AddChild(firstRow1);
+    column->AddChild(secondRow);
+    column->AddChild(thirdRow);
+    column->AddChild(forthRow);
+    auto grid1 = CreatGrid1(0);
+    column->AddChild(grid1);
+    auto clipModeColumn = CreateClipModeControls(grid);
+    column->AddChild(clipModeColumn);
+    return column;
+}
+
+static std::shared_ptr<ScrollComponent> AssembleFinalLayout()
+{
     auto scroll = new ScrollComponent();
-    scroll->SetMargin(0, 0, 50, 0);
+    scroll->SetMargin(PARAM_0, PARAM_0, SIZE_50, PARAM_0);
     scroll->SetHeight(SIZE_2000);
     scroll->SetScrollScrollBar(ArkUI_ScrollBarDisplayMode::ARKUI_SCROLL_BAR_DISPLAY_MODE_ON);
     scroll->SetId("scroll");
     scroll->AddChild(column);
+    return scroll;
+}
 
+napi_value GridTest::CreateNativeNode(napi_env env, napi_callback_info info) 
+{
+    auto scroll = AssembleFinalLayout();
     std::string id(xComponentID);
     if (OH_NativeXComponent_AttachNativeRootNode(
-            PluginManager::GetInstance()->GetNativeXComponent(id), scroll->GetComponent()) == INVALID_PARAM) {
+            PluginManager::GetInstance()->GetNativeXComponent(id), 
+            scroll->GetComponent()) == INVALID_PARAM) {
         OH_LOG_Print(
             LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, "GridTest", "OH_NativeXComponent_AttachNativeRootNode failed");
     }
