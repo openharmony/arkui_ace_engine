@@ -163,14 +163,14 @@ struct waterExample7 {
       Column() {
         Row() {
           Button("column: " + this.waterFlowMod.columnList[this.waterFlowMod.index]).onClick(() => {
-            this.waterFlowMod.index++
-            this.waterFlowMod.index = this.waterFlowMod.index % this.waterFlowMod.columnList.length
+            this.waterFlowMod.index++;
+            this.waterFlowMod.index = this.waterFlowMod.index % this.waterFlowMod.columnList.length;
           })
           Button('width' + this.widthIndex)
             .onClick(() => {
-              this.widthIndex++
+              this.widthIndex++;
               if (this.widthIndex > this.widthList.length - 1) {
-                this.widthIndex = 0
+                this.widthIndex = 0;
               }
             })
         }
@@ -178,22 +178,22 @@ struct waterExample7 {
         Row() {
           Button('CachedCount')
             .onClick(() => {
-              this.changeCachedCountIndex++
+              this.changeCachedCountIndex++;
               if (this.changeCachedCountIndex > this.changeCachedCountList.length - 1) {
-                this.changeCachedCountIndex = 0
+                this.changeCachedCountIndex = 0;
               }
             })
           Button('CachedCountBol')
             .onClick(() => {
-              this.changeCachedCountBolIndex++
+              this.changeCachedCountBolIndex++;
               if (this.changeCachedCountBolIndex > this.changeCachedCountBolList.length - 1) {
-                this.changeCachedCountBolIndex = 0
+                this.changeCachedCountBolIndex = 0;
               }
             })
           Button(`更改排列方向`).onClick(() => {
             this.changelistDirectionIndex = this.changelistDirectionIndex + 1;
             if (this.changelistDirectionIndex >= this.changelistDirectionList.length) {
-              this.changelistDirectionIndex = 0
+              this.changelistDirectionIndex = 0;
             }
 
             let value = this.changelistDirectionList[this.changelistDirectionIndex];
@@ -216,7 +216,7 @@ struct waterExample7 {
             .onClick(() => {
               this.gapIndex++
               if (this.gapIndex > this.gaps.length - 1) {
-                this.gapIndex = 0
+                this.gapIndex = 0;
               }
             })
           Button('padding')
