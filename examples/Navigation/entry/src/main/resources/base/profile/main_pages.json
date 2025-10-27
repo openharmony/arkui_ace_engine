@@ -23,6 +23,10 @@
     "pages/menuItem/Index",
     "pages/menuItem/Test1",
     "pages/menuItem/Test2",
-    "pages/menuItem/WindowTwo"
+    "pages/menuItem/WindowTwo",
+    "pages/navigationPc/NavDestinationPage",
+    "pages/modifier/Index",
+    "pages/modifier/page1",
+    "pages/modifier/page2"
   ]
 }

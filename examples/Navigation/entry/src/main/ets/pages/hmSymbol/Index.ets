@@ -26,7 +26,7 @@ struct Index {
   private items : ListCategories[] = [
     {title:'Navigation use symbol set fontSize、fontColor、fontWeight、effectStrategy',url:'pages/hmSymbol/test1'},
     {title:'Navigation use symbol set fontSize、fontColor、fontWeight、renderingStrategy',url:'pages/hmSymbol/test2'},
-    {title:'Navigation use symbol set symbolEffect（isActive）',url:'pages/hmSymbol/test4'},
+    {title:'Navigation use symbol set symbolEffect（isActive）',url:'pages/hmSymbol/test4'}
   ]
 
   build() {

@@ -21,17 +21,23 @@ interface ListCategories {
 
 @Entry
 @Component
-struct Index {
+struct MenuIndex {
+  @State message: string = 'Navigation expend to status'
   private items : ListCategories[] = [
-    {title:'Navigation-title enhanced',url:'pages/titleStyle/Index'},
-    {title:'Navigation removePageById',url:'pages/removePageById/Index'},
-    {title:'Navigation symbol',url:'pages/hmSymbol/Index'},
-    {title:'Navigation modifier',url:'pages/modifier/Index'},
-    {title:'navigationPc',url:'pages/navigationPc/NavDestinationPage'},
+    {title:'test',url:'pages/modifier/page1'},
+    {title:'test modifier',url:'pages/modifier/page2'},
   ]
 
   build() {
     Column() {
+      Text(this.message)
+        .fontSize(22)
+        .fontColor(0xFFFFFF)
+        .fontWeight(FontWeight.Bold)
+        .textAlign(TextAlign.Center)
+        .width('100%')
+        .padding(5)
+        .backgroundColor('#1770b9')
       List({space:'10vp'}) {
         ForEach(this.items,(item : ListCategories) => {
           ListItem() {
