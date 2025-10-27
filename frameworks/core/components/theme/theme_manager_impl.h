@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_THEME_THEME_MANAGER_IMPL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_THEME_THEME_MANAGER_IMPL_H
 
+#include <shared_mutex>
 #include "core/components/theme/resource_adapter.h"
 #include "core/components/theme/theme_manager.h"
 #include "core/components_ng/token_theme/token_theme_wrapper.h"
@@ -135,6 +136,11 @@ public:
 
     RefPtr<Theme> GetThemeKit(ThemeType type, int32_t themeScopeId);
 
+    void AddThemeWithType(ThemeType type, const RefPtr<Theme>& theme);
+    RefPtr<Theme> GetThemeWithType(ThemeType type) const;
+    bool IsThemeExists(ThemeType type) const;
+    void ClearThemes();
+
 private:
     using ThemeWrappers = std::unordered_map<ThemeType, RefPtr<TokenThemeWrapper>>;
     std::unordered_map<ThemeType, RefPtr<Theme>> themes_;
@@ -148,6 +154,8 @@ private:
 
     ThemeWrappers& GetThemeWrappers(ColorMode mode);
     ColorMode GetCurrentColorMode() const;
+
+    mutable std::shared_mutex themesMutex_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_THEME_THEME_MANAGER_H
