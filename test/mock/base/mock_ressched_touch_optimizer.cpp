@@ -20,7 +20,7 @@ namespace OHOS::Ace {
 // 添加测试用的状态变量
 bool ResSchedTouchOptimizer::isTpFlushFrameDisplayPeriod_ = false;
 bool ResSchedTouchOptimizer::isFristFrameAfterTpFlushFrameDisplayPeriod_ = false;
-bool ResSchedTouchOptimizer::needTpFlushVsyncResult_ = false;
+bool ResSchedTouchOptimizer::isTpFlushFrameDisplayPeriod_ = false;
 bool ResSchedTouchOptimizer::rvsEnableCheckResult_ = false;
 TouchEvent ResSchedTouchOptimizer::setPointReverseSignalResult_;
 uint64_t ResSchedTouchOptimizer::fineTuneTimeStampDuringTpFlushPeriodResult_ = 0;
@@ -61,7 +61,7 @@ bool ResSchedTouchOptimizer::GetIsTpFlushFrameDisplayPeriod() const
     return isTpFlushFrameDisplayPeriod_;
 }
 
-bool ResSchedTouchOptimizer::GetIsFristFrameAfterTpFlushFrameDisplayPeriod() const
+bool ResSchedTouchOptimizer::GetIsFirstFrameAfterTpFlushFrameDisplayPeriod() const
 {
     return isFristFrameAfterTpFlushFrameDisplayPeriod_;
 }
@@ -82,7 +82,7 @@ uint64_t ResSchedTouchOptimizer::GetLastVsyncTimeStamp() const
 
 bool ResSchedTouchOptimizer::NeedTpFlushVsync(const TouchEvent& touchEvent)
 {
-    return needTpFlushVsyncResult_;
+    return isTpFlushFrameDisplayPeriod_;
 }
 
 TouchEvent ResSchedTouchOptimizer::SetPointReverseSignal(const TouchEvent& inputEvent)

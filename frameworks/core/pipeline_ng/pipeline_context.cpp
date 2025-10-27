@@ -925,8 +925,8 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
     ComponentTest::UpdatePipelineStatus();
 #endif // COMPONENT_TEST_ENABLED
     if (ResSchedTouchOptimizer::GetInstance().GetIsTpFlushFrameDisplayPeriod() ||
-        ResSchedTouchOptimizer::GetInstamce().GetIsFirstFrameAfterTpFlushFrameDisplayPeriod()) {
-        ACE_SCOPED_TRAC("TpFlush RequestFrame");
+        ResSchedTouchOptimizer::GetInstance().GetIsFirstFrameAfterTpFlushFrameDisplayPeriod()) {
+        ACE_SCOPED_TRACE("TpFlush RequestFrame");
         RequestFrame();
     }
 }
@@ -3841,7 +3841,7 @@ void PipelineContext::FlushTouchEvents()
         canUseLongPredictTask_ = false;
         eventManager_->FlushTouchEventsBegin(touchEvents_);
         std::unordered_map<int, TouchEvent> idToTouchPoints;
-        if (touchAccelarate_) {fConsumeTouchEvents
+        if (touchAccelarate_) {
             AccelerateConsumeTouchEvents(touchEvents, idToTouchPoints);
         } else {
             ConsumeTouchEvents(touchEvents, idToTouchPoints);

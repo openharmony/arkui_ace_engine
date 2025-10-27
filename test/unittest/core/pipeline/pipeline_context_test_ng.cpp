@@ -2676,8 +2676,8 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg033, TestSize.Level1)
     testing::Mock::AllowLeak(mockWindow);
     
     // Setup ResSchedTouchOptimizer mock
-    ResSchedTouchOptimizer::isTpFlushFrameDisplayPeriod_ = true;
-    ResSchedTouchOptimizer::isFristFrameAfterTpFlushFrameDisplayPeriod_ = false;
+    ResSchedTouchOptimizer::GetInstance().isTpFlushFrameDisplayPeriod_ = true;
+    ResSchedTouchOptimizer::GetInstance().isFristFrameAfterTpFlushFrameDisplayPeriod_ = false;
     
     // Expect RequestFrame to be called
     EXPECT_CALL(*mockWindow, RequestFrame()).Times(AtLeast(1));
@@ -2689,7 +2689,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg033, TestSize.Level1)
     testing::Mock::VerifyAndClearExpectations(mockWindow);
     
     // Reset for next test
-    ResSchedTouchOptimizer::isTpFlushFrameDisplayPeriod_ = false;
+    ResSchedTouchOptimizer::GetInstance().isTpFlushFrameDisplayPeriod_ = false;
 }
 
 /**
@@ -2715,8 +2715,8 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg034, TestSize.Level1)
     testing::Mock::AllowLeak(mockWindow);
     
     // Setup ResSchedTouchOptimizer mock
-    ResSchedTouchOptimizer::isTpFlushFrameDisplayPeriod_ = false;
-    ResSchedTouchOptimizer::isFristFrameAfterTpFlushFrameDisplayPeriod_ = true;
+    ResSchedTouchOptimizer::GetInstance().isTpFlushFrameDisplayPeriod_ = false;
+    ResSchedTouchOptimizer::GetInstance().isFristFrameAfterTpFlushFrameDisplayPeriod_ = true;
     
     // Expect RequestFrame to be called
     EXPECT_CALL(*mockWindow, RequestFrame()).Times(AtLeast(1));
@@ -2728,7 +2728,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg034, TestSize.Level1)
     testing::Mock::VerifyAndClearExpectations(mockWindow);
     
     // Reset for next test
-    ResSchedTouchOptimizer::isFristFrameAfterTpFlushFrameDisplayPeriod_ = false;
+    ResSchedTouchOptimizer::GetInstance().isFristFrameAfterTpFlushFrameDisplayPeriod_ = false;
 }
 
 /**
@@ -2754,7 +2754,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg035, TestSize.Level1)
     testing::Mock::AllowLeak(mockWindow);
     
     // Setup ResSchedTouchOptimizer mock
-    ResSchedTouchOptimizer::needTpFlushVsyncResult_ = true;
+    ResSchedTouchOptimizer::GetInstance().isTpFlushFrameDisplayPeriod_ = true;
     
     // Expect FlushVsync to be called
     EXPECT_CALL(*mockWindow, FlushTasks(testing::_)).Times(AtLeast(1));
@@ -2775,7 +2775,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg035, TestSize.Level1)
     testing::Mock::VerifyAndClearExpectations(mockWindow);
     
     // Reset for next test
-    ResSchedTouchOptimizer::needTpFlushVsyncResult_ = false;
+    ResSchedTouchOptimizer::GetInstance().isTpFlushFrameDisplayPeriod_ = false;
 }
 
 /**
@@ -2804,7 +2804,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg036, TestSize.Level1)
     EXPECT_CALL(*mockWindow, RequestFrame()).Times(AtLeast(1));
     
     // Setup ResSchedTouchOptimizer mock
-    ResSchedTouchOptimizer::needTpFlushVsyncResult_ = false;
+    ResSchedTouchOptimizer::GetInstance().isTpFlushFrameDisplayPeriod_ = false;
     
     // Create a touch event
     TouchEvent touchEvent;
@@ -2837,7 +2837,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg037, TestSize.Level1)
     context_->SetupRootElement();
     
     // Setup ResSchedTouchOptimizer mock
-    ResSchedTouchOptimizer::isTpFlushFrameDisplayPeriod_ = true;
+    ResSchedTouchOptimizer::GetInstance().isTpFlushFrameDisplayPeriod_ = true;
     
     // Create test data
     std::unordered_set<int32_t> ids = {1};
@@ -2872,7 +2872,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg037, TestSize.Level1)
     EXPECT_TRUE(context_->touchEvents_.empty());
     
     // Reset for next test
-    ResSchedTouchOptimizer::isTpFlushFrameDisplayPeriod_ = false;
+    ResSchedTouchOptimizer::GetInstance().isTpFlushFrameDisplayPeriod_ = false;
 }
 } // namespace NG
 } // namespace OHOS::Ace

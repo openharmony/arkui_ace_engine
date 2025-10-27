@@ -110,11 +110,11 @@ void ResSchedTouchOptimizer::SetSlideAccepted(bool accept)
  */
 void ResSchedTouchOptimizer::SetLastVsyncTimeStamp(uint64_t lastVsyncTimeStamp)
 {
-    if (!vSyncTimeReportExemption_) {
-        vSyncFlushed_ = true;
+    if (!vsyncTimeReportExemption_) {
+        vsyncFlushed_ = true;
         lastVsyncTimeStamp_ = lastVsyncTimeStamp;
     }
-    vSyncTimeReportExemption_ = false;
+    vsyncTimeReportExemption_ = false;
 }
 
 /*
@@ -143,12 +143,15 @@ void ResSchedTouchOptimizer::SetSlideDirection(int32_t slideDirection)
 bool ResSchedTouchOptimizer::NeedTpFlushVsync(const TouchEvent& touchEvent)
 {
     isFristFrameAfterTpFlushFrameDisplayPeriod_ = false;
-    bool result = NeedTpFlushVsync(touchEvent);
+    bool result = NeedTpFlushVsyncInner(touchEvent);
     if (isTpFlushFrameDisplayPeriod_ && !result) {
         TAG_LOGD(AceLogTag::ACE_UIEVENT, "TpFlush end");
         ACE_SCOPED_TRACE("TpFlush end");
         isFristFrameAfterTpFlushFrameDisplayPeriod_ = true;
     }
+    isTpFlushFrameDisplayPeriod_ = result;
+    vsyncFlushed_ = false;
+    return result;
 }
 
 bool ResSchedTouchOptimizer::NeedTpFlushVsyncInner(const TouchEvent& touchEvent)
@@ -175,7 +178,7 @@ bool ResSchedTouchOptimizer::NeedTpFlushVsyncInner(const TouchEvent& touchEvent)
     }
     // If last frame was TP triggered and current Vsync count differs,
     // trigger TP flush to avoid frame drop
-    if (lastTpFlush_ && vSyncFlushed_) {
+    if (lastTpFlush_ && vsyncFlushed_) {
         TAG_LOGD(AceLogTag::ACE_UIEVENT, "TpFlush continue");
         ACE_SCOPED_TRACE("TpFlush continue");
         return true;
@@ -711,7 +714,7 @@ bool ResSchedTouchOptimizer::GetIsTpFlushFrameDisplayPeriod() const
     return isTpFlushFrameDisplayPeriod_;
 }
 
-bool ResSchedTouchOptimizer::GetIsFristFrameAfterTpFlushFrameDisplayPeriod() const
+bool ResSchedTouchOptimizer::GetIsFirstFrameAfterTpFlushFrameDisplayPeriod() const
 {
     return isFristFrameAfterTpFlushFrameDisplayPeriod_;
 }
@@ -728,11 +731,11 @@ void ResSchedTouchOptimizer::SetHisAvgPointTimeStamp(const int32_t pointId,
         return;
     }
 
-    for (const auto& iter = historyPointsById.at(pointId).begin(); iter != historyPointsById.at(pointId).end(); iter++) {
-        if (lastTime == 0 || static_cast<int64_t>(iter->time.time_since_epoch().count()) != lastTime) {
-            avgTime += static_cast<int64_t>(iter->time.time_since_epoch().count());
+    for (auto iter = historyPointsById.at(pointId).begin(); iter != historyPointsById.at(pointId).end(); iter++) {
+        if (lastTime == 0 || static_cast<uint64_t>(iter->time.time_since_epoch().count()) != lastTime) {
+            avgTime += static_cast<uint64_t>(iter->time.time_since_epoch().count());
             i++;
-            lastTime = static_cast<int64_t>(iter->time.time_since_epoch().count());
+            lastTime = static_cast<uint64_t>(iter->time.time_since_epoch().count());
         }
     }
     if (i > 0) {
@@ -745,11 +748,11 @@ uint64_t ResSchedTouchOptimizer::FineTuneTimeStampDuringTpFlushPeriod(uint64_t t
 {
     uint64_t fictionalVsyncTime = timeStamp;
     if (hisAvgPointTimeStamp_ != 0) {
-        fictionalVsyncTime = fictionalVsyncTime - vSyncPeriod_ + ONE_MS_IN_NS > hisAvgPointTimeStamp_
-            ? fictionalVsyncTime : hisAvgPointTimeStamp_ + vSyncPeriod_;
+        fictionalVsyncTime = fictionalVsyncTime - vsyncPeriod_ + ONE_MS_IN_NS > hisAvgPointTimeStamp_
+            ? fictionalVsyncTime : hisAvgPointTimeStamp_ + vsyncPeriod_;
     }
     lastTpFlush_ = true;
-    vSyncTimeReportExemption_ = true;
+    vsyncTimeReportExemption_ = true;
     return fictionalVsyncTime;
 }
 
@@ -758,15 +761,15 @@ void ResSchedTouchOptimizer::FineTuneTimeStampWhenFirstFrameAfterTpFlushPeriod(c
 {
     if (isFristFrameAfterTpFlushFrameDisplayPeriod_ && hisAvgPointTimeStamp_ !=  0 && lastVsyncTimeStamp_ != 0 &&
         lastVsyncTimeStamp_ + ONE_MS_IN_NS <= hisAvgPointTimeStamp_ &&
-        historyPointsById,find(pointId) != historyPointsById.end()) {
+        historyPointsById.find(pointId) != historyPointsById.end()) {
             std::chrono::nanoseconds newTimeStamp(lastVsyncTimeStamp_);
             historyPointsById.at(pointId).back().time = std::chrono::high_resolution_clock::time_point(newTimeStamp);
     }
     lastTpFlush_ = false;
-    vSyncTimeReportExemption_ = false;
+    vsyncTimeReportExemption_ = false;
 }
 
-TouchEvent ResSchedTouchOptimizer::SetPointReverseSignal(cosnt TouchEvent& point)
+TouchEvent ResSchedTouchOptimizer::SetPointReverseSignal(const TouchEvent& point)
 {
     if (RVSEnableCheck()) {
         std::list<TouchEvent> touchEvents;

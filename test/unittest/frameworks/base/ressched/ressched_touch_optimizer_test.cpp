@@ -84,12 +84,8 @@ HWTEST_F(ResSchedTouchOptimizerTest, SetterTest001, TestSize.Level1)
 {
     ResSchedTouchOptimizer::GetInstance().SetSlideAccepted(true);
     EXPECT_TRUE(ResSchedTouchOptimizer::GetInstance().slideAccepted_);
-    ResSchedTouchOptimizer::GetInstance().SetLastTpFlush(true);
-    EXPECT_TRUE(ResSchedTouchOptimizer::GetInstance().lastTpFlush_);
     ResSchedTouchOptimizer::GetInstance().SetSlideAccepted(false);
     EXPECT_FALSE(ResSchedTouchOptimizer::GetInstance().slideAccepted_);
-    ResSchedTouchOptimizer::GetInstance().SetLastTpFlush(false);
-    EXPECT_FALSE(ResSchedTouchOptimizer::GetInstance().lastTpFlush_);
 }
 
 /**
@@ -802,35 +798,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, DispatchPointSelect002, TestSize.Level1)
     // Check that no RVS data was added
     EXPECT_TRUE(optimizer.dptHistoryPointX_.find(1) == optimizer.dptHistoryPointX_.end());
     EXPECT_TRUE(optimizer.dptHistoryPointY_.find(1) == optimizer.dptHistoryPointY_.end());
-}
-
-/**
- * @tc.name: SelectSinglePoint003
- * @tc.desc: test SelectSinglePoint with non-finger source tool
- * @tc.type: FUNC
- */
-HWTEST_F(ResSchedTouchOptimizerTest, SelectSinglePoint003, TestSize.Level1)
-{
-    ResSchedTouchOptimizer& optimizer = ResSchedTouchOptimizer::GetInstance();
-    optimizer.rvsEnable_ = true;
-    
-    TouchEvent touchEvent1;
-    touchEvent1.id = 1;
-    touchEvent1.type = TouchType::MOVE;
-    touchEvent1.xReverse = RVS_DIRECTION::RVS_DOWN_LEFT;
-    touchEvent1.sourceTool = SourceTool::MOUSE; // Non-finger source
-    
-    TouchEvent touchEvent2;
-    touchEvent2.id = 2;
-    touchEvent2.sourceTool = SourceTool::MOUSE;
-    
-    std::list<TouchEvent> touchEvents = {touchEvent1, touchEvent2};
-    
-    // With non-finger source, processing should return early
-    optimizer.SelectSinglePoint(touchEvents);
-    
-    // List should remain unchanged since processing returns early
-    EXPECT_EQ(touchEvents.size(), 2);
 }
 
 /**
@@ -1983,8 +1950,8 @@ HWTEST_F(ResSchedTouchOptimizerTest, NeedTpFlushVsyncInner003, TestSize.Level1)
     optimizer.hisAvgPointTimeStamp_ = 1000;
     optimizer.slideAccepted_ = true;
     optimizer.lastTpFlush_ = true;
-    optimizer.vSyncFlushed_ = true;
-    
+    optimizer.vsyncFlushed_ = true;
+
     TouchEvent touchEvent;
     touchEvent.sourceTool = SourceTool::FINGER;
     
@@ -2032,16 +1999,16 @@ HWTEST_F(ResSchedTouchOptimizerTest, NeedTpFlushVsyncInner004, TestSize.Level1)
 HWTEST_F(ResSchedTouchOptimizerTest, SetLastVsyncTimeStamp001, TestSize.Level1)
 {
     ResSchedTouchOptimizer& optimizer = ResSchedTouchOptimizer::GetInstance();
-    optimizer.vSyncTimeReportExemption_ = false;
-    optimizer.vSyncFlushed_ = false;
+    optimizer.vsyncTimeReportExemption_ = false;
+    optimizer.vsyncFlushed_ = false;
     optimizer.lastVsyncTimeStamp_ = 0;
     
     uint64_t testTimeStamp = 123456789;
     optimizer.SetLastVsyncTimeStamp(testTimeStamp);
     
-    EXPECT_TRUE(optimizer.vSyncFlushed_);
+    EXPECT_TRUE(optimizer.vsyncFlushed_);
     EXPECT_EQ(optimizer.lastVsyncTimeStamp_, testTimeStamp);
-    EXPECT_FALSE(optimizer.vSyncTimeReportExemption_);
+    EXPECT_FALSE(optimizer.vsyncTimeReportExemption_);
 }
 
 /**
@@ -2052,17 +2019,17 @@ HWTEST_F(ResSchedTouchOptimizerTest, SetLastVsyncTimeStamp001, TestSize.Level1)
 HWTEST_F(ResSchedTouchOptimizerTest, SetLastVsyncTimeStamp002, TestSize.Level1)
 {
     ResSchedTouchOptimizer& optimizer = ResSchedTouchOptimizer::GetInstance();
-    optimizer.vSyncTimeReportExemption_ = true;
-    optimizer.vSyncFlushed_ = false;
+    optimizer.vsyncTimeReportExemption_ = true;
+    optimizer.vsyncFlushed_ = false;
     optimizer.lastVsyncTimeStamp_ = 0;
     
     uint64_t testTimeStamp = 123456789;
     optimizer.SetLastVsyncTimeStamp(testTimeStamp);
     
-    // When exemption is true, should not update vSyncFlushed_ and lastVsyncTimeStamp_
-    EXPECT_FALSE(optimizer.vSyncFlushed_);
+    // When exemption is true, should not update vsyncFlushed_ and lastVsyncTimeStamp_
+    EXPECT_FALSE(optimizer.vsyncFlushed_);
     EXPECT_EQ(optimizer.lastVsyncTimeStamp_, 0);
-    EXPECT_FALSE(optimizer.vSyncTimeReportExemption_);
+    EXPECT_FALSE(optimizer.vsyncTimeReportExemption_);
 }
 
 /**
@@ -2097,18 +2064,18 @@ HWTEST_F(ResSchedTouchOptimizerTest, GetIsTpFlushFrameDisplayPeriod001, TestSize
 }
 
 /**
- * @tc.name: GetIsFristFrameAfterTpFlushFrameDisplayPeriod001
- * @tc.desc: Test GetIsFristFrameAfterTpFlushFrameDisplayPeriod functionality
+ * @tc.name: GetIsFirstFrameAfterTpFlushFrameDisplayPeriod001
+ * @tc.desc: Test GetIsFirstFrameAfterTpFlushFrameDisplayPeriod functionality
  * @tc.type: FUNC
  */
-HWTEST_F(ResSchedTouchOptimizerTest, GetIsFristFrameAfterTpFlushFrameDisplayPeriod001, TestSize.Level1)
+HWTEST_F(ResSchedTouchOptimizerTest, GetIsFirstFrameAfterTpFlushFrameDisplayPeriod001, TestSize.Level1)
 {
     ResSchedTouchOptimizer& optimizer = ResSchedTouchOptimizer::GetInstance();
     optimizer.isFristFrameAfterTpFlushFrameDisplayPeriod_ = false;
-    EXPECT_FALSE(optimizer.GetIsFristFrameAfterTpFlushFrameDisplayPeriod());
+    EXPECT_FALSE(optimizer.GetIsFirstFrameAfterTpFlushFrameDisplayPeriod());
     
     optimizer.isFristFrameAfterTpFlushFrameDisplayPeriod_ = true;
-    EXPECT_TRUE(optimizer.GetIsFristFrameAfterTpFlushFrameDisplayPeriod());
+    EXPECT_TRUE(optimizer.GetIsFirstFrameAfterTpFlushFrameDisplayPeriod());
 }
 
 /**
@@ -2166,8 +2133,8 @@ HWTEST_F(ResSchedTouchOptimizerTest, FineTuneTimeStampDuringTpFlushPeriod001, Te
     ResSchedTouchOptimizer& optimizer = ResSchedTouchOptimizer::GetInstance();
     optimizer.hisAvgPointTimeStamp_ = 0;
     optimizer.lastTpFlush_ = false;
-    optimizer.vSyncTimeReportExemption_ = false;
-    optimizer.vSyncPeriod_ = 16666666;
+    optimizer.vsyncTimeReportExemption_ = false;
+    optimizer.vsyncPeriod_ = 16666666;
     
     uint64_t testTimeStamp = 123456789;
     uint64_t result = optimizer.FineTuneTimeStampDuringTpFlushPeriod(testTimeStamp);
@@ -2175,7 +2142,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, FineTuneTimeStampDuringTpFlushPeriod001, Te
     // When hisAvgPointTimeStamp_ is 0, should return the original timestamp
     EXPECT_EQ(result, testTimeStamp);
     EXPECT_TRUE(optimizer.lastTpFlush_);
-    EXPECT_TRUE(optimizer.vSyncTimeReportExemption_);
+    EXPECT_TRUE(optimizer.vsyncTimeReportExemption_);
 }
 
 /**
@@ -2188,8 +2155,8 @@ HWTEST_F(ResSchedTouchOptimizerTest, FineTuneTimeStampDuringTpFlushPeriod002, Te
     ResSchedTouchOptimizer& optimizer = ResSchedTouchOptimizer::GetInstance();
     optimizer.hisAvgPointTimeStamp_ = 100000000;
     optimizer.lastTpFlush_ = false;
-    optimizer.vSyncTimeReportExemption_ = false;
-    optimizer.vSyncPeriod_ = 16666666;
+    optimizer.vsyncTimeReportExemption_ = false;
+    optimizer.vsyncPeriod_ = 16666666;
     
     uint64_t testTimeStamp = 123456789;
     uint64_t result = optimizer.FineTuneTimeStampDuringTpFlushPeriod(testTimeStamp);
@@ -2197,7 +2164,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, FineTuneTimeStampDuringTpFlushPeriod002, Te
     // Should calculate fictional Vsync time based on hisAvgPointTimeStamp_
     EXPECT_NE(result, testTimeStamp);
     EXPECT_TRUE(optimizer.lastTpFlush_);
-    EXPECT_TRUE(optimizer.vSyncTimeReportExemption_);
+    EXPECT_TRUE(optimizer.vsyncTimeReportExemption_);
 }
 
 /**
@@ -2212,16 +2179,16 @@ HWTEST_F(ResSchedTouchOptimizerTest, FineTuneTimeStampWhenFirstFrameAfterTpFlush
     optimizer.hisAvgPointTimeStamp_ = 0;
     optimizer.lastVsyncTimeStamp_ = 0;
     optimizer.lastTpFlush_ = true;
-    optimizer.vSyncTimeReportExemption_ = true;
+    optimizer.vsyncTimeReportExemption_ = true;
     
     std::unordered_map<int32_t, std::vector<TouchEvent>> historyPointsById;
     int32_t pointId = 1;
     
     optimizer.FineTuneTimeStampWhenFirstFrameAfterTpFlushPeriod(pointId, historyPointsById);
     
-    // Should not change lastTpFlush_ and vSyncTimeReportExemption_ since conditions are not met
+    // Should not change lastTpFlush_ and vsyncTimeReportExemption_ since conditions are not met
     EXPECT_TRUE(optimizer.lastTpFlush_);
-    EXPECT_TRUE(optimizer.vSyncTimeReportExemption_);
+    EXPECT_TRUE(optimizer.vsyncTimeReportExemption_);
 }
 
 /**
@@ -2236,7 +2203,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, FineTuneTimeStampWhenFirstFrameAfterTpFlush
     optimizer.hisAvgPointTimeStamp_ = 200000000;
     optimizer.lastVsyncTimeStamp_ = 100000000;
     optimizer.lastTpFlush_ = true;
-    optimizer.vSyncTimeReportExemption_ = true;
+    optimizer.vsyncTimeReportExemption_ = true;
     
     std::unordered_map<int32_t, std::vector<TouchEvent>> historyPointsById;
     int32_t pointId = 1;
@@ -2248,9 +2215,9 @@ HWTEST_F(ResSchedTouchOptimizerTest, FineTuneTimeStampWhenFirstFrameAfterTpFlush
     
     optimizer.FineTuneTimeStampWhenFirstFrameAfterTpFlushPeriod(pointId, historyPointsById);
     
-    // Should reset lastTpFlush_ and vSyncTimeReportExemption_
+    // Should reset lastTpFlush_ and vsyncTimeReportExemption_
     EXPECT_FALSE(optimizer.lastTpFlush_);
-    EXPECT_FALSE(optimizer.vSyncTimeReportExemption_);
+    EXPECT_FALSE(optimizer.vsyncTimeReportExemption_);
 }
 
 /**

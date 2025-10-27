@@ -29,17 +29,17 @@ public:
     void SetLastTpFlush(bool lastTpFlush);
     void SetSlideDirection(int32_t direction);
     void SetLastVsyncTimeStamp(uint64_t lastVsyncTimeStamp);
-    void SetVsyncPeriod(uint64_t vSyncPeriod);
+    void SetVsyncPeriod(uint64_t vsyncPeriod);
     bool GetIsTpFlushFrameDisplayPeriod() const;
-    bool GetIsFristFrameAfterTpFlushFrameDisplayPeriod() const;
+    bool GetIsFirstFrameAfterTpFlushFrameDisplayPeriod() const;
 
     // TP driven drawing
-    bool NeedTpFlushVsync(const& touchEvent);
+    bool NeedTpFlushVsync(const TouchEvent& touchEvent);
 
     // RVS Dispatch funcs
     void DispatchPointSelect(bool resampleEnable, TouchEvent& point,
         TouchEvent& resamplePoint, TouchEvent& resultPoint);
-    TouchEvent SetPointReverseSignal(cosnt TouchEvent& point);
+    TouchEvent SetPointReverseSignal(const TouchEvent& point);
     // Dynamic effect chasing
     void SetSlideAcceptOffset(Offset offset);
     double HandleMainDelta(double& mainDelta, const double& touchPointsSize,
@@ -91,9 +91,6 @@ private:
     std::atomic_bool slideAccepted_ = true;
     // Whether the last frame drawing was triggered by TP
     std::atomic_bool lastTpFlush_ = false;
-    // Record the last Vsync count to determine if current TP falls between
-    // the last TP triggered early drawing and the next Vsync
-    uint32_t lastTpFlushCount_ = 0;
 
     // Dynamic effect chasing
     Offset slideAcceptOffset_{0.0, 0.0};
@@ -101,13 +98,13 @@ private:
 
     int32_t slideDirection_ = 0;
 
-    uint64_t vSyncPeriod_ = std::numeric_limits<uint64_t>::max();
+    uint64_t vsyncPeriod_ = std::numeric_limits<uint64_t>::max();
     uint64_t lastVsyncTimeStamp_ = 0;
     uint64_t hisAvgPointTimeStamp_ = 0;
-    bool vSyncTimeReportExemption_ = false;
+    bool vsyncTimeReportExemption_ = false;
     bool isTpFlushFrameDisplayPeriod_ = false;
     bool isFristFrameAfterTpFlushFrameDisplayPeriod_ = false;
-    bool vSyncFlushed_ = false;
+    bool vsyncFlushed_ = false;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_RESSCHED_RESSCHED_TOUCH_OPTIMIZER_H
