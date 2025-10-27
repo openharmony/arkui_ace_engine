@@ -217,6 +217,9 @@ float MenuItemLayoutAlgorithm::GetLeftRowMinWidth(LayoutWrapper* layoutWrapper)
 
 bool MenuItemLayoutAlgorithm::NeedLimitRightRowWidth(LayoutWrapper* layoutWrapper)
 {
+    if (isOption_) {
+        return false;
+    }
     CHECK_NULL_RETURN(layoutWrapper, false);
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(host, false);
@@ -236,6 +239,7 @@ bool MenuItemLayoutAlgorithm::NeedLimitRightRowWidth(LayoutWrapper* layoutWrappe
 
 void MenuItemLayoutAlgorithm::CalcLeftRowMinWidth(LayoutWrapper* layoutWrapper)
 {
+    CHECK_NULL_VOID(layoutWrapper);
     if (!NeedLimitRightRowWidth(layoutWrapper)) {
         return;
     }
@@ -248,26 +252,27 @@ void MenuItemLayoutAlgorithm::CalcLeftRowMinWidth(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
-    float iconContentPadding = 0.0f;
-    if (!isOption_) {
-        iconContentPadding = static_cast<float>(theme->GetIconContentPadding().ConvertToPx());
-    }
+    float iconContentPadding = static_cast<float>(theme->GetIconContentPadding().ConvertToPx());
     float leftRowMinWidth = 0.0f;
     for (const auto& child : children) {
+        CHECK_NULL_CONTINUE(child);
+        auto geometryNode = child->GetGeometryNode();
+        CHECK_NULL_CONTINUE(geometryNode);
         if (child != children.back()) {
             // not content node
-            leftRowMinWidth += child->GetGeometryNode()->GetMarginFrameSize().Width() + iconContentPadding;
+            leftRowMinWidth += geometryNode->GetMarginFrameSize().Width() + iconContentPadding;
         } else {
-            float geometryNodeWidth = child->GetGeometryNode()->GetMarginFrameSize().Width();
             auto textNode = child->GetHostNode();
+            CHECK_NULL_CONTINUE(textNode);
             auto textPattern = textNode->GetPattern<TextPattern>();
+            CHECK_NULL_CONTINUE(textPattern);
             auto pManager = textPattern->GetParagraphManager();
+            CHECK_NULL_CONTINUE(pManager);
             auto textLongestLineWidth = pManager->GetLongestLineWithIndent();
-            if (GreatNotEqual(textLongestLineWidth, geometryNodeWidth)) {
-                leftRowMinWidth += textLongestLineWidth;
-            } else {
+            if (LessOrEqual(textLongestLineWidth, geometryNode->GetMarginFrameSize().Width())) {
                 return;
             }
+            leftRowMinWidth += textLongestLineWidth;
         }
     }
     CHECK_NULL_VOID(layoutWrapper);
