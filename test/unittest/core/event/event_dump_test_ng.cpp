@@ -690,6 +690,7 @@ HWTEST_F(EventDumpTestNg, EventDumpTestNg018, TestSize.Level1)
     ASSERT_NE(pipeline, nullptr);
     auto eventManager = pipeline->GetEventManager();
     ASSERT_NE(eventManager, nullptr);
+
     int32_t fingerId = 1;
     eventManager->downFingerIds_[fingerId] = 1;
     TouchEvent event;
