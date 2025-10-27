@@ -78,8 +78,8 @@ static std::shared_ptr<ListComponent> CreateList()
     list->SetBorderColor(COLOR_BLACK, COLOR_BLACK, COLOR_BLACK, COLOR_BLACK);
     list->SetWidth(SIZE_100);
     list->SetHeight(SIZE_300);
-    int32_t align_center = ArkUI_ScrollSnapAlign::ARKUI_SCROLL_SNAP_ALIGN_CENTER;
-    list->SetScrollSnapAlign(align_center);
+    int32_t alignCenter = ArkUI_ScrollSnapAlign::ARKUI_SCROLL_SNAP_ALIGN_CENTER;
+    list->SetScrollSnapAlign(alignCenter);
     std::vector<std::shared_ptr<Component>> input;
     for (int i = 0; i < size; i++) {
         auto column = std::make_shared<ColumnComponent>();
@@ -167,7 +167,8 @@ napi_value SnapSpeedTest::CreateNativeNode(napi_env env, napi_callback_info info
 
     std::string id(xComponentID);
     if (OH_NativeXComponent_AttachNativeRootNode(
-            PluginManager::GetInstance()->GetNativeXComponent(id), rootColumn->GetComponent()) == INVALID_PARAM) {
+        PluginManager::GetInstance()->GetNativeXComponent(id),
+        rootColumn->GetComponent == INVALID_PARAM)) {
         OH_LOG_Print(
             LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, "SnapSpeedTest", "OH_NativeXComponent_AttachNativeRootNode failed");
     }
@@ -212,7 +213,8 @@ napi_value SnapSpeedTest::CreateNativeNodeNoLazyForeach(napi_env env, napi_callb
 
     std::string id(xComponentID);
     if (OH_NativeXComponent_AttachNativeRootNode(
-            PluginManager::GetInstance()->GetNativeXComponent(id), rootColumn->GetComponent()) == INVALID_PARAM) {
+        PluginManager::GetInstance()->GetNativeXComponent(id),
+        rootColumn->GetComponent == INVALID_PARAM)) {
         OH_LOG_Print(
             LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, "SnapSpeedTest", "OH_NativeXComponent_AttachNativeRootNode failed");
     }
