@@ -77,7 +77,7 @@ void RichEditorStyleOneTestNg::TearDownTestSuite()
  * @tc.desc: test update span style
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyleOneTestNg, TextStyle001, TestSize.Level1)
+HWTEST_F(RichEditorStyleOneTestNg, TextStyle001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -131,7 +131,7 @@ HWTEST_F(RichEditorStyleOneTestNg, TextStyle001, TestSize.Level1)
  * @tc.desc: test update span style
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyleOneTestNg, UpdateSpanStyle001, TestSize.Level1)
+HWTEST_F(RichEditorStyleOneTestNg, UpdateSpanStyle001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. get richEditor controller
@@ -208,7 +208,7 @@ HWTEST_F(RichEditorStyleOneTestNg, UpdateSpanStyle001, TestSize.Level1)
  * @tc.desc: test UpdateImageStyle
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyleOneTestNg, UpdateSpanStyle002, TestSize.Level1)
+HWTEST_F(RichEditorStyleOneTestNg, UpdateSpanStyle002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. get richEditor controller
@@ -280,7 +280,7 @@ HWTEST_F(RichEditorStyleOneTestNg, UpdateSpanStyle002, TestSize.Level1)
  * @tc.desc: test update span style
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyleOneTestNg, UpdateSpanStyle003, TestSize.Level1)
+HWTEST_F(RichEditorStyleOneTestNg, UpdateSpanStyle003, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -334,7 +334,7 @@ HWTEST_F(RichEditorStyleOneTestNg, UpdateSpanStyle003, TestSize.Level1)
  * @tc.desc: test AddTextSpan with UpdateParagraphStyle
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyleOneTestNg, UpdateParagraphStyle001, TestSize.Level1)
+HWTEST_F(RichEditorStyleOneTestNg, UpdateParagraphStyle001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. get richEditor controller

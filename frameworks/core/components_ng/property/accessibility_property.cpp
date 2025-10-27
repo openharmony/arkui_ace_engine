@@ -1369,4 +1369,20 @@ void AccessibilityProperty::ResetAccessibilityGroupOptions()
 {
     accessibilityGroupOptions_.reset();
 }
+
+void AccessibilityProperty::SetIsAccessibilityModal(bool isModal)
+{
+    if (!overlayProperty_.has_value()) {
+        overlayProperty_ = OverlayAccessibilityProperty();
+    }
+    CHECK_EQUAL_VOID(overlayProperty_.has_value(), false);
+    overlayProperty_->isModal = isModal;
+}
+
+bool AccessibilityProperty::IsAccessibilityModal() const
+{
+    CHECK_EQUAL_RETURN(overlayProperty_.has_value(), false, true);
+    return overlayProperty_->isModal;
+}
+
 } // namespace OHOS::Ace::NG

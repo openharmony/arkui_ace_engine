@@ -82,7 +82,7 @@ void RichEditorCopyCutPasteTestNg::TearDownTestSuite()
  * @tc.desc: test HandleOnCopy
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCopyCutPasteTestNg, HandleOnCopy001, TestSize.Level1)
+HWTEST_F(RichEditorCopyCutPasteTestNg, HandleOnCopy001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -111,7 +111,7 @@ HWTEST_F(RichEditorCopyCutPasteTestNg, HandleOnCopy001, TestSize.Level1)
  * @tc.desc: test InsertValueByPaste
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCopyCutPasteTestNg, HandleOnCopy002, TestSize.Level1)
+HWTEST_F(RichEditorCopyCutPasteTestNg, HandleOnCopy002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. init callback
@@ -150,7 +150,7 @@ HWTEST_F(RichEditorCopyCutPasteTestNg, HandleOnCopy002, TestSize.Level1)
  * @tc.desc: test InsertValueByPaste
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCopyCutPasteTestNg, HandleOnCopy003, TestSize.Level1)
+HWTEST_F(RichEditorCopyCutPasteTestNg, HandleOnCopy003, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. init callback
@@ -191,7 +191,7 @@ HWTEST_F(RichEditorCopyCutPasteTestNg, HandleOnCopy003, TestSize.Level1)
  * @tc.desc: test HandleOnCopy
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCopyCutPasteTestNg, HandleOnCopy004, TestSize.Level1)
+HWTEST_F(RichEditorCopyCutPasteTestNg, HandleOnCopy004, TestSize.Level0)
 {
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
@@ -212,7 +212,7 @@ HWTEST_F(RichEditorCopyCutPasteTestNg, HandleOnCopy004, TestSize.Level1)
  * @tc.desc: test CopyGestureOption
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCopyCutPasteTestNg, CopyGestureOption001, TestSize.Level1)
+HWTEST_F(RichEditorCopyCutPasteTestNg, CopyGestureOption001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -233,7 +233,7 @@ HWTEST_F(RichEditorCopyCutPasteTestNg, CopyGestureOption001, TestSize.Level1)
  * @tc.desc: test CopyGestureOption
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCopyCutPasteTestNg, CopyGestureOption002, TestSize.Level1)
+HWTEST_F(RichEditorCopyCutPasteTestNg, CopyGestureOption002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -256,7 +256,7 @@ HWTEST_F(RichEditorCopyCutPasteTestNg, CopyGestureOption002, TestSize.Level1)
  * @tc.desc: test HandleOnCopyStyledString
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCopyCutPasteTestNg, HandleOnCopyStyledString001, TestSize.Level1)
+HWTEST_F(RichEditorCopyCutPasteTestNg, HandleOnCopyStyledString001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -276,7 +276,7 @@ HWTEST_F(RichEditorCopyCutPasteTestNg, HandleOnCopyStyledString001, TestSize.Lev
  * @tc.desc: test OnCopyOperationExt
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCopyCutPasteTestNg, OnCopyOperationExt001, TestSize.Level1)
+HWTEST_F(RichEditorCopyCutPasteTestNg, OnCopyOperationExt001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -295,7 +295,7 @@ HWTEST_F(RichEditorCopyCutPasteTestNg, OnCopyOperationExt001, TestSize.Level1)
  * @tc.desc: test InsertValueByPaste
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCopyCutPasteTestNg, InsertValueByPaste001, TestSize.Level1)
+HWTEST_F(RichEditorCopyCutPasteTestNg, InsertValueByPaste001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create textFrameNode.
@@ -329,7 +329,7 @@ HWTEST_F(RichEditorCopyCutPasteTestNg, InsertValueByPaste001, TestSize.Level1)
  * @tc.desc: test HandleOnPaste
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCopyCutPasteTestNg, HandleOnPaste001, TestSize.Level1)
+HWTEST_F(RichEditorCopyCutPasteTestNg, HandleOnPaste001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -364,7 +364,7 @@ HWTEST_F(RichEditorCopyCutPasteTestNg, HandleOnPaste001, TestSize.Level1)
  * @tc.desc: test RichEditorPattern ResetAfterPaste
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCopyCutPasteTestNg, ResetAfterPaste001, TestSize.Level1)
+HWTEST_F(RichEditorCopyCutPasteTestNg, ResetAfterPaste001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -383,7 +383,7 @@ HWTEST_F(RichEditorCopyCutPasteTestNg, ResetAfterPaste001, TestSize.Level1)
  * @tc.desc: test PasteStr
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCopyCutPasteTestNg, PasteStr001, TestSize.Level1)
+HWTEST_F(RichEditorCopyCutPasteTestNg, PasteStr001, TestSize.Level0)
 {
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
@@ -408,7 +408,7 @@ HWTEST_F(RichEditorCopyCutPasteTestNg, PasteStr001, TestSize.Level1)
  * @tc.desc: test PasteStr
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCopyCutPasteTestNg, PasteStr002, TestSize.Level1)
+HWTEST_F(RichEditorCopyCutPasteTestNg, PasteStr002, TestSize.Level0)
 {
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
@@ -423,7 +423,7 @@ HWTEST_F(RichEditorCopyCutPasteTestNg, PasteStr002, TestSize.Level1)
  * @tc.desc: test RichEditorPattern HandleOnCut
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCopyCutPasteTestNg, HandleOnCut001, TestSize.Level1)
+HWTEST_F(RichEditorCopyCutPasteTestNg, HandleOnCut001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -445,7 +445,7 @@ HWTEST_F(RichEditorCopyCutPasteTestNg, HandleOnCut001, TestSize.Level1)
  * @tc.desc: test InsertValueByPaste
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCopyCutPasteTestNg, HandleOnCut002, TestSize.Level1)
+HWTEST_F(RichEditorCopyCutPasteTestNg, HandleOnCut002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. init callback
@@ -497,7 +497,7 @@ HWTEST_F(RichEditorCopyCutPasteTestNg, HandleOnCut002, TestSize.Level1)
  * @tc.desc: test InsertValueByPaste
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCopyCutPasteTestNg, HandleOnCut003, TestSize.Level1)
+HWTEST_F(RichEditorCopyCutPasteTestNg, HandleOnCut003, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. init callback
@@ -535,7 +535,7 @@ HWTEST_F(RichEditorCopyCutPasteTestNg, HandleOnCut003, TestSize.Level1)
  * @tc.desc: test HandleOnCut
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCopyCutPasteTestNg, HandleOnCut004, TestSize.Level1)
+HWTEST_F(RichEditorCopyCutPasteTestNg, HandleOnCut004, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. init callback
@@ -584,7 +584,7 @@ HWTEST_F(RichEditorCopyCutPasteTestNg, HandleOnCut004, TestSize.Level1)
  * @tc.desc: test SetSubSpans
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCopyCutPasteTestNg, SetSubSpans001, TestSize.Level1)
+HWTEST_F(RichEditorCopyCutPasteTestNg, SetSubSpans001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -606,7 +606,7 @@ HWTEST_F(RichEditorCopyCutPasteTestNg, SetSubSpans001, TestSize.Level1)
  * @tc.desc: test CopySpansForClipboard function
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCopyCutPasteTestNg, CopySpansForClipboard, TestSize.Level1)
+HWTEST_F(RichEditorCopyCutPasteTestNg, CopySpansForClipboard, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -641,7 +641,7 @@ HWTEST_F(RichEditorCopyCutPasteTestNg, CopySpansForClipboard, TestSize.Level1)
  * @tc.desc: test OnModifyDone
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCopyCutPasteTestNg, OnModifyDone001, TestSize.Level1)
+HWTEST_F(RichEditorCopyCutPasteTestNg, OnModifyDone001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -656,7 +656,7 @@ HWTEST_F(RichEditorCopyCutPasteTestNg, OnModifyDone001, TestSize.Level1)
  * @tc.desc: test AddUdmfData
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCopyCutPasteTestNg, AddUdmfData001, TestSize.Level1)
+HWTEST_F(RichEditorCopyCutPasteTestNg, AddUdmfData001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -697,7 +697,7 @@ HWTEST_F(RichEditorCopyCutPasteTestNg, AddUdmfData001, TestSize.Level1)
  * @tc.desc: Test AsyncHandleOnCopyStyledStringHtml.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCopyCutPasteTestNg, AsyncHandleOnCopyStyledStringHtml, TestSize.Level1)
+HWTEST_F(RichEditorCopyCutPasteTestNg, AsyncHandleOnCopyStyledStringHtml, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();

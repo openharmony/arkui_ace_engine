@@ -61,7 +61,7 @@ class stateMgmtConsole {
     aceConsole.warn(LogTag.STATE_MGMT, ...args);
   }
 
-  public static frequentApplicationError(msg: string): void {
+  private static limitLog(msg: string): number {
     if (!stateMgmtConsole.startTimer) {
       stateMgmtConsole.startTimer = true;
       if (typeof setTimeout === 'function') {
@@ -73,6 +73,18 @@ class stateMgmtConsole {
     }
     const count = stateMgmtConsole.errorLogFrequency.get(msg);
     stateMgmtConsole.errorLogFrequency.set(msg, count ? count + 1 : 1);
+
+    if (stateMgmtConsole.errorLogFrequency.size > stateMgmtConsole.MAX_LOG_TYPES) {
+      aceConsole.error(LogTag.STATE_MGMT, `There are more than ${stateMgmtConsole.errorLogFrequency.size} different kinds application error logs, please check the previous log printed.`);
+      stateMgmtConsole.errorLogFrequency.clear();
+      typeof setTimeout !== 'function' && stateMgmtConsole.errorLogFlag.clear();
+    }
+    return count;
+  }
+
+  public static frequentApplicationError(msg: string): void {
+    const count = stateMgmtConsole.limitLog(msg);
+
     if (!stateMgmtConsole.errorLogFlag.has(msg)) {
       stateMgmtConsole.errorLogFlag.add(msg);
       if (count) {
@@ -81,17 +93,34 @@ class stateMgmtConsole {
         aceConsole.error(LogTag.STATE_MGMT, `FIX THIS APPLICATION ERROR:`, msg);
       }
     }
+  }
 
-    if (stateMgmtConsole.errorLogFrequency.size > stateMgmtConsole.MAX_LOG_TYPES) {
-      aceConsole.error(LogTag.STATE_MGMT, `There are more than ${stateMgmtConsole.errorLogFrequency.size} different kinds application error logs, please check the previous log printed.`);
-      stateMgmtConsole.errorLogFrequency.clear();
-      typeof setTimeout !== 'function' && stateMgmtConsole.errorLogFlag.clear();
+  public static frequentWarn(msg: string): void {
+    const count = stateMgmtConsole.limitLog(msg);
+
+    if (!stateMgmtConsole.errorLogFlag.has(msg)) {
+      stateMgmtConsole.errorLogFlag.add(msg);
+      if (count) {
+        aceConsole.warn(LogTag.STATE_MGMT, msg, `Current log drops ${count + 1} line(s).`);
+      } else {
+        aceConsole.warn(LogTag.STATE_MGMT, msg);
+      }
     }
   }
 
-  public static featureCombinationError(msg: string): void {
-    aceConsole.warn(LogTag.STATE_MGMT, msg);
+  public static frequentError(msg: string): void {
+    const count = stateMgmtConsole.limitLog(msg);
+
+    if (!stateMgmtConsole.errorLogFlag.has(msg)) {
+      stateMgmtConsole.errorLogFlag.add(msg);
+      if (count) {
+        aceConsole.error(LogTag.STATE_MGMT, msg, `Current log drops ${count + 1} line(s).`);
+      } else {
+        aceConsole.error(LogTag.STATE_MGMT, msg);
+      }
+    }
   }
+
 }
 
 type TraceArgs = string | number | boolean;

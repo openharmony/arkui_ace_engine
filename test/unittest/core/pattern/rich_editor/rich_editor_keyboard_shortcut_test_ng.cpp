@@ -83,7 +83,7 @@ void RichEditorKeyboardShortcutTestNg::TearDownTestSuite()
  * @tc.desc: test OnKeyEvent
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorKeyboardShortcutTestNg, OnKeyEvent001, TestSize.Level1)
+HWTEST_F(RichEditorKeyboardShortcutTestNg, OnKeyEvent001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -118,7 +118,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, OnKeyEvent001, TestSize.Level1)
  * @tc.desc: test the cursor move line start
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts001, TestSize.Level1)
+HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. get richEditor pattern
@@ -170,7 +170,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts001, TestS
  * @tc.desc: test the cursor move line end and down
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts002, TestSize.Level1)
+HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. get richEditor pattern
@@ -212,7 +212,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts002, TestS
  * @tc.desc: test the select move position
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts101, TestSize.Level1)
+HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts101, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. get richEditor pattern
@@ -256,7 +256,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts101, TestS
  * @tc.desc: test the select move position, up
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts102, TestSize.Level1)
+HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts102, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. get richEditor pattern
@@ -305,7 +305,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts102, TestS
  * @tc.desc: test the delete comb
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts201, TestSize.Level1)
+HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts201, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. get richEditor pattern
@@ -337,7 +337,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts201, TestS
  * @tc.desc: test the text font style
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts202, TestSize.Level1)
+HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts202, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. get richEditor pattern
@@ -372,7 +372,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts202, TestS
  * @tc.desc: test the text font style
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts203, TestSize.Level1)
+HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts203, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. get richEditor pattern
@@ -407,7 +407,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts203, TestS
  * @tc.desc: test the text font style
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts204, TestSize.Level1)
+HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts204, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. get richEditor pattern
@@ -441,7 +441,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts204, TestS
  * @tc.desc: test BeforeAddImage
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorKeyboardShortcutTestNg, BeforeAddImage101, TestSize.Level1)
+HWTEST_F(RichEditorKeyboardShortcutTestNg, BeforeAddImage101, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. declare and init variables and call function.
@@ -473,7 +473,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, BeforeAddImage101, TestSize.Level1)
  * @tc.desc: test BeforeChangeText
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorKeyboardShortcutTestNg, BeforeChangeText101, TestSize.Level1)
+HWTEST_F(RichEditorKeyboardShortcutTestNg, BeforeChangeText101, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. declare and init variables and call function.
@@ -503,7 +503,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, BeforeChangeText101, TestSize.Level1)
  * @tc.desc: test GetTextThemeFontSize
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorKeyboardShortcutTestNg, GetTextThemeFontSize101, TestSize.Level1)
+HWTEST_F(RichEditorKeyboardShortcutTestNg, GetTextThemeFontSize101, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. declare and init variables and call function.
@@ -528,7 +528,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, GetTextThemeFontSize101, TestSize.Lev
  * @tc.desc: test HandleSelectWrapper
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleSelectWrapper101, TestSize.Level1)
+HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleSelectWrapper101, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. declare and init variables and call function.
@@ -547,7 +547,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleSelectWrapper101, TestSize.Leve
  * @tc.desc: test HandleTripleClickEvent001
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleTripleClickEvent001, TestSize.Level1)
+HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleTripleClickEvent001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. declare and init variables and call function.
@@ -578,7 +578,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleTripleClickEvent001, TestSize.L
  * @tc.desc: test PreferredParagraph
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorKeyboardShortcutTestNg, PreferredParagraph001, TestSize.Level1)
+HWTEST_F(RichEditorKeyboardShortcutTestNg, PreferredParagraph001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. declare and init variables and call function.
@@ -618,7 +618,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, PreferredParagraph001, TestSize.Level
  * @tc.desc: test GetTextColorInJson
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorKeyboardShortcutTestNg, GetTextColorInJson001, TestSize.Level1)
+HWTEST_F(RichEditorKeyboardShortcutTestNg, GetTextColorInJson001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. declare and init variables and call function.
@@ -641,7 +641,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, GetTextColorInJson001, TestSize.Level
  * @tc.desc: test GetPlaceHolderInJson
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorKeyboardShortcutTestNg, GetPlaceHolderInJson001, TestSize.Level1)
+HWTEST_F(RichEditorKeyboardShortcutTestNg, GetPlaceHolderInJson001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. declare and init variables and call function.
@@ -666,7 +666,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, GetPlaceHolderInJson001, TestSize.Lev
  * @tc.desc: test CheckTripClickEvent
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorKeyboardShortcutTestNg, CheckTripClickEvent001, TestSize.Level1)
+HWTEST_F(RichEditorKeyboardShortcutTestNg, CheckTripClickEvent001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. declare and init variables and call function.
@@ -692,7 +692,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, CheckTripClickEvent001, TestSize.Leve
  * @tc.desc: test HandleSelectPosition
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleSelectPosition001, TestSize.Level1)
+HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleSelectPosition001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. init and call function.
@@ -714,7 +714,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleSelectPosition001, TestSize.Lev
  * @tc.desc: test CalcLineEndPosition
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorKeyboardShortcutTestNg, CalcLineEndPosition001, TestSize.Level1)
+HWTEST_F(RichEditorKeyboardShortcutTestNg, CalcLineEndPosition001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. declare and init variables.
@@ -739,7 +739,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, CalcLineEndPosition001, TestSize.Leve
  * @tc.desc: test GetDeletedSpan
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorKeyboardShortcutTestNg, GetDeletedSpan001, TestSize.Level1)
+HWTEST_F(RichEditorKeyboardShortcutTestNg, GetDeletedSpan001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. declare and init variables.
@@ -766,7 +766,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, GetDeletedSpan001, TestSize.Level1)
  * @tc.desc: test BeforeAddImage
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorKeyboardShortcutTestNg, BeforeAddImage102, TestSize.Level1)
+HWTEST_F(RichEditorKeyboardShortcutTestNg, BeforeAddImage102, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. declare and init variables and call function.
@@ -810,7 +810,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, BeforeAddImage102, TestSize.Level1)
  * @tc.desc: test BeforeChangeText
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorKeyboardShortcutTestNg, BeforeChangeText102, TestSize.Level1)
+HWTEST_F(RichEditorKeyboardShortcutTestNg, BeforeChangeText102, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. declare and init variables and call function.
@@ -841,7 +841,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, BeforeChangeText102, TestSize.Level1)
  * @tc.desc: test GetDelPartiallySpanItem
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorKeyboardShortcutTestNg, GetDelPartiallySpanItem002, TestSize.Level1)
+HWTEST_F(RichEditorKeyboardShortcutTestNg, GetDelPartiallySpanItem002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. init and call function.
@@ -893,7 +893,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, GetDelPartiallySpanItem002, TestSize.
  * @tc.desc: test GetDeletedSpan
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorKeyboardShortcutTestNg, GetDeletedSpan002, TestSize.Level1)
+HWTEST_F(RichEditorKeyboardShortcutTestNg, GetDeletedSpan002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. declare and init variables.
@@ -926,7 +926,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, GetDeletedSpan002, TestSize.Level1)
  * @tc.desc: test GetSelectArea
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorKeyboardShortcutTestNg, GetSelectArea101, TestSize.Level1)
+HWTEST_F(RichEditorKeyboardShortcutTestNg, GetSelectArea101, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -956,7 +956,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, GetSelectArea101, TestSize.Level1)
  * @tc.desc: test SetCustomKeyboard
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorKeyboardShortcutTestNg, SetCustomKeyboard001, TestSize.Level1)
+HWTEST_F(RichEditorKeyboardShortcutTestNg, SetCustomKeyboard001, TestSize.Level0)
 {
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
@@ -972,7 +972,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, SetCustomKeyboard001, TestSize.Level1
  * @tc.desc: test SetEnterKeyType
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorKeyboardShortcutTestNg, SetEnterKeyType, TestSize.Level1)
+HWTEST_F(RichEditorKeyboardShortcutTestNg, SetEnterKeyType, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. get richEditor controller
@@ -999,7 +999,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, SetEnterKeyType, TestSize.Level1)
  * @tc.desc: test HandleSelectFontStyle
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts205, TestSize.Level1)
+HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts205, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. get richEditor pattern and controller
@@ -1061,7 +1061,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts205, TestS
  * @tc.desc: test HandleSelectFontStyle
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts206, TestSize.Level1)
+HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts206, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. get richEditor pattern and controller
@@ -1099,7 +1099,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts206, TestS
  * @tc.desc: test the text font style
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts207, TestSize.Level1)
+HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts207, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. get richEditor pattern and controller
@@ -1151,7 +1151,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts207, TestS
  * @tc.desc: test richEditor shift multiple selection function
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorKeyboardShortcutTestNg, ShiftMultipleSelection001, TestSize.Level1)
+HWTEST_F(RichEditorKeyboardShortcutTestNg, ShiftMultipleSelection001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1211,7 +1211,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, ShiftMultipleSelection001, TestSize.L
  * @tc.desc: test the shortcut for deletion on dragging status
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleDelKeyOnDragging, TestSize.Level1)
+HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleDelKeyOnDragging, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. get richEditor pattern

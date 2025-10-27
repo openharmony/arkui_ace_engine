@@ -155,6 +155,9 @@ function __Interop_createCompatibleStaticState_Internal(value: Object): Object {
     if(InteropExtractorModule.createCompatibleStaticState === undefined) {
         throw new Error('Non Method For createCompatibleStaticState');
     }
+    if (value instanceof SynchedPropertyTwoWayPU<Object>) {
+        value = value.getRootSource();
+    }
     return InteropExtractorModule.createCompatibleStaticState(value);
 }
 

@@ -74,7 +74,7 @@ void RichEditorMouseTest::TearDownTestSuite()
  * @tc.desc: test HandleMouseLeftButton
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorMouseTest, HandleMouseLeftButton001, TestSize.Level1)
+HWTEST_F(RichEditorMouseTest, HandleMouseLeftButton001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -115,7 +115,7 @@ HWTEST_F(RichEditorMouseTest, HandleMouseLeftButton001, TestSize.Level1)
  * @tc.desc: test HandleMouseLeftButton
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorMouseTest, HandleMouseLeftButton002, TestSize.Level1)
+HWTEST_F(RichEditorMouseTest, HandleMouseLeftButton002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     AddSpan(INIT_VALUE_1);
@@ -172,7 +172,7 @@ HWTEST_F(RichEditorMouseTest, HandleMouseLeftButton002, TestSize.Level1)
  * @tc.desc: test HandleMouseLeftButton
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorMouseTest, HandleMouseLeftButton003, TestSize.Level1)
+HWTEST_F(RichEditorMouseTest, HandleMouseLeftButton003, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -214,7 +214,7 @@ HWTEST_F(RichEditorMouseTest, HandleMouseLeftButton003, TestSize.Level1)
  * @tc.desc: test on hover
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorMouseTest, OnHover001, TestSize.Level1)
+HWTEST_F(RichEditorMouseTest, OnHover001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -237,7 +237,7 @@ HWTEST_F(RichEditorMouseTest, OnHover001, TestSize.Level1)
  * @tc.desc: test MouseRightFocus
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorMouseTest, MouseRightFocus001, TestSize.Level1)
+HWTEST_F(RichEditorMouseTest, MouseRightFocus001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -260,7 +260,7 @@ HWTEST_F(RichEditorMouseTest, MouseRightFocus001, TestSize.Level1)
  * @tc.desc: test MouseRightFocus
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorMouseTest, MouseRightFocus002, TestSize.Level1)
+HWTEST_F(RichEditorMouseTest, MouseRightFocus002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -277,7 +277,7 @@ HWTEST_F(RichEditorMouseTest, MouseRightFocus002, TestSize.Level1)
  * @tc.desc: test MouseRightFocus
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorMouseTest, MouseRightFocus003, TestSize.Level1)
+HWTEST_F(RichEditorMouseTest, MouseRightFocus003, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -300,7 +300,7 @@ HWTEST_F(RichEditorMouseTest, MouseRightFocus003, TestSize.Level1)
  * @tc.desc: test MouseRightFocus
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorMouseTest, MouseRightFocus004, TestSize.Level1)
+HWTEST_F(RichEditorMouseTest, MouseRightFocus004, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -323,7 +323,7 @@ HWTEST_F(RichEditorMouseTest, MouseRightFocus004, TestSize.Level1)
  * @tc.desc: test MouseRightFocus
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorMouseTest, MouseRightFocus005, TestSize.Level1)
+HWTEST_F(RichEditorMouseTest, MouseRightFocus005, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -351,7 +351,7 @@ HWTEST_F(RichEditorMouseTest, MouseRightFocus005, TestSize.Level1)
  * @tc.desc: test MouseRightFocus
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorMouseTest, MouseRightFocus006, TestSize.Level1)
+HWTEST_F(RichEditorMouseTest, MouseRightFocus006, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -371,7 +371,7 @@ HWTEST_F(RichEditorMouseTest, MouseRightFocus006, TestSize.Level1)
  * @tc.desc: test MouseRightFocus
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorMouseTest, MouseRightFocus007, TestSize.Level1)
+HWTEST_F(RichEditorMouseTest, MouseRightFocus007, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -395,7 +395,7 @@ HWTEST_F(RichEditorMouseTest, MouseRightFocus007, TestSize.Level1)
  * @tc.desc: test InitMouseEvent
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorMouseTest, RichEditorPatternTestInitMouseEvent001, TestSize.Level1)
+HWTEST_F(RichEditorMouseTest, RichEditorPatternTestInitMouseEvent001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -434,7 +434,7 @@ HWTEST_F(RichEditorMouseTest, RichEditorPatternTestInitMouseEvent001, TestSize.L
  * @tc.desc: test HandleMouseRightButton
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorMouseTest, HandleMouseRightButton001, TestSize.Level1)
+HWTEST_F(RichEditorMouseTest, HandleMouseRightButton001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -475,7 +475,7 @@ HWTEST_F(RichEditorMouseTest, HandleMouseRightButton001, TestSize.Level1)
  * @tc.desc: test HandleMouseRightButton
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorMouseTest, HandleMouseRightButton002, TestSize.Level1)
+HWTEST_F(RichEditorMouseTest, HandleMouseRightButton002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. declare and init variables.
@@ -497,7 +497,7 @@ HWTEST_F(RichEditorMouseTest, HandleMouseRightButton002, TestSize.Level1)
  * @tc.desc: test HandleMouseRightButton
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorMouseTest, HandleMouseRightButton003, TestSize.Level1)
+HWTEST_F(RichEditorMouseTest, HandleMouseRightButton003, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. declare and init variables.
@@ -542,7 +542,7 @@ HWTEST_F(RichEditorMouseTest, HandleMouseRightButton003, TestSize.Level1)
  * @tc.desc: test HandleMouseRightButton
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorMouseTest, HandleMouseRightButton004, TestSize.Level1)
+HWTEST_F(RichEditorMouseTest, HandleMouseRightButton004, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -573,7 +573,7 @@ HWTEST_F(RichEditorMouseTest, HandleMouseRightButton004, TestSize.Level1)
  * @tc.desc: test HandleMouseLeftButtonMove
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorMouseTest, HandleMouseLeftButtonMove001, TestSize.Level1)
+HWTEST_F(RichEditorMouseTest, HandleMouseLeftButtonMove001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. declare and init variables.
@@ -632,7 +632,7 @@ HWTEST_F(RichEditorMouseTest, HandleMouseLeftButtonMove001, TestSize.Level1)
  * @tc.desc: test HandleAISpanHoverEvent
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorMouseTest, HandleAISpanHoverEvent001, TestSize.Level1)
+HWTEST_F(RichEditorMouseTest, HandleAISpanHoverEvent001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -647,7 +647,7 @@ HWTEST_F(RichEditorMouseTest, HandleAISpanHoverEvent001, TestSize.Level1)
  * @tc.desc: test HandleAISpanHoverEvent
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorMouseTest, HandleAISpanHoverEvent002, TestSize.Level1)
+HWTEST_F(RichEditorMouseTest, HandleAISpanHoverEvent002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -663,7 +663,7 @@ HWTEST_F(RichEditorMouseTest, HandleAISpanHoverEvent002, TestSize.Level1)
  * @tc.desc: test HandleAISpanHoverEvent
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorMouseTest, HandleAISpanHoverEvent003, TestSize.Level1)
+HWTEST_F(RichEditorMouseTest, HandleAISpanHoverEvent003, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -684,7 +684,7 @@ HWTEST_F(RichEditorMouseTest, HandleAISpanHoverEvent003, TestSize.Level1)
  * @tc.desc: test HandleAISpanHoverEvent
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorMouseTest, HandleAISpanHoverEvent004, TestSize.Level1)
+HWTEST_F(RichEditorMouseTest, HandleAISpanHoverEvent004, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -707,7 +707,7 @@ HWTEST_F(RichEditorMouseTest, HandleAISpanHoverEvent004, TestSize.Level1)
  * @tc.desc: test HandleAISpanHoverEvent
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorMouseTest, HandleAISpanHoverEvent005, TestSize.Level1)
+HWTEST_F(RichEditorMouseTest, HandleAISpanHoverEvent005, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -730,7 +730,7 @@ HWTEST_F(RichEditorMouseTest, HandleAISpanHoverEvent005, TestSize.Level1)
  * @tc.desc: test HandleAISpanHoverEvent
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorMouseTest, HandleAISpanHoverEvent006, TestSize.Level1)
+HWTEST_F(RichEditorMouseTest, HandleAISpanHoverEvent006, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -752,7 +752,7 @@ HWTEST_F(RichEditorMouseTest, HandleAISpanHoverEvent006, TestSize.Level1)
  * @tc.desc: test HandleAISpanHoverEvent
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorMouseTest, HandleAISpanHoverEvent007, TestSize.Level1)
+HWTEST_F(RichEditorMouseTest, HandleAISpanHoverEvent007, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -776,7 +776,7 @@ HWTEST_F(RichEditorMouseTest, HandleAISpanHoverEvent007, TestSize.Level1)
  * @tc.desc: test HandleAISpanHoverEvent
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorMouseTest, HandleAISpanHoverEvent008, TestSize.Level1)
+HWTEST_F(RichEditorMouseTest, HandleAISpanHoverEvent008, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -800,7 +800,7 @@ HWTEST_F(RichEditorMouseTest, HandleAISpanHoverEvent008, TestSize.Level1)
  * @tc.desc: test HandleAISpanHoverEvent
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorMouseTest, HandleAISpanHoverEvent009, TestSize.Level1)
+HWTEST_F(RichEditorMouseTest, HandleAISpanHoverEvent009, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -825,7 +825,7 @@ HWTEST_F(RichEditorMouseTest, HandleAISpanHoverEvent009, TestSize.Level1)
  * @tc.desc: test HandleAISpanHoverEvent
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorMouseTest, HandleAISpanHoverEvent010, TestSize.Level1)
+HWTEST_F(RichEditorMouseTest, HandleAISpanHoverEvent010, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -847,7 +847,7 @@ HWTEST_F(RichEditorMouseTest, HandleAISpanHoverEvent010, TestSize.Level1)
  * @tc.desc: test HandleMouseLeftButtonPress
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorMouseTest, HandleMouseLeftButtonPress001, TestSize.Level1)
+HWTEST_F(RichEditorMouseTest, HandleMouseLeftButtonPress001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -862,7 +862,7 @@ HWTEST_F(RichEditorMouseTest, HandleMouseLeftButtonPress001, TestSize.Level1)
  * @tc.desc: test HandleMouseLeftButtonPress
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorMouseTest, HandleMouseLeftButtonPress002, TestSize.Level1)
+HWTEST_F(RichEditorMouseTest, HandleMouseLeftButtonPress002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -885,7 +885,7 @@ HWTEST_F(RichEditorMouseTest, HandleMouseLeftButtonPress002, TestSize.Level1)
  * @tc.desc: test HandleMouseLeftButtonPress
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorMouseTest, HandleMouseLeftButtonPress003, TestSize.Level1)
+HWTEST_F(RichEditorMouseTest, HandleMouseLeftButtonPress003, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -906,7 +906,7 @@ HWTEST_F(RichEditorMouseTest, HandleMouseLeftButtonPress003, TestSize.Level1)
  * @tc.desc: test HandleMouseEvent
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorMouseTest, HandleMouseEvent001, TestSize.Level1)
+HWTEST_F(RichEditorMouseTest, HandleMouseEvent001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -934,7 +934,7 @@ HWTEST_F(RichEditorMouseTest, HandleMouseEvent001, TestSize.Level1)
  * @tc.desc: test handle mouse event
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorMouseTest, HandleMouseEvent002, TestSize.Level1)
+HWTEST_F(RichEditorMouseTest, HandleMouseEvent002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -967,7 +967,7 @@ HWTEST_F(RichEditorMouseTest, HandleMouseEvent002, TestSize.Level1)
  * @tc.desc: test HandleMouseEvent
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorMouseTest, HandleMouseEvent003, TestSize.Level1)
+HWTEST_F(RichEditorMouseTest, HandleMouseEvent003, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. declare and init variables.
@@ -995,7 +995,7 @@ HWTEST_F(RichEditorMouseTest, HandleMouseEvent003, TestSize.Level1)
  * @tc.desc: test HandleMouseEvent
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorMouseTest, HandleMouseEvent004, TestSize.Level1)
+HWTEST_F(RichEditorMouseTest, HandleMouseEvent004, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1019,7 +1019,7 @@ HWTEST_F(RichEditorMouseTest, HandleMouseEvent004, TestSize.Level1)
  * @tc.desc: test HandleMouseEvent
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorMouseTest, HandleMouseEvent005, TestSize.Level1)
+HWTEST_F(RichEditorMouseTest, HandleMouseEvent005, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1048,7 +1048,7 @@ HWTEST_F(RichEditorMouseTest, HandleMouseEvent005, TestSize.Level1)
  * @tc.desc: test HandleMouseEvent
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorMouseTest, HandleMouseEvent006, TestSize.Level1)
+HWTEST_F(RichEditorMouseTest, HandleMouseEvent006, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1064,7 +1064,7 @@ HWTEST_F(RichEditorMouseTest, HandleMouseEvent006, TestSize.Level1)
  * @tc.desc: test HandleMouseEvent
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorMouseTest, HandleMouseEvent007, TestSize.Level1)
+HWTEST_F(RichEditorMouseTest, HandleMouseEvent007, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1080,7 +1080,7 @@ HWTEST_F(RichEditorMouseTest, HandleMouseEvent007, TestSize.Level1)
  * @tc.desc: test HandleMouseEvent
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorMouseTest, HandleMouseEvent008, TestSize.Level1)
+HWTEST_F(RichEditorMouseTest, HandleMouseEvent008, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1096,7 +1096,7 @@ HWTEST_F(RichEditorMouseTest, HandleMouseEvent008, TestSize.Level1)
  * @tc.desc: test HandleMouseEvent
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorMouseTest, HandleMouseEvent009, TestSize.Level1)
+HWTEST_F(RichEditorMouseTest, HandleMouseEvent009, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1132,7 +1132,7 @@ HWTEST_F(RichEditorMouseTest, HandleMouseEvent009, TestSize.Level1)
  * @tc.desc: test RichEditorPattern MouseDoubleClickParagraphEnd
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorMouseTest, MouseDoubleClickParagraphEnd001, TestSize.Level1)
+HWTEST_F(RichEditorMouseTest, MouseDoubleClickParagraphEnd001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1163,7 +1163,7 @@ HWTEST_F(RichEditorMouseTest, MouseDoubleClickParagraphEnd001, TestSize.Level1)
  * @tc.desc: test OnPlaceholderHover
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorMouseTest, OnPlaceholderHover001, TestSize.Level1)
+HWTEST_F(RichEditorMouseTest, OnPlaceholderHover001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1181,7 +1181,7 @@ HWTEST_F(RichEditorMouseTest, OnPlaceholderHover001, TestSize.Level1)
  * @tc.desc: test HandleMouseLeftButtonRelease
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorMouseTest, HandleMouseLeftButtonRelease001, TestSize.Level1)
+HWTEST_F(RichEditorMouseTest, HandleMouseLeftButtonRelease001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. declare and init variables.
@@ -1202,7 +1202,7 @@ HWTEST_F(RichEditorMouseTest, HandleMouseLeftButtonRelease001, TestSize.Level1)
  * @tc.desc: test HandleMouseLeftButtonRelease
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorMouseTest, HandleMouseLeftButtonRelease002, TestSize.Level1)
+HWTEST_F(RichEditorMouseTest, HandleMouseLeftButtonRelease002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1218,7 +1218,7 @@ HWTEST_F(RichEditorMouseTest, HandleMouseLeftButtonRelease002, TestSize.Level1)
  * @tc.desc: test HandleMouseLeftButtonRelease
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorMouseTest, HandleMouseLeftButtonRelease003, TestSize.Level1)
+HWTEST_F(RichEditorMouseTest, HandleMouseLeftButtonRelease003, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1236,7 +1236,7 @@ HWTEST_F(RichEditorMouseTest, HandleMouseLeftButtonRelease003, TestSize.Level1)
  * @tc.desc: test HandleMouseLeftButtonRelease
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorMouseTest, HandleMouseLeftButtonRelease004, TestSize.Level1)
+HWTEST_F(RichEditorMouseTest, HandleMouseLeftButtonRelease004, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1254,7 +1254,7 @@ HWTEST_F(RichEditorMouseTest, HandleMouseLeftButtonRelease004, TestSize.Level1)
  * @tc.desc: test HandleMouseLeftButtonRelease
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorMouseTest, HandleMouseLeftButtonRelease005, TestSize.Level1)
+HWTEST_F(RichEditorMouseTest, HandleMouseLeftButtonRelease005, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1277,7 +1277,7 @@ HWTEST_F(RichEditorMouseTest, HandleMouseLeftButtonRelease005, TestSize.Level1)
  * @tc.desc: test OnHandleMouseEvent
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorMouseTest, OnHandleMouseEvent001, TestSize.Level1)
+HWTEST_F(RichEditorMouseTest, OnHandleMouseEvent001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1293,7 +1293,7 @@ HWTEST_F(RichEditorMouseTest, OnHandleMouseEvent001, TestSize.Level1)
  * @tc.desc: test OnHandleMouseEvent
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorMouseTest, OnHandleMouseEvent002, TestSize.Level1)
+HWTEST_F(RichEditorMouseTest, OnHandleMouseEvent002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1309,7 +1309,7 @@ HWTEST_F(RichEditorMouseTest, OnHandleMouseEvent002, TestSize.Level1)
  * @tc.desc: test AdjustMouseLocalOffset
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorMouseTest, AdjustMouseLocalOffset, TestSize.Level1)
+HWTEST_F(RichEditorMouseTest, AdjustMouseLocalOffset, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1353,7 +1353,7 @@ HWTEST_F(RichEditorMouseTest, AdjustMouseLocalOffset, TestSize.Level1)
  * @tc.desc: test HandleImageHoverEvent
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorMouseTest, HandleImageHoverEvent001, TestSize.Level1)
+HWTEST_F(RichEditorMouseTest, HandleImageHoverEvent001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();

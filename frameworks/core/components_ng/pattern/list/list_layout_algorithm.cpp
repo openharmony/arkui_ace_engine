@@ -1285,6 +1285,17 @@ int32_t ListLayoutAlgorithm::LayoutALineBackward(LayoutWrapper* layoutWrapper,
     return 1;
 }
 
+bool ListLayoutAlgorithm::LayoutReachEnd(float currentEndPos, float endMainPos, int32_t currentIndex)
+{
+    if (LessNotEqual(currentEndPos, endMainPos)) {
+        return true;
+    }
+    if (GreatNotEqual(currentEndPos, endMainPos)) {
+        return false;
+    }
+    return (posMap_ && NearZero(posMap_->GetPositionInfo(currentIndex + 1).mainSize));
+}
+
 void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t startIndex, float startPos)
 {
     float currentEndPos = startPos;
@@ -1315,7 +1326,7 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t st
             endMainPos = layoutEndMainPos_.value_or(endMainPos_);
             forwardFeature_ = false;
         }
-    } while (LessNotEqual(currentEndPos + chainOffset, endMainPos + endFixPos) || forwardFeature_);
+    } while (LayoutReachEnd(currentEndPos + chainOffset, endMainPos + endFixPos, currentIndex) || forwardFeature_);
     currentEndPos += chainOffset;
 
     while (itemPosition_.size() > 1 && !targetIndex_) {
@@ -2038,7 +2049,9 @@ void ListLayoutAlgorithm::SetListItemGroupParam(const RefPtr<LayoutWrapper>& lay
 
 ListItemInfo ListLayoutAlgorithm::GetListItemGroupPosition(const RefPtr<LayoutWrapper>& layoutWrapper, int32_t index)
 {
-    int32_t id = layoutWrapper->GetHostNode()->GetId();
+    auto wrapper = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(wrapper, (ListItemInfo{ -1, 0, 0, false }));
+    int32_t id = wrapper->GetId();
     ListItemInfo pos = { id, 0, 0, true };
     auto layoutAlgorithmWrapper = layoutWrapper->GetLayoutAlgorithm(true);
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, pos);

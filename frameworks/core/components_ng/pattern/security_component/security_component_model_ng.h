@@ -56,6 +56,7 @@ public:
     static void SetIcon(const ImageSourceInfo& value);
     static void SetText(const std::string& value);
     static void SetIconSize(FrameNode* frameNode, const std::optional<Dimension>& value);
+    static void SetIconSize(FrameNode* frameNode, const std::optional<NG::CalcSize>& value);
     static void SetIconColor(FrameNode* frameNode, const std::optional<Color>& value);
     static void SetSymbolIconColor(const std::vector<Color>& value);
     static void SetFontSize(const Dimension& value);

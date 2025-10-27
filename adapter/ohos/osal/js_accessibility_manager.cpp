@@ -64,6 +64,7 @@ constexpr int32_t MAX_PAGE_ID_WITH_SUB_TREE = (1 << SUB_TREE_OFFSET_IN_PAGE_ID);
 constexpr size_t MIN_PARAMS_SIZE = 2;
 constexpr int32_t MIN_NUM = 2;
 constexpr int64_t INVALID_NODE_ID = -1;
+constexpr int32_t ACCESSIBILITY_FOCUS_WITHOUT_EVENT = -2100001;
 
 const std::string ACTION_ARGU_SCROLL_STUB = "scrolltype"; // wait for change
 const std::string ACTION_DEFAULT_PARAM = "ACCESSIBILITY_ACTION_INVALID";
@@ -1564,6 +1565,13 @@ void UpdateChildrenOfAccessibilityElementInfo(
     }
 }
 
+void UpdateAccessibilityFocusState(const RefPtr<NG::FrameNode>& node, AccessibilityElementInfo& nodeInfo)
+{
+    CHECK_NULL_VOID(node);
+    auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    nodeInfo.SetAccessibilityFocus(accessibilityProperty->GetAccessibilityFocusState());
+}
 }
 
 void JsAccessibilityManager::UpdateVirtualNodeChildAccessibilityElementInfo(
@@ -1581,7 +1589,7 @@ void JsAccessibilityManager::UpdateVirtualNodeChildAccessibilityElementInfo(
 
     nodeInfo.SetEnabled(node->GetFocusHub() ? node->GetFocusHub()->IsEnabled() : true);
     nodeInfo.SetFocused(node->GetFocusHub() ? node->GetFocusHub()->IsCurrentFocus() : false);
-    nodeInfo.SetAccessibilityFocus(node->GetRenderContext()->GetAccessibilityFocus().value_or(false));
+    UpdateAccessibilityFocusState(node, nodeInfo);
     nodeInfo.SetInspectorKey(node->GetInspectorId().value_or(""));
     nodeInfo.SetVisible(node->IsVisible());
     if (node->IsVisible()) {
@@ -1624,7 +1632,7 @@ void JsAccessibilityManager::UpdateVirtualNodeAccessibilityElementInfo(
 
     nodeInfo.SetEnabled(node->GetFocusHub() ? node->GetFocusHub()->IsEnabled() : true);
     nodeInfo.SetFocused(node->GetFocusHub() ? node->GetFocusHub()->IsCurrentFocus() : false);
-    nodeInfo.SetAccessibilityFocus(node->GetRenderContext()->GetAccessibilityFocus().value_or(false));
+    UpdateAccessibilityFocusState(node, nodeInfo);
     nodeInfo.SetInspectorKey(node->GetInspectorId().value_or(""));
     nodeInfo.SetVisible(node->IsVisible());
     if (node->IsVisible()) {
@@ -1846,6 +1854,22 @@ void JsAccessibilityManager::UpdateAccessibilityElementInfo(
     UpdateAccessibilityElementInfo(node, nodeInfo);
     UpdateAccessibilityVisible(node, nodeInfo);
 }
+
+void JsAccessibilityManager::UpdateElementInfo(
+    const RefPtr<NG::FrameNode>& node, const CommonProperty& commonProperty,
+    AccessibilityElementInfo& nodeInfo, const RefPtr<NG::PipelineContext>& ngPipeline)
+{
+    if (node->IsAccessibilityVirtualNode()) {
+        auto parentUinode = node->GetVirtualNodeParent().Upgrade();
+        CHECK_NULL_VOID(parentUinode);
+        auto parentFrame = AceType::DynamicCast<NG::FrameNode>(parentUinode);
+        CHECK_NULL_VOID(parentFrame);
+        UpdateVirtualNodeAccessibilityElementInfo(parentFrame, node, commonProperty, nodeInfo, ngPipeline);
+    } else {
+        UpdateAccessibilityElementInfo(node, commonProperty, nodeInfo, ngPipeline);
+    }
+}
+
 #ifdef WEB_SUPPORTED
 
 void JsAccessibilityManager::WebSetScreenRect(const std::shared_ptr<NG::TransitionalNodeInfo>& node,
@@ -2711,7 +2735,8 @@ void JsAccessibilityManager::UpdateVirtualNodeFocus()
         CHECK_NULL_VOID(parentFrame);
         renderContext = parentFrame->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
-        renderContext->UpdateAccessibilityFocus(false);
+        // FOCUS_WITHOUT_EVENT used to dont send a11y event, just update rect
+        renderContext->UpdateAccessibilityFocus(false, ACCESSIBILITY_FOCUS_WITHOUT_EVENT);
         auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
         CHECK_NULL_VOID(accessibilityProperty);
         if (accessibilityProperty->IsMatchAccessibilityResponseRegion(true)) {
@@ -2720,7 +2745,8 @@ void JsAccessibilityManager::UpdateVirtualNodeFocus()
         } else {
             renderContext->UpdateAccessibilityFocusRect(GetFrameNodeRectInt(frameNode));
         }
-        renderContext->UpdateAccessibilityFocus(true, frameNode->GetAccessibilityId());
+        // used to dont send a11y event, just update rect
+        renderContext->UpdateAccessibilityFocus(true, ACCESSIBILITY_FOCUS_WITHOUT_EVENT);
         accessibilityProperty->SetAccessibilityFocusState(true);
     }
 }
@@ -3626,8 +3652,7 @@ int64_t JsAccessibilityManager::GetDelayTimeBeforeSendEvent(
 
 bool JsAccessibilityManager::IsEventIgnoredByWorkMode(const AccessibilityEvent& accessibilityEvent)
 {
-    auto accessibilityWorkMode = GenerateAccessibilityWorkMode();
-    if (!accessibilityWorkMode.isTouchExplorationEnabled) {
+    if (!AceApplicationInfo::GetInstance().IsAccessibilityScreenReadEnabled()) {
         switch (accessibilityEvent.type) {
             case AccessibilityEventType::ELEMENT_INFO_CHANGE:
             case AccessibilityEventType::COMPONENT_CHANGE:
@@ -5696,7 +5721,7 @@ void JsAccessibilityManager::SearchElementInfoByAccessibilityIdNG(int64_t elemen
         "windowId: %{public}d, windowLeft: %{public}d, "
         "windowTop: %{public}d",
         commonProperty.windowId, commonProperty.windowLeft, commonProperty.windowTop);
-    UpdateAccessibilityElementInfo(node, commonProperty, nodeInfo, ngPipeline);
+    UpdateElementInfo(node, commonProperty, nodeInfo, ngPipeline);
     SetRootAccessibilityVisible(node, nodeInfo);
     SetRootAccessibilityNextFocusId(node, rootNode, nodeInfo);
     SetRootAccessibilityPreFocusId(node, rootNode, nodeInfo,
@@ -7434,6 +7459,19 @@ void JsAccessibilityManager::DeregisterAccessibilitySAObserverCallback(int64_t e
     componentSACallbackMap_.erase(elementId);
 }
 
+void JsAccessibilityManager::RegisterScreenReaderObserverCallback(
+    int64_t elementId, const std::shared_ptr<AccessibilityScreenReaderObserverCallback>& callback)
+{
+    std::lock_guard<std::mutex> lock(componentScreenReaderCallbackMutex_);
+    componentScreenReaderCallbackMap_[elementId] = callback;
+}
+
+void JsAccessibilityManager::DeregisterScreenReaderObserverCallback(int64_t elementId)
+{
+    std::lock_guard<std::mutex> lock(componentScreenReaderCallbackMutex_);
+    componentScreenReaderCallbackMap_.erase(elementId);
+}
+
 void JsAccessibilityManager::NotifyAccessibilitySAStateChange(bool state)
 {
     std::lock_guard<std::mutex> lock(componentSACallbackMutex_);
@@ -7484,6 +7522,15 @@ void JsAccessibilityManager::NotifySetChildTreeIdAndWinId(
     CHECK_NULL_VOID(callback);
     callback->SetChildTreeId(treeId);
     callback->OnSetChildTree(childWindowId, treeId);
+}
+
+void JsAccessibilityManager::NotifyScreenReaderObserverStateChange(bool state)
+{
+    std::lock_guard<std::mutex> lock(componentScreenReaderCallbackMutex_);
+    for (auto &item : componentScreenReaderCallbackMap_) {
+        CHECK_NULL_CONTINUE(item.second);
+        item.second->OnState(state);
+    }
 }
 
 bool JsAccessibilityManager::CheckIsChildElement(
@@ -7888,6 +7935,7 @@ void JsAccessibilityManager::JsAccessibilityStateObserver::OnStateChanged(const 
                 jsAccessibilityManager->isScreenReaderEnabledInitialized_ = true;
                 jsAccessibilityManager->isScreenReaderEnabled_ = state;
                 AceApplicationInfo::GetInstance().SetAccessibilityScreenReadEnabled(state);
+                jsAccessibilityManager->NotifyScreenReaderObserverStateChange(state);
             } else if (eventType == AccessibilityStateEventType::EVENT_CONFIG_EVENT_CHANGED) {
                 std::vector<uint32_t> needEvents;
                 auto client = AccessibilitySystemAbilityClient::GetInstance();

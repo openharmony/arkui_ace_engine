@@ -29,12 +29,6 @@ void AssignArkValue(Ark_Object& dst, const Nav::ExternalData& src)
         dst = src->data_;
     }
 }
-void AssignArkValue(Ark_NavPathInfo& dst, const Nav::PathInfo& src)
-{
-    auto peer = new NavPathInfoPeer();
-    CHECK_NULL_VOID(peer);
-    peer->data = src;
-}
 
 template<>
 Nav::ExternalData Convert(const Ark_Object& src)

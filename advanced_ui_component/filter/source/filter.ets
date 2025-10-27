@@ -1017,16 +1017,22 @@ export struct Filter {
   private refreshFloatFilterBarText(): void {
     this.floatFilterBarText = '';
     this.floatFilterBarAccessibilityText = '';
-    if (this.selectedFilters) {
-      const selectedValueFilters = this.selectedFilters?.filter(item => item?.value).map((item) => {
-        if (typeof item.value !== 'string') {
-          return getContext()?.resourceManager?.getStringSync((item.value as Resource)?.id);
-        } else {
-          return item.value;
-        }
-      });
-      this.floatFilterBarText = selectedValueFilters.join('/');
-      this.floatFilterBarAccessibilityText = selectedValueFilters.join(' ');
+    try {
+      if (this.selectedFilters) {
+        const selectedValueFilters = this.selectedFilters?.filter(item => item?.value).map((item) => {
+          if (typeof item.value !== 'string') {
+            return getContext()?.resourceManager?.getStringSync((item.value as Resource)?.id);
+          } else {
+            return item.value;
+          }
+        });
+        this.floatFilterBarText = selectedValueFilters.join('/');
+        this.floatFilterBarAccessibilityText = selectedValueFilters.join(' ');
+      }
+    } catch (error) {
+      let code: number = (error as BusinessError)?.code;
+      let message: string = (error as BusinessError)?.message;
+      hilog.error(0x3900, 'Ace', `Filter selectedValueFilters error, code: ${code}, message: ${message}`);
     }
   }
 

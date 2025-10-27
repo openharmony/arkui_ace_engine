@@ -242,6 +242,7 @@ public:
     virtual void SetSafeBrowsingCheckFinishId(
         std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& safeBrowsingCheckFinishId) {};
     virtual void SetBackToTop(bool isBackToTop) {};
+    virtual void SetOnVerifyPinRequest(std::function<bool(const BaseEventInfo* info)>&& jsCallback) {};
 private:
     static std::unique_ptr<WebModel> instance_;
     static std::mutex mutex_;

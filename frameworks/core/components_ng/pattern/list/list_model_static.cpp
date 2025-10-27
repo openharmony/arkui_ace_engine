@@ -63,7 +63,7 @@ void ListModelStatic::SetListItemAlign(FrameNode* frameNode, const std::optional
     if (listItemAlign.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ListItemAlign, listItemAlign.value(), frameNode);
     } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ListItemAlign, frameNode);
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(ListLayoutProperty, ListItemAlign, PROPERTY_UPDATE_MEASURE, frameNode);
     }
 }
 
@@ -81,8 +81,8 @@ void ListModelStatic::SetListScrollBar(FrameNode* frameNode, const std::optional
     CHECK_NULL_VOID(frameNode);
     int32_t displayNumber;
 
-    if (!barState.has_value() || (barState.has_value() &&
-        (barState.value() < 0 || barState.value() >= static_cast<int32_t>(DISPLAY_MODE.size())))) {
+    if (!barState.has_value() ||
+        (barState.value() < 0 || barState.value() >= static_cast<int32_t>(DISPLAY_MODE.size()))) {
         displayNumber = static_cast<int32_t>(DisplayMode::AUTO);
     } else {
         displayNumber = barState.value();
@@ -304,6 +304,33 @@ void ListModelStatic::AddDragFrameNodeToManagerMultiThread(FrameNode* frameNode)
         dragDropManager->AddListDragFrameNode(node->GetId(), AceType::WeakClaim(AceType::RawPtr(node)));
     });
 }
+
+void ListModelStatic::RemoveDragFrameNodeToManager(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    FREE_NODE_CHECK(frameNode, RemoveDragFrameNodeToManager, frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+
+    dragDropManager->RemoveDragFrameNode(frameNode->GetId());
+}
+
+void ListModelStatic::RemoveDragFrameNodeToManagerMultiThread(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->PostAfterAttachMainTreeTask([weak = AceType::WeakClaim(frameNode)]() {
+        auto node = weak.Upgrade();
+        CHECK_NULL_VOID(node);
+        auto pipeline = node->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto dragDropManager = pipeline->GetDragDropManager();
+        CHECK_NULL_VOID(dragDropManager);
+        dragDropManager->RemoveDragFrameNode(node->GetId());
+    });
+}
+
 void ListModelStatic::SetOnScrollIndex(FrameNode* frameNode, OnScrollIndexEvent&& onScrollIndex)
 {
     CHECK_NULL_VOID(frameNode);
@@ -425,6 +452,18 @@ void ListModelStatic::SetOnItemDragStart(FrameNode* frameNode, OnItemDragStartFu
     eventHub->InitItemDragEvent(gestureEventHub);
 
     ListModelStatic::AddDragFrameNodeToManager(frameNode);
+}
+
+void ListModelStatic::ResetOnItemDragStart(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnItemDragStart(nullptr);
+    auto gestureEventHub = eventHub->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureEventHub);
+    gestureEventHub->RemoveDragEvent();
+    ListModelStatic::RemoveDragFrameNodeToManager(frameNode);
 }
 
 void ListModelStatic::SetOnItemDragEnter(FrameNode* frameNode, OnItemDragEnterFunc&& onItemDragEnter)

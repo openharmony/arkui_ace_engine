@@ -21,5 +21,6 @@ ace_unittest("container_picker_test") {
     "container_picker_pattern_test.cpp",
     "container_picker_test.cpp",
     "container_picker_paint_method_test.cpp",
+    "container_picker_resource_test.cpp",
   ]
 }

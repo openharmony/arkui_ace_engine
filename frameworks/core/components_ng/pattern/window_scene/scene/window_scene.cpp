@@ -63,6 +63,9 @@ WindowScene::WindowScene(const sptr<Rosen::Session>& session)
             session->SetBufferAvailable(true, false);
             Rosen::SceneSessionManager::GetInstance().NotifyCompleteFirstFrameDrawing(session->GetPersistentId());
         }
+        if (session->GetSessionInfo().isPrelaunch_) {
+            session->EditSessionInfo().isPrelaunch_ = false;
+        }
         // In a locked screen scenario, the lifetime of the session is larger than the lifetime of the object self
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
@@ -951,6 +954,7 @@ void WindowScene::OnPreLoadStartingWindowFinished()
 
 void WindowScene::OnRestart()
 {
+    CHECK_EQUAL_VOID(session_->GetSessionInfo().isRestartInSameProcess_, false);
     auto uiTask = [weakThis = WeakClaim(this)]() {
         ACE_SCOPED_TRACE("WindowScene::OnRestart");
         auto self = weakThis.Upgrade();
@@ -972,11 +976,12 @@ void WindowScene::OnRestart()
         self->SetSubSessionVisible();
 
         self->CreateAppWindow();
+        CHECK_NULL_VOID(self->appWindow_);
         self->CreateStartingWindow();
         self->AddChild(host, self->startingWindow_, self->startingWindowName_);
         auto surfaceNode = self->session_->GetSurfaceNode();
         CHECK_NULL_VOID(surfaceNode);
-        auto context = self->GetContextByDisableDelegator(false, false);
+        auto context = AceType::DynamicCast<RosenRenderContext>(self->appWindow_->GetRenderContext());
         CHECK_NULL_VOID(context);
         context->SetRSNode(surfaceNode);
 

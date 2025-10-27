@@ -105,7 +105,7 @@ void RichEditorCursorTestNg::InitAdjustObject(MockDataDetectorMgr& mockDataDetec
  * @tc.desc: test GetRightTextOfCursor
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCursorTestNg, GetRightTextOfCursor001, TestSize.Level1)
+HWTEST_F(RichEditorCursorTestNg, GetRightTextOfCursor001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -128,7 +128,7 @@ HWTEST_F(RichEditorCursorTestNg, GetRightTextOfCursor001, TestSize.Level1)
  * @tc.desc: test get right text of cursor
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCursorTestNg, GetRightTextOfCursor002, TestSize.Level1)
+HWTEST_F(RichEditorCursorTestNg, GetRightTextOfCursor002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -143,7 +143,7 @@ HWTEST_F(RichEditorCursorTestNg, GetRightTextOfCursor002, TestSize.Level1)
  * @tc.desc: test get text index at cursor
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCursorTestNg, GetTextIndexAtCursor001, TestSize.Level1)
+HWTEST_F(RichEditorCursorTestNg, GetTextIndexAtCursor001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -158,7 +158,7 @@ HWTEST_F(RichEditorCursorTestNg, GetTextIndexAtCursor001, TestSize.Level1)
  * @tc.desc: test AdjustCursorPosition
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCursorTestNg, AdjustCursorPosition001, TestSize.Level1)
+HWTEST_F(RichEditorCursorTestNg, AdjustCursorPosition001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. init and call function.
@@ -185,7 +185,7 @@ HWTEST_F(RichEditorCursorTestNg, AdjustCursorPosition001, TestSize.Level1)
  * @tc.desc: test CursorMoveLineBegin
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCursorTestNg, CursorMoveLineBegin001, TestSize.Level1)
+HWTEST_F(RichEditorCursorTestNg, CursorMoveLineBegin001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -216,7 +216,7 @@ HWTEST_F(RichEditorCursorTestNg, CursorMoveToParagraphBegin001, TestSize.Level2)
  * @tc.desc: test CursorMoveToParagraphEnd
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCursorTestNg, CursorMoveToParagraphEnd001, TestSize.Level1)
+HWTEST_F(RichEditorCursorTestNg, CursorMoveToParagraphEnd001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -230,7 +230,7 @@ HWTEST_F(RichEditorCursorTestNg, CursorMoveToParagraphEnd001, TestSize.Level1)
  * @tc.desc: test CalcCursorOffsetByPosition
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCursorTestNg, CalcCursorOffsetByPosition001, TestSize.Level1)
+HWTEST_F(RichEditorCursorTestNg, CalcCursorOffsetByPosition001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -262,7 +262,7 @@ HWTEST_F(RichEditorCursorTestNg, CalcCursorOffsetByPosition001, TestSize.Level1)
  * @tc.desc: test CalcCursorOffsetByPosition
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCursorTestNg, CalcCursorOffsetByPosition002, TestSize.Level1)
+HWTEST_F(RichEditorCursorTestNg, CalcCursorOffsetByPosition002, TestSize.Level0)
 {
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
@@ -289,7 +289,7 @@ HWTEST_F(RichEditorCursorTestNg, CalcCursorOffsetByPosition002, TestSize.Level1)
  * @tc.desc: test CalcCursorOffsetByPosition
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCursorTestNg, CalcCursorOffsetByPosition003, TestSize.Level1)
+HWTEST_F(RichEditorCursorTestNg, CalcCursorOffsetByPosition003, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -308,7 +308,7 @@ HWTEST_F(RichEditorCursorTestNg, CalcCursorOffsetByPosition003, TestSize.Level1)
  * @tc.desc: test CursorMoveUp
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCursorTestNg, CursorMoveUp001, TestSize.Level1)
+HWTEST_F(RichEditorCursorTestNg, CursorMoveUp001, TestSize.Level0)
 {
     auto richEditorPattern = GetRichEditorPattern();
     ASSERT_NE(richEditorPattern, nullptr);
@@ -322,7 +322,7 @@ HWTEST_F(RichEditorCursorTestNg, CursorMoveUp001, TestSize.Level1)
  * @tc.desc: test CursorMoveUp
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCursorTestNg, CursorMoveUp002, TestSize.Level1)
+HWTEST_F(RichEditorCursorTestNg, CursorMoveUp002, TestSize.Level0)
 {
     auto richEditorPattern = GetRichEditorPattern();
     ASSERT_NE(richEditorPattern, nullptr);
@@ -338,7 +338,7 @@ HWTEST_F(RichEditorCursorTestNg, CursorMoveUp002, TestSize.Level1)
  * @tc.desc: test RichEditorPattern CursorMoveUp
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCursorTestNg, CursorMoveUp003, TestSize.Level1)
+HWTEST_F(RichEditorCursorTestNg, CursorMoveUp003, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -360,7 +360,7 @@ HWTEST_F(RichEditorCursorTestNg, CursorMoveUp003, TestSize.Level1)
  * @tc.desc: test RichEditorPattern CursorMoveHome
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCursorTestNg, CursorMoveHome001, TestSize.Level1)
+HWTEST_F(RichEditorCursorTestNg, CursorMoveHome001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -375,7 +375,7 @@ HWTEST_F(RichEditorCursorTestNg, CursorMoveHome001, TestSize.Level1)
  * @tc.desc: test CursorMoveLineEnd
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCursorTestNg, CursorMoveLineEnd001, TestSize.Level1)
+HWTEST_F(RichEditorCursorTestNg, CursorMoveLineEnd001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -391,7 +391,7 @@ HWTEST_F(RichEditorCursorTestNg, CursorMoveLineEnd001, TestSize.Level1)
  * @tc.desc: test CursorMoveLineEnd
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCursorTestNg, CursorMoveLineEnd002, TestSize.Level1)
+HWTEST_F(RichEditorCursorTestNg, CursorMoveLineEnd002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -407,7 +407,7 @@ HWTEST_F(RichEditorCursorTestNg, CursorMoveLineEnd002, TestSize.Level1)
  * @tc.desc: test BeforeStatusCursorMove
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCursorTestNg, BeforeStatusCursorMove001, TestSize.Level1)
+HWTEST_F(RichEditorCursorTestNg, BeforeStatusCursorMove001, TestSize.Level0)
 {
     auto richEditorPattern = GetRichEditorPattern();
     ASSERT_NE(richEditorPattern, nullptr);
@@ -447,7 +447,7 @@ HWTEST_F(RichEditorCursorTestNg, CursorMoveEnd001, TestSize.Level2)
  * @tc.desc: test CursorMoveDown
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCursorTestNg, CursorMoveDown001, TestSize.Level1)
+HWTEST_F(RichEditorCursorTestNg, CursorMoveDown001, TestSize.Level0)
 {
     auto richEditorPattern = GetRichEditorPattern();
     ASSERT_NE(richEditorPattern, nullptr);
@@ -463,7 +463,7 @@ HWTEST_F(RichEditorCursorTestNg, CursorMoveDown001, TestSize.Level1)
  * @tc.desc: test double click
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCursorTestNg, AdjustWordCursorAndSelect001, TestSize.Level1)
+HWTEST_F(RichEditorCursorTestNg, AdjustWordCursorAndSelect001, TestSize.Level0)
 {
     using namespace std::chrono;
     ASSERT_NE(richEditorNode_, nullptr);
@@ -522,7 +522,7 @@ HWTEST_F(RichEditorCursorTestNg, AdjustWordCursorAndSelect001, TestSize.Level1)
  * @tc.desc: test double click
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCursorTestNg, AdjustSelectorForEmoji001, TestSize.Level1)
+HWTEST_F(RichEditorCursorTestNg, AdjustSelectorForEmoji001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();

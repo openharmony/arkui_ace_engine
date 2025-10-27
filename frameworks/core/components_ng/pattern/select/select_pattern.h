@@ -128,13 +128,18 @@ public:
     void SetValue(const std::string& value);
     void SetFontSize(const Dimension& value);
     void SetItalicFontStyle(const Ace::FontStyle& value);
+    void SetItalicFontStyleImpl(const Ace::FontStyle& value);
     void SetFontWeight(const FontWeight& value);
+    void SetFontWeightImpl(const FontWeight& value);
     void SetFontFamily(const std::vector<std::string>& value);
+    void SetFontFamilyImpl(const std::vector<std::string>& value);
     void SetFontColor(const Color& color);
+    void SetFontColorImpl(const Color& color);
 
     // set props of option nodes
     void SetOptionBgColor(const Color& color);
     void SetOptionFontSize(const Dimension& value);
+    void SetOptionFontSizeImpl(const Dimension& value);
     void SetOptionItalicFontStyle(const Ace::FontStyle& value);
     void SetOptionFontWeight(const FontWeight& value);
     void SetOptionFontFamily(const std::vector<std::string>& value);
@@ -289,6 +294,13 @@ private:
     void OnAttachToMainTreeMultiThread();
     void ResetParamsMultiThread();
     void ResetOptionPropsMultiThread();
+    void SetFontSizeMultiThread(const Dimension& value);
+    void SetFontColorMultiThread(const Color& color);
+    void SetFontWeightMultiThread(const FontWeight& value);
+    void SetOptionFontSizeMultiThread(const Dimension& value);
+    void SetFontFamilyMultiThread(const std::vector<std::string>& value);
+    void SetItalicFontStyleMultiThread(const Ace::FontStyle& value);
+    void ResetFontColorMultiThread();
 
     bool HasRowNode() const
     {

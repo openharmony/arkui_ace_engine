@@ -62,6 +62,9 @@ import { ArkXComponentComponent, XComponentOptions, XComponentParameters, Native
 import { CanvasOpsHandWritten } from "./CanvasOpsHandWritten";
 import { VideoOpsHandWritten } from "./VideoOpsHandWritten";
 import { XComponentOpsHandWritten } from "./XComponentOpsHandWritten";
+import { PeerNode } from '../PeerNode';
+import { int32 } from "@koalaui/common";
+import { DrawModifier } from "arkui/component/common";
 
 export function hookId(component: object, value?: string) {}
 
@@ -227,6 +230,30 @@ export function hookCustomPropertyImpl(component: ArkCommonMethodComponent, name
     };
     ArkUIAniModule._Common_SetCustomPropertyCallBack(component.getPeer().getPeerPtr(), removeCallback, getCallback,
         getAllCustomPropertiesCallback);
+}
+
+export function hookDrawModifier(arkComponent: ArkCommonMethodComponent, value: DrawModifier | undefined): void {
+  if (value === undefined) {
+    return;
+  }
+  let classType: ClassType = (Type.of(value) as ClassType);
+  let numberOfFun = classType.getMethodsNum();
+  let flag: int32 = 0;
+  for (let i = 0; i < numberOfFun; i++) {
+    if (classType.getMethod(i)?.getName() === "drawFront") {
+      flag |= (1 << 0);
+    } else if (classType.getMethod(i)?.getName() === "drawContent") {
+      flag |= (1 << 1);
+    } else if (classType.getMethod(i)?.getName() === "drawBehind") {
+      flag |= (1 << 2);
+    } else if (classType.getMethod(i)?.getName() === "drawForeground") {
+      flag |= (1 << 3);
+    }
+  }
+  if (flag) {
+    ArkUIAniModule._SetDrawModifier(arkComponent.getPeer().getPeerPtr(), flag, value!);
+    value.weakRefOfPeerNode = new WeakRef<PeerNode>(arkComponent.getPeer());
+  }
 }
 
 export * from "./modifiers";

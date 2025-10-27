@@ -310,6 +310,7 @@ public:
     }
 
     std::string DumpHashKey();
+    void DumpInfo();
 
 protected:
     virtual int32_t OnGetTotalCount() = 0;

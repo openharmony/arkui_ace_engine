@@ -516,6 +516,13 @@ public:
         } else if (args.Length() == 2 && args[0]->IsString() && args[1]->IsString()) {
             privateKeyFile = args[0]->ToString();
             certChainFile = args[1]->ToString();
+        } else if (args.Length() == 2 && args[0]->IsString() && args[1]->IsNumber()) {
+            std::string identity = args[0]->ToString();
+            int32_t type = args[1]->ToNumber<int32_t>();
+            if (result_) {
+                result_->HandleConfirm(identity, type);
+                return;
+            }
         } else {
             return;
         }
@@ -555,6 +562,53 @@ private:
     }
 
     RefPtr<SslSelectCertResult> result_;
+};
+
+class JSWebVerifyPin : public WebTransferBase<RefPtr<VerifyPinResult>> {
+public:
+    static void JSBind(BindingTarget globalObj)
+    {
+        JSClass<JSWebVerifyPin>::Declare("VerifyPinHandler");
+        JSClass<JSWebVerifyPin>::CustomMethod("confirm", &JSWebVerifyPin::HandleConfirm);
+        JSClass<JSWebVerifyPin>::Bind(globalObj, &JSWebVerifyPin::Constructor, &JSWebVerifyPin::Destructor);
+    }
+ 
+    void SetResult(const RefPtr<VerifyPinResult>& result)
+    {
+        result_ = result;
+        transferValues_ = std::make_tuple(result_);
+    }
+ 
+    void HandleConfirm(const JSCallbackInfo& args)
+    {
+        int32_t verifyResult = -1;
+        if (args.Length() == 1 && args[0]->IsNumber()) {
+            verifyResult = args[0]->ToNumber<int32_t>();
+        } else {
+            return;
+        }
+ 
+        if (result_) {
+            result_->HandleConfirm(verifyResult);
+        }
+    }
+ 
+private:
+    static void Constructor(const JSCallbackInfo& args)
+    {
+        auto jSWebVerifyPin = Referenced::MakeRefPtr<JSWebVerifyPin>();
+        jSWebVerifyPin->IncRefCount();
+        args.SetReturnValue(Referenced::RawPtr(jSWebVerifyPin));
+    }
+ 
+    static void Destructor(JSWebVerifyPin* jSWebVerifyPin)
+    {
+        if (jSWebVerifyPin != nullptr) {
+            jSWebVerifyPin->DecRefCount();
+        }
+    }
+ 
+    RefPtr<VerifyPinResult> result_;
 };
 
 class JSWebConsoleLog : public WebTransferBase<RefPtr<WebConsoleLog>> {
@@ -2299,6 +2353,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("blankScreenDetectionConfig", &JSWeb::BlankScreenDetectionConfig);
     JSClass<JSWeb>::StaticMethod("onSafeBrowsingCheckFinish", &JSWeb::OnSafeBrowsingCheckFinish);
     JSClass<JSWeb>::StaticMethod("backToTop", &JSWeb::JSBackToTop);
+    JSClass<JSWeb>::StaticMethod("onVerifyPin", &JSWeb::OnVerifyPinRequest);
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
     JSWebGeolocation::JSBind(globalObj);
@@ -2313,6 +2368,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSWebSslError::JSBind(globalObj);
     JSWebAllSslError::JSBind(globalObj);
     JSWebSslSelectCert::JSBind(globalObj);
+    JSWebVerifyPin::JSBind(globalObj);
     JSWebPermissionRequest::JSBind(globalObj);
     JSContextMenuParam::JSBind(globalObj);
     JSContextMenuResult::JSBind(globalObj);
@@ -5618,6 +5674,28 @@ JSRef<JSVal> SafeBrowsingCheckResultEventToJSValue(const SafeBrowsingCheckResult
     return JSRef<JSVal>::Cast(obj);
 }
 
+JSRef<JSVal> VerifyPinRequestEventToJSValue(const RenderProcessRespondingEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    return JSRef<JSVal>::Cast(obj);
+}
+ 
+JSRef<JSVal> VerifyPinEventToJSValue(const WebVerifyPinEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    JSRef<JSObject> resultObj = JSClass<JSWebVerifyPin>::NewInstance();
+    auto jSWebVerifyPin = Referenced::Claim(resultObj->Unwrap<JSWebVerifyPin>());
+    if (!jSWebVerifyPin) {
+        return JSRef<JSVal>::Cast(obj);
+    }
+    jSWebVerifyPin->SetResult(eventInfo.GetResult());
+    WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(resultObj), static_cast<void *>(jSWebVerifyPin.GetRawPtr()));
+    obj->SetPropertyObject("handler", resultObj);
+    obj->SetProperty("identity", eventInfo.GetIdentity());
+ 
+    return JSRef<JSVal>::Cast(obj);
+}
+
 void JSWeb::OnSafeBrowsingCheckResult(const JSCallbackInfo& args)
 {
     if (args.Length() < 1 || !args[0]->IsFunction()) {
@@ -7033,6 +7111,31 @@ void JSWeb::OnSafeBrowsingCheckFinish(const JSCallbackInfo& args)
             }, TaskExecutor::TaskType::UI, "ArkUIWebSafeBrowsingCheckResult");
     };
     WebModel::GetInstance()->SetSafeBrowsingCheckFinishId(std::move(uiCallback));
+}
+
+void JSWeb::OnVerifyPinRequest(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        return;
+    }
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<WebVerifyPinEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), VerifyPinEventToJSValue);
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = frameNode](
+                          const BaseEventInfo* info) -> bool {
+        auto webNode = node.Upgrade();
+        CHECK_NULL_RETURN(webNode, false);
+        ContainerScope scope(webNode->GetInstanceId());
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        if (pipelineContext) {
+            pipelineContext->UpdateCurrentActiveNode(node);
+        }
+        auto* eventInfo = TypeInfoHelper::DynamicCast<WebVerifyPinEvent>(info);
+        func->Execute(*eventInfo);
+        return true;
+    };
+    WebModel::GetInstance()->SetOnVerifyPinRequest(jsCallback);
 }
 
 ARKWEB_CREATE_JS_OBJECT(WebScreenCaptureRequest, JSScreenCaptureRequest, SetEvent, value)

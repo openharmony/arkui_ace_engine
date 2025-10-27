@@ -22,12 +22,18 @@
 #include "core/components_ng/pattern/container_picker/container_picker_paint_method.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/common/resource/resource_object.h"
+#include "core/common/resource/resource_parse_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 const std::string CONTAINER_PICKER_DRAG_SCENE = "container_picker_drag_scene";
 constexpr double MOVE_THRESHOLD = 2.0;
 constexpr float SPRING_DURATION = 600.0f;
+constexpr float SPRING_CURVE_VELOCITY = 0.0f;
+constexpr float SPRING_CURVE_MASS = 1.0f;
+constexpr float SPRING_CURVE_STIFFNESS = 20.0f;
+constexpr float SPRING_CURVE_DAMPING = 10.0f;
 constexpr float DEFAULT_SPRING_RESPONSE = 0.416f;
 constexpr float DEFAULT_SPRING_DAMP = 0.99f;
 constexpr float MIN_TIME = 1.0f;
@@ -35,8 +41,10 @@ constexpr float PICKER_SPEED_TH = 0.25f;
 constexpr int32_t VELOCITY_TRANS = 1000;
 constexpr int32_t DEFAULT_FONT_SIZE = 20;
 constexpr int32_t CLICK_ANIMATION_DURATION = 300;
+constexpr int32_t DELTA_INDEX_1 = 1;
+constexpr int32_t DELTA_INDEX_2 = 2;
+constexpr int32_t DELTA_INDEX_3 = 3;
 constexpr uint32_t CUSTOM_SPRING_ANIMATION_DURATION = 1000;
-const std::string SPRING_PROPERTY_NAME = "spring";
 } // namespace
 
 RefPtr<LayoutAlgorithm> ContainerPickerPattern::CreateLayoutAlgorithm()
@@ -45,6 +53,9 @@ RefPtr<LayoutAlgorithm> ContainerPickerPattern::CreateLayoutAlgorithm()
     CHECK_NULL_RETURN(layoutAlgorithm, nullptr);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
+    totalItemCount_ = host->TotalChildCount();
+    isLoop_ = IsLoop();
+
     layoutAlgorithm->SetTotalItemCount(host->TotalChildCount());
     layoutAlgorithm->SetCurrentDelta(currentDelta_);
 
@@ -112,13 +123,19 @@ bool ContainerPickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper
     CHECK_NULL_RETURN(pickerAlgorithm, false);
     GetLayoutProperties(pickerAlgorithm);
     PostIdleTask(GetHost());
-    SetDefaultTextStyle();
+    SetDefaultTextStyle(false);
     HandleTargetIndex();
 
     if (isNeedPlayInertialAnimation_) {
         PlayInertialAnimation();
     }
-    return false;
+
+    if (isModified_) {
+        isModified_ = false;
+        return true;
+    } else {
+        return false;
+    }
 }
 
 float ContainerPickerPattern::ShortestDistanceBetweenCurrentAndTarget(int32_t targetIndex)
@@ -133,8 +150,8 @@ float ContainerPickerPattern::ShortestDistanceBetweenCurrentAndTarget(int32_t ta
     float currentOffsetFromMiddle = CalculateMiddleLineOffset();
     auto downDelta = (targetIndex - selectedIndex_ + totalItemCount_) % totalItemCount_;
     auto upDelta = (selectedIndex_ - targetIndex + totalItemCount_) % totalItemCount_;
-    return downDelta <= upDelta ? downDelta * pickerItemHeight_ - currentOffsetFromMiddle
-                                : upDelta * pickerItemHeight_ * -1 + currentOffsetFromMiddle;
+    return downDelta <= upDelta ? downDelta * pickerItemHeight_ + currentOffsetFromMiddle
+                                : upDelta * pickerItemHeight_ * -1 - currentOffsetFromMiddle;
 }
 
 void ContainerPickerPattern::HandleTargetIndex()
@@ -146,7 +163,7 @@ void ContainerPickerPattern::HandleTargetIndex()
         targetIndex_.reset();
         return;
     }
-    if (isTargetAnimationRunning_) {
+    if (isAnimationRunning_) {
         return;
     }
     PlayTargetAnimation();
@@ -203,6 +220,7 @@ void ContainerPickerPattern::GetLayoutProperties(const RefPtr<ContainerPickerLay
     offScreenItemsIndex_ = algo->GetOffScreenItems();
     contentMainSize_ = algo->GetContentMainSize();
     height_ = algo->GetHeight();
+    topPadding_ = algo->GetTopPadding();
     crossMatchChild_ = algo->IsCrossMatchChild();
     auto contentCrossSize = algo->GetContentCrossSize();
     if (!NearEqual(contentCrossSize, contentCrossSize_)) {
@@ -215,7 +233,7 @@ void ContainerPickerPattern::GetLayoutProperties(const RefPtr<ContainerPickerLay
 
 void ContainerPickerPattern::OnAttachToFrameNode()
 {
-    CreateAnimation();
+    CreateScrollProperty();
     UpdatePanEvent();
     UpdateClipEdge();
     InitDefaultParams();
@@ -280,34 +298,43 @@ bool ContainerPickerPattern::IsLoop() const
     return props->GetCanLoopValue(true);
 }
 
-void ContainerPickerPattern::SetDefaultTextStyle() const
+void ContainerPickerPattern::SetDefaultTextStyle(bool isUpdateTextStyle)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(theme);
+    Color defaultColor = theme->GetDividerColor();
     for (const auto& item : itemPosition_) {
         auto index = ContainerPickerUtils::GetLoopIndex(item.first, totalItemCount_);
         auto child = DynamicCast<FrameNode>(host->GetOrCreateChildByIndex(index));
-        SetDefaultTextStyle(child);
+        if (isUpdateTextStyle) {
+            UpdateDefaultTextStyle(child, defaultColor);
+        } else {
+            SetDefaultTextStyle(child, defaultColor);
+        }
     }
 }
 
-void ContainerPickerPattern::SetDefaultTextStyle(RefPtr<FrameNode> node) const
+void ContainerPickerPattern::SetDefaultTextStyle(RefPtr<FrameNode> node, Color defaultColor)
 {
     CHECK_NULL_VOID(node);
     if (node->GetTag() == V2::TEXT_ETS_TAG) {
         auto textLayoutProperty = node->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
-        bool modified = false;
         if (!textLayoutProperty->GetFontSize().has_value()) {
             textLayoutProperty->UpdateFontSize(Dimension(DEFAULT_FONT_SIZE, DimensionUnit::FP));
-            modified = true;
+            isModified_ = true;
         }
         if (!textLayoutProperty->GetTextColor().has_value()) {
-            textLayoutProperty->UpdateTextColor(Color::FromString("#66182431"));
-            modified = true;
+            textLayoutProperty->UpdateTextColor(defaultColor);
+            isModified_ = true;
+            isUseDefaultFontColor_ = true;
         }
 
-        if (modified) {
+        if (isModified_) {
             node->MarkModifyDone();
             node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
@@ -318,7 +345,28 @@ void ContainerPickerPattern::SetDefaultTextStyle(RefPtr<FrameNode> node) const
                 continue;
             }
             auto childNode = DynamicCast<FrameNode>(child);
-            SetDefaultTextStyle(childNode);
+            SetDefaultTextStyle(childNode, defaultColor);
+        }
+    }
+}
+
+void ContainerPickerPattern::UpdateDefaultTextStyle(RefPtr<FrameNode> node, Color defaultColor)
+{
+    CHECK_NULL_VOID(node);
+    if (node->GetTag() == V2::TEXT_ETS_TAG) {
+        auto textLayoutProperty = node->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        if (isUseDefaultFontColor_) {
+            textLayoutProperty->UpdateTextColor(defaultColor);
+        }
+    } else {
+        auto& children = node->GetChildren();
+        for (const auto& child : children) {
+            if (!child) {
+                continue;
+            }
+            auto childNode = DynamicCast<FrameNode>(child);
+            UpdateDefaultTextStyle(childNode, defaultColor);
         }
     }
 }
@@ -326,7 +374,7 @@ void ContainerPickerPattern::SetDefaultTextStyle(RefPtr<FrameNode> node) const
 void ContainerPickerPattern::SwipeTo(int32_t targetIndex)
 {
     // If animation is still running, stop it before play new animation.
-    if (selectedIndex_ == targetIndex || isTargetAnimationRunning_) {
+    if (selectedIndex_ == targetIndex || isAnimationRunning_) {
         return;
     }
 
@@ -334,7 +382,7 @@ void ContainerPickerPattern::SwipeTo(int32_t targetIndex)
     PickerMarkDirty();
 }
 
-void ContainerPickerPattern::OnAroundButtonClick(RefPtr<ContainerPickerEventParam> param)
+void ContainerPickerPattern::OnAroundButtonClick(float offsetY)
 {
     if (clickBreak_) {
         return;
@@ -343,54 +391,58 @@ void ContainerPickerPattern::OnAroundButtonClick(RefPtr<ContainerPickerEventPara
     auto host = GetHost();
     CHECK_NULL_VOID(host);
 
-    for (auto& pos : itemPosition_) {
-        if (param->itemNodeId == pos.second.node->GetId()) {
-            int32_t realIndex = ContainerPickerUtils::GetLoopIndex(pos.first, totalItemCount_);
-            SwipeTo(realIndex);
-            break;
-        }
+    auto middlePos = height_ / HALF + topPadding_;
+    auto delta = offsetY - middlePos;
+    auto halfOfMiddleItem = pickerItemHeight_ / HALF;
+    auto direction = Positive(delta) ? 1 : -1;
+    int32_t deltaIndex = 0;
+    if (GreatNotEqual(std::abs(delta), height_ / HALF)) {
+        // click out of visiable area
+        return;
+    } else if (LessOrEqual(std::abs(delta), halfOfMiddleItem)) {
+        // click at middle item
+        return;
+    } else if (LessOrEqual(std::abs(delta), halfOfMiddleItem + firstAdjacentItemHeight_)) {
+        deltaIndex = DELTA_INDEX_1 * direction;
+    } else if (LessOrEqual(std::abs(delta), halfOfMiddleItem + firstAdjacentItemHeight_ + secondAdjacentItemHeight_)) {
+        deltaIndex = DELTA_INDEX_2 * direction;
+    } else if (LessOrEqual(std::abs(delta), halfOfMiddleItem + firstAdjacentItemHeight_ + secondAdjacentItemHeight_ +
+                                                thirdAdjacentItemHeight_)) {
+        deltaIndex = DELTA_INDEX_3 * direction;
+    } else {
+        // click within visiable area but there is no item
+        return;
     }
+    auto targetIndex = selectedIndex_ + deltaIndex;
+    if (!isLoop_ && (targetIndex < 0 || targetIndex >= totalItemCount_)) {
+        return;
+    }
+    SwipeTo(ContainerPickerUtils::GetLoopIndex(targetIndex, totalItemCount_));
 }
 
-RefPtr<ClickEvent> ContainerPickerPattern::CreateItemClickEventListener(RefPtr<ContainerPickerEventParam> param)
+RefPtr<ClickEvent> ContainerPickerPattern::CreateItemClickEventListener()
 {
-    auto clickEventHandler = [param, weak = WeakClaim(this)](const GestureEvent& /* info */) {
+    auto clickEventHandler = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->OnAroundButtonClick(param);
+        pattern->OnAroundButtonClick(info.GetLocalLocation().GetY());
     };
 
     auto listener = AceType::MakeRefPtr<NG::ClickEvent>(clickEventHandler);
     return listener;
 }
 
-void ContainerPickerPattern::CreateChildrenClickEvent(RefPtr<UINode>& host)
+void ContainerPickerPattern::CreateChildrenClickEvent()
 {
+    auto host = GetHost();
     CHECK_NULL_VOID(host);
-    const auto& children = host->GetChildren();
-    for (auto child : children) {
-        auto tag = child->GetTag();
-        if (tag == V2::JS_FOR_EACH_ETS_TAG || tag == V2::JS_SYNTAX_ITEM_ETS_TAG || tag == V2::JS_IF_ELSE_ETS_TAG) {
-            CreateChildrenClickEvent(child);
-        } else if (tag == V2::ROW_ETS_TAG || tag == V2::IMAGE_ETS_TAG || tag == V2::TEXT_ETS_TAG ||
-                   tag == V2::SYMBOL_ETS_TAG) {
-            RefPtr<ContainerPickerEventParam> param = MakeRefPtr<ContainerPickerEventParam>();
-            param->itemNodeId = child->GetId();
-            RefPtr<FrameNode> childNode = AceType::DynamicCast<FrameNode>(child);
-            CHECK_NULL_VOID(childNode);
-            auto eventHub = childNode->GetEventHub<EventHub>();
-            CHECK_NULL_VOID(eventHub);
-            RefPtr<ClickEvent> clickListener = CreateItemClickEventListener(param);
-            CHECK_NULL_VOID(clickListener);
-            auto gesture = eventHub->GetOrCreateGestureEventHub();
-            CHECK_NULL_VOID(gesture);
-            gesture->AddClickEvent(clickListener);
-        } else {
-            TAG_LOGI(AceLogTag::ACE_CONTAINER_PICKER,
-                "CreateChildrenClickEvent does not support this type of the node. id: %{public}d, tag: %{public}s",
-                host->GetId(), tag.c_str());
-        }
-    }
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    RefPtr<ClickEvent> clickListener = CreateItemClickEventListener();
+    CHECK_NULL_VOID(clickListener);
+    auto gesture = eventHub->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    gesture->AddClickEvent(clickListener);
 }
 
 RefPtr<TouchEventImpl> ContainerPickerPattern::CreateItemTouchEventListener()
@@ -405,15 +457,18 @@ RefPtr<TouchEventImpl> ContainerPickerPattern::CreateItemTouchEventListener()
         pattern->isAllowPlayHaptic_ = (info.GetSourceTool() == SourceTool::MOUSE) ? false : true;
 
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
-            if (pattern->isInertialRollingAnimationRunning_) {
+            if (pattern->isAnimationRunning_) {
                 pattern->touchBreak_ = true;
-                pattern->animationBreak_ = true;
                 pattern->clickBreak_ = true;
-                pattern->StopInertialRollingAnimation();
+                pattern->StopAnimation();
             } else {
                 pattern->animationBreak_ = false;
                 pattern->clickBreak_ = false;
             }
+            pattern->mainDeltaSum_ = 0.0f;
+            pattern->currentDelta_ = 0.0f;
+            pattern->springOffset_ = 0.0f;
+            pattern->lastAnimationScroll_ = 0.0f;
         }
 
         if (info.GetTouches().front().GetTouchType() == TouchType::UP) {
@@ -445,8 +500,7 @@ void ContainerPickerPattern::InitMouseAndPressEvent()
     CHECK_NULL_VOID(pickerGesture);
     pickerGesture->AddTouchEvent(touchListener);
 
-    auto uiNode = AceType::DynamicCast<UINode>(host);
-    CreateChildrenClickEvent(uiNode);
+    CreateChildrenClickEvent();
     isItemClickEventCreated_ = true;
 }
 
@@ -541,11 +595,10 @@ void ContainerPickerPattern::HandleDragStart(const GestureEvent& info)
     mainDeltaSum_ = 0.0f;
     currentDelta_ = 0.0f;
     springOffset_ = 0.0f;
+    StopAnimation();
 
     yLast_ = info.GetGlobalPoint().GetY();
     dragStartTime_ = GetCurrentTime();
-
-    StopSpringAnimation();
 }
 
 void ContainerPickerPattern::HandleDragUpdate(const GestureEvent& info)
@@ -565,7 +618,6 @@ void ContainerPickerPattern::HandleDragUpdate(const GestureEvent& info)
         }
         SwipeTo(index);
         selectedIndex_ = index;
-        FireScrollStopEvent();
         return;
     }
 
@@ -581,7 +633,6 @@ void ContainerPickerPattern::HandleDragUpdate(const GestureEvent& info)
     }
 
     float mainDelta = static_cast<float>(info.GetMainDelta());
-    ProcessDelta(mainDelta, contentMainSize_, mainDeltaSum_);
 
     HandleScroll(mainDelta, SCROLL_FROM_UPDATE, NestedState::GESTURE, velocity);
     UpdateColumnChildPosition(offsetY);
@@ -616,27 +667,7 @@ void ContainerPickerPattern::HandleDragEnd(double dragVelocity, float mainDelta)
     // Adjust the position to ensure it is centered.
     float currentOffsetFromMiddle = CalculateMiddleLineOffset();
     float resetOffset = CalculateResetOffset(currentOffsetFromMiddle);
-    CreateAnimation(0.0, resetOffset);
-}
-
-void ContainerPickerPattern::StopSpringAnimation()
-{
-    CHECK_NULL_VOID(springAnimation_);
-    CHECK_NULL_VOID(isSpringAnimationRunning_);
-    AnimationUtils::StopAnimation(springAnimation_);
-    isSpringAnimationRunning_ = false;
-    animationBreak_ = true;
-}
-
-void ContainerPickerPattern::ProcessDelta(float& delta, float mainSize, float deltaSum)
-{
-    if (GreatNotEqual(std::abs(delta), mainSize)) {
-        delta = GreatNotEqual(delta, 0.0f) ? mainSize : -mainSize;
-    }
-
-    if (GreatNotEqual(std::abs(deltaSum + delta), mainSize)) {
-        delta = GreatNotEqual((deltaSum + delta), 0.0f) ? (mainSize - deltaSum) : (-deltaSum - mainSize);
-    }
+    CreateTargetAnimation(resetOffset);
 }
 
 void ContainerPickerPattern::UpdateCurrentOffset(float offset)
@@ -731,25 +762,10 @@ bool ContainerPickerPattern::CheckDragOutOfBoundary()
     return false;
 }
 
-void ContainerPickerPattern::CreateSpringProperty()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->CreateAnimatablePropertyFloat(
-        SPRING_PROPERTY_NAME, 0,
-        [weak = AceType::WeakClaim(this)](float position) {
-            auto picker = weak.Upgrade();
-            CHECK_NULL_VOID(picker);
-            auto positionDelta = static_cast<float>(position) - picker->mainDeltaSum_;
-            picker->UpdateCurrentOffset(positionDelta);
-        },
-        PropertyUnit::PIXEL_POSITION);
-}
-
 void ContainerPickerPattern::PlaySpringAnimation()
 {
-    if (isSpringAnimationRunning_) {
-        return;
+    if (!scrollProperty_) {
+        CreateScrollProperty();
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -758,29 +774,17 @@ void ContainerPickerPattern::PlaySpringAnimation()
         return;
     }
 
-    auto middlePos = height_ / HALF;
-    auto halfOfItemHeight = pickerItemHeight_ / HALF;
-    auto leading = mainDeltaSum_ + middlePos - itemPosition_.rbegin()->second.endPos + halfOfItemHeight;
-    auto trailing = mainDeltaSum_ + middlePos - itemPosition_.begin()->second.startPos - halfOfItemHeight;
-    CreateSpringProperty();
-    host->UpdateAnimatablePropertyFloat(SPRING_PROPERTY_NAME, mainDeltaSum_);
-    auto delta = Negative(mainDeltaSum_) ? leading : trailing;
-
-    CreateSpringAnimation(delta);
+    auto currentOffsetFromMiddle = CalculateMiddleLineOffset();
+    CreateSpringAnimation(currentOffsetFromMiddle);
 }
 
 void ContainerPickerPattern::PlayTargetAnimation()
 {
-    float targetPos = ShortestDistanceBetweenCurrentAndTarget(targetIndex_.value_or(0));
-    isTargetAnimationRunning_ = true;
-    auto context = GetContext();
-    if (context) {
-        context->AddAfterLayoutTask([weak = WeakClaim(this), targetPos]() {
-            auto picker = weak.Upgrade();
-            CHECK_NULL_VOID(picker);
-            picker->CreateTargetAnimation(targetPos);
-        });
+    if (!scrollProperty_) {
+        CreateScrollProperty();
     }
+    float targetPos = ShortestDistanceBetweenCurrentAndTarget(targetIndex_.value_or(0));
+    CreateTargetAnimation(targetPos);
     targetIndex_.reset();
 }
 
@@ -856,34 +860,44 @@ bool ContainerPickerPattern::Play(double dragVelocity)
 
 void ContainerPickerPattern::PlayInertialAnimation()
 {
+    if (!scrollProperty_) {
+        CreateScrollProperty();
+    }
     AnimationOption option;
     option.SetDuration(CUSTOM_SPRING_ANIMATION_DURATION);
     auto curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(DEFAULT_SPRING_RESPONSE, DEFAULT_SPRING_DAMP, 0.0f);
     option.SetCurve(curve);
-    if (!snapOffsetProperty_) {
-        CreateSnapProperty();
-    }
 
     float endOffset = 0.0f;
     CalcEndOffset(endOffset, dragVelocity_);
-    snapOffsetProperty_->Set(0.0f);
-    snapOffsetProperty_->SetPropertyUnit(PropertyUnit::PIXEL_POSITION);
-    auto finishCallback = [weak = AceType::WeakClaim(this), id = Container::CurrentId()]() {
-        ContainerScope scope(id);
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        if (!pattern->animationBreak_) {
-            pattern->lastAnimationScroll_ = 0.0f;
-        }
-        pattern->isInertialRollingAnimationRunning_ = false;
-        if (!NearZero(pattern->mainDeltaSum_)) {
-            pattern->PlaySpringAnimation();
-        } else {
-            pattern->FireScrollStopEvent();
-        }
-        pattern->StopHapticController();
-    };
-    snapOffsetProperty_->AnimateWithVelocity(option, -endOffset, dragVelocity_, finishCallback);
+    scrollProperty_->Set(0.0f);
+    scrollProperty_->SetPropertyUnit(PropertyUnit::PIXEL_POSITION);
+    isAnimationRunning_ = true;
+    animationBreak_ = false;
+    auto host = GetHost();
+    auto context = host ? host->GetContextRefPtr() : nullptr;
+    scrollAnimation_ = AnimationUtils::StartAnimation(
+        option,
+        [weak = AceType::WeakClaim(this), endOffset]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->scrollProperty_->Set(-endOffset);
+        },
+        [weak = AceType::WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            if (!pattern->animationBreak_) {
+                pattern->lastAnimationScroll_ = 0.0f;
+            }
+            pattern->isAnimationRunning_ = false;
+            if (!NearZero(pattern->mainDeltaSum_)) {
+                pattern->PlaySpringAnimation();
+            } else {
+                pattern->FireScrollStopEvent();
+            }
+            pattern->StopHapticController();
+        },
+        nullptr, context);
     isNeedPlayInertialAnimation_ = false;
 }
 
@@ -971,7 +985,7 @@ void ContainerPickerPattern::UpdateColumnChildPosition(double offsetY)
     SpringCurveTailEndProcess(useRebound, stopMove);
 }
 
-void ContainerPickerPattern::CreateAnimation()
+void ContainerPickerPattern::CreateScrollProperty()
 {
     CHECK_NULL_VOID(!animationCreated_);
     auto host = GetHost();
@@ -1000,50 +1014,9 @@ void ContainerPickerPattern::AttachNodeAnimatableProperty(const RefPtr<NodeAnima
     renderContext->AttachNodeAnimatableProperty(property);
 }
 
-void ContainerPickerPattern::CreateSnapProperty()
-{
-    auto propertyCallback = [weak = AceType::WeakClaim(this)](float position) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        if (pattern->touchBreak_) {
-            return;
-        }
-        pattern->currentDelta_ = position - pattern->lastAnimationScroll_;
-        pattern->lastAnimationScroll_ = position;
-        pattern->isInertialRollingAnimationRunning_ = true;
-        pattern->PickerMarkDirty();
-        pattern->UpdateColumnChildPosition(position);
-    };
-    snapOffsetProperty_ = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
-    AttachNodeAnimatableProperty(snapOffsetProperty_);
-}
-
-void ContainerPickerPattern::CreateAnimation(double from, double to)
-{
-    AnimationOption option;
-    option.SetCurve(Curves::FAST_OUT_SLOW_IN);
-    option.SetDuration(CLICK_ANIMATION_DURATION);
-    scrollProperty_->Set(from);
-    auto host = GetHost();
-    auto context = host ? host->GetContextRefPtr() : nullptr;
-    AnimationUtils::Animate(
-        option,
-        [weak = AceType::WeakClaim(this), to]() {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->scrollProperty_->Set(to);
-        },
-        [weak = AceType::WeakClaim(this)]() {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->lastAnimationScroll_ = 0.0f;
-            pattern->FireScrollStopEvent();
-        },
-        nullptr, context);
-}
-
 void ContainerPickerPattern::CreateTargetAnimation(float delta)
 {
+    animationBreak_ = false;
     lastAnimationScroll_ = 0.0f;
     AnimationOption option;
     option.SetCurve(Curves::FAST_OUT_SLOW_IN);
@@ -1051,7 +1024,8 @@ void ContainerPickerPattern::CreateTargetAnimation(float delta)
     scrollProperty_->Set(0.0f);
     auto host = GetHost();
     auto context = host ? host->GetContextRefPtr() : nullptr;
-    AnimationUtils::Animate(
+    isAnimationRunning_ = true;
+    scrollAnimation_ = AnimationUtils::StartAnimation(
         option,
         [weak = AceType::WeakClaim(this), delta]() {
             auto pattern = weak.Upgrade();
@@ -1061,38 +1035,40 @@ void ContainerPickerPattern::CreateTargetAnimation(float delta)
         [weak = AceType::WeakClaim(this)]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            pattern->isTargetAnimationRunning_ = false;
+            pattern->isAnimationRunning_ = false;
             pattern->lastAnimationScroll_ = 0.0f;
             pattern->yOffset_ = 0.0;
             pattern->yLast_ = 0.0;
             pattern->FireScrollStopEvent();
+            pattern->StopHapticController();
         },
         nullptr, context);
 }
 
 void ContainerPickerPattern::CreateSpringAnimation(float delta)
 {
+    animationBreak_ = false;
     auto host = GetHost();
     auto context = host ? host->GetContextRefPtr() : nullptr;
-    // spring curve: (velocity: 0.0, mass: 1.0, stiffness: 20.0, damping: 10.0)
-    auto springCurve = MakeRefPtr<SpringCurve>(0.0f, 1.0f, 20.0f, 10.0f);
+    auto springCurve =
+        MakeRefPtr<SpringCurve>(SPRING_CURVE_VELOCITY, SPRING_CURVE_MASS, SPRING_CURVE_STIFFNESS, SPRING_CURVE_DAMPING);
     AnimationOption option;
     option.SetCurve(springCurve);
     option.SetDuration(SPRING_DURATION);
-    isSpringAnimationRunning_ = true;
-    springAnimation_ = AnimationUtils::StartAnimation(
+    isAnimationRunning_ = true;
+    scrollProperty_->Set(0.0f);
+    scrollAnimation_ = AnimationUtils::StartAnimation(
         option,
         [weak = AceType::WeakClaim(this), delta]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            auto host = pattern->GetHost();
-            CHECK_NULL_VOID(host);
-            host->UpdateAnimatablePropertyFloat(SPRING_PROPERTY_NAME, delta);
+            pattern->scrollProperty_->Set(delta);
         },
         [weak = AceType::WeakClaim(this)]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            pattern->isSpringAnimationRunning_ = false;
+            pattern->isAnimationRunning_ = false;
+            pattern->lastAnimationScroll_ = 0.0f;
             pattern->yOffset_ = 0.0;
             pattern->yLast_ = 0.0;
             pattern->FireScrollStopEvent();
@@ -1111,31 +1087,18 @@ void ContainerPickerPattern::PickerMarkDirty()
     }
 }
 
-void ContainerPickerPattern::StopInertialRollingAnimation()
+void ContainerPickerPattern::StopAnimation()
 {
-    CHECK_NULL_VOID(snapOffsetProperty_);
-    CHECK_NULL_VOID(isInertialRollingAnimationRunning_);
+    CHECK_NULL_VOID(isAnimationRunning_);
+    CHECK_NULL_VOID(scrollProperty_);
+    CHECK_NULL_VOID(scrollAnimation_);
 
-    isInertialRollingAnimationRunning_ = false;
-    AnimationOption option;
-    option.SetCurve(Curves::LINEAR);
-    option.SetDuration(0);
-    option.SetDelay(0);
-    auto host = GetHost();
-    auto context = host ? host->GetContextRefPtr() : nullptr;
-
-    AnimationUtils::StartAnimation(
-        option,
-        [weak = AceType::WeakClaim(this)]() {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->snapOffsetProperty_->Set(0.0f);
-        },
-        [weak = AceType::WeakClaim(this)]() {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->lastAnimationScroll_ = 0.0f;
-        });
+    animationBreak_ = true;
+    AnimationUtils::StopAnimation(scrollAnimation_);
+    isAnimationRunning_ = false;
+    lastAnimationScroll_ = 0.0f;
+    yOffset_ = 0.0;
+    yLast_ = 0.0;
 }
 
 void ContainerPickerPattern::PlayResetAnimation()
@@ -1145,7 +1108,7 @@ void ContainerPickerPattern::PlayResetAnimation()
     if (std::abs(resetOffset) >= (pickerItemHeight_ * 0.5f)) {
         InnerHandleScroll(LessNotEqual(resetOffset, 0.0));
     }
-    CreateAnimation(0.0f, resetOffset);
+    CreateTargetAnimation(resetOffset);
 }
 
 double ContainerPickerPattern::GetCurrentTime() const
@@ -1180,7 +1143,7 @@ float ContainerPickerPattern::CalculateMiddleLineOffset()
 {
     auto currentMiddleItem =
         ContainerPickerUtils::CalcCurrentMiddleItem(itemPosition_, height_, totalItemCount_, isLoop_);
-    return (currentMiddleItem.second.startPos + currentMiddleItem.second.endPos) / HALF - height_ / HALF;
+    return (currentMiddleItem.second.startPos + currentMiddleItem.second.endPos - height_) / HALF;
 }
 
 bool ContainerPickerPattern::IsEnableHaptic() const
@@ -1240,6 +1203,133 @@ bool ContainerPickerPattern::InnerHandleScroll(bool isDown)
         hapticController_->PlayOnce();
     }
     return true;
+}
+
+void ContainerPickerPattern::OnColorConfigurationUpdate()
+{
+    SetDefaultTextStyle(true);
+
+    if (SystemProperties::ConfigChangePerform()) {
+        // Proactively trigger PickerIndicatorStyle drawing.
+        auto frameNode = GetHost();
+        CHECK_NULL_VOID(frameNode);
+        frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+}
+
+void ContainerPickerPattern::UpdateDividerWidthWithResObj(const RefPtr<ResourceObject>& resObj)
+{
+    auto pickerNode = GetHost();
+    CHECK_NULL_VOID(pickerNode);
+    auto property = pickerNode->GetLayoutPropertyPtr<ContainerPickerLayoutProperty>();
+    CHECK_NULL_VOID(property);
+
+    CalcDimension strokeWidth;
+    if (resObj && ResourceParseUtils::ParseResDimensionVp(resObj, strokeWidth)) {
+        property->UpdateIndicatorDividerWidth(strokeWidth);
+    } else {
+        auto context = pickerNode->GetContext();
+        CHECK_NULL_VOID(context);
+        auto theme = context->GetTheme<PickerTheme>();
+        CHECK_NULL_VOID(theme);
+        property->UpdateIndicatorDividerWidth(theme->GetDividerThickness());
+    }
+}
+
+void ContainerPickerPattern::UpdateDividerColorWithResObj(const RefPtr<ResourceObject>& resObj)
+{
+    auto pickerNode = GetHost();
+    CHECK_NULL_VOID(pickerNode);
+    auto property = pickerNode->GetLayoutPropertyPtr<ContainerPickerLayoutProperty>();
+    CHECK_NULL_VOID(property);
+
+    Color color;
+    if (resObj && ResourceParseUtils::ParseResColor(resObj, color)) {
+        property->UpdateIndicatorDividerColor(color);
+    } else {
+        auto context = pickerNode->GetContext();
+        CHECK_NULL_VOID(context);
+        auto theme = context->GetTheme<PickerTheme>();
+        CHECK_NULL_VOID(theme);
+        property->UpdateIndicatorDividerColor(theme->GetDividerColor());
+    }
+}
+
+void ContainerPickerPattern::UpdateStartMarginWithResObj(const RefPtr<ResourceObject>& resObj)
+{
+    auto pickerNode = GetHost();
+    CHECK_NULL_VOID(pickerNode);
+    auto property = pickerNode->GetLayoutPropertyPtr<ContainerPickerLayoutProperty>();
+    CHECK_NULL_VOID(property);
+
+    CalcDimension startMargin;
+    if (resObj && ResourceParseUtils::ParseResDimensionVp(resObj, startMargin)) {
+        property->UpdateIndicatorStartMargin(startMargin);
+    } else {
+        property->UpdateIndicatorStartMargin(Dimension());
+    }
+}
+
+void ContainerPickerPattern::UpdateEndMarginWithResObj(const RefPtr<ResourceObject>& resObj)
+{
+    auto pickerNode = GetHost();
+    CHECK_NULL_VOID(pickerNode);
+    auto property = pickerNode->GetLayoutPropertyPtr<ContainerPickerLayoutProperty>();
+    CHECK_NULL_VOID(property);
+
+    CalcDimension endMargin;
+    if (resObj && ResourceParseUtils::ParseResDimensionVp(resObj, endMargin)) {
+        property->UpdateIndicatorEndMargin(endMargin);
+    } else {
+        property->UpdateIndicatorEndMargin(Dimension());
+    }
+}
+
+void ContainerPickerPattern::UpdateBackgroundColorWithResObj(const RefPtr<ResourceObject>& resObj)
+{
+    auto pickerNode = GetHost();
+    CHECK_NULL_VOID(pickerNode);
+    auto property = pickerNode->GetLayoutPropertyPtr<ContainerPickerLayoutProperty>();
+    CHECK_NULL_VOID(property);
+
+    Color color;
+    if (resObj && ResourceParseUtils::ParseResColor(resObj, color)) {
+        property->UpdateIndicatorBackgroundColor(color);
+    } else {
+        auto context = pickerNode->GetContext();
+        CHECK_NULL_VOID(context);
+        auto theme = context->GetTheme<PickerTheme>();
+        CHECK_NULL_VOID(theme);
+        property->UpdateIndicatorBackgroundColor(theme->GetSelectedBackgroundColor());
+    }
+}
+
+void ContainerPickerPattern::UpdateBorderRadiusWithResObj(const RefPtr<ResourceObject>& resObj)
+{
+    auto pickerNode = GetHost();
+    CHECK_NULL_VOID(pickerNode);
+    auto property = pickerNode->GetLayoutPropertyPtr<ContainerPickerLayoutProperty>();
+    CHECK_NULL_VOID(property);
+
+    PickerIndicatorStyle style = GetIndicatorStyleVal();
+    if (style.borderRadius->HasResources()) {
+        style.borderRadius->ReloadResources();
+        NG::BorderRadiusProperty& borderRadiusValue = style.borderRadius.value();
+        property->UpdateIndicatorBorderRadius(borderRadiusValue);
+    } else if (style.borderRadiusResObj) {
+        CalcDimension calcDimension;
+        ResourceParseUtils::ParseResDimensionVpNG(style.borderRadiusResObj, calcDimension);
+        if (GreatOrEqual(calcDimension.Value(), 0.0f)) {
+            NG::BorderRadiusProperty borderRadiusValue = NG::BorderRadiusProperty(calcDimension);
+            property->UpdateIndicatorBorderRadius(borderRadiusValue);
+        }
+    } else {
+        auto context = pickerNode->GetContext();
+        CHECK_NULL_VOID(context);
+        auto theme = context->GetTheme<PickerTheme>();
+        CHECK_NULL_VOID(theme);
+        property->UpdateIndicatorBorderRadius(BorderRadiusProperty(*theme->GetSelectedBorderRadius().radiusTopLeft));
+    }
 }
 
 } // namespace OHOS::Ace::NG

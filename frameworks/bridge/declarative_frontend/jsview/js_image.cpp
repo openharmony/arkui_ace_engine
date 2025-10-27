@@ -408,7 +408,7 @@ void JSImage::CreateImage(const JSCallbackInfo& info, bool isImageSpan)
     config.isImageSpan = isImageSpan;
     ImageModel::GetInstance()->Create(config);
     ParseImageAIOptions(info);
-    if (SystemProperties::ConfigChangePerform() && resObj) {
+    if (SystemProperties::ConfigChangePerform()) {
         ImageModel::GetInstance()->CreateWithResourceObj(ImageResourceType::SRC, resObj);
     }
 }
@@ -704,6 +704,7 @@ void JSImage::JsBorderRadius(const JSCallbackInfo& info)
         ImageModel::GetInstance()->SetBackBorder();
         return;
     }
+    SetCornerApplyType(info);
     static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER,
         JSCallbackInfoType::OBJECT };
     auto jsVal = info[0];

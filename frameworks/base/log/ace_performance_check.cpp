@@ -123,7 +123,9 @@ bool AceScopedPerformanceCheck::CheckIsRuleContainsPage(const std::string& ruleT
         std::unique_ptr<JsonValue> componentsJson;
         if (indexJson->Contains("components")) {
             componentsJson = indexJson->GetValue("components");
-            value = componentsJson->GetArrayItem(0)->GetString("pagePath", {});
+            if (componentsJson && componentsJson->IsArray() && componentsJson->GetArraySize() > 0) {
+                value = componentsJson->GetArrayItem(0)->GetString("pagePath", {});
+            }
         }
         if (value == pagePath) {
             return true;

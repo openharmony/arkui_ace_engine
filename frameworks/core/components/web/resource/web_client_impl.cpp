@@ -1652,4 +1652,29 @@ void WebClientImpl::OnRemoveBlanklessFrameWithAnimation(int delayTime)
     CHECK_NULL_VOID(delegate);
     delegate->RemoveSnapshotFrameNode(delayTime, true);
 }
+
+bool WebClientImpl::OnVerifyPinRequestByJS(
+    std::shared_ptr<NWeb::NWebJSVerifyPinResult> result, const std::string& identity)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_RETURN(delegate, false);
+    ContainerScope scope(delegate->GetInstanceId());
+ 
+    bool jsResult = false;
+    auto param = std::make_shared<WebVerifyPinEvent>(AceType::MakeRefPtr<VerifyPinResultOhos>(result), identity);
+    auto task = delegate->GetTaskExecutor();
+    CHECK_NULL_RETURN(task, false);
+ 
+    task->PostSyncTask(
+        [webClient = this, &param, &jsResult] {
+            if (!webClient) {
+                return;
+            }
+            auto delegate = webClient->webDelegate_.Upgrade();
+            if (delegate) {
+                jsResult = delegate->OnVerifyPinRequest(param);
+            }
+        }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebClientVerifyPinRequest");
+    return jsResult;
+}
 } // namespace OHOS::Ace

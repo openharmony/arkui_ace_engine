@@ -2608,6 +2608,7 @@ int32_t ScrollablePattern::ScrollToTarget(
 ScrollResult ScrollablePattern::HandleScrollParentFirst(float& offset, int32_t source, NestedState state)
 {
     auto parent = GetNestedScrollParent();
+    CHECK_NULL_RETURN(parent, (ScrollResult{ 0, false }));
     ScrollState scrollState = source == SCROLL_FROM_ANIMATION ? ScrollState::FLING : ScrollState::SCROLL;
     if (state == NestedState::CHILD_OVER_SCROLL) {
         if (!HasEdgeEffect(offset)) {
@@ -2652,6 +2653,9 @@ ScrollResult ScrollablePattern::HandleScrollParentFirst(float& offset, int32_t s
 ScrollResult ScrollablePattern::HandleScrollSelfFirst(float& offset, int32_t source, NestedState state)
 {
     auto parent = GetNestedScrollParent();
+    if (!parent) {
+        return { 0, true };
+    }
     ScrollState scrollState = source == SCROLL_FROM_ANIMATION ? ScrollState::FLING : ScrollState::SCROLL;
     if (state == NestedState::CHILD_OVER_SCROLL) {
         auto result = parent->HandleScroll(offset, source, NestedState::CHILD_OVER_SCROLL, GetVelocity());
@@ -2736,6 +2740,9 @@ ScrollResult ScrollablePattern::HandleScrollParallel(float& offset, int32_t sour
 {
     auto remainOffset = 0.0;
     auto parent = GetNestedScrollParent();
+    if (!parent) {
+        return { remainOffset, true };
+    }
     ScrollState scrollState = source == SCROLL_FROM_ANIMATION ? ScrollState::FLING : ScrollState::SCROLL;
     if (state == NestedState::CHILD_OVER_SCROLL) {
         if (GetEdgeEffect() == EdgeEffect::NONE) {
@@ -2934,6 +2941,7 @@ bool ScrollablePattern::HandleScrollableOverScroll(float velocity)
 {
     bool result = false;
     for (auto ancestor = GetNestedScrollParent(); ancestor != nullptr; ancestor = ancestor->GetNestedScrollParent()) {
+        CHECK_NULL_RETURN(ancestor, false);
         if (ancestor->NestedScrollOutOfBoundary()) {
             result = ancestor->HandleScrollVelocity(velocity, Claim(this));
             break;
@@ -3586,6 +3594,7 @@ void ScrollablePattern::Register2DragDropManager()
 float ScrollablePattern::IsInHotZone(const PointF& point)
 {
     auto host = GetHost();
+    CHECK_NULL_RETURN(host, 0.f);
     auto offset = 0.f;
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, 0.f);

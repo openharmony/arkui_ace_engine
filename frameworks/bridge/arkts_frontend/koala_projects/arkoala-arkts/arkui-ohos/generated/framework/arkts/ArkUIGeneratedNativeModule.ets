@@ -77,6 +77,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _AlphabetIndexerAttribute_setEnableHapticFeedback(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _VideoAttribute_setSurfaceBackgroundColor(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _AlphabetIndexerAttribute_setAlignStyle(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _Animator_construct(id: KInt, flags: KInt): KPointer
@@ -230,8 +232,6 @@ export class ArkUIGeneratedNativeModule {
     native static _CommonMethod_setWidth(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _CommonMethod_setHeight(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
-    native static _CommonMethod_setDrawModifier(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _CommonMethod_setResponseRegion(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
@@ -3924,20 +3924,6 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _DrawingRenderingContext_setSize(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _DrawModifier_construct(): KPointer
-    @ani.unsafe.Direct
-    native static _DrawModifier_getFinalizer(): KPointer
-    @ani.unsafe.Direct
-    native static _DrawModifier_invalidate(ptr: KPointer): void
-    @ani.unsafe.Direct
-    native static _DrawModifier_getDrawBehind_callback(ptr: KPointer): KPointer
-    @ani.unsafe.Direct
-    native static _DrawModifier_setDrawBehind_callback(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
-    native static _DrawModifier_getDrawContent_callback(ptr: KPointer): KPointer
-    @ani.unsafe.Direct
-    native static _DrawModifier_setDrawContent_callback(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
     native static _EnvironmentBackend_isAccessibilityEnabled(): boolean
     @ani.unsafe.Direct
     native static _EnvironmentBackend_getColorMode(): int32
@@ -4876,6 +4862,14 @@ export class ArkUIGeneratedNativeModule {
     native static _NodeContainerOps_setOnTouchEvent(self: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _NodeContainerOps_setOnDestoryEvent(self: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _NodeContentExtender_constructorNodeContent(): KPointer
+    @ani.unsafe.Direct
+    native static _NodeContentExtender_getDestroy(): KPointer
+    @ani.unsafe.Direct
+    native static _NodeContentExtender_addFrameNode(content: KPointer, node: KPointer): boolean
+    @ani.unsafe.Direct
+    native static _NodeContentExtender_removeFrameNode(content: KPointer, node: KPointer): boolean
     @ani.unsafe.Direct
     native static _OffscreenCanvas_construct(width: number, height: number, thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct

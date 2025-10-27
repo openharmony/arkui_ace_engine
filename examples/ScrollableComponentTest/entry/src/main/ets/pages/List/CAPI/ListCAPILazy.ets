@@ -26,10 +26,10 @@ struct ListCAPILazy {
   changeNativeFlag(): void {
     if (this.showNative) {
       // 传递NodeContent对象用于Native创建组件的挂载显示
-      nativeNode.createNativeRoot(this.rootSlot, 1);
+      nativeNode.createLazyTextListExample(this.rootSlot, 1);
     } else {
       // 销毁NativeModule组件
-      nativeNode.destroyNativeRoot();
+      nativeNode.destroyListExample(this.rootSlot)
     }
   }
 

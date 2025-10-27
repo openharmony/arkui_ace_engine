@@ -724,6 +724,31 @@ class FrameNode extends Disposable {
     getUINativeModule().frameNode.removeSupportedStates(this.getNodePtr(), uiStates);
     __JSScopeUtil__.restoreInstanceId();
   }
+  isTransferred(): boolean {
+    return false;
+  }
+  convertPoint(position, targetNode): Position {
+    if (targetNode === null) {
+        throw { message: "The parameter 'targetNode' is invalid: it cannot be null. Please pass a non-null FrameNode object.", code: 100025 };
+    }
+    if (targetNode === undefined) {
+        throw { message: "The parameter 'targetNode' is invalid: it cannot be undefined.", code: 100025 };
+    }
+    if (targetNode.isDisposed()) {
+        throw { message: "The parameter 'targetNode' is invalid: the node has already been disposed. Check the node's status with 'isDisposed()' before passing it.", code: 100025 };
+    }
+    if (position === undefined) {
+        throw { message: "The parameter 'position' is invalid: it cannot be undefined. Provide a valid position object with x and y properties.", code: 100025 };
+    }
+    if (position === null) {
+        throw { message: "The parameter 'position' is invalid: it cannot be null. Provide a non-null position object.", code: 100025 };
+    }
+    __JSScopeUtil__.syncInstanceId(this.instanceId_);
+    const offsetPosition = getUINativeModule().frameNode.convertPoint(
+        this.getNodePtr(), position.x, position.y, targetNode.nodePtr_);
+    __JSScopeUtil__.restoreInstanceId();
+    return { x: offsetPosition[0], y: offsetPosition[1] };
+  }
 }
 
 class ImmutableFrameNode extends FrameNode {

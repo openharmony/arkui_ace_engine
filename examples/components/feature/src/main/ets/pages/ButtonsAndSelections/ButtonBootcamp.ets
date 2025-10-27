@@ -631,6 +631,12 @@ export struct ButtonBootcamp {
   @StorageLink('Block') listEventTriggeredTags: Array<BlockTag> = [];
   @State listEventTriggeredTagsTemp: Array<BlockTag> = [];
   @State selection: string | null = null;
+  @State config: DragSpringLoadingConfiguration = {
+    stillTimeLimit: 200,
+    updateInterval: 300,
+    updateNotifyCount: 4,
+    updateToFinishInterval: 300
+  };
   scroller: Scroller = new Scroller()
 
   aboutToAppear(): void {
@@ -1382,6 +1388,21 @@ export struct ButtonBootcamp {
           this.compEventTriggeredLog('自定义事件拦截onChildTouchTest触发')
           return HitTestMode.Default;
         })
+        .onDragSpringLoading((context: SpringLoadingContext) => {
+          if (context.state = 0) {
+            this.compEventTriggeredLog('自定义事件拦截onDragSpringLoading.BEGIN触发')
+          } else if(context.state = 1) {
+            this.compEventTriggeredLog('自定义事件拦截onDragSpringLoading.UPDATE触发')
+          } else if(context.state = 2) {
+            this.compEventTriggeredLog('自定义事件拦截onDragSpringLoading.END触发')
+          } else if(context.state = 3) {
+            this.compEventTriggeredLog('自定义事件拦截onDragSpringLoading.CANCEL触发')
+          }
+          if (context.currentNotifySequence = 5) {
+            this.compEventTriggeredLog('自定义事件拦截onDragSpringLoading.currentNotifySequence触发')
+          }
+        }, this.config)
+
     }
 
   }

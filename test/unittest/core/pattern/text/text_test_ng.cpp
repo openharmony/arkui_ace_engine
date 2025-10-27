@@ -1097,7 +1097,7 @@ HWTEST_F(TextTestNg, TextCreateParagraph001, TestSize.Level1)
 HWTEST_F(TextTestNg, MeasureContent001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. init
+     * @tc.steps: step1. init.
      */
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);

@@ -22,7 +22,7 @@ import unifiedDataChannel from '@ohos.data.unifiedDataChannel';
 import uniformTypeDescriptor from '@ohos.data.uniformTypeDescriptor';
 import { LocalStorage } from '@ohos.arkui.stateManagement';
 import { DrawContext } from 'arkui.Graphics';
-import { AnimatableArithmetic, DrawModifier, AsyncCallback, Callback, DragItemInfo, ResourceColor, DragPreviewOptions, DragInteractionOptions, ExpectedFrameRateRange } from '#generated';
+import { AnimatableArithmetic, AsyncCallback, Callback, DragItemInfo, ResourceColor, DragPreviewOptions, DragInteractionOptions, ExpectedFrameRateRange } from '#generated';
 import { ArkCustomComponent } from 'arkui/ArkCustomComponent';
 import { WaterFlowOptions, WaterFlowSections, OverlayOptions } from '#generated';
 import { ChildrenMainSize, PageTransitionOptions, PageTransitionCallback, SlideEffect, ScaleOptions, TranslateOptions } from '#generated';
@@ -41,6 +41,8 @@ import { RectShape, CircleShape, EllipseShape, PathShape } from '@ohos.arkui.sha
 import curves from '@ohos.curves';
 import matrix4 from '@ohos.matrix4';
 import uiEffect from '@ohos.graphics.uiEffect';
+import { DrawModifier } from "#handwritten"
+
 export class ArkUIAniModule {
     static {
         loadLibrary('arkoala_native_ani')

@@ -2174,10 +2174,8 @@ bool CustomPaintPaintMethod::UpdateFillParagraph(const std::string& text)
 {
 #ifndef ACE_UNITTEST
     RSParagraphStyle style;
-    TextAlign textAlign = state_.fillState.GetTextAlign();
-    style.textAlign = Constants::ConvertTxtTextAlign(textAlign);
+    style.textAlign = Rosen::TextAlign::LEFT;
     style.textDirection = Constants::ConvertTxtTextDirection(state_.fillState.GetOffTextDirection());
-    style.textAlign = GetEffectiveAlign(style.textAlign, style.textDirection);
     auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
     CHECK_NULL_RETURN(fontCollection, false);
     std::unique_ptr<RSParagraphBuilder> builder = RSParagraphBuilder::Create(style, fontCollection);
@@ -2242,10 +2240,8 @@ bool CustomPaintPaintMethod::UpdateStrokeParagraph(const std::string& text)
 {
 #ifndef ACE_UNITTEST
     RSParagraphStyle style;
-    TextAlign textAlign = state_.strokeState.GetTextAlign();
-    style.textAlign = Constants::ConvertTxtTextAlign(textAlign);
+    style.textAlign = Rosen::TextAlign::LEFT;
     style.textDirection = Constants::ConvertTxtTextDirection(state_.fillState.GetOffTextDirection());
-    style.textAlign = GetEffectiveAlign(style.textAlign, style.textDirection);
     auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
     CHECK_NULL_RETURN(fontCollection, false);
     std::unique_ptr<RSParagraphBuilder> builder = RSParagraphBuilder::Create(style, fontCollection);

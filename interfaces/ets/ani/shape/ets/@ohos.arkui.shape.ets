@@ -59,7 +59,7 @@ class BaseShape<T> extends CommonShapeMethod<T> {
 }
 
 export class RectShape extends BaseShape<RectShape> {
-    rectShapeResult:long;
+    basicShapeResult:long;
 
     public native constructor(options?: RectShapeOptions | RoundRectShapeOptions);
 
@@ -84,7 +84,7 @@ export class RectShape extends BaseShape<RectShape> {
 
 export class EllipseShape  extends BaseShape<EllipseShape > {
 
-    ellipseShapeResult:long;
+    basicShapeResult:long;
 
     public native constructor(options?: ShapeSize);
 
@@ -103,7 +103,7 @@ export class EllipseShape  extends BaseShape<EllipseShape > {
 
 export class CircleShape extends BaseShape<CircleShape > {
 
-    circleShapeResult:long;
+    basicShapeResult:long;
 
     public native constructor(options?: ShapeSize);
 
@@ -122,7 +122,7 @@ export class CircleShape extends BaseShape<CircleShape > {
 
 export class PathShape extends CommonShapeMethod<PathShape> {
 
-    pathShapeResult:long;
+    basicShapeResult:long;
 
     public native constructor(options?: PathShapeOptions);
 

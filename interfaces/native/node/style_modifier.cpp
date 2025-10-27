@@ -16169,7 +16169,7 @@ int32_t SetWaterFlowColumnsGap(ArkUI_NodeHandle node, const ArkUI_AttributeItem*
     auto* fullImpl = GetFullImpl();
 
     fullImpl->getNodeModifiers()->getWaterFlowModifier()->setColumnsGap(
-        node->uiNodeHandle, item->value[NUM_0].f32, GetDefaultUnit(node, UNIT_VP), nullptr);
+        node->uiNodeHandle, item->value[NUM_0].f32, GetDefaultUnit(node, UNIT_VP), nullptr, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -16194,7 +16194,7 @@ int32_t SetWaterFlowRowsGap(ArkUI_NodeHandle node, const ArkUI_AttributeItem* it
     }
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getWaterFlowModifier()->setRowsGap(
-        node->uiNodeHandle, item->value[NUM_0].f32, GetDefaultUnit(node, UNIT_VP), nullptr);
+        node->uiNodeHandle, item->value[NUM_0].f32, GetDefaultUnit(node, UNIT_VP), nullptr, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -16395,13 +16395,13 @@ int32_t SetItemConstraintSize(ArkUI_NodeHandle node, const ArkUI_AttributeItem* 
         }
     }
     fullImpl->getNodeModifiers()->getWaterFlowModifier()->setItemMinWidth(
-        node->uiNodeHandle, constraintSize[NUM_0], units[NUM_0], nullptr);
+        node->uiNodeHandle, constraintSize[NUM_0], units[NUM_0], nullptr, nullptr);
     fullImpl->getNodeModifiers()->getWaterFlowModifier()->setItemMaxWidth(
-        node->uiNodeHandle, constraintSize[NUM_1], units[NUM_1], nullptr);
+        node->uiNodeHandle, constraintSize[NUM_1], units[NUM_1], nullptr, nullptr);
     fullImpl->getNodeModifiers()->getWaterFlowModifier()->setItemMinHeight(
-        node->uiNodeHandle, constraintSize[NUM_2], units[NUM_2], nullptr);
+        node->uiNodeHandle, constraintSize[NUM_2], units[NUM_2], nullptr, nullptr);
     fullImpl->getNodeModifiers()->getWaterFlowModifier()->setItemMaxHeight(
-        node->uiNodeHandle, constraintSize[NUM_3], units[NUM_3], nullptr);
+        node->uiNodeHandle, constraintSize[NUM_3], units[NUM_3], nullptr, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -16935,7 +16935,7 @@ int32_t SetGridColumnsGap(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item
     }
     auto* fullImpl = GetFullImpl();
     ArkUIResourceLength columnGap = { item->value[NUM_0].f32, GetDefaultUnit(node, UNIT_VP), nullptr };
-    fullImpl->getNodeModifiers()->getGridModifier()->setGridColumnsGap(node->uiNodeHandle, &columnGap);
+    fullImpl->getNodeModifiers()->getGridModifier()->setGridColumnsGap(node->uiNodeHandle, &columnGap, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -16960,7 +16960,7 @@ int32_t SetGridRowsGap(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     }
     auto* fullImpl = GetFullImpl();
     ArkUIResourceLength rowGap = { item->value[NUM_0].f32, GetDefaultUnit(node, UNIT_VP), nullptr };
-    fullImpl->getNodeModifiers()->getGridModifier()->setGridRowsGap(node->uiNodeHandle, &rowGap);
+    fullImpl->getNodeModifiers()->getGridModifier()->setGridRowsGap(node->uiNodeHandle, &rowGap, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 

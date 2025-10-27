@@ -44,6 +44,7 @@
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_transition_proxy.h"
+#include "core/interfaces/native/implementation/nav_path_info_peer_impl.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/refresh/refresh_layout_property.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
@@ -371,6 +372,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_TextBackgroundStyle& dst, const TextBackgroundStyle& src, ConvContext *ctx);
     void AssignArkValue(Ark_TextChangeOptions& dst, const ChangeValueInfo& src, ConvContext *ctx);
     void AssignArkValue(Ark_LengthMetricsCustom& dst, const CalcDimension& src);
+    void AssignArkValue(Ark_NavPathInfo& dst, const OHOS::Ace::NG::GeneratedModifier::NavigationContext::PathInfo& src);
     void AssignArkValue(Ark_TextDecorationStyle& dst, const OHOS::Ace::TextDecorationStyle& src);
     void AssignArkValue(Ark_TextDecorationType& dst, const OHOS::Ace::TextDecoration& src);
     void AssignArkValue(Ark_TextDeleteDirection& dst, const TextDeleteDirection& src);
@@ -398,6 +400,8 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_VisibleListContentInfo& dst, const ListItemIndex& src);
     void AssignArkValue(Ark_WebNavigationType& dst, const NavigationType& src);
     void AssignArkValue(Ark_WordBreak& dst, const WordBreak& src);
+    void AssignArkValue(Ark_NativeEmbedParamItem& dst, const NativeEmbedParamItem& src);
+    void AssignArkValue(Ark_NativeEmbedParamStatus& dst, const NativeEmbedParamStatus& src);
     void AssignArkValue(Ark_uiObserver_NavigationInfo& dst, const std::shared_ptr<OHOS::Ace::NG::NavigationInfo>& src);
     void AssignArkValue(Ark_unifiedDataChannel_UnifiedData& dst, const RefPtr<UnifiedData>& src);
 

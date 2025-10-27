@@ -159,6 +159,23 @@ void XComponentPattern::OnAttachToMainTreeMultiThread(const RefPtr<FrameNode>& h
     }
 }
 
+void XComponentPattern::OnModifyDoneMultiThread(const RefPtr<FrameNode>& host)
+{
+    CHECK_EQUAL_VOID(host->IsThreadSafeNode(), false);
+#ifdef ENABLE_ROSEN_BACKEND
+    auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(renderContextForSurface_);
+    multiThreadModifier_ = multiThreadModifier_ == nullptr ?
+        std::make_shared<Rosen::ModifierNG::RSFrameClipModifier>() :
+        multiThreadModifier_;
+    CHECK_NULL_VOID(multiThreadModifier_);
+    multiThreadModifier_->SetFrameGravity(static_cast<Rosen::Gravity>(renderFit_));
+    multiThreadModifier_->SetClipToFrame(true);
+    std::shared_ptr<Rosen::RSNode> rsNode = rosenRenderContext->GetRSNode();
+    CHECK_NULL_VOID(rsNode);
+    rsNode->AddModifier(multiThreadModifier_);
+#endif
+}
+
 void XComponentPattern::OnDetachFromMainTreeMultiThread(const RefPtr<FrameNode>& host)
 {
     isOnTree_ = false;

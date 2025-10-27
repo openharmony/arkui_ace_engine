@@ -1336,11 +1336,22 @@ HWTEST_F(ListControllerTestNg, CheckIsAtEndWhenScrollToBottom, TestSize.Level1)
 
     /**
      * @tc.steps: step2. Scroll to bottom, check IsAtEnd.
-     * @tc.expected: IsAtEnd is true.
+     * @tc.expected: IsAtEnd is true and endIndex_ is 10.
      */
     ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushUITasks(frameNode_);
+    EXPECT_EQ(pattern_->itemPosition_.count(10), 1);
+    EXPECT_EQ(pattern_->endIndex_, 10);
+    EXPECT_TRUE(pattern_->positionController_->IsAtEnd());
+
+    /**
+     * @tc.steps: step3. remeasure list.
+     * @tc.expected: IsAtEnd is true and endIndex_ is 10.
+     */
+    FlushUITasks(frameNode_);
+    EXPECT_EQ(pattern_->itemPosition_.count(10), 1);
+    EXPECT_EQ(pattern_->endIndex_, 10);
     EXPECT_TRUE(pattern_->positionController_->IsAtEnd());
 }
 } // namespace OHOS::Ace::NG

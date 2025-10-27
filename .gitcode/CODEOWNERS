@@ -253,8 +253,10 @@ component_ext/ext_common/
 component_ext/movingphoto/ @arkuiadvancedcomponent
 
 [Examples]
+examples/TextComponentTest/entry/src/main/ets/pages/05-RichEditorSample/ @arkui_rich_editor
 examples/ @arkuipopupwindow_all
 examples/Image/ @arkui001
+examples/DrawableDescriptor/ @arkui001
 examples/Dialog_C/ @arkui001
 examples/Info/ @arkui001
 examples/ImageAnimator/ @arkui001
@@ -3197,6 +3199,8 @@ frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/node_adapter/ @arkui_framework_xnode
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/dragController/drag_controller_module.cpp @ArkUI_Event
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/dragController/drag_controller_module.h @ArkUI_Event
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/xbar/xbar_module_methods.h @ArkUI_ability_group
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/xbar/xbar_module_methods.cpp @ArkUI_ability_group
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/dragController/drag_preview.h @ArkUI_Event
 frameworks\bridge\arkts_frontend\koala_projects\arkoala-arkts\arkui-ohos\src\ani\native\keyboard_avoid_mode\keyboard_avoid_mode_module.h @arkuilayout1
 frameworks\bridge\arkts_frontend\koala_projects\arkoala-arkts\arkui-ohos\src\ani\native\keyboard_avoid_mode\keyboard_avoid_mode_module.cpp @arkuilayout1
@@ -3237,6 +3241,8 @@ frameworks/core/interfaces/native/ani/node_adapter_ani_modifier.cpp @arkui_frame
 frameworks/core/interfaces/native/ani/node_adapter_ani_modifier.h @arkui_framework_xnode
 frameworks/core/interfaces/native/ani/keyboard_avoid_mode_ani_modifier.h @arkuilayout1
 frameworks/core/interfaces/native/ani/keyboard_avoid_mode_ani_modifier.cpp @arkuilayout1
+frameworks/core/interfaces/native/ani/xbar_ani_modifier.h @ArkUI_ability_group
+frameworks/core/interfaces/native/ani/xbar_ani_modifier.cpp @ArkUI_ability_group
 
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ApplyModifierToNode.ets @huawei_g_five
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/typedNode/ArkSymbolGlyphNode.ets @huawei_g_five

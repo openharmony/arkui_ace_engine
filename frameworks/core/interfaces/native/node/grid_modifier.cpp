@@ -70,7 +70,7 @@ void ResetGridRowsTemplate(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     GridModelNG::SetRowsTemplate(frameNode, DEFAULT_ROWS_TEMPLATE);
 }
-void SetGridColumnsGap(ArkUINodeHandle node, const struct ArkUIResourceLength* columnsGap)
+void SetGridColumnsGap(ArkUINodeHandle node, const struct ArkUIResourceLength* columnsGap, void* columnsGapRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -85,6 +85,12 @@ void SetGridColumnsGap(ArkUINodeHandle node, const struct ArkUIResourceLength* c
         gap = 0.0_px;
     }
     GridModelNG::SetColumnsGap(frameNode, gap);
+
+    if (SystemProperties::ConfigChangePerform()) {
+        auto* columnsGapInner = reinterpret_cast<ResourceObject*>(columnsGapRawPtr);
+        auto columnsGapResObj = AceType::Claim(columnsGapInner);
+        GridModelNG::ParseResObjColumnsGap(frameNode, columnsGapResObj);
+    }
 }
 
 void ResetGridColumnsGap(ArkUINodeHandle node)
@@ -92,9 +98,13 @@ void ResetGridColumnsGap(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     GridModelNG::SetColumnsGap(frameNode, DEFAULT_COLUMNS_GAP);
+
+    if (SystemProperties::ConfigChangePerform()) {
+        GridModelNG::ParseResObjColumnsGap(frameNode, nullptr);
+    }
 }
 
-void SetGridRowsGap(ArkUINodeHandle node, const struct ArkUIResourceLength* rowsGap)
+void SetGridRowsGap(ArkUINodeHandle node, const struct ArkUIResourceLength* rowsGap, void* rowsGapRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -109,6 +119,11 @@ void SetGridRowsGap(ArkUINodeHandle node, const struct ArkUIResourceLength* rows
         gap = 0.0_px;
     }
     GridModelNG::SetRowsGap(frameNode, gap);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto* rowsGapInner = reinterpret_cast<ResourceObject*>(rowsGapRawPtr);
+        auto rowsGapResObj = AceType::Claim(rowsGapInner);
+        GridModelNG::ParseResObjRowsGap(frameNode, rowsGapResObj);
+    }
 }
 
 void ResetGridRowsGap(ArkUINodeHandle node)
@@ -116,6 +131,9 @@ void ResetGridRowsGap(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     GridModelNG::SetRowsGap(frameNode, DEFAULT_ROWS_GAP);
+    if (SystemProperties::ConfigChangePerform()) {
+        GridModelNG::ParseResObjRowsGap(frameNode, nullptr);
+    }
 }
 
 void SetGridScrollBar(ArkUINodeHandle node, int32_t scrollBar)

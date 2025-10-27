@@ -1198,4 +1198,10 @@ namespace OHOS::Ace::NG {
         }
         return cachedItemInfo + "|" + expiringItemInfo;
     }
+
+    void LazyForEachBuilder::DumpInfo()
+    {
+        DumpLog::GetInstance().AddDesc(std::string("The totalCount of data:")
+                                            .append(std::to_string(GetTotalCount()).c_str()));
+    }
 }

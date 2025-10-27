@@ -2240,10 +2240,6 @@ void SubwindowOhos::HidePixelMap(bool startDrag, double x, double y, bool showAn
     auto manager = parentPipeline->GetOverlayManager();
     CHECK_NULL_VOID(manager);
     ContainerScope scope(parentContainerId_);
-    if (!startDrag) {
-        manager->RemovePreviewBadgeNode();
-        manager->RemoveGatherNodeWithAnimation();
-    }
     if (showAnimation) {
         manager->RemovePixelMapAnimation(startDrag, x, y, true);
     } else {

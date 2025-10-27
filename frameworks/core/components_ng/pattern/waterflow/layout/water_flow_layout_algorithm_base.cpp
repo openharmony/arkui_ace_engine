@@ -115,7 +115,9 @@ void WaterFlowLayoutBase::PostIdleTask(const RefPtr<FrameNode>& frameNode)
 
 int32_t WaterFlowLayoutBase::GetUpdateIdx(LayoutWrapper* host, int32_t footerIdx)
 {
-    int32_t updateIdx = host->GetHostNode()->GetChildrenUpdated();
+    auto layoutHost = host->GetHostNode();
+    CHECK_NULL_RETURN(layoutHost, 0);
+    int32_t updateIdx = layoutHost->GetChildrenUpdated();
     if (updateIdx > 0 && footerIdx == 0) {
         --updateIdx;
     }

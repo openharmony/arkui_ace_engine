@@ -209,6 +209,10 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
       TrackedObject.notifyObjectValueAssignment(/* old value */ oldValue, /* new value */ this.localCopyObservedObject_,
         this.notifyPropertyHasChangedPU,
         this.notifyTrackedObjectPropertyHasChanged, this);
+      // for interop
+      if (InteropConfigureStateMgmt.needsInterop()) {
+        InteropExtractorModule.setStaticValueForInterop(this, newValue);
+      }
     }
   }
 

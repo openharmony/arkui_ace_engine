@@ -804,13 +804,15 @@ bool ParseAniColor(ani_env *env, ani_ref resourceColor_ref, OHOS::Ace::Color& re
         return true;
     }
     if (GetIsColorEnum(env, resourceColor_ref)) {
-        ani_int Color_int;
-        if (ANI_OK != env->EnumItem_GetValue_Int(static_cast<ani_enum_item>(resourceColor_ref), &Color_int)) {
+        ani_string Color_int;
+        if (ANI_OK != env->EnumItem_GetValue_String(static_cast<ani_enum_item>(resourceColor_ref), &Color_int)) {
             return false;
         }
         OHOS::Ace::Color resourceColorValue;
-        ParseColorMapToColor(static_cast<ResColor>(Color_int), resourceColorValue);
-        resourceColor = resourceColorValue;
+        std::string color = ANIUtils_ANIStringToStdString(env, static_cast<ani_string>(Color_int));
+        if (OHOS::Ace::Color::ParseColorString(color, resourceColorValue)) {
+            resourceColor = resourceColorValue;
+        }
         return true;
     }
     if (GetIsNumberObject(env, resourceColor_ref)) {

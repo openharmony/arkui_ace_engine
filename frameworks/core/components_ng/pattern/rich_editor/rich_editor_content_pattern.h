@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RICH_EDITOR_RICH_EDITOR_CONTENT_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RICH_EDITOR_RICH_EDITOR_CONTENT_PATTERN_H
 
+#include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 
 namespace OHOS::Ace::NG {

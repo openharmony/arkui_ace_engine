@@ -27,6 +27,7 @@
 #include "test/mock/core/rosen/testing_canvas.h"
 
 #include "core/common/ace_engine.h"
+#include "core/common/multi_thread_build_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/common/properties/shadow_config.h"

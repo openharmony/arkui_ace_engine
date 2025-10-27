@@ -26,6 +26,7 @@ struct Index {
   private items : ListCategories[] = [
     {title:'Navigation-title set backgroundColor',url:'pages/titleStyle/Test3'},
     {title:'Navigation-title set blur',url:'pages/titleStyle/Test4'},
+    {title:'Navigation-title set blur&backgroundColor',url:'pages/titleStyle/Test5'},
   ]
 
   build() {

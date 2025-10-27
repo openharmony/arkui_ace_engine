@@ -1806,19 +1806,6 @@ void impl_CommonMethod_setHeight(Ark_NativePointer thisPtr, KSerializerBuffer th
         GetNodeModifiers()->getCommonMethodModifier()->setHeight(self, static_cast<Opt_Union_Length_LayoutPolicy*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(CommonMethod_setHeight, Ark_NativePointer, KSerializerBuffer, int32_t)
-void impl_CommonMethod_setDrawModifier(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
-        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
-        DeserializerBase thisDeserializer(thisArray, thisLength);
-        const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_DrawModifier valueValueTempTmpBuf = {};
-        valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-        if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            valueValueTempTmpBuf.value = static_cast<Ark_DrawModifier>(DrawModifier_serializer::read(thisDeserializer));
-        }
-        Opt_DrawModifier valueValueTemp = valueValueTempTmpBuf;;
-        GetNodeModifiers()->getCommonMethodModifier()->setDrawModifier(self, static_cast<Opt_DrawModifier*>(&valueValueTemp));
-}
-KOALA_INTEROP_DIRECT_V3(CommonMethod_setDrawModifier, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_CommonMethod_setResponseRegion(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -23629,6 +23616,19 @@ void impl_VideoAttribute_setEnableShortcutKey(Ark_NativePointer thisPtr, KSerial
         GetNodeModifiers()->getVideoModifier()->setEnableShortcutKey(self, static_cast<Opt_Boolean*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(VideoAttribute_setEnableShortcutKey, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_VideoAttribute_setSurfaceBackgroundColor(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_ColorMetrics valueValueTempTmpBuf = {};
+        valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            valueValueTempTmpBuf.value = static_cast<Ark_ColorMetrics>(ColorMetrics_serializer::read(thisDeserializer));
+        }
+        Opt_ColorMetrics valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getVideoModifier()->setSurfaceBackgroundColor(self, static_cast<Opt_ColorMetrics*>(&valueValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(VideoAttribute_setSurfaceBackgroundColor, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_WaterFlow_construct(Ark_Int32 id, Ark_Int32 flags) {
         return GetNodeModifiers()->getWaterFlowModifier()->construct(id, flags);
 }
@@ -28939,47 +28939,6 @@ void impl_DrawingRenderingContext_setSize(Ark_NativePointer thisPtr, KSerializer
         GetAccessors()->getDrawingRenderingContextAccessor()->setSize(self, static_cast<Ark_Size*>(&sizeValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(DrawingRenderingContext_setSize, Ark_NativePointer, KSerializerBuffer, int32_t)
-Ark_NativePointer impl_DrawModifier_construct() {
-        return GetAccessors()->getDrawModifierAccessor()->construct();
-}
-KOALA_INTEROP_DIRECT_0(DrawModifier_construct, Ark_NativePointer)
-Ark_NativePointer impl_DrawModifier_getFinalizer() {
-        return GetAccessors()->getDrawModifierAccessor()->getFinalizer();
-}
-KOALA_INTEROP_DIRECT_0(DrawModifier_getFinalizer, Ark_NativePointer)
-void impl_DrawModifier_invalidate(Ark_NativePointer thisPtr) {
-        Ark_DrawModifier self = reinterpret_cast<Ark_DrawModifier>(thisPtr);
-        GetAccessors()->getDrawModifierAccessor()->invalidate(self);
-}
-KOALA_INTEROP_DIRECT_V1(DrawModifier_invalidate, Ark_NativePointer)
-Ark_NativePointer impl_DrawModifier_getDrawBehind_callback(Ark_NativePointer thisPtr) {
-        Ark_DrawModifier self = reinterpret_cast<Ark_DrawModifier>(thisPtr);
-        [[maybe_unused]] const auto &_api_call_result = GetAccessors()->getDrawModifierAccessor()->getDrawBehind_callback(self);
-        // TODO: Value serialization needs to be implemented
-        return {};
-}
-KOALA_INTEROP_DIRECT_1(DrawModifier_getDrawBehind_callback, Ark_NativePointer, Ark_NativePointer)
-void impl_DrawModifier_setDrawBehind_callback(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
-        Ark_DrawModifier self = reinterpret_cast<Ark_DrawModifier>(thisPtr);
-        DeserializerBase thisDeserializer(thisArray, thisLength);
-        Callback_DrawContext_Void drawBehind_callbackValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_DrawContext drawContext)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_DrawContext_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_DrawContext drawContext)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_DrawContext_Void))))};;
-        GetAccessors()->getDrawModifierAccessor()->setDrawBehind_callback(self, static_cast<Callback_DrawContext_Void*>(&drawBehind_callbackValueTemp));
-}
-KOALA_INTEROP_DIRECT_V3(DrawModifier_setDrawBehind_callback, Ark_NativePointer, KSerializerBuffer, int32_t)
-Ark_NativePointer impl_DrawModifier_getDrawContent_callback(Ark_NativePointer thisPtr) {
-        Ark_DrawModifier self = reinterpret_cast<Ark_DrawModifier>(thisPtr);
-        [[maybe_unused]] const auto &_api_call_result = GetAccessors()->getDrawModifierAccessor()->getDrawContent_callback(self);
-        // TODO: Value serialization needs to be implemented
-        return {};
-}
-KOALA_INTEROP_DIRECT_1(DrawModifier_getDrawContent_callback, Ark_NativePointer, Ark_NativePointer)
-void impl_DrawModifier_setDrawContent_callback(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
-        Ark_DrawModifier self = reinterpret_cast<Ark_DrawModifier>(thisPtr);
-        DeserializerBase thisDeserializer(thisArray, thisLength);
-        Callback_DrawContext_Void drawContent_callbackValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_DrawContext drawContext)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_DrawContext_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_DrawContext drawContext)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_DrawContext_Void))))};;
-        GetAccessors()->getDrawModifierAccessor()->setDrawContent_callback(self, static_cast<Callback_DrawContext_Void*>(&drawContent_callbackValueTemp));
-}
-KOALA_INTEROP_DIRECT_V3(DrawModifier_setDrawContent_callback, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_Boolean impl_EnvironmentBackend_isAccessibilityEnabled() {
         return GetAccessors()->getEnvironmentBackendAccessor()->isAccessibilityEnabled();
 }
@@ -32415,6 +32374,22 @@ void impl_NodeContainerOps_setOnDestoryEvent(Ark_NativePointer self, KSerializer
         GetAccessors()->getNodeContainerOpsAccessor()->setOnDestoryEvent(self, static_cast<Callback_OnDestory_Void*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(NodeContainerOps_setOnDestoryEvent, Ark_NativePointer, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_NodeContentExtender_constructorNodeContent() {
+        return GetAccessors()->getNodeContentExtenderAccessor()->constructorNodeContent();
+}
+KOALA_INTEROP_DIRECT_0(NodeContentExtender_constructorNodeContent, Ark_NativePointer)
+Ark_NativePointer impl_NodeContentExtender_getDestroy() {
+        return GetAccessors()->getNodeContentExtenderAccessor()->getDestroy();
+}
+KOALA_INTEROP_DIRECT_0(NodeContentExtender_getDestroy, Ark_NativePointer)
+Ark_Boolean impl_NodeContentExtender_addFrameNode(Ark_NativePointer content, Ark_NativePointer node) {
+        return GetAccessors()->getNodeContentExtenderAccessor()->addFrameNode(content, node);
+}
+KOALA_INTEROP_DIRECT_2(NodeContentExtender_addFrameNode, Ark_Boolean, Ark_NativePointer, Ark_NativePointer)
+Ark_Boolean impl_NodeContentExtender_removeFrameNode(Ark_NativePointer content, Ark_NativePointer node) {
+        return GetAccessors()->getNodeContentExtenderAccessor()->removeFrameNode(content, node);
+}
+KOALA_INTEROP_DIRECT_2(NodeContentExtender_removeFrameNode, Ark_Boolean, Ark_NativePointer, Ark_NativePointer)
 Ark_NativePointer impl_OffscreenCanvas_construct(KInteropNumber width, KInteropNumber height, KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto unitValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());

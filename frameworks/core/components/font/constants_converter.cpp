@@ -786,6 +786,9 @@ void ConvertSymbolTxtStyle(const TextStyle& textStyle, Rosen::TextStyle& txtStyl
                 txtStyle.symbol.SetAnimationMode(static_cast<uint16_t>(options.GetScopeType().value()));
             }
         }
+        if (effectType == SymbolEffectType::REPLACE || effectType == SymbolEffectType::QUICK_REPLACE) {
+            txtStyle.symbol.SetFirstActive(true);
+        }
     } else {
         auto effectStrategyValue = textStyle.GetEffectStrategy();
         if (effectStrategyValue < NONE_EFFECT || effectStrategyValue > SCALE_EFFECT) {

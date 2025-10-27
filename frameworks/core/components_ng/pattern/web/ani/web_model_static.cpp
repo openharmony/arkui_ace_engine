@@ -1245,6 +1245,36 @@ void WebModelStatic::SetNativeEmbedVisibilityChangeId(
     webEventHub->SetOnNativeEmbedVisibilityChangeEvent(std::move(uiCallback));
 }
 
+void WebModelStatic::SetNativeEmbedObjectParamChangeId(
+    FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnNativeEmbedObjectParamChangeEvent(std::move(uiCallback));
+}
+
+void WebModelStatic::SetForceEnableZoom(FrameNode* frameNode, bool isForceEnableZoom)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateForceEnableZoom(isForceEnableZoom);
+}
+
+void WebModelStatic::SetRotateRenderEffect(FrameNode* frameNode, const std::optional<WebRotateEffect>& effect)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    if (effect) {
+        webPatternStatic->UpdateRotateRenderEffect(effect.value());
+    } else {
+        webPatternStatic->ResetRotateRenderEffect();
+    }
+}
+
 void WebModelStatic::SetNativeEmbedGestureEventId(
     FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback)
 {

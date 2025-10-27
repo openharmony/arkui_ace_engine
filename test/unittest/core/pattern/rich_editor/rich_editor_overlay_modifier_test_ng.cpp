@@ -68,7 +68,7 @@ void RichEditorOverlayModifierTestNg::TearDownTestSuite()
  * @tc.desc: Test rich editor CreateRichEditorOverlayModifier function.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorOverlayModifierTestNg, CreateRichEditorOverlayModifier001, TestSize.Level1)
+HWTEST_F(RichEditorOverlayModifierTestNg, CreateRichEditorOverlayModifier001, TestSize.Level2)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -84,7 +84,7 @@ HWTEST_F(RichEditorOverlayModifierTestNg, CreateRichEditorOverlayModifier001, Te
  * @tc.desc: Test rich editor GetOverlayModifier function.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorOverlayModifierTestNg, GetOverlayModifier001, TestSize.Level1)
+HWTEST_F(RichEditorOverlayModifierTestNg, GetOverlayModifier001, TestSize.Level2)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();

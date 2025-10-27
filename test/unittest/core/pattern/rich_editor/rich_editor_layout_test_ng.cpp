@@ -75,7 +75,7 @@ void RichEditorLayoutTestNg::TearDownTestSuite()
  * @tc.desc: test on dirty layout wrapper
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorLayoutTestNg, OnDirtyLayoutWrapper001, TestSize.Level1)
+HWTEST_F(RichEditorLayoutTestNg, OnDirtyLayoutWrapper001, TestSize.Level2)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -109,7 +109,7 @@ HWTEST_F(RichEditorLayoutTestNg, OnDirtyLayoutWrapper001, TestSize.Level1)
  * @tc.desc: test on dirty layout wrapper
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorLayoutTestNg, OnDirtyLayoutWrapper002, TestSize.Level1)
+HWTEST_F(RichEditorLayoutTestNg, OnDirtyLayoutWrapper002, TestSize.Level2)
 {
     /**
      * @tc.steps: step1. create richEditorPattern.
@@ -171,7 +171,7 @@ HWTEST_F(RichEditorLayoutTestNg, OnDirtyLayoutWrapper002, TestSize.Level1)
  * @tc.desc: test OnDirtyLayoutWrapperSwap
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorLayoutTestNg, OnDirtyLayoutWrapper003, TestSize.Level1)
+HWTEST_F(RichEditorLayoutTestNg, OnDirtyLayoutWrapper003, TestSize.Level2)
 {
     CHECK_NULL_VOID(richEditorNode_);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -205,7 +205,7 @@ HWTEST_F(RichEditorLayoutTestNg, OnDirtyLayoutWrapper003, TestSize.Level1)
  * @tc.desc: test OnDirtyLayoutWrapperSwap
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorLayoutTestNg, OnDirtyLayoutWrapper004, TestSize.Level1)
+HWTEST_F(RichEditorLayoutTestNg, OnDirtyLayoutWrapper004, TestSize.Level2)
 {
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
@@ -230,7 +230,7 @@ HWTEST_F(RichEditorLayoutTestNg, OnDirtyLayoutWrapper004, TestSize.Level1)
  * @tc.desc: test MeasureContent
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorLayoutTestNg, RichEditorLayoutAlgorithm001, TestSize.Level1)
+HWTEST_F(RichEditorLayoutTestNg, RichEditorLayoutAlgorithm001, TestSize.Level2)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -287,7 +287,7 @@ HWTEST_F(RichEditorLayoutTestNg, RichEditorLayoutAlgorithm001, TestSize.Level1)
  * @tc.desc: test GetParagraphStyleSpanItem
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorLayoutTestNg, RichEditorLayoutAlgorithm002, TestSize.Level1)
+HWTEST_F(RichEditorLayoutTestNg, RichEditorLayoutAlgorithm002, TestSize.Level2)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -308,7 +308,7 @@ HWTEST_F(RichEditorLayoutTestNg, RichEditorLayoutAlgorithm002, TestSize.Level1)
  * @tc.desc: test Measure
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorLayoutTestNg, RichEditorLayoutAlgorithm003, TestSize.Level1)
+HWTEST_F(RichEditorLayoutTestNg, RichEditorLayoutAlgorithm003, TestSize.Level2)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -334,7 +334,7 @@ HWTEST_F(RichEditorLayoutTestNg, RichEditorLayoutAlgorithm003, TestSize.Level1)
  * @tc.desc: test LayoutPolicy MATCH_PARENT
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorLayoutTestNg, UpdateFrameSizeWithLayoutPolicy001, TestSize.Level1)
+HWTEST_F(RichEditorLayoutTestNg, UpdateFrameSizeWithLayoutPolicy001, TestSize.Level2)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -374,7 +374,7 @@ HWTEST_F(RichEditorLayoutTestNg, UpdateFrameSizeWithLayoutPolicy001, TestSize.Le
  * @tc.desc: test LayoutPolicy WRAP_CONTENT and FIX_AT_IDEAL_SIZE
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorLayoutTestNg, UpdateFrameSizeWithLayoutPolicy002, TestSize.Level1)
+HWTEST_F(RichEditorLayoutTestNg, UpdateFrameSizeWithLayoutPolicy002, TestSize.Level2)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -432,7 +432,7 @@ HWTEST_F(RichEditorLayoutTestNg, UpdateFrameSizeWithLayoutPolicy002, TestSize.Le
  * @tc.desc: test LayoutPolicy WRAP_CONTENT and FIX_AT_IDEAL_SIZE with calcLayoutConstraint is nullPtr
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorLayoutTestNg, UpdateFrameSizeWithLayoutPolicy003, TestSize.Level1)
+HWTEST_F(RichEditorLayoutTestNg, UpdateFrameSizeWithLayoutPolicy003, TestSize.Level2)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -475,7 +475,7 @@ HWTEST_F(RichEditorLayoutTestNg, UpdateFrameSizeWithLayoutPolicy003, TestSize.Le
  * @tc.desc: test UpdateConstraintByLayoutPolicy
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorLayoutTestNg, UpdateConstraintByLayoutPolicy, TestSize.Level1)
+HWTEST_F(RichEditorLayoutTestNg, UpdateConstraintByLayoutPolicy, TestSize.Level2)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -522,7 +522,7 @@ HWTEST_F(RichEditorLayoutTestNg, UpdateConstraintByLayoutPolicy, TestSize.Level1
  * @tc.desc: test UpdateMaxSizeByLayoutPolicy
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorLayoutTestNg, UpdateMaxSizeByLayoutPolicy, TestSize.Level1)
+HWTEST_F(RichEditorLayoutTestNg, UpdateMaxSizeByLayoutPolicy, TestSize.Level2)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -565,7 +565,7 @@ HWTEST_F(RichEditorLayoutTestNg, UpdateMaxSizeByLayoutPolicy, TestSize.Level1)
  * @tc.desc: test HandleAISpanTest
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorLayoutTestNg, HandleAISpanTest001, TestSize.Level1)
+HWTEST_F(RichEditorLayoutTestNg, HandleAISpanTest001, TestSize.Level2)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -607,7 +607,7 @@ HWTEST_F(RichEditorLayoutTestNg, HandleAISpanTest001, TestSize.Level1)
  * @tc.desc: test RichEditorPattern UpdateTextFieldManager
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorLayoutTestNg, UpdateTextFieldManager001, TestSize.Level1)
+HWTEST_F(RichEditorLayoutTestNg, UpdateTextFieldManager001, TestSize.Level2)
 {
     MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
 
@@ -665,7 +665,7 @@ HWTEST_F(RichEditorLayoutTestNg, UpdateTextFieldManager001, TestSize.Level1)
  * @tc.desc: test UpdateTextFieldManager
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorLayoutTestNg, UpdateTextFieldManager002, TestSize.Level1)
+HWTEST_F(RichEditorLayoutTestNg, UpdateTextFieldManager002, TestSize.Level2)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -696,7 +696,7 @@ HWTEST_F(RichEditorLayoutTestNg, UpdateTextFieldManager002, TestSize.Level1)
  * @tc.desc: test OnDirtyLayoutWrapperSwap
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorLayoutTestNg, OnDirtyLayoutWrapperSwap001, TestSize.Level1)
+HWTEST_F(RichEditorLayoutTestNg, OnDirtyLayoutWrapperSwap001, TestSize.Level2)
 {
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
@@ -720,7 +720,7 @@ HWTEST_F(RichEditorLayoutTestNg, OnDirtyLayoutWrapperSwap001, TestSize.Level1)
  * @tc.desc: test RichEditorLayoutAlgorithm
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorLayoutTestNg, RichEditorLayoutAlgorithmTest001, TestSize.Level1)
+HWTEST_F(RichEditorLayoutTestNg, RichEditorLayoutAlgorithmTest001, TestSize.Level2)
 {
     auto pattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(pattern, nullptr);
@@ -747,7 +747,7 @@ HWTEST_F(RichEditorLayoutTestNg, RichEditorLayoutAlgorithmTest001, TestSize.Leve
  * @tc.desc: test RichEditorLayoutAlgorithm
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorLayoutTestNg, RichEditorLayoutAlgorithmTest002, TestSize.Level1)
+HWTEST_F(RichEditorLayoutTestNg, RichEditorLayoutAlgorithmTest002, TestSize.Level2)
 {
     auto pattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(pattern, nullptr);
@@ -758,11 +758,17 @@ HWTEST_F(RichEditorLayoutTestNg, RichEditorLayoutAlgorithmTest002, TestSize.Leve
 
     auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         richEditorNode_, AceType::MakeRefPtr<GeometryNode>(), richEditorNode_->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+
     SizeF textSize;
     ASSERT_EQ(textSize.Width(), 0.0f);
     layoutAlgorithm->allSpans_.clear();
     layoutAlgorithm->HandleTextSizeWhenEmpty(AceType::RawPtr(layoutWrapper), textSize);
     EXPECT_NE(textSize.Width(), 0.0f);
+
+    layoutWrapper = nullptr;
+    layoutAlgorithm->Layout(AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(layoutAlgorithm->parentGlobalOffset_.GetX(), 0.0f);
 }
 
 } // namespace OHOS::Ace::NG

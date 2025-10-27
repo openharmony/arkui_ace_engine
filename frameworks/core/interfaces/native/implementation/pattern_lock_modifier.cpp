@@ -59,6 +59,7 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 }
 } // PatternLockModifier
 namespace PatternLockInterfaceModifier {
+std::mutex controllerMutex;
 void SetPatternLockOptionsImpl(Ark_NativePointer node,
                                const Opt_PatternLockController* controller)
 {
@@ -67,6 +68,7 @@ void SetPatternLockOptionsImpl(Ark_NativePointer node,
 
     auto controllerPtr = Converter::OptConvertPtr<Ark_PatternLockController>(controller);
     if (controllerPtr.has_value()) {
+        std::lock_guard<std::mutex> lock(controllerMutex);
         auto internalController = PatternLockModelStatic::GetController(frameNode);
         auto peerImplPtr = reinterpret_cast<PatternLockControllerPeerImpl *>(controllerPtr.value());
         CHECK_NULL_VOID(peerImplPtr);

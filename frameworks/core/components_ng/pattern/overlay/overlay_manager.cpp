@@ -315,6 +315,7 @@ AnimationOption GetHoverImageAnimationOption(const RefPtr<MenuWrapperPattern>& m
         CHECK_NULL_VOID(overlayManager);
         if (overlayManager->RemoveMenuInSubWindow(menuWrapper)) {
             overlayManager->SetIsMenuShow(false);
+            overlayManager->PublishMenuStatus(false);
         }
     });
 
@@ -1353,6 +1354,7 @@ void OverlayManager::ShowMenuAnimation(const RefPtr<FrameNode>& menu)
 
     wrapperPattern->SetMenuStatus(MenuStatus::ON_SHOW_ANIMATION);
     SetIsMenuShow(true, menu);
+    PublishMenuStatus(true, menu);
     ResetContextMenuDragHideFinished();
     if (wrapperPattern->HasTransitionEffect()) {
         TAG_LOGD(AceLogTag::ACE_OVERLAY, "show menu animation with transition effect");
@@ -1540,6 +1542,7 @@ bool OverlayManager::CheckSelectSubWindowToClose(
         if (subWindowManager->IsSubwindowExist(subwindow)) {
             if (overlayManager->RemoveMenuInSubWindow(menu)) {
                 overlayManager->SetIsMenuShow(false);
+                overlayManager->PublishMenuStatus(false);
                 return true;
             }
         }
@@ -1558,6 +1561,7 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPr
         return;
     }
 
+    PublishMenuStatus(false);
     ResetLowerNodeFocusable(menu);
     ResetContextMenuDragHideFinished();
     RemoveMenuBadgeNode(menu);
@@ -2730,6 +2734,7 @@ void OverlayManager::HideAllMenusWithoutAnimation(bool showInSubwindow)
         RemoveMenuFilter(menuNode, false);
         EraseMenuInfo(targetId);
         SetIsMenuShow(false);
+        PublishMenuStatus(false);
     }
 }
 
@@ -3039,6 +3044,7 @@ void OverlayManager::DeleteMenu(int32_t targetId)
     }
     EraseMenuInfo(targetId);
     SetIsMenuShow(false);
+    PublishMenuStatus(false);
 }
 
 void OverlayManager::CleanMenuInSubWindowWithAnimation()
@@ -3144,6 +3150,7 @@ void OverlayManager::CleanMenuInSubWindow(int32_t targetId)
         rootNode->RemoveChild(node);
         rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         SetIsMenuShow(false);
+        PublishMenuStatus(false);
         auto subwindowMgr = SubwindowManager::GetInstance();
         subwindowMgr->DeleteHotAreas(Container::CurrentId(), node->GetId(), SubwindowType::TYPE_MENU);
         RemoveMenuFilter(node, false);
@@ -4229,9 +4236,8 @@ bool OverlayManager::RemoveDragPreview(const RefPtr<FrameNode>& overlay)
     return true;
 }
 
-void OverlayManager::SetIsMenuShow(bool isMenuShow, const RefPtr<FrameNode>& menuNode)
+void OverlayManager::PublishMenuStatus(bool isMenuShow, const RefPtr<FrameNode>& menuNode)
 {
-    isMenuShow_ = isMenuShow;
     // notify drag manager the menu show status
     if (!menuNode) {
         DragDropGlobalController::GetInstance().PublishMenuStatusWithNode(isMenuShow);
@@ -4246,6 +4252,11 @@ void OverlayManager::SetIsMenuShow(bool isMenuShow, const RefPtr<FrameNode>& men
     auto targetNode = FrameNode::GetFrameNode(menuPattern->GetTargetTag(), menuPattern->GetTargetId());
     CHECK_NULL_VOID(targetNode);
     DragDropGlobalController::GetInstance().PublishMenuStatusWithNode(isMenuShow, targetNode);
+}
+
+void OverlayManager::SetIsMenuShow(bool isMenuShow, const RefPtr<FrameNode>& menuNode)
+{
+    isMenuShow_ = isMenuShow;
 }
 
 int32_t OverlayManager::GetPopupIdByNode(const RefPtr<FrameNode>& overlay)
@@ -5717,6 +5728,7 @@ void OverlayManager::RemoveSheetNode(const RefPtr<FrameNode>& sheetNode)
 
 void OverlayManager::RemoveSheet(RefPtr<FrameNode> sheetNode)
 {
+    CHECK_NULL_VOID(sheetNode);
     const auto& layoutProp = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_VOID(layoutProp);
     auto showInSubWindow = layoutProp->GetSheetStyleValue(SheetStyle()).showInSubWindow.value_or(false);
@@ -5746,6 +5758,7 @@ void OverlayManager::RemoveSheet(RefPtr<FrameNode> sheetNode)
             parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
     }
+    CHECK_NULL_VOID(maskNode);
     // detele sheet wrapper in subwindow
     SubwindowManager::GetInstance()->DeleteHotAreas(sheetWrapperPattern->GetSubWindowId(),
         maskNode->GetId(), SubwindowType::TYPE_SHEET);
@@ -6218,6 +6231,7 @@ bool OverlayManager::CreateSheetKey(const RefPtr<NG::FrameNode>& sheetContentNod
 void OverlayManager::UpdateSheetMask(const RefPtr<FrameNode>& maskNode,
     const RefPtr<FrameNode>& sheetNode, const SheetStyle& sheetStyle, bool isPartialUpdate)
 {
+    CHECK_NULL_VOID(maskNode);
     auto maskRenderContext = maskNode->GetRenderContext();
     CHECK_NULL_VOID(maskRenderContext);
     auto pipeline = maskNode->GetContext();

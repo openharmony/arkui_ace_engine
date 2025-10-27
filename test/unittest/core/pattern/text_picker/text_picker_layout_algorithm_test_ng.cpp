@@ -28,7 +28,6 @@
 #include "core/components_ng/pattern/text_picker/textpicker_layout_algorithm.h"
 #include "core/components_ng/pattern/text_picker/textpicker_pattern.h"
 #include "core/components_ng/pattern/text_picker/textpicker_model_ng.h"
-#include "core/components_ng/pattern/flex/flex_layout_property.h"
 
 #undef private
 #undef protected

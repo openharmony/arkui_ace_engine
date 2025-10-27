@@ -45,6 +45,12 @@
 #include "core/components_ng/manager/display_sync/ui_display_sync.h"
 #include "core/gestures/velocity.h"
 
+#ifdef ENABLE_ROSEN_BACKEND
+namespace OHOS::Rosen::ModifierNG {
+class RSFrameClipModifier;
+}
+#endif
+
 namespace OHOS::Ace {
 class ImageAnalyzerManager;
 }
@@ -386,6 +392,7 @@ protected:
     bool IsSupportImageAnalyzerFeature();
     void UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode);
     void RegisterTransformHintCallback(PipelineContext* context);
+    void OnModifyDoneMultiThread(const RefPtr<FrameNode>& host);
 
     std::optional<std::string> id_;
     std::string nodeId_ = "-1";
@@ -546,6 +553,9 @@ private:
     WeakPtr<PipelineContext> initialContext_ = nullptr;
     // record the initial surfaceId_ in InitSurface, this variable should not be modified after the initial assignment
     std::string initialSurfaceId_;
+#ifdef ENABLE_ROSEN_BACKEND
+    std::shared_ptr<Rosen::ModifierNG::RSFrameClipModifier> multiThreadModifier_;
+#endif
 };
 } // namespace OHOS::Ace::NG
 

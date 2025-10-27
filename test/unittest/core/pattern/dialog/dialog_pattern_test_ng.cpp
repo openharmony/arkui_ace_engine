@@ -35,6 +35,7 @@
 
 #include "base/log/dump_log.h"
 #include "base/subwindow/subwindow_manager.h"
+#include "core/common/multi_thread_build_manager.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/select/select_theme.h"

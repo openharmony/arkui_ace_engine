@@ -535,6 +535,16 @@ void SecurityComponentModelNG::SetIconSize(FrameNode* frameNode, const std::opti
     }
 }
 
+void SecurityComponentModelNG::SetIconSize(FrameNode* frameNode, const std::optional<NG::CalcSize>& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, IconCalcSize, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, IconCalcSize, frameNode);
+    }
+}
+
 void SecurityComponentModelNG::SetIconColor(const Color& value)
 {
     ACE_UPDATE_PAINT_PROPERTY(SecurityComponentPaintProperty, IconColor, value);

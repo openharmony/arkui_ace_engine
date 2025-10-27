@@ -23,15 +23,19 @@ const char* ANI_SHAPE_NAME = "@ohos.arkui.shape.CircleShape";
 void ANICreateCircleShape(ani_env* env, [[maybe_unused]] ani_object object)
 {
     ani_class cls;
-    if (ANI_OK != env->FindClass(ANI_SHAPE_NAME, &cls)) {
+    ani_status status;
+    if ((status = env->FindClass(ANI_SHAPE_NAME, &cls)) != ANI_OK) {
+        LOGE("Not find CircleShape class, status:%{public}d", status);
         return;
     }
     CirclePeer* shapePeer = new CirclePeer();
     auto circle = AceType::MakeRefPtr<Circle>();
     shapePeer->circleShape = circle;
 
-    if (ANI_OK !=
-        env->Object_SetPropertyByName_Long(object, "circleShapeResult", reinterpret_cast<ani_long>(shapePeer))) {
+    if ((status = env->Object_SetPropertyByName_Long(
+             object, "basicShapeResult", reinterpret_cast<ani_long>(shapePeer))) != ANI_OK) {
+        LOGE("CircleShape set addr failed, status:%{public}d", status);
+        delete shapePeer;
         return;
     }
 }
@@ -59,8 +63,11 @@ void ANICreateCircleShapeWithParam(ani_env* env, [[maybe_unused]] ani_object obj
     }
     shapePeer->circleShape = circle;
 
-    if (ANI_OK !=
-        env->Object_SetPropertyByName_Long(object, "circleShapeResult", reinterpret_cast<ani_long>(shapePeer))) {
+    ani_status status;
+    if ((status = env->Object_SetPropertyByName_Long(
+             object, "basicShapeResult", reinterpret_cast<ani_long>(shapePeer))) != ANI_OK) {
+        LOGE("CircleShape set addr failed, status:%{public}d", status);
+        delete shapePeer;
         return;
     }
 }
@@ -68,7 +75,7 @@ void ANICreateCircleShapeWithParam(ani_env* env, [[maybe_unused]] ani_object obj
 CirclePeer* GetCircleShape(ani_env* env, ani_object obj)
 {
     ani_long circleAni;
-    if (ANI_OK != env->Object_GetFieldByName_Long(obj, "circleShapeResult", &circleAni)) {
+    if (ANI_OK != env->Object_GetFieldByName_Long(obj, "basicShapeResult", &circleAni)) {
         return nullptr;
     }
 
@@ -206,7 +213,7 @@ ani_object ANICircleShapeColor(ani_env* env, ani_object object, [[maybe_unused]]
 
 ani_object CircleShape::ANICircleShapeFromPtr(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr)
 {
-    return ANIShapeFromPtr<CirclePeer>(env, ptr, ANI_SHAPE_NAME, "circleShapeResult");
+    return ANIShapeFromPtr<CirclePeer>(env, ptr, ANI_SHAPE_NAME, "basicShapeResult");
 }
 
 ani_status CircleShape::BindCircleShape(ani_env* env)

@@ -228,8 +228,22 @@ public:
     void HandleCancel() override;
 
     void HandleIgnore() override;
+
+    void HandleConfirm(const std::string& identity, int32_t type) override;
 private:
     std::shared_ptr<OHOS::NWeb::NWebJSSslSelectCertResult> result_;
+};
+
+class VerifyPinResultOhos : public VerifyPinResult {
+    DECLARE_ACE_TYPE(VerifyPinResultOhos, VerifyPinResult);
+ 
+public:
+    explicit VerifyPinResultOhos(std::shared_ptr<OHOS::NWeb::NWebJSVerifyPinResult> result)
+        : result_(result) {}
+ 
+    void HandleConfirm(int32_t verifyResult) override;
+private:
+    std::shared_ptr<OHOS::NWeb::NWebJSVerifyPinResult> result_;
 };
 
 class FileSelectorParamOhos : public WebFileSelectorParam {
@@ -1164,6 +1178,7 @@ public:
     bool OnSslErrorRequest(const std::shared_ptr<BaseEventInfo>& info);
     bool OnAllSslErrorRequest(const std::shared_ptr<BaseEventInfo>& info);
     bool OnSslSelectCertRequest(const std::shared_ptr<BaseEventInfo>& info);
+    bool OnVerifyPinRequest(const std::shared_ptr<BaseEventInfo>& info);
     void OnDownloadStart(const std::string& url, const std::string& userAgent, const std::string& contentDisposition,
         const std::string& mimetype, long contentLength);
     void OnAccessibilityEvent(int64_t accessibilityId, AccessibilityEventType eventType, const std::string& argument);

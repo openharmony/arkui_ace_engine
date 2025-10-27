@@ -1436,16 +1436,27 @@ void DialogPattern::OnColorConfigurationUpdate()
 
 void DialogPattern::UpdateMaskColor()
 {
-    if (!dialogProperties_.isModal || dialogProperties_.maskColor.has_value()) {
+    if (dialogProperties_.maskColor.has_value()) {
         return;
     }
-    if (!dialogProperties_.isShowInSubWindow || isUIExtensionSubWindow_ || dialogProperties_.isSceneBoardDialog) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto renderContext = host->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        renderContext->UpdateBackgroundColor(dialogTheme_->GetMaskColorEnd());
+    auto maskNode = GetMaskNode();
+    CHECK_NULL_VOID(maskNode);
+    auto renderContext = maskNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    CHECK_NULL_VOID(dialogTheme_);
+    renderContext->UpdateBackgroundColor(dialogTheme_->GetMaskColorEnd());
+}
+
+RefPtr<FrameNode> DialogPattern::GetMaskNode()
+{
+    CHECK_NULL_RETURN(dialogProperties_.isModal, nullptr);
+    if (extraMaskNode_) {
+        return extraMaskNode_;
     }
+    if (isUIExtensionSubWindow_ || dialogProperties_.isSceneBoardDialog || !dialogProperties_.isShowInSubWindow) {
+        return GetHost();
+    }
+    return nullptr;
 }
 
 void DialogPattern::UpdateTitleAndContentColor()

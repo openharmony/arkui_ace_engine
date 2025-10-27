@@ -352,6 +352,20 @@ void SslSelectCertResultOhos::HandleIgnore()
     }
 }
 
+void SslSelectCertResultOhos::HandleConfirm(const std::string& identity, int32_t type)
+{
+    if (result_) {
+        result_->Confirm(identity, type);
+    }
+}
+
+void VerifyPinResultOhos::HandleConfirm(int32_t verifyResult)
+{
+    if (result_) {
+        result_->Confirm(verifyResult);
+    }
+}
+
 std::string FileSelectorParamOhos::GetTitle()
 {
     if (param_) {
@@ -5633,6 +5647,42 @@ bool WebDelegate::OnSslSelectCertRequest(const std::shared_ptr<BaseEventInfo>& i
         result = webCom->OnSslSelectCertRequest(info.get());
 #endif
     }, "ArkUIWebSslSelectCertRequest");
+    return result;
+}
+
+bool WebDelegate::OnVerifyPinRequest(const std::shared_ptr<BaseEventInfo>& info)
+{
+    CHECK_NULL_RETURN(taskExecutor_, false);
+    bool result = false;
+    auto jsTaskExecutor = SingleTaskExecutor::Make(taskExecutor_, TaskExecutor::TaskType::JS);
+    jsTaskExecutor.PostSyncTask([weak = WeakClaim(this), info, &result]() {
+        auto delegate = weak.Upgrade();
+        CHECK_NULL_VOID(delegate);
+#ifdef NG_BUILD
+        auto webPattern = delegate->webPattern_.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        auto webEventHub = webPattern->GetWebEventHub();
+        CHECK_NULL_VOID(webEventHub);
+        auto propOnVerifyPinRequestEvent = webEventHub->GetOnVerifyPinRequestEvent();
+        CHECK_NULL_VOID(propOnVerifyPinRequestEvent);
+        result = propOnVerifyPinRequestEvent(info);
+        return;
+#else
+        if (Container::IsCurrentUseNewPipeline()) {
+            auto webPattern = delegate->webPattern_.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            auto webEventHub = webPattern->GetWebEventHub();
+            CHECK_NULL_VOID(webEventHub);
+            auto propOnVerifyPinRequestEvent = webEventHub->GetOnVerifyPinRequestEvent();
+            CHECK_NULL_VOID(propOnVerifyPinRequestEvent);
+            result = propOnVerifyPinRequestEvent(info);
+            return;
+        }
+        auto webCom = delegate->webComponent_.Upgrade();
+        CHECK_NULL_VOID(webCom);
+        result = webCom->OnVerifyPinRequest(info.get());
+#endif
+    }, "ArkUIWebVerifyPinRequest");
     return result;
 }
 

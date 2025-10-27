@@ -16,7 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_COMMON_VIEW_COMMON_LAYOUT_ALGORITHM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_COMMON_VIEW_COMMON_LAYOUT_ALGORITHM_H
 
-#include "core/components_ng/layout/layout_algorithm.h"
+#include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 
 namespace OHOS::Ace::NG {

@@ -227,6 +227,7 @@ public:
     static void OnPdfScrollAtBottom(const JSCallbackInfo& args);
     static void OnPdfLoadEvent(const JSCallbackInfo& args);
     static void OnSafeBrowsingCheckFinish(const JSCallbackInfo& args);
+    static void OnVerifyPinRequest(const JSCallbackInfo& args);
 
 protected:
     static void OnCommonDialog(const JSCallbackInfo& args, int dialogEventType);

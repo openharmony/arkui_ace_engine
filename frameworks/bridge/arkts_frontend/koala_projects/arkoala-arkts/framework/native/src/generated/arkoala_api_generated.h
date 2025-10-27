@@ -6123,10 +6123,10 @@ typedef struct Opt_SideBarPosition {
     Ark_SideBarPosition value;
 } Opt_SideBarPosition;
 typedef enum Ark_SlideEffect {
-    ARK_SLIDE_EFFECT_LEFT = 0,
-    ARK_SLIDE_EFFECT_RIGHT = 1,
-    ARK_SLIDE_EFFECT_TOP = 2,
-    ARK_SLIDE_EFFECT_BOTTOM = 3,
+    ARK_SLIDE_EFFECT_LEFT = 1,
+    ARK_SLIDE_EFFECT_RIGHT = 2,
+    ARK_SLIDE_EFFECT_TOP = 3,
+    ARK_SLIDE_EFFECT_BOTTOM = 4,
     ARK_SLIDE_EFFECT_START = 5,
     ARK_SLIDE_EFFECT_END = 6,
 } Ark_SlideEffect;
@@ -13587,7 +13587,7 @@ typedef struct Opt_GaugeConfiguration {
 } Opt_GaugeConfiguration;
 typedef struct Ark_GaugeOptions {
     /* kind: Interface */
-    Ark_Number value;
+    Opt_Number value;
     Opt_Number min;
     Opt_Number max;
 } Ark_GaugeOptions;
@@ -21312,8 +21312,6 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                      const Opt_Union_Length_LayoutPolicy* value);
     void (*setHeight)(Ark_NativePointer node,
                       const Opt_Union_Length_LayoutPolicy* value);
-    void (*setDrawModifier)(Ark_NativePointer node,
-                            const Opt_DrawModifier* value);
     void (*setResponseRegion)(Ark_NativePointer node,
                               const Opt_Union_Array_Rectangle_Rectangle* value);
     void (*setMouseResponseRegion)(Ark_NativePointer node,
@@ -24245,6 +24243,8 @@ typedef struct GENERATED_ArkUIVideoModifier {
                               const Opt_ImageAnalyzerConfig* value);
     void (*setEnableShortcutKey)(Ark_NativePointer node,
                                  const Opt_Boolean* value);
+    void (*setSurfaceBackgroundColor)(Ark_NativePointer node,
+                                      const Opt_ColorMetrics* value);
 } GENERATED_ArkUIVideoModifier;
 
 typedef struct GENERATED_ArkUIWaterFlowModifier {
@@ -25484,19 +25484,6 @@ typedef struct GENERATED_ArkUIDrawingRenderingContextAccessor {
                     const Ark_Size* size);
 } GENERATED_ArkUIDrawingRenderingContextAccessor;
 
-typedef struct GENERATED_ArkUIDrawModifierAccessor {
-    void (*destroyPeer)(Ark_DrawModifier peer);
-    Ark_DrawModifier (*construct)();
-    Ark_NativePointer (*getFinalizer)();
-    void (*invalidate)(Ark_DrawModifier peer);
-    Callback_DrawContext_Void (*getDrawBehind_callback)(Ark_DrawModifier peer);
-    void (*setDrawBehind_callback)(Ark_DrawModifier peer,
-                                   const Callback_DrawContext_Void* drawBehind_callback);
-    Callback_DrawContext_Void (*getDrawContent_callback)(Ark_DrawModifier peer);
-    void (*setDrawContent_callback)(Ark_DrawModifier peer,
-                                    const Callback_DrawContext_Void* drawContent_callback);
-} GENERATED_ArkUIDrawModifierAccessor;
-
 typedef struct GENERATED_ArkUIEnvironmentBackendAccessor {
     Ark_Boolean (*isAccessibilityEnabled)();
     Ark_Int32 (*getColorMode)();
@@ -26463,6 +26450,15 @@ typedef struct GENERATED_ArkUINodeContainerOpsAccessor {
     void (*setOnDestoryEvent)(Ark_NativePointer self,
                               const Callback_OnDestory_Void* value);
 } GENERATED_ArkUINodeContainerOpsAccessor;
+
+typedef struct GENERATED_ArkUINodeContentExtenderAccessor {
+    Ark_NativePointer (*constructorNodeContent)();
+    Ark_NativePointer (*getDestroy)();
+    Ark_Boolean (*addFrameNode)(Ark_NativePointer content,
+                                Ark_NativePointer node);
+    Ark_Boolean (*removeFrameNode)(Ark_NativePointer content,
+                                   Ark_NativePointer node);
+} GENERATED_ArkUINodeContentExtenderAccessor;
 
 typedef struct GENERATED_ArkUIOffscreenCanvasAccessor {
     void (*destroyPeer)(Ark_OffscreenCanvas peer);
@@ -27981,7 +27977,6 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIDismissPopupActionAccessor* (*getDismissPopupActionAccessor)();
     const GENERATED_ArkUIDragEventAccessor* (*getDragEventAccessor)();
     const GENERATED_ArkUIDrawingRenderingContextAccessor* (*getDrawingRenderingContextAccessor)();
-    const GENERATED_ArkUIDrawModifierAccessor* (*getDrawModifierAccessor)();
     const GENERATED_ArkUIEnvironmentBackendAccessor* (*getEnvironmentBackendAccessor)();
     const GENERATED_ArkUIEventEmulatorAccessor* (*getEventEmulatorAccessor)();
     const GENERATED_ArkUIEventResultAccessor* (*getEventResultAccessor)();
@@ -28039,6 +28034,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUINavPathInfoAccessor* (*getNavPathInfoAccessor)();
     const GENERATED_ArkUINavPathStackAccessor* (*getNavPathStackAccessor)();
     const GENERATED_ArkUINodeContainerOpsAccessor* (*getNodeContainerOpsAccessor)();
+    const GENERATED_ArkUINodeContentExtenderAccessor* (*getNodeContentExtenderAccessor)();
     const GENERATED_ArkUIOffscreenCanvasAccessor* (*getOffscreenCanvasAccessor)();
     const GENERATED_ArkUIOffscreenCanvasRenderingContext2DAccessor* (*getOffscreenCanvasRenderingContext2DAccessor)();
     const GENERATED_ArkUIPanGestureEventAccessor* (*getPanGestureEventAccessor)();

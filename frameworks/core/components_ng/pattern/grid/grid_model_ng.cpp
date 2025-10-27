@@ -710,8 +710,8 @@ DisplayMode GridModelNG::GetDisplayMode() const
 
 std::string GridModelNG::GetColumnsTemplate(FrameNode* frameNode)
 {
-    CHECK_NULL_RETURN(frameNode, nullptr);
     std::string value = "1fr";
+    CHECK_NULL_RETURN(frameNode, value);
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(GridLayoutProperty, ColumnsTemplate, value, frameNode, value);
     return value;
 }
@@ -728,7 +728,7 @@ PresetFillType GridModelNG::GetItemFillPolicy(FrameNode* frameNode)
 std::string GridModelNG::GetRowsTemplate(FrameNode* frameNode)
 {
     std::string value = "1fr";
-    CHECK_NULL_RETURN(frameNode, nullptr);
+    CHECK_NULL_RETURN(frameNode, value);
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(GridLayoutProperty, RowsTemplate, value, frameNode, value);
     return value;
 }
@@ -1005,5 +1005,59 @@ void GridModelNG::CreateWithResourceObjScrollBarColor(const RefPtr<ResourceObjec
 void GridModelNG::CreateWithResourceObjScrollBarColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
 {
     ScrollableModelNG::CreateWithResourceObjScrollBarColor(frameNode, resObj);
+}
+
+void GridModelNG::ParseResObjRowsGap(const RefPtr<ResourceObject>& resObj)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    ParseResObjRowsGap(frameNode, resObj);
+}
+
+void GridModelNG::ParseResObjRowsGap(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj("grid.rowsGap");
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto node = weak.Upgrade();
+        CHECK_NULL_VOID(node);
+        CalcDimension result;
+        bool parseOk = ResourceParseUtils::ParseResDimensionVpNG(resObj, result);
+        if (!(parseOk && result > 0.0_vp)) {
+            result.SetValue(0.0);
+        }
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, RowsGap, result, node);
+    };
+    pattern->AddResObj("grid.rowsGap", resObj, std::move(updateFunc));
+}
+
+void GridModelNG::ParseResObjColumnsGap(const RefPtr<ResourceObject>& resObj)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    ParseResObjColumnsGap(frameNode, resObj);
+}
+
+void GridModelNG::ParseResObjColumnsGap(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj("grid.columnsGap");
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto node = weak.Upgrade();
+        CHECK_NULL_VOID(node);
+        CalcDimension result;
+        bool parseOk = ResourceParseUtils::ParseResDimensionVpNG(resObj, result);
+        if (!(parseOk && result > 0.0_vp)) {
+            result.SetValue(0.0);
+        }
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, ColumnsGap, result, node);
+    };
+    pattern->AddResObj("grid.columnsGap", resObj, std::move(updateFunc));
 }
 } // namespace OHOS::Ace::NG

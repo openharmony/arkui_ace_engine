@@ -351,6 +351,8 @@ public:
     void OnRefreshAccessedHistoryV2(const std::string& url, bool isReload, bool isMainFrame) override;
     bool IsQuickMenuShow() override;
     void OnRemoveBlanklessFrameWithAnimation(int delayTime) override;
+    bool OnVerifyPinRequestByJS(
+        std::shared_ptr<NWeb::NWebJSVerifyPinResult> result, const std::string& identity) override;
 private:
     std::weak_ptr<OHOS::NWeb::NWeb> webviewWeak_;
     WeakPtr<WebDelegate> webDelegate_;

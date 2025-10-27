@@ -111,6 +111,11 @@ void ReturnPromise(const JSCallbackInfo& info, napi_value result)
     }
     info.SetReturnValue(JSRef<JSObject>::Cast(jsPromise));
 }
+
+void ReturnNull(const JSCallbackInfo& args)
+{
+    args.SetReturnValue(JSVal::Null());
+}
 } // namespace
 void JSXComponentController::JSBind(BindingTarget globalObj)
 {
@@ -320,11 +325,11 @@ void JSXComponentController::GetXComponentSurfaceRotation(const JSCallbackInfo& 
 
 void JSXComponentController::LockCanvas(const JSCallbackInfo& args)
 {
-    CHECK_NULL_VOID(xcomponentController_);
+    CHECK_NULL_RETURN(xcomponentController_, ReturnNull(args));
     auto rsCanvas = xcomponentController_->LockCanvas();
-    CHECK_NULL_VOID(rsCanvas);
+    CHECK_NULL_RETURN(rsCanvas, ReturnNull(args));
     auto engine = EngineHelper::GetCurrentEngine();
-    CHECK_NULL_VOID(engine);
+    CHECK_NULL_RETURN(engine, ReturnNull(args));
     NativeEngine* nativeEngine = engine->GetNativeEngine();
     napi_env env = reinterpret_cast<napi_env>(nativeEngine);
     ScopeRAII scope(env);

@@ -891,7 +891,7 @@ public:
         return contentRect_.GetY() == textRect_.GetY();
     }
 
-    bool IsAtBottom(bool considerRepeat = false, bool fromController = false) const override
+    bool IsAtBottom(bool considerRepeat = false) const override
     {
         return contentRect_.GetY() + contentRect_.Height() == textRect_.GetY() + textRect_.Height();
     }
@@ -2039,6 +2039,7 @@ private:
     void UpdateBlurReason();
     AceAutoFillType TextContentTypeToAceAutoFillType(const TextContentType& type);
     bool CheckAutoFillType(const AceAutoFillType& aceAutoFillAllType, bool isFromKeyBoard = false);
+    void ToJsonValueForApi22(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     bool GetAutoFillTriggeredStateByType(const AceAutoFillType& autoFillType);
     void SetAutoFillTriggeredStateByType(const AceAutoFillType& autoFillType);
     AceAutoFillType GetAutoFillType(bool isNeedToHitType = true);
@@ -2119,7 +2120,7 @@ private:
     bool ShouldSkipUpdateParagraph();
     void UpdateParagraphForDragNode(bool skipUpdate);
     void UpdateMagnifierWithFloatingCaretPos();
-    void HandleEditingEventCrossPlatform(const std::shared_ptr<TextEditingValue>& value);
+    bool HandleEditingEventCrossPlatform(const std::shared_ptr<TextEditingValue>& value);
     void ApplyInnerBorderColor();
 #if defined(ENABLE_STANDARD_INPUT)
     void UpdateCaretInfoStandard(bool forceUpdate);

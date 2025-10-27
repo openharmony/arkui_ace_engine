@@ -439,7 +439,7 @@ std::string RichEditorStyledStringExtendTestNg::GetRecordString(const UndoRedoRe
  * @tc.desc: Test HandleSelectFontStyle.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyledStringExtendTestNg, HandleSelectFontStyle, TestSize.Level1)
+HWTEST_F(RichEditorStyledStringExtendTestNg, HandleSelectFontStyle, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -490,7 +490,7 @@ HWTEST_F(RichEditorStyledStringExtendTestNg, HandleSelectFontStyle, TestSize.Lev
  * @tc.desc: Test RecordOperation by insert or delete.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyledStringExtendTestNg, RecordOperation001, TestSize.Level1)
+HWTEST_F(RichEditorStyledStringExtendTestNg, RecordOperation001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -542,7 +542,7 @@ HWTEST_F(RichEditorStyledStringExtendTestNg, RecordOperation001, TestSize.Level1
  * @tc.desc: Test RecordOperation by paste or drag.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyledStringExtendTestNg, RecordOperation002, TestSize.Level1)
+HWTEST_F(RichEditorStyledStringExtendTestNg, RecordOperation002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -607,7 +607,7 @@ HWTEST_F(RichEditorStyledStringExtendTestNg, RecordOperation002, TestSize.Level1
  * @tc.desc: Test RecordOperation by SetStyledString or HandleSelectFontStyle.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyledStringExtendTestNg, RecordOperation003, TestSize.Level1)
+HWTEST_F(RichEditorStyledStringExtendTestNg, RecordOperation003, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -656,7 +656,7 @@ HWTEST_F(RichEditorStyledStringExtendTestNg, RecordOperation003, TestSize.Level1
  * @tc.desc: Test HandleUndoAction.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyledStringExtendTestNg, HandleUndoAction001, TestSize.Level1)
+HWTEST_F(RichEditorStyledStringExtendTestNg, HandleUndoAction001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -710,7 +710,7 @@ HWTEST_F(RichEditorStyledStringExtendTestNg, HandleUndoAction001, TestSize.Level
  * @tc.desc: Test HandleRedoAction.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyledStringExtendTestNg, HandleRedoAction001, TestSize.Level1)
+HWTEST_F(RichEditorStyledStringExtendTestNg, HandleRedoAction001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();

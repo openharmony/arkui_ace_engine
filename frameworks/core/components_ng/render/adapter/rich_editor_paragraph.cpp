@@ -60,20 +60,4 @@ size_t RichEditorParagraph::GetLineCount()
 {
     return lineCount_;
 }
-
-bool RichEditorParagraph::HandleCaretWhenEmpty(CaretMetricsF& result, bool needLineHighest)
-{
-    bool ret = TxtParagraph::HandleCaretWhenEmpty(result, needLineHighest);
-    CHECK_NULL_RETURN(ret, false);
-    bool hasLeadingMargin = paraStyle_.drawableLeadingMargin || paraStyle_.leadingMargin;
-    bool needHandleRtlLeadingMargin = paraStyle_.direction == TextDirection::RTL
-        && paraStyle_.align == TextAlign::START && hasLeadingMargin;
-    CHECK_NULL_RETURN(needHandleRtlLeadingMargin, true);
-    auto leadingMarginWidth = paraStyle_.drawableLeadingMargin
-        ? paraStyle_.drawableLeadingMargin->size.Width().ConvertToPx()
-        : paraStyle_.leadingMargin->size.Width().ConvertToPx();
-    result.offset.SetX(GetMaxWidth() - leadingMarginWidth);
-    return true;
-}
-
 } // namespace OHOS::Ace::NG

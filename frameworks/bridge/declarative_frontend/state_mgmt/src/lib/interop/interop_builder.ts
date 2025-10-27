@@ -68,6 +68,7 @@ function createDynamicUpdatableBuilder(
               ViewStackProcessor.push(stateMeta[0]);
               ViewStackProcessor.pop();
           } else {
+              Object.values(args).forEach(arg =>arg);
               stateMeta[1]()
           }
           ObserveV2.getObserve().__interopInStaticRendering_internal_ = false;

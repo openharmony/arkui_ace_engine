@@ -115,7 +115,7 @@ void RichEditorChangeCallbackOneTestNg::InitDeleteCallback(RichEditorModelNG& ri
  * @tc.desc: test set on select
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorChangeCallbackOneTestNg, SetOnSelect, TestSize.Level1)
+HWTEST_F(RichEditorChangeCallbackOneTestNg, SetOnSelect, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -162,7 +162,7 @@ HWTEST_F(RichEditorChangeCallbackOneTestNg, SetOnSelect, TestSize.Level1)
  * @tc.desc: test set on select
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorChangeCallbackOneTestNg, SetOnSelect2, TestSize.Level1)
+HWTEST_F(RichEditorChangeCallbackOneTestNg, SetOnSelect2, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -202,7 +202,7 @@ HWTEST_F(RichEditorChangeCallbackOneTestNg, SetOnSelect2, TestSize.Level1)
  * @tc.desc: test Set On Select
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorChangeCallbackOneTestNg, SetOnSelect003, TestSize.Level1)
+HWTEST_F(RichEditorChangeCallbackOneTestNg, SetOnSelect003, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. get richEditor controller
@@ -244,7 +244,7 @@ HWTEST_F(RichEditorChangeCallbackOneTestNg, SetOnSelect003, TestSize.Level1)
  * @tc.desc: test Set On Select
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorChangeCallbackOneTestNg, SetOnSelect004, TestSize.Level1)
+HWTEST_F(RichEditorChangeCallbackOneTestNg, SetOnSelect004, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. get richEditor controller
@@ -281,7 +281,7 @@ HWTEST_F(RichEditorChangeCallbackOneTestNg, SetOnSelect004, TestSize.Level1)
  * @tc.desc: test on handle move
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorChangeCallbackOneTestNg, OnHandleMove001, TestSize.Level1)
+HWTEST_F(RichEditorChangeCallbackOneTestNg, OnHandleMove001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -300,7 +300,7 @@ HWTEST_F(RichEditorChangeCallbackOneTestNg, OnHandleMove001, TestSize.Level1)
  * @tc.desc: test OnAreaChangedInner
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorChangeCallbackOneTestNg, OnAreaChangedInner001, TestSize.Level1)
+HWTEST_F(RichEditorChangeCallbackOneTestNg, OnAreaChangedInner001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -321,7 +321,7 @@ HWTEST_F(RichEditorChangeCallbackOneTestNg, OnAreaChangedInner001, TestSize.Leve
  * @tc.desc: test HandleSurfaceChanged
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorChangeCallbackOneTestNg, HandleSurfaceChanged001, TestSize.Level1)
+HWTEST_F(RichEditorChangeCallbackOneTestNg, HandleSurfaceChanged001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -339,7 +339,7 @@ HWTEST_F(RichEditorChangeCallbackOneTestNg, HandleSurfaceChanged001, TestSize.Le
  * @tc.desc: test IsStopBackPress
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorChangeCallbackOneTestNg, IsStopBackPress001, TestSize.Level1)
+HWTEST_F(RichEditorChangeCallbackOneTestNg, IsStopBackPress001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -355,7 +355,7 @@ HWTEST_F(RichEditorChangeCallbackOneTestNg, IsStopBackPress001, TestSize.Level1)
  * @tc.desc: test OnBackPressed
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorChangeCallbackOneTestNg, OnBackPressed001, TestSize.Level1)
+HWTEST_F(RichEditorChangeCallbackOneTestNg, OnBackPressed001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();

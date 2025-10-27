@@ -19,7 +19,7 @@ import { TimeAnimation, constAnimation } from "./TimeAnimation"
 import { Disposable } from "../states/Disposable"
 import { GlobalStateManager } from "../states/GlobalStateManager"
 import { ComputableState, MutableState } from "../states/State"
-import { State, StateContext } from 'arkui.incremental.runtime.state';
+import { ReadableState as State, StateContext } from 'arkui.incremental.runtime.state';
 
 
 /**

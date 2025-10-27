@@ -14,6 +14,7 @@
  */
 #include "test/unittest/core/base/frame_node_test_ng.h"
 
+#include "core/common/recorder/exposure_processor.h"
 #include "core/event/touch_event.h"
 
 using namespace testing;
@@ -567,6 +568,7 @@ HWTEST_F(FrameNodeTestNg, FindSameParentComponentTest, TestSize.Level1)
     frameNode->SetActive(true);
 
     auto child = FrameNode::CreateFrameNode("column", 3, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(child, nullptr);
     child->SetActive(true);
     frameNode->AddChild(child);
 

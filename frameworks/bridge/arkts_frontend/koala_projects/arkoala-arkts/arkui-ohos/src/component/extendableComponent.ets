@@ -21,6 +21,8 @@ import {
     IProvideDecoratedVariable,
     IProviderDecoratedVariable,
     LocalStorage,
+    StateMgmtDFX,
+    DumpInfo
 } from '@ohos.arkui.stateManagement';
 import { UIContext } from '@ohos/arkui/UIContext';
 import { PeerNode } from '../PeerNode';
@@ -239,7 +241,20 @@ export abstract class ExtendableComponent implements LifeCycle {
     }
 
     public onDumpInspector(): string {
-        return ""
+        const dumpInfo: DumpInfo = new DumpInfo();
+        const isV2 = this instanceof CustomComponentV2;
+        dumpInfo.viewinfo = {
+            componentName: Type.of(this).getName(),
+            isV2: isV2
+        };
+        let ret: string = '';
+        try {
+            StateMgmtDFX.getDecoratedVariableInfo(this, dumpInfo, isV2);
+            ret = JSON.stringify(dumpInfo);
+        } catch (error) {
+            InteropNativeModule._NativeLog(`dump component ${ dumpInfo.viewinfo.componentName} error: ${(error as Error).message}`);
+        }
+        return ret;
     }
 
     onWillApplyTheme(theme: Theme) {}

@@ -20,7 +20,7 @@ import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
-import { extractors, GestureModifier, WrappedBuilder, hookId, hookStateStyleImpl, hookGesture, hookPriorityGesture, hookParallelGesture, hookGestureModifier, hookCustomPropertyImpl, CustomStyles, ContentModifier, hookCommonMethodAttributeModifier, AttributeModifier, AttributeUpdater, hookCommonShapeMethodAttributeModifier, hookScrollableCommonMethodAttributeModifier, hookAllowDropAttribute, hookDragPreviewOptions, hookDragEventStartDataLoading, hookDragEventGetSummary } from "#handwritten"
+import { extractors, DrawModifier, GestureModifier, WrappedBuilder, hookId, hookStateStyleImpl, hookGesture, hookPriorityGesture, hookParallelGesture, hookGestureModifier, hookCustomPropertyImpl, hookDrawModifier, CustomStyles, ContentModifier, hookCommonMethodAttributeModifier, AttributeModifier, AttributeUpdater, hookCommonShapeMethodAttributeModifier, hookScrollableCommonMethodAttributeModifier, hookAllowDropAttribute, hookDragPreviewOptions, hookDragEventStartDataLoading, hookDragEventGetSummary } from "#handwritten"
 import { default as unifiedDataChannel } from "@ohos.data.unifiedDataChannel"
 import { DrawContext, LengthMetrics, ColorMetrics } from "arkui.Graphics"
 import { KeyType, KeySource, Color, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, InteractionHand, GradientDirection, SharedTransitionEffectType, ArrowPointPosition, Placement, LineCapStyle, LineJoinStyle, BarState, CrownSensitivity, EdgeEffect, TextDecorationType, TextDecorationStyle, PlayMode, VerticalAlign, HorizontalAlign, FontWeight, FontStyle, TouchType, CrownAction, ClickEffectLevel, NestedScrollMode, PixelRoundCalcPolicy, ScrollSource, IlluminatedType, AccessibilityHoverType, AxisAction, AxisType, AxisModel, MouseButton, MouseAction } from "./enums"
@@ -77,6 +77,7 @@ import { UIContext_serializer } from "./../framework/ohos.arkui.UIContext"
 // instructive change start
 import { _animateTo, _animationStart, _animationStop } from "arkui/base/ArkAnimation"
 import { AnimationExtender } from '#generated';
+import { ArkUIAniModule } from "arkui.ani"
 // instructive change end
 export interface BaseEvent {
     target: EventTarget
@@ -917,93 +918,7 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
         thisSerializer.release()
     }
 }
-export class DrawModifierInternal {
-    public static fromPtr(ptr: KPointer): DrawModifier {
-        return new DrawModifier(ptr)
-    }
-}
-export class DrawModifier implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
-    drawBehind(drawContext: DrawContext): void {
-        throw new Error("Not implemented!")
-    }
-    get drawBehind_callback(): ((drawContext: DrawContext) => void) {
-        return this.getDrawBehind_callback()
-    }
-    set drawBehind_callback(drawBehind_callback: ((drawContext: DrawContext) => void)) {
-        this.setDrawBehind_callback(drawBehind_callback)
-    }
-    drawContent(drawContext: DrawContext): void {
-        throw new Error("Not implemented!")
-    }
-    get drawContent_callback(): ((drawContext: DrawContext) => void) {
-        return this.getDrawContent_callback()
-    }
-    set drawContent_callback(drawContent_callback: ((drawContext: DrawContext) => void)) {
-        this.setDrawContent_callback(drawContent_callback)
-    }
-    constructor(peerPtr: KPointer) {
-        this.peer = new Finalizable(peerPtr, DrawModifier.getFinalizer())
-    }
-    constructor() {
-        this(DrawModifier.construct())
-        this.drawBehind_callback = this.drawBehind
-        this.drawContent_callback = this.drawContent
-    }
-    static construct(): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._DrawModifier_construct()
-        return retval
-    }
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._DrawModifier_getFinalizer()
-    }
-    public invalidate(): void {
-        this.invalidate_serialize()
-        return
-    }
-    private getDrawBehind_callback(): ((drawContext: DrawContext) => void) {
-        return this.getDrawBehind_callback_serialize()
-    }
-    private setDrawBehind_callback(drawBehind_callback: ((drawContext: DrawContext) => void)): void {
-        const drawBehind_callback_casted = drawBehind_callback as (((drawContext: DrawContext) => void))
-        this.setDrawBehind_callback_serialize(drawBehind_callback_casted)
-        return
-    }
-    private getDrawContent_callback(): ((drawContext: DrawContext) => void) {
-        return this.getDrawContent_callback_serialize()
-    }
-    private setDrawContent_callback(drawContent_callback: ((drawContext: DrawContext) => void)): void {
-        const drawContent_callback_casted = drawContent_callback as (((drawContext: DrawContext) => void))
-        this.setDrawContent_callback_serialize(drawContent_callback_casted)
-        return
-    }
-    invalidate_serialize(): void {
-        ArkUIGeneratedNativeModule._DrawModifier_invalidate(this.peer!.ptr)
-    }
-    private getDrawBehind_callback_serialize(): ((drawContext: DrawContext) => void) {
-        const retval  = ArkUIGeneratedNativeModule._DrawModifier_getDrawBehind_callback(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
-    }
-    private setDrawBehind_callback_serialize(drawBehind_callback: ((drawContext: DrawContext) => void)): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        thisSerializer.holdAndWriteCallback(drawBehind_callback)
-        ArkUIGeneratedNativeModule._DrawModifier_setDrawBehind_callback(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    private getDrawContent_callback_serialize(): ((drawContext: DrawContext) => void) {
-        const retval  = ArkUIGeneratedNativeModule._DrawModifier_getDrawContent_callback(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
-    }
-    private setDrawContent_callback_serialize(drawContent_callback: ((drawContext: DrawContext) => void)): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        thisSerializer.holdAndWriteCallback(drawContent_callback)
-        ArkUIGeneratedNativeModule._DrawModifier_setDrawContent_callback(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-}
+
 export interface KeyEvent {
     type: KeyType
     keyCode: number
@@ -2431,18 +2346,6 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._CommonMethod_setHeight(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    setDrawModifierAttribute(value: DrawModifier | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (value !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
-            DrawModifier_serializer.write(thisSerializer, valueTmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._CommonMethod_setDrawModifier(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setResponseRegionAttribute(value: Array<Rectangle> | Rectangle | undefined): void {
@@ -7356,6 +7259,10 @@ export interface CommonMethod {
     animationStop(value: AnimateParam | undefined): this {
         throw new Error("Unimplemented method animationStop")
     }
+    __createOrSetAnimatableProperty<T>(functionName: string, value: number | AnimatableArithmetic<T>,
+        callback: (value: number | AnimatableArithmetic<T>) => void): void {
+        throw new Error("Unimplemented method __createOrSetAnimatableProperty")
+    }
     // instructive change end
 
     transition(value: TransitionEffect | undefined): this {
@@ -8144,6 +8051,8 @@ export class ArkCommonMethodStyle implements CommonMethod {
     public animationStop(value: AnimateParam | undefined): this {
         return this
     }
+    public __createOrSetAnimatableProperty<T>(functionName: string, value: number | AnimatableArithmetic<T>,
+        callback: (value: number | AnimatableArithmetic<T>) => void): void {}
     // instructive change end
 
     transition(value: TransitionEffect | undefined): this {
@@ -8949,9 +8858,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public drawModifier(value: DrawModifier | undefined): this {
         if (this.checkPriority("drawModifier")) {
-            const value_casted = value as (DrawModifier | undefined)
-            this.getPeer()?.setDrawModifierAttribute(value_casted)
-            return this
+            hookDrawModifier(this, value)
         }
         return this
     }
@@ -9434,6 +9341,24 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
             return this
         }
         return this
+    }
+    public __createOrSetAnimatableProperty<T>(functionName: string, value: number | AnimatableArithmetic<T>,
+        callback: (value: number | AnimatableArithmetic<T>) => void): void {
+        if (this.getPeer()) {
+            const peer = this.getPeer();
+            let isFirst = true;
+            const newCallback = (value: number | AnimatableArithmetic<T>): void => {
+                if (isFirst) {
+                    isFirst = false;
+                    callback(value);
+                    return;
+                }
+                this.setPeer(peer);
+                callback(value);
+                this.setPeer(undefined);
+            }
+            ArkUIAniModule._Animation_SetOrCreateAnimatableProperty(this.getPeer().getPeerPtr(), functionName, value, newCallback);
+        }
     }
     // instructive change end
 
@@ -11795,17 +11720,6 @@ export class DragItemInfo_serializer {
         const extraInfoTmpResult : string | undefined = extraInfoTmpBuf
         let value : DragItemInfo = ({pixelMap: pixelMapTmpResult, builder: builderTmpResult, extraInfo: extraInfoTmpResult} as DragItemInfo)
         return value
-    }
-}
-export class DrawModifier_serializer {
-    public static write(buffer: SerializerBase, value: DrawModifier): void {
-        let valueSerializer : SerializerBase = buffer
-        valueSerializer.writePointer(toPeerPtr(value))
-    }
-    public static read(buffer: DeserializerBase): DrawModifier {
-        let valueDeserializer : DeserializerBase = buffer
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return DrawModifierInternal.fromPtr(ptr)
     }
 }
 export class DropOptions_serializer {

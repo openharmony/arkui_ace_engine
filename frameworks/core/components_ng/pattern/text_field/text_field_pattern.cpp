@@ -6175,7 +6175,7 @@ void TextFieldPattern::ApplyInnerBorderColor()
         }
     } else {
         BorderColorProperty overCountBorderColor;
-        if (layoutProperty->HasCounterTextOverflowColor()) {
+        if (layoutProperty && layoutProperty->HasCounterTextOverflowColor()) {
             overCountBorderColor.SetColor(layoutProperty->GetCounterTextOverflowColorValue());
         } else {
             overCountBorderColor.SetColor(theme->GetOverCounterColor());
@@ -6303,7 +6303,9 @@ void TextFieldPattern::UpdateEditingValue(const std::shared_ptr<TextEditingValue
             value->selection.baseOffset -= deleteSize;
         }
     }
-    HandleEditingEventCrossPlatform(value);
+    if (HandleEditingEventCrossPlatform(value)) {
+        return;
+    }
 #endif
     UpdateEditingValueToRecord();
     contentController_->SetTextValue(result);
@@ -6317,34 +6319,36 @@ void TextFieldPattern::UpdateEditingValue(const std::shared_ptr<TextEditingValue
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
-void TextFieldPattern::HandleEditingEventCrossPlatform(const std::shared_ptr<TextEditingValue>& value)
+bool TextFieldPattern::HandleEditingEventCrossPlatform(const std::shared_ptr<TextEditingValue>& value)
 {
 #ifdef CROSS_PLATFORM
 #ifdef IOS_PLATFORM
     if (value->isDelete && !value->discardedMarkedText) {
         HandleOnDelete(true);
-        return;
+        return true;
     }
 #else
     if (value->isDelete) {
         HandleOnDelete(true);
-        return;
+        return true;
     }
 #endif
 #ifdef IOS_PLATFORM
     compose_ = value->compose;
     unmarkText_ = value->unmarkText;
     if (value->discardedMarkedText) {
-        return;
+        return false;
     }
 #endif
 #ifdef ANDROID_PLATFORM
     if (value->appendText.empty()) {
-        return;
+        return true;
     }
 #endif
     InsertValue(UtfUtils::Str8DebugToStr16(value->appendText), true);
+    return true;
 #endif // CROSS_PLATFORM
+    return false;
 }
 
 void TextFieldPattern::UpdateInputFilterErrorText(const std::u16string& errorText)
@@ -8267,6 +8271,24 @@ void TextFieldPattern::ToJsonValueForOption(std::unique_ptr<JsonValue>& json, co
     auto jsonShowCounter = JsonUtil::Create(true);
     jsonShowCounter->Put("value", layoutProperty->GetShowCounterValue(false));
     auto jsonShowCounterOptions = JsonUtil::Create(true);
+    jsonShowCounterOptions->Put("thresholdPercentage", layoutProperty->GetSetCounterValue(DEFAULT_MODE));
+    jsonShowCounterOptions->Put("highlightBorder", layoutProperty->GetShowHighlightBorderValue(true));
+    jsonShowCounter->Put("options", jsonShowCounterOptions);
+    json->PutExtAttr("showCounter", jsonShowCounter, filter);
+    json->PutExtAttr("keyboardAppearance", static_cast<int32_t>(keyboardAppearance_), filter);
+    json->PutExtAttr("enableHapticFeedback", isEnableHapticFeedback_ ? "true" : "false", filter);
+    ToJsonValueForApi22(json, filter);
+}
+
+void TextFieldPattern::ToJsonValueForApi22(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto jsonShowCounter = JsonUtil::Create(true);
+    jsonShowCounter->Put("value", layoutProperty->GetShowCounterValue(false));
+    auto jsonShowCounterOptions = JsonUtil::Create(true);
     auto counterTextColor = layoutProperty->GetCounterTextColor();
     auto counterTextOverflowColor = layoutProperty->GetCounterTextOverflowColor();
     jsonShowCounterOptions->Put("thresholdPercentage", layoutProperty->GetSetCounterValue(DEFAULT_MODE));
@@ -8274,9 +8296,7 @@ void TextFieldPattern::ToJsonValueForOption(std::unique_ptr<JsonValue>& json, co
     jsonShowCounterOptions->Put("counterTextColor", counterTextColor->ColorToString().c_str());
     jsonShowCounterOptions->Put("counterTextOverflowColor", counterTextOverflowColor->ColorToString().c_str());
     jsonShowCounter->Put("options", jsonShowCounterOptions);
-    json->PutExtAttr("showCounter", jsonShowCounter, filter);
-    json->PutExtAttr("keyboardAppearance", static_cast<int32_t>(keyboardAppearance_), filter);
-    json->PutExtAttr("enableHapticFeedback", isEnableHapticFeedback_ ? "true" : "false", filter);
+    json->PutExtAttr("showCounterApi22", jsonShowCounter, filter);
 }
 
 void TextFieldPattern::ToJsonValueSelectOverlay(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const

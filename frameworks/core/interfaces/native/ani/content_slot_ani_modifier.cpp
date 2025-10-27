@@ -16,7 +16,7 @@
 #include "content_slot_ani_modifier.h"
 
 #include "core/components_ng/syntax/content_slot_node.h"
-#include "frameworks/core/interfaces/native/ani/node_content_peer.h"
+#include "core/components_ng/syntax/node_content_peer.h"
 #include "core/interfaces/native/utility/converter.h"
 
 namespace OHOS::Ace::NG {

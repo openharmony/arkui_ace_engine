@@ -71,7 +71,7 @@ void RichEditorCaretTestNg::TearDownTestSuite()
  * @tc.desc: test GetCaretColor
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCaretTestNg, GetCaretColor001, TestSize.Level1)
+HWTEST_F(RichEditorCaretTestNg, GetCaretColor001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -96,7 +96,7 @@ HWTEST_F(RichEditorCaretTestNg, GetCaretColor001, TestSize.Level1)
  * @tc.desc: test MoveCaretToContentRect
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCaretTestNg, MoveCaretToContentRect001, TestSize.Level1)
+HWTEST_F(RichEditorCaretTestNg, MoveCaretToContentRect001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -155,7 +155,7 @@ HWTEST_F(RichEditorCaretTestNg, MoveCaretToContentRect001, TestSize.Level1)
  * @tc.desc: test set and get caretColor
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCaretTestNg, CaretColorTest001, TestSize.Level1)
+HWTEST_F(RichEditorCaretTestNg, CaretColorTest001, TestSize.Level0)
 {
     RichEditorModelNG model;
     model.Create();
@@ -174,7 +174,7 @@ HWTEST_F(RichEditorCaretTestNg, CaretColorTest001, TestSize.Level1)
  * @tc.desc: test SetCaretPosition
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCaretTestNg, SetCaretPosition001, TestSize.Level1)
+HWTEST_F(RichEditorCaretTestNg, SetCaretPosition001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -190,7 +190,7 @@ HWTEST_F(RichEditorCaretTestNg, SetCaretPosition001, TestSize.Level1)
  * @tc.desc: test RepeatClickCaret
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCaretTestNg, RepeatClickCaret001, TestSize.Level1)
+HWTEST_F(RichEditorCaretTestNg, RepeatClickCaret001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -206,7 +206,7 @@ HWTEST_F(RichEditorCaretTestNg, RepeatClickCaret001, TestSize.Level1)
  * @tc.desc: test GetCaretMetrics
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCaretTestNg, GetCaretMetrics001, TestSize.Level1)
+HWTEST_F(RichEditorCaretTestNg, GetCaretMetrics001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. init and call function.
@@ -229,7 +229,7 @@ HWTEST_F(RichEditorCaretTestNg, GetCaretMetrics001, TestSize.Level1)
  * @tc.desc: Test the paragraph manager function.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCaretTestNg, CalcCaretMetricsByPosition001, TestSize.Level1)
+HWTEST_F(RichEditorCaretTestNg, CalcCaretMetricsByPosition001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -264,7 +264,7 @@ HWTEST_F(RichEditorCaretTestNg, CalcCaretMetricsByPosition001, TestSize.Level1)
  * @tc.desc: test GetCaretOffsetInfoByPosition
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCaretTestNg, GetCaretOffsetInfoByPosition001, TestSize.Level1)
+HWTEST_F(RichEditorCaretTestNg, GetCaretOffsetInfoByPosition001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -279,7 +279,7 @@ HWTEST_F(RichEditorCaretTestNg, GetCaretOffsetInfoByPosition001, TestSize.Level1
  * @tc.desc: test RichEditorPattern CalculateEmptyValueCaretRect
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCaretTestNg, CalculateEmptyValueCaretRect001, TestSize.Level1)
+HWTEST_F(RichEditorCaretTestNg, CalculateEmptyValueCaretRect001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -325,7 +325,7 @@ HWTEST_F(RichEditorCaretTestNg, CalculateEmptyValueCaretRect001, TestSize.Level1
  * @tc.desc: test CalculateEmptyValueCaretRect
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCaretTestNg, CalculateEmptyValueCaretRect002, TestSize.Level1)
+HWTEST_F(RichEditorCaretTestNg, CalculateEmptyValueCaretRect002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -351,7 +351,7 @@ HWTEST_F(RichEditorCaretTestNg, CalculateEmptyValueCaretRect002, TestSize.Level1
  * @tc.desc: test SetCaretOffset
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCaretTestNg, SetCaretOffset001, TestSize.Level1)
+HWTEST_F(RichEditorCaretTestNg, SetCaretOffset001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -371,7 +371,7 @@ HWTEST_F(RichEditorCaretTestNg, SetCaretOffset001, TestSize.Level1)
  * @tc.desc: test SetCaretOffset
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCaretTestNg, SetCaretOffset002, TestSize.Level1)
+HWTEST_F(RichEditorCaretTestNg, SetCaretOffset002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. get richEditor pattern
@@ -405,7 +405,7 @@ HWTEST_F(RichEditorCaretTestNg, SetCaretOffset002, TestSize.Level1)
  * @tc.desc: test set caret offset
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCaretTestNg, SetCaretOffset003, TestSize.Level1)
+HWTEST_F(RichEditorCaretTestNg, SetCaretOffset003, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -424,7 +424,7 @@ HWTEST_F(RichEditorCaretTestNg, SetCaretOffset003, TestSize.Level1)
  * @tc.desc: test MoveCaretAndStartFocus
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCaretTestNg, MoveCaretAndStartFocus001, TestSize.Level1)
+HWTEST_F(RichEditorCaretTestNg, MoveCaretAndStartFocus001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -444,7 +444,7 @@ HWTEST_F(RichEditorCaretTestNg, MoveCaretAndStartFocus001, TestSize.Level1)
  * @tc.desc: test IsCaretInContentArea
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCaretTestNg, IsCaretInContentArea001, TestSize.Level1)
+HWTEST_F(RichEditorCaretTestNg, IsCaretInContentArea001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. init and call function.
@@ -467,7 +467,7 @@ HWTEST_F(RichEditorCaretTestNg, IsCaretInContentArea001, TestSize.Level1)
  * @tc.desc: test FloatingCaret
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCaretTestNg, FloatingCaretTest001, TestSize.Level1)
+HWTEST_F(RichEditorCaretTestNg, FloatingCaretTest001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -518,7 +518,7 @@ HWTEST_F(RichEditorCaretTestNg, FloatingCaretTest001, TestSize.Level1)
  * @tc.desc: test FloatingCaret
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCaretTestNg, FloatingCaretTest002, TestSize.Level1)
+HWTEST_F(RichEditorCaretTestNg, FloatingCaretTest002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -571,7 +571,7 @@ HWTEST_F(RichEditorCaretTestNg, FloatingCaretTest002, TestSize.Level1)
  * @tc.desc: test FloatingCaret
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCaretTestNg, FloatingCaretTest003, TestSize.Level1)
+HWTEST_F(RichEditorCaretTestNg, FloatingCaretTest003, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -625,7 +625,7 @@ HWTEST_F(RichEditorCaretTestNg, FloatingCaretTest003, TestSize.Level1)
  * @tc.desc: test ScheduleCaretTwinkling
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCaretTestNg, ScheduleCaretTwinkling001, TestSize.Level1)
+HWTEST_F(RichEditorCaretTestNg, ScheduleCaretTwinkling001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -643,7 +643,7 @@ HWTEST_F(RichEditorCaretTestNg, ScheduleCaretTwinkling001, TestSize.Level1)
  * @tc.desc: test ScheduleCaretTwinkling
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCaretTestNg, ScheduleCaretTwinkling002, TestSize.Level1)
+HWTEST_F(RichEditorCaretTestNg, ScheduleCaretTwinkling002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -660,7 +660,7 @@ HWTEST_F(RichEditorCaretTestNg, ScheduleCaretTwinkling002, TestSize.Level1)
  * @tc.desc: test get caret rect
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCaretTestNg, GetCaretRect001, TestSize.Level1)
+HWTEST_F(RichEditorCaretTestNg, GetCaretRect001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -681,7 +681,7 @@ HWTEST_F(RichEditorCaretTestNg, GetCaretRect001, TestSize.Level1)
  * @tc.desc: test get caret rect
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCaretTestNg, GetCaretRect002, TestSize.Level1)
+HWTEST_F(RichEditorCaretTestNg, GetCaretRect002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto manager = AceType::MakeRefPtr<TextFieldManagerNG>();
@@ -707,7 +707,7 @@ HWTEST_F(RichEditorCaretTestNg, GetCaretRect002, TestSize.Level1)
  * @tc.desc: test get caret rect
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCaretTestNg, GetCaretRect003, TestSize.Level1)
+HWTEST_F(RichEditorCaretTestNg, GetCaretRect003, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -732,7 +732,7 @@ HWTEST_F(RichEditorCaretTestNg, GetCaretRect003, TestSize.Level1)
  * @tc.desc: test move caret after text change
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCaretTestNg, MoveCaretAfterTextChange001, TestSize.Level1)
+HWTEST_F(RichEditorCaretTestNg, MoveCaretAfterTextChange001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -761,7 +761,7 @@ HWTEST_F(RichEditorCaretTestNg, MoveCaretAfterTextChange001, TestSize.Level1)
  * @tc.desc: test SetCaretWidth
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCaretTestNg, SetCaretWidth001, TestSize.Level1)
+HWTEST_F(RichEditorCaretTestNg, SetCaretWidth001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -778,7 +778,7 @@ HWTEST_F(RichEditorCaretTestNg, SetCaretWidth001, TestSize.Level1)
  * @tc.desc: test on caret twinkling
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCaretTestNg, OnCaretTwinkling001, TestSize.Level1)
+HWTEST_F(RichEditorCaretTestNg, OnCaretTwinkling001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -793,7 +793,7 @@ HWTEST_F(RichEditorCaretTestNg, OnCaretTwinkling001, TestSize.Level1)
  * @tc.desc: test rich_editor_pattern.cpp StartFloatingCaretLand function
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCaretTestNg, StartFloatingCaretLand001, TestSize.Level1)
+HWTEST_F(RichEditorCaretTestNg, StartFloatingCaretLand001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -811,7 +811,7 @@ HWTEST_F(RichEditorCaretTestNg, StartFloatingCaretLand001, TestSize.Level1)
  * @tc.desc: test CalcMoveDownPos
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCaretTestNg, CalcMoveDownPos001, TestSize.Level1)
+HWTEST_F(RichEditorCaretTestNg, CalcMoveDownPos001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -828,7 +828,7 @@ HWTEST_F(RichEditorCaretTestNg, CalcMoveDownPos001, TestSize.Level1)
  * @tc.desc: test CalcMoveDownPos
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCaretTestNg, CalcMoveDownPos002, TestSize.Level1)
+HWTEST_F(RichEditorCaretTestNg, CalcMoveDownPos002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -922,7 +922,7 @@ HWTEST_F(RichEditorCaretTestNg, CalcMoveUpPos001, TestSize.Level0)
  * @tc.desc: test rich_editor_pattern.cpp TriggerAvoidOnCaretChange function
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCaretTestNg, TriggerAvoidOnCaretChange001, TestSize.Level1)
+HWTEST_F(RichEditorCaretTestNg, TriggerAvoidOnCaretChange001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto pattern_ = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -945,7 +945,7 @@ HWTEST_F(RichEditorCaretTestNg, TriggerAvoidOnCaretChange001, TestSize.Level1)
  * @tc.desc: test rich_editor_pattern.cpp TriggerAvoidOnCaretChange function
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCaretTestNg, TriggerAvoidOnCaretChange002, TestSize.Level1)
+HWTEST_F(RichEditorCaretTestNg, TriggerAvoidOnCaretChange002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto pattern_ = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -979,7 +979,7 @@ HWTEST_F(RichEditorCaretTestNg, TriggerAvoidOnCaretChange002, TestSize.Level1)
  * @tc.desc: test rich_editor_pattern.cpp CheckIfNeedAvoidOnCaretChange function
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCaretTestNg, CheckIfNeedAvoidOnCaretChange001, TestSize.Level1)
+HWTEST_F(RichEditorCaretTestNg, CheckIfNeedAvoidOnCaretChange001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto pattern_ = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1013,7 +1013,7 @@ HWTEST_F(RichEditorCaretTestNg, CheckIfNeedAvoidOnCaretChange001, TestSize.Level
  * @tc.desc: test get caret offset
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorCaretTestNg, GetCaretOffset001, TestSize.Level1)
+HWTEST_F(RichEditorCaretTestNg, GetCaretOffset001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();

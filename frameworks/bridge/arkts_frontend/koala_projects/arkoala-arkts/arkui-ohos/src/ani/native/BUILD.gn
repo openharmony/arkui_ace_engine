@@ -32,7 +32,10 @@ ohos_source_set("ani_utils_common") {
   public_configs = [ ":ani_utils_common_config" ]
   sources = [ "utils/ani_utils.cpp" ]
 
-  external_deps = [ "runtime_core:ani" ]
+  external_deps = [
+    "hilog:libhilog", 
+    "runtime_core:ani"
+  ]
 }
 ohos_shared_library("arkoala_native_ani") {
   shlib_type = "ani"

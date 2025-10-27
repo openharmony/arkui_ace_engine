@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_PICKER_CONTAINER_PICKER_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_PICKER_CONTAINER_PICKER_PATTERN_H
 
+#include "adapter/ohos/entrance/picker/picker_haptic_interface.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/event/event_hub.h"
@@ -28,7 +29,7 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
 #include "core/gestures/gesture_event.h"
-#include "adapter/ohos/entrance/picker/picker_haptic_interface.h"
+#include "core/common/resource/resource_object.h"
 
 namespace OHOS::Ace::NG {
 class ContainerPickerEventParam : public virtual AceType {
@@ -75,14 +76,19 @@ public:
         contentMainSize_ = contentMainSize;
     }
 
-    void SetSelectedIndex(int32_t index)
+    void SetTargetIndex(int32_t index)
     {
         if (index < 0 || index >= totalItemCount_) {
             index = 0;
         }
         if (index != selectedIndex_) {
-            targetIndex_ = index;
+            SwipeTo(index);
         }
+    }
+
+    void SetSelectedIndex(int32_t index)
+    {
+        selectedIndex_ = index;
     }
 
     const std::vector<int32_t>& GetOffScreenItems() const
@@ -108,6 +114,7 @@ public:
     // Lifecycle methods
     void OnAttachToFrameNode() override;
     void OnModifyDone() override;
+    void OnColorConfigurationUpdate() override;
 
     // Event firing methods
     void FireChangeEvent();
@@ -115,6 +122,22 @@ public:
     bool SpringOverScroll(float offset);
     void UpdateCurrentOffset(float offset);
 
+    void SetIndicatorStyleVal(const PickerIndicatorStyle& style)
+    {
+        indicatorStyle_ = style;
+    }
+
+    PickerIndicatorStyle GetIndicatorStyleVal()
+    {
+        return indicatorStyle_;
+    }
+
+    void UpdateDividerWidthWithResObj(const RefPtr<ResourceObject>& resObj);
+    void UpdateDividerColorWithResObj(const RefPtr<ResourceObject>& resObj);
+    void UpdateStartMarginWithResObj(const RefPtr<ResourceObject>& resObj);
+    void UpdateEndMarginWithResObj(const RefPtr<ResourceObject>& resObj);
+    void UpdateBackgroundColorWithResObj(const RefPtr<ResourceObject>& resObj);
+    void UpdateBorderRadiusWithResObj(const RefPtr<ResourceObject>& resObj);
 protected:
     bool ChildPreMeasureHelperEnabled() override
     {
@@ -164,7 +187,6 @@ private:
     void HandleDragStart(const GestureEvent& info);
     void HandleDragUpdate(const GestureEvent& info);
     void HandleDragEnd(double dragVelocity, float mainDelta = 0.0f);
-    void ProcessDelta(float& delta, float mainSize, float deltaSum);
     bool CheckDragOutOfBoundary();
     bool IsOutOfBoundary(float mainOffset = 0.0f) const;
     bool IsOutOfStart(float mainOffset = 0.0f) const;
@@ -182,9 +204,9 @@ private:
     std::pair<int32_t, PickerItemInfo> CalcCurrentMiddleItem() const;
     float ShortestDistanceBetweenCurrentAndTarget(int32_t targetIndex);
     void SwipeTo(int32_t index);
-    void OnAroundButtonClick(RefPtr<ContainerPickerEventParam> param);
+    void OnAroundButtonClick(float offsetY);
 
-    RefPtr<ClickEvent> CreateItemClickEventListener(RefPtr<ContainerPickerEventParam> param);
+    RefPtr<ClickEvent> CreateItemClickEventListener();
     void InitMouseAndPressEvent();
     void UpdatePanEvent();
     void AddPanEvent(const RefPtr<GestureEventHub>& gestureHub, GestureEventFunc&& actionStart,
@@ -193,30 +215,28 @@ private:
     GestureEventFunc ActionUpdateTask();
     GestureEventFunc ActionEndTask();
     GestureEventNoParameter ActionCancelTask();
-    void CreateChildrenClickEvent(RefPtr<UINode>& host);
+    void CreateChildrenClickEvent();
     RefPtr<TouchEventImpl> CreateItemTouchEventListener();
 
-    void CreateAnimation();
     void AttachNodeAnimatableProperty(const RefPtr<NodeAnimatablePropertyFloat>& property);
-    void CreateSnapProperty();
+    void CreateScrollProperty();
     void CreateSpringProperty();
-    void CreateAnimation(double from, double to);
     void CreateTargetAnimation(float delta);
     void CreateSpringAnimation(float delta);
     void PlayInertialAnimation();
     void PlaySpringAnimation();
     void PlayTargetAnimation();
     void PlayResetAnimation();
-    void StopInertialRollingAnimation();
-    void StopSpringAnimation();
+    void StopAnimation();
 
     bool IsLoop() const;
-    void SetDefaultTextStyle() const;
-    void SetDefaultTextStyle(RefPtr<FrameNode> node) const;
+    void SetDefaultTextStyle(bool isUpdateTextStyle);
+    void SetDefaultTextStyle(RefPtr<FrameNode> node, Color defaultColor);
+    void UpdateDefaultTextStyle(RefPtr<FrameNode> node, Color defaultColor);
     void PickerMarkDirty();
     void PostIdleTask(const RefPtr<FrameNode>& frameNode);
     double GetCurrentTime() const;
-    
+
     bool IsEnableHaptic() const;
     void InitOrRefreshHapticController();
     void StopHapticController();
@@ -229,6 +249,10 @@ private:
         pickerDefaultHeight_ = static_cast<float>(PICKER_DEFAULT_HEIGHT.ConvertToPx());
         pickerHeightBeforeRotate_ = static_cast<float>(PICKER_HEIGHT_BEFORE_ROTATE.ConvertToPx());
         maxOverscrollOffset_ = static_cast<float>(MAX_OVERSCROLL_OFFSET.ConvertToPx());
+
+        firstAdjacentItemHeight_ = static_cast<float>(FIRST_ADJACENT_ITEM_HEIGHT.ConvertToPx());
+        secondAdjacentItemHeight_ = static_cast<float>(SECOND_ADJACENT_ITEM_HEIGHT.ConvertToPx());
+        thirdAdjacentItemHeight_ = static_cast<float>(THIRD_ADJACENT_ITEM_HEIGHT.ConvertToPx());
     }
 
     RefPtr<PanEvent> panEvent_;
@@ -241,9 +265,8 @@ private:
     ContainerPickerUtils::PositionMap itemPosition_;
 
     RefPtr<NodeAnimatablePropertyFloat> scrollProperty_;
-    RefPtr<NodeAnimatablePropertyFloat> snapOffsetProperty_;
+    std::shared_ptr<AnimationUtils::Animation> scrollAnimation_;
 
-    std::shared_ptr<AnimationUtils::Animation> springAnimation_;
     std::shared_ptr<IPickerAudioHaptic> hapticController_ = nullptr;
 
     bool isFirstAxisAction_ = true;
@@ -251,9 +274,7 @@ private:
     bool isItemClickEventCreated_ = false;
     bool crossMatchChild_ = false;
     bool animationCreated_ = false;
-    bool isTargetAnimationRunning_ = false;
-    bool isSpringAnimationRunning_ = false;
-    bool isInertialRollingAnimationRunning_ = false;
+    bool isAnimationRunning_ = false;
     bool requestLongPredict_ = true;
     bool isLoop_ = true;
     bool isNeedPlayInertialAnimation_ = false;
@@ -262,12 +283,15 @@ private:
     bool animationBreak_ = false;
     bool isAllowPlayHaptic_ = true;
     bool isEnableHaptic_ = true;
+    bool isUseDefaultFontColor_ = false;
+    bool isModified_ = false;
 
     int32_t containerPickerId_ = -1;
     int32_t displayCount_ = 7;
     int32_t totalItemCount_ = 0;
     int32_t selectedIndex_ = 0;
 
+    // scroll params
     double yLast_ = 0.0;
     double yOffset_ = 0.0;
     double dragStartTime_ = 0.0;
@@ -276,17 +300,24 @@ private:
 
     float lastAnimationScroll_ = 0.0f;
     float currentDelta_ = 0.0f;
+    float mainDeltaSum_ = 0.0f;
+    float springOffset_ = 0.0f;
+    float maxOverscrollOffset_ = 0.0f;
+
+    float firstAdjacentItemHeight_ = 0.0f;  // the height of the first item above and below selected item
+    float secondAdjacentItemHeight_ = 0.0f; // the height of the second item above and below selected item
+    float thirdAdjacentItemHeight_ = 0.0f;  // the height of the third item above and below selected item
+
+    // layout params
     float currentOffset_ = 0.0f;
     float height_ = 0.0f;
     float contentMainSize_ = 0.0f;
     float contentCrossSize_ = 0.0f;
-    float mainDeltaSum_ = 0.0f;
-    float springOffset_ = 0.0f;
-
+    float topPadding_ = 0.0f;
     float pickerItemHeight_ = 0.0f;
     float pickerDefaultHeight_ = 0.0f;
     float pickerHeightBeforeRotate_ = 0.0f;
-    float maxOverscrollOffset_ = 0.0f;
+    PickerIndicatorStyle indicatorStyle_;
 };
 } // namespace OHOS::Ace::NG
 

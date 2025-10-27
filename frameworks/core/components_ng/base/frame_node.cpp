@@ -50,8 +50,10 @@
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
 #include "core/common/recorder/event_recorder.h"
+#include "core/common/recorder/exposure_processor.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/components_ng/base/extension_handler.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
@@ -59,6 +61,7 @@
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_component_manager.h"
 #endif
+#include "core/components_ng/render/paint_wrapper.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
@@ -639,6 +642,15 @@ void FrameNode::GetOneDepthVisibleFrameWithOffset(std::list<RefPtr<FrameNode>>& 
     if (overlayNode_) {
         children.emplace_back(overlayNode_);
     }
+}
+
+void FrameNode::SetDrawModifier(const RefPtr<NG::DrawModifier>& drawModifier)
+{
+    if (!extensionHandler_) {
+        extensionHandler_ = MakeRefPtr<ExtensionHandler>();
+        extensionHandler_->AttachFrameNode(this);
+    }
+    extensionHandler_->SetDrawModifier(drawModifier);
 }
 
 bool FrameNode::IsSupportDrawModifier()
@@ -2530,6 +2542,19 @@ RefPtr<ContentModifier> FrameNode::GetContentModifier()
     CHECK_NULL_RETURN(paintMethod, nullptr);
     auto contentModifier = DynamicCast<ContentModifier>(paintMethod->GetContentModifier(AceType::RawPtr(wrapper)));
     return contentModifier;
+}
+
+ExtensionHandler* FrameNode::GetExtensionHandler() const
+{
+    return RawPtr(extensionHandler_);
+}
+
+void FrameNode::SetExtensionHandler(const RefPtr<ExtensionHandler>& handler)
+{
+    extensionHandler_ = handler;
+    if (extensionHandler_) {
+        extensionHandler_->AttachFrameNode(this);
+    }
 }
 
 RefPtr<PaintWrapper> FrameNode::CreatePaintWrapper()
@@ -5262,7 +5287,8 @@ void FrameNode::ProcessAccessibilityVirtualNode()
     if (virtualFrameNode) {
         auto constraint = GetLayoutConstraint();
         virtualFrameNode->ApplyConstraint(constraint);
-        ProcessOffscreenNode(virtualFrameNode);
+        virtualFrameNode->SetActive(true, false);
+        ProcessOffscreenNode(virtualFrameNode, true);
     }
 }
 

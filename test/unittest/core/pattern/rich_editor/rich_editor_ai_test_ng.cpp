@@ -83,7 +83,7 @@ void RichEditorAITestOneNg::TearDownTestSuite()
  * @tc.desc: test IsShowAIWrite
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorAITestOneNg, IsShowAIWrite001, TestSize.Level1)
+HWTEST_F(RichEditorAITestOneNg, IsShowAIWrite001, TestSize.Level2)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -106,7 +106,7 @@ HWTEST_F(RichEditorAITestOneNg, IsShowAIWrite001, TestSize.Level1)
  * @tc.desc: test IsShowAIWrite
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorAITestOneNg, IsShowAIWrite002, TestSize.Level1)
+HWTEST_F(RichEditorAITestOneNg, IsShowAIWrite002, TestSize.Level2)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -128,7 +128,7 @@ HWTEST_F(RichEditorAITestOneNg, IsShowAIWrite002, TestSize.Level1)
  * @tc.desc: test IsShowAIWrite
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorAITestOneNg, IsShowAIWrite003, TestSize.Level1)
+HWTEST_F(RichEditorAITestOneNg, IsShowAIWrite003, TestSize.Level2)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -155,7 +155,7 @@ HWTEST_F(RichEditorAITestOneNg, IsShowAIWrite003, TestSize.Level1)
  * @tc.desc: test IsShowAIWrite
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorAITestOneNg, IsShowAIWrite004, TestSize.Level1)
+HWTEST_F(RichEditorAITestOneNg, IsShowAIWrite004, TestSize.Level2)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -184,7 +184,7 @@ HWTEST_F(RichEditorAITestOneNg, IsShowAIWrite004, TestSize.Level1)
  * @tc.desc: test IsShowAIWrite
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorAITestOneNg, IsShowAIWrite005, TestSize.Level1)
+HWTEST_F(RichEditorAITestOneNg, IsShowAIWrite005, TestSize.Level2)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -216,7 +216,7 @@ HWTEST_F(RichEditorAITestOneNg, IsShowAIWrite005, TestSize.Level1)
  * @tc.desc: test IsShowAIWrite
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorAITestOneNg, IsShowAIWrite006, TestSize.Level1)
+HWTEST_F(RichEditorAITestOneNg, IsShowAIWrite006, TestSize.Level2)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -249,7 +249,7 @@ HWTEST_F(RichEditorAITestOneNg, IsShowAIWrite006, TestSize.Level1)
  * @tc.desc: test GetAIWriteInfo
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorAITestOneNg, HandleAIWrite001, TestSize.Level1)
+HWTEST_F(RichEditorAITestOneNg, HandleAIWrite001, TestSize.Level2)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -280,7 +280,7 @@ HWTEST_F(RichEditorAITestOneNg, HandleAIWrite001, TestSize.Level1)
  * @tc.desc: test HandleOnAIWrite
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorAITestOneNg, HandleAIWrite002, TestSize.Level1)
+HWTEST_F(RichEditorAITestOneNg, HandleAIWrite002, TestSize.Level2)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -307,7 +307,7 @@ HWTEST_F(RichEditorAITestOneNg, HandleAIWrite002, TestSize.Level1)
  * @tc.desc: test AddSpansAndReplacePlaceholder&SetSubSpansWithAIWrite
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorAITestOneNg, HandleAIWrite003, TestSize.Level1)
+HWTEST_F(RichEditorAITestOneNg, HandleAIWrite003, TestSize.Level2)
 {
     /**
      * @tc.steps: step1. get richEditor controller
@@ -358,7 +358,7 @@ HWTEST_F(RichEditorAITestOneNg, HandleAIWrite003, TestSize.Level1)
  * @tc.desc: test GetAIWriteInfo
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorAITestOneNg, GetAIWriteInfo001, TestSize.Level1)
+HWTEST_F(RichEditorAITestOneNg, GetAIWriteInfo001, TestSize.Level2)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -389,7 +389,7 @@ HWTEST_F(RichEditorAITestOneNg, GetAIWriteInfo001, TestSize.Level1)
  * @tc.desc: test CanStartAITask
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorAITestOneNg, CanStartAITask001, TestSize.Level1)
+HWTEST_F(RichEditorAITestOneNg, CanStartAITask001, TestSize.Level2)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -406,7 +406,7 @@ HWTEST_F(RichEditorAITestOneNg, CanStartAITask001, TestSize.Level1)
  * @tc.desc: test CanStartAITask
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorAITestOneNg, CanStartAITask002, TestSize.Level1)
+HWTEST_F(RichEditorAITestOneNg, CanStartAITask002, TestSize.Level2)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -423,7 +423,7 @@ HWTEST_F(RichEditorAITestOneNg, CanStartAITask002, TestSize.Level1)
  * @tc.desc: test CanStartAITask
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorAITestOneNg, CanStartAITask003, TestSize.Level1)
+HWTEST_F(RichEditorAITestOneNg, CanStartAITask003, TestSize.Level2)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -440,7 +440,7 @@ HWTEST_F(RichEditorAITestOneNg, CanStartAITask003, TestSize.Level1)
  * @tc.desc: test NeedShowAIDetect
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorAITestOneNg, NeedShowAIDetect001, TestSize.Level1)
+HWTEST_F(RichEditorAITestOneNg, NeedShowAIDetect001, TestSize.Level2)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -461,7 +461,7 @@ HWTEST_F(RichEditorAITestOneNg, NeedShowAIDetect001, TestSize.Level1)
  * @tc.desc: test NeedShowAIDetect
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorAITestOneNg, NeedShowAIDetect002, TestSize.Level1)
+HWTEST_F(RichEditorAITestOneNg, NeedShowAIDetect002, TestSize.Level2)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -482,7 +482,7 @@ HWTEST_F(RichEditorAITestOneNg, NeedShowAIDetect002, TestSize.Level1)
  * @tc.desc: test NeedShowAIDetect
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorAITestOneNg, NeedShowAIDetect003, TestSize.Level1)
+HWTEST_F(RichEditorAITestOneNg, NeedShowAIDetect003, TestSize.Level2)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -503,7 +503,7 @@ HWTEST_F(RichEditorAITestOneNg, NeedShowAIDetect003, TestSize.Level1)
  * @tc.desc: test NeedShowAIDetect
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorAITestOneNg, InitAiselection001, TestSize.Level1)
+HWTEST_F(RichEditorAITestOneNg, InitAiselection001, TestSize.Level2)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -552,7 +552,7 @@ HWTEST_F(RichEditorAITestOneNg, InitAiselection001, TestSize.Level1)
  * @tc.desc: test InitAiSelection
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorAITestOneNg, InitAiSelection002, TestSize.Level1)
+HWTEST_F(RichEditorAITestOneNg, InitAiSelection002, TestSize.Level2)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto pattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -609,7 +609,7 @@ HWTEST_F(RichEditorAITestOneNg, InitAiSelection002, TestSize.Level1)
  * @tc.desc: test UpdateAIStyle.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorAITestOneNg, UpdateAIStyle001, TestSize.Level1)
+HWTEST_F(RichEditorAITestOneNg, UpdateAIStyle001, TestSize.Level2)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -640,7 +640,7 @@ HWTEST_F(RichEditorAITestOneNg, UpdateAIStyle001, TestSize.Level1)
  * @tc.desc: Test CreateAIEntityMenu set preview menu nodes correctly
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorAITestOneNg, CreateAIEntityMenuTest001, TestSize.Level1)
+HWTEST_F(RichEditorAITestOneNg, CreateAIEntityMenuTest001, TestSize.Level2)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto pattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -685,7 +685,7 @@ HWTEST_F(RichEditorAITestOneNg, CreateAIEntityMenuTest001, TestSize.Level1)
  * @tc.desc: test NeedAiAnalysis
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorAITestOneNg, NeedAiAnalysis001, TestSize.Level1)
+HWTEST_F(RichEditorAITestOneNg, NeedAiAnalysis001, TestSize.Level2)
 {
     /**
      * @tc.steps: step1. init and call function.
@@ -720,7 +720,7 @@ HWTEST_F(RichEditorAITestOneNg, NeedAiAnalysis001, TestSize.Level1)
  * @tc.desc: test NeedClearAISpanMap
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorAITestOneNg, NeedClearAISpanMap001, TestSize.Level1)
+HWTEST_F(RichEditorAITestOneNg, NeedClearAISpanMap001, TestSize.Level2)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();

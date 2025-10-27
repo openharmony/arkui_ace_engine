@@ -141,7 +141,7 @@ RefPtr<MutableSpanString> RichEditorAccessibilityTestNg::CreateTextStyledString(
  * @tc.desc: Test GetSubComponentInfos for addTextSpan.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorAccessibilityTestNg, GetSubComponentInfos000, TestSize.Level1)
+HWTEST_F(RichEditorAccessibilityTestNg, GetSubComponentInfos000, TestSize.Level2)
 {
     SetSpanStringMode(false);
 
@@ -177,7 +177,7 @@ HWTEST_F(RichEditorAccessibilityTestNg, GetSubComponentInfos000, TestSize.Level1
  * @tc.desc: Test GetSubComponentInfos for addTextSpan.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorAccessibilityTestNg, GetSubComponentInfos001, TestSize.Level1)
+HWTEST_F(RichEditorAccessibilityTestNg, GetSubComponentInfos001, TestSize.Level2)
 {
     SetSpanStringMode(false);
 
@@ -214,7 +214,7 @@ HWTEST_F(RichEditorAccessibilityTestNg, GetSubComponentInfos001, TestSize.Level1
  * @tc.desc: Test GetSubComponentInfos for SetStyledString.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorAccessibilityTestNg, GetSubComponentInfos002, TestSize.Level1)
+HWTEST_F(RichEditorAccessibilityTestNg, GetSubComponentInfos002, TestSize.Level2)
 {
     SetSpanStringMode(true);
 
@@ -278,7 +278,7 @@ HWTEST_F(RichEditorAccessibilityTestNg, GetSubComponentInfos002, TestSize.Level1
  * @tc.desc: Test GetSubComponentInfos for SetStyledString.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorAccessibilityTestNg, GetSubComponentInfos003, TestSize.Level1)
+HWTEST_F(RichEditorAccessibilityTestNg, GetSubComponentInfos003, TestSize.Level2)
 {
     SetSpanStringMode(true);
 
@@ -345,7 +345,7 @@ HWTEST_F(RichEditorAccessibilityTestNg, GetSubComponentInfos003, TestSize.Level1
  * @tc.desc: Test ExecSubComponent for addTextSpan.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorAccessibilityTestNg, ExecSubComponent000, TestSize.Level1)
+HWTEST_F(RichEditorAccessibilityTestNg, ExecSubComponent000, TestSize.Level2)
 {
     SetSpanStringMode(false);
 
@@ -393,7 +393,7 @@ HWTEST_F(RichEditorAccessibilityTestNg, ExecSubComponent000, TestSize.Level1)
  * @tc.desc: Test ExecSubComponent for SetStyledString.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorAccessibilityTestNg, ExecSubComponent001, TestSize.Level1)
+HWTEST_F(RichEditorAccessibilityTestNg, ExecSubComponent001, TestSize.Level2)
 {
     SetSpanStringMode(true);
 
@@ -470,7 +470,7 @@ HWTEST_F(RichEditorAccessibilityTestNg, ExecSubComponent001, TestSize.Level1)
  * @tc.desc: Test ActActionSetText
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorAccessibilityTestNg, ActActionSetText, TestSize.Level1)
+HWTEST_F(RichEditorAccessibilityTestNg, ActActionSetText, TestSize.Level2)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -496,7 +496,7 @@ HWTEST_F(RichEditorAccessibilityTestNg, ActActionSetText, TestSize.Level1)
  * @tc.desc: Test ActActionCut
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorAccessibilityTestNg, ActActionCut, TestSize.Level1)
+HWTEST_F(RichEditorAccessibilityTestNg, ActActionCut, TestSize.Level2)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -526,7 +526,7 @@ HWTEST_F(RichEditorAccessibilityTestNg, ActActionCut, TestSize.Level1)
  * @tc.desc: Test GetText
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorAccessibilityTestNg, AccessibilityProperty001, TestSize.Level1)
+HWTEST_F(RichEditorAccessibilityTestNg, AccessibilityProperty001, TestSize.Level2)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -556,7 +556,7 @@ HWTEST_F(RichEditorAccessibilityTestNg, AccessibilityProperty001, TestSize.Level
  * @tc.desc: Test GetText
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorAccessibilityTestNg, AccessibilityProperty002, TestSize.Level1)
+HWTEST_F(RichEditorAccessibilityTestNg, AccessibilityProperty002, TestSize.Level2)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
