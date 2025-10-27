@@ -246,7 +246,7 @@ struct ArkUIDragPointerEvent {
 struct ArkUIDragControllerAsync {
     ani_env* env = nullptr;
     bool isArray = false;
-    const char* extraParams;
+    std::string extraParams;
     bool hasHandle = false;
     SharedPointerWrapper touchPoint;
     SharedPointerWrapper unifiedData;
