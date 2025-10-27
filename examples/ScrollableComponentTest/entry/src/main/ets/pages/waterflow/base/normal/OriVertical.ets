@@ -13,29 +13,29 @@
  * limitations under the License.
  */
 
- /*
-  * Description: WaterFlow组件支持基于断点自适应列数
-  * Writer: renxiaowen
-  */
-  
+/*
+ * Description: WaterFlow组件支持基于断点自适应列数
+ * Writer: renxiaowen
+ */
+
 @Entry
 @Component
 struct waterExample91 {
   @State columnIndex: number = 0;
-  @State columnList:(string| ItemFillPolicy|undefined|null)[]=[
+  @State columnList: (string | ItemFillPolicy | undefined | null)[] = [
     '1fr 2fr 1fr',
-    {fillType:PresetFillType.BREAKPOINT_DEFAULT},
-    {fillType:PresetFillType.BREAKPOINT_SM1MD2LG3},
-    {fillType:PresetFillType.BREAKPOINT_SM2MD3LG5},
+    { fillType: PresetFillType.BREAKPOINT_DEFAULT },
+    { fillType: PresetFillType.BREAKPOINT_SM1MD2LG3 },
+    { fillType: PresetFillType.BREAKPOINT_SM2MD3LG5 },
     undefined,
     null
   ]
-  @State widthIndex:number = 0;
-  @State widthList:(string )[]=[
-    '100%','80%','60%','20%'
+  @State widthIndex: number = 0;
+  @State widthList: (string)[] = [
+    '100%', '80%', '60%', '20%'
   ]
-  @State directionIndex:number = 0;
-  @State directionList:(FlexDirection)[]=[
+  @State directionIndex: number = 0;
+  @State directionList: (FlexDirection)[] = [
     FlexDirection.Row,
     FlexDirection.Column,
     FlexDirection.RowReverse,
@@ -103,7 +103,7 @@ struct waterExample91 {
   };
   @State changeSyncLoadIndex: number = 0;
   @State changeSyncLoadList: (boolean | undefined | null)[] = [
-    true,false, undefined, null
+    true, false, undefined, null
   ]
   @State gapIndex: number = 0;
   @State gaps: number[] = [
@@ -113,6 +113,7 @@ struct waterExample91 {
   @State paddings: number[] = [
     0, 10, 20
   ]
+
   @Builder
   itemFoot() {
     Column() {
@@ -125,6 +126,7 @@ struct waterExample91 {
       // .margin({ top: 20,bottom:5 })
     }
   }
+
   // 计算FlowItem高度
   getSize() {
     let ret = Math.floor(Math.random() * this.maxSize);
@@ -145,7 +147,7 @@ struct waterExample91 {
     Scroll() {
       Column() {
 
-        Row(){
+        Row() {
           Button('column' + this.columnIndex)
             .onClick(() => {
               this.columnIndex++
@@ -168,6 +170,7 @@ struct waterExample91 {
               }
             })
         }
+
         Row() {
           Button('CachedCount')
             .onClick(() => {
@@ -203,7 +206,8 @@ struct waterExample91 {
             }
           })
         }
-        Row(){
+
+        Row() {
           Button('rowGap')
             .onClick(() => {
               this.gapIndex++
@@ -211,13 +215,14 @@ struct waterExample91 {
                 this.gapIndex = 0
               }
             })
-          Button('padding' )
-            .onClick(()=> {
+          Button('padding')
+            .onClick(() => {
               this.paddingIndex = (this.paddingIndex + 1) % this.paddings.length;
             })
 
         }
-        Text('Width：'+ this.contentWidth+'，Height：'+ this.contentHeight)
+
+        Text('Width：' + this.contentWidth + '，Height：' + this.contentHeight)
           .fontColor(Color.Red)
           .height(15)
         Text('Index：' + this.changeCachedCountIndex + '，CachedCount数值：' +
@@ -232,14 +237,14 @@ struct waterExample91 {
         this.changelistDirectionList[this.changelistDirectionIndex])
           .fontColor(Color.Pink)
           .height(15)
-        Text('gap：'+ this.gaps[this.gapIndex])
+        Text('gap：' + this.gaps[this.gapIndex])
           .fontColor(Color.Blue)
           .height(15)
-        Text('padding：'+ this.paddings[this.paddingIndex])
+        Text('padding：' + this.paddings[this.paddingIndex])
           .fontColor(Color.Green)
           .height(15)
-        WaterFlow({ scroller:this.scroller,footer: this.itemFoot() }) {
-          ForEach(this.arr, (item: number,  index?: number) => {
+        WaterFlow({ scroller: this.scroller, footer: this.itemFoot() }) {
+          ForEach(this.arr, (item: number, index?: number) => {
             FlowItem() {
               Flex({ direction: FlexDirection.Row, alignItems: ItemAlign.Center }) {
                 Text('' + item)
@@ -261,7 +266,7 @@ struct waterExample91 {
                   }).stateEffect(true)
                 }
               }
-            }.padding({top:this.paddings[this.paddingIndex]})
+            }.padding({ top: this.paddings[this.paddingIndex] })
           }, (item: number) => item.toString())
         }
         .columnsTemplate(this.columnList[this.columnIndex])

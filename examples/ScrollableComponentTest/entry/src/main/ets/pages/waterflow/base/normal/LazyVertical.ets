@@ -13,31 +13,31 @@
  * limitations under the License.
  */
 
- /*
-  * Description: WaterFlow组件支持基于断点自适应列数
-  * Writer: renxiaowen
-  */
-  
+/*
+ * Description: WaterFlow组件支持基于断点自适应列数
+ * Writer: renxiaowen
+ */
+
 import { WaterFlowDataSource } from '../../WaterFlowDataSource';
 
 @Entry
 @Component
 struct waterExample7 {
   @State columnIndex: number = 0;
-  @State columnList:(string| ItemFillPolicy|undefined|null)[]=[
+  @State columnList: (string | ItemFillPolicy | undefined | null)[] = [
     '1fr 2fr 1fr',
-    {fillType:PresetFillType.BREAKPOINT_DEFAULT},
-  {fillType:PresetFillType.BREAKPOINT_SM2MD3LG5},
-    {fillType:PresetFillType.BREAKPOINT_SM1MD2LG3},
+    { fillType: PresetFillType.BREAKPOINT_DEFAULT },
+    { fillType: PresetFillType.BREAKPOINT_SM2MD3LG5 },
+    { fillType: PresetFillType.BREAKPOINT_SM1MD2LG3 },
     undefined,
     null
   ]
-  @State widthIndex:number = 0;
-  @State widthList:(string )[]=[
-    '100%','80%','60%','20%'
+  @State widthIndex: number = 0;
+  @State widthList: (string)[] = [
+    '100%', '80%', '60%', '20%'
   ]
-  @State directionIndex:number = 0;
-  @State directionList:(FlexDirection)[]=[
+  @State directionIndex: number = 0;
+  @State directionList: (FlexDirection)[] = [
     FlexDirection.Column,
     FlexDirection.ColumnReverse
   ]
@@ -109,12 +109,13 @@ struct waterExample7 {
   };
   @State changeSyncLoadIndex: number = 0;
   @State changeSyncLoadList: (boolean | undefined | null)[] = [
-    true,false, undefined, null
+    true, false, undefined, null
   ]
   @State gapIndex: number = 0;
   @State gaps: number[] = [
     0, 10, 20
   ]
+
   @Builder
   itemFoot() {
     Column() {
@@ -158,7 +159,7 @@ struct waterExample7 {
     Scroll() {
       Column() {
 
-        Row(){
+        Row() {
           Button('column' + this.columnIndex)
             .onClick(() => {
               this.columnIndex++
@@ -217,7 +218,8 @@ struct waterExample7 {
             }
           })
         }
-        Row(){
+
+        Row() {
           Button('rowGap')
             .onClick(() => {
               this.gapIndex++
@@ -225,13 +227,14 @@ struct waterExample7 {
                 this.gapIndex = 0
               }
             })
-          Button('padding' )
-            .onClick(()=> {
+          Button('padding')
+            .onClick(() => {
               this.paddingIndex = (this.paddingIndex + 1) % this.paddings.length;
             })
 
         }
-        Text('Width：'+ this.contentWidth+'，Height：'+ this.contentHeight)
+
+        Text('Width：' + this.contentWidth + '，Height：' + this.contentHeight)
           .fontColor(Color.Red)
           .height(15)
         Text('Index：' + this.changeCachedCountIndex + '，CachedCount数值：' +
@@ -246,13 +249,13 @@ struct waterExample7 {
         this.changelistDirectionList[this.changelistDirectionIndex])
           .fontColor(Color.Pink)
           .height(15)
-        Text('gap：'+ this.gaps[this.gapIndex])
+        Text('gap：' + this.gaps[this.gapIndex])
           .fontColor(Color.Blue)
           .height(15)
-        Text('padding：'+ this.paddings[this.paddingIndex])
+        Text('padding：' + this.paddings[this.paddingIndex])
           .fontColor(Color.Green)
           .height(15)
-        WaterFlow({ scroller:this.scroller,footer: this.itemFoot() }) {
+        WaterFlow({ scroller: this.scroller, footer: this.itemFoot() }) {
           LazyForEach(this.arr, (item: number) => {
             FlowItem() {
               Flex({ direction: FlexDirection.Row, alignItems: ItemAlign.Center }) {
@@ -265,7 +268,7 @@ struct waterExample7 {
                   .backgroundColor(0xFFFFFF)
               }
             }
-            .padding({top:this.paddings[this.paddingIndex]})
+            .padding({ top: this.paddings[this.paddingIndex] })
           }, (item: string) => item)
         }
         .columnsTemplate(this.columnList[this.columnIndex])
