@@ -82,10 +82,10 @@ void ContainerPickerModel::SetOnScrollStop(ContainerPickerChangeEvent&& onScroll
 void ContainerPickerModel::SetIndicatorStyle(const PickerIndicatorStyle& style)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ContainerPickerLayoutProperty, IndicatorType, style.type);
-    if (style.type == static_cast<int32_t>(IndicatorType::DIVIDER)) {
-        if (style.dividerWidth.has_value()) {
+    if (style.type == static_cast<int32_t>(PickerIndicatorType::DIVIDER)) {
+        if (style.strokeWidth.has_value()) {
             ACE_UPDATE_LAYOUT_PROPERTY(ContainerPickerLayoutProperty, IndicatorDividerWidth,
-                style.dividerWidth.value());
+                style.strokeWidth.value());
         }
         if (style.dividerColor.has_value()) {
             ACE_UPDATE_LAYOUT_PROPERTY(ContainerPickerLayoutProperty, IndicatorDividerColor,
@@ -99,7 +99,7 @@ void ContainerPickerModel::SetIndicatorStyle(const PickerIndicatorStyle& style)
             ACE_UPDATE_LAYOUT_PROPERTY(ContainerPickerLayoutProperty, IndicatorEndMargin,
                 style.endMargin.value());
         }
-    } else if (style.type == static_cast<int32_t>(IndicatorType::BACKGROUND)) {
+    } else if (style.type == static_cast<int32_t>(PickerIndicatorType::BACKGROUND)) {
         if (style.backgroundColor.has_value()) {
             ACE_UPDATE_LAYOUT_PROPERTY(ContainerPickerLayoutProperty, IndicatorBackgroundColor,
                 style.backgroundColor.value());
@@ -153,10 +153,10 @@ void ContainerPickerModel::SetIndicatorStyle(FrameNode* frameNode, const PickerI
 {
     CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ContainerPickerLayoutProperty, IndicatorType, style.type, frameNode);
-    if (style.type == static_cast<int32_t>(IndicatorType::DIVIDER)) {
-        if (style.dividerWidth.has_value()) {
+    if (style.type == static_cast<int32_t>(PickerIndicatorType::DIVIDER)) {
+        if (style.strokeWidth.has_value()) {
             ACE_UPDATE_NODE_LAYOUT_PROPERTY(
-                ContainerPickerLayoutProperty, IndicatorDividerWidth, style.dividerWidth.value(), frameNode);
+                ContainerPickerLayoutProperty, IndicatorDividerWidth, style.strokeWidth.value(), frameNode);
         }
         if (style.dividerColor.has_value()) {
             ACE_UPDATE_NODE_LAYOUT_PROPERTY(
@@ -170,7 +170,7 @@ void ContainerPickerModel::SetIndicatorStyle(FrameNode* frameNode, const PickerI
             ACE_UPDATE_NODE_LAYOUT_PROPERTY(
                 ContainerPickerLayoutProperty, IndicatorEndMargin, style.endMargin.value(), frameNode);
         }
-    } else if (style.type == static_cast<int32_t>(IndicatorType::BACKGROUND)) {
+    } else if (style.type == static_cast<int32_t>(PickerIndicatorType::BACKGROUND)) {
         if (style.backgroundColor.has_value()) {
             ACE_UPDATE_NODE_LAYOUT_PROPERTY(
                 ContainerPickerLayoutProperty, IndicatorBackgroundColor, style.backgroundColor.value(), frameNode);
@@ -199,7 +199,7 @@ void ContainerPickerModel::ProcessResourceObj(const std::string& key, const RefP
 
     using Handler = std::function<void(const RefPtr<ResourceObject>&)>;
     const std::unordered_map<std::string, Handler> handlers = {
-        {"containerPicker.dividerWidth", [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        {"containerPicker.strokeWidth", [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
                 auto pickerNode = weak.Upgrade();
                 CHECK_NULL_VOID(pickerNode);
                 auto pickerPattern = pickerNode->GetPattern<ContainerPickerPattern>();

@@ -5666,10 +5666,25 @@ RefPtr<NodePaintMethod> TextPattern::CreateNodePaintMethod()
     ProcessBoundRectByTextMarquee(boundsRect);
     boundsRect.SetWidth(std::max(frameSize.Width(), boundsRect.Width()));
     boundsRect.SetHeight(std::max(frameSize.Height(), boundsRect.Height()));
+    auto boundsRectY = boundsRect.GetY() + TextContentAlignOffsetY();
+    boundsRect.SetTop(boundsRectY);
     auto baselineOffset = LessOrEqual(baselineOffset_, 0) ? std::fabs(baselineOffset_) : 0;
     pManager_->GetPaintRegion(boundsRect, contentRect_.GetX(), contentRect_.GetY() + baselineOffset);
     overlayMod_->SetBoundsRect(boundsRect);
     return paintMethod;
+}
+
+float TextPattern::TextContentAlignOffsetY()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, 0.0f);
+    auto textLayoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(textLayoutProperty, 0.0f);
+    CHECK_NULL_RETURN(textLayoutProperty->HasTextContentAlign(), 0.0f);
+    auto textContentAlign = textLayoutProperty->GetTextContentAlign().value();
+    auto alignOffsetY = static_cast<int32_t>(textContentAlign) *
+        (contentRect_.Height() + std::fabs(baselineOffset_) - pManager_->GetHeight()) / 2.0;
+    return alignOffsetY;
 }
 
 void TextPattern::SetResponseRegion(const SizeF& frameSize, const SizeF& boundsSize)

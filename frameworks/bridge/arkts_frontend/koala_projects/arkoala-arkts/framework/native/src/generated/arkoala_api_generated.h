@@ -17608,6 +17608,7 @@ typedef struct Ark_SliderBlockStyle {
     /* kind: Interface */
     Ark_SliderBlockType type;
     Opt_ResourceStr image;
+    Opt_Union_CircleShape_EllipseShape_PathShape_RectShape shape;
 } Ark_SliderBlockStyle;
 typedef struct Opt_SliderBlockStyle {
     Ark_Tag tag;
@@ -25965,6 +25966,8 @@ typedef struct GENERATED_ArkUIIUIContextAccessor {
                           Ark_Boolean isFrozen);
     void (*freezeUINode1)(const Ark_Number* id,
                           Ark_Boolean isFrozen);
+    Ark_Boolean (*dispatchKeyEvent)(const Ark_Union_Number_String* node,
+                                    Ark_KeyEvent event);
 } GENERATED_ArkUIIUIContextAccessor;
 
 typedef struct GENERATED_ArkUIJsGeolocationAccessor {

@@ -509,7 +509,10 @@ OffsetF MultipleParagraphLayoutAlgorithm::SetContentOffset(LayoutWrapper* layout
         if (textLayoutProperty) {
             if (textLayoutProperty->HasTextContentAlign()) {
                 auto textContentAlign = textLayoutProperty->GetTextContentAlign().value();
-                alignPosition = GetAlignPosition(size, content->GetRect().GetSize(), textContentAlign, align);
+                auto contentSize = content->GetRect().GetSize();
+                alignPosition = GreatOrEqual(contentSize.Height(), contentHeight_) ?
+                    GetAlignPosition(size, content->GetRect().GetSize(), textContentAlign, align) :
+                    Alignment::GetAlignPosition(size, content->GetRect().GetSize(), align);
             } else {
                 alignPosition = Alignment::GetAlignPosition(size, content->GetRect().GetSize(), align);
             }

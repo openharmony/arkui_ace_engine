@@ -186,6 +186,7 @@ private:
     void AdjustOffsetOnAbove(float currentStartPos);
     std::pair<int32_t, PickerItemInfo> CalcCurrentMiddleItem() const;
     void TranslateAndRotate(RefPtr<FrameNode> node, OffsetF& offset);
+    void UpdateFadeItems(RefPtr<FrameNode> node, std::pair<int32_t, PickerItemInfo> pos);
 
     LayoutConstraintF childLayoutConstraint_;
     ContainerPickerUtils::PositionMap itemPosition_;

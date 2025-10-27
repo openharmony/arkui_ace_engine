@@ -445,9 +445,8 @@ void TextContentModifier::DrawActualText(DrawingContext& drawingContext, const R
     if (clip_ && clip_->Get() &&
         (!fontSize_.has_value() || !fontSizeFloat_ ||
             NearEqual(fontSize_.value().Value(), fontSizeFloat_->Get()))) {
-        auto contentOffsetY = std::max(contentOffset.GetY(), 0.0f);
-        RSRect clipInnerRect = RSRect(contentOffset.GetX(), contentOffsetY,
-            contentSize.Width() + contentOffset.GetX(), contentSize.Height() + contentOffsetY);
+        RSRect clipInnerRect = RSRect(contentOffset.GetX(), contentOffset.GetY(),
+            contentSize.Width() + contentOffset.GetX(), contentSize.Height() + contentOffset.GetY());
         canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
     }
     if (!marqueeSet_) {
@@ -511,6 +510,7 @@ void TextContentModifier::DrawText(
     RSCanvas& canvas, const RefPtr<ParagraphManager>& pManager, const RefPtr<TextPattern>& textPattern)
 {
     auto paintOffsetY = paintOffset_.GetY();
+    SetTextContentAlingOffsetY(paintOffsetY);
     auto paragraphs = pManager->GetParagraphs();
     std::u16string paragraphContent;
     for (auto&& info : paragraphs) {
@@ -546,6 +546,26 @@ void TextContentModifier::PaintLeadingMarginSpan(const RefPtr<TextPattern>& text
     CHECK_NULL_VOID(pManager);
     auto offset = textPattern->GetTextRect().GetOffset();
     pManager->PaintAllLeadingMarginSpan(drawingContext, offset);
+}
+
+void TextContentModifier::SetTextContentAlingOffsetY(float& paintOffsetY)
+{
+    auto pattern = DynamicCast<TextPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(pattern);
+    auto host = pattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    CHECK_NULL_VOID(layoutProperty->HasTextContentAlign());
+    auto pManager = pattern->GetParagraphManager();
+    CHECK_NULL_VOID(pManager);
+    auto contentRect = pattern->GetTextContentRect();
+    auto contentHeight = contentRect.Height() + std::fabs(pattern->GetBaselineOffset());
+    if (contentHeight >= pManager->GetHeight()) {
+        return;
+    }
+    auto alignOffsetY = pattern->TextContentAlignOffsetY();
+    paintOffsetY = paintOffsetY + alignOffsetY;
 }
 
 void TextContentModifier::DrawTextRacing(DrawingContext& drawingContext, const FadeoutInfo& info,

@@ -4406,6 +4406,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _IUIContext_freezeUINode1(id: number, isFrozen: KInt): void
     @ani.unsafe.Direct
+    native static _IUIContext_dispatchKeyEvent(thisArray: KSerializerBuffer, thisLength: int32, event: KPointer): boolean
+    @ani.unsafe.Direct
     native static _JsGeolocation_construct(): KPointer
     @ani.unsafe.Direct
     native static _JsGeolocation_getFinalizer(): KPointer

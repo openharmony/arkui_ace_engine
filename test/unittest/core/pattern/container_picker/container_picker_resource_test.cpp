@@ -38,7 +38,7 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
-const std::string TEST_DIVIDER_WIDTH_KEY = "containerPicker.dividerWidth";
+const std::string TEST_DIVIDER_WIDTH_KEY = "containerPicker.strokeWidth";
 const std::string TEST_DIVIDER_COLOR_KEY = "containerPicker.dividerColor";
 const std::string TEST_START_MARGIN_KEY = "containerPicker.startMargin";
 const std::string TEST_END_MARGIN_KEY = "containerPicker.endMargin";
@@ -109,7 +109,7 @@ HWTEST_F(ContainerPickerResourceTest, ContainerPickerPatternTest001, TestSize.Le
      * @tc.steps: step1. Create test style
      */
     PickerIndicatorStyle testStyle;
-    testStyle.dividerWidth = Dimension(2.0);
+    testStyle.strokeWidth = Dimension(2.0);
     testStyle.dividerColor = Color::RED;
     testStyle.startMargin = Dimension(10.0);
     testStyle.endMargin = Dimension(15.0);
@@ -137,7 +137,7 @@ HWTEST_F(ContainerPickerResourceTest, ContainerPickerPatternTest001, TestSize.Le
     auto retrievedStyle = pattern->GetIndicatorStyleVal();
 
     // Verify values
-    EXPECT_EQ(retrievedStyle.dividerWidth, testStyle.dividerWidth);
+    EXPECT_EQ(retrievedStyle.strokeWidth, testStyle.strokeWidth);
     EXPECT_EQ(retrievedStyle.dividerColor, testStyle.dividerColor);
     EXPECT_EQ(retrievedStyle.startMargin, testStyle.startMargin);
     EXPECT_EQ(retrievedStyle.endMargin, testStyle.endMargin);
@@ -183,7 +183,7 @@ HWTEST_F(ContainerPickerResourceTest, ContainerPickerPatternTest002, TestSize.Le
      */
     auto style = pickerPattern->GetIndicatorStyleVal();
     EXPECT_TRUE(style.isDefaultDividerWidth);
-    EXPECT_NE(style.dividerWidth.value_or(Dimension()), Dimension(TEST_DIVIDER_WIDTH));
+    EXPECT_NE(style.strokeWidth.value_or(Dimension()), Dimension(TEST_DIVIDER_WIDTH));
 }
 
 /**
@@ -391,7 +391,7 @@ HWTEST_F(ContainerPickerResourceTest, ContainerPickerModelTest001, TestSize.Leve
     auto mockResObj = AceType::MakeRefPtr<ResourceObject>();
 
     /**
-     * @tc.steps: step4. Test ProcessResourceObj with dividerWidth key
+     * @tc.steps: step4. Test ProcessResourceObj with strokeWidth key
      * @tc.expected: step4. The style will not be updated due to the failure of resource parsing.
      */
     ContainerPickerModel::ProcessResourceObj(TEST_DIVIDER_WIDTH_KEY, mockResObj);

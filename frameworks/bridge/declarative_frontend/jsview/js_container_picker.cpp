@@ -99,7 +99,7 @@ void JSContainerPicker::SetSelectionIndicator(const JSCallbackInfo& info)
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
 
     NG::PickerIndicatorStyle indicatorStyle;
-    int32_t type = jsObj->GetPropertyValue<int32_t>("type", static_cast<int32_t>(NG::IndicatorType::DIVIDER));
+    int32_t type = jsObj->GetPropertyValue<int32_t>("type", static_cast<int32_t>(NG::PickerIndicatorType::BACKGROUND));
     indicatorStyle.type = type;
     SetDivider(jsObj, indicatorStyle);
     SetSelectedBackground(jsObj, indicatorStyle);
@@ -110,30 +110,30 @@ void JSContainerPicker::SetDivider(const JSRef<JSObject>& paramObj, NG::PickerIn
 {
     auto pickerTheme = GetTheme<PickerTheme>();
     if (pickerTheme) {
-        indicatorStyle.dividerWidth = pickerTheme->GetDividerThickness();
+        indicatorStyle.strokeWidth = pickerTheme->GetDividerThickness();
         indicatorStyle.dividerColor = pickerTheme->GetDividerColor();
         indicatorStyle.startMargin = Dimension();
         indicatorStyle.endMargin = Dimension();
     }
-    UnRegisterResource("containerPicker.dividerWidth");
+    UnRegisterResource("containerPicker.strokeWidth");
     UnRegisterResource("containerPicker.dividerColor");
     UnRegisterResource("containerPicker.startMargin");
     UnRegisterResource("containerPicker.endMargin");
 
-    auto dividerWidth = paramObj->GetProperty("dividerWidth");
+    auto strokeWidth = paramObj->GetProperty("strokeWidth");
     auto dividerColor = paramObj->GetProperty("dividerColor");
     auto startMargin = paramObj->GetProperty("startMargin");
     auto endMargin = paramObj->GetProperty("endMargin");
 
-    if (!dividerWidth->IsUndefined() && !dividerWidth->IsNull()) {
-        CalcDimension dividerWidthVal = pickerTheme->GetDividerThickness();
+    if (!strokeWidth->IsUndefined() && !strokeWidth->IsNull()) {
+        CalcDimension strokeWidthVal = pickerTheme->GetDividerThickness();
         RefPtr<ResourceObject> resObj;
-        if (ParseLengthMetricsToDimension(dividerWidth, dividerWidthVal, resObj) &&
-            GreatOrEqual(dividerWidthVal.Value(), 0.0f)) {
-            indicatorStyle.dividerWidth = dividerWidthVal;
+        if (ParseLengthMetricsToDimension(strokeWidth, strokeWidthVal, resObj) &&
+            GreatOrEqual(strokeWidthVal.Value(), 0.0f)) {
+            indicatorStyle.strokeWidth = strokeWidthVal;
             indicatorStyle.isDefaultDividerWidth = false;
         }
-        NG::ContainerPickerModel::ProcessResourceObj("containerPicker.dividerWidth", resObj);
+        NG::ContainerPickerModel::ProcessResourceObj("containerPicker.strokeWidth", resObj);
     }
     if (!dividerColor->IsUndefined() && !dividerColor->IsNull()) {
         Color color = pickerTheme->GetDividerColor();

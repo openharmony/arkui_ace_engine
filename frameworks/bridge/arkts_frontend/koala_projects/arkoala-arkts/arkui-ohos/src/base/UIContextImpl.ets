@@ -73,6 +73,7 @@ import { PromptActionExtender, FrameNodeExtender, AlertDialog, ActionSheet, Anim
     DialogExtender, IUIContext } from '../framework';
 import { EntryPoint, NavInterface } from "../component/customComponent"
 import { AsyncCallback as routerAsyncCallback } from "@ohos.base"
+import { IUIContext } from "arkui/component/idlize"
 
 export class ContextRecord {
     uiContext?: UIContext
@@ -1445,7 +1446,10 @@ export class UIContextImpl extends UIContext {
     }
 
     public dispatchKeyEvent(node: number | string, event: KeyEvent): boolean {
-        throw new Error("no impl");
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let result = IUIContext.dispatchKeyEvent(node, event);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return true;
     }
 
     public getFocusController(): FocusController {
