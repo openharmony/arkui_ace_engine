@@ -16,6 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
+import { ArkThemeScopeManager } from "#arktheme"
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer } from "@koalaui/interop"
 import { TextBackgroundStyle_serializer, TextBackgroundStyle } from "./span"
 import { int32, int64, float32 } from "@koalaui/common"
@@ -43,6 +44,7 @@ export class ArkContainerSpanPeer extends PeerNode {
         return _peer
     }
     setContainerSpanOptionsAttribute(): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         ArkUIGeneratedNativeModule._ContainerSpanInterface_setContainerSpanOptions(this.peer.ptr)
     }
     setTextBackgroundStyleAttribute(value: TextBackgroundStyle | undefined): void {

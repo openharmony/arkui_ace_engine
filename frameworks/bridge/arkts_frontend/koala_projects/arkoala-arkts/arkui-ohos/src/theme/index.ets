@@ -325,3 +325,5 @@ export interface CustomThemeInternal extends CustomTheme {
     shapes?: CustomShapes;
     typography?: CustomTypography;
 }
+
+export { ArkThemeScopeManager } from './ArkThemeScopeManager';

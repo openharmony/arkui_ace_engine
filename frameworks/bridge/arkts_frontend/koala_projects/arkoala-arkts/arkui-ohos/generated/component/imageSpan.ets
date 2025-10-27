@@ -16,6 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
+import { ArkThemeScopeManager } from "#arktheme"
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { Resource_serializer } from "./../framework/resource"
 import { image_PixelMap_serializer } from "./../framework/ohos.multimedia.image"
@@ -53,6 +54,7 @@ export class ArkImageSpanPeer extends ArkBaseSpanPeer {
         return _peer
     }
     setImageSpanOptionsAttribute(value: ResourceStr | image.PixelMap): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value instanceof ResourceStr) {
             thisSerializer.writeInt8((0).toByte())

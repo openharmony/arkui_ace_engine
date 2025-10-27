@@ -20,6 +20,7 @@ import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
+import { ArkThemeScopeManager } from "#arktheme"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
@@ -109,6 +110,7 @@ export class ArkLinearIndicatorPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setLinearIndicatorOptionsAttribute(count?: number, controller?: LinearIndicatorController): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (count !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)

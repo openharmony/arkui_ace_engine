@@ -20,6 +20,7 @@ import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, DeserializerBase, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
+import { ArkThemeScopeManager } from "#arktheme"
 import { image_PixelMap_serializer } from "./../framework/ohos.multimedia.image"
 import { Resource_serializer } from "./../framework/resource"
 import { DrawableDescriptor_serializer } from "./../framework/ohos.arkui.drawableDescriptor"
@@ -93,6 +94,7 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         return _peer
     }
     setImageOptionsAttribute(src: image.PixelMap | ResourceStr | DrawableDescriptor | ImageContent, imageAIOptions?: ImageAIOptions): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (src instanceof image.PixelMap) {
             thisSerializer.writeInt8((0).toByte())

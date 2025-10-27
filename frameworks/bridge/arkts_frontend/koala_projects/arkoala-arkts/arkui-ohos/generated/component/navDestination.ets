@@ -21,6 +21,7 @@ import { NavPathInfo, NavPathInfoInternal, NavPathStack, NavPathStackInternal, N
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
+import { ArkThemeScopeManager } from "#arktheme"
 import { Resource_serializer } from "./../framework/resource"
 import { image_PixelMap_serializer } from "./../framework/ohos.multimedia.image"
 import { SymbolGlyphModifier_serializer } from "./../SymbolGlyphModifier"
@@ -187,6 +188,7 @@ export class ArkNavDestinationPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setNavDestinationOptionsAttribute(moduleInfo?: NavDestinationModuleInfo): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (moduleInfo !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)

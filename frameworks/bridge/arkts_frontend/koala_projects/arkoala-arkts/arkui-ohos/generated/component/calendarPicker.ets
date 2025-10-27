@@ -20,6 +20,7 @@ import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
+import { ArkThemeScopeManager } from "#arktheme"
 import { PickerTextStyle_serializer, ArkCommonMethodPeer, CommonMethod, PickerTextStyle, DateRange, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, PickerDialogButtonStyle, ShadowOptions, ShadowStyle, HoverModeAreaType, ArkCommonMethodComponent, ArkCommonMethodStyle, DateRange_serializer, BackgroundBlurStyleOptions_serializer, BackgroundEffectOptions_serializer, PickerDialogButtonStyle_serializer, ShadowOptions_serializer } from "./common"
 import { Offset_serializer, Offset, Length, VoidCallback, ResourceColor } from "./units"
 import { ComponentBase } from "./../ComponentBase"
@@ -88,6 +89,7 @@ export class ArkCalendarPickerPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setCalendarPickerOptionsAttribute(options?: CalendarOptions): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (options !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)

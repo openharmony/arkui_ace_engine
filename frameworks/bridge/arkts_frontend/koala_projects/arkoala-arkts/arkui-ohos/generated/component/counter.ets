@@ -16,6 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
+import { ArkThemeScopeManager } from "#arktheme"
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer } from "@koalaui/interop"
 import { int32, int64, float32 } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
@@ -44,6 +45,7 @@ export class ArkCounterPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setCounterOptionsAttribute(): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         ArkUIGeneratedNativeModule._CounterInterface_setCounterOptions(this.peer.ptr)
     }
     setOnIncAttribute(value: VoidCallback | undefined): void {

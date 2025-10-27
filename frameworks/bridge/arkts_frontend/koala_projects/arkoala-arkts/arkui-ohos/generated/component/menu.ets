@@ -16,6 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
+import { ArkThemeScopeManager } from "#arktheme"
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer } from "@koalaui/interop"
 import { Font_serializer, BorderRadiuses_serializer, DividerStyleOptions_serializer, Font, ResourceColor, Dimension, BorderRadiuses, DividerStyleOptions } from "./units"
 import { Resource_serializer } from "./../framework/resource"
@@ -49,6 +50,7 @@ export class ArkMenuPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setMenuOptionsAttribute(): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         ArkUIGeneratedNativeModule._MenuInterface_setMenuOptions(this.peer.ptr)
     }
     setFontAttribute(value: Font | undefined): void {

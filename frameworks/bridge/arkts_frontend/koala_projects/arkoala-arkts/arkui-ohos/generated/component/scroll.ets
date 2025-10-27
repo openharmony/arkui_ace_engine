@@ -25,6 +25,7 @@ import { Resource } from "global.resource"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
+import { ArkThemeScopeManager } from "#arktheme"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ScrollState, ScrollSnapAlign } from "./list"
@@ -260,6 +261,7 @@ export class ArkScrollPeer extends ArkScrollableCommonMethodPeer {
         return _peer
     }
     setScrollOptionsAttribute(scroller?: Scroller): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (scroller !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)

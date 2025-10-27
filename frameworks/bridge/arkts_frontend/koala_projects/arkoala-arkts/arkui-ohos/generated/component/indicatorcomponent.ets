@@ -20,6 +20,7 @@ import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
+import { ArkThemeScopeManager } from "#arktheme"
 import { DotIndicator_serializer, DigitIndicator_serializer, DotIndicator, DigitIndicator } from "./swiper"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
@@ -107,6 +108,7 @@ export class ArkIndicatorComponentPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setIndicatorComponentOptionsAttribute(controller?: IndicatorComponentController): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (controller !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)

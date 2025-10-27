@@ -16,6 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
+import { ArkThemeScopeManager } from "#arktheme"
 import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { Resource_serializer } from "./../framework/resource"
 import { SymbolGlyphModifier_serializer } from "./../SymbolGlyphModifier"
@@ -322,6 +323,7 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setSelectOptionsAttribute(options: Array<SelectOption>): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.writeInt32((options.length).toInt())
         for (let optionsCounterI = 0; optionsCounterI < options.length; optionsCounterI++) {
