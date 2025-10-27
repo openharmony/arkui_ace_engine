@@ -25963,6 +25963,8 @@ typedef struct GENERATED_ArkUIIUIContextAccessor {
                           Ark_Boolean isFrozen);
     void (*freezeUINode1)(const Ark_Number* id,
                           Ark_Boolean isFrozen);
+    Ark_Boolean (*dispatchKeyEvent)(const Ark_Union_Number_String* node,
+                                    Ark_KeyEvent event);
 } GENERATED_ArkUIIUIContextAccessor;
 
 typedef struct GENERATED_ArkUIJsGeolocationAccessor {
