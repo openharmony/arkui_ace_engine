@@ -174,7 +174,7 @@ namespace OHOS::Ace::NG::Converter {
         return toValue;
     }
     template<>
-    V2::GridContainerSize Convert(const Ark_Number& value);
+    V2::GridContainerSize Convert(const Ark_Int32& value);
     template<>
     V2::GridContainerSize Convert(const Ark_GridRowColumnOption& value)
     {
