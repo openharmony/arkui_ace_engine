@@ -18,6 +18,7 @@
 #include "frameworks/base/log/ace_scoring_log.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "frameworks/core/components_ng/pattern/container_picker/container_picker_utils.h"
 #include "frameworks/core/components_ng/pattern/container_picker/container_picker_model.h"
 #include "frameworks/core/components_ng/pattern/picker/picker_type_define.h"
 #include "core/common/resource/resource_object.h"
@@ -129,7 +130,7 @@ void JSContainerPicker::SetDivider(const JSRef<JSObject>& paramObj, NG::PickerIn
         CalcDimension strokeWidthVal = pickerTheme->GetDividerThickness();
         RefPtr<ResourceObject> resObj;
         if (ParseLengthMetricsToDimension(strokeWidth, strokeWidthVal, resObj) &&
-            GreatOrEqual(strokeWidthVal.Value(), 0.0f)) {
+            GreatOrEqual(strokeWidthVal.Value(), 0.0f) && (strokeWidthVal.Unit() != DimensionUnit::PERCENT)) {
             indicatorStyle.strokeWidth = strokeWidthVal;
             indicatorStyle.isDefaultDividerWidth = false;
         }
@@ -148,7 +149,7 @@ void JSContainerPicker::SetDivider(const JSRef<JSObject>& paramObj, NG::PickerIn
         CalcDimension startMarginVal = Dimension();
         RefPtr<ResourceObject> resObj;
         if (ParseLengthMetricsToDimension(startMargin, startMarginVal, resObj) &&
-            GreatOrEqual(startMarginVal.Value(), 0.0f)) {
+            GreatOrEqual(startMarginVal.Value(), 0.0f) && (startMarginVal.Unit() != DimensionUnit::PERCENT)) {
             indicatorStyle.startMargin = startMarginVal;
             indicatorStyle.isDefaultStartMargin = false;
         }
@@ -158,7 +159,7 @@ void JSContainerPicker::SetDivider(const JSRef<JSObject>& paramObj, NG::PickerIn
         CalcDimension endMarginVal = Dimension();
         RefPtr<ResourceObject> resObj;
         if (ParseLengthMetricsToDimension(endMargin, endMarginVal, resObj) &&
-            GreatOrEqual(endMarginVal.Value(), 0.0f)) {
+            GreatOrEqual(endMarginVal.Value(), 0.0f) && (endMarginVal.Unit() != DimensionUnit::PERCENT)) {
             indicatorStyle.endMargin = endMarginVal;
             indicatorStyle.isDefaultEndMargin = false;
         }
@@ -171,7 +172,7 @@ void JSContainerPicker::SetSelectedBackground(const JSRef<JSObject>& paramObj, N
     auto pickerTheme = GetTheme<PickerTheme>();
     if (pickerTheme) {
         indicatorStyle.backgroundColor = pickerTheme->GetSelectedBackgroundColor();
-        indicatorStyle.borderRadius = NG::BorderRadiusProperty(*pickerTheme->GetSelectedBorderRadius().radiusTopLeft);
+        indicatorStyle.borderRadius = NG::BorderRadiusProperty(NG::DEFAULT_RADIUS);
     }
     UnRegisterResource("containerPicker.backgroundColor");
     UnRegisterResource("containerPicker.borderRadius");
@@ -190,8 +191,7 @@ void JSContainerPicker::SetSelectedBackground(const JSRef<JSObject>& paramObj, N
     }
     if (!borderRadius->IsUndefined() && !borderRadius->IsNull()) {
         CalcDimension calcDimension;
-        NG::BorderRadiusProperty borderRadiusProperty =
-            NG::BorderRadiusProperty(*pickerTheme->GetSelectedBorderRadius().radiusTopLeft);
+        NG::BorderRadiusProperty borderRadiusProperty = NG::BorderRadiusProperty(NG::DEFAULT_RADIUS);
         if (ParseLengthMetricsToDimension(borderRadius, calcDimension, indicatorStyle.borderRadiusResObj)) {
             if (GreatOrEqual(calcDimension.Value(), 0.0f)) {
                 indicatorStyle.borderRadius = NG::BorderRadiusProperty(calcDimension);
