@@ -13,22 +13,22 @@
  * limitations under the License.
  */
 
- /*
-  * Description: List组件限位滚动支持设置动画速度档位
-  * Writer: renxiaowen
-  */
+/*
+ * Description: List组件限位滚动支持设置动画速度档位
+ * Writer: renxiaowen
+ */
 
 #include "snap_speed/snap_speed_test.h"
 
 #include <arkui/native_interface.h>
 #include <memory>
 
-#include "components/column/Column.h"
 #include "common.h"
-#include "components/text/Text.h"
-#include "components/row/Row.h"
-#include "components/list/List1.h"
 #include "components/button/Button.h"
+#include "components/column/Column.h"
+#include "components/list/List1.h"
+#include "components/row/Row.h"
+#include "components/text/Text.h"
 #include "manager/plugin_manager.h"
 
 namespace ArkUICApiDemo {
@@ -36,7 +36,8 @@ namespace ArkUICApiDemo {
 constexpr int32_t LIST_ITEM_COUNT = 60;
 constexpr int32_t LIST_ITEM_GROUP_COUNT = 6;
 
-int32_t ConvertSnapSpeed(const std::string& label) {
+int32_t ConvertSnapSpeed(const std::string& label)
+{
     if (label == "-1") {
         return -1;
     } else if (label == "NORMAL") {
@@ -50,8 +51,9 @@ int32_t ConvertSnapSpeed(const std::string& label) {
     }
 }
 
-std::shared_ptr<ButtonComponent> CreateButton(const std::string &label, const std::shared_ptr<ListComponent> &list,
-                                              const std::shared_ptr<TextComponent> &text) {
+std::shared_ptr<ButtonComponent> CreateButton(
+    const std::string& label, const std::shared_ptr<ListComponent>& list, const std::shared_ptr<TextComponent>& text)
+{
     auto button = std::make_shared<ButtonComponent>();
     button->SetLabel(label);
     button->RegisterOnClick([list, label, text]() {
@@ -66,10 +68,10 @@ std::shared_ptr<ButtonComponent> CreateButton(const std::string &label, const st
     return button;
 }
 
-template <int32_t size = LIST_ITEM_COUNT, int32_t direction = ArkUI_Axis::ARKUI_AXIS_VERTICAL>
-static std::shared_ptr<ListComponent>
-CreateList() {
-//    auto col = std::make_shared<ColumnComponent>();
+template<int32_t size = LIST_ITEM_COUNT, int32_t direction = ArkUI_Axis::ARKUI_AXIS_VERTICAL>
+static std::shared_ptr<ListComponent> CreateList()
+{
+    //    auto col = std::make_shared<ColumnComponent>();
     auto list = std::make_shared<ListComponent>();
     list->SetListDirection(direction);
     list->SetBorderWidth(1);
@@ -99,14 +101,11 @@ CreateList() {
     childrenMainSize->Resize(size);
     childrenMainSize->SetDefaultMainSize(50);
     return list;
-//    col->AddChild(list);
-//    return col;
 }
 
-template <int32_t size = LIST_ITEM_COUNT, int32_t direction = ArkUI_Axis::ARKUI_AXIS_VERTICAL>
-static std::shared_ptr<ListComponent>
-CreateListNoLazyForeachs() {
-//    auto col = std::make_shared<ColumnComponent>();
+template<int32_t size = LIST_ITEM_COUNT, int32_t direction = ArkUI_Axis::ARKUI_AXIS_VERTICAL>
+static std::shared_ptr<ListComponent> CreateListNoLazyForeachs()
+{
     auto list = std::make_shared<ListComponent>();
     list->SetListDirection(direction);
     list->SetBorderWidth(1);
@@ -133,24 +132,21 @@ CreateListNoLazyForeachs() {
     childrenMainSize->Resize(size);
     childrenMainSize->SetDefaultMainSize(50);
     return list;
-//    col->AddChild(list);
-//    return col;
 }
 
-napi_value SnapSpeedTest::CreateNativeNode(napi_env env, napi_callback_info info) {
+napi_value SnapSpeedTest::CreateNativeNode(napi_env env, napi_callback_info info)
+{
     size_t argc = 1;
-    napi_value args[1] = {nullptr};
+    napi_value args[1] = { nullptr };
     napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
     size_t length = PARAM_64;
     size_t strLength = 0;
-    char xComponentID[PARAM_64] = {0};
+    char xComponentID[PARAM_64] = { 0 };
     napi_get_value_string_utf8(env, args[0], xComponentID, length, &strLength);
-    OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, "SnapSpeedTest",
-                 "%{public}s", xComponentID);
+    OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, "SnapSpeedTest", "%{public}s", xComponentID);
 
     if ((env == nullptr) || (info == nullptr)) {
-        OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, "SnapSpeedTest",
-                     "GetContext env or info is null");
+        OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, "SnapSpeedTest", "GetContext env or info is null");
         return nullptr;
     }
     auto row = std::make_shared<RowComponent>();
@@ -168,12 +164,12 @@ napi_value SnapSpeedTest::CreateNativeNode(napi_env env, napi_callback_info info
     row->AddChild(btnCol);
     auto rootColumn = new ColumnComponent();
     rootColumn->AddChild(row);
-    
+
     std::string id(xComponentID);
-    if (OH_NativeXComponent_AttachNativeRootNode(PluginManager::GetInstance()->GetNativeXComponent(id),
-                                                 rootColumn->GetComponent()) == INVALID_PARAM) {
-        OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, "SnapSpeedTest",
-                     "OH_NativeXComponent_AttachNativeRootNode failed");
+    if (OH_NativeXComponent_AttachNativeRootNode(
+            PluginManager::GetInstance()->GetNativeXComponent(id), rootColumn->GetComponent()) == INVALID_PARAM) {
+        OH_LOG_Print(
+            LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, "SnapSpeedTest", "OH_NativeXComponent_AttachNativeRootNode failed");
     }
     napi_value exports;
     if (napi_create_object(env, &exports) != napi_ok) {
@@ -186,18 +182,16 @@ napi_value SnapSpeedTest::CreateNativeNode(napi_env env, napi_callback_info info
 napi_value SnapSpeedTest::CreateNativeNodeNoLazyForeach(napi_env env, napi_callback_info info)
 {
     size_t argc = 1;
-    napi_value args[1] = {nullptr};
+    napi_value args[1] = { nullptr };
     napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
     size_t length = PARAM_64;
     size_t strLength = 0;
-    char xComponentID[PARAM_64] = {0};
+    char xComponentID[PARAM_64] = { 0 };
     napi_get_value_string_utf8(env, args[0], xComponentID, length, &strLength);
-    OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, "SnapSpeedTest",
-                 "%{public}s", xComponentID);
+    OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, "SnapSpeedTest", "%{public}s", xComponentID);
 
     if ((env == nullptr) || (info == nullptr)) {
-        OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, "SnapSpeedTest",
-                     "GetContext env or info is null");
+        OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, "SnapSpeedTest", "GetContext env or info is null");
         return nullptr;
     }
     auto row = std::make_shared<RowComponent>();
@@ -215,12 +209,12 @@ napi_value SnapSpeedTest::CreateNativeNodeNoLazyForeach(napi_env env, napi_callb
     row->AddChild(btnCol);
     auto rootColumn = new ColumnComponent();
     rootColumn->AddChild(row);
-    
+
     std::string id(xComponentID);
-    if (OH_NativeXComponent_AttachNativeRootNode(PluginManager::GetInstance()->GetNativeXComponent(id),
-                                                 rootColumn->GetComponent()) == INVALID_PARAM) {
-        OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, "SnapSpeedTest",
-                     "OH_NativeXComponent_AttachNativeRootNode failed");
+    if (OH_NativeXComponent_AttachNativeRootNode(
+            PluginManager::GetInstance()->GetNativeXComponent(id), rootColumn->GetComponent()) == INVALID_PARAM) {
+        OH_LOG_Print(
+            LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, "SnapSpeedTest", "OH_NativeXComponent_AttachNativeRootNode failed");
     }
     napi_value exports;
     if (napi_create_object(env, &exports) != napi_ok) {
@@ -229,4 +223,4 @@ napi_value SnapSpeedTest::CreateNativeNodeNoLazyForeach(napi_env env, napi_callb
     }
     return exports;
 }
-}
+} // namespace ArkUICApiDemo
