@@ -20,6 +20,7 @@ import { InteropNativeModule, SerializerBase, DeserializerBase, KPointer } from 
 import {
     IProvideDecoratedVariable,
     IProviderDecoratedVariable,
+    IVariableOwner,
     LocalStorage,
 } from '@ohos.arkui.stateManagement';
 import { UIContext } from '@ohos/arkui/UIContext';
@@ -56,7 +57,7 @@ export interface IExtendableComponent {
     setActiveInternal(active: boolean, isReuse: boolean): void;
 }
 
-export abstract class ExtendableComponent implements LifeCycle {
+export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
     static current: object | undefined = undefined;
     private isActive_: number = 1;
 
@@ -132,18 +133,18 @@ export abstract class ExtendableComponent implements LifeCycle {
         this.delegate_ = delegate;
     }
 
-    addProvidedVarV2<T>(providedPropName: string, store: IProviderDecoratedVariable<T>): void {
+    addProvider<T>(providedPropName: string, store: IProviderDecoratedVariable<T>): void {
         this.providedVarsV2_.set(providedPropName, store as object as IProviderDecoratedVariable<object>);
     }
 
-    addProvidedVar<T>(providedPropName: string, store: IProvideDecoratedVariable<T>, allowOverride?: boolean | undefined): void {
+    addProvide<T>(providedPropName: string, store: IProvideDecoratedVariable<T>, allowOverride?: boolean): void {
         if (!allowOverride && this.findProvide<T>(providedPropName)) {
             throw new ReferenceError(`Duplicate @Provide property with name ${providedPropName}. Property with this name is provided by one of the ancestor Component already.`);
         }
         this.providedVars_.set(providedPropName, store as object as IProvideDecoratedVariable<object>);
     }
 
-    findProvideV2<T>(providedPropName: string): IProviderDecoratedVariable<T> | null {
+    findProvider<T>(providedPropName: string): IProviderDecoratedVariable<T> | undefined {
         let parentCom = this.parent_;
         while (parentCom !== undefined) {
             let provideVar = parentCom.providedVarsV2_.get(providedPropName);
@@ -152,18 +153,15 @@ export abstract class ExtendableComponent implements LifeCycle {
             }
             parentCom = parentCom.parent_;
         }
-        return null;
+        return undefined;
     }
 
-    findProvide<T>(providedPropName: string): IProvideDecoratedVariable<T> | null {
+    findProvide<T>(providedPropName: string): IProvideDecoratedVariable<T> | undefined {
         const localVar = this.providedVars_.get(providedPropName);
         if (localVar !== undefined) {
             return localVar as object as IProvideDecoratedVariable<T>;
         }
-        if (this.parent_ !== undefined) {
-            return this.parent_!.findProvide<T>(providedPropName);
-        }
-        return null;
+        return this.parent_?.findProvide<T>(providedPropName);
     }
 
     getUIContext(): UIContext {
@@ -189,6 +187,10 @@ export abstract class ExtendableComponent implements LifeCycle {
 
     getDialogController(): promptAction.DialogController | undefined {
         return this.delegate_!.getDialogController();
+    }
+
+    getLocalStorage(): LocalStorage {
+        return this.localStorage_;
     }
 
     public get localStorage_(): LocalStorage {

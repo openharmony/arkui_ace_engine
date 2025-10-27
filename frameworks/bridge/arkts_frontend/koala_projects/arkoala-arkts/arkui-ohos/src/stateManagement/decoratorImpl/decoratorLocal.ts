@@ -12,16 +12,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { ExtendableComponent } from '../../component/extendableComponent';
 import { IBackingValue } from '../base/iBackingValue';
 import { FactoryInternal } from '../base/iFactoryInternal';
-import { ILocalDecoratedVariable } from '../decorator';
+import { ILocalDecoratedVariable, IVariableOwner } from '../decorator';
 import { UIUtils } from '../utils';
 import { DecoratedV2VariableBase } from './decoratorBase';
 import { uiUtils } from '../base/uiUtilsImpl';
 export class LocalDecoratedVariable<T> extends DecoratedV2VariableBase implements ILocalDecoratedVariable<T> {
     public readonly backing_: IBackingValue<T>;
-    constructor(owningView: ExtendableComponent | null, varName: string, initValue: T) {
+    constructor(owningView: IVariableOwner | undefined, varName: string, initValue: T) {
         super('@Local', owningView, varName);
         this.backing_ = FactoryInternal.mkDecoratorValue(varName, initValue);
     }

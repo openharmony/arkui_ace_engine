@@ -174,8 +174,8 @@ export function bindCompatibleProvideCallback(staticComponent: ExtendableCompone
     const setFindProvideInterop = global.getProperty('setFindProvideInterop');
     const callback = (providedPropName: string): Object | null => {
         let provide = staticComponent.findProvide<Object>(providedPropName);
-        if ((provide === null)) {
-            return provide;
+        if ((provide === undefined)) {
+            return null;
         }
         let state = provide as ProvideDecoratedVariable<Object>;
         if (state.getProxy() === undefined) {
@@ -602,10 +602,10 @@ export class InteropExtendableComponent extends ExtendableComponent {
 
     /** @memo */ build(): void {}
 
-    override findProvide<T>(providedPropName: string): IProvideDecoratedVariable<T> | null {
+    override findProvide<T>(providedPropName: string): IProvideDecoratedVariable<T> | undefined {
         const value = this.dynamicComponent.invokeMethod('findProvidePU', ESValue.wrap(providedPropName));
         if (value.unwrap() == undefined) {
-            return null;
+            return undefined;
         }
         const getProxy = value.invokeMethod('getProxy').unwrap();
         if (getProxy === undefined && ExtendableComponent.current) {
@@ -635,7 +635,7 @@ export class InteropExtendableComponent extends ExtendableComponent {
         }
     }
 
-    override addProvidedVar<T>(providedPropName: string, store: IProvideDecoratedVariable<T>, allowOverride?: boolean | undefined): void {}
+    override addProvide<T>(providedPropName: string, store: IProvideDecoratedVariable<T>, allowOverride?: boolean): void {}
 }
 
 export function updateInteropExtendableComponent(dynamicComponent: Object): void {
@@ -694,7 +694,7 @@ function createCompatibleStaticState<T>(dynamicValue: Object): IStateDecoratedVa
     const value = ESValue.wrap(dynamicValue);
     const getProxy = value.invokeMethod('getProxy').unwrap();
     if (getProxy === undefined) {
-        const stateVar = new StateDecoratedVariable<T>(null, 'proxy', uiUtils.makeV1Observed(value.invokeMethod('get').unwrap()) as T);
+        const stateVar = new StateDecoratedVariable<T>(undefined, 'proxy', uiUtils.makeV1Observed(value.invokeMethod('get').unwrap()) as T);
         value.invokeMethod('setProxy', ESValue.wrap(stateVar));
         const setProxyValue = ((newVal: T): void => {
             value.invokeMethod('set', ESValue.wrap(newVal));

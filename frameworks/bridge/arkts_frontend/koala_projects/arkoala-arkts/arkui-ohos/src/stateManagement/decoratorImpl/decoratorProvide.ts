@@ -13,9 +13,8 @@
  * limitations under the License.
  */
 
-import { ExtendableComponent } from '../../component/extendableComponent';
 import { DecoratedV1VariableBase } from './decoratorBase';
-import { IObservedObject, WatchFuncType } from '../decorator';
+import { IObservedObject, IVariableOwner, WatchFuncType } from '../decorator';
 import { IProvideDecoratedVariable } from '../decorator';
 import { IBackingValue } from '../base/iBackingValue';
 import { FactoryInternal } from '../base/iFactoryInternal';
@@ -32,7 +31,7 @@ export class ProvideDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
     private readonly backing_: IBackingValue<T>;
     private readonly allowOverride_: boolean;
     constructor(
-        owningView: ExtendableComponent,
+        owningView: IVariableOwner,
         varName: string,
         provideAliasName: string,
         initValue: T,
@@ -47,9 +46,9 @@ export class ProvideDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
         this.allowOverride_ = allowOverride ? allowOverride : false;
         this.backing_ = FactoryInternal.mkDecoratorValue<T>(varName, initValue);
         this.registerWatchForObservedObjectChanges(initValue);
-        owningView.addProvidedVar(provideAliasName, this, allowOverride);
+        owningView.addProvide(provideAliasName, this, allowOverride);
         if (varName !== provideAliasName) {
-            owningView.addProvidedVar(varName, this, allowOverride);
+            owningView.addProvide(varName, this, allowOverride);
         }
     }
     public get(): T {
