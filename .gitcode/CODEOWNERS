@@ -254,6 +254,9 @@ component_ext/movingphoto/ @arkuiadvancedcomponent
 
 [Examples]
 examples/ @arkuipopupwindow_all
+examples/Navigation @arkui_navigation
+examples/BindSheet @arkuicodepulse
+examples/BindSheet_DragBar @arkuicodepulse
 examples/Image/ @arkui001
 examples/DrawableDescriptor/ @arkui001
 examples/Dialog_C/ @arkui001
