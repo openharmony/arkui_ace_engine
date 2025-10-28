@@ -150,6 +150,10 @@ void TextFieldPattern::OnAttachToMainTreeMultiThreadAddition()
         registerWindowSizeCallbackMultiThread_ = false;
         RegisterWindowSizeCallbackMultiThreadAction();
     }
+    if (registerWindowFocusChangeCallbackMultiThread_) {
+        registerWindowFocusChangeCallbackMultiThread_ = false;
+        RegisterWindowFocusChangeCallbackMultiThread();
+    }
     if (processDefaultStyleAndBehaviorsMultiThread_) {
         processDefaultStyleAndBehaviorsMultiThread_ = false;
         ProcessDefaultStyleAndBehaviorsMultiThread();
@@ -190,6 +194,7 @@ void TextFieldPattern::OnDetachFromMainTreeMultiThread()
     }
     pipeline->RemoveWindowSizeChangeCallback(node->GetId());
     pipeline->RemoveOnAreaChangeNode(node->GetId());
+    pipeline->RemoveWindowFocusChangedCallback(node->GetId());
 }
 
 void TextFieldPattern::HandleSetSelectionMultiThread(int32_t start, int32_t end, bool showHandle)
@@ -415,6 +420,26 @@ void TextFieldPattern::RegisterWindowSizeCallbackMultiThread()
 }
 
 void TextFieldPattern::RegisterWindowSizeCallbackMultiThreadAction()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddWindowSizeChangeCallback(host->GetId());
+}
+
+void TextFieldPattern::RegisterWindowFocusChangeCallbackMultiThread()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (isWindowFocusChangeCallbackRegisted_) {
+        return;
+    }
+    isWindowFocusChangeCallbackRegisted_ = true;
+    registerWindowFocusChangeCallbackMultiThread_ = true;
+}
+
+void TextFieldPattern::RegisterWindowFocusChangeCallbackMultiThreadAction()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
