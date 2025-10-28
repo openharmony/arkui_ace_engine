@@ -4384,8 +4384,8 @@ export class ArkUIGeneratedNativeModule {
     native static _KeyEvent_getTimestamp(ptr: KPointer): int64
     @ani.unsafe.Direct
     native static _KeyEvent_setTimestamp(ptr: KPointer, timestamp: KLong): void
-    @ani.unsafe.Direct
-    native static _KeyEvent_getStopPropagation(ptr: KPointer): KPointer
+    @ani.unsafe.Quick
+    native static _KeyEvent_getStopPropagation(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _KeyEvent_setStopPropagation(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
@@ -4604,8 +4604,8 @@ export class ArkUIGeneratedNativeModule {
     native static _MouseEvent_getY(ptr: KPointer): double
     @ani.unsafe.Direct
     native static _MouseEvent_setY(ptr: KPointer, y: KDouble): void
-    @ani.unsafe.Direct
-    native static _MouseEvent_getStopPropagation(ptr: KPointer): KPointer
+    @ani.unsafe.Quick
+    native static _MouseEvent_getStopPropagation(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _MouseEvent_setStopPropagation(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Quick
