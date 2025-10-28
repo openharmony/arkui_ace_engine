@@ -61,7 +61,12 @@ bool DrawableDescriptorInfo::IsValidBase64Head(const std::string& uri)
 
 bool DrawableDescriptorInfo::IsValidFileHead(const std::string& uri)
 {
-    std::regex fileRegex("^file://.");
-    return std::regex_match(uri, fileRegex);
+    auto iter = uri.find_first_of(':');
+    if (iter == std::string::npos) {
+        return false;
+    }
+    std::string head = uri.substr(0, iter);
+    std::transform(head.begin(), head.end(), head.begin(), [](unsigned char c) { return std::tolower(c); });
+    return head == "file";
 }
 } // namespace OHOS::Ace

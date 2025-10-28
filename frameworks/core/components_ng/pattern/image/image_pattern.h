@@ -135,9 +135,13 @@ public:
     void CheckHandles(SelectHandleInfo& handleInfo);
     // for drawable descriptor
     void UpdateDrawableDescriptor(const RefPtr<DrawableDescriptor>& newDrawable);
+    void InitializeStatus(DrawableDescriptorLoadResult loadResult);
     void AnimatedDrawableControllAnimation(const int32_t id);
     void DrawableRegisterUpdateCallback();
     void ResetDrawableDescriptor();
+    void SetImageType(ImageType imageType);
+    ImageType GetImageType() const;
+    bool GetIsAnimation() const;
 
     void EnableDrag();
     bool BetweenSelectedPosition(const Offset& globalOffset) override;
@@ -253,21 +257,6 @@ public:
     void ResetAltImage();
     void ResetImageAndAlt();
     void ResetAltImageError();
-
-    void SetImageType(ImageType imageType)
-    {
-        imageType_ = imageType;
-    }
-
-    ImageType GetImageType()
-    {
-        return imageType_;
-    }
-
-    bool GetIsAnimation() const
-    {
-        return imageType_ == ImageType::ANIMATED_DRAWABLE;
-    }
 
     bool IsAtomicNode() const override
     {
@@ -473,6 +462,7 @@ private:
 
 private:
     RefPtr<DrawableDescriptor> drawable_;
+    SizeF imageSize_;
     CopyOptions copyOption_ = CopyOptions::None;
     ImageInterpolation interpolation_ = ImageInterpolation::LOW;
     bool needLoadAlt_ = true;
@@ -537,6 +527,7 @@ private:
     bool hasSetPixelMapMemoryName_ = false;
     bool previousVisibility_ = false;
     bool supportSvg2_ = false;
+    bool isMeasured_ = false;
     bool loadFailed_ = false;
     bool isLoadAlt_ = false;
     ImageType imageType_ = ImageType::BASE;
