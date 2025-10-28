@@ -38,6 +38,7 @@ import { ScrollModifier } from "./../ScrollModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { curves_ICurve_serializer } from "./../framework/ohos.curves"
 import { LengthMetrics_serializer } from "./../Graphics"
+import { ModifierStateManager } from "../CommonModifier"
 export class ScrollerInternal {
     public static fromPtr(ptr: KPointer): Scroller {
         return new Scroller(ptr)
@@ -814,7 +815,9 @@ export class ArkScrollComponent extends ArkScrollableCommonMethodComponent imple
         return this
     }
     public attributeModifier(value: AttributeModifier<ScrollAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        hookScrollAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookScrollAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
