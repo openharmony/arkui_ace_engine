@@ -3305,12 +3305,12 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setOnBlur(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setTabIndexAttribute(value: number | undefined): void {
+    setTabIndexAttribute(value: int32 | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeNumber(valueTmpValue)
+            thisSerializer.writeInt32(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -7218,7 +7218,7 @@ export interface CommonMethod {
     onBlur(value: (() => void) | undefined): this {
         throw new Error("Unimplemented method onBlur")
     }
-    tabIndex(value: number | undefined): this {
+    tabIndex(value: int32 | undefined): this {
         throw new Error("Unimplemented method tabIndex")
     }
     defaultFocus(value: boolean | undefined): this {
@@ -8566,7 +8566,7 @@ export interface MotionBlurAnchor {
     y: double;
 }
 export interface MotionBlurOptions {
-    radius: number;
+    radius: double;
     anchor: MotionBlurAnchor;
 }
 export interface GeometryInfo extends SizeResult {
@@ -8748,8 +8748,8 @@ export interface LightSource {
     color?: ResourceColor;
 }
 export interface KeyframeAnimateParam {
-    delay?: number;
-    iterations?: number;
+    delay?: int32;
+    iterations?: int32;
     onFinish?: (() => void);
     expectedFrameRateRange?: ExpectedFrameRateRange;
 }
@@ -9253,9 +9253,9 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public tabIndex(value: number | undefined): this {
+    public tabIndex(value: int32 | undefined): this {
         if (this.checkPriority("tabIndex")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (int32 | undefined)
             this.getPeer()?.setTabIndexAttribute(value_casted)
             return this
         }
@@ -10855,6 +10855,22 @@ export class MotionBlurAnchor_serializer {
         const xTmpResult : double = valueDeserializer.readFloat64()
         const yTmpResult : double = valueDeserializer.readFloat64()
         let value : MotionBlurAnchor = ({x: xTmpResult, y: yTmpResult} as MotionBlurAnchor)
+        return value
+    }
+}
+export class MotionBlurOptions_serializer {
+    public static write(buffer: SerializerBase, value: MotionBlurOptions): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForRadius  = value.radius
+        valueSerializer.writeFloat64(valueHolderForRadius)
+        const valueHolderForAnchor  = value.anchor
+        MotionBlurAnchor_serializer.write(valueSerializer, valueHolderForAnchor)
+    }
+    public static read(buffer: DeserializerBase): MotionBlurOptions {
+        let valueDeserializer : DeserializerBase = buffer
+        const radiusTmpResult : double = valueDeserializer.readFloat64()
+        const anchorTmpResult : MotionBlurAnchor = MotionBlurAnchor_serializer.read(valueDeserializer)
+        let value : MotionBlurOptions = ({radius: radiusTmpResult, anchor: anchorTmpResult} as MotionBlurOptions)
         return value
     }
 }
@@ -12482,22 +12498,6 @@ export class MeasureResult_serializer {
         const widthTmpResult : number = (valueDeserializer.readNumber() as number)
         const heightTmpResult : number = (valueDeserializer.readNumber() as number)
         let value : MeasureResult = ({width: widthTmpResult, height: heightTmpResult} as MeasureResult)
-        return value
-    }
-}
-export class MotionBlurOptions_serializer {
-    public static write(buffer: SerializerBase, value: MotionBlurOptions): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForRadius  = value.radius
-        valueSerializer.writeNumber(valueHolderForRadius)
-        const valueHolderForAnchor  = value.anchor
-        MotionBlurAnchor_serializer.write(valueSerializer, valueHolderForAnchor)
-    }
-    public static read(buffer: DeserializerBase): MotionBlurOptions {
-        let valueDeserializer : DeserializerBase = buffer
-        const radiusTmpResult : number = (valueDeserializer.readNumber() as number)
-        const anchorTmpResult : MotionBlurAnchor = MotionBlurAnchor_serializer.read(valueDeserializer)
-        let value : MotionBlurOptions = ({radius: radiusTmpResult, anchor: anchorTmpResult} as MotionBlurOptions)
         return value
     }
 }
@@ -14539,7 +14539,7 @@ export class KeyframeAnimateParam_serializer {
         if (valueHolderForDelay !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForDelayTmpValue  = valueHolderForDelay!
-            valueSerializer.writeNumber(valueHolderForDelayTmpValue)
+            valueSerializer.writeInt32(valueHolderForDelayTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -14547,7 +14547,7 @@ export class KeyframeAnimateParam_serializer {
         if (valueHolderForIterations !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForIterationsTmpValue  = valueHolderForIterations!
-            valueSerializer.writeNumber(valueHolderForIterationsTmpValue)
+            valueSerializer.writeInt32(valueHolderForIterationsTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -14571,17 +14571,17 @@ export class KeyframeAnimateParam_serializer {
     public static read(buffer: DeserializerBase): KeyframeAnimateParam {
         let valueDeserializer : DeserializerBase = buffer
         const delayTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let delayTmpBuf : number | undefined = undefined
+        let delayTmpBuf : int32 | undefined = undefined
         if ((delayTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            delayTmpBuf = (valueDeserializer.readNumber() as number)
+            delayTmpBuf = valueDeserializer.readInt32()
         }
-        const delayTmpResult : number | undefined = delayTmpBuf
+        const delayTmpResult : int32 | undefined = delayTmpBuf
         const iterationsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let iterationsTmpBuf : number | undefined = undefined
+        let iterationsTmpBuf : int32 | undefined = undefined
         if ((iterationsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            iterationsTmpBuf = (valueDeserializer.readNumber() as number)
+            iterationsTmpBuf = valueDeserializer.readInt32()
         }
-        const iterationsTmpResult : number | undefined = iterationsTmpBuf
+        const iterationsTmpResult : int32 | undefined = iterationsTmpBuf
         const onFinishTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let onFinishTmpBuf : (() => void) | undefined = undefined
         if ((onFinishTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {

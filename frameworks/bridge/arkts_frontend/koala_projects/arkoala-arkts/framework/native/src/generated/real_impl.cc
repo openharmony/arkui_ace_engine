@@ -1788,7 +1788,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetTabIndexImpl(Ark_NativePointer node,
-                         const Opt_Number* value)
+                         const Opt_Int32* value)
     {
     }
     void SetDefaultFocusImpl(Ark_NativePointer node,

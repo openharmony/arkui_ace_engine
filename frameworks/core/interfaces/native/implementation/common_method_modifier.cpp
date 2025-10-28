@@ -3074,7 +3074,7 @@ void SetOnBlurImpl(Ark_NativePointer node,
     ViewAbstract::SetOnBlur(frameNode, std::move(onEvent));
 }
 void SetTabIndexImpl(Ark_NativePointer node,
-                     const Opt_Number* value)
+                     const Opt_Int32* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

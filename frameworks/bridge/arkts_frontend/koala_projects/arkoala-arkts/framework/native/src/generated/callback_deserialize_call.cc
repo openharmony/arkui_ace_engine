@@ -5716,20 +5716,27 @@ void deserializeAndCallPageTransitionCallback(KSerializerBuffer thisArray, Ark_I
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
     const Ark_Int32 _resourceId = thisDeserializer.readInt32();
-    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, Ark_RouteType type, const Ark_Number progress)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_PageTransitionCallback))));
+    const auto _call =
+        reinterpret_cast<void (*)(const Ark_Int32 resourceId, Ark_RouteType type, const Ark_Float64 progress)>(
+            thisDeserializer.readPointerOrDefault(
+                reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_PageTransitionCallback))));
     thisDeserializer.readPointer();
     Ark_RouteType type = static_cast<Ark_RouteType>(thisDeserializer.readInt32());
-    Ark_Number progress = static_cast<Ark_Number>(thisDeserializer.readNumber());
+    Ark_Float64 progress = thisDeserializer.readFloat64();
     _call(_resourceId, type, progress);
 }
-void deserializeAndCallSyncPageTransitionCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+void deserializeAndCallSyncPageTransitionCallback(
+    Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
     const Ark_Int32 resourceId = thisDeserializer.readInt32();
     thisDeserializer.readPointer();
-    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, Ark_RouteType type, const Ark_Number progress)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_PageTransitionCallback))));
+    const auto callSyncMethod = reinterpret_cast<void (*)(
+        Ark_VMContext vmContext, const Ark_Int32 resourceId, Ark_RouteType type, const Ark_Float64 progress)>(
+        thisDeserializer.readPointerOrDefault(
+            reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_PageTransitionCallback))));
     Ark_RouteType type = static_cast<Ark_RouteType>(thisDeserializer.readInt32());
-    Ark_Number progress = static_cast<Ark_Number>(thisDeserializer.readNumber());
+    Ark_Float64 progress = thisDeserializer.readFloat64();
     callSyncMethod(vmContext, resourceId, type, progress);
 }
 void deserializeAndCallPasteButtonCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)

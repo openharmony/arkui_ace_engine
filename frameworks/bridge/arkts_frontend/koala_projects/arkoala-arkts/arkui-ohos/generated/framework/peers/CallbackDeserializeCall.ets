@@ -2779,7 +2779,7 @@ export function deserializeAndCallPageTransitionCallback(thisDeserializer: Deser
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as PageTransitionCallback)
     let type : RouteType = RouteType.fromValue(thisDeserializer.readInt32())
-    let progress : number = (thisDeserializer.readNumber() as number)
+    let progress : double = thisDeserializer.readFloat64()
     _call(type, progress)
 }
 export function deserializeAndCallPasteButtonCallback(thisDeserializer: DeserializerBase): void {

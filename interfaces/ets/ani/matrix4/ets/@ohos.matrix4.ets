@@ -39,8 +39,8 @@ export default namespace matrix4 {
     }
 
     export interface Point {
-        x: number;
-        y: number;
+        x: double;
+        y: double;
     }
 
     export interface PolyToPolyOptions {

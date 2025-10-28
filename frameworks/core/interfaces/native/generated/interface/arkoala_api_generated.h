@@ -467,6 +467,8 @@ typedef struct matrix4_Matrix4TransitPeer* Ark_matrix4_Matrix4Transit;
 typedef struct Opt_matrix4_Matrix4Transit Opt_matrix4_Matrix4Transit;
 typedef struct Ark_MotionBlurAnchor Ark_MotionBlurAnchor;
 typedef struct Opt_MotionBlurAnchor Opt_MotionBlurAnchor;
+typedef struct Ark_MotionBlurOptions Ark_MotionBlurOptions;
+typedef struct Opt_MotionBlurOptions Opt_MotionBlurOptions;
 typedef struct MultiAppModePeer MultiAppModePeer;
 typedef struct MultiAppModePeer* Ark_MultiAppMode;
 typedef struct Opt_MultiAppMode Opt_MultiAppMode;
@@ -2035,8 +2037,6 @@ typedef struct Opt_Metadata Opt_Metadata;
 typedef struct ModuleMetadataPeer ModuleMetadataPeer;
 typedef struct ModuleMetadataPeer* Ark_ModuleMetadata;
 typedef struct Opt_ModuleMetadata Opt_ModuleMetadata;
-typedef struct Ark_MotionBlurOptions Ark_MotionBlurOptions;
-typedef struct Opt_MotionBlurOptions Opt_MotionBlurOptions;
 typedef struct Ark_MotionPathOptions Ark_MotionPathOptions;
 typedef struct Opt_MotionPathOptions Opt_MotionPathOptions;
 typedef struct Ark_NativeEmbedVisibilityInfo Ark_NativeEmbedVisibilityInfo;
@@ -7263,6 +7263,15 @@ typedef struct Opt_MotionBlurAnchor {
     Ark_Tag tag;
     Ark_MotionBlurAnchor value;
 } Opt_MotionBlurAnchor;
+typedef struct Ark_MotionBlurOptions {
+    /* kind: Interface */
+    Ark_Float64 radius;
+    Ark_MotionBlurAnchor anchor;
+} Ark_MotionBlurOptions;
+typedef struct Opt_MotionBlurOptions {
+    Ark_Tag tag;
+    Ark_MotionBlurOptions value;
+} Opt_MotionBlurOptions;
 typedef struct Opt_MultiAppMode {
     Ark_Tag tag;
     Ark_MultiAppMode value;
@@ -12107,8 +12116,8 @@ typedef struct Opt_PageMapBuilder {
 typedef struct PageTransitionCallback {
     /* kind: Callback */
     Ark_CallbackResource resource;
-    void (*call)(const Ark_Int32 resourceId, Ark_RouteType type, const Ark_Number progress);
-    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, Ark_RouteType type, const Ark_Number progress);
+    void (*call)(const Ark_Int32 resourceId, Ark_RouteType type, const Ark_Float64 progress);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, Ark_RouteType type, const Ark_Float64 progress);
 } PageTransitionCallback;
 typedef struct Opt_PageTransitionCallback {
     Ark_Tag tag;
@@ -13971,15 +13980,6 @@ typedef struct Opt_ModuleMetadata {
     Ark_Tag tag;
     Ark_ModuleMetadata value;
 } Opt_ModuleMetadata;
-typedef struct Ark_MotionBlurOptions {
-    /* kind: Interface */
-    Ark_Number radius;
-    Ark_MotionBlurAnchor anchor;
-} Ark_MotionBlurOptions;
-typedef struct Opt_MotionBlurOptions {
-    Ark_Tag tag;
-    Ark_MotionBlurOptions value;
-} Opt_MotionBlurOptions;
 typedef struct Ark_MotionPathOptions {
     /* kind: Interface */
     Ark_String path;
@@ -16689,8 +16689,8 @@ typedef struct Opt_ImageFrameInfo {
 } Opt_ImageFrameInfo;
 typedef struct Ark_KeyframeAnimateParam {
     /* kind: Interface */
-    Opt_Number delay;
-    Opt_Number iterations;
+    Opt_Int32 delay;
+    Opt_Int32 iterations;
     Opt_Callback_Void onFinish;
     Opt_ExpectedFrameRateRange expectedFrameRateRange;
 } Ark_KeyframeAnimateParam;
@@ -21003,7 +21003,7 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
     void (*setOnBlur)(Ark_NativePointer node,
                       const Opt_Callback_Void* value);
     void (*setTabIndex)(Ark_NativePointer node,
-                        const Opt_Number* value);
+                        const Opt_Int32* value);
     void (*setDefaultFocus)(Ark_NativePointer node,
                             const Opt_Boolean* value);
     void (*setGroupDefaultFocus)(Ark_NativePointer node,

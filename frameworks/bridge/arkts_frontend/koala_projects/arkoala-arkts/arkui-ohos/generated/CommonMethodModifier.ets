@@ -155,7 +155,7 @@ export class CommonMethodModifier implements CommonMethod {
     _onBlur_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onBlur_0_0value?: (() => void) | undefined
     _tabIndex_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _tabIndex_0_0value?: number | undefined
+    _tabIndex_0_0value?: int32 | undefined
     _defaultFocus_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _defaultFocus_0_0value?: boolean | undefined
     _groupDefaultFocus_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -1480,7 +1480,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (this._tabIndex_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setTabIndexAttribute((this._tabIndex_0_0value as number | undefined));
+                    peer.setTabIndexAttribute((this._tabIndex_0_0value as int32 | undefined));
                     this._tabIndex_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -1490,7 +1490,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     this._tabIndex_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setTabIndexAttribute((undefined as number | undefined));
+                    peer.setTabIndexAttribute((undefined as int32 | undefined));
                 }
             }
         }
@@ -4704,7 +4704,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.tabIndex((undefined as number | undefined));
+                    this.tabIndex((undefined as int32 | undefined));
                 }
             }
         }
@@ -7162,7 +7162,7 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    tabIndex(value: number | undefined): this {
+    tabIndex(value: int32 | undefined): this {
         if (((this._tabIndex_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._tabIndex_0_0value) !== (value)))
         {
             this._tabIndex_0_flag = AttributeUpdaterFlag.UPDATE
