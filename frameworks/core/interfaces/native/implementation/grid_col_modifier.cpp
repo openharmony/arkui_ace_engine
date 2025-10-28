@@ -44,7 +44,7 @@ namespace Converter {
         return toValue;
     }
     template<>
-    V2::GridContainerSize Convert(const Ark_Number& value)
+    V2::GridContainerSize Convert(const Ark_Int32& value)
     {
         V2::GridContainerSize toValue;
         int32_t iValue = Converter::Convert<int32_t>(value);
@@ -99,7 +99,7 @@ void SetGridColOptionsImpl(Ark_NativePointer node,
 } // GridColInterfaceModifier
 namespace GridColAttributeModifier {
 void SetSpanImpl(Ark_NativePointer node,
-                 const Opt_Union_Number_GridColColumnOption* value)
+                 const Opt_Union_I32_GridColColumnOption* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -110,7 +110,7 @@ void SetSpanImpl(Ark_NativePointer node,
     GridColModelNGStatic::SetSpan(frameNode, gcSizeValue);
 }
 void SetGridColOffsetImpl(Ark_NativePointer node,
-                          const Opt_Union_Number_GridColColumnOption* value)
+                          const Opt_Union_I32_GridColColumnOption* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -120,7 +120,7 @@ void SetGridColOffsetImpl(Ark_NativePointer node,
     GridColModelNGStatic::SetOffset(frameNode, gcSizeValue);
 }
 void SetOrderImpl(Ark_NativePointer node,
-                  const Opt_Union_Number_GridColColumnOption* value)
+                  const Opt_Union_I32_GridColColumnOption* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

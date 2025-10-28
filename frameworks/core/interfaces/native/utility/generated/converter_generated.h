@@ -1231,7 +1231,7 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
-                   const Ark_Union_Number_GridColColumnOption& src)
+                   const Ark_Union_I32_GridColColumnOption& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -1246,7 +1246,7 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
-                   const Ark_Union_Number_GridRowColumnOption& src)
+                   const Ark_Union_I32_GridRowColumnOption& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -4551,8 +4551,8 @@ ASSIGN_OPT(Opt_Union_LengthMetrics_String)
 ASSIGN_OPT(Opt_Union_MenuPreviewMode_CustomBuilder)
 ASSIGN_OPT(Opt_Union_NestedScrollOptions_NestedScrollOptionsExt)
 ASSIGN_OPT(Opt_Union_Number_Bindable)
-ASSIGN_OPT(Opt_Union_Number_GridColColumnOption)
-ASSIGN_OPT(Opt_Union_Number_GridRowColumnOption)
+ASSIGN_OPT(Opt_Union_I32_GridColColumnOption)
+ASSIGN_OPT(Opt_Union_I32_GridRowColumnOption)
 ASSIGN_OPT(Opt_Union_Number_Resource)
 ASSIGN_OPT(Opt_Union_Number_ResourceStr)
 ASSIGN_OPT(Opt_Union_Number_String_Resource)
