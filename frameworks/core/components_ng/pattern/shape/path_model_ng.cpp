@@ -16,9 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_PATH_MODEL_NG_CPP
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_PATH_MODEL_NG_CPP
 
+#include "core/components_ng/pattern/shape/path_model_ng.h"
+
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/shape/path_model_ng.h"
 #include "core/components_ng/pattern/shape/path_paint_property.h"
 #include "core/components_ng/pattern/shape/path_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -45,5 +47,32 @@ void PathModelNG::SetCommands(FrameNode* frameNode, const std::string& pathCmd)
     ACE_UPDATE_NODE_PAINT_PROPERTY(PathPaintProperty, Commands, pathCmd, frameNode);
 }
 
+void PathModelNG::SetCommands(const RefPtr<ResourceObject>& commandsResObj)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetCommands(frameNode, commandsResObj);
+}
+
+void PathModelNG::SetCommands(FrameNode* frameNode, const RefPtr<ResourceObject>& commandsResObj)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    auto pattern = frameNode->GetPattern<PathPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        std::string pathCmd;
+        if (ResourceParseUtils::ParseResString(resObj, pathCmd)) {
+            ACE_UPDATE_NODE_PAINT_PROPERTY(PathPaintProperty, Commands, pathCmd, frameNode);
+        }
+    };
+    pattern->AddResObj("PathCommands", commandsResObj, std::move(updateFunc));
+}
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_PATH_MODEL_NG_CPP

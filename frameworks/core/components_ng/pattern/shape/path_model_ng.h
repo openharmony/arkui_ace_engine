@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_PATH_MODEL_NG_H
 
 #include "base/utils/macros.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/shape/path_model.h"
 
 namespace OHOS::Ace::NG {
@@ -25,8 +26,10 @@ class ACE_EXPORT PathModelNG : public OHOS::Ace::PathModel {
 public:
     void Create() override;
     void SetCommands(const std::string& pathCmd) override;
+    void SetCommands(const RefPtr<ResourceObject>& commandsResObj) override;
     
     static void SetCommands(FrameNode* frameNode, const std::string& pathCmd);
+    static void SetCommands(FrameNode* frameNode, const RefPtr<ResourceObject>& commandsResObj);
 };
 
 } // namespace OHOS::Ace::NG
