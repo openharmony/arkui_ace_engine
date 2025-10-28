@@ -904,7 +904,7 @@ void AssignArkValue(Ark_text_TextDecorationType& dst, const TextDecoration& src,
             break;
         case TextDecoration::LINE_THROUGH:
             dst = Ark_text_TextDecorationType::ARK_TEXT_TEXT_DECORATION_TYPE_LINE_THROUGH;
-            break;        
+            break;
         case TextDecoration::INHERIT:
         default:
             LOGE("Unexpected enum value in TextDecoration: %{public}d", src);
@@ -933,7 +933,7 @@ void AssignArkValue(Ark_text_FontWeight& dst, const FontWeight& src, ConvContext
             break;
         case FontWeight::W400:
             dst = Ark_text_FontWeight::ARK_TEXT_FONT_WEIGHT_W400;
-            break;    
+            break;
         case FontWeight::W500:
             dst = Ark_text_FontWeight::ARK_TEXT_FONT_WEIGHT_W500;
             break;
@@ -1232,14 +1232,6 @@ void AssignArkValue(Ark_NavPathInfo& dst, const OHOS::Ace::NG::GeneratedModifier
 {
     const auto peer = PeerUtils::CreatePeer<NavPathInfoPeer>();
     peer->data = src;
-    dst = peer;
-}
-
-void AssignArkValue(
-    Ark_NavPathStack& dst, const RefPtr<NG::GeneratedModifier::NavigationContext::NavigationStack>& src)
-{
-    const auto peer = PeerUtils::CreatePeer<NavPathStackPeer>();
-    peer->SetNavigationStack(src);
     dst = peer;
 }
 

@@ -53,7 +53,7 @@ using VectorOptionsTest = std::vector<TupleOptionsTest>;
 TupleOptionsTest getTestTuple(const RatingOptionsTestRow& src)
 {
     Ark_RatingOptions arkInputValue = {
-        .rating = Converter::ArkUnion<Opt_Union_Number_Bindable, Ark_Number>(src.input.rating),
+        .rating = Converter::ArkUnion<Opt_Union_F64_Bindable, Ark_Float64>(src.input.rating),
         .indicator = Converter::ArkValue<Opt_Boolean>(src.input.indicator)
     };
     auto optInputValue = Converter::ArkValue<Opt_RatingOptions>(arkInputValue);
@@ -200,10 +200,10 @@ HWTEST_F(RatingModifierTest, setStarsTestDefaultValues, TestSize.Level1)
 }
 
 // Valid values for attribute 'stars' of method 'stars'
-static std::vector<std::tuple<int32_t, Ark_Number, int32_t>> starsStarsValidValues = {
-    {0, Converter::ArkValue<Ark_Number>(0), 0},
-    {1, Converter::ArkValue<Ark_Number>(1), 1},
-    {5, Converter::ArkValue<Ark_Number>(5), 5}
+static std::vector<std::tuple<int32_t, Ark_Int32, int32_t>> starsStarsValidValues = {
+    {0, Converter::ArkValue<Ark_Int32>(0), 0},
+    {1, Converter::ArkValue<Ark_Int32>(1), 1},
+    {5, Converter::ArkValue<Ark_Int32>(5), 5}
 };
 
 /*
@@ -216,17 +216,10 @@ HWTEST_F(RatingModifierTest, setStarsTestValidValues, TestSize.Level1)
     std::unique_ptr<JsonValue> jsonNode;
     int32_t resultValue;
     int32_t expectedValue;
-    Ark_Number inputValueStars;
-    Ark_Number initValueStars;
-
-    // Initial setup
-    initValueStars = std::get<1>(starsStarsValidValues[0]);
 
     // Verifying attribute's  values
-    inputValueStars = initValueStars;
     for (auto&& value: starsStarsValidValues) {
-        inputValueStars = std::get<1>(value);
-        auto optInputValueStars = Converter::ArkValue<Opt_Number>(inputValueStars);
+        auto optInputValueStars = Converter::ArkValue<Opt_Int32>(std::get<1>(value));
         modifier_->setStars(node_, &optInputValueStars);
         jsonNode = GetJsonValue(node_);
         resultValue = std::stoi(GetAttrValue<std::string>(jsonNode, ATTRIBUTE_STARS_NAME));
@@ -245,10 +238,9 @@ HWTEST_F(RatingModifierTest, setStarsTestNullValues, TestSize.Level1)
     std::unique_ptr<JsonValue> jsonNode;
     int32_t resultValue;
     int32_t expectedValue = ATTRIBUTE_STARS_DEFAULT_VALUE;
-    Opt_Number initValueStars;
 
     // Initial setup
-    initValueStars = Converter::ArkValue<Opt_Number>(std::get<1>(starsStarsValidValues[0]));
+    auto initValueStars = Converter::ArkValue<Opt_Int32>(std::get<1>(starsStarsValidValues[0]));
     modifier_->setStars(node_, &initValueStars);
 
     modifier_->setStars(node_, nullptr);
@@ -258,8 +250,8 @@ HWTEST_F(RatingModifierTest, setStarsTestNullValues, TestSize.Level1)
 }
 
 // Invalid values for attribute 'stars' of method 'stars'
-static std::vector<std::tuple<int32_t, Ark_Number, int32_t>> starsStarsInvalidValues = {
-    {ATTRIBUTE_STARS_DEFAULT_VALUE, Converter::ArkValue<Ark_Number>(-1), ATTRIBUTE_STARS_DEFAULT_VALUE}
+static std::vector<std::tuple<int32_t, Ark_Int32, int32_t>> starsStarsInvalidValues = {
+    {ATTRIBUTE_STARS_DEFAULT_VALUE, Converter::ArkValue<Ark_Int32>(-1), ATTRIBUTE_STARS_DEFAULT_VALUE}
 };
 
 /*
@@ -272,17 +264,10 @@ HWTEST_F(RatingModifierTest, setStarsTestInvalidValues, TestSize.Level1)
     std::unique_ptr<JsonValue> jsonNode;
     int32_t resultValue;
     int32_t expectedValue;
-    Ark_Number inputValueStars;
-    Ark_Number initValueStars;
-
-    // Initial setup
-    initValueStars = std::get<1>(starsStarsInvalidValues[0]);
 
     // Verifying attribute's  values
-    inputValueStars = initValueStars;
     for (auto&& value: starsStarsInvalidValues) {
-        inputValueStars = std::get<1>(value);
-        auto optInputValueStars = Converter::ArkValue<Opt_Number>(inputValueStars);
+        auto optInputValueStars = Converter::ArkValue<Opt_Int32>(std::get<1>(value));
         modifier_->setStars(node_, &optInputValueStars);
         jsonNode = GetJsonValue(node_);
         resultValue = std::stoi(GetAttrValue<std::string>(jsonNode, ATTRIBUTE_STARS_NAME));
@@ -304,15 +289,13 @@ HWTEST_F(RatingModifierTest, setStepSizeTestDefaultValues, TestSize.Level1)
 }
 
 // Valid values for attribute 'stepSize' of method 'stepSize'
-using TupleStepSizeTest = std::tuple<float, Ark_Number, float>;
-using VectorStepSizeTest = std::vector<TupleStepSizeTest>;
-static VectorStepSizeTest stepSizeStepSizeValidValues = {
-    {0.1, Converter::ArkValue<Ark_Number>(0.1), 0.1},
-    {0.4, Converter::ArkValue<Ark_Number>(0.4), 0.4},
-    {0.5, Converter::ArkValue<Ark_Number>(0.5), 0.5},
-    {1.0, Converter::ArkValue<Ark_Number>(1.0), 1.0},
-    {5.0, Converter::ArkValue<Ark_Number>(5.0), 5.0},
-    {6.0, Converter::ArkValue<Ark_Number>(6.0), 6.0}
+static std::vector<std::tuple<float, Ark_Float64, float>> stepSizeStepSizeValidValues = {
+    {0.1, Converter::ArkValue<Ark_Float64>(0.1), 0.1},
+    {0.4, Converter::ArkValue<Ark_Float64>(0.4), 0.4},
+    {0.5, Converter::ArkValue<Ark_Float64>(0.5), 0.5},
+    {1.0, Converter::ArkValue<Ark_Float64>(1.0), 1.0},
+    {5.0, Converter::ArkValue<Ark_Float64>(5.0), 5.0},
+    {6.0, Converter::ArkValue<Ark_Float64>(6.0), 6.0}
 };
 
 /*
@@ -325,17 +308,10 @@ HWTEST_F(RatingModifierTest, setStepSizeTestValidValues, TestSize.Level1)
     std::unique_ptr<JsonValue> jsonNode;
     float resultValue;
     float expectedValue;
-    Ark_Number inputValueStepSize;
-    Ark_Number initValueStepSize;
-
-    // Initial setup
-    initValueStepSize = std::get<1>(stepSizeStepSizeValidValues[0]);
 
     // Verifying attribute's  values
-    inputValueStepSize = initValueStepSize;
     for (auto&& value: stepSizeStepSizeValidValues) {
-        inputValueStepSize = std::get<1>(value);
-        auto optInputValueStepSize = Converter::ArkValue<Opt_Number>(inputValueStepSize);
+        auto optInputValueStepSize = Converter::ArkValue<Opt_Float64>(std::get<1>(value));
         modifier_->setStepSize(node_, &optInputValueStepSize);
         jsonNode = GetJsonValue(node_);
         resultValue = std::stof(GetAttrValue<std::string>(jsonNode, ATTRIBUTE_STEP_SIZE_NAME));
@@ -362,9 +338,9 @@ HWTEST_F(RatingModifierTest, setStepSizeTestNullValues, TestSize.Level1)
 }
 
 // Valid values for attribute 'stepSize' of method 'stepSize'
-static VectorStepSizeTest setStepSizeTestInvalidValues = {
-    {0.5, Converter::ArkValue<Ark_Number>(0.099), 0.5},
-    {0.5, Converter::ArkValue<Ark_Number>(-0.5), 0.5}
+static std::vector<std::tuple<float, Ark_Float64, float>> setStepSizeTestInvalidValues = {
+    {0.5, Converter::ArkValue<Ark_Float64>(0.099), 0.5},
+    {0.5, Converter::ArkValue<Ark_Float64>(-0.5), 0.5}
 };
 /*
  * @tc.name: setStepSizeTestInvalidValues
@@ -376,17 +352,10 @@ HWTEST_F(RatingModifierTest, setStepSizeTestInvalidValues, TestSize.Level1)
     std::unique_ptr<JsonValue> jsonNode;
     float resultValue;
     float expectedValue;
-    Ark_Number inputValueStepSize;
-    Ark_Number initValueStepSize;
-
-    // Initial setup
-    initValueStepSize = std::get<1>(stepSizeStepSizeValidValues[0]);
 
     // Verifying attribute's  values
-    inputValueStepSize = initValueStepSize;
     for (auto&& value: setStepSizeTestInvalidValues) {
-        inputValueStepSize = std::get<1>(value);
-        auto optInputValueStepSize = Converter::ArkValue<Opt_Number>(inputValueStepSize);
+        auto optInputValueStepSize = Converter::ArkValue<Opt_Float64>(std::get<1>(value));
         modifier_->setStepSize(node_, &optInputValueStepSize);
         jsonNode = GetJsonValue(node_);
         resultValue = std::stof(GetAttrValue<std::string>(jsonNode, ATTRIBUTE_STEP_SIZE_NAME));
@@ -406,15 +375,15 @@ HWTEST_F(RatingModifierTest, setStarStyleTestDefaultValues, TestSize.Level1)
 }
 
 // Valid values for attribute 'backgroundUri' of method 'starStyle'
-static std::vector<std::tuple<std::string, Ark_ResourceStr, std::string>> starStyleBackgroundUriValidValues = {
-    {"\"\"", Converter::ArkUnion<Ark_ResourceStr, Ark_String>(""), ""},
-    {"\"abc\"", Converter::ArkUnion<Ark_ResourceStr, Ark_String>("abc"), "abc"},
+static std::vector<std::tuple<std::string, Opt_ResourceStr, std::string>> starStyleBackgroundUriValidValues = {
+    {"\"\"", Converter::ArkUnion<Opt_ResourceStr, Ark_String>(""), ""},
+    {"\"abc\"", Converter::ArkUnion<Opt_ResourceStr, Ark_String>("abc"), "abc"},
 };
 
 // Valid values for attribute 'foregroundUri' of method 'starStyle'
-static std::vector<std::tuple<std::string, Ark_ResourceStr, std::string>> starStyleForegroundUriValidValues = {
-    {"\"\"", Converter::ArkUnion<Ark_ResourceStr, Ark_String>(""), ""},
-    {"\"abc\"", Converter::ArkUnion<Ark_ResourceStr, Ark_String>("abc"), "abc"},
+static std::vector<std::tuple<std::string, Opt_ResourceStr, std::string>> starStyleForegroundUriValidValues = {
+    {"\"\"", Converter::ArkUnion<Opt_ResourceStr, Ark_String>(""), ""},
+    {"\"abc\"", Converter::ArkUnion<Opt_ResourceStr, Ark_String>("abc"), "abc"},
 };
 
 // Valid values for attribute 'secondaryUri' of method 'starStyle'
@@ -555,7 +524,7 @@ HWTEST_F(RatingModifierTest, setOnChangeTest, TestSize.Level1)
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     OnRatingChangeCallback onChangeCallback = {
         .resource = {.resourceId = frameNode->GetId()},
-        .call = [](Ark_Int32 nodeId, const Ark_Number index) {
+        .call = [](Ark_Int32 nodeId, const Ark_Float64 index) {
             checkEvent = CheckEvent{
                 .nodeId = nodeId,
                 .index = Converter::Convert<float>(index)
@@ -568,7 +537,7 @@ HWTEST_F(RatingModifierTest, setOnChangeTest, TestSize.Level1)
     eventHub->FireChangeEvent("55.5");
     ASSERT_EQ(checkEvent.has_value(), true);
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
-    EXPECT_EQ(checkEvent->index, 55.5);
+    EXPECT_FLOAT_EQ(checkEvent->index, 55.5);
     eventHub->FireChangeEvent("0.0");
     ASSERT_EQ(checkEvent.has_value(), true);
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());

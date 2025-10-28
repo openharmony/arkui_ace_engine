@@ -93,10 +93,8 @@ HWTEST_F(ListItemGroupModifierTest, setListItemGroupOptionsTest, TestSize.Level1
     EXPECT_EQ(space, "0.00vp");
 
     Ark_ListItemGroupOptions groupOptions = {
-        .style = Converter::ArkValue<Opt_ListItemGroupStyle>
-            (Converter::ArkValue<Ark_ListItemGroupStyle>(V2::ListItemGroupStyle::CARD)),
-        .space = Converter::ArkValue<Opt_Union_Number_String>
-            (Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(10)),
+        .style = Converter::ArkValue<Opt_ListItemGroupStyle>(ARK_LIST_ITEM_GROUP_STYLE_CARD),
+        .space = Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(10.),
     };
     arg = Converter::ArkValue<Opt_ListItemGroupOptions>(groupOptions);
     modifier_->setListItemGroupOptions(node_, &arg);
@@ -106,10 +104,8 @@ HWTEST_F(ListItemGroupModifierTest, setListItemGroupOptionsTest, TestSize.Level1
     EXPECT_EQ(space, "10.00vp");
 
     groupOptions = {
-        .style = Converter::ArkValue<Opt_ListItemGroupStyle>
-            (Converter::ArkValue<Ark_ListItemGroupStyle>(V2::ListItemGroupStyle::CARD)),
-        .space = Converter::ArkValue<Opt_Union_Number_String>
-            (Converter::ArkUnion<Ark_Union_Number_String, Ark_String>("20")),
+        .style = Converter::ArkValue<Opt_ListItemGroupStyle>(ARK_LIST_ITEM_GROUP_STYLE_CARD),
+        .space = Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("20"),
     };
     arg = Converter::ArkValue<Opt_ListItemGroupOptions>(groupOptions);
     modifier_->setListItemGroupOptions(node_, &arg);
@@ -120,7 +116,7 @@ HWTEST_F(ListItemGroupModifierTest, setListItemGroupOptionsTest, TestSize.Level1
 
     groupOptions = {
         .style = Converter::ArkValue<Opt_ListItemGroupStyle>(Ark_Empty()),
-        .space = Converter::ArkValue<Opt_Union_Number_String>(Ark_Empty()),
+        .space = Converter::ArkValue<Opt_Union_F64_String>(Ark_Empty()),
     };
     arg = Converter::ArkValue<Opt_ListItemGroupOptions>(groupOptions);
     modifier_->setListItemGroupOptions(node_, &arg);
@@ -147,10 +143,9 @@ HWTEST_F(ListItemGroupModifierTest, setListItemGroupOptionsCustomBuilderTest, Te
     Ark_ListItemGroupOptions options = {
         .header = header,
         .footer = footer,
-        .style = Converter::ArkValue<Opt_ListItemGroupStyle>
-            (Converter::ArkValue<Ark_ListItemGroupStyle>(V2::ListItemGroupStyle::CARD)),
-        .space = Converter::ArkValue<Opt_Union_Number_String>
-            (Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(10))};
+        .style = Converter::ArkValue<Opt_ListItemGroupStyle>(ARK_LIST_ITEM_GROUP_STYLE_CARD),
+        .space = Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(10.),
+    };
     auto optionsOpt = Converter::ArkValue<Opt_ListItemGroupOptions>(options);
     checkEventH = std::nullopt;
     checkEventF = std::nullopt;
@@ -180,8 +175,8 @@ HWTEST_F(ListItemGroupModifierTest, setDividerTest, TestSize.Level1)
     // set valid values, color as Ark_Color aka int
     Ark_ListDividerOptions dividerOptions = {
         .strokeWidth = Converter::ArkValue<Ark_Length>(11.),
-        .startMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(55.5f)),
-        .endMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(77.)),
+        .startMargin = Converter::ArkValue<Opt_Length>(55.5),
+        .endMargin = Converter::ArkValue<Opt_Length>(77.),
         .color = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_WHITE),
     };
     auto divider = Converter::ArkValue<Opt_ListDividerOptions>(dividerOptions);
@@ -200,8 +195,8 @@ HWTEST_F(ListItemGroupModifierTest, setDividerTest, TestSize.Level1)
     // set color as Ark_Number
     dividerOptions = {
         .strokeWidth = Converter::ArkValue<Ark_Length>(11.),
-        .startMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(55.5f)),
-        .endMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(77.)),
+        .startMargin = Converter::ArkValue<Opt_Length>(55.5),
+        .endMargin = Converter::ArkValue<Opt_Length>(77.),
         .color = Converter::ArkUnion<Opt_ResourceColor, Ark_Int32>(0x123456),
     };
     divider = Converter::ArkValue<Opt_ListDividerOptions>(dividerOptions);
@@ -250,8 +245,8 @@ HWTEST_F(ListItemGroupModifierTest, setDividerColorStringTest, TestSize.Level1)
     // set color as Ark_String
     Ark_ListDividerOptions dividerOptions = {
         .strokeWidth = Converter::ArkValue<Ark_Length>(11.),
-        .startMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(55.5f)),
-        .endMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(77.)),
+        .startMargin = Converter::ArkValue<Opt_Length>(55.5),
+        .endMargin = Converter::ArkValue<Opt_Length>(77.),
         .color = Converter::ArkUnion<Opt_ResourceColor, Ark_String>("#11223344"),
     };
     auto divider = Converter::ArkValue<Opt_ListDividerOptions>(dividerOptions);

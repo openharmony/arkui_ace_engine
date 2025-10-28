@@ -461,14 +461,14 @@ HWTEST_F(PatternLockModifierTest, SetOnPatternCompleteTest, TestSize.Level1)
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
 
-    auto onPatternComplete = [](Ark_Int32 nodeId, const Array_Number input) {
+    auto onPatternComplete = [](Ark_Int32 nodeId, const Array_Int32 input) {
         checkEvent = {
             .nodeId = nodeId,
             .input = Converter::Convert<std::vector<int32_t>>(input),
         };
     };
 
-    Callback_Array_Number_Void callBackValue = {
+    Callback_Array_I32_Void callBackValue = {
         .resource = Ark_CallbackResource {
             .resourceId = frameNode->GetId(),
             .hold = nullptr,
@@ -480,7 +480,7 @@ HWTEST_F(PatternLockModifierTest, SetOnPatternCompleteTest, TestSize.Level1)
     auto test = [this, &callBackValue, eventHub, frameNode](const std::vector<int> testVec) {
         checkEvent = std::nullopt;
         auto event = V2::PatternCompleteEvent(testVec);
-        auto optVal = Converter::ArkValue<Opt_Callback_Array_Number_Void>(callBackValue);
+        auto optVal = Converter::ArkValue<Opt_Callback_Array_I32_Void>(callBackValue);
         modifier_->setOnPatternComplete(node_, &optVal);
         EXPECT_FALSE(checkEvent.has_value());
         eventHub->UpdateCompleteEvent(&event);
@@ -512,14 +512,14 @@ HWTEST_F(PatternLockModifierTest, SetOnDotConnectTest, TestSize.Level1)
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
 
-    auto onDotConnect = [](Ark_Int32 nodeId, const Ark_Number code) {
+    auto onDotConnect = [](Ark_Int32 nodeId, const Ark_Int32 code) {
         checkEvent = {
             .nodeId = nodeId,
             .code = Converter::Convert<int32_t>(code),
         };
     };
 
-    Callback_Number_Void callBackValue = {
+    Callback_I32_Void callBackValue = {
         .resource = Ark_CallbackResource {
             .resourceId = frameNode->GetId(),
             .hold = nullptr,
@@ -530,7 +530,7 @@ HWTEST_F(PatternLockModifierTest, SetOnDotConnectTest, TestSize.Level1)
 
     auto test = [this, &callBackValue, eventHub, frameNode](const int32_t testValue) {
         checkEvent = std::nullopt;
-        auto optVal = Converter::ArkValue<Opt_Callback_Number_Void>(callBackValue);
+        auto optVal = Converter::ArkValue<Opt_Callback_I32_Void>(callBackValue);
         modifier_->setOnDotConnect(node_, &optVal);
         EXPECT_FALSE(checkEvent.has_value());
         eventHub->UpdateDotConnectEvent(testValue);

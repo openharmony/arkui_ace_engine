@@ -322,11 +322,13 @@ HWTEST_F(CheckboxModifierTest, setUnselectedColorTestDefaultValues, TestSize.Lev
     EXPECT_EQ(resultStr, ATTRIBUTE_UNSELECTED_COLOR_DEFAULT_VALUE);
 }
 
+namespace {
 // Valid values for attribute 'unselectedColor' of method 'unselectedColor'
-static std::vector<std::tuple<std::string, Ark_ResourceColor, std::string>> unselectedColorUnselectedColorValidValues = {
+std::vector<std::tuple<std::string, Ark_ResourceColor, std::string>> unselectedColorUnselectedColorValidValues = {
     { "ARK_COLOR_BLUE", Converter::ArkUnion<Ark_ResourceColor, enum Ark_Color>(ARK_COLOR_BLUE), "#FF0000FF" },
     { "ARK_COLOR_RED", Converter::ArkUnion<Ark_ResourceColor, enum Ark_Color>(ARK_COLOR_RED), "#FFFF0000" },
 };
+} // namespace
 
 /*
  * @tc.name: setUnselectedColorTestValidValues

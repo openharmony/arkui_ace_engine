@@ -37,7 +37,7 @@ namespace Converter {
 inline void AssignArkValue(Ark_TabContentAnimatedTransition& dst, const TabContentAnimatedTransition& src,
     ConvContext *ctx)
 {
-    dst.timeout.value = Converter::ArkValue<Ark_Number>(src.timeout);
+    dst.timeout.value = Converter::ArkValue<Ark_Int32>(src.timeout);
 }
 template<> void AssignArkValue(Opt_PageFlipMode& dst, const PageFlipMode& src, ConvContext *ctx);
 } // Converter
@@ -94,7 +94,7 @@ const auto RES_NAME = NamedResourceId{"RES_NAME", ResourceType::COLOR};
 const auto RES_ID = IntResourceId{11111, ResourceType::COLOR};
 const auto RES_STRING_FAKE_ID = IntResourceId{22222, ResourceType::STRING};
 const auto RES_STRING_REGISTERED_ID = IntResourceId{33333, ResourceType::STRING};
-constexpr double ANIMATION_DURATION_DEFAULT = 300.0;
+constexpr int32_t ANIMATION_DURATION_DEFAULT = 300;
 constexpr double COMPARING_DELTA = 0.0001;
 constexpr double GRAY_SCALE0 = 20.0;
 constexpr double GRAY_SCALE1 = 30.0;
@@ -109,14 +109,14 @@ constexpr double SCALE = 0.123;
 constexpr double DEFAULT_SCALE = 1.0;
 const auto ATTRIBUTE_PAGE_FLIP_MODE_DEFAULT_VALUE = 0;
 
-Ark_ScrollableBarModeOptions CreateScrollableMode(Opt_Length margin, Ark_LayoutStyle layoutStyle)
+Opt_ScrollableBarModeOptions CreateScrollableMode(Opt_Dimension margin, Ark_LayoutStyle layoutStyle)
 {
     Opt_LayoutStyle nonScrollableLayoutStyle = Converter::ArkValue<Opt_LayoutStyle>(layoutStyle);
     Ark_ScrollableBarModeOptions options = {
         .margin = margin,
         .nonScrollableLayoutStyle = nonScrollableLayoutStyle
     };
-    return options;
+    return Converter::ArkValue<Opt_ScrollableBarModeOptions>(options);
 }
 
 typedef std::pair<Ark_Boolean, std::string> BoolStrTestStep;
@@ -130,31 +130,31 @@ const std::vector<BoolStrTestStep> BOOL_STR_TEST_PLAN = {
     { false, "false" }
 };
 const int64_t FAKE_RES_ID(1234);
-const Ark_Length RES_ARK_LENGTH = Converter::ArkValue<Ark_Length>(FAKE_RES_ID);
-typedef std::pair<Ark_ScrollableBarModeOptions, std::string> ScrollableBarModeTestStep;
-const std::vector<ScrollableBarModeTestStep> SCROLLABLE_BAR_MODE_TEST_PLAN = {
-    { CreateScrollableMode(Converter::ArkValue<Opt_Length>(70._px), ARK_LAYOUT_STYLE_ALWAYS_AVERAGE_SPLIT),
+const std::vector<std::pair<Opt_ScrollableBarModeOptions, std::string>> SCROLLABLE_BAR_MODE_TEST_PLAN = {
+    { CreateScrollableMode(Converter::ArkValue<Opt_Dimension>("70px"), ARK_LAYOUT_STYLE_ALWAYS_AVERAGE_SPLIT),
         "BarMode.Scrollable,"
         "{\"margin\":\"70.00px\","
         "\"nonScrollableLayoutStyle\":\"LayoutStyle.ALWAYS_AVERAGE_SPLIT\"}" },
-    { CreateScrollableMode(Converter::ArkValue<Opt_Length>(32.7f), ARK_LAYOUT_STYLE_SPACE_BETWEEN_OR_CENTER),
+    { CreateScrollableMode(Converter::ArkValue<Opt_Dimension>(32.7f), ARK_LAYOUT_STYLE_SPACE_BETWEEN_OR_CENTER),
         "BarMode.Scrollable,"
         "{\"margin\":\"32.70vp\","
         "\"nonScrollableLayoutStyle\":\"LayoutStyle.SPACE_BETWEEN_OR_CENTER\"}" },
-    { CreateScrollableMode(Converter::ArkValue<Opt_Length>("10.00%"), static_cast<Ark_LayoutStyle>(25)),
+    { CreateScrollableMode(Converter::ArkValue<Opt_Dimension>("10.00%"), static_cast<Ark_LayoutStyle>(25)),
         "BarMode.Scrollable,"
         "{\"margin\":\"0.00vp\","
         "\"nonScrollableLayoutStyle\":\"LayoutStyle.ALWAYS_CENTER\"}" },
-    { CreateScrollableMode(Converter::ArkValue<Opt_Length>(-32.7f), ARK_LAYOUT_STYLE_ALWAYS_CENTER),
+    { CreateScrollableMode(Converter::ArkValue<Opt_Dimension>(-32.7f), ARK_LAYOUT_STYLE_ALWAYS_CENTER),
         "BarMode.Scrollable,"
         "{\"margin\":\"-32.70vp\","
         "\"nonScrollableLayoutStyle\":\"LayoutStyle.ALWAYS_CENTER\"}" },
-    { CreateScrollableMode(Converter::ArkValue<Opt_Length>(RES_ARK_LENGTH),
+    { CreateScrollableMode(Converter::ArkValue<Opt_Dimension>(FAKE_RES_ID),
         ARK_LAYOUT_STYLE_ALWAYS_AVERAGE_SPLIT),
         "BarMode.Scrollable,"
         "{\"margin\":\"10.00px\","
         "\"nonScrollableLayoutStyle\":\"LayoutStyle.ALWAYS_AVERAGE_SPLIT\"}"}
 };
+
+const auto RES_ARK_LENGTH = Converter::ArkValue<Ark_Length>(FAKE_RES_ID);
 
 int32_t g_indexValue(0);
 int32_t g_targetIndexValue(0);
@@ -193,14 +193,15 @@ public:
  */
 HWTEST_F(TabsModifierTest, setVerticalTest, TestSize.Level1)
 {
-    const std::string PROP_NAME("vertical");
+    const std::string propName = "vertical";
     ASSERT_NE(modifier_->setVertical, nullptr);
-    auto checkVal = GetAttrValue<std::string>(GetJsonValue(node_), PROP_NAME);
+    auto checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
     EXPECT_EQ(checkVal, "false");
 
     for (const auto& [value, expectVal] : BOOL_STR_TEST_PLAN) {
-        modifier_->setVertical(node_, value);
-        checkVal = GetAttrValue<std::string>(GetJsonValue(node_), PROP_NAME);
+        auto inputValue = Converter::ArkValue<Opt_Boolean>(value);
+        modifier_->setVertical(node_, &inputValue);
+        checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
         EXPECT_EQ(checkVal, expectVal);
     }
 }
@@ -212,14 +213,15 @@ HWTEST_F(TabsModifierTest, setVerticalTest, TestSize.Level1)
  */
 HWTEST_F(TabsModifierTest, setFadingEdgeTest, TestSize.Level1)
 {
-    const std::string PROP_NAME("fadingEdge");
+    const std::string propName = "fadingEdge";
     ASSERT_NE(modifier_->setFadingEdge, nullptr);
-    auto checkVal = GetAttrValue<std::string>(GetJsonValue(node_), PROP_NAME);
+    auto checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
     EXPECT_EQ(checkVal, "true");
 
     for (const auto& [value, expectVal] : BOOL_STR_TEST_PLAN) {
-        modifier_->setFadingEdge(node_, value);
-        checkVal = GetAttrValue<std::string>(GetJsonValue(node_), PROP_NAME);
+        auto inputValue = Converter::ArkValue<Opt_Boolean>(value);
+        modifier_->setFadingEdge(node_, &inputValue);
+        checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
         EXPECT_EQ(checkVal, expectVal);
     }
 }
@@ -231,9 +233,9 @@ HWTEST_F(TabsModifierTest, setFadingEdgeTest, TestSize.Level1)
  */
 HWTEST_F(TabsModifierTest, setScrollableTest, TestSize.Level1)
 {
-    const std::string PROP_NAME("scrollable");
+    const std::string propName = "scrollable";
     ASSERT_NE(modifier_->setScrollable, nullptr);
-    auto checkVal = GetAttrValue<bool>(GetJsonValue(node_), PROP_NAME);
+    auto checkVal = GetAttrValue<bool>(GetJsonValue(node_), propName);
     EXPECT_EQ(checkVal, true);
 
     typedef std::pair<Ark_Boolean, bool> BoolTestStep;
@@ -248,9 +250,10 @@ HWTEST_F(TabsModifierTest, setScrollableTest, TestSize.Level1)
     };
 
     for (const auto& [value, expectVal] : boolTestPlan) {
-        modifier_->setScrollable(node_, value);
+        auto inputValue = Converter::ArkValue<Opt_Boolean>(value);
+        modifier_->setScrollable(node_, &inputValue);
         auto json = GetJsonValue(node_);
-        checkVal = GetAttrValue<bool>(json, PROP_NAME);
+        checkVal = GetAttrValue<bool>(json, propName);
         EXPECT_EQ(checkVal, expectVal);
     }
 }
@@ -262,14 +265,15 @@ HWTEST_F(TabsModifierTest, setScrollableTest, TestSize.Level1)
  */
 HWTEST_F(TabsModifierTest, setBarOverlapTest, TestSize.Level1)
 {
-    const std::string PROP_NAME("barOverlap");
+    const std::string propName = "barOverlap";
     ASSERT_NE(modifier_->setBarOverlap, nullptr);
-    auto checkVal = GetAttrValue<std::string>(GetJsonValue(node_), PROP_NAME);
+    auto checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
     EXPECT_EQ(checkVal, "false");
 
     for (const auto& [value, expectVal] : BOOL_STR_TEST_PLAN) {
-        modifier_->setBarOverlap(node_, value);
-        checkVal = GetAttrValue<std::string>(GetJsonValue(node_), PROP_NAME);
+        auto inputValue = Converter::ArkValue<Opt_Boolean>(value);
+        modifier_->setBarOverlap(node_, &inputValue);
+        checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
         EXPECT_EQ(checkVal, expectVal);
     }
 }
@@ -281,32 +285,27 @@ HWTEST_F(TabsModifierTest, setBarOverlapTest, TestSize.Level1)
  */
 HWTEST_F(TabsModifierTest, setAnimationDurationTest, TestSize.Level1)
 {
-    const std::string PROP_NAME("animationDuration");
+    const std::string propName = "animationDuration";
     ASSERT_NE(modifier_->setAnimationDuration, nullptr);
-    auto checkVal = GetAttrValue<int>(GetJsonValue(node_), PROP_NAME);
-    EXPECT_EQ(checkVal, static_cast<int>(ANIMATION_DURATION_DEFAULT));
+    auto checkVal = GetAttrValue<int>(GetJsonValue(node_), propName);
+    EXPECT_EQ(checkVal, ANIMATION_DURATION_DEFAULT);
 
-    typedef std::pair<Ark_Number, int> ArkNumberTestStep;
-    const std::vector<ArkNumberTestStep> arkNumberTestPlan = {
-        { Converter::ArkValue<Ark_Number>(20), 20 },
-        { Converter::ArkValue<Ark_Number>(0), 0 },
-        { Converter::ArkValue<Ark_Number>(22.5f), 22 },
+    const std::vector<std::pair<Opt_Int32, int>> arkNumberTestPlan = {
+        { Converter::ArkValue<Opt_Int32>(20), 20 },
+        { Converter::ArkValue<Opt_Int32>(0), 0 },
         // now next step is failed, because Tabs component used incorrect default value 200
-        { Converter::ArkValue<Ark_Number>(-20), static_cast<int>(ANIMATION_DURATION_DEFAULT) },
-        { Converter::ArkValue<Ark_Number>(0.0f), 0 },
-        // now next step is failed, because Tabs component used incorrect default value 200
-        { Converter::ArkValue<Ark_Number>(-22.5f), static_cast<int>(ANIMATION_DURATION_DEFAULT) },
-        { Converter::ArkValue<Ark_Number>(20), 20 }};
+        { Converter::ArkValue<Opt_Int32>(-20), ANIMATION_DURATION_DEFAULT },
+    };
 
     for (const auto& [value, expectVal] : arkNumberTestPlan) {
         modifier_->setAnimationDuration(node_, &value);
-        checkVal = GetAttrValue<int>(GetJsonValue(node_), PROP_NAME);
+        checkVal = GetAttrValue<int>(GetJsonValue(node_), propName);
         EXPECT_EQ(checkVal, expectVal);
     }
 
     //value should not be changed
     modifier_->setAnimationDuration(node_, nullptr);
-    checkVal = GetAttrValue<int>(GetJsonValue(node_), PROP_NAME);
+    checkVal = GetAttrValue<int>(GetJsonValue(node_), propName);
     EXPECT_EQ(checkVal, arkNumberTestPlan[arkNumberTestPlan.size()-1].second);
 }
 
@@ -317,30 +316,30 @@ HWTEST_F(TabsModifierTest, setAnimationDurationTest, TestSize.Level1)
  */
 HWTEST_F(TabsModifierTest, setAnimationModeTest, TestSize.Level1)
 {
-    const std::string PROP_NAME("animationMode");
+    const std::string propName = "animationMode";
+    const auto defaultValue = "AnimationMode.CONTENT_FIRST";
     ASSERT_NE(modifier_->setAnimationMode, nullptr);
-    auto checkVal = GetAttrValue<std::string>(GetJsonValue(node_), PROP_NAME);
-    EXPECT_EQ(checkVal, "AnimationMode.CONTENT_FIRST");
+    auto checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
+    EXPECT_EQ(checkVal, defaultValue);
 
     typedef std::pair<Opt_AnimationMode, std::string> AnimationModeTestStep;
     const std::vector<AnimationModeTestStep> animationModeTestPlan = {
         { Converter::ArkValue<Opt_AnimationMode>(ARK_ANIMATION_MODE_ACTION_FIRST), "AnimationMode.ACTION_FIRST" },
         { Converter::ArkValue<Opt_AnimationMode>(ARK_ANIMATION_MODE_CONTENT_FIRST), "AnimationMode.CONTENT_FIRST" },
         { Converter::ArkValue<Opt_AnimationMode>(ARK_ANIMATION_MODE_NO_ANIMATION), "AnimationMode.NO_ANIMATION" },
-        { Converter::ArkValue<Opt_AnimationMode>(static_cast<Ark_AnimationMode>(25)), "AnimationMode.CONTENT_FIRST" },
+        { Converter::ArkValue<Opt_AnimationMode>(static_cast<Ark_AnimationMode>(25)), defaultValue },
         { Converter::ArkValue<Opt_AnimationMode>(ARK_ANIMATION_MODE_NO_ANIMATION), "AnimationMode.NO_ANIMATION" },
     };
 
     for (const auto& [value, expectVal] : animationModeTestPlan) {
         modifier_->setAnimationMode(node_, &value);
-        checkVal = GetAttrValue<std::string>(GetJsonValue(node_), PROP_NAME);
+        checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
         EXPECT_EQ(checkVal, expectVal);
     }
 
-    //value should not be changed
     modifier_->setAnimationMode(node_, nullptr);
-    checkVal = GetAttrValue<std::string>(GetJsonValue(node_), PROP_NAME);
-    EXPECT_EQ(checkVal, animationModeTestPlan[animationModeTestPlan.size()-1].second);
+    checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
+    EXPECT_EQ(checkVal, defaultValue);
 }
 
 /**
@@ -350,29 +349,29 @@ HWTEST_F(TabsModifierTest, setAnimationModeTest, TestSize.Level1)
  */
 HWTEST_F(TabsModifierTest, setEdgeEffectTest, TestSize.Level1)
 {
-    const std::string PROP_NAME("edgeEffect");
+    const std::string propName = "edgeEffect";
+    const auto defaultValue = "EdgeEffect::SPRING";
     ASSERT_NE(modifier_->setEdgeEffect, nullptr);
-    auto checkVal = GetAttrValue<std::string>(GetJsonValue(node_), PROP_NAME);
-    EXPECT_EQ(checkVal, "EdgeEffect::SPRING");
+    auto checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
+    EXPECT_EQ(checkVal, defaultValue);
     typedef std::pair<Opt_EdgeEffect, std::string> EdgeEffectTestStep;
     const std::vector<EdgeEffectTestStep> edgeEffectTestPlan = {
         { Converter::ArkValue<Opt_EdgeEffect>(ARK_EDGE_EFFECT_FADE), "EdgeEffect::FADE" },
         { Converter::ArkValue<Opt_EdgeEffect>(ARK_EDGE_EFFECT_SPRING), "EdgeEffect::SPRING" },
         { Converter::ArkValue<Opt_EdgeEffect>(ARK_EDGE_EFFECT_NONE), "EdgeEffect::NONE" },
-        { Converter::ArkValue<Opt_EdgeEffect>(static_cast<Ark_EdgeEffect>(25)),  "EdgeEffect::SPRING" },
+        { Converter::ArkValue<Opt_EdgeEffect>(static_cast<Ark_EdgeEffect>(25)), defaultValue },
         { Converter::ArkValue<Opt_EdgeEffect>(ARK_EDGE_EFFECT_NONE), "EdgeEffect::NONE" }
     };
 
     for (const auto& [value, expectVal] : edgeEffectTestPlan) {
         modifier_->setEdgeEffect(node_, &value);
-        checkVal = GetAttrValue<std::string>(GetJsonValue(node_), PROP_NAME);
+        checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
         EXPECT_EQ(checkVal, expectVal);
     }
 
-    //value should not be changed
     modifier_->setEdgeEffect(node_, nullptr);
-    checkVal = GetAttrValue<std::string>(GetJsonValue(node_), PROP_NAME);
-    EXPECT_EQ(checkVal, edgeEffectTestPlan[edgeEffectTestPlan.size()-1].second);
+    checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
+    EXPECT_EQ(checkVal, defaultValue);
 }
 
 /**
@@ -382,119 +381,61 @@ HWTEST_F(TabsModifierTest, setEdgeEffectTest, TestSize.Level1)
  */
 HWTEST_F(TabsModifierTest, setBarPositionTest, TestSize.Level1)
 {
-    const std::string PROP_NAME("barPosition");
+    const auto defaultValue = "BarPosition.Start";
+    const std::string propName = "barPosition";
     ASSERT_NE(modifier_->setBarPosition, nullptr);
-    auto checkVal = GetAttrValue<std::string>(GetJsonValue(node_), PROP_NAME);
-    EXPECT_EQ(checkVal, "BarPosition.Start");
+    auto checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
+    EXPECT_EQ(checkVal, defaultValue);
 
-    typedef std::pair<Ark_BarPosition, std::string> BarPositionTestStep;
-    const std::vector<BarPositionTestStep> BarPositionTestPlan = {
-        { ARK_BAR_POSITION_END, "BarPosition.End" },
-        { ARK_BAR_POSITION_START, "BarPosition.Start" },
-        { ARK_BAR_POSITION_END, "BarPosition.End" },
-        { static_cast<Ark_BarPosition>(25), "BarPosition.Start" }
+    const std::vector<std::pair<Opt_BarPosition, std::string>> BarPositionTestPlan = {
+        { Converter::ArkValue<Opt_BarPosition>(ARK_BAR_POSITION_END), "BarPosition.End" },
+        { Converter::ArkValue<Opt_BarPosition>(ARK_BAR_POSITION_START), "BarPosition.Start" },
+        { Converter::ArkValue<Opt_BarPosition>(ARK_BAR_POSITION_END), "BarPosition.End" },
+        { Converter::ArkValue<Opt_BarPosition>(Converter::INVALID_ENUM_VAL<Ark_BarPosition>), defaultValue },
+        { Converter::ArkValue<Opt_BarPosition>(ARK_BAR_POSITION_END), "BarPosition.End" },
+        { Converter::ArkValue<Opt_BarPosition>(), defaultValue },
     };
 
     for (const auto& [value, expectVal] : BarPositionTestPlan) {
-        modifier_->setBarPosition(node_, value);
-        checkVal = GetAttrValue<std::string>(GetJsonValue(node_), PROP_NAME);
+        modifier_->setBarPosition(node_, &value);
+        checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
         EXPECT_EQ(checkVal, expectVal);
     }
 }
 
 /**
- * @tc.name: setBarMode0Test
- * @tc.desc: Check the functionality of GENERATED_ArkUITabsModifier.setBarMode0
+ * @tc.name: setBarModeTest
+ * @tc.desc: Check the functionality of GENERATED_ArkUITabsModifier.setBarMode
  * @tc.type: FUNC
  */
-HWTEST_F(TabsModifierTest, setBarMode0Test, TestSize.Level1)
+HWTEST_F(TabsModifierTest, setBarModeTest, TestSize.Level1)
 {
-    const std::string PROP_NAME("barMode");
-    ASSERT_NE(modifier_->setBarMode0, nullptr);
-    ASSERT_NE(modifier_->setBarMode1, nullptr);
-    auto checkVal = GetAttrValue<std::string>(GetJsonValue(node_), PROP_NAME);
-    EXPECT_EQ(checkVal, "BarMode.Fixed");
-
-    typedef std::pair<Ark_BarMode, std::string> BarMode0TestStep;
-    const std::vector<BarMode0TestStep> BarMode0TestPlan = {
-        { ARK_BAR_MODE_SCROLLABLE, "BarMode.Fixed" },
-        { ARK_BAR_MODE_FIXED, "BarMode.Fixed" },
-        { static_cast<Ark_BarMode>(25), "BarMode.Fixed" }
-    };
-    std::string scrollableMode =
-        "BarMode.Scrollable,{\"margin\":\"0.00vp\",\"nonScrollableLayoutStyle\":\"LayoutStyle.ALWAYS_CENTER\"}";
-
-    for (const auto& [value, expectVal] : BarMode0TestPlan) {
-        modifier_->setBarMode1(node_, ARK_BAR_MODE_SCROLLABLE, nullptr);
-        checkVal = GetAttrValue<std::string>(GetJsonValue(node_), PROP_NAME);
-        EXPECT_EQ(checkVal, scrollableMode);
-
-        modifier_->setBarMode0(node_, value);
-        checkVal = GetAttrValue<std::string>(GetJsonValue(node_), PROP_NAME);
-        EXPECT_EQ(checkVal, expectVal);
-    }
-}
-
-/**
- * @tc.name: setBarMode1Test
- * @tc.desc: Check the functionality of GENERATED_ArkUITabsModifier.setBarMode1
- * @tc.type: FUNC
- */
-HWTEST_F(TabsModifierTest, setBarMode1Test, TestSize.Level1)
-{
-    const std::string PROP_NAME("barMode");
-    ASSERT_NE(modifier_->setBarMode0, nullptr);
-    ASSERT_NE(modifier_->setBarMode1, nullptr);
-    auto checkVal = GetAttrValue<std::string>(GetJsonValue(node_), PROP_NAME);
-    EXPECT_EQ(checkVal, "BarMode.Fixed");
+    const auto defaultValue = "BarMode.Fixed";
+    const std::string propName = "barMode";
+    ASSERT_NE(modifier_->setBarMode, nullptr);
+    auto checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
+    EXPECT_EQ(checkVal, defaultValue);
 
     std::string scrollableMode =
         "BarMode.Scrollable,{\"margin\":\"0.00vp\",\"nonScrollableLayoutStyle\":\"LayoutStyle.ALWAYS_CENTER\"}";
-    typedef std::pair<Ark_BarMode, std::string> BarMode0TestStep;
-    const std::vector<BarMode0TestStep> BarMode1TestPlan = {
-        { ARK_BAR_MODE_SCROLLABLE, scrollableMode },
-        { ARK_BAR_MODE_FIXED, "BarMode.Fixed" },
-        { static_cast<Ark_BarMode>(25), "BarMode.Fixed" }
+    const std::vector<std::pair<Opt_BarMode, std::string>> BarModeTestPlan = {
+        { Converter::ArkValue<Opt_BarMode>(ARK_BAR_MODE_FIXED), "BarMode.Fixed" },
+        { Converter::ArkValue<Opt_BarMode>(ARK_BAR_MODE_SCROLLABLE), scrollableMode },
+        { Converter::ArkValue<Opt_BarMode>(Converter::INVALID_ENUM_VAL<Ark_BarMode>), defaultValue },
+        { Converter::ArkValue<Opt_BarMode>(ARK_BAR_MODE_SCROLLABLE), scrollableMode },
+        { Converter::ArkValue<Opt_BarMode>(), defaultValue },
     };
-
-    for (const auto& [value, expectVal] : BarMode1TestPlan) {
-        modifier_->setBarMode1(node_, value, nullptr);
-        checkVal = GetAttrValue<std::string>(GetJsonValue(node_), PROP_NAME);
-        EXPECT_EQ(checkVal, expectVal);
-
-        modifier_->setBarMode0(node_, ARK_BAR_MODE_FIXED);
-        checkVal = GetAttrValue<std::string>(GetJsonValue(node_), PROP_NAME);
-        EXPECT_EQ(checkVal, "BarMode.Fixed");
-    }
-
-    Opt_Length margin = Converter::ArkValue<Opt_Length>(70._px);
-    Opt_LayoutStyle nonScrollableLayoutStyle =
-    Converter::ArkValue<Opt_LayoutStyle>(ARK_LAYOUT_STYLE_ALWAYS_AVERAGE_SPLIT);
-    Ark_ScrollableBarModeOptions options = {.margin = margin, .nonScrollableLayoutStyle = nonScrollableLayoutStyle};
-    std::string scrollableMode2 = "BarMode.Scrollable,"
-        "{\"margin\":\"70.00px\","
-        "\"nonScrollableLayoutStyle\":\"LayoutStyle.ALWAYS_AVERAGE_SPLIT\"}";
-    auto optOptions = Converter::ArkValue<Opt_ScrollableBarModeOptions>(options);
-    modifier_->setBarMode1(node_, ARK_BAR_MODE_SCROLLABLE, &optOptions);
-    checkVal = GetAttrValue<std::string>(GetJsonValue(node_), PROP_NAME);
-    EXPECT_EQ(checkVal, scrollableMode2);
-}
-
-/**
- * @tc.name: setBarMode2Test
- * @tc.desc: Check the functionality of GENERATED_ArkUITabsModifier.setBarMode2
- * @tc.type: FUNC
- */
-HWTEST_F(TabsModifierTest, setBarMode2Test, TestSize.Level1)
-{
-    const std::string PROP_NAME("barMode");
-    ASSERT_NE(modifier_->setBarModeScrollable, nullptr);
-    auto checkVal = GetAttrValue<std::string>(GetJsonValue(node_), PROP_NAME);
-    EXPECT_EQ(checkVal, "BarMode.Fixed");
 
     for (const auto& [value, expectVal] : SCROLLABLE_BAR_MODE_TEST_PLAN) {
-        modifier_->setBarModeScrollable(node_, &value);
-        checkVal = GetAttrValue<std::string>(GetJsonValue(node_), PROP_NAME);
+        auto mode = Converter::ArkValue<Opt_BarMode>(ARK_BAR_MODE_SCROLLABLE);
+        modifier_->setBarMode(node_, &mode, &value);
+        checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
+        EXPECT_EQ(checkVal, expectVal);
+    }
+
+    for (const auto& [value, expectVal] : BarModeTestPlan) {
+        modifier_->setBarMode(node_, &value, nullptr);
+        checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
         EXPECT_EQ(checkVal, expectVal);
     }
 }
@@ -506,32 +447,35 @@ HWTEST_F(TabsModifierTest, setBarMode2Test, TestSize.Level1)
  */
 HWTEST_F(TabsModifierTest, setBarBackgroundBlurStyle0Test, TestSize.Level1)
 {
-    const std::string PROP_NAME("barBackgroundBlurStyle");
+    const auto defaultValue = "BlurStyle.NONE";
+    const std::string propName = "barBackgroundBlurStyle";
     ASSERT_NE(modifier_->setBarBackgroundBlurStyle0, nullptr);
-    auto checkVal = GetAttrValue<std::string>(GetJsonValue(node_), PROP_NAME);
-    EXPECT_EQ(checkVal, "BlurStyle.NONE");
+    auto checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
+    EXPECT_EQ(checkVal, defaultValue);
 
-    typedef std::pair<Ark_BlurStyle, std::string> BlurStyleTestStep;
-    const std::vector<BlurStyleTestStep> BlurStyleTestPlan = {
-        { ARK_BLUR_STYLE_THIN, "BlurStyle.Thin" },
-        { ARK_BLUR_STYLE_REGULAR, "BlurStyle.Regular" },
-        { ARK_BLUR_STYLE_THICK, "BlurStyle.Thick" },
-        { ARK_BLUR_STYLE_BACKGROUND_THIN, "BlurStyle.BACKGROUND_THIN" },
-        { ARK_BLUR_STYLE_BACKGROUND_REGULAR, "BlurStyle.BACKGROUND_REGULAR" },
-        { ARK_BLUR_STYLE_BACKGROUND_THICK, "BlurStyle.BACKGROUND_THICK" },
-        { ARK_BLUR_STYLE_BACKGROUND_ULTRA_THICK, "BlurStyle.BACKGROUND_ULTRA_THICK" },
-        { ARK_BLUR_STYLE_NONE, "BlurStyle.NONE" },
-        { ARK_BLUR_STYLE_COMPONENT_ULTRA_THIN, "BlurStyle.COMPONENT_ULTRA_THIN" },
-        { ARK_BLUR_STYLE_COMPONENT_THIN, "BlurStyle.COMPONENT_THIN" },
-        { ARK_BLUR_STYLE_COMPONENT_REGULAR, "BlurStyle.COMPONENT_REGULAR" },
-        { ARK_BLUR_STYLE_COMPONENT_THICK, "BlurStyle.COMPONENT_THICK" },
-        { ARK_BLUR_STYLE_COMPONENT_ULTRA_THICK, "BlurStyle.COMPONENT_ULTRA_THICK" },
-        { static_cast<Ark_BlurStyle>(25), "BlurStyle.NONE" }
+    const std::vector<std::pair<Opt_BlurStyle, std::string>> BlurStyleTestPlan = {
+        { Converter::ArkValue<Opt_BlurStyle>(ARK_BLUR_STYLE_THIN), "BlurStyle.Thin" },
+        { Converter::ArkValue<Opt_BlurStyle>(ARK_BLUR_STYLE_REGULAR), "BlurStyle.Regular" },
+        { Converter::ArkValue<Opt_BlurStyle>(ARK_BLUR_STYLE_THICK), "BlurStyle.Thick" },
+        { Converter::ArkValue<Opt_BlurStyle>(ARK_BLUR_STYLE_BACKGROUND_THIN), "BlurStyle.BACKGROUND_THIN" },
+        { Converter::ArkValue<Opt_BlurStyle>(ARK_BLUR_STYLE_BACKGROUND_REGULAR), "BlurStyle.BACKGROUND_REGULAR" },
+        { Converter::ArkValue<Opt_BlurStyle>(ARK_BLUR_STYLE_BACKGROUND_THICK), "BlurStyle.BACKGROUND_THICK" },
+        { Converter::ArkValue<Opt_BlurStyle>(ARK_BLUR_STYLE_BACKGROUND_ULTRA_THICK),
+            "BlurStyle.BACKGROUND_ULTRA_THICK" },
+        { Converter::ArkValue<Opt_BlurStyle>(ARK_BLUR_STYLE_NONE), "BlurStyle.NONE" },
+        { Converter::ArkValue<Opt_BlurStyle>(ARK_BLUR_STYLE_COMPONENT_ULTRA_THIN), "BlurStyle.COMPONENT_ULTRA_THIN" },
+        { Converter::ArkValue<Opt_BlurStyle>(ARK_BLUR_STYLE_COMPONENT_THIN), "BlurStyle.COMPONENT_THIN" },
+        { Converter::ArkValue<Opt_BlurStyle>(ARK_BLUR_STYLE_COMPONENT_REGULAR), "BlurStyle.COMPONENT_REGULAR" },
+        { Converter::ArkValue<Opt_BlurStyle>(ARK_BLUR_STYLE_COMPONENT_THICK), "BlurStyle.COMPONENT_THICK" },
+        { Converter::ArkValue<Opt_BlurStyle>(ARK_BLUR_STYLE_COMPONENT_ULTRA_THICK), "BlurStyle.COMPONENT_ULTRA_THICK" },
+        { Converter::ArkValue<Opt_BlurStyle>(Converter::INVALID_ENUM_VAL<Ark_BlurStyle>), defaultValue },
+        { Converter::ArkValue<Opt_BlurStyle>(ARK_BLUR_STYLE_THIN), "BlurStyle.Thin" },
+        { Converter::ArkValue<Opt_BlurStyle>(), defaultValue },
     };
 
     for (const auto& [value, expectVal] : BlurStyleTestPlan) {
-        modifier_->setBarBackgroundBlurStyle0(node_, value);
-        checkVal = GetAttrValue<std::string>(GetJsonValue(node_), PROP_NAME);
+        modifier_->setBarBackgroundBlurStyle0(node_, &value);
+        checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
         EXPECT_EQ(checkVal, expectVal);
     }
 }
@@ -545,10 +489,10 @@ HWTEST_F(TabsModifierTest, setOnChangeTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto onChange =
-        [](Ark_Int32 nodeId, const Ark_Number index) {
+        [](Ark_Int32 nodeId, const Ark_Int32 index) {
             g_indexValue = Converter::Convert<int32_t>(index);
         };
-    auto func = Converter::ArkValue<Callback_Number_Void>(onChange, CONTEXT_ID);
+    auto func = Converter::ArkCallback<Opt_Callback_I32_Void>(onChange, CONTEXT_ID);
     ASSERT_NE(frameNode, nullptr);
     auto context = MockPipelineContext::GetCurrent();
     frameNode->AttachToMainTree(true, Referenced::RawPtr(context));
@@ -575,7 +519,7 @@ HWTEST_F(TabsModifierTest, setOnAnimationStartTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto onAnimationStart =
-        [](Ark_Int32 nodeId, const Ark_Number index, const Ark_Number targetIndex,
+        [](Ark_Int32 nodeId, const Ark_Int32 index, const Ark_Int32 targetIndex,
             const Ark_TabsAnimationEvent event) {
             g_indexValue = Converter::Convert<int32_t>(index);
             g_targetIndexValue = Converter::Convert<int32_t>(targetIndex);
@@ -583,7 +527,7 @@ HWTEST_F(TabsModifierTest, setOnAnimationStartTest, TestSize.Level1)
             g_targetOffsetValue = Converter::Convert<float>(event.targetOffset);
             g_velocityValue = Converter::Convert<float>(event.velocity);
         };
-    auto func = Converter::ArkValue<OnTabsAnimationStartCallback>(onAnimationStart, CONTEXT_ID);
+    auto func = Converter::ArkCallback<Opt_OnTabsAnimationStartCallback>(onAnimationStart, CONTEXT_ID);
     modifier_->setOnAnimationStart(node_, &func);
 
     auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
@@ -624,13 +568,13 @@ HWTEST_F(TabsModifierTest, setOnAnimationEndTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto onAnimationEnd =
-        [](Ark_Int32 nodeId, const Ark_Number index, const Ark_TabsAnimationEvent event) {
+        [](Ark_Int32 nodeId, const Ark_Int32 index, const Ark_TabsAnimationEvent event) {
             g_indexValue = Converter::Convert<int32_t>(index);
             g_currentOffsetValue = Converter::Convert<float>(event.currentOffset);
             g_targetOffsetValue = Converter::Convert<float>(event.targetOffset);
             g_velocityValue = Converter::Convert<float>(event.velocity);
         };
-    auto func = Converter::ArkValue<OnTabsAnimationEndCallback>(onAnimationEnd, CONTEXT_ID);
+    auto func = Converter::ArkCallback<Opt_OnTabsAnimationEndCallback>(onAnimationEnd, CONTEXT_ID);
     modifier_->setOnAnimationEnd(node_, &func);
 
     auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
@@ -670,13 +614,13 @@ HWTEST_F(TabsModifierTest, setOnGestureSwipeTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto onGestureSwipe =
-        [](Ark_Int32 nodeId, const Ark_Number index, const Ark_TabsAnimationEvent event) {
+        [](Ark_Int32 nodeId, const Ark_Int32 index, const Ark_TabsAnimationEvent event) {
             g_indexValue = Converter::Convert<int32_t>(index);
             g_currentOffsetValue = Converter::Convert<float>(event.currentOffset);
             g_targetOffsetValue = Converter::Convert<float>(event.targetOffset);
             g_velocityValue = Converter::Convert<float>(event.velocity);
         };
-    auto func = Converter::ArkValue<OnTabsGestureSwipeCallback>(onGestureSwipe, CONTEXT_ID);
+    auto func = Converter::ArkCallback<Opt_OnTabsGestureSwipeCallback>(onGestureSwipe, CONTEXT_ID);
     modifier_->setOnGestureSwipe(node_, &func);
 
     auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
@@ -721,18 +665,20 @@ HWTEST_F(TabsModifierTest, setCustomContentTransitionTest, TestSize.Level1)
     ASSERT_NE(swiperPattern, nullptr);
 
     static const Ark_Int32 expectedResId = 123;
+    static bool called = false;
     auto onTransition = [](Ark_VMContext context, const Ark_Int32 resourceId,
-        const Ark_Number from, const Ark_Number to,
+        const Ark_Int32 from, const Ark_Int32 to,
         const Callback_Opt_TabContentAnimatedTransition_Void cbReturn) {
+        called = true;
         EXPECT_EQ(resourceId, expectedResId);
         EXPECT_EQ(Converter::Convert<int32_t>(to), TO);
         TabContentAnimatedTransition result;
         CallbackHelper(cbReturn).InvokeSync(Converter::ArkValue<Opt_TabContentAnimatedTransition>(result));
     };
-    auto arkFunc = Converter::ArkValue<TabsCustomContentTransitionCallback>(
-        nullptr, onTransition, expectedResId);
+    auto arkFunc = Converter::ArkCallback<Opt_TabsCustomContentTransitionCallback>(onTransition, expectedResId);
     modifier_->setCustomContentTransition(node_, &arkFunc);
     swiperPattern->OnCustomContentTransition(TO);
+    EXPECT_TRUE(called);
 }
 
 /**
@@ -753,15 +699,14 @@ HWTEST_F(TabsModifierTest, setOnContentWillChangeTest, TestSize.Level1)
 
     static const Ark_Int32 expectedResId = 123;
     auto onContentWillChange = [](Ark_VMContext context, const Ark_Int32 resourceId,
-        const Ark_Number currentIndex, const Ark_Number comingIndex, const Callback_Boolean_Void cbReturn) {
+        const Ark_Int32 currentIndex, const Ark_Int32 comingIndex, const Callback_Boolean_Void cbReturn) {
         EXPECT_EQ(resourceId, expectedResId);
         EXPECT_EQ(Converter::Convert<int32_t>(currentIndex), CURRENT_INDEX);
         EXPECT_EQ(Converter::Convert<int32_t>(comingIndex), COMING_INDEX);
         bool result = Converter::Convert<int32_t>(comingIndex) > 0;
         CallbackHelper(cbReturn).InvokeSync(Converter::ArkValue<Ark_Boolean>(result));
     };
-    auto arkFunc = Converter::ArkValue<OnTabsContentWillChangeCallback>(
-        nullptr, onContentWillChange, expectedResId);
+    auto arkFunc = Converter::ArkCallback<Opt_OnTabsContentWillChangeCallback>(onContentWillChange, expectedResId);
     modifier_->setOnContentWillChange(node_, &arkFunc);
 
     auto called = tabPattern->OnContentWillChange(CURRENT_INDEX, COMING_INDEX);
@@ -777,10 +722,10 @@ HWTEST_F(TabsModifierTest, setOnTabBarClickTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto onTabBarClick =
-        [](Ark_Int32 nodeId, const Ark_Number index) {
+        [](Ark_Int32 nodeId, const Ark_Int32 index) {
             g_indexValue = Converter::Convert<int32_t>(index);
         };
-    auto func = Converter::ArkValue<Callback_Number_Void>(onTabBarClick, CONTEXT_ID);
+    auto func = Converter::ArkCallback<Opt_Callback_I32_Void>(onTabBarClick);
     modifier_->setOnTabBarClick(node_, &func);
     EXPECT_EQ(g_indexValue, 0);
 
@@ -810,16 +755,16 @@ HWTEST_F(TabsModifierTest, setBarWidthTestDefaultValues, TestSize.Level1)
 }
 
 // Valid values for attribute 'barWidth' of method 'barWidth'
-static std::vector<std::tuple<std::string, Ark_Length, std::string>> barSizeValidValues = {
-    {"2.45f", Converter::ArkValue<Ark_Length>(2.45f), "2.45vp"},
-    {"5.0_px", Converter::ArkValue<Ark_Length>(5.0_px), "5.00px"},
-    {"22.35_px", Converter::ArkValue<Ark_Length>(22.35_px), "22.35px"},
-    {"7.0_vp", Converter::ArkValue<Ark_Length>(7.0_vp), "7.00vp"},
-    {"1.65_vp", Converter::ArkValue<Ark_Length>(1.65_vp), "1.65vp"},
-    {"65.00fp", Converter::ArkValue<Ark_Length>(65.0_fp), "65.00fp"},
-    {"4.3_fp", Converter::ArkValue<Ark_Length>(4.3_fp), "4.30fp"},
-    {"12.0_pct", Converter::ArkValue<Ark_Length>("12.00%"), "12.00%"},
-    {"RES_ARK_LENGTH", RES_ARK_LENGTH, "10.00px"}
+static std::vector<std::tuple<std::string, Opt_Length, std::string>> barSizeValidValues = {
+    {"2.45", Converter::ArkValue<Opt_Length>(2.45), "2.45vp"},
+    {"5.0px", Converter::ArkValue<Opt_Length>("5.0px"), "5.00px"},
+    {"22.35px", Converter::ArkValue<Opt_Length>("22.35px"), "22.35px"},
+    {"7.0vp", Converter::ArkValue<Opt_Length>("7.0vp"), "7.00vp"},
+    {"1.65vp", Converter::ArkValue<Opt_Length>("1.65vp"), "1.65vp"},
+    {"65.00fp", Converter::ArkValue<Opt_Length>("65.0fp"), "65.00fp"},
+    {"4.3fp", Converter::ArkValue<Opt_Length>("4.3fp"), "4.30fp"},
+    {"12%", Converter::ArkValue<Opt_Length>("12.00%"), "12.00%"},
+    {"RES_ARK_LENGTH", Converter::ArkValue<Opt_Length>(RES_ARK_LENGTH), "10.00px"},
 };
 
 /*
@@ -832,11 +777,10 @@ HWTEST_F(TabsModifierTest, setBarWidthTestValidValues, TestSize.Level1)
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    Ark_Length inputValueBarWidth;
 
     // Verifying attribute's  values
     for (auto&& value: barSizeValidValues) {
-        inputValueBarWidth = std::get<1>(value);
+        auto inputValueBarWidth = std::get<1>(value);
         modifier_->setBarWidth(node_, &inputValueBarWidth);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BAR_WIDTH_NAME);
@@ -846,15 +790,15 @@ HWTEST_F(TabsModifierTest, setBarWidthTestValidValues, TestSize.Level1)
 }
 
 // Invalid values for attribute 'barWidth' of method 'barWidth'
-static std::vector<std::tuple<std::string, Ark_Length>> barSizeInvalidValues = {
-    {"-2.45f", Converter::ArkValue<Ark_Length>(-2.45f)},
-    {"-5.0_px", Converter::ArkValue<Ark_Length>(-5.0_px)},
-    {"-22.35_px", Converter::ArkValue<Ark_Length>(-22.35_px)},
-    {"-7.0_vp", Converter::ArkValue<Ark_Length>(-7.0_vp)},
-    {"-1.65_vp", Converter::ArkValue<Ark_Length>(-1.65_vp)},
-    {"-65.00fp", Converter::ArkValue<Ark_Length>(-65.0_fp)},
-    {"-4.3_fp", Converter::ArkValue<Ark_Length>(-4.3_fp)},
-    {"-12.0_pct", Converter::ArkValue<Ark_Length>("-12.00%")}
+static std::vector<std::tuple<std::string, Opt_Length>> barSizeInvalidValues = {
+    {"-2.45", Converter::ArkValue<Opt_Length>(-2.45)},
+    {"-5.0px", Converter::ArkValue<Opt_Length>("-5.0px")},
+    {"-22.35px", Converter::ArkValue<Opt_Length>("-22.35px")},
+    {"-7.0vp", Converter::ArkValue<Opt_Length>("-7.0vp")},
+    {"-1.65vp", Converter::ArkValue<Opt_Length>("-1.65vp")},
+    {"-65.00fp", Converter::ArkValue<Opt_Length>("-65.0fp")},
+    {"-4.3fp", Converter::ArkValue<Opt_Length>("-4.3fp")},
+    {"-12%", Converter::ArkValue<Opt_Length>("-12%")},
 };
 
 /*
@@ -867,15 +811,13 @@ HWTEST_F(TabsModifierTest, setBarWidthTestInvalidValues, TestSize.Level1)
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    Ark_Length inputValueBarWidth;
-    Ark_Length initValueBarWidth;
 
     // Initial setup
-    initValueBarWidth = std::get<1>(barSizeValidValues[0]);
+    auto initValueBarWidth = std::get<1>(barSizeValidValues[0]);
 
     // Verifying attribute's  values
     for (auto&& value: barSizeInvalidValues) {
-        inputValueBarWidth = initValueBarWidth;
+        auto inputValueBarWidth = initValueBarWidth;
         modifier_->setBarWidth(node_, &inputValueBarWidth);
         inputValueBarWidth = std::get<1>(value);
         modifier_->setBarWidth(node_, &inputValueBarWidth);
@@ -914,11 +856,10 @@ HWTEST_F(TabsModifierTest, setBarHeightTestValidValues, TestSize.Level1)
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    Ark_Length inputValueBarHeight;
 
     // Verifying attribute's  values
     for (auto&& value: barSizeValidValues) {
-        inputValueBarHeight = std::get<1>(value);
+        auto inputValueBarHeight = std::get<1>(value);
         modifier_->setBarHeight(node_, &inputValueBarHeight);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BAR_HEIGHT_NAME);
@@ -937,15 +878,13 @@ HWTEST_F(TabsModifierTest, setBarHeightTestInvalidValues, TestSize.Level1)
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    Ark_Length inputValueBarHeight;
-    Ark_Length initValueBarHeight;
 
     // Initial setup
-    initValueBarHeight = std::get<1>(barSizeValidValues[0]);
+    auto initValueBarHeight = std::get<1>(barSizeValidValues[0]);
 
     // Verifying attribute's  values
     for (auto&& value: barSizeInvalidValues) {
-        inputValueBarHeight = initValueBarHeight;
+        auto inputValueBarHeight = initValueBarHeight;
         modifier_->setBarHeight(node_, &inputValueBarHeight);
         inputValueBarHeight = std::get<1>(value);
         modifier_->setBarHeight(node_, &inputValueBarHeight);
@@ -971,9 +910,9 @@ HWTEST_F(TabsModifierTest, setDividerTest, TestSize.Level1)
 
     // set valid values, color as Ark_Color aka int
     Ark_DividerStyle dividerOptions = {
-        .strokeWidth = Converter::ArkValue<Ark_Length>(11._px),
-        .startMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(55.5f)),
-        .endMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(77._px)),
+        .strokeWidth = Converter::ArkValue<Opt_Length>("11px"),
+        .startMargin = Converter::ArkValue<Opt_Length>(55.5),
+        .endMargin = Converter::ArkValue<Opt_Length>("77px"),
         .color = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_WHITE),
     };
     auto divider = Converter::ArkValue<Opt_DividerStyle>(dividerOptions);
@@ -990,12 +929,8 @@ HWTEST_F(TabsModifierTest, setDividerTest, TestSize.Level1)
     EXPECT_EQ(colorCheckValue, "#FFFFFFFF");
 
     // set color as Ark_Number
-    dividerOptions = {
-        .strokeWidth = Converter::ArkValue<Ark_Length>(11._px),
-        .startMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(55.5f)),
-        .endMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(77._px)),
-        .color = Converter::ArkUnion<Opt_ResourceColor, Ark_Int32>(0x123456),
-    };
+    dividerOptions.color = Converter::ArkUnion<Opt_ResourceColor, Ark_Int32>(0x123456);
+
     divider = Converter::ArkValue<Opt_DividerStyle>(dividerOptions);
     modifier_->setDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
@@ -1013,7 +948,7 @@ HWTEST_F(TabsModifierTest, setDividerUndefinedTest, TestSize.Level1)
 {
     // set undefined values
     Ark_DividerStyle dividerOptions = {
-        .strokeWidth = Converter::ArkValue<Ark_Length>(11._px),
+        .strokeWidth = Converter::ArkValue<Opt_Length>("11px"),
         .startMargin = Converter::ArkValue<Opt_Length>(Ark_Empty()),
         .endMargin = Converter::ArkValue<Opt_Length>(Ark_Empty()),
         .color = Converter::ArkValue<Opt_ResourceColor>(),
@@ -1041,9 +976,9 @@ HWTEST_F(TabsModifierTest, setDividerColorStringTest, TestSize.Level1)
 {
     // set color as Ark_String
     Ark_DividerStyle dividerOptions = {
-        .strokeWidth = Converter::ArkValue<Ark_Length>(11._px),
-        .startMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(55.5f)),
-        .endMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(77._px)),
+        .strokeWidth = Converter::ArkValue<Opt_Length>("11px"),
+        .startMargin = Converter::ArkValue<Opt_Length>(55.5),
+        .endMargin = Converter::ArkValue<Opt_Length>("77px"),
         .color = Converter::ArkUnion<Opt_ResourceColor, Ark_String>("#11223344"),
     };
     auto divider = Converter::ArkValue<Opt_DividerStyle>(dividerOptions);
@@ -1123,18 +1058,19 @@ HWTEST_F(TabsModifierTest, DISABLED_setBarBackgroundEffectTestValidValues, TestS
 {
     ASSERT_NE(modifier_->setBarBackgroundEffect, nullptr);
     Ark_BackgroundEffectOptions inputValValid = {
-        .radius = Converter::ArkValue<Ark_Number>(EFFECT_RADIUS),
-        .saturation = Converter::ArkValue<Opt_Number>(EFFECT_SATURATION),
-        .brightness = Converter::ArkValue<Opt_Number>(EFFECT_BRIGHTNESS),
+        .radius = Converter::ArkValue<Ark_Float64>(EFFECT_RADIUS),
+        .saturation = Converter::ArkValue<Opt_Float64>(EFFECT_SATURATION),
+        .brightness = Converter::ArkValue<Opt_Float64>(EFFECT_BRIGHTNESS),
         .color = Converter::ArkUnion<Opt_ResourceColor, Ark_Int32>(0x123123),
         .adaptiveColor = Converter::ArkValue<Opt_AdaptiveColor>(ARK_ADAPTIVE_COLOR_AVERAGE),
         .blurOptions = Converter::ArkValue<Opt_BlurOptions>(Ark_BlurOptions{
-            .grayscale = {Converter::ArkValue<Ark_Number>(GRAY_SCALE0), Converter::ArkValue<Ark_Number>(GRAY_SCALE1)}
+            .grayscale = {Converter::ArkValue<Ark_Float64>(GRAY_SCALE0), Converter::ArkValue<Ark_Float64>(GRAY_SCALE1)}
         }),
         .policy = Converter::ArkValue<Opt_BlurStyleActivePolicy>(ARK_BLUR_STYLE_ACTIVE_POLICY_ALWAYS_INACTIVE),
         .inactiveColor = Converter::ArkUnion<Opt_ResourceColor, Ark_String>(COLOR_GREEN),
     };
-    modifier_->setBarBackgroundEffect(node_, &inputValValid);
+    auto inputValue = Converter::ArkValue<Opt_BackgroundEffectOptions>(inputValValid);
+    modifier_->setBarBackgroundEffect(node_, &inputValue);
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     ASSERT_NE(jsonValue, nullptr);
     auto effect = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_BAR_BACKGROUND_EFFECT);
@@ -1217,20 +1153,21 @@ HWTEST_F(TabsModifierTest, setBarBackgroundBlurStyle1TestValidValues, TestSize.L
 {
     ASSERT_NE(modifier_->setBarBackgroundBlurStyle1, nullptr);
 
-    Ark_BlurStyle inputStyleValid = ARK_BLUR_STYLE_BACKGROUND_REGULAR;
+    auto inputStyleValid = Converter::ArkValue<Opt_BlurStyle>(ARK_BLUR_STYLE_BACKGROUND_REGULAR);
 
     Ark_BackgroundBlurStyleOptions inputOptionValid = {
         .colorMode  = Converter::ArkValue<Opt_ThemeColorMode>(ARK_THEME_COLOR_MODE_DARK),
         .adaptiveColor = Converter::ArkValue<Opt_AdaptiveColor>(ARK_ADAPTIVE_COLOR_AVERAGE),
-        .scale = Converter::ArkValue<Opt_Number>(SCALE),
+        .scale = Converter::ArkValue<Opt_Float64>(SCALE),
         .blurOptions = Converter::ArkValue<Opt_BlurOptions>(Ark_BlurOptions{
-            .grayscale = {Converter::ArkValue<Ark_Number>(GRAY_SCALE0), Converter::ArkValue<Ark_Number>(GRAY_SCALE1)}
+            .grayscale = {Converter::ArkValue<Ark_Float64>(GRAY_SCALE0), Converter::ArkValue<Ark_Float64>(GRAY_SCALE1)}
         }),
         .policy = Converter::ArkValue<Opt_BlurStyleActivePolicy>(ARK_BLUR_STYLE_ACTIVE_POLICY_ALWAYS_INACTIVE),
         .inactiveColor = Converter::ArkUnion<Opt_ResourceColor, Ark_String>(COLOR_GREEN),
     };
 
-    modifier_->setBarBackgroundBlurStyle1(node_, inputStyleValid, &inputOptionValid);
+    auto optOptions = Converter::ArkValue<Opt_BackgroundBlurStyleOptions>(inputOptionValid);
+    modifier_->setBarBackgroundBlurStyle1(node_, &inputStyleValid, &optOptions);
 
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     ASSERT_NE(jsonValue, nullptr);
@@ -1282,14 +1219,17 @@ HWTEST_F(TabsModifierTest, setBarBackgroundColorTestDefaultValues, TestSize.Leve
 }
 
 // Color values for attribute 'barBackgroundColor' of method 'barBackgroundColor'
-static std::vector<std::tuple<std::string, Ark_ResourceColor, std::string>> barBackgroundColorValues = {
-    {"ARK_COLOR_BLUE", Converter::ArkUnion<Ark_ResourceColor, enum Ark_Color>(ARK_COLOR_BLUE), COLOR_BLUE},
-    {"0x123456", Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0x123456), "#FF123456"},
-    {"0.5f", Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0.5f), COLOR_TRANSPARENT},
-    {"#11223344", Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"), "#11223344"},
-    {"65535", Converter::ArkUnion<Ark_ResourceColor, Ark_String>("65535"), "#FF00FFFF"},
-    {"incorrect_color", Converter::ArkUnion<Ark_ResourceColor, Ark_String>("incorrect_color"), COLOR_TRANSPARENT},
-    {"empty string", Converter::ArkUnion<Ark_ResourceColor, Ark_String>(""), COLOR_TRANSPARENT}
+static std::vector<std::tuple<std::string, Opt_ResourceColor, std::string>> barBackgroundColorValues = {
+    {"ARK_COLOR_BLUE", Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_BLUE), COLOR_BLUE},
+    {"0x123456", Converter::ArkUnion<Opt_ResourceColor, Ark_Int32>(0x123456), "#FF123456"},
+    {"#11223344", Converter::ArkUnion<Opt_ResourceColor, Ark_String>("#11223344"), "#11223344"},
+    {"incorrect_color", Converter::ArkUnion<Opt_ResourceColor, Ark_String>("incorrect_color"), COLOR_TRANSPARENT},
+    {"65535", Converter::ArkUnion<Opt_ResourceColor, Ark_String>("65535"), "#FF00FFFF"},
+    {"empty string", Converter::ArkUnion<Opt_ResourceColor, Ark_String>(""), COLOR_TRANSPARENT},
+    {"No res 1", CreateResourceUnion<Opt_ResourceColor>(RES_NAME), COLOR_RED}, // Color::RED is default mocked color
+    {"TRANSPARENT res", CreateResourceUnion<Opt_ResourceColor>(RES_STRING_FAKE_ID), COLOR_TRANSPARENT},
+    {"No res 2", CreateResourceUnion<Opt_ResourceColor>(RES_ID), COLOR_RED}, // Color::RED is default mocked color
+    {"GREEN res", CreateResourceUnion<Opt_ResourceColor>(RES_STRING_REGISTERED_ID), COLOR_GREEN},
 };
 
 /*
@@ -1302,43 +1242,9 @@ HWTEST_F(TabsModifierTest, setBarBackgroundColorTest, TestSize.Level1)
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    Ark_ResourceColor inputValueBarBackgroundColor;
 
     for (auto&& value: barBackgroundColorValues) {
-        inputValueBarBackgroundColor = std::get<1>(value);
-        modifier_->setBarBackgroundColor(node_, &inputValueBarBackgroundColor);
-        jsonValue = GetJsonValue(node_);
-        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BAR_BACKGROUND_COLOR_NAME);
-        expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
-    }
-}
-
-static std::vector<std::tuple<std::string, Ark_ResourceColor, std::string>> barBackgroundColorResourceValues = {
-    {"RED1", Converter::ArkUnion<Ark_ResourceColor, struct Ark_Resource>(CreateResource(RES_NAME)),
-        COLOR_RED}, // Color::RED is result of mocked ThemeConstants::GetColorByName
-    {"TRANSPARENT", Converter::ArkUnion<Ark_ResourceColor, struct Ark_Resource>(CreateResource(RES_STRING_FAKE_ID)),
-        COLOR_TRANSPARENT},
-    {"RED2", Converter::ArkUnion<Ark_ResourceColor, struct Ark_Resource>(CreateResource(RES_ID)),
-        COLOR_RED}, // Color::RED is result of mocked ThemeConstants::GetColor(int)
-    {"GREEN", Converter::ArkUnion<Ark_ResourceColor, struct Ark_Resource>(CreateResource(RES_STRING_REGISTERED_ID)),
-        COLOR_GREEN}
-};
-
-/*
- * @tc.name: setBarBackgroundColorTestResourceValues
- * @tc.desc: Check the functionality of GENERATED_ArkUITabsModifier.setBarBackgroundColor
- * @tc.type: FUNC
- */
-HWTEST_F(TabsModifierTest, setBarBackgroundColorTestResourceValues, TestSize.Level1)
-{
-    std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
-    std::string expectedStr;
-    Ark_ResourceColor inputValueBarBackgroundColor;
-
-    for (auto&& value: barBackgroundColorResourceValues) {
-        inputValueBarBackgroundColor = std::get<1>(value);
+        auto inputValueBarBackgroundColor = std::get<1>(value);
         modifier_->setBarBackgroundColor(node_, &inputValueBarBackgroundColor);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BAR_BACKGROUND_COLOR_NAME);
@@ -1376,54 +1282,54 @@ HWTEST_F(TabsModifierTest, setBarGridAlignTestDefaultValues, TestSize.Level1)
 }
 
 // Valid values for attribute 'sm' of method 'barGridAlign'
-static std::vector<std::tuple<std::string, Opt_Number, std::string>> barGridAlignSmValidValues = {
-    {"sm_0", Converter::ArkValue<Opt_Number>(0), "0"},
-    {"sm_2", Converter::ArkValue<Opt_Number>(2), "2"},
-    {"sm_4", Converter::ArkValue<Opt_Number>(4), "4"}
+static std::vector<std::tuple<std::string, Opt_Int32, std::string>> barGridAlignSmValidValues = {
+    {"sm_0", Converter::ArkValue<Opt_Int32>(0), "0"},
+    {"sm_2", Converter::ArkValue<Opt_Int32>(2), "2"},
+    {"sm_4", Converter::ArkValue<Opt_Int32>(4), "4"}
 };
 
 // Valid values for attribute 'md' of method 'barGridAlign'
-static std::vector<std::tuple<std::string, Opt_Number, std::string>> barGridAlignMdValidValues = {
-    {"md_0", Converter::ArkValue<Opt_Number>(0), "0"},
-    {"md_2", Converter::ArkValue<Opt_Number>(2), "2"},
-    {"md_4", Converter::ArkValue<Opt_Number>(4), "4"},
-    {"md_6", Converter::ArkValue<Opt_Number>(6), "6"},
-    {"md_8", Converter::ArkValue<Opt_Number>(8), "8"}
+static std::vector<std::tuple<std::string, Opt_Int32, std::string>> barGridAlignMdValidValues = {
+    {"md_0", Converter::ArkValue<Opt_Int32>(0), "0"},
+    {"md_2", Converter::ArkValue<Opt_Int32>(2), "2"},
+    {"md_4", Converter::ArkValue<Opt_Int32>(4), "4"},
+    {"md_6", Converter::ArkValue<Opt_Int32>(6), "6"},
+    {"md_8", Converter::ArkValue<Opt_Int32>(8), "8"}
 };
 
 // Valid values for attribute 'lg' of method 'barGridAlign'
-static std::vector<std::tuple<std::string, Opt_Number, std::string>> barGridAlignLgValidValues = {
-    {"lg_0", Converter::ArkValue<Opt_Number>(0), "0"},
-    {"lg_2", Converter::ArkValue<Opt_Number>(2), "2"},
-    {"lg_4", Converter::ArkValue<Opt_Number>(4), "4"},
-    {"lg_6", Converter::ArkValue<Opt_Number>(6), "6"},
-    {"lg_8", Converter::ArkValue<Opt_Number>(8), "8"},
-    {"lg_10", Converter::ArkValue<Opt_Number>(10), "10"},
-    {"lg_12", Converter::ArkValue<Opt_Number>(12), "12"}
+static std::vector<std::tuple<std::string, Opt_Int32, std::string>> barGridAlignLgValidValues = {
+    {"lg_0", Converter::ArkValue<Opt_Int32>(0), "0"},
+    {"lg_2", Converter::ArkValue<Opt_Int32>(2), "2"},
+    {"lg_4", Converter::ArkValue<Opt_Int32>(4), "4"},
+    {"lg_6", Converter::ArkValue<Opt_Int32>(6), "6"},
+    {"lg_8", Converter::ArkValue<Opt_Int32>(8), "8"},
+    {"lg_10", Converter::ArkValue<Opt_Int32>(10), "10"},
+    {"lg_12", Converter::ArkValue<Opt_Int32>(12), "12"}
 };
 
 // Valid values for attribute 'margin' of method 'barGridAlign'
-static std::vector<std::tuple<std::string, Opt_Length, std::string>> barGridAlignMarginValidValues = {
-    {"margin_2.45f", Converter::ArkValue<Opt_Length>(2.45f), "2.45vp"},
-    {"margin_5.0_px", Converter::ArkValue<Opt_Length>(5.0_px), "5.00px"},
-    {"margin_22.35_px", Converter::ArkValue<Opt_Length>(22.35_px), "22.35px"},
-    {"margin_7.0_vp", Converter::ArkValue<Opt_Length>(7.0_vp), "7.00vp"},
-    {"margin_1.65_vp", Converter::ArkValue<Opt_Length>(1.65_vp), "1.65vp"},
-    {"margin_65.00fp", Converter::ArkValue<Opt_Length>(65.0_fp), "65.00fp"},
-    {"margin_4.3_fp", Converter::ArkValue<Opt_Length>(4.3_fp), "4.30fp"},
-    {"RES_ARK_LENGTH", Converter::ArkValue<Opt_Length>(RES_ARK_LENGTH), "10.00px"}
+static std::vector<std::tuple<std::string, Opt_Dimension, std::string>> barGridAlignMarginValidValues = {
+    {"margin_2.45", Converter::ArkValue<Opt_Dimension>(2.45f), "2.45vp"},
+    {"margin_5.0px", Converter::ArkValue<Opt_Dimension>("5.0px"), "5.00px"},
+    {"margin_22.35px", Converter::ArkValue<Opt_Dimension>("22.35px"), "22.35px"},
+    {"margin_7.0vp", Converter::ArkValue<Opt_Dimension>("7.0vp"), "7.00vp"},
+    {"margin_1.65vp", Converter::ArkValue<Opt_Dimension>("1.65vp"), "1.65vp"},
+    {"margin_65.00fp", Converter::ArkValue<Opt_Dimension>("65.0fp"), "65.00fp"},
+    {"margin_4.3fp", Converter::ArkValue<Opt_Dimension>("4.3fp"), "4.30fp"},
+    {"mocked res", Converter::ArkValue<Opt_Dimension>(FAKE_RES_ID), "10.00px"}
 };
 
 // Valid values for attribute 'gutter' of method 'barGridAlign'
-static std::vector<std::tuple<std::string, Opt_Length, std::string>> barGridAlignGutterValidValues = {
-    {"gutter_2.45f", Converter::ArkValue<Opt_Length>(2.45f), "2.45vp"},
-    {"gutter_5.0_px", Converter::ArkValue<Opt_Length>(5.0_px), "5.00px"},
-    {"gutter_22.35_px", Converter::ArkValue<Opt_Length>(22.35_px), "22.35px"},
-    {"gutter_7.0_vp", Converter::ArkValue<Opt_Length>(7.0_vp), "7.00vp"},
-    {"gutter_1.65_vp", Converter::ArkValue<Opt_Length>(1.65_vp), "1.65vp"},
-    {"gutter_65.00fp", Converter::ArkValue<Opt_Length>(65.0_fp), "65.00fp"},
-    {"gutter_4.3_fp", Converter::ArkValue<Opt_Length>(4.3_fp), "4.30fp"},
-    {"RES_ARK_LENGTH", Converter::ArkValue<Opt_Length>(RES_ARK_LENGTH), "10.00px"}
+static std::vector<std::tuple<std::string, Opt_Dimension, std::string>> barGridAlignGutterValidValues = {
+    {"gutter_2.45", Converter::ArkValue<Opt_Dimension>(2.45f), "2.45vp"},
+    {"gutter_5.0px", Converter::ArkValue<Opt_Dimension>("5.0px"), "5.00px"},
+    {"gutter_22.35px", Converter::ArkValue<Opt_Dimension>("22.35px"), "22.35px"},
+    {"gutter_7.0vp", Converter::ArkValue<Opt_Dimension>("7.0vp"), "7.00vp"},
+    {"gutter_1.65vp", Converter::ArkValue<Opt_Dimension>("1.65vp"), "1.65vp"},
+    {"gutter_65.00fp", Converter::ArkValue<Opt_Dimension>("65.0fp"), "65.00fp"},
+    {"gutter_4.3fp", Converter::ArkValue<Opt_Dimension>("4.3fp"), "4.30fp"},
+    {"mocked res", Converter::ArkValue<Opt_Dimension>(FAKE_RES_ID), "10.00px"}
 };
 
 /*
@@ -1451,7 +1357,8 @@ HWTEST_F(TabsModifierTest, setBarGridAlignTestValidValues1, TestSize.Level1)
     inputValueBarGridAlign = initValueBarGridAlign;
     for (auto&& value: barGridAlignSmValidValues) {
         inputValueBarGridAlign.sm = std::get<1>(value);
-        modifier_->setBarGridAlign(node_, &inputValueBarGridAlign);
+        auto inputValue = Converter::ArkValue<Opt_BarGridColumnOptions>(inputValueBarGridAlign);
+        modifier_->setBarGridAlign(node_, &inputValue);
         jsonValue = GetJsonValue(node_);
         resultBarGridAlign = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_BAR_GRID_ALIGN_NAME);
         resultStr = GetAttrValue<std::string>(resultBarGridAlign, ATTRIBUTE_BAR_GRID_ALIGN_SM_NAME);
@@ -1463,7 +1370,8 @@ HWTEST_F(TabsModifierTest, setBarGridAlignTestValidValues1, TestSize.Level1)
     inputValueBarGridAlign = initValueBarGridAlign;
     for (auto&& value: barGridAlignMdValidValues) {
         inputValueBarGridAlign.md = std::get<1>(value);
-        modifier_->setBarGridAlign(node_, &inputValueBarGridAlign);
+        auto inputValue = Converter::ArkValue<Opt_BarGridColumnOptions>(inputValueBarGridAlign);
+        modifier_->setBarGridAlign(node_, &inputValue);
         jsonValue = GetJsonValue(node_);
         resultBarGridAlign = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_BAR_GRID_ALIGN_NAME);
         resultStr = GetAttrValue<std::string>(resultBarGridAlign, ATTRIBUTE_BAR_GRID_ALIGN_MD_NAME);
@@ -1475,7 +1383,8 @@ HWTEST_F(TabsModifierTest, setBarGridAlignTestValidValues1, TestSize.Level1)
     inputValueBarGridAlign = initValueBarGridAlign;
     for (auto&& value: barGridAlignLgValidValues) {
         inputValueBarGridAlign.lg = std::get<1>(value);
-        modifier_->setBarGridAlign(node_, &inputValueBarGridAlign);
+        auto inputValue = Converter::ArkValue<Opt_BarGridColumnOptions>(inputValueBarGridAlign);
+        modifier_->setBarGridAlign(node_, &inputValue);
         jsonValue = GetJsonValue(node_);
         resultBarGridAlign = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_BAR_GRID_ALIGN_NAME);
         resultStr = GetAttrValue<std::string>(resultBarGridAlign, ATTRIBUTE_BAR_GRID_ALIGN_LG_NAME);
@@ -1509,7 +1418,8 @@ HWTEST_F(TabsModifierTest, setBarGridAlignTestValidValues2, TestSize.Level1)
     inputValueBarGridAlign = initValueBarGridAlign;
     for (auto&& value: barGridAlignMarginValidValues) {
         inputValueBarGridAlign.margin = std::get<1>(value);
-        modifier_->setBarGridAlign(node_, &inputValueBarGridAlign);
+        auto inputValue = Converter::ArkValue<Opt_BarGridColumnOptions>(inputValueBarGridAlign);
+        modifier_->setBarGridAlign(node_, &inputValue);
         jsonValue = GetJsonValue(node_);
         resultBarGridAlign = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_BAR_GRID_ALIGN_NAME);
         resultStr = GetAttrValue<std::string>(resultBarGridAlign, ATTRIBUTE_BAR_GRID_ALIGN_MARGIN_NAME);
@@ -1521,7 +1431,8 @@ HWTEST_F(TabsModifierTest, setBarGridAlignTestValidValues2, TestSize.Level1)
     inputValueBarGridAlign = initValueBarGridAlign;
     for (auto&& value: barGridAlignGutterValidValues) {
         inputValueBarGridAlign.gutter = std::get<1>(value);
-        modifier_->setBarGridAlign(node_, &inputValueBarGridAlign);
+        auto inputValue = Converter::ArkValue<Opt_BarGridColumnOptions>(inputValueBarGridAlign);
+        modifier_->setBarGridAlign(node_, &inputValue);
         jsonValue = GetJsonValue(node_);
         resultBarGridAlign = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_BAR_GRID_ALIGN_NAME);
         resultStr = GetAttrValue<std::string>(resultBarGridAlign, ATTRIBUTE_BAR_GRID_ALIGN_GUTTER_NAME);
@@ -1531,41 +1442,41 @@ HWTEST_F(TabsModifierTest, setBarGridAlignTestValidValues2, TestSize.Level1)
 }
 
 // Invalid values for attribute 'sm' of method 'barGridAlign'
-static std::vector<std::tuple<std::string, Opt_Number>> barGridAlignSmInvalidValues = {
-    {"sm_Ark_Empty", Converter::ArkValue<Opt_Number>(Ark_Empty())},
-    {"sm_Negative", Converter::ArkValue<Opt_Number>(-1)},
-    {"sm_Invalid_14", Converter::ArkValue<Opt_Number>(14)},
-    {"sm_Invalid_3", Converter::ArkValue<Opt_Number>(3)}
+static std::vector<std::tuple<std::string, Opt_Int32>> barGridAlignSmInvalidValues = {
+    {"sm_Ark_Empty", Converter::ArkValue<Opt_Int32>(Ark_Empty())},
+    {"sm_Negative", Converter::ArkValue<Opt_Int32>(-1)},
+    {"sm_Invalid_14", Converter::ArkValue<Opt_Int32>(14)},
+    {"sm_Invalid_3", Converter::ArkValue<Opt_Int32>(3)}
 };
 
 // Invalid values for attribute 'md' of method 'barGridAlign'
-static std::vector<std::tuple<std::string, Opt_Number>> barGridAlignMdInvalidValues = {
-    {"md_Ark_Empty", Converter::ArkValue<Opt_Number>(Ark_Empty())},
-    {"md_negative", Converter::ArkValue<Opt_Number>(-1)},
-    {"md_invalid_14", Converter::ArkValue<Opt_Number>(14)},
-    {"md_invalid_3", Converter::ArkValue<Opt_Number>(3)}
+static std::vector<std::tuple<std::string, Opt_Int32>> barGridAlignMdInvalidValues = {
+    {"md_Ark_Empty", Converter::ArkValue<Opt_Int32>(Ark_Empty())},
+    {"md_negative", Converter::ArkValue<Opt_Int32>(-1)},
+    {"md_invalid_14", Converter::ArkValue<Opt_Int32>(14)},
+    {"md_invalid_3", Converter::ArkValue<Opt_Int32>(3)}
 };
 
 // Invalid values for attribute 'lg' of method 'barGridAlign'
-static std::vector<std::tuple<std::string, Opt_Number>> barGridAlignLgInvalidValues = {
-    {"lg_Ark_Empty", Converter::ArkValue<Opt_Number>(Ark_Empty())},
-    {"lg_negative", Converter::ArkValue<Opt_Number>(-1)},
-    {"lg_invalid_14", Converter::ArkValue<Opt_Number>(14)},
-    {"lg_invalid_3", Converter::ArkValue<Opt_Number>(3)}
+static std::vector<std::tuple<std::string, Opt_Int32>> barGridAlignLgInvalidValues = {
+    {"lg_Ark_Empty", Converter::ArkValue<Opt_Int32>(Ark_Empty())},
+    {"lg_negative", Converter::ArkValue<Opt_Int32>(-1)},
+    {"lg_invalid_14", Converter::ArkValue<Opt_Int32>(14)},
+    {"lg_invalid_3", Converter::ArkValue<Opt_Int32>(3)}
 };
 
 // Invalid values for attribute 'margin' of method 'barGridAlign'
-static std::vector<std::tuple<std::string, Opt_Length>> barGridAlignMarginInvalidValues = {
-    {"margin_Ark_Empty", Converter::ArkValue<Opt_Length>(Ark_Empty())},
-    {"margin_percent", Converter::ArkValue<Opt_Length>("12.00%")},
-    {"margin_negative", Converter::ArkValue<Opt_Length>(-10._px)}
+static std::vector<std::tuple<std::string, Opt_Dimension>> barGridAlignMarginInvalidValues = {
+    {"margin_Ark_Empty", Converter::ArkValue<Opt_Dimension>(Ark_Empty())},
+    {"margin_percent", Converter::ArkValue<Opt_Dimension>("12.00%")},
+    {"margin_negative", Converter::ArkValue<Opt_Dimension>("-10px")}
 };
 
 // Invalid values for attribute 'gutter' of method 'barGridAlign'
-static std::vector<std::tuple<std::string, Opt_Length>> barGridAlignGutterInvalidValues = {
-    {"gutter_Ark_Empty", Converter::ArkValue<Opt_Length>(Ark_Empty())},
-    {"gutter_percent", Converter::ArkValue<Opt_Length>("12.00%")},
-    {"gutter_negative", Converter::ArkValue<Opt_Length>(-10._px)}
+static std::vector<std::tuple<std::string, Opt_Dimension>> barGridAlignGutterInvalidValues = {
+    {"gutter_Ark_Empty", Converter::ArkValue<Opt_Dimension>(Ark_Empty())},
+    {"gutter_percent", Converter::ArkValue<Opt_Dimension>("12.00%")},
+    {"gutter_negative", Converter::ArkValue<Opt_Dimension>("-10px")}
 };
 
 /*
@@ -1578,7 +1489,6 @@ HWTEST_F(TabsModifierTest, setBarGridAlignTestInvalidValues1, TestSize.Level1)
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> resultBarGridAlign;
     std::string resultStr;
-    std::string expectedStr;
     Ark_BarGridColumnOptions inputValueBarGridAlign;
     Ark_BarGridColumnOptions initValueBarGridAlign;
 
@@ -1592,40 +1502,43 @@ HWTEST_F(TabsModifierTest, setBarGridAlignTestInvalidValues1, TestSize.Level1)
     // Verifying attribute's 'sm' values
     for (auto&& value: barGridAlignSmInvalidValues) {
         inputValueBarGridAlign = initValueBarGridAlign;
-        modifier_->setBarGridAlign(node_, &inputValueBarGridAlign);
+        auto inputValue = Converter::ArkValue<Opt_BarGridColumnOptions>(inputValueBarGridAlign);
+        modifier_->setBarGridAlign(node_, &inputValue);
         inputValueBarGridAlign.sm = std::get<1>(value);
-        modifier_->setBarGridAlign(node_, &inputValueBarGridAlign);
+        inputValue = Converter::ArkValue<Opt_BarGridColumnOptions>(inputValueBarGridAlign);
+        modifier_->setBarGridAlign(node_, &inputValue);
         jsonValue = GetJsonValue(node_);
         resultBarGridAlign = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_BAR_GRID_ALIGN_NAME);
         resultStr = GetAttrValue<std::string>(resultBarGridAlign, ATTRIBUTE_BAR_GRID_ALIGN_SM_NAME);
-        expectedStr = ATTRIBUTE_BAR_GRID_ALIGN_SM_DEFAULT_VALUE;
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_EQ(resultStr, ATTRIBUTE_BAR_GRID_ALIGN_SM_DEFAULT_VALUE) << "Passed value is: " << std::get<0>(value);
     }
 
     // Verifying attribute's 'md' values
     for (auto&& value: barGridAlignMdInvalidValues) {
         inputValueBarGridAlign = initValueBarGridAlign;
-        modifier_->setBarGridAlign(node_, &inputValueBarGridAlign);
+        auto inputValue = Converter::ArkValue<Opt_BarGridColumnOptions>(inputValueBarGridAlign);
+        modifier_->setBarGridAlign(node_, &inputValue);
         inputValueBarGridAlign.md = std::get<1>(value);
-        modifier_->setBarGridAlign(node_, &inputValueBarGridAlign);
+        inputValue = Converter::ArkValue<Opt_BarGridColumnOptions>(inputValueBarGridAlign);
+        modifier_->setBarGridAlign(node_, &inputValue);
         jsonValue = GetJsonValue(node_);
         resultBarGridAlign = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_BAR_GRID_ALIGN_NAME);
         resultStr = GetAttrValue<std::string>(resultBarGridAlign, ATTRIBUTE_BAR_GRID_ALIGN_MD_NAME);
-        expectedStr = ATTRIBUTE_BAR_GRID_ALIGN_MD_DEFAULT_VALUE;
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_EQ(resultStr, ATTRIBUTE_BAR_GRID_ALIGN_MD_DEFAULT_VALUE) << "Passed value is: " << std::get<0>(value);
     }
 
     // Verifying attribute's 'lg' values
     for (auto&& value: barGridAlignLgInvalidValues) {
         inputValueBarGridAlign = initValueBarGridAlign;
-        modifier_->setBarGridAlign(node_, &inputValueBarGridAlign);
+        auto inputValue = Converter::ArkValue<Opt_BarGridColumnOptions>(inputValueBarGridAlign);
+        modifier_->setBarGridAlign(node_, &inputValue);
         inputValueBarGridAlign.lg = std::get<1>(value);
-        modifier_->setBarGridAlign(node_, &inputValueBarGridAlign);
+        inputValue = Converter::ArkValue<Opt_BarGridColumnOptions>(inputValueBarGridAlign);
+        modifier_->setBarGridAlign(node_, &inputValue);
         jsonValue = GetJsonValue(node_);
         resultBarGridAlign = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_BAR_GRID_ALIGN_NAME);
         resultStr = GetAttrValue<std::string>(resultBarGridAlign, ATTRIBUTE_BAR_GRID_ALIGN_LG_NAME);
-        expectedStr = ATTRIBUTE_BAR_GRID_ALIGN_LG_DEFAULT_VALUE;
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_EQ(resultStr, ATTRIBUTE_BAR_GRID_ALIGN_LG_DEFAULT_VALUE) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -1653,9 +1566,11 @@ HWTEST_F(TabsModifierTest, setBarGridAlignTestInvalidValues2, TestSize.Level1)
     // Verifying attribute's 'margin' values
     for (auto&& value: barGridAlignMarginInvalidValues) {
         inputValueBarGridAlign = initValueBarGridAlign;
-        modifier_->setBarGridAlign(node_, &inputValueBarGridAlign);
+        auto inputValue = Converter::ArkValue<Opt_BarGridColumnOptions>(inputValueBarGridAlign);
+        modifier_->setBarGridAlign(node_, &inputValue);
         inputValueBarGridAlign.margin = std::get<1>(value);
-        modifier_->setBarGridAlign(node_, &inputValueBarGridAlign);
+        inputValue = Converter::ArkValue<Opt_BarGridColumnOptions>(inputValueBarGridAlign);
+        modifier_->setBarGridAlign(node_, &inputValue);
         jsonValue = GetJsonValue(node_);
         resultBarGridAlign = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_BAR_GRID_ALIGN_NAME);
         resultStr = GetAttrValue<std::string>(resultBarGridAlign, ATTRIBUTE_BAR_GRID_ALIGN_MARGIN_NAME);
@@ -1666,9 +1581,11 @@ HWTEST_F(TabsModifierTest, setBarGridAlignTestInvalidValues2, TestSize.Level1)
     // Verifying attribute's 'gutter' values
     for (auto&& value: barGridAlignGutterInvalidValues) {
         inputValueBarGridAlign = initValueBarGridAlign;
-        modifier_->setBarGridAlign(node_, &inputValueBarGridAlign);
+        auto inputValue = Converter::ArkValue<Opt_BarGridColumnOptions>(inputValueBarGridAlign);
+        modifier_->setBarGridAlign(node_, &inputValue);
         inputValueBarGridAlign.gutter = std::get<1>(value);
-        modifier_->setBarGridAlign(node_, &inputValueBarGridAlign);
+        inputValue = Converter::ArkValue<Opt_BarGridColumnOptions>(inputValueBarGridAlign);
+        modifier_->setBarGridAlign(node_, &inputValue);
         jsonValue = GetJsonValue(node_);
         resultBarGridAlign = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_BAR_GRID_ALIGN_NAME);
         resultStr = GetAttrValue<std::string>(resultBarGridAlign, ATTRIBUTE_BAR_GRID_ALIGN_GUTTER_NAME);
@@ -1677,6 +1594,7 @@ HWTEST_F(TabsModifierTest, setBarGridAlignTestInvalidValues2, TestSize.Level1)
     }
 }
 
+#ifdef WRONG_OLD_CALLBACK
 /*
  * @tc.name: setOnChangeEventIndexImpl
  * @tc.desc:
@@ -1720,6 +1638,7 @@ HWTEST_F(TabsModifierTest, setOnChangeEventIndexImpl, TestSize.Level1)
     EXPECT_EQ(checkEvent->nodeId, contextId);
     EXPECT_EQ(checkEvent->value, 2);
 }
+#endif
 
 /**
  * @tc.name: setPageFlipModeTestDefaultValue
@@ -1806,10 +1725,10 @@ HWTEST_F(TabsModifierTest, setOnSelectedTest, TestSize.Level1)
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
     auto onSelected =
-        [](Ark_Int32 nodeId, const Ark_Number index) {
+        [](Ark_Int32 nodeId, const Ark_Int32 index) {
             g_indexValue = Converter::Convert<int32_t>(index);
         };
-    auto func = Converter::ArkValue<Callback_Number_Void>(onSelected, CONTEXT_ID);
+    auto func = Converter::ArkCallback<Opt_Callback_I32_Void>(onSelected);
     modifier_->setOnSelected(node_, &func);
     EXPECT_EQ(g_indexValue, 0);
 
@@ -1834,10 +1753,10 @@ HWTEST_F(TabsModifierTest, setOnUnselectedTest, TestSize.Level1)
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
     auto onUnselected =
-        [](Ark_Int32 nodeId, const Ark_Number index) {
+        [](Ark_Int32 nodeId, const Ark_Int32 index) {
             g_indexValue = Converter::Convert<int32_t>(index);
         };
-    auto func = Converter::ArkValue<Callback_Number_Void>(onUnselected, CONTEXT_ID);
+    auto func = Converter::ArkCallback<Opt_Callback_I32_Void>(onUnselected);
     modifier_->setOnUnselected(node_, &func);
     EXPECT_EQ(g_indexValue, 0);
 
@@ -1874,8 +1793,9 @@ HWTEST_F(TabsModifierTest, setCachedMaxCountValues, TestSize.Level1)
     };
 
     for (auto [expectedModeValue, modeValue, countValue]: testMap) {
-        auto arkCount = Converter::ArkValue<Ark_Number>(countValue);
-        modifier_->setCachedMaxCount(frameNode, &arkCount, modeValue);
+        auto arkCount = Converter::ArkValue<Opt_Int32>(countValue);
+        auto arkMode = Converter::ArkValue<Opt_TabsCacheMode>(modeValue);
+        modifier_->setCachedMaxCount(frameNode, &arkCount, &arkMode);
         auto json = GetJsonValue(node_);
         ASSERT_TRUE(json);
         auto cachedMaxCount = GetAttrValue<std::unique_ptr<JsonValue>>(json, "cachedMaxCount");
@@ -1884,7 +1804,8 @@ HWTEST_F(TabsModifierTest, setCachedMaxCountValues, TestSize.Level1)
         EXPECT_EQ(countValue, GetAttrValue<int32_t>(cachedMaxCount, "count"));
     }
 
-    modifier_->setCachedMaxCount(frameNode, nullptr, ARK_TABS_CACHE_MODE_CACHE_BOTH_SIDE);
+    auto arkMode = Converter::ArkValue<Opt_TabsCacheMode>(ARK_TABS_CACHE_MODE_CACHE_BOTH_SIDE);
+    modifier_->setCachedMaxCount(frameNode, nullptr, &arkMode);
     json = GetJsonValue(node_);
     ASSERT_TRUE(json);
     EXPECT_EQ("", GetAttrValue<std::string>(json, "cachedMaxCount"));

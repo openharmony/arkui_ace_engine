@@ -61,26 +61,26 @@ TextMarqueeOptions Convert(const Ark_TextMarqueeOptions& src)
     TextMarqueeOptions options;
     options.UpdateTextMarqueeStart(Convert<bool>(src.start));
 
-    auto optLoop = OptConvert<Dimension>(src.loop);
+    auto optLoop = OptConvert<int32_t>(src.loop);
     if (optLoop) {
-        auto loop = static_cast<int32_t>(optLoop.value().Value());
+        auto loop = *optLoop;
         if (loop == std::numeric_limits<int32_t>::max() || loop <= 0) {
             loop = -1;
         }
         options.UpdateTextMarqueeLoop(loop);
     }
 
-    auto optStep = OptConvert<Dimension>(src.step);
+    auto optStep = OptConvert<double>(src.step);
     if (optStep) {
-        auto step = optStep.value().Value();
+        auto step = *optStep;
         if (GreatNotEqual(step, 0.0)) {
             options.UpdateTextMarqueeStep(Dimension(step, DimensionUnit::VP).ConvertToPx());
         }
     }
 
-    auto optDelay = OptConvert<Dimension>(src.delay);
+    auto optDelay = OptConvert<int32_t>(src.delay);
     if (optDelay) {
-        auto delayValue = static_cast<int32_t>(optDelay.value().Value());
+        auto delayValue = *optDelay;
         if (delayValue < 0) {
             delayValue = 0;
         }

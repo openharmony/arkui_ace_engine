@@ -125,7 +125,7 @@ void SetStrokeDashArrayImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<std::vector<std::optional<Dimension>>>(*value);
+    auto convValue = Converter::OptConvertPtr<std::vector<std::optional<Dimension>>>(value);
     if (!convValue) {
         ShapeModelNG::SetStrokeDashArray(frameNode, {});
         return;

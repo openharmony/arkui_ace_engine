@@ -75,7 +75,8 @@ HWTEST_F(FlexModifierTest, SetFlexOptionsTestDefaultValues, TestSize.Level1)
     EXPECT_EQ(resultStr, ATTRIBUTE_SET_FLEX_SPACE_DEFAULT_VALUE);
 
     auto fullJson = GetJsonValue(node_);
-    auto flexConstructorAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_SET_FLEX_CONSTRUCTOR_NAME);
+    auto flexConstructorAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson,
+        ATTRIBUTE_SET_FLEX_CONSTRUCTOR_NAME);
 
     auto flexDirection = flexConstructorAttrs->GetString(ATTRIBUTE_SET_FLEX_DIRECTION_NAME);
     EXPECT_EQ(flexDirection, ATTRIBUTE_SET_FLEX_DIRECTION_DEFAULT_VALUE);
@@ -111,7 +112,8 @@ HWTEST_F(FlexModifierTest, SetFlexOptionsTestNoWrapValues, TestSize.Level1)
     modifier_->setFlexOptions(node_, &inputValue);
     auto fullJson = GetJsonValue(node_);
 
-    auto flexConstructorAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_SET_FLEX_CONSTRUCTOR_NAME);
+    auto flexConstructorAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson,
+        ATTRIBUTE_SET_FLEX_CONSTRUCTOR_NAME);
 
     auto wrapAttr = flexConstructorAttrs->GetString(ATTRIBUTE_SET_FLEX_WRAP_NAME);
     EXPECT_EQ(wrapAttr, ATTRIBUTE_SET_FLEX_WRAP_DEFAULT_VALUE);
@@ -147,7 +149,8 @@ HWTEST_F(FlexModifierTest, SetFlexOptionsTestEmptyWrapValues, TestSize.Level1)
     modifier_->setFlexOptions(node_, &inputValue);
     auto fullJson = GetJsonValue(node_);
 
-    auto flexConstructorAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_SET_FLEX_CONSTRUCTOR_NAME);
+    auto flexConstructorAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson,
+        ATTRIBUTE_SET_FLEX_CONSTRUCTOR_NAME);
 
     auto wrapAttr = flexConstructorAttrs->GetString(ATTRIBUTE_SET_FLEX_WRAP_NAME);
     EXPECT_EQ(wrapAttr, ATTRIBUTE_SET_FLEX_WRAP_DEFAULT_VALUE);
@@ -183,7 +186,8 @@ HWTEST_F(FlexModifierTest, SetFlexOptionsTestWrapValues, TestSize.Level1)
     inputValue = Converter::ArkValue<Opt_FlexOptions>(flexOptions);
     modifier_->setFlexOptions(node_, &inputValue);
     auto fullJson = GetJsonValue(node_);
-    auto flexConstructorAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_SET_FLEX_CONSTRUCTOR_NAME);
+    auto flexConstructorAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson,
+        ATTRIBUTE_SET_FLEX_CONSTRUCTOR_NAME);
 
     auto wrapAttr = flexConstructorAttrs->GetString(ATTRIBUTE_SET_FLEX_WRAP_NAME);
     EXPECT_EQ(wrapAttr, ATTRIBUTE_SET_FLEX_WRAP_VALUE);

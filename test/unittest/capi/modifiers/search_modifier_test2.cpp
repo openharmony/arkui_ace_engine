@@ -69,7 +69,7 @@ HWTEST_F(SearchModifierTest2, setCustomKeyboard_CustomNodeBuilder, TestSize.Leve
 
     int callsCount = 0;
     CustomNodeBuilderTestHelper<SearchModifierTest2> builderHelper(this, frameNode);
-    const CustomNodeBuilder builder = builderHelper.GetBuilder();
+    const auto builder = Converter::ArkValue<Opt_CustomNodeBuilder>(builderHelper.GetBuilder());
     modifier_->setCustomKeyboard(frameNode, &builder, nullptr);
 
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
@@ -97,7 +97,7 @@ HWTEST_F(SearchModifierTest2, setCustomKeyboard_CustomNodeBuilder_KeyboardOption
 
     int callsCount = 0;
     CustomNodeBuilderTestHelper<SearchModifierTest2> builderHelper(this, frameNode);
-    const CustomNodeBuilder builder = builderHelper.GetBuilder();
+    const auto builder = Converter::ArkValue<Opt_CustomNodeBuilder>(builderHelper.GetBuilder());
     modifier_->setCustomKeyboard(node_, &builder, &optKeyboardOptions);
 
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
@@ -157,61 +157,66 @@ HWTEST_F(SearchModifierTest2, setKeyboardAppearanceValuesTest, TestSize.Level1)
     }
 }
 
+
+namespace Converter {
+template<>
+ChangeValueInfo Convert(const Ark_EditableTextChangeValue& parameter)
+{
+    ChangeValueInfo info;
+    info.value = Converter::Convert<std::u16string>(parameter.content);
+    info.previewText = Converter::Convert<PreviewText>(parameter.previewText.value);
+    info.rangeBefore = Converter::Convert<TextRange>(parameter.options.value.rangeBefore);
+    info.rangeAfter = Converter::Convert<TextRange>(parameter.options.value.rangeAfter);
+    info.oldContent = Converter::Convert<std::u16string>(parameter.options.value.oldContent);
+    info.oldPreviewText =  Converter::Convert<PreviewText>(parameter.options.value.oldPreviewText);
+    return info;
+}
+} // namespace Converter
+
 /*
-+ * @tc.name: setOnWillChangeTest
-+ * @tc.desc:
-+ * @tc.type: FUNC
-+ */
+ * @tc.name: setOnWillChangeTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
 HWTEST_F(SearchModifierTest2, setOnWillChangeTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnWillChange, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    struct CheckEvent {
-        int32_t resourceId;
-        ChangeValueInfo info;
-    };
-    static std::optional<CheckEvent> checkEvent = std::nullopt;
-    int32_t expectedResourceId = 123321;
+    static std::optional<ChangeValueInfo> checkEvent = std::nullopt;
     auto expectedChangeValueInfo = ChangeValueInfo {
-        .value = u"test content", .previewText.offset = 2, .previewText.value = u"previewText",
-        .oldPreviewText.offset = 1, .oldPreviewText.value = u"oldPreviewText", .oldContent = u"oldContent",
-        .rangeBefore.start = 1, .rangeBefore.end = 6, .rangeAfter.start = 2, .rangeAfter.end = 5};
+        .value = u"test content",
+        .previewText = { .offset = 2, .value = u"previewText" },
+        .oldPreviewText = { .offset = 1, .value = u"oldPreviewText" },
+        .oldContent = u"oldContent",
+        .rangeBefore = { .start = 1, .end = 6 },
+        .rangeAfter = { .start = 2, .end = 5 },
+    };
 
     auto inputCallback = [] (Ark_VMContext context, const Ark_Int32 resourceId,
         const Ark_EditableTextChangeValue parameter, const Callback_Boolean_Void continuation) {
-        ChangeValueInfo info;
-        info.value = Converter::Convert<std::u16string>(parameter.content);
-        info.previewText = Converter::Convert<PreviewText>(parameter.previewText.value);
-        info.rangeBefore = Converter::Convert<TextRange>(parameter.options.value.rangeBefore);
-        info.rangeAfter = Converter::Convert<TextRange>(parameter.options.value.rangeAfter);
-        info.oldContent = Converter::Convert<std::u16string>(parameter.options.value.oldContent);
-        info.oldPreviewText =  Converter::Convert<PreviewText>(parameter.options.value.oldPreviewText);
-        checkEvent = CheckEvent {resourceId, info};
+        checkEvent = Converter::Convert<ChangeValueInfo>(parameter);
         CallbackHelper(continuation).InvokeSync(Converter::ArkValue<Ark_Boolean>(true));
     };
-    auto func = Converter::ArkValue<Callback_EditableTextChangeValue_Boolean>(nullptr,
-        inputCallback, expectedResourceId);
-    auto optCallback = Converter::ArkValue<Opt_Callback_EditableTextChangeValue_Boolean>(func);
-    modifier_->setOnWillChange(node_, &optCallback);
+    auto func = Converter::ArkCallback<Opt_Callback_EditableTextChangeValue_Boolean>(inputCallback);
+    modifier_->setOnWillChange(node_, &func);
 
     auto searchTextField = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-    CHECK_NULL_VOID(searchTextField);
+    ASSERT_NE(searchTextField, nullptr);
     auto eventHub = searchTextField->GetEventHub<TextFieldEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto result = eventHub->FireOnWillChangeEvent(expectedChangeValueInfo);
     EXPECT_TRUE(result);
     ASSERT_TRUE(checkEvent);
-    EXPECT_EQ(checkEvent->resourceId, expectedResourceId);
-    EXPECT_EQ(checkEvent->info.value, expectedChangeValueInfo.value);
-    EXPECT_EQ(checkEvent->info.previewText.offset, expectedChangeValueInfo.previewText.offset);
-    EXPECT_EQ(checkEvent->info.previewText.value, expectedChangeValueInfo.previewText.value);
-    EXPECT_EQ(checkEvent->info.oldPreviewText.offset, expectedChangeValueInfo.oldPreviewText.offset);
-    EXPECT_EQ(checkEvent->info.oldPreviewText.value, expectedChangeValueInfo.oldPreviewText.value);
-    EXPECT_EQ(checkEvent->info.oldContent, expectedChangeValueInfo.oldContent);
-    EXPECT_EQ(checkEvent->info.rangeBefore.start, expectedChangeValueInfo.rangeBefore.start);
-    EXPECT_EQ(checkEvent->info.rangeBefore.end, expectedChangeValueInfo.rangeBefore.end);
-    EXPECT_EQ(checkEvent->info.rangeAfter.start, expectedChangeValueInfo.rangeAfter.start);
-    EXPECT_EQ(checkEvent->info.rangeAfter.end, expectedChangeValueInfo.rangeAfter.end);
+    EXPECT_EQ(checkEvent->value, expectedChangeValueInfo.value);
+    EXPECT_EQ(checkEvent->previewText.offset, expectedChangeValueInfo.previewText.offset);
+    EXPECT_EQ(checkEvent->previewText.value, expectedChangeValueInfo.previewText.value);
+    EXPECT_EQ(checkEvent->oldPreviewText.offset, expectedChangeValueInfo.oldPreviewText.offset);
+    EXPECT_EQ(checkEvent->oldPreviewText.value, expectedChangeValueInfo.oldPreviewText.value);
+    EXPECT_EQ(checkEvent->oldContent, expectedChangeValueInfo.oldContent);
+    EXPECT_EQ(checkEvent->rangeBefore.start, expectedChangeValueInfo.rangeBefore.start);
+    EXPECT_EQ(checkEvent->rangeBefore.end, expectedChangeValueInfo.rangeBefore.end);
+    EXPECT_EQ(checkEvent->rangeAfter.start, expectedChangeValueInfo.rangeAfter.start);
+    EXPECT_EQ(checkEvent->rangeAfter.end, expectedChangeValueInfo.rangeAfter.end);
 }
 } // namespace OHOS::Ace::NG

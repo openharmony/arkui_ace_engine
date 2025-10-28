@@ -172,9 +172,9 @@ HWTEST_F(GridModifierTest, setGridOptionsTestValidLayoutOptionsValues, TestSize.
     layoutOptions.regularSize.value0 = Converter::ArkValue<Ark_Int32>(1);
     layoutOptions.regularSize.value1 = Converter::ArkValue<Ark_Int32>(1);
     std::vector<int32_t> indexes{1, 2, 3, 4, 5};
-    Converter::ArkArrayHolder<Array_I32> indexesHolder(indexes);
-    Array_I32 indexesArrayResult = indexesHolder.ArkValue();
-    layoutOptions.irregularIndexes = Converter::ArkValue<Opt_Array_I32>(indexesArrayResult);
+    Converter::ArkArrayHolder<Array_Int32> indexesHolder(indexes);
+    Array_Int32 indexesArrayResult = indexesHolder.ArkValue();
+    layoutOptions.irregularIndexes = Converter::ArkValue<Opt_Array_Int32>(indexesArrayResult);
     inputValue1 = Converter::ArkValue<Opt_GridLayoutOptions>(layoutOptions);
     modifier_->setGridOptions(node_, &inputValue0, &inputValue1);
     strResult = GetStringAttribute(node_, ATTRIBUTE_SET_GRID_OPTIONS_LAYOUT_OPTIONS_NAME);

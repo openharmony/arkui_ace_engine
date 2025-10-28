@@ -92,8 +92,8 @@ const auto EXPECTED_FONT_WEIGHT = "FontWeight.Bold";
 const auto EXPECTED_FONT_FAMILY = "TestFontFamily";
 const auto EXPECTED_FONT_STYLE = "FontStyle.Italic";
 
-const auto SELECTED_INDEX = ArkUnion<Opt_Union_Number_Resource_Bindable_Bindable, Ark_Number>(1);
-const auto INVALID_INDEX = ArkUnion<Opt_Union_Number_Resource_Bindable_Bindable, Ark_Number>(-1);
+const auto SELECTED_INDEX = ArkUnion<Opt_Union_I32_Resource_Bindable_Bindable, Ark_Int32>(1);
+const auto INVALID_INDEX = ArkUnion<Opt_Union_I32_Resource_Bindable_Bindable, Ark_Int32>(-1);
 
 // length values
 const Ark_Float32 AFLT32_POS(1.234f);
@@ -198,7 +198,6 @@ extern std::vector<std::tuple<std::string, Ark_Resource, std::string>> testColor
 extern std::vector<std::tuple<std::string, Ark_Resource, std::string>> testStringResValidValues;
 extern std::vector<std::tuple<std::string, Ark_Resource, std::string>> testIntResValidValues;
 extern std::vector<std::tuple<std::string, Ark_String, std::string>> testWeightStringValidValues;
-extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testNumberNonNegIntValidValues;
 extern std::vector<std::tuple<ResIntegerID, std::string, OHOS::Ace::ResRawValue>> resourceInitTable;
 
 const Ark_Font TEST_ARK_FONT = {

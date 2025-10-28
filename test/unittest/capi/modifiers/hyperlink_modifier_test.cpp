@@ -79,18 +79,15 @@ HWTEST_F(HyperlinkModifierTest, setHyperlinkOptionsTestDefaultValues, TestSize.L
  */
 HWTEST_F(HyperlinkModifierTest, setHyperlinkOptionsTestAddressValidValues, TestSize.Level1)
 {
-    Ark_Union_String_Resource initValueAddress;
-    Opt_Union_String_Resource initValueContent;
-
     // Initial setup
-    initValueAddress =
-        ArkUnion<Ark_Union_String_Resource, Ark_String>(std::get<1>(Fixtures::testFixtureStringNoEmptyValidValues[0]));
-    initValueContent =
+    auto initValueAddress =
+        ArkUnion<Opt_Union_String_Resource, Ark_String>(std::get<1>(Fixtures::testFixtureStringNoEmptyValidValues[0]));
+    auto initValueContent =
         ArkUnion<Opt_Union_String_Resource, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
 
     auto checkValue = [this, &initValueAddress, &initValueContent](const std::string& input,
-                          const Ark_Union_String_Resource& value, const std::string& expectedStr) {
-        Ark_Union_String_Resource inputValueAddress = initValueAddress;
+                          const Opt_Union_String_Resource& value, const std::string& expectedStr) {
+        Opt_Union_String_Resource inputValueAddress = initValueAddress;
         Opt_Union_String_Resource inputValueContent = initValueContent;
 
         // Re-create node for 'options' attribute
@@ -105,10 +102,10 @@ HWTEST_F(HyperlinkModifierTest, setHyperlinkOptionsTestAddressValidValues, TestS
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureStringNoEmptyValidValues) {
-        checkValue(input, ArkUnion<Ark_Union_String_Resource, Ark_String>(value), expected);
+        checkValue(input, ArkUnion<Opt_Union_String_Resource, Ark_String>(value), expected);
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureStringResNoEmptyValidValues) {
-        checkValue(input, ArkUnion<Ark_Union_String_Resource, Ark_Resource>(value), expected);
+        checkValue(input, ArkUnion<Opt_Union_String_Resource, Ark_Resource>(value), expected);
     }
 }
 
@@ -119,18 +116,15 @@ HWTEST_F(HyperlinkModifierTest, setHyperlinkOptionsTestAddressValidValues, TestS
  */
 HWTEST_F(HyperlinkModifierTest, setHyperlinkOptionsTestAddressInvalidValues, TestSize.Level1)
 {
-    Ark_Union_String_Resource initValueAddress;
-    Opt_Union_String_Resource initValueContent;
-
     // Initial setup
-    initValueAddress =
-        ArkUnion<Ark_Union_String_Resource, Ark_String>(std::get<1>(Fixtures::testFixtureStringNoEmptyValidValues[0]));
-    initValueContent =
+    auto initValueAddress =
+        ArkUnion<Opt_Union_String_Resource, Ark_String>(std::get<1>(Fixtures::testFixtureStringNoEmptyValidValues[0]));
+    auto initValueContent =
         ArkUnion<Opt_Union_String_Resource, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
 
     auto checkValue = [this, &initValueAddress, &initValueContent](
-                          const std::string& input, const Ark_Union_String_Resource& value) {
-        Ark_Union_String_Resource inputValueAddress = initValueAddress;
+                          const std::string& input, const Opt_Union_String_Resource& value) {
+        Opt_Union_String_Resource inputValueAddress = initValueAddress;
         Opt_Union_String_Resource inputValueContent = initValueContent;
 
         // Re-create node for 'options' attribute
@@ -145,7 +139,8 @@ HWTEST_F(HyperlinkModifierTest, setHyperlinkOptionsTestAddressInvalidValues, Tes
     };
 
     // Check invalid union
-    checkValue("invalid union", ArkUnion<Ark_Union_String_Resource, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Opt_Union_String_Resource, Ark_Empty>(nullptr));
+    checkValue("undefined", ArkUnion<Opt_Union_String_Resource>(Ark_Empty()));
 }
 
 /*
@@ -155,18 +150,15 @@ HWTEST_F(HyperlinkModifierTest, setHyperlinkOptionsTestAddressInvalidValues, Tes
  */
 HWTEST_F(HyperlinkModifierTest, setHyperlinkOptionsTestContentValidValues, TestSize.Level1)
 {
-    Ark_Union_String_Resource initValueAddress;
-    Opt_Union_String_Resource initValueContent;
-
     // Initial setup
-    initValueAddress =
-        ArkUnion<Ark_Union_String_Resource, Ark_String>(std::get<1>(Fixtures::testFixtureStringNoEmptyValidValues[0]));
-    initValueContent =
+    auto initValueAddress =
+        ArkUnion<Opt_Union_String_Resource, Ark_String>(std::get<1>(Fixtures::testFixtureStringNoEmptyValidValues[0]));
+    auto initValueContent =
         ArkUnion<Opt_Union_String_Resource, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
 
     auto checkValue = [this, &initValueAddress, &initValueContent](const std::string& input,
                           const Opt_Union_String_Resource& value, const std::string& expectedStr) {
-        Ark_Union_String_Resource inputValueAddress = initValueAddress;
+        Opt_Union_String_Resource inputValueAddress = initValueAddress;
         Opt_Union_String_Resource inputValueContent = initValueContent;
 
         // Re-create node for 'options' attribute
@@ -198,18 +190,15 @@ HWTEST_F(HyperlinkModifierTest, setHyperlinkOptionsTestContentValidValues, TestS
  */
 HWTEST_F(HyperlinkModifierTest, setHyperlinkOptionsTestContentInvalidValues, TestSize.Level1)
 {
-    Ark_Union_String_Resource initValueAddress;
-    Opt_Union_String_Resource initValueContent;
-
     // Initial setup
-    initValueAddress =
-        ArkUnion<Ark_Union_String_Resource, Ark_String>(std::get<1>(Fixtures::testFixtureStringNoEmptyValidValues[0]));
-    initValueContent =
+    auto initValueAddress =
+        ArkUnion<Opt_Union_String_Resource, Ark_String>(std::get<1>(Fixtures::testFixtureStringNoEmptyValidValues[0]));
+    auto initValueContent =
         ArkUnion<Opt_Union_String_Resource, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
 
     auto checkValue = [this, &initValueAddress, &initValueContent](
                           const std::string& input, const Opt_Union_String_Resource& value) {
-        Ark_Union_String_Resource inputValueAddress = initValueAddress;
+        Opt_Union_String_Resource inputValueAddress = initValueAddress;
         Opt_Union_String_Resource inputValueContent = initValueContent;
 
         // Re-create node for 'options' attribute

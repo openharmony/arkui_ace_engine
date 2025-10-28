@@ -203,23 +203,19 @@ HWTEST_F(CounterModifierTest, setOnDecTest, TestSize.Level1)
  */
 HWTEST_F(CounterModifierTest, DISABLED_setBackgroundColorTest, TestSize.Level1)
 {
-    using OneTestStep = std::pair<Opt_ResourceColor, std::string>;
     static const std::string PROP_NAME("backgroundColor");
     static auto resName = NamedResourceId("aa.bb.cc", ResourceType::COLOR);
     static auto resId = IntResourceId(1234, ResourceType::COLOR);
     static const std::string EXPECTED_RESOURCE_COLOR =
         Color::RED.ToString(); // Color::RED is result of ThemeConstants::GetColorXxxx stubs
-    static const std::vector<OneTestStep> testPlan = {
-        { Converter::ArkValue<Opt_ResourceColor>(ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE)),
-             "#FFFFFFFF" },
-        { Converter::ArkValue<Opt_ResourceColor>(ArkUnion<Ark_ResourceColor, Ark_Int32>(0x123456)), "#FF123456" },
-        { Converter::ArkValue<Opt_ResourceColor>(ArkUnion<Ark_ResourceColor, Ark_Int32>(0.5f)), "#00000000" },
-        { Converter::ArkValue<Opt_ResourceColor>(ArkUnion<Ark_ResourceColor, Ark_String>("#11223344")), "#11223344" },
-        { Converter::ArkValue<Opt_ResourceColor>(ArkUnion<Ark_ResourceColor, Ark_String>("65535")), "#FF00FFFF" },
-        { Converter::ArkValue<Opt_ResourceColor>(CreateResourceUnion<Ark_ResourceColor>(resName)),
-             EXPECTED_RESOURCE_COLOR },
-        { Converter::ArkValue<Opt_ResourceColor>(CreateResourceUnion<Ark_ResourceColor>(resId)),
-             EXPECTED_RESOURCE_COLOR },
+    static const std::vector<std::pair<Ark_ResourceColor, std::string>> testPlan = {
+        { ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE), "#FFFFFFFF" },
+        { ArkUnion<Ark_ResourceColor, Ark_Int32>(0x123456), "#FF123456" },
+        { ArkUnion<Ark_ResourceColor, Ark_Int32>(0), "#00000000" },
+        { ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"), "#11223344" },
+        { ArkUnion<Ark_ResourceColor, Ark_String>("65535"), "#FF00FFFF" },
+        { CreateResourceUnion<Ark_ResourceColor>(resName), EXPECTED_RESOURCE_COLOR },
+        { CreateResourceUnion<Ark_ResourceColor>(resId), EXPECTED_RESOURCE_COLOR },
     };
 
     ASSERT_NE(commonModifier_->setBackgroundColor, nullptr);
@@ -228,7 +224,8 @@ HWTEST_F(CounterModifierTest, DISABLED_setBackgroundColorTest, TestSize.Level1)
     EXPECT_EQ(checkInitial, Color::TRANSPARENT.ToString());
 
     for (const auto &[arkResColor, expected]: testPlan) {
-        commonModifier_->setBackgroundColor(node_, &arkResColor);
+        auto inputValue = ArkUnion<Opt_Union_ResourceColor_ColorMetrics, Ark_ResourceColor>(arkResColor);
+        commonModifier_->setBackgroundColor(node_, &inputValue);
         auto checkColor = GetAttrValue<std::string>(node_, PROP_NAME);
         EXPECT_EQ(checkColor, expected);
     }

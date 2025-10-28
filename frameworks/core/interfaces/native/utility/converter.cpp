@@ -1022,9 +1022,9 @@ Dimension Convert(const Ark_Number& src)
 }
 
 template<>
-Dimension Convert(const Ark_Int32& src)
+Dimension Convert(const Ark_Float64& src)
 {
-    return Dimension(static_cast<int>(src), DimensionUnit::VP);
+    return Dimension(Converter::Convert<double>(src), ConverterStatus::DEFAULT_UNIT);
 }
 
 template<>
@@ -1036,13 +1036,6 @@ Color Convert(const Ark_Number& src)
 
 template<>
 Color Convert(const Ark_Int32& src)
-{
-    uint32_t value = static_cast<uint32_t>(src);
-    return Color(ColorAlphaAdapt(value));
-}
-
-template<>
-Color Convert(const Ark_Float64& src)
 {
     uint32_t value = static_cast<uint32_t>(src);
     return Color(ColorAlphaAdapt(value));
@@ -1191,13 +1184,6 @@ BorderStyleProperty Convert(const Ark_BorderStyle& src)
 }
 
 template<>
-Dimension Convert(const Ark_CustomObject& src)
-{
-    LOGW("Convert [Ark_CustomObject] to [Dimension] is not supported");
-    return Dimension();
-}
-
-template<>
 DimensionOffset Convert(const Ark_Offset& src)
 {
     return DimensionOffset(
@@ -1255,16 +1241,14 @@ Font Convert(const Ark_Font& src)
         font.fontFamilies = fontfamiliesOpt->families;
         font.fontFamiliesNG = std::optional<std::vector<std::string>>(fontfamiliesOpt->families);
     }
-    auto fontSize = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Float64>(src.size);
-    if (fontSize) {
+    {
+        DefaultDimensionUnit defaultUnit(DimensionUnit::FP);
+        auto fontSize = OptConvert<Dimension>(src.size);
         Validator::ValidateNonNegative(fontSize);
         Validator::ValidateNonPercent(fontSize);
         font.fontSize = fontSize;
     }
-    auto weight = OptConvert<FontWeight>(src.weight);
-    if (weight) {
-        font.fontWeight = weight;
-    }
+    font.fontWeight = OptConvert<FontWeight>(src.weight);
     font.fontStyle = OptConvert<OHOS::Ace::FontStyle>(src.style);
     return font;
 }
@@ -1595,18 +1579,6 @@ void AssignCast(std::optional<TextResponseType>& dst, const Ark_TextResponseType
 }
 
 template<>
-void AssignCast(std::optional<uint32_t>& dst, const Ark_Number& src)
-{
-    if (src.tag == INTEROP_TAG_FLOAT32) {
-        if (src.f32 >= 0) {
-            dst = static_cast<int>(src.f32);
-        }
-    } else if (src.i32 >= 0) {
-        dst = src.i32;
-    }
-}
-
-template<>
 void AssignCast(std::optional<std::string>& dst, const Array_TextDataDetectorType& src)
 {
     CHECK_NULL_VOID(src.array);
@@ -1655,7 +1627,7 @@ TextDetectConfig Convert(const Ark_TextDataDetectorConfig& src)
 {
     TextDetectConfig ret;
     ret.types = OptConvert<std::string>(src.types).value_or("");
-    auto onDetectResultUpdate = OptConvert<Callback_String_Void>(src.onDetectResultUpdate);
+    auto onDetectResultUpdate = GetOpt(src.onDetectResultUpdate);
     if (onDetectResultUpdate) {
         auto callback = [arkCallback = CallbackHelper(*onDetectResultUpdate)](const std::string& arg) -> void {
             ConvContext ctx;
@@ -1764,7 +1736,7 @@ NG::NavigationBackgroundOptions Convert(const Ark_MoreButtonOptions& src)
     options.effectOption.reset();
     BlurStyleOption styleOptions;
     EffectOption effectOption;
-  
+
     if (src.backgroundBlurStyleOptions.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
         styleOptions = Converter::Convert<BlurStyleOption>(src.backgroundBlurStyleOptions.value);
         options.blurStyleOption = styleOptions;
@@ -2157,18 +2129,6 @@ void AssignCast(std::optional<double>& dst, const Ark_String& src)
     }
 }
 
-template<>
-void AssignCast(std::optional<double>& dst, const Ark_Float64& src)
-{
-    dst = Convert<double>(src);
-}
-
-template<>
-void AssignCast(std::optional<float>& dst, const Ark_Float64& src)
-{
-    dst = Convert<float>(src);
-}
-
 Dimension ConvertFromString(const std::string& str, DimensionUnit unit)
 {
     static const int32_t percentUnit = 100;
@@ -2424,18 +2384,10 @@ void AssignCast(std::optional<std::u16string>& dst, const Ark_Resource& src)
 }
 
 template<>
-Dimension Convert(const Ark_Float64& src)
-{
-    return Dimension(src, ConverterStatus::DEFAULT_UNIT);
-}
-
-template<>
 Dimension Convert(const Ark_LengthMetrics& src)
 {
     auto value = Converter::Convert<float>(src.value);
-    auto unit = static_cast<int32_t>(src.unit);
-
-    auto dimensionUnit = static_cast<DimensionUnit>(unit);
+    auto dimensionUnit = OptConvert<DimensionUnit>(src.unit).value_or(DimensionUnit::INVALID);
     return Dimension(value, dimensionUnit);
 }
 
@@ -2845,7 +2797,7 @@ BorderWidthProperty Convert(const Ark_LocalizedEdgeWidths& src)
         isRightToLeft? Converter::OptConvert<Dimension>(src.end) : Converter::OptConvert<Dimension>(src.start);
     widthProperty.rightDimen =
         isRightToLeft? Converter::OptConvert<Dimension>(src.start) : Converter::OptConvert<Dimension>(src.end);
-    
+
     widthProperty.multiValued = true;
 
     return widthProperty;
@@ -3645,7 +3597,7 @@ ScrollFrameResult Convert(const Ark_OnScrollFrameBeginHandlerResult& from)
     ret.offset = Converter::Convert<Dimension>(from.offsetRemain);
     return ret;
 }
-template<> 
+template<>
 RectWidthStyle Convert(const Ark_text_RectWidthStyle& src)
 {
     switch (src) {
@@ -3659,7 +3611,7 @@ RectWidthStyle Convert(const Ark_text_RectWidthStyle& src)
     }
     return RectWidthStyle::TIGHT;
 }
-template<> 
+template<>
 RectHeightStyle Convert(const Ark_text_RectHeightStyle& src)
 {
     switch (src) {
@@ -3670,7 +3622,7 @@ RectHeightStyle Convert(const Ark_text_RectHeightStyle& src)
         case Ark_text_RectHeightStyle::ARK_TEXT_RECT_HEIGHT_STYLE_INCLUDE_LINE_SPACE_MIDDLE:
             return RectHeightStyle::INCLUDE_LINE_SPACE_MIDDLE;
         case Ark_text_RectHeightStyle::ARK_TEXT_RECT_HEIGHT_STYLE_INCLUDE_LINE_SPACE_TOP:
-            return RectHeightStyle::INCLUDE_LINE_SPACE_TOP; 
+            return RectHeightStyle::INCLUDE_LINE_SPACE_TOP;
         case Ark_text_RectHeightStyle::ARK_TEXT_RECT_HEIGHT_STYLE_INCLUDE_LINE_SPACE_BOTTOM:
             return RectHeightStyle::INCLUDE_LINE_SPACE_BOTTOM;
         case Ark_text_RectHeightStyle::ARK_TEXT_RECT_HEIGHT_STYLE_STRUT:

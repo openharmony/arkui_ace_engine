@@ -40,8 +40,8 @@ namespace {
     };
     void AssignArkValue(Ark_FractionStop& dst, const FractionStop& fractionStopValue)
     {
-        dst.value0 = Converter::ArkValue<Ark_Number>(fractionStopValue.first);
-        dst.value1 = Converter::ArkValue<Ark_Number>(fractionStopValue.second);
+        dst.value0 = Converter::ArkValue<Ark_Float64>(fractionStopValue.first);
+        dst.value1 = Converter::ArkValue<Ark_Float64>(fractionStopValue.second);
     }
 }
 

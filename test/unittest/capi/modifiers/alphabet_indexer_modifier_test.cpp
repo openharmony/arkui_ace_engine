@@ -81,7 +81,6 @@ const auto ATTRIBUTE_POPUP_POSITION_DEFAULT_VALUE = "0.00px";
 const auto ATTRIBUTE_AUTOCOLLAPSE_DEFAULT_VALUE = "false";
 const auto ATTRIBUTE_POPUP_ITEM_BORDER_RADIUS_DEFAULT_VALUE = "24.00vp";
 const auto ATTRIBUTE_ITEM_BORDER_RADIUS_DEFAULT_VALUE = "8.00vp";
-const auto ATTRIBUTE_ITEM_BORDER_RADIUS_DEFAULT_NUM_VALUE = 8.0;
 const auto ATTRIBUTE_POPUP_BACKGROUND_BLUR_STYLE_DEFAULT_VALUE = "BlurStyle.COMPONENT_REGULAR";
 const auto ATTRIBUTE_HAPTIC_FEEDBACK_DEFAULT_VALUE = "true";
 
@@ -136,7 +135,6 @@ static const std::vector<ItemSizeTestStep> ITEM_SIZE_TEST_PLAN = {
 const std::string COLOR_RED = "#FFFF0000";
 const std::string COLOR_BLACK = "#FF000000";
 const std::string COLOR_TRANSPARENT = "#00000000";
-const Ark_String COLOR_NAME = Converter::ArkValue<Ark_String>("color_name");
 
 typedef std::tuple<Opt_ResourceColor, std::string> ColorTestStep;
 const std::vector<ColorTestStep> COLOR_TEST_PLAN_BLACK = {
@@ -169,25 +167,19 @@ const std::vector<ColorTestStep> COLOR_TEST_PLAN_RES = {
         COLOR_RED }
 };
 
-const Ark_Float32 AFLT32_POS(1.234f);
-const Ark_Float32 AFLT32_NEG(-5.6789f);
-const auto CHECK_AFLT32_POS = "1.23vp";
-
-const auto RES_CONTENT = Converter::ArkValue<Ark_String>("aa.bb.cc");
 const auto RES_NAME = NamedResourceId{"res_name", ResourceType::STRING};
-const Opt_Union_String_Resource OPT_UNION_RESOURCE_RESOURCE = CreateResourceUnion<Opt_Union_String_Resource>(RES_NAME);
-const std::string CHECK_RESOURCE_STR("aa.bb.cc");
+const std::string CHECK_RESOURCE_STR("xx.yy.zz");
 
 typedef std::pair<Opt_Union_String_Resource, std::string> UnionStringResourceTestStep;
 const std::vector<UnionStringResourceTestStep> UNION_RESOURCE_STRING_PLAN = {
-    { Converter::ArkUnion<Opt_Union_String_Resource, Ark_String>(RES_CONTENT), CHECK_RESOURCE_STR },
-    { OPT_UNION_RESOURCE_RESOURCE, CHECK_RESOURCE_STR }
+    { Converter::ArkUnion<Opt_Union_String_Resource, Ark_String>("aa.bb.cc"), "aa.bb.cc" },
+    { CreateResourceUnion<Opt_Union_String_Resource>(RES_NAME), CHECK_RESOURCE_STR }
 };
 
 typedef std::pair<Opt_Length, std::string> OptLengthTestStep;
 const std::vector<OptLengthTestStep> FONT_SIZE_TEST_PLAN = {
-    { Converter::ArkValue<Opt_Length>(AFLT32_POS), CHECK_AFLT32_POS },
-    { Converter::ArkValue<Opt_Length>(AFLT32_NEG), ATTRIBUTE_FONT_DEFAULT_SIZE },
+    { Converter::ArkValue<Opt_Length>(1.234), "1.23fp" },
+    { Converter::ArkValue<Opt_Length>(-5.6789), ATTRIBUTE_FONT_DEFAULT_SIZE },
 };
 
 typedef std::pair<Opt_FontStyle, std::string> ArkFontStyleTestStep;
@@ -211,18 +203,12 @@ const std::vector<ArkFontWeightTest> FONT_WEIGHT_TEST_PLAN = {
         "FontWeight.Bold" },
     { Converter::ArkUnion<Opt_Union_FontWeight_I32_String, Ark_FontWeight>(ARK_FONT_WEIGHT_BOLDER),
         "FontWeight.Bolder" },
-    { Converter::ArkUnion<Opt_Union_FontWeight_I32_String, Ark_String>(Converter::ArkValue<Ark_String>("lighter")),
-        "FontWeight.Lighter" },
-    { Converter::ArkUnion<Opt_Union_FontWeight_I32_String, Ark_String>(Converter::ArkValue<Ark_String>("normal")),
-        "FontWeight.Normal" },
-    { Converter::ArkUnion<Opt_Union_FontWeight_I32_String, Ark_String>(Converter::ArkValue<Ark_String>("regular")),
-        "FontWeight.Regular" },
-    { Converter::ArkUnion<Opt_Union_FontWeight_I32_String, Ark_String>(Converter::ArkValue<Ark_String>("medium")),
-        "FontWeight.Medium" },
-    { Converter::ArkUnion<Opt_Union_FontWeight_I32_String, Ark_String>(Converter::ArkValue<Ark_String>("bold")),
-        "FontWeight.Bold" },
-    { Converter::ArkUnion<Opt_Union_FontWeight_I32_String, Ark_String>(Converter::ArkValue<Ark_String>("bolder")),
-        "FontWeight.Bolder" }
+    { Converter::ArkUnion<Opt_Union_FontWeight_I32_String, Ark_String>("lighter"), "FontWeight.Lighter" },
+    { Converter::ArkUnion<Opt_Union_FontWeight_I32_String, Ark_String>("normal"), "FontWeight.Normal" },
+    { Converter::ArkUnion<Opt_Union_FontWeight_I32_String, Ark_String>("regular"), "FontWeight.Regular" },
+    { Converter::ArkUnion<Opt_Union_FontWeight_I32_String, Ark_String>("medium"), "FontWeight.Medium" },
+    { Converter::ArkUnion<Opt_Union_FontWeight_I32_String, Ark_String>("bold"), "FontWeight.Bold" },
+    { Converter::ArkUnion<Opt_Union_FontWeight_I32_String, Ark_String>("bolder"), "FontWeight.Bolder" },
 };
 
 const std::vector<ArkFontWeightTest> FONT_WEIGHT_TEST_PLAN2 = {
@@ -1476,28 +1462,23 @@ HWTEST_F(IndexerModifierTest, DISABLED_setItemBorderRadius, TestSize.Level1)
     auto checkVal = GetAttrValue<std::string>(node_, PROP_NAME_ITEM_BORDER_RADIUS);
     EXPECT_EQ(checkVal, ATTRIBUTE_ITEM_BORDER_RADIUS_DEFAULT_VALUE);
 
-    using TestStep = std::tuple<Ark_Number, std::string, std::string>;
+    using TestStep = std::tuple<double, std::string, std::string>;
     static const std::vector<TestStep> testPlan = {
-        {ArkValue<Ark_Number>(10), StringUtils::DoubleToString(10).append("vp"),
-            StringUtils::DoubleToString(10).append("vp")},
-        {ArkValue<Ark_Number>(832.599345f), StringUtils::DoubleToString(832.599345f).append("vp"),
-            StringUtils::DoubleToString(832.599345f).append("vp")},
-        {ArkValue<Ark_Number>(-123), ATTRIBUTE_ITEM_BORDER_RADIUS_DEFAULT_VALUE,
-            StringUtils::DoubleToString(ATTRIBUTE_ITEM_BORDER_RADIUS_DEFAULT_NUM_VALUE).append("vp")},
-        {ArkValue<Ark_Number>(25.01), StringUtils::DoubleToString(25.01).append("vp"),
-            StringUtils::DoubleToString(25.01).append("vp")},
-        {ArkValue<Ark_Number>(-832.5f), ATTRIBUTE_ITEM_BORDER_RADIUS_DEFAULT_VALUE,
-            StringUtils::DoubleToString(ATTRIBUTE_ITEM_BORDER_RADIUS_DEFAULT_NUM_VALUE).append("vp")},
-        {ArkValue<Ark_Number>(0.0f), "0.00vp", "0.00vp"},
+        {10, "10.00vp", "10.00vp"},
+        {832.599345, "832.60vp", "832.60vp"},
+        {-123, ATTRIBUTE_ITEM_BORDER_RADIUS_DEFAULT_VALUE, ATTRIBUTE_ITEM_BORDER_RADIUS_DEFAULT_VALUE},
+        {25.01, "25.01vp", "25.01vp"},
+        {-832.5, ATTRIBUTE_ITEM_BORDER_RADIUS_DEFAULT_VALUE, ATTRIBUTE_ITEM_BORDER_RADIUS_DEFAULT_VALUE},
+        {0.0, "0.00vp", "0.00vp"},
     };
 
     for (const auto& [value, expectItemVal, expectVal] : testPlan) {
-        auto optValue = Converter::ArkValue<Opt_Number>(value);
+        auto optValue = Converter::ArkValue<Opt_Float64>(value);
         modifier_->setItemBorderRadius(node_, &optValue);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_ITEM_BORDER_RADIUS);
-        EXPECT_EQ(checkVal, expectItemVal);
+        EXPECT_EQ(checkVal, expectItemVal) << "Input value: " << value;
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_INDEXER_BORDER_RADIUS);
-        EXPECT_EQ(checkVal, expectVal);
+        EXPECT_EQ(checkVal, expectVal) << "Input value: " << value;;
     }
 }
 
