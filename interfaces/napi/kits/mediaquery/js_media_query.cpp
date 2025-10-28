@@ -93,7 +93,7 @@ public:
         struct Leave {
             ~Leave()
             {
-                if (delayDeleteEnv_) {
+                if (delayDeleteEnv_ && delayDeleteCallbacks_) {
                     for (auto& cbRef : *delayDeleteCallbacks_) {
                         napi_delete_reference(delayDeleteEnv_, cbRef);
                     }
@@ -131,7 +131,7 @@ public:
             }
 
             for (const auto& cbRef : copyCallbacks) {
-                if (delayDeleteCallbacks_->find(cbRef) != delayDeleteCallbacks_->end()) {
+                if (delayDeleteCallbacks_ && delayDeleteCallbacks_->find(cbRef) != delayDeleteCallbacks_->end()) {
                     continue;
                 }
                 napi_handle_scope scope = nullptr;
