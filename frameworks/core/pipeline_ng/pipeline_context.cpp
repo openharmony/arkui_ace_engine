@@ -40,7 +40,6 @@
 #include "base/mousestyle/mouse_style.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/ressched/ressched_report.h"
-#include "base/ressched/ressched_touch_optimizer.h"
 #include "base/thread/background_task_executor.h"
 #include "base/utils/cpu_boost.h"
 #include "core/common/ace_engine.h"

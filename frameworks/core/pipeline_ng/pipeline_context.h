@@ -28,6 +28,7 @@
 #include "base/log/frame_info.h"
 #include "base/log/frame_report.h"
 #include "base/memory/referenced.h"
+#include "base/ressched/ressched_touch_optimizer.h"
 #include "base/utils/device_config.h"
 #include "base/view_data/view_data_wrap.h"
 #include "core/accessibility/accessibility_manager_ng.h"

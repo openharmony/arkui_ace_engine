@@ -16,7 +16,7 @@
 #include "gtest/gtest.h"
 #define private public
 #define protected public
-#include "base/ressched/ressched_touch_optimizer->h"
+#include "base/ressched/ressched_touch_optimizer.h"
 #include "core/event/touch_event.h"
 #undef private
 #undef protected
