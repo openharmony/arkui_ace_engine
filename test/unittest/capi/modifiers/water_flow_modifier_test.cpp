@@ -29,23 +29,20 @@ using namespace testing::ext;
 using namespace Converter;
 
 const auto CASHED_COUNT_ATTRIBUTE_NAME = "cachedCount";
-const auto CASHED_COUNT_ATTRIBUTE_DEFAULT_VALUE = "1"
+const auto CASHED_COUNT_ATTRIBUTE_DEFAULT_VALUE = "1";
 
-typedef std::tuple<Ark_Number, std::string> ArkNumberTestStep;
-static const std::vector<ArkNumberTestStep> CASHED_COUNT_TEST_PLAN = {
-    { ArkValue<Ark_Number>(10), "10"},
-    { ArkValue<Ark_Number>(-10), "1"},
-    { ArkValue<Ark_Number>(12.5), "12"},
-    { ArkValue<Ark_Number>(-5.5), "1"},
-    { ArkValue<Ark_Number>(832), "832"},
-    { ArkValue<Ark_Number>(1.0f), "1"}
+static const std::vector<std::tuple<Opt_Int32, std::string>> CASHED_COUNT_TEST_PLAN = {
+    { ArkValue<Opt_Int32>(10), "10"},
+    { ArkValue<Opt_Int32>(-10), CASHED_COUNT_ATTRIBUTE_DEFAULT_VALUE},
+    { ArkValue<Opt_Int32>(832), "832"},
+    { ArkValue<Opt_Int32>(), CASHED_COUNT_ATTRIBUTE_DEFAULT_VALUE}
 };
 
 namespace Converter {
 inline void AssignArkValue(Ark_OnScrollFrameBeginHandlerResult& dst, const ScrollFrameResult& src,
     ConvContext *ctx)
 {
-    dst.offsetRemain = Converter::ArkValue<Ark_Number>(src.offset);
+    dst.offsetRemain = Converter::ArkValue<Ark_Float64>(src.offset);
 }
 } // Converter
 
@@ -77,7 +74,7 @@ HWTEST_F(WaterFlowModifierTest, DISABLED_setOnScrollIndexTestCachedCountValidVal
     static std::optional<CheckEvent> checkEvent = std::nullopt;
 
     // Create an event handler for `onScrollIndex`
-    auto onScrollIndex = [](Ark_Int32 nodeId, const Ark_Number first, const Ark_Number last) {
+    auto onScrollIndex = [](Ark_Int32 nodeId, const Ark_Int32 first, const Ark_Int32 last) {
         checkEvent = {
             .nodeId = nodeId,
             .firstIndex = Converter::Convert<int32_t>(first),
@@ -85,18 +82,8 @@ HWTEST_F(WaterFlowModifierTest, DISABLED_setOnScrollIndexTestCachedCountValidVal
         };
     };
 
-    // Initialize the Callback_Number_Number_Void structure
-    Callback_Number_Number_Void callBackValue = {
-        .resource = Ark_CallbackResource {
-            .resourceId = frameNode->GetId(),
-            .hold = nullptr,
-            .release = nullptr,
-        },
-        .call = onScrollIndex
-    };
-
     // Set the callback for scroll index change
-    auto optCallback = Converter::ArkValue<Opt_Callback_Number_Number_Void>(callBackValue);
+    auto optCallback = Converter::ArkCallback<Opt_Callback_I32_I32_Void>(onScrollIndex, frameNode->GetId());
     modifier_->setOnScrollIndex(node_, &optCallback);
 
     // Check that the event has not been triggered yet
@@ -145,17 +132,16 @@ HWTEST_F(WaterFlowModifierTest, setOnScrollFrameBeginTest, TestSize.Level1)
     ASSERT_NE(eventHub, nullptr);
     ASSERT_NE(modifier_->setOnScrollFrameBegin, nullptr);
     static const Ark_Int32 expectedResId = 123;
-    auto onScrollFrameBegin = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_Number offset,
-                                  Ark_ScrollState state, const Callback_OnScrollFrameBeginHandlerResult_Void cbReturn) {
+    auto onScrollFrameBegin = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_Float64 offset,
+        Ark_ScrollState state, const Callback_OnScrollFrameBeginHandlerResult_Void cbReturn) {
         EXPECT_EQ(resourceId, expectedResId);
         EXPECT_EQ(Converter::Convert<float>(offset), TEST_OFFSET);
         ScrollFrameResult result;
         result.offset = Converter::Convert<Dimension>(offset);
         CallbackHelper(cbReturn).InvokeSync(Converter::ArkValue<Ark_OnScrollFrameBeginHandlerResult>(result));
     };
-    auto arkFunc = Converter::ArkValue<OnScrollFrameBeginCallback>(nullptr, onScrollFrameBegin, expectedResId);
-    auto optCallback = Converter::ArkValue<Opt_OnScrollFrameBeginCallback>(arkFunc);
-    modifier_->setOnScrollFrameBegin(node_, &optCallback);
+    auto arkFunc = Converter::ArkCallback<Opt_OnScrollFrameBeginCallback>(onScrollFrameBegin, expectedResId);
+    modifier_->setOnScrollFrameBegin(node_, &arkFunc);
 
     Dimension dimension(TEST_OFFSET);
     ScrollState state = ScrollState::SCROLL;
@@ -168,16 +154,15 @@ HWTEST_F(WaterFlowModifierTest, setOnScrollFrameBeginTest, TestSize.Level1)
  * @tc.desc: test function of SetCachedCount
  * @tc.type: FUNC
  */
-HWTEST_F(WaterFlowModifierTest, setCashedCountTest, TestSize.Level1)
+HWTEST_F(WaterFlowModifierTest, setCachedCount0Test, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    ASSERT_NE(modifier_->setCashedCount, nullptr);
-    auto checkval = GetAttrValue<std::string>(node_, CASHED_COUNT_ATTRIBUTE_NAME);
+    ASSERT_NE(modifier_->setCachedCount0, nullptr);
+    auto checkVal = GetAttrValue<std::string>(node_, CASHED_COUNT_ATTRIBUTE_NAME);
     EXPECT_EQ(checkVal, CASHED_COUNT_ATTRIBUTE_DEFAULT_VALUE);
     for (const auto& [value, expectVal] : CASHED_COUNT_TEST_PLAN) {
-        auto optValue = Converter::ArkValue<Opt_Number>(value);
-        modifier_->setCashedCount(node_, &optValue);
+        modifier_->setCachedCount0(node_, &value);
         checkVal = GetAttrValue<std::string>(node_, CASHED_COUNT_ATTRIBUTE_NAME);
         EXPECT_EQ(checkVal, expectVal);
     }

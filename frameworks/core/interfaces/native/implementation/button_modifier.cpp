@@ -193,6 +193,7 @@ void SetFontSizeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    Converter::DefaultDimensionUnit du(DimensionUnit::FP);
     auto fontSize = Converter::OptConvertPtr<Dimension>(value);
     Validator::ValidatePositive(fontSize);
     Validator::ValidateNonPercent(fontSize);

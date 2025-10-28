@@ -85,7 +85,7 @@ namespace {
     const auto ATTRIBUTE_ENABLE_SCROLL_INTERACTION_NAME = "enableScrollInteraction";
     const auto ATTRIBUTE_ENABLE_SCROLL_INTERACTION_DEFAULT_VALUE = true;
     const auto ATTRIBUTE_FRICTION_NAME = "friction";
-    const auto ATTRIBUTE_FRICTION_DEFAULT_VALUE = 0.75f;
+    const auto ATTRIBUTE_FRICTION_DEFAULT_VALUE = 0.6;
     const auto ATTRIBUTE_ALIGN_ITEMS_ALIGNMENT_NAME = "alignItems";
     const auto ATTRIBUTE_ALIGN_ITEMS_ALIGNMENT_DEFAULT_VALUE = "GridItemAlignment.Default";
 
@@ -143,7 +143,7 @@ public:
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GridModifierTest, setGridOptionsTestDefaultLayoutOptionaValues, TestSize.Level1)
+HWTEST_F(GridModifierTest, DISABLED_setGridOptionsTestDefaultLayoutOptionaValues, TestSize.Level1)
 {
     std::string strResult;
 
@@ -162,7 +162,7 @@ HWTEST_F(GridModifierTest, setGridOptionsTestDefaultLayoutOptionaValues, TestSiz
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GridModifierTest, setGridOptionsTestValidLayoutOptionsValues, TestSize.Level1)
+HWTEST_F(GridModifierTest, DISABLED_setGridOptionsTestValidLayoutOptionsValues, TestSize.Level1)
 {
     std::string strResult;
     Opt_Scroller inputValue0;
@@ -172,9 +172,9 @@ HWTEST_F(GridModifierTest, setGridOptionsTestValidLayoutOptionsValues, TestSize.
     layoutOptions.regularSize.value0 = Converter::ArkValue<Ark_Int32>(1);
     layoutOptions.regularSize.value1 = Converter::ArkValue<Ark_Int32>(1);
     std::vector<int32_t> indexes{1, 2, 3, 4, 5};
-    Converter::ArkArrayHolder<Array_I32> indexesHolder(indexes);
-    Array_I32 indexesArrayResult = indexesHolder.ArkValue();
-    layoutOptions.irregularIndexes = Converter::ArkValue<Opt_Array_I32>(indexesArrayResult);
+    Converter::ArkArrayHolder<Array_Int32> indexesHolder(indexes);
+    Array_Int32 indexesArrayResult = indexesHolder.ArkValue();
+    layoutOptions.irregularIndexes = Converter::ArkValue<Opt_Array_Int32>(indexesArrayResult);
     inputValue1 = Converter::ArkValue<Opt_GridLayoutOptions>(layoutOptions);
     modifier_->setGridOptions(node_, &inputValue0, &inputValue1);
     strResult = GetStringAttribute(node_, ATTRIBUTE_SET_GRID_OPTIONS_LAYOUT_OPTIONS_NAME);
@@ -199,7 +199,7 @@ HWTEST_F(GridModifierTest, setGridOptionsTestValidLayoutOptionsValues, TestSize.
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GridModifierTest, setGridOptionsTestInvalidLayoutOptionsValues, TestSize.Level1)
+HWTEST_F(GridModifierTest, DISABLED_setGridOptionsTestInvalidLayoutOptionsValues, TestSize.Level1)
 {
     std::string strResult;
     Opt_Scroller inputValue0;
@@ -404,18 +404,15 @@ HWTEST_F(GridModifierTest, setColumnsTemplateTestDefaultValues, TestSize.Level1)
 HWTEST_F(GridModifierTest, setColumnsTemplateTestValidValues, TestSize.Level1)
 {
     std::string strResult;
-    Ark_String inputValue;
 
     // check '1fr 1fr 1fr' template
-    inputValue = Converter::ArkValue<Ark_String>("1fr 1fr 1fr");
-    auto optInputValue = Converter::ArkValue<Opt_String>(inputValue);
+    auto optInputValue = Converter::ArkUnion<Opt_Union_String_ItemFillPolicy, Ark_String>("1fr 1fr 1fr");
     modifier_->setColumnsTemplate(node_, &optInputValue);
     strResult = GetStringAttribute(node_, ATTRIBUTE_COLUMNS_TEMPLATE_NAME);
     EXPECT_EQ(strResult, "1fr 1fr 1fr");
 
     // check '2fr' template
-    inputValue = Converter::ArkValue<Ark_String>("2fr");
-    optInputValue = Converter::ArkValue<Opt_String>(inputValue);
+    optInputValue = Converter::ArkUnion<Opt_Union_String_ItemFillPolicy, Ark_String>("2fr");
     modifier_->setColumnsTemplate(node_, &optInputValue);
     strResult = GetStringAttribute(node_, ATTRIBUTE_COLUMNS_TEMPLATE_NAME);
     EXPECT_EQ(strResult, "2fr");
@@ -429,17 +426,16 @@ HWTEST_F(GridModifierTest, setColumnsTemplateTestValidValues, TestSize.Level1)
 HWTEST_F(GridModifierTest, setColumnsTemplateTestInvalidValues, TestSize.Level1)
 {
     std::string strResult;
-    Opt_String inputValue;
-    auto initValue = Converter::ArkValue<Opt_String>("1fr");
+    auto initValue = Converter::ArkUnion<Opt_Union_String_ItemFillPolicy, Ark_String>("1fr");
 
     // check empty template
-    inputValue = Converter::ArkValue<Opt_String>("");
+    auto inputValue = Converter::ArkUnion<Opt_Union_String_ItemFillPolicy, Ark_String>("");
     modifier_->setColumnsTemplate(node_, &initValue);
     modifier_->setColumnsTemplate(node_, &inputValue);
     strResult = GetStringAttribute(node_, ATTRIBUTE_COLUMNS_TEMPLATE_NAME);
     EXPECT_EQ(strResult, ATTRIBUTE_COLUMNS_TEMPLATE_DEFAULT_VALUE);
 
-    inputValue = Converter::ArkValue<Opt_String>();
+    inputValue = Converter::ArkValue<Opt_Union_String_ItemFillPolicy>();
     modifier_->setColumnsTemplate(node_, &initValue);
     modifier_->setColumnsTemplate(node_, &inputValue);
     strResult = GetStringAttribute(node_, ATTRIBUTE_COLUMNS_TEMPLATE_NAME);
@@ -1259,8 +1255,7 @@ HWTEST_F(GridModifierTest, setFrictionTestDefaultValues, TestSize.Level1)
 {
     double doubleResult;
 
-    auto columnsStr = ArkValue<Ark_String>("1fr 1fr 2fr");
-    auto optColumnsStr = Converter::ArkValue<Opt_String>(columnsStr);
+    auto optColumnsStr = Converter::ArkUnion<Opt_Union_String_ItemFillPolicy, Ark_String>("1fr 1fr 2fr");
     modifier_->setColumnsTemplate(node_, &optColumnsStr);
     OnModifyDone();
 

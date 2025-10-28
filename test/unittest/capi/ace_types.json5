@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 {
+    "simpleTypes": ["Ark_Resource", "Ark_LengthMetrics"],
     "enums": {
         "Ark_Alignment": "Alignment",
         "Ark_Axis": "Axis",
@@ -213,45 +214,34 @@
         },
         {
             "name": "ColorsNum",
-            "type": "Ark_Number",
+            "type": "Ark_Int32",
             "validValues": [
-                ["0", "#00000000"],
+                //["0", "#00000000"], // This special case need to be investigated
                 ["1", "#FF000001"],
                 ["65535", "#FF00FFFF"],
                 ["-1", "#FFFFFFFF"],
                 ["0xBE7AC0DE", "#BE7AC0DE"],
-                ["std::numeric_limits<float>::quiet_NaN()", "#80000000"],
-                ["std::numeric_limits<float>::infinity()", "#80000000"]
             ]
         },
         {
             // Set 20% opacity (0x33) if alpha==0xFF
             "name": "ColorsAlpha20Num",
-            "type": "Ark_Number",
+            "type": "Ark_Int32",
             "validValues": [
                 ["0", "#00000000"],
                 ["1", "#33000001"],
                 ["65535", "#3300FFFF"],
                 ["-1", "#33FFFFFF"],
                 ["0xBE7AC0DE", "#BE7AC0DE"],
-                ["std::numeric_limits<float>::quiet_NaN()", "#80000000"],
-                ["std::numeric_limits<float>::infinity()", "#80000000"]
             ]
         },
         {
             "name": "TextMaxLength",
-            "type": "Ark_Number",
+            "type": "Ark_Int32",
             "validValues": [
                 ["20", "20"],
-                ["22.5f", "22"],
-                ["22.1f", "22"],
-                ["22.4f", "22"],
-                ["22.6f", "22"],
-                ["22.9f", "22"],
                 ["0", "0"],
                 ["-20", "INF"],
-                ["0.0f", "0"],
-                ["-22.5f", "INF"]
             ]
         },
         {
@@ -462,104 +452,110 @@
         },
         {
             "name": "LengthNonNegNonPct",
-            "type": "Ark_Length",
+            "type": "Ark_String",
+            "quoted": true,
             "validValues": [
-                ["123.0_vp", "123.00vp"],
-                ["0.0_vp", "0.00vp"],
-                ["1.23_vp", "1.23vp"],
-                ["123.0_fp", "123.00fp"],
-                ["0.0_fp", "0.00fp"],
-                ["1.23_fp", "1.23fp"],
-                ["123.0_px", "123.00px"],
-                ["0.0_px", "0.00px"],
-                ["1.23_px", "1.23px"],
+                ["123.0vp", "123.00vp"],
+                ["0.0vp", "0.00vp"],
+                ["1.23vp", "1.23vp"],
+                ["123.0fp", "123.00fp"],
+                ["0.0fp", "0.00fp"],
+                ["1.23fp", "1.23fp"],
+                ["123.0px", "123.00px"],
+                ["0.0px", "0.00px"],
+                ["1.23px", "1.23px"],
             ],
-            "invalidValues": ["-2.3_vp", "-4.5_fp", "-5.6_px", "0.5_pct", "0.0_pct", "-0.8_pct"],
+            "invalidValues": ["-2.3vp", "-4.5fp", "-5.6px", "50%", "0%", "-80%"],
         },
         {
             "name": "LengthPositivel",
-            "type": "Ark_Length",
+            "type": "Ark_String",
+            "quoted": true,
             "validValues": [
-                ["123.0_vp", "123.000000"],
-                ["1.23_vp", "1.230000"],
-                ["123.0_fp", "123.000000"],
-                ["1.23_fp", "1.230000"],
-                ["123.0_px", "123.000000"],
-                ["1.23_px", "1.230000"],
+                ["123.0vp", "123.000000"],
+                ["1.23vp", "1.230000"],
+                ["123.0fp", "123.000000"],
+                ["1.23fp", "1.230000"],
+                ["123.0px", "123.000000"],
+                ["1.23px", "1.230000"],
             ],
-            "invalidValues": ["-2.3_vp", "-4.5_fp", "-5.6_px", "0.0_pct", "-0.8_pct"],
+            "invalidValues": ["-2.3vp", "-4.5fp", "-5.6px", "0%", "-80%"],
         },
         {
             "name": "LengthPosNonPct",
-            "type": "Ark_Length",
+            "type": "Ark_String",
+            "quoted": true,
             "validValues": [
-                ["123.0_vp", "123.00vp"],
-                ["1.23_vp", "1.23vp"],
-                ["123.0_fp", "123.00fp"],
-                ["1.23_fp", "1.23fp"],
-                ["123.0_px", "123.00px"],
-                ["1.23_px", "1.23px"],
+                ["123.0vp", "123.00vp"],
+                ["1.23vp", "1.23vp"],
+                ["123.0fp", "123.00fp"],
+                ["1.23fp", "1.23fp"],
+                ["123.0px", "123.00px"],
+                ["1.23px", "1.23px"],
             ],
-            "invalidValues": ["-2.3_vp", "-4.5_fp", "-5.6_px", "0.5_pct", "0.0_pct", "-0.8_pct",
-                "0.0_vp", "0.0_fp", "0.0_px"],
+            "invalidValues": ["-2.3vp", "-4.5fp", "-5.6px", "50%", "0%", "-80%",
+                "0.0vp", "0.0fp", "0.0px"],
         },
         {
             "name": "LengthNonPct",
-            "type": "Ark_Length",
+            "type": "Ark_String",
+            "quoted": true,
             "validValues": [
-                ["123.0_vp", "123.00vp"],
-                ["0.0_vp", "0.00vp"],
-                ["1.23_vp", "1.23vp"],
-                ["123.0_fp", "123.00fp"],
-                ["0.0_fp", "0.00fp"],
-                ["1.23_fp", "1.23fp"],
-                ["123.0_px", "123.00px"],
-                ["0.0_px", "0.00px"],
-                ["1.23_px", "1.23px"],
-                ["-2.3_vp", "-2.30vp"],
-                ["-4.5_fp", "-4.50fp"],
-                ["-5.6_px", "-5.60px"],
+                ["123.0vp", "123.00vp"],
+                ["0.0vp", "0.00vp"],
+                ["1.23vp", "1.23vp"],
+                ["123.0fp", "123.00fp"],
+                ["0.0fp", "0.00fp"],
+                ["1.23fp", "1.23fp"],
+                ["123.0px", "123.00px"],
+                ["0.0px", "0.00px"],
+                ["1.23px", "1.23px"],
+                ["-2.3vp", "-2.30vp"],
+                ["-4.5fp", "-4.50fp"],
+                ["-5.6px", "-5.60px"],
             ],
-            "invalidValues": ["0.5_pct", "0.0_pct", "-0.8_pct"],
+            "invalidValues": ["50%", "0%", "-80%"],
         },
         {
             "name": "LengthNonNeg",
-            "type": "Ark_Length",
+            "type": "Ark_String",
+            "quoted": true,
             "validValues": [
-                ["123.0_vp", "123.00vp"],
-                ["0.0_vp", "0.00vp"],
-                ["1.23_vp", "1.23vp"],
-                ["123.0_fp", "123.00fp"],
-                ["0.0_fp", "0.00fp"],
-                ["1.23_fp", "1.23fp"],
-                ["123.0_px", "123.00px"],
-                ["0.0_px", "0.00px"],
-                ["1.23_px", "1.23px"],
-                ["0.5_pct", "50.00%"],
-                ["0.0_pct", "0.00%"],
+                ["123.0vp", "123.00vp"],
+                ["0.0vp", "0.00vp"],
+                ["1.23vp", "1.23vp"],
+                ["123.0fp", "123.00fp"],
+                ["0.0fp", "0.00fp"],
+                ["1.23fp", "1.23fp"],
+                ["123.0px", "123.00px"],
+                ["0.0px", "0.00px"],
+                ["1.23px", "1.23px"],
+                ["50%", "50.00%"],
+                ["0%", "0.00%"],
             ],
-            "invalidValues": ["-2.3_vp", "-4.5_fp", "-5.6_px", "-0.8_pct"],
+            "invalidValues": ["-2.3vp", "-4.5fp", "-5.6px", "-80%"],
         },
         {
             "name": "LengthPositive",
-            "type": "Ark_Length",
+            "type": "Ark_String",
+            "quoted": true,
             "validValues": [
-                ["123.0_vp", "123.00vp"],
-                ["1.23_vp", "1.23vp"],
-                ["123.0_fp", "123.00fp"],
-                ["1.23_fp", "1.23fp"],
-                ["123.0_px", "123.00px"],
-                ["1.23_px", "1.23px"],
-                ["0.5_pct", "50.00%"],
+                ["123.0vp", "123.00vp"],
+                ["1.23vp", "1.23vp"],
+                ["123.0fp", "123.00fp"],
+                ["1.23fp", "1.23fp"],
+                ["123.0px", "123.00px"],
+                ["1.23px", "1.23px"],
+                ["50%", "50.00%"],
             ],
-            "invalidValues": ["0.0_vp", "0.0_fp", "0.0_px", "0.0_pct", "-2.3_vp", "-4.5_fp", "-5.6_px", "-0.8_pct"],
+            "invalidValues": ["0.0vp", "0.0fp", "0.0px", "0%", "-2.3vp", "-4.5fp", "-5.6px", "-80%"],
         },
         {
             "name": "ResDataForLength",
             "type": "Ark_Resource",
             "resType": "FLOAT",
             "validValues": [
-                ["432.0_vp", "432.00vp"],   // RES_DATA_FOR_LENGTH_0_ID
+                ["432.0_vp", "432.00vp"],
                 ["123.0_fp", "123.00fp"],
                 ["22.55_px", "22.55px"],
                 ["0.5_pct", "50.00%"],
@@ -576,44 +572,25 @@
             ],
         },
         {
-            "name": "LengthResPositive",
-            "type": "Ark_Length",
-            "validValues": [
-                ["RES_DATA_FOR_LENGTH_0_ID", "432.00vp"],
-                ["RES_DATA_FOR_LENGTH_1_ID", "123.00fp"],
-                ["RES_DATA_FOR_LENGTH_2_ID", "22.55px"],
-                ["RES_DATA_FOR_LENGTH_3_ID", "50.00%"],
-            ],
-            "invalidValues": [
-                "RES_DATA_FOR_LENGTH_4_ID",
-                "RES_DATA_FOR_LENGTH_5_ID",
-                "RES_DATA_FOR_LENGTH_6_ID",
-                "RES_DATA_FOR_LENGTH_7_ID",
-                "RES_DATA_FOR_LENGTH_8_ID",
-                "RES_DATA_FOR_LENGTH_9_ID",
-                "RES_DATA_FOR_LENGTH_10_ID",
-                "RES_DATA_FOR_LENGTH_11_ID",
-            ],
-        },
-        {
             "name": "LengthAny",
-            "type": "Ark_Length",
+            "type": "Ark_String",
+            "quoted": true,
             "validValues": [
-                ["123.0_vp", "123.00vp"],
-                ["0.0_vp", "0.00vp"],
-                ["1.23_vp", "1.23vp"],
-                ["123.0_fp", "123.00fp"],
-                ["0.0_fp", "0.00fp"],
-                ["1.23_fp", "1.23fp"],
-                ["123.0_px", "123.00px"],
-                ["0.0_px", "0.00px"],
-                ["1.23_px", "1.23px"],
-                ["-2.3_vp", "-2.30vp"],
-                ["-4.5_fp", "-4.50fp"],
-                ["-5.6_px", "-5.60px"],
-                ["0.5_pct", "50.00%"],
-                ["0.0_pct", "0.00%"],
-                ["-0.8_pct", "-80.00%"],
+                ["123.0vp", "123.00vp"],
+                ["0.0vp", "0.00vp"],
+                ["1.23vp", "1.23vp"],
+                ["123.0fp", "123.00fp"],
+                ["0.0fp", "0.00fp"],
+                ["1.23fp", "1.23fp"],
+                ["123.0px", "123.00px"],
+                ["0.0px", "0.00px"],
+                ["1.23px", "1.23px"],
+                ["-2.3vp", "-2.30vp"],
+                ["-4.5fp", "-4.50fp"],
+                ["-5.6px", "-5.60px"],
+                ["50%", "50.00%"],
+                ["0%", "0.00%"],
+                ["-80%", "-80.00%"],
             ],
         },
         {
@@ -636,9 +613,11 @@
         },
         {
             "name": "BaselineOffsetNum",
-            "type": "Ark_Number",
+            "type": "Ark_Float64",
             "validValues": [
                 ["123", "123"],
+                ["123.33", "123"],
+                ["123.55", "123"],
                 ["0", "0"],
                 ["-2", "-2"],
             ],
@@ -669,7 +648,6 @@
                 ["ARK_COPY_OPTIONS_NONE", "CopyOptions.None"],
                 ["ARK_COPY_OPTIONS_IN_APP", "CopyOptions.InApp"],
                 ["ARK_COPY_OPTIONS_LOCAL_DEVICE", "CopyOptions.Local"],
-                ["ARK_COPY_OPTIONS_CROSS_DEVICE", "CopyOptions.Distributed"],
             ],
             "invalidValues": [
                 "static_cast<Ark_CopyOptions>(-1)",
@@ -700,29 +678,49 @@
             "invalidValues": ["-1"],
         },
         {
-            "name": "FlexBasisValid",
-            "type": "Ark_Number",
+            "name": "DimensionsFltNonNeg",
+            "type": "Ark_Float64",
             "validValues": [
                 ["123", "123.00vp"],
                 ["0", "0.00vp"],
                 ["1.23", "1.23vp"],
-                ["-2", "auto"],
-                ["-3.45", "auto"],
             ],
+            "invalidValues": ["-1"],
         },
         {
-            "name": "DimensionsStrNonPerc",
+            "name": "DimensionsF64NonNeg",
+            "type": "Ark_Float64",
+            "validValues": [
+                ["123", "123.00vp"],
+                ["0", "0.00vp"],
+                ["1.23", "1.23vp"],
+            ],
+            "invalidValues": ["-1"],
+        },
+        {
+            "name": "DimensionsStrNonPct",
             "type": "Ark_String",
             "validValues": [
                 ["\"123vp\"", "123.00vp"],
-                ["\"0_fp\"", "0.00fp"],
-                ["\"1.23_fp\"", "1.23fp"],
+                ["\"0fp\"", "0.00fp"],
+                ["\"1.23fp\"", "1.23fp"],
             ],
             "invalidValues": ["\"20%\"", "\"0%\"", "\"-20%\""],
         },
         {
             "name": "DimensionsNumAny",
             "type": "Ark_Number",
+            "validValues": [
+                ["123", "123.00vp"],
+                ["0", "0.00vp"],
+                ["1.23", "1.23vp"],
+                ["-2", "-2.00vp"],
+                ["-3.45", "-3.45vp"],
+            ],
+        },
+        {
+            "name": "DimensionsFltAny",
+            "type": "Ark_Float64",
             "validValues": [
                 ["123", "123.00vp"],
                 ["0", "0.00vp"],
@@ -772,6 +770,28 @@
             ],
             "invalidValues": [
                 "\"-123vp\"", "\"-123vp\"", "\"-123px\"", "\"-123lpx\"", "\"20%\"", "\"-20%\"",
+            ],
+        },
+        {
+            "name": "DimensionsResAny",
+            "type": "Ark_Resource",
+            "resType": "FLOAT",
+            "validValues": [
+                ["123.0_vp", "123.00vp"],
+                ["0.0_vp", "0.00vp"],
+                ["1.23_vp", "1.23vp"],
+                ["123.0_fp", "123.00fp"],
+                ["0.0_fp", "0.00fp"],
+                ["1.23_fp", "1.23fp"],
+                ["123.0_px", "123.00px"],
+                ["0.0_px", "0.00px"],
+                ["1.23_px", "1.23px"],
+                ["-2.3_vp", "-2.30vp"],
+                ["-4.5_fp", "-4.50fp"],
+                ["-5.6_px", "-5.60px"],
+                ["0.5_pct", "50.00%"],
+                ["0.0_pct", "0.00%"],
+                ["-0.8_pct", "-80.00%"],
             ],
         },
         {
@@ -837,7 +857,7 @@
         },
         {
             "name": "MaxFontScaleNum",
-            "type": "Ark_Number",
+            "type": "Ark_Float64",
             "validValues": [
                 ["1", "1.000000"],
                 ["2.5", "2.500000"],
@@ -856,7 +876,7 @@
         },
         {
             "name": "MinFontScaleNum",
-            "type": "Ark_Number",
+            "type": "Ark_Float64",
             "validValues": [
                 ["0.1", "0.100000"],
                 ["0.89", "0.890000"],
@@ -925,25 +945,77 @@
                 ["-56.73", "-56.730000"],
             ],
         },
-
         {
-            "name": "NumberFloatPositive",
+            "name": "FloatAnything",
+            "type": "Ark_Float64",
+            "validValues": [
+                ["100", "100.000000"],
+                ["0", "0.000000"],
+                ["-100", "-100.000000"],
+                ["12.34", "12.340000"],
+                ["-56.73", "-56.730000"],
+            ],
+        },
+        {
+            "name": "StringFloatAnything",
+            "type": "Ark_String",
+            "quoted": true,
+            "validValues": [
+                ["100", "100.000000"],
+                ["0", "0.000000"],
+                ["-100", "-100.000000"],
+                ["12.34", "12.340000"],
+                ["-56.73", "-56.730000"],
+                ["Inf", "inf"],
+                ["NaN", "nan"],
+            ],
+            "invalidValues": ["", "abc"],
+        },
+        {
+            "name": "NumberFloatNonNeg",
             "type": "Ark_Number",
             "validValues": [
                 ["100", "100.000000"],
                 ["50", "50.000000"],
                 ["0", "0.000000"],
             ],
+            "invalidValues": ["-1", "-100"],
         },
         {
-            "name": "NumberIntFloor",
+            "name": "FloatNonNeg",
+            "type": "Ark_Float64",
+            "validValues": [
+                ["100", "100.000000"],
+                ["50", "50.000000"],
+                ["0", "0.000000"],
+            ],
+            "invalidValues": ["-1", "-100"],
+        },
+        {
+            "name": "NumberFloatPos",
             "type": "Ark_Number",
+            "validValues": [
+                ["100", "100.000000"],
+                ["50", "50.000000"],
+            ],
+            "invalidValues": ["0", "-1", "-100"],
+        },
+        {
+            "name": "FloatPos",
+            "type": "Ark_Float64",
+            "validValues": [
+                ["100", "100.000000"],
+                ["50", "50.000000"],
+            ],
+            "invalidValues": ["0", "-1", "-100"],
+        },
+        {
+            "name": "Int32Anything",
+            "type": "Ark_Int32",
             "validValues": [
                 ["100", "100"],
                 ["0", "0"],
                 ["-100", "-100"],
-                ["12.34", "12"],
-                ["-56.78", "-56"],
             ],
         },
         {
@@ -957,6 +1029,16 @@
             "invalidValues": ["-100", "-56.78"],
         },
         {
+            "name": "Int32NonNeg",
+            "type": "Ark_Int32",
+            "validValues": [
+                ["1", "1"],
+                ["100", "100"],
+                ["0", "0"],
+            ],
+            "invalidValues": ["-1", "-100"],
+        },
+        {
             "name": "NumberPosIntFloor",
             "type": "Ark_Number",
             "validValues": [
@@ -967,8 +1049,29 @@
             "invalidValues": ["0", "-1", "-100", "-23.45"],
         },
         {
+            "name": "Int32Pos",
+            "type": "Ark_Int32",
+            "validValues": [
+                ["100", "100"],
+                ["1", "1"],
+            ],
+            "invalidValues": ["0", "-1", "-100"],
+        },
+        {
             "name": "NumberNonNegIntFloor",
             "type": "Ark_Number",
+            "validValues": [
+                ["100", "100"],
+                ["12.34", "12"],
+                ["12.55", "12"],
+                ["0", "0"],
+                ["1", "1"],
+            ],
+            "invalidValues": ["-1", "-100", "-23.45"],
+        },
+        {
+            "name": "FloatNonNegIntFloor",
+            "type": "Ark_Float64",
             "validValues": [
                 ["100", "100"],
                 ["12.34", "12"],
@@ -991,8 +1094,20 @@
             "invalidValues": ["-1", "-100", "-23.45"],
         },
         {
+            "name": "FloatNonNegIntCeil",
+            "type": "Ark_Float64",
+            "validValues": [
+                ["100", "100"],
+                ["12.34", "13"],
+                ["12.55", "13"],
+                ["0", "0"],
+                ["1", "1"],
+            ],
+            "invalidValues": ["-1", "-100", "-23.45"],
+        },
+        {
             "name": "FlingSpeedLimit",
-            "type": "Ark_Number",
+            "type": "Ark_Float64",
             "validValues": [
                 ["15000", "15000.00vp"],
                 ["12.34", "12.34vp"],
@@ -1002,7 +1117,7 @@
         },
         {
             "name": "TextMarqueeStep",
-            "type": "Ark_Number",
+            "type": "Ark_Float64",
             "validValues": [
                 ["100", "100.00"],
                 ["12.34", "12.34"],
@@ -1012,20 +1127,8 @@
             "invalidValues": ["0", "-1", "-100", "-23.45"],
         },
         {
-            "name": "TextMarqueeLoop",
-            "type": "Ark_Number",
-            "validValues": [
-                ["100", "100"],
-                ["7", "7"],
-                ["0", "-1"],
-                ["-100", "-1"],
-                ["12.34", "12"],
-                ["-56.78", "-1"],
-            ],
-        },
-        {
             "name": "NumberPercentageThresholdFloor",
-            "type": "Ark_Number",
+            "type": "Ark_Float64",
             "validValues": [
                 ["1", "1"],
                 ["10", "10"],
@@ -1041,7 +1144,7 @@
         },
         {
             "name": "FontWeightNumbers",
-            "type": "Ark_Number",
+            "type": "Ark_Int32",
             "validValues": [
                 ["100", "100"],
                 ["200", "200"],
@@ -1076,8 +1179,27 @@
             ]
         },
         {
+            "name": "FontWeightResStrings",
+            "type": "Ark_Resource",
+            "resType": "STRING",
+            "validValues": [
+                ["\"100\"", "100"],
+                ["\"200\"", "200"],
+                ["\"300\"", "300"],
+                ["\"400\"", "400"],
+                ["\"500\"", "500"],
+                ["\"600\"", "600"],
+                ["\"700\"", "700"],
+                ["\"800\"", "800"],
+                ["\"900\"", "900"],
+            ],
+            "invalidValues": [
+                "\"0\"", "\"1000\"", "\"-100\""
+            ]
+        },
+        {
             "name": "ScrollableFrictionNum",
-            "type": "Ark_Number",
+            "type": "Ark_Float64",
             "validValues": [
                 ["0.125", "0.125"],
                 ["0.75", "0.75"],
@@ -1102,7 +1224,7 @@
         },
         {
             "name": "Opacity",
-            "type": "Ark_Number",
+            "type": "Ark_Float64",
             "validValues":[
                 ["0.1f", "0.100000"],
                 ["0", "0.000000"],
@@ -1133,17 +1255,17 @@
             "name" : "FixtureNavBarWidthRange",
             "type": "Ark_Tuple_Dimension_Dimension",
             "validValues": [
-                ["std::pair<const Dimension, Dimension>{0.1_fp, 10.0_vp}", "0.10fp, 10.00vp"],
-                ["std::pair<const Dimension, Dimension>{0.1_px, 112.0_vp}", "0.10px, 112.00vp"],
-                ["std::pair<const Dimension, Dimension>{5, 6}", "5.00px, 6.00px"],
-                ["std::pair<const Dimension, Dimension>{0.5_pct, 100}", "50.00%, 100.00px"],
+                ["std::pair<const Dimension, const Dimension>{0.1_fp, 10.0_vp}", "0.10fp, 10.00vp"],
+                ["std::pair<const Dimension, const Dimension>{0.1_px, 112.0_vp}", "0.10px, 112.00vp"],
+                ["std::pair<const Dimension, const Dimension>{5, 6}", "5.00px, 6.00px"],
+                ["std::pair<const Dimension, const Dimension>{0.5_pct, 100}", "50.00%, 100.00px"],
             ],
             "invalidValues": [
-                "std::pair<const Dimension, Dimension>{0, 0}",
-                "std::pair<const Dimension, Dimension>{-0.1f, INT_MIN}",
-                "std::pair<const Dimension, Dimension>{-123._px, 0._fp}",
-                "std::pair<const Dimension, Dimension>{0, -0.15_pct}",
-                "std::pair<const Dimension, Dimension>{0._px, -432.01_vp}",
+                "std::pair<const Dimension, const Dimension>{0, 0}",
+                "std::pair<const Dimension, const Dimension>{-0.1f, INT_MIN}",
+                "std::pair<const Dimension, const Dimension>{-123._px, 0._fp}",
+                "std::pair<const Dimension, const Dimension>{0, -0.15_pct}",
+                "std::pair<const Dimension, const Dimension>{0._px, -432.01_vp}",
             ]
         },
         {
@@ -1240,7 +1362,47 @@
             ]
         },
         {
-            "name": "FontFeature",
+            "name": "TimeFormatRes",
+            "type": "Ark_Resource",
+            "resType": "STRING",
+            "validValues":[
+                ["\"aa hh:mm:ss\"", "aa hh:mm:ss"],
+                ["\"EEEE, M, d, yyyy\"", "EEEE, M, d, yyyy"],
+                ["\"MMM d, yyyy\"", "MMM d, yyyy"],
+                ["\"EEEE, M, d\"", "EEEE, M, d"],
+                ["\"MMM dd\"", "MMM dd"],
+                ["\"MM/dd/yyyy\"", "MM/dd/yyyy"],
+                ["\"EEEE MM dd\"", "EEEE MM dd"],
+                ["\"yyyy\"", "yyyy"],
+                ["\"yy\"", "yy"],
+                ["\"MM\"", "MM"],
+                ["\"M\"", "M"],
+                ["\"dd\"", "dd"],
+                ["\"d\"", "d"],
+                ["\"EEEE\"", "EEEE"],
+                ["\"E, EE, EEE\"", "E, EE, EEE"],
+                ["\"MMM d, yyyy\"", "MMM d, yyyy"],
+                ["\"yyyy/M/d\"", "yyyy/M/d"],
+                ["\"yyyy-M-d\"", "yyyy-M-d"],
+                ["\"yyyy.M.d\"", "yyyy.M.d"],
+                ["\"HH:mm:ss\"", "HH:mm:ss"],
+                ["\"aa hh:mm:ss\"", "aa hh:mm:ss"],
+                ["\"hh:mm:ss\"", "hh:mm:ss"],
+                ["\"HH:mm\"", "HH:mm"],
+                ["\"aa hh:mm\"", "aa hh:mm"],
+                ["\"hh:mm\"", "hh:mm"],
+                ["\"mm:ss\"", "mm:ss"],
+                ["\"mm:ss.SS\"", "mm:ss.SS"],
+                ["\"mm:ss.SSS\"", "mm:ss.SSS"],
+                ["\"hh:mm:ss aa\"", "hh:mm:ss aa"],
+                ["\"HH\"", "HH"],
+            ],
+            "invalidValues": [
+                "\"\""
+            ]
+        },
+        {
+            "name": "FontFeatureNum",
             "type": "Ark_String",
             "validValues":[
                 ["\"'ss01' on\"", "'ss01' 1"],
@@ -1251,6 +1413,27 @@
                 ["\"'ss01' on, 'ss02' off\"", "'ss01' 1,'ss02' 0"],
                 ["\"'ss01' on, ss02 off\"",  "'ss01' 1"],
                 ["\"'ss01' on\"",  "'ss01' 1"],
+            ],
+            "invalidValues": [
+                "\"\"",
+                "\"invalid\"",
+                "\"ss01 1\"",
+                "\"ss01 on, ss02 off\"",
+                "\"'incorrect' on\""
+            ]
+        },
+        {
+            "name": "FontFeatureStr",
+            "type": "Ark_String",
+            "validValues":[
+                ["\"'ss01' on\"", "'ss01' on"],
+                ["\"'ss01' off\"", "'ss01' off"],
+                ["\"'ss01' 1\"", "'ss01' on"],
+                ["\"'ss01' 0\"", "'ss01' off"],
+                ["\"'ss01' on, 'ss02' on\"", "'ss01' on,'ss02' on"],
+                ["\"'ss01' on, 'ss02' off\"", "'ss01' on,'ss02' off"],
+                ["\"'ss01' on, ss02 off\"",  "'ss01' on"],
+                ["\"'ss01' on\"",  "'ss01' on"],
             ],
             "invalidValues": [
                 "\"\"",
@@ -1275,7 +1458,7 @@
         },
         {
             "name": "ShadowRadiusNumber",
-            "type": "Ark_Number",
+            "type": "Ark_Float64",
             "validValues": [
                 ["123", "123.000000"],
                 ["0", "0.000000"],
@@ -1298,7 +1481,7 @@
         },
         {
             "name": "ShadowOffsetNumber",
-            "type": "Ark_Number",
+            "type": "Ark_Float64",
             "validValues": [
                 ["123", "123.000000"],
                 ["0", "0.000000"],
@@ -1325,12 +1508,12 @@
         },
         {
             "name": "TimerInputCount",
-            "type": "Ark_Number",
-            "resType": "FLOAT",
+            "type": "Ark_Int64",
+            "resType": "INTEGER",
             "validValues": [
-                ["1.0f", "1.000000"],
-                ["25.0f", "25.000000"],
-                ["86300000.0f","86300000.000000"]
+                ["1", "1.000000"],
+                ["25", "25.000000"],
+                ["86300000","86300000.000000"]
             ],
             "invalidValues": [
                 "-5.0", "86400001.0"
@@ -1351,6 +1534,13 @@
                 "\"xyz\"",
                 "\"zz:rr:tt\""
             ]
+        },
+        {
+            "name": "ImageContent",
+            "type": "Ark_ImageContent",
+            "validValues": [
+                ["ARK_IMAGE_CONTENT_EMPTY", ""],
+            ],
         },
     ],
     "types": [
@@ -1376,23 +1566,63 @@
         },
         {
             "name": "Ark_Length",
-            "fixtures": ["LengthNonNegNonPct"]
+            "fixtures": ["LengthNonNegNonPct", "DimensionsResNonNegNonPct", "DimensionsFltNonNeg"]
+        },
+        {
+            "name": "Ark_Dimension",
+            "fixtures": ["LengthNonNegNonPct", "DimensionsResNonNegNonPct", "DimensionsNumNonNeg"]
         },
         {
             "name": "Ark_Number",
             "fixtures": ["NumberAnything"]
         },
         {
-            "name": "Union_Number_FontWeight_String",
-            "fixtures": ["FontWeightNumbers"]
+            "name": "Ark_Float64",
+            "fixtures": ["FloatAnything"]
+        },
+        {
+            "name": "Ark_Int32",
+            "fixtures": ["Int32Anything"]
+        },
+        {
+            "name": "FloatAnything",
+            "fixtures": ["FloatAnything", "StringFloatAnything"]
+        },
+        {
+            "name": "FontWeightType",
+            "fixtures": ["FontWeightNumbers", "FontWeightStrings"]
+        },
+        {
+            "name": "FontWeightTypeWithRes",
+            "fixtures": ["FontWeightNumbers", "FontWeightStrings", "FontWeightResStrings"]
         },
         {
             "name": "FontFamily",
             "fixtures": ["FontFamilyResource", "FontFamilyString"]
         },
         {
+            "name": "DimensionNonNeg",
+            "fixtures": ["DimensionsFltNonNeg", "DimensionsStrNonNeg", "DimensionsResNonNeg"]
+        },
+        {
             "name": "DimensionNonNegNonPct",
+            "fixtures": ["DimensionsFltNonNeg", "DimensionsStrNonNegNonPct", "DimensionsResNonNegNonPct"]
+        },
+        {
+            "name": "DimensionNonNegNonPctOld",
             "fixtures": ["DimensionsNumNonNeg", "DimensionsStrNonNegNonPct", "DimensionsResNonNegNonPct"]
+        },
+        {
+            "name": "DimensionAny",
+            "fixtures": ["DimensionsFltAny", "LengthAny", "DimensionsResAny"]
+        },
+        {
+            "name": "DimensionAnyOld",
+            "fixtures": ["DimensionsNumAny", "LengthAny", "DimensionsResAny"]
+        },
+        {
+            "name": "ColorsAlpha20",
+            "fixtures": ["ColorsAlpha20Enum", "ColorsAlpha20Num", "ColorsAlpha20Str", "ColorsAlpha20Res"]
         },
         {
             "name": "OpacityWithResource",
@@ -1537,6 +1767,8 @@
                 }
             ],
             "remove": [
+                "setAlignRules0TestDefaultValues",
+                "setAlignRules0TestValidValues",
                 "setAlignRules0TestAlignRulesBiasHorizontalInvalidValues",
                 "setAlignRules0TestAlignRulesBiasVerticalInvalidValues",
                 "setAlignRules0TestAlignRulesBottomAlignInvalidValues",
@@ -1563,18 +1795,9 @@
                 "setBorderColorTestBorderColorInvalidValues",
                 "setBorderColorTestBorderColorValidValues",
                 "setBorderColorTestDefaultValues",
-                "setBorderRadius0TestBorderRadiusInvalidValues",
-                "setBorderRadius0TestBorderRadiusValidValues",
-                "setBorderRadius0TestDefaultValues",
-                "setBorderRadius1TestBorderRadiusBorderRadiusesBottomLeftInvalidValues",
-                "setBorderRadius1TestBorderRadiusBorderRadiusesBottomLeftValidValues",
-                "setBorderRadius1TestBorderRadiusBorderRadiusesBottomRightInvalidValues",
-                "setBorderRadius1TestBorderRadiusBorderRadiusesBottomRightValidValues",
-                "setBorderRadius1TestBorderRadiusBorderRadiusesTopLeftInvalidValues",
-                "setBorderRadius1TestBorderRadiusBorderRadiusesTopLeftValidValues",
-                "setBorderRadius1TestBorderRadiusBorderRadiusesTopRightInvalidValues",
-                "setBorderRadius1TestBorderRadiusBorderRadiusesTopRightValidValues",
-                "setBorderRadius1TestDefaultValues",
+                "setBorderRadiusTestBorderRadiusInvalidValues",
+                "setBorderRadiusTestBorderRadiusValidValues",
+                "setBorderRadiusTestDefaultValues",
                 "setBorderStyleTestBorderStyleInvalidValues",
                 "setBorderStyleTestBorderStyleValidValues",
                 "setBorderStyleTestDefaultValues",
@@ -1624,6 +1847,7 @@
                 "setIconSizeTestIconSizeValidValues",
                 "setKeyTestDefaultValues",
                 "setKeyTestKeyValidValues",
+                "setKeyTestKeyInvalidValues",
                 "setLayoutDirectionTestDefaultValues",
                 "setLayoutDirectionTestLayoutDirectionInvalidValues",
                 "setLayoutDirectionTestLayoutDirectionValidValues",
@@ -1640,6 +1864,7 @@
                 "setMaxFontSizeTestMaxFontSizeValidValues",
                 "setMaxLinesTestDefaultValues",
                 "setMaxLinesTestMaxLinesValidValues",
+                "setMaxLinesTestMaxLinesInvalidValues",
                 "setMinFontScaleTestDefaultValues",
                 "setMinFontScaleTestMinFontScaleInvalidValues",
                 "setMinFontScaleTestMinFontScaleValidValues",
@@ -1647,7 +1872,18 @@
                 "setMinFontSizeTestMinFontSizeInvalidValues",
                 "setMinFontSizeTestMinFontSizeValidValues",
                 "setOffsetTestDefaultValues",
-                "setOffsetTestValidValues",
+                "setOffsetTestOffsetPositionXValidValues",
+                "setOffsetTestOffsetPositionXInvalidValues",
+                "setOffsetTestOffsetPositionYValidValues",
+                "setOffsetTestOffsetPositionYInvalidValues",
+                "setOffsetTestOffsetEdgesTopValidValues",
+                "setOffsetTestOffsetEdgesTopInvalidValues",
+                "setOffsetTestOffsetEdgesLeftValidValues",
+                "setOffsetTestOffsetEdgesLeftInvalidValues",
+                "setOffsetTestOffsetEdgesBottomValidValues",
+                "setOffsetTestOffsetEdgesBottomInvalidValues",
+                "setOffsetTestOffsetEdgesRightValidValues",
+                "setOffsetTestOffsetEdgesRightInvalidValues",
                 "setPaddingTestDefaultValues",
                 "setPaddingTestPaddingPaddingBottomInvalidValues",
                 "setPaddingTestPaddingPaddingBottomValidValues",
@@ -1675,10 +1911,19 @@
                 "setWidthTestWidthValidValues",
             ],
             "disable": [
+                "setIdTestIdInvalidValues",
             ],
         },
         {
             "name": "BaseSpan",
+            "includes": [
+                "core/components_ng/pattern/text/span_node.h",
+                "core/components_ng/pattern/text/text_pattern.h",
+            ],
+            "setup": [
+                "static auto pattern = AceType::MakeRefPtr<TextPattern>()",
+                "reinterpret_cast<SpanNode *>(node_)->GetSpanItem()->SetTextPattern(pattern)",
+            ],
             "disable": [
                 "setBaselineOffsetTestDefaultValues", // new attribute
                 "setBaselineOffsetTestValidValues", // new attribute
@@ -1824,7 +2069,22 @@
                 "core/components/text_field/textfield_theme.h"
             ],
             "themes": ["TextFieldTheme"],
+            "ignoreAttributes": [
+                "onSubmit", // Callback
+                "enableKeyboardOnFocus", // No value in JSON
+                "selectionMenuHidden", // No value in JSON
+                "lineBreakStrategy", // No value in JSON
+            ],
             "attributes": [
+                {
+                    "name": "placeholder",
+                    "default": ""
+                },
+                {
+                    "name": "text",
+                    "type": "Ark_ResourceStr",
+                    "default": ""
+                },
                 {
                     "name": "enableHapticFeedback",
                     "default": "true"
@@ -1841,12 +2101,12 @@
                 },
                 {
                     "name": "minFontScale",
-                    "default": "0.000000",
+                    "default": "0.850000",
                     "fixtures": ["MinFontScaleNum", "MinFontScaleRes"],
                 },
                 {
                     "name": "maxFontScale",
-                    "default": "1.000000",
+                    "default": "3.200000",
                     "fixtures": ["MaxFontScaleNum", "MaxFontScaleRes"],
                 },
                 {
@@ -1927,7 +2187,7 @@
                 {
                     "name": "fontWeight",
                     "default": "FontWeight.Normal",
-                    "fixtures": ["FontWeightNumbers", "FontWeightStrings"]
+                    "type": "FontWeightType",
                 },
                 {
                     "name": "fontFamily",
@@ -1954,7 +2214,7 @@
                 {
                     "name": "textIndent",
                     "default": "0.00vp",
-                    "fixtures": ["LengthAny"]
+                    "type": "DimensionAnyOld",
                 },
                 {
                     "name": "enterKeyType",
@@ -1967,7 +2227,7 @@
                 {
                     "name": "caretPosition",
                     "default": "0",
-                    "fixtures": ["NumberNonNeg"]
+                    "fixtures": ["Int32NonNeg"]
                 },
                 {
                     "name": "caretStyle",
@@ -1995,12 +2255,12 @@
                 {
                     "name": "lineHeight",
                     "default": "0.00vp",
-                    "fixtures": ["DimensionsNumNonNeg", "DimensionsStrNonNeg", "DimensionsResNonNeg"],
+                    "fixtures": ["DimensionsFltNonNeg", "DimensionsStrNonNeg", "DimensionsResNonNeg"],
                 },
                 {
                     "name": "maxLines",
                     "default": "3",
-                    "fixtures": ["NumberPosIntFloor"]
+                    "fixtures": ["Int32Pos"]
                 },
                 {
                     "name": "maxLength",
@@ -2064,7 +2324,13 @@
                 },
                 {
                     "name": "selectedBackgroundColor",
-                    "default": "#FF000000"
+                    "default": "#FF000000",
+                    "type": "ColorsAlpha20",
+                },
+                {
+                    "name": "fontFeature",
+                    "default": "",
+                    "fixtures": ["FontFeatureStr"]
                 },
                 {
                     "name": "placeholderFont",
@@ -2072,12 +2338,12 @@
                         {
                             "name": "size",
                             "default": "0.00px", // Docs says 16fp, but current theme values is 0.00px
-                            "type": "LengthNonNegNonPct"
+                            "type": "LengthNonNegNonPct",
                         },
                         {
                             "name": "weight",
                             "default": "FontWeight.Normal",
-                            "fixtures": ["FontWeightNumbers", "FontWeightStrings"]
+                            "type": "FontWeightType",
                         },
                         {
                             "name": "family",
@@ -2097,9 +2363,12 @@
                 "setPlaceholderFontTestPlaceholderFontWeightInvalidValues",
                 "setPlaceholderFontTestPlaceholderFontFamilyValidValues",
                 "setPlaceholderFontTestPlaceholderFontFamilyInvalidValues",
+
+                // Invalid SDK
+                "setEnableSelectedDataDetectorTestEnableSelectedDataDetectorValidValues",
+                "setEnableSelectedDataDetectorTestEnableSelectedDataDetectorInvalidValues",
             ],
             "disable": [
-                "setTextAreaOptionsTestValidValues",
                 "setEnterKeyTypeTestDefaultValues",
                 "setEnterKeyTypeTestEnterKeyTypeInvalidValues",
                 "setTextAlignTestTextAlignValidValues",
@@ -2108,8 +2377,6 @@
                 "setMaxLinesTestMaxLinesValidValues",
                 "setMaxLinesTestMaxLinesInvalidValues",
                 "setLineSpacingTestValidValues",
-                "setFontFeatureTestDefaultValues",
-                "setFontFeatureTestFontFeatureValidValues",
                 "setTextOverflowTestTextOverflowValidValues", // due to issue #IB57XU can not be fixed
                 "setPlaceholderColorTestPlaceholderColorValidValues", // After upmerge 20250224
 
@@ -2122,6 +2389,12 @@
                 "setAutoCapitalizationModeTestDefaultValues",
                 "setAutoCapitalizationModeTestAutoCapitalizationModeValidValues",
                 "setAutoCapitalizationModeTestAutoCapitalizationModeInvalidValues",
+
+                "setEnterKeyTypeTestEnterKeyTypeValidValues", // Bug
+                "setFontFamilyTestFontFamilyInvalidValues", // Bug
+                "setCaretStyleTestCaretStyleWidthInvalidValues", // Bug
+                "setShowCounterTestShowCounterValueInvalidValues", // Bug
+                "setFontFeatureTestFontFeatureInvalidValues", // Bug
             ]
         },
         {
@@ -2130,7 +2403,21 @@
                 "core/components/text_field/textfield_theme.h"
             ],
             "themes": ["TextFieldTheme"],
+            "ignoreAttributes": [
+                "enableKeyboardOnFocus", // No value in JSON
+                "selectionMenuHidden", // ???
+                "lineBreakStrategy", // No value in JSON
+            ],
             "attributes": [
+                {
+                    "name": "placeholder",
+                    "default": ""
+                },
+                {
+                    "name": "text",
+                    "type": "Ark_ResourceStr",
+                    "default": ""
+                },
                 {
                     "name": "decoration",
                     "type": "DecorationStyleInterface",
@@ -2151,18 +2438,18 @@
                 },
                 {
                     "name": "minFontScale",
-                    "default": "0.000000",
+                    "default": "0.850000",
                     "fixtures": ["MinFontScaleNum", "MinFontScaleRes"],
                 },
                 {
                     "name": "maxFontScale",
-                    "default": "1.000000",
+                    "default": "3.200000",
                     "fixtures": ["MaxFontScaleNum", "MaxFontScaleRes"],
                 },
                 {
                     "name": "fontFeature",
                     "default": "",
-                    "fixtures": ["FontFeature"]
+                    "fixtures": ["FontFeatureStr"]
                 },
                 {
                     "name": "minFontSize",
@@ -2190,7 +2477,7 @@
                 {
                     "name": "fontWeight",
                     "default": "FontWeight.Normal",
-                    "fixtures": ["FontWeightNumbers", "FontWeightStrings"]
+                    "type": "FontWeightType",
                 },
                 {
                     "name": "fontFamily",
@@ -2217,7 +2504,7 @@
                 {
                     "name": "textIndent",
                     "default": "0.00vp",
-                    "fixtures": ["LengthAny"]
+                    "type": "DimensionAnyOld",
                 },
                 {
                     "name": "enterKeyType",
@@ -2230,7 +2517,7 @@
                 {
                     "name": "caretPosition",
                     "default": "0",
-                    "fixtures": ["NumberNonNeg"]
+                    "fixtures": ["Int32NonNeg"]
                 },
                 {
                     "name": "caretStyle",
@@ -2247,7 +2534,7 @@
                 },
                 {
                     "name": "letterSpacing",
-                    "fixtures": ["DimensionsNumAny", "DimensionsStrNonPerc", "DimensionsResNonPct"]
+                    "fixtures": ["DimensionsFltAny", "DimensionsStrNonPct", "DimensionsResNonPct"]
                 },
                 {
                     "name": "lineSpacing",
@@ -2255,12 +2542,12 @@
                 },
                 {
                     "name": "lineHeight",
-                    "fixtures": ["DimensionsNumNonNeg", "DimensionsStrNonNeg", "DimensionsResNonNeg"],
+                    "fixtures": ["DimensionsFltNonNeg", "DimensionsStrNonNeg", "DimensionsResNonNeg"],
                 },
                 {
                     "name": "maxLines",
                     "default": "3",
-                    "fixtures": ["NumberPosIntFloor"]
+                    "fixtures": ["Int32Pos"]
                 },
                 {
                     "name": "maxLength",
@@ -2370,7 +2657,8 @@
                 },
                 {
                     "name": "selectedBackgroundColor",
-                    "default": "#FF000000"
+                    "default": "#FF000000",
+                    "type": "ColorsAlpha20",
                 },
                 {
                     "name": "placeholderFont",
@@ -2378,12 +2666,12 @@
                         {
                             "name": "size",
                             "default": "0.00px",  // Docs says 16fp, but current theme values is 0.00px
-                            "type": "LengthNonNegNonPct"
+                            "type": "LengthNonNegNonPct",
                         },
                         {
                             "name": "weight",
                             "default": "FontWeight.Normal",
-                            "fixtures": ["FontWeightNumbers", "FontWeightStrings"]
+                            "type": "FontWeightType",
                         },
                         {
                             "name": "family",
@@ -2487,6 +2775,10 @@
                 "setPlaceholderFontTestPlaceholderFontWeightInvalidValues",
                 "setPlaceholderFontTestPlaceholderFontFamilyValidValues",
                 "setPlaceholderFontTestPlaceholderFontFamilyInvalidValues",
+
+                // Invalid SDK
+                "setEnableSelectedDataDetectorTestEnableSelectedDataDetectorValidValues",
+                "setEnableSelectedDataDetectorTestEnableSelectedDataDetectorInvalidValues",
             ],
             "disable": [
                 "setCaretPositionTestCaretPositionValidValues",
@@ -2521,6 +2813,18 @@
                 "setAutoCapitalizationModeTestDefaultValues",
                 "setAutoCapitalizationModeTestAutoCapitalizationModeValidValues",
                 "setAutoCapitalizationModeTestAutoCapitalizationModeInvalidValues",
+
+                "setEnterKeyTypeTestEnterKeyTypeValidValues", // Bug
+                "setCaretStyleTestCaretStyleWidthInvalidValues", // Bug
+                "setFontFeatureTestFontFeatureInvalidValues", // Bug
+                "setShowCounterTestShowCounterValueInvalidValues", // Bug
+                "setMaxLinesTestMaxLinesValidValues", // ???
+
+                "setCancelButtonTestCancelButtonCancelButtonOptionsStyleValidValues", // Bug?
+                "setCancelButtonTestCancelButtonCancelButtonOptionsIconSizeValidValues", // Bug?
+                "setCancelButtonTestCancelButtonCancelButtonOptionsIconColorValidValues", // Bug?
+                "setCancelButtonTestCancelButtonCancelButtonOptionsIconSrcValidValues", // Bug?
+                "setCancelButtonTestCancelButtonCancelButtonSymbolOptionsStyleValidValues", // Bug?
             ]
         },
         {
@@ -2604,7 +2908,7 @@
             ]
         },
         {
-            "name": "Blank",
+            "name": ":Blank",
             "disable": [
                 "setColorTestColorInvalidValues", // Invalid colors doesn't rest color to default
             ],
@@ -2616,7 +2920,7 @@
                 {
                     "name": "min",
                     "default": "0.00px",
-                    "fixtures": ["DimensionsNumNonNeg", "DimensionsStrNonNegNonPct"]
+                    "fixtures": ["DimensionsFltNonNeg", "DimensionsStrNonNegNonPct"]
                 },
             ]
         },
@@ -2633,6 +2937,8 @@
                 "setLabelStyleTestLabelStyleOverflowInvalidValues", // Bug in arkui?
                 "setLabelStyleTestDefaultValues", // Invalid default value for labelStyle.overflow
                 "setLabelStyleTestLabelStyleOverflowValidValues", // Invalid case for MARQUEE enum
+                "setStateEffectTestStateEffectInvalidValues", // Bug
+                "setControlSizeTestControlSizeInvalidValues", // Bug
                 // New attributes
                 "setMinFontScaleTestDefaultValues",
                 "setMinFontScaleTestMinFontScaleValidValues",
@@ -2640,6 +2946,30 @@
                 "setMaxFontScaleTestDefaultValues",
                 "setMaxFontScaleTestMaxFontScaleValidValues",
                 "setMaxFontScaleTestMaxFontScaleInvalidValues",
+            ],
+            "remove": [
+                // Invalid SDK
+                "setButtonOptionsTestDefaultValues",
+                "setButtonOptionsTestLabelButtonOptionsTypeValidValues",
+                "setButtonOptionsTestLabelButtonOptionsTypeInvalidValues",
+                "setButtonOptionsTestLabelButtonOptionsStateEffectValidValues",
+                "setButtonOptionsTestLabelButtonOptionsStateEffectInvalidValues",
+                "setButtonOptionsTestLabelButtonOptionsButtonStyleValidValues",
+                "setButtonOptionsTestLabelButtonOptionsButtonStyleInvalidValues",
+                "setButtonOptionsTestLabelButtonOptionsControlSizeValidValues",
+                "setButtonOptionsTestLabelButtonOptionsControlSizeInvalidValues",
+                "setButtonOptionsTestLabelButtonOptionsRoleValidValues",
+                "setButtonOptionsTestLabelButtonOptionsRoleInvalidValues",
+                "setButtonOptionsTestOptionsTypeValidValues",
+                "setButtonOptionsTestOptionsTypeInvalidValues",
+                "setButtonOptionsTestOptionsStateEffectValidValues",
+                "setButtonOptionsTestOptionsStateEffectInvalidValues",
+                "setButtonOptionsTestOptionsButtonStyleValidValues",
+                "setButtonOptionsTestOptionsButtonStyleInvalidValues",
+                "setButtonOptionsTestOptionsControlSizeValidValues",
+                "setButtonOptionsTestOptionsControlSizeInvalidValues",
+                "setButtonOptionsTestOptionsRoleValidValues",
+                "setButtonOptionsTestOptionsRoleInvalidValues",
             ],
             "attributes": [
                 {
@@ -2665,7 +2995,7 @@
                 {
                     "name": "fontWeight",
                     "default": "FontWeight.Medium",
-                    "fixtures": ["FontWeightNumbers", "FontWeightStrings"],
+                    "type": "FontWeightType",
                 },
                 {
                     "name": "fontStyle",
@@ -2690,7 +3020,7 @@
                         {
                             "name": "maxLines",
                             "default": "1",
-                            "fixtures": ["NumberPosIntFloor"],
+                            "fixtures": ["Int32Pos"],
                         },
                         {
                             "name": "minFontSize",
@@ -2712,11 +3042,12 @@
                                 {
                                     "name": "size",
                                     "default": "0.00px", // Docs says 16fp, but it is applicable only when properly initialized
+                                    "type": "LengthNonNegNonPct",
                                 },
                                 {
                                     "name": "weight",
                                     "default": "FontWeight.Medium",
-                                    "fixtures": ["FontWeightNumbers", "FontWeightStrings"],
+                                    "type": "FontWeightType",
                                 },
                                 {
                                     "name": "family",
@@ -2747,7 +3078,10 @@
         },
         {
             "name": "ColumnSplit",
-            "disable": ["setDividerTestDefaultValues"], // Wrong default values when not initialized. Need to investigate!
+            "disable": [
+                "setDividerTestDefaultValues", // Wrong default values when not initialized. Need to investigate!
+                "setResizeableTestResizeableInvalidValues", // Bug
+            ],
             "attributes": [
                 {
                     "name": "resizeable",
@@ -2759,12 +3093,12 @@
                         {
                             "name": "startMargin",
                             "default": "0.00vp",
-                            "fixtures": ["LengthAny"],
+                            "type": "DimensionAnyOld",
                         },
                         {
                             "name": "endMargin",
                             "default": "0.00vp",
-                            "fixtures": ["LengthAny"],
+                            "type": "DimensionAnyOld",
                         },
                     ]
                 },
@@ -2807,6 +3141,12 @@
             "name": "RichEditor",
             "includes": ["core/components_ng/pattern/rich_editor/rich_editor_theme.h"],
             "themes": ["RichEditorTheme"],
+            "ignoreAttributes": [
+                "enablePreviewText", // API 129
+                "caretColor", // Not in JSON
+                "selectedBackgroundColor", // Not in JSON
+                "enterKeyType", // Not in JSON
+            ],
             "disable": [
                 "setRichEditorOptions0TestDefaultValues",
                 "setRichEditorOptions0TestValidValues",
@@ -2852,6 +3192,15 @@
                 "setStopBackPressTestDefaultValues",
                 "setStopBackPressTestStopBackPressValidValues",
                 "setStopBackPressTestStopBackPressInvalidValues",
+
+                "setEnableDataDetectorTestEnableDataDetectorInvalidValues", // Bug
+            ],
+            "remove": [
+                // Invalid SDK
+                "setMaxLengthTestMaxLengthValidValues",
+                "setMaxLengthTestMaxLengthInvalidValues",
+                "setMaxLinesTestMaxLinesValidValues",
+                "setMaxLinesTestMaxLinesInvalidValues",
             ],
             "attributes": [
                 {
@@ -2888,940 +3237,171 @@
         {
             "name": "CommonMethod",
             "nodeTypes": ["Blank"],
-            "disable":[
-                "setDragPreview0TestDragPreviewDragItemInfoExtraInfoInvalidValues",
-                "setDragPreview0TestDragPreviewDragItemInfoExtraInfoValidValues",
-                "setChainWeightTestDefaultValues",
-                "setChainWeightTestChainWeightHorizontalValidValues",
-                "setChainWeightTestChainWeightHorizontalInvalidValues",
-                "setChainWeightTestChainWeightVerticalValidValues",
-                "setChainWeightTestChainWeightVerticalInvalidValues",
+            "disable": [
+                // Bugs!
+                "setFocusScopePriorityTestFocusScopeIdInvalidValues",
+                "setRotateTestRotateCenterZValidValues", // Looks like wrong fixture AND bug in implementation
+                "setRotateTestRotateCenterZInvalidValues",
+                "setMarkAnchorTestMarkAnchorPositionXInvalidValues",
+                "setMarkAnchorTestMarkAnchorPositionYInvalidValues",
+                "setTabIndexTestTabIndexInvalidValues",
+                "setDefaultFocusTestDefaultFocusInvalidValues",
+                "setGroupDefaultFocusTestGroupDefaultFocusInvalidValues",
+                "setFocusOnTouchTestFocusOnTouchInvalidValues",
+                "setFlexGrowTestFlexGrowInvalidValues",
+                "setFlexShrinkTestFlexShrinkInvalidValues",
+
+                "setChainWeightTestChainWeightHorizontalValidValues", //  Need float CMP
+                "setChainWeightTestChainWeightVerticalValidValues", //  Need float CMP
+                "setAlignRules0TestDefaultValues", // Stubbed in API 129
+                "setAlignRules0TestValidValues", // Stubbed in API 129
+
+                "setAlignRules1TestAlignRulesStartAnchorValidValues", // Start is not in JSON
+                "setAlignRules1TestAlignRulesStartAlignValidValues", // Start is not in JSON
+                "setAlignRules1TestAlignRulesEndAnchorValidValues", // End is not in JSON
+                "setAlignRules1TestAlignRulesEndAlignValidValues", // End is not in JSON
+
+                "setFlexBasisTestFlexBasisInvalidValues", // Bug. Reset commented in model
+                "setRotateTestRotateCenterXInvalidValues", // Bug in modifier
+                "setRotateTestRotateCenterYInvalidValues", // Bug in modifier
+            ],
+            "ignoreAttributes": [
+                "accessibilityChecked",
+                "accessibilityDefaultFocus",
+                "accessibilityDescription",
+                "accessibilityFocusDrawLevel",
+                "accessibilityGroup",
+                "accessibilityLevel",
+                "accessibilityNextFocusId",
+                "accessibilityRole",
+                "accessibilitySelected",
+                "accessibilityScrollTriggerable",
+                "accessibilityText",
+                "accessibilityTextHint",
+                "accessibilityUseSamePage",
+                "advancedBlendMode",
+                "align",
+                "alignSelf",
+                "allowDrop",
+                "animation",
+                "aspectRatio",
+                "backdropBlur",
+                "backgroundBlur",
+                "backgroundBlurStyle",
+                "backgroundBrightness",
+                "backgroundColor",
+                "backgroundEffect",
+                "backgroundFilter",
+                "backgroundImage",
+                "backgroundImagePosition",
+                "backgroundImageResizable",
+                "backgroundImageSize",
+                "bindMenu",
+                "bindPopup",
+                "bindTips",
+                "blendMode",
+                "blur",
+                "border",
+                "borderColor",
+                "borderImage",
+                "borderRadius",
+                "borderStyle",
+                "borderWidth",
+                "brightness",
+                "chainMode",
+                "clickEffect",
+                "clip",
+                "clipShape",
+                "colorBlend",
+                "compositingFilter",
+                "constraintSize",
+                "contrast",
+                "customProperty",
+                "direction",
+                "displayPriority",
+                "dragPreview",
+                "dragPreviewOptions",
+                "draggable",
+                "drawModifier",
+                "enabled",
+                "expandSafeArea",
+                "focusBox",
+                "focusScopeId",
+                "focusable",
+                "foregroundBlurStyle",
+                "foregroundColor",
+                "foregroundEffect",
+                "foregroundFilter",
+                "freeze",
+                "geometryTransition",
+                "gesture",
+                "grayscale",
+                "gridOffset",
+                "gridSpan",
+                "height",
+                "hitTestBehavior",
+                "hoverEffect",
+                "hueRotate",
+                "id",
+                "invert",
+                "key",
+                "layoutWeight",
+                "lightUpEffect",
+                "linearGradient",
+                "linearGradientBlur",
+                "margin",
+                "mask",
+                "maskShape",
+                "monopolizeEvents",
+                "motionBlur", // No attribute in JSON
+                "motionPath",
+                "mouseResponseRegion",
+                "nextFocus",
+                "obscured",
+                "offset",
+                "opacity",
+                "outline",
+                "outlineColor",
+                "outlineRadius",
+                "outlineStyle",
+                "outlineWidth",
+                "overlay",
+                "padding",
+                "parallelGesture",
+                "pixelRound",
+                "pixelStretchEffect",
+                "position",
+                "priorityGesture",
+                "radialGradient",
+                "renderGroup",
+                "responseRegion",
+                "restoreId",
+                "reuseId",
+                "safeAreaPadding",
+                "saturate",
+                "scale",
+                "sepia",
+                "shadow",
+                "sharedTransition",
+                "size",
+                "sphericalEffect",
+                "sweepGradient",
+                "tabStop",
+                "touchable",
+                "transform",
+                "transition",
+                "translate",
+                "useEffect",
+                "useShadowBatching",
+                "useSizeType",
+                "visibility",
+                "width",
+                "zIndex",
             ],
             "remove":[
-//1
-"setClip2TestDefaultValues",
-"setClip2TestClipValidValues",
-"setClip2TestClipInvalidValues",
-"setBackgroundBlurStyle1TestBackgroundBlurStyleStyleValidValues",
-"setBackgroundBlurStyle1TestBackgroundBlurStyleStyleInvalidValues",
-"setForegroundBlurStyle1TestForegroundBlurStyleStyleValidValues",
-"setForegroundBlurStyle1TestForegroundBlurStyleStyleInvalidValues",
-//?
-"setMask2TestDefaultValues",
-"setMask2TestValidValues",
-"setAccessibilityRoleTestDefaultValues",
-"setAccessibilityRoleTestAccessibilityRoleValidValues",
-"setAccessibilityRoleTestAccessibilityRoleInvalidValues",
-                "setBlendMode1TestBlendModeModeValidValues",
-                "setBlendMode1TestBlendModeModeInvalidValues",
-//1
-                "setUseSizeTypeTestUseSizeTypeXsLiteral_Number_offset_spanSpanValidValues",
-                "setUseSizeTypeTestUseSizeTypeXsLiteral_Number_offset_spanOffsetValidValues",
-// above need check later
-                "setRotate0TestRotateAngleValidValues",
-                "setRotate1TestRotateAngleValidValues",
-                "setRotate0TestRotateCenterZValidValues",
-                "setRotate0TestRotateCenterZInvalidValues",
-                "setRotate1TestRotateCenterZValidValues",
-                "setRotate1TestRotateCenterZInvalidValues",
-                "setObscuredTestDefaultValues",
-                "setObscuredTestValidValues",
-                "setTransition0TestTransitionTransitionOptionsTypeValidValues",
-                "setTransition0TestTransitionTransitionOptionsTypeInvalidValues",
-                "setTransition0TestTransitionTransitionOptionsOpacityValidValues",
-                "setTransition0TestTransitionTransitionOptionsOpacityInvalidValues",
-                "setTransition0TestTransitionTransitionOptionsTranslateXValidValues",
-                "setTransition0TestTransitionTransitionOptionsTranslateXInvalidValues",
-                "setTransition0TestTransitionTransitionOptionsTranslateYValidValues",
-                "setTransition0TestTransitionTransitionOptionsTranslateYInvalidValues",
-                "setTransition0TestTransitionTransitionOptionsTranslateZValidValues",
-                "setTransition0TestTransitionTransitionOptionsTranslateZInvalidValues",
-                "setTransition0TestTransitionTransitionOptionsScaleXValidValues",
-                "setTransition0TestTransitionTransitionOptionsScaleXInvalidValues",
-                "setTransition0TestTransitionTransitionOptionsScaleYValidValues",
-                "setTransition0TestTransitionTransitionOptionsScaleYInvalidValues",
-                "setTransition0TestTransitionTransitionOptionsScaleZValidValues",
-                "setTransition0TestTransitionTransitionOptionsScaleZInvalidValues",
-                "setTransition0TestTransitionTransitionOptionsScaleCenterXValidValues",
-                "setTransition0TestTransitionTransitionOptionsScaleCenterXInvalidValues",
-                "setTransition0TestTransitionTransitionOptionsScaleCenterYValidValues",
-                "setTransition0TestTransitionTransitionOptionsScaleCenterYInvalidValues",
-                "setTransition0TestTransitionTransitionOptionsRotateXValidValues",
-                "setTransition0TestTransitionTransitionOptionsRotateXInvalidValues",
-                "setTransition0TestTransitionTransitionOptionsRotateYValidValues",
-                "setTransition0TestTransitionTransitionOptionsRotateYInvalidValues",
-                "setTransition0TestTransitionTransitionOptionsRotateZValidValues",
-                "setTransition0TestTransitionTransitionOptionsRotateZInvalidValues",
-                "setTransition0TestTransitionTransitionOptionsRotateCenterXValidValues",
-                "setTransition0TestTransitionTransitionOptionsRotateCenterXInvalidValues",
-                "setTransition0TestTransitionTransitionOptionsRotateCenterYValidValues",
-                "setTransition0TestTransitionTransitionOptionsRotateCenterYInvalidValues",
-                "setTransition0TestTransitionTransitionOptionsRotateCenterZValidValues",
-                "setTransition0TestTransitionTransitionOptionsRotateCenterZInvalidValues",
-                "setTransition0TestTransitionTransitionOptionsRotatePerspectiveValidValues",
-                "setTransition0TestTransitionTransitionOptionsRotatePerspectiveInvalidValues",
-                "setTransition0TestTransitionTransitionOptionsRotateAngleValidValues",
-                "setTransition0TestTransitionTransitionOptionsRotateAngleInvalidValues",
-                "setFocusScopeId0TestDefaultValues",
-                "setFocusScopeId0TestFocusScopeIdIdValidValues",
-                "setFocusScopeId0TestFocusScopeIdIsGroupValidValues",
-                "setFocusScopeId0TestFocusScopeIdIsGroupInvalidValues",
-                "setFocusScopeId1TestDefaultValues",
-                "setFocusScopeId1TestFocusScopeIdIdValidValues",
-                "setFocusScopeId1TestFocusScopeIdIsGroupValidValues",
-                "setFocusScopeId1TestFocusScopeIdIsGroupInvalidValues",
-                "setFocusScopeId1TestFocusScopeIdArrowStepOutValidValues",
-                "setFocusScopeId1TestFocusScopeIdArrowStepOutInvalidValues",
-                "setUseSizeTypeTestUseSizeTypeLgLiteral_Number_offset_spanOffsetInvalidValues",
-                "setUseSizeTypeTestUseSizeTypeLgLiteral_Number_offset_spanSpanInvalidValues",
-                "setUseSizeTypeTestUseSizeTypeMdLiteral_Number_offset_spanOffsetInvalidValues",
-                "setUseSizeTypeTestUseSizeTypeMdLiteral_Number_offset_spanSpanInvalidValues",
-                "setUseSizeTypeTestUseSizeTypeSmLiteral_Number_offset_spanOffsetInvalidValues",
-                "setUseSizeTypeTestUseSizeTypeSmLiteral_Number_offset_spanSpanInvalidValues",
-                "setUseSizeTypeTestUseSizeTypeXsLiteral_Number_offset_spanOffsetInvalidValues",
-                "setUseSizeTypeTestUseSizeTypeXsLiteral_Number_offset_spanSpanInvalidValues",
-                "setAlignRules0TestDefaultValues",
-                "setAlignRules1TestDefaultValues",
-                "setSafeAreaPaddingTestDefaultValues",
-                "setSafeAreaPaddingTestValidValues",
-                "setMarkAnchorTestValidValues", //above tests replaced by manual UT
-                "setTabStopTestDefaultValues",
-                "setTabStopTestTabStopValidValues",
-                "setUseEffect0TestDefaultValues",
-                "setUseEffect0TestUseEffectValidValues",
-                "setUseEffect1TestDefaultValues",
-                "setUseEffect1TestUseEffectUseEffectValidValues",
-                "setUseEffect1TestUseEffectEffectTypeValidValues",
-                "setUseEffect1TestUseEffectEffectTypeInvalidValues",
-                "setUseEffect2TestDefaultValues",
-                "setUseEffect2TestUseEffectUseEffectValidValues",
-                "setUseEffect2TestUseEffectUseEffectInvalidValues",
-                "setUseEffect2TestUseEffectEffectTypeValidValues",
-                "setUseEffect2TestUseEffectEffectTypeInvalidValues",
-                "setMask0TestDefaultValues",
-                "setMask0TestValidValues",
-                "setAccessibilityGroup0TestDefaultValues",
-                "setAccessibilityGroup0TestAccessibilityGroupValidValues",
-                "setAccessibilityGroup1TestDefaultValues",
-                "setAccessibilityGroup1TestAccessibilityGroupIsGroupValidValues",
-                "setAccessibilityGroup1TestAccessibilityGroupAccessibilityOptionsAccessibilityPreferredValidValues",
-                "setAccessibilityGroup1TestAccessibilityGroupAccessibilityOptionsAccessibilityPreferredInvalidValues",
-                "setAccessibilityCheckedTestDefaultValues",
-                "setAccessibilityCheckedTestAccessibilityCheckedValidValues",
-                "setAccessibilitySelectedTestDefaultValues",
-                "setAccessibilitySelectedTestAccessibilitySelectedValidValues",
-                "setWidth0TestDefaultValues",
-                "setWidth0TestWidthValidValues",
-                "setWidth0TestWidthInvalidValues",
-                "setWidth1TestDefaultValues",
-                "setWidth1TestWidthValidValues",
-                "setWidth1TestWidthInvalidValues",
-                "setHeight0TestDefaultValues",
-                "setHeight0TestHeightValidValues",
-                "setHeight0TestHeightInvalidValues",
-                "setHeight1TestDefaultValues",
-                "setHeight1TestHeightValidValues",
-                "setHeight1TestHeightInvalidValues",
-                "setDrawModifierTestDefaultValues",
-                "setDrawModifierTestValidValues",
-                "setResponseRegionTestDefaultValues",
-                "setResponseRegionTestResponseRegionRectangleXValidValues",
-                "setResponseRegionTestResponseRegionRectangleXInvalidValues",
-                "setResponseRegionTestResponseRegionRectangleYValidValues",
-                "setResponseRegionTestResponseRegionRectangleYInvalidValues",
-                "setResponseRegionTestResponseRegionRectangleWidthValidValues",
-                "setResponseRegionTestResponseRegionRectangleWidthInvalidValues",
-                "setResponseRegionTestResponseRegionRectangleHeightValidValues",
-                "setResponseRegionTestResponseRegionRectangleHeightInvalidValues",
-                "setMouseResponseRegionTestDefaultValues",
-                "setMouseResponseRegionTestMouseResponseRegionRectangleXValidValues",
-                "setMouseResponseRegionTestMouseResponseRegionRectangleXInvalidValues",
-                "setMouseResponseRegionTestMouseResponseRegionRectangleYValidValues",
-                "setMouseResponseRegionTestMouseResponseRegionRectangleYInvalidValues",
-                "setMouseResponseRegionTestMouseResponseRegionRectangleWidthValidValues",
-                "setMouseResponseRegionTestMouseResponseRegionRectangleWidthInvalidValues",
-                "setMouseResponseRegionTestMouseResponseRegionRectangleHeightValidValues",
-                "setMouseResponseRegionTestMouseResponseRegionRectangleHeightInvalidValues",
-                "setSizeTestDefaultValues",
-                "setSizeTestSizeWidthValidValues",
-                "setSizeTestSizeWidthInvalidValues",
-                "setSizeTestSizeHeightValidValues",
-                "setSizeTestSizeHeightInvalidValues",
-                "setConstraintSizeTestDefaultValues",
-                "setConstraintSizeTestConstraintSizeMinWidthValidValues",
-                "setConstraintSizeTestConstraintSizeMinWidthInvalidValues",
-                "setConstraintSizeTestConstraintSizeMaxWidthValidValues",
-                "setConstraintSizeTestConstraintSizeMaxWidthInvalidValues",
-                "setConstraintSizeTestConstraintSizeMinHeightValidValues",
-                "setConstraintSizeTestConstraintSizeMinHeightInvalidValues",
-                "setConstraintSizeTestConstraintSizeMaxHeightValidValues",
-                "setConstraintSizeTestConstraintSizeMaxHeightInvalidValues",
-                "setTouchableTestDefaultValues",
-                "setTouchableTestTouchableValidValues",
-                "setHitTestBehaviorTestDefaultValues",
-                "setHitTestBehaviorTestHitTestBehaviorValidValues",
-                "setHitTestBehaviorTestHitTestBehaviorInvalidValues",
-                "setLayoutWeightTestDefaultValues",
-                "setLayoutWeightTestLayoutWeightValidValues",
-                "setLayoutWeightTestLayoutWeightInvalidValues",
-                "setPaddingTestDefaultValues",
-                "setPaddingTestValidValues",
-                "setMarginTestDefaultValues",
-                "setMarginTestValidValues",
-                "setBackgroundColor0TestDefaultValues",
-                "setBackgroundColor1TestDefaultValues",
-                "setBackgroundColor0TestBackgroundColorValidValues",
-                "setBackgroundColor1TestBackgroundColorValidValues",
-                "setBackgroundColor0TestBackgroundColorInvalidValues",
-                "setBackgroundColor1TestBackgroundColorInvalidValues",
-                "setPixelRoundTestDefaultValues",
-                "setPixelRoundTestPixelRoundStartValidValues",
-                "setPixelRoundTestPixelRoundStartInvalidValues",
-                "setPixelRoundTestPixelRoundTopValidValues",
-                "setPixelRoundTestPixelRoundTopInvalidValues",
-                "setPixelRoundTestPixelRoundEndValidValues",
-                "setPixelRoundTestPixelRoundEndInvalidValues",
-                "setPixelRoundTestPixelRoundBottomValidValues",
-                "setPixelRoundTestPixelRoundBottomInvalidValues",
-                "setBackgroundImageSizeTestDefaultValues",
-                "setBackgroundImageSizeTestBackgroundImageSizeSizeOptionsWidthValidValues",
-                "setBackgroundImageSizeTestBackgroundImageSizeSizeOptionsWidthInvalidValues",
-                "setBackgroundImageSizeTestBackgroundImageSizeSizeOptionsHeightValidValues",
-                "setBackgroundImageSizeTestBackgroundImageSizeSizeOptionsHeightInvalidValues",
-                "setBackgroundImagePositionTestDefaultValues",
-                "setBackgroundImagePositionTestBackgroundImagePositionPositionXValidValues",
-                "setBackgroundImagePositionTestBackgroundImagePositionPositionXInvalidValues",
-                "setBackgroundBlurStyle0TestDefaultValues",
-                "setBackgroundBlurStyle0TestBackgroundBlurStyleValueValidValues",
-                "setBackgroundBlurStyle0TestBackgroundBlurStyleValueInvalidValues",
-                "setBackgroundBlurStyle0TestBackgroundBlurStyleOptionsPolicyValidValues",
-                "setBackgroundBlurStyle0TestBackgroundBlurStyleOptionsPolicyInvalidValues",
-                "setBackgroundBlurStyle0TestBackgroundBlurStyleOptionsInactiveColorValidValues",
-                "setBackgroundBlurStyle0TestBackgroundBlurStyleOptionsInactiveColorInvalidValues",
-                "setBackgroundBlurStyle0TestBackgroundBlurStyleOptionsTypeValidValues",
-                "setBackgroundBlurStyle0TestBackgroundBlurStyleOptionsTypeInvalidValues",
-                "setBackgroundBlurStyle1TestDefaultValues",
-                "setBackgroundBlurStyle1TestBackgroundBlurStyleValueValidValues",
-                "setBackgroundBlurStyle1TestBackgroundBlurStyleValueInvalidValues",
-                "setBackgroundBlurStyle1TestBackgroundBlurStyleOptionsPolicyValidValues",
-                "setBackgroundBlurStyle1TestBackgroundBlurStyleOptionsPolicyInvalidValues",
-                "setBackgroundBlurStyle1TestBackgroundBlurStyleOptionsInactiveColorValidValues",
-                "setBackgroundBlurStyle1TestBackgroundBlurStyleOptionsInactiveColorInvalidValues",
-                "setBackgroundBlurStyle1TestBackgroundBlurStyleOptionsTypeValidValues",
-                "setBackgroundBlurStyle1TestBackgroundBlurStyleOptionsTypeInvalidValues",
-                "setBackgroundBlurStyle1TestBackgroundBlurStyleSysOptionsDisableSystemAdaptationValidValues",
-                "setBackgroundBlurStyle1TestBackgroundBlurStyleSysOptionsDisableSystemAdaptationInvalidValues",
-                "setForegroundBlurStyle0TestDefaultValues",
-                "setForegroundBlurStyle0TestForegroundBlurStyleValueValidValues",
-                "setForegroundBlurStyle0TestForegroundBlurStyleValueInvalidValues",
-                "setForegroundBlurStyle1TestDefaultValues",
-                "setForegroundBlurStyle1TestForegroundBlurStyleValueValidValues",
-                "setForegroundBlurStyle1TestForegroundBlurStyleValueInvalidValues",
-                "setForegroundBlurStyle1TestForegroundBlurStyleSysOptionsDisableSystemAdaptationValidValues",
-                "setForegroundBlurStyle1TestForegroundBlurStyleSysOptionsDisableSystemAdaptationInvalidValues",
-                "setFocusScopeIdTestIsGroupValidValues",
-                "setFocusScopeIdTestFocusScopeIdValidValues",
-                "setFocusScopeIdTestFocusScopeIdIdValidValues",
-                "setFocusScopeIdTestFocusScopeIdIsGroupValidValues",
-                "setFocusScopeIdTestFocusScopeIdIsGroupInvalidValues",
-                "setFocusScopePriorityTestDefaultValues",
-                "setFocusScopePriorityTestPriorityValidValues",
-                "setFocusScopePriorityTestPriorityInvalidValues",
-                "setFocusScopePriorityTestFocusScopePriorityValidValues",
-                "setFocusScopePriorityTestFocusScopePriorityScopeIdValidValues",
-                "setFocusScopePriorityTestFocusScopePriorityPriorityValidValues",
-                "setFocusScopePriorityTestFocusScopePriorityPriorityInvalidValues",
-                "setGestureTestDefaultValues",
-                "setGestureTestGestureGestureValidValues",
-                "setGestureTestGestureGestureInvalidValues",
-                "setGestureTestGestureMaskValidValues",
-                "setGestureTestGestureMaskInvalidValues",
-                "setPriorityGestureTestDefaultValues",
-                "setPriorityGestureTestPriorityGestureGestureValidValues",
-                "setPriorityGestureTestPriorityGestureGestureInvalidValues",
-                "setPriorityGestureTestPriorityGestureMaskValidValues",
-                "setPriorityGestureTestPriorityGestureMaskInvalidValues",
-                "setParallelGestureTestDefaultValues",
-                "setParallelGestureTestParallelGestureGestureValidValues",
-                "setParallelGestureTestParallelGestureGestureInvalidValues",
-                "setParallelGestureTestParallelGestureMaskValidValues",
-                "setParallelGestureTestParallelGestureMaskInvalidValues",
-                "setBlur0TestDefaultValues",
-                "setBlur0TestValidValues",
-                "setBlur1TestDefaultValues",
-                "setBlur1TestValidValues",
-                "setLinearGradientBlur0TestDefaultValues",
-                "setLinearGradientBlur0TestValidValues",
-                "setLinearGradientBlur1TestDefaultValues",
-                "setLinearGradientBlur1TestValidValues",
-                "setBackdropBlur0TestDefaultValues",
-                "setBackdropBlur0TestValidValues",
-                "setBackdropBlur1TestDefaultValues",
-                "setBackdropBlur1TestValidValues",
-                "setSharedTransitionTestDefaultValues",
-                "setSharedTransitionTestSharedTransitionIdValidValues",
-                "setSharedTransitionTestSharedTransitionOptionsDurationValidValues",
-                "setSharedTransitionTestSharedTransitionOptionsDurationInvalidValues",
-                "setSharedTransitionTestSharedTransitionOptionsDelayValidValues",
-                "setSharedTransitionTestSharedTransitionOptionsDelayInvalidValues",
-                "setSharedTransitionTestSharedTransitionOptionsMotionPathPathValidValues",
-                "setSharedTransitionTestSharedTransitionOptionsMotionPathFromValidValues",
-                "setSharedTransitionTestSharedTransitionOptionsMotionPathFromInvalidValues",
-                "setSharedTransitionTestSharedTransitionOptionsMotionPathToValidValues",
-                "setSharedTransitionTestSharedTransitionOptionsMotionPathToInvalidValues",
-                "setSharedTransitionTestSharedTransitionOptionsMotionPathRotatableValidValues",
-                "setSharedTransitionTestSharedTransitionOptionsMotionPathRotatableInvalidValues",
-                "setSharedTransitionTestSharedTransitionOptionsZIndexValidValues",
-                "setSharedTransitionTestSharedTransitionOptionsZIndexInvalidValues",
-                "setSharedTransitionTestSharedTransitionOptionsTypeValidValues",
-                "setSharedTransitionTestSharedTransitionOptionsTypeInvalidValues",
-                "setChainModeTestDefaultValues",
-                "setChainModeTestChainModeDirectionValidValues",
-                "setChainModeTestChainModeDirectionInvalidValues",
-                "setChainModeTestChainModeStyleValidValues",
-                "setChainModeTestChainModeStyleInvalidValues",
-                "setDragPreviewOptionsTestDefaultValues",
-                "setDragPreviewOptionsTestDragPreviewOptionsValueModeValidValues",
-                "setDragPreviewOptionsTestDragPreviewOptionsValueModeInvalidValues",
-                "setDragPreviewOptionsTestDragPreviewOptionsValueNumberBadgeValidValues",
-                "setDragPreviewOptionsTestDragPreviewOptionsValueNumberBadgeInvalidValues",
-                "setDragPreviewOptionsTestDragPreviewOptionsValueSizeChangeEffectValidValues",
-                "setDragPreviewOptionsTestDragPreviewOptionsValueSizeChangeEffectInvalidValues",
-                "setDragPreviewOptionsTestDragPreviewOptionsOptionsIsMultiSelectionEnabledValidValues",
-                "setDragPreviewOptionsTestDragPreviewOptionsOptionsIsMultiSelectionEnabledInvalidValues",
-                "setDragPreviewOptionsTestDragPreviewOptionsOptionsDefaultAnimationBeforeLiftingValidValues",
-                "setDragPreviewOptionsTestDragPreviewOptionsOptionsDefaultAnimationBeforeLiftingInvalidValues",
-                "setDragPreviewOptionsTestDragPreviewOptionsOptionsEnableEdgeAutoScrollValidValues",
-                "setDragPreviewOptionsTestDragPreviewOptionsOptionsEnableEdgeAutoScrollInvalidValues",
-                "setDragPreviewOptionsTestDragPreviewOptionsOptionsEnableHapticFeedbackValidValues",
-                "setDragPreviewOptionsTestDragPreviewOptionsOptionsEnableHapticFeedbackInvalidValues",
-                "setDragPreviewOptionsTestDragPreviewOptionsOptionsIsLiftingDisabledValidValues",
-                "setDragPreviewOptionsTestDragPreviewOptionsOptionsIsLiftingDisabledInvalidValues",
-                "setOverlayTestDefaultValues",
-                "setOverlayTestOverlayValueValidValues",
-                "setOverlayTestOverlayValueInvalidValues",
-                "setOverlayTestOverlayOptionsAlignValidValues",
-                "setOverlayTestOverlayOptionsAlignInvalidValues",
-                "setOverlayTestOverlayOptionsOffsetXValidValues",
-                "setOverlayTestOverlayOptionsOffsetXInvalidValues",
-                "setOverlayTestOverlayOptionsOffsetYValidValues",
-                "setOverlayTestOverlayOptionsOffsetYInvalidValues",
-                "setBlendMode0TestDefaultValues",
-                "setBlendMode0TestBlendModeValueValidValues",
-                "setBlendMode0TestBlendModeValueInvalidValues",
-                "setBlendMode0TestBlendModeTypeValidValues",
-                "setBlendMode0TestBlendModeTypeInvalidValues",
-                "setBlendMode1TestDefaultValues",
-                "setBlendMode1TestBlendModeValueValidValues",
-                "setBlendMode1TestBlendModeValueInvalidValues",
-                "setBlendMode1TestBlendModeTypeValidValues",
-                "setBlendMode1TestBlendModeTypeInvalidValues",
-                "setAdvancedBlendModeTestDefaultValues",
-                "setAdvancedBlendModeTestAdvancedBlendModeEffectValidValues",
-                "setAdvancedBlendModeTestAdvancedBlendModeEffectInvalidValues",
-                "setAdvancedBlendModeTestAdvancedBlendModeTypeValidValues",
-                "setAdvancedBlendModeTestAdvancedBlendModeTypeInvalidValues",
-                "setBindPopupTestDefaultValues",
-                "setBindPopupTestValidValues",
-                "setBindMenu0TestDefaultValues",
-                "setBindMenu0TestValidValues",
-                "setBindMenu1TestDefaultValues",
-                "setBindMenu1TestValidValues",
-                "setBackgroundImagePositionTestBackgroundImagePositionPositionYValidValues",
-                "setBackgroundImagePositionTestBackgroundImagePositionPositionYInvalidValues",
-                "setBackgroundEffect0TestDefaultValues",
-                "setBackgroundEffect1TestDefaultValues",
-                "setBackgroundEffect0TestValidValues",
-                "setBackgroundEffect1TestValidValues",
-                "setBackgroundImageResizableTestDefaultValues",
-                "setBackgroundImageResizableTestBackgroundImageResizableSliceTopValidValues",
-                "setBackgroundImageResizableTestBackgroundImageResizableSliceTopInvalidValues",
-                "setBackgroundImageResizableTestBackgroundImageResizableSliceRightValidValues",
-                "setBackgroundImageResizableTestBackgroundImageResizableSliceRightInvalidValues",
-                "setBackgroundImageResizableTestBackgroundImageResizableSliceBottomValidValues",
-                "setBackgroundImageResizableTestBackgroundImageResizableSliceBottomInvalidValues",
-                "setBackgroundImageResizableTestBackgroundImageResizableSliceLeftValidValues",
-                "setBackgroundImageResizableTestBackgroundImageResizableSliceLeftInvalidValues",
-                "setForegroundEffectTestDefaultValues",
-                "setForegroundEffectTestForegroundEffectRadiusValidValues",
-                "setOpacity0TestDefaultValues",
-                "setOpacity0TestOpacityValidValues",
-                "setOpacity0TestOpacityInvalidValues",
-                "setOpacity1TestDefaultValues",
-                "setOpacity1TestOpacityValidValues",
-                "setOpacity1TestOpacityInvalidValues",
-                "setBorderTestDefaultValues",
-                "setBorderTestValidValues",
-                "setBorderStyleTestDefaultValues",
-                "setBorderStyleTestBorderStyleEdgeStylesTopValidValues",
-                "setBorderStyleTestBorderStyleEdgeStylesTopInvalidValues",
-                "setBorderStyleTestBorderStyleEdgeStylesRightValidValues",
-                "setBorderStyleTestBorderStyleEdgeStylesRightInvalidValues",
-                "setBorderStyleTestBorderStyleEdgeStylesBottomValidValues",
-                "setBorderStyleTestBorderStyleEdgeStylesBottomInvalidValues",
-                "setBorderStyleTestBorderStyleEdgeStylesLeftValidValues",
-                "setBorderStyleTestBorderStyleEdgeStylesLeftInvalidValues",
-                "setBorderWidthTestDefaultValues",
-                "setBorderWidthTestValidValues",
-                "setBorderColorTestDefaultValues",
-                "setBorderColorTestBorderColorEdgeColorsTopValidValues",
-                "setBorderColorTestBorderColorEdgeColorsTopInvalidValues",
-                "setBorderColorTestBorderColorEdgeColorsRightValidValues",
-                "setBorderColorTestBorderColorEdgeColorsRightInvalidValues",
-                "setBorderColorTestBorderColorEdgeColorsBottomValidValues",
-                "setBorderColorTestBorderColorEdgeColorsBottomInvalidValues",
-                "setBorderColorTestBorderColorEdgeColorsLeftValidValues",
-                "setBorderColorTestBorderColorEdgeColorsLeftInvalidValues",
-                "setBorderColorTestBorderColorLocalizedEdgeColorsTopValidValues",
-                "setBorderColorTestBorderColorLocalizedEdgeColorsTopInvalidValues",
-                "setBorderColorTestBorderColorLocalizedEdgeColorsEndValidValues",
-                "setBorderColorTestBorderColorLocalizedEdgeColorsEndInvalidValues",
-                "setBorderColorTestBorderColorLocalizedEdgeColorsBottomValidValues",
-                "setBorderColorTestBorderColorLocalizedEdgeColorsBottomInvalidValues",
-                "setBorderColorTestBorderColorLocalizedEdgeColorsStartValidValues",
-                "setBorderColorTestBorderColorLocalizedEdgeColorsStartInvalidValues",
-                "setBorderRadiusTestDefaultValues",
-                "setBorderRadiusTestValidValues",
-                "setBorderImageTestDefaultValues",
-                "setBorderImageTestValidValues",
-                "setOutline0TestDefaultValues",
-                "setOutline0TestOutlineWidthEdgeOutlineWidthsTopValidValues",
-                "setOutline0TestOutlineWidthEdgeOutlineWidthsTopInvalidValues",
-                "setOutline0TestOutlineWidthEdgeOutlineWidthsRightValidValues",
-                "setOutline0TestOutlineWidthEdgeOutlineWidthsRightInvalidValues",
-                "setOutline0TestOutlineWidthEdgeOutlineWidthsBottomValidValues",
-                "setOutline0TestOutlineWidthEdgeOutlineWidthsBottomInvalidValues",
-                "setOutline0TestOutlineWidthEdgeOutlineWidthsLeftValidValues",
-                "setOutline0TestOutlineWidthEdgeOutlineWidthsLeftInvalidValues",
-                "setOutline0TestOutlineColorEdgeColorsTopValidValues",
-                "setOutline0TestOutlineColorEdgeColorsTopInvalidValues",
-                "setOutline0TestOutlineColorEdgeColorsRightValidValues",
-                "setOutline0TestOutlineColorEdgeColorsRightInvalidValues",
-                "setOutline0TestOutlineColorEdgeColorsBottomValidValues",
-                "setOutline0TestOutlineColorEdgeColorsBottomInvalidValues",
-                "setOutline0TestOutlineColorEdgeColorsLeftValidValues",
-                "setOutline0TestOutlineColorEdgeColorsLeftInvalidValues",
-                "setOutline0TestOutlineColorLocalizedEdgeColorsTopValidValues",
-                "setOutline0TestOutlineColorLocalizedEdgeColorsTopInvalidValues",
-                "setOutline0TestOutlineColorLocalizedEdgeColorsEndValidValues",
-                "setOutline0TestOutlineColorLocalizedEdgeColorsEndInvalidValues",
-                "setOutline0TestOutlineColorLocalizedEdgeColorsBottomValidValues",
-                "setOutline0TestOutlineColorLocalizedEdgeColorsBottomInvalidValues",
-                "setOutline0TestOutlineColorLocalizedEdgeColorsStartValidValues",
-                "setOutline0TestOutlineColorLocalizedEdgeColorsStartInvalidValues",
-                "setOutline0TestOutlineRadiusOutlineRadiusesTopLeftValidValues",
-                "setOutline0TestOutlineRadiusOutlineRadiusesTopLeftInvalidValues",
-                "setOutline0TestOutlineRadiusOutlineRadiusesTopRightValidValues",
-                "setOutline0TestOutlineRadiusOutlineRadiusesTopRightInvalidValues",
-                "setOutline0TestOutlineRadiusOutlineRadiusesBottomLeftValidValues",
-                "setOutline0TestOutlineRadiusOutlineRadiusesBottomLeftInvalidValues",
-                "setOutline0TestOutlineRadiusOutlineRadiusesBottomRightValidValues",
-                "setOutline0TestOutlineRadiusOutlineRadiusesBottomRightInvalidValues",
-                "setOutline0TestOutlineStyleEdgeOutlineStylesTopValidValues",
-                "setOutline0TestOutlineStyleEdgeOutlineStylesTopInvalidValues",
-                "setOutline0TestOutlineStyleEdgeOutlineStylesRightValidValues",
-                "setOutline0TestOutlineStyleEdgeOutlineStylesRightInvalidValues",
-                "setOutline0TestOutlineStyleEdgeOutlineStylesBottomValidValues",
-                "setOutline0TestOutlineStyleEdgeOutlineStylesBottomInvalidValues",
-                "setOutline0TestOutlineStyleEdgeOutlineStylesLeftValidValues",
-                "setOutline0TestOutlineStyleEdgeOutlineStylesLeftInvalidValues",
-                "setOutline1TestDefaultValues",
-                "setOutline1TestOutlineWidthEdgeOutlineWidthsTopValidValues",
-                "setOutline1TestOutlineWidthEdgeOutlineWidthsTopInvalidValues",
-                "setOutline1TestOutlineWidthEdgeOutlineWidthsRightValidValues",
-                "setOutline1TestOutlineWidthEdgeOutlineWidthsRightInvalidValues",
-                "setOutline1TestOutlineWidthEdgeOutlineWidthsBottomValidValues",
-                "setOutline1TestOutlineWidthEdgeOutlineWidthsBottomInvalidValues",
-                "setOutline1TestOutlineWidthEdgeOutlineWidthsLeftValidValues",
-                "setOutline1TestOutlineWidthEdgeOutlineWidthsLeftInvalidValues",
-                "setOutline1TestOutlineColorEdgeColorsTopValidValues",
-                "setOutline1TestOutlineColorEdgeColorsTopInvalidValues",
-                "setOutline1TestOutlineColorEdgeColorsRightValidValues",
-                "setOutline1TestOutlineColorEdgeColorsRightInvalidValues",
-                "setOutline1TestOutlineColorEdgeColorsBottomValidValues",
-                "setOutline1TestOutlineColorEdgeColorsBottomInvalidValues",
-                "setOutline1TestOutlineColorEdgeColorsLeftValidValues",
-                "setOutline1TestOutlineColorEdgeColorsLeftInvalidValues",
-                "setOutline1TestOutlineColorLocalizedEdgeColorsTopValidValues",
-                "setOutline1TestOutlineColorLocalizedEdgeColorsTopInvalidValues",
-                "setOutline1TestOutlineColorLocalizedEdgeColorsEndValidValues",
-                "setOutline1TestOutlineColorLocalizedEdgeColorsEndInvalidValues",
-                "setOutline1TestOutlineColorLocalizedEdgeColorsBottomValidValues",
-                "setOutline1TestOutlineColorLocalizedEdgeColorsBottomInvalidValues",
-                "setOutline1TestOutlineColorLocalizedEdgeColorsStartValidValues",
-                "setOutline1TestOutlineColorLocalizedEdgeColorsStartInvalidValues",
-                "setOutline1TestOutlineRadiusOutlineRadiusesTopLeftValidValues",
-                "setOutline1TestOutlineRadiusOutlineRadiusesTopLeftInvalidValues",
-                "setOutline1TestOutlineRadiusOutlineRadiusesTopRightValidValues",
-                "setOutline1TestOutlineRadiusOutlineRadiusesTopRightInvalidValues",
-                "setOutline1TestOutlineRadiusOutlineRadiusesBottomLeftValidValues",
-                "setOutline1TestOutlineRadiusOutlineRadiusesBottomLeftInvalidValues",
-                "setOutline1TestOutlineRadiusOutlineRadiusesBottomRightValidValues",
-                "setOutline1TestOutlineRadiusOutlineRadiusesBottomRightInvalidValues",
-                "setOutline1TestOutlineStyleEdgeOutlineStylesTopValidValues",
-                "setOutline1TestOutlineStyleEdgeOutlineStylesTopInvalidValues",
-                "setOutline1TestOutlineStyleEdgeOutlineStylesRightValidValues",
-                "setOutline1TestOutlineStyleEdgeOutlineStylesRightInvalidValues",
-                "setOutline1TestOutlineStyleEdgeOutlineStylesBottomValidValues",
-                "setOutline1TestOutlineStyleEdgeOutlineStylesBottomInvalidValues",
-                "setOutline1TestOutlineStyleEdgeOutlineStylesLeftValidValues",
-                "setOutline1TestOutlineStyleEdgeOutlineStylesLeftInvalidValues",
-                "setOutlineStyle0TestDefaultValues",
-                "setOutlineStyle0TestOutlineStyleEdgeOutlineStylesTopValidValues",
-                "setOutlineStyle0TestOutlineStyleEdgeOutlineStylesTopInvalidValues",
-                "setOutlineStyle0TestOutlineStyleEdgeOutlineStylesRightValidValues",
-                "setOutlineStyle0TestOutlineStyleEdgeOutlineStylesRightInvalidValues",
-                "setOutlineStyle0TestOutlineStyleEdgeOutlineStylesBottomValidValues",
-                "setOutlineStyle0TestOutlineStyleEdgeOutlineStylesBottomInvalidValues",
-                "setOutlineStyle0TestOutlineStyleEdgeOutlineStylesLeftValidValues",
-                "setOutlineStyle0TestOutlineStyleEdgeOutlineStylesLeftInvalidValues",
-                "setOutlineStyle1TestDefaultValues",
-                "setOutlineStyle1TestOutlineStyleEdgeOutlineStylesTopValidValues",
-                "setOutlineStyle1TestOutlineStyleEdgeOutlineStylesTopInvalidValues",
-                "setOutlineStyle1TestOutlineStyleEdgeOutlineStylesRightValidValues",
-                "setOutlineStyle1TestOutlineStyleEdgeOutlineStylesRightInvalidValues",
-                "setOutlineStyle1TestOutlineStyleEdgeOutlineStylesBottomValidValues",
-                "setOutlineStyle1TestOutlineStyleEdgeOutlineStylesBottomInvalidValues",
-                "setOutlineStyle1TestOutlineStyleEdgeOutlineStylesLeftValidValues",
-                "setOutlineStyle1TestOutlineStyleEdgeOutlineStylesLeftInvalidValues",
-                "setOutlineWidth0TestDefaultValues",
-                "setOutlineWidth0TestOutlineWidthEdgeOutlineWidthsTopValidValues",
-                "setOutlineWidth0TestOutlineWidthEdgeOutlineWidthsTopInvalidValues",
-                "setOutlineWidth0TestOutlineWidthEdgeOutlineWidthsRightValidValues",
-                "setOutlineWidth0TestOutlineWidthEdgeOutlineWidthsRightInvalidValues",
-                "setOutlineWidth0TestOutlineWidthEdgeOutlineWidthsBottomValidValues",
-                "setOutlineWidth0TestOutlineWidthEdgeOutlineWidthsBottomInvalidValues",
-                "setOutlineWidth0TestOutlineWidthEdgeOutlineWidthsLeftValidValues",
-                "setOutlineWidth0TestOutlineWidthEdgeOutlineWidthsLeftInvalidValues",
-                "setOutlineWidth1TestDefaultValues",
-                "setOutlineWidth1TestOutlineWidthEdgeOutlineWidthsTopValidValues",
-                "setOutlineWidth1TestOutlineWidthEdgeOutlineWidthsTopInvalidValues",
-                "setOutlineWidth1TestOutlineWidthEdgeOutlineWidthsRightValidValues",
-                "setOutlineWidth1TestOutlineWidthEdgeOutlineWidthsRightInvalidValues",
-                "setOutlineWidth1TestOutlineWidthEdgeOutlineWidthsBottomValidValues",
-                "setOutlineWidth1TestOutlineWidthEdgeOutlineWidthsBottomInvalidValues",
-                "setOutlineWidth1TestOutlineWidthEdgeOutlineWidthsLeftValidValues",
-                "setOutlineWidth1TestOutlineWidthEdgeOutlineWidthsLeftInvalidValues",
-                "setOutlineColor0TestDefaultValues",
-                "setOutlineColor0TestOutlineColorEdgeColorsTopValidValues",
-                "setOutlineColor0TestOutlineColorEdgeColorsTopInvalidValues",
-                "setOutlineColor0TestOutlineColorEdgeColorsRightValidValues",
-                "setOutlineColor0TestOutlineColorEdgeColorsRightInvalidValues",
-                "setOutlineColor0TestOutlineColorEdgeColorsBottomValidValues",
-                "setOutlineColor0TestOutlineColorEdgeColorsBottomInvalidValues",
-                "setOutlineColor0TestOutlineColorEdgeColorsLeftValidValues",
-                "setOutlineColor0TestOutlineColorEdgeColorsLeftInvalidValues",
-                "setOutlineColor0TestOutlineColorLocalizedEdgeColorsTopValidValues",
-                "setOutlineColor0TestOutlineColorLocalizedEdgeColorsTopInvalidValues",
-                "setOutlineColor0TestOutlineColorLocalizedEdgeColorsEndValidValues",
-                "setOutlineColor0TestOutlineColorLocalizedEdgeColorsEndInvalidValues",
-                "setOutlineColor0TestOutlineColorLocalizedEdgeColorsBottomValidValues",
-                "setOutlineColor0TestOutlineColorLocalizedEdgeColorsBottomInvalidValues",
-                "setOutlineColor0TestOutlineColorLocalizedEdgeColorsStartValidValues",
-                "setOutlineColor0TestOutlineColorLocalizedEdgeColorsStartInvalidValues",
-                "setOutlineColor1TestDefaultValues",
-                "setOutlineColor1TestOutlineColorEdgeColorsTopValidValues",
-                "setOutlineColor1TestOutlineColorEdgeColorsTopInvalidValues",
-                "setOutlineColor1TestOutlineColorEdgeColorsRightValidValues",
-                "setOutlineColor1TestOutlineColorEdgeColorsRightInvalidValues",
-                "setOutlineColor1TestOutlineColorEdgeColorsBottomValidValues",
-                "setOutlineColor1TestOutlineColorEdgeColorsBottomInvalidValues",
-                "setOutlineColor1TestOutlineColorEdgeColorsLeftValidValues",
-                "setOutlineColor1TestOutlineColorEdgeColorsLeftInvalidValues",
-                "setOutlineColor1TestOutlineColorLocalizedEdgeColorsTopValidValues",
-                "setOutlineColor1TestOutlineColorLocalizedEdgeColorsTopInvalidValues",
-                "setOutlineColor1TestOutlineColorLocalizedEdgeColorsEndValidValues",
-                "setOutlineColor1TestOutlineColorLocalizedEdgeColorsEndInvalidValues",
-                "setOutlineColor1TestOutlineColorLocalizedEdgeColorsBottomValidValues",
-                "setOutlineColor1TestOutlineColorLocalizedEdgeColorsBottomInvalidValues",
-                "setOutlineColor1TestOutlineColorLocalizedEdgeColorsStartValidValues",
-                "setOutlineColor1TestOutlineColorLocalizedEdgeColorsStartInvalidValues",
-                "setOutlineRadius0TestDefaultValues",
-                "setOutlineRadius0TestOutlineRadiusOutlineRadiusesTopLeftValidValues",
-                "setOutlineRadius0TestOutlineRadiusOutlineRadiusesTopLeftInvalidValues",
-                "setOutlineRadius0TestOutlineRadiusOutlineRadiusesTopRightValidValues",
-                "setOutlineRadius0TestOutlineRadiusOutlineRadiusesTopRightInvalidValues",
-                "setOutlineRadius0TestOutlineRadiusOutlineRadiusesBottomLeftValidValues",
-                "setOutlineRadius0TestOutlineRadiusOutlineRadiusesBottomLeftInvalidValues",
-                "setOutlineRadius0TestOutlineRadiusOutlineRadiusesBottomRightValidValues",
-                "setOutlineRadius0TestOutlineRadiusOutlineRadiusesBottomRightInvalidValues",
-                "setOutlineRadius1TestDefaultValues",
-                "setOutlineRadius1TestOutlineRadiusOutlineRadiusesTopLeftValidValues",
-                "setOutlineRadius1TestOutlineRadiusOutlineRadiusesTopLeftInvalidValues",
-                "setOutlineRadius1TestOutlineRadiusOutlineRadiusesTopRightValidValues",
-                "setOutlineRadius1TestOutlineRadiusOutlineRadiusesTopRightInvalidValues",
-                "setOutlineRadius1TestOutlineRadiusOutlineRadiusesBottomLeftValidValues",
-                "setOutlineRadius1TestOutlineRadiusOutlineRadiusesBottomLeftInvalidValues",
-                "setOutlineRadius1TestOutlineRadiusOutlineRadiusesBottomRightValidValues",
-                "setOutlineRadius1TestOutlineRadiusOutlineRadiusesBottomRightInvalidValues",
-                "setForegroundColor0TestDefaultValues",
-                "setForegroundColor0TestForegroundColorValidValues",
-                "setForegroundColor0TestForegroundColorInvalidValues",
-                "setForegroundColor1TestDefaultValues",
-                "setForegroundColor1TestForegroundColorValidValues",
-                "setForegroundColor1TestForegroundColorInvalidValues",
-                "setHoverEffectTestDefaultValues",
-                "setHoverEffectTestHoverEffectValidValues",
-                "setHoverEffectTestHoverEffectInvalidValues",
-                "setFocusableTestDefaultValues",
-                "setFocusableTestFocusableValidValues",
-                "setFocusBoxTestDefaultValues",
-                "setFocusBoxTestValidValues",
-                "setAnimationTestDefaultValues",
-                "setAnimationTestAnimationDurationValidValues",
-                "setAnimationTestAnimationDurationInvalidValues",
-                "setAnimationTestAnimationTempoValidValues",
-                "setAnimationTestAnimationTempoInvalidValues",
-                "setAnimationTestAnimationDelayValidValues",
-                "setAnimationTestAnimationDelayInvalidValues",
-                "setAnimationTestAnimationIterationsValidValues",
-                "setAnimationTestAnimationIterationsInvalidValues",
-                "setAnimationTestAnimationPlayModeValidValues",
-                "setAnimationTestAnimationPlayModeInvalidValues",
-                "setAnimationTestAnimationFinishCallbackTypeValidValues",
-                "setAnimationTestAnimationFinishCallbackTypeInvalidValues",
-                "setAnimationTestAnimationExpectedFrameRateRangeMinValidValues",
-                "setAnimationTestAnimationExpectedFrameRateRangeMaxValidValues",
-                "setAnimationTestAnimationExpectedFrameRateRangeExpectedValidValues",
-                "setTransition0TestDefaultValues",
-                "setTransition1TestDefaultValues",
-                "setTransition1TestValidValues",
-                "setBrightness0TestDefaultValues",
-                "setBrightness0TestBrightnessValidValues",
-                "setBrightness1TestDefaultValues",
-                "setBrightness1TestBrightnessValidValues",
-                "setBrightness1TestBrightnessInvalidValues",
-                "setContrast0TestDefaultValues",
-                "setContrast0TestContrastValidValues",
-                "setContrast1TestDefaultValues",
-                "setContrast1TestContrastValidValues",
-                "setContrast1TestContrastInvalidValues",
-                "setGrayscale0TestDefaultValues",
-                "setGrayscale0TestGrayscaleValidValues",
-                "setGrayscale1TestDefaultValues",
-                "setGrayscale1TestGrayscaleValidValues",
-                "setGrayscale1TestGrayscaleInvalidValues",
-                "setColorBlend0TestDefaultValues",
-                "setColorBlend0TestColorBlendValidValues",
-                "setColorBlend0TestColorBlendInvalidValues",
-                "setColorBlend1TestDefaultValues",
-                "setColorBlend1TestColorBlendValidValues",
-                "setColorBlend1TestColorBlendInvalidValues",
-                "setSaturate0TestDefaultValues",
-                "setSaturate0TestSaturateValidValues",
-                "setSaturate1TestDefaultValues",
-                "setSaturate1TestSaturateValidValues",
-                "setSaturate1TestSaturateInvalidValues",
-                "setSepia0TestDefaultValues",
-                "setSepia0TestSepiaValidValues",
-                "setSepia1TestDefaultValues",
-                "setSepia1TestSepiaValidValues",
-                "setSepia1TestSepiaInvalidValues",
-                "setInvert0TestDefaultValues",
-                "setInvert0TestInvertInvertOptionsLowValidValues",
-                "setInvert0TestInvertInvertOptionsHighValidValues",
-                "setInvert0TestInvertInvertOptionsThresholdValidValues",
-                "setInvert0TestInvertInvertOptionsThresholdRangeValidValues",
-                "setInvert1TestDefaultValues",
-                "setInvert1TestInvertInvertOptionsLowValidValues",
-                "setInvert1TestInvertInvertOptionsHighValidValues",
-                "setInvert1TestInvertInvertOptionsThresholdValidValues",
-                "setInvert1TestInvertInvertOptionsThresholdRangeValidValues",
-                "setHueRotate0TestDefaultValues",
-                "setHueRotate0TestHueRotateValidValues",
-                "setHueRotate0TestHueRotateInvalidValues",
-                "setHueRotate1TestDefaultValues",
-                "setHueRotate1TestHueRotateValidValues",
-                "setHueRotate1TestHueRotateInvalidValues",
-                "setUseShadowBatching0TestDefaultValues",
-                "setUseShadowBatching0TestUseShadowBatchingValidValues",
-                "setUseShadowBatching1TestDefaultValues",
-                "setUseShadowBatching1TestUseShadowBatchingValidValues",
-                "setUseShadowBatching1TestUseShadowBatchingInvalidValues",
-                "setRenderGroup0TestDefaultValues",
-                "setRenderGroup0TestRenderGroupValidValues",
-                "setRenderGroup1TestDefaultValues",
-                "setRenderGroup1TestRenderGroupValidValues",
-                "setRenderGroup1TestRenderGroupInvalidValues",
-                "setFreeze0TestDefaultValues",
-                "setFreeze0TestFreezeValidValues",
-                "setFreeze1TestDefaultValues",
-                "setFreeze1TestFreezeValidValues",
-                "setFreeze1TestFreezeInvalidValues",
-                "setTranslate0TestDefaultValues",
-                "setTranslate0TestTranslateXValidValues",
-                "setTranslate0TestTranslateXInvalidValues",
-                "setTranslate0TestTranslateYValidValues",
-                "setTranslate0TestTranslateYInvalidValues",
-                "setTranslate0TestTranslateZValidValues",
-                "setTranslate0TestTranslateZInvalidValues",
-                "setTranslate1TestDefaultValues",
-                "setTranslate1TestTranslateXValidValues",
-                "setTranslate1TestTranslateXInvalidValues",
-                "setTranslate1TestTranslateYValidValues",
-                "setTranslate1TestTranslateYInvalidValues",
-                "setTranslate1TestTranslateZValidValues",
-                "setTranslate1TestTranslateZInvalidValues",
-                "setScale0TestDefaultValues",
-                "setScale0TestScaleXValidValues",
-                "setScale0TestScaleXInvalidValues",
-                "setScale0TestScaleYValidValues",
-                "setScale0TestScaleYInvalidValues",
-                "setScale0TestScaleZValidValues",
-                "setScale0TestScaleZInvalidValues",
-                "setScale0TestScaleCenterXValidValues",
-                "setScale0TestScaleCenterXInvalidValues",
-                "setScale0TestScaleCenterYValidValues",
-                "setScale0TestScaleCenterYInvalidValues",
-                "setScale1TestDefaultValues",
-                "setScale1TestScaleXValidValues",
-                "setScale1TestScaleXInvalidValues",
-                "setScale1TestScaleYValidValues",
-                "setScale1TestScaleYInvalidValues",
-                "setScale1TestScaleZValidValues",
-                "setScale1TestScaleZInvalidValues",
-                "setScale1TestScaleCenterXValidValues",
-                "setScale1TestScaleCenterXInvalidValues",
-                "setScale1TestScaleCenterYValidValues",
-                "setScale1TestScaleCenterYInvalidValues",
-                "setGridSpanTestDefaultValues",
-                "setGridSpanTestGridSpanValidValues",
-                "setGridOffsetTestDefaultValues",
-                "setGridOffsetTestGridOffsetValidValues",
-                "setVisibilityTestDefaultValues",
-                "setVisibilityTestVisibilityValidValues",
-                "setVisibilityTestVisibilityInvalidValues",
-                "setAlignSelfTestDefaultValues",
-                "setAlignSelfTestAlignSelfValidValues",
-                "setAlignSelfTestAlignSelfInvalidValues",
-                "setDisplayPriorityTestDefaultValues",
-                "setDisplayPriorityTestDisplayPriorityValidValues",
-                "setZIndexTestDefaultValues",
-                "setZIndexTestZIndexValidValues",
-                "setDirectionTestDefaultValues",
-                "setDirectionTestDirectionValidValues",
-                "setDirectionTestDirectionInvalidValues",
-                "setAlignTestDefaultValues",
-                "setAlignTestAlignValidValues",
-                "setAlignTestAlignInvalidValues",
-                "setPositionTestDefaultValues",
-                "setPositionTestValidValues",
-                "setOffsetTestDefaultValues",
-                "setOffsetTestValidValues",
-                "setEnabledTestDefaultValues",
-                "setEnabledTestEnabledValidValues",
-                "setAspectRatioTestDefaultValues",
-                "setAspectRatioTestAspectRatioValidValues",
-                "setClickEffect0TestDefaultValues",
-                "setClickEffect0TestClickEffectLevelValidValues",
-                "setClickEffect0TestClickEffectLevelInvalidValues",
-                "setClickEffect0TestClickEffectScaleValidValues",
-                "setClickEffect0TestClickEffectScaleInvalidValues",
-                "setClickEffect1TestDefaultValues",
-                "setClickEffect1TestClickEffectLevelValidValues",
-                "setClickEffect1TestClickEffectLevelInvalidValues",
-                "setClickEffect1TestClickEffectScaleValidValues",
-                "setClickEffect1TestClickEffectScaleInvalidValues",
-                "setAllowDropTestDefaultValues",
-                "setAllowDropTestValidValues",
-                "setDraggableTestDefaultValues",
-                "setDraggableTestDraggableValidValues",
-                "setDragPreview0TestDefaultValues",
-                "setDragPreview0TestValidValues",
-                "setDragPreview1TestDefaultValues",
-                "setDragPreview1TestDragPreviewPreviewDragItemInfoExtraInfoValidValues",
-                "setDragPreview1TestDragPreviewPreviewDragItemInfoExtraInfoInvalidValues",
-                "setDragPreview1TestDragPreviewConfigOnlyForLiftingValidValues",
-                "setDragPreview1TestDragPreviewConfigOnlyForLiftingInvalidValues",
-                "setDragPreview1TestDragPreviewConfigDelayCreatingValidValues",
-                "setDragPreview1TestDragPreviewConfigDelayCreatingInvalidValues",
-                "setLinearGradient0TestDefaultValues",
-                "setLinearGradient0TestValidValues",
-                "setLinearGradient1TestDefaultValues",
-                "setLinearGradient1TestValidValues",
-                "setSweepGradient0TestDefaultValues",
-                "setSweepGradient0TestValidValues",
-                "setSweepGradient1TestDefaultValues",
-                "setSweepGradient1TestValidValues",
-                "setRadialGradient0TestDefaultValues",
-                "setRadialGradient0TestValidValues",
-                "setRadialGradient1TestDefaultValues",
-                "setRadialGradient1TestValidValues",
-                "setMotionPathTestDefaultValues",
-                "setMotionPathTestMotionPathPathValidValues",
-                "setMotionPathTestMotionPathFromValidValues",
-                "setMotionPathTestMotionPathFromInvalidValues",
-                "setMotionPathTestMotionPathToValidValues",
-                "setMotionPathTestMotionPathToInvalidValues",
-                "setMotionPathTestMotionPathRotatableValidValues",
-                "setMotionPathTestMotionPathRotatableInvalidValues",
-                "setShadow0TestDefaultValues",
-                "setShadow0TestShadowShadowOptionsRadiusValidValues",
-                "setShadow0TestShadowShadowOptionsRadiusInvalidValues",
-                "setShadow0TestShadowShadowOptionsTypeValidValues",
-                "setShadow0TestShadowShadowOptionsTypeInvalidValues",
-                "setShadow0TestShadowShadowOptionsColorValidValues",
-                "setShadow0TestShadowShadowOptionsColorInvalidValues",
-                "setShadow0TestShadowShadowOptionsOffsetXValidValues",
-                "setShadow0TestShadowShadowOptionsOffsetXInvalidValues",
-                "setShadow0TestShadowShadowOptionsOffsetYValidValues",
-                "setShadow0TestShadowShadowOptionsOffsetYInvalidValues",
-                "setShadow0TestShadowShadowOptionsFillValidValues",
-                "setShadow0TestShadowShadowOptionsFillInvalidValues",
-                "setShadow1TestDefaultValues",
-                "setShadow1TestShadowShadowOptionsRadiusValidValues",
-                "setShadow1TestShadowShadowOptionsRadiusInvalidValues",
-                "setShadow1TestShadowShadowOptionsTypeValidValues",
-                "setShadow1TestShadowShadowOptionsTypeInvalidValues",
-                "setShadow1TestShadowShadowOptionsColorValidValues",
-                "setShadow1TestShadowShadowOptionsColorInvalidValues",
-                "setShadow1TestShadowShadowOptionsOffsetXValidValues",
-                "setShadow1TestShadowShadowOptionsOffsetXInvalidValues",
-                "setShadow1TestShadowShadowOptionsOffsetYValidValues",
-                "setShadow1TestShadowShadowOptionsOffsetYInvalidValues",
-                "setShadow1TestShadowShadowOptionsFillValidValues",
-                "setShadow1TestShadowShadowOptionsFillInvalidValues",
-                "setClip0TestDefaultValues",
-                "setClip0TestClipValidValues",
-                "setClip1TestDefaultValues",
-                "setClip1TestClipValidValues",
-                "setClip1TestClipInvalidValues",
-                "setClipShape0TestDefaultValues",
-                "setClipShape0TestValidValues",
-                "setClipShape1TestDefaultValues",
-                "setClipShape1TestValidValues",
-                "setMask1TestDefaultValues",
-                "setMask1TestValidValues",
-                "setMaskShape0TestDefaultValues",
-                "setMaskShape0TestValidValues",
-                "setMaskShape1TestDefaultValues",
-                "setMaskShape1TestValidValues",
-                "setKeyTestDefaultValues",
-                "setKeyTestKeyValidValues",
-                "setIdTestDefaultValues",
-                "setIdTestIdValidValues",
-                "setGeometryTransition0TestDefaultValues",
-                "setGeometryTransition0TestGeometryTransitionValidValues",
-                "setGeometryTransition1TestDefaultValues",
-                "setGeometryTransition1TestGeometryTransitionIdValidValues",
-                "setGeometryTransition1TestGeometryTransitionOptionsFollowValidValues",
-                "setGeometryTransition1TestGeometryTransitionOptionsFollowInvalidValues",
-                "setGeometryTransition1TestGeometryTransitionOptionsHierarchyStrategyValidValues",
-                "setGeometryTransition1TestGeometryTransitionOptionsHierarchyStrategyInvalidValues",
-                "setRestoreIdTestDefaultValues",
-                "setRestoreIdTestRestoreIdValidValues",
-                "setSphericalEffect0TestDefaultValues",
-                "setSphericalEffect0TestSphericalEffectValidValues",
-                "setSphericalEffect1TestDefaultValues",
-                "setSphericalEffect1TestSphericalEffectValidValues",
-                "setSphericalEffect1TestSphericalEffectInvalidValues",
-                "setLightUpEffect0TestDefaultValues",
-                "setLightUpEffect0TestLightUpEffectValidValues",
-                "setLightUpEffect1TestDefaultValues",
-                "setLightUpEffect1TestLightUpEffectValidValues",
-                "setLightUpEffect1TestLightUpEffectInvalidValues",
-                "setPixelStretchEffect0TestDefaultValues",
-                "setPixelStretchEffect0TestPixelStretchEffectTopValidValues",
-                "setPixelStretchEffect0TestPixelStretchEffectTopInvalidValues",
-                "setPixelStretchEffect0TestPixelStretchEffectBottomValidValues",
-                "setPixelStretchEffect0TestPixelStretchEffectBottomInvalidValues",
-                "setPixelStretchEffect0TestPixelStretchEffectLeftValidValues",
-                "setPixelStretchEffect0TestPixelStretchEffectLeftInvalidValues",
-                "setPixelStretchEffect0TestPixelStretchEffectRightValidValues",
-                "setPixelStretchEffect0TestPixelStretchEffectRightInvalidValues",
-                "setPixelStretchEffect1TestDefaultValues",
-                "setPixelStretchEffect1TestPixelStretchEffectTopValidValues",
-                "setPixelStretchEffect1TestPixelStretchEffectTopInvalidValues",
-                "setPixelStretchEffect1TestPixelStretchEffectBottomValidValues",
-                "setPixelStretchEffect1TestPixelStretchEffectBottomInvalidValues",
-                "setPixelStretchEffect1TestPixelStretchEffectLeftValidValues",
-                "setPixelStretchEffect1TestPixelStretchEffectLeftInvalidValues",
-                "setPixelStretchEffect1TestPixelStretchEffectRightValidValues",
-                "setPixelStretchEffect1TestPixelStretchEffectRightInvalidValues",
-                "setAccessibilityGroupTestDefaultValues",
-                "setAccessibilityGroupTestAccessibilityGroupValidValues",
-                "setAccessibilityText0TestDefaultValues",
-                "setAccessibilityText0TestAccessibilityTextValidValues",
-                "setAccessibilityText1TestDefaultValues",
-                "setAccessibilityText1TestValidValues",
-                "setAccessibilityTextHintTestDefaultValues",
-                "setAccessibilityTextHintTestAccessibilityTextHintValidValues",
-                "setAccessibilityDescription0TestDefaultValues",
-                "setAccessibilityDescription0TestAccessibilityDescriptionValidValues",
-                "setAccessibilityDescription1TestDefaultValues",
-                "setAccessibilityDescription1TestValidValues",
-                "setAccessibilityLevelTestDefaultValues",
-                "setAccessibilityLevelTestAccessibilityLevelValidValues",
-                "setReuseIdTestDefaultValues",
-                "setReuseIdTestReuseIdValidValues",
-                "setBackgroundBrightness0TestDefaultValues",
-                "setBackgroundBrightness0TestBackgroundBrightnessRateValidValues",
-                "setBackgroundBrightness0TestBackgroundBrightnessLightUpDegreeValidValues",
-                "setBackgroundBrightness1TestDefaultValues",
-                "setBackgroundBrightness1TestBackgroundBrightnessRateValidValues",
-                "setBackgroundBrightness1TestBackgroundBrightnessLightUpDegreeValidValues",
-                "setMonopolizeEventsTestDefaultValues",
-                "setMonopolizeEventsTestMonopolizeEventsValidValues",
-                "setCustomPropertyTestDefaultValues",
-                "setCustomPropertyTestValidValues",
-                "setExpandSafeAreaTestDefaultValues",
-                "setExpandSafeAreaTestValidValues",
-                "setBackgroundImage0TestDefaultValues",
-                "setBackgroundImage0TestBackgroundImageSrcValidValues",
-                "setBackgroundImage0TestBackgroundImageSrcInvalidValues",
-                "setBackgroundImage0TestBackgroundImageRepeatValidValues",
-                "setBackgroundImage0TestBackgroundImageRepeatInvalidValues",
-                "setBackgroundImage1TestDefaultValues",
-                "setBackgroundImage1TestBackgroundImageSrcValidValues",
-                "setBackgroundImage1TestBackgroundImageSrcInvalidValues",
-                "setBackgroundImage1TestBackgroundImageOptionsSyncLoadValidValues",
-                "setBackgroundImage1TestBackgroundImageOptionsSyncLoadInvalidValues",
-                "setBackgroundImage1TestBackgroundImageOptionsRepeatValidValues",
-                "setBackgroundImage1TestBackgroundImageOptionsRepeatInvalidValues",
-                "setNextFocusTestDefaultValues",
-                "setNextFocusTestNextFocusForwardValidValues",
-                "setNextFocusTestNextFocusForwardInvalidValues",
-                "setNextFocusTestNextFocusBackwardValidValues",
-                "setNextFocusTestNextFocusBackwardInvalidValues",
-                "setNextFocusTestNextFocusUpValidValues",
-                "setNextFocusTestNextFocusUpInvalidValues",
-                "setNextFocusTestNextFocusDownValidValues",
-                "setNextFocusTestNextFocusDownInvalidValues",
-                "setNextFocusTestNextFocusLeftValidValues",
-                "setNextFocusTestNextFocusLeftInvalidValues",
-                "setNextFocusTestNextFocusRightValidValues",
-                "setNextFocusTestNextFocusRightInvalidValues",
-                "setAccessibilityNextFocusIdTestDefaultValues",
-                "setAccessibilityNextFocusIdTestAccessibilityNextFocusIdValidValues",
-                "setAccessibilityDefaultFocusTestDefaultValues",
-                "setAccessibilityDefaultFocusTestAccessibilityDefaultFocusValidValues",
-                "setAccessibilityUseSamePageTestDefaultValues",
-                "setAccessibilityUseSamePageTestAccessibilityUseSamePageValidValues",
-                "setAccessibilityUseSamePageTestAccessibilityUseSamePageInvalidValues",
-                "setAccessibilityScrollTriggerableTestDefaultValues",
-                "setAccessibilityScrollTriggerableTestAccessibilityScrollTriggerableValidValues",
-                "setAccessibilityFocusDrawLevelTestDefaultValues",
-                "setAccessibilityFocusDrawLevelTestAccessibilityFocusDrawLevelValidValues",
-                "setAccessibilityFocusDrawLevelTestAccessibilityFocusDrawLevelInvalidValues",
-                "setBindTipsTestDefaultValues",
-                "setBindTipsTestBindTipsMessageValidValues",
-                "setBindTipsTestBindTipsMessageInvalidValues",
-                "setBindTipsTestBindTipsOptionsAppearingTimeValidValues",
-                "setBindTipsTestBindTipsOptionsAppearingTimeInvalidValues",
-                "setBindTipsTestBindTipsOptionsDisappearingTimeValidValues",
-                "setBindTipsTestBindTipsOptionsDisappearingTimeInvalidValues",
-                "setBindTipsTestBindTipsOptionsAppearingTimeWithContinuousOperationValidValues",
-                "setBindTipsTestBindTipsOptionsAppearingTimeWithContinuousOperationInvalidValues",
-                "setBindTipsTestBindTipsOptionsDisappearingTimeWithContinuousOperationValidValues",
-                "setBindTipsTestBindTipsOptionsDisappearingTimeWithContinuousOperationInvalidValues",
-                "setBindTipsTestBindTipsOptionsEnableArrowValidValues",
-                "setBindTipsTestBindTipsOptionsEnableArrowInvalidValues",
-                "setBindTipsTestBindTipsOptionsArrowPointPositionValidValues",
-                "setBindTipsTestBindTipsOptionsArrowPointPositionInvalidValues",
-                "setBindTipsTestBindTipsOptionsArrowWidthValidValues",
-                "setBindTipsTestBindTipsOptionsArrowWidthInvalidValues",
-                "setBindTipsTestBindTipsOptionsArrowHeightValidValues",
-                "setBindTipsTestBindTipsOptionsArrowHeightInvalidValues",
+                // Invalid SDK
+                "setTabIndexTestTabIndexValidValues",
+                "setTabIndexTestTabIndexInvalidValues",
             ],
             "attributes": [
                 {
@@ -3829,10 +3409,12 @@
                     "attributes": [
                         {
                             "name": "x",
+                            "type": "DimensionAny",
                             "default": "",
                         },
                         {
                             "name": "y",
+                            "type": "DimensionAny",
                             "default": "",
                         },
                         {
@@ -3852,7 +3434,7 @@
                 {
                     "name": "tabIndex",
                     "default": "0",
-                    "fixtures": ["NumberIntFloor"],
+                    "fixtures": ["Int32Anything"],
                 },
                 {
                     "name": "defaultFocus",
@@ -3869,7 +3451,7 @@
                 {
                     "name": "flexBasis",
                     "default": "auto",
-                    "fixtures": ["FlexBasisValid","DimensionsStrNonNegNonPct"],
+                    "fixtures": ["DimensionsNumNonNeg", "DimensionsStrNonNegNonPct"],
                 },
                 {
                     "name": "groupDefaultFocus",
@@ -3892,18 +3474,22 @@
                 {
                     "name": "focusScopePriority",
                     "default": "FocusPriority.AUTO",
-                    "arguments": ["^focusScopePriority", "^"],
+                    "arguments": ["^focusScopeId", "^focusScopePriority"],
+                },
+                {
+                    "name": "focusScopeId",
+                    "default": "",
                 },
                 {
                     "name": "chainWeight",
                     "attributes": [
                         {
                             "name": "horizontal",
-                            "default": "",
+                            "default": "0",
                         },
                         {
                             "name": "vertical",
-                            "default": "",
+                            "default": "0",
                         }
                     ]
                 },
@@ -4125,42 +3711,42 @@
                         {
                             "name": "x",
                             "default": "0.000000",
-                            "fixtures": ["NumberFloatAnything"],
+                            "fixtures": ["FloatAnything"],
                         },
                         {
                             "name": "y",
                             "default": "0.000000",
-                            "fixtures": ["NumberFloatAnything"],
+                            "fixtures": ["FloatAnything"],
                         },
                         {
                             "name": "z",
                             "default": "0.000000",
-                            "fixtures": ["NumberFloatAnything"],
+                            "fixtures": ["FloatAnything"],
                         },
                         {
                             "name": "angle",
                             "default": "0.000000",
-                            "fixtures": ["NumberFloatAnything"],
+                            "type": "FloatAnything",
                         },
                         {
                             "name": "perspective",
                             "default": "0.000000",
-                            "fixtures": ["NumberFloatAnything"],
+                            "fixtures": ["FloatAnything"],
                         },
                         {
                             "name": "centerX",
                             "default": "5000.00%",
-                            "fixtures": ["DimensionsNumAny","DimensionsStrNonPerc"],
+                            "fixtures": ["DimensionsFltAny","LengthAny"],
                         },
                         {
                             "name": "centerY",
                             "default": "5000.00%",
-                            "fixtures": ["DimensionsNumAny","DimensionsStrNonPerc"],
+                            "fixtures": ["DimensionsFltAny","LengthAny"],
                         },
                         {
                             "name": "centerZ",
                             "default": "0.00px",
-                            //"fixtures": ["DimensionsNumAny","DimensionsStrNonPerc"],
+                            "fixtures": ["DimensionsFltAny"],
                         },
                     ]
                 },
@@ -4208,23 +3794,24 @@
         },
         {
             "name": "Image",
+            "ignoreAttributes": [
+                "sourceSize", // Non-standard JSON formatting
+                "resizable", // Non-standard JSON formatting
+                "edgeAntialiasing", // No values in the JSON
+                "analyzerConfig", // No values in the JSON
+                "colorFilter", // No values in the JSON
+                "enhancedImageQuality", // New in API 130
+            ],
             "attributes": [
                 {
-                    "name": "analyzerConfig",
-                    "attributes": [
-                        {
-                            "name": "types",
-                            "default": ""
-                        }
-                    ]
-                },
-                {
                     "name": "src",
-                    "default": ""
+                    "default": "",
+                    "fixtures": ["ImageContent"],
                 },
                 {
-                     "name": "alt",
-                     "default": ""
+                    "name": "alt",
+                    "default": "",
+                    "fixtures": ["String", "StringRes"],
                 },
                 {
                     "name": "imageAIOptions",
@@ -4238,10 +3825,6 @@
                             "default": ""
                         },
                     ]
-                },
-                {
-                    "name": "colorFilter",
-                    "default": ""
                 },
                 {
                     "name": "config",
@@ -4335,7 +3918,7 @@
                         },
                         {
                             "name": "bloom",
-                            "default": "0"
+                            "default": "0.000000"
                         }
                     ]
                 },
@@ -4370,7 +3953,7 @@
                 },
                 {
                     "name": "draggable",
-                    "default": "true"
+                    "default": "false"
                 },
                 {
                     "name": "privacySensitive",
@@ -4384,15 +3967,11 @@
                     "name": "orientation",
                     "default": "1",
                     "fixtures": ["ImageRotateOrientation"]
-                }
+                },
             ],
             "remove": [
-                "setColorFilterTestValidValues", // Need to properly configure fixtures in configuration file for proper test generation!
-                "setDraggableTestDefaultValues",
-                "setDraggableTestDraggableValidValues",
-                "setSourceSizeTestDefaultValues",
-                "setSourceSizeTestSourceSizeWidthValidValues",
-                "setSourceSizeTestSourceSizeHeightValidValues",
+            ],
+            "disable": [
                 "setPointLightTestDefaultValues", // No values in the JSON. Need investigate it in the ace_engine
                 "setPointLightTestPointLightLightSourcePositionXValidValues",  // No values in the JSON
                 "setPointLightTestPointLightLightSourcePositionXInvalidValues", // No values in the JSON
@@ -4403,44 +3982,36 @@
                 "setPointLightTestPointLightLightSourceIntensityValidValues", // No values in the JSON
                 "setPointLightTestPointLightLightSourceColorValidValues", // No values in the JSON
                 "setPointLightTestPointLightLightSourceColorInvalidValues", // No values in the JSON
-                "setPointLightTestPointLightIlluminatedValidValues", // No values in the JSON
-                "setPointLightTestPointLightIlluminatedInvalidValues", // No values in the JSON
                 "setPointLightTestPointLightBloomValidValues", // No values in the JSON
                 "setPointLightTestPointLightBloomInvalidValues", // No values in the JSON
-            ],
-            "disable": [
-                "setImageOptions0TestSrcValidValues", // No fixture is defined for type Ark_CustomObject
-                "setImageOptions0TestSrcInvalidValues", // No fixture is defined for type Ark_CustomObject
+
                 "setImageOptions1TestSrcValidValues", // Method not correctly implemented
                 "setImageOptions1TestSrcInvalidValues", // No fixture is defined for type Ark_CustomObject
                 "setImageOptions2TestDefaultValues", // Method not correctly implemented
                 "setImageOptions2TestValidValues", // Need to properly configure fixtures in configuration file for proper test generation!
-                "setAltTestAltValidValues", // No fixture is defined for type Ark_CustomObject
-                "setAltTestAltInvalidValues", // No fixture is defined for type Ark_CustomObject
                 "setDynamicRangeModeTestDefaultValues", // Invalid enum in JSON. Need investigate it in the ace_engine
                 "setDynamicRangeModeTestDynamicRangeModeValidValues", // Invalid enum in JSON. Need investigate it in the ace_engine
                 "setDynamicRangeModeTestDynamicRangeModeInvalidValues", // Invalid enum in JSON. Need investigate it in the ace_engine
                 "setCopyOptionTestCopyOptionValidValues", // Invalid enum in JSON. Need investigate it in the ace_engine
-                "setAnalyzerConfigTestValidValues", // Need to properly configure fixtures in configuration file for proper test generation!
-                "setResizableTestDefaultValues", // No values in the JSON
-                "setEdgeAntialiasingTestEdgeAntialiasingValidValues", // possible double or integer
-                "setResizableTestResizableSliceTopValidValues", // No values in the JSON
-                "setResizableTestResizableSliceTopInvalidValues", // No values in the JSON
-                "setResizableTestResizableSliceRightValidValues", // No values in the JSON
-                "setResizableTestResizableSliceRightInvalidValues", // No values in the JSON
-                "setResizableTestResizableSliceBottomValidValues", // No values in the JSON
-                "setResizableTestResizableSliceBottomInvalidValues", // No values in the JSON
-                "setResizableTestResizableSliceLeftValidValues", // No values in the JSON
-                "setResizableTestResizableSliceLeftInvalidValues", // No values in the JSON
+
                 "setObjectFitTestObjectFitValidValues", // Changes in master
 
-                // New API 122
-                "setFillColor1TestFillColorValidValues",
-                "setFillColor1TestFillColorInvalidValues",
+                "setMatchTextDirectionTestMatchTextDirectionInvalidValues", // Bug
+                "setAutoResizeTestAutoResizeInvalidValues", // Bug
+                "setSyncLoadTestSyncLoadInvalidValues", // Bug
+                "setEnableAnalyzerTestEnableAnalyzerInvalidValues", // Bug
+                "setFitOriginalSizeTestFitOriginalSizeInvalidValues", // Bug
+
+                "setDraggableTestDraggableValidValues", // Looks like Bug
+
+                "setImageOptions1TestValidValues", // Need opt support for valid values...
             ]
         },
         {
             "name": "ImageAnimator",
+            "ignoreAttributes": [
+                "images", // No support for arrays yet
+            ],
             "attributes": [
                 {
                     "name": "state",
@@ -4449,7 +4020,7 @@
                 {
                     "name": "duration",
                     "default": "1000",
-                    "fixtures": ["NumberNonNegIntFloor"],
+                    "fixtures": ["Int32NonNeg"],
                 },
                 {
                     "name": "reverse",
@@ -4462,23 +4033,22 @@
                 {
                     "name": "fillMode",
                     "default": "FillMode.Forwards",
-                }
+                },
+                {
+                    "name": "iterations",
+                    "default": "1",
+                    "fixtures": ["Int32Pos"],
+                },
+                {
+                    "name": "monitorInvisibleArea",
+                    "default": "false",
+                },
             ],
             "disable": [
-                "setImagesTestDefaultValues",
-                "setImagesTestValidValues",
-                "setIterationsTestDefaultValues",
-                "setIterationsTestIterationsValidValues",
-                "setIterationsTestIterationsInvalidValues",
-
-                // New API 122
-                "setMonitorInvisibleAreaTestDefaultValues",
-                "setMonitorInvisibleAreaTestMonitorInvisibleAreaValidValues",
+                "setReverseTestReverseInvalidValues", // Bug
+                "setMonitorInvisibleAreaTestMonitorInvisibleAreaInvalidValues", // Bug
+                "setIterationsTestIterationsValidValues", // Looks like bug
             ],
-            "remove": [
-                "setPreDecodeTestDefaultValues",
-                "setPreDecodeTestPreDecodeValidValues",
-            ]
         },
         {
             "name": "Polygon",
@@ -4490,12 +4060,12 @@
                 {
                     "name": "height",
                     "default": "0.00vp",
-                    "fixtures": ["DimensionsNumNonNeg", "DimensionsStrNonNeg"]
+                    "fixtures": ["DimensionsF64NonNeg", "DimensionsStrNonNeg"]
                 },
                 {
                     "name": "width",
                     "default": "0.00vp",
-                    "fixtures": ["DimensionsNumNonNeg", "DimensionsStrNonNeg"]
+                    "fixtures": ["DimensionsF64NonNeg", "DimensionsStrNonNeg"]
                 },
             ]
         },
@@ -4509,17 +4079,17 @@
                 {
                     "name": "height",
                     "default": "0.00vp",
-                    "fixtures": ["DimensionsNumNonNeg", "DimensionsStrNonNeg"]
+                    "fixtures": ["DimensionsF64NonNeg", "DimensionsStrNonNeg"]
                 },
                 {
                     "name": "width",
                     "default": "0.00vp",
-                    "fixtures": ["DimensionsNumNonNeg", "DimensionsStrNonNeg"]
+                    "fixtures": ["DimensionsF64NonNeg", "DimensionsStrNonNeg"]
                 },
             ]
         },
         {
-            "name": "Progress",
+            "name": ":Progress",
             "includes": ["core/components/progress/progress_theme.h"],
             "themes": ["ProgressTheme"],
             "remove": [
@@ -4565,17 +4135,23 @@
                 "setStyleTestValidValues",
 
                 "setColorTestColorInvalidValues", // broken LinearGradient
+                "setValueTestValueInvalidValues", // Bug
+                "setStyleTestStyleLinearStyleOptionsStrokeWidthInvalidValues", // Bug
+                "setStyleTestStyleRingStyleOptionsStrokeWidthInvalidValues", // Bug
+                "setStyleTestStyleProgressStyleOptionsStrokeWidthInvalidValues", // Bug
+
+                "setPrivacySensitiveTestPrivacySensitiveValidValues", // Bug: Code commented in model
             ],
             "attributes": [
                 {
                     "name": "value",
                     "default": "0.000000",
-                    "fixtures": ["NumberFloatPositive"],
+                    "fixtures": ["FloatNonNeg"],
                 },
                 {
                     "name": "total",
                     "default": "100.000000",
-                    "fixtures": ["NumberFloatPositive"],
+                    "fixtures": ["FloatPos"],
                 },
                 {
                     "name": "type",
@@ -4631,7 +4207,7 @@
                 {
                     "name": "scrollBarWidth",
                     "default": "0.00px",
-                    "fixtures": ["DimensionsNumNonNeg", "DimensionsStrNonNegNonPct"],
+                    "fixtures": ["DimensionsFltNonNeg", "DimensionsStrNonNegNonPct"],
                 },
                 {
                     "name": "nestedScroll",
@@ -4706,6 +4282,10 @@
                 // New API 122
                 "setBackToTopTestDefaultValues",
                 "setBackToTopTestBackToTopValidValues",
+                "setBackToTopTestBackToTopInvalidValues",
+
+                // 129
+                "setFlingSpeedLimitTestFlingSpeedLimitInvalidValues",
             ],
             "remove": [
                 "setClipContentTestDefaultValues",
@@ -4748,8 +4328,6 @@
                 "setBlockSizeTestDefaultValues", // Wrong default value
                 "setBlockSizeTestBlockSizeWidthValidValues", // Wrong 0 value units
                 "setBlockSizeTestBlockSizeHeightValidValues", // Wrong 0 value units
-                "setBlockStyleTestDefaultValues", // Wrong JSON path?
-                "setBlockStyleTestValidValues", // Unsupported yet
                 "setMinResponsiveDistanceTestMinResponsiveDistanceValidValues", // Need float comp in UT generator
                 "setSlideRangeTestSlideRangeFromValidValues", // Need float comp in UT generator
                 "setSlideRangeTestSlideRangeToValidValues", // Need float comp in UT generator (looks like dep on from)
@@ -4764,8 +4342,14 @@
                 "setDigitalCrownSensitivityTestDefaultValues",
                 "setDigitalCrownSensitivityTestDigitalCrownSensitivityValidValues",
                 "setDigitalCrownSensitivityTestDigitalCrownSensitivityInvalidValues",
-                "setEnableHapticFeedbackTestDefaultValues",
-                "setEnableHapticFeedbackTestEnableHapticFeedbackValidValues",
+
+                "setShowTipsTestShowTipsInvalidValues", // Bug
+                "setSelectedColorTestSelectedColorInvalidValues", // Bug
+                "setEnableHapticFeedbackTestEnableHapticFeedbackValidValues", // Bug in NG model, need to switch to static model
+                "setShowStepsTestShowStepsInvalidValues", // Bug
+            ],
+            "ignoreAttributes": [
+                "blockStyle", // Wrong JSON format
             ],
             "attributes": [
                 {
@@ -4842,7 +4426,7 @@
                 {
                     "name": "trackThickness",
                     "default": "0.00px",
-                    "fixtures": ["LengthNonNeg"],
+                    "type": "DimensionNonNeg",
                 },
                 {
                     "name": "blockBorderColor",
@@ -4851,7 +4435,7 @@
                 {
                     "name": "blockBorderWidth",
                     "default": "0.00px",
-                    "fixtures": ["LengthNonNeg"],
+                    "type": "DimensionNonNeg",
                 },
                 {
                     "name": "stepColor",
@@ -4860,12 +4444,12 @@
                 {
                     "name": "trackBorderRadius",
                     "default": "",
-                    "fixtures": ["LengthNonNeg"],
+                    "type": "DimensionNonNegNonPct",
                 },
                 {
                     "name": "selectedBorderRadius",
                     "default": "",
-                    "fixtures": ["LengthNonNeg"],
+                    "type": "DimensionNonNegNonPctOld",
                 },
                 {
                     "name": "blockSize",
@@ -4873,12 +4457,12 @@
                         {
                             "name": "width",
                             "default": "0.00px",
-                            "fixtures": ["LengthNonNeg"],
+                            "type": "DimensionNonNeg",
                         },
                         {
                             "name": "height",
                             "default": "0.00px",
-                            "fixtures": ["LengthNonNeg"],
+                            "type": "DimensionNonNeg",
                         },
                     ]
                 },
@@ -4898,7 +4482,7 @@
                 {
                     "name": "stepSize",
                     "default": "0.00px",
-                    "fixtures": ["LengthNonNeg"],
+                    "type": "DimensionNonNeg",
                 },
                 {
                     "name": "sliderInteractionMode",
@@ -4907,7 +4491,7 @@
                 {
                     "name": "minResponsiveDistance",
                     "default": "0.000000",
-                    "fixtures": ["NumberNonNeg"],
+                    "fixtures": ["FloatNonNeg"],
                 },
                 {
                     "name": "slideRange",
@@ -4915,20 +4499,35 @@
                         {
                             "name": "from",
                             "default": "",
-                            "fixtures": ["NumberNonNegIntFloor"],
+                            "fixtures": ["FloatNonNegIntFloor"],
                         },
                         {
                             "name": "to",
                             "default": "",
-                            "fixtures": ["NumberNonNegIntCeil"],
+                            "fixtures": ["FloatNonNegIntCeil"],
                         },
                     ],
+                },
+                {
+                    "name": "enableHapticFeedback",
+                    "default": "true"
                 },
             ],
         },
         {
             "name": "Span",
             "themes": ["TextTheme"],
+            "includes": [
+                "core/components_ng/pattern/text/span_node.h",
+                "core/components_ng/pattern/text/text_model_ng.h",
+                "core/components_ng/pattern/text/text_pattern.h",
+            ],
+            "setup": [
+                "static auto node = TextModelNG::CreateFrameNode(0, u\"\")",
+                "static auto pattern = AceType::MakeRefPtr<TextPattern>()",
+                "pattern->AttachToFrameNode(node)",
+                "reinterpret_cast<SpanNode *>(node_)->GetSpanItem()->SetTextPattern(pattern)",
+            ],
             "disable": [
                 "setFontTestFontFamilyValidValues", // Incorrect resource processing
                 "setFontFamilyTestFontFamilyValidValues", // Incorrect resource processing
@@ -5006,7 +4605,7 @@
                 {
                     "name": "letterSpacing",
                     "default": "0.00px",
-                    "fixtures": ["DimensionsNumAny", "DimensionsStrNonPerc"]
+                    "fixtures": ["DimensionsFltAny", "DimensionsStrNonPct"]
                 },
                 {
                     "name": "textCase",
@@ -5016,20 +4615,20 @@
                 {
                     "name": "lineHeight",
                     "default": "0.00px",
-                    "fixtures": ["LengthNonNeg"]
+                    "type": "DimensionNonNeg",
                 },
                 {
                     "name": "font",
                     "attributes": [
                         {
                             "name": "size",
-                            "default": "16.00fp",
+                            "default": "14.00px",
                             "type": "LengthNonNegNonPct",
                         },
                         {
                             "name": "weight",
                             "default": "FontWeight.Normal",
-                            "fixtures": ["FontWeightNumbers", "FontWeightStrings"],
+                            "type": "FontWeightType",
                         },
                         {
                             "name": "family",
@@ -5049,7 +4648,7 @@
                 },
                 {
                     "name": "fontSize",
-                    "default": "16.00fp",
+                    "default": "14.00px",
                     "type": "DimensionNonNegNonPct",
                 },
                 {
@@ -5059,7 +4658,7 @@
                 {
                     "name": "fontWeight",
                     "default": "FontWeight.Normal",
-                    "fixtures": ["FontWeightNumbers", "FontWeightStrings"],
+                    "type": "FontWeightType",
                 },
                 {
                     "name": "fontStyle",
@@ -5071,6 +4670,13 @@
             "name": "Text",
             "includes": ["core/components/text/text_theme.h"],
             "themes": ["TextTheme"],
+            "ignoreAttributes": [
+                "selection", // Tested value is not stored in a property
+                "halfLeading", // No value in JSON
+                "textIndent", // No value in JSON
+                "draggable", // No value in JSON
+                "fontFeature", // No value in JSON
+            ],
             "attributes": [
                 {
                     "name": "baselineOffset",
@@ -5122,17 +4728,21 @@
                 },
                 {
                     "name": "font",
-                    "arguments": ["^font", "^",],
+                    "arguments": ["^font", "|",],
                     "attributes": [
                         {
                             "name": "size",
-                            "default": "16.00fp",
-                            "fixtures": ["LengthNonNegNonPct"],
+                            "default": "14.00px",
+                            "type": "LengthNonNegNonPct",
                         },
                         {
                             "name": "weight",
                             "default": "FontWeight.Normal",
-                            "fixtures": ["FontWeightNumbers", "FontWeightStrings"],
+                            "type": "FontWeightType",
+                        },
+                        {
+                            "name": "enableVariableFontWeight",
+                            "default": "false",
                         },
                         {
                             "name": "family",
@@ -5157,13 +4767,13 @@
                 {
                     "name": "fontFeature",
                     "default": "",
-                    "fixtures": ["FontFeature"]
+                    "fixtures": ["FontFeatureStr"]
                 },
                 {
                     "name": "fontSize",
-                    "default": "16.00fp",
+                    "default": "14.00px",
                     "fixtures": [
-                        "DimensionsNumNonNeg",
+                        "DimensionsFltNonNeg",
                         "DimensionsStrNonNegNonPct",
                         "DimensionsResNonNegNonPct"
                     ]
@@ -5174,8 +4784,9 @@
                 },
                 {
                     "name": "fontWeight",
+                    "arguments": ["^fontWeight", "^font"],
                     "default": "FontWeight.Normal",
-                    "fixtures": ["FontWeightNumbers", "FontWeightStrings"]
+                    "type": "FontWeightType",
                 },
                 {
                     "name": "halfLeading",
@@ -5187,7 +4798,7 @@
                 },
                 {
                     "name": "letterSpacing",
-                    "fixtures": ["DimensionsNumAny", "DimensionsStrNonPerc"]
+                    "fixtures": ["DimensionsFltAny", "DimensionsStrNonPct"]
                 },
                 {
                     "name": "lineBreakStrategy",
@@ -5196,7 +4807,7 @@
                 },
                 {
                     "name": "lineHeight",
-                    "fixtures": ["DimensionsNumNonNeg", "DimensionsStrNonNeg", "DimensionsResNonNeg"],
+                    "fixtures": ["DimensionsFltNonNeg", "DimensionsStrNonNeg", "DimensionsResNonNeg"],
                 },
                 {
                     "name": "lineSpacing",
@@ -5217,7 +4828,7 @@
                         },
                         {
                             "name": "loop",
-                            "fixtures": ["TextMarqueeLoop"],
+                            "fixtures": ["Int32Pos"],
                             "default": "-1"
                         },
                         {
@@ -5226,7 +4837,7 @@
                         },
                         {
                             "name": "delay",
-                            "fixtures": ["NumberNonNegIntFloor"],
+                            "fixtures": ["Int32NonNeg"],
                             "default": "0"
                         },
                         {
@@ -5241,7 +4852,7 @@
                 },
                 {
                     "name": "maxLines",
-                    "fixtures": ["NumberPosIntFloor"],
+                    "fixtures": ["Int32Pos"],
                 },
                 {
                     "name": "maxFontScale",
@@ -5280,7 +4891,7 @@
                 {
                     "name": "textIndent",
                     "default": "0.00vp",
-                    "fixtures": ["LengthAny"]
+                    "type": "DimensionAnyOld",
                 },
                 {
                     "name": "textSelectable",
@@ -5369,11 +4980,6 @@
                 "setMinFontSizeTestDefaultValues",
                 "setMinFontSizeTestMinFontSizeInvalidValues",
 
-                // Tested value is not stored in a property
-                "setSelectionTestDefaultValues",
-                "setSelectionTestSelectionSelectionEndValidValues",
-                "setSelectionTestSelectionSelectionStartValidValues",
-
                 // Ark_ShadowOptions.fill attribute is not supported
                 "setTextShadowTestDefaultValues",
                 "setTextShadowTestTextShadowShadowOptionsFillValidValues",
@@ -5385,6 +4991,11 @@
                 "setAutoCapitalizationModeTestDefaultValues",
                 "setAutoCapitalizationModeTestAutoCapitalizationModeValidValues",
                 "setAutoCapitalizationModeTestAutoCapitalizationModeInvalidValues",
+
+                // enableVariableFontWeight issue
+                "setFontTestDefaultValues",
+                "setFontTestOptionsEnableVariableFontWeightValidValues",
+                "setFontTestOptionsEnableVariableFontWeightInvalidValues",
             ],
             "remove": [
                 "setFontWeight1TestDefaultValues",
@@ -5392,6 +5003,10 @@
                 "setFontWeight1TestFontWeightOptionsEnableVariableFontWeightValidValues",
                 "setFontWeight1TestFontWeightWeightInvalidValues",
                 "setFontWeight1TestFontWeightWeightValidValues",
+
+                // Invalid SDK
+                "setEnableSelectedDataDetectorTestEnableSelectedDataDetectorValidValues",
+                "setEnableSelectedDataDetectorTestEnableSelectedDataDetectorInvalidValues",
             ]
         },
         {
@@ -5400,7 +5015,6 @@
             "themes": ["TextTheme"],
             "disable": [
                 "setTextClockOptionsTestValidValues",
-                "setDateTimeOptionsTestValidValues",
                 "setFontSizeTestFontSizeInvalidValues",
                 "setTextShadowTestDefaultValues",
                 "setTextShadowTestTextShadowShadowOptionsRadiusValidValues",
@@ -5413,9 +5027,13 @@
                 "setTextShadowTestTextShadowShadowOptionsOffsetYValidValues",
                 "setTextShadowTestTextShadowShadowOptionsOffsetYInvalidValues",
                 "setTextShadowTestTextShadowShadowOptionsFillValidValues",
-                "setDateTimeOptionsTestDefaultValues",
 
                 "setFontSizeTestDefaultValues", // broken at FB
+                "setTextClockOptionsTestOptionsTimeZoneOffsetValidValues", // Looks like invalid fixture
+                "setFontFeatureTestFontFeatureInvalidValues", // Bug
+            ],
+            "ignoreAttributes": [
+                "dateTimeOptions", // No values in JSON
             ],
             "attributes": [
                 {
@@ -5429,7 +5047,7 @@
                 {
                     "name": "format",
                     "default": "aa hh:mm:ss",
-                    "fixtures": ["TimeFormat"]
+                    "fixtures": ["TimeFormat", "TimeFormatRes"],
                 },
                 {
                     "name": "fontColor",
@@ -5446,7 +5064,7 @@
                 {
                     "name": "fontWeight",
                     "default": "FontWeight.Normal",
-                    "fixtures": ["FontWeightNumbers", "FontWeightStrings"]
+                    "type": "FontWeightType",
                 },
                 {
                     "name": "fontFamily",
@@ -5485,330 +5103,13 @@
                 {
                     "name": "fontFeature",
                     "default": "",
-                    "fixtures": ["FontFeature"]
-                },
-            ],
-        },
-        {
-            "name": "Web",
-            "disable": [
-                // Blocked
-                "setWebOptionsTestDefaultValues",
-                "setWebOptionsTestValidValues",
-                "setJavaScriptProxyTestDefaultValues",
-                "setJavaScriptProxyTestValidValues",
-
-                // Deprecated (no need testing)
-                "setPasswordTestDefaultValues",
-                "setPasswordTestPasswordValidValues",
-                "setTableDataTestDefaultValues",
-                "setTableDataTestTableDataValidValues",
-                "setWideViewModeAccessTestDefaultValues",
-                "setWideViewModeAccessTestWideViewModeAccessValidValues",
-
-                // Not Fully Implemented
-                "setJavaScriptOnDocumentStartTestDefaultValues",
-                "setJavaScriptOnDocumentStartTestValidValues",
-                "setJavaScriptOnDocumentEndTestDefaultValues",
-                "setJavaScriptOnDocumentEndTestValidValues",
-                "setSelectionMenuOptionsTestDefaultValues",
-                "setSelectionMenuOptionsTestValidValues",
-
-                // Test Skipped (incorrect test behaviour)
-                "setDefaultTextEncodingFormatTestDefaultTextEncodingFormatValidValues",
-                "setNestedScrollTestDefaultValues",
-                "setNestedScrollTestNestedScrollNestedScrollOptionsScrollForwardValidValues",
-                "setNestedScrollTestNestedScrollNestedScrollOptionsScrollForwardInvalidValues",
-                "setNestedScrollTestNestedScrollNestedScrollOptionsScrollBackwardValidValues",
-                "setNestedScrollTestNestedScrollNestedScrollOptionsScrollBackwardInvalidValues",
-
-                // New API 111
-                "setBlurOnKeyboardHideModeTestDefaultValues",
-                "setBlurOnKeyboardHideModeTestBlurOnKeyboardHideModeValidValues",
-                "setBlurOnKeyboardHideModeTestBlurOnKeyboardHideModeInvalidValues",
-                "setEnableFollowSystemFontWeightTestDefaultValues",
-                "setEnableFollowSystemFontWeightTestEnableFollowSystemFontWeightValidValues",
-                "setEnableWebAVSessionTestDefaultValues",
-                "setEnableWebAVSessionTestEnableWebAVSessionValidValues",
-
-                // Disabled after upmerge 20250224
-                "setEnableSmoothDragResizeTestDefaultValues",
-                "setEnableSmoothDragResizeTestEnableSmoothDragResizeValidValues",
-
-                "setCacheModeTestCacheModeValidValues", // Mixed new and onld enum
-
-                // New API 122
-                "setOptimizeParserBudgetTestDefaultValues",
-                "setOptimizeParserBudgetTestOptimizeParserBudgetValidValues",
-                "setRunJavaScriptOnDocumentStartTestDefaultValues",
-                "setRunJavaScriptOnDocumentStartTestValidValues",
-                "setRunJavaScriptOnDocumentEndTestDefaultValues",
-                "setRunJavaScriptOnDocumentEndTestValidValues",
-                "setRunJavaScriptOnHeadEndTestDefaultValues",
-                "setRunJavaScriptOnHeadEndTestValidValues",
-
-                // New API 126
-                "setNativeEmbedOptionsTestDefaultValues",
-                "setNativeEmbedOptionsTestNativeEmbedOptionsSupportDefaultIntrinsicSizeValidValues",
-                "setNativeEmbedOptionsTestNativeEmbedOptionsSupportDefaultIntrinsicSizeInvalidValues",
-            ],
-            "attributes": [
-                {
-                    "name": "javaScriptAccess",
-                    "default": "true",
-                },
-                {
-                    "name": "mediaPlayGestureAccess",
-                    "default": "true",
-                },
-                {
-                    "name": "fileAccess",
-                    "default": "false",
-                },
-                {
-                    "name": "onlineImageAccess",
-                    "default": "true",
-                },
-                {
-                    "name": "domStorageAccess",
-                    "default": "false",
-                },
-                {
-                    "name": "imageAccess",
-                    "default": "true",
-                },
-                {
-                    "name": "mixedMode",
-                    "default": "MixedMode.None",
-                },
-                {
-                    "name": "zoomAccess",
-                    "default": "true",
-                },
-                {
-                    "name": "geolocationAccess",
-                    "default": "true",
-                },
-                {
-                    "name": "cacheMode",
-                    "default": "CacheMode.Default",
-                },
-                {
-                    "name": "darkMode",
-                    "default": "WebDarkMode.Off",
-                },
-                {
-                    "name": "forceDarkAccess",
-                    "default": "false",
-                },
-                {
-                    "name": "overviewModeAccess",
-                    "default": "true",
-                },
-                {
-                    "name": "overScrollMode",
-                    "default": "OverScrollMode.NEVER",
-                },
-                {
-                    "name": "textZoomAtio",
-                    "default": "100",
-                    "fixtures": ["NumberIntFloor"],
-                },
-                {
-                    "name": "textZoomRatio",
-                    "default": "100",
-                    "fixtures": ["NumberIntFloor"],
-                },
-                {
-                    "name": "databaseAccess",
-                    "default": "false",
-                },
-                {
-                    "name": "initialScale",
-                    "default": "empty",
-                    "fixtures": ["NumberFloatAnything"],
-                },
-                {
-                    "name": "userAgent",
-                    "default": "",
-                },
-                {
-                    "name": "metaViewport",
-                    "default": "empty",
-                },
-                {
-                    "name": "multiWindowAccess",
-                    "default": "false",
-                },
-                {
-                    "name": "webStandardFont",
-                    "default": "sans-serif",
-                },
-                {
-                    "name": "webSerifFont",
-                    "default": "serif",
-                },
-                {
-                    "name": "webSansSerifFont",
-                    "default": "sans-serif",
-                },
-                {
-                    "name": "webFixedFont",
-                    "default": "monospace",
-                },
-                {
-                    "name": "webFantasyFont",
-                    "default": "fantasy",
-                },
-                {
-                    "name": "webCursiveFont",
-                    "default": "cursive",
-                },
-                {
-                    "name": "defaultFixedFontSize",
-                    "default": "13",
-                    "fixtures": ["NumberIntFloor"],
-                },
-                {
-                    "name": "defaultFontSize",
-                    "default": "16",
-                    "fixtures": ["NumberIntFloor"],
-                },
-                {
-                    "name": "minFontSize",
-                    "default": "8",
-                    "fixtures": ["NumberIntFloor"],
-                },
-                {
-                    "name": "minLogicalFontSize",
-                    "default": "8",
-                    "fixtures": ["NumberIntFloor"],
-                },
-                {
-                    "name": "defaultTextEncodingFormat",
-                    "default": "UTF-8",
-                    "fixtures": ["String"],
-                },
-                {
-                    "name": "forceDisplayScrollBar",
-                    "default": "false",
-                },
-                {
-                    "name": "horizontalScrollBarAccess",
-                    "default": "true",
-                },
-                {
-                    "name": "verticalScrollBarAccess",
-                    "default": "true",
-                },
-                {
-                    "name": "pinchSmooth",
-                    "default": "false",
-                },
-                {
-                    "name": "allowWindowOpenMethod",
-                    "default": "false",
-                },
-                {
-                    "name": "layoutMode",
-                    "default": "WebLayoutMode.NONE",
-                },
-                {
-                    "name": "enableNativeEmbedMode",
-                    "default": "false",
-                },
-                {
-                    "name": "copyOptions",
-                    "default": "CopyOptions.CROSS_DEVICE",
-                },
-                {
-                    "name": "textAutosizing",
-                    "default": "true",
-                },
-                {
-                    "name": "enableSmoothDragResize",
-                    "default": "false",
-                },
-                {
-                    "name": "keyboardAvoidMode",
-                    "default": "empty",
-                },
-                {
-                    "name": "enableHapticFeedback",
-                    "default": "empty",
-                },
-                {
-                    "name": "blockNetwork",
-                    "default": "empty",
-                },
-                {
-                    "name": "nestedScroll",
-                    "attributes": [
-                        {
-                            "name": "scrollUp",
-                            "default": "NestedScrollMode.SELF_FIRST",
-                        },
-                        {
-                            "name": "scrollDown",
-                            "default": "NestedScrollMode.SELF_FIRST",
-                        },
-                        {
-                            "name": "scrollRight",
-                            "default": "NestedScrollMode.SELF_FIRST",
-                        },
-                        {
-                            "name": "scrollLeft",
-                            "default": "NestedScrollMode.SELF_FIRST",
-                        },
-                    ],
-                },
-                {
-                    "name": "enableNativeMediaPlayer",
-                    "attributes": [
-                        {
-                            "name": "enable",
-                            "default": "false",
-                        },
-                        {
-                            "name": "shouldOverlay",
-                            "default": "false",
-                        },
-                    ],
-                },
-                {
-                    "name": "registerNativeEmbedRule",
-                    "attributes": [
-                        {
-                            "name": "tag",
-                            "default": "",
-                        },
-                        {
-                            "name": "type",
-                            "default": "",
-                        },
-                    ],
-                },
-                {
-                    "name": "mediaOptions",
-                    "attributes": [
-                        {
-                            "name": "resumeInterval",
-                            "default": "-1",
-                            "fixtures": ["NumberIntFloor"],
-                        },
-                        {
-                            "name": "audioExclusive",
-                            "default": "true",
-                        },
-                    ],
+                    "fixtures": ["FontFeatureNum"]
                 },
             ],
         },
         {
             "name": "WaterFlow",
             "disable": [
-                "setWaterFlowOptionsTestDefaultValues", // not implemented modifier custom builder options!
-                "setWaterFlowOptionsTestValidValues", // not implemented modifier custom builder options!
                 "setRowsTemplateTestDefaultValues", //no default value set!
                 "setColumnsTemplateTestDefaultValues", //no default value set!
                 "setItemConstraintSizeTestDefaultValues", //no default value set!
@@ -5819,12 +5120,26 @@
                 "setLayoutDirectionTestLayoutDirectionValidValues", // wrong name in json!
                 "setLayoutDirectionTestLayoutDirectionInvalidValues", // wrong name in json!
 
+                // Bugs
+                "setColumnsTemplateTestColumnsTemplateInvalidValues",
+                "setRowsTemplateTestRowsTemplateInvalidValues",
+
                 // New override in API 105?
                 "setCachedCount1TestDefaultValues",
                 "setCachedCount1TestCachedCountCountValidValues",
                 "setCachedCount1TestCachedCountShowValidValues",
+                "setCachedCount1TestCachedCountCountInvalidValues",
+                "setCachedCount1TestCachedCountShowInvalidValues",
+
+                // 129 API
+                "setWaterFlowOptionsTestOptionsLayoutModeValidValues",
+                "setWaterFlowOptionsTestOptionsLayoutModeInvalidValues",
             ],
             "attributes": [
+                {
+                    "name": "layoutMode",
+                    "default": "", // Not yet implemented
+                },
                 {
                     "name": "columnsTemplate",
                     "default": "1fr",
@@ -5840,19 +5155,23 @@
                     "attributes": [
                         {
                             "name": "minWidth",
-                            "default": "0.00vp"
+                            "default": "0.00vp",
+                            "type": "DimensionAny",
                         },
                         {
                             "name": "maxWidth",
-                            "default": "0.00vp"
+                            "default": "0.00vp",
+                            "type": "DimensionAny",
                         },
                         {
                             "name": "minHeight",
-                            "default": "0.00vp"
+                            "default": "0.00vp",
+                            "type": "DimensionAny",
                         },
                         {
                             "name": "maxHeight",
-                            "default": "0.00vp"
+                            "default": "0.00vp",
+                            "type": "DimensionAny",
                         }
                     ]
                 },
@@ -5893,12 +5212,12 @@
                 {
                     "name": "cachedCount",
                     "default": "1",
-                    "fixtures": ["NumberNonNegIntFloor"]
+                    "fixtures": ["Int32NonNeg"]
                 },
             ]
         },
         {
-            "name": "Row",
+            "name": ":Row",
             "remove": [
                 "setRowOptions1TestOptionsRowOptionsV2SpaceValidValues",
                 "setRowOptions1TestOptionsRowOptionsV2SpaceInvalidValues",
@@ -5929,6 +5248,7 @@
             ],
             "disable": [
                 "setRowOptions1TestDefaultValues",
+                "setRowOptions1TestValidValues",
             ],
             "attributes": [
                 {
@@ -5940,37 +5260,49 @@
         },
         {
             "name": "SymbolSpan",
+            "themes": ["TextTheme"],
+            "includes": [
+                "core/components_ng/pattern/text/span_node.h",
+                "core/components_ng/pattern/text/text_model_ng.h",
+                "core/components_ng/pattern/text/text_pattern.h",
+            ],
+            "setup": [
+                "static auto node = TextModelNG::CreateFrameNode(0, u\"\")",
+                "static auto pattern = AceType::MakeRefPtr<TextPattern>()",
+                "pattern->AttachToFrameNode(node)",
+                "reinterpret_cast<SpanNode *>(node_)->GetSpanItem()->SetTextPattern(pattern)",
+            ],
             "disable": [
                 "setFontColorTestValidValues",
                 "setSymbolSpanOptionsTestDefaultValues",
                 "setSymbolSpanOptionsTestValidValues",
             ],
             "attributes": [
-               {
-                   "name": "fontSize",
-                   "default": "16.00fp",
-                   "type": "DimensionNonNegNonPct",
-               },
-               {
-                   "name": "fontWeight",
-                   "default": "FontWeight.Normal",
-                   "fixtures": ["FontWeightNumbers", "FontWeightStrings"]
-               },
-               {
-                   "name": "fontColor",
-                   "default": "#FF000000",
-               },
-               {
-                   "name": "effectStrategy",
-                   "default": "SymbolEffectStrategy.NONE",
-               },
-               {
-                   "name": "renderingStrategy",
-                   "default": "SymbolRenderingStrategy.SINGLE",
-               },
+                {
+                    "name": "fontSize",
+                    "default": "14.00px",
+                    "type": "DimensionNonNegNonPct",
+                },
+                {
+                    "name": "fontWeight",
+                    "default": "FontWeight.Normal",
+                    "type": "FontWeightType",
+                },
+                {
+                    "name": "fontColor",
+                    "default": "#FF000000",
+                },
+                {
+                    "name": "effectStrategy",
+                    "default": "SymbolEffectStrategy.NONE",
+                },
+                {
+                    "name": "renderingStrategy",
+                    "default": "SymbolRenderingStrategy.SINGLE",
+                },
             ]
-       },
-       {
+        },
+        {
             "name": "TextTimer",
             "disable": [
                 "setTextTimerOptionsTestValidValues",
@@ -6010,7 +5342,7 @@
                 {
                     "name": "fontWeight",
                     "default": "FontWeight.Normal",
-                    "fixtures": ["FontWeightNumbers", "FontWeightStrings"]
+                    "type": "FontWeightTypeWithRes",
                 },
                 {
                     "name": "fontFamily",

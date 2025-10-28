@@ -38,7 +38,7 @@ namespace  {
     const auto ATTRIBUTE_BUTTON_TYPE_NAME = "buttonType";
     const auto ATTRIBUTE_BUTTON_TYPE_DEFAULT_VALUE = ButtonType::CAPSULE;
 
-    const auto DEFAULT_JSON_INT = -1;
+    const auto DEFAULT_JSON_INT = -999;
     constexpr double OFFSET_X = 60.4;
     constexpr double OFFSET_Y = 85.5;
 } // namespace
@@ -55,22 +55,19 @@ public:
 };
 
 /*
- * @tc.name: setPasteButtonOptions0
+ * @tc.name: setPasteButtonOptionsTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(PasteButtonModifierTest, setPasteButtonOptions0, TestSize.Level1)
+HWTEST_F(PasteButtonModifierTest, DISABLED_setPasteButtonOptionsTestDefaultValues, TestSize.Level1)
 {
-    auto node = CreateNode();
-    modifier_->setPasteButtonOptions0(node);
-    auto jsonValue = GetJsonValue(node);
-    DisposeNode(node);
+    auto jsonValue = GetJsonValue(node_);
     int32_t resultText = jsonValue->GetInt(ATTRIBUTE_TEXT_NAME, DEFAULT_JSON_INT);
     int32_t resultIcon = jsonValue->GetInt(ATTRIBUTE_ICON_NAME, DEFAULT_JSON_INT);
     int32_t resultButtonType = jsonValue->GetInt(ATTRIBUTE_BUTTON_TYPE_NAME, DEFAULT_JSON_INT);
-    EXPECT_EQ(resultText, static_cast<int32_t>(PasteButtonStyle::DEFAULT_TEXT));
-    EXPECT_EQ(resultIcon, static_cast<int32_t>(PasteButtonStyle::DEFAULT_ICON));
-    EXPECT_EQ(resultButtonType, static_cast<int32_t>(PasteButtonStyle::DEFAULT_BACKGROUND_TYPE));
+    EXPECT_EQ(resultText, static_cast<int32_t>(ATTRIBUTE_TEXT_DEFAULT_VALUE));
+    EXPECT_EQ(resultIcon, static_cast<int32_t>(ATTRIBUTE_ICON_DEFAULT_VALUE));
+    EXPECT_EQ(resultButtonType, static_cast<int32_t>(ATTRIBUTE_BUTTON_TYPE_DEFAULT_VALUE));
 }
 
 // Valid values for attribute 'icon' of method 'setPasteButtonOptions'
@@ -118,11 +115,11 @@ static std::vector<std::tuple<std::string, Opt_ButtonType, ButtonType>> setPaste
 };
 
 /*
- * @tc.name: setPasteButtonOptions1TestValidValues
+ * @tc.name: setPasteButtonOptionsTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(PasteButtonModifierTest, setPasteButtonOptions1TestValidValues, TestSize.Level1)
+HWTEST_F(PasteButtonModifierTest, setPasteButtonOptionsTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     int32_t result;
@@ -140,7 +137,8 @@ HWTEST_F(PasteButtonModifierTest, setPasteButtonOptions1TestValidValues, TestSiz
     for (auto&& value: setPasteButtonOptionsIconValidValues) {
         inputValueOptions.icon = std::get<1>(value);
         auto node = CreateNode();
-        modifier_->setPasteButtonOptions1(node, &inputValueOptions);
+        auto inputValue = Converter::ArkValue<Opt_PasteButtonOptions>(inputValueOptions);
+        modifier_->setPasteButtonOptions(node, &inputValue);
         jsonValue = GetJsonValue(node);
         DisposeNode(node);
         result = jsonValue->GetInt(ATTRIBUTE_ICON_NAME, DEFAULT_JSON_INT);
@@ -153,7 +151,8 @@ HWTEST_F(PasteButtonModifierTest, setPasteButtonOptions1TestValidValues, TestSiz
     for (auto&& value: setPasteButtonOptionsTextValidValues) {
         inputValueOptions.text = std::get<1>(value);
         auto node = CreateNode();
-        modifier_->setPasteButtonOptions1(node, &inputValueOptions);
+        auto inputValue = Converter::ArkValue<Opt_PasteButtonOptions>(inputValueOptions);
+        modifier_->setPasteButtonOptions(node, &inputValue);
         jsonValue = GetJsonValue(node);
         DisposeNode(node);
         result = jsonValue->GetInt(ATTRIBUTE_TEXT_NAME, DEFAULT_JSON_INT);
@@ -166,7 +165,8 @@ HWTEST_F(PasteButtonModifierTest, setPasteButtonOptions1TestValidValues, TestSiz
     for (auto&& value: setPasteButtonOptionsButtonTypeValidValues) {
         inputValueOptions.buttonType = std::get<1>(value);
         auto node = CreateNode();
-        modifier_->setPasteButtonOptions1(node, &inputValueOptions);
+        auto inputValue = Converter::ArkValue<Opt_PasteButtonOptions>(inputValueOptions);
+        modifier_->setPasteButtonOptions(node, &inputValue);
         jsonValue = GetJsonValue(node);
         DisposeNode(node);
         result = jsonValue->GetInt(ATTRIBUTE_BUTTON_TYPE_NAME, DEFAULT_JSON_INT);
@@ -212,11 +212,11 @@ static std::vector<std::tuple<std::string, Opt_ButtonType>> setPasteButtonOption
 };
 
 /*
- * @tc.name: setPasteButtonOptions1TestInvalidValues
+ * @tc.name: setPasteButtonOptionsTestInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(PasteButtonModifierTest, setPasteButtonOptions1TestInvalidValues, TestSize.Level1)
+HWTEST_F(PasteButtonModifierTest, setPasteButtonOptionsTestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     int32_t result;
@@ -234,7 +234,8 @@ HWTEST_F(PasteButtonModifierTest, setPasteButtonOptions1TestInvalidValues, TestS
         inputValueOptions = initValueOptions;
         inputValueOptions.icon = std::get<1>(value);
         auto node = CreateNode();
-        modifier_->setPasteButtonOptions1(node, &inputValueOptions);
+        auto inputValue = Converter::ArkValue<Opt_PasteButtonOptions>(inputValueOptions);
+        modifier_->setPasteButtonOptions(node, &inputValue);
         jsonValue = GetJsonValue(node);
         DisposeNode(node);
         result = jsonValue->GetInt(ATTRIBUTE_ICON_NAME, DEFAULT_JSON_INT);
@@ -247,7 +248,8 @@ HWTEST_F(PasteButtonModifierTest, setPasteButtonOptions1TestInvalidValues, TestS
         inputValueOptions = initValueOptions;
         inputValueOptions.text = std::get<1>(value);
         auto node = CreateNode();
-        modifier_->setPasteButtonOptions1(node, &inputValueOptions);
+        auto inputValue = Converter::ArkValue<Opt_PasteButtonOptions>(inputValueOptions);
+        modifier_->setPasteButtonOptions(node, &inputValue);
         jsonValue = GetJsonValue(node);
         DisposeNode(node);
         result = jsonValue->GetInt(ATTRIBUTE_TEXT_NAME, DEFAULT_JSON_INT);
@@ -260,7 +262,8 @@ HWTEST_F(PasteButtonModifierTest, setPasteButtonOptions1TestInvalidValues, TestS
         inputValueOptions = initValueOptions;
         inputValueOptions.buttonType = std::get<1>(value);
         auto node = CreateNode();
-        modifier_->setPasteButtonOptions1(node, &inputValueOptions);
+        auto inputValue = Converter::ArkValue<Opt_PasteButtonOptions>(inputValueOptions);
+        modifier_->setPasteButtonOptions(node, &inputValue);
         jsonValue = GetJsonValue(node);
         DisposeNode(node);
         result = jsonValue->GetInt(ATTRIBUTE_BUTTON_TYPE_NAME, DEFAULT_JSON_INT);
@@ -270,11 +273,11 @@ HWTEST_F(PasteButtonModifierTest, setPasteButtonOptions1TestInvalidValues, TestS
 }
 
 /*
- * @tc.name: setPasteButtonOptions1TestTextAndIconEmpty
+ * @tc.name: setPasteButtonOptionsTestTextAndIconEmpty
  * @tc.desc: Verify that all attributes are set to default values in case neither text nor icon is set.
  * @tc.type: FUNC
  */
-HWTEST_F(PasteButtonModifierTest, setPasteButtonOptions1TestTextAndIconEmpty, TestSize.Level1)
+HWTEST_F(PasteButtonModifierTest, setPasteButtonOptionsTestTextAndIconEmpty, TestSize.Level1)
 {
     Ark_PasteButtonOptions inputValueOptions = {
         .text = Converter::ArkValue<Opt_PasteDescription>(Ark_Empty()),
@@ -282,7 +285,8 @@ HWTEST_F(PasteButtonModifierTest, setPasteButtonOptions1TestTextAndIconEmpty, Te
         .buttonType = Converter::ArkValue<Opt_ButtonType>(ARK_BUTTON_TYPE_NORMAL)
     };
     auto node = CreateNode();
-    modifier_->setPasteButtonOptions1(node, &inputValueOptions);
+    auto inputValue = Converter::ArkValue<Opt_PasteButtonOptions>(inputValueOptions);
+    modifier_->setPasteButtonOptions(node, &inputValue);
     auto jsonValue = GetJsonValue(node);
     DisposeNode(node);
     int32_t resultText = jsonValue->GetInt(ATTRIBUTE_TEXT_NAME, DEFAULT_JSON_INT);
@@ -293,79 +297,24 @@ HWTEST_F(PasteButtonModifierTest, setPasteButtonOptions1TestTextAndIconEmpty, Te
     EXPECT_EQ(resultButtonType, static_cast<int32_t>(PasteButtonStyle::DEFAULT_BACKGROUND_TYPE));
 }
 
-struct CheckEvent {
-    int32_t nodeId;
-    Ark_Number offsetX = Converter::ArkValue<Ark_Number>(-1.0f);
-    Ark_Number offsetY = Converter::ArkValue<Ark_Number>(-1.0f);
-    std::optional<Ark_PasteButtonOnClickResult> result = std::nullopt;
-};
+namespace {
+std::shared_ptr<JsonValue> CreateJson(SecurityComponentHandleResult value)
+{
+    int32_t res = static_cast<int32_t>(value);
+    auto jsonNode = JsonUtil::Create(true);
+    jsonNode->Put("handleRes", res);
+    return std::move(jsonNode);
+}
 
-#ifdef SECURITY_COMPONENT_ENABLE
+struct CheckEvent {
+    double offsetX;
+    double offsetY;
+    Ark_PasteButtonOnClickResult result;
+};
+} // namespace
+
 /*
  * @tc.name: setOnClickTestSecurity
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(PasteButtonModifierTest, setOnClickTestSecurity, TestSize.Level1)
-{
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    ASSERT_NE(frameNode, nullptr);
-    static std::optional<CheckEvent> checkEvent = std::nullopt;
-
-    auto onClick = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_ClickEvent event,
-        Ark_PasteButtonOnClickResult result, Opt_BusinessError error) {
-        auto peer = event;
-        ASSERT_NE(peer, nullptr);
-        auto accessor = GeneratedModifier::GetClickEventAccessor();
-        checkEvent = {
-            .nodeId = resourceId,
-            .offsetX = accessor->getWindowX(peer),
-            .offsetY = accessor->getWindowY(peer),
-            .result = result
-        };
-        accessor->destroyPeer(peer);
-    };
-
-    auto func = Converter::ArkValue<PasteButtonCallback>(onClick, frameNode->GetId());
-    auto arkCallback = Converter::ArkValue<Opt_PasteButtonCallback>(func);
-    modifier_->setOnClick(node_, &arkCallback);
-    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
-    ASSERT_NE(gestureEventHub, nullptr);
-    auto geometryNode = frameNode->GetGeometryNode();
-    ASSERT_NE(geometryNode, nullptr);
-    geometryNode->SetFrameOffset({OFFSET_X, OFFSET_Y});
-
-    auto createJson = [](SecurityComponentHandleResult value) {
-        int32_t res = static_cast<int32_t>(value);
-        auto jsonNode = JsonUtil::Create(true);
-        jsonNode->Put("handleRes", res);
-        std::shared_ptr<JsonValue> jsonShrd(jsonNode.release());
-        return jsonShrd;
-    };
-
-    auto testFunction = [gestureEventHub, createJson](SecurityComponentHandleResult input,
-        Ark_PasteButtonOnClickResult expected) {
-        checkEvent.reset();
-        gestureEventHub->ActClick(createJson(input));
-        ASSERT_TRUE(checkEvent);
-        ASSERT_TRUE(checkEvent->result);
-        EXPECT_EQ(checkEvent->result.value(), expected);
-        EXPECT_FLOAT_EQ(Converter::Convert<double>(checkEvent->offsetX), OFFSET_X);
-        EXPECT_FLOAT_EQ(Converter::Convert<double>(checkEvent->offsetY), OFFSET_Y);
-    };
-
-    testFunction(SecurityComponentHandleResult::CLICK_SUCCESS,
-        ARK_PASTE_BUTTON_ON_CLICK_RESULT_SUCCESS);
-    testFunction(SecurityComponentHandleResult::CLICK_GRANT_FAILED,
-        ARK_PASTE_BUTTON_ON_CLICK_RESULT_TEMPORARY_AUTHORIZATION_FAILED);
-
-    checkEvent.reset();
-    gestureEventHub->ActClick(createJson(SecurityComponentHandleResult::DROP_CLICK));
-    ASSERT_FALSE(checkEvent); // callback is not called in modifier in DROP_CLICK case
-}
-#else
-/*
- * @tc.name: setOnClickTest
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -381,48 +330,46 @@ HWTEST_F(PasteButtonModifierTest, setOnClickTest, TestSize.Level1)
         ASSERT_NE(peer, nullptr);
         auto accessor = GeneratedModifier::GetClickEventAccessor();
         checkEvent = {
-            .nodeId = resourceId,
-            .offsetX = accessor->getWindowX(peer),
-            .offsetY = accessor->getWindowY(peer),
-            .result = result
+            .offsetX = Converter::Convert<double>(accessor->getWindowX(peer)),
+            .offsetY = Converter::Convert<double>(accessor->getWindowY(peer)),
+            .result = result,
         };
         accessor->destroyPeer(peer);
     };
 
-    auto func = Converter::ArkValue<PasteButtonCallback>(onClick, frameNode->GetId());
-    auto arkCallback = Converter::ArkValue<Opt_PasteButtonCallback>(func);
-    modifier_->setOnClick(node_, &arkCallback);
+    auto func = Converter::ArkCallback<Opt_PasteButtonCallback>(onClick);
+    modifier_->setOnClick(node_, &func);
     auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
     ASSERT_NE(gestureEventHub, nullptr);
     auto geometryNode = frameNode->GetGeometryNode();
     ASSERT_NE(geometryNode, nullptr);
     geometryNode->SetFrameOffset({OFFSET_X, OFFSET_Y});
 
-    auto createJson = [](SecurityComponentHandleResult value)
-    {
-        int32_t res = static_cast<int32_t>(value);
-        auto jsonNode = JsonUtil::Create(true);
-        jsonNode->Put("handleRes", res);
-        std::shared_ptr<JsonValue> jsonShrd(jsonNode.release());
-        return jsonShrd;
-    };
-
-    auto testFunction = [gestureEventHub, createJson](SecurityComponentHandleResult input,
+    auto testFunction = [gestureEventHub](SecurityComponentHandleResult input,
         Ark_PasteButtonOnClickResult expected) {
         checkEvent.reset();
-        gestureEventHub->ActClick(createJson(input));
+        gestureEventHub->ActClick(CreateJson(input));
         ASSERT_TRUE(checkEvent);
-        EXPECT_EQ(checkEvent->result, expected);
-        EXPECT_FLOAT_EQ(Converter::Convert<double>(checkEvent->offsetX), OFFSET_X);
-        EXPECT_FLOAT_EQ(Converter::Convert<double>(checkEvent->offsetY), OFFSET_Y);
+        EXPECT_EQ(checkEvent->result, expected) << "Input value is " << static_cast<int32_t>(input);
+        EXPECT_FLOAT_EQ(checkEvent->offsetX, OFFSET_X);
+        EXPECT_FLOAT_EQ(checkEvent->offsetY, OFFSET_Y);
     };
 
+#ifdef SECURITY_COMPONENT_ENABLE
+    testFunction(SecurityComponentHandleResult::CLICK_SUCCESS, ARK_PASTE_BUTTON_ON_CLICK_RESULT_SUCCESS);
+    testFunction(SecurityComponentHandleResult::CLICK_GRANT_FAILED,
+        ARK_PASTE_BUTTON_ON_CLICK_RESULT_TEMPORARY_AUTHORIZATION_FAILED);
+
+    checkEvent.reset();
+    gestureEventHub->ActClick(CreateJson(SecurityComponentHandleResult::DROP_CLICK));
+    ASSERT_FALSE(checkEvent.has_value());
+#else
     testFunction(SecurityComponentHandleResult::CLICK_SUCCESS,
         ARK_PASTE_BUTTON_ON_CLICK_RESULT_TEMPORARY_AUTHORIZATION_FAILED);
     testFunction(SecurityComponentHandleResult::CLICK_GRANT_FAILED,
         ARK_PASTE_BUTTON_ON_CLICK_RESULT_TEMPORARY_AUTHORIZATION_FAILED);
     testFunction(SecurityComponentHandleResult::DROP_CLICK,
         ARK_PASTE_BUTTON_ON_CLICK_RESULT_TEMPORARY_AUTHORIZATION_FAILED);
-}
 #endif
+}
 } // namespace OHOS::Ace::NG

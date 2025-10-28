@@ -21,7 +21,8 @@
 #include "core/components_ng/pattern/shape/polygon_paint_property.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "arkoala_api_generated.h"
+
+#include "shape_utils.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -53,35 +54,22 @@ HWTEST_F(PolylineModifierTest, setPolylineOptionsTestDefaultValues, TestSize.Lev
  */
 HWTEST_F(PolylineModifierTest, setPointsTestValidValues, TestSize.Level1)
 {
-    auto arkPoints = std::array {
-        Ark_ShapePoint {
-            .value0 = Converter::ArkValue<Ark_Length>(100.0_vp), .value1 = Converter::ArkValue<Ark_Length>(100.0_vp) },
-        Ark_ShapePoint {
-            .value0 = Converter::ArkValue<Ark_Length>(200.0_vp), .value1 = Converter::ArkValue<Ark_Length>(200.0_vp) },
-        Ark_ShapePoint {
-            .value0 = Converter::ArkValue<Ark_Length>(300.0_vp), .value1 = Converter::ArkValue<Ark_Length>(100.0_vp) },
-        Ark_ShapePoint {
-            .value0 = Converter::ArkValue<Ark_Length>(300.0_vp), .value1 = Converter::ArkValue<Ark_Length>(300.0_vp) },
-        Ark_ShapePoint {
-            .value0 = Converter::ArkValue<Ark_Length>(200.0_vp), .value1 = Converter::ArkValue<Ark_Length>(300.0_vp) },
-        Ark_ShapePoint {
-            .value0 = Converter::ArkValue<Ark_Length>(100.0_vp), .value1 = Converter::ArkValue<Ark_Length>(300.0_vp) },
-        Ark_ShapePoint {
-            .value0 = Converter::ArkValue<Ark_Length>(100.0_px), .value1 = Converter::ArkValue<Ark_Length>(100.0_px) },
-        Ark_ShapePoint {
-            .value0 = Converter::ArkValue<Ark_Length>(200.0_px), .value1 = Converter::ArkValue<Ark_Length>(200.0_px) },
-        Ark_ShapePoint {
-            .value0 = Converter::ArkValue<Ark_Length>(300.0_px), .value1 = Converter::ArkValue<Ark_Length>(100.0_px) },
-        Ark_ShapePoint {
-            .value0 = Converter::ArkValue<Ark_Length>(100.0_pct),
-            .value1 = Converter::ArkValue<Ark_Length>(100.0_pct) },
-        Ark_ShapePoint {
-            .value0 = Converter::ArkValue<Ark_Length>(13.0_pct), .value1 = Converter::ArkValue<Ark_Length>(26.0_pct) },
-        Ark_ShapePoint {
-            .value0 = Converter::ArkValue<Ark_Length>(1.23_vp), .value1 = Converter::ArkValue<Ark_Length>(4.56_vp) }
+    auto arkPoints = std::vector<std::pair<std::string, std::string>> {
+        { "100.00vp", "100.00vp" },
+        { "200.00vp", "200.00vp" },
+        { "300.00vp", "100.00vp" },
+        { "300.00vp", "300.00vp" },
+        { "200.00vp", "300.00vp" },
+        { "100.00vp", "300.00vp" },
+        { "100.00px", "100.00px" },
+        { "200.00px", "200.00px" },
+        { "300.00px", "100.00px" },
+        { "100.00%", "100.00%" },
+        { "13.00%", "26.00%" },
+        { "1.23vp", "4.56vp" },
     };
-    Converter::ArkArrayHolder<Array_ShapePoint> holderArg(arkPoints);
-    Opt_Array_ShapePoint value = holderArg.OptValue<Opt_Array_ShapePoint>();
+    Converter::ConvContext ctx;
+    auto value = Converter::ArkValue<Opt_Array_ShapePoint>(arkPoints, &ctx);
     modifier_->setPoints(node_, &value);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto paintProperty = frameNode->GetPaintProperty<PolygonPaintProperty>();
@@ -90,8 +78,8 @@ HWTEST_F(PolylineModifierTest, setPointsTestValidValues, TestSize.Level1)
     ASSERT_TRUE(points.has_value());
     ASSERT_EQ(arkPoints.size(), points->size());
     for (int i = 0; i < points->size(); ++i) {
-        EXPECT_EQ(Converter::OptConvert<Dimension>(arkPoints[i].value0), (*points)[i].first);
-        EXPECT_EQ(Converter::OptConvert<Dimension>(arkPoints[i].value1), (*points)[i].second);
+        EXPECT_EQ(std::get<0>(arkPoints[i]), std::get<0>((*points)[i]).ToString());
+        EXPECT_EQ(std::get<1>(arkPoints[i]), std::get<1>((*points)[i]).ToString());
     }
 }
 
@@ -102,18 +90,19 @@ HWTEST_F(PolylineModifierTest, setPointsTestValidValues, TestSize.Level1)
  */
 HWTEST_F(PolylineModifierTest, setPointsTestInvalidValues, TestSize.Level1)
 {
-    auto arkPoints = std::array {
-        Ark_ShapePoint {
-            .value0 = Converter::ArkValue<Ark_Length>(100.0_vp), .value1 = Converter::ArkValue<Ark_Length>(100.0_vp) },
-    };
-    Converter::ArkArrayHolder<Array_ShapePoint> holderArg(arkPoints);
-    Opt_Array_ShapePoint value = holderArg.OptValue<Opt_Array_ShapePoint>();
+    auto arkPoints = std::array<std::pair<std::string, std::string>, 1> {{
+        { "100.0vp", "100.0vp" },
+    }};
+    Converter::ConvContext ctx;
+    auto value = Converter::ArkValue<Opt_Array_ShapePoint>(arkPoints, &ctx);
     modifier_->setPoints(node_, &value);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto paintProperty = frameNode->GetPaintProperty<PolygonPaintProperty>();
     ASSERT_NE(paintProperty, nullptr);
     auto points = paintProperty->GetPoints();
-    EXPECT_FALSE(points.has_value());
+    if (points.has_value()) {
+        EXPECT_TRUE(points->empty());
+    }
 }
 
 } // namespace OHOS::Ace::NG

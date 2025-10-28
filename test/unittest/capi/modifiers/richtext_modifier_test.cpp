@@ -42,7 +42,7 @@ HWTEST_F(RichTextModifierTest, setRichTextOptionsTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(modifier_->setRichTextOptions, nullptr);
-    Ark_String text = Converter::ArkValue<Ark_String>(TEST_VALUE);
+    auto text = Converter::ArkUnion<Ark_Union_String_Resource, Ark_String>(TEST_VALUE);
 
     modifier_->setRichTextOptions(node_, &text);
 

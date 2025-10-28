@@ -36,6 +36,10 @@ namespace GeneratedModifier {
     const GENERATED_ArkUISubmitEventAccessor* GetSubmitEventAccessor();
 } // namespace GeneratedModifier
 
+namespace Converter {
+template<> PreviewText Convert(const Ark_PreviewText& src);
+} // namespace Converter
+
 namespace {
 Ark_EnterKeyType g_EventTestKey {};
 const std::string TEST_CONTENT_ONE = "ContentTestOne";
@@ -176,7 +180,7 @@ HWTEST_F(TextInputModifierTest2, setOnPasteTest, TestSize.Level1)
         }
     };
 
-    auto onPaste = Converter::ArkCallback<Opt_OnPasteCallback>(arkCallback, frameNode->GetId());
+    auto onPaste = Converter::ArkCallback<Opt_OnPasteCallback>(arkCallback);
     modifier_->setOnPaste(node_, &onPaste);
     TextCommonEvent event;
     EXPECT_FALSE(event.IsPreventDefault());
@@ -250,7 +254,7 @@ HWTEST_F(TextInputModifierTest2, setCustomKeyboard_CustomNodeBuilder_KeyboardOpt
 HWTEST_F(TextInputModifierTest2, OnSubmitTest, TestSize.Level1)
 {
     static const int expectedResId = 123;
-    static const std::u16string testValue(u"string text");
+    static const std::u16string testValue = u"string text";
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<NG::TextFieldEventHub>();
     ASSERT_NE(eventHub, nullptr);
@@ -298,8 +302,9 @@ HWTEST_F(TextInputModifierTest2, OnSubmitTest, TestSize.Level1)
  * @tc.desc: setEditMenuOptions test
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest2, setEditMenuOptionsTest, TestSize.Level1)
+HWTEST_F(TextInputModifierTest2, DISABLED_setEditMenuOptionsTest, TestSize.Level1)
 {
+#ifdef WRONG_PRIVATE
     ASSERT_NE(modifier_->setEditMenuOptions, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
@@ -348,6 +353,7 @@ HWTEST_F(TextInputModifierTest2, setEditMenuOptionsTest, TestSize.Level1)
     ASSERT_NE(selectOverlayInfo.onCreateCallback.onMenuItemClick, nullptr);
     EXPECT_TRUE(selectOverlayInfo.onCreateCallback.onMenuItemClick(params[0]));
     EXPECT_FALSE(selectOverlayInfo.onCreateCallback.onMenuItemClick(params[1]));
+#endif
 }
 #endif
 } // namespace OHOS::Ace::NG

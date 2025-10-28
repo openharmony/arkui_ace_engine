@@ -340,8 +340,8 @@ using PositionWithLocalization = std::pair<std::optional<OffsetT<Dimension>>, bo
 
 using OffsetOrEdgesParam = std::variant<
     std::monostate,
-    std::optional<OffsetT<Dimension>>,
-    std::optional<EdgesParamOptions>
+    OffsetT<Dimension>,
+    EdgesParamOptions
 >;
 
 auto g_isPopupCreated = [](FrameNode* frameNode) -> bool {
@@ -4223,11 +4223,11 @@ void SetOffsetImpl(Ark_NativePointer node,
         ViewAbstractModelStatic::SetOffset(frameNode, OffsetT<Dimension>(Dimension(0), Dimension(0)));
         return;
     }
-    if (auto offset = std::get_if<std::optional<OffsetT<Dimension>>>(&varOpt.value()); offset) {
-        ViewAbstractModelStatic::SetOffset(frameNode, offset->value());
-    } else if (auto edges = std::get_if<std::optional<EdgesParamOptions>>(&varOpt.value()); edges) {
-        ViewAbstractModelStatic::SetOffsetEdges(frameNode, edges->value().value);
-        ViewAbstractModelStatic::SetOffsetLocalizedEdges(frameNode, edges->value().isLocalized);
+    if (auto offset = std::get_if<OffsetT<Dimension>>(&varOpt.value()); offset) {
+        ViewAbstractModelStatic::SetOffset(frameNode, *offset);
+    } else if (auto edges = std::get_if<EdgesParamOptions>(&varOpt.value()); edges) {
+        ViewAbstractModelStatic::SetOffsetEdges(frameNode, edges->value);
+        ViewAbstractModelStatic::SetOffsetLocalizedEdges(frameNode, edges->isLocalized);
     } else {
         LOGE("ARKOALA CommonMethod::OffsetImpl: incorrect value");
     }

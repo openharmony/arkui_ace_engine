@@ -885,6 +885,9 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setEnterKeyTypeTest2, TestSize.Level1)
     EXPECT_EQ(checkVal, "EnterKeyType.NEW_LINE");
 
     // Additional conditions
+#ifdef WRONG_API
+    TextFieldModelNG::SetMaxLines(reinterpret_cast<FrameNode*>(node_), 1);
+#endif
     checkVal = GetStringAttribute(node_, "maxLines");
     EXPECT_EQ(checkVal, "1");
 

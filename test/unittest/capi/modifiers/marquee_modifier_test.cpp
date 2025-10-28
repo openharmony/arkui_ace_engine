@@ -449,8 +449,8 @@ HWTEST_F(MarqueeModifierTest, DISABLED_SetMarqueeOptionsValidTest, TestSize.Leve
 
     inputValueOptions.step = Converter::ArkValue<Opt_Float64>(8);
     inputValueOptions.loop = Converter::ArkValue<Opt_Int32>(3);
-    inputValueOptions.src = Converter::ArkValue<Ark_String>("teststring");
-    inputValueOptions.start = Converter::ArkValue<Ark_Boolean>(false);
+    inputValueOptions.src = Converter::ArkValue<Opt_String>("teststring");
+    inputValueOptions.start = Converter::ArkValue<Opt_Boolean>(false);
     inputValueOptions.fromStart = Converter::ArkValue<Opt_Boolean>(true);
     // Test
     modifier_->setMarqueeOptions(node_, &inputValueOptions);
