@@ -111,8 +111,16 @@ namespace {
         if (index >= params.size()) {
             return std::string();
         }
-        //return params.at(index);
-        return ""; // TODO: Correct formatting for all types
+        if (auto* value = std::get_if<std::string>(&params.at(index).value())) {
+            return *value;
+        } else if (auto* value = std::get_if<int64_t>(&params.at(index).value())) {
+            return std::to_string(*value);
+        } else if (auto* value = std::get_if<double>(&params.at(index).value())) {
+            return std::to_string(*value);
+        } else if (auto* value = std::get_if<Converter::ResourceConverter>(&params.at(index).value())) {
+            return value->ToString().value_or("");
+        }
+        return "";
     }
     void ReplaceHolder(std::optional<std::string>& originStr,
         std::vector<Converter::ResourceConverter::ParamType>& params, size_t containCount)
@@ -503,6 +511,16 @@ std::optional<StringArray> ResourceConverter::ToFontFamilies()
 
 std::optional<Dimension> ResourceConverter::ToDimension()
 {
+    return GetDimensionInner();
+}
+
+std::optional<CalcDimension> ResourceConverter::ToCalcDimension()
+{
+    return GetDimensionInner();
+}
+
+std::optional<CalcDimension> ResourceConverter::GetDimensionInner()
+{
     CHECK_NULL_RETURN(resWrapper_, std::nullopt);
     if (type_ == ResourceType::INTEGER) {
         auto resource = GetIntegerResource();
@@ -514,13 +532,13 @@ std::optional<Dimension> ResourceConverter::ToDimension()
         } else if (auto name = GetResourceName(); name) {
             return resWrapper_->GetDimensionByName(*name);
         } else {
-            LOGE("ResourceConverter::ToDimension Unknown resource value");
+            LOGE("ResourceConverter::ToCalcDimension Unknown resource value");
         }
     } else if (type_ == ResourceType::STRING) {
         if (auto str = GetStringResource(); str) {
-            return StringUtils::StringToDimension(*str, true);
+            return StringUtils::StringToCalcDimension(*str, true);
         } else {
-            LOGE("ResourceConverter::ToDimension Unknown string value");
+            LOGE("ResourceConverter::GetDimensionInner Unknown string value");
         }
     }
     return std::nullopt;
@@ -650,7 +668,7 @@ template<>
 void AssignCast(std::optional<CalcDimension>& dst, const Ark_Resource& src)
 {
     ResourceConverter converter(src);
-    dst = converter.ToDimension();
+    dst = converter.ToCalcDimension();
 }
 
 template<>
