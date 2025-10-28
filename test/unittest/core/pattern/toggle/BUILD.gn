@@ -19,6 +19,7 @@ ace_unittest("toggle_test_ng") {
     "toggle_content_modifier_add_test_ng.cpp",
     "toggle_content_modifier_test_ng.cpp",
     "toggle_model_static_test_ng.cpp",
+    "toggle_switch_one_test_ng.cpp",
     "toggle_switch_test_ng.cpp",
     "toggle_test_ng.cpp",
   ]

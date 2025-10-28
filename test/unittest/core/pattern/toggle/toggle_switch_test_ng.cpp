@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -52,11 +52,10 @@ constexpr float POINT_RADIUS_INITIAL = 0.0f;
 constexpr float POINT_RADIUS_ILLEGAL = -20.0f;
 constexpr float POINT_RADIUS_LARGE = 30.0f;
 constexpr float TRACK_BORDER_RADIUS = 10.0f;
-constexpr float USER_DEFINE_WIDTH = 180.0f;
-constexpr float USER_DEFINE_HEIGHT = 100.0f;
 const SizeF CONTAINER_SIZE(CONTAINER_WIDTH, CONTAINER_HEIGHT);
 const SizeF TEST_CONTAINER_SIZE(200.0f, 200.0f);
 const SizeF TEST_CONTAINER_SIZE0(0.0f, 0.0f);
+constexpr float TEST_ZERO = 0.0f;
 } // namespace
 
 class ToggleSwitchTestNg : public testing::Test {
@@ -90,580 +89,6 @@ PaddingPropertyF ToggleSwitchTestNg::CreatePadding(Dimension length)
     return padding;
 }
 
-/**
- * @tc.name: ToggleSwitchLayoutTest001
- * @tc.desc: Test toggle switch layout.
- * @tc.type: FUNC
- */
-HWTEST_F(ToggleSwitchTestNg, ToggleSwitchLayoutTest001, TestSize.Level1)
-{
-    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    int32_t setApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_TWELVE);
-    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
-    /**
-     * @tc.steps: step1. create switch and get frameNode.
-     */
-    ToggleModelNG toggleModelNG;
-    toggleModelNG.Create(ToggleType::SWITCH, IS_ON);
-    auto switchFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(switchFrameNode, nullptr);
-
-    /**
-     * @tc.steps: step2.  get switchPattern and switchWrapper.
-     * @tc.expected: step2. get switchPattern success.
-     */
-    auto switchPattern = AceType::DynamicCast<SwitchPattern>(switchFrameNode->GetPattern());
-    EXPECT_NE(switchPattern, nullptr);
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    EXPECT_NE(switchFrameNode, nullptr);
-    LayoutWrapperNode layoutWrapper =
-        LayoutWrapperNode(switchFrameNode, geometryNode, switchFrameNode->GetLayoutProperty());
-    auto switchLayoutAlgorithm = AceType::DynamicCast<SwitchLayoutAlgorithm>(switchPattern->CreateLayoutAlgorithm());
-    EXPECT_NE(switchLayoutAlgorithm, nullptr);
-    layoutWrapper.SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(switchLayoutAlgorithm));
-
-    /**
-     * @tc.steps: step3. update layoutWrapper.
-     */
-    // set switchTheme to themeManager before using themeManager to get switchTheme
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-
-    // update switchTheme values
-    auto switchTheme = AceType::MakeRefPtr<SwitchTheme>();
-    switchTheme->width_ = TOGGLE_WIDTH;
-    switchTheme->height_ = TOGGLE_HEIGHT;
-    switchTheme->hotZoneHorizontalPadding_ = ZERO;
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(switchTheme));
-    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(switchTheme));
-
-    LayoutConstraintF layoutConstraintSize;
-    layoutConstraintSize.maxSize = CONTAINER_SIZE;
-    auto switchSize = switchLayoutAlgorithm->MeasureContent(layoutConstraintSize, &layoutWrapper);
-    EXPECT_EQ(switchSize->Width(), TOGGLE_WIDTH.ConvertToPx());
-    EXPECT_EQ(switchSize->Height(), TOGGLE_HEIGHT.ConvertToPx());
-
-    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
-}
-
-/**
- * @tc.name: ToggleSwitchLayoutTest002
- * @tc.desc: Test toggle switch layout.
- * @tc.type: FUNC
- */
-HWTEST_F(ToggleSwitchTestNg, ToggleSwitchLayoutTest002, TestSize.Level1)
-{
-    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    int32_t setApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_TWELVE);
-    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
-    /**
-     * @tc.steps: step1. create switch and get frameNode.
-     */
-    ToggleModelNG toggleModelNG;
-    toggleModelNG.Create(ToggleType::SWITCH, IS_ON);
-    auto switchFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(switchFrameNode, nullptr);
-
-    /**
-     * @tc.steps: step2.  get switchPattern and switchWrapper.
-     * @tc.expected: step2. get switchPattern success.
-     */
-    auto switchPattern = AceType::DynamicCast<SwitchPattern>(switchFrameNode->GetPattern());
-    EXPECT_NE(switchPattern, nullptr);
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    EXPECT_NE(switchFrameNode, nullptr);
-    LayoutWrapperNode layoutWrapper =
-        LayoutWrapperNode(switchFrameNode, geometryNode, switchFrameNode->GetLayoutProperty());
-    auto switchLayoutAlgorithm = AceType::DynamicCast<SwitchLayoutAlgorithm>(switchPattern->CreateLayoutAlgorithm());
-    EXPECT_NE(switchLayoutAlgorithm, nullptr);
-    layoutWrapper.SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(switchLayoutAlgorithm));
-
-    /**
-     * @tc.steps: step3. update layoutWrapper.
-     */
-    // set switchTheme to themeManager before using themeManager to get switchTheme
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-
-    // update switchTheme values
-    auto switchTheme = AceType::MakeRefPtr<SwitchTheme>();
-    switchTheme->width_ = TOGGLE_WIDTH;
-    switchTheme->height_ = TOGGLE_HEIGHT;
-    switchTheme->hotZoneHorizontalPadding_ = ZERO;
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(switchTheme));
-    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(switchTheme));
-    // different branch: update frameWidth = frameHeight = 0
-    LayoutConstraintF layoutConstraintSize;
-    layoutConstraintSize.maxSize = SizeF(30, 10); //30 is width of toggle, 10 is height of toggle
-    auto switchSize = switchLayoutAlgorithm->MeasureContent(layoutConstraintSize, &layoutWrapper);
-    EXPECT_EQ(switchSize->Width(), 30);  //30 is width of toggle
-    EXPECT_EQ(switchSize->Height(), 10); //10 is height of toggle
-    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
-}
-
-/**
- * @tc.name: ToggleSwitchLayoutTest003
- * @tc.desc: Test toggle switch layout.
- * @tc.type: FUNC
- */
-HWTEST_F(ToggleSwitchTestNg, ToggleSwitchLayoutTest003, TestSize.Level1)
-{
-    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    int32_t setApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_TWELVE);
-    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
-    /**
-     * @tc.steps: step1. create switch and get frameNode.
-     */
-    ToggleModelNG toggleModelNG;
-    toggleModelNG.Create(ToggleType::SWITCH, IS_ON);
-    auto switchFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(switchFrameNode, nullptr);
-
-    /**
-     * @tc.steps: step2.  get switchPattern and switchWrapper.
-     * @tc.expected: step2. get switchPattern success.
-     */
-    auto switchPattern = AceType::DynamicCast<SwitchPattern>(switchFrameNode->GetPattern());
-    EXPECT_NE(switchPattern, nullptr);
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    EXPECT_NE(switchFrameNode, nullptr);
-    LayoutWrapperNode layoutWrapper =
-        LayoutWrapperNode(switchFrameNode, geometryNode, switchFrameNode->GetLayoutProperty());
-    auto switchLayoutAlgorithm = AceType::DynamicCast<SwitchLayoutAlgorithm>(switchPattern->CreateLayoutAlgorithm());
-    EXPECT_NE(switchLayoutAlgorithm, nullptr);
-    layoutWrapper.SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(switchLayoutAlgorithm));
-
-    /**
-     * @tc.steps: step3. update layoutWrapper.
-     */
-    // set switchTheme to themeManager before using themeManager to get switchTheme
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-
-    // update switchTheme values
-    auto switchTheme = AceType::MakeRefPtr<SwitchTheme>();
-    switchTheme->width_ = TOGGLE_WIDTH;
-    switchTheme->height_ = TOGGLE_HEIGHT;
-    switchTheme->hotZoneHorizontalPadding_ = ZERO;
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(switchTheme));
-    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(switchTheme));
-
-    // different branch: update (frameWidth / frameHeight) > ratio = 1.8
-    LayoutConstraintF layoutConstraintSize;
-    layoutConstraintSize.maxSize = CONTAINER_SIZE;
-    layoutConstraintSize.selfIdealSize.SetSize(SizeF(SWITCH_WIDTH, SWITCH_HEIGHT));
-    auto switchSize = switchLayoutAlgorithm->MeasureContent(layoutConstraintSize, &layoutWrapper);
-    EXPECT_EQ(switchSize->Width(), SWITCH_WIDTH);
-    EXPECT_EQ(switchSize->Height(), SWITCH_HEIGHT);
-
-    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
-}
-
-/**
- * @tc.name: ToggleSwitchLayoutTest004
- * @tc.desc: Test toggle switch layout.
- * @tc.type: FUNC
- */
-HWTEST_F(ToggleSwitchTestNg, ToggleSwitchLayoutTest004, TestSize.Level1)
-{
-    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    int32_t setApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_TWELVE);
-    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
-    /**
-     * @tc.steps: step1. create switch and get frameNode.
-     */
-    ToggleModelNG toggleModelNG;
-    toggleModelNG.Create(ToggleType::SWITCH, IS_ON);
-    auto switchFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(switchFrameNode, nullptr);
-
-    /**
-     * @tc.steps: step2.  get switchPattern and switchWrapper.
-     * @tc.expected: step2. get switchPattern success.
-     */
-    auto switchPattern = AceType::DynamicCast<SwitchPattern>(switchFrameNode->GetPattern());
-    EXPECT_NE(switchPattern, nullptr);
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    EXPECT_NE(switchFrameNode, nullptr);
-    LayoutWrapperNode layoutWrapper =
-        LayoutWrapperNode(switchFrameNode, geometryNode, switchFrameNode->GetLayoutProperty());
-    auto switchLayoutAlgorithm = AceType::DynamicCast<SwitchLayoutAlgorithm>(switchPattern->CreateLayoutAlgorithm());
-    EXPECT_NE(switchLayoutAlgorithm, nullptr);
-    layoutWrapper.SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(switchLayoutAlgorithm));
-
-    /**
-     * @tc.steps: step3. update layoutWrapper.
-     */
-    // set switchTheme to themeManager before using themeManager to get switchTheme
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-
-    // update switchTheme values
-    auto switchTheme = AceType::MakeRefPtr<SwitchTheme>();
-    switchTheme->width_ = TOGGLE_WIDTH;
-    switchTheme->height_ = TOGGLE_HEIGHT;
-    switchTheme->hotZoneHorizontalPadding_ = ZERO;
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(switchTheme));
-    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(switchTheme));
-
-    // different branch: update (frameWidth / frameHeight) < ratio = 1.8
-    LayoutConstraintF layoutConstraintSize;
-    layoutConstraintSize.maxSize = CONTAINER_SIZE;
-    layoutConstraintSize.selfIdealSize.SetSize(SizeF(60, 40)); //60 is width of toggle, 40 is height of toggle
-    auto switchSize = switchLayoutAlgorithm->MeasureContent(layoutConstraintSize, &layoutWrapper);
-    EXPECT_EQ(switchSize->Width(), 60);  //60 is width of toggle
-    EXPECT_EQ(switchSize->Height(), 40); //40 is height of toggle
-
-    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
-}
-
-/**
- * @tc.name: ToggleSwitchLayoutTest005
- * @tc.desc: Test toggle switch layout.
- * @tc.type: FUNC
- */
-HWTEST_F(ToggleSwitchTestNg, ToggleSwitchLayoutTest005, TestSize.Level1)
-{
-    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    int32_t setApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_TWELVE);
-    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
-    /**
-     * @tc.steps: step1. create switch and get frameNode.
-     */
-    ToggleModelNG toggleModelNG;
-    toggleModelNG.Create(ToggleType::SWITCH, IS_ON);
-    auto switchFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(switchFrameNode, nullptr);
-
-    /**
-     * @tc.steps: step2.  get switchPattern and switchWrapper.
-     * @tc.expected: step2. get switchPattern success.
-     */
-    auto switchPattern = AceType::DynamicCast<SwitchPattern>(switchFrameNode->GetPattern());
-    EXPECT_NE(switchPattern, nullptr);
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    EXPECT_NE(switchFrameNode, nullptr);
-    LayoutWrapperNode layoutWrapper =
-        LayoutWrapperNode(switchFrameNode, geometryNode, switchFrameNode->GetLayoutProperty());
-    auto switchLayoutAlgorithm = AceType::DynamicCast<SwitchLayoutAlgorithm>(switchPattern->CreateLayoutAlgorithm());
-    EXPECT_NE(switchLayoutAlgorithm, nullptr);
-    layoutWrapper.SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(switchLayoutAlgorithm));
-
-    /**
-     * @tc.steps: step3. update layoutWrapper.
-     */
-    // set switchTheme to themeManager before using themeManager to get switchTheme
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-
-    // update switchTheme values
-    auto switchTheme = AceType::MakeRefPtr<SwitchTheme>();
-    switchTheme->width_ = TOGGLE_WIDTH;
-    switchTheme->height_ = TOGGLE_HEIGHT;
-    switchTheme->hotZoneHorizontalPadding_ = ZERO;
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(switchTheme));
-    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(switchTheme));
-
-    // different branch: update (frameWidth / frameHeight) = ratio = 1.8
-    LayoutConstraintF layoutConstraintSize;
-    layoutConstraintSize.maxSize = CONTAINER_SIZE;
-    layoutConstraintSize.selfIdealSize.SetSize(SizeF(USER_DEFINE_WIDTH, USER_DEFINE_HEIGHT));
-    auto switchSize = switchLayoutAlgorithm->MeasureContent(layoutConstraintSize, &layoutWrapper);
-    EXPECT_EQ(switchSize->Width(), USER_DEFINE_WIDTH);
-    EXPECT_EQ(switchSize->Height(), USER_DEFINE_HEIGHT);
-
-    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
-}
-
-/**
- * @tc.name: ToggleSwitchLayoutTest006
- * @tc.desc: Test toggle switch layout.
- * @tc.type: FUNC
- */
-HWTEST_F(ToggleSwitchTestNg, ToggleSwitchLayoutTest006, TestSize.Level1)
-{
-    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    int32_t setApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_TWELVE);
-    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
-    /**
-     * @tc.steps: step1. create switch and get frameNode.
-     */
-    ToggleModelNG toggleModelNG;
-    toggleModelNG.Create(ToggleType::SWITCH, IS_ON);
-    auto switchFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(switchFrameNode, nullptr);
-
-    /**
-     * @tc.steps: step2.  get switchPattern and switchWrapper.
-     * @tc.expected: step2. get switchPattern success.
-     */
-    auto switchPattern = AceType::DynamicCast<SwitchPattern>(switchFrameNode->GetPattern());
-    EXPECT_NE(switchPattern, nullptr);
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    EXPECT_NE(switchFrameNode, nullptr);
-    LayoutWrapperNode layoutWrapper =
-        LayoutWrapperNode(switchFrameNode, geometryNode, switchFrameNode->GetLayoutProperty());
-    auto switchLayoutAlgorithm = AceType::DynamicCast<SwitchLayoutAlgorithm>(switchPattern->CreateLayoutAlgorithm());
-    EXPECT_NE(switchLayoutAlgorithm, nullptr);
-    layoutWrapper.SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(switchLayoutAlgorithm));
-
-    /**
-     * @tc.steps: step3. update layoutWrapper.
-     */
-    // set switchTheme to themeManager before using themeManager to get switchTheme
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-
-    // update switchTheme values
-    auto switchTheme = AceType::MakeRefPtr<SwitchTheme>();
-    switchTheme->width_ = TOGGLE_WIDTH;
-    switchTheme->height_ = TOGGLE_HEIGHT;
-    switchTheme->hotZoneHorizontalPadding_ = ZERO;
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(switchTheme));
-    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(switchTheme));
-
-    // different branch: update width and height over constraint
-    LayoutConstraintF layoutConstraintSize;
-    layoutConstraintSize.maxSize = CONTAINER_SIZE;
-    layoutConstraintSize.selfIdealSize.SetSize(SizeF(280, 180)); //280 is width of toggle, 180 is height of toggle
-    auto switchSize = switchLayoutAlgorithm->MeasureContent(layoutConstraintSize, &layoutWrapper);
-    EXPECT_EQ(switchSize->Width(), 280);  //280 is width of toggle
-    EXPECT_EQ(switchSize->Height(), 180); //180 is height of toggle
-
-    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
-}
-
-/**
- * @tc.name: ToggleSwitchLayoutTest007
- * @tc.desc: Test toggle switch layout.
- * @tc.type: FUNC
- */
-HWTEST_F(ToggleSwitchTestNg, ToggleSwitchLayoutTest007, TestSize.Level1)
-{
-    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    int32_t setApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_TWELVE);
-    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
-    /**
-     * @tc.steps: step1. create switch and get frameNode.
-     */
-    ToggleModelNG toggleModelNG;
-    toggleModelNG.Create(ToggleType::SWITCH, IS_ON);
-    auto switchFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(switchFrameNode, nullptr);
-
-    /**
-     * @tc.steps: step2.  get switchPattern and switchWrapper.
-     * @tc.expected: step2. get switchPattern success.
-     */
-    auto switchPattern = AceType::DynamicCast<SwitchPattern>(switchFrameNode->GetPattern());
-    EXPECT_NE(switchPattern, nullptr);
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    EXPECT_NE(switchFrameNode, nullptr);
-    LayoutWrapperNode layoutWrapper =
-        LayoutWrapperNode(switchFrameNode, geometryNode, switchFrameNode->GetLayoutProperty());
-    auto switchLayoutAlgorithm = AceType::DynamicCast<SwitchLayoutAlgorithm>(switchPattern->CreateLayoutAlgorithm());
-    EXPECT_NE(switchLayoutAlgorithm, nullptr);
-    layoutWrapper.SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(switchLayoutAlgorithm));
-
-    /**
-     * @tc.steps: step3. update layoutWrapper.
-     */
-    // set switchTheme to themeManager before using themeManager to get switchTheme
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-
-    // update switchTheme values
-    auto switchTheme = AceType::MakeRefPtr<SwitchTheme>();
-    switchTheme->width_ = TOGGLE_WIDTH;
-    switchTheme->height_ = TOGGLE_HEIGHT;
-    switchTheme->hotZoneHorizontalPadding_ = ZERO;
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(switchTheme));
-    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(switchTheme));
-
-    // different branch: undefined selfIdealSize
-    LayoutConstraintF layoutConstraintSize;
-    layoutConstraintSize.maxSize = CONTAINER_SIZE;
-    auto switchSize = switchLayoutAlgorithm->MeasureContent(layoutConstraintSize, &layoutWrapper);
-    EXPECT_EQ(switchSize->Width(), TOGGLE_WIDTH.ConvertToPx());
-    EXPECT_EQ(switchSize->Height(), TOGGLE_HEIGHT.ConvertToPx());
-
-    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
-}
-
-/**
- * @tc.name: ToggleSwitchLayoutTest008
- * @tc.desc: Test toggle switch layout.
- * @tc.type: FUNC
- */
-HWTEST_F(ToggleSwitchTestNg, ToggleSwitchLayoutTest008, TestSize.Level1)
-{
-    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    int32_t setApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_TWELVE);
-    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
-    /**
-     * @tc.steps: step1. create switch and get frameNode.
-     */
-    ToggleModelNG toggleModelNG;
-    toggleModelNG.Create(ToggleType::SWITCH, IS_ON);
-    auto switchFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(switchFrameNode, nullptr);
-
-    /**
-     * @tc.steps: step2.  get switchPattern and switchWrapper.
-     * @tc.expected: step2. get switchPattern success.
-     */
-    auto switchPattern = AceType::DynamicCast<SwitchPattern>(switchFrameNode->GetPattern());
-    EXPECT_NE(switchPattern, nullptr);
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    EXPECT_NE(switchFrameNode, nullptr);
-    LayoutWrapperNode layoutWrapper =
-        LayoutWrapperNode(switchFrameNode, geometryNode, switchFrameNode->GetLayoutProperty());
-    auto switchLayoutAlgorithm = AceType::DynamicCast<SwitchLayoutAlgorithm>(switchPattern->CreateLayoutAlgorithm());
-    EXPECT_NE(switchLayoutAlgorithm, nullptr);
-    layoutWrapper.SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(switchLayoutAlgorithm));
-
-    /**
-     * @tc.steps: step3. update layoutWrapper.
-     */
-    // set switchTheme to themeManager before using themeManager to get switchTheme
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-
-    // update switchTheme values
-    auto switchTheme = AceType::MakeRefPtr<SwitchTheme>();
-    switchTheme->width_ = 280.0_px;  //280.0_px is width of switchTheme
-    switchTheme->height_ = 180.0_px; //180.0_px is height of switchTheme
-    switchTheme->hotZoneHorizontalPadding_ = ZERO;
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(switchTheme));
-    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(switchTheme));
-
-    // different branch: undefined selfIdealSize
-    LayoutConstraintF layoutConstraintSize;
-    layoutConstraintSize.maxSize = CONTAINER_SIZE;
-    auto switchSize = switchLayoutAlgorithm->MeasureContent(layoutConstraintSize, &layoutWrapper);
-    EXPECT_EQ(switchSize->Width(), CONTAINER_WIDTH);
-    EXPECT_EQ(switchSize->Height(), CONTAINER_HEIGHT);
-
-    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
-}
-
-/**
- * @tc.name: ToggleSwitchLayoutTest009
- * @tc.desc: Test toggle switch layout.
- * @tc.type: FUNC
- */
-HWTEST_F(ToggleSwitchTestNg, ToggleSwitchLayoutTest009, TestSize.Level1)
-{
-    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    int32_t setApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_TWELVE);
-    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
-    /**
-     * @tc.steps: step1. create switch and get frameNode.
-     */
-    ToggleModelNG toggleModelNG;
-    toggleModelNG.Create(ToggleType::SWITCH, IS_ON);
-    auto switchFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(switchFrameNode, nullptr);
-
-    /**
-     * @tc.steps: step2.  get switchPattern and switchWrapper.
-     * @tc.expected: step2. get switchPattern success.
-     */
-    auto switchPattern = AceType::DynamicCast<SwitchPattern>(switchFrameNode->GetPattern());
-    EXPECT_NE(switchPattern, nullptr);
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    EXPECT_NE(switchFrameNode, nullptr);
-    LayoutWrapperNode layoutWrapper =
-        LayoutWrapperNode(switchFrameNode, geometryNode, switchFrameNode->GetLayoutProperty());
-    auto switchLayoutAlgorithm = AceType::DynamicCast<SwitchLayoutAlgorithm>(switchPattern->CreateLayoutAlgorithm());
-    EXPECT_NE(switchLayoutAlgorithm, nullptr);
-    layoutWrapper.SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(switchLayoutAlgorithm));
-
-    /**
-     * @tc.steps: step3. update layoutWrapper.
-     */
-    // set switchTheme to themeManager before using themeManager to get switchTheme
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-
-    // update switchTheme values
-    auto switchTheme = AceType::MakeRefPtr<SwitchTheme>();
-    switchTheme->width_ = TOGGLE_WIDTH;
-    switchTheme->height_ = TOGGLE_HEIGHT;
-    switchTheme->hotZoneHorizontalPadding_ = ZERO;
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(switchTheme));
-    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(switchTheme));
-
-    // different branch: update width and height illegal value
-    LayoutConstraintF layoutConstraintSize;
-    layoutConstraintSize.maxSize = CONTAINER_SIZE;
-    layoutConstraintSize.selfIdealSize.SetSize(
-        SizeF(0, CONTAINER_HEIGHT)); //280 is width of toggle, 180 is height of toggle
-    auto switchSize = switchLayoutAlgorithm->MeasureContent(layoutConstraintSize, &layoutWrapper);
-    EXPECT_EQ(switchSize->Width(), 0);
-    EXPECT_EQ(switchSize->Height(), CONTAINER_HEIGHT);
-
-    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
-}
-
-/**
- * @tc.name: ToggleSwitchLayoutTest010
- * @tc.desc: Test toggle switch layout.
- * @tc.type: FUNC
- */
-HWTEST_F(ToggleSwitchTestNg, ToggleSwitchLayoutTest010, TestSize.Level1)
-{
-    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    int32_t setApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_TWELVE);
-    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
-    /**
-     * @tc.steps: step1. create switch and get frameNode.
-     */
-    ToggleModelNG toggleModelNG;
-    toggleModelNG.Create(ToggleType::SWITCH, IS_ON);
-    auto switchFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(switchFrameNode, nullptr);
-
-    /**
-     * @tc.steps: step2.  get switchPattern and switchWrapper.
-     * @tc.expected: step2. get switchPattern success.
-     */
-    auto switchPattern = AceType::DynamicCast<SwitchPattern>(switchFrameNode->GetPattern());
-    EXPECT_NE(switchPattern, nullptr);
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    EXPECT_NE(switchFrameNode, nullptr);
-    LayoutWrapperNode layoutWrapper =
-        LayoutWrapperNode(switchFrameNode, geometryNode, switchFrameNode->GetLayoutProperty());
-    auto switchLayoutAlgorithm = AceType::DynamicCast<SwitchLayoutAlgorithm>(switchPattern->CreateLayoutAlgorithm());
-    EXPECT_NE(switchLayoutAlgorithm, nullptr);
-    layoutWrapper.SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(switchLayoutAlgorithm));
-
-    /**
-     * @tc.steps: step3. update layoutWrapper.
-     */
-    // set switchTheme to themeManager before using themeManager to get switchTheme
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-
-    // update switchTheme values
-    auto switchTheme = AceType::MakeRefPtr<SwitchTheme>();
-    switchTheme->width_ = TOGGLE_WIDTH;
-    switchTheme->height_ = TOGGLE_HEIGHT;
-    switchTheme->hotZoneHorizontalPadding_ = ZERO;
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(switchTheme));
-    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(switchTheme));
-
-    // different branch: update width and height illegal value
-    LayoutConstraintF layoutConstraintSize;
-    layoutConstraintSize.maxSize = CONTAINER_SIZE;
-    layoutConstraintSize.selfIdealSize.SetSize(
-        SizeF(-280, CONTAINER_HEIGHT)); //-280 is width of toggle, 180 is height of toggle
-    auto switchSize = switchLayoutAlgorithm->MeasureContent(layoutConstraintSize, &layoutWrapper);
-    EXPECT_EQ(switchSize->Width(), -280); //-280 is width of toggle
-    EXPECT_EQ(switchSize->Height(), CONTAINER_HEIGHT);
-
-    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
-}
 
 /**
  * @tc.name: ToggleSwitchPaintTest001
@@ -1443,5 +868,458 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPatternTest004, TestSize.Level1)
     EXPECT_EQ(paintRect.GetRect().ToString(), "RectT (0.00, 0.00) - [0.00 x 20.00]");
 
     MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: ToggleSwitchPatternTest005
+ * @tc.desc: Test update switchModifier.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPatternTest005, TestSize.Level1)
+{
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    int32_t setApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_TWELVE);
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    /**
+     * @tc.steps: step1. create switch and get frameNode.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(ToggleType::SWITCH, IS_ON);
+    toggleModelNG.SetPointRadius(Dimension(POINT_RADIUS_LARGE));
+    auto switchFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(switchFrameNode, nullptr);
+    switchFrameNode->MarkModifyDone();
+    auto pattern = AceType::DynamicCast<SwitchPattern>(switchFrameNode->GetPattern());
+    EXPECT_NE(pattern, nullptr);
+    pattern->paintMethod_ = AceType::MakeRefPtr<SwitchPaintMethod>();
+    /**
+     * @tc.steps: step2. get paintWrapper
+     * @tc.expected: paintWrapper is not null
+     */
+    auto renderContext = switchFrameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto geometryNode = switchFrameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto paintProperty = pattern->GetPaintProperty<SwitchPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
+    ASSERT_NE(paintWrapper, nullptr);
+    pattern->width_ = 0;
+    pattern->height_ = CONTAINER_HEIGHT;
+    EXPECT_NE(pattern->paintMethod_->GetContentModifier(paintWrapper), nullptr);
+    pattern->paintMethod_->UpdateContentModifier(paintWrapper);
+    auto eventHub = switchFrameNode->GetFocusHub();
+    ASSERT_NE(eventHub, nullptr);
+    RoundRect paintRect;
+    eventHub->getInnerFocusRectFunc_(paintRect);
+    EXPECT_EQ(paintRect.GetRect().ToString(), "RectT (0.00, 0.00) - [0.00 x 100.00]");
+
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: ToggleSwitchPatternTest006
+ * @tc.desc: Test update switchModifier.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPatternTest006, TestSize.Level1)
+{
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    int32_t setApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_TWELVE);
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    /**
+     * @tc.steps: step1. create switch and get frameNode.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(ToggleType::SWITCH, IS_ON);
+    toggleModelNG.SetPointRadius(Dimension(POINT_RADIUS_LARGE));
+    auto switchFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(switchFrameNode, nullptr);
+    switchFrameNode->MarkModifyDone();
+    auto pattern = AceType::DynamicCast<SwitchPattern>(switchFrameNode->GetPattern());
+    EXPECT_NE(pattern, nullptr);
+    pattern->paintMethod_ = AceType::MakeRefPtr<SwitchPaintMethod>();
+    /**
+     * @tc.steps: step2. get paintWrapper
+     * @tc.expected: paintWrapper is not null
+     */
+    auto renderContext = switchFrameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto geometryNode = switchFrameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto paintProperty = pattern->GetPaintProperty<SwitchPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
+    ASSERT_NE(paintWrapper, nullptr);
+
+    pattern->width_ = SWITCH_WIDTH;
+    pattern->height_ = 0;
+    EXPECT_NE(pattern->paintMethod_->GetContentModifier(paintWrapper), nullptr);
+    pattern->paintMethod_->UpdateContentModifier(paintWrapper);
+    auto eventHub = switchFrameNode->GetFocusHub();
+    ASSERT_NE(eventHub, nullptr);
+    RoundRect paintRect;
+    eventHub->getInnerFocusRectFunc_(paintRect);
+    EXPECT_EQ(paintRect.GetRect().ToString(), "RectT (0.00, 0.00) - [100.00 x 0.00]");
+
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: ToggleFixIdealSizeTest001
+ * @tc.desc: Test toggle switch fixIdealSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleSwitchTestNg, ToggleFixIdealSizeTest001, TestSize.Level1)
+{
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    int32_t setApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_TWELVE);
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+
+    /**
+     * @tc.steps: step1. create switch and get frameNode.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(ToggleType::SWITCH, IS_ON);
+    auto switchFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(switchFrameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get switchPattern and switchWrapper.
+     * @tc.expected: step2. get switchPattern success.
+     */
+    auto switchPattern = AceType::DynamicCast<SwitchPattern>(switchFrameNode->GetPattern());
+    EXPECT_NE(switchPattern, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(switchFrameNode, nullptr);
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(switchFrameNode, geometryNode, switchFrameNode->GetLayoutProperty());
+    auto switchLayoutAlgorithm = AceType::DynamicCast<SwitchLayoutAlgorithm>(switchPattern->CreateLayoutAlgorithm());
+    EXPECT_NE(switchLayoutAlgorithm, nullptr);
+    layoutWrapper.SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(switchLayoutAlgorithm));
+
+    /**
+     * @tc.steps: step3. set widthLayoutPolicy_ and heightLayoutPolicy_ to null.
+     * @tc.expected: step3. switchSize is not equal to TEST_CONTAINER_SIZE.
+     */
+    auto layoutProperty = layoutWrapper.GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    LayoutConstraintF contentConstraint;
+    contentConstraint.parentIdealSize.SetSize(TEST_CONTAINER_SIZE);
+    auto switchSize = switchLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_NE(switchSize, TEST_CONTAINER_SIZE);
+
+    /**
+     * @tc.steps: step3. set widthLayoutPolicy_ and heightLayoutPolicy_ to FIX_AT_IDEAL_SIZE,FIX_AT_IDEAL_SIZE.
+     * @tc.expected: step3. switchSize is not equal to TEST_CONTAINER_SIZE.
+     */
+    LayoutPolicyProperty layoutPolicyProperty;
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    switchSize = switchLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_NE(switchSize, TEST_CONTAINER_SIZE);
+
+    /**
+     * @tc.steps: step4. set widthLayoutPolicy_ and heightLayoutPolicy_ to TEST_CONTAINER_SIZE，NO_MATCH.
+     * @tc.expected: step4. switchSize is equal to TEST_CONTAINER_SIZE.
+     */
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    switchSize = switchLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_NE(switchSize, TEST_CONTAINER_SIZE);
+    /**
+     * @tc.steps: step4. set widthLayoutPolicy_ and heightLayoutPolicy_ to FIX_AT_IDEAL_SIZE,NO_MATCH.
+     * @tc.expected: step4. switchSize is equal to TEST_CONTAINER_SIZE.
+     */
+    contentConstraint.selfIdealSize.SetSize(TEST_CONTAINER_SIZE);
+    switchSize = switchLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_EQ(switchSize, TEST_CONTAINER_SIZE);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: ToggleFixIdealSizeTest002
+ * @tc.desc: Test toggle switch fixIdealSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleSwitchTestNg, ToggleFixIdealSizeTest002, TestSize.Level1)
+{
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    int32_t setApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_TWELVE);
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+
+    /**
+     * @tc.steps: step1. create switch and get frameNode.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(ToggleType::SWITCH, IS_ON);
+    auto switchFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(switchFrameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get switchPattern and switchWrapper.
+     * @tc.expected: step2. get switchPattern success.
+     */
+    auto switchPattern = AceType::DynamicCast<SwitchPattern>(switchFrameNode->GetPattern());
+    EXPECT_NE(switchPattern, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(switchFrameNode, nullptr);
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(switchFrameNode, geometryNode, switchFrameNode->GetLayoutProperty());
+    auto switchLayoutAlgorithm = AceType::DynamicCast<SwitchLayoutAlgorithm>(switchPattern->CreateLayoutAlgorithm());
+    EXPECT_NE(switchLayoutAlgorithm, nullptr);
+    layoutWrapper.SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(switchLayoutAlgorithm));
+
+    /**
+     * @tc.steps: step3. set widthLayoutPolicy_ and heightLayoutPolicy_ to NO_MATCH,FIX_AT_IDEAL_SIZE.
+     * @tc.expected: step3. switchSize is not equal to TEST_CONTAINER_SIZE.
+     */
+    auto layoutProperty = layoutWrapper.GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    LayoutConstraintF contentConstraint;
+    contentConstraint.parentIdealSize.SetSize(TEST_CONTAINER_SIZE);
+    LayoutPolicyProperty layoutPolicyProperty;
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    auto switchSize = switchLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_NE(switchSize, TEST_CONTAINER_SIZE);
+
+    /**
+     * @tc.steps: step4. set widthLayoutPolicy_ and heightLayoutPolicy_ to FIX_AT_IDEAL_SIZE,NO_MATCH.
+     * @tc.expected: step4. switchSize is equal to TEST_CONTAINER_SIZE.
+     */
+    contentConstraint.selfIdealSize.SetSize(TEST_CONTAINER_SIZE);
+    switchSize = switchLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_EQ(switchSize, TEST_CONTAINER_SIZE);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+
+    /**
+     * @tc.steps: step3. set widthLayoutPolicy_ and heightLayoutPolicy_ to NO_MATCH.
+     */
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    float frameWidth = 0.0f;
+    float frameHeight = 0.0f;
+    switchLayoutAlgorithm->LayoutPolicyIsFixAtIdelSize(contentConstraint, layoutPolicyProperty,
+        frameWidth, frameHeight);
+    EXPECT_FLOAT_EQ(frameWidth, TEST_ZERO);
+    EXPECT_FLOAT_EQ(frameHeight, TEST_ZERO);
+}
+
+/**
+ * @tc.name: ToggleWrapContentTest001
+ * @tc.desc: Test toggle switch WrapContent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleSwitchTestNg, ToggleWrapContentTest001, TestSize.Level1)
+{
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    int32_t setApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_TWELVE);
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+
+    /**
+     * @tc.steps: step1. create switch and get frameNode.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(ToggleType::SWITCH, IS_ON);
+    auto switchFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(switchFrameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get switchPattern and switchWrapper.
+     * @tc.expected: step2. get switchPattern success.
+     */
+    auto switchPattern = AceType::DynamicCast<SwitchPattern>(switchFrameNode->GetPattern());
+    EXPECT_NE(switchPattern, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(switchFrameNode, nullptr);
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(switchFrameNode, geometryNode, switchFrameNode->GetLayoutProperty());
+    auto switchLayoutAlgorithm = AceType::DynamicCast<SwitchLayoutAlgorithm>(switchPattern->CreateLayoutAlgorithm());
+    EXPECT_NE(switchLayoutAlgorithm, nullptr);
+    layoutWrapper.SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(switchLayoutAlgorithm));
+
+    /**
+     * @tc.steps: step3. set widthLayoutPolicy_ and heightLayoutPolicy_ to null.
+     * @tc.expected: step3. switchSize is not equal to TEST_CONTAINER_SIZE.
+     */
+    auto layoutProperty = layoutWrapper.GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    LayoutConstraintF contentConstraint;
+    contentConstraint.parentIdealSize.SetSize(TEST_CONTAINER_SIZE);
+    auto switchSize = switchLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_NE(switchSize, TEST_CONTAINER_SIZE);
+
+    /**
+     * @tc.steps: step3. set widthLayoutPolicy_ and heightLayoutPolicy_ to WRAP_CONTENT,WRAP_CONTENT.
+     * @tc.expected: step3. switchSize is not equal to TEST_CONTAINER_SIZE.
+     */
+    LayoutPolicyProperty layoutPolicyProperty;
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::WRAP_CONTENT;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::WRAP_CONTENT;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    switchSize = switchLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_NE(switchSize, TEST_CONTAINER_SIZE);
+
+    /**
+     * @tc.steps: step4. set widthLayoutPolicy_ and heightLayoutPolicy_ to TEST_CONTAINER_SIZE，NO_MATCH.
+     * @tc.expected: step4. switchSize is equal to TEST_CONTAINER_SIZE.
+     */
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::WRAP_CONTENT;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    switchSize = switchLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_NE(switchSize, TEST_CONTAINER_SIZE);
+    /**
+     * @tc.steps: step4. set widthLayoutPolicy_ and heightLayoutPolicy_ to WRAP_CONTENT,NO_MATCH.
+     * @tc.expected: step4. switchSize is equal to TEST_CONTAINER_SIZE.
+     */
+    contentConstraint.selfIdealSize.SetSize(TEST_CONTAINER_SIZE);
+    switchSize = switchLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_EQ(switchSize, TEST_CONTAINER_SIZE);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: ToggleWrapContentTest002
+ * @tc.desc: Test toggle switch fixIdealSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleSwitchTestNg, ToggleWrapContentTest002, TestSize.Level1)
+{
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    int32_t setApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_TWELVE);
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+
+    /**
+     * @tc.steps: step1. create switch and get frameNode.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(ToggleType::SWITCH, IS_ON);
+    auto switchFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(switchFrameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get switchPattern and switchWrapper.
+     * @tc.expected: step2. get switchPattern success.
+     */
+    auto switchPattern = AceType::DynamicCast<SwitchPattern>(switchFrameNode->GetPattern());
+    EXPECT_NE(switchPattern, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(switchFrameNode, nullptr);
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(switchFrameNode, geometryNode, switchFrameNode->GetLayoutProperty());
+    auto switchLayoutAlgorithm = AceType::DynamicCast<SwitchLayoutAlgorithm>(switchPattern->CreateLayoutAlgorithm());
+    EXPECT_NE(switchLayoutAlgorithm, nullptr);
+    layoutWrapper.SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(switchLayoutAlgorithm));
+
+    /**
+     * @tc.steps: step3. set widthLayoutPolicy_ and heightLayoutPolicy_ to NO_MATCH,WRAP_CONTENT.
+     * @tc.expected: step3. switchSize is not equal to TEST_CONTAINER_SIZE.
+     */
+    auto layoutProperty = layoutWrapper.GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    LayoutConstraintF contentConstraint;
+    contentConstraint.parentIdealSize.SetSize(TEST_CONTAINER_SIZE);
+    LayoutPolicyProperty layoutPolicyProperty;
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::WRAP_CONTENT;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    auto switchSize = switchLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_NE(switchSize, TEST_CONTAINER_SIZE);
+
+    /**
+     * @tc.steps: step4. set widthLayoutPolicy_ and heightLayoutPolicy_ to WRAP_CONTENT,NO_MATCH.
+     * @tc.expected: step4. switchSize is equal to TEST_CONTAINER_SIZE.
+     */
+    contentConstraint.selfIdealSize.SetSize(TEST_CONTAINER_SIZE);
+    switchSize = switchLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_EQ(switchSize, TEST_CONTAINER_SIZE);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+
+    /**
+     * @tc.steps: step3. set widthLayoutPolicy_ and heightLayoutPolicy_ to NO_MATCH.
+     */
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    float frameWidth = 0.0f;
+    float frameHeight = 0.0f;
+    switchLayoutAlgorithm->LayoutPolicyIsWrapContent(contentConstraint, layoutPolicyProperty,
+        frameWidth, frameHeight);
+    EXPECT_FLOAT_EQ(frameWidth, TEST_ZERO);
+    EXPECT_FLOAT_EQ(frameHeight, TEST_ZERO);
+}
+
+/**
+ * @tc.name: OnColorConfigurationUpdate001
+ * @tc.desc: test OnColorConfigurationUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleSwitchTestNg, OnColorConfigurationUpdate001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize toggle model and validate dependencies.
+     * @tc.expected: step1. Frame node, paint property, pipeline context, pattern, and theme are created and valid.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(ToggleType::SWITCH, true);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<SwitchPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto pipelineContext = PipelineBase::GetCurrentContextSafely();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto pattern = frameNode->GetPattern<SwitchPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto switchTheme = pipelineContext->GetTheme<SwitchTheme>();
+    ASSERT_NE(switchTheme, nullptr);
+
+    /**
+     * @tc.steps: step2. Configure theme colors and initialize paint method and modifier.
+     * @tc.expected: step2. Theme colors are set to RED, paint method and modifier are created.
+     */
+    switchTheme->activeColor_ = Color::RED;
+    switchTheme->pointColor_ = Color::RED;
+    switchTheme->inactiveColor_ = Color::RED;
+    pattern->paintMethod_ = AceType::MakeRefPtr<SwitchPaintMethod>();
+    ASSERT_NE(pattern->paintMethod_, nullptr);
+    OptionalSize<float> size(1.0f, 2.0f);
+    pattern->paintMethod_->switchModifier_ =
+        AceType::MakeRefPtr<SwitchModifier>(SizeF(), OffsetF(), 0.0, false, Color::RED, Color::RED, 0.0f);
+
+    /**
+     * @tc.steps: step3. First call to OnColorConfigurationUpdate with default state.
+     * @tc.expected: step3. No user-set colors, all properties should update to theme defaults.
+     */
+    pattern->OnColorConfigurationUpdate();
+
+    /**
+     * @tc.steps: step4. Simulate config change and set user preferences.
+     * @tc.expected: step4. Selected color updates to theme's RED when not set by user.
+     */
+    g_isConfigChangePerform = true;
+    paintProperty->UpdateSelectedColorSetByUser(false);
+    paintProperty->UpdateSwitchPointColorSetByUser(true);
+    paintProperty->UpdateUnselectedColorSetByUser(true);
+    pattern->OnColorConfigurationUpdate();
+    auto ret = paintProperty->GetSelectedColor();
+    EXPECT_EQ(ret.value_or(Color::BLACK), Color::RED);
+
+    /**
+     * @tc.steps: step5. Reverse user preferences and re-run update.
+     * @tc.expected: step5. Switch point and unselected colors update to theme's RED when not set by user.
+     */
+    paintProperty->UpdateSelectedColorSetByUser(true);
+    paintProperty->UpdateSwitchPointColorSetByUser(false);
+    paintProperty->UpdateUnselectedColorSetByUser(false);
+    pattern->OnColorConfigurationUpdate();
+    EXPECT_EQ(paintProperty->GetSwitchPointColor(), Color::RED);
+    EXPECT_EQ(paintProperty->GetUnselectedColor(), Color::RED);
+    g_isConfigChangePerform = false;
 }
 } // namespace OHOS::Ace::NG
