@@ -4340,6 +4340,7 @@ void TextFieldPattern::OnDetachFromFrameNode(FrameNode* node)
     }
     pipeline->RemoveWindowSizeChangeCallback(node->GetId());
     pipeline->RemoveOnAreaChangeNode(node->GetId());
+    pipeline->RemoveWindowFocusChangedCallback(node->GetId());
 }
 
 void TextFieldPattern::CloseSelectOverlay()
@@ -9583,6 +9584,28 @@ void TextFieldPattern::UnitResponseKeyEvent()
         CHECK_NULL_VOID(selectPattern);
         selectPattern->ShowSelectMenu();
     }
+}
+
+void TextFieldPattern::RegisterWindowFocusChangeCallback()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    // call RegisterWindowSizeCallbackMultiThread() by multi thread
+    FREE_NODE_CHECK(host, RegisterWindowFocusChangeCallback);
+    if (isWindowFocusChangeCallbackRegisted_) {
+        return;
+    }
+    isWindowFocusChangeCallbackRegisted_ = true;
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddWindowFocusChangedCallback(host->GetId());
+}
+
+void TextFieldPattern::OnWindowFocused()
+{
+    CHECK_NULL_VOID(HasFocus());
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "TextField Need To Reattach InputMethod");
+    RequestKeyboardByFocusSwitch();
 }
 
 void TextFieldPattern::ScrollToSafeArea() const

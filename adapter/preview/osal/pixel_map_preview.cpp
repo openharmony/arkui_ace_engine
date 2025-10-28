@@ -27,6 +27,11 @@ RefPtr<PixelMap> PixelMap::Create(const InitializationOptions& opts)
     return nullptr;
 }
 
+RefPtr<PixelMap> PixelMap::Create(const std::shared_ptr<Media::PixelMap>& pixelMap)
+{
+    return nullptr;
+}
+
 RefPtr<PixelMap> PixelMap::CreatePixelMap(void* rawPtr)
 {
     return nullptr;

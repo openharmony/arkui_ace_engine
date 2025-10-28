@@ -22,6 +22,21 @@ interface routerInfo {
 
 let routerData: routerInfo[] = [
   { url: 'pages/waterflow/waterFlowModifier/waterFlowFrictionModifier', info: 'Friction' },
+  { url: "pages/waterflow/modifier/AlwaysTopDown/LazyVertical", info: "AlwaysTopDown_LazyVertical"},
+  { url: "pages/waterflow/modifier/AlwaysTopDown/LazyVerticalSections", info: "AlwaysTopDown_LazyVerticalSections"},
+  { url: "pages/waterflow/modifier/AlwaysTopDown/OriVertical", info: "AlwaysTopDown_OriVertical"},
+  { url: "pages/waterflow/modifier/AlwaysTopDown/OriVerticalSections", info: "AlwaysTopDown_OriVerticalSections"},
+  { url: "pages/waterflow/modifier/AlwaysTopDown/RepeatVertical", info: "AlwaysTopDown_RepeatVertical"},
+  { url: "pages/waterflow/modifier/AlwaysTopDown/RepeatVerticalSections", info: "AlwaysTopDown_RepeatVerticalSections"},
+  { url: "pages/waterflow/modifier/SlidingWindow/LazyVertical", info: "SlidingWindow_LazyVertical"},
+  { url: "pages/waterflow/modifier/SlidingWindow/LazyVerticalSections", info: "SlidingWindow_LazyVerticalSections"},
+  { url: "pages/waterflow/modifier/SlidingWindow/OriVertical", info: "SlidingWindow_OriVertical"},
+  { url: "pages/waterflow/modifier/SlidingWindow/OriVerticalSections", info: "SlidingWindow_OriVerticalSections"},
+  { url: "pages/waterflow/modifier/SlidingWindow/RepeatVertical", info: "SlidingWindow_RepeatVertical"},
+  { url: "pages/waterflow/modifier/SlidingWindow/RepeatVerticalSections", info: "SlidingWindow_RepeatVerticalSections"},
+  { url: "pages/waterflow/modifier/normal/LazyVertical", info: "normal_LazyVertical"},
+  { url: "pages/waterflow/modifier/normal/OriVertical", info: "normal_OriVertical"},
+  { url: "pages/waterflow/modifier/normal/RepeatVertical", info: "normal_RepeatVertical"},
 ]
 
 @Entry

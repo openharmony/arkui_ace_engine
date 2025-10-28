@@ -74,6 +74,28 @@ Opt_LengthMetrics GetOptLengthMetricsFromCalcLength(const std::optional<CalcLeng
     }
     return result;
 }
+constexpr int32_t ERROR_CODE_NO_ERROR = 0;
+constexpr int32_t ERROR_CODE_NODE_IS_ADOPTED = 106206;
+constexpr int32_t ERROR_CODE_NODE_HAS_PARENT = 106207;
+constexpr int32_t ERROR_CODE_NODE_CAN_NOT_BE_ADOPTED = 106208;
+constexpr int32_t ERROR_CODE_NODE_CAN_NOT_ADOPT_TO = 106209;
+constexpr int32_t ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN = 106210;
+constexpr int32_t ERROR_CODE_RENDER_IS_FROM_FRAME_NODE = 106406;
+constexpr int32_t ERROR_CODE_RENDER_HAS_INVALID_FRAME_NODE = 106407;
+constexpr int32_t ERROR_CODE_RENDER_NOT_ADOPTED_NODE = 106408;
+constexpr int32_t ERROR_CODE_PARAM_INVALID = 401;
+
+bool CheckChildCanBeAdopted(RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_RETURN(node, false);
+    return node->IsCNode() || node->IsArkTsFrameNode() || node->GetIsRootBuilderNode();
+}
+
+bool CheckParentCanAdopt(RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_RETURN(node, false);
+    return node->IsCNode() || node->IsArkTsFrameNode();
+}
 } // namespace
 namespace FrameNodeExtenderAccessor {
 void DestroyPeerImpl(Ark_FrameNode peer)
@@ -101,40 +123,47 @@ Ark_Boolean IsModifiableImpl(Ark_NativePointer peer)
     auto isModifiable = peerNode->GetTag() == "CustomFrameNode";
     return Converter::ArkValue<Ark_Boolean>(isModifiable);
 }
-void AppendChildImpl(Ark_FrameNode peer,
-                     Ark_FrameNode child)
+Ark_Float64 AppendChildImpl(Ark_FrameNode peer,
+                            Ark_FrameNode child)
 {
     auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
-    CHECK_NULL_VOID(peerNode);
+    CHECK_NULL_RETURN(peerNode, Converter::ArkValue<Ark_Float64>(ERROR_CODE_PARAM_INVALID));
     auto currentUINodeRef = AceType::DynamicCast<UINode>(peerNode);
-    CHECK_NULL_VOID(currentUINodeRef);
-
+    CHECK_NULL_RETURN(currentUINodeRef, Converter::ArkValue<Ark_Float64>(ERROR_CODE_PARAM_INVALID));
+    
     auto childPeerNode = FrameNodePeer::GetFrameNodeByPeer(child);
-    CHECK_NULL_VOID(childPeerNode);
+    CHECK_NULL_RETURN(childPeerNode, Converter::ArkValue<Ark_Float64>(ERROR_CODE_PARAM_INVALID));
     auto childNode = AceType::DynamicCast<UINode>(childPeerNode);
-    CHECK_NULL_VOID(childNode);
+    CHECK_NULL_RETURN(childNode, Converter::ArkValue<Ark_Float64>(ERROR_CODE_PARAM_INVALID));
+    if (childNode->IsAdopted()) {
+        return Converter::ArkValue<Ark_Float64>(ERROR_CODE_NODE_IS_ADOPTED);
+    }
     if (childNode->GetParent() != nullptr && childNode->GetParent() != currentUINodeRef) {
-        return;
+        return Converter::ArkValue<Ark_Float64>(ERROR_CODE_PARAM_INVALID);
     }
     currentUINodeRef->AddChild(childNode);
     currentUINodeRef->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
+    return Converter::ArkValue<Ark_Float64>(ERROR_CODE_NO_ERROR);
 }
-void InsertChildAfterImpl(Ark_NativePointer peer,
-                          Ark_NativePointer child,
-                          Ark_NativePointer sibling)
+Ark_Float64 InsertChildAfterImpl(Ark_NativePointer peer,
+                                 Ark_NativePointer child,
+                                 Ark_NativePointer sibling)
 {
     auto peerNodePeer = reinterpret_cast<FrameNodePeer*>(peer);
     auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peerNodePeer);
-    CHECK_NULL_VOID(peerNode);
+    CHECK_NULL_RETURN(peerNode, Converter::ArkValue<Ark_Float64>(ERROR_CODE_PARAM_INVALID));
     auto currentUINodeRef = AceType::DynamicCast<UINode>(peerNode);
-    CHECK_NULL_VOID(currentUINodeRef);
+    CHECK_NULL_RETURN(currentUINodeRef, Converter::ArkValue<Ark_Float64>(ERROR_CODE_PARAM_INVALID));
 
     auto childPeerNodePeer = reinterpret_cast<FrameNodePeer*>(child);
     auto childPeerNode = FrameNodePeer::GetFrameNodeByPeer(childPeerNodePeer);
-    CHECK_NULL_VOID(childPeerNode);
+    CHECK_NULL_RETURN(childPeerNode, Converter::ArkValue<Ark_Float64>(ERROR_CODE_PARAM_INVALID));
     auto childNode = AceType::DynamicCast<UINode>(childPeerNode);
+    if (childNode->IsAdopted()) {
+        return Converter::ArkValue<Ark_Float64>(ERROR_CODE_NODE_IS_ADOPTED);
+    }
     if (childNode->GetParent() != nullptr) {
-        return;
+        return Converter::ArkValue<Ark_Float64>(ERROR_CODE_PARAM_INVALID);
     }
     auto index = -1;
     if (sibling) {
@@ -146,6 +175,7 @@ void InsertChildAfterImpl(Ark_NativePointer peer,
 
     currentUINodeRef->AddChild(childNode, index + 1);
     currentUINodeRef->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
+    return Converter::ArkValue<Ark_Float64>(ERROR_CODE_NO_ERROR);
 }
 void RemoveChildImpl(Ark_FrameNode peer,
                      Ark_FrameNode child)
@@ -684,19 +714,22 @@ Ark_Number GetIdByFrameNodeImpl(Ark_NativePointer node)
     auto nodeId = currentNode->GetId();
     return Converter::ArkValue<Ark_Number>(nodeId);
 }
-void MoveToImpl(Ark_FrameNode peer,
-                Ark_FrameNode targetParent,
-                const Ark_Number* index)
+Ark_Float64 MoveToImpl(Ark_FrameNode peer,
+                       Ark_FrameNode targetParent,
+                       const Ark_Number* index)
 {
     auto indexInt = Converter::Convert<int32_t>(*index);
     auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
-    CHECK_NULL_VOID(peerNode);
+    CHECK_NULL_RETURN(peerNode, Converter::ArkValue<Ark_Float64>(ERROR_CODE_PARAM_INVALID));
     auto moveNode = AceType::DynamicCast<UINode>(peerNode);
-    CHECK_NULL_VOID(moveNode);
+    CHECK_NULL_RETURN(moveNode, Converter::ArkValue<Ark_Float64>(ERROR_CODE_PARAM_INVALID));
+    if (moveNode->IsAdopted()) {
+        return Converter::ArkValue<Ark_Float64>(ERROR_CODE_NODE_IS_ADOPTED);
+    }
     auto targetParentPeerNode = FrameNodePeer::GetFrameNodeByPeer(targetParent);
-    CHECK_NULL_VOID(targetParentPeerNode);
+    CHECK_NULL_RETURN(targetParentPeerNode, Converter::ArkValue<Ark_Float64>(ERROR_CODE_PARAM_INVALID));
     auto toNode = AceType::DynamicCast<UINode>(targetParentPeerNode);
-    CHECK_NULL_VOID(toNode);
+    CHECK_NULL_RETURN(toNode, Converter::ArkValue<Ark_Float64>(ERROR_CODE_PARAM_INVALID));
     static const std::vector<const char*> nodeTypeArray = {
         OHOS::Ace::V2::STACK_ETS_TAG,
         OHOS::Ace::V2::XCOMPONENT_ETS_TAG,
@@ -704,7 +737,7 @@ void MoveToImpl(Ark_FrameNode peer,
     };
     auto pos = std::find(nodeTypeArray.begin(), nodeTypeArray.end(), moveNode->GetTag());
     if (pos == nodeTypeArray.end()) {
-        return;
+        return Converter::ArkValue<Ark_Float64>(ERROR_CODE_PARAM_INVALID);
     }
     auto oldParent = moveNode->GetParent();
     moveNode->setIsMoving(true);
@@ -721,6 +754,7 @@ void MoveToImpl(Ark_FrameNode peer,
     }
     toNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     moveNode->setIsMoving(false);
+    return Converter::ArkValue<Ark_Float64>(ERROR_CODE_NO_ERROR);
 }
 Ark_Number GetFirstChildIndexWithoutExpandImpl(Ark_FrameNode peer)
 {
@@ -890,7 +924,7 @@ Ark_Boolean CancelAnimationsImpl(Ark_FrameNode peer, const Array_AnimationProper
     ContainerScope scope(containerId);
     CHECK_NULL_RETURN(properties, false);
     std::vector<AnimationPropertyType> propertyVec;
-    for (uint32_t i = 0; i < properties->length; ++i) {
+    for (int i = 0; i < properties->length; ++i) {
         auto propertyType = static_cast<AnimationPropertyType>(properties->array[i]);
         if (std::find(propertyVec.begin(), propertyVec.end(), propertyType) == propertyVec.end()) {
             propertyVec.emplace_back(propertyType);
@@ -1043,6 +1077,59 @@ Array_Float64 ConvertPointImpl(Ark_FrameNode peer, Ark_FrameNode node, const Ark
     Array_Float64 resultValue = Converter::ArkValue<Array_Float64>(indexes, Converter::FC);
     return resultValue;
 }
+Ark_Float64 AdoptChildImpl(Ark_FrameNode peer, Ark_FrameNode child)
+{
+    auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_RETURN(peerNode, Converter::ArkValue<Ark_Float64>(ERROR_CODE_NODE_CAN_NOT_ADOPT_TO));
+    auto currentUINodeRef = AceType::DynamicCast<FrameNode>(peerNode);
+    CHECK_NULL_RETURN(currentUINodeRef, Converter::ArkValue<Ark_Float64>(ERROR_CODE_NODE_CAN_NOT_ADOPT_TO));
+    bool peerNodeCanAdopt = CheckParentCanAdopt(currentUINodeRef);
+    if (!peerNodeCanAdopt) {
+        return Converter::ArkValue<Ark_Float64>(ERROR_CODE_NODE_CAN_NOT_ADOPT_TO);
+    }
+    auto childPeerNode = FrameNodePeer::GetFrameNodeByPeer(child);
+    CHECK_NULL_RETURN(childPeerNode, Converter::ArkValue<Ark_Float64>(ERROR_CODE_NODE_CAN_NOT_BE_ADOPTED));
+    auto childNodeRef = AceType::DynamicCast<FrameNode>(childPeerNode);
+    CHECK_NULL_RETURN(childNodeRef, Converter::ArkValue<Ark_Float64>(ERROR_CODE_NODE_CAN_NOT_BE_ADOPTED));
+    bool childCanBeAdopted = CheckChildCanBeAdopted(childNodeRef);
+    if (!childCanBeAdopted) {
+        return Converter::ArkValue<Ark_Float64>(ERROR_CODE_NODE_CAN_NOT_BE_ADOPTED);
+    }
+    if (childNodeRef->GetParent()) {
+        return Converter::ArkValue<Ark_Float64>(ERROR_CODE_NODE_HAS_PARENT);
+    }
+    currentUINodeRef->AdoptChild(childNodeRef);
+    return Converter::ArkValue<Ark_Float64>(ERROR_CODE_NO_ERROR);
+}
+
+Ark_Float64 RemoveAdoptedChildImpl(Ark_FrameNode peer, Ark_FrameNode child)
+{
+    auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_RETURN(peerNode, Converter::ArkValue<Ark_Float64>(ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN));
+    auto currentUINodeRef = AceType::DynamicCast<FrameNode>(peerNode);
+    CHECK_NULL_RETURN(currentUINodeRef, Converter::ArkValue<Ark_Float64>(ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN));
+
+    auto childPeerNode = FrameNodePeer::GetFrameNodeByPeer(child);
+    CHECK_NULL_RETURN(childPeerNode, Converter::ArkValue<Ark_Float64>(ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN));
+    auto childNodeRef = AceType::DynamicCast<FrameNode>(childPeerNode);
+    CHECK_NULL_RETURN(childNodeRef, Converter::ArkValue<Ark_Float64>(ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN));
+
+    if (!childNodeRef->IsAdopted()) {
+        return Converter::ArkValue<Ark_Float64>(ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN);
+    }
+    auto adoptParent = childNodeRef->GetAdoptParent();
+    CHECK_NULL_RETURN(adoptParent, Converter::ArkValue<Ark_Float64>(ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN));
+    if (adoptParent->GetId() != currentUINodeRef->GetId()) {
+        return Converter::ArkValue<Ark_Float64>(ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN);
+    }
+    if (!currentUINodeRef->RemoveAdoptedChild(childNodeRef)) {
+        return Converter::ArkValue<Ark_Float64>(ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN);
+    }
+    auto renderContext = peerNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, Converter::ArkValue<Ark_Float64>(ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN));
+    renderContext->RemoveFromTree();
+    return Converter::ArkValue<Ark_Float64>(ERROR_CODE_NO_ERROR);
+}
 } // FrameNodeExtenderAccessor
 const GENERATED_ArkUIFrameNodeExtenderAccessor* GetFrameNodeExtenderAccessor()
 {
@@ -1111,6 +1198,8 @@ const GENERATED_ArkUIFrameNodeExtenderAccessor* GetFrameNodeExtenderAccessor()
         FrameNodeExtenderAccessor::GetCommonEventImpl,
         FrameNodeExtenderAccessor::GetRenderNodeImpl,
         FrameNodeExtenderAccessor::ConvertPointImpl,
+        FrameNodeExtenderAccessor::AdoptChildImpl,
+        FrameNodeExtenderAccessor::RemoveAdoptedChildImpl,
     };
     return &FrameNodeExtenderAccessorImpl;
 }
