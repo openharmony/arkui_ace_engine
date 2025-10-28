@@ -139,9 +139,6 @@ export class UIUtilsImpl {
         if (!value || typeof value !== 'object') {
             return value as T;
         }
-        if (isDynamicObject(value)) {
-            value = getRawObject(value);
-        }
         const isProxy = StateMgmtTool.isObjectLiteral(value);
         if (value instanceof ObserveWrappedBase || !(UIUtilsImpl.checkIsBuitInType(value) || isProxy)) {
             return value as T;
