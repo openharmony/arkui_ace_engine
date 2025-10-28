@@ -174,7 +174,7 @@ public:
 
     void SetTouchStar(int32_t touchStar, const RefPtr<FrameNode>& host)
     {
-        if (touchStar < 0 || touchStar >= starNum_->Get() || touchStar_->Get() != touchStar) {
+        if (touchStar < 0 || touchStar >= starNum_->Get() || (touchStar_ && (touchStar_->Get() != touchStar))) {
             SetHoverState(RatingAnimationType::NONE, host);
         }
         if (touchStar_) {
