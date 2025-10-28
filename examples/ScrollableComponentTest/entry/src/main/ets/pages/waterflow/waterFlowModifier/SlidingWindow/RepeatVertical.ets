@@ -17,7 +17,7 @@
  * Description: WaterFlow组件支持基于断点自适应列数
  * Writer: renxiaowen
  */
- 
+
 // Index.ets
 import { WaterFlowDataSource } from '../../WaterFlowDataSource';
 import { image } from '@kit.ImageKit';
@@ -219,7 +219,7 @@ struct WaterFlowDemo55 {
           .onClick(() => {
             this.paddingIndex = (this.paddingIndex + 1) % this.paddings.length;
           })
-        Button("column: " + this.waterFlowMod.columnList[this.waterFlowMod.index]).onClick(() => {
+        Button('column: ' + this.waterFlowMod.columnList[this.waterFlowMod.index]).onClick(() => {
           this.waterFlowMod.index++;
           this.waterFlowMod.index = this.waterFlowMod.index % this.waterFlowMod.columnList.length;
         })
@@ -264,7 +264,7 @@ struct WaterFlowDemo55 {
               FlowItem() {
                 // 使用可复用组件，提升性能
                 Column() {
-                  Text("R" + ri.item).fontSize(12).height('16')
+                  Text('R' + ri.item).fontSize(12).height('16')
                 }
                 .height(ri.item * 11)
               }
