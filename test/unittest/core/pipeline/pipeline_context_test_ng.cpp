@@ -2654,198 +2654,243 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg129, TestSize.Level1)
 }
 
 /**
- * @tc.name: FlushVsync_TpFlushFrameDisplayPeriod_Test033
- * @tc.desc: Test FlushVsync with TpFlushFrameDisplayPeriod
+ * @tc.name: PipelineContextTestNg_TouchOptimizer_NullPtr_Test
+ * @tc.desc: Test PipelineContext functions when touchOptimizer_ is null
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTestNg, FlushVsync_TpFlushFrameDisplayPeriod_Test033, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_TouchOptimizer_NullPtr_Test, TestSize.Level1)
 {
     /**
-     * @tc.steps: Create mock ResSchedTouchOptimizer and setup expectations
-     * @tc.expected: RequestFrame should be called when TpFlushFrameDisplayPeriod is true
+     * @tc.steps: Create pipeline context with null touchOptimizer and test functions
+     * @tc.expected: Functions should handle null pointer gracefully
      */
     ASSERT_NE(context_, nullptr);
-    context_->SetupRootElement();
     
-    // Setup mock window to track RequestFrame calls
-    auto mockWindow = (MockWindow*)(context_->window_.get());
-    ASSERT_NE(mockWindow, nullptr);
+    // 保存原始的touchOptimizer
+    auto originalTouchOptimizer = std::move(context_->touchOptimizer_);
     
-    // Reset mock expectations
-    testing::Mock::VerifyAndClearExpectations(mockWindow);
-    testing::Mock::AllowLeak(mockWindow);
+    // 设置touchOptimizer为nullptr
+    context_->touchOptimizer_ = nullptr;
     
-    // Setup ResSchedTouchOptimizer mock
-    ResSchedTouchOptimizer::GetInstance().isTpFlushFrameDisplayPeriod_ = true;
-    ResSchedTouchOptimizer::GetInstance().isFristFrameAfterTpFlushFrameDisplayPeriod_ = false;
-    
-    // Expect RequestFrame to be called
-    EXPECT_CALL(*mockWindow, RequestFrame()).Times(AtLeast(1));
-    
-    // Call FlushVsync
+    // 测试FlushVsync中touchOptimizer_为null的情况
     context_->FlushVsync(NANO_TIME_STAMP, FRAME_COUNT);
     
-    // Verify expectations
-    testing::Mock::VerifyAndClearExpectations(mockWindow);
-    
-    // Reset for next test
-    ResSchedTouchOptimizer::GetInstance().isTpFlushFrameDisplayPeriod_ = false;
-}
-
-/**
- * @tc.name: FlushVsync_FirstFrameAfterTpFlush_Test034
- * @tc.desc: Test FlushVsync with FirstFrameAfterTpFlushFrameDisplayPeriod
- * @tc.type: FUNC
- */
-HWTEST_F(PipelineContextTestNg, FlushVsync_FirstFrameAfterTpFlush_Test034, TestSize.Level1)
-{
-    /**
-     * @tc.steps: Create mock ResSchedTouchOptimizer and setup expectations for first frame after TP flush
-     * @tc.expected: RequestFrame should be called when FirstFrameAfterTpFlushFrameDisplayPeriod is true
-     */
-    ASSERT_NE(context_, nullptr);
-    context_->SetupRootElement();
-    
-    // Setup mock window to track RequestFrame calls
-    auto mockWindow = (MockWindow*)(context_->window_.get());
-    ASSERT_NE(mockWindow, nullptr);
-    
-    // Reset mock expectations
-    testing::Mock::VerifyAndClearExpectations(mockWindow);
-    testing::Mock::AllowLeak(mockWindow);
-    
-    // Setup ResSchedTouchOptimizer mock
-    ResSchedTouchOptimizer::GetInstance().isTpFlushFrameDisplayPeriod_ = false;
-    ResSchedTouchOptimizer::GetInstance().isFristFrameAfterTpFlushFrameDisplayPeriod_ = true;
-    
-    // Expect RequestFrame to be called
-    EXPECT_CALL(*mockWindow, RequestFrame()).Times(AtLeast(1));
-    
-    // Call FlushVsync
-    context_->FlushVsync(NANO_TIME_STAMP, FRAME_COUNT);
-    
-    // Verify expectations
-    testing::Mock::VerifyAndClearExpectations(mockWindow);
-    
-    // Reset for next test
-    ResSchedTouchOptimizer::GetInstance().isFristFrameAfterTpFlushFrameDisplayPeriod_ = false;
-}
-
-/**
- * @tc.name: OnTouchEvent_NeedTpFlushVsyncTrue_Test035
- * @tc.desc: Test OnTouchEvent with NeedTpFlushVsync returning true
- * @tc.type: FUNC
- */
-HWTEST_F(PipelineContextTestNg, OnTouchEvent_NeedTpFlushVsyncTrue_Test035, TestSize.Level1)
-{
-    ASSERT_NE(context_, nullptr);
-    context_->SetupRootElement();
-    
-    auto mockWindow = (MockWindow*)(context_->window_.get());
-    ASSERT_NE(mockWindow, nullptr);
-    
-    testing::Mock::VerifyAndClearExpectations(mockWindow);
-    testing::Mock::AllowLeak(mockWindow);
-    
-    // Setup ResSchedTouchOptimizer mock
-    ResSchedTouchOptimizer::GetInstance().isTpFlushFrameDisplayPeriod_ = true;
-    
-    // Create a touch event
+    // 测试OnTouchEvent中touchOptimizer_为null的情况
     TouchEvent touchEvent;
     touchEvent.type = TouchType::MOVE;
     touchEvent.id = 1;
     touchEvent.x = 100.0f;
     touchEvent.y = 100.0f;
-    touchEvent.sourceTool = SourceTool::FINGER;
-    touchEvent.sourceType = SourceType::TOUCH;
-    
-    // Call OnTouchEvent
     context_->OnTouchEvent(touchEvent, false);
-    EXPECT_FALSE(ResSchedTouchOptimizer::GetInstance().isTpFlushFrameDisplayPeriod_);
-}
-
-/**
- * @tc.name: OnTouchEvent_NeedTpFlushVsyncFalse_Test036
- * @tc.desc: Test OnTouchEvent with NeedTpFlushVsync returning false
- * @tc.type: FUNC
- */
-HWTEST_F(PipelineContextTestNg, OnTouchEvent_NeedTpFlushVsyncFalse_Test036, TestSize.Level1)
-{
-    ASSERT_NE(context_, nullptr);
-    context_->SetupRootElement();
     
-    auto mockWindow = (MockWindow*)(context_->window_.get());
-    ASSERT_NE(mockWindow, nullptr);
-    
-    testing::Mock::VerifyAndClearExpectations(mockWindow);
-    testing::Mock::AllowLeak(mockWindow);
-    
-    ResSchedTouchOptimizer::GetInstance().isTpFlushFrameDisplayPeriod_ = false;
-    
-    TouchEvent touchEvent;
-    touchEvent.type = TouchType::MOVE;
-    touchEvent.id = 1;
-    touchEvent.x = 100.0f;
-    touchEvent.y = 100.0f;
-    touchEvent.sourceTool = SourceTool::FINGER;
-    touchEvent.sourceType = SourceType::TOUCH;
-    
-    // Call OnTouchEvent
-    context_->OnTouchEvent(touchEvent, false);
-    EXPECT_TRUE(context_->historyPointsById_.empty());
-}
-
-/**
- * @tc.name: ConsumeTouchEventsInterpolation_TpFlushFrameDisplay_Test037
- * @tc.desc: Test ConsumeTouchEventsInterpolation with TpFlushFrameDisplayPeriod
- * @tc.type: FUNC
- */
-HWTEST_F(PipelineContextTestNg, ConsumeTouchEventsInterpolation_TpFlushFrameDisplay_Test037, TestSize.Level1)
-{
-    /**
-     * @tc.steps: Test touch event interpolation when TpFlushFrameDisplayPeriod is true
-     * @tc.expected: Target timestamp should be adjusted when TpFlushFrameDisplayPeriod is true
-     */
-    ASSERT_NE(context_, nullptr);
-    context_->SetupRootElement();
-    
-    // Setup ResSchedTouchOptimizer mock
-    ResSchedTouchOptimizer::GetInstance().isTpFlushFrameDisplayPeriod_ = true;
-    
-    // Create test data
+    // 测试ConsumeTouchEventsInterpolation中touchOptimizer_为null的情况
     std::unordered_set<int32_t> ids = {1};
     std::map<int32_t, int32_t> timestampToIds = {{0, 1}};
     std::unordered_map<int32_t, TouchEvent> newIdTouchPoints;
     std::unordered_map<int, TouchEvent> idToTouchPoints;
     
-    // Create a touch event
+    context_->ConsumeTouchEventsInterpolation(ids, timestampToIds, newIdTouchPoints, idToTouchPoints);
+    
+    // 恢复原始的touchOptimizer
+    context_->touchOptimizer_ = std::move(originalTouchOptimizer);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg_TouchOptimizer_Exists_Test
+ * @tc.desc: Test PipelineContext functions when touchOptimizer_ exists
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_TouchOptimizer_Exists_Test, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Test functions with existing touchOptimizer_
+     * @tc.expected: Functions should work normally with touchOptimizer_
+     */
+    ASSERT_NE(context_, nullptr);
+    ASSERT_NE(context_->touchOptimizer_, nullptr);
+    
+    // 测试GetTouchOptimizer接口
+    auto touchOptimizer = context_->GetTouchOptimizer();
+    EXPECT_NE(touchOptimizer, nullptr);
+    
+    // 测试FlushVsync中touchOptimizer_存在的情况
+    context_->FlushVsync(NANO_TIME_STAMP, FRAME_COUNT);
+    
+    // 测试OnTouchEvent中touchOptimizer_存在的情况
     TouchEvent touchEvent;
+    touchEvent.type = TouchType::MOVE;
     touchEvent.id = 1;
-    touchEvent.time = std::chrono::high_resolution_clock::now();
-    idToTouchPoints.emplace(1, touchEvent);
+    touchEvent.x = 100.0f;
+    touchEvent.y = 100.0f;
+    touchEvent.sourceTool = SourceTool::FINGER;
+    context_->OnTouchEvent(touchEvent, false);
     
-    // Set resample timestamp to be greater than touch event timestamp
-    context_->resampleTimeStamp_ = static_cast<uint64_t>(
-        std::chrono::duration_cast<std::chrono::nanoseconds>(
-            touchEvent.time.time_since_epoch()).count()) + 1000000; // 1ms later
+    // 验证touchOptimizer_的状态
+    EXPECT_FALSE(context_->touchOptimizer_->GetIsTpFlushFrameDisplayPeriod());
+    EXPECT_FALSE(context_->touchOptimizer_->GetIsFirstFrameAfterTpFlushFrameDisplayPeriod());
+}
+
+/**
+ * @tc.name: PipelineContextTestNg_TpFlushFrameDisplayPeriod_Test
+ * @tc.desc: Test TpFlushFrameDisplayPeriod with touchOptimizer_
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_TpFlushFrameDisplayPeriod_Test, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Test TpFlushFrameDisplayPeriod functionality
+     * @tc.expected: RequestFrame should be called when TpFlushFrameDisplayPeriod is true
+     */
+    ASSERT_NE(context_, nullptr);
+    ASSERT_NE(context_->touchOptimizer_, nullptr);
+    context_->SetupRootElement();
     
-    // Call the method (private, so we test indirectly through touch event processing)
-    // We'll test this by triggering the touch event processing flow
-    TouchEvent inputEvent;
-    inputEvent.type = TouchType::MOVE;
-    inputEvent.id = 1;
-    inputEvent.x = 100.0f;
-    inputEvent.y = 100.0f;
-    context_->touchEvents_.push_back(inputEvent);
+    auto mockWindow = (MockWindow*)(context_->window_.get());
+    ASSERT_NE(mockWindow, nullptr);
     
-    // Process touch events
-    context_->FlushTouchEvents();
+    testing::Mock::VerifyAndClearExpectations(mockWindow);
+    testing::Mock::AllowLeak(mockWindow);
     
-    // Verify that touch events were processed
-    EXPECT_TRUE(context_->touchEvents_.empty());
+    // 设置touchOptimizer_的状态
+    context_->touchOptimizer_->isTpFlushFrameDisplayPeriod_ = true;
+    context_->touchOptimizer_->isFristFrameAfterTpFlushFrameDisplayPeriod_ = false;
     
-    // Reset for next test
-    ResSchedTouchOptimizer::GetInstance().isTpFlushFrameDisplayPeriod_ = false;
+    // 期望RequestFrame被调用
+    EXPECT_CALL(*mockWindow, RequestFrame()).Times(AtLeast(1));
+    
+    // 调用FlushVsync
+    context_->FlushVsync(NANO_TIME_STAMP, FRAME_COUNT);
+    
+    testing::Mock::VerifyAndClearExpectations(mockWindow);
+    
+    // 重置状态
+    context_->touchOptimizer_->isTpFlushFrameDisplayPeriod_ = false;
+}
+
+/**
+ * @tc.name: PipelineContextTestNg_FirstFrameAfterTpFlush_Test
+ * @tc.desc: Test FirstFrameAfterTpFlushFrameDisplayPeriod with touchOptimizer_
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_FirstFrameAfterTpFlush_Test, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Test FirstFrameAfterTpFlushFrameDisplayPeriod functionality
+     * @tc.expected: RequestFrame should be called when FirstFrameAfterTpFlushFrameDisplayPeriod is true
+     */
+    ASSERT_NE(context_, nullptr);
+    ASSERT_NE(context_->touchOptimizer_, nullptr);
+    context_->SetupRootElement();
+    
+    auto mockWindow = (MockWindow*)(context_->window_.get());
+    ASSERT_NE(mockWindow, nullptr);
+    
+    testing::Mock::VerifyAndClearExpectations(mockWindow);
+    testing::Mock::AllowLeak(mockWindow);
+    
+    // 设置touchOptimizer_的状态
+    context_->touchOptimizer_->isTpFlushFrameDisplayPeriod_ = false;
+    context_->touchOptimizer_->isFristFrameAfterTpFlushFrameDisplayPeriod_ = true;
+    
+    // 期望RequestFrame被调用
+    EXPECT_CALL(*mockWindow, RequestFrame()).Times(AtLeast(1));
+    
+    // 调用FlushVsync
+    context_->FlushVsync(NANO_TIME_STAMP, FRAME_COUNT);
+    
+    testing::Mock::VerifyAndClearExpectations(mockWindow);
+    
+    // 重置状态
+    context_->touchOptimizer_->isFristFrameAfterTpFlushFrameDisplayPeriod_ = false;
+}
+
+/**
+ * @tc.name: PipelineContextTestNg_TouchEvent_NeedTpFlush_Test
+ * @tc.desc: Test OnTouchEvent with NeedTpFlushVsync returning true
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_TouchEvent_NeedTpFlush_Test, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Test OnTouchEvent when NeedTpFlushVsync returns true
+     * @tc.expected: FlushVsync should be called directly
+     */
+    ASSERT_NE(context_, nullptr);
+    ASSERT_NE(context_->touchOptimizer_, nullptr);
+    context_->SetupRootElement();
+    
+    auto mockWindow = (MockWindow*)(context_->window_.get());
+    ASSERT_NE(mockWindow, nullptr);
+    
+    testing::Mock::VerifyAndClearExpectations(mockWindow);
+    testing::Mock::AllowLeak(mockWindow);
+    
+    // 设置touchOptimizer_的状态以使NeedTpFlushVsync返回true
+    context_->touchOptimizer_->isTpFlushFrameDisplayPeriod_ = true;
+    context_->touchOptimizer_->slideAccepted_ = false; // 这将导致NeedTpFlushVsync返回true
+    
+    // 期望FlushTasks被调用
+    EXPECT_CALL(*mockWindow, FlushTasks(testing::_)).Times(AtLeast(1));
+    
+    // 创建触摸事件
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::MOVE;
+    touchEvent.id = 1;
+    touchEvent.x = 100.0f;
+    touchEvent.y = 100.0f;
+    touchEvent.sourceTool = SourceTool::FINGER;
+    touchEvent.sourceType = SourceType::TOUCH;
+    
+    // 调用OnTouchEvent
+    context_->OnTouchEvent(touchEvent, false);
+    
+    testing::Mock::VerifyAndClearExpectations(mockWindow);
+    
+    // 重置状态
+    context_->touchOptimizer_->isTpFlushFrameDisplayPeriod_ = false;
+    context_->touchOptimizer_->slideAccepted_ = true;
+}
+
+/**
+ * @tc.name: PipelineContextTestNg_TouchEvent_NoNeedTpFlush_Test
+ * @tc.desc: Test OnTouchEvent with NeedTpFlushVsync returning false
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_TouchEvent_NoNeedTpFlush_Test, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Test OnTouchEvent when NeedTpFlushVsync returns false
+     * @tc.expected: RequestFrame should be called
+     */
+    ASSERT_NE(context_, nullptr);
+    ASSERT_NE(context_->touchOptimizer_, nullptr);
+    context_->SetupRootElement();
+    
+    auto mockWindow = (MockWindow*)(context_->window_.get());
+    ASSERT_NE(mockWindow, nullptr);
+    
+    testing::Mock::VerifyAndClearExpectations(mockWindow);
+    testing::Mock::AllowLeak(mockWindow);
+    
+    // 设置touchOptimizer_的状态以使NeedTpFlushVsync返回false
+    context_->touchOptimizer_->isTpFlushFrameDisplayPeriod_ = false;
+    
+    // 期望RequestFrame被调用
+    EXPECT_CALL(*mockWindow, RequestFrame()).Times(AtLeast(1));
+    
+    // 创建触摸事件
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::MOVE;
+    touchEvent.id = 1;
+    touchEvent.x = 100.0f;
+    touchEvent.y = 100.0f;
+    touchEvent.sourceTool = SourceTool::FINGER;
+    touchEvent.sourceType = SourceType::TOUCH;
+    
+    // 调用OnTouchEvent
+    context_->OnTouchEvent(touchEvent, false);
+    
+    testing::Mock::VerifyAndClearExpectations(mockWindow);
 }
 } // namespace NG
 } // namespace OHOS::Ace
