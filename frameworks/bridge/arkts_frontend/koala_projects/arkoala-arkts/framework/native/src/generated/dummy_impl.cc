@@ -36913,6 +36913,608 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     } // RenderingContextSettingsAccessor
+    namespace RenderNodeExtenderAccessor {
+    Ark_NativePointer ConstructorRenderNodeImpl(Ark_Int32 nodeId)
+    {
+        if (!needGroupedLog(1))
+        {
+            return nullptr;
+        }
+        string out("constructorRenderNode(");
+        WriteToString(&out, nodeId);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    Ark_NativePointer GetDestroyImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return nullptr;
+        }
+        string out("getDestroy(");
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    void DestroyPeerImpl(Ark_RenderNode peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("destroyPeer(");
+        WriteToString(&out, peer);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetBackgroundColorImpl(Ark_RenderNode peer,
+                                Ark_Int32 backgroundColor)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setBackgroundColor(");
+        WriteToString(&out, peer);
+        out.append(", ");
+        WriteToString(&out, backgroundColor);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetClipToFrameImpl(Ark_RenderNode peer,
+                            Ark_Boolean clipToFrame)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setClipToFrame(");
+        WriteToString(&out, peer);
+        out.append(", ");
+        WriteToString(&out, clipToFrame);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetOpacityImpl(Ark_RenderNode peer,
+                        Ark_Float64 opacity)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setOpacity(");
+        WriteToString(&out, peer);
+        out.append(", ");
+        WriteToString(&out, opacity);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetSizeImpl(Ark_RenderNode peer,
+                     const Ark_Size* size,
+                     Ark_Int32 unitValue)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setSize(");
+        WriteToString(&out, peer);
+        out.append(", ");
+        WriteToString(&out, size);
+        out.append(", ");
+        WriteToString(&out, unitValue);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetPositionImpl(Ark_RenderNode peer,
+                         const Ark_Vector2* position,
+                         Ark_Int32 unitValue)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setPosition(");
+        WriteToString(&out, peer);
+        out.append(", ");
+        WriteToString(&out, position);
+        out.append(", ");
+        WriteToString(&out, unitValue);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetPivotImpl(Ark_RenderNode peer,
+                      const Ark_Vector2* pivot)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setPivot(");
+        WriteToString(&out, peer);
+        out.append(", ");
+        WriteToString(&out, pivot);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetScaleImpl(Ark_RenderNode peer,
+                      const Ark_Vector2* scale)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setScale(");
+        WriteToString(&out, peer);
+        out.append(", ");
+        WriteToString(&out, scale);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetTranslationImpl(Ark_RenderNode peer,
+                            const Ark_Vector2* translation)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setTranslation(");
+        WriteToString(&out, peer);
+        out.append(", ");
+        WriteToString(&out, translation);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetRotationImpl(Ark_RenderNode peer,
+                         const Ark_Vector3* rotation,
+                         Ark_Int32 unitValue)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setRotation(");
+        WriteToString(&out, peer);
+        out.append(", ");
+        WriteToString(&out, rotation);
+        out.append(", ");
+        WriteToString(&out, unitValue);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetTransformImpl(Ark_RenderNode peer,
+                          const Ark_Matrix4* transform)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setTransform(");
+        WriteToString(&out, peer);
+        out.append(", ");
+        WriteToString(&out, transform);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetShadowColorImpl(Ark_RenderNode peer,
+                            Ark_Int32 shadowColor)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setShadowColor(");
+        WriteToString(&out, peer);
+        out.append(", ");
+        WriteToString(&out, shadowColor);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetShadowOffsetImpl(Ark_RenderNode peer,
+                             const Ark_Vector2* shadowOffset,
+                             Ark_Int32 unitValue)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setShadowOffset(");
+        WriteToString(&out, peer);
+        out.append(", ");
+        WriteToString(&out, shadowOffset);
+        out.append(", ");
+        WriteToString(&out, unitValue);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetLabelImpl(Ark_RenderNode peer,
+                      const Ark_String* label)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setLabel(");
+        WriteToString(&out, peer);
+        out.append(", ");
+        WriteToString(&out, label);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetShadowAlphaImpl(Ark_RenderNode peer,
+                            Ark_Float64 shadowAlpha)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setShadowAlpha(");
+        WriteToString(&out, peer);
+        out.append(", ");
+        WriteToString(&out, shadowAlpha);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetShadowElevationImpl(Ark_RenderNode peer,
+                                Ark_Float64 shadowElevation)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setShadowElevation(");
+        WriteToString(&out, peer);
+        out.append(", ");
+        WriteToString(&out, shadowElevation);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetShadowRadiusImpl(Ark_RenderNode peer,
+                             Ark_Float64 shadowRadius)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setShadowRadius(");
+        WriteToString(&out, peer);
+        out.append(", ");
+        WriteToString(&out, shadowRadius);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetBorderStyleImpl(Ark_RenderNode peer,
+                            const Ark_NodeEdgeStyles* borderStyle)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setBorderStyle(");
+        WriteToString(&out, peer);
+        out.append(", ");
+        WriteToString(&out, borderStyle);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetBorderWidthImpl(Ark_RenderNode peer,
+                            const Ark_EdgeF64* borderWidth,
+                            Ark_Int32 unitValue)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setBorderWidth(");
+        WriteToString(&out, peer);
+        out.append(", ");
+        WriteToString(&out, borderWidth);
+        out.append(", ");
+        WriteToString(&out, unitValue);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetBorderColorImpl(Ark_RenderNode peer,
+                            const Ark_EdgeI32* borderColor)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setBorderColor(");
+        WriteToString(&out, peer);
+        out.append(", ");
+        WriteToString(&out, borderColor);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetBorderRadiusImpl(Ark_RenderNode peer,
+                             const Ark_BorderRadiuses_graphics* borderRadius,
+                             Ark_Int32 unitValue)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setBorderRadius(");
+        WriteToString(&out, peer);
+        out.append(", ");
+        WriteToString(&out, borderRadius);
+        out.append(", ");
+        WriteToString(&out, unitValue);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetMarkNodeGroupImpl(Ark_RenderNode peer,
+                              Ark_Boolean markNodeGroup)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setMarkNodeGroup(");
+        WriteToString(&out, peer);
+        out.append(", ");
+        WriteToString(&out, markNodeGroup);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetRectMaskImpl(Ark_RenderNode peer,
+                         const Ark_common2D_Rect* rect,
+                         const Ark_Number* fillColor,
+                         const Ark_Number* strokeColor,
+                         const Ark_Number* strokeWidth)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setRectMask(");
+        WriteToString(&out, peer);
+        out.append(", ");
+        WriteToString(&out, rect);
+        out.append(", ");
+        WriteToString(&out, fillColor);
+        out.append(", ");
+        WriteToString(&out, strokeColor);
+        out.append(", ");
+        WriteToString(&out, strokeWidth);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetCircleMaskImpl(Ark_RenderNode peer,
+                           const Ark_Circle* circle,
+                           const Ark_Number* fillColor,
+                           const Ark_Number* strokeColor,
+                           const Ark_Number* strokeWidth)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setCircleMask(");
+        WriteToString(&out, peer);
+        out.append(", ");
+        WriteToString(&out, circle);
+        out.append(", ");
+        WriteToString(&out, fillColor);
+        out.append(", ");
+        WriteToString(&out, strokeColor);
+        out.append(", ");
+        WriteToString(&out, strokeWidth);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetRoundRectMaskImpl(Ark_RenderNode peer,
+                              const Ark_RoundRect* roundRect,
+                              const Ark_Number* fillColor,
+                              const Ark_Number* strokeColor,
+                              const Ark_Number* strokeWidth)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setRoundRectMask(");
+        WriteToString(&out, peer);
+        out.append(", ");
+        WriteToString(&out, roundRect);
+        out.append(", ");
+        WriteToString(&out, fillColor);
+        out.append(", ");
+        WriteToString(&out, strokeColor);
+        out.append(", ");
+        WriteToString(&out, strokeWidth);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetOvalMaskImpl(Ark_RenderNode peer,
+                         const Ark_common2D_Rect* rect,
+                         const Ark_Number* fillColor,
+                         const Ark_Number* strokeColor,
+                         const Ark_Number* strokeWidth)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setOvalMask(");
+        WriteToString(&out, peer);
+        out.append(", ");
+        WriteToString(&out, rect);
+        out.append(", ");
+        WriteToString(&out, fillColor);
+        out.append(", ");
+        WriteToString(&out, strokeColor);
+        out.append(", ");
+        WriteToString(&out, strokeWidth);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetPathImpl(Ark_RenderNode peer,
+                     const Ark_CommandPath* path,
+                     const Ark_Number* fillColor,
+                     const Ark_Number* strokeColor,
+                     const Ark_Number* strokeWidth)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setPath(");
+        WriteToString(&out, peer);
+        out.append(", ");
+        WriteToString(&out, path);
+        out.append(", ");
+        WriteToString(&out, fillColor);
+        out.append(", ");
+        WriteToString(&out, strokeColor);
+        out.append(", ");
+        WriteToString(&out, strokeWidth);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetRectClipImpl(Ark_RenderNode peer,
+                         const Ark_common2D_Rect* rect)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setRectClip(");
+        WriteToString(&out, peer);
+        out.append(", ");
+        WriteToString(&out, rect);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetCircleClipImpl(Ark_RenderNode peer,
+                           const Ark_Circle* circle)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setCircleClip(");
+        WriteToString(&out, peer);
+        out.append(", ");
+        WriteToString(&out, circle);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetRoundRectClipImpl(Ark_RenderNode peer,
+                              const Ark_RoundRect* roundRect)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setRoundRectClip(");
+        WriteToString(&out, peer);
+        out.append(", ");
+        WriteToString(&out, roundRect);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetOvalClipImpl(Ark_RenderNode peer,
+                         const Ark_common2D_Rect* rect)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setOvalClip(");
+        WriteToString(&out, peer);
+        out.append(", ");
+        WriteToString(&out, rect);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetPathClipImpl(Ark_RenderNode peer,
+                         const Ark_CommandPath* path)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setPathClip(");
+        WriteToString(&out, peer);
+        out.append(", ");
+        WriteToString(&out, path);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void AppendChildImpl(Ark_RenderNode peer,
+                         Ark_RenderNode node)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("appendChild(");
+        WriteToString(&out, peer);
+        out.append(", ");
+        WriteToString(&out, node);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void InsertChildAfterImpl(Ark_RenderNode peer,
+                              Ark_RenderNode child,
+                              Ark_RenderNode sibling)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("insertChildAfter(");
+        WriteToString(&out, peer);
+        out.append(", ");
+        WriteToString(&out, child);
+        out.append(", ");
+        WriteToString(&out, sibling);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void RemoveChildImpl(Ark_RenderNode peer,
+                         Ark_RenderNode node)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("removeChild(");
+        WriteToString(&out, peer);
+        out.append(", ");
+        WriteToString(&out, node);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void ClearChildrenImpl(Ark_RenderNode peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("clearChildren(");
+        WriteToString(&out, peer);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void InvalidateImpl(Ark_RenderNode peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("invalidate(");
+        WriteToString(&out, peer);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    } // RenderNodeExtenderAccessor
     namespace RenderServiceNodeAccessor {
     } // RenderServiceNodeAccessor
     namespace ReplaceSymbolEffectAccessor {
@@ -45973,6 +46575,52 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct RenderingContextSettingsPeer {
         virtual ~RenderingContextSettingsPeer() = default;
     };
+    const GENERATED_ArkUIRenderNodeExtenderAccessor* GetRenderNodeExtenderAccessor()
+    {
+        static const GENERATED_ArkUIRenderNodeExtenderAccessor RenderNodeExtenderAccessorImpl {
+            RenderNodeExtenderAccessor::ConstructorRenderNodeImpl,
+            RenderNodeExtenderAccessor::GetDestroyImpl,
+            RenderNodeExtenderAccessor::DestroyPeerImpl,
+            RenderNodeExtenderAccessor::SetBackgroundColorImpl,
+            RenderNodeExtenderAccessor::SetClipToFrameImpl,
+            RenderNodeExtenderAccessor::SetOpacityImpl,
+            RenderNodeExtenderAccessor::SetSizeImpl,
+            RenderNodeExtenderAccessor::SetPositionImpl,
+            RenderNodeExtenderAccessor::SetPivotImpl,
+            RenderNodeExtenderAccessor::SetScaleImpl,
+            RenderNodeExtenderAccessor::SetTranslationImpl,
+            RenderNodeExtenderAccessor::SetRotationImpl,
+            RenderNodeExtenderAccessor::SetTransformImpl,
+            RenderNodeExtenderAccessor::SetShadowColorImpl,
+            RenderNodeExtenderAccessor::SetShadowOffsetImpl,
+            RenderNodeExtenderAccessor::SetLabelImpl,
+            RenderNodeExtenderAccessor::SetShadowAlphaImpl,
+            RenderNodeExtenderAccessor::SetShadowElevationImpl,
+            RenderNodeExtenderAccessor::SetShadowRadiusImpl,
+            RenderNodeExtenderAccessor::SetBorderStyleImpl,
+            RenderNodeExtenderAccessor::SetBorderWidthImpl,
+            RenderNodeExtenderAccessor::SetBorderColorImpl,
+            RenderNodeExtenderAccessor::SetBorderRadiusImpl,
+            RenderNodeExtenderAccessor::SetMarkNodeGroupImpl,
+            RenderNodeExtenderAccessor::SetRectMaskImpl,
+            RenderNodeExtenderAccessor::SetCircleMaskImpl,
+            RenderNodeExtenderAccessor::SetRoundRectMaskImpl,
+            RenderNodeExtenderAccessor::SetOvalMaskImpl,
+            RenderNodeExtenderAccessor::SetPathImpl,
+            RenderNodeExtenderAccessor::SetRectClipImpl,
+            RenderNodeExtenderAccessor::SetCircleClipImpl,
+            RenderNodeExtenderAccessor::SetRoundRectClipImpl,
+            RenderNodeExtenderAccessor::SetOvalClipImpl,
+            RenderNodeExtenderAccessor::SetPathClipImpl,
+            RenderNodeExtenderAccessor::AppendChildImpl,
+            RenderNodeExtenderAccessor::InsertChildAfterImpl,
+            RenderNodeExtenderAccessor::RemoveChildImpl,
+            RenderNodeExtenderAccessor::ClearChildrenImpl,
+            RenderNodeExtenderAccessor::InvalidateImpl,
+        };
+        return &RenderNodeExtenderAccessorImpl;
+    }
+
     const GENERATED_ArkUIRenderServiceNodeAccessor* GetRenderServiceNodeAccessor()
     {
         static const GENERATED_ArkUIRenderServiceNodeAccessor RenderServiceNodeAccessorImpl {
@@ -47307,6 +47955,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetPromptActionExtenderAccessor,
             GetPulseSymbolEffectAccessor,
             GetRenderingContextSettingsAccessor,
+            GetRenderNodeExtenderAccessor,
             GetRenderServiceNodeAccessor,
             GetReplaceSymbolEffectAccessor,
             GetRestrictedWorkerAccessor,

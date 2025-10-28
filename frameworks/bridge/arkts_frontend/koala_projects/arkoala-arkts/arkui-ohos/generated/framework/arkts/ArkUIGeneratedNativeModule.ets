@@ -4332,7 +4332,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _IUIContext_freezeUINode0(id: KStringPtr, isFrozen: KInt): void
     @ani.unsafe.Direct
-    native static _IUIContext_freezeUINode1(id: number, isFrozen: KInt): void
+    native static _IUIContext_freezeUINode1(id: KLong, isFrozen: KInt): void
     @ani.unsafe.Direct
     native static _IUIContext_dispatchKeyEvent(thisArray: KSerializerBuffer, thisLength: int32, event: KPointer): boolean
     @ani.unsafe.Direct
@@ -5029,11 +5029,11 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _RenderNodeExtender_destroyPeer(peer: KPointer): void
     @ani.unsafe.Direct
-    native static _RenderNodeExtender_setBackgroundColor(peer: KPointer, backgroundColor: number): void
+    native static _RenderNodeExtender_setBackgroundColor(peer: KPointer, backgroundColor: KInt): void
     @ani.unsafe.Direct
     native static _RenderNodeExtender_setClipToFrame(peer: KPointer, clipToFrame: KInt): void
-    @ani.unsafe.Direct
-    native static _RenderNodeExtender_setOpacity(peer: KPointer, opacity: number): void
+    @ani.unsafe.Quick
+    native static _RenderNodeExtender_setOpacity(peer: KPointer, opacity: KDouble): void
     @ani.unsafe.Direct
     native static _RenderNodeExtender_setSize(peer: KPointer, thisArray: KSerializerBuffer, thisLength: int32, unitValue: KInt): void
     @ani.unsafe.Direct
@@ -5049,17 +5049,17 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _RenderNodeExtender_setTransform(peer: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _RenderNodeExtender_setShadowColor(peer: KPointer, shadowColor: number): void
+    native static _RenderNodeExtender_setShadowColor(peer: KPointer, shadowColor: KInt): void
     @ani.unsafe.Direct
     native static _RenderNodeExtender_setShadowOffset(peer: KPointer, thisArray: KSerializerBuffer, thisLength: int32, unitValue: KInt): void
     @ani.unsafe.Quick
     native static _RenderNodeExtender_setLabel(peer: KPointer, label: KStringPtr): void
-    @ani.unsafe.Direct
-    native static _RenderNodeExtender_setShadowAlpha(peer: KPointer, shadowAlpha: number): void
-    @ani.unsafe.Direct
-    native static _RenderNodeExtender_setShadowElevation(peer: KPointer, shadowElevation: number): void
-    @ani.unsafe.Direct
-    native static _RenderNodeExtender_setShadowRadius(peer: KPointer, shadowRadius: number): void
+    @ani.unsafe.Quick
+    native static _RenderNodeExtender_setShadowAlpha(peer: KPointer, shadowAlpha: KDouble): void
+    @ani.unsafe.Quick
+    native static _RenderNodeExtender_setShadowElevation(peer: KPointer, shadowElevation: KDouble): void
+    @ani.unsafe.Quick
+    native static _RenderNodeExtender_setShadowRadius(peer: KPointer, shadowRadius: KDouble): void
     @ani.unsafe.Direct
     native static _RenderNodeExtender_setBorderStyle(peer: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct

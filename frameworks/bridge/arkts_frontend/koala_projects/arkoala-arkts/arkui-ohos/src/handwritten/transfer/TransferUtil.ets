@@ -283,7 +283,7 @@ export class TransferUtil {
     }
 
     // number color: int(1.2) -> long(1.1)
-    static setPropColorLong(name: string, inVal: number | undefined, outJs: ESValue) {
+    static setPropColorLong(name: string, inVal: int | undefined, outJs: ESValue) {
         if (inVal === undefined) {
             return;
         }
@@ -310,7 +310,7 @@ export class TransferUtil {
     }
 
     // number color: int(1.2) -> long(1.1)
-    static setPropEdgesColor(name: string, inVal: NodeEdges<number>, outJs: ESValue) {
+    static setPropEdgesColor(name: string, inVal: NodeEdges<int>, outJs: ESValue) {
         let propVal: ESValue = ESValue.instantiateEmptyObject();
         TransferUtil.setPropColorLong('left', inVal.left, propVal);
         TransferUtil.setPropColorLong('top', inVal.top, propVal);

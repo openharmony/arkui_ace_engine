@@ -15560,6 +15560,187 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     } // RenderingContextSettingsAccessor
+    namespace RenderNodeExtenderAccessor {
+    Ark_NativePointer ConstructorRenderNodeImpl(Ark_Int32 nodeId)
+    {
+        return {};
+    }
+    Ark_NativePointer GetDestroyImpl()
+    {
+        return {};
+    }
+    void DestroyPeerImpl(Ark_RenderNode peer)
+    {
+        auto peerImpl = reinterpret_cast<RenderNodeExtenderPeerImpl *>(peer);
+        if (peerImpl) {
+            delete peerImpl;
+        }
+    }
+    void SetBackgroundColorImpl(Ark_RenderNode peer,
+                                Ark_Int32 backgroundColor)
+    {
+    }
+    void SetClipToFrameImpl(Ark_RenderNode peer,
+                            Ark_Boolean clipToFrame)
+    {
+    }
+    void SetOpacityImpl(Ark_RenderNode peer,
+                        Ark_Float64 opacity)
+    {
+    }
+    void SetSizeImpl(Ark_RenderNode peer,
+                     const Ark_Size* size,
+                     Ark_Int32 unitValue)
+    {
+    }
+    void SetPositionImpl(Ark_RenderNode peer,
+                         const Ark_Vector2* position,
+                         Ark_Int32 unitValue)
+    {
+    }
+    void SetPivotImpl(Ark_RenderNode peer,
+                      const Ark_Vector2* pivot)
+    {
+    }
+    void SetScaleImpl(Ark_RenderNode peer,
+                      const Ark_Vector2* scale)
+    {
+    }
+    void SetTranslationImpl(Ark_RenderNode peer,
+                            const Ark_Vector2* translation)
+    {
+    }
+    void SetRotationImpl(Ark_RenderNode peer,
+                         const Ark_Vector3* rotation,
+                         Ark_Int32 unitValue)
+    {
+    }
+    void SetTransformImpl(Ark_RenderNode peer,
+                          const Ark_Matrix4* transform)
+    {
+    }
+    void SetShadowColorImpl(Ark_RenderNode peer,
+                            Ark_Int32 shadowColor)
+    {
+    }
+    void SetShadowOffsetImpl(Ark_RenderNode peer,
+                             const Ark_Vector2* shadowOffset,
+                             Ark_Int32 unitValue)
+    {
+    }
+    void SetLabelImpl(Ark_RenderNode peer,
+                      const Ark_String* label)
+    {
+    }
+    void SetShadowAlphaImpl(Ark_RenderNode peer,
+                            Ark_Float64 shadowAlpha)
+    {
+    }
+    void SetShadowElevationImpl(Ark_RenderNode peer,
+                                Ark_Float64 shadowElevation)
+    {
+    }
+    void SetShadowRadiusImpl(Ark_RenderNode peer,
+                             Ark_Float64 shadowRadius)
+    {
+    }
+    void SetBorderStyleImpl(Ark_RenderNode peer,
+                            const Ark_NodeEdgeStyles* borderStyle)
+    {
+    }
+    void SetBorderWidthImpl(Ark_RenderNode peer,
+                            const Ark_EdgeF64* borderWidth,
+                            Ark_Int32 unitValue)
+    {
+    }
+    void SetBorderColorImpl(Ark_RenderNode peer,
+                            const Ark_EdgeI32* borderColor)
+    {
+    }
+    void SetBorderRadiusImpl(Ark_RenderNode peer,
+                             const Ark_BorderRadiuses_graphics* borderRadius,
+                             Ark_Int32 unitValue)
+    {
+    }
+    void SetMarkNodeGroupImpl(Ark_RenderNode peer,
+                              Ark_Boolean markNodeGroup)
+    {
+    }
+    void SetRectMaskImpl(Ark_RenderNode peer,
+                         const Ark_common2D_Rect* rect,
+                         const Ark_Number* fillColor,
+                         const Ark_Number* strokeColor,
+                         const Ark_Number* strokeWidth)
+    {
+    }
+    void SetCircleMaskImpl(Ark_RenderNode peer,
+                           const Ark_Circle* circle,
+                           const Ark_Number* fillColor,
+                           const Ark_Number* strokeColor,
+                           const Ark_Number* strokeWidth)
+    {
+    }
+    void SetRoundRectMaskImpl(Ark_RenderNode peer,
+                              const Ark_RoundRect* roundRect,
+                              const Ark_Number* fillColor,
+                              const Ark_Number* strokeColor,
+                              const Ark_Number* strokeWidth)
+    {
+    }
+    void SetOvalMaskImpl(Ark_RenderNode peer,
+                         const Ark_common2D_Rect* rect,
+                         const Ark_Number* fillColor,
+                         const Ark_Number* strokeColor,
+                         const Ark_Number* strokeWidth)
+    {
+    }
+    void SetPathImpl(Ark_RenderNode peer,
+                     const Ark_CommandPath* path,
+                     const Ark_Number* fillColor,
+                     const Ark_Number* strokeColor,
+                     const Ark_Number* strokeWidth)
+    {
+    }
+    void SetRectClipImpl(Ark_RenderNode peer,
+                         const Ark_common2D_Rect* rect)
+    {
+    }
+    void SetCircleClipImpl(Ark_RenderNode peer,
+                           const Ark_Circle* circle)
+    {
+    }
+    void SetRoundRectClipImpl(Ark_RenderNode peer,
+                              const Ark_RoundRect* roundRect)
+    {
+    }
+    void SetOvalClipImpl(Ark_RenderNode peer,
+                         const Ark_common2D_Rect* rect)
+    {
+    }
+    void SetPathClipImpl(Ark_RenderNode peer,
+                         const Ark_CommandPath* path)
+    {
+    }
+    void AppendChildImpl(Ark_RenderNode peer,
+                         Ark_RenderNode node)
+    {
+    }
+    void InsertChildAfterImpl(Ark_RenderNode peer,
+                              Ark_RenderNode child,
+                              Ark_RenderNode sibling)
+    {
+    }
+    void RemoveChildImpl(Ark_RenderNode peer,
+                         Ark_RenderNode node)
+    {
+    }
+    void ClearChildrenImpl(Ark_RenderNode peer)
+    {
+    }
+    void InvalidateImpl(Ark_RenderNode peer)
+    {
+    }
+    } // RenderNodeExtenderAccessor
     namespace RenderServiceNodeAccessor {
     Ark_Int32 GetNodeIdImpl(const Ark_String* nodeId)
     {
@@ -20314,6 +20495,52 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct RenderingContextSettingsPeer {
         virtual ~RenderingContextSettingsPeer() = default;
     };
+    const GENERATED_ArkUIRenderNodeExtenderAccessor* GetRenderNodeExtenderAccessor()
+    {
+        static const GENERATED_ArkUIRenderNodeExtenderAccessor RenderNodeExtenderAccessorImpl {
+            RenderNodeExtenderAccessor::ConstructorRenderNodeImpl,
+            RenderNodeExtenderAccessor::GetDestroyImpl,
+            RenderNodeExtenderAccessor::DestroyPeerImpl,
+            RenderNodeExtenderAccessor::SetBackgroundColorImpl,
+            RenderNodeExtenderAccessor::SetClipToFrameImpl,
+            RenderNodeExtenderAccessor::SetOpacityImpl,
+            RenderNodeExtenderAccessor::SetSizeImpl,
+            RenderNodeExtenderAccessor::SetPositionImpl,
+            RenderNodeExtenderAccessor::SetPivotImpl,
+            RenderNodeExtenderAccessor::SetScaleImpl,
+            RenderNodeExtenderAccessor::SetTranslationImpl,
+            RenderNodeExtenderAccessor::SetRotationImpl,
+            RenderNodeExtenderAccessor::SetTransformImpl,
+            RenderNodeExtenderAccessor::SetShadowColorImpl,
+            RenderNodeExtenderAccessor::SetShadowOffsetImpl,
+            RenderNodeExtenderAccessor::SetLabelImpl,
+            RenderNodeExtenderAccessor::SetShadowAlphaImpl,
+            RenderNodeExtenderAccessor::SetShadowElevationImpl,
+            RenderNodeExtenderAccessor::SetShadowRadiusImpl,
+            RenderNodeExtenderAccessor::SetBorderStyleImpl,
+            RenderNodeExtenderAccessor::SetBorderWidthImpl,
+            RenderNodeExtenderAccessor::SetBorderColorImpl,
+            RenderNodeExtenderAccessor::SetBorderRadiusImpl,
+            RenderNodeExtenderAccessor::SetMarkNodeGroupImpl,
+            RenderNodeExtenderAccessor::SetRectMaskImpl,
+            RenderNodeExtenderAccessor::SetCircleMaskImpl,
+            RenderNodeExtenderAccessor::SetRoundRectMaskImpl,
+            RenderNodeExtenderAccessor::SetOvalMaskImpl,
+            RenderNodeExtenderAccessor::SetPathImpl,
+            RenderNodeExtenderAccessor::SetRectClipImpl,
+            RenderNodeExtenderAccessor::SetCircleClipImpl,
+            RenderNodeExtenderAccessor::SetRoundRectClipImpl,
+            RenderNodeExtenderAccessor::SetOvalClipImpl,
+            RenderNodeExtenderAccessor::SetPathClipImpl,
+            RenderNodeExtenderAccessor::AppendChildImpl,
+            RenderNodeExtenderAccessor::InsertChildAfterImpl,
+            RenderNodeExtenderAccessor::RemoveChildImpl,
+            RenderNodeExtenderAccessor::ClearChildrenImpl,
+            RenderNodeExtenderAccessor::InvalidateImpl,
+        };
+        return &RenderNodeExtenderAccessorImpl;
+    }
+
     const GENERATED_ArkUIRenderServiceNodeAccessor* GetRenderServiceNodeAccessor()
     {
         static const GENERATED_ArkUIRenderServiceNodeAccessor RenderServiceNodeAccessorImpl {
@@ -21648,6 +21875,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetPromptActionExtenderAccessor,
             GetPulseSymbolEffectAccessor,
             GetRenderingContextSettingsAccessor,
+            GetRenderNodeExtenderAccessor,
             GetRenderServiceNodeAccessor,
             GetReplaceSymbolEffectAccessor,
             GetRestrictedWorkerAccessor,
