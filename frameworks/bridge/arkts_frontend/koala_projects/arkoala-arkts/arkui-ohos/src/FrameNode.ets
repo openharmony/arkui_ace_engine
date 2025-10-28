@@ -159,6 +159,19 @@ export class FrameNodeInternal {
     }
 }
 
+const ERROR_CODE_NODE_IS_ADOPTED = 106206;
+const ERROR_CODE_NODE_HAS_PARENT = 106207;
+const ERROR_CODE_NODE_CAN_NOT_BE_ADOPTED = 106208;
+const ERROR_CODE_NODE_CAN_NOT_ADOPT_TO = 106209;
+const ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN = 106210;
+
+const errorMap_: Map<number, string> = new Map<number, string>();
+errorMap_.set(ERROR_CODE_NODE_IS_ADOPTED, "The parameter 'child' is invalid: the node has already been adopted.");
+errorMap_.set(ERROR_CODE_NODE_HAS_PARENT, "The parameter 'child' is invalid: the child already has a parent node.");
+errorMap_.set(ERROR_CODE_NODE_CAN_NOT_BE_ADOPTED, "The parameter 'child' is invalid: the node cannot be adopted.");
+errorMap_.set(ERROR_CODE_NODE_CAN_NOT_ADOPT_TO, 'Current node is invalid: the node cannot adopt children.');
+errorMap_.set(ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN, "The parameter 'child' is invalid: the node is not adopted by the parent node.");
+
 export class FrameNode implements MaterializedBase {
     peer?: Finalizable | undefined = undefined
     uiContext: UIContextImpl | undefined = undefined
@@ -249,8 +262,12 @@ export class FrameNode implements MaterializedBase {
             const error = Error('The FrameNode is not modifiable.');
             throw new BusinessError(100021, error);
         }
-        const node_casted = node as (FrameNode)
-        FrameNodeExtender.appendChild(this, node_casted)
+        const node_casted = node as (FrameNode);
+        let flag = FrameNodeExtender.appendChild(this, node_casted);
+        if (flag === ERROR_CODE_NODE_IS_ADOPTED) {
+            const error = Error("The parameter 'node' is invalid: the node has already been adopted.");
+            throw new BusinessError(100025, error);
+        }
         return
     }
     public addComponentContent<T = undefined>(content: ComponentContent<T>) {
@@ -293,10 +310,15 @@ export class FrameNode implements MaterializedBase {
             const error = Error('The FrameNode is not modifiable.');
             throw new BusinessError(100021, error);
         }
+        let flag: number = 0;
         if (sibling === null || sibling === undefined) {
-            FrameNodeExtender.insertChildAfter(this.peer!.ptr, toPeerPtr(child), nullptr);
+            flag = FrameNodeExtender.insertChildAfter(this.peer!.ptr, toPeerPtr(child), nullptr);
         } else {
-            FrameNodeExtender.insertChildAfter(this.peer!.ptr, toPeerPtr(child), toPeerPtr(sibling!));
+            flag = FrameNodeExtender.insertChildAfter(this.peer!.ptr, toPeerPtr(child), toPeerPtr(sibling!));
+        }
+        if (flag === ERROR_CODE_NODE_IS_ADOPTED) {
+            const error = Error("The parameter 'child' is invalid: the node has already been adopted.");
+            throw new BusinessError(100025, error);
         }
         return
     }
@@ -573,6 +595,46 @@ export class FrameNode implements MaterializedBase {
     public isTransferred(): boolean {
         return false;
     }
+    adoptChild(child: FrameNode): void{
+    if (child === undefined || child === null) {
+        return;
+    }
+    if (!this.checkValid(this) || !this.isModifiable()) {
+        const error = Error('The FrameNode is not modifiable.');
+        throw new BusinessError(100021, error);
+    }
+    if (!child.checkValid(this) || !child.isModifiable()) {
+        const error = Error('The child node is not modifiable.');
+        throw new BusinessError(100021, error);
+    }
+    const child_casted = child as (FrameNode);
+    let result = FrameNodeExtender.adoptChild(this, child_casted);
+    let errorInfo = errorMap_.get(result);
+    if (errorInfo !== undefined) {
+        const error = Error(errorInfo);
+        throw new BusinessError(100025, error);
+    }
+  }
+    removeAdoptedChild(child: FrameNode): void {
+    if (child === undefined || child === null) {
+      return;
+    }
+    if (!this.checkValid(this) || !this.isModifiable()) {
+        const error = Error('The FrameNode is not modifiable.');
+        throw new BusinessError(100021, error);
+    }
+    if (!child.checkValid(this) || !child.isModifiable()) {
+        const error = Error('The child node is not modifiable.');
+        throw new BusinessError(100021, error);
+    }
+    const child_casted = child as (FrameNode);
+    let result = FrameNodeExtender.removeAdoptedChild(this, child_casted);
+    let errorInfo = errorMap_.get(result);
+    if (errorInfo !== undefined) {
+        const error = Error(errorInfo);
+        throw new BusinessError(100025, error);
+    }
+  }
     private getCommonEvent(): UICommonEvent {
         return FrameNodeExtender.getCommonEvent(this);
     }
@@ -594,7 +656,11 @@ export class FrameNode implements MaterializedBase {
             throw new BusinessError(100021, error);
         }
         const targetParent_casted = targetParent as (FrameNode);
-        FrameNodeExtender.moveTo(this, targetParent_casted, index_casted);
+        let result = FrameNodeExtender.moveTo(this, targetParent_casted, index_casted);
+        if (result === ERROR_CODE_NODE_IS_ADOPTED) {
+            const error = Error('The current node has already been adopted.');
+            throw new BusinessError(100027, error);
+        }
         return;
     }
 

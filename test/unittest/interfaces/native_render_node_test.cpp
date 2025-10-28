@@ -1396,4 +1396,69 @@ HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest214, TestSize.Level1)
     OH_ArkUI_RenderNodeUtils_DisposeContentModifier(modifier);
 }
 
+/**
+ * @tc.name: NativeRenderNodeAdopterTest001
+ * @tc.desc: Test renderNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeAdopterTest001, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootCustomNode = nodeAPI->createNode(ARKUI_NODE_CUSTOM);
+    ASSERT_NE(rootCustomNode, nullptr);
+    auto customNode = nodeAPI->createNode(ARKUI_NODE_CUSTOM);
+    ASSERT_NE(customNode, nullptr);
+
+    auto result = OH_ArkUI_NativeModule_AdoptChild(rootCustomNode, customNode);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    result = OH_ArkUI_NativeModule_RemoveAdoptedChild(rootCustomNode, customNode);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+}
+
+/**
+ * @tc.name: NativeRenderNodeAdopterTest002
+ * @tc.desc: Test renderNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeAdopterTest002, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootCustomNode = nodeAPI->createNode(ARKUI_NODE_CUSTOM);
+    ASSERT_NE(rootCustomNode, nullptr);
+    auto customNode = nodeAPI->createNode(ARKUI_NODE_CUSTOM);
+    ASSERT_NE(customNode, nullptr);
+
+    auto result = OH_ArkUI_NativeModule_AdoptChild(nullptr, customNode);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NODE_CAN_NOT_ADOPT_TO);
+    result = OH_ArkUI_NativeModule_AdoptChild(rootCustomNode, nullptr);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NODE_CAN_NOT_BE_ADOPTED);
+    result = OH_ArkUI_NativeModule_RemoveAdoptedChild(nullptr, customNode);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN);
+    result = OH_ArkUI_NativeModule_RemoveAdoptedChild(rootCustomNode, nullptr);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN);
+}
+
+/**
+ * @tc.name: NativeRenderNodeAdopterTest003
+ * @tc.desc: Test renderNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeAdopterTest003, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootCustomNode = nodeAPI->createNode(ARKUI_NODE_CUSTOM);
+    ASSERT_NE(rootCustomNode, nullptr);
+    auto customNode = nodeAPI->createNode(ARKUI_NODE_CUSTOM);
+    ASSERT_NE(customNode, nullptr);
+
+    auto result = OH_ArkUI_NativeModule_AdoptChild(rootCustomNode, customNode);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    ArkUI_RenderNodeHandle renderNode;
+    result = OH_ArkUI_RenderNodeUtils_GetRenderNode(customNode, &renderNode);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_NE(renderNode, nullptr);
+}
 } // namespace OHOS::Ace

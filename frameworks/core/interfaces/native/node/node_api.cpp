@@ -347,6 +347,11 @@ ArkUI_Int32 AddChild(ArkUINodeHandle parent, ArkUINodeHandle child)
     if (nodeAdapter) {
         return ERROR_CODE_NATIVE_IMPL_NODE_ADAPTER_EXIST;
     }
+    auto childNode = reinterpret_cast<UINode*>(child);
+    CHECK_NULL_RETURN(childNode, ERROR_CODE_PARAM_INVALID);
+    if (childNode->IsAdopted()) {
+        return ERROR_CODE_NODE_IS_ADOPTED;
+    }
     ViewModel::AddChild(parent, child);
     return ERROR_CODE_NO_ERROR;
 }
@@ -356,6 +361,11 @@ ArkUI_Int32 InsertChildAt(ArkUINodeHandle parent, ArkUINodeHandle child, int32_t
     auto* nodeAdapter = NodeAdapter::GetNodeAdapterAPI()->getNodeAdapter(parent);
     if (nodeAdapter) {
         return ERROR_CODE_NATIVE_IMPL_NODE_ADAPTER_EXIST;
+    }
+    auto childNode = reinterpret_cast<UINode*>(child);
+    CHECK_NULL_RETURN(childNode, ERROR_CODE_PARAM_INVALID);
+    if (childNode->IsAdopted()) {
+        return ERROR_CODE_NODE_IS_ADOPTED;
     }
     ViewModel::InsertChildAt(parent, child, position);
     return ERROR_CODE_NO_ERROR;
@@ -371,6 +381,11 @@ ArkUI_Int32 InsertChildAfter(ArkUINodeHandle parent, ArkUINodeHandle child, ArkU
     auto* nodeAdapter = NodeAdapter::GetNodeAdapterAPI()->getNodeAdapter(parent);
     if (nodeAdapter) {
         return ERROR_CODE_NATIVE_IMPL_NODE_ADAPTER_EXIST;
+    }
+    auto childNode = reinterpret_cast<UINode*>(child);
+    CHECK_NULL_RETURN(childNode, ERROR_CODE_PARAM_INVALID);
+    if (childNode->IsAdopted()) {
+        return ERROR_CODE_NODE_IS_ADOPTED;
     }
     ViewModel::InsertChildAfter(parent, child, sibling);
     return ERROR_CODE_NO_ERROR;
