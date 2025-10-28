@@ -1284,6 +1284,16 @@ HWTEST_F(WebModelStaticTest, SetOnPageStartedEvent001, TestSize.Level1)
         [&callbackCalled](const BaseEventInfo* info) { callbackCalled = true; });
     webEventHub->FireOnPageFinishedEvent(mockEventInfo);
     EXPECT_TRUE(callbackCalled);
+    callbackCalled = false;
+    WebModelStatic::SetOnLoadStarted(AccessibilityManager::RawPtr(frameNode),
+        [&callbackCalled](const BaseEventInfo* info) { callbackCalled = true; });
+    webEventHub->FireOnLoadStartedEvent(mockEventInfo);
+    EXPECT_TRUE(callbackCalled);
+    callbackCalled = false;
+    WebModelStatic::SetOnLoadFinished(AccessibilityManager::RawPtr(frameNode),
+        [&callbackCalled](const BaseEventInfo* info) { callbackCalled = true; });
+    webEventHub->FireOnLoadFinishedEvent(mockEventInfo);
+    EXPECT_TRUE(callbackCalled);
     auto onProgressChangeImpl = [](const BaseEventInfo* info) {};
     WebModelStatic::SetOnProgressChange(nullptr, onProgressChangeImpl);
     WebModelStatic::SetOnProgressChange(AccessibilityManager::RawPtr(frameNode), onProgressChangeImpl);
@@ -2177,6 +2187,35 @@ HWTEST_F(WebModelStaticTest, SetOnUrlLoadIntercept001, TestSize.Level1)
 
     auto mockEventInfo = std::make_shared<MockBaseEventInfo>();
     webEventHub->FireOnUrlLoadInterceptEvent(mockEventInfo);
+    EXPECT_NE(callCount, 0);
+#endif
+}
+
+/**
+ * @tc.name: SetOnOverrideErrorPage001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetOnOverrideErrorPage001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    auto callback = [&callCount](const BaseEventInfo* info) {
+        callCount++;
+        return "";
+    };
+    WebModelStatic::SetOnOverrideErrorPage(AccessibilityManager::RawPtr(frameNode), callback);
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+
+    auto mockEventInfo = std::make_shared<MockBaseEventInfo>();
+    webEventHub->FireOnOverrideErrorPageEvent(mockEventInfo);
     EXPECT_NE(callCount, 0);
 #endif
 }
