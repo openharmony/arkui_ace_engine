@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
- /*
-  * Description: WaterFlow组件支持基于断点自适应列数
-  * Writer: renxiaowen
-  */
+/*
+ * Description: WaterFlow组件支持基于断点自适应列数
+ * Writer: renxiaowen
+ */
 
 // Index.ets
 import { WaterFlowDataSource } from '../../WaterFlowDataSource';
@@ -35,7 +35,7 @@ struct ReusableFlowItem {
 
   build() {
     Column() {
-      Text("N" + this.item).fontSize(12).height('16')
+      Text('N' + this.item).fontSize(12).height('16')
       // 注意：需要确保对应的jpg文件存在才会正常显示
       Image('res/waterFlow(' + this.item % 5 + ').jpg')
         .objectFit(ImageFit.Fill)
@@ -49,20 +49,20 @@ struct ReusableFlowItem {
 @Component
 struct WaterFlowDemo333 {
   @State columnIndex: number = 0;
-  @State columnList:(string| ItemFillPolicy|undefined|null)[]=[
+  @State columnList: (string | ItemFillPolicy | undefined | null)[] = [
     '1fr 2fr 1fr',
-    {fillType:PresetFillType.BREAKPOINT_DEFAULT},
-    {fillType:PresetFillType.BREAKPOINT_SM1MD2LG3},
-    {fillType:PresetFillType.BREAKPOINT_SM2MD3LG5},
+    { fillType: PresetFillType.BREAKPOINT_DEFAULT },
+    { fillType: PresetFillType.BREAKPOINT_SM1MD2LG3 },
+    { fillType: PresetFillType.BREAKPOINT_SM2MD3LG5 },
     undefined,
     null
   ]
-  @State widthIndex:number = 0;
-  @State widthList:(string )[]=[
-    '100%','80%','60%','20%'
+  @State widthIndex: number = 0;
+  @State widthList: (string)[] = [
+    '100%', '80%', '60%', '20%'
   ]
-  @State directionIndex:number = 0;
-  @State directionList:(FlexDirection)[]=[
+  @State directionIndex: number = 0;
+  @State directionList: (FlexDirection)[] = [
     FlexDirection.Row,
     FlexDirection.Column,
     FlexDirection.RowReverse,
@@ -133,6 +133,7 @@ struct WaterFlowDemo333 {
       return this.itemHeightArray[index % 100];
     }
   };
+
   @Builder
   itemFoot() {
     Column() {
@@ -145,6 +146,7 @@ struct WaterFlowDemo333 {
       // .margin({ top: 20,bottom:5 })
     }
   }
+
   // 计算FlowItem宽/高
   getSize() {
     let ret = Math.floor(Math.random() * this.maxSize);
@@ -192,60 +194,63 @@ struct WaterFlowDemo333 {
   build() {
     Column({ space: 2 }) {
 
-      Row(){
+      Row() {
         Button('column' + this.columnIndex)
           .onClick(() => {
-            this.columnIndex++
+            this.columnIndex++;
             if (this.columnIndex > this.columnList.length - 1) {
-              this.columnIndex = 0
+              this.columnIndex = 0;
             }
           })
         Button('width' + this.widthIndex)
           .onClick(() => {
-            this.widthIndex++
+            this.widthIndex++;
             if (this.widthIndex > this.widthList.length - 1) {
-              this.widthIndex = 0
+              this.widthIndex = 0;
             }
           })
         Button('direction' + this.directionIndex)
           .onClick(() => {
-            this.directionIndex++
+            this.directionIndex++;
             if (this.directionIndex > this.directionList.length - 1) {
-              this.directionIndex = 0
+              this.directionIndex = 0;
             }
           })
       }
+
       Row() {
         Button('CachedCount')
           .onClick(() => {
-            this.changeCachedCountIndex++
+            this.changeCachedCountIndex++;
             if (this.changeCachedCountIndex > this.changeCachedCountList.length - 1) {
-              this.changeCachedCountIndex = 0
+              this.changeCachedCountIndex = 0;
             }
           })
         Button('CachedCountBol')
           .onClick(() => {
-            this.changeCachedCountBolIndex++
+            this.changeCachedCountBolIndex++;
             if (this.changeCachedCountBolIndex > this.changeCachedCountBolList.length - 1) {
-              this.changeCachedCountBolIndex = 0
+              this.changeCachedCountBolIndex = 0;
             }
           })
         Button('rowGap')
           .onClick(() => {
-            this.gapIndex++
+            this.gapIndex++;
             if (this.gapIndex > this.gaps.length - 1) {
-              this.gapIndex = 0
+              this.gapIndex = 0;
             }
           })
       }
-      Row(){
-        Button('padding' )
-          .onClick(()=> {
+
+      Row() {
+        Button('padding')
+          .onClick(() => {
             this.paddingIndex = (this.paddingIndex + 1) % this.paddings.length;
           })
 
       }
-      Text('Width：'+ this.contentWidth+'，Height：'+ this.contentHeight)
+
+      Text('Width：' + this.contentWidth + '，Height：' + this.contentHeight)
         .fontColor(Color.Red)
         .height(15)
       Text('Index：' + this.changeCachedCountIndex + '，CachedCount数值：' +
@@ -256,10 +261,10 @@ struct WaterFlowDemo333 {
       this.changeCachedCountBolList[this.changeCachedCountBolIndex])
         .fontColor(Color.Orange)
         .height(15)
-      Text('gap：'+ this.gaps[this.gapIndex])
+      Text('gap：' + this.gaps[this.gapIndex])
         .fontColor(Color.Blue)
         .height(15)
-      Text('padding：'+ this.paddings[this.paddingIndex])
+      Text('padding：' + this.paddings[this.paddingIndex])
         .fontColor(Color.Green)
         .height(15)
       Stack() {
@@ -274,12 +279,16 @@ struct WaterFlowDemo333 {
             centerY: 0
           })
 
-        WaterFlow({ scroller:this.scroller,layoutMode: WaterFlowLayoutMode.ALWAYS_TOP_DOWN,footer: this.itemFoot() }) {
+        WaterFlow({
+          scroller: this.scroller,
+          layoutMode: WaterFlowLayoutMode.ALWAYS_TOP_DOWN,
+          footer: this.itemFoot()
+        }) {
           ForEach(this.dataSource.dataArray, (item: number) => {
             FlowItem() {
               // 使用可复用组件，提升性能
               Column() {
-                Text("F" + item).fontSize(12).height('16')
+                Text('F' + item).fontSize(12).height('16')
               }
               .height(item * 11)
             }
