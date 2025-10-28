@@ -2891,6 +2891,11 @@ void SearchPattern::UpdatePropertyImpl(const std::string& key, RefPtr<PropertyVa
                 if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
                     auto pattern = wp.Upgrade();
                     CHECK_NULL_VOID(pattern);
+                    if (!GreatOrEqual(realValue->Value(), 0.0) || realValue->Unit() == DimensionUnit::PERCENT) {
+                        auto theme = pattern->GetTheme();
+                        CHECK_NULL_VOID(theme);
+                        *realValue = theme->GetButtonFontSize();
+                    }
                     pattern->UpdateSearchButtonFontSizeResource(*realValue);
                     prop->UpdateSearchButtonFontSize(*realValue);
                 }
@@ -2941,6 +2946,11 @@ void SearchPattern::UpdatePropertyImpl(const std::string& key, RefPtr<PropertyVa
                     auto pattern = wp.Upgrade();
                     CHECK_NULL_VOID(pattern);
                     realValue->SetUnit(DimensionUnit::VP);
+                    if (LessNotEqual(realValue->Value(), 0.0) || realValue->Unit() == DimensionUnit::PERCENT) {
+                        auto theme = pattern->GetTheme();
+                        CHECK_NULL_VOID(theme);
+                        *realValue = theme->GetIconHeight();
+                    }
                     pattern->SetCancelIconSize(*realValue);
                     prop->UpdateCancelButtonUDSize(*realValue);
                 }
@@ -2968,6 +2978,11 @@ void SearchPattern::UpdatePropertyImpl(const std::string& key, RefPtr<PropertyVa
                 if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
                     auto pattern = wp.Upgrade();
                     CHECK_NULL_VOID(pattern);
+                    if (!GreatOrEqual(realValue->Value(), 0.0) || realValue->Unit() == DimensionUnit::PERCENT) {
+                        auto theme = pattern->GetTheme();
+                        CHECK_NULL_VOID(theme);
+                        *realValue = theme->GetFontSize();
+                    }
                     pattern->UpdateFontSizeResource(*realValue);
                 }
             }
@@ -2991,10 +3006,20 @@ void SearchPattern::UpdatePropertyImpl(const std::string& key, RefPtr<PropertyVa
             }
         },
 
-        {"caretWidth", [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+        { "caretWidth",
+            [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
                 if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
                     auto pattern = wp.Upgrade();
                     CHECK_NULL_VOID(pattern);
+                    if (LessNotEqual(realValue->Value(), 0.0)) {
+                        auto host = pattern->GetHost();
+                        CHECK_NULL_VOID(host);
+                        auto pipeline = host->GetContext();
+                        CHECK_NULL_VOID(pipeline);
+                        auto theme = pipeline->GetTheme<TextFieldTheme>();
+                        CHECK_NULL_VOID(theme);
+                        *realValue = theme->GetCursorWidth();
+                    }
                     pattern->UpdateCaretWidthResource(*realValue);
                 }
             }
@@ -3031,6 +3056,9 @@ void SearchPattern::UpdatePropertyImpl(const std::string& key, RefPtr<PropertyVa
             if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
                     auto pattern = wp.Upgrade();
                     CHECK_NULL_VOID(pattern);
+                    if (realValue->IsNegative()) {
+                        *realValue = CalcDimension();
+                    }
                     pattern->UpdateMinFontSizeResource(*realValue);
                 }
             }
@@ -3040,6 +3068,11 @@ void SearchPattern::UpdatePropertyImpl(const std::string& key, RefPtr<PropertyVa
             if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
                     auto pattern = wp.Upgrade();
                     CHECK_NULL_VOID(pattern);
+                    if (realValue->IsNegative()) {
+                        auto theme = pattern->GetTheme();
+                        CHECK_NULL_VOID(theme);
+                        *realValue = theme->GetTextStyle().GetAdaptMaxFontSize();
+                    }
                     pattern->UpdateMaxFontSizeResource(*realValue);
                 }
             }
@@ -3058,6 +3091,9 @@ void SearchPattern::UpdatePropertyImpl(const std::string& key, RefPtr<PropertyVa
             if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
                     auto pattern = wp.Upgrade();
                     CHECK_NULL_VOID(pattern);
+                    if (realValue->IsNegative()) {
+                        realValue->Reset();
+                    }
                     pattern->UpdateLineHeightResource(*realValue);
                 }
             }
