@@ -79,16 +79,12 @@ namespace {
 
 namespace OHOS::Ace {
 
-/*
- * Get the singleton instance of ResSchedTouchOptimizer.
- *
- * Returns:
- *     Reference to the ResSchedTouchOptimizer instance for the current thread.
- */
-ResSchedTouchOptimizer& ResSchedTouchOptimizer::GetInstance()
+ResSchedTouchOptimizer::ResSchedTouchOptimizer()
 {
-    thread_local ResSchedTouchOptimizer instance;
-    return instance;
+}
+
+ResSchedTouchOptimizer::~ResSchedTouchOptimizer()
+{
 }
 
 /*

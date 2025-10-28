@@ -1299,6 +1299,11 @@ public:
         return window_->GetIsRequestFrame();
     }
 
+    std::shared_ptr<ResSchedTouchOptimizer> GetTouchOptimizer() const
+    {
+        return touchOptimizer_;
+    }
+
     void SetMagnifierController(const RefPtr<MagnifierController>& magnifierController);
     RefPtr<MagnifierController> GetMagnifierController() const;
 protected:
@@ -1661,6 +1666,7 @@ private:
     bool needReloadResource_ = false;
     std::list<WeakPtr<UINode>> needReloadNodes_;
     RefPtr<MagnifierController> magnifierController_;
+    std::shared_ptr<ResSchedTouchOptimizer> touchOptimizer_;
 };
 
 /**

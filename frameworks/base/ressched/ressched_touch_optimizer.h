@@ -22,9 +22,10 @@
 namespace OHOS::Ace {
 class ACE_EXPORT ResSchedTouchOptimizer final {
 public:
-    static ResSchedTouchOptimizer& GetInstance();
+    ResSchedTouchOptimizer();
+    ~ResSchedTouchOptimizer();
 
-    // basic getter adns setters
+    // basic getter and setters
     void SetSlideAccepted(bool accept);
     void SetLastTpFlush(bool lastTpFlush);
     void SetSlideDirection(int32_t direction);
