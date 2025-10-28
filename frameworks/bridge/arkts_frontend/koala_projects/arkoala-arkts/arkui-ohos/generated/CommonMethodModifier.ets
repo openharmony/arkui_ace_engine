@@ -133,7 +133,7 @@ export class CommonMethodModifier implements CommonMethod {
     _onTouch_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onTouch_0_0value?: ((event: TouchEvent) => void) | undefined
     _onKeyEvent_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onKeyEvent_0_0value?: ((event: KeyEvent) => void) | undefined
+    _onKeyEvent_0_0value?: ((event: KeyEvent) => boolean) | undefined
     _onDigitalCrown_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onDigitalCrown_0_0value?: ((value0: CrownEvent) => void) | undefined
     _onKeyPreIme_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -1282,7 +1282,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (this._onKeyEvent_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnKeyEventAttribute((this._onKeyEvent_0_0value as ((event: KeyEvent) => void) | undefined));
+                    peer.setOnKeyEventAttribute((this._onKeyEvent_0_0value as ((event: KeyEvent) => boolean) | undefined));
                     this._onKeyEvent_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -1292,7 +1292,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     this._onKeyEvent_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnKeyEventAttribute((undefined as ((event: KeyEvent) => void) | undefined));
+                    peer.setOnKeyEventAttribute((undefined as ((event: KeyEvent) => boolean) | undefined));
                 }
             }
         }
@@ -4561,7 +4561,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.onKeyEvent((undefined as ((event: KeyEvent) => void) | undefined));
+                    this.onKeyEvent((undefined as ((event: KeyEvent) => boolean) | undefined));
                 }
             }
         }
@@ -7030,7 +7030,7 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    onKeyEvent(value: ((event: KeyEvent) => void) | undefined): this {
+    onKeyEvent(value: ((event: KeyEvent) => boolean) | undefined): this {
         if (((this._onKeyEvent_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._onKeyEvent_0_flag = AttributeUpdaterFlag.UPDATE
