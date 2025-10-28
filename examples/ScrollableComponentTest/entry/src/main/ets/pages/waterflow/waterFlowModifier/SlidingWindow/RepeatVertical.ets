@@ -1,4 +1,69 @@
-{
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/*
+ * Description: WaterFlow组件支持基于断点自适应列数
+ * Writer: renxiaowen
+ */
+ 
+// Index.ets
+import { WaterFlowDataSource } from '../../WaterFlowDataSource';
+import { image } from '@kit.ImageKit';
+
+class waterFlowModifier implements AttributeModifier<WaterFlowAttribute> {
+  index: number = 0;
+  columnList: (string | ItemFillPolicy | undefined | null)[] = [
+    '1fr 2fr 1fr',
+    { fillType: PresetFillType.BREAKPOINT_DEFAULT },
+    { fillType: PresetFillType.BREAKPOINT_SM2MD3LG5 },
+    { fillType: PresetFillType.BREAKPOINT_SM1MD2LG3 },
+    undefined,
+    null
+  ]
+
+  applyNormalAttribute(instance: WaterFlowAttribute): void {
+    instance.columnsTemplate(this.columnList[this.index])
+  }
+}
+
+// 可复用组件：优化性能，减少组件创建销毁开销
+@Reusable
+@Component
+struct ReusableFlowItem {
+  @State item: number = 0;
+
+  // 从复用缓存中加入到组件树之前调用，可在此处更新组件的状态变量以展示正确的内容
+  aboutToReuse(params: Record<string, number>) {
+    this.item = params.item;
+  }
+
+  build() {
+    Column() {
+      Text('N' + this.item).fontSize(12).height('16')
+      // 注意：需要确保对应的jpg文件存在才会正常显示
+      Image('res/waterFlow(' + this.item % 5 + ').jpg')
+        .objectFit(ImageFit.Fill)
+        .width('100%')
+        .layoutWeight(1)
+    }
+  }
+}
+
+@Entry
+@Component
+struct WaterFlowDemo55 {
   @State waterFlowMod: waterFlowModifier = new waterFlowModifier()
   minSize: number = 80;
   maxSize: number = 180;
@@ -154,7 +219,7 @@
           .onClick(() => {
             this.paddingIndex = (this.paddingIndex + 1) % this.paddings.length;
           })
-        Button('column: ' + this.waterFlowMod.columnList[this.waterFlowMod.index]).onClick(() => {
+        Button("column: " + this.waterFlowMod.columnList[this.waterFlowMod.index]).onClick(() => {
           this.waterFlowMod.index++;
           this.waterFlowMod.index = this.waterFlowMod.index % this.waterFlowMod.columnList.length;
         })
@@ -199,7 +264,7 @@
               FlowItem() {
                 // 使用可复用组件，提升性能
                 Column() {
-                  Text('R' + ri.item).fontSize(12).height('16')
+                  Text("R" + ri.item).fontSize(12).height('16')
                 }
                 .height(ri.item * 11)
               }

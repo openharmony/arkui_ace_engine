@@ -204,9 +204,9 @@ struct WaterFlowDemo555 {
           })
         Button('width' + this.widthIndex)
           .onClick(() => {
-            this.widthIndex++
+            this.widthIndex++;
             if (this.widthIndex > this.widthList.length - 1) {
-              this.widthIndex = 0
+              this.widthIndex = 0;
             }
           })
         Button('direction' + this.directionIndex)
