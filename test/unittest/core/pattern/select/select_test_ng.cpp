@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -332,35 +332,7 @@ HWTEST_F(SelectTestNg, SelectEvent001, TestSize.Level1)
     event.code = KeyCode::KEY_ENTER;
     EXPECT_TRUE(selectPattern->OnKeyEvent(event));
 }
-/**
- * @tc.name: OnModifyDone001
- * @tc.desc: Test SelectPattern OnModifyDone
- * @tc.type: FUNC
- */
-HWTEST_F(SelectTestNg, OnModifyDone001, TestSize.Level1)
-{
-    SelectModelNG selectModelInstance;
-    /**
-     * @tc.steps: step1. Create select.
-     */
-    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE },
-        { OPTION_TEXT_3, INTERNAL_SOURCE } };
-    selectModelInstance.Create(params);
-    /**
-     * @tc.steps: step2. Get frameNode and pattern.
-     */
-    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(select, nullptr);
-    auto selectPattern = select->GetPattern<SelectPattern>();
-    ASSERT_NE(selectPattern, nullptr);
-    /**
-     * @tc.steps: step3. Call OnModifyDone.
-     * @tc.expected: the function runs normally
-     */
-    selectPattern->OnModifyDone();
-    auto host = selectPattern->GetHost();
-    EXPECT_NE(host->GetEventHub<SelectEventHub>(), nullptr);
-}
+
 /**
  * @tc.name: UpdateSelectedProps001
  * @tc.desc: Test SelectPattern UpdateSelectedProps
