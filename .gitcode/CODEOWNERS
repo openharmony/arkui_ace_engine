@@ -206,8 +206,8 @@ adapter/ohos/tools/raw_input_injector/ @ArkUI_Event
 
 [Preview adapter]
 adapter/preview/entrance/window_free_container.cpp @arkui_framework_xnode
-adapter/preview/osal/advance/data_detector_adapter.cpp @huawei_g_five
 adapter/preview/ @arkui_statemgmt
+adapter/preview/osal/advance/data_detector_adapter.cpp @huawei_g_five
 
 [Advanced UI Components]
 advanced_ui_component/arcslider/
