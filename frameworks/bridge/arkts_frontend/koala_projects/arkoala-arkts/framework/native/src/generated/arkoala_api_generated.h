@@ -1870,8 +1870,10 @@ typedef struct Ark_DropOptions Ark_DropOptions;
 typedef struct Opt_DropOptions Opt_DropOptions;
 typedef struct Ark_EdgeEffectOptions Ark_EdgeEffectOptions;
 typedef struct Opt_EdgeEffectOptions Opt_EdgeEffectOptions;
-typedef struct Ark_EdgeNumber Ark_EdgeNumber;
-typedef struct Opt_EdgeNumber Opt_EdgeNumber;
+typedef struct Ark_EdgeF64 Ark_EdgeF64;
+typedef struct Opt_EdgeF64 Opt_EdgeF64;
+typedef struct Ark_EdgeI32 Ark_EdgeI32;
+typedef struct Opt_EdgeI32 Opt_EdgeI32;
 typedef struct Ark_EdgeOutlineStyles Ark_EdgeOutlineStyles;
 typedef struct Opt_EdgeOutlineStyles Opt_EdgeOutlineStyles;
 typedef struct Ark_EdgeStyles Ark_EdgeStyles;
@@ -13215,17 +13217,28 @@ typedef struct Opt_EdgeEffectOptions {
     Ark_Tag tag;
     Ark_EdgeEffectOptions value;
 } Opt_EdgeEffectOptions;
-typedef struct Ark_EdgeNumber {
+typedef struct Ark_EdgeF64 {
     /* kind: Interface */
-    Ark_Number top;
-    Ark_Number right;
-    Ark_Number bottom;
-    Ark_Number left;
-} Ark_EdgeNumber;
-typedef struct Opt_EdgeNumber {
+    Ark_Float64 top;
+    Ark_Float64 right;
+    Ark_Float64 bottom;
+    Ark_Float64 left;
+} Ark_EdgeF64;
+typedef struct Opt_EdgeF64 {
     Ark_Tag tag;
-    Ark_EdgeNumber value;
-} Opt_EdgeNumber;
+    Ark_EdgeF64 value;
+} Opt_EdgeF64;
+typedef struct Ark_EdgeI32 {
+    /* kind: Interface */
+    Ark_Int32 top;
+    Ark_Int32 right;
+    Ark_Int32 bottom;
+    Ark_Int32 left;
+} Ark_EdgeI32;
+typedef struct Opt_EdgeI32 {
+    Ark_Tag tag;
+    Ark_EdgeI32 value;
+} Opt_EdgeI32;
 typedef struct Ark_EdgeOutlineStyles {
     /* kind: Interface */
     Opt_OutlineStyle top;
@@ -25433,7 +25446,7 @@ typedef struct GENERATED_ArkUIIndicatorComponentControllerAccessor {
 typedef struct GENERATED_ArkUIIUIContextAccessor {
     void (*freezeUINode0)(const Ark_String* id,
                           Ark_Boolean isFrozen);
-    void (*freezeUINode1)(const Ark_Number* id,
+    void (*freezeUINode1)(Ark_Int64 id,
                           Ark_Boolean isFrozen);
     Ark_Boolean (*dispatchKeyEvent)(const Ark_Union_Number_String* node,
                                     Ark_KeyEvent event);
@@ -26233,11 +26246,11 @@ typedef struct GENERATED_ArkUIRenderNodeExtenderAccessor {
     Ark_NativePointer (*getDestroy)();
     void (*destroyPeer)(Ark_RenderNode peer);
     void (*setBackgroundColor)(Ark_RenderNode peer,
-                               const Ark_Number* backgroundColor);
+                               Ark_Int32 backgroundColor);
     void (*setClipToFrame)(Ark_RenderNode peer,
                            Ark_Boolean clipToFrame);
     void (*setOpacity)(Ark_RenderNode peer,
-                       const Ark_Number* opacity);
+                       Ark_Float64 opacity);
     void (*setSize)(Ark_RenderNode peer,
                     const Ark_Size* size,
                     Ark_Int32 unitValue);
@@ -26256,25 +26269,25 @@ typedef struct GENERATED_ArkUIRenderNodeExtenderAccessor {
     void (*setTransform)(Ark_RenderNode peer,
                          const Ark_Matrix4* transform);
     void (*setShadowColor)(Ark_RenderNode peer,
-                           const Ark_Number* shadowColor);
+                           Ark_Int32 shadowColor);
     void (*setShadowOffset)(Ark_RenderNode peer,
                             const Ark_Vector2* shadowOffset,
                             Ark_Int32 unitValue);
     void (*setLabel)(Ark_RenderNode peer,
                      const Ark_String* label);
     void (*setShadowAlpha)(Ark_RenderNode peer,
-                           const Ark_Number* shadowAlpha);
+                           Ark_Float64 shadowAlpha);
     void (*setShadowElevation)(Ark_RenderNode peer,
-                               const Ark_Number* shadowElevation);
+                               Ark_Float64 shadowElevation);
     void (*setShadowRadius)(Ark_RenderNode peer,
-                            const Ark_Number* shadowRadius);
+                            Ark_Float64 shadowRadius);
     void (*setBorderStyle)(Ark_RenderNode peer,
                            const Ark_NodeEdgeStyles* borderStyle);
     void (*setBorderWidth)(Ark_RenderNode peer,
-                           const Ark_EdgeNumber* borderWidth,
+                           const Ark_EdgeF64* borderWidth,
                            Ark_Int32 unitValue);
     void (*setBorderColor)(Ark_RenderNode peer,
-                           const Ark_EdgeNumber* borderColor);
+                           const Ark_EdgeI32* borderColor);
     void (*setBorderRadius)(Ark_RenderNode peer,
                             const Ark_BorderRadiuses_graphics* borderRadius,
                             Ark_Int32 unitValue);

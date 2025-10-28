@@ -41,7 +41,7 @@ export class RenderNodeTransfer {
         }
         let borderColorVal = TransferUtil.getPropEdgesColor(inVal, "borderColorValue");
         if (borderColorVal) {
-            rn.borderColor = borderColorVal as NodeEdges<number>;
+            rn.borderColor = borderColorVal as NodeEdges<int>;
         }
         let borderRadiusVal = TransferUtil.getPropCornersNoExcept(inVal, "borderRadiusValue");
         if (borderRadiusVal) {
@@ -57,7 +57,7 @@ export class RenderNodeTransfer {
         }
         let colorVal = TransferUtil.getPropColorInt(inVal, "backgroundColorValue");
         if (colorVal !== undefined) {
-            rn.backgroundColor = colorVal as number;
+            rn.backgroundColor = colorVal as int;
         }
         rn.clipToFrame = TransferUtil.getPropBool(inVal, "clipToFrameValue");
         rn.frame = TransferUtil.getPropFrame(inVal, "frameValue");
@@ -68,7 +68,7 @@ export class RenderNodeTransfer {
         rn.scale = TransferUtil.getPropVector2(inVal, "scaleValue");
         let ClrVal = TransferUtil.getPropColorInt(inVal, "shadowColorValue");
         if (ClrVal !== undefined) {
-            rn.shadowColor = ClrVal as number;
+            rn.shadowColor = ClrVal as int;
         }
         rn.shadowOffset = TransferUtil.getPropVector2(inVal, "shadowOffsetValue");
         rn.label = TransferUtil.getPropString(inVal, "labelValue");
