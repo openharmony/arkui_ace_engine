@@ -16,6 +16,7 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("bubble_test_ng") {
   type = "new"
   sources = [
+    "bubble_test_four_ng.cpp",
     "bubble_test_One_ng.cpp",
     "bubble_test_ng.cpp",
     "bubble_test_two_ng.cpp",
