@@ -100,6 +100,7 @@ build_component_ng("pattern_ng") {
     "container_modal/static/container_modal_static_bridge.cpp",
     "container_modal/static/container_modal_static_pattern.cpp",
     "container_modal/static/container_modal_static_view.cpp",
+    "container_picker/container_picker_accessibility_property.cpp",
     "container_picker/container_picker_layout_algorithm.cpp",
     "container_picker/container_picker_model.cpp",
     "container_picker/container_picker_paint_method.cpp",

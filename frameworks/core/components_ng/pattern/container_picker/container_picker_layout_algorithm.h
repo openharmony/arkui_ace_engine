@@ -36,6 +36,7 @@ public:
     void SetItemPosition(const ContainerPickerUtils::PositionMap& itemPosition)
     {
         itemPosition_ = itemPosition;
+        prevItemPosition_ = itemPosition_;
     }
 
     ContainerPickerUtils::PositionMap&& GetItemPosition()
@@ -54,6 +55,16 @@ public:
     void SetTotalItemCount(int32_t realTotalCount)
     {
         totalItemCount_ = realTotalCount;
+    }
+
+    int32_t GetTotalItemCount()
+    {
+        return totalItemCount_;
+    }
+
+    void SetPrevTotalItemCount(int32_t prevTotalCount)
+    {
+        prevTotalItemCount_ = prevTotalCount;
     }
 
     void SetCurrentDelta(float offset)
@@ -199,13 +210,14 @@ private:
     std::vector<int32_t> offScreenItemsIndex_;
 
     int32_t totalItemCount_ = 0;
+    int32_t prevTotalItemCount_ = 0;
     int32_t selectedIndex_ = 0;
 
     float startMainPos_ = 0.0f;
     float endMainPos_ = 0.0f;
     float topPadding_ = 0.0f;
-    float height_ = 0.0f;          // usage: record picker real height
-    float contentMainSize_ = 0.0f; // usage: picker content area height
+    float height_ = 0.0f;           // usage: record picker real height
+    float contentMainSize_ = 0.0f;  // usage: picker content area height
     float contentCrossSize_ = 0.0f; // usage: picker content area width
     float middleItemStartPos_ = 0.0f;
     float middleItemEndPos_ = 0.0f;

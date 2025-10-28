@@ -46,10 +46,10 @@ private:
     void PaintSelectionIndicatorDivider(PaintWrapper* paintWrapper, RSCanvas& canvas) const;
 
     void CheckMarginAndLength(float& length, double& startMargin, double& endMargin) const;
-    void SetDefaultIndicatorBackground(RefPtr<FrameNode> pickerNode,
-        Color& backgroundColor, BorderRadiusProperty& borderRadius) const;
-    void SetDefaultIndicatorDivider(RefPtr<FrameNode> pickerNode, double& strokeWidth,
-        Color& dividerColor, double& startMargin, double& endMargin) const;
+    void SetDefaultIndicatorBackground(
+        RefPtr<FrameNode> pickerNode, Color& backgroundColor, BorderRadiusProperty& borderRadius) const;
+    void SetDefaultIndicatorDivider(RefPtr<FrameNode> pickerNode, double& strokeWidth, Color& dividerColor,
+        double& startMargin, double& endMargin) const;
 
     PaddingPropertyF safeAreaPadding_;
 };
