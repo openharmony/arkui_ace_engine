@@ -19,12 +19,13 @@ import {
   ShadowStyle, $r, Builder, BuilderParam, CustomBuilder, RichEditorSelection, RichEditorTextSpanResult, Column, ForEach,
   ConstraintSizeOptions, SizeResult, MeasureResult, SymbolEffect, Area, GeometryInfo, Component, Length, Menu,
   RichEditorTextStyle, FontStyle, FontWeight, TextDecorationType, Flex, Visibility, Scroll, FlexWrap, MenuItemGroup,
-  OutlineOptions, Padding, ClickEvent, SymbolGlyph, Image, ButtonType, SymbolEffectStrategy, ClassCastError
+  OutlineOptions, Padding, ClickEvent, SymbolGlyph, Image, ButtonType, SymbolEffectStrategy, ClassCastError,
+  RichEditorTextStyleResult
 } from '@ohos.arkui.component';
 import { State, Observed, PropRef, StorageProp, Watch, StorageLink } from '@ohos.arkui.stateManagement';
 import { Context, UIContext, MeasureUtils } from '@ohos.arkui.UIContext';
 import pasteboard from '@ohos.pasteboard'
-import { BusinessError } from '@ohos.base';
+import { BusinessError, RecordData } from '@ohos.base';
 import hilog from '@ohos.hilog';
 import common from '@ohos.app.ability.common';
 import { SymbolGlyphModifier } from '@kit.ArkUI';
@@ -218,8 +219,7 @@ struct SelectionMenuComponent {
       .outline(this.hasSystemMenu() ? { width: this.theme.outlineWidth, color: this.theme.outlineColor,
         radius: this.theme.containerBorderRadius } as OutlineOptions : undefined)
       .constraintSize({
-        // maxHeight: `calc(100% - ${this.horizontalMenuHeight > 0 ? this.horizontalMenuHeight + this.theme.menuSpacing : 0}vp)`,
-        maxHeight: 300,
+        maxHeight: `calc(100% - ${this.horizontalMenuHeight > 0 ? this.horizontalMenuHeight + this.theme.menuSpacing : 0}vp)`,
         minWidth: this.theme.defaultMenuWidth
       })
     }
@@ -233,31 +233,32 @@ struct SelectionMenuComponent {
   pushDataToPasteboard(richEditorSelection: RichEditorSelection) {
     let sysBoard = pasteboard.getSystemPasteboard()
     let pasteData = pasteboard.createData(pasteboard.MIMETYPE_TEXT_PLAIN, '')
-//    if (richEditorSelection.spans && richEditorSelection.spans.length > 0) {
-//      let count = richEditorSelection.spans.length
-//      for (let i = count - 1; i >= 0; i--) {
-//        let item = richEditorSelection.spans[i]
-//        if ((item as RichEditorTextSpanResult)?.textStyle) {
-//          let span = item as RichEditorTextSpanResult
-//          let style = span.textStyle
-//          let data = pasteboard.createRecord(pasteboard.MIMETYPE_TEXT_PLAIN,
-//            span.value.substring(span.offsetInSpan[0], span.offsetInSpan[1]))
-//          let prop = pasteData.getProperty()
-//          let temp: Record<string, Object> = {
-//            'color': style.fontColor,
-//            'size': style.fontSize,
-//            'style': style.fontStyle,
-//            'weight': this.fontWeightTable[style.fontWeight],
-//            'fontFamily': style.fontFamily,
-//            'decorationType': style.decoration.type,
-//            'decorationColor': style.decoration.color
-//          }
-//          prop.additions[i] = temp;
-//          pasteData.addRecord(data)
-//          pasteData.setProperty(prop)
-//        }
-//      }
-//    }
+    let prop = pasteData.getProperty()
+    let tempAddition: Record<string, RecordData> = new Record<string, RecordData>()
+    if (richEditorSelection.spans && richEditorSelection.spans.length > 0) {
+      let count = richEditorSelection.spans.length
+      for (let i = count - 1; i >= 0; i--) {
+        let item = richEditorSelection.spans[i]
+        if ((item as RichEditorTextSpanResult)?.textStyle) {
+          let span = item as RichEditorTextSpanResult
+          let style = span.textStyle
+          let data = pasteboard.createRecord(pasteboard.MIMETYPE_TEXT_PLAIN,
+            span.value.substring(span.offsetInSpan[0], span.offsetInSpan[1]))
+          tempAddition[i.toString()] = {
+            'color': style.fontColor,
+            'size': style.fontSize,
+            'style': style.fontStyle,
+            'weight': this.fontWeightTable[style.fontWeight],
+            'fontFamily': style.fontFamily,
+            'decorationType': style.decoration.type,
+            'decorationColor': style.decoration.color
+          } as Record<string, RecordData>
+          pasteData.addRecord(data)
+        }
+      }
+    }
+    prop.additions = tempAddition
+    pasteData.setProperty(prop)
     sysBoard.clearData()
     sysBoard.setData(pasteData).then(() => {
       hilog.info(0x3900, 'Ace', 'SelectionMenu copy option, Succeeded in setting PasteData.');
@@ -290,33 +291,33 @@ struct SelectionMenuComponent {
           fontStyle: FontStyle.Normal,
           decoration: { type: TextDecorationType.None, color: '#FF000000' }
         }
-//        if (data!.getProperty() && data!.getProperty().additions[i]) {
-//          const tmp = data!.getProperty().additions[i] as Record<string, Object | undefined>;
-//          if (tmp.color) {
-//            tex.fontColor = tmp.color as ResourceColor;
-//          }
-//          if (tmp.size) {
-//            tex.fontSize = tmp.size as Length | number;
-//          }
-//          if (tmp.style) {
-//            tex.fontStyle = tmp.style as FontStyle;
-//          }
-//          if (tmp.weight) {
-//            tex.fontWeight = tmp.weight as number | FontWeight | string;
-//          }
-//          if (tmp.fontFamily) {
-//            tex.fontFamily = tmp.fontFamily as ResourceStr;
-//          }
-//          if (tmp.decorationType && tex.decoration) {
-//            tex.decoration!.type = tmp.decorationType as TextDecorationType;
-//          }
-//          if (tmp.decorationColor && tex.decoration) {
-//            tex.decoration!.color = tmp.decorationColor as ResourceColor;
-//          }
-//          if (tex.decoration) {
-//            tex.decoration = { type: tex.decoration!.type, color: tex.decoration!.color }
-//          }
-//        }
+        if (data!.getProperty() && data!.getProperty().additions[i.toString()]) {
+          const tmp = data!.getProperty().additions[i.toString()] as Record<string, RecordData>;
+          if (tmp['color']) {
+            tex.fontColor = tmp['color'] as ResourceColor;
+          }
+          if (tmp['size']) {
+            tex.fontSize = tmp['size'] as Length | number;
+          }
+          if (tmp['style']) {
+            tex.fontStyle = tmp['style'] as FontStyle;
+          }
+          if (tmp['weight']) {
+            tex.fontWeight = tmp['weight'] as int | FontWeight | string;
+          }
+          if (tmp['fontFamily']) {
+            tex.fontFamily = tmp['fontFamily'] as ResourceStr;
+          }
+          if (tmp['decorationType'] && tex.decoration) {
+            tex.decoration!.type = tmp['decorationType'] as TextDecorationType;
+          }
+          if (tmp['decorationColor'] && tex.decoration) {
+            tex.decoration!.color = tmp['decorationColor'] as ResourceColor;
+          }
+          if (tex.decoration) {
+            tex.decoration = { type: tex.decoration!.type, color: tex.decoration!.color }
+          }
+        }
         if (element && element.plainText && element.mimeType === pasteboard.MIMETYPE_TEXT_PLAIN && this.controller) {
           this.controller!.addTextSpan(element.plainText,
             {
