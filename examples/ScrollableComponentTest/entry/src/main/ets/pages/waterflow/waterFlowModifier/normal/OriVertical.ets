@@ -148,7 +148,7 @@ struct waterExample9 {
     Scroll() {
       Column() {
         Row() {
-          Button("column: " + this.waterFlowMod.columnList[this.waterFlowMod.index]).onClick(() => {
+          Button('column: ' + this.waterFlowMod.columnList[this.waterFlowMod.index]).onClick(() => {
             this.waterFlowMod.index++;
             this.waterFlowMod.index = this.waterFlowMod.index % this.waterFlowMod.columnList.length;
           })
@@ -246,7 +246,7 @@ struct waterExample9 {
                   .backgroundColor(0xFFFFFF)
                 if (this.editFlag) {
                   Button() {
-                    Text("delete").fontSize(16)
+                    Text('delete').fontSize(16)
                   }.width('30%').height(40)
                   .onClick(() => {
                     if (index != undefined) {

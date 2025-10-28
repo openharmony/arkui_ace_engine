@@ -256,7 +256,7 @@ struct waterExample91 {
                   .backgroundColor(0xFFFFFF)
                 if (this.editFlag) {
                   Button() {
-                    Text("delete").fontSize(16)
+                    Text('delete').fontSize(16)
                   }.width('30%').height(40)
                   .onClick(() => {
                     if (index != undefined) {

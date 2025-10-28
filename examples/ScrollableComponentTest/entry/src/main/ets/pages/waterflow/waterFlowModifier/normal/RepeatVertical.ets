@@ -120,7 +120,6 @@ struct waterExample11 {
         .width(50)
         .height(100)
         .align(Alignment.Center)
-      // .margin({ top: 20,bottom:5 })
     }
   }
 
@@ -144,7 +143,7 @@ struct waterExample11 {
     Scroll() {
       Column() {
         Row() {
-          Button("column: " + this.waterFlowMod.columnList[this.waterFlowMod.index]).onClick(() => {
+          Button('column: ' + this.waterFlowMod.columnList[this.waterFlowMod.index]).onClick(() => {
             this.waterFlowMod.index++;
             this.waterFlowMod.index = this.waterFlowMod.index % this.waterFlowMod.columnList.length;
           })

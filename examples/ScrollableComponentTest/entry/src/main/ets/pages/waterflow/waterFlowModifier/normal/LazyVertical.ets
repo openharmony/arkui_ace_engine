@@ -162,7 +162,7 @@ struct waterExample7 {
     Scroll() {
       Column() {
         Row() {
-          Button("column: " + this.waterFlowMod.columnList[this.waterFlowMod.index]).onClick(() => {
+          Button('column: ' + this.waterFlowMod.columnList[this.waterFlowMod.index]).onClick(() => {
             this.waterFlowMod.index++;
             this.waterFlowMod.index = this.waterFlowMod.index % this.waterFlowMod.columnList.length;
           })
@@ -214,7 +214,7 @@ struct waterExample7 {
         Row() {
           Button('rowGap')
             .onClick(() => {
-              this.gapIndex++
+              this.gapIndex++;
               if (this.gapIndex > this.gaps.length - 1) {
                 this.gapIndex = 0;
               }
