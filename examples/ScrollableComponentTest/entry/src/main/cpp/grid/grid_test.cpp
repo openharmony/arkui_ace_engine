@@ -1045,7 +1045,8 @@ napi_value GridTest::CreateNativeNode(napi_env env, napi_callback_info info)
     auto scroll = AssembleFinalLayout();
     std::string id(xComponentID);
     if (OH_NativeXComponent_AttachNativeRootNode(
-            PluginManager::GetInstance()->GetNativeXComponent(id), scroll->GetComponent()) == INVALID_PARAM) {
+            PluginManager::GetInstance()->GetNativeXComponent(id), 
+            scroll->GetComponent == INVALID_PARAM)) {
         OH_LOG_Print(
             LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, "GridTest", "OH_NativeXComponent_AttachNativeRootNode failed");
     }
