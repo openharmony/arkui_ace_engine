@@ -1525,8 +1525,7 @@ export class UIContextImpl extends UIContext {
         return
     }
       public getWindowName(): string | undefined {
-        return  this.getWindowName_serialize();
-
+        return ArkUIAniModule._Common_getWindowName(this.instanceId_);
     }
     public getWindowWidthBreakpoint(): WidthBreakpoint {
 
@@ -1559,11 +1558,7 @@ export class UIContextImpl extends UIContext {
     public getId() : int32 {
         return this.instanceId_;
     }
-    private getWindowName_serialize(): string | undefined {
-        throw new Error("no impl");
-        
-        // return ArkUIGeneratedNativeModule._UIContext_getWindowName(this.instanceId_);
-    }
+
     private getWindowWidthBreakpoint_serialize(): WidthBreakpoint {
         throw new Error("no impl");
     }

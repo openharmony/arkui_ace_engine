@@ -605,6 +605,18 @@ ani_double Px2lpx(ani_double value, ani_int instanceId)
     return value / windowConfig.designWidthScale;
 }
 
+std::optional<std::string> GetWindowName(ani_int instanceId)
+{
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    ContainerScope scope(instanceId);
+    auto context = container->GetPipelineContext();
+    CHECK_NULL_RETURN(context, std::nullopt);
+    auto window = context->GetWindow();
+    CHECK_NULL_RETURN(window, std::nullopt);
+    std::string windowName = window->GetWindowName();
+    return windowName;
+}
+
 void* TransferKeyEventPointer(ani_long nativePtr)
 {
     CHECK_NULL_RETURN(nativePtr, nullptr);
@@ -945,6 +957,7 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .px2fp = OHOS::Ace::NG::Px2fp,
         .lpx2px = OHOS::Ace::NG::Lpx2px,
         .px2lpx = OHOS::Ace::NG::Px2lpx,
+        .getWindowName = OHOS::Ace::NG::GetWindowName,
         .transferKeyEventPointer = OHOS::Ace::NG::TransferKeyEventPointer,
         .createKeyEventAccessorWithPointer = OHOS::Ace::NG::CreateKeyEventAccessorWithPointer,
         .createEventTargetInfoAccessor = OHOS::Ace::NG::CreateEventTargetInfoAccessor,
