@@ -19,6 +19,7 @@ ace_unittest("select_test_ng") {
     "select_model_static_test_ng.cpp",
     "select_pattern_test_controlsize_ng.cpp",
     "select_pattern_test_ng.cpp",
+    "select_pattern_two_test_ng.cpp",
     "select_test_controlsize_ng.cpp",
     "select_test_ng.cpp",
   ]
