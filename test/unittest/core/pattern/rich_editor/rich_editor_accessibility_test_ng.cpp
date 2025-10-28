@@ -59,12 +59,6 @@ void ConstructUserGestureOptions(UserGestureOptions& gestureOption)
 }
 } // namespace
 
-
-
-
-
-
-
 class RichEditorAccessibilityTestNg : public TestNG {
 public:
     void SetUp() override;
@@ -563,6 +557,19 @@ HWTEST_F(RichEditorAccessibilityTestNg, AccessibilityProperty001, TestSize.Level
  * @tc.type: FUNC
  */
 HWTEST_F(RichEditorAccessibilityTestNg, AccessibilityProperty002, TestSize.Level2)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->SetAccessibilityAction();
+}
+
+/**
+ * @tc.name: AccessibilityProperty
+ * @tc.desc: Test GetText
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorAccessibilityTestNg, AccessibilityProperty003, TestSize.Level2)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
