@@ -33950,7 +33950,7 @@ void impl_RouterExtender_runPage(Ark_NativePointer jsView, KSerializerBuffer thi
         Opt_RouterFinishCallback finishCallbackValueTemp = finishCallbackValueTempTmpBuf;;
         GetAccessors()->getRouterExtenderAccessor()->runPage(jsView, static_cast<Ark_PageRouterOptions*>(&optionsValueTemp), static_cast<Opt_RouterFinishCallback*>(&finishCallbackValueTemp));
 }
-KOALA_INTEROP_DIRECT_V3(RouterExtender_runPage, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_V3(RouterExtender_runPage, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_RouterExtender_clear() {
         GetAccessors()->getRouterExtenderAccessor()->clear();
 }
