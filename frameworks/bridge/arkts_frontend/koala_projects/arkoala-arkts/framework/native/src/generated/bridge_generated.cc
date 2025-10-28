@@ -26392,7 +26392,7 @@ void impl_BuilderNodeOps_create(Ark_NativePointer thisPtr, KSerializerBuffer thi
         Callback_Void buildFuncValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Void))))};;
         GetAccessors()->getBuilderNodeOpsAccessor()->create(self, static_cast<Callback_Void*>(&buildFuncValueTemp));
 }
-KOALA_INTEROP_DIRECT_V3(BuilderNodeOps_create, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_V3(BuilderNodeOps_create, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_BuilderNodeOps_disposeNode(Ark_NativePointer thisPtr) {
         Ark_BuilderNodeOps self = reinterpret_cast<Ark_BuilderNodeOps>(thisPtr);
         GetAccessors()->getBuilderNodeOpsAccessor()->disposeNode(self);
