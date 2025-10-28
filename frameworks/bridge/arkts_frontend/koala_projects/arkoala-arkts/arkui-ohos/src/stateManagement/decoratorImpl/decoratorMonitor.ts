@@ -16,8 +16,7 @@ import { ObserveSingleton } from '../base/observeSingleton';
 import { IBindingSource } from '../base/mutableStateMeta';
 import { StateMgmtConsole } from '../tools/stateMgmtDFX';
 import { ITrackedDecoratorRef } from '../base/mutableStateMeta';
-import { RenderIdType, IMonitorValue, IMonitorDecoratedVariable, IMonitor, IMonitorPathInfo } from '../decorator';
-import { ExtendableComponent } from '../../component/extendableComponent';
+import { RenderIdType, IMonitorValue, IMonitorDecoratedVariable, IMonitor, IMonitorPathInfo, IVariableOwner } from '../decorator';
 
 export class MonitorFunctionDecorator implements IMonitorDecoratedVariable, IMonitor {
     public static readonly MIN_MONITOR_ID: RenderIdType = 0x20000000;
@@ -25,9 +24,9 @@ export class MonitorFunctionDecorator implements IMonitorDecoratedVariable, IMon
     public readonly decorator: string;
     private readonly monitorFunction_: (m: IMonitor) => void;
     private readonly values_: MonitorValueInternal[] = new Array<MonitorValueInternal>();
-    private readonly owningComponent_?: ExtendableComponent;
+    private readonly owningComponent_?: IVariableOwner;
 
-    constructor(pathLambda: IMonitorPathInfo[], monitorFunction: (m: IMonitor) => void, owningView?: ExtendableComponent) {
+    constructor(pathLambda: IMonitorPathInfo[], monitorFunction: (m: IMonitor) => void, owningView?: IVariableOwner) {
         this.monitorFunction_ = monitorFunction;
         this.owningComponent_ = owningView;
         pathLambda.forEach((info: IMonitorPathInfo) => {

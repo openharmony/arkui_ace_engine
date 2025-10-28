@@ -15,9 +15,8 @@
 import { AbstractProperty, SubscribedAbstractProperty } from './storageProperty';
 import { StorageProperty } from './storageBase';
 import { InteropStorageBase } from '../interop/interopStorage';
-import { WatchFuncType } from '../decorator';
+import { IVariableOwner, WatchFuncType } from '../decorator';
 import { StorageLinkDecoratedVariable } from '../decoratorImpl/decoratorStorageLink';
-import { ExtendableComponent } from '../../component/extendableComponent';
 
 type RecordData = undefined | null | Object | Record<string, RecordData> | Array<RecordData>;
 
@@ -280,7 +279,7 @@ export class LocalStorage {
      * @returns
      */
     public __makeStorageLink<T>(
-        owner: ExtendableComponent,
+        owner: IVariableOwner,
         propName: string,
         varName: string,
         decoratorName: string,

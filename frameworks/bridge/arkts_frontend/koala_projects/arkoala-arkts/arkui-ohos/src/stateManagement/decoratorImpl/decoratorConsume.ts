@@ -13,9 +13,8 @@
  * limitations under the License.
  */
 
-import { ExtendableComponent } from '../../component/extendableComponent';
 import { DecoratedV1VariableBase } from './decoratorBase';
-import { IProvideDecoratedVariable } from '../decorator';
+import { IProvideDecoratedVariable, IVariableOwner } from '../decorator';
 import { WatchFuncType } from '../decorator';
 import { IConsumeDecoratedVariable } from '../decorator';
 import { ObserveSingleton } from '../base/observeSingleton';
@@ -24,12 +23,12 @@ import { UIUtils } from '../utils';
 import { uiUtils } from '../base/uiUtilsImpl';
 export class ConsumeDecoratedVariable<T> extends DecoratedV1VariableBase<T> implements IConsumeDecoratedVariable<T> {
     provideAliasName: string;
-    sourceProvide_: IProvideDecoratedVariable<T> | null;
-    constructor(owningView: ExtendableComponent, varName: string, provideAliasName: string, watchFunc?: WatchFuncType) {
+    sourceProvide_: IProvideDecoratedVariable<T> | undefined;
+    constructor(owningView: IVariableOwner, varName: string, provideAliasName: string, watchFunc?: WatchFuncType) {
         super('@Consume', owningView, varName, watchFunc);
         this.provideAliasName = provideAliasName;
         this.sourceProvide_ = owningView.findProvide<T>(provideAliasName);
-        if (this.sourceProvide_ === null) {
+        if (this.sourceProvide_ === undefined) {
             throw new Error('no Provide found for Consume');
         }
         if (this.sourceProvide_) {

@@ -18,8 +18,7 @@ import { LocalStorage } from '../storage/localStorage';
 import { StorageBase } from '../storage/storageBase';
 import { SubscribedAbstractProperty } from '../storage/storageProperty';
 import { StorageProperty } from '../storage/storageBase';
-import { ExtendableComponent } from '../../component/extendableComponent';
-import { WatchFuncType } from '../decorator';
+import { IVariableOwner, WatchFuncType } from '../decorator';
 import { StorageLinkDecoratedVariable } from '../decoratorImpl/decoratorStorageLink';
 import { StateMgmtConsole } from '../tools/stateMgmtDFX';
 
@@ -468,7 +467,7 @@ export class InteropStorageBase extends StorageBase {
      * @returns
      */
     public __makeStorageLink<T>(
-        owner: ExtendableComponent,
+        owner: IVariableOwner,
         key: string,
         varName: string,
         decoratorName: string,

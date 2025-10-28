@@ -15,8 +15,7 @@
 
 import { DecoratedV1VariableBase } from './decoratorBase';
 import { StateUpdateLoop } from '../base/stateUpdateLoop';
-import { ExtendableComponent } from '../../component/extendableComponent';
-import { IObjectLinkDecoratedVariable } from '../decorator';
+import { IObjectLinkDecoratedVariable, IVariableOwner } from '../decorator';
 import { IBackingValue } from '../base/iBackingValue';
 import { FactoryInternal } from '../base/iFactoryInternal';
 import { ObserveSingleton } from '../base/observeSingleton';
@@ -44,7 +43,7 @@ export class ObjectLinkDecoratedVariable<T>
     private readonly backing_: IBackingValue<T>;
     // parentInitValue is the init value of parent @Component
     // constructor takes a copy of it
-    constructor(owningView: ExtendableComponent, varName: string, parentInitValue: T, watchFunc?: WatchFuncType) {
+    constructor(owningView: IVariableOwner, varName: string, parentInitValue: T, watchFunc?: WatchFuncType) {
         super('@ObjectLink', owningView, varName, watchFunc);
         this.backing_ = FactoryInternal.mkDecoratorValue<T>(varName, parentInitValue);
         this.registerWatchForObservedObjectChanges(parentInitValue);
