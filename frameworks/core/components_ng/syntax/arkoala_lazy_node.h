@@ -144,7 +144,7 @@ private:
     // ArkoalaLazyNode is not instance of FrameNode, needs to propagate active state to all items inside
     bool isActive_ = true;
 
-    UniqueValuedMap<int32_t, WeakPtr<UINode>, WeakPtr<UINode>::Hash> node4Index_;
+    UniqueValuedMap<int32_t, RefPtr<UINode>, WeakPtr<UINode>::Hash> node4Index_;
     CreateItemCb createItem_;
     UpdateRangeCb updateRange_;
     int32_t totalCount_ = 0;
