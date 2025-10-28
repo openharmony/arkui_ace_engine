@@ -83,6 +83,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         try {
             ObserveV2.getObserve().constructComputed(this, this.constructor.name);
             ObserveV2.getObserve().constructMonitor(this, this.constructor.name);
+            ObserveV2.getObserve().constructSyncMonitors(this, this.constructor.name);
         } catch (error) {
             stateMgmtConsole.applicationError(`Exception occurred when constructor @Computed or @Monitor`, error.message);
             _arkUIUncaughtPromiseError(error);

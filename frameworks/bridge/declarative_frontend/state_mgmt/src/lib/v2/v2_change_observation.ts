@@ -570,10 +570,21 @@ class ObserveV2 {
       throw new Error(error);
     }
 
+    let targetSymbolRefs = target[ObserveV2.SYMBOL_REFS];
     // enable this trace marker for more fine grained tracing of the update pipeline
     // note: two (!) end markers need to be enabled
-    let changedIdSet = target[ObserveV2.SYMBOL_REFS][attrName];
-    if (changedIdSet instanceof Set === false) {
+
+    let changedIdSet: Set<number> | undefined = undefined;
+    if (targetSymbolRefs[attrName] != undefined) {
+      changedIdSet = targetSymbolRefs[attrName];
+    }
+    if (targetSymbolRefs[MonitorV2.OB_ANY] !== undefined) {
+      if (changedIdSet === undefined) {
+        changedIdSet = new Set<number>();
+      }
+      targetSymbolRefs[MonitorV2.OB_ANY].forEach(item => changedIdSet!.add(item))
+    }
+    if (changedIdSet === undefined || changedIdSet.size === 0) {
       return;
     }
 
@@ -986,16 +997,16 @@ class ObserveV2 {
     aceDebugTrace.begin(`ObservedV3.updateDirtyMonitorPath: ${monitors.size} addMonitor`);
 
     let ret: number = 0;
-    monitors.forEach((watchId) => {
-      const monitor = this.id2Others_[watchId]?.deref();
+    monitors.forEach((monitorId) => {
+      const monitor = this.id2Others_[monitorId]?.deref();
       if (monitor instanceof MonitorV2) {
         const monitorTarget = monitor.getTarget();
         if (monitorTarget instanceof ViewV2 && !monitorTarget.isViewActive()) {
-          monitorTarget.addDelayedMonitorIds(watchId)
+          monitorTarget.addDelayedMonitorIds(monitorId)
         } else {
           // find the path MonitorValue and record dependency again
           // get path owning MonitorV2 id
-          ret = monitor.notifyChangeForEachPath(watchId);
+          ret = monitor.notifyChangeForEachPath(monitorId);
         }
       }
 
@@ -1110,6 +1121,19 @@ class ObserveV2 {
     } // if target[watchProp]
   }
 
+  public constructSyncMonitors(owningObject: Object, owningObjectName: string): void {
+    let watchProp = Symbol.for(MonitorV2.SYNC_MONITOR_PREFIX + owningObjectName);
+    if (owningObject && (typeof owningObject === 'object') && owningObject[watchProp]) {
+      Object.entries(owningObject[watchProp]).forEach(([pathString, monitorFunc]) => {
+        if (monitorFunc && pathString && typeof monitorFunc === 'function') {
+            this.AddMonitorPath(owningObject, pathString,
+                monitorFunc as MonitorCallback, {isSynchronous: true});
+        }
+      });
+      delete owningObject[watchProp];
+    }
+  }
+
   public AddMonitorPath(target: object, path: string | string[], monitorFunc: MonitorCallback, options?: MonitorOptions): void {
     const funcName = monitorFunc.name;
     const refs = target[ObserveV2.ADD_MONITOR_REFS] ??= {};
@@ -1122,8 +1146,8 @@ class ObserveV2 {
         stateMgmtConsole.applicationError(`addMonitor failed, current function ${funcName} has already register as ${monitor.isSync()? `sync`: `async`}, cannot change to ${isSync? `sync`: `async`} anymore`);
         return;
       }
-      paths.forEach(item => {
-        monitor.addPath(item);
+      paths.forEach(path => {
+        monitor.addPath(path);
       });
       monitor.InitRun();
       return;
