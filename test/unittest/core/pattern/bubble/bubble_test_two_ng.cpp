@@ -1349,4 +1349,63 @@ HWTEST_F(BubbleTestTwoNg, GetLeftRect001, TestSize.Level1)
     EXPECT_FLOAT_EQ(rect.Left(), RESULT_TEN);
     EXPECT_FLOAT_EQ(rect.Top(), 0.0f);
 }
+
+/**
+ * @tc.name: BubblePatternUpdateStyleOptionTest001
+ * @tc.desc: Test BubblePattern::UpdateStyleOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestTwoNg, BubblePatternUpdateStyleOptionTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create targetNode and get frameNode.
+     */
+    auto targetNode = FrameNode::GetOrCreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    auto popupNode = BubbleView::CreateBubbleNode(targetNode->GetTag(), targetNode->GetId(), popupParam);
+    ASSERT_NE(popupNode, nullptr);
+    auto bubblePattern = popupNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+
+    /**
+     * @tc.steps: step2. set param.
+     */
+    bubblePattern->isTips_ = true;
+    bubblePattern->OnColorConfigurationUpdate();
+    auto childNode = AceType::DynamicCast<FrameNode>(popupNode->GetFirstChild());
+    CHECK_NULL_VOID(childNode);
+    auto renderContext = childNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext->GetBackBlurStyle().has_value());
+    EXPECT_EQ(BlurStyle::COMPONENT_REGULAR, renderContext->GetBackBlurStyle()->blurStyle);
+}
+
+/**
+ * @tc.name: BubblePatternUpdateBubbleBackGroundColorTest002
+ * @tc.desc: Test BubblePattern::UpdateBubbleBackGroundColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestTwoNg, BubblePatternUpdateBubbleBackGroundColorTest002, TestSize.Level1)
+{
+     /**
+     * @tc.steps: step1. create targetNode and get frameNode.
+     */
+    auto targetNode = FrameNode::GetOrCreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    popupParam->SetBlurStyle(BlurStyle::COMPONENT_REGULAR);
+    auto popupNode = BubbleView::CreateBubbleNode(targetNode->GetTag(), targetNode->GetId(), popupParam);
+    ASSERT_NE(popupNode, nullptr);
+    auto bubblePattern = popupNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    bubblePattern->SetPopupParam(popupParam);
+    Color testColor = Color::RED;
+    bubblePattern->UpdateBubbleBackGroundColor(testColor);
+    auto childNode = AceType::DynamicCast<FrameNode>(popupNode->GetFirstChild());
+    ASSERT_NE(childNode, nullptr);
+    auto renderContext = childNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_EQ(renderContext->GetBackBlurStyle().has_value(), true);
+    EXPECT_EQ(BlurStyle::COMPONENT_REGULAR, renderContext->GetBackBlurStyle()->blurStyle);
+}
 } // namespace OHOS::Ace::NG
