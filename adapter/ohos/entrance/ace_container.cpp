@@ -5027,5 +5027,8 @@ void AceContainer::NotifyArkoalaConfigurationChange(const ConfigurationChange& c
     auto frontend = GetFrontend();
     CHECK_NULL_VOID(frontend);
     frontend->NotifyArkoalaConfigurationChange(configurationChange.IsNeedUpdate());
+    if (subFrontend_) {
+        subFrontend_->NotifyArkoalaConfigurationChange(configurationChange.IsNeedUpdate());
+    }
 }
 } // namespace OHOS::Ace::Platform

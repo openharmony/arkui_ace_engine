@@ -921,6 +921,14 @@ void SetImageRawDataCacheSize(ani_int value, ani_int instanceId)
     imageCache->SetDataCacheLimit(cacheSize);
 }
 
+void ApplyThemeScopeId(ani_env* env, ani_long ptr, ani_int themeScopeId)
+{
+    auto* selfPtr = reinterpret_cast<UINode*>(ptr);
+    if (selfPtr) {
+        selfPtr->SetThemeScopeId(themeScopeId);
+    }
+}
+
 const ArkUIAniCommonModifier* GetCommonAniModifier()
 {
     static const ArkUIAniCommonModifier impl = {
@@ -990,7 +998,8 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .applyParentThemeScopeId = OHOS::Ace::NG::ApplyParentThemeScopeId,
         .getPx2VpWithCurrentDensity = OHOS::Ace::NG::GetPx2VpWithCurrentDensity,
         .setImageCacheCount = OHOS::Ace::NG::SetImageCacheCount,
-        .setImageRawDataCacheSize = OHOS::Ace::NG::SetImageRawDataCacheSize
+        .setImageRawDataCacheSize = OHOS::Ace::NG::SetImageRawDataCacheSize,
+        .applyThemeScopeId = OHOS::Ace::NG::ApplyThemeScopeId
     };
     return &impl;
 }

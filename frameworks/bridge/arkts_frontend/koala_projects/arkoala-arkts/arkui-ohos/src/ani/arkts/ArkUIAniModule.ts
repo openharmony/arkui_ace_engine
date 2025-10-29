@@ -396,4 +396,6 @@ export class ArkUIAniModule {
     native static _ParallelizeUIAdapterNode_Construct(id: KInt): KPointer
     native static _ParallelizeUIAdapterNode_Reset(ptr: KPointer): void
     native static _ParallelizeUIAdapterNode_RegisterCallback(ptr: KPointer, getCount: (() => KInt), getFrame: ((index:KInt, needBuild:KInt, isCache:KInt) =>KPointer)): void
+
+    native static _ApplyThemeScopeId(self: KPointer, themeScopeId: KInt): void
 }

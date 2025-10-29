@@ -14,68 +14,68 @@
  */
 
 import { ResourceColor } from 'arkui/component/units';
-import { Colors } from '@ohos/arkui/theme';
+import { Colors, CustomColors } from '@ohos/arkui/theme';
 import { _r } from 'arkui/component/resources';
 
 export class ArkSystemColors implements Colors {
-    brand: ResourceColor;
-    warning: ResourceColor;
-    alert: ResourceColor;
-    confirm: ResourceColor;
+    public brand: ResourceColor;
+    public warning: ResourceColor;
+    public alert: ResourceColor;
+    public confirm: ResourceColor;
 
-    fontPrimary: ResourceColor;
-    fontSecondary: ResourceColor;
-    fontTertiary: ResourceColor;
-    fontFourth: ResourceColor;
-    fontEmphasize: ResourceColor;
+    public fontPrimary: ResourceColor;
+    public fontSecondary: ResourceColor;
+    public fontTertiary: ResourceColor;
+    public fontFourth: ResourceColor;
+    public fontEmphasize: ResourceColor;
 
-    fontOnPrimary: ResourceColor;
-    fontOnSecondary: ResourceColor;
-    fontOnTertiary: ResourceColor;
-    fontOnFourth: ResourceColor;
+    public fontOnPrimary: ResourceColor;
+    public fontOnSecondary: ResourceColor;
+    public fontOnTertiary: ResourceColor;
+    public fontOnFourth: ResourceColor;
 
-    iconPrimary: ResourceColor;
-    iconSecondary: ResourceColor;
-    iconTertiary: ResourceColor;
-    iconFourth: ResourceColor;
-    iconEmphasize: ResourceColor;
-    iconSubEmphasize: ResourceColor;
+    public iconPrimary: ResourceColor;
+    public iconSecondary: ResourceColor;
+    public iconTertiary: ResourceColor;
+    public iconFourth: ResourceColor;
+    public iconEmphasize: ResourceColor;
+    public iconSubEmphasize: ResourceColor;
 
-    iconOnPrimary: ResourceColor;
-    iconOnSecondary: ResourceColor;
-    iconOnTertiary: ResourceColor;
-    iconOnFourth: ResourceColor;
+    public iconOnPrimary: ResourceColor;
+    public iconOnSecondary: ResourceColor;
+    public iconOnTertiary: ResourceColor;
+    public iconOnFourth: ResourceColor;
 
-    backgroundPrimary: ResourceColor;
-    backgroundSecondary: ResourceColor;
-    backgroundTertiary: ResourceColor;
-    backgroundFourth: ResourceColor;
-    backgroundEmphasize: ResourceColor;
+    public backgroundPrimary: ResourceColor;
+    public backgroundSecondary: ResourceColor;
+    public backgroundTertiary: ResourceColor;
+    public backgroundFourth: ResourceColor;
+    public backgroundEmphasize: ResourceColor;
 
-    compForegroundPrimary: ResourceColor;
-    compBackgroundPrimary: ResourceColor;
-    compBackgroundPrimaryTran: ResourceColor;
-    compBackgroundPrimaryContrary: ResourceColor;
-    compBackgroundGray: ResourceColor;
-    compBackgroundSecondary: ResourceColor;
-    compBackgroundTertiary: ResourceColor;
-    compBackgroundEmphasize: ResourceColor;
-    compBackgroundNeutral: ResourceColor;
-    compEmphasizeSecondary: ResourceColor;
-    compEmphasizeTertiary: ResourceColor;
-    compDivider: ResourceColor;
-    compCommonContrary: ResourceColor;
-    compBackgroundFocus: ResourceColor;
-    compFocusedPrimary: ResourceColor;
-    compFocusedSecondary: ResourceColor;
-    compFocusedTertiary: ResourceColor;
+    public compForegroundPrimary: ResourceColor;
+    public compBackgroundPrimary: ResourceColor;
+    public compBackgroundPrimaryTran: ResourceColor;
+    public compBackgroundPrimaryContrary: ResourceColor;
+    public compBackgroundGray: ResourceColor;
+    public compBackgroundSecondary: ResourceColor;
+    public compBackgroundTertiary: ResourceColor;
+    public compBackgroundEmphasize: ResourceColor;
+    public compBackgroundNeutral: ResourceColor;
+    public compEmphasizeSecondary: ResourceColor;
+    public compEmphasizeTertiary: ResourceColor;
+    public compDivider: ResourceColor;
+    public compCommonContrary: ResourceColor;
+    public compBackgroundFocus: ResourceColor;
+    public compFocusedPrimary: ResourceColor;
+    public compFocusedSecondary: ResourceColor;
+    public compFocusedTertiary: ResourceColor;
 
-    interactiveHover: ResourceColor;
-    interactivePressed: ResourceColor;
-    interactiveFocus: ResourceColor;
-    interactiveActive: ResourceColor;
-    interactiveSelect: ResourceColor;
-    interactiveClick: ResourceColor;
+    public interactiveHover: ResourceColor;
+    public interactivePressed: ResourceColor;
+    public interactiveFocus: ResourceColor;
+    public interactiveActive: ResourceColor;
+    public interactiveSelect: ResourceColor;
+    public interactiveClick: ResourceColor;
 
     constructor() {
         this.brand = _r(125830976, 10001, '', '');
@@ -137,4 +137,67 @@ export class ArkSystemColors implements Colors {
         this.interactiveSelect = _r(125831023, 10001, '', '');
         this.interactiveClick = _r(125831024, 10001, '', '');
     }
+}
+
+export class ArkSystemCustomColors implements CustomColors {
+    public brand?: ResourceColor;
+    public warning?: ResourceColor;
+    public alert?: ResourceColor;
+    public confirm?: ResourceColor;
+
+    public fontPrimary?: ResourceColor;
+    public fontSecondary?: ResourceColor;
+    public fontTertiary?: ResourceColor;
+    public fontFourth?: ResourceColor;
+    public fontEmphasize?: ResourceColor;
+
+    public fontOnPrimary?: ResourceColor;
+    public fontOnSecondary?: ResourceColor;
+    public fontOnTertiary?: ResourceColor;
+    public fontOnFourth?: ResourceColor;
+
+    public iconPrimary?: ResourceColor;
+    public iconSecondary?: ResourceColor;
+    public iconTertiary?: ResourceColor;
+    public iconFourth?: ResourceColor;
+    public iconEmphasize?: ResourceColor;
+    public iconSubEmphasize?: ResourceColor;
+
+    public iconOnPrimary?: ResourceColor;
+    public iconOnSecondary?: ResourceColor;
+    public iconOnTertiary?: ResourceColor;
+    public iconOnFourth?: ResourceColor;
+
+    public backgroundPrimary?: ResourceColor;
+    public backgroundSecondary?: ResourceColor;
+    public backgroundTertiary?: ResourceColor;
+    public backgroundFourth?: ResourceColor;
+    public backgroundEmphasize?: ResourceColor;
+
+    public compForegroundPrimary?: ResourceColor;
+    public compBackgroundPrimary?: ResourceColor;
+    public compBackgroundPrimaryTran?: ResourceColor;
+    public compBackgroundPrimaryContrary?: ResourceColor;
+    public compBackgroundGray?: ResourceColor;
+    public compBackgroundSecondary?: ResourceColor;
+    public compBackgroundTertiary?: ResourceColor;
+    public compBackgroundEmphasize?: ResourceColor;
+    public compBackgroundNeutral?: ResourceColor;
+    public compEmphasizeSecondary?: ResourceColor;
+    public compEmphasizeTertiary?: ResourceColor;
+    public compDivider?: ResourceColor;
+    public compCommonContrary?: ResourceColor;
+    public compBackgroundFocus?: ResourceColor;
+    public compFocusedPrimary?: ResourceColor;
+    public compFocusedSecondary?: ResourceColor;
+    public compFocusedTertiary?: ResourceColor;
+
+    public interactiveHover?: ResourceColor;
+    public interactivePressed?: ResourceColor;
+    public interactiveFocus?: ResourceColor;
+    public interactiveActive?: ResourceColor;
+    public interactiveSelect?: ResourceColor;
+    public interactiveClick?: ResourceColor;
+
+    constructor() {}
 }
