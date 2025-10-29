@@ -1150,6 +1150,8 @@ panda::Local<panda::JSValueRef> WrapAxisEventPointer(panda::JsiRuntimeCallInfo* 
         panda::FunctionRef::New(vm, NG::ArkTSUtils::JsGetPinchAxisScaleValue));
     dynamicEvent->Set(vm, panda::StringRef::NewFromUtf8(vm, "getModifierKeyState"),
         panda::FunctionRef::New(vm, NG::ArkTSUtils::JsGetModifierKeyState));
+    dynamicEvent->Set(vm, panda::StringRef::NewFromUtf8(vm, "hasAxis"),
+        panda::FunctionRef::New(vm, NG::ArkTSUtils::JsHasAxis));
     panda::Local<panda::JSValueRef> pointerObj = runtimeCallInfo->GetCallArgRef(1);
     if (!pointerObj.IsNull() && !pointerObj->IsUndefined()) {
         auto nativePointer = static_cast<int64_t>(pointerObj->ToNumber(vm)->Value());
