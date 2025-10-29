@@ -641,6 +641,21 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_Array_BarrierStyle_Array_LocalizedBarrierStyle& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Union_Array_MenuElement_CustomBuilder& src)
 {
     switch (src.selector) {
@@ -3859,6 +3874,7 @@ ASSIGN_OPT(Opt_Array_LayoutSafeAreaEdge)
 ASSIGN_OPT(Opt_Array_LayoutSafeAreaType)
 ASSIGN_OPT(Opt_Array_Length)
 ASSIGN_OPT(Opt_Array_LengthMetrics)
+ASSIGN_OPT(Opt_Array_LocalizedBarrierStyle)
 ASSIGN_OPT(Opt_Array_Measurable)
 ASSIGN_OPT(Opt_Array_MenuElement)
 ASSIGN_OPT(Opt_Array_Metadata)
@@ -4375,6 +4391,7 @@ ASSIGN_OPT(Opt_ListItemGroupOptions)
 ASSIGN_OPT(Opt_ListItemOptions)
 ASSIGN_OPT(Opt_ListOptions)
 ASSIGN_OPT(Opt_LoadCommittedDetails)
+ASSIGN_OPT(Opt_LocalizedBarrierStyle)
 ASSIGN_OPT(Opt_LocalizedHorizontalAlignParam)
 ASSIGN_OPT(Opt_LocalizedVerticalAlignParam)
 ASSIGN_OPT(Opt_MarqueeOptions)
@@ -4512,6 +4529,7 @@ ASSIGN_OPT(Opt_uiEffect_BrightnessBlender)
 ASSIGN_OPT(Opt_UIExtensionOptions)
 ASSIGN_OPT(Opt_uiObserver_NavDestinationInfo)
 ASSIGN_OPT(Opt_unifiedDataChannel_Summary)
+ASSIGN_OPT(Opt_Union_Array_BarrierStyle_Array_LocalizedBarrierStyle)
 ASSIGN_OPT(Opt_Union_Array_MenuElement_CustomBuilder)
 ASSIGN_OPT(Opt_Union_Array_NavigationMenuItem_CustomBuilder)
 ASSIGN_OPT(Opt_Union_Array_String_Array_Array_String_Resource_Array_TextPickerRangeContent_Array_TextCascadePickerRangeContent)

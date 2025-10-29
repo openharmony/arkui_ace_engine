@@ -308,7 +308,9 @@ HWTEST_F(RelativeContainerModifierTest, DISABLED_setBarrierTestValidValues, Test
     }
     Converter::ArkArrayHolder<Array_BarrierStyle> inputHolder(inputVec);
     Array_BarrierStyle inputValueBarrier = inputHolder.ArkValue();
-    auto optInputValueBarrier = Converter::ArkValue<Opt_Array_BarrierStyle>(inputValueBarrier);
+    auto optInputValueBarrier =
+        Converter::ArkUnion<Opt_Union_Array_BarrierStyle_Array_LocalizedBarrierStyle, Array_BarrierStyle>(
+            inputValueBarrier);
     modifier_->setBarrier(node_, &optInputValueBarrier);
     checkBarrierData(node_, vecId, vecBarrierDir, vecDataRefIds);
 }
@@ -332,7 +334,9 @@ HWTEST_F(RelativeContainerModifierTest, DISABLED_setBarrierTestValidValues2, Tes
     }
     Converter::ArkArrayHolder<Array_BarrierStyle> inputHolder(inputVec);
     Array_BarrierStyle inputValueBarrier = inputHolder.ArkValue();
-    auto optInputValueBarrier = Converter::ArkValue<Opt_Array_BarrierStyle>(inputValueBarrier);
+    auto optInputValueBarrier =
+        Converter::ArkUnion<Opt_Union_Array_BarrierStyle_Array_LocalizedBarrierStyle, Array_BarrierStyle>(
+            inputValueBarrier);
     modifier_->setBarrier(node_, &optInputValueBarrier);
     checkBarrierData(node_, vecId, vecBarrierDir, vecDataRefIds);
 }
@@ -357,7 +361,9 @@ HWTEST_F(RelativeContainerModifierTest, DISABLED_setBarrierTestInvalidValues, Te
     }
     Converter::ArkArrayHolder<Array_BarrierStyle> inputHolder(inputVec);
     Array_BarrierStyle inputValueBarrier = inputHolder.ArkValue();
-    auto optInputValueBarrier = Converter::ArkValue<Opt_Array_BarrierStyle>(inputValueBarrier);
+    auto optInputValueBarrier =
+        Converter::ArkUnion<Opt_Union_Array_BarrierStyle_Array_LocalizedBarrierStyle, Array_BarrierStyle>(
+            inputValueBarrier);
     modifier_->setBarrier(node_, &optInputValueBarrier);
     checkBarrierData(node_, vecId, vecBarrierDir, vecDataRefIds);
 }
@@ -382,7 +388,9 @@ HWTEST_F(RelativeContainerModifierTest, DISABLED_setBarrierTestInvalidValues2, T
     }
     Converter::ArkArrayHolder<Array_BarrierStyle> inputHolder(inputVec);
     Array_BarrierStyle inputValueBarrier = inputHolder.ArkValue();
-    auto optInputValueBarrier = Converter::ArkValue<Opt_Array_BarrierStyle>(inputValueBarrier);
+    auto optInputValueBarrier =
+        Converter::ArkUnion<Opt_Union_Array_BarrierStyle_Array_LocalizedBarrierStyle, Array_BarrierStyle>(
+            inputValueBarrier);
     modifier_->setBarrier(node_, &optInputValueBarrier);
     checkBarrierData(node_, vecId, vecBarrierDir, vecDataRefIds);
 }
