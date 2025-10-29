@@ -20,6 +20,7 @@ ace_unittest("bubble_test_ng") {
     "bubble_test_four_ng.cpp",
     "bubble_test_One_ng.cpp",
     "bubble_test_ng.cpp",
+    "bubble_test_three_ng.cpp",
     "bubble_test_two_ng.cpp",
     "bubble_tips_test_ng.cpp",
   ]
