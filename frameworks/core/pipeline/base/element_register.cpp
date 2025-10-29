@@ -385,7 +385,7 @@ RefPtr<NG::FrameNode> ElementRegisterImpl::GetAttachedFrameNodeById(const std::s
             continue;
         }
         auto depOfNode = uiNode->GetDepth();
-        bool withInScope = willGetAll || (!willGetAll && uiNode->IsOnMainTree());
+        bool withInScope = willGetAll || uiNode->IsOnMainTree();
         if (withInScope && uiNode->GetInspectorId().value_or("") == key && depth > depOfNode) {
             depth = depOfNode;
             frameNode = uiNode;

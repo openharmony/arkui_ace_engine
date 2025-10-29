@@ -937,7 +937,10 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
             rootElement_->GetRenderNode()->DumpTree(0);
         }
     } else if (params[0] == "-focus") {
-        rootElement_->GetFocusScope()->DumpFocusTree(0);
+        auto rootElementFocusScope = rootElement_->GetFocusScope();
+        if (rootElementFocusScope != nullptr) {
+            rootElementFocusScope->DumpFocusTree(0);
+        }
     } else if (params[0] == "-layer") {
         auto rootNode = AceType::DynamicCast<RenderRoot>(rootElement_->GetRenderNode());
         rootNode->DumpLayerTree();

@@ -2955,7 +2955,10 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
         } else {
             auto pipeline = pipelineWeak.Upgrade();
             CHECK_NULL_VOID(pipeline);
-            auto rsUiDirector = pipeline->GetWindow()->GetRSUIDirector();
+            auto pipelineWindow = pipeline->GetWindow();
+            CHECK_NULL_VOID(pipelineWindow);
+            auto rsUiDirector = pipelineWindow->GetRSUIDirector();
+            CHECK_NULL_VOID(rsUiDirector);
             auto rsUiContext = rsUiDirector->GetRSUIContext();
             if (rsUiDirector && rsUiContext) {
                 rsUiContext->GetRSTransaction()->ExecuteSynchronousTask(syncTask);

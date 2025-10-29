@@ -990,22 +990,22 @@ RefPtr<ResourceObject> ParseResourceParamToObj(napi_env env, napi_value value)
     if (napi_is_array(env, paramsNApi, &isArray) != napi_ok || !isArray) {
         return nullptr;
     }
-    int32_t id;
+    int32_t id = -1;
     napi_typeof(env, idNApi, &valueType);
     if (valueType == napi_number) {
         napi_get_value_int32(env, idNApi, &id);
     }
-    int32_t type;
+    int32_t type = -1;
     napi_typeof(env, typeNApi, &valueType);
     if (valueType == napi_number) {
         napi_get_value_int32(env, typeNApi, &type);
     }
-    std::string bundleName;
+    std::string bundleName = "";
     napi_typeof(env, bundleNameNApi, &valueType);
     if (valueType == napi_string) {
         NapiStringToString(env, bundleNameNApi, bundleName);
     }
-    std::string moduleName;
+    std::string moduleName = "";
     napi_typeof(env, moduleNameNApi, &valueType);
     if (valueType == napi_string) {
         NapiStringToString(env, moduleNameNApi, moduleName);
