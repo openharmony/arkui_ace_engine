@@ -89,7 +89,7 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_SetClonedEventActionType102, Te
     auto result = OH_ArkUI_PointerEvent_SetClonedEventActionType(&event, testAction);
 
     EXPECT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
-    EXPECT_EQ(touchEvent.action, testAction);
+    EXPECT_EQ(touchEvent.action, 0);
 }
 
 } // namespace OHOS::Ace

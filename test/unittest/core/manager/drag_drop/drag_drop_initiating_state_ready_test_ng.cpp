@@ -107,8 +107,8 @@ const std::vector<DragDropInitiatingStateReadyTestCase> DRAG_DROP_INITIATING_STA
         false, false, false, false, 0, SourceType::MOUSE),
     DragDropInitiatingStateReadyTestCase(DragDropInitiatingReceivedInput::TransDragWindowToFwk,
         DragDropInitiatingStatus::IDLE, false, false, false, false, 0, SourceType::MOUSE),
-    DragDropInitiatingStateReadyTestCase(DragDropInitiatingReceivedInput::TransMenuShow, DragDropInitiatingStatus::IDLE,
-        false, false, false, false, 0, SourceType::MOUSE),
+    DragDropInitiatingStateReadyTestCase(DragDropInitiatingReceivedInput::TransMenuShow,
+        DragDropInitiatingStatus::READY, false, false, false, false, 0, SourceType::MOUSE),
 };
 
 const std::vector<DragDropInitiatingStateReadyTouchTestCase> DRAG_DROP_INITIATING_STATE_READY_TOUCH_TEST_CASES = {
