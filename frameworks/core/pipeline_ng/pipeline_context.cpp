@@ -5885,6 +5885,7 @@ void PipelineContext::SetContainerModalTitleHeight(int32_t height)
     CHECK_NULL_VOID(containerNode);
     auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
     CHECK_NULL_VOID(containerPattern);
+    containerPattern->IsSetContainerModalTitleHeight(true);
     containerPattern->SetContainerModalTitleHeight(height);
 }
 

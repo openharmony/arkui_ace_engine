@@ -629,9 +629,11 @@ void ContainerModalPattern::SetContainerModalTitleVisible(bool customTitleSetted
         titleMgr_->ResetExpandStackNode();
     }
 
-    titleMgr_->UpdateToolbarShow(isTitleShow_, customTitleSettedShow_);
-    CHECK_NULL_VOID(floatTitleMgr_);
-    floatTitleMgr_->UpdateToolbarShow(isTitleShow_, customTitleSettedShow_);
+    if (!isSetContainerModalTitleHeight_) {
+        titleMgr_->UpdateToolbarShow(isTitleShow_, customTitleSettedShow_);
+        CHECK_NULL_VOID(floatTitleMgr_);
+        floatTitleMgr_->UpdateToolbarShow(isTitleShow_, customTitleSettedShow_);
+    }
 }
 
 bool ContainerModalPattern::GetContainerModalTitleVisible(bool isImmersive)
@@ -654,31 +656,49 @@ void ContainerModalPattern::SetContainerModalTitleHeight(int32_t height)
         height = 0;
     }
     titleHeight_ = Dimension(Dimension(height, DimensionUnit::PX).ConvertToVp(), DimensionUnit::VP);
-    SetControlButtonsRowHeight(titleHeight_);
-    SetContainerModalTitleWithoutButtonsHeight(titleHeight_);
+    SetControlButtonsRowHeight();
+    auto customTitleRow = GetCustomTitleRow();
+    UpdateRowHeight(customTitleRow, titleHeight_);
+    auto gestureRow = GetGestureRow();
+    UpdateRowHeight(gestureRow, titleHeight_);
 }
 
-void ContainerModalPattern::SetContainerModalTitleWithoutButtonsHeight(Dimension height)
+void ContainerModalPattern::SetControlButtonsRowHeight()
 {
-    auto customTitleRow = GetCustomTitleRow();
-    UpdateRowHeight(customTitleRow, height);
-    auto gestureRow = GetGestureRow();
-    UpdateRowHeight(gestureRow, height);
+    auto controlButtonsRowHeight = titleHeight_;
+    if (!isTitleShow_) {
+        CHECK_NULL_VOID(floatTitleMgr_);
+        if (floatTitleMgr_->hasNavOrSideBarNodes_) {
+            controlButtonsRowHeight = toolBarTitleHeight_;
+        } else {
+            controlButtonsRowHeight = CONTAINER_TITLE_HEIGHT;
+        }
+    } else if (!customTitleSettedShow_ && !isSetContainerModalTitleHeight_) {
+        controlButtonsRowHeight = CONTAINER_TITLE_HEIGHT;
+    }
+    auto controlButtonsRow = GetControlButtonRow();
+    UpdateRowHeight(controlButtonsRow, controlButtonsRowHeight);
+    CallButtonsRectChange();
+}
+
+void ContainerModalPattern::SetToolbarTitleHeight()
+{
+    SetControlButtonsRowHeight();
+    if (!isSetContainerModalTitleHeight_) {
+        titleHeight_ = toolBarTitleHeight_;
+        auto customTitleRow = GetCustomTitleRow();
+        UpdateRowHeight(customTitleRow, toolBarTitleHeight_);
+        auto gestureRow = GetGestureRow();
+        UpdateRowHeight(gestureRow, toolBarTitleHeight_);
+    }
     if (floatTitleMgr_ != nullptr) {
         auto floatingTitleRow = GetFloatingTitleRow();
         CHECK_NULL_VOID(floatingTitleRow);
-        UpdateRowHeight(floatingTitleRow, height);
+        UpdateRowHeight(floatingTitleRow, toolBarTitleHeight_);
     }
     if (titleMgr_ != nullptr) {
         titleMgr_->UpdateTargetNodesBarMargin();
     }
-}
-
-void ContainerModalPattern::SetControlButtonsRowHeight(Dimension height)
-{
-    auto controlButtonsRow = GetControlButtonRow();
-    UpdateRowHeight(controlButtonsRow, height);
-    CallButtonsRectChange();
 }
 
 int32_t ContainerModalPattern::GetContainerModalTitleHeight()
@@ -869,6 +889,7 @@ void ContainerModalPattern::InitLayoutProperty()
     InitTitleRowLayoutProperty(GetCustomTitleRow(), false);
     InitTitleRowLayoutProperty(GetFloatingTitleRow(), true);
     InitButtonsLayoutProperty();
+    isSetContainerModalTitleHeight_ = false;
 
     containerModal->MarkModifyDone();
 }
@@ -880,8 +901,11 @@ void ContainerModalPattern::InitTitleRowLayoutProperty(RefPtr<FrameNode> titleRo
     CHECK_NULL_VOID(titleRowProperty);
     titleRowProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     auto rowHeight = CONTAINER_TITLE_HEIGHT;
-    if (!isFloating || (isFloating && floatTitleMgr_ != nullptr)) {
+    if (!isFloating) {
         rowHeight = (CONTAINER_TITLE_HEIGHT == titleHeight_) ? CONTAINER_TITLE_HEIGHT : titleHeight_;
+    }
+    if (isFloating && floatTitleMgr_ != nullptr && GetIsHaveToolBar()) {
+        rowHeight = toolBarTitleHeight_;
     }
     titleRowProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(rowHeight)));
@@ -1078,9 +1102,13 @@ void ContainerModalPattern::CallSetContainerWindow(bool considerFloatingWindow)
     windowPaintRect_ = expectRect;
 
     CHECK_NULL_VOID(titleMgr_);
-    titleMgr_->UpdateToolbarShow(isTitleShow_, customTitleSettedShow_);
     CHECK_NULL_VOID(floatTitleMgr_);
-    floatTitleMgr_->UpdateToolbarShow(isTitleShow_, customTitleSettedShow_);
+    if (!isSetContainerModalTitleHeight_) {
+        titleMgr_->UpdateToolbarShow(isTitleShow_, customTitleSettedShow_);
+        floatTitleMgr_->UpdateToolbarShow(isTitleShow_, customTitleSettedShow_);
+    } else {
+        SetControlButtonsRowHeight();
+    }
 }
 
 void ContainerModalPattern::UpdateRowHeight(const RefPtr<FrameNode>& row, Dimension height)
