@@ -2387,4 +2387,42 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerTest082, TestSize.Level1)
     bool result = dragDropManager->IsAnyDraggableHit(pipelineContext, 0);
     EXPECT_FALSE(result);
 }
+
+/**
+ * @tc.name: DragDropManagerTest083
+ * @tc.desc: Test DoDragStartAnimation with RefPtr<OverlayManager>& overlayManager and GestureEvent
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNgNew, DragDropManagerTest083, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropManager.
+     * @tc.expected: dragDropManager is not null.
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+     * @tc.steps: step2. Construct frameNode and overlayManager and update the properties.
+     * @tc.expected: frameNode and geometryNode are not null.
+     */
+    RefPtr<UINode> frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(AceType::DynamicCast<FrameNode>(frameNode));
+    ASSERT_NE(overlayManager, nullptr);
+
+    /**
+     * @tc.steps: step3. call DoDragStartAnimation into arguments overlayManager and event.
+     * @tc.expected: retFlag is false.
+     */
+    GestureEvent event;
+    dragDropManager->SetIsDragWithContextMenu(true);
+    auto frameNode2 = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode2, nullptr);
+    auto guestureEventHub = frameNode2->GetOrCreateGestureEventHub();
+    PreparedInfoForDrag drag;
+    dragDropManager->DoDragStartAnimation(overlayManager, event, guestureEventHub, drag);
+    ASSERT_EQ(DragDropGlobalController::GetInstance().GetStartDragVsyncTime(), 0);
+}
 } // namespace OHOS::Ace::NG
