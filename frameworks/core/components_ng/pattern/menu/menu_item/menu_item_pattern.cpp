@@ -3447,16 +3447,12 @@ void MenuItemPattern::ApplyOptionThemeStyles()
 
 RefPtr<SelectTheme> MenuItemPattern::GetCurrentSelectTheme()
 {
-    if (selectTheme_) {
-        return selectTheme_;
-    }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
     auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, nullptr);
-    selectTheme_ = theme;
     return theme;
 }
 
