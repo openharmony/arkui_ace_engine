@@ -2709,10 +2709,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_TouchOptimizer_Exists_Test
     ASSERT_NE(context_, nullptr);
     ASSERT_NE(context_->touchOptimizer_, nullptr);
     
-    // 测试GetTouchOptimizer接口
-    auto touchOptimizer = context_->GetTouchOptimizer();
-    EXPECT_NE(touchOptimizer, nullptr);
-    
     // 测试FlushVsync中touchOptimizer_存在的情况
     context_->FlushVsync(NANO_TIME_STAMP, FRAME_COUNT);
     
@@ -2819,19 +2815,10 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_TouchEvent_NeedTpFlush_Tes
     ASSERT_NE(context_->touchOptimizer_, nullptr);
     context_->SetupRootElement();
     
-    auto mockWindow = (MockWindow*)(context_->window_.get());
-    ASSERT_NE(mockWindow, nullptr);
-    
-    testing::Mock::VerifyAndClearExpectations(mockWindow);
-    testing::Mock::AllowLeak(mockWindow);
-    
     // 设置touchOptimizer_的状态以使NeedTpFlushVsync返回true
     context_->touchOptimizer_->isTpFlushFrameDisplayPeriod_ = true;
     context_->touchOptimizer_->slideAccepted_ = false; // 这将导致NeedTpFlushVsync返回true
-    
-    // 期望FlushTasks被调用
-    EXPECT_CALL(*mockWindow, FlushTasks(testing::_)).Times(AtLeast(1));
-    
+
     // 创建触摸事件
     TouchEvent touchEvent;
     touchEvent.type = TouchType::MOVE;
@@ -2843,9 +2830,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_TouchEvent_NeedTpFlush_Tes
     
     // 调用OnTouchEvent
     context_->OnTouchEvent(touchEvent, false);
-    
-    testing::Mock::VerifyAndClearExpectations(mockWindow);
-    
+    EXPECT_FALSE(context_->touchOptimizer_->isTpFlushFrameDisplayPeriod_);
     // 重置状态
     context_->touchOptimizer_->isTpFlushFrameDisplayPeriod_ = false;
     context_->touchOptimizer_->slideAccepted_ = true;

@@ -63,21 +63,20 @@ namespace {
     };
 } // namespace
 
+static std::unique_ptrM<ResSchedTouchOptimizer> optimizer_;
+
 class ResSchedTouchOptimizerTest : public testing::Test {
 public:
-    std::unique_ptr<ResSchedTouchOptimizer> optimizer_;
     static void SetUpTestSuite()
     {
+        optimizer_ = std::make_unique<ResSchedTouchOptimizer>();
     }
     static void TearDownTestSuite()
     {
-    }
-    void SetUp() {
-        optimizer_ = std::make_unique<ResSchedTouchOptimizer>();
-    };
-    void TearDown() {
         optimizer_.reset();
-    };
+    }
+    void SetUp() {};
+    void TearDown() {};
 };
 
 /**
@@ -101,7 +100,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, SetterTest001, TestSize.Level1)
  */
 HWTEST_F(ResSchedTouchOptimizerTest, HandleMainDelta_Test001, TestSize.Level1)
 {
-    
     optimizer_->SetSlideAcceptOffset(Offset(0.0, 0.0));
     optimizer_->rvsEnable_ = false;
 
@@ -120,7 +118,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, HandleMainDelta_Test001, TestSize.Level1)
  */
 HWTEST_F(ResSchedTouchOptimizerTest, HandleMainDelta_Test002, TestSize.Level1)
 {
-    
     optimizer_->rvsEnable_ = false;
     optimizer_->SetSlideAcceptOffset(Offset(10.0, 10.0));
     optimizer_->rvsEnable_ = true;
@@ -141,7 +138,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, HandleMainDelta_Test002, TestSize.Level1)
  */
 HWTEST_F(ResSchedTouchOptimizerTest, HandleMainDelta_Test003, TestSize.Level1)
 {
-    
     optimizer_->SetSlideAcceptOffset(Offset(10.0, 10.0));
     optimizer_->accumulatedDistance_ = 10.0;
 
@@ -160,7 +156,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, HandleMainDelta_Test003, TestSize.Level1)
  */
 HWTEST_F(ResSchedTouchOptimizerTest, SetSliceAcceptOffsetTest001, TestSize.Level1)
 {
-    
     Offset offset = {10.0, 20.0};
     optimizer_->SetSlideAcceptOffset(offset);
     
@@ -176,7 +171,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, SetSliceAcceptOffsetTest001, TestSize.Level
  */
 HWTEST_F(ResSchedTouchOptimizerTest, SetSliceAcceptOffsetTest002, TestSize.Level1)
 {
-    
     Offset offset = {0.0, 0.0};
     optimizer_->SetSlideAcceptOffset(offset);
     
@@ -192,7 +186,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, SetSliceAcceptOffsetTest002, TestSize.Level
  */
 HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate001, TestSize.Level1)
 {
-    
     optimizer_->rvsEnable_ = true;
 
     TouchEvent touchEvent1;
@@ -224,7 +217,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate001, TestSize.Level1)
  */
 HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithSignal001, TestSize.Level1)
 {
-    
     optimizer_->rvsEnable_ = true;
 
     TouchEvent touchEvent1;
@@ -256,7 +248,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithSignal001, TestSize.Level1
  */
 HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithoutSignal001, TestSize.Level1)
 {
-    
     optimizer_->rvsEnable_ = true;
 
     TouchEvent touchEvent1;
@@ -284,7 +275,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithoutSignal001, TestSize.Lev
  */
 HWTEST_F(ResSchedTouchOptimizerTest, RVSPointReset001, TestSize.Level1)
 {
-    
     optimizer_->rvsEnable_ = true;
     int32_t id = 1;
     optimizer_->rvsDequeX_[id].push_back(100);
@@ -326,7 +316,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSPointReset001, TestSize.Level1)
  */
 HWTEST_F(ResSchedTouchOptimizerTest, DispatchPointSelect001, TestSize.Level1)
 {
-    
     optimizer_->rvsEnable_ = true;
 
     TouchEvent touchEvent1;
@@ -365,7 +354,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, DispatchPointSelect001, TestSize.Level1)
  */
 HWTEST_F(ResSchedTouchOptimizerTest, UpdateDepHistory001, TestSize.Level1)
 {
-    
     optimizer_->rvsEnable_ = true;
     
     TouchEvent event;
@@ -393,7 +381,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, UpdateDepHistory001, TestSize.Level1)
  */
 HWTEST_F(ResSchedTouchOptimizerTest, RVSEnableCheck001, TestSize.Level1)
 {
-    
     optimizer_->rvsEnable_ = false;
     EXPECT_FALSE(optimizer_->RVSEnableCheck());
     optimizer_->rvsEnable_ = true;
@@ -407,7 +394,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSEnableCheck001, TestSize.Level1)
  */
 HWTEST_F(ResSchedTouchOptimizerTest, UpdateState001, TestSize.Level1)
 {
-    
     optimizer_->rvsEnable_ = true;
     int32_t id = 1;
     
@@ -425,7 +411,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, UpdateState001, TestSize.Level1)
  */
 HWTEST_F(ResSchedTouchOptimizerTest, HandleState0_001, TestSize.Level1)
 {
-    
     optimizer_->rvsEnable_ = true;
     
     TouchEvent point;
@@ -456,7 +441,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, HandleState0_001, TestSize.Level1)
  */
 HWTEST_F(ResSchedTouchOptimizerTest, HandleState0_002, TestSize.Level1)
 {
-    
     optimizer_->rvsEnable_ = true;
     
     TouchEvent point;
@@ -485,7 +469,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, HandleState0_002, TestSize.Level1)
  */
 HWTEST_F(ResSchedTouchOptimizerTest, HandleState1_001, TestSize.Level1)
 {
-    
     optimizer_->rvsEnable_ = true;
     
     TouchEvent point;
@@ -516,7 +499,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, HandleState1_001, TestSize.Level1)
  */
 HWTEST_F(ResSchedTouchOptimizerTest, HandleState1_002, TestSize.Level1)
 {
-    
     optimizer_->rvsEnable_ = true;
     
     TouchEvent point;
@@ -547,7 +529,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, HandleState1_002, TestSize.Level1)
  */
 HWTEST_F(ResSchedTouchOptimizerTest, HandleState1_003, TestSize.Level1)
 {
-    
     optimizer_->rvsEnable_ = true;
     
     TouchEvent point;
@@ -577,7 +558,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, HandleState1_003, TestSize.Level1)
  */
 HWTEST_F(ResSchedTouchOptimizerTest, HandleState2_001, TestSize.Level1)
 {
-    
     optimizer_->rvsEnable_ = true;
     
     TouchEvent point;
@@ -603,7 +583,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, HandleState2_001, TestSize.Level1)
  */
 HWTEST_F(ResSchedTouchOptimizerTest, HandleState2_002, TestSize.Level1)
 {
-    
     optimizer_->rvsEnable_ = true;
     
     TouchEvent point;
@@ -629,7 +608,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, HandleState2_002, TestSize.Level1)
  */
 HWTEST_F(ResSchedTouchOptimizerTest, RVSSingleAxisUpdate001, TestSize.Level1)
 {
-    
     optimizer_->rvsEnable_ = true;
     
     TouchEvent point;
@@ -663,7 +641,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSSingleAxisUpdate001, TestSize.Level1)
  */
 HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithSignal002, TestSize.Level1)
 {
-    
     optimizer_->rvsEnable_ = true;
     
     TouchEvent touchEvent;
@@ -687,7 +664,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithSignal002, TestSize.Level1
  */
 HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithoutSignal002, TestSize.Level1)
 {
-    
     optimizer_->rvsEnable_ = true;
     
     TouchEvent touchEvent;
@@ -709,7 +685,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithoutSignal002, TestSize.Lev
  */
 HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate002, TestSize.Level1)
 {
-    
     optimizer_->rvsEnable_ = true;
     
     TouchEvent touchEvent1;
@@ -743,7 +718,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate002, TestSize.Level1)
  */
 HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate003, TestSize.Level1)
 {
-    
     optimizer_->rvsEnable_ = true;
     
     TouchEvent touchEvent1;
@@ -776,7 +750,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate003, TestSize.Level1)
  */
 HWTEST_F(ResSchedTouchOptimizerTest, DispatchPointSelect002, TestSize.Level1)
 {
-    
     optimizer_->rvsEnable_ = true;
     optimizer_->dptHistoryPointX_.clear();
     optimizer_->dptHistoryPointY_.clear();
@@ -813,7 +786,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, DispatchPointSelect002, TestSize.Level1)
  */
 HWTEST_F(ResSchedTouchOptimizerTest, HandleMainDelta_Test004, TestSize.Level1)
 {
-    
     optimizer_->rvsEnable_ = true;
     
     double mainDelta = 10.0;
@@ -838,7 +810,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, HandleMainDelta_Test004, TestSize.Level1)
  */
 HWTEST_F(ResSchedTouchOptimizerTest, SetSlideAcceptOffsetTest003, TestSize.Level1)
 {
-    
     optimizer_->rvsEnable_ = true;
     
     Offset offset = {15.0, 25.0};
@@ -858,9 +829,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, SetSlideAcceptOffsetTest003, TestSize.Level
  */
 HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithSignal003, TestSize.Level1)
 {
-    
     optimizer_->rvsEnable_ = true;
-    
     TouchEvent touchEvent;
     touchEvent.id = 1;
     touchEvent.x = 100;
@@ -883,7 +852,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithSignal003, TestSize.Level1
  */
 HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithSignal004, TestSize.Level1)
 {
-    
     optimizer_->rvsEnable_ = true;
     optimizer_->rvsDequeX_.clear();
     TouchEvent touchEvent;
@@ -902,7 +870,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithSignal004, TestSize.Level1
  */
 HWTEST_F(ResSchedTouchOptimizerTest, HandleState0_003, TestSize.Level1)
 {
-    
     optimizer_->rvsEnable_ = true;
     
     TouchEvent point;
@@ -931,7 +898,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, HandleState0_003, TestSize.Level1)
  */
 HWTEST_F(ResSchedTouchOptimizerTest, HandleState1_004, TestSize.Level1)
 {
-    
     optimizer_->rvsEnable_ = true;
     
     TouchEvent point;
@@ -964,7 +930,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, HandleState1_004, TestSize.Level1)
  */
 HWTEST_F(ResSchedTouchOptimizerTest, HandleState1_005, TestSize.Level1)
 {
-    
     optimizer_->rvsEnable_ = true;
     
     TouchEvent point;
@@ -996,7 +961,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, HandleState1_005, TestSize.Level1)
  */
 HWTEST_F(ResSchedTouchOptimizerTest, HandleState1_006, TestSize.Level1)
 {
-    
     optimizer_->rvsEnable_ = true;
     
     TouchEvent point;
@@ -1028,7 +992,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, HandleState1_006, TestSize.Level1)
  */
 HWTEST_F(ResSchedTouchOptimizerTest, HandleState1_007, TestSize.Level1)
 {
-    
     optimizer_->rvsEnable_ = true;
     
     TouchEvent point;
@@ -1060,7 +1023,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, HandleState1_007, TestSize.Level1)
  */
 HWTEST_F(ResSchedTouchOptimizerTest, HandleState1_008, TestSize.Level1)
 {
-    
     optimizer_->rvsEnable_ = true;
     
     TouchEvent point;
@@ -1092,7 +1054,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, HandleState1_008, TestSize.Level1)
  */
 HWTEST_F(ResSchedTouchOptimizerTest, HandleState1_009, TestSize.Level1)
 {
-    
     optimizer_->rvsEnable_ = true;
     
     TouchEvent point;
@@ -1124,7 +1085,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, HandleState1_009, TestSize.Level1)
  */
 HWTEST_F(ResSchedTouchOptimizerTest, HandleState2_003, TestSize.Level1)
 {
-    
     optimizer_->rvsEnable_ = true;
     
     TouchEvent point;
@@ -1152,7 +1112,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, HandleState2_003, TestSize.Level1)
  */
 HWTEST_F(ResSchedTouchOptimizerTest, HandleState2_004, TestSize.Level1)
 {
-    
     optimizer_->rvsEnable_ = true;
     
     TouchEvent point;
@@ -1179,7 +1138,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, HandleState2_004, TestSize.Level1)
  */
 HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate004, TestSize.Level1)
 {
-    
     optimizer_->rvsEnable_ = true;
     
     // 设置一个较早的时间戳，使其超过RVS_CLEAR_GAP_TIME
@@ -1220,7 +1178,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate004, TestSize.Level1)
  */
 HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate005, TestSize.Level1)
 {
-    
     optimizer_->rvsEnable_ = true;
     
     TouchEvent touchEvent;
@@ -1256,7 +1213,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate005, TestSize.Level1)
  */
 HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate006, TestSize.Level1)
 {
-    
     optimizer_->rvsEnable_ = true;
     
     TouchEvent touchEvent;
@@ -1290,7 +1246,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate006, TestSize.Level1)
  */
 HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate007, TestSize.Level1)
 {
-    
     optimizer_->rvsEnable_ = true;
     
     TouchEvent touchEvent;
@@ -1334,7 +1289,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate007, TestSize.Level1)
  */
 HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate008, TestSize.Level1)
 {
-    
     optimizer_->rvsEnable_ = true;
     
     TouchEvent touchEvent;
@@ -1386,7 +1340,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate008, TestSize.Level1)
  */
 HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate009, TestSize.Level1)
 {
-    
     optimizer_->rvsEnable_ = true;
     
     // Pre-populate some data for id=1
@@ -1421,7 +1374,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate009, TestSize.Level1)
  */
 HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate010, TestSize.Level1)
 {
-    
     optimizer_->rvsEnable_ = true;
     
     TouchEvent moveEvent;
@@ -1458,7 +1410,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate010, TestSize.Level1)
  */
 HWTEST_F(ResSchedTouchOptimizerTest, RVSSingleAxisUpdate002, TestSize.Level1)
 {
-    
     optimizer_->rvsEnable_ = true;
     
     TouchEvent moveEvent;
@@ -1486,7 +1437,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSSingleAxisUpdate002, TestSize.Level1)
  */
 HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithSignal005, TestSize.Level1)
 {
-    
     optimizer_->rvsEnable_ = true;
     
     TouchEvent touchEvent;
@@ -1515,7 +1465,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithSignal005, TestSize.Level1
  */
 HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithSignal006, TestSize.Level1)
 {
-    
     optimizer_->rvsEnable_ = true;
     
     TouchEvent touchEvent;
@@ -1544,7 +1493,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithSignal006, TestSize.Level1
  */
 HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithoutSignal003, TestSize.Level1)
 {
-    
     optimizer_->rvsEnable_ = true;
     
     TouchEvent touchEvent;
@@ -1572,7 +1520,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithoutSignal003, TestSize.Lev
  */
 HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithoutSignal004, TestSize.Level1)
 {
-    
     optimizer_->rvsEnable_ = true;
     
     TouchEvent touchEvent;
@@ -1601,7 +1548,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithoutSignal004, TestSize.Lev
  */
 HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithoutSignal005, TestSize.Level1)
 {
-    
     optimizer_->rvsEnable_ = true;
     
     TouchEvent touchEvent;
@@ -1630,7 +1576,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithoutSignal005, TestSize.Lev
  */
 HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithoutSignal006, TestSize.Level1)
 {
-    
     optimizer_->rvsEnable_ = true;
     
     TouchEvent touchEvent;
@@ -1654,7 +1599,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithoutSignal006, TestSize.Lev
  */
 HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithoutSignal007, TestSize.Level1)
 {
-    
     optimizer_->rvsEnable_ = true;
     
     TouchEvent touchEvent;
@@ -1679,7 +1623,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithoutSignal007, TestSize.Lev
  */
 HWTEST_F(ResSchedTouchOptimizerTest, SetSlideDirection001, TestSize.Level1)
 {
-    
     optimizer_->slideDirection_ = SLIDE_DIRECTION::NONE;
     
     optimizer_->SetSlideDirection(SLIDE_DIRECTION::HORIZONTAL);
@@ -1696,7 +1639,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, SetSlideDirection001, TestSize.Level1)
  */
 HWTEST_F(ResSchedTouchOptimizerTest, RVSDirectionStateCheck001, TestSize.Level1)
 {
-    
     
     // Test valid directions
     EXPECT_TRUE(optimizer_->RVSDirectionStateCheck(RVS_DIRECTION::RVS_DOWN_LEFT));
@@ -1715,7 +1657,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSDirectionStateCheck001, TestSize.Level1)
  */
 HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate011, TestSize.Level1)
 {
-    
     optimizer_->rvsEnable_ = true;
     optimizer_->slideDirection_ = SLIDE_DIRECTION::HORIZONTAL;
     optimizer_->rvsDequeX_.clear();
@@ -1753,7 +1694,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate011, TestSize.Level1)
  */
 HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate012, TestSize.Level1)
 {
-    
     optimizer_->rvsEnable_ = true;
     optimizer_->slideDirection_ = SLIDE_DIRECTION::VERTICAL;
     optimizer_->rvsDequeX_.clear();
@@ -1791,7 +1731,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate012, TestSize.Level1)
  */
 HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate013, TestSize.Level1)
 {
-    
     optimizer_->rvsEnable_ = true;
     optimizer_->slideDirection_ = SLIDE_DIRECTION::HORIZONTAL;
     optimizer_->rvsDequeX_.clear();
@@ -1821,7 +1760,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate013, TestSize.Level1)
  */
 HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate014, TestSize.Level1)
 {
-    
     optimizer_->rvsEnable_ = true;
     optimizer_->slideDirection_ = SLIDE_DIRECTION::HORIZONTAL;
     optimizer_->rvsDequeX_.clear();
@@ -1856,7 +1794,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate014, TestSize.Level1)
  */
 HWTEST_F(ResSchedTouchOptimizerTest, NeedTpFlushVsync001, TestSize.Level1)
 {
-    
     optimizer_->rvsEnable_ = false;
     
     TouchEvent touchEvent;
@@ -1874,7 +1811,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, NeedTpFlushVsync001, TestSize.Level1)
  */
 HWTEST_F(ResSchedTouchOptimizerTest, NeedTpFlushVsync002, TestSize.Level1)
 {
-    
     optimizer_->rvsEnable_ = true;
     optimizer_->hisAvgPointTimeStamp_ = 1000;
     optimizer_->slideAccepted_ = false;
@@ -1902,8 +1838,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, NeedTpFlushVsync002, TestSize.Level1)
  */
 HWTEST_F(ResSchedTouchOptimizerTest, NeedTpFlushVsyncInner001, TestSize.Level1)
 {
-    
-    
     // Test when RVS is disabled
     optimizer_->rvsEnable_ = false;
     TouchEvent touchEvent;
@@ -1928,7 +1862,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, NeedTpFlushVsyncInner001, TestSize.Level1)
  */
 HWTEST_F(ResSchedTouchOptimizerTest, NeedTpFlushVsyncInner002, TestSize.Level1)
 {
-    
     optimizer_->rvsEnable_ = true;
     optimizer_->hisAvgPointTimeStamp_ = 1000;
     optimizer_->slideAccepted_ = false;
@@ -1951,7 +1884,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, NeedTpFlushVsyncInner002, TestSize.Level1)
  */
 HWTEST_F(ResSchedTouchOptimizerTest, NeedTpFlushVsyncInner003, TestSize.Level1)
 {
-    
     optimizer_->rvsEnable_ = true;
     optimizer_->hisAvgPointTimeStamp_ = 1000;
     optimizer_->slideAccepted_ = true;
@@ -1972,7 +1904,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, NeedTpFlushVsyncInner003, TestSize.Level1)
  */
 HWTEST_F(ResSchedTouchOptimizerTest, NeedTpFlushVsyncInner004, TestSize.Level1)
 {
-    
     optimizer_->rvsEnable_ = true;
     optimizer_->hisAvgPointTimeStamp_ = 1000;
     optimizer_->slideAccepted_ = true;
@@ -2004,7 +1935,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, NeedTpFlushVsyncInner004, TestSize.Level1)
  */
 HWTEST_F(ResSchedTouchOptimizerTest, SetLastVsyncTimeStamp001, TestSize.Level1)
 {
-    
     optimizer_->vsyncTimeReportExemption_ = false;
     optimizer_->vsyncFlushed_ = false;
     optimizer_->lastVsyncTimeStamp_ = 0;
@@ -2024,7 +1954,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, SetLastVsyncTimeStamp001, TestSize.Level1)
  */
 HWTEST_F(ResSchedTouchOptimizerTest, SetLastVsyncTimeStamp002, TestSize.Level1)
 {
-    
     optimizer_->vsyncTimeReportExemption_ = true;
     optimizer_->vsyncFlushed_ = false;
     optimizer_->lastVsyncTimeStamp_ = 0;
@@ -2045,7 +1974,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, SetLastVsyncTimeStamp002, TestSize.Level1)
  */
 HWTEST_F(ResSchedTouchOptimizerTest, SetVsyncPeriod001, TestSize.Level1)
 {
-    
     optimizer_->vsyncPeriod_ = std::numeric_limits<uint64_t>::max();
     
     uint64_t testPeriod = 16666666; // ~60Hz
@@ -2061,7 +1989,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, SetVsyncPeriod001, TestSize.Level1)
  */
 HWTEST_F(ResSchedTouchOptimizerTest, GetIsTpFlushFrameDisplayPeriod001, TestSize.Level1)
 {
-    
     optimizer_->isTpFlushFrameDisplayPeriod_ = false;
     EXPECT_FALSE(optimizer_->GetIsTpFlushFrameDisplayPeriod());
     
@@ -2076,7 +2003,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, GetIsTpFlushFrameDisplayPeriod001, TestSize
  */
 HWTEST_F(ResSchedTouchOptimizerTest, GetIsFirstFrameAfterTpFlushFrameDisplayPeriod001, TestSize.Level1)
 {
-    
     optimizer_->isFristFrameAfterTpFlushFrameDisplayPeriod_ = false;
     EXPECT_FALSE(optimizer_->GetIsFirstFrameAfterTpFlushFrameDisplayPeriod());
     
@@ -2091,7 +2017,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, GetIsFirstFrameAfterTpFlushFrameDisplayPeri
  */
 HWTEST_F(ResSchedTouchOptimizerTest, SetHisAvgPointTimeStamp001, TestSize.Level1)
 {
-    
     optimizer_->hisAvgPointTimeStamp_ = 1000;
     
     std::unordered_map<int32_t, std::vector<TouchEvent>> historyPointsById;
@@ -2108,7 +2033,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, SetHisAvgPointTimeStamp001, TestSize.Level1
  */
 HWTEST_F(ResSchedTouchOptimizerTest, SetHisAvgPointTimeStamp002, TestSize.Level1)
 {
-    
     optimizer_->hisAvgPointTimeStamp_ = 0;
     
     std::unordered_map<int32_t, std::vector<TouchEvent>> historyPointsById;
@@ -2136,7 +2060,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, SetHisAvgPointTimeStamp002, TestSize.Level1
  */
 HWTEST_F(ResSchedTouchOptimizerTest, FineTuneTimeStampDuringTpFlushPeriod001, TestSize.Level1)
 {
-    
     optimizer_->hisAvgPointTimeStamp_ = 0;
     optimizer_->lastTpFlush_ = false;
     optimizer_->vsyncTimeReportExemption_ = false;
@@ -2158,7 +2081,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, FineTuneTimeStampDuringTpFlushPeriod001, Te
  */
 HWTEST_F(ResSchedTouchOptimizerTest, FineTuneTimeStampDuringTpFlushPeriod002, TestSize.Level1)
 {
-    
     optimizer_->hisAvgPointTimeStamp_ = 123456789;
     optimizer_->lastTpFlush_ = false;
     optimizer_->vsyncTimeReportExemption_ = false;
@@ -2180,7 +2102,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, FineTuneTimeStampDuringTpFlushPeriod002, Te
  */
 HWTEST_F(ResSchedTouchOptimizerTest, FineTuneTimeStampWhenFirstFrameAfterTpFlushPeriod001, TestSize.Level1)
 {
-    
     optimizer_->isFristFrameAfterTpFlushFrameDisplayPeriod_ = false;
     optimizer_->hisAvgPointTimeStamp_ = 0;
     optimizer_->lastVsyncTimeStamp_ = 0;
@@ -2204,7 +2125,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, FineTuneTimeStampWhenFirstFrameAfterTpFlush
  */
 HWTEST_F(ResSchedTouchOptimizerTest, FineTuneTimeStampWhenFirstFrameAfterTpFlushPeriod002, TestSize.Level1)
 {
-    
     optimizer_->isFristFrameAfterTpFlushFrameDisplayPeriod_ = true;
     optimizer_->hisAvgPointTimeStamp_ = 200000000;
     optimizer_->lastVsyncTimeStamp_ = 100000000;
@@ -2233,7 +2153,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, FineTuneTimeStampWhenFirstFrameAfterTpFlush
  */
 HWTEST_F(ResSchedTouchOptimizerTest, SetPointReverseSignal001, TestSize.Level1)
 {
-    
     optimizer_->rvsEnable_ = false;
     
     TouchEvent inputEvent;
@@ -2260,7 +2179,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, SetPointReverseSignal001, TestSize.Level1)
  */
 HWTEST_F(ResSchedTouchOptimizerTest, SetPointReverseSignal002, TestSize.Level1)
 {
-    
     optimizer_->rvsEnable_ = true;
     
     TouchEvent inputEvent;
