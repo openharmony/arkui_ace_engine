@@ -28,14 +28,50 @@ export class CommonModifier extends CommonMethodModifier implements CommonAttrib
     applySelectedAttribute(instance: CommonAttribute): void {}
 }
 
+export class ModifierStateManager {
+    static INSTANCE: ModifierStateManager = new ModifierStateManager();
+    private constructor() { }
+    private _flag: boolean = false;
+    get isEnable(): boolean {
+        return this._flag;
+    }
+    scope(f: () => void): void {
+        this.disable();
+        try {
+            f();
+        } finally {
+            this.enable();
+        }
+    }
+    private enable(): void {
+        this._flag = true;
+    }
+    private disable(): void {
+        this._flag = false;
+    }
+}
+
 export interface IModifierState {
     addRef(): void;
     fireChange(): void;
 }
 
 export class ModifierState implements IModifierState {
+    public _state: MutableState<int> | undefined = undefined;
+    constructor() {
+        this._state = GlobalStateManager.instance.mutableState<int>(0, true);
+    }
+    get state(): MutableState<int> {
+        return this._state!;
+    }
     addRef(): void {
+        this._state!.value;
     }
     fireChange(): void {
+        if (!ModifierStateManager.INSTANCE.isEnable) {
+            this._state!.value;
+            return;
+        }
+        this._state!.value = this._state!.value % 100 + 1;
     }
 }

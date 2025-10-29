@@ -3980,6 +3980,7 @@ export class CommonMethodModifier implements CommonMethod {
         }
     }
     mergeModifier(modifier: CommonMethodModifier): void {
+        this._state = modifier._state;
         if (modifier._width_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._width_0_flag) {

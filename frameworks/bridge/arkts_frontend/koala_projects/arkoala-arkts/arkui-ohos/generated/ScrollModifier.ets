@@ -531,6 +531,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
     }
     mergeModifier(modifier: ScrollModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._scrollable_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._scrollable_0_flag) {
