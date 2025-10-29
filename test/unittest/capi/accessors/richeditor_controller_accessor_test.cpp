@@ -130,7 +130,7 @@ void AssignArkValue(Ark_DecorationStyleInterface& dst, const Converter::TextDeco
 {
     dst.color = Converter::ArkUnion<Opt_ResourceColor, Ark_String>(src.color, ctx);
     dst.style = Converter::ArkValue<Opt_TextDecorationStyle>(src.style);
-    dst.type = Converter::ArkValue<Ark_TextDecorationType>(src.textDecoration);
+    dst.type = Converter::ArkValue<Opt_TextDecorationType>(src.textDecoration);
 }
 
 void AssignArkValue(Ark_RichEditorTextStyle& dst, const OHOS::Ace::TextStyle& style,

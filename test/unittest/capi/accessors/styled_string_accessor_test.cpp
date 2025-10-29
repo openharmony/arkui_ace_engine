@@ -245,7 +245,7 @@ private:
     void FillDecorationStyle(Ark_StyledStringValue& styledValue)
     {
         const Ark_DecorationStyleInterface decorationStyle = {
-            .type = Converter::ArkValue<Ark_TextDecorationType>(TEST_DCRN_TYPE),
+            .type = Converter::ArkValue<Opt_TextDecorationType>(TEST_DCRN_TYPE),
             .color = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(TEST_DCRN_COLOR)),
             .style = Converter::ArkValue<Opt_TextDecorationStyle>(TEST_DCRN_STYLE),
         };
