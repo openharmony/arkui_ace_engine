@@ -1857,6 +1857,39 @@ HWTEST_F(DragEventTestNg, DragClog001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetThumbnailPixelMap
+ * @tc.desc: test GetThumbnailPixelMap.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNg, GetThumbnailPixelMap, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create DragEventActuator.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    DragDropInfo dragDropInfo;
+    frameNode->SetDragPreview(dragDropInfo);
+    NG::DragPreviewOption previewOptions;
+    previewOptions.isLiftingDisabled = true;
+    frameNode->SetDragPreviewOptions(previewOptions);
+
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE_EQUAL_DEFAULT);
+    dragEventActuator->gestureEventHub_ = gestureEventHub;
+    /**
+     * @tc.steps: step2. Create DragEvent and set as DragEventActuator's DragEvent.
+     * @tc.expected: dragEventActuator's userCallback_ is not null.
+     */
+
+    dragEventActuator->GetThumbnailPixelMap(true);
+    EXPECT_FALSE(dragEventActuator->isOnBeforeLiftingAnimation_);
+}
+
+/**
  * @tc.name: DragEventPreviewLongPressActionTestNG001
  * @tc.desc: Test DragEventPreviewLongPressActionTestNG001 function.
  * @tc.type: FUNC
@@ -1918,39 +1951,6 @@ HWTEST_F(DragEventTestNg, DragEventPreviewLongPressActionTestNG001, TestSize.Lev
     panRecognizer->disposal_ = GestureDisposal::REJECT;
     (*(dragEventActuator->previewLongPressRecognizer_->onAction_))(info);
     EXPECT_TRUE(dragEventActuator->isOnBeforeLiftingAnimation_);
-}
-
-/**
- * @tc.name: GetThumbnailPixelMap
- * @tc.desc: test GetThumbnailPixelMap.
- * @tc.type: FUNC
- */
-HWTEST_F(DragEventTestNg, GetThumbnailPixelMap, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create DragEventActuator.
-     */
-    auto eventHub = AceType::MakeRefPtr<EventHub>();
-    auto frameNode = FrameNode::CreateFrameNode(
-        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
-    DragDropInfo dragDropInfo;
-    frameNode->SetDragPreview(dragDropInfo);
-    NG::DragPreviewOption previewOptions;
-    previewOptions.isLiftingDisabled = true;
-    frameNode->SetDragPreviewOptions(previewOptions);
-
-    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
-    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
-    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
-        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE_EQUAL_DEFAULT);
-    dragEventActuator->gestureEventHub_ = gestureEventHub;
-    /**
-     * @tc.steps: step2. Create DragEvent and set as DragEventActuator's DragEvent.
-     * @tc.expected: dragEventActuator's userCallback_ is not null.
-     */
-
-    dragEventActuator->GetThumbnailPixelMap(true);
-    EXPECT_FALSE(dragEventActuator->isOnBeforeLiftingAnimation_);
 }
 
 /**

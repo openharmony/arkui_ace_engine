@@ -956,6 +956,23 @@ ani_double Px2lpx(ani_env* env, ani_object obj, ani_double value, ani_int instan
     }
     return modifier->getCommonAniModifier()->px2lpx(value, instanceId);
 }
+
+ani_string getWindowName(ani_env* env, ani_object obj, ani_int instanceId)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return nullptr;
+    }
+    auto ret = modifier->getCommonAniModifier()->getWindowName(instanceId);
+    if (ret.has_value()) {
+        auto retValue = AniUtils::StdStringToANIString(env, ret.value());
+        if (retValue) {
+            return *retValue;
+        }
+    }
+    return nullptr;
+}
+
 void* TransferKeyEventPointer(ani_env* env, ani_object obj, ani_long pointer)
 {
     const auto* modifier = GetNodeAniModifier();

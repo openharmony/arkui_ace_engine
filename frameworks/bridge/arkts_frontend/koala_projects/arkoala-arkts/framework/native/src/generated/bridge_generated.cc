@@ -29229,14 +29229,14 @@ Ark_Boolean impl_FrameNodeExtender_isModifiable(Ark_NativePointer peer) {
         return GetAccessors()->getFrameNodeExtenderAccessor()->isModifiable(peer);
 }
 KOALA_INTEROP_DIRECT_1(FrameNodeExtender_isModifiable, Ark_Boolean, Ark_NativePointer)
-void impl_FrameNodeExtender_appendChild(Ark_NativePointer peer, Ark_NativePointer child) {
-        GetAccessors()->getFrameNodeExtenderAccessor()->appendChild(static_cast<Ark_FrameNode>(peer), static_cast<Ark_FrameNode>(child));
+Ark_Int32 impl_FrameNodeExtender_appendChild(Ark_NativePointer peer, Ark_NativePointer child) {
+        return GetAccessors()->getFrameNodeExtenderAccessor()->appendChild(static_cast<Ark_FrameNode>(peer), static_cast<Ark_FrameNode>(child));
 }
-KOALA_INTEROP_DIRECT_V2(FrameNodeExtender_appendChild, Ark_NativePointer, Ark_NativePointer)
-void impl_FrameNodeExtender_insertChildAfter(Ark_NativePointer peer, Ark_NativePointer child, Ark_NativePointer sibling) {
-        GetAccessors()->getFrameNodeExtenderAccessor()->insertChildAfter(peer, child, sibling);
+KOALA_INTEROP_2(FrameNodeExtender_appendChild, Ark_Int32, Ark_NativePointer, Ark_NativePointer)
+Ark_Int32 impl_FrameNodeExtender_insertChildAfter(Ark_NativePointer peer, Ark_NativePointer child, Ark_NativePointer sibling) {
+        return GetAccessors()->getFrameNodeExtenderAccessor()->insertChildAfter(peer, child, sibling);
 }
-KOALA_INTEROP_DIRECT_V3(FrameNodeExtender_insertChildAfter, Ark_NativePointer, Ark_NativePointer, Ark_NativePointer)
+KOALA_INTEROP_3(FrameNodeExtender_insertChildAfter, Ark_Int32, Ark_NativePointer, Ark_NativePointer, Ark_NativePointer)
 void impl_FrameNodeExtender_removeChild(Ark_NativePointer peer, Ark_NativePointer child) {
         GetAccessors()->getFrameNodeExtenderAccessor()->removeChild(static_cast<Ark_FrameNode>(peer), static_cast<Ark_FrameNode>(child));
 }
@@ -29441,10 +29441,10 @@ Ark_Number impl_FrameNodeExtender_getIdByFrameNode(Ark_NativePointer node) {
         return GetAccessors()->getFrameNodeExtenderAccessor()->getIdByFrameNode(node);
 }
 KOALA_INTEROP_DIRECT_1(FrameNodeExtender_getIdByFrameNode, KInteropNumber, Ark_NativePointer)
-void impl_FrameNodeExtender_moveTo(Ark_NativePointer peer, Ark_NativePointer targetParent, KInteropNumber index) {
-        GetAccessors()->getFrameNodeExtenderAccessor()->moveTo(static_cast<Ark_FrameNode>(peer), static_cast<Ark_FrameNode>(targetParent), (const Ark_Number*) (&index));
+Ark_Int32 impl_FrameNodeExtender_moveTo(Ark_NativePointer peer, Ark_NativePointer targetParent, KInteropNumber index) {
+        return GetAccessors()->getFrameNodeExtenderAccessor()->moveTo(static_cast<Ark_FrameNode>(peer), static_cast<Ark_FrameNode>(targetParent), (const Ark_Number*) (&index));
 }
-KOALA_INTEROP_DIRECT_V3(FrameNodeExtender_moveTo, Ark_NativePointer, Ark_NativePointer, KInteropNumber)
+KOALA_INTEROP_3(FrameNodeExtender_moveTo, Ark_Int32, Ark_NativePointer, Ark_NativePointer, KInteropNumber)
 Ark_Number impl_FrameNodeExtender_getFirstChildIndexWithoutExpand(Ark_NativePointer peer) {
         return GetAccessors()->getFrameNodeExtenderAccessor()->getFirstChildIndexWithoutExpand(static_cast<Ark_FrameNode>(peer));
 }
@@ -29562,6 +29562,14 @@ KInteropReturnBuffer impl_FrameNodeExtender_convertPoint(Ark_NativePointer peer,
         return _retSerializer.toReturnBuffer();
 }
 KOALA_INTEROP_4(FrameNodeExtender_convertPoint, KInteropReturnBuffer, Ark_NativePointer, Ark_NativePointer, KSerializerBuffer, int32_t)
+Ark_Int32 impl_FrameNodeExtender_adoptChild(Ark_NativePointer peer, Ark_NativePointer child) {
+        return GetAccessors()->getFrameNodeExtenderAccessor()->adoptChild(static_cast<Ark_FrameNode>(peer), static_cast<Ark_FrameNode>(child));
+}
+KOALA_INTEROP_2(FrameNodeExtender_adoptChild, Ark_Int32, Ark_NativePointer, Ark_NativePointer)
+Ark_Int32 impl_FrameNodeExtender_removeAdoptedChild(Ark_NativePointer peer, Ark_NativePointer child) {
+        return GetAccessors()->getFrameNodeExtenderAccessor()->removeAdoptedChild(static_cast<Ark_FrameNode>(peer), static_cast<Ark_FrameNode>(child));
+}
+KOALA_INTEROP_2(FrameNodeExtender_removeAdoptedChild, Ark_Int32, Ark_NativePointer, Ark_NativePointer)
 Ark_NativePointer impl_FrictionMotion_construct(KInteropNumber friction, KInteropNumber position, KInteropNumber velocity) {
         return GetAccessors()->getFrictionMotionAccessor()->construct((const Ark_Number*) (&friction), (const Ark_Number*) (&position), (const Ark_Number*) (&velocity));
 }
@@ -32428,10 +32436,10 @@ Ark_NativePointer impl_NodeContentExtender_getDestroy() {
         return GetAccessors()->getNodeContentExtenderAccessor()->getDestroy();
 }
 KOALA_INTEROP_DIRECT_0(NodeContentExtender_getDestroy, Ark_NativePointer)
-Ark_Boolean impl_NodeContentExtender_addFrameNode(Ark_NativePointer content, Ark_NativePointer node) {
+Ark_Int32 impl_NodeContentExtender_addFrameNode(Ark_NativePointer content, Ark_NativePointer node) {
         return GetAccessors()->getNodeContentExtenderAccessor()->addFrameNode(content, node);
 }
-KOALA_INTEROP_DIRECT_2(NodeContentExtender_addFrameNode, Ark_Boolean, Ark_NativePointer, Ark_NativePointer)
+KOALA_INTEROP_2(NodeContentExtender_addFrameNode, Ark_Int32, Ark_NativePointer, Ark_NativePointer)
 Ark_Boolean impl_NodeContentExtender_removeFrameNode(Ark_NativePointer content, Ark_NativePointer node) {
         return GetAccessors()->getNodeContentExtenderAccessor()->removeFrameNode(content, node);
 }
@@ -33395,14 +33403,14 @@ void impl_RenderNodeExtender_setPathClip(Ark_NativePointer peer, KSerializerBuff
         GetAccessors()->getRenderNodeExtenderAccessor()->setPathClip(static_cast<Ark_RenderNode>(peer), static_cast<Ark_CommandPath*>(&pathValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(RenderNodeExtender_setPathClip, Ark_NativePointer, KSerializerBuffer, int32_t)
-void impl_RenderNodeExtender_appendChild(Ark_NativePointer peer, Ark_NativePointer node) {
-        GetAccessors()->getRenderNodeExtenderAccessor()->appendChild(static_cast<Ark_RenderNode>(peer), static_cast<Ark_RenderNode>(node));
+Ark_Int32 impl_RenderNodeExtender_appendChild(Ark_NativePointer peer, Ark_NativePointer node) {
+        return GetAccessors()->getRenderNodeExtenderAccessor()->appendChild(static_cast<Ark_RenderNode>(peer), static_cast<Ark_RenderNode>(node));
 }
-KOALA_INTEROP_DIRECT_V2(RenderNodeExtender_appendChild, Ark_NativePointer, Ark_NativePointer)
-void impl_RenderNodeExtender_insertChildAfter(Ark_NativePointer peer, Ark_NativePointer child, Ark_NativePointer sibling) {
-        GetAccessors()->getRenderNodeExtenderAccessor()->insertChildAfter(static_cast<Ark_RenderNode>(peer), static_cast<Ark_RenderNode>(child), static_cast<Ark_RenderNode>(sibling));
+KOALA_INTEROP_2(RenderNodeExtender_appendChild, Ark_Int32, Ark_NativePointer, Ark_NativePointer)
+Ark_Int32 impl_RenderNodeExtender_insertChildAfter(Ark_NativePointer peer, Ark_NativePointer child, Ark_NativePointer sibling) {
+        return GetAccessors()->getRenderNodeExtenderAccessor()->insertChildAfter(static_cast<Ark_RenderNode>(peer), static_cast<Ark_RenderNode>(child), static_cast<Ark_RenderNode>(sibling));
 }
-KOALA_INTEROP_DIRECT_V3(RenderNodeExtender_insertChildAfter, Ark_NativePointer, Ark_NativePointer, Ark_NativePointer)
+KOALA_INTEROP_3(RenderNodeExtender_insertChildAfter, Ark_Int32, Ark_NativePointer, Ark_NativePointer, Ark_NativePointer)
 void impl_RenderNodeExtender_removeChild(Ark_NativePointer peer, Ark_NativePointer node) {
         GetAccessors()->getRenderNodeExtenderAccessor()->removeChild(static_cast<Ark_RenderNode>(peer), static_cast<Ark_RenderNode>(node));
 }

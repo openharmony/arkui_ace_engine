@@ -1010,9 +1010,8 @@ void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode,
 {
     FREE_NODE_CHECK(parentNode, CreateTextField, parentNode, placeholder, value, hasTextFieldNode, searchTheme);
     CHECK_NULL_VOID(searchTheme);
-    auto nodeId = parentNode->GetTextFieldId();
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::SEARCH_Field_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<SearchTextFieldPattern>(); });
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::SEARCH_Field_ETS_TAG, parentNode->GetTextFieldId(),
+        []() { return AceType::MakeRefPtr<SearchTextFieldPattern>(); });
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
@@ -1041,6 +1040,7 @@ void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode,
     pattern->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());
     pattern->GetTextFieldController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(pattern)));
     pattern->InitSurfaceChangedCallback();
+    pattern->RegisterWindowFocusChangeCallback();
     pattern->RegisterWindowSizeCallback();
     pattern->SetTextFadeoutCapacity(true);
     pattern->InitSurfacePositionChangedCallback();

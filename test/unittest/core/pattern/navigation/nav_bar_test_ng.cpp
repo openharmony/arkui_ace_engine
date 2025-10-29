@@ -1831,4 +1831,80 @@ HWTEST_F(NavBarTestNg, NavigationStack024, TestSize.Level1)
     auto siz = navigationStack->GetAllPathIndex().size();
     EXPECT_EQ(siz, 0);
 }
+
+/**
+ * @tc.name: OnAttachToMainTreeMultiThread
+ * @tc.desc: test OnAttachToFrameNodeMultiThread & OnAttachToMainTreeMultiThread.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavBarTestNg, OnAttachToMainTreeMultiThread, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create navBarNode.
+     */
+    auto navBarNode = NavBarNode::GetOrCreateNavBarNode(V2::BAR_ITEM_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavBarPattern>(); });
+    ASSERT_NE(navBarNode, nullptr);
+    auto navBarPattern = navBarNode->GetPattern<NavBarPattern>();
+    ASSERT_NE(navBarPattern, nullptr);
+    /**
+     * @tc.steps: step2. Simulate MutltiThread Enviroment.
+     */
+    auto host = navBarPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    host->isThreadSafeNode_ = true;
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto size = context->onWindowSizeChangeCallbacks_.size();
+    /**
+     * @tc.steps: step3. Call OnAttachToFrameNode.
+     * @tc.expected: OnAttachToFrameNodeMultiThread is called, nothing is done.
+     */
+    navBarPattern->OnAttachToFrameNode(); // call OnAttachToFrameNodeMultiThread
+    EXPECT_EQ(size, context->onWindowSizeChangeCallbacks_.size());
+
+    /**
+     * @tc.steps: step4. Call OnAttachToMainTree.
+     * @tc.expected: OnAttachToMainTreeMultiThread is called.
+     */
+    navBarPattern->OnAttachToMainTree(); // call OnAttachToMainTreeMultiThread
+    EXPECT_EQ(size, context->onWindowSizeChangeCallbacks_.size());
+}
+
+/**
+ * @tc.name: OnDetachFromMainTreeMultiThread
+ * @tc.desc: test OnDetachFromFrameNodeMultiThread & OnDetachFromMainTreeMultiThread.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavBarTestNg, OnDetachFromMainTreeMultiThread, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create navBarNode.
+     */
+    CreateNavBar();
+    ASSERT_NE(navBarpattern_, nullptr);
+    /**
+     * @tc.steps: step2. Simulate MutltiThread Enviroment.
+     */
+    auto host = navBarpattern_->GetHost();
+    ASSERT_NE(host, nullptr);
+    host->isThreadSafeNode_ = true;
+    auto context = host->GetContextWithCheck();
+    ASSERT_NE(context, nullptr);
+    auto size = context->onWindowSizeChangeCallbacks_.size();
+    auto frameNode = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<NavigationPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->isThreadSafeNode_ = true;
+    /**
+     * @tc.steps: step3. Call OnDetachFromFrameNode.
+     * @tc.expected: OnDetachFromFrameNodeMultiThread is called, nothing is done.
+     */
+    navBarpattern_->OnDetachFromFrameNode(AceType::RawPtr(frameNode)); // call OnAttachToFrameNodeMultiThread
+    EXPECT_EQ(size, context->onWindowSizeChangeCallbacks_.size());
+    /**
+     * @tc.steps: step4. Call OnDetachFromMainTree.
+     * @tc.expected: OnDetachFromMainTreeMultiThread is called.
+     */
+    navBarpattern_->OnDetachFromMainTree(); // call OnAttachToMainTreeMultiThread
+}
 } // namespace OHOS::Ace::NG
