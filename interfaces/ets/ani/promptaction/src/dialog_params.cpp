@@ -28,9 +28,9 @@
 constexpr int32_t CALLBACK_PARAM_LENGTH = 2;
 constexpr int32_t PRIMARY_BUTTON_COUNT_MAX = 1;
 std::unordered_map<int32_t, OHOS::Ace::BorderStyle> borderStyleMap = {
-    { 0, OHOS::Ace::BorderStyle::DOTTED },
+    { 2, OHOS::Ace::BorderStyle::DOTTED },
     { 1, OHOS::Ace::BorderStyle::DASHED },
-    { 2, OHOS::Ace::BorderStyle::SOLID },
+    { 0, OHOS::Ace::BorderStyle::SOLID },
 };
 
 bool GetButtonInfo(ani_env* env, ani_ref resultRef, OHOS::Ace::ButtonInfo& result)
