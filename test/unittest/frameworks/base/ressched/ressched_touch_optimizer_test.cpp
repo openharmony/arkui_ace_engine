@@ -1639,7 +1639,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, SetSlideDirection001, TestSize.Level1)
  */
 HWTEST_F(ResSchedTouchOptimizerTest, RVSDirectionStateCheck001, TestSize.Level1)
 {
-    
     // Test valid directions
     EXPECT_TRUE(optimizer_->RVSDirectionStateCheck(RVS_DIRECTION::RVS_DOWN_LEFT));
     EXPECT_TRUE(optimizer_->RVSDirectionStateCheck(RVS_DIRECTION::RVS_UP_RIGHT));
