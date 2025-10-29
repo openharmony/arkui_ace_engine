@@ -1243,6 +1243,16 @@ void HandleSrcResource(const RefPtr<ResourceObject>& resObj, const RefPtr<ImageP
         CHECK_NULL_VOID(pattern);
         std::string src =
             ResourceManager::GetInstance().GetOrCreateResourceAdapter(resObj)->GetMediaPath(resObj->GetId());
+        auto params = resObj->GetParams();
+        if (src.empty() && params.size() && params[0].value.has_value()) {
+            if (resObj->GetType() == static_cast<int32_t>(ResourceType::RAWFILE)) {
+                src = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resObj)->GetRawfile(
+                    params[0].value.value());
+            } else {
+                src = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resObj)->GetMediaPathByName(
+                    params[0].value.value());
+            }
+        }
         if (src.empty() && pattern->GetIsAnimation()) {
             pattern->SetSrcUndefined(true);
             return;
@@ -1266,6 +1276,16 @@ void HandleAltResource(const RefPtr<ResourceObject>& resObj, const RefPtr<ImageP
         CHECK_NULL_VOID(pattern);
         std::string src =
             ResourceManager::GetInstance().GetOrCreateResourceAdapter(resObj)->GetMediaPath(resObj->GetId());
+        auto params = resObj->GetParams();
+        if (src.empty() && params.size() && params[0].value.has_value()) {
+            if (resObj->GetType() == static_cast<int32_t>(ResourceType::RAWFILE)) {
+                src = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resObj)->GetRawfile(
+                    params[0].value.value());
+            } else {
+                src = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resObj)->GetMediaPathByName(
+                    params[0].value.value());
+            }
+        }
         if (src.empty() && pattern->GetIsAnimation()) {
             pattern->SetSrcUndefined(true);
             return;
