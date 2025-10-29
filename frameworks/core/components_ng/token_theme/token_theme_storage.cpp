@@ -221,12 +221,22 @@ RefPtr<TokenTheme> TokenThemeStorage::CreateSystemTokenTheme(ColorMode colorMode
     std::vector<Color> darkColors;
     colors.reserve(TokenColors::TOTAL_NUMBER);
     darkColors.reserve(TokenColors::TOTAL_NUMBER);
+    std::vector<RefPtr<ResourceObject>> resObjs;
+    std::vector<RefPtr<ResourceObject>> resDarkObjs;
+    std::vector<ResourceObjectParams> params;
     for (size_t resId = 0; resId < TokenColors::TOTAL_NUMBER; ++resId) {
+        auto resourceId = TokenColors::GetSystemColorResIdByIndex(resId);
+        auto resObj = AceType::MakeRefPtr<ResourceObject>(
+            resourceId, static_cast<int32_t>(ResourceType::COLOR), params, "", "", Container::CurrentIdSafely());
+        resObjs.push_back(resObj);
+        resDarkObjs.push_back(resObj);
         colors.push_back(themeConstants->GetColor(TokenColors::GetSystemColorResIdByIndex(resId)));
         darkColors.push_back(themeConstants->GetColor(TokenColors::GetSystemColorResIdByIndex(resId)));
     }
     tokenColors->SetColors(std::move(colors));
     tokenDarkColors->SetColors(std::move(darkColors));
+    tokenTheme->SetResObjs(std::move(resObjs));
+    tokenTheme->SetDarkResObjs(std::move(resDarkObjs));
     return tokenTheme;
 }
 

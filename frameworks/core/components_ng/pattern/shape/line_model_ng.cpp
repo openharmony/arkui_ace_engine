@@ -84,13 +84,13 @@ void LineModelNG::StartPoint(
         ShapePoint result = value;
         if (resObjArray[0]) {
             Dimension dim;
-            ResourceParseUtils::ConvertFromResObjNG(resObjArray[0], dim);
-            result.first = dim;
+            bool res = ResourceParseUtils::ConvertFromResObjNG(resObjArray[0], dim);
+            result.first = res ? dim : 0.0_vp;
         }
         if (resObjArray[1]) {
             Dimension dim;
-            ResourceParseUtils::ConvertFromResObjNG(resObjArray[1], dim);
-            result.second = dim;
+            bool res = ResourceParseUtils::ConvertFromResObjNG(resObjArray[1], dim);
+            result.second = res ? dim : 0.0_vp;
         }
         ACE_UPDATE_NODE_PAINT_PROPERTY(LinePaintProperty, StartPoint, result, frameNode);
     };
@@ -123,13 +123,13 @@ void LineModelNG::EndPoint(
         ShapePoint result = value;
         if (resObjArray[0]) {
             Dimension dim;
-            ResourceParseUtils::ConvertFromResObjNG(resObjArray[0], dim);
-            result.first = dim;
+            bool res = ResourceParseUtils::ConvertFromResObjNG(resObjArray[0], dim);
+            result.first = res ? dim : 0.0_vp;
         }
         if (resObjArray[1]) {
             Dimension dim;
-            ResourceParseUtils::ConvertFromResObjNG(resObjArray[1], dim);
-            result.second = dim;
+            bool res = ResourceParseUtils::ConvertFromResObjNG(resObjArray[1], dim);
+            result.second = res ? dim : 0.0_vp;
         }
         ACE_UPDATE_NODE_PAINT_PROPERTY(LinePaintProperty, EndPoint, result, frameNode);
     };

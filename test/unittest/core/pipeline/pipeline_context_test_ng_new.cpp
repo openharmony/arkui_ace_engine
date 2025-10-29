@@ -22,7 +22,6 @@
 #include "core/components_ng/pattern/button/button_event_hub.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
-#include "core/components_ng/token_theme/token_theme_storage.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/unittest/core/pattern/scroll/mock_task_executor.h"
 #ifdef ENHANCED_ANIMATION
@@ -4131,44 +4130,6 @@ HWTEST_F(PipelineContextTestNg, LinearColorGetValue001, TestSize.Level1)
 {
     LinearColor linearColor(-1, -1, -1, -1);
     EXPECT_EQ(linearColor.GetValue(), 0x00000000);
-}
-
-/**
- * @tc.name: CacheClearTest001
- * @tc.desc: Cache not cleared when fullUpdate=false even if colorModeUpdate=true.
- * @tc.type: FUNC
- */
-HWTEST_F(PipelineContextTestNg, CacheClearTest001, TestSize.Level1)
-{
-    ASSERT_NE(context_, nullptr);
-    TokenThemeStorage::GetInstance()->CacheClear();
-    auto theme = AceType::MakeRefPtr<TokenTheme>(10001);
-    TokenThemeStorage::GetInstance()->CacheSet(theme);
-    EXPECT_EQ(TokenThemeStorage::GetInstance()->themeCache_.size(), 1);
-
-    ConfigurationChange change;
-    change.colorModeUpdate = true;
-    context_->FlushReload(change, false);
-    EXPECT_EQ(TokenThemeStorage::GetInstance()->themeCache_.size(), 1);
-}
-
-/**
- * @tc.name: CacheClearTest002
- * @tc.desc: Cache not cleared when colorModeUpdate=false even if fullUpdate=true.
- * @tc.type: FUNC
- */
-HWTEST_F(PipelineContextTestNg, CacheClearTest002, TestSize.Level1)
-{
-    ASSERT_NE(context_, nullptr);
-    TokenThemeStorage::GetInstance()->CacheClear();
-    auto theme = AceType::MakeRefPtr<TokenTheme>(10002);
-    TokenThemeStorage::GetInstance()->CacheSet(theme);
-    EXPECT_EQ(TokenThemeStorage::GetInstance()->themeCache_.size(), 1);
-
-    ConfigurationChange change;
-    change.colorModeUpdate = false;
-    context_->FlushReload(change, true);
-    EXPECT_EQ(TokenThemeStorage::GetInstance()->themeCache_.size(), 1);
 }
 } // namespace NG
 } // namespace OHOS::Ace

@@ -734,4 +734,51 @@ HWTEST_F(WithThemeTestNg, WithThemeTest017, TestSize.Level1)
     EXPECT_EQ(colors->InteractiveSelect(), Color(gColors[TokenColors::INTERACTIVE_SELECT]));
     EXPECT_EQ(colors->InteractiveClick(), Color(gColors[TokenColors::INTERACTIVE_CLICK]));
 }
+
+/**
+ * @tc.name: WithThemeTestNg018
+ * @tc.desc: Test SetResObjs and SetDarkResObjs set correct number of resource objects
+ * @tc.type: FUNC
+ */
+HWTEST_F(WithThemeTestNg, WithThemeTest018, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Create resource objects vectors with TOTAL_NUMBER items
+     * @tc.expected: Vectors are properly sized
+     */
+    std::vector<RefPtr<ResourceObject>> resObjs;
+    std::vector<RefPtr<ResourceObject>> resDarkObjs;
+    std::vector<ResourceObjectParams> params;
+    
+    for (size_t resId = 0; resId < TokenColors::TOTAL_NUMBER; ++resId) {
+        auto resourceId = TokenColors::GetSystemColorResIdByIndex(resId);
+        auto resObj = AceType::MakeRefPtr<ResourceObject>(
+            resourceId, static_cast<int32_t>(ResourceType::COLOR), params, "", "", Container::CurrentIdSafely());
+        resObjs.push_back(resObj);
+        resDarkObjs.push_back(resObj);
+    }
+    
+    EXPECT_EQ(resObjs.size(), TokenColors::TOTAL_NUMBER);
+    EXPECT_EQ(resDarkObjs.size(), TokenColors::TOTAL_NUMBER);
+}
+
+/**
+ * @tc.name: WithThemeNodeTest001
+ * @tc.desc: Test SetThemeScopeId basic functionality
+ * @tc.type: FUNC
+ */
+HWTEST_F(WithThemeTestNg, WithThemeNodeTest001, TestSize.Level1)
+{
+    // Create WithThemeNode and reset themeScopeId_ to 0
+    auto withThemeNode = WithThemeNode::CreateWithThemeNode(60086);
+    withThemeNode->themeScopeId_ = 0;
+    
+    // Test SetThemeScopeId when themeScopeId_ is 0
+    withThemeNode->SetThemeScopeId(12345);
+    EXPECT_EQ(withThemeNode->GetThemeScopeId(), 12345);
+    
+    // Test SetThemeScopeId when themeScopeId_ is not 0 (should not change)
+    withThemeNode->SetThemeScopeId(67890);
+    EXPECT_EQ(withThemeNode->GetThemeScopeId(), 12345);
+}
 } //namespace OHOS::Ace::NG

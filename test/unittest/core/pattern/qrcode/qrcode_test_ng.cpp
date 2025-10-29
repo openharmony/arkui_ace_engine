@@ -748,6 +748,26 @@ HWTEST_F(QRCodeTestNg, QRCodeModelNG001, TestSize.Level0)
     ASSERT_NE(property, nullptr);
     EXPECT_EQ(property->GetValueValue(), CREATE_VALUE);
 }
+
+/**
+ * @tc.name: QRCodeModelNG002
+ * @tc.desc: test QRCodeModelNG static Method
+ * @tc.type: FUNC
+ */
+HWTEST_F(QRCodeTestNg, QRCodeModelNG002, TestSize.Level0)
+{
+    /**
+     * @tc.steps: steps1. Create qrCodeModel
+     */
+    auto frameNode = QRCodeModelNG::CreateFrameNode(-1);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto backgroundColor = renderContext->GetBackgroundColorValue();
+    EXPECT_EQ(backgroundColor, Color::WHITE);
+}
+
 /**
  * @tc.name: QRCodeModifierTest001
  * @tc.desc: test modifier
@@ -1016,9 +1036,9 @@ HWTEST_F(QRCodeTestNg, QRCodePropertyUpdateTest002, TestSize.Level1)
      * @tc.expected: Opacity should not update when conditions not met
      */
     const double opacity = 0.5;
-    double originalOpacity = paintProperty->GetOpacityValue();
+    double originalOpacity = paintProperty->GetOpacityValue(1.0);
     qrCodePattern->UpdateContentOpacity(opacity, false);
-    EXPECT_EQ(paintProperty->GetOpacityValue(), originalOpacity);
+    EXPECT_EQ(paintProperty->GetOpacityValue(1.0), originalOpacity);
 
     /**
      * @tc.steps: step4. Test opacity update on first load

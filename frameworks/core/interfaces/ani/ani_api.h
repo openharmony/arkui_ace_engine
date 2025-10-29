@@ -502,6 +502,7 @@ struct ArkUIAniCommonModifier {
     ani_double (*px2fp)(ani_double value, ani_int instanceId);
     ani_double (*lpx2px)(ani_double value, ani_int instanceId);
     ani_double (*px2lpx)(ani_double value, ani_int instanceId);
+    std::optional<std::string> (*getWindowName)(ani_int instanceId);
     void* (*transferKeyEventPointer)(ani_long nativePtr);
     void* (*createKeyEventAccessorWithPointer)(ani_long nativePtr);
     void* (*createEventTargetInfoAccessor)();
@@ -537,6 +538,7 @@ struct ArkUIAniCommonModifier {
     float (*getPx2VpWithCurrentDensity)(float px);
     void (*setImageCacheCount)(ani_int value, ani_int instanceId);
     void (*setImageRawDataCacheSize)(ani_int value, ani_int instanceId);
+    void (*applyThemeScopeId)(ani_env* env, ani_long ptr, ani_int themeScopeId);
 };
 struct  ArkUICustomNodeInfo {
     std::function<void()> onPageShowFunc;

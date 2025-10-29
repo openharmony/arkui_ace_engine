@@ -1417,4 +1417,36 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPaintMethodTest005, TestSize.Level1)
     checkBoxModifier->UpdateAnimatableProperty(true);
     EXPECT_EQ(checkBoxModifier->animateTouchHoverColor_->Get(), LinearColor(Color::BLUE));
 }
+
+/**
+ * @tc.name: CheckBoxPatternTest0133
+ * @tc.desc: Test CheckBox InitOnKeyEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0133, TestSize.Level1)
+{
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto eventHub = frameNode->GetFocusHub();
+    ASSERT_NE(eventHub, nullptr);
+    /**
+     * test event.action != KeyAction::DOWN
+     */
+    KeyEvent keyEventOne(KeyCode::KEY_FUNCTION, KeyAction::UP);
+    EXPECT_FALSE(eventHub->ProcessOnKeyEventInternal(keyEventOne));
+    /**
+     * test event.action == KeyAction::DOWN and event.code != KeyCode::KEY_FUNCTION
+     */
+    KeyEvent keyEventTwo(KeyCode::KEY_A, KeyAction::DOWN);
+    EXPECT_FALSE(eventHub->ProcessOnKeyEventInternal(keyEventTwo));
+    /**
+     * test event.action == KeyAction::DOWN and event.code == KeyCode::KEY_FUNCTION
+     */
+    KeyEvent keyEventThr(KeyCode::KEY_FUNCTION, KeyAction::DOWN);
+    EXPECT_TRUE(eventHub->ProcessOnKeyEventInternal(keyEventThr));
+}
 } // namespace OHOS::Ace::NG

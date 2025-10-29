@@ -214,7 +214,7 @@ void JSShape::SetStroke(const JSCallbackInfo& info)
     if (SystemProperties::ConfigChangePerform()) {
         UnRegisterResource("ShapeStroke");
         if (strokeResObj) {
-            RegisterResource<Color>("ShapeStroke", strokeResObj, strokeColor);
+            ShapeModel::GetInstance()->SetStroke(strokeResObj);
         }
     }
     ShapeModel::GetInstance()->SetStroke(strokeColor);
@@ -239,7 +239,7 @@ void JSShape::SetFill(const JSCallbackInfo& info)
         return;
     }
     if (SystemProperties::ConfigChangePerform() && fillResObj) {
-        RegisterResource<Color>("ShapeFill", fillResObj, fillColor);
+        ShapeModel::GetInstance()->SetFill(fillResObj);
     }
     ShapeModel::GetInstance()->SetFill(fillColor);
 }
@@ -265,7 +265,7 @@ void JSShape::SetStrokeDashOffset(const JSCallbackInfo& info)
         }
     }
     if (SystemProperties::ConfigChangePerform() && dashOffsetResObj) {
-        RegisterResource<CalcDimension>("ShapeDashOffset", dashOffsetResObj, offset);
+        ShapeModel::GetInstance()->SetStrokeDashOffset(dashOffsetResObj);
     }
     ShapeModel::GetInstance()->SetStrokeDashOffset(offset);
 }
@@ -291,7 +291,7 @@ void JSShape::SetStrokeMiterLimit(const JSCallbackInfo& info)
     if (SystemProperties::ConfigChangePerform()) {
         UnRegisterResource("ShapeMiterLimit");
         if (miterLimitResObj) {
-            RegisterResource<double>("ShapeMiterLimit", miterLimitResObj, miterLimit);
+            ShapeModel::GetInstance()->SetStrokeMiterLimit(miterLimitResObj);
         }
     }
     ShapeModel::GetInstance()->SetStrokeMiterLimit(miterLimit);
@@ -308,7 +308,7 @@ void JSShape::SetStrokeOpacity(const JSCallbackInfo& info)
     if (SystemProperties::ConfigChangePerform()) {
         UnRegisterResource("ShapeStrokeOpacity");
         if (strokeOpacityResObj) {
-            RegisterResource<double>("ShapeStrokeOpacity", strokeOpacityResObj, strokeOpacity);
+            ShapeModel::GetInstance()->SetStrokeOpacity(strokeOpacityResObj);
         }
     }
     ShapeModel::GetInstance()->SetStrokeOpacity(strokeOpacity);
@@ -325,7 +325,7 @@ void JSShape::SetFillOpacity(const JSCallbackInfo& info)
     if (SystemProperties::ConfigChangePerform()) {
         UnRegisterResource("ShapeFillOpacity");
         if (fillOpacityResObj) {
-            RegisterResource<double>("ShapeFillOpacity", fillOpacityResObj, fillOpacity);
+            ShapeModel::GetInstance()->SetFillOpacity(fillOpacityResObj);
         }
     }
     ShapeModel::GetInstance()->SetFillOpacity(fillOpacity);
@@ -355,7 +355,7 @@ void JSShape::SetStrokeWidth(const JSCallbackInfo& info)
         RefPtr<ResourceObject> strokeWidthResObj;
         ParseJsDimensionVp(info[0], lineWidth, strokeWidthResObj);
         if (SystemProperties::ConfigChangePerform() && strokeWidthResObj) {
-            RegisterResource<CalcDimension>("ShapeStrokeWidth", strokeWidthResObj, lineWidth);
+            ShapeModel::GetInstance()->SetStrokeWidth(strokeWidthResObj);
         }
     }
     if (lineWidth.IsNegative()) {
@@ -430,7 +430,7 @@ void JSShape::SetForegroundColor(const JSCallbackInfo& info)
         return;
     }
     if (SystemProperties::ConfigChangePerform() && foregroundColorResObj) {
-        RegisterResource<Color>("ShapeForegroundColor", foregroundColorResObj, foregroundColor);
+        ShapeModel::GetInstance()->SetForegroundColor(foregroundColorResObj);
     }
     ShapeModel::GetInstance()->SetForegroundColor(foregroundColor);
     ViewAbstractModel::GetInstance()->SetForegroundColor(foregroundColor);

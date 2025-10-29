@@ -205,6 +205,7 @@ void DisposeNode(ArkUI_NodeHandle nativePtr)
     }
     // already check in entry point.
     const auto* impl = GetFullImpl();
+    impl->getNodeModifiers()->getNDKRenderNodeModifier()->detachRsNodeDuringDispose(nativePtr->uiNodeHandle);
     impl->getBasicAPI()->disposeNode(nativePtr->uiNodeHandle);
     DisposeNativeSource(nativePtr);
     g_nodeSet.erase(nativePtr);
@@ -225,9 +226,9 @@ int32_t AddChild(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode)
     }
     const auto* impl = GetFullImpl();
     // already check in entry point.
-    impl->getBasicAPI()->addChild(parentNode->uiNodeHandle, childNode->uiNodeHandle);
+    int result = impl->getBasicAPI()->addChild(parentNode->uiNodeHandle, childNode->uiNodeHandle);
     impl->getBasicAPI()->markDirty(parentNode->uiNodeHandle, ARKUI_DIRTY_FLAG_MEASURE_BY_CHILD_REQUEST);
-    return ERROR_CODE_NO_ERROR;
+    return result;
 }
 
 int32_t RemoveChild(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode)
@@ -259,10 +260,10 @@ int32_t InsertChildAfter(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode
         return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
     }
     const auto* impl = GetFullImpl();
-    impl->getBasicAPI()->insertChildAfter(
+    int result = impl->getBasicAPI()->insertChildAfter(
         parentNode->uiNodeHandle, childNode->uiNodeHandle, siblingNode ? siblingNode->uiNodeHandle : nullptr);
     impl->getBasicAPI()->markDirty(parentNode->uiNodeHandle, ARKUI_DIRTY_FLAG_MEASURE_BY_CHILD_REQUEST);
-    return ERROR_CODE_NO_ERROR;
+    return result;
 }
 
 int32_t InsertChildBefore(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode, ArkUI_NodeHandle siblingNode)
@@ -277,10 +278,10 @@ int32_t InsertChildBefore(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNod
         return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
     }
     const auto* impl = GetFullImpl();
-    impl->getBasicAPI()->insertChildBefore(
+    int result = impl->getBasicAPI()->insertChildBefore(
         parentNode->uiNodeHandle, childNode->uiNodeHandle, siblingNode ? siblingNode->uiNodeHandle : nullptr);
     impl->getBasicAPI()->markDirty(parentNode->uiNodeHandle, ARKUI_DIRTY_FLAG_MEASURE_BY_CHILD_REQUEST);
-    return ERROR_CODE_NO_ERROR;
+    return result;
 }
 
 int32_t InsertChildAt(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode, int32_t position)
@@ -295,9 +296,9 @@ int32_t InsertChildAt(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode, i
         return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
     }
     const auto* impl = GetFullImpl();
-    impl->getBasicAPI()->insertChildAt(parentNode->uiNodeHandle, childNode->uiNodeHandle, position);
+    int result = impl->getBasicAPI()->insertChildAt(parentNode->uiNodeHandle, childNode->uiNodeHandle, position);
     impl->getBasicAPI()->markDirty(parentNode->uiNodeHandle, ARKUI_DIRTY_FLAG_MEASURE_BY_CHILD_REQUEST);
-    return ERROR_CODE_NO_ERROR;
+    return result;
 }
 
 void SetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute, const char* value)
@@ -950,6 +951,23 @@ void* CreateDrawable(uint32_t type)
     }
     auto* drawable = create(type);
     return drawable;
+}
+
+void SetPixelMaps(void* object, std::vector<std::shared_ptr<OHOS::Media::PixelMap>> pixelMaps)
+{
+    void* module = FindModule();
+    if (!module) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get module");
+        return;
+    }
+    void (*setPixelMaps)(void* object, std::vector<std::shared_ptr<OHOS::Media::PixelMap>> pixelMaps) = nullptr;
+    setPixelMaps = reinterpret_cast<void (*)(void*, std::vector<std::shared_ptr<OHOS::Media::PixelMap>>)>(
+        FindFunction(module, "OHOS_ACE_AnimatedDrawableDescriptor_SetPixelMapList"));
+    if (!setPixelMaps) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Cannot find OHOS_ACE_AnimatedDrawableDescriptor_SetPixelMapList");
+        return;
+    }
+    setPixelMaps(object, pixelMaps);
 }
 
 void SetTotalDuration(void* object, int32_t duration)

@@ -1194,6 +1194,16 @@ let NavDestinationMode;
   NavDestinationMode[NavDestinationMode.DIALOG = 1] = 'DIALOG';
 }(NavDestinationMode || (NavDestinationMode = {})));
 
+let NavDestinationActiveReason;
+(function (NavDestinationActiveReason) {
+  NavDestinationActiveReason[NavDestinationActiveReason.TRANSITION = 0] = 'TRANSITION';
+  NavDestinationActiveReason[NavDestinationActiveReason.CONTENT_COVER = 1] = 'CONTENT_COVER';
+  NavDestinationActiveReason[NavDestinationActiveReason.SHEET = 2] = 'SHEET';
+  NavDestinationActiveReason[NavDestinationActiveReason.DIALOG = 3] = 'DIALOG';
+  NavDestinationActiveReason[NavDestinationActiveReason.OVERLAY = 4] = 'OVERLAY';
+  NavDestinationActiveReason[NavDestinationActiveReason.APP_STATE = 5] = 'APP_STATE';
+}(NavDestinationActiveReason || (NavDestinationActiveReason = {})));
+
 let NavigationSystemTransitionType;
 (function (NavigationSystemTransitionType) {
   NavigationSystemTransitionType[NavigationSystemTransitionType.DEFAULT = 0] = 'DEFAULT';

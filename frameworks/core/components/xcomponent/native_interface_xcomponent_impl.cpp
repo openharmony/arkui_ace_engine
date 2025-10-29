@@ -15,6 +15,8 @@
 
 #include "frameworks/core/components/xcomponent/native_interface_xcomponent_impl.h"
 
+#include "core/components_ng/base/ui_node.h"
+
 #include "securec.h"
 
 #include "base/error/error_code.h"
@@ -291,6 +293,10 @@ int32_t OH_NativeXComponent::UnregisterOnFrameCallback()
 int32_t OH_NativeXComponent::AttachNativeRootNode(void* root)
 {
     if (root == nullptr) {
+        return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
+    }
+    auto rootNode = reinterpret_cast<OHOS::Ace::NG::UINode*>(root);
+    if (rootNode->IsAdopted()) {
         return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
     }
     xcomponentImpl_->AttachContainer(root);

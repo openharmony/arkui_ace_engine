@@ -35,7 +35,7 @@ void SetRectRadiusWidth(
     pattern->UnRegisterResource("RectRadiusWidth");
     if (SystemProperties::ConfigChangePerform() && resObjPtr) {
         auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resObjPtr));
-        pattern->RegisterResource<CalcDimension>("RectRadiusWidth", resObj, radiusWidth);
+        RectModelNG::SetRadiusWidth(frameNode, resObj);
     }
 }
 
@@ -64,7 +64,7 @@ void SetRectRadiusHeight(
     pattern->UnRegisterResource("RectRadiusHeight");
     if (SystemProperties::ConfigChangePerform() && resObjPtr) {
         auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resObjPtr));
-        pattern->RegisterResource<CalcDimension>("RectRadiusHeight", resObj, radiusHeight);
+        RectModelNG::SetRadiusHeight(frameNode, resObj);
     }
 }
 
@@ -127,7 +127,7 @@ void SetRectRadiusWithValue(ArkUINodeHandle node, ArkUI_Float32 radiusValue, Ark
     pattern->UnRegisterResource("RectRadius");
     if (SystemProperties::ConfigChangePerform() && resObjPtr) {
         auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resObjPtr));
-        pattern->RegisterResource<CalcDimension>("RectRadius", resObj, radius);
+        RectModelNG::SetRadius(frameNode, resObj);
     }
 }
 

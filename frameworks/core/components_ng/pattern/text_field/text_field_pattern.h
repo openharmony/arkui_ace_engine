@@ -837,6 +837,10 @@ public:
     void InitSurfacePositionChangedCallbackMultiThread();
     void InitSurfacePositionChangedCallbackMultiThreadAction();
 
+    void RegisterWindowFocusChangeCallback();
+    void RegisterWindowFocusChangeCallbackMultiThread();
+    void RegisterWindowFocusChangeCallbackMultiThreadAction();
+
     bool HasSurfaceChangedCallback()
     {
         return surfaceChangedCallbackId_.has_value();
@@ -1756,6 +1760,8 @@ public:
     void ProcessDefaultStyleAndBehaviors();
     void ProcessDefaultStyleAndBehaviorsMultiThread();
 
+    void OnWindowFocused() override;
+
     void ProcessResponseArea();
     void AddContentScrollingCallback(std::function<void(const Offset&)>&& callback)
     {
@@ -2238,6 +2244,7 @@ private:
     float inlinePadding_ = 0.0f;
 
     bool isOritationListenerRegisted_ = false;
+    bool isWindowFocusChangeCallbackRegisted_ = false;
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> textChangeListener_;
@@ -2355,6 +2362,7 @@ private:
     bool initSurfaceChangedCallbackMultiThread_ = false;
     bool handleCountStyleMultiThread_ = false;
     bool startTwinklingMultiThread_ = false;
+    bool registerWindowFocusChangeCallbackMultiThread_ = false;
     bool registerWindowSizeCallbackMultiThread_ = false;
     bool processDefaultStyleAndBehaviorsMultiThread_ = false;
     bool stopEditingMultiThread_ = false;
