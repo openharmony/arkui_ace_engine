@@ -928,8 +928,8 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
 #ifdef COMPONENT_TEST_ENABLED
     ComponentTest::UpdatePipelineStatus();
 #endif // COMPONENT_TEST_ENABLED
-    if (touchOptimizer_ && touchOptimizer_->GetIsTpFlushFrameDisplayPeriod() ||
-        touchOptimizer_->GetIsFirstFrameAfterTpFlushFrameDisplayPeriod()) {
+    if (touchOptimizer_ && (touchOptimizer_->GetIsTpFlushFrameDisplayPeriod() ||
+        touchOptimizer_->GetIsFirstFrameAfterTpFlushFrameDisplayPeriod())) {
         ACE_SCOPED_TRACE("TpFlush RequestFrame");
         RequestFrame();
     }
@@ -3286,7 +3286,7 @@ void PipelineContext::OnTouchEvent(
             uint64_t vsyncPeriod = static_cast<uint64_t>(window_->GetVSyncPeriod());
             touchOptimizer_->SetVsyncPeriod(vsyncPeriod);
             TouchEvent pointWithReverseSignal = touchOptimizer_->SetPointReverseSignal(point);
-            touchEvents_->push_back(pointWithReverseSignal);
+            touchEvents_.push_back(pointWithReverseSignal);
             touchOptimizer_->SetHisAvgPointTimeStamp(touchEvents_.back().id, historyPointsById_);
 
             if (touchOptimizer_->NeedTpFlushVsync(touchEvents_.back())) {
@@ -3891,7 +3891,7 @@ void PipelineContext::ConsumeTouchEventsInterpolation(
         auto stamp = std::chrono::duration_cast<std::chrono::nanoseconds>(
             touchIter->second.time.time_since_epoch()).count();
         if (targetTimeStamp > static_cast<uint64_t>(stamp)) {
-            if (touchOptimizer_ && touchOptimizer_.GetIsTpFlushFrameDisplayPeriod()) {
+            if (touchOptimizer_ && touchOptimizer_->GetIsTpFlushFrameDisplayPeriod()) {
                 targetTimeStamp = static_cast<uint64_t>(stamp) - ONE_MS_IN_NS;
             } else {
                 continue;

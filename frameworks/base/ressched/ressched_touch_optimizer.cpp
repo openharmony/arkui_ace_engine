@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "ressched_report.h"
 #include "ressched_touch_optimizer.h"
 
 #include "base/log/ace_trace.h"

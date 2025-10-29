@@ -16,7 +16,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_RESSCHED_RESSCHED_TOUCH_OPTIMIZER_H
 
 #include "core/event/touch_event.h"
-#include "ressched_report.h"
 #include <deque>
 
 namespace OHOS::Ace {

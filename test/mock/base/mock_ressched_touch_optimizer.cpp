@@ -17,11 +17,14 @@
 #include "base/ressched/ressched_touch_optimizer.h"
 
 namespace OHOS::Ace {
-ResSchedTouchOptimizer& ResSchedTouchOptimizer::GetInstance()
+ResSchedTouchOptimizer::ResSchedTouchOptimizer()
 {
-    thread_local ResSchedTouchOptimizer instance;
-    return instance;
 }
+
+ResSchedTouchOptimizer::~ResSchedTouchOptimizer()
+{
+}
+
 
 void ResSchedTouchOptimizer::SetSlideAccepted(bool accept)
 {

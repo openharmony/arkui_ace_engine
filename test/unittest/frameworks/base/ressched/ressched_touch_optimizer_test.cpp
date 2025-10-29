@@ -65,6 +65,7 @@ namespace {
 
 class ResSchedTouchOptimizerTest : public testing::Test {
 public:
+    std::unique_ptr<ResSchedTouchOptimizer> optimizer_;
     static void SetUpTestSuite()
     {
     }
@@ -75,7 +76,7 @@ public:
         optimizer_ = std::make_unique<ResSchedTouchOptimizer>();
     };
     void TearDown() {
-        optimizer_.erset();
+        optimizer_.reset();
     };
 };
 
@@ -101,13 +102,13 @@ HWTEST_F(ResSchedTouchOptimizerTest, SetterTest001, TestSize.Level1)
 HWTEST_F(ResSchedTouchOptimizerTest, HandleMainDelta_Test001, TestSize.Level1)
 {
     
-    optimizer->SetSlideAcceptOffset(Offset(0.0, 0.0));
-    optimizer->rvsEnable_ = false;
+    optimizer_->SetSlideAcceptOffset(Offset(0.0, 0.0));
+    optimizer_->rvsEnable_ = false;
 
     double mainDelta = 10.0;
     double touchPointsSize = 5.0;
     std::map<int32_t, TouchEvent> touchPoints;
-    double result = optimizer->HandleMainDelta(mainDelta, touchPointsSize, touchPoints);
+    double result = optimizer_->HandleMainDelta(mainDelta, touchPointsSize, touchPoints);
 
     EXPECT_DOUBLE_EQ(result, mainDelta / touchPointsSize);
 }
@@ -120,15 +121,15 @@ HWTEST_F(ResSchedTouchOptimizerTest, HandleMainDelta_Test001, TestSize.Level1)
 HWTEST_F(ResSchedTouchOptimizerTest, HandleMainDelta_Test002, TestSize.Level1)
 {
     
-    optimizer->rvsEnable_ = false;
-    optimizer->SetSlideAcceptOffset(Offset(10.0, 10.0));
-    optimizer->rvsEnable_ = true;
-    optimizer->SetSlideAcceptOffset(Offset(10.0, 10.0));
+    optimizer_->rvsEnable_ = false;
+    optimizer_->SetSlideAcceptOffset(Offset(10.0, 10.0));
+    optimizer_->rvsEnable_ = true;
+    optimizer_->SetSlideAcceptOffset(Offset(10.0, 10.0));
 
     double mainDelta = 10.0;
     double touchPointsSize = 5.0;
     std::map<int32_t, TouchEvent> touchPoints;
-    double result = optimizer->HandleMainDelta(mainDelta, touchPointsSize, touchPoints);
+    double result = optimizer_->HandleMainDelta(mainDelta, touchPointsSize, touchPoints);
 
     EXPECT_DOUBLE_EQ(result, mainDelta / touchPointsSize + mainDelta / (touchPointsSize * COMPENSATE_EXTENT));
 }
@@ -141,13 +142,13 @@ HWTEST_F(ResSchedTouchOptimizerTest, HandleMainDelta_Test002, TestSize.Level1)
 HWTEST_F(ResSchedTouchOptimizerTest, HandleMainDelta_Test003, TestSize.Level1)
 {
     
-    optimizer->SetSlideAcceptOffset(Offset(10.0, 10.0));
-    optimizer->accumulatedDistance_ = 10.0;
+    optimizer_->SetSlideAcceptOffset(Offset(10.0, 10.0));
+    optimizer_->accumulatedDistance_ = 10.0;
 
     double mainDelta = 10.0;
     double touchPointsSize = 5.0;
     std::map<int32_t, TouchEvent> touchPoints;
-    double result = optimizer->HandleMainDelta(mainDelta, touchPointsSize, touchPoints);
+    double result = optimizer_->HandleMainDelta(mainDelta, touchPointsSize, touchPoints);
 
     EXPECT_DOUBLE_EQ(result, 2.5);
 }
@@ -161,11 +162,11 @@ HWTEST_F(ResSchedTouchOptimizerTest, SetSliceAcceptOffsetTest001, TestSize.Level
 {
     
     Offset offset = {10.0, 20.0};
-    optimizer->SetSlideAcceptOffset(offset);
+    optimizer_->SetSlideAcceptOffset(offset);
     
-    EXPECT_DOUBLE_EQ(optimizer->slideAcceptOffset_.GetX(), offset.GetX());
-    EXPECT_DOUBLE_EQ(optimizer->slideAcceptOffset_.GetX(), offset.GetX());
-    EXPECT_DOUBLE_EQ(optimizer->accumulatedDistance_, 0.0);
+    EXPECT_DOUBLE_EQ(optimizer_->slideAcceptOffset_.GetX(), offset.GetX());
+    EXPECT_DOUBLE_EQ(optimizer_->slideAcceptOffset_.GetX(), offset.GetX());
+    EXPECT_DOUBLE_EQ(optimizer_->accumulatedDistance_, 0.0);
 }
 
 /**
@@ -177,11 +178,11 @@ HWTEST_F(ResSchedTouchOptimizerTest, SetSliceAcceptOffsetTest002, TestSize.Level
 {
     
     Offset offset = {0.0, 0.0};
-    optimizer->SetSlideAcceptOffset(offset);
+    optimizer_->SetSlideAcceptOffset(offset);
     
-    EXPECT_DOUBLE_EQ(optimizer->slideAcceptOffset_.GetX(), offset.GetX());
-    EXPECT_DOUBLE_EQ(optimizer->slideAcceptOffset_.GetX(), offset.GetX());
-    EXPECT_DOUBLE_EQ(optimizer->accumulatedDistance_, 0.0);
+    EXPECT_DOUBLE_EQ(optimizer_->slideAcceptOffset_.GetX(), offset.GetX());
+    EXPECT_DOUBLE_EQ(optimizer_->slideAcceptOffset_.GetX(), offset.GetX());
+    EXPECT_DOUBLE_EQ(optimizer_->accumulatedDistance_, 0.0);
 }
 
 /**
@@ -192,7 +193,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, SetSliceAcceptOffsetTest002, TestSize.Level
 HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate001, TestSize.Level1)
 {
     
-    optimizer->rvsEnable_ = true;
+    optimizer_->rvsEnable_ = true;
 
     TouchEvent touchEvent1;
     touchEvent1.id = 1;
@@ -208,12 +209,12 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate001, TestSize.Level1)
 
     std::list<TouchEvent> touchEvents = {touchEvent1, touchEvent2};
 
-    optimizer->RVSQueueUpdate(touchEvents);
+    optimizer_->RVSQueueUpdate(touchEvents);
 
-    EXPECT_TRUE(optimizer->rvsDequeX_[1].empty());
-    EXPECT_FALSE(optimizer->rvsDequeY_[1].empty());
-    EXPECT_TRUE(optimizer->rvsDequeX_.find(2) == optimizer->rvsDequeX_.end());
-    EXPECT_TRUE(optimizer->rvsDequeY_.find(2) == optimizer->rvsDequeY_.end());
+    EXPECT_TRUE(optimizer_->rvsDequeX_[1].empty());
+    EXPECT_FALSE(optimizer_->rvsDequeY_[1].empty());
+    EXPECT_TRUE(optimizer_->rvsDequeX_.find(2) == optimizer_->rvsDequeX_.end());
+    EXPECT_TRUE(optimizer_->rvsDequeY_.find(2) == optimizer_->rvsDequeY_.end());
 }
 
 /**
@@ -224,7 +225,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate001, TestSize.Level1)
 HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithSignal001, TestSize.Level1)
 {
     
-    optimizer->rvsEnable_ = true;
+    optimizer_->rvsEnable_ = true;
 
     TouchEvent touchEvent1;
     touchEvent1.id = 1;
@@ -240,12 +241,12 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithSignal001, TestSize.Level1
 
     std::list<TouchEvent> touchEvents = {touchEvent1, touchEvent2};
 
-    optimizer->RVSQueueUpdate(touchEvents);
+    optimizer_->RVSQueueUpdate(touchEvents);
 
-    EXPECT_TRUE(optimizer->rvsDequeX_[1].empty());
-    EXPECT_FALSE(optimizer->rvsDequeY_[1].empty());
-    EXPECT_TRUE(optimizer->rvsDequeX_.find(2) == optimizer->rvsDequeX_.end());
-    EXPECT_TRUE(optimizer->rvsDequeY_.find(2) == optimizer->rvsDequeY_.end());
+    EXPECT_TRUE(optimizer_->rvsDequeX_[1].empty());
+    EXPECT_FALSE(optimizer_->rvsDequeY_[1].empty());
+    EXPECT_TRUE(optimizer_->rvsDequeX_.find(2) == optimizer_->rvsDequeX_.end());
+    EXPECT_TRUE(optimizer_->rvsDequeY_.find(2) == optimizer_->rvsDequeY_.end());
 }
 
 /**
@@ -256,7 +257,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithSignal001, TestSize.Level1
 HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithoutSignal001, TestSize.Level1)
 {
     
-    optimizer->rvsEnable_ = true;
+    optimizer_->rvsEnable_ = true;
 
     TouchEvent touchEvent1;
     touchEvent1.id = 1;
@@ -266,13 +267,13 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithoutSignal001, TestSize.Lev
     touchEvent1.sourceTool = SourceTool::FINGER;
 
     std::deque<double> yDeque = {50, 75, 100};
-    optimizer->rvsDequeX_[1] = yDeque;
-    EXPECT_FALSE(optimizer->RVSPointCheckWithoutSignal(touchEvent1, RVS_AXIS::RVS_AXIS_Y));
+    optimizer_->rvsDequeX_[1] = yDeque;
+    EXPECT_FALSE(optimizer_->RVSPointCheckWithoutSignal(touchEvent1, RVS_AXIS::RVS_AXIS_Y));
 
     yDeque = {200, 190, 180, 170, 160, 150, 140, 130, 120, 110, 200};
-    optimizer->rvsDequeY_[1] = yDeque;
+    optimizer_->rvsDequeY_[1] = yDeque;
 
-    EXPECT_TRUE(optimizer->RVSPointCheckWithoutSignal(touchEvent1, RVS_AXIS::RVS_AXIS_Y));
+    EXPECT_TRUE(optimizer_->RVSPointCheckWithoutSignal(touchEvent1, RVS_AXIS::RVS_AXIS_Y));
     EXPECT_NE(touchEvent1.yReverse, RVS_DIRECTION::RVS_NOT_APPLY);
 }
 
@@ -284,38 +285,38 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithoutSignal001, TestSize.Lev
 HWTEST_F(ResSchedTouchOptimizerTest, RVSPointReset001, TestSize.Level1)
 {
     
-    optimizer->rvsEnable_ = true;
+    optimizer_->rvsEnable_ = true;
     int32_t id = 1;
-    optimizer->rvsDequeX_[id].push_back(100);
-    optimizer->rvsDequeY_[id].push_back(200);
-    optimizer->stateTagX_[id] = 1;
-    optimizer->stateTagY_[id] = 1;
-    optimizer->dptGapX_[id] = 5.0;
-    optimizer->dptGapY_[id] = 10.0;
+    optimizer_->rvsDequeX_[id].push_back(100);
+    optimizer_->rvsDequeY_[id].push_back(200);
+    optimizer_->stateTagX_[id] = 1;
+    optimizer_->stateTagY_[id] = 1;
+    optimizer_->dptGapX_[id] = 5.0;
+    optimizer_->dptGapY_[id] = 10.0;
 
-    optimizer->RVSPointReset(id, RVS_RESET_INFO::RVS_RESET_CUR_ID);
-    EXPECT_TRUE(optimizer->rvsDequeX_.find(id) == optimizer->rvsDequeX_.end());
-    EXPECT_TRUE(optimizer->rvsDequeY_.find(id) == optimizer->rvsDequeY_.end());
-    EXPECT_TRUE(optimizer->stateTagX_.find(id) == optimizer->stateTagX_.end());
-    EXPECT_TRUE(optimizer->stateTagY_.find(id) == optimizer->stateTagY_.end());
-    EXPECT_TRUE(optimizer->dptGapX_.find(id) == optimizer->dptGapX_.end());
-    EXPECT_TRUE(optimizer->dptGapY_.find(id) == optimizer->dptGapY_.end());
+    optimizer_->RVSPointReset(id, RVS_RESET_INFO::RVS_RESET_CUR_ID);
+    EXPECT_TRUE(optimizer_->rvsDequeX_.find(id) == optimizer_->rvsDequeX_.end());
+    EXPECT_TRUE(optimizer_->rvsDequeY_.find(id) == optimizer_->rvsDequeY_.end());
+    EXPECT_TRUE(optimizer_->stateTagX_.find(id) == optimizer_->stateTagX_.end());
+    EXPECT_TRUE(optimizer_->stateTagY_.find(id) == optimizer_->stateTagY_.end());
+    EXPECT_TRUE(optimizer_->dptGapX_.find(id) == optimizer_->dptGapX_.end());
+    EXPECT_TRUE(optimizer_->dptGapY_.find(id) == optimizer_->dptGapY_.end());
 
-    optimizer->rvsDequeX_[id].push_back(100);
-    optimizer->rvsDequeY_[id].push_back(200);
-    optimizer->stateTagX_[id] = 1;
-    optimizer->stateTagY_[id] = 1;
-    optimizer->dptGapX_[id] = 5.0;
-    optimizer->dptGapY_[id] = 10.0;
+    optimizer_->rvsDequeX_[id].push_back(100);
+    optimizer_->rvsDequeY_[id].push_back(200);
+    optimizer_->stateTagX_[id] = 1;
+    optimizer_->stateTagY_[id] = 1;
+    optimizer_->dptGapX_[id] = 5.0;
+    optimizer_->dptGapY_[id] = 10.0;
 
-    optimizer->RVSPointReset(0, RVS_RESET_INFO::RVS_RESET_ALL);
-    EXPECT_TRUE(optimizer->rvsDequeX_.empty());
-    EXPECT_TRUE(optimizer->rvsDequeY_.empty());
-    EXPECT_TRUE(optimizer->stateTagX_.empty());
-    EXPECT_TRUE(optimizer->stateTagY_.empty());
-    EXPECT_TRUE(optimizer->dptGapX_.empty());
-    EXPECT_TRUE(optimizer->dptGapY_.empty());
-    EXPECT_EQ(optimizer->lastRVSPointTimeStamp_, 0);
+    optimizer_->RVSPointReset(0, RVS_RESET_INFO::RVS_RESET_ALL);
+    EXPECT_TRUE(optimizer_->rvsDequeX_.empty());
+    EXPECT_TRUE(optimizer_->rvsDequeY_.empty());
+    EXPECT_TRUE(optimizer_->stateTagX_.empty());
+    EXPECT_TRUE(optimizer_->stateTagY_.empty());
+    EXPECT_TRUE(optimizer_->dptGapX_.empty());
+    EXPECT_TRUE(optimizer_->dptGapY_.empty());
+    EXPECT_EQ(optimizer_->lastRVSPointTimeStamp_, 0);
 }
 
 /**
@@ -326,7 +327,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSPointReset001, TestSize.Level1)
 HWTEST_F(ResSchedTouchOptimizerTest, DispatchPointSelect001, TestSize.Level1)
 {
     
-    optimizer->rvsEnable_ = true;
+    optimizer_->rvsEnable_ = true;
 
     TouchEvent touchEvent1;
     touchEvent1.id = 1;
@@ -344,16 +345,16 @@ HWTEST_F(ResSchedTouchOptimizerTest, DispatchPointSelect001, TestSize.Level1)
 
     TouchEvent resultPoint;
 
-    optimizer->DispatchPointSelect(true, touchEvent1, resamplePoint, resultPoint);
+    optimizer_->DispatchPointSelect(true, touchEvent1, resamplePoint, resultPoint);
     EXPECT_EQ(resultPoint.x, resamplePoint.x);
     EXPECT_EQ(resultPoint.y, resamplePoint.y);
 
-    optimizer->DispatchPointSelect(false, touchEvent1, resamplePoint, resultPoint);
+    optimizer_->DispatchPointSelect(false, touchEvent1, resamplePoint, resultPoint);
     EXPECT_EQ(resultPoint.x, touchEvent1.x);
     EXPECT_EQ(resultPoint.y, touchEvent1.y);
 
-    EXPECT_FALSE(optimizer->dptHistoryPointX_[1].empty());
-    EXPECT_FALSE(optimizer->dptHistoryPointY_[1].empty());
+    EXPECT_FALSE(optimizer_->dptHistoryPointX_[1].empty());
+    EXPECT_FALSE(optimizer_->dptHistoryPointY_[1].empty());
 }
 
 
@@ -365,7 +366,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, DispatchPointSelect001, TestSize.Level1)
 HWTEST_F(ResSchedTouchOptimizerTest, UpdateDepHistory001, TestSize.Level1)
 {
     
-    optimizer->rvsEnable_ = true;
+    optimizer_->rvsEnable_ = true;
     
     TouchEvent event;
     event.id = 1;
@@ -373,16 +374,16 @@ HWTEST_F(ResSchedTouchOptimizerTest, UpdateDepHistory001, TestSize.Level1)
     event.y = 200;
     event.sourceTool = SourceTool::FINGER;
 
-    optimizer->UpdateDptHistory(event);
-    EXPECT_FALSE(optimizer->dptHistoryPointX_[1].empty());
-    EXPECT_FALSE(optimizer->dptHistoryPointY_[1].empty());
+    optimizer_->UpdateDptHistory(event);
+    EXPECT_FALSE(optimizer_->dptHistoryPointX_[1].empty());
+    EXPECT_FALSE(optimizer_->dptHistoryPointY_[1].empty());
 
     for (int i = 0; i < DPT_QUEUE_SIZE; i++) {
-        optimizer->UpdateDptHistory(event);
+        optimizer_->UpdateDptHistory(event);
     }
 
-    EXPECT_EQ(optimizer->dptHistoryPointX_[1].size(), DPT_QUEUE_SIZE);
-    EXPECT_EQ(optimizer->dptHistoryPointY_[1].size(), DPT_QUEUE_SIZE);
+    EXPECT_EQ(optimizer_->dptHistoryPointX_[1].size(), DPT_QUEUE_SIZE);
+    EXPECT_EQ(optimizer_->dptHistoryPointY_[1].size(), DPT_QUEUE_SIZE);
 }
 
 /**
@@ -393,10 +394,10 @@ HWTEST_F(ResSchedTouchOptimizerTest, UpdateDepHistory001, TestSize.Level1)
 HWTEST_F(ResSchedTouchOptimizerTest, RVSEnableCheck001, TestSize.Level1)
 {
     
-    optimizer->rvsEnable_ = false;
-    EXPECT_FALSE(optimizer->RVSEnableCheck());
-    optimizer->rvsEnable_ = true;
-    EXPECT_TRUE(optimizer->RVSEnableCheck());
+    optimizer_->rvsEnable_ = false;
+    EXPECT_FALSE(optimizer_->RVSEnableCheck());
+    optimizer_->rvsEnable_ = true;
+    EXPECT_TRUE(optimizer_->RVSEnableCheck());
 }
 
 /**
@@ -407,14 +408,14 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSEnableCheck001, TestSize.Level1)
 HWTEST_F(ResSchedTouchOptimizerTest, UpdateState001, TestSize.Level1)
 {
     
-    optimizer->rvsEnable_ = true;
+    optimizer_->rvsEnable_ = true;
     int32_t id = 1;
     
-    optimizer->UpdateState(id, RVS_FINETUNE_STATE::TP_USE, RVS_AXIS::RVS_AXIS_X);
-    EXPECT_EQ(optimizer->stateTagX_[id], RVS_FINETUNE_STATE::TP_USE);
+    optimizer_->UpdateState(id, RVS_FINETUNE_STATE::TP_USE, RVS_AXIS::RVS_AXIS_X);
+    EXPECT_EQ(optimizer_->stateTagX_[id], RVS_FINETUNE_STATE::TP_USE);
     
-    optimizer->UpdateState(id, RVS_FINETUNE_STATE::OFFSET, RVS_AXIS::RVS_AXIS_Y);
-    EXPECT_EQ(optimizer->stateTagY_[id], RVS_FINETUNE_STATE::OFFSET);
+    optimizer_->UpdateState(id, RVS_FINETUNE_STATE::OFFSET, RVS_AXIS::RVS_AXIS_Y);
+    EXPECT_EQ(optimizer_->stateTagY_[id], RVS_FINETUNE_STATE::OFFSET);
 }
 
 /**
@@ -425,7 +426,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, UpdateState001, TestSize.Level1)
 HWTEST_F(ResSchedTouchOptimizerTest, HandleState0_001, TestSize.Level1)
 {
     
-    optimizer->rvsEnable_ = true;
+    optimizer_->rvsEnable_ = true;
     
     TouchEvent point;
     point.id = 1;
@@ -436,16 +437,16 @@ HWTEST_F(ResSchedTouchOptimizerTest, HandleState0_001, TestSize.Level1)
     bool resampleEnable = false;
     
     // Clear history first
-    optimizer->dptHistoryPointX_.clear();
-    optimizer->dptHistoryPointY_.clear();
+    optimizer_->dptHistoryPointX_.clear();
+    optimizer_->dptHistoryPointY_.clear();
     
     // Test when queue is empty
-    EXPECT_FALSE(optimizer->HandleState0(point, resampleEnable, RVS_AXIS::RVS_AXIS_X, result));
+    EXPECT_FALSE(optimizer_->HandleState0(point, resampleEnable, RVS_AXIS::RVS_AXIS_X, result));
     
     // Test when queue has less than DPT_QUEUE_SIZE elements
-    optimizer->dptHistoryPointX_[1].push_back(90);
-    optimizer->dptHistoryPointX_[1].push_back(95);
-    EXPECT_FALSE(optimizer->HandleState0(point, resampleEnable, RVS_AXIS::RVS_AXIS_X, result));
+    optimizer_->dptHistoryPointX_[1].push_back(90);
+    optimizer_->dptHistoryPointX_[1].push_back(95);
+    EXPECT_FALSE(optimizer_->HandleState0(point, resampleEnable, RVS_AXIS::RVS_AXIS_X, result));
 }
 
 /**
@@ -456,7 +457,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, HandleState0_001, TestSize.Level1)
 HWTEST_F(ResSchedTouchOptimizerTest, HandleState0_002, TestSize.Level1)
 {
     
-    optimizer->rvsEnable_ = true;
+    optimizer_->rvsEnable_ = true;
     
     TouchEvent point;
     point.id = 1;
@@ -467,13 +468,13 @@ HWTEST_F(ResSchedTouchOptimizerTest, HandleState0_002, TestSize.Level1)
     bool resampleEnable = false;
     
     // Fill history with close values
-    optimizer->dptHistoryPointX_[1].clear();
-    optimizer->dptHistoryPointX_[1].push_back(99);
-    optimizer->dptHistoryPointX_[1].push_back(99.5);
-    optimizer->dptHistoryPointX_[1].push_back(100); // Back element
+    optimizer_->dptHistoryPointX_[1].clear();
+    optimizer_->dptHistoryPointX_[1].push_back(99);
+    optimizer_->dptHistoryPointX_[1].push_back(99.5);
+    optimizer_->dptHistoryPointX_[1].push_back(100); // Back element
     
-    EXPECT_TRUE(optimizer->HandleState0(point, resampleEnable, RVS_AXIS::RVS_AXIS_X, result));
-    EXPECT_EQ(optimizer->stateTagX_[1], RVS_FINETUNE_STATE::TP_USE);
+    EXPECT_TRUE(optimizer_->HandleState0(point, resampleEnable, RVS_AXIS::RVS_AXIS_X, result));
+    EXPECT_EQ(optimizer_->stateTagX_[1], RVS_FINETUNE_STATE::TP_USE);
     EXPECT_DOUBLE_EQ(result, 100.0);
 }
 
@@ -485,7 +486,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, HandleState0_002, TestSize.Level1)
 HWTEST_F(ResSchedTouchOptimizerTest, HandleState1_001, TestSize.Level1)
 {
     
-    optimizer->rvsEnable_ = true;
+    optimizer_->rvsEnable_ = true;
     
     TouchEvent point;
     point.id = 1;
@@ -497,15 +498,15 @@ HWTEST_F(ResSchedTouchOptimizerTest, HandleState1_001, TestSize.Level1)
     bool resampleEnable = true;
     
     // Setup history
-    optimizer->dptHistoryPointX_[1].clear();
-    optimizer->dptHistoryPointX_[1].push_back(90);
-    optimizer->dptHistoryPointX_[1].push_back(95);
-    optimizer->dptHistoryPointX_[1].push_back(110); // Second to last element
+    optimizer_->dptHistoryPointX_[1].clear();
+    optimizer_->dptHistoryPointX_[1].push_back(90);
+    optimizer_->dptHistoryPointX_[1].push_back(95);
+    optimizer_->dptHistoryPointX_[1].push_back(110); // Second to last element
     
-    optimizer->stateTagX_[1] = RVS_FINETUNE_STATE::TP_USE;
+    optimizer_->stateTagX_[1] = RVS_FINETUNE_STATE::TP_USE;
     
-    EXPECT_FALSE(optimizer->HandleState1(point, resampleEnable, RVS_AXIS::RVS_AXIS_X, result));
-    EXPECT_EQ(optimizer->stateTagX_[1], RVS_FINETUNE_STATE::OFFSET);
+    EXPECT_FALSE(optimizer_->HandleState1(point, resampleEnable, RVS_AXIS::RVS_AXIS_X, result));
+    EXPECT_EQ(optimizer_->stateTagX_[1], RVS_FINETUNE_STATE::OFFSET);
 }
 
 /**
@@ -516,7 +517,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, HandleState1_001, TestSize.Level1)
 HWTEST_F(ResSchedTouchOptimizerTest, HandleState1_002, TestSize.Level1)
 {
     
-    optimizer->rvsEnable_ = true;
+    optimizer_->rvsEnable_ = true;
     
     TouchEvent point;
     point.id = 1;
@@ -528,15 +529,15 @@ HWTEST_F(ResSchedTouchOptimizerTest, HandleState1_002, TestSize.Level1)
     bool resampleEnable = true;
     
     // Setup history
-    optimizer->dptHistoryPointX_[1].clear();
-    optimizer->dptHistoryPointX_[1].push_back(110);
-    optimizer->dptHistoryPointX_[1].push_back(105);
-    optimizer->dptHistoryPointX_[1].push_back(90); // Second to last element
+    optimizer_->dptHistoryPointX_[1].clear();
+    optimizer_->dptHistoryPointX_[1].push_back(110);
+    optimizer_->dptHistoryPointX_[1].push_back(105);
+    optimizer_->dptHistoryPointX_[1].push_back(90); // Second to last element
     
-    optimizer->stateTagX_[1] = RVS_FINETUNE_STATE::TP_USE;
+    optimizer_->stateTagX_[1] = RVS_FINETUNE_STATE::TP_USE;
     
-    EXPECT_FALSE(optimizer->HandleState1(point, resampleEnable, RVS_AXIS::RVS_AXIS_X, result));
-    EXPECT_EQ(optimizer->stateTagX_[1], RVS_FINETUNE_STATE::OFFSET);
+    EXPECT_FALSE(optimizer_->HandleState1(point, resampleEnable, RVS_AXIS::RVS_AXIS_X, result));
+    EXPECT_EQ(optimizer_->stateTagX_[1], RVS_FINETUNE_STATE::OFFSET);
 }
 
 /**
@@ -547,7 +548,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, HandleState1_002, TestSize.Level1)
 HWTEST_F(ResSchedTouchOptimizerTest, HandleState1_003, TestSize.Level1)
 {
     
-    optimizer->rvsEnable_ = true;
+    optimizer_->rvsEnable_ = true;
     
     TouchEvent point;
     point.id = 1;
@@ -558,15 +559,15 @@ HWTEST_F(ResSchedTouchOptimizerTest, HandleState1_003, TestSize.Level1)
     bool resampleEnable = true;
     
     // Setup history
-    optimizer->dptHistoryPointX_[1].clear();
-    optimizer->dptHistoryPointX_[1].push_back(90);
-    optimizer->dptHistoryPointX_[1].push_back(95);
-    optimizer->dptHistoryPointX_[1].push_back(100); // Back element
+    optimizer_->dptHistoryPointX_[1].clear();
+    optimizer_->dptHistoryPointX_[1].push_back(90);
+    optimizer_->dptHistoryPointX_[1].push_back(95);
+    optimizer_->dptHistoryPointX_[1].push_back(100); // Back element
     
-    optimizer->stateTagX_[1] = RVS_FINETUNE_STATE::TP_USE;
+    optimizer_->stateTagX_[1] = RVS_FINETUNE_STATE::TP_USE;
     
-    EXPECT_TRUE(optimizer->HandleState1(point, resampleEnable, RVS_AXIS::RVS_AXIS_X, result));
-    EXPECT_EQ(optimizer->stateTagX_[1], RVS_FINETUNE_STATE::NO_CHANGE);
+    EXPECT_TRUE(optimizer_->HandleState1(point, resampleEnable, RVS_AXIS::RVS_AXIS_X, result));
+    EXPECT_EQ(optimizer_->stateTagX_[1], RVS_FINETUNE_STATE::NO_CHANGE);
 }
 
 /**
@@ -577,7 +578,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, HandleState1_003, TestSize.Level1)
 HWTEST_F(ResSchedTouchOptimizerTest, HandleState2_001, TestSize.Level1)
 {
     
-    optimizer->rvsEnable_ = true;
+    optimizer_->rvsEnable_ = true;
     
     TouchEvent point;
     point.id = 1;
@@ -587,12 +588,12 @@ HWTEST_F(ResSchedTouchOptimizerTest, HandleState2_001, TestSize.Level1)
     double result = 0.0;
     
     // Setup gap
-    optimizer->dptGapX_[1] = -5.0; // Positive gap
+    optimizer_->dptGapX_[1] = -5.0; // Positive gap
     
-    optimizer->stateTagX_[1] = RVS_FINETUNE_STATE::OFFSET;
+    optimizer_->stateTagX_[1] = RVS_FINETUNE_STATE::OFFSET;
     
-    EXPECT_TRUE(optimizer->HandleState2(point, RVS_AXIS::RVS_AXIS_X, result));
-    EXPECT_EQ(optimizer->stateTagX_[1], RVS_FINETUNE_STATE::OFFSET);
+    EXPECT_TRUE(optimizer_->HandleState2(point, RVS_AXIS::RVS_AXIS_X, result));
+    EXPECT_EQ(optimizer_->stateTagX_[1], RVS_FINETUNE_STATE::OFFSET);
 }
 
 /**
@@ -603,7 +604,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, HandleState2_001, TestSize.Level1)
 HWTEST_F(ResSchedTouchOptimizerTest, HandleState2_002, TestSize.Level1)
 {
     
-    optimizer->rvsEnable_ = true;
+    optimizer_->rvsEnable_ = true;
     
     TouchEvent point;
     point.id = 1;
@@ -613,11 +614,11 @@ HWTEST_F(ResSchedTouchOptimizerTest, HandleState2_002, TestSize.Level1)
     double result = 0.0;
     
     // Setup gap
-    optimizer->dptGapX_[1] = 5.0;
+    optimizer_->dptGapX_[1] = 5.0;
     
-    optimizer->stateTagX_[1] = RVS_FINETUNE_STATE::OFFSET;
+    optimizer_->stateTagX_[1] = RVS_FINETUNE_STATE::OFFSET;
     
-    EXPECT_TRUE(optimizer->HandleState2(point, RVS_AXIS::RVS_AXIS_X, result));
+    EXPECT_TRUE(optimizer_->HandleState2(point, RVS_AXIS::RVS_AXIS_X, result));
     EXPECT_EQ(result, 95.0); // point.x - dptGapX_
 }
 
@@ -629,7 +630,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, HandleState2_002, TestSize.Level1)
 HWTEST_F(ResSchedTouchOptimizerTest, RVSSingleAxisUpdate001, TestSize.Level1)
 {
     
-    optimizer->rvsEnable_ = true;
+    optimizer_->rvsEnable_ = true;
     
     TouchEvent point;
     point.id = 1;
@@ -645,14 +646,14 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSSingleAxisUpdate001, TestSize.Level1)
     bool resampleEnable = true;
     
     // Test NO_CHANGE state
-    optimizer->stateTagX_[1] = RVS_FINETUNE_STATE::NO_CHANGE;
-    optimizer->dptHistoryPointX_[1].clear();
-    optimizer->dptHistoryPointX_[1].push_back(99);
-    optimizer->dptHistoryPointX_[1].push_back(99.5);
-    optimizer->dptHistoryPointX_[1].push_back(100);
+    optimizer_->stateTagX_[1] = RVS_FINETUNE_STATE::NO_CHANGE;
+    optimizer_->dptHistoryPointX_[1].clear();
+    optimizer_->dptHistoryPointX_[1].push_back(99);
+    optimizer_->dptHistoryPointX_[1].push_back(99.5);
+    optimizer_->dptHistoryPointX_[1].push_back(100);
     
-    EXPECT_TRUE(optimizer->RVSSingleAxisUpdate(point, resamplePoint, resampleEnable, RVS_AXIS::RVS_AXIS_X, result));
-    EXPECT_EQ(optimizer->stateTagX_[1], RVS_FINETUNE_STATE::TP_USE);
+    EXPECT_TRUE(optimizer_->RVSSingleAxisUpdate(point, resamplePoint, resampleEnable, RVS_AXIS::RVS_AXIS_X, result));
+    EXPECT_EQ(optimizer_->stateTagX_[1], RVS_FINETUNE_STATE::TP_USE);
 }
 
 /**
@@ -663,7 +664,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSSingleAxisUpdate001, TestSize.Level1)
 HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithSignal002, TestSize.Level1)
 {
     
-    optimizer->rvsEnable_ = true;
+    optimizer_->rvsEnable_ = true;
     
     TouchEvent touchEvent;
     touchEvent.id = 1;
@@ -672,11 +673,11 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithSignal002, TestSize.Level1
     touchEvent.xReverse = RVS_DIRECTION::RVS_NOT_APPLY; // No signal
     
     // Fill deque
-    optimizer->rvsDequeX_[1].push_back(80);
-    optimizer->rvsDequeX_[1].push_back(90);
-    optimizer->rvsDequeX_[1].push_back(100);
+    optimizer_->rvsDequeX_[1].push_back(80);
+    optimizer_->rvsDequeX_[1].push_back(90);
+    optimizer_->rvsDequeX_[1].push_back(100);
     
-    EXPECT_FALSE(optimizer->RVSPointCheckWithSignal(touchEvent, RVS_AXIS::RVS_AXIS_X));
+    EXPECT_FALSE(optimizer_->RVSPointCheckWithSignal(touchEvent, RVS_AXIS::RVS_AXIS_X));
 }
 
 /**
@@ -687,7 +688,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithSignal002, TestSize.Level1
 HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithoutSignal002, TestSize.Level1)
 {
     
-    optimizer->rvsEnable_ = true;
+    optimizer_->rvsEnable_ = true;
     
     TouchEvent touchEvent;
     touchEvent.id = 1;
@@ -696,9 +697,9 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithoutSignal002, TestSize.Lev
     
     // Fill deque with same direction values
     std::deque<double> xDeque = {100, 110, 120, 130, 140, 150, 160};
-    optimizer->rvsDequeX_[1] = xDeque;
+    optimizer_->rvsDequeX_[1] = xDeque;
     
-    EXPECT_FALSE(optimizer->RVSPointCheckWithoutSignal(touchEvent, RVS_AXIS::RVS_AXIS_X));
+    EXPECT_FALSE(optimizer_->RVSPointCheckWithoutSignal(touchEvent, RVS_AXIS::RVS_AXIS_X));
 }
 
 /**
@@ -709,7 +710,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithoutSignal002, TestSize.Lev
 HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate002, TestSize.Level1)
 {
     
-    optimizer->rvsEnable_ = true;
+    optimizer_->rvsEnable_ = true;
     
     TouchEvent touchEvent1;
     touchEvent1.id = 1;
@@ -728,11 +729,11 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate002, TestSize.Level1)
     std::list<TouchEvent> touchEvents = {touchEvent1, touchEvent2};
     
     // Should return early when encountering non-finger source
-    optimizer->RVSQueueUpdate(touchEvents);
+    optimizer_->RVSQueueUpdate(touchEvents);
     
     // Since the first event is non-finger, processing should stop and no data should be added
-    EXPECT_TRUE(optimizer->rvsDequeX_.empty());
-    EXPECT_TRUE(optimizer->rvsDequeY_.empty());
+    EXPECT_TRUE(optimizer_->rvsDequeX_.empty());
+    EXPECT_TRUE(optimizer_->rvsDequeY_.empty());
 }
 
 /**
@@ -743,7 +744,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate002, TestSize.Level1)
 HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate003, TestSize.Level1)
 {
     
-    optimizer->rvsEnable_ = true;
+    optimizer_->rvsEnable_ = true;
     
     TouchEvent touchEvent1;
     touchEvent1.id = 1;
@@ -761,11 +762,11 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate003, TestSize.Level1)
     
     std::list<TouchEvent> touchEvents = {touchEvent1, touchEvent2};
     
-    optimizer->RVSQueueUpdate(touchEvents);
+    optimizer_->RVSQueueUpdate(touchEvents);
     
     // Second event should not be processed
-    EXPECT_TRUE(optimizer->rvsDequeX_.find(2) == optimizer->rvsDequeX_.end());
-    EXPECT_TRUE(optimizer->rvsDequeY_.find(2) == optimizer->rvsDequeY_.end());
+    EXPECT_TRUE(optimizer_->rvsDequeX_.find(2) == optimizer_->rvsDequeX_.end());
+    EXPECT_TRUE(optimizer_->rvsDequeY_.find(2) == optimizer_->rvsDequeY_.end());
 }
 
 /**
@@ -776,9 +777,9 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate003, TestSize.Level1)
 HWTEST_F(ResSchedTouchOptimizerTest, DispatchPointSelect002, TestSize.Level1)
 {
     
-    optimizer->rvsEnable_ = true;
-    optimizer->dptHistoryPointX_.clear();
-    optimizer->dptHistoryPointY_.clear();
+    optimizer_->rvsEnable_ = true;
+    optimizer_->dptHistoryPointX_.clear();
+    optimizer_->dptHistoryPointY_.clear();
     TouchEvent touchEvent1;
     touchEvent1.id = 1;
     touchEvent1.type = TouchType::MOVE;
@@ -796,13 +797,13 @@ HWTEST_F(ResSchedTouchOptimizerTest, DispatchPointSelect002, TestSize.Level1)
     TouchEvent resultPoint;
     
     // With non-finger source, RVS optimization should not be applied
-    optimizer->DispatchPointSelect(true, touchEvent1, resamplePoint, resultPoint);
+    optimizer_->DispatchPointSelect(true, touchEvent1, resamplePoint, resultPoint);
     EXPECT_EQ(resultPoint.x, resamplePoint.x);
     EXPECT_EQ(resultPoint.y, resamplePoint.y);
     
     // Check that no RVS data was added
-    EXPECT_TRUE(optimizer->dptHistoryPointX_.find(1) == optimizer->dptHistoryPointX_.end());
-    EXPECT_TRUE(optimizer->dptHistoryPointY_.find(1) == optimizer->dptHistoryPointY_.end());
+    EXPECT_TRUE(optimizer_->dptHistoryPointX_.find(1) == optimizer_->dptHistoryPointX_.end());
+    EXPECT_TRUE(optimizer_->dptHistoryPointY_.find(1) == optimizer_->dptHistoryPointY_.end());
 }
 
 /**
@@ -813,7 +814,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, DispatchPointSelect002, TestSize.Level1)
 HWTEST_F(ResSchedTouchOptimizerTest, HandleMainDelta_Test004, TestSize.Level1)
 {
     
-    optimizer->rvsEnable_ = true;
+    optimizer_->rvsEnable_ = true;
     
     double mainDelta = 10.0;
     double touchPointsSize = 5.0;
@@ -824,7 +825,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, HandleMainDelta_Test004, TestSize.Level1)
     event.sourceTool = SourceTool::MOUSE; // Non-finger source
     touchPoints[1] = event;
     
-    double result = optimizer->HandleMainDelta(mainDelta, touchPointsSize, touchPoints);
+    double result = optimizer_->HandleMainDelta(mainDelta, touchPointsSize, touchPoints);
     
     // Should return basic calculation without compensation since source is not finger
     EXPECT_DOUBLE_EQ(result, mainDelta / touchPointsSize);
@@ -838,16 +839,16 @@ HWTEST_F(ResSchedTouchOptimizerTest, HandleMainDelta_Test004, TestSize.Level1)
 HWTEST_F(ResSchedTouchOptimizerTest, SetSlideAcceptOffsetTest003, TestSize.Level1)
 {
     
-    optimizer->rvsEnable_ = true;
+    optimizer_->rvsEnable_ = true;
     
     Offset offset = {15.0, 25.0};
-    optimizer->SetSlideAcceptOffset(offset);
+    optimizer_->SetSlideAcceptOffset(offset);
     
     // When RVS is enabled, SetSlideAcceptOffset should not set the values
     // Based on the implementation, the condition is inverted
-    EXPECT_DOUBLE_EQ(optimizer->slideAcceptOffset_.GetX(), 15.0);
-    EXPECT_DOUBLE_EQ(optimizer->slideAcceptOffset_.GetY(), 25.0);
-    EXPECT_DOUBLE_EQ(optimizer->accumulatedDistance_, 0.0);
+    EXPECT_DOUBLE_EQ(optimizer_->slideAcceptOffset_.GetX(), 15.0);
+    EXPECT_DOUBLE_EQ(optimizer_->slideAcceptOffset_.GetY(), 25.0);
+    EXPECT_DOUBLE_EQ(optimizer_->accumulatedDistance_, 0.0);
 }
 
 /**
@@ -858,21 +859,21 @@ HWTEST_F(ResSchedTouchOptimizerTest, SetSlideAcceptOffsetTest003, TestSize.Level
 HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithSignal003, TestSize.Level1)
 {
     
-    optimizer->rvsEnable_ = true;
+    optimizer_->rvsEnable_ = true;
     
     TouchEvent touchEvent;
     touchEvent.id = 1;
     touchEvent.x = 100;
     touchEvent.y = 200;
     touchEvent.xReverse = RVS_DIRECTION::RVS_DOWN_LEFT;
-    optimizer->rvsDequeX_.clear();
-    optimizer->rvsDequeY_.clear();
+    optimizer_->rvsDequeX_.clear();
+    optimizer_->rvsDequeY_.clear();
     // Test with empty deque for X axis
-    EXPECT_FALSE(optimizer->RVSPointCheckWithSignal(touchEvent, RVS_AXIS::RVS_AXIS_X));
+    EXPECT_FALSE(optimizer_->RVSPointCheckWithSignal(touchEvent, RVS_AXIS::RVS_AXIS_X));
     
     // Test with empty deque for Y axis
     touchEvent.yReverse = RVS_DIRECTION::RVS_UP_RIGHT;
-    EXPECT_FALSE(optimizer->RVSPointCheckWithSignal(touchEvent, RVS_AXIS::RVS_AXIS_Y));
+    EXPECT_FALSE(optimizer_->RVSPointCheckWithSignal(touchEvent, RVS_AXIS::RVS_AXIS_Y));
 }
 
 /**
@@ -883,15 +884,15 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithSignal003, TestSize.Level1
 HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithSignal004, TestSize.Level1)
 {
     
-    optimizer->rvsEnable_ = true;
-    optimizer->rvsDequeX_.clear();
+    optimizer_->rvsEnable_ = true;
+    optimizer_->rvsDequeX_.clear();
     TouchEvent touchEvent;
     touchEvent.id = 1;
     touchEvent.x = 100;
     touchEvent.y = 200;
     touchEvent.xReverse = RVS_DIRECTION::RVS_DOWN_LEFT;
     
-    EXPECT_FALSE(optimizer->RVSPointCheckWithSignal(touchEvent, RVS_AXIS::RVS_AXIS_X));
+    EXPECT_FALSE(optimizer_->RVSPointCheckWithSignal(touchEvent, RVS_AXIS::RVS_AXIS_X));
 }
 
 /**
@@ -902,7 +903,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithSignal004, TestSize.Level1
 HWTEST_F(ResSchedTouchOptimizerTest, HandleState0_003, TestSize.Level1)
 {
     
-    optimizer->rvsEnable_ = true;
+    optimizer_->rvsEnable_ = true;
     
     TouchEvent point;
     point.id = 1;
@@ -913,14 +914,14 @@ HWTEST_F(ResSchedTouchOptimizerTest, HandleState0_003, TestSize.Level1)
     bool resampleEnable = false;
     
     // Fill history with distant values
-    optimizer->dptHistoryPointX_[1].clear();
-    optimizer->dptHistoryPointX_[1].push_back(80);
-    optimizer->dptHistoryPointX_[1].push_back(90);
-    optimizer->dptHistoryPointX_[1].push_back(100); // Back element
+    optimizer_->dptHistoryPointX_[1].clear();
+    optimizer_->dptHistoryPointX_[1].push_back(80);
+    optimizer_->dptHistoryPointX_[1].push_back(90);
+    optimizer_->dptHistoryPointX_[1].push_back(100); // Back element
     
     // Should not change state with large movement
-    EXPECT_FALSE(optimizer->HandleState0(point, resampleEnable, RVS_AXIS::RVS_AXIS_X, result));
-    EXPECT_EQ(optimizer->stateTagX_[1], RVS_FINETUNE_STATE::NO_CHANGE); // State should not be set
+    EXPECT_FALSE(optimizer_->HandleState0(point, resampleEnable, RVS_AXIS::RVS_AXIS_X, result));
+    EXPECT_EQ(optimizer_->stateTagX_[1], RVS_FINETUNE_STATE::NO_CHANGE); // State should not be set
 }
 
 /**
@@ -931,7 +932,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, HandleState0_003, TestSize.Level1)
 HWTEST_F(ResSchedTouchOptimizerTest, HandleState1_004, TestSize.Level1)
 {
     
-    optimizer->rvsEnable_ = true;
+    optimizer_->rvsEnable_ = true;
     
     TouchEvent point;
     point.id = 1;
@@ -943,17 +944,17 @@ HWTEST_F(ResSchedTouchOptimizerTest, HandleState1_004, TestSize.Level1)
     bool resampleEnable = false;
     
     // Setup history
-    optimizer->dptHistoryPointX_[1].clear();
-    optimizer->dptHistoryPointX_[1].push_back(95);
-    optimizer->dptHistoryPointX_[1].push_back(98);
-    optimizer->dptHistoryPointX_[1].push_back(100);
+    optimizer_->dptHistoryPointX_[1].clear();
+    optimizer_->dptHistoryPointX_[1].push_back(95);
+    optimizer_->dptHistoryPointX_[1].push_back(98);
+    optimizer_->dptHistoryPointX_[1].push_back(100);
     
-    optimizer->stateTagX_[1] = RVS_FINETUNE_STATE::TP_USE;
+    optimizer_->stateTagX_[1] = RVS_FINETUNE_STATE::TP_USE;
     
     // With no reverse signal, should just return the point value
-    EXPECT_TRUE(optimizer->HandleState1(point, resampleEnable, RVS_AXIS::RVS_AXIS_X, result));
+    EXPECT_TRUE(optimizer_->HandleState1(point, resampleEnable, RVS_AXIS::RVS_AXIS_X, result));
     EXPECT_EQ(result, 100.0);
-    EXPECT_EQ(optimizer->stateTagX_[1], RVS_FINETUNE_STATE::TP_USE); // State should not change
+    EXPECT_EQ(optimizer_->stateTagX_[1], RVS_FINETUNE_STATE::TP_USE); // State should not change
 }
 
 /**
@@ -964,7 +965,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, HandleState1_004, TestSize.Level1)
 HWTEST_F(ResSchedTouchOptimizerTest, HandleState1_005, TestSize.Level1)
 {
     
-    optimizer->rvsEnable_ = true;
+    optimizer_->rvsEnable_ = true;
     
     TouchEvent point;
     point.id = 1;
@@ -975,17 +976,17 @@ HWTEST_F(ResSchedTouchOptimizerTest, HandleState1_005, TestSize.Level1)
     bool resampleEnable = false; // Resample disabled
     
     // Setup history
-    optimizer->dptHistoryPointX_[1].clear();
-    optimizer->dptHistoryPointX_[1].push_back(99);
-    optimizer->dptHistoryPointX_[1].push_back(100);
-    optimizer->dptHistoryPointX_[1].push_back(100); // Back element
+    optimizer_->dptHistoryPointX_[1].clear();
+    optimizer_->dptHistoryPointX_[1].push_back(99);
+    optimizer_->dptHistoryPointX_[1].push_back(100);
+    optimizer_->dptHistoryPointX_[1].push_back(100); // Back element
     
-    optimizer->stateTagX_[1] = RVS_FINETUNE_STATE::TP_USE;
+    optimizer_->stateTagX_[1] = RVS_FINETUNE_STATE::TP_USE;
     
     // With small movement and resample disabled, should just return the point value
-    EXPECT_TRUE(optimizer->HandleState1(point, resampleEnable, RVS_AXIS::RVS_AXIS_X, result));
+    EXPECT_TRUE(optimizer_->HandleState1(point, resampleEnable, RVS_AXIS::RVS_AXIS_X, result));
     EXPECT_EQ(result, 101.0);
-    EXPECT_EQ(optimizer->stateTagX_[1], RVS_FINETUNE_STATE::TP_USE); // State should not change
+    EXPECT_EQ(optimizer_->stateTagX_[1], RVS_FINETUNE_STATE::TP_USE); // State should not change
 }
 
 /**
@@ -996,7 +997,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, HandleState1_005, TestSize.Level1)
 HWTEST_F(ResSchedTouchOptimizerTest, HandleState1_006, TestSize.Level1)
 {
     
-    optimizer->rvsEnable_ = true;
+    optimizer_->rvsEnable_ = true;
     
     TouchEvent point;
     point.id = 1;
@@ -1008,16 +1009,16 @@ HWTEST_F(ResSchedTouchOptimizerTest, HandleState1_006, TestSize.Level1)
     bool resampleEnable = true;
     
     // Setup history where second to last element (index 1) is 100, current point is 90
-    optimizer->dptHistoryPointX_[1].clear();
-    optimizer->dptHistoryPointX_[1].push_back(80);
-    optimizer->dptHistoryPointX_[1].push_back(100); // Second to last element
-    optimizer->dptHistoryPointX_[1].push_back(95);  // Last element
+    optimizer_->dptHistoryPointX_[1].clear();
+    optimizer_->dptHistoryPointX_[1].push_back(80);
+    optimizer_->dptHistoryPointX_[1].push_back(100); // Second to last element
+    optimizer_->dptHistoryPointX_[1].push_back(95);  // Last element
     
-    optimizer->stateTagX_[1] = RVS_FINETUNE_STATE::TP_USE;
+    optimizer_->stateTagX_[1] = RVS_FINETUNE_STATE::TP_USE;
     
-    EXPECT_FALSE(optimizer->HandleState1(point, resampleEnable, RVS_AXIS::RVS_AXIS_X, result));
-    EXPECT_EQ(optimizer->stateTagX_[1], RVS_FINETUNE_STATE::OFFSET);
-    EXPECT_DOUBLE_EQ(optimizer->dptGapX_[1], 95 - 100); // gap = last - second to last
+    EXPECT_FALSE(optimizer_->HandleState1(point, resampleEnable, RVS_AXIS::RVS_AXIS_X, result));
+    EXPECT_EQ(optimizer_->stateTagX_[1], RVS_FINETUNE_STATE::OFFSET);
+    EXPECT_DOUBLE_EQ(optimizer_->dptGapX_[1], 95 - 100); // gap = last - second to last
 }
 
 /**
@@ -1028,7 +1029,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, HandleState1_006, TestSize.Level1)
 HWTEST_F(ResSchedTouchOptimizerTest, HandleState1_007, TestSize.Level1)
 {
     
-    optimizer->rvsEnable_ = true;
+    optimizer_->rvsEnable_ = true;
     
     TouchEvent point;
     point.id = 1;
@@ -1040,16 +1041,16 @@ HWTEST_F(ResSchedTouchOptimizerTest, HandleState1_007, TestSize.Level1)
     bool resampleEnable = true;
     
     // Setup history where current point (100) >= last element (95)
-    optimizer->dptHistoryPointX_[1].clear();
-    optimizer->dptHistoryPointX_[1].push_back(80);
-    optimizer->dptHistoryPointX_[1].push_back(110);
-    optimizer->dptHistoryPointX_[1].push_back(95); // Last element
+    optimizer_->dptHistoryPointX_[1].clear();
+    optimizer_->dptHistoryPointX_[1].push_back(80);
+    optimizer_->dptHistoryPointX_[1].push_back(110);
+    optimizer_->dptHistoryPointX_[1].push_back(95); // Last element
     
-    optimizer->stateTagX_[1] = RVS_FINETUNE_STATE::TP_USE;
+    optimizer_->stateTagX_[1] = RVS_FINETUNE_STATE::TP_USE;
     
-    EXPECT_FALSE(optimizer->HandleState1(point, resampleEnable, RVS_AXIS::RVS_AXIS_X, result));
-    EXPECT_EQ(optimizer->stateTagX_[1], RVS_FINETUNE_STATE::OFFSET);
-    EXPECT_DOUBLE_EQ(optimizer->dptGapX_[1], THRESHOLD_OFFSET_VALUE);
+    EXPECT_FALSE(optimizer_->HandleState1(point, resampleEnable, RVS_AXIS::RVS_AXIS_X, result));
+    EXPECT_EQ(optimizer_->stateTagX_[1], RVS_FINETUNE_STATE::OFFSET);
+    EXPECT_DOUBLE_EQ(optimizer_->dptGapX_[1], THRESHOLD_OFFSET_VALUE);
 }
 
 /**
@@ -1060,7 +1061,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, HandleState1_007, TestSize.Level1)
 HWTEST_F(ResSchedTouchOptimizerTest, HandleState1_008, TestSize.Level1)
 {
     
-    optimizer->rvsEnable_ = true;
+    optimizer_->rvsEnable_ = true;
     
     TouchEvent point;
     point.id = 1;
@@ -1072,16 +1073,16 @@ HWTEST_F(ResSchedTouchOptimizerTest, HandleState1_008, TestSize.Level1)
     bool resampleEnable = true;
     
     // Setup history where second to last element (index 1) is 100, current point is 110
-    optimizer->dptHistoryPointX_[1].clear();
-    optimizer->dptHistoryPointX_[1].push_back(80);
-    optimizer->dptHistoryPointX_[1].push_back(100); // Second to last element
-    optimizer->dptHistoryPointX_[1].push_back(105); // Last element
+    optimizer_->dptHistoryPointX_[1].clear();
+    optimizer_->dptHistoryPointX_[1].push_back(80);
+    optimizer_->dptHistoryPointX_[1].push_back(100); // Second to last element
+    optimizer_->dptHistoryPointX_[1].push_back(105); // Last element
     
-    optimizer->stateTagX_[1] = RVS_FINETUNE_STATE::TP_USE;
+    optimizer_->stateTagX_[1] = RVS_FINETUNE_STATE::TP_USE;
     
-    EXPECT_FALSE(optimizer->HandleState1(point, resampleEnable, RVS_AXIS::RVS_AXIS_X, result));
-    EXPECT_EQ(optimizer->stateTagX_[1], RVS_FINETUNE_STATE::OFFSET);
-    EXPECT_DOUBLE_EQ(optimizer->dptGapX_[1], 105 - 100); // gap = last - second to last
+    EXPECT_FALSE(optimizer_->HandleState1(point, resampleEnable, RVS_AXIS::RVS_AXIS_X, result));
+    EXPECT_EQ(optimizer_->stateTagX_[1], RVS_FINETUNE_STATE::OFFSET);
+    EXPECT_DOUBLE_EQ(optimizer_->dptGapX_[1], 105 - 100); // gap = last - second to last
 }
 
 /**
@@ -1092,7 +1093,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, HandleState1_008, TestSize.Level1)
 HWTEST_F(ResSchedTouchOptimizerTest, HandleState1_009, TestSize.Level1)
 {
     
-    optimizer->rvsEnable_ = true;
+    optimizer_->rvsEnable_ = true;
     
     TouchEvent point;
     point.id = 1;
@@ -1104,16 +1105,16 @@ HWTEST_F(ResSchedTouchOptimizerTest, HandleState1_009, TestSize.Level1)
     bool resampleEnable = true;
     
     // Setup history where current point (100) <= last element (105)
-    optimizer->dptHistoryPointX_[1].clear();
-    optimizer->dptHistoryPointX_[1].push_back(80);
-    optimizer->dptHistoryPointX_[1].push_back(90);
-    optimizer->dptHistoryPointX_[1].push_back(105); // Last element
+    optimizer_->dptHistoryPointX_[1].clear();
+    optimizer_->dptHistoryPointX_[1].push_back(80);
+    optimizer_->dptHistoryPointX_[1].push_back(90);
+    optimizer_->dptHistoryPointX_[1].push_back(105); // Last element
     
-    optimizer->stateTagX_[1] = RVS_FINETUNE_STATE::TP_USE;
+    optimizer_->stateTagX_[1] = RVS_FINETUNE_STATE::TP_USE;
     
-    EXPECT_FALSE(optimizer->HandleState1(point, resampleEnable, RVS_AXIS::RVS_AXIS_X, result));
-    EXPECT_EQ(optimizer->stateTagX_[1], RVS_FINETUNE_STATE::OFFSET);
-    EXPECT_DOUBLE_EQ(optimizer->dptGapX_[1], -THRESHOLD_OFFSET_VALUE);
+    EXPECT_FALSE(optimizer_->HandleState1(point, resampleEnable, RVS_AXIS::RVS_AXIS_X, result));
+    EXPECT_EQ(optimizer_->stateTagX_[1], RVS_FINETUNE_STATE::OFFSET);
+    EXPECT_DOUBLE_EQ(optimizer_->dptGapX_[1], -THRESHOLD_OFFSET_VALUE);
 }
 
 /**
@@ -1124,7 +1125,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, HandleState1_009, TestSize.Level1)
 HWTEST_F(ResSchedTouchOptimizerTest, HandleState2_003, TestSize.Level1)
 {
     
-    optimizer->rvsEnable_ = true;
+    optimizer_->rvsEnable_ = true;
     
     TouchEvent point;
     point.id = 1;
@@ -1134,13 +1135,13 @@ HWTEST_F(ResSchedTouchOptimizerTest, HandleState2_003, TestSize.Level1)
     double result = 0.0;
     
     // Setup positive gap
-    optimizer->dptGapX_[1] = 5.0; // Positive gap
+    optimizer_->dptGapX_[1] = 5.0; // Positive gap
     
-    optimizer->stateTagX_[1] = RVS_FINETUNE_STATE::OFFSET;
+    optimizer_->stateTagX_[1] = RVS_FINETUNE_STATE::OFFSET;
     
     // Condition (dptGap > 0 && (dptGap - pointNow) > 0) is not met because (5 - 100) < 0
-    EXPECT_TRUE(optimizer->HandleState2(point, RVS_AXIS::RVS_AXIS_X, result));
-    EXPECT_EQ(optimizer->stateTagX_[1], RVS_FINETUNE_STATE::OFFSET); // State should not change
+    EXPECT_TRUE(optimizer_->HandleState2(point, RVS_AXIS::RVS_AXIS_X, result));
+    EXPECT_EQ(optimizer_->stateTagX_[1], RVS_FINETUNE_STATE::OFFSET); // State should not change
     EXPECT_DOUBLE_EQ(result, 100 - 5.0); // point.x - dptGapX_
 }
 
@@ -1152,7 +1153,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, HandleState2_003, TestSize.Level1)
 HWTEST_F(ResSchedTouchOptimizerTest, HandleState2_004, TestSize.Level1)
 {
     
-    optimizer->rvsEnable_ = true;
+    optimizer_->rvsEnable_ = true;
     
     TouchEvent point;
     point.id = 1;
@@ -1162,12 +1163,12 @@ HWTEST_F(ResSchedTouchOptimizerTest, HandleState2_004, TestSize.Level1)
     double result = 0.0;
     
     // Setup negative gap
-    optimizer->dptGapX_[1] = -5.0; // Negative gap
+    optimizer_->dptGapX_[1] = -5.0; // Negative gap
     
-    optimizer->stateTagX_[1] = RVS_FINETUNE_STATE::OFFSET;
+    optimizer_->stateTagX_[1] = RVS_FINETUNE_STATE::OFFSET;
     
-    EXPECT_TRUE(optimizer->HandleState2(point, RVS_AXIS::RVS_AXIS_X, result));
-    EXPECT_EQ(optimizer->stateTagX_[1], RVS_FINETUNE_STATE::NO_CHANGE); // State should not change
+    EXPECT_TRUE(optimizer_->HandleState2(point, RVS_AXIS::RVS_AXIS_X, result));
+    EXPECT_EQ(optimizer_->stateTagX_[1], RVS_FINETUNE_STATE::NO_CHANGE); // State should not change
     EXPECT_DOUBLE_EQ(result, 100); // point.x - dptGapX_
 }
 
@@ -1179,10 +1180,10 @@ HWTEST_F(ResSchedTouchOptimizerTest, HandleState2_004, TestSize.Level1)
 HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate004, TestSize.Level1)
 {
     
-    optimizer->rvsEnable_ = true;
+    optimizer_->rvsEnable_ = true;
     
     // 设置一个较早的时间戳，使其超过RVS_CLEAR_GAP_TIME
-    optimizer->lastRVSPointTimeStamp_ = 1000;
+    optimizer_->lastRVSPointTimeStamp_ = 1000;
     
     TouchEvent touchEvent;
     touchEvent.id = 1;
@@ -1197,19 +1198,19 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate004, TestSize.Level1)
     // Since we can't easily mock this, we'll test the reset behavior by pre-setting data
     
     // Pre-populate some data
-    optimizer->rvsDequeX_[1].push_back(50);
-    optimizer->rvsDequeY_[1].push_back(150);
-    optimizer->stateTagX_[1] = RVS_FINETUNE_STATE::TP_USE;
-    optimizer->stateTagY_[1] = RVS_FINETUNE_STATE::OFFSET;
+    optimizer_->rvsDequeX_[1].push_back(50);
+    optimizer_->rvsDequeY_[1].push_back(150);
+    optimizer_->stateTagX_[1] = RVS_FINETUNE_STATE::TP_USE;
+    optimizer_->stateTagY_[1] = RVS_FINETUNE_STATE::OFFSET;
     
     // This test mainly verifies the structure, actual timeout would need mocking
-    optimizer->RVSPointReset(0, RVS_RESET_INFO::RVS_RESET_ALL);
+    optimizer_->RVSPointReset(0, RVS_RESET_INFO::RVS_RESET_ALL);
     
-    EXPECT_TRUE(optimizer->rvsDequeX_.empty());
-    EXPECT_TRUE(optimizer->rvsDequeY_.empty());
-    EXPECT_TRUE(optimizer->stateTagX_.empty());
-    EXPECT_TRUE(optimizer->stateTagY_.empty());
-    EXPECT_EQ(optimizer->lastRVSPointTimeStamp_, 0);
+    EXPECT_TRUE(optimizer_->rvsDequeX_.empty());
+    EXPECT_TRUE(optimizer_->rvsDequeY_.empty());
+    EXPECT_TRUE(optimizer_->stateTagX_.empty());
+    EXPECT_TRUE(optimizer_->stateTagY_.empty());
+    EXPECT_EQ(optimizer_->lastRVSPointTimeStamp_, 0);
 }
 
 /**
@@ -1220,7 +1221,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate004, TestSize.Level1)
 HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate005, TestSize.Level1)
 {
     
-    optimizer->rvsEnable_ = true;
+    optimizer_->rvsEnable_ = true;
     
     TouchEvent touchEvent;
     touchEvent.id = 1;
@@ -1230,22 +1231,22 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate005, TestSize.Level1)
     touchEvent.y = 200;
     
     // Pre-fill deques with same values as the event
-    optimizer->rvsDequeX_[1].clear();
-    optimizer->rvsDequeX_[1].push_back(100); // Same x value
+    optimizer_->rvsDequeX_[1].clear();
+    optimizer_->rvsDequeX_[1].push_back(100); // Same x value
     
-    optimizer->rvsDequeY_[1].clear();
-    optimizer->rvsDequeY_[1].push_back(200); // Same y value
+    optimizer_->rvsDequeY_[1].clear();
+    optimizer_->rvsDequeY_[1].push_back(200); // Same y value
     
     std::list<TouchEvent> touchEvents = {touchEvent};
     
     // Should not add duplicate values to the deques
-    optimizer->RVSQueueUpdate(touchEvents);
+    optimizer_->RVSQueueUpdate(touchEvents);
     
     // Check that no new elements were added (size should still be 1)
-    EXPECT_EQ(optimizer->rvsDequeX_[1].size(), 1);
-    EXPECT_EQ(optimizer->rvsDequeY_[1].size(), 1);
-    EXPECT_EQ(optimizer->rvsDequeX_[1].back(), 100);
-    EXPECT_EQ(optimizer->rvsDequeY_[1].back(), 200);
+    EXPECT_EQ(optimizer_->rvsDequeX_[1].size(), 1);
+    EXPECT_EQ(optimizer_->rvsDequeY_[1].size(), 1);
+    EXPECT_EQ(optimizer_->rvsDequeX_[1].back(), 100);
+    EXPECT_EQ(optimizer_->rvsDequeY_[1].back(), 200);
 }
 
 /**
@@ -1256,7 +1257,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate005, TestSize.Level1)
 HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate006, TestSize.Level1)
 {
     
-    optimizer->rvsEnable_ = true;
+    optimizer_->rvsEnable_ = true;
     
     TouchEvent touchEvent;
     touchEvent.id = 1;
@@ -1266,20 +1267,20 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate006, TestSize.Level1)
     touchEvent.y = 205; // Different from existing
     
     // Pre-fill deques with different values
-    optimizer->rvsDequeX_[1].clear();
-    optimizer->rvsDequeX_[1].push_back(100); // Different x value
+    optimizer_->rvsDequeX_[1].clear();
+    optimizer_->rvsDequeX_[1].push_back(100); // Different x value
     
-    optimizer->rvsDequeY_[1].clear();
-    optimizer->rvsDequeY_[1].push_back(200); // Different y value
+    optimizer_->rvsDequeY_[1].clear();
+    optimizer_->rvsDequeY_[1].push_back(200); // Different y value
     
     std::list<TouchEvent> touchEvents = {touchEvent};
     
     // Should add new values to the deques
-    optimizer->RVSQueueUpdate(touchEvents);
+    optimizer_->RVSQueueUpdate(touchEvents);
     
     // Check that new elements were added
-    EXPECT_EQ(optimizer->rvsDequeX_[1].back(), 100);
-    EXPECT_EQ(optimizer->rvsDequeY_[1].back(), 205);
+    EXPECT_EQ(optimizer_->rvsDequeX_[1].back(), 100);
+    EXPECT_EQ(optimizer_->rvsDequeY_[1].back(), 205);
 }
 
 /**
@@ -1290,7 +1291,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate006, TestSize.Level1)
 HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate007, TestSize.Level1)
 {
     
-    optimizer->rvsEnable_ = true;
+    optimizer_->rvsEnable_ = true;
     
     TouchEvent touchEvent;
     touchEvent.id = 1;
@@ -1302,28 +1303,28 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate007, TestSize.Level1)
     touchEvent.yReverse = RVS_DIRECTION::RVS_NOT_APPLY;
     
     // Pre-fill deques to near RVS_QUEUE_SIZE (7) - fill with 6 elements
-    optimizer->rvsDequeX_[1].clear();
+    optimizer_->rvsDequeX_[1].clear();
     for (int i = 0; i < 6; i++) {
-        optimizer->rvsDequeX_[1].push_back(100 + i * 5);
+        optimizer_->rvsDequeX_[1].push_back(100 + i * 5);
     }
     
-    optimizer->rvsDequeY_[1].clear();
+    optimizer_->rvsDequeY_[1].clear();
     for (int i = 0; i < 6; i++) {
-        optimizer->rvsDequeY_[1].push_back(200 + i * 5);
+        optimizer_->rvsDequeY_[1].push_back(200 + i * 5);
     }
     
     std::list<TouchEvent> touchEvents = {touchEvent};
     
     // After adding the new event, the size should be 7 (RVS_QUEUE_SIZE)
-    optimizer->RVSQueueUpdate(touchEvents);
+    optimizer_->RVSQueueUpdate(touchEvents);
     
     // Check that the deques have the expected size
-    EXPECT_EQ(optimizer->rvsDequeX_[1].size(), 6);
-    EXPECT_EQ(optimizer->rvsDequeY_[1].size(), 6);
+    EXPECT_EQ(optimizer_->rvsDequeX_[1].size(), 6);
+    EXPECT_EQ(optimizer_->rvsDequeY_[1].size(), 6);
     
     // The new element should be at the back
-    EXPECT_EQ(optimizer->rvsDequeX_[1].back(), 125);
-    EXPECT_EQ(optimizer->rvsDequeY_[1].back(), 250);
+    EXPECT_EQ(optimizer_->rvsDequeX_[1].back(), 125);
+    EXPECT_EQ(optimizer_->rvsDequeY_[1].back(), 250);
 }
 
 /**
@@ -1334,7 +1335,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate007, TestSize.Level1)
 HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate008, TestSize.Level1)
 {
     
-    optimizer->rvsEnable_ = true;
+    optimizer_->rvsEnable_ = true;
     
     TouchEvent touchEvent;
     touchEvent.id = 1;
@@ -1346,36 +1347,36 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate008, TestSize.Level1)
     touchEvent.yReverse = RVS_DIRECTION::RVS_UP_RIGHT;
     
     // Pre-fill deques with exactly RVS_QUEUE_SIZE elements
-    optimizer->rvsDequeX_[1].clear();
+    optimizer_->rvsDequeX_[1].clear();
     for (int i = 0; i < 7; i++) {
-        optimizer->rvsDequeX_[1].push_back(100 + i * 5);
+        optimizer_->rvsDequeX_[1].push_back(100 + i * 5);
     }
     
-    optimizer->rvsDequeY_[1].clear();
+    optimizer_->rvsDequeY_[1].clear();
     for (int i = 0; i < 7; i++) {
-        optimizer->rvsDequeY_[1].push_back(200 + i * 5);
+        optimizer_->rvsDequeY_[1].push_back(200 + i * 5);
     }
     
     // Save the front elements to check if they get popped
-    double frontX = optimizer->rvsDequeX_[1].front();
-    double frontY = optimizer->rvsDequeY_[1].front();
+    double frontX = optimizer_->rvsDequeX_[1].front();
+    double frontY = optimizer_->rvsDequeY_[1].front();
     
     std::list<TouchEvent> touchEvents = {touchEvent};
     
     // After adding the new event, the front element should be popped
-    optimizer->RVSQueueUpdate(touchEvents);
+    optimizer_->RVSQueueUpdate(touchEvents);
     
     // Check that the size is still RVS_QUEUE_SIZE (7)
-    EXPECT_EQ(optimizer->rvsDequeX_[1].size(), 7);
-    EXPECT_EQ(optimizer->rvsDequeY_[1].size(), 7);
+    EXPECT_EQ(optimizer_->rvsDequeX_[1].size(), 7);
+    EXPECT_EQ(optimizer_->rvsDequeY_[1].size(), 7);
     
     // The new element should be at the back
-    EXPECT_EQ(optimizer->rvsDequeX_[1].back(), 130);
-    EXPECT_EQ(optimizer->rvsDequeY_[1].back(), 300);
+    EXPECT_EQ(optimizer_->rvsDequeX_[1].back(), 130);
+    EXPECT_EQ(optimizer_->rvsDequeY_[1].back(), 300);
     
     // The old front element should no longer be in the deque
-    EXPECT_EQ(optimizer->rvsDequeX_[1].front(), frontX);
-    EXPECT_NE(optimizer->rvsDequeY_[1].front(), frontY);
+    EXPECT_EQ(optimizer_->rvsDequeX_[1].front(), frontX);
+    EXPECT_NE(optimizer_->rvsDequeY_[1].front(), frontY);
 }
 
 /**
@@ -1386,13 +1387,13 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate008, TestSize.Level1)
 HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate009, TestSize.Level1)
 {
     
-    optimizer->rvsEnable_ = true;
+    optimizer_->rvsEnable_ = true;
     
     // Pre-populate some data for id=1
-    optimizer->rvsDequeX_[1].push_back(100);
-    optimizer->rvsDequeY_[1].push_back(200);
-    optimizer->stateTagX_[1] = RVS_FINETUNE_STATE::TP_USE;
-    optimizer->stateTagY_[1] = RVS_FINETUNE_STATE::OFFSET;
+    optimizer_->rvsDequeX_[1].push_back(100);
+    optimizer_->rvsDequeY_[1].push_back(200);
+    optimizer_->stateTagX_[1] = RVS_FINETUNE_STATE::TP_USE;
+    optimizer_->stateTagY_[1] = RVS_FINETUNE_STATE::OFFSET;
     
     TouchEvent touchEvent;
     touchEvent.id = 1;
@@ -1404,13 +1405,13 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate009, TestSize.Level1)
     std::list<TouchEvent> touchEvents = {touchEvent};
     
     // Should reset data for id=1 since it's a non-MOVE event
-    optimizer->RVSQueueUpdate(touchEvents);
+    optimizer_->RVSQueueUpdate(touchEvents);
     
     // Check that data for id=1 has been cleared
-    EXPECT_TRUE(optimizer->rvsDequeX_.find(1) == optimizer->rvsDequeX_.end());
-    EXPECT_TRUE(optimizer->rvsDequeY_.find(1) == optimizer->rvsDequeY_.end());
-    EXPECT_TRUE(optimizer->stateTagX_.find(1) == optimizer->stateTagX_.end());
-    EXPECT_TRUE(optimizer->stateTagY_.find(1) == optimizer->stateTagY_.end());
+    EXPECT_TRUE(optimizer_->rvsDequeX_.find(1) == optimizer_->rvsDequeX_.end());
+    EXPECT_TRUE(optimizer_->rvsDequeY_.find(1) == optimizer_->rvsDequeY_.end());
+    EXPECT_TRUE(optimizer_->stateTagX_.find(1) == optimizer_->stateTagX_.end());
+    EXPECT_TRUE(optimizer_->stateTagY_.find(1) == optimizer_->stateTagY_.end());
 }
 
 /**
@@ -1421,7 +1422,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate009, TestSize.Level1)
 HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate010, TestSize.Level1)
 {
     
-    optimizer->rvsEnable_ = true;
+    optimizer_->rvsEnable_ = true;
     
     TouchEvent moveEvent;
     moveEvent.id = 1;
@@ -1439,15 +1440,15 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate010, TestSize.Level1)
     
     std::list<TouchEvent> touchEvents = {moveEvent, upEvent};
     
-    optimizer->RVSQueueUpdate(touchEvents);
+    optimizer_->RVSQueueUpdate(touchEvents);
     
     // MOVE event should be processed and data added
-    EXPECT_TRUE(optimizer->rvsDequeX_.find(1) == optimizer->rvsDequeX_.end());
-    EXPECT_FALSE(optimizer->rvsDequeY_.find(1) == optimizer->rvsDequeY_.end());
+    EXPECT_TRUE(optimizer_->rvsDequeX_.find(1) == optimizer_->rvsDequeX_.end());
+    EXPECT_FALSE(optimizer_->rvsDequeY_.find(1) == optimizer_->rvsDequeY_.end());
     
     // data for ID 1 should still exist
-    EXPECT_TRUE(optimizer->rvsDequeX_.find(1) == optimizer->rvsDequeX_.end());
-    EXPECT_FALSE(optimizer->rvsDequeY_.find(1) == optimizer->rvsDequeY_.end());
+    EXPECT_TRUE(optimizer_->rvsDequeX_.find(1) == optimizer_->rvsDequeX_.end());
+    EXPECT_FALSE(optimizer_->rvsDequeY_.find(1) == optimizer_->rvsDequeY_.end());
 }
 
 /**
@@ -1458,7 +1459,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate010, TestSize.Level1)
 HWTEST_F(ResSchedTouchOptimizerTest, RVSSingleAxisUpdate002, TestSize.Level1)
 {
     
-    optimizer->rvsEnable_ = true;
+    optimizer_->rvsEnable_ = true;
     
     TouchEvent moveEvent;
     double result = 0.0;
@@ -1474,8 +1475,8 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSSingleAxisUpdate002, TestSize.Level1)
     resampleEvent.sourceTool = SourceTool::FINGER;
     resampleEvent.x = 150;
     resampleEvent.y = 250;
-    optimizer->stateTagY_[1] = RVS_FINETUNE_STATE::OFFSET;
-    EXPECT_TRUE(optimizer->RVSSingleAxisUpdate(moveEvent, resampleEvent, false, RVS_AXIS::RVS_AXIS_Y, result));
+    optimizer_->stateTagY_[1] = RVS_FINETUNE_STATE::OFFSET;
+    EXPECT_TRUE(optimizer_->RVSSingleAxisUpdate(moveEvent, resampleEvent, false, RVS_AXIS::RVS_AXIS_Y, result));
 }
 
 /**
@@ -1486,7 +1487,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSSingleAxisUpdate002, TestSize.Level1)
 HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithSignal005, TestSize.Level1)
 {
     
-    optimizer->rvsEnable_ = true;
+    optimizer_->rvsEnable_ = true;
     
     TouchEvent touchEvent;
     touchEvent.id = 1;
@@ -1495,14 +1496,14 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithSignal005, TestSize.Level1
     touchEvent.xReverse = RVS_DIRECTION::RVS_DOWN_LEFT; // Signal indicating reverse
     
     // Fill deque with multiple elements for X axis
-    optimizer->rvsDequeX_[1].clear();
-    optimizer->rvsDequeX_[1].push_back(100); // First element
-    optimizer->rvsDequeX_[1].push_back(120); // Second element
-    optimizer->rvsDequeX_[1].push_back(130); // Third element
-    optimizer->rvsDequeX_[1].push_back(150); // Current element (back)
+    optimizer_->rvsDequeX_[1].clear();
+    optimizer_->rvsDequeX_[1].push_back(100); // First element
+    optimizer_->rvsDequeX_[1].push_back(120); // Second element
+    optimizer_->rvsDequeX_[1].push_back(130); // Third element
+    optimizer_->rvsDequeX_[1].push_back(150); // Current element (back)
     
     // Test X axis with multiple elements
-    EXPECT_TRUE(optimizer->RVSPointCheckWithSignal(touchEvent, RVS_AXIS::RVS_AXIS_X));
+    EXPECT_TRUE(optimizer_->RVSPointCheckWithSignal(touchEvent, RVS_AXIS::RVS_AXIS_X));
     // Gap should be positive (150-130=20), so direction should be RVS_DOWN_LEFT
     EXPECT_EQ(touchEvent.xReverse, RVS_DIRECTION::RVS_DOWN_LEFT);
 }
@@ -1515,7 +1516,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithSignal005, TestSize.Level1
 HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithSignal006, TestSize.Level1)
 {
     
-    optimizer->rvsEnable_ = true;
+    optimizer_->rvsEnable_ = true;
     
     TouchEvent touchEvent;
     touchEvent.id = 1;
@@ -1524,14 +1525,14 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithSignal006, TestSize.Level1
     touchEvent.yReverse = RVS_DIRECTION::RVS_UP_RIGHT; // Signal indicating reverse
     
     // Fill deque with multiple elements for Y axis
-    optimizer->rvsDequeY_[1].clear();
-    optimizer->rvsDequeY_[1].push_back(200); // First element
-    optimizer->rvsDequeY_[1].push_back(190); // Second element
-    optimizer->rvsDequeY_[1].push_back(180); // Third element
-    optimizer->rvsDequeY_[1].push_back(90);  // Current element (back)
+    optimizer_->rvsDequeY_[1].clear();
+    optimizer_->rvsDequeY_[1].push_back(200); // First element
+    optimizer_->rvsDequeY_[1].push_back(190); // Second element
+    optimizer_->rvsDequeY_[1].push_back(180); // Third element
+    optimizer_->rvsDequeY_[1].push_back(90);  // Current element (back)
     
     // Test Y axis with multiple elements and negative gap
-    EXPECT_TRUE(optimizer->RVSPointCheckWithSignal(touchEvent, RVS_AXIS::RVS_AXIS_Y));
+    EXPECT_TRUE(optimizer_->RVSPointCheckWithSignal(touchEvent, RVS_AXIS::RVS_AXIS_Y));
     // Gap should be negative (90-180=-90), so direction should be RVS_UP_RIGHT
     EXPECT_EQ(touchEvent.yReverse, RVS_DIRECTION::RVS_UP_RIGHT);
 }
@@ -1544,7 +1545,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithSignal006, TestSize.Level1
 HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithoutSignal003, TestSize.Level1)
 {
     
-    optimizer->rvsEnable_ = true;
+    optimizer_->rvsEnable_ = true;
     
     TouchEvent touchEvent;
     touchEvent.id = 1;
@@ -1554,13 +1555,13 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithoutSignal003, TestSize.Lev
     
     // Fill deque with elements showing direction change for X axis
     // Sequence: 150 -> 130 -> 100 (decreasing, then decreasing again)
-    optimizer->rvsDequeX_[1].clear();
-    optimizer->rvsDequeX_[1].push_back(150); // First element
-    optimizer->rvsDequeX_[1].push_back(130); // Second element (gap1 = 130-150 = -20)
-    optimizer->rvsDequeX_[1].push_back(100); // Third element (gap2 = 100-130 = -30)
+    optimizer_->rvsDequeX_[1].clear();
+    optimizer_->rvsDequeX_[1].push_back(150); // First element
+    optimizer_->rvsDequeX_[1].push_back(130); // Second element (gap1 = 130-150 = -20)
+    optimizer_->rvsDequeX_[1].push_back(100); // Third element (gap2 = 100-130 = -30)
     
     // Both gaps are negative, so no direction change - should return false
-    EXPECT_FALSE(optimizer->RVSPointCheckWithoutSignal(touchEvent, RVS_AXIS::RVS_AXIS_X));
+    EXPECT_FALSE(optimizer_->RVSPointCheckWithoutSignal(touchEvent, RVS_AXIS::RVS_AXIS_X));
     EXPECT_EQ(touchEvent.xReverse, RVS_DIRECTION::RVS_NOT_APPLY); // Should remain unchanged
 }
 
@@ -1572,7 +1573,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithoutSignal003, TestSize.Lev
 HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithoutSignal004, TestSize.Level1)
 {
     
-    optimizer->rvsEnable_ = true;
+    optimizer_->rvsEnable_ = true;
     
     TouchEvent touchEvent;
     touchEvent.id = 1;
@@ -1582,13 +1583,13 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithoutSignal004, TestSize.Lev
     
     // Fill deque with elements showing actual direction change for X axis
     // Sequence: 100 -> 150 -> 130 (increasing, then decreasing)
-    optimizer->rvsDequeX_[1].clear();
-    optimizer->rvsDequeX_[1].push_back(100); // First element
-    optimizer->rvsDequeX_[1].push_back(150); // Second element (gap1 = 150-100 = 50, positive)
-    optimizer->rvsDequeX_[1].push_back(130); // Third element (gap2 = 130-150 = -20, negative)
+    optimizer_->rvsDequeX_[1].clear();
+    optimizer_->rvsDequeX_[1].push_back(100); // First element
+    optimizer_->rvsDequeX_[1].push_back(150); // Second element (gap1 = 150-100 = 50, positive)
+    optimizer_->rvsDequeX_[1].push_back(130); // Third element (gap2 = 130-150 = -20, negative)
     
     // Gaps have different signs, so direction change detected - should return true
-    EXPECT_TRUE(optimizer->RVSPointCheckWithoutSignal(touchEvent, RVS_AXIS::RVS_AXIS_X));
+    EXPECT_TRUE(optimizer_->RVSPointCheckWithoutSignal(touchEvent, RVS_AXIS::RVS_AXIS_X));
     // Second gap is negative, so direction should be RVS_DOWN_LEFT
     EXPECT_EQ(touchEvent.xReverse, RVS_DIRECTION::RVS_DOWN_LEFT);
 }
@@ -1601,7 +1602,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithoutSignal004, TestSize.Lev
 HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithoutSignal005, TestSize.Level1)
 {
     
-    optimizer->rvsEnable_ = true;
+    optimizer_->rvsEnable_ = true;
     
     TouchEvent touchEvent;
     touchEvent.id = 1;
@@ -1611,13 +1612,13 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithoutSignal005, TestSize.Lev
     
     // Fill deque with elements showing reverse direction change for Y axis
     // Sequence: 200 -> 150 -> 160 (decreasing, then increasing)
-    optimizer->rvsDequeY_[1].clear();
-    optimizer->rvsDequeY_[1].push_back(200); // First element
-    optimizer->rvsDequeY_[1].push_back(150); // Second element (gap1 = 150-200 = -50, negative)
-    optimizer->rvsDequeY_[1].push_back(160); // Third element (gap2 = 160-150 = 10, positive)
+    optimizer_->rvsDequeY_[1].clear();
+    optimizer_->rvsDequeY_[1].push_back(200); // First element
+    optimizer_->rvsDequeY_[1].push_back(150); // Second element (gap1 = 150-200 = -50, negative)
+    optimizer_->rvsDequeY_[1].push_back(160); // Third element (gap2 = 160-150 = 10, positive)
     
     // Gaps have different signs, so direction change detected - should return true
-    EXPECT_TRUE(optimizer->RVSPointCheckWithoutSignal(touchEvent, RVS_AXIS::RVS_AXIS_Y));
+    EXPECT_TRUE(optimizer_->RVSPointCheckWithoutSignal(touchEvent, RVS_AXIS::RVS_AXIS_Y));
     // Second gap is positive, so direction should be RVS_UP_RIGHT
     EXPECT_EQ(touchEvent.yReverse, RVS_DIRECTION::RVS_UP_RIGHT);
 }
@@ -1630,7 +1631,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithoutSignal005, TestSize.Lev
 HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithoutSignal006, TestSize.Level1)
 {
     
-    optimizer->rvsEnable_ = true;
+    optimizer_->rvsEnable_ = true;
     
     TouchEvent touchEvent;
     touchEvent.id = 1;
@@ -1638,12 +1639,12 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithoutSignal006, TestSize.Lev
     touchEvent.y = 200;
     
     // Fill deque with only one element
-    optimizer->rvsDequeX_[1].clear();
-    optimizer->rvsDequeX_[1].push_back(100); // Only one element
+    optimizer_->rvsDequeX_[1].clear();
+    optimizer_->rvsDequeX_[1].push_back(100); // Only one element
     
     // With only one element, pointCurrent will be set but no gaps can be calculated
     // Loop will exit without processing gaps, should return false
-    EXPECT_FALSE(optimizer->RVSPointCheckWithoutSignal(touchEvent, RVS_AXIS::RVS_AXIS_X));
+    EXPECT_FALSE(optimizer_->RVSPointCheckWithoutSignal(touchEvent, RVS_AXIS::RVS_AXIS_X));
 }
 
 /**
@@ -1654,7 +1655,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithoutSignal006, TestSize.Lev
 HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithoutSignal007, TestSize.Level1)
 {
     
-    optimizer->rvsEnable_ = true;
+    optimizer_->rvsEnable_ = true;
     
     TouchEvent touchEvent;
     touchEvent.id = 1;
@@ -1662,13 +1663,13 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithoutSignal007, TestSize.Lev
     touchEvent.y = 250;
     
     // Fill deque with two elements
-    optimizer->rvsDequeX_[1].clear();
-    optimizer->rvsDequeX_[1].push_back(100); // First element
-    optimizer->rvsDequeX_[1].push_back(150); // Second element
+    optimizer_->rvsDequeX_[1].clear();
+    optimizer_->rvsDequeX_[1].push_back(100); // First element
+    optimizer_->rvsDequeX_[1].push_back(150); // Second element
     
     // With two elements, gap1 will be calculated but not gap2
     // Loop will exit without comparing gap signs, should return false
-    EXPECT_TRUE(optimizer->RVSPointCheckWithoutSignal(touchEvent, RVS_AXIS::RVS_AXIS_X));
+    EXPECT_TRUE(optimizer_->RVSPointCheckWithoutSignal(touchEvent, RVS_AXIS::RVS_AXIS_X));
 }
 
 /**
@@ -1679,13 +1680,13 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSPointCheckWithoutSignal007, TestSize.Lev
 HWTEST_F(ResSchedTouchOptimizerTest, SetSlideDirection001, TestSize.Level1)
 {
     
-    optimizer->slideDirection_ = SLIDE_DIRECTION::NONE;
+    optimizer_->slideDirection_ = SLIDE_DIRECTION::NONE;
     
-    optimizer->SetSlideDirection(SLIDE_DIRECTION::HORIZONTAL);
-    EXPECT_EQ(optimizer->slideDirection_, SLIDE_DIRECTION::HORIZONTAL);
+    optimizer_->SetSlideDirection(SLIDE_DIRECTION::HORIZONTAL);
+    EXPECT_EQ(optimizer_->slideDirection_, SLIDE_DIRECTION::HORIZONTAL);
     
-    optimizer->SetSlideDirection(SLIDE_DIRECTION::VERTICAL);
-    EXPECT_EQ(optimizer->slideDirection_, SLIDE_DIRECTION::VERTICAL);
+    optimizer_->SetSlideDirection(SLIDE_DIRECTION::VERTICAL);
+    EXPECT_EQ(optimizer_->slideDirection_, SLIDE_DIRECTION::VERTICAL);
 }
 
 /**
@@ -1698,13 +1699,13 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSDirectionStateCheck001, TestSize.Level1)
     
     
     // Test valid directions
-    EXPECT_TRUE(optimizer->RVSDirectionStateCheck(RVS_DIRECTION::RVS_DOWN_LEFT));
-    EXPECT_TRUE(optimizer->RVSDirectionStateCheck(RVS_DIRECTION::RVS_UP_RIGHT));
+    EXPECT_TRUE(optimizer_->RVSDirectionStateCheck(RVS_DIRECTION::RVS_DOWN_LEFT));
+    EXPECT_TRUE(optimizer_->RVSDirectionStateCheck(RVS_DIRECTION::RVS_UP_RIGHT));
     
     // Test invalid directions
-    EXPECT_FALSE(optimizer->RVSDirectionStateCheck(RVS_DIRECTION::RVS_NOT_APPLY));
-    EXPECT_FALSE(optimizer->RVSDirectionStateCheck(RVS_DIRECTION::RVS_INITIAL_SIGNAL));
-    EXPECT_FALSE(optimizer->RVSDirectionStateCheck(100)); // Invalid value
+    EXPECT_FALSE(optimizer_->RVSDirectionStateCheck(RVS_DIRECTION::RVS_NOT_APPLY));
+    EXPECT_FALSE(optimizer_->RVSDirectionStateCheck(RVS_DIRECTION::RVS_INITIAL_SIGNAL));
+    EXPECT_FALSE(optimizer_->RVSDirectionStateCheck(100)); // Invalid value
 }
 
 /**
@@ -1715,10 +1716,10 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSDirectionStateCheck001, TestSize.Level1)
 HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate011, TestSize.Level1)
 {
     
-    optimizer->rvsEnable_ = true;
-    optimizer->slideDirection_ = SLIDE_DIRECTION::HORIZONTAL;
-    optimizer->rvsDequeX_.clear();
-    optimizer->rvsDequeY_.clear();
+    optimizer_->rvsEnable_ = true;
+    optimizer_->slideDirection_ = SLIDE_DIRECTION::HORIZONTAL;
+    optimizer_->rvsDequeX_.clear();
+    optimizer_->rvsDequeY_.clear();
     
     TouchEvent touchEvent;
     touchEvent.id = 1;
@@ -1730,19 +1731,19 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate011, TestSize.Level1)
     std::list<TouchEvent> touchEvents = {touchEvent};
     
     // First call - should add to deque but not process yet (size < RVS_QUEUE_SIZE)
-    optimizer->RVSQueueUpdate(touchEvents);
-    EXPECT_EQ(optimizer->rvsDequeX_[1].size(), 1);
-    EXPECT_TRUE(optimizer->rvsDequeY_[1].empty()); // Y should not be processed for horizontal slide
+    optimizer_->RVSQueueUpdate(touchEvents);
+    EXPECT_EQ(optimizer_->rvsDequeX_[1].size(), 1);
+    EXPECT_TRUE(optimizer_->rvsDequeY_[1].empty()); // Y should not be processed for horizontal slide
     
     // Add more events to reach RVS_QUEUE_SIZE
     for (int i = 1; i < 7; i++) {
         touchEvent.x = 100 + i * 10;
         touchEvents = {touchEvent};
-        optimizer->RVSQueueUpdate(touchEvents);
+        optimizer_->RVSQueueUpdate(touchEvents);
     }
     
     // Now deque should have RVS_QUEUE_SIZE elements
-    EXPECT_EQ(optimizer->rvsDequeX_[1].size(), 6);
+    EXPECT_EQ(optimizer_->rvsDequeX_[1].size(), 6);
 }
 
 /**
@@ -1753,10 +1754,10 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate011, TestSize.Level1)
 HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate012, TestSize.Level1)
 {
     
-    optimizer->rvsEnable_ = true;
-    optimizer->slideDirection_ = SLIDE_DIRECTION::VERTICAL;
-    optimizer->rvsDequeX_.clear();
-    optimizer->rvsDequeY_.clear();
+    optimizer_->rvsEnable_ = true;
+    optimizer_->slideDirection_ = SLIDE_DIRECTION::VERTICAL;
+    optimizer_->rvsDequeX_.clear();
+    optimizer_->rvsDequeY_.clear();
     
     TouchEvent touchEvent;
     touchEvent.id = 1;
@@ -1768,19 +1769,19 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate012, TestSize.Level1)
     std::list<TouchEvent> touchEvents = {touchEvent};
     
     // First call - should add to deque but not process yet (size < RVS_QUEUE_SIZE)
-    optimizer->RVSQueueUpdate(touchEvents);
-    EXPECT_EQ(optimizer->rvsDequeY_[1].size(), 1);
-    EXPECT_TRUE(optimizer->rvsDequeX_[1].empty()); // X should not be processed for vertical slide
+    optimizer_->RVSQueueUpdate(touchEvents);
+    EXPECT_EQ(optimizer_->rvsDequeY_[1].size(), 1);
+    EXPECT_TRUE(optimizer_->rvsDequeX_[1].empty()); // X should not be processed for vertical slide
     
     // Add more events to reach RVS_QUEUE_SIZE
     for (int i = 1; i < 7; i++) {
         touchEvent.y = 200 + i * 10;
         touchEvents = {touchEvent};
-        optimizer->RVSQueueUpdate(touchEvents);
+        optimizer_->RVSQueueUpdate(touchEvents);
     }
     
     // Now deque should have RVS_QUEUE_SIZE elements
-    EXPECT_EQ(optimizer->rvsDequeY_[1].size(), 6);
+    EXPECT_EQ(optimizer_->rvsDequeY_[1].size(), 6);
 }
 
 /**
@@ -1791,9 +1792,9 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate012, TestSize.Level1)
 HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate013, TestSize.Level1)
 {
     
-    optimizer->rvsEnable_ = true;
-    optimizer->slideDirection_ = SLIDE_DIRECTION::HORIZONTAL;
-    optimizer->rvsDequeX_.clear();
+    optimizer_->rvsEnable_ = true;
+    optimizer_->slideDirection_ = SLIDE_DIRECTION::HORIZONTAL;
+    optimizer_->rvsDequeX_.clear();
     
     TouchEvent touchEvent;
     touchEvent.id = 1;
@@ -1805,12 +1806,12 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate013, TestSize.Level1)
     
     // Add same value multiple times
     for (int i = 0; i < 3; i++) {
-        optimizer->RVSQueueUpdate(touchEvents);
+        optimizer_->RVSQueueUpdate(touchEvents);
     }
     
     // Should only contain one element due to duplicate filtering
-    EXPECT_EQ(optimizer->rvsDequeX_[1].size(), 1);
-    EXPECT_EQ(optimizer->rvsDequeX_[1].back(), 100);
+    EXPECT_EQ(optimizer_->rvsDequeX_[1].size(), 1);
+    EXPECT_EQ(optimizer_->rvsDequeX_[1].back(), 100);
 }
 
 /**
@@ -1821,13 +1822,13 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate013, TestSize.Level1)
 HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate014, TestSize.Level1)
 {
     
-    optimizer->rvsEnable_ = true;
-    optimizer->slideDirection_ = SLIDE_DIRECTION::HORIZONTAL;
-    optimizer->rvsDequeX_.clear();
+    optimizer_->rvsEnable_ = true;
+    optimizer_->slideDirection_ = SLIDE_DIRECTION::HORIZONTAL;
+    optimizer_->rvsDequeX_.clear();
     
     // Pre-fill deque to RVS_QUEUE_SIZE - 1
     for (int i = 0; i < 6; i++) {
-        optimizer->rvsDequeX_[1].push_back(50 + i * 10);
+        optimizer_->rvsDequeX_[1].push_back(50 + i * 10);
     }
     
     TouchEvent touchEvent;
@@ -1839,13 +1840,13 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate014, TestSize.Level1)
     std::list<TouchEvent> touchEvents = {touchEvent};
     
     // Mock the check functions to avoid complex setup
-    optimizer->RVSPointCheckWithSignal(touchEvent, RVS_AXIS::RVS_AXIS_X);
-    optimizer->RVSPointCheckWithoutSignal(touchEvent, RVS_AXIS::RVS_AXIS_X);
+    optimizer_->RVSPointCheckWithSignal(touchEvent, RVS_AXIS::RVS_AXIS_X);
+    optimizer_->RVSPointCheckWithoutSignal(touchEvent, RVS_AXIS::RVS_AXIS_X);
     
-    optimizer->RVSQueueUpdate(touchEvents);
+    optimizer_->RVSQueueUpdate(touchEvents);
     
     // Queue should now have RVS_QUEUE_SIZE elements
-    EXPECT_EQ(optimizer->rvsDequeX_[1].size(), 6);
+    EXPECT_EQ(optimizer_->rvsDequeX_[1].size(), 6);
 }
 
 /**
@@ -1856,14 +1857,14 @@ HWTEST_F(ResSchedTouchOptimizerTest, RVSQueueUpdate014, TestSize.Level1)
 HWTEST_F(ResSchedTouchOptimizerTest, NeedTpFlushVsync001, TestSize.Level1)
 {
     
-    optimizer->rvsEnable_ = false;
+    optimizer_->rvsEnable_ = false;
     
     TouchEvent touchEvent;
     touchEvent.sourceTool = SourceTool::FINGER;
     
     // When RVS is disabled, should return false
-    EXPECT_FALSE(optimizer->NeedTpFlushVsync(touchEvent));
-    EXPECT_FALSE(optimizer->isFristFrameAfterTpFlushFrameDisplayPeriod_);
+    EXPECT_FALSE(optimizer_->NeedTpFlushVsync(touchEvent));
+    EXPECT_FALSE(optimizer_->isFristFrameAfterTpFlushFrameDisplayPeriod_);
 }
 
 /**
@@ -1874,24 +1875,24 @@ HWTEST_F(ResSchedTouchOptimizerTest, NeedTpFlushVsync001, TestSize.Level1)
 HWTEST_F(ResSchedTouchOptimizerTest, NeedTpFlushVsync002, TestSize.Level1)
 {
     
-    optimizer->rvsEnable_ = true;
-    optimizer->hisAvgPointTimeStamp_ = 1000;
-    optimizer->slideAccepted_ = false;
-    optimizer->isTpFlushFrameDisplayPeriod_ = true;
+    optimizer_->rvsEnable_ = true;
+    optimizer_->hisAvgPointTimeStamp_ = 1000;
+    optimizer_->slideAccepted_ = false;
+    optimizer_->isTpFlushFrameDisplayPeriod_ = true;
     
     TouchEvent touchEvent;
     touchEvent.sourceTool = SourceTool::FINGER;
     
     // When slide is not accepted, should return true
-    EXPECT_TRUE(optimizer->NeedTpFlushVsync(touchEvent));
+    EXPECT_TRUE(optimizer_->NeedTpFlushVsync(touchEvent));
     
     // Test the transition to first frame after TP flush
-    optimizer->slideAccepted_ = true;
-    optimizer->isTpFlushFrameDisplayPeriod_ = true;
-    optimizer->lastTpFlush_ = false;
-    optimizer->NeedTpFlushVsyncInner(touchEvent); // Call inner function to set up state
-    optimizer->NeedTpFlushVsync(touchEvent);
-    EXPECT_TRUE(optimizer->isFristFrameAfterTpFlushFrameDisplayPeriod_);
+    optimizer_->slideAccepted_ = true;
+    optimizer_->isTpFlushFrameDisplayPeriod_ = true;
+    optimizer_->lastTpFlush_ = false;
+    optimizer_->NeedTpFlushVsyncInner(touchEvent); // Call inner function to set up state
+    optimizer_->NeedTpFlushVsync(touchEvent);
+    EXPECT_TRUE(optimizer_->isFristFrameAfterTpFlushFrameDisplayPeriod_);
 }
 
 /**
@@ -1904,20 +1905,20 @@ HWTEST_F(ResSchedTouchOptimizerTest, NeedTpFlushVsyncInner001, TestSize.Level1)
     
     
     // Test when RVS is disabled
-    optimizer->rvsEnable_ = false;
+    optimizer_->rvsEnable_ = false;
     TouchEvent touchEvent;
     touchEvent.sourceTool = SourceTool::FINGER;
-    EXPECT_FALSE(optimizer->NeedTpFlushVsyncInner(touchEvent));
+    EXPECT_FALSE(optimizer_->NeedTpFlushVsyncInner(touchEvent));
     
     // Test when hisAvgPointTimeStamp_ is zero
-    optimizer->rvsEnable_ = true;
-    optimizer->hisAvgPointTimeStamp_ = 0;
-    EXPECT_FALSE(optimizer->NeedTpFlushVsyncInner(touchEvent));
+    optimizer_->rvsEnable_ = true;
+    optimizer_->hisAvgPointTimeStamp_ = 0;
+    EXPECT_FALSE(optimizer_->NeedTpFlushVsyncInner(touchEvent));
     
     // Test with non-finger source tool
-    optimizer->hisAvgPointTimeStamp_ = 1000;
+    optimizer_->hisAvgPointTimeStamp_ = 1000;
     touchEvent.sourceTool = SourceTool::MOUSE;
-    EXPECT_FALSE(optimizer->NeedTpFlushVsyncInner(touchEvent));
+    EXPECT_FALSE(optimizer_->NeedTpFlushVsyncInner(touchEvent));
 }
 
 /**
@@ -1928,19 +1929,19 @@ HWTEST_F(ResSchedTouchOptimizerTest, NeedTpFlushVsyncInner001, TestSize.Level1)
 HWTEST_F(ResSchedTouchOptimizerTest, NeedTpFlushVsyncInner002, TestSize.Level1)
 {
     
-    optimizer->rvsEnable_ = true;
-    optimizer->hisAvgPointTimeStamp_ = 1000;
-    optimizer->slideAccepted_ = false;
+    optimizer_->rvsEnable_ = true;
+    optimizer_->hisAvgPointTimeStamp_ = 1000;
+    optimizer_->slideAccepted_ = false;
     
     TouchEvent touchEvent;
     touchEvent.sourceTool = SourceTool::FINGER;
     
     // When slide is not accepted, should trigger TP flush for first frame
-    EXPECT_TRUE(optimizer->NeedTpFlushVsyncInner(touchEvent));
+    EXPECT_TRUE(optimizer_->NeedTpFlushVsyncInner(touchEvent));
     
     // Test when slide is accepted
-    optimizer->slideAccepted_ = true;
-    EXPECT_FALSE(optimizer->NeedTpFlushVsyncInner(touchEvent));
+    optimizer_->slideAccepted_ = true;
+    EXPECT_FALSE(optimizer_->NeedTpFlushVsyncInner(touchEvent));
 }
 
 /**
@@ -1951,17 +1952,17 @@ HWTEST_F(ResSchedTouchOptimizerTest, NeedTpFlushVsyncInner002, TestSize.Level1)
 HWTEST_F(ResSchedTouchOptimizerTest, NeedTpFlushVsyncInner003, TestSize.Level1)
 {
     
-    optimizer->rvsEnable_ = true;
-    optimizer->hisAvgPointTimeStamp_ = 1000;
-    optimizer->slideAccepted_ = true;
-    optimizer->lastTpFlush_ = true;
-    optimizer->vsyncFlushed_ = true;
+    optimizer_->rvsEnable_ = true;
+    optimizer_->hisAvgPointTimeStamp_ = 1000;
+    optimizer_->slideAccepted_ = true;
+    optimizer_->lastTpFlush_ = true;
+    optimizer_->vsyncFlushed_ = true;
 
     TouchEvent touchEvent;
     touchEvent.sourceTool = SourceTool::FINGER;
     
     // When last frame was TP triggered and current Vsync count differs, should continue TP flush
-    EXPECT_TRUE(optimizer->NeedTpFlushVsyncInner(touchEvent));
+    EXPECT_TRUE(optimizer_->NeedTpFlushVsyncInner(touchEvent));
 }
 
 /**
@@ -1972,10 +1973,10 @@ HWTEST_F(ResSchedTouchOptimizerTest, NeedTpFlushVsyncInner003, TestSize.Level1)
 HWTEST_F(ResSchedTouchOptimizerTest, NeedTpFlushVsyncInner004, TestSize.Level1)
 {
     
-    optimizer->rvsEnable_ = true;
-    optimizer->hisAvgPointTimeStamp_ = 1000;
-    optimizer->slideAccepted_ = true;
-    optimizer->lastTpFlush_ = false;
+    optimizer_->rvsEnable_ = true;
+    optimizer_->hisAvgPointTimeStamp_ = 1000;
+    optimizer_->slideAccepted_ = true;
+    optimizer_->lastTpFlush_ = false;
     
     TouchEvent touchEvent;
     touchEvent.sourceTool = SourceTool::FINGER;
@@ -1983,17 +1984,17 @@ HWTEST_F(ResSchedTouchOptimizerTest, NeedTpFlushVsyncInner004, TestSize.Level1)
     touchEvent.yReverse = RVS_DIRECTION::RVS_NOT_APPLY;
     
     // When current direction is reversed and last frame wasn't TP triggered, should trigger TP flush
-    EXPECT_TRUE(optimizer->NeedTpFlushVsyncInner(touchEvent));
+    EXPECT_TRUE(optimizer_->NeedTpFlushVsyncInner(touchEvent));
     
     // Test with Y axis reverse
     touchEvent.xReverse = RVS_DIRECTION::RVS_NOT_APPLY;
     touchEvent.yReverse = RVS_DIRECTION::RVS_UP_RIGHT;
-    EXPECT_TRUE(optimizer->NeedTpFlushVsyncInner(touchEvent));
+    EXPECT_TRUE(optimizer_->NeedTpFlushVsyncInner(touchEvent));
     
     // Test with no reverse direction
     touchEvent.xReverse = RVS_DIRECTION::RVS_NOT_APPLY;
     touchEvent.yReverse = RVS_DIRECTION::RVS_NOT_APPLY;
-    EXPECT_FALSE(optimizer->NeedTpFlushVsyncInner(touchEvent));
+    EXPECT_FALSE(optimizer_->NeedTpFlushVsyncInner(touchEvent));
 }
 
 /**
@@ -2004,16 +2005,16 @@ HWTEST_F(ResSchedTouchOptimizerTest, NeedTpFlushVsyncInner004, TestSize.Level1)
 HWTEST_F(ResSchedTouchOptimizerTest, SetLastVsyncTimeStamp001, TestSize.Level1)
 {
     
-    optimizer->vsyncTimeReportExemption_ = false;
-    optimizer->vsyncFlushed_ = false;
-    optimizer->lastVsyncTimeStamp_ = 0;
+    optimizer_->vsyncTimeReportExemption_ = false;
+    optimizer_->vsyncFlushed_ = false;
+    optimizer_->lastVsyncTimeStamp_ = 0;
     
     uint64_t testTimeStamp = 123456789;
-    optimizer->SetLastVsyncTimeStamp(testTimeStamp);
+    optimizer_->SetLastVsyncTimeStamp(testTimeStamp);
     
-    EXPECT_TRUE(optimizer->vsyncFlushed_);
-    EXPECT_EQ(optimizer->lastVsyncTimeStamp_, testTimeStamp);
-    EXPECT_FALSE(optimizer->vsyncTimeReportExemption_);
+    EXPECT_TRUE(optimizer_->vsyncFlushed_);
+    EXPECT_EQ(optimizer_->lastVsyncTimeStamp_, testTimeStamp);
+    EXPECT_FALSE(optimizer_->vsyncTimeReportExemption_);
 }
 
 /**
@@ -2024,17 +2025,17 @@ HWTEST_F(ResSchedTouchOptimizerTest, SetLastVsyncTimeStamp001, TestSize.Level1)
 HWTEST_F(ResSchedTouchOptimizerTest, SetLastVsyncTimeStamp002, TestSize.Level1)
 {
     
-    optimizer->vsyncTimeReportExemption_ = true;
-    optimizer->vsyncFlushed_ = false;
-    optimizer->lastVsyncTimeStamp_ = 0;
+    optimizer_->vsyncTimeReportExemption_ = true;
+    optimizer_->vsyncFlushed_ = false;
+    optimizer_->lastVsyncTimeStamp_ = 0;
     
     uint64_t testTimeStamp = 123456789;
-    optimizer->SetLastVsyncTimeStamp(testTimeStamp);
+    optimizer_->SetLastVsyncTimeStamp(testTimeStamp);
     
     // When exemption is true, should not update vsyncFlushed_ and lastVsyncTimeStamp_
-    EXPECT_FALSE(optimizer->vsyncFlushed_);
-    EXPECT_EQ(optimizer->lastVsyncTimeStamp_, 0);
-    EXPECT_FALSE(optimizer->vsyncTimeReportExemption_);
+    EXPECT_FALSE(optimizer_->vsyncFlushed_);
+    EXPECT_EQ(optimizer_->lastVsyncTimeStamp_, 0);
+    EXPECT_FALSE(optimizer_->vsyncTimeReportExemption_);
 }
 
 /**
@@ -2045,12 +2046,12 @@ HWTEST_F(ResSchedTouchOptimizerTest, SetLastVsyncTimeStamp002, TestSize.Level1)
 HWTEST_F(ResSchedTouchOptimizerTest, SetVsyncPeriod001, TestSize.Level1)
 {
     
-    optimizer->vsyncPeriod_ = std::numeric_limits<uint64_t>::max();
+    optimizer_->vsyncPeriod_ = std::numeric_limits<uint64_t>::max();
     
     uint64_t testPeriod = 16666666; // ~60Hz
-    optimizer->SetVsyncPeriod(testPeriod);
+    optimizer_->SetVsyncPeriod(testPeriod);
     
-    EXPECT_EQ(optimizer->vsyncPeriod_, testPeriod);
+    EXPECT_EQ(optimizer_->vsyncPeriod_, testPeriod);
 }
 
 /**
@@ -2061,11 +2062,11 @@ HWTEST_F(ResSchedTouchOptimizerTest, SetVsyncPeriod001, TestSize.Level1)
 HWTEST_F(ResSchedTouchOptimizerTest, GetIsTpFlushFrameDisplayPeriod001, TestSize.Level1)
 {
     
-    optimizer->isTpFlushFrameDisplayPeriod_ = false;
-    EXPECT_FALSE(optimizer->GetIsTpFlushFrameDisplayPeriod());
+    optimizer_->isTpFlushFrameDisplayPeriod_ = false;
+    EXPECT_FALSE(optimizer_->GetIsTpFlushFrameDisplayPeriod());
     
-    optimizer->isTpFlushFrameDisplayPeriod_ = true;
-    EXPECT_TRUE(optimizer->GetIsTpFlushFrameDisplayPeriod());
+    optimizer_->isTpFlushFrameDisplayPeriod_ = true;
+    EXPECT_TRUE(optimizer_->GetIsTpFlushFrameDisplayPeriod());
 }
 
 /**
@@ -2076,11 +2077,11 @@ HWTEST_F(ResSchedTouchOptimizerTest, GetIsTpFlushFrameDisplayPeriod001, TestSize
 HWTEST_F(ResSchedTouchOptimizerTest, GetIsFirstFrameAfterTpFlushFrameDisplayPeriod001, TestSize.Level1)
 {
     
-    optimizer->isFristFrameAfterTpFlushFrameDisplayPeriod_ = false;
-    EXPECT_FALSE(optimizer->GetIsFirstFrameAfterTpFlushFrameDisplayPeriod());
+    optimizer_->isFristFrameAfterTpFlushFrameDisplayPeriod_ = false;
+    EXPECT_FALSE(optimizer_->GetIsFirstFrameAfterTpFlushFrameDisplayPeriod());
     
-    optimizer->isFristFrameAfterTpFlushFrameDisplayPeriod_ = true;
-    EXPECT_TRUE(optimizer->GetIsFirstFrameAfterTpFlushFrameDisplayPeriod());
+    optimizer_->isFristFrameAfterTpFlushFrameDisplayPeriod_ = true;
+    EXPECT_TRUE(optimizer_->GetIsFirstFrameAfterTpFlushFrameDisplayPeriod());
 }
 
 /**
@@ -2091,13 +2092,13 @@ HWTEST_F(ResSchedTouchOptimizerTest, GetIsFirstFrameAfterTpFlushFrameDisplayPeri
 HWTEST_F(ResSchedTouchOptimizerTest, SetHisAvgPointTimeStamp001, TestSize.Level1)
 {
     
-    optimizer->hisAvgPointTimeStamp_ = 1000;
+    optimizer_->hisAvgPointTimeStamp_ = 1000;
     
     std::unordered_map<int32_t, std::vector<TouchEvent>> historyPointsById;
     int32_t pointId = 1;
     
-    optimizer->SetHisAvgPointTimeStamp(pointId, historyPointsById);
-    EXPECT_EQ(optimizer->hisAvgPointTimeStamp_, 0);
+    optimizer_->SetHisAvgPointTimeStamp(pointId, historyPointsById);
+    EXPECT_EQ(optimizer_->hisAvgPointTimeStamp_, 0);
 }
 
 /**
@@ -2108,7 +2109,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, SetHisAvgPointTimeStamp001, TestSize.Level1
 HWTEST_F(ResSchedTouchOptimizerTest, SetHisAvgPointTimeStamp002, TestSize.Level1)
 {
     
-    optimizer->hisAvgPointTimeStamp_ = 0;
+    optimizer_->hisAvgPointTimeStamp_ = 0;
     
     std::unordered_map<int32_t, std::vector<TouchEvent>> historyPointsById;
     int32_t pointId = 1;
@@ -2123,9 +2124,9 @@ HWTEST_F(ResSchedTouchOptimizerTest, SetHisAvgPointTimeStamp002, TestSize.Level1
     historyPointsById[pointId].push_back(event1);
     historyPointsById[pointId].push_back(event2);
     
-    optimizer->SetHisAvgPointTimeStamp(pointId, historyPointsById);
+    optimizer_->SetHisAvgPointTimeStamp(pointId, historyPointsById);
     // Should calculate average timestamp
-    EXPECT_NE(optimizer->hisAvgPointTimeStamp_, 0);
+    EXPECT_NE(optimizer_->hisAvgPointTimeStamp_, 0);
 }
 
 /**
@@ -2136,18 +2137,18 @@ HWTEST_F(ResSchedTouchOptimizerTest, SetHisAvgPointTimeStamp002, TestSize.Level1
 HWTEST_F(ResSchedTouchOptimizerTest, FineTuneTimeStampDuringTpFlushPeriod001, TestSize.Level1)
 {
     
-    optimizer->hisAvgPointTimeStamp_ = 0;
-    optimizer->lastTpFlush_ = false;
-    optimizer->vsyncTimeReportExemption_ = false;
-    optimizer->vsyncPeriod_ = 16666666;
+    optimizer_->hisAvgPointTimeStamp_ = 0;
+    optimizer_->lastTpFlush_ = false;
+    optimizer_->vsyncTimeReportExemption_ = false;
+    optimizer_->vsyncPeriod_ = 16666666;
     
     uint64_t testTimeStamp = 123456789;
-    uint64_t result = optimizer->FineTuneTimeStampDuringTpFlushPeriod(testTimeStamp);
+    uint64_t result = optimizer_->FineTuneTimeStampDuringTpFlushPeriod(testTimeStamp);
     
     // When hisAvgPointTimeStamp_ is 0, should return the original timestamp
     EXPECT_EQ(result, testTimeStamp);
-    EXPECT_TRUE(optimizer->lastTpFlush_);
-    EXPECT_TRUE(optimizer->vsyncTimeReportExemption_);
+    EXPECT_TRUE(optimizer_->lastTpFlush_);
+    EXPECT_TRUE(optimizer_->vsyncTimeReportExemption_);
 }
 
 /**
@@ -2158,18 +2159,18 @@ HWTEST_F(ResSchedTouchOptimizerTest, FineTuneTimeStampDuringTpFlushPeriod001, Te
 HWTEST_F(ResSchedTouchOptimizerTest, FineTuneTimeStampDuringTpFlushPeriod002, TestSize.Level1)
 {
     
-    optimizer->hisAvgPointTimeStamp_ = 123456789;
-    optimizer->lastTpFlush_ = false;
-    optimizer->vsyncTimeReportExemption_ = false;
-    optimizer->vsyncPeriod_ = 16666666;
+    optimizer_->hisAvgPointTimeStamp_ = 123456789;
+    optimizer_->lastTpFlush_ = false;
+    optimizer_->vsyncTimeReportExemption_ = false;
+    optimizer_->vsyncPeriod_ = 16666666;
     
     uint64_t testTimeStamp = 123456789;
-    uint64_t result = optimizer->FineTuneTimeStampDuringTpFlushPeriod(testTimeStamp);
+    uint64_t result = optimizer_->FineTuneTimeStampDuringTpFlushPeriod(testTimeStamp);
     
     // Should calculate fictional Vsync time based on hisAvgPointTimeStamp_
     EXPECT_NE(result, testTimeStamp);
-    EXPECT_TRUE(optimizer->lastTpFlush_);
-    EXPECT_TRUE(optimizer->vsyncTimeReportExemption_);
+    EXPECT_TRUE(optimizer_->lastTpFlush_);
+    EXPECT_TRUE(optimizer_->vsyncTimeReportExemption_);
 }
 
 /**
@@ -2180,20 +2181,20 @@ HWTEST_F(ResSchedTouchOptimizerTest, FineTuneTimeStampDuringTpFlushPeriod002, Te
 HWTEST_F(ResSchedTouchOptimizerTest, FineTuneTimeStampWhenFirstFrameAfterTpFlushPeriod001, TestSize.Level1)
 {
     
-    optimizer->isFristFrameAfterTpFlushFrameDisplayPeriod_ = false;
-    optimizer->hisAvgPointTimeStamp_ = 0;
-    optimizer->lastVsyncTimeStamp_ = 0;
-    optimizer->lastTpFlush_ = true;
-    optimizer->vsyncTimeReportExemption_ = true;
+    optimizer_->isFristFrameAfterTpFlushFrameDisplayPeriod_ = false;
+    optimizer_->hisAvgPointTimeStamp_ = 0;
+    optimizer_->lastVsyncTimeStamp_ = 0;
+    optimizer_->lastTpFlush_ = true;
+    optimizer_->vsyncTimeReportExemption_ = true;
     
     std::unordered_map<int32_t, std::vector<TouchEvent>> historyPointsById;
     int32_t pointId = 1;
     
-    optimizer->FineTuneTimeStampWhenFirstFrameAfterTpFlushPeriod(pointId, historyPointsById);
+    optimizer_->FineTuneTimeStampWhenFirstFrameAfterTpFlushPeriod(pointId, historyPointsById);
     
     // Should not change lastTpFlush_ and vsyncTimeReportExemption_ since conditions are not met
-    EXPECT_FALSE(optimizer->lastTpFlush_);
-    EXPECT_FALSE(optimizer->vsyncTimeReportExemption_);
+    EXPECT_FALSE(optimizer_->lastTpFlush_);
+    EXPECT_FALSE(optimizer_->vsyncTimeReportExemption_);
 }
 
 /**
@@ -2204,11 +2205,11 @@ HWTEST_F(ResSchedTouchOptimizerTest, FineTuneTimeStampWhenFirstFrameAfterTpFlush
 HWTEST_F(ResSchedTouchOptimizerTest, FineTuneTimeStampWhenFirstFrameAfterTpFlushPeriod002, TestSize.Level1)
 {
     
-    optimizer->isFristFrameAfterTpFlushFrameDisplayPeriod_ = true;
-    optimizer->hisAvgPointTimeStamp_ = 200000000;
-    optimizer->lastVsyncTimeStamp_ = 100000000;
-    optimizer->lastTpFlush_ = true;
-    optimizer->vsyncTimeReportExemption_ = true;
+    optimizer_->isFristFrameAfterTpFlushFrameDisplayPeriod_ = true;
+    optimizer_->hisAvgPointTimeStamp_ = 200000000;
+    optimizer_->lastVsyncTimeStamp_ = 100000000;
+    optimizer_->lastTpFlush_ = true;
+    optimizer_->vsyncTimeReportExemption_ = true;
     
     std::unordered_map<int32_t, std::vector<TouchEvent>> historyPointsById;
     int32_t pointId = 1;
@@ -2218,11 +2219,11 @@ HWTEST_F(ResSchedTouchOptimizerTest, FineTuneTimeStampWhenFirstFrameAfterTpFlush
     testEvent.time = std::chrono::high_resolution_clock::time_point(std::chrono::nanoseconds(150000000));
     historyPointsById[pointId].push_back(testEvent);
     
-    optimizer->FineTuneTimeStampWhenFirstFrameAfterTpFlushPeriod(pointId, historyPointsById);
+    optimizer_->FineTuneTimeStampWhenFirstFrameAfterTpFlushPeriod(pointId, historyPointsById);
     
     // Should reset lastTpFlush_ and vsyncTimeReportExemption_
-    EXPECT_FALSE(optimizer->lastTpFlush_);
-    EXPECT_FALSE(optimizer->vsyncTimeReportExemption_);
+    EXPECT_FALSE(optimizer_->lastTpFlush_);
+    EXPECT_FALSE(optimizer_->vsyncTimeReportExemption_);
 }
 
 /**
@@ -2233,7 +2234,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, FineTuneTimeStampWhenFirstFrameAfterTpFlush
 HWTEST_F(ResSchedTouchOptimizerTest, SetPointReverseSignal001, TestSize.Level1)
 {
     
-    optimizer->rvsEnable_ = false;
+    optimizer_->rvsEnable_ = false;
     
     TouchEvent inputEvent;
     inputEvent.id = 1;
@@ -2242,7 +2243,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, SetPointReverseSignal001, TestSize.Level1)
     inputEvent.xReverse = RVS_DIRECTION::RVS_NOT_APPLY;
     inputEvent.yReverse = RVS_DIRECTION::RVS_NOT_APPLY;
     
-    TouchEvent resultEvent = optimizer->SetPointReverseSignal(inputEvent);
+    TouchEvent resultEvent = optimizer_->SetPointReverseSignal(inputEvent);
     
     // When RVS is disabled, should return the same event
     EXPECT_EQ(resultEvent.id, inputEvent.id);
@@ -2260,7 +2261,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, SetPointReverseSignal001, TestSize.Level1)
 HWTEST_F(ResSchedTouchOptimizerTest, SetPointReverseSignal002, TestSize.Level1)
 {
     
-    optimizer->rvsEnable_ = true;
+    optimizer_->rvsEnable_ = true;
     
     TouchEvent inputEvent;
     inputEvent.id = 1;
@@ -2271,7 +2272,7 @@ HWTEST_F(ResSchedTouchOptimizerTest, SetPointReverseSignal002, TestSize.Level1)
     inputEvent.xReverse = RVS_DIRECTION::RVS_NOT_APPLY;
     inputEvent.yReverse = RVS_DIRECTION::RVS_NOT_APPLY;
     
-    TouchEvent resultEvent = optimizer->SetPointReverseSignal(inputEvent);
+    TouchEvent resultEvent = optimizer_->SetPointReverseSignal(inputEvent);
     
     // When RVS is enabled, should process the event through RVSQueueUpdate
     EXPECT_EQ(resultEvent.id, inputEvent.id);
