@@ -2047,10 +2047,12 @@ HWTEST_F(FormPatternTest, GetRectRelativeToWindow001, TestSize.Level1)
 
     auto renderContext = formNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
+
     auto pipeline = AceType::MakeRefPtr<NG::PipelineContext>();
     ASSERT_NE(pipeline, nullptr);
     pipeline->instanceId_ = 1;
     formNode->AttachContext(AceType::RawPtr(pipeline), false);
+
     AccessibilityParentRectInfo parentRectInfo;
     pattern->GetRectRelativeToWindow(parentRectInfo);
     auto rectInfoDegree = parentRectInfo.rotateTransform.rotateDegree;
@@ -2157,13 +2159,16 @@ HWTEST_F(FormPatternTest, FormPatternTest_061, TestSize.Level0)
     RefPtr<FormNode> frameNode = CreateFromNode();
     auto pattern = frameNode->GetPattern<FormPattern>();
     EXPECT_NE(pattern, nullptr);
+
     // accessibilityState_ == state, return false
     pattern->accessibilityState_ = false;
     EXPECT_FALSE(pattern->OnAccessibilityStateChange(false));
+
     // isDynamic_ is true, return false
     pattern->isDynamic_ = true;
     EXPECT_FALSE(pattern->OnAccessibilityStateChange(true));
     EXPECT_TRUE(pattern->IsAccessibilityState());
+
     pattern->SetAccessibilityState(false);
     EXPECT_FALSE(pattern->IsAccessibilityState());
     pattern->SetAccessibilityState(true);
