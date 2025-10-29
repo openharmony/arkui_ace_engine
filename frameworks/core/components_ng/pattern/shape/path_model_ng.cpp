@@ -53,13 +53,12 @@ void PathModelNG::SetCommands(const RefPtr<ResourceObject>& commandsResObj)
         return;
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
     SetCommands(frameNode, commandsResObj);
 }
 
 void PathModelNG::SetCommands(FrameNode* frameNode, const RefPtr<ResourceObject>& commandsResObj)
 {
-    if (!SystemProperties::ConfigChangePerform()) {
+    if (!SystemProperties::ConfigChangePerform() || frameNode == nullptr) {
         return;
     }
     auto pattern = frameNode->GetPattern<PathPattern>();
@@ -70,6 +69,9 @@ void PathModelNG::SetCommands(FrameNode* frameNode, const RefPtr<ResourceObject>
         std::string pathCmd;
         if (ResourceParseUtils::ParseResString(resObj, pathCmd)) {
             ACE_UPDATE_NODE_PAINT_PROPERTY(PathPaintProperty, Commands, pathCmd, frameNode);
+        }
+        if (frameNode->GetRerenderable()) {
+            frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         }
     };
     pattern->AddResObj("PathCommands", commandsResObj, std::move(updateFunc));

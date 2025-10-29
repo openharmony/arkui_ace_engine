@@ -374,15 +374,17 @@ void SetShapeForegroundColor(ArkUINodeHandle node, ArkUI_Bool isColor, uint32_t 
     CHECK_NULL_VOID(frameNode);
     if (isColor) {
         auto foregroundColor = Color(color);
-        ShapeModelNG::SetFill(frameNode, foregroundColor);
-        ViewAbstract::SetForegroundColor(frameNode, foregroundColor);
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
         pattern->UnRegisterResource("ShapeAbstractForegroundColor");
         if (SystemProperties::ConfigChangePerform() && resObjPtr) {
             auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resObjPtr));
             ShapeModelNG::SetFill(frameNode, resObj);
+            ViewAbstract::SetForegroundColor(frameNode, foregroundColor, resObj);
+        } else {
+            ViewAbstract::SetForegroundColor(frameNode, foregroundColor);
         }
+        ShapeModelNG::SetFill(frameNode, foregroundColor);
     } else {
         ShapeModelNG::SetFill(frameNode, Color::FOREGROUND);
         auto strategy = static_cast<ForegroundColorStrategy>(color);

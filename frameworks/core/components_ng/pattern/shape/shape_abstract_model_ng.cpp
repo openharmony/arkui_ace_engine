@@ -156,19 +156,21 @@ void ShapeAbstractModelNG::SetStrokeDashArray(
         return;
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
     SetStrokeDashArray(frameNode, segments, resObjArray);
 }
 
 void ShapeAbstractModelNG::SetStrokeDashArray(FrameNode* frameNode, const std::vector<Ace::Dimension>& segments,
     const std::vector<RefPtr<ResourceObject>>& resObjArray)
 {
-    if (!SystemProperties::ConfigChangePerform()) {
+    if (!SystemProperties::ConfigChangePerform() || frameNode == nullptr) {
         return;
     }
     auto pattern = frameNode->GetPattern<ShapePattern>();
     CHECK_NULL_VOID(pattern);
-    auto&& updateFunc = [frameNode, segments, resObjArray](const RefPtr<ResourceObject>& resObj) {
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode), segments, resObjArray](
+                            const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
         if (segments.size() != resObjArray.size()) {
             return;
         }
@@ -179,14 +181,16 @@ void ShapeAbstractModelNG::SetStrokeDashArray(FrameNode* frameNode, const std::v
                 if (!ResourceParseUtils::ConvertFromResObjNG(resObjArray[i], dim)) {
                     result.clear();
                     break;
-                } else {
-                    result.emplace_back(dim);
                 }
+                result.emplace_back(dim);
             } else {
                 result.emplace_back(segments[i]);
             }
         }
         ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeDashArray, result, frameNode);
+        if (frameNode->GetRerenderable()) {
+            frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        }
     };
     RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
     pattern->AddResObj("ShapeAbstractStrokeDashArray", resObj, std::move(updateFunc));
@@ -198,7 +202,6 @@ void ShapeAbstractModelNG::SetStroke(const RefPtr<ResourceObject>& resObj)
         return;
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
     SetStroke(frameNode, resObj);
 }
 
@@ -208,7 +211,6 @@ void ShapeAbstractModelNG::SetFill(const RefPtr<ResourceObject>& resObj)
         return;
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
     SetFill(frameNode, resObj);
 }
 
@@ -218,7 +220,6 @@ void ShapeAbstractModelNG::SetForegroundColor(const RefPtr<ResourceObject>& resO
         return;
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
     SetForegroundColor(frameNode, resObj);
 }
 
@@ -228,7 +229,6 @@ void ShapeAbstractModelNG::SetStrokeOpacity(const RefPtr<ResourceObject>& resObj
         return;
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
     SetStrokeOpacity(frameNode, resObj);
 }
 
@@ -238,7 +238,6 @@ void ShapeAbstractModelNG::SetFillOpacity(const RefPtr<ResourceObject>& resObj)
         return;
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
     SetFillOpacity(frameNode, resObj);
 }
 
@@ -248,7 +247,6 @@ void ShapeAbstractModelNG::SetStrokeWidth(const RefPtr<ResourceObject>& resObj)
         return;
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
     SetStrokeWidth(frameNode, resObj);
 }
 
@@ -258,7 +256,6 @@ void ShapeAbstractModelNG::SetWidth(const RefPtr<ResourceObject>& resObj)
         return;
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
     SetWidth(frameNode, resObj);
 }
 
@@ -268,13 +265,12 @@ void ShapeAbstractModelNG::SetHeight(const RefPtr<ResourceObject>& resObj)
         return;
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
     SetHeight(frameNode, resObj);
 }
 
 void ShapeAbstractModelNG::SetStroke(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
 {
-    if (!SystemProperties::ConfigChangePerform()) {
+    if (!SystemProperties::ConfigChangePerform() || frameNode == nullptr) {
         return;
     }
     auto pattern = frameNode->GetPattern<ShapePattern>();
@@ -288,13 +284,16 @@ void ShapeAbstractModelNG::SetStroke(FrameNode* frameNode, const RefPtr<Resource
             return;
         }
         ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, Stroke, value, frameNode);
+        if (frameNode->GetRerenderable()) {
+            frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        }
     };
     pattern->AddResObj("ShapeAbstractStroke", resObj, std::move(updateFunc));
 }
 
 void ShapeAbstractModelNG::SetFill(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
 {
-    if (!SystemProperties::ConfigChangePerform()) {
+    if (!SystemProperties::ConfigChangePerform() || frameNode == nullptr) {
         return;
     }
     auto pattern = frameNode->GetPattern<ShapePattern>();
@@ -312,13 +311,16 @@ void ShapeAbstractModelNG::SetFill(FrameNode* frameNode, const RefPtr<ResourceOb
         ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, Fill, value, frameNode);
         ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, value, frameNode);
         ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
+        if (frameNode->GetRerenderable()) {
+            frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        }
     };
     pattern->AddResObj("ShapeAbstractFill", resObj, std::move(updateFunc));
 }
 
 void ShapeAbstractModelNG::SetForegroundColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
 {
-    if (!SystemProperties::ConfigChangePerform()) {
+    if (!SystemProperties::ConfigChangePerform() || frameNode == nullptr) {
         return;
     }
     auto pattern = frameNode->GetPattern<ShapePattern>();
@@ -336,13 +338,16 @@ void ShapeAbstractModelNG::SetForegroundColor(FrameNode* frameNode, const RefPtr
         ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, Fill, value, frameNode);
         ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, value, frameNode);
         ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
+        if (frameNode->GetRerenderable()) {
+            frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        }
     };
     pattern->AddResObj("ShapeAbstractForegroundColor", resObj, std::move(updateFunc));
 }
 
 void ShapeAbstractModelNG::SetStrokeOpacity(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
 {
-    if (!SystemProperties::ConfigChangePerform()) {
+    if (!SystemProperties::ConfigChangePerform() || frameNode == nullptr) {
         return;
     }
     auto pattern = frameNode->GetPattern<ShapePattern>();
@@ -355,15 +360,17 @@ void ShapeAbstractModelNG::SetStrokeOpacity(FrameNode* frameNode, const RefPtr<R
             ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeOpacity, 1.0, frameNode);
             return;
         }
-
         ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeOpacity, std::clamp(value, 0.0, 1.0), frameNode);
+        if (frameNode->GetRerenderable()) {
+            frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        }
     };
     pattern->AddResObj("ShapeAbstractStrokeOpacity", resObj, std::move(updateFunc));
 }
 
 void ShapeAbstractModelNG::SetFillOpacity(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
 {
-    if (!SystemProperties::ConfigChangePerform()) {
+    if (!SystemProperties::ConfigChangePerform() || frameNode == nullptr) {
         return;
     }
     auto pattern = frameNode->GetPattern<ShapePattern>();
@@ -376,15 +383,17 @@ void ShapeAbstractModelNG::SetFillOpacity(FrameNode* frameNode, const RefPtr<Res
             ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, FillOpacity, 1.0, frameNode);
             return;
         }
-
         ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, FillOpacity, std::clamp(value, 0.0, 1.0), frameNode);
+        if (frameNode->GetRerenderable()) {
+            frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        }
     };
     pattern->AddResObj("ShapeAbstractFillOpacity", resObj, std::move(updateFunc));
 }
 
 void ShapeAbstractModelNG::SetStrokeWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
 {
-    if (!SystemProperties::ConfigChangePerform()) {
+    if (!SystemProperties::ConfigChangePerform() || frameNode == nullptr) {
         return;
     }
     auto pattern = frameNode->GetPattern<ShapePattern>();
@@ -399,13 +408,16 @@ void ShapeAbstractModelNG::SetStrokeWidth(FrameNode* frameNode, const RefPtr<Res
         }
         auto strokeWidth = value.IsNegative() ? 1.0_vp : value;
         ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeWidth, strokeWidth, frameNode);
+        if (frameNode->GetRerenderable()) {
+            frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        }
     };
     pattern->AddResObj("ShapeAbstractStrokeWidth", resObj, std::move(updateFunc));
 }
 
 void ShapeAbstractModelNG::SetWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
 {
-    if (!SystemProperties::ConfigChangePerform()) {
+    if (!SystemProperties::ConfigChangePerform() || frameNode == nullptr) {
         return;
     }
     auto pattern = frameNode->GetPattern<ShapePattern>();
@@ -415,7 +427,7 @@ void ShapeAbstractModelNG::SetWidth(FrameNode* frameNode, const RefPtr<ResourceO
         CHECK_NULL_VOID(frameNode);
         auto layoutProperty = frameNode->GetLayoutProperty();
         CHECK_NULL_VOID(layoutProperty);
-        CalcDimension value = 1.0_vp;
+        CalcDimension value;
         if (!ResourceParseUtils::ParseResDimensionFpNG(resObj, value)) {
             layoutProperty->ClearUserDefinedIdealSize(true, false);
             return;
@@ -430,13 +442,16 @@ void ShapeAbstractModelNG::SetWidth(FrameNode* frameNode, const RefPtr<ResourceO
             height = layoutConstraint->selfIdealSize->Height();
         }
         layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(value), height));
+        if (frameNode->GetRerenderable()) {
+            frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        }
     };
     pattern->AddResObj("ShapeAbstractWidth", resObj, std::move(updateFunc));
 }
 
 void ShapeAbstractModelNG::SetHeight(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
 {
-    if (!SystemProperties::ConfigChangePerform()) {
+    if (!SystemProperties::ConfigChangePerform() || frameNode == nullptr) {
         return;
     }
     auto pattern = frameNode->GetPattern<ShapePattern>();
@@ -446,7 +461,7 @@ void ShapeAbstractModelNG::SetHeight(FrameNode* frameNode, const RefPtr<Resource
         CHECK_NULL_VOID(frameNode);
         auto layoutProperty = frameNode->GetLayoutProperty();
         CHECK_NULL_VOID(layoutProperty);
-        CalcDimension height = 1.0_vp;
+        CalcDimension height;
         if (!ResourceParseUtils::ParseResDimensionFpNG(resObj, height)) {
             layoutProperty->ClearUserDefinedIdealSize(false, true);
             return;
@@ -461,6 +476,9 @@ void ShapeAbstractModelNG::SetHeight(FrameNode* frameNode, const RefPtr<Resource
             width = layoutConstraint->selfIdealSize->Width();
         }
         layoutProperty->UpdateUserDefinedIdealSize(CalcSize(width, CalcLength(height)));
+        if (frameNode->GetRerenderable()) {
+            frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        }
     };
     pattern->AddResObj("ShapeAbstractHeight", resObj, std::move(updateFunc));
 }

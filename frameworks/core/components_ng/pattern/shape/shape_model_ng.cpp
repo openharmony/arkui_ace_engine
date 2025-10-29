@@ -71,19 +71,21 @@ void ShapeModelNG::SetViewPort(
         return;
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
     SetViewPort(frameNode, dimArray, resObjArray);
 }
 
 void ShapeModelNG::SetViewPort(FrameNode* frameNode, const std::vector<Dimension>& dimArray,
     const std::vector<RefPtr<ResourceObject>>& resObjArray)
 {
-    if (!SystemProperties::ConfigChangePerform()) {
+    if (!SystemProperties::ConfigChangePerform() || frameNode == nullptr) {
         return;
     }
     auto pattern = frameNode->GetPattern<ShapeContainerPattern>();
     CHECK_NULL_VOID(pattern);
-    auto&& updateFunc = [frameNode, dimArray, resObjArray](const RefPtr<ResourceObject>& resObj) {
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode), dimArray, resObjArray](
+                            const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
         if (dimArray.size() != SHAPE_VIEW_BOX_SIZE || dimArray.size() != resObjArray.size()) {
             return;
         }
@@ -256,14 +258,13 @@ void ShapeModelNG::SetStrokeDashArray(
         return;
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
     SetStrokeDashArray(frameNode, segments, resObjArray);
 }
 
 void ShapeModelNG::SetStrokeDashArray(FrameNode* frameNode, const std::vector<Ace::Dimension>& segments,
     const std::vector<RefPtr<ResourceObject>>& resObjArray)
 {
-    if (!SystemProperties::ConfigChangePerform()) {
+    if (!SystemProperties::ConfigChangePerform() || frameNode == nullptr) {
         return;
     }
     auto pattern = frameNode->GetPattern<ShapeContainerPattern>();
@@ -279,9 +280,8 @@ void ShapeModelNG::SetStrokeDashArray(FrameNode* frameNode, const std::vector<Ac
                 if (!ResourceParseUtils::ConvertFromResObjNG(resObjArray[i], dim)) {
                     result.clear();
                     break;
-                } else {
-                    result.emplace_back(dim);
                 }
+                result.emplace_back(dim);
             } else {
                 result.emplace_back(segments[i]);
             }
@@ -298,7 +298,6 @@ void ShapeModelNG::SetStroke(const RefPtr<ResourceObject>& resObj)
         return;
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
     SetStroke(frameNode, resObj);
 }
 
@@ -308,7 +307,6 @@ void ShapeModelNG::SetFill(const RefPtr<ResourceObject>& resObj)
         return;
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
     SetFill(frameNode, resObj);
 }
 
@@ -318,7 +316,6 @@ void ShapeModelNG::SetForegroundColor(const RefPtr<ResourceObject>& resObj)
         return;
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
     SetForegroundColor(frameNode, resObj);
 }
 
@@ -328,7 +325,6 @@ void ShapeModelNG::SetStrokeDashOffset(const RefPtr<ResourceObject>& resObj)
         return;
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
     SetStrokeDashOffset(frameNode, resObj);
 }
 
@@ -338,7 +334,6 @@ void ShapeModelNG::SetStrokeMiterLimit(const RefPtr<ResourceObject>& resObj)
         return;
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
     SetStrokeMiterLimit(frameNode, resObj);
 }
 
@@ -348,7 +343,6 @@ void ShapeModelNG::SetStrokeOpacity(const RefPtr<ResourceObject>& resObj)
         return;
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
     SetStrokeOpacity(frameNode, resObj);
 }
 
@@ -358,7 +352,6 @@ void ShapeModelNG::SetFillOpacity(const RefPtr<ResourceObject>& resObj)
         return;
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
     SetFillOpacity(frameNode, resObj);
 }
 
@@ -368,13 +361,12 @@ void ShapeModelNG::SetStrokeWidth(const RefPtr<ResourceObject>& resObj)
         return;
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
     SetStrokeWidth(frameNode, resObj);
 }
 
 void ShapeModelNG::SetStroke(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
 {
-    if (!SystemProperties::ConfigChangePerform()) {
+    if (!SystemProperties::ConfigChangePerform() || frameNode == nullptr) {
         return;
     }
     auto pattern = frameNode->GetPattern<ShapeContainerPattern>();
@@ -398,7 +390,7 @@ void ShapeModelNG::SetStroke(FrameNode* frameNode, const RefPtr<ResourceObject>&
 
 void ShapeModelNG::SetFill(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
 {
-    if (!SystemProperties::ConfigChangePerform()) {
+    if (!SystemProperties::ConfigChangePerform() || frameNode == nullptr) {
         return;
     }
     auto pattern = frameNode->GetPattern<ShapeContainerPattern>();
@@ -426,7 +418,7 @@ void ShapeModelNG::SetFill(FrameNode* frameNode, const RefPtr<ResourceObject>& r
 
 void ShapeModelNG::SetForegroundColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
 {
-    if (!SystemProperties::ConfigChangePerform()) {
+    if (!SystemProperties::ConfigChangePerform() || frameNode == nullptr) {
         return;
     }
     auto pattern = frameNode->GetPattern<ShapeContainerPattern>();
@@ -454,7 +446,7 @@ void ShapeModelNG::SetForegroundColor(FrameNode* frameNode, const RefPtr<Resourc
 
 void ShapeModelNG::SetStrokeDashOffset(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
 {
-    if (!SystemProperties::ConfigChangePerform()) {
+    if (!SystemProperties::ConfigChangePerform() || frameNode == nullptr) {
         return;
     }
     auto pattern = frameNode->GetPattern<ShapeContainerPattern>();
@@ -477,7 +469,7 @@ void ShapeModelNG::SetStrokeDashOffset(FrameNode* frameNode, const RefPtr<Resour
 
 void ShapeModelNG::SetStrokeMiterLimit(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
 {
-    if (!SystemProperties::ConfigChangePerform()) {
+    if (!SystemProperties::ConfigChangePerform() || frameNode == nullptr) {
         return;
     }
     auto pattern = frameNode->GetPattern<ShapeContainerPattern>();
@@ -500,7 +492,7 @@ void ShapeModelNG::SetStrokeMiterLimit(FrameNode* frameNode, const RefPtr<Resour
 
 void ShapeModelNG::SetStrokeOpacity(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
 {
-    if (!SystemProperties::ConfigChangePerform()) {
+    if (!SystemProperties::ConfigChangePerform() || frameNode == nullptr) {
         return;
     }
     auto pattern = frameNode->GetPattern<ShapeContainerPattern>();
@@ -523,7 +515,7 @@ void ShapeModelNG::SetStrokeOpacity(FrameNode* frameNode, const RefPtr<ResourceO
 
 void ShapeModelNG::SetFillOpacity(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
 {
-    if (!SystemProperties::ConfigChangePerform()) {
+    if (!SystemProperties::ConfigChangePerform() || frameNode == nullptr) {
         return;
     }
     auto pattern = frameNode->GetPattern<ShapeContainerPattern>();
@@ -546,7 +538,7 @@ void ShapeModelNG::SetFillOpacity(FrameNode* frameNode, const RefPtr<ResourceObj
 
 void ShapeModelNG::SetStrokeWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
 {
-    if (!SystemProperties::ConfigChangePerform()) {
+    if (!SystemProperties::ConfigChangePerform() || frameNode == nullptr) {
         return;
     }
     auto pattern = frameNode->GetPattern<ShapeContainerPattern>();

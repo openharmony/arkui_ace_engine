@@ -51,12 +51,15 @@ void PolygonModelNG::SetPoints(FrameNode* frameNode, const ShapePoints& points)
 void PolygonModelNG::SetPoints(FrameNode* frameNode, const ShapePoints& points,
     const std::vector<RefPtr<ResourceObject>>& xResObjArray, const std::vector<RefPtr<ResourceObject>>& yResObjArray)
 {
-    if (!SystemProperties::ConfigChangePerform()) {
+    if (!SystemProperties::ConfigChangePerform() || frameNode == nullptr) {
         return;
     }
     auto pattern = frameNode->GetPattern<PolygonPattern>();
     CHECK_NULL_VOID(pattern);
-    auto&& updateFunc = [frameNode, points, xResObjArray, yResObjArray](const RefPtr<ResourceObject>& resObj) {
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode), points, xResObjArray, yResObjArray](
+                            const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
         if ((points.size() != xResObjArray.size()) || (points.size() != yResObjArray.size())) {
             return;
         }
@@ -86,6 +89,9 @@ void PolygonModelNG::SetPoints(FrameNode* frameNode, const ShapePoints& points,
             result.push_back(point);
         }
         ACE_UPDATE_NODE_PAINT_PROPERTY(PolygonPaintProperty, Points, result, frameNode);
+        if (frameNode->GetRerenderable()) {
+            frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        }
     };
     RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
     pattern->AddResObj("PolygonPoints", resObj, std::move(updateFunc));
