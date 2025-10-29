@@ -2948,6 +2948,22 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_SingleLengthDetent_DoubleLengthDetents_TripleLengthDetents& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Union_SizeOptions_ImageSize& src)
 {
     switch (src.selector) {
@@ -4849,6 +4865,7 @@ ASSIGN_OPT(Opt_ConstraintSizeOptions)
 ASSIGN_OPT(Opt_DividerOptions)
 ASSIGN_OPT(Opt_DividerStyle)
 ASSIGN_OPT(Opt_DotIndicator)
+ASSIGN_OPT(Opt_DoubleLengthDetents)
 ASSIGN_OPT(Opt_EdgeOutlineWidths)
 ASSIGN_OPT(Opt_Edges)
 ASSIGN_OPT(Opt_EdgeWidths)
@@ -4884,6 +4901,7 @@ ASSIGN_OPT(Opt_RingStyleOptions)
 ASSIGN_OPT(Opt_ScrollableBarModeOptions)
 ASSIGN_OPT(Opt_ScrollSnapOptions)
 ASSIGN_OPT(Opt_SearchButtonOptions)
+ASSIGN_OPT(Opt_SingleLengthDetent)
 ASSIGN_OPT(Opt_SizeOptions)
 ASSIGN_OPT(Opt_SubTabBarIndicatorStyle)
 ASSIGN_OPT(Opt_SweepGradientOptions)
@@ -4937,6 +4955,7 @@ ASSIGN_OPT(Opt_Union_Position_Edges_LocalizedEdges)
 ASSIGN_OPT(Opt_Union_Position_LocalizedPosition)
 ASSIGN_OPT(Opt_Union_RectOptions_RoundedRectOptions)
 ASSIGN_OPT(Opt_Union_ResourceStr_CustomBuilder_NavigationCommonTitle_NavigationCustomTitle)
+ASSIGN_OPT(Opt_Union_SingleLengthDetent_DoubleLengthDetents_TripleLengthDetents)
 ASSIGN_OPT(Opt_Union_SizeOptions_ImageSize)
 ASSIGN_OPT(Opt_Union_String_CustomBuilder_NavDestinationCommonTitle_NavDestinationCustomTitle_Resource)
 ASSIGN_OPT(Opt_Union_UIAbilityContext_UIContext)

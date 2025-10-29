@@ -6757,11 +6757,11 @@ export type SingleLengthDetent = [
     SheetSize | Length
 ]
 export type DoubleLengthDetents = [
-    SheetSize | Length,
+    (SheetSize | Length),
     SheetSize | Length | undefined
 ]
 export type TripleLengthDetents = [
-    SheetSize | Length,
+    (SheetSize | Length),
     SheetSize | Length | undefined,
     SheetSize | Length | undefined
 ]
@@ -6769,7 +6769,7 @@ export interface SheetOptions extends BindOptions {
     height?: SheetSize | Length;
     dragBar?: boolean;
     maskColor?: ResourceColor;
-    detents?: TripleLengthDetents;
+    detents?: SingleLengthDetent | DoubleLengthDetents | TripleLengthDetents;
     blurStyle?: BlurStyle;
     showClose?: boolean | Resource;
     preferType?: SheetType;
@@ -19992,83 +19992,165 @@ export class SheetOptions_serializer {
         if (valueHolderForDetents !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForDetentsTmpValue  = valueHolderForDetents!
-            const valueHolderForDetentsTmpValue_0  = valueHolderForDetentsTmpValue[0]
-            if (valueHolderForDetentsTmpValue_0 instanceof SheetSize) {
+            if (valueHolderForDetentsTmpValue instanceof Tuple1) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForDetentsTmpValue_0ForIdx0  = valueHolderForDetentsTmpValue_0 as SheetSize
-                valueSerializer.writeInt32(valueHolderForDetentsTmpValue_0ForIdx0.valueOf())
-            } else if (valueHolderForDetentsTmpValue_0 instanceof Length) {
+                const valueHolderForDetentsTmpValueForIdx0  = valueHolderForDetentsTmpValue as SingleLengthDetent
+                const valueHolderForDetentsTmpValueForIdx0_0  = valueHolderForDetentsTmpValueForIdx0[0]
+                if (valueHolderForDetentsTmpValueForIdx0_0 instanceof SheetSize) {
+                    valueSerializer.writeInt8((0).toByte())
+                    const valueHolderForDetentsTmpValueForIdx0_0ForIdx0  = valueHolderForDetentsTmpValueForIdx0_0 as SheetSize
+                    valueSerializer.writeInt32(valueHolderForDetentsTmpValueForIdx0_0ForIdx0.valueOf())
+                } else if (valueHolderForDetentsTmpValueForIdx0_0 instanceof Length) {
+                    valueSerializer.writeInt8((1).toByte())
+                    const valueHolderForDetentsTmpValueForIdx0_0ForIdx1  = valueHolderForDetentsTmpValueForIdx0_0 as Length
+                    if (valueHolderForDetentsTmpValueForIdx0_0ForIdx1 instanceof string) {
+                        valueSerializer.writeInt8((0).toByte())
+                        const valueHolderForDetentsTmpValueForIdx0_0ForIdx1ForIdx0  = valueHolderForDetentsTmpValueForIdx0_0ForIdx1 as string
+                        valueSerializer.writeString(valueHolderForDetentsTmpValueForIdx0_0ForIdx1ForIdx0)
+                    } else if (valueHolderForDetentsTmpValueForIdx0_0ForIdx1 instanceof number) {
+                        valueSerializer.writeInt8((1).toByte())
+                        const valueHolderForDetentsTmpValueForIdx0_0ForIdx1ForIdx1  = valueHolderForDetentsTmpValueForIdx0_0ForIdx1 as number
+                        valueSerializer.writeNumber(valueHolderForDetentsTmpValueForIdx0_0ForIdx1ForIdx1)
+                    } else if (valueHolderForDetentsTmpValueForIdx0_0ForIdx1 instanceof Resource) {
+                        valueSerializer.writeInt8((2).toByte())
+                        const valueHolderForDetentsTmpValueForIdx0_0ForIdx1ForIdx2  = valueHolderForDetentsTmpValueForIdx0_0ForIdx1 as Resource
+                        Resource_serializer.write(valueSerializer, valueHolderForDetentsTmpValueForIdx0_0ForIdx1ForIdx2)
+                    }
+                }
+            } else if (valueHolderForDetentsTmpValue instanceof Tuple2) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForDetentsTmpValue_0ForIdx1  = valueHolderForDetentsTmpValue_0 as Length
-                if (valueHolderForDetentsTmpValue_0ForIdx1 instanceof string) {
+                const valueHolderForDetentsTmpValueForIdx1  = valueHolderForDetentsTmpValue as DoubleLengthDetents
+                const valueHolderForDetentsTmpValueForIdx1_0  = valueHolderForDetentsTmpValueForIdx1[0]
+                if (valueHolderForDetentsTmpValueForIdx1_0 instanceof SheetSize) {
                     valueSerializer.writeInt8((0).toByte())
-                    const valueHolderForDetentsTmpValue_0ForIdx1ForIdx0  = valueHolderForDetentsTmpValue_0ForIdx1 as string
-                    valueSerializer.writeString(valueHolderForDetentsTmpValue_0ForIdx1ForIdx0)
-                } else if (valueHolderForDetentsTmpValue_0ForIdx1 instanceof double) {
+                    const valueHolderForDetentsTmpValueForIdx1_0ForIdx0  = valueHolderForDetentsTmpValueForIdx1_0 as SheetSize
+                    valueSerializer.writeInt32(valueHolderForDetentsTmpValueForIdx1_0ForIdx0.valueOf())
+                } else if (valueHolderForDetentsTmpValueForIdx1_0 instanceof Length) {
                     valueSerializer.writeInt8((1).toByte())
-                    const valueHolderForDetentsTmpValue_0ForIdx1ForIdx1  = valueHolderForDetentsTmpValue_0ForIdx1 as double
-                    valueSerializer.writeFloat64(valueHolderForDetentsTmpValue_0ForIdx1ForIdx1)
-                } else if (valueHolderForDetentsTmpValue_0ForIdx1 instanceof Resource) {
-                    valueSerializer.writeInt8((2).toByte())
-                    const valueHolderForDetentsTmpValue_0ForIdx1ForIdx2  = valueHolderForDetentsTmpValue_0ForIdx1 as Resource
-                    Resource_serializer.write(valueSerializer, valueHolderForDetentsTmpValue_0ForIdx1ForIdx2)
-                }
-            }
-            const valueHolderForDetentsTmpValue_1  = valueHolderForDetentsTmpValue[1]
-            if (valueHolderForDetentsTmpValue_1 !== undefined) {
-                valueSerializer.writeInt8(RuntimeType.OBJECT)
-                const valueHolderForDetentsTmpValue_1TmpValue  = valueHolderForDetentsTmpValue_1!
-                if (valueHolderForDetentsTmpValue_1TmpValue instanceof SheetSize) {
-                    valueSerializer.writeInt8((0).toByte())
-                    const valueHolderForDetentsTmpValue_1TmpValueForIdx0  = valueHolderForDetentsTmpValue_1TmpValue as SheetSize
-                    valueSerializer.writeInt32(valueHolderForDetentsTmpValue_1TmpValueForIdx0.valueOf())
-                } else if (valueHolderForDetentsTmpValue_1TmpValue instanceof Length) {
-                    valueSerializer.writeInt8((1).toByte())
-                    const valueHolderForDetentsTmpValue_1TmpValueForIdx1  = valueHolderForDetentsTmpValue_1TmpValue as Length
-                    if (valueHolderForDetentsTmpValue_1TmpValueForIdx1 instanceof string) {
+                    const valueHolderForDetentsTmpValueForIdx1_0ForIdx1  = valueHolderForDetentsTmpValueForIdx1_0 as Length
+                    if (valueHolderForDetentsTmpValueForIdx1_0ForIdx1 instanceof string) {
                         valueSerializer.writeInt8((0).toByte())
-                        const valueHolderForDetentsTmpValue_1TmpValueForIdx1ForIdx0  = valueHolderForDetentsTmpValue_1TmpValueForIdx1 as string
-                        valueSerializer.writeString(valueHolderForDetentsTmpValue_1TmpValueForIdx1ForIdx0)
-                    } else if (valueHolderForDetentsTmpValue_1TmpValueForIdx1 instanceof double) {
+                        const valueHolderForDetentsTmpValueForIdx1_0ForIdx1ForIdx0  = valueHolderForDetentsTmpValueForIdx1_0ForIdx1 as string
+                        valueSerializer.writeString(valueHolderForDetentsTmpValueForIdx1_0ForIdx1ForIdx0)
+                    } else if (valueHolderForDetentsTmpValueForIdx1_0ForIdx1 instanceof number) {
                         valueSerializer.writeInt8((1).toByte())
-                        const valueHolderForDetentsTmpValue_1TmpValueForIdx1ForIdx1  = valueHolderForDetentsTmpValue_1TmpValueForIdx1 as double
-                        valueSerializer.writeFloat64(valueHolderForDetentsTmpValue_1TmpValueForIdx1ForIdx1)
-                    } else if (valueHolderForDetentsTmpValue_1TmpValueForIdx1 instanceof Resource) {
+                        const valueHolderForDetentsTmpValueForIdx1_0ForIdx1ForIdx1  = valueHolderForDetentsTmpValueForIdx1_0ForIdx1 as number
+                        valueSerializer.writeNumber(valueHolderForDetentsTmpValueForIdx1_0ForIdx1ForIdx1)
+                    } else if (valueHolderForDetentsTmpValueForIdx1_0ForIdx1 instanceof Resource) {
                         valueSerializer.writeInt8((2).toByte())
-                        const valueHolderForDetentsTmpValue_1TmpValueForIdx1ForIdx2  = valueHolderForDetentsTmpValue_1TmpValueForIdx1 as Resource
-                        Resource_serializer.write(valueSerializer, valueHolderForDetentsTmpValue_1TmpValueForIdx1ForIdx2)
+                        const valueHolderForDetentsTmpValueForIdx1_0ForIdx1ForIdx2  = valueHolderForDetentsTmpValueForIdx1_0ForIdx1 as Resource
+                        Resource_serializer.write(valueSerializer, valueHolderForDetentsTmpValueForIdx1_0ForIdx1ForIdx2)
                     }
                 }
-            } else {
-                valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-            }
-            const valueHolderForDetentsTmpValue_2  = valueHolderForDetentsTmpValue[2]
-            if (valueHolderForDetentsTmpValue_2 !== undefined) {
-                valueSerializer.writeInt8(RuntimeType.OBJECT)
-                const valueHolderForDetentsTmpValue_2TmpValue  = valueHolderForDetentsTmpValue_2!
-                if (valueHolderForDetentsTmpValue_2TmpValue instanceof SheetSize) {
-                    valueSerializer.writeInt8((0).toByte())
-                    const valueHolderForDetentsTmpValue_2TmpValueForIdx0  = valueHolderForDetentsTmpValue_2TmpValue as SheetSize
-                    valueSerializer.writeInt32(valueHolderForDetentsTmpValue_2TmpValueForIdx0.valueOf())
-                } else if (valueHolderForDetentsTmpValue_2TmpValue instanceof Length) {
-                    valueSerializer.writeInt8((1).toByte())
-                    const valueHolderForDetentsTmpValue_2TmpValueForIdx1  = valueHolderForDetentsTmpValue_2TmpValue as Length
-                    if (valueHolderForDetentsTmpValue_2TmpValueForIdx1 instanceof string) {
+                const valueHolderForDetentsTmpValueForIdx1_1  = valueHolderForDetentsTmpValueForIdx1[1]
+                if (valueHolderForDetentsTmpValueForIdx1_1 !== undefined) {
+                    valueSerializer.writeInt8(RuntimeType.OBJECT)
+                    const valueHolderForDetentsTmpValueForIdx1_1TmpValue  = valueHolderForDetentsTmpValueForIdx1_1!
+                    if (valueHolderForDetentsTmpValueForIdx1_1TmpValue instanceof SheetSize) {
                         valueSerializer.writeInt8((0).toByte())
-                        const valueHolderForDetentsTmpValue_2TmpValueForIdx1ForIdx0  = valueHolderForDetentsTmpValue_2TmpValueForIdx1 as string
-                        valueSerializer.writeString(valueHolderForDetentsTmpValue_2TmpValueForIdx1ForIdx0)
-                    } else if (valueHolderForDetentsTmpValue_2TmpValueForIdx1 instanceof double) {
+                        const valueHolderForDetentsTmpValueForIdx1_1TmpValueForIdx0  = valueHolderForDetentsTmpValueForIdx1_1TmpValue as SheetSize
+                        valueSerializer.writeInt32(valueHolderForDetentsTmpValueForIdx1_1TmpValueForIdx0.valueOf())
+                    } else if (valueHolderForDetentsTmpValueForIdx1_1TmpValue instanceof Length) {
                         valueSerializer.writeInt8((1).toByte())
-                        const valueHolderForDetentsTmpValue_2TmpValueForIdx1ForIdx1  = valueHolderForDetentsTmpValue_2TmpValueForIdx1 as double
-                        valueSerializer.writeFloat64(valueHolderForDetentsTmpValue_2TmpValueForIdx1ForIdx1)
-                    } else if (valueHolderForDetentsTmpValue_2TmpValueForIdx1 instanceof Resource) {
+                        const valueHolderForDetentsTmpValueForIdx1_1TmpValueForIdx1  = valueHolderForDetentsTmpValueForIdx1_1TmpValue as Length
+                        if (valueHolderForDetentsTmpValueForIdx1_1TmpValueForIdx1 instanceof string) {
+                            valueSerializer.writeInt8((0).toByte())
+                            const valueHolderForDetentsTmpValueForIdx1_1TmpValueForIdx1ForIdx0  = valueHolderForDetentsTmpValueForIdx1_1TmpValueForIdx1 as string
+                            valueSerializer.writeString(valueHolderForDetentsTmpValueForIdx1_1TmpValueForIdx1ForIdx0)
+                        } else if (valueHolderForDetentsTmpValueForIdx1_1TmpValueForIdx1 instanceof number) {
+                            valueSerializer.writeInt8((1).toByte())
+                            const valueHolderForDetentsTmpValueForIdx1_1TmpValueForIdx1ForIdx1  = valueHolderForDetentsTmpValueForIdx1_1TmpValueForIdx1 as number
+                            valueSerializer.writeNumber(valueHolderForDetentsTmpValueForIdx1_1TmpValueForIdx1ForIdx1)
+                        } else if (valueHolderForDetentsTmpValueForIdx1_1TmpValueForIdx1 instanceof Resource) {
+                            valueSerializer.writeInt8((2).toByte())
+                            const valueHolderForDetentsTmpValueForIdx1_1TmpValueForIdx1ForIdx2  = valueHolderForDetentsTmpValueForIdx1_1TmpValueForIdx1 as Resource
+                            Resource_serializer.write(valueSerializer, valueHolderForDetentsTmpValueForIdx1_1TmpValueForIdx1ForIdx2)
+                        }
+                    }
+                } else {
+                    valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+                }
+            } else if (valueHolderForDetentsTmpValue instanceof Tuple3) {
+                valueSerializer.writeInt8((2).toByte())
+                const valueHolderForDetentsTmpValueForIdx2  = valueHolderForDetentsTmpValue as TripleLengthDetents
+                const valueHolderForDetentsTmpValueForIdx2_0  = valueHolderForDetentsTmpValueForIdx2[0]
+                if (valueHolderForDetentsTmpValueForIdx2_0 instanceof SheetSize) {
+                    valueSerializer.writeInt8((0).toByte())
+                    const valueHolderForDetentsTmpValueForIdx2_0ForIdx0  = valueHolderForDetentsTmpValueForIdx2_0 as SheetSize
+                    valueSerializer.writeInt32(valueHolderForDetentsTmpValueForIdx2_0ForIdx0.valueOf())
+                } else if (valueHolderForDetentsTmpValueForIdx2_0 instanceof Length) {
+                    valueSerializer.writeInt8((1).toByte())
+                    const valueHolderForDetentsTmpValueForIdx2_0ForIdx1  = valueHolderForDetentsTmpValueForIdx2_0 as Length
+                    if (valueHolderForDetentsTmpValueForIdx2_0ForIdx1 instanceof string) {
+                        valueSerializer.writeInt8((0).toByte())
+                        const valueHolderForDetentsTmpValueForIdx2_0ForIdx1ForIdx0  = valueHolderForDetentsTmpValueForIdx2_0ForIdx1 as string
+                        valueSerializer.writeString(valueHolderForDetentsTmpValueForIdx2_0ForIdx1ForIdx0)
+                    } else if (valueHolderForDetentsTmpValueForIdx2_0ForIdx1 instanceof number) {
+                        valueSerializer.writeInt8((1).toByte())
+                        const valueHolderForDetentsTmpValueForIdx2_0ForIdx1ForIdx1  = valueHolderForDetentsTmpValueForIdx2_0ForIdx1 as number
+                        valueSerializer.writeNumber(valueHolderForDetentsTmpValueForIdx2_0ForIdx1ForIdx1)
+                    } else if (valueHolderForDetentsTmpValueForIdx2_0ForIdx1 instanceof Resource) {
                         valueSerializer.writeInt8((2).toByte())
-                        const valueHolderForDetentsTmpValue_2TmpValueForIdx1ForIdx2  = valueHolderForDetentsTmpValue_2TmpValueForIdx1 as Resource
-                        Resource_serializer.write(valueSerializer, valueHolderForDetentsTmpValue_2TmpValueForIdx1ForIdx2)
+                        const valueHolderForDetentsTmpValueForIdx2_0ForIdx1ForIdx2  = valueHolderForDetentsTmpValueForIdx2_0ForIdx1 as Resource
+                        Resource_serializer.write(valueSerializer, valueHolderForDetentsTmpValueForIdx2_0ForIdx1ForIdx2)
                     }
                 }
-            } else {
-                valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+                const valueHolderForDetentsTmpValueForIdx2_1  = valueHolderForDetentsTmpValueForIdx2[1]
+                if (valueHolderForDetentsTmpValueForIdx2_1 !== undefined) {
+                    valueSerializer.writeInt8(RuntimeType.OBJECT)
+                    const valueHolderForDetentsTmpValueForIdx2_1TmpValue  = valueHolderForDetentsTmpValueForIdx2_1!
+                    if (valueHolderForDetentsTmpValueForIdx2_1TmpValue instanceof SheetSize) {
+                        valueSerializer.writeInt8((0).toByte())
+                        const valueHolderForDetentsTmpValueForIdx2_1TmpValueForIdx0  = valueHolderForDetentsTmpValueForIdx2_1TmpValue as SheetSize
+                        valueSerializer.writeInt32(valueHolderForDetentsTmpValueForIdx2_1TmpValueForIdx0.valueOf())
+                    } else if (valueHolderForDetentsTmpValueForIdx2_1TmpValue instanceof Length) {
+                        valueSerializer.writeInt8((1).toByte())
+                        const valueHolderForDetentsTmpValueForIdx2_1TmpValueForIdx1  = valueHolderForDetentsTmpValueForIdx2_1TmpValue as Length
+                        if (valueHolderForDetentsTmpValueForIdx2_1TmpValueForIdx1 instanceof string) {
+                            valueSerializer.writeInt8((0).toByte())
+                            const valueHolderForDetentsTmpValueForIdx2_1TmpValueForIdx1ForIdx0  = valueHolderForDetentsTmpValueForIdx2_1TmpValueForIdx1 as string
+                            valueSerializer.writeString(valueHolderForDetentsTmpValueForIdx2_1TmpValueForIdx1ForIdx0)
+                        } else if (valueHolderForDetentsTmpValueForIdx2_1TmpValueForIdx1 instanceof number) {
+                            valueSerializer.writeInt8((1).toByte())
+                            const valueHolderForDetentsTmpValueForIdx2_1TmpValueForIdx1ForIdx1  = valueHolderForDetentsTmpValueForIdx2_1TmpValueForIdx1 as number
+                            valueSerializer.writeNumber(valueHolderForDetentsTmpValueForIdx2_1TmpValueForIdx1ForIdx1)
+                        } else if (valueHolderForDetentsTmpValueForIdx2_1TmpValueForIdx1 instanceof Resource) {
+                            valueSerializer.writeInt8((2).toByte())
+                            const valueHolderForDetentsTmpValueForIdx2_1TmpValueForIdx1ForIdx2  = valueHolderForDetentsTmpValueForIdx2_1TmpValueForIdx1 as Resource
+                            Resource_serializer.write(valueSerializer, valueHolderForDetentsTmpValueForIdx2_1TmpValueForIdx1ForIdx2)
+                        }
+                    }
+                } else {
+                    valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+                }
+                const valueHolderForDetentsTmpValueForIdx2_2  = valueHolderForDetentsTmpValueForIdx2[2]
+                if (valueHolderForDetentsTmpValueForIdx2_2 !== undefined) {
+                    valueSerializer.writeInt8(RuntimeType.OBJECT)
+                    const valueHolderForDetentsTmpValueForIdx2_2TmpValue  = valueHolderForDetentsTmpValueForIdx2_2!
+                    if (valueHolderForDetentsTmpValueForIdx2_2TmpValue instanceof SheetSize) {
+                        valueSerializer.writeInt8((0).toByte())
+                        const valueHolderForDetentsTmpValueForIdx2_2TmpValueForIdx0  = valueHolderForDetentsTmpValueForIdx2_2TmpValue as SheetSize
+                        valueSerializer.writeInt32(valueHolderForDetentsTmpValueForIdx2_2TmpValueForIdx0.valueOf())
+                    } else if (valueHolderForDetentsTmpValueForIdx2_2TmpValue instanceof Length) {
+                        valueSerializer.writeInt8((1).toByte())
+                        const valueHolderForDetentsTmpValueForIdx2_2TmpValueForIdx1  = valueHolderForDetentsTmpValueForIdx2_2TmpValue as Length
+                        if (valueHolderForDetentsTmpValueForIdx2_2TmpValueForIdx1 instanceof string) {
+                            valueSerializer.writeInt8((0).toByte())
+                            const valueHolderForDetentsTmpValueForIdx2_2TmpValueForIdx1ForIdx0  = valueHolderForDetentsTmpValueForIdx2_2TmpValueForIdx1 as string
+                            valueSerializer.writeString(valueHolderForDetentsTmpValueForIdx2_2TmpValueForIdx1ForIdx0)
+                        } else if (valueHolderForDetentsTmpValueForIdx2_2TmpValueForIdx1 instanceof number) {
+                            valueSerializer.writeInt8((1).toByte())
+                            const valueHolderForDetentsTmpValueForIdx2_2TmpValueForIdx1ForIdx1  = valueHolderForDetentsTmpValueForIdx2_2TmpValueForIdx1 as number
+                            valueSerializer.writeNumber(valueHolderForDetentsTmpValueForIdx2_2TmpValueForIdx1ForIdx1)
+                        } else if (valueHolderForDetentsTmpValueForIdx2_2TmpValueForIdx1 instanceof Resource) {
+                            valueSerializer.writeInt8((2).toByte())
+                            const valueHolderForDetentsTmpValueForIdx2_2TmpValueForIdx1ForIdx2  = valueHolderForDetentsTmpValueForIdx2_2TmpValueForIdx1 as Resource
+                            Resource_serializer.write(valueSerializer, valueHolderForDetentsTmpValueForIdx2_2TmpValueForIdx1ForIdx2)
+                        }
+                    }
+                } else {
+                    valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+                }
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -20583,84 +20665,163 @@ export class SheetOptions_serializer {
         }
         const maskColorTmpResult : ResourceColor | undefined = maskColorTmpBuf
         const detentsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let detentsTmpBuf : TripleLengthDetents | undefined = undefined
+        let detentsTmpBuf : SingleLengthDetent | DoubleLengthDetents | TripleLengthDetents | undefined = undefined
         if ((detentsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const detentsTmpBuf_Value0TempBufUnionSelector : int32 = valueDeserializer.readInt8()
-            let detentsTmpBuf_Value0TempBuf : SheetSize | Length | undefined
-            if (detentsTmpBuf_Value0TempBufUnionSelector == (0).toChar()) {
-                detentsTmpBuf_Value0TempBuf = SheetSize.fromValue(valueDeserializer.readInt32())
-            } else if (detentsTmpBuf_Value0TempBufUnionSelector == (1).toChar()) {
-                const detentsTmpBuf_Value0TempBufBufUUnionSelector : int32 = valueDeserializer.readInt8()
-                let detentsTmpBuf_Value0TempBufBufU : string | double | Resource | undefined
-                if (detentsTmpBuf_Value0TempBufBufUUnionSelector == (0).toChar()) {
-                    detentsTmpBuf_Value0TempBufBufU = (valueDeserializer.readString() as string)
-                } else if (detentsTmpBuf_Value0TempBufBufUUnionSelector == (1).toChar()) {
-                    detentsTmpBuf_Value0TempBufBufU = valueDeserializer.readFloat64()
-                } else if (detentsTmpBuf_Value0TempBufBufUUnionSelector == (2).toChar()) {
-                    detentsTmpBuf_Value0TempBufBufU = Resource_serializer.read(valueDeserializer)
+            const detentsTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let detentsTmpBuf_ : SingleLengthDetent | DoubleLengthDetents | TripleLengthDetents | undefined
+            if (detentsTmpBuf_UnionSelector == (0).toChar()) {
+                const detentsTmpBuf_BufUValue0TempBufUnionSelector : int32 = valueDeserializer.readInt8()
+                let detentsTmpBuf_BufUValue0TempBuf : SheetSize | Length | undefined
+                if (detentsTmpBuf_BufUValue0TempBufUnionSelector == (0).toChar()) {
+                    detentsTmpBuf_BufUValue0TempBuf = SheetSize.fromValue(valueDeserializer.readInt32())
+                } else if (detentsTmpBuf_BufUValue0TempBufUnionSelector == (1).toChar()) {
+                    const detentsTmpBuf_BufUValue0TempBufBufUUnionSelector : int32 = valueDeserializer.readInt8()
+                    let detentsTmpBuf_BufUValue0TempBufBufU : string | number | Resource | undefined
+                    if (detentsTmpBuf_BufUValue0TempBufBufUUnionSelector == (0).toChar()) {
+                        detentsTmpBuf_BufUValue0TempBufBufU = (valueDeserializer.readString() as string)
+                    } else if (detentsTmpBuf_BufUValue0TempBufBufUUnionSelector == (1).toChar()) {
+                        detentsTmpBuf_BufUValue0TempBufBufU = (valueDeserializer.readNumber() as number)
+                    } else if (detentsTmpBuf_BufUValue0TempBufBufUUnionSelector == (2).toChar()) {
+                        detentsTmpBuf_BufUValue0TempBufBufU = Resource_serializer.read(valueDeserializer)
+                    } else {
+                        throw new Error("One of the branches for detentsTmpBuf_BufUValue0TempBufBufU has to be chosen through deserialisation.")
+                    }
+                    detentsTmpBuf_BufUValue0TempBuf = (detentsTmpBuf_BufUValue0TempBufBufU as string | number | Resource)
                 } else {
-                    throw new Error("One of the branches for detentsTmpBuf_Value0TempBufBufU has to be chosen through deserialisation.")
+                    throw new Error("One of the branches for detentsTmpBuf_BufUValue0TempBuf has to be chosen through deserialisation.")
                 }
-                detentsTmpBuf_Value0TempBuf = (detentsTmpBuf_Value0TempBufBufU as string | double | Resource)
+                const detentsTmpBuf_BufUValue0 : SheetSize | Length = (detentsTmpBuf_BufUValue0TempBuf as SheetSize | Length)
+                detentsTmpBuf_ = ([detentsTmpBuf_BufUValue0] as SingleLengthDetent)
+            } else if (detentsTmpBuf_UnionSelector == (1).toChar()) {
+                const detentsTmpBuf_BufUValue0TempBufUnionSelector : int32 = valueDeserializer.readInt8()
+                let detentsTmpBuf_BufUValue0TempBuf : SheetSize | Length | undefined
+                if (detentsTmpBuf_BufUValue0TempBufUnionSelector == (0).toChar()) {
+                    detentsTmpBuf_BufUValue0TempBuf = SheetSize.fromValue(valueDeserializer.readInt32())
+                } else if (detentsTmpBuf_BufUValue0TempBufUnionSelector == (1).toChar()) {
+                    const detentsTmpBuf_BufUValue0TempBufBufUUnionSelector : int32 = valueDeserializer.readInt8()
+                    let detentsTmpBuf_BufUValue0TempBufBufU : string | number | Resource | undefined
+                    if (detentsTmpBuf_BufUValue0TempBufBufUUnionSelector == (0).toChar()) {
+                        detentsTmpBuf_BufUValue0TempBufBufU = (valueDeserializer.readString() as string)
+                    } else if (detentsTmpBuf_BufUValue0TempBufBufUUnionSelector == (1).toChar()) {
+                        detentsTmpBuf_BufUValue0TempBufBufU = (valueDeserializer.readNumber() as number)
+                    } else if (detentsTmpBuf_BufUValue0TempBufBufUUnionSelector == (2).toChar()) {
+                        detentsTmpBuf_BufUValue0TempBufBufU = Resource_serializer.read(valueDeserializer)
+                    } else {
+                        throw new Error("One of the branches for detentsTmpBuf_BufUValue0TempBufBufU has to be chosen through deserialisation.")
+                    }
+                    detentsTmpBuf_BufUValue0TempBuf = (detentsTmpBuf_BufUValue0TempBufBufU as string | number | Resource)
+                } else {
+                    throw new Error("One of the branches for detentsTmpBuf_BufUValue0TempBuf has to be chosen through deserialisation.")
+                }
+                const detentsTmpBuf_BufUValue0 : SheetSize | Length = (detentsTmpBuf_BufUValue0TempBuf as SheetSize | Length)
+                const detentsTmpBuf_BufUValue1TempBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+                let detentsTmpBuf_BufUValue1TempBuf : SheetSize | Length | undefined = undefined
+                if ((detentsTmpBuf_BufUValue1TempBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+                    const detentsTmpBuf_BufUValue1TempBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+                    let detentsTmpBuf_BufUValue1TempBuf_ : SheetSize | Length | undefined
+                    if (detentsTmpBuf_BufUValue1TempBuf_UnionSelector == (0).toChar()) {
+                        detentsTmpBuf_BufUValue1TempBuf_ = SheetSize.fromValue(valueDeserializer.readInt32())
+                    } else if (detentsTmpBuf_BufUValue1TempBuf_UnionSelector == (1).toChar()) {
+                        const detentsTmpBuf_BufUValue1TempBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
+                        let detentsTmpBuf_BufUValue1TempBuf_BufU : string | number | Resource | undefined
+                        if (detentsTmpBuf_BufUValue1TempBuf_BufUUnionSelector == (0).toChar()) {
+                            detentsTmpBuf_BufUValue1TempBuf_BufU = (valueDeserializer.readString() as string)
+                        } else if (detentsTmpBuf_BufUValue1TempBuf_BufUUnionSelector == (1).toChar()) {
+                            detentsTmpBuf_BufUValue1TempBuf_BufU = (valueDeserializer.readNumber() as number)
+                        } else if (detentsTmpBuf_BufUValue1TempBuf_BufUUnionSelector == (2).toChar()) {
+                            detentsTmpBuf_BufUValue1TempBuf_BufU = Resource_serializer.read(valueDeserializer)
+                        } else {
+                            throw new Error("One of the branches for detentsTmpBuf_BufUValue1TempBuf_BufU has to be chosen through deserialisation.")
+                        }
+                        detentsTmpBuf_BufUValue1TempBuf_ = (detentsTmpBuf_BufUValue1TempBuf_BufU as string | number | Resource)
+                    } else {
+                        throw new Error("One of the branches for detentsTmpBuf_BufUValue1TempBuf_ has to be chosen through deserialisation.")
+                    }
+                    detentsTmpBuf_BufUValue1TempBuf = (detentsTmpBuf_BufUValue1TempBuf_ as SheetSize | Length)
+                }
+                const detentsTmpBuf_BufUValue1 : SheetSize | Length | undefined = detentsTmpBuf_BufUValue1TempBuf
+                detentsTmpBuf_ = ([detentsTmpBuf_BufUValue0, detentsTmpBuf_BufUValue1] as DoubleLengthDetents)
+            } else if (detentsTmpBuf_UnionSelector == (2).toChar()) {
+                const detentsTmpBuf_BufUValue0TempBufUnionSelector : int32 = valueDeserializer.readInt8()
+                let detentsTmpBuf_BufUValue0TempBuf : SheetSize | Length | undefined
+                if (detentsTmpBuf_BufUValue0TempBufUnionSelector == (0).toChar()) {
+                    detentsTmpBuf_BufUValue0TempBuf = SheetSize.fromValue(valueDeserializer.readInt32())
+                } else if (detentsTmpBuf_BufUValue0TempBufUnionSelector == (1).toChar()) {
+                    const detentsTmpBuf_BufUValue0TempBufBufUUnionSelector : int32 = valueDeserializer.readInt8()
+                    let detentsTmpBuf_BufUValue0TempBufBufU : string | number | Resource | undefined
+                    if (detentsTmpBuf_BufUValue0TempBufBufUUnionSelector == (0).toChar()) {
+                        detentsTmpBuf_BufUValue0TempBufBufU = (valueDeserializer.readString() as string)
+                    } else if (detentsTmpBuf_BufUValue0TempBufBufUUnionSelector == (1).toChar()) {
+                        detentsTmpBuf_BufUValue0TempBufBufU = (valueDeserializer.readNumber() as number)
+                    } else if (detentsTmpBuf_BufUValue0TempBufBufUUnionSelector == (2).toChar()) {
+                        detentsTmpBuf_BufUValue0TempBufBufU = Resource_serializer.read(valueDeserializer)
+                    } else {
+                        throw new Error("One of the branches for detentsTmpBuf_BufUValue0TempBufBufU has to be chosen through deserialisation.")
+                    }
+                    detentsTmpBuf_BufUValue0TempBuf = (detentsTmpBuf_BufUValue0TempBufBufU as string | number | Resource)
+                } else {
+                    throw new Error("One of the branches for detentsTmpBuf_BufUValue0TempBuf has to be chosen through deserialisation.")
+                }
+                const detentsTmpBuf_BufUValue0 : SheetSize | Length = (detentsTmpBuf_BufUValue0TempBuf as SheetSize | Length)
+                const detentsTmpBuf_BufUValue1TempBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+                let detentsTmpBuf_BufUValue1TempBuf : SheetSize | Length | undefined = undefined
+                if ((detentsTmpBuf_BufUValue1TempBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+                    const detentsTmpBuf_BufUValue1TempBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+                    let detentsTmpBuf_BufUValue1TempBuf_ : SheetSize | Length | undefined
+                    if (detentsTmpBuf_BufUValue1TempBuf_UnionSelector == (0).toChar()) {
+                        detentsTmpBuf_BufUValue1TempBuf_ = SheetSize.fromValue(valueDeserializer.readInt32())
+                    } else if (detentsTmpBuf_BufUValue1TempBuf_UnionSelector == (1).toChar()) {
+                        const detentsTmpBuf_BufUValue1TempBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
+                        let detentsTmpBuf_BufUValue1TempBuf_BufU : string | number | Resource | undefined
+                        if (detentsTmpBuf_BufUValue1TempBuf_BufUUnionSelector == (0).toChar()) {
+                            detentsTmpBuf_BufUValue1TempBuf_BufU = (valueDeserializer.readString() as string)
+                        } else if (detentsTmpBuf_BufUValue1TempBuf_BufUUnionSelector == (1).toChar()) {
+                            detentsTmpBuf_BufUValue1TempBuf_BufU = (valueDeserializer.readNumber() as number)
+                        } else if (detentsTmpBuf_BufUValue1TempBuf_BufUUnionSelector == (2).toChar()) {
+                            detentsTmpBuf_BufUValue1TempBuf_BufU = Resource_serializer.read(valueDeserializer)
+                        } else {
+                            throw new Error("One of the branches for detentsTmpBuf_BufUValue1TempBuf_BufU has to be chosen through deserialisation.")
+                        }
+                        detentsTmpBuf_BufUValue1TempBuf_ = (detentsTmpBuf_BufUValue1TempBuf_BufU as string | number | Resource)
+                    } else {
+                        throw new Error("One of the branches for detentsTmpBuf_BufUValue1TempBuf_ has to be chosen through deserialisation.")
+                    }
+                    detentsTmpBuf_BufUValue1TempBuf = (detentsTmpBuf_BufUValue1TempBuf_ as SheetSize | Length)
+                }
+                const detentsTmpBuf_BufUValue1 : SheetSize | Length | undefined = detentsTmpBuf_BufUValue1TempBuf
+                const detentsTmpBuf_BufUValue2TempBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+                let detentsTmpBuf_BufUValue2TempBuf : SheetSize | Length | undefined = undefined
+                if ((detentsTmpBuf_BufUValue2TempBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+                    const detentsTmpBuf_BufUValue2TempBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+                    let detentsTmpBuf_BufUValue2TempBuf_ : SheetSize | Length | undefined
+                    if (detentsTmpBuf_BufUValue2TempBuf_UnionSelector == (0).toChar()) {
+                        detentsTmpBuf_BufUValue2TempBuf_ = SheetSize.fromValue(valueDeserializer.readInt32())
+                    } else if (detentsTmpBuf_BufUValue2TempBuf_UnionSelector == (1).toChar()) {
+                        const detentsTmpBuf_BufUValue2TempBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
+                        let detentsTmpBuf_BufUValue2TempBuf_BufU : string | number | Resource | undefined
+                        if (detentsTmpBuf_BufUValue2TempBuf_BufUUnionSelector == (0).toChar()) {
+                            detentsTmpBuf_BufUValue2TempBuf_BufU = (valueDeserializer.readString() as string)
+                        } else if (detentsTmpBuf_BufUValue2TempBuf_BufUUnionSelector == (1).toChar()) {
+                            detentsTmpBuf_BufUValue2TempBuf_BufU = (valueDeserializer.readNumber() as number)
+                        } else if (detentsTmpBuf_BufUValue2TempBuf_BufUUnionSelector == (2).toChar()) {
+                            detentsTmpBuf_BufUValue2TempBuf_BufU = Resource_serializer.read(valueDeserializer)
+                        } else {
+                            throw new Error("One of the branches for detentsTmpBuf_BufUValue2TempBuf_BufU has to be chosen through deserialisation.")
+                        }
+                        detentsTmpBuf_BufUValue2TempBuf_ = (detentsTmpBuf_BufUValue2TempBuf_BufU as string | number | Resource)
+                    } else {
+                        throw new Error("One of the branches for detentsTmpBuf_BufUValue2TempBuf_ has to be chosen through deserialisation.")
+                    }
+                    detentsTmpBuf_BufUValue2TempBuf = (detentsTmpBuf_BufUValue2TempBuf_ as SheetSize | Length)
+                }
+                const detentsTmpBuf_BufUValue2 : SheetSize | Length | undefined = detentsTmpBuf_BufUValue2TempBuf
+                detentsTmpBuf_ = ([detentsTmpBuf_BufUValue0, detentsTmpBuf_BufUValue1, detentsTmpBuf_BufUValue2] as TripleLengthDetents)
             } else {
-                throw new Error("One of the branches for detentsTmpBuf_Value0TempBuf has to be chosen through deserialisation.")
+                throw new Error("One of the branches for detentsTmpBuf_ has to be chosen through deserialisation.")
             }
-            const detentsTmpBuf_Value0 : SheetSize | Length = (detentsTmpBuf_Value0TempBuf as SheetSize | Length)
-            const detentsTmpBuf_Value1TempBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-            let detentsTmpBuf_Value1TempBuf : SheetSize | Length | undefined = undefined
-            if ((detentsTmpBuf_Value1TempBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-                const detentsTmpBuf_Value1TempBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-                let detentsTmpBuf_Value1TempBuf_ : SheetSize | Length | undefined
-                if (detentsTmpBuf_Value1TempBuf_UnionSelector == (0).toChar()) {
-                    detentsTmpBuf_Value1TempBuf_ = SheetSize.fromValue(valueDeserializer.readInt32())
-                } else if (detentsTmpBuf_Value1TempBuf_UnionSelector == (1).toChar()) {
-                    const detentsTmpBuf_Value1TempBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
-                    let detentsTmpBuf_Value1TempBuf_BufU : string | double | Resource | undefined
-                    if (detentsTmpBuf_Value1TempBuf_BufUUnionSelector == (0).toChar()) {
-                        detentsTmpBuf_Value1TempBuf_BufU = (valueDeserializer.readString() as string)
-                    } else if (detentsTmpBuf_Value1TempBuf_BufUUnionSelector == (1).toChar()) {
-                        detentsTmpBuf_Value1TempBuf_BufU = valueDeserializer.readFloat64()
-                    } else if (detentsTmpBuf_Value1TempBuf_BufUUnionSelector == (2).toChar()) {
-                        detentsTmpBuf_Value1TempBuf_BufU = Resource_serializer.read(valueDeserializer)
-                    } else {
-                        throw new Error("One of the branches for detentsTmpBuf_Value1TempBuf_BufU has to be chosen through deserialisation.")
-                    }
-                    detentsTmpBuf_Value1TempBuf_ = (detentsTmpBuf_Value1TempBuf_BufU as string | double | Resource)
-                } else {
-                    throw new Error("One of the branches for detentsTmpBuf_Value1TempBuf_ has to be chosen through deserialisation.")
-                }
-                detentsTmpBuf_Value1TempBuf = (detentsTmpBuf_Value1TempBuf_ as SheetSize | Length)
-            }
-            const detentsTmpBuf_Value1 : SheetSize | Length | undefined = detentsTmpBuf_Value1TempBuf
-            const detentsTmpBuf_Value2TempBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-            let detentsTmpBuf_Value2TempBuf : SheetSize | Length | undefined = undefined
-            if ((detentsTmpBuf_Value2TempBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-                const detentsTmpBuf_Value2TempBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-                let detentsTmpBuf_Value2TempBuf_ : SheetSize | Length | undefined
-                if (detentsTmpBuf_Value2TempBuf_UnionSelector == (0).toChar()) {
-                    detentsTmpBuf_Value2TempBuf_ = SheetSize.fromValue(valueDeserializer.readInt32())
-                } else if (detentsTmpBuf_Value2TempBuf_UnionSelector == (1).toChar()) {
-                    const detentsTmpBuf_Value2TempBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
-                    let detentsTmpBuf_Value2TempBuf_BufU : string | double | Resource | undefined
-                    if (detentsTmpBuf_Value2TempBuf_BufUUnionSelector == (0).toChar()) {
-                        detentsTmpBuf_Value2TempBuf_BufU = (valueDeserializer.readString() as string)
-                    } else if (detentsTmpBuf_Value2TempBuf_BufUUnionSelector == (1).toChar()) {
-                        detentsTmpBuf_Value2TempBuf_BufU = valueDeserializer.readFloat64()
-                    } else if (detentsTmpBuf_Value2TempBuf_BufUUnionSelector == (2).toChar()) {
-                        detentsTmpBuf_Value2TempBuf_BufU = Resource_serializer.read(valueDeserializer)
-                    } else {
-                        throw new Error("One of the branches for detentsTmpBuf_Value2TempBuf_BufU has to be chosen through deserialisation.")
-                    }
-                    detentsTmpBuf_Value2TempBuf_ = (detentsTmpBuf_Value2TempBuf_BufU as string | double | Resource)
-                } else {
-                    throw new Error("One of the branches for detentsTmpBuf_Value2TempBuf_ has to be chosen through deserialisation.")
-                }
-                detentsTmpBuf_Value2TempBuf = (detentsTmpBuf_Value2TempBuf_ as SheetSize | Length)
-            }
-            const detentsTmpBuf_Value2 : SheetSize | Length | undefined = detentsTmpBuf_Value2TempBuf
-            detentsTmpBuf = ([detentsTmpBuf_Value0, detentsTmpBuf_Value1, detentsTmpBuf_Value2] as TripleLengthDetents)
+            detentsTmpBuf = (detentsTmpBuf_ as SingleLengthDetent | DoubleLengthDetents | TripleLengthDetents)
         }
-        const detentsTmpResult : TripleLengthDetents | undefined = detentsTmpBuf
+        const detentsTmpResult : SingleLengthDetent | DoubleLengthDetents | TripleLengthDetents | undefined = detentsTmpBuf
         const blurStyleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let blurStyleTmpBuf : BlurStyle | undefined = undefined
         if ((blurStyleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {

@@ -669,9 +669,14 @@ namespace Converter {
     template<> ShadowColorStrategy Convert(const Ark_String& src);
     template<> ShapePoint Convert(const Ark_ShapePoint& src);
     template<> SheetHeight Convert(const Ark_Float64& src);
+    template<> SheetHeight Convert(const Ark_DoubleLengthDetents& src);
+    template<> SheetHeight Convert(const Ark_Number& src);
     template<> SheetHeight Convert(const Ark_Resource& src);
     template<> SheetHeight Convert(const Ark_SheetSize& src);
+    template<> SheetHeight Convert(const Ark_SingleLengthDetent& src);
     template<> SheetHeight Convert(const Ark_String& src);
+    template<> SheetHeight Convert(const Ark_TripleLengthDetents& src);
+    template<> SheetHeight Convert(const Ark_Union_SheetSize_Length& src);
     template<> StringArray Convert(const Ark_CustomObject& src);
     template<> SysOptions Convert(const Ark_SystemAdaptiveOptions& src);
     template<> TextBackgroundStyle Convert(const Ark_TextBackgroundStyle& src);
