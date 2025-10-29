@@ -158,6 +158,11 @@ ArkUINativeModuleValue ThemeBridge::SetDefaultTheme(ArkUIRuntimeCallInfo* runtim
     std::vector<RefPtr<ResourceObject>> resObjs;
     auto basisTheme =
         TokenThemeStorage::GetInstance()->ObtainSystemTheme(isDark ? ColorMode::DARK : ColorMode::LIGHT);
+    std::vector<RefPtr<ResourceObject>> basisObjs;
+    if (basisTheme) {
+        basisObjs = basisTheme->GetResObjs();
+    }
+    bool basisObjsAvaliable = basisObjs.size() == TokenColors::TOTAL_NUMBER;
     for (size_t i = 0; i < TokenColors::TOTAL_NUMBER; i++) {
         Color color;
         auto colorParams = panda::ArrayRef::GetValueAt(vm, colorsArg, i);
@@ -169,6 +174,7 @@ ArkUINativeModuleValue ThemeBridge::SetDefaultTheme(ArkUIRuntimeCallInfo* runtim
             if (basisTheme) {
                 color = basisTheme->Colors()->GetByIndex(i);
                 isColorAvailable = true;
+                resObj = basisObjsAvaliable ? basisObjs[i] : nullptr;
             }
         } else {
             isColorAvailable = true;

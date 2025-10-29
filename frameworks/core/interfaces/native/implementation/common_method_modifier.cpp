@@ -3463,7 +3463,7 @@ void SetOnAppearImpl(Ark_NativePointer node,
         return;
     }
     auto onEvent = [arkCallback = CallbackHelper(*optValue)]() {
-        arkCallback.Invoke();
+        arkCallback.InvokeSync();
     };
     ViewAbstract::SetOnAppear(frameNode, std::move(onEvent));
 }
@@ -3478,7 +3478,7 @@ void SetOnDisAppearImpl(Ark_NativePointer node,
         return;
     }
     auto onEvent = [arkCallback = CallbackHelper(*optValue)]() {
-        arkCallback.Invoke();
+        arkCallback.InvokeSync();
     };
     ViewAbstract::SetOnDisappear(frameNode, std::move(onEvent));
 }
@@ -3495,7 +3495,7 @@ void SetOnAttachImpl(Ark_NativePointer node,
     auto weakNode = AceType::WeakClaim(frameNode);
     auto onAttach = [arkCallback = CallbackHelper(*optValue), node = weakNode]() {
         PipelineContext::SetCallBackNode(node);
-        arkCallback.Invoke();
+        arkCallback.InvokeSync();
     };
     ViewAbstract::SetOnAttach(frameNode, std::move(onAttach));
 }
@@ -3512,7 +3512,7 @@ void SetOnDetachImpl(Ark_NativePointer node,
     auto weakNode = AceType::WeakClaim(frameNode);
     auto onDetach = [arkCallback = CallbackHelper(*optValue), node = weakNode]() {
         PipelineContext::SetCallBackNode(node);
-        arkCallback.Invoke();
+        arkCallback.InvokeSync();
     };
     ViewAbstract::SetOnDetach(frameNode, std::move(onDetach));
 }
@@ -3559,7 +3559,7 @@ void SetOnAreaChangeImpl(Ark_NativePointer node,
         current.globalPosition.y = Converter::ArkValue<Opt_Length>(
             PipelineBase::Px2VpWithCurrentDensity(currentOffset.GetY() + origin.GetY()), &ctx);
 
-        arkCallback.Invoke(previous, current);
+        arkCallback.InvokeSync(previous, current);
     };
 
     auto areaChangeCallback = [areaChangeFunc = std::move(onEvent)](const RectF& oldRect,
@@ -3853,9 +3853,14 @@ void SetOnDragStartImpl(Ark_NativePointer node,
                 result.customNode = CallbackHelper(val).BuildSync(Referenced::RawPtr(fnode));
             }
         };
-        auto parseDragI = [&result](const Ark_DragItemInfo& value) {
+        auto parseDragI = [&result, weakNode](const Ark_DragItemInfo& value) {
             result.pixelMap = Converter::OptConvert<RefPtr<PixelMap>>(value.pixelMap).value_or(nullptr);
             result.extraInfo = Converter::OptConvert<std::string>(value.extraInfo).value_or(std::string());
+            auto fnode = weakNode.Upgrade();
+            auto builder = Converter::OptConvert<CustomNodeBuilder>(value.builder);
+            if (builder && fnode) {
+                result.customNode = CallbackHelper(builder.value()).BuildSync(Referenced::RawPtr(fnode));
+            }
         };
         auto handler = [custB = std::move(parseCustBuilder), dragI = std::move(parseDragI)](const void *rawResultPtr) {
             auto arkResultPtr = reinterpret_cast<const Ark_Union_CustomBuilder_DragItemInfo*>(rawResultPtr);
@@ -4645,7 +4650,7 @@ void SetOnSizeChangeImpl(Ark_NativePointer node,
         Ark_SizeOptions newSize;
         newSize.width = Converter::ArkValue<Opt_Length>(PipelineBase::Px2VpWithCurrentDensity(newRect.Width()));
         newSize.height = Converter::ArkValue<Opt_Length>(PipelineBase::Px2VpWithCurrentDensity(newRect.Height()));
-        callback.Invoke(oldSize, newSize);
+        callback.InvokeSync(oldSize, newSize);
     };
     ViewAbstract::SetOnSizeChanged(frameNode, std::move(onSizeChange));
 }
@@ -4828,11 +4833,13 @@ void SetOnClick1Impl(Ark_NativePointer node,
     if (frameNode->GetTag() == "Span") {
         SpanModelNG::SetOnClick(static_cast<UINode *>(node), std::move(onEvent));
     } else {
-        if (!convValue) {
-            ViewAbstract::DisableOnClick(frameNode);
-            return;
+        double threshold = convValue.value_or(std::numeric_limits<double>::infinity());
+        if (threshold != std::numeric_limits<double>::infinity() && threshold >= 0) {
+            threshold = Dimension(threshold, DimensionUnit::VP).ConvertToPx();
+        } else {
+            threshold = std::numeric_limits<double>::infinity();
         }
-        ViewAbstract::SetOnClick(frameNode, std::move(onEvent), *convValue);
+        ViewAbstract::SetOnClick(frameNode, std::move(onEvent), threshold);
     }
 }
 void SetFocusScopeIdImpl(Ark_NativePointer node,
@@ -5038,8 +5045,7 @@ void SetDragPreview1Impl(Ark_NativePointer node,
                     ViewAbstract::SetDragPreview(frameNode, info);
                     }, node);
             } else {
-                ViewAbstract::SetDragPreview(frameNode, DragDropInfo {
-                    .onlyForLifting = onlyForLifting, .delayCreating = delayCreating });
+                ViewAbstract::SetDragPreview(frameNode, dragDropInfo);
             }
         },
         [frameNode]() {

@@ -505,6 +505,15 @@ void ArktsFrontend::AttachPipelineContext(const RefPtr<PipelineBase>& context)
     }
 }
 
+void ArktsFrontend::AttachSubPipelineContext(const RefPtr<PipelineBase>& context)
+{
+    if (!context) {
+        return;
+    }
+    accessibilityManager_->AddSubPipelineContext(context);
+    accessibilityManager_->RegisterSubWindowInteractionOperation(context->GetWindowId());
+}
+
 ani_ref ArktsFrontend::GetSharedStorage(int32_t id)
 {
     int32_t currentInstance = id;

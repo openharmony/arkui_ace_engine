@@ -615,12 +615,11 @@ ani_object ExtractorFromPtrToUnifiedData(ani_env* env, [[maybe_unused]] ani_obje
     auto unifiedData_obj = OHOS::UDMF::AniConverter::WrapUnifiedData(env, unifiedData);
     ani_boolean isUnifiedData;
     ani_class dataClass;
-    env->FindClass("L@ohos/data/unifiedDataChannel/unifiedDataChannel/UnifiedData;", &dataClass);
+    env->FindClass("@ohos.data.unifiedDataChannel.unifiedDataChannel.UnifiedData", &dataClass);
     env->Object_InstanceOf(unifiedData_obj, dataClass, &isUnifiedData);
     if (!isUnifiedData) {
         return result_obj;
     }
     return unifiedData_obj;
-    return {};
 }
 } // namespace OHOS::Ace::Ani

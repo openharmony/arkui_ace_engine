@@ -65,14 +65,20 @@ void PolygonModelNG::SetPoints(FrameNode* frameNode, const ShapePoints& points,
             ShapePoint point;
             if (xResObjArray[i]) {
                 Dimension dim;
-                ResourceParseUtils::ConvertFromResObjNG(xResObjArray[i], dim);
+                if (!ResourceParseUtils::ConvertFromResObjNG(xResObjArray[i], dim)) {
+                    result.clear();
+                    break;
+                }
                 point.first = dim;
             } else {
                 point.first = points[i].first;
             }
             if (yResObjArray[i]) {
                 Dimension dim;
-                ResourceParseUtils::ConvertFromResObjNG(yResObjArray[i], dim);
+                if (!ResourceParseUtils::ConvertFromResObjNG(yResObjArray[i], dim)) {
+                    result.clear();
+                    break;
+                }
                 point.second = dim;
             } else {
                 point.second = points[i].second;

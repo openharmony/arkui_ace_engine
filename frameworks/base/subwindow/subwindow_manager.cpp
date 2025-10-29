@@ -495,6 +495,7 @@ void SubwindowManager::ShowPopup(const RefPtr<Component>& newComponent, bool dis
 void SubwindowManager::ShowTipsNG(const RefPtr<NG::FrameNode>& targetNode, const NG::PopupInfo& popupInfo,
     int32_t appearingTime, int32_t appearingTimeWithContinuousOperation)
 {
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show tips enter");
     CHECK_NULL_VOID(targetNode);
     auto pipelineContext = targetNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);

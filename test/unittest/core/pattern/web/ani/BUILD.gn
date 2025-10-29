@@ -312,6 +312,7 @@ ohos_unittest("web_pattern_static_unit_test_ohos") {
     "$ace_root/frameworks/core/components_ng/pattern/navrouter/navdestination_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/navrouter/navdestination_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/navrouter/navdestination_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/navrouter/navdestination_pattern_multi_thread.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/navrouter/navrouter_group_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/navrouter/navrouter_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/navrouter/navrouter_pattern.cpp",

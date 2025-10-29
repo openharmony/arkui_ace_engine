@@ -53,7 +53,7 @@ const std::unordered_map<SpanType, std::function<void(RefPtr<RichEditorPattern>)
 };
 } // namespace
 
-class RichEditorSpanOneTest : public RichEditorCommonTestNg {
+class RichEditorSpanAmendTestNg : public RichEditorCommonTestNg {
 public:
     void SetUp() override;
     void TearDown() override;
@@ -65,7 +65,7 @@ public:
     static void TearDownTestSuite();
 };
 
-void RichEditorSpanOneTest::SetUp()
+void RichEditorSpanAmendTestNg::SetUp()
 {
     MockPipelineContext::SetUp();
     MockContainer::SetUp();
@@ -83,19 +83,19 @@ void RichEditorSpanOneTest::SetUp()
     richEditorNode_->GetGeometryNode()->SetContentSize({});
 }
 
-void RichEditorSpanOneTest::TearDown()
+void RichEditorSpanAmendTestNg::TearDown()
 {
     richEditorNode_ = nullptr;
     MockParagraph::TearDown();
 }
 
-void RichEditorSpanOneTest::TearDownTestSuite()
+void RichEditorSpanAmendTestNg::TearDownTestSuite()
 {
     TestNG::TearDownTestSuite();
 }
 
 template<typename... Args>
-void RichEditorSpanOneTest::InitSpans(Args... args)
+void RichEditorSpanAmendTestNg::InitSpans(Args... args)
 {
     RichEditorCommonTestNg::ClearSpan();
     auto pattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -103,7 +103,7 @@ void RichEditorSpanOneTest::InitSpans(Args... args)
 }
 
 template<typename T, typename... Args>
-void RichEditorSpanOneTest::ConstructSpans(RefPtr<RichEditorPattern> pattern, T value, Args... args)
+void RichEditorSpanAmendTestNg::ConstructSpans(RefPtr<RichEditorPattern> pattern, T value, Args... args)
 {
     if constexpr (std::is_same_v<T, std::string>) {
         pattern->AddTextSpan({ .value = value });
@@ -119,7 +119,7 @@ void RichEditorSpanOneTest::ConstructSpans(RefPtr<RichEditorPattern> pattern, T 
  * @tc.desc: test AddTextSpan
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSpanOneTest, AddTextSpan001, TestSize.Level0)
+HWTEST_F(RichEditorSpanAmendTestNg, AddTextSpan001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -139,7 +139,7 @@ HWTEST_F(RichEditorSpanOneTest, AddTextSpan001, TestSize.Level0)
  * @tc.desc: test AddTextSpan
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSpanOneTest, PlaceholderSpanNodeTest001, TestSize.Level0)
+HWTEST_F(RichEditorSpanAmendTestNg, PlaceholderSpanNodeTest001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -167,7 +167,7 @@ HWTEST_F(RichEditorSpanOneTest, PlaceholderSpanNodeTest001, TestSize.Level0)
  * @tc.desc: test delete span
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSpanOneTest, SpanAddAndClear001, TestSize.Level0)
+HWTEST_F(RichEditorSpanAmendTestNg, SpanAddAndClear001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -209,7 +209,7 @@ HWTEST_F(RichEditorSpanOneTest, SpanAddAndClear001, TestSize.Level0)
  * @tc.desc: test delete span
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSpanOneTest, SpanAddAndClear002, TestSize.Level0)
+HWTEST_F(RichEditorSpanAmendTestNg, SpanAddAndClear002, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -258,7 +258,7 @@ HWTEST_F(RichEditorSpanOneTest, SpanAddAndClear002, TestSize.Level0)
  * @tc.desc: test update symbol span
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSpanOneTest, SymbolTest001, TestSize.Level0)
+HWTEST_F(RichEditorSpanAmendTestNg, SymbolTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. get richEditor controller

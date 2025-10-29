@@ -19,6 +19,7 @@
 #define private public
 #include "core/common/agingadapation/aging_adapation_dialog_theme.h"
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
+#include "core/common/multi_thread_build_manager.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -1823,5 +1824,43 @@ HWTEST_F(ToolBarTestNg, SetToolbarMoreButtonOptionsTest002, TestSize.Level1)
     navToolbarPattern->SetToolbarMoreButtonOptions(std::move(opt));
     EXPECT_EQ(
         navToolbarPattern->GetToolbarMoreButtonOptions().bgOptions.effectOption->adaptiveColor, AdaptiveColor::DEFAULT);
+}
+
+/**
+ * @tc.name: UpdateBackgroundStyleMultiThread
+ * @tc.desc: test UpdateBackgroundStyleMultiThread.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolBarTestNg, UpdateBackgroundStyleMultiThread, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Simulate non-UI thread environment and create a thread-safe select node.
+     */
+    MultiThreadBuildManager::SetIsThreadSafeNodeScope(true);
+    bool isUIThread = MultiThreadBuildManager::isUIThread_;
+    MultiThreadBuildManager::isUIThread_ = false;
+
+    /**
+     * @tc.steps: step2. Create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<NavToolbarPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->isThreadSafeNode_ = true;
+    auto size = frameNode->afterAttachMainTreeTasks_.size();
+    auto navToolbarPattern = frameNode->GetPattern<NavToolbarPattern>();
+    ASSERT_NE(navToolbarPattern, nullptr);
+
+    /**
+     * @tc.steps: step3. Call UpdateBackgroundStyle.
+     * @tc.expected: afterAttachMainTreeTasks_.size()++.
+     */
+    navToolbarPattern->UpdateBackgroundStyle(); // call UpdateBackgroundStyleMultiThread
+    EXPECT_EQ(frameNode->afterAttachMainTreeTasks_.size(), size + 1);
+
+    /**
+     * @tc.steps: step4. Restore environment.
+     */
+    MultiThreadBuildManager::isUIThread_ = isUIThread;
+    MultiThreadBuildManager::SetIsThreadSafeNodeScope(false);
 }
 } // namespace OHOS::Ace::NG

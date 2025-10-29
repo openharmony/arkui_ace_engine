@@ -1051,21 +1051,27 @@ void ImagePattern::UpdateDrawableDescriptor(const RefPtr<DrawableDescriptor>& ne
             [weak, nodeId, result]() {
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_VOID(pattern);
-                auto host = pattern->GetHost();
-                CHECK_NULL_VOID(host);
-                auto imageLayoutProperty = host->GetLayoutProperty<ImageLayoutProperty>();
-                CHECK_NULL_VOID(imageLayoutProperty);
-                auto&& layoutConstraint = imageLayoutProperty->GetCalcLayoutConstraint();
-                if (!layoutConstraint && !layoutConstraint->selfIdealSize.has_value()) {
-                    CalcSize realSize = { CalcLength(result.imageWidth_), CalcLength(result.imageHeight_) };
-                    imageLayoutProperty->UpdateUserDefinedIdealSize(realSize);
-                    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-                }
-                pattern->DrawableRegisterUpdateCallback();
-                pattern->AnimatedDrawableControllAnimation(nodeId);
+                pattern->InitializeStatus(result);
             },
             "AceImageUpdateDrawableDescriptor");
     });
+}
+
+void ImagePattern::InitializeStatus(DrawableDescriptorLoadResult result)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto nodeId = host->GetId();
+    auto layoutProperty = host->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    imageSize_.SetWidth(static_cast<float>(result.imageWidth_));
+    imageSize_.SetHeight(static_cast<float>(result.imageHeight_));
+    if (isMeasured_) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        isMeasured_ = false;
+    }
+    DrawableRegisterUpdateCallback();
+    AnimatedDrawableControllAnimation(nodeId);
 }
 
 void ImagePattern::AnimatedDrawableControllAnimation(const int32_t id)
@@ -1108,6 +1114,29 @@ void ImagePattern::ResetDrawableDescriptor()
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->RemoveContentModifier(contentMod_);
+}
+
+void ImagePattern::SetImageType(ImageType imageType)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (imageType_ == ImageType::ANIMATED_DRAWABLE && imageType != ImageType::ANIMATED_DRAWABLE) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+    if (imageType_ != ImageType::ANIMATED_DRAWABLE && imageType == ImageType::ANIMATED_DRAWABLE) {
+        isMeasured_ = true;
+    }
+    imageType_ = imageType;
+}
+
+ImageType ImagePattern::GetImageType() const
+{
+    return imageType_;
+}
+
+bool ImagePattern::GetIsAnimation() const
+{
+    return imageType_ == ImageType::ANIMATED_DRAWABLE;
 }
 
 void ImagePattern::InitOnKeyEvent()

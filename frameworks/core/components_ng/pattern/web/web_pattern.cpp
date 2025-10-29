@@ -6695,13 +6695,13 @@ void WebPattern::UpdateOnFocusTextField(bool isFocus)
             : textFieldManager->ClearOnFocusTextField(host->GetId());
 }
 
-void WebPattern::UpdateTextFieldStatus(bool isShowKeyboard, bool isAttachIME)
+void WebPattern::UpdateTextFieldStatus(bool isImeShowKeyboard, bool isTextInputfocus)
 {
-    UpdateOnFocusTextField(isAttachIME);
-    if (isShowKeyboard) {
-        isVirtualKeyBoardShow_ = VkState::VK_SHOW;
+    UpdateOnFocusTextField(isTextInputfocus);
+    if (isImeShowKeyboard) {
+        isImeStatus_ = VkState::VK_SHOW;
     } else {
-        isVirtualKeyBoardShow_ = VkState::VK_HIDE;
+        isImeStatus_ = VkState::VK_HIDE;
     }
 }
 
@@ -6710,7 +6710,7 @@ bool WebPattern::OnBackPressed()
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     TAG_LOGI(AceLogTag::ACE_WEB, "Web %{public}d receives back press event", host->GetId());
-    if (IsVirtualKeyBoardShow()) {
+    if (IsVirtualKeyBoardShow() || IsImeStatusShow()) {
         CloseSelectOverlay();
         SelectCancel();
         TAG_LOGI(AceLogTag::ACE_WEB, "Request close soft keyboard.");
@@ -6720,7 +6720,7 @@ bool WebPattern::OnBackPressed()
         CHECK_NULL_RETURN(delegate_, true);
         delegate_->CloseCustomKeyboard();
         delegate_->GestureBackBlur();
-        UpdateOnFocusTextField(false);
+        UpdateTextFieldStatus(false, false);
         return true;
     }
     return false;

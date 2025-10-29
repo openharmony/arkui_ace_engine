@@ -2973,6 +2973,9 @@ JSRef<JSObject> JSRichEditorBaseController::CreateJsDecorationObj(const struct U
         decorationObj->SetProperty<int32_t>("style",
             static_cast<int32_t>(typingStyle.updateTextDecorationStyle.value()));
     }
+    if (typingStyle.updateLineThicknessScale.has_value()) {
+        decorationObj->SetProperty<float>("thicknessScale", typingStyle.updateLineThicknessScale.value());
+    }
     return decorationObj;
 }
 

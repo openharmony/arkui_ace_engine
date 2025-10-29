@@ -1363,7 +1363,9 @@ HWTEST_F(SearchTestNg, Create004, TestSize.Level1)
     auto pattern = searchNode->GetPattern<SearchPattern>();
     ASSERT_NE(pattern, nullptr);
     ASSERT_NE(searchNode, nullptr);
+
     searchModelInstance.CreateTextField(searchNode, PLACEHOLDER_U16, EMPTY_VALUE_U16, true);
+
     std::function<void(bool)> onEditChangefunc;
     std::function<void(const ChangeValueInfo&)> onChange;
     std::function<void(const std::u16string&)> onCut;
@@ -1376,6 +1378,7 @@ HWTEST_F(SearchTestNg, Create004, TestSize.Level1)
     std::function<void(const std::u16string&)> onChangeEvent;
     NG::OnCreateMenuCallback onCreateMenuCallback;
     NG::OnMenuItemClickCallback onMenuItemClickCallback;
+
     OHOS::Ace::NG::SearchModelNG::SetOnEditChange(frameNode, std::move(onEditChangefunc));
     std::function<void(float, float)> onContentScroll;
     OHOS::Ace::NG::SearchModelNG::SetOnContentScroll(frameNode, std::move(onContentScroll));
@@ -1389,12 +1392,15 @@ HWTEST_F(SearchTestNg, Create004, TestSize.Level1)
     OHOS::Ace::NG::SearchModelNG::SetOnWillDeleteEvent(frameNode, std::move(onWillDelete));
     OHOS::Ace::NG::SearchModelNG::OnCreateMenuCallbackUpdate(frameNode, std::move(onCreateMenuCallback));
     OHOS::Ace::NG::SearchModelNG::OnMenuItemClickCallbackUpdate(frameNode, std::move(onMenuItemClickCallback));
+
     std::function<void(const std::u16string&, NG::TextCommonEvent&)> onPasteEvent;
+
     searchModelInstance.SetOnPasteWithEvent(std::move(onPasteEvent));
     auto searchTextField = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
     auto eventHub = searchTextField->GetEventHub<TextFieldEventHub>();
     ASSERT_NE(eventHub, nullptr);
     TextCommonEvent event;
+
     eventHub->FireOnPasteWithEvent(u"", event);
 }
 

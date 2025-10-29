@@ -56,7 +56,7 @@ void JSPath::Create(const JSCallbackInfo& info)
         }
         UnRegisterResource("PathCommands");
         if (SystemProperties::ConfigChangePerform() && commandsResObj) {
-            RegisterResource<std::string>("PathCommands", commandsResObj, strRet);
+            PathModel::GetInstance()->SetCommands(commandsResObj);
         }
         PathModel::GetInstance()->SetCommands(strRet);
     }
@@ -79,7 +79,7 @@ void JSPath::SetCommands(const JSCallbackInfo& info)
             return;
         }
         if (SystemProperties::ConfigChangePerform() && commandsResObj) {
-            RegisterResource<std::string>("PathCommands", commandsResObj, strRet);
+            PathModel::GetInstance()->SetCommands(commandsResObj);
         }
         PathModel::GetInstance()->SetCommands(strRet);
     } else if (info[0]->IsString()) {

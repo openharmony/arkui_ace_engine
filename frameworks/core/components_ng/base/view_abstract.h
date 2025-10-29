@@ -487,6 +487,7 @@ public:
         const RefPtr<UINode> &customNode);
     static void BindTips(
         const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode, const RefPtr<SpanString>& spanString);
+    static void AddClickEventForTips(const RefPtr<FrameNode>& targetNode, PopupInfo& tipsInfo);
     static void HandleHoverTipsInfo(const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode,
         PopupInfo& tipsInfo, bool showInSubWindow, const RefPtr<SpanString>& spanString);
     static void AddHoverEventForTips(const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode,

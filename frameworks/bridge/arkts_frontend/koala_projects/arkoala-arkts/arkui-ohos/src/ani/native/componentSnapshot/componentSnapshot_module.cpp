@@ -231,7 +231,7 @@ static bool GetAniIntValue(ani_env* env, ani_object object, int32_t& value)
         return false;
     }
     value = static_cast<int32_t>(aniValue);
-    value = (value <= 0) ? DEFAULT_DELAY_TIME : value;
+    value = (value < 0) ? DEFAULT_DELAY_TIME : value;
     return true;
 }
 

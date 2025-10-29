@@ -1347,11 +1347,13 @@ export class FrameNodeExtender {
         const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_isModifiable(peer)
         return retval
     }
-    static appendChild_serialize(peer: FrameNode, child: FrameNode): void {
-        ArkUIGeneratedNativeModule._FrameNodeExtender_appendChild(extractors.toFrameNodePtr(peer), extractors.toFrameNodePtr(child))
+    static appendChild_serialize(peer: FrameNode, child: FrameNode): double {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_appendChild(extractors.toFrameNodePtr(peer), extractors.toFrameNodePtr(child))
+        return retval
     }
-    static insertChildAfter_serialize(peer: KPointer, child: KPointer, sibling: KPointer): void {
-        ArkUIGeneratedNativeModule._FrameNodeExtender_insertChildAfter(peer, child, sibling)
+    static insertChildAfter_serialize(peer: KPointer, child: KPointer, sibling: KPointer): double {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_insertChildAfter(peer, child, sibling)
+        return retval;
     }
     static removeChild_serialize(peer: FrameNode, child: FrameNode): void {
         ArkUIGeneratedNativeModule._FrameNodeExtender_removeChild(extractors.toFrameNodePtr(peer), extractors.toFrameNodePtr(child))
@@ -1539,8 +1541,9 @@ export class FrameNodeExtender {
         const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getIdByFrameNode(node)
         return retval
     }
-    static moveTo_serialize(peer: FrameNode, targetParent: FrameNode, index: number): void {
-        ArkUIGeneratedNativeModule._FrameNodeExtender_moveTo(extractors.toFrameNodePtr(peer), extractors.toFrameNodePtr(targetParent), index)
+    static moveTo_serialize(peer: FrameNode, targetParent: FrameNode, index: number): double {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_moveTo(extractors.toFrameNodePtr(peer), extractors.toFrameNodePtr(targetParent), index)
+        return retval
     }
     static getFirstChildIndexWithoutExpand_serialize(peer: FrameNode): number {
         const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getFirstChildIndexWithoutExpand(extractors.toFrameNodePtr(peer))
@@ -1653,6 +1656,14 @@ export class FrameNodeExtender {
         const returnResult : Array<double> = buffer
         return returnResult
     }
+    static adoptChild_serialize(peer: FrameNode, child: FrameNode): double {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_adoptChild(extractors.toFrameNodePtr(peer), extractors.toFrameNodePtr(child))
+        return retval
+    }
+    static removeAdoptedChild_serialize(peer: FrameNode, child: FrameNode): double {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_removeAdoptedChild(extractors.toFrameNodePtr(peer), extractors.toFrameNodePtr(child))
+        return retval
+    }
     public static constructorFrameNode(): KPointer {
         return FrameNodeExtender.constructorFrameNode_serialize()
     }
@@ -1668,18 +1679,16 @@ export class FrameNodeExtender {
         const peer_casted = peer as (KPointer)
         return FrameNodeExtender.isModifiable_serialize(peer_casted)
     }
-    public static appendChild(peer: FrameNode, child: FrameNode): void {
+    public static appendChild(peer: FrameNode, child: FrameNode): double {
         const peer_casted = peer as (FrameNode)
         const child_casted = child as (FrameNode)
-        FrameNodeExtender.appendChild_serialize(peer_casted, child_casted)
-        return
+        return FrameNodeExtender.appendChild_serialize(peer_casted, child_casted)
     }
-    public static insertChildAfter(peer: KPointer, child: KPointer, sibling: KPointer): void {
+    public static insertChildAfter(peer: KPointer, child: KPointer, sibling: KPointer): double {
         const peer_casted = peer as (KPointer)
         const child_casted = child as (KPointer)
         const sibling_casted = sibling as (KPointer)
-        FrameNodeExtender.insertChildAfter_serialize(peer_casted, child_casted, sibling_casted)
-        return
+        return FrameNodeExtender.insertChildAfter_serialize(peer_casted, child_casted, sibling_casted)
     }
     public static removeChild(peer: FrameNode, child: FrameNode): void {
         const peer_casted = peer as (FrameNode)
@@ -1859,12 +1868,11 @@ export class FrameNodeExtender {
         const node_casted = node as (KPointer)
         return FrameNodeExtender.getIdByFrameNode_serialize(node_casted)
     }
-    public static moveTo(peer: FrameNode, targetParent: FrameNode, index: number): void {
+    public static moveTo(peer: FrameNode, targetParent: FrameNode, index: number): double {
         const peer_casted = peer as (FrameNode)
         const targetParent_casted = targetParent as (FrameNode)
         const index_casted = index as (number)
-        FrameNodeExtender.moveTo_serialize(peer_casted, targetParent_casted, index_casted)
-        return
+        return FrameNodeExtender.moveTo_serialize(peer_casted, targetParent_casted, index_casted)
     }
     public static getFirstChildIndexWithoutExpand(peer: FrameNode): number {
         const peer_casted = peer as (FrameNode)
@@ -1945,6 +1953,16 @@ export class FrameNodeExtender {
         const node_casted = node as (FrameNode)
         const vector2_casted = vector2 as (Vector2)
         return FrameNodeExtender.convertPoint_serialize(peer_casted, node_casted, vector2_casted)
+    }
+    public static adoptChild(peer: FrameNode, child: FrameNode): double {
+        const peer_casted = peer as (FrameNode)
+        const child_casted = child as (FrameNode)
+        return FrameNodeExtender.adoptChild_serialize(peer_casted, child_casted)
+    }
+    public static removeAdoptedChild(peer: FrameNode, child: FrameNode): double {
+        const peer_casted = peer as (FrameNode)
+        const child_casted = child as (FrameNode)
+        return FrameNodeExtender.removeAdoptedChild_serialize(peer_casted, child_casted)
     }
 }
 export class GestureOps {
@@ -2822,7 +2840,7 @@ export class NodeContentExtender {
         const retval  = ArkUIGeneratedNativeModule._NodeContentExtender_getDestroy()
         return retval
     }
-    static addFrameNode_serialize(content: KPointer, node: KPointer): boolean {
+    static addFrameNode_serialize(content: KPointer, node: KPointer): double {
         const retval  = ArkUIGeneratedNativeModule._NodeContentExtender_addFrameNode(content, node)
         return retval
     }
@@ -2836,7 +2854,7 @@ export class NodeContentExtender {
     public static getDestroy(): KPointer {
         return NodeContentExtender.getDestroy_serialize()
     }
-    public static addFrameNode(content: KPointer, node: KPointer): boolean {
+    public static addFrameNode(content: KPointer, node: KPointer): double {
         const content_casted = content as (KPointer)
         const node_casted = node as (KPointer)
         return NodeContentExtender.addFrameNode_serialize(content_casted, node_casted)
@@ -3157,11 +3175,13 @@ export class RenderNodeExtender {
         ArkUIGeneratedNativeModule._RenderNodeExtender_setPathClip(extractors.toRenderNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    static appendChild_serialize(peer: RenderNode, node: RenderNode): void {
-        ArkUIGeneratedNativeModule._RenderNodeExtender_appendChild(extractors.toRenderNodePtr(peer), extractors.toRenderNodePtr(node))
+    static appendChild_serialize(peer: RenderNode, node: RenderNode): double {
+        const retval  = ArkUIGeneratedNativeModule._RenderNodeExtender_appendChild(extractors.toRenderNodePtr(peer), extractors.toRenderNodePtr(node))
+        return retval
     }
-    static insertChildAfter_serialize(peer: RenderNode, child: RenderNode, sibling: RenderNode): void {
-        ArkUIGeneratedNativeModule._RenderNodeExtender_insertChildAfter(extractors.toRenderNodePtr(peer), extractors.toRenderNodePtr(child), extractors.toRenderNodePtr(sibling))
+    static insertChildAfter_serialize(peer: RenderNode, child: RenderNode, sibling: RenderNode): double {
+        const retval  = ArkUIGeneratedNativeModule._RenderNodeExtender_insertChildAfter(extractors.toRenderNodePtr(peer), extractors.toRenderNodePtr(child), extractors.toRenderNodePtr(sibling))
+        return retval
     }
     static removeChild_serialize(peer: RenderNode, node: RenderNode): void {
         ArkUIGeneratedNativeModule._RenderNodeExtender_removeChild(extractors.toRenderNodePtr(peer), extractors.toRenderNodePtr(node))
@@ -3391,18 +3411,16 @@ export class RenderNodeExtender {
         RenderNodeExtender.setPathClip_serialize(peer_casted, path_casted)
         return
     }
-    public static appendChild(peer: RenderNode, node: RenderNode): void {
+    public static appendChild(peer: RenderNode, node: RenderNode): double {
         const peer_casted = peer as (RenderNode)
         const node_casted = node as (RenderNode)
-        RenderNodeExtender.appendChild_serialize(peer_casted, node_casted)
-        return
+        return RenderNodeExtender.appendChild_serialize(peer_casted, node_casted)
     }
-    public static insertChildAfter(peer: RenderNode, child: RenderNode, sibling: RenderNode): void {
+    public static insertChildAfter(peer: RenderNode, child: RenderNode, sibling: RenderNode): double {
         const peer_casted = peer as (RenderNode)
         const child_casted = child as (RenderNode)
         const sibling_casted = sibling as (RenderNode)
-        RenderNodeExtender.insertChildAfter_serialize(peer_casted, child_casted, sibling_casted)
-        return
+        return RenderNodeExtender.insertChildAfter_serialize(peer_casted, child_casted, sibling_casted)
     }
     public static removeChild(peer: RenderNode, node: RenderNode): void {
         const peer_casted = peer as (RenderNode)

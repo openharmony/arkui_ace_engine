@@ -43,4 +43,9 @@ RefPtr<PixelMap> PixelMap::Create(const InitializationOptions& opts)
 {
     return AceType::MakeRefPtr<MockPixelMap>();
 }
+
+RefPtr<PixelMap> PixelMap::Create(const std::shared_ptr<Media::PixelMap>& pixmap)
+{
+    return AceType::MakeRefPtr<MockPixelMap>(); 
+}
 } // namespace OHOS::Ace

@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "securec.h"
 #include "drag_controller_module.h"
 #include "drag_and_drop/native_drag_drop_global.h"
 #include "load.h"
@@ -349,6 +350,8 @@ void TriggerJsCallback(std::shared_ptr<ArkUIDragControllerAsync> asyncCtx, ani_r
         }
     }
     HILOGI("AceDrag, TriggerJsCallback end.");
+    delete[] asyncCtx->extraParams;
+    asyncCtx->extraParams = nullptr;
     asyncCtx->deferred = nullptr;
     asyncCtx->hasHandle = false;
 }
@@ -663,12 +666,23 @@ bool CheckAndParseSecondParams(ani_env* env, ArkUIDragControllerAsync& asyncCtx,
 
     asyncCtx.dragPointerEvent.pointerId = static_cast<int32_t>(pointerIdAni);
     HILOGI("AceDrag, pointerId = %{public}d", asyncCtx.dragPointerEvent.pointerId);
+    char* extraParamsCStr = nullptr;
     if (AniUtils::IsClassObject(env, extraParamsAni, "std.core.String")) {
         std::string extraParamsStr = AniUtils::ANIStringToStdString(env, static_cast<ani_string>(extraParamsAni));
         std::string extraInfoLimited = extraParamsStr.size() > EXTRA_INFO_MAX_LENGTH
                                     ? extraParamsStr.substr(0, EXTRA_INFO_MAX_LENGTH)
                                     : extraParamsStr;
-        asyncCtx.extraParams = extraInfoLimited.c_str();
+        uint32_t extraParamsLen = extraParamsStr.size() > EXTRA_INFO_MAX_LENGTH ?
+            EXTRA_INFO_MAX_LENGTH : extraParamsStr.size();
+        extraParamsCStr = new char[extraParamsLen + 1];
+        auto errCode = strcpy_s(extraParamsCStr, extraParamsLen + 1, extraInfoLimited.c_str());
+        if (errCode != 0) {
+            HILOGE("AceDrag, get extraParams failed.");
+            delete[] extraParamsCStr;
+            extraParamsCStr = nullptr;
+            return false;
+        }
+        asyncCtx.extraParams = extraParamsCStr;
     }
     if (!AniUtils::IsUndefined(env, static_cast<ani_object>(dataAni))) {
         auto dataValue = OHOS::UDMF::AniConverter::UnwrapUnifiedData(env, static_cast<ani_object>(dataAni));

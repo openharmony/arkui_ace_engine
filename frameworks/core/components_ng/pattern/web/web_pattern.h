@@ -669,7 +669,7 @@ public:
     void OnCompleteSwapWithNewSize();
     void OnResizeNotWork();
     void UpdateOnFocusTextField(bool isFocus);
-    void UpdateTextFieldStatus(bool isShowKeyboard, bool isAttachIME);
+    void UpdateTextFieldStatus(bool isImeShowKeyboard, bool isTextInputfocus);
     bool OnBackPressed() override;
     bool OnBackPressedForFullScreen() const;
     void SetFullScreenExitHandler(const std::shared_ptr<FullScreenEnterEvent>& fullScreenExitHandler);
@@ -727,6 +727,10 @@ public:
     bool IsVirtualKeyBoardShow() const
     {
         return isVirtualKeyBoardShow_ == VkState::VK_SHOW;
+    }
+    bool IsImeStatusShow() const
+    {
+        return isImeStatus_ == VkState::VK_SHOW;
     }
     bool FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity);
     bool OnNestedScroll(float& x, float& y, float& xVelocity, float& yVelocity, bool& isAvailable);
@@ -1346,6 +1350,7 @@ private:
     bool needUpdateWeb_ = true;
     bool isFocus_ = false;
     VkState isVirtualKeyBoardShow_ { VkState::VK_NONE };
+    VkState isImeStatus_ { VkState::VK_NONE };
     bool isDragging_ = false;
     bool isReceivedArkDrag_ = false;
     bool isW3cDragEvent_ = false;

@@ -26,6 +26,7 @@
 #include "core/components/picker/picker_theme.h"
 #include "core/components_ng/pattern/container_picker/container_picker_model.h"
 #include "core/components_ng/pattern/container_picker/container_picker_pattern.h"
+#include "core/components_ng/pattern/container_picker/container_picker_utils.h"
 #include "core/common/resource/resource_object.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -48,7 +49,6 @@ constexpr float TEST_DIVIDER_WIDTH = 3.0f;
 constexpr uint32_t TEST_DIVIDER_COLOR = 0xFF000000; // Black
 constexpr float TEST_MARGIN = 20.0f;
 constexpr uint32_t TEST_BACKGROUND_COLOR = 0xFFFF0000; // Red
-constexpr float TEST_BORDER_RADIUS = 10.0f;
 }
 
 class ContainerPickerResourceTest : public TestNG {
@@ -356,9 +356,10 @@ HWTEST_F(ContainerPickerResourceTest, ContainerPickerPatternTest007, TestSize.Le
      * @tc.steps: step4. Check if the style has been updated.
      * @tc.expected: step4. The style will not be updated due to the failure of resource parsing.
      */
-    auto style = pickerPattern->GetIndicatorStyleVal();
-    EXPECT_TRUE(style.isDefaultBorderRadius);
-    EXPECT_NE(style.borderRadius->radiusTopLeft.value_or(Dimension()), Dimension(TEST_BORDER_RADIUS));
+    auto property = frameNode->GetLayoutPropertyPtr<ContainerPickerLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    EXPECT_EQ(property->GetIndicatorBorderRadius().value_or(BorderRadiusProperty(Dimension())),
+        BorderRadiusProperty(DEFAULT_RADIUS));
 }
 
 /**

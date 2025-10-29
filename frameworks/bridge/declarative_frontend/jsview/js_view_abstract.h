@@ -937,6 +937,7 @@ private:
     static bool ParseBackgroundBuilder(
         const JSCallbackInfo& info, const JSRef<JSVal>& jsFunc, std::function<void()>& builderFunc);
     static int32_t GetStringFormatStartIndex(const JSRef<JSObject>& jsObj);
+    static void GetResourceObjectType(const JSRef<JSObject>& jsObj, JSRef<JSVal>& type, int32_t& resTypeValue);
 };
 } // namespace OHOS::Ace::Framework
 #endif // JS_VIEW_ABSTRACT_H

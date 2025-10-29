@@ -497,6 +497,36 @@ ArkUINativeModuleValue FrameNodeBridge::ApplyAttributesFinish(ArkUIRuntimeCallIn
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue FrameNodeBridge::AdoptChild(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    auto defaultReturnValue = panda::NumberRef::New(vm, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(vm, defaultReturnValue);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(!firstArg.IsNull(), defaultReturnValue);
+    auto parentNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    CHECK_NULL_RETURN(!secondArg.IsNull(), defaultReturnValue);
+    auto childNode = nodePtr(secondArg->ToNativePointer(vm)->Value());
+    auto result = GetArkUINodeModifiers()->getNDKRenderNodeModifier()->adoptChild(parentNode, childNode);
+    return panda::NumberRef::New(vm, result);
+}
+
+ArkUINativeModuleValue FrameNodeBridge::RemoveAdoptedChild(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    auto defaultReturnValue = panda::NumberRef::New(vm, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(vm, defaultReturnValue);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(!firstArg.IsNull(), defaultReturnValue);
+    auto parentNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    CHECK_NULL_RETURN(!secondArg.IsNull(), defaultReturnValue);
+    auto childNode = nodePtr(secondArg->ToNativePointer(vm)->Value());
+    auto result = GetArkUINodeModifiers()->getNDKRenderNodeModifier()->removeAdoptedChild(parentNode, childNode);
+    return panda::NumberRef::New(vm, result);
+}
+
 ArkUINativeModuleValue FrameNodeBridge::ConvertPoint(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -569,21 +599,31 @@ ArkUINativeModuleValue FrameNodeBridge::AppendChild(ArkUIRuntimeCallInfo* runtim
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    CHECK_NULL_RETURN(!firstArg.IsNull(), panda::BooleanRef::New(vm, true));
+    CHECK_NULL_RETURN(!firstArg.IsNull(), panda::NumberRef::New(vm, ERROR_CODE_NO_ERROR));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto childNativeNode = nodePtr(secondArg->ToNativePointer(vm)->Value());
+    auto* childNativeUINode = reinterpret_cast<UINode*>(childNativeNode);
+    CHECK_NULL_RETURN(childNativeUINode, panda::NumberRef::New(vm, ERROR_CODE_PARAM_INVALID));
+    if (childNativeUINode->IsAdopted()) {
+        return panda::NumberRef::New(vm, ERROR_CODE_NODE_IS_ADOPTED);
+    }
     auto result = GetArkUINodeModifiers()->getFrameNodeModifier()->appendChild(nativeNode, childNativeNode);
-    return panda::BooleanRef::New(vm, result);
+    return panda::NumberRef::New(vm, result ? ERROR_CODE_NO_ERROR : ERROR_CODE_PARAM_INVALID);
 }
 ArkUINativeModuleValue FrameNodeBridge::InsertChildAfter(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    CHECK_NULL_RETURN(!firstArg.IsNull(), panda::BooleanRef::New(vm, true));
+    CHECK_NULL_RETURN(!firstArg.IsNull(), panda::NumberRef::New(vm, ERROR_CODE_NO_ERROR));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto child = nodePtr(secondArg->ToNativePointer(vm)->Value());
+    auto* childNativeUINode = reinterpret_cast<UINode*>(child);
+    CHECK_NULL_RETURN(childNativeUINode, panda::NumberRef::New(vm, ERROR_CODE_PARAM_INVALID));
+    if (childNativeUINode->IsAdopted()) {
+        return panda::NumberRef::New(vm, ERROR_CODE_NODE_IS_ADOPTED);
+    }
     Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(2); // 2 : index to get the insert node
     if (thirdArg.IsNull()) {
         GetArkUINodeModifiers()->getFrameNodeModifier()->insertChildAfter(nativeNode, child, nullptr);
@@ -591,7 +631,7 @@ ArkUINativeModuleValue FrameNodeBridge::InsertChildAfter(ArkUIRuntimeCallInfo* r
     }
     auto sibling = nodePtr(thirdArg->ToNativePointer(vm)->Value());
     auto result = GetArkUINodeModifiers()->getFrameNodeModifier()->insertChildAfter(nativeNode, child, sibling);
-    return panda::BooleanRef::New(vm, result);
+    return panda::NumberRef::New(vm, result ? ERROR_CODE_NO_ERROR : ERROR_CODE_PARAM_INVALID);
 }
 ArkUINativeModuleValue FrameNodeBridge::RemoveBuilderNode(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
@@ -732,14 +772,19 @@ ArkUINativeModuleValue FrameNodeBridge::MoveTo(ArkUIRuntimeCallInfo* runtimeCall
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    CHECK_NULL_RETURN(!firstArg.IsNull(), panda::BooleanRef::New(vm, true));
+    CHECK_NULL_RETURN(!firstArg.IsNull(), panda::NumberRef::New(vm, ERROR_CODE_NO_ERROR));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto* nativeUINode = reinterpret_cast<UINode*>(nativeNode);
+    CHECK_NULL_RETURN(nativeUINode, panda::NumberRef::New(vm, ERROR_CODE_PARAM_INVALID));
+    if (nativeUINode->IsAdopted()) {
+        return panda::NumberRef::New(vm, ERROR_CODE_NODE_IS_ADOPTED);
+    }
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto targetNativeNode = nodePtr(secondArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(2); // 2 : index of child node position
     int index = thirdArg->ToNumber(vm)->Value();
     GetArkUINodeModifiers()->getFrameNodeModifier()->moveNodeTo(nativeNode, targetNativeNode, index);
-    return panda::JSValueRef::Undefined(vm);
+    return panda::NumberRef::New(vm, ERROR_CODE_NO_ERROR);
 }
 ArkUINativeModuleValue FrameNodeBridge::GetIdByNodePtr(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
@@ -2156,7 +2201,7 @@ ArkUINativeModuleValue FrameNodeBridge::AddFrameNodeToNodeContent(ArkUIRuntimeCa
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    CHECK_NULL_RETURN(!firstArg.IsNull(), panda::BooleanRef::New(vm, true));
+    CHECK_NULL_RETURN(!firstArg.IsNull(), panda::NumberRef::New(vm, ERROR_CODE_NO_ERROR));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeContent = reinterpret_cast<ArkUINodeContentHandle>(secondArg->ToNativePointer(vm)->Value());
@@ -2165,7 +2210,7 @@ ArkUINativeModuleValue FrameNodeBridge::AddFrameNodeToNodeContent(ArkUIRuntimeCa
     if (result != ERROR_CODE_NO_ERROR) {
         LOGW("AddFrameNodeToNodeContent failed error:%{public}d", result);
     }
-    return panda::BooleanRef::New(vm, !result);
+    return panda::NumberRef::New(vm, result);
 }
 
 ArkUINativeModuleValue FrameNodeBridge::RemoveFrameNodeFromNodeContent(ArkUIRuntimeCallInfo* runtimeCallInfo)

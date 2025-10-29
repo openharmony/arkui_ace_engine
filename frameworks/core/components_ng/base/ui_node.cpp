@@ -169,6 +169,9 @@ void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot,
     bool silently, bool addDefaultTransition, bool addModalUiextension)
 {
     CHECK_NULL_VOID(child);
+    if (child->IsAdopted()) {
+        return;
+    }
     if (child->GetAncestor() == this) {
         auto it = std::find(children_.begin(), children_.end(), child);
         if (it != children_.end()) {
@@ -369,6 +372,18 @@ void UINode::RemoveChildAtIndex(int32_t index)
     auto iter = children.begin();
     std::advance(iter, index);
     RemoveChild(*iter);
+}
+
+bool UINode::RemoveAdoptedChild(const RefPtr<FrameNode>& child)
+{
+    auto iter = std::find(adoptedChildren_.begin(), adoptedChildren_.end(), child);
+    if (iter == adoptedChildren_.end()) {
+        return false;
+    }
+    adoptedChildren_.erase(iter);
+    child->SetIsAdopted(false);
+    child->SetAdoptParent(nullptr);
+    return true;
 }
 
 RefPtr<UINode> UINode::GetChildAtIndex(int32_t index) const
@@ -640,6 +655,33 @@ void UINode::UpdateForceDarkAllowedNode(const RefPtr<UINode>& child)
     }
 }
 
+void UINode::AdoptChild(const RefPtr<FrameNode>& child, bool silently, bool addDefaultTransition)
+{
+    if (child->GetParent()) {
+        return;
+    }
+    auto prevParent = child->GetAdoptParent();
+    if (child->IsAdopted() && prevParent && prevParent->GetId() != this->GetId()) {
+        prevParent->RemoveAdoptedChild(child);
+    }
+    adoptedChildren_.emplace_back(child);
+    child->SetAdoptParent(WeakClaim(this));
+    child->SetIsAdopted(true);
+
+    child->SetDepth(depth_ + 1);
+
+    if (nodeStatus_ != NodeStatus::NORMAL_NODE) {
+        child->UpdateNodeStatus(nodeStatus_);
+    }
+
+    if (!silently && onMainTree_) {
+        child->AttachToMainTree(!addDefaultTransition, context_);
+    }
+    ProcessIsInDestroyingForReuseableNode(child);
+
+    child->SetActive(true);
+}
+
 void UINode::DoAddChild(
     std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently, bool addDefaultTransition)
 {
@@ -883,6 +925,9 @@ void UINode::AttachToMainTree(bool recursive, PipelineContext* context)
     for (const auto& child : GetChildren()) {
         child->AttachToMainTree(isRecursive, context);
     }
+    for (const auto& adoptChild : GetAdoptedChildren()) {
+        adoptChild->AttachToMainTree(isRecursive, context);
+    }
     if (context && context->IsOpenInvisibleFreeze()) {
         auto parent = GetParent();
         // if it does not has parent, reset the flag.
@@ -948,9 +993,13 @@ void UINode::DetachFromMainTree(bool recursive, bool needCheckThreadSafeNodeTree
     bool isRecursive = recursive || AceType::InstanceOf<FrameNode>(this);
     isTraversing_ = true;
     std::list<RefPtr<UINode>> children = GetChildren();
+    std::list<RefPtr<FrameNode>> adoptedChildren = GetAdoptedChildren();
     bool needCheckChild = CheckThreadSafeNodeTree(needCheckThreadSafeNodeTree);
     for (const auto& child : children) {
         child->DetachFromMainTree(isRecursive, needCheckChild);
+    }
+    for (const auto& adoptChild : adoptedChildren) {
+        adoptChild->DetachFromMainTree(isRecursive, needCheckChild);
     }
     if (isThreadSafeNode_) {
         ElementRegister::GetInstance()->RemoveItemSilently(GetId());
@@ -1000,8 +1049,12 @@ void UINode::UpdateChildrenFreezeState(bool isFreeze, bool isForceUpdateFreezeVa
 void UINode::FireCustomDisappear()
 {
     std::list<RefPtr<UINode>> children = GetChildren();
+    std::list<RefPtr<FrameNode>> adoptedChildren = GetAdoptedChildren();
     for (const auto& child : children) {
         child->FireCustomDisappear();
+    }
+    for (const auto& adoptChild : adoptedChildren) {
+        adoptChild->FireCustomDisappear();
     }
 }
 

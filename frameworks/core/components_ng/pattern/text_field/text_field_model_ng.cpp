@@ -75,6 +75,7 @@ void TextFieldModelNG::CreateNode(
     pattern->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());
     pattern->GetTextFieldController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(pattern)));
     pattern->InitSurfaceChangedCallback();
+    pattern->RegisterWindowFocusChangeCallback();
     pattern->RegisterWindowSizeCallback();
     pattern->InitSurfacePositionChangedCallback();
     auto pipeline = frameNode->GetContext();
@@ -152,6 +153,7 @@ void TextFieldModelNG::UpdateTextFieldPattern(
         pattern->UpdateEditingValueToRecord(); // record initial status
     }
     pattern->InitSurfaceChangedCallback();
+    pattern->RegisterWindowFocusChangeCallback();
     pattern->InitSurfacePositionChangedCallback();
     pattern->RegisterWindowSizeCallback();
     auto pipeline = frameNode->GetContext();

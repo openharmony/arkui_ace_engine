@@ -234,6 +234,7 @@ public:
     GestureEventFunc GetClickEvent();
     void BindMenu(GestureEventFunc&& showMenu);
     void RegisterMenuOnTouch(TouchEventFunc&& callback);
+    void AddClickEventForTips(GestureEventFunc&& tipsClickEventFunc);
     bool IsLongClickable() const;
     void SetRedirectClick(bool redirectClick);
     bool ActLongClick();
@@ -484,6 +485,7 @@ private:
     // used in bindMenu, need to delete the old callback when bindMenu runs again
     RefPtr<ClickEvent> showMenu_;
     RefPtr<TouchEventImpl> bindMenuTouch_;
+    RefPtr<ClickEvent> tipsClickEvent_;
 
     HitTestMode hitTestMode_ = HitTestMode::HTMDEFAULT;
     bool recreateGesture_ = true;

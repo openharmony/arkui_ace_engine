@@ -123,6 +123,7 @@ void SearchPattern::ProcessTextFieldDefaultStyleAndBehaviorsMultiThread()
     CHECK_NULL_VOID(textFieldPaintProperty);
     auto colorMode = pipeline->GetColorMode();
     pattern->InitSurfaceChangedCallback();
+    pattern->RegisterWindowFocusChangeCallback();
     pattern->RegisterWindowSizeCallback();
     pattern->SetTextFadeoutCapacity(true);
     pattern->InitSurfacePositionChangedCallback();

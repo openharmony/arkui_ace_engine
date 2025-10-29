@@ -328,7 +328,6 @@ HWTEST_F(ClickEventTestNg, ClickEventActuatorTest005, TestSize.Level1)
     clickEventActuator.OnCollectTouchTarget(
         COORDINATE_OFFSET, CLICK_TOUCH_RESTRICT, getEventTargetImpl, finalResultAfterClear, responseLinkResult);
     EXPECT_EQ(finalResultAfterClear.size(), CLICK_TEST_RESULT_SIZE_1);
-
     /**
      * @tc.steps: step4. test clear event again.
      * @tc.expected: callback and event are null, and it's size is equal 0.

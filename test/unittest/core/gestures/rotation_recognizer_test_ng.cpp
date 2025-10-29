@@ -1165,6 +1165,8 @@ HWTEST_F(RotationRecognizerTestNg, SetOnActionCancelTest003, TestSize.Level1)
         AceType::MakeRefPtr<RotationRecognizer>(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
     RefPtr<RotationRecognizer> rotationRecognizerPtr =
         AceType::MakeRefPtr<RotationRecognizer>(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
+    ASSERT_NE(rotationRecognizer, nullptr);
+    ASSERT_NE(rotationRecognizerPtr, nullptr);
 
     /**
      * @tc.steps: step2. Call SetOnActionCancel.
@@ -1187,7 +1189,7 @@ HWTEST_F(RotationRecognizerTestNg, SetOnActionCancelTest003, TestSize.Level1)
     rotationRecognizer->activeFingers_.push_back(1);
     rotationRecognizer->activeFingers_.push_back(2);
     auto result = rotationRecognizer->ReconcileFrom(rotationRecognizerPtr);
-    EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_VALUE);
+    EXPECT_EQ(unknownPropertyValue, 0);
     EXPECT_EQ(result, false);
 }
 
@@ -1365,6 +1367,7 @@ HWTEST_F(RotationRecognizerTestNg, HandleTouchUpEvent002, TestSize.Level1)
 {
     int32_t DEFAULT_ROTATION_FINGERS = 2;
     auto rotationRecognizer = AceType::MakeRefPtr<RotationRecognizer>(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
+    ASSERT_NE(rotationRecognizer, nullptr);
 
     int32_t testId = 1;
     int32_t testId2 = 2;
@@ -1385,6 +1388,7 @@ HWTEST_F(RotationRecognizerTestNg, HandleTouchUpEvent002, TestSize.Level1)
     EXPECT_TRUE(rotationRecognizer->isNeedResetVoluntarily_);
 
     auto rotationRecognizer1 = AceType::MakeRefPtr<RotationRecognizer>(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
+    ASSERT_NE(rotationRecognizer1, nullptr);
     rotationRecognizer1->activeFingers_.clear();
     rotationRecognizer1->refereeState_ = RefereeState::SUCCEED;
     rotationRecognizer1->activeFingers_.push_front(testId);
@@ -1392,6 +1396,7 @@ HWTEST_F(RotationRecognizerTestNg, HandleTouchUpEvent002, TestSize.Level1)
     EXPECT_FALSE(rotationRecognizer1->isNeedResetVoluntarily_);
 
     auto rotationRecognizer2 = AceType::MakeRefPtr<RotationRecognizer>(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
+    ASSERT_NE(rotationRecognizer2, nullptr);
     rotationRecognizer2->activeFingers_.clear();
     rotationRecognizer2->activeFingers_.push_front(testId2);
     rotationRecognizer2->activeFingers_.push_front(testId);
@@ -1400,6 +1405,7 @@ HWTEST_F(RotationRecognizerTestNg, HandleTouchUpEvent002, TestSize.Level1)
     EXPECT_FALSE(rotationRecognizer2->isNeedResetVoluntarily_);
 
     auto rotationRecognizer3 = AceType::MakeRefPtr<RotationRecognizer>(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
+    ASSERT_NE(rotationRecognizer3, nullptr);
     int32_t testId3 = 3;
     rotationRecognizer3->activeFingers_.clear();
     rotationRecognizer3->activeFingers_.push_front(testId);
@@ -1408,6 +1414,7 @@ HWTEST_F(RotationRecognizerTestNg, HandleTouchUpEvent002, TestSize.Level1)
     rotationRecognizer3->refereeState_ = RefereeState::FAIL;
     rotationRecognizer3->HandleTouchUpEvent(touchEvent);
     EXPECT_FALSE(rotationRecognizer3->isNeedResetVoluntarily_);
+    EXPECT_EQ(static_cast<int32_t>(rotationRecognizer3->activeFingers_.size()), 2);
 }
 
 /**

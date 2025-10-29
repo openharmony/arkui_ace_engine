@@ -131,24 +131,6 @@ export class ArkBadgeComponent extends ArkCommonMethodComponent implements Badge
     }
 }
 
-@memo
-export function BadgeImpl(
-    @memo
-    style: ((attributes: BadgeAttribute) => void) | undefined,
-    @memo
-    content_?: () => void,
-): void {
-    const receiver = remember<ArkBadgeComponent>((): ArkBadgeComponent => {
-        return new ArkBadgeComponent()
-    })
-    NodeAttach<ArkBadgePeer>((): ArkBadgePeer => ArkBadgePeer.create(receiver), (peer: ArkBadgePeer): void => {
-        receiver.setPeer(peer)
-        style?.(receiver)
-        receiver.setPeer(undefined)
-        content_?.()
-    })
-}
-
 export class BadgeStyle_serializer {
     public static write(buffer: SerializerBase, value: BadgeStyle): void {
         let valueSerializer : SerializerBase = buffer

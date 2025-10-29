@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 
 #include "base/log/dump_log.h"
+#include "base/utils/multi_thread.h"
 #include "core/common/agingadapation/aging_adapation_dialog_theme.h"
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
 #include "core/components/theme/app_theme.h"
@@ -382,6 +383,7 @@ void NavDestinationPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode);
     NavDestinationPatternBase::InitOnTouchEvent(host);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_SYSTEM | SAFE_AREA_TYPE_CUTOUT,
@@ -401,6 +403,7 @@ void NavDestinationPattern::OnAttachToFrameNode()
 void NavDestinationPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
+    THREAD_SAFE_NODE_CHECK(frameNode, OnDetachFromFrameNode, frameNode);
     auto id = frameNode->GetId();
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
@@ -464,6 +467,7 @@ void NavDestinationPattern::SetSystemBarStyle(const RefPtr<SystemBarStyle>& styl
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    FREE_NODE_CHECK(host, SetSystemBarStyle, style);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto windowManager = pipeline->GetWindowManager();
@@ -505,12 +509,20 @@ void NavDestinationPattern::OnWindowHide()
     stack->SetIsEntryByIndex(index, false);
 }
 
+void NavDestinationPattern::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
+}
+
 void NavDestinationPattern::OnDetachFromMainTree()
 {
-    backupStyle_.reset();
-    currStyle_.reset();
     auto host = AceType::DynamicCast<NavDestinationGroupNode>(GetHost());
     CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree);
+    backupStyle_.reset();
+    currStyle_.reset();
     if (!host->IsHomeDestination()) {
         return;
     }

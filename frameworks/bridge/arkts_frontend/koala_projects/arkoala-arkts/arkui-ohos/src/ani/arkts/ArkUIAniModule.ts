@@ -308,6 +308,7 @@ export class ArkUIAniModule {
     native static _Common_px2fp(value:number, instanceId: KInt): number
     native static _Common_lpx2px(value:number, instanceId: KInt): number
     native static _Common_px2lpx(value:number, instanceId: KInt): number
+    native static _Common_getWindowName(instanceId: KInt): string
     native static _Common_getWindowWidthBreakpoint(): KInt
     native static _Common_getWindowHeightBreakpoint(): KInt
 
@@ -397,4 +398,6 @@ export class ArkUIAniModule {
     native static _ParallelizeUIAdapterNode_Construct(id: KInt): KPointer
     native static _ParallelizeUIAdapterNode_Reset(ptr: KPointer): void
     native static _ParallelizeUIAdapterNode_RegisterCallback(ptr: KPointer, getCount: (() => KInt), getFrame: ((index:KInt, needBuild:KInt, isCache:KInt) =>KPointer)): void
+
+    native static _ApplyThemeScopeId(self: KPointer, themeScopeId: KInt): void
 }

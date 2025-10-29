@@ -204,7 +204,7 @@ public:
         return jsEngine_;
     }
 
-    void AttachSubPipelineContext(const RefPtr<PipelineBase>& context);
+    void AttachSubPipelineContext(const RefPtr<PipelineBase>& context) override;
 
     void FlushReload() override;
     void HotReload() override;

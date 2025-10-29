@@ -88,7 +88,7 @@ void RotationRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         firstInputTime_ = event.time;
     }
 
-    if (static_cast<int32_t>(activeFingers_.size()) >= DEFAULT_ROTATION_FINGERS) {
+    if (static_cast<int32_t>(activeFingers_.size()) >= fingers_) {
         return;
     }
     if (fingers_ > MAX_ROTATION_FINGERS) {
@@ -101,7 +101,8 @@ void RotationRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     activeFingers_.emplace_back(event.id);
     touchPoints_[event.id] = event;
 
-    if (static_cast<int32_t>(activeFingers_.size()) >= DEFAULT_ROTATION_FINGERS) {
+    if (static_cast<int32_t>(activeFingers_.size()) >= DEFAULT_ROTATION_FINGERS &&
+        refereeState_ != RefereeState::DETECTING) {
         initialAngle_ = ComputeAngle();
         currentAngle_ = initialAngle_;
         lastRefereeState_ = refereeState_;
@@ -157,7 +158,7 @@ void RotationRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     }
 
     if (refereeState_ == RefereeState::SUCCEED &&
-        static_cast<int32_t>(activeFingers_.size()) == DEFAULT_ROTATION_FINGERS) {
+        static_cast<int32_t>(activeFingers_.size()) == fingers_) {
         SendCallbackMsg(onActionEnd_, GestureCallbackType::END);
         int64_t overTime = GetSysTimestamp();
         int64_t inputTime = overTime;
@@ -288,7 +289,7 @@ void RotationRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
     }
 
     if (refereeState_ == RefereeState::SUCCEED &&
-        static_cast<int32_t>(activeFingers_.size()) == DEFAULT_ROTATION_FINGERS) {
+        static_cast<int32_t>(activeFingers_.size()) == fingers_) {
         SendCallbackMsg(onActionCancel_, GestureCallbackType::CANCEL);
         lastRefereeState_ = RefereeState::READY;
         refereeState_ = RefereeState::READY;
@@ -490,7 +491,7 @@ bool RotationRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recogn
 
     if (curr->fingers_ != fingers_ || !NearEqual(curr->angle_, angle_) || curr->priorityMask_ != priorityMask_) {
         if (refereeState_ == RefereeState::SUCCEED &&
-            static_cast<int32_t>(activeFingers_.size()) == DEFAULT_ROTATION_FINGERS) {
+            static_cast<int32_t>(activeFingers_.size()) == fingers_) {
             SendCallbackMsg(onActionCancel_, GestureCallbackType::CANCEL);
         }
         ResetStatus();

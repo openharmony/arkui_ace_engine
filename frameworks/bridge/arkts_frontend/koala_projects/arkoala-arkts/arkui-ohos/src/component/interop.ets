@@ -45,6 +45,9 @@ import {
     registerResetInteropExtendableComponent,
     createInteropView
 } from './interopExtendableComponent';
+import { ThemeColorMode } from "arkui/component/common"
+import { ArkThemeNativeHelper } from "arkui/theme/ArkThemeNativeHelper"
+import { ArkThemeScopeManager } from "arkui/theme/ArkThemeScopeManager"
 
 import { StateManagerImpl } from '@koalaui/runtime';
 import { MutableStateMeta } from '../stateManagement/base/mutableStateMeta';
@@ -113,7 +116,9 @@ export function compatibleComponent(
         node.setStaticParent(staticComponent);
         return node;
     }, (node: CompatiblePeerNode) => {
+        ArkThemeScopeManager.getInstance().applyWithThemeForCompatibleComponent(node.view);
         update(node.view);
+        ArkThemeScopeManager.getInstance().popWithThemeForCompatibleComponent();
     });
 }
 
@@ -144,6 +149,8 @@ export function compatibleStaticComponent<T extends BaseCustomComponent<T_Option
         manager = GlobalStateManager.instance;
     }
 
+    ArkThemeScopeManager.getInstance().applyColorModeFromThemeScope();
+    
     const node = manager.updatableNode(new IncrementalNode(), (context: StateContext) => {
         const frozen = manager.frozen;
         manager.frozen = true;
@@ -166,7 +173,14 @@ export function compatibleStaticComponent<T extends BaseCustomComponent<T_Option
     }
     const staticComponent = (peerNode as ArkCustomComponentRootPeer).getComponent();
     uiContext.getDetachedRootEntryManager().detachedRoots_.set(peerNode.peer.ptr, new DetachedRootEntryImpl<IncrementalNode>(node));
-    return [() => {(staticComponent as CustomDelegate<T, T_Options>).__updateStruct(options ? options() : undefined);}, peerNode.getPeerPtr() as number];
+    ArkThemeScopeManager.getInstance().restoreColorMode()
+    return [
+        () => {
+            ArkThemeScopeManager.getInstance().executeReload(node);
+            (staticComponent as CustomDelegate<T, T_Options>).__updateStruct(options ? options() : undefined);
+            }, 
+            peerNode.getPeerPtr() as number,
+        ];
 }
 
 function openInterop(): void {

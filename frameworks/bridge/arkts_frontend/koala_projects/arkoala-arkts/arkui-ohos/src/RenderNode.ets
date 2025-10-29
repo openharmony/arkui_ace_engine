@@ -24,6 +24,7 @@ import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { PeerNode } from "./PeerNode"
 import { FrameNode } from "./FrameNode"
 import { ArkUIAniModule } from "arkui.ani"
+import { BusinessError } from '#external';
 import hilog from '@ohos.hilog'
 import { RenderNodeExtender, NodeEdgeStyles, EdgeNumber, BorderRadiuses_graphics } from "./framework";
 
@@ -35,6 +36,9 @@ export class RenderNodeInternal {
         return obj
     }
 }
+
+const ERROR_CODE_NODE_IS_ADOPTED = 106206;
+
 export class RenderNode implements MaterializedBase {
     peer?: Finalizable | undefined = undefined
     private type?: string;  // use for transfer
@@ -356,7 +360,11 @@ export class RenderNode implements MaterializedBase {
         }
         this.childrenList.push(node)
         node.parentRenderNode = new WeakRef<RenderNode>(this)
-        RenderNodeExtender.appendChild(this, node_casted)
+        let result = RenderNodeExtender.appendChild(this, node_casted);
+        if (result === ERROR_CODE_NODE_IS_ADOPTED) {
+            const error = Error("The parameter 'node' is invalid: the node has already been adopted.");
+            throw new BusinessError(100025, error);
+        }
         return
     }
     public insertChildAfter(child: RenderNode, sibling: RenderNode | null): void {
@@ -382,7 +390,11 @@ export class RenderNode implements MaterializedBase {
         }
         InteropNativeModule._NativeLog("FFZZYY insertChildAfter 555")
         const sibling_casted = sibling as RenderNode
-        RenderNodeExtender.insertChildAfter(this, child, sibling_casted);
+        let result = RenderNodeExtender.insertChildAfter(this, child, sibling_casted);
+        if (result === ERROR_CODE_NODE_IS_ADOPTED) {
+            const error = Error("The parameter 'child' is invalid: the node has already been adopted.");
+            throw new BusinessError(100025, error);
+        }
         InteropNativeModule._NativeLog("FFZZYY insertChildAfter 666")
         return
     }

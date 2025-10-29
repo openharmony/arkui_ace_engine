@@ -7616,6 +7616,10 @@ struct ArkUINDKRenderNodeModifier {
     ArkUI_Int32 (*setRoundRectClip)(ArkUIRenderNodeHandle node, ArkUIRoundRectShape shape);
     ArkUI_Int32 (*setOvalClip)(ArkUIRenderNodeHandle node, ArkUIRectShape shape);
     ArkUI_Int32 (*setCommandPathClip)(ArkUIRenderNodeHandle node, ArkUI_CharPtr commands);
+    ArkUI_Int32 (*adoptChild)(ArkUINodeHandle node, ArkUINodeHandle child);
+    ArkUI_Int32 (*getRenderNode)(ArkUINodeHandle node, ArkUIRenderNodeHandle* renderNode, ArkUI_Int32* renderNodeId);
+    ArkUI_Int32 (*removeAdoptedChild)(ArkUINodeHandle node, ArkUINodeHandle child);
+    void (*detachRsNodeDuringDispose)(ArkUINodeHandle node);
 };
 
 /**

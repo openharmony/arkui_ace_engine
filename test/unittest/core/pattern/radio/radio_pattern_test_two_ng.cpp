@@ -1,0 +1,860 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "gtest/gtest.h"
+
+#define private public
+#define protected public
+#include "test/mock/base/mock_system_properties.h"
+#include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/rosen/mock_canvas.h"
+
+#include "core/components/checkable/checkable_theme.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/linear_layout/column_model_ng.h"
+#include "core/components_ng/pattern/radio/radio_model_ng.h"
+#include "core/components_ng/pattern/radio/radio_paint_property.h"
+#include "core/components_ng/pattern/radio/radio_pattern.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
+#include "core/components_ng/pattern/stage/stage_pattern.h"
+#include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components_ng/pattern/image/image_layout_property.h"
+#include "core/components_ng/pattern/stage/page_event_hub.h"
+#include "core/components_v2/inspector/inspector_constants.h"
+
+using namespace testing;
+using namespace testing::ext;
+using RadioBuilderFunc = std::function<void()>;
+namespace OHOS::Ace::NG {
+namespace {
+const std::string NAME = "radio";
+const std::string VALUE = "radio";
+const std::string NAME1 = "radio1";
+const std::string GROUP_NAME = "radioGroup";
+const std::string GROUP_NAME1 = "radioGroup1";
+const std::string GROUP_NAME_CHANGE = "radioGroupChange";
+constexpr double DEFAULT_WIDTH = 100.0;
+constexpr double DEFAULT_HEIGHT = 110.0;
+constexpr Dimension DEFAULT_WIDTH_DIMENSION = Dimension(DEFAULT_WIDTH);
+constexpr Dimension DEFAULT_HEIGHT_DIMENSION = Dimension(DEFAULT_HEIGHT);
+constexpr Dimension HORIZONTAL_PADDING = Dimension(5.0);
+constexpr Dimension VERTICAL_PADDING = Dimension(4.0);
+const SizeF CONTENT_SIZE = SizeF(400.0, 500.0);
+const OffsetF CONTENT_OFFSET = OffsetF(50.0, 60.0);
+const std::optional<int32_t> INDICATOR_TYPE_TICK = 0;
+const int32_t RADIOINDICATOR_TYPE_TICK = 0;
+} // namespace
+
+class RadioPatternTwoTestNg : public testing::Test {
+public:
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
+    static RadioBuilderFunc RadioBuilder();
+};
+
+void RadioPatternTwoTestNg::SetUpTestSuite()
+{
+    MockPipelineContext::SetUp();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        auto radioTheme = AceType::MakeRefPtr<RadioTheme>();
+        radioTheme->hotZoneHorizontalPadding_ = HORIZONTAL_PADDING;
+        radioTheme->hotZoneVerticalPadding_ = VERTICAL_PADDING;
+        radioTheme->defaultWidth_ = DEFAULT_WIDTH_DIMENSION;
+        radioTheme->defaultHeight_ = DEFAULT_HEIGHT_DIMENSION;
+        return radioTheme;
+    });
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    MockContainer::SetUp();
+}
+
+void RadioPatternTwoTestNg::TearDownTestSuite()
+{
+    MockPipelineContext::GetCurrent()->themeManager_ = nullptr;
+    MockPipelineContext::TearDown();
+    MockContainer::TearDown();
+}
+
+/**
+ * @tc.name: RadioPatternTest097
+ * @tc.desc: Radio test startExitAnimation.
+ */
+HWTEST_F(RadioPatternTwoTestNg, RadioPatternTest097, TestSize.Level1)
+{
+    int32_t settingApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    RadioModelNG radioModelNG;
+    radioModelNG.Create("", GROUP_NAME, INDICATOR_TYPE_TICK);
+    radioModelNG.SetChecked(true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto host = pattern->GetHost();
+    pattern->startExitAnimation();
+
+    EXPECT_TRUE(eventHub->enabled_);
+}
+
+/**
+ * @tc.name: RadioPatternTest098
+ * @tc.desc: Radio test startExitAnimation.
+ */
+HWTEST_F(RadioPatternTwoTestNg, RadioPatternTest098, TestSize.Level1)
+{
+    int32_t settingApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
+    radioModelNG.SetChecked(true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto host = pattern->GetHost();
+    pattern->startExitAnimation();
+
+    EXPECT_TRUE(eventHub->enabled_);
+}
+
+/**
+ * @tc.name: RadioPatternTest099
+ * @tc.desc: Radio test startExitAnimation.
+ */
+HWTEST_F(RadioPatternTwoTestNg, RadioPatternTest099, TestSize.Level1)
+{
+    int32_t settingApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(VALUE, GROUP_NAME, INDICATOR_TYPE_TICK);
+    radioModelNG.SetChecked(true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto context = frameNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    auto theme = context->GetTheme<RadioTheme>();
+    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_TYPE_TICK, theme);
+   
+    pattern->ImageNodeCreate();
+    auto Hasval = pattern->preTypeIsBuilder_;
+    ASSERT_EQ(Hasval, false);
+}
+
+/**
+ * @tc.name: RadioPatternTest100
+ * @tc.desc: Radio test startExitAnimation.
+ */
+HWTEST_F(RadioPatternTwoTestNg, RadioPatternTest100, TestSize.Level1)
+{
+    int32_t settingApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    RadioModelNG radioModelNG;
+    radioModelNG.Create("", GROUP_NAME, INDICATOR_TYPE_TICK);
+    radioModelNG.SetChecked(true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto context = frameNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    auto theme = context->GetTheme<RadioTheme>();
+    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_TYPE_TICK, theme);
+
+    pattern->ImageNodeCreate();
+    auto hasval = pattern->preTypeIsBuilder_;
+    ASSERT_EQ(hasval, false);
+}
+
+/**
+ * @tc.name: RadioPatternTest101
+ * @tc.desc: Radio test startExitAnimation.
+ */
+HWTEST_F(RadioPatternTwoTestNg, RadioPatternTest101, TestSize.Level1)
+{
+    int32_t settingApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
+    radioModelNG.SetChecked(true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto context = frameNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    auto theme = context->GetTheme<RadioTheme>();
+    auto imageSourceInfo = pattern->GetImageSourceInfoFromTheme(RADIOINDICATOR_TYPE_TICK, theme);
+
+    pattern->ImageNodeCreate();
+    auto hasval = pattern->preTypeIsBuilder_;
+    ASSERT_EQ(hasval, false);
+}
+
+/**
+ * @tc.name: RadioPatternTest102
+ * @tc.desc: Radio test startExitAnimation.
+ */
+HWTEST_F(RadioPatternTwoTestNg, RadioPatternTest102, TestSize.Level1)
+{
+    int32_t settingApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(VALUE, GROUP_NAME, INDICATOR_TYPE_TICK);
+    radioModelNG.SetChecked(true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    
+    pattern->UpdateIndicatorType();
+    auto hasval = pattern->preTypeIsBuilder_;
+    ASSERT_EQ(hasval, false);
+}
+
+/**
+ * @tc.name: RadioPatternTest103
+ * @tc.desc: Radio test startExitAnimation.
+ */
+HWTEST_F(RadioPatternTwoTestNg, RadioPatternTest103, TestSize.Level1)
+{
+    int32_t settingApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    RadioModelNG radioModelNG;
+    radioModelNG.Create("", GROUP_NAME, INDICATOR_TYPE_TICK);
+    radioModelNG.SetChecked(true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    
+    pattern->UpdateIndicatorType();
+    auto hasval = pattern->preTypeIsBuilder_;
+    ASSERT_EQ(hasval, false);
+}
+
+/**
+ * @tc.name: RadioPatternTest104
+ * @tc.desc: Radio test startExitAnimation.
+ */
+HWTEST_F(RadioPatternTwoTestNg, RadioPatternTest104, TestSize.Level1)
+{
+    int32_t settingApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
+    radioModelNG.SetChecked(true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->UpdateIndicatorType();
+    auto hasval = pattern->preTypeIsBuilder_;
+    ASSERT_EQ(hasval, false);
+}
+
+/**
+ * @tc.name: RadioPatternTest105
+ * @tc.desc: Radio test UpdateState.
+ */
+HWTEST_F(RadioPatternTwoTestNg, RadioPatternTest105, TestSize.Level1)
+{
+    int32_t settingApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(VALUE, GROUP_NAME, INDICATOR_TYPE_TICK);
+    radioModelNG.SetChecked(true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    
+    pattern->UpdateState();
+    auto val = pattern->isGroupChanged_;
+    ASSERT_EQ(val, false);
+}
+
+/**
+ * @tc.name: RadioPatternTest106
+ * @tc.desc: Radio test UpdateState.
+ */
+HWTEST_F(RadioPatternTwoTestNg, RadioPatternTest106, TestSize.Level1)
+{
+    int32_t settingApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    RadioModelNG radioModelNG;
+    radioModelNG.Create("", GROUP_NAME, INDICATOR_TYPE_TICK);
+    radioModelNG.SetChecked(true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->UpdateState();
+    auto val = pattern->isGroupChanged_;
+    ASSERT_EQ(val, false);
+}
+
+/**
+ * @tc.name: RadioPatternTest107
+ * @tc.desc: Radio test UpdateState.
+ */
+HWTEST_F(RadioPatternTwoTestNg, RadioPatternTest107, TestSize.Level1)
+{
+    int32_t settingApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
+    radioModelNG.SetChecked(true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    
+    pattern->UpdateState();
+    auto val = pattern->isGroupChanged_;
+    ASSERT_EQ(val, false);
+}
+
+/**
+ * @tc.name: RadioPatternTest108
+ * @tc.desc: Radio test LoadBuilder.
+ */
+HWTEST_F(RadioPatternTwoTestNg, RadioPatternTest108, TestSize.Level1)
+{
+    int32_t settingApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(VALUE, GROUP_NAME, INDICATOR_TYPE_TICK);
+    radioModelNG.SetChecked(true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    
+    pattern->LoadBuilder();
+    auto val = pattern->preTypeIsBuilder_;
+    ASSERT_NE(val, true);
+}
+
+/**
+ * @tc.name: RadioPatternTest109
+ * @tc.desc: Radio test LoadBuilder.
+ */
+HWTEST_F(RadioPatternTwoTestNg, RadioPatternTest109, TestSize.Level1)
+{
+    int32_t settingApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    RadioModelNG radioModelNG;
+    radioModelNG.Create("", GROUP_NAME, INDICATOR_TYPE_TICK);
+    radioModelNG.SetChecked(true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    
+    pattern->LoadBuilder();
+    auto val = pattern->preTypeIsBuilder_;
+    ASSERT_NE(val, true);
+}
+
+/**
+ * @tc.name: RadioPatternTest110
+ * @tc.desc: Radio test LoadBuilder.
+ */
+HWTEST_F(RadioPatternTwoTestNg, RadioPatternTest110, TestSize.Level1)
+{
+    int32_t settingApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
+    radioModelNG.SetChecked(true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    
+    pattern->LoadBuilder();
+    auto val = pattern->preTypeIsBuilder_;
+    ASSERT_NE(val, true);
+}
+
+/**
+ * @tc.name: RadioPatternTest111
+ * @tc.desc: Radio test LoadBuilder.
+ */
+HWTEST_F(RadioPatternTwoTestNg, RadioPatternTest111, TestSize.Level1)
+{
+    int32_t settingApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(VALUE, GROUP_NAME, INDICATOR_TYPE_TICK);
+    radioModelNG.SetChecked(true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->builder_ = []() {
+        std::cout << "";
+    };
+    pattern->LoadBuilder();
+    auto val = pattern->preTypeIsBuilder_;
+    ASSERT_NE(val, true);
+}
+
+/**
+ * @tc.name: RadioPatternTest112
+ * @tc.desc: Radio test LoadBuilder.
+ */
+HWTEST_F(RadioPatternTwoTestNg, RadioPatternTest112, TestSize.Level1)
+{
+    int32_t settingApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    RadioModelNG radioModelNG;
+    radioModelNG.Create("", GROUP_NAME, INDICATOR_TYPE_TICK);
+    radioModelNG.SetChecked(true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    
+    pattern->builder_ = []() {
+
+    };
+    pattern->LoadBuilder();
+    auto val = pattern->preTypeIsBuilder_;
+    ASSERT_NE(val, true);
+}
+
+/**
+ * @tc.name: RadioPatternTest113
+ * @tc.desc: Radio test LoadBuilder.
+ */
+HWTEST_F(RadioPatternTwoTestNg, RadioPatternTest113, TestSize.Level1)
+{
+    int32_t settingApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
+    radioModelNG.SetChecked(true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    
+    pattern->builder_ = []() {
+
+    };
+    pattern->LoadBuilder();
+    auto val = pattern->preTypeIsBuilder_;
+    ASSERT_NE(val, true);
+}
+
+/**
+ * @tc.name: RadioPatternTest114
+ * @tc.desc: Radio test LoadBuilder.
+ */
+HWTEST_F(RadioPatternTwoTestNg, RadioPatternTest114, TestSize.Level1)
+{
+    int32_t settingApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
+    radioModelNG.SetChecked(true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->SetPrePageIdToLastPageId();
+
+    auto groupManager = pattern->GetGroupManager();
+    auto check = false;
+    settingApiVersion = 11;
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    pattern->UpdateGroupCheckStatus(frameNode, groupManager, check);
+}
+
+/**
+ * @tc.name: RadioPatternTest115
+ * @tc.desc: Radio test LoadBuilder.
+ */
+HWTEST_F(RadioPatternTwoTestNg, RadioPatternTest115, TestSize.Level1)
+{
+    int32_t settingApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
+    radioModelNG.SetChecked(true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->SetPrePageIdToLastPageId();
+
+    auto groupManager = pattern->GetGroupManager();
+    auto check = false;
+    pattern->UpdateGroupCheckStatus(frameNode, groupManager, check);
+}
+
+/**
+ * @tc.name: RadioPatternTest116
+ * @tc.desc: Radio test LoadBuilder.
+ */
+HWTEST_F(RadioPatternTwoTestNg, RadioPatternTest116, TestSize.Level1)
+{
+    int32_t settingApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
+    radioModelNG.SetChecked(true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    auto status = eventHub->IsEnabled();
+    auto enabled = status;
+    if (enabled == true) {
+        enabled = false;
+    } else {
+        enabled = true;
+    }
+    eventHub->SetEnabled(enabled);
+    pattern->HandleEnabled();
+    settingApiVersion = 11;
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    pattern->HandleEnabled();
+    eventHub->SetEnabled(status);
+}
+
+/**
+ * @tc.name: RadioPatternTest117
+ * @tc.desc: Radio test LoadBuilder.
+ */
+HWTEST_F(RadioPatternTwoTestNg, RadioPatternTest117, TestSize.Level1)
+{
+    int32_t settingApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
+    radioModelNG.SetChecked(true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    auto status = eventHub->IsEnabled();
+    auto enabled = status;
+    if (enabled == true) {
+        enabled = false;
+    } else {
+        enabled = true;
+    }
+    eventHub->SetEnabled(enabled);
+    settingApiVersion = 11;
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    pattern->HandleEnabled();
+    eventHub->SetEnabled(status);
+}
+
+/**
+ * @tc.name: RadioPatternTest118
+ * @tc.desc: Radio test LoadBuilder.
+ */
+HWTEST_F(RadioPatternTwoTestNg, RadioPatternTest118, TestSize.Level1)
+{
+    int32_t settingApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
+    radioModelNG.SetChecked(true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->CheckPageNode();
+}
+
+/**
+ * @tc.name: RadioPatternTest119
+ * @tc.desc: Radio test LoadBuilder.
+ */
+HWTEST_F(RadioPatternTwoTestNg, RadioPatternTest119, TestSize.Level1)
+{
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
+    radioModelNG.SetChecked(true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnAfterModifyDone();
+}
+
+/**
+ * @tc.name: RadioPatternTest120
+ * @tc.desc: Test Radio OnDetachFromFrameNodeMultiThread.
+ */
+HWTEST_F(RadioPatternTwoTestNg, RadioPatternTest120, TestSize.Level1)
+{
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnDetachFromFrameNodeMultiThread();
+}
+
+/**
+ * @tc.name: RadioPatternTest121
+ * @tc.desc: Test Radio OnDetachFromMainTree.
+ */
+HWTEST_F(RadioPatternTwoTestNg, RadioPatternTest121, TestSize.Level1)
+{
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnDetachFromMainTree();
+}
+
+/**
+ * @tc.name: RadioPatternTest122
+ * @tc.desc: Test Radio OnDetachFromMainTreeMultiThread.
+ */
+HWTEST_F(RadioPatternTwoTestNg, RadioPatternTest122, TestSize.Level1)
+{
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnDetachFromMainTreeMultiThread(frameNode);
+}
+
+/**
+ * @tc.name: InitDefaultMarginTest001
+ * @tc.desc: Test Radio InitDefaultMargin.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioPatternTwoTestNg, InitDefaultMarginTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init radio node
+     */
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. make builderFunc
+     */
+    auto buildFunc = [](RadioConfiguration config) -> RefPtr<FrameNode> { return nullptr; };
+    /**
+     * @tc.steps: step3. set builder func and call InitDefaultMargin.
+     * @tc.expected: step3. margin property is null.
+     */
+    radioModelNG.SetIsUserSetMargin(true);
+    pattern->SetBuilderFunc(buildFunc);
+    pattern->InitDefaultMargin();
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    EXPECT_EQ(layoutProperty->GetMarginProperty(), nullptr);
+    /**
+     * @tc.steps: step4. clear builderFunc and call InitDefaultMargin.
+     * @tc.expected: step4. margin property is not null.
+     */
+    radioModelNG.SetIsUserSetMargin(false);
+    pattern->InitDefaultMargin();
+    EXPECT_NE(layoutProperty->GetMarginProperty(), nullptr);
+    pattern->SetBuilderFunc(nullptr);
+    pattern->InitDefaultMargin();
+    EXPECT_NE(layoutProperty->GetMarginProperty(), nullptr);
+}
+
+/**
+ * @tc.name: UpdateRadioComponentColor
+ * @tc.desc: Test UpdateRadioComponentColor for all RadioColorType.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioPatternTwoTestNg, UpdateRadioComponentColor, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create radio frame node and initialize components.
+     * @tc.expected: step1. Frame node and pattern are created successfully.
+     */
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto paintProperty = frameNode->GetPaintProperty<RadioPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. Update checked background color and verify.
+     * @tc.expected: step2. Checked background color is updated to RED.
+     */
+    pattern->UpdateRadioComponentColor(Color::RED, RadioColorType::CHECKED_BACKGROUND_COLOR);
+    auto color1 = paintProperty->GetRadioCheckedBackgroundColor();
+    ASSERT_TRUE(color1.has_value());
+    EXPECT_EQ(color1.value(), Color::RED);
+
+    /**
+     * @tc.steps: step3. Update unchecked border color and verify.
+     * @tc.expected: step3. Unchecked border color is updated to BLUE.
+     */
+    pattern->UpdateRadioComponentColor(Color::BLUE, RadioColorType::UNCHECKED_BORDER_COLOR);
+    auto color2 = paintProperty->GetRadioUncheckedBorderColor();
+    ASSERT_TRUE(color2.has_value());
+    EXPECT_EQ(color2.value(), Color::BLUE);
+
+    /**
+     * @tc.steps: step4. Update indicator color and verify.
+     * @tc.expected: step4. Indicator color is updated to GREEN.
+     */
+    pattern->UpdateRadioComponentColor(Color::GREEN, RadioColorType::INDICATOR_COLOR);
+    auto color3 = paintProperty->GetRadioIndicatorColor();
+    ASSERT_TRUE(color3.has_value());
+    EXPECT_EQ(color3.value(), Color::GREEN);
+
+    EXPECT_EQ(pattern->preTypeIsBuilder_, false);
+}
+
+/**
+ * @tc.name: OnColorConfigurationUpdate
+ * @tc.desc: Test OnColorConfigurationUpdate updates paint properties correctly when user has not set colors.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioPatternTwoTestNg, OnColorConfigurationUpdate, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set API version and create radio frame node.
+     * @tc.expected: step1. API version is set and frame node is created.
+     */
+    int32_t settingApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<RadioPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto radioTheme = pipeline->GetTheme<RadioTheme>();
+    ASSERT_NE(radioTheme, nullptr);
+    pattern->OnColorConfigurationUpdate();
+
+    /**
+     * @tc.steps: step2. Set theme colors and update with user color flags.
+     * @tc.expected: step2. Checked background color is updated to theme's active color (BLACK).
+     */
+    g_isConfigChangePerform = true;
+    radioTheme->activeColor_ = Color::BLACK;
+    radioTheme->inactiveColor_ = Color::BLACK;
+    radioTheme->pointColor_ = Color::BLACK;
+    paintProperty->UpdateRadioCheckedBackgroundColorSetByUser(false);
+    paintProperty->UpdateRadioUncheckedBorderColorSetByUser(true);
+    paintProperty->UpdateRadioIndicatorColorSetByUser(true);
+    pattern->OnColorConfigurationUpdate();
+    EXPECT_EQ(paintProperty->GetRadioCheckedBackgroundColorValue(), Color::BLACK);
+
+    /**
+     * @tc.steps: step3. Reverse user color flags and verify unchecked border color.
+     * @tc.expected: step3. Unchecked border color is updated to theme's inactive color (BLACK).
+     */
+    paintProperty->UpdateRadioCheckedBackgroundColorSetByUser(true);
+    paintProperty->UpdateRadioUncheckedBorderColorSetByUser(false);
+    paintProperty->UpdateRadioIndicatorColorSetByUser(true);
+    pattern->OnColorConfigurationUpdate();
+    EXPECT_EQ(paintProperty->GetRadioUncheckedBorderColorValue(), Color::BLACK);
+
+    /**
+     * @tc.steps: step4. Reverse user color flags again and verify indicator color.
+     * @tc.expected: step4. Indicator color is updated to theme's point color (BLACK).
+     */
+    paintProperty->UpdateRadioCheckedBackgroundColorSetByUser(true);
+    paintProperty->UpdateRadioUncheckedBorderColorSetByUser(true);
+    paintProperty->UpdateRadioIndicatorColorSetByUser(false);
+    pattern->OnColorConfigurationUpdate();
+    EXPECT_EQ(paintProperty->GetRadioIndicatorColorValue(), Color::BLACK);
+    g_isConfigChangePerform = false;
+}
+
+/**
+ * @tc.name: OnColorConfigurationUpdate002
+ * @tc.desc: Test OnColorConfigurationUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioPatternTwoTestNg, OnColorConfigurationUpdate002, TestSize.Level1)
+{
+    int32_t settingApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<RadioPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto radioTheme = pipeline->GetTheme<RadioTheme>();
+    ASSERT_NE(radioTheme, nullptr);
+    pattern->OnColorConfigurationUpdate();
+
+    g_isConfigChangePerform = true;
+    pattern->SetUncheckedBorderColorByJSRadioTheme(false);
+    paintProperty->UpdateRadioUncheckedBorderColorSetByUser(false);
+    pattern->SetIndicatorColorByJSRadioTheme(false);
+    paintProperty->UpdateRadioIndicatorColorSetByUser(false);
+    pattern->OnColorConfigurationUpdate();
+    EXPECT_EQ(paintProperty->GetRadioUncheckedBorderColorValue(), radioTheme->GetUnCheckBorderColor());
+    g_isConfigChangePerform = false;
+}
+} // namespace OHOS::Ace::NG

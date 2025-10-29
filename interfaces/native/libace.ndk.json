@@ -4370,5 +4370,17 @@
     {
         "first_introduced": "22",
         "name": "OH_ArkUI_SelectedDataDetectorConfig_GetTypes"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_RenderNodeUtils_GetRenderNode"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_NativeModule_AdoptChild"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_NativeModule_RemoveAdoptedChild"
     }
 ]

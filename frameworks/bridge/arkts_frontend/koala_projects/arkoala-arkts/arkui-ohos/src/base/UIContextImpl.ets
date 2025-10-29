@@ -1281,7 +1281,7 @@ export class UIContextImpl extends UIContext {
     isDebugMode_: boolean = false;
     updateParallelizeItemNodeCallback_?:() => void;
     callbacks: Array<() => void>;
-
+    isUpdateConfiguration_ = false;
 
     bufferSize = 4096
     buffer: KBuffer = new KBuffer(this.bufferSize)
@@ -1525,21 +1525,14 @@ export class UIContextImpl extends UIContext {
         return
     }
       public getWindowName(): string | undefined {
-        return  this.getWindowName_serialize();
-
+        return ArkUIAniModule._Common_getWindowName(this.instanceId_);
     }
     public getWindowWidthBreakpoint(): WidthBreakpoint {
         let ret = ArkUIAniModule._Common_getWindowWidthBreakpoint();
-        if (ret === -1) {
-            throw Error("current uiContext not null or undefined");
-        }
         return ret as WidthBreakpoint;
     }
     public getWindowHeightBreakpoint(): HeightBreakpoint {
         let ret = ArkUIAniModule._Common_getWindowHeightBreakpoint();
-        if (ret === -1) {
-            throw Error("current uiContext not null or undefined");
-        }
         return ret as HeightBreakpoint;
     }
     public vp2px(value: number): number {
@@ -1564,12 +1557,6 @@ export class UIContextImpl extends UIContext {
     public getId() : int32 {
         return this.instanceId_;
     }
-    private getWindowName_serialize(): string | undefined {
-        throw new Error("no impl");
-        
-        // return ArkUIGeneratedNativeModule._UIContext_getWindowName(this.instanceId_);
-    }
-
     private setFrameCallback_serialize(onFrameCallback: ((index: number) => void),
                                                          onIdleCallback: ((index: number) => void),
                                                          delayTime: number): void {
@@ -1738,5 +1725,13 @@ export class UIContextImpl extends UIContext {
             callback?.()
         }
         this.callbacks.length = 0
+    }
+
+    public isUpdateConfiguration(): boolean {
+        return this.isUpdateConfiguration_;
+    }
+
+    public setUpdateConfiguration(value: boolean) {
+        this.isUpdateConfiguration_ = value;
     }
 }

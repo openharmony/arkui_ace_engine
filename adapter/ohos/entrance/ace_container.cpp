@@ -2932,6 +2932,11 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
             declarativeFrontend->AttachSubPipelineContext(pipelineContext_);
         }
         return;
+    } else if (frontend_->GetType() == FrontendType::ARK_TS ||
+               frontend_->GetType() == FrontendType::DYNAMIC_HYBRID_STATIC ||
+               frontend_->GetType() == FrontendType::STATIC_HYBRID_DYNAMIC) {
+        frontend_->AttachSubPipelineContext(pipelineContext_);
+        return;
     }
 
     auto dataAbilityHelperImpl = [ability = GetAbilityInner(), runtimeContext = runtimeContext_,
@@ -5022,5 +5027,8 @@ void AceContainer::NotifyArkoalaConfigurationChange(const ConfigurationChange& c
     auto frontend = GetFrontend();
     CHECK_NULL_VOID(frontend);
     frontend->NotifyArkoalaConfigurationChange(configurationChange.IsNeedUpdate());
+    if (subFrontend_) {
+        subFrontend_->NotifyArkoalaConfigurationChange(configurationChange.IsNeedUpdate());
+    }
 }
 } // namespace OHOS::Ace::Platform

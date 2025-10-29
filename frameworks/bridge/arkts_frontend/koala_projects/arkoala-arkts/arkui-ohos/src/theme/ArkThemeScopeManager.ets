@@ -28,10 +28,17 @@ import { ArkColorsImpl } from './ArkColorsImpl';
 import { ArkCustomComponent } from 'arkui/ArkCustomComponent';
 import { ArkThemeWhiteList } from './ArkThemeWhiteList';
 import { ArkCommonMethodComponent } from 'arkui/component/common';
-import { GlobalStateManager, StateManagerImpl } from "@koalaui/runtime";
+import { GlobalStateManager, StateManagerImpl, IncrementalNode, ComputableState } from "@koalaui/runtime";
 import { findPeerNode } from "arkui/PeerNode";
 import { KPointer } from '@koalaui/interop';
 import { ThemeOps } from 'arkui/component/idlize';
+import { UIContextImpl } from 'arkui/base/UIContextImpl';
+import { UIContextUtil } from 'arkui/base/UIContextUtil';
+
+export interface WithThemeScopeItem {
+    options: WithThemeOptions,
+    themeScopeId: int32
+}
 
 export class ArkThemeScopeManager {
     private static instance: ArkThemeScopeManager | undefined = undefined;
@@ -90,6 +97,18 @@ export class ArkThemeScopeManager {
     private colorModeStack: Array<ThemeColorMode> = new Array<ThemeColorMode>();
 
     private themeOptionsMap: Map<int32, WithThemeOptions> = new Map<int32, WithThemeOptions>();
+
+    public themeOptionsStack: Array<WithThemeScopeItem> = new Array<WithThemeScopeItem>();
+
+    public interopWithThemeId = -1;
+
+    public currentThemeOptions(): WithThemeScopeItem | undefined {
+        if (this.themeOptionsStack.length === 0) {
+            return undefined;
+        }
+        const len = this.themeOptionsStack.length;
+        return this.themeOptionsStack[len - 1];
+    }
 
     /**
      * Obtain System Colors
@@ -511,6 +530,68 @@ export class ArkThemeScopeManager {
         const themeScopeId =  stateManager.stateBy<int32>("themeScopeId")?.value;
         if (themeScopeId) {
             ThemeOps.applyThemeScopeIdToNode(ptr, themeScopeId as int32);
+        }
+    }
+
+    public applyWithThemeForCompatibleComponent(view: ESValue):void {
+        const currentThemeOptions = this.currentThemeOptions();
+        if (!currentThemeOptions) {
+            view.invokeMethod('forceCompleteRerender', true);
+            return;
+        }
+        const global = ESValue.getGlobal();
+        const themeScopeMgr = global.getProperty('themeScopeMgr');
+        themeScopeMgr.setProperty('handledIsFirstRender', true);
+
+        const viewStackProcessor = global.getProperty('ViewStackProcessor');
+
+        viewStackProcessor.invokeMethod('StartGetAccessRecordingFor', currentThemeOptions?.themeScopeId ? currentThemeOptions!.themeScopeId : 0);
+        
+        const withTheme = global.getProperty('WithTheme');
+        const withThemeCreate = withTheme.getProperty('create');
+
+        const dynamicValue = ESValue.instantiateEmptyObject();
+        dynamicValue.setProperty('colorMode', currentThemeOptions?.options?.colorMode ? currentThemeOptions!.options!.colorMode : 0);
+        withThemeCreate.invoke(dynamicValue);
+
+        viewStackProcessor.invokeMethod('StopGetAccessRecording');
+
+        view.invokeMethod('forceCompleteRerender', true);
+    }
+
+    public popWithThemeForCompatibleComponent():void {
+        const currentThemeOptions = this.currentThemeOptions();
+        if (!currentThemeOptions) {
+            return;
+        }
+        const global = ESValue.getGlobal();
+        const withTheme = global.getProperty('WithTheme');
+        withTheme.invokeMethod('pop');
+    }
+
+    public applyColorModeFromThemeScope(): void {
+        const global = ESValue.getGlobal();
+        const themeScopeMgr = global.getProperty('themeScopeMgr');
+        const handledColorMode = themeScopeMgr.getProperty('handledColorMode');
+        if (handledColorMode.isNull() || handledColorMode.isUndefined()) {
+            return;
+        }
+        const colorModeValue = handledColorMode.toNumber() as int32;
+        let colorMode = ThemeColorMode.SYSTEM;
+        if (colorModeValue === 0) {
+            colorMode = ThemeColorMode.SYSTEM;
+        } else if (colorModeValue === 1) {
+            colorMode = ThemeColorMode.LIGHT;
+        } else if (colorModeValue === 2) {
+            colorMode = ThemeColorMode.DARK;
+        }
+        this.updateColorMode(colorMode);
+    }
+
+    public executeReload(node: ComputableState<IncrementalNode>): void {
+        const uiContext = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+        if (uiContext.isUpdateConfiguration()) {
+            node.forceCompleteRerender();
         }
     }
 }

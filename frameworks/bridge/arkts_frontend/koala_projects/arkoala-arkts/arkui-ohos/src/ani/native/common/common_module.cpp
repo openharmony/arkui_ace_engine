@@ -956,6 +956,23 @@ ani_double Px2lpx(ani_env* env, ani_object obj, ani_double value, ani_int instan
     }
     return modifier->getCommonAniModifier()->px2lpx(value, instanceId);
 }
+
+ani_string getWindowName(ani_env* env, ani_object obj, ani_int instanceId)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return nullptr;
+    }
+    auto ret = modifier->getCommonAniModifier()->getWindowName(instanceId);
+    if (ret.has_value()) {
+        auto retValue = AniUtils::StdStringToANIString(env, ret.value());
+        if (retValue) {
+            return *retValue;
+        }
+    }
+    return nullptr;
+}
+
 ani_int getWindowWidthBreakpoint(ani_env* env, ani_object obj)
 {
     const auto* modifier = GetNodeAniModifier();
@@ -973,6 +990,7 @@ ani_int getWindowHeightBreakpoint(ani_env* env, ani_object obj)
     }
     return modifier->getCommonAniModifier()->getWindowHeightBreakpoint();
 }
+
 void* TransferKeyEventPointer(ani_env* env, ani_object obj, ani_long pointer)
 {
     const auto* modifier = GetNodeAniModifier();
@@ -1312,5 +1330,13 @@ ani_object ExtractorsFromDrawContextPtr(ani_env* env, ani_object aniClass, ani_l
     auto contextPtr = reinterpret_cast<NG::DrawingContext *>(ptr);
     CHECK_NULL_RETURN(contextPtr, {});
     return CreateDrawingContext(env, *contextPtr);
+}
+void ApplyThemeScopeId(ani_env* env, ani_object obj, ani_long ptr, ani_int themeScopeId)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return;
+    }
+    modifier->getCommonAniModifier()->applyThemeScopeId(env, ptr, themeScopeId);
 }
 } // namespace OHOS::Ace::Ani

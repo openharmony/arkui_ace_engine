@@ -34,7 +34,7 @@ RichEditorChangeValue onDidChangeValue;
 RichEditorDeleteValue aboutToDeleteValue;
 } // namespace
 
-class RichEditorChangeCallbackOneTestNg : public RichEditorCommonTestNg {
+class RichEditorCallbackContentNoChangeTestNg : public RichEditorCommonTestNg {
 public:
     void SetUp() override;
     void TearDown() override;
@@ -45,7 +45,7 @@ private:
     void InitDeleteCallback(RichEditorModelNG& richEditorModel);
 };
 
-void RichEditorChangeCallbackOneTestNg::SetUp()
+void RichEditorCallbackContentNoChangeTestNg::SetUp()
 {
     MockPipelineContext::SetUp();
     MockContainer::SetUp();
@@ -63,19 +63,19 @@ void RichEditorChangeCallbackOneTestNg::SetUp()
     richEditorNode_->GetGeometryNode()->SetContentSize({});
 }
 
-void RichEditorChangeCallbackOneTestNg::TearDown()
+void RichEditorCallbackContentNoChangeTestNg::TearDown()
 {
     richEditorNode_ = nullptr;
     MockParagraph::TearDown();
 }
 
-void RichEditorChangeCallbackOneTestNg::TearDownTestSuite()
+void RichEditorCallbackContentNoChangeTestNg::TearDownTestSuite()
 {
     TestNG::TearDownTestSuite();
 }
 
 
-void RichEditorChangeCallbackOneTestNg::ResetContentChangeCallbackState()
+void RichEditorCallbackContentNoChangeTestNg::ResetContentChangeCallbackState()
 {
     g_isOnWillChangeCalled = false;
     g_isOnDidChangeCalled = false;
@@ -83,7 +83,7 @@ void RichEditorChangeCallbackOneTestNg::ResetContentChangeCallbackState()
     onDidChangeValue.reset();
 }
 
-void RichEditorChangeCallbackOneTestNg::InitContentChangeCallback(RichEditorModelNG& richEditorModel)
+void RichEditorCallbackContentNoChangeTestNg::InitContentChangeCallback(RichEditorModelNG& richEditorModel)
 {
     ResetContentChangeCallbackState();
     auto onWillChange = [](const RichEditorChangeValue& changeValue) {
@@ -100,7 +100,7 @@ void RichEditorChangeCallbackOneTestNg::InitContentChangeCallback(RichEditorMode
     richEditorModel.SetOnDidChange(std::move(onDidChange));
 }
 
-void RichEditorChangeCallbackOneTestNg::InitDeleteCallback(RichEditorModelNG& richEditorModel)
+void RichEditorCallbackContentNoChangeTestNg::InitDeleteCallback(RichEditorModelNG& richEditorModel)
 {
     aboutToDeleteValue = RichEditorDeleteValue();
     auto aboutToDelete = [](const RichEditorDeleteValue& deleteValue) {
@@ -115,7 +115,7 @@ void RichEditorChangeCallbackOneTestNg::InitDeleteCallback(RichEditorModelNG& ri
  * @tc.desc: test set on select
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorChangeCallbackOneTestNg, SetOnSelect, TestSize.Level0)
+HWTEST_F(RichEditorCallbackContentNoChangeTestNg, SetOnSelect, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -162,7 +162,7 @@ HWTEST_F(RichEditorChangeCallbackOneTestNg, SetOnSelect, TestSize.Level0)
  * @tc.desc: test set on select
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorChangeCallbackOneTestNg, SetOnSelect2, TestSize.Level0)
+HWTEST_F(RichEditorCallbackContentNoChangeTestNg, SetOnSelect2, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -202,7 +202,7 @@ HWTEST_F(RichEditorChangeCallbackOneTestNg, SetOnSelect2, TestSize.Level0)
  * @tc.desc: test Set On Select
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorChangeCallbackOneTestNg, SetOnSelect003, TestSize.Level0)
+HWTEST_F(RichEditorCallbackContentNoChangeTestNg, SetOnSelect003, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. get richEditor controller
@@ -244,7 +244,7 @@ HWTEST_F(RichEditorChangeCallbackOneTestNg, SetOnSelect003, TestSize.Level0)
  * @tc.desc: test Set On Select
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorChangeCallbackOneTestNg, SetOnSelect004, TestSize.Level0)
+HWTEST_F(RichEditorCallbackContentNoChangeTestNg, SetOnSelect004, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. get richEditor controller
@@ -281,7 +281,7 @@ HWTEST_F(RichEditorChangeCallbackOneTestNg, SetOnSelect004, TestSize.Level0)
  * @tc.desc: test on handle move
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorChangeCallbackOneTestNg, OnHandleMove001, TestSize.Level0)
+HWTEST_F(RichEditorCallbackContentNoChangeTestNg, OnHandleMove001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -300,7 +300,7 @@ HWTEST_F(RichEditorChangeCallbackOneTestNg, OnHandleMove001, TestSize.Level0)
  * @tc.desc: test OnAreaChangedInner
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorChangeCallbackOneTestNg, OnAreaChangedInner001, TestSize.Level0)
+HWTEST_F(RichEditorCallbackContentNoChangeTestNg, OnAreaChangedInner001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -321,7 +321,7 @@ HWTEST_F(RichEditorChangeCallbackOneTestNg, OnAreaChangedInner001, TestSize.Leve
  * @tc.desc: test HandleSurfaceChanged
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorChangeCallbackOneTestNg, HandleSurfaceChanged001, TestSize.Level0)
+HWTEST_F(RichEditorCallbackContentNoChangeTestNg, HandleSurfaceChanged001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -339,7 +339,7 @@ HWTEST_F(RichEditorChangeCallbackOneTestNg, HandleSurfaceChanged001, TestSize.Le
  * @tc.desc: test IsStopBackPress
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorChangeCallbackOneTestNg, IsStopBackPress001, TestSize.Level0)
+HWTEST_F(RichEditorCallbackContentNoChangeTestNg, IsStopBackPress001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -355,7 +355,7 @@ HWTEST_F(RichEditorChangeCallbackOneTestNg, IsStopBackPress001, TestSize.Level0)
  * @tc.desc: test OnBackPressed
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorChangeCallbackOneTestNg, OnBackPressed001, TestSize.Level0)
+HWTEST_F(RichEditorCallbackContentNoChangeTestNg, OnBackPressed001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();

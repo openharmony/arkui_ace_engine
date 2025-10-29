@@ -3687,7 +3687,7 @@ bool WebDelegate::GetIsSmoothDragResizeEnabled()
         return false;
     }
     bool isBrowserUsage = nweb_->IsNWebEx();
-    if ((OHOS::system::GetDeviceType() != "2in1" && !IsPcMode()) || !isBrowserUsage) {
+    if (OHOS::system::GetDeviceType() != "2in1" || !isBrowserUsage) {
         TAG_LOGD(AceLogTag::ACE_WEB, "Smooth drag resize only support browser in 2in1");
         return false;
     }

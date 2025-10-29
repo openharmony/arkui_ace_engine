@@ -180,7 +180,7 @@ extern "C" ACE_FORCE_EXPORT int32_t OHOS_ACE_AnimatedDrawableDescriptor_GetDurat
 }
 
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_AnimatedDrawableDescriptor_SetPixelMapList(
-    void* object, std::vector<void*> pixelMaps)
+    void* object, std::vector<std::shared_ptr<Media::PixelMap>> pixelMaps)
 {
     if (pixelMaps.size() == 0) {
         return;
@@ -189,7 +189,8 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_AnimatedDrawableDescriptor_SetPixelMap
     if (drawable) {
         std::vector<RefPtr<PixelMap>> pixelMapList;
         for (size_t i = 0; i < pixelMaps.size(); i++) {
-            pixelMapList.push_back(PixelMap::CreatePixelMap(pixelMaps[i]));
+            auto pixelMap = PixelMap::Create(pixelMaps[i]);
+            pixelMapList.push_back(pixelMap);
         }
         drawable->SetPixelMapList(pixelMapList);
     }

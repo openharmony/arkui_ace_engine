@@ -139,4 +139,152 @@ HWTEST_F(ExtensionHandlerTestNg, ExtensionHandlerTest006, TestSize.Level1)
     test.ForegroundDraw(context);
     EXPECT_TRUE(isFunc);
 }
+
+/**
+ * @tc.name: ForegroundRender001
+ * @tc.desc: Test ForegroundRender with foreGroundRender_ function set.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionHandlerTestNg, ForegroundRender001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ExtensionHandler and set foreGroundRender_ function.
+     */
+    class TestExtensionHandler : public ExtensionHandler {
+    public:
+        using ExtensionHandler::SetForeGroundRenderImpl;
+        using ExtensionHandler::NeedRender;
+    };
+
+    auto extensionHandler = AceType::MakeRefPtr<TestExtensionHandler>();
+    bool foreGroundRenderCalled = false;
+
+    extensionHandler->SetForeGroundRenderImpl([&foreGroundRenderCalled]() {
+        foreGroundRenderCalled = true;
+    });
+
+    /**
+     * @tc.steps: step2. Call ForegroundRender method.
+     * @tc.expected: expect foreGroundRender_ function is called and needRender_ is set to true.
+     */
+    extensionHandler->ForegroundRender();
+
+    EXPECT_TRUE(foreGroundRenderCalled);
+    EXPECT_TRUE(extensionHandler->NeedRender());
+}
+
+/**
+ * @tc.name: ForegroundRender002
+ * @tc.desc: Test ForegroundRender without foreGroundRender_ function but with node_.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionHandlerTestNg, ForegroundRender002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ExtensionHandler and attach a mock frame node.
+     */
+    class TestExtensionHandler : public ExtensionHandler {
+    public:
+        using ExtensionHandler::AttachFrameNode;
+        using ExtensionHandler::NeedRender;
+    };
+
+    class MockFrameNode : public FrameNode {
+    public:
+        MockFrameNode() : FrameNode("Mock", -1, AceType::MakeRefPtr<Pattern>()) {}
+        bool markNeedRenderOnlyCalled = false;
+
+        void MarkNeedRenderOnly() {
+            markNeedRenderOnlyCalled = true;
+        }
+    };
+
+    auto extensionHandler = AceType::MakeRefPtr<TestExtensionHandler>();
+    auto mockNode = AceType::MakeRefPtr<MockFrameNode>();
+
+    extensionHandler->AttachFrameNode(static_cast<FrameNode*>(mockNode.GetRawPtr()));
+
+    /**
+     * @tc.steps: step2. Call ForegroundRender method.
+     * @tc.expected: expect node_->MarkNeedRenderOnly() is called and needRender_ is set to true.
+     */
+    extensionHandler->ForegroundRender();
+
+    EXPECT_FALSE(mockNode->markNeedRenderOnlyCalled);
+    EXPECT_TRUE(extensionHandler->NeedRender());
+}
+
+/**
+ * @tc.name: ForegroundRender003
+ * @tc.desc: Test ForegroundRender without foreGroundRender_ function and without node_.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionHandlerTestNg, ForegroundRender003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ExtensionHandler without setting foreGroundRender_ or node_.
+     */
+    class TestExtensionHandler : public ExtensionHandler {
+    public:
+        using ExtensionHandler::NeedRender;
+    };
+
+    auto extensionHandler = AceType::MakeRefPtr<TestExtensionHandler>();
+
+    /**
+     * @tc.steps: step2. Call ForegroundRender method.
+     * @tc.expected: expect needRender_ is set to true but no function is called.
+     */
+    extensionHandler->ForegroundRender();
+
+    EXPECT_TRUE(extensionHandler->NeedRender());
+}
+
+/**
+ * @tc.name: ForegroundRender004
+ * @tc.desc: Test ForegroundRender with both foreGroundRender_ function and node_.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionHandlerTestNg, ForegroundRender004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ExtensionHandler and set both foreGroundRender_ function and node_.
+     */
+    class TestExtensionHandler : public ExtensionHandler {
+    public:
+        using ExtensionHandler::SetForeGroundRenderImpl;
+        using ExtensionHandler::AttachFrameNode;
+        using ExtensionHandler::NeedRender;
+    };
+
+    class MockFrameNode : public FrameNode {
+    public:
+        MockFrameNode() : FrameNode("Mock", -1, AceType::MakeRefPtr<Pattern>()) {}
+        bool markNeedRenderOnlyCalled = false;
+
+        void MarkNeedRenderOnly() {
+            markNeedRenderOnlyCalled = true;
+        }
+    };
+
+    auto extensionHandler = AceType::MakeRefPtr<TestExtensionHandler>();
+    auto mockNode = AceType::MakeRefPtr<MockFrameNode>();
+    bool foreGroundRenderCalled = false;
+
+    extensionHandler->SetForeGroundRenderImpl([&foreGroundRenderCalled]() {
+        foreGroundRenderCalled = true;
+    });
+
+    extensionHandler->AttachFrameNode(static_cast<FrameNode*>(mockNode.GetRawPtr()));
+
+    /**
+     * @tc.steps: step2. Call ForegroundRender method.
+     * @tc.expected: expect foreGroundRender_ function is called but node_->MarkNeedRenderOnly() is not called.
+     */
+    extensionHandler->ForegroundRender();
+
+    EXPECT_TRUE(foreGroundRenderCalled);
+    EXPECT_FALSE(mockNode->markNeedRenderOnlyCalled);
+    EXPECT_TRUE(extensionHandler->NeedRender());
+}
 }

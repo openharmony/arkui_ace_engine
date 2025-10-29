@@ -173,7 +173,10 @@ public:
         return navDestinationId_;
     }
 
+    void OnAttachToMainTree() override;
+    void OnAttachToMainTreeMultiThread();
     void OnDetachFromMainTree() override;
+    void OnDetachFromMainTreeMultiThread();
 
     bool OverlayOnBackPressed();
 
@@ -221,6 +224,7 @@ public:
     bool NeedIgnoreKeyboard();
 
     void SetSystemBarStyle(const RefPtr<SystemBarStyle>& style);
+    void SetSystemBarStyleMultiThread(const RefPtr<SystemBarStyle>& style);
     const std::optional<RefPtr<SystemBarStyle>>& GetBackupStyle() const
     {
         return backupStyle_;
@@ -333,7 +337,9 @@ private:
         RefPtr<NavDestinationGroupNode>& hostNode, bool& needRunTitleBarAnimation);
     void OnFontScaleConfigurationUpdate() override;
     void OnAttachToFrameNode() override;
+    void OnAttachToFrameNodeMultiThread();
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    void OnDetachFromFrameNodeMultiThread(FrameNode* frameNode);
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
     void CloseLongPressDialog();
     void CheckIfOrientationChanged();

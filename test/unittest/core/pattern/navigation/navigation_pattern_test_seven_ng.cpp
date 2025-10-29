@@ -21,6 +21,7 @@
 
 #define protected public
 #define private public
+#include "core/common/multi_thread_build_manager.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_content_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_drag_bar_pattern.h"
@@ -2632,5 +2633,133 @@ HWTEST_F(NavigationPatternTestSevenNg, TransitionWithOutAnimationTest004, TestSi
     layoutProperty->UpdateUsrNavigationMode(NavigationMode::STACK);
     navigationPattern->SyncWithJsStackIfNeeded();
     ASSERT_FALSE(homeNode->IsVisible());
+}
+
+/**
+ * @tc.name: OnAttachToMainTreeMultiThread
+ * @tc.desc: test OnAttachToFrameNodeMultiThread & OnAttachToMainTreeMultiThread.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestSevenNg, OnAttachToMainTreeMultiThread, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create navigationNode.
+     */
+    auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack(mockNavPathStack);
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    /**
+     * @tc.steps: step2. Simulate MutltiThread Enviroment.
+     */
+    auto host = navigationPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    host->isThreadSafeNode_ = true;
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto size = context->onWindowStateChangedCallbacks_.size();
+    /**
+     * @tc.steps: step3. Call OnAttachToFrameNode.
+     * @tc.expected: OnAttachToFrameNodeMultiThread is called, nothing is done.
+     */
+    navigationPattern->OnAttachToFrameNode(); // call OnAttachToFrameNodeMultiThread
+    EXPECT_EQ(size, context->onWindowStateChangedCallbacks_.size());
+    /**
+     * @tc.steps: step4. Call OnAttachToMainTree.
+     * @tc.expected: OnAttachToMainTreeMultiThread is called.
+     */
+    host->nodeId_++;
+    navigationPattern->OnAttachToMainTree(); // call OnAttachToMainTreeMultiThread
+    EXPECT_EQ(size + 1, context->onWindowStateChangedCallbacks_.size());
+}
+
+/**
+ * @tc.name: OnDetachFromMainTreeMultiThread
+ * @tc.desc: test OnDetachFromFrameNodeMultiThread & OnDetachFromMainTreeMultiThread.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestSevenNg, OnDetachFromMainTreeMultiThread, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create navdestinationNode.
+     */
+    auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack(mockNavPathStack);
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    /**
+     * @tc.steps: step2. Simulate MutltiThread Enviroment.
+     */
+    auto host = navigationPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    host->isThreadSafeNode_ = true;
+    navigationPattern->OnAttachToMainTree(); // call OnAttachToMainTreeMultiThread
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->isThreadSafeNode_ = true;
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto size = context->onWindowStateChangedCallbacks_.size();
+    /**
+     * @tc.steps: step3. Call OnDetachFromFrameNode.
+     * @tc.expected: OnDetachFromFrameNodeMultiThread is called, nothing is done.
+     */
+    navigationPattern->OnDetachFromFrameNode(frameNode); // call OnDetachFromFrameNodeMultiThread
+    EXPECT_EQ(size, context->onWindowStateChangedCallbacks_.size());
+    /**
+     * @tc.steps: step4. Call OnDetachFromMainTree.
+     * @tc.expected: OnDetachFromMainTreeMultiThread is called.
+     */
+    navigationPattern->OnDetachFromMainTree(); // call OnDetachFromMainTreeMultiThread
+    EXPECT_EQ(size - 1, context->onWindowStateChangedCallbacks_.size());
+}
+
+/**
+ * @tc.name: SetSystemBarStyleMultiThread
+ * @tc.desc: test SetSystemBarStyleMultiThread.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestSevenNg, SetSystemBarStyleMultiThread, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Simulate non-UI thread environment and create a thread-safe select node.
+     */
+    MultiThreadBuildManager::SetIsThreadSafeNodeScope(true);
+    bool isUIThread = MultiThreadBuildManager::isUIThread_;
+    MultiThreadBuildManager::isUIThread_ = false;
+    /**
+     * @tc.steps: step2. Create navigationNode.
+     */
+    auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack(mockNavPathStack);
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto host = navigationPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    host->isThreadSafeNode_ = true;
+    auto size = host->afterAttachMainTreeTasks_.size();
+    /**
+     * @tc.steps: step3. Call SetSystemBarStyle.
+     * @tc.expected: afterAttachMainTreeTasks_.size()++.
+     */
+    navigationPattern->SetSystemBarStyle(nullptr); // call SetSystemBarStyleMultiThread
+    EXPECT_EQ(size + 1, host->afterAttachMainTreeTasks_.size());
+    /**
+     * @tc.steps: step4. Restore environment.
+     */
+    MultiThreadBuildManager::isUIThread_ = isUIThread;
+    MultiThreadBuildManager::SetIsThreadSafeNodeScope(false);
 }
 } // namespace OHOS::Ace::NG

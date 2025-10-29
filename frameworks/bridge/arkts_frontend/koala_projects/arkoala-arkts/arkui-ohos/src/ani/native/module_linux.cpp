@@ -337,6 +337,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::Px2lpx)
         },
         ani_native_function {
+            "_Common_getWindowName",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::getWindowName)
+        },
+        ani_native_function {
             "_Common_getWindowWidthBreakpoint",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::getWindowWidthBreakpoint)

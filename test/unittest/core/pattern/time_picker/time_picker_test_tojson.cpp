@@ -23,43 +23,16 @@
 
 #define private public
 #define protected public
-#include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_default.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
-#include "base/geometry/dimension.h"
-#include "base/geometry/offset.h"
-#include "base/geometry/point.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "bridge/common/utils/utils.h"
-#include "core/animation/curves.h"
-#include "core/components/common/properties/color.h"
-#include "core/components/common/properties/shadow_config.h"
-#include "core/components/picker/picker_data.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/event/click_event.h"
-#include "core/components_ng/event/event_hub.h"
-#include "core/components_ng/event/focus_hub.h"
-#include "core/components_ng/layout/layout_algorithm.h"
-#include "core/components_ng/layout/layout_property.h"
-#include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components/theme/icon_theme.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
-#include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
-#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/time_picker/timepicker_column_pattern.h"
-#include "core/components_ng/pattern/time_picker/timepicker_dialog_view.h"
 #include "core/components_ng/pattern/time_picker/timepicker_model_ng.h"
 #include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
-#include "core/components_ng/pattern/picker_utils/toss_animation_controller.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/event/key_event.h"
-#include "core/event/touch_event.h"
-#include "core/gestures/gesture_info.h"
 
 #undef private
 #undef protected
@@ -634,4 +607,63 @@ HWTEST_F(TimePickerTestToJson, TimePickerLayoutPropertyToJsonValue008, TestSize.
     EXPECT_EQ(timeOption->GetString("second"), "");
 }
 
+/**
+ * @tc.name: TimePickerLayoutPropertyToJsonValue009
+ * @tc.desc: Test TimePickerLayoutProperty ToJsonValue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerTestToJson, TimePickerLayoutPropertyToJsonValue009, TestSize.Level0)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    auto disappearFont = JsonUtil::Create(true);
+    pickerProperty->ToJsonValue(disappearFont, filter);
+    EXPECT_NE(disappearFont, nullptr);
+}
+
+/**
+ * @tc.name: TimePickerLayoutPropertyToJsonValue011
+ * @tc.desc: Test TimePickerLayoutProperty ToJsonValue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerTestToJson, TimePickerLayoutPropertyToJsonValue011, TestSize.Level0)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto timePickerModeNG = TimePickerModelNG::GetInstance();
+
+    /**
+     * @tc.cases: case. cover set isUseMilitaryTime and call ToJsonValue().
+     */
+    bool isUseMilitaryTime = true;
+    timePickerModeNG->SetHour24(isUseMilitaryTime);
+
+    auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    pickerProperty->UpdateLoop(false);
+    auto json = JsonUtil::Create(true);
+    pickerProperty->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetString("useMilitaryTime"), "true");
+    EXPECT_EQ(json->GetString("loop"), "false");
+
+    /**
+     * @tc.cases: case. cover update isUseMilitaryTime by layoutProperty and call ToJsonValue().
+     */
+    pickerProperty->UpdateIsUseMilitaryTime(true);
+    pickerProperty->UpdateLoop(true);
+    EXPECT_TRUE(pickerProperty->GetLoopValue());
+    auto json2 = JsonUtil::Create(true);
+    pickerProperty->ToJsonValue(json2, filter);
+    EXPECT_TRUE(pickerProperty->HasLoop());
+    EXPECT_EQ(json2->GetString("useMilitaryTime"), "true");
+    EXPECT_EQ(json2->GetString("loop"), "true");
+}
 } // namespace OHOS::Ace::NG

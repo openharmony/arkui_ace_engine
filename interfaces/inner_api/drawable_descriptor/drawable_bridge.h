@@ -33,7 +33,7 @@ void GetPixelMapC(void* object, std::shared_ptr<Media::PixelMap>& pixelmap);
 void AnimatedLoadSync(void* object, int32_t& width, int32_t& height, int32_t& errorCode);
 void AnimatedSetPath(void* object, const char* path);
 void AnimatedSetResource(void* object, void* resource);
-void AnimatedSetPixelMapListC(void* object, std::vector<void*> pixelMaps);
+void AnimatedSetPixelMapListC(void* object, std::vector<std::shared_ptr<Media::PixelMap>> pixelMaps);
 void AnimatedSetTotalDurationC(void* object, int32_t duration);
 void AnimatedSetDurationsC(void* object, const std::vector<int32_t>& durations);
 void AnimatedSetIterationsC(void* object, int32_t iteration);

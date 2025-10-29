@@ -6045,6 +6045,16 @@ void JSViewAbstract::CompleteResourceObjectWithResIdType(JSRef<JSObject>& jsObj,
     CompleteResourceObjectInner(jsObj, bundleName, moduleName, resId, resType);
 }
 
+void JSViewAbstract::GetResourceObjectType(const JSRef<JSObject>& jsObj, JSRef<JSVal>& type, int32_t& resTypeValue)
+{
+    type = jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::TYPE));
+    if (type->IsNumber()) {
+        resTypeValue = type->ToNumber<int32_t>();
+    } else {
+        resTypeValue = UNKNOWN_RESOURCE_TYPE;
+    }
+}
+
 void JSViewAbstract::CompleteResourceObjectInner(JSRef<JSObject>& jsObj, std::string& bundleName,
     std::string& moduleName, int32_t& resIdValue, int32_t& resTypeValue)
 {
@@ -6053,21 +6063,17 @@ void JSViewAbstract::CompleteResourceObjectInner(JSRef<JSObject>& jsObj, std::st
     JSRef<JSVal> resId = jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::ID));
     ResourceType resType = ResourceType::UNKNOWN;
 
-    JSRef<JSVal> type = jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::TYPE));
-    if (type->IsNumber()) {
-        resTypeValue = type->ToNumber<int32_t>();
-    } else {
-        resTypeValue = UNKNOWN_RESOURCE_TYPE;
-    }
-
     std::string targetModule;
     std::string resName;
+    JSRef<JSVal> type;
     if (resId->IsString()) {
+        GetResourceObjectType(jsObj, type, resTypeValue);
         if (!ParseDollarResource(resId, targetModule, resType, resName, resTypeValue == UNKNOWN_RESOURCE_TYPE)) {
             return;
         }
         CompleteResourceObjectFromId(type, jsObj, resType, resName);
     } else if (resId->IsNumber()) {
+        GetResourceObjectType(jsObj, type, resTypeValue);
         resIdValue = resId->ToNumber<int32_t>();
         if (resIdValue == -1 || resTypeValue == UNKNOWN_RESOURCE_TYPE) {
             CompleteResourceObjectFromParams(resIdValue, resTypeValue, jsObj, targetModule, resType, resName);
@@ -6648,7 +6654,9 @@ bool JSViewAbstract::ParseJsColorFromResource(const JSRef<JSVal>& jsValue, Color
 bool JSViewAbstract::ParseJsObjColorFromResource(const JSRef<JSObject> &jsObj, Color& result,
     RefPtr<ResourceObject>& resObj, int32_t& resIdNum, int32_t& type)
 {
-
+    if (type == UNKNOWN_RESOURCE_TYPE) {
+        return false;
+    }
     resObj = SystemProperties::ConfigChangePerform() ? GetResourceObject(jsObj) :
         GetResourceObjectByBundleAndModule(jsObj);
     auto resourceWrapper = CreateResourceWrapper(jsObj, resObj);
@@ -12840,6 +12848,7 @@ extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_ParseResourceObject(void* value)
     JSRef<JSVal> jsVal = JsConverter::ConvertNapiValueToJsVal(napiValue);
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsVal);
     auto resourceObject = JSViewAbstract::GetResourceObject(jsObj);
+    CHECK_NULL_RETURN(resourceObject, nullptr);
     resourceObject->IncRefCount();
     return reinterpret_cast<void*>(AceType::RawPtr(resourceObject));
 }

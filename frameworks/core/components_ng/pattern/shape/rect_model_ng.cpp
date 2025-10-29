@@ -56,6 +56,113 @@ void RectModelNG::SetRadiusHeight(const Dimension& value)
     RectModelNG::UpdateRadius(radius);
 }
 
+void RectModelNG::SetRadiusWidth(const RefPtr<ResourceObject>& radiusWidthResObj)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetRadiusWidth(frameNode, radiusWidthResObj);
+}
+
+void RectModelNG::SetRadiusWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& radiusWidthResObj)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    auto pattern = frameNode->GetPattern<RectPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto property = frameNode->GetPaintPropertyPtr<RectPaintProperty>();
+        CHECK_NULL_VOID(property);
+        CalcDimension value(0.0f);
+        if (!ResourceParseUtils::ParseResDimensionFpNG(resObj, value)) {
+            value.SetValue(0.0f);
+        }
+        Radius radius;
+        value.IsNegative() ? radius.SetX(Dimension(DEFAULT_RADIUS_VALUE)) : radius.SetX(value);
+        radius.SetY(DEFAULT_RADIUS_INVALID);
+        property->UpdateRadius(radius);
+    };
+    pattern->AddResObj("RectRadiusWidth", radiusWidthResObj, std::move(updateFunc));
+}
+
+void RectModelNG::SetRadiusHeight(const RefPtr<ResourceObject>& radiusHeightResObj)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetRadiusHeight(frameNode, radiusHeightResObj);
+}
+
+void RectModelNG::SetRadiusHeight(FrameNode* frameNode, const RefPtr<ResourceObject>& radiusHeightResObj)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    auto pattern = frameNode->GetPattern<RectPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto property = frameNode->GetPaintPropertyPtr<RectPaintProperty>();
+        CHECK_NULL_VOID(property);
+        CalcDimension value(0.0f);
+        if (!ResourceParseUtils::ParseResDimensionFpNG(resObj, value)) {
+            value.SetValue(0.0f);
+        }
+        Radius radius;
+        value.IsNegative() ? radius.SetY(Dimension(DEFAULT_RADIUS_VALUE)) : radius.SetY(value);
+        radius.SetX(DEFAULT_RADIUS_INVALID);
+        property->UpdateRadius(radius);
+    };
+    pattern->AddResObj("RectRadiusHeight", radiusHeightResObj, std::move(updateFunc));
+}
+
+void RectModelNG::SetRadius(const RefPtr<ResourceObject>& radiusResObj)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetRadius(frameNode, radiusResObj);
+}
+
+void RectModelNG::SetRadius(FrameNode* frameNode, const RefPtr<ResourceObject>& radiusResObj)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    auto pattern = frameNode->GetPattern<RectPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto property = frameNode->GetPaintPropertyPtr<RectPaintProperty>();
+        CHECK_NULL_VOID(property);
+        CalcDimension value(0.0f);
+        if (!ResourceParseUtils::ParseResDimensionFpNG(resObj, value)) {
+            value.SetValue(0.0f);
+        }
+        Radius radius;
+        if (value.IsNegative()) {
+            radius.SetY(Dimension(DEFAULT_RADIUS_VALUE));
+            radius.SetX(Dimension(DEFAULT_RADIUS_VALUE));
+        } else {
+            radius.SetX(value);
+            radius.SetY(value);
+        }
+        property->UpdateRadius(radius);
+    };
+    pattern->AddResObj("RectRadius", radiusResObj, std::move(updateFunc));
+}
+
 void RectModelNG::SetRadiusValue(const Dimension& radiusX, const Dimension& radiusY, int32_t index)
 {
     NG::Radius radius = NG::Radius(radiusX, radiusY);
@@ -174,12 +281,16 @@ void RectModelNG::SetRadiusValue(FrameNode* frameNode, const Dimension& radiusX,
         NG::Radius radius = NG::Radius(radiusX, radiusY);
         if (radiusXResObj) {
             Dimension dim;
-            ResourceParseUtils::ConvertFromResObjNG(radiusXResObj, dim);
+            if (!ResourceParseUtils::ConvertFromResObjNG(radiusXResObj, dim)) {
+                dim = 0.0_vp;
+            }
             radius.SetX(dim);
         }
         if (radiusYResObj) {
             Dimension dim;
-            ResourceParseUtils::ConvertFromResObjNG(radiusYResObj, dim);
+            if (!ResourceParseUtils::ConvertFromResObjNG(radiusYResObj, dim)) {
+                dim = 0.0_vp;
+            }
             radius.SetY(dim);
         }
         switch (index) {

@@ -4737,6 +4737,11 @@ void ArkUINativeModule::RegisterFrameNodeAttributes(Local<panda::ObjectRef> obje
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "convertPoint"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::ConvertPoint));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "frameNode"), frameNode);
+
+    frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "adoptChild"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::AdoptChild));
+    frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "removeAdoptedChild"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::RemoveAdoptedChild));
 }
 
 void ArkUINativeModule::RegisterLineAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)

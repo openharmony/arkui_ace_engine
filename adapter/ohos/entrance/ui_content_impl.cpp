@@ -571,14 +571,14 @@ public:
             ACE_SCOPED_TRACE("OnAvoidAreaChanged type: %d, value: %s; keyboardRect: %s, textFieldPositionY %f, "
                 "textFieldHeight %f; instanceId: %d", type, avoidArea.ToString().c_str(),
                 keyboardRect.ToString().c_str(), textFieldPositionY, textFieldHeight, instanceId_);
-            TAG_LOGI(ACE_LAYOUT, "OnAvoidAreaChanged type: %{public}d, value: %{public}s; keyboardRect: %{public}s, "
+            TAG_LOGD(ACE_LAYOUT, "OnAvoidAreaChanged type: %{public}d, value: %{public}s; keyboardRect: %{public}s, "
                 "textFieldPositionY: %{public}f, textFieldHeight: %{public}f; instanceId: %{public}d",
                 type, avoidArea.ToString().c_str(), keyboardRect.ToString().c_str(), textFieldPositionY,
                 textFieldHeight, instanceId_);
         } else {
             ACE_SCOPED_TRACE("OnAvoidAreaChanged type: %d, value: %s, instanceId: %d, "
             "keyboardInfo is null", type, avoidArea.ToString().c_str(), instanceId_);
-            TAG_LOGI(ACE_LAYOUT, "OnAvoidAreaChanged type: %{public}d, value: %{public}s; instanceId: %{public}d, "
+            TAG_LOGD(ACE_LAYOUT, "OnAvoidAreaChanged type: %{public}d, value: %{public}s; instanceId: %{public}d, "
             "keyboardInfo is null", type, avoidArea.ToString().c_str(), instanceId_);
         }
         auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -3711,7 +3711,7 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
                 static_cast<uint32_t>(reason), rsTransaction == nullptr, stringifiedMap.c_str(),
                 keyboardRect.ToString().c_str());
         }
-        TAG_LOGI(ACE_LAYOUT,
+        TAG_LOGD(ACE_LAYOUT,
             "[%{public}s][%{public}s][%{public}d]: UpdateViewportConfig %{public}s, windowSizeChangeReason %{public}d,"
             " is rsTransaction nullptr %{public}d, %{public}s, keyboardRect %{public}s", bundleName_.c_str(),
             moduleName_.c_str(), instanceId_, config.ToString().c_str(), static_cast<uint32_t>(reason),
@@ -3724,7 +3724,7 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
                 bundleName_.c_str(), moduleName_.c_str(), instanceId_, config.ToString().c_str(),
                 static_cast<uint32_t>(reason), rsTransaction == nullptr, stringifiedMap.c_str());
         }
-        TAG_LOGI(ACE_LAYOUT,
+        TAG_LOGD(ACE_LAYOUT,
             "[%{public}s][%{public}s][%{public}d]: UpdateViewportConfig %{public}s, windowSizeChangeReason %{public}d,"
             " is rsTransaction nullptr %{public}d, %{public}s, keyboardInfo is null", bundleName_.c_str(),
             moduleName_.c_str(), instanceId_, config.ToString().c_str(), static_cast<uint32_t>(reason),

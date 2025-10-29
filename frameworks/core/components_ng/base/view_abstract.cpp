@@ -3959,6 +3959,7 @@ void ViewAbstract::HandleHoverTipsInfo(const RefPtr<PopupParam>& param, const Re
         }
     }
     AddHoverEventForTips(param, targetNode, tipsInfo, showInSubWindow);
+    AddClickEventForTips(targetNode, tipsInfo);
 }
 
 void ViewAbstract::UpdateTipsInfo(PopupInfo& tipsInfo, int32_t popupId, const RefPtr<FrameNode>& popupNode,
@@ -4001,6 +4002,9 @@ void ViewAbstract::AddHoverEventForTips(
             BubbleView::UpdatePopupParam(popupId, param, targetNode);
             popupNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             if (showInSubWindow) {
+                auto pattern = popupNode->GetPattern<NG::BubblePattern>();
+                CHECK_NULL_VOID(pattern);
+                pattern->SetIsTipsAppearing(true);
                 SubwindowManager::GetInstance()->ShowTipsNG(
                     targetNode, tipsInfo, param->GetAppearingTime(), param->GetAppearingTimeWithContinuousOperation());
                 return;
@@ -4022,6 +4026,32 @@ void ViewAbstract::AddHoverEventForTips(
     if (param->GetAnchorType() == TipsAnchorType::CURSOR) {
         AddMouseEventForTips(targetNode, tipsInfo);
     }
+}
+
+void ViewAbstract::AddClickEventForTips(const RefPtr<FrameNode>& targetNode, PopupInfo& tipsInfo)
+{
+    CHECK_NULL_VOID(targetNode);
+    auto targetId = targetNode->GetId();
+    auto context = targetNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto instanceId = context->GetInstanceId();
+    auto clickCallback = [targetId, instanceId,
+        popupNode = AceType::WeakClaim(AceType::RawPtr(tipsInfo.popupNode))](GestureEvent& info) {
+        auto popup = popupNode.Upgrade();
+        CHECK_NULL_VOID(popup);
+        auto pattern = popup->GetPattern<BubblePattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetIsTipsAppearing(false);
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(instanceId, SubwindowType::TYPE_TIPS);
+        if (subwindow) {
+            auto overlayManager = subwindow->GetOverlayManager();
+            CHECK_NULL_VOID(overlayManager);
+            overlayManager->ErasePopup(targetId);
+        }
+    };
+    auto gestureHub = targetNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->AddClickEventForTips(std::move(clickCallback));
 }
 
 void ViewAbstract::AddMouseEventForTips(const RefPtr<FrameNode>& targetNode, PopupInfo& tipsInfo)

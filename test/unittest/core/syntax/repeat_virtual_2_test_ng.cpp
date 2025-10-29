@@ -733,6 +733,22 @@ HWTEST_F(RepeatVirtual2TestNg, ConvertFromToIndex002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RecycleItems001
+ * @tc.desc: Test node.RecycleItems
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatVirtual2TestNg, RecycleItems001, TestSize.Level1)
+{
+    auto repeatNode = CreateRepeatVirtualNode(10);
+    repeatNode->RecycleItems(0, 5);
+    EXPECT_EQ(repeatNode->prevRecycleFrom_, 0);
+    EXPECT_EQ(repeatNode->prevRecycleTo_, 5);
+    repeatNode->RecycleItems(5, 0);
+    EXPECT_EQ(repeatNode->prevRecycleFrom_, 0);
+    EXPECT_EQ(repeatNode->prevRecycleTo_, 5);
+}
+
+/**
  * @tc.name: UpdateFrameChildIndexRecord001
  * @tc.desc: Test node.updateFrameChildIndexRecord
  * @tc.type: FUNC

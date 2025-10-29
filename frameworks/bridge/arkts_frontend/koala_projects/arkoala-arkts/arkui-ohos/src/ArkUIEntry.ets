@@ -475,6 +475,9 @@ export class Application {
             }
         }
         leaveForeignContext()
+        if (this.uiContext && this.uiContext!.isUpdateConfiguration()) {
+            this.uiContext!.setUpdateConfiguration(false);
+        }
         return this.exitApp
     }
 
@@ -523,6 +526,19 @@ export class Application {
             console.log(`Cannot find target node ${target}`)
         }
         return "0"
+    }
+
+    notifyConfigurationChange() {
+        if (!this.uiContext || !this.manager) {
+            console.warn("Arkoala haven't been initialized !");
+            return;
+        }
+        this.uiContext!.setUpdateConfiguration(true);
+        let uiContextRouter = this.uiContext!.getRouter();
+        let rootState = uiContextRouter.getStateRoot();
+        rootState?.forceCompleteRerender();
+        this.manager!.syncChanges();
+        this.manager!.updateSnapshot();
     }
 
     static createApplication(startUrl: string, startParams: string, useNativeLog: boolean, moduleName: string, userView: UserView | undefined, entryPoint: EntryPoint | undefined): Application {

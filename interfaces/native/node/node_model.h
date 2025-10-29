@@ -28,6 +28,10 @@
 #include "frameworks/core/common/ace_application_info.h"
 #include "frameworks/core/interfaces/arkoala/arkoala_api.h"
 
+namespace OHOS::Media {
+class PixelMap;
+} // namespace OHOS::Media
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -190,6 +194,7 @@ void* GetParseJsMedia();
 void IncreaseRefDrawable(void* object);
 void DecreaseRefDrawable(void* object);
 void* CreateDrawable(uint32_t type);
+void SetPixelMaps(void* object, std::vector<std::shared_ptr<OHOS::Media::PixelMap>> pixelMaps);
 void SetTotalDuration(void* object, int32_t duration);
 int32_t GetTotalDuration(void* object);
 void SetIterations(void* object, int32_t duration);

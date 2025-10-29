@@ -94,6 +94,7 @@ export class ArkWithThemeComponent extends ComponentBase implements WithThemeAtt
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+        ArkThemeScopeManager.getInstance().themeOptionsStack.pop();
     }
 }
 

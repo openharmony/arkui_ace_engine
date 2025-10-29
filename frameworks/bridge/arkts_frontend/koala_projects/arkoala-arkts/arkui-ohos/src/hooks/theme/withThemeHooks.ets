@@ -16,7 +16,7 @@
 import { ArkWithThemeComponent, WithThemeOptions } from 'arkui/component/withTheme';
 import { int32 } from "@koalaui/common"
 import { ThemeColorMode } from "arkui/component/common"
-import { ArkThemeScopeManager } from 'arkui/theme/ArkThemeScopeManager';
+import { ArkThemeScopeManager, WithThemeScopeItem } from 'arkui/theme/ArkThemeScopeManager';
 import { ArkThemeBase } from 'arkui/theme/ArkThemeBase';
 import { ArkThemeNativeHelper } from 'arkui/theme/ArkThemeNativeHelper';
 
@@ -27,6 +27,11 @@ export function hookWithThemeOptions(receiver: ArkWithThemeComponent, options: W
     const theme: ArkThemeBase = ArkThemeScopeManager.getInstance().makeTheme(cloneTheme, colorMode);
     // bind theme to theme scope with elmtId
     theme.bindToScope(elmtId);
+
+    ArkThemeScopeManager.getInstance().themeOptionsStack.push({
+        options: options,
+        themeScopeId: elmtId,
+    } as WithThemeScopeItem);
 
     // prepare on theme scope destroy callback
     const onThemeScopeDestroy = () => {

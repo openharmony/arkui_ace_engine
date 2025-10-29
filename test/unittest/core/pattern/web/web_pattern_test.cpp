@@ -478,13 +478,27 @@ HWTEST_F(WebPatternTest, ProcessVirtualKeyBoardHideAvoidMenu, TestSize.Level1)
  */
 HWTEST_F(WebPatternTest, UpdateTextFieldStatus, TestSize.Level1)
 {
-    g_webPattern->isVirtualKeyBoardShow_ = WebPattern::VkState::VK_HIDE;
+    g_webPattern->isImeStatus_ = WebPattern::VkState::VK_HIDE;
     g_webPattern->UpdateTextFieldStatus(true, true);
-    EXPECT_TRUE(g_webPattern->isVirtualKeyBoardShow_ == WebPattern::VkState::VK_SHOW);
+    EXPECT_TRUE(g_webPattern->isImeStatus_ == WebPattern::VkState::VK_SHOW);
 
-    g_webPattern->isVirtualKeyBoardShow_ = WebPattern::VkState::VK_SHOW;
+    g_webPattern->isImeStatus_ = WebPattern::VkState::VK_SHOW;
     g_webPattern->UpdateTextFieldStatus(false, false);
-    EXPECT_TRUE(g_webPattern->isVirtualKeyBoardShow_ == WebPattern::VkState::VK_HIDE);
+    EXPECT_TRUE(g_webPattern->isImeStatus_ == WebPattern::VkState::VK_HIDE);
+}
+
+/**
+ * @tc.name: VirtualKeyBoard IsImeStatusShow
+ * @tc.desc: Test IsImeStatusShow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTest, IsImeStatusShow, TestSize.Level1)
+{
+    g_webPattern->isImeStatus_ = WebPattern::VkState::VK_HIDE;
+    EXPECT_TRUE(!g_webPattern->IsImeStatusShow());
+
+    g_webPattern->isImeStatus_ = WebPattern::VkState::VK_SHOW;
+    EXPECT_TRUE(g_webPattern->IsImeStatusShow());
 }
 
 /**

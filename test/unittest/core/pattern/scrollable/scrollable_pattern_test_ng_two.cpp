@@ -605,4 +605,19 @@ HWTEST_F(ScrollableTestNg, HandleScrollVelocity, TestSize.Level1)
     EXPECT_TRUE(scrollablePattern->IsOutOfBoundary());
     EXPECT_FALSE(scrollablePattern->HandleScrollVelocity(-10.0f));
 }
+
+/**
+ * @tc.name: StopHotZoneScrollWithoutAnimation
+ * @tc.desc: Test Scrollable StopHotZoneScroll without animator
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, StopHotZoneScrollWithoutAnimator, TestSize.Level1)
+{
+    RefPtr<ScrollPattern> scrollablePattern = AceType::MakeRefPtr<ScrollPattern>();
+    scrollablePattern->isAnimationStop_ = false;
+    scrollablePattern->animator_ = nullptr;
+    EXPECT_FALSE(scrollablePattern->AnimateStoped());
+    scrollablePattern->StopHotzoneScroll();
+    EXPECT_FALSE(scrollablePattern->AnimateStoped());
+}
 } // namespace OHOS::Ace::NG

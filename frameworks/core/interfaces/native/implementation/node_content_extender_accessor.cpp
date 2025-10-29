@@ -22,6 +22,13 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+
+namespace {
+constexpr int32_t ERROR_CODE_NO_ERROR = 0;
+constexpr int32_t ERROR_CODE_NODE_IS_ADOPTED = 106206;
+constexpr int32_t ERROR_CODE_PARAM_INVALID = 401;
+} // namespace
+
 namespace NodeContentExtenderAccessor {
 void DestroyPeerImpl(Ark_NativePointer peer)
 {
@@ -43,21 +50,24 @@ Ark_NativePointer GetDestroyImpl()
     return reinterpret_cast<void*>(&DestroyPeerImpl);
 }
 
-Ark_Boolean AddFrameNodeImpl(Ark_NativePointer peer, Ark_NativePointer node)
+Ark_Float64 AddFrameNodeImpl(Ark_NativePointer peer, Ark_NativePointer node)
 {
-    CHECK_NULL_RETURN(peer, false);
+    CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_Float64>(ERROR_CODE_PARAM_INVALID));
     auto peerImpl = reinterpret_cast<NodeContentPeer*>(peer);
-    CHECK_NULL_RETURN(peerImpl->content, false);
-    CHECK_NULL_RETURN(node, false);
+    CHECK_NULL_RETURN(peerImpl->content, Converter::ArkValue<Ark_Float64>(ERROR_CODE_PARAM_INVALID));
+    CHECK_NULL_RETURN(node, Converter::ArkValue<Ark_Float64>(ERROR_CODE_PARAM_INVALID));
     auto frameNodePeer = reinterpret_cast<FrameNodePeer*>(node);
-    CHECK_NULL_RETURN(frameNodePeer->node, false);
+    CHECK_NULL_RETURN(frameNodePeer->node, Converter::ArkValue<Ark_Float64>(ERROR_CODE_PARAM_INVALID));
+    if (frameNodePeer->node->IsAdopted()) {
+        return Converter::ArkValue<Ark_Float64>(ERROR_CODE_NODE_IS_ADOPTED);
+    }
     auto nodeContent = AceType::DynamicCast<NG::NodeContent>(peerImpl->content);
-    CHECK_NULL_RETURN(nodeContent, false);
+    CHECK_NULL_RETURN(nodeContent, Converter::ArkValue<Ark_Float64>(ERROR_CODE_PARAM_INVALID));
     auto childNode = AceType::DynamicCast<UINode>(frameNodePeer->node);
-    CHECK_NULL_RETURN(childNode, false);
+    CHECK_NULL_RETURN(childNode, Converter::ArkValue<Ark_Float64>(ERROR_CODE_PARAM_INVALID));
     nodeContent->AddNode(AceType::RawPtr(childNode));
     childNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
-    return true;
+    return Converter::ArkValue<Ark_Float64>(ERROR_CODE_NO_ERROR);
 }
 
 Ark_Boolean RemoveFrameNodeImpl(Ark_NativePointer peer, Ark_NativePointer node)

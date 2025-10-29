@@ -121,9 +121,12 @@ public:
     void AddChildAfter(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode);
     void AddChildBefore(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode);
 
+    void AdoptChild(const RefPtr<FrameNode>& child, bool silently = false, bool addDefaultTransition = false);
+
     std::list<RefPtr<UINode>>::iterator RemoveChild(const RefPtr<UINode>& child, bool allowTransition = false);
     bool RemoveChildSilently(const RefPtr<UINode>& child);
     int32_t RemoveChildAndReturnIndex(const RefPtr<UINode>& child);
+    bool RemoveAdoptedChild(const RefPtr<FrameNode>& child);
     void ReplaceChild(const RefPtr<UINode>& oldNode, const RefPtr<UINode>& newNode);
     void MovePosition(int32_t slot);
     virtual void MountToParent(const RefPtr<UINode>& parent, int32_t slot = DEFAULT_NODE_SLOT, bool silently = false,
@@ -198,6 +201,11 @@ public:
     // int32_t second - index of the node
     std::pair<bool, int32_t> GetChildFlatIndex(int32_t id);
 
+    const std::list<RefPtr<FrameNode>>& GetAdoptedChildren() const
+    {
+        return adoptedChildren_;
+    }
+
     virtual const std::list<RefPtr<UINode>>& GetChildren(bool notDetach = false) const
     {
         return children_;
@@ -238,6 +246,11 @@ public:
         return parent_.Upgrade();
     }
 
+    RefPtr<UINode> GetAdoptParent() const
+    {
+        return adoptParent_.Upgrade();
+    }
+
     RefPtr<UINode> GetAncestor() const;
 
     void SetNeedCallChildrenUpdate(bool needCallChildrenUpdate)
@@ -246,6 +259,12 @@ public:
     }
 
     virtual void SetParent(const WeakPtr<UINode>& parent, bool needDetect = true);
+
+    void SetAdoptParent(const WeakPtr<UINode>& adoptParent)
+    {
+        adoptParent_ = adoptParent;
+    }
+
     void SetAncestor(const WeakPtr<UINode>& parent);
     // Tree operation end.
 
@@ -302,6 +321,16 @@ public:
     bool IsRootNode() const
     {
         return isRoot_;
+    }
+
+    bool IsAdopted() const
+    {
+        return isAdopted_;
+    }
+
+    bool IsFirstTimeGetRenderNode() const
+    {
+        return isFirstTimeGetRenderNode_;
     }
 
     int32_t GetDepth() const
@@ -375,6 +404,16 @@ public:
     }
 
     void SetChildrenInDestroying();
+
+    void SetIsAdopted(bool isAdopted)
+    {
+        isAdopted_ = isAdopted;
+    }
+
+    void SetIsFirstTimeGetRenderNode(bool isFirstTimeGetRenderNode)
+    {
+        isFirstTimeGetRenderNode_ = isFirstTimeGetRenderNode;
+    }
 
     virtual HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
         const PointF& parentRevertPoint, TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId,
@@ -896,7 +935,7 @@ public:
     virtual void NotifyChange(int32_t changeIdx, int32_t count, int64_t id, NotificationType notificationType);
 
     int32_t GetThemeScopeId() const;
-    void SetThemeScopeId(int32_t themeScopeId);
+    virtual void SetThemeScopeId(int32_t themeScopeId);
     virtual void UpdateThemeScopeId(int32_t themeScopeId);
     virtual void UpdateThemeScopeUpdate(int32_t themeScopeId);
     virtual void OnThemeScopeUpdate(int32_t themeScopeId) {}
@@ -1259,10 +1298,12 @@ private:
     virtual bool MaybeRelease() override;
 
     std::list<RefPtr<UINode>> children_;
+    std::list<RefPtr<FrameNode>> adoptedChildren_;
     // disappearingChild、index、branchId
     std::list<std::tuple<RefPtr<UINode>, uint32_t, int32_t>> disappearingChildren_;
     std::unique_ptr<PerformanceCheckNode> nodeInfo_;
     WeakPtr<UINode> parent_; // maybe wrong when not on the tree
+    WeakPtr<UINode> adoptParent_; // maybe wrong when not on the tree
     WeakPtr<UINode> ancestor_; // always correct parent ptr, used to remove duplicates when inserting child nodes
     bool isRoot_ = false;
     bool onMainTree_ = false;
@@ -1278,6 +1319,7 @@ private:
     bool isArkTsRenderNode_ = false;
     bool isTraversing_ = false;
     bool isAllowUseParentTheme_ = true;
+    bool isFirstTimeGetRenderNode_ = true;
     NodeStatus nodeStatus_ = NodeStatus::NORMAL_NODE;
     RootNodeType rootNodeType_ = RootNodeType::PAGE_ETS_TAG;
     InteractionEventBindingInfo eventBindingInfo_;
@@ -1330,6 +1372,7 @@ private:
 
     bool isStaticNode_ = false;
     bool uiNodeGcEnable_ = false;
+    bool isAdopted_ = false;
 };
 
 } // namespace OHOS::Ace::NG

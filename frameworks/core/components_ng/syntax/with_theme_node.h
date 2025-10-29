@@ -54,6 +54,7 @@ public:
     void UpdateThemeScopeUpdate(int32_t themeScopeId) override;
     void NotifyThemeScopeUpdate();
     void SetOnThemeScopeDestroy(ThemeScopeDestroyCallback&& callback);
+    void SetThemeScopeId(int32_t themeScopeId) override;
 
 private:
     ThemeScopeDestroyCallback themeScopeDestroyCallback_;

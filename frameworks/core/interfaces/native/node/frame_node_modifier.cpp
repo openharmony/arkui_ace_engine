@@ -97,6 +97,9 @@ void AddBuilderNodeInFrameNode(ArkUINodeHandle node, ArkUINodeHandle child)
     CHECK_NULL_VOID(currentNode);
     auto* childNode = reinterpret_cast<UINode*>(child);
     CHECK_NULL_VOID(childNode);
+    if (childNode->IsAdopted()) {
+        return;
+    }
     auto childRef = Referenced::Claim<UINode>(childNode);
     CHECK_NULL_VOID(childRef);
     auto parentNode = childRef->GetParent();
@@ -993,6 +996,9 @@ ArkUI_Int32 MoveNodeTo(ArkUINodeHandle node, ArkUINodeHandle target_parent, ArkU
     auto* toNode = reinterpret_cast<UINode*>(target_parent);
     CHECK_NULL_RETURN(moveNode, ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(toNode, ERROR_CODE_PARAM_INVALID);
+    if (moveNode->IsAdopted()) {
+        return ERROR_CODE_NODE_IS_ADOPTED;
+    }
     static const std::vector<const char*> nodeTypeArray = {
         OHOS::Ace::V2::STACK_ETS_TAG,
         OHOS::Ace::V2::XCOMPONENT_ETS_TAG,

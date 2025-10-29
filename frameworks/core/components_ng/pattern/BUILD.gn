@@ -365,6 +365,7 @@ build_component_ng("pattern_ng") {
     "navrouter/navdestination_model_ng.cpp",
     "navrouter/navdestination_model_static.cpp",
     "navrouter/navdestination_pattern.cpp",
+    "navrouter/navdestination_pattern_multi_thread.cpp",
     "navrouter/navrouter_group_node.cpp",
     "navrouter/navrouter_model_ng.cpp",
     "navrouter/navrouter_pattern.cpp",

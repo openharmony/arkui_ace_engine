@@ -55,6 +55,7 @@ namespace {
 struct RenderNodeStruct {
     std::shared_ptr<RSNode> rsNode;
     int32_t nodeId;
+    bool getFromAdoptedFrameNode = false;
 };
 
 struct RenderModifierStruct {
@@ -79,6 +80,37 @@ std::shared_ptr<RSNode> GetRsNodeFromStruct(ArkUIRenderNodeHandle node)
     return nodeStruct->rsNode;
 }
 
+bool IsGetFromAdoptedFrameNode(ArkUIRenderNodeHandle node)
+{
+    auto* nodeStruct = reinterpret_cast<RenderNodeStruct*>(node);
+    CHECK_NULL_RETURN(nodeStruct, false);
+    return nodeStruct->getFromAdoptedFrameNode;
+}
+
+RefPtr<FrameNode> GetFrameNodeFromRenderNodeHandle(ArkUIRenderNodeHandle node)
+{
+    ViewAbstract::CheckMainThread();
+    auto rsNodePtr = GetRsNodeFromStruct(node);
+    CHECK_NULL_RETURN(rsNodePtr, nullptr);
+    auto frameNodeId = rsNodePtr->GetFrameNodeId();
+    auto frameNodeTag = rsNodePtr->GetFrameNodeTag();
+    return NG::FrameNode::GetFrameNode(frameNodeTag, frameNodeId);
+}
+
+bool CheckParentCanAdopt(ArkUINodeHandle node)
+{
+    auto parentNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(parentNode, false);
+    return parentNode->IsCNode() || parentNode->IsArkTsFrameNode();
+}
+
+bool CheckChildCanBeAdopted(ArkUINodeHandle node)
+{
+    auto childNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(childNode, false);
+    return childNode->IsCNode() || childNode->IsArkTsFrameNode() || childNode->GetIsRootBuilderNode();
+}
+
 ArkUI_Int32 AddRenderNode(ArkUINodeHandle node, ArkUIRenderNodeHandle child)
 {
     ViewAbstract::CheckMainThread();
@@ -86,6 +118,10 @@ ArkUI_Int32 AddRenderNode(ArkUINodeHandle node, ArkUIRenderNodeHandle child)
     CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
     if (frameNode->TotalChildCount() > 0) {
         return ERROR_CODE_CHILD_EXISTED;
+    }
+    auto childFrameNode = GetFrameNodeFromRenderNodeHandle(child);
+    if (IsGetFromAdoptedFrameNode(child) && (childFrameNode == nullptr || !childFrameNode->IsAdopted())) {
+        return ERROR_CODE_RENDER_HAS_INVALID_FRAME_NODE;
     }
     CHECK_NULL_RETURN(frameNode->GetRenderContext(), ERROR_CODE_PARAM_INVALID);
     auto rsContext = AceType::DynamicCast<RosenRenderContext>(frameNode->GetRenderContext());
@@ -156,6 +192,13 @@ ArkUIRenderNodeHandle CreateNode(int32_t* nodeId)
 ArkUI_Int32 AddChild(ArkUIRenderNodeHandle node, ArkUIRenderNodeHandle child)
 {
     ViewAbstract::CheckMainThread();
+    if (IsGetFromAdoptedFrameNode(node)) {
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
+    auto childFrameNode = GetFrameNodeFromRenderNodeHandle(child);
+    if (IsGetFromAdoptedFrameNode(child) && (childFrameNode == nullptr || !childFrameNode->IsAdopted())) {
+        return ERROR_CODE_RENDER_HAS_INVALID_FRAME_NODE;
+    }
     auto parentNodePtr = GetRsNodeFromStruct(node);
     CHECK_NULL_RETURN(parentNodePtr, ERROR_CODE_PARAM_INVALID);
     auto childNodePtr = GetRsNodeFromStruct(child);
@@ -192,6 +235,13 @@ int32_t GetRSNodeChildCount(std::shared_ptr<RSNode> node)
 ArkUI_Int32 InsertChildAfter(ArkUIRenderNodeHandle node, ArkUIRenderNodeHandle child, ArkUIRenderNodeHandle sibling)
 {
     ViewAbstract::CheckMainThread();
+    if (IsGetFromAdoptedFrameNode(node)) {
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
+    auto childFrameNode = GetFrameNodeFromRenderNodeHandle(child);
+    if (IsGetFromAdoptedFrameNode(child) && (childFrameNode == nullptr || !childFrameNode->IsAdopted())) {
+        return ERROR_CODE_RENDER_HAS_INVALID_FRAME_NODE;
+    }
     auto parentNodePtr = GetRsNodeFromStruct(node);
     CHECK_NULL_RETURN(parentNodePtr, ERROR_CODE_PARAM_INVALID);
     auto childNodePtr = GetRsNodeFromStruct(child);
@@ -210,6 +260,9 @@ ArkUI_Int32 InsertChildAfter(ArkUIRenderNodeHandle node, ArkUIRenderNodeHandle c
 ArkUI_Int32 RemoveChild(ArkUIRenderNodeHandle node, ArkUIRenderNodeHandle child)
 {
     ViewAbstract::CheckMainThread();
+    if (IsGetFromAdoptedFrameNode(node)) {
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
     auto parentNodePtr = GetRsNodeFromStruct(node);
     CHECK_NULL_RETURN(parentNodePtr, ERROR_CODE_PARAM_INVALID);
     auto childNodePtr = GetRsNodeFromStruct(child);
@@ -221,6 +274,9 @@ ArkUI_Int32 RemoveChild(ArkUIRenderNodeHandle node, ArkUIRenderNodeHandle child)
 ArkUI_Int32 ClearChildren(ArkUIRenderNodeHandle node)
 {
     ViewAbstract::CheckMainThread();
+    if (IsGetFromAdoptedFrameNode(node)) {
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
     auto rsNodePtr = GetRsNodeFromStruct(node);
     CHECK_NULL_RETURN(rsNodePtr, ERROR_CODE_PARAM_INVALID);
     rsNodePtr->ClearChildren();
@@ -229,6 +285,9 @@ ArkUI_Int32 ClearChildren(ArkUIRenderNodeHandle node)
 
 ArkUI_Int32 GetChild(ArkUIRenderNodeHandle node, int32_t index, ArkUIRenderNodeHandle* child, int32_t* childId)
 {
+    if (IsGetFromAdoptedFrameNode(node)) {
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
     auto rsNodePtr = GetRsNodeFromStruct(node);
     CHECK_NULL_RETURN(rsNodePtr, ERROR_CODE_PARAM_INVALID);
     auto renderNode = rsNodePtr->GetChildByIndex(index);
@@ -241,6 +300,9 @@ ArkUI_Int32 GetChild(ArkUIRenderNodeHandle node, int32_t index, ArkUIRenderNodeH
 
 ArkUI_Int32 GetChildren(ArkUIRenderNodeHandle node, ArkUIRenderNodeHandle** child, uint32_t** childId, int32_t* count)
 {
+    if (IsGetFromAdoptedFrameNode(node)) {
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
     auto rsNodePtr = GetRsNodeFromStruct(node);
     CHECK_NULL_RETURN(rsNodePtr, ERROR_CODE_PARAM_INVALID);
     auto childCount = GetRSNodeChildCount(rsNodePtr);
@@ -268,6 +330,9 @@ ArkUI_Int32 GetChildren(ArkUIRenderNodeHandle node, ArkUIRenderNodeHandle** chil
 
 ArkUI_Int32 GetFirstChild(ArkUIRenderNodeHandle node, ArkUIRenderNodeHandle* child, int32_t* childId)
 {
+    if (IsGetFromAdoptedFrameNode(node)) {
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
     auto rsNodePtr = GetRsNodeFromStruct(node);
     CHECK_NULL_RETURN(rsNodePtr, ERROR_CODE_PARAM_INVALID);
     auto count = GetRSNodeChildCount(rsNodePtr);
@@ -321,6 +386,9 @@ ArkUI_Int32 GetPreviousSibling(ArkUIRenderNodeHandle node, ArkUIRenderNodeHandle
 
 ArkUI_Int32 GetChildrenCount(ArkUIRenderNodeHandle node, int32_t* count)
 {
+    if (IsGetFromAdoptedFrameNode(node)) {
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
     auto rsNodePtr = GetRsNodeFromStruct(node);
     CHECK_NULL_RETURN(rsNodePtr, ERROR_CODE_PARAM_INVALID);
     *count = GetRSNodeChildCount(rsNodePtr);
@@ -330,6 +398,9 @@ ArkUI_Int32 GetChildrenCount(ArkUIRenderNodeHandle node, int32_t* count)
 ArkUI_Int32 SetBackgroundColor(ArkUIRenderNodeHandle handle, uint32_t backgroundColor)
 {
     ViewAbstract::CheckMainThread();
+    if (IsGetFromAdoptedFrameNode(handle)) {
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     rsNode->SetBackgroundColor(backgroundColor);
@@ -338,6 +409,9 @@ ArkUI_Int32 SetBackgroundColor(ArkUIRenderNodeHandle handle, uint32_t background
 
 int32_t GetBackgroundColor(ArkUIRenderNodeHandle handle, uint32_t* color)
 {
+    if (IsGetFromAdoptedFrameNode(handle)) {
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     *color = rsNode->GetStagingProperties().GetBackgroundColor().AsArgbInt();
@@ -347,6 +421,9 @@ int32_t GetBackgroundColor(ArkUIRenderNodeHandle handle, uint32_t* color)
 int32_t SetOpacity(ArkUIRenderNodeHandle handle, float opacity)
 {
     ViewAbstract::CheckMainThread();
+    if (IsGetFromAdoptedFrameNode(handle)) {
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     rsNode->SetAlpha(opacity);
@@ -355,6 +432,9 @@ int32_t SetOpacity(ArkUIRenderNodeHandle handle, float opacity)
 
 int32_t GetOpacity(ArkUIRenderNodeHandle handle, float* opacity)
 {
+    if (IsGetFromAdoptedFrameNode(handle)) {
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     *opacity = rsNode->GetStagingProperties().GetAlpha();
@@ -364,6 +444,9 @@ int32_t GetOpacity(ArkUIRenderNodeHandle handle, float* opacity)
 int32_t SetSize(ArkUIRenderNodeHandle handle, int32_t width, int32_t height)
 {
     ViewAbstract::CheckMainThread();
+    if (IsGetFromAdoptedFrameNode(handle)) {
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     rsNode->SetBoundsWidth(width);
@@ -375,6 +458,9 @@ int32_t SetSize(ArkUIRenderNodeHandle handle, int32_t width, int32_t height)
 
 int32_t GetSize(ArkUIRenderNodeHandle handle, int32_t* width, int32_t* height)
 {
+    if (IsGetFromAdoptedFrameNode(handle)) {
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     auto vector4f = rsNode->GetStagingProperties().GetBounds();
@@ -386,6 +472,9 @@ int32_t GetSize(ArkUIRenderNodeHandle handle, int32_t* width, int32_t* height)
 int32_t SetPosition(ArkUIRenderNodeHandle handle, int32_t x, int32_t y)
 {
     ViewAbstract::CheckMainThread();
+    if (IsGetFromAdoptedFrameNode(handle)) {
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     auto vector4f = rsNode->GetStagingProperties().GetBounds();
@@ -398,6 +487,9 @@ int32_t SetPosition(ArkUIRenderNodeHandle handle, int32_t x, int32_t y)
 
 int32_t GetPosition(ArkUIRenderNodeHandle handle, int32_t* x, int32_t* y)
 {
+    if (IsGetFromAdoptedFrameNode(handle)) {
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     auto vector4f = rsNode->GetStagingProperties().GetFrame();
@@ -409,6 +501,9 @@ int32_t GetPosition(ArkUIRenderNodeHandle handle, int32_t* x, int32_t* y)
 int32_t SetPivot(ArkUIRenderNodeHandle handle, float x, float y)
 {
     ViewAbstract::CheckMainThread();
+    if (IsGetFromAdoptedFrameNode(handle)) {
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     rsNode->SetPivot(x, y);
@@ -417,6 +512,9 @@ int32_t SetPivot(ArkUIRenderNodeHandle handle, float x, float y)
 
 int32_t GetPivot(ArkUIRenderNodeHandle handle, float* x, float* y)
 {
+    if (IsGetFromAdoptedFrameNode(handle)) {
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     auto vector2f = rsNode->GetStagingProperties().GetPivot();
@@ -428,6 +526,9 @@ int32_t GetPivot(ArkUIRenderNodeHandle handle, float* x, float* y)
 int32_t SetScale(ArkUIRenderNodeHandle handle, float x, float y)
 {
     ViewAbstract::CheckMainThread();
+    if (IsGetFromAdoptedFrameNode(handle)) {
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     rsNode->SetScale(x, y);
@@ -436,6 +537,9 @@ int32_t SetScale(ArkUIRenderNodeHandle handle, float x, float y)
 
 int32_t GetScale(ArkUIRenderNodeHandle handle, float* x, float* y)
 {
+    if (IsGetFromAdoptedFrameNode(handle)) {
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     auto vector2f = rsNode->GetStagingProperties().GetScale();
@@ -447,6 +551,9 @@ int32_t GetScale(ArkUIRenderNodeHandle handle, float* x, float* y)
 int32_t SetTranslation(ArkUIRenderNodeHandle handle, float x, float y)
 {
     ViewAbstract::CheckMainThread();
+    if (IsGetFromAdoptedFrameNode(handle)) {
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     OHOS::Rosen::Vector2f translate = { x, y };
@@ -456,6 +563,9 @@ int32_t SetTranslation(ArkUIRenderNodeHandle handle, float x, float y)
 
 int32_t GetTranslation(ArkUIRenderNodeHandle handle, float* x, float* y)
 {
+    if (IsGetFromAdoptedFrameNode(handle)) {
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     auto vector2f = rsNode->GetStagingProperties().GetTranslate();
@@ -467,6 +577,9 @@ int32_t GetTranslation(ArkUIRenderNodeHandle handle, float* x, float* y)
 int32_t SetRotation(ArkUIRenderNodeHandle handle, float x, float y, float z)
 {
     ViewAbstract::CheckMainThread();
+    if (IsGetFromAdoptedFrameNode(handle)) {
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     rsNode->SetRotation(x, y, z);
@@ -475,6 +588,9 @@ int32_t SetRotation(ArkUIRenderNodeHandle handle, float x, float y, float z)
 
 int32_t GetRotation(ArkUIRenderNodeHandle handle, float* x, float* y, float* z)
 {
+    if (IsGetFromAdoptedFrameNode(handle)) {
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     *z = rsNode->GetStagingProperties().GetRotation();
@@ -499,6 +615,9 @@ void AddOrUpdateModifier(std::shared_ptr<RSNode>& rsNode, const T& value)
 int32_t SetTransform(ArkUIRenderNodeHandle handle, float* matrix)
 {
     ViewAbstract::CheckMainThread();
+    if (IsGetFromAdoptedFrameNode(handle)) {
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
 
@@ -541,6 +660,9 @@ int32_t SetTransform(ArkUIRenderNodeHandle handle, float* matrix)
 int32_t SetShadowColor(ArkUIRenderNodeHandle handle, uint32_t color)
 {
     ViewAbstract::CheckMainThread();
+    if (IsGetFromAdoptedFrameNode(handle)) {
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     rsNode->SetShadowColor(color);
@@ -549,6 +671,9 @@ int32_t SetShadowColor(ArkUIRenderNodeHandle handle, uint32_t color)
 
 int32_t GetShadowColor(ArkUIRenderNodeHandle handle, uint32_t* color)
 {
+    if (IsGetFromAdoptedFrameNode(handle)) {
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     *color = rsNode->GetStagingProperties().GetShadowColor().AsArgbInt();
@@ -558,6 +683,9 @@ int32_t GetShadowColor(ArkUIRenderNodeHandle handle, uint32_t* color)
 int32_t SetShadowOffset(ArkUIRenderNodeHandle handle, int32_t x, int32_t y)
 {
     ViewAbstract::CheckMainThread();
+    if (IsGetFromAdoptedFrameNode(handle)) {
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     rsNode->SetShadowOffset(static_cast<float>(x), static_cast<float>(y));
@@ -566,6 +694,9 @@ int32_t SetShadowOffset(ArkUIRenderNodeHandle handle, int32_t x, int32_t y)
 
 int32_t GetShadowOffset(ArkUIRenderNodeHandle handle, int32_t* x, int32_t* y)
 {
+    if (IsGetFromAdoptedFrameNode(handle)) {
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     *x = rsNode->GetStagingProperties().GetShadowOffsetX();
@@ -576,6 +707,9 @@ int32_t GetShadowOffset(ArkUIRenderNodeHandle handle, int32_t* x, int32_t* y)
 int32_t SetShadowAlpha(ArkUIRenderNodeHandle handle, float alpha)
 {
     ViewAbstract::CheckMainThread();
+    if (IsGetFromAdoptedFrameNode(handle)) {
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     rsNode->SetShadowAlpha(alpha);
@@ -584,6 +718,9 @@ int32_t SetShadowAlpha(ArkUIRenderNodeHandle handle, float alpha)
 
 int32_t GetShadowAlpha(ArkUIRenderNodeHandle handle, float* alpha)
 {
+    if (IsGetFromAdoptedFrameNode(handle)) {
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     *alpha = rsNode->GetStagingProperties().GetShadowAlpha();
@@ -593,6 +730,9 @@ int32_t GetShadowAlpha(ArkUIRenderNodeHandle handle, float* alpha)
 int32_t SetShadowElevation(ArkUIRenderNodeHandle handle, float elevation)
 {
     ViewAbstract::CheckMainThread();
+    if (IsGetFromAdoptedFrameNode(handle)) {
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     rsNode->SetShadowElevation(elevation);
@@ -601,6 +741,9 @@ int32_t SetShadowElevation(ArkUIRenderNodeHandle handle, float elevation)
 
 int32_t GetShadowElevation(ArkUIRenderNodeHandle handle, float* elevation)
 {
+    if (IsGetFromAdoptedFrameNode(handle)) {
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     *elevation = rsNode->GetStagingProperties().GetShadowElevation();
@@ -610,6 +753,9 @@ int32_t GetShadowElevation(ArkUIRenderNodeHandle handle, float* elevation)
 int32_t SetShadowRadius(ArkUIRenderNodeHandle handle, float radius)
 {
     ViewAbstract::CheckMainThread();
+    if (IsGetFromAdoptedFrameNode(handle)) {
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     rsNode->SetShadowRadius(radius);
@@ -618,6 +764,9 @@ int32_t SetShadowRadius(ArkUIRenderNodeHandle handle, float radius)
 
 int32_t GetShadowRadius(ArkUIRenderNodeHandle handle, float* radius)
 {
+    if (IsGetFromAdoptedFrameNode(handle)) {
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     *radius = rsNode->GetStagingProperties().GetShadowRadius();
@@ -627,6 +776,9 @@ int32_t GetShadowRadius(ArkUIRenderNodeHandle handle, float* radius)
 int32_t SetBorderStyle(ArkUIRenderNodeHandle handle, uint32_t left, uint32_t top, uint32_t right, uint32_t bottom)
 {
     ViewAbstract::CheckMainThread();
+    if (IsGetFromAdoptedFrameNode(handle)) {
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     rsNode->SetBorderStyle(left, top, right, bottom);
@@ -635,6 +787,9 @@ int32_t SetBorderStyle(ArkUIRenderNodeHandle handle, uint32_t left, uint32_t top
 
 int32_t GetBorderStyle(ArkUIRenderNodeHandle handle, uint32_t* left, uint32_t* top, uint32_t* right, uint32_t* bottom)
 {
+    if (IsGetFromAdoptedFrameNode(handle)) {
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     auto vector4 = rsNode->GetStagingProperties().GetBorderStyle();
@@ -648,6 +803,9 @@ int32_t GetBorderStyle(ArkUIRenderNodeHandle handle, uint32_t* left, uint32_t* t
 int32_t SetBorderWidth(ArkUIRenderNodeHandle handle, float left, float top, float right, float bottom)
 {
     ViewAbstract::CheckMainThread();
+    if (IsGetFromAdoptedFrameNode(handle)) {
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     rsNode->SetBorderWidth(left, top, right, bottom);
@@ -656,6 +814,9 @@ int32_t SetBorderWidth(ArkUIRenderNodeHandle handle, float left, float top, floa
 
 int32_t GetBorderWidth(ArkUIRenderNodeHandle handle, float* left, float* top, float* right, float* bottom)
 {
+    if (IsGetFromAdoptedFrameNode(handle)) {
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     auto vector4 = rsNode->GetStagingProperties().GetBorderWidth();
@@ -669,6 +830,9 @@ int32_t GetBorderWidth(ArkUIRenderNodeHandle handle, float* left, float* top, fl
 int32_t SetBorderColor(ArkUIRenderNodeHandle handle, uint32_t left, uint32_t top, uint32_t right, uint32_t bottom)
 {
     ViewAbstract::CheckMainThread();
+    if (IsGetFromAdoptedFrameNode(handle)) {
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     rsNode->SetBorderColor(left, top, right, bottom);
@@ -677,6 +841,9 @@ int32_t SetBorderColor(ArkUIRenderNodeHandle handle, uint32_t left, uint32_t top
 
 int32_t GetBorderColor(ArkUIRenderNodeHandle handle, uint32_t* left, uint32_t* top, uint32_t* right, uint32_t* bottom)
 {
+    if (IsGetFromAdoptedFrameNode(handle)) {
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     auto vector4 = rsNode->GetStagingProperties().GetBorderColor();
@@ -691,6 +858,9 @@ int32_t SetBorderRadius(ArkUIRenderNodeHandle handle,
     float topLeft, float topRight, float bottomLeft, float bottomRight)
 {
     ViewAbstract::CheckMainThread();
+    if (IsGetFromAdoptedFrameNode(handle)) {
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     OHOS::Rosen::Vector4f vector4f;
@@ -705,6 +875,9 @@ int32_t SetBorderRadius(ArkUIRenderNodeHandle handle,
 int32_t GetBorderRadius(ArkUIRenderNodeHandle handle,
    float* topLeft, float* topRight, float* bottomLeft, float* bottomRight)
 {
+    if (IsGetFromAdoptedFrameNode(handle)) {
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     auto vector4 = rsNode->GetStagingProperties().GetCornerRadius();
@@ -718,6 +891,9 @@ int32_t GetBorderRadius(ArkUIRenderNodeHandle handle,
 int32_t SetMarkNodeGroup(ArkUIRenderNodeHandle handle, int32_t markNodeGroup)
 {
     ViewAbstract::CheckMainThread();
+    if (IsGetFromAdoptedFrameNode(handle)) {
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     rsNode->MarkNodeGroup(markNodeGroup);
@@ -727,6 +903,9 @@ int32_t SetMarkNodeGroup(ArkUIRenderNodeHandle handle, int32_t markNodeGroup)
 int32_t SetBounds(ArkUIRenderNodeHandle handle, uint32_t x, uint32_t y, uint32_t width, uint32_t height)
 {
     ViewAbstract::CheckMainThread();
+    if (IsGetFromAdoptedFrameNode(handle)) {
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     rsNode->SetBounds(x, y, width, height);
@@ -736,6 +915,9 @@ int32_t SetBounds(ArkUIRenderNodeHandle handle, uint32_t x, uint32_t y, uint32_t
 
 int32_t GetBounds(ArkUIRenderNodeHandle handle, uint32_t* x, uint32_t* y, uint32_t* width, uint32_t* height)
 {
+    if (IsGetFromAdoptedFrameNode(handle)) {
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     auto vector4 = rsNode->GetStagingProperties().GetBounds();
@@ -749,6 +931,9 @@ int32_t GetBounds(ArkUIRenderNodeHandle handle, uint32_t* x, uint32_t* y, uint32
 int32_t SetDrawRegion(ArkUIRenderNodeHandle handle, float x, float y, float w, float h)
 {
     ViewAbstract::CheckMainThread();
+    if (IsGetFromAdoptedFrameNode(handle)) {
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     std::shared_ptr<Rosen::RectF> drawRect = std::make_shared<Rosen::RectF>(x, y, w, h);
@@ -759,6 +944,9 @@ int32_t SetDrawRegion(ArkUIRenderNodeHandle handle, float x, float y, float w, f
 int32_t SetClipToFrame(ArkUIRenderNodeHandle handle, int32_t clipToFrame)
 {
     ViewAbstract::CheckMainThread();
+    if (IsGetFromAdoptedFrameNode(handle)) {
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     rsNode->SetClipToFrame(static_cast<bool>(clipToFrame));
@@ -767,6 +955,9 @@ int32_t SetClipToFrame(ArkUIRenderNodeHandle handle, int32_t clipToFrame)
 
 int32_t GetClipToFrame(ArkUIRenderNodeHandle handle, int32_t* clipToFrame)
 {
+    if (IsGetFromAdoptedFrameNode(handle)) {
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     *clipToFrame = static_cast<int32_t>(rsNode->GetStagingProperties().GetClipToFrame());
@@ -775,6 +966,9 @@ int32_t GetClipToFrame(ArkUIRenderNodeHandle handle, int32_t* clipToFrame)
 
 int32_t GetClipToBounds(ArkUIRenderNodeHandle handle, int32_t* clipToBounds)
 {
+    if (IsGetFromAdoptedFrameNode(handle)) {
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     *clipToBounds = static_cast<int32_t>(rsNode->GetStagingProperties().GetClipToBounds());
@@ -784,6 +978,9 @@ int32_t GetClipToBounds(ArkUIRenderNodeHandle handle, int32_t* clipToBounds)
 int32_t SetClipToBounds(ArkUIRenderNodeHandle handle, int32_t clipToBounds)
 {
     ViewAbstract::CheckMainThread();
+    if (IsGetFromAdoptedFrameNode(handle)) {
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     rsNode->SetClipToBounds(static_cast<bool>(clipToBounds));
@@ -793,6 +990,9 @@ int32_t SetClipToBounds(ArkUIRenderNodeHandle handle, int32_t clipToBounds)
 int32_t AttachModifier(ArkUIRenderNodeHandle node, ArkUIRenderModifierHandle modifier)
 {
     ViewAbstract::CheckMainThread();
+    if (IsGetFromAdoptedFrameNode(node)) {
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
     auto rsNodePtr = GetRsNodeFromStruct(node);
     CHECK_NULL_RETURN(rsNodePtr, ERROR_CODE_PARAM_INVALID);
     auto* modifierStruct = reinterpret_cast<RenderModifierStruct*>(modifier);
@@ -1102,6 +1302,9 @@ RSBrush GetRsBrush(uint32_t fillColor)
 ArkUI_Int32 SetRectMask(ArkUIRenderNodeHandle node, ArkUIRectShape shape, ArkUIMaskFill fill)
 {
     ViewAbstract::CheckMainThread();
+    if (IsGetFromAdoptedFrameNode(node)) {
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
     auto rsNodePtr = GetRsNodeFromStruct(node);
     CHECK_NULL_RETURN(rsNodePtr, ERROR_CODE_PARAM_INVALID);
     RSPath path;
@@ -1118,6 +1321,9 @@ ArkUI_Int32 SetRectMask(ArkUIRenderNodeHandle node, ArkUIRectShape shape, ArkUIM
 ArkUI_Int32 SetCircleMask(ArkUIRenderNodeHandle node, ArkUICircleShape shape, ArkUIMaskFill fill)
 {
     ViewAbstract::CheckMainThread();
+    if (IsGetFromAdoptedFrameNode(node)) {
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
     auto rsNodePtr = GetRsNodeFromStruct(node);
     CHECK_NULL_RETURN(rsNodePtr, ERROR_CODE_PARAM_INVALID);
     RSPath path;
@@ -1134,6 +1340,9 @@ ArkUI_Int32 SetCircleMask(ArkUIRenderNodeHandle node, ArkUICircleShape shape, Ar
 ArkUI_Int32 SetRoundRectMask(ArkUIRenderNodeHandle node, ArkUIRoundRectShape shape, ArkUIMaskFill fill)
 {
     ViewAbstract::CheckMainThread();
+    if (IsGetFromAdoptedFrameNode(node)) {
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
     auto rsNodePtr = GetRsNodeFromStruct(node);
     CHECK_NULL_RETURN(rsNodePtr, ERROR_CODE_PARAM_INVALID);
     RSRoundRect rsRoundRect;
@@ -1160,6 +1369,9 @@ ArkUI_Int32 SetRoundRectMask(ArkUIRenderNodeHandle node, ArkUIRoundRectShape sha
 ArkUI_Int32 SetOvalMask(ArkUIRenderNodeHandle node, ArkUIRectShape shape, ArkUIMaskFill fill)
 {
     ViewAbstract::CheckMainThread();
+    if (IsGetFromAdoptedFrameNode(node)) {
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
     auto rsNodePtr = GetRsNodeFromStruct(node);
     CHECK_NULL_RETURN(rsNodePtr, ERROR_CODE_PARAM_INVALID);
     RSRect rsRect(shape.left, shape.top, shape.right, shape.bottom);
@@ -1177,6 +1389,9 @@ ArkUI_Int32 SetOvalMask(ArkUIRenderNodeHandle node, ArkUIRectShape shape, ArkUIM
 ArkUI_Int32 SetCommandPathMask(ArkUIRenderNodeHandle node, ArkUI_CharPtr commands, ArkUIMaskFill fill)
 {
     ViewAbstract::CheckMainThread();
+    if (IsGetFromAdoptedFrameNode(node)) {
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
     auto rsNodePtr = GetRsNodeFromStruct(node);
     CHECK_NULL_RETURN(rsNodePtr, ERROR_CODE_PARAM_INVALID);
     RSPath path;
@@ -1193,6 +1408,9 @@ ArkUI_Int32 SetCommandPathMask(ArkUIRenderNodeHandle node, ArkUI_CharPtr command
 ArkUI_Int32 SetRectClip(ArkUIRenderNodeHandle node, ArkUIRectShape shape)
 {
     ViewAbstract::CheckMainThread();
+    if (IsGetFromAdoptedFrameNode(node)) {
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
     auto rsNodePtr = GetRsNodeFromStruct(node);
     CHECK_NULL_RETURN(rsNodePtr, ERROR_CODE_PARAM_INVALID);
     RectF rectF(shape.left, shape.top, shape.right, shape.bottom);
@@ -1205,6 +1423,9 @@ ArkUI_Int32 SetRectClip(ArkUIRenderNodeHandle node, ArkUIRectShape shape)
 ArkUI_Int32 SetCircleClip(ArkUIRenderNodeHandle node, ArkUICircleShape shape)
 {
     ViewAbstract::CheckMainThread();
+    if (IsGetFromAdoptedFrameNode(node)) {
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
     auto rsNodePtr = GetRsNodeFromStruct(node);
     CHECK_NULL_RETURN(rsNodePtr, ERROR_CODE_PARAM_INVALID);
     RSRecordingPath rsPath;
@@ -1216,6 +1437,9 @@ ArkUI_Int32 SetCircleClip(ArkUIRenderNodeHandle node, ArkUICircleShape shape)
 ArkUI_Int32 SetRoundRectClip(ArkUIRenderNodeHandle node, ArkUIRoundRectShape shape)
 {
     ViewAbstract::CheckMainThread();
+    if (IsGetFromAdoptedFrameNode(node)) {
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
     auto rsNodePtr = GetRsNodeFromStruct(node);
     CHECK_NULL_RETURN(rsNodePtr, ERROR_CODE_PARAM_INVALID);
     RSRoundRect rsRoundRect;
@@ -1237,6 +1461,9 @@ ArkUI_Int32 SetRoundRectClip(ArkUIRenderNodeHandle node, ArkUIRoundRectShape sha
 ArkUI_Int32 SetOvalClip(ArkUIRenderNodeHandle node, ArkUIRectShape shape)
 {
     ViewAbstract::CheckMainThread();
+    if (IsGetFromAdoptedFrameNode(node)) {
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
     auto rsNodePtr = GetRsNodeFromStruct(node);
     CHECK_NULL_RETURN(rsNodePtr, ERROR_CODE_PARAM_INVALID);
     RectF rectF(shape.left, shape.top, shape.right, shape.bottom);
@@ -1249,6 +1476,9 @@ ArkUI_Int32 SetOvalClip(ArkUIRenderNodeHandle node, ArkUIRectShape shape)
 ArkUI_Int32 SetCommandPathClip(ArkUIRenderNodeHandle node, ArkUI_CharPtr commands)
 {
     ViewAbstract::CheckMainThread();
+    if (IsGetFromAdoptedFrameNode(node)) {
+        return ERROR_CODE_RENDER_IS_FROM_FRAME_NODE;
+    }
     auto rsNodePtr = GetRsNodeFromStruct(node);
     CHECK_NULL_RETURN(rsNodePtr, ERROR_CODE_PARAM_INVALID);
     RSRecordingPath rsPath;
@@ -1256,6 +1486,107 @@ ArkUI_Int32 SetCommandPathClip(ArkUIRenderNodeHandle node, ArkUI_CharPtr command
     rsNodePtr->SetClipBounds(Rosen::RSPath::CreateRSPath(rsPath));
     return ERROR_CODE_NO_ERROR;
 }
+
+ArkUI_Int32 AdoptChild(ArkUINodeHandle node, ArkUINodeHandle child)
+{
+    ViewAbstract::CheckMainThread();
+    auto parentNode = reinterpret_cast<FrameNode*>(node);
+    auto childNode = reinterpret_cast<FrameNode*>(child);
+    bool parentCanAdopt = CheckParentCanAdopt(node);
+    if (!parentNode || !parentCanAdopt) {
+        return ERROR_CODE_NODE_CAN_NOT_ADOPT_TO;
+    }
+    bool childCanBeAdopted = CheckChildCanBeAdopted(child);
+    if (!childNode || !childCanBeAdopted) {
+        return ERROR_CODE_NODE_CAN_NOT_BE_ADOPTED;
+    }
+    if (childNode->GetParent()) {
+        return ERROR_CODE_NODE_HAS_PARENT;
+    }
+    auto childRef = Referenced::Claim<FrameNode>(childNode);
+    parentNode->AdoptChild(childRef);
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 GetRenderNode(ArkUINodeHandle node, ArkUIRenderNodeHandle* renderNode, ArkUI_Int32* renderNodeId)
+{
+    ViewAbstract::CheckMainThread();
+    CHECK_NULL_RETURN(renderNode && renderNodeId, ERROR_CODE_CAPI_INIT_ERROR);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_CODE_RENDER_NOT_ADOPTED_NODE);
+    if (!frameNode->IsAdopted()) {
+        return ERROR_CODE_RENDER_NOT_ADOPTED_NODE;
+    }
+    CHECK_NULL_RETURN(frameNode->GetRenderContext(), ERROR_CODE_CAPI_INIT_ERROR);
+    auto rsContext = AceType::DynamicCast<RosenRenderContext>(frameNode->GetRenderContext());
+    CHECK_NULL_RETURN(rsContext, ERROR_CODE_CAPI_INIT_ERROR);
+    auto rsNode = rsContext->GetRSNode();
+    CHECK_NULL_RETURN(rsNode, ERROR_CODE_CAPI_INIT_ERROR);
+    RenderNodeStruct* nodeStruct = new RenderNodeStruct {
+        .rsNode = rsNode,
+        .nodeId = rsNode->GetId(),
+        .getFromAdoptedFrameNode = true,
+    };
+    *renderNodeId = nodeStruct->nodeId;
+    *renderNode = reinterpret_cast<ArkUIRenderNodeHandle>(nodeStruct);
+    if (frameNode->IsFirstTimeGetRenderNode()) {
+        frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_RENDER);
+        frameNode->SetIsFirstTimeGetRenderNode(false);
+    }
+    return ERROR_CODE_NO_ERROR;
+}
+
+void DetachRsNode(FrameNode* node)
+{
+    ViewAbstract::CheckMainThread();
+    CHECK_NULL_VOID(node && node->GetRenderContext());
+    auto rsContext = AceType::DynamicCast<RosenRenderContext>(node->GetRenderContext());
+    CHECK_NULL_VOID(rsContext);
+    auto rsNode = rsContext->GetRSNode();
+    CHECK_NULL_VOID(rsNode);
+    auto parentRsNode = rsNode->GetParent();
+    CHECK_NULL_VOID(parentRsNode);
+    parentRsNode->RemoveChild(rsNode);
+}
+
+void DetachRsNodeDuringDispose(ArkUINodeHandle node)
+{
+    ViewAbstract::CheckMainThread();
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto& adoptedChildren = frameNode->GetAdoptedChildren();
+    if (frameNode->IsAdopted()) {
+        DetachRsNode(frameNode);
+    } else if (adoptedChildren.size() > 0) {
+        for (auto& adoptedChild : adoptedChildren) {
+            adoptedChild->SetIsAdopted(false);
+            adoptedChild->SetAdoptParent(nullptr);
+            DetachRsNode(adoptedChild.GetRawPtr());
+        }
+    }
+}
+
+ArkUI_Int32 RemoveAdoptedChild(ArkUINodeHandle node, ArkUINodeHandle child)
+{
+    ViewAbstract::CheckMainThread();
+    auto parentFrameNode = reinterpret_cast<FrameNode*>(node);
+    auto childFrameNode = reinterpret_cast<FrameNode*>(child);
+    CHECK_NULL_RETURN(parentFrameNode && childFrameNode, ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN);
+    if (!childFrameNode->IsAdopted()) {
+        return ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN;
+    }
+    auto adoptParent = childFrameNode->GetAdoptParent();
+    CHECK_NULL_RETURN(adoptParent, ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN);
+    if (adoptParent->GetId() != parentFrameNode->GetId()) {
+        return ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN;
+    }
+    if (!parentFrameNode->RemoveAdoptedChild(Referenced::Claim<FrameNode>(childFrameNode))) {
+        return ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN;
+    }
+    DetachRsNode(childFrameNode);
+    return ERROR_CODE_NO_ERROR;
+}
+
 
 } // namespace
 namespace NodeModifier {
@@ -1355,6 +1686,10 @@ const ArkUINDKRenderNodeModifier* GetNDKRenderNodeModifier()
         .setRoundRectClip = SetRoundRectClip,
         .setOvalClip = SetOvalClip,
         .setCommandPathClip = SetCommandPathClip,
+        .adoptChild = AdoptChild,
+        .getRenderNode = GetRenderNode,
+        .removeAdoptedChild = RemoveAdoptedChild,
+        .detachRsNodeDuringDispose = DetachRsNodeDuringDispose,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

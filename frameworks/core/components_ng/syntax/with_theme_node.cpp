@@ -69,4 +69,11 @@ void WithThemeNode::SetOnThemeScopeDestroy(ThemeScopeDestroyCallback&& callback)
     themeScopeDestroyCallback_ = std::move(callback);
 }
 
+void WithThemeNode::SetThemeScopeId(int32_t themeScopeId)
+{
+    if (themeScopeId_ == 0) {
+        UINode::SetThemeScopeId(themeScopeId);
+    }
+}
+
 } // namespace OHOS::Ace::NG
