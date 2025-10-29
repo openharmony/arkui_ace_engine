@@ -82,7 +82,7 @@ export interface CustomTheme {
 }
 
 export class ThemeControl {
-    static setDefaultTheme(customTheme: CustomTheme) {
+    static setDefaultTheme(customTheme: CustomTheme | undefined) {
         ArkThemeScopeManager.getInstance().setDefaultTheme(customTheme);
     }
 }

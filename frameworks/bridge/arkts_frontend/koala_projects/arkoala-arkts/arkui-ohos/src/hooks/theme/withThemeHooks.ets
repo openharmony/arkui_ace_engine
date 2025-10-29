@@ -20,10 +20,10 @@ import { ArkThemeScopeManager } from 'arkui/theme/ArkThemeScopeManager';
 import { ArkThemeBase } from 'arkui/theme/ArkThemeBase';
 import { ArkThemeNativeHelper } from 'arkui/theme/ArkThemeNativeHelper';
 
-export function hookWithThemeOptions(receiver: ArkWithThemeComponent, options: WithThemeOptions) {
+export function hookWithThemeOptions(receiver: ArkWithThemeComponent, options: WithThemeOptions | undefined) {
     const elmtId: int32 = receiver.getPeer()?.getId() ?? 0;
-    const colorMode = options.colorMode ?? ThemeColorMode.SYSTEM;
-    const cloneTheme = ArkThemeScopeManager.cloneCustomThemeWithExpand(options.theme);
+    const colorMode = options?.colorMode ?? ThemeColorMode.SYSTEM;
+    const cloneTheme = ArkThemeScopeManager.cloneCustomThemeWithExpand(options?.theme);
     const theme: ArkThemeBase = ArkThemeScopeManager.getInstance().makeTheme(cloneTheme, colorMode);
     // bind theme to theme scope with elmtId
     theme.bindToScope(elmtId);
