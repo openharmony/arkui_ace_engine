@@ -37,6 +37,9 @@ WebComponent::WebComponent(const std::string& type) : type_(type)
 RefPtr<RenderNode> WebComponent::CreateRenderNode()
 {
     RefPtr<RenderNode> renderNode = RenderWeb::Create();
+    if (!renderNode) {
+        return nullptr;
+    }
     delegate_ = AceType::MakeRefPtr<WebDelegate>(renderNode->GetContext(),
                                                  std::move(errorCallback_), type_);
     delegate_->SetComponent(AceType::Claim(this));
