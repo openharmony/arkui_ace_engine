@@ -6133,7 +6133,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetOnRouterImpl(Ark_NativePointer node,
-                         const Opt_Callback_Object_Void* value)
+                         const Opt_Callback_RouterCallbackInfo_Void* value)
     {
         if (!needGroupedLog(1))
         {

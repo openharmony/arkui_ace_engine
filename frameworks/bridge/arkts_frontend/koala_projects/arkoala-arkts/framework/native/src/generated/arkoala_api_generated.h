@@ -1336,6 +1336,8 @@ typedef struct Callback_RichEditorSelection_Void Callback_RichEditorSelection_Vo
 typedef struct Opt_Callback_RichEditorSelection_Void Opt_Callback_RichEditorSelection_Void;
 typedef struct Callback_RichEditorTextSpanResult_Void Callback_RichEditorTextSpanResult_Void;
 typedef struct Opt_Callback_RichEditorTextSpanResult_Void Opt_Callback_RichEditorTextSpanResult_Void;
+typedef struct Callback_RouterCallbackInfo_Void Callback_RouterCallbackInfo_Void;
+typedef struct Opt_Callback_RouterCallbackInfo_Void Opt_Callback_RouterCallbackInfo_Void;
 typedef struct Callback_SheetDismiss_Void Callback_SheetDismiss_Void;
 typedef struct Opt_Callback_SheetDismiss_Void Opt_Callback_SheetDismiss_Void;
 typedef struct Callback_SheetType_Void Callback_SheetType_Void;
@@ -2229,6 +2231,8 @@ typedef struct Ark_router_RouterOptions Ark_router_RouterOptions;
 typedef struct Opt_router_RouterOptions Opt_router_RouterOptions;
 typedef struct Ark_router_RouterState Ark_router_RouterState;
 typedef struct Opt_router_RouterState Opt_router_RouterState;
+typedef struct Ark_RouterCallbackInfo Ark_RouterCallbackInfo;
+typedef struct Opt_RouterCallbackInfo Opt_RouterCallbackInfo;
 typedef struct RouterItemPeer RouterItemPeer;
 typedef struct RouterItemPeer* Ark_RouterItem;
 typedef struct Opt_RouterItem Opt_RouterItem;
@@ -10853,6 +10857,16 @@ typedef struct Opt_Callback_RichEditorTextSpanResult_Void {
     Ark_Tag tag;
     Callback_RichEditorTextSpanResult_Void value;
 } Opt_Callback_RichEditorTextSpanResult_Void;
+typedef struct Callback_RouterCallbackInfo_Void {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_RouterCallbackInfo value0);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_RouterCallbackInfo value0);
+} Callback_RouterCallbackInfo_Void;
+typedef struct Opt_Callback_RouterCallbackInfo_Void {
+    Ark_Tag tag;
+    Callback_RouterCallbackInfo_Void value;
+} Opt_Callback_RouterCallbackInfo_Void;
 typedef struct Callback_SheetDismiss_Void {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -13532,6 +13546,7 @@ typedef struct Ark_FormCallbackInfo {
     /* kind: Interface */
     Ark_Int64 id;
     Ark_String idString;
+    Ark_Boolean isLocked;
 } Ark_FormCallbackInfo;
 typedef struct Opt_FormCallbackInfo {
     Ark_Tag tag;
@@ -14949,6 +14964,18 @@ typedef struct Opt_RouteMapConfig {
     Ark_Tag tag;
     Ark_RouteMapConfig value;
 } Opt_RouteMapConfig;
+typedef struct Ark_RouterCallbackInfo {
+    /* kind: Interface */
+    Ark_String action;
+    Ark_String bundleName;
+    Ark_String moduleName;
+    Ark_String abilityName;
+    Ark_String params;
+} Ark_RouterCallbackInfo;
+typedef struct Opt_RouterCallbackInfo {
+    Ark_Tag tag;
+    Ark_RouterCallbackInfo value;
+} Opt_RouterCallbackInfo;
 typedef struct Ark_router_RouterOptions {
     /* kind: Interface */
     Ark_String url;
@@ -16919,6 +16946,7 @@ typedef struct Ark_FormInfo {
     Opt_Want want;
     Opt_FormRenderingMode renderingMode;
     Opt_FormShape shape;
+    Opt_Boolean exemptAppLock;
 } Ark_FormInfo;
 typedef struct Opt_FormInfo {
     Ark_Tag tag;
@@ -21996,7 +22024,7 @@ typedef struct GENERATED_ArkUIFormComponentModifier {
     void (*setOnError)(Ark_NativePointer node,
                        const Opt_Callback_ErrorInformation_Void* value);
     void (*setOnRouter)(Ark_NativePointer node,
-                        const Opt_Callback_Object_Void* value);
+                        const Opt_Callback_RouterCallbackInfo_Void* value);
     void (*setOnUninstall)(Ark_NativePointer node,
                            const Opt_Callback_FormCallbackInfo_Void* value);
     void (*setOnLoad)(Ark_NativePointer node,

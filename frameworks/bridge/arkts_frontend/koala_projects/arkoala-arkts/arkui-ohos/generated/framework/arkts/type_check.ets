@@ -73,7 +73,7 @@ import { EnvironmentBackgroundType, Animation, SceneResource, Environment } from
 import { default as EventHub } from "application.EventHub"
 import { ExtendableComponent, LifeCycle } from "./../../component/extendableComponent"
 import { default as uiObserver } from "@ohos.arkui.observer"
-import { FormDimension, FormRenderingMode, FormShape, FormSize, ErrorInformation, FormCallbackInfo, FormInfo } from "./../../component/formComponent"
+import { FormDimension, FormRenderingMode, FormShape, FormSize, ErrorInformation, FormCallbackInfo, FormInfo, RouterCallbackInfo } from "./../../component/formComponent"
 import { FrictionMotion, ScrollMotion, SpringProp, SpringMotion } from "./../../component/animator"
 import { FullscreenInfo, PlaybackInfo, PlaybackSpeed, PreparedInfo, SeekMode, VideoController, PosterOptions, VideoOptions } from "./../../component/video"
 import { GridDirection, GridItemAlignment, ComputedBarAttribute, GridLayoutOptions } from "./../../component/grid"
@@ -2593,6 +2593,9 @@ export class TypeChecker {
     }
     static isRouteMapConfig(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
         return value instanceof RouteMapConfig
+    }
+    static isRouterCallbackInfo(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof RouterCallbackInfo
     }
     static isRouterItem(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean): boolean {
         return value instanceof RouterItem
