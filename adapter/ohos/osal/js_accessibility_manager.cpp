@@ -8790,7 +8790,7 @@ void JsAccessibilityManager::FindTextByTextHint(const RefPtr<NG::UINode>& node,
         std::string textType = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetTextType();
         nlohmann::json textTypeJson = nlohmann::json::parse(textType, nullptr, false);
         if (!textTypeJson.is_null() && !textTypeJson.is_discarded() &&
-            textTypeJson.contains("type") && textTypeJson["type"] == value) {
+            textTypeJson.contains("type") && textTypeJson["type"].is_string() && textTypeJson["type"] == value) {
             AccessibilityElementInfo nodeInfo;
             UpdateAccessibilityElementInfo(frameNode, commonProperty, nodeInfo, context);
             infos.emplace_back(nodeInfo);
