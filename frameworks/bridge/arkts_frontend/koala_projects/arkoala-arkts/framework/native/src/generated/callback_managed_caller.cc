@@ -6788,26 +6788,29 @@ void callManagedPageMapBuilderSync(Ark_VMContext vmContext, Ark_Int32 resourceId
     KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
     callData.dispose(callData.data, callData.length);
 }
-void callManagedPageTransitionCallback(Ark_Int32 resourceId, Ark_RouteType type, Ark_Number progress)
+void callManagedPageTransitionCallback(Ark_Int32 resourceId, Ark_RouteType type, Ark_Float64 progress)
 {
-    CallbackBuffer callbackBuffer = {{}, {}};
-    const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
+    CallbackBuffer callbackBuffer = { {}, {} };
+    const Ark_CallbackResource callbackResourceSelf = { resourceId, holdManagedCallbackResource,
+        releaseManagedCallbackResource };
     callbackBuffer.resourceHolder.holdCallbackResource(&callbackResourceSelf);
-    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
+    SerializerBase argsSerializer = SerializerBase(
+        (KSerializerBuffer) & (callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
     argsSerializer.writeInt32(Kind_PageTransitionCallback);
     argsSerializer.writeInt32(resourceId);
     argsSerializer.writeInt32(static_cast<Ark_RouteType>(type));
-    argsSerializer.writeNumber(progress);
+    argsSerializer.writeFloat64(progress);
     enqueueCallback(10, &callbackBuffer);
 }
-void callManagedPageTransitionCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_RouteType type, Ark_Number progress)
+void callManagedPageTransitionCallbackSync(
+    Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_RouteType type, Ark_Float64 progress)
 {
     SerializerBase argsSerializer = SerializerBase(nullptr);
     argsSerializer.writeInt32(10);
     argsSerializer.writeInt32(Kind_PageTransitionCallback);
     argsSerializer.writeInt32(resourceId);
     argsSerializer.writeInt32(static_cast<Ark_RouteType>(type));
-    argsSerializer.writeNumber(progress);
+    argsSerializer.writeFloat64(progress);
     KInteropReturnBuffer callData = argsSerializer.toReturnBuffer();
     KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
     callData.dispose(callData.data, callData.length);
