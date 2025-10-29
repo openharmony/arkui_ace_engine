@@ -1545,4 +1545,183 @@ HWTEST_F(ScrollLayoutTestNg, ContentOffsetWithInitialOffset, TestSize.Level1)
     EXPECT_EQ(pattern_->currentOffset_, -CONTENT_START_OFFSET - 5.f);
     EXPECT_EQ(pattern_->GetTotalOffset(), 5.f);
 }
+
+/**
+ * @tc.name: ContentOffsetWithSmallChildSize
+ * @tc.desc: Test Scroll with small child and ContentStartOffset and ContentEndOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, ContentOffsetWithSmallChildSize, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    ScrollableModelNG::SetContentStartOffset(CONTENT_START_OFFSET);
+    ScrollableModelNG::SetContentEndOffset(CONTENT_END_OFFSET);
+    CreateContent(100.f);
+    CreateScrollDone();
+
+    EXPECT_EQ(pattern_->currentOffset_, 0.0f);
+    EXPECT_EQ(pattern_->GetChildrenExpandedSize().height_, 100.f);
+}
+
+/**
+ * @tc.name: ContentOffsetWithAlignTopCenter
+ * @tc.desc: Test Scroll with align top center and ContentStartOffset and ContentEndOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, ContentOffsetWithAlignTopCenter, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    ViewAbstract::SetAlign(Alignment::TOP_CENTER);
+    ScrollableModelNG::SetContentStartOffset(CONTENT_START_OFFSET);
+    ScrollableModelNG::SetContentEndOffset(CONTENT_END_OFFSET);
+    CreateContent(100.f);
+    CreateScrollDone();
+
+    RectF childRect = GetChildRect(frameNode_, 0);
+    EXPECT_EQ(childRect.y_, CONTENT_START_OFFSET);
+}
+
+/**
+ * @tc.name: ContentOffsetWithAlignCenter
+ * @tc.desc: Test Scroll with align center and ContentStartOffset and ContentEndOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, ContentOffsetWithAlignCenter, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    ViewAbstract::SetAlign(Alignment::CENTER);
+    ScrollableModelNG::SetContentStartOffset(CONTENT_START_OFFSET);
+    ScrollableModelNG::SetContentEndOffset(CONTENT_END_OFFSET);
+    CreateContent(100.f);
+    CreateScrollDone();
+
+    RectF childRect = GetChildRect(frameNode_, 0);
+    EXPECT_EQ(childRect.y_, (HEIGHT - CONTENT_START_OFFSET - CONTENT_END_OFFSET - 100) / 2 + CONTENT_START_OFFSET);
+}
+
+/**
+ * @tc.name: ContentOffsetWithAlignBottomCenter
+ * @tc.desc: Test Scroll with align center and ContentStartOffset and ContentEndOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, ContentOffsetWithAlignBottomCenter, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    ViewAbstract::SetAlign(Alignment::BOTTOM_CENTER);
+    ScrollableModelNG::SetContentStartOffset(CONTENT_START_OFFSET);
+    ScrollableModelNG::SetContentEndOffset(CONTENT_END_OFFSET);
+    CreateContent(100.f);
+    CreateScrollDone();
+
+    RectF childRect = GetChildRect(frameNode_, 0);
+    EXPECT_EQ(childRect.y_, HEIGHT - 100 - CONTENT_END_OFFSET);
+}
+
+/**
+ * @tc.name: ContentOffsetWithItemAlignStart
+ * @tc.desc: Test Scroll with align Start and ContentStartOffset and ContentEndOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, ContentOffsetWithItemAlignStart, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    ViewAbstract::SetAlign(Alignment::TOP_CENTER);
+    ScrollableModelNG::SetContentStartOffset(CONTENT_START_OFFSET);
+    ScrollableModelNG::SetContentEndOffset(CONTENT_END_OFFSET);
+    CreateContent(HEIGHT - 10);
+    CreateScrollDone();
+
+    RectF childRect = GetChildRect(frameNode_, 0);
+    EXPECT_EQ(childRect.y_, CONTENT_START_OFFSET);
+}
+
+/**
+ * @tc.name: ContentOffsetWithItemAlignCenter
+ * @tc.desc: Test Scroll with align Center and ContentStartOffset and ContentEndOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, ContentOffsetWithItemAlignCenter, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    ViewAbstract::SetAlign(Alignment::CENTER);
+    ScrollableModelNG::SetContentStartOffset(CONTENT_START_OFFSET);
+    ScrollableModelNG::SetContentEndOffset(CONTENT_END_OFFSET);
+    CreateContent(HEIGHT - 10);
+    CreateScrollDone();
+
+    RectF childRect = GetChildRect(frameNode_, 0);
+    EXPECT_EQ(childRect.y_, CONTENT_START_OFFSET);
+}
+
+/**
+ * @tc.name: ContentOffsetWithItemAlignBottom
+ * @tc.desc: Test Scroll with align Center and ContentStartOffset and ContentEndOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, ContentOffsetWithItemAlignBottom, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    ViewAbstract::SetAlign(Alignment::BOTTOM_CENTER);
+    ScrollableModelNG::SetContentStartOffset(CONTENT_START_OFFSET);
+    ScrollableModelNG::SetContentEndOffset(CONTENT_END_OFFSET);
+    CreateContent(HEIGHT - 10);
+    CreateScrollDone();
+
+    RectF childRect = GetChildRect(frameNode_, 0);
+    EXPECT_EQ(childRect.y_, CONTENT_START_OFFSET);
+}
+
+/**
+ * @tc.name: ContentOffsetWithItemAlignStart
+ * @tc.desc: Test Scroll with align Start and ContentStartOffset and ContentEndOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, ContentOffsetWithItemHeightAlignStart, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    ViewAbstract::SetAlign(Alignment::TOP_CENTER);
+    ScrollableModelNG::SetContentStartOffset(CONTENT_START_OFFSET);
+    ScrollableModelNG::SetContentEndOffset(CONTENT_END_OFFSET);
+    CreateContent(HEIGHT - CONTENT_START_OFFSET - CONTENT_END_OFFSET);
+    CreateScrollDone();
+
+    RectF childRect = GetChildRect(frameNode_, 0);
+    EXPECT_EQ(childRect.y_, CONTENT_START_OFFSET);
+}
+
+/**
+ * @tc.name: ContentOffsetWithItemAlignCenter
+ * @tc.desc: Test Scroll with align Center and ContentStartOffset and ContentEndOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, ContentOffsetWithItemHeightAlignCenter, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    ViewAbstract::SetAlign(Alignment::CENTER);
+    ScrollableModelNG::SetContentStartOffset(CONTENT_START_OFFSET);
+    ScrollableModelNG::SetContentEndOffset(CONTENT_END_OFFSET);
+    CreateContent(HEIGHT - CONTENT_START_OFFSET - CONTENT_END_OFFSET);
+    CreateScrollDone();
+
+    RectF childRect = GetChildRect(frameNode_, 0);
+    EXPECT_EQ(childRect.y_, CONTENT_START_OFFSET);
+}
+
+/**
+ * @tc.name: ContentOffsetWithItemAlignBottom
+ * @tc.desc: Test Scroll with align Center and ContentStartOffset and ContentEndOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, ContentOffsetWithItemHeightAlignBottom, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    ViewAbstract::SetAlign(Alignment::BOTTOM_CENTER);
+    ScrollableModelNG::SetContentStartOffset(CONTENT_START_OFFSET);
+    ScrollableModelNG::SetContentEndOffset(CONTENT_END_OFFSET);
+    CreateContent(HEIGHT - CONTENT_START_OFFSET - CONTENT_END_OFFSET);
+    CreateScrollDone();
+
+    RectF childRect = GetChildRect(frameNode_, 0);
+    EXPECT_EQ(childRect.y_, CONTENT_START_OFFSET);
+}
 } // namespace OHOS::Ace::NG
