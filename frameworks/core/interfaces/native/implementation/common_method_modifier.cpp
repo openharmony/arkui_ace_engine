@@ -5336,8 +5336,9 @@ void BindContextMenuBase(Ark_NativePointer node,
                 contentBuilder(menuParam, std::move(previewBuildFunc));
                 }, node);
         },
-        [&menuParam, contentBuilder]() {
+        [&menuParam, menuOption, type, node, contentBuilder]() {
             std::function<void()> previewBuildFunc = nullptr;
+            ParseContextMenuParam(menuParam, menuOption, type, node);
             contentBuilder(menuParam, std::move(previewBuildFunc));
         });
 }
