@@ -4699,6 +4699,7 @@ void WebPattern::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
         } else {
             delegate_->HandleTouchDown(touchPoint.id, touchPoint.x, touchPoint.y, fromOverlay);
         }
+        UpdateImageOverlayStatus(ImageOverlayEvent::TOUCH_PRESS);
         if (overlayCreating_) {
             imageAnalyzerManager_->UpdateOverlayTouchInfo(touchPoint.x, touchPoint.y, TouchType::DOWN);
         }
@@ -4757,7 +4758,7 @@ void WebPattern::HandleTouchUp(const TouchEventInfo& info, bool fromOverlay)
         } else {
             delegate_->HandleTouchUp(touchPoint.id, touchPoint.x, touchPoint.y, fromOverlay);
         }
-
+        UpdateImageOverlayStatus(ImageOverlayEvent::TOUCH_RELEASE);
         if (overlayCreating_) {
             if (imageAnalyzerManager_) {
                 imageAnalyzerManager_->UpdateOverlayTouchInfo(touchPoint.x, touchPoint.y, TouchType::UP);
@@ -4859,6 +4860,7 @@ void WebPattern::HandleTouchCancel(const TouchEventInfo& info)
     CHECK_NULL_VOID(delegate_);
     delegate_->HandleTouchCancel();
     touchEventInfoList_.clear();
+    UpdateImageOverlayStatus(ImageOverlayEvent::TOUCH_RELEASE);
     if (overlayCreating_) {
         imageAnalyzerManager_->UpdateOverlayTouchInfo(0, 0, TouchType::CANCEL);
         overlayCreating_ = false;
@@ -7021,12 +7023,7 @@ void WebPattern::OnScrollStart(const float x, const float y)
     expectedScrollAxis_ =(abs(x) > abs(y) ? Axis::HORIZONTAL : Axis::VERTICAL);
     OnScrollStartRecursive(0.0);
     if (imageAnalyzerManager_) {
-        imageAnalyzerManager_->UpdateOverlayStatus(
-            false,
-            0,
-            0,
-            0,
-            0);
+        imageAnalyzerManager_->UpdateOverlayStatus(false, 0, 0, 0, 0);
     }
 }
 
@@ -8333,13 +8330,14 @@ void WebPattern::CreateOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap, int 
     TAG_LOGI(AceLogTag::ACE_WEB,
         "CreateOverlay, offsetX=%{public}d, offsetY=%{public}d, width=%{public}d, height=%{public}d", offsetX, offsetY,
         rectWidth, rectHeight);
-    auto callback = [weak = AceType::WeakClaim(this)]() {
+    auto task = [weak = AceType::WeakClaim(this)]() {
         auto webPattern = weak.Upgrade();
         CHECK_NULL_VOID(webPattern);
         webPattern->OnTextSelected();
     };
     imageAnalyzerManager_->DestroyAnalyzerOverlay();
     awaitingOnTextSelected_ = true;
+    UpdateImageOverlayStatus(ImageOverlayEvent::CREATE_OVERLAY);
     auto selectedTask = [weak = AceType::WeakClaim(this)](bool isSelected) {
         auto webPattern = weak.Upgrade();
         CHECK_NULL_VOID(webPattern);
@@ -8355,7 +8353,7 @@ void WebPattern::CreateOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap, int 
     };
     imageAnalyzerManager_->SetNotifySelectedCallback(std::move(selectedTask));
     imageAnalyzerManager_->UpdatePressOverlay(
-        pixelMap, offsetX, offsetY, rectWidth, rectHeight, pointX, pointY, std::move(callback));
+        pixelMap, offsetX, offsetY, rectWidth, rectHeight, pointX, pointY, std::move(task));
     imageAnalyzerManager_->CreateAnalyzerOverlay(nullptr);
 }
 
@@ -8377,13 +8375,57 @@ void WebPattern::OnOverlayStateChanged(int offsetX, int offsetY, int rectWidth, 
 void WebPattern::OnTextSelected()
 {
     if (!awaitingOnTextSelected_) {
+        if (!overlayCreating_ && imageOverlayStatus_ == ImageOverlayStatus::TOUCH_HOLD) {
+            TAG_LOGI(AceLogTag::ACE_WEB, "OnTextSelected, handle touch cancel");
+            HandleTouchCancel(touchEventInfo_);
+        }
         TAG_LOGD(AceLogTag::ACE_WEB, "OnTextSelected already called, ignored.");
         return;
     }
     awaitingOnTextSelected_ = false;
     CHECK_NULL_VOID(delegate_);
     delegate_->OnTextSelected();
-    overlayCreating_ = true;
+    // only when hold create overlay, set overlayCreating_ = true, for sending touch event to image analyzer
+    if (imageOverlayStatus_ == ImageOverlayStatus::HOLD_CREATE) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "OnTextSelected, overlayCreating_ = true");
+        overlayCreating_ = true;
+        imageOverlayStatus_ = ImageOverlayStatus::TOUCH_HOLD;
+    }
+}
+
+void WebPattern::UpdateImageOverlayStatus(ImageOverlayEvent event)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::UpdateImageOverlayStatus, event = %{public}d, status = %{public}d",
+        static_cast<int32_t>(event), static_cast<int32_t>(imageOverlayStatus_));
+    switch (event) {
+        case ImageOverlayEvent::TOUCH_PRESS:
+            imageOverlayStatus_ =
+                imageOverlayStatus_ == ImageOverlayStatus::NONE ? ImageOverlayStatus::TOUCH_HOLD : imageOverlayStatus_;
+            break;
+        case ImageOverlayEvent::TOUCH_RELEASE:
+            imageOverlayStatus_ = ImageOverlayStatus::NONE;
+            break;
+        case ImageOverlayEvent::CREATE_OVERLAY:
+            imageOverlayStatus_ = imageOverlayStatus_ == ImageOverlayStatus::TOUCH_HOLD
+                                      ? ImageOverlayStatus::HOLD_CREATE
+                                      : imageOverlayStatus_;
+            break;
+        case ImageOverlayEvent::CREATE_OVERLAY_RELEASE:
+            imageOverlayStatus_ = imageOverlayStatus_ == ImageOverlayStatus::HOLD_CREATE
+                                      ? ImageOverlayStatus::TOUCH_HOLD
+                                      : imageOverlayStatus_;
+            break;
+        default:
+            break;
+    }
+}
+
+void WebPattern::DestroyOverlayOnNoResponse()
+{
+    if (awaitingOnTextSelected_) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::DestroyOverlayOnNoResponse, probably false trigger image analyzer");
+        DestroyAnalyzerOverlay();
+    }
 }
 
 void WebPattern::DestroyAnalyzerOverlay()
@@ -8396,6 +8438,7 @@ void WebPattern::DestroyAnalyzerOverlay()
     overlayCreating_ = false;
     imageOverlayIsSelected_ = false;
     awaitingOnTextSelected_ = false;
+    UpdateImageOverlayStatus(ImageOverlayEvent::CREATE_OVERLAY_RELEASE);
 }
 
 void WebPattern::OnAccessibilityHoverEvent(
@@ -8548,8 +8591,8 @@ void WebPattern::UpdateTouchpadSlidingStatus(const GestureEvent& event)
 
 bool WebPattern::CloseImageOverlaySelection()
 {
-    if (imageOverlayIsSelected_) {
-        TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::CloseImageOverlaySelection");
+    if (imageOverlayIsSelected_ || isMouseEvent_) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::CloseImageOverlaySelection, from mouse = %{public}d", isMouseEvent_);
         DestroyAnalyzerOverlay();
         return true;
     }
