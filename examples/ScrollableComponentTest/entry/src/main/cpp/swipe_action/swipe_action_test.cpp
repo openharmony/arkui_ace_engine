@@ -246,7 +246,7 @@ napi_value SwipeActionTest::CreateNativeNode(napi_env env, napi_callback_info in
     std::string id(xComponentID);
     if (OH_NativeXComponent_AttachNativeRootNode(
             PluginManager::GetInstance()->GetNativeXComponent(id), 
-            rootRow-> == INVALID_PARAM)) {
+            rootRow->GetComponent()) == INVALID_PARAM) {
         OH_LOG_Print(
             LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, "SwipeActionTest", "OH_NativeXComponent_AttachNativeRootNode failed");
     }
