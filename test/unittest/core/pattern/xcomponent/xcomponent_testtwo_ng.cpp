@@ -681,6 +681,33 @@ HWTEST_F(XComponentTestTwoNg, OnAttachContextTest, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnAttachContextInitializeAccessibility
+ * @tc.desc: Test OnAttachContext Func Init Accessibilty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestTwoNg, OnAttachContextShouldInitializeAccessibility, TestSize.Level1)
+{
+    // type = XCOMPONENT_SURFACE_TYPE_VALUE
+    g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    g_testProperty.libraryName = std::nullopt;
+    auto frameNode = CreateXComponentNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+
+    PipelineContext* context = frameNode->GetContext();
+    
+    pattern->isTypedNode_ = true;
+    pattern->OnAttachContext(context);
+    EXPECT_EQ(pattern->accessibilityChildTreeCallback_, nullptr);
+
+    pattern->isTypedNode_ = false;
+    pattern->OnAttachContext(context);
+    EXPECT_NE(pattern->accessibilityChildTreeCallback_, nullptr);
+}
+
+/**
  * @tc.name: HdrBrightnessTest
  * @tc.desc: Test HdrBrightness Func.
  * @tc.type: FUNC
@@ -995,24 +1022,23 @@ HWTEST_F(XComponentTestTwoNg, InitXComponentShouldNotCallInitNativeXComponentTes
 }
 
 /**
- * @tc.name: InitXComponentShouldCallInitAccessibilty
- * @tc.desc: Test InitXComponent Func Init Accessibilty when isTypedNode_ = true
+ * @tc.name: InitXComponentShouldNotCallInitAccessibilty
+ * @tc.desc: Test InitXComponent Func Not Init Accessibilty
  * @tc.type: FUNC
  */
 HWTEST_F(XComponentTestTwoNg, InitXComponentShouldCallInitAccessibilty, TestSize.Level1)
 {
-    // type = XCOMPONENT_SURFACE_TYPE_VALUE, isTypedNode_ = true, libraryName = std::nullopt
+    // type = XCOMPONENT_SURFACE_TYPE_VALUE, isTypedNode_ = false, libraryName = std::nullopt
     g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
     g_testProperty.libraryName = std::nullopt;
     auto frameNode = CreateXComponentNode(g_testProperty);
     ASSERT_TRUE(frameNode);
     auto pattern = frameNode->GetPattern<XComponentPattern>();
     ASSERT_TRUE(pattern);
-    pattern->isTypedNode_ = true;
 
     XComponentModelNG().InitXComponent(Referenced::RawPtr(frameNode));
     EXPECT_EQ(pattern->isNativeXComponent_, false);
-    EXPECT_NE(pattern->accessibilityChildTreeCallback_, nullptr);
+    EXPECT_EQ(pattern->accessibilityChildTreeCallback_, nullptr);
 }
 
 /**
