@@ -4349,7 +4349,7 @@ HWTEST_F(TextTestNg, TextPattern011, TestSize.Level1)
 
 /**
  * @tc.name: TextPattern013
- * @tc.desc: Test TextPattern CopyBindSelectionMenuParams
+ * @tc.desc: Test TextPattern CopyBindSelectionMenuParams.
  * @tc.type: FUNC
  */
 HWTEST_F(TextTestNg, TextPattern013, TestSize.Level1)
@@ -4361,7 +4361,7 @@ HWTEST_F(TextTestNg, TextPattern013, TestSize.Level1)
     pattern->RemoveAreaChangeInner();
 
     /**
-     * @tc.steps: step2. create SelectOverlayInfo
+     * @tc.steps: step2. create SelectOverlayInfo.
      */
     SelectOverlayInfo selectInfo;
     selectInfo.singleLineHeight = NODE_ID;
@@ -4382,7 +4382,7 @@ HWTEST_F(TextTestNg, TextPattern013, TestSize.Level1)
     };
 
     /**
-     * @tc.steps: step3. test pattern CopyBindSelectionMenuParams
+     * @tc.steps: step3. test pattern CopyBindSelectionMenuParams.
      */
     std::shared_ptr<SelectionMenuParams> menuParams = std::make_shared<SelectionMenuParams>(
         TextSpanType::MIXED, buildFunc, onAppear, onDisappear, TextResponseType::RIGHT_CLICK);
@@ -4392,18 +4392,18 @@ HWTEST_F(TextTestNg, TextPattern013, TestSize.Level1)
 
 /**
  * @tc.name: TextPattern014
- * @tc.desc: Test TextPattern CopySelectionMenuParams
+ * @tc.desc: Test TextPattern CopySelectionMenuParams.
  * @tc.type: FUNC
  */
 HWTEST_F(TextTestNg, TextPattern014, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create frameNode
+     * @tc.steps: step1. create frameNode.
      */
     auto [frameNode, pattern] = Init();
 
     /**
-     * @tc.steps: step2. create SelectOverlayInfo
+     * @tc.steps: step2. create SelectOverlayInfo.
      */
     SelectOverlayInfo selectInfo;
     selectInfo.singleLineHeight = NODE_ID;
@@ -4424,7 +4424,7 @@ HWTEST_F(TextTestNg, TextPattern014, TestSize.Level1)
     };
 
     /**
-     * @tc.steps: step3. test pattern CopySelectionMenuParams
+     * @tc.steps: step3. test pattern CopySelectionMenuParams.
      */
     selectInfo.isUsingMouse = true;
     pattern->selectedType_ = TextSpanType::MIXED;
@@ -4618,7 +4618,7 @@ HWTEST_F(TextTestNg, TextPattern020, TestSize.Level1)
 
 /**
  * @tc.name: SetFontSize001
- * @tc.desc: Test TextContentModifier SetFontSize
+ * @tc.desc: Test TextContentModifier SetFontSize.
  * @tc.type: FUNC
  */
 HWTEST_F(TextTestNg, SetFontSize001, TestSize.Level1)
