@@ -38,6 +38,8 @@ export function transferTypeName(typename: string): string {
     return typename.substring(typename.lastIndexOf('.') + 1);
 }
 
+export interface SerializableObject extends jsonx.JsonElementSerializable, jsonx.JsonElementDeserializable {}
+
 export interface ConnectOptions<T extends object> {
     type: Type;
     key?: string;
@@ -85,11 +87,31 @@ export class PersistenceV2 {
         return PersistenceV2Impl.instance().connect(ttype, key, toJson, fromJson, defaultCreator);
     }
 
+    public static connect<T extends SerializableObject>(
+      ttype: Type,
+      defaultCreator?: StorageDefaultCreator<T>
+    ): T | undefined {
+      return PersistenceV2Impl.instance().connect<T>(ttype, transferTypeName(ttype.getName()), undefined, undefined, defaultCreator);
+    }
+
+    public static connect<T extends SerializableObject>(
+      ttype: Type,
+      key: string,
+      defaultCreator?: StorageDefaultCreator<T>
+    ): T | undefined {
+      return PersistenceV2Impl.instance().connect<T>(ttype, key, undefined, undefined, defaultCreator);
+    }
+
     public static globalConnect<T extends object>(
         connectOptions: ConnectOptions<T>,
         toJson: ToJSONType<T>,
         fromJson: FromJSONType<T>): T | undefined {
         return PersistenceV2Impl.instance().globalConnect(connectOptions, toJson, fromJson);
+    }
+
+    public static globalConnect<T extends SerializableObject>(
+        connectOptions: ConnectOptions<T>): T | undefined {
+        return PersistenceV2Impl.instance().globalConnect(connectOptions, undefined, undefined);
     }
 
     public static keys(): Array<string> {
@@ -342,20 +364,11 @@ export class PersistenceV2Impl {
         this.storageBackend_ = storage;
     }
 
-    public connect<T extends object>(
-        ttype: Type,
-        toJson: ToJSONType<T>,
-        fromJson: FromJSONType<T>,
-        defaultCreator?: StorageDefaultCreator<T>
-    ): T | undefined {
-        return this.connect(ttype, transferTypeName(ttype.getName()), toJson, fromJson, defaultCreator);
-    }
-
-    public connect<T extends object>(
+    public connect<T extends object | SerializableObject>(
         ttype: Type,
         key: string,
-        toJson: ToJSONType<T>,
-        fromJson: FromJSONType<T>,
+        toJson: ToJSONType<T> | undefined,
+        fromJson: FromJSONType<T> | undefined,
         defaultCreator?: StorageDefaultCreator<T>,
     ): T | undefined {
         if (this.storageBackend_ === undefined) {
@@ -386,7 +399,7 @@ export class PersistenceV2Impl {
 
         // Not in memory (not connected), but exists on the disk
         if (this.storageBackend_!.has(key)) {
-            return this.readValueFromDisk<T>(key, ttype, toJson, fromJson);
+            return this.readValueFromDisk<T>(key, ttype, toJson, fromJson, defaultCreator);
         }
 
         // Key is neither in the memory nor in the storage/disk
@@ -403,13 +416,13 @@ export class PersistenceV2Impl {
 
     public globalConnect<T extends object>(
         connectOptions: ConnectOptions<T>,
-        toJson: ToJSONType<T>,
-        fromJson: FromJSONType<T>): T | undefined {
+        toJson: ToJSONType<T> | undefined,
+        fromJson: FromJSONType<T> | undefined): T | undefined {
         return this.doGlobalConnect(connectOptions, toJson, fromJson);
     }
 
     private doGlobalConnect<T extends object>(connectOptions: ConnectOptions<T>,
-        toJson: ToJSONType<T>, fromJson: FromJSONType<T>): T | undefined {
+        toJson: ToJSONType<T> | undefined, fromJson: FromJSONType<T> | undefined): T | undefined {
 
         this.checkTypeIsValidClassObject(connectOptions.type);
 
@@ -439,7 +452,7 @@ export class PersistenceV2Impl {
         const areaMode: AreaMode = this.getAreaMode(connectOptions.areaMode);
         this.globalMapAreaMode_.set(key, areaMode);
         if (this.storageBackend_!.has(key, areaMode)) {
-            return this.readValueFromDisk<T>(key, connectOptions.type, toJson, fromJson, areaMode);
+            return this.readValueFromDisk<T>(key, connectOptions.type, toJson, fromJson, connectOptions.defaultCreator, areaMode);
         }
 
         // Neither in memory or in disk, create new entry
@@ -548,7 +561,7 @@ export class PersistenceV2Impl {
         this.observationInProgress_ = false;
     }
 
-    private propertyWriter<T extends object>(key: string, toJson: ToJSONType<T>) {
+    private propertyWriter<T extends object>(key: string, toJson: ToJSONType<T> | undefined) {
         const keyType: MapType = this.getKeyMapType(key!);
         if (keyType === MapType.NOT_IN_MAP) {
             return;
@@ -580,7 +593,7 @@ export class PersistenceV2Impl {
         key: string,
         newValue: StoragePropertyV2<T>,
         ttype: Type,
-        toJson: ToJSONType<T>,
+        toJson: ToJSONType<T> | undefined,
         writeFlag: boolean = true,
         areaMode?: AreaMode): void {
         this.propertyWriters_.set(
@@ -682,20 +695,31 @@ export class PersistenceV2Impl {
         return transferTypeName(Type.of(value).getName());
     }
 
-    private static fromJsonWithType<T extends object>(fromJson: FromJSONType<T>, record: jsonx.JsonElement)
-        : [string, T] {
+    private static fromJsonWithType<T extends object | SerializableObject>(
+        key: string,
+        fromJson: FromJSONType<T> | undefined,
+        record: jsonx.JsonElement,
+        valueToUpdate: SerializableObject | undefined = undefined)
+        : [string, T | undefined] {
         let recordArray = record.asArray();
         let typeString = recordArray[0].asString();
-        let value = fromJson(recordArray[1]);
+        let value : T | undefined = undefined;
+        if (fromJson !== undefined) {
+            value = fromJson(recordArray[1])
+         } else if (valueToUpdate !== undefined){
+            StorageHelper.checkTypeByName(key, Type.of(valueToUpdate), typeString);
+            valueToUpdate!.fromJSON(recordArray[1]);
+            value = valueToUpdate! as T;
+         }
         return [typeString, value];
     }
 
-    private static toJsonWithType<T extends object>(toJson: ToJSONType<T>, obj: T): jsonx.JsonElement {
+    private static toJsonWithType<T extends object | SerializableObject>(toJson: ToJSONType<T> | undefined, obj: T): jsonx.JsonElement {
         let topArray = new Array<jsonx.JsonElement>();
         let classname = PersistenceV2Impl.getTargetClassName(obj);
         let el = jsonx.JsonElement.createString(classname);
         topArray.push(el);
-        topArray.push(toJson(obj));
+        topArray.push(toJson !== undefined? toJson(obj) : (obj as SerializableObject).toJSON());
         let ret = jsonx.JsonElement.createArray(topArray);
         return ret;
     }
@@ -703,8 +727,9 @@ export class PersistenceV2Impl {
     private readValueFromDisk<T extends object>(
         key: string,
         ttype: Type,
-        toJson: ToJSONType<T>,
-        fromJson: FromJSONType<T>,
+        toJson: ToJSONType<T> | undefined,
+        fromJson: FromJSONType<T> | undefined,
+        defaultCreator: StorageDefaultCreator<T> | undefined,
         areaMode?: AreaMode): T | undefined {
         try {
             const jsonString: string = this.storageBackend_!.get(key, areaMode)!;
@@ -712,25 +737,36 @@ export class PersistenceV2Impl {
                 this.errorHelper(key, Serialization, StorageHelper.ERROR_NOT_IN_THE_STORE);
                 return undefined;
             }
-            let property = new StoragePropertyV2<T>(key);
+            let property: StoragePropertyV2<T> | undefined;
+            let newObservedValue: T | undefined;
             const jsonElement = JSON.parseJsonElement(jsonString);
-            let newValueTuple = PersistenceV2Impl.fromJsonWithType(fromJson, jsonElement);
-            let typeName = newValueTuple[0]
-            let newValue = newValueTuple[1];
-            if (newValue === undefined) {
-                throw new Error("unable to deserialize object for the key: " + key);
+            if (fromJson !== undefined) {
+                property = new StoragePropertyV2<T>(key);
+                const newValueTuple = PersistenceV2Impl.fromJsonWithType(key, fromJson, jsonElement);
+                const typeName = newValueTuple[0]
+                const newValue = newValueTuple[1];
+                if (newValue === undefined) {
+                    throw new Error("unable to deserialize object for the key: " + key);
+                }
+                // Exception if type mismatch
+                StorageHelper.checkTypeByName(key, ttype, typeName);
+                StorageHelper.checkTypeByInstanceOf(key, ttype, newValue);
+                newObservedValue = uiUtils.autoProxyObject(newValue!);
+                property.set(newObservedValue);
+            } else {
+                property = this.createDefaultValue<T>(key, ttype, defaultCreator);
+                if ((property === undefined) || (property!.get() === undefined)) {
+                    throw new Error("unable to create default value the key: " + key);
+                }
+                const newValueTuple = PersistenceV2Impl.fromJsonWithType(key, undefined, jsonElement, property!.get() as SerializableObject);
+                newObservedValue = property!.get();
             }
-            let newObservedValue = uiUtils.autoProxyObject(newValue!);
-            property.set(newObservedValue);
 
             // Collect dependencies
             this.startObservation(property);
-            PersistenceV2Impl.toJsonWithType(toJson, newObservedValue);
+            PersistenceV2Impl.toJsonWithType(toJson, newObservedValue!);
             this.stopObservation();
 
-            // Exception if type mismatch
-            StorageHelper.checkTypeByName(key, ttype, typeName);
-            StorageHelper.checkTypeByInstanceOf(key, ttype, newValue);
             // Adds to one of the maps, do not store key on disk
             this.connectNewValue<T>(key, property, ttype, toJson, false, areaMode);
             return newObservedValue;
