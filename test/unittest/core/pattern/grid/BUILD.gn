@@ -39,6 +39,8 @@ ace_unittest("grid_test_regular") {
     "grid_pattern_testthree_ng.cpp",
     "grid_pattern_testtwo_ng.cpp",
     "grid_scroll_layout_test_ng.cpp",
+    "grid_scroll_layout_testfour_ng.cpp",
+    "grid_scroll_layout_testthree_ng.cpp",
     "grid_scroll_layout_testtwo_ng.cpp",
     "grid_scroller_event_test_ng.cpp",
     "grid_sync_load_test_ng.cpp",
