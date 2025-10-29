@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -55,14 +55,7 @@ constexpr float VALUE = 50.0f;
 constexpr float STEP = 1.0f;
 constexpr float MIN = 0.0f;
 constexpr float MAX = 100.0f;
-constexpr float MIN_RANGE = MIN + 40.0f;
-constexpr float MAX_RANGE = MAX - 30.0f;
-constexpr float MIDDLE_OF_RANGE = (MIN_RANGE + MAX_RANGE) / 2;
-constexpr float NAN_VALUE = std::numeric_limits<float>::quiet_NaN();
-constexpr float INFINITY_VALUE = std::numeric_limits<float>::infinity();
 const Color TEST_COLOR = Color::BLUE;
-constexpr float MIN_LABEL = 10.0f;
-constexpr float MAX_LABEL = 20.0f;
 constexpr Dimension WIDTH = 50.0_vp;
 constexpr Dimension HEIGHT = 50.0_vp;
 constexpr Dimension HUGE_WIDTH = 500000000.0_vp;
@@ -99,15 +92,15 @@ const PointF POINTF_END { 20.0f, 20.0f };
 const PointF POINTF_END_DIFFX { 10.0f, 20.0f };
 const PointF POINTF_START_DIFFY { 10.0f, 20.0f };
 const PointF POINTF_END_DIFFY { 20.0f, 10.0f };
-const PointF POINTF_CENTER { 15.0f, 15.0f };
-constexpr Dimension BUBBLE_TO_SLIDER_DISTANCE = 10.0_vp;
-const OffsetF SLIDER_GLOBAL_OFFSET = { 200.0f, 200.0f };
 constexpr Dimension ARROW_HEIGHT = 8.0_vp;
 constexpr Dimension ARROW_WIDTH = 16.0_vp;
 constexpr Dimension CIRCULAR_HORIZON_OFFSET = 13.86_vp;
 constexpr Dimension TEXT_MAX = 36.0_vp;
 const SizeF BLOCK_SIZE_F(10.0f, 10.0f);
 const SizeF BLOCK_SIZE_F_ZREO(0.0f, 0.0f);
+const PointF POINTF_CENTER { 15.0f, 15.0f };
+const OffsetF SLIDER_GLOBAL_OFFSET = { 200.0f, 200.0f };
+constexpr Dimension BUBBLE_TO_SLIDER_DISTANCE = 10.0_vp;
 } // namespace
 class SliderExTestNg : public testing::Test {
 public:
@@ -1123,290 +1116,5 @@ HWTEST_F(SliderExTestNg, SliderModelNgTest003, TestSize.Level2)
     sliderModelNG.SetThickness(rawPtr, Dimension(-1));
     sliderModelNG.SetThickness(rawPtr, Dimension(1));
     EXPECT_TRUE(sliderLayoutProperty->GetBlockSize().has_value());
-}
-
-/**
- * @tc.name: SliderValidRangeTest001
- * @tc.desc: check value of slider valid range by default
- * @tc.type: FUNC
- */
-HWTEST_F(SliderExTestNg, SliderValidRangeTest001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create slider and set the properties ,and then get frameNode.
-     */
-    SliderModelNG sliderModelNG;
-    sliderModelNG.Create(VALUE, STEP, MIN, MAX);
-    std::function<void(float, int32_t)> eventOnChange = [](float floatValue, int32_t intValue) {};
-    sliderModelNG.SetOnChange(std::move(eventOnChange));
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
-
-    /**
-     * @tc.steps: step2. get SliderValidRange by default.
-     * @tc.expected: step2. check whether the properties is correct.
-     */
-    auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
-    EXPECT_NE(sliderPaintProperty, nullptr);
-    EXPECT_EQ(sliderPaintProperty->GetMax(), MAX);
-    EXPECT_EQ(sliderPaintProperty->GetMin(), MIN);
-    EXPECT_EQ(sliderPaintProperty->GetStep(), STEP);
-    EXPECT_EQ(sliderPaintProperty->GetValue(), VALUE);
-    EXPECT_FALSE(sliderPaintProperty->GetValidSlideRange().has_value());
-}
-
-/**
- * @tc.name: SliderValidRangeTest002
- * @tc.desc: Update Slider value by Slider valid range
- * @tc.type: FUNC
- */
-HWTEST_F(SliderExTestNg, SliderValidRangeTest002, TestSize.Level1)
-{
-    struct TestData {
-        float value { 0.0f };
-        std::shared_ptr<SliderModel::SliderValidRange> range { nullptr };
-    };
-    std::vector<std::pair<TestData, TestData>> testSliderValidRangeData {
-        std::make_pair<TestData, TestData>(
-            { MIN, std::make_shared<SliderModel::SliderValidRange>(MIN_RANGE, MAX_RANGE) },
-            { MIN_RANGE, std::make_shared<SliderModel::SliderValidRange>(MIN_RANGE, MAX_RANGE) }),
-        std::make_pair<TestData, TestData>(
-            { MIN + 1.0f, std::make_shared<SliderModel::SliderValidRange>(MIN_RANGE, MAX_RANGE) },
-            { MIN_RANGE, std::make_shared<SliderModel::SliderValidRange>(MIN_RANGE, MAX_RANGE) }),
-        std::make_pair<TestData, TestData>(
-            { MIN + 10.0f, std::make_shared<SliderModel::SliderValidRange>(MIN_RANGE, MAX_RANGE) },
-            { MIN_RANGE, std::make_shared<SliderModel::SliderValidRange>(MIN_RANGE, MAX_RANGE) }),
-        std::make_pair<TestData, TestData>(
-            { MIN_RANGE - 1.0f, std::make_shared<SliderModel::SliderValidRange>(MIN_RANGE, MAX_RANGE) },
-            { MIN_RANGE, std::make_shared<SliderModel::SliderValidRange>(MIN_RANGE, MAX_RANGE) }),
-        std::make_pair<TestData, TestData>(
-            { MIN_RANGE, std::make_shared<SliderModel::SliderValidRange>(MIN_RANGE, MAX_RANGE) },
-            { MIN_RANGE, std::make_shared<SliderModel::SliderValidRange>(MIN_RANGE, MAX_RANGE) }),
-        std::make_pair<TestData, TestData>(
-            { MAX, std::make_shared<SliderModel::SliderValidRange>(MIN_RANGE, MAX_RANGE) },
-            { MAX_RANGE, std::make_shared<SliderModel::SliderValidRange>(MIN_RANGE, MAX_RANGE) }),
-        std::make_pair<TestData, TestData>(
-            { MAX - 1.0f, std::make_shared<SliderModel::SliderValidRange>(MIN_RANGE, MAX_RANGE) },
-            { MAX_RANGE, std::make_shared<SliderModel::SliderValidRange>(MIN_RANGE, MAX_RANGE) }),
-        std::make_pair<TestData, TestData>(
-            { MAX - 10.0f, std::make_shared<SliderModel::SliderValidRange>(MIN_RANGE, MAX_RANGE) },
-            { MAX_RANGE, std::make_shared<SliderModel::SliderValidRange>(MIN_RANGE, MAX_RANGE) }),
-        std::make_pair<TestData, TestData>(
-            { MAX_RANGE + 1.0f, std::make_shared<SliderModel::SliderValidRange>(MIN_RANGE, MAX_RANGE) },
-            { MAX_RANGE, std::make_shared<SliderModel::SliderValidRange>(MIN_RANGE, MAX_RANGE) }),
-        std::make_pair<TestData, TestData>(
-            { MAX_RANGE, std::make_shared<SliderModel::SliderValidRange>(MIN_RANGE, MAX_RANGE) },
-            { MAX_RANGE, std::make_shared<SliderModel::SliderValidRange>(MIN_RANGE, MAX_RANGE) }),
-        std::make_pair<TestData, TestData>(
-            { MIN_RANGE + 1.0f, std::make_shared<SliderModel::SliderValidRange>(MIN_RANGE, MAX_RANGE) },
-            { MIN_RANGE + 1.0f, std::make_shared<SliderModel::SliderValidRange>(MIN_RANGE, MAX_RANGE) }),
-        std::make_pair<TestData, TestData>(
-            { MAX_RANGE - 1.0f, std::make_shared<SliderModel::SliderValidRange>(MIN_RANGE, MAX_RANGE) },
-            { MAX_RANGE - 1.0f, std::make_shared<SliderModel::SliderValidRange>(MIN_RANGE, MAX_RANGE) }),
-        std::make_pair<TestData, TestData>(
-            { MIDDLE_OF_RANGE, std::make_shared<SliderModel::SliderValidRange>(MIN_RANGE, MAX_RANGE) },
-            { MIDDLE_OF_RANGE, std::make_shared<SliderModel::SliderValidRange>(MIN_RANGE, MAX_RANGE) }),
-        std::make_pair<TestData, TestData>(
-            { MIDDLE_OF_RANGE, std::make_shared<SliderModel::SliderValidRange>(NAN_VALUE, NAN_VALUE) },
-            { MIDDLE_OF_RANGE, nullptr }),
-        std::make_pair<TestData, TestData>(
-            { MIDDLE_OF_RANGE, std::make_shared<SliderModel::SliderValidRange>(NAN_VALUE, MAX_RANGE) },
-            { MIDDLE_OF_RANGE, nullptr }),
-        std::make_pair<TestData, TestData>(
-            { MIDDLE_OF_RANGE, std::make_shared<SliderModel::SliderValidRange>(NAN_VALUE, MAX) },
-            { MIDDLE_OF_RANGE, nullptr }),
-        std::make_pair<TestData, TestData>(
-            { MIDDLE_OF_RANGE, std::make_shared<SliderModel::SliderValidRange>(NAN_VALUE, MAX + 1.0f) },
-            { MIDDLE_OF_RANGE, nullptr }),
-        std::make_pair<TestData, TestData>(
-            { MIDDLE_OF_RANGE, std::make_shared<SliderModel::SliderValidRange>(MAX, MIN) },
-            { MIDDLE_OF_RANGE, nullptr }),
-        std::make_pair<TestData, TestData>(
-            { MIDDLE_OF_RANGE, std::make_shared<SliderModel::SliderValidRange>(MAX_RANGE, MIN_RANGE) },
-            { MIDDLE_OF_RANGE, nullptr }),
-        std::make_pair<TestData, TestData>(
-            { MIDDLE_OF_RANGE, std::make_shared<SliderModel::SliderValidRange>(MIN, MAX) },
-            { MIDDLE_OF_RANGE, std::make_shared<SliderModel::SliderValidRange>(MIN, MAX) }),
-        std::make_pair<TestData, TestData>(
-            { MIDDLE_OF_RANGE, std::make_shared<SliderModel::SliderValidRange>(MIN - 1.0f, MAX) },
-            { MIDDLE_OF_RANGE, nullptr }),
-        std::make_pair<TestData, TestData>(
-            { MIDDLE_OF_RANGE, std::make_shared<SliderModel::SliderValidRange>(MIN, MAX + 1.0f) },
-            { MIDDLE_OF_RANGE, nullptr }),
-        std::make_pair<TestData, TestData>(
-            { MIDDLE_OF_RANGE, std::make_shared<SliderModel::SliderValidRange>(INFINITY_VALUE, INFINITY_VALUE) },
-            { MIDDLE_OF_RANGE, std::make_shared<SliderModel::SliderValidRange>(MIN, MAX) }),
-        std::make_pair<TestData, TestData>(
-            { MIDDLE_OF_RANGE, std::make_shared<SliderModel::SliderValidRange>(MIN_RANGE, INFINITY_VALUE) },
-            { MIDDLE_OF_RANGE, std::make_shared<SliderModel::SliderValidRange>(MIN_RANGE, MAX) }),
-        std::make_pair<TestData, TestData>(
-            { MIDDLE_OF_RANGE, std::make_shared<SliderModel::SliderValidRange>(INFINITY_VALUE, MAX_RANGE) },
-            { MIDDLE_OF_RANGE, std::make_shared<SliderModel::SliderValidRange>(MIN, MAX_RANGE) }),
-        std::make_pair<TestData, TestData>(
-            { MIDDLE_OF_RANGE, std::make_shared<SliderModel::SliderValidRange>(MIN_RANGE, NAN_VALUE) },
-            { MIDDLE_OF_RANGE, nullptr }),
-        std::make_pair<TestData, TestData>(
-            { MIDDLE_OF_RANGE, std::make_shared<SliderModel::SliderValidRange>(MIN, NAN_VALUE) },
-            { MIDDLE_OF_RANGE, nullptr }),
-        std::make_pair<TestData, TestData>(
-            { MIDDLE_OF_RANGE, std::make_shared<SliderModel::SliderValidRange>(MIN - 1.0f, NAN_VALUE) },
-            { MIDDLE_OF_RANGE, nullptr }),
-    };
-
-    for (auto testData : testSliderValidRangeData) {
-        /**
-         * @tc.steps: step1. create slider and set the properties ,and then get frameNode.
-         */
-        SliderModelNG sliderModelNG;
-        auto setValue = testData.first.value;
-        auto checkValue = testData.second.value;
-        auto setRangeValue = testData.first.range;
-        auto checkRangeValue = testData.second.range;
-        sliderModelNG.Create(setValue, STEP, MIN, MAX);
-        if (setRangeValue.get()) {
-            sliderModelNG.SetValidSlideRange(setRangeValue.get()->GetFromValue(), setRangeValue.get()->GetToValue());
-        }
-        std::function<void(float, int32_t)> eventOnChange = [](float floatValue, int32_t intValue) {};
-        sliderModelNG.SetOnChange(std::move(eventOnChange));
-        auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-        EXPECT_NE(frameNode, nullptr);
-
-        /**
-         * @tc.steps: step2. get SliderValidRange.
-         * @tc.expected: step2. check whether the properties is correct.
-         */
-        auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
-        EXPECT_NE(sliderPaintProperty, nullptr);
-        EXPECT_EQ(sliderPaintProperty->GetMax(), MAX);
-        EXPECT_EQ(sliderPaintProperty->GetMin(), MIN);
-        EXPECT_EQ(sliderPaintProperty->GetStep(), STEP);
-
-        if (checkRangeValue.get()) {
-            EXPECT_TRUE(sliderPaintProperty->GetValidSlideRange().has_value());
-            auto rangeValue = sliderPaintProperty->GetValidSlideRange().value();
-            EXPECT_EQ(rangeValue->GetFromValue(), checkRangeValue.get()->GetFromValue());
-            EXPECT_EQ(rangeValue->GetToValue(), checkRangeValue.get()->GetToValue());
-        } else {
-            EXPECT_FALSE(sliderPaintProperty->GetValidSlideRange().has_value());
-        }
-        EXPECT_EQ(sliderPaintProperty->GetValue(), checkValue);
-    }
-}
-
-/**
- * @tc.name: SliderValidRangeTest003
- * @tc.desc: Check touch events with Slider valid range
- * @tc.type: FUNC
- */
-HWTEST_F(SliderExTestNg, SliderValidRangeTest003, TestSize.Level1)
-{
-    struct TestInputData {
-        float value { 0.0f };
-        float touchOffset { 0.0f };
-        std::shared_ptr<SliderModel::SliderValidRange> range { nullptr };
-    };
-    struct TestOutputData {
-        float value;
-    };
-
-    std::vector<std::pair<TestInputData, TestOutputData>> testSliderValidRangeData {
-        std::make_pair<TestInputData, TestOutputData>(
-            { MIDDLE_OF_RANGE, -1.0f, std::make_shared<SliderModel::SliderValidRange>(MIN_RANGE, MAX_RANGE) },
-            { MIDDLE_OF_RANGE - 1.0f }),
-        std::make_pair<TestInputData, TestOutputData>(
-            { MIDDLE_OF_RANGE, -10.0f, std::make_shared<SliderModel::SliderValidRange>(MIN_RANGE, MAX_RANGE) },
-            { MIDDLE_OF_RANGE - 10.0f }),
-        std::make_pair<TestInputData, TestOutputData>(
-            { MIDDLE_OF_RANGE, 1.0f, std::make_shared<SliderModel::SliderValidRange>(MIN_RANGE, MAX_RANGE) },
-            { MIDDLE_OF_RANGE + 1.0f }),
-        std::make_pair<TestInputData, TestOutputData>(
-            { MIDDLE_OF_RANGE, 10.0f, std::make_shared<SliderModel::SliderValidRange>(MIN_RANGE, MAX_RANGE) },
-            { MIDDLE_OF_RANGE + 10.0f }),
-        std::make_pair<TestInputData, TestOutputData>(
-            { MIDDLE_OF_RANGE, -MIN_RANGE, std::make_shared<SliderModel::SliderValidRange>(MIN_RANGE, MAX_RANGE) },
-            { MIN_RANGE }),
-        std::make_pair<TestInputData, TestOutputData>(
-            { MIDDLE_OF_RANGE, -MIDDLE_OF_RANGE,
-                std::make_shared<SliderModel::SliderValidRange>(MIN_RANGE, MAX_RANGE) },
-            { MIN_RANGE }),
-        std::make_pair<TestInputData, TestOutputData>(
-            { MIDDLE_OF_RANGE, -MIDDLE_OF_RANGE + 1.0f,
-                std::make_shared<SliderModel::SliderValidRange>(MIN_RANGE, MAX_RANGE) },
-            { MIN_RANGE }),
-        std::make_pair<TestInputData, TestOutputData>(
-            { MIDDLE_OF_RANGE, MIN_RANGE, std::make_shared<SliderModel::SliderValidRange>(MIN_RANGE, MAX_RANGE) },
-            { MAX_RANGE }),
-        std::make_pair<TestInputData, TestOutputData>(
-            { MIDDLE_OF_RANGE, MAX - MIDDLE_OF_RANGE - 1.0f,
-                std::make_shared<SliderModel::SliderValidRange>(MIN_RANGE, MAX_RANGE) },
-            { MAX_RANGE }),
-        std::make_pair<TestInputData, TestOutputData>(
-            { MIDDLE_OF_RANGE, MAX - MIDDLE_OF_RANGE,
-                std::make_shared<SliderModel::SliderValidRange>(MIN_RANGE, MAX_RANGE) },
-            { MAX_RANGE }),
-    };
-
-    for (auto testData : testSliderValidRangeData) {
-        /**
-         * @tc.steps: step1. create slider and set the properties ,and then get frameNode.
-         */
-        SliderModelNG sliderModelNG;
-        float setValue = testData.first.value;
-        float touchOffset = testData.first.touchOffset;
-        auto setRangeValue = testData.first.range;
-        sliderModelNG.Create(setValue, STEP, MIN, MAX);
-        if (setRangeValue.get()) {
-            sliderModelNG.SetValidSlideRange(setRangeValue.get()->GetFromValue(), setRangeValue.get()->GetToValue());
-        }
-        auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-        ASSERT_NE(frameNode, nullptr);
-        frameNode->geometryNode_->SetContentSize(SizeF(MAX_WIDTH, MAX_HEIGHT));
-        auto sliderPattern = frameNode->GetPattern<SliderPattern>();
-        ASSERT_NE(sliderPattern, nullptr);
-        auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
-        ASSERT_NE(sliderPaintProperty, nullptr);
-        auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-        PipelineBase::GetCurrentContext()->SetThemeManager(themeManager);
-        auto sliderTheme = AceType::MakeRefPtr<SliderTheme>();
-        EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sliderTheme));
-        EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(sliderTheme));
-        sliderPattern->sliderLength_ = MIN_LABEL * MIN_LABEL;
-        sliderPattern->blockHotSize_ = SizeF(setValue, MIN_LABEL);
-
-        /**
-         * @tc.steps: step2. initialize touch information.
-         * @tc.desc:  when TouchType is DOWN, SourceType is touch.
-         */
-        TouchLocationInfo LInfo(0);
-        LInfo.touchType_ = TouchType::DOWN;
-        LInfo.localLocation_ = Offset(setValue + touchOffset, MAX_LABEL);
-        TouchEventInfo infoDown("");
-        infoDown.SetSourceDevice(SourceType::TOUCH);
-        infoDown.changedTouches_.emplace_back(LInfo);
-
-        /**
-         * @tc.steps: step2. initialize touch information.
-         * @tc.desc:  when TouchType is UP, SourceType is touch.
-         */
-        TouchLocationInfo UpInfo(0);
-        UpInfo.touchType_ = TouchType::UP;
-        UpInfo.localLocation_ = Offset(setValue + touchOffset, MAX_LABEL);
-        TouchEventInfo infoUp("");
-        infoUp.SetSourceDevice(SourceType::TOUCH);
-        infoUp.changedTouches_.emplace_back(UpInfo);
-
-        /**
-         * @tc.cases: case1. check Slider value after touch down
-         */
-        sliderPattern->lastTouchLocation_ = Offset(setValue + touchOffset, MAX_LABEL);
-        sliderPattern->fingerId_ = LInfo.GetFingerId();
-        sliderPattern->HandleTouchEvent(infoDown);
-
-        /**
-         * @tc.cases: case2. check Slider value after touch up
-         */
-        sliderPattern->HandleTouchEvent(infoUp);
-        EXPECT_TRUE(NearEqual(sliderPattern->value_, setValue));
-    }
 }
 } // namespace OHOS::Ace::NG
