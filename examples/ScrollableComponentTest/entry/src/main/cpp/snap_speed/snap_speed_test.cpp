@@ -71,7 +71,6 @@ std::shared_ptr<ButtonComponent> CreateButton(
 template<int32_t size = LIST_ITEM_COUNT, int32_t direction = ArkUI_Axis::ARKUI_AXIS_VERTICAL>
 static std::shared_ptr<ListComponent> CreateList()
 {
-    //    auto col = std::make_shared<ColumnComponent>();
     auto list = std::make_shared<ListComponent>();
     list->SetListDirection(direction);
     list->SetBorderWidth(PARAM_1);
