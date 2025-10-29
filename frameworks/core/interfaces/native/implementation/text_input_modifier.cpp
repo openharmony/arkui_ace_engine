@@ -1000,9 +1000,10 @@ void SetCustomKeyboardImpl(Ark_NativePointer node,
         return;
     }
     CallbackHelper(*optValue).BuildAsync([frameNode, supportAvoidance](const RefPtr<UINode>& uiNode) {
-        auto customNode = AceType::DynamicCast<FrameNode>(uiNode);
-        auto customFrameNode = Referenced::RawPtr(customNode);
-        TextFieldModelNG::SetCustomKeyboard(frameNode, customFrameNode, supportAvoidance);
+        auto customNodeBuilder = [uiNode]() {
+            NG::ViewStackProcessor::GetInstance()->Push(uiNode);
+        };
+        TextFieldModelStatic::SetCustomKeyboard(frameNode, std::move(customNodeBuilder), supportAvoidance);
         }, node);
 }
 void SetShowCounterImpl(Ark_NativePointer node,
