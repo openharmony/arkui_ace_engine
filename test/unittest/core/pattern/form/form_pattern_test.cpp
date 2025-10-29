@@ -2164,7 +2164,7 @@ HWTEST_F(FormPatternTest, FormPatternTest_061, TestSize.Level0)
     pattern->accessibilityState_ = false;
     EXPECT_FALSE(pattern->OnAccessibilityStateChange(false));
 
-    // isDynamic_ is true, return false
+    // isDynamic_ is true, should return false
     pattern->isDynamic_ = true;
     EXPECT_FALSE(pattern->OnAccessibilityStateChange(true));
     EXPECT_TRUE(pattern->IsAccessibilityState());
