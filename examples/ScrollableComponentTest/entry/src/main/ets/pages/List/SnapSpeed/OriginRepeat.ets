@@ -13,14 +13,15 @@
  * limitations under the License.
  */
 
- /*
-  * Description: List组件限位滚动支持设置动画速度档位
-  * Writer: renxiaowen
-  */
+/*
+ * Description: List组件限位滚动支持设置动画速度档位
+ * Writer: renxiaowen
+ */
 
 import common from '@ohos.app.ability.common';
 import window from '@ohos.window';
 import { LengthMetrics } from '@kit.ArkUI';
+
 interface Speed {
   scrollSnapAnimationSpeed: string;
 }
@@ -28,12 +29,16 @@ interface Speed {
 interface InspectorInfo {
   $attrs: Speed;
 }
+
 @Entry
 @Component
 struct ListOriExample {
   @State arr: number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
   @State arrIndex: number = 10;
-  private repeatArr: Array<string> = ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31','32','33','34','35','36','37','38','39','40','41','42','43','44','45',]; // 数据源
+  private repeatArr: Array<string> =
+    ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20',
+      '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31', '32', '33', '34', '35', '36', '37', '38', '39',
+      '40', '41', '42', '43', '44', '45',]; // 数据源
   @State repeatArrIndex: number = 46;
   @State speedIndex: number = 0;
   @State editFlag: boolean = false
@@ -48,8 +53,8 @@ struct ListOriExample {
   ]
   @State listDirectionIndex: number = 0;
   @State listDirection: Axis[] = [Axis.Vertical, Axis.Horizontal];
-  @State itemHeight:Length = 40;
-  @State itemWidth:Length = '100%';
+  @State itemHeight: Length = 40;
+  @State itemWidth: Length = '100%';
 
   private changeOrientation(isLandscape: boolean) {
     let context = getContext(this) as common.UIAbilityContext;
@@ -60,58 +65,59 @@ struct ListOriExample {
 
   build() {
     Column() {
-      List({ space: 20, initialIndex: 0}) {
+      List({ space: 20, initialIndex: 0 }) {
 
-          Repeat<string>(this.repeatArr)
-            .each((ri: RepeatItem<string>) => {
-              ListItemGroup(){
-                ListItem() {
-                  Flex({ direction: FlexDirection.Row, alignItems: ItemAlign.Center }) {
-                    Text('' + ri.item)
-                      .width(this.itemWidth)
-                      .height(this.itemHeight)
-                      .fontSize(16)
-                      .textAlign(TextAlign.Center)
-                      .borderRadius(10)
-                      .backgroundColor(0xFFFFFF)
-                    if (this.editFlag) {
-                      Button() {
-                        Text("delete").fontSize(16)
-                      }.width('30%').height(40)
-                      .onClick(() => {
-                        if (ri.index != undefined) {
-                          this.repeatArr.splice(ri.index, 1);
-                          this.editFlag = false;
-                        }
-                      }).stateEffect(true)
-                    }
-                  }
-                }
-                ListItem() {
-                  Flex({ direction: FlexDirection.Row, alignItems: ItemAlign.Center }) {
-                    Text('' + ri.item)
-                      .width(this.itemWidth)
-                      .height(this.itemHeight)
-                      .fontSize(16)
-                      .textAlign(TextAlign.Center)
-                      .borderRadius(10)
-                      .backgroundColor(0xFFFFFF)
-                    if (this.editFlag) {
-                      Button() {
-                        Text("delete").fontSize(16)
-                      }.width('30%').height(40)
-                      .onClick(() => {
-                        if (ri.index != undefined) {
-                          this.repeatArr.splice(ri.index, 1);
-                          this.editFlag = false;
-                        }
-                      }).stateEffect(true)
-                    }
+        Repeat<string>(this.repeatArr)
+          .each((ri: RepeatItem<string>) => {
+            ListItemGroup() {
+              ListItem() {
+                Flex({ direction: FlexDirection.Row, alignItems: ItemAlign.Center }) {
+                  Text('' + ri.item)
+                    .width(this.itemWidth)
+                    .height(this.itemHeight)
+                    .fontSize(16)
+                    .textAlign(TextAlign.Center)
+                    .borderRadius(10)
+                    .backgroundColor(0xFFFFFF)
+                  if (this.editFlag) {
+                    Button() {
+                      Text('delete').fontSize(16)
+                    }.width('30%').height(40)
+                    .onClick(() => {
+                      if (ri.index != undefined) {
+                        this.repeatArr.splice(ri.index, 1);
+                        this.editFlag = false;
+                      }
+                    }).stateEffect(true)
                   }
                 }
               }
-            })
-            .virtualScroll({ totalCount: this.arr.length }) // 打开懒加载，totalCount为期望加载的数据长度
+
+              ListItem() {
+                Flex({ direction: FlexDirection.Row, alignItems: ItemAlign.Center }) {
+                  Text('' + ri.item)
+                    .width(this.itemWidth)
+                    .height(this.itemHeight)
+                    .fontSize(16)
+                    .textAlign(TextAlign.Center)
+                    .borderRadius(10)
+                    .backgroundColor(0xFFFFFF)
+                  if (this.editFlag) {
+                    Button() {
+                      Text('delete').fontSize(16)
+                    }.width('30%').height(40)
+                    .onClick(() => {
+                      if (ri.index != undefined) {
+                        this.repeatArr.splice(ri.index, 1);
+                        this.editFlag = false;
+                      }
+                    }).stateEffect(true)
+                  }
+                }
+              }
+            }
+          })
+          .virtualScroll({ totalCount: this.arr.length }) // 打开懒加载，totalCount为期望加载的数据长度
       }
       .id('list')
       .scrollSnapAnimationSpeed(this.speedList[this.speedIndex])
@@ -138,12 +144,12 @@ struct ListOriExample {
             this.speedIndex = 0;
           }
         })
-        Row({space: 10}) {
-          Button("getInspectorByKey")
+        Row({ space: 10 }) {
+          Button('getInspectorByKey')
             .onClick(() => {
-              let msg = getInspectorByKey("list");
+              let msg = getInspectorByKey('list');
               let a: InspectorInfo = JSON.parse(msg) as InspectorInfo;
-              console.log("CXN ", a?.$attrs?.scrollSnapAnimationSpeed);
+              console.log('CXN ', a?.$attrs?.scrollSnapAnimationSpeed);
             })
         }.alignItems(VerticalAlign.Center)
       }

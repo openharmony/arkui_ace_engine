@@ -153,7 +153,7 @@ struct ListOriExample {
           .onClick(() => {
             this.snapSpeedModifier.speedIndex = this.snapSpeedModifier.speedIndex + 1;
             if (this.snapSpeedModifier.speedIndex >= this.snapSpeedModifier.speedList.length) {
-              this.snapSpeedModifier.speedIndex = 0
+              this.snapSpeedModifier.speedIndex = 0;
             }
           })
         Row({ space: 10 }) {
