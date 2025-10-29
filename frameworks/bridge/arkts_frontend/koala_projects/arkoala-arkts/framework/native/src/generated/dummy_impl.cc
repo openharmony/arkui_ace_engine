@@ -3628,26 +3628,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void SetAlignRulesWithAlignRuleOptionTypedValueImpl(Ark_NativePointer node,
-                                                        const Opt_AlignRuleOption* value)
+    void SetAlignRulesImpl(Ark_NativePointer node,
+                           const Opt_Union_AlignRuleOption_LocalizedAlignRuleOptions* value)
     {
         if (!needGroupedLog(1))
         {
             return;
         }
-        string out("setAlignRulesWithAlignRuleOptionTypedValue(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void SetAlignRulesWithLocalizedAlignRuleOptionsTypedValueImpl(Ark_NativePointer node,
-                                                                  const Opt_LocalizedAlignRuleOptions* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setAlignRulesWithLocalizedAlignRuleOptionsTypedValue(");
+        string out("setAlignRules(");
         WriteToString(&out, value);
         out.append(") \n");
         appendGroupedLog(1, out);
@@ -21440,8 +21428,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetMarkAnchorImpl,
             CommonMethodModifier::SetOffsetImpl,
             CommonMethodModifier::SetEnabledImpl,
-            CommonMethodModifier::SetAlignRulesWithAlignRuleOptionTypedValueImpl,
-            CommonMethodModifier::SetAlignRulesWithLocalizedAlignRuleOptionsTypedValueImpl,
+            CommonMethodModifier::SetAlignRulesImpl,
             CommonMethodModifier::SetAspectRatioImpl,
             CommonMethodModifier::SetClickEffectImpl,
             CommonMethodModifier::SetOnDragStartImpl,

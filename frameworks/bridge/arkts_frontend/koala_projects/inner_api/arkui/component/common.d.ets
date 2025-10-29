@@ -570,7 +570,7 @@ export declare class ArkCommonMethodPeer extends PeerNode {
     public offsetAttribute(value: Position | Edges | LocalizedEdges | undefined): void;
     public enabledAttribute(value: boolean | undefined): void;
     public useSizeTypeAttribute(value: Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs | undefined): void;
-    public alignRules0Attribute(value: AlignRuleOption | undefined): void;
+    public alignRules0Attribute(value: AlignRuleOption | LocalizedAlignRuleOptions | undefined): void;
     public alignRules1Attribute(value: LocalizedAlignRuleOptions | undefined): void;
     public aspectRatioAttribute(value: number | undefined): void;
     public clickEffect0Attribute(value: ClickEffect | undefined): void;
@@ -1101,7 +1101,7 @@ export declare class ArkCommonMethodStyle implements CommonMethod {
     public offset_value?: Position | Edges | LocalizedEdges | undefined;
     public enabled_value?: boolean | undefined;
     public useSizeType_value?: Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs | undefined;
-    public alignRules_value?: AlignRuleOption | undefined;
+    public alignRules_value?: AlignRuleOption | LocalizedAlignRuleOptions | undefined;
     public aspectRatio_value?: number | undefined;
     public clickEffect_value?: ClickEffect | undefined;
     public onDragStart_value?: ((event: DragEvent, extraParams?: string) => CustomBuilder | DragItemInfo) | undefined;
