@@ -93,6 +93,9 @@ public:
         struct Leave {
             ~Leave()
             {
+                if (!delayDeleteCallbacks_) {
+                    TAG_LOGE(AceLogTag::ACE_MEDIA_QUERY, "Null pointer exceptions in Leave.");
+                }
                 if (delayDeleteEnv_ && delayDeleteCallbacks_) {
                     for (auto& cbRef : *delayDeleteCallbacks_) {
                         napi_delete_reference(delayDeleteEnv_, cbRef);
@@ -131,6 +134,9 @@ public:
             }
 
             for (const auto& cbRef : copyCallbacks) {
+                if (!delayDeleteCallbacks_) {
+                    TAG_LOGE(AceLogTag::ACE_MEDIA_QUERY, "Null pointer exceptions in TriggerAllCallbacks.");
+                }
                 if (delayDeleteCallbacks_ && delayDeleteCallbacks_->find(cbRef) != delayDeleteCallbacks_->end()) {
                     continue;
                 }
