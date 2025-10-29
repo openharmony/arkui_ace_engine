@@ -15,6 +15,7 @@
 
 import { Rect, Circle, RoundRect, CommandPath, Size, Frame, Vector2, Vector3, Matrix4, NodeEdges, Corners, ShapeMask, ShapeClip, LengthMetricsUnit, DrawContext } from '../../Graphics'
 import { KPointer } from '@koalaui/interop'
+import { unsafeCast, int32, int64, float32 } from '@koalaui/common'
 import { BorderStyle } from '../../component/enums'
 import { ArkUIAniModule } from 'arkui.ani'
 import { ShapeClipTransfer } from './ShapeClipTransfer'
@@ -46,7 +47,7 @@ export class TransferUtil {
        2. color = '#FF000000' -> number
        3. color = 0xFF000000  -> number
     */
-    static getPropColorInt(inVal: ESValue, name: string): number | undefined {
+    static getPropColorInt(inVal: ESValue, name: string): int32 | undefined {
         const propVal = inVal.getProperty(name);
         if (propVal.typeOf() === 'string') {
             let parStr = propVal.toString();
@@ -193,7 +194,7 @@ export class TransferUtil {
     }
 
     // number color: 1.1(long) -> 1.2(int)
-    static getPropEdgesColor(inVal: ESValue, name: string): NodeEdges<number> | undefined {
+    static getPropEdgesColor(inVal: ESValue, name: string): NodeEdges<int32> | undefined {
         let borderVal = inVal.getProperty(name);
         if (borderVal.isUndefined() || borderVal.isNull()) {
             return undefined;
@@ -202,7 +203,7 @@ export class TransferUtil {
         let top = TransferUtil.getPropColorInt(borderVal, 'top');
         let right = TransferUtil.getPropColorInt(borderVal, 'right');
         let bottom = TransferUtil.getPropColorInt(borderVal, 'bottom');
-        let egVal = {left: left, top: top, right: right, bottom: bottom} as NodeEdges<number>;
+        let egVal = {left: left, top: top, right: right, bottom: bottom} as NodeEdges<int32>;
         return egVal;
     }
 
@@ -288,7 +289,7 @@ export class TransferUtil {
             return;
         }
     
-        const colorLong = ArkUIAniModule._ToColorLong(Double.toInt(inVal));
+        const colorLong = ArkUIAniModule._ToColorLong(inVal);
         outJs.setProperty(name, colorLong);
     }
 
