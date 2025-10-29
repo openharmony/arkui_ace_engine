@@ -21,7 +21,7 @@ class ContainerPickerModifier extends ArkContainerPickerComponent implements Att
     this._modifiersWithKeys = new ModifierMap();
   }
 
-  applyNormalAttribute(instance: DatePickerAttribute): void {
+  applyNormalAttribute(instance: PickerAttribute): void {
     ModifierUtils.applySetOnChange(this);
     ModifierUtils.applyAndMergeModifier<PickerAttribute, ArkContainerPickerComponent, ArkComponent>(instance, this);
   }

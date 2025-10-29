@@ -40883,10 +40883,9 @@ class ContainerPickerSelectionIndicatorModifier extends ModifierWithKey {
       getUINativeModule().containerPicker.resetContainerPickerSelectionIndicator(node);
     } else if (this.value == null) {
       getUINativeModule().containerPicker.setContainerPickerSelectionIndicator(node, undefined, undefined, undefined,
-        undefined, undefined, undefined, undefined, undefined,
-        undefined, undefined);
+        undefined, undefined, undefined, undefined, undefined, undefined, undefined);
     } else {
-      const { type, dividerWidth, dividerColor, startMargin, endMargin, backgroundColor, borderRadius } = this.value;
+      const { type, strokeWidth, dividerColor, startMargin, endMargin, backgroundColor, borderRadius } = this.value;
       if (borderRadius != null) {
         const borderRadiusKeys = Object.keys(borderRadius);
         let topLeft;
@@ -40906,10 +40905,10 @@ class ContainerPickerSelectionIndicatorModifier extends ModifierWithKey {
           bottomLeft = borderRadius.bottomStart;
           bottomRight = borderRadius.bottomEnd;
         }
-        getUINativeModule().containerPicker.setContainerPickerSelectionIndicator(node, type, dividerWidth, dividerColor, startMargin, endMargin, backgroundColor, topLeft, topRight, bottomLeft,
+        getUINativeModule().containerPicker.setContainerPickerSelectionIndicator(node, type, strokeWidth, dividerColor, startMargin, endMargin, backgroundColor, topLeft, topRight, bottomLeft,
           bottomRight);
       } else {
-        getUINativeModule().containerPicker.setContainerPickerSelectionIndicator(node, type, dividerWidth, dividerColor, startMargin, endMargin, backgroundColor, undefined, undefined,
+        getUINativeModule().containerPicker.setContainerPickerSelectionIndicator(node, type, strokeWidth, dividerColor, startMargin, endMargin, backgroundColor, undefined, undefined,
           undefined, undefined);
       }
     }
@@ -40923,7 +40922,7 @@ ContainerPickerSelectionIndicatorModifier.identity = Symbol('containerPickerSele
 if (globalThis.Picker !== undefined) {
   globalThis.Picker.attributeModifier = function (modifier) {
     attributeModifierFunc.call(this, modifier, (nativePtr) => {
-      return new ArkTextPickerComponent(nativePtr);
+      return new ArkContainerPickerComponent(nativePtr);
     }, (nativePtr, classType, modifierJS) => {
       return new modifierJS.ContainerPickerModifier(nativePtr, classType);
     });

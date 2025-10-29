@@ -18,11 +18,11 @@
 #include "core/interfaces/native/node/node_container_picker_modifier.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/pattern/container_picker/container_picker_model.h"
+#include "core/components_ng/pattern/container_picker/container_picker_utils.h"
 #include "core/common/resource/resource_parse_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
-
 enum GetValueArrayIndex {
     GETTOPLEFT,
     GETTOPRIGHT,
@@ -49,7 +49,8 @@ void ResetContainerPickerCanLoop(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     ContainerPickerModel::SetCanLoop(frameNode, true);
 }
-void SetContainerPickerOnChangeExt(ArkUINodeHandle node, void* callback)
+
+void SetContainerPickerOnChangeEvt(ArkUINodeHandle node, void* callback)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -63,13 +64,15 @@ void ResetContainerPickerOnChange(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     ContainerPickerModel::SetOnChange(frameNode, nullptr);
 }
-void SetContainerPickerOnScrollStopExt(ArkUINodeHandle node, void* callback)
+
+void SetContainerPickerOnScrollStopEvt(ArkUINodeHandle node, void* callback)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto onScrollStop = reinterpret_cast<std::function<void(const double)>*>(callback);
     ContainerPickerModel::SetOnScrollStop(frameNode, std::move(*onScrollStop));
 }
+
 void ResetContainerPickerOnScrollStop(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -130,12 +133,18 @@ void SetContainerPickerSelectionIndicator(ArkUINodeHandle node, ArkUI_Bool* isHa
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<PickerTheme>();
-    CHECK_NULL_VOID(theme);
     PickerIndicatorStyle indicatorStyle;
-    indicatorStyle.borderRadius = theme->GetSelectedBorderRadius();
+    indicatorStyle.type = pickerIndicatorStyle->type;
+    indicatorStyle.strokeWidth = Dimension(pickerIndicatorStyle->strokeWidthValue,
+        static_cast<DimensionUnit>(pickerIndicatorStyle->strokeWidthUnit));
+    indicatorStyle.startMargin = Dimension(pickerIndicatorStyle->startMarginValue,
+        static_cast<DimensionUnit>(pickerIndicatorStyle->startMarginUnit));
+    indicatorStyle.endMargin = Dimension(pickerIndicatorStyle->endMarginValue,
+        static_cast<DimensionUnit>(pickerIndicatorStyle->endMarginUnit));
+    indicatorStyle.dividerColor = Color(pickerIndicatorStyle->dividerColor);
+
+    indicatorStyle.backgroundColor = Color(pickerIndicatorStyle->backgroundColor);
+    indicatorStyle.borderRadius = BorderRadiusProperty(DEFAULT_RADIUS);
     if (isHasValue[GETTOPLEFT]) {
         indicatorStyle.borderRadius->radiusTopLeft = Dimension(pickerIndicatorStyle->values[TOPLEFT],
             static_cast<DimensionUnit>(pickerIndicatorStyle->units[TOPLEFT]));
@@ -161,12 +170,7 @@ void ResetContainerPickerSelectionIndicator(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<PickerTheme>();
-    CHECK_NULL_VOID(theme);
     PickerIndicatorStyle indicatorStyle;
-    indicatorStyle.borderRadius = theme->GetSelectedBorderRadius();
     ContainerPickerModel::SetIndicatorStyle(frameNode, indicatorStyle);
 }
 }  // namespace
@@ -176,9 +180,9 @@ const ArkUIContainerPickerModifier* GetContainerPickerModifier()
 {
     CHECK_INITIALIZED_FIELDS_BEGIN();  // don't move this line
     static const ArkUIContainerPickerModifier modifier = {
-        .setContainerPickerOnChange = SetContainerPickerOnChangeExt,
+        .setContainerPickerOnChange = SetContainerPickerOnChangeEvt,
         .resetContainerPickerOnChange = ResetContainerPickerOnChange,
-        .setContainerPickerOnScrollStop = SetContainerPickerOnScrollStopExt,
+        .setContainerPickerOnScrollStop = SetContainerPickerOnScrollStopEvt,
         .resetContainerPickerOnScrollStop = ResetContainerPickerOnScrollStop,
         .setContainerPickerEnableHapticFeedback = SetContainerPickerEnableHapticFeedback,
         .resetContainerPickerEnableHapticFeedback = ResetContainerPickerEnableHapticFeedback,

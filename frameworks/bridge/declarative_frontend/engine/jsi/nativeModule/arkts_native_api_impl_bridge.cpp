@@ -3361,7 +3361,7 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     RegisterEmbeddedComponentAttributes(object, vm);
 #endif
     RegisterStepperAttributes(object, vm);
-    RegisterContainerAttributes(object, vm);
+    RegisterContainerPickerAttributes(object, vm);
     return object;
 }
 
@@ -7417,7 +7417,7 @@ void ArkUINativeModule::RegisterStepperAttributes(Local<panda::ObjectRef> object
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "stepper"), stepper);
 }
 
-void ArkUINativeModule::RegisterContainerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
+void ArkUINativeModule::RegisterContainerPickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
 {
     auto containerPicker = panda::ObjectRef::New(vm);
     containerPicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setContainerPickerCanLoop"),
@@ -7445,6 +7445,6 @@ void ArkUINativeModule::RegisterContainerAttributes(Local<panda::ObjectRef> obje
     containerPicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetContainerPickerOnScrollStop"),
         panda::FunctionRef::New(
             const_cast<panda::EcmaVM*>(vm), ContainerPickerBridge::ResetContainerPickerOnScrollStop));
-    object->Set(vm, panda::StringRef::NewFromUtf8(vm, ""), containerPicker);
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "containerPicker"), containerPicker);
 }
 } // namespace OHOS::Ace::NG

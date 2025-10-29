@@ -1050,8 +1050,8 @@ struct ArkUIPickerTextStyleStruct {
 
 struct ArkUIPickerIndicatorStyle {
     ArkUI_Int32 type;
-    ArkUI_Int32 dividerWidthUnit;
-    ArkUI_Float32 dividerWidthValue;
+    ArkUI_Int32 strokeWidthUnit;
+    ArkUI_Float32 strokeWidthValue;
     ArkUI_Int32 startMarginUnit;
     ArkUI_Float32 startMarginValue;
     ArkUI_Int32 endMarginUnit;

@@ -2152,4 +2152,122 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternHandleDirectionKeyTes
     EXPECT_FALSE(pattern->HandleDirectionKey(KeyCode::KEY_0));
 }
 
+/**
+ * @tc.name: ContainerPickerPatternOnKeyEventTest001
+ * @tc.desc: Test OnKeyEvent method with KEY_DPAD_UP key
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternOnKeyEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker and get pattern
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->totalItemCount_ = 5;
+    
+    /**
+     * @tc.steps: step2. Create a key event for KEY_DPAD_UP
+     */
+    KeyEvent keyEvent;
+    keyEvent.code = KeyCode::KEY_DPAD_UP;
+    keyEvent.action = KeyAction::DOWN;
+    
+    /**
+     * @tc.steps: step3. Call OnKeyEvent
+     * @tc.expected: step3. OnKeyEvent should return true
+     */
+    bool result = pattern->OnKeyEvent(keyEvent);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: ContainerPickerPatternOnKeyEventTest002
+ * @tc.desc: Test OnKeyEvent method with KEY_DPAD_DOWN key
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternOnKeyEventTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker and get pattern
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->totalItemCount_ = 5;
+    
+    /**
+     * @tc.steps: step2. Create a key event for KEY_DPAD_DOWN
+     */
+    KeyEvent keyEvent;
+    keyEvent.code = KeyCode::KEY_DPAD_DOWN;
+    keyEvent.action = KeyAction::DOWN;
+    
+    /**
+     * @tc.steps: step3. Call OnKeyEvent
+     * @tc.expected: step3. OnKeyEvent should return true
+     */
+    bool result = pattern->OnKeyEvent(keyEvent);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: ContainerPickerPatternOnKeyEventTest003
+ * @tc.desc: Test OnKeyEvent method with invalid key
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternOnKeyEventTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker and get pattern
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    
+    /**
+     * @tc.steps: step2. Create a key event for invalid key
+     */
+    KeyEvent keyEvent;
+    keyEvent.code = KeyCode::KEY_0;
+    keyEvent.action = KeyAction::DOWN;
+    
+    /**
+     * @tc.steps: step3. Call OnKeyEvent
+     * @tc.expected: step3. OnKeyEvent should return false
+     */
+    bool result = pattern->OnKeyEvent(keyEvent);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ContainerPickerPatternOnKeyEventTest004
+ * @tc.desc: Test OnKeyEvent method with UP action
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternOnKeyEventTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker and get pattern
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    
+    /**
+     * @tc.steps: step2. Create a key event with UP action
+     */
+    KeyEvent keyEvent;
+    keyEvent.code = KeyCode::KEY_DPAD_UP;
+    keyEvent.action = KeyAction::UP;
+    
+    /**
+     * @tc.steps: step3. Call OnKeyEvent
+     * @tc.expected: step3. OnKeyEvent should return false
+     */
+    bool result = pattern->OnKeyEvent(keyEvent);
+    EXPECT_FALSE(result);
+}
+
 } // namespace OHOS::Ace::NG
