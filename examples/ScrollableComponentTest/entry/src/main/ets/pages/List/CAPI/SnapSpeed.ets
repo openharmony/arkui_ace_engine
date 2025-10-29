@@ -23,7 +23,7 @@ import entry from 'libentry.so';
 @Entry
 @Component
 struct NativePage {
-  @State text: string = "Hello, Native";
+  @State text: string = 'Hello, Native';
   @State tag: string = 'NativePage';
 
   build() {

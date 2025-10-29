@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
- /*
-  * Description: Grid组件支持基于断点自适应列数
-  * Writer: renxiaowen
-  */
+/*
+ * Description: Grid组件支持基于断点自适应列数
+ * Writer: renxiaowen
+ */
 
 import { GridDataSource } from './GridDataSource';
 
@@ -54,12 +54,12 @@ struct GridExample {
       Column() {
         Text('columnsTemplate列宽')
         Row() {
-          Text("columnsTemplate: " + this.columnsTemplatePool[this.columnsTemplateIndex])
+          Text('columnsTemplate: ' + this.columnsTemplatePool[this.columnsTemplateIndex])
             .fontSize(12)
             .fontColor(0x696969)
           Button('columnsTemplate:' + this.columnsTemplateIndex).onClick(() => {
             this.columnsTemplateIndex = (this.columnsTemplateIndex + 1) % this.columnsTemplatePool.length;
-            this.template = this.columnsTemplatePool[this.columnsTemplateIndex]
+            this.template = this.columnsTemplatePool[this.columnsTemplateIndex];
           })
         }
 
@@ -80,7 +80,7 @@ struct GridExample {
         .scrollBar(BarState.Off)
         .friction(0.6)
         .width(300)
-        .height("50%")
+        .height('50%')
         .padding(10)
         .margin({ top: 20 })
         .columnsTemplate('' + this.template)
