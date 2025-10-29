@@ -353,7 +353,7 @@ export class ArkThemeScopeManager {
         });
     }
 
-    setDefaultTheme(customTheme: CustomTheme) {
+    setDefaultTheme(customTheme: CustomTheme | undefined) {
         // unbind previous default theme from 0 theme scope
         this.defaultTheme?.unbindFromScope(0);
         this.defaultTheme = ArkThemeScopeManager.systemTheme;
