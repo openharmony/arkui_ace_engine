@@ -797,6 +797,8 @@ typedef struct Ark_Union_I32_TextOverflow Ark_Union_I32_TextOverflow;
 typedef struct Opt_Union_I32_TextOverflow Opt_Union_I32_TextOverflow;
 typedef struct Ark_Union_I64_String Ark_Union_I64_String;
 typedef struct Opt_Union_I64_String Opt_Union_I64_String;
+typedef struct Ark_Union_Int32_String Ark_Union_Int32_String;
+typedef struct Opt_Union_Int32_String Opt_Union_Int32_String;
 typedef struct Ark_Union_ImageAnalyzerController_Object Ark_Union_ImageAnalyzerController_Object;
 typedef struct Opt_Union_ImageAnalyzerController_Object Opt_Union_ImageAnalyzerController_Object;
 typedef struct Ark_Union_Number_FontWeight_String Ark_Union_Number_FontWeight_String;
@@ -8296,6 +8298,18 @@ typedef struct Opt_Union_I64_String {
     Ark_Tag tag;
     Ark_Union_I64_String value;
 } Opt_Union_I64_String;
+typedef struct Ark_Union_Int32_String {
+    /* kind: UnionType */
+    Ark_Int32 selector;
+    union {
+        Ark_Int32 value0;
+        Ark_String value1;
+    };
+} Ark_Union_Int32_String;
+typedef struct Opt_Union_Int32_String {
+    Ark_Tag tag;
+    Ark_Union_Int32_String value;
+} Opt_Union_Int32_String;
 typedef struct Ark_Union_ImageAnalyzerController_Object {
     /* kind: UnionType */
     Ark_Int32 selector;
@@ -25485,7 +25499,7 @@ typedef struct GENERATED_ArkUIIUIContextAccessor {
                           Ark_Boolean isFrozen);
     void (*freezeUINode1)(Ark_Int64 id,
                           Ark_Boolean isFrozen);
-    Ark_Boolean (*dispatchKeyEvent)(const Ark_Union_Number_String* node,
+    Ark_Boolean (*dispatchKeyEvent)(const Ark_Union_Int32_String* node,
                                     Ark_KeyEvent event);
 } GENERATED_ArkUIIUIContextAccessor;
 

@@ -30107,19 +30107,19 @@ KOALA_INTEROP_DIRECT_V2(IUIContext_freezeUINode1, KLong, Ark_Boolean)
 Ark_Boolean impl_IUIContext_dispatchKeyEvent(KSerializerBuffer thisArray, int32_t thisLength, Ark_NativePointer event) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const Ark_Int8 nodeValueTempTmpBufUnionSelector = thisDeserializer.readInt8();
-        Ark_Union_Number_String nodeValueTempTmpBuf = {};
+        Ark_Union_Int32_String nodeValueTempTmpBuf = {};
         nodeValueTempTmpBuf.selector = nodeValueTempTmpBufUnionSelector;
         if (nodeValueTempTmpBufUnionSelector == 0) {
             nodeValueTempTmpBuf.selector = 0;
-            nodeValueTempTmpBuf.value0 = static_cast<Ark_Number>(thisDeserializer.readNumber());
+            nodeValueTempTmpBuf.value0 = static_cast<Ark_Int32>(thisDeserializer.readInt32());
         } else if (nodeValueTempTmpBufUnionSelector == 1) {
             nodeValueTempTmpBuf.selector = 1;
             nodeValueTempTmpBuf.value1 = static_cast<Ark_String>(thisDeserializer.readString());
         } else {
             INTEROP_FATAL("One of the branches for nodeValueTempTmpBuf has to be chosen through deserialisation.");
         }
-        Ark_Union_Number_String nodeValueTemp = static_cast<Ark_Union_Number_String>(nodeValueTempTmpBuf);;
-        return GetAccessors()->getIUIContextAccessor()->dispatchKeyEvent(static_cast<Ark_Union_Number_String*>(&nodeValueTemp), static_cast<Ark_KeyEvent>(event));
+        Ark_Union_Int32_String nodeValueTemp = static_cast<Ark_Union_Int32_String>(nodeValueTempTmpBuf);;
+        return GetAccessors()->getIUIContextAccessor()->dispatchKeyEvent(static_cast<Ark_Union_Int32_String*>(&nodeValueTemp), static_cast<Ark_KeyEvent>(event));
 }
 KOALA_INTEROP_DIRECT_3(IUIContext_dispatchKeyEvent, Ark_Boolean, KSerializerBuffer, int32_t, Ark_NativePointer)
 Ark_NativePointer impl_JsGeolocation_construct() {
