@@ -2159,7 +2159,6 @@ HWTEST_F(FormPatternTest, FormPatternTest_061, TestSize.Level0)
     RefPtr<FormNode> frameNode = CreateFromNode();
     auto pattern = frameNode->GetPattern<FormPattern>();
     EXPECT_NE(pattern, nullptr);
-
     // accessibilityState_ == state, return false
     pattern->accessibilityState_ = false;
     EXPECT_FALSE(pattern->OnAccessibilityStateChange(false));
