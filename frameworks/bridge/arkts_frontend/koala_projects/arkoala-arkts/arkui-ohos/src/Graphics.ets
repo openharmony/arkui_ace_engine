@@ -229,7 +229,7 @@ export class ColorMetrics {
                 colorMetrics.setResourceId(resourceId);
             }
             return colorMetrics;
-        } else if (typeof color === 'number') {
+        } else if (typeof color === 'int') {
             return ColorMetrics.numeric(color as int32);
         } else if (typeof color === 'string') {
             let colorValue = color as string;
