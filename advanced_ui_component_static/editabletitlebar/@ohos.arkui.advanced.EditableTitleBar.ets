@@ -763,7 +763,7 @@ struct ImageMenuItem {
         this.isOnClick = false;
       }
       return true;
-    } as Callback<KeyEvent, boolean>)
+    })
     .onTouch((event: TouchEvent) => {
       if (!this.item.isEnabled) {
         return;
@@ -841,7 +841,7 @@ struct ImageMenuItem {
             this.isOnClick = false;
           }
           return true;
-        } as Callback<KeyEvent, boolean>)
+        })
         .onTouch((event: TouchEvent) => {
           if (!this.item.isEnabled) {
             return;
