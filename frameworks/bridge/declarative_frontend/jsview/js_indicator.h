@@ -42,7 +42,9 @@ protected:
         const RefPtr<SwiperIndicatorTheme>& swiperIndicatorTheme);
 };
 
-class JSIndicatorController final : public Referenced {
+class JSIndicatorController final : public NG::JSIndicatorControllerBase {
+    DECLARE_ACE_TYPE(JSIndicatorController, NG::JSIndicatorControllerBase);
+
 public:
     JSIndicatorController() = default;
     ~JSIndicatorController() override = default;
