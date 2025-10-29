@@ -391,6 +391,7 @@ arkui_files = [
   "arkui-preprocessed/arkui/handwritten/transfer/ShapeBaseTransfer.ets",
   "arkui-preprocessed/arkui/handwritten/transfer/ShapeClipTransfer.ets",
   "arkui-preprocessed/arkui/handwritten/transfer/ShapeMaskTransfer.ets",
+  "arkui-preprocessed/arkui/handwritten/transfer/ThemeTransfer.ets",
   "arkui-preprocessed/arkui/handwritten/transfer/TransferUtil.ets",
   "arkui-preprocessed/arkui/handwritten/transfer/UIContextTransfer.ets",
   "arkui-preprocessed/arkui/handwritten/transfer/WebTransfer.ets",

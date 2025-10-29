@@ -25605,11 +25605,11 @@ typedef struct GENERATED_ArkUIFrameNodeExtenderAccessor {
     Ark_NativePointer (*getDestroy)();
     void (*destroyPeer)(Ark_FrameNode peer);
     Ark_Boolean (*isModifiable)(Ark_NativePointer peer);
-    void (*appendChild)(Ark_FrameNode peer,
-                        Ark_FrameNode child);
-    void (*insertChildAfter)(Ark_NativePointer peer,
-                             Ark_NativePointer child,
-                             Ark_NativePointer sibling);
+    Ark_Float64 (*appendChild)(Ark_FrameNode peer,
+                               Ark_FrameNode child);
+    Ark_Float64 (*insertChildAfter)(Ark_NativePointer peer,
+                                    Ark_NativePointer child,
+                                    Ark_NativePointer sibling);
     void (*removeChild)(Ark_FrameNode peer,
                         Ark_FrameNode child);
     void (*clearChildren)(Ark_FrameNode peer);
@@ -25658,9 +25658,9 @@ typedef struct GENERATED_ArkUIFrameNodeExtenderAccessor {
     Ark_SizeTLengthMetrics (*getUserConfigSize)(Ark_FrameNode peer);
     Ark_NativePointer (*getFrameNodeByKey)(const Ark_String* name);
     Ark_Number (*getIdByFrameNode)(Ark_NativePointer node);
-    void (*moveTo)(Ark_FrameNode peer,
-                   Ark_FrameNode targetParent,
-                   const Ark_Number* index);
+    Ark_Float64 (*moveTo)(Ark_FrameNode peer,
+                          Ark_FrameNode targetParent,
+                          const Ark_Number* index);
     Ark_Number (*getFirstChildIndexWithoutExpand)(Ark_FrameNode peer);
     Ark_Number (*getLastChildIndexWithoutExpand)(Ark_FrameNode peer);
     Ark_NativePointer (*getAttachedFrameNodeById)(const Ark_String* id);
@@ -25688,6 +25688,10 @@ typedef struct GENERATED_ArkUIFrameNodeExtenderAccessor {
     Array_Float64 (*convertPoint)(Ark_FrameNode peer,
                                  Ark_FrameNode node,
                                  const Ark_Vector2* vector2);
+    Ark_Float64 (*adoptChild)(Ark_FrameNode peer,
+                              Ark_FrameNode child);
+    Ark_Float64 (*removeAdoptedChild)(Ark_FrameNode peer,
+                                      Ark_FrameNode child);
 } GENERATED_ArkUIFrameNodeExtenderAccessor;
 
 typedef struct GENERATED_ArkUIFrictionMotionAccessor {
@@ -26493,7 +26497,7 @@ typedef struct GENERATED_ArkUINodeContainerOpsAccessor {
 typedef struct GENERATED_ArkUINodeContentExtenderAccessor {
     Ark_NativePointer (*constructorNodeContent)();
     Ark_NativePointer (*getDestroy)();
-    Ark_Boolean (*addFrameNode)(Ark_NativePointer content,
+    Ark_Float64 (*addFrameNode)(Ark_NativePointer content,
                                 Ark_NativePointer node);
     Ark_Boolean (*removeFrameNode)(Ark_NativePointer content,
                                    Ark_NativePointer node);
@@ -26820,11 +26824,11 @@ typedef struct GENERATED_ArkUIRenderNodeExtenderAccessor {
                         const Ark_common2D_Rect* rect);
     void (*setPathClip)(Ark_RenderNode peer,
                         const Ark_CommandPath* path);
-    void (*appendChild)(Ark_RenderNode peer,
-                        Ark_RenderNode node);
-    void (*insertChildAfter)(Ark_RenderNode peer,
-                             Ark_RenderNode child,
-                             Ark_RenderNode sibling);
+    Ark_Float64 (*appendChild)(Ark_RenderNode peer,
+                               Ark_RenderNode node);
+    Ark_Float64 (*insertChildAfter)(Ark_RenderNode peer,
+                                    Ark_RenderNode child,
+                                    Ark_RenderNode sibling);
     void (*removeChild)(Ark_RenderNode peer,
                         Ark_RenderNode node);
     void (*clearChildren)(Ark_RenderNode peer);

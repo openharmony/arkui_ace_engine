@@ -571,14 +571,14 @@ public:
             ACE_SCOPED_TRACE("OnAvoidAreaChanged type: %d, value: %s; keyboardRect: %s, textFieldPositionY %f, "
                 "textFieldHeight %f; instanceId: %d", type, avoidArea.ToString().c_str(),
                 keyboardRect.ToString().c_str(), textFieldPositionY, textFieldHeight, instanceId_);
-            TAG_LOGI(ACE_LAYOUT, "OnAvoidAreaChanged type: %{public}d, value: %{public}s; keyboardRect: %{public}s, "
+            TAG_LOGD(ACE_LAYOUT, "OnAvoidAreaChanged type: %{public}d, value: %{public}s; keyboardRect: %{public}s, "
                 "textFieldPositionY: %{public}f, textFieldHeight: %{public}f; instanceId: %{public}d",
                 type, avoidArea.ToString().c_str(), keyboardRect.ToString().c_str(), textFieldPositionY,
                 textFieldHeight, instanceId_);
         } else {
             ACE_SCOPED_TRACE("OnAvoidAreaChanged type: %d, value: %s, instanceId: %d, "
             "keyboardInfo is null", type, avoidArea.ToString().c_str(), instanceId_);
-            TAG_LOGI(ACE_LAYOUT, "OnAvoidAreaChanged type: %{public}d, value: %{public}s; instanceId: %{public}d, "
+            TAG_LOGD(ACE_LAYOUT, "OnAvoidAreaChanged type: %{public}d, value: %{public}s; instanceId: %{public}d, "
             "keyboardInfo is null", type, avoidArea.ToString().c_str(), instanceId_);
         }
         auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -3711,7 +3711,7 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
                 static_cast<uint32_t>(reason), rsTransaction == nullptr, stringifiedMap.c_str(),
                 keyboardRect.ToString().c_str());
         }
-        TAG_LOGI(ACE_LAYOUT,
+        TAG_LOGD(ACE_LAYOUT,
             "[%{public}s][%{public}s][%{public}d]: UpdateViewportConfig %{public}s, windowSizeChangeReason %{public}d,"
             " is rsTransaction nullptr %{public}d, %{public}s, keyboardRect %{public}s", bundleName_.c_str(),
             moduleName_.c_str(), instanceId_, config.ToString().c_str(), static_cast<uint32_t>(reason),
@@ -3724,7 +3724,7 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
                 bundleName_.c_str(), moduleName_.c_str(), instanceId_, config.ToString().c_str(),
                 static_cast<uint32_t>(reason), rsTransaction == nullptr, stringifiedMap.c_str());
         }
-        TAG_LOGI(ACE_LAYOUT,
+        TAG_LOGD(ACE_LAYOUT,
             "[%{public}s][%{public}s][%{public}d]: UpdateViewportConfig %{public}s, windowSizeChangeReason %{public}d,"
             " is rsTransaction nullptr %{public}d, %{public}s, keyboardInfo is null", bundleName_.c_str(),
             moduleName_.c_str(), instanceId_, config.ToString().c_str(), static_cast<uint32_t>(reason),
@@ -5797,11 +5797,11 @@ void UIContentImpl::InitUISessionManagerCallbacks(const WeakPtr<TaskExecutor>& t
     };
     UiSessionManager::GetInstance()->SaveRegisterForWebFunction(webCallback);
     SetupGetPixelMapCallback(taskExecutor);
-    RegisterGetCurrentPageName();
+    RegisterGetCurrentPageName(taskExecutor);
     InitSendCommandFunctionsCallbacks(taskExecutor);
     sendCommandCallbackInner(taskExecutor);
     SaveGetCurrentInstanceId();
-    RegisterExeAppAIFunction();
+    RegisterExeAppAIFunction(taskExecutor);
 }
 
 void UIContentImpl::SetupGetPixelMapCallback(const WeakPtr<TaskExecutor>& taskExecutor)
@@ -5833,12 +5833,20 @@ void UIContentImpl::SaveGetCurrentInstanceId()
     });
 }
 
-void UIContentImpl::RegisterGetCurrentPageName()
+void UIContentImpl::RegisterGetCurrentPageName(const WeakPtr<TaskExecutor>& taskExecutor)
 {
-    auto getPageNameCallback = []() -> std::string {
-        auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
-        CHECK_NULL_RETURN(pipeline, "");
-        return pipeline->GetCurrentPageNameCallback();
+    auto getPageNameCallback = [weakTaskExecutor = taskExecutor]() -> std::string {
+        auto taskExecutor = weakTaskExecutor.Upgrade();
+        CHECK_NULL_RETURN(taskExecutor, "");
+        std::string pageName = "";
+        taskExecutor->PostSyncTask(
+            [&pageName]() {
+                auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+                CHECK_NULL_VOID(pipeline);
+                pageName = pipeline->GetCurrentPageNameCallback();
+            },
+            TaskExecutor::TaskType::UI, "UiSessionGetPageName");
+        return pageName;
     };
     UiSessionManager::GetInstance()->RegisterPipeLineGetCurrentPageName(getPageNameCallback);
 }
@@ -6108,14 +6116,22 @@ UIContentErrorCode UIContentImpl::InitializeByNameWithAniStorage(
     return errorCode;
 }
 
-void UIContentImpl::RegisterExeAppAIFunction()
+void UIContentImpl::RegisterExeAppAIFunction(const WeakPtr<TaskExecutor>& taskExecutor)
 {
-    auto exeAppAIFunctionCallback = [](
+    auto exeAppAIFunctionCallback = [weakTaskExecutor = taskExecutor](
         const std::string& funcName, const std::string& params) -> uint32_t {
         static constexpr uint32_t AI_CALL_ENV_INVALID = 4;
-        auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
-        CHECK_NULL_RETURN(pipeline, AI_CALL_ENV_INVALID);
-        return pipeline->ExeAppAIFunctionCallback(funcName, params);
+        auto taskExecutor = weakTaskExecutor.Upgrade();
+        CHECK_NULL_RETURN(taskExecutor, AI_CALL_ENV_INVALID);
+        uint32_t result = AI_CALL_ENV_INVALID;
+        taskExecutor->PostSyncTask(
+            [funcName, params, &result]() {
+                auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+                CHECK_NULL_VOID(pipeline);
+                result = pipeline->ExeAppAIFunctionCallback(funcName, params);
+            },
+            TaskExecutor::TaskType::UI, "UiSessionExeAppAIFunction");
+        return result;
     };
     UiSessionManager::GetInstance()->RegisterPipeLineExeAppAIFunction(exeAppAIFunctionCallback);
 }

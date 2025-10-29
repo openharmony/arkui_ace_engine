@@ -17,11 +17,15 @@ ace_unittest("checkbox_test_ng") {
   type = "new"
   sources = [
     "checkbox_content_modifier_test_ng.cpp",
+    "checkbox_content_modifier_test_two_ng.cpp",
     "checkbox_model_static_test_ng.cpp",
     "checkbox_patternScd_test_ng.cpp",
     "checkbox_pattern_sub_test_ng.cpp",
     "checkbox_pattern_test_ng.cpp",
+    "checkbox_pattern_test_two_ng.cpp",
     "checkbox_sub_test_ng.cpp",
     "checkbox_test_ng.cpp",
+    "checkbox_test_three_ng.cpp",
+    "checkbox_test_two_ng.cpp",
   ]
 }
