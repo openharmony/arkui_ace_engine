@@ -40,6 +40,7 @@ TaskExecutor::Task CustomDialogControllerModelStatic::ParseOpenDialogTask(int32_
             TAG_LOGE(AceLogTag::ACE_DIALOG, "Current container is null.");
             return;
         }
+        dialogProperties.isUserCreatedDialog = true;
         if (dialogProperties.isShowInSubWindow) {
             dialog = SubwindowManager::GetInstance()->ShowDialogNG(dialogProperties, std::move(func));
             CHECK_NULL_VOID(dialog);
