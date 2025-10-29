@@ -17,6 +17,7 @@
 
 #include "core/event/touch_event.h"
 #include <deque>
+#include <mutex>
 
 namespace OHOS::Ace {
 class ACE_EXPORT ResSchedTouchOptimizer final {
