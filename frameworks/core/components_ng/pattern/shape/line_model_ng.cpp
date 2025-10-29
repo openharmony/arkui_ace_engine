@@ -65,19 +65,21 @@ void LineModelNG::StartPoint(const ShapePoint& value, const std::vector<RefPtr<R
         return;
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
     StartPoint(frameNode, value, resObjArray);
 }
 
 void LineModelNG::StartPoint(
     FrameNode* frameNode, const ShapePoint& value, const std::vector<RefPtr<ResourceObject>>& resObjArray)
 {
-    if (!SystemProperties::ConfigChangePerform()) {
+    if (!SystemProperties::ConfigChangePerform() || frameNode == nullptr) {
         return;
     }
     auto pattern = frameNode->GetPattern<ShapePattern>();
     CHECK_NULL_VOID(pattern);
-    auto&& updateFunc = [frameNode, value, resObjArray](const RefPtr<ResourceObject>& resObj) {
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode), value, resObjArray](
+                            const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
         if (resObjArray.size() != POINT_SIZE) {
             return;
         }
@@ -93,6 +95,9 @@ void LineModelNG::StartPoint(
             result.second = res ? dim : 0.0_vp;
         }
         ACE_UPDATE_NODE_PAINT_PROPERTY(LinePaintProperty, StartPoint, result, frameNode);
+        if (frameNode->GetRerenderable()) {
+            frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        }
     };
     RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
     pattern->AddResObj("LineStartPoint", resObj, std::move(updateFunc));
@@ -104,19 +109,21 @@ void LineModelNG::EndPoint(const ShapePoint& value, const std::vector<RefPtr<Res
         return;
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
     EndPoint(frameNode, value, resObjArray);
 }
 
 void LineModelNG::EndPoint(
     FrameNode* frameNode, const ShapePoint& value, const std::vector<RefPtr<ResourceObject>>& resObjArray)
 {
-    if (!SystemProperties::ConfigChangePerform()) {
+    if (!SystemProperties::ConfigChangePerform() || frameNode == nullptr) {
         return;
     }
     auto pattern = frameNode->GetPattern<ShapePattern>();
     CHECK_NULL_VOID(pattern);
-    auto&& updateFunc = [frameNode, value, resObjArray](const RefPtr<ResourceObject>& resObj) {
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode), value, resObjArray](
+                            const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
         if (resObjArray.size() != POINT_SIZE) {
             return;
         }
@@ -132,6 +139,9 @@ void LineModelNG::EndPoint(
             result.second = res ? dim : 0.0_vp;
         }
         ACE_UPDATE_NODE_PAINT_PROPERTY(LinePaintProperty, EndPoint, result, frameNode);
+        if (frameNode->GetRerenderable()) {
+            frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        }
     };
     RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
     pattern->AddResObj("LineEndPoint", resObj, std::move(updateFunc));

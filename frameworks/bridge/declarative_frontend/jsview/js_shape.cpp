@@ -19,6 +19,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/models/shape_model_impl.h"
 #include "core/common/container.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/shape/shape_abstract_model.h"
 #include "core/components_ng/pattern/shape/shape_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
@@ -431,9 +432,12 @@ void JSShape::SetForegroundColor(const JSCallbackInfo& info)
     }
     if (SystemProperties::ConfigChangePerform() && foregroundColorResObj) {
         ShapeModel::GetInstance()->SetForegroundColor(foregroundColorResObj);
+        auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        NG::ViewAbstract::SetForegroundColor(frameNode, foregroundColor, foregroundColorResObj);
+    } else {
+        ViewAbstractModel::GetInstance()->SetForegroundColor(foregroundColor);
     }
     ShapeModel::GetInstance()->SetForegroundColor(foregroundColor);
-    ViewAbstractModel::GetInstance()->SetForegroundColor(foregroundColor);
 }
 
 void JSShape::JSBind(BindingTarget globalObj)

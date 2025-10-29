@@ -62,13 +62,12 @@ void RectModelNG::SetRadiusWidth(const RefPtr<ResourceObject>& radiusWidthResObj
         return;
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
     SetRadiusWidth(frameNode, radiusWidthResObj);
 }
 
 void RectModelNG::SetRadiusWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& radiusWidthResObj)
 {
-    if (!SystemProperties::ConfigChangePerform()) {
+    if (!SystemProperties::ConfigChangePerform() || frameNode == nullptr) {
         return;
     }
     auto pattern = frameNode->GetPattern<RectPattern>();
@@ -86,6 +85,9 @@ void RectModelNG::SetRadiusWidth(FrameNode* frameNode, const RefPtr<ResourceObje
         value.IsNegative() ? radius.SetX(Dimension(DEFAULT_RADIUS_VALUE)) : radius.SetX(value);
         radius.SetY(DEFAULT_RADIUS_INVALID);
         property->UpdateRadius(radius);
+        if (frameNode->GetRerenderable()) {
+            frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        }
     };
     pattern->AddResObj("RectRadiusWidth", radiusWidthResObj, std::move(updateFunc));
 }
@@ -96,13 +98,12 @@ void RectModelNG::SetRadiusHeight(const RefPtr<ResourceObject>& radiusHeightResO
         return;
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
     SetRadiusHeight(frameNode, radiusHeightResObj);
 }
 
 void RectModelNG::SetRadiusHeight(FrameNode* frameNode, const RefPtr<ResourceObject>& radiusHeightResObj)
 {
-    if (!SystemProperties::ConfigChangePerform()) {
+    if (!SystemProperties::ConfigChangePerform() || frameNode == nullptr) {
         return;
     }
     auto pattern = frameNode->GetPattern<RectPattern>();
@@ -120,6 +121,9 @@ void RectModelNG::SetRadiusHeight(FrameNode* frameNode, const RefPtr<ResourceObj
         value.IsNegative() ? radius.SetY(Dimension(DEFAULT_RADIUS_VALUE)) : radius.SetY(value);
         radius.SetX(DEFAULT_RADIUS_INVALID);
         property->UpdateRadius(radius);
+        if (frameNode->GetRerenderable()) {
+            frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        }
     };
     pattern->AddResObj("RectRadiusHeight", radiusHeightResObj, std::move(updateFunc));
 }
@@ -130,13 +134,12 @@ void RectModelNG::SetRadius(const RefPtr<ResourceObject>& radiusResObj)
         return;
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
     SetRadius(frameNode, radiusResObj);
 }
 
 void RectModelNG::SetRadius(FrameNode* frameNode, const RefPtr<ResourceObject>& radiusResObj)
 {
-    if (!SystemProperties::ConfigChangePerform()) {
+    if (!SystemProperties::ConfigChangePerform() || frameNode == nullptr) {
         return;
     }
     auto pattern = frameNode->GetPattern<RectPattern>();
@@ -159,6 +162,9 @@ void RectModelNG::SetRadius(FrameNode* frameNode, const RefPtr<ResourceObject>& 
             radius.SetY(value);
         }
         property->UpdateRadius(radius);
+        if (frameNode->GetRerenderable()) {
+            frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        }
     };
     pattern->AddResObj("RectRadius", radiusResObj, std::move(updateFunc));
 }
@@ -264,20 +270,21 @@ void RectModelNG::SetRadiusValue(const Dimension& radiusX, const Dimension& radi
         return;
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
     SetRadiusValue(frameNode, radiusX, radiusY, radiusXResObj, radiusYResObj, index);
 }
 
 void RectModelNG::SetRadiusValue(FrameNode* frameNode, const Dimension& radiusX, const Dimension& radiusY,
     const RefPtr<ResourceObject>& radiusXResObj, const RefPtr<ResourceObject>& radiusYResObj, int32_t index)
 {
-    if (!SystemProperties::ConfigChangePerform()) {
+    if (!SystemProperties::ConfigChangePerform() || frameNode == nullptr) {
         return;
     }
     auto pattern = frameNode->GetPattern<ShapePattern>();
     CHECK_NULL_VOID(pattern);
-    auto&& updateFunc = [frameNode, radiusX, radiusY, radiusXResObj, radiusYResObj, index](
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode), radiusX, radiusY, radiusXResObj, radiusYResObj, index](
                             const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
         NG::Radius radius = NG::Radius(radiusX, radiusY);
         if (radiusXResObj) {
             Dimension dim;
@@ -306,6 +313,9 @@ void RectModelNG::SetRadiusValue(FrameNode* frameNode, const Dimension& radiusX,
             case BOTTOM_LEFT_RADIUS:
                 ACE_UPDATE_NODE_PAINT_PROPERTY(RectPaintProperty, BottomRightRadius, radius, frameNode);
                 break;
+        }
+        if (frameNode->GetRerenderable()) {
+            frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         }
     };
     RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
