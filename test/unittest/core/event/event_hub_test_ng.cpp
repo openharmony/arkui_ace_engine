@@ -39,6 +39,7 @@ const std::string DRAG_LEAVE_EVENT_TYPE = "drag leave";
 const std::string DRAG_MOVE_EVENT_TYPE = "drag move";
 const std::string DRAG_DROP_EVENT_TYPE = "drag drop";
 const std::string DRAG_END_EVENT_TYPE = "drag end";
+const std::string DRAG_SPRING_LOADING_EVENT_TYPE = "drag spring loading";
 
 const float OLD_X_VALUE = 10.9f;
 const float OLD_Y_VALUE = 11.0f;
@@ -245,6 +246,8 @@ HWTEST_F(EventHubTestNg, EventHubDragEventsTest004, TestSize.Level1)
     EXPECT_NE(eventHub->GetOnDragStart(), nullptr);
     eventHub->GetOnDragStart()(dragEvent, DRAG_STARR_EVENT_TYPE);
     EXPECT_EQ(dragEventType, DRAG_STARR_EVENT_TYPE);
+    eventHub->ClearCustomerOnDragStart();
+    EXPECT_FALSE(eventHub->HasOnDragStart());
 
     /**
      * @tc.steps: step3. Set EventHub OnDragEnter event and fire it.
@@ -255,6 +258,7 @@ HWTEST_F(EventHubTestNg, EventHubDragEventsTest004, TestSize.Level1)
     auto onDragEnter = OnDragFunc;
     eventHub->SetOnDragEnter(onDragEnter);
     eventHub->FireOnDragEnter(dragEvent, DRAG_ENTER_EVENT_TYPE);
+    EXPECT_TRUE(eventHub->HasOnDragEnter());
     EXPECT_EQ(dragEventType, DRAG_ENTER_EVENT_TYPE);
 
     /**
@@ -264,6 +268,7 @@ HWTEST_F(EventHubTestNg, EventHubDragEventsTest004, TestSize.Level1)
     auto onDragLeave = OnDragFunc;
     eventHub->SetOnDragLeave(onDragLeave);
     eventHub->FireOnDragLeave(dragEvent, DRAG_LEAVE_EVENT_TYPE);
+    EXPECT_TRUE(eventHub->HasOnDragLeave());
     EXPECT_EQ(dragEventType, DRAG_LEAVE_EVENT_TYPE);
 
     /**
@@ -273,6 +278,7 @@ HWTEST_F(EventHubTestNg, EventHubDragEventsTest004, TestSize.Level1)
     auto onDragMove = OnDragFunc;
     eventHub->SetOnDragMove(onDragMove);
     eventHub->FireOnDragMove(dragEvent, DRAG_MOVE_EVENT_TYPE);
+    EXPECT_TRUE(eventHub->HasOnDragMove());
     EXPECT_EQ(dragEventType, DRAG_MOVE_EVENT_TYPE);
 
     /**
@@ -281,7 +287,7 @@ HWTEST_F(EventHubTestNg, EventHubDragEventsTest004, TestSize.Level1)
      */
     auto onDragDrop = OnDragFunc;
     eventHub->SetOnDrop(onDragDrop);
-    eventHub->FireOnDragMove(dragEvent, DRAG_DROP_EVENT_TYPE);
+    eventHub->FireOnDrop(dragEvent, DRAG_DROP_EVENT_TYPE);
     EXPECT_TRUE(eventHub->HasOnDrop());
     EXPECT_EQ(dragEventType, DRAG_DROP_EVENT_TYPE);
 }
@@ -347,6 +353,8 @@ HWTEST_F(EventHubTestNg, EventHubDragEventsTest006, TestSize.Level1)
     eventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_ENTER, onDragEnter);
     eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_ENTER, dragEvent, DRAG_ENTER_EVENT_TYPE);
     EXPECT_EQ(dragEventType, DRAG_ENTER_EVENT_TYPE);
+    eventHub->ClearCustomerOnDragEnter();
+    EXPECT_FALSE(eventHub->HasCustomerOnDragEnter());
 
     /**
      * @tc.steps: step3. Set EventHub Customer OnDragLeave event and fire it.
@@ -356,6 +364,8 @@ HWTEST_F(EventHubTestNg, EventHubDragEventsTest006, TestSize.Level1)
     eventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_LEAVE, onDragLeave);
     eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_LEAVE, dragEvent, DRAG_LEAVE_EVENT_TYPE);
     EXPECT_EQ(dragEventType, DRAG_LEAVE_EVENT_TYPE);
+    eventHub->ClearCustomerOnDragLeave();
+    EXPECT_FALSE(eventHub->HasCustomerOnDragLeave());
 
     /**
      * @tc.steps: step4. Set EventHub Customer OnDragMove event and fire it.
@@ -365,9 +375,11 @@ HWTEST_F(EventHubTestNg, EventHubDragEventsTest006, TestSize.Level1)
     eventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_MOVE, onDragMove);
     eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_MOVE, dragEvent, DRAG_MOVE_EVENT_TYPE);
     EXPECT_EQ(dragEventType, DRAG_MOVE_EVENT_TYPE);
+    eventHub->ClearCustomerOnDragMove();
+    EXPECT_FALSE(eventHub->HasCustomerOnDragMove());
 
     /**
-     * @tc.steps: step6. Set EventHub Customer OnDrop event and fire it.
+     * @tc.steps: step5. Set EventHub Customer OnDrop event and fire it.
      * @tc.expected: OnDrop is invoked and the temp values are assigned with correct values.
      */
     auto onDragDrop = OnDragFunc;
@@ -375,9 +387,11 @@ HWTEST_F(EventHubTestNg, EventHubDragEventsTest006, TestSize.Level1)
     eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_DROP, dragEvent, DRAG_DROP_EVENT_TYPE);
     EXPECT_TRUE(eventHub->HasCustomerOnDrop());
     EXPECT_EQ(dragEventType, DRAG_DROP_EVENT_TYPE);
+    eventHub->ClearCustomerOnDragFunc();
+    EXPECT_FALSE(eventHub->HasCustomerOnDrop());
 
     /**
-     * @tc.steps: step7. Set EventHub Customer OnDragEnd event and fire it.
+     * @tc.steps: step6. Set EventHub Customer OnDragEnd event and fire it.
      * @tc.expected: OnDragEnd is invoked and the temp values are assigned with correct values.
      */
     auto OnDragEnd = [&dragEventType](const RefPtr<OHOS::Ace::DragEvent>& /* dragEvent */) {
@@ -386,6 +400,49 @@ HWTEST_F(EventHubTestNg, EventHubDragEventsTest006, TestSize.Level1)
     eventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_END, OnDragEnd);
     eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_END, dragEvent);
     EXPECT_EQ(dragEventType, DRAG_END_EVENT_TYPE);
+    eventHub->ClearCustomerOnDragEnd();
+    EXPECT_FALSE(eventHub->HasCustomerOnDragEnd());
+}
+
+/**
+ * @tc.name: EventHubDragEventsTest007
+ * @tc.desc: Create EventHub and set/get/fire/clear drag related functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubDragEventsTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventHub.
+     * @tc.expected: eventHub is not null.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_NE(eventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Set EventHub Customer OnDragSpringLoading event and fire it.
+     * @tc.expected: OnDragSpringLoading is invoked and the temp values are assigned with correct values.
+     */
+    auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragSpringLoadingContext>();
+    std::string dragEventType;
+    auto onDragSpringLoading = [&dragEventType](const RefPtr<OHOS::Ace::DragSpringLoadingContext>&) {
+        dragEventType = DRAG_SPRING_LOADING_EVENT_TYPE;
+    };
+    eventHub->SetCustomerOnDragSpringLoading(onDragSpringLoading);
+    auto onDragSpringLoadingFire = eventHub->GetCustomerOnDragSpringLoading();
+    onDragSpringLoadingFire(dragEvent);
+    EXPECT_EQ(dragEventType, DRAG_SPRING_LOADING_EVENT_TYPE);
+    eventHub->ClearCustomerOnDragSpringLoading();
+    EXPECT_FALSE(eventHub->HasCustomerOnDragSpringLoading());
+
+    /**
+     * @tc.steps: step3. Set EventHub Customer OnDragSpringLoading event and clear it.
+     * @tc.expected: OnPreDrag is cleared.
+     */
+    auto onPreDragFunc = [](OHOS::Ace::PreDragStatus) {};
+    eventHub->SetOnPreDrag(onPreDragFunc);
+    EXPECT_NE(eventHub->GetOnPreDrag(), nullptr);
+    eventHub->ClearOnPreDrag();
+    EXPECT_EQ(eventHub->GetOnPreDrag(), nullptr);
 }
 
 /**
