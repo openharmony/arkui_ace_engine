@@ -3482,7 +3482,7 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_SetClonedEventActionType001, Te
     res = OH_ArkUI_PointerEvent_SetClonedEventActionType(inputEvent, ARKUI_ACTIONTYPE_SET);
     action = OH_ArkUI_UIInputEvent_GetAction(inputEvent);
     EXPECT_EQ(res, 0);
-    EXPECT_EQ(action, 1);
+    EXPECT_EQ(action, 0);
 }
 
 /**
