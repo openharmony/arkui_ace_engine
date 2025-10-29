@@ -457,6 +457,9 @@ public:
     {
         leftRowMinWidth_ = width;
     }
+    mutable RefPtr<UINode> detachedProxy_ = nullptr;
+    void HandleCloseSubMenu();
+    void DoCloseSubMenu();
 
 protected:
     void RegisterOnKeyEvent();

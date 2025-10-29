@@ -1024,6 +1024,22 @@ void MenuPattern::HideMenu(bool isMenuOnTouch, OffsetF position, const HideMenuT
     CHECK_NULL_VOID(overlayManager);
     overlayManager->HideMenu(wrapper, targetId_, isMenuOnTouch, reason);
     overlayManager->EraseMenuInfo(targetId_);
+    DoCloseSubMenus();
+}
+
+void MenuPattern::DoCloseSubMenus() const
+{
+    showedSubMenu_ = nullptr;
+    for (auto iter = embeddedMenuItems_.begin(); iter != embeddedMenuItems_.end();) {
+        auto& menuItem = *iter;
+        auto menuItemPattern = menuItem->GetPattern<MenuItemPattern>();
+        if (menuItemPattern) {
+            menuItemPattern->HandleCloseSubMenu();
+            iter = embeddedMenuItems_.erase(iter);
+        } else {
+             ++iter;
+        }
+    }
 }
 
 bool MenuPattern::HideStackExpandMenu(const OffsetF& position) const
