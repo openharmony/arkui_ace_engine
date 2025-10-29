@@ -248,7 +248,10 @@ void DialogPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
 
 RectF DialogPattern::GetContentRect(const RefPtr<FrameNode>& contentNode)
 {
-    auto contentRect = contentNode->GetGeometryNode()->GetFrameRect();
+    RectF contentRect;
+    auto contentRenderContext = contentNode->GetRenderContext();
+    CHECK_NULL_RETURN(contentRenderContext, contentRect);
+    contentRect = contentRenderContext->GetPaintRectWithoutTransform();
     if (!dialogProperties_.customStyle) {
         return contentRect;
     }
