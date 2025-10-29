@@ -13,8 +13,7 @@
  * limitations under the License.
  */
 import { DecoratedV1VariableBase } from './decoratorBase';
-import { WatchFuncType, IStoragePropDecoratedVariable } from '../decorator';
-import { ExtendableComponent } from '../../component/extendableComponent';
+import { WatchFuncType, IStoragePropDecoratedVariable, IVariableOwner } from '../decorator';
 
 export class StoragePropDecoratedVariable<T>
     extends DecoratedV1VariableBase<T>
@@ -25,7 +24,7 @@ export class StoragePropDecoratedVariable<T>
     // localInitValue is the rhs of @state variable : type = localInitialValue;
     // caller ensure it is IObseredObject, eg. by wrapping
     constructor(
-        owningComponent: ExtendableComponent | null,
+        owningComponent: IVariableOwner | undefined,
         propertyNameInAppStorage: string,
         varName: string,
         watchFunc?: WatchFuncType

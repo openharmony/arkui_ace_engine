@@ -122,7 +122,7 @@ class StoragePropertyV2<T extends object>
     public observable: boolean;
 
     constructor(key: string, initValue: T) {
-        super("", null, "");
+        super("", undefined, "");
         this.id = ++PersistenceV2Impl.nextPersistId_;
         this.weakThis = new WeakRef<ITrackedDecoratorRef>(this as ITrackedDecoratorRef);
         this.reverseBindings = new Set<WeakRef<IBindingSource>>;
@@ -151,7 +151,7 @@ class StoragePropertyV2<T extends object>
     }
 
     constructor(key: string) {
-        super("", null, "");
+        super("", undefined, "");
         this.id = ++PersistenceV2Impl.nextPersistId_;
         this.weakThis = new WeakRef<ITrackedDecoratorRef>(this as ITrackedDecoratorRef);
         this.reverseBindings = new Set<WeakRef<IBindingSource>>;

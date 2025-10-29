@@ -13,11 +13,10 @@
  * limitations under the License.
  */
 
-import { ExtendableComponent } from '../../component/extendableComponent';
 import { IBackingValue } from '../base/iBackingValue';
 import { ObserveSingleton } from '../base/observeSingleton';
 import { NullableObject } from '../base/types';
-import { IPropRefDecoratedVariable, ISubscribedWatches, WatchFuncType } from '../decorator';
+import { IPropRefDecoratedVariable, ISubscribedWatches, IVariableOwner, WatchFuncType } from '../decorator';
 import { StateMgmtTool } from '#stateMgmtTool';
 import { UIUtils } from '../utils';
 import { DecoratedV1VariableBase } from './decoratorBase';
@@ -32,7 +31,7 @@ export class PropRefDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
     localValue: IBackingValue<T>;
     needForceUpdateFunc: WatchFunc;
     isForceRender: boolean = false;
-    constructor(owningView: ExtendableComponent, varName: string, initValue: T, watchFunc?: WatchFuncType) {
+    constructor(owningView: IVariableOwner, varName: string, initValue: T, watchFunc?: WatchFuncType) {
         super('@PropRef', owningView, varName, watchFunc);
         this.sourceValue = initValue;
         if (isDynamicObject(initValue)) {
