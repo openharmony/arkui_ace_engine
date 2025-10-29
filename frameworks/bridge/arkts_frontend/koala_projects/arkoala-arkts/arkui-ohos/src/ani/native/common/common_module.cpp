@@ -394,7 +394,8 @@ void SetDrawModifier(
     }
     ani_vm* vm = nullptr;
     env->GetVM(&vm);
-    ani_ref drawModifierRef = static_cast<ani_ref>(drawModifier);
+    ani_ref drawModifierRef;
+    env->GlobalReference_Create(reinterpret_cast<ani_ref>(drawModifier), &drawModifierRef);
     void* fnDrawBehindFun = nullptr;
     void* fnDrawContentFun = nullptr;
     void* fnDrawFrontFun = nullptr;
