@@ -42,6 +42,7 @@
 #include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "core/components_ng/pattern/stage/page_node.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "base/log/ace_checker.h"
 
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
@@ -1051,6 +1052,7 @@ void NavigationPattern::SyncWithJsStackIfNeeded()
     auto topNavPath = navigationStack_->GetTopNavPath();
     FireInterceptionBeforeLifeCycleEvent(topNavPath, toIndex);
     needSyncWithJsStack_ = false;
+    SetStartTime(GetSysTimestamp());
     UpdateNavPathList();
     auto newTopNavPath = navigationStack_->GetTopNavPath();
     auto replaceValue = navigationStack_->GetReplaceValue();
@@ -3570,6 +3572,21 @@ bool NavigationPattern::GetHomeDestinationName(const RefPtr<FrameNode>& hostNode
     return true;
 }
 
+void NavigationPattern::TriggerPerformanceCheck(
+    const RefPtr<NavDestinationGroupNode>& topDestination, std::string fromPath)
+{
+    if (AceChecker::IsPerformanceCheckEnabled()) {
+        CHECK_NULL_VOID(topDestination);
+        std::string path = topDestination->GetNavDestinationPathInfo();
+        std::string moduleName = topDestination->GetNavDestinationModuleName();
+        int64_t endTime = GetSysTimestamp();
+        PerformanceCheckNodeMap nodeMap;
+        topDestination->GetPerformanceCheckData(nodeMap);
+        AceScopedPerformanceCheck::RecordPerformanceCheckData(
+            nodeMap, endTime - startTime_, path, fromPath, moduleName, true);
+    }
+}
+
 void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& preDestination,
     const RefPtr<NavDestinationGroupNode>& topDestination,
     bool isAnimated, bool isPopPage, bool isNeedVisible)
@@ -3663,8 +3680,10 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
         NotifyDialogLifecycle(NavDestinationLifecycle::ON_WILL_SHOW, true);
         topDestination->SetNodeFreeze(false);
     }
+    std::string fromPath = "";
     if (preDestination) {
         preDestination->SetNodeFreeze(false);
+        fromPath = preDestination->GetNavDestinationPathInfo();
     }
     UpdatePageViewportConfigIfNeeded(preDestination, topDestination);
     pipeline->AddAfterLayoutTask([weakPattern = WeakClaim(this)]() {
@@ -3678,13 +3697,21 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
         prePrimaryNodes_.clear();
         primaryNodesToBeRemoved_.clear();
         RemoveRedundantPrimaryNavDestination();
+        pipeline->AddAfterLayoutTask(
+            [weakPattern = WeakClaim(this), weakTopDestination = WeakPtr<NavDestinationGroupNode>(topDestination),
+                fromPath]() {
+                auto navigationPattern = weakPattern.Upgrade();
+                CHECK_NULL_VOID(navigationPattern);
+                auto topDestination = weakTopDestination.Upgrade();
+                navigationPattern->TriggerPerformanceCheck(topDestination, fromPath);
+            });
         return;
     }
 
     pipeline->AddAfterLayoutTask([weakNavigation = WeakClaim(this),
         weakPreDestination = WeakPtr<NavDestinationGroupNode>(preDestination),
         weakTopDestination = WeakPtr<NavDestinationGroupNode>(topDestination),
-        isPopPage, isNeedVisible]() {
+        isPopPage, isNeedVisible, fromPath]() {
         auto navigationPattern = AceType::DynamicCast<NavigationPattern>(weakNavigation.Upgrade());
         CHECK_NULL_VOID(navigationPattern);
         auto preDestination = weakPreDestination.Upgrade();
@@ -3696,6 +3723,7 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
             ((preDestination && preDestination->GetNavDestinationType() == NavDestinationType::HOME) ||
             (topDestination && topDestination->GetNavDestinationType() == NavDestinationType::HOME))) {
             navigationPattern->FireShowAndHideLifecycle(preDestination, topDestination, isPopPage, false);
+            navigationPattern->TriggerPerformanceCheck(topDestination, fromPath);
             navigationPattern->TransitionWithOutAnimation(preDestination, topDestination, isPopPage, isNeedVisible);
             navigationPattern->prePrimaryNodes_.clear();
             navigationPattern->primaryNodesToBeRemoved_.clear();
@@ -3704,6 +3732,7 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
         }
 
         navigationPattern->FireShowAndHideLifecycle(preDestination, topDestination, isPopPage, true);
+        navigationPattern->TriggerPerformanceCheck(topDestination, fromPath);
         navigationPattern->TransitionWithAnimation(preDestination, topDestination, isPopPage, isNeedVisible);
         navigationPattern->prePrimaryNodes_.clear();
         navigationPattern->primaryNodesToBeRemoved_.clear();
