@@ -2913,7 +2913,7 @@ void TabBarPattern::SetEdgeEffect(const RefPtr<GestureEventHub>& gestureHub)
     if (!scrollEffect_) {
         auto springEffect = AceType::MakeRefPtr<ScrollSpringEffect>();
         CHECK_NULL_VOID(springEffect);
-        springEffect->SetOutBoundaryCallback([weak = AceType::WeakClaim(this)]() {
+        springEffect->SetOutBoundaryCallback([weak = AceType::WeakClaim(this)](bool useCurrentDelta) {
             auto pattern = weak.Upgrade();
             CHECK_NULL_RETURN(pattern, false);
             return pattern->IsAtTop() || pattern->IsAtBottom();

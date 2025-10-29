@@ -160,9 +160,9 @@ public:
     {
         return !IsAtBottom();
     }
-    virtual bool OutBoundaryCallback()
+    virtual bool OutBoundaryCallback(bool useCurrentDelta = true)
     {
-        return IsOutOfBoundary();
+        return IsOutOfBoundary(useCurrentDelta);
     }
 
     virtual bool IsOutOfBoundary(bool useCurrentDelta = true)

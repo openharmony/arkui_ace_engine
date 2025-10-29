@@ -1351,7 +1351,7 @@ HWTEST_F(ScrollableCoverTestNg, HandleTouchUpTest002, TestSize.Level1)
      * @tc.steps: step1. Set outBoundary has callback and isSpringAnimationStop_ to false
      */
     bool outBoundaryIsCalled = false;
-    scrollable->outBoundaryCallback_ = [&outBoundaryIsCalled]() {
+    scrollable->outBoundaryCallback_ = [&outBoundaryIsCalled](bool useChainDelta) {
         outBoundaryIsCalled = true;
         return true;
     };

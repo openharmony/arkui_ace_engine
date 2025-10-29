@@ -66,7 +66,7 @@ struct SlidInfo {
 };
 
 using ScrollEventCallback = std::function<void()>;
-using OutBoundaryCallback = std::function<bool()>;
+using OutBoundaryCallback = std::function<bool(bool useCurrentDelta)>;
 using ScrollOverCallback = std::function<void(double velocity)>;
 using WatchFixCallback = std::function<double(double final, double current)>;
 using ScrollBeginCallback = std::function<ScrollInfo(Dimension, Dimension)>;

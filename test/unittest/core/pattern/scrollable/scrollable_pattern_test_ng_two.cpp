@@ -214,7 +214,7 @@ HWTEST_F(ScrollableTestNg, ProcessScrollOverCallback001, TestSize.Level1)
     RefPtr<Scrollable> scrollable =
         AceType::MakeRefPtr<Scrollable>([](double position, int32_t source) { return true; }, Axis::VERTICAL);
     double number = 4.0;
-    scrollable->outBoundaryCallback_ = []() { return false; };
+    scrollable->outBoundaryCallback_ = [](bool useChainDelta) { return false; };
     scrollable->canOverScroll_ = false;
     scrollable->notifyScrollOverCallback_ = [&number](double velocity) { number += velocity; };
     scrollable->ProcessScrollOverCallback(2.0);
@@ -231,7 +231,7 @@ HWTEST_F(ScrollableTestNg, ProcessScrollOverCallback002, TestSize.Level1)
     RefPtr<Scrollable> scrollable =
         AceType::MakeRefPtr<Scrollable>([](double position, int32_t source) { return true; }, Axis::VERTICAL);
     double number = 4.0;
-    scrollable->outBoundaryCallback_ = []() { return false; };
+    scrollable->outBoundaryCallback_ = [](bool useChainDelta) { return false; };
     scrollable->canOverScroll_ = true;
     scrollable->notifyScrollOverCallback_ = [&number](double velocity) { number += velocity; };
     scrollable->ProcessScrollOverCallback(2.0);
