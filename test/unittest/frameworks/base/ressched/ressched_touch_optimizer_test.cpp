@@ -63,7 +63,7 @@ namespace {
     };
 } // namespace
 
-static std::unique_ptrM<ResSchedTouchOptimizer> optimizer_;
+static std::unique_ptr<ResSchedTouchOptimizer> optimizer_;
 
 class ResSchedTouchOptimizerTest : public testing::Test {
 public:
