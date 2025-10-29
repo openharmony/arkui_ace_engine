@@ -5797,11 +5797,11 @@ void UIContentImpl::InitUISessionManagerCallbacks(const WeakPtr<TaskExecutor>& t
     };
     UiSessionManager::GetInstance()->SaveRegisterForWebFunction(webCallback);
     SetupGetPixelMapCallback(taskExecutor);
-    RegisterGetCurrentPageName();
+    RegisterGetCurrentPageName(taskExecutor);
     InitSendCommandFunctionsCallbacks(taskExecutor);
     sendCommandCallbackInner(taskExecutor);
     SaveGetCurrentInstanceId();
-    RegisterExeAppAIFunction();
+    RegisterExeAppAIFunction(taskExecutor);
 }
 
 void UIContentImpl::SetupGetPixelMapCallback(const WeakPtr<TaskExecutor>& taskExecutor)
@@ -5833,12 +5833,20 @@ void UIContentImpl::SaveGetCurrentInstanceId()
     });
 }
 
-void UIContentImpl::RegisterGetCurrentPageName()
+void UIContentImpl::RegisterGetCurrentPageName(const WeakPtr<TaskExecutor>& taskExecutor)
 {
-    auto getPageNameCallback = []() -> std::string {
-        auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
-        CHECK_NULL_RETURN(pipeline, "");
-        return pipeline->GetCurrentPageNameCallback();
+    auto getPageNameCallback = [weakTaskExecutor = taskExecutor]() -> std::string {
+        auto taskExecutor = weakTaskExecutor.Upgrade();
+        CHECK_NULL_RETURN(taskExecutor, "");
+        std::string pageName = "";
+        taskExecutor->PostSyncTask(
+            [&pageName]() {
+                auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+                CHECK_NULL_VOID(pipeline);
+                pageName = pipeline->GetCurrentPageNameCallback();
+            },
+            TaskExecutor::TaskType::UI, "UiSessionGetPageName");
+        return pageName;
     };
     UiSessionManager::GetInstance()->RegisterPipeLineGetCurrentPageName(getPageNameCallback);
 }
@@ -6108,14 +6116,22 @@ UIContentErrorCode UIContentImpl::InitializeByNameWithAniStorage(
     return errorCode;
 }
 
-void UIContentImpl::RegisterExeAppAIFunction()
+void UIContentImpl::RegisterExeAppAIFunction(const WeakPtr<TaskExecutor>& taskExecutor)
 {
-    auto exeAppAIFunctionCallback = [](
+    auto exeAppAIFunctionCallback = [weakTaskExecutor = taskExecutor](
         const std::string& funcName, const std::string& params) -> uint32_t {
         static constexpr uint32_t AI_CALL_ENV_INVALID = 4;
-        auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
-        CHECK_NULL_RETURN(pipeline, AI_CALL_ENV_INVALID);
-        return pipeline->ExeAppAIFunctionCallback(funcName, params);
+        auto taskExecutor = weakTaskExecutor.Upgrade();
+        CHECK_NULL_RETURN(taskExecutor, AI_CALL_ENV_INVALID);
+        uint32_t result = AI_CALL_ENV_INVALID;
+        taskExecutor->PostSyncTask(
+            [funcName, params, &result]() {
+                auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+                CHECK_NULL_VOID(pipeline);
+                result = pipeline->ExeAppAIFunctionCallback(funcName, params);
+            },
+            TaskExecutor::TaskType::UI, "UiSessionExeAppAIFunction");
+        return result;
     };
     UiSessionManager::GetInstance()->RegisterPipeLineExeAppAIFunction(exeAppAIFunctionCallback);
 }
