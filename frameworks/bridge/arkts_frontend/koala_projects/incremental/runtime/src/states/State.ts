@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -104,7 +104,7 @@ export interface ArrayState<Item> extends ReadableState<ReadonlyArray<Item>> {
     push(...items: Item[]): int32
     reverse(): Array<Item>
     shift(): Item | undefined
-    sort(comparator?: (a: Item, b: Item) => number): Array<Item>
+    sort(comparator?: (a: Item, b: Item) => int32): Array<Item>
     splice(start: int32, deleteCount: int32 | undefined, ...items: Item[]): Array<Item>
     unshift(...items: Item[]): int32
 }
@@ -498,7 +498,7 @@ class ArrayStateImpl<Item> extends StateImpl<Array<Item>> implements ArrayState<
         return this.mutable.shift()
     }
 
-    sort(comparator?: (a: Item, b: Item) => number): Array<Item> {
+    sort(comparator?: (a: Item, b: Item) => int): Array<Item> {
         return this.mutable.sort(comparator)
     }
 
