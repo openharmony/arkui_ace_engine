@@ -19,6 +19,7 @@ ace_unittest("radio_test_ng") {
     "radio_model_static_test_ng.cpp",
     "radio_node_test_ng.cpp",
     "radio_pattern_test_ng.cpp",
+    "radio_pattern_test_two_ng.cpp",
     "radio_setbuilder_test_ng.cpp",
     "radio_test_ng.cpp",
     "radio_test_two_ng.cpp",
