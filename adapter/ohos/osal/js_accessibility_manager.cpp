@@ -20,6 +20,7 @@
 #include "perf_monitor_adapter.h"
 
 #include "adapter/ohos/osal/accessibility/accessibility_hidumper_osal.h"
+#include "adapter/ohos/osal/accessibility/focus_move/accessibility_focus_strategy.h"
 #include "adapter/ohos/entrance/ace_container.h"
 #include "base/log/event_report.h"
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
@@ -7744,9 +7745,10 @@ void JsAccessibilityManager::JsInteractionOperation::FocusMoveSearchWithConditio
     const int64_t elementId, const AccessibilityFocusMoveParam param,
     const int32_t requestId, AccessibilityElementOperatorCallback& callback)
 {
-    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
-        "focus move search with condition %{public}" PRId64 ", direction: %{public}d, condition %{public}d",
-        elementId, param.direction, param.condition);
+    HILOG_INFO_FOCUS(
+        "focus move search with condition %{public}" PRId64 ", "
+        "direction: %{public}d, condition %{public}d requestId %{public}d",
+        elementId, param.direction, param.condition, requestId);
     int64_t splitElementId = AccessibilityElementInfo::UNDEFINED_ACCESSIBILITY_ID;
     int32_t splitTreeId = AccessibilityElementInfo::UNDEFINED_TREE_ID;
     AccessibilitySystemAbilityClient::GetTreeIdAndElementIdBySplitElementId(elementId, splitElementId, splitTreeId);

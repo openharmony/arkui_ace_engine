@@ -718,11 +718,17 @@ void JsThirdProviderInteractionOperation::FocusMoveSearchWithCondition(
             infos.emplace_back(nodeInfo);
             result = FocusMoveResult::SEARCH_FAIL;
         }
+        HILOG_INFO_FOCUS("focus move search third result id %{public}" PRId64 ", "
+            "ret %{public}d requestID %{public}d",
+            nodeInfo.GetAccessibilityId(), result, requestId);
         callback.SetFocusMoveSearchWithConditionResult(infos, result, requestId);
         return;
     }
     auto result = strategy.ExecuteFocusMoveSearch(elementId, param, nodeInfo);
     infos.emplace_back(nodeInfo);
+    HILOG_INFO_FOCUS("focus move search third result id %{public}" PRId64 ", "
+        "ret %{public}d requestID %{public}d",
+        nodeInfo.GetAccessibilityId(), result, requestId);
     callback.SetFocusMoveSearchWithConditionResult(infos, result, requestId);
 }
 
