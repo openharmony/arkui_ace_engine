@@ -943,6 +943,8 @@ RefPtr<FrameNode> DialogPattern::CreateButton(
         BindCloseCallBack(hub, -1);
     }
 
+    RegisterButtonOnKeyEvent(params, buttonNode, isCancel ? -1 : index);
+
     // add scale animation
     auto inputHub = buttonNode->GetOrCreateInputEventHub();
     CHECK_NULL_RETURN(inputHub, nullptr);
@@ -964,6 +966,32 @@ RefPtr<FrameNode> DialogPattern::CreateButton(
         layoutProps->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(theme->GetHeight())));
     }
     return buttonNode;
+}
+
+void DialogPattern::RegisterButtonOnKeyEvent(const ButtonInfo& params, RefPtr<FrameNode>& buttonNode, int32_t buttonIdx)
+{
+    auto focusHub = buttonNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto onKeyEvent = [weak = WeakClaim(RawPtr(host)), params, buttonIdx](const KeyEvent& event) -> bool {
+        if ((event.code == KeyCode::KEY_SPACE || event.code == KeyCode::KEY_ENTER) &&
+            event.action == KeyAction::DOWN) {
+            auto dialog = weak.Upgrade();
+            CHECK_NULL_RETURN(dialog, false);
+            if (params.action) {
+                auto actionFunc = params.action->GetGestureEventFunc();
+                GestureEvent info;
+                actionFunc(info);
+            }
+            auto pattern = dialog->GetPattern<DialogPattern>();
+            CHECK_NULL_RETURN(pattern, false);
+            pattern->PopDialog(buttonIdx);
+            return true;
+        }
+        return false;
+    };
+    focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
 }
 
 void DialogPattern::UpdateDialogButtonProperty(
