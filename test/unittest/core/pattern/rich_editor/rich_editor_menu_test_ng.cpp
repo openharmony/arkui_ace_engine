@@ -1069,6 +1069,56 @@ HWTEST_F(RichEditorMenuTestNg, OnUpdateMenuInfo001, TestSize.Level0)
 }
 
 /**
+ * @tc.name: OnUpdateMenuInfo002
+ * @tc.desc: test OnUpdateMenuInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorMenuTestNg, OnUpdateMenuInfo002, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. searchIsSupport_ set to true.
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
+    auto theme = AceType::MakeRefPtr<RichEditorTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
+    theme->searchIsSupport_ = true;
+    auto showSearch = richEditorPattern->IsShowSearch();
+    EXPECT_TRUE(showSearch);
+    theme->translateIsSupport_ = true;
+    auto showTranslate = richEditorPattern->IsShowTranslate();
+    EXPECT_TRUE(showTranslate);
+    auto selectOverlay = richEditorPattern->selectOverlay_;
+    ASSERT_NE(selectOverlay, nullptr);
+
+    /**
+     * @tc.steps: step2. select nothing.
+     */
+    TextSpanOptions options;
+    options.value = EMPTY_STRING;
+    richEditorController->AddTextSpan(options);
+    richEditorPattern->textSelector_.Update(0, 0);
+    richEditorPattern->copyOption_ = CopyOptions::Local;
+    theme->aiWriteBundleName_ = "bundleName";
+    theme->aiWriteAbilityName_ = "abilityName";
+    theme->aiWriteIsSupport_ = "true";
+
+    /**
+     * @tc.steps: step3. test OnUpdateMenuInfo.
+     */
+    SelectMenuInfo menuInfo;
+    selectOverlay->OnUpdateMenuInfo(menuInfo, DIRTY_ALL_MENU_ITEM);
+    EXPECT_TRUE(menuInfo.showAIWrite);
+}
+
+/**
  * @tc.name: SetPreviewMenuParam001
  * @tc.desc: test SetPreviewMenuParam
  * @tc.type: FUNC
