@@ -18,6 +18,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
+#include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/qrcode/qrcode_modifier.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/node_paint_method.h"
@@ -28,8 +29,8 @@ class QRCodePaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(QRCodePaintMethod, NodePaintMethod);
 
 public:
-    QRCodePaintMethod(float qrCodeSize, const RefPtr<QRCodeModifier>& qrCodeModifier)
-        : qrCodeSize_(qrCodeSize), qrCodeModifier_(qrCodeModifier)
+    QRCodePaintMethod(const WeakPtr<Pattern>& pattern, float qrCodeSize, const RefPtr<QRCodeModifier>& qrCodeModifier)
+        : pattern_(pattern), qrCodeSize_(qrCodeSize), qrCodeModifier_(qrCodeModifier)
     {}
     ~QRCodePaintMethod() override = default;
     RefPtr<Modifier> GetContentModifier(PaintWrapper* paintWrapper) override
@@ -40,6 +41,7 @@ public:
     void UpdateContentModifier(PaintWrapper* paintWrapper) override;
 
 private:
+    WeakPtr<Pattern> pattern_;
     float qrCodeSize_ = 0.0f;
     RefPtr<QRCodeModifier> qrCodeModifier_;
 };

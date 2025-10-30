@@ -1602,10 +1602,10 @@ void JSSearch::SetLetterSpacing(const JSCallbackInfo& info)
 {
     CalcDimension value;
     RefPtr<ResourceObject> resourceObject;
+    UnregisterResource("letterSpacing");
     if (!ParseJsDimensionFpNG(info[0], value, resourceObject, false)) {
         value.Reset();
         SearchModel::GetInstance()->SetLetterSpacing(value);
-        UnregisterResource("letterSpacing");
         return;
     }
     if (SystemProperties::ConfigChangePerform() && resourceObject) {
@@ -1618,10 +1618,10 @@ void JSSearch::SetLineHeight(const JSCallbackInfo& info)
 {
     CalcDimension value;
     RefPtr<ResourceObject> resourceObject;
+    UnregisterResource("lineHeight");
     if (!ParseJsDimensionFpNG(info[0], value, resourceObject)) {
         value.Reset();
         SearchModel::GetInstance()->SetLineHeight(value);
-        UnregisterResource("lineHeight");
         return;
     }
     if (SystemProperties::ConfigChangePerform() && resourceObject) {

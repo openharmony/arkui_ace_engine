@@ -394,7 +394,8 @@ void SetDrawModifier(
     }
     ani_vm* vm = nullptr;
     env->GetVM(&vm);
-    ani_ref drawModifierRef = static_cast<ani_ref>(drawModifier);
+    ani_ref drawModifierRef;
+    env->GlobalReference_Create(reinterpret_cast<ani_ref>(drawModifier), &drawModifierRef);
     void* fnDrawBehindFun = nullptr;
     void* fnDrawContentFun = nullptr;
     void* fnDrawFrontFun = nullptr;
@@ -956,6 +957,23 @@ ani_double Px2lpx(ani_env* env, ani_object obj, ani_double value, ani_int instan
     }
     return modifier->getCommonAniModifier()->px2lpx(value, instanceId);
 }
+
+ani_string getWindowName(ani_env* env, ani_object obj, ani_int instanceId)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return nullptr;
+    }
+    auto ret = modifier->getCommonAniModifier()->getWindowName(instanceId);
+    if (ret.has_value()) {
+        auto retValue = AniUtils::StdStringToANIString(env, ret.value());
+        if (retValue) {
+            return *retValue;
+        }
+    }
+    return nullptr;
+}
+
 void* TransferKeyEventPointer(ani_env* env, ani_object obj, ani_long pointer)
 {
     const auto* modifier = GetNodeAniModifier();
@@ -1295,5 +1313,13 @@ ani_object ExtractorsFromDrawContextPtr(ani_env* env, ani_object aniClass, ani_l
     auto contextPtr = reinterpret_cast<NG::DrawingContext *>(ptr);
     CHECK_NULL_RETURN(contextPtr, {});
     return CreateDrawingContext(env, *contextPtr);
+}
+void ApplyThemeScopeId(ani_env* env, ani_object obj, ani_long ptr, ani_int themeScopeId)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return;
+    }
+    modifier->getCommonAniModifier()->applyThemeScopeId(env, ptr, themeScopeId);
 }
 } // namespace OHOS::Ace::Ani

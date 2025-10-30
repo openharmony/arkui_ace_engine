@@ -116,6 +116,7 @@ void SliderTipModifier::PaintText(DrawingContext& context)
                                                   HALF);
         }
     }
+    CHECK_NULL_VOID(paragraph_);
     paragraph_->Paint(context.canvas, textOffset_.GetX(), textOffset_.GetY());
 }
 

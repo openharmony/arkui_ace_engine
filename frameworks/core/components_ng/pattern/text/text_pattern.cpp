@@ -6995,8 +6995,6 @@ void TextPattern::UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValu
         DEFINE_PROP_HANDLER(TextIndent, CalcDimension, UpdateTextIndent),
         DEFINE_PROP_HANDLER(MinFontScale, float, UpdateMinFontScale),
         DEFINE_PROP_HANDLER(MaxFontScale, float, UpdateMaxFontScale),
-        DEFINE_PROP_HANDLER(LineHeight, CalcDimension, UpdateLineHeight),
-        DEFINE_PROP_HANDLER(LineSpacing, CalcDimension, UpdateLineSpacing),
         DEFINE_PROP_HANDLER(LetterSpacing, CalcDimension, UpdateLetterSpacing),
         DEFINE_PROP_HANDLER(AdaptMaxFontSize, CalcDimension, UpdateAdaptMaxFontSize),
         DEFINE_PROP_HANDLER(AdaptMinFontSize, CalcDimension, UpdateAdaptMinFontSize),
@@ -7005,6 +7003,28 @@ void TextPattern::UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValu
         DEFINE_PROP_HANDLER(TextDecorationColor, Color, UpdateTextDecorationColor),
         DEFINE_PROP_HANDLER(Content, std::u16string, UpdateContent),
         DEFINE_PROP_HANDLER(FontFamily, std::vector<std::string>, UpdateFontFamily),
+
+        { "LineHeight", [](
+            TextLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
+                    if (realValue->IsNegative()) {
+                        realValue->Reset();
+                    }
+                    prop->UpdateLineHeight(*realValue);
+                }
+            }
+        },
+        
+        { "LineSpacing", [](
+            TextLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
+                    if (realValue->IsNegative()) {
+                        realValue->Reset();
+                    }
+                    prop->UpdateLineSpacing(*realValue);
+                }
+            }
+        },
 
         {"SelectedBackgroundColor", [wp = WeakClaim(RawPtr(frameNode))](
             TextLayoutProperty* prop, RefPtr<PropertyValueBase> value) {

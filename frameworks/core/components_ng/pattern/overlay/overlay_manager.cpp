@@ -3127,6 +3127,7 @@ void OverlayManager::CleanMenuInSubWindow(int32_t targetId)
 
     for (const auto& child : rootNode->GetChildren()) {
         auto node = DynamicCast<FrameNode>(child);
+        CHECK_NULL_CONTINUE(node);
         if (node && node->GetTag() != V2::MENU_WRAPPER_ETS_TAG) {
             continue;
         }
@@ -5326,6 +5327,7 @@ void OverlayManager::PlayDefaultModalIn(
 void OverlayManager::PlayDefaultModalOut(
     const RefPtr<FrameNode>& modalNode, const RefPtr<RenderContext>& context, AnimationOption option, float showHeight)
 {
+    CHECK_NULL_VOID(context);
     auto lastModalNode = lastModalNode_.Upgrade();
     CHECK_NULL_VOID(lastModalNode);
     auto lastModalContext = lastModalNode->GetRenderContext();
@@ -8725,6 +8727,7 @@ RefPtr<UINode> OverlayManager::FindChildNodeByKey(const RefPtr<NG::UINode>& pare
     CHECK_NULL_RETURN(parentNode, nullptr);
     const auto& children = parentNode->GetChildren();
     for (const auto& childNode : children) {
+        CHECK_NULL_CONTINUE(childNode);
         if (childNode->GetTag() == V2::STAGE_ETS_TAG) {
             continue;
         }

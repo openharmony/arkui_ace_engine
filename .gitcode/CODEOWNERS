@@ -3231,6 +3231,7 @@ frameworks/bridge/arkts_frontend/arkts_frontend.h @arkui_framework_xnode
 frameworks/bridge/arkts_frontend/entry/ @arkui_framework_xnode
 
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/generated/component/web.ets @arkweb-committer-group
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/generated/component/gesture.ets @ArkUI_Event
 frameworks/core/interfaces/native/implementation/overlay_accessor.cpp @ArkUI_Event
 frameworks/core/interfaces/native/implementation/drag_event_accessor.cpp @ArkUI_Event
 frameworks/core/interfaces/native/implementation/drag_drop_accessor.cpp @ArkUI_Event

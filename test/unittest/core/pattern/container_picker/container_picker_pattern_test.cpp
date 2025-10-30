@@ -666,7 +666,7 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_HandleDragStart0
      * @tc.expected: step2. drag state variables are initialized correctly.
      */
     GestureEvent info;
-    info.SetGlobalPoint(Point(100.0f, 200.0f));
+    info.SetLocalLocation(Offset(100.0, 200.0));
 
     pattern->HandleDragStart(info);
     EXPECT_TRUE(pattern->isDragging_);
@@ -817,7 +817,7 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_HandleDragUpdate
     pattern->itemPosition_[0] = { 0.0f, 100.0f, nullptr };
 
     GestureEvent info;
-    info.SetGlobalPoint(Point(50.0f, 150.0f));
+    info.SetLocalLocation(Offset(50.0, 150.0));
     info.SetMainDelta(50.0f);
     info.SetMainVelocity(200.0f);
 

@@ -28,13 +28,9 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components/theme/icon_theme.h"
-#include "core/components/picker/picker_theme.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/dialog/dialog_theme.h"
 
-#include "core/components/picker/picker_data.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/time_picker/timepicker_column_pattern.h"
 #include "core/components_ng/pattern/time_picker/timepicker_model_ng.h"
 #include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
 #undef private

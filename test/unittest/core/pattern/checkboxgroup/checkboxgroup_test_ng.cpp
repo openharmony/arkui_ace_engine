@@ -1388,53 +1388,98 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupAccessibilityPropertyTestNg002, TestS
     checkBoxPaintProperty->SetSelectStatus(CheckBoxGroupPaintProperty::SelectStatus::NONE);
     EXPECT_FALSE(accessibility->IsChecked());
 }
-
 /**
- * @tc.name: CheckBoxGroupAccessibilityPropertyTestNg003
- * @tc.desc: Test GetCollectionItemCounts property of CheckBoxGroup.
+ * @tc.name: CheckBoxGroupPatternTest022
+ * @tc.desc: Test CheckBoxGroupPattern MeasureContent.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupAccessibilityPropertyTestNg003, TestSize.Level1)
+HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPatternTest022, TestSize.Level1)
 {
-    auto groupFrameNode = FrameNode::GetOrCreateFrameNode(
-        V2::CHECKBOXGROUP_ETS_TAG, 1, []() { return AceType::MakeRefPtr<CheckBoxGroupPattern>(); });
-    EXPECT_NE(groupFrameNode, nullptr);
-    auto eventHub = groupFrameNode->GetEventHub<NG::CheckBoxGroupEventHub>();
-    eventHub->SetGroupName(GROUP_NAME);
-    groupFrameNode->MarkModifyDone();
-
-    auto accessibility = groupFrameNode->GetAccessibilityProperty<CheckBoxGroupAccessibilityProperty>();
-    ASSERT_NE(accessibility, nullptr);
-    EXPECT_EQ(accessibility->GetCollectionItemCounts(), 0);
-}
-
-/**
- * @tc.name: CheckBoxUpdateChangeEventTest001
- * @tc.desc: Test CheckBoxGroup onChange event.
- * @tc.type: FUNC
- */
-HWTEST_F(CheckBoxGroupTestNG, CheckBoxUpdateChangeEventTest001, TestSize.Level1)
-{
-    CheckBoxGroupModelNG checkBoxGroup;
-    checkBoxGroup.Create(GROUP_NAME);
-    std::vector<std::string> vec;
-    int status = 0;
-    CheckboxGroupResult groupResult(
-        std::vector<std::string> { NAME }, int(CheckBoxGroupPaintProperty::SelectStatus::ALL));
-    auto changeEvent = [&vec, &status](const BaseEventInfo* groupResult) {
-        const auto* eventInfo = TypeInfoHelper::DynamicCast<CheckboxGroupResult>(groupResult);
-        vec = eventInfo->GetNameList();
-        status = eventInfo->GetStatus();
-    };
-
-    checkBoxGroup.SetChangeEvent(changeEvent);
+    /**
+     * @tc.steps: step1. Create CheckBoxGroupPattern.
+     * @tc.expected: Create successfully.
+     */
+    CheckBoxGroupModelNG CheckBoxGroupModelNG;
+    CheckBoxGroupModelNG.Create(GROUP_NAME);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::CheckBoxGroupEventHub>();
-    ASSERT_NE(eventHub, nullptr);
-    eventHub->UpdateChangeEvent(&groupResult);
-    EXPECT_FALSE(vec.empty());
-    EXPECT_EQ(vec.front(), NAME);
-    EXPECT_EQ(status, int(CheckBoxGroupPaintProperty::SelectStatus::ALL));
+    auto checkBoxGroupPattern = frameNode->GetPattern<CheckBoxGroupPattern>();
+    ASSERT_NE(checkBoxGroupPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call touchCallback with different touchType.
+     * @tc.expected: TouchCallback works correctly.
+     */
+    checkBoxGroupPattern->InitTouchEvent();
+    ASSERT_NE(checkBoxGroupPattern->touchListener_, nullptr);
+    checkBoxGroupPattern->InitTouchEvent();
+    auto touchCallback = checkBoxGroupPattern->touchListener_->GetTouchEventCallback();
+    TouchLocationInfo touchLocationInfo(-1);
+    touchLocationInfo.SetTouchType(TouchType::UP);
+    TouchEventInfo touchEventInfo(NAME);
+    touchEventInfo.touches_.clear();
+    touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
+    touchCallback(touchEventInfo);
+    EXPECT_EQ(checkBoxGroupPattern->touchHoverType_, TouchHoverAnimationType::NONE);
+    touchLocationInfo.SetTouchType(TouchType::CANCEL);
+    checkBoxGroupPattern->isHover_ = true;
+    touchCallback(touchEventInfo);
+    EXPECT_EQ(checkBoxGroupPattern->touchHoverType_, TouchHoverAnimationType::PRESS_TO_HOVER);
 }
+
+/**
+ * @tc.name: CheckBoxGroupPatternTest023
+ * @tc.desc: Test CheckBoxGroupPattern UpdateState.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPatternTest023, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create CheckBoxGroupPattern.
+     * @tc.expected: Create successfully.
+     */
+    CheckBoxGroupModelNG CheckBoxGroupModelNG;
+    CheckBoxGroupModelNG.Create(GROUP_NAME);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<CheckBoxGroupPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto eventHub = frameNode->GetEventHub<CheckBoxGroupEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto checkBoxGroupPattern = frameNode->GetPattern<CheckBoxGroupPattern>();
+    ASSERT_NE(checkBoxGroupPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call method while checkBoxGroup hasn't preGroup.
+     * @tc.expected: SelectStatus and uiStatus set correctly.
+     */
+    checkBoxGroupPattern->preGroup_.reset();
+    paintProperty->UpdateCheckBoxGroupSelect(true);
+    checkBoxGroupPattern->isFirstCreated_ = false;
+    checkBoxGroupPattern->UpdateState();
+    EXPECT_EQ(paintProperty->GetSelectStatus(), CheckBoxGroupPaintProperty::SelectStatus::ALL);
+    EXPECT_EQ(checkBoxGroupPattern->uiStatus_, UIStatus::OFF_TO_ON);
+
+    /**
+     * @tc.steps: step3. Call method while clicked requires processing.
+     * @tc.expected: Change selectAll to false dynamically.
+     */
+    checkBoxGroupPattern->preGroup_ = std::make_optional<std::string>(NAME);
+    eventHub->SetGroupName(NAME);
+    checkBoxGroupPattern->updateFlag_ = true;
+    checkBoxGroupPattern->SetIsAddToMap(true);
+    checkBoxGroupPattern->UpdateState();
+    EXPECT_EQ(paintProperty->GetSelectStatus(), CheckBoxGroupPaintProperty::SelectStatus::ALL);
+    EXPECT_FALSE(checkBoxGroupPattern->updateFlag_);
+    paintProperty->UpdateCheckBoxGroupSelect(true);
+    checkBoxGroupPattern->SetIsAddToMap(false);
+    checkBoxGroupPattern->UpdateState();
+    EXPECT_EQ(paintProperty->GetSelectStatus(), CheckBoxGroupPaintProperty::SelectStatus::ALL);
+    EXPECT_FALSE(checkBoxGroupPattern->updateFlag_);
+
+    paintProperty->UpdateCheckBoxGroupSelect(false);
+    checkBoxGroupPattern->UpdateState();
+    EXPECT_FALSE(checkBoxGroupPattern->updateFlag_);
+}
+
 } // namespace OHOS::Ace::NG
