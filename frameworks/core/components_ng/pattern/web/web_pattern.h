@@ -118,6 +118,7 @@ enum class WebInfoType : int32_t {
 };
 
 struct PipInfo {
+    int32_t nodeId;
     uint32_t mainWindowId;
     int delegateId;
     int childId;
