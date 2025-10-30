@@ -48,6 +48,14 @@ public:
     void SetAntiAlias(bool antiAlias) override;
     void SetWidth() override {}
     void SetHeight() override {}
+    void SetStroke(const RefPtr<ResourceObject>& resObj) override;
+    void SetFill(const RefPtr<ResourceObject>& resObj) override;
+    void SetForegroundColor(const RefPtr<ResourceObject>& resObj) override;
+    void SetStrokeDashOffset(const RefPtr<ResourceObject>& resObj) override;
+    void SetStrokeMiterLimit(const RefPtr<ResourceObject>& resObj) override;
+    void SetStrokeOpacity(const RefPtr<ResourceObject>& resObj) override;
+    void SetFillOpacity(const RefPtr<ResourceObject>& resObj) override;
+    void SetStrokeWidth(const RefPtr<ResourceObject>& resObj) override;
     static void SetStrokeDashArray(FrameNode* frameNode, const std::vector<Ace::Dimension>& segments);
     static void SetStrokeDashArray(FrameNode* frameNode, const std::vector<Ace::Dimension>& segments,
         const std::vector<RefPtr<ResourceObject>>& resObjArray);
@@ -69,6 +77,14 @@ public:
     static void SetWidth(FrameNode* frameNode) {}
     static void SetHeight(FrameNode* frameNode) {}
     static void InitBox(FrameNode* frameNode, const RefPtr<PixelMap>& pixMap);
+    static void SetStroke(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void SetFill(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void SetForegroundColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void SetStrokeDashOffset(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void SetStrokeMiterLimit(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void SetStrokeOpacity(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void SetFillOpacity(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void SetStrokeWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
 };
 
 } // namespace OHOS::Ace::NG

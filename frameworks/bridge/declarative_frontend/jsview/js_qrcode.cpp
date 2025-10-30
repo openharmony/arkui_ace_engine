@@ -71,7 +71,7 @@ void JSQRCode::Create(const JSCallbackInfo& info)
     }
     QRCodeModel::GetInstance()->Create(value);
     JSQRCodeTheme::ApplyTheme();
-    if (SystemProperties::ConfigChangePerform() && resObj) {
+    if (SystemProperties::ConfigChangePerform()) {
         QRCodeModel::GetInstance()->CreateWithResourceObj(QRCodeResourceType::CREATE, resObj);
     }
 }

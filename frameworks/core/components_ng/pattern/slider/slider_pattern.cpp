@@ -985,7 +985,11 @@ bool SliderPattern::AtMousePanArea(const Offset& offsetInFrame)
 
 bool SliderPattern::AtTouchPanArea(const Offset& offsetInFrame)
 {
-    const auto& content = GetHost()->GetGeometryNode()->GetContent();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, false);
+    const auto& content = geometryNode->GetContent();
     CHECK_NULL_RETURN(content, false);
     auto contentOffset = content->GetRect().GetOffset();
     auto offset = Offset(offsetInFrame.GetX() - contentOffset.GetX(), offsetInFrame.GetY() - contentOffset.GetY());

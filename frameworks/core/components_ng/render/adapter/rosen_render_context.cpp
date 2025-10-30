@@ -709,8 +709,10 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
     }
     if (SystemProperties::GetSyncDebugTraceEnabled()) {
         auto host = GetHost();
-        ACE_LAYOUT_SCOPED_TRACE("SyncGeometryProperties [%s][self:%d] set bounds %s", host->GetTag().c_str(),
-            host->GetId(), paintRect.ToString().c_str());
+        if (host != nullptr) {
+            ACE_LAYOUT_SCOPED_TRACE("SyncGeometryProperties [%s][self:%d] set bounds %s", host->GetTag().c_str(),
+                host->GetId(), paintRect.ToString().c_str());
+        }
     }
     if (extraOffset_.has_value()) {
         SyncGeometryFrame(paintRect + extraOffset_.value());
@@ -1320,6 +1322,8 @@ void RosenRenderContext::OnLightUpEffectUpdate(double radio)
 void RosenRenderContext::OnParticleOptionArrayUpdate(const std::list<ParticleOption>& optionList)
 {
     CHECK_NULL_VOID(rsNode_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     RectF rect = GetPaintRectWithoutTransform();
     if (rect.IsEmpty()) {
         return;
@@ -1327,7 +1331,7 @@ void RosenRenderContext::OnParticleOptionArrayUpdate(const std::list<ParticleOpt
     if (NeedPreloadImage(optionList, rect)) {
         return;
     }
-    auto pattern = GetHost()->GetPattern();
+    auto pattern = host->GetPattern();
     auto particlePattern = AceType::DynamicCast<ParticlePattern>(pattern);
     if (particlePattern->HaveUnVisibleParent()) {
         return;
@@ -1418,7 +1422,7 @@ bool RosenRenderContext::NeedPreloadImage(const std::list<ParticleOption>& optio
             auto imageHeight = Dimension(ConvertDimensionToPx(imageSize.second, rect.Height()), DimensionUnit::PX);
             auto canvasImageIter = particleImageMap_.find(imageParameter.GetImageSource());
             bool imageHasData = true;
-            if (canvasImageIter->second) {
+            if (canvasImageIter != particleImageMap_.end() && canvasImageIter->second) {
                 imageHasData = canvasImageIter->second->HasData();
             }
             if (canvasImageIter == particleImageMap_.end() || !imageHasData) {
@@ -3352,7 +3356,7 @@ void RosenRenderContext::OnBorderImageGradientUpdate(const Gradient& gradient)
     if (!gradient.IsValid()) {
         return;
     }
-    if (GetHost()->GetGeometryNode()->GetFrameSize().IsPositive()) {
+    if (GetHost() && GetHost()->GetGeometryNode() && GetHost()->GetGeometryNode()->GetFrameSize().IsPositive()) {
         PaintBorderImageGradient();
     }
     RequestNextFrame();
@@ -3371,7 +3375,9 @@ void RosenRenderContext::PaintBorderImageGradient()
     if (NearZero(paintSize.Width()) || NearZero(paintSize.Height())) {
         return;
     }
-    auto layoutProperty = GetHost()->GetLayoutProperty();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
 
     auto borderImageProperty = *GetBdImage();
@@ -3927,6 +3933,7 @@ void RosenRenderContext::CombineMarginAndPosition(Dimension& resultX, Dimension&
 
 bool RosenRenderContext::IsUsingPosition(const RefPtr<FrameNode>& frameNode)
 {
+    CHECK_NULL_RETURN(frameNode, true);
     auto layoutProperty = frameNode->GetLayoutProperty();
     bool isUsingPosition = true;
     if (layoutProperty) {
@@ -4542,7 +4549,7 @@ void RosenRenderContext::ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& 
     auto childNodesNew = children;
     if (SystemProperties::GetContainerDeleteFlag()) {
         auto frameNode = GetHost();
-        if (frameNode->GetIsDelete()) {
+        if (!frameNode || frameNode->GetIsDelete()) {
             return;
         }
         childNodesNew.clear();

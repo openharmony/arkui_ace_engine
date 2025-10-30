@@ -1436,7 +1436,7 @@ std::vector<ButtonInfo> JsParseDialogButtons(const std::unique_ptr<JsonValue>& a
     if (argsPtr != nullptr && argsPtr->GetValue(key) != nullptr && argsPtr->GetValue(key)->IsArray()) {
         for (int32_t i = 0; i < argsPtr->GetValue(key)->GetArraySize(); i++) {
             auto button = argsPtr->GetValue(key)->GetArrayItem(i);
-            if (!button->GetValue("text")->IsString()) {
+            if (!button->GetValue("text") || !button->GetValue("text")->IsString()) {
                 continue;
             }
             ButtonInfo buttonInfo;

@@ -30,7 +30,7 @@ void DestroyPeerImpl(Ark_ConsoleMessage peer)
 }
 Ark_ConsoleMessage ConstructImpl()
 {
-    return {};
+    return new ConsoleMessagePeer();
 }
 Ark_ConsoleMessage CtorImpl1(const Ark_String* message,
                              const Ark_String* sourceId,

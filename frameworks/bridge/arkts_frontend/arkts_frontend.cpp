@@ -547,13 +547,13 @@ ani_object ArktsFrontend::GetUIContext(int32_t instanceId)
     CHECK_NULL_RETURN(env, result);
 
     ani_class uiContextClass;
-    if ((status = env->FindClass("Larkui/handwritten/UIContextUtil/UIContextUtil;", &uiContextClass)) != ANI_OK) {
+    if ((status = env->FindClass("arkui.base.UIContextUtil.UIContextUtil", &uiContextClass)) != ANI_OK) {
         LOGE("FindClass UIContext failed, %{public}d", status);
         return result;
     }
     ani_ref aniRef = nullptr;
     if ((status = env->Class_CallStaticMethodByName_Ref(uiContextClass, "getOrCreateUIContextById",
-        "I:L@ohos/arkui/UIContext/UIContext;", &aniRef, instanceId)) != ANI_OK) {
+        "i:C{@ohos.arkui.UIContext.UIContext}", &aniRef, instanceId)) != ANI_OK) {
         LOGE("Class_CallStaticMethodByName_Ref failed, %{public}d", status);
         return result;
     }

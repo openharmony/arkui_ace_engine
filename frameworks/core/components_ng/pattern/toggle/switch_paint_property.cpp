@@ -27,9 +27,8 @@ void SwitchPaintParagraph::ToJsonValue(
         return;
     }
     int32_t themeScopeId = 0;
-    if (host) {
-        themeScopeId = host->GetThemeScopeId();
-    }
+    CHECK_NULL_VOID(host);
+    themeScopeId = host->GetThemeScopeId();
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto switchTheme = pipeline->GetTheme<SwitchTheme>(themeScopeId);

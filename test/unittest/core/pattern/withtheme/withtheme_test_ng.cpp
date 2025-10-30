@@ -761,4 +761,24 @@ HWTEST_F(WithThemeTestNg, WithThemeTest018, TestSize.Level1)
     EXPECT_EQ(resObjs.size(), TokenColors::TOTAL_NUMBER);
     EXPECT_EQ(resDarkObjs.size(), TokenColors::TOTAL_NUMBER);
 }
+
+/**
+ * @tc.name: WithThemeNodeTest001
+ * @tc.desc: Test SetThemeScopeId basic functionality
+ * @tc.type: FUNC
+ */
+HWTEST_F(WithThemeTestNg, WithThemeNodeTest001, TestSize.Level1)
+{
+    // Create WithThemeNode and reset themeScopeId_ to 0
+    auto withThemeNode = WithThemeNode::CreateWithThemeNode(60086);
+    withThemeNode->themeScopeId_ = 0;
+    
+    // Test SetThemeScopeId when themeScopeId_ is 0
+    withThemeNode->SetThemeScopeId(12345);
+    EXPECT_EQ(withThemeNode->GetThemeScopeId(), 12345);
+    
+    // Test SetThemeScopeId when themeScopeId_ is not 0 (should not change)
+    withThemeNode->SetThemeScopeId(67890);
+    EXPECT_EQ(withThemeNode->GetThemeScopeId(), 12345);
+}
 } //namespace OHOS::Ace::NG

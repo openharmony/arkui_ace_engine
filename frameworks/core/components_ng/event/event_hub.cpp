@@ -497,16 +497,17 @@ void EventHub::ClearOnAreaChangedInnerCallbacks()
 void EventHub::ClearCustomerOnDragFunc()
 {
     CHECK_NULL_VOID(dragDropCallbackSet_);
-    CHECK_NULL_VOID(dragDropCallbackSet_->innerDragDropCallback);
-    dragDropCallbackSet_->innerDragDropCallback->onDragStart = nullptr;
-    CHECK_NULL_VOID(dragDropCallbackSet_->customerDragDropCallback);
-    dragDropCallbackSet_->customerDragDropCallback->onDragEnter = nullptr;
-    dragDropCallbackSet_->customerDragDropCallback->onDragSpringLoading = nullptr;
-    dragDropCallbackSet_->customerDragDropCallback->onDragLeave = nullptr;
-    dragDropCallbackSet_->customerDragDropCallback->onDragMove = nullptr;
-    dragDropCallbackSet_->customerDragDropCallback->onDrop = nullptr;
-    dragDropCallbackSet_->customerDragDropCallback->onDragEnd = nullptr;
-    dragDropCallbackSet_->innerDragDropCallback = nullptr;
+    if (dragDropCallbackSet_->innerDragDropCallback) {
+        dragDropCallbackSet_->innerDragDropCallback->onDragStart = nullptr;
+    }
+    if (dragDropCallbackSet_->customerDragDropCallback) {
+        dragDropCallbackSet_->customerDragDropCallback->onDragEnter = nullptr;
+        dragDropCallbackSet_->customerDragDropCallback->onDragSpringLoading = nullptr;
+        dragDropCallbackSet_->customerDragDropCallback->onDragLeave = nullptr;
+        dragDropCallbackSet_->customerDragDropCallback->onDragMove = nullptr;
+        dragDropCallbackSet_->customerDragDropCallback->onDrop = nullptr;
+        dragDropCallbackSet_->customerDragDropCallback->onDragEnd = nullptr;
+    }
 }
 
 void EventHub::ClearCustomerOnDragStart()

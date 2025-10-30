@@ -496,10 +496,10 @@ void JSText::SetTextIndent(const JSCallbackInfo& info)
     RefPtr<ResourceObject> resObj;
     JSRef<JSVal> args = info[0];
 
+    UnRegisterResource("TextIndent");
     if (!ParseJsDimensionFpNG(args, value, resObj)) {
         value.Reset();
         TextModel::GetInstance()->SetTextIndent(value);
-        UnRegisterResource("TextIndent");
         return;
     }
     if (SystemProperties::ConfigChangePerform() && resObj) {
@@ -562,10 +562,10 @@ void JSText::SetLineHeight(const JSCallbackInfo& info)
     JSRef<JSVal> args = info[0];
     RefPtr<ResourceObject> resObj;
 
+    UnRegisterResource("LineHeight");
     if (!ParseJsDimensionFpNG(args, value, resObj)) {
         value.Reset();
         TextModel::GetInstance()->SetLineHeight(value);
-        UnRegisterResource("LineHeight");
         return;
     }
     if (SystemProperties::ConfigChangePerform() && resObj) {
@@ -691,10 +691,10 @@ void JSText::SetMinFontSize(const JSCallbackInfo& info)
     CalcDimension minFontSize = theme->GetTextStyle().GetAdaptMinFontSize();
     JSRef<JSVal> args = info[0];
     RefPtr<ResourceObject> resObj;
+    UnRegisterResource("AdaptMinFontSize");
     if (!ParseJsDimensionFpNG(args, minFontSize, resObj, false)) {
         minFontSize = theme->GetTextStyle().GetAdaptMinFontSize();
         TextModel::GetInstance()->SetAdaptMinFontSize(minFontSize);
-        UnRegisterResource("AdaptMinFontSize");
         return;
     }
     if (SystemProperties::ConfigChangePerform() && resObj) {
@@ -718,10 +718,10 @@ void JSText::SetMaxFontSize(const JSCallbackInfo& info)
     CalcDimension maxFontSize = theme->GetTextStyle().GetAdaptMaxFontSize();
     JSRef<JSVal> args = info[0];
     RefPtr<ResourceObject> resObj;
+    UnRegisterResource("AdaptMaxFontSize");
     if (!ParseJsDimensionFpNG(args, maxFontSize, resObj, false)) {
         maxFontSize = theme->GetTextStyle().GetAdaptMaxFontSize();
         TextModel::GetInstance()->SetAdaptMaxFontSize(maxFontSize);
-        UnRegisterResource("AdaptMaxFontSize");
         return;
     }
     if (maxFontSize.IsNegative()) {
@@ -766,10 +766,10 @@ void JSText::SetBaselineOffset(const JSCallbackInfo& info)
     CalcDimension value;
     JSRef<JSVal> args = info[0];
     RefPtr<ResourceObject> resObj;
+    UnRegisterResource("BaselineOffset");
     if (!ParseJsDimensionFpNG(args, value, resObj, false)) {
         value.Reset();
         TextModel::GetInstance()->SetBaselineOffset(value);
-        UnRegisterResource("BaselineOffset");
         return;
     }
     if (SystemProperties::ConfigChangePerform() && resObj) {

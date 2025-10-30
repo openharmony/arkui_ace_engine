@@ -540,15 +540,12 @@ public:
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetEnableAutoSpacing: [%{public}d]", isEnableAutoSpacing_);
     }
 
-    void OnAttachToMainTree() override
-    {
-        TextPattern::OnAttachToMainTree();
-    }
-
-    void OnDetachFromMainTree() override
-    {
-        TextPattern::OnDetachFromMainTree();
-    }
+    void OnAttachToMainTree() override;
+    void OnDetachFromMainTree() override;
+    void OnAttachToFrameNodeMultiThread() {}
+    void OnAttachToMainTreeMultiThread();
+    void OnDetachFromMainTreeMultiThread();
+    void OnDetachFromFrameNodeMultiThread(FrameNode* frameNode) {}
     
     void RegisterCaretChangeListener(std::function<void(int32_t)>&& listener)
     {
