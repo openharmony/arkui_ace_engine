@@ -4896,10 +4896,20 @@ void SetLinearGradientBlurImpl(Ark_NativePointer node,
     auto radius = Converter::OptConvertPtr<Dimension>(value);
     auto convValue = Converter::OptConvertPtr<NG::LinearGradientBlurPara>(options);
     Validator::ValidateNonNegative(radius);
-    NG::LinearGradientBlurPara para(
-        Dimension(0.0f, DimensionUnit::VP), std::vector<std::pair<float, float>>(), GradientDirection::BOTTOM);
+    NG::LinearGradientBlurPara para(Dimension(0.0f, DimensionUnit::VP),
+        std::vector<std::pair<float, float>> { { 0.0f, 0.0f }, { 0.0f, 1.0f } }, GradientDirection::BOTTOM);
     if (convValue.has_value()) {
-        para = convValue.value();
+        auto newPara = convValue.value();
+        if (static_cast<int32_t>(newPara.fractionStops_.size()) <= 1) {
+            newPara.fractionStops_.clear();
+            newPara.fractionStops_.push_back(std::pair<float, float>(0.0f, 0.0f));
+            newPara.fractionStops_.push_back(std::pair<float, float>(0.0f, 1.0f));
+        }
+        if (newPara.direction_ < GradientDirection::LEFT || newPara.direction_ >= GradientDirection::NONE) {
+            newPara.direction_ = GradientDirection::BOTTOM;
+        }
+        para.fractionStops_ = newPara.fractionStops_;
+        para.direction_ = newPara.direction_;
     }
     if (radius.has_value()) {
         para.blurRadius_ = radius.value();
