@@ -430,12 +430,12 @@ void SwiperPattern::MarkDirtyBindIndicatorNode() const
     indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
-Framework::JSIndicatorController* SwiperPattern::GetIndicatorController()
+RefPtr<JSIndicatorControllerBase> SwiperPattern::GetIndicatorController()
 {
-    return indicatorController_;
+    return indicatorController_.Upgrade();
 }
 
-void SwiperPattern::SetIndicatorController(Framework::JSIndicatorController* controller)
+void SwiperPattern::SetIndicatorController(RefPtr<JSIndicatorControllerBase> controller)
 {
     indicatorController_ = controller;
 }

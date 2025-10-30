@@ -999,7 +999,8 @@ void JSSwiper::SetIndicatorController(const JSCallbackInfo& info)
     SwiperModel::GetInstance()->SetBindIndicator(true);
     auto targetNode = AceType::Claim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto resetFunc = jsIndicatorController->SetSwiperNodeBySwiper(targetNode);
-    SwiperModel::GetInstance()->SetIndicatorController(jsIndicatorController);
+    SwiperModel::GetInstance()->SetIndicatorController(
+        AceType::DynamicCast<NG::JSIndicatorControllerBase>(AceType::Claim(jsIndicatorController)));
     if (resetFunc) {
         SwiperModel::GetInstance()->SetJSIndicatorController(resetFunc);
     }
@@ -1007,7 +1008,8 @@ void JSSwiper::SetIndicatorController(const JSCallbackInfo& info)
 
 void JSSwiper::ResetSwiperNode(const JSCallbackInfo& info)
 {
-    JSIndicatorController* jsIndicatorController = SwiperModel::GetInstance()->GetIndicatorController();
+    RefPtr<JSIndicatorController> jsIndicatorController =
+        AceType::DynamicCast<Framework::JSIndicatorController>(SwiperModel::GetInstance()->GetIndicatorController());
     JSIndicatorController* controller = nullptr;
     if (info.Length() >= 1 && info[0]->IsObject()) {
         controller = JSRef<JSObject>::Cast(info[0])->Unwrap<JSIndicatorController>();
