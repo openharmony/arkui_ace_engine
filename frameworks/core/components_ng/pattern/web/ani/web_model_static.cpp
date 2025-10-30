@@ -1514,4 +1514,13 @@ void WebModelStatic::SetActivateContentEventId(
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnActivateContentEvent(std::move(uiCallback));
 }
+
+void WebModelStatic::SetSafeBrowsingCheckFinishId(FrameNode* frameNode,
+    std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& safeBrowsingCheckFinishId)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnSafeBrowsingCheckFinishEvent(std::move(safeBrowsingCheckFinishId));
+}
 } // namespace OHOS::Ace::NG

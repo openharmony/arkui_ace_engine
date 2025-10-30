@@ -114,6 +114,8 @@ enum class ThreatType {
     FRAUD = 1,
     RISK = 2,
     WARNING = 3,
+    NONE = 4,
+    UNPROCESSED = 5
 };
 
 enum class RenderingStrategy {

@@ -1393,6 +1393,27 @@ void OnActivateContent(const CallbackHelper<VoidCallback>& arkCallback,
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     arkCallback.InvokeSync();
 }
+
+void OnSafeBrowsingCheckFinish(const CallbackHelper<OnSafeBrowsingCheckResultCallback>& arkCallback,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info)
+{
+    ContainerScope scope(instanceId);
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->UpdateCurrentActiveNode(weakNode);
+    auto func = [arkCallback, info]() {
+        auto* eventInfo = TypeInfoHelper::DynamicCast<SafeBrowsingCheckResultEvent>(info.get());
+        CHECK_NULL_VOID(eventInfo);
+        Ark_ThreatType parameter = Converter::ArkValue<Ark_ThreatType>(
+            static_cast<Converter::ThreatType>(eventInfo->GetThreatType()));
+        arkCallback.InvokeSync(parameter);
+    };
+#ifdef ARKUI_CAPI_UNITTEST
+    func();
+#else
+    pipelineContext->PostAsyncEvent([func]() { func(); }, "ArkUIWebSafeBrowsingCheckFinish");
+#endif // ARKUI_CAPI_UNITTEST
+}
 } // namespace OHOS::Ace::NG::GeneratedModifier::WebAttributeModifier
 #endif // WEB_SUPPORTED
 
