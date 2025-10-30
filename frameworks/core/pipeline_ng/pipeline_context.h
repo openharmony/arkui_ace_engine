@@ -28,7 +28,6 @@
 #include "base/log/frame_info.h"
 #include "base/log/frame_report.h"
 #include "base/memory/referenced.h"
-#include "base/ressched/ressched_touch_optimizer.h"
 #include "base/utils/device_config.h"
 #include "base/view_data/view_data_wrap.h"
 #include "core/accessibility/accessibility_manager_ng.h"
@@ -74,6 +73,10 @@ class UIContextImpl;
 
 namespace OHOS::Rosen {
   class RSUIDirector;
+}
+
+namespace OHOS::Ace {
+  class ResSchedTouchOptimizer;
 }
 
 namespace OHOS::Ace::NG {
@@ -1298,11 +1301,6 @@ public:
     {
         CHECK_NULL_RETURN(window_, false);
         return window_->GetIsRequestFrame();
-    }
-
-    const std::unique_ptr<ResSchedTouchOptimizer>& GetTouchOptimizer() const
-    {
-        return touchOptimizer_;
     }
 
     void SetMagnifierController(const RefPtr<MagnifierController>& magnifierController);
