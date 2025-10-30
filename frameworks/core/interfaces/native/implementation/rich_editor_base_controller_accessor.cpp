@@ -256,6 +256,11 @@ Opt_RectResult GetCaretRectImpl(Ark_RichEditorBaseController peer)
     CHECK_EQUAL_RETURN(caretRect->IsValid(), false, invalidValue);
     return Converter::ArkValue<Opt_RectResult>(*caretRect);
 }
+void DeleteBackwardImpl(Ark_RichEditorBaseController peer)
+{
+    CHECK_NULL_VOID(peer);
+    peer->DeleteBackward();
+}
 } // RichEditorBaseControllerAccessor
 const GENERATED_ArkUIRichEditorBaseControllerAccessor* GetRichEditorBaseControllerAccessor()
 {
@@ -274,6 +279,7 @@ const GENERATED_ArkUIRichEditorBaseControllerAccessor* GetRichEditorBaseControll
         RichEditorBaseControllerAccessor::GetLayoutManagerImpl,
         RichEditorBaseControllerAccessor::GetPreviewTextImpl,
         RichEditorBaseControllerAccessor::GetCaretRectImpl,
+        RichEditorBaseControllerAccessor::DeleteBackwardImpl,
     };
     return &RichEditorBaseControllerAccessorImpl;
 }

@@ -34983,6 +34983,11 @@ KInteropReturnBuffer impl_RichEditorBaseController_getCaretRect(Ark_NativePointe
         return _retSerializer.toReturnBuffer();
 }
 KOALA_INTEROP_1(RichEditorBaseController_getCaretRect, KInteropReturnBuffer, Ark_NativePointer)
+void impl_RichEditorBaseController_deleteBackward(Ark_NativePointer thisPtr) {
+        Ark_RichEditorBaseController self = reinterpret_cast<Ark_RichEditorBaseController>(thisPtr);
+        GetAccessors()->getRichEditorBaseControllerAccessor()->deleteBackward(self);
+}
+KOALA_INTEROP_DIRECT_V1(RichEditorBaseController_deleteBackward, Ark_NativePointer)
 Ark_NativePointer impl_RichEditorController_construct() {
         return GetAccessors()->getRichEditorControllerAccessor()->construct();
 }

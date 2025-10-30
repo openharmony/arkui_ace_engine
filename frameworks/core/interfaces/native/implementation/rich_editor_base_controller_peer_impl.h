@@ -64,6 +64,13 @@ public:
         return nullptr;
     }
 
+    void DeleteBackward()
+    {
+        if (auto controller = handler_.Upgrade(); controller) {
+            controller->DeleteBackwardFunction();
+        }
+    }
+
     void CloseSelectionMenu() override
     {
         if (auto controller = handler_.Upgrade(); controller) {

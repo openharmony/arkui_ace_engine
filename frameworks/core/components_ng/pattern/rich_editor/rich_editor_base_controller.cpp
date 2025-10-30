@@ -98,6 +98,12 @@ void RichEditorBaseController::StopEditing()
     richEditorPattern->StopEditing();
 }
 
+void RichEditorBaseController::DeleteBackwardFunction()
+{
+    auto richEditorPattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(richEditorPattern);
+    richEditorPattern->DeleteBackwardFunction();
+}
 
 void RichEditorBaseController::SetSelection(
     int32_t selectionStart, int32_t selectionEnd, const std::optional<SelectionOptions>& options, bool isForward)

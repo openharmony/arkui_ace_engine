@@ -27686,6 +27686,7 @@ typedef struct GENERATED_ArkUIRichEditorBaseControllerAccessor {
     Opt_LayoutManager (*getLayoutManager)(Ark_RichEditorBaseController peer);
     Opt_PreviewText (*getPreviewText)(Ark_RichEditorBaseController peer);
     Opt_RectResult (*getCaretRect)(Ark_RichEditorBaseController peer);
+    void (*deleteBackward)(Ark_RichEditorBaseController peer);
 } GENERATED_ArkUIRichEditorBaseControllerAccessor;
 
 typedef struct GENERATED_ArkUIRichEditorControllerAccessor {

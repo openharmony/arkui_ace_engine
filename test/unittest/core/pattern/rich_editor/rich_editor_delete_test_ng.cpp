@@ -263,6 +263,26 @@ HWTEST_F(RichEditorDeleteTestNg, HandleOnDelete001, TestSize.Level0)
 }
 
 /**
+ * @tc.name: DeleteBackwardFunction001
+ * @tc.desc: test DeleteBackwardFunction
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorDeleteTestNg, DeleteBackwardFunction001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorPattern->previewTextRecord_.previewContent = u"123";
+    richEditorPattern->previewTextRecord_.previewTextHasStarted = true;
+    richEditorPattern->previewTextRecord_.startOffset = 0;
+    richEditorPattern->previewTextRecord_.endOffset = 0;
+    richEditorPattern->DeleteBackwardFunction();
+
+    EXPECT_EQ(richEditorPattern->IsPreviewTextInputting(), true);
+}
+
+/**
  * @tc.name: DeleteBackward001
  * @tc.desc: test DeleteBackward
  * @tc.type: FUNC
