@@ -3870,7 +3870,7 @@ void SwiperPattern::PropertyPrefMonitor(bool isBeginPerf)
         if (isInAutoPlay_) {
             ResSchedReport::GetInstance().ResSchedDataReport("auto_play_off");
         } else {
-            ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
+            ResSchedReport::GetInstance().ResSchedDataReport("swiper_slide_off");
         }
 #endif
         isInAutoPlay_ = false;
