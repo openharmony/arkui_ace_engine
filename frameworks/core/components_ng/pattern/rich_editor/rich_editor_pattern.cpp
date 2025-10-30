@@ -36,6 +36,7 @@
 #include "base/log/dump_log.h"
 #include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
+#include "base/utils/multi_thread.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utf_helper.h"
 #include "base/utils/utils.h"
@@ -1138,9 +1139,56 @@ RefPtr<FrameNode> RichEditorPattern::GetContentHost() const
     return contentPattern_->GetHost();
 }
 
+void RichEditorPattern::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode);
+    TextPattern::OnAttachToMainTree();
+}
+
+void RichEditorPattern::OnDetachFromMainTree()
+{
+    auto host = GetHost();
+    THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree);
+    TextPattern::OnDetachFromMainTree();
+}
+
 void RichEditorPattern::OnAttachToFrameNode()
 {
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "OnAttachToFrameNode");
+    auto frameNode = GetHost();
+    THREAD_SAFE_NODE_CHECK(frameNode, OnAttachToFrameNode);
+    CHECK_NULL_VOID(frameNode);
+    TextPattern::OnAttachToFrameNode();
+    richEditorInstanceId_ = Container::CurrentIdSafely();
+    frameId_ = frameNode->GetId();
+    StylusDetectorMgr::GetInstance()->AddTextFieldFrameNode(frameNode, WeakClaim(this));
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    context->AddWindowSizeChangeCallback(frameId_);
+
+    auto patternCreator = [weak = WeakClaim(this)]() { return AceType::MakeRefPtr<RichEditorContentPattern>(weak); };
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto contentNode = FrameNode::GetOrCreateFrameNode(V2::RICH_EDITOR_CONTENT_ETS_TAG, nodeId, patternCreator);
+    frameNode->AddChild(contentNode);
+    SetContentPattern(contentNode->GetPattern<RichEditorContentPattern>());
+}
+
+void RichEditorPattern::OnDetachFromFrameNode(FrameNode* node)
+{
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "OnDetachFromFrameNode");
+    THREAD_SAFE_NODE_CHECK(node, OnDetachFromFrameNode, node);
+    CHECK_NULL_VOID(node);
+    TextPattern::OnDetachFromFrameNode(node);
+    ScrollablePattern::OnDetachFromFrameNode(node);
+    ClearOnFocusTextField(node);
+    auto context = pipeline_.Upgrade();
+    IF_PRESENT(context, RemoveWindowSizeChangeCallback(frameId_));
+}
+
+void RichEditorPattern::OnAttachToMainTreeMultiThread()
+{
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "OnAttachToMainTreeMultiThread");
     TextPattern::OnAttachToFrameNode();
     richEditorInstanceId_ = Container::CurrentIdSafely();
     auto frameNode = GetHost();
@@ -1158,12 +1206,15 @@ void RichEditorPattern::OnAttachToFrameNode()
     SetContentPattern(contentNode->GetPattern<RichEditorContentPattern>());
 }
 
-void RichEditorPattern::OnDetachFromFrameNode(FrameNode* node)
+void RichEditorPattern::OnDetachFromMainTreeMultiThread()
 {
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "OnAttachToFrameNode");
-    TextPattern::OnDetachFromFrameNode(node);
-    ScrollablePattern::OnDetachFromFrameNode(node);
-    ClearOnFocusTextField(node);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "OnDetachFromMainTreeMultiThread");
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto frameNode = host.GetRawPtr();
+    TextPattern::OnDetachFromFrameNode(frameNode);
+    ScrollablePattern::OnDetachFromFrameNode(frameNode);
+    ClearOnFocusTextField(frameNode);
     auto context = pipeline_.Upgrade();
     IF_PRESENT(context, RemoveWindowSizeChangeCallback(frameId_));
 }
