@@ -459,6 +459,10 @@ static const std::set<std::string> TAGS_MODAL_DIALOG_COMPONENT = {
     V2::SHEET_WRAPPER_TAG,
 };
 
+static const std::set<std::string> TAGS_IGNORE_COMPONENT = {
+    V2::CONTAINER_MODAL_ETS_TAG,
+};
+
 bool AccessibilityProperty::IsTagInSubTreeComponent(const std::string& tag)
 {
     if (TAGS_SUBTREE_COMPONENT.find(tag) != TAGS_SUBTREE_COMPONENT.end()) {
@@ -483,6 +487,9 @@ bool AccessibilityProperty::HitAccessibilityHoverPriority(const RefPtr<FrameNode
 
 bool AccessibilityProperty::CheckHoverConsumeByAccessibility(const RefPtr<FrameNode>& node)
 {
+    CHECK_NULL_RETURN(node, false);
+    auto isAccessibilityIgnore = TAGS_IGNORE_COMPONENT.find(node->GetTag()) != TAGS_IGNORE_COMPONENT.end();
+    CHECK_EQUAL_RETURN(isAccessibilityIgnore, true, false);
     return (IsAccessibilityFocusable(node) || IsTagInModalDialog(node) || HitAccessibilityHoverPriority(node));
 }
 
