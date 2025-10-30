@@ -731,6 +731,30 @@ export class UIObserver {
             this.observerImpl!.off(type, options, callback);
         }
     }
+
+    public onTabChange(callback: ((param: object) => void)): void {
+        if (this.observerImpl) {
+            this.observerImpl!.onTabChange(callback);
+        }
+    }
+
+    public offTabChange(callback?: ((param: object) => void)): void {
+        if (this.observerImpl) {
+            this.observerImpl!.offTabChange(callback);
+        }
+    }
+
+    public onTabChange(options: uiObserver.ObserverOptions, callback: ((param: object) => void)): void {
+        if (this.observerImpl) {
+            this.observerImpl!.onTabChange(options, callback);
+        }
+    }
+
+    public offTabChange(options: uiObserver.ObserverOptions, callback?: ((param: object) => void)): void {
+        if (this.observerImpl) {
+            this.observerImpl!.offTabChange(options, callback);
+        }
+    }
 }
 export interface PageInfo {}
 export interface ContentCoverController {}

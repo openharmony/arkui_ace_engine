@@ -16,6 +16,11 @@ declare namespace uiObserver {
         
         on(type: string, options: NavDestinationSwitchObserverOptions, callback: object): void;
         off(type: string, options: NavDestinationSwitchObserverOptions, callback?: object): void;
+
+        onTabChange(callback: object): void;
+        offTabChange(callback?: object): void;
+        onTabChange(options: ObserverOptions, callback: object): void;
+        offTabChange(options: ObserverOptions, callback?: object): void;
     }
     export function createUIObserver(id: number): UIObserver;
 
@@ -65,6 +70,25 @@ declare namespace uiObserver {
     }
     export interface NavDestinationSwitchObserverOptions {
         navigationId: ResourceStr;
+    }
+
+    export enum TabContentState {
+        ON_SHOW = 0,
+        ON_HIDE = 1
+    }
+
+    export interface TabContentInfo {
+        tabContentId: string;
+        tabContentUniqueId: number;
+        state: TabContentState;
+        index: number;
+        id: string;
+        uniqueId: number;
+        lastIndex?: int;
+    }
+
+    export interface ObserverOptions {
+        id: string;
     }
 }
 

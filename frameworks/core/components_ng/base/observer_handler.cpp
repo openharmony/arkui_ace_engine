@@ -293,8 +293,12 @@ void UIObserverHandler::NotifyTabContentStateUpdate(const TabContentInfo& info)
 
 void UIObserverHandler::NotifyTabChange(const TabContentInfo& info)
 {
-    CHECK_NULL_VOID(tabChangeHandleFunc_);
-    tabChangeHandleFunc_(info);
+    if (tabChangeHandleFunc_) {
+        tabChangeHandleFunc_(info);
+    }
+    if (tabChangeHandleFuncForAni_) {
+        tabChangeHandleFuncForAni_(info);
+    }
 }
 
 UIObserverHandler::NavDestinationSwitchHandleFunc UIObserverHandler::GetHandleNavDestinationSwitchFunc()
@@ -593,6 +597,11 @@ void UIObserverHandler::SetHandleTabContentStateUpdateFunc(TabContentStateHandle
 void UIObserverHandler::SetHandleTabChangeFunc(TabChangeHandleFunc func)
 {
     tabChangeHandleFunc_ = func;
+}
+
+void UIObserverHandler::SetHandleTabChangeFuncForAni(TabChangeHandleFuncForAni func)
+{
+    tabChangeHandleFuncForAni_ = func;
 }
 
 void UIObserverHandler::SetHandleTextChangeEventFunc(TextChangeEventHandleFunc&& func)
