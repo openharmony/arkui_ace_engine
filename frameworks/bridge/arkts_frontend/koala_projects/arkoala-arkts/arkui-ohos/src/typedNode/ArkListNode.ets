@@ -17,8 +17,8 @@ import { RuntimeType, runtimeType } from "@koalaui/interop";
 import { ArkScrollableNode } from "./ArkScrollableNode";
 import { ListAttribute, ArkListPeer, ListOptions, ListItemAlign, Axis, BarState, ListDividerOptions, ChainAnimationOptions, StickyStyle,
     ScrollSnapAlign, NestedScrollOptions, ChildrenMainSize, OnScrollVisibleContentChangeCallback, ItemDragInfo, CustomBuilder,
-    OnScrollFrameBeginCallback, OnWillScrollCallback, OnScrollCallback, LengthConstrain, Dimension, EdgeEffect, EdgeEffectOptions
-} from "../framework";
+    OnScrollFrameBeginCallback, OnWillScrollCallback, OnScrollCallback, LengthConstrain, Dimension, EdgeEffect, EdgeEffectOptions,
+    AttributeModifier, ScrollableCommonMethod, CommonMethod } from "../framework";
 import { Resource } from "global.resource"
 export class ArkListNode extends ArkScrollableNode implements ListAttribute {
     constructParam(...param: Object[]): this {
@@ -280,5 +280,8 @@ export class ArkListNode extends ArkScrollableNode implements ListAttribute {
         this.getPeer()?.setEdgeEffectAttribute(value_casted, options_casted)
         this.markDirty()
         return this
+    }
+    attributeModifier(value: AttributeModifier<ListAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
     }
 }

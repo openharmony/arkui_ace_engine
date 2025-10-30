@@ -15,7 +15,7 @@
 
 import { RuntimeType, runtimeType } from "@koalaui/interop";
 import { ArkBaseNode } from "./ArkBaseNode";
-import { GridItemAttribute, ArkGridItemPeer, GridItemOptions, Bindable } from "../component/gridItem";
+import { GridItemAttribute, ArkGridItemPeer, GridItemOptions, Bindable, AttributeModifier, CommonMethod } from "../component/gridItem";
 export class ArkGridItemNode extends ArkBaseNode implements GridItemAttribute {
     constructParam(...param: Object[]): this {
         if (param.length > 1) {
@@ -80,5 +80,8 @@ export class ArkGridItemNode extends ArkBaseNode implements GridItemAttribute {
         this.getPeer()?.setOnSelectAttribute(value_casted)
         this.markDirty()
         return this
+    }
+    attributeModifier(value: AttributeModifier<GridItemAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
     }
 }

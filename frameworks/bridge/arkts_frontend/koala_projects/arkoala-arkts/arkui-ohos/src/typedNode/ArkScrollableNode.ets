@@ -15,7 +15,7 @@
 
 import { ArkBaseNode } from "./ArkBaseNode";
 import { ScrollableCommonMethod, ArkScrollableCommonMethodPeer, BarState, Color, NestedScrollOptions, ContentClipMode,
-    CrownSensitivity, EdgeEffect, EdgeEffectOptions, FadingEdgeOptions } from "../framework";
+    CrownSensitivity, EdgeEffect, EdgeEffectOptions, FadingEdgeOptions, AttributeModifier, CommonMethod } from "../framework";
 import { RectShape } from "@ohos.arkui.shape"
 import { Resource } from "global.resource"
 export class ArkScrollableNode extends ArkBaseNode implements ScrollableCommonMethod {
@@ -119,5 +119,8 @@ export class ArkScrollableNode extends ArkBaseNode implements ScrollableCommonMe
         this.getPeer()?.setFadingEdgeAttribute(enabled_casted, options_casted)
         this.markDirty()
         return this
+    }
+    attributeModifier(value: AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
     }
 }
