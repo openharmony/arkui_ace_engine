@@ -2573,6 +2573,7 @@ HWTEST_F(SearchTestNg, InitMargin, TestSize.Level1)
      * @tc.steps: Create Text filed node with default text and placeholder
      */
     SearchModelNG searchModelInstance;
+
     searchModelInstance.Create(EMPTY_VALUE_U16, PLACEHOLDER_U16, SEARCH_SVG);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -2582,6 +2583,7 @@ HWTEST_F(SearchTestNg, InitMargin, TestSize.Level1)
     auto searchLayoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
     ASSERT_NE(searchLayoutProperty, nullptr);
     searchPattern->InitMargin(searchLayoutProperty);
+
     const auto& marginProperty = searchLayoutProperty->GetMarginProperty();
     ASSERT_NE(marginProperty, nullptr);
     EXPECT_TRUE(marginProperty->top);
@@ -2593,6 +2595,7 @@ HWTEST_F(SearchTestNg, InitMargin, TestSize.Level1)
     EXPECT_FALSE(marginProperty->bottom);
 
     MarginProperty margin;
+
     margin.top = CalcLength(10.0f);
     margin.bottom = CalcLength(10.0f);
     searchLayoutProperty->UpdateUserMargin(margin);
@@ -2601,6 +2604,9 @@ HWTEST_F(SearchTestNg, InitMargin, TestSize.Level1)
 
     EXPECT_TRUE(marginProperty->top);
     EXPECT_TRUE(marginProperty->bottom);
+
+    searchPattern->UpdateSearchSymbol();
+    searchPattern->UpdateSearchSymbol();
 }
 
 /**

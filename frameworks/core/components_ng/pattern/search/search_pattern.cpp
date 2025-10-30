@@ -2071,6 +2071,12 @@ void SearchPattern::OnColorConfigurationUpdate()
         UpdateImageIconNode(IMAGE_INDEX);
         UpdateImageIconNode(CANCEL_IMAGE_INDEX);
     }
+    UpdateDividerColorMode();
+    if (SystemProperties::ConfigChangePerform()) {
+        UpdateSearchSymbol();
+        return;
+    }
+
     auto buttonNode = buttonNode_.Upgrade();
     if (buttonNode) {
         auto buttonRenderContext = buttonNode->GetRenderContext();
@@ -2097,7 +2103,30 @@ void SearchPattern::OnColorConfigurationUpdate()
         textField->MarkModifyDone();
         textField->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
-    UpdateDividerColorMode();
+}
+
+void SearchPattern::UpdateSearchSymbol()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto searchTheme = GetTheme();
+    CHECK_NULL_VOID(searchTheme);
+    auto iconFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(IMAGE_INDEX));
+    if (searchIconUsingThemeColor_ && iconFrameNode && iconFrameNode->GetTag() != V2::SYMBOL_ETS_TAG) {
+        auto symbolLayoutProperty = iconFrameNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(symbolLayoutProperty);
+        symbolLayoutProperty->UpdateSymbolColorList({Color(searchTheme->GetSymbolIconColor())});
+        iconFrameNode->MarkModifyDone();
+        iconFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
+    auto cancelIconFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(CANCEL_IMAGE_INDEX));
+    if (cancelIconUsingThemeColor_ && cancelIconFrameNode && cancelIconFrameNode->GetTag() != V2::SYMBOL_ETS_TAG) {
+        auto symbolLayoutProperty = cancelIconFrameNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(symbolLayoutProperty);
+        symbolLayoutProperty->UpdateSymbolColorList({Color(searchTheme->GetSymbolIconColor())});
+        cancelIconFrameNode->MarkModifyDone();
+        cancelIconFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
 }
 
 bool SearchPattern::OnThemeScopeUpdate(int32_t themeScopeId)
@@ -2265,6 +2294,7 @@ void SearchPattern::InitSearchIconColorSize()
     GetSearchNode()->SetSearchSymbolIconSize(searchTheme->GetSymbolIconHeight());
     GetSearchNode()->SetSearchImageIconColor(Color(searchTheme->GetSearchIconColor()));
     GetSearchNode()->SetSearchImageIconSize(searchTheme->GetIconHeight());
+    searchIconUsingThemeColor_ = true;
 }
 
 void SearchPattern::InitCancelIconColorSize()
@@ -2275,6 +2305,7 @@ void SearchPattern::InitCancelIconColorSize()
     GetSearchNode()->SetCancelSymbolIconSize(SYMBOL_ICON_HEIGHT);
     GetSearchNode()->SetCancelImageIconColor(Color(searchTheme->GetSearchIconColor()));
     GetSearchNode()->SetCancelImageIconSize(searchTheme->GetIconHeight());
+    cancelIconUsingThemeColor_ = true;
 }
 
 void SearchPattern::CreateSearchIcon(const std::string& src, bool forceUpdate)
@@ -2455,6 +2486,7 @@ void SearchPattern::SetSearchIconColor(const Color& color)
     CHECK_NULL_VOID(iconFrameNode);
     if (iconFrameNode->GetTag() == V2::SYMBOL_ETS_TAG) {
         GetSearchNode()->SetSearchSymbolIconColor(Color(color));
+        searchIconUsingThemeColor_ = false;
         auto symbolLayoutProperty = iconFrameNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(symbolLayoutProperty);
         symbolLayoutProperty->UpdateSymbolColorList({color});
@@ -2529,6 +2561,7 @@ void SearchPattern::SetCancelIconColor(const Color& color)
     CHECK_NULL_VOID(cancelIconFrameNode);
     if (cancelIconFrameNode->GetTag() == V2::SYMBOL_ETS_TAG) {
         GetSearchNode()->SetCancelSymbolIconColor(Color(color));
+        cancelIconUsingThemeColor_ = false;
         auto symbolLayoutProperty = cancelIconFrameNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(symbolLayoutProperty);
         symbolLayoutProperty->UpdateSymbolColorList({color});
