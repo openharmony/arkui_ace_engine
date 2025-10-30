@@ -76,7 +76,7 @@ namespace OHOS::Rosen {
 }
 
 namespace OHOS::Ace {
-  class ResSchedTouchOptimizer;
+    class ResSchedTouchOptimizer;
 }
 
 namespace OHOS::Ace::NG {
