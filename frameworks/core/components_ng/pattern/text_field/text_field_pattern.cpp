@@ -850,6 +850,22 @@ bool TextFieldPattern::CheckAttachInput()
 void TextFieldPattern::UpdateCaretInfoToController(bool forceUpdate)
 {
     CHECK_NULL_VOID(HasFocus());
+#if defined(CROSS_PLATFORM)
+#if defined(IOS_PLATFORM)
+    if (editingValue_ && editingValue_->selection.IsValid() &&
+        editingValue_->selection.GetEnd() < selectController_->GetCaretIndex()) {
+#else
+    if (editingValue_ && editingValue_->selection.IsValid() &&
+        editingValue_->selection.GetEnd() < selectController_->GetCaretIndex() && !editingValue_->appendText.empty()) {
+#endif
+        SetCaretPosition(editingValue_->selection.GetEnd());
+    }
+    if (editingValue_ && editingValue_->selection.IsValid()) {
+
+        editingValue_->selection.Update(-1);
+    }
+#endif
+
 #if defined(ENABLE_STANDARD_INPUT)
     UpdateCaretInfoStandard(forceUpdate);
 #else
@@ -5448,11 +5464,12 @@ void TextFieldPattern::ExecuteInsertValueCommand(const InsertCommandInfo& info)
     auto isIME = (info.reason == InputReason::IME);
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-#if defined(IOS_PLATFORM)
-    if (info.compose.isActive && (insertValue.length() > 0 || info.unmarkText)) {
-        auto composeStart = info.compose.start;
-        auto composeEnd = info.compose.end;
-        DeleteByRange(composeStart, composeEnd);
+#if defined(CROSS_PLATFORM)
+    if (info.compose.end > -1 && info.compose.start > -1 && (info.compose.end > info.compose.start) &&
+        (insertValue.length() > 0 || info.unmarkText)) {
+        auto start1 = info.compose.start;
+        auto end1 = info.compose.end;
+        DeleteByRange(start1, end1);
     }
 #endif
     TwinklingByFocus();
@@ -6324,7 +6341,18 @@ bool TextFieldPattern::HandleEditingEventCrossPlatform(const std::shared_ptr<Tex
 #ifdef CROSS_PLATFORM
 #ifdef IOS_PLATFORM
     if (value->isDelete && !value->discardedMarkedText) {
-        HandleOnDelete(true);
+        if (value->compose.IsValid()) {
+            EmojiRelation relation = GetEmojiRelation(value->selection.GetEnd());
+            if (relation == EmojiRelation::IN_EMOJI || relation == EmojiRelation::MIDDLE_EMOJI ||
+                relation == EmojiRelation::BEFORE_EMOJI || value->selection.GetEnd() != value->compose.GetStart()) {
+                HandleOnDelete(true);
+            } else {
+                DeleteBackward(value->compose.GetEnd() - value->compose.GetStart());
+                value->compose.Update(-1);
+            }
+        } else {
+            HandleOnDelete(true);
+        }
         return true;
     }
 #else
@@ -6333,9 +6361,8 @@ bool TextFieldPattern::HandleEditingEventCrossPlatform(const std::shared_ptr<Tex
         return true;
     }
 #endif
+    editingValue_ = value;
 #ifdef IOS_PLATFORM
-    compose_ = value->compose;
-    unmarkText_ = value->unmarkText;
     if (value->discardedMarkedText) {
         return false;
     }
@@ -11273,9 +11300,8 @@ void TextFieldPattern::AddInsertCommand(const std::u16string& insertValue, Input
             return;
         }
         if (!isEdit_ || (reason == InputReason::IME && IsDragging())) {
-            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
-                "textfield %{public}d NOT allow input, isEdit_ = %{public}d, IsDragging = %{public}d", host->GetId(),
-                isEdit_, IsDragging());
+            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "textfield %{public}d NOT allow input, isEdit_ = %{public}d"
+                ", IsDragging = %{public}d", host->GetId(), isEdit_, IsDragging());
             return;
         }
     }
@@ -11290,11 +11316,13 @@ void TextFieldPattern::AddInsertCommand(const std::u16string& insertValue, Input
     InsertCommandInfo info;
     info.insertValue = insertValue;
     info.reason = reason;
-#if defined(IOS_PLATFORM)
-    info.compose.start = compose_.GetStart();
-    info.compose.end = compose_.GetEnd();
-    info.compose.isActive = compose_.IsValid();
-    info.unmarkText = unmarkText_;
+#if defined(CROSS_PLATFORM)
+    if (editingValue_) {
+        info.compose.start = editingValue_->compose.GetStart();
+        info.compose.end = editingValue_->compose.GetEnd();
+        info.compose.isActive = editingValue_->compose.IsValid();
+        info.unmarkText = editingValue_->unmarkText;
+    }
 #endif
     insertCommands_.emplace(info);
     CloseSelectOverlay(true);
