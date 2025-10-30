@@ -74,6 +74,20 @@ ScriptItems Convert(const Array_ScriptItem& src)
 }
 
 template<>
+ScriptItemsByOrder Convert(const Array_ScriptItem& src)
+{
+    auto items = Converter::Convert<std::vector<ScriptItem>>(src);
+    ScriptItemsByOrder scriptItemsByOrder;
+    std::unordered_set<std::string> temp;
+    for (auto item : items) {
+        if (temp.insert(item.first).second) {
+            scriptItemsByOrder.push_back(item.first);
+        }
+    }
+    return scriptItemsByOrder;
+}
+
+template<>
 NestedScrollOptionsExt Convert(const Ark_NestedScrollOptionsExt& src)
 {
     NestedScrollOptionsExt nestedOpt = {
@@ -2215,7 +2229,13 @@ void SetRunJavaScriptOnHeadEndImpl(Ark_NativePointer node,
         // Implement Reset value
         return;
     }
-    WebModelStatic::JavaScriptOnHeadEnd(frameNode, *convValue);
+
+    auto convValueByOrder = Converter::OptConvert<ScriptItemsByOrder>(*value);
+    if (!convValueByOrder) {
+        // Implement Reset value
+        return;
+    }
+    WebModelStatic::JavaScriptOnHeadEnd(frameNode, *convValue, *convValueByOrder);
 #endif // WEB_SUPPORTED
 }
 void SetNativeEmbedOptionsImpl(Ark_NativePointer node,
