@@ -18,6 +18,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/mousestyle/mouse_style.h"
+#include "base/ressched/ressched_touch_optimizer.h"
 #include "base/utils/utils.h"
 #include "core/accessibility/accessibility_manager.h"
 #include "core/common/page_viewport_config.h"
@@ -180,6 +181,11 @@ std::string PipelineContext::GetBundleName()
 std::string PipelineContext::GetModuleName()
 {
     return "";
+}
+
+const std::unique_ptr<ResSchedTouchOptimizer>& PipelineContext::GetTouchOptimizer() const
+{
+    return touchOptimizer_;
 }
 
 RefPtr<MockPipelineContext> MockPipelineContext::GetCurrent()
