@@ -276,7 +276,7 @@ HWTEST_F(RichEditorAITestOneNg, HandleAIWrite001, TestSize.Level2)
 }
 
 /**
- * @tc.name: HandleAIWrite001
+ * @tc.name: HandleAIWrite002
  * @tc.desc: test HandleOnAIWrite
  * @tc.type: FUNC
  */
@@ -413,9 +413,7 @@ HWTEST_F(RichEditorAITestOneNg, CanStartAITask002, TestSize.Level2)
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->textDetectEnable_ = true;
     richEditorPattern->isEditing_ = true;
-    bool ret = true;
-    ret = richEditorPattern->CanStartAITask();
-    EXPECT_FALSE(ret);
+    EXPECT_FALSE(richEditorPattern->CanStartAITask());
 }
 
 /**
@@ -430,9 +428,7 @@ HWTEST_F(RichEditorAITestOneNg, CanStartAITask003, TestSize.Level2)
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->textDetectEnable_ = true;
     richEditorPattern->isShowPlaceholder_ = true;
-    bool ret = true;
-    ret = richEditorPattern->CanStartAITask();
-    EXPECT_FALSE(ret);
+    EXPECT_FALSE(richEditorPattern->CanStartAITask());
 }
 
 /**
@@ -451,9 +447,7 @@ HWTEST_F(RichEditorAITestOneNg, NeedShowAIDetect001, TestSize.Level2)
     aiSpanMap[0] = aiSpan0;
     richEditorPattern->dataDetectorAdapter_->aiSpanMap_ = aiSpanMap;
     richEditorPattern->textDetectEnable_ = true;
-    bool ret = false;
-    ret = richEditorPattern->NeedShowAIDetect();
-    EXPECT_TRUE(ret);
+    EXPECT_TRUE(richEditorPattern->NeedShowAIDetect());
 }
 
 /**
@@ -472,9 +466,7 @@ HWTEST_F(RichEditorAITestOneNg, NeedShowAIDetect002, TestSize.Level2)
     richEditorPattern->dataDetectorAdapter_->aiSpanMap_ = aiSpanMap;
     richEditorPattern->textDetectEnable_ = true;
     richEditorPattern->isEditing_ = true;
-    bool ret = true;
-    ret = richEditorPattern->NeedShowAIDetect();
-    EXPECT_FALSE(ret);
+    EXPECT_FALSE(richEditorPattern->NeedShowAIDetect());
 }
 
 /**
@@ -493,9 +485,7 @@ HWTEST_F(RichEditorAITestOneNg, NeedShowAIDetect003, TestSize.Level2)
     richEditorPattern->dataDetectorAdapter_->aiSpanMap_ = aiSpanMap;
     richEditorPattern->textDetectEnable_ = true;
     richEditorPattern->isShowPlaceholder_ = true;
-    bool ret = true;
-    ret = richEditorPattern->NeedShowAIDetect();
-    EXPECT_FALSE(ret);
+    EXPECT_FALSE(richEditorPattern->NeedShowAIDetect());
 }
 
 /**
