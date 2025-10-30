@@ -18,7 +18,6 @@
 
 #include "gmock/gmock.h"
 
-#include "base/ressched/ressched_touch_optimizer.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/base/node_render_status_monitor.h"
 #include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
@@ -28,8 +27,8 @@ class MockPipelineContext : public PipelineContext {
     DECLARE_ACE_TYPE(MockPipelineContext, PipelineContext);
 
 public:
-    MockPipelineContext() = default;
-    ~MockPipelineContext() override = default;
+    MockPipelineContext();
+    ~MockPipelineContext() override;
 
     static void SetUp();
     static void TearDown();
