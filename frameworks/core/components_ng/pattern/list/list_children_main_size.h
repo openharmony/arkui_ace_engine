@@ -49,8 +49,13 @@ class ListChildrenMainSize : public virtual AceType {
     DECLARE_ACE_TYPE(ListChildrenMainSize, AceType);
 public:
     ListChildrenMainSize() = default;
+
     ListChildrenMainSize(const std::vector<float>& mainSize, float defaulatMainSize)
         : childrenSize_(mainSize), defaultSize_(defaulatMainSize) {};
+
+    ListChildrenMainSize(std::vector<float>&& mainSize, float defaulatMainSize)
+        : childrenSize_(std::move(mainSize)), defaultSize_(defaulatMainSize) {};
+
     ~ListChildrenMainSize() override = default;
 
     void SetOnDataChange(std::function<void(std::tuple<int32_t, int32_t, int32_t>, ListChangeFlag)>&& func)

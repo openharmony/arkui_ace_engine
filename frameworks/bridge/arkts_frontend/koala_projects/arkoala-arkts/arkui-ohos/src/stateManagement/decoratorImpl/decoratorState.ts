@@ -75,7 +75,7 @@ export class StateDecoratedVariable<T> extends DecoratedV1VariableBase<T> implem
         let value: T = uiUtils.makeV1Observed(newValue);
         // for interop
         if (isDynamicObject(newValue)) {
-            let value = getObservedObject(newValue);
+            const value = getObservedObject(newValue);
             this.backing_.setNoCheck(value);
         } else {
             this.backing_.setNoCheck(value);

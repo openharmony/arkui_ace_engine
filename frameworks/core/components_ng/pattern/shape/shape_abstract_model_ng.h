@@ -42,6 +42,14 @@ public:
     void SetAntiAlias(bool antiAlias) override;
     void SetWidth(Dimension& width) override;
     void SetHeight(Dimension& height) override;
+    void SetStroke(const RefPtr<ResourceObject>& resObj) override;
+    void SetFill(const RefPtr<ResourceObject>& resObj) override;
+    void SetForegroundColor(const RefPtr<ResourceObject>& resObj) override;
+    void SetStrokeOpacity(const RefPtr<ResourceObject>& resObj) override;
+    void SetFillOpacity(const RefPtr<ResourceObject>&) override;
+    void SetStrokeWidth(const RefPtr<ResourceObject>& resObj) override;
+    void SetWidth(const RefPtr<ResourceObject>& resObj) override;
+    void SetHeight(const RefPtr<ResourceObject>& resObj) override;
     static void SetStrokeDashArray(FrameNode* frameNode, const std::vector<Ace::Dimension>& segments,
         const std::vector<RefPtr<ResourceObject>>& resObjArray);
     static void SetWidth(FrameNode* frameNode, Dimension& width);
@@ -51,6 +59,14 @@ public:
     static void SetStroke(FrameNode* frameNode, const Color& color);
     static void SetFill(FrameNode* frameNode, const Color& color);
     static void SetStrokeWidth(FrameNode* frameNode, const Ace::Dimension& lineWidth);
+    static void SetStroke(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void SetFill(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void SetForegroundColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void SetStrokeOpacity(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void SetFillOpacity(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void SetStrokeWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void SetWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void SetHeight(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
 };
 
 } // namespace OHOS::Ace::NG

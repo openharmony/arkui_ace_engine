@@ -1061,4 +1061,20 @@ HWTEST_F(GridCommonTestTwoNg, CreateWithResourceObjFriction002, TestSize.Level1)
     GridModelNG::CreateWithResourceObjFriction(AceType::RawPtr(frameNode_), nullptr);
     EXPECT_EQ(pattern_->resourceMgr_, nullptr);
 }
+
+/**
+ * @tc.name: ParseResObjRowsGap
+ * @tc.desc: Test ParseResObjRowsGap in GridCommonTestTwoNg
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCommonTestTwoNg, ParseResObjRowsGap001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_EQ(pattern_->resourceMgr_, nullptr);
+
+    model.ParseResObjRowsGap(nullptr);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+}
 } // namespace OHOS::Ace::NG

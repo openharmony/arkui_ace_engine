@@ -393,13 +393,14 @@ void XComponentPattern::RequestFocus()
 
 void XComponentPattern::OnAttachToFrameNode()
 {
+    auto host = GetHost();
+    if (host) {
+        nodeId_ = std::to_string(host->GetId());
+    }
     Initialize();
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().EnableSelfRender();
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    nodeId_ = std::to_string(host->GetId());
 }
 
 void XComponentPattern::OnModifyDone()

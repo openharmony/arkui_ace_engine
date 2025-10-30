@@ -104,6 +104,7 @@ void ToastPattern::UpdateHoverModeRect(const RefPtr<ToastLayoutProperty>& toastP
 {
     auto hoverModeArea = toastProps->GetHoverModeAreaValue(HoverModeAreaType::TOP_SCREEN);
     auto container = Container::CurrentSafelyWithCheck();
+    CHECK_NULL_VOID(container);
     float foldCreaseTop = 0.0f;
     float foldCreaseBottom = 0.0f;
     auto displayInfo = container->GetDisplayInfo();

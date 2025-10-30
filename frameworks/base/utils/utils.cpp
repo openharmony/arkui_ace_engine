@@ -59,7 +59,7 @@ std::string ReadFileToString(const std::string& packagePathStr, const std::strin
     }
 
     int64_t size = std::ftell(file.get());
-    if (size == -1L || size <= 0L || size > MAX_FILE_SIZE) {
+    if (size <= 0L || size > MAX_FILE_SIZE) {
         return "";
     }
 

@@ -352,20 +352,6 @@ void WindowSceneLayoutManager::IsFrameNodeAbnormal(const RefPtr<FrameNode>& node
         return;
     }
     abnormalNodeDfxSet_.insert(nodeId);
-    auto rsNode = GetRSNode(node);
-    int32_t eventRet = HiSysEventWrite(
-        OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
-        "WINDOW_STATE_ERROR",
-        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
-        "PID", getpid(),
-        "PERSISTENT_ID", nodeId,
-        "TYPE", "WINDOW_PATTERN_EXCEPTION",
-        "WINDOW_NAME", GetWindowName(node).c_str(),
-        "FRAME_NODE_ID", node->GetId(),
-        "RS_NODE_ID", rsNode ? rsNode->GetId() : 0,
-        "DISPLAY_ID", GetScreenId(node));
-    TAG_LOGE(AceLogTag::ACE_WINDOW_PIPELINE, "ret:%{public}d node:%{public}d name:%{public}s on ui tree not rs tree,"
-        "screenId:%{public}" PRIu64, eventRet, node->GetId(), GetWindowName(node).c_str(), GetScreenId(node));
 }
 
 void WindowSceneLayoutManager::FillTransScenePos(const RefPtr<FrameNode>& node, TraverseInfo& ancestorInfo)

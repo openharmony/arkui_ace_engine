@@ -25676,10 +25676,8 @@ typedef struct GENERATED_ArkUIFrameNodeExtenderAccessor {
                                           Ark_AnimationPropertyType property);
     Ark_NativePointer (*getFrameNodePtr)(Ark_FrameNode node);
     Ark_NativePointer (*createTypedFrameNode)(const Ark_String* type);
-    Ark_NativePointer (*createByRawPtr)(Ark_FrameNode peer,
-                                        Ark_FrameNode pointer);
-    Ark_FrameNode (*unWrapRawPtr)(Ark_FrameNode peer,
-                                  Ark_NativePointer pointer);
+    Ark_NativePointer (*createByRawPtr)(Ark_NativePointer ptr);
+    Ark_NativePointer (*unWrapRawPtr)(Ark_NativePointer ptr);
     Ark_UICommonEvent (*getCommonEvent)(Ark_FrameNode peer);
     Ark_NativePointer (*getRenderNode)(Ark_NativePointer peer);
     Array_Float64 (*convertPoint)(Ark_FrameNode peer,

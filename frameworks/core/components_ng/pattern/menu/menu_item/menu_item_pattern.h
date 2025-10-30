@@ -133,7 +133,9 @@ public:
     {
         isSelected_ = isSelected;
         if (!isOptionPattern_) {
-            GetHost()->MarkModifyDone();
+            auto host = GetHost();
+            CHECK_NULL_VOID(host);
+            host->MarkModifyDone();
         }
         UpdateDividerSelectedStatus(isSelected_);
     }

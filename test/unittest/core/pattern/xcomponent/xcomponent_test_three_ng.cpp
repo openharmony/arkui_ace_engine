@@ -114,6 +114,7 @@ const int NUM_TWO = 2;
 const float SURFACE_OFFSETX = 10.0f;
 const float SURFACE_OFFSETY = 20.0f;
 int g_surfaceShowNum = 1;
+const std::string NODE_ID_STRING = "-1";
 
 class XComponentMockRenderContext : public RenderContext {
     void SetRenderFit(RenderFit renderFit) override
@@ -1279,5 +1280,39 @@ HWTEST_F(XComponentTestThreeNg, OnAccessibilityChildTreeDeregisterTest001, TestS
     ASSERT_FALSE(result);
     result = pattern->OnAccessibilityChildTreeDeregister();
     ASSERT_FALSE(result);
+}
+
+/**
+ * @tc.name: XComponentAttachToFrameNodeTest001
+ * @tc.desc: Test OnAttachToFrameNode Func
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestThreeNg, XComponentAttachToFrameNodeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    g_testProperty.libraryName = XCOMPONENT_LIBRARY_NAME;
+    auto frameNode = CreateXComponentNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    pattern->nodeId_ = NODE_ID_STRING;
+    /**
+     * @tc.steps2: call OnAttachToFrameNode
+     * @tc.expected: nodeId_ is updated
+     */
+    pattern->OnAttachToFrameNode();
+    EXPECT_EQ(pattern->nodeId_, std::to_string(frameNode->GetId()));
+    /**
+     * @tc.steps3: call OnAttachToFrameNode when host is nullptr
+     * @tc.expected: nodeId_ is not updated
+     */
+    pattern->nodeId_ = NODE_ID_STRING;
+    pattern->frameNode_ = nullptr;
+    pattern->OnAttachToFrameNode();
+    EXPECT_EQ(pattern->nodeId_, NODE_ID_STRING);
 }
 }

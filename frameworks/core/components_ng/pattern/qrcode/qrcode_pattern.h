@@ -50,7 +50,7 @@ public:
         if (!qrCodeModifier_) {
             qrCodeModifier_ = AceType::MakeRefPtr<QRCodeModifier>();
         }
-        return MakeRefPtr<QRCodePaintMethod>(qrCodeSize_, qrCodeModifier_);
+        return MakeRefPtr<QRCodePaintMethod>(WeakClaim(this), qrCodeSize_, qrCodeModifier_);
     }
 
     bool IsEnableMatchParent() override

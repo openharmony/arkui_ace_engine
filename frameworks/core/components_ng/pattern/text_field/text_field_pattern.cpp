@@ -11969,8 +11969,16 @@ void TextFieldPattern::UpdatePropertyImpl(const std::string& key, RefPtr<Propert
             }
         },
 
-        {"placeholderFontSize", [](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+        { "placeholderFontSize",
+            [wp = WeakClaim(this)](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
                 if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
+                    if (realValue->Unit() == DimensionUnit::PERCENT) {
+                        auto pattern = wp.Upgrade();
+                        CHECK_NULL_VOID(pattern);
+                        auto theme = pattern->GetTheme();
+                        CHECK_NULL_VOID(theme);
+                        *realValue = Dimension(theme->GetFontSize());
+                    }
                     prop->UpdatePlaceholderFontSize(*realValue);
                     prop->UpdatePreferredPlaceholderLineHeightNeedToUpdate(true);
                 }
@@ -12041,6 +12049,11 @@ void TextFieldPattern::UpdatePropertyImpl(const std::string& key, RefPtr<Propert
                     auto frameNode = pattern->GetHost();
                     CHECK_NULL_VOID(frameNode);
                     realValue->SetUnit(DimensionUnit::VP);
+                    if (LessNotEqual(realValue->Value(), 0.0)) {
+                        auto theme = pattern->GetTheme();
+                        CHECK_NULL_VOID(theme);
+                        *realValue = theme->GetCursorWidth();
+                    }
                     ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, CursorWidth, *realValue, frameNode);
                     pattern->CalculateDefaultCursor();
                 }

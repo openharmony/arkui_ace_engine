@@ -181,6 +181,7 @@ public:
     static void SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd);
     static void SetListChildrenMainSize(
         FrameNode* frameNode, float defaultSize, const std::vector<float>& mainSize);
+    static void SetListChildrenMainSize(FrameNode* frameNode, RefPtr<ListChildrenMainSize>& childrenSize);
     static void ResetListChildrenMainSize(FrameNode* frameNode);
     static int32_t GetInitialIndex(FrameNode* frameNode);
     static V2::ItemDivider GetDivider(FrameNode* frameNode);

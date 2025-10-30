@@ -39,6 +39,7 @@ export class PeerNode extends IncrementalNode {
     peer: NativePeerNode
     protected static currentId: int32 = INITIAL_ID
     protected static cursor: int32 = UNINITIALIZE_CURSOR
+    private static staticLock = new Mutex()
     static nextId(): int32 {
         if (PeerNode.cursor === UNINITIALIZE_CURSOR || PeerNode.currentId >= PeerNode.cursor + ID_CAPACITY) {
             PeerNode.cursor = ArkUIAniModule._RequireArkoalaNodeId(ID_CAPACITY)
@@ -175,7 +176,7 @@ export class PeerNode extends IncrementalNode {
         this._onReuse = cb
     }
 
-    private static peerNodeMap = new Map<number, PeerNode>()
+    private static peerNodeMap = new containers.ConcurrentHashMap<number, PeerNode>()
 
     // peerNodeRawTail needs for perf optimizations. Insert into array much faster
     private static peerNodeRawTail = new Array<PeerNode>()
@@ -208,7 +209,9 @@ export class PeerNode extends IncrementalNode {
         super(derivedNodeType ?? PeerNodeType)
         this.id = id
         this.peer = NativePeerNode.create(this, peerPtr, flags)
+        PeerNode.staticLock.lock()
         PeerNode.peerNodeRawTail.push(this)
+        PeerNode.staticLock.unlock()
         this.onChildInserted = (child: IncrementalNode) => {
             // Improve: rework to avoid search
             let peer = findPeerNode(child)

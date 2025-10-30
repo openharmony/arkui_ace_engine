@@ -30,7 +30,10 @@ public:
 
     virtual void Create();
     virtual void SetRadiusWidth(const Dimension& value);
+    virtual void SetRadiusWidth(const RefPtr<ResourceObject>& radiusWidthResObj) {};
     virtual void SetRadiusHeight(const Dimension& value);
+    virtual void SetRadiusHeight(const RefPtr<ResourceObject>& radiusHeightResObj) {};
+    virtual void SetRadius(const RefPtr<ResourceObject>& radiusResObj) {};
     virtual void SetRadiusValue(const Dimension& radiusX, const Dimension& radiusY, int32_t index);
     virtual void SetRadiusValue(const Dimension& radiusX, const Dimension& radiusY,
         const RefPtr<ResourceObject>& radiusXResObj, const RefPtr<ResourceObject>& radiusYResObj, int32_t index) {};

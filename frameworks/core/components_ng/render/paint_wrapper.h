@@ -96,18 +96,21 @@ public:
     bool HasForegroundColor() const
     {
         auto renderContext = renderContext_.Upgrade();
+        CHECK_NULL_RETURN(renderContext, false);
         return renderContext->HasForegroundColor();
     }
 
     bool HasForegroundColorStrategy() const
     {
         auto renderContext = renderContext_.Upgrade();
+        CHECK_NULL_RETURN(renderContext, false);
         return renderContext->HasForegroundColorStrategy();
     }
 
     Color GetForegroundColor() const
     {
         auto renderContext = renderContext_.Upgrade();
+        CHECK_NULL_RETURN(renderContext, Color::FOREGROUND);
         return renderContext->GetForegroundColor().value_or(Color::FOREGROUND);
     }
 
