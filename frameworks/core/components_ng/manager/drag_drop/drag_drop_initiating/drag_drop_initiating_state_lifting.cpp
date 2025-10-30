@@ -139,6 +139,10 @@ void DragDropInitiatingStateLifting::HandlePanOnActionEnd(const GestureEvent& in
 
 void DragDropInitiatingStateLifting::HandleReStartDrag(const GestureEvent& info)
 {
+    if (info.GetInputEventType() == InputEventType::AXIS) {
+        TAG_LOGE(AceLogTag::ACE_DRAG, "Trigger drag pan event by axis");
+        return;
+    }
     if (info.GetOriginUIInputEventType() == UIInputEventType::AXIS) {
         TAG_LOGE(AceLogTag::ACE_DRAG, "Trigger drag pan event by touch transformed from axis");
         return;
