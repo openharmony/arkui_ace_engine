@@ -216,6 +216,12 @@ export class Router {
     public hideAlertBeforeBackPage(): void {
         throw Error("hideAlertBeforeBackPage not implemented in Router!");
     }
+    public getPageInfoByUniqueId(id: int): PageInfo {
+         throw Error("getPageInfoByUniqueId not implemented in UIContext!")
+     }
+     getNavigationInfoByUniqueId(id: int): uiObserver.NavigationInfo | undefined {
+        throw Error("getNavigationInfoByUniqueId not implemented in UIContext!")
+     }
 }
 
 export interface AtomicServiceBar {
@@ -918,7 +924,10 @@ export class UIObserver {
         }
     }
 }
-export interface PageInfo {}
+export interface PageInfo {
+        routerPageInfo?: uiObserver.RouterPageInfo;
+        navDestinationInfo?: uiObserver.NavDestinationInfo;
+}
 export interface ContentCoverController {}
 export class DynamicSyncScene {
     private range: ExpectedFrameRateRange;
