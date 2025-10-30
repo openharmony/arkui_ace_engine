@@ -2800,4 +2800,42 @@ HWTEST_F(ImagePatternTestNg, ImagePatternAltError003, TestSize.Level0)
     imagePattern->loadFailed_ = true;
     EXPECT_EQ(frameNode->GetGeometryNode()->GetContent().get(), nullptr);
 }
+
+/**
+ * @tc.name: ImagePatternAltError004
+ * @tc.desc: Test function for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, ImagePatternAltError004, TestSize.Level0)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.parentIdealSize.width_ = 100.0;
+    layoutConstraint.parentIdealSize.height_ = 300.0;
+
+    LayoutPolicyProperty layoutPolicyProperty;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+
+    imageLayoutProperty->layoutPolicy_ = layoutPolicyProperty;
+
+    imageLayoutProperty->UpdateLayoutConstraint(layoutConstraint);
+    auto altErrorCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(
+        ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT),
+        LoadNotifier(nullptr, nullptr, nullptr));
+    ASSERT_NE(altErrorCtx_, nullptr);
+    pattern->altErrorCtx_ = altErrorCtx_;
+
+    EXPECT_FALSE(layoutConstraint.selfIdealSize.IsValid());
+    EXPECT_TRUE(layoutConstraint.parentIdealSize.IsValid());
+
+    auto imageSize = pattern->GetImageSizeForMeasure();
+    EXPECT_EQ(imageSize->Width(), IMAGE_SOURCESIZE_WIDTH);
+    EXPECT_EQ(imageSize->Height(), IMAGE_SOURCESIZE_HEIGHT);
+}
 } // namespace OHOS::Ace::NG
