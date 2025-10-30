@@ -21,6 +21,44 @@ import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { TypeChecker } from "#components"
 import { CallbackTransformer } from "./../CallbackTransformer"
+export class common2D_Color_serializer {
+    public static write(buffer: SerializerBase, value: common2D.Color): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForAlpha  = value.alpha
+        valueSerializer.writeInt32(valueHolderForAlpha)
+        const valueHolderForRed  = value.red
+        valueSerializer.writeInt32(valueHolderForRed)
+        const valueHolderForGreen  = value.green
+        valueSerializer.writeInt32(valueHolderForGreen)
+        const valueHolderForBlue  = value.blue
+        valueSerializer.writeInt32(valueHolderForBlue)
+    }
+    public static read(buffer: DeserializerBase): common2D.Color {
+        let valueDeserializer : DeserializerBase = buffer
+        const alphaTmpResult : int32 = valueDeserializer.readInt32()
+        const redTmpResult : int32 = valueDeserializer.readInt32()
+        const greenTmpResult : int32 = valueDeserializer.readInt32()
+        const blueTmpResult : int32 = valueDeserializer.readInt32()
+        let value : common2D.Color = ({alpha: alphaTmpResult, red: redTmpResult, green: greenTmpResult, blue: blueTmpResult} as common2D.Color)
+        return value
+    }
+}
+export class common2D_Point_serializer {
+    public static write(buffer: SerializerBase, value: common2D.Point): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForX  = value.x
+        valueSerializer.writeFloat64(valueHolderForX)
+        const valueHolderForY  = value.y
+        valueSerializer.writeFloat64(valueHolderForY)
+    }
+    public static read(buffer: DeserializerBase): common2D.Point {
+        let valueDeserializer : DeserializerBase = buffer
+        const xTmpResult : double = valueDeserializer.readFloat64()
+        const yTmpResult : double = valueDeserializer.readFloat64()
+        let value : common2D.Point = ({x: xTmpResult, y: yTmpResult} as common2D.Point)
+        return value
+    }
+}
 export class common2D_Rect_serializer {
     public static write(buffer: SerializerBase, value: common2D.Rect): void {
         let valueSerializer : SerializerBase = buffer

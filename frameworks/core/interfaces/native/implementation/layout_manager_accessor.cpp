@@ -68,6 +68,36 @@ Ark_PositionWithAffinity GetGlyphPositionAtCoordinateImpl(Ark_LayoutManager peer
     );
     return Converter::ArkValue<Ark_PositionWithAffinity>(result);
 }
+Ark_text_LineMetrics GetLineMetricsImpl(Ark_LayoutManager peer,
+                                        Ark_Int32 lineNumber)
+{
+    CHECK_NULL_RETURN(peer, {});
+    auto handler = peer->handler.Upgrade();
+    CHECK_NULL_RETURN(handler, {});
+    TextLineMetrics lineMetrics = handler->GetLineMetrics(Converter::Convert<int>(lineNumber));
+    return Converter::ArkValue<Ark_text_LineMetrics>(lineMetrics, Converter::FC);
+}
+Array_text_TextBox GetRectsForRangeImpl(Ark_LayoutManager peer,
+                                        const Ark_TextRange* range,
+                                        Ark_text_RectWidthStyle widthStyle,
+                                        Ark_text_RectHeightStyle heightStyle)
+{
+    CHECK_NULL_RETURN(peer, {});
+    auto handler = peer->handler.Upgrade();
+    CHECK_NULL_RETURN(handler, {});
+    auto textRange = Converter::Convert<TextRange>(*range);
+    auto dstHeightStyle = Converter::OptConvert<RectHeightStyle>(heightStyle);
+    auto dstWidthStyle = Converter::OptConvert<RectWidthStyle>(widthStyle);
+    CHECK_NULL_RETURN(dstHeightStyle.has_value() && dstWidthStyle.has_value(), {});
+    std::vector<NG::ParagraphManager::TextBox> textBoxes =
+        handler->GetRectsForRange(textRange.start, textRange.end, dstHeightStyle.value(), dstWidthStyle.value());
+    std::vector<Ark_text_TextBox> values;
+    for (const NG::ParagraphManager::TextBox& box : textBoxes) {
+        auto tempBox = Converter::ArkValue<Ark_text_TextBox>(box, Converter::FC);
+        values.push_back(tempBox);
+    }
+    return Converter::ArkValue<Array_text_TextBox>(values, Converter::FC);
+}
 } // LayoutManagerAccessor
 const GENERATED_ArkUILayoutManagerAccessor* GetLayoutManagerAccessor()
 {
@@ -77,6 +107,8 @@ const GENERATED_ArkUILayoutManagerAccessor* GetLayoutManagerAccessor()
         LayoutManagerAccessor::GetFinalizerImpl,
         LayoutManagerAccessor::GetLineCountImpl,
         LayoutManagerAccessor::GetGlyphPositionAtCoordinateImpl,
+        LayoutManagerAccessor::GetLineMetricsImpl,
+        LayoutManagerAccessor::GetRectsForRangeImpl,
     };
     return &LayoutManagerAccessorImpl;
 }
