@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-import { ExtendableComponent } from '../../component/extendableComponent';
 import {
     IDecoratedV1Variable,
     IDecoratedV2Variable,
+    IVariableOwner,
     IWatchSubscriberRegister,
     OBSERVE,
     WatchFuncType,
@@ -49,7 +49,7 @@ V2:
  * Base class of all decorated variable classes
  */
 export class DecoratedVariableBase {
-    protected readonly owningComponent_: ExtendableComponent | null;
+    protected readonly owningComponent_: IVariableOwner | undefined;
     // can be read publically
     public _varName: string;
     public decorator: string;
@@ -60,7 +60,7 @@ export class DecoratedVariableBase {
     set varName(value: string) {
         this._varName = value;
     }
-    constructor(decorator: string, owningComponent: ExtendableComponent | null, varName: string) {
+    constructor(decorator: string, owningComponent: IVariableOwner | undefined, varName: string) {
         this.decorator = decorator;
         this.owningComponent_ = owningComponent;
         this._varName = varName;
@@ -86,7 +86,7 @@ export abstract class DecoratedV1VariableBase<T> extends DecoratedVariableBase i
 
     constructor(
         decorator: string,
-        owningComponent: ExtendableComponent | null,
+        owningComponent: IVariableOwner | undefined,
         varName: string,
         watchFunc?: WatchFuncType
     ) {
@@ -206,7 +206,7 @@ export abstract class DecoratedV1VariableBase<T> extends DecoratedVariableBase i
 }
 
 export abstract class DecoratedV2VariableBase extends DecoratedVariableBase implements IDecoratedV2Variable {
-    constructor(decorator: string, owningComponent: ExtendableComponent | null, varName: string) {
+    constructor(decorator: string, owningComponent: IVariableOwner | undefined, varName: string) {
         super(decorator, owningComponent, varName);
     }
     public info(): string {
