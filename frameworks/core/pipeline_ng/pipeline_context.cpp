@@ -40,6 +40,7 @@
 #include "base/mousestyle/mouse_style.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/ressched/ressched_report.h"
+#include "base/ressched/ressched_touch_optimizer.h"
 #include "base/thread/background_task_executor.h"
 #include "base/utils/cpu_boost.h"
 #include "core/common/ace_engine.h"
@@ -3281,7 +3282,7 @@ void PipelineContext::OnTouchEvent(
         }
         NotifyDragTouchEvent(scalePoint, node);
         hasIdleTasks_ = true;
-        if (touchOptimizer_) {
+        if (touchOptimizer_ && window_) {
             uint64_t vsyncPeriod = static_cast<uint64_t>(window_->GetVSyncPeriod());
             touchOptimizer_->SetVsyncPeriod(vsyncPeriod);
             TouchEvent pointWithReverseSignal = touchOptimizer_->SetPointReverseSignal(point);
@@ -6879,4 +6880,10 @@ void PipelineContext::ResSchedReportAxisEvent(const AxisEvent& event) const
         ResSchedReport::GetInstance().OnAxisEvent(event);
     }
 }
+
+const std::unique_ptr<ResSchedTouchOptimizer>& PipelineContext::GetTouchOptimizer() const
+{
+    return touchOptimizer_;
+}
+
 } // namespace OHOS::Ace::NG
