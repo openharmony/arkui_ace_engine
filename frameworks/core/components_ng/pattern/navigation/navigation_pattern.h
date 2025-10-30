@@ -284,6 +284,11 @@ public:
         ifNeedInit_ = ifNeedInit;
     }
 
+    void SetStartTime(int64_t startTime)
+    {
+        startTime_ = startTime;
+    }
+
     void UpdateContextRect(
         const RefPtr<NavDestinationGroupNode>& curDestination, const RefPtr<NavigationGroupNode>& navigation);
 
@@ -795,6 +800,7 @@ private:
     void FireHomeDestinationLifecycleForTransition(NavDestinationLifecycle lifecycle);
     RefPtr<NavDestinationContext> GetHomeDestinationContext();
     bool GetHomeDestinationName(const RefPtr<FrameNode>& hostNode, std::string& name);
+    void TriggerPerformanceCheck(const RefPtr<NavDestinationGroupNode>& topDestination, std::string fromPath);
 
     //-------for force split------- begin------
     bool IsNavBarValid();
@@ -824,6 +830,7 @@ private:
     std::optional<RefPtr<SystemBarStyle>> currStyle_;
     bool addByNavRouter_ = false;
     bool ifNeedInit_ = true;
+    int64_t startTime_ = 0;
     float preNavBarWidth_ = 0.0f;
     float realNavBarWidth_ = DEFAULT_NAV_BAR_WIDTH.ConvertToPx();
     float initNavBarWidth_ = DEFAULT_NAV_BAR_WIDTH.ConvertToPx();

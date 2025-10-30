@@ -31,7 +31,7 @@ void SetPathCommands(ArkUINodeHandle node, ArkUI_CharPtr commands, void* resObjP
     pattern->UnRegisterResource("PathCommands");
     if (SystemProperties::ConfigChangePerform() && resObjPtr) {
         auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resObjPtr));
-        pattern->RegisterResource<std::string>("PathCommands", resObj, commandsVal);
+        PathModelNG::SetCommands(frameNode, resObj);
     }
 }
 

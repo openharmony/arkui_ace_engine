@@ -45,6 +45,9 @@
     "pages/withScroll/main",
     "pages/withScroll/navigation1",
     "pages/withScroll/navigation2",
-    "pages/withScroll/navigation3"
+    "pages/withScroll/navigation3",
+    "pages/titleBarAndToolBar/Index",
+    "pages/titleBarAndToolBar/page5",
+    "pages/titleBarAndToolBar/test1"
   ]
 }

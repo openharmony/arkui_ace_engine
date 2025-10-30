@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -57,6 +57,7 @@ constexpr float DEFAULT_VIEW_SCALE = 1.0f;
 constexpr float MAX_FORM_VIEW_SCALE = 1.0f / 0.85f;
 constexpr float LAYOUT_WIEDTH_FLOAT = 100.0f;
 } // namespace
+
 class FormPatternTest : public testing::Test {
 public:
     static void SetUpTestSuite();
@@ -2158,20 +2159,23 @@ HWTEST_F(FormPatternTest, FormPatternTest_061, TestSize.Level0)
 {
     RefPtr<FormNode> frameNode = CreateFromNode();
     auto pattern = frameNode->GetPattern<FormPattern>();
+    // pattern not null
     EXPECT_NE(pattern, nullptr);
 
-    // accessibilityState_ == state, return false
+    // accessibilityState_ == false, return false
     pattern->accessibilityState_ = false;
     EXPECT_FALSE(pattern->OnAccessibilityStateChange(false));
 
-    // isDynamic_ is true, return false
+    // isDynamic_ is true, should return false
     pattern->isDynamic_ = true;
     EXPECT_FALSE(pattern->OnAccessibilityStateChange(true));
     EXPECT_TRUE(pattern->IsAccessibilityState());
 
+    // AccessibilityState is false, return false
     pattern->SetAccessibilityState(false);
     EXPECT_FALSE(pattern->IsAccessibilityState());
 
+    // AccessibilityState is true, return true
     pattern->SetAccessibilityState(true);
     EXPECT_TRUE(pattern->IsAccessibilityState());
 }

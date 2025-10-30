@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_QRCODE_QRCODE_THEME_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_QRCODE_QRCODE_THEME_H
 
+#include "ui/properties/color.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
@@ -29,7 +30,6 @@ namespace OHOS::Ace {
 namespace {
 constexpr double QRCODE_SIZE = 200.0;
 constexpr Color QRCODE_DEFAULT_COLOR = Color(0xff000000);
-constexpr Color QRCODE_DEFAULT_BACKGROUND_COLOR = Color(0xffffffff);
 } // namespace
 
 class QrcodeTheme : public virtual Theme {
@@ -58,7 +58,6 @@ public:
                 return;
             }
             theme->qrcodeDefaultSize_ = pattern->GetAttr<Dimension>("default_size", 240.0_vp);
-            theme->backgroundColor_ = QRCODE_DEFAULT_BACKGROUND_COLOR;
             if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
                 theme->qrcodeColor_ = Color(0xff000000);
                 theme->qrcodeType_ = QrcodeType::RECT;
@@ -122,7 +121,7 @@ protected:
 
 private:
     Color qrcodeColor_;
-    Color backgroundColor_;
+    Color backgroundColor_ = Color::WHITE;
     Color focusedColor_;
     QrcodeType qrcodeType_ { QrcodeType::RECT };
     Dimension qrcodeWidth_;

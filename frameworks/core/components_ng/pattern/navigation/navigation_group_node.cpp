@@ -1138,30 +1138,6 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
     isOnAnimation_ = true;
     auto curNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(curNode);
     CHECK_NULL_VOID(curNavDestination);
-    auto preNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(preNode);
-    std::string fromPath = "";
-    if (AceChecker::IsPerformanceCheckEnabled()) {
-        if (preNavDestination) {
-        fromPath = preNavDestination->GetNavDestinationPathInfo();
-        }
-        int64_t startTime = GetSysTimestamp();
-        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(GetContextWithCheck());
-        CHECK_NULL_VOID(pipeline);
-        // After completing layout tasks at all nodes on the page, perform performance testing and management
-        pipeline->AddAfterLayoutTask([weakNav = WeakClaim(this), weakNode = WeakPtr<FrameNode>(curNode), startTime,
-                                         path = curNavDestination->GetNavDestinationPathInfo(), fromPath,
-                                         moduleName = curNavDestination->GetNavDestinationModuleName()]() {
-            auto navigation = weakNav.Upgrade();
-            CHECK_NULL_VOID(navigation);
-            auto curNode = weakNode.Upgrade();
-            int64_t endTime = GetSysTimestamp();
-            CHECK_NULL_VOID(curNode);
-            PerformanceCheckNodeMap nodeMap;
-            curNode->GetPerformanceCheckData(nodeMap);
-            AceScopedPerformanceCheck::RecordPerformanceCheckData(
-                nodeMap, endTime - startTime, path, fromPath, moduleName, true);
-        });
-    }
 #if !defined(ACE_UNITTEST)
     TransparentNodeDetector::GetInstance().PostCheckNodeTransparentTask(curNode,
         curNavDestination->GetNavDestinationPathInfo());

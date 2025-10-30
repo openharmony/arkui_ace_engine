@@ -453,8 +453,8 @@ std::string JsiBaseUtils::TranslateBySourceMap(const std::string& stackStr, cons
     // collect error info first
     for (uint32_t i = 0; i < res.size(); i++) {
         std::string temp = res[i];
-        uint32_t start = temp.find(openBrace);
-        uint32_t end = temp.find(":");
+        std::size_t start = temp.find(openBrace);
+        std::size_t end = temp.find(":");
         if (temp.empty() || end < start + 1) {
             break;
         }
