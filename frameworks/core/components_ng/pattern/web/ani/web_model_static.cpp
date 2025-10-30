@@ -699,6 +699,24 @@ void WebModelStatic::SetOnPageStart(FrameNode* frameNode, std::function<void(con
     webEventHub->SetOnPageStartedEvent(std::move(uiCallback));
 }
 
+void WebModelStatic::SetOnLoadStarted(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnLoadStartedEvent(std::move(uiCallback));
+}
+
+void WebModelStatic::SetOnLoadFinished(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnLoadFinishedEvent(std::move(uiCallback));
+}
+
 void WebModelStatic::SetOnProgressChange(FrameNode* frameNode,
     std::function<void(const BaseEventInfo* info)>&& callback)
 {
@@ -950,6 +968,18 @@ void WebModelStatic::SetOnInterceptRequest(
     auto webEventHub = frameNode->GetEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnInterceptRequestEvent(std::move(uiCallback));
+}
+
+void WebModelStatic::SetOnOverrideErrorPage(
+    FrameNode* frameNode, std::function<std::string(const BaseEventInfo* info)>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) -> std::string {
+        return func(info.get());
+    };
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnOverrideErrorPageEvent(std::move(uiCallback));
 }
 
 void WebModelStatic::SetPermissionRequestEventId(

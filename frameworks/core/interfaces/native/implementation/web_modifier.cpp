@@ -551,18 +551,42 @@ void SetOnPageBeginImpl(Ark_NativePointer node,
 void SetOnLoadStartedImpl(Ark_NativePointer node,
                           const Opt_Callback_OnLoadStartedEvent_Void* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    // WebModelNG::SetSetOnLoadStarted(frameNode, convValue);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // Implement Reset value
+        return;
+    }
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onLoadStarted = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const BaseEventInfo* info) {
+        OnLoadStarted(callback, weakNode, instanceId, info);
+    };
+    WebModelStatic::SetOnLoadStarted(frameNode, onLoadStarted);
+#endif // WEB_SUPPORTED
 }
 void SetOnLoadFinishedImpl(Ark_NativePointer node,
                            const Opt_Callback_OnLoadFinishedEvent_Void* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    // WebModelNG::SetSetOnLoadFinished(frameNode, convValue);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // Implement Reset value
+        return;
+    }
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onLoadFinished = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const BaseEventInfo* info) {
+        OnLoadFinished(callback, weakNode, instanceId, info);
+    };
+    WebModelStatic::SetOnLoadFinished(frameNode, onLoadFinished);
+#endif // WEB_SUPPORTED
 }
 void SetOnProgressChangeImpl(Ark_NativePointer node,
                              const Opt_Callback_OnProgressChangeEvent_Void* value)
@@ -2428,6 +2452,22 @@ void SetRotateRenderEffectImpl(Ark_NativePointer node,
 void SetOnOverrideErrorPageImpl(Ark_NativePointer node,
                                 const Opt_OnOverrideErrorPageCallback* value)
 {
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // Implement Reset value
+        return;
+    }
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onOverrideErrorPage = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const BaseEventInfo* info) -> std::string {
+        return OnOverrideErrorPage(callback, weakNode, instanceId, info);
+    };
+    WebModelStatic::SetOnOverrideErrorPage(frameNode, onOverrideErrorPage);
+#endif // WEB_SUPPORTED
 }
 
 void SetOnPdfScrollAtBottomImpl(Ark_NativePointer node,

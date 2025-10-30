@@ -82,6 +82,34 @@ void OnPageBegin(const CallbackHelper<Callback_OnPageBeginEvent_Void>& arkCallba
     arkCallback.InvokeSync(parameter);
 }
 
+void OnLoadStarted(const CallbackHelper<Callback_OnLoadStartedEvent_Void>& arkCallback,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
+{
+    ContainerScope scope(instanceId);
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->UpdateCurrentActiveNode(weakNode);
+    auto* eventInfo = TypeInfoHelper::DynamicCast<LoadStartedEvent>(info);
+    CHECK_NULL_VOID(eventInfo);
+    Ark_OnLoadStartedEvent parameter;
+    parameter.url = Converter::ArkValue<Ark_String>(eventInfo->GetLoadedUrl());
+    arkCallback.InvokeSync(parameter);
+}
+
+void OnLoadFinished(const CallbackHelper<Callback_OnLoadFinishedEvent_Void>& arkCallback,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
+{
+    ContainerScope scope(instanceId);
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->UpdateCurrentActiveNode(weakNode);
+    auto* eventInfo = TypeInfoHelper::DynamicCast<LoadFinishedEvent>(info);
+    CHECK_NULL_VOID(eventInfo);
+    Ark_OnLoadFinishedEvent parameter;
+    parameter.url = Converter::ArkValue<Ark_String>(eventInfo->GetLoadedUrl());
+    arkCallback.InvokeSync(parameter);
+}
+
 void OnProgressChange(const CallbackHelper<Callback_OnProgressChangeEvent_Void>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
@@ -479,6 +507,30 @@ RefPtr<WebResponse> OnInterceptRequest(
         Callback_WebResourceResponse_Void>(parameter);
     CHECK_NULL_RETURN(arkResult, nullptr);
     return arkResult->handler;
+}
+
+std::string OnOverrideErrorPage(
+    const CallbackHelper<OnOverrideErrorPageCallback>& arkCallback,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
+{
+    const auto refNode = weakNode.Upgrade();
+    CHECK_NULL_RETURN(refNode, "");
+    ContainerScope scope(instanceId);
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(pipelineContext, "");
+    pipelineContext->UpdateCurrentActiveNode(weakNode);
+    auto* eventInfo = TypeInfoHelper::DynamicCast<OnOverrideErrorPageEvent>(info);
+    CHECK_NULL_RETURN(eventInfo, "");
+    Ark_OnErrorReceiveEvent parameter;
+    auto errorPeer = new WebResourceErrorPeer();
+    errorPeer->handler = eventInfo->GetError();
+    parameter.error = errorPeer;
+    auto requestPeer = new WebResourceRequestPeer();
+    requestPeer->webRequest = eventInfo->GetWebResourceRequest();
+    parameter.request = requestPeer;
+    const auto arkResult = arkCallback.InvokeWithObtainResult<Ark_String,
+        Callback_String_Void>(parameter);
+    return Converter::Convert<std::string>(arkResult);
 }
 
 void OnPermissionRequest(const CallbackHelper<Callback_OnPermissionRequestEvent_Void>& arkCallback,
