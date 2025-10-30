@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { ExtendableComponent } from '../../component/extendableComponent';
 import { DecoratedV1VariableBase } from './decoratorBase';
-import { IDecoratedV1Variable, WatchFuncType } from '../decorator';
+import { IDecoratedV1Variable, IVariableOwner, WatchFuncType } from '../decorator';
 import { ILinkDecoratedVariable } from '../decorator';
 import { ObserveSingleton } from '../base/observeSingleton';
 import { NullableObject } from '../base/types';
@@ -40,7 +39,7 @@ export class LinkDecoratedVariable<T> extends DecoratedV1VariableBase<T> impleme
     // localInitValue is the rhs of @state variable : type = localInitialValue;
     // caller ensure it is IObseredObject, eg. by wrapping
     constructor(
-        owningView: ExtendableComponent | null,
+        owningView: IVariableOwner | undefined,
         varName: string,
         source: IDecoratedV1Variable<T>,
         sourceGet: () => T,

@@ -130,4 +130,15 @@ void SelectPattern::ResetFontColorMultiThread()
         select->ResetFontColor();
     });
 }
+ 
+void SelectPattern::SetValueMultiThread(const std::string& value)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->PostAfterAttachMainTreeTask([weak = WeakClaim(this), value]() {
+        auto select = weak.Upgrade();
+        CHECK_NULL_VOID(select);
+        select->SetValueImpl(value);
+    });
+}
 } // namespace OHOS::Ace::NG

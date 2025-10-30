@@ -126,6 +126,7 @@ public:
 
     // set properties of text node
     void SetValue(const std::string& value);
+    void SetValueImpl(const std::string& value);
     void SetFontSize(const Dimension& value);
     void SetItalicFontStyle(const Ace::FontStyle& value);
     void SetItalicFontStyleImpl(const Ace::FontStyle& value);
@@ -301,6 +302,7 @@ private:
     void SetFontFamilyMultiThread(const std::vector<std::string>& value);
     void SetItalicFontStyleMultiThread(const Ace::FontStyle& value);
     void ResetFontColorMultiThread();
+    void SetValueMultiThread(const std::string& value);
 
     bool HasRowNode() const
     {

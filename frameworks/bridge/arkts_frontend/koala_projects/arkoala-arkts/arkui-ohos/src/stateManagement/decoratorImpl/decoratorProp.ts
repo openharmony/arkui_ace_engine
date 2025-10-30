@@ -16,8 +16,7 @@
 import { DecoratedV1VariableBase } from './decoratorBase';
 import { propDeepCopy } from '@koalaui/common';
 import { StateUpdateLoop } from '../base/stateUpdateLoop';
-import { ExtendableComponent } from '../../component/extendableComponent';
-import { IObservedObject, IPropDecoratedVariable } from '../decorator';
+import { IObservedObject, IPropDecoratedVariable, IVariableOwner } from '../decorator';
 import { WatchFuncType } from '../decorator';
 import { IBackingValue } from '../base/iBackingValue';
 import { DecoratorBackingValue } from '../base/backingValue';
@@ -61,7 +60,7 @@ export class PropDecoratedVariable<T> extends DecoratedV1VariableBase<T> impleme
     private __localValue: IBackingValue<T>;
     // initValue is the init value either from parent @Component or local initialized value
     // constructor takes a copy of it
-    constructor(owningView: ExtendableComponent | null, varName: string, initValue: T, watchFunc?: WatchFuncType) {
+    constructor(owningView: IVariableOwner | undefined, varName: string, initValue: T, watchFunc?: WatchFuncType) {
         super('@Prop', owningView, varName, watchFunc);
         if (isDynamicObject(initValue)) {
             initValue = getObservedObject(initValue);

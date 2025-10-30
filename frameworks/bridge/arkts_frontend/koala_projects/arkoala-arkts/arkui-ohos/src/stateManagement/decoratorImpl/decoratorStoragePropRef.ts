@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-import { ExtendableComponent } from '../../component/extendableComponent';
 import { IBackingValue } from '../base/iBackingValue';
 import {
     ILocalStoragePropRefDecoratedVariable,
     IStoragePropRefDecoratedVariable,
+    IVariableOwner,
     IWatchSubscriberRegister,
     WatchFuncType,
 } from '../decorator';
@@ -42,7 +42,7 @@ export class StoragePropRefDecoratedVariable<T>
     storageWatchFunc_: WatchFunc;
     propName: string;
     constructor(
-        owningView: ExtendableComponent,
+        owningView: IVariableOwner,
         storagePropRef: AbstractProperty<T>,
         propName: string,
         varName: string,

@@ -2308,6 +2308,7 @@ class SingleIconStyle extends ViewPU {
                                     Image.draggable(false);
                                     Image.borderRadius(getResourceValue('sys.float.subheader_right_image_radius'));
                                     Image.padding(getResourceValue('sys.float.subheader_right_image_padding'));
+                                    Image.attributeModifier.bind(this)(!DEFAULT_FOCUS_STYLE() ? undefined : new DefaultImageButtonFocusStyle());
                                 }, Image);
                             });
                         }
@@ -2514,6 +2515,17 @@ class DefaultFocusStyleModifier {
         instance.onBlur(() => {
             this.stateStyleAction && this.stateStyleAction(false);
         });
+    }
+}
+
+class DefaultImageButtonFocusStyle {
+    applyNormalAttribute(instance) {
+        if (!instance) {
+            return;
+        }
+        instance
+            .borderRadius(getResourceValue('sys.float.padding_level2'))
+            .focusBox({ margin: LengthMetrics.vp(getResourceValue('sys.float.padding_level4')) });
     }
 }
 

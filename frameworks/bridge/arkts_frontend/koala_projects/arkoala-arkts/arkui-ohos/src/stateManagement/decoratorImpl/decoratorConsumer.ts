@@ -12,22 +12,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { ExtendableComponent } from '../../component/extendableComponent';
 import { IBackingValue } from '../base/iBackingValue';
 import { FactoryInternal } from '../base/iFactoryInternal';
-import { IConsumerDecoratedVariable, IProviderDecoratedVariable } from '../decorator';
+import { IConsumerDecoratedVariable, IProviderDecoratedVariable, IVariableOwner } from '../decorator';
 import { UIUtils } from '../utils';
 import { DecoratedV2VariableBase } from './decoratorBase';
 import { uiUtils } from '../base/uiUtilsImpl';
 export class ConsumerDecoratedVariable<T> extends DecoratedV2VariableBase implements IConsumerDecoratedVariable<T> {
     provideAlias_: string;
-    sourceProvider_: IProviderDecoratedVariable<T> | null;
+    sourceProvider_: IProviderDecoratedVariable<T> | undefined;
     backing_?: IBackingValue<T>;
-    constructor(owningView: ExtendableComponent, varName: string, provideAlias: string, initValue: T) {
+    constructor(owningView: IVariableOwner, varName: string, provideAlias: string, initValue: T) {
         super('@Consumer', owningView, varName);
         this.provideAlias_ = provideAlias;
-        this.sourceProvider_ = owningView.findProvideV2<T>(provideAlias);
-        if (this.sourceProvider_ === null) {
+        this.sourceProvider_ = owningView.findProvider<T>(provideAlias);
+        if (this.sourceProvider_ === undefined) {
             this.backing_ = FactoryInternal.mkDecoratorValue(varName, initValue);
         }
     }

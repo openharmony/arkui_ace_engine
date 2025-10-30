@@ -64,18 +64,18 @@ export class InteropExtendableComponent extends ExtendableComponent {
         return provider as IProviderDecoratedVariable<T>;
     }
 
-    override findProvideV2<T>(providedPropName: string): IProviderDecoratedVariable<T> | null {
+    override findProvider<T>(providedPropName: string): IProviderDecoratedVariable<T> | undefined {
         const result = this.findProvidedVarV2(providedPropName);
         if (result == undefined) {
-            return null;
+            return undefined;
         }
         return result as IProviderDecoratedVariable<T>;
     }
 
-    override findProvide<T>(providedPropName: string): IProvideDecoratedVariable<T> | null {
+    override findProvide<T>(providedPropName: string): IProvideDecoratedVariable<T> | undefined {
         const value = this.dynamicComponent.invokeMethod('findProvidePU__', ESValue.wrap(providedPropName));
         if (value.unwrap() == undefined) {
-            return null;
+            return undefined;
         }
         const getProxy = value.invokeMethod('getProxy').unwrap();
         if (getProxy === undefined && ExtendableComponent.current) {
@@ -118,7 +118,7 @@ export class InteropExtendableComponent extends ExtendableComponent {
         return proxy.unwrap() as LocalStorage;
     }
 
-    override addProvidedVar<T>(providedPropName: string, store: IProvideDecoratedVariable<T>, allowOverride?: boolean | undefined): void {}
+    override addProvide<T>(providedPropName: string, store: IProvideDecoratedVariable<T>, allowOverride?: boolean): void {}
 
     override isViewActive(): boolean {
         return this.dynamicComponent.invokeMethod('isViewActive').unwrap() as boolean;
@@ -152,8 +152,8 @@ export function createInteropView(staticComponent: ExtendableComponent): ESValue
     const createState = ESValue.getGlobal().getProperty('createStateVariable');
     const findProvidePU = (providedPropName: string): Object | null => {
         let provide = staticComponent.findProvide<Object>(providedPropName);
-        if ((provide === null)) {
-            return provide;
+        if (!provide) {
+            return null;
         }
         let state = provide as ProvideDecoratedVariable<Object>;
         if (state.getProxy() === undefined) {
@@ -180,8 +180,8 @@ export function createInteropView(staticComponent: ExtendableComponent): ESValue
     const findProvider = (varName: string) => {
         const result = (
             staticComponent.findProvidedVarV2<Object>(varName) ||
-            staticComponent.findProvideV2<Object>(varName)
-        ) as ProviderDecoratedVariable<Object> | undefined | null;
+            staticComponent.findProvider<Object>(varName)
+        ) as ProviderDecoratedVariable<Object> | undefined;
         if (result == undefined) {
             return undefined;
         }
