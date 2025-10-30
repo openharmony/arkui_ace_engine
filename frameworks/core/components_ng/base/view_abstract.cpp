@@ -666,6 +666,7 @@ void ViewAbstract::SetBackgroundColor(FrameNode* frameNode, const Color& color, 
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<Pattern>();
     CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj("backgroundColor");
     auto &&updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject> &resObj) {
         CHECK_NULL_VOID(resObj);
         auto frameNode = weak.Upgrade();
@@ -749,6 +750,7 @@ void ViewAbstract::SetBackgroundImage(
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<Pattern>();
     CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj("backgroundImageSrc");
     auto &&updateFunc = [weak = AceType::WeakClaim(frameNode),
                             bundleName = src.GetBundleName(),
                             moduleName = src.GetModuleName()](const RefPtr<ResourceObject> &resObj) {
@@ -846,6 +848,7 @@ void ViewAbstract::SetBackgroundImageSize(BackgroundImageSize& bgImgSize)
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
         RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
+        pattern->RemoveResObj("backgroundImageSize");
         auto&& updateFunc = [bgImgSize, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
             auto frameNode = weak.Upgrade();
             CHECK_NULL_VOID(frameNode);
@@ -889,6 +892,7 @@ void SetBackgroundImagePositionUpdateFunc(FrameNode* frameNode, BackgroundImageP
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
     RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
+    pattern->RemoveResObj("backgroundImagePosition");
     auto&& updateFunc = [bgImgPosition, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
         auto frameNode = weak.Upgrade();
         CHECK_NULL_VOID(frameNode);
@@ -7767,6 +7771,7 @@ void ViewAbstract::SetBackgroundEffect(
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
         RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+        pattern->RemoveResObj("backgroundEffect");
         auto&& updateFunc = [effectOption, sysOptions, weak = AceType::WeakClaim(frameNode)](
                                 const RefPtr<ResourceObject>& resObj) {
             auto frameNode = weak.Upgrade();
@@ -9226,6 +9231,7 @@ void ViewAbstract::SetBackgroundImageResizableSlice(ImageResizableSlice& slice)
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
         RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
+        pattern->RemoveResObj("backgroundImageResizableSlice");
         auto&& updateFunc = [slice, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
             auto frameNode = weak.Upgrade();
             CHECK_NULL_VOID(frameNode);
