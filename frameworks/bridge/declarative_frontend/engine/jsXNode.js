@@ -1390,7 +1390,7 @@ class FrameNode extends Disposable {
     }
     getChildrenCount(isExpanded) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        const childrenCount = getUINativeModule().frameNode.getChildrenCount(this.nodePtr_, isExpanded);
+        const childrenCount = getUINativeModule().frameNode.getChildrenCount(this.getNodePtr(), isExpanded);
         __JSScopeUtil__.restoreInstanceId();
         return childrenCount;
     }
