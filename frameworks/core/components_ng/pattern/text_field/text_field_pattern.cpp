@@ -820,6 +820,22 @@ bool TextFieldPattern::CheckAttachInput()
 void TextFieldPattern::UpdateCaretInfoToController(bool forceUpdate)
 {
     CHECK_NULL_VOID(HasFocus());
+#if defined(CROSS_PLATFORM)
+#if defined(IOS_PLATFORM)
+    if (editingValue_ && editingValue_->selection.IsValid() &&
+        editingValue_->selection.GetEnd() < selectController_->GetCaretIndex()) {
+#else
+    if (editingValue_ && editingValue_->selection.IsValid() &&
+        editingValue_->selection.GetEnd() < selectController_->GetCaretIndex() && !editingValue_->appendText.empty()) {
+#endif
+        SetCaretPosition(editingValue_->selection.GetEnd());
+    }
+    if (editingValue_ && editingValue_->selection.IsValid()) {
+
+        editingValue_->selection.Update(-1);
+    }
+#endif
+
 #if defined(ENABLE_STANDARD_INPUT)
     CHECK_NULL_VOID(CheckAttachInput());
     auto miscTextConfig = GetMiscTextConfig();
@@ -5143,11 +5159,12 @@ void TextFieldPattern::ExecuteInsertValueCommand(const InsertCommandInfo& info)
     auto isIME = (info.reason == InputReason::IME);
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-#if defined(IOS_PLATFORM)
-    if (info.compose.isActive && (insertValue.length() > 0 || info.unmarkText)) {
-        auto composeStart = info.compose.start;
-        auto composeEnd = info.compose.end;
-        DeleteByRange(composeStart, composeEnd);
+#if defined(CROSS_PLATFORM)
+    if (info.compose.end > -1 && info.compose.start > -1 && (info.compose.end > info.compose.start) &&
+        (insertValue.length() > 0 || info.unmarkText)) {
+        auto start1 = info.compose.start;
+        auto end1 = info.compose.end;
+        DeleteByRange(start1, end1);
     }
 #endif
     TwinklingByFocus();
@@ -5976,24 +5993,10 @@ void TextFieldPattern::UpdateEditingValue(const std::shared_ptr<TextEditingValue
             value->selection.baseOffset -= deleteSize;
         }
     }
-#ifdef CROSS_PLATFORM
-    if (value->isDelete) {
-        HandleOnDelete(true);
-        return;
-    } else {
-#ifdef IOS_PLATFORM
-        compose_ = value->compose;
-        unmarkText_ = value->unmarkText;
-#endif
-#ifdef ANDROID_PLATFORM
-        if (value->appendText.empty()) {
-            return;
-        }
-#endif
-        InsertValue(UtfUtils::Str8DebugToStr16(value->appendText), true);
+
+    if (HandleEditingEventCrossPlatform(value)) {
         return;
     }
-#endif
 #endif
     UpdateEditingValueToRecord();
     contentController_->SetTextValue(result);
@@ -6005,6 +6008,37 @@ void TextFieldPattern::UpdateEditingValue(const std::shared_ptr<TextEditingValue
     CHECK_NULL_VOID(host);
 
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+}
+
+bool TextFieldPattern::HandleEditingEventCrossPlatform(const std::shared_ptr<TextEditingValue>& value)
+{
+#ifdef CROSS_PLATFORM
+#ifdef IOS_PLATFORM
+    if (value->isDelete) {
+        if (value->compose.IsValid()) {
+            DeleteBackward(value->compose.GetEnd() - value->compose.GetStart());
+            value->compose.Update(-1);
+        } else {
+            HandleOnDelete(true);
+        }
+        return true;
+    }
+#else
+    if (value->isDelete) {
+        HandleOnDelete(true);
+        return true;
+    }
+#endif
+    editingValue_ = value;
+#ifdef ANDROID_PLATFORM
+    if (value->appendText.empty()) {
+        return true;
+    }
+#endif
+    InsertValue(UtfUtils::Str8DebugToStr16(value->appendText), true);
+    return true;
+#endif // CROSS_PLATFORM
+    return false;
 }
 
 void TextFieldPattern::UpdateInputFilterErrorText(const std::u16string& errorText)
@@ -10895,9 +10929,8 @@ void TextFieldPattern::AddInsertCommand(const std::u16string& insertValue, Input
             return;
         }
         if (!isEdit_ || (reason == InputReason::IME && IsDragging())) {
-            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
-                "textfield %{public}d NOT allow input, isEdit_ = %{public}d, IsDragging = %{public}d", host->GetId(),
-                isEdit_, IsDragging());
+            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "textfield %{public}d NOT allow input, isEdit_ = %{public}d"
+                ", IsDragging = %{public}d", host->GetId(), isEdit_, IsDragging());
             return;
         }
     }
@@ -10914,11 +10947,13 @@ void TextFieldPattern::AddInsertCommand(const std::u16string& insertValue, Input
     InsertCommandInfo info;
     info.insertValue = insertValue;
     info.reason = reason;
-#if defined(IOS_PLATFORM)
-    info.compose.start = compose_.GetStart();
-    info.compose.end = compose_.GetEnd();
-    info.compose.isActive = compose_.IsValid();
-    info.unmarkText = unmarkText_;
+#if defined(CROSS_PLATFORM)
+    if (editingValue_) {
+        info.compose.start = editingValue_->compose.GetStart();
+        info.compose.end = editingValue_->compose.GetEnd();
+        info.compose.isActive = editingValue_->compose.IsValid();
+        info.unmarkText = editingValue_->unmarkText;
+    }
 #endif
     insertCommands_.emplace(info);
     CloseSelectOverlay(true);

@@ -192,7 +192,7 @@ struct PreviewTextInfo {
     bool isIme;
 };
 
-#if defined(IOS_PLATFORM)
+#if defined(CROSS_PLATFORM)
 struct InsertCommandComposeInfo {
     int32_t start;
     int32_t end;
@@ -203,7 +203,7 @@ struct InsertCommandComposeInfo {
 struct InsertCommandInfo {
     std::u16string insertValue;
     InputReason reason;
-#if defined(IOS_PLATFORM)
+#if defined(CROSS_PLATFORM)
     InsertCommandComposeInfo compose;
     bool unmarkText;
 #endif
@@ -2064,6 +2064,7 @@ private:
     bool ShouldSkipUpdateParagraph();
     void UpdateParagraphForDragNode(bool skipUpdate);
     void UpdateMagnifierWithFloatingCaretPos();
+    bool HandleEditingEventCrossPlatform(const std::shared_ptr<TextEditingValue>& value);
 
     RectF frameRect_;
     RectF textRect_;
@@ -2283,9 +2284,8 @@ private:
     OverflowMode lastOverflowMode_ = OverflowMode::SCROLL;
     TextOverflow lastTextOverflow_ = TextOverflow::ELLIPSIS;
 
-#if defined(IOS_PLATFORM)
-    TextCompose compose_;
-    bool unmarkText_;
+#if defined(CROSS_PLATFORM)
+    std::shared_ptr<TextEditingValue> editingValue_;
 #endif
 
     // ----- multi thread state variables -----
