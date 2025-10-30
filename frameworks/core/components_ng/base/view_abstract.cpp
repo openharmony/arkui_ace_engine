@@ -3960,7 +3960,7 @@ void ViewAbstract::HandleHoverTipsInfo(const RefPtr<PopupParam>& param, const Re
         }
     }
     AddHoverEventForTips(param, targetNode, tipsInfo, showInSubWindow);
-    AddClickEventForTips(targetNode, tipsInfo);
+    AddTouchEventForTips(targetNode, tipsInfo);
 }
 
 void ViewAbstract::UpdateTipsInfo(PopupInfo& tipsInfo, int32_t popupId, const RefPtr<FrameNode>& popupNode,
@@ -4029,15 +4029,22 @@ void ViewAbstract::AddHoverEventForTips(
     }
 }
 
-void ViewAbstract::AddClickEventForTips(const RefPtr<FrameNode>& targetNode, PopupInfo& tipsInfo)
+void ViewAbstract::AddTouchEventForTips(const RefPtr<FrameNode>& targetNode, PopupInfo& tipsInfo)
 {
     CHECK_NULL_VOID(targetNode);
     auto targetId = targetNode->GetId();
     auto context = targetNode->GetContext();
     CHECK_NULL_VOID(context);
     auto instanceId = context->GetInstanceId();
-    auto clickCallback = [targetId, instanceId,
-        popupNode = AceType::WeakClaim(AceType::RawPtr(tipsInfo.popupNode))](GestureEvent& info) {
+    auto touchCallback = [targetId, instanceId,
+        popupNode = AceType::WeakClaim(AceType::RawPtr(tipsInfo.popupNode))](const TouchEventInfo& info) {
+        if (info.GetTouches().empty()) {
+            return;
+        }
+        auto touchType = info.GetTouches().front().GetTouchType();
+        if (touchType != TouchType::DOWN) {
+            return;
+        }
         auto popup = popupNode.Upgrade();
         CHECK_NULL_VOID(popup);
         auto pattern = popup->GetPattern<BubblePattern>();
@@ -4052,7 +4059,7 @@ void ViewAbstract::AddClickEventForTips(const RefPtr<FrameNode>& targetNode, Pop
     };
     auto gestureHub = targetNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    gestureHub->AddClickEventForTips(std::move(clickCallback));
+    gestureHub->AddTouchEventForTips(std::move(touchCallback));
 }
 
 void ViewAbstract::AddMouseEventForTips(const RefPtr<FrameNode>& targetNode, PopupInfo& tipsInfo)
