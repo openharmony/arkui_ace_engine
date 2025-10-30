@@ -159,7 +159,7 @@ void PushPathByName0Impl(Ark_NavPathStack peer,
     auto convName = Converter::Convert<std::string>(*name);
     auto convParam = Converter::OptConvertPtr<Nav::ExternalData>(param).value_or(Nav::ExternalData{});
     auto convAnimated = Converter::OptConvertPtr<bool>(animated);
-    navStack->Nav::PathStack::PushPathByName(convName, convParam, Nav::OnPopCallback(), convAnimated);
+    navStack->Nav::PathStack::PushPathByName(convName, convParam, nullptr, convAnimated);
 }
 void PushPathByName1Impl(Ark_NavPathStack peer,
                          const Ark_String* name,
@@ -191,21 +191,34 @@ void PushDestinationByName0Impl(Ark_VMContext vmContext,
                                 const Opt_Boolean* animated,
                                 const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
-    Ark_NativePointer invalid = nullptr;
-    LOGE("NavPathStackAccessor::PushDestinationByName0Impl is not implemented yet.");
-    CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(name);
-    CHECK_NULL_VOID(param);
-    auto navStack = peer->GetNavPathStack();
-    if (!navStack) {
-        LOGE("NavPathStackAccessor::PushDestinationByName0Impl. Navigation Stack isn't bound to a component.");
-        return;
-    }
+    CHECK_NULL_VOID(peer && name && param && animated && outputArgumentForReturningPromise);
+    auto promise = std::make_shared<PromiseHelper<Callback_Opt_Array_String_Void>>(outputArgumentForReturningPromise);
+    auto finishFunc = [promise](int32_t errorCode, std::string errorMessage) {
+        if (errorCode == ERROR_CODE_NO_ERROR) {
+            promise->Resolve();
+        } else {
+            promise->Reject({ std::to_string(errorCode), errorMessage });
+        }
+    };
 
     auto convName = Converter::Convert<std::string>(*name);
     auto convParam = Converter::Convert<Nav::ExternalData>(*param);
-    auto convAnimated = Converter::OptConvertPtr<bool>(animated);
-    navStack->Nav::PathStack::PushDestinationByName(convName, convParam, nullptr, convAnimated);
+    auto convAnimated = Converter::OptConvertPtr<bool>(animated).value_or(true);
+    auto info = std::make_shared<NavigationContext::PathInfo>(convName, convParam);
+
+    auto execFunc = [peer, info, convAnimated, finishFunc]() {
+        auto navStack = peer->GetNavPathStack();
+        if (!navStack) {
+            LOGE("NavPathStackAccessor::PushDestinationByName0Impl. Navigation Stack isn't bound to a component.");
+            finishFunc(ERROR_CODE_PARAM_INVALID,
+                "Parameter error. Possible causes: 1. Mandatory parameters are left unspecified; 2. Incorrect "
+                "parameter types; 3. Parameter verification failed.");
+            return;
+        }
+        info->promise_ = finishFunc;
+        navStack->NavigationContext::PathStack::PushDestinationByName(info->name_, info->param_, nullptr, convAnimated);
+    };
+    promise->StartAsync(vmContext, *asyncWorker, execFunc);
 }
 void PushDestinationByName1Impl(Ark_VMContext vmContext,
                                 Ark_AsyncWorkerPtr asyncWorker,
@@ -216,22 +229,36 @@ void PushDestinationByName1Impl(Ark_VMContext vmContext,
                                 const Opt_Boolean* animated,
                                 const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
-    LOGE("NavPathStackAccessor::PushDestinationByName1Impl is not implemented yet.");
-    CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(name);
-    CHECK_NULL_VOID(param);
-    CHECK_NULL_VOID(onPop);
-    auto navStack = peer->GetNavPathStack();
-    if (!navStack) {
-        LOGE("NavPathStackAccessor::PushDestinationByName1Impl. Navigation Stack isn't bound to a component.");
-        return;
-    }
+    CHECK_NULL_VOID(peer && name && param && onPop && animated && outputArgumentForReturningPromise);
+    auto promise = std::make_shared<PromiseHelper<Callback_Opt_Array_String_Void>>(outputArgumentForReturningPromise);
+    auto finishFunc = [promise](int32_t errorCode, std::string errorMessage) {
+        if (errorCode == ERROR_CODE_NO_ERROR) {
+            promise->Resolve();
+        } else {
+            promise->Reject({ std::to_string(errorCode), errorMessage });
+        }
+    };
 
     auto convName = Converter::Convert<std::string>(*name);
     auto convParam = Converter::Convert<Nav::ExternalData>(*param);
     auto convOnPop = AceType::MakeRefPtr<CallbackHelper<Callback_PopInfo_Void>>(*onPop);
-    auto convAnimated = Converter::OptConvertPtr<bool>(animated);
-    navStack->Nav::PathStack::PushDestinationByName(convName, convParam, convOnPop, convAnimated);
+    auto convAnimated = Converter::OptConvertPtr<bool>(animated).value_or(true);
+    auto info = std::make_shared<NavigationContext::PathInfo>(convName, convParam, convOnPop);
+
+    auto execFunc = [peer, info, convAnimated, finishFunc]() {
+        auto navStack = peer->GetNavPathStack();
+        if (!navStack) {
+            LOGE("NavPathStackAccessor::PushDestinationByName1Impl. Navigation Stack isn't bound to a component.");
+            finishFunc(ERROR_CODE_PARAM_INVALID,
+                "Parameter error. Possible causes: 1. Mandatory parameters are left unspecified; 2. Incorrect "
+                "parameter types; 3. Parameter verification failed.");
+            return;
+        }
+        info->promise_ = finishFunc;
+        navStack->NavigationContext::PathStack::PushDestinationByName(
+            info->name_, info->param_, info->onPop_, convAnimated);
+    };
+    promise->StartAsync(vmContext, *asyncWorker, execFunc);
 }
 void ReplacePath0Impl(Ark_NavPathStack peer,
                       Ark_NavPathInfo info,
@@ -304,6 +331,13 @@ void ReplacePathByNameImpl(Ark_NavPathStack peer,
                            const Ark_Object* param,
                            const Opt_Boolean* animated)
 {
+    CHECK_NULL_VOID(peer && name && param && animated);
+    auto navStack = peer->GetNavPathStack();
+    CHECK_NULL_VOID(navStack);
+    auto convName = Converter::Convert<std::string>(*name);
+    auto convParam = Converter::Convert<Nav::ExternalData>(*param);
+    auto convAnimated = Converter::OptConvertPtr<bool>(animated).value_or(true);
+    navStack->NavigationContext::PathStack::ReplacePathByName(convName, convParam, convAnimated);
 }
 Ark_Int32 RemoveByIndexesImpl(Ark_NavPathStack peer,
                               const Array_Int32* indexes)
@@ -449,7 +483,7 @@ void MoveIndexToTopImpl(Ark_NavPathStack peer,
                         const Opt_Boolean* animated)
 {
     CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(index);
+    CHECK_NULL_VOID(animated);
     auto navStack = peer->GetNavPathStack();
     CHECK_NULL_VOID(navStack);
     auto indexNum = Converter::Convert<std::uint32_t>(index);

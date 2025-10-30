@@ -968,7 +968,7 @@ class RouterImpl implements Router {
     getStateByUrl(url: string): Array<router.RouterState> {
         let retVal: Array<router.RouterState> = new Array<router.RouterState>()
         this.visiblePages.value.forEach((element, index) => {
-            if (element.url === url) {
+            if ((element.path + element.url) === url) {
                 // routerState index is started from 1. 
                 let state: router.RouterState = {
                     index: index + 1,
