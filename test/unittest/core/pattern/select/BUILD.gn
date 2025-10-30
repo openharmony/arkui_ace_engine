@@ -22,5 +22,6 @@ ace_unittest("select_test_ng") {
     "select_pattern_three_test_ng.cpp",
     "select_test_controlsize_ng.cpp",
     "select_test_ng.cpp",
+    "select_two_test_ng.cpp",
   ]
 }
