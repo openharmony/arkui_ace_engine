@@ -1015,19 +1015,18 @@ Ark_NativePointer CreateTypedFrameNodeImpl(const Ark_String* type)
     newNode->DecRefCount();
     return static_cast<Ark_FrameNode>(FrameNodePeer::Create(newNode));
 }
-Ark_NativePointer CreateByRawPtrImpl(Ark_FrameNode peer,
-                                     Ark_FrameNode pointer)
+Ark_NativePointer CreateByRawPtrImpl(Ark_NativePointer rawPtr)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(pointer);
-    frameNode->SetExclusiveEventForChild(true);
-    frameNode->SetIsArkTsFrameNode(true);
-    auto returnPeer = FrameNodePeer::Create(frameNode);
-    return returnPeer;
+    auto frameNode = reinterpret_cast<FrameNode*>(rawPtr);
+    auto peer = FrameNodePeer::Create(frameNode);
+    return reinterpret_cast<Ark_NativePointer>(peer);
 }
-Ark_FrameNode UnWrapRawPtrImpl(Ark_FrameNode peer,
-                               Ark_NativePointer pointer)
+Ark_NativePointer UnWrapRawPtrImpl(Ark_NativePointer peerNode)
 {
-    return peer;
+    auto frameNodePeer = reinterpret_cast<FrameNodePeer*>(peerNode);
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(frameNodePeer);
+    auto frameNodeRaw = Referenced::RawPtr(frameNode);
+    return reinterpret_cast<Ark_NativePointer>(frameNodeRaw);
 }
 Ark_UICommonEvent GetCommonEventImpl(Ark_FrameNode peer)
 {
