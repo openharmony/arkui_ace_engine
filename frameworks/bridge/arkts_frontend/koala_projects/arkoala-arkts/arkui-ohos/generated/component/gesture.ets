@@ -139,13 +139,12 @@ export class GestureRecognizer implements MaterializedBase {
     getEventTargetInfo_serialize(): EventTargetInfo {
         const retval  = ArkUIGeneratedNativeModule._GestureRecognizer_getEventTargetInfo(this.peer!.ptr)
         // instructive change start
-        const eventTargetInfoObj : EventTargetInfo = EventTargetInfoInternal.fromPtr(retval)
         const isScorllableComponent = ArkUIGeneratedNativeModule._GestureOps_isScrollableComponent(retval)
         if (isScorllableComponent) {
             const scrollableTargetInfoObj : ScrollableTargetInfo = ScrollableTargetInfoInternal.fromPtr(retval)
             return scrollableTargetInfoObj
         }
-        return eventTargetInfoObj
+        return EventTargetInfoInternal.fromPtr(retval)
         // instructive change end
     }
     isValid_serialize(): boolean {
@@ -396,8 +395,8 @@ export class GestureRecognizer_serializer {
         let valueDeserializer : DeserializerBase = buffer
         let ptr : KPointer = valueDeserializer.readPointer()
         // instructive change start
-        let recognizer = GestureRecognizerInternal.fromPtr(ptr)
-        let recognizerType = recognizer.getType()
+        const retval  = ArkUIGeneratedNativeModule._GestureRecognizer_getType(ptr)
+        let recognizerType =  GestureControl.GestureType.fromValue(retval)
         switch(recognizerType) {
             case GestureControl.GestureType.TAP_GESTURE:
                 return TapRecognizerInternal.fromPtr(ptr)
@@ -414,7 +413,7 @@ export class GestureRecognizer_serializer {
             case GestureControl.GestureType.CLICK:
             case GestureControl.GestureType.DRAG:
             default:
-                return recognizer
+                return GestureRecognizerInternal.fromPtr(ptr)
         }
         // instructive change end
     }
@@ -734,7 +733,6 @@ export class BaseGestureEvent_serializer {
         let valueDeserializer : DeserializerBase = buffer
         let ptr : KPointer = valueDeserializer.readPointer()
         // instructive change start
-        let event = BaseGestureEventInternal.fromPtr(ptr)
         let type = ArkUIGeneratedNativeModule._GestureOps_getGestureEventType(ptr)
         let recognizerType = GestureControl.GestureType.fromValue(type as int32)
         switch(recognizerType) {
@@ -753,7 +751,7 @@ export class BaseGestureEvent_serializer {
             case GestureControl.GestureType.CLICK:
             case GestureControl.GestureType.DRAG:
             default:
-                return event
+                return BaseGestureEventInternal.fromPtr(ptr)
         }
         // instructive change end
     }
