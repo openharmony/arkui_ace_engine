@@ -100,6 +100,8 @@ void QRCodeModelNG::SetContentOpacity(FrameNode* frameNode, const double opacity
 void HandleCreateResource(const RefPtr<QRCodePattern>& pattern, const RefPtr<ResourceObject>& resObj)
 {
     std::string createKey = "qrcode.create";
+    pattern->RemoveResObj(createKey);
+    CHECK_NULL_VOID(resObj);
     auto&& updateCreateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern))](
                                   const RefPtr<ResourceObject>& resObj) {
         auto pattern = weak.Upgrade();
