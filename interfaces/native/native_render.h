@@ -1989,6 +1989,7 @@ void OH_ArkUI_RenderNodeUtils_DisposeRenderNodeClipOption(ArkUI_RenderNodeClipOp
  * @param renderNode pointer, the RenderNode of the target node.
  * @return Error code.
  *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
  *         {@link ARKUI_ERROR_CODE_CAPI_INIT_ERROR} if CAPI init error.
  *         {@link ARKUI_ERROR_CODE_RENDER_NOT_ADOPTED_NODE} The node is not adopted.
  * @since 23

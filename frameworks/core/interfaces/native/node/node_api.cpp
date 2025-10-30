@@ -408,6 +408,11 @@ ArkUI_Int32 InsertChildBefore(ArkUINodeHandle parent, ArkUINodeHandle child, Ark
     if (nodeAdapter) {
         return ERROR_CODE_NATIVE_IMPL_NODE_ADAPTER_EXIST;
     }
+    auto childNode = reinterpret_cast<UINode*>(child);
+    CHECK_NULL_RETURN(childNode, ERROR_CODE_PARAM_INVALID);
+    if (childNode->IsAdopted()) {
+        return ERROR_CODE_NODE_IS_ADOPTED;
+    }
     ViewModel::InsertChildBefore(parent, child, sibling);
     return ERROR_CODE_NO_ERROR;
 }

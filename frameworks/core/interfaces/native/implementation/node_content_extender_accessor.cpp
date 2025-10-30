@@ -50,24 +50,24 @@ Ark_NativePointer GetDestroyImpl()
     return reinterpret_cast<void*>(&DestroyPeerImpl);
 }
 
-Ark_Float64 AddFrameNodeImpl(Ark_NativePointer peer, Ark_NativePointer node)
+Ark_Int32 AddFrameNodeImpl(Ark_NativePointer peer, Ark_NativePointer node)
 {
-    CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_Float64>(ERROR_CODE_PARAM_INVALID));
+    CHECK_NULL_RETURN(peer, ERROR_CODE_PARAM_INVALID);
     auto peerImpl = reinterpret_cast<NodeContentPeer*>(peer);
-    CHECK_NULL_RETURN(peerImpl->content, Converter::ArkValue<Ark_Float64>(ERROR_CODE_PARAM_INVALID));
-    CHECK_NULL_RETURN(node, Converter::ArkValue<Ark_Float64>(ERROR_CODE_PARAM_INVALID));
+    CHECK_NULL_RETURN(peerImpl->content, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(node, ERROR_CODE_PARAM_INVALID);
     auto frameNodePeer = reinterpret_cast<FrameNodePeer*>(node);
-    CHECK_NULL_RETURN(frameNodePeer->node, Converter::ArkValue<Ark_Float64>(ERROR_CODE_PARAM_INVALID));
+    CHECK_NULL_RETURN(frameNodePeer->node, ERROR_CODE_PARAM_INVALID);
     if (frameNodePeer->node->IsAdopted()) {
-        return Converter::ArkValue<Ark_Float64>(ERROR_CODE_NODE_IS_ADOPTED);
+        return ERROR_CODE_NODE_IS_ADOPTED;
     }
     auto nodeContent = AceType::DynamicCast<NG::NodeContent>(peerImpl->content);
-    CHECK_NULL_RETURN(nodeContent, Converter::ArkValue<Ark_Float64>(ERROR_CODE_PARAM_INVALID));
+    CHECK_NULL_RETURN(nodeContent, ERROR_CODE_PARAM_INVALID);
     auto childNode = AceType::DynamicCast<UINode>(frameNodePeer->node);
-    CHECK_NULL_RETURN(childNode, Converter::ArkValue<Ark_Float64>(ERROR_CODE_PARAM_INVALID));
+    CHECK_NULL_RETURN(childNode, ERROR_CODE_PARAM_INVALID);
     nodeContent->AddNode(AceType::RawPtr(childNode));
     childNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
-    return Converter::ArkValue<Ark_Float64>(ERROR_CODE_NO_ERROR);
+    return ERROR_CODE_NO_ERROR;
 }
 
 Ark_Boolean RemoveFrameNodeImpl(Ark_NativePointer peer, Ark_NativePointer node)
