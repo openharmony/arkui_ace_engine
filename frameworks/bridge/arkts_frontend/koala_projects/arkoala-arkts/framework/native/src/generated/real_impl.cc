@@ -13276,7 +13276,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
-    Ark_Number GetUniqueIdImpl(Ark_FrameNode peer)
+    Ark_Int32 GetUniqueIdImpl(Ark_FrameNode peer)
     {
         return {};
     }
@@ -13402,7 +13402,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
-    Ark_NativePointer GetFrameNodeByUniqueIdImpl(const Ark_Number* id)
+    Ark_NativePointer GetFrameNodeByUniqueIdImpl(Ark_Int32 id)
     {
         return {};
     }

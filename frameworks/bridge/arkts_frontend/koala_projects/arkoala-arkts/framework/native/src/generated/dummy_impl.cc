@@ -31052,7 +31052,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return nullptr;
     }
-    Ark_NativePointer GetFrameNodeByUniqueIdImpl(const Ark_Number* id)
+    Ark_NativePointer GetFrameNodeByUniqueIdImpl(Ark_Int32 id)
     {
         if (!needGroupedLog(1))
         {

@@ -4128,7 +4128,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _FrameNodeExtender_getId(peer: KPointer): string
     @ani.unsafe.Direct
-    native static _FrameNodeExtender_getUniqueId(peer: KPointer): number
+    native static _FrameNodeExtender_getUniqueId(peer: KPointer): int32
     @ani.unsafe.Quick
     native static _FrameNodeExtender_getNodeType(peer: KPointer): string
     @ani.unsafe.Direct
@@ -4190,7 +4190,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _FrameNodeExtender_getFrameNodeById(id: number): KPointer
     @ani.unsafe.Direct
-    native static _FrameNodeExtender_getFrameNodeByUniqueId(id: number): KPointer
+    native static _FrameNodeExtender_getFrameNodeByUniqueId(id: KInt): KPointer
     @ani.unsafe.Direct
     native static _FrameNodeExtender_reuse(peer: KPointer): void
     @ani.unsafe.Direct

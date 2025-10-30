@@ -1462,7 +1462,7 @@ export class FrameNodeExtender {
         const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getId(extractors.toFrameNodePtr(peer))
         return retval
     }
-    static getUniqueId_serialize(peer: FrameNode): number {
+    static getUniqueId_serialize(peer: FrameNode): int32 {
         const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getUniqueId(extractors.toFrameNodePtr(peer))
         return retval
     }
@@ -1607,7 +1607,7 @@ export class FrameNodeExtender {
         const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getFrameNodeById(id)
         return retval
     }
-    static getFrameNodeByUniqueId_serialize(id: number): KPointer {
+    static getFrameNodeByUniqueId_serialize(id: int32): KPointer {
         const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getFrameNodeByUniqueId(id)
         return retval
     }
@@ -1801,7 +1801,7 @@ export class FrameNodeExtender {
         const peer_casted = peer as (FrameNode)
         return FrameNodeExtender.getId_serialize(peer_casted)
     }
-    public static getUniqueId(peer: FrameNode): number {
+     public static getUniqueId(peer: FrameNode): int32 {
         const peer_casted = peer as (FrameNode)
         return FrameNodeExtender.getUniqueId_serialize(peer_casted)
     }
@@ -1939,8 +1939,8 @@ export class FrameNodeExtender {
         const id_casted = id as (number)
         return FrameNodeExtender.getFrameNodeById_serialize(id_casted)
     }
-    public static getFrameNodeByUniqueId(id: number): KPointer {
-        const id_casted = id as (number)
+    public static getFrameNodeByUniqueId(id: int32): KPointer {
+        const id_casted = id as (int32)
         return FrameNodeExtender.getFrameNodeByUniqueId_serialize(id_casted)
     }
     public static reuse(peer: FrameNode): void {

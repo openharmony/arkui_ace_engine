@@ -372,13 +372,11 @@ Ark_String GetIdImpl(Ark_FrameNode peer)
     auto inspectorId = frameNode->GetInspectorId().value_or("");
     return Converter::ArkValue<Ark_String>(inspectorId, Converter::FC);
 }
-Ark_Number GetUniqueIdImpl(Ark_FrameNode peer)
+Ark_Int32 GetUniqueIdImpl(Ark_FrameNode peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
-    CHECK_NULL_RETURN(frameNode, errValue);
-    const auto returValue = Converter::ArkValue<Ark_Number>(frameNode->GetId());
-    return returValue;
+    CHECK_NULL_RETURN(frameNode, 0);
+    return Converter::ArkValue<Ark_Int32>(frameNode->GetId());
 }
 Ark_String GetNodeTypeImpl(Ark_FrameNode peer)
 {
@@ -801,9 +799,9 @@ Ark_NativePointer GetFrameNodeByIdImpl(const Ark_Number* id)
     auto nodeRef = AceType::DynamicCast<NG::FrameNode>(node);
     return FrameNodePeer::Create(OHOS::Ace::AceType::RawPtr(nodeRef));
 }
-Ark_NativePointer GetFrameNodeByUniqueIdImpl(const Ark_Number* id)
+Ark_NativePointer GetFrameNodeByUniqueIdImpl(Ark_Int32 id)
 {
-    auto idInt = Converter::Convert<int32_t>(*id);
+    auto idInt = Converter::Convert<int32_t>(id);
     auto node = AceType::DynamicCast<NG::UINode>(OHOS::Ace::ElementRegister::GetInstance()->GetNodeById(idInt));
     CHECK_NULL_RETURN(node, nullptr);
     if (node->GetTag() == "root" || node->GetTag() == "stage" || node->GetTag() == "page") {
