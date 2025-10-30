@@ -36,6 +36,10 @@ namespace OHOS::Ace::Framework {
 class JSIndicatorController;
 }
 
+namespace OHOS::Ace::NG {
+class JSIndicatorControllerBase;
+}
+
 namespace OHOS::Ace {
 
 struct SwiperParameters {
@@ -220,8 +224,8 @@ public:
     virtual void SetJSIndicatorController(std::function<void()> resetFunc) {}
     virtual void ResetJSIndicatorController() {}
     virtual void SetOnSelected(std::function<void(const BaseEventInfo* info)>&& onSelected) {}
-    virtual void SetIndicatorController(Framework::JSIndicatorController* controller) {}
-    virtual Framework::JSIndicatorController* GetIndicatorController() { return nullptr; }
+    virtual void SetIndicatorController(RefPtr<NG::JSIndicatorControllerBase> controller) {}
+    virtual RefPtr<NG::JSIndicatorControllerBase> GetIndicatorController() { return nullptr; }
     virtual void SetMaintainVisibleContentPosition(bool value) {}
     virtual void ProcessNextMarginWithResourceObj(const RefPtr<ResourceObject>& resObj) {}
     virtual void ProcessPreviousMarginWithResourceObj(const RefPtr<ResourceObject>& resObj) {};

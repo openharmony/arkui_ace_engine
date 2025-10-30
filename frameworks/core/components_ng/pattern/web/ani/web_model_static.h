@@ -100,6 +100,8 @@ public:
         FrameNode* frameNode, const std::shared_ptr<WebPreviewSelectionMenuParam>& param);
     static void SetOnPageFinish(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
     static void SetOnPageStart(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetOnLoadStarted(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetOnLoadFinished(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
     static void SetOnProgressChange(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
     static void SetOnTitleReceive(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
     static void SetOnGeolocationHide(
@@ -134,6 +136,8 @@ public:
         FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& callback);
     static void SetOnInterceptRequest(
         FrameNode* frameNode, std::function<RefPtr<WebResponse>(const BaseEventInfo* info)>&& callback);
+    static void SetOnOverrideErrorPage(
+        FrameNode* frameNode, std::function<std::string(const BaseEventInfo* info)>&& callback);
     static void SetPermissionRequestEventId(
         FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
     static void SetScreenCaptureRequestEventId(
@@ -223,6 +227,8 @@ public:
     static void SetAllowWindowOpenMethod(FrameNode* frameNode, bool isAllowWindowOpenMethod);
     static void SetActivateContentEventId(
         FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetSafeBrowsingCheckFinishId(FrameNode* frameNode,
+        std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& safeBrowsingCheckFinishId);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_ANI_WEB_MODEL_STATIC_H

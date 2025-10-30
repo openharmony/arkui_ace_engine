@@ -60,8 +60,8 @@ public:
     void SetOnAnimationStart(AnimationStartEvent&& onAnimationStart) override;
     void SetOnAnimationEnd(AnimationEndEvent&& onAnimationEnd) override;
     void SetOnGestureSwipe(GestureSwipeEvent&& gestureSwipe) override;
-    void SetIndicatorController(Framework::JSIndicatorController* controller) override;
-    Framework::JSIndicatorController* GetIndicatorController() override;
+    void SetIndicatorController(RefPtr<NG::JSIndicatorControllerBase> controller) override;
+    RefPtr<NG::JSIndicatorControllerBase> GetIndicatorController() override;
 
     void SetRemoteMessageEventId(RemoteCallback&& remoteCallback) override;
     void SetOnClick(

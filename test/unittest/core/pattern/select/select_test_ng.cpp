@@ -1369,4 +1369,45 @@ HWTEST_F(SelectTestNg, SelectPattern001, TestSize.Level1)
     EXPECT_EQ(selectColor, selectTheme->GetBackgroundColor());
     ViewStackProcessor::GetInstance()->ClearStack();
 }
+
+/**
+ * @tc.name: SetValueMultiThread001
+ * @tc.desc: Test SetValueMultiThread posts a task correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, SetValueMultiThread001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Simulate non-UI thread, create a select node, and set an option property.
+     */
+    MultiThreadBuildManager::SetIsThreadSafeNodeScope(true);
+    bool isUIThread = MultiThreadBuildManager::isUIThread_;
+    MultiThreadBuildManager::isUIThread_ = false;
+
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { "Test", "Test" } };
+    selectModelInstance.Create(params);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    // Set value after node creation
+    selectModelInstance.SetValue("Test");
+    
+    auto selectPattern = frameNode->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    // Execute tasks to make sure the property is set on the pattern
+    frameNode->ExecuteAfterAttachMainTreeTasks();
+
+    /**
+     * @tc.steps: step2. Call SetValueultiThread and check if a task is posted.
+     */
+    auto initialTaskCount = frameNode->afterAttachMainTreeTasks_.size();
+    selectPattern->SetValueMultiThread("Test");
+    EXPECT_EQ(frameNode->afterAttachMainTreeTasks_.size(), initialTaskCount + 1);
+
+    /**
+     * @tc.steps: step3. Restore environment.
+     */
+    MultiThreadBuildManager::isUIThread_ = isUIThread;
+    MultiThreadBuildManager::SetIsThreadSafeNodeScope(false);
+}
 } // namespace OHOS::Ace::NG

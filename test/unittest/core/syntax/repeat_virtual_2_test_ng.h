@@ -19,6 +19,7 @@
 #include <optional>
 #include <utility>
 
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
 #include "base/memory/ace_type.h"

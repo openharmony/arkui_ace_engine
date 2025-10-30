@@ -942,6 +942,14 @@ void SelectPattern::BuildChild()
 
 void SelectPattern::SetValue(const std::string& value)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    FREE_NODE_CHECK(host, SetValue, value);
+    SetValueImpl(value);
+}
+
+void SelectPattern::SetValueImpl(const std::string& value)
+{
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
     props->UpdateContent(value);

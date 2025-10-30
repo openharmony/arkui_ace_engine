@@ -48,6 +48,11 @@
     "pages/withScroll/navigation3",
     "pages/titleBarAndToolBar/Index",
     "pages/titleBarAndToolBar/page5",
-    "pages/titleBarAndToolBar/test1"
+    "pages/titleBarAndToolBar/test1",
+    "pages/queryApi/Index",
+    "pages/queryApi/Page",
+    "pages/onTouchDivider/Index",
+    "pages/onTouchDivider/test1",
+    "pages/onTouchDivider/WindowTwo"
   ]
 }

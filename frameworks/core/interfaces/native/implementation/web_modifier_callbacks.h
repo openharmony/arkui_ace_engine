@@ -27,6 +27,10 @@ void OnPageEnd(const CallbackHelper<Callback_OnPageEndEvent_Void>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
 void OnPageBegin(const CallbackHelper<Callback_OnPageBeginEvent_Void>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
+void OnLoadStarted(const CallbackHelper<Callback_OnLoadStartedEvent_Void>& arkCallback,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
+void OnLoadFinished(const CallbackHelper<Callback_OnLoadFinishedEvent_Void>& arkCallback,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
 void OnProgressChange(const CallbackHelper<Callback_OnProgressChangeEvent_Void>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
 void OnTitleReceive(const CallbackHelper<Callback_OnTitleReceiveEvent_Void>& arkCallback,
@@ -73,6 +77,9 @@ bool OnHttpAuthRequest(const CallbackHelper<Callback_OnHttpAuthRequestEvent_Bool
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
 RefPtr<WebResponse> OnInterceptRequest(
     const CallbackHelper<Callback_OnInterceptRequestEvent_WebResourceResponse>& arkCallback,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
+std::string OnOverrideErrorPage(
+    const CallbackHelper<OnOverrideErrorPageCallback>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
 void OnPermissionRequest(const CallbackHelper<Callback_OnPermissionRequestEvent_Void>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
@@ -154,6 +161,8 @@ void OnAdsBlocked(const CallbackHelper<OnAdsBlockedCallback>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
 void OnActivateContent(const CallbackHelper<VoidCallback>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
+void OnSafeBrowsingCheckFinish(const CallbackHelper<OnSafeBrowsingCheckResultCallback>& arkCallback,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info);
 } // namespace OHOS::Ace::NG::GeneratedModifier::WebAttributeModifier
 #endif // WEB_SUPPORTED
 
