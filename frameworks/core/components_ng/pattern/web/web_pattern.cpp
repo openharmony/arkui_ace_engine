@@ -9138,8 +9138,7 @@ bool WebPattern::Pip(int status,
             CHECK_NULL_RETURN(env, false);
             auto host = GetHost();
             CHECK_NULL_RETURN(host, false);
-            int32_t nodeId = host->GetId();
-            PipInfo pipInfo{nodeId, windowId_, delegateId, childId,
+            PipInfo pipInfo{host->GetId(), windowId_, delegateId, childId,
                             frameRoutingId, width, height};
             result = CreatePip(status, env, init, pipController, pipInfo);
             WEB_CHECK_FALSE_RETURN(result, false);
