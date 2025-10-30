@@ -910,6 +910,7 @@ void JSNavigationStack::FireNavigationInterceptionBeforeLifeCycle(const RefPtr<N
     }
     params[operationIndex] = JSRef<JSVal>::Make(ToJSValue(static_cast<int32_t>(operation)));
     const uint8_t animatedIndex = 4;
+    isAnimated = !GetDisableAnimation() && GetAnimatedValue();
     params[animatedIndex] = JSRef<JSVal>::Make(ToJSValue(isAnimated));
     beforeFunc->Call(JSRef<JSObject>(), argsNum, params);
 }
