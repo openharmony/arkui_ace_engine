@@ -602,7 +602,9 @@ void ContainerModalPatternEnhance::OnMaxBtnHoverEvent(bool hover, WeakPtr<FrameN
         CHECK_NULL_VOID(pattern);
         pattern->ShowMaxMenu(maximizeBtn);
     };
-    auto pipeline = GetHost()->GetContextRefPtr();
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     contextTimer_.Reset(callback);
     pipeline->GetTaskExecutor()->PostDelayedTask(

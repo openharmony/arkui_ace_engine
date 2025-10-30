@@ -2247,12 +2247,29 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerTest075, TestSize.Level1)
 }
 
 /**
-* @tc.name: DragDropManagerTest076
+ * @tc.name: DragDropManagerTest076
+ * @tc.desc: Test IsAnyDraggableHit Funcition When isAnyDraggableHit_ Is False
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNgNew, DragDropManagerTest076, TestSize.Level1)
+{
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    dragDropManager->SetIsAnyDraggableHit(false);
+    bool result = dragDropManager->IsAnyDraggableHit(pipelineContext, 0);
+    EXPECT_FALSE(result);
+}
+
+/**
+* @tc.name: DragDropManagerTest077
 * @tc.desc: Test GetScaleInfo with scale
 * @tc.type: FUNC
 * @tc.author:
 */
-HWTEST_F(DragDropManagerTestNgNew, DragDropManagerTest076, TestSize.Level1)
+HWTEST_F(DragDropManagerTestNgNew, DragDropManagerTest077, TestSize.Level1)
 {
     constexpr float WIDTH_UNKOWN = 00.0f;
     constexpr float HEIGHT_UNKOWN = 00.0f;
@@ -2269,23 +2286,6 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerTest076, TestSize.Level1)
     auto scaleLarge = DragDropManager::GetScaleInfo(WIDTH_LARGE, HEIGHT_LARGE, false);
     ASSERT_NE(scaleLarge, nullptr);
     EXPECT_NE(scaleLarge->scale, 1);
-}
-
-/**
- * @tc.name: IsAnyDraggableHit001
- * @tc.desc: Test IsAnyDraggableHit Funcition When isAnyDraggableHit_ Is False
- * @tc.type: FUNC
- * @tc.author:
- */
-HWTEST_F(DragDropManagerTestNgNew, DragDropManagerTest077, TestSize.Level1)
-{
-    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
-    ASSERT_NE(dragDropManager, nullptr);
-    auto pipelineContext = MockPipelineContext::GetCurrentContext();
-    ASSERT_NE(pipelineContext, nullptr);
-    dragDropManager->SetIsAnyDraggableHit(false);
-    bool result = dragDropManager->IsAnyDraggableHit(pipelineContext, 0);
-    EXPECT_FALSE(result);
 }
 
 /**

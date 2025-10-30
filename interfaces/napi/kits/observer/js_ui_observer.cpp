@@ -1493,6 +1493,7 @@ napi_value ObserverProcess::ProcessAfterPanEndUnRegister(napi_env env, napi_call
 napi_value ObserverProcess::ProcessNodeRenderStateRegister(napi_env env, napi_callback_info info)
 {
     auto container = AceEngine::Get().GetContainer(Container::CurrentIdSafely());
+    CHECK_NULL_RETURN(container, nullptr);
     auto pipeline = container->GetPipelineContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(pipeline);
@@ -1517,6 +1518,7 @@ napi_value ObserverProcess::ProcessNodeRenderStateRegister(napi_env env, napi_ca
 napi_value ObserverProcess::ProcessNodeRenderStateUnRegister(napi_env env, napi_callback_info info)
 {
     auto container = AceEngine::Get().GetContainer(Container::CurrentIdSafely());
+    CHECK_NULL_RETURN(container, nullptr);
     auto pipeline = container->GetPipelineContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(pipeline);

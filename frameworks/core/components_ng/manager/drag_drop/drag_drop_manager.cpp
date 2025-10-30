@@ -401,6 +401,7 @@ RefPtr<FrameNode> DragDropManager::FindTargetInChildNodes(
     if (parentFrameNode && (!parentFrameNode->IsActive() || !parentFrameNode->IsVisible())) {
         return nullptr;
     }
+    CHECK_NULL_RETURN(parentFrameNode, nullptr);
     auto children = parentFrameNode->GetFrameChildren();
 
     for (auto iter = children.rbegin(); iter != children.rend(); iter++) {
@@ -415,7 +416,6 @@ RefPtr<FrameNode> DragDropManager::FindTargetInChildNodes(
         }
     }
 
-    CHECK_NULL_RETURN(parentFrameNode, nullptr);
     for (auto iter : hitFrameNodes) {
         if (parentFrameNode == iter) {
             auto eventHub = parentFrameNode->GetEventHub<EventHub>();
@@ -855,6 +855,7 @@ void DragDropManager::OnDragMoveOut(const DragPointerEvent& pointerEvent)
 {
     Point point = pointerEvent.GetPoint();
     auto container = Container::Current();
+    CHECK_NULL_VOID(container);
     if (container && container->IsSceneBoardWindow()) {
         if (IsDragged() && IsWindowConsumed()) {
             SetIsWindowConsumed(false);
@@ -886,6 +887,7 @@ void DragDropManager::OnDragMoveOut(const DragPointerEvent& pointerEvent)
 void DragDropManager::OnDragThrow(const DragPointerEvent& pointerEvent)
 {
     auto container = Container::Current();
+    CHECK_NULL_VOID(container);
     if (container && container->IsSceneBoardWindow()) {
         if (IsDragged() && IsWindowConsumed()) {
             SetIsWindowConsumed(false);
@@ -915,6 +917,7 @@ void DragDropManager::OnDragPullCancel(const DragPointerEvent& pointerEvent)
 {
     RemoveDeadlineTimer();
     auto container = Container::Current();
+    CHECK_NULL_VOID(container);
     auto containerId = container->GetInstanceId();
     DragDropBehaviorReporter::GetInstance().UpdateContainerId(containerId);
     DragDropBehaviorReporter::GetInstance().UpdateDragStopResult(DragStopResult::USER_STOP_DRAG);
@@ -1240,6 +1243,7 @@ void DragDropManager::OnDragEnd(const DragPointerEvent& pointerEvent, const std:
     DoDragReset();
     dragDropPointerEvent_ = pointerEvent;
     auto container = Container::Current();
+    CHECK_NULL_VOID(container);
     auto containerId = container->GetInstanceId();
     DragDropBehaviorReporter::GetInstance().UpdateContainerId(containerId);
     if (container && container->IsSceneBoardWindow() && (IsDragged() && IsWindowConsumed())) {
@@ -1499,10 +1503,10 @@ bool DragDropManager::PostStopDrag(const RefPtr<FrameNode>& dragFrameNode, const
     taskScheduler->PostDelayedTask(
         [pointerEvent, event, extraParams, nodeWeak = WeakClaim(AceType::RawPtr(dragFrameNode)),
             weakManager = WeakClaim(this)]() {
-            if (!DragDropGlobalController::GetInstance().IsCurrentDrag(event->GetRequestIdentify())) {
+            if (!DragDropGlobalController::GetInstance().IsOnOnDropPhase() || !event) {
                 return;
             }
-            if (!DragDropGlobalController::GetInstance().IsOnOnDropPhase() || !event) {
+            if (!DragDropGlobalController::GetInstance().IsCurrentDrag(event->GetRequestIdentify())) {
                 return;
             }
             auto dragDropManager = weakManager.Upgrade();
