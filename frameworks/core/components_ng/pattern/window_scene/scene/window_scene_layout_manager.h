@@ -39,8 +39,8 @@ struct TraverseInfo {
     bool isAncestorRecent = false;
     bool isAncestorDirty = false;
     bool notSyncPosition = false;
-    int32_t transScenePosX = 0;
-    int32_t transScenePosY = 0;
+    float transScenePosX = 0.0f;
+    float transScenePosY = 0.0f;
 };
 
 class WindowSceneLayoutManager {
