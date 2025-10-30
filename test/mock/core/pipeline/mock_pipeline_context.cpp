@@ -1532,6 +1532,12 @@ bool NG::PipelineContext::CheckSourceTypeChange(SourceType currentSourceType)
     return ret;
 }
 
+const std::unique_ptr<ResSchedTouchOptimizer>& PipelineContext::GetTouchOptimizer() const
+{
+    return touchOptimizer_;
+}
+
+
 const RefPtr<NG::PostEventManager>& NG::PipelineContext::GetPostEventManager()
 {
     return postEventManager_;

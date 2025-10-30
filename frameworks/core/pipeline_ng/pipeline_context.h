@@ -1303,6 +1303,8 @@ public:
         return window_->GetIsRequestFrame();
     }
 
+    const std::unique_ptr<ResSchedTouchOptimizer>& GetTouchOptimizer() const;
+
     void SetMagnifierController(const RefPtr<MagnifierController>& magnifierController);
     RefPtr<MagnifierController> GetMagnifierController() const;
 protected:
