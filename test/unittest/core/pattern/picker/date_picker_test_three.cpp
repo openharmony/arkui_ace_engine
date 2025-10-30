@@ -1054,8 +1054,8 @@ HWTEST_F(DatePickerTestThree, DatePickerColumnPatternTest003, TestSize.Level1)
      * @tc.expected: columnPattern->pressed_ is true.
      */
     GestureEvent gestureEvent;
-    Point point(OFFSET_X, OFFSET_Y);
-    gestureEvent.SetGlobalPoint(point);
+    Offset point(OFFSET_X, OFFSET_Y);
+    gestureEvent.SetLocalLocation(point);
     panEvent->actionStart_(gestureEvent);
     EXPECT_EQ(columnPattern->GetToss()->yStart_, OFFSET_Y);
     EXPECT_TRUE(columnPattern->pressed_);
@@ -1125,8 +1125,8 @@ HWTEST_F(DatePickerTestThree, DatePickerColumnPatternTest004, TestSize.Level1)
     columnPattern->InitPanEvent(gestureHub);
     auto panEvent = columnPattern->panEvent_;
     GestureEvent gestureEvent;
-    Point point(OFFSET_X, OFFSET_Y);
-    gestureEvent.SetGlobalPoint(point);
+    Offset point(OFFSET_X, OFFSET_Y);
+    gestureEvent.SetLocalLocation(point);
     panEvent->actionStart_(gestureEvent);
     /**
      * @tc.step: step3. call actionUpdate_ method.

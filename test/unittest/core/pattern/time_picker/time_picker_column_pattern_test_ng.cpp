@@ -508,8 +508,8 @@ HWTEST_F(TimePickerColumnPatternTestNg, TimePickerColumnPattern010, TestSize.Lev
 
     // action start
     GestureEvent gestureEvent;
-    Point point(OFFSET_X, OFFSET_Y);
-    gestureEvent.SetGlobalPoint(point);
+    Offset point(OFFSET_X, OFFSET_Y);
+    gestureEvent.SetLocalLocation(point);
     panEvent->actionStart_(gestureEvent);
     EXPECT_EQ(minuteColumnPattern->GetToss()->yStart_, OFFSET_Y);
     EXPECT_EQ(minuteColumnPattern->yOffset_, YOFFSET_START1);
@@ -537,7 +537,7 @@ HWTEST_F(TimePickerColumnPatternTestNg, TimePickerColumnPattern010, TestSize.Lev
     EXPECT_EQ(currentIndex, (preIndex + totalOptionCount - 1) % totalOptionCount);
 
     point.SetY(OFFSET_Y + 2);
-    gestureEvent.SetGlobalPoint(point);
+    gestureEvent.SetLocalLocation(point);
     gestureEvent.SetInputEventType(InputEventType::MOUSE_BUTTON);
     minuteColumnPattern->SetCurrentIndex(totalOptionCount);
     panEvent->actionUpdate_(gestureEvent);

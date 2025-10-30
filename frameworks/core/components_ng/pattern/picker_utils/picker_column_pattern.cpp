@@ -465,43 +465,51 @@ void PickerColumnPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub
 void PickerColumnPattern::HandleDragStart(const GestureEvent& event)
 {
     SetSelectedMark();
-    CHECK_NULL_VOID(GetHost());
-    CHECK_NULL_VOID(GetToss());
-    auto toss = GetToss(); // todo
-    auto offsetY = event.GetGlobalPoint().GetY();
-    toss->SetStart(offsetY);
-    yLast_ = offsetY;
-    pressed_ = true;
+    // Cache host and toss once to avoid repeated lookups in hotpath
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
-    frameNode->AddFRCSceneInfo(PICKER_DRAG_SCENE, event.GetMainVelocity(), SceneStatus::START);
+    auto toss = GetToss();
+    CHECK_NULL_VOID(toss);
+
+    const double rawY = event.GetLocalLocation().GetY();
+    toss->SetStart(rawY);
+    yLast_ = rawY;
+    pressed_ = true;
+    const double mainVelocity = event.GetMainVelocity();
+    frameNode->AddFRCSceneInfo(PICKER_DRAG_SCENE, mainVelocity, SceneStatus::START);
 }
 
 void PickerColumnPattern::HandleDragMove(const GestureEvent& event)
 {
-    if (event.GetInputEventType() == InputEventType::AXIS && event.GetSourceTool() == SourceTool::MOUSE &&
-        CanMove(LessNotEqual(event.GetDelta().GetY(), 0.0))) {
-        InnerHandleScroll(LessNotEqual(event.GetDelta().GetY(), 0.0), true);
+    if (event.GetInputEventType() == InputEventType::AXIS && event.GetSourceTool() == SourceTool::MOUSE) {
+        InnerHandleScroll(LessNotEqual(event.GetDelta().GetY(), 0.0f), true);
         return;
     }
     animationBreak_ = false;
-    CHECK_NULL_VOID(pressed_);
-    CHECK_NULL_VOID(GetHost());
-    CHECK_NULL_VOID(GetToss());
+    if (!pressed_) {
+        return;
+    }
+
+    // Cache frequently used objects/values to avoid repeated calls
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
     auto toss = GetToss();
-    auto offsetY =
-        event.GetGlobalPoint().GetY() + (event.GetInputEventType() == InputEventType::AXIS ? event.GetOffsetY() : 0.0);
-    if (NearEqual(offsetY, yLast_, 1.0)) { // if changing less than 1.0, no need to handle
+    CHECK_NULL_VOID(toss);
+
+    const bool isAxis = (event.GetInputEventType() == InputEventType::AXIS);
+    const double rawY = event.GetLocalLocation().GetY();
+    const double offsetY = rawY + (isAxis ? event.GetOffsetY() : 0.0f);
+    if (NearEqual(offsetY, yLast_, 1.0f)) { // if changing less than 1.0, no need to handle
         if (hapticController_) {
             hapticController_->Stop();
         }
         return;
     }
+
     toss->SetEnd(offsetY);
     UpdateColumnChildPosition(offsetY);
-    auto frameNode = GetHost();
-    CHECK_NULL_VOID(frameNode);
-    frameNode->AddFRCSceneInfo(PICKER_DRAG_SCENE, event.GetMainVelocity(), SceneStatus::RUNNING);
+    const double mainVelocity = event.GetMainVelocity();
+    frameNode->AddFRCSceneInfo(PICKER_DRAG_SCENE, mainVelocity, SceneStatus::RUNNING);
 }
 
 void PickerColumnPattern::HandleDragEnd()

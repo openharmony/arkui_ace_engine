@@ -273,7 +273,7 @@ HWTEST_F(TextPickerColumnExtendTestNg, PlayTossAnimation001, TestSize.Level1)
     GestureEvent eventInfo;
     textPickerColumnPattern->HandleDragStart(eventInfo);
     toss->timeStart_ = toss->GetCurrentTime();
-    eventInfo.SetGlobalPoint(Point(0, 5.0));
+    eventInfo.SetLocalLocation(Offset(0.0f, 5.0f));
     textPickerColumnPattern->HandleDragMove(eventInfo);
     double dragTimeStep = 3.0;
     toss->timeEnd_ = toss->GetCurrentTime() + dragTimeStep;
@@ -292,7 +292,7 @@ HWTEST_F(TextPickerColumnExtendTestNg, PlayTossAnimation001, TestSize.Level1)
      */
     textPickerColumnPattern->HandleDragStart(eventInfo);
     toss->timeStart_ = toss->GetCurrentTime();
-    eventInfo.SetGlobalPoint(Point(0, 10.0));
+    eventInfo.SetLocalLocation(Offset(0.0f, 10.0f));
     textPickerColumnPattern->HandleDragMove(eventInfo);
     toss->timeEnd_ = toss->GetCurrentTime() + dragTimeStep;
     textPickerColumnPattern->HandleDragEnd();
@@ -1411,4 +1411,162 @@ HWTEST_F(TextPickerColumnExtendTestNg, TextPickerDialogViewShow013, TestSize.Lev
     }
 }
 
+/**
+ * @tc.name: HandleDragStart001
+ * @tc.desc: Test HandleDragStart sets toss start time and position.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnExtendTestNg, HandleDragStart001, TestSize.Level1)
+{
+    auto textPickerColumnPattern = GetTextPickerColumnPatternFromNodeTree();
+    ASSERT_NE(textPickerColumnPattern, nullptr);
+    auto toss = textPickerColumnPattern->GetToss();
+    ASSERT_NE(toss, nullptr);
+
+    // Ensure layout/property is initialized
+    textPickerColumnPattern->OnModifyDone();
+
+    GestureEvent event;
+    // Use raw global location since HandleDragStart reads raw global location
+    event.SetLocalLocation(Offset(0.0f, 8.0f));
+    event.SetMainVelocity(250.0f);
+
+    textPickerColumnPattern->HandleDragStart(event);
+
+    // Verify toss start position and that start time was recorded
+    EXPECT_DOUBLE_EQ(toss->yStart_, 8.0f);
+    EXPECT_GT(toss->timeStart_, 0.0f);
+}
+
+/**
+ * @tc.name: HandleDragStartStopsAnimation001
+ * @tc.desc: Test HandleDragStart when there is an ongoing animation_ (should stop it and set pressed_).
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnExtendTestNg, HandleDragStartStopsAnimation001, TestSize.Level1)
+{
+    auto textPickerColumnPattern = GetTextPickerColumnPatternFromNodeTree();
+    ASSERT_NE(textPickerColumnPattern, nullptr);
+    auto toss = textPickerColumnPattern->GetToss();
+    ASSERT_NE(toss, nullptr);
+
+    // Initialize
+    textPickerColumnPattern->OnModifyDone();
+
+    // Start a dummy animation to make animation_ non-null
+    AnimationOption option;
+    textPickerColumnPattern->animation_ = AnimationUtils::StartAnimation(option, []() {});
+    ASSERT_NE(textPickerColumnPattern->animation_, nullptr);
+
+    GestureEvent event;
+    event.SetLocalLocation(Offset(0.0f, 9.0f));
+    event.SetMainVelocity(100.0f);
+
+    // Call HandleDragStart which should take the branch and stop the animation (no crash expected)
+    textPickerColumnPattern->HandleDragStart(event);
+
+    EXPECT_TRUE(textPickerColumnPattern->pressed_);
+    EXPECT_DOUBLE_EQ(toss->yStart_, 9.0f);
+}
+
+/**
+ * @tc.name: HandleDragStartReboundAnimation001
+ * @tc.desc: Test HandleDragStart when NotLoopOptions() is true and reboundAnimation_ is non-null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnExtendTestNg, HandleDragStartReboundAnimation001, TestSize.Level1)
+{
+    auto textPickerColumnPattern = GetTextPickerColumnPatternFromNodeTree();
+    ASSERT_NE(textPickerColumnPattern, nullptr);
+    auto toss = textPickerColumnPattern->GetToss();
+    ASSERT_NE(toss, nullptr);
+
+    // Initialize and set parent layout canLoop to false to exercise NotLoopOptions()
+    textPickerColumnPattern->OnModifyDone();
+    auto parentLayout = textPickerColumnPattern->GetParentLayout();
+    ASSERT_NE(parentLayout, nullptr);
+    parentLayout->UpdateCanLoop(false);
+
+    // Start a dummy rebound animation to make reboundAnimation_ non-null
+    AnimationOption option;
+    textPickerColumnPattern->reboundAnimation_ = AnimationUtils::StartAnimation(option, []() {});
+    ASSERT_NE(textPickerColumnPattern->reboundAnimation_, nullptr);
+
+    GestureEvent event;
+    event.SetLocalLocation(Offset(0.0f, 11.0f));
+    event.SetMainVelocity(120.0f);
+
+    // Call HandleDragStart which should stop reboundAnimation_ branch
+    textPickerColumnPattern->HandleDragStart(event);
+
+    EXPECT_TRUE(textPickerColumnPattern->pressed_);
+    EXPECT_DOUBLE_EQ(toss->yStart_, 11.0f);
+    EXPECT_FALSE(textPickerColumnPattern->isReboundInProgress_);
+}
+
+/**
+ * @tc.name: HandleDragMoveAllBranch001
+ * @tc.desc: Test HandleDragMove covers multiple branches: multi-finger early return, AXIS+MOUSE path,
+ *           and near-equal threshold early return.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnExtendTestNg, HandleDragMoveAllBranch001, TestSize.Level1)
+{
+    auto textPickerColumnPattern = GetTextPickerColumnPatternFromNodeTree();
+    ASSERT_NE(textPickerColumnPattern, nullptr);
+
+    // Prepare simple options so InnerHandleScroll can operate
+    std::vector<NG::RangeContent> options;
+    NG::RangeContent rc1; rc1.text_ = "11"; options.emplace_back(rc1);
+    NG::RangeContent rc2; rc2.text_ = "12"; options.emplace_back(rc2);
+    NG::RangeContent rc3; rc3.text_ = "13"; options.emplace_back(rc3);
+    textPickerColumnPattern->SetOptions(options);
+    textPickerColumnPattern->OnModifyDone();
+
+    // Start a drag to set pressed_ state
+    GestureEvent startEvent;
+    textPickerColumnPattern->HandleDragStart(startEvent);
+
+    // Case 1: multi-finger early return, scroll stop callback should NOT be invoked
+    bool scrollStopCalled = false;
+    textPickerColumnPattern->SetScrollStopEventCallback([&scrollStopCalled](bool) { scrollStopCalled = true; });
+    GestureEvent multiFingerEvent;
+    std::list<OHOS::Ace::FingerInfo> fingerList;
+    OHOS::Ace::FingerInfo f1; f1.fingerId_ = 1;
+    OHOS::Ace::FingerInfo f2; f2.fingerId_ = 2;
+    fingerList.push_back(f1);
+    fingerList.push_back(f2);
+    multiFingerEvent.SetFingerList(fingerList);
+    multiFingerEvent.SetLocalLocation(Offset(0.0f, 20.0f));
+    textPickerColumnPattern->HandleDragMove(multiFingerEvent);
+    EXPECT_FALSE(scrollStopCalled);
+
+    // Case 2: AXIS + MOUSE should call InnerHandleScroll and then scroll stop callback when true
+    scrollStopCalled = false;
+    GestureEvent axisEvent;
+    axisEvent.SetInputEventType(InputEventType::AXIS);
+    axisEvent.SetSourceTool(SourceTool::MOUSE);
+    axisEvent.SetDelta(Offset(0.0f, 5.0f));
+    axisEvent.SetLocalLocation(Offset(0.0f, 30.0f));
+    textPickerColumnPattern->HandleDragMove(axisEvent);
+    EXPECT_TRUE(scrollStopCalled);
+
+    // Case 3: Near-equal to yLast_ should return early and not change offset
+    textPickerColumnPattern->SetYLast(50.0f);
+    GestureEvent nearEvent;
+    nearEvent.SetLocalLocation(Offset(0.0f, 50.0f));
+    textPickerColumnPattern->HandleDragMove(nearEvent);
+    EXPECT_DOUBLE_EQ(textPickerColumnPattern->GetOffset(), 0.0f);
+
+    // Case 4: not pressed early return should not change offset
+    textPickerColumnPattern->pressed_ = false;
+    double prevOffsetNotPressed = textPickerColumnPattern->GetOffset();
+    GestureEvent notPressedEvent;
+    notPressedEvent.SetInputEventType(InputEventType::MOUSE_BUTTON);
+    notPressedEvent.SetSourceTool(SourceTool::FINGER);
+    notPressedEvent.SetLocalLocation(Offset(0.0, 60.0));
+    notPressedEvent.SetOffsetY(0.0);
+    textPickerColumnPattern->HandleDragMove(notPressedEvent);
+    EXPECT_DOUBLE_EQ(textPickerColumnPattern->GetOffset(), prevOffsetNotPressed);
+}
 } // namespace OHOS::Ace::NG
