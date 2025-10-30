@@ -1536,10 +1536,12 @@ private:
     void DumpDragInfo(std::unique_ptr<JsonValue>& json);
     void DumpAlignRulesInfo(std::unique_ptr<JsonValue>& json);
     void DumpSafeAreaInfo(std::unique_ptr<JsonValue>& json);
+    void DumpVisibleAreaInfo(std::unique_ptr<JsonValue>& json);
     void DumpExtensionHandlerInfo(std::unique_ptr<JsonValue>& json);
     void DumpOnSizeChangeInfo(std::unique_ptr<JsonValue>& json);
     void BuildLayoutInfo(std::unique_ptr<JsonValue>& json);
 
+    void DumpVisibleAreaInfo();
     void DumpSafeAreaInfo();
     // add flexLayout && direction && align && aspectRatio dumpInfo
     void DumpLayoutInfo();

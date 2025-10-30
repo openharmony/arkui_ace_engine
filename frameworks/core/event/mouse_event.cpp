@@ -38,6 +38,15 @@ bool HoverEventTarget::HandleHoverEvent(bool isHovered, const MouseEvent& event)
         auto localX = static_cast<float>(localPoint.GetX());
         auto localY = static_cast<float>(localPoint.GetY());
         hoverInfo.SetLocalLocation(Offset(localX, localY));
+        if (SystemProperties::GetDebugEnabled()) {
+            TAG_LOGI(AceLogTag::ACE_MOUSE,
+                "HandleHoverEvent_node(%{public}s/%{public}d/%{public}s/%{public}s) isHovered:%{public}d",
+                node->GetTag().c_str(), node->GetId(), std::to_string(node->GetAccessibilityId()).c_str(),
+                node->GetInspectorId().value_or("").c_str(), isHovered);
+            ACE_SCOPED_TRACE("HandleHoverEvent_node(%s/%d/%s/%s) isHovered:%d", node->GetTag().c_str(),
+                node->GetId(), std::to_string(node->GetAccessibilityId()).c_str(),
+                node->GetInspectorId().value_or("").c_str(), isHovered);
+        }
     }
     hoverInfo.SetGlobalLocation(Offset(event.x, event.y));
     hoverInfo.SetScreenLocation(Offset(event.screenX, event.screenY));

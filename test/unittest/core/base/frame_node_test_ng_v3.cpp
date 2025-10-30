@@ -2342,4 +2342,59 @@ HWTEST_F(FrameNodeTestNg, SetNDKColorModeUpdateCallbackTest004, TestSize.Level1)
      */
     EXPECT_EQ(frameNode->colorMode_, context->GetColorMode());
 }
+
+/**
+ * @tc.name: DumpVisibleAreaInfo001
+ * @tc.desc: Test DumpVisibleAreaInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, DumpVisibleAreaInfo001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("test", -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+    ASSERT_NE(json, nullptr);
+    frameNode->DumpVisibleAreaInfo();
+    frameNode->DumpVisibleAreaInfo(json);
+    /**
+     * @tc.steps: step1. register userCallback.
+     */
+    std::vector<double> ratios = { 0.0, 1.0 };
+    auto jsCallback1 = [](bool, double) {};
+    VisibleCallbackInfo callbackInfo;
+    callbackInfo.callback = std::move(jsCallback1);
+    callbackInfo.isCurrentVisible = false;
+    callbackInfo.period = static_cast<uint32_t>(0);
+    callbackInfo.measureFromViewport = true;
+    frameNode->SetVisibleAreaUserCallback(ratios, callbackInfo);
+    /**
+     * @tc.steps: step2. register innerCallback.
+     */
+    std::vector<double> ratios2 = { 0.0, 1.0 };
+    auto jsCallback2 = [](bool, double) {};
+    VisibleCallbackInfo callbackInfo2;
+    callbackInfo2.callback = std::move(jsCallback2);
+    callbackInfo2.isCurrentVisible = false;
+    callbackInfo2.period = static_cast<uint32_t>(0);
+    callbackInfo2.measureFromViewport = true;
+    frameNode->SetVisibleAreaInnerCallback(ratios2, callbackInfo2);
+    /**
+     * @tc.steps: step3. register throttledCallback.
+     */
+    std::vector<double> ratios3 = { 0.0, 1.0 };
+    auto jsCallback3 = [](bool, double) {};
+    VisibleCallbackInfo callbackInfo3;
+    callbackInfo3.callback = std::move(jsCallback3);
+    callbackInfo3.isCurrentVisible = false;
+    callbackInfo3.period = static_cast<uint32_t>(500);
+    callbackInfo3.measureFromViewport = true;
+    frameNode->SetVisibleAreaUserCallback(ratios3, callbackInfo3);
+    frameNode->DumpVisibleAreaInfo();
+    frameNode->DumpVisibleAreaInfo(json);
+    EXPECT_TRUE(eventHub->HasVisibleAreaCallback(false));
+    EXPECT_TRUE(eventHub->HasVisibleAreaCallback(true));
+    EXPECT_TRUE(eventHub->HasThrottledVisibleAreaCallback());
+}
 } // namespace OHOS::Ace::NG
