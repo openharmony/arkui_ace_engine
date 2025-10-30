@@ -843,7 +843,7 @@ void ResetRegisterNativeEmbedRule(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    WebModelNG::RegisterNativeEmbedRule(frameNode, nullptr, nullptr);
+    WebModelNG::RegisterNativeEmbedRule(frameNode, "", "");
 }
 
 void SetNativeEmbedOptions(ArkUINodeHandle node, ArkUI_Bool value)

@@ -124,7 +124,7 @@ public:
     void NotifyWindowMode(OHOS::Rosen::WindowMode mode) override;
     void UpdateDecorVisible(bool visible, bool hasDecor) override;
     void UpdateWindowBlur();
-    void RegisterGetCurrentPageName();
+    void RegisterGetCurrentPageName(const WeakPtr<TaskExecutor>& taskExecutor);
     void SaveGetCurrentInstanceId();
     void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) override;
     void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) override;
@@ -132,7 +132,7 @@ public:
     void ProcessFormVisibleChange(bool isVisible) override;
     void UpdateTitleInTargetPos(bool isShow, int32_t height) override;
     void NotifyRotationAnimationEnd() override;
-    void RegisterExeAppAIFunction();
+    void RegisterExeAppAIFunction(const WeakPtr<TaskExecutor>& taskExecutor);
 
     void ChangeSensitiveNodes(bool isSensitive) override;
 

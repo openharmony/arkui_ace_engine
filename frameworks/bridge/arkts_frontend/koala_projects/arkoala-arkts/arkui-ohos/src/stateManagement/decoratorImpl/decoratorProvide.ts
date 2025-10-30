@@ -66,7 +66,7 @@ export class ProvideDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
         }
         let value: T = uiUtils.makeV1Observed(newValue);
         if (isDynamicObject(newValue)) {
-            let value = getObservedObject(newValue);
+            const value = getObservedObject(newValue);
             this.backing_.setNoCheck(value);
         } else {
             // for interop

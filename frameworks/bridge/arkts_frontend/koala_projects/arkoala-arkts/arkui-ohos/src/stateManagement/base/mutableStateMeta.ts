@@ -78,7 +78,7 @@ export class MutableStateMeta extends MutableStateMetaBase implements IMutableSt
 
     public addRef(): void {
         const renderingComponent = ObserveSingleton.instance.renderingComponent;
-        if (renderingComponent <= ObserveSingleton.RenderingComponent) {
+        if (renderingComponent <= ObserveSingleton.RenderingComponent && !this.enableDynamicCompatible) {
             return;
         }
         // >= RenderingMonitor means Monitor/Computed/PersistentStorage

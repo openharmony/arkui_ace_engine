@@ -54,8 +54,7 @@ constexpr double FORM_CLICK_OPEN_LIMIT_DISTANCE = 20.0;
 constexpr uint32_t DELAY_TIME_FOR_FORM_SUBCONTAINER_CACHE = 30000;
 constexpr uint32_t DELAY_TIME_FOR_FORM_SNAPSHOT_3S = 3000;
 constexpr uint32_t DELAY_TIME_FOR_FORM_SNAPSHOT_EXTRA = 200;
-constexpr uint32_t DELAY_TIME_FOR_SET_NON_TRANSPARENT = 70;
-constexpr uint32_t DELAY_TIME_FOR_DELETE_IMAGE_NODE = 100;
+constexpr uint32_t DELAY_TIME_FOR_DELETE_IMAGE_NODE = 200;
 constexpr uint32_t STATIC_FORM_DELAY_TIME_FOR_DELETE_IMAGE_NODE = 300;
 constexpr uint32_t DELAY_TIME_FOR_RESET_MANUALLY_CLICK_FLAG = 3000;
 constexpr double ARC_RADIUS_TO_DIAMETER = 2.0;
@@ -280,12 +279,7 @@ void FormPattern::HandleUnTrustForm()
         }
     }
 
-    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
-    auto parent = host->GetParent();
-    CHECK_NULL_VOID(parent);
-    parent->MarkNeedSyncRenderTree();
-    parent->RebuildRenderContextTree();
-    host->GetRenderContext()->RequestNextFrame();
+    RequestRender();
 }
 
 void FormPattern::UpdateBackgroundColorWhenUnTrustForm()
@@ -547,14 +541,8 @@ void FormPattern::SetNonTransparentAfterRecover()
 {
     ACE_FUNCTION_TRACE();
     // set frs node non transparent
-    if (formChildrenNodeMap_.find(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE)
-        == formChildrenNodeMap_.end()) {
+    if (formChildrenNodeMap_.find(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE) == formChildrenNodeMap_.end()) {
         UpdateChildNodeOpacity(FormChildNodeType::FORM_SURFACE_NODE, NON_TRANSPARENT_VAL);
-        //update form after updateChildNodeOpacity
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
-        TAG_LOGI(AceLogTag::ACE_FORM, "surfaceNode setOpacity:1");
     } else {
         TAG_LOGW(AceLogTag::ACE_FORM, "has forbidden node");
     }
@@ -563,25 +551,31 @@ void FormPattern::SetNonTransparentAfterRecover()
 void FormPattern::DeleteImageNodeAfterRecover(bool needHandleCachedClick)
 {
     ACE_FUNCTION_TRACE();
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
+    SetNonTransparentAfterRecover();
 
     // delete image rs node and frame node
     RemoveFormChildNode(FormChildNodeType::FORM_STATIC_IMAGE_NODE);
-
-    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
-    auto parent = host->GetParent();
-    CHECK_NULL_VOID(parent);
-    parent->MarkNeedSyncRenderTree();
-    parent->RebuildRenderContextTree();
-    renderContext->RequestNextFrame();
-
+    RequestRender();
     // handle cached pointer event
     if (needHandleCachedClick && formManagerBridge_) {
         formManagerBridge_->HandleCachedClickEvents();
     }
+}
+
+void FormPattern::RequestRender()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+ 
+    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+    auto parent = host->GetParent();
+    if (parent) {
+        parent->MarkNeedSyncRenderTree();
+        parent->RebuildRenderContextTree();
+    }
+    renderContext->RequestNextFrame();
 }
 
 RefPtr<FrameNode> FormPattern::CreateImageNode()
@@ -657,12 +651,7 @@ void FormPattern::RemoveFrsNode()
     CHECK_NULL_VOID(renderContext);
     renderContext->RemoveChild(externalRenderContext_);
 
-    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
-    auto parent = host->GetParent();
-    CHECK_NULL_VOID(parent);
-    parent->MarkNeedSyncRenderTree();
-    parent->RebuildRenderContextTree();
-    host->GetRenderContext()->RequestNextFrame();
+    RequestRender();
 }
 
 void FormPattern::ReleaseRenderer()
@@ -1824,15 +1813,7 @@ void FormPattern::FireFormSurfaceNodeCallback(
     SetFormAccessibilityAction();
     ProcDeleteImageNode(want);
 
-    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
-    auto parent = host->GetParent();
-    if (parent) {
-        parent->MarkNeedSyncRenderTree();
-        parent->RebuildRenderContextTree();
-    }
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    renderContext->RequestNextFrame();
+    RequestRender();
     OnLoadEvent();
 
     auto formNode = DynamicCast<FormNode>(host);
@@ -1869,13 +1850,6 @@ void FormPattern::DelayDeleteImageNode(bool needHandleCachedClick)
     std::string nodeIdStr = std::to_string(host->GetId());
     auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
     uiTaskExecutor.PostDelayedTask(
-        [weak = WeakClaim(this)] {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->SetNonTransparentAfterRecover();
-        },
-        DELAY_TIME_FOR_SET_NON_TRANSPARENT, "ArkUIFormSetNonTransparentAfterRecover_" + nodeIdStr);
-    uiTaskExecutor.PostDelayedTask(
         [weak = WeakClaim(this), needHandleCachedClick] {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
@@ -1899,12 +1873,7 @@ void FormPattern::FireFormSurfaceChangeCallback(float width, float height, float
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     isUnTrust_ = false;
-    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
-    auto parent = host->GetParent();
-    CHECK_NULL_VOID(parent);
-    parent->MarkNeedSyncRenderTree();
-    parent->RebuildRenderContextTree();
-    renderContext->RequestNextFrame();
+    RequestRender();
 }
 
 void FormPattern::FireFormSurfaceDetachCallback()

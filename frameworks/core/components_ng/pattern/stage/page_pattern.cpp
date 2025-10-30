@@ -261,6 +261,8 @@ void PagePattern::OnWindowSizeChanged(int32_t /*width*/, int32_t /*height*/, Win
     auto stageManager = pipelineContext->GetStageManager();
     CHECK_NULL_VOID(stageManager);
     stageManager->AbortAnimation();
+    FirePageTransitionFinish();
+    TAG_LOGI(AceLogTag::ACE_ROUTER, "window rotation, stop page animation");
 }
 
 void PagePattern::OnShow(bool isFromWindow)

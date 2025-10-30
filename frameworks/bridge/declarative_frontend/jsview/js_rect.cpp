@@ -126,7 +126,7 @@ void JSRect::SetRadiusWidth(const JSRef<JSVal>& jsVal)
     }
     UnRegisterResource("RectRadiusWidth");
     if (SystemProperties::ConfigChangePerform() && radiusWidthResObj) {
-        RegisterResource<CalcDimension>("RectRadiusWidth", radiusWidthResObj, value);
+        RectModel::GetInstance()->SetRadiusWidth(radiusWidthResObj);
     }
     RectModel::GetInstance()->SetRadiusWidth(value);
 }
@@ -144,7 +144,7 @@ void JSRect::SetRadiusHeight(const JSRef<JSVal>& jsVal)
     }
     UnRegisterResource("RectRadiusHeight");
     if (SystemProperties::ConfigChangePerform() && radiusHeightResObj) {
-        RegisterResource<CalcDimension>("RectRadiusHeight", radiusHeightResObj, value);
+        RectModel::GetInstance()->SetRadiusHeight(radiusHeightResObj);
     }
     RectModel::GetInstance()->SetRadiusHeight(value);
 }
@@ -187,7 +187,7 @@ void JSRect::SetRadiusWithJsVal(const RefPtr<ShapeRect>& shapeRect, const JSRef<
     }
     UnRegisterResource("RectRadius");
     if (SystemProperties::ConfigChangePerform() && radiusResObj) {
-        RegisterResource<CalcDimension>("RectRadius", radiusResObj, value);
+        RectModel::GetInstance()->SetRadius(radiusResObj);
     }
     RectModel::GetInstance()->SetRadiusWidth(value);
     RectModel::GetInstance()->SetRadiusHeight(value);

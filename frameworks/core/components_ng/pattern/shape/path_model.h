@@ -19,6 +19,7 @@
 #include <memory>
 #include <mutex>
 #include "base/utils/macros.h"
+#include "core/common/resource/resource_object.h"
 
 namespace OHOS::Ace {
 class ACE_FORCE_EXPORT PathModel {
@@ -28,6 +29,7 @@ public:
 
     virtual void Create();
     virtual void SetCommands(const std::string& pathCmd);
+    virtual void SetCommands(const RefPtr<ResourceObject>& commandsResObj) {};
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PATH_PATH_MODEL_H

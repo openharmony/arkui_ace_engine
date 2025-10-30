@@ -2015,9 +2015,9 @@ void JSTextField::SetCancelIconColorAndIconSrc(const JSRef<JSObject>& iconParam)
     std::string moduleName;
     auto iconSrcProp = iconParam->GetProperty("src");
     RefPtr<ResourceObject> resourceObject;
+    UnregisterResource("cancelButtonIconSrc");
     if (iconSrcProp->IsUndefined() || iconSrcProp->IsNull() ||
         !ParseJsMedia(iconSrcProp, iconSrc, resourceObject)) {
-        UnregisterResource("cancelButtonIconSrc");
         iconSrc = "";
     }
     if (SystemProperties::ConfigChangePerform() && resourceObject) {
@@ -2031,6 +2031,7 @@ void JSTextField::SetCancelIconColorAndIconSrc(const JSRef<JSObject>& iconParam)
     Color iconColor;
     RefPtr<ResourceObject> colorObject;
     UnregisterResource("cancelButtonIconColor");
+    UnregisterResource("cancelButtonIconColorDefault");
     auto iconColorProp = iconParam->GetProperty("color");
     if (!iconColorProp->IsUndefined() && !iconColorProp->IsNull() &&
         ParseJsColor(iconColorProp, iconColor, colorObject)) {
@@ -2200,10 +2201,10 @@ void JSTextField::SetLetterSpacing(const JSCallbackInfo& info)
 {
     CalcDimension value;
     RefPtr<ResourceObject> resourceObject;
+    UnregisterResource("letterSpacing");
     if (!ParseJsDimensionFpNG(info[0], value, resourceObject, false)) {
         value.Reset();
         TextFieldModel::GetInstance()->SetLetterSpacing(value);
-        UnregisterResource("letterSpacing");
         return;
     }
     if (SystemProperties::ConfigChangePerform() && resourceObject) {
@@ -2296,9 +2297,9 @@ void JSTextField::SetTextIndent(const JSCallbackInfo& info)
 {
     CalcDimension value;
     RefPtr<ResourceObject> resourceObject;
+    UnregisterResource("textIndent");
     if (!ParseJsDimensionVpNG(info[0], value, resourceObject, true)) {
         value.Reset();
-        UnregisterResource("textIndent");
     }
     if (SystemProperties::ConfigChangePerform() && resourceObject) {
         RegisterResource<CalcDimension>("textIndent", resourceObject, value);

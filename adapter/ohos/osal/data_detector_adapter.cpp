@@ -319,7 +319,7 @@ void DataDetectorAdapter::PreprocessTextDetect()
     }
 }
 
-void DataDetectorAdapter::InitTextDetect(int32_t startPos, std::string detectText)
+void DataDetectorAdapter::InitTextDetect(int32_t startPos, std::string detectText, uint64_t taskId)
 {
     CHECK_NULL_VOID(!textDetectTypes_.empty());
     TextDataDetectInfo info;
@@ -330,16 +330,20 @@ void DataDetectorAdapter::InitTextDetect(int32_t startPos, std::string detectTex
     CHECK_NULL_VOID(context);
     int32_t instanceID = context->GetInstanceId();
     auto textFunc = [weak = WeakClaim(this),
-        instanceID, startPos, detectTypesSet = textDetectTypesSet_](const TextDataDetectResult result) {
+        instanceID, startPos, detectTypesSet = textDetectTypesSet_, taskId](const TextDataDetectResult result) {
         ContainerScope scope(instanceID);
         auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
+        TAG_LOGD(AceLogTag::ACE_TEXT, "detectBackgroundTaskCallback, taskId=%{public}" PRIu64 "", taskId);
         CHECK_NULL_VOID(context);
+        auto dataDetectorAdapter = weak.Upgrade();
+        CHECK_NULL_VOID(dataDetectorAdapter && dataDetectorAdapter->CheckTaskId(taskId));
         auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         uiTaskExecutor.PostTask(
-            [result, weak, instanceID, startPos, detectTypesSet] {
+            [result, weak, instanceID, startPos, detectTypesSet, taskId] {
+                TAG_LOGD(AceLogTag::ACE_TEXT, "detectParseResult, taskId=%{public}" PRIu64 "", taskId);
                 ContainerScope scope(instanceID);
                 auto dataDetectorAdapter = weak.Upgrade();
-                CHECK_NULL_VOID(dataDetectorAdapter);
+                CHECK_NULL_VOID(dataDetectorAdapter && dataDetectorAdapter->CheckTaskId(taskId));
                 if (detectTypesSet != dataDetectorAdapter->textDetectTypesSet_) {
                     return;
                 }
@@ -353,9 +357,10 @@ void DataDetectorAdapter::InitTextDetect(int32_t startPos, std::string detectTex
 
     auto backgroundExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
     backgroundExecutor.PostTask(
-        [info, textFunc] {
+        [info, textFunc, taskId] {
             TAG_LOGI(AceLogTag::ACE_TEXT, "DataDetectorAdapter::InitTextDetect, start AI detect, length: %{public}zu",
                 info.text.size());
+            TAG_LOGD(AceLogTag::ACE_TEXT, "detectBackgroundTask, taskId=%{public}" PRIu64 "", taskId);
             DataDetectorMgr::GetInstance().DataDetect(info, textFunc);
         },
         "ArkUITextInitDataDetect");
@@ -387,22 +392,26 @@ void DataDetectorAdapter::UpdateAISelectMenu()
     }
 }
 
-void DataDetectorAdapter::HandleTextUrlDetect()
+void DataDetectorAdapter::HandleTextUrlDetect(uint64_t taskId)
 {
     auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     int32_t instanceID = context->GetInstanceId();
     auto textFunc = [weak = WeakClaim(this),
-        instanceID, detectTypesSet = textDetectTypesSet_](const std::vector<UrlEntity>& urlEntities) {
+        instanceID, detectTypesSet = textDetectTypesSet_, taskId](const std::vector<UrlEntity>& urlEntities) {
         ContainerScope scope(instanceID);
+        TAG_LOGD(AceLogTag::ACE_TEXT, "urlBackgroundTaskCallback, taskId=%{public}" PRIu64 "", taskId);
         auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(context);
+        auto dataDetectorAdapter = weak.Upgrade();
+        CHECK_NULL_VOID(dataDetectorAdapter && dataDetectorAdapter->CheckTaskId(taskId));
         auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         uiTaskExecutor.PostTask(
-            [urlEntities, weak, instanceID, detectTypesSet] {
+            [urlEntities, weak, instanceID, detectTypesSet, taskId] {
                 ContainerScope scope(instanceID);
                 auto dataDetectorAdapter = weak.Upgrade();
-                CHECK_NULL_VOID(dataDetectorAdapter);
+                CHECK_NULL_VOID(dataDetectorAdapter && dataDetectorAdapter->CheckTaskId(taskId));
+                TAG_LOGD(AceLogTag::ACE_TEXT, "urlParseResult, taskId=%{public}" PRIu64 "", taskId);
                 if (detectTypesSet != dataDetectorAdapter->textDetectTypesSet_) {
                     return;
                 }
@@ -414,8 +423,9 @@ void DataDetectorAdapter::HandleTextUrlDetect()
 
     auto backgroundExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
     backgroundExecutor.PostTask(
-        [text = UtfUtils::Str16DebugToStr8(textForAI_), func = std::move(textFunc)] {
+        [text = UtfUtils::Str16DebugToStr8(textForAI_), func = std::move(textFunc), taskId] {
             TAG_LOGI(AceLogTag::ACE_TEXT, "Start url entity detect using AI");
+            TAG_LOGD(AceLogTag::ACE_TEXT, "urlBackgroundTask, taskId=%{public}" PRIu64 "", taskId);
             func(DataUrlAnalyzerMgr::GetInstance().AnalyzeUrls(text));
         },
         "ArkUITextInitUrlDetect");
@@ -545,9 +555,11 @@ void DataDetectorAdapter::ParseAIJson(
     }
 }
 
-std::function<void()> DataDetectorAdapter::GetDetectDelayTask(const std::map<int32_t, AISpan>& aiSpanMap)
+std::function<void()> DataDetectorAdapter::GetDetectDelayTask(const std::map<int32_t, AISpan>& aiSpanMap,
+    uint64_t taskId)
 {
-    return [aiSpanMap, weak = WeakClaim(this)]() {
+    return [aiSpanMap, weak = WeakClaim(this), taskId]() {
+        TAG_LOGD(AceLogTag::ACE_TEXT, "startDetectDelayTask, taskId=%{public}" PRIu64 "", taskId);
         auto dataDetectorAdapter = weak.Upgrade();
         CHECK_NULL_VOID(dataDetectorAdapter && !dataDetectorAdapter->textForAI_.empty());
         TAG_LOGI(AceLogTag::ACE_TEXT, "DataDetectorAdapter, delayed whole task executed, id: %{public}i",
@@ -577,7 +589,7 @@ std::function<void()> DataDetectorAdapter::GetDetectDelayTask(const std::map<int
                 ++aiSpanMapIt;
             }
             if (!isSameDetectText) {
-                dataDetectorAdapter->InitTextDetect(startPos, detectText);
+                dataDetectorAdapter->InitTextDetect(startPos, detectText, taskId);
                 if (detectTextIdx < dataDetectorAdapter->detectTexts_.size()) {
                     dataDetectorAdapter->detectTexts_[detectTextIdx] = detectText;
                 } else {
@@ -588,7 +600,7 @@ std::function<void()> DataDetectorAdapter::GetDetectDelayTask(const std::map<int
             startPos += AI_TEXT_MAX_LENGTH - AI_TEXT_GAP;
         } while (startPos + AI_TEXT_GAP < wTextForAILength && (!dataDetectorAdapter->textDetectTypes_.empty()));
         if (dataDetectorAdapter->hasUrlType_) {
-            dataDetectorAdapter->HandleTextUrlDetect();
+            dataDetectorAdapter->HandleTextUrlDetect(taskId);
         }
         if (hasSame) {
             dataDetectorAdapter->MarkDirtyNode();
@@ -621,8 +633,10 @@ void DataDetectorAdapter::StartAITask(bool clearAISpanMap, bool isSelectDetect)
     CHECK_NULL_VOID(context);
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
+    ++taskId_;
+    TAG_LOGD(AceLogTag::ACE_TEXT, "StartAITask, taskId=%{public}" PRIu64 "", taskId_);
     aiDetectDelayTask_.Cancel();
-    aiDetectDelayTask_.Reset(GetDetectDelayTask(aiSpanMapCopy));
+    aiDetectDelayTask_.Reset(GetDetectDelayTask(aiSpanMapCopy, taskId_));
     TAG_LOGI(AceLogTag::ACE_TEXT, "DataDetectorAdapter::StartAITask, post whole task, id: %{public}i",
         GetHost() ? GetHost()->GetId() : -1);
     taskExecutor->PostDelayedTask(

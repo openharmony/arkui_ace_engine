@@ -17,7 +17,10 @@
 
 #include "gtest/gtest.h"
 #include "include/core/SkCanvas.h"
+#include "test/mock/base/mock_system_properties.h"
+#include "test/mock/core/common/mock_resource_adapter_v2.h"
 
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
 
@@ -51,6 +54,7 @@ public:
     static constexpr float STROKE_WIDTH = 3.0f;
     static constexpr bool ANTIALIAS = false;
     static constexpr float STROKE_LIMIT = 5.0f;
+    static constexpr float DEFAULT_STROKE_LIMIT = 4.0f;
     static constexpr float DASHOFFSET = 3;
     static constexpr int32_t LINE_JOIN = 1;
     static constexpr int32_t LINE_CAP = 1;

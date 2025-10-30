@@ -15,7 +15,8 @@
 
 import { RuntimeType, runtimeType } from "@koalaui/interop";
 import { ArkBaseNode } from "./ArkBaseNode";
-import { ListItemAttribute, ArkListItemPeer, ListItemOptions, Bindable, SwipeActionOptions } from "../framework";
+import { ListItemAttribute, ArkListItemPeer, ListItemOptions, Bindable, SwipeActionOptions, AttributeModifier, CommonMethod
+} from "../framework";
 export class ArkListItemNode extends ArkBaseNode implements ListItemAttribute {
     constructParam(...param: Object[]): this {
         if (param.length > 1) {
@@ -68,5 +69,8 @@ export class ArkListItemNode extends ArkBaseNode implements ListItemAttribute {
         this.getPeer()?.setOnSelectAttribute(value_casted)
         this.markDirty()
         return this
+    }
+    attributeModifier(value: AttributeModifier<ListItemAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
     }
 }

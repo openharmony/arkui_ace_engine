@@ -1778,7 +1778,9 @@ bool CustomMenuItemPattern::OnKeyEvent(const KeyEvent& event)
 
 void MenuItemPattern::InitLongPressEvent()
 {
-    auto gesture = GetHost()->GetOrCreateGestureEventHub();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gesture = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gesture);
     auto longPressCallback = [weak = WeakClaim(this)](GestureEvent& info) {
         auto itemPattern = weak.Upgrade();
@@ -2471,7 +2473,9 @@ void MenuItemPattern::UpdateTextNodes()
 
 bool MenuItemPattern::IsDisabled()
 {
-    auto eventHub = GetHost()->GetEventHub<MenuItemEventHub>();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, true);
+    auto eventHub = host->GetEventHub<MenuItemEventHub>();
     CHECK_NULL_RETURN(eventHub, true);
     return !eventHub->IsEnabled();
 }
@@ -2717,7 +2721,9 @@ RefPtr<FrameNode> MenuItemPattern::FindTouchedEmbeddedMenuItem(const PointF& pos
 
 void MenuItemPattern::SetBgColor(const Color& color)
 {
-    auto renderContext = GetHost()->GetRenderContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateBackgroundColor(color);
     bgColor_ = color;
@@ -2947,6 +2953,7 @@ Dimension MenuItemPattern::GetFontSize()
 float MenuItemPattern::GetSelectOptionWidth()
 {
     RefPtr<GridColumnInfo> columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::MENU);
+    CHECK_NULL_RETURN(columnInfo, MIN_OPTION_WIDTH.ConvertToPx());
     auto parent = columnInfo->GetParent();
     CHECK_NULL_RETURN(parent, MIN_OPTION_WIDTH.ConvertToPx());
     parent->BuildColumnWidth();
@@ -3447,16 +3454,12 @@ void MenuItemPattern::ApplyOptionThemeStyles()
 
 RefPtr<SelectTheme> MenuItemPattern::GetCurrentSelectTheme()
 {
-    if (selectTheme_) {
-        return selectTheme_;
-    }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
     auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, nullptr);
-    selectTheme_ = theme;
     return theme;
 }
 

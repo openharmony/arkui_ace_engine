@@ -322,6 +322,7 @@ private:
     bool IsFormDueControl(const std::string &bundleName, const std::string &moduleName, const std::string &abilityName,
         const std::string &formName, const int32_t dimension, const bool isDisablePolicy);
     void InitFormRenderDiedCallback();
+    void RequestRender();
 
     RefPtr<RenderContext> externalRenderContext_;
 

@@ -195,6 +195,29 @@ HWTEST_F(RichEditorMagnifierTest, MagnifierTest002, TestSize.Level2)
     TestMagnifier(richEditorPattern, controller, localOffset);
 }
 
+/**
+ * @tc.name: MagnifierTest003
+ * @tc.desc: Test magnifier position.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorMagnifierTest, MagnifierTest003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto frameSize = SizeF(600.f, 400.f);
+    InitMagnifierParams(frameSize);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    RefPtr<MagnifierController> controller = richEditorPattern->GetMagnifierController();
+    ASSERT_NE(controller, nullptr);
+    controller->OpenMagnifier();
+    auto magnifierNode = controller->magnifierFrameNode_;
+    controller->colorModeChange_ = true;
+    controller->OpenMagnifier();
+    EXPECT_EQ(controller->colorModeChange_, false);
+    EXPECT_NE(magnifierNode, controller->magnifierFrameNode_);
+}
+
 void RichEditorMagnifierTest::TestMagnifier(const RefPtr<RichEditorPattern>& richEditorPattern,
     const RefPtr<MagnifierController>& controller, const OffsetF& localOffset)
 {

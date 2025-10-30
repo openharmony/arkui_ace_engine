@@ -22,7 +22,7 @@ export function SliderPrefixSuffixBuilder(name: string, param: Object) {
 }
 
 class NodeParams {
-  param: ResourceStr = ""
+  public param: ResourceStr = '';
 
   constructor(param: ResourceStr) {
     this.param = param;
@@ -49,10 +49,14 @@ struct SliderPrefixSuffixExample {
   private sufIntSet: string = '高';
   private uiContext: UIContext = this.getUIContext();
 
-  private preOutSetNode: ComponentContent<NodeParams> = new ComponentContent(this.uiContext, wrapBuilder(textBuilder), new NodeParams(this.preOutSet));
-  private sufOutSetNode: ComponentContent<NodeParams> = new ComponentContent(this.uiContext, wrapBuilder(textBuilder), new NodeParams(this.sufOutSet));
-  private preIntSetNode: ComponentContent<NodeParams> = new ComponentContent(this.uiContext, wrapBuilder(textBuilder), new NodeParams(this.preIntSet));
-  private sufIntSetNode: ComponentContent<NodeParams> = new ComponentContent(this.uiContext, wrapBuilder(textBuilder), new NodeParams(this.sufIntSet));
+  private preOutSetNode: ComponentContent<NodeParams> = 
+    new ComponentContent(this.uiContext, wrapBuilder(textBuilder), new NodeParams(this.preOutSet));
+  private sufOutSetNode: ComponentContent<NodeParams> = 
+    new ComponentContent(this.uiContext, wrapBuilder(textBuilder), new NodeParams(this.sufOutSet));
+  private preIntSetNode: ComponentContent<NodeParams> = 
+    new ComponentContent(this.uiContext, wrapBuilder(textBuilder), new NodeParams(this.preIntSet));
+  private sufIntSetNode: ComponentContent<NodeParams> = 
+    new ComponentContent(this.uiContext, wrapBuilder(textBuilder), new NodeParams(this.sufIntSet));
 
 
   build() {

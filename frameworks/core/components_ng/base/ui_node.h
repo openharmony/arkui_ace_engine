@@ -935,7 +935,7 @@ public:
     virtual void NotifyChange(int32_t changeIdx, int32_t count, int64_t id, NotificationType notificationType);
 
     int32_t GetThemeScopeId() const;
-    void SetThemeScopeId(int32_t themeScopeId);
+    virtual void SetThemeScopeId(int32_t themeScopeId);
     virtual void UpdateThemeScopeId(int32_t themeScopeId);
     virtual void UpdateThemeScopeUpdate(int32_t themeScopeId);
     virtual void OnThemeScopeUpdate(int32_t themeScopeId) {}

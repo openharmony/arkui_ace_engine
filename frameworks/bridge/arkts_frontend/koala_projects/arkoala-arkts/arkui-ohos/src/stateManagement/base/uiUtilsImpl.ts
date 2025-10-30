@@ -34,8 +34,8 @@ export class UIUtilsImpl {
 
     public static set<T extends Object>(obj: Object, wrapObject: T, allowDeep: boolean): T {
         allowDeep
-            ? UIUtilsImpl.deepObservedMap.set(obj, new WeakRef<T>(wrapObject)) as Object
-            : UIUtilsImpl.observedMap.set(obj, new WeakRef<T>(wrapObject) as Object);
+            ? UIUtilsImpl.deepObservedMap.set(obj, wrapObject)
+            : UIUtilsImpl.observedMap.set(obj, wrapObject);
         return wrapObject;
     }
 
@@ -44,14 +44,14 @@ export class UIUtilsImpl {
             return obj;
         }
         return allowDeep
-            ? ((UIUtilsImpl.deepObservedMap.get(obj) as WeakRef<T> | undefined)?.deref() as T | undefined)
-            : ((UIUtilsImpl.observedMap.get(obj) as WeakRef<T> | undefined)?.deref() as T | undefined);
+            ? UIUtilsImpl.deepObservedMap.get(obj) as T | undefined
+            : UIUtilsImpl.observedMap.get(obj) as T | undefined;
     }
 
     public static getObserved<T extends Object>(obj: T, allowDeep: boolean): T | undefined {
         return allowDeep
-            ? ((UIUtilsImpl.deepObservedMap.get(obj) as WeakRef<T> | undefined)?.deref() as T | undefined)
-            : ((UIUtilsImpl.observedMap.get(obj) as WeakRef<T> | undefined)?.deref() as T | undefined);
+            ? UIUtilsImpl.deepObservedMap.get(obj) as T | undefined
+            : UIUtilsImpl.observedMap.get(obj) as T | undefined;
     }
 
     public static isProxied<T extends Object>(value: T): boolean {
@@ -138,9 +138,6 @@ export class UIUtilsImpl {
     public makeV1Observed<T>(value: T): T {
         if (!value || typeof value !== 'object') {
             return value as T;
-        }
-        if (isDynamicObject(value)) {
-            value = getRawObject(value);
         }
         const isProxy = StateMgmtTool.isObjectLiteral(value);
         if (value instanceof ObserveWrappedBase || !(UIUtilsImpl.checkIsBuitInType(value) || isProxy)) {

@@ -623,10 +623,22 @@ void SpanNode::UpdatePropertyImpl(
         DEFINE_SPAN_PROP_HANDLER(fontWeight, FontWeight, UpdateFontWeight),
         DEFINE_SPAN_PROP_HANDLER(letterSpacing, CalcDimension, UpdateLetterSpacing),
         DEFINE_SPAN_PROP_HANDLER(decorationColor, Color, UpdateTextDecorationColor),
-        DEFINE_SPAN_PROP_HANDLER(lineHeight, CalcDimension, UpdateLineHeight),
         DEFINE_SPAN_PROP_HANDLER(baselineOffset, CalcDimension, UpdateBaselineOffset),
         DEFINE_SPAN_PROP_HANDLER(value, std::u16string, UpdateContent),
         DEFINE_SPAN_PROP_HANDLER(fontFamily, std::vector<std::string>, UpdateFontFamily),
+
+        { "lineHeight",
+            [](int32_t nodeId, RefPtr<PropertyValueBase> value) {
+                auto spanNode = ElementRegister::GetInstance()->GetSpecificItemById<SpanNode>(nodeId);
+                CHECK_NULL_VOID(spanNode);
+                if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
+                    if (realValue->IsNegative()) {
+                        realValue->Reset();
+                    }
+                    spanNode->UpdateLineHeight(*realValue);
+                }
+            }
+        },
     };
     auto it = span_handlers.find(key);
     if (it != span_handlers.end()) {
