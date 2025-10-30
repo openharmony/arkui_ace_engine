@@ -423,6 +423,17 @@ void SetTitleImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(options);
     NavigationTitlebarOptions titleOptions;
     if (options->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        auto pipelineContext = frameNode->GetContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto theme = pipelineContext->GetTheme<NavigationBarTheme>();
+        CHECK_NULL_VOID(theme);
+        auto blurStyle = static_cast<BlurStyle>(theme->GetTitlebarBackgroundBlurStyle());
+        if (blurStyle != BlurStyle::NO_MATERIAL) {
+            BlurStyleOption blurStyleOption;
+            blurStyleOption.blurStyle = blurStyle;
+            titleOptions.bgOptions.blurStyleOption = blurStyleOption;
+            titleOptions.bgOptions.color = Color::TRANSPARENT;
+        }
         titleOptions = Converter::OptConvert<NavigationTitlebarOptions>(options->value).value_or(titleOptions);
     }
     NavigationModelStatic::SetTitlebarOptions(frameNode, std::move(titleOptions));
