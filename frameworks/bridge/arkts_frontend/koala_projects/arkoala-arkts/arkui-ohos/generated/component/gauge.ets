@@ -208,9 +208,9 @@ export class ArkGaugePeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._GaugeAttribute_setTrackShadow(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setIndicatorAttribute(value: GaugeIndicatorOptions | undefined): void {
+    setIndicatorAttribute(value: GaugeIndicatorOptions | null | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (value !== undefined) {
+        if (value !== undefined && value !== null) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             GaugeIndicatorOptions_serializer.write(thisSerializer, valueTmpValue)
@@ -274,7 +274,7 @@ export interface GaugeAttribute extends CommonMethod {
     trackShadow(value: GaugeShadowOptions | undefined): this {
         throw new Error("Unimplemented method trackShadow")
     }
-    indicator(value: GaugeIndicatorOptions | undefined): this {
+    indicator(value: GaugeIndicatorOptions | null | undefined): this {
         throw new Error("Unimplemented method indicator")
     }
     privacySensitive(value: boolean | undefined): this {
@@ -295,7 +295,7 @@ export class ArkGaugeStyle extends ArkCommonMethodStyle implements GaugeAttribut
     strokeWidth_value?: Length | undefined
     description_value?: CustomBuilder | undefined
     trackShadow_value?: GaugeShadowOptions | undefined
-    indicator_value?: GaugeIndicatorOptions | undefined
+    indicator_value?: GaugeIndicatorOptions | null | undefined
     privacySensitive_value?: boolean | undefined
     contentModifier_value?: ContentModifier<GaugeConfiguration> | undefined
     attributeModifier_value?: AttributeModifier<GaugeAttribute> | AttributeModifier<CommonMethod> | undefined
@@ -323,7 +323,7 @@ export class ArkGaugeStyle extends ArkCommonMethodStyle implements GaugeAttribut
     trackShadow(value: GaugeShadowOptions | undefined): this {
         return this
     }
-    indicator(value: GaugeIndicatorOptions | undefined): this {
+    indicator(value: GaugeIndicatorOptions | null | undefined): this {
         return this
     }
     privacySensitive(value: boolean | undefined): this {
@@ -409,9 +409,9 @@ export class ArkGaugeComponent extends ArkCommonMethodComponent implements Gauge
         }
         return this
     }
-    public indicator(value: GaugeIndicatorOptions | undefined): this {
+    public indicator(value: GaugeIndicatorOptions | null | undefined): this {
         if (this.checkPriority("indicator")) {
-            const value_casted = value as (GaugeIndicatorOptions | undefined)
+            const value_casted = value as (GaugeIndicatorOptions | null | undefined)
             this.getPeer()?.setIndicatorAttribute(value_casted)
             return this
         }
