@@ -23992,7 +23992,7 @@ void impl_WebInterface_setWebOptions(Ark_NativePointer thisPtr, KSerializerBuffe
         Ark_WebOptions valueValueTemp = WebOptions_serializer::read(thisDeserializer);;
         GetNodeModifiers()->getWebModifier()->setWebOptions(self, static_cast<Ark_WebOptions*>(&valueValueTemp));
 }
-KOALA_INTEROP_DIRECT_V3(WebInterface_setWebOptions, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_V3(WebInterface_setWebOptions, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_WebAttribute_setJavaScriptAccess(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
