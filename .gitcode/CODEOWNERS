@@ -3395,6 +3395,15 @@ frameworks/core/interfaces/native/ani/component3d_ani_modifier.h @arkui_componen
 frameworks/core/interfaces/native/implementation/component3d_modifier.cpp @arkui_component3d
 
 [ArkTS static]
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/typedNode/ArkFlowItemNode.ets @arkuiscroll
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/typedNode/ArkGridItemNode.ets @arkuiscroll
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/typedNode/ArkGridNode.ets @arkuiscroll
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/typedNode/ArkListItemGroupNode.ets @arkuiscroll
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/typedNode/ArkListItemNode.ets @arkuiscroll
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/typedNode/ArkListNode.ets @arkuiscroll
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/typedNode/ArkScrollNode.ets @arkuiscroll
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/typedNode/ArkScrollableNode.ets @arkuiscroll
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/typedNode/ArkWaterFlowNode.ets @arkuiscroll
 frameworks/core/interfaces/native/implementation/children_main_size_accessor.cpp @arkuiscroll
 frameworks/core/interfaces/native/implementation/children_main_size_peer.h @arkuiscroll
 frameworks/core/interfaces/native/implementation/flow_item_modifier.cpp @arkuiscroll
