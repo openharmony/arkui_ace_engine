@@ -22,6 +22,9 @@
 #else
 #include "image_source_preview.h"
 #endif
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
+#include "application_context.h"
+#endif
 #include "drawable_bridge.h"
 #include "drawable_descriptor.h"
 #include "resource_manager.h"
@@ -683,6 +686,26 @@ napi_value JsDrawableDescriptor::AnimatedConstructor(napi_env env, napi_callback
     return thisVar;
 }
 
+std::shared_ptr<Global::Resource::ResourceManager> GetResourceManager()
+{
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
+    std::shared_ptr<AbilityRuntime::Platform::ApplicationContext> applicationContext =
+        AbilityRuntime::Platform::ApplicationContext::GetInstance();
+    if (!applicationContext) {
+        HILOGE("Failed to get applicationContext!");
+        return nullptr;
+    }
+    auto resMgr = applicationContext->GetResourceManager();
+    if (!resMgr) {
+        HILOGE("Failed to get resource manager!");
+    }
+    return resMgr;
+#else
+    std::shared_ptr<Global::Resource::ResourceManager> resMgr(Global::Resource::CreateResourceManager());
+    return resMgr;
+#endif
+}
+
 napi_value JsDrawableDescriptor::LayeredConstructor(napi_env env, napi_callback_info info)
 {
     napi_escapable_handle_scope scope = nullptr;
@@ -707,7 +730,7 @@ napi_value JsDrawableDescriptor::LayeredConstructor(napi_env env, napi_callback_
     std::shared_ptr<Media::PixelMap> foregroundPixelMap = nullptr;
     auto updateUndefinedPixelMap = [&pos, &layeredDrawable, &foregroundPixelMap]() -> void {
         if (pos == MASK_INDEX) {
-            std::shared_ptr<Global::Resource::ResourceManager> resMgr(Global::Resource::CreateResourceManager());
+            auto resMgr = GetResourceManager();
             layeredDrawable->InitialMask(resMgr);
         } else if (pos == BACKGROUND_INDEX && foregroundPixelMap) {
             UpdateLayeredParam(layeredDrawable, pos, foregroundPixelMap);
