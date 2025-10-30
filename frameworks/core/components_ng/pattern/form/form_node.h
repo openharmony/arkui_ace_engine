@@ -74,7 +74,7 @@ private:
 private:
     std::optional<int32_t> imageId_;
     std::shared_ptr<AccessibilityChildTreeCallback> accessibilityChildTreeCallback_;
-    std::shared_ptr<AccessibilitySAObserverCallback> accessibilitySAObserverCallback_;
+    std::shared_ptr<AccessibilityScreenReaderObserverCallback> accessibilityScreenReaderObserverCallback_;
 };
 
 } // namespace OHOS::Ace::NG
