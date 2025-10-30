@@ -2776,6 +2776,31 @@ HWTEST_F(TextTestThreeNg, TextMinLines002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TextModelNGMinLines003
+ * @tc.desc: Test TextModelNGMinLines
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestThreeNg, TextMinLines003, TestSize.Level1)
+{
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textModelNG.SetMinLines(frameNode, 1);
+    EXPECT_EQ(textModelNG.GetMinLines(frameNode), 1U);
+    textLayoutProperty->UpdateMinLines(9);
+    EXPECT_EQ(textLayoutProperty->GetMinLines().value(), 9);
+    textModelNG.ResetMinLines(frameNode);
+    EXPECT_EQ(textLayoutProperty->HasMinLines(), false);
+}
+
+/**
  * @tc.name: TextModelNGMinLineHeight001
  * @tc.desc: Test TextModelNGMinLineHeight
  * @tc.type: FUNC

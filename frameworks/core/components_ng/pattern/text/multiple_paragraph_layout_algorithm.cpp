@@ -1009,7 +1009,8 @@ void MultipleParagraphLayoutAlgorithm::CalcHeightWithMinLines(TextStyle& textSty
             minLines = std::min(minLines, textLayoutProperty->GetMaxLines().value());
         }
         auto lineCount = static_cast<uint32_t>(paragraphManager_->GetLineCount());
-        if (lineCount >= minLines) {
+        auto paragraphLength = paragraphManager_->GetParagraphLength();
+        if (lineCount >= minLines && paragraphLength != 0) {
             return;
         }
         auto paragraphHeight = paragraphManager_->GetHeight();

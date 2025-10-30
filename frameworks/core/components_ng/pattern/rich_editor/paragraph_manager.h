@@ -110,6 +110,7 @@ public:
     bool IsIndexAtParagraphEnd(int32_t index);
     bool DidExceedMaxLinesInner() const;
     std::string GetDumpInfo() const;
+    int32_t GetParagraphLength() const;
 
 protected:
     std::vector<ParagraphInfo> paragraphs_;
