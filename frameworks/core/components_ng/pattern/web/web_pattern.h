@@ -131,6 +131,21 @@ enum class WebWindowMaximizeReason : uint32_t {
     EXIT_FREE_MULTI_MODE,
 };
 
+// Event for touch trigger image analyzer
+enum class ImageOverlayEvent {
+    TOUCH_PRESS,
+    TOUCH_RELEASE,
+    CREATE_OVERLAY,
+    CREATE_OVERLAY_RELEASE
+};
+
+// only for touch, if mouse trigger image analyzer, always NONE
+enum class ImageOverlayStatus {
+    NONE,
+    TOUCH_HOLD,  // touch hold
+    HOLD_CREATE  // touch hold and create overlay
+};
+
 using CursorStyleInfo = std::tuple<OHOS::NWeb::CursorType, std::shared_ptr<OHOS::NWeb::NWebCursorInfo>>;
 class WebPattern : public NestableScrollContainer,
                    public TextBase,
@@ -768,6 +783,8 @@ public:
         int rectHeight, int pointX, int pointY);
     void OnOverlayStateChanged(int offsetX, int offsetY, int rectWidth, int rectHeight);
     void OnTextSelected();
+    void UpdateImageOverlayStatus(ImageOverlayEvent event);
+    void DestroyOverlayOnNoResponse();
     void DestroyAnalyzerOverlay();
     WebInfoType GetWebInfoType();
     void RequestFocus();
@@ -1450,6 +1467,7 @@ private:
     std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_ = nullptr;
     bool overlayCreating_ = false;
     bool awaitingOnTextSelected_ = false;
+    ImageOverlayStatus imageOverlayStatus_ = ImageOverlayStatus::NONE;
     RefPtr<OverlayManager> keyboardOverlay_;
     std::function<void()> customKeyboardBuilder_ = nullptr;
     std::function<void(int32_t)> updateInstanceIdCallback_;

@@ -217,14 +217,19 @@ void HandleStrokeWidth(
                             const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto pipeline = host->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetTheme<DataPanelTheme>();
+        CHECK_NULL_VOID(theme);
         CalcDimension result;
         if (ResourceParseUtils::ParseResDimensionVpNG(resObj, result)) {
+            if (result.IsNegative() || result.Unit() == DimensionUnit::PERCENT) {
+                result = theme->GetThickness();
+            }
             pattern->UpdateStrokeWidth(result, isFirstLoad);
         } else {
-            auto pipeline = PipelineBase::GetCurrentContext();
-            CHECK_NULL_VOID(pipeline);
-            auto theme = pipeline->GetTheme<DataPanelTheme>();
-            CHECK_NULL_VOID(theme);
             result = theme->GetThickness();
             pattern->UpdateStrokeWidth(result, isFirstLoad);
         }

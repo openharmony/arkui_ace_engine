@@ -747,7 +747,7 @@ HWTEST_F(XComponentTestNg, OnDetachFromFrameNodeMultiThread006, TestSize.Level1)
     ASSERT_TRUE(pattern);
     pattern->isTypedNode_ = true;
     pattern->isNativeXComponent_ = false;
-    EXPECT_TRUE(pattern->accessibilityChildTreeCallback_);
+    EXPECT_FALSE(pattern->accessibilityChildTreeCallback_);
     /**
      * @tc.steps: step2. call OnDetachFromMainTreeMultiThread
      * @tc.expected: Child tree callback is released

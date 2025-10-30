@@ -15,7 +15,7 @@
 #include "core/common/ai/data_detector_adapter.h"
 
 namespace OHOS::Ace {
-void DataDetectorAdapter::InitTextDetect(int32_t startPos, std::string detectText) {}
+void DataDetectorAdapter::InitTextDetect(int32_t startPos, std::string detectText, uint64_t taskId) {}
 void DataDetectorAdapter::SetTextDetectTypes(const std::string& types) {}
 bool DataDetectorAdapter::ParseOriText(const std::unique_ptr<JsonValue>& entityJson, std::u16string& text)
 {
@@ -54,7 +54,7 @@ void DataDetectorAdapter::OnClickAIMenuOption(const AISpan& aiSpan,
 {}
 
 void DataDetectorAdapter::GetAIEntityMenu() {}
-std::function<void()> GetDetectDelayTask(const std::map<int32_t, AISpan>& aiSpanMap)
+std::function<void()> GetDetectDelayTask(const std::map<int32_t, AISpan>& aiSpanMap, uint64_t taskId)
 {
     return []() {};
 }

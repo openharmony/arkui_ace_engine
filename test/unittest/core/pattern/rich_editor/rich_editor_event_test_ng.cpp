@@ -843,4 +843,18 @@ HWTEST_F(RichEditorEventTestNg, PreventDefault001, TestSize.Level0)
     EXPECT_FALSE(richEditorPattern->HasFocus());
 }
 
+/**
+ * @tc.name: OnAttachToMainTreeMultiThread001
+ * @tc.desc: test OnAttachToMainTreeMultiThread
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEventTestNg, OnAttachToMainTreeMultiThread001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->OnAttachToMainTreeMultiThread();
+    EXPECT_NE(richEditorPattern->richEditorInstanceId_, -2);
+}
+
 }

@@ -6482,6 +6482,8 @@ typedef enum Ark_ThreatType {
     ARK_THREAT_TYPE_THREAT_FRAUD = 1,
     ARK_THREAT_TYPE_THREAT_RISK = 2,
     ARK_THREAT_TYPE_THREAT_WARNING = 3,
+    ARK_THREAT_TYPE_THREAT_NONE = 4,
+    ARK_THREAT_TYPE_THREAT_UNPROCESSED = 5,
 } Ark_ThreatType;
 typedef struct Opt_ThreatType {
     Ark_Tag tag;
@@ -25679,10 +25681,8 @@ typedef struct GENERATED_ArkUIFrameNodeExtenderAccessor {
                                           Ark_AnimationPropertyType property);
     Ark_NativePointer (*getFrameNodePtr)(Ark_FrameNode node);
     Ark_NativePointer (*createTypedFrameNode)(const Ark_String* type);
-    Ark_NativePointer (*createByRawPtr)(Ark_FrameNode peer,
-                                        Ark_FrameNode pointer);
-    Ark_FrameNode (*unWrapRawPtr)(Ark_FrameNode peer,
-                                  Ark_NativePointer pointer);
+    Ark_NativePointer (*createByRawPtr)(Ark_NativePointer ptr);
+    Ark_NativePointer (*unWrapRawPtr)(Ark_NativePointer ptr);
     Ark_UICommonEvent (*getCommonEvent)(Ark_FrameNode peer);
     Ark_NativePointer (*getRenderNode)(Ark_NativePointer peer);
     Array_Float64 (*convertPoint)(Ark_FrameNode peer,

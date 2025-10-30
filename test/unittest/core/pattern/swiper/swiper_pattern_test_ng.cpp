@@ -2238,4 +2238,21 @@ HWTEST_F(SwiperPatternTestNg, FillType002, TestSize.Level1)
     // 840 is LG, contenWidth + padding = 820 + 10 + 10.
     EXPECT_EQ(SwiperUtils::GetWidthBreakpoint(layoutProperty, 820), WidthBreakpoint::WIDTH_LG);
 }
+
+/**
+ * @tc.name: JSIndicatorControllerBase001
+ * @tc.desc: Test FillType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, JSIndicatorControllerBase001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swiper.
+     * @tc.expected: check the indicatorController type.
+     */
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    auto controller = AceType::MakeRefPtr<JSIndicatorControllerBase>();
+    swiperPattern->SetIndicatorController(controller);
+    EXPECT_EQ(AceType::TypeName(swiperPattern->indicatorController_.Upgrade()), "JSIndicatorControllerBase");
+}
 } // namespace OHOS::Ace::NG

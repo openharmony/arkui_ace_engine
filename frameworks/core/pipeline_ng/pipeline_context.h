@@ -28,6 +28,7 @@
 #include "base/log/frame_info.h"
 #include "base/log/frame_report.h"
 #include "base/memory/referenced.h"
+#include "base/ressched/ressched_touch_optimizer.h"
 #include "base/utils/device_config.h"
 #include "base/view_data/view_data_wrap.h"
 #include "core/accessibility/accessibility_manager_ng.h"
@@ -1299,6 +1300,11 @@ public:
         return window_->GetIsRequestFrame();
     }
 
+    const std::unique_ptr<ResSchedTouchOptimizer>& GetTouchOptimizer() const
+    {
+        return touchOptimizer_;
+    }
+
     void SetMagnifierController(const RefPtr<MagnifierController>& magnifierController);
     RefPtr<MagnifierController> GetMagnifierController() const;
 protected:
@@ -1661,6 +1667,7 @@ private:
     bool needReloadResource_ = false;
     std::list<WeakPtr<UINode>> needReloadNodes_;
     RefPtr<MagnifierController> magnifierController_;
+    std::unique_ptr<ResSchedTouchOptimizer> touchOptimizer_;
 };
 
 /**

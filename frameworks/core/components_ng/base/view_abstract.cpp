@@ -499,7 +499,8 @@ void ViewAbstract::SetBackgroundIgnoresLayoutSafeAreaEdges(const uint32_t layout
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, BackgroundIgnoresLayoutSafeAreaEdges, layoutSafeAreaEdges);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+        LayoutProperty, BackgroundIgnoresLayoutSafeAreaEdges, layoutSafeAreaEdges, frameNode);
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
 }
 

@@ -124,7 +124,7 @@ constexpr uint32_t VIDEO_DURATION = 10u;
 constexpr uint32_t VIDEO_CURRENT_TIME = 5u;
 constexpr float VOLUME_STEP = 0.05f;
 constexpr int32_t MILLISECONDS_TO_SECONDS = 1000;
-TestProperty g_testProperty;
+TestProperty testProperty;
 } // namespace
 
 class VideoPropertyTestNg : public testing::Test {
@@ -135,18 +135,18 @@ public:
     void TearDown() {}
 
 protected:
-    static RefPtr<FrameNode> CreateVideoNode(TestProperty& g_testProperty);
+    static RefPtr<FrameNode> CreateVideoNode(TestProperty& testProperty);
 };
 
 void VideoPropertyTestNg::SetUpTestSuite()
 {
-    g_testProperty.progressRate = VIDEO_PROGRESS_RATE;
-    g_testProperty.showFirstFrame = SHOW_FIRST_FRAME;
-    g_testProperty.muted = MUTED_VALUE;
-    g_testProperty.autoPlay = AUTO_PLAY;
-    g_testProperty.controls = CONTROL_VALUE;
-    g_testProperty.loop = LOOP_VALUE;
-    g_testProperty.objectFit = VIDEO_IMAGE_FIT;
+    testProperty.progressRate = VIDEO_PROGRESS_RATE;
+    testProperty.showFirstFrame = SHOW_FIRST_FRAME;
+    testProperty.muted = MUTED_VALUE;
+    testProperty.autoPlay = AUTO_PLAY;
+    testProperty.controls = CONTROL_VALUE;
+    testProperty.loop = LOOP_VALUE;
+    testProperty.objectFit = VIDEO_IMAGE_FIT;
     MockPipelineContext::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
@@ -164,10 +164,10 @@ void VideoPropertyTestNg::SetUp()
     ViewStackProcessor::GetInstance()->ClearStack();
 }
 
-RefPtr<FrameNode> VideoPropertyTestNg::CreateVideoNode(TestProperty& g_testProperty)
+RefPtr<FrameNode> VideoPropertyTestNg::CreateVideoNode(TestProperty& testProperty)
 {
-    if (g_testProperty.videoController.has_value()) {
-        VideoModelNG().Create(g_testProperty.videoController.value());
+    if (testProperty.videoController.has_value()) {
+        VideoModelNG().Create(testProperty.videoController.value());
     } else {
         auto videoController = AceType::MakeRefPtr<VideoControllerV2>();
         VideoModelNG().Create(videoController);
@@ -179,32 +179,32 @@ RefPtr<FrameNode> VideoPropertyTestNg::CreateVideoNode(TestProperty& g_testPrope
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPattern->mediaPlayer_)), IsMediaPlayerValid())
         .WillRepeatedly(Return(true));
 
-    if (g_testProperty.src.has_value()) {
-        VideoModelNG().SetSrc(g_testProperty.src.value(), "", "");
+    if (testProperty.src.has_value()) {
+        VideoModelNG().SetSrc(testProperty.src.value(), "", "");
     }
-    if (g_testProperty.progressRate.has_value()) {
-        VideoModelNG().SetProgressRate(g_testProperty.progressRate.value());
+    if (testProperty.progressRate.has_value()) {
+        VideoModelNG().SetProgressRate(testProperty.progressRate.value());
     }
-    if (g_testProperty.posterUrl.has_value()) {
-        VideoModelNG().SetPosterSourceInfo(g_testProperty.posterUrl.value(), "", "");
+    if (testProperty.posterUrl.has_value()) {
+        VideoModelNG().SetPosterSourceInfo(testProperty.posterUrl.value(), "", "");
     }
-    if (g_testProperty.muted.has_value()) {
-        VideoModelNG().SetMuted(g_testProperty.muted.value());
+    if (testProperty.muted.has_value()) {
+        VideoModelNG().SetMuted(testProperty.muted.value());
     }
-    if (g_testProperty.autoPlay.has_value()) {
-        VideoModelNG().SetAutoPlay(g_testProperty.autoPlay.value());
+    if (testProperty.autoPlay.has_value()) {
+        VideoModelNG().SetAutoPlay(testProperty.autoPlay.value());
     }
-    if (g_testProperty.controls.has_value()) {
-        VideoModelNG().SetControls(g_testProperty.controls.value());
+    if (testProperty.controls.has_value()) {
+        VideoModelNG().SetControls(testProperty.controls.value());
     }
-    if (g_testProperty.loop.has_value()) {
-        VideoModelNG().SetLoop(g_testProperty.loop.value());
+    if (testProperty.loop.has_value()) {
+        VideoModelNG().SetLoop(testProperty.loop.value());
     }
-    if (g_testProperty.objectFit.has_value()) {
-        VideoModelNG().SetObjectFit(g_testProperty.objectFit.value());
+    if (testProperty.objectFit.has_value()) {
+        VideoModelNG().SetObjectFit(testProperty.objectFit.value());
     }
-    if (g_testProperty.showFirstFrame.has_value()) {
-        VideoModelNG().SetShowFirstFrame(g_testProperty.showFirstFrame.value());
+    if (testProperty.showFirstFrame.has_value()) {
+        VideoModelNG().SetShowFirstFrame(testProperty.showFirstFrame.value());
     }
 
     auto element = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -1132,7 +1132,7 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest026, TestSize.Level1)
      * @tc.steps: step1. Create Video
      * @tc.expected: step1. Create Video successfully
      */
-    auto frameNode = CreateVideoNode(g_testProperty);
+    auto frameNode = CreateVideoNode(testProperty);
     ASSERT_TRUE(frameNode);
     auto videoPattern = frameNode->GetPattern<VideoPattern>();
     ASSERT_TRUE(videoPattern);

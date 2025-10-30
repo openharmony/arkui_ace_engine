@@ -601,7 +601,7 @@ void ContainerPickerPattern::HandleDragStart(const GestureEvent& info)
     springOffset_ = 0.0f;
     StopAnimation();
 
-    yLast_ = info.GetGlobalPoint().GetY();
+    yLast_ = info.GetLocalLocation().GetY();
     dragStartTime_ = GetCurrentTime();
 }
 
@@ -621,7 +621,6 @@ void ContainerPickerPattern::HandleDragUpdate(const GestureEvent& info)
             index = (totalCountAndIndex ? totalCountAndIndex : 0) % totalItemCount_;
         }
         SwipeTo(index);
-        selectedIndex_ = index;
         return;
     }
 
@@ -630,7 +629,7 @@ void ContainerPickerPattern::HandleDragUpdate(const GestureEvent& info)
     animationBreak_ = false;
 
     auto offsetY =
-        info.GetGlobalPoint().GetY() + (info.GetInputEventType() == InputEventType::AXIS ? info.GetOffsetY() : 0.0);
+        info.GetLocalLocation().GetY() + (info.GetInputEventType() == InputEventType::AXIS ? info.GetOffsetY() : 0.0);
     if (NearEqual(offsetY, yLast_, MOVE_THRESHOLD)) {
         StopHapticController();
         return;
@@ -1328,11 +1327,7 @@ void ContainerPickerPattern::UpdateBorderRadiusWithResObj(const RefPtr<ResourceO
             property->UpdateIndicatorBorderRadius(borderRadiusValue);
         }
     } else {
-        auto context = pickerNode->GetContext();
-        CHECK_NULL_VOID(context);
-        auto theme = context->GetTheme<PickerTheme>();
-        CHECK_NULL_VOID(theme);
-        property->UpdateIndicatorBorderRadius(BorderRadiusProperty(*theme->GetSelectedBorderRadius().radiusTopLeft));
+        property->UpdateIndicatorBorderRadius(BorderRadiusProperty(DEFAULT_RADIUS));
     }
 }
 

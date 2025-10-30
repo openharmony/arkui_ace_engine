@@ -18,9 +18,6 @@
 
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 
-namespace OHOS::Ace::Framework {
-class JSIndicatorController;
-}
 namespace OHOS::Ace::NG {
 class IndicatorPattern;
 class IndicatorController : public virtual AceType {
@@ -66,6 +63,10 @@ private:
     WeakPtr<FrameNode> swiperNode_;
 };
 
-} // namespace OHOS::Ace
+class JSIndicatorControllerBase : public AceType {
+    DECLARE_ACE_TYPE(JSIndicatorControllerBase, AceType);
+};
+
+} // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SWIPER_SWIPER_CONTROLLER_H

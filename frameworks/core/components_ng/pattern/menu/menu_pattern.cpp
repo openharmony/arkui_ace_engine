@@ -1307,6 +1307,7 @@ bool MenuPattern::GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
         return true;
     }
     auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
     auto pipelineContext = host->GetContextRefPtr();
     CHECK_NULL_RETURN(pipelineContext, false);
     auto colorMode = pipelineContext->GetColorMode();

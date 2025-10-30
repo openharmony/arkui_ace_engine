@@ -266,9 +266,6 @@ void XComponentPattern::Initialize()
             InitNativeNodeCallbacks();
         }
     }
-    if (!isTypedNode_) {
-        InitializeAccessibility();
-    }
 }
 
 void XComponentPattern::OnAttachToMainTree()
@@ -393,13 +390,14 @@ void XComponentPattern::RequestFocus()
 
 void XComponentPattern::OnAttachToFrameNode()
 {
+    auto host = GetHost();
+    if (host) {
+        nodeId_ = std::to_string(host->GetId());
+    }
     Initialize();
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().EnableSelfRender();
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    nodeId_ = std::to_string(host->GetId());
 }
 
 void XComponentPattern::OnModifyDone()
@@ -491,7 +489,6 @@ void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     UnregisterNode();
     CHECK_NULL_VOID(frameNode);
     THREAD_SAFE_NODE_CHECK(frameNode, OnDetachFromFrameNode, frameNode);
-    UninitializeAccessibility(frameNode);
     if (isTypedNode_) {
         if (surfaceCallbackMode_ == SurfaceCallbackMode::PIP) {
             HandleSurfaceDestroyed(frameNode);
@@ -582,6 +579,9 @@ void XComponentPattern::OnAttachContext(PipelineContext* context)
         }
         initialContext_ = nullptr;
     }
+    if (!isTypedNode_) {
+        InitializeAccessibility();
+    }
 }
 
 void XComponentPattern::OnDetachContext(PipelineContext* context)
@@ -589,6 +589,7 @@ void XComponentPattern::OnDetachContext(PipelineContext* context)
     CHECK_NULL_VOID(context);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    UninitializeAccessibility(host.GetRawPtr());
     context->RemoveWindowStateChangedCallback(host->GetId());
 }
 

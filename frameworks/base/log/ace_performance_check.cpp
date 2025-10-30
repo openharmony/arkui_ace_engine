@@ -24,6 +24,9 @@
 namespace OHOS::Ace {
 namespace {
 constexpr int32_t BASE_YEAR = 1900;
+constexpr char FAULT_COMPONENT_LARGE[] = "9901";
+constexpr char FAULT_RENDERING_LONG[] = "9903";
+constexpr char FAULT_FOREACH_FULL[] = "9904";
 constexpr char DATE_FORMAT[] = "MM-dd HH:mm:ss";
 constexpr int32_t CONVERT_NANOSECONDS = 1000000;
 constexpr int32_t FUNCTION_TIMEOUT = 150;
@@ -170,8 +173,10 @@ bool AceScopedPerformanceCheck::CheckPage(const CodeInfo& codeInfo, const std::s
         AcePerformanceCheck::isPagesOfSharedLibFirstReqOrPagesOfMainLib_ = true;
         AcePerformanceCheck::preRuleType_ = rule;
     }
-    if ((rule == "9901" || rule == "9904") && AcePerformanceCheck::isPagesOfSharedLib_ &&
-            AcePerformanceCheck::isPagesOfSharedLibFirstReqOrPagesOfMainLib_) {
+    std::unordered_set<std::string> sourcesEmptyRules = { FAULT_COMPONENT_LARGE, FAULT_RENDERING_LONG,
+        FAULT_FOREACH_FULL };
+    if (sourcesEmptyRules.find(rule) != sourcesEmptyRules.end() && AcePerformanceCheck::isPagesOfSharedLib_ &&
+        AcePerformanceCheck::isPagesOfSharedLibFirstReqOrPagesOfMainLib_) {
         AcePerformanceCheck::isPagesOfSharedLibFirstReqOrPagesOfMainLib_ = false;
         if (CheckIsRuleContainsPage(rule, codeInfo.sources)) {
             return true;

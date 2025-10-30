@@ -15,7 +15,10 @@
 
 #include "core/components_ng/pattern/qrcode/qrcode_paint_method.h"
 
+#include "core/components/qrcode/qrcode_theme.h"
 #include "core/components_ng/pattern/qrcode/qrcode_paint_property.h"
+#include "core/components_ng/pattern/qrcode/qrcode_pattern.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -40,9 +43,18 @@ void QRCodePaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     } else if (renderContext->HasForegroundColorStrategy()) {
         paintProperty->UpdateColor(Color::FOREGROUND);
     }
-    auto color = paintProperty->GetColorValue();
-    auto backgroundColor = paintProperty->GetBackgroundColorValue();
-    auto opacity = paintProperty->GetOpacityValue();
+
+    auto pattern = DynamicCast<QRCodePattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(pattern);
+    auto frameNode = pattern->GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<QrcodeTheme>();
+    CHECK_NULL_VOID(theme);
+    auto color = paintProperty->GetColorValue(theme->GetQrcodeColor());
+    auto backgroundColor = paintProperty->GetBackgroundColorValue(theme->GetBackgroundColor());
+    auto opacity = paintProperty->GetOpacityValue(1.0);
 
     // For the long string, just show the length as 256.
     if (value.size() > QRCODE_VALUE_MAX_LENGTH) {

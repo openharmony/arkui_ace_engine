@@ -2062,4 +2062,16 @@ HWTEST_F(SelectOverlayTestTwoNg, DraggingSingleHandle, TestSize.Level1)
     selectContentOverlayPattern->UpdateIsShowHandleLine(true);
     EXPECT_FALSE(shareInfo->isHandleLineShow);
 }
+
+HWTEST_F(SelectOverlayTestTwoNg, CheckInShowArea010, TestSize.Level1)
+{
+    SelectOverlayInfo selectInfo;
+    selectInfo.useFullScreen = false;
+    selectInfo.isSingleHandle = false;
+    selectInfo.firstHandle.paintRect = RectF(10.0f, 10.0f, 20.0f, 20.0f);
+    selectInfo.secondHandle.paintRect = RectF(110.0f, 110.0f, 20.0f, 20.0f);
+    selectInfo.showArea = RectF(0.0f, 0.0f, 100.0f, 100.0f);
+
+    EXPECT_FALSE(SelectOverlayLayoutAlgorithm::CheckInShowArea(selectInfo));
+}
 } // namespace OHOS::Ace::NG

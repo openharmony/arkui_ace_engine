@@ -72,6 +72,7 @@ RefPtr<PopupTheme> GetPopupTheme()
 Dimension GetMaxWith()
 {
     auto gridColumnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::BUBBLE_TYPE);
+    CHECK_NULL_RETURN(gridColumnInfo, Dimension());
     auto parent = gridColumnInfo->GetParent();
     if (parent) {
         parent->BuildColumnWidth();

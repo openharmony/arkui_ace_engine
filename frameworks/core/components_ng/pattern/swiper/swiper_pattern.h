@@ -47,6 +47,8 @@
 #include "core/event/crown_event.h"
 #endif
 namespace OHOS::Ace::NG {
+class JSIndicatorControllerBase;
+
 enum class GestureStatus {
     INIT = 0,
     START,
@@ -826,9 +828,9 @@ public:
         return frameNode;
     }
 
-    void SetIndicatorController(Framework::JSIndicatorController* controller);
+    void SetIndicatorController(RefPtr<JSIndicatorControllerBase> controller);
 
-    Framework::JSIndicatorController* GetIndicatorController();
+    RefPtr<JSIndicatorControllerBase> GetIndicatorController();
 
     bool IsFocusNodeInItemPosition(const RefPtr<FrameNode>& focusNode);
     virtual RefPtr<Curve> GetCurve() const;
@@ -953,7 +955,6 @@ protected:
     Axis direction_ = Axis::HORIZONTAL;
 
 private:
-    Framework::JSIndicatorController* indicatorController_ = nullptr;
     void OnModifyDone() override;
     void OnAfterModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -1528,6 +1529,7 @@ private:
     WeakPtr<FrameNode> indicatorNode_;
     bool isBindIndicator_ = false;
     std::function<void()> resetFunc_;
+    WeakPtr<JSIndicatorControllerBase> indicatorController_;
 
     SwiperHoverFlag hoverFlag_ = HOVER_NONE;
     GestureStatus gestureStatus_ = GestureStatus::INIT;

@@ -3217,6 +3217,16 @@ void ListPattern::OnChildrenSizeChanged(std::tuple<int32_t, int32_t, int32_t> ch
     MarkDirtyNodeSelf();
 }
 
+void ListPattern::SetListChildrenMainSize(RefPtr<ListChildrenMainSize>& childrenSize)
+{
+    childrenSize_ = childrenSize;
+    OnChildrenSizeChanged({ -1, -1, -1 }, LIST_UPDATE_CHILD_SIZE);
+    auto pipeline = GetContext();
+    if (pipeline && pipeline->GetPixelRoundMode() == PixelRoundMode::PIXEL_ROUND_AFTER_MEASURE) {
+        childrenSize_->SetIsRoundingMode();
+    }
+}
+
 void ListPattern::SetListChildrenMainSize(float defaultSize, const std::vector<float>& mainSize)
 {
     childrenSize_ = AceType::MakeRefPtr<ListChildrenMainSize>(mainSize, defaultSize);
