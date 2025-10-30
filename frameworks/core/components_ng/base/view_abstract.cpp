@@ -134,7 +134,12 @@ void ViewAbstract::SetWidth(const RefPtr<ResourceObject>& resObj)
             ResourceParseUtils::ParseResDimensionVpNG(resObj, value);
             pattern->AddResCache("width", value.ToString());
         } else {
-            value = StringUtils::StringToCalcDimension(widthString);
+            if (std::strcmp(widthString.c_str(), "0.00auto") == 0) {
+                value = Dimension(0.0f, DimensionUnit::AUTO);
+            } else if(!StringUtils::StringToCalcDimensionNG(widthString, value)) {
+                ClearWidthOrHeight(true);
+                return;
+            }
         }
         if (LessNotEqual(value.Value(), 0.0)) {
             if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -145,11 +150,7 @@ void ViewAbstract::SetWidth(const RefPtr<ResourceObject>& resObj)
             }
         }
         CalcLength width;
-        if (value.Unit() == DimensionUnit::CALC) {
-            width = NG::CalcLength(value.CalcValue());
-        } else {
-            width = NG::CalcLength(value);
-        }
+        width = (value.Unit() == DimensionUnit::CALC) ? NG::CalcLength(value.CalcValue()) : NG::CalcLength(value);
         auto layoutProperty = frameNode->GetLayoutProperty();
         CHECK_NULL_VOID(layoutProperty);
         // get previously user defined ideal height
@@ -203,7 +204,12 @@ void ViewAbstract::SetHeight(const RefPtr<ResourceObject>& resObj)
             ResourceParseUtils::ParseResDimensionVpNG(resObj, value);
             pattern->AddResCache("height", value.ToString());
         } else {
-            value = StringUtils::StringToCalcDimension(heightString);
+            if (std::strcmp(heightString.c_str(), "0.00auto") == 0) {
+                value = Dimension(0.0f, DimensionUnit::AUTO);
+            } else if(!StringUtils::StringToCalcDimensionNG(heightString, value)) {
+                ClearWidthOrHeight(false);
+                return;
+            }
         }
         if (LessNotEqual(value.Value(), 0.0)) {
             if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -214,11 +220,7 @@ void ViewAbstract::SetHeight(const RefPtr<ResourceObject>& resObj)
             }
         }
         CalcLength height;
-        if (value.Unit() == DimensionUnit::CALC) {
-            height = NG::CalcLength(value.CalcValue());
-        } else {
-            height = NG::CalcLength(value);
-        }
+        height = (value.Unit() == DimensionUnit::CALC) ? NG::CalcLength(value.CalcValue()) : NG::CalcLength(value);
         auto layoutProperty = frameNode->GetLayoutProperty();
         CHECK_NULL_VOID(layoutProperty);
         // get previously user defined ideal width
