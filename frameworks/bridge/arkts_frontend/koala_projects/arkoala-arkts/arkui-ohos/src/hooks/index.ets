@@ -509,7 +509,7 @@ export function hookCreateImageData(peerPtr: CanvasRenderer, sw: number, sh: num
     const arrayBuffer: ArrayBuffer = new ArrayBuffer(length)
     const uint8View = new Uint8Array(arrayBuffer)
     for (let i = 0; i < length; i++) {
-        uint8View[i] = 0xffffffff
+        uint8View[i] = 0xffffffff.toInt()
     }
     const data: Uint8ClampedArray = new Uint8ClampedArray(arrayBuffer)
     const resObj: ImageData = new ImageData(width_cast, height_cast, data, LengthMetricsUnit.PX)
@@ -522,7 +522,7 @@ export function hookCreateImageData(peerPtr: CanvasRenderer, imagedata: ImageDat
     const arrayBuffer: ArrayBuffer = new ArrayBuffer(length)
     const uint8View = new Uint8Array(arrayBuffer)
     for (let i = 0; i < length; i++) {
-        uint8View[i] = 0xffffffff
+        uint8View[i] = 0xffffffff.toInt()
     }
     const data: Uint8ClampedArray = new Uint8ClampedArray(arrayBuffer)
     const resObj: ImageData = new ImageData(width_cast, height_cast, data, LengthMetricsUnit.PX)
