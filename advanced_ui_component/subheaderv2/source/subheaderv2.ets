@@ -1290,6 +1290,7 @@ struct SingleIconStyle {
           .draggable(false)
           .borderRadius(getResourceValue('sys.float.subheader_right_image_radius'))
           .padding(getResourceValue('sys.float.subheader_right_image_padding'))
+          .attributeModifier(!DEFAULT_FOCUS_STYLE() ? undefined : new DefaultImageButtonFocusStyle())
       }
     }
   }
@@ -1584,5 +1585,16 @@ class DefaultFocusStyleModifier implements AttributeModifier<ButtonAttribute> {
       .onBlur(() => {
         this.stateStyleAction && this.stateStyleAction(false);
       })
+  }
+}
+
+class DefaultImageButtonFocusStyle implements AttributeModifier<ImageAttribute> {
+  applyNormalAttribute(instance: ImageAttribute): void {
+    if (!instance) {
+      return;
+    }
+    instance
+      .borderRadius(getResourceValue('sys.float.padding_level2'))
+      .focusBox({margin: LengthMetrics.vp(getResourceValue('sys.float.padding_level4'))})
   }
 }
