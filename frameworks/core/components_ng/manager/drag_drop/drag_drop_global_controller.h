@@ -74,6 +74,8 @@ public:
     bool IsAppGlobalDragEnabled() const;
     bool IsAlreadyGetAppGlobalDrag() const;
     bool IsCurrentDrag(int32_t requestId) const;
+    uint64_t GetStartDragVsyncTime() const;
+    void SetStartDragVsyncTime(uint64_t startDragVsyncTime);
 
 private:
     DragDropGlobalController() = default;
@@ -104,6 +106,7 @@ private:
     DragStartRequestStatus dragStartRequestStatus_{DragStartRequestStatus::READY};
     std::function<void()> asyncDragCallback_;
     bool enableDropDisallowedBadge_ = false;
+    uint64_t startDragVsyncTime_ = 0;
 };
 
 } // namespace OHOS::Ace::NG

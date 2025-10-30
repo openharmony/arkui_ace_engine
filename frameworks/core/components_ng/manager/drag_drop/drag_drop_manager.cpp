@@ -70,7 +70,7 @@ constexpr float MAX_DISTANCE_TO_PRE_POINTER = 3.0f;
 constexpr float DEFAULT_SPRING_RESPONSE = 0.347f;
 constexpr float MIN_SPRING_RESPONSE_FOR_SCENE_BOARD = 0.001f;
 constexpr float MIN_SPRING_RESPONSE = 0.05f;
-constexpr float DEL_SPRING_RESPONSE = 0.005f;
+constexpr uint64_t ANIMATION_DURATION = 350;
 constexpr float MIN_UI_EXTENSION_BOUNDARY_DISTANCE = 5.0f;
 constexpr float MIN_FOLDER_SUBWINDOW_BOUNDARY_DISTANCE = 5.0f;
 constexpr uint32_t TASK_DELAY_TIME = 5 * 1000;
@@ -2497,11 +2497,18 @@ void DragDropManager::DragMoveAnimation(
 {
     auto containerId = Container::CurrentId();
     bool isMenuShow = overlayManager->IsMenuShow();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    uint64_t dragStartVsyncTime = DragDropGlobalController::GetInstance().GetStartDragVsyncTime();
+    uint64_t durationVsyncTime = pipeline->GetVsyncTime() - dragStartVsyncTime;
     AnimationOption option;
     auto minResponse = info_.isSceneBoardTouchDrag ?
         MIN_SPRING_RESPONSE_FOR_SCENE_BOARD : MIN_SPRING_RESPONSE;
     auto springResponse =
-        std::max(DEFAULT_SPRING_RESPONSE - DEL_SPRING_RESPONSE * allAnimationCnt_, minResponse);
+        std::max(DEFAULT_SPRING_RESPONSE
+            - (DEFAULT_SPRING_RESPONSE - MIN_SPRING_RESPONSE)
+            * durationVsyncTime / (1000 * 1000) / ANIMATION_DURATION,
+            minResponse);
     const RefPtr<Curve> curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(springResponse, 0.99f, 0.0f);
     constexpr int32_t animateDuration = 30;
     option.SetCurve(curve);
@@ -2560,7 +2567,6 @@ void DragDropManager::DragMoveDefaultAnimation(const RefPtr<OverlayManager>& ove
 void DragDropManager::DragMoveTransitionAnimation(const RefPtr<OverlayManager>& overlayManager,
     const DragPreviewInfo& info, AnimationOption option, const Offset& newOffset, Point point)
 {
-    option.SetCurve(DRAG_TRANSITION_ANIMATION_CURVE);
     auto renderContext = info_.imageNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto offset = OffsetF(point.GetX(), point.GetY());
@@ -2624,6 +2630,9 @@ void DragDropManager::DoDragStartAnimation(const RefPtr<OverlayManager>& overlay
     }
     CHECK_NULL_VOID(overlayManager);
     CHECK_NULL_VOID(gestureHub);
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    DragDropGlobalController::GetInstance().SetStartDragVsyncTime(pipeline->GetVsyncTime());
     bool isDragStartPending = DragDropGlobalController::GetInstance().GetAsyncDragCallback() != nullptr;
     if (!(GetDragPreviewInfo(overlayManager, info_, gestureHub, data)) ||
         (!IsNeedDisplayInSubwindow() && !data.isMenuShow && !isDragWithContextMenu_ && !isDragStartPending)) {
