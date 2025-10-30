@@ -38,6 +38,31 @@ constexpr int32_t PRIMARY_PAGE_NODE_THRESHOLD = 100;
 constexpr int32_t MAX_ROUTER_STACK_SIZE = 32;
 constexpr Dimension APP_ICON_SIZE = 64.0_vp;
 const std::vector<std::string> PRIMARY_PAGE_PREFIX = {"main", "home", "index", "root"};
+
+class PlaceholderPattern : public StackPattern {
+    DECLARE_ACE_TYPE(PlaceholderPattern, StackPattern);
+public:
+    PlaceholderPattern() = default;
+    ~PlaceholderPattern() override = default;
+
+    void OnColorConfigurationUpdate() override;
+};
+
+void PlaceholderPattern::OnColorConfigurationUpdate()
+{
+    auto host = AceType::DynamicCast<FrameNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
+    auto navManager = context->GetNavigationManager();
+    CHECK_NULL_VOID(navManager);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    Color bgColor;
+    if (navManager->GetSystemColor(BG_COLOR_SYS_RES_NAME, bgColor)) {
+        renderContext->UpdateBackgroundColor(bgColor);
+    }
+}
 }
 
 void ParallelPageRouterManager::NotifyForceFullScreenChangeIfNeeded(
@@ -281,7 +306,7 @@ RefPtr<FrameNode> ParallelPageRouterManager::LoadPlaceHolderPage()
 
     int32_t stackId = ElementRegister::GetInstance()->MakeUniqueId();
     auto stackNode = FrameNode::GetOrCreateFrameNode(
-        V2::STACK_ETS_TAG, stackId, []() { return AceType::MakeRefPtr<StackPattern>(); });
+        V2::STACK_ETS_TAG, stackId, []() { return AceType::MakeRefPtr<PlaceholderPattern>(); });
     CHECK_NULL_RETURN(stackNode, nullptr);
     stackNode->MountToParent(placeHolderPageNode);
     auto stackContext = stackNode->GetRenderContext();
