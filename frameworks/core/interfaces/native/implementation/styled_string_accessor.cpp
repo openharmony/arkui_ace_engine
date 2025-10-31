@@ -195,18 +195,18 @@ Ark_String GetStringImpl(Ark_StyledString peer)
     result = peer->spanString->GetString();
     return Converter::ArkValue<Ark_String>(result, Converter::FC);
 }
-Array_SpanStyle GetStylesImpl(Ark_StyledString peer,
-                              const Ark_Int32 start,
-                              const Ark_Int32 length,
-                              const Opt_StyledStringKey* styledKey)
+Opt_Array_SpanStyle GetStylesImpl(Ark_StyledString peer,
+                                  const Ark_Int32 start,
+                                  const Ark_Int32 length,
+                                  const Opt_StyledStringKey* styledKey)
 {
-    CHECK_NULL_RETURN(peer, {});
-    CHECK_NULL_RETURN(peer->spanString, {});
+    CHECK_NULL_RETURN(peer, Converter::ArkValue<Opt_Array_SpanStyle>(Ark_Empty()));
+    CHECK_NULL_RETURN(peer->spanString, Converter::ArkValue<Opt_Array_SpanStyle>(Ark_Empty()));
     auto spanStart = Converter::Convert<int32_t>(start);
     auto spanLength = Converter::Convert<int32_t>(length);
     if (!peer->spanString->CheckRange(spanStart, spanLength)) {
         LOGE("CheckBoundary failed: start:%{public}d length:%{public}d", spanStart, spanLength);
-        return {};
+        return Converter::ArkValue<Opt_Array_SpanStyle>(Ark_Empty());
     }
     std::vector<RefPtr<SpanBase>> spans;
     auto spanType = Converter::OptConvertPtr<Ace::SpanType>(styledKey);
@@ -215,7 +215,7 @@ Array_SpanStyle GetStylesImpl(Ark_StyledString peer,
     } else {
         spans = peer->spanString->GetSpans(spanStart, spanLength);
     }
-    return Converter::ArkValue<Array_SpanStyle>(spans, Converter::FC);
+    return Converter::ArkValue<Opt_Array_SpanStyle>(spans, Converter::FC);
 }
 Ark_Boolean EqualsImpl(Ark_StyledString peer,
                        Ark_StyledString other)
@@ -226,13 +226,12 @@ Ark_Boolean EqualsImpl(Ark_StyledString peer,
     CHECK_NULL_RETURN(other->spanString, false);
     return peer->spanString->IsEqualToSpanString(other->spanString);
 }
-Ark_StyledString SubStyledStringImpl(Ark_StyledString peer,
+Opt_StyledString SubStyledStringImpl(Ark_StyledString peer,
                                      const Ark_Int32 start,
                                      const Opt_Int32* length)
 {
-    Ark_StyledString ret = nullptr;
-    CHECK_NULL_RETURN(peer, ret);
-    CHECK_NULL_RETURN(peer->spanString, ret);
+    CHECK_NULL_RETURN(peer, Converter::ArkValue<Opt_StyledString>(Ark_Empty()));
+    CHECK_NULL_RETURN(peer->spanString, Converter::ArkValue<Opt_StyledString>(Ark_Empty()));
     auto startSpan = Converter::Convert<int32_t>(start);
     auto lengthSpan = peer->spanString->GetLength() - startSpan;
     auto lengthOpt = Converter::OptConvertPtr<int32_t>(length);
@@ -241,11 +240,11 @@ Ark_StyledString SubStyledStringImpl(Ark_StyledString peer,
     }
     if (!peer->spanString->CheckRange(startSpan, lengthSpan)) {
         LOGE("CheckBoundary failed: start:%{public}d length:%{public}d", startSpan, lengthSpan);
-        return ret;
+        return Converter::ArkValue<Opt_StyledString>(Ark_Empty());
     }
     auto spanString = peer->spanString->GetSubSpanString(startSpan, lengthSpan);
-    CHECK_NULL_RETURN(spanString, ret);
-    return StyledStringPeer::Create(spanString);
+    CHECK_NULL_RETURN(spanString, Converter::ArkValue<Opt_StyledString>(Ark_Empty()));
+    return Converter::ArkValue<Opt_StyledString>(StyledStringPeer::Create(spanString));
 }
 void FromHtmlImpl(Ark_VMContext vmContext,
                   Ark_AsyncWorkerPtr asyncWorker,
@@ -278,15 +277,15 @@ Ark_String ToHtmlImpl(Ark_StyledString styledString)
     result = OHOS::Ace::HtmlUtils::ToHtml(Referenced::RawPtr(styledString->spanString));
     return Converter::ArkValue<Ark_String>(result, Converter::FC);
 }
-Ark_Buffer Marshalling0Impl(Ark_StyledString styledString,
+Opt_Buffer Marshalling0Impl(Ark_StyledString styledString,
                             const StyledStringMarshallCallback* callback_)
 {
-    CHECK_NULL_RETURN(styledString, {});
-    CHECK_NULL_RETURN(styledString->spanString, {});
+    CHECK_NULL_RETURN(styledString, Converter::ArkValue<Opt_Buffer>(Ark_Empty()));
+    CHECK_NULL_RETURN(callback_, Converter::ArkValue<Opt_Buffer>(Ark_Empty()));
 
     std::vector<uint8_t> tlvData;
     if (!styledString->spanString->EncodeTlv(tlvData)) {
-        return {};
+        return Converter::ArkValue<Opt_Buffer>(Ark_Empty());
     }
 
     if (callback_) {
@@ -315,11 +314,11 @@ Ark_Buffer Marshalling0Impl(Ark_StyledString styledString,
         CallbackKeeper::ReleaseReverseCallback(continuation);
     }
     if (tlvData.empty()) {
-        return {};
+        return Converter::ArkValue<Opt_Buffer>(Ark_Empty());
     }
     Ark_Buffer result = BufferKeeper::Allocate(tlvData.size());
     std::copy(tlvData.begin(), tlvData.end(), reinterpret_cast<uint8_t*>(result.data));
-    return result;
+    return Converter::ArkValue<Opt_Buffer>(result);
 }
 void Unmarshalling0Impl(Ark_VMContext vmContext,
                         Ark_AsyncWorkerPtr asyncWorker,
@@ -365,15 +364,15 @@ void Unmarshalling0Impl(Ark_VMContext vmContext,
 
     promise->StartAsync(vmContext, *asyncWorker, std::move(unmarshallingExec));
 }
-Ark_Buffer Marshalling1Impl(Ark_StyledString styledString)
+Opt_Buffer Marshalling1Impl(Ark_StyledString styledString)
 {
-    CHECK_NULL_RETURN(styledString, {});
-    CHECK_NULL_RETURN(styledString->spanString, {});
+    CHECK_NULL_RETURN(styledString, Converter::ArkValue<Opt_Buffer>(Ark_Empty()));
+    CHECK_NULL_RETURN(styledString->spanString, Converter::ArkValue<Opt_Buffer>(Ark_Empty()));
     std::vector<uint8_t> tlvData;
     styledString->spanString->EncodeTlv(tlvData);
     Ark_Buffer result = BufferKeeper::Allocate(tlvData.size());
     copy(tlvData.begin(), tlvData.end(), reinterpret_cast<uint8_t*>(result.data));
-    return result;
+    return Converter::ArkValue<Opt_Buffer>(result);
 }
 void Unmarshalling1Impl(Ark_VMContext vmContext,
                         Ark_AsyncWorkerPtr asyncWorker,

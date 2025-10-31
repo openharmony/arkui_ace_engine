@@ -111,10 +111,10 @@ HWTEST_F(LayoutManagerAccessorTest, getLineCountTest01, TestSize.Level1)
 {
     ASSERT_NE(accessor_, nullptr);
     ASSERT_NE(peer_, nullptr);
-    auto value = Converter::Convert<int32_t>(accessor_->getLineCount(peer_));
+    auto value = Converter::OptConvert<int32_t>(accessor_->getLineCount(peer_));
     ASSERT_EQ(value, 0);
-    value = Converter::Convert<int32_t>(accessor_->getLineCount(nullptr));
-    ASSERT_EQ(value, 0);
+    value = Converter::OptConvert<int32_t>(accessor_->getLineCount(nullptr));
+    ASSERT_EQ(value, std::nullopt);
 }
 
 /**
@@ -135,7 +135,10 @@ HWTEST_F(LayoutManagerAccessorTest, GetGlyphPositionAtCoordinate01, TestSize.Lev
     ON_CALL(*handlerKeeper_, GetGlyphPositionAtCoordinate(_, _)).WillByDefault(Return(targetError));
     EXPECT_CALL(*handlerKeeper_, GetGlyphPositionAtCoordinate(EXPECTED_X, EXPECTED_Y)).WillOnce(Return(target));
 
-    Ark_PositionWithAffinity result = accessor_->getGlyphPositionAtCoordinate(peer_, actualX, actualY);
+    Opt_PositionWithAffinity resultOpt = accessor_->getGlyphPositionAtCoordinate(peer_, actualX, actualY);
+    auto resultArk = Converter::GetOpt(resultOpt);
+    ASSERT_TRUE(resultArk.has_value());
+    auto result = resultArk.value();
     PositionWithAffinity position = Converter::Convert<PositionWithAffinity>(result);
     EXPECT_EQ(position.position_, target.position_);
 #ifdef WRONG_SDK
