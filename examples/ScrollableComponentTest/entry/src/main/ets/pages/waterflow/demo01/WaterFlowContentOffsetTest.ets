@@ -12,13 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { GridDataSource } from './GridDataSource'
+
+import { WaterFlowDataSource } from './WaterFlowDataSource';
 import { LengthMetrics } from '@kit.ArkUI';
 
 @Entry
 @Component
-struct GridContentOffsetTest {
-  arr: GridDataSource = new GridDataSource([])
+struct WaterFlowContentOffsetTest {
+  arr: WaterFlowDataSource = new WaterFlowDataSource([])
   @State edgeE: EdgeEffect = EdgeEffect.Spring
   @State alwaysEnable: boolean = false;
   @State columnCount: number = 2
@@ -36,34 +37,11 @@ struct GridContentOffsetTest {
   @State backToTop: boolean = false
   scroller: Scroller = new Scroller();
   irregular: boolean = false;
-  @State layoutOptions: GridLayoutOptions = {
-    regularSize: [1, 1]
-  }
 
   build() {
     Column({ space: 5 }) {
       Scroll() {
         Column({ space: 5 }) {
-          Row() {
-            Button('切换布局模式')
-              .onClick(() => {
-                this.irregular = !this.irregular
-                if (this.irregular) {
-                  this.layoutOptions = {
-                    regularSize: [1, 1],
-                    irregularIndexes: [0, 5, 7, 11, 24],
-                    onGetIrregularSizeByIndex: (index: number) => {
-                      if (index == 0) {
-                        return [1, 3]
-                      }
-                      return [2, 2]
-                    }
-                  }
-                } else {
-                  this.layoutOptions = { regularSize: [1, 1] }
-                }
-              })
-          }
           Row() {
             Button('currentOffset: ' + this.currentOffset)
               .onClick(() => {
@@ -201,7 +179,7 @@ struct GridContentOffsetTest {
               })
             Button('start--')
               .onClick(() => {
-                if (this.startOffset > 0) {
+                if (this.columnCount > 0) {
                   this.startOffset -= 10
                 }
               })
@@ -214,7 +192,7 @@ struct GridContentOffsetTest {
               })
             Button('end--')
               .onClick(() => {
-                if (this.endOffset > 0) {
+                if (this.columnCount > 0) {
                   this.endOffset -= 10
                 }
               })
@@ -246,9 +224,9 @@ struct GridContentOffsetTest {
         }
       }.height('40%')
 
-      Grid(this.scroller, this.layoutOptions) {
+      WaterFlow({scroller:this.scroller}) {
         LazyForEach(this.arr, (item: string, index: number) => {
-          GridItem() {
+          FlowItem() {
             Text(item)
               .width('30%')
               .height(100)
@@ -297,13 +275,5 @@ struct GridContentOffsetTest {
       .fadingEdge(this.fadingEdge)
       .backToTop(this.backToTop)
     }
-  }
-
-  aboutToAppear() {
-    let list: string[] = [];
-    for (let i = 0; i < 24; i++) {
-      list.push(i + '')
-    }
-    this.arr = new GridDataSource(list);
   }
 }
