@@ -1118,11 +1118,11 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest019, TestSize.Level0)
 }
 
 /**
- * @tc.name: ImageColorFilterTest020
+ * @tc.name: ImageColorFilterTestImageInterpolationForSvg
  * @tc.desc: Test whether image ColorFilter and ImageInterpolation affect each other for svg image and sync mode.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestOneNg, ImageColorFilterTest020, TestSize.Level0)
+HWTEST_F(ImageTestOneNg, ImageColorFilterTestImageInterpolationForSvg, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode with svg image and sync mode.
