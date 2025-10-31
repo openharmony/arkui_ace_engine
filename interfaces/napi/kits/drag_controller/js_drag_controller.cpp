@@ -974,6 +974,7 @@ bool CreatePreparedInfoForDrag(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
     CHECK_NULL_RETURN(asyncCtx, false);
     CHECK_NULL_RETURN(pixelMap, false);
     auto container = AceEngine::Get().GetContainer(asyncCtx->instanceId);
+    CHECK_NULL_RETURN(container, false);
     auto pipeline = container->GetPipelineContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto dragNodePipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
@@ -993,6 +994,7 @@ bool CreatePreparedInfoForDrag(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
     NG::DragControllerFuncWrapper::ResetContextMenuDragPosition(asyncCtx->instanceId);
     if (scaleData->isNeedScale && asyncCtx->dragPreviewOption.isScaleEnabled) {
         auto overlayManager = dragNodePipeline->GetOverlayManager();
+        CHECK_NULL_RETURN(overlayManager, false);
         auto imageNode = overlayManager->GetPixelMapContentNode();
         scale = scaleData->scale * asyncCtx->windowScale;
         data.previewScale = scale;
