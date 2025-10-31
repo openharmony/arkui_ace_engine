@@ -1581,6 +1581,9 @@ void WebSelectOverlay::MenuAvoidStrategy(OffsetF& menuOffset, MenuAvoidStrategyM
     } else {
         menuOffset.SetY(member.avoidPositionY);
     }
+    if (NearEqual(member.info->selectArea.Width(), 0.0) && NearEqual(member.info->selectArea.Height(), 0.0)) {
+        return;
+    }
     menuOffset.SetX(member.avoidPositionX);
 }
 
