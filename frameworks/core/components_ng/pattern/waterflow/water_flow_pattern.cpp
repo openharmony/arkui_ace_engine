@@ -139,7 +139,8 @@ void WaterFlowPattern::UpdateScrollBarOffset()
         overScroll = Positive(overScroll) ? overScroll : 0.0f;
     }
     HandleScrollBarOutBoundary(overScroll);
-    UpdateScrollBarRegion(-layoutInfo_->Offset() + layoutInfo_->contentStartOffset_, layoutInfo_->EstimateTotalHeight(),
+    UpdateScrollBarRegion(-layoutInfo_->Offset() + layoutInfo_->contentStartOffset_,
+        layoutInfo_->EstimateTotalHeight() + layoutInfo_->contentStartOffset_ + layoutInfo_->contentEndOffset_,
         Size(viewSize.Width(), viewSize.Height()), Offset(0.0f, 0.0f));
 };
 

@@ -475,7 +475,6 @@ void WaterFlowLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize, L
         layoutInfo_->footerHeight_ = WaterFlowLayoutUtils::MeasureFooter(layoutWrapper, axis_);
         maxItemHeight += layoutInfo_->footerHeight_;
     }
-    maxItemHeight += layoutInfo_->contentEndOffset_;
     if (layoutInfo_->jumpIndex_ != WaterFlowLayoutInfoBase::EMPTY_JUMP_INDEX) {
         if (layoutInfo_->extraOffset_.has_value() && Negative(layoutInfo_->extraOffset_.value())) {
             layoutInfo_->extraOffset_.reset();
@@ -485,7 +484,7 @@ void WaterFlowLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize, L
     }
     layoutInfo_->maxHeight_ = maxItemHeight;
 
-    if (mainSize - layoutInfo_->contentStartOffset_ >= maxItemHeight) {
+    if (mainSize - layoutInfo_->contentStartOffset_ - layoutInfo_->contentEndOffset_ >= maxItemHeight) {
         if ((GreatOrEqual(layoutInfo_->currentOffset_, layoutInfo_->contentStartOffset_) && !canOverScrollStart_) ||
             (LessOrEqual(layoutInfo_->currentOffset_, layoutInfo_->contentStartOffset_) && !canOverScrollEnd_)) {
             layoutInfo_->currentOffset_ = layoutInfo_->contentStartOffset_;
@@ -495,10 +494,11 @@ void WaterFlowLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize, L
         return;
     }
 
-    if (LessOrEqualCustomPrecision(layoutInfo_->currentOffset_ + maxItemHeight, mainSize, 0.1f)) {
+    if (LessOrEqualCustomPrecision(layoutInfo_->currentOffset_ + maxItemHeight,
+        mainSize - layoutInfo_->contentStartOffset_ - layoutInfo_->contentEndOffset_, 0.1f)) {
         layoutInfo_->offsetEnd_ = true;
         if (!canOverScrollEnd_) {
-            layoutInfo_->currentOffset_ = mainSize - maxItemHeight;
+            layoutInfo_->currentOffset_ = mainSize - maxItemHeight - layoutInfo_->contentEndOffset_;
         }
 
         ReMeasureItems(layoutWrapper);

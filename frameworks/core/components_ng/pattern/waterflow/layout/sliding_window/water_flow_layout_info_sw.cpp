@@ -52,8 +52,8 @@ void WaterFlowLayoutInfoSW::Sync(int32_t itemCnt, float mainSize, const std::vec
         footerHeight_ = 0.0f;
     }
 
-    const float contentEnd = endPos_ + footerHeight_ + BotMargin() + contentEndOffset_;
-    offsetEnd_ = itemEnd_ && LessOrEqualCustomPrecision(contentEnd, mainSize, 0.1f);
+    const float contentEnd = endPos_ + footerHeight_ + BotMargin();
+    offsetEnd_ = itemEnd_ && LessOrEqualCustomPrecision(contentEnd + contentEndOffset_, mainSize, 0.1f);
     maxHeight_ = std::max(-totalOffset_ + contentEnd, maxHeight_);
 
     newStartIndex_ = EMPTY_NEW_START_INDEX;
@@ -161,7 +161,8 @@ OverScrollOffset WaterFlowLayoutInfoSW::GetOverScrolledDelta(float delta) const
     if (!itemEnd_) {
         return res;
     }
-    float disToBot = EndPosWithMargin() + footerHeight_ + contentEndOffset_ - std::min(lastMainSize_, maxHeight_);
+    float disToBot = EndPosWithMargin() + footerHeight_ + contentEndOffset_ -
+                     std::min(lastMainSize_, maxHeight_ + contentEndOffset_ + contentStartOffset_);
     if (Positive(disToBot) && LessNotEqual(maxHeight_, lastMainSize_)) {
         res.end = std::min(0.0f, disToBot + delta);
         return res;
@@ -537,7 +538,7 @@ float WaterFlowLayoutInfoSW::TopFinalPos() const
 float WaterFlowLayoutInfoSW::BottomFinalPos(float viewHeight) const
 {
     return -(EndPosWithMargin() + delta_ + footerHeight_ + contentEndOffset_) +
-           std::min(maxHeight_ + contentStartOffset_, viewHeight);
+           std::min(maxHeight_ + contentStartOffset_ + contentEndOffset_, viewHeight);
 };
 
 bool WaterFlowLayoutInfoSW::IsMisaligned() const
@@ -858,7 +859,7 @@ float WaterFlowLayoutInfoSW::EstimateTotalHeight() const
                    + (endPos_ - startPos_);
     if (itemEnd_ && repeatDifference_ == 0) {
         float bottomOverScroll = std::max(BottomFinalPos(lastMainSize_), 0.0f);
-        return height - bottomOverScroll + BotMargin() + footerHeight_ + contentEndOffset_;
+        return height - bottomOverScroll + BotMargin() + footerHeight_;
     }
 
     const float average = GetAverageItemHeight();
@@ -866,7 +867,6 @@ float WaterFlowLayoutInfoSW::EstimateTotalHeight() const
         height += EstimateSectionHeight(i, average, endIndex_ + 1, INT_MAX);
     }
     float virtualTotalHeight = 0.f;
-    height += contentEndOffset_;
     if (EstimateVirtualTotalHeight(average, virtualTotalHeight)) {
         height += virtualTotalHeight;
         return height;
