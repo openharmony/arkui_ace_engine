@@ -821,7 +821,16 @@ bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     }
     const auto& dstSize = dirty->GetGeometryNode()->GetContentSize();
     StartDecoding(dstSize);
-    if (loadingCtx_) {
+    LoadingContext();
+    if (IsSupportImageAnalyzerFeature()) {
+        UpdateAnalyzerUIConfig(dirty->GetGeometryNode());
+    }
+    return image_ || altErrorImage_ || altImage_;
+}
+
+void ImagePattern::LoadingContext()
+{
+    if (loadingCtx_ && loadingCtx_->GetImageObject() != nullptr) {
         auto renderProp = GetPaintProperty<ImageRenderProperty>();
         if (renderProp && (renderProp->HasImageResizableSlice() || renderProp->HasImageResizableLattice()) && image_) {
             loadingCtx_->ResizableCalcDstSize();
@@ -829,7 +838,7 @@ bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
                 loadingCtx_->GetFrameCount());
         }
     }
-    if (altErrorCtx_) {
+    if (altErrorCtx_ && altErrorCtx_->GetImageObject() != nullptr) {
         auto renderProp = GetPaintProperty<ImageRenderProperty>();
         if (renderProp && (renderProp->HasImageResizableSlice() || renderProp->HasImageResizableLattice()) &&
             altErrorImage_) {
@@ -838,7 +847,7 @@ bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
                 altErrorCtx_->GetSrc(), altErrorCtx_->GetFrameCount());
         }
     }
-    if (altLoadingCtx_) {
+    if (altLoadingCtx_ && altLoadingCtx_->GetImageObject() != nullptr) {
         auto renderProp = GetPaintProperty<ImageRenderProperty>();
         if (renderProp && (renderProp->HasImageResizableSlice() || renderProp->HasImageResizableLattice()) &&
             altImage_) {
@@ -847,10 +856,6 @@ bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
                 altLoadingCtx_->GetSrc(), altLoadingCtx_->GetFrameCount());
         }
     }
-    if (IsSupportImageAnalyzerFeature()) {
-        UpdateAnalyzerUIConfig(dirty->GetGeometryNode());
-    }
-    return image_ || altErrorImage_ || altImage_;
 }
 
 void ImagePattern::CreateObscuredImage()
