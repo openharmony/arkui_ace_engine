@@ -187,7 +187,7 @@ public:
 
     static Ark_VMContext GetVMContext()
     {
-        auto container = Container::Current();
+        auto container = Container::CurrentSafely();
         CHECK_NULL_RETURN(container, nullptr);
         auto frontEnd = container->GetFrontend();
         CHECK_NULL_RETURN(frontEnd, nullptr);
