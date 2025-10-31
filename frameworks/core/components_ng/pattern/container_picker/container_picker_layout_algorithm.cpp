@@ -93,17 +93,26 @@ void ContainerPickerLayoutAlgorithm::MeasureHeight(LayoutWrapper* layoutWrapper,
     auto pickerLayoutProperty = AceType::DynamicCast<ContainerPickerLayoutProperty>(layoutWrapper->GetLayoutProperty());
     auto contentConstraint = pickerLayoutProperty->GetContentLayoutConstraint().value();
     auto layoutPolicy = pickerLayoutProperty->GetLayoutPolicyProperty();
+    float mainSize = GetMainAxisSize(contentConstraint.selfIdealSize, axis_).value_or(UNDEFINED_SIZE);
 
     // measure height
-    float height = GetMainAxisSize(contentConstraint.selfIdealSize, axis_).value_or(UNDEFINED_SIZE);
-    if (layoutPolicy.has_value() && layoutPolicy->IsHeightMatch()) {
-        auto parentMainSize =
-            CreateIdealSizeByPercentRef(contentConstraint, axis_, MeasureType::MATCH_PARENT_MAIN_AXIS).MainSize(axis_);
-        height = parentMainSize.value_or(pickerDefaultHeight_);
-    } else {
-        if (Negative(height)) {
-            height = pickerDefaultHeight_;
+    float height;
+    auto parentMainSize =
+        CreateIdealSizeByPercentRef(contentConstraint, axis_, MeasureType::MATCH_PARENT_MAIN_AXIS, true)
+            .MainSize(axis_);
+    if (layoutPolicy.has_value()) {
+        if (layoutPolicy->IsHeightMatch() && parentMainSize.has_value()) {
+            height = parentMainSize.value();
+        } else if (layoutPolicy->IsHeightFix() || layoutPolicy->IsHeightWrap()) {
+            height = parentMainSize.has_value() ? std::min(pickerDefaultHeight_, parentMainSize.value())
+                                                : pickerDefaultHeight_;
+        } else {
+            height = Negative(mainSize) ? std::min(pickerDefaultHeight_, parentMainSize.value())
+                                        : std::min(mainSize, parentMainSize.value());
         }
+    } else {
+        height = Negative(mainSize) ? std::min(pickerDefaultHeight_, parentMainSize.value())
+                                    : std::min(mainSize, parentMainSize.value());
     }
 
     if (!NearEqual(height, height_)) {
@@ -120,40 +129,40 @@ void ContainerPickerLayoutAlgorithm::MeasureWidth(LayoutWrapper* layoutWrapper, 
     auto pickerLayoutProperty = AceType::DynamicCast<ContainerPickerLayoutProperty>(layoutWrapper->GetLayoutProperty());
     auto contentConstraint = pickerLayoutProperty->GetContentLayoutConstraint().value();
     auto layoutPolicy = pickerLayoutProperty->GetLayoutPolicyProperty();
-    auto crossSize = contentIdealSize.CrossSize(axis_).value_or(UNDEFINED_SIZE);
+    float crossSize = GetCrossAxisSize(contentConstraint.selfIdealSize, axis_).value_or(UNDEFINED_SIZE);
 
     // measure width
     float width;
+    auto childMaxWidth = GetChildMaxWidth(layoutWrapper);
+    auto parentCrossSize =
+        CreateIdealSizeByPercentRef(contentConstraint, axis_, MeasureType::MATCH_PARENT_CROSS_AXIS, true)
+            .CrossSize(axis_);
+
+    auto commonSetWidth = [crossSize, parentCrossSize, childMaxWidth, &width]() -> bool {
+        bool crossMatchChild = false;
+        if ((NonNegative(crossSize) && GreaterOrEqualToInfinity(crossSize)) || Negative(crossSize)) {
+            width = parentCrossSize.has_value() ? std::min(childMaxWidth, parentCrossSize.value()) : childMaxWidth;
+            crossMatchChild = true;
+        } else {
+            width = parentCrossSize.has_value() ? std::min(crossSize, parentCrossSize.value()) : crossSize;
+        }
+        return crossMatchChild;
+    };
+
     if (layoutPolicy.has_value()) {
-        auto parentCrossSize =
-            CreateIdealSizeByPercentRef(contentConstraint, axis_, MeasureType::MATCH_PARENT_CROSS_AXIS)
-                .CrossSize(axis_);
         if (layoutPolicy->IsWidthWrap()) {
-            width = GetChildMaxWidth(layoutWrapper);
-            if (parentCrossSize.has_value()) {
-                width = std::min(width, parentCrossSize.value());
-            }
+            width = parentCrossSize.has_value() ? std::min(childMaxWidth, parentCrossSize.value()) : childMaxWidth;
             crossMatchChild_ = true;
         } else if (layoutPolicy->IsWidthFix()) {
-            width = GetChildMaxWidth(layoutWrapper);
+            width = std::min(childMaxWidth, contentConstraint.maxSize.Width());
             crossMatchChild_ = true;
         } else if (layoutPolicy->IsWidthMatch() && parentCrossSize.has_value()) {
             width = parentCrossSize.value();
         } else {
-            if ((NonNegative(crossSize) && GreaterOrEqualToInfinity(crossSize)) || Negative(crossSize)) {
-                width = GetChildMaxWidth(layoutWrapper);
-                crossMatchChild_ = true;
-            } else {
-                width = crossSize;
-            }
+            crossMatchChild_ = commonSetWidth();
         }
     } else {
-        if ((NonNegative(crossSize) && GreaterOrEqualToInfinity(crossSize)) || Negative(crossSize)) {
-            width = GetChildMaxWidth(layoutWrapper);
-            crossMatchChild_ = true;
-        } else {
-            width = crossSize;
-        }
+        crossMatchChild_ = commonSetWidth();
     }
     contentCrossSize_ = width;
     contentIdealSize.SetCrossSize(width, axis_);
