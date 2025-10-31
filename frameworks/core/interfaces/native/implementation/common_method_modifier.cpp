@@ -435,7 +435,7 @@ auto g_bindMenuOptionsParamCallbacks = [](
     if (onAppearValue) {
         auto onAppear = [arkCallback = CallbackHelper(onAppearValue.value()), weakNode]() {
             PipelineContext::SetCallBackNode(weakNode);
-            arkCallback.Invoke();
+            arkCallback.InvokeSync();
         };
         menuParam.onAppear = std::move(onAppear);
     }
