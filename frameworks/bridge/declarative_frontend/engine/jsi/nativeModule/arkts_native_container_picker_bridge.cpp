@@ -33,9 +33,8 @@ constexpr int NUM_6 = 6;
 constexpr int NUM_7 = 7;
 constexpr int PARAM_ARR_LENGTH_1 = 1;
 const int32_t VALUE_MAX_SIZE = 4;
-constexpr int GETVALUE_MAX_SIZE = 5;
+constexpr int GETVALUE_MAX_SIZE = 4;
 constexpr int32_t UNIT_VP = 1;
-constexpr int32_t COLOR_ARG_INDEX = 1;
 const int32_t DEFAULT_CONTAINER_PICKER_SELECTED_BACKGROUND_BORDER_RADIUS = 24;
 constexpr Color DEFAULT_BORDER_COLOR = Color(0x33006cde);
 constexpr double DEFAULT_BORDER_RADIUS = 0;
@@ -139,14 +138,14 @@ void ParseSelectionIndicatorStyleRadius(const EcmaVM* vm, ArkUIRuntimeCallInfo* 
     for (int i = 0; i < VALUE_MAX_SIZE; i++) {
         if (ArkTSUtils::ParseJsLengthMetrics(vm, runtimeCallInfo->GetCallArgRef(i + NUM_7), calcDimension, tmpResObj) &&
             !calcDimension.IsNegative()) {
-            isHasValue[i + COLOR_ARG_INDEX] = true;
+            isHasValue[i] = true;
             value[i] = calcDimension.Value();
             unit[i] = static_cast<int>(calcDimension.Unit());
             radiusResObjs[i] = tmpResObj;
         }
         if (ArkTSUtils::ParseJsDimensionVp(vm, runtimeCallInfo->GetCallArgRef(i + NUM_7), calcDimension, tmpResObj) &&
             !calcDimension.IsNegative()) {
-            isHasValue[i + COLOR_ARG_INDEX] = true;
+            isHasValue[i] = true;
             value[i] = calcDimension.Value();
             unit[i] = static_cast<int>(calcDimension.Unit());
             radiusResObjs[i] = tmpResObj;
@@ -195,14 +194,14 @@ void ParseBackgroundColor(const EcmaVM* vm, ArkUIPickerIndicatorStyle& pickerInd
 }
 
 void ParseDividerWidth(
-    const EcmaVM* vm, ArkUIPickerIndicatorStyle& pickerIndicatorStyle, Local<JSValueRef>& dividerWidthArg)
+    const EcmaVM* vm, ArkUIPickerIndicatorStyle& pickerIndicatorStyle, Local<JSValueRef>& strokeWidthArg)
 {
-    CalcDimension dividerWidth = CalcDimension(DEFAULT_BORDER_RADIUS, DimensionUnit::PERCENT);
-    if (dividerWidthArg->IsNull() || !ArkTSUtils::ParseJsLengthMetrics(vm, dividerWidthArg, dividerWidth)) {
-        dividerWidth.SetUnit(DimensionUnit::PERCENT);
+    CalcDimension strokeWidth = CalcDimension(DEFAULT_BORDER_RADIUS, DimensionUnit::PERCENT);
+    if (strokeWidthArg->IsNull() || !ArkTSUtils::ParseJsLengthMetrics(vm, strokeWidthArg, strokeWidth)) {
+        strokeWidth.SetUnit(DimensionUnit::PERCENT);
     }
-    pickerIndicatorStyle.dividerWidthValue = dividerWidth.Value();
-    pickerIndicatorStyle.dividerWidthUnit = static_cast<uint8_t>(dividerWidth.Unit());
+    pickerIndicatorStyle.strokeWidthValue = strokeWidth.Value();
+    pickerIndicatorStyle.strokeWidthUnit = static_cast<uint8_t>(strokeWidth.Unit());
 }
 
 void ParseStartMargin(
@@ -212,7 +211,7 @@ void ParseStartMargin(
     if (startMarginArg->IsNull() || !ArkTSUtils::ParseJsLengthMetrics(vm, startMarginArg, startMargin)) {
         startMargin.SetUnit(DimensionUnit::PERCENT);
     }
-    pickerIndicatorStyle.dividerWidthValue = startMargin.Value();
+    pickerIndicatorStyle.startMarginValue = startMargin.Value();
     pickerIndicatorStyle.startMarginUnit = static_cast<uint8_t>(startMargin.Unit());
 }
 
@@ -233,7 +232,7 @@ ArkUINativeModuleValue ContainerPickerBridge::SetContainerPickerSelectionIndicat
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> typeArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    Local<JSValueRef> dividerWidthArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    Local<JSValueRef> strokeWidthArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     Local<JSValueRef> dividerColorArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     Local<JSValueRef> startMarginArg = runtimeCallInfo->GetCallArgRef(NUM_4);
     Local<JSValueRef> endMarginArg = runtimeCallInfo->GetCallArgRef(NUM_5);
@@ -243,12 +242,12 @@ ArkUINativeModuleValue ContainerPickerBridge::SetContainerPickerSelectionIndicat
     CHECK_NULL_RETURN(nativeNode, panda::NativePointerRef::New(vm, nullptr));
     auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
 
-    ArkUI_Bool isHasValue[GETVALUE_MAX_SIZE] = { false, false, false, false, false };
+    ArkUI_Bool isHasValue[GETVALUE_MAX_SIZE] = { false, false, false, false };
     ArkUIPickerIndicatorStyle pickerIndicatorStyle;
     if (typeArg->IsNumber()) {
         pickerIndicatorStyle.type = typeArg->ToNumber(vm)->Value();
     }
-    ParseDividerWidth(vm, pickerIndicatorStyle, dividerWidthArg);
+    ParseDividerWidth(vm, pickerIndicatorStyle, strokeWidthArg);
     ParseDividerColor(vm, pickerIndicatorStyle, dividerColorArg, nodeInfo);
     ParseStartMargin(vm, pickerIndicatorStyle, startMarginArg);
     ParseEndMargin(vm, pickerIndicatorStyle, endMarginArg);
@@ -263,10 +262,9 @@ ArkUINativeModuleValue ContainerPickerBridge::SetContainerPickerSelectionIndicat
 
     auto modifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(modifiers, panda::NativePointerRef::New(vm, nullptr));
-    auto textPickerModifier = modifiers->getTextPickerModifier();
-    CHECK_NULL_RETURN(textPickerModifier, panda::NativePointerRef::New(vm, nullptr));
-    GetArkUINodeModifiers()->getContainerPickerModifier()->setContainerPickerSelectionIndicator(
-        nativeNode, isHasValue, &pickerIndicatorStyle);
+    auto containerPickerModifier = modifiers->getContainerPickerModifier();
+    CHECK_NULL_RETURN(containerPickerModifier, panda::NativePointerRef::New(vm, nullptr));
+    containerPickerModifier->setContainerPickerSelectionIndicator(nativeNode, isHasValue, &pickerIndicatorStyle);
     return panda::JSValueRef::Undefined(vm);
 }
 

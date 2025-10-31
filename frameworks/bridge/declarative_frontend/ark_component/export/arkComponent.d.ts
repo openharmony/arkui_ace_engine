@@ -1046,8 +1046,8 @@ declare class ArkTextPickerComponent extends ArkComponent implements TextPickerA
 
 declare class ArkContainerPicker extends ArkComponent implements PickerAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
-    onChange(callback: Optional<OnPickerChangeCallback>): this;
-    onScrollStop(callback: Optional<OnPickerChangeCallback>): this;
+    onChange(callback: Optional<OnPickerCallback>): this;
+    onScrollStop(callback: Optional<OnPickerCallback>): this;
     canLoop(isLoop: Optional<boolean>): this;
     enableHapticFeedback(enable: Optional<boolean>): this;
     selectionIndicator(style: Optional<PickerIndicatorStyle>): this;
