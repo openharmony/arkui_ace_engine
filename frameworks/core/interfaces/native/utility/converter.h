@@ -191,6 +191,7 @@ namespace Converter {
             std::optional<StringArray> ToFontFamilies();
             std::optional<Dimension> ToDimension();
             std::optional<CalcLength> ToCalcLength();
+            std::optional<CalcDimension> ToCalcDimension();
             std::optional<float> ToFloat();
             std::optional<int32_t> ToInt();
             std::optional<uint32_t> ToSymbol();
@@ -206,6 +207,7 @@ namespace Converter {
             std::optional<std::string> GetRawfilePath();
             std::optional<std::string> GetMediaPath();
             std::optional<std::string> GetPluralResource();
+            std::optional<CalcDimension> GetDimensionInner();
             std::optional<int32_t> GetIntegerResource();
             std::optional<double> GetFloatResource();
 
