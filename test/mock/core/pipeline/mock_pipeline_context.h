@@ -27,8 +27,8 @@ class MockPipelineContext : public PipelineContext {
     DECLARE_ACE_TYPE(MockPipelineContext, PipelineContext);
 
 public:
-    MockPipelineContext() = default;
-    ~MockPipelineContext() override = default;
+    MockPipelineContext();
+    ~MockPipelineContext() override;
 
     static void SetUp();
     static void TearDown();
