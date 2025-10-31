@@ -1875,4 +1875,43 @@ HWTEST_F(ImageTestTwoNg, HandleBorderRadiusResource001, TestSize.Level1)
     pattern->OnColorModeChange(colorMode);
     EXPECT_TRUE(pattern->needBorderRadius_);
 }
+
+/**
+ * @tc.name: HandleBorderRadiusResource002
+ * @tc.desc: Test HandleBorderRadiusResource function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, HandleBorderRadiusResource002, TestSize.Level1)
+{
+    /* *
+     * @tc.steps: step1. create image object
+     */
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.pixelMap = pixMap;
+    imageInfoConfig.src = std::make_shared<std::string>(RESOURCE_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. create resobj.
+     */
+    ResourceObjectParams params { .value = "test", .type = ResourceObjectParamType::STRING };
+    std::vector<ResourceObjectParams> resObjParamsList;
+    resObjParamsList.push_back(params);
+    RefPtr<ResourceObject> resObjWithDimensionId =
+        AceType::MakeRefPtr<ResourceObject>(100000, 10007, resObjParamsList, "com.example.test", "entry", 100000);
+    /**
+     * @tc.steps: step3. call function.
+     */
+    image.CreateWithResourceObj(ImageResourceType::BORDER_RADIUS, resObjWithDimensionId);
+    int32_t colorMode = static_cast<int32_t>(ColorMode::DARK);
+    pattern->OnColorModeChange(colorMode);
+    EXPECT_TRUE(pattern->needBorderRadius_);
+}
 } // namespace OHOS::Ace::NG
