@@ -387,6 +387,10 @@ ohos_unittest("ui_input_event_test_coverage") {
     "ui_input_event_first_test.cpp",
     "ui_input_event_test.cpp",
     "ui_input_event_test_one.cpp",
+    "ui_input_event_first_two_test.cpp",
+    "ui_input_event_test_two.cpp",
+    "ui_input_event_test_three.cpp",
+    "ui_input_event_test_five.cpp",
   ]
 
   configs = [

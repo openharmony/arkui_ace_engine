@@ -28,6 +28,10 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr float APPEARINGTIME = 300.0f;
+constexpr float CONTINUOUSTIME = 300.0f;
+}
 /**
  * @tc.name: ViewAbstractTest031
  * @tc.desc: Test the operation of View_Abstract
@@ -195,7 +199,10 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractBindTipsTest002, TestSize.Level1)
         V2::POPUP_ETS_TAG, info.popupId, AceType::MakeRefPtr<BubblePattern>(targetNode->GetId(), targetNode->GetTag()));
     info.popupNode = popupNode1;
     info.target = targetNode2;
-    overlayManager->ShowTips(targetNode->GetId(), info, 300, 300, true);
+    overlayManager->ShowTips(targetNode->GetId(), info, APPEARINGTIME, CONTINUOUSTIME, true);
+    auto pattern = popupNode1->GetPattern<BubblePattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_NE(pattern->IsTipsAppearing(), true);
     EXPECT_NE(overlayManager->GetTipsStatus(targetNode->GetId()), true);
 }
 

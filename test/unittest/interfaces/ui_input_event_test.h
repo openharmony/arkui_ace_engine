@@ -32,6 +32,11 @@ public:
     static void SetUpTestSuite() {}
     static void TearDownTestSuite() {}
 };
+class UIInputEventTwoTest : public testing::Test {
+public:
+    static void SetUpTestSuite() {}
+    static void TearDownTestSuite() {}
+};
 } // namespace OHOS::Ace
 
 #endif // TEST_UNITTEST_INTERFACES_UI_INPUT_EVENT_TEST_H
