@@ -23,6 +23,7 @@ import { SymbolGlyphModifier } from "arkui.SymbolGlyphModifier"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
+import { ComponentContent_serializer } from "./../ComponentContent"
 import { Resource_serializer } from "./../framework/resource"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
@@ -144,7 +145,7 @@ export class ArkTabContentPeer extends ArkCommonMethodPeer {
             if (valueTmpValue instanceof ComponentContent) {
                 thisSerializer.writeInt8((0).toChar())
                 const valueTmpValueForIdx0  = valueTmpValue as ComponentContent
-                thisSerializer.holdAndWriteObject(valueTmpValueForIdx0)
+                ComponentContent_serializer.write(thisSerializer, valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof SubTabBarStyle) {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as SubTabBarStyle
@@ -1234,7 +1235,7 @@ export class SubTabBarStyle_serializer {
             } else if (valueHolderFor_contentTmpValue instanceof ComponentContent) {
                 valueSerializer.writeInt8((2).toChar())
                 const valueHolderFor_contentTmpValueForIdx2  = valueHolderFor_contentTmpValue as ComponentContent
-                valueSerializer.holdAndWriteObject(valueHolderFor_contentTmpValueForIdx2)
+                ComponentContent_serializer.write(valueSerializer, valueHolderFor_contentTmpValueForIdx2)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)

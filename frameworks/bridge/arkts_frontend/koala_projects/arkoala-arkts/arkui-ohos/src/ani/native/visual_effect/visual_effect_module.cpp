@@ -72,7 +72,7 @@ ani_long ExtractorsToPathShapePtr(ani_env* env, ani_object aniClass, ani_object 
 ani_object ExtractorsFromPathShapePtr(ani_env* env, ani_object aniClass, ani_long ptr)
 {
     return CallFromPtrMethod(env, "PathFromPtr", ptr);
-}
+} 
 ani_long ExtractorsToICurvePtr(ani_env* env, ani_object aniClass, ani_object obj)
 {
     return GetPropertyName(env, obj, "nativeContext");

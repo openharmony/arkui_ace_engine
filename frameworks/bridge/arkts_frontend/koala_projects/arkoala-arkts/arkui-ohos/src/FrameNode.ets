@@ -183,6 +183,9 @@ export class FrameNode implements MaterializedBase {
     checkValid(node: FrameNode): boolean {
         return true;
     }
+    getComponentContent() {
+        
+    }
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
