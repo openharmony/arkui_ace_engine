@@ -16,6 +16,7 @@
 #include "accessibility_config.h"
 #include "accessibility_element_operator.h"
 #include "frameworks/core/accessibility/accessibility_manager.h"
+#include "frameworks/core/components_ng/property/accessibility_property.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -79,6 +80,22 @@ AceFocusMoveResult FindScrollAncestor(
         parent = parent->GetAceParent();
     }
     return AceFocusMoveResult::FIND_SUCCESS;
+}
+
+bool CheckIsLevelHideDescendants(const std::shared_ptr<FocusRulesCheckNode>& currentNode)
+{
+    CHECK_NULL_RETURN(currentNode, false);
+    Accessibility::PropValue value;
+    auto result = currentNode->GetPropAccessibilityLevel(value);
+    CHECK_EQUAL_RETURN(result, false, false);
+    return value.valueStr == NG::AccessibilityProperty::Level::NO_HIDE_DESCENDANTS;
+}
+
+bool NoNeedSearchChild(const std::shared_ptr<FocusRulesCheckNode>& currentNode)
+{
+    CHECK_NULL_RETURN(currentNode, true);
+    // level is HideDescendants means no need search child
+    return CheckIsLevelHideDescendants(currentNode) || !currentNode->IsAccessibiltyVisible();
 }
 } // namespace
 
@@ -194,7 +211,7 @@ AceFocusMoveResult AccessibilityFocusStrategy::FindNextReadableNodeBySelfAndSame
         currentNode->GetAccessibilityId(), condition.bypassSelf);
     HILOG_INFO_FOCUS("input node childs %{public}s", GetChildrenIdsStr(children).c_str());
     // 2. need firstly search children of currentNode when currentNode is visible and bypassDescendants not set
-    if (!condition.bypassDescendants && !children.empty() && currentNode->IsAccessibiltyVisible()) {
+    if (!condition.bypassDescendants && !children.empty() && !NoNeedSearchChild(currentNode)) {
         AceFocusMoveDetailCondition nextLevelCondition = {.bypassSelf = false, .bypassDescendants = false};
         auto result = FindNextReadableNodeBySelfAndSameLevel(nextLevelCondition,
             children.front(), children, targetNode);
@@ -225,26 +242,6 @@ AceFocusMoveResult AccessibilityFocusStrategy::FindNextReadableNodeBySelfAndSame
         }
     } else {
         HILOG_INFO_FOCUS("same level cannot find checked ID %{public}" PRId64, currentNode->GetAccessibilityId());
-    }
-    return AceFocusMoveResult::FIND_FAIL;
-}
-
-AceFocusMoveResult AccessibilityFocusStrategy::FindNextReadableNodeToCheckUserNext(
-    const std::shared_ptr<FocusRulesCheckNode>& currentNode,
-    std::shared_ptr<FocusRulesCheckNode>& targetNode)
-{
-    // normal check next node, need to check user defined next focus node
-    auto nextNode = currentNode->GetUserNextFocusNode();
-    CHECK_NULL_RETURN(nextNode, AceFocusMoveResult::FIND_FAIL);
-    if (CanAccessibilityFocus(nextNode)) {
-        targetNode = nextNode;
-        HILOG_INFO_FOCUS("result: find next focusNode");
-        return AceFocusMoveResult::FIND_SUCCESS;
-    } else if (nextNode->IsChildTreeContainer()) {
-        // set user defined focusNode but not focusable, need to continue search child
-        targetNode = nextNode;
-        HILOG_INFO_FOCUS("result: find next focusNode not focusable by childtree container");
-        return AceFocusMoveResult::FIND_CHILDTREE;
     }
     return AceFocusMoveResult::FIND_FAIL;
 }
@@ -315,10 +312,7 @@ AceFocusMoveResult AccessibilityFocusStrategy::FindNextReadableNode(
     if (parent) {
         sameLevelNodes = parent->GetAceChildren();
     }
-    if (condition.bypassSelf) {
-        auto result = FindNextReadableNodeToCheckUserNext(currentNode, targetNode);
-        CHECK_NE_RETURN(result, AceFocusMoveResult::FIND_FAIL, result);
-    }
+
     HILOG_INFO_FOCUS("--- check input id %{public}" PRId64
         "and sameLevel. ParentId %{public}" PRId64, currentNode->GetAccessibilityId(),
         parent? parent->GetAccessibilityId() : -1);
@@ -354,21 +348,19 @@ AceFocusMoveResult AccessibilityFocusStrategy::FindPrevReadableNodeByChildAndSel
     std::shared_ptr<FocusRulesCheckNode>& targetNode)
 {
     CHECK_NULL_RETURN(currentNode, AceFocusMoveResult::FIND_FAIL);
-    std::vector<std::shared_ptr<FocusRulesCheckNode>> children = currentNode->GetAceChildren();
-
-    if (!currentNode->IsAccessibiltyVisible()) {
-        HILOG_INFO_FOCUS("not check %{public}" PRId64 " and child by invisible", currentNode->GetAccessibilityId());
-        return AceFocusMoveResult::FIND_FAIL;
-    }
     // query in the reverse order of pre-order traversal, i.e., right-left-root
     HILOG_INFO_FOCUS("== check id %{public}" PRId64, currentNode->GetAccessibilityId());
-    HILOG_INFO_FOCUS("=== check child firstly %{public}s", GetChildrenIdsStr(children).c_str());
-    for (auto childIt = children.rbegin(); childIt != children.rend(); ++ childIt) {
-        auto result = FindPrevReadableNodeByChildAndSelf(*childIt, targetNode);
-        if (result != AceFocusMoveResult::FIND_FAIL) {
-            return result;
+    if (!NoNeedSearchChild(currentNode)) {
+        std::vector<std::shared_ptr<FocusRulesCheckNode>> children = currentNode->GetAceChildren();
+        HILOG_INFO_FOCUS("=== check child firstly %{public}s", GetChildrenIdsStr(children).c_str());
+        for (auto childIt = children.rbegin(); childIt != children.rend(); ++ childIt) {
+            auto result = FindPrevReadableNodeByChildAndSelf(*childIt, targetNode);
+            CHECK_NE_RETURN(result, AceFocusMoveResult::FIND_FAIL, result);
         }
+    } else {
+        HILOG_INFO_FOCUS("=== not check child");
     }
+
     HILOG_INFO_FOCUS("=== check self Id %{public}" PRId64, currentNode->GetAccessibilityId());
     // hit childtree container should return
     if (currentNode->IsChildTreeContainer()) {
@@ -462,22 +454,7 @@ AceFocusMoveResult AccessibilityFocusStrategy::FindPrevReadableNode(
         HILOG_INFO_FOCUS("result: check self focusable");
         return AceFocusMoveResult::FIND_SUCCESS;
     }
-    // 1.3 check whether having prev node
-    auto prevNode = currentNode->GetUserPrevFocusNode();
-    if (prevNode) {
-        // check focusable
-        if (CanAccessibilityFocus(prevNode)) {
-            targetNode = prevNode;
-            HILOG_INFO_FOCUS("result: prev focusnode");
-            return AceFocusMoveResult::FIND_SUCCESS;
-        } else if (prevNode->IsChildTreeContainer()) {
-            // for web, prev node is childtree contianer and not focusable. should serach child
-            targetNode = prevNode;
-            HILOG_INFO_FOCUS("result: prev focusnode not focusable but childtree container");
-            return AceFocusMoveResult::FIND_CHILDTREE;
-        }
-    }
-    // 1.4 embededTarget can not find higher node
+    // 1.3 embededTarget can not find higher node
     if (currentNode->IsEmbededTarget()) {
         HILOG_INFO_FOCUS("result: Input node is Embeded");
         targetNode = currentNode;

@@ -138,10 +138,6 @@ private:
         const std::shared_ptr<FocusRulesCheckNode>& currentNode,
         std::shared_ptr<FocusRulesCheckNode>& targetNode);
 
-    AceFocusMoveResult FindNextReadableNodeToCheckUserNext(
-        const std::shared_ptr<FocusRulesCheckNode>& currentNode,
-        std::shared_ptr<FocusRulesCheckNode>& targetNode);
-
     AceFocusMoveResult FindNextReadableNodeToHigherLevel(
         std::shared_ptr<FocusRulesCheckNode>& parent,
         std::shared_ptr<FocusRulesCheckNode>& targetNode);
