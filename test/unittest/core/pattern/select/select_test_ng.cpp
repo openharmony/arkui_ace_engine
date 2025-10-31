@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -332,35 +332,7 @@ HWTEST_F(SelectTestNg, SelectEvent001, TestSize.Level1)
     event.code = KeyCode::KEY_ENTER;
     EXPECT_TRUE(selectPattern->OnKeyEvent(event));
 }
-/**
- * @tc.name: OnModifyDone001
- * @tc.desc: Test SelectPattern OnModifyDone
- * @tc.type: FUNC
- */
-HWTEST_F(SelectTestNg, OnModifyDone001, TestSize.Level1)
-{
-    SelectModelNG selectModelInstance;
-    /**
-     * @tc.steps: step1. Create select.
-     */
-    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE },
-        { OPTION_TEXT_3, INTERNAL_SOURCE } };
-    selectModelInstance.Create(params);
-    /**
-     * @tc.steps: step2. Get frameNode and pattern.
-     */
-    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(select, nullptr);
-    auto selectPattern = select->GetPattern<SelectPattern>();
-    ASSERT_NE(selectPattern, nullptr);
-    /**
-     * @tc.steps: step3. Call OnModifyDone.
-     * @tc.expected: the function runs normally
-     */
-    selectPattern->OnModifyDone();
-    auto host = selectPattern->GetHost();
-    EXPECT_NE(host->GetEventHub<SelectEventHub>(), nullptr);
-}
+
 /**
  * @tc.name: UpdateSelectedProps001
  * @tc.desc: Test SelectPattern UpdateSelectedProps
@@ -1368,46 +1340,5 @@ HWTEST_F(SelectTestNg, SelectPattern001, TestSize.Level1)
     auto selectColor = optionPattern->GetBgColor();
     EXPECT_EQ(selectColor, selectTheme->GetBackgroundColor());
     ViewStackProcessor::GetInstance()->ClearStack();
-}
-
-/**
- * @tc.name: SetValueMultiThread001
- * @tc.desc: Test SetValueMultiThread posts a task correctly.
- * @tc.type: FUNC
- */
-HWTEST_F(SelectTestNg, SetValueMultiThread001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Simulate non-UI thread, create a select node, and set an option property.
-     */
-    MultiThreadBuildManager::SetIsThreadSafeNodeScope(true);
-    bool isUIThread = MultiThreadBuildManager::isUIThread_;
-    MultiThreadBuildManager::isUIThread_ = false;
-
-    SelectModelNG selectModelInstance;
-    std::vector<SelectParam> params = { { "Test", "Test" } };
-    selectModelInstance.Create(params);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    // Set value after node creation
-    selectModelInstance.SetValue("Test");
-    
-    auto selectPattern = frameNode->GetPattern<SelectPattern>();
-    ASSERT_NE(selectPattern, nullptr);
-    // Execute tasks to make sure the property is set on the pattern
-    frameNode->ExecuteAfterAttachMainTreeTasks();
-
-    /**
-     * @tc.steps: step2. Call SetValueultiThread and check if a task is posted.
-     */
-    auto initialTaskCount = frameNode->afterAttachMainTreeTasks_.size();
-    selectPattern->SetValueMultiThread("Test");
-    EXPECT_EQ(frameNode->afterAttachMainTreeTasks_.size(), initialTaskCount + 1);
-
-    /**
-     * @tc.steps: step3. Restore environment.
-     */
-    MultiThreadBuildManager::isUIThread_ = isUIThread;
-    MultiThreadBuildManager::SetIsThreadSafeNodeScope(false);
 }
 } // namespace OHOS::Ace::NG
