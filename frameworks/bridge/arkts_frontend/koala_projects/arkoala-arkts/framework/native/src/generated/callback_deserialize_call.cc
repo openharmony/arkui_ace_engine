@@ -2964,21 +2964,27 @@ void deserializeAndCallCallback_RangeUpdate(KSerializerBuffer thisArray, Ark_Int
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
     const Ark_Int32 _resourceId = thisDeserializer.readInt32();
-    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Int32 start, const Ark_Int32 end)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_RangeUpdate))));
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Int32 start, const Ark_Int32 end, const Ark_Int32 cacheStart, const Ark_Int32 cacheEnd, const Ark_Boolean isLoop)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_RangeUpdate))));
     thisDeserializer.readPointer();
     Ark_Int32 start = thisDeserializer.readInt32();
     Ark_Int32 end = thisDeserializer.readInt32();
-    _call(_resourceId, start, end);
+    Ark_Int32 cacheStart = thisDeserializer.readInt32();
+    Ark_Int32 cacheEnd = thisDeserializer.readInt32();
+    Ark_Boolean isLoop = thisDeserializer.readBoolean();
+    _call(_resourceId, start, end, cacheStart, cacheEnd, isLoop);
 }
 void deserializeAndCallSyncCallback_RangeUpdate(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
     const Ark_Int32 resourceId = thisDeserializer.readInt32();
     thisDeserializer.readPointer();
-    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 start, const Ark_Int32 end)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_RangeUpdate))));
+    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 start, const Ark_Int32 end, const Ark_Int32 cacheStart, const Ark_Int32 cacheEnd, const Ark_Boolean isLoop)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_RangeUpdate))));
     Ark_Int32 start = thisDeserializer.readInt32();
     Ark_Int32 end = thisDeserializer.readInt32();
-    callSyncMethod(vmContext, resourceId, start, end);
+    Ark_Int32 cacheStart = thisDeserializer.readInt32();
+    Ark_Int32 cacheEnd = thisDeserializer.readInt32();
+    Ark_Boolean isLoop = thisDeserializer.readBoolean();
+    callSyncMethod(vmContext, resourceId, start, end, cacheStart, cacheEnd, isLoop);
 }
 void deserializeAndCallCallback_RefreshStatus_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {

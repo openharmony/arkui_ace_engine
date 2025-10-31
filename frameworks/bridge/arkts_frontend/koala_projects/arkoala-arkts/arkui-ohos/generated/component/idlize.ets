@@ -4730,7 +4730,7 @@ export interface CustomDialogControllerOptionsExtender {
 export interface CustomDialogControllerExternalOptionsExtender {
     customStyle?: boolean;
 }
-export type Callback_RangeUpdate = (start: int32, end: int32) => void;
+export type Callback_RangeUpdate = (start: int32, end: int32, cacheStart: int32, cacheEnd: int32, isLoop: boolean) => void;
 export type Callback_CreateItem = (index: int32) => KPointer;
 export type Callback_OnMoveFromTo = (from: int32, to: int32) => void;
 export interface LengthMetricsCustom {

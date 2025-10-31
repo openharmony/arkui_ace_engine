@@ -52,9 +52,12 @@ export function LazyForEachImplForOptions<T>(dataSource: IDataSource<T>,
 ) {
     const node = createLazyNode(isRepeat)
 
-    let pool = rememberDisposable(() => new LazyItemPool(node, CustomComponent.current), (pool?: LazyItemPool) => {
-        pool?.dispose()
-    })
+    let pool = rememberDisposable(
+        () => new LazyItemPool(node, dataSource.totalCount(), CustomComponent.current),
+        (pool?: LazyItemPool) => {
+            pool?.dispose()
+        }
+    )
     let changeCounter = rememberMutableState(0)
     changeCounter.value //subscribe
     let listener = remember(() => {
@@ -151,6 +154,7 @@ class LazyItemCompositionContext {
 class LazyItemPool implements Disposable {
     private _activeItems = new Map<int32, ComputableState<LazyItemNode>>()
     private _parent: PeerNode
+    private _totalCount: int32
     private _componentRoot?: Object
     private _moveFromTo?: [int32, int32] = undefined // used to track moveFromTo in onMove event
     disposed: boolean = false
@@ -160,8 +164,9 @@ class LazyItemPool implements Disposable {
      * @param parent direct parent node (should be the scroll container node)
      * @param root root object of the current CustomComponent
      */
-    constructor(parent: PeerNode, root?: Object) {
+    constructor(parent: PeerNode, totalCount: int32, root?: Object) {
         this._parent = parent
+        this._totalCount = totalCount
         this._componentRoot = root
     }
 
@@ -236,14 +241,14 @@ class LazyItemPool implements Disposable {
      * @param start 
      * @param end 
      */
-    updateActiveRange(start: int32, end: int32) {
+    updateActiveRange(start: int32, end: int32, cacheStart: int32, cacheEnd: int32, isLoop: boolean) {
         if (start > end) {
             return
         }
         try {
             this.pruneBy(index => {
                 index = this.convertFromToIndexRevert(index)
-                return index < start || index > end
+                return !this.isInCacheRange(index, start, end, cacheStart, cacheEnd, isLoop, this._totalCount);
             })
         } catch (error) {
             InteropNativeModule._NativeLog(`error during LazyItem pruning: ${error}`)
@@ -331,5 +336,67 @@ class LazyItemPool implements Disposable {
             return index + 1;
         }
         return index;
+    }
+
+    // check if index is in cache range
+    private isInCacheRange(
+        index: int32,
+        start: int32,
+        end: int32,
+        cacheStart: int32,
+        cacheEnd: int32,
+        isLoop: boolean,
+        total: int32
+    ): boolean {
+        if (total <= 0 || index < 0 || index >= total) {
+            return false;
+        }
+
+        // calculate cache boundaries
+        const cacheStartBound = start - cacheStart;
+        const cacheEndBound = end + cacheEnd;
+
+        if (!isLoop) {
+            // non-loop mode: simple clamping
+            const actualStart = Math.max(0, cacheStartBound);
+            const actualEnd = Math.min(total - 1, cacheEndBound);
+            return index >= actualStart && index <= actualEnd;
+        } else {
+            // loop mode
+            const normalize = (idx: int32): int32 => {
+                return ((idx % total) + total) % total;
+            };
+
+            const normIndex = normalize(index);
+            const normStart = normalize(start);
+            const normEnd = normalize(end);
+
+            // check if visible region is wrapped
+            const isWrapped = normStart > normEnd;
+            if (isWrapped) {
+                // wrapped case: visible region is [start, totalCount-1] + [0, end]
+                // cache region is [start-cacheStart, totalCount-1] + [0, end+cacheEnd]
+                // full coverage condition: cache regions connect or overlap
+                if (cacheStartBound <= cacheEndBound + 1) {
+                    return true;
+                }
+            } else {
+                // normal case: check if cache region covers entire list
+                if (cacheStartBound - cacheEndBound + 1 >= total) {
+                    return true;
+                }
+            }
+
+            // non-full coverage case
+            const normCacheStart = normalize(cacheStartBound);
+            const normCacheEnd = normalize(cacheEndBound);
+            if (normCacheStart <= normCacheEnd) {
+                // single continuous region
+                return normIndex >= normCacheStart && normIndex <= normCacheEnd;
+            } else {
+                // two regions: [0, normCacheEnd] + [normCacheStart, totalCount-1]
+                return normIndex >= normCacheStart || normIndex <= normCacheEnd;
+            }
+        }
     }
 }
