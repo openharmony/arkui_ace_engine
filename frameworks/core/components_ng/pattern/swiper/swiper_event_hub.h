@@ -281,7 +281,9 @@ public:
             --aniStartCalledCount_;
             return;
         }
-        auto context = GetFrameNode()->GetContext();
+        auto frameNode = GetFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto context = frameNode->GetContext();
         CHECK_NULL_VOID(context);
         context->AddBuildFinishCallBack([this, index, info]() {
             std::for_each(animationEndEvents_.begin(), animationEndEvents_.end(),

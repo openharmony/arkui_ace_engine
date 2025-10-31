@@ -1419,8 +1419,18 @@ HWTEST_F(SwiperAttrTestNg, ArcDotIndicator002, TestSize.Level1)
     CreateSwiperItems();
     CreateSwiperDone();
     RefPtr<ArcSwiperPattern> indicatorPattern = frameNode_->GetPattern<ArcSwiperPattern>();
+    EXPECT_NE(indicatorPattern, nullptr);
     indicatorPattern->GetSwiperArcDotParameters();
     EXPECT_NE(indicatorPattern->swiperArcDotParameters_, nullptr);
+
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto swiperTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    auto paintProperty = indicatorNode_->GetPaintProperty<CircleDotIndicatorPaintProperty>();
+    indicatorPattern->OnModifyDone();
+    EXPECT_EQ(pattern_->GetIndicatorType(), SwiperIndicatorType::ARC_DOT);
+    EXPECT_EQ(paintProperty->GetArcDirection(), SwiperArcDirection::SIX_CLOCK_DIRECTION);
+    EXPECT_EQ(paintProperty->GetColor(), swiperTheme->GetArcItemColor());
+    EXPECT_EQ(paintProperty->GetSelectedColor(), swiperTheme->GetArcSelectedItemColor());
 }
 
 /**
