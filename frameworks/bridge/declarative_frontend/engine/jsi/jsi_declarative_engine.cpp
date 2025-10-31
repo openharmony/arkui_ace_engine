@@ -1753,12 +1753,12 @@ bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t c
             std::shared_ptr<AbilityBase::Extractor> extractor =
                 AbilityBase::ExtractorUtil::GetExtractor(hapFilePath, flag, false);
             if (extractor == nullptr) {
-                LOGE(AceLogTag::ACE_FORM, "hapFilePath %{private}s GetExtractor failed", hapFilePath.c_str());
+                TAG_LOGE(AceLogTag::ACE_FORM, "hapFilePath %{private}s GetExtractor failed", hapFilePath.c_str());
                 return false;
             }
             auto data = extractor->GetSafeData(FORM_ES_MODULE_CARD_PATH);
             if (!data) {
-                LOGE(AceLogTag::ACE_FORM, "null data");
+                TAG_LOGE(AceLogTag::ACE_FORM, "null data");
                 return false;
             }
             data->SetAutoReleaseMem(true);
