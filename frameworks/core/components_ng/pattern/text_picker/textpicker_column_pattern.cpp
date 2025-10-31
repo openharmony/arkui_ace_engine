@@ -1413,10 +1413,9 @@ void TextPickerColumnPattern::HandleDragStart(const GestureEvent& event)
     yLast_ = offsetY;
     overscroller_.SetStart(offsetY);
     pressed_ = true;
-    if (auto frameNode = GetHost()) {
-        const double mainVelocity = event.GetMainVelocity();
-        frameNode->AddFRCSceneInfo(PICKER_DRAG_SCENE, mainVelocity, SceneStatus::START);
-    }
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->AddFRCSceneInfo(PICKER_DRAG_SCENE, event.GetMainVelocity(), SceneStatus::START);
     // AccessibilityEventType::SCROLL_START
 
     if (animation_) {
@@ -1433,7 +1432,7 @@ void TextPickerColumnPattern::HandleDragStart(const GestureEvent& event)
 
 void TextPickerColumnPattern::HandleDragMove(const GestureEvent& event)
 {
-    if (event.GetFingerList().size() > 1 || !pressed_) {
+    if (event.GetFingerList().size() > 1) {
         return;
     }
     if (event.GetInputEventType() == InputEventType::AXIS && event.GetSourceTool() == SourceTool::MOUSE) {
@@ -1443,6 +1442,7 @@ void TextPickerColumnPattern::HandleDragMove(const GestureEvent& event)
         return;
     }
     animationBreak_ = false;
+    CHECK_EQUAL_VOID(pressed_, false);
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
     auto toss = GetToss();
