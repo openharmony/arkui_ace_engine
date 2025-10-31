@@ -862,7 +862,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
     }
 }
 export interface TextOverflowOptions {
-    overflow: TextOverflow;
+    overflow: TextOverflow | undefined;
 }
 export interface TextAttribute extends CommonMethod {
     setTextOptions(content?: string | Resource, value?: TextOptions): this {
@@ -1636,11 +1636,22 @@ export class TextOverflowOptions_serializer {
     public static write(buffer: SerializerBase, value: TextOverflowOptions): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForOverflow  = value.overflow
-        valueSerializer.writeInt32(valueHolderForOverflow.valueOf())
+        if (valueHolderForOverflow !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForOverflowTmpValue  = (valueHolderForOverflow as TextOverflow)
+            valueSerializer.writeInt32(valueHolderForOverflowTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): TextOverflowOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const overflowTmpResult : TextOverflow = TextOverflow.fromValue(valueDeserializer.readInt32())
+        const overflowTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let overflowTmpBuf : TextOverflow | undefined = undefined
+        if ((overflowTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            overflowTmpBuf = TextOverflow.fromValue(valueDeserializer.readInt32())
+        }
+        const overflowTmpResult : TextOverflow | undefined = overflowTmpBuf
         let value : TextOverflowOptions = ({overflow: overflowTmpResult} as TextOverflowOptions)
         return value
     }

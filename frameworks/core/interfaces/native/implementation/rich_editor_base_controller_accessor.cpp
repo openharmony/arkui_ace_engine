@@ -90,7 +90,7 @@ void AssignArkValue(Ark_DecorationStyleInterface& dst, const UpdateSpanStyle& sr
 {
     dst.color = Converter::ArkUnion<Opt_ResourceColor, Ark_String>(src.updateTextDecorationColor, ctx);
     dst.style = Converter::ArkValue<Opt_TextDecorationStyle>(src.updateTextDecorationStyle);
-    dst.type = Converter::ArkValue<Ark_TextDecorationType>(src.updateTextDecoration.value_or(TextDecoration::NONE));
+    dst.type = Converter::ArkValue<Opt_TextDecorationType>(src.updateTextDecoration);
 }
 
 Ark_RichEditorTextStyle CreateEmptyArkTextStyle()
