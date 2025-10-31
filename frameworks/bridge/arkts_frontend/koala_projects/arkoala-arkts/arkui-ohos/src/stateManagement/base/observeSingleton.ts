@@ -268,6 +268,9 @@ export class ObserveSingleton implements IObserve {
      * @returns
      */
     public applyTaskDelayMutableStateChange<T>(task: TaskType<T>): T {
+        if (ObserveSingleton.instance.renderingComponent === ObserveSingleton.RenderingComponent) {
+            return task();
+        }
         const temp = this.mutateMutableStateMode_;
         this.mutateMutableStateMode_ = NotifyMutableStateMode.delayMutation;
         const result: T = task();
