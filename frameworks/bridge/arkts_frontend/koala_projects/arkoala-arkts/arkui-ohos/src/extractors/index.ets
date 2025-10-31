@@ -580,9 +580,8 @@ export namespace extractors {
     const pointer = value.getNodePtr();
     if (pointer === undefined) {
       return nullptr;
-    } else {
-      return pointer;
     }
+    return pointer;
   }
   export function fromComponentContentPtr(ptr: KPointer): ComponentContent {
     const x: Object = {};
