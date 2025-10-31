@@ -378,11 +378,11 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest008, TestSize.Level0)
 }
 
 /**
- * @tc.name: ImageColorFilterTest009
+ * @tc.name: ImageColorFilterTestFillColor
  * @tc.desc: Test whether image ColorFilter and FillColor affect each other
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestOneNg, ImageColorFilterTest009, TestSize.Level0)
+HWTEST_F(ImageTestOneNg, ImageColorFilterTestFillColor, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
