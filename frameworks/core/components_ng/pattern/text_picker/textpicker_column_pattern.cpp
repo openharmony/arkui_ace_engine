@@ -1406,16 +1406,17 @@ RefPtr<TextPickerLayoutProperty> TextPickerColumnPattern::GetParentLayout() cons
 void TextPickerColumnPattern::HandleDragStart(const GestureEvent& event)
 {
     SetSelectedMark();
-    CHECK_NULL_VOID(GetToss());
     auto toss = GetToss();
-    auto offsetY = event.GetGlobalPoint().GetY();
+    CHECK_NULL_VOID(toss);
+    const double offsetY = event.GetLocalLocation().GetY();
     toss->SetStart(offsetY);
     yLast_ = offsetY;
     overscroller_.SetStart(offsetY);
     pressed_ = true;
-    auto frameNode = GetHost();
-    CHECK_NULL_VOID(frameNode);
-    frameNode->AddFRCSceneInfo(PICKER_DRAG_SCENE, event.GetMainVelocity(), SceneStatus::START);
+    if (auto frameNode = GetHost()) {
+        const double mainVelocity = event.GetMainVelocity();
+        frameNode->AddFRCSceneInfo(PICKER_DRAG_SCENE, mainVelocity, SceneStatus::START);
+    }
     // AccessibilityEventType::SCROLL_START
 
     if (animation_) {
@@ -1432,7 +1433,7 @@ void TextPickerColumnPattern::HandleDragStart(const GestureEvent& event)
 
 void TextPickerColumnPattern::HandleDragMove(const GestureEvent& event)
 {
-    if (event.GetFingerList().size() > 1) {
+    if (event.GetFingerList().size() > 1 || !pressed_) {
         return;
     }
     if (event.GetInputEventType() == InputEventType::AXIS && event.GetSourceTool() == SourceTool::MOUSE) {
@@ -1442,21 +1443,21 @@ void TextPickerColumnPattern::HandleDragMove(const GestureEvent& event)
         return;
     }
     animationBreak_ = false;
-    CHECK_NULL_VOID(pressed_);
-    CHECK_NULL_VOID(GetHost());
-    CHECK_NULL_VOID(GetToss());
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
     auto toss = GetToss();
-    auto offsetY =
-        event.GetGlobalPoint().GetY() + (event.GetInputEventType() == InputEventType::AXIS ? event.GetOffsetY() : 0.0);
+    CHECK_NULL_VOID(toss);
+    const double rawY = event.GetLocalLocation().GetY();
+    const bool isAxis = (event.GetInputEventType() == InputEventType::AXIS);
+    const double offsetY = rawY + (isAxis ? event.GetOffsetY() : 0.0);
     if (NearEqual(offsetY, yLast_, MOVE_THRESHOLD)) { // if changing less than MOVE_THRESHOLD, no need to handle
         StopHapticController();
         return;
     }
     toss->SetEnd(offsetY);
     UpdateColumnChildPosition(offsetY);
-    auto frameNode = GetHost();
-    CHECK_NULL_VOID(frameNode);
-    frameNode->AddFRCSceneInfo(PICKER_DRAG_SCENE, event.GetMainVelocity(), SceneStatus::RUNNING);
+    const double mainVelocity = event.GetMainVelocity();
+    frameNode->AddFRCSceneInfo(PICKER_DRAG_SCENE, mainVelocity, SceneStatus::RUNNING);
 }
 
 void TextPickerColumnPattern::HandleDragEnd()

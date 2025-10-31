@@ -335,8 +335,8 @@ HWTEST_F(TextPickerColumnTestTwoNg, TextPickerColumnPatternTest003, TestSize.Lev
     columnPattern->InitPanEvent(gestureHub);
     auto panEvent = columnPattern->panEvent_;
     GestureEvent gestureEvent;
-    Point point(OFFSET_X, OFFSET_Y);
-    gestureEvent.SetGlobalPoint(point);
+    Offset point(OFFSET_X, OFFSET_Y);
+    gestureEvent.SetLocalLocation(point);
     panEvent->actionStart_(gestureEvent);
     /**
      * cover actionUpdate_ callback
@@ -407,8 +407,8 @@ HWTEST_F(TextPickerColumnTestTwoNg, TextPickerColumnPatternTest005, TestSize.Lev
      * cover actionStart_ callback
      */
     GestureEvent gestureEvent;
-    Point point(OFFSET_X, OFFSET_Y);
-    gestureEvent.SetGlobalPoint(point);
+    Offset point(OFFSET_X, OFFSET_Y);
+    gestureEvent.SetLocalLocation(point);
     panEvent->actionStart_(gestureEvent);
     EXPECT_EQ(columnPattern->GetToss()->yStart_, OFFSET_Y);
     EXPECT_TRUE(columnPattern->pressed_);
