@@ -262,7 +262,7 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, DISABLED_onAttachTest, TestSize.L
     }
     int arkCounter = 0;
     for (size_t i = 0; i < eventsSize; ++i) {
-        accessor_->onAttach(vmContext_, peer_, &checkEvents[i].first);
+        accessor_->onAttach(peer_, &checkEvents[i].first);
         EXPECT_FALSE(checkEvents[i].second);
         for (size_t j = 0; j <= i; ++j) {
             mockPatternKeeper_->AttachRenderContext();
@@ -340,11 +340,11 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, DISABLED_offAttachTest, TestSize.
         };
         auto arkCallback = ArkValue<VoidCallback>(callback, i);
         checkEvents.emplace_back(std::make_pair(ArkValue<Opt_VoidCallback>(arkCallback), std::nullopt));
-        accessor_->onAttach(vmContext_, peer_, &arkCallback);
+        accessor_->onAttach(peer_, &arkCallback);
     }
     int arkCounter = 0;
     for (size_t i = 0; i < eventsSize; ++i) {
-        accessor_->offAttach(vmContext_, peer_, &checkEvents[i].first);
+        accessor_->offAttach(peer_, &checkEvents[i].first);
         checkEvents[i].second = std::nullopt;
         for (size_t j = 0; j < eventsSize; ++j) {
             mockPatternKeeper_->AttachRenderContext();
@@ -386,10 +386,10 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, DISABLED_offAttachTestAll, TestSi
         };
         auto arkCallback = ArkValue<VoidCallback>(callback, i);
         checkEvents.emplace_back(std::make_pair(ArkValue<Opt_VoidCallback>(arkCallback), std::nullopt));
-        accessor_->onAttach(vmContext_, peer_, &arkCallback);
+        accessor_->onAttach(peer_, &arkCallback);
     }
     auto optCallback = ArkValue<Opt_VoidCallback>();
-    accessor_->offAttach(vmContext_, peer_, &optCallback);
+    accessor_->offAttach(peer_, &optCallback);
     mockPatternKeeper_->AttachRenderContext();
     for (size_t j = 0; j < eventsSize; ++j) {
         EXPECT_FALSE(checkEvents[j].second);
@@ -408,6 +408,7 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, DISABLED_offDetachTest, TestSize.
     auto holder = TestHolder::GetInstance();
     holder->SetUp();
     ASSERT_TRUE(mockPatternKeeper_);
+    ASSERT_NE(accessor_, nullptr);
     ASSERT_NE(accessor_->onAttach, nullptr);
     struct CheckEvent {
         int32_t resourceId;

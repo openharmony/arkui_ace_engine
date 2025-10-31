@@ -49,7 +49,7 @@ import { ArkXComponentComponent, XComponentOptions, XComponentParameters, Native
 
 import { AnimateParam } from "#generated";
 import { GestureModifier } from "#generated";
-import { CanvasRenderer, ImageData, OffscreenCanvas, RenderingContextSettings, CanvasRenderingContext2D, Callback } from "#generated";
+import { CanvasRenderer, ImageData, OffscreenCanvas, RenderingContextSettings, CanvasRenderingContext2D, OffscreenCanvasRenderingContext2D, VoidCallback } from "#generated";
 import { pointer } from "@koalaui/interop";
 import { ArkUIAniModule } from "arkui.ani"
 import { InteropNativeModule } from "@koalaui/interop"
@@ -416,9 +416,73 @@ export function hookPutImageData(peerPtr: CanvasRenderer, imagedata: ImageData, 
     let dirtyHeight_val: number = (dirtyHeight_type == RuntimeType.STRING) ? convertDimensionStrToNumber(dirtyHeight as string) : (dirtyHeight as number)
     ArkUIAniModule._CanvasRenderer_PutImageData1(peerPtr.peer!.ptr, imagedata.data, dx_val, dy_val, imagedata.width as int, imagedata.height as int, dirtyX_val, dirtyY_val, dirtyWidth_val, dirtyHeight_val)
 }
-export function hookGetContext(peerPtr: OffscreenCanvas, contextType: string, options: RenderingContextSettings)
+export function hookGetContext(peerPtr: OffscreenCanvas, contextType: string, options: RenderingContextSettings): OffscreenCanvasRenderingContext2D
 {
   return peerPtr.getContext2d(options)
+}
+let attachCallbackId: int = 0;
+let detachCallbackId: int = 0;
+const attachCallbackMap: Map<VoidCallback, int> = new Map<VoidCallback, int>()
+const detachCallbackMap: Map<VoidCallback, int> = new Map<VoidCallback, int>()
+export function registerAttach(peerPtr: CanvasRenderingContext2D, callback: VoidCallback): void
+{
+  let id: int = -1
+  if (attachCallbackMap.has(callback)) {
+    let res = attachCallbackMap.get(callback)
+    if (res !== undefined) {
+      id = res as int
+    }
+  } else {
+    id = attachCallbackId
+    attachCallbackMap.set(callback, attachCallbackId++)    
+  }
+  ArkUIAniModule._CanvasRenderingContext_setAttachCallbackId(peerPtr.peer!.ptr, id)
+}
+export function unregisterAttach(peerPtr: CanvasRenderingContext2D, callback?: VoidCallback): void
+{
+  if (callback === undefined) {
+    attachCallbackMap.clear()
+    return
+  }
+  let id: int = -1
+  if (attachCallbackMap.has(callback)) {
+    let res = attachCallbackMap.get(callback)
+    if (res !== undefined) {
+      id = res as int
+    }
+    attachCallbackMap.delete(callback)
+  }
+  ArkUIAniModule._CanvasRenderingContext_setAttachCallbackId(peerPtr.peer!.ptr, id)
+}
+export function registerDetach(peerPtr: CanvasRenderingContext2D, callback: VoidCallback): void
+{
+  let id: int = -1
+  if (detachCallbackMap.has(callback)) {
+    let res = detachCallbackMap.get(callback)
+    if (res !== undefined) {
+      id = res as int
+    }
+  } else {
+    id = detachCallbackId
+    detachCallbackMap.set(callback, detachCallbackId++)    
+  }
+  ArkUIAniModule._CanvasRenderingContext_setDetachCallbackId(peerPtr.peer!.ptr, id)
+}
+export function unregisterDetach(peerPtr: CanvasRenderingContext2D, callback?: VoidCallback): void
+{
+  if (callback === undefined) {
+    detachCallbackMap.clear()
+    return
+  }
+  let id: int = -1
+  if (detachCallbackMap.has(callback)) {
+    let res = detachCallbackMap.get(callback)
+    if (res !== undefined) {
+      id = res as int
+    }
+    detachCallbackMap.delete(callback)
+  }
+  ArkUIAniModule._CanvasRenderingContext_setDetachCallbackId(peerPtr.peer!.ptr, id)
 }
 export function hookWaterFlowOptionsImpl(node: ArkWaterFlowComponent, options: WaterFlowOptions | undefined): void {
     WaterFlowHandWritten.hookWaterFlowOptionsImpl(node, options)

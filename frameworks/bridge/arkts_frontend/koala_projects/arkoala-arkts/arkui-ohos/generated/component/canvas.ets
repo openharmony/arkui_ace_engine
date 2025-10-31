@@ -24,7 +24,7 @@ import { Matrix2D_serializer, Matrix2D, Matrix2DInternal } from "./matrix2d"
 import { ColorMetrics_serializer, Size_serializer, LengthMetrics_serializer } from "./../Graphics"
 import { drawing_Canvas_serializer } from "./../framework/ohos.graphics.drawing"
 import { ColorMetrics, Size, LengthMetricsUnit, LengthMetrics } from "arkui.Graphics"
-import { extractors, AttributeModifier, hookCanvasAttributeModifier, AttributeUpdater, hookCreateImageData, hookGetImageData, hookPutImageData, hookGetContext } from "#handwritten"
+import { extractors, AttributeModifier, hookCanvasAttributeModifier, AttributeUpdater, hookCreateImageData, hookGetImageData, hookPutImageData, hookGetContext, registerAttach, unregisterAttach, registerDetach, unregisterDetach } from "#handwritten"
 import { default as drawing } from "@ohos.graphics.drawing"
 import { image_PixelMap_serializer } from "./../framework/ohos.multimedia.image"
 import { default as image } from "@ohos.multimedia.image"
@@ -2201,21 +2201,25 @@ export class CanvasRenderingContext2D extends CanvasRenderer implements Material
         return
     }
     public onAttach(callback_: VoidCallback): void {
+        registerAttach(this, callback_)
         const callback__casted = callback_ as (VoidCallback)
         this.onAttach_serialize(callback__casted)
         return
     }
     public offAttach(callback_?: VoidCallback): void {
+        unregisterAttach(this, callback_)
         const callback__casted = callback_ as (VoidCallback | undefined)
         this.offAttach_serialize(callback__casted)
         return
     }
     public onDetach(callback_: VoidCallback): void {
+        registerDetach(this, callback_)
         const callback__casted = callback_ as (VoidCallback)
         this.onDetach_serialize(callback__casted)
         return
     }
     public offDetach(callback_?: VoidCallback): void {
+        unregisterDetach(this, callback_)
         const callback__casted = callback_ as (VoidCallback | undefined)
         this.offDetach_serialize(callback__casted)
         return
