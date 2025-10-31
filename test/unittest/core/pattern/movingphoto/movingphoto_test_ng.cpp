@@ -17,6 +17,7 @@
 #include "gtest/gtest.h"
 
 
+
 #define private public
 #define protected public
 #include "test/mock/core/common/mock_theme_manager.h"
