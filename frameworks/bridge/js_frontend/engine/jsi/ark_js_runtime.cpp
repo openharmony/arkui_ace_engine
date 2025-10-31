@@ -245,16 +245,6 @@ bool ArkJSRuntime::ExecuteModuleBuffer(const uint8_t* data, int32_t size, const 
     return ret;
 }
 
-bool ArkJSRuntime::ExecuteModuleBufferSecure(uint8_t* data, int32_t size, const std::string& filename, bool needUpdate)
-{
-    JSExecutionScope executionScope(vm_);
-    LocalScope scope(vm_);
-    panda::TryCatch trycatch(vm_);
-    bool ret = JSNApi::ExecuteModuleBufferSecure(vm_, data, size, filename, needUpdate);
-    HandleUncaughtException(trycatch);
-    return ret;
-}
-
 shared_ptr<JsValue> ArkJSRuntime::EvaluateJsCode([[maybe_unused]] const std::string& src)
 {
     return NewUndefined();
