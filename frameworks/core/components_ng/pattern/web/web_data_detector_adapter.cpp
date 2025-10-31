@@ -92,8 +92,10 @@ WebDataDetectorAdapter::WebDataDetectorAdapter(const WeakPtr<Pattern>& pattern, 
     if (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_TWO)) {
         TAG_LOGW(AceLogTag::ACE_WEB, "Using API Version less than 22");
         SetSelectDataDetectorEnable(false);
+        SetSelectedDataDetectorConfig(defaultConfig, true);
+    } else {
+        SetSelectedDataDetectorConfig(defaultConfig, false);
     }
-    SetSelectedDataDetectorConfig(defaultConfig, true);
 }
 
 void WebDataDetectorAdapter::SetDataDetectorEnable(bool enable)
