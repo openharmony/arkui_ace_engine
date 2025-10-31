@@ -47,6 +47,31 @@ constexpr char NAVIGATION_OPTIONS_DEPTH_KEY[] = "depth";
 constexpr char NAVIGATION_OPTIONS_DISABLE_PLACEHOLDER_KEY[] = "disablePlaceholder";
 constexpr char NAVIGATION_OPTIONS_DISABLE_DIVIDER_KEY[] = "disableDivider";
 constexpr char FULL_SCREEN_PAGES_KEY[] = "fullScreenPages";
+
+class PlaceholderPattern : public Pattern {
+    DECLARE_ACE_TYPE(PlaceholderPattern, Pattern);
+public:
+    PlaceholderPattern() = default;
+    ~PlaceholderPattern() override = default;
+
+    void OnColorConfigurationUpdate() override;
+};
+
+void PlaceholderPattern::OnColorConfigurationUpdate()
+{
+    auto host = AceType::DynamicCast<FrameNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
+    auto navManager = context->GetNavigationManager();
+    CHECK_NULL_VOID(navManager);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    Color bgColor;
+    if (navManager->GetSystemColor(BG_COLOR_SYS_RES_NAME, bgColor)) {
+        renderContext->UpdateBackgroundColor(bgColor);
+    }
+}
 }
 
 RefPtr<FrameNode> ForceSplitUtils::CreatePlaceHolderContent(const RefPtr<PipelineContext>& context)
@@ -199,7 +224,7 @@ RefPtr<FrameNode> ForceSplitUtils::CreatePlaceHolderNode()
 {
     int32_t phId = ElementRegister::GetInstance()->MakeUniqueId();
     auto phNode = FrameNode::GetOrCreateFrameNode(
-        V2::SPLIT_PLACEHOLDER_CONTENT_ETS_TAG, phId, []() { return AceType::MakeRefPtr<Pattern>(); });
+        V2::SPLIT_PLACEHOLDER_CONTENT_ETS_TAG, phId, []() { return AceType::MakeRefPtr<PlaceholderPattern>(); });
     CHECK_NULL_RETURN(phNode, nullptr);
     auto context = phNode->GetContextRefPtr();
     CHECK_NULL_RETURN(context, nullptr);
