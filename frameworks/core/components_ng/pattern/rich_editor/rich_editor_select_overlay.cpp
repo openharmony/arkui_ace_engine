@@ -39,6 +39,7 @@ bool RichEditorSelectOverlay::PreProcessOverlay(const OverlayRequest& request)
     SetEnableSubWindowMenu(true);
     CheckEnableContainerModal();
     IF_TRUE(request.requestCode == REQUEST_RECREATE, needRefreshMenu_ = false);
+    pattern->UpdateAIMenuOptions();
     return true;
 }
 
@@ -331,7 +332,6 @@ void RichEditorSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectO
 // param filling except callback
 void RichEditorSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& selectInfo, int32_t requestCode)
 {
-    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "OnUpdateSelectOverlayInfo, requestCode=%{public}d", requestCode);
     auto pattern = GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
     BaseTextSelectOverlay::OnUpdateSelectOverlayInfo(selectInfo, requestCode);
@@ -798,11 +798,6 @@ void RichEditorSelectOverlay::UpdateHandleColor()
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
     manager->MarkInfoChange(DIRTY_HANDLE_COLOR_FLAG);
-}
-
-void RichEditorSelectOverlay::UpdateAISelectMenu()
-{
-    IsUsingMouse() ? ProcessOverlay({ .requestCode = REQUEST_RECREATE }) : TextSelectOverlay::UpdateAISelectMenu();
 }
 
 } // namespace OHOS::Ace::NG

@@ -92,7 +92,6 @@ public:
     RectF GetVisibleRect();
     float GetHandleHotZoneRadius();
     bool IsMenuShow();
-    void UpdateAISelectMenu() override;
 
 protected:
     RectF GetSelectAreaFromRects(SelectRectsType pos) override;
