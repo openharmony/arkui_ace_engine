@@ -126,13 +126,12 @@ export class AppStorageV2Impl {
     public removeByInterop(keyOrType: string | Type): boolean {
         const key = StorageHelper.getKeyOrTypeNameWithChecks(keyOrType);
         if (!key) {
-            StateMgmtConsole.log(StorageHelper.DELETE_NOT_EXIST_KEY);
             return false;
         }
 
         const isDeleted: boolean = this.memorizedValues_.delete(key);
         if (!isDeleted) {
-            StateMgmtConsole.log(StorageHelper.DELETE_NOT_EXIST_KEY);
+            StateMgmtConsole.warn(StorageHelper.DELETE_NOT_EXIST_KEY);
             return false;
         }
         return true;
