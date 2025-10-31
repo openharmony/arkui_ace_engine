@@ -194,6 +194,9 @@ void JsAccessibilityManager::FocusMoveSearchWithCondition(
         }
         auto result = FocusMoveSearchWithConditionNG(elementId, param, context, nodeInfo);
         infos.emplace_back(nodeInfo);
+        HILOG_INFO_FOCUS("focus move search result id %{public}" PRId64 ", "
+            "ret %{public}d requestID %{public}d",
+            nodeInfo.GetAccessibilityId(), result, requestId);
         callback.SetFocusMoveSearchWithConditionResult(infos, result, requestId);
         return;
     }
@@ -245,6 +248,8 @@ void JsAccessibilityManager::ProcessGetScrollAncestor(
         infos.emplace_back(info);
         result = FocusMoveResult::SEARCH_FAIL;
     }
+    HILOG_INFO_FOCUS("focus move search get scroll result  %{public}d requestID %{public}d",
+        result, requestId);
     callback.SetFocusMoveSearchWithConditionResult(infos, result, requestId);
 }
 

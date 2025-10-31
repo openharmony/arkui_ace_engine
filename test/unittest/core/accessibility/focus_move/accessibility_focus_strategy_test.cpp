@@ -640,7 +640,7 @@ HWTEST_F(AccessibilityFocusStrategyTest, FindNextReadableNodeToCheckUserNext001,
 
 /**
  * @tc.name: AccessibilityPropertyTest020
- * @tc.desc: Test the method SetAccessibilityLevel.
+ * @tc.desc: Test the method SetIsAccessibilityModal.
  * @tc.type: FUNC
  */
 HWTEST_F(AccessibilityFocusStrategyTest, IsAccessibilityModalTest001, TestSize.Level1)
@@ -654,4 +654,21 @@ HWTEST_F(AccessibilityFocusStrategyTest, IsAccessibilityModalTest001, TestSize.L
     accessibilityProperty.SetIsAccessibilityModal(true);
     EXPECT_TRUE(accessibilityProperty.IsAccessibilityModal());
 }
+
+/**
+ * @tc.name: FindPrevReadableNode001
+ * @tc.desc: Test the method FindPrevReadableNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFocusStrategyTest, FindPrevReadableNode001, TestSize.Level1)
+{
+    MockAccessibilityFocusStrategy focusStrategy;
+    std::shared_ptr<FocusRulesCheckNode> checkNode1;
+    std::shared_ptr<FocusRulesCheckNode> targetNode;
+    AceFocusMoveDetailCondition condition;
+    auto result = focusStrategy.FindPrevReadableNode(condition, checkNode1, targetNode);
+    // checknode null，returns fail
+    ASSERT_EQ(result, AceFocusMoveResult::FIND_FAIL);
+}
+
 } // namespace OHOS::Ace::NG
