@@ -80,6 +80,5 @@ void ApsMonitorImpl::LoadApsFuncOnce()
 
 void ApsMonitorImpl::ReSetApsClient()
 {
-
 }
 } // namespace OHOS::Ace
