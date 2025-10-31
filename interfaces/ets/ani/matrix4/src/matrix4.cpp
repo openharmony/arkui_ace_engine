@@ -332,7 +332,7 @@ void ParseArray([[maybe_unused]] ani_env* env, const char* property, ani_object 
     for (int i = 0; i < static_cast<int32_t>(length); i++) {
         ani_ref pointRef;
         if (ANI_OK != env->Object_CallMethodByName_Ref(static_cast<ani_object>(params_ref),
-            "$_get", "i:C{std.core.Object}", &pointRef, (ani_int)i)) {
+            "$_get", "i:Y", &pointRef, (ani_int)i)) {
             break;
         }
         ani_object pointObject = static_cast<ani_object>(pointRef);
