@@ -540,11 +540,11 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest010, TestSize.Level0)
 }
 
 /**
- * @tc.name: ImageColorFilterTest011
+ * @tc.name: ImageColorFilterTestForAlt
  * @tc.desc: Test image ColorFilter is set correctly for alt.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestOneNg, ImageColorFilterTest011, TestSize.Level0)
+HWTEST_F(ImageTestOneNg, ImageColorFilterTestForAlt, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode without picture.
