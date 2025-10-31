@@ -1074,11 +1074,11 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest018, TestSize.Level0)
 }
 
 /**
- * @tc.name: ImageColorFilterTest019
+ * @tc.name: ImageColorFilterTestLanguageChanging
  * @tc.desc: Test whether image ColorFilter is set correctly when language changeing
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestOneNg, ImageColorFilterTest019, TestSize.Level0)
+HWTEST_F(ImageTestOneNg, ImageColorFilterTestLanguageChanging, TestSize.Level0)
 {
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
