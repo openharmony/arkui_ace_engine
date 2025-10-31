@@ -13,11 +13,12 @@
  * limitations under the License.
  */
 
+
 #include "gtest/gtest.h"
+
 
 #define private public
 #define protected public
- 
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_media_player.h"
@@ -53,8 +54,10 @@
 #include "component_ext/movingphoto/movingphoto_layout_algorithm.h"
 #include "component_ext/movingphoto/movingphoto_utils.h"
 
+
 using namespace testing;
 using namespace testing::ext;
+
 
 namespace OHOS::Ace::NG {
 struct TestProperty {
@@ -240,12 +243,15 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoEventTest003, TestSize.Level1)
     movingPhotoEventHub->FireStartEvent();
     auto onStart_ = movingPhotoEventHub->GetOnStart();
     EXPECT_TRUE(onStart_ != nullptr);
+
     movingPhotoEventHub->FireFinishEvent();
     auto onFinish_ = movingPhotoEventHub->GetOnFinish();
     EXPECT_TRUE(onFinish_!= nullptr);
+    
     movingPhotoEventHub->FireStopEvent();
     auto onStop_ = movingPhotoEventHub->GetOnStop();
     EXPECT_TRUE(onStop_ != nullptr);
+    
     movingPhotoEventHub->FireErrorEvent();
     auto onError_ = movingPhotoEventHub->GetOnError();
     EXPECT_TRUE(onError_ != nullptr);
