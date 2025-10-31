@@ -12,17 +12,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { GridDataSource } from './GridDataSource'
 import { LengthMetrics } from '@kit.ArkUI';
 
 @Entry
 @Component
-struct GridContentOffsetTest {
-  arr: GridDataSource = new GridDataSource([])
+struct ListContentOffsetTest {
+  private arr: number[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18];
   @State edgeE: EdgeEffect = EdgeEffect.Spring
   @State alwaysEnable: boolean = false;
   @State columnCount: number = 2
-  @State columnTemplate: string = '1fr '.repeat(this.columnCount)
   @State currentOffset: number = 0
   @State startOffset: number = 20
   @State endOffset: number = 30
@@ -35,35 +33,11 @@ struct GridContentOffsetTest {
   @State fadingEdge: boolean = false
   @State backToTop: boolean = false
   scroller: Scroller = new Scroller();
-  irregular: boolean = false;
-  @State layoutOptions: GridLayoutOptions = {
-    regularSize: [1, 1]
-  }
 
   build() {
     Column({ space: 5 }) {
       Scroll() {
         Column({ space: 5 }) {
-          Row() {
-            Button('切换布局模式')
-              .onClick(() => {
-                this.irregular = !this.irregular
-                if (this.irregular) {
-                  this.layoutOptions = {
-                    regularSize: [1, 1],
-                    irregularIndexes: [0, 5, 7, 11, 24],
-                    onGetIrregularSizeByIndex: (index: number) => {
-                      if (index == 0) {
-                        return [1, 3]
-                      }
-                      return [2, 2]
-                    }
-                  }
-                } else {
-                  this.layoutOptions = { regularSize: [1, 1] }
-                }
-              })
-          }
           Row() {
             Button('currentOffset: ' + this.currentOffset)
               .onClick(() => {
@@ -246,9 +220,9 @@ struct GridContentOffsetTest {
         }
       }.height('40%')
 
-      Grid(this.scroller, this.layoutOptions) {
-        LazyForEach(this.arr, (item: string, index: number) => {
-          GridItem() {
+      List({scroller:this.scroller, space:10}) {
+        ForEach(this.arr, (item: string, index: number) => {
+          ListItem() {
             Text(item)
               .width('30%')
               .height(100)
@@ -260,9 +234,6 @@ struct GridContentOffsetTest {
           }
         }, (item: string) => item)
       }
-      .columnsTemplate(this.columnTemplate)
-      .columnsGap(10)
-      .rowsGap(10)
       .edgeEffect(this.edgeE, { alwaysEnabled: this.alwaysEnable })
       .width('90%')
       .height(300)
@@ -270,40 +241,33 @@ struct GridContentOffsetTest {
       .backgroundColor(Color.Green)
       .cachedCount(this.cachedCount, this.showCache)
       .scrollBar(BarState.On)
+      .lanes(this.columnCount)
       .contentStartOffset(this.startOffset)
       .contentEndOffset(this.endOffset)
       .scrollBarWidth(20)
       .onScrollStart(() => {
-        console.log('grid on scroll start')
+        console.log('list on scroll start')
       })
       .onScrollStop(() => {
-        console.log('grid on scroll stop')
+        console.log('list on scroll stop')
       })
       .onReachStart(() => {
-        console.log('grid on reach start')
+        console.log('list on reach start')
       })
       .onReachEnd(() => {
-        console.log('grid on reach end')
+        console.log('list on reach end')
       })
       .onScrollIndex((start: number, end: number) => {
-        console.log('grid on scroll index start' + start + ', end:' + end)
+        console.log('list on scroll index start' + start + ', end:' + end)
       })
       .onDidScroll((offset: number, state: ScrollState) => {
-        console.log('grid on did scroll offset:' + offset + ', state:' + state)
+        console.log('list on did scroll offset:' + offset + ', state:' + state)
       })
       .onWillScroll((offset: number, state: ScrollState, source: ScrollSource) => {
-        console.log('grid on did scroll offset:' + offset + ', state:' + state + ', source:' + source)
+        console.log('list on did scroll offset:' + offset + ', state:' + state + ', source:' + source)
       })
       .fadingEdge(this.fadingEdge)
       .backToTop(this.backToTop)
     }
-  }
-
-  aboutToAppear() {
-    let list: string[] = [];
-    for (let i = 0; i < 24; i++) {
-      list.push(i + '')
-    }
-    this.arr = new GridDataSource(list);
   }
 }
