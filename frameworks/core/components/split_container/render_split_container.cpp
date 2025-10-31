@@ -291,6 +291,7 @@ bool RenderSplitContainer::HandleMouseEvent(const MouseEvent& event)
             preIsDraged_ = isDraged_;
             auto mouseStyle = MouseStyle::CreateMouseStyle();
             auto context = GetContext().Upgrade();
+            CHECK_NULL_RETURN(context, false);
             auto windowId = context->GetWindowId();
             if (isDraged_) {
                 MouseFormat leftRightStyle = MouseFormat::WEST_EAST;
@@ -315,6 +316,7 @@ bool RenderSplitContainer::HandleMouseEvent(const MouseEvent& event)
             preIsDraged_ = isDraged_;
             auto mouseStyle = MouseStyle::CreateMouseStyle();
             auto context = GetContext().Upgrade();
+            CHECK_NULL_RETURN(context, false);
             auto windowId = context->GetWindowId();
             if (isDraged_) {
                 MouseFormat upDownStyle = MouseFormat::NORTH_SOUTH;
