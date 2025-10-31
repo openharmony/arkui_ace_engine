@@ -48,6 +48,7 @@ public:
     static void SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd);
     static void SetLayoutMode(FrameNode* frameNode, WaterFlowLayoutMode mode);
     static void SetFooter(FrameNode* frameNode, const RefPtr<NG::UINode>& footer);
+    static void ResetFooter(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_MODEL_STATIC_H
