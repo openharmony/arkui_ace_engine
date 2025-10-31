@@ -211,6 +211,10 @@ std::string GetAniStringEnum(ani_env* env, ani_array array, ani_int index, bool&
         isSuccess = false;
         return "";
     }
+    if (AniUtils::IsString(env, static_cast<ani_object>(modeRef))) {
+        isSuccess = true;
+        return AniUtils::ANIStringToStdString(env, static_cast<ani_string>(modeRef));
+    }
     ani_string dataTypeAni;
     if ((ANI_OK != env->EnumItem_GetValue_String(static_cast<ani_enum_item>(modeRef), &dataTypeAni))) {
         isSuccess = false;
