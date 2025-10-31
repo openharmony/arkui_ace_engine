@@ -17,7 +17,6 @@
 #include "gtest/gtest.h"
 
 
-
 #define private public
 #define protected public
 #include "test/mock/core/common/mock_theme_manager.h"
@@ -46,7 +45,6 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/image/image_source_info.h"
-
 
 #include "component_ext/movingphoto/movingphoto_styles.h"
 #include "component_ext/movingphoto/movingphoto_pattern.h"
@@ -245,12 +243,15 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoEventTest003, TestSize.Level1)
     movingPhotoEventHub->FireStartEvent();
     auto onStart_ = movingPhotoEventHub->GetOnStart();
     EXPECT_TRUE(onStart_ != nullptr);
+
     movingPhotoEventHub->FireFinishEvent();
     auto onFinish_ = movingPhotoEventHub->GetOnFinish();
     EXPECT_TRUE(onFinish_!= nullptr);
+    
     movingPhotoEventHub->FireStopEvent();
     auto onStop_ = movingPhotoEventHub->GetOnStop();
     EXPECT_TRUE(onStop_ != nullptr);
+    
     movingPhotoEventHub->FireErrorEvent();
     auto onError_ = movingPhotoEventHub->GetOnError();
     EXPECT_TRUE(onError_ != nullptr);
