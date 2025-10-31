@@ -25,6 +25,7 @@ public:
     ApsMonitor() = default;
     virtual ~ApsMonitor() = default;
     virtual void SetApsScene(const std::string& sceneName, bool onOff) = 0;
+    virtual void ReSetApsClient() = 0;
 };
 
 } // namespace OHOS::Ace

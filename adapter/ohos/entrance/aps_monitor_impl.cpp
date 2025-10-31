@@ -77,4 +77,9 @@ void ApsMonitorImpl::LoadApsFuncOnce()
     }
     isloadapsfunc_ = true;
 }
+
+void ApsMonitorImpl::ReSetApsClient()
+{
+
+}
 } // namespace OHOS::Ace

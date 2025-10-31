@@ -27,6 +27,7 @@ public:
 
 private:
     void LoadApsFuncOnce();
+    void ReSetApsClient() override;
     static const std::set<std::string> apsScenes;
     void* loadfilehandle_ = nullptr;
     SetSceneFunc setFunc_ = nullptr;
