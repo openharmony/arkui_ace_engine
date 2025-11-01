@@ -85,11 +85,11 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTestForJpg, TestSize.Level0)
 }
 
 /**
- * @tc.name: ImageColorFilterTest003
+ * @tc.name: ImageColorFilterTestForPng
  * @tc.desc: Test image ColorFilter for png is set correctly.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestOneNg, ImageColorFilterTest003, TestSize.Level0)
+HWTEST_F(ImageTestOneNg, ImageColorFilterTestForPng, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
