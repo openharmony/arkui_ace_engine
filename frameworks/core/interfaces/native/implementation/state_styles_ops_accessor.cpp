@@ -40,7 +40,7 @@ void OnStateStyleChangeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(eventHub);
     uint64_t currentState = static_cast<uint64_t>(static_cast<uint32_t>(allState));
     std::function<void(uint64_t)> onStateStyleChange = onStateStyleChangeLambda;
-    eventHub->AddSupportedUIStateWithCallback(allState, onStateStyleChange, false);
+    eventHub->AddSupportedUIStateWithCallback(currentState, onStateStyleChange, false);
 }
 } // StateStylesOpsAccessor
 const GENERATED_ArkUIStateStylesOpsAccessor* GetStateStylesOpsAccessor()
