@@ -289,11 +289,11 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTestForPngEmptyArray, TestSize.Level0)
 }
 
 /**
- * @tc.name: ImageColorFilterTest007
+ * @tc.name: ImageColorFilterTestForSvgEmptyArray
  * desc: Test image ColorFilter for svg is set correctly by empty array.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestOneNg, ImageColorFilterTest007, TestSize.Level0)
+HWTEST_F(ImageTestOneNg, ImageColorFilterTestForSvgEmptyArray, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
