@@ -584,7 +584,11 @@ void NavigationModelNG::UpdateMainTitle(
     CHECK_NULL_VOID(titleBarNode);
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
     CHECK_NULL_VOID(titleBarPattern);
-    titleBarPattern->AddResObj(key, mainResObj, std::move(updateFunc));
+    if (mainResObj) {
+        titleBarPattern->AddResObj(key, mainResObj, std::move(updateFunc));
+    } else {
+        titleBarPattern->RemoveResObj(key);
+    }
 }
 
 void NavigationModelNG::UpdateSubTitle(
@@ -613,7 +617,11 @@ void NavigationModelNG::UpdateSubTitle(
     CHECK_NULL_VOID(titleBarNode);
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
     CHECK_NULL_VOID(titleBarPattern);
-    titleBarPattern->AddResObj(key, resObj, std::move(updateFunc));
+    if (resObj) {
+        titleBarPattern->AddResObj(key, resObj, std::move(updateFunc));
+    } else {
+        titleBarPattern->RemoveResObj(key);
+    }
 }
 
 void NavigationModelNG::SetTitle(const std::string& title, bool hasSubTitle) {}
@@ -697,7 +705,11 @@ void NavigationModelNG::SetTitleHeight(const Dimension& height, const RefPtr<Res
     };
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
     CHECK_NULL_VOID(titleBarPattern);
-    titleBarPattern->AddResObj("navigation.title.customtitle", resObj, std::move(updateFunc));
+    if (resObj) {
+        titleBarPattern->AddResObj("navigation.title.customtitle", resObj, std::move(updateFunc));
+    } else {
+        titleBarPattern->RemoveResObj("navigation.title.customtitle");
+    }
 }
 
 CalcDimension NavigationModelNG::ParseTitleHeight(
@@ -1068,7 +1080,11 @@ void NavigationModelNG::SetBackButtonIcon(const std::function<void(WeakPtr<NG::F
     };
     auto titleBarPattern = titleBarNode->GetPattern();
     CHECK_NULL_VOID(titleBarPattern);
-    titleBarPattern->AddResObj(key, resObj, std::move(updateFunc));
+    if (resObj) {
+        titleBarPattern->AddResObj(key, resObj, std::move(updateFunc));
+    } else {
+        titleBarPattern->RemoveResObj(key);
+    }
 }
 
 void NavigationModelNG::SetBackButtonIconSrcAndTextRes(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
@@ -1133,7 +1149,11 @@ void NavigationModelNG::UpdateBackButtonIcon(const std::vector<std::string>& nam
     };
     auto titleBarPattern = titleBarNode->GetPattern();
     CHECK_NULL_VOID(titleBarPattern);
-    titleBarPattern->AddResObj(key, backButtonIconResObj, std::move(updateFunc));
+    if (backButtonIconResObj) {
+        titleBarPattern->AddResObj(key, backButtonIconResObj, std::move(updateFunc));
+    } else {
+        titleBarPattern->RemoveResObj(key);
+    }
 }
 
 void NavigationModelNG::UpdateBackButtonIconText(bool userDefinedAccessibilityText,
@@ -1164,7 +1184,11 @@ void NavigationModelNG::UpdateBackButtonIconText(bool userDefinedAccessibilityTe
     };
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
     CHECK_NULL_VOID(titleBarPattern);
-    titleBarPattern->AddResObj(key, backButtonTextResObj, std::move(updateFunc));
+    if (backButtonTextResObj) {
+        titleBarPattern->AddResObj(key, backButtonTextResObj, std::move(updateFunc));
+    } else {
+        titleBarPattern->RemoveResObj(key);
+    }
 }
 
 void NavigationModelNG::SetBackButtonIconTextRes(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
@@ -1208,7 +1232,11 @@ void NavigationModelNG::SetBackButtonIconTextRes(const std::function<void(WeakPt
     };
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
     CHECK_NULL_VOID(titleBarPattern);
-    titleBarPattern->AddResObj(key, resObj, std::move(updateFunc));
+    if (resObj) {
+        titleBarPattern->AddResObj(key, resObj, std::move(updateFunc));
+    } else {
+        titleBarPattern->RemoveResObj(key);
+    }
 }
 
 void NavigationModelNG::SetHideBackButton(bool hideBackButton)
@@ -1338,7 +1366,11 @@ void NavigationModelNG::SetToolbarConfiguration(std::vector<NG::BarItem>&& toolB
     };
     auto pattern = navBarNode->GetPattern();
     CHECK_NULL_VOID(pattern);
-    pattern->AddResObj("navigation.toolbarConfiguration", resObj, std::move(updateFunc));
+    if (resObj) {
+        pattern->AddResObj("navigation.toolbarConfiguration", resObj, std::move(updateFunc));
+    } else {
+        pattern->RemoveResObj("navigation.toolbarConfiguration");
+    }
 }
 
 void NavigationModelNG::SetToolbarConfiguration(std::vector<NG::BarItem>&& toolBarItems)
@@ -1400,7 +1432,11 @@ void NavigationModelNG::SetMenuItems(std::vector<NG::BarItem>&& menuItems)
         navBarNode->MarkModifyDone();
         navBarNode->MarkDirtyNode();
     };
-    navBarPattern->AddResObj("navigation.menuItems", resObj, std::move(updateFunc));
+    if (resObj) {
+        navBarPattern->AddResObj("navigation.menuItems", resObj, std::move(updateFunc));
+    } else {
+        navBarPattern->RemoveResObj("navigation.menuItems");
+    }
 }
 
 void NavigationModelNG::SetCustomMenu(const RefPtr<AceType>& customNode)
@@ -1530,7 +1566,11 @@ void NavigationModelNG::SetNavBarWidth(const RefPtr<ResourceObject>& navBarWidth
     };
     auto pattern = frameNode->GetPattern<NavigationPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->AddResObj(key, navBarWidthResObj, std::move(updateNavBarWidthFunc));
+    if (navBarWidthResObj) {
+        pattern->AddResObj(key, navBarWidthResObj, std::move(updateNavBarWidthFunc));
+    } else {
+        pattern->RemoveResObj(key);
+    }
 }
 
 void NavigationModelNG::SetMinNavBarWidth(const Dimension& value)
@@ -1584,7 +1624,11 @@ void NavigationModelNG::SetMinNavBarWidth(const RefPtr<ResourceObject>& minNavBa
     };
     auto pattern = frameNode->GetPattern<NavigationPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->AddResObj(key, minNavBarWidthResObj, std::move(updateMinNavBarWidthFunc));
+    if (minNavBarWidthResObj) {
+        pattern->AddResObj(key, minNavBarWidthResObj, std::move(updateMinNavBarWidthFunc));
+    } else {
+        pattern->RemoveResObj(key);
+    }
 }
 
 void NavigationModelNG::SetMaxNavBarWidth(const Dimension& value)
@@ -1638,7 +1682,11 @@ void NavigationModelNG::SetMaxNavBarWidth(const RefPtr<ResourceObject>& maxNavBa
     };
     auto pattern = frameNode->GetPattern<NavigationPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->AddResObj(key, maxNavBarWidthResObj, std::move(updateMaxNavBarWidthFunc));
+    if (maxNavBarWidthResObj) {
+        pattern->AddResObj(key, maxNavBarWidthResObj, std::move(updateMaxNavBarWidthFunc));
+    } else {
+        pattern->RemoveResObj(key);
+    }
 }
 
 void NavigationModelNG::SetMinContentWidth(const Dimension& value)
@@ -1689,7 +1737,11 @@ void NavigationModelNG::SetMinContentWidth(const RefPtr<ResourceObject>& minCont
     };
     auto pattern = frameNode->GetPattern<NavigationPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->AddResObj(key, minContentWidthResObj, std::move(updateMinContentWidthFunc));
+    if (minContentWidthResObj) {
+        pattern->AddResObj(key, minContentWidthResObj, std::move(updateMinContentWidthFunc));
+    } else {
+        pattern->RemoveResObj(key);
+    }
 }
 
 void NavigationModelNG::SetOnNavBarStateChange(std::function<void(bool)>&& onNavBarStateChange)
@@ -1994,7 +2046,11 @@ void NavigationModelNG::SetMinContentWidth(FrameNode* frameNode, const RefPtr<Re
     };
     auto pattern = frameNode->GetPattern<NavigationPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->AddResObj(key, minContentWidthResObj, std::move(updateMinContentWidthFunc));
+    if (minContentWidthResObj) {
+        pattern->AddResObj(key, minContentWidthResObj, std::move(updateMinContentWidthFunc));
+    } else {
+        pattern->RemoveResObj(key);
+    }
 }
 
 void NavigationModelNG::SetMinNavBarWidth(FrameNode* frameNode, const Dimension& value)
@@ -2045,7 +2101,11 @@ void NavigationModelNG::SetMinNavBarWidth(FrameNode* frameNode, const RefPtr<Res
     };
     auto pattern = frameNode->GetPattern<NavigationPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->AddResObj(key, minNavBarWidthResObj, std::move(updateMinNavBarWidthFunc));
+    if (minNavBarWidthResObj) {
+        pattern->AddResObj(key, minNavBarWidthResObj, std::move(updateMinNavBarWidthFunc));
+    } else {
+        pattern->RemoveResObj(key);
+    }
 }
 
 void NavigationModelNG::SetMaxNavBarWidth(FrameNode* frameNode, const Dimension& value)
@@ -2096,7 +2156,11 @@ void NavigationModelNG::SetMaxNavBarWidth(FrameNode* frameNode, const RefPtr<Res
     };
     auto pattern = frameNode->GetPattern<NavigationPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->AddResObj(key, maxNavBarWidthResObj, std::move(updateMaxNavBarWidthFunc));
+    if (maxNavBarWidthResObj) {
+        pattern->AddResObj(key, maxNavBarWidthResObj, std::move(updateMaxNavBarWidthFunc));
+    } else {
+        pattern->RemoveResObj(key);
+    }
 }
 
 void NavigationModelNG::SetNavBarWidth(FrameNode* frameNode, const Dimension& value)
@@ -2154,7 +2218,11 @@ void NavigationModelNG::SetNavBarWidth(FrameNode* frameNode, const RefPtr<Resour
     };
     auto pattern = frameNode->GetPattern<NavigationPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->AddResObj(key, navBarWidthResObj, std::move(updateNavBarWidthFunc));
+    if (navBarWidthResObj) {
+        pattern->AddResObj(key, navBarWidthResObj, std::move(updateNavBarWidthFunc));
+    } else {
+        pattern->RemoveResObj(key);
+    }
 }
 
 void NavigationModelNG::SetNavBarPosition(FrameNode* frameNode, NG::NavBarPosition mode)
@@ -2232,7 +2300,11 @@ void NavigationModelNG::SetBackButtonIcon(FrameNode* frameNode,
     };
     auto pattern = titleBarNode->GetPattern<TitleBarPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->AddResObj(key, backButtonIconResObj, std::move(updateFunc));
+    if (backButtonIconResObj) {
+        pattern->AddResObj(key, backButtonIconResObj, std::move(updateFunc));
+    } else {
+        pattern->RemoveResObj(key);
+    }
 }
 
 void NavigationModelNG::SetHideNavBarInner(
@@ -2572,7 +2644,11 @@ void NavigationModelNG::SetTitlebarOptions(NavigationTitlebarOptions&& opt)
     };
     auto pattern = navigationGroupNode->GetPattern();
     CHECK_NULL_VOID(pattern);
-    pattern->AddResObj("navigation.navigationTitlebarOptions", resObj, std::move(updateFunc));
+    if (resObj) {
+        pattern->AddResObj("navigation.navigationTitlebarOptions", resObj, std::move(updateFunc));
+    } else {
+        pattern->RemoveResObj("navigation.navigationTitlebarOptions");
+    }
 }
 
 void NavigationModelNG::SetHideItemText(bool isHideItemText)
@@ -2639,7 +2715,11 @@ void NavigationModelNG::SetMenuOptions(NavigationMenuOptions&& opt)
         navigationGroupNode->MarkModifyDone();
         navigationGroupNode->MarkDirtyNode();
     };
-    navBarPattern->AddResObj("navigation.navigationMenuOptions", resObj, std::move(updateFunc));
+    if (resObj) {
+        navBarPattern->AddResObj("navigation.navigationMenuOptions", resObj, std::move(updateFunc));
+    } else {
+        navBarPattern->RemoveResObj("navigation.navigationMenuOptions");
+    }
 }
 
 void NavigationModelNG::SetIgnoreLayoutSafeArea(const NG::IgnoreLayoutSafeAreaOpts& opts)
@@ -2886,6 +2966,11 @@ void NavigationModelNG::UpdateMainTitleInfo(
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
     CHECK_NULL_VOID(titleBarPattern);
     titleBarPattern->AddResObj(key, mainResObj, std::move(updateFunc));
+    if (mainResObj) {
+        titleBarPattern->AddResObj(key, mainResObj, std::move(updateFunc));
+    } else {
+        titleBarPattern->RemoveResObj(key);
+    }
 }
 
 void NavigationModelNG::UpdateSubTitleInfo(
@@ -2914,7 +2999,11 @@ void NavigationModelNG::UpdateSubTitleInfo(
     };
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
     CHECK_NULL_VOID(titleBarPattern);
-    titleBarPattern->AddResObj(key, resObj, std::move(updateFunc));
+    if (resObj) {
+        titleBarPattern->AddResObj(key, resObj, std::move(updateFunc));
+    } else {
+        titleBarPattern->RemoveResObj(key);
+    }
 }
 
 void NavigationModelNG::SetTitlebarOptions(FrameNode* frameNode, NavigationTitlebarOptions&& opt)
