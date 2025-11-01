@@ -216,11 +216,12 @@ void SecurityUIExtensionPattern::OnAttachContext(PipelineContext *context)
 
 void SecurityUIExtensionPattern::UpdateSessionInstanceId(int32_t instanceId)
 {
-    auto sessionWrapperImpl = AceType::DynamicCast<PreviewSessionWrapperImpl>(sessionWrapper_);
-    if (!sessionWrapperImpl) {
+    if (sessionWrapper_ == nullptr) {
+        PLATFORM_LOGW("securitySessionWrapperImpl is nullptr");
         return;
     }
-    sessionWrapperImpl->UpdateInstanceId(instanceId);
+
+    sessionWrapper_->UpdateInstanceId(instanceId);
 }
 
 void SecurityUIExtensionPattern::UpdateWant(const AAFwk::Want& want)

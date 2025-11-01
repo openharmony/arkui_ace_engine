@@ -292,4 +292,8 @@ void SecuritySessionWrapperImpl::ReDispatchWantParams() {}
 void SecuritySessionWrapperImpl::DispatchExtensionDataToHostWindow(uint32_t customId, const AAFwk::Want& data)
 {
 }
+
+void SecuritySessionWrapperImpl::UpdateInstanceId(int32_t instanceId)
+{
+}
 } // namespace OHOS::Ace::NG
