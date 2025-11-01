@@ -399,7 +399,16 @@ import hilog from '@ohos.hilog'
         ON_HIDE = 1
     }
 
-    export class TabContentInfo {
+    export interface TabContentInfo {
+        tabContentId: string;
+        tabContentUniqueId: int;
+        state: TabContentState;
+        index: int;
+        id: string;
+        uniqueId: int;
+    }
+
+    export class TabContentInfoImpl implements TabContentInfo {
         tabContentId: string;
         tabContentUniqueId: int;
         state: TabContentState;

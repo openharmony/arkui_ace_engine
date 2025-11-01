@@ -36,7 +36,7 @@ constexpr char NAVDESTINATION_PARAM_WITHID[] =
 constexpr char ANI_TABCONTENT_WITH_OPTIONS_CLS[] =
     "C{@ohos.arkui.observer.uiObserver.ObserverOptions}C{std.core.Function1}:";
 constexpr char ANI_TABCONTENT_CLS[] = "C{std.core.Function1}:";
-constexpr char ANI_TABCONTENT_INFO_CLS[] = "@ohos.arkui.observer.uiObserver.TabContentInfo";
+constexpr char ANI_TABCONTENT_INFO_CLS[] = "@ohos.arkui.observer.uiObserver.TabContentInfoImpl";
 constexpr char ANI_TABCONTENT_STATE_TYPE[] = "@ohos.arkui.observer.uiObserver.TabContentState";
 } // namespace
 namespace OHOS::Ace {
@@ -688,7 +688,7 @@ public:
             env->FunctionalObject_Call(
                 reinterpret_cast<ani_fn_object>(cb), cbParam.size(), cbParam.data(), &fnRetrunVal);
         }
-        auto iter = specifiedTabContentUpdateListeners_.find(tabContentInfo.tabContentId);
+        auto iter = specifiedTabContentUpdateListeners_.find(tabContentInfo.id);
         if (iter == specifiedTabContentUpdateListeners_.end()) {
             return;
         }
@@ -1126,7 +1126,7 @@ static void OffTabContentUpdateWithOptions([[maybe_unused]] ani_env* env, [[mayb
         return;
     }
     ani_ref aniTabId;
-    env->Object_GetPropertyByName_Ref(options, "tabContentId", &aniTabId);
+    env->Object_GetPropertyByName_Ref(options, "id", &aniTabId);
     std::string tabContentId = ANIUtils_ANIStringToStdString(env, reinterpret_cast<ani_string>(aniTabId));
     ani_ref fnObjGlobalRef = nullptr;
     ani_boolean isUndef = ANI_FALSE;
