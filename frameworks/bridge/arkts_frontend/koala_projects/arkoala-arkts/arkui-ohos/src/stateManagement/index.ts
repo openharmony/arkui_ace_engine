@@ -16,6 +16,7 @@ export * from './base/stateUpdateLoop';
 export * from './decoratorImpl/decoratorState';
 export * from './decoratorImpl/decoratorLink';
 export * from './decoratorImpl/decoratorProp';
+export * from './decoratorImpl/decoratorPropRef';
 export * from './decoratorImpl/decoratorProvide';
 export * from './decoratorImpl/decoratorProvider';
 export * from './decoratorImpl/decoratorConsume';

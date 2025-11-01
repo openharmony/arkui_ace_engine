@@ -24,6 +24,7 @@ import {
     StateDecoratedVariable, 
     ProvideDecoratedVariable, 
     PropDecoratedVariable,
+    PropRefDecoratedVariable,
     LinkDecoratedVariable, 
     ConsumeDecoratedVariable, 
     InteropWatchFunc,
@@ -211,7 +212,7 @@ function closeInterop(): void {
 
 export type CompatibleStateChangeCallback<T> = (value: T) => void;
 
-type StateUnion<T> = StateDecoratedVariable<T> | ProvideDecoratedVariable<T> | PropDecoratedVariable<T>
+type StateUnion<T> = StateDecoratedVariable<T> | ProvideDecoratedVariable<T> | PropDecoratedVariable<T> | PropRefDecoratedVariable<T>;
 
 export function getCompatibleState<T>(staticState: IDecoratedV1Variable<T>): ESValue {
     const global = ESValue.getGlobal();
@@ -230,6 +231,7 @@ export function getCompatibleState<T>(staticState: IDecoratedV1Variable<T>): ESV
     const isState = source instanceof StateDecoratedVariable;
     const isProvide = source instanceof ProvideDecoratedVariable;
     const isProp = source instanceof PropDecoratedVariable;
+    const isPropRef = source instanceof PropRefDecoratedVariable;
 
     if (isState) {
         let state = source as StateDecoratedVariable<T>;
@@ -275,6 +277,27 @@ export function getCompatibleState<T>(staticState: IDecoratedV1Variable<T>): ESV
         return state.getProxy()!;
     } else if (isProp) {
         let state = source as PropDecoratedVariable<T>;
+        if (state.getProxy() === undefined) {
+            const setSource = ((value: T): void => {
+                state.set(value);
+            });
+            const fireChange = (): void => {
+                state.fireChange();
+            }
+            const proxy = createState.invoke(ESValue.wrap(state), ESValue.wrap(state!.get()), ESValue.wrap(setSource), ESValue.wrap(fireChange));
+            state.setProxy(proxy);
+            const setProxyValue = ((value: T): void => {
+                proxy.invokeMethod('set', ESValue.wrap(value));
+            });
+            state.setProxyValue = setProxyValue;
+            const notifyProxy = (): void => {
+                proxy.invokeMethod('syncPeerHasChanged');
+            };
+            state.addWatch(notifyProxy);
+        }
+        return state.getProxy()!;
+    } else if (isPropRef) {
+        let state = source as PropRefDecoratedVariable<T>;
         if (state.getProxy() === undefined) {
             const setSource = ((value: T): void => {
                 state.set(value);
