@@ -943,11 +943,11 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTestForPictureWithPng, TestSize.Level0)
 }
 
 /**
- * @tc.name: ImageColorFilterTest017
+ * @tc.name: ImageColorFilterTestGetContentDrawFunction
  * @tc.desc: Test image ColorFilter is set correctly by the methode of GetContentDrawFunction .
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestOneNg, ImageColorFilterTest017, TestSize.Level0)
+HWTEST_F(ImageTestOneNg, ImageColorFilterTestGetContentDrawFunction, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
