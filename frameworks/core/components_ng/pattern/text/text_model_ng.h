@@ -241,6 +241,7 @@ public:
     static bool GetOptimizeTrailingSpace(FrameNode* frameNode);
     static void SetGradientStyle(FrameNode* frameNode, NG::Gradient& gradient);
     static void SetColorShaderStyle(FrameNode* frameNode, const Color& value);
+    static Color GetColorShaderStyle(FrameNode* frameNode);
     static NG::Gradient GetGradientStyle(FrameNode* frameNode);
     static void ResetTextGradient(FrameNode* frameNode);
     static void SetTextVerticalAlign(FrameNode* frameNode, TextVerticalAlign verticalAlign);

@@ -1296,6 +1296,7 @@ void JSText::ParseShaderStyle(const JSCallbackInfo& info, NG::Gradient& gradient
         return;
     }
     auto shaderStyleObj = JSRef<JSObject>::Cast(info[0]);
+    UnRegisterResource("ColorShaderStyle");
     if (shaderStyleObj->HasProperty("options")) {
         auto optionsValue = shaderStyleObj->GetProperty("options");
         if (optionsValue->IsObject()) {
@@ -1310,8 +1311,15 @@ void JSText::ParseShaderStyle(const JSCallbackInfo& info, NG::Gradient& gradient
         TextModel::GetInstance()->SetGradientShaderStyle(gradient);
     } else if (shaderStyleObj->HasProperty("color")) {
         Color textColor;
+        RefPtr<ResourceObject> resObj;
         auto infoColor = shaderStyleObj->GetProperty("color");
-        ParseJsColor(infoColor, textColor);
+        if (!ParseJsColor(infoColor, textColor, resObj)) {
+            TextModel::GetInstance()->ResetGradientShaderStyle();
+            return;
+        }
+        if (SystemProperties::ConfigChangePerform() && resObj) {
+            RegisterResource<Color>("ColorShaderStyle", resObj, textColor);
+        }
         TextModel::GetInstance()->SetColorShaderStyle(textColor);
     } else {
         TextModel::GetInstance()->ResetGradientShaderStyle();
