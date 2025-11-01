@@ -1706,21 +1706,34 @@ HWTEST_F(ImageTestNg, OnAttachToFrameNode001, TestSize.Level0)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<ImageTheme>()));
     auto pipeline = PipelineContext::GetCurrentContext();
+
+    /**
+     * @tc.cases: case1. frameNode draggable is false, imageTheme draggable is false.
+     */
     pipeline->GetTheme<ImageTheme>()->draggable_ = false;
     frameNode->draggable_ = false;
     pattern->OnAttachToFrameNode();
     EXPECT_FALSE(frameNode->draggable_);
 
+    /**
+     * @tc.cases: case2. frameNode draggable is true, imageTheme draggable is false.
+     */
     pipeline->GetTheme<ImageTheme>()->draggable_ = false;
     frameNode->draggable_ = true;
     pattern->OnAttachToFrameNode();
     EXPECT_TRUE(frameNode->draggable_);
 
+    /**
+     * @tc.cases: case3. frameNode draggable is true, imageTheme draggable is true.
+     */
     pipeline->GetTheme<ImageTheme>()->draggable_ = true;
     frameNode->draggable_ = true;
     pattern->OnAttachToFrameNode();
     EXPECT_TRUE(frameNode->draggable_);
 
+    /**
+     * @tc.cases: case4. frameNode draggable is false, imageTheme draggable is true.
+     */
     pipeline->GetTheme<ImageTheme>()->draggable_ = true;
     frameNode->draggable_ = false;
     pattern->OnAttachToFrameNode();
@@ -2199,7 +2212,7 @@ HWTEST_F(ImageTestNg, ImageReset001, TestSize.Level0)
 }
 
 /* @tc.name: TestSetBorderRadius001
- * @tc.desc: Test SetBorderRadius
+ * @tc.desc: Test SetBorderRadius.
  * @tc.type: FUNC
  */
 HWTEST_F(ImageTestNg, TestSetBorderRadius001, TestSize.Level0)
