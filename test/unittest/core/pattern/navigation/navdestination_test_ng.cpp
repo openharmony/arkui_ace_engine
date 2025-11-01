@@ -1646,6 +1646,35 @@ HWTEST_F(NavdestinationTestNg, ResetResObj002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateMainTitle
+ * @tc.desc: if (resObj) false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, UpdateMainTitle, TestSize.Level1)
+{
+    NavDestinationModelNG navDestinationModelNG;
+    navDestinationModelNG.Create();
+    navDestinationModelNG.SetTitle("navDestinationModelNG", false);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    auto navDestinationPattern = navDestinationGroupNode->GetPattern<NavDestinationPattern>();
+    
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(BUNDLE_NAME, MODULE_NAME, 0);
+    auto updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {};
+    std::string key = "navDestination.title.commonMainTitle";
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationGroupNode->GetTitleBarNode());
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    titleBarPattern->AddResObj(key, resObj, std::move(updateFunc));
+    auto resMgr = titleBarPattern->resourceMgr_;
+    EXPECT_EQ(resMgr->resMap_.size(), 1);
+    
+    resObj = nullptr;
+    navDestinationModelNG.UpdateMainTitle(titleBarNode, resObj);
+    EXPECT_EQ(resMgr->resMap_.size(), 0);
+}
+
+/**
  * @tc.name: RegisterBackgroundColorUpdateCallback001
  * @tc.desc: Test RegisterBackgroundColorUpdateCallback.
  * @tc.type: FUNC

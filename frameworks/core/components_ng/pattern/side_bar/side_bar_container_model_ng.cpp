@@ -182,7 +182,11 @@ void SideBarContainerModelNG::SetSideBarWidth(const RefPtr<ResourceObject>& resO
     };
     auto pattern = frameNode->GetPattern<SideBarContainerPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->AddResObj(key, resObj, std::move(updateSideBarWidthFunc));
+    if (resObj) {
+        pattern->AddResObj(key, resObj, std::move(updateSideBarWidthFunc));
+    } else {
+        pattern->RemoveResObj(key);
+    }
 }
 
 void SideBarContainerModelNG::SetMinSideBarWidth(const RefPtr<ResourceObject>& resObj)
@@ -211,7 +215,11 @@ void SideBarContainerModelNG::SetMinSideBarWidth(const RefPtr<ResourceObject>& r
     };
     auto pattern = frameNode->GetPattern<SideBarContainerPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->AddResObj(key, resObj, std::move(updateMinSideBarWidthFunc));
+    if (resObj) {
+        pattern->AddResObj(key, resObj, std::move(updateMinSideBarWidthFunc));
+    } else {
+        pattern->RemoveResObj(key);
+    }
 }
 
 void SideBarContainerModelNG::SetMaxSideBarWidth(const RefPtr<ResourceObject>& resObj)
@@ -241,7 +249,11 @@ void SideBarContainerModelNG::SetMaxSideBarWidth(const RefPtr<ResourceObject>& r
     };
     auto pattern = frameNode->GetPattern<SideBarContainerPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->AddResObj("sideBarContainer.maxSideBarWidth", resObj, std::move(updateMaxSideBarWidthFunc));
+    if (resObj) {
+        pattern->AddResObj("sideBarContainer.maxSideBarWidth", resObj, std::move(updateMaxSideBarWidthFunc));
+    } else {
+        pattern->RemoveResObj("sideBarContainer.maxSideBarWidth");
+    }
 }
 
 void SideBarContainerModelNG::SetAutoHide(bool autoHide)
@@ -341,7 +353,11 @@ void SideBarContainerModelNG::SetControlButtonShowIconInfo(
     };
     auto pattern = frameNode->GetPattern<SideBarContainerPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->AddResObj(key, showIconResObj, std::move(updateShowIconFunc));
+    if (showIconResObj) {
+        pattern->AddResObj(key, showIconResObj, std::move(updateShowIconFunc));
+    } else {
+        pattern->RemoveResObj(key);
+    }
 }
 
 void SideBarContainerModelNG::SetControlButtonHiddenIconInfo(
@@ -376,7 +392,11 @@ void SideBarContainerModelNG::SetControlButtonHiddenIconInfo(
     };
     auto pattern = frameNode->GetPattern<SideBarContainerPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->AddResObj(key, hiddenIconResObj, std::move(updateHiddenIconFunc));
+    if (hiddenIconResObj) {
+        pattern->AddResObj(key, hiddenIconResObj, std::move(updateHiddenIconFunc));
+    } else {
+        pattern->RemoveResObj(key);
+    }
 }
 
 void SideBarContainerModelNG::SetControlButtonSwitchingIconInfo(
@@ -411,7 +431,11 @@ void SideBarContainerModelNG::SetControlButtonSwitchingIconInfo(
     };
     auto pattern = frameNode->GetPattern<SideBarContainerPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->AddResObj(key, switchingIconResObj, std::move(updateSwitchingIconFunc));
+    if (switchingIconResObj) {
+        pattern->AddResObj(key, switchingIconResObj, std::move(updateSwitchingIconFunc));
+    } else {
+        pattern->RemoveResObj(key);
+    }
 }
 
 void SideBarContainerModelNG::ResetControlButtonIconInfo()
@@ -495,7 +519,11 @@ void SideBarContainerModelNG::SetDividerStrokeWidth(const RefPtr<ResourceObject>
     };
     auto pattern = frameNode->GetPattern<SideBarContainerPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->AddResObj(key, strokeWidthResObj, std::move(updateDividerStrokeWidthFunc));
+    if (strokeWidthResObj) {
+        pattern->AddResObj(key, strokeWidthResObj, std::move(updateDividerStrokeWidthFunc));
+    } else {
+        pattern->RemoveResObj(key);
+    }
 }
 
 void SideBarContainerModelNG::SetDividerColor(const RefPtr<ResourceObject>& colorResObj)
@@ -526,7 +554,11 @@ void SideBarContainerModelNG::SetDividerColor(const RefPtr<ResourceObject>& colo
     };
     auto pattern = frameNode->GetPattern<SideBarContainerPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->AddResObj(key, colorResObj, std::move(updateDividerColorFunc));
+    if (colorResObj) {
+        pattern->AddResObj(key, colorResObj, std::move(updateDividerColorFunc));
+    } else {
+        pattern->RemoveResObj(key);
+    }
 }
 
 void SideBarContainerModelNG::SetDividerStartMargin(const RefPtr<ResourceObject>& startMarginResObj)
@@ -557,7 +589,11 @@ void SideBarContainerModelNG::SetDividerStartMargin(const RefPtr<ResourceObject>
     };
     auto pattern = frameNode->GetPattern<Pattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->AddResObj(key, startMarginResObj, std::move(updateDividerStartMarginFunc));
+    if (startMarginResObj) {
+        pattern->AddResObj(key, startMarginResObj, std::move(updateDividerStartMarginFunc));
+    } else {
+        pattern->RemoveResObj(key);
+    }
 }
 
 void SideBarContainerModelNG::SetDividerEndMargin(const RefPtr<ResourceObject>& endMarginResObj)
@@ -588,7 +624,11 @@ void SideBarContainerModelNG::SetDividerEndMargin(const RefPtr<ResourceObject>& 
     };
     auto pattern = frameNode->GetPattern<Pattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->AddResObj(key, endMarginResObj, std::move(updateDividerEndMarginFunc));
+    if (endMarginResObj) {
+        pattern->AddResObj(key, endMarginResObj, std::move(updateDividerEndMarginFunc));
+    } else {
+        pattern->RemoveResObj(key);
+    }
 }
 
 void SideBarContainerModelNG::SetMinContentWidth(const Dimension& minContentWidth)
@@ -636,7 +676,11 @@ void SideBarContainerModelNG::SetMinContentWidth(const RefPtr<ResourceObject>& r
     };
     auto pattern = frameNode->GetPattern<SideBarContainerPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->AddResObj(key, resObj, std::move(updateMinContentFunc));
+    if (resObj) {
+        pattern->AddResObj(key, resObj, std::move(updateMinContentFunc));
+    } else {
+        pattern->RemoveResObj(key);
+    }
 }
 
 void SideBarContainerModelNG::SetOnChange(std::function<void(const bool)>&& onChange)
@@ -737,7 +781,11 @@ void SideBarContainerModelNG::SetSideBarWidth(FrameNode* frameNode, const RefPtr
     };
     auto pattern = frameNode->GetPattern<SideBarContainerPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->AddResObj(key, resObj, std::move(updateSideBarWidthFunc));
+    if (resObj) {
+        pattern->AddResObj(key, resObj, std::move(updateSideBarWidthFunc));
+    } else {
+        pattern->RemoveResObj(key);
+    }
 }
 
 void SideBarContainerModelNG::SetMinSideBarWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
@@ -772,7 +820,11 @@ void SideBarContainerModelNG::SetMinSideBarWidth(FrameNode* frameNode, const Ref
     };
     auto pattern = frameNode->GetPattern<SideBarContainerPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->AddResObj(key, resObj, std::move(updateSideBarWidthFunc));
+    if (resObj) {
+        pattern->AddResObj(key, resObj, std::move(updateSideBarWidthFunc));
+    } else {
+        pattern->RemoveResObj(key);
+    }
 }
 
 void SideBarContainerModelNG::SetMaxSideBarWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
@@ -803,7 +855,11 @@ void SideBarContainerModelNG::SetMaxSideBarWidth(FrameNode* frameNode, const Ref
     };
     auto pattern = frameNode->GetPattern<SideBarContainerPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->AddResObj(key, resObj, std::move(updateMaxSideBarWidthFunc));
+    if (resObj) {
+        pattern->AddResObj(key, resObj, std::move(updateMaxSideBarWidthFunc));
+    } else {
+        pattern->RemoveResObj(key);
+    }
 }
 
 void SideBarContainerModelNG::SetMinContentWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
@@ -840,7 +896,11 @@ void SideBarContainerModelNG::SetMinContentWidth(FrameNode* frameNode, const Ref
     };
     auto pattern = frameNode->GetPattern<SideBarContainerPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->AddResObj(key, resObj, std::move(updateMinContentFunc));
+    if (resObj) {
+        pattern->AddResObj(key, resObj, std::move(updateMinContentFunc));
+    } else {
+        pattern->RemoveResObj(key);
+    }
 }
 
 void SideBarContainerModelNG::SetControlButtonWidth(FrameNode* frameNode, const Dimension& width)
@@ -894,7 +954,11 @@ void SideBarContainerModelNG::SetControlButtonShowIconInfo(
     };
     auto pattern = frameNode->GetPattern<SideBarContainerPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->AddResObj(key, showIconResObj, std::move(updateShowIconFunc));
+    if (showIconResObj) {
+        pattern->AddResObj(key, showIconResObj, std::move(updateShowIconFunc));
+    } else {
+        pattern->RemoveResObj(key);
+    }
 }
 
 void SideBarContainerModelNG::SetControlButtonHiddenIconInfo(
@@ -928,7 +992,11 @@ void SideBarContainerModelNG::SetControlButtonHiddenIconInfo(
     };
     auto pattern = frameNode->GetPattern<SideBarContainerPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->AddResObj(key, hiddenIconResObj, std::move(updateHiddenIconFunc));
+    if (hiddenIconResObj) {
+        pattern->AddResObj(key, hiddenIconResObj, std::move(updateHiddenIconFunc));
+    } else {
+        pattern->RemoveResObj(key);
+    }
 }
 
 void SideBarContainerModelNG::SetControlButtonSwitchingIconInfo(
@@ -962,7 +1030,11 @@ void SideBarContainerModelNG::SetControlButtonSwitchingIconInfo(
     };
     auto pattern = frameNode->GetPattern<SideBarContainerPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->AddResObj(key, switchingIconResObj, std::move(updateSwitchingIconFunc));
+    if (switchingIconResObj) {
+        pattern->AddResObj(key, switchingIconResObj, std::move(updateSwitchingIconFunc));
+    } else {
+        pattern->RemoveResObj(key);
+    }
 }
 
 void SideBarContainerModelNG::SetControlButtonShowIconInfo(
@@ -1074,7 +1146,11 @@ void SideBarContainerModelNG::SetDividerStrokeWidth(
     };
     auto pattern = frameNode->GetPattern<SideBarContainerPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->AddResObj(key, strokeWidthResObj, std::move(updateDividerStrokeWidthFunc));
+    if (strokeWidthResObj) {
+        pattern->AddResObj(key, strokeWidthResObj, std::move(updateDividerStrokeWidthFunc));
+    } else {
+        pattern->RemoveResObj(key);
+    }
 }
 
 void SideBarContainerModelNG::SetDividerColor(FrameNode* frameNode, const RefPtr<ResourceObject>& colorResObj)
@@ -1104,7 +1180,11 @@ void SideBarContainerModelNG::SetDividerColor(FrameNode* frameNode, const RefPtr
     };
     auto pattern = frameNode->GetPattern<SideBarContainerPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->AddResObj(key, colorResObj, std::move(updateDividerColorFunc));
+    if (colorResObj) {
+        pattern->AddResObj(key, colorResObj, std::move(updateDividerColorFunc));
+    } else {
+        pattern->RemoveResObj(key);
+    }
 }
 
 void SideBarContainerModelNG::SetDividerStartMargin(
@@ -1135,7 +1215,11 @@ void SideBarContainerModelNG::SetDividerStartMargin(
     };
     auto pattern = frameNode->GetPattern<SideBarContainerPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->AddResObj(key, startMarginResObj, std::move(updateDividerStartMarginFunc));
+    if (startMarginResObj) {
+        pattern->AddResObj(key, startMarginResObj, std::move(updateDividerStartMarginFunc));
+    } else {
+        pattern->RemoveResObj(key);
+    }
 }
 
 void SideBarContainerModelNG::SetDividerEndMargin(FrameNode* frameNode, const RefPtr<ResourceObject>& endMarginResObj)
@@ -1165,7 +1249,11 @@ void SideBarContainerModelNG::SetDividerEndMargin(FrameNode* frameNode, const Re
     };
     auto pattern = frameNode->GetPattern<Pattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->AddResObj(key, endMarginResObj, std::move(updateDividerEndMarginFunc));
+    if (endMarginResObj) {
+        pattern->AddResObj(key, endMarginResObj, std::move(updateDividerEndMarginFunc));
+    } else {
+        pattern->RemoveResObj(key);
+    }
 }
 
 void SideBarContainerModelNG::SetDividerStrokeWidth(FrameNode* frameNode, const Dimension& strokeWidth)
