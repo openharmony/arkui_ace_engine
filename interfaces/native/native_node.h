@@ -10463,6 +10463,20 @@ int32_t OH_ArkUI_NativeModule_AdoptChild(ArkUI_NodeHandle node, ArkUI_NodeHandle
 int32_t OH_ArkUI_NativeModule_RemoveAdoptedChild(ArkUI_NodeHandle node, ArkUI_NodeHandle child);
 
 /**
+ * @brief Returns true if the node is in the render state. A node is considered to be in the render state if its
+ * corresponding RenderNode is on the render tree.
+ *
+ * @param node ArkUI_NodeHandle pointer.
+ * @param isInRenderState If the node is in the render state.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ *         {@link ARKUI_ERROR_CODE_CAPI_INIT_ERROR} if the CAPI init error.
+ * @since 23
+ */
+int32_t OH_ArkUI_NativeModule_IsInRenderState(ArkUI_NodeHandle node, bool* isInRenderState);
+
+/**
  * @brief Get info of the window to which the node belongs.
  *
  * @param node Target node object.

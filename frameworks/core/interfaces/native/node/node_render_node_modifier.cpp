@@ -1587,7 +1587,6 @@ ArkUI_Int32 RemoveAdoptedChild(ArkUINodeHandle node, ArkUINodeHandle child)
     return ERROR_CODE_NO_ERROR;
 }
 
-
 } // namespace
 namespace NodeModifier {
 const ArkUINDKRenderNodeModifier* GetNDKRenderNodeModifier()

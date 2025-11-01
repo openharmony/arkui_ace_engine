@@ -151,6 +151,7 @@ public:
     static ArkUINativeModuleValue ApplyAttributesFinish(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue AdoptChild(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue RemoveAdoptedChild(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue IsOnRenderTree(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ConvertPoint(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
 

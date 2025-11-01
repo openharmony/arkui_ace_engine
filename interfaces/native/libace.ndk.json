@@ -4402,5 +4402,9 @@
     {
         "first_introduced": "23",
         "name": "OH_ArkUI_TextLayoutManager_GetLineMetrics"
+    },
+    {
+        "name": "OH_ArkUI_NativeModule_IsInRenderState",
+        "first_introduced": "23"
     }
 ]

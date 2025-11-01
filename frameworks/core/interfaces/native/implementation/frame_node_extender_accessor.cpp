@@ -1130,6 +1130,15 @@ Ark_Int32 RemoveAdoptedChildImpl(Ark_FrameNode peer, Ark_FrameNode child)
     renderContext->RemoveFromTree();
     return ERROR_CODE_NO_ERROR;
 }
+Ark_Boolean IsOnRenderTreeImpl(Ark_FrameNode peer)
+{
+    auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_RETURN(peerNode, false);
+    auto frameNode = AceType::DynamicCast<FrameNode>(peerNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+    return renderContext->IsOnRenderTree();
+}
 } // FrameNodeExtenderAccessor
 const GENERATED_ArkUIFrameNodeExtenderAccessor* GetFrameNodeExtenderAccessor()
 {
@@ -1200,6 +1209,7 @@ const GENERATED_ArkUIFrameNodeExtenderAccessor* GetFrameNodeExtenderAccessor()
         FrameNodeExtenderAccessor::ConvertPointImpl,
         FrameNodeExtenderAccessor::AdoptChildImpl,
         FrameNodeExtenderAccessor::RemoveAdoptedChildImpl,
+        FrameNodeExtenderAccessor::IsOnRenderTreeImpl,
     };
     return &FrameNodeExtenderAccessorImpl;
 }

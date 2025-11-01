@@ -25756,6 +25756,7 @@ typedef struct GENERATED_ArkUIFrameNodeExtenderAccessor {
                             Ark_FrameNode child);
     Ark_Int32 (*removeAdoptedChild)(Ark_FrameNode peer,
                                     Ark_FrameNode child);
+    Ark_Boolean (*isOnRenderTree)(Ark_FrameNode peer);       
 } GENERATED_ArkUIFrameNodeExtenderAccessor;
 
 typedef struct GENERATED_ArkUIFrictionMotionAccessor {

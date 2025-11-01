@@ -80,6 +80,13 @@ void ApplyAttributesFinish(ArkUINodeHandle node)
     frameNode->MarkModifyDone();
 }
 
+ArkUI_Bool IsOnRenderTree(ArkUINodeHandle node)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto renderContext = frameNode->GetRenderContext();
+    return renderContext->IsOnRenderTree();
+}
+
 RefPtr<FrameNode> GetParentNode(UINode* node)
 {
     auto uiNode = AceType::Claim<UINode>(node);
@@ -1205,6 +1212,7 @@ const ArkUIFrameNodeModifier* GetFrameNodeModifier()
         .setFocusDependence = SetFocusDependence,
         .resetFocusDependence = ResetFocusDependence,
         .applyAttributesFinish = ApplyAttributesFinish,
+        .isOnRenderTree = IsOnRenderTree,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

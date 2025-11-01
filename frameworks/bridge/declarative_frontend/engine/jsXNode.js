@@ -1713,6 +1713,9 @@ class FrameNode extends Disposable {
             throw { message: errorInfo, code: 100025 };
         }
     }
+    isInRenderState() {
+        return getUINativeModule().frameNode.isOnRenderTree(this.nodePtr_);
+    }
 }
 class ImmutableFrameNode extends FrameNode {
     isModifiable() {
