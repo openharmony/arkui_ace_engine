@@ -1059,6 +1059,7 @@ Array_Float64 ConvertPointImpl(Ark_FrameNode peer, Ark_FrameNode node, const Ark
     std::vector<float> indexes;
     ParseArrayFailNumber(indexes);
     Array_Float64 errValue = Converter::ArkValue<Array_Float64>(indexes, Converter::FC);
+    CHECK_NULL_RETURN(vector2, errValue);
     auto currentNode = FrameNodePeer::GetFrameNodeByPeer(peer);
     CHECK_NULL_RETURN(currentNode, errValue);
     auto targetNode = FrameNodePeer::GetFrameNodeByPeer(node);
