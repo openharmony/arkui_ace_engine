@@ -68,3 +68,17 @@ export class ArkUIAniUiextensionModal {
     native static _Uiextension_Set_OnReleaseCallback(nodePointer: KLong, value?: ReleaseCallback) : void;
     native static _Uiextension_Set_OnDrawReadyCallback(nodePointer: KLong, value?: DrawReadyCallback) : void;
 }
+
+export class ArkUIAniSecurityUiextensionModal {
+    static {
+        ArkUIAniUiextensionLoadLibraryHelp.LoadLibrary();
+    }
+    native static _Uiextension_Set_Security_Option(nodePointer: KLong, option: ArkUIAniUIExtensionOptions): void;
+    native static _Uiextension_Set_Security_Want(nodePointer: KLong, want: Want): void;
+    native static _Uiextension_Set_Security_OnResultCallback(nodePointer: KLong, value?: ResultCallback) : void;
+    native static _Uiextension_Set_Security_OnErrorCallback(nodePointer: KLong, value?: ErrorCallback) : void;
+    native static _Uiextension_Set_Security_OnReciveCallback(nodePointer: KLong, value?: ReciveCallback) : void;
+    native static _Uiextension_Set_Security_OnTerminationCallback(nodePointer: KLong, value?: TerminationCallback) : void;
+    native static _Uiextension_Set_Security_OnReleaseCallback(nodePointer: KLong, value?: ReleaseCallback) : void;
+    native static _Uiextension_Set_Security_OnDrawReadyCallback(nodePointer: KLong, value: DrawReadyCallback) : void;
+}

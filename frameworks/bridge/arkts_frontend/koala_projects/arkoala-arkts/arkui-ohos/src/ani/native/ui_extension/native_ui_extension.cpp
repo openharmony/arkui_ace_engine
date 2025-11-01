@@ -662,34 +662,3 @@ ani_object NativeUiExtension::SendDataSync(
     return static_cast<ani_object>(wantParamsObj);
 }
 } // namespace OHOS::Ace::Ani
-
-ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
-{
-    TAG_LOGI(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
-        "arkuiuiextension_ani ANI_Constructor start");
-    ani_env* env;
-    if (ANI_OK != vm->GetEnv(ANI_VERSION_1, &env)) {
-        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
-            "GetEnv failed when ANI_Constructor");
-        return ANI_ERROR;
-    }
-
-    auto ani_status = OHOS::Ace::Ani::NativeUiExtension::BindNativeUiExtension(env);
-    if (ani_status != ANI_OK) {
-        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
-            "BindNativeUiExtension failed when ANI_Constructor");
-        return ani_status;
-    }
-
-    ani_status = OHOS::Ace::Ani::NativeDynamicModule::BindNativeDynamicModule(env);
-    if (ani_status != ANI_OK) {
-        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DYNAMIC_COMPONENT,
-            "BindNativeDynamicModule failed when ANI_Constructor");
-        return ani_status;
-    }
-
-    *result = ANI_VERSION_1;
-    TAG_LOGI(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
-        "arkuiuiextension_ani ANI_Constructor end");
-    return ANI_OK;
-}
