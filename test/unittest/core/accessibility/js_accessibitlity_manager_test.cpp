@@ -870,6 +870,7 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager017, TestSize.Level1)
     /**
      * @tc.steps: step2. test RegisterInteractionOperation
      */
+    jsAccessibilityManager->Register(true);
     auto ret = jsAccessibilityManager->RegisterInteractionOperation(0);
     EXPECT_EQ(ret, false);
 }
