@@ -28961,7 +28961,7 @@ KOALA_INTEROP_1(FrameNodeExtender_getMeasuredSize, KInteropReturnBuffer, Ark_Nat
 KInteropReturnBuffer impl_FrameNodeExtender_getLayoutPosition(Ark_NativePointer peer) {
         const auto &retValue = GetAccessors()->getFrameNodeExtenderAccessor()->getLayoutPosition(static_cast<Ark_FrameNode>(peer));
         SerializerBase _retSerializer {};
-        Position_serializer::write(_retSerializer, retValue);
+        Vector2_serializer::write(_retSerializer, retValue);
         return _retSerializer.toReturnBuffer();
 }
 KOALA_INTEROP_1(FrameNodeExtender_getLayoutPosition, KInteropReturnBuffer, Ark_NativePointer)

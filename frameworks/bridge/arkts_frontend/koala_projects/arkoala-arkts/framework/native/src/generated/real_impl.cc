@@ -12872,7 +12872,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
-    Ark_Position GetLayoutPositionImpl(Ark_FrameNode peer)
+    Ark_Vector2 GetLayoutPositionImpl(Ark_FrameNode peer)
     {
         return {};
     }

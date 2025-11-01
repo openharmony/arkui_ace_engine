@@ -298,7 +298,7 @@ Ark_Size GetMeasuredSizeImpl(Ark_FrameNode peer)
     auto size = geometryNode->GetFrameSize();
     return Converter::ArkValue<Ark_Size>(size);
 }
-Ark_Position GetLayoutPositionImpl(Ark_FrameNode peer)
+Ark_Vector2 GetLayoutPositionImpl(Ark_FrameNode peer)
 {
     if (!peer) {
         LOGW("This frameNode nullptr when GetLayoutPositionImpl!");
@@ -309,7 +309,7 @@ Ark_Position GetLayoutPositionImpl(Ark_FrameNode peer)
     auto geometryNode = frameNode->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, {});
     auto offset = geometryNode->GetMarginFrameOffset();
-    return Converter::ArkValue<Ark_Position>(offset);
+    return Converter::ArkValue<Ark_Vector2>(offset);
 }
 Ark_String GetIdImpl(Ark_FrameNode peer)
 {

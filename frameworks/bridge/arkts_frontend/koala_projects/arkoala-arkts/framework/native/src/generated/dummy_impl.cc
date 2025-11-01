@@ -29630,7 +29630,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {};
     }
-    Ark_Position GetLayoutPositionImpl(Ark_FrameNode peer)
+    Ark_Vector2 GetLayoutPositionImpl(Ark_FrameNode peer)
     {
         if (!needGroupedLog(1))
         {
