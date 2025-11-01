@@ -876,7 +876,7 @@ private:
 
     std::vector<WeakPtr<NavDestinationNodeBase>> preVisibleNodes_;
     int32_t runningTransitionCount_ = 0;
-    bool isTransitionAnimationAborted_ = false;
+    bool windowSizeChangedDuringTransition_ = false;
     bool enableVisibilityLifecycleWithContentCover_ = true;
     bool enableLockOrientation_ = false;
 
