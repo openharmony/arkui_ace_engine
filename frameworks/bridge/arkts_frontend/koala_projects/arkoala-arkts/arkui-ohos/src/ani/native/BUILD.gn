@@ -74,6 +74,7 @@ ohos_shared_library("arkoala_native_ani") {
     "text_based_modifier/text_based_modifier_module.cpp",
     "shape/shape_module_methods.cpp",
     "styled_string/styled_string_module.cpp",
+    "utils/ani_profiler.cpp",
     "utils/ani_trace.cpp",
     "utils/convert_utils.cpp",
     "video/video_module_methods.cpp",
@@ -107,6 +108,7 @@ ohos_shared_library("arkoala_native_ani") {
     "udmf:libudmf",
     "udmf:udmf_client",
     "udmf:udmf_taihe_native",
+    "runtime_core:libarkruntime",
   ]
   if (!build_ohos_sdk) {
     external_deps += [
