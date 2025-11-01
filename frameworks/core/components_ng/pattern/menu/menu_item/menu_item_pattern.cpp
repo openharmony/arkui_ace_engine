@@ -1013,11 +1013,10 @@ void MenuItemPattern::SetShowEmbeddedMenuParams(const RefPtr<FrameNode>& expanda
     auto imageNode = AceType::DynamicCast<FrameNode>(rightRow->GetChildren().back());
     CHECK_NULL_VOID(imageNode);
     expandableNode->MountToParent(host, EXPANDABLE_AREA_VIEW_INDEX);
+    expandableNode->MarkModifyDone();
     auto imageContext = imageNode->GetRenderContext();
     CHECK_NULL_VOID(imageContext);
     imageContext->UpdateTransformRotate(Vector5F(0.0f, 0.0f, 1.0f, SEMI_CIRCLE_ANGEL, 0.0f));
-    expandableNode->MarkModifyDone();
-    expandableNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 
     auto menuItemPattern = host->GetPattern<MenuItemPattern>();
     CHECK_NULL_VOID(menuItemPattern);
@@ -1035,6 +1034,7 @@ void MenuItemPattern::SetShowEmbeddedMenuParams(const RefPtr<FrameNode>& expanda
     auto pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     pipeline->FlushUITasks();
+    expandableNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     auto expandableAreaFrameSize = expandableNode->GetGeometryNode()->GetFrameSize();
     auto expandableAreaContext = expandableNode->GetRenderContext();
     CHECK_NULL_VOID(expandableAreaContext);
