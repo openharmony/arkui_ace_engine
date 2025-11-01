@@ -108,6 +108,8 @@ export function hookGestureModifier(commonMethod: ArkCommonMethodComponent, valu
         gestureEvent = new UIGestureEvent();
         gestureEvent.setPeer(commonMethod.getPeer());
         commonMethod.setGestureEvent(gestureEvent);
+    } else {
+        gestureEvent = commonMethod.getGestureEvent();
     }
     gestureEvent!.clearGestures();
     value_casted.applyGesture(gestureEvent as UIGestureEvent);
