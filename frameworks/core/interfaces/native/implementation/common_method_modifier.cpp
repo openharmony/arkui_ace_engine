@@ -3407,7 +3407,7 @@ void SetOnAppearImpl(Ark_NativePointer node,
         return;
     }
     auto onEvent = [arkCallback = CallbackHelper(*optValue)]() {
-        arkCallback.Invoke();
+        arkCallback.InvokeSync();
     };
     ViewAbstract::SetOnAppear(frameNode, std::move(onEvent));
 }
@@ -3422,7 +3422,7 @@ void SetOnDisAppearImpl(Ark_NativePointer node,
         return;
     }
     auto onEvent = [arkCallback = CallbackHelper(*optValue)]() {
-        arkCallback.Invoke();
+        arkCallback.InvokeSync();
     };
     ViewAbstract::SetOnDisappear(frameNode, std::move(onEvent));
 }
@@ -3439,7 +3439,7 @@ void SetOnAttachImpl(Ark_NativePointer node,
     auto weakNode = AceType::WeakClaim(frameNode);
     auto onAttach = [arkCallback = CallbackHelper(*optValue), node = weakNode]() {
         PipelineContext::SetCallBackNode(node);
-        arkCallback.Invoke();
+        arkCallback.InvokeSync();
     };
     ViewAbstract::SetOnAttach(frameNode, std::move(onAttach));
 }
@@ -3456,7 +3456,7 @@ void SetOnDetachImpl(Ark_NativePointer node,
     auto weakNode = AceType::WeakClaim(frameNode);
     auto onDetach = [arkCallback = CallbackHelper(*optValue), node = weakNode]() {
         PipelineContext::SetCallBackNode(node);
-        arkCallback.Invoke();
+        arkCallback.InvokeSync();
     };
     ViewAbstract::SetOnDetach(frameNode, std::move(onDetach));
 }
