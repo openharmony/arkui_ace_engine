@@ -15,6 +15,8 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("rich_editor_test_ng") {
   module_out_path = "ace_engine/Component-RichEditor"
+  module_name = "Component-RichEditor"
+  module_output = ""
   type = "new"
   sources = [
     "paragraph_manager_test_ng.cpp",
