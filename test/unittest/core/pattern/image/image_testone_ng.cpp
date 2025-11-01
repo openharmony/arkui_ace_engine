@@ -599,11 +599,11 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest011, TestSize.Level0)
 }
 
 /**
- * @tc.name: ImageColorFilterTest012
+ * @tc.name: ImageColorFilterTestForPictureWithWeb
  * @tc.desc: Test image ColorFilter is set correctly for picture with web image and sync mode.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestOneNg, ImageColorFilterTest012, TestSize.Level0)
+HWTEST_F(ImageTestOneNg, ImageColorFilterTestForPictureWithWeb, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode with web image and sync mode.
