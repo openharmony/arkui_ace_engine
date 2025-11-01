@@ -757,6 +757,43 @@ HWTEST_F(ImageTestTwoNg, ImagePatternOnDirtyLayoutWrapperSwap0051, TestSize.Leve
 }
 
 /**
+ * @tc.name: ImagePatternOnDirtyLayoutWrapperSwap0052
+ * @tc.desc: Test Image related method calls.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, ImagePatternOnDirtyLayoutWrapperSwap0052, TestSize.Level0)
+{
+    auto frameNode = ImageTestTwoNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    auto imageLayoutProperty = AceType::MakeRefPtr<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(SizeF(WIDTH, HEIGHT));
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(nullptr, geometryNode, imageLayoutProperty);
+    auto layoutAlgorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(nullptr);
+    layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
+    DirtySwapConfig config;
+    config.skipMeasure = false;
+    ImageResizableSlice tmp;
+    tmp.bottom = Dimension(5);
+    tmp.top = Dimension(5);
+    tmp.left = Dimension(5);
+    tmp.right = Dimension(5);
+    imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
+    auto imageRenderProperty = imagePattern->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(imageRenderProperty, nullptr);
+    imageRenderProperty->UpdateImageResizableSlice(tmp);
+    EXPECT_NE(imagePattern->loadingCtx_, nullptr);
+    auto res = imagePattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    EXPECT_TRUE(res);
+    EXPECT_NE(imagePattern->altLoadingCtx_, nullptr);
+    res = imagePattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    EXPECT_TRUE(res);
+}
+
+/**
  * @tc.name: ImagePatternOnAreaChangedInner0054
  * @tc.desc: call OnAreaChangedInner.
  * @tc.type: FUNC

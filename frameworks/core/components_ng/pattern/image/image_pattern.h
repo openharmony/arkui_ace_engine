@@ -445,6 +445,7 @@ private:
     void ClearReloadFlagsAfterLoad();
     void LoadImage(const ImageSourceInfo& src, bool needLayout);
     void LoadAltImage(const ImageSourceInfo& altImageSourceInfo);
+    void LoadingContext();
 
     void CreateAnalyzerOverlay();
     void UpdateAnalyzerOverlay();
