@@ -915,10 +915,26 @@ class RouterImpl implements Router {
 
     back(options?: router.RouterOptions): void {
         RouterExtender.back(options);
+        if (options) {
+            let url = options?.url;
+            let index = this.visiblePages.value.findLastIndex(element => (element.path + element.url) === url);
+            if (index != -1) {
+                let pageInfo = this.visiblePages.at(index);
+                if (pageInfo) {
+                    pageInfo.params = (options?.params === undefined ? undefined : options?.params);
+                }
+            }
+        }
     }
 
     back(index: int, param?: object): void {
         RouterExtender.back(index, param);
+        if (index >= 1 && index <= this.showingPageIndex) {
+            let pageInfo = this.visiblePages.at(index);
+            if (pageInfo) {
+                pageInfo.params = param;
+            }
+        }
     }
 
     clear(): void {
