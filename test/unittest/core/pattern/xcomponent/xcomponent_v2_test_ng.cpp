@@ -1066,11 +1066,11 @@ HWTEST_F(XComponentV2TestNg, GetSurfaceHolderTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnModifyDoneTest
+ * @tc.name: OnModifyDoneTest001
  * @tc.desc: Test XComponentPatternV2 OnModifyDone func
  * @tc.type: FUNC
  */
-HWTEST_F(XComponentV2TestNg, OnModifyDoneTest, TestSize.Level1)
+HWTEST_F(XComponentV2TestNg, OnModifyDoneTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. call CreateXComponentNode
@@ -1083,6 +1083,35 @@ HWTEST_F(XComponentV2TestNg, OnModifyDoneTest, TestSize.Level1)
     ASSERT_TRUE(pattern);
     pattern->usesSuperMethod_ = false;
     ASSERT_TRUE(pattern->renderContextForSurface_);
+    pattern->renderContextForSurface_->propBackgroundColor_.reset();
+
+    /**
+     * @tc.steps: step2. call OnModifyDone func
+     * @tc.expected: surface background color is updated
+     */
+    pattern->OnModifyDone();
+    EXPECT_EQ(pattern->renderContextForSurface_->propBackgroundColor_, Color::BLACK);
+}
+
+/**
+ * @tc.name: OnModifyDoneTest002
+ * @tc.desc: Test XComponentPatternV2 OnModifyDone func when usesSuperMethod_ is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentV2TestNg, OnModifyDoneTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. call CreateXComponentNode
+     * @tc.expected: xcomponent frameNode create successfully
+     */
+    auto frameNode = CreateXComponentNode();
+    ASSERT_TRUE(frameNode);
+    EXPECT_EQ(frameNode->GetTag(), V2::XCOMPONENT_ETS_TAG);
+    auto pattern = frameNode->GetPattern<XComponentPatternV2>();
+    ASSERT_TRUE(pattern);
+    pattern->usesSuperMethod_ = true;
+    ASSERT_TRUE(pattern->renderContextForSurface_);
+    pattern->handlingSurfaceRenderContext_ = pattern->renderContextForSurface_;
     pattern->renderContextForSurface_->propBackgroundColor_.reset();
 
     /**
