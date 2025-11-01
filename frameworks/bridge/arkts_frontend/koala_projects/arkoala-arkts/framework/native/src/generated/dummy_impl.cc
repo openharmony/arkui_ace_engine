@@ -29591,7 +29591,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Position GetPositionToWindowImpl(Ark_FrameNode peer)
+    Ark_Vector2 GetPositionToWindowImpl(Ark_FrameNode peer)
     {
         if (!needGroupedLog(1))
         {

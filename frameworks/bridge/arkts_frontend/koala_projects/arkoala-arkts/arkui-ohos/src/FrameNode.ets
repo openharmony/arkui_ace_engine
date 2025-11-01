@@ -440,8 +440,7 @@ export class FrameNode implements MaterializedBase {
         return { x: 0, y: 0 } as NodePosition;
     }
     public getPositionToWindow(): NodePosition {
-        // return FrameNodeExtender.getPositionToWindow(this)
-        return { x: 0, y: 0 } as NodePosition;
+        return FrameNodeExtender.getPositionToWindow(this);
     }
     public getPositionToParentWithTransform(): NodePosition {
         // return FrameNodeExtender.getPositionToParentWithTransform(this)

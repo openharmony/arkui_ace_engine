@@ -258,7 +258,7 @@ void DisposeImpl(Ark_FrameNode peer)
     CHECK_NULL_VOID(parent);
     parent->RemoveChild(currentUINodeRef);
 }
-Ark_Position GetPositionToWindowImpl(Ark_FrameNode peer)
+Ark_Vector2 GetPositionToWindowImpl(Ark_FrameNode peer)
 {
     if (!peer) {
         LOGW("This frameNode nullptr when GetPositionToWindowImpl!");
@@ -269,7 +269,7 @@ Ark_Position GetPositionToWindowImpl(Ark_FrameNode peer)
     auto offset = frameNode->GetOffsetRelativeToWindow();
     offset.SetX(PipelineBase::Px2VpWithCurrentDensity(offset.GetX()));
     offset.SetY(PipelineBase::Px2VpWithCurrentDensity(offset.GetY()));
-    return Converter::ArkValue<Ark_Position>(offset);
+    return Converter::ArkValue<Ark_Vector2>(offset);
 }
 Ark_Position GetPositionToParentImpl(Ark_FrameNode peer)
 {

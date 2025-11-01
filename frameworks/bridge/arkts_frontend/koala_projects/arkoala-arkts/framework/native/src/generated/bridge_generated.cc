@@ -28940,7 +28940,7 @@ KOALA_INTEROP_DIRECT_V1(FrameNodeExtender_dispose, Ark_NativePointer)
 KInteropReturnBuffer impl_FrameNodeExtender_getPositionToWindow(Ark_NativePointer peer) {
         const auto &retValue = GetAccessors()->getFrameNodeExtenderAccessor()->getPositionToWindow(static_cast<Ark_FrameNode>(peer));
         SerializerBase _retSerializer {};
-        Position_serializer::write(_retSerializer, retValue);
+        Vector2_serializer::write(_retSerializer, retValue);
         return _retSerializer.toReturnBuffer();
 }
 KOALA_INTEROP_1(FrameNodeExtender_getPositionToWindow, KInteropReturnBuffer, Ark_NativePointer)
