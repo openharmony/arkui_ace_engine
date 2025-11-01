@@ -44,11 +44,6 @@ constexpr int32_t DELETE_ANIMATION_DURATION = 400;
 constexpr Color ITEM_FILL_COLOR = Color(0x1A0A59f7);
 } // namespace
 
-void ListItemPattern::SetShallowBuilder(const RefPtr<ShallowBuilder>&& shallowBuilder)
-{
-    shallowBuilder_ = std::move(shallowBuilder);
-}
-
 void ListItemPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
