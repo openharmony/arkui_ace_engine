@@ -2233,6 +2233,29 @@ HWTEST_F(SwiperPatternTestNg, FillType002, TestSize.Level1)
     CreateSwiperDone();
     auto layoutProperty = frameNode_->GetLayoutProperty<SwiperLayoutProperty>();
     PaddingProperty padding { CalcLength(10, DimensionUnit::VP), CalcLength(10, DimensionUnit::VP),
+        CalcLength(0, DimensionUnit::VP), CalcLength(0, DimensionUnit::VP) };
+    layoutProperty->padding_ = std::make_unique<PaddingProperty>(padding);
+    // 840 is LG, contenWidth + padding = 820 + 10 + 10.
+    EXPECT_EQ(SwiperUtils::GetWidthBreakpoint(layoutProperty, 820), WidthBreakpoint::WIDTH_LG);
+}
+
+/**
+ * @tc.name: FillType003
+ * @tc.desc: Test FillType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, FillType003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swiper.
+     * @tc.expected: check the effect of padding.
+     */
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::VERTICAL);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto layoutProperty = frameNode_->GetLayoutProperty<SwiperLayoutProperty>();
+    PaddingProperty padding { CalcLength(0, DimensionUnit::VP), CalcLength(0, DimensionUnit::VP),
         CalcLength(10, DimensionUnit::VP), CalcLength(10, DimensionUnit::VP) };
     layoutProperty->padding_ = std::make_unique<PaddingProperty>(padding);
     // 840 is LG, contenWidth + padding = 820 + 10 + 10.

@@ -259,9 +259,9 @@ private:
     static WidthBreakpoint GetWidthBreakpoint(const RefPtr<SwiperLayoutProperty>& property, float contentWidth)
     {
         const auto& padding = property->CreatePaddingAndBorder();
-        auto axis = property->GetDirectionValue(Axis::VERTICAL);
-        auto leftPadding = axis == Axis::HORIZONTAL ? padding.top.value_or(0) : padding.left.value_or(0);
-        auto rightPadding = axis == Axis::HORIZONTAL ? padding.bottom.value_or(0) : padding.right.value_or(0);
+        auto axis = property->GetDirectionValue(Axis::HORIZONTAL);
+        auto leftPadding = axis == Axis::VERTICAL ? padding.top.value_or(0) : padding.left.value_or(0);
+        auto rightPadding = axis == Axis::VERTICAL ? padding.bottom.value_or(0) : padding.right.value_or(0);
         auto contentConstraintOps = property->GetContentLayoutConstraint();
         CHECK_NULL_RETURN(contentConstraintOps, WidthBreakpoint::WIDTH_SM);
         auto density = contentConstraintOps.value().scaleProperty.vpScale;
