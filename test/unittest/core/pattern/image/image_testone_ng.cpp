@@ -2097,7 +2097,7 @@ HWTEST_F(ImageTestOneNg, SetImageModelStaticSrc001, TestSize.Level1)
 
 /**
  * @tc.name: SetImageModelStaticImageFit001
- * @tc.desc: parse src
+ * @tc.desc: Test ImageDynamicImageFit.
  * @tc.type: FUNC
  */
 HWTEST_F(ImageTestOneNg, SetImageModelStaticImageFit001, TestSize.Level1)
@@ -2106,11 +2106,19 @@ HWTEST_F(ImageTestOneNg, SetImageModelStaticImageFit001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     ImageFit defaultFit = ImageFit::NONE;
     const std::optional<ImageFit> value = ImageFit::FILL;
+
+    /**
+     * @tc.cases: case1. ImageFit FILL.
+     */
     ImageModelStatic::SetImageFit(frameNode, value);
 
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
         ImageLayoutProperty, ImageFit, defaultFit, frameNode, ImageFit::COVER);
     ASSERT_EQ(defaultFit, ImageFit::FILL);
+
+    /**
+     * @tc.cases: case2. reset ImageFit.
+     */
     ImageModelStatic::SetImageFit(frameNode, std::nullopt);
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
         ImageLayoutProperty, ImageFit, defaultFit, frameNode, ImageFit::COVER);
