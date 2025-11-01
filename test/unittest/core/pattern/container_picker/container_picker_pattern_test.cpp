@@ -2113,7 +2113,7 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternHandleDirectionKeyTes
     auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
     ASSERT_NE(pattern, nullptr);
     pattern->totalItemCount_ = 5;
-    
+
     // Test Arrow Up key
     EXPECT_TRUE(pattern->HandleDirectionKey(KeyCode::KEY_DPAD_UP));
 }
@@ -2130,7 +2130,7 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternHandleDirectionKeyTes
     auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
     ASSERT_NE(pattern, nullptr);
     pattern->totalItemCount_ = 5;
-    
+
     // Test Arrow Down key
     EXPECT_TRUE(pattern->HandleDirectionKey(KeyCode::KEY_DPAD_DOWN));
 }
@@ -2147,7 +2147,7 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternHandleDirectionKeyTes
     auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
     ASSERT_NE(pattern, nullptr);
     pattern->totalItemCount_ = 5;
-    
+
     // Test invalid key
     EXPECT_FALSE(pattern->HandleDirectionKey(KeyCode::KEY_0));
 }
@@ -2166,14 +2166,14 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternOnKeyEventTest001, Te
     auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
     ASSERT_NE(pattern, nullptr);
     pattern->totalItemCount_ = 5;
-    
+
     /**
      * @tc.steps: step2. Create a key event for KEY_DPAD_UP
      */
     KeyEvent keyEvent;
     keyEvent.code = KeyCode::KEY_DPAD_UP;
     keyEvent.action = KeyAction::DOWN;
-    
+
     /**
      * @tc.steps: step3. Call OnKeyEvent
      * @tc.expected: step3. OnKeyEvent should return true
@@ -2196,14 +2196,14 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternOnKeyEventTest002, Te
     auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
     ASSERT_NE(pattern, nullptr);
     pattern->totalItemCount_ = 5;
-    
+
     /**
      * @tc.steps: step2. Create a key event for KEY_DPAD_DOWN
      */
     KeyEvent keyEvent;
     keyEvent.code = KeyCode::KEY_DPAD_DOWN;
     keyEvent.action = KeyAction::DOWN;
-    
+
     /**
      * @tc.steps: step3. Call OnKeyEvent
      * @tc.expected: step3. OnKeyEvent should return true
@@ -2225,14 +2225,14 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternOnKeyEventTest003, Te
     auto frameNode = CreateContainerPickerNode();
     auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
     ASSERT_NE(pattern, nullptr);
-    
+
     /**
      * @tc.steps: step2. Create a key event for invalid key
      */
     KeyEvent keyEvent;
     keyEvent.code = KeyCode::KEY_0;
     keyEvent.action = KeyAction::DOWN;
-    
+
     /**
      * @tc.steps: step3. Call OnKeyEvent
      * @tc.expected: step3. OnKeyEvent should return false
@@ -2254,14 +2254,14 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternOnKeyEventTest004, Te
     auto frameNode = CreateContainerPickerNode();
     auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
     ASSERT_NE(pattern, nullptr);
-    
+
     /**
      * @tc.steps: step2. Create a key event with UP action
      */
     KeyEvent keyEvent;
     keyEvent.code = KeyCode::KEY_DPAD_UP;
     keyEvent.action = KeyAction::UP;
-    
+
     /**
      * @tc.steps: step3. Call OnKeyEvent
      * @tc.expected: step3. OnKeyEvent should return false

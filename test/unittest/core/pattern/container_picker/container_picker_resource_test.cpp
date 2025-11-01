@@ -16,19 +16,19 @@
 #include "gtest/gtest.h"
 #define private public
 #define protected public
+#include "test/mock/base/mock_system_properties.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_default.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/base/mock_system_properties.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
+#include "core/common/resource/resource_object.h"
 #include "core/components/picker/picker_theme.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/container_picker/container_picker_model.h"
 #include "core/components_ng/pattern/container_picker/container_picker_pattern.h"
 #include "core/components_ng/pattern/container_picker/container_picker_utils.h"
-#include "core/common/resource/resource_object.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 #undef private
@@ -49,7 +49,7 @@ constexpr float TEST_DIVIDER_WIDTH = 3.0f;
 constexpr uint32_t TEST_DIVIDER_COLOR = 0xFF000000; // Black
 constexpr float TEST_MARGIN = 20.0f;
 constexpr uint32_t TEST_BACKGROUND_COLOR = 0xFFFF0000; // Red
-}
+} // namespace
 
 class ContainerPickerResourceTest : public TestNG {
 public:
@@ -474,7 +474,7 @@ HWTEST_F(ContainerPickerResourceTest, ContainerPickerModelTest002, TestSize.Leve
      * @tc.steps: step3. Create mock resource object
      */
     auto mockResObj = AceType::MakeRefPtr<ResourceObject>();
-    
+
     /**
      * @tc.steps: step4. Test with invalid key
      */
@@ -534,4 +534,4 @@ HWTEST_F(ContainerPickerResourceTest, ContainerPickerModelTest003, TestSize.Leve
     EXPECT_FALSE(resMap.find(TEST_DIVIDER_WIDTH_KEY) == resMap.end());
 }
 
-}
+} // namespace OHOS::Ace::NG

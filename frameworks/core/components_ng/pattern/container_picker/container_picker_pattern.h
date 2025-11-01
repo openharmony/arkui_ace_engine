@@ -19,8 +19,10 @@
 #include "adapter/ohos/entrance/picker/picker_haptic_interface.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "core/common/resource/resource_object.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/pan_event.h"
+#include "core/components_ng/pattern/container_picker/container_picker_accessibility_property.h"
 #include "core/components_ng/pattern/container_picker/container_picker_event_hub.h"
 #include "core/components_ng/pattern/container_picker/container_picker_layout_algorithm.h"
 #include "core/components_ng/pattern/container_picker/container_picker_layout_property.h"
@@ -29,7 +31,6 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
 #include "core/gestures/gesture_event.h"
-#include "core/common/resource/resource_object.h"
 
 namespace OHOS::Ace::NG {
 class ContainerPickerEventParam : public virtual AceType {
@@ -62,6 +63,11 @@ public:
         return MakeRefPtr<ContainerPickerLayoutProperty>();
     }
 
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
+    {
+        return MakeRefPtr<ContainerPickerAccessibilityProperty>();
+    }
+
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
@@ -91,6 +97,11 @@ public:
         selectedIndex_ = index;
     }
 
+    int32_t GetSelectedIndex()
+    {
+        return selectedIndex_;
+    }
+
     const std::vector<int32_t>& GetOffScreenItems() const
     {
         return offScreenItemsIndex_;
@@ -109,6 +120,21 @@ public:
     bool GetRequestLongPredict() const
     {
         return requestLongPredict_;
+    }
+
+    int32_t GetStartIndex() const
+    {
+        return itemPosition_.empty() ? 0 : itemPosition_.begin()->first;
+    }
+
+    int32_t GetEndIndex() const
+    {
+        return itemPosition_.empty() ? 0 : itemPosition_.rbegin()->first;
+    }
+
+    int32_t GetTotalCount() const
+    {
+        return totalItemCount_;
     }
 
     // Lifecycle methods
@@ -138,6 +164,12 @@ public:
     void UpdateEndMarginWithResObj(const RefPtr<ResourceObject>& resObj);
     void UpdateBackgroundColorWithResObj(const RefPtr<ResourceObject>& resObj);
     void UpdateBorderRadiusWithResObj(const RefPtr<ResourceObject>& resObj);
+
+    bool IsLoop() const;
+    std::string GetTextOfCurrentChild();
+    void ShowNext();
+    void ShowPrevious();
+
 protected:
     bool ChildPreMeasureHelperEnabled() override
     {
@@ -163,6 +195,8 @@ protected:
 
     bool AccumulatingTerminateHelper(RectF& adjustingRect, ExpandEdges& totalExpand, bool fromSelf = false,
         LayoutSafeAreaType ignoreType = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM) override;
+
+    void FireAnimationEndEvent();
 
 private:
     Axis GetAxis() const override
@@ -205,7 +239,7 @@ private:
     float ShortestDistanceBetweenCurrentAndTarget(int32_t targetIndex);
     void SwipeTo(int32_t index);
     void OnAroundButtonClick(float offsetY);
-
+    void SetAccessibilityAction();
     RefPtr<ClickEvent> CreateItemClickEventListener();
     void InitMouseAndPressEvent();
     void UpdatePanEvent();
@@ -227,9 +261,9 @@ private:
     void PlaySpringAnimation();
     void PlayTargetAnimation();
     void PlayResetAnimation();
+    void ForceResetWithoutAnimation();
     void StopAnimation();
 
-    bool IsLoop() const;
     void SetDefaultTextStyle(bool isUpdateTextStyle);
     void SetDefaultTextStyle(RefPtr<FrameNode> node, Color defaultColor);
     void UpdateDefaultTextStyle(RefPtr<FrameNode> node, Color defaultColor);
@@ -294,6 +328,7 @@ private:
     int32_t containerPickerId_ = -1;
     int32_t displayCount_ = 7;
     int32_t totalItemCount_ = 0;
+    int32_t prevTotalItemCount_ = 0;
     int32_t selectedIndex_ = 0;
 
     // scroll params

@@ -217,7 +217,6 @@ void ContainerPickerLayoutAlgorithm::MeasurePickerItems(
     float startPos = middleItemStartPos_;
     float endPos = middleItemEndPos_;
     int32_t middleIndexInVisibleWindow = selectedIndex_;
-    prevItemPosition_ = itemPosition_;
     if (!itemPosition_.empty()) {
         auto middleItem = ContainerPickerUtils::CalcCurrentMiddleItem(itemPosition_, height_, totalItemCount_, isLoop_);
         middleIndexInVisibleWindow = middleItem.first;
@@ -232,7 +231,7 @@ void ContainerPickerLayoutAlgorithm::MeasurePickerItems(
     std::vector<int32_t> prevItemsIndex;
     std::vector<int32_t> curItemsIndex;
     for (const auto& pair : prevItemPosition_) {
-        prevItemsIndex.push_back(ContainerPickerUtils::GetLoopIndex(pair.first, totalItemCount_));
+        prevItemsIndex.push_back(ContainerPickerUtils::GetLoopIndex(pair.first, prevTotalItemCount_));
     }
     for (const auto& pair : itemPosition_) {
         curItemsIndex.push_back(ContainerPickerUtils::GetLoopIndex(pair.first, totalItemCount_));

@@ -1565,9 +1565,8 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithmTrans
     algorithm_->SetPickerHeightBeforeRotate(0);
 
     /**
-     * @tc.steps: step2. Test TranslateAndRotate with
+     * @tc.steps: step2. Test TranslateAndRotate with zero offset
      */
-    // Test case 1: Zero offset
     OffsetF offset1(0.0f, 120.0f);
     float originalY1 = offset1.GetY();
     algorithm_->TranslateAndRotate(frameNode, offset1);

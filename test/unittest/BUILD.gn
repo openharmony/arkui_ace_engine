@@ -898,6 +898,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/container_modal/enhance/container_modal_view_enhance.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/container_modal/static/container_modal_static_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/container_modal/static/container_modal_static_view.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/container_picker/container_picker_accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/container_picker/container_picker_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/container_picker/container_picker_model.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/container_picker/container_picker_paint_method.cpp",

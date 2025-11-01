@@ -19,11 +19,11 @@
 #include "adapter/ohos/entrance/picker/picker_haptic_factory.h"
 #include "base/log/dump_log.h"
 #include "core/animation/spring_curve.h"
+#include "core/common/resource/resource_object.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/pattern/container_picker/container_picker_paint_method.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/common/resource/resource_object.h"
-#include "core/common/resource/resource_parse_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -57,6 +57,7 @@ RefPtr<LayoutAlgorithm> ContainerPickerPattern::CreateLayoutAlgorithm()
     isLoop_ = IsLoop();
 
     layoutAlgorithm->SetTotalItemCount(host->TotalChildCount());
+    layoutAlgorithm->SetPrevTotalItemCount(prevTotalItemCount_);
     layoutAlgorithm->SetCurrentDelta(currentDelta_);
 
     layoutAlgorithm->SetSelectedIndex(selectedIndex_);
@@ -222,6 +223,7 @@ void ContainerPickerPattern::GetLayoutProperties(const RefPtr<ContainerPickerLay
     height_ = algo->GetHeight();
     topPadding_ = algo->GetTopPadding();
     crossMatchChild_ = algo->IsCrossMatchChild();
+    prevTotalItemCount_ = algo->GetTotalItemCount();
     auto contentCrossSize = algo->GetContentCrossSize();
     if (!NearEqual(contentCrossSize, contentCrossSize_)) {
         contentCrossSize_ = contentCrossSize;
@@ -249,6 +251,7 @@ void ContainerPickerPattern::OnModifyDone()
     totalItemCount_ = host->TotalChildCount();
     isLoop_ = IsLoop();
     InitOrRefreshHapticController();
+    SetAccessibilityAction();
 
     auto focusHub = host->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
@@ -279,6 +282,19 @@ void ContainerPickerPattern::FireScrollStopEvent()
         return;
     }
     pickerEventHub->FireScrollStopEvent(selectedIndex_);
+}
+
+void ContainerPickerPattern::FireAnimationEndEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetUserTextValue(GetTextOfCurrentChild());
+    accessibilityProperty->SetAccessibilityText(GetTextOfCurrentChild());
+    host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE);
+    FireScrollStopEvent();
+    ForceResetWithoutAnimation();
 }
 
 void ContainerPickerPattern::UpdateClipEdge()
@@ -506,6 +522,93 @@ void ContainerPickerPattern::InitMouseAndPressEvent()
 
     CreateChildrenClickEvent();
     isItemClickEventCreated_ = true;
+}
+
+std::string ContainerPickerPattern::GetTextOfCurrentChild()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, "");
+    auto currentChild = host->GetOrCreateChildByIndex(selectedIndex_, false, true);
+    CHECK_NULL_RETURN(currentChild, "");
+    auto childNode = currentChild->GetHostNode();
+    CHECK_NULL_RETURN(childNode, "");
+    auto childAccessibilityProperty = childNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_RETURN(childAccessibilityProperty, "");
+    auto childText = childAccessibilityProperty->GetGroupPreferAccessibilityText(true);
+    return childText;
+}
+
+void ContainerPickerPattern::SetAccessibilityAction()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityGroup(true);
+    accessibilityProperty->SetUserTextValue(GetTextOfCurrentChild());
+    accessibilityProperty->SetAccessibilityText(GetTextOfCurrentChild());
+    accessibilityProperty->SetAccessibilityCustomRole("TextPicker");
+    accessibilityProperty->SetSpecificSupportActionCallback(
+        [weakPtr = WeakClaim(this), accessibilityPtr = WeakClaim(RawPtr(accessibilityProperty))]() {
+            const auto& pattern = weakPtr.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            const auto& accessibilityProperty = accessibilityPtr.Upgrade();
+            CHECK_NULL_VOID(accessibilityProperty);
+            if (pattern->IsLoop()) {
+                accessibilityProperty->AddSupportAction(AceAction::ACTION_SCROLL_FORWARD);
+                accessibilityProperty->AddSupportAction(AceAction::ACTION_SCROLL_BACKWARD);
+            } else {
+                if (pattern->GetSelectedIndex() > 0) {
+                    accessibilityProperty->AddSupportAction(AceAction::ACTION_SCROLL_BACKWARD);
+                }
+
+                if (pattern->GetSelectedIndex() < pattern->GetTotalCount() - 1) {
+                    accessibilityProperty->AddSupportAction(AceAction::ACTION_SCROLL_FORWARD);
+                }
+            }
+        });
+
+    accessibilityProperty->SetActionScrollForward(
+        [weakPtr = WeakClaim(this), accessibility = WeakClaim(RawPtr(accessibilityProperty))]() {
+            const auto& pattern = weakPtr.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            const auto& accessibilityProperty = accessibility.Upgrade();
+            CHECK_NULL_VOID(accessibilityProperty);
+            if (!accessibilityProperty->IsScrollable()) {
+                return;
+            }
+            pattern->ShowNext();
+        });
+
+    accessibilityProperty->SetActionScrollBackward(
+        [weakPtr = WeakClaim(this), accessibility = WeakClaim(RawPtr(accessibilityProperty))]() {
+            const auto& pattern = weakPtr.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            const auto& accessibilityProperty = accessibility.Upgrade();
+            CHECK_NULL_VOID(accessibilityProperty);
+            if (!accessibilityProperty->IsScrollable()) {
+                return;
+            }
+            pattern->ShowPrevious();
+        });
+}
+
+void ContainerPickerPattern::ShowNext()
+{
+    auto targetIndex = selectedIndex_ + 1;
+    if (!isLoop_ && (targetIndex < 0 || targetIndex >= totalItemCount_)) {
+        return;
+    }
+    SwipeTo(ContainerPickerUtils::GetLoopIndex(targetIndex, totalItemCount_));
+}
+
+void ContainerPickerPattern::ShowPrevious()
+{
+    auto targetIndex = selectedIndex_ - 1;
+    if (!isLoop_ && (targetIndex < 0 || targetIndex >= totalItemCount_)) {
+        return;
+    }
+    SwipeTo(ContainerPickerUtils::GetLoopIndex(targetIndex, totalItemCount_));
 }
 
 void ContainerPickerPattern::UpdatePanEvent()
@@ -896,7 +999,7 @@ void ContainerPickerPattern::PlayInertialAnimation()
             if (!NearZero(pattern->mainDeltaSum_)) {
                 pattern->PlaySpringAnimation();
             } else {
-                pattern->FireScrollStopEvent();
+                pattern->FireAnimationEndEvent();
             }
             pattern->StopHapticController();
         },
@@ -1042,7 +1145,7 @@ void ContainerPickerPattern::CreateTargetAnimation(float delta)
             pattern->lastAnimationScroll_ = 0.0f;
             pattern->yOffset_ = 0.0;
             pattern->yLast_ = 0.0;
-            pattern->FireScrollStopEvent();
+            pattern->FireAnimationEndEvent();
             pattern->StopHapticController();
         },
         nullptr, context);
@@ -1074,7 +1177,7 @@ void ContainerPickerPattern::CreateSpringAnimation(float delta)
             pattern->lastAnimationScroll_ = 0.0f;
             pattern->yOffset_ = 0.0;
             pattern->yLast_ = 0.0;
-            pattern->FireScrollStopEvent();
+            pattern->FireAnimationEndEvent();
         },
         nullptr, context);
 }
@@ -1112,6 +1215,14 @@ void ContainerPickerPattern::PlayResetAnimation()
         InnerHandleScroll(LessNotEqual(resetOffset, 0.0));
     }
     CreateTargetAnimation(resetOffset);
+}
+
+void ContainerPickerPattern::ForceResetWithoutAnimation()
+{
+    float currentOffsetFromMiddle = CalculateMiddleLineOffset();
+    float resetOffset = CalculateResetOffset(currentOffsetFromMiddle);
+    currentDelta_ = resetOffset;
+    PickerMarkDirty();
 }
 
 double ContainerPickerPattern::GetCurrentTime() const
@@ -1383,7 +1494,7 @@ bool ContainerPickerPattern::HandleDirectionKey(KeyCode code)
             FireScrollStopEvent();
             break;
         }
-        
+
         case KeyCode::KEY_DPAD_DOWN: {
             int32_t downIndex = (totalItemCount_ + selectedIndex_ + 1) % totalItemCount_;
             SwipeTo(downIndex);
@@ -1406,17 +1517,17 @@ void ContainerPickerPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto frameRect = geometryNode->GetFrameRect();
-    
+
     float paintRectWidth = frameRect.Width() - FOCUS_DEFAULT_STROCK_WIDTH.ConvertToPx();
     float paintRectHeight = PICKER_ITEM_HEIGHT.ConvertToPx() - FOCUS_DEFAULT_STROCK_WIDTH.ConvertToPx();
     float offsetX = FOCUS_DEFAULT_STROCK_WIDTH.ConvertToPx() / 2;
     float offsetY = frameRect.Height() / 2 - paintRectHeight / 2;
     paintRect.SetRect(RectF(offsetX, offsetY, paintRectWidth, paintRectHeight));
 
-    paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS,
-        static_cast<RSScalar>(DEFAULT_RADIUS.ConvertToPx()), static_cast<RSScalar>(DEFAULT_RADIUS.ConvertToPx()));
-    paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS,
-        static_cast<RSScalar>(DEFAULT_RADIUS.ConvertToPx()), static_cast<RSScalar>(DEFAULT_RADIUS.ConvertToPx()));
+    paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS, static_cast<RSScalar>(DEFAULT_RADIUS.ConvertToPx()),
+        static_cast<RSScalar>(DEFAULT_RADIUS.ConvertToPx()));
+    paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS, static_cast<RSScalar>(DEFAULT_RADIUS.ConvertToPx()),
+        static_cast<RSScalar>(DEFAULT_RADIUS.ConvertToPx()));
     paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_LEFT_POS,
         static_cast<RSScalar>(DEFAULT_RADIUS.ConvertToPx()), static_cast<RSScalar>(DEFAULT_RADIUS.ConvertToPx()));
     paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS,
