@@ -38,6 +38,7 @@ constexpr bool DEFAULT_TRIM_SPACE = false;
 constexpr TextDecoration DEFAULT_TEXT_DECORATION = TextDecoration::NONE;
 constexpr Color DEFAULT_DECORATION_COLOR = Color(0xff000000);
 constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SOLID;
+constexpr float DEFAULT_LINE_THICKNESS_SCALE = 1.0f;
 constexpr TextCase DEFAULT_TEXT_CASE = TextCase::NORMAL;
 constexpr uint32_t DEFAULT_MAX_LINE = Infinity<uint32_t>();
 constexpr uint32_t DEFAULT_MIN_LINE = 0;
@@ -530,6 +531,7 @@ void GetTextDecoration(ArkUINodeHandle node, ArkUITextDecorationType* decoration
     decoration->decorationType = static_cast<int32_t>(TextModelNG::GetDecoration(frameNode));
     decoration->color = TextModelNG::GetTextDecorationColor(frameNode).GetValue();
     decoration->style = static_cast<int32_t>(TextModelNG::GetTextDecorationStyle(frameNode));
+    decoration->lineThicknessScale = TextModelNG::GetLineThicknessScale(frameNode);
 }
 
 void ResetTextDecoration(ArkUINodeHandle node)
@@ -539,6 +541,7 @@ void ResetTextDecoration(ArkUINodeHandle node)
     TextModelNG::SetTextDecoration(frameNode, DEFAULT_TEXT_DECORATION);
     TextModelNG::SetTextDecorationColor(frameNode, DEFAULT_DECORATION_COLOR);
     TextModelNG::SetTextDecorationStyle(frameNode, DEFAULT_DECORATION_STYLE);
+    TextModelNG::SetLineThicknessScale(frameNode, DEFAULT_LINE_THICKNESS_SCALE);
     if (SystemProperties::ConfigChangePerform()) {
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
@@ -2248,6 +2251,78 @@ void ResetTextContentTransition(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     TextModelNG::ResetContentTransition(frameNode);
 }
+
+void* GetRectsForRange(
+    ArkUINodeHandle node, ArkUI_Int32 start, ArkUI_Int32 end, ArkUI_Int32 heightStyle, ArkUI_Int32 widthStyle)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    std::vector<OHOS::Rosen::TextRect>* textRects = new std::vector<OHOS::Rosen::TextRect>;
+    std::vector<ParagraphManager::TextBox> textBoxes = TextModelNG::GetRectsForRange(
+        frameNode, start, end, static_cast<RectHeightStyle>(heightStyle), static_cast<RectWidthStyle>(widthStyle));
+    for (uint32_t i = 0; i < textBoxes.size(); i++) {
+        ParagraphManager::TextBox textBox = textBoxes[i];
+        OHOS::Rosen::Drawing::RectF rect(
+            textBox.rect_.Left(), textBox.rect_.Top(), textBox.rect_.Right(), textBox.rect_.Bottom());
+        OHOS::Rosen::TextRect textRect(rect, static_cast<OHOS::Rosen::TextDirection>(textBox.direction_));
+        (*textRects).push_back(textRect);
+    }
+    return textRects;
+}
+
+void* GetGlyphPositionAtCoordinate(ArkUINodeHandle node, ArkUI_Float64 dx, ArkUI_Float64 dy)
+{
+#ifndef PREVIEW
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    PositionWithAffinity positionWithAffinity = TextModelNG::GetGlyphPositionAtCoordinate(frameNode, dx, dy);
+    OHOS::Rosen::IndexAndAffinity* indexAndAffinity =
+        new OHOS::Rosen::IndexAndAffinity(0, OHOS::Rosen::Affinity::PREV);
+    indexAndAffinity->index = positionWithAffinity.position_;
+    indexAndAffinity->affinity = static_cast<OHOS::Rosen::Affinity>(positionWithAffinity.affinity_);
+    return indexAndAffinity;
+#else
+    return nullptr;
+#endif
+}
+
+ArkUITextLineMetrics GetLineMetrics(ArkUINodeHandle node, ArkUI_Int32 lineNumber)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, {});
+    TextLineMetrics textLineMetrics = TextModelNG::GetLineMetrics(frameNode, lineNumber);
+    ArkUITextLineMetrics lineMetrics;
+    lineMetrics.ascender = textLineMetrics.ascender;
+    lineMetrics.descender = textLineMetrics.descender;
+    lineMetrics.capHeight = textLineMetrics.capHeight;
+    lineMetrics.xHeight = textLineMetrics.xHeight;
+    lineMetrics.width = textLineMetrics.width;
+    lineMetrics.height = textLineMetrics.height;
+    lineMetrics.x = textLineMetrics.x;
+    lineMetrics.y = textLineMetrics.y;
+    lineMetrics.startIndex = textLineMetrics.startIndex;
+    lineMetrics.endIndex = textLineMetrics.endIndex;
+    FontMetrics firstCharMetrics = textLineMetrics.firstCharMetrics;
+    ArkUIFontMetrics fontMetrics;
+    fontMetrics.fFlags = firstCharMetrics.fFlags;
+    fontMetrics.fTop = firstCharMetrics.fTop;
+    fontMetrics.fAscent = firstCharMetrics.fAscent;
+    fontMetrics.fDescent = firstCharMetrics.fDescent;
+    fontMetrics.fBottom = firstCharMetrics.fBottom;
+    fontMetrics.fLeading = firstCharMetrics.fLeading;
+    fontMetrics.fAvgCharWidth = firstCharMetrics.fAvgCharWidth;
+    fontMetrics.fMaxCharWidth = firstCharMetrics.fMaxCharWidth;
+    fontMetrics.fXMin = firstCharMetrics.fXMin;
+    fontMetrics.fXMax = firstCharMetrics.fXMax;
+    fontMetrics.fXHeight = firstCharMetrics.fXHeight;
+    fontMetrics.fCapHeight = firstCharMetrics.fCapHeight;
+    fontMetrics.fUnderlineThickness = firstCharMetrics.fUnderlineThickness;
+    fontMetrics.fUnderlinePosition = firstCharMetrics.fUnderlinePosition;
+    fontMetrics.fStrikeoutThickness = firstCharMetrics.fStrikeoutThickness;
+    fontMetrics.fStrikeoutPosition = firstCharMetrics.fStrikeoutPosition;
+    lineMetrics.firstCharMetrics = fontMetrics;
+    return lineMetrics;
+}
 } // namespace
 
 namespace NodeModifier {
@@ -2424,6 +2499,9 @@ const ArkUITextModifier* GetTextModifier()
         .resetColorShaderColor = ResetColorShaderColor,
         .setTextContentTransition = SetTextContentTransition,
         .resetTextContentTransition = ResetTextContentTransition,
+        .getRectsForRange = GetRectsForRange,
+        .getGlyphPositionAtCoordinate = GetGlyphPositionAtCoordinate,
+        .getLineMetrics = GetLineMetrics,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

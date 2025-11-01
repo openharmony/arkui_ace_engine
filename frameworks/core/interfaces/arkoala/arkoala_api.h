@@ -893,6 +893,7 @@ struct ArkUITextDecorationType {
     ArkUI_Int32 decorationType;
     ArkUI_Uint32 color;
     ArkUI_Int32 style;
+    ArkUI_Float32 lineThicknessScale;
 };
 
 struct ArkUIFilterColorType {
@@ -2386,6 +2387,39 @@ struct ArkUIBlankScreenDetectionConfigStruct {
     ArkUI_Int32 contentfulNodesCountThreshold = 0;
 };
 
+struct ArkUIFontMetrics {
+    ArkUI_Uint32 fFlags;
+    ArkUI_Float32 fTop;
+    ArkUI_Float32 fAscent;
+    ArkUI_Float32 fDescent;
+    ArkUI_Float32 fBottom;
+    ArkUI_Float32 fLeading;
+    ArkUI_Float32 fAvgCharWidth;
+    ArkUI_Float32 fMaxCharWidth;
+    ArkUI_Float32 fXMin;
+    ArkUI_Float32 fXMax;
+    ArkUI_Float32 fXHeight;
+    ArkUI_Float32 fCapHeight;
+    ArkUI_Float32 fUnderlineThickness;
+    ArkUI_Float32 fUnderlinePosition;
+    ArkUI_Float32 fStrikeoutThickness;
+    ArkUI_Float32 fStrikeoutPosition;
+};
+
+struct ArkUITextLineMetrics {
+    ArkUI_Float64 ascender;
+    ArkUI_Float64 descender;
+    ArkUI_Float64 capHeight;
+    ArkUI_Float64 xHeight;
+    ArkUI_Float64 width;
+    ArkUI_Float64 height;
+    ArkUI_Float64 x;
+    ArkUI_Float64 y;
+    ArkUI_Uint64 startIndex;
+    ArkUI_Uint64 endIndex;
+    ArkUIFontMetrics firstCharMetrics;
+};
+
 struct ArkUICommonModifier {
     ArkUI_Int32 (*setOnTouchTestDoneCallback)(ArkUINodeHandle node, void* userData,
         void (*touchTestDone)(
@@ -3247,6 +3281,10 @@ struct ArkUITextModifier {
     void (*resetTextContentTransition)(ArkUINodeHandle node);
     void (*setColorShaderColor)(ArkUINodeHandle node, ArkUI_Uint32 color, void* colorShaderColorRawPtr);
     void (*resetColorShaderColor)(ArkUINodeHandle node);
+    void* (*getRectsForRange)(
+        ArkUINodeHandle node, ArkUI_Int32 start, ArkUI_Int32 end, ArkUI_Int32 heightStyle, ArkUI_Int32 widthStyle);
+    void* (*getGlyphPositionAtCoordinate)(ArkUINodeHandle node, ArkUI_Float64 dx, ArkUI_Float64 dy);
+    ArkUITextLineMetrics (*getLineMetrics)(ArkUINodeHandle node, ArkUI_Int32 lineNumber);
 };
 
 struct ArkUIButtonModifier {
