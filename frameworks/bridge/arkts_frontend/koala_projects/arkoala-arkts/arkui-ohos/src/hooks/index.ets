@@ -68,6 +68,8 @@ import { PeerNode } from '../PeerNode';
 import { int32 } from "@koalaui/common";
 import { DrawModifier } from "arkui/component/common";
 import { ArkTextPickerComponent, ArkTextPickerPeer, DividerOptions } from "#generated";
+import { ArkListComponent, ArkListItemGroupComponent, ChildrenMainSize } from "#generated";
+import { ListHandWritten } from "./ListHandWritten"
 
 export function hookId(component: object, value?: string) {}
 
@@ -444,4 +446,12 @@ export function hookTextPickerDivider(receiver: ArkTextPickerComponent | ArkText
 
   const value_casted = value as (DividerOptions | null | undefined)
   peer.setDividerAttribute(value_casted)
+}
+
+export function hookListChildrenMainSizeImpl(node: ArkListComponent, value: ChildrenMainSize | undefined): void {
+  ListHandWritten.hookListChildrenMainSizeImpl(node, value)
+}
+
+export function hookListItemGroupChildrenMainSizeImpl(node: ArkListItemGroupComponent, value: ChildrenMainSize | undefined): void {
+  ListHandWritten.hookListItemGroupChildrenMainSizeImpl(node, value)
 }
