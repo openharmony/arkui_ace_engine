@@ -1182,6 +1182,7 @@ HWTEST_F(DragEventTestNg, TestCreateGatherNode002, TestSize.Level1)
      */
     dragEventActuator->FindItemParentNode(gridItemNode1);
     auto gatherNode = DragEventActuator::CreateGatherNode(dragEventActuator);
+
     EXPECT_EQ(gatherNode, nullptr);
 }
 
