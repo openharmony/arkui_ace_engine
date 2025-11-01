@@ -39903,6 +39903,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return 0;
     }
+    void SetLengthImpl(Ark_StyledString peer,
+                       Ark_Int32 length)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setLength(");
+        WriteToString(&out, length);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     } // StyledStringAccessor
     namespace StyledStringControllerAccessor {
     void DestroyPeerImpl(Ark_StyledStringController peer)
@@ -47051,6 +47063,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             StyledStringAccessor::Marshalling1Impl,
             StyledStringAccessor::Unmarshalling1Impl,
             StyledStringAccessor::GetLengthImpl,
+            StyledStringAccessor::SetLengthImpl,
         };
         return &StyledStringAccessorImpl;
     }

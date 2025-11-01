@@ -34624,6 +34624,11 @@ Ark_Int32 impl_StyledString_getLength(Ark_NativePointer thisPtr) {
         return GetAccessors()->getStyledStringAccessor()->getLength(self);
 }
 KOALA_INTEROP_DIRECT_1(StyledString_getLength, Ark_Int32, Ark_NativePointer)
+void impl_StyledString_setLength(Ark_NativePointer thisPtr, Ark_Int32 length) {
+        Ark_StyledString self = reinterpret_cast<Ark_StyledString>(thisPtr);
+        GetAccessors()->getStyledStringAccessor()->setLength(self, length);
+}
+KOALA_INTEROP_DIRECT_V2(StyledString_setLength, Ark_NativePointer, Ark_Int32)
 Ark_NativePointer impl_StyledStringController_construct() {
         return GetAccessors()->getStyledStringControllerAccessor()->construct();
 }
