@@ -27,6 +27,7 @@
 namespace {
 #ifdef ENABLE_ROSEN_BACKEND
 constexpr float ONE_SECOND_IN_NANO = 1000000000.0f;
+static std::atomic<int32_t> vsyncCounter = 0;
 
 float GetDisplayRefreshRate()
 {
@@ -55,9 +56,11 @@ FormRenderWindow::FormRenderWindow(RefPtr<TaskExecutor> taskExecutor, int32_t id
         frameRateLinker_ = Rosen::RSFrameRateLinker::Create();
         receiver_ = rsClient.CreateVSyncReceiver("Form", frameRateLinker_ != nullptr ? frameRateLinker_->GetId() : 0);
         if (receiver_ == nullptr) {
-            LOGE("Form Create VSync receiver failed.");
+            LOGE("Form create vsync receiver failed, total counter:%{public}d",
+                vsyncCounter.load(std::memory_order_relaxed));
             return;
         }
+        LOGI("VSync created, total counter:%{public}d", ++vsyncCounter);
         receiver_->Init();
     }
 
@@ -135,6 +138,9 @@ void FormRenderWindow::Destroy()
     if (rsUIDirector_) {
         rsUIDirector_->Destroy();
         rsUIDirector_.reset();
+    }
+    if (receiver_) {
+        LOGI("VSync destroyed, remained counter:%{public}d", --vsyncCounter);
     }
     callbacks_.clear();
 #endif
