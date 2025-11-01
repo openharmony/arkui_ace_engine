@@ -729,13 +729,13 @@ void GestureEventHub::AddClickEvent(const RefPtr<ClickEvent>& clickEvent)
 }
 
 // replace last bindTips callback
-void GestureEventHub::AddClickEventForTips(GestureEventFunc&& tipsClickEventFunc)
+void GestureEventHub::AddTouchEventForTips(TouchEventFunc&& tipsTouchEventFunc)
 {
-    if (tipsClickEvent_) {
-        RemoveClickEvent(tipsClickEvent_);
+    if (tipsTouchEvent_) {
+        RemoveTouchEvent(tipsTouchEvent_);
     }
-    tipsClickEvent_ = MakeRefPtr<ClickEvent>(std::move(tipsClickEventFunc));
-    AddClickEvent(tipsClickEvent_);
+    tipsTouchEvent_ = MakeRefPtr<TouchEventImpl>(std::move(tipsTouchEventFunc));
+    AddTouchEvent(tipsTouchEvent_);
 }
 
 void GestureEventHub::AddClickAfterEvent(const RefPtr<ClickEvent>& clickEvent)
