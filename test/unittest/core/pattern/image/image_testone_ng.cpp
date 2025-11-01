@@ -460,11 +460,11 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest009, TestSize.Level0)
 }
 
 /**
- * @tc.name: ImageColorFilterTest010
+ * @tc.name: ImageColorFilterTestSmoothEdge
  * @tc.desc: Test whether image ColorFilter and smoothedge affect each other
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestOneNg, ImageColorFilterTest010, TestSize.Level0)
+HWTEST_F(ImageTestOneNg, ImageColorFilterTestSmoothEdge, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
