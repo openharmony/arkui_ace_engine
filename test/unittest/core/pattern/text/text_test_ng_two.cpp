@@ -898,6 +898,57 @@ HWTEST_F(TextTestNgTwo, TextContentAlign001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TextContentAlign002
+ * @tc.desc: test text_content_modifier.cpp .
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgTwo, TextContentAlign002, TestSize.Level1)
+{
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*paragraph, GetMaxWidth).WillRepeatedly(Return(100.0f));
+    /**
+     * @tc.steps: step1. create textFrameNode.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    textPattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. set textLayoutProperty.
+     */
+    textLayoutProperty->UpdateContent(CREATE_VALUE_W);
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.selfIdealSize.SetSize(TEXT_SIZE);
+    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
+
+    /**
+     * @tc.steps: step3. create textLayoutAlgorithm and call MeasureContent function.
+     * @tc.expected: The width of the return value of MeasureContent is equal to 100.0f
+     */
+    auto textLayoutAlgorithm = AceType::MakeRefPtr<TextLayoutAlgorithm>();
+    auto contentSize =
+        textLayoutAlgorithm->MeasureContent(parentLayoutConstraint, AccessibilityManager::RawPtr(layoutWrapper));
+    textLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    textLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_EQ(contentSize.value().Width(), 100.0f);
+    textLayoutProperty->UpdateTextContentAlign(TextContentAlign::TOP);
+    auto contentOffset = textLayoutAlgorithm->GetContentOffset(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_EQ(contentOffset.GetY(), 0.0f);
+    textLayoutProperty->ResetTextContentAlign();
+    contentOffset = textLayoutAlgorithm->GetContentOffset(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_EQ(contentOffset.GetY(), 0.0f);
+    textPattern->pManager_->Reset();
+}
+
+/**
  * @tc.name: TextLayoutAlgorithmTest006
  * @tc.desc: text_layout_algorithm.cpp:Set TextOverflow to MARQUEE
  * @tc.type: FUNC
