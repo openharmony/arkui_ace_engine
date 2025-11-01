@@ -28,6 +28,7 @@ public:
     static void SetTrackBorderRadius(FrameNode* frameNode, const std::optional<Dimension>& borderRadius);
     static void OnChangeEvent(FrameNode* frameNode, ChangeEvent&& onChangeEvent);
     static void TriggerChange(FrameNode* frameNode, bool value);
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, ToggleType toggleType);
 };
 
 } // namespace OHOS::Ace::NG
