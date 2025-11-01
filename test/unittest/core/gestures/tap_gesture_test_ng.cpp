@@ -103,6 +103,7 @@ HWTEST_F(TapGestureTestNg, TapGestureTest002, TestSize.Level1)
     auto onActionStart = [](GestureEvent& info) { return true; };
     tapGesture.SetOnActionId(onActionStart);
     auto tapRecognizer = AceType::DynamicCast<ClickRecognizer>(tapGesture.CreateRecognizer());
+
     EXPECT_NE(tapRecognizer, nullptr);
     EXPECT_EQ(tapRecognizer->GetPriority(), GesturePriority::Low);
     EXPECT_EQ(tapRecognizer->GetPriorityMask(), GestureMask::Normal);
