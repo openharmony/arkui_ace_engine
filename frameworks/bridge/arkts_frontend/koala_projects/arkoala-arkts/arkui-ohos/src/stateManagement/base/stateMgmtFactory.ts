@@ -163,7 +163,7 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
                 watchFunc
             ) as ILinkDecoratedVariable<T>;
         }
-        if (source instanceof IPropRefDecoratedVariable) {
+        if (StateMgmtTool.isPropRefDecoratedVariable(source)) {
             return this.makeLinkOnPropRef(
                 owningView,
                 varName,

@@ -24,7 +24,7 @@ import { WatchFunc } from './decoratorWatch';
 import { FactoryInternal } from '../base/iFactoryInternal';
 import { StateUpdateLoop } from '../base/stateUpdateLoop';
 import { uiUtils } from '../base/uiUtilsImpl';
-import { getObservedObject, isDynamicObject } from '../../component/interop';
+import { CompatibleStateChangeCallback, getObservedObject, isDynamicObject } from '../../component/interop';
 
 export class PropRefDecoratedVariable<T> extends DecoratedV1VariableBase<T> implements IPropRefDecoratedVariable<T> {
     sourceValue: T;
@@ -67,6 +67,9 @@ export class PropRefDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
         }
         this.unregisterWatchFromObservedObjectChanges(oldValue);
         this.registerWatchForObservedObjectChanges(this.localValue.get(false));
+        if (this.setProxyValue) {
+            this.setProxyValue!(newValue);
+        }
         this.execWatchFuncs();
     }
 
@@ -125,5 +128,21 @@ export class PropRefDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
                 this.needForceUpdateFunc.unregisterMeFrom(iSubscribedWatches);
             }
         }
+    }
+
+    private proxy?: ESValue;
+
+    public getProxy(): ESValue | undefined {
+        return this.proxy;
+    }
+
+    public setProxy(proxy: ESValue): void {
+        this.proxy = proxy;
+    }
+
+    public setProxyValue?: CompatibleStateChangeCallback<T>;
+
+    public fireChange(): void {
+        this.localValue.fireChange();
     }
 }
