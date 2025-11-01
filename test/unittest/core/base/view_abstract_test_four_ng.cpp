@@ -671,6 +671,41 @@ HWTEST_F(ViewAbstractTestFourNg, ViewAbstractTestNg0097, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ViewAbstractTest098
+ * @tc.desc: Test the operation of View_Abstract.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestFourNg, ViewAbstractTest098, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.Using static methods to set component properties
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern();
+    ASSERT_NE(pattern, nullptr);
+
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+
+    pattern->AddResCache("height", "0.00auto");
+    pattern->AddResCache("width", "0.00auto");
+    ViewAbstract::SetWidth(resObj);
+    ViewAbstract::SetHeight(resObj);
+
+    /**
+     * @tc.expected: Successfully set various properties of the top node on the stack
+     */
+    CalcDimension result = Dimension(0.0f, DimensionUnit::AUTO);
+    ResourceParseUtils::ParseResDimensionVpNG(resObj, result);
+    EXPECT_EQ(pattern->GetResCacheMapByKey("width"), result.ToString());
+    EXPECT_EQ(pattern->GetResCacheMapByKey("height"), result.ToString());
+    pattern->RemoveResObj("width");
+    pattern->RemoveResObj("height");
+}
+
+/**
  * @tc.name: SetLinearGradient
  * @tc.desc: Test SetLinearGradient of View_Abstract
  * @tc.type: FUNC
