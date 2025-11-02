@@ -1854,4 +1854,23 @@ HWTEST_F(InspectorTestNg, GetOverlayNode_002, TestSize.Level1)
 
     context1->stageManager_ = nullptr;
 }
+
+/**
+ * @tc.name: GetElementRegisterNodes_001
+ * @tc.desc: Test the operation of GetElementRegisterNodes
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, GetElementRegisterNodes_001, TestSize.Level1)
+{
+    auto id1 = ElementRegister::GetInstance()->MakeUniqueId();
+    RefPtr<FrameNode> ONE = FrameNode::CreateFrameNode("one", id1, AceType::MakeRefPtr<Pattern>(), true);
+    auto id2 = ElementRegister::GetInstance()->MakeUniqueId();
+    const RefPtr<FrameNode> TWO = FrameNode::CreateFrameNode("two", id2, AceType::MakeRefPtr<Pattern>());
+    NG::InspectorTreeMap treesInfos;
+    Inspector::GetElementRegisterNodes(treesInfos);
+    auto it = treesInfos.find(id1);
+    EXPECT_TRUE(it != treesInfos.end());
+    it = treesInfos.find(id2);
+    EXPECT_TRUE(it != treesInfos.end());
+}
 } // namespace OHOS::Ace::NG
