@@ -68,21 +68,21 @@ export class font_FontOptions_serializer {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForFamilyName  = value.familyName
         if (valueHolderForFamilyName instanceof string) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForFamilyNameForIdx0  = valueHolderForFamilyName as string
             valueSerializer.writeString(valueHolderForFamilyNameForIdx0)
         } else if (valueHolderForFamilyName instanceof Resource) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForFamilyNameForIdx1  = valueHolderForFamilyName as Resource
             Resource_serializer.write(valueSerializer, valueHolderForFamilyNameForIdx1)
         }
         const valueHolderForFamilySrc  = value.familySrc
         if (valueHolderForFamilySrc instanceof string) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForFamilySrcForIdx0  = valueHolderForFamilySrc as string
             valueSerializer.writeString(valueHolderForFamilySrcForIdx0)
         } else if (valueHolderForFamilySrc instanceof Resource) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForFamilySrcForIdx1  = valueHolderForFamilySrc as Resource
             Resource_serializer.write(valueSerializer, valueHolderForFamilySrcForIdx1)
         }

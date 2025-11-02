@@ -48,21 +48,21 @@ export class uiObserver_NavDestinationInfo_serializer {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForNavigationId  = value.navigationId
         if (valueHolderForNavigationId instanceof string) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForNavigationIdForIdx0  = valueHolderForNavigationId as string
             valueSerializer.writeString(valueHolderForNavigationIdForIdx0)
         } else if (valueHolderForNavigationId instanceof Resource) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForNavigationIdForIdx1  = valueHolderForNavigationId as Resource
             Resource_serializer.write(valueSerializer, valueHolderForNavigationIdForIdx1)
         }
         const valueHolderForName  = value.name
         if (valueHolderForName instanceof string) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForNameForIdx0  = valueHolderForName as string
             valueSerializer.writeString(valueHolderForNameForIdx0)
         } else if (valueHolderForName instanceof Resource) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForNameForIdx1  = valueHolderForName as Resource
             Resource_serializer.write(valueSerializer, valueHolderForNameForIdx1)
         }

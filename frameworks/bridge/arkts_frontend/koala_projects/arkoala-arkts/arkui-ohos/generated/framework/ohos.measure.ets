@@ -29,11 +29,11 @@ export class MeasureOptions_serializer {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForTextContent  = value.textContent
         if (valueHolderForTextContent instanceof string) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForTextContentForIdx0  = valueHolderForTextContent as string
             valueSerializer.writeString(valueHolderForTextContentForIdx0)
         } else if (valueHolderForTextContent instanceof Resource) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForTextContentForIdx1  = valueHolderForTextContent as Resource
             Resource_serializer.write(valueSerializer, valueHolderForTextContentForIdx1)
         }
@@ -42,15 +42,15 @@ export class MeasureOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForConstraintWidthTmpValue  = valueHolderForConstraintWidth!
             if (valueHolderForConstraintWidthTmpValue instanceof double) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForConstraintWidthTmpValueForIdx0  = valueHolderForConstraintWidthTmpValue as double
                 valueSerializer.writeFloat64(valueHolderForConstraintWidthTmpValueForIdx0)
             } else if (valueHolderForConstraintWidthTmpValue instanceof string) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForConstraintWidthTmpValueForIdx1  = valueHolderForConstraintWidthTmpValue as string
                 valueSerializer.writeString(valueHolderForConstraintWidthTmpValueForIdx1)
             } else if (valueHolderForConstraintWidthTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForConstraintWidthTmpValueForIdx2  = valueHolderForConstraintWidthTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForConstraintWidthTmpValueForIdx2)
             }
@@ -62,15 +62,15 @@ export class MeasureOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForFontSizeTmpValue  = valueHolderForFontSize!
             if (valueHolderForFontSizeTmpValue instanceof double) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForFontSizeTmpValueForIdx0  = valueHolderForFontSizeTmpValue as double
                 valueSerializer.writeFloat64(valueHolderForFontSizeTmpValueForIdx0)
             } else if (valueHolderForFontSizeTmpValue instanceof string) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForFontSizeTmpValueForIdx1  = valueHolderForFontSizeTmpValue as string
                 valueSerializer.writeString(valueHolderForFontSizeTmpValueForIdx1)
             } else if (valueHolderForFontSizeTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForFontSizeTmpValueForIdx2  = valueHolderForFontSizeTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForFontSizeTmpValueForIdx2)
             }
@@ -82,11 +82,11 @@ export class MeasureOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForFontStyleTmpValue  = valueHolderForFontStyle!
             if (valueHolderForFontStyleTmpValue instanceof int32) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForFontStyleTmpValueForIdx0  = valueHolderForFontStyleTmpValue as int32
                 valueSerializer.writeInt32(valueHolderForFontStyleTmpValueForIdx0)
             } else if (valueHolderForFontStyleTmpValue instanceof FontStyle) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForFontStyleTmpValueForIdx1  = valueHolderForFontStyleTmpValue as FontStyle
                 valueSerializer.writeInt32(valueHolderForFontStyleTmpValueForIdx1.valueOf())
             }
@@ -98,15 +98,15 @@ export class MeasureOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForFontWeightTmpValue  = valueHolderForFontWeight!
             if (valueHolderForFontWeightTmpValue instanceof int32) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForFontWeightTmpValueForIdx0  = valueHolderForFontWeightTmpValue as int32
                 valueSerializer.writeInt32(valueHolderForFontWeightTmpValueForIdx0)
             } else if (valueHolderForFontWeightTmpValue instanceof string) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForFontWeightTmpValueForIdx1  = valueHolderForFontWeightTmpValue as string
                 valueSerializer.writeString(valueHolderForFontWeightTmpValueForIdx1)
             } else if (valueHolderForFontWeightTmpValue instanceof FontWeight) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForFontWeightTmpValueForIdx2  = valueHolderForFontWeightTmpValue as FontWeight
                 valueSerializer.writeInt32(valueHolderForFontWeightTmpValueForIdx2.valueOf())
             }
@@ -118,11 +118,11 @@ export class MeasureOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForFontFamilyTmpValue  = valueHolderForFontFamily!
             if (valueHolderForFontFamilyTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForFontFamilyTmpValueForIdx0  = valueHolderForFontFamilyTmpValue as string
                 valueSerializer.writeString(valueHolderForFontFamilyTmpValueForIdx0)
             } else if (valueHolderForFontFamilyTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForFontFamilyTmpValueForIdx1  = valueHolderForFontFamilyTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForFontFamilyTmpValueForIdx1)
             }
@@ -134,11 +134,11 @@ export class MeasureOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForLetterSpacingTmpValue  = valueHolderForLetterSpacing!
             if (valueHolderForLetterSpacingTmpValue instanceof double) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForLetterSpacingTmpValueForIdx0  = valueHolderForLetterSpacingTmpValue as double
                 valueSerializer.writeFloat64(valueHolderForLetterSpacingTmpValueForIdx0)
             } else if (valueHolderForLetterSpacingTmpValue instanceof string) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForLetterSpacingTmpValueForIdx1  = valueHolderForLetterSpacingTmpValue as string
                 valueSerializer.writeString(valueHolderForLetterSpacingTmpValueForIdx1)
             }
@@ -150,11 +150,11 @@ export class MeasureOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForTextAlignTmpValue  = valueHolderForTextAlign!
             if (valueHolderForTextAlignTmpValue instanceof int32) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForTextAlignTmpValueForIdx0  = valueHolderForTextAlignTmpValue as int32
                 valueSerializer.writeInt32(valueHolderForTextAlignTmpValueForIdx0)
             } else if (valueHolderForTextAlignTmpValue instanceof TextAlign) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForTextAlignTmpValueForIdx1  = valueHolderForTextAlignTmpValue as TextAlign
                 valueSerializer.writeInt32(valueHolderForTextAlignTmpValueForIdx1.valueOf())
             }
@@ -166,11 +166,11 @@ export class MeasureOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForOverflowTmpValue  = valueHolderForOverflow!
             if (valueHolderForOverflowTmpValue instanceof int32) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForOverflowTmpValueForIdx0  = valueHolderForOverflowTmpValue as int32
                 valueSerializer.writeInt32(valueHolderForOverflowTmpValueForIdx0)
             } else if (valueHolderForOverflowTmpValue instanceof TextOverflow) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForOverflowTmpValueForIdx1  = valueHolderForOverflowTmpValue as TextOverflow
                 valueSerializer.writeInt32(valueHolderForOverflowTmpValueForIdx1.valueOf())
             }
@@ -190,15 +190,15 @@ export class MeasureOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForLineHeightTmpValue  = valueHolderForLineHeight!
             if (valueHolderForLineHeightTmpValue instanceof double) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForLineHeightTmpValueForIdx0  = valueHolderForLineHeightTmpValue as double
                 valueSerializer.writeFloat64(valueHolderForLineHeightTmpValueForIdx0)
             } else if (valueHolderForLineHeightTmpValue instanceof string) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForLineHeightTmpValueForIdx1  = valueHolderForLineHeightTmpValue as string
                 valueSerializer.writeString(valueHolderForLineHeightTmpValueForIdx1)
             } else if (valueHolderForLineHeightTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForLineHeightTmpValueForIdx2  = valueHolderForLineHeightTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForLineHeightTmpValueForIdx2)
             }
@@ -210,11 +210,11 @@ export class MeasureOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBaselineOffsetTmpValue  = valueHolderForBaselineOffset!
             if (valueHolderForBaselineOffsetTmpValue instanceof double) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForBaselineOffsetTmpValueForIdx0  = valueHolderForBaselineOffsetTmpValue as double
                 valueSerializer.writeFloat64(valueHolderForBaselineOffsetTmpValueForIdx0)
             } else if (valueHolderForBaselineOffsetTmpValue instanceof string) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForBaselineOffsetTmpValueForIdx1  = valueHolderForBaselineOffsetTmpValue as string
                 valueSerializer.writeString(valueHolderForBaselineOffsetTmpValueForIdx1)
             }
@@ -226,11 +226,11 @@ export class MeasureOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForTextCaseTmpValue  = valueHolderForTextCase!
             if (valueHolderForTextCaseTmpValue instanceof int32) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForTextCaseTmpValueForIdx0  = valueHolderForTextCaseTmpValue as int32
                 valueSerializer.writeInt32(valueHolderForTextCaseTmpValueForIdx0)
             } else if (valueHolderForTextCaseTmpValue instanceof TextCase) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForTextCaseTmpValueForIdx1  = valueHolderForTextCaseTmpValue as TextCase
                 valueSerializer.writeInt32(valueHolderForTextCaseTmpValueForIdx1.valueOf())
             }
@@ -242,11 +242,11 @@ export class MeasureOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForTextIndentTmpValue  = valueHolderForTextIndent!
             if (valueHolderForTextIndentTmpValue instanceof double) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForTextIndentTmpValueForIdx0  = valueHolderForTextIndentTmpValue as double
                 valueSerializer.writeFloat64(valueHolderForTextIndentTmpValueForIdx0)
             } else if (valueHolderForTextIndentTmpValue instanceof string) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForTextIndentTmpValueForIdx1  = valueHolderForTextIndentTmpValue as string
                 valueSerializer.writeString(valueHolderForTextIndentTmpValueForIdx1)
             }

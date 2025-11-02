@@ -142,31 +142,31 @@ export class ArkTabContentPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof ComponentContent) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as ComponentContent
                 thisSerializer.holdAndWriteObject(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof SubTabBarStyle) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as SubTabBarStyle
                 SubTabBarStyle_serializer.write(thisSerializer, valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof BottomTabBarStyle) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as BottomTabBarStyle
                 BottomTabBarStyle_serializer.write(thisSerializer, valueTmpValueForIdx2)
             } else if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((3).toChar())
+                thisSerializer.writeInt8((3).toByte())
                 const valueTmpValueForIdx3  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx3)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((4).toChar())
+                thisSerializer.writeInt8((4).toByte())
                 const valueTmpValueForIdx4  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx4)
             } else if (valueTmpValue instanceof CustomBuilder) {
-                thisSerializer.writeInt8((5).toChar())
+                thisSerializer.writeInt8((5).toByte())
                 const valueTmpValueForIdx5  = valueTmpValue as CustomBuilder
                 thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueTmpValueForIdx5))
             } else if (valueTmpValue instanceof TabBarOptions) {
-                thisSerializer.writeInt8((6).toChar())
+                thisSerializer.writeInt8((6).toByte())
                 const valueTmpValueForIdx6  = valueTmpValue as TabBarOptions
                 TabBarOptions_serializer.write(thisSerializer, valueTmpValueForIdx6)
             }
@@ -428,19 +428,19 @@ export class TabBarIconStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForSelectedColorTmpValue  = valueHolderForSelectedColor!
             if (valueHolderForSelectedColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForSelectedColorTmpValueForIdx0  = valueHolderForSelectedColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForSelectedColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForSelectedColorTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForSelectedColorTmpValueForIdx1  = valueHolderForSelectedColorTmpValue as number
                 valueSerializer.writeNumber(valueHolderForSelectedColorTmpValueForIdx1)
             } else if (valueHolderForSelectedColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForSelectedColorTmpValueForIdx2  = valueHolderForSelectedColorTmpValue as string
                 valueSerializer.writeString(valueHolderForSelectedColorTmpValueForIdx2)
             } else if (valueHolderForSelectedColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForSelectedColorTmpValueForIdx3  = valueHolderForSelectedColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForSelectedColorTmpValueForIdx3)
             }
@@ -452,19 +452,19 @@ export class TabBarIconStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForUnselectedColorTmpValue  = valueHolderForUnselectedColor!
             if (valueHolderForUnselectedColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForUnselectedColorTmpValueForIdx0  = valueHolderForUnselectedColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForUnselectedColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForUnselectedColorTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForUnselectedColorTmpValueForIdx1  = valueHolderForUnselectedColorTmpValue as number
                 valueSerializer.writeNumber(valueHolderForUnselectedColorTmpValueForIdx1)
             } else if (valueHolderForUnselectedColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForUnselectedColorTmpValueForIdx2  = valueHolderForUnselectedColorTmpValue as string
                 valueSerializer.writeString(valueHolderForUnselectedColorTmpValueForIdx2)
             } else if (valueHolderForUnselectedColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForUnselectedColorTmpValueForIdx3  = valueHolderForUnselectedColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForUnselectedColorTmpValueForIdx3)
             }
@@ -524,11 +524,11 @@ export class TabBarOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForIconTmpValue  = valueHolderForIcon!
             if (valueHolderForIconTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForIconTmpValueForIdx0  = valueHolderForIconTmpValue as string
                 valueSerializer.writeString(valueHolderForIconTmpValueForIdx0)
             } else if (valueHolderForIconTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForIconTmpValueForIdx1  = valueHolderForIconTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForIconTmpValueForIdx1)
             }
@@ -540,11 +540,11 @@ export class TabBarOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForTextTmpValue  = valueHolderForText!
             if (valueHolderForTextTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForTextTmpValueForIdx0  = valueHolderForTextTmpValue as string
                 valueSerializer.writeString(valueHolderForTextTmpValueForIdx0)
             } else if (valueHolderForTextTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForTextTmpValueForIdx1  = valueHolderForTextTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForTextTmpValueForIdx1)
             }
@@ -596,15 +596,15 @@ export class BoardStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBorderRadiusTmpValue  = valueHolderForBorderRadius!
             if (valueHolderForBorderRadiusTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForBorderRadiusTmpValueForIdx0  = valueHolderForBorderRadiusTmpValue as string
                 valueSerializer.writeString(valueHolderForBorderRadiusTmpValueForIdx0)
             } else if (valueHolderForBorderRadiusTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForBorderRadiusTmpValueForIdx1  = valueHolderForBorderRadiusTmpValue as number
                 valueSerializer.writeNumber(valueHolderForBorderRadiusTmpValueForIdx1)
             } else if (valueHolderForBorderRadiusTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForBorderRadiusTmpValueForIdx2  = valueHolderForBorderRadiusTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForBorderRadiusTmpValueForIdx2)
             }
@@ -643,19 +643,19 @@ export class SubTabBarIndicatorStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForColorTmpValue  = valueHolderForColor!
             if (valueHolderForColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForColorTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as number
                 valueSerializer.writeNumber(valueHolderForColorTmpValueForIdx1)
             } else if (valueHolderForColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForColorTmpValueForIdx2  = valueHolderForColorTmpValue as string
                 valueSerializer.writeString(valueHolderForColorTmpValueForIdx2)
             } else if (valueHolderForColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForColorTmpValueForIdx3  = valueHolderForColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForColorTmpValueForIdx3)
             }
@@ -667,15 +667,15 @@ export class SubTabBarIndicatorStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForHeightTmpValue  = valueHolderForHeight!
             if (valueHolderForHeightTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForHeightTmpValueForIdx0  = valueHolderForHeightTmpValue as string
                 valueSerializer.writeString(valueHolderForHeightTmpValueForIdx0)
             } else if (valueHolderForHeightTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForHeightTmpValueForIdx1  = valueHolderForHeightTmpValue as number
                 valueSerializer.writeNumber(valueHolderForHeightTmpValueForIdx1)
             } else if (valueHolderForHeightTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForHeightTmpValueForIdx2  = valueHolderForHeightTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForHeightTmpValueForIdx2)
             }
@@ -687,15 +687,15 @@ export class SubTabBarIndicatorStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForWidthTmpValue  = valueHolderForWidth!
             if (valueHolderForWidthTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForWidthTmpValueForIdx0  = valueHolderForWidthTmpValue as string
                 valueSerializer.writeString(valueHolderForWidthTmpValueForIdx0)
             } else if (valueHolderForWidthTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForWidthTmpValueForIdx1  = valueHolderForWidthTmpValue as number
                 valueSerializer.writeNumber(valueHolderForWidthTmpValueForIdx1)
             } else if (valueHolderForWidthTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForWidthTmpValueForIdx2  = valueHolderForWidthTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForWidthTmpValueForIdx2)
             }
@@ -707,15 +707,15 @@ export class SubTabBarIndicatorStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBorderRadiusTmpValue  = valueHolderForBorderRadius!
             if (valueHolderForBorderRadiusTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForBorderRadiusTmpValueForIdx0  = valueHolderForBorderRadiusTmpValue as string
                 valueSerializer.writeString(valueHolderForBorderRadiusTmpValueForIdx0)
             } else if (valueHolderForBorderRadiusTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForBorderRadiusTmpValueForIdx1  = valueHolderForBorderRadiusTmpValue as number
                 valueSerializer.writeNumber(valueHolderForBorderRadiusTmpValueForIdx1)
             } else if (valueHolderForBorderRadiusTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForBorderRadiusTmpValueForIdx2  = valueHolderForBorderRadiusTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForBorderRadiusTmpValueForIdx2)
             }
@@ -727,15 +727,15 @@ export class SubTabBarIndicatorStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForMarginTopTmpValue  = valueHolderForMarginTop!
             if (valueHolderForMarginTopTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForMarginTopTmpValueForIdx0  = valueHolderForMarginTopTmpValue as string
                 valueSerializer.writeString(valueHolderForMarginTopTmpValueForIdx0)
             } else if (valueHolderForMarginTopTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForMarginTopTmpValueForIdx1  = valueHolderForMarginTopTmpValue as number
                 valueSerializer.writeNumber(valueHolderForMarginTopTmpValueForIdx1)
             } else if (valueHolderForMarginTopTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForMarginTopTmpValueForIdx2  = valueHolderForMarginTopTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForMarginTopTmpValueForIdx2)
             }
@@ -860,18 +860,18 @@ export class TabBarLabelStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForMinFontSizeTmpValue  = valueHolderForMinFontSize!
             if (valueHolderForMinFontSizeTmpValue instanceof number) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForMinFontSizeTmpValueForIdx0  = valueHolderForMinFontSizeTmpValue as number
                 valueSerializer.writeNumber(valueHolderForMinFontSizeTmpValueForIdx0)
             } else if (valueHolderForMinFontSizeTmpValue instanceof ResourceStr) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForMinFontSizeTmpValueForIdx1  = valueHolderForMinFontSizeTmpValue as ResourceStr
                 if (valueHolderForMinFontSizeTmpValueForIdx1 instanceof string) {
-                    valueSerializer.writeInt8((0).toChar())
+                    valueSerializer.writeInt8((0).toByte())
                     const valueHolderForMinFontSizeTmpValueForIdx1ForIdx0  = valueHolderForMinFontSizeTmpValueForIdx1 as string
                     valueSerializer.writeString(valueHolderForMinFontSizeTmpValueForIdx1ForIdx0)
                 } else if (valueHolderForMinFontSizeTmpValueForIdx1 instanceof Resource) {
-                    valueSerializer.writeInt8((1).toChar())
+                    valueSerializer.writeInt8((1).toByte())
                     const valueHolderForMinFontSizeTmpValueForIdx1ForIdx1  = valueHolderForMinFontSizeTmpValueForIdx1 as Resource
                     Resource_serializer.write(valueSerializer, valueHolderForMinFontSizeTmpValueForIdx1ForIdx1)
                 }
@@ -884,18 +884,18 @@ export class TabBarLabelStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForMaxFontSizeTmpValue  = valueHolderForMaxFontSize!
             if (valueHolderForMaxFontSizeTmpValue instanceof number) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForMaxFontSizeTmpValueForIdx0  = valueHolderForMaxFontSizeTmpValue as number
                 valueSerializer.writeNumber(valueHolderForMaxFontSizeTmpValueForIdx0)
             } else if (valueHolderForMaxFontSizeTmpValue instanceof ResourceStr) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForMaxFontSizeTmpValueForIdx1  = valueHolderForMaxFontSizeTmpValue as ResourceStr
                 if (valueHolderForMaxFontSizeTmpValueForIdx1 instanceof string) {
-                    valueSerializer.writeInt8((0).toChar())
+                    valueSerializer.writeInt8((0).toByte())
                     const valueHolderForMaxFontSizeTmpValueForIdx1ForIdx0  = valueHolderForMaxFontSizeTmpValueForIdx1 as string
                     valueSerializer.writeString(valueHolderForMaxFontSizeTmpValueForIdx1ForIdx0)
                 } else if (valueHolderForMaxFontSizeTmpValueForIdx1 instanceof Resource) {
-                    valueSerializer.writeInt8((1).toChar())
+                    valueSerializer.writeInt8((1).toByte())
                     const valueHolderForMaxFontSizeTmpValueForIdx1ForIdx1  = valueHolderForMaxFontSizeTmpValueForIdx1 as Resource
                     Resource_serializer.write(valueSerializer, valueHolderForMaxFontSizeTmpValueForIdx1ForIdx1)
                 }
@@ -924,19 +924,19 @@ export class TabBarLabelStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForSelectedColorTmpValue  = valueHolderForSelectedColor!
             if (valueHolderForSelectedColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForSelectedColorTmpValueForIdx0  = valueHolderForSelectedColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForSelectedColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForSelectedColorTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForSelectedColorTmpValueForIdx1  = valueHolderForSelectedColorTmpValue as number
                 valueSerializer.writeNumber(valueHolderForSelectedColorTmpValueForIdx1)
             } else if (valueHolderForSelectedColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForSelectedColorTmpValueForIdx2  = valueHolderForSelectedColorTmpValue as string
                 valueSerializer.writeString(valueHolderForSelectedColorTmpValueForIdx2)
             } else if (valueHolderForSelectedColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForSelectedColorTmpValueForIdx3  = valueHolderForSelectedColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForSelectedColorTmpValueForIdx3)
             }
@@ -948,19 +948,19 @@ export class TabBarLabelStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForUnselectedColorTmpValue  = valueHolderForUnselectedColor!
             if (valueHolderForUnselectedColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForUnselectedColorTmpValueForIdx0  = valueHolderForUnselectedColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForUnselectedColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForUnselectedColorTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForUnselectedColorTmpValueForIdx1  = valueHolderForUnselectedColorTmpValue as number
                 valueSerializer.writeNumber(valueHolderForUnselectedColorTmpValueForIdx1)
             } else if (valueHolderForUnselectedColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForUnselectedColorTmpValueForIdx2  = valueHolderForUnselectedColorTmpValue as string
                 valueSerializer.writeString(valueHolderForUnselectedColorTmpValueForIdx2)
             } else if (valueHolderForUnselectedColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForUnselectedColorTmpValueForIdx3  = valueHolderForUnselectedColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForUnselectedColorTmpValueForIdx3)
             }
@@ -1092,19 +1092,19 @@ export class BottomTabBarStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderFor_iconTmpValue  = valueHolderFor_icon!
             if (valueHolderFor_iconTmpValue instanceof ResourceStr) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderFor_iconTmpValueForIdx0  = valueHolderFor_iconTmpValue as ResourceStr
                 if (valueHolderFor_iconTmpValueForIdx0 instanceof string) {
-                    valueSerializer.writeInt8((0).toChar())
+                    valueSerializer.writeInt8((0).toByte())
                     const valueHolderFor_iconTmpValueForIdx0ForIdx0  = valueHolderFor_iconTmpValueForIdx0 as string
                     valueSerializer.writeString(valueHolderFor_iconTmpValueForIdx0ForIdx0)
                 } else if (valueHolderFor_iconTmpValueForIdx0 instanceof Resource) {
-                    valueSerializer.writeInt8((1).toChar())
+                    valueSerializer.writeInt8((1).toByte())
                     const valueHolderFor_iconTmpValueForIdx0ForIdx1  = valueHolderFor_iconTmpValueForIdx0 as Resource
                     Resource_serializer.write(valueSerializer, valueHolderFor_iconTmpValueForIdx0ForIdx1)
                 }
             } else if (valueHolderFor_iconTmpValue instanceof TabBarSymbol) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderFor_iconTmpValueForIdx1  = valueHolderFor_iconTmpValue as TabBarSymbol
                 TabBarSymbol_serializer.write(valueSerializer, valueHolderFor_iconTmpValueForIdx1)
             }
@@ -1116,11 +1116,11 @@ export class BottomTabBarStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderFor_textTmpValue  = valueHolderFor_text!
             if (valueHolderFor_textTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderFor_textTmpValueForIdx0  = valueHolderFor_textTmpValue as string
                 valueSerializer.writeString(valueHolderFor_textTmpValueForIdx0)
             } else if (valueHolderFor_textTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderFor_textTmpValueForIdx1  = valueHolderFor_textTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderFor_textTmpValueForIdx1)
             }
@@ -1140,27 +1140,27 @@ export class BottomTabBarStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderFor_paddingTmpValue  = valueHolderFor_padding!
             if (valueHolderFor_paddingTmpValue instanceof Padding) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderFor_paddingTmpValueForIdx0  = valueHolderFor_paddingTmpValue as Padding
                 Padding_serializer.write(valueSerializer, valueHolderFor_paddingTmpValueForIdx0)
             } else if (valueHolderFor_paddingTmpValue instanceof Dimension) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderFor_paddingTmpValueForIdx1  = valueHolderFor_paddingTmpValue as Dimension
                 if (valueHolderFor_paddingTmpValueForIdx1 instanceof string) {
-                    valueSerializer.writeInt8((0).toChar())
+                    valueSerializer.writeInt8((0).toByte())
                     const valueHolderFor_paddingTmpValueForIdx1ForIdx0  = valueHolderFor_paddingTmpValueForIdx1 as string
                     valueSerializer.writeString(valueHolderFor_paddingTmpValueForIdx1ForIdx0)
                 } else if (valueHolderFor_paddingTmpValueForIdx1 instanceof number) {
-                    valueSerializer.writeInt8((1).toChar())
+                    valueSerializer.writeInt8((1).toByte())
                     const valueHolderFor_paddingTmpValueForIdx1ForIdx1  = valueHolderFor_paddingTmpValueForIdx1 as number
                     valueSerializer.writeNumber(valueHolderFor_paddingTmpValueForIdx1ForIdx1)
                 } else if (valueHolderFor_paddingTmpValueForIdx1 instanceof Resource) {
-                    valueSerializer.writeInt8((2).toChar())
+                    valueSerializer.writeInt8((2).toByte())
                     const valueHolderFor_paddingTmpValueForIdx1ForIdx2  = valueHolderFor_paddingTmpValueForIdx1 as Resource
                     Resource_serializer.write(valueSerializer, valueHolderFor_paddingTmpValueForIdx1ForIdx2)
                 }
             } else if (valueHolderFor_paddingTmpValue instanceof LocalizedPadding) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderFor_paddingTmpValueForIdx2  = valueHolderFor_paddingTmpValue as LocalizedPadding
                 LocalizedPadding_serializer.write(valueSerializer, valueHolderFor_paddingTmpValueForIdx2)
             }
@@ -1220,15 +1220,15 @@ export class SubTabBarStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderFor_contentTmpValue  = valueHolderFor_content!
             if (valueHolderFor_contentTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderFor_contentTmpValueForIdx0  = valueHolderFor_contentTmpValue as string
                 valueSerializer.writeString(valueHolderFor_contentTmpValueForIdx0)
             } else if (valueHolderFor_contentTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderFor_contentTmpValueForIdx1  = valueHolderFor_contentTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderFor_contentTmpValueForIdx1)
             } else if (valueHolderFor_contentTmpValue instanceof ComponentContent) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderFor_contentTmpValueForIdx2  = valueHolderFor_contentTmpValue as ComponentContent
                 valueSerializer.holdAndWriteObject(valueHolderFor_contentTmpValueForIdx2)
             }
@@ -1272,31 +1272,31 @@ export class SubTabBarStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderFor_paddingTmpValue  = valueHolderFor_padding!
             if (valueHolderFor_paddingTmpValue instanceof Padding | Dimension) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderFor_paddingTmpValueForIdx0  = valueHolderFor_paddingTmpValue as Padding | Dimension
                 if (valueHolderFor_paddingTmpValueForIdx0 instanceof Padding) {
-                    valueSerializer.writeInt8((0).toChar())
+                    valueSerializer.writeInt8((0).toByte())
                     const valueHolderFor_paddingTmpValueForIdx0ForIdx0  = valueHolderFor_paddingTmpValueForIdx0 as Padding
                     Padding_serializer.write(valueSerializer, valueHolderFor_paddingTmpValueForIdx0ForIdx0)
                 } else if (valueHolderFor_paddingTmpValueForIdx0 instanceof Dimension) {
-                    valueSerializer.writeInt8((1).toChar())
+                    valueSerializer.writeInt8((1).toByte())
                     const valueHolderFor_paddingTmpValueForIdx0ForIdx1  = valueHolderFor_paddingTmpValueForIdx0 as Dimension
                     if (valueHolderFor_paddingTmpValueForIdx0ForIdx1 instanceof string) {
-                        valueSerializer.writeInt8((0).toChar())
+                        valueSerializer.writeInt8((0).toByte())
                         const valueHolderFor_paddingTmpValueForIdx0ForIdx1ForIdx0  = valueHolderFor_paddingTmpValueForIdx0ForIdx1 as string
                         valueSerializer.writeString(valueHolderFor_paddingTmpValueForIdx0ForIdx1ForIdx0)
                     } else if (valueHolderFor_paddingTmpValueForIdx0ForIdx1 instanceof number) {
-                        valueSerializer.writeInt8((1).toChar())
+                        valueSerializer.writeInt8((1).toByte())
                         const valueHolderFor_paddingTmpValueForIdx0ForIdx1ForIdx1  = valueHolderFor_paddingTmpValueForIdx0ForIdx1 as number
                         valueSerializer.writeNumber(valueHolderFor_paddingTmpValueForIdx0ForIdx1ForIdx1)
                     } else if (valueHolderFor_paddingTmpValueForIdx0ForIdx1 instanceof Resource) {
-                        valueSerializer.writeInt8((2).toChar())
+                        valueSerializer.writeInt8((2).toByte())
                         const valueHolderFor_paddingTmpValueForIdx0ForIdx1ForIdx2  = valueHolderFor_paddingTmpValueForIdx0ForIdx1 as Resource
                         Resource_serializer.write(valueSerializer, valueHolderFor_paddingTmpValueForIdx0ForIdx1ForIdx2)
                     }
                 }
             } else if (valueHolderFor_paddingTmpValue instanceof LocalizedPadding) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderFor_paddingTmpValueForIdx1  = valueHolderFor_paddingTmpValue as LocalizedPadding
                 LocalizedPadding_serializer.write(valueSerializer, valueHolderFor_paddingTmpValueForIdx1)
             }

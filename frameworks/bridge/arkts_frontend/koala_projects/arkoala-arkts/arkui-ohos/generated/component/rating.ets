@@ -307,11 +307,11 @@ export class RatingOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForRatingTmpValue  = valueHolderForRating!
             if (valueHolderForRatingTmpValue instanceof number) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForRatingTmpValueForIdx0  = valueHolderForRatingTmpValue as number
                 valueSerializer.writeNumber(valueHolderForRatingTmpValueForIdx0)
             } else if (valueHolderForRatingTmpValue instanceof Bindable<number>) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForRatingTmpValueForIdx1  = valueHolderForRatingTmpValue as Bindable<number>
                 Bindable_Number_serializer.write(valueSerializer, valueHolderForRatingTmpValueForIdx1)
             }
@@ -359,21 +359,21 @@ export class StarStyleOptions_serializer {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForBackgroundUri  = value.backgroundUri
         if (valueHolderForBackgroundUri instanceof string) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForBackgroundUriForIdx0  = valueHolderForBackgroundUri as string
             valueSerializer.writeString(valueHolderForBackgroundUriForIdx0)
         } else if (valueHolderForBackgroundUri instanceof Resource) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForBackgroundUriForIdx1  = valueHolderForBackgroundUri as Resource
             Resource_serializer.write(valueSerializer, valueHolderForBackgroundUriForIdx1)
         }
         const valueHolderForForegroundUri  = value.foregroundUri
         if (valueHolderForForegroundUri instanceof string) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForForegroundUriForIdx0  = valueHolderForForegroundUri as string
             valueSerializer.writeString(valueHolderForForegroundUriForIdx0)
         } else if (valueHolderForForegroundUri instanceof Resource) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForForegroundUriForIdx1  = valueHolderForForegroundUri as Resource
             Resource_serializer.write(valueSerializer, valueHolderForForegroundUriForIdx1)
         }
@@ -382,11 +382,11 @@ export class StarStyleOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForSecondaryUriTmpValue  = valueHolderForSecondaryUri!
             if (valueHolderForSecondaryUriTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForSecondaryUriTmpValueForIdx0  = valueHolderForSecondaryUriTmpValue as string
                 valueSerializer.writeString(valueHolderForSecondaryUriTmpValueForIdx0)
             } else if (valueHolderForSecondaryUriTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForSecondaryUriTmpValueForIdx1  = valueHolderForSecondaryUriTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForSecondaryUriTmpValueForIdx1)
             }

@@ -38,11 +38,11 @@ export class TargetInfo_serializer {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForId  = value.id
         if (valueHolderForId instanceof string) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForIdForIdx0  = valueHolderForId as string
             valueSerializer.writeString(valueHolderForIdForIdx0)
         } else if (valueHolderForId instanceof number) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForIdForIdx1  = valueHolderForId as number
             valueSerializer.writeNumber(valueHolderForIdForIdx1)
         }
