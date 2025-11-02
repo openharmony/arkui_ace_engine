@@ -30,6 +30,7 @@
 #include "interop_ani_modifier.h"
 #include "lazy_for_each_node_ani_modifier.h"
 #include "list_ani_modifier.h"
+#include "list_item_group_ani_modifier.h"
 #include "node_adapter_ani_modifier.h"
 #include "rich_editor_ani_modifier.h"
 #include "text_based_ani_modifier.h"
@@ -61,6 +62,7 @@ const ArkUIAniModifiers* GetArkUIAniModifiers()
         .getArkUIAniDrawModifier = OHOS::Ace::NG::GetArkUIAniDrawModifier,
         .getArkUIAniWaterFlowModifier = OHOS::Ace::NG::GetArkUIAniWaterFlowModifier,
         .getArkUIAniListModifier = OHOS::Ace::NG::GetArkUIAniListModifier,
+        .getArkUIAniListItemGroupModifier = OHOS::Ace::NG::GetArkUIAniListItemGroupModifier,
         .getComponentSnapshotAniModifier = OHOS::Ace::NG::GetComponentSnapshotAniModifier,
         .getAnimationAniModifier = OHOS::Ace::NG::GetAnimationAniModifier,
         .getInteropAniModifier = OHOS::Ace::NG::GetInteropAniModifier,

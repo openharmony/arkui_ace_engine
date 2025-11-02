@@ -31,8 +31,8 @@ class ACE_EXPORT ListItemGroupModelStatic {
 public:
     static void SetDivider(FrameNode* frameNode, const std::optional<V2::ItemDivider>& divider);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
-    static void SetHeader(FrameNode* frameNode, std::function<RefPtr<UINode>()>&& builder);
-    static void SetFooter(FrameNode* frameNode, std::function<RefPtr<UINode>()>&& builder);
+    static void SetHeader(FrameNode* frameNode, const RefPtr<NG::UINode>& node, bool isContent = false);
+    static void SetFooter(FrameNode* frameNode, const RefPtr<NG::UINode>& node, bool isContent = false);
     static void SetSpace(FrameNode* frameNode, const std::optional<Dimension>& space);
     static void SetStyle(FrameNode* frameNode, const std::optional<V2::ListItemGroupStyle>& style);
     static RefPtr<ListChildrenMainSize> GetOrCreateListChildrenMainSize(FrameNode* frameNode);

@@ -394,6 +394,7 @@ arkui_files = [
   "arkui-preprocessed/arkui/handwritten/transfer/ShapeMaskTransfer.ets",
   "arkui-preprocessed/arkui/handwritten/transfer/TransferUtil.ets",
   "arkui-preprocessed/arkui/handwritten/transfer/UIContextTransfer.ets",
+  "arkui-preprocessed/arkui/hooks/ListItemGroupHandWritten.ets",
   "arkui-preprocessed/arkui/hooks/NavigationOpsHandWritten.ets",
   "arkui-preprocessed/arkui/hooks/ListHandWritten.ets",
   "arkui-preprocessed/arkui/hooks/TabsOpsHandWritten.ets",

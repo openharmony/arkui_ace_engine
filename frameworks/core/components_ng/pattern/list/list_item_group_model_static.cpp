@@ -36,28 +36,32 @@ RefPtr<FrameNode> ListItemGroupModelStatic::CreateFrameNode(int32_t nodeId)
     return frameNode;
 }
 
-void ListItemGroupModelStatic::SetHeader(FrameNode* frameNode, std::function<RefPtr<UINode>()>&& builder)
+void ListItemGroupModelStatic::SetHeader(FrameNode* frameNode, const RefPtr<NG::UINode>& node, bool isContent)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
     CHECK_NULL_VOID(pattern);
-    RefPtr<UINode> unitNode = builder();
-    if (unitNode) {
-        pattern->AddHeader(unitNode);
+    if (node) {
+        pattern->AddHeader(node);
+        if (isContent) {
+            pattern->SetHeaderComponentContentExist(true);
+        }
     } else {
         pattern->SetHeaderComponentContentExist(true);
         pattern->RemoveHeader();
     }
 }
 
-void ListItemGroupModelStatic::SetFooter(FrameNode* frameNode, std::function<RefPtr<UINode>()>&& builder)
+void ListItemGroupModelStatic::SetFooter(FrameNode* frameNode, const RefPtr<NG::UINode>& node, bool isContent)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
     CHECK_NULL_VOID(pattern);
-    RefPtr<UINode> unitNode = builder();
-    if (unitNode) {
-        pattern->AddFooter(unitNode);
+    if (node) {
+        pattern->AddFooter(node);
+        if (isContent) {
+            pattern->SetFooterComponentContentExist(true);
+        }
     } else {
         pattern->SetFooterComponentContentExist(true);
         pattern->RemoveFooter();
