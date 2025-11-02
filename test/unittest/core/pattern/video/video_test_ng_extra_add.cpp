@@ -1211,6 +1211,11 @@ HWTEST_F(VideoTestExtraAddNg, ChangePlayerStatus001, TestSize.Level1)
     videoPattern->duration_ = 0;
     videoPattern->ChangePlayerStatus(status);
     EXPECT_EQ(videoPattern->duration_, 0);
+
+    status = PlaybackStatus::STOPPED;
+    videoPattern->isStop_ = false;
+    videoPattern->ChangePlayerStatus(status);
+    EXPECT_TRUE(videoPattern->isStop_);
 }
 
 /**
@@ -1349,23 +1354,23 @@ HWTEST_F(VideoTestExtraAddNg, Stop001, TestSize.Level1)
     EXPECT_CALL(*mockMediaPlayer, IsMediaPlayerValid()).WillRepeatedly(Return(true));
     videoPattern->mediaPlayer_ = mockMediaPlayer;
 
-    videoPattern->isStop_ = false;
+    videoPattern->isSeeking_ = true;
     videoPattern->Stop();
-    EXPECT_TRUE(videoPattern->isStop_);
+    EXPECT_FALSE(videoPattern->isSeeking_);
 
     mockMediaPlayer = AceType::MakeRefPtr<MockMediaPlayer>();
     EXPECT_CALL(*mockMediaPlayer, IsMediaPlayerValid()).WillRepeatedly(Return(false));
     videoPattern->mediaPlayer_ = mockMediaPlayer;
 
-    videoPattern->isStop_ = false;
+    videoPattern->isSeeking_ = true;
     videoPattern->Stop();
-    EXPECT_FALSE(videoPattern->isStop_);
+    EXPECT_TRUE(videoPattern->isSeeking_);
 
     videoPattern->mediaPlayer_ = nullptr;
 
-    videoPattern->isStop_ = false;
+    videoPattern->isSeeking_ = true;
     videoPattern->Stop();
-    EXPECT_FALSE(videoPattern->isStop_);
+    EXPECT_TRUE(videoPattern->isSeeking_);
 }
 
 /**

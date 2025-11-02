@@ -648,6 +648,7 @@ void VideoPattern::ChangePlayerStatus(const PlaybackStatus& status)
             eventHub->FirePauseEvent();
             break;
         case PlaybackStatus::STOPPED:
+            isStop_ = true;
             CHECK_NULL_VOID(eventHub);
             eventHub->FireStopEvent();
             break;
@@ -1883,7 +1884,6 @@ void VideoPattern::Stop()
     TAG_LOGI(AceLogTag::ACE_VIDEO, "Video[%{public}d] trigger mediaPlayer stop", hostId_);
     OnCurrentTimeChange(0);
     mediaPlayer_->Stop();
-    isStop_ = true;
     SetIsSeeking(false);
 }
 

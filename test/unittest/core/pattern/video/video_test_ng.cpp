@@ -693,7 +693,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest012, TestSize.Level1)
     pattern->isStop_ = false;
     pattern->Stop();
     EXPECT_EQ(static_cast<int32_t>(pattern->currentPos_), 0);
-    EXPECT_TRUE(pattern->isStop_);
+    EXPECT_FALSE(pattern->isSeeking_);
 
     /**
      * @tc.steps: step3. Call Stop when the mediaplayer is valid.
@@ -705,12 +705,12 @@ HWTEST_F(VideoTestNg, VideoPatternTest012, TestSize.Level1)
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), Stop()).WillOnce(Return(0));
     pattern->Stop();
     EXPECT_EQ(static_cast<int32_t>(pattern->currentPos_), 0);
-    EXPECT_TRUE(pattern->isStop_);
+    EXPECT_FALSE(pattern->isSeeking_);
 
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), Stop()).WillOnce(Return(0));
     EXPECT_EQ(static_cast<int32_t>(pattern->currentPos_), 0);
     pattern->Stop(); // case2: media player is valid & currentPos = currentPos_ = 0
-    EXPECT_TRUE(pattern->isStop_);
+    EXPECT_FALSE(pattern->isSeeking_);
 
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), Stop())
         .Times(2)
@@ -718,19 +718,20 @@ HWTEST_F(VideoTestNg, VideoPatternTest012, TestSize.Level1)
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), GetDuration(_)).Times(0);
     updateCheck.clear();
     pattern->currentPos_ = 1;
+    pattern->isStop_ = true;
     pattern->Stop(); // case3: media player is valid & currentPos != currentPos_ & duration_ = 0 &
                      // mediaPlayer_->GetDuration return ok
                      // this will call OnUpdateTime(pos=DURATION_POS)
     EXPECT_EQ(static_cast<int32_t>(pattern->currentPos_), 1);
     EXPECT_EQ(updateCheck, "");
-    EXPECT_TRUE(pattern->isStop_);
+    EXPECT_FALSE(pattern->isSeeking_);
     updateCheck.clear();
     pattern->currentPos_ = 1;
     pattern->Stop(); // case4: media player is valid & currentPos != currentPos_ & duration_ = 0 &
                      // mediaPlayer_->GetDuration return err
     EXPECT_EQ(static_cast<int32_t>(pattern->currentPos_), 1);
     EXPECT_EQ(updateCheck, "");
-    EXPECT_TRUE(pattern->isStop_);
+    EXPECT_FALSE(pattern->isSeeking_);
 }
 
 /**
