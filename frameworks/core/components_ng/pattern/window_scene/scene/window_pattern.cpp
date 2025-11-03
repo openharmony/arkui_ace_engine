@@ -262,8 +262,7 @@ void WindowPattern::OnAttachToFrameNode()
 bool WindowPattern::CheckSnapshotWindow(uint32_t key)
 {
     return session_->GetScenePersistence() &&
-        (session_->GetScenePersistence()->IsSnapshotExisted(key) ||
-        session_->GetScenePersistence()->IsSavingSnapshot(key) ||
+        (session_->GetScenePersistence()->IsSavingSnapshot(key) ||
         session_->GetScenePersistence()->HasSnapshot() ||
         session_->HasSnapshot());
 }
@@ -738,13 +737,13 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
         auto isSavingSnapshot = scenePersistence->IsSavingSnapshot(key, freeMultiWindow);
         auto hasSnapshot = scenePersistence->HasSnapshot(key, freeMultiWindow);
         TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
-            "id: %{public}d isSavingSnapshot: %{public}d, hasSnapshot: %{public}d",
-            persistentId, isSavingSnapshot, hasSnapshot);
+            "id: %{public}d isSavingSnapshot: %{public}d, hasSnapshot: %{public}d, key: %{public}d",
+            persistentId, isSavingSnapshot, hasSnapshot, key);
         const bool matchSnapshot = isSavingSnapshot || hasSnapshot;
         ImageRotateOrientation rotate;
         auto lastRotation = session_->GetLastOrientation();
         auto windowRotation = session_->GetWindowSnapshotOrientation();
-        bool needRotate = (!freeMultiWindow) && (!matchSnapshot);
+        bool needRotate = !freeMultiWindow;
         if (isSavingSnapshot) {
             auto snapshotPixelMap = session_->GetSnapshotPixelMap();
             CHECK_NULL_VOID(snapshotPixelMap);
