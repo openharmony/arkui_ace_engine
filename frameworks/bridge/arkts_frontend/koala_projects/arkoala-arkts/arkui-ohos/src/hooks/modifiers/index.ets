@@ -772,8 +772,6 @@ export function hookShapeAttributeModifier(component: ArkShapeComponent, modifie
         if ((RuntimeType.UNDEFINED) !== param1_type) {
             const pixelMap = params[0] as PixelMap;
             ArkUIAniModule._Shape_Transfer_PixelMap(peer.getPeerPtr() as KPointer, pixelMap);
-        } else {
-          // peer?.setShapeOptions1Attribute();
         }
     };
     let updaterReceiver = (): ArkShapeComponent => {
@@ -973,7 +971,6 @@ export function hookVideoAttributeModifier(component: ArkVideoComponent, modifie
         const param1_type = runtimeType(params[0])
         if ((RuntimeType.UNDEFINED) !== param1_type) {
             const options_casted = params[0] as VideoOptions;
-            // hookSetVideoOptionsWithPeer(peer, options_casted);
         }
     };
     let updaterReceiver = (): ArkVideoComponent => {
@@ -3102,35 +3099,3 @@ export function hookRichEditorAttributeModifier(component: ArkRichEditorComponen
     applyAttributeModifierBase(modifier as Object as AttributeModifier<RichEditorAttribute>, attributeSet,
         constructParam, updaterReceiver, component.getPeer());
 }
-
-// export function hookParticleAttributeModifier(component: ArkParticleComponent, modifier: AttributeModifier<ParticleAttribute> | AttributeModifier<CommonMethod> | undefined): void {
-//     if (modifier === undefined) {
-//         return;
-//     }
-//     let isCommonModifier: boolean = modifier instanceof CommonModifier;
-//     if (isCommonModifier) {
-//         applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
-//         return;
-//     }
-//     let attributeSet = (): ParticleModifier => {
-//         let isParticleModifier: boolean = modifier instanceof ParticleModifier;
-//         let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new ParticleModifier();
-//         if (isParticleModifier) {
-//             let particleModifier = modifier as object as ParticleModifier;
-//             initModifier.mergeModifier(particleModifier);
-//             component.getPeer().attributeSet = initModifier;
-//             return initModifier;
-//         } else {
-//             component.getPeer().attributeSet = initModifier;
-//             return initModifier;
-//         }
-//     }
-//     let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
-//     };
-//     let updaterReceiver = (): ArkParticleComponent => {
-//         let componentNew: ArkParticleComponent = new ArkParticleComponent();
-//         componentNew.setPeer(component.getPeer());
-//         return componentNew;
-//     };
-//     applyAttributeModifierBase(modifier as Object as AttributeModifier<ParticleAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
-// }
