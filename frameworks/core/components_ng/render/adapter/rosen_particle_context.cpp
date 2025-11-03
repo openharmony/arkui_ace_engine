@@ -22,8 +22,11 @@ class RosenRenderContext;
 void RosenRenderParticle::UpdateDisturbance(
     const RefPtr<FrameNode>& frameNode, const std::vector<ParticleDisturbance>& disturbanceArray)
 {
+    CHECK_NULL_VOID(frameNode);
     auto renderContext = AceType::DynamicCast<NG::RosenRenderContext>(frameNode->GetRenderContext());
+    CHECK_NULL_VOID(renderContext);
     auto rsNode = renderContext->GetRSNode();
+    CHECK_NULL_VOID(rsNode);
     std::shared_ptr<Rosen::ParticleNoiseFields> fields = std::make_shared<Rosen::ParticleNoiseFields>();
     for (auto field : disturbanceArray) {
         double sizeWidthPx = Dimension(field.size[0], DimensionUnit::VP).ConvertToPx();
@@ -46,6 +49,7 @@ void RosenRenderParticle::updateEmitterPosition(
     if (props.size() == 0) {
         return;
     }
+    CHECK_NULL_VOID(frameNode);
     auto renderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto rsNode = AceType::DynamicCast<NG::RosenRenderContext>(renderContext)->GetRSNode();
