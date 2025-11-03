@@ -250,15 +250,15 @@ export class ArkTabsPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof number) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as number
                 thisSerializer.writeNumber(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
@@ -274,11 +274,11 @@ export class ArkTabsPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof curves.Curve) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as curves.Curve
                 thisSerializer.writeInt32(valueTmpValueForIdx0.valueOf())
             } else if (valueTmpValue instanceof curves.ICurve) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as curves.ICurve
                 curves_ICurve_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
@@ -450,19 +450,19 @@ export class ArkTabsPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof Color) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
             } else if (valueTmpValue instanceof number) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as number
                 thisSerializer.writeNumber(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx2)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((3).toChar())
+                thisSerializer.writeInt8((3).toByte())
                 const valueTmpValueForIdx3  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
@@ -569,15 +569,15 @@ export class ArkTabsPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const heightTmpValue  = height!
             if (heightTmpValue instanceof string) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const heightTmpValueForIdx0  = heightTmpValue as string
                 thisSerializer.writeString(heightTmpValueForIdx0)
             } else if (heightTmpValue instanceof number) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const heightTmpValueForIdx1  = heightTmpValue as number
                 thisSerializer.writeNumber(heightTmpValueForIdx1)
             } else if (heightTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const heightTmpValueForIdx2  = heightTmpValue as Resource
                 Resource_serializer.write(thisSerializer, heightTmpValueForIdx2)
             }
@@ -1283,11 +1283,11 @@ export class TabsOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForIndexTmpValue  = valueHolderForIndex!
             if (valueHolderForIndexTmpValue instanceof number) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForIndexTmpValueForIdx0  = valueHolderForIndexTmpValue as number
                 valueSerializer.writeNumber(valueHolderForIndexTmpValueForIdx0)
             } else if (valueHolderForIndexTmpValue instanceof Bindable<number>) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForIndexTmpValueForIdx1  = valueHolderForIndexTmpValue as Bindable<number>
                 Bindable_Number_serializer.write(valueSerializer, valueHolderForIndexTmpValueForIdx1)
             }
@@ -1368,15 +1368,15 @@ export class BarGridColumnOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForMarginTmpValue  = valueHolderForMargin!
             if (valueHolderForMarginTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForMarginTmpValueForIdx0  = valueHolderForMarginTmpValue as string
                 valueSerializer.writeString(valueHolderForMarginTmpValueForIdx0)
             } else if (valueHolderForMarginTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForMarginTmpValueForIdx1  = valueHolderForMarginTmpValue as number
                 valueSerializer.writeNumber(valueHolderForMarginTmpValueForIdx1)
             } else if (valueHolderForMarginTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForMarginTmpValueForIdx2  = valueHolderForMarginTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForMarginTmpValueForIdx2)
             }
@@ -1388,15 +1388,15 @@ export class BarGridColumnOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForGutterTmpValue  = valueHolderForGutter!
             if (valueHolderForGutterTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForGutterTmpValueForIdx0  = valueHolderForGutterTmpValue as string
                 valueSerializer.writeString(valueHolderForGutterTmpValueForIdx0)
             } else if (valueHolderForGutterTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForGutterTmpValueForIdx1  = valueHolderForGutterTmpValue as number
                 valueSerializer.writeNumber(valueHolderForGutterTmpValueForIdx1)
             } else if (valueHolderForGutterTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForGutterTmpValueForIdx2  = valueHolderForGutterTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForGutterTmpValueForIdx2)
             }
@@ -1470,15 +1470,15 @@ export class ScrollableBarModeOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForMarginTmpValue  = valueHolderForMargin!
             if (valueHolderForMarginTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForMarginTmpValueForIdx0  = valueHolderForMarginTmpValue as string
                 valueSerializer.writeString(valueHolderForMarginTmpValueForIdx0)
             } else if (valueHolderForMarginTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForMarginTmpValueForIdx1  = valueHolderForMarginTmpValue as number
                 valueSerializer.writeNumber(valueHolderForMarginTmpValueForIdx1)
             } else if (valueHolderForMarginTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForMarginTmpValueForIdx2  = valueHolderForMarginTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForMarginTmpValueForIdx2)
             }

@@ -299,11 +299,11 @@ export class RefreshOptions_serializer {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForRefreshing  = value.refreshing
         if (valueHolderForRefreshing instanceof boolean) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForRefreshingForIdx0  = valueHolderForRefreshing as boolean
             valueSerializer.writeBoolean(valueHolderForRefreshingForIdx0)
         } else if (valueHolderForRefreshing instanceof Bindable<boolean>) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForRefreshingForIdx1  = valueHolderForRefreshing as Bindable<boolean>
             Bindable_Boolean_serializer.write(valueSerializer, valueHolderForRefreshingForIdx1)
         }
@@ -312,11 +312,11 @@ export class RefreshOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForPromptTextTmpValue  = valueHolderForPromptText!
             if (valueHolderForPromptTextTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForPromptTextTmpValueForIdx0  = valueHolderForPromptTextTmpValue as string
                 valueSerializer.writeString(valueHolderForPromptTextTmpValueForIdx0)
             } else if (valueHolderForPromptTextTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForPromptTextTmpValueForIdx1  = valueHolderForPromptTextTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForPromptTextTmpValueForIdx1)
             }

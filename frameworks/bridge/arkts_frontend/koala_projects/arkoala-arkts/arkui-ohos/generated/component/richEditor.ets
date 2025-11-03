@@ -190,11 +190,11 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
     setRichEditorOptionsAttribute(options: RichEditorOptions | RichEditorStyledStringOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (options instanceof RichEditorOptions) {
-            thisSerializer.writeInt8((0).toChar())
+            thisSerializer.writeInt8((0).toByte())
             const optionsForIdx0  = options as RichEditorOptions
             RichEditorOptions_serializer.write(thisSerializer, optionsForIdx0)
         } else if (options instanceof RichEditorStyledStringOptions) {
-            thisSerializer.writeInt8((1).toChar())
+            thisSerializer.writeInt8((1).toByte())
             const optionsForIdx1  = options as RichEditorStyledStringOptions
             RichEditorStyledStringOptions_serializer.write(thisSerializer, optionsForIdx1)
         }
@@ -363,19 +363,19 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof Color) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
             } else if (valueTmpValue instanceof number) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as number
                 thisSerializer.writeNumber(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx2)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((3).toChar())
+                thisSerializer.writeInt8((3).toByte())
                 const valueTmpValueForIdx3  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
@@ -391,19 +391,19 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof Color) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as Color
                 thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
             } else if (valueTmpValue instanceof number) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as number
                 thisSerializer.writeNumber(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((2).toChar())
+                thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx2)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((3).toChar())
+                thisSerializer.writeInt8((3).toByte())
                 const valueTmpValueForIdx3  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
@@ -613,11 +613,11 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const responseTypeTmpValue  = responseType!
             if (responseTypeTmpValue instanceof ResponseType) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const responseTypeTmpValueForIdx0  = responseTypeTmpValue as ResponseType
                 thisSerializer.writeInt32(responseTypeTmpValueForIdx0.valueOf())
             } else if (responseTypeTmpValue instanceof RichEditorResponseType) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const responseTypeTmpValueForIdx1  = responseTypeTmpValue as RichEditorResponseType
                 thisSerializer.writeInt32(responseTypeTmpValueForIdx1.valueOf())
             }
@@ -659,11 +659,11 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
@@ -1591,11 +1591,11 @@ export class RichEditorDeleteValue_serializer {
         for (let valueHolderForRichEditorDeleteSpansCounterI = 0; valueHolderForRichEditorDeleteSpansCounterI < valueHolderForRichEditorDeleteSpans.length; valueHolderForRichEditorDeleteSpansCounterI++) {
             const valueHolderForRichEditorDeleteSpansTmpElement : RichEditorTextSpanResult | RichEditorImageSpanResult = valueHolderForRichEditorDeleteSpans[valueHolderForRichEditorDeleteSpansCounterI]
             if (valueHolderForRichEditorDeleteSpansTmpElement instanceof RichEditorTextSpanResult) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForRichEditorDeleteSpansTmpElementForIdx0  = valueHolderForRichEditorDeleteSpansTmpElement as RichEditorTextSpanResult
                 RichEditorTextSpanResult_serializer.write(valueSerializer, valueHolderForRichEditorDeleteSpansTmpElementForIdx0)
             } else if (valueHolderForRichEditorDeleteSpansTmpElement instanceof RichEditorImageSpanResult) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForRichEditorDeleteSpansTmpElementForIdx1  = valueHolderForRichEditorDeleteSpansTmpElement as RichEditorImageSpanResult
                 RichEditorImageSpanResult_serializer.write(valueSerializer, valueHolderForRichEditorDeleteSpansTmpElementForIdx1)
             }
@@ -1794,11 +1794,11 @@ export class RichEditorSelection_serializer {
         for (let valueHolderForSpansCounterI = 0; valueHolderForSpansCounterI < valueHolderForSpans.length; valueHolderForSpansCounterI++) {
             const valueHolderForSpansTmpElement : RichEditorTextSpanResult | RichEditorImageSpanResult = valueHolderForSpans[valueHolderForSpansCounterI]
             if (valueHolderForSpansTmpElement instanceof RichEditorTextSpanResult) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForSpansTmpElementForIdx0  = valueHolderForSpansTmpElement as RichEditorTextSpanResult
                 RichEditorTextSpanResult_serializer.write(valueSerializer, valueHolderForSpansTmpElementForIdx0)
             } else if (valueHolderForSpansTmpElement instanceof RichEditorImageSpanResult) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForSpansTmpElementForIdx1  = valueHolderForSpansTmpElement as RichEditorImageSpanResult
                 RichEditorImageSpanResult_serializer.write(valueSerializer, valueHolderForSpansTmpElementForIdx1)
             }
@@ -2063,15 +2063,15 @@ export class RichEditorSymbolSpanStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForFontSizeTmpValue  = valueHolderForFontSize!
             if (valueHolderForFontSizeTmpValue instanceof number) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForFontSizeTmpValueForIdx0  = valueHolderForFontSizeTmpValue as number
                 valueSerializer.writeNumber(valueHolderForFontSizeTmpValueForIdx0)
             } else if (valueHolderForFontSizeTmpValue instanceof string) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForFontSizeTmpValueForIdx1  = valueHolderForFontSizeTmpValue as string
                 valueSerializer.writeString(valueHolderForFontSizeTmpValueForIdx1)
             } else if (valueHolderForFontSizeTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForFontSizeTmpValueForIdx2  = valueHolderForFontSizeTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForFontSizeTmpValueForIdx2)
             }
@@ -2086,19 +2086,19 @@ export class RichEditorSymbolSpanStyle_serializer {
             for (let valueHolderForFontColorTmpValueCounterI = 0; valueHolderForFontColorTmpValueCounterI < valueHolderForFontColorTmpValue.length; valueHolderForFontColorTmpValueCounterI++) {
                 const valueHolderForFontColorTmpValueTmpElement : ResourceColor = valueHolderForFontColorTmpValue[valueHolderForFontColorTmpValueCounterI]
                 if (valueHolderForFontColorTmpValueTmpElement instanceof Color) {
-                    valueSerializer.writeInt8((0).toChar())
+                    valueSerializer.writeInt8((0).toByte())
                     const valueHolderForFontColorTmpValueTmpElementForIdx0  = valueHolderForFontColorTmpValueTmpElement as Color
                     valueSerializer.writeInt32(valueHolderForFontColorTmpValueTmpElementForIdx0.getOrdinal())
                 } else if (valueHolderForFontColorTmpValueTmpElement instanceof number) {
-                    valueSerializer.writeInt8((1).toChar())
+                    valueSerializer.writeInt8((1).toByte())
                     const valueHolderForFontColorTmpValueTmpElementForIdx1  = valueHolderForFontColorTmpValueTmpElement as number
                     valueSerializer.writeNumber(valueHolderForFontColorTmpValueTmpElementForIdx1)
                 } else if (valueHolderForFontColorTmpValueTmpElement instanceof string) {
-                    valueSerializer.writeInt8((2).toChar())
+                    valueSerializer.writeInt8((2).toByte())
                     const valueHolderForFontColorTmpValueTmpElementForIdx2  = valueHolderForFontColorTmpValueTmpElement as string
                     valueSerializer.writeString(valueHolderForFontColorTmpValueTmpElementForIdx2)
                 } else if (valueHolderForFontColorTmpValueTmpElement instanceof Resource) {
-                    valueSerializer.writeInt8((3).toChar())
+                    valueSerializer.writeInt8((3).toByte())
                     const valueHolderForFontColorTmpValueTmpElementForIdx3  = valueHolderForFontColorTmpValueTmpElement as Resource
                     Resource_serializer.write(valueSerializer, valueHolderForFontColorTmpValueTmpElementForIdx3)
                 }
@@ -2111,15 +2111,15 @@ export class RichEditorSymbolSpanStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForFontWeightTmpValue  = valueHolderForFontWeight!
             if (valueHolderForFontWeightTmpValue instanceof number) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForFontWeightTmpValueForIdx0  = valueHolderForFontWeightTmpValue as number
                 valueSerializer.writeNumber(valueHolderForFontWeightTmpValueForIdx0)
             } else if (valueHolderForFontWeightTmpValue instanceof FontWeight) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForFontWeightTmpValueForIdx1  = valueHolderForFontWeightTmpValue as FontWeight
                 valueSerializer.writeInt32(valueHolderForFontWeightTmpValueForIdx1.valueOf())
             } else if (valueHolderForFontWeightTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForFontWeightTmpValueForIdx2  = valueHolderForFontWeightTmpValue as string
                 valueSerializer.writeString(valueHolderForFontWeightTmpValueForIdx2)
             }
@@ -2268,11 +2268,11 @@ export class RichEditorUrlStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForUrlTmpValue  = valueHolderForUrl!
             if (valueHolderForUrlTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForUrlTmpValueForIdx0  = valueHolderForUrlTmpValue as string
                 valueSerializer.writeString(valueHolderForUrlTmpValueForIdx0)
             } else if (valueHolderForUrlTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForUrlTmpValueForIdx1  = valueHolderForUrlTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForUrlTmpValueForIdx1)
             }
@@ -2453,29 +2453,29 @@ export class LeadingMarginPlaceholder_serializer {
         const valueHolderForSize  = value.size
         const valueHolderForSize_0  = valueHolderForSize[0]
         if (valueHolderForSize_0 instanceof string) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForSize_0ForIdx0  = valueHolderForSize_0 as string
             valueSerializer.writeString(valueHolderForSize_0ForIdx0)
         } else if (valueHolderForSize_0 instanceof number) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForSize_0ForIdx1  = valueHolderForSize_0 as number
             valueSerializer.writeNumber(valueHolderForSize_0ForIdx1)
         } else if (valueHolderForSize_0 instanceof Resource) {
-            valueSerializer.writeInt8((2).toChar())
+            valueSerializer.writeInt8((2).toByte())
             const valueHolderForSize_0ForIdx2  = valueHolderForSize_0 as Resource
             Resource_serializer.write(valueSerializer, valueHolderForSize_0ForIdx2)
         }
         const valueHolderForSize_1  = valueHolderForSize[1]
         if (valueHolderForSize_1 instanceof string) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForSize_1ForIdx0  = valueHolderForSize_1 as string
             valueSerializer.writeString(valueHolderForSize_1ForIdx0)
         } else if (valueHolderForSize_1 instanceof number) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForSize_1ForIdx1  = valueHolderForSize_1 as number
             valueSerializer.writeNumber(valueHolderForSize_1ForIdx1)
         } else if (valueHolderForSize_1 instanceof Resource) {
-            valueSerializer.writeInt8((2).toChar())
+            valueSerializer.writeInt8((2).toByte())
             const valueHolderForSize_1ForIdx2  = valueHolderForSize_1 as Resource
             Resource_serializer.write(valueSerializer, valueHolderForSize_1ForIdx2)
         }
@@ -2566,19 +2566,19 @@ export class PlaceholderStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForFontColorTmpValue  = valueHolderForFontColor!
             if (valueHolderForFontColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForFontColorTmpValueForIdx0  = valueHolderForFontColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForFontColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForFontColorTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForFontColorTmpValueForIdx1  = valueHolderForFontColorTmpValue as number
                 valueSerializer.writeNumber(valueHolderForFontColorTmpValueForIdx1)
             } else if (valueHolderForFontColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForFontColorTmpValueForIdx2  = valueHolderForFontColorTmpValue as string
                 valueSerializer.writeString(valueHolderForFontColorTmpValueForIdx2)
             } else if (valueHolderForFontColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForFontColorTmpValueForIdx3  = valueHolderForFontColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForFontColorTmpValueForIdx3)
             }
@@ -2625,23 +2625,23 @@ export class RichEditorLayoutStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForMarginTmpValue  = valueHolderForMargin!
             if (valueHolderForMarginTmpValue instanceof Dimension) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForMarginTmpValueForIdx0  = valueHolderForMarginTmpValue as Dimension
                 if (valueHolderForMarginTmpValueForIdx0 instanceof string) {
-                    valueSerializer.writeInt8((0).toChar())
+                    valueSerializer.writeInt8((0).toByte())
                     const valueHolderForMarginTmpValueForIdx0ForIdx0  = valueHolderForMarginTmpValueForIdx0 as string
                     valueSerializer.writeString(valueHolderForMarginTmpValueForIdx0ForIdx0)
                 } else if (valueHolderForMarginTmpValueForIdx0 instanceof number) {
-                    valueSerializer.writeInt8((1).toChar())
+                    valueSerializer.writeInt8((1).toByte())
                     const valueHolderForMarginTmpValueForIdx0ForIdx1  = valueHolderForMarginTmpValueForIdx0 as number
                     valueSerializer.writeNumber(valueHolderForMarginTmpValueForIdx0ForIdx1)
                 } else if (valueHolderForMarginTmpValueForIdx0 instanceof Resource) {
-                    valueSerializer.writeInt8((2).toChar())
+                    valueSerializer.writeInt8((2).toByte())
                     const valueHolderForMarginTmpValueForIdx0ForIdx2  = valueHolderForMarginTmpValueForIdx0 as Resource
                     Resource_serializer.write(valueSerializer, valueHolderForMarginTmpValueForIdx0ForIdx2)
                 }
             } else if (valueHolderForMarginTmpValue instanceof Padding) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForMarginTmpValueForIdx1  = valueHolderForMarginTmpValue as Padding
                 Padding_serializer.write(valueSerializer, valueHolderForMarginTmpValueForIdx1)
             }
@@ -2653,23 +2653,23 @@ export class RichEditorLayoutStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBorderRadiusTmpValue  = valueHolderForBorderRadius!
             if (valueHolderForBorderRadiusTmpValue instanceof Dimension) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForBorderRadiusTmpValueForIdx0  = valueHolderForBorderRadiusTmpValue as Dimension
                 if (valueHolderForBorderRadiusTmpValueForIdx0 instanceof string) {
-                    valueSerializer.writeInt8((0).toChar())
+                    valueSerializer.writeInt8((0).toByte())
                     const valueHolderForBorderRadiusTmpValueForIdx0ForIdx0  = valueHolderForBorderRadiusTmpValueForIdx0 as string
                     valueSerializer.writeString(valueHolderForBorderRadiusTmpValueForIdx0ForIdx0)
                 } else if (valueHolderForBorderRadiusTmpValueForIdx0 instanceof number) {
-                    valueSerializer.writeInt8((1).toChar())
+                    valueSerializer.writeInt8((1).toByte())
                     const valueHolderForBorderRadiusTmpValueForIdx0ForIdx1  = valueHolderForBorderRadiusTmpValueForIdx0 as number
                     valueSerializer.writeNumber(valueHolderForBorderRadiusTmpValueForIdx0ForIdx1)
                 } else if (valueHolderForBorderRadiusTmpValueForIdx0 instanceof Resource) {
-                    valueSerializer.writeInt8((2).toChar())
+                    valueSerializer.writeInt8((2).toByte())
                     const valueHolderForBorderRadiusTmpValueForIdx0ForIdx2  = valueHolderForBorderRadiusTmpValueForIdx0 as Resource
                     Resource_serializer.write(valueSerializer, valueHolderForBorderRadiusTmpValueForIdx0ForIdx2)
                 }
             } else if (valueHolderForBorderRadiusTmpValue instanceof BorderRadiuses) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForBorderRadiusTmpValueForIdx1  = valueHolderForBorderRadiusTmpValue as BorderRadiuses
                 BorderRadiuses_serializer.write(valueSerializer, valueHolderForBorderRadiusTmpValueForIdx1)
             }
@@ -2751,23 +2751,23 @@ export class RichEditorParagraphStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForLeadingMarginTmpValue  = valueHolderForLeadingMargin!
             if (valueHolderForLeadingMarginTmpValue instanceof Dimension) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForLeadingMarginTmpValueForIdx0  = valueHolderForLeadingMarginTmpValue as Dimension
                 if (valueHolderForLeadingMarginTmpValueForIdx0 instanceof string) {
-                    valueSerializer.writeInt8((0).toChar())
+                    valueSerializer.writeInt8((0).toByte())
                     const valueHolderForLeadingMarginTmpValueForIdx0ForIdx0  = valueHolderForLeadingMarginTmpValueForIdx0 as string
                     valueSerializer.writeString(valueHolderForLeadingMarginTmpValueForIdx0ForIdx0)
                 } else if (valueHolderForLeadingMarginTmpValueForIdx0 instanceof number) {
-                    valueSerializer.writeInt8((1).toChar())
+                    valueSerializer.writeInt8((1).toByte())
                     const valueHolderForLeadingMarginTmpValueForIdx0ForIdx1  = valueHolderForLeadingMarginTmpValueForIdx0 as number
                     valueSerializer.writeNumber(valueHolderForLeadingMarginTmpValueForIdx0ForIdx1)
                 } else if (valueHolderForLeadingMarginTmpValueForIdx0 instanceof Resource) {
-                    valueSerializer.writeInt8((2).toChar())
+                    valueSerializer.writeInt8((2).toByte())
                     const valueHolderForLeadingMarginTmpValueForIdx0ForIdx2  = valueHolderForLeadingMarginTmpValueForIdx0 as Resource
                     Resource_serializer.write(valueSerializer, valueHolderForLeadingMarginTmpValueForIdx0ForIdx2)
                 }
             } else if (valueHolderForLeadingMarginTmpValue instanceof LeadingMarginPlaceholder) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForLeadingMarginTmpValueForIdx1  = valueHolderForLeadingMarginTmpValue as LeadingMarginPlaceholder
                 LeadingMarginPlaceholder_serializer.write(valueSerializer, valueHolderForLeadingMarginTmpValueForIdx1)
             }
@@ -2905,29 +2905,29 @@ export class RichEditorImageSpanStyle_serializer {
             const valueHolderForSizeTmpValue  = valueHolderForSize!
             const valueHolderForSizeTmpValue_0  = valueHolderForSizeTmpValue[0]
             if (valueHolderForSizeTmpValue_0 instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForSizeTmpValue_0ForIdx0  = valueHolderForSizeTmpValue_0 as string
                 valueSerializer.writeString(valueHolderForSizeTmpValue_0ForIdx0)
             } else if (valueHolderForSizeTmpValue_0 instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForSizeTmpValue_0ForIdx1  = valueHolderForSizeTmpValue_0 as number
                 valueSerializer.writeNumber(valueHolderForSizeTmpValue_0ForIdx1)
             } else if (valueHolderForSizeTmpValue_0 instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForSizeTmpValue_0ForIdx2  = valueHolderForSizeTmpValue_0 as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForSizeTmpValue_0ForIdx2)
             }
             const valueHolderForSizeTmpValue_1  = valueHolderForSizeTmpValue[1]
             if (valueHolderForSizeTmpValue_1 instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForSizeTmpValue_1ForIdx0  = valueHolderForSizeTmpValue_1 as string
                 valueSerializer.writeString(valueHolderForSizeTmpValue_1ForIdx0)
             } else if (valueHolderForSizeTmpValue_1 instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForSizeTmpValue_1ForIdx1  = valueHolderForSizeTmpValue_1 as number
                 valueSerializer.writeNumber(valueHolderForSizeTmpValue_1ForIdx1)
             } else if (valueHolderForSizeTmpValue_1 instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForSizeTmpValue_1ForIdx2  = valueHolderForSizeTmpValue_1 as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForSizeTmpValue_1ForIdx2)
             }
@@ -3080,19 +3080,19 @@ export class RichEditorTextStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForFontColorTmpValue  = valueHolderForFontColor!
             if (valueHolderForFontColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForFontColorTmpValueForIdx0  = valueHolderForFontColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForFontColorTmpValueForIdx0.getOrdinal())
             } else if (valueHolderForFontColorTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForFontColorTmpValueForIdx1  = valueHolderForFontColorTmpValue as number
                 valueSerializer.writeNumber(valueHolderForFontColorTmpValueForIdx1)
             } else if (valueHolderForFontColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForFontColorTmpValueForIdx2  = valueHolderForFontColorTmpValue as string
                 valueSerializer.writeString(valueHolderForFontColorTmpValueForIdx2)
             } else if (valueHolderForFontColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toChar())
+                valueSerializer.writeInt8((3).toByte())
                 const valueHolderForFontColorTmpValueForIdx3  = valueHolderForFontColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForFontColorTmpValueForIdx3)
             }
@@ -3104,15 +3104,15 @@ export class RichEditorTextStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForFontSizeTmpValue  = valueHolderForFontSize!
             if (valueHolderForFontSizeTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForFontSizeTmpValueForIdx0  = valueHolderForFontSizeTmpValue as string
                 valueSerializer.writeString(valueHolderForFontSizeTmpValueForIdx0)
             } else if (valueHolderForFontSizeTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForFontSizeTmpValueForIdx1  = valueHolderForFontSizeTmpValue as number
                 valueSerializer.writeNumber(valueHolderForFontSizeTmpValueForIdx1)
             } else if (valueHolderForFontSizeTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForFontSizeTmpValueForIdx2  = valueHolderForFontSizeTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForFontSizeTmpValueForIdx2)
             }
@@ -3132,15 +3132,15 @@ export class RichEditorTextStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForFontWeightTmpValue  = valueHolderForFontWeight!
             if (valueHolderForFontWeightTmpValue instanceof number) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForFontWeightTmpValueForIdx0  = valueHolderForFontWeightTmpValue as number
                 valueSerializer.writeNumber(valueHolderForFontWeightTmpValueForIdx0)
             } else if (valueHolderForFontWeightTmpValue instanceof FontWeight) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForFontWeightTmpValueForIdx1  = valueHolderForFontWeightTmpValue as FontWeight
                 valueSerializer.writeInt32(valueHolderForFontWeightTmpValueForIdx1.valueOf())
             } else if (valueHolderForFontWeightTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForFontWeightTmpValueForIdx2  = valueHolderForFontWeightTmpValue as string
                 valueSerializer.writeString(valueHolderForFontWeightTmpValueForIdx2)
             }
@@ -3152,11 +3152,11 @@ export class RichEditorTextStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForFontFamilyTmpValue  = valueHolderForFontFamily!
             if (valueHolderForFontFamilyTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForFontFamilyTmpValueForIdx0  = valueHolderForFontFamilyTmpValue as string
                 valueSerializer.writeString(valueHolderForFontFamilyTmpValueForIdx0)
             } else if (valueHolderForFontFamilyTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForFontFamilyTmpValueForIdx1  = valueHolderForFontFamilyTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForFontFamilyTmpValueForIdx1)
             }
@@ -3176,11 +3176,11 @@ export class RichEditorTextStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForTextShadowTmpValue  = valueHolderForTextShadow!
             if (valueHolderForTextShadowTmpValue instanceof ShadowOptions) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForTextShadowTmpValueForIdx0  = valueHolderForTextShadowTmpValue as ShadowOptions
                 ShadowOptions_serializer.write(valueSerializer, valueHolderForTextShadowTmpValueForIdx0)
             } else if (TypeChecker.isArray_ShadowOptions(valueHolderForTextShadowTmpValue)) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForTextShadowTmpValueForIdx1  = valueHolderForTextShadowTmpValue as Array<ShadowOptions>
                 valueSerializer.writeInt32((valueHolderForTextShadowTmpValueForIdx1.length).toInt())
                 for (let valueHolderForTextShadowTmpValueForIdx1CounterI = 0; valueHolderForTextShadowTmpValueForIdx1CounterI < valueHolderForTextShadowTmpValueForIdx1.length; valueHolderForTextShadowTmpValueForIdx1CounterI++) {
@@ -3196,11 +3196,11 @@ export class RichEditorTextStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForLetterSpacingTmpValue  = valueHolderForLetterSpacing!
             if (valueHolderForLetterSpacingTmpValue instanceof number) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForLetterSpacingTmpValueForIdx0  = valueHolderForLetterSpacingTmpValue as number
                 valueSerializer.writeNumber(valueHolderForLetterSpacingTmpValueForIdx0)
             } else if (valueHolderForLetterSpacingTmpValue instanceof string) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForLetterSpacingTmpValueForIdx1  = valueHolderForLetterSpacingTmpValue as string
                 valueSerializer.writeString(valueHolderForLetterSpacingTmpValueForIdx1)
             }
@@ -3212,15 +3212,15 @@ export class RichEditorTextStyle_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForLineHeightTmpValue  = valueHolderForLineHeight!
             if (valueHolderForLineHeightTmpValue instanceof number) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForLineHeightTmpValueForIdx0  = valueHolderForLineHeightTmpValue as number
                 valueSerializer.writeNumber(valueHolderForLineHeightTmpValueForIdx0)
             } else if (valueHolderForLineHeightTmpValue instanceof string) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForLineHeightTmpValueForIdx1  = valueHolderForLineHeightTmpValue as string
                 valueSerializer.writeString(valueHolderForLineHeightTmpValueForIdx1)
             } else if (valueHolderForLineHeightTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForLineHeightTmpValueForIdx2  = valueHolderForLineHeightTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForLineHeightTmpValueForIdx2)
             }
@@ -3413,19 +3413,19 @@ export class RichEditorTextStyleResult_serializer {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForFontColor  = value.fontColor
         if (valueHolderForFontColor instanceof Color) {
-            valueSerializer.writeInt8((0).toChar())
+            valueSerializer.writeInt8((0).toByte())
             const valueHolderForFontColorForIdx0  = valueHolderForFontColor as Color
             valueSerializer.writeInt32(valueHolderForFontColorForIdx0.getOrdinal())
         } else if (valueHolderForFontColor instanceof number) {
-            valueSerializer.writeInt8((1).toChar())
+            valueSerializer.writeInt8((1).toByte())
             const valueHolderForFontColorForIdx1  = valueHolderForFontColor as number
             valueSerializer.writeNumber(valueHolderForFontColorForIdx1)
         } else if (valueHolderForFontColor instanceof string) {
-            valueSerializer.writeInt8((2).toChar())
+            valueSerializer.writeInt8((2).toByte())
             const valueHolderForFontColorForIdx2  = valueHolderForFontColor as string
             valueSerializer.writeString(valueHolderForFontColorForIdx2)
         } else if (valueHolderForFontColor instanceof Resource) {
-            valueSerializer.writeInt8((3).toChar())
+            valueSerializer.writeInt8((3).toByte())
             const valueHolderForFontColorForIdx3  = valueHolderForFontColor as Resource
             Resource_serializer.write(valueSerializer, valueHolderForFontColorForIdx3)
         }
@@ -3751,11 +3751,11 @@ export class RichEditorImageSpanResult_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForValueResourceStrTmpValue  = valueHolderForValueResourceStr!
             if (valueHolderForValueResourceStrTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForValueResourceStrTmpValueForIdx0  = valueHolderForValueResourceStrTmpValue as string
                 valueSerializer.writeString(valueHolderForValueResourceStrTmpValueForIdx0)
             } else if (valueHolderForValueResourceStrTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForValueResourceStrTmpValueForIdx1  = valueHolderForValueResourceStrTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForValueResourceStrTmpValueForIdx1)
             }
@@ -4055,11 +4055,11 @@ export class RichEditorController extends RichEditorBaseController implements Ma
     addTextSpan_serialize(content: ResourceStr, options?: RichEditorTextSpanOptions): number {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (content instanceof string) {
-            thisSerializer.writeInt8((0).toChar())
+            thisSerializer.writeInt8((0).toByte())
             const contentForIdx0  = content as string
             thisSerializer.writeString(contentForIdx0)
         } else if (content instanceof Resource) {
-            thisSerializer.writeInt8((1).toChar())
+            thisSerializer.writeInt8((1).toByte())
             const contentForIdx1  = content as Resource
             Resource_serializer.write(thisSerializer, contentForIdx1)
         }
@@ -4077,18 +4077,18 @@ export class RichEditorController extends RichEditorBaseController implements Ma
     addImageSpan_serialize(value: image.PixelMap | ResourceStr, options?: RichEditorImageSpanOptions): number {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value instanceof image.PixelMap) {
-            thisSerializer.writeInt8((0).toChar())
+            thisSerializer.writeInt8((0).toByte())
             const valueForIdx0  = value as image.PixelMap
             image_PixelMap_serializer.write(thisSerializer, valueForIdx0)
         } else if (value instanceof ResourceStr) {
-            thisSerializer.writeInt8((1).toChar())
+            thisSerializer.writeInt8((1).toByte())
             const valueForIdx1  = value as ResourceStr
             if (valueForIdx1 instanceof string) {
-                thisSerializer.writeInt8((0).toChar())
+                thisSerializer.writeInt8((0).toByte())
                 const valueForIdx1ForIdx0  = valueForIdx1 as string
                 thisSerializer.writeString(valueForIdx1ForIdx0)
             } else if (valueForIdx1 instanceof Resource) {
-                thisSerializer.writeInt8((1).toChar())
+                thisSerializer.writeInt8((1).toByte())
                 const valueForIdx1ForIdx1  = valueForIdx1 as Resource
                 Resource_serializer.write(thisSerializer, valueForIdx1ForIdx1)
             }
@@ -4135,15 +4135,15 @@ export class RichEditorController extends RichEditorBaseController implements Ma
     updateSpanStyle_serialize(value: RichEditorUpdateTextSpanStyleOptions | RichEditorUpdateImageSpanStyleOptions | RichEditorUpdateSymbolSpanStyleOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value instanceof RichEditorUpdateTextSpanStyleOptions) {
-            thisSerializer.writeInt8((0).toChar())
+            thisSerializer.writeInt8((0).toByte())
             const valueForIdx0  = value as RichEditorUpdateTextSpanStyleOptions
             RichEditorUpdateTextSpanStyleOptions_serializer.write(thisSerializer, valueForIdx0)
         } else if (value instanceof RichEditorUpdateImageSpanStyleOptions) {
-            thisSerializer.writeInt8((1).toChar())
+            thisSerializer.writeInt8((1).toByte())
             const valueForIdx1  = value as RichEditorUpdateImageSpanStyleOptions
             RichEditorUpdateImageSpanStyleOptions_serializer.write(thisSerializer, valueForIdx1)
         } else if (value instanceof RichEditorUpdateSymbolSpanStyleOptions) {
-            thisSerializer.writeInt8((2).toChar())
+            thisSerializer.writeInt8((2).toByte())
             const valueForIdx2  = value as RichEditorUpdateSymbolSpanStyleOptions
             RichEditorUpdateSymbolSpanStyleOptions_serializer.write(thisSerializer, valueForIdx2)
         }

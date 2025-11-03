@@ -238,15 +238,15 @@ export class GuideLinePosition_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForStartTmpValue  = valueHolderForStart!
             if (valueHolderForStartTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForStartTmpValueForIdx0  = valueHolderForStartTmpValue as string
                 valueSerializer.writeString(valueHolderForStartTmpValueForIdx0)
             } else if (valueHolderForStartTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForStartTmpValueForIdx1  = valueHolderForStartTmpValue as number
                 valueSerializer.writeNumber(valueHolderForStartTmpValueForIdx1)
             } else if (valueHolderForStartTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForStartTmpValueForIdx2  = valueHolderForStartTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForStartTmpValueForIdx2)
             }
@@ -258,15 +258,15 @@ export class GuideLinePosition_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForEndTmpValue  = valueHolderForEnd!
             if (valueHolderForEndTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toChar())
+                valueSerializer.writeInt8((0).toByte())
                 const valueHolderForEndTmpValueForIdx0  = valueHolderForEndTmpValue as string
                 valueSerializer.writeString(valueHolderForEndTmpValueForIdx0)
             } else if (valueHolderForEndTmpValue instanceof number) {
-                valueSerializer.writeInt8((1).toChar())
+                valueSerializer.writeInt8((1).toByte())
                 const valueHolderForEndTmpValueForIdx1  = valueHolderForEndTmpValue as number
                 valueSerializer.writeNumber(valueHolderForEndTmpValueForIdx1)
             } else if (valueHolderForEndTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toChar())
+                valueSerializer.writeInt8((2).toByte())
                 const valueHolderForEndTmpValueForIdx2  = valueHolderForEndTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForEndTmpValueForIdx2)
             }

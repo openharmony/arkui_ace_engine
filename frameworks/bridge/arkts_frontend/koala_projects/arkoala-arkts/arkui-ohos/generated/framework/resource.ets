@@ -38,23 +38,23 @@ export class Resource_serializer {
             for (let valueHolderForParamsTmpValueCounterI = 0; valueHolderForParamsTmpValueCounterI < valueHolderForParamsTmpValue.length; valueHolderForParamsTmpValueCounterI++) {
                 const valueHolderForParamsTmpValueTmpElement : string | int32 | int64 | double | Resource = valueHolderForParamsTmpValue[valueHolderForParamsTmpValueCounterI]
                 if (valueHolderForParamsTmpValueTmpElement instanceof string) {
-                    valueSerializer.writeInt8((0).toChar())
+                    valueSerializer.writeInt8((0).toByte())
                     const valueHolderForParamsTmpValueTmpElementForIdx0  = valueHolderForParamsTmpValueTmpElement as string
                     valueSerializer.writeString(valueHolderForParamsTmpValueTmpElementForIdx0)
                 } else if (valueHolderForParamsTmpValueTmpElement instanceof int32) {
-                    valueSerializer.writeInt8((1).toChar())
+                    valueSerializer.writeInt8((1).toByte())
                     const valueHolderForParamsTmpValueTmpElementForIdx1  = valueHolderForParamsTmpValueTmpElement as int32
                     valueSerializer.writeInt32(valueHolderForParamsTmpValueTmpElementForIdx1)
                 } else if (valueHolderForParamsTmpValueTmpElement instanceof int64) {
-                    valueSerializer.writeInt8((2).toChar())
+                    valueSerializer.writeInt8((2).toByte())
                     const valueHolderForParamsTmpValueTmpElementForIdx2  = valueHolderForParamsTmpValueTmpElement as int64
                     valueSerializer.writeInt64(valueHolderForParamsTmpValueTmpElementForIdx2)
                 } else if (valueHolderForParamsTmpValueTmpElement instanceof double) {
-                    valueSerializer.writeInt8((3).toChar())
+                    valueSerializer.writeInt8((3).toByte())
                     const valueHolderForParamsTmpValueTmpElementForIdx3  = valueHolderForParamsTmpValueTmpElement as double
                     valueSerializer.writeFloat64(valueHolderForParamsTmpValueTmpElementForIdx3)
                 } else if (valueHolderForParamsTmpValueTmpElement instanceof Resource) {
-                    valueSerializer.writeInt8((4).toChar())
+                    valueSerializer.writeInt8((4).toByte())
                     const valueHolderForParamsTmpValueTmpElementForIdx4  = valueHolderForParamsTmpValueTmpElement as Resource
                     Resource_serializer.write(valueSerializer, valueHolderForParamsTmpValueTmpElementForIdx4)
                 }
