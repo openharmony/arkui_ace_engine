@@ -28,6 +28,7 @@ namespace {
 ApsMonitorImpl::~ApsMonitorImpl()
 {
     if (loadfilehandle_ != nullptr) {
+        ReSetApsClient();
         dlclose(loadfilehandle_);
         loadfilehandle_ = nullptr;
     }
