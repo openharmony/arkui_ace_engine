@@ -237,6 +237,7 @@ public:
         const RefPtr<NG::FrameNode>& frameNode, NG::GestureActionPhase phase);
     using TabContentStateHandleFunc = void (*)(const TabContentInfo&);
     using TabChangeHandleFunc = void (*)(const TabContentInfo&);
+    using TabChangeHandleFuncForAni = std::function<void(const TabContentInfo& info)>;
     using NavigationHandleFuncForAni = std::function<void(const NG::NavDestinationInfo& info)>;
     using TextChangeEventHandleFunc = void (*)(const TextChangeEventInfo&);
     NavDestinationSwitchHandleFunc GetHandleNavDestinationSwitchFunc();
@@ -261,6 +262,7 @@ public:
     void SetPanGestureHandleFunc(PanGestureHandleFunc func);
     void SetHandleTabContentStateUpdateFunc(TabContentStateHandleFunc func);
     void SetHandleTabChangeFunc(TabChangeHandleFunc func);
+    void SetHandleTabChangeFuncForAni(TabChangeHandleFuncForAni func);
     void SetHandleGestureHandleFunc(GestureHandleFunc func);
 
     using BeforePanStartHandleFuncForAni = std::function<void()>;
@@ -294,6 +296,7 @@ private:
     PanGestureHandleFunc panGestureHandleFunc_ = nullptr;
     TabContentStateHandleFunc tabContentStateHandleFunc_ = nullptr;
     TabChangeHandleFunc tabChangeHandleFunc_ = nullptr;
+    TabChangeHandleFuncForAni tabChangeHandleFuncForAni_ = nullptr;
     GestureHandleFunc gestureHandleFunc_ = nullptr;
     TextChangeEventHandleFunc textChangeEventHandleFunc_ = nullptr;
 

@@ -32,6 +32,11 @@ import hilog from '@ohos.hilog'
         off(type: string, callback?: object) : void;
         on(type: string, options: NavDestinationSwitchObserverOptions, callback: object): void;
         off(type: string, options: NavDestinationSwitchObserverOptions, callback?: object): void;
+
+        onTabChange(callback: object): void;
+        offTabChange(callback?: object): void;
+        onTabChange(options: ObserverOptions, callback: object): void;
+        offTabChange(options: ObserverOptions, callback?: object): void;
     }
     
     class UIObserverImpl implements UIObserver
@@ -49,6 +54,11 @@ import hilog from '@ohos.hilog'
         
         public native on(type: string, options: NavDestinationSwitchObserverOptions, callback: object): void;
         public native off(type: string, options: NavDestinationSwitchObserverOptions, callback?: object): void;
+
+        public native onTabChange(callback: object): void;
+        public native offTabChange(callback?: object): void;
+        public native onTabChange(options: ObserverOptions, callback: object): void;
+        public native offTabChange(options: ObserverOptions, callback?: object): void;
     }
 
     export interface NavigationInfo {
@@ -337,5 +347,40 @@ import hilog from '@ohos.hilog'
 
     export interface NavDestinationSwitchInfo {}
 
-    export interface TabContentInfo {}
+    export enum TabContentState {
+        ON_SHOW = 0,
+        ON_HIDE = 1
+    }
+
+    export interface TabContentInfo {
+        tabContentId: string;
+        tabContentUniqueId: number;
+        state: TabContentState;
+        index: number;
+        id: string;
+        uniqueId: number;
+        lastIndex?: int;
+    }
+
+    export class TabContentInfoImpl implements TabContentInfo {
+        tabContentId: string;
+        tabContentUniqueId: number;
+        state: TabContentState;
+        index: number;
+        id: string;
+        uniqueId: number;
+        lastIndex?: int;
+        static setTabContentInfoImplLastIndex(contentInfo: TabContentInfoImpl, value: int): void {
+            contentInfo.lastIndex = value;
+        }
+        static castToTabContentState(value: number): TabContentState {
+            if (value === 0) {
+                return TabContentState.ON_SHOW;
+            } else if (value === 1) {
+                return TabContentState.ON_HIDE;
+            } else {
+                throw Error("state in TabContentState type Error");
+            }
+        }
+    }
  }
