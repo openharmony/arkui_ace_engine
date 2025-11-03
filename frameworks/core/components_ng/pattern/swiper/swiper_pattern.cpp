@@ -3872,7 +3872,7 @@ void SwiperPattern::PropertyPrefMonitor(bool isBeginPerf)
         } else {
             std::unordered_map<std::string, std::string> payload;
             payload["slide_type"] = "swiper";
-            ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
+            ResSchedReport::GetInstance().ResSchedDataReport("slide_off", payload);
         }
 #endif
         isInAutoPlay_ = false;
