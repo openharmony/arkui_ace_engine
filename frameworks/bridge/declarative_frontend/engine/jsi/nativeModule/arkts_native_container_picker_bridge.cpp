@@ -142,6 +142,7 @@ void ParseSelectionIndicatorStyleRadius(const EcmaVM* vm, ArkUIRuntimeCallInfo* 
             value[i] = calcDimension.Value();
             unit[i] = static_cast<int>(calcDimension.Unit());
             radiusResObjs[i] = tmpResObj;
+            pickerIndicatorStyle.isDefaultBorderRadius = false;
         }
         if (ArkTSUtils::ParseJsDimensionVp(vm, runtimeCallInfo->GetCallArgRef(i + NUM_7), calcDimension, tmpResObj) &&
             !calcDimension.IsNegative()) {
@@ -149,6 +150,7 @@ void ParseSelectionIndicatorStyleRadius(const EcmaVM* vm, ArkUIRuntimeCallInfo* 
             value[i] = calcDimension.Value();
             unit[i] = static_cast<int>(calcDimension.Unit());
             radiusResObjs[i] = tmpResObj;
+            pickerIndicatorStyle.isDefaultBorderRadius = false;
         }
     }
     if (isRightToLeft && (value[TOPLEFT] != value[BOTTOMLEFT] || value[TOPRIGHT] != value[BOTTOMRIGHT]) &&
@@ -168,58 +170,70 @@ void ParseSelectionIndicatorStyleRadius(const EcmaVM* vm, ArkUIRuntimeCallInfo* 
 }
 
 void ParseDividerColor(const EcmaVM* vm, ArkUIPickerIndicatorStyle& pickerIndicatorStyle,
-    Local<JSValueRef>& dividerColorArg, const NodeInfo& nodeInfo)
+    Local<JSValueRef>& dividerColorArg, const NodeInfo& nodeInfo, RefPtr<ResourceObject>& resObj)
 {
     Color dividerColor = DEFAULT_BORDER_COLOR;
-    RefPtr<ResourceObject> resObj;
     if (dividerColorArg->IsNull() ||
         !ArkTSUtils::ParseJsColorAlpha(vm, dividerColorArg, dividerColor, resObj, nodeInfo)) {
         dividerColor = DEFAULT_BORDER_COLOR;
+    } else {
+        pickerIndicatorStyle.isDefaultDividerColor = false;
     }
 
     pickerIndicatorStyle.dividerColor = dividerColor.GetValue();
 }
 
 void ParseBackgroundColor(const EcmaVM* vm, ArkUIPickerIndicatorStyle& pickerIndicatorStyle,
-    Local<JSValueRef>& backgroundColorArg, const NodeInfo& nodeInfo)
+    Local<JSValueRef>& backgroundColorArg, const NodeInfo& nodeInfo, RefPtr<ResourceObject>& resObj)
 {
     Color backgroundColor = DEFAULT_BORDER_COLOR;
-    RefPtr<ResourceObject> resObj;
     if (backgroundColorArg->IsNull() ||
         !ArkTSUtils::ParseJsColorAlpha(vm, backgroundColorArg, backgroundColor, resObj, nodeInfo)) {
         backgroundColor = DEFAULT_BORDER_COLOR;
+    } else {
+        pickerIndicatorStyle.isDefaultBackgroundColor = false;
     }
 
     pickerIndicatorStyle.backgroundColor = backgroundColor.GetValue();
 }
 
-void ParseDividerWidth(
-    const EcmaVM* vm, ArkUIPickerIndicatorStyle& pickerIndicatorStyle, Local<JSValueRef>& strokeWidthArg)
+void ParseDividerWidth(const EcmaVM* vm, ArkUIPickerIndicatorStyle& pickerIndicatorStyle,
+    Local<JSValueRef>& strokeWidthArg, RefPtr<ResourceObject>& resObj)
 {
     CalcDimension strokeWidth = CalcDimension(DEFAULT_BORDER_RADIUS, DimensionUnit::PERCENT);
-    if (strokeWidthArg->IsNull() || !ArkTSUtils::ParseJsLengthMetrics(vm, strokeWidthArg, strokeWidth)) {
+    if (strokeWidthArg->IsNull() ||
+        !ArkTSUtils::ParseJsLengthMetrics(vm, strokeWidthArg, strokeWidth, resObj)) {
         strokeWidth.SetUnit(DimensionUnit::PERCENT);
+    } else {
+        pickerIndicatorStyle.isDefaultDividerWidth = false;
     }
     pickerIndicatorStyle.strokeWidthValue = strokeWidth.Value();
     pickerIndicatorStyle.strokeWidthUnit = static_cast<uint8_t>(strokeWidth.Unit());
 }
 
-void ParseStartMargin(
-    const EcmaVM* vm, ArkUIPickerIndicatorStyle& pickerIndicatorStyle, Local<JSValueRef>& startMarginArg)
+void ParseStartMargin(const EcmaVM* vm, ArkUIPickerIndicatorStyle& pickerIndicatorStyle,
+    Local<JSValueRef>& startMarginArg, RefPtr<ResourceObject>& resObj)
 {
     CalcDimension startMargin = CalcDimension(DEFAULT_BORDER_RADIUS, DimensionUnit::PERCENT);
-    if (startMarginArg->IsNull() || !ArkTSUtils::ParseJsLengthMetrics(vm, startMarginArg, startMargin)) {
+    if (startMarginArg->IsNull() ||
+        !ArkTSUtils::ParseJsLengthMetrics(vm, startMarginArg, startMargin, resObj)) {
         startMargin.SetUnit(DimensionUnit::PERCENT);
+    } else {
+        pickerIndicatorStyle.isDefaultStartMargin = false;
     }
     pickerIndicatorStyle.startMarginValue = startMargin.Value();
     pickerIndicatorStyle.startMarginUnit = static_cast<uint8_t>(startMargin.Unit());
 }
 
-void ParseEndMargin(const EcmaVM* vm, ArkUIPickerIndicatorStyle& pickerIndicatorStyle, Local<JSValueRef>& endMarginArg)
+void ParseEndMargin(const EcmaVM* vm, ArkUIPickerIndicatorStyle& pickerIndicatorStyle,
+    Local<JSValueRef>& endMarginArg, RefPtr<ResourceObject>& resObj)
 {
     CalcDimension endMargin = CalcDimension(DEFAULT_BORDER_RADIUS, DimensionUnit::PERCENT);
-    if (endMarginArg->IsNull() || !ArkTSUtils::ParseJsLengthMetrics(vm, endMarginArg, endMargin)) {
+    if (endMarginArg->IsNull() ||
+        !ArkTSUtils::ParseJsLengthMetrics(vm, endMarginArg, endMargin, resObj)) {
         endMargin.SetUnit(DimensionUnit::PERCENT);
+    } else {
+        pickerIndicatorStyle.isDefaultEndMargin = false;
     }
     pickerIndicatorStyle.endMarginValue = endMargin.Value();
     pickerIndicatorStyle.endMarginUnit = static_cast<uint8_t>(endMargin.Unit());
@@ -247,11 +261,26 @@ ArkUINativeModuleValue ContainerPickerBridge::SetContainerPickerSelectionIndicat
     if (typeArg->IsNumber()) {
         pickerIndicatorStyle.type = typeArg->ToNumber(vm)->Value();
     }
-    ParseDividerWidth(vm, pickerIndicatorStyle, strokeWidthArg);
-    ParseDividerColor(vm, pickerIndicatorStyle, dividerColorArg, nodeInfo);
-    ParseStartMargin(vm, pickerIndicatorStyle, startMarginArg);
-    ParseEndMargin(vm, pickerIndicatorStyle, endMarginArg);
-    ParseBackgroundColor(vm, pickerIndicatorStyle, backgroundColorArg, nodeInfo);
+
+    RefPtr<ResourceObject> strokeWidthResObj;
+    ParseDividerWidth(vm, pickerIndicatorStyle, strokeWidthArg, strokeWidthResObj);
+    pickerIndicatorStyle.strokeWidthRawPtr = AceType::RawPtr(strokeWidthResObj);
+
+    RefPtr<ResourceObject> dividerColorResObj;
+    ParseDividerColor(vm, pickerIndicatorStyle, dividerColorArg, nodeInfo, dividerColorResObj);
+    pickerIndicatorStyle.dividerColorRawPtr = AceType::RawPtr(dividerColorResObj);
+
+    RefPtr<ResourceObject> startMarginResObj;
+    ParseStartMargin(vm, pickerIndicatorStyle, startMarginArg, startMarginResObj);
+    pickerIndicatorStyle.startMarginRawPtr = AceType::RawPtr(startMarginResObj);
+
+    RefPtr<ResourceObject> endMarginResObj;
+    ParseEndMargin(vm, pickerIndicatorStyle, endMarginArg, endMarginResObj);
+    pickerIndicatorStyle.endMarginRawPtr = AceType::RawPtr(endMarginResObj);
+
+    RefPtr<ResourceObject> bgColorResObj;
+    ParseBackgroundColor(vm, pickerIndicatorStyle, backgroundColorArg, nodeInfo, bgColorResObj);
+    pickerIndicatorStyle.backgroundColorRawPtr = AceType::RawPtr(bgColorResObj);
 
     RefPtr<ResourceObject> radiusResObjs[VALUE_MAX_SIZE] = { nullptr, nullptr, nullptr, nullptr };
     ParseSelectionIndicatorStyleRadius(vm, runtimeCallInfo, isHasValue, pickerIndicatorStyle, radiusResObjs);

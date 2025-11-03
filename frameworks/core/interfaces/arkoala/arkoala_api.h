@@ -1061,10 +1061,21 @@ struct ArkUIPickerIndicatorStyle {
     ArkUI_Float32* values;
     ArkUI_Int32* units;
     ArkUI_Int32 length;
+    void* strokeWidthRawPtr;
+    void* dividerColorRawPtr;
+    void* startMarginRawPtr;
+    void* endMarginRawPtr;
+    void* backgroundColorRawPtr;
     void* topLeftRawPtr;
     void* topRightRawPtr;
     void* bottomLeftRawPtr;
     void* bottomRightRawPtr;
+    bool isDefaultDividerWidth = true;
+    bool isDefaultDividerColor = true;
+    bool isDefaultStartMargin = true;
+    bool isDefaultEndMargin = true;
+    bool isDefaultBackgroundColor = true;
+    bool isDefaultBorderRadius = true;
 };
 
 struct ArkUIPickerDividerResObjStruct {

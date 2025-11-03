@@ -2270,4 +2270,49 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternOnKeyEventTest004, Te
     EXPECT_FALSE(result);
 }
 
+/**
+ * @tc.name: ContainerPickerPatternTest_GetDragDeltaLessThanJumpInterval001
+ * @tc.desc: Test GetDragDeltaLessThanJumpInterval function with isOverScroll logic
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_GetDragDeltaLessThanJumpInterval001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. set up test data
+     */
+    pattern->height_ = 500.0f;
+    pattern->pickerItemHeight_ = 100.0f;
+    pattern->totalItemCount_ = 5;
+    pattern->isLoop_ = false;
+    CreateItemPosition();
+
+    /**
+     * @tc.steps: step3. test with useRebound=true but not out of boundary
+     * @tc.expected: step3. isOverScroll should be false
+     */
+    double offsetY = 0.0f;
+    float originalDragDelta = 10.0f;
+    bool useRebound = true;
+    float shiftDistance = 100.0f;
+    pattern->yOffset_ = 0.0f;
+    double result = pattern->GetDragDeltaLessThanJumpInterval(offsetY, originalDragDelta, useRebound, shiftDistance);
+    EXPECT_EQ(result, 10.0f); // originalDragDelta + yOffset_
+
+    /**
+     * @tc.steps: step4. test with useRebound=true and out of boundary
+     * @tc.expected: step4. isOverScroll should be true
+     */
+    offsetY = 300.0f; // Out of boundary
+    result = pattern->GetDragDeltaLessThanJumpInterval(offsetY, originalDragDelta, useRebound, shiftDistance);
+    EXPECT_EQ(result, 10.0f); // originalDragDelta + yOffset_
+}
+
 } // namespace OHOS::Ace::NG

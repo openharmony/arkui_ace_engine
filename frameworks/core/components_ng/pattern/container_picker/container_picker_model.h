@@ -42,6 +42,7 @@ public:
     static void SetOnScrollStop(FrameNode* frameNode, ContainerPickerChangeEvent&& onScrollStop);
     static void SetIndicatorStyle(FrameNode* frameNode, const PickerIndicatorStyle& style);
     static void ProcessResourceObj(const std::string& key, const RefPtr<ResourceObject>& resObj);
+    static void ProcessResourceObj(FrameNode* frameNode, const std::string& key, const RefPtr<ResourceObject>& resObj);
 };
 } // namespace OHOS::Ace::NG
 

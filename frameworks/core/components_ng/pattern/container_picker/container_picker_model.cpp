@@ -190,12 +190,19 @@ void ContainerPickerModel::SetIndicatorStyle(FrameNode* frameNode, const PickerI
 
 void ContainerPickerModel::ProcessResourceObj(const std::string& key, const RefPtr<ResourceObject>& resObj)
 {
-    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    ProcessResourceObj(frameNode, key, resObj);
+}
+
+void ContainerPickerModel::ProcessResourceObj(FrameNode* frameNode, const std::string& key,
+    const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(resObj);
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
     auto pickerPattern = frameNode->GetPattern<ContainerPickerPattern>();
     CHECK_NULL_VOID(pickerPattern);
-    CHECK_NULL_VOID(resObj);
 
     using Handler = std::function<void(const RefPtr<ResourceObject>&)>;
     const std::unordered_map<std::string, Handler> handlers = {
