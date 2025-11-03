@@ -285,6 +285,7 @@ private:
 
     void UpdateSearchSymbolIconColor();
     void UpdateCancelSymbolIconColor();
+    void UpdateSearchSymbol();
 
     void CreateOrUpdateSymbol(int32_t index, bool isCreateNode, bool isFromModifier);
     void CreateOrUpdateImage(int32_t index, bool isCreateNode);
@@ -370,6 +371,9 @@ private:
     WeakPtr<FrameNode> cancelIcon_;
     WeakPtr<SearchNode> searchNode_;
     WeakPtr<SearchTheme> searchTheme_;
+
+    bool searchIconUsingThemeColor_ = false;
+    bool cancelIconUsingThemeColor_ = false;
 
     // ----- multi thread state variables -----
     bool processTextFieldDefaultStyleAndBehaviorsMultiThread_ = false;
