@@ -1225,7 +1225,6 @@ export enum InputType {
     NORMAL = 0,
     Normal = 0,
     NUMBER = 2,
-    Number = 2,
     PHONE_NUMBER = 3,
     PhoneNumber = 3,
     EMAIL = 5,
