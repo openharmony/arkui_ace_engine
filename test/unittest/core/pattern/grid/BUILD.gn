@@ -22,6 +22,7 @@ COMMON_SRC = [
   "grid_common_testtwo_ng.cpp",
   "grid_option_layout_test_ng.cpp",
   "grid_scroller_test_ng.cpp",
+  "grid_scroller_testtwo_ng.cpp",
   "grid_test_ng.cpp",
   "grid_cache_layout_test_ng.cpp",
   "grid_pattern_test_ng.cpp",
