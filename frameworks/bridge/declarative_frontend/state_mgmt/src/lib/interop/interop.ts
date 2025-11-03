@@ -174,3 +174,7 @@ function createObservedObject(value: Object): Object {
     }
     return value;
 }
+
+function invokeObserveFireChange(target: Object, key: string): void {
+    ObserveV2.getObserve().fireChange(RefInfo.get(UIUtilsImpl.instance().getTarget(target)), key);
+}
