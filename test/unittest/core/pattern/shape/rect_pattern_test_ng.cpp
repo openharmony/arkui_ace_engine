@@ -304,9 +304,9 @@ HWTEST_F(RectPatternTestNg, SetRadiusWidth001, TestSize.Level1)
     EXPECT_FLOAT_EQ(paintProperty->GetBottomLeftRadiusValue().GetX().ConvertToPx(), 0.0f);
 
     std::vector<ResourceObjectParams> params;
-    AddMockResourceData(0, RADIUS_WIDTH);
+    AddMockResourceData(ID_RADIUS_WIDTH, RADIUS_WIDTH);
     auto resObjWithString = AceType::MakeRefPtr<ResourceObject>(
-        0, static_cast<int32_t>(ResourceType::FLOAT), params, "", "", Container::CurrentIdSafely());
+        ID_RADIUS_WIDTH, static_cast<int32_t>(ResourceType::FLOAT), params, "", "", Container::CurrentIdSafely());
     rectModelNG.SetRadiusWidth(resObjWithString);
     pattern->resourceMgr_->ReloadResources();
     EXPECT_EQ(paintProperty->HasTopLeftRadius(), true);
@@ -356,9 +356,9 @@ HWTEST_F(RectPatternTestNg, SetRadiusHeight001, TestSize.Level1)
     EXPECT_FLOAT_EQ(paintProperty->GetBottomLeftRadiusValue().GetY().ConvertToPx(), 0.0f);
 
     std::vector<ResourceObjectParams> params;
-    AddMockResourceData(0, RADIUS_HEIGHT);
+    AddMockResourceData(ID_RADIUS_HEIGHT, RADIUS_HEIGHT);
     auto resObjWithString = AceType::MakeRefPtr<ResourceObject>(
-        0, static_cast<int32_t>(ResourceType::FLOAT), params, "", "", Container::CurrentIdSafely());
+        ID_RADIUS_HEIGHT, static_cast<int32_t>(ResourceType::FLOAT), params, "", "", Container::CurrentIdSafely());
     rectModelNG.SetRadiusHeight(resObjWithString);
     pattern->resourceMgr_->ReloadResources();
     EXPECT_EQ(paintProperty->HasTopLeftRadius(), true);
@@ -412,9 +412,9 @@ HWTEST_F(RectPatternTestNg, SetRadius001, TestSize.Level1)
     EXPECT_FLOAT_EQ(paintProperty->GetBottomLeftRadiusValue().GetY().ConvertToPx(), 0.0f);
 
     std::vector<ResourceObjectParams> params;
-    AddMockResourceData(0, RADIUS_HEIGHT);
+    AddMockResourceData(ID_RADIUS_HEIGHT, RADIUS_HEIGHT);
     auto resObjWithString = AceType::MakeRefPtr<ResourceObject>(
-        0, static_cast<int32_t>(ResourceType::FLOAT), params, "", "", Container::CurrentIdSafely());
+        ID_RADIUS_HEIGHT, static_cast<int32_t>(ResourceType::FLOAT), params, "", "", Container::CurrentIdSafely());
     rectModelNG.SetRadius(resObjWithString);
     pattern->resourceMgr_->ReloadResources();
     EXPECT_EQ(paintProperty->HasTopLeftRadius(), true);
