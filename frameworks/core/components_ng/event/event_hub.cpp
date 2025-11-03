@@ -1202,17 +1202,14 @@ void EventHub::CleanVisibleAreaCallback(bool isUser, bool isThrottled)
         CHECK_NULL_VOID(visibleAreaChangeCallbackSet_->innerVisibleAreaChange);
         visibleAreaChangeCallbackSet_->innerVisibleAreaChange->ratios.clear();
         visibleAreaChangeCallbackSet_->innerVisibleAreaChange->callbackInfo.callback = nullptr;
-        visibleAreaChangeCallbackSet_->innerVisibleAreaChange = nullptr;
     } else if (isThrottled) {
         CHECK_NULL_VOID(visibleAreaChangeCallbackSet_->throttledVisibleAreaChange);
         visibleAreaChangeCallbackSet_->throttledVisibleAreaChange->ratios.clear();
         visibleAreaChangeCallbackSet_->throttledVisibleAreaChange->callbackInfo.callback = nullptr;
-        visibleAreaChangeCallbackSet_->throttledVisibleAreaChange = nullptr;
     } else {
         CHECK_NULL_VOID(visibleAreaChangeCallbackSet_->userVisibleAreaChange);
         visibleAreaChangeCallbackSet_->userVisibleAreaChange->ratios.clear();
         visibleAreaChangeCallbackSet_->userVisibleAreaChange->callbackInfo.callback = nullptr;
-        visibleAreaChangeCallbackSet_->userVisibleAreaChange = nullptr;
     }
 }
 
