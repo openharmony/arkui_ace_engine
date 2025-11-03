@@ -160,9 +160,7 @@ public:
             checkNestedEvent = {
                 .resourceId = resourceId,
             };
-            auto helper = CallbackHelper(parameter.springBack);
             checkNestedEvent->fired = true;
-            helper.Invoke();
         };
         auto arkDismissCallback =
             Converter::ArkValue<Callback_SpringBackAction_Void>(dismissCallback, frameNode->GetId());

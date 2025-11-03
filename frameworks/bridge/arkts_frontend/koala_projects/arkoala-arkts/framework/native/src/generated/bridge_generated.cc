@@ -34451,6 +34451,19 @@ Ark_NativePointer impl_SearchOps_registerSearchValueCallback(Ark_NativePointer n
         return GetAccessors()->getSearchOpsAccessor()->registerSearchValueCallback(node, (const Ark_String*) (&value), static_cast<SearchValueCallback*>(&callbackValueTemp));
 }
 KOALA_INTEROP_4(SearchOps_registerSearchValueCallback, Ark_NativePointer, Ark_NativePointer, KStringPtr, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_SpringBackAction_construct() {
+        return GetAccessors()->getSpringBackActionAccessor()->construct();
+}
+KOALA_INTEROP_DIRECT_0(SpringBackAction_construct, Ark_NativePointer)
+Ark_NativePointer impl_SpringBackAction_getFinalizer() {
+        return GetAccessors()->getSpringBackActionAccessor()->getFinalizer();
+}
+KOALA_INTEROP_DIRECT_0(SpringBackAction_getFinalizer, Ark_NativePointer)
+void impl_SpringBackAction_springBack(Ark_NativePointer thisPtr) {
+        Ark_SpringBackAction self = reinterpret_cast<Ark_SpringBackAction>(thisPtr);
+        GetAccessors()->getSpringBackActionAccessor()->springBack(self);
+}
+KOALA_INTEROP_DIRECT_V1(SpringBackAction_springBack, Ark_NativePointer)
 Ark_NativePointer impl_SpringMotion_construct(KInteropNumber start, KInteropNumber end, KInteropNumber velocity, Ark_NativePointer prop) {
         return GetAccessors()->getSpringMotionAccessor()->construct((const Ark_Number*) (&start), (const Ark_Number*) (&end), (const Ark_Number*) (&velocity), static_cast<Ark_SpringProp>(prop));
 }
