@@ -964,7 +964,7 @@ public:
     {
         return false;
     }
-    bool OutBoundaryCallback() override
+    bool OutBoundaryCallback(bool useCurrentDelta = true) override
     {
         return false;
     }

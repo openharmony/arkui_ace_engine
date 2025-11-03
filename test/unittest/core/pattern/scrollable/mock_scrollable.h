@@ -50,7 +50,7 @@ public:
 private:
     MOCK_METHOD(bool, HandleScrollVelocity, (float, const RefPtr<NestableScrollContainer>&), (override));
     MOCK_METHOD(void, OnScrollEndCallback, (), (override));
-    MOCK_METHOD(bool, OutBoundaryCallback, (), (override));
+    MOCK_METHOD(bool, OutBoundaryCallback, (bool useCurrentDelta), (override));
 };
 
 class MockScrollEdgeEffect : public ScrollEdgeEffect {

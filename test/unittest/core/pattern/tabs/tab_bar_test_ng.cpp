@@ -2090,7 +2090,7 @@ HWTEST_F(TabBarTestNg, TabBarPatternSetEdgeEffect004, TestSize.Level1)
     auto scrollEffect = AceType::DynamicCast<ScrollSpringEffect>(tabBarPattern_->scrollEffect_);
     ASSERT_NE(scrollEffect, nullptr);
     auto outBoundaryCallback = scrollEffect->outBoundaryCallback_;
-    EXPECT_TRUE(outBoundaryCallback());
+    EXPECT_TRUE(outBoundaryCallback(true));
     auto currentPositionCallback = scrollEffect->currentPositionCallback_;
     auto leadingCallback = scrollEffect->leadingCallback_;
     auto trailingCallback = scrollEffect->trailingCallback_;

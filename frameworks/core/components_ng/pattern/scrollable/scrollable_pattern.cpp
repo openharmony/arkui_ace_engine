@@ -1093,10 +1093,10 @@ void ScrollablePattern::SetEdgeEffect(EdgeEffect edgeEffect)
     if (edgeEffect == EdgeEffect::SPRING && !scrollEffect_) {
         auto springEffect = AceType::MakeRefPtr<ScrollSpringEffect>();
         CHECK_NULL_VOID(springEffect);
-        springEffect->SetOutBoundaryCallback([weak = AceType::WeakClaim(this)]() {
+        springEffect->SetOutBoundaryCallback([weak = AceType::WeakClaim(this)](bool useCurrentDelta) {
             auto pattern = weak.Upgrade();
             CHECK_NULL_RETURN(pattern, false);
-            return pattern->OutBoundaryCallback();
+            return pattern->OutBoundaryCallback(useCurrentDelta);
         });
         // add callback to springEdgeEffect
         SetEdgeEffectCallback(springEffect);
