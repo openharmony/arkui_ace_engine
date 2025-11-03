@@ -2835,7 +2835,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetOnRouterImpl(Ark_NativePointer node,
-                         const Opt_Callback_Object_Void* value)
+                         const Opt_Callback_RouterCallbackInfo_Void* value)
     {
     }
     void SetOnUninstallImpl(Ark_NativePointer node,

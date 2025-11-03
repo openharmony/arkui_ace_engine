@@ -148,6 +148,7 @@ export enum CallbackKind {
     Kind_Callback_RichEditorTextSpanResult_Void = 1980824326,
     Kind_Callback_RotationGesture = 1688035159,
     Kind_Callback_RotationGesture_Void = 924806076,
+    Kind_Callback_RouterCallbackInfo_Void = 538725412,
     Kind_Callback_SheetDismiss_Void = 22609082,
     Kind_Callback_SheetType_Void = -224451112,
     Kind_Callback_Size_Void = -646869686,

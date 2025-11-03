@@ -3028,6 +3028,24 @@ void deserializeAndCallSyncCallback_RichEditorTextSpanResult_Void(Ark_VMContext 
     Ark_RichEditorTextSpanResult value0 = RichEditorTextSpanResult_serializer::read(thisDeserializer);
     callSyncMethod(vmContext, resourceId, value0);
 }
+void deserializeAndCallCallback_RouterCallbackInfo_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_RouterCallbackInfo value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_RouterCallbackInfo_Void))));
+    thisDeserializer.readPointer();
+    Ark_RouterCallbackInfo value0 = RouterCallbackInfo_serializer::read(thisDeserializer);
+    _call(_resourceId, value0);
+}
+void deserializeAndCallSyncCallback_RouterCallbackInfo_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_RouterCallbackInfo value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_RouterCallbackInfo_Void))));
+    Ark_RouterCallbackInfo value0 = RouterCallbackInfo_serializer::read(thisDeserializer);
+    callSyncMethod(vmContext, resourceId, value0);
+}
 void deserializeAndCallCallback_SheetDismiss_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
@@ -6971,6 +6989,7 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
         case Kind_Callback_RichEditorRange_Void: return deserializeAndCallCallback_RichEditorRange_Void(thisArray, thisLength);
         case Kind_Callback_RichEditorSelection_Void: return deserializeAndCallCallback_RichEditorSelection_Void(thisArray, thisLength);
         case Kind_Callback_RichEditorTextSpanResult_Void: return deserializeAndCallCallback_RichEditorTextSpanResult_Void(thisArray, thisLength);
+        case Kind_Callback_RouterCallbackInfo_Void: return deserializeAndCallCallback_RouterCallbackInfo_Void(thisArray, thisLength);
         case Kind_Callback_SheetDismiss_Void: return deserializeAndCallCallback_SheetDismiss_Void(thisArray, thisLength);
         case Kind_Callback_SheetType_Void: return deserializeAndCallCallback_SheetType_Void(thisArray, thisLength);
         case Kind_Callback_Size_Void: return deserializeAndCallCallback_Size_Void(thisArray, thisLength);
@@ -7283,6 +7302,7 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         case Kind_Callback_RichEditorRange_Void: return deserializeAndCallSyncCallback_RichEditorRange_Void(vmContext, thisArray, thisLength);
         case Kind_Callback_RichEditorSelection_Void: return deserializeAndCallSyncCallback_RichEditorSelection_Void(vmContext, thisArray, thisLength);
         case Kind_Callback_RichEditorTextSpanResult_Void: return deserializeAndCallSyncCallback_RichEditorTextSpanResult_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_RouterCallbackInfo_Void: return deserializeAndCallSyncCallback_RouterCallbackInfo_Void(vmContext, thisArray, thisLength);
         case Kind_Callback_SheetDismiss_Void: return deserializeAndCallSyncCallback_SheetDismiss_Void(vmContext, thisArray, thisLength);
         case Kind_Callback_SheetType_Void: return deserializeAndCallSyncCallback_SheetType_Void(vmContext, thisArray, thisLength);
         case Kind_Callback_Size_Void: return deserializeAndCallSyncCallback_Size_Void(vmContext, thisArray, thisLength);

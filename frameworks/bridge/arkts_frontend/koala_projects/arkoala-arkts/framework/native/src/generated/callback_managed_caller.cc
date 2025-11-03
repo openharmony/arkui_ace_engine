@@ -3504,6 +3504,27 @@ void callManagedCallback_RichEditorTextSpanResult_VoidSync(Ark_VMContext vmConte
     RichEditorTextSpanResult_serializer::write(argsSerializer, value0);
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
 }
+void callManagedCallback_RouterCallbackInfo_Void(Ark_Int32 resourceId, Ark_RouterCallbackInfo value0)
+{
+    CallbackBuffer callbackBuffer = {{}, {}};
+    const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
+    callbackBuffer.resourceHolder.holdCallbackResource(&callbackResourceSelf);
+    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
+    argsSerializer.writeInt32(Kind_Callback_RouterCallbackInfo_Void);
+    argsSerializer.writeInt32(resourceId);
+    RouterCallbackInfo_serializer::write(argsSerializer, value0);
+    enqueueCallback(10, &callbackBuffer);
+}
+void callManagedCallback_RouterCallbackInfo_VoidSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_RouterCallbackInfo value0)
+{
+    uint8_t dataBuffer[4096];
+    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&dataBuffer, sizeof(dataBuffer), nullptr);
+    argsSerializer.writeInt32(10);
+    argsSerializer.writeInt32(Kind_Callback_RouterCallbackInfo_Void);
+    argsSerializer.writeInt32(resourceId);
+    RouterCallbackInfo_serializer::write(argsSerializer, value0);
+    KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
+}
 void callManagedCallback_SheetDismiss_Void(Ark_Int32 resourceId, Ark_SheetDismiss sheetDismiss)
 {
     CallbackBuffer callbackBuffer = {{}, {}};
@@ -7908,6 +7929,7 @@ Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
         case Kind_Callback_RichEditorRange_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_RichEditorRange_Void);
         case Kind_Callback_RichEditorSelection_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_RichEditorSelection_Void);
         case Kind_Callback_RichEditorTextSpanResult_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_RichEditorTextSpanResult_Void);
+        case Kind_Callback_RouterCallbackInfo_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_RouterCallbackInfo_Void);
         case Kind_Callback_SheetDismiss_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_SheetDismiss_Void);
         case Kind_Callback_SheetType_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_SheetType_Void);
         case Kind_Callback_Size_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Size_Void);
@@ -8219,6 +8241,7 @@ Ark_NativePointer getManagedCallbackCallerSync(CallbackKind kind)
         case Kind_Callback_RichEditorRange_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_RichEditorRange_VoidSync);
         case Kind_Callback_RichEditorSelection_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_RichEditorSelection_VoidSync);
         case Kind_Callback_RichEditorTextSpanResult_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_RichEditorTextSpanResult_VoidSync);
+        case Kind_Callback_RouterCallbackInfo_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_RouterCallbackInfo_VoidSync);
         case Kind_Callback_SheetDismiss_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_SheetDismiss_VoidSync);
         case Kind_Callback_SheetType_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_SheetType_VoidSync);
         case Kind_Callback_Size_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Size_VoidSync);
