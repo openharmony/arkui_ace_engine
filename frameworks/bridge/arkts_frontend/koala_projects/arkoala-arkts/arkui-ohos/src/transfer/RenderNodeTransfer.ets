@@ -111,7 +111,6 @@ export class RenderNodeTransfer {
         }
         // get node type
         let typeStr : string | undefined = TransferUtil.getPropStringType(inVal, "type");
-        // new RenderNode
         let tsNode: RenderNode = new RenderNode(nodePtrVal, typeStr);
         this.mapNodeStatic.set(nodeId, tsNode);
         // tsNode set property

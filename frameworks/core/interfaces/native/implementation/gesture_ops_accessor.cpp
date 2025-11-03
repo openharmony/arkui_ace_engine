@@ -308,7 +308,7 @@ void ClearGesturesImpl(Ark_NativePointer node)
 Ark_Number GetGestureEventType(Ark_NativePointer event)
 {
     auto* peer = reinterpret_cast<Ark_BaseGestureEvent>(event);
-    CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_Number>(-1););
+    CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_Number>(-1));
     return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(peer->GetRecognizerType()));
 }
 Ark_Boolean IsScrollableComponent(Ark_NativePointer event)

@@ -235,13 +235,11 @@ export class Application {
     }
 
     private computeRoot(): PeerNode {
-        // let handle = ArkUINativeModule._SystemAPI_StartFrame()
         let result: PeerNode
         try {
             result = this.rootState!.value
             this.rootPointer = result.peer.ptr
         } finally {
-            // ArkUINativeModule._SystemAPI_EndFrame(handle)
         }
         return result
     }
@@ -354,7 +352,6 @@ export class Application {
             ObserveSingleton.instance.makeDelayedMutableStateChanges();
         }
         // Here we request to draw a frame and call custom components callbacks.
-        // ArkUINativeModule._MeasureLayoutAndDraw(this.rootPointer)
 
         // Here we request to draw a frame and call custom components callbacks.
         rootState!.value;
@@ -379,7 +376,6 @@ export class Application {
             detachedRoot.compute()
         }
         updateLazyItems()
-        // flushBuilderRootNode()
         if (partialUpdates.length > 0) {
             // If there are pending partial updates - we apply them one by one and provide update context.
             for (let update of partialUpdates) {

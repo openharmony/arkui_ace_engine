@@ -289,7 +289,7 @@ export class ComponentSnapshot {
     }
 
     public createFromComponent<T extends Object>(content: ComponentContent<T>, delay?: int, checkImageStatus?: boolean, options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> {
-        throw Error("createFromComponent not implemented in ComponentSnapshot!")
+        throw Error('createFromComponent not implemented in ComponentSnapshot!')
     }
 }
 
