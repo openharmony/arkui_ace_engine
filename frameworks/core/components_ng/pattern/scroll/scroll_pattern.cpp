@@ -725,8 +725,9 @@ void ScrollPattern::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth)
     if (LessOrEqual(scrollableDistance_, 0.0)) {
         return;
     }
-    float distance =
-        scrollEdgeType == ScrollEdgeType::SCROLL_TOP ? -currentOffset_ : (-scrollableDistance_ - currentOffset_);
+    float distance = scrollEdgeType == ScrollEdgeType::SCROLL_TOP
+                         ? -currentOffset_ + contentStartOffset_
+                         : (-scrollableDistance_ - currentOffset_ - contentEndOffset_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     ACE_SCOPED_TRACE("Scroll ScrollToEdge scrollEdgeType:%zu, offset:%f, id:%d", scrollEdgeType, distance,
