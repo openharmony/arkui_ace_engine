@@ -61,6 +61,7 @@ private:
     void HandleTextArea();
     std::string GetAccessibilityText(uint32_t textLength, uint32_t maxLength);
     void ProcessCounterColor(RefPtr<FrameNode>& decoratedNode, TextStyle& countTextStyle);
+    void UpdateBottomMargin(const std::unique_ptr<MarginProperty>& marginProp, Dimension& bottom);
 };
 
 class ACE_EXPORT ErrorDecorator : public TextComponentDecorator {

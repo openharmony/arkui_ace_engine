@@ -528,6 +528,13 @@ void TextFieldPattern::CheckAndUpdateRecordBeforeOperation()
 
 void TextFieldPattern::BeforeCreateLayoutWrapper()
 {
+    ReprocessAllRelatedToLPX();
+    HandleInputOperations();
+    selectOverlay_->MarkOverlayDirty();
+}
+
+void TextFieldPattern::HandleInputOperations()
+{
     while (!inputOperations_.empty()) {
         auto operation = inputOperations_.front();
         inputOperations_.pop();
@@ -579,7 +586,6 @@ void TextFieldPattern::BeforeCreateLayoutWrapper()
                 break;
         }
     }
-    selectOverlay_->MarkOverlayDirty();
 }
 
 void TextFieldPattern::SetPlaceholderStyledString(const RefPtr<SpanString>& value)
@@ -3664,11 +3670,9 @@ void TextFieldPattern::OnModifyDone()
     }
     // The textRect position can't be changed by only redraw.
     if (!initTextRect_) {
-        auto border = GetBorderWidthProperty();
-        textRect_.SetLeft(GetPaddingLeft() + GetBorderLeft(border));
-        textRect_.SetTop(GetPaddingTop() + GetBorderTop(border));
-        AdjustTextRectByCleanNode(textRect_);
+        InitTextRect();
         initTextRect_ = true;
+        lpxInfo_.initTextRectWithLPX = lpxInfo_.hasLPXPadding || HasLPXBorder();
     }
     CalculateDefaultCursor();
 
@@ -3690,6 +3694,7 @@ void TextFieldPattern::OnModifyDone()
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     SetIsEnableSubWindowMenu();
     isModifyDone_ = true;
+    lpxInfo_.lastLogicScale = context->GetLogicScale();
     if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         InitCancelButtonMouseEvent();
         InitPasswordButtonMouseEvent();
@@ -4042,6 +4047,8 @@ void TextFieldPattern::ProcessInnerPadding()
     paddings.left = NG::CalcLength(left);
     paddings.right = NG::CalcLength(right);
     layoutProperty->UpdatePadding(paddings);
+    lpxInfo_.hasLPXPadding = (top.Unit() == DimensionUnit::LPX || bottom.Unit() == DimensionUnit::LPX ||
+                              left.Unit() == DimensionUnit::LPX || right.Unit() == DimensionUnit::LPX);
 }
 
 void TextFieldPattern::ProcessNumberOfLines()
@@ -12514,5 +12521,58 @@ void TextFieldPattern::UpdateParagraphForDragNode(bool skipUpdate)
     auto dragNodePattern = AceType::DynamicCast<TextDragPattern>(dragNode_->GetPattern());
     CHECK_NULL_VOID(dragNodePattern);
     dragNodePattern->UpdateParagraph(paragraph_);
+}
+
+void TextFieldPattern::InitTextRect()
+{
+    auto border = GetBorderWidthProperty();
+    textRect_.SetLeft(GetPaddingLeft() + GetBorderLeft(border));
+    textRect_.SetTop(GetPaddingTop() + GetBorderTop(border));
+    AdjustTextRectByCleanNode(textRect_);
+}
+
+bool TextFieldPattern::HasLPXBorder()
+{
+    auto border = GetBorderWidthProperty();
+    return (border.leftDimen.has_value() && border.leftDimen->Unit() == DimensionUnit::LPX) ||
+           (border.topDimen.has_value() && border.topDimen->Unit() == DimensionUnit::LPX) ||
+           (border.rightDimen.has_value() && border.rightDimen->Unit() == DimensionUnit::LPX) ||
+           (border.bottomDimen.has_value() && border.bottomDimen->Unit() == DimensionUnit::LPX);
+}
+
+void TextFieldPattern::ReprocessAllRelatedToLPX()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto currentLogicScale = context->GetLogicScale();
+    bool isLogicScaleChanged = (lpxInfo_.lastLogicScale != currentLogicScale);
+    lpxInfo_.lastLogicScale = currentLogicScale;
+    if (!isLogicScaleChanged) {
+        return;
+    }
+    if (lpxInfo_.hasLPXPadding) {
+        ProcessInnerPadding();
+        ProcessNumberOfLines();
+    }
+
+    if (lpxInfo_.initTextRectWithLPX) {
+        InitTextRect();
+        lpxInfo_.initTextRectWithLPX = false;
+    }   
+
+    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
+    if (paintProperty && paintProperty->HasMarginByUser()) {
+        const auto& currentMargin = paintProperty->GetMarginByUserValue();
+        if (currentMargin.bottom.has_value() && currentMargin.bottom->GetDimension().Unit() == DimensionUnit::LPX) {
+            if (counterDecorator_) {
+                counterDecorator_->UpdateTextFieldMargin();
+            }
+            if (errorDecorator_) {
+                errorDecorator_->UpdateTextFieldMargin();
+            }
+        }
+    }
 }
 } // namespace OHOS::Ace::NG
