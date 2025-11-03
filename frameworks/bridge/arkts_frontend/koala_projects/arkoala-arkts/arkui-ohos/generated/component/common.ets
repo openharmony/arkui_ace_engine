@@ -35,6 +35,7 @@ import { FocusBoxStyle_serializer, FocusBoxStyle, FocusPriority } from "./focus"
 import { matrix4_Matrix4Transit_serializer } from "./../framework/ohos.matrix4"
 import { CircleShape_serializer, EllipseShape_serializer, PathShape_serializer, RectShape_serializer } from "./../framework/ohos.arkui.shape"
 import { image_PixelMap_serializer } from "./../framework/ohos.multimedia.image"
+import { ComponentContent_serializer } from "./../ComponentContent"
 import { StyledString_serializer, StyledString, ImageAttachment, CustomSpan, StyleOptions, StyledStringKey, SpanStyle, StyledStringMarshallCallback, UserDataSpan, StyledStringUnmarshallCallback } from "./styledString"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
@@ -1076,8 +1077,29 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
         ArkUIGeneratedNativeModule._KeyEvent_setTimestamp(this.peer!.ptr, timestamp)
     }
     private getStopPropagation_serialize(): (() => void) {
-        const retval  = ArkUIGeneratedNativeModule._KeyEvent_getStopPropagation(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        const retval = ArkUIGeneratedNativeModule._KeyEvent_getStopPropagation(this.peer!.ptr)
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType = retvalDeserializer.readInt8().toInt()
+        let buffer: (() => void) | undefined = undefined
+        
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const buffer_BufResource: CallbackResource = retvalDeserializer.readCallbackResource()
+            const buffer_BufCall: KPointer = retvalDeserializer.readPointer()
+            const buffer_BufCallSync: KPointer = retvalDeserializer.readPointer()
+            
+            buffer = (): void => {
+                const buffer_BufArgsSerializer: SerializerBase = SerializerBase.hold();
+                buffer_BufArgsSerializer.writeInt32(buffer_BufResource.resourceId);
+                buffer_BufArgsSerializer.writePointer(buffer_BufCall);
+                buffer_BufArgsSerializer.writePointer(buffer_BufCallSync);
+                InteropNativeModule._CallCallbackSync(10, -1867723152, buffer_BufArgsSerializer.asBuffer(), buffer_BufArgsSerializer.length());
+                buffer_BufArgsSerializer.release();
+                return;
+            }
+        }
+        
+        const returnResult: (() => void) = (buffer || (() => {})) as (() => void);
+        return returnResult;
     }
     private setStopPropagation_serialize(stopPropagation: (() => void)): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
@@ -5036,7 +5058,7 @@ export class ArkCommonMethodPeer extends PeerNode {
             } else if (valueTmpValue instanceof ComponentContent) {
                 thisSerializer.writeInt8((2).toChar())
                 const valueTmpValueForIdx2  = valueTmpValue as ComponentContent
-                thisSerializer.holdAndWriteObject(valueTmpValueForIdx2)
+                ComponentContent_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -6489,7 +6511,7 @@ export enum ShadowStyle {
     OUTER_FLOATING_MD = 5
 }
 export interface MultiShadowOptions {
-    radius?: number | Resource;
+    radius?: double | Resource;
     offsetX?: double | Resource;
     offsetY?: double | Resource;
 }
@@ -7650,7 +7672,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     tabStop_value?: boolean | undefined
     onFocus_value?: (() => void) | undefined
     onBlur_value?: (() => void) | undefined
-    tabIndex_value?: number | undefined
+    tabIndex_value?: int32 | undefined
     defaultFocus_value?: boolean | undefined
     groupDefaultFocus_value?: boolean | undefined
     focusOnTouch_value?: boolean | undefined
@@ -7918,7 +7940,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     onBlur(value: (() => void) | undefined): this {
         return this
     }
-    tabIndex(value: number | undefined): this {
+    tabIndex(value: int32 | undefined): this {
         return this
     }
     defaultFocus(value: boolean | undefined): this {
@@ -22841,8 +22863,29 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
         ArkUIGeneratedNativeModule._MouseEvent_setY(this.peer!.ptr, y)
     }
     private getStopPropagation_serialize(): (() => void) {
-        const retval  = ArkUIGeneratedNativeModule._MouseEvent_getStopPropagation(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        const retval = ArkUIGeneratedNativeModule._MouseEvent_getStopPropagation(this.peer!.ptr)
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType = retvalDeserializer.readInt8().toInt()
+        let buffer: (() => void) | undefined = undefined
+        
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const buffer_BufResource: CallbackResource = retvalDeserializer.readCallbackResource()
+            const buffer_BufCall: KPointer = retvalDeserializer.readPointer()
+            const buffer_BufCallSync: KPointer = retvalDeserializer.readPointer()
+            
+            buffer = (): void => {
+                const buffer_BufArgsSerializer: SerializerBase = SerializerBase.hold();
+                buffer_BufArgsSerializer.writeInt32(buffer_BufResource.resourceId);
+                buffer_BufArgsSerializer.writePointer(buffer_BufCall);
+                buffer_BufArgsSerializer.writePointer(buffer_BufCallSync);
+                InteropNativeModule._CallCallbackSync(10, -1867723152, buffer_BufArgsSerializer.asBuffer(), buffer_BufArgsSerializer.length());
+                buffer_BufArgsSerializer.release();
+                return;
+            }
+        }
+        
+        const returnResult: (() => void) = (buffer || (() => {})) as (() => void);
+        return returnResult;
     }
     private setStopPropagation_serialize(stopPropagation: (() => void)): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()

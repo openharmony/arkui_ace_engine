@@ -20,16 +20,13 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/list/list_item_event_hub.h"
 #include "core/components_ng/pattern/list/list_item_model.h"
-#include "core/components_ng/syntax/shallow_builder.h"
 
 namespace OHOS::Ace::NG {
 
 class ACE_EXPORT ListItemModelStatic {
 public:
-    static void SetShallowBuilder(FrameNode* frameNode, const RefPtr<ShallowBuilder>& shallowBuilder);
     static void SetSticky(FrameNode* frameNode, const std::optional<V2::StickyMode>& stickyMode);
-    static RefPtr<FrameNode> CreateFrameNode(
-        int32_t nodeId, bool isCreateArc = false, bool isDelayedDeepRenderFunc = false);
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, bool isCreateArc = false);
     static void SetSelectCallback(FrameNode* frameNode, OnSelectFunc&& selectCallback);
     static void SetSelectChangeEvent(FrameNode* frameNode, OnSelectFunc&& changeEvent);
     static void SetSelectable(FrameNode* frameNode, bool selectable);

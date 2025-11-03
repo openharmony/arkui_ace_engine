@@ -473,10 +473,10 @@ export class DataPanelShadowOptions_serializer {
         if (valueHolderForRadius !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForRadiusTmpValue  = valueHolderForRadius!
-            if (valueHolderForRadiusTmpValue instanceof number) {
+            if (valueHolderForRadiusTmpValue instanceof double) {
                 valueSerializer.writeInt8((0).toChar())
-                const valueHolderForRadiusTmpValueForIdx0  = valueHolderForRadiusTmpValue as number
-                valueSerializer.writeNumber(valueHolderForRadiusTmpValueForIdx0)
+                const valueHolderForRadiusTmpValueForIdx0  = valueHolderForRadiusTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForRadiusTmpValueForIdx0)
             } else if (valueHolderForRadiusTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((1).toChar())
                 const valueHolderForRadiusTmpValueForIdx1  = valueHolderForRadiusTmpValue as Resource
@@ -557,20 +557,20 @@ export class DataPanelShadowOptions_serializer {
     public static read(buffer: DeserializerBase): DataPanelShadowOptions {
         let valueDeserializer : DeserializerBase = buffer
         const radiusTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let radiusTmpBuf : number | Resource | undefined = undefined
+        let radiusTmpBuf : double | Resource | undefined = undefined
         if ((radiusTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const radiusTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let radiusTmpBuf_ : number | Resource | undefined
+            let radiusTmpBuf_ : double | Resource | undefined
             if (radiusTmpBuf_UnionSelector == (0).toChar()) {
-                radiusTmpBuf_ = (valueDeserializer.readNumber() as number)
+                radiusTmpBuf_ = valueDeserializer.readFloat64()
             } else if (radiusTmpBuf_UnionSelector == (1).toChar()) {
                 radiusTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for radiusTmpBuf_ has to be chosen through deserialisation.")
             }
-            radiusTmpBuf = (radiusTmpBuf_ as number | Resource)
+            radiusTmpBuf = (radiusTmpBuf_ as double | Resource)
         }
-        const radiusTmpResult : number | Resource | undefined = radiusTmpBuf
+        const radiusTmpResult : double | Resource | undefined = radiusTmpBuf
         const offsetXTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let offsetXTmpBuf : double | Resource | undefined = undefined
         if ((offsetXTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {

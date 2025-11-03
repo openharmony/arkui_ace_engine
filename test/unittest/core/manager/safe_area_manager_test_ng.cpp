@@ -1363,17 +1363,14 @@ HWTEST_F(SafeAreaManagerTest, AddNodeToExpandListIfNeededTest, TestSize.Level1)
 {
     auto frameNode0 = FrameNode::CreateFrameNode(
         V2::PAGE_ETS_TAG, 0, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()), true);
-
     auto frameNode1 =
         FrameNode::CreateFrameNode(V2::NAVIGATION_VIEW_ETS_TAG, 1, AceType::MakeRefPtr<NavigationPattern>(), false);
-
     auto frameNode2 = FrameNode::CreateFrameNode(
         V2::NAVDESTINATION_VIEW_ETS_TAG, 2, AceType::MakeRefPtr<NavDestinationPattern>(), true);
-
     auto frameNode3 = FrameNode::CreateFrameNode(
         V2::NAVDESTINATION_CONTENT_ETS_TAG, 3, AceType::MakeRefPtr<LinearLayoutPattern>(true), false);
-
     auto frameNode4 = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 4, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+
     EXPECT_EQ(safeAreaManager_->AddNodeToExpandListIfNeeded(frameNode0), true);
     EXPECT_EQ(safeAreaManager_->AddNodeToExpandListIfNeeded(frameNode1), true);
     EXPECT_EQ(safeAreaManager_->AddNodeToExpandListIfNeeded(frameNode2), true);
@@ -1431,7 +1428,6 @@ HWTEST_F(SafeAreaManagerTest, IsModeResizeOrIsModeOffset, TestSize.Level1)
         { false, true },
         { false, false }
     };
-    
     for (int i= 0; i < modeArr.size(); ++i) {
         safeAreaManager_->SetKeyBoardAvoidMode(modeArr[i]);
         EXPECT_EQ(safeAreaManager_->IsModeOffset(), expectedRes[i].first);

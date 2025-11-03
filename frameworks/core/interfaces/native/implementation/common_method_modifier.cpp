@@ -3407,7 +3407,7 @@ void SetOnAppearImpl(Ark_NativePointer node,
         return;
     }
     auto onEvent = [arkCallback = CallbackHelper(*optValue)]() {
-        arkCallback.Invoke();
+        arkCallback.InvokeSync();
     };
     ViewAbstract::SetOnAppear(frameNode, std::move(onEvent));
 }
@@ -3422,7 +3422,7 @@ void SetOnDisAppearImpl(Ark_NativePointer node,
         return;
     }
     auto onEvent = [arkCallback = CallbackHelper(*optValue)]() {
-        arkCallback.Invoke();
+        arkCallback.InvokeSync();
     };
     ViewAbstract::SetOnDisappear(frameNode, std::move(onEvent));
 }
@@ -3439,7 +3439,7 @@ void SetOnAttachImpl(Ark_NativePointer node,
     auto weakNode = AceType::WeakClaim(frameNode);
     auto onAttach = [arkCallback = CallbackHelper(*optValue), node = weakNode]() {
         PipelineContext::SetCallBackNode(node);
-        arkCallback.Invoke();
+        arkCallback.InvokeSync();
     };
     ViewAbstract::SetOnAttach(frameNode, std::move(onAttach));
 }
@@ -3456,7 +3456,7 @@ void SetOnDetachImpl(Ark_NativePointer node,
     auto weakNode = AceType::WeakClaim(frameNode);
     auto onDetach = [arkCallback = CallbackHelper(*optValue), node = weakNode]() {
         PipelineContext::SetCallBackNode(node);
-        arkCallback.Invoke();
+        arkCallback.InvokeSync();
     };
     ViewAbstract::SetOnDetach(frameNode, std::move(onDetach));
 }
@@ -4896,10 +4896,20 @@ void SetLinearGradientBlurImpl(Ark_NativePointer node,
     auto radius = Converter::OptConvertPtr<Dimension>(value);
     auto convValue = Converter::OptConvertPtr<NG::LinearGradientBlurPara>(options);
     Validator::ValidateNonNegative(radius);
-    NG::LinearGradientBlurPara para(
-        Dimension(0.0f, DimensionUnit::VP), std::vector<std::pair<float, float>>(), GradientDirection::BOTTOM);
+    NG::LinearGradientBlurPara para(Dimension(0.0f, DimensionUnit::VP),
+        std::vector<std::pair<float, float>> { { 0.0f, 0.0f }, { 0.0f, 1.0f } }, GradientDirection::BOTTOM);
     if (convValue.has_value()) {
-        para = convValue.value();
+        auto newPara = convValue.value();
+        if (static_cast<int32_t>(newPara.fractionStops_.size()) <= 1) {
+            newPara.fractionStops_.clear();
+            newPara.fractionStops_.push_back(std::pair<float, float>(0.0f, 0.0f));
+            newPara.fractionStops_.push_back(std::pair<float, float>(0.0f, 1.0f));
+        }
+        if (newPara.direction_ < GradientDirection::LEFT || newPara.direction_ >= GradientDirection::NONE) {
+            newPara.direction_ = GradientDirection::BOTTOM;
+        }
+        para.fractionStops_ = newPara.fractionStops_;
+        para.direction_ = newPara.direction_;
     }
     if (radius.has_value()) {
         para.blurRadius_ = radius.value();
@@ -4928,10 +4938,10 @@ void SetBackdropBlurImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto optRadius = Converter::OptConvertPtr<Dimension>(radius);
+    double radiusValue = Converter::OptConvertPtr<double>(radius).value_or(0.0);
     auto optOption = Converter::OptConvertPtr<BlurOption>(options);
     auto sysOpts = Converter::OptConvertPtr<SysOptions>(sysOptions).value_or(SysOptions());
-    ViewAbstractModelStatic::SetBackdropBlur(frameNode, optRadius, optOption, sysOpts);
+    ViewAbstractModelStatic::SetBackdropBlur(frameNode, Dimension(radiusValue, DimensionUnit::PX), optOption, sysOpts);
 }
 void SetSharedTransitionImpl(Ark_NativePointer node,
                              const Opt_String* id,

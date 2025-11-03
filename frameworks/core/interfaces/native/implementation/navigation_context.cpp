@@ -702,6 +702,7 @@ bool NavigationStack::CreateNodeByIndex(int32_t index, const WeakPtr<NG::UINode>
         auto navPathInfo = AceType::MakeRefPtr<JSNavPathInfoStatic>();
         node = AceType::DynamicCast<NG::UINode>(
             NavDestinationModelStatic::CreateFrameNode(0, navPathInfo));
+        FirePromise(pathInfo, errorCode);
         return true;
     }
     node = targetNode;

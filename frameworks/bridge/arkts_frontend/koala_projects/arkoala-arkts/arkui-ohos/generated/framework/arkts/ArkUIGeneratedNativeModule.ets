@@ -2832,7 +2832,6 @@ export class ArkUIGeneratedNativeModule {
     native static _WaterFlowAttribute_setCachedCount1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _Web_construct(id: KInt, flags: KInt): KPointer
-    @ani.unsafe.Direct
     native static _WebInterface_setWebOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _WebAttribute_setJavaScriptAccess(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
@@ -4383,8 +4382,8 @@ export class ArkUIGeneratedNativeModule {
     native static _KeyEvent_getTimestamp(ptr: KPointer): int64
     @ani.unsafe.Direct
     native static _KeyEvent_setTimestamp(ptr: KPointer, timestamp: KLong): void
-    @ani.unsafe.Direct
-    native static _KeyEvent_getStopPropagation(ptr: KPointer): KPointer
+    @ani.unsafe.Quick
+    native static _KeyEvent_getStopPropagation(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _KeyEvent_setStopPropagation(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
@@ -4427,6 +4426,10 @@ export class ArkUIGeneratedNativeModule {
     native static _LayoutManager_getLineCount(ptr: KPointer): int32
     @ani.unsafe.Quick
     native static _LayoutManager_getGlyphPositionAtCoordinate(ptr: KPointer, x: KDouble, y: KDouble): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _LayoutManager_getLineMetrics(ptr: KPointer, lineNumber: KInt): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _LayoutManager_getRectsForRange(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32, widthStyle: KInt, heightStyle: KInt): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _LayoutPolicy_construct(): KPointer
     @ani.unsafe.Direct
@@ -4603,8 +4606,8 @@ export class ArkUIGeneratedNativeModule {
     native static _MouseEvent_getY(ptr: KPointer): double
     @ani.unsafe.Direct
     native static _MouseEvent_setY(ptr: KPointer, y: KDouble): void
-    @ani.unsafe.Direct
-    native static _MouseEvent_getStopPropagation(ptr: KPointer): KPointer
+    @ani.unsafe.Quick
+    native static _MouseEvent_getStopPropagation(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _MouseEvent_setStopPropagation(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Quick

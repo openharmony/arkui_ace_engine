@@ -246,7 +246,7 @@ struct ArkUIDragPointerEvent {
 struct ArkUIDragControllerAsync {
     ani_env* env = nullptr;
     bool isArray = false;
-    const char* extraParams;
+    std::string extraParams;
     bool hasHandle = false;
     SharedPointerWrapper touchPoint;
     SharedPointerWrapper unifiedData;
@@ -570,6 +570,7 @@ struct ArkUIAniWaterFlowModifier {
         ArkUINodeHandle node, int32_t start, int32_t deleteCount, void* section, ArkUI_Int32 size);
     void (*setWaterFlowFooterContent)(ArkUINodeHandle node, ArkUINodeHandle footerPtr);
     void (*setWaterFlowFooter)(ArkUINodeHandle node, ArkUINodeHandle footerPtr);
+    void (*resetWaterFlowFooter)(ArkUINodeHandle node);
     void (*setWaterFlowScroller)(ArkUINodeHandle node, void* scroller);
     void (*setWaterFlowLayoutMode)(ArkUINodeHandle node, int32_t mode);
 };

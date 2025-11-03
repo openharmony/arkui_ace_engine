@@ -695,13 +695,18 @@ HWTEST_F(CommonMethodModifierTest9, SetOnAttachTest, TestSize.Level1)
         checkEvent = { .nodeId = resourceId };
     };
 
+    auto onAttachSyncFunc = [](Ark_VMContext vmContext, const Ark_Int32 resourceId) {
+        checkEvent = { .nodeId = resourceId };
+    };
+
     auto callBackValue = Converter::ArkValue<Opt_VoidCallback>(VoidCallback {
         .resource = Ark_CallbackResource {
             .resourceId = frameNode->GetId(),
             .hold = nullptr,
             .release = nullptr
         },
-        .call = onAttachFunc
+        .call = onAttachFunc,
+        .callSync = onAttachSyncFunc
     });
 
     auto test = [this, &callBackValue, eventHub, frameNode]() {
@@ -734,13 +739,18 @@ HWTEST_F(CommonMethodModifierTest9, SetOnDetachTest, TestSize.Level1)
         checkEvent = { .nodeId = resourceId };
     };
 
+    auto onDetachSyncFunc = [](Ark_VMContext vmContext, const Ark_Int32 resourceId) {
+        checkEvent = { .nodeId = resourceId };
+    };
+
     auto callBackValue = Converter::ArkValue<Opt_VoidCallback>(VoidCallback {
         .resource = Ark_CallbackResource {
             .resourceId = frameNode->GetId(),
             .hold = nullptr,
             .release = nullptr
         },
-        .call = onDetachFunc
+        .call = onDetachFunc,
+        .callSync = onDetachSyncFunc
     });
 
     auto test = [this, &callBackValue, eventHub, frameNode]() {

@@ -41,13 +41,12 @@ bool GetToastBottom(ani_env* env, ani_object object, std::string& result)
         return false;
     }
 
-    ani_object resultObj = static_cast<ani_object>(resultRef);
-    if (GetStringParam(env, resultObj, result)) {
+    if (GetStringParam(env, resultRef, result)) {
         return true;
     }
 
     double resultDouble;
-    if (GetDoubleParam(env, resultObj, resultDouble)) {
+    if (GetDoubleParam(env, resultRef, resultDouble)) {
         result = std::to_string(resultDouble);
         return true;
     }

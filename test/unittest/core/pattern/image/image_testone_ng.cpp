@@ -26,11 +26,11 @@ public:
 };
 
 /**
- * @tc.name: ImageColorFilterTest002
+ * @tc.name: ImageColorFilterTestForJpg
  * @tc.desc: Test image ColorFilter for jpg is set correctly.
  * @tc.type: FUNC
 */
-HWTEST_F(ImageTestOneNg, ImageColorFilterTest002, TestSize.Level0)
+HWTEST_F(ImageTestOneNg, ImageColorFilterTestForJpg, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -85,11 +85,11 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest002, TestSize.Level0)
 }
 
 /**
- * @tc.name: ImageColorFilterTest003
+ * @tc.name: ImageColorFilterTestForPng
  * @tc.desc: Test image ColorFilter for png is set correctly.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestOneNg, ImageColorFilterTest003, TestSize.Level0)
+HWTEST_F(ImageTestOneNg, ImageColorFilterTestForPng, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -144,11 +144,11 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest003, TestSize.Level0)
 }
 
 /**
- * @tc.name: ImageColorFilterTest004
+ * @tc.name: ImageColorFilterTestForWeb
  * @tc.desc: Test image ColorFilter for web picture is set correctly.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestOneNg, ImageColorFilterTest004, TestSize.Level0)
+HWTEST_F(ImageTestOneNg, ImageColorFilterTestForWeb, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -203,11 +203,11 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest004, TestSize.Level0)
 }
 
 /**
- * @tc.name: ImageColorFilterTest005
+ * @tc.name: ImageColorFilterTestForJpgEmptyArray
  * @tc.desc: Test image ColorFilter for jpg is set correctly by empty array.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestOneNg, ImageColorFilterTest005, TestSize.Level0)
+HWTEST_F(ImageTestOneNg, ImageColorFilterTestForJpgEmptyArray, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -246,11 +246,11 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest005, TestSize.Level0)
 }
 
 /**
- * @tc.name: ImageColorFilterTest006
+ * @tc.name: ImageColorFilterTestForPngEmptyArray
  * @tc.desc: Test image ColorFilter for png is set correctly by empty array.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestOneNg, ImageColorFilterTest006, TestSize.Level0)
+HWTEST_F(ImageTestOneNg, ImageColorFilterTestForPngEmptyArray, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -289,11 +289,11 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest006, TestSize.Level0)
 }
 
 /**
- * @tc.name: ImageColorFilterTest007
+ * @tc.name: ImageColorFilterTestForSvgEmptyArray
  * desc: Test image ColorFilter for svg is set correctly by empty array.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestOneNg, ImageColorFilterTest007, TestSize.Level0)
+HWTEST_F(ImageTestOneNg, ImageColorFilterTestForSvgEmptyArray, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -332,11 +332,11 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest007, TestSize.Level0)
 }
 
 /**
- * @tc.name: ImageColorFilterTest008
+ * @tc.name: ImageColorFilterTestForWebEmptyArray
  * @tc.desc: Test image ColorFilter for web picture is set correctly by empty array.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestOneNg, ImageColorFilterTest008, TestSize.Level0)
+HWTEST_F(ImageTestOneNg, ImageColorFilterTestForWebEmptyArray, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -378,11 +378,11 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest008, TestSize.Level0)
 }
 
 /**
- * @tc.name: ImageColorFilterTest009
+ * @tc.name: ImageColorFilterTestFillColor
  * @tc.desc: Test whether image ColorFilter and FillColor affect each other
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestOneNg, ImageColorFilterTest009, TestSize.Level0)
+HWTEST_F(ImageTestOneNg, ImageColorFilterTestFillColor, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -460,11 +460,11 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest009, TestSize.Level0)
 }
 
 /**
- * @tc.name: ImageColorFilterTest010
+ * @tc.name: ImageColorFilterTestSmoothEdge
  * @tc.desc: Test whether image ColorFilter and smoothedge affect each other
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestOneNg, ImageColorFilterTest010, TestSize.Level0)
+HWTEST_F(ImageTestOneNg, ImageColorFilterTestSmoothEdge, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -540,11 +540,11 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest010, TestSize.Level0)
 }
 
 /**
- * @tc.name: ImageColorFilterTest011
+ * @tc.name: ImageColorFilterTestForAlt
  * @tc.desc: Test image ColorFilter is set correctly for alt.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestOneNg, ImageColorFilterTest011, TestSize.Level0)
+HWTEST_F(ImageTestOneNg, ImageColorFilterTestForAlt, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode without picture.
@@ -599,11 +599,11 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest011, TestSize.Level0)
 }
 
 /**
- * @tc.name: ImageColorFilterTest012
+ * @tc.name: ImageColorFilterTestForPictureWithWeb
  * @tc.desc: Test image ColorFilter is set correctly for picture with web image and sync mode.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestOneNg, ImageColorFilterTest012, TestSize.Level0)
+HWTEST_F(ImageTestOneNg, ImageColorFilterTestForPictureWithWeb, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode with web image and sync mode.
@@ -657,11 +657,11 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest012, TestSize.Level0)
 }
 
 /**
- * @tc.name: ImageColorFilterTest013
+ * @tc.name: ImageColorFilterTestRenderMode
  * @tc.desc: Test whether image ColorFilter and rendermode affect each other
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestOneNg, ImageColorFilterTest013, TestSize.Level0)
+HWTEST_F(ImageTestOneNg, ImageColorFilterTestRenderMode, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -737,11 +737,11 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest013, TestSize.Level0)
 }
 
 /**
- * @tc.name: ImageColorFilterTest014
+ * @tc.name: ImageColorFilterTestImageFit
  * @tc.desc: Test whether image ColorFilter and ImageFit affect each other
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestOneNg, ImageColorFilterTest014, TestSize.Level0)
+HWTEST_F(ImageTestOneNg, ImageColorFilterTestImageFit, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -815,11 +815,11 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest014, TestSize.Level0)
 }
 
 /**
- * @tc.name: ImageColorFilterTest015
+ * @tc.name: ImageColorFilterTestFillColorForSvg
  * @tc.desc: Test whether image ColorFilter and FillColor affect each other for svg image and sync mode.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestOneNg, ImageColorFilterTest015, TestSize.Level0)
+HWTEST_F(ImageTestOneNg, ImageColorFilterTestFillColorForSvg, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode with svg image and sync mode.
@@ -884,11 +884,11 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest015, TestSize.Level0)
 }
 
 /**
- * @tc.name: ImageColorFilterTest016
+ * @tc.name: ImageColorFilterTestForPictureWithPng
  * @tc.desc: Test image ColorFilter is set correctly for picture with png image and sync mode.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestOneNg, ImageColorFilterTest016, TestSize.Level0)
+HWTEST_F(ImageTestOneNg, ImageColorFilterTestForPictureWithPng, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode with web image and sync mode.
@@ -943,11 +943,11 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest016, TestSize.Level0)
 }
 
 /**
- * @tc.name: ImageColorFilterTest017
+ * @tc.name: ImageColorFilterTestGetContentDrawFunction
  * @tc.desc: Test image ColorFilter is set correctly by the methode of GetContentDrawFunction .
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestOneNg, ImageColorFilterTest017, TestSize.Level0)
+HWTEST_F(ImageTestOneNg, ImageColorFilterTestGetContentDrawFunction, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -990,11 +990,11 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest017, TestSize.Level0)
 }
 
 /**
- * @tc.name: ImageColorFilterTest018
+ * @tc.name: ImageColorFilterTestImageSourceSize
  * @tc.desc: Test whether image ColorFilter and ImageSourceSize affect each other
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestOneNg, ImageColorFilterTest018, TestSize.Level0)
+HWTEST_F(ImageTestOneNg, ImageColorFilterTestImageSourceSize, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -1074,11 +1074,11 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest018, TestSize.Level0)
 }
 
 /**
- * @tc.name: ImageColorFilterTest019
+ * @tc.name: ImageColorFilterTestLanguageChanging
  * @tc.desc: Test whether image ColorFilter is set correctly when language changeing
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestOneNg, ImageColorFilterTest019, TestSize.Level0)
+HWTEST_F(ImageTestOneNg, ImageColorFilterTestLanguageChanging, TestSize.Level0)
 {
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
@@ -1118,11 +1118,11 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest019, TestSize.Level0)
 }
 
 /**
- * @tc.name: ImageColorFilterTest020
+ * @tc.name: ImageColorFilterTestImageInterpolationForSvg
  * @tc.desc: Test whether image ColorFilter and ImageInterpolation affect each other for svg image and sync mode.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestOneNg, ImageColorFilterTest020, TestSize.Level0)
+HWTEST_F(ImageTestOneNg, ImageColorFilterTestImageInterpolationForSvg, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode with svg image and sync mode.
@@ -1187,11 +1187,11 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest020, TestSize.Level0)
 }
 
 /**
- * @tc.name: ImageColorFilterTest021
+ * @tc.name: ImageColorFilterTestImageRepeat
  * @tc.desc: Test whether image ColorFilter and ImageRepeat affect each other
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestOneNg, ImageColorFilterTest021, TestSize.Level0)
+HWTEST_F(ImageTestOneNg, ImageColorFilterTestImageRepeat, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -1267,11 +1267,11 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest021, TestSize.Level0)
 }
 
 /**
- * @tc.name: ImageColorFilterTest022
+ * @tc.name: ImageColorFilterTestMatchTextDirection
  * @tc.desc: Test whether image ColorFilter and MatchTextDirection affect each other
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestOneNg, ImageColorFilterTest022, TestSize.Level0)
+HWTEST_F(ImageTestOneNg, ImageColorFilterTestMatchTextDirection, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -1347,11 +1347,11 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest022, TestSize.Level0)
 }
 
 /**
- * @tc.name: ImageColorFilterTest023
+ * @tc.name: ImageColorFilterTestCopyOption
  * @tc.desc: Test whether image ColorFilter and CopyOption affect each other
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestOneNg, ImageColorFilterTest023, TestSize.Level0)
+HWTEST_F(ImageTestOneNg, ImageColorFilterTestCopyOption, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -2097,7 +2097,7 @@ HWTEST_F(ImageTestOneNg, SetImageModelStaticSrc001, TestSize.Level1)
 
 /**
  * @tc.name: SetImageModelStaticImageFit001
- * @tc.desc: parse src
+ * @tc.desc: Test ImageDynamicImageFit.
  * @tc.type: FUNC
  */
 HWTEST_F(ImageTestOneNg, SetImageModelStaticImageFit001, TestSize.Level1)
@@ -2106,11 +2106,19 @@ HWTEST_F(ImageTestOneNg, SetImageModelStaticImageFit001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     ImageFit defaultFit = ImageFit::NONE;
     const std::optional<ImageFit> value = ImageFit::FILL;
+
+    /**
+     * @tc.cases: case1. ImageFit FILL.
+     */
     ImageModelStatic::SetImageFit(frameNode, value);
 
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
         ImageLayoutProperty, ImageFit, defaultFit, frameNode, ImageFit::COVER);
     ASSERT_EQ(defaultFit, ImageFit::FILL);
+
+    /**
+     * @tc.cases: case2. reset ImageFit.
+     */
     ImageModelStatic::SetImageFit(frameNode, std::nullopt);
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
         ImageLayoutProperty, ImageFit, defaultFit, frameNode, ImageFit::COVER);

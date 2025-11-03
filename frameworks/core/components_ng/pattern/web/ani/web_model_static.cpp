@@ -315,10 +315,13 @@ void WebModelStatic::JavaScriptOnDocumentEnd(FrameNode* frameNode, const ScriptI
     webPatternStatic->JavaScriptOnDocumentEnd(scriptItems);
 }
 
-void WebModelStatic::JavaScriptOnHeadEnd(FrameNode *frameNode, const ScriptItems& scriptItems)
+void WebModelStatic::JavaScriptOnHeadEnd(
+    FrameNode* frameNode, const ScriptItems& scriptItems, const ScriptItemsByOrder& scriptItemsByOrder)
 {
-    (void)frameNode;
-    (void)scriptItems;
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->JavaScriptOnHeadReadyByOrder(scriptItems, scriptItemsByOrder);
 }
 
 void WebModelStatic::SetNativeEmbedOptions(FrameNode *frameNode, bool supportDefaultIntrinsicSize)

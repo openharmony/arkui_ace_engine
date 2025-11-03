@@ -74,6 +74,20 @@ ScriptItems Convert(const Array_ScriptItem& src)
 }
 
 template<>
+ScriptItemsByOrder Convert(const Array_ScriptItem& src)
+{
+    auto items = Converter::Convert<std::vector<ScriptItem>>(src);
+    ScriptItemsByOrder scriptItemsByOrder;
+    std::unordered_set<std::string> temp;
+    for (auto item : items) {
+        if (temp.insert(item.first).second) {
+            scriptItemsByOrder.push_back(item.first);
+        }
+    }
+    return scriptItemsByOrder;
+}
+
+template<>
 NestedScrollOptionsExt Convert(const Ark_NestedScrollOptionsExt& src)
 {
     NestedScrollOptionsExt nestedOpt = {
@@ -2113,23 +2127,33 @@ void SetEditMenuOptionsImpl(Ark_NativePointer node,
         // Implement Reset value
         return;
     }
-    auto onCreateMenuCallback = [arkCreateMenu = CallbackHelper(optValue->onCreateMenu)](
-        const std::vector<NG::MenuItemParam>& systemMenuItems) -> std::vector<NG::MenuOptionsParam> {
+    auto createMenuCallback = Converter::GetOpt(optValue->onCreateMenu);
+    std::function<std::vector<NG::MenuOptionsParam>(const std::vector<NG::MenuItemParam>&)> onCreateMenuCallback =
+        nullptr;
+    if (createMenuCallback) {
+        onCreateMenuCallback =
+            [arkCreateMenu = CallbackHelper(*createMenuCallback)](
+                const std::vector<NG::MenuItemParam>& systemMenuItems) -> std::vector<NG::MenuOptionsParam> {
             auto menuItems = Converter::ArkValue<Array_TextMenuItem>(systemMenuItems, Converter::FC);
             auto result = arkCreateMenu.InvokeWithOptConvertResult<std::vector<NG::MenuOptionsParam>,
                 Array_TextMenuItem, Callback_Array_TextMenuItem_Void>(menuItems);
             return result.value_or(std::vector<NG::MenuOptionsParam>());
         };
-    auto onMenuItemClick = [arkMenuItemClick = CallbackHelper(optValue->onMenuItemClick)](
-        NG::MenuItemParam menuOptionsParam) -> bool {
-            TextRange range {.start = menuOptionsParam.start, .end = menuOptionsParam.end};
+    }
+    auto menuItemClickCallback = Converter::GetOpt(optValue->onMenuItemClick);
+    std::function<bool(NG::MenuItemParam)> onMenuItemClickCallback = nullptr;
+    if (menuItemClickCallback) {
+        onMenuItemClickCallback = [arkMenuItemClick = CallbackHelper(*menuItemClickCallback)](
+                                      NG::MenuItemParam menuOptionsParam) -> bool {
+            TextRange range { .start = menuOptionsParam.start, .end = menuOptionsParam.end };
             auto menuItem = Converter::ArkValue<Ark_TextMenuItem>(menuOptionsParam);
             auto arkRange = Converter::ArkValue<Ark_TextRange>(range);
-            auto arkResult = arkMenuItemClick.InvokeWithObtainResult<
-                Ark_Boolean, Callback_Boolean_Void>(menuItem, arkRange);
+            auto arkResult =
+                arkMenuItemClick.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(menuItem, arkRange);
             return Converter::Convert<bool>(arkResult);
         };
-    WebModelStatic::SetEditMenuOptions(frameNode, std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+    }
+    WebModelStatic::SetEditMenuOptions(frameNode, std::move(onCreateMenuCallback), std::move(onMenuItemClickCallback));
 #endif // WEB_SUPPORTED
 }
 void SetEnableHapticFeedbackImpl(Ark_NativePointer node,
@@ -2215,7 +2239,13 @@ void SetRunJavaScriptOnHeadEndImpl(Ark_NativePointer node,
         // Implement Reset value
         return;
     }
-    WebModelStatic::JavaScriptOnHeadEnd(frameNode, *convValue);
+
+    auto convValueByOrder = Converter::OptConvert<ScriptItemsByOrder>(*value);
+    if (!convValueByOrder) {
+        // Implement Reset value
+        return;
+    }
+    WebModelStatic::JavaScriptOnHeadEnd(frameNode, *convValue, *convValueByOrder);
 #endif // WEB_SUPPORTED
 }
 void SetNativeEmbedOptionsImpl(Ark_NativePointer node,

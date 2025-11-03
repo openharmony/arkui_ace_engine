@@ -16,8 +16,10 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
+import { text_LineMetrics_serializer, text_TextBox_serializer } from "./../framework/ohos.graphics.text"
+import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, nullptr, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { default as text } from "@ohos.graphics.text"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, runtimeType, RuntimeType, SerializerBase, DeserializerBase, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, nullptr, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { StyledString, StyledStringInternal, MutableStyledString, MutableStyledStringInternal, DecorationStyleInterface, StyledString_serializer, DecorationStyleInterface_serializer } from "./styledString"
@@ -31,6 +33,8 @@ import { Color, TextDecorationType, TextDecorationStyle } from "./enums"
 export interface LayoutManager {
     getLineCount(): int32
     getGlyphPositionAtCoordinate(x: double, y: double): PositionWithAffinity
+    getLineMetrics(lineNumber: int32): text.LineMetrics
+    getRectsForRange(range: TextRange, widthStyle: text.RectWidthStyle, heightStyle: text.RectHeightStyle): Array<text.TextBox>
 }
 export class LayoutManagerInternal implements MaterializedBase,LayoutManager {
     peer?: Finalizable | undefined = undefined
@@ -61,6 +65,16 @@ export class LayoutManagerInternal implements MaterializedBase,LayoutManager {
         const y_casted = y as (double)
         return this.getGlyphPositionAtCoordinate_serialize(x_casted, y_casted)
     }
+    public getLineMetrics(lineNumber: int32): text.LineMetrics {
+        const lineNumber_casted = lineNumber as (int32)
+        return this.getLineMetrics_serialize(lineNumber_casted)
+    }
+    public getRectsForRange(range: TextRange, widthStyle: text.RectWidthStyle, heightStyle: text.RectHeightStyle): Array<text.TextBox> {
+        const range_casted = range as (TextRange)
+        const widthStyle_casted = widthStyle as (text.RectWidthStyle)
+        const heightStyle_casted = heightStyle as (text.RectHeightStyle)
+        return this.getRectsForRange_serialize(range_casted, widthStyle_casted, heightStyle_casted)
+    }
     getLineCount_serialize(): int32 {
         const retval  = ArkUIGeneratedNativeModule._LayoutManager_getLineCount(this.peer!.ptr)
         return retval
@@ -69,6 +83,26 @@ export class LayoutManagerInternal implements MaterializedBase,LayoutManager {
         const retval  = ArkUIGeneratedNativeModule._LayoutManager_getGlyphPositionAtCoordinate(this.peer!.ptr, x, y)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult : PositionWithAffinity = PositionWithAffinity_serializer.read(retvalDeserializer)
+        return returnResult
+    }
+    getLineMetrics_serialize(lineNumber: int32): text.LineMetrics {
+        const retval  = ArkUIGeneratedNativeModule._LayoutManager_getLineMetrics(this.peer!.ptr, lineNumber)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult : text.LineMetrics = text_LineMetrics_serializer.read(retvalDeserializer)
+        return returnResult
+    }
+    getRectsForRange_serialize(range: TextRange, widthStyle: text.RectWidthStyle, heightStyle: text.RectHeightStyle): Array<text.TextBox> {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        TextRange_serializer.write(thisSerializer, range)
+        const retval  = ArkUIGeneratedNativeModule._LayoutManager_getRectsForRange(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length(), widthStyle.valueOf(), heightStyle.valueOf())
+        thisSerializer.release()
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const bufferLength : int32 = retvalDeserializer.readInt32()
+        let buffer : Array<text.TextBox> = new Array<text.TextBox>(bufferLength)
+        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
+            buffer[bufferBufCounterI] = text_TextBox_serializer.read(retvalDeserializer)
+        }
+        const returnResult : Array<text.TextBox> = buffer
         return returnResult
     }
 }
@@ -374,7 +408,13 @@ export interface StyledStringChangeValue {
 }
 export interface PositionWithAffinity {
     position: int32;
+    affinity: text.Affinity;
 }
+export type Affinity = text.Affinity;
+export type LineMetrics = text.LineMetrics;
+export type RectWidthStyle = text.RectWidthStyle;
+export type RectHeightStyle = text.RectHeightStyle;
+export type TextBox = text.TextBox;
 export interface CaretStyle {
     width?: Length;
     color?: ResourceColor;
@@ -388,8 +428,8 @@ export interface TextMenuItem {
 export type OnCreateMenuCallback = (menuItems: Array<TextMenuItem>) => Array<TextMenuItem>;
 export type OnMenuItemClickCallback = (menuItem: TextMenuItem, range: TextRange) => boolean;
 export interface EditMenuOptions {
-    onCreateMenu: OnCreateMenuCallback;
-    onMenuItemClick: OnMenuItemClickCallback;
+    onCreateMenu: OnCreateMenuCallback | undefined;
+    onMenuItemClick: OnMenuItemClickCallback | undefined;
 }
 export interface DecorationStyleResult {
     type: TextDecorationType;
@@ -432,19 +472,6 @@ export class LayoutManager_serializer {
         let valueDeserializer : DeserializerBase = buffer
         let ptr : KPointer = valueDeserializer.readPointer()
         return LayoutManagerInternal.fromPtr(ptr)
-    }
-}
-export class PositionWithAffinity_serializer {
-    public static write(buffer: SerializerBase, value: PositionWithAffinity): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForPosition  = value.position
-        valueSerializer.writeInt32(valueHolderForPosition)
-    }
-    public static read(buffer: DeserializerBase): PositionWithAffinity {
-        let valueDeserializer : DeserializerBase = buffer
-        const positionTmpResult : int32 = valueDeserializer.readInt32()
-        let value : PositionWithAffinity = ({position: positionTmpResult} as PositionWithAffinity)
-        return value
     }
 }
 export class StyledStringController_serializer {
@@ -514,53 +541,75 @@ export class EditMenuOptions_serializer {
     public static write(buffer: SerializerBase, value: EditMenuOptions): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForOnCreateMenu  = value.onCreateMenu
-        valueSerializer.holdAndWriteCallback(valueHolderForOnCreateMenu)
+        if (valueHolderForOnCreateMenu !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForOnCreateMenuTmpValue  = valueHolderForOnCreateMenu!
+            valueSerializer.holdAndWriteCallback(valueHolderForOnCreateMenuTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
         const valueHolderForOnMenuItemClick  = value.onMenuItemClick
-        valueSerializer.holdAndWriteCallback(valueHolderForOnMenuItemClick)
+        if (valueHolderForOnMenuItemClick !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForOnMenuItemClickTmpValue  = valueHolderForOnMenuItemClick!
+            valueSerializer.holdAndWriteCallback(valueHolderForOnMenuItemClickTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): EditMenuOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const onCreateMenuTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
-        const onCreateMenuTmpBufBufCall : KPointer = valueDeserializer.readPointer()
-        const onCreateMenuTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
-        const onCreateMenuTmpResult : OnCreateMenuCallback = (menuItems: Array<TextMenuItem>):Array<TextMenuItem> => {
-            const onCreateMenuTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
-            onCreateMenuTmpBufBufArgsSerializer.writeInt32(onCreateMenuTmpBufBufResource.resourceId);
-            onCreateMenuTmpBufBufArgsSerializer.writePointer(onCreateMenuTmpBufBufCall);
-            onCreateMenuTmpBufBufArgsSerializer.writePointer(onCreateMenuTmpBufBufCallSync);
-            onCreateMenuTmpBufBufArgsSerializer.writeInt32((menuItems.length).toInt());
-            for (let menuItemsCounterI = 0; menuItemsCounterI < menuItems.length; menuItemsCounterI++) {
-                const menuItemsTmpElement : TextMenuItem = menuItems[menuItemsCounterI];
-                TextMenuItem_serializer.write(onCreateMenuTmpBufBufArgsSerializer, menuItemsTmpElement);
+        const onCreateMenuTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let onCreateMenuTmpBuf : OnCreateMenuCallback | undefined = undefined
+        if ((onCreateMenuTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const onCreateMenuTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
+            const onCreateMenuTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
+            const onCreateMenuTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
+            onCreateMenuTmpBuf = (menuItems: Array<TextMenuItem>):Array<TextMenuItem> => {
+                const onCreateMenuTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
+                onCreateMenuTmpBuf_BufArgsSerializer.writeInt32(onCreateMenuTmpBuf_BufResource.resourceId);
+                onCreateMenuTmpBuf_BufArgsSerializer.writePointer(onCreateMenuTmpBuf_BufCall);
+                onCreateMenuTmpBuf_BufArgsSerializer.writePointer(onCreateMenuTmpBuf_BufCallSync);
+                onCreateMenuTmpBuf_BufArgsSerializer.writeInt32((menuItems.length).toInt());
+                for (let menuItemsCounterI = 0; menuItemsCounterI < menuItems.length; menuItemsCounterI++) {
+                    const menuItemsTmpElement : TextMenuItem = menuItems[menuItemsCounterI];
+                    TextMenuItem_serializer.write(onCreateMenuTmpBuf_BufArgsSerializer, menuItemsTmpElement);
+                }
+                let onCreateMenuTmpBuf_BufContinuationValue : Array<TextMenuItem> | undefined;
+                const onCreateMenuTmpBuf_BufContinuationCallback : ((value: Array<TextMenuItem>) => void) = (value: Array<TextMenuItem>):void => {
+                onCreateMenuTmpBuf_BufContinuationValue = value;
             }
-            let onCreateMenuTmpBufBufContinuationValue : Array<TextMenuItem> | undefined;
-            const onCreateMenuTmpBufBufContinuationCallback : ((value: Array<TextMenuItem>) => void) = (value: Array<TextMenuItem>):void => {
-            onCreateMenuTmpBufBufContinuationValue = value;
+                onCreateMenuTmpBuf_BufArgsSerializer.holdAndWriteCallback(onCreateMenuTmpBuf_BufContinuationCallback);
+                InteropNativeModule._CallCallbackSync(10, 312701677, onCreateMenuTmpBuf_BufArgsSerializer.asBuffer(), onCreateMenuTmpBuf_BufArgsSerializer.length());
+                onCreateMenuTmpBuf_BufArgsSerializer.release();
+                return (onCreateMenuTmpBuf_BufContinuationValue as Array<TextMenuItem>);
+            }
         }
-            onCreateMenuTmpBufBufArgsSerializer.holdAndWriteCallback(onCreateMenuTmpBufBufContinuationCallback);
-            InteropNativeModule._CallCallbackSync(10, 312701677, onCreateMenuTmpBufBufArgsSerializer.asBuffer(), onCreateMenuTmpBufBufArgsSerializer.length());
-            onCreateMenuTmpBufBufArgsSerializer.release();
-            return (onCreateMenuTmpBufBufContinuationValue as Array<TextMenuItem>);
+        const onCreateMenuTmpResult : OnCreateMenuCallback | undefined = onCreateMenuTmpBuf
+        const onMenuItemClickTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let onMenuItemClickTmpBuf : OnMenuItemClickCallback | undefined = undefined
+        if ((onMenuItemClickTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const onMenuItemClickTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
+            const onMenuItemClickTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
+            const onMenuItemClickTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
+            onMenuItemClickTmpBuf = (menuItem: TextMenuItem, range: TextRange):boolean => {
+                const onMenuItemClickTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
+                onMenuItemClickTmpBuf_BufArgsSerializer.writeInt32(onMenuItemClickTmpBuf_BufResource.resourceId);
+                onMenuItemClickTmpBuf_BufArgsSerializer.writePointer(onMenuItemClickTmpBuf_BufCall);
+                onMenuItemClickTmpBuf_BufArgsSerializer.writePointer(onMenuItemClickTmpBuf_BufCallSync);
+                TextMenuItem_serializer.write(onMenuItemClickTmpBuf_BufArgsSerializer, menuItem);
+                TextRange_serializer.write(onMenuItemClickTmpBuf_BufArgsSerializer, range);
+                let onMenuItemClickTmpBuf_BufContinuationValue : boolean | undefined;
+                const onMenuItemClickTmpBuf_BufContinuationCallback : ((value0: boolean) => void) = (value: boolean):void => {
+                onMenuItemClickTmpBuf_BufContinuationValue = value;
+            }
+                onMenuItemClickTmpBuf_BufArgsSerializer.holdAndWriteCallback(onMenuItemClickTmpBuf_BufContinuationCallback);
+                InteropNativeModule._CallCallbackSync(10, -1106041422, onMenuItemClickTmpBuf_BufArgsSerializer.asBuffer(), onMenuItemClickTmpBuf_BufArgsSerializer.length());
+                onMenuItemClickTmpBuf_BufArgsSerializer.release();
+                return (onMenuItemClickTmpBuf_BufContinuationValue as boolean);
+            }
         }
-        const onMenuItemClickTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
-        const onMenuItemClickTmpBufBufCall : KPointer = valueDeserializer.readPointer()
-        const onMenuItemClickTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
-        const onMenuItemClickTmpResult : OnMenuItemClickCallback = (menuItem: TextMenuItem, range: TextRange):boolean => {
-            const onMenuItemClickTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
-            onMenuItemClickTmpBufBufArgsSerializer.writeInt32(onMenuItemClickTmpBufBufResource.resourceId);
-            onMenuItemClickTmpBufBufArgsSerializer.writePointer(onMenuItemClickTmpBufBufCall);
-            onMenuItemClickTmpBufBufArgsSerializer.writePointer(onMenuItemClickTmpBufBufCallSync);
-            TextMenuItem_serializer.write(onMenuItemClickTmpBufBufArgsSerializer, menuItem);
-            TextRange_serializer.write(onMenuItemClickTmpBufBufArgsSerializer, range);
-            let onMenuItemClickTmpBufBufContinuationValue : boolean | undefined;
-            const onMenuItemClickTmpBufBufContinuationCallback : ((value0: boolean) => void) = (value: boolean):void => {
-            onMenuItemClickTmpBufBufContinuationValue = value;
-        }
-            onMenuItemClickTmpBufBufArgsSerializer.holdAndWriteCallback(onMenuItemClickTmpBufBufContinuationCallback);
-            InteropNativeModule._CallCallbackSync(10, -1106041422, onMenuItemClickTmpBufBufArgsSerializer.asBuffer(), onMenuItemClickTmpBufBufArgsSerializer.length());
-            onMenuItemClickTmpBufBufArgsSerializer.release();
-            return (onMenuItemClickTmpBufBufContinuationValue as boolean);
-        }
+        const onMenuItemClickTmpResult : OnMenuItemClickCallback | undefined = onMenuItemClickTmpBuf
         let value : EditMenuOptions = ({onCreateMenu: onCreateMenuTmpResult, onMenuItemClick: onMenuItemClickTmpResult} as EditMenuOptions)
         return value
     }
@@ -602,6 +651,22 @@ export class InsertValue_serializer {
         const insertOffsetTmpResult : int32 = valueDeserializer.readInt32()
         const insertValueTmpResult : string = (valueDeserializer.readString() as string)
         let value : InsertValue = ({insertOffset: insertOffsetTmpResult, insertValue: insertValueTmpResult} as InsertValue)
+        return value
+    }
+}
+export class PositionWithAffinity_serializer {
+    public static write(buffer: SerializerBase, value: PositionWithAffinity): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForPosition  = value.position
+        valueSerializer.writeInt32(valueHolderForPosition)
+        const valueHolderForAffinity  = value.affinity
+        valueSerializer.writeInt32(valueHolderForAffinity.valueOf())
+    }
+    public static read(buffer: DeserializerBase): PositionWithAffinity {
+        let valueDeserializer : DeserializerBase = buffer
+        const positionTmpResult : int32 = valueDeserializer.readInt32()
+        const affinityTmpResult : text.Affinity = text.Affinity.fromValue(valueDeserializer.readInt32())
+        let value : PositionWithAffinity = ({position: positionTmpResult, affinity: affinityTmpResult} as PositionWithAffinity)
         return value
     }
 }

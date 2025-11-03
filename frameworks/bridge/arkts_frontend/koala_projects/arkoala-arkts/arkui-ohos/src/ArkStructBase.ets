@@ -90,7 +90,9 @@ export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent 
             this.build();
             OBSERVE.renderingComponent = savedRenderingComponent
             remember(() => {
-                this.onDidBuild();
+                ObserveSingleton.instance.applyTaskDelayMutableStateChange(() => {
+                    this.onDidBuild();
+                })
             });
             node.setOnRecycle(() =>
                 this.aboutToRecycle()

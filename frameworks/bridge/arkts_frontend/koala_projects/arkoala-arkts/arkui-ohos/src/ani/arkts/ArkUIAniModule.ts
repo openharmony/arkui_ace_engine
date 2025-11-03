@@ -111,6 +111,7 @@ export class ArkUIAniModule {
     native static _SetWaterFlowSection(ptr: KPointer, sections: WaterFlowSections): void
     native static _SetWaterFlowFooterContent(ptr: KPointer, footerContent: KPointer): void
     native static _SetWaterFlowFooter(ptr: KPointer, footer: KPointer): void
+    native static _ResetWaterFlowFooter(ptr: KPointer): void
     native static _SetWaterFlowScroller(ptr: KPointer, scroller: KPointer): void
     native static _SetWaterFlowLayoutMode(ptr: KPointer, mode: KInt): void
     native static _SetListChildrenMainSize(ptr: KPointer, value: ChildrenMainSize): void
@@ -185,13 +186,13 @@ export class ArkUIAniModule {
 
     // for componentSnapshot
     native static _ComponentSnapshot_createFromBuilderWithCallback(ptr: KPointer, destroyCallback: () => void,
-        callback: AsyncCallback<image.PixelMap>, delay?: number, checkImageStatus?: boolean,
+        callback: AsyncCallback<image.PixelMap>, delay?: int, checkImageStatus?: boolean,
         options?: componentSnapshot.SnapshotOptions): void
     native static _ComponentSnapshot_createFromBuilderWithPromise(ptr: KPointer, destroyCallback: () => void,
-        delay?: number, checkImageStatus?: boolean,
+        delay?: int, checkImageStatus?: boolean,
         options?: componentSnapshot.SnapshotOptions): Promise<image.PixelMap>
     native static _ComponentSnapshot_createFromComponentWithPromise(ptr: KPointer, destroyCallback: () => void,
-        delay?: number, checkImageStatus?: boolean,
+        delay?: int, checkImageStatus?: boolean,
         options?: componentSnapshot.SnapshotOptions): Promise<image.PixelMap>
 
     // for dragController

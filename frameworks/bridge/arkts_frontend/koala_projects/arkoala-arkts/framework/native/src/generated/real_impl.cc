@@ -13647,7 +13647,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                            Ark_Boolean isFrozen)
     {
     }
-    Ark_Boolean DispatchKeyEventImpl(const Ark_Union_Number_String* node,
+    Ark_Boolean DispatchKeyEventImpl(const Ark_Union_Int32_String* node,
                                      Ark_KeyEvent event)
     {
         return {};
@@ -13880,6 +13880,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     Ark_PositionWithAffinity GetGlyphPositionAtCoordinateImpl(Ark_LayoutManager peer,
                                                               Ark_Float64 x,
                                                               Ark_Float64 y)
+    {
+        return {};
+    }
+    Ark_text_LineMetrics GetLineMetricsImpl(Ark_LayoutManager peer,
+                                            Ark_Int32 lineNumber)
+    {
+        return {};
+    }
+    Array_text_TextBox GetRectsForRangeImpl(Ark_LayoutManager peer,
+                                            const Ark_TextRange* range,
+                                            Ark_text_RectWidthStyle widthStyle,
+                                            Ark_text_RectHeightStyle heightStyle)
     {
         return {};
     }
@@ -19783,6 +19795,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             LayoutManagerAccessor::GetFinalizerImpl,
             LayoutManagerAccessor::GetLineCountImpl,
             LayoutManagerAccessor::GetGlyphPositionAtCoordinateImpl,
+            LayoutManagerAccessor::GetLineMetricsImpl,
+            LayoutManagerAccessor::GetRectsForRangeImpl,
         };
         return &LayoutManagerAccessorImpl;
     }

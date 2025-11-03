@@ -21,7 +21,7 @@ import { markableQueue } from '../common/MarkableQueue'
 import { RuntimeProfiler } from '../common/RuntimeProfiler'
 import { IncrementalNode } from '../tree/IncrementalNode'
 import { ReadonlyTreeNode } from '../tree/ReadonlyTreeNode'
-import { State, StateContext as StateContextBase, IncrementalScope } from 'arkui.incremental.runtime.state';
+import { ReadableState as State, StateContext as StateContextBase, IncrementalScope } from 'arkui.incremental.runtime.state';
 
 export const CONTEXT_ROOT_SCOPE = 'ohos.koala.context.root.scope'
 export const CONTEXT_ROOT_NODE = 'ohos.koala.context.root.node'
@@ -171,7 +171,7 @@ export interface InternalScope<Value> extends IncrementalScope<Value> {
     /** @returns internal value updated after the computation */
     recache(newValue?: Value): Value
     /** @returns internal state for parameter */
-    param<V>(index: int32, value: V, equivalent?: Equivalent<V>, name?: string, contextLocal?: boolean): State<V>
+    param<V>(index: int32, value: V): State<V>
     paramEx<V>(index: int32, value: V, equivalent?: Equivalent<V>, name?: string, contextLocal?: boolean): State<V>
 }
 
@@ -1138,8 +1138,8 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
         return this.myValue as Value
     }
 
-    param<V>(index: int32, value: V, equivalent?: Equivalent<V>, name?: string, contextLocal?: boolean): State<V> {
-        return this.paramEx(index, value, equivalent, name, contextLocal)
+    param<V>(index: int32, value: V): State<V> {
+        return this.paramEx(index, value, undefined, undefined, undefined)
     }
 
     paramEx<V>(index: int32, value: V, equivalent?: Equivalent<V>, name?: string, contextLocal?: boolean): State<V> {

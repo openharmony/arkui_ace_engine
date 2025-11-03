@@ -32,13 +32,11 @@ export class ImageData {
     get data(): Uint8ClampedArray {
         return this.data_val
     }
-    get height(): number {
-        const height_cast: number = this.finalHeight as number
-        return height_cast
+    get height(): int {
+        return this.finalHeight
     }
-    get width(): number {
-        const width_cast: number = this.finalWidth as number
-        return width_cast
+    get width(): int {
+        return this.finalWidth
     }
     constructor(width: number, height: number, data?: Uint8ClampedArray, unit?: LengthMetricsUnit) {
         if (width == undefined || height == undefined) {

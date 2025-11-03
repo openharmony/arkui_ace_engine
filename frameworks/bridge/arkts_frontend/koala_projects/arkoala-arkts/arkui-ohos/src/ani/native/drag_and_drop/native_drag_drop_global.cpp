@@ -203,13 +203,17 @@ std::string GetAniStringEnum(ani_env* env, ani_array array, ani_int index, bool&
 {
     ani_ref modeRef;
     if (ANI_OK != env->Object_CallMethodByName_Ref(
-        array, "$_get", "i:C{std.core.Object}", &modeRef, index)) {
+        array, "$_get", "i:Y", &modeRef, index)) {
         isSuccess = false;
         return "";
     }
     if (AniUtils::IsUndefined(env, static_cast<ani_object>(modeRef))) {
         isSuccess = false;
         return "";
+    }
+    if (AniUtils::IsString(env, static_cast<ani_object>(modeRef))) {
+        isSuccess = true;
+        return AniUtils::ANIStringToStdString(env, static_cast<ani_string>(modeRef));
     }
     ani_string dataTypeAni;
     if ((ANI_OK != env->EnumItem_GetValue_String(static_cast<ani_enum_item>(modeRef), &dataTypeAni))) {
@@ -389,7 +393,7 @@ bool ParseDragPreviewMode(ani_env* env, ArkUIDragPreviewOption& previewOptions, 
         for (int32_t i = 0; i < lengthInt; i++) {
             ani_ref modeRef;
             if (ANI_OK != env->Object_CallMethodByName_Ref(
-                modeObj, "$_get", "i:C{std.core.Object}", &modeRef, (ani_int)i)) {
+                modeObj, "$_get", "i:Y", &modeRef, (ani_int)i)) {
                 return false;
             }
             if (AniUtils::IsUndefined(env, static_cast<ani_object>(modeRef))) {

@@ -4343,14 +4343,14 @@ HWTEST_F(TextTestNg, TextContentModifierSetFontSize001, TestSize.Level1)
 
 /**
  * @tc.name: ProcessSpanString001
- * @tc.desc: Test TextPattern ProcessSpanString
+ * @tc.desc: Test TextPattern ProcessSpanString.
  * @tc.type: FUNC
  */
 HWTEST_F(TextTestNg, ProcessSpanString001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create imageSpanItem.
-     * Set the image to be loaded synchronously
+     * Set the image to be loaded synchronously.
      */
     
     ImageSpanOptions options;
@@ -4450,7 +4450,7 @@ HWTEST_F(TextTestNg, ProcessSpanString002, TestSize.Level1)
 
 /**
  * @tc.name: UpdateParagraphBySpan002
- * @tc.desc: Test the maxlines of UpdateParagraphBySpan
+ * @tc.desc: Test the maxlines of UpdateParagraphBySpan.
  * @tc.type: FUNC
  */
 HWTEST_F(TextTestNg, UpdateParagraphBySpan002, TestSize.Level1)
@@ -4469,7 +4469,7 @@ HWTEST_F(TextTestNg, UpdateParagraphBySpan002, TestSize.Level1)
     ASSERT_NE(textPattern, nullptr);
 
     /**
-     * @tc.steps: step2. Use span to construct two paragraphs
+     * @tc.steps: step2. Use span to construct two paragraphs.
      */
     
     std::vector<std::list<RefPtr<SpanItem>>> spans;
@@ -4523,7 +4523,7 @@ HWTEST_F(TextTestNg, UpdateParagraphBySpan002, TestSize.Level1)
 
 /**
  * @tc.name: UpdateParagraphBySpan003
- * @tc.desc: Test the maxlines of UpdateParagraphBySpan
+ * @tc.desc: Test the maxlines of UpdateParagraphBySpan.
  * @tc.type: FUNC
  */
 HWTEST_F(TextTestNg, UpdateParagraphBySpan003, TestSize.Level1)
@@ -4542,7 +4542,7 @@ HWTEST_F(TextTestNg, UpdateParagraphBySpan003, TestSize.Level1)
     ASSERT_NE(textPattern, nullptr);
 
     /**
-     * @tc.steps: step2. Use span to construct two paragraphs
+     * @tc.steps: step2. Use span to construct two paragraphs.
      */
     
     std::vector<std::list<RefPtr<SpanItem>>> spans;
@@ -4622,14 +4622,14 @@ HWTEST_F(TextTestNg, UpdateParagraphBySpan004, TestSize.Level1)
     std::list<RefPtr<SpanItem>> spanList1;
     RefPtr<SpanItem> span1 = AceType::MakeRefPtr<SpanItem>();
     span1->content = u"span1";
-    span1->textLineStyle->propMaxLines = MAX_LINES_VALUE4; // Set maxLines to 5 for the first span
+    span1->textLineStyle->propMaxLines = MAX_LINES_VALUE4; // Set maxLines to 5 for the first span.
     spanList1.emplace_back(span1);
     spans.emplace_back(spanList1);
 
     std::list<RefPtr<SpanItem>> spanList2;
     RefPtr<SpanItem> span2 = AceType::MakeRefPtr<SpanItem>();
     span2->content = u"span2";
-    span2->textLineStyle->propMaxLines = MAX_LINES_VALUE2; // Set maxLines to 7 for the second span
+    span2->textLineStyle->propMaxLines = MAX_LINES_VALUE2; // Set maxLines to 7 for the second span.
     spanList2.emplace_back(span2);
     spans.emplace_back(spanList2);
 

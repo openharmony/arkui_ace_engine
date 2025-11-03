@@ -56,7 +56,16 @@ std::optional<PickerDate> ProcessBindableSelected(FrameNode* frameNode, const Op
                 const auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(event);
                 CHECK_NULL_VOID(eventInfo);
                 auto selectedStr = eventInfo->GetSelectedStr();
-                auto result = Converter::ArkValue<Ark_Date>(selectedStr);
+                std::unique_ptr<JsonValue> argsPtr = JsonUtil::ParseJsonString(selectedStr);
+                CHECK_NULL_VOID(argsPtr);
+                const auto year = argsPtr->GetValue("year")->GetInt();
+                const auto month = argsPtr->GetValue("month")->GetInt() + 1; // 0-11 means 1 to 12 months
+                const auto day = argsPtr->GetValue("day")->GetInt();
+                PickerDateTime dateTime;
+                dateTime.SetDate(PickerDate(year, month, day));
+                dateTime.SetTime(PickerTime::Current());
+
+                auto result = Converter::ArkValue<Ark_Date>(dateTime.ToString(true));
                 PipelineContext::SetCallBackNode(weakNode);
                 arkCallback.Invoke(result);
             };

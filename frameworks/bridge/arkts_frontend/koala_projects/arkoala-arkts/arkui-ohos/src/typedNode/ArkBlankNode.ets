@@ -24,16 +24,16 @@ export class ArkBlankNode extends ArkBaseNode implements BlankAttribute {
         if (param.length > 1) {
             throw new Error('more than 1 parameters');
         }
-        let min_casted: number | string | undefined = undefined;
+        let min_casted: double | string | undefined = undefined;
         if (param.length === 1) {
-            min_casted = param[0] as (number | string | undefined);
+            min_casted = param[0] as (double | string | undefined);
         }
         this.getPeer()?.setBlankOptionsAttribute(min_casted);
         return this;
     }
 
-    initialize(min?: number | string): this {
-        const min_casted = min as (number | string | undefined);
+    initialize(min?: double | string): this {
+        const min_casted = min as (double | string | undefined);
         this.getPeer()?.setBlankOptionsAttribute(min_casted);
         return this;
     }

@@ -445,6 +445,13 @@ void SideBarContainerPattern::OnHostChildUpdateDone()
     CHECK_NULL_VOID(host);
 
     CreateAndMountNodes();
+    
+    auto hub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(hub);
+    auto gestureHub = hub->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+
+    InitPanEvent(gestureHub);
 
     auto layoutProperty = host->GetLayoutProperty<SideBarContainerLayoutProperty>();
     OnUpdateShowSideBar(layoutProperty);
@@ -721,14 +728,14 @@ void SideBarContainerPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestur
         pattern->HandleDragEnd();
     };
 
-    dragEvent_ = MakeRefPtr<PanEvent>(
-        std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
-    PanDirection panDirection = { .type = PanDirection::HORIZONTAL };
-
     auto dividerNode = GetDividerNode();
     CHECK_NULL_VOID(dividerNode);
     auto dividerGestureHub = dividerNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(dividerGestureHub);
+    dragEvent_ = MakeRefPtr<PanEvent>(
+        std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
+    PanDirection panDirection = { .type = PanDirection::HORIZONTAL };
+
     PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() },
         { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.ConvertToPx() } };
     dividerGestureHub->AddPanEvent(dragEvent_, panDirection, DEFAULT_PAN_FINGER, distanceMap);

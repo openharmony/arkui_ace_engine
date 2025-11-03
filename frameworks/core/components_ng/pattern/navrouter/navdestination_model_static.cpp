@@ -196,6 +196,37 @@ void NavDestinationModelStatic::SetMenuOptions(FrameNode* frameNode, NavigationM
     navDestinationPattern->SetMenuOptions(opt);
 }
 
+void NavDestinationModelStatic::UpdateBindingWithScrollable(FrameNode* frameNode,
+    std::function<void(const RefPtr<NG::NavDestinationScrollableProcessor>& processor)>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto node = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(node);
+    auto pattern = node->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto processor = pattern->GetScrollableProcessor();
+    callback(processor);
+}
+
+void NavDestinationModelStatic::SetScrollableProcessor(const RefPtr<FrameNode> frameNode,
+    const std::function<RefPtr<NG::NavDestinationScrollableProcessor>()>& creator)
+{
+    CHECK_NULL_VOID(creator);
+    CHECK_NULL_VOID(frameNode);
+    auto node = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(node);
+    auto pattern = node->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (!pattern->GetScrollableProcessor()) {
+        auto processor = creator();
+        if (processor) {
+            processor->SetNodeId(node->GetId());
+            processor->SetNavDestinationPattern(WeakPtr(pattern));
+        }
+        pattern->SetScrollableProcessor(processor);
+    }
+}
+
 void NavDestinationModelStatic::CreateBackButton(const RefPtr<NavDestinationGroupNode>& navDestinationNode)
 {
     int32_t titleBarNodeId = ElementRegister::GetInstance()->MakeUniqueId();

@@ -67,6 +67,14 @@ void WaterFlowModelStatic::SetFooter(FrameNode* frameNode, const RefPtr<NG::UINo
     pattern->AddFooter(footer);
 }
 
+void WaterFlowModelStatic::ResetFooter(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<WaterFlowPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->AddFooter(nullptr);
+}
+
 void WaterFlowModelStatic::SetOnReachStart(FrameNode* frameNode, OnReachEvent&& onReachStart)
 {
     ScrollableModelNG::SetOnReachStart(frameNode, std::move(onReachStart));
