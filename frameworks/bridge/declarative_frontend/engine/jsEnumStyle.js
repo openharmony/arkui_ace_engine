@@ -206,11 +206,11 @@ let BorderStyle;
   BorderStyle[BorderStyle.Dotted = 2] = 'Dotted';
 })(BorderStyle || (BorderStyle = {}));
 
-let CornerApplyType;
-(function (CornerApplyType) {
-  CornerApplyType[CornerApplyType.FAST = 0] = 'FAST';
-  CornerApplyType[CornerApplyType.OFFSCREEN = 1] = 'OFFSCREEN';
-})(CornerApplyType || (CornerApplyType = {}));
+let RenderStrategy;
+(function (RenderStrategy) {
+  RenderStrategy[RenderStrategy.FAST = 0] = 'FAST';
+  RenderStrategy[RenderStrategy.OFFSCREEN = 1] = 'OFFSCREEN';
+})(RenderStrategy || (RenderStrategy = {}));
 
 let LineCapStyle;
 (function (LineCapStyle) {
