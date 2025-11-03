@@ -61,6 +61,7 @@ public:
 
     virtual bool operator==(const Ace::RefPtr<Scroller>& other) const = 0;
     virtual RefPtr<FrameNode> GetBindingFrameNode() = 0;
+    virtual void SetCanOverScroll(bool canOverScroll) = 0;
 };
 
 } // namespace OHOS::Ace::Kit

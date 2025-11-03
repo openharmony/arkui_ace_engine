@@ -934,6 +934,8 @@ public:
         return isInitialized_;
     }
 
+    void SetCanOverScroll(bool val);
+
 protected:
     void SuggestOpIncGroup(bool flag);
     void OnAttachToFrameNode() override;
@@ -1030,7 +1032,6 @@ protected:
         return scrollOriginChild_.Upgrade();
     }
 
-    void SetCanOverScroll(bool val);
     bool GetCanOverScroll() const;
     bool lastCanOverScroll_ = false;
 

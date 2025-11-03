@@ -329,11 +329,11 @@ void RefreshModelNG::SetChangeEvent(FrameNode* frameNode, RefreshChangeEvent&& c
     eventHub->SetChangeEvent(std::move(changeEvent));
 }
 
-void RefreshModelNG::SetStepOffsetChange(FrameNode* frameNode, OffsetChangeEvent&& dragOffset)
+void RefreshModelNG::SetStepOffsetChange(FrameNode* frameNode, OffsetStepChangeEvent&& changeEvent)
 {
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<RefreshEventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnStepOffsetChange(std::move(dragOffset));
+    eventHub->SetOnStepOffsetChange(std::move(changeEvent));
 }
 } // namespace OHOS::Ace::NG

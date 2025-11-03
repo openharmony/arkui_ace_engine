@@ -172,7 +172,7 @@ private:
     float GetTargetOffset();
     void ResetAnimation();
     void FireOnOffsetChange(float value);
-    void FireOnStepOffsetChange(float value);
+    void FireOnStepOffsetChange(float value, bool isDrag);
     void UpdateDragFRCSceneInfo(const std::string& scene, float speed, SceneStatus sceneStatus);
     void InitProgressColumn();
     void UpdateLoadingTextOpacity(float opacity);
