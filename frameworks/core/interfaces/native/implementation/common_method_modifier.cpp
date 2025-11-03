@@ -5433,7 +5433,7 @@ void SetBindContentCover1Impl(Ark_NativePointer node,
         modalStyle.backgroundColor = Converter::OptConvert<Color>(coverOption->backgroundColor);
         contentCoverParam.transitionEffect = OptConvert<RefPtr<NG::ChainedTransitionEffect>>(coverOption->transition)
             .value_or(contentCoverParam.transitionEffect);
-        contentCoverParam.enableSafeArea = Converter::OptConvert<bool>(coverOption->enableSafeArea).value();
+        contentCoverParam.enableSafeArea = Converter::OptConvert<bool>(coverOption->enableSafeArea).value_or(false);
     }
     contentCoverParam.onWillDismiss = std::move(onWillDismissFunc);
 
