@@ -36,6 +36,7 @@
 #include "core/components_ng/pattern/container_picker/container_picker_layout_property.h"
 #include "core/components_ng/pattern/container_picker/container_picker_paint_method.h"
 #include "core/components_ng/pattern/container_picker/container_picker_pattern.h"
+#include "core/components_ng/pattern/container_picker/container_picker_theme.h"
 #include "core/components_ng/pattern/container_picker/container_picker_utils.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
@@ -65,13 +66,16 @@ public:
 void ContainerPickerPaintMethodTest::SetUpTestSuite()
 {
     TestNG::SetUpTestSuite();
+    MockPipelineContext::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<PickerTheme>()));
+    auto theme = AceType::MakeRefPtr<ContainerPickerTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
 }
 
 void ContainerPickerPaintMethodTest::TearDownTestSuite()
 {
+    MockPipelineContext::TearDown();
     TestNG::TearDownTestSuite();
 }
 

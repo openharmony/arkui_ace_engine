@@ -44,6 +44,7 @@ const Dimension FOCUS_DEFAULT_STROCK_WIDTH = 2.0_vp;
 const Dimension DEFAULT_RADIUS = 12.0_vp;
 const float HALF = 2.0;
 const float FADE_OPACITY = 0.4f;
+const float DISABLE_ALPHA = 0.6f;
 } // namespace
 class ContainerPickerUtils {
 public:
