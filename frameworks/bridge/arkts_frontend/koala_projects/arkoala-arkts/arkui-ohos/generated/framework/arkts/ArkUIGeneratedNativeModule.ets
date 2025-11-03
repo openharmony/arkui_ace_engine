@@ -5381,6 +5381,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _StyledString_getLength(ptr: KPointer): int32
     @ani.unsafe.Direct
+    native static _StyledString_setLength(ptr: KPointer, length: KInt): void
+    @ani.unsafe.Direct
     native static _StyledStringController_construct(): KPointer
     @ani.unsafe.Direct
     native static _StyledStringController_getFinalizer(): KPointer

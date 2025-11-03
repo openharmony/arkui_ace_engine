@@ -16666,6 +16666,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
+    void SetLengthImpl(Ark_StyledString peer,
+                       Ark_Int32 length)
+    {
+    }
     } // StyledStringAccessor
     namespace StyledStringControllerAccessor {
     void DestroyPeerImpl(Ark_StyledStringController peer)
@@ -20949,6 +20953,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             StyledStringAccessor::Marshalling1Impl,
             StyledStringAccessor::Unmarshalling1Impl,
             StyledStringAccessor::GetLengthImpl,
+            StyledStringAccessor::SetLengthImpl,
         };
         return &StyledStringAccessorImpl;
     }

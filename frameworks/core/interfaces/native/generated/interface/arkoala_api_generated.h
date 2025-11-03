@@ -27138,6 +27138,8 @@ typedef struct GENERATED_ArkUIStyledStringAccessor {
                            const Ark_Buffer* buffer,
                            const Callback_Opt_StyledString_Opt_Array_String_Void* outputArgumentForReturningPromise);
     Ark_Int32 (*getLength)(Ark_StyledString peer);
+    void (*setLength)(Ark_StyledString peer,
+                      Ark_Int32 length);
 } GENERATED_ArkUIStyledStringAccessor;
 
 typedef struct GENERATED_ArkUIStyledStringControllerAccessor {
