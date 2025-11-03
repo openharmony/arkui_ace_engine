@@ -70,12 +70,20 @@ void ApsMonitorImpl::LoadApsFuncOnce()
         return;
     }
 
-    setFunc_ = reinterpret_cast<SetSceneFunc>(dlsym(loadfilehandle_, "SetApsScene"));
-    if (setFunc_ == nullptr) {
-        LOGE("[ApsMonitorImpl]ApsManager Function loaded failed!");
+    resetFunc_ = reinterpret_cast<ReSetClientFunc>(dlsym(loadfilehandle_, "ReSetApsClient"));
+    if (resetFunc_ == nullptr) {
+        LOGE("[ApsMonitorImpl]ApsManager ReSetApsClient Function loaded failed!");
         dlclose(loadfilehandle_);
         return;
     }
+
+    setFunc_ = reinterpret_cast<SetSceneFunc>(dlsym(loadfilehandle_, "SetApsScene"));
+    if (setFunc_ == nullptr) {
+        LOGE("[ApsMonitorImpl]ApsManager SetApsScene Function loaded failed!");
+        dlclose(loadfilehandle_);
+        return;
+    }
+
     isloadapsfunc_ = true;
 }
 
