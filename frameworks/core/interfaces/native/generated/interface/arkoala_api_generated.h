@@ -25525,7 +25525,7 @@ typedef struct GENERATED_ArkUIFrameNodeExtenderAccessor {
     Ark_Size (*getMeasuredSize)(Ark_FrameNode peer);
     Ark_Position (*getLayoutPosition)(Ark_FrameNode peer);
     Ark_String (*getId)(Ark_FrameNode peer);
-    Ark_Number (*getUniqueId)(Ark_FrameNode peer);
+    Ark_Int32 (*getUniqueId)(Ark_FrameNode peer);
     Ark_String (*getNodeType)(Ark_FrameNode peer);
     Ark_Number (*getOpacity)(Ark_FrameNode peer);
     Ark_Boolean (*isVisible)(Ark_FrameNode peer);
@@ -25559,7 +25559,7 @@ typedef struct GENERATED_ArkUIFrameNodeExtenderAccessor {
     Ark_Number (*getLastChildIndexWithoutExpand)(Ark_FrameNode peer);
     Ark_NativePointer (*getAttachedFrameNodeById)(const Ark_String* id);
     Ark_NativePointer (*getFrameNodeById)(const Ark_Number* id);
-    Ark_NativePointer (*getFrameNodeByUniqueId)(const Ark_Number* id);
+    Ark_NativePointer (*getFrameNodeByUniqueId)(Ark_Int32 id);
     void (*reuse)(Ark_FrameNode peer);
     void (*recycle)(Ark_FrameNode peer);
     Ark_NativePointer (*getFrameNodePtr)(Ark_FrameNode node);

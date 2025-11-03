@@ -24,7 +24,7 @@ import { AnimatorResult , AnimatorOptions, Animator, SimpleAnimatorOptions } fro
 import { UIContext, MeasureUtils, TextMenuController, Font, FocusController, ContextMenuController, ComponentUtils,
     FrameCallback, UIInspector, UIObserver, OverlayManager, PromptAction, AtomicServiceBar, Router, CursorController,
     MediaQuery, ComponentSnapshot, OverlayManagerOptions, DragController, TargetInfo, CustomBuilderWithId,
-    KeyboardAvoidMode, DynamicSyncScene, SwiperDynamicSyncScene, SwiperDynamicSyncSceneType } from '@ohos/arkui/UIContext';
+    KeyboardAvoidMode, DynamicSyncScene, SwiperDynamicSyncScene, SwiperDynamicSyncSceneType, PageInfo} from '@ohos/arkui/UIContext';
 import { StateManager, ComputableState, GlobalStateManager, memoEntry, memoEntry1,
     IncrementalNode } from '@koalaui/runtime';
 import { StateContext } from 'arkui.incremental.runtime.state';
@@ -74,6 +74,7 @@ import { PromptActionExtender, FrameNodeExtender, AlertDialog, ActionSheet, Anim
 import { EntryPoint, NavInterface } from "../component/customComponent"
 import { AsyncCallback as routerAsyncCallback } from "@ohos.base"
 import { IUIContext } from "arkui/component/idlize"
+  import { PathStackUtils } from './ArkNavPathStack';
 
 export class ContextRecord {
     uiContext?: UIContext
@@ -1463,9 +1464,9 @@ export class UIContextImpl extends UIContext {
         ArkUIAniModule._Common_Restore_InstanceId();
         return node;
     }
-    getFrameNodeByUniqueId(id: long): FrameNode | null {
+    getFrameNodeByUniqueId(id: int): FrameNode | null {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        const retval = FrameNodeExtender.getFrameNodeByUniqueId(id as number);
+        const retval = FrameNodeExtender.getFrameNodeByUniqueId(id);
         if (retval === nullptr) {
             ArkUIAniModule._Common_Restore_InstanceId();
             return null;
@@ -1476,6 +1477,22 @@ export class UIContextImpl extends UIContext {
         }
         ArkUIAniModule._Common_Restore_InstanceId();
         return node;
+    }
+     public getPageInfoByUniqueId(id: int): PageInfo {
+        const navDestinationInfo = ArkUIAniModule._CustomNode_QueryNavDestinationInfo1(id);
+        const routerPageInfo = ArkUIAniModule._CustomNode_QueryRouterPageInfo1(id);
+        if (navDestinationInfo) {
+            let param = PathStackUtils.getParamByNavDestinationId(navDestinationInfo.navDestinationId);
+            navDestinationInfo.param = param ? param! : undefined;
+        }
+        if (routerPageInfo) {
+            routerPageInfo.context = this;
+        }
+        let pageInfo: PageInfo = {
+            navDestinationInfo: navDestinationInfo,
+            routerPageInfo: routerPageInfo
+        }
+        return pageInfo;
     }
     getHostContext(): Context | undefined {
         return ArkUIAniModule._Common_GetHostContext(this.instanceId_);
