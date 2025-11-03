@@ -810,6 +810,25 @@ void BubbleLayoutAlgorithm::UpdateDumpInfo()
     dumpInfo_.targetID = targetNodeId_;
 }
 
+void BubbleLayoutAlgorithm::InitBubbleArrow(const RefPtr<BubbleLayoutProperty>& layoutProp,
+    LayoutWrapper* layoutWrapper)
+{
+    if (enableArrow_) {
+        CHECK_NULL_VOID(layoutProp);
+        auto height = layoutProp->GetArrowHeight().value_or(DEFAULT_BUBBLE_ARROW_HEIGHT);
+        auto width = layoutProp->GetArrowWidth().value_or(DEFAULT_BUBBLE_ARROW_WIDTH);
+        calculateArrowPoint(height, width, layoutWrapper);
+        arrowHeight_ = height.ConvertToPx();
+        scaledBubbleSpacing_ = arrowHeight_;
+    } else {
+        BUBBLE_ARROW_HEIGHT = 0.0_vp;
+        BUBBLE_ARROW_WIDTH = 0.0_vp;
+        BUBBLE_ARROW_HEIGHT_F = 0.0;
+        BUBBLE_ARROW_WIDTH_F = 0.0;
+    }
+    SetArrowSize(realArrowWidth_, realArrowHeight_);
+}
+
 void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layoutProp, bool showInSubWindow,
     LayoutWrapper* layoutWrapper)
 {
@@ -825,16 +844,11 @@ void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layout
     targetSpace_ = layoutProp->GetTargetSpace().value_or(popupTheme->GetTargetSpace());
     placement_ = layoutProp->GetPlacement().value_or(Placement::BOTTOM);
     isCaretMode_ = layoutProp->GetIsCaretMode().value_or(true);
-    auto height = layoutProp->GetArrowHeight().value_or(DEFAULT_BUBBLE_ARROW_HEIGHT);
-    auto width = layoutProp->GetArrowWidth().value_or(DEFAULT_BUBBLE_ARROW_WIDTH);
-    calculateArrowPoint(height, width, layoutWrapper);
     followCursor_ = isTips_ && layoutProp->GetShowAtAnchorValue(TipsAnchorType::TARGET) == TipsAnchorType::CURSOR;
-    arrowHeight_ = height.ConvertToPx();
-    scaledBubbleSpacing_ = arrowHeight_;
-    SetArrowSize(realArrowWidth_, realArrowHeight_);
+    enableArrow_ = followCursor_ ? false : layoutProp->GetEnableArrow().value_or(true);
+    InitBubbleArrow(layoutProp, layoutWrapper);
     positionOffset_ = layoutProp->GetPositionOffset().value_or(OffsetF());
     auto constraint = layoutProp->GetLayoutConstraint();
-    enableArrow_ = followCursor_ ? false : layoutProp->GetEnableArrow().value_or(true);
     followTransformOfTarget_ = layoutProp->GetFollowTransformOfTarget().value_or(false);
     auto wrapperIdealSize =
         CreateIdealSize(constraint.value(), Axis::FREE, layoutProp->GetMeasureType(MeasureType::MATCH_PARENT), true);

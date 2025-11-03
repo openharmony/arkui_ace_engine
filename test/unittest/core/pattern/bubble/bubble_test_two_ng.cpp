@@ -1022,6 +1022,47 @@ HWTEST_F(BubbleTestTwoNg, AvoidToTargetLeft001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: InitBubbleArrow001
+ * @tc.desc: Test InitBubbleArrow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestTwoNg, InitBubbleArrow001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create bubble and get frameNode.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    ASSERT_NE(frameNode, nullptr);
+
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    auto layoutAlgorithm = AceType::DynamicCast<BubbleLayoutAlgorithm>(bubblePattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    auto bubbleLayoutProperty = bubblePattern->GetLayoutProperty<BubbleLayoutProperty>();
+    ASSERT_NE(bubbleLayoutProperty, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    /**
+     * @tc.steps: step2. test InitBubbleArrow.
+     */
+    layoutAlgorithm->enableArrow_ = false;
+    layoutAlgorithm->InitBubbleArrow(bubbleLayoutProperty, AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(layoutAlgorithm->realArrowHeight_, 0.0f);
+    layoutAlgorithm->enableArrow_ = true;
+    layoutAlgorithm->InitBubbleArrow(bubbleLayoutProperty, AceType::RawPtr(layoutWrapper));
+    EXPECT_NE(layoutAlgorithm->realArrowHeight_, 0.0f);
+}
+
+/**
  * @tc.name: AvoidToTargetLeft002
  * @tc.desc: Test AvoidToTargetLeft
  * @tc.type: FUNC
