@@ -23,7 +23,7 @@ namespace OHOS::Ace::NG {
 struct PanGestureOptionsInfo {
     std::optional<int32_t> fingers;
     std::optional<PanDirection> direction;
-    std::optional<float> distance;
+    std::optional<double> distance;
     std::optional<bool> isFingerCountLimited;
 };
 
@@ -34,7 +34,7 @@ void AssignCast(std::optional<PanGestureOptionsInfo>& dst, const Ark_PanGestureH
     PanGestureOptionsInfo result;
     result.fingers = Converter::OptConvert<int32_t>(src.fingers);
     result.direction = Converter::OptConvert<PanDirection>(src.direction);
-    result.distance = Converter::OptConvert<float>(src.distance);
+    result.distance = Converter::OptConvert<double>(src.distance);
     result.isFingerCountLimited = Converter::OptConvert<bool>(src.isFingerCountLimited);
     dst = result;
 }
