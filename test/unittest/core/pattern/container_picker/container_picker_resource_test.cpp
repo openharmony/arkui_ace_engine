@@ -24,10 +24,10 @@
 #include "test/unittest/core/pattern/test_ng.h"
 
 #include "core/common/resource/resource_object.h"
-#include "core/components/picker/picker_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/container_picker/container_picker_model.h"
 #include "core/components_ng/pattern/container_picker/container_picker_pattern.h"
+#include "core/components_ng/pattern/container_picker/container_picker_theme.h"
 #include "core/components_ng/pattern/container_picker/container_picker_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -64,13 +64,16 @@ public:
 void ContainerPickerResourceTest::SetUpTestSuite()
 {
     TestNG::SetUpTestSuite();
+    MockPipelineContext::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<PickerTheme>()));
+    auto theme = AceType::MakeRefPtr<ContainerPickerTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
 }
 
 void ContainerPickerResourceTest::TearDownTestSuite()
 {
+    MockPipelineContext::TearDown();
     TestNG::TearDownTestSuite();
 }
 

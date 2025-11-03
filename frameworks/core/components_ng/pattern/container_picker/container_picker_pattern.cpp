@@ -252,6 +252,7 @@ void ContainerPickerPattern::OnModifyDone()
     isLoop_ = IsLoop();
     InitOrRefreshHapticController();
     SetAccessibilityAction();
+    InitDisabled();
 
     auto focusHub = host->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
@@ -259,6 +260,22 @@ void ContainerPickerPattern::OnModifyDone()
 
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     PickerMarkDirty();
+}
+
+void ContainerPickerPattern::InitDisabled()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (!eventHub->IsEnabled()) {
+        renderContext->UpdateOpacity(DISABLE_ALPHA);
+    } else {
+        renderContext->UpdateOpacity(1.0);
+    }
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void ContainerPickerPattern::FireChangeEvent()

@@ -294,6 +294,8 @@ private:
     bool HandleDirectionKey(KeyCode code);
     void GetInnerFocusPaintRect(RoundRect& paintRect);
 
+    void InitDisabled();
+
     RefPtr<PanEvent> panEvent_;
     PanDirection panDirection_;
     LayoutConstraintF layoutConstraint_;

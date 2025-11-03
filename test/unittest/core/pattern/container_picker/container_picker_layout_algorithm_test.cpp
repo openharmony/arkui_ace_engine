@@ -22,12 +22,12 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
-#include "core/components/picker/picker_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/pattern/container_picker/container_picker_layout_algorithm.h"
 #include "core/components_ng/pattern/container_picker/container_picker_layout_property.h"
 #include "core/components_ng/pattern/container_picker/container_picker_model.h"
 #include "core/components_ng/pattern/container_picker/container_picker_pattern.h"
+#include "core/components_ng/pattern/container_picker/container_picker_theme.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 #undef private
@@ -50,7 +50,7 @@ public:
     RefPtr<Theme> GetThemeByType(ThemeType type);
 
     RefPtr<IconTheme> iconThem_;
-    RefPtr<PickerTheme> pickerTheme_;
+    RefPtr<ContainerPickerTheme> containerPickerTheme_;
     RefPtr<ContainerPickerLayoutAlgorithm> algorithm_;
     RefPtr<FrameNode> frameNode_;
     void CreateContainerPickerNode(int32_t itemCount = 9);
@@ -91,7 +91,7 @@ void ContainerPickerLayoutAlgorithmTest::TearDownTestSuite()
 void ContainerPickerLayoutAlgorithmTest::SetUp()
 {
     iconThem_ = AceType::MakeRefPtr<IconTheme>();
-    pickerTheme_ = AceType::MakeRefPtr<PickerTheme>();
+    containerPickerTheme_ = AceType::MakeRefPtr<ContainerPickerTheme>();
     algorithm_ = AceType::MakeRefPtr<ContainerPickerLayoutAlgorithm>();
 
     float itemHeight = 40.0f;
@@ -122,8 +122,8 @@ RefPtr<Theme> ContainerPickerLayoutAlgorithmTest::GetThemeByType(ThemeType type)
 {
     if (type == IconTheme::TypeId()) {
         return iconThem_;
-    } else if (type == PickerTheme::TypeId()) {
-        return pickerTheme_;
+    } else if (type == ContainerPickerTheme::TypeId()) {
+        return containerPickerTheme_;
     } else {
         return nullptr;
     }
