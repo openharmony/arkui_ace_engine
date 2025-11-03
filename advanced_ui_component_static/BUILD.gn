@@ -38,7 +38,8 @@ group("advanced_ui_component_static") {
       "composetitlebar:composeTitleBar",
       "multinavigation:multiNavigation",
       "toolbar:toolBar",
-      "toolbarv2:toolBarV2"
+      "toolbarv2:toolBarV2",
+      "gridobjectsortcomponent:gridobjectsortcomponent",
     ]
   }
 }
