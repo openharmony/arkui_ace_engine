@@ -531,6 +531,7 @@ frameworks/bridge/common/manifest/ @arkui_framework_xnode
 frameworks/bridge/common/media_query/ @arkuilayout1
 frameworks/bridge/common/plugin_adapter/ @ArkUI_ability_group
 frameworks/bridge/common/utils/ @arkui_framework_xnode
+frameworks/bridge/declarative_frontend/ark_breakpoint/ @arkui_framework_resource
 frameworks/bridge/declarative_frontend/ark_component/export/arkComponent.d.ts @arkui_framework_xnode
 frameworks/bridge/declarative_frontend/ark_component/src/ArkAlphabetIndexer.ts @arkuicodepulse
 frameworks/bridge/declarative_frontend/ark_component/src/ArkBadge.ts @huawei_g_five
