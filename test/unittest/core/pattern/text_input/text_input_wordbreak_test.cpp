@@ -520,8 +520,11 @@ HWTEST_F(TextInputWordBreakTest, textInputLayout005, TestSize.Level1)
      * @tc.step: step2. Set wordBreak invalid value
      */
     const int32_t invalidValue = -1;
+
     layoutProperty_->UpdateWordBreak((OHOS::Ace::WordBreak)invalidValue);
+
     frameNode_->MarkModifyDone();
+
     EXPECT_EQ((int32_t)(layoutProperty_->GetWordBreak().value()), invalidValue);
 
     /**
@@ -535,7 +538,9 @@ HWTEST_F(TextInputWordBreakTest, textInputLayout005, TestSize.Level1)
     TextStyle textStyle;
 
     std::u16string textContent(DEFAULT_TEXT_U16);
+
     bool showPlaceHolder = false;
+
     LayoutWrapperNode layoutWrapper =
         LayoutWrapperNode(frameNode_, AceType::MakeRefPtr<GeometryNode>(), layoutProperty_);
     textInputLayoutAlgorithm->ConstructTextStyles(&layoutWrapper, textStyle, textContent, showPlaceHolder);
