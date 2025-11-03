@@ -1056,7 +1056,7 @@ double ContainerPickerPattern::GetDragDeltaLessThanJumpInterval(
     double offsetY, float originalDragDelta, bool useRebound, float shiftDistance)
 {
     double dragDelta = originalDragDelta + yOffset_;
-    auto isOverScroll = useRebound;
+    auto isOverScroll = useRebound && IsOutOfBoundary(offsetY);
     if (NearEqual(std::abs(dragDelta), std::abs(shiftDistance)) && !NearZero(dragDelta)) {
         dragDelta = std::abs(dragDelta) / dragDelta * std::abs(shiftDistance);
     }
@@ -1309,12 +1309,12 @@ bool ContainerPickerPattern::InnerHandleScroll(bool isDown)
         return false;
     }
 
-    if (!IsLoop() && ((isDown && targetIndex_ == totalItemCount_ - 1) || (!isDown && targetIndex_ == 0))) {
-        return false;
-    }
-
     if (isEnableHaptic_ && hapticController_ && isAllowPlayHaptic_) {
         hapticController_->PlayOnce();
+    }
+
+    if (!IsLoop() && ((isDown && targetIndex_ == totalItemCount_ - 1) || (!isDown && targetIndex_ == 0))) {
+        return false;
     }
     return true;
 }
