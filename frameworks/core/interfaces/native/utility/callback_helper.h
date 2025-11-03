@@ -94,7 +94,7 @@ public:
         if (callback_.callSync) {
             Ark_VMContext vmContext = GetVMContext();
             if (vmContext == nullptr) {
-                LOGF_ABORT("InvokeSync %{public}p. VMContext is null.", callback_.callSync);
+                LOGF_ABORT("InvokeSync VMContext is null.");
             }
             (*callback_.callSync)(vmContext, callback_.resource.resourceId, std::forward<Params>(args)...);
         }
