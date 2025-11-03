@@ -78,4 +78,18 @@ HWTEST_F(ResSchedReportTest, ResSchedReportTest002, TestSize.Level1)
     ResSchedReport::GetInstance().OnTouchEvent(touchEvent, config);
     EXPECT_NE(touchEvent.localX, touchEvent.localY);
 }
+
+/**
+ * @tc.name: ResSchedReportTest003
+ * @tc.desc: test load function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedReportTest, ResSchedReportTest003, TestSize.Level1)
+{
+    if (ResSchedReport::GetInstance().setNotifyForceExpandStateFunc_ &&
+        ResSchedReport::GetInstance().notifyAppSceneFunc_) {
+        EXPECT_NE(LoadSetNotifyForceExpandStateFunc(), nullptr);
+        EXPECT_NE(LoadNotifyAppSceneFunc(), nullptr);
+    }
+}
 } // namespace OHOS::Ace

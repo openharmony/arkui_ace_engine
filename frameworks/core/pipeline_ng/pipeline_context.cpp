@@ -2905,6 +2905,7 @@ bool PipelineContext::OnBackPressed()
         }
     }
     auto hasOverlay = false;
+    ResSchedReport::GetInstance().ResSchedDataReport("backpressed");
     taskExecutor_->PostSyncTask(
         [weakOverlay = AceType::WeakClaim(AceType::RawPtr(overlayManager_)),
             weakSelectOverlay = AceType::WeakClaim(AceType::RawPtr(selectOverlayManager_)), &hasOverlay]() {
