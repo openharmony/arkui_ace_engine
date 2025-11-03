@@ -688,4 +688,57 @@ HWTEST_F(ScrollPatternThreeTestNg, EdgeEffectCallbackwithContentOffset, TestSize
     EXPECT_EQ(edgeEffect->initLeadingCallback_(), 0.0);
     EXPECT_EQ(edgeEffect->initTrailingCallback_(), 0.0);
 }
+
+/**
+ * @tc.name: ScrollEdgeWithContentOffset
+ * @tc.desc: Test ScrollEdge with contentOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternThreeTestNg, ScrollEdgeWithContentOffset, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    ScrollableModelNG::SetContentStartOffset(CONTENT_START_OFFSET);
+    ScrollableModelNG::SetContentEndOffset(CONTENT_END_OFFSET);
+    CreateContent();
+    CreateScrollDone();
+
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    EXPECT_EQ(pattern_->GetTotalOffset(), CONTENT_MAIN_SIZE - HEIGHT + CONTENT_END_OFFSET);
+    EXPECT_EQ(pattern_->currentOffset_, -CONTENT_MAIN_SIZE + HEIGHT - CONTENT_END_OFFSET - CONTENT_START_OFFSET);
+
+    ScrollToEdge(ScrollEdgeType::SCROLL_TOP, false);
+    EXPECT_EQ(pattern_->GetTotalOffset(), -CONTENT_START_OFFSET);
+    EXPECT_EQ(pattern_->currentOffset_, 0);
+}
+
+/**
+ * @tc.name: ScrollEdgeAnimationWithContentOffset
+ * @tc.desc: Test ScrollEdge with animation and contentOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternThreeTestNg, ScrollEdgeAnimationWithContentOffset, TestSize.Level1)
+{
+    MockAnimationManager::GetInstance().SetTicks(TICK);
+    ScrollModelNG model = CreateScroll();
+    ScrollableModelNG::SetContentStartOffset(CONTENT_START_OFFSET);
+    ScrollableModelNG::SetContentEndOffset(CONTENT_END_OFFSET);
+    CreateContent();
+    CreateScrollDone();
+
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->GetTotalOffset(), CONTENT_MAIN_SIZE - HEIGHT + CONTENT_END_OFFSET);
+    EXPECT_EQ(pattern_->currentOffset_, -CONTENT_MAIN_SIZE + HEIGHT - CONTENT_END_OFFSET - CONTENT_START_OFFSET);
+
+    ScrollToEdge(ScrollEdgeType::SCROLL_TOP, true);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->GetTotalOffset(), -CONTENT_START_OFFSET);
+    EXPECT_EQ(pattern_->currentOffset_, 0);
+}
 } // namespace OHOS::Ace::NG
