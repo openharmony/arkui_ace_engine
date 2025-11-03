@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace::NG {
 
-class MovingPhotoController : public virtual AceType {
+class Ace_EXPORT MovingPhotoController : public virtual AceType {
     DECLARE_ACE_TYPE(MovingPhotoController, AceType)
 
 public:

@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+        "package": "@ohos.multimedia",
+        "outDir": "MovingPhoto_abc/cache",
+        "baseUrl": "./ets",
+        "paths": {
+
+        }
+    },
+    "files": [
+        "./ets/MovingPhoto.ets"
+    ],
+    "rootDir":"."
+}
