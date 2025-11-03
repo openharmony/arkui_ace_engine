@@ -282,7 +282,7 @@ static ani_string AniGetFilteredInspectorTree(ani_env *env, ani_array filters)
     }
     ani_string result;
     if (ANI_OK != env->String_NewUTF8(nodeInfos.c_str(), nodeInfos.size(), &result)) {
-        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "get filter inspector tree failed");
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "get filter inspector tree failed.");
         return nullptr;
     }
     return result;
@@ -299,7 +299,7 @@ static ani_string AniGetFilteredInspectorTreeById(ani_env *env, ani_string id, a
     NG::InspectorFilter inspectorFilter = GetInspectorFilter(env, filters, isLayoutInspector);
     std::string idStr;
     if (ANI_OK != ANIUtils_ANIStringToStdString(env, id, idStr)) {
-        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "get filter inspector tree failed");
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "get filter inspector tree failed.");
         return nullptr;
     }
     inspectorFilter.SetFilterID(idStr);
@@ -313,7 +313,7 @@ static ani_string AniGetFilteredInspectorTreeById(ani_env *env, ani_string id, a
     }
     ani_string result;
     if (ANI_OK != env->String_NewUTF8(nodeInfos.c_str(), nodeInfos.size(), &result)) {
-        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "get filter inspector tree failed");
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "get filter inspector tree failed.");
         return nullptr;
     }
     return result;
@@ -348,7 +348,7 @@ static ani_ref CreateComponentObserver(ani_env *env, ani_string id, const char *
     ani_ref undefinedRef {};
     env->GetUndefined(&undefinedRef);
     if (ANI_OK != env->FindClass(className, &cls)) {
-        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani not found class");
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani not found class.");
         return undefinedRef;
     }
     
