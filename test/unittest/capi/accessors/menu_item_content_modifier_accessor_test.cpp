@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include "node_api.h"
 #include "accessor_test_base.h"
+#include "core/interfaces/native/implementation/menu_item_configuration_peer.h"
 #include "core/components_ng/pattern/menu/menu_model_static.h"
 #include "core/components_ng/pattern/select/select_pattern.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
@@ -107,9 +108,9 @@ HWTEST_F(MenuItemContentModifierHelperAccessor, menuItemContentModifierHelperAcc
             checkEvent = {
                 .nodeId = navigationNode->GetId(),
                 .resourceId = resourceId,
-                .objId = config.contentModifier.resource.resourceId,
-                .selected = Converter::Convert<bool>(config.selected),
-                .index = Converter::Convert<int>(config.index)
+                .objId = config->contentModifier.resource.resourceId,
+                .selected = Converter::Convert<bool>(config->selected),
+                .index = Converter::Convert<int>(config->index)
             };
     };
 

@@ -33,6 +33,7 @@
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
 #include "core/components_ng/pattern/toggle/toggle_model_static.h"
 #include "core/interfaces/native/implementation/frame_node_peer_impl.h"
+#include "core/interfaces/native/implementation/menu_item_configuration_peer.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/object_keeper.h"
@@ -314,15 +315,16 @@ void ContentModifierMenuItemImpl(Ark_NativePointer node,
     auto builderFunc = [arkBuilder = CallbackHelper(*builder), node, frameNode, objectKeeper](
         MenuItemConfiguration config) -> RefPtr<FrameNode> {
         Ark_ContentModifier contentModifier = (*objectKeeper).get();
-        Ark_MenuItemConfiguration arkConfig;
-        arkConfig.contentModifier = contentModifier;
-        arkConfig.enabled = Converter::ArkValue<Ark_Boolean>(config.enabled_);
-        arkConfig.value = Converter::ArkValue<Ark_ResourceStr>(config.value_);
-        arkConfig.icon = Converter::ArkValue<Opt_ResourceStr>(config.icon_);
+        Ark_MenuItemConfiguration arkConfig = PeerUtils::CreatePeer<MenuItemConfigurationPeer>();
+        arkConfig->contentModifier = contentModifier;
+        arkConfig->enabled = Converter::ArkValue<Ark_Boolean>(config.enabled_);
+        arkConfig->value = Converter::ArkValue<Ark_ResourceStr>(config.value_);
+        arkConfig->icon = Converter::ArkValue<Opt_ResourceStr>(config.icon_);
         LOGE("Opt_SymbolGlyphModifiers is a stub.");
-        arkConfig.symbolIcon = Converter::ArkValue<Opt_SymbolGlyphModifier>(std::nullopt);
-        arkConfig.selected = Converter::ArkValue<Ark_Boolean>(config.selected_);
-        arkConfig.index = Converter::ArkValue<Ark_Int32>(config.index_);
+        arkConfig->symbolIcon = Converter::ArkValue<Opt_SymbolGlyphModifier>(std::nullopt);
+        arkConfig->selected = Converter::ArkValue<Ark_Boolean>(config.selected_);
+        arkConfig->index = Converter::ArkValue<Ark_Int32>(config.index_);
+        arkConfig->node = node;
         auto boxNode = CommonViewModelNG::CreateFrameNode(ViewStackProcessor::GetInstance()->ClaimNodeId());
         arkBuilder.BuildAsync([boxNode](const RefPtr<UINode>& uiNode) mutable {
             boxNode->AddChild(uiNode);
