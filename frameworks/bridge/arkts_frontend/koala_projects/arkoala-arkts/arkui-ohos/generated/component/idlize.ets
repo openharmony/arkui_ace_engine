@@ -204,11 +204,11 @@ export class AnimationExtender {
         ArkUIGeneratedNativeModule._AnimationExtender_AnimationTranslate(node, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    static AnimateToImmediatelyImpl_serialize(param: AnimateParam, event: (() => void)): void {
+    static AnimateToImmediatelyImpl_serialize(param: AnimateParam, event: (() => void), immediately: boolean): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         AnimateParam_serializer.write(thisSerializer, param)
         thisSerializer.holdAndWriteCallback(event)
-        ArkUIGeneratedNativeModule._AnimationExtender_AnimateToImmediatelyImpl(thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._AnimationExtender_AnimateToImmediatelyImpl(thisSerializer.asBuffer(), thisSerializer.length(), immediately ? 1 : 0)
         thisSerializer.release()
     }
     static KeyframeAnimationImpl_serialize(param: KeyframeAnimateParam, keyfames: Array<KeyframeState>): void {
@@ -263,10 +263,11 @@ export class AnimationExtender {
         AnimationExtender.AnimationTranslate_serialize(node_casted, options_casted)
         return
     }
-    public static AnimateToImmediatelyImpl(param: AnimateParam, event: (() => void)): void {
+    public static AnimateToImmediatelyImpl(param: AnimateParam, event: (() => void), immediately: boolean): void {
         const param_casted = param as (AnimateParam)
         const event_casted = event as ((() => void))
-        AnimationExtender.AnimateToImmediatelyImpl_serialize(param_casted, event_casted)
+        const immediately_casted = immediately as (boolean)
+        AnimationExtender.AnimateToImmediatelyImpl_serialize(param_casted, event_casted, immediately_casted)
         return
     }
     public static KeyframeAnimationImpl(param: KeyframeAnimateParam, keyfames: Array<KeyframeState>): void {

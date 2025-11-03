@@ -26030,13 +26030,13 @@ void impl_AnimationExtender_AnimationTranslate(Ark_NativePointer node, KSerializ
         GetAccessors()->getAnimationExtenderAccessor()->AnimationTranslate(node, static_cast<Ark_TranslateOptions*>(&optionsValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(AnimationExtender_AnimationTranslate, Ark_NativePointer, KSerializerBuffer, int32_t)
-void impl_AnimationExtender_AnimateToImmediatelyImpl(KSerializerBuffer thisArray, int32_t thisLength) {
+void impl_AnimationExtender_AnimateToImmediatelyImpl(KSerializerBuffer thisArray, int32_t thisLength, Ark_Boolean immediately) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         Ark_AnimateParam paramValueTemp = AnimateParam_serializer::read(thisDeserializer);;
         Callback_Void eventValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Void))))};;
-        GetAccessors()->getAnimationExtenderAccessor()->AnimateToImmediatelyImpl(static_cast<Ark_AnimateParam*>(&paramValueTemp), static_cast<Callback_Void*>(&eventValueTemp));
+        GetAccessors()->getAnimationExtenderAccessor()->AnimateToImmediatelyImpl(static_cast<Ark_AnimateParam*>(&paramValueTemp), static_cast<Callback_Void*>(&eventValueTemp), immediately);
 }
-KOALA_INTEROP_DIRECT_V2(AnimationExtender_AnimateToImmediatelyImpl, KSerializerBuffer, int32_t)
+KOALA_INTEROP_DIRECT_V3(AnimationExtender_AnimateToImmediatelyImpl, KSerializerBuffer, int32_t, Ark_Boolean)
 void impl_AnimationExtender_KeyframeAnimationImpl(KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         Ark_KeyframeAnimateParam paramValueTemp = KeyframeAnimateParam_serializer::read(thisDeserializer);;
@@ -26050,7 +26050,7 @@ void impl_AnimationExtender_KeyframeAnimationImpl(KSerializerBuffer thisArray, i
         Array_KeyframeState keyfamesValueTemp = keyfamesValueTempTmpBuf;;
         GetAccessors()->getAnimationExtenderAccessor()->KeyframeAnimationImpl(static_cast<Ark_KeyframeAnimateParam*>(&paramValueTemp), static_cast<Array_KeyframeState*>(&keyfamesValueTemp));
 }
-KOALA_INTEROP_DIRECT_V2(AnimationExtender_KeyframeAnimationImpl, KSerializerBuffer, int32_t)
+KOALA_INTEROP_V2(AnimationExtender_KeyframeAnimationImpl, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_AppearSymbolEffect_construct(KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto scopeValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());

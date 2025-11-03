@@ -10857,12 +10857,12 @@ export function $rawfile(value: string): Resource {
 }
 export function animateTo(value: AnimateParam, event: (() => void)): void {
     // instructive change start
-    _animateTo(value, event)
+    AnimationExtender.AnimateToImmediatelyImpl(value, event, false)
     // instructive change end
 }
 export function animateToImmediately(value: AnimateParam, event: (() => void)): void {
     // instructive change start
-    AnimationExtender.AnimateToImmediatelyImpl(value, event)
+    AnimationExtender.AnimateToImmediatelyImpl(value, event, true)
     // instructive change end
 }
 export function vp2px(value: number): number {
