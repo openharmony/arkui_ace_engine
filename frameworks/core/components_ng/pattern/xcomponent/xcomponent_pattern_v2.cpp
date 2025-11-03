@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/xcomponent/xcomponent_ext_surface_callback_client.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_inner_surface_controller.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_surface_config_client.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_utils.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "transaction/rs_transaction.h"
 #include "transaction/rs_transaction_handler.h"
@@ -551,9 +552,9 @@ void XComponentPatternV2::DumpInfo()
     DumpLog::GetInstance().AddDesc(std::string("autoInitialize: ").append(BoolToString(autoInitialize_)));
     DumpLog::GetInstance().AddDesc(std::string("isInitialized: ").append(BoolToString(isInitialized_)));
     DumpLog::GetInstance().AddDesc(
-        std::string("xcomponentNodeType: ").append(XComponentPattern::XComponentNodeTypeToString(nodeType_)));
+        std::string("xcomponentNodeType: ").append(XComponentUtils::XComponentNodeTypeToString(nodeType_)));
     DumpLog::GetInstance().AddDesc(
-        std::string("xcomponentType: ").append(XComponentPattern::XComponentTypeToString(type_)));
+        std::string("xcomponentType: ").append(XComponentUtils::XComponentTypeToString(type_)));
     DumpLog::GetInstance().AddDesc(std::string("surfaceId: ").append(surfaceId_));
     DumpLog::GetInstance().AddDesc(std::string("surfaceRect: ").append(paintRect_.ToString()));
     DumpLog::GetInstance().AddDesc(std::string("isOpaque: ").append(isOpaque_ ? "true" : "false"));
