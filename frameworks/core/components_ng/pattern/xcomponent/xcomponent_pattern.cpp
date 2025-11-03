@@ -478,9 +478,9 @@ void XComponentPattern::OnRebuildFrame()
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     CHECK_NULL_VOID(handlingSurfaceRenderContext_);
-    renderContext->AddChild(handlingSurfaceRenderContext_, 0);
     auto pipeline = host->GetContext();
     handlingSurfaceRenderContext_->SetRSUIContext(pipeline);
+    renderContext->AddChild(handlingSurfaceRenderContext_, 0);
     SetSurfaceNodeToGraphic();
 }
 
@@ -1378,10 +1378,10 @@ void XComponentPattern::SetHandlingRenderContextForSurface(const RefPtr<RenderCo
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
-    renderContext->ClearChildren();
-    renderContext->AddChild(handlingSurfaceRenderContext_, 0);
     auto pipeline = host->GetContext();
     handlingSurfaceRenderContext_->SetRSUIContext(pipeline);
+    renderContext->ClearChildren();
+    renderContext->AddChild(handlingSurfaceRenderContext_, 0);
     handlingSurfaceRenderContext_->SetBounds(
         paintRect_.GetX(), paintRect_.GetY(), paintRect_.Width(), paintRect_.Height());
     host->MarkModifyDone();
@@ -1546,10 +1546,10 @@ bool XComponentPattern::StopTextureExport()
     CHECK_NULL_RETURN(host, false);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
-    renderContext->ClearChildren();
-    renderContext->AddChild(handlingSurfaceRenderContext_, 0);
     auto pipeline = host->GetContext();
     handlingSurfaceRenderContext_->SetRSUIContext(pipeline);
+    renderContext->ClearChildren();
+    renderContext->AddChild(handlingSurfaceRenderContext_, 0);
     renderContext->SetIsNeedRebuildRSTree(true);
     return true;
 }
