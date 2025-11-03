@@ -23,11 +23,6 @@
  * 
  */
 
-
-// Flag enables support for '*' monitored path
-// That will monitor all tracked properties on 'this' object
-const enableTopLevelWildcard = true;
-
 class MonitorPathHelper {
   public static hasWildcardEnding(path: string): boolean {
     return path.endsWith('.*');
@@ -49,7 +44,7 @@ class MonitorPathHelper {
     let count = path.split('*').length - 1;
     // Allow top level "*"
     return ((count <= 0)
-      || (count == 1 && ((path.endsWith(".*") || (enableTopLevelWildcard && path == "*")))));
+      || (count == 1 && (path.endsWith(".*") || (path == "*"))));
   }
 }
 
@@ -377,11 +372,8 @@ class MonitorV2 {
     let value = undefined;
     if (this.isSync_ && monitoredValue.isWildcard()) {
       let sureValue = monitoredValue.getLastSureValuePath()?.now
-      if (enableTopLevelWildcard
-        && sureValue === undefined
-        && MonitorPathHelper.isWildcardPath(monitoredValue.path)) {
+      if (sureValue === undefined && MonitorPathHelper.isWildcardPath(monitoredValue.path)) {
         // For single top level wildcard
-        console.log("recordDependenciesForProp use target_ as LSV");
         sureValue = this.target_;
       }
       if (sureValue !== undefined && (sureValue instanceof Object)) {
