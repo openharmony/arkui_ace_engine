@@ -283,7 +283,8 @@ void ContainerModalPattern::AddPanEvent(const RefPtr<FrameNode>& controlButtonsN
             TAG_LOGI(AceLogTag::ACE_APPBAR, "container window pan recognized. currentWindowMode = %{public}d",
                 currentWindowMode);
             if ((windowManager->GetCurrentWindowMaximizeMode() != MaximizeMode::MODE_AVOID_SYSTEM_BAR) &&
-                (event.GetSourceTool() != SourceTool::TOUCHPAD)) {
+                (event.GetSourceTool() != SourceTool::TOUCHPAD) &&
+                (event.GetInputEventType() != InputEventType::AXIS)) {
                 windowManager->WindowStartMove();
                 SubwindowManager::GetInstance()->ClearToastInSubwindow();
             }

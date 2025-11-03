@@ -950,4 +950,23 @@ HWTEST_F(ContainerModalPatternEnhanceTestNg, InitMenuDefaultRadius, TestSize.Lev
     containerPattern->InitMenuDefaultRadius();
     EXPECT_TRUE(titleResult);
 }
+/**
+ * @tc.name: AddPanEvent001
+ * @tc.desc: Test AddPanEvent001
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, AddPanEvent001, TestSize.Level1)
+{
+    auto containerModalPatternEnhance = AceType::MakeRefPtr<ContainerModalPatternEnhance>();
+    auto windowMode = WindowMode::WINDOW_MODE_FULLSCREEN;
+    const auto windowManager = AceType::MakeRefPtr<WindowManager>();
+    auto windowModeCallback = [windowMode]() { return windowMode; };
+    windowManager->SetWindowGetModeCallBack(std::move(windowModeCallback));
+    auto pipeline = MockPipelineContext::GetCurrent();
+    pipeline->windowManager_ = windowManager;
+    auto frameNode = AceType::MakeRefPtr<FrameNode>("frameNode", 100, AceType::MakeRefPtr<Pattern>());
+    containerModalPatternEnhance->AddPanEvent(frameNode);
+    EXPECT_NE(containerModalPatternEnhance->panEvent_, nullptr);
+}
 } // namespace OHOS::Ace::NG
