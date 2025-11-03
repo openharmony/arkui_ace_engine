@@ -20,11 +20,6 @@ ace_unittest("text_test_ng") {
   sources = [
     "paragraph_manager_test_ng.cpp",
     "preview_menu_controller_test_ng.cpp",
-    "span_accessibility_test_ng.cpp",
-    "span_string_test_ng.cpp",
-    "span_string_test_two_ng.cpp",
-    "span_sub_test_ng.cpp",
-    "span_test_ng.cpp",
     "text_arkoala_test.cpp",
     "text_base.cpp",
     "text_pattern_test_ng.cpp",
@@ -40,8 +35,46 @@ ace_unittest("text_test_ng") {
     "text_testthirteen_ng.cpp",
     "text_testthree_ng.cpp",
     "text_testtwelve_ng.cpp",
-    "text_testtwo_ng.cpp",
-    "typed_text_test_ng.cpp",
+    "typed_text_test_ng.cpp",    
+  ]
+  defines = [ "ENABLE_ROSEN_BACKEND" ]
+  cflags = [ "-fno-access-control" ]
+}
+
+ace_unittest("text_test_ng_addition") {
+  module_name = "Component-Text"
+  module_output = ""
+  type = "new"
+  sources = [
+    "text_base.cpp",
+    "text_test_ng_one.cpp",
+    "text_test_ng_two.cpp",
+    "text_test_ng_three.cpp",
+    "text_test_ng_four.cpp",
+    "text_test_ng_five.cpp",
+    "text_test_ng_six.cpp",
+    "text_test_ng_seven.cpp",
+    "text_test_ng_eight.cpp",
+    "text_test_ng_nine.cpp",
+    "text_test_ng_ten.cpp",
+    "text_test_ng_eleven.cpp",
+  ]
+  defines = [ "ENABLE_ROSEN_BACKEND" ]
+  cflags = [ "-fno-access-control" ]
+}
+
+ace_unittest("span_test_ng") {
+  module_name = "Component-Text"
+  module_output = ""
+  type = "new"
+  sources = [
+    "span_accessibility_test_ng.cpp",
+    "span_string_test_ng.cpp",
+    "span_string_test_two_ng.cpp",
+    "span_sub_test_ng.cpp",
+    "span_test_ng.cpp",
+    "text_base.cpp",
+    "span_string_test_three_ng.cpp"
   ]
   defines = [ "ENABLE_ROSEN_BACKEND" ]
   cflags = [ "-fno-access-control" ]

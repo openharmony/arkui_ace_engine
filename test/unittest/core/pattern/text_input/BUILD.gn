@@ -13,7 +13,7 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ace_unittest("TextInputTest") {
+ace_unittest("text_input_test") {
   module_name = "Component-Text"
   module_output = ""
   type = "new"
@@ -27,13 +27,60 @@ ace_unittest("TextInputTest") {
     "text_field_algorithm_test.cpp",
     "text_field_auto_fill_controller_test.cpp",
     "text_field_content_modifier_test.cpp",
-    "text_field_controller_test.cpp",
     "text_field_keyevent_test.cpp",
     "text_field_manager_test_ng.cpp",
     "text_field_model_static_test.cpp",
     "text_field_overlay_modifier_test.cpp",
     "text_field_pattern_func_test.cpp",
     "text_field_pattern_onwill.cpp",
+    "text_input_area_model_test.cpp",
+    "text_input_base.cpp",
+    "text_input_check_test.cpp",
+    "text_input_cursor_test.cpp",
+    "text_input_decoration_test.cpp",
+    "text_input_menu_test.cpp",
+    "text_input_modify_test.cpp",
+    "text_input_preview_test.cpp",
+    "text_input_sub_1_test.cpp",
+    "text_input_sub_2_test.cpp",
+    "text_input_test.cpp",
+    "text_input_update_test.cpp",
+    "text_input_wordbreak_test.cpp",
+    "text_select_controller_test.cpp",
+  ]
+  cflags = [ "-fno-access-control" ]
+
+  external_deps = [
+  ]
+}
+
+
+ace_unittest("text_field_test_ng") {
+  module_name = "Component-Text"
+  module_output = ""
+  type = "new"
+  sources = [
+    "text_input_base.cpp",
+    "text_field_pattern_func_test_two.cpp",
+    "text_field_test_ng_one.cpp",
+    "text_field_test_ng_two.cpp",
+    "text_field_test_ng_three.cpp",
+    "text_field_test_ng_four.cpp",
+    "text_field_test_ng_five.cpp",
+    "$ace_root/test/mock/core/common/mock_font_manager.cpp",
+  ]
+  cflags = [ "-fno-access-control" ]
+
+  external_deps = [
+  ]
+}
+
+ace_unittest("text_input_pattern_test") {
+  module_name = "Component-Text"
+  module_output = ""
+  type = "new"
+  sources = [
+    "text_area_base.cpp",
     "text_field_pattern_test.cpp",
     "text_field_pattern_testeight.cpp",
     "text_field_pattern_testeleven.cpp",
@@ -45,21 +92,24 @@ ace_unittest("TextInputTest") {
     "text_field_pattern_testten.cpp",
     "text_field_pattern_testthree.cpp",
     "text_field_pattern_testtwo.cpp",
-    "text_input_area_model_test.cpp",
     "text_input_base.cpp",
-    "text_input_check_test.cpp",
-    "text_input_cursor_test.cpp",
-    "text_input_decoration_test.cpp",
+    "$ace_root/test/mock/core/common/mock_font_manager.cpp",
+  ]
+  cflags = [ "-fno-access-control" ]
+
+  external_deps = [
+  ]
+}
+
+
+ace_unittest("text_emoji_test") {
+  module_name = "Component-Text"
+  module_output = ""
+  type = "new"
+  sources = [
+    "text_input_base.cpp",
+    "text_field_controller_test.cpp",
     "text_input_emoji_test.cpp",
-    "text_input_menu_test.cpp",
-    "text_input_modify_test.cpp",
-    "text_input_preview_test.cpp",
-    "text_input_sub_1_test.cpp",
-    "text_input_sub_2_test.cpp",
-    "text_input_test.cpp",
-    "text_input_update_test.cpp",
-    "text_input_wordbreak_test.cpp",
-    "text_select_controller_test.cpp",
   ]
   cflags = [ "-fno-access-control" ]
 
