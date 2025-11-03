@@ -2170,6 +2170,19 @@ HWTEST_F(SwiperPatternTestNg, PropertyPrefMonitor002, TestSize.Level1)
     pattern_->PropertyPrefMonitor(false);
     EXPECT_FALSE(pattern_->isInAutoPlay_);
     EXPECT_FALSE(pattern_->isAutoPlayAnimationRunning_);
+
+    pattern_->isInAutoPlay_ = false;
+    pattern_->isAutoPlayAnimationRunning_ =true;
+    pattern_->PropertyPrefMonitor(false);
+    EXPECT_FALSE(pattern_->isInAutoPlay_);
+    EXPECT_FALSE(pattern_->isAutoPlayAnimationRunning_);
+ 
+    pattern_->isInAutoPlay_ = true;
+    pattern_->hasTabsAncestor_ = false;
+    pattern_->isAutoPlayAnimationRunning_ =false;
+    pattern_->PropertyPrefMonitor(true);
+    EXPECT_TRUE(pattern_->isInAutoPlay_);
+    EXPECT_TRUE(pattern_->isAutoPlayAnimationRunning_);
 }
 
 /**
