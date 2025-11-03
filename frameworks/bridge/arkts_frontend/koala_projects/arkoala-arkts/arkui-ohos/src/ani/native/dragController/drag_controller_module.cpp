@@ -39,6 +39,10 @@ public:
     ~DragAction()
     {
         asyncCtx_.dragAction = nullptr;
+        if (asyncCtx_.extraParams) {
+            delete[] asyncCtx_.extraParams;
+            asyncCtx_.extraParams = nullptr;
+        }
         CHECK_NULL_VOID(env_);
         for (auto& item : cbList_) {
             if (ANI_OK != env_->GlobalReference_Delete(item)) {
@@ -350,8 +354,6 @@ void TriggerJsCallback(std::shared_ptr<ArkUIDragControllerAsync> asyncCtx, ani_r
         }
     }
     HILOGI("AceDrag, TriggerJsCallback end.");
-    delete[] asyncCtx->extraParams;
-    asyncCtx->extraParams = nullptr;
     asyncCtx->deferred = nullptr;
     asyncCtx->hasHandle = false;
 }
@@ -448,6 +450,32 @@ void CallBackJsFunction(std::shared_ptr<ArkUIDragControllerAsync> asyncCtx, cons
     asyncCtx->env->DestroyLocalScope();
 }
 
+bool GetDragEventParamExtraParams(ani_env* env, ArkUIDragControllerAsync& asyncCtx, ani_ref extraParamsAni)
+{
+    char* extraParamsCStr = nullptr;
+    if (AniUtils::IsClassObject(env, extraParamsAni, "std.core.String")) {
+        std::string extraParamsStr = AniUtils::ANIStringToStdString(env, static_cast<ani_string>(extraParamsAni));
+        std::string extraInfoLimited = extraParamsStr.size() > EXTRA_INFO_MAX_LENGTH
+                                    ? extraParamsStr.substr(0, EXTRA_INFO_MAX_LENGTH)
+                                    : extraParamsStr;
+        uint32_t extraParamsLen = extraParamsStr.size() > EXTRA_INFO_MAX_LENGTH ?
+            EXTRA_INFO_MAX_LENGTH : extraParamsStr.size();
+        extraParamsCStr = new char[extraParamsLen + 1];
+        auto errCode = strcpy_s(extraParamsCStr, extraParamsLen + 1, extraInfoLimited.c_str());
+        if (errCode != 0) {
+            delete[] extraParamsCStr;
+            extraParamsCStr = nullptr;
+            return false;
+        }
+        if (asyncCtx.extraParams) {
+            delete[] asyncCtx.extraParams;
+            asyncCtx.extraParams = nullptr;
+        }
+        asyncCtx.extraParams = extraParamsCStr;
+    }
+    return true;
+}
+
 bool ParseDragItemInfoParam(ani_env* env, ArkUIDragControllerAsync& asyncCtx, ani_object dragItemInfo)
 {
     CHECK_NULL_RETURN(env, false);
@@ -461,12 +489,9 @@ bool ParseDragItemInfoParam(ani_env* env, ArkUIDragControllerAsync& asyncCtx, an
         HILOGE("AceDrag, get extraInfo failed.");
         return false;
     }
-    if (AniUtils::IsClassObject(env, extraInfoAni, "std.core.String")) {
-        std::string extraParamsStr = AniUtils::ANIStringToStdString(env, static_cast<ani_string>(extraInfoAni));
-        std::string extraInfoLimited = extraParamsStr.size() > EXTRA_INFO_MAX_LENGTH
-                                    ? extraParamsStr.substr(0, EXTRA_INFO_MAX_LENGTH)
-                                    : extraParamsStr;
-        asyncCtx.extraParams = extraInfoLimited.c_str();
+    if (!GetDragEventParamExtraParams(env, asyncCtx, extraInfoAni)) {
+        HILOGE("AceDrag, get extraParmas failed.");
+        return false;
     }
     if (AniUtils::IsUndefined(env, static_cast<ani_object>(pixelMapAni))) {
         HILOGI("AceDrag, failed to parse pixelMap from the first argument");
@@ -666,24 +691,12 @@ bool CheckAndParseSecondParams(ani_env* env, ArkUIDragControllerAsync& asyncCtx,
 
     asyncCtx.dragPointerEvent.pointerId = static_cast<int32_t>(pointerIdAni);
     HILOGI("AceDrag, pointerId = %{public}d", asyncCtx.dragPointerEvent.pointerId);
-    char* extraParamsCStr = nullptr;
-    if (AniUtils::IsClassObject(env, extraParamsAni, "std.core.String")) {
-        std::string extraParamsStr = AniUtils::ANIStringToStdString(env, static_cast<ani_string>(extraParamsAni));
-        std::string extraInfoLimited = extraParamsStr.size() > EXTRA_INFO_MAX_LENGTH
-                                    ? extraParamsStr.substr(0, EXTRA_INFO_MAX_LENGTH)
-                                    : extraParamsStr;
-        uint32_t extraParamsLen = extraParamsStr.size() > EXTRA_INFO_MAX_LENGTH ?
-            EXTRA_INFO_MAX_LENGTH : extraParamsStr.size();
-        extraParamsCStr = new char[extraParamsLen + 1];
-        auto errCode = strcpy_s(extraParamsCStr, extraParamsLen + 1, extraInfoLimited.c_str());
-        if (errCode != 0) {
-            HILOGE("AceDrag, get extraParams failed.");
-            delete[] extraParamsCStr;
-            extraParamsCStr = nullptr;
-            return false;
-        }
-        asyncCtx.extraParams = extraParamsCStr;
+
+    if (!GetDragEventParamExtraParams(env, asyncCtx, extraParamsAni)) {
+        HILOGE("AceDrag, get extraParmas failed.");
+        return false;
     }
+
     if (!AniUtils::IsUndefined(env, static_cast<ani_object>(dataAni))) {
         auto dataValue = OHOS::UDMF::AniConverter::UnwrapUnifiedData(env, static_cast<ani_object>(dataAni));
         if (dataValue) {
