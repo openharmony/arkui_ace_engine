@@ -71,7 +71,7 @@ namespace ToggleModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    auto frameNode = ToggleModelNG::CreateFrameNode(id, NG::ToggleType::SWITCH, false);
+    auto frameNode = ToggleModelStatic::CreateFrameNode(id, NG::ToggleType::SWITCH);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -104,8 +104,9 @@ void SetToggleOptionsImpl(Ark_NativePointer node,
     auto isOn = ProcessBindableIsOn(frameNode, options->isOn);
     if (isOn.has_value()) {
         ToggleModelNG::SetToggleState(frameNode, *isOn);
+    } else {
+        ToggleModelNG::SetToggleState(frameNode, false);
     }
-    LOGE("ToggleModifier::SetToggleOptionsImpl. Set ToggleType is not supported!");
 }
 } // ToggleInterfaceModifier
 namespace ToggleAttributeModifier {
