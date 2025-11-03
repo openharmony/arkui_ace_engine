@@ -116,7 +116,13 @@ public:
             FrameNode::GetOrCreateFrameNode("components", nodeId, []() { return AceType::MakeRefPtr<Pattern>(); });
         stack->Push(frameNode);
     }
-    void TearDown() override {}
+    void TearDown() override
+    {
+        auto* stack = ViewStackProcessor::GetInstance();
+        if (stack) {
+            stack->ClearStack();
+        }
+    }
 };
 class ViewAbstractTestFourNg : public testing::Test {
 public:
