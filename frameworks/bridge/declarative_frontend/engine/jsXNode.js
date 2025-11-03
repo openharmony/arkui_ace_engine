@@ -2688,7 +2688,7 @@ class RenderNode extends Disposable {
     constructor(type, cptrVal = 0) {
         super();
         this.nodePtr = null;
-        this.type = type;     // use for transfer 
+        this.type = type; // use for transfer 
         this.childrenList = [];
         this.parentRenderNode = null;
         this.backgroundColorValue = 0;
@@ -2718,7 +2718,7 @@ class RenderNode extends Disposable {
         if (type === 'BuilderRootFrameNode' || type === 'CustomFrameNode') {
             return;
         }
-        if (cptrVal == 0) {
+        if (cptrVal === 0 || cptrVal === null || cptrVal === undefined) {
             this._nativeRef = getUINativeModule().renderNode.createRenderNode(this);
         } else {
             this._nativeRef = getUINativeModule().renderNode.createRenderNodeWithPtrVal(this, cptrVal);
