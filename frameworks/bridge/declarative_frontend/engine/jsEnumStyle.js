@@ -3401,7 +3401,7 @@ class WaterFlowSections {
     intDeleteCount = intDeleteCount < 0 ? 0 : intDeleteCount;
 
     if (this.nativeSection) {
-      this.nativeSection.onSectionChanged({ start: intStart, deleteCount: intDeleteCount, sections: sections ? sections : [] });
+      this.nativeSection.onSectionChanged({ start: intStart, deleteCount: intDeleteCount, sections: sections ? sections : [], allSections: this.sectionArray });
     }
     this.changeFlag = !this.changeFlag;
     return true;
@@ -3414,7 +3414,7 @@ class WaterFlowSections {
     let oldLength = this.sectionArray.length;
     this.sectionArray.push(section);
     if (this.nativeSection) {
-      this.nativeSection.onSectionChanged({ start: oldLength, deleteCount: 0, sections: [section] });
+      this.nativeSection.onSectionChanged({ start: oldLength, deleteCount: 0, sections: [section], allSections: this.sectionArray });
     }
     this.changeFlag = !this.changeFlag;
     return true;
@@ -3429,7 +3429,7 @@ class WaterFlowSections {
 
     let intStart = this.toArrayIndex(sectionIndex, oldLength);
     if (this.nativeSection) {
-      this.nativeSection.onSectionChanged({ start: intStart, deleteCount: 1, sections: [section] });
+      this.nativeSection.onSectionChanged({ start: intStart, deleteCount: 1, sections: [section], allSections: this.sectionArray });
     }
     this.changeFlag = !this.changeFlag;
     return true;

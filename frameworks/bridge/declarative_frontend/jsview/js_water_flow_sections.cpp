@@ -225,6 +225,21 @@ void JSWaterFlowSections::OnSectionChanged(const JSCallbackInfo& info)
         }
     }
 
+    auto allSectionsValue = changeObject->GetProperty("allSections");
+    if (!allSectionsValue->IsArray()) {
+        return;
+    }
+    auto allSectionArray = JSRef<JSArray>::Cast(allSectionsValue);
+    auto allSectionsCount = allSectionArray->Length();
+    std::vector<NG::WaterFlowSections::Section> allSections;
+    for (size_t j = 0; j < allSectionsCount; ++j) {
+        NG::WaterFlowSections::Section section;
+        auto newSection = allSectionArray->GetValueAt(j);
+        if (JSWaterFlowSections::ParseSectionOptions(info, newSection, section)) {
+            allSections.emplace_back(section);
+        }
+    }
+
     auto start = changeObject->GetProperty("start");
     auto deleteCount = changeObject->GetProperty("deleteCount");
     if (!start->IsNumber() || !deleteCount->IsNumber()) {
@@ -235,7 +250,7 @@ void JSWaterFlowSections::OnSectionChanged(const JSCallbackInfo& info)
             it = callbacks_.erase(it);
         } else {
             if (it->second) {
-                it->second(start->ToNumber<int32_t>(), deleteCount->ToNumber<int32_t>(), newSections);
+                it->second(start->ToNumber<int32_t>(), deleteCount->ToNumber<int32_t>(), newSections, allSections);
             }
             ++it;
         }

@@ -117,22 +117,27 @@ void UpdateSections(
     }
     auto id = Container::CurrentId();
     auto callback = [id, weak = AceType::WeakClaim(AceType::RawPtr(waterFlowSections)),
-                        weakNode = AceType::WeakClaim(frameNode)](
-                        size_t start, size_t deleteCount, std::vector<NG::WaterFlowSections::Section>& newSections) {
+                        weakNode = AceType::WeakClaim(frameNode)](size_t start, size_t deleteCount,
+                        std::vector<NG::WaterFlowSections::Section>& newSections,
+                        const std::vector<NG::WaterFlowSections::Section>& allSections) {
         ContainerScope scope(id);
         auto node = weakNode.Upgrade();
         CHECK_NULL_VOID(node);
         auto context = node->GetContext();
         CHECK_NULL_VOID(context);
-        context->AddBuildFinishCallBack([start, deleteCount, change = newSections, weak]() {
+        context->AddBuildFinishCallBack([start, deleteCount, change = newSections, weak, all = allSections]() {
             auto nodeSection = weak.Upgrade();
             CHECK_NULL_VOID(nodeSection);
             nodeSection->ChangeData(start, deleteCount, change);
+            if (nodeSection->GetSectionInfo().size() != all.size()) {
+                nodeSection->ChangeData(0, nodeSection->GetSectionInfo().size(), all);
+            }
         });
         context->RequestFrame();
     };
     section->SetOnSectionChangedCallback(frameNode, callback);
-
+    // Used for makeObserved to listen and refresh status.
+    sectionsObject->GetProperty("changeFlag");
     auto allSections = sectionsObject->GetProperty("sectionArray");
     CHECK_NULL_VOID(allSections->IsArray());
     ParseSections(args, JSRef<JSArray>::Cast(allSections), waterFlowSections);
