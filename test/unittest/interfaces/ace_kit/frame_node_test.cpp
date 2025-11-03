@@ -887,4 +887,31 @@ HWTEST_F(FrameNodeTest, FrameNodeTestTest119, TestSize.Level1)
     EXPECT_TRUE(NearEqual(buttonsSize.Width(), 0.0f));
     EXPECT_TRUE(NearEqual(buttonsSize.Height(), 0.0f));
 }
+
+/**
+ * @tc.name: FrameNodeTestTest120
+ * @tc.desc: test SetOnNodeDestroyCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTest, FrameNodeTestTest120, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     */
+    constexpr char tag[] = "TEST120";
+    const int32_t id = 120;
+    auto mockPattern = AceType::MakeRefPtr<MockAceKitPattern>();
+    auto frameNode = AbstractViewFactory::CreateFrameNode(tag, id, mockPattern);
+    EXPECT_NE(frameNode, nullptr);
+
+    auto frameNodeImpl = AceType::DynamicCast<FrameNodeImpl>(frameNode);
+    ASSERT_TRUE(frameNodeImpl);
+
+    /**
+     * @tc.steps2: set destroy callback, validate result.
+     */
+    frameNodeImpl->SetOnNodeDestroyCallback([](RefPtr<FrameNode> frameNode) -> void {});
+    auto node = frameNodeImpl->PopAceNode();
+    EXPECT_NE(node->destroyCallback_, nullptr);
+}
 } // namespace OHOS::Ace
