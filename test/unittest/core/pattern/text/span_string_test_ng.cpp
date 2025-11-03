@@ -1421,8 +1421,6 @@ HWTEST_F(SpanStringTestNg, SpanString010, TestSize.Level1)
 
     auto customSpan = AceType::MakeRefPtr<CustomSpan>();
     auto customSpanItem = AceType::MakeRefPtr<NG::CustomSpanItem>();
-    auto span1 = customSpanItem->GetSameStyleSpanItem(true);
-    span1->content = u" ";
     customSpan->ApplyToSpanItem(spanItem, SpanOperation::ADD);
     customSpan->ApplyToSpanItem(customSpanItem, SpanOperation::ADD);
     customSpan->ApplyToSpanItem(customSpanItem, SpanOperation::REMOVE);
