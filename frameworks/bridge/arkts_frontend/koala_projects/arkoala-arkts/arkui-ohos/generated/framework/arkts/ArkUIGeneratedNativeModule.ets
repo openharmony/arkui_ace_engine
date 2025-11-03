@@ -4012,9 +4012,9 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _FrameNodeExtender_isModifiable(peer: KPointer): boolean
     @ani.unsafe.Direct
-    native static _FrameNodeExtender_appendChild(peer: KPointer, child: KPointer): double
+    native static _FrameNodeExtender_appendChild(peer: KPointer, child: KPointer): int32
     @ani.unsafe.Direct
-    native static _FrameNodeExtender_insertChildAfter(peer: KPointer, child: KPointer, sibling: KPointer): double
+    native static _FrameNodeExtender_insertChildAfter(peer: KPointer, child: KPointer, sibling: KPointer): int32
     @ani.unsafe.Direct
     native static _FrameNodeExtender_removeChild(peer: KPointer, child: KPointer): void
     @ani.unsafe.Direct
@@ -4096,7 +4096,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _FrameNodeExtender_getIdByFrameNode(node: KPointer): number
     @ani.unsafe.Direct
-    native static _FrameNodeExtender_moveTo(peer: KPointer, targetParent: KPointer, index: number): double
+    native static _FrameNodeExtender_moveTo(peer: KPointer, targetParent: KPointer, index: number): int32
     @ani.unsafe.Direct
     native static _FrameNodeExtender_getFirstChildIndexWithoutExpand(peer: KPointer): number
     @ani.unsafe.Direct
@@ -4132,9 +4132,9 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _FrameNodeExtender_convertPoint(peer: KPointer, node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KInteropReturnBuffer
     @ani.unsafe.Direct
-    native static _FrameNodeExtender_adoptChild(peer: KPointer, child: KPointer): double
+    native static _FrameNodeExtender_adoptChild(peer: KPointer, child: KPointer): int32
     @ani.unsafe.Direct
-    native static _FrameNodeExtender_removeAdoptedChild(peer: KPointer, child: KPointer): double
+    native static _FrameNodeExtender_removeAdoptedChild(peer: KPointer, child: KPointer): int32
     @ani.unsafe.Direct
     native static _FrictionMotion_construct(friction: number, position: number, velocity: number): KPointer
     @ani.unsafe.Direct
@@ -4881,7 +4881,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _NodeContentExtender_getDestroy(): KPointer
     @ani.unsafe.Direct
-    native static _NodeContentExtender_addFrameNode(content: KPointer, node: KPointer): double
+    native static _NodeContentExtender_addFrameNode(content: KPointer, node: KPointer): int32
     @ani.unsafe.Direct
     native static _NodeContentExtender_removeFrameNode(content: KPointer, node: KPointer): boolean
     @ani.unsafe.Direct
@@ -5149,9 +5149,9 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _RenderNodeExtender_setPathClip(peer: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _RenderNodeExtender_appendChild(peer: KPointer, node: KPointer): double
+    native static _RenderNodeExtender_appendChild(peer: KPointer, node: KPointer): int32
     @ani.unsafe.Direct
-    native static _RenderNodeExtender_insertChildAfter(peer: KPointer, child: KPointer, sibling: KPointer): double
+    native static _RenderNodeExtender_insertChildAfter(peer: KPointer, child: KPointer, sibling: KPointer): int32
     @ani.unsafe.Direct
     native static _RenderNodeExtender_removeChild(peer: KPointer, node: KPointer): void
     @ani.unsafe.Direct

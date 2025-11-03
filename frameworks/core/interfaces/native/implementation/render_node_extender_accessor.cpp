@@ -740,42 +740,42 @@ void SetPathClipImpl(Ark_RenderNode peer,
     renderContext->SetClipBoundsWithCommands(pathValue);
     renderContext->RequestNextFrame();
 }
-Ark_Float64 AppendChildImpl(Ark_RenderNode peer,
-                            Ark_RenderNode node)
+Ark_Int32 AppendChildImpl(Ark_RenderNode peer,
+                          Ark_RenderNode node)
 {
     if (!peer || !node) {
         LOGW("This renderNode or child is nullptr when appendChild !");
-        return Converter::ArkValue<Ark_Float64>(ERROR_CODE_PARAM_INVALID);
+        return ERROR_CODE_PARAM_INVALID;
     }
     auto parent = peer->GetFrameNode();
     auto child = node->GetFrameNode();
     if (parent && child) {
         if (child->IsAdopted()) {
-            return Converter::ArkValue<Ark_Float64>(ERROR_CODE_NODE_IS_ADOPTED);
+            return ERROR_CODE_NODE_IS_ADOPTED;
         }
         parent->AddChild(child);
         parent->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
     }
-    return Converter::ArkValue<Ark_Float64>(ERROR_CODE_NO_ERROR);
+    return ERROR_CODE_NO_ERROR;
 }
-Ark_Float64 InsertChildAfterImpl(Ark_RenderNode peer,
-                                 Ark_RenderNode child,
-                                 Ark_RenderNode sibling)
+Ark_Int32 InsertChildAfterImpl(Ark_RenderNode peer,
+                               Ark_RenderNode child,
+                               Ark_RenderNode sibling)
 {
     if (!peer || !child) {
         LOGW("This renderNode or child is nullptr when InsertChildAfter !");
-        return Converter::ArkValue<Ark_Float64>(ERROR_CODE_PARAM_INVALID);
+        return ERROR_CODE_PARAM_INVALID;
     }
     auto currentNode = peer->GetFrameNode();
     auto childNode = child->GetFrameNode();
     if (childNode && childNode->IsAdopted()) {
-        return Converter::ArkValue<Ark_Float64>(ERROR_CODE_NODE_IS_ADOPTED);
+        return ERROR_CODE_NODE_IS_ADOPTED;
     }
     auto siblingNode = sibling->GetFrameNode();
     auto index = currentNode->GetChildIndex(siblingNode);
     currentNode->AddChild(childNode, index + 1);
     currentNode->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
-    return Converter::ArkValue<Ark_Float64>(ERROR_CODE_NO_ERROR);
+    return ERROR_CODE_NO_ERROR;
 }
 void RemoveChildImpl(Ark_RenderNode peer,
                      Ark_RenderNode node)

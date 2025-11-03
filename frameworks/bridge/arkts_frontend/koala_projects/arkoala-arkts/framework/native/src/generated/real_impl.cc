@@ -12966,14 +12966,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         CHECK_NULL_VOID(frameNode);
         return {};
     }
-    Ark_Float64 AppendChildImpl(Ark_FrameNode peer,
-                                Ark_FrameNode child)
+    Ark_Int32 AppendChildImpl(Ark_FrameNode peer,
+                              Ark_FrameNode child)
     {
         return {};
     }
-    Ark_Float64 InsertChildAfterImpl(Ark_NativePointer peer,
-                                     Ark_NativePointer child,
-                                     Ark_NativePointer sibling)
+    Ark_Int32 InsertChildAfterImpl(Ark_NativePointer peer,
+                                   Ark_NativePointer child,
+                                   Ark_NativePointer sibling)
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
@@ -13139,9 +13139,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         CHECK_NULL_VOID(frameNode);
         return {};
     }
-    Ark_Float64 MoveToImpl(Ark_FrameNode peer,
-                          Ark_FrameNode targetParent,
-                          const Ark_Number* index)
+    Ark_Int32 MoveToImpl(Ark_FrameNode peer,
+                         Ark_FrameNode targetParent,
+                         const Ark_Number* index)
     {
         return {};
     }
@@ -13209,13 +13209,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
-    Ark_Float64 AdoptChildImpl(Ark_FrameNode peer,
-                               Ark_FrameNode child)
+    Ark_Int32 AdoptChildImpl(Ark_FrameNode peer,
+                             Ark_FrameNode child)
     {
         return {};
     }
-    Ark_Float64 RemoveAdoptedChildImpl(Ark_FrameNode peer,
-                                       Ark_FrameNode child)
+    Ark_Int32 RemoveAdoptedChildImpl(Ark_FrameNode peer,
+                                     Ark_FrameNode child)
     {
         return {};
     }
@@ -15213,8 +15213,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
-    Ark_Float64 AddFrameNodeImpl(Ark_NativePointer content,
-                                 Ark_NativePointer node)
+    Ark_Int32 AddFrameNodeImpl(Ark_NativePointer content,
+                               Ark_NativePointer node)
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);

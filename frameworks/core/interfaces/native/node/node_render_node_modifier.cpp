@@ -1511,7 +1511,7 @@ ArkUI_Int32 AdoptChild(ArkUINodeHandle node, ArkUINodeHandle child)
 ArkUI_Int32 GetRenderNode(ArkUINodeHandle node, ArkUIRenderNodeHandle* renderNode, ArkUI_Int32* renderNodeId)
 {
     ViewAbstract::CheckMainThread();
-    CHECK_NULL_RETURN(renderNode && renderNodeId, ERROR_CODE_CAPI_INIT_ERROR);
+    CHECK_NULL_RETURN(renderNode && renderNodeId, ERROR_CODE_PARAM_INVALID);
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_CODE_RENDER_NOT_ADOPTED_NODE);
     if (!frameNode->IsAdopted()) {

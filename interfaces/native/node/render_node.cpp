@@ -1733,7 +1733,7 @@ int32_t OH_ArkUI_RenderNodeUtils_GetRenderNode(ArkUI_NodeHandle node, ArkUI_Rend
         node->uiNodeHandle, &renderNodeHandle, &renderNodeId);
     if (result == OHOS::Ace::ERROR_CODE_NO_ERROR) {
         auto iter = g_renderNodeMap.find(renderNodeId);
-        if (iter != g_renderNodeMap.end()) {
+        if (iter == g_renderNodeMap.end()) {
             g_renderNodeMap.insert(std::pair<int32_t, ArkUIRenderNodeHandle>(renderNodeId, renderNodeHandle));
         }
         *renderNode = new ArkUI_RenderNode({ renderNodeHandle });

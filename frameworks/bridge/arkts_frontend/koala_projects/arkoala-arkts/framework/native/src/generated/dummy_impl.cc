@@ -29838,29 +29838,29 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return 0;
     }
-    Ark_Float64 AppendChildImpl(Ark_FrameNode peer,
-                                Ark_FrameNode child)
+    Ark_Int32 AppendChildImpl(Ark_FrameNode peer,
+                              Ark_FrameNode child)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("appendChild(");
         WriteToString(&out, peer);
         out.append(", ");
         WriteToString(&out, child);
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
-    Ark_Float64 InsertChildAfterImpl(Ark_NativePointer peer,
-                                     Ark_NativePointer child,
-                                     Ark_NativePointer sibling)
+    Ark_Int32 InsertChildAfterImpl(Ark_NativePointer peer,
+                                   Ark_NativePointer child,
+                                   Ark_NativePointer sibling)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("insertChildAfter(");
         WriteToString(&out, peer);
@@ -29869,9 +29869,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(", ");
         WriteToString(&out, sibling);
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void RemoveChildImpl(Ark_FrameNode peer,
                          Ark_FrameNode child)
@@ -30623,37 +30623,37 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return reinterpret_cast<Ark_UICommonEvent>(300);
     }
-    Ark_Float64 AdoptChildImpl(Ark_FrameNode peer,
-                               Ark_FrameNode child)
+    Ark_Int32 AdoptChildImpl(Ark_FrameNode peer,
+                             Ark_FrameNode child)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("adoptChild(");
         WriteToString(&out, peer);
         out.append(", ");
         WriteToString(&out, child);
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
-    Ark_Float64 RemoveAdoptedChildImpl(Ark_FrameNode peer,
-                                       Ark_FrameNode child)
+    Ark_Int32 RemoveAdoptedChildImpl(Ark_FrameNode peer,
+                                     Ark_FrameNode child)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("removeAdoptedChild(");
         WriteToString(&out, peer);
         out.append(", ");
         WriteToString(&out, child);
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     } // FrameNodeExtenderAccessor
     namespace FrictionMotionAccessor {
@@ -36000,21 +36000,21 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return nullptr;
     }
-    Ark_Float64 AddFrameNodeImpl(Ark_NativePointer content,
-                                 Ark_NativePointer node)
+    Ark_Int32 AddFrameNodeImpl(Ark_NativePointer content,
+                               Ark_NativePointer node)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("addFrameNode(");
         WriteToString(&out, content);
         out.append(", ");
         WriteToString(&out, node);
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     Ark_Boolean RemoveFrameNodeImpl(Ark_NativePointer content,
                                     Ark_NativePointer node)
