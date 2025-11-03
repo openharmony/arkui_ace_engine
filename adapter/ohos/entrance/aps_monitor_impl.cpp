@@ -81,5 +81,8 @@ void ApsMonitorImpl::LoadApsFuncOnce()
 
 void ApsMonitorImpl::ReSetApsClient()
 {
+    if (resetFunc_ != nullptr) {
+        resetFunc_();
+    }
 }
 } // namespace OHOS::Ace
