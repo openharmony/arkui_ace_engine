@@ -13647,7 +13647,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                            Ark_Boolean isFrozen)
     {
     }
-    Ark_Boolean DispatchKeyEventImpl(const Ark_Union_Number_String* node,
+    Ark_Boolean DispatchKeyEventImpl(const Ark_Union_Int32_String* node,
                                      Ark_KeyEvent event)
     {
         return {};

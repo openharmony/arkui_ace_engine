@@ -31828,7 +31828,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Boolean DispatchKeyEventImpl(const Ark_Union_Number_String* node,
+    Ark_Boolean DispatchKeyEventImpl(const Ark_Union_Int32_String* node,
                                      Ark_KeyEvent event)
     {
         if (!needGroupedLog(1))

@@ -7756,7 +7756,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     tabStop_value?: boolean | undefined
     onFocus_value?: (() => void) | undefined
     onBlur_value?: (() => void) | undefined
-    tabIndex_value?: number | undefined
+    tabIndex_value?: int32 | undefined
     defaultFocus_value?: boolean | undefined
     groupDefaultFocus_value?: boolean | undefined
     focusOnTouch_value?: boolean | undefined
@@ -8024,7 +8024,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     onBlur(value: (() => void) | undefined): this {
         return this
     }
-    tabIndex(value: number | undefined): this {
+    tabIndex(value: int32 | undefined): this {
         return this
     }
     defaultFocus(value: boolean | undefined): this {

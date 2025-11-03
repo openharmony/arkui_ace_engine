@@ -262,28 +262,28 @@ export class ComponentSnapshot {
     }
     //@ts-ignore
     public createFromBuilder(builder: CustomBuilder, callback: AsyncCallback<PixelMap>,
-                             delay?: number, checkImageStatus?: boolean,
+                             delay?: int, checkImageStatus?: boolean,
                              options?: componentSnapshot.SnapshotOptions): void {
         throw Error("createFromBuilder with callback not implemented in ComponentSnapshot!")
     }
     //@ts-ignore
-    public createFromBuilder(builder: CustomBuilder, delay?: number, checkImageStatus?: boolean,
+    public createFromBuilder(builder: CustomBuilder, delay?: int, checkImageStatus?: boolean,
                              options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> {
         throw Error("createFromBuilder with promise not implemented in ComponentSnapshot!")
     }
     public getSync(id: string, options?: componentSnapshot.SnapshotOptions): PixelMap {
         throw Error("getSync not implemented in ComponentSnapshot!")
     }
-    public getWithUniqueId(uniqueId: number, options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> {
+    public getWithUniqueId(uniqueId: int, options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> {
         throw Error("getWithUniqueId not implemented in ComponentSnapshot!")
     }
 
-    public getSyncWithUniqueId(uniqueId: number, options?: componentSnapshot.SnapshotOptions): PixelMap {
+    public getSyncWithUniqueId(uniqueId: int, options?: componentSnapshot.SnapshotOptions): PixelMap {
         throw Error("getSyncWithUniqueId not implemented in ComponentSnapshot!")
     }
 
-    public createFromComponent<T extends Object>(content: ComponentContent<T>, delay?: number, checkImageStatus?: boolean, options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> {
-        throw Error("getSyncWithUniqueId not implemented in ComponentSnapshot!")
+    public createFromComponent<T extends Object>(content: ComponentContent<T>, delay?: int, checkImageStatus?: boolean, options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> {
+        throw Error("createFromComponent not implemented in ComponentSnapshot!")
     }
 }
 
@@ -553,7 +553,7 @@ export class UIContext {
         throw Error("getAtomicServiceBar not implemented in UIContext!")
     }
 
-    public dispatchKeyEvent(node: number | string, event: KeyEvent): boolean {
+    public dispatchKeyEvent(node: int | string, event: KeyEvent): boolean {
         throw Error("dispatchKeyEvent not implemented in UIContext!")
     }
 
