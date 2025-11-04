@@ -148,8 +148,8 @@ export class ArkScrollNode extends ArkScrollableNode implements ScrollAttribute 
         this.markDirty()
         return this
     }
-    attributeModifier(value: AttributeModifier<ScrollAttribute> |
-        AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this {
+    attributeModifier(value: AttributeModifier<ScrollAttribute> | AttributeModifier<ScrollableCommonMethod> |
+        AttributeModifier<CommonMethod> | undefined): this {
         throw new Error('Unimplemented method attributeModifier')
     }
 }

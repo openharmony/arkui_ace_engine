@@ -119,13 +119,15 @@ export class ArkGridNode extends ArkScrollableNode implements GridAttribute {
     cachedCount(count: number | undefined, show: boolean | undefined): this {
         const count_type = runtimeType(count)
         const show_type = runtimeType(show)
-        if (((RuntimeType.NUMBER == count_type) || (RuntimeType.UNDEFINED == count_type)) && (RuntimeType.UNDEFINED == show_type)) {
+        if (((RuntimeType.NUMBER == count_type) || (RuntimeType.UNDEFINED == count_type)) &&
+            (RuntimeType.UNDEFINED == show_type)) {
             const value_casted = count as (number | undefined)
             this.getPeer()?.setCachedCount0Attribute(value_casted)
             this.markDirty()
             return this
         }
-        if (((RuntimeType.NUMBER == count_type) || (RuntimeType.UNDEFINED == count_type)) && ((RuntimeType.BOOLEAN == show_type) || (RuntimeType.UNDEFINED == show_type))) {
+        if (((RuntimeType.NUMBER == count_type) || (RuntimeType.UNDEFINED == count_type)) &&
+            ((RuntimeType.BOOLEAN == show_type) || (RuntimeType.UNDEFINED == show_type))) {
             const count_casted = count as (number | undefined)
             const show_casted = show as (boolean | undefined)
             this.getPeer()?.setCachedCount1Attribute(count_casted, show_casted)
@@ -201,7 +203,8 @@ export class ArkGridNode extends ArkScrollableNode implements GridAttribute {
         return this
     }
     onItemDrop(value: ((event: ItemDragInfo,itemIndex: number,insertIndex: number,isSuccess: boolean) => void) | undefined): this {
-        const value_casted = value as (((event: ItemDragInfo,itemIndex: number,insertIndex: number,isSuccess: boolean) => void) | undefined)
+        const value_casted = value as (((event: ItemDragInfo,itemIndex: number,
+        insertIndex: number,isSuccess: boolean) => void) | undefined)
         this.getPeer()?.setOnItemDropAttribute(value_casted)
         this.markDirty()
         return this
