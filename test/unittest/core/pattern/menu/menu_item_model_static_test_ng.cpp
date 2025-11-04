@@ -495,6 +495,7 @@ HWTEST_F(MenuItemModelStaticTestNg, SetSymbolEndIcon001, TestSize.Level1)
 
     auto menuProperty = frameNode->GetLayoutProperty<MenuItemLayoutProperty>();
     ASSERT_NE(menuProperty, nullptr);
+    
     ASSERT_NE(menuProperty->GetEndSymbol(), nullptr);
 }
 
