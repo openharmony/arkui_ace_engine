@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_FONT_CONSTANTS_CONVERTER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_FONT_CONSTANTS_CONVERTER_H
 
+#include "rosen_text/typography.h"
 #include "rosen_text/typography_types.h"
 #include "SkColor.h"
 #include "symbol_constants.h"

@@ -32,6 +32,7 @@ namespace OHOS::Ace::NG {
 constexpr uint32_t DEFAULT_MIN_LINES = 0;
 constexpr int32_t DEFAULT_ALPHA = 255;
 constexpr float DEFAULT_OPACITY = 0.2;
+constexpr float DEFAULT_LINE_THICKNESS_SCALE = 1.0f;
 
 void TextModelNG::Create(const std::u16string& content)
 {
@@ -1126,6 +1127,14 @@ TextDecorationStyle TextModelNG::GetTextDecorationStyle(FrameNode* frameNode)
     return layoutProperty->GetTextDecorationStyle().value_or(TextDecorationStyle::SOLID);
 }
 
+float TextModelNG::GetLineThicknessScale(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, DEFAULT_LINE_THICKNESS_SCALE);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, DEFAULT_LINE_THICKNESS_SCALE);
+    return layoutProperty->GetLineThicknessScale().value_or(DEFAULT_LINE_THICKNESS_SCALE);
+}
+
 TextCase TextModelNG::GetTextCase(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, TextCase::NORMAL);
@@ -1651,6 +1660,31 @@ size_t TextModelNG::GetLineCount(FrameNode* frameNode)
     auto textPattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_RETURN(textPattern, 0);
     return textPattern->GetLineCount();
+}
+
+std::vector<ParagraphManager::TextBox> TextModelNG::GetRectsForRange(
+    FrameNode* frameNode, int32_t start, int32_t end, RectHeightStyle heightStyle, RectWidthStyle widthStyle)
+{
+    CHECK_NULL_RETURN(frameNode, {});
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_RETURN(textPattern, {});
+    return textPattern->GetRectsForRange(start, end, heightStyle, widthStyle);
+}
+
+PositionWithAffinity TextModelNG::GetGlyphPositionAtCoordinate(FrameNode* frameNode, double dx, double dy)
+{
+    CHECK_NULL_RETURN(frameNode, PositionWithAffinity(0, TextAffinity::UPSTREAM));
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_RETURN(textPattern, PositionWithAffinity(0, TextAffinity::UPSTREAM));
+    return textPattern->GetGlyphPositionAtCoordinate(dx, dy);
+}
+
+TextLineMetrics TextModelNG::GetLineMetrics(FrameNode* frameNode, int32_t lineNumber)
+{
+    CHECK_NULL_RETURN(frameNode, TextLineMetrics());
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_RETURN(textPattern, TextLineMetrics());
+    return textPattern->GetLineMetrics(lineNumber);
 }
 
 void TextModelNG::SetOptimizeTrailingSpace(bool trim)

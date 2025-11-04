@@ -110,6 +110,7 @@ constexpr int32_t GRAY_SCALE_END = 5;
 constexpr float MAX_GRAYSCALE = 127.0f;
 constexpr int32_t DECORATION_COLOR_INDEX = 1;
 constexpr int32_t DECORATION_STYLE_INDEX = 2;
+constexpr int32_t DECORATION_THICKNESS_SCALE_INDEX = 3;
 constexpr int32_t PROGRESS_TYPE_LINEAR = 1;
 constexpr int32_t PROGRESS_TYPE_RING = 2;
 constexpr int32_t PROGRESS_TYPE_SCALE = 3;
@@ -12088,6 +12089,12 @@ int32_t SetDecoration(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     if (DECORATION_STYLE_INDEX < actualSize) {
         decorationStyle = item->value[DECORATION_STYLE_INDEX].i32;
     }
+    float thicknessScale = 1.0f;
+    if (DECORATION_THICKNESS_SCALE_INDEX < actualSize &&
+        GreatOrEqualTargetAPIVersion(OHOS::Ace::PlatformVersion::VERSION_TWENTY_THREE)) {
+        thicknessScale = item->value[DECORATION_THICKNESS_SCALE_INDEX].f32;
+        thicknessScale = thicknessScale < 0 ? 1.0f : thicknessScale;
+    }
     switch (node->type) {
         case ARKUI_NODE_SPAN:
             fullImpl->getNodeModifiers()->getSpanModifier()->setSpanDecoration(
@@ -12095,7 +12102,7 @@ int32_t SetDecoration(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
             break;
         case ARKUI_NODE_TEXT:
             fullImpl->getNodeModifiers()->getTextModifier()->setTextDecoration(
-                node->uiNodeHandle, decoration, decorationColor, nullptr, decorationStyle, 1.0f);
+                node->uiNodeHandle, decoration, decorationColor, nullptr, decorationStyle, thicknessScale);
             break;
         default:
             break;
@@ -12644,6 +12651,14 @@ void ResetTextDataDetectorConfig(ArkUI_NodeHandle node)
 {
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getTextModifier()->resetTextDataDetectorConfig(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetTextLayoutManager(ArkUI_NodeHandle node)
+{
+    ArkUI_TextLayoutManager* layoutManager = new ArkUI_TextLayoutManager();
+    layoutManager->node = node;
+    g_attributeItem.object = layoutManager;
+    return &g_attributeItem;
 }
 
 int32_t SetSelectDetectorEnable(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
@@ -14813,7 +14828,8 @@ const ArkUI_AttributeItem* GetDecoration(ArkUI_NodeHandle node)
             g_numberValues[0].i32 = textDecorationType.decorationType;
             g_numberValues[DECORATION_COLOR_INDEX].u32 = textDecorationType.color;
             g_numberValues[DECORATION_STYLE_INDEX].i32 = textDecorationType.style;
-            g_attributeItem.size = NUM_3;
+            g_numberValues[DECORATION_THICKNESS_SCALE_INDEX].f32 = textDecorationType.lineThicknessScale;
+            g_attributeItem.size = NUM_4;
             break;
         }
         default:
@@ -17815,7 +17831,8 @@ int32_t SetTextAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_A
         SetFontFeature, SetTextEnableDateDetector, SetTextDataDetectorConfig, SetTextSelectedBackgroundColor,
         SetTextContentWithStyledString, SetHalfLeading, SetImmutableFontWeight, SetLineCount, SetOptimizeTrailingSpace,
         SetTextLinearGradient, SetTextRadialGradient, SetTextVerticalAlign, SetTextContentAlign, SetTextMinLines,
-        SetSelectDetectorEnable, SetSelectDetectorConfig, SetMinLineHeight, SetMaxLineHeight, SetLineHeightMultiple };
+        SetSelectDetectorEnable, SetSelectDetectorConfig, SetMinLineHeight, SetMaxLineHeight, SetLineHeightMultiple,
+        nullptr };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "text node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -17832,7 +17849,7 @@ const ArkUI_AttributeItem* GetTextAttribute(ArkUI_NodeHandle node, int32_t subTy
         GetFontFeature, GetTextEnableDateDetector, GetTextDataDetectorConfig, GetTextSelectedBackgroundColor, nullptr,
         GetHalfLeading, GetFontWeight, GetLineCount, GetOptimizeTrailingSpace, GetTextLinearGradient,
         GetTextRadialGradient, GetTextVerticalAlign, GetTextContentAlign, GetTextMinLines, GetSelectDetectorEnable,
-        GetSelectDetectorConfig, GetMinLineHeight, GetMaxLineHeight, GetLineHeightMultiple };
+        GetSelectDetectorConfig, GetMinLineHeight, GetMaxLineHeight, GetLineHeightMultiple, GetTextLayoutManager };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*) || !getters[subTypeId]) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "text node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -17852,7 +17869,7 @@ void ResetTextAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetHalfLeading, ResetFontWeight, ResetLineCount, ResetOptimizeTrailingSpace, ResetTextLinearGradient,
         ResetTextRadialGradient, ResetTextVerticalAlign, ResetTextContentAlign, ResetTextMinLines,
         ResetSelectDetectorEnable, ResetSelectDetectorConfig, ResetMinLineHeight, ResetMaxLineHeight,
-        ResetLineHeightMultiple };
+        ResetLineHeightMultiple, nullptr };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "text node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;

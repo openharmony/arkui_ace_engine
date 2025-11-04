@@ -4382,5 +4382,25 @@
     {
         "first_introduced": "23",
         "name": "OH_ArkUI_NativeModule_RemoveAdoptedChild"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextLayoutManager_Dispose"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextLayoutManager_GetLineCount"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextLayoutManager_GetRectsForRange"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextLayoutManager_GetGlyphPositionAtCoordinate"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_TextLayoutManager_GetLineMetrics"
     }
 ]

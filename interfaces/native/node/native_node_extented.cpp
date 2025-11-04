@@ -16,6 +16,7 @@
 #include <cstdint>
 #include "native_styled_string.h"
 #include "node_extened.h"
+#include "node_model.h"
 #include "styled_string.h"
 
 #include "base/utils/utils.h"
@@ -1435,6 +1436,95 @@ uint32_t OH_ArkUI_ShowCounterConfig_GetCounterTextOverflowColor(ArkUI_ShowCounte
 {
     CHECK_NULL_RETURN(config, 0);
     return config->counterTextOverflowColor.value;
+}
+
+void OH_ArkUI_TextLayoutManager_Dispose(ArkUI_TextLayoutManager* layoutManager)
+{
+    delete layoutManager;
+    layoutManager = nullptr;
+}
+
+ArkUI_ErrorCode OH_ArkUI_TextLayoutManager_GetLineCount(ArkUI_TextLayoutManager* layoutManager, int32_t* outLineCount)
+{
+    CHECK_NULL_RETURN(layoutManager, ARKUI_ERROR_CODE_PARAM_INVALID);
+    ArkUI_NodeHandle node = layoutManager->node;
+    CHECK_NULL_RETURN(node, ARKUI_ERROR_CODE_PARAM_INVALID);
+    auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
+    *outLineCount = fullImpl->getNodeModifiers()->getTextModifier()->getLineCount(node->uiNodeHandle);
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_TextLayoutManager_GetRectsForRange(ArkUI_TextLayoutManager* layoutManager,
+    int32_t start, int32_t end, OH_Drawing_RectWidthStyle widthStyle, OH_Drawing_RectHeightStyle heightStyle,
+    OH_Drawing_TextBox** outTextBoxes)
+{
+    CHECK_NULL_RETURN(layoutManager, ARKUI_ERROR_CODE_PARAM_INVALID);
+    ArkUI_NodeHandle node = layoutManager->node;
+    CHECK_NULL_RETURN(node, ARKUI_ERROR_CODE_PARAM_INVALID);
+    if (start < 0 || end < 0 || start > end) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
+    *outTextBoxes = reinterpret_cast<OH_Drawing_TextBox*>(
+        fullImpl->getNodeModifiers()->getTextModifier()->getRectsForRange(node->uiNodeHandle, start, end,
+            static_cast<ArkUI_Int32>(heightStyle), static_cast<ArkUI_Int32>(widthStyle)));
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_TextLayoutManager_GetGlyphPositionAtCoordinate(
+    ArkUI_TextLayoutManager* layoutManager, double dx, double dy, OH_Drawing_PositionAndAffinity** outPos)
+{
+    CHECK_NULL_RETURN(layoutManager, ARKUI_ERROR_CODE_PARAM_INVALID);
+    ArkUI_NodeHandle node = layoutManager->node;
+    CHECK_NULL_RETURN(node, ARKUI_ERROR_CODE_PARAM_INVALID);
+    auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
+    *outPos = reinterpret_cast<OH_Drawing_PositionAndAffinity*>(
+        fullImpl->getNodeModifiers()->getTextModifier()->getGlyphPositionAtCoordinate(node->uiNodeHandle, dx, dy));
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_TextLayoutManager_GetLineMetrics(ArkUI_TextLayoutManager* layoutManager,
+    int32_t lineNumber, OH_Drawing_LineMetrics* outMetrics)
+{
+    CHECK_NULL_RETURN(layoutManager, ARKUI_ERROR_CODE_PARAM_INVALID);
+    ArkUI_NodeHandle node = layoutManager->node;
+    CHECK_NULL_RETURN(node, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(outMetrics, ARKUI_ERROR_CODE_PARAM_INVALID);
+    auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
+    int32_t lineCount = fullImpl->getNodeModifiers()->getTextModifier()->getLineCount(node->uiNodeHandle);
+    if (lineNumber < 0 || lineNumber >= lineCount) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    ArkUITextLineMetrics lineMetrics =
+        fullImpl->getNodeModifiers()->getTextModifier()->getLineMetrics(node->uiNodeHandle, lineNumber);
+    outMetrics->ascender = lineMetrics.ascender;
+    outMetrics->descender = lineMetrics.descender;
+    outMetrics->capHeight = lineMetrics.capHeight;
+    outMetrics->xHeight = lineMetrics.xHeight;
+    outMetrics->width = lineMetrics.width;
+    outMetrics->height = lineMetrics.height;
+    outMetrics->x = lineMetrics.x;
+    outMetrics->y = lineMetrics.y;
+    outMetrics->startIndex = lineMetrics.startIndex;
+    outMetrics->endIndex = lineMetrics.endIndex;
+    ArkUIFontMetrics firstCharMetrics = lineMetrics.firstCharMetrics;
+    outMetrics->firstCharMetrics.flags = firstCharMetrics.fFlags;
+    outMetrics->firstCharMetrics.top = firstCharMetrics.fTop;
+    outMetrics->firstCharMetrics.ascent = firstCharMetrics.fAscent;
+    outMetrics->firstCharMetrics.descent = firstCharMetrics.fDescent;
+    outMetrics->firstCharMetrics.bottom = firstCharMetrics.fBottom;
+    outMetrics->firstCharMetrics.leading = firstCharMetrics.fLeading;
+    outMetrics->firstCharMetrics.avgCharWidth = firstCharMetrics.fAvgCharWidth;
+    outMetrics->firstCharMetrics.maxCharWidth = firstCharMetrics.fMaxCharWidth;
+    outMetrics->firstCharMetrics.xMin = firstCharMetrics.fXMin;
+    outMetrics->firstCharMetrics.xMax = firstCharMetrics.fXMax;
+    outMetrics->firstCharMetrics.xHeight = firstCharMetrics.fXHeight;
+    outMetrics->firstCharMetrics.capHeight = firstCharMetrics.fCapHeight;
+    outMetrics->firstCharMetrics.underlineThickness = firstCharMetrics.fUnderlineThickness;
+    outMetrics->firstCharMetrics.underlinePosition = firstCharMetrics.fUnderlinePosition;
+    outMetrics->firstCharMetrics.strikeoutThickness = firstCharMetrics.fStrikeoutThickness;
+    outMetrics->firstCharMetrics.strikeoutPosition = firstCharMetrics.fStrikeoutPosition;
+    return ARKUI_ERROR_CODE_NO_ERROR;
 }
 #ifdef __cplusplus
 };
