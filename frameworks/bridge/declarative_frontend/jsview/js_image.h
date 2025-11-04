@@ -88,6 +88,10 @@ public:
     static bool IsImageAltObject(JSRef<JSVal> val);
     static void ParseAltImageAlt(JSRef<JSVal> val, bool isCard, int32_t type);
     static void HandleAltType(int32_t type, const ImageSourceInfo& srcInfo);
+    static void SetImageLengthMetricsBorderRadiusWithResObj(JSRef<JSObject>& object, CalcDimension& topLeft,
+        CalcDimension& topRight, CalcDimension& bottomLeft, CalcDimension& bottomRight);
+    static void SetImageBorderRadiusWithResObj(JSRef<JSObject>& object, CalcDimension& topLeft, CalcDimension& topRight,
+        CalcDimension& bottomLeft, CalcDimension& bottomRight);
 
 protected:
     static void SetBorder(const Border& border);

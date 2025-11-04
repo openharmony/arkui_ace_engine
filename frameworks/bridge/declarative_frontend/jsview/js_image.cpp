@@ -67,6 +67,10 @@ constexpr char DRAWABLE_DESCRIPTOR_NAME[] = "DrawableDescriptor";
 constexpr char LAYERED_DRAWABLE_DESCRIPTOR_NAME[] = "LayeredDrawableDescriptor";
 constexpr char ANIMATED_DRAWABLE_DESCRIPTOR_NAME[] = "AnimatedDrawableDescriptor";
 constexpr char PIXELMAP_DRAWABLE_DESCRIPTOR_NAME[] = "PixelMapDrawableDescriptor";
+const char* TOP_START_PROPERTY = "topStart";
+const char* TOP_END_PROPERTY = "topEnd";
+const char* BOTTOM_START_PROPERTY = "bottomStart";
+const char* BOTTOM_END_PROPERTY = "bottomEnd";
 } // namespace
 
 namespace OHOS::Ace {
@@ -518,6 +522,63 @@ void SetImageBorderRadius(const CalcDimension& topLeft, const CalcDimension& top
     ViewAbstractModel::GetInstance()->SetBorderRadius(topLeft, topRight, bottomLeft, bottomRight);
 }
 
+void JSImage::SetImageLengthMetricsBorderRadiusWithResObj(JSRef<JSObject>& object, CalcDimension& topLeft,
+    CalcDimension& topRight, CalcDimension& bottomLeft, CalcDimension& bottomRight)
+{
+    NG::BorderRadiusProperty borderRadiusProperty;
+    RefPtr<ResourceObject> topLeftResObj;
+    RefPtr<ResourceObject> topRightResObj;
+    RefPtr<ResourceObject> bottomLeftResObj;
+    RefPtr<ResourceObject> bottomRightResObj;
+    if (object->HasProperty(TOP_START_PROPERTY) && object->GetProperty(TOP_START_PROPERTY)->IsObject()) {
+        JSRef<JSObject> startObj = JSRef<JSObject>::Cast(object->GetProperty(TOP_START_PROPERTY));
+        ParseJsLengthMetricsVpWithResObj(startObj, topLeft, topLeftResObj);
+    }
+    if (object->HasProperty(TOP_END_PROPERTY) && object->GetProperty(TOP_END_PROPERTY)->IsObject()) {
+        JSRef<JSObject> endObj = JSRef<JSObject>::Cast(object->GetProperty(TOP_END_PROPERTY));
+        ParseJsLengthMetricsVpWithResObj(endObj, topRight, topRightResObj);
+    }
+    if (object->HasProperty(BOTTOM_START_PROPERTY) && object->GetProperty(BOTTOM_START_PROPERTY)->IsObject()) {
+        JSRef<JSObject> startObj = JSRef<JSObject>::Cast(object->GetProperty(BOTTOM_START_PROPERTY));
+        ParseJsLengthMetricsVpWithResObj(startObj, bottomLeft, bottomLeftResObj);
+    }
+    if (object->HasProperty(BOTTOM_END_PROPERTY) && object->GetProperty(BOTTOM_END_PROPERTY)->IsObject()) {
+        JSRef<JSObject> endObj = JSRef<JSObject>::Cast(object->GetProperty(BOTTOM_END_PROPERTY));
+        ParseJsLengthMetricsVpWithResObj(endObj, bottomRight, bottomRightResObj);
+    }
+    borderRadiusProperty.radiusTopLeft = topLeft;
+    borderRadiusProperty.radiusTopRight = topRight;
+    borderRadiusProperty.radiusBottomLeft = bottomLeft;
+    borderRadiusProperty.radiusBottomRight = bottomRight;
+    borderRadiusProperty.multiValued = true;
+    ParseImageAllBorderRadiusesResObj(
+        borderRadiusProperty, topLeftResObj, topRightResObj, bottomLeftResObj, bottomRightResObj);
+    ImageModel::GetInstance()->SetBorderRadius(borderRadiusProperty);
+    ViewAbstractModel::GetInstance()->SetBorderRadius(borderRadiusProperty);
+}
+
+void JSImage::SetImageBorderRadiusWithResObj(JSRef<JSObject>& object, CalcDimension& topLeft, CalcDimension& topRight,
+    CalcDimension& bottomLeft, CalcDimension& bottomRight)
+{
+    NG::BorderRadiusProperty borderRadiusProperty;
+    RefPtr<ResourceObject> topLeftResObj;
+    RefPtr<ResourceObject> topRightResObj;
+    RefPtr<ResourceObject> bottomLeftResObj;
+    RefPtr<ResourceObject> bottomRightResObj;
+    GetBorderRadiusResObj("topLeft", object, topLeft, topLeftResObj);
+    GetBorderRadiusResObj("topRight", object, topRight, topRightResObj);
+    GetBorderRadiusResObj("bottomLeft", object, bottomLeft, bottomLeftResObj);
+    GetBorderRadiusResObj("bottomRight", object, bottomRight, bottomRightResObj);
+    borderRadiusProperty.radiusTopLeft = topLeft;
+    borderRadiusProperty.radiusTopRight = topRight;
+    borderRadiusProperty.radiusBottomLeft = bottomLeft;
+    borderRadiusProperty.radiusBottomRight = bottomRight;
+    borderRadiusProperty.multiValued = true;
+    ParseImageAllBorderRadiusesResObj(
+        borderRadiusProperty, topLeftResObj, topRightResObj, bottomLeftResObj, bottomRightResObj);
+    ImageModel::GetInstance()->SetBorderRadius(borderRadiusProperty);
+    ViewAbstractModel::GetInstance()->SetBorderRadius(borderRadiusProperty);
+}
 void JSImage::ParseBorderRadius(const JSRef<JSVal>& args)
 {
     CalcDimension borderRadius;
@@ -538,32 +599,19 @@ void JSImage::ParseBorderRadius(const JSRef<JSVal>& args)
         CalcDimension topRight;
         CalcDimension bottomLeft;
         CalcDimension bottomRight;
-        if (ParseAllBorderRadiuses(object, topLeft, topRight, bottomLeft, bottomRight)) {
+        if (SystemProperties::ConfigChangePerform()) {
+            if (object->HasProperty(TOP_START_PROPERTY) || object->HasProperty(TOP_END_PROPERTY) ||
+                object->HasProperty(BOTTOM_START_PROPERTY) || object->HasProperty(BOTTOM_END_PROPERTY)) {
+                SetImageLengthMetricsBorderRadiusWithResObj(object, topLeft, topRight, bottomLeft, bottomRight);
+            } else {
+                SetImageBorderRadiusWithResObj(object, topLeft, topRight, bottomLeft, bottomRight);
+            }
+        } else if (ParseAllBorderRadiuses(object, topLeft, topRight, bottomLeft, bottomRight)) {
             ImageModel::GetInstance()->SetBorderRadius(
                 GetLocalizedBorderRadius(topLeft, topRight, bottomLeft, bottomRight));
             ViewAbstractModel::GetInstance()->SetBorderRadius(
                 GetLocalizedBorderRadius(topLeft, topRight, bottomLeft, bottomRight));
             return;
-        }
-        if (SystemProperties::ConfigChangePerform()) {
-            NG::BorderRadiusProperty borderRadiusProperty;
-            RefPtr<ResourceObject> topLeftResObj;
-            RefPtr<ResourceObject> topRightResObj;
-            RefPtr<ResourceObject> bottomLeftResObj;
-            RefPtr<ResourceObject> bottomRightResObj;
-            GetBorderRadiusResObj("topLeft", object, topLeft, topLeftResObj);
-            GetBorderRadiusResObj("topRight", object, topRight, topRightResObj);
-            GetBorderRadiusResObj("bottomLeft", object, bottomLeft, bottomLeftResObj);
-            GetBorderRadiusResObj("bottomRight", object, bottomRight, bottomRightResObj);
-            borderRadiusProperty.radiusTopLeft = topLeft;
-            borderRadiusProperty.radiusTopRight = topRight;
-            borderRadiusProperty.radiusBottomLeft = bottomLeft;
-            borderRadiusProperty.radiusBottomRight = bottomRight;
-            borderRadiusProperty.multiValued = true;
-            ParseImageAllBorderRadiusesResObj(
-                borderRadiusProperty, topLeftResObj, topRightResObj, bottomLeftResObj, bottomRightResObj);
-            ImageModel::GetInstance()->SetBorderRadius(borderRadiusProperty);
-            ViewAbstractModel::GetInstance()->SetBorderRadius(borderRadiusProperty);
         } else {
             SetImageBorderRadius(topLeft, topRight, bottomLeft, bottomRight);
         }
@@ -711,6 +759,7 @@ void JSImage::JsBorderRadius(const JSCallbackInfo& info)
     if (!CheckJSCallbackInfo("JsBorderRadius", jsVal, checkList)) {
         ViewAbstractModel::GetInstance()->SetBorderRadius(Dimension {});
         ImageModel::GetInstance()->SetBorderRadius(Dimension {});
+        ImageModel::GetInstance()->CreateWithResourceObj(ImageResourceType::BORDER_RADIUS, nullptr);
         return;
     }
     ParseBorderRadius(jsVal);
@@ -749,6 +798,9 @@ void JSImage::SetImageFill(const JSCallbackInfo& info)
     if (!status) {
         if (ParseColorContent(info[0])) {
             ImageModel::GetInstance()->ResetImageFill();
+            if (SystemProperties::ConfigChangePerform()) {
+                ImageModel::GetInstance()->CreateWithResourceObj(ImageResourceType::FILL_COLOR, resObj);
+            }
             return;
         }
         if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_ELEVEN)) {
