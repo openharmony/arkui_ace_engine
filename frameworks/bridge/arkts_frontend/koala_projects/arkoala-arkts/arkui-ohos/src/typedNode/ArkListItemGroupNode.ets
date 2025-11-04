@@ -14,8 +14,15 @@
  */
 
 import { ArkBaseNode } from './ArkBaseNode';
-import { ListItemGroupAttribute, ArkListItemGroupPeer, ListItemGroupOptions, ListDividerOptions,
-    ChildrenMainSize, AttributeModifier, CommonMethod } from '../framework';
+import {
+  ListItemGroupAttribute,
+  ArkListItemGroupPeer,
+  ListItemGroupOptions,
+  ListDividerOptions,
+  ChildrenMainSize,
+  AttributeModifier,
+  CommonMethod
+} from '../framework';
 export class ArkListItemGroupNode extends ArkBaseNode implements ListItemGroupAttribute {
     constructParam(...param: Object[]): this {
         if (param.length > 1) {

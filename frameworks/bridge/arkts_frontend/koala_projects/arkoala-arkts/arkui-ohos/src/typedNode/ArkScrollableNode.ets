@@ -14,9 +14,20 @@
  */
 
 import { ArkBaseNode } from './ArkBaseNode';
-import { ScrollableCommonMethod, ArkScrollableCommonMethodPeer, BarState, Color, NestedScrollOptions, ContentClipMode,
-    CrownSensitivity, EdgeEffect, EdgeEffectOptions, FadingEdgeOptions,
-    AttributeModifier, CommonMethod } from '../framework';
+import {
+  ScrollableCommonMethod,
+  ArkScrollableCommonMethodPeer,
+  BarState,
+  Color,
+  NestedScrollOptions,
+  ContentClipMode,
+  CrownSensitivity,
+  EdgeEffect,
+  EdgeEffectOptions,
+  FadingEdgeOptions,
+  AttributeModifier,
+  CommonMethod
+} from '../framework';
 import { RectShape } from '@ohos.arkui.shape'
 import { Resource } from 'global.resource'
 export class ArkScrollableNode extends ArkBaseNode implements ScrollableCommonMethod {

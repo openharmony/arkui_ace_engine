@@ -15,8 +15,14 @@
 
 import { RuntimeType, runtimeType } from '@koalaui/interop';
 import { ArkBaseNode } from './ArkBaseNode';
-import { GridItemAttribute, ArkGridItemPeer, GridItemOptions, Bindable,
-    AttributeModifier, CommonMethod } from '../component/gridItem';
+import {
+  GridItemAttribute,
+  ArkGridItemPeer,
+  GridItemOptions,
+  Bindable,
+  AttributeModifier,
+  CommonMethod
+} from '../component/gridItem';
 export class ArkGridItemNode extends ArkBaseNode implements GridItemAttribute {
     constructParam(...param: Object[]): this {
         if (param.length > 1) {

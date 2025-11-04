@@ -15,13 +15,33 @@
 
 import { RuntimeType, runtimeType } from '@koalaui/interop';
 import { ArkScrollableNode } from './ArkScrollableNode';
-import { ListAttribute, ArkListPeer, ListOptions, ListItemAlign,
-    Axis, BarState, ListDividerOptions, ChainAnimationOptions, StickyStyle,
-    ScrollSnapAlign, NestedScrollOptions, ChildrenMainSize,
-    OnScrollVisibleContentChangeCallback, ItemDragInfo, CustomBuilder,
-    OnScrollFrameBeginCallback, OnWillScrollCallback, OnScrollCallback,
-    LengthConstrain, Dimension, EdgeEffect, EdgeEffectOptions,
-    AttributeModifier, ScrollableCommonMethod, CommonMethod } from '../framework';
+import {
+  ListAttribute,
+  ArkListPeer,
+  ListOptions,
+  ListItemAlign,
+  Axis,
+  BarState,
+  ListDividerOptions,
+  ChainAnimationOptions,
+  StickyStyle,
+  ScrollSnapAlign,
+  NestedScrollOptions,
+  ChildrenMainSize,
+  OnScrollVisibleContentChangeCallback,
+  ItemDragInfo,
+  CustomBuilder,
+  OnScrollFrameBeginCallback,
+  OnWillScrollCallback,
+  OnScrollCallback,
+  LengthConstrain,
+  Dimension,
+  EdgeEffect,
+  EdgeEffectOptions,
+  AttributeModifier,
+  ScrollableCommonMethod,
+  CommonMethod
+} from '../framework';
 import { Resource } from 'global.resource'
 export class ArkListNode extends ArkScrollableNode implements ListAttribute {
     constructParam(...param: Object[]): this {

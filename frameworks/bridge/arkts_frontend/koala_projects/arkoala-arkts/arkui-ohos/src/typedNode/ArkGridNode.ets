@@ -18,9 +18,16 @@ import { ArkScrollableNode } from './ArkScrollableNode';
 import { Length } from '../component/units';
 import { Color, BarState, EdgeEffect } from '../component/enums';
 import { CustomBuilder } from '../component/builder';
-import { ItemDragInfo, NestedScrollOptions, OnWillScrollCallback,
-    OnScrollCallback, EdgeEffectOptions, AttributeModifier,
-    ScrollableCommonMethod, CommonMethod } from '../component/common';
+import {
+  ItemDragInfo,
+  NestedScrollOptions,
+  OnWillScrollCallback,
+  OnScrollCallback,
+  EdgeEffectOptions,
+  AttributeModifier,
+  ScrollableCommonMethod,
+  CommonMethod
+} from '../component/common';
 import { Scroller, OnScrollFrameBeginCallback } from '../component/scroll';
 import { ArkGridPeer, ComputedBarAttribute, GridDirection, GridItemAlignment,
     GridAttribute, GridLayoutOptions } from '../component/grid';

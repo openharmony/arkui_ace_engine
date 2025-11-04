@@ -14,11 +14,27 @@
  */
 
 import { ArkScrollableNode } from './ArkScrollableNode';
-import { ScrollAttribute, ArkScrollPeer, Scroller, ScrollDirection, ScrollOnWillScrollCallback, ScrollOnScrollCallback,
-    OnScrollEdgeCallback, VoidCallback, BarState, Color,
-    OnScrollFrameBeginCallback, NestedScrollOptions, ScrollSnapOptions,
-    OffsetOptions, EdgeEffect, EdgeEffectOptions, AttributeModifier,
-    ScrollableCommonMethod, CommonMethod } from '../framework';
+import {
+  ScrollAttribute,
+  ArkScrollPeer,
+  Scroller,
+  ScrollDirection,
+  ScrollOnWillScrollCallback,
+  ScrollOnScrollCallback,
+  OnScrollEdgeCallback,
+  VoidCallback,
+  BarState,
+  Color,
+  OnScrollFrameBeginCallback,
+  NestedScrollOptions,
+  ScrollSnapOptions,
+  OffsetOptions,
+  EdgeEffect,
+  EdgeEffectOptions,
+  AttributeModifier,
+  ScrollableCommonMethod,
+  CommonMethod
+} from '../framework';
 import { Resource } from 'global.resource'
 export class ArkScrollNode extends ArkScrollableNode implements ScrollAttribute {
     constructParam(...param: Object[]): this {

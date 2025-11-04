@@ -15,8 +15,15 @@
 
 import { RuntimeType, runtimeType } from '@koalaui/interop';
 import { ArkBaseNode } from './ArkBaseNode';
-import { ListItemAttribute, ArkListItemPeer, ListItemOptions, Bindable,
-    SwipeActionOptions, AttributeModifier, CommonMethod} from '../framework';
+import {
+  ListItemAttribute,
+  ArkListItemPeer,
+  ListItemOptions,
+  Bindable,
+  SwipeActionOptions,
+  AttributeModifier,
+  CommonMethod
+} from '../framework';
 export class ArkListItemNode extends ArkBaseNode implements ListItemAttribute {
     constructParam(...param: Object[]): this {
         if (param.length > 1) {
