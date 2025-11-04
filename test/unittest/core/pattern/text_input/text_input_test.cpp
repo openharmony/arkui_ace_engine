@@ -1451,4 +1451,32 @@ HWTEST_F(TextFieldUXTest, testUnderlineColor001, TestSize.Level1)
     EXPECT_EQ(userColorNullRes.error, std::nullopt);
     EXPECT_EQ(userColorNullRes.disable, std::nullopt);
 }
+
+/**
+ * @tc.name: TextSelectOverlayTestOnUpdateMenuInfo002
+ * @tc.desc: Verify OnUpdateMenuInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextSelectOverlayTestOnUpdateMenuInfo002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input and get focus
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+    auto textFieldTheme = pattern_->GetTheme();
+    ASSERT_NE(textFieldTheme, nullptr);
+    textFieldTheme->aiWriteBundleName_ = "BundleName";
+    textFieldTheme->aiWriteAbilityName_ = "AbilityName";
+    textFieldTheme->aiWriteIsSupport_ = "true";
+    auto textSelectOverlay = pattern_->selectOverlay_;
+    ASSERT_NE(textSelectOverlay, nullptr);
+
+    /**
+     * @tc.steps: step2. Do OnUpdateMenuInfo
+     */
+    SelectMenuInfo menuInfo;
+    textSelectOverlay->OnUpdateMenuInfo(menuInfo, DIRTY_ALL_MENU_ITEM);
+    ASSERT_EQ(menuInfo.showAIWrite, true);
+}
 } // namespace OHOS::Ace::NG
