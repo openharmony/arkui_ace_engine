@@ -3267,7 +3267,9 @@ void NavigationPattern::NotifyNavDestinationSwitch(RefPtr<NavDestinationContext>
     auto host = GetHost();
     auto NavdestinationSwitchFunc =
         UIObserverHandler::GetInstance().GetHandleNavDestinationSwitchFunc();
-    if (!host || !NavdestinationSwitchFunc) {
+    auto navDestinationSwitchFuncForAni =
+        UIObserverHandler::GetInstance().GetHandleNavDestinationSwitchFuncForAni();
+    if (!host || (!NavdestinationSwitchFunc && !navDestinationSwitchFuncForAni)) {
         return;
     }
 

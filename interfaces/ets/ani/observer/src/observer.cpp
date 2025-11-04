@@ -22,6 +22,9 @@
 #include "core/components_ng/base/observer_handler.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
+using NavIdAndListenersMap =
+    std::unordered_map<std::optional<std::string>, std::list<ani_ref>>;
+
 namespace {
 // constexpr const char DENSITY_CHNAGE[] = "densityUpdate";
 const char ANI_OBSERVER_NS[] = "@ohos.arkui.observer.uiObserver";
@@ -38,6 +41,8 @@ constexpr char ANI_TABCONTENT_WITH_OPTIONS_CLS[] =
 constexpr char ANI_TABCONTENT_CLS[] = "C{std.core.Function1}:";
 constexpr char ANI_TABCONTENT_INFO_CLS[] = "@ohos.arkui.observer.uiObserver.TabContentInfoImpl";
 constexpr char ANI_TABCONTENT_STATE_TYPE[] = "@ohos.arkui.observer.uiObserver.TabContentState";
+constexpr char ANI_NAV_SWITCH_INFO[] = "@ohos.arkui.observer.uiObserver.NavDestinationSwitchInfoImpl";
+constexpr char ANI_NAVIGATION_OPERATION_TYPE[] = "arkui.component.navigation.NavigationOperation";
 } // namespace
 namespace OHOS::Ace {
 class UiObserver {
@@ -538,6 +543,121 @@ public:
             holder.begin(), holder.end(), [env, cb](ani_ref cb1) { return AniEqual(env, cb, cb1); }), holder.end());
     }
 
+    static void RegisterNavDestinationSwitchCallback(
+        int32_t uiContextInstanceId, const std::optional<std::string>& navigationId, ani_ref& cb)
+    {
+        if (uiContextInstanceId == 0) {
+            uiContextInstanceId = Container::CurrentIdSafelyWithCheck();
+        }
+        auto listenersMapIter = uiContextNavDesSwitchListeners_.find(uiContextInstanceId);
+        if (listenersMapIter == uiContextNavDesSwitchListeners_.end()) {
+            NavIdAndListenersMap listenersMap;
+            listenersMap.emplace(navigationId, std::list<ani_ref>({ cb }));
+            uiContextNavDesSwitchListeners_[uiContextInstanceId] = listenersMap;
+            return;
+        }
+
+        auto& listenersMap = listenersMapIter->second;
+        auto it = listenersMap.find(navigationId);
+        if (it == listenersMap.end()) {
+            listenersMap[navigationId] = std::list<ani_ref>({ cb });
+            return;
+        }
+
+        if (std::find(it->second.begin(), it->second.end(), cb) == it->second.end()) {
+            it->second.emplace_back(cb);
+        }
+    }
+
+    static void UnRegisterNavDestinationSwitchCallback(
+        ani_env* env, int32_t uiContextInstanceId, const std::optional<std::string>& navigationId, ani_ref& cb)
+    {
+        if (uiContextInstanceId == 0) {
+            uiContextInstanceId = Container::CurrentIdSafelyWithCheck();
+        }
+        auto listenersMapIter = uiContextNavDesSwitchListeners_.find(uiContextInstanceId);
+        if (listenersMapIter == uiContextNavDesSwitchListeners_.end()) {
+            return;
+        }
+        auto& listenersMap = listenersMapIter->second;
+        auto it = listenersMap.find(navigationId);
+        if (it == listenersMap.end()) {
+            return;
+        }
+        auto& listeners = it->second;
+        if (cb == nullptr) {
+            listeners.clear();
+        } else {
+            listeners.erase(std::remove_if(listeners.begin(), listeners.end(),
+                                [env, cb](ani_ref cb1) { return AniEqual(env, cb, cb1); }),
+                listeners.end());
+        }
+        if (listeners.empty()) {
+            listenersMap.erase(it);
+        }
+        if (listenersMap.empty()) {
+            uiContextNavDesSwitchListeners_.erase(listenersMapIter);
+        }
+    }
+
+    static void HandleUIContextNavDestinationSwitch(ani_env* env, const NG::NavDestinationSwitchInfo& switchInfo)
+    {
+        auto currentId = Container::CurrentIdSafelyWithCheck();
+        auto listenersMapIter = uiContextNavDesSwitchListeners_.find(currentId);
+        if (listenersMapIter == uiContextNavDesSwitchListeners_.end()) {
+            return;
+        }
+        auto listenersMap = listenersMapIter->second;
+        HandleListenersWithEmptyNavigationId(env, listenersMap, switchInfo);
+        HandleListenersWithSpecifiedNavigationId(env, listenersMap, switchInfo);
+    }
+
+    static void HandleListenersWithEmptyNavigationId(
+        ani_env* env, const NavIdAndListenersMap& listenersMap, const NG::NavDestinationSwitchInfo& switchInfo)
+    {
+        std::optional<std::string> navId;
+        auto it = listenersMap.find(navId);
+        if (it != listenersMap.end()) {
+            ani_object res;
+            CreateNavSwitchInfo(env, switchInfo, res);
+            std::vector<ani_ref> cbParam;
+            cbParam.emplace_back(res);
+            ani_ref fnReturnVal;
+            const auto listeners = it->second;
+            for (const auto& listener : listeners) {
+                env->FunctionalObject_Call(
+                    reinterpret_cast<ani_fn_object>(listener), cbParam.size(), cbParam.data(), &fnReturnVal);
+            }
+        }
+    }
+
+    static void HandleListenersWithSpecifiedNavigationId(
+        ani_env* env, const NavIdAndListenersMap& listenersMap, const NG::NavDestinationSwitchInfo& switchInfo)
+    {
+        std::string navigationId;
+        if (switchInfo.from.has_value()) {
+            navigationId = switchInfo.from.value().navigationId;
+        } else if (switchInfo.to.has_value()) {
+            navigationId = switchInfo.to.value().navigationId;
+        }
+        if (!navigationId.empty()) {
+            std::optional<std::string> navId { navigationId };
+            ani_object res;
+            CreateNavSwitchInfo(env, switchInfo, res);
+            std::vector<ani_ref> cbParam;
+            cbParam.emplace_back(res);
+            ani_ref fnReturnVal;
+            auto it = listenersMap.find(navId);
+            if (it != listenersMap.end()) {
+                const auto listeners = it->second;
+                for (const auto& listener : listeners) {
+                    env->FunctionalObject_Call(
+                        reinterpret_cast<ani_fn_object>(listener), cbParam.size(), cbParam.data(), &fnReturnVal);
+                }
+            }
+        }
+    }
+
     void HandleDensityChange(ani_env* env, double density)
     {
         auto currentId = Container::CurrentId();
@@ -846,6 +966,53 @@ public:
         env->Object_SetPropertyByName_Ref(res, "context", uiContext);
     }
 
+    static void CreateNavSwitchInfo(ani_env* env, const NG::NavDestinationSwitchInfo& switchInfo, ani_object& res)
+    {
+        ani_class cls;
+        env->FindClass(ANI_NAV_SWITCH_INFO, &cls);
+        ani_method navSwitchCtor;
+        env->Class_FindMethod(cls, "<ctor>", nullptr, &navSwitchCtor);
+        env->Object_New(cls, navSwitchCtor, &res);
+
+        ani_class uiContextUtil;
+        env->FindClass("arkui.base.UIContextUtil.UIContextUtil", &uiContextUtil);
+        ani_static_method getUiContext;
+        env->Class_FindStaticMethod(
+            uiContextUtil, "getOrCreateUIContextById", "i:C{@ohos.arkui.UIContext.UIContext}", &getUiContext);
+        ani_int instanceId = Container::CurrentIdSafelyWithCheck();
+        ani_ref uiContext;
+        env->Class_CallStaticMethod_Ref(uiContextUtil, getUiContext, &uiContext, instanceId);
+        env->Object_SetPropertyByName_Ref(res, "context", uiContext);
+
+        std::string navBar = "NavBar";
+
+        if (switchInfo.from.has_value()) {
+            ani_object from;
+            CreateNavigationInfo(env, switchInfo.from.value(), from);
+            env->Object_SetPropertyByName_Ref(res, "from", from);
+        } else {
+            ani_string fromNavBar {};
+            env->String_NewUTF8(navBar.c_str(), navBar.size(), &fromNavBar);
+            env->Object_SetPropertyByName_Ref(res, "from", fromNavBar);
+        }
+
+        if (switchInfo.to.has_value()) {
+            ani_object to;
+            CreateNavigationInfo(env, switchInfo.to.value(), to);
+            env->Object_SetPropertyByName_Ref(res, "to", to);
+        } else {
+            ani_string toNavBar {};
+            env->String_NewUTF8(navBar.c_str(), navBar.size(), &toNavBar);
+            env->Object_SetPropertyByName_Ref(res, "from", toNavBar);
+        }
+
+        ani_enum operation;
+        env->FindEnum(ANI_NAVIGATION_OPERATION_TYPE, &operation);
+        ani_enum_item operationItem;
+        env->Enum_GetEnumItemByIndex(operation, static_cast<ani_size>(switchInfo.operation), &operationItem);
+        env->Object_SetPropertyByName_Ref(res, "operation", operationItem);
+    }
+
 private:
     int32_t id_;
     std::unordered_map<int32_t, std::list<ani_ref>> densityCbMap_;
@@ -864,11 +1031,13 @@ private:
     static std::unordered_map<int32_t, std::list<ani_ref>> specifiedRouterPageListeners_;
     std::unordered_map<int32_t, std::list<ani_ref>> specifiedWillDrawCbMap_;
     std::unordered_map<int32_t, std::list<ani_ref>> specifiedDidLayoutCbMap_;
+    static std::unordered_map<int32_t, NavIdAndListenersMap> uiContextNavDesSwitchListeners_;
 };
 
 std::list<ani_ref> UiObserver::unspecifiedNavigationListeners_;
 std::unordered_map<std::string, std::list<ani_ref>> UiObserver::specifiedCNavigationListeners_;
 std::unordered_map<int32_t, std::list<ani_ref>> UiObserver::specifiedRouterPageListeners_;
+std::unordered_map<int32_t, NavIdAndListenersMap> UiObserver::uiContextNavDesSwitchListeners_;
 
 static UiObserver* Unwrapp(ani_env* env, ani_object object)
 {
@@ -1365,6 +1534,10 @@ static void onNavDestinationSwitch([[maybe_unused]] ani_env* env, [[maybe_unused
     }
     ani_ref fnObjGlobalRef = nullptr;
     env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
+
+    std::optional<std::string> navId;
+    const int idMs = 100000;
+    observer->RegisterNavDestinationSwitchCallback(idMs, navId, fnObjGlobalRef);
 }
 
 static void offNavDestinationSwitch([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
@@ -1381,9 +1554,13 @@ static void offNavDestinationSwitch([[maybe_unused]] ani_env* env, [[maybe_unuse
     if (isUndef != ANI_TRUE) {
         env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
     }
+
+    std::optional<std::string> navId;
+    const int idMs = 100000;
+    observer->UnRegisterNavDestinationSwitchCallback(env, idMs, navId, fnObjGlobalRef);
 }
 
-static void onNavDestinationSwitchContext([[maybe_unused]] ani_env* env, ani_fn_object fnObj)
+static void onNavDestinationSwitchContext([[maybe_unused]] ani_env* env, ani_object uiContext, ani_fn_object fnObj)
 {
     if (fnObj == nullptr) {
         LOGE("observer-ani callback is undefined.");
@@ -1391,9 +1568,22 @@ static void onNavDestinationSwitchContext([[maybe_unused]] ani_env* env, ani_fn_
     }
     ani_ref fnObjGlobalRef = nullptr;
     env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
+
+    static std::once_flag onceFlag;
+    std::call_once(onceFlag, [&env]() {
+        auto navDestinationSwitchCallback = [env](NG::NavDestinationSwitchInfo& info) {
+            UiObserver::HandleUIContextNavDestinationSwitch(env, info);
+        };
+        NG::UIObserverHandler::GetInstance().SetHandleNavDestinationSwitchFuncForAni(navDestinationSwitchCallback);
+    });
+
+    std::optional<std::string> navId;
+    ani_int idMs = 0;
+    env->Object_GetPropertyByName_Int(uiContext, "instanceId_", &idMs);
+    UiObserver::RegisterNavDestinationSwitchCallback(idMs, navId, fnObjGlobalRef);
 }
 
-static void offNavDestinationSwitchContext([[maybe_unused]] ani_env* env, ani_fn_object fnObj)
+static void offNavDestinationSwitchContext([[maybe_unused]] ani_env* env, ani_object uiContext, ani_fn_object fnObj)
 {
     ani_ref fnObjGlobalRef = nullptr;
     ani_boolean isUndef = ANI_FALSE;
@@ -1401,6 +1591,11 @@ static void offNavDestinationSwitchContext([[maybe_unused]] ani_env* env, ani_fn
     if (isUndef != ANI_TRUE) {
         env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
     }
+
+    std::optional<std::string> navId;
+    ani_int idMs = 0;
+    env->Object_GetPropertyByName_Int(uiContext, "instanceId_", &idMs);
+    UiObserver::UnRegisterNavDestinationSwitchCallback(env, idMs, navId, fnObjGlobalRef);
 }
 
 static void onNavDestinationSwitchWithId([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
@@ -1418,6 +1613,9 @@ static void onNavDestinationSwitchWithId([[maybe_unused]] ani_env* env, [[maybe_
     std::string navigationId = ANIUtils_ANIStringToStdString(env, reinterpret_cast<ani_string>(aniNavId));
     ani_ref fnObjGlobalRef = nullptr;
     env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
+
+    const int idMs = 100000;
+    observer->RegisterNavDestinationSwitchCallback(idMs, navigationId, fnObjGlobalRef);
 }
 
 static void offNavDestinationSwitchWithId([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
@@ -1435,10 +1633,13 @@ static void offNavDestinationSwitchWithId([[maybe_unused]] ani_env* env, [[maybe
     std::string navigationId = ANIUtils_ANIStringToStdString(env, reinterpret_cast<ani_string>(aniNavId));
     ani_ref fnObjGlobalRef = nullptr;
     env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
+
+    const int idMs = 100000;
+    observer->UnRegisterNavDestinationSwitchCallback(env, idMs, navigationId, fnObjGlobalRef);
 }
 
-static void onNavDestinationSwitchWithIdContext([[maybe_unused]] ani_env* env, ani_object options,
-    ani_fn_object fnObj)
+static void onNavDestinationSwitchWithIdContext([[maybe_unused]] ani_env* env, ani_object uiContext,
+    ani_object options, ani_fn_object fnObj)
 {
     if (!fnObj) {
         return;
@@ -1448,10 +1649,22 @@ static void onNavDestinationSwitchWithIdContext([[maybe_unused]] ani_env* env, a
     std::string navigationId = ANIUtils_ANIStringToStdString(env, reinterpret_cast<ani_string>(aniNavId));
     ani_ref fnObjGlobalRef = nullptr;
     env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
+
+    static std::once_flag onceFlag;
+    std::call_once(onceFlag, [&env]() {
+        auto navDestinationSwitchCallback = [env](NG::NavDestinationSwitchInfo& info) {
+            UiObserver::HandleUIContextNavDestinationSwitch(env, info);
+        };
+        NG::UIObserverHandler::GetInstance().SetHandleNavDestinationSwitchFuncForAni(navDestinationSwitchCallback);
+    });
+
+    ani_int idMs = 0;
+    env->Object_GetPropertyByName_Int(uiContext, "instanceId_", &idMs);
+    UiObserver::RegisterNavDestinationSwitchCallback(idMs, navigationId, fnObjGlobalRef);
 }
 
-static void offNavDestinationSwitchWithIdContext([[maybe_unused]] ani_env* env, ani_object options,
-    ani_fn_object fnObj)
+static void offNavDestinationSwitchWithIdContext([[maybe_unused]] ani_env* env, ani_object uiContext,
+    ani_object options, ani_fn_object fnObj)
 {
     if (!fnObj) {
         return;
@@ -1461,6 +1674,10 @@ static void offNavDestinationSwitchWithIdContext([[maybe_unused]] ani_env* env, 
     std::string navigationId = ANIUtils_ANIStringToStdString(env, reinterpret_cast<ani_string>(aniNavId));
     ani_ref fnObjGlobalRef = nullptr;
     env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
+
+    ani_int idMs = 0;
+    env->Object_GetPropertyByName_Int(uiContext, "instanceId_", &idMs);
+    UiObserver::UnRegisterNavDestinationSwitchCallback(env, idMs, navigationId, fnObjGlobalRef);
 }
 
 static ani_object CreateObserver([[maybe_unused]] ani_env* env, ani_int id)
@@ -1524,6 +1741,10 @@ static ani_object CreateObserver([[maybe_unused]] ani_env* env, ani_int id)
         observer->HandleTabContentUpdate(env, info);
     };
     NG::UIObserverHandler::GetInstance().SetHandleTabContentUpdateFuncForAni(tabContentCallback);
+    auto navDestinationSwitchCallback = [observer, env](NG::NavDestinationSwitchInfo& info) {
+        observer->HandleUIContextNavDestinationSwitch(env, info);
+    };
+    NG::UIObserverHandler::GetInstance().SetHandleNavDestinationSwitchFuncForAni(navDestinationSwitchCallback);
     ani_object context_object;
     if (ANI_OK != env->Object_New(cls, ctor, &context_object, reinterpret_cast<ani_long>(observer))) {
         LOGE("observer-ani Can not new object.");
