@@ -1021,7 +1021,7 @@ void NavigationPattern::SyncWithJsStackIfNeeded()
         static_cast<int32_t>(navigationStack_->GetAllPathName().size()));
     GetVisibleNodes(true, preVisibleNodes_);
     if (runningTransitionCount_ <= 0) {
-        isTransitionAnimationAborted_ = false;
+        windowSizeChangedDuringTransition_ = false;
     }
     preTopNavPath_ = navigationStack_->GetPreTopNavPath();
     preStackSize_ = navigationStack_->PreSize();
@@ -2205,9 +2205,6 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
 void NavigationPattern::AbortAnimation(RefPtr<NavigationGroupNode>& hostNode)
 {
     TAG_LOGD(AceLogTag::ACE_NAVIGATION, "Aborting navigation animations");
-    if (runningTransitionCount_ > 0) {
-        isTransitionAnimationAborted_ = true;
-    }
     if (!hostNode->GetPushAnimations().empty()) {
         auto pushAnimations = hostNode->GetPushAnimations();
         for (const auto& animation : pushAnimations) {
@@ -4001,6 +3998,10 @@ void NavigationPattern::FireShowAndHideLifecycle(const RefPtr<NavDestinationGrou
 
 void NavigationPattern::OnWindowSizeChanged(int32_t  /*width*/, int32_t  /*height*/, WindowSizeChangeReason type)
 {
+    if (runningTransitionCount_ > 0) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "window size changed[type:%{public}d] during transition.", (int32_t)type);
+        windowSizeChangedDuringTransition_ = true;
+    }
     if (WindowSizeChangeReason::ROTATION == type) {
         auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
         CHECK_NULL_VOID(hostNode);
@@ -4938,8 +4939,8 @@ void NavigationPattern::SetRequestedOrientationIfNeeded()
 {
     bool enableLockOrientation = enableLockOrientation_;
     enableLockOrientation_ = false;
-    bool animationAborted = isTransitionAnimationAborted_;
-    isTransitionAnimationAborted_ = false;
+    bool windowSizeChanged = windowSizeChangedDuringTransition_;
+    windowSizeChangedDuringTransition_ = false;
     if (!IsPageLevelConfigEnabled() || !enableLockOrientation) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "conditions are not met, don't set Orientation");
         ClearPageAndNavigationConfig();
@@ -4970,7 +4971,7 @@ void NavigationPattern::SetRequestedOrientationIfNeeded()
     auto windowMgr = context->GetWindowManager();
     CHECK_NULL_VOID(windowMgr);
     auto targetOrientation = firstVisibleNode->GetOrientation();
-    auto restoreTask = [nodes = std::move(visibleNodes), weakPattern = WeakClaim(this), animationAborted]() {
+    auto restoreTask = [nodes = std::move(visibleNodes), weakPattern = WeakClaim(this), windowSizeChanged]() {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "restore Navigation RenderContext");
         ACE_SCOPED_TRACE("NavigationPattern restoreTask");
         for (auto& weakNode : nodes) {
@@ -4982,7 +4983,7 @@ void NavigationPattern::SetRequestedOrientationIfNeeded()
         auto pattern = weakPattern.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->ClearPageAndNavigationConfig();
-        if (!animationAborted) {
+        if (!windowSizeChanged) {
             return;
         }
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "reset Page Constraint");
@@ -4990,6 +4991,11 @@ void NavigationPattern::SetRequestedOrientationIfNeeded()
         CHECK_NULL_VOID(pageNode);
         auto geometryNode = pageNode->GetGeometryNode();
         CHECK_NULL_VOID(geometryNode);
+        /**
+         * During the transition process, the page size is forcibly maintained unchanged.
+         * Therefore, if the window size changes during the transition, the page size needs to be forcibly
+         * refreshed upon the completion of the transition.
+         */
         geometryNode->ResetParentLayoutConstraint();
     };
     if (!windowMgr->IsSetOrientationNeeded(targetOrientation)) {
