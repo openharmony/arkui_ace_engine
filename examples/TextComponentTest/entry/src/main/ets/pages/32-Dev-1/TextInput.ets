@@ -147,7 +147,7 @@ struct TextInput32dev3 {
           .onChange((value: string, previewRange: PreviewText, options: TextChangeOptions) => {
             this.value = value
             this.previewRangeStart = options.rangeAfter.start + ''
-            this.previewRangeEnd = options.rangeAfter.start + ''
+            this.previewRangeEnd = options.rangeAfter.end + ''
           })
           .onWillInsert((info: InsertValue) => {
             this.insertValue = info.insertValue
