@@ -504,13 +504,13 @@ HWTEST_F(AccessibilityManagerNgTestNg, AccessibilityManagerNgTest010, TestSize.L
     NG::PointF hoverPoint(x, y);
     TimeStamp time;
 
-    auto ret = accessibilityManagerNg.NotifyHoverEventToNodeSession(frameNode, frameNode,
+    auto result = accessibilityManagerNg.NotifyHoverEventToNodeSession(frameNode, frameNode,
         hoverPoint, SourceType::MOUSE, AccessibilityHoverEventType::ENTER, time);
-    EXPECT_FALSE(ret);
+    EXPECT_FALSE(result);
 
-    ret = accessibilityManagerNg.NotifyHoverEventToNodeSession(frameNode, nullptr,
+    result = accessibilityManagerNg.NotifyHoverEventToNodeSession(frameNode, nullptr,
         hoverPoint, SourceType::MOUSE, AccessibilityHoverEventType::ENTER, time);
-    EXPECT_FALSE(ret);
+    EXPECT_FALSE(result);
 
     auto testNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MockAccessibilityTestPattern>());
@@ -520,9 +520,9 @@ HWTEST_F(AccessibilityManagerNgTestNg, AccessibilityManagerNgTest010, TestSize.L
     auto eventHub = testNode->eventHub_;
     ASSERT_NE(eventHub, nullptr);
     eventHub->SetEnabledInternal(true);
-    ret = accessibilityManagerNg.NotifyHoverEventToNodeSession(testNode, testNode,
+    result = accessibilityManagerNg.NotifyHoverEventToNodeSession(testNode, testNode,
         hoverPoint, SourceType::TOUCH, AccessibilityHoverEventType::ENTER, time);
-    EXPECT_TRUE(ret);
+    EXPECT_TRUE(result);
 }
 
 /**
