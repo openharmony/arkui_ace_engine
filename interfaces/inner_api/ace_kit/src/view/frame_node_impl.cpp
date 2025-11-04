@@ -310,14 +310,9 @@ NodeHandle FrameNodeImpl::GetParentHandle()
 void FrameNodeImpl::SetOnNodeDestroyCallback(const std::function<void(RefPtr<FrameNode>)>& destroyCallback)
 {
     CHECK_NULL_VOID(frameNode_);
-    auto onDestroyCallback = [weakNode = WeakClaim(frameNode_), destroyCallback](int32_t nodeId) {
-        auto frameNode = weakNode.Upgrade();
+    auto onDestroyCallback = [frameNode = Claim(this), destroyCallback](int32_t nodeId) {
         CHECK_NULL_VOID(frameNode);
-        RefPtr<FrameNode> node = frameNode->GetKitNode();
-        if (!node) {
-            node = AceType::MakeRefPtr<FrameNodeImpl>(frameNode);
-        }
-        destroyCallback(node);
+        destroyCallback(frameNode);
     };
     frameNode_->SetOnNodeDestroyCallback(std::move(onDestroyCallback));
 }
