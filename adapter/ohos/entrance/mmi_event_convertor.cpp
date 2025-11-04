@@ -170,6 +170,10 @@ TouchPoint ConvertTouchPoint(const MMI::PointerEvent::PointerItem& pointerItem, 
         touchPoint.screenX = pointerItem.GetDisplayX();
         touchPoint.screenY = pointerItem.GetDisplayY();
     }
+    if (pointerItem.GetPredictExist()) {
+        touchPoint.x = pointerItem.GetWindowXPredict();
+        touchPoint.y = pointerItem.GetWindowYPredict();
+    }
     touchPoint.globalDisplayX = pointerItem.GetGlobalX();
     touchPoint.globalDisplayY = pointerItem.GetGlobalY();
     touchPoint.isPressed = pointerItem.IsPressed();
