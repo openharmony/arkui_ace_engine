@@ -157,4 +157,13 @@ bool FormManagerDelegate::CheckFormDueControl(const std::string &bundleName, con
 {
     return false;
 }
+
+void SetFormRendererDispatcher(sptr<IFormRendererDispatcher> &rendererDispatcher) {}
+
+void ClearFormRendererDispatcher() {}
+
+sptr<IFormRendererDispatcher> GetFormRendererDispatcher()
+{
+    return nullptr;
+}
 } // namespace OHOS::Ace
