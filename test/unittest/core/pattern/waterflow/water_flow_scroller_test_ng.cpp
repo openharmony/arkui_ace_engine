@@ -1181,4 +1181,36 @@ HWTEST_F(WaterFlowScrollerTestNg, FadingEdge001, TestSize.Level1)
     geo = frameNode_->GetOverlayNode()->GetGeometryNode();
     EXPECT_EQ(geo->GetFrameSize().Height(), 810.f);
 }
+
+/**
+ * @tc.name: HorizontalFocus001
+ * @tc.desc: Test WaterFlow horizontal focus navigation with rows template
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowScrollerTestNg, HorizontalFocus001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetRowsTemplate("1fr 1fr 1fr");
+    CreateFocusableWaterFlowItems(30);
+    CreateDone();
+
+    auto info = pattern_->layoutInfo_;
+    EXPECT_EQ(info->startIndex_, 0);
+
+    // Test RIGHT navigation from startIndex
+    auto next = pattern_->GetNextFocusNode(FocusStep::RIGHT, GetChildFocusHub(frameNode_, info->startIndex_)).Upgrade();
+    EXPECT_NE(next, nullptr);
+
+    // Verify the focused item is visible
+    auto nextFrame = next->GetFrameNode();
+    int32_t actualIndex = frameNode_->GetChildIndex(nextFrame);
+    auto childRect = GetChildRect(frameNode_, actualIndex);
+    EXPECT_GE(childRect.Left(), 0.0f);
+    EXPECT_LE(childRect.Right(), WATER_FLOW_WIDTH);
+
+    // Test DOWN navigation
+    next = pattern_->GetNextFocusNode(FocusStep::DOWN, GetChildFocusHub(frameNode_, 0)).Upgrade();
+    auto cmp = GetChildFocusHub(frameNode_, 1);
+    EXPECT_EQ(AceType::RawPtr(next), AceType::RawPtr(cmp));
+}
 } // namespace OHOS::Ace::NG
