@@ -59,9 +59,12 @@ void ResetItemFillPolicy(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    std::string column = "1fr";
-    WaterFlowModelNG::ResetItemFillPolicy(frameNode);
-    WaterFlowModelNG::SetColumnsTemplate(frameNode, column);
+    auto layoutProperty = frameNode->GetLayoutProperty<WaterFlowLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto itemFillPolicy = layoutProperty->GetItemFillPolicy();
+    if (itemFillPolicy.has_value()) {
+        WaterFlowModelNG::ResetItemFillPolicy(frameNode);
+    }
 }
 
 void SetItemFillPolicy(ArkUINodeHandle node, int32_t itemFillPolicy)
