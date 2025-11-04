@@ -258,6 +258,9 @@ public:
     std::vector<std::string> GetAcceptType() override;
     bool IsCapture() override;
     std::vector<std::string> GetMimeType() override;
+    std::string GetDefaultPath() override;
+    std::vector<std::string> GetDescriptions() override;
+    bool IsAcceptAllOptionExcluded() override;
 
 private:
     std::shared_ptr<OHOS::NWeb::NWebFileSelectorParams> param_;
