@@ -103,8 +103,8 @@ public:
 
     static RefPtr<RenderContext> Create();
 
-    void SetRequestFrame(const std::function<void()>& requestFrame);
-    void RequestNextFrame() const;
+    void SetRequestFrame(const std::function<void(bool)>& requestFrame);
+    void RequestNextFrame(bool isOffScreenNode = false) const;
 
     virtual void SetHostNode(const WeakPtr<FrameNode>& host);
     RefPtr<FrameNode> GetHost() const;
@@ -949,10 +949,10 @@ protected:
     virtual void OnAttractionEffectUpdate(const AttractionEffect& effect) {}
 
 private:
-    void RequestNextFrameMultiThread() const;
+    void RequestNextFrameMultiThread(bool isOffScreenNode) const;
     friend class ViewAbstract;
     friend class ViewAbstractModelStatic;
-    std::function<void()> requestFrame_;
+    std::function<void(bool)> requestFrame_;
     WeakPtr<FrameNode> host_;
     RefPtr<OneCenterTransitionOptionType> oneCenterTransition_;
     ACE_DISALLOW_COPY_AND_MOVE(RenderContext);

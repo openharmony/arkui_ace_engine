@@ -1643,7 +1643,7 @@ private:
     void MarkNeedRenderMultiThread(bool isRenderBoundary);
     void UpdateBackground();
     void DispatchVisibleAreaChangeEvent(const CacheVisibleRectResult& visibleResult);
-
+    PipelineContext* GetOffMainTreeNodeContext();
     bool isTrimMemRecycle_ = false;
     // sort in ZIndex.
     std::multiset<WeakPtr<FrameNode>, ZIndexComparator> frameChildren_;

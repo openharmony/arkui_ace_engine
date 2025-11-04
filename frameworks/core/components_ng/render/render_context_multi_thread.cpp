@@ -18,10 +18,10 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-void RenderContext::RequestNextFrameMultiThread() const
+void RenderContext::RequestNextFrameMultiThread(bool isOffScreenNode) const
 {
     if (requestFrame_) {
-        requestFrame_();
+        requestFrame_(isOffScreenNode);
         auto node = GetHost();
         CHECK_NULL_VOID(node);
         auto eventHub = node->GetEventHub<NG::EventHub>();
