@@ -1222,4 +1222,43 @@ HWTEST_F(SwiperIndicatorModifierTestTwoNg, CircleDotIndicatorSetFunctions001, Te
     paintMethod->SetNextValidIndex(1);
     EXPECT_EQ(paintMethod->nextValidIndex_, 1);
 }
+
+/**
+ * @tc.name: UpdateContentProperty001
+ * @tc.desc: Test UpdateContentProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorModifierTestTwoNg, UpdateContentProperty001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create indicator modifier.
+     */
+    RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
+    modifier->itemHalfSizes_->Set({ 0.0f, 0.0f, 0.0f, 0.0f });
+    modifier->indicatorMargin_->Set({ 0.0f, 0.0f });
+    modifier->longPointLeftCenterX_->Set(0.0f);
+    modifier->longPointRightCenterX_->Set(0.0f);
+
+    auto contentProperty = modifier->UpdateContentProperty();
+    EXPECT_EQ(contentProperty.itemHalfSizes, modifier->itemHalfSizes_->Get());
+    EXPECT_EQ(contentProperty.indicatorMargin, modifier->indicatorMargin_->Get());
+    EXPECT_EQ(contentProperty.longPointLeftCenterX, modifier->longPointLeftCenterX_->Get());
+    EXPECT_EQ(contentProperty.longPointRightCenterX, modifier->longPointRightCenterX_->Get());
+    /**
+     * @tc.steps: step2. update targetContentProperty_ and check result.
+     */
+    LinearVector<float> itemHalfSizes = { 1.0f, 1.0f, 1.0f, 1.0f };
+    OffsetF indicatorMargin = { 1.0f, 1.0f };
+    float longPointLeftCenterX = 1.0f;
+    float longPointRightCenterX = 1.0f;
+    modifier->targetContentProperty_.itemHalfSizes = itemHalfSizes;
+    modifier->targetContentProperty_.indicatorMargin = indicatorMargin;
+    modifier->targetContentProperty_.longPointLeftCenterX = longPointLeftCenterX;
+    modifier->targetContentProperty_.longPointRightCenterX = longPointRightCenterX;
+    contentProperty = modifier->UpdateContentProperty();
+    EXPECT_EQ(contentProperty.itemHalfSizes, itemHalfSizes);
+    EXPECT_EQ(contentProperty.indicatorMargin, indicatorMargin);
+    EXPECT_EQ(contentProperty.longPointLeftCenterX, longPointLeftCenterX);
+    EXPECT_EQ(contentProperty.longPointRightCenterX, longPointRightCenterX);
+}
 } // namespace OHOS::Ace::NG

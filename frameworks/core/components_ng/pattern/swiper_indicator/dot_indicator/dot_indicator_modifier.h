@@ -112,6 +112,13 @@ public:
         uint8_t newPointOpacity = 0;
     };
 
+    struct TargetContentProperty {
+        LinearVector<float> itemHalfSizes = {};
+        std::optional<float> longPointLeftCenterX;
+        std::optional<float> longPointRightCenterX;
+        std::optional<OffsetF> indicatorMargin;
+    };
+
     std::tuple<float, float, float, float> CalCBoundsRect();
     void onDraw(DrawingContext& context) override;
     // paint
@@ -375,6 +382,7 @@ protected:
         const std::vector<std::pair<float, float>>& longPointCenterX, GestureState gestureState, bool isNormal);
     std::tuple<float, float, float, float> CalcAndAdjustIndicatorPaintRect(
         const ContentProperty& contentProperty, float& rectWidth, float& rectHeight);
+    ContentProperty UpdateContentProperty();
 
     RefPtr<AnimatablePropertyColor> backgroundColor_;
     RefPtr<AnimatablePropertyVectorFloat> vectorBlackPointCenterX_;
@@ -437,6 +445,7 @@ protected:
     float rectWidth_ = 0.0f;
     float rectHeight_ = 0.0f;
     LinearVector<float> targetVectorBlackPointCenterX_;
+    TargetContentProperty targetContentProperty_;
     ACE_DISALLOW_COPY_AND_MOVE(DotIndicatorModifier);
 };
 } // namespace OHOS::Ace::NG
