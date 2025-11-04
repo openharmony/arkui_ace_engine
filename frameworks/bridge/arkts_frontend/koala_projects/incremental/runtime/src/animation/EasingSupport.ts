@@ -20,7 +20,9 @@ export class EasingSupport {
     private y: Float64Array
 
     private constructor(size: uint32, xSupplier: (value: float64) => float64, ySupplier: (value: float64) => float64) {
-        if (!Number.isInteger(size) || size <= 1) throw new Error('easing size must be integer value greater than 1, but is ' + size)
+        if (!Number.isInteger(size) || size <= 1) {
+            throw new Error('easing size must be integer value greater than 1, but is ' + size)
+        }
         this.x = new Float64Array(size)
         this.y = new Float64Array(size)
         this.x[0] = xSupplier(0)
@@ -38,21 +40,35 @@ export class EasingSupport {
     convert(value: float64): float64 {
         let last = (this.x.length - 1) as uint32
         let left = 0 as uint32
-        if (value < this.x[left]) return this.y[left]
+        if (value < this.x[left]) {
+            return this.y[left]
+        }
         let right = last
-        if (value > this.x[right]) return this.y[right]
+        if (value > this.x[right]) {
+            return this.y[right]
+        }
         while (left <= right) {
             const center = ((left + right) >>> 1) as uint32
-            if (value < this.x[center]) right = center - 1
-            else if (value > this.x[center]) left = center + 1
-            else return this.y[center]
+            if (value < this.x[center]) {
+                right = center - 1
+            }
+            else if (value > this.x[center]) {
+                left = center + 1
+            }
+            else {
+                return this.y[center]
+            }
         }
         return this.y[left > last ? last : left]
     }
 
     static newCubicBezier(p1x: float64, p1y: float64, p2x: float64, p2y: float64, size: uint32 = 1024): EasingSupport {
-        if (!isFiniteNumber(p1x) || !isFiniteNumber(p1y) || p1x < 0 || 1 < p1x) throw new Error(`illegal point: (${p1x},${p1y}), where 0 <= x <= 1`)
-        if (!isFiniteNumber(p2x) || !isFiniteNumber(p2y) || p2x < 0 || 1 < p2x) throw new Error(`illegal point: (${p2x},${p2y}), where 0 <= x <= 1`)
+        if (!isFiniteNumber(p1x) || !isFiniteNumber(p1y) || p1x < 0 || 1 < p1x) {
+            throw new Error(`illegal point: (${p1x},${p1y}), where 0 <= x <= 1`)
+        }
+        if (!isFiniteNumber(p2x) || !isFiniteNumber(p2y) || p2x < 0 || 1 < p2x) {
+            throw new Error(`illegal point: (${p2x},${p2y}), where 0 <= x <= 1`)
+        }
         return new EasingSupport(size, (value: float64) => cubicBezierValue(value, p1x, p2x), (value: float64) => cubicBezierValue(value, p1y, p2y))
     }
 }

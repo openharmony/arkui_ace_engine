@@ -58,7 +58,9 @@ export abstract class TreeUpdater<Node> {
      */
     up(): void {
         let parent = this.current.parent
-        if (parent === undefined) throw new Error('unexpected')
+        if (parent === undefined) {
+            throw new Error('unexpected')
+        }
         this.current = parent
     }
 

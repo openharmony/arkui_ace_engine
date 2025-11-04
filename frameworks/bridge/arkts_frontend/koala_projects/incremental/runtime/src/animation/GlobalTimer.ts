@@ -34,6 +34,8 @@ export function getAnimationTimer(context: StateContext = GlobalStateManager.ins
  * @internal
  */
 export function createAnimationTimer(context: StateContext, initial: int64 = 0): MutableState<int64> {
-    if (getAnimationTimer(context)) throw new Error('the global animation timer is already initialized')
+    if (getAnimationTimer(context)) {
+        throw new Error('the global animation timer is already initialized')
+    }
     return context.namedState(GLOBAL_ANIMATION_TIMER, () => initial, true)
 }
