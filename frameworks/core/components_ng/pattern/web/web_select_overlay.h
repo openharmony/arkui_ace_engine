@@ -61,6 +61,7 @@ struct TouchHandleState {
 struct MenuAvoidStrategyMember {
     LayoutWrapper* layoutWrapper = nullptr;
     std::shared_ptr<SelectOverlayInfo> info;
+    bool fixWrongNewAvoid = false;
     bool hasKeyboard = false;
     RectF upPaint;
     RectF downPaint;
@@ -200,6 +201,7 @@ public:
     void InitMenuAvoidStrategyAboutBottom(MenuAvoidStrategyMember& member, InitStrategyTools& tools);
     void InitMenuAvoidStrategyAboutPosition(MenuAvoidStrategyMember& member, InitStrategyTools& tools);
     void MenuAvoidStrategy(OffsetF& menuOffset, MenuAvoidStrategyMember& member);
+    bool QuickMenuIsReallyNeedNewAvoid(MenuAvoidStrategyMember &member);
 private:
     void UpdateSelectMenuOptions();
     void UpdateIsSelectAll();

@@ -1439,7 +1439,7 @@ bool WebSelectOverlay::ComputeMenuOffset(LayoutWrapper *layoutWrapper, OffsetF &
 {
     CHECK_NULL_RETURN(info, false);
     CHECK_NULL_RETURN(layoutWrapper, false);
-    if (info->isSingleHandle || info->isNewAvoid) {
+    if (info->isSingleHandle) {
         return false;
     }
     MenuAvoidStrategyMember member;
@@ -1474,6 +1474,10 @@ bool WebSelectOverlay::InitMenuAvoidStrategyMember(MenuAvoidStrategyMember& memb
     InitMenuAvoidStrategyAboutTop(member, tools);
     InitMenuAvoidStrategyAboutBottom(member, tools);
     InitMenuAvoidStrategyAboutPosition(member, tools);
+
+    if (QuickMenuIsReallyNeedNewAvoid(member)) {
+        return false;
+    }
 
     return true;
 }
@@ -1549,6 +1553,12 @@ void WebSelectOverlay::InitMenuAvoidStrategyAboutPosition(MenuAvoidStrategyMembe
 
 void WebSelectOverlay::MenuAvoidStrategy(OffsetF& menuOffset, MenuAvoidStrategyMember& member)
 {
+    if (member.fixWrongNewAvoid) {
+        double fixY = member.upPaint.Top() - member.avoidFromText - member.menuHeight;
+        if (GreatNotEqual(fixY, member.topArea)) {
+            menuOffset.SetY(fixY);
+        }
+    }
     if (GreatNotEqual(menuOffset.GetY(), member.upPaint.Top())) {
         menuOffset.SetY(member.downPaint.Bottom() + member.avoidFromText);
     }
@@ -1560,11 +1570,11 @@ void WebSelectOverlay::MenuAvoidStrategy(OffsetF& menuOffset, MenuAvoidStrategyM
         menuTop = menuOffset.GetY();
         menuBottom = menuTop + menuHeight;
     }
-    if (GreatNotEqual(member.upPaint.Top(), menuTop)) {
+    if (GreatNotEqual(member.upPaint.Top(), menuBottom)) {
         double finalY = member.upPaint.Top() - member.avoidFromText - menuHeight;
         finalY = GreatNotEqual(menuTop, finalY) ? finalY : menuTop;
         menuOffset.SetY(finalY);
-    } else if (GreatNotEqual(menuBottom, member.downPaint.Bottom())) {
+    } else if (GreatNotEqual(menuTop, member.downPaint.Bottom())) {
         double finalY = member.downPaint.Bottom() + member.avoidFromText;
         finalY = GreatNotEqual(finalY, menuTop) ? finalY : menuTop;
         menuOffset.SetY(finalY);
@@ -1572,5 +1582,18 @@ void WebSelectOverlay::MenuAvoidStrategy(OffsetF& menuOffset, MenuAvoidStrategyM
         menuOffset.SetY(member.avoidPositionY);
     }
     menuOffset.SetX(member.avoidPositionX);
+}
+
+bool WebSelectOverlay::QuickMenuIsReallyNeedNewAvoid(MenuAvoidStrategyMember& member)
+{
+    if (!member.info->isNewAvoid) {
+        return false;
+    }
+    bool upHandleIsNotShow = GreatNotEqual(member.topArea, member.upPaint.Top()) ||
+                             GreatNotEqual(member.upPaint.Bottom(), member.bottomArea);
+    bool downHandleIsNotShow = GreatNotEqual(member.topArea, member.downPaint.Top()) ||
+                               GreatNotEqual(member.downPaint.Bottom(), member.bottomArea);
+    member.fixWrongNewAvoid = !upHandleIsNotShow || !downHandleIsNotShow;
+    return !member.fixWrongNewAvoid;
 }
 } // namespace OHOS::Ace::NG
