@@ -137,19 +137,23 @@ Ark_GestureRecognizer CreateArkGestureRecognizer(const RefPtr<NGGestureRecognize
     peer = Converter::ArkValue<Ark_GestureRecognizer>(recognizer);
     return peer;
 }
-std::optional<bool> ProcessBindableIsShow(FrameNode* frameNode, const Opt_Union_Boolean_Bindable *value)
+std::optional<bool> ProcessBindableIsShow(FrameNode* frameNode,
+                                          const Opt_Union_Boolean_Bindable *value,
+                                          std::function<void(const std::string&)>& outEvent)
 {
     std::optional<bool> result;
     Converter::VisitUnionPtr(value,
-        [&result](const Ark_Boolean& src) {
+        [&result, &outEvent](const Ark_Boolean& src) {
             result = Converter::OptConvert<bool>(src);
+            outEvent = nullptr;
         },
-        [&result, frameNode](const Ark_Bindable_Boolean& src) {
+        [&result, frameNode, &outEvent](const Ark_Bindable_Boolean& src) {
             result = Converter::OptConvert<bool>(src.value);
             WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-            auto onEvent = [arkCallback = CallbackHelper(src.onChange), weakNode](const bool value) {
+            outEvent = [arkCallback = CallbackHelper(src.onChange), weakNode](const std::string& param) {
                 PipelineContext::SetCallBackNode(weakNode);
-                arkCallback.Invoke(Converter::ArkValue<Ark_Boolean>(value));
+                bool isShow = (param == "true");
+                arkCallback.Invoke(Converter::ArkValue<Ark_Boolean>(isShow));
             };
         },
         [] {});
@@ -5382,7 +5386,8 @@ void SetBindContentCover0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(builder);
-    auto isShowValue = ProcessBindableIsShow(frameNode, isShow);
+    std::function<void(const std::string&)> changeEvent;
+    auto isShowValue = ProcessBindableIsShow(frameNode, isShow, changeEvent);
     ModalStyle modalStyle;
     modalStyle.modalTransition = (Converter::OptConvertPtr<ModalTransition>(type))
         .value_or(ModalTransition::DEFAULT);
@@ -5414,7 +5419,8 @@ void SetBindContentCover1Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(builder);
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto isShowValue = ProcessBindableIsShow(frameNode, isShow);
+    std::function<void(const std::string&)> changeEvent;
+    auto isShowValue = ProcessBindableIsShow(frameNode, isShow, changeEvent);
     ModalStyle modalStyle;
     modalStyle.modalTransition = ModalTransition::DEFAULT;
     std::function<void()> onShowCallback;
@@ -5440,6 +5446,7 @@ void SetBindContentCover1Impl(Ark_NativePointer node,
     auto optBuilder = Converter::GetOptPtr(builder);
     if (isShowValue && *isShowValue && optBuilder) {
         CallbackHelper(*optBuilder).BuildAsync([weakNode, frameNode, modalStyle, contentCoverParam,
+            changeEvent = std::move(changeEvent),
             onShowCallback = std::move(onShowCallback),
             onDismissCallback = std::move(onDismissCallback),
             onWillShowCallback = std::move(onWillShowCallback),
@@ -5449,12 +5456,12 @@ void SetBindContentCover1Impl(Ark_NativePointer node,
             auto buildFunc = [uiNode]() -> RefPtr<UINode> {
                 return uiNode;
             };
-            ViewAbstractModelStatic::BindContentCover(frameNode, true, nullptr, std::move(buildFunc),
+            ViewAbstractModelStatic::BindContentCover(frameNode, true, std::move(changeEvent), std::move(buildFunc),
                 modalStyle, std::move(onShowCallback), std::move(onDismissCallback), std::move(onWillShowCallback),
                 std::move(onWillDismissCallback), contentCoverParam);
             }, node);
     } else {
-        ViewAbstractModelStatic::BindContentCover(frameNode, false, nullptr, nullptr,
+        ViewAbstractModelStatic::BindContentCover(frameNode, false, std::move(changeEvent), nullptr,
             modalStyle, std::move(onShowCallback), std::move(onDismissCallback),
             std::move(onWillShowCallback), std::move(onWillDismissCallback), contentCoverParam);
     }
@@ -5467,7 +5474,8 @@ void SetBindSheetImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(builder);
-    auto isShowValue = ProcessBindableIsShow(frameNode, isShow);
+    std::function<void(const std::string&)> changeEvent;
+    auto isShowValue = ProcessBindableIsShow(frameNode, isShow, changeEvent);
     if (!isShowValue) {
         // Implement Reset value
         return;
@@ -5503,13 +5511,14 @@ void SetBindSheetImpl(Ark_NativePointer node,
         // Implement Reset value
         return;
     }
-    CallbackHelper(*optBuilder).BuildAsync([frameNode, isShowValue, sheetStyle, cb = std::move(cbs)](
+    CallbackHelper(*optBuilder).BuildAsync([frameNode, isShowValue, sheetStyle, changeEvent = std::move(changeEvent),
+        cb = std::move(cbs)](
         const RefPtr<UINode>& uiNode) mutable {
         auto buildFunc = [frameNode, uiNode]() {
             PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
             ViewStackProcessor::GetInstance()->Push(uiNode);
         };
-        ViewAbstractModelStatic::BindSheet(frameNode, *isShowValue, nullptr, std::move(buildFunc),
+        ViewAbstractModelStatic::BindSheet(frameNode, *isShowValue, std::move(changeEvent), std::move(buildFunc),
             std::move(cb.titleBuilder), sheetStyle, std::move(cb.onAppear), std::move(cb.onDisappear),
             std::move(cb.shouldDismiss), std::move(cb.onWillDismiss), std::move(cb.onWillAppear),
             std::move(cb.onWillDisappear), std::move(cb.onHeightDidChange), std::move(cb.onDetentsDidChange),
