@@ -206,6 +206,10 @@ void ModelAdapterWrapper::OnPaint3D(const RefPtr<ModelPaintProperty>& modelPaint
         UpdateShaderInputBuffers(modelPaintProperty);
     }
 
+    if (modelPaintProperty->NeedsBackgroundColorSetup()) {
+        UpdateBackgroundColor(modelPaintProperty);
+    }
+
     DrawFrame();
 }
 
@@ -461,5 +465,12 @@ void ModelAdapterWrapper::UpdateShaderInputBuffers(const RefPtr<ModelPaintProper
 
         adapter->widgetAdapter_->UpdateShaderInputBuffer(shaderInputBuffer);
     });
+}
+
+void ModelAdapterWrapper::UpdateBackgroundColor(const RefPtr<ModelPaintProperty>& modelPaintProperty)
+{
+    CHECK_NULL_VOID(textureLayer_);
+    uint32_t backgroundColor = modelPaintProperty->GetBackgroundColor().value_or(0x00000000);
+    textureLayer_->SetBackgroundColor(backgroundColor);
 }
 } // namespace OHOS::Ace::NG

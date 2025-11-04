@@ -498,5 +498,50 @@ HWTEST_F(ModelTestNg, ModelViewNgTest007, TestSize.Level1)
     ModelViewNG::SetModelViewContext(frameNode.GetRawPtr(), { "bundleName", "moduleName", surfaceType, nullptr });
     ASSERT_EQ(modelPattern->modelAdapter_, oldAdapter);
 }
+
+/**
+ * @tc.name: ModelViewNgTest008
+ * @tc.desc: dynamic path, test SetBackgroundColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(ModelTestNg, ModelViewNgTest008, TestSize.Level1)
+{
+    // Get FrameNode
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    // Get ModelPaintProperty
+    auto modelPaintProperty = frameNode->GetPaintProperty<ModelPaintProperty>();
+    ASSERT_NE(modelPaintProperty, nullptr);
+    // Get ModelPattern
+    auto modelPattern = frameNode->GetPattern<ModelPattern>();
+    ASSERT_NE(modelPattern, nullptr);
+    // Get Adapter
+    auto modelAdapter = modelPattern->modelAdapter_;
+    ASSERT_NE(modelAdapter, nullptr);
+
+    uint32_t argb = 0xff0000ff; // opaque blue
+    modelViewNG.SetBackgroundColor(argb);
+    ASSERT_EQ(modelPaintProperty->GetBackgroundColorValue(), argb);
+    modelAdapter->UpdateBackgroundColor(modelPaintProperty);
+}
+
+/**
+ * @tc.name: ModelViewNgTest009
+ * @tc.desc: static path, test SetBackgroundColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(ModelTestNg, ModelViewNgTest009, TestSize.Level1)
+{
+    // Create FrameNode in static way
+    auto frameNode = ModelViewNG::CreateFrameNode(testKey++);
+    ASSERT_NE(frameNode, nullptr);
+    // Get ModelPaintProperty
+    auto modelPaintProperty = frameNode->GetPaintProperty<ModelPaintProperty>();
+    ASSERT_NE(modelPaintProperty, nullptr);
+
+    uint32_t argb = 0xff0000ff; // opaque blue
+    ModelViewNG::SetBackgroundColor(frameNode.GetRawPtr(), argb);
+    ASSERT_EQ(modelPaintProperty->GetBackgroundColorValue(), argb);
+}
 } // namespace OHOS::Ace::NG
 

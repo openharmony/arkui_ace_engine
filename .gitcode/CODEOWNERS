@@ -1319,8 +1319,8 @@ frameworks/bridge/declarative_frontend/jsview/js_row_split.cpp @arkuilayout1
 frameworks/bridge/declarative_frontend/jsview/js_row_split.h @arkuilayout1
 frameworks/bridge/declarative_frontend/jsview/js_save_button.cpp @harylee
 frameworks/bridge/declarative_frontend/jsview/js_save_button.h @harylee
-frameworks/bridge/declarative_frontend/jsview/js_sceneview.cpp
-frameworks/bridge/declarative_frontend/jsview/js_sceneview.h
+frameworks/bridge/declarative_frontend/jsview/js_sceneview.cpp @arkui_component3d
+frameworks/bridge/declarative_frontend/jsview/js_sceneview.h @arkui_component3d
 frameworks/bridge/declarative_frontend/jsview/js_scope_util.cpp @arkui_framework_xnode
 frameworks/bridge/declarative_frontend/jsview/js_scope_util.h @arkui_framework_xnode
 frameworks/bridge/declarative_frontend/jsview/js_scrollable_base.cpp @arkuiscroll

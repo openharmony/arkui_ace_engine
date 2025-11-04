@@ -37,6 +37,7 @@ public:
     void AddShaderImageTexture(const std::string& path) override;
     void AddShaderInputBuffer(const std::shared_ptr<Render3D::ShaderInputBuffer>& buffer) override;
     std::optional<std::shared_ptr<Render3D::ShaderInputBuffer>> GetShaderInputBuffer() override;
+    void SetBackgroundColor(uint32_t argb) override;
 
     static void AddShaderInputBuffer(FrameNode* frameNode, const std::shared_ptr<Render3D::ShaderInputBuffer>& buffer);
     static void AddCustomRender(FrameNode* frameNode,
@@ -49,6 +50,7 @@ public:
     static void SetRenderHeight(FrameNode* frameNode, const std::optional<Dimension>& height);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetModelViewContext(FrameNode* frameNode, const ModelViewContext& context);
+    static void SetBackgroundColor(FrameNode* frameNode, uint32_t argb);
 private:
     // Camera and lights animations are done from the frontend with Animatable types.
     WeakPtr<FrameNode> frameNode_;
