@@ -3079,21 +3079,14 @@ bool FormPattern::OnAccessibilityStateChange(bool state)
         return false;
     }
 
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    auto pipeline = host->GetContext();
-    CHECK_NULL_RETURN(pipeline, false);
-    auto taskExecutor = SingleTaskExecutor::Make(pipeline->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
-
-    taskExecutor.PostTask([weak = WeakClaim(this)] {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        CHECK_NULL_VOID(pattern->formManagerBridge_);
-        if (pattern->IsAccessibilityState()) {
-            pattern->UnregisterAccessibility();
-        }
-        pattern->formManagerBridge_->ReAddForm();
-        }, "ReAddForm");
+    if (formManagerBridge_ == nullptr) {
+        TAG_LOGI(AceLogTag::ACE_FORM, "formManagerBridge_ is null");
+        return false;
+    }
+    if (state) {
+        UnregisterAccessibility();
+    }
+    formManagerBridge_->ReAddForm();
     return true;
 }
 
