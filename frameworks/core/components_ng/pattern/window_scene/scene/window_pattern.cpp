@@ -208,7 +208,7 @@ void WindowPattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto state = session_->GetSessionState();
-    auto key = Rosen::WSSnapshotHelper::GetInstance()->GetScreenStatus();
+    auto key = session_->GetScreenSnapshotStatus();
     TAG_LOGW(AceLogTag::ACE_WINDOW_SCENE, "OnAttachToFrameNode id: %{public}d, node id: %{public}d, "
         "name: %{public}s, state: %{public}u, in recents: %{public}d, prelaunch: %{public}d",
         session_->GetPersistentId(), host->GetId(), session_->GetSessionInfo().bundleName_.c_str(),
@@ -732,7 +732,7 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
         ImageSourceInfo sourceInfo;
         auto scenePersistence = session_->GetScenePersistence();
         CHECK_NULL_VOID(scenePersistence);
-        auto key = Rosen::WSSnapshotHelper::GetInstance()->GetScreenStatus();
+        auto key = session_->GetScreenSnapshotStatus();
         auto freeMultiWindow = session_->freeMultiWindow_.load();
         auto isSavingSnapshot = scenePersistence->IsSavingSnapshot(key, freeMultiWindow);
         auto hasSnapshot = scenePersistence->HasSnapshot(key, freeMultiWindow);
