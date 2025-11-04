@@ -154,12 +154,8 @@ export class TextMenuControllerImpl extends TextMenuController {
 // export class AtomicServiceBarInternal implements AtomicServiceBar {
     // instanceId_: int32;
     // constructor(instanceId: int32) {
-    //     this.instanceId_ = instanceId;
     // }
     // public getBarRect(): Frame {
-    //     ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-    //     let frame = UIContextAtomicServiceBar.getBarRect();
-    //     ArkUIAniModule._Common_Restore_InstanceId();
     //     return frame;
     // }
 // }
@@ -210,7 +206,6 @@ class ContextMenuControllerImpl extends ContextMenuController {
 
     public close(): void {
         // ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        // ContextMenu.close();
         // ArkUIAniModule._Common_Restore_InstanceId();
     }
 }
@@ -510,7 +505,6 @@ export class RouterImpl extends Router {
             throw Error("router set in uiContext is empty");
         }
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        // this.router_!.push(options, callback);
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 
@@ -519,7 +513,6 @@ export class RouterImpl extends Router {
             throw Error("router set in uiContext is empty");
         }
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        // this.router_!.push(options, callback, mode);
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 
@@ -548,7 +541,6 @@ export class RouterImpl extends Router {
             throw Error("router set in uiContext is empty");
         }
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        // this.router_!.pushNamedRoute(options, callback);
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 
@@ -557,7 +549,6 @@ export class RouterImpl extends Router {
             throw Error("router set in uiContext is empty");
         }
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        // this.router_!.pushNamedRoute(options, callback, mode);
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 
@@ -586,7 +577,6 @@ export class RouterImpl extends Router {
             throw Error("router set in uiContext is empty");
         }
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        // this.router_!.replace(options, callback);
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 
@@ -595,7 +585,6 @@ export class RouterImpl extends Router {
             throw Error("router set in uiContext is empty");
         }
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        // this.router_!.replace(options, callback, mode);
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 
@@ -624,7 +613,6 @@ export class RouterImpl extends Router {
             throw Error("router set in uiContext is empty");
         }
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        // this.router_!.replaceNamedRoute(options, callback);
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 
@@ -633,7 +621,6 @@ export class RouterImpl extends Router {
             throw Error("router set in uiContext is empty");
         }
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        // this.router_!.replaceNamedRoute(options, callback, mode);
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 
@@ -1193,7 +1180,6 @@ export class CursorControllerImpl extends CursorController {
 
     public setCursor(value: PointerStyle): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        // GlobalScope.cursorControl_setCursor(value)
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 }
@@ -1352,7 +1338,6 @@ export class UIContextImpl extends UIContext {
         this.componentUtils_ = new ComponentUtilsImpl(instanceId);
         this.componentSnapshot_ = new ComponentSnapshotImpl(instanceId);
         this.dragController_ = new DragControllerImpl(instanceId);
-        // this.atomicServiceBar_ = new AtomicServiceBarInternal(instanceId);
         this.contextMenuController_ = new ContextMenuControllerImpl(instanceId);
         this.cursorController_ = new CursorControllerImpl(instanceId);
         this.font_ = new FontImpl(instanceId);
@@ -1374,11 +1359,8 @@ export class UIContextImpl extends UIContext {
         // }
 
         // if (this.position + length > this.bufferSize) {
-        //     throw Error("Callback buffer of UIContextImpl is full!")
         // }
 
-        // InteropNativeModule._CopyBuffer(this.buffer.buffer + this.position, length, buffer)
-        // this.position += length
     }
 
     callCallbacks(): void {
@@ -1640,7 +1622,6 @@ export class UIContextImpl extends UIContext {
         ArkUIAniModule._Common_Restore_InstanceId()
     }
     clearResourceCache(): void {
-        // ArkUIGeneratedNativeModule._SystemOps_resourceManagerReset()
     }
     postFrameCallback(frameCallback: FrameCallback): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_)

@@ -81,14 +81,14 @@ export class ParallelNode<T> {
     buildNoArgs(
         /** @memo */
         builder: () => void,  updateUseParallel?: boolean) {
-        if (this.needAttach && this.status == 2) {
+        if (this.needAttach && this.status === 2) {
             this.manager!.merge(__context(), this.rootState!);
             this.update(updateUseParallel)
             this.options?.completed?.()
             this.status = 3; // is attached
             return;
         }
-        if (this.status == 0) {
+        if (this.status === 0) {
             const manager = (__context() as StateManager)
             this.manager = manager.fork() as StateManager
             this.run(manager, this.manager!, builder)
