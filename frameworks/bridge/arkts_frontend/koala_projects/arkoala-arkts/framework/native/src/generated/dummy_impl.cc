@@ -23905,7 +23905,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void AnimateToImmediatelyImplImpl(const Ark_AnimateParam* param,
-                                      const Callback_Void* event)
+                                      const Callback_Void* event,
+                                      Ark_Boolean immediately)
     {
         if (!needGroupedLog(1))
         {
@@ -23915,6 +23916,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         WriteToString(&out, param);
         out.append(", ");
         WriteToString(&out, event);
+        out.append(", ");
+        WriteToString(&out, immediately);
         out.append(") \n");
         appendGroupedLog(1, out);
     }

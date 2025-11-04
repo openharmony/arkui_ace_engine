@@ -10683,7 +10683,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         CHECK_NULL_VOID(frameNode);
     }
     void AnimateToImmediatelyImplImpl(const Ark_AnimateParam* param,
-                                      const Callback_Void* event)
+                                      const Callback_Void* event,
+                                      Ark_Boolean immediately)
     {
     }
     void KeyframeAnimationImplImpl(const Ark_KeyframeAnimateParam* param,

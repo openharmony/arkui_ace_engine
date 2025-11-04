@@ -24752,7 +24752,8 @@ typedef struct GENERATED_ArkUIAnimationExtenderAccessor {
     void (*AnimationTranslate)(Ark_NativePointer node,
                                const Ark_TranslateOptions* options);
     void (*AnimateToImmediatelyImpl)(const Ark_AnimateParam* param,
-                                     const Callback_Void* event);
+                                     const Callback_Void* event,
+                                     Ark_Boolean immediately);
     void (*KeyframeAnimationImpl)(const Ark_KeyframeAnimateParam* param,
                                   const Array_KeyframeState* keyfames);
 } GENERATED_ArkUIAnimationExtenderAccessor;
