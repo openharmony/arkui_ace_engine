@@ -757,6 +757,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _DatePickerAttribute_setEnableHapticFeedback(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _DatePickerAttribute_setCanLoop(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _Divider_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
     native static _DividerInterface_setDividerOptions(ptr: KPointer): void
@@ -990,6 +992,8 @@ export class ArkUIGeneratedNativeModule {
     native static _ImageAttribute_setRenderMode(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _ImageAttribute_setDynamicRangeMode(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ImageAttribute_setHdrBrightness(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _ImageAttribute_setInterpolation(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
@@ -2766,6 +2770,8 @@ export class ArkUIGeneratedNativeModule {
     native static _TextPickerAttribute_setEnableHapticFeedback(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _TextPickerAttribute_setDigitalCrownSensitivity(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _TextPickerAttribute_setSelectedBackgroundStyle(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _TextTimer_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct

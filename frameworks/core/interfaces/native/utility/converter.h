@@ -634,6 +634,7 @@ namespace Converter {
     template<> PaddingProperty Convert(const Ark_Padding& src);
     template<> PaddingProperty Convert(const Ark_Resource& src);
     template<> PaddingProperty Convert(const Ark_String& src);
+    template<> PickerBackgroundStyle Convert(const Ark_PickerBackgroundStyle& src);
     template<> PickerIndicatorStyle Convert(const Ark_PickerIndicatorStyle& src);
     template<> PickerRangeType Convert(const Ark_Resource& src);
     template<> PickerRangeType Convert(const Array_Array_String& src);

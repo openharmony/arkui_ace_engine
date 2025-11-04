@@ -40,6 +40,7 @@ const auto DEFAULT_SELECTED_TEXT_STYLE = PickerTextStyle { .textColor = Color(0x
     .fontWeight = FontWeight::MEDIUM };
 const bool DEFAULT_SHOW_LUNAR = false;
 const bool DEFAULT_ENABLE_HAPTIC = true;
+const bool DEFAULT_CAN_LOOP = true;
 
 std::optional<PickerDate> ProcessBindableSelected(FrameNode* frameNode, const Opt_Union_Date_Bindable& value)
 {
@@ -218,6 +219,14 @@ void SetEnableHapticFeedbackImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvert<bool>(*value).value_or(DEFAULT_ENABLE_HAPTIC);
     DatePickerModelNG::SetEnableHapticFeedback(frameNode, convValue);
 }
+void SetCanLoopImpl(Ark_NativePointer node,
+                    const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvert<bool>(*value).value_or(DEFAULT_CAN_LOOP);
+    DatePickerModelNG::SetCanLoop(frameNode, convValue);
+}
 } // DatePickerAttributeModifier
 const GENERATED_ArkUIDatePickerModifier* GetDatePickerModifier()
 {
@@ -231,6 +240,7 @@ const GENERATED_ArkUIDatePickerModifier* GetDatePickerModifier()
         DatePickerAttributeModifier::SetOnDateChangeImpl,
         DatePickerAttributeModifier::SetDigitalCrownSensitivityImpl,
         DatePickerAttributeModifier::SetEnableHapticFeedbackImpl,
+        DatePickerAttributeModifier::SetCanLoopImpl,
     };
     return &ArkUIDatePickerModifierImpl;
 }

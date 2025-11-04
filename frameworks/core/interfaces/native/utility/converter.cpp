@@ -3266,6 +3266,32 @@ PointLightStyle Convert(const Ark_PointLightStyle& src)
 }
 
 template<>
+PickerBackgroundStyle Convert(const Ark_PickerBackgroundStyle& src)
+{
+    PickerBackgroundStyle dst;
+    dst.color = Converter::OptConvert<Color>(src.color);
+    dst.borderRadius = Converter::OptConvert<BorderRadiusProperty>(src.borderRadius);
+    return dst;
+}
+
+template<>
+void AssignCast(
+    std::optional<BorderRadiusProperty>& dst, const Ark_Union_LengthMetrics_BorderRadiuses_LocalizedBorderRadiuses& src)
+{
+    Converter::VisitUnion(src,
+        [&dst](const Ark_LengthMetrics& value) {
+            dst = Converter::OptConvert<BorderRadiusProperty>(value);
+        },
+        [&dst](const Ark_BorderRadiuses& value) {
+            dst = Converter::OptConvert<BorderRadiusProperty>(value);
+        },
+        [&dst](const Ark_LocalizedBorderRadiuses& value) {
+            dst = Converter::OptConvert<BorderRadiusProperty>(value);
+        },
+        []() {});
+}
+
+template<>
 PickerRangeType Convert(const Array_String& src)
 {
     std::pair<bool, std::vector<NG::RangeContent>> dst;

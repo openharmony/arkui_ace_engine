@@ -57,7 +57,7 @@ import { NavPathStack, NavigationModuleInfo, NavPathInfo, NavigationOptions, Pop
 import { NavDestinationContextInternal, RouteMapConfig } from "../component/navDestination"
 import { PageMapBuilder } from "../component/builder";
 import { NavigationOpsHandWritten } from "./NavigationOpsHandWritten";
-import { ArkImageComponent, ResourceStr, ImageContent, ImageAIOptions, ArkTabsComponent  } from "#generated";
+import { ArkImageComponent, ResourceStr, ImageContent, ImageAIOptions, ArkImagePeer, ImageErrorCallback, ArkTabsComponent } from "#generated";
 import { ArkWaterFlowComponent, WaterFlowOptions } from '#generated';
 import { ImageOpsHandWritten } from "./ImageOpsHandWritten";
 import { TabsOpsHandWritten } from "./TabsOpsHandWritten";
@@ -413,6 +413,10 @@ export { NavDestinationBuilder, NavigationRouterMap } from "./NavigationOpsHandW
 
 export function hookImageSetImageOptions(component: ArkImageComponent, src: image.PixelMap | ResourceStr | DrawableDescriptor | ImageContent, imageAIOptions?: ImageAIOptions): void {
     ImageOpsHandWritten.hookImageSetImageOptionsImpl(component, src, imageAIOptions);
+}
+
+export function hookImageOnError(receiver: ArkImageComponent | ArkImagePeer, value: ImageErrorCallback | undefined): void {
+    ImageOpsHandWritten.hookImageOnErrorImpl(receiver, value);
 }
 
 export function hookTabsApplyAttributesFinish(node: ArkTabsComponent): void  {

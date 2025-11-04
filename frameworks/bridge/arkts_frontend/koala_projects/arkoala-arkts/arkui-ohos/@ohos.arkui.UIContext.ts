@@ -39,7 +39,7 @@ import { default as mediaquery } from '@ohos.mediaquery';
 import { AlertDialogParamWithConfirm, AlertDialogParamWithButtons, AlertDialogParamWithOptions } from 'arkui/framework';
 import { ActionSheetOptions } from 'arkui/framework';
 import { TimePickerDialogOptions } from 'arkui/framework';
-import { TextPickerDialogOptions } from 'arkui/framework';
+import { TextPickerDialogOptions, TextPickerDialogOptionsExt } from 'arkui/framework';
 import { DatePickerDialogOptions } from 'arkui/framework';
 import { SheetOptions } from 'arkui/framework';
 import inspector from '@ohos/arkui/inspector';
@@ -636,7 +636,7 @@ export class UIContext {
         throw Error("showTimePickerDialog not implemented in UIContext!")
     }
 
-    public showTextPickerDialog(options: TextPickerDialogOptions): void {
+    public showTextPickerDialog(options: TextPickerDialogOptions | TextPickerDialogOptionsExt): void {
         throw Error("showTextPickerDialog not implemented in UIContext!")
     }
 

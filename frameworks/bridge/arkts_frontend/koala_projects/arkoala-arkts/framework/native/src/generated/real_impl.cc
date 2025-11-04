@@ -2683,6 +2683,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                      const Opt_Boolean* value)
     {
     }
+    void SetCanLoopImpl(Ark_NativePointer node,
+                        const Opt_Boolean* value)
+    {
+    }
     } // DatePickerAttributeModifier
     namespace DividerModifier {
     Ark_NativePointer ConstructImpl(Ark_Int32 id,
@@ -3254,6 +3258,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void SetDynamicRangeModeImpl(Ark_NativePointer node,
                                  const Opt_DynamicRangeMode* value)
+    {
+    }
+    void SetHdrBrightnessImpl(Ark_NativePointer node,
+                              const Opt_Float64* value)
     {
     }
     void SetInterpolationImpl(Ark_NativePointer node,
@@ -7322,15 +7330,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetDisappearTextStyleImpl(Ark_NativePointer node,
-                                   const Opt_PickerTextStyle* value)
+                                   const Opt_Union_PickerTextStyle_TextPickerTextStyle* value)
     {
     }
     void SetTextStyleImpl(Ark_NativePointer node,
-                          const Opt_PickerTextStyle* value)
+                          const Opt_Union_PickerTextStyle_TextPickerTextStyle* value)
     {
     }
     void SetSelectedTextStyleImpl(Ark_NativePointer node,
-                                  const Opt_PickerTextStyle* value)
+                                  const Opt_Union_PickerTextStyle_TextPickerTextStyle* value)
     {
     }
     void SetDisableTextStyleAnimationImpl(Ark_NativePointer node,
@@ -7371,6 +7379,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void SetDigitalCrownSensitivityImpl(Ark_NativePointer node,
                                         const Opt_CrownSensitivity* value)
+    {
+    }
+    void SetSelectedBackgroundStyleImpl(Ark_NativePointer node,
+                                        const Opt_PickerBackgroundStyle* value)
     {
     }
     } // TextPickerAttributeModifier
@@ -8871,6 +8883,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             DatePickerAttributeModifier::SetOnDateChangeImpl,
             DatePickerAttributeModifier::SetDigitalCrownSensitivityImpl,
             DatePickerAttributeModifier::SetEnableHapticFeedbackImpl,
+            DatePickerAttributeModifier::SetCanLoopImpl,
         };
         return &ArkUIDatePickerModifierImpl;
     }
@@ -9100,6 +9113,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             ImageAttributeModifier::SetAutoResizeImpl,
             ImageAttributeModifier::SetRenderModeImpl,
             ImageAttributeModifier::SetDynamicRangeModeImpl,
+            ImageAttributeModifier::SetHdrBrightnessImpl,
             ImageAttributeModifier::SetInterpolationImpl,
             ImageAttributeModifier::SetSourceSizeImpl,
             ImageAttributeModifier::SetSyncLoadImpl,
@@ -10464,6 +10478,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TextPickerAttributeModifier::SetGradientHeightImpl,
             TextPickerAttributeModifier::SetEnableHapticFeedbackImpl,
             TextPickerAttributeModifier::SetDigitalCrownSensitivityImpl,
+            TextPickerAttributeModifier::SetSelectedBackgroundStyleImpl,
         };
         return &ArkUITextPickerModifierImpl;
     }
@@ -12975,7 +12990,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     void ShowTimePickerDialogImpl(const Ark_TimePickerDialogOptions* options)
     {
     }
-    void ShowTextPickerDialogImpl(const Ark_TextPickerDialogOptions* options)
+    void ShowTextPickerDialogImpl(const Ark_Union_TextPickerDialogOptions_TextPickerDialogOptionsExt* options)
     {
     }
     void ShowDatePickerDialogImpl(const Ark_DatePickerDialogOptions* options)

@@ -18,7 +18,7 @@
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { ModifierState } from './CommonModifier'
-import { AttributeModifier, extractors } from "#handwritten"
+import { AttributeModifier, extractors, hookImageOnError } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkImagePeer, ImageAlt, ColorContent, ImageRenderMode, DynamicRangeMode, ImageInterpolation, ImageSourceSize, ImageOnCompleteCallback, ImageCompleteEvent, ImageErrorCallback, ImageError, ResizableOptions, ImageRotateOrientation, ImageAttribute } from "./component/image"
@@ -67,6 +67,8 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
     _renderMode_0_0value?: ImageRenderMode | undefined
     _dynamicRangeMode_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _dynamicRangeMode_0_0value?: DynamicRangeMode | undefined
+    _hdrBrightness_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _hdrBrightness_0_0value?: double | undefined
     _interpolation_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _interpolation_0_0value?: ImageInterpolation | undefined
     _sourceSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -289,6 +291,24 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
                 }
             }
         }
+        if (this._hdrBrightness_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._hdrBrightness_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setHdrBrightnessAttribute((this._hdrBrightness_0_0value as double | undefined));
+                    this._hdrBrightness_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._hdrBrightness_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._hdrBrightness_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setHdrBrightnessAttribute((undefined as double | undefined));
+                }
+            }
+        }
         if (this._interpolation_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._interpolation_0_flag) {
@@ -455,7 +475,7 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
         {
             switch (this._onError_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnErrorAttribute((this._onError_0_0value as ImageErrorCallback | undefined));
+                    hookImageOnError(peer, (this._onError_0_0value as ImageErrorCallback | undefined));
                     this._onError_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -465,7 +485,7 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
                 }
                 default: {
                     this._onError_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnErrorAttribute((undefined as ImageErrorCallback | undefined));
+                    hookImageOnError(peer, (undefined as ImageErrorCallback | undefined));
                 }
             }
         }
@@ -762,6 +782,19 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
                 }
                 default: {
                     this.dynamicRangeMode((undefined as DynamicRangeMode | undefined));
+                }
+            }
+        }
+        if (modifier._hdrBrightness_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._hdrBrightness_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.hdrBrightness(modifier._hdrBrightness_0_0value);
+                    break;
+                }
+                default: {
+                    this.hdrBrightness((undefined as double | undefined));
                 }
             }
         }
@@ -1120,6 +1153,17 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
         } else
         {
             this._dynamicRangeMode_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    hdrBrightness(value: double | undefined): this {
+        if (((this._hdrBrightness_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._hdrBrightness_0_0value) !== (value)))
+        {
+            this._hdrBrightness_0_flag = AttributeUpdaterFlag.UPDATE
+            this._hdrBrightness_0_0value = value
+        } else
+        {
+            this._hdrBrightness_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

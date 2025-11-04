@@ -471,7 +471,7 @@ void SetCanLoopImpl(Ark_NativePointer node,
     TextPickerModelStatic::SetCanLoop(frameNode, *convValue);
 }
 void SetDisappearTextStyleImpl(Ark_NativePointer node,
-                               const Opt_PickerTextStyle* value)
+                               const Opt_Union_PickerTextStyle_TextPickerTextStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -483,7 +483,7 @@ void SetDisappearTextStyleImpl(Ark_NativePointer node,
     TextPickerModelStatic::SetDisappearTextStyle(frameNode, theme, *convValue);
 }
 void SetTextStyleImpl(Ark_NativePointer node,
-                      const Opt_PickerTextStyle* value)
+                      const Opt_Union_PickerTextStyle_TextPickerTextStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -495,7 +495,7 @@ void SetTextStyleImpl(Ark_NativePointer node,
     TextPickerModelStatic::SetNormalTextStyle(frameNode, theme, *convValue);
 }
 void SetSelectedTextStyleImpl(Ark_NativePointer node,
-                              const Opt_PickerTextStyle* value)
+                              const Opt_Union_PickerTextStyle_TextPickerTextStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -692,6 +692,25 @@ void SetDigitalCrownSensitivityImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvertPtr<CrownSensitivity>(value);
     TextPickerModelStatic::SetDigitalCrownSensitivity(frameNode, EnumToInt(convValue));
 }
+void SetSelectedBackgroundStyleImpl(Ark_NativePointer node, const Opt_PickerBackgroundStyle* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(theme);
+
+    NG::PickerBackgroundStyle backgroundStyle;
+    backgroundStyle.color = theme->GetSelectedBackgroundColor();
+    backgroundStyle.borderRadius = theme->GetSelectedBorderRadius();
+    auto bgStyle = Converter::OptConvertPtr<PickerBackgroundStyle>(value);
+    if (bgStyle) {
+        backgroundStyle.color = bgStyle->color ? bgStyle->color : backgroundStyle.color;
+        backgroundStyle.borderRadius = bgStyle->borderRadius ? bgStyle->borderRadius : backgroundStyle.borderRadius;
+    }
+    TextPickerModelStatic::SetSelectedBackgroundStyle(frameNode, backgroundStyle);
+}
 } // TextPickerAttributeModifier
 const GENERATED_ArkUITextPickerModifier* GetTextPickerModifier()
 {
@@ -713,6 +732,7 @@ const GENERATED_ArkUITextPickerModifier* GetTextPickerModifier()
         TextPickerAttributeModifier::SetGradientHeightImpl,
         TextPickerAttributeModifier::SetEnableHapticFeedbackImpl,
         TextPickerAttributeModifier::SetDigitalCrownSensitivityImpl,
+        TextPickerAttributeModifier::SetSelectedBackgroundStyleImpl,
     };
     return &ArkUITextPickerModifierImpl;
 }

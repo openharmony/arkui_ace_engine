@@ -6759,6 +6759,19 @@ void impl_DatePickerAttribute_setEnableHapticFeedback(Ark_NativePointer thisPtr,
         GetNodeModifiers()->getDatePickerModifier()->setEnableHapticFeedback(self, static_cast<Opt_Boolean*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(DatePickerAttribute_setEnableHapticFeedback, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_DatePickerAttribute_setCanLoop(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Boolean valueValueTempTmpBuf = {};
+        valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            valueValueTempTmpBuf.value = thisDeserializer.readBoolean();
+        }
+        Opt_Boolean valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getDatePickerModifier()->setCanLoop(self, static_cast<Opt_Boolean*>(&valueValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(DatePickerAttribute_setCanLoop, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_Divider_construct(Ark_Int32 id, Ark_Int32 flags) {
         return GetNodeModifiers()->getDividerModifier()->construct(id, flags);
 }
@@ -8481,6 +8494,19 @@ void impl_ImageAttribute_setDynamicRangeMode(Ark_NativePointer thisPtr, KSeriali
         GetNodeModifiers()->getImageModifier()->setDynamicRangeMode(self, static_cast<Opt_DynamicRangeMode*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(ImageAttribute_setDynamicRangeMode, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_ImageAttribute_setHdrBrightness(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Float64 valueValueTempTmpBuf = {};
+        valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            valueValueTempTmpBuf.value = thisDeserializer.readFloat64();
+        }
+        Opt_Float64 valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getImageModifier()->setHdrBrightness(self, static_cast<Opt_Float64*>(&valueValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(ImageAttribute_setHdrBrightness, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_ImageAttribute_setInterpolation(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -23420,39 +23446,75 @@ void impl_TextPickerAttribute_setDisappearTextStyle(Ark_NativePointer thisPtr, K
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_PickerTextStyle valueValueTempTmpBuf = {};
+        Opt_Union_PickerTextStyle_TextPickerTextStyle valueValueTempTmpBuf = {};
         valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            valueValueTempTmpBuf.value = PickerTextStyle_serializer::read(thisDeserializer);
+            const Ark_Int8 valueValueTempTmpBuf_UnionSelector = thisDeserializer.readInt8();
+            Ark_Union_PickerTextStyle_TextPickerTextStyle valueValueTempTmpBuf_ = {};
+            valueValueTempTmpBuf_.selector = valueValueTempTmpBuf_UnionSelector;
+            if (valueValueTempTmpBuf_UnionSelector == 0) {
+                valueValueTempTmpBuf_.selector = 0;
+                valueValueTempTmpBuf_.value0 = PickerTextStyle_serializer::read(thisDeserializer);
+            } else if (valueValueTempTmpBuf_UnionSelector == 1) {
+                valueValueTempTmpBuf_.selector = 1;
+                valueValueTempTmpBuf_.value1 = TextPickerTextStyle_serializer::read(thisDeserializer);
+            } else {
+                INTEROP_FATAL("One of the branches for valueValueTempTmpBuf_ has to be chosen through deserialisation.");
+            }
+            valueValueTempTmpBuf.value = static_cast<Ark_Union_PickerTextStyle_TextPickerTextStyle>(valueValueTempTmpBuf_);
         }
-        Opt_PickerTextStyle valueValueTemp = valueValueTempTmpBuf;;
-        GetNodeModifiers()->getTextPickerModifier()->setDisappearTextStyle(self, static_cast<Opt_PickerTextStyle*>(&valueValueTemp));
+        Opt_Union_PickerTextStyle_TextPickerTextStyle valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getTextPickerModifier()->setDisappearTextStyle(self, static_cast<Opt_Union_PickerTextStyle_TextPickerTextStyle*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(TextPickerAttribute_setDisappearTextStyle, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_TextPickerAttribute_setTextStyle(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_PickerTextStyle valueValueTempTmpBuf = {};
+        Opt_Union_PickerTextStyle_TextPickerTextStyle valueValueTempTmpBuf = {};
         valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            valueValueTempTmpBuf.value = PickerTextStyle_serializer::read(thisDeserializer);
+            const Ark_Int8 valueValueTempTmpBuf_UnionSelector = thisDeserializer.readInt8();
+            Ark_Union_PickerTextStyle_TextPickerTextStyle valueValueTempTmpBuf_ = {};
+            valueValueTempTmpBuf_.selector = valueValueTempTmpBuf_UnionSelector;
+            if (valueValueTempTmpBuf_UnionSelector == 0) {
+                valueValueTempTmpBuf_.selector = 0;
+                valueValueTempTmpBuf_.value0 = PickerTextStyle_serializer::read(thisDeserializer);
+            } else if (valueValueTempTmpBuf_UnionSelector == 1) {
+                valueValueTempTmpBuf_.selector = 1;
+                valueValueTempTmpBuf_.value1 = TextPickerTextStyle_serializer::read(thisDeserializer);
+            } else {
+                INTEROP_FATAL("One of the branches for valueValueTempTmpBuf_ has to be chosen through deserialisation.");
+            }
+            valueValueTempTmpBuf.value = static_cast<Ark_Union_PickerTextStyle_TextPickerTextStyle>(valueValueTempTmpBuf_);
         }
-        Opt_PickerTextStyle valueValueTemp = valueValueTempTmpBuf;;
-        GetNodeModifiers()->getTextPickerModifier()->setTextStyle(self, static_cast<Opt_PickerTextStyle*>(&valueValueTemp));
+        Opt_Union_PickerTextStyle_TextPickerTextStyle valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getTextPickerModifier()->setTextStyle(self, static_cast<Opt_Union_PickerTextStyle_TextPickerTextStyle*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(TextPickerAttribute_setTextStyle, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_TextPickerAttribute_setSelectedTextStyle(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_PickerTextStyle valueValueTempTmpBuf = {};
+        Opt_Union_PickerTextStyle_TextPickerTextStyle valueValueTempTmpBuf = {};
         valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            valueValueTempTmpBuf.value = PickerTextStyle_serializer::read(thisDeserializer);
+            const Ark_Int8 valueValueTempTmpBuf_UnionSelector = thisDeserializer.readInt8();
+            Ark_Union_PickerTextStyle_TextPickerTextStyle valueValueTempTmpBuf_ = {};
+            valueValueTempTmpBuf_.selector = valueValueTempTmpBuf_UnionSelector;
+            if (valueValueTempTmpBuf_UnionSelector == 0) {
+                valueValueTempTmpBuf_.selector = 0;
+                valueValueTempTmpBuf_.value0 = PickerTextStyle_serializer::read(thisDeserializer);
+            } else if (valueValueTempTmpBuf_UnionSelector == 1) {
+                valueValueTempTmpBuf_.selector = 1;
+                valueValueTempTmpBuf_.value1 = TextPickerTextStyle_serializer::read(thisDeserializer);
+            } else {
+                INTEROP_FATAL("One of the branches for valueValueTempTmpBuf_ has to be chosen through deserialisation.");
+            }
+            valueValueTempTmpBuf.value = static_cast<Ark_Union_PickerTextStyle_TextPickerTextStyle>(valueValueTempTmpBuf_);
         }
-        Opt_PickerTextStyle valueValueTemp = valueValueTempTmpBuf;;
-        GetNodeModifiers()->getTextPickerModifier()->setSelectedTextStyle(self, static_cast<Opt_PickerTextStyle*>(&valueValueTemp));
+        Opt_Union_PickerTextStyle_TextPickerTextStyle valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getTextPickerModifier()->setSelectedTextStyle(self, static_cast<Opt_Union_PickerTextStyle_TextPickerTextStyle*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(TextPickerAttribute_setSelectedTextStyle, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_TextPickerAttribute_setDisableTextStyleAnimation(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
@@ -23619,6 +23681,19 @@ void impl_TextPickerAttribute_setDigitalCrownSensitivity(Ark_NativePointer thisP
         GetNodeModifiers()->getTextPickerModifier()->setDigitalCrownSensitivity(self, static_cast<Opt_CrownSensitivity*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(TextPickerAttribute_setDigitalCrownSensitivity, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_TextPickerAttribute_setSelectedBackgroundStyle(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_PickerBackgroundStyle valueValueTempTmpBuf = {};
+        valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            valueValueTempTmpBuf.value = PickerBackgroundStyle_serializer::read(thisDeserializer);
+        }
+        Opt_PickerBackgroundStyle valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getTextPickerModifier()->setSelectedBackgroundStyle(self, static_cast<Opt_PickerBackgroundStyle*>(&valueValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(TextPickerAttribute_setSelectedBackgroundStyle, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_TextTimer_construct(Ark_Int32 id, Ark_Int32 flags) {
         return GetNodeModifiers()->getTextTimerModifier()->construct(id, flags);
 }
@@ -29565,9 +29640,20 @@ void impl_DialogExtender_showTimePickerDialog(KSerializerBuffer thisArray, int32
 KOALA_INTEROP_DIRECT_V2(DialogExtender_showTimePickerDialog, KSerializerBuffer, int32_t)
 void impl_DialogExtender_showTextPickerDialog(KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
-        Ark_TextPickerDialogOptions optionsValueTemp = TextPickerDialogOptions_serializer::read(thisDeserializer);;
-        GetAccessors()->getDialogExtenderAccessor()->showTextPickerDialog(
-            static_cast<Ark_TextPickerDialogOptions*>(&optionsValueTemp));
+        const Ark_Int8 optionsValueTempTmpBufUnionSelector = thisDeserializer.readInt8();
+        Ark_Union_TextPickerDialogOptions_TextPickerDialogOptionsExt optionsValueTempTmpBuf = {};
+        optionsValueTempTmpBuf.selector = optionsValueTempTmpBufUnionSelector;
+        if (optionsValueTempTmpBufUnionSelector == 0) {
+            optionsValueTempTmpBuf.selector = 0;
+            optionsValueTempTmpBuf.value0 = TextPickerDialogOptions_serializer::read(thisDeserializer);
+        } else if (optionsValueTempTmpBufUnionSelector == 1) {
+            optionsValueTempTmpBuf.selector = 1;
+            optionsValueTempTmpBuf.value1 = TextPickerDialogOptionsExt_serializer::read(thisDeserializer);
+        } else {
+            INTEROP_FATAL("One of the branches for optionsValueTempTmpBuf has to be chosen through deserialisation.");
+        }
+        Ark_Union_TextPickerDialogOptions_TextPickerDialogOptionsExt optionsValueTemp = static_cast<Ark_Union_TextPickerDialogOptions_TextPickerDialogOptionsExt>(optionsValueTempTmpBuf);;
+        GetAccessors()->getDialogExtenderAccessor()->showTextPickerDialog(static_cast<Ark_Union_TextPickerDialogOptions_TextPickerDialogOptionsExt*>(&optionsValueTemp));
 }
 KOALA_INTEROP_DIRECT_V2(DialogExtender_showTextPickerDialog, KSerializerBuffer, int32_t)
 void impl_DialogExtender_showDatePickerDialog(KSerializerBuffer thisArray, int32_t thisLength) {

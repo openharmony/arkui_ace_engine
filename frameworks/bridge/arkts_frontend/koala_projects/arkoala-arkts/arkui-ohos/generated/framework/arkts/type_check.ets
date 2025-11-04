@@ -130,7 +130,7 @@ import { SymbolGlyphModifier } from "arkui.SymbolGlyphModifier"
 import { TextAreaController, TextAreaType, TextAreaOptions } from "./../../component/textArea"
 import { TextClockConfiguration, TextClockController, TextClockOptions } from "./../../component/textClock"
 import { TextModifier } from "arkui.TextModifier"
-import { TextPickerDialog, TextPickerDialogOptions, TextCascadePickerRangeContent, TextPickerRangeContent, TextPickerResult, DividerOptions, TextPickerOptions, TextPickerTextStyle } from "./../../component/textPicker"
+import { TextPickerDialog, TextPickerDialogOptions, TextPickerDialogOptionsExt, TextCascadePickerRangeContent, TextPickerRangeContent, TextPickerResult, DividerOptions, TextPickerOptions, PickerBackgroundStyle, TextPickerTextStyle } from "./../../component/textPicker"
 import { TextTimerConfiguration, TextTimerController, TextTimerOptions } from "./../../component/textTimer"
 import { TimePickerDialog, TimePickerFormat, TimePickerResult, TimePickerDialogOptions, TimePickerOptions } from "./../../component/timePicker"
 import { ToggleType, ToggleConfiguration, SwitchStyle, ToggleOptions } from "./../../component/toggle"
@@ -838,7 +838,7 @@ export class TypeChecker {
     static isDatePickerDialog(value: Object | string | number | undefined): boolean {
         return value instanceof DatePickerDialog
     }
-    static isDatePickerDialogOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean, arg10: boolean, arg11: boolean, arg12: boolean, arg13: boolean, arg14: boolean, arg15: boolean, arg16: boolean, arg17: boolean, arg18: boolean, arg19: boolean, arg20: boolean, arg21: boolean, arg22: boolean, arg23: boolean, arg24: boolean, arg25: boolean, arg26: boolean, arg27: boolean, arg28: boolean): boolean {
+    static isDatePickerDialogOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean, arg10: boolean, arg11: boolean, arg12: boolean, arg13: boolean, arg14: boolean, arg15: boolean, arg16: boolean, arg17: boolean, arg18: boolean, arg19: boolean, arg20: boolean, arg21: boolean, arg22: boolean, arg23: boolean, arg24: boolean, arg25: boolean, arg26: boolean, arg27: boolean, arg28: boolean, arg29: boolean): boolean {
         return value instanceof DatePickerDialogOptions
     }
     static isDatePickerMode(value: Object | string | number | undefined): boolean {
@@ -2272,6 +2272,9 @@ export class TypeChecker {
     static isPermissionRequest(value: Object | string | number | undefined): boolean {
         return value instanceof PermissionRequest
     }
+    static isPickerBackgroundStyle(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof PickerBackgroundStyle
+    }
     static isPickerDialogButtonStyle(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean, arg10: boolean): boolean {
         return value instanceof PickerDialogButtonStyle
     }
@@ -3300,6 +3303,9 @@ export class TypeChecker {
     }
     static isTextPickerDialogOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean, arg10: boolean, arg11: boolean, arg12: boolean, arg13: boolean, arg14: boolean, arg15: boolean, arg16: boolean, arg17: boolean, arg18: boolean, arg19: boolean, arg20: boolean, arg21: boolean, arg22: boolean, arg23: boolean, arg24: boolean, arg25: boolean, arg26: boolean, arg27: boolean, arg28: boolean): boolean {
         return value instanceof TextPickerDialogOptions
+    }
+    static isTextPickerDialogOptionsExt(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean, arg10: boolean, arg11: boolean, arg12: boolean, arg13: boolean, arg14: boolean, arg15: boolean, arg16: boolean, arg17: boolean, arg18: boolean, arg19: boolean, arg20: boolean, arg21: boolean, arg22: boolean, arg23: boolean, arg24: boolean, arg25: boolean, arg26: boolean, arg27: boolean, arg28: boolean, arg29: boolean): boolean {
+        return value instanceof TextPickerDialogOptionsExt
     }
     static isTextPickerOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean): boolean {
         return value instanceof TextPickerOptions
