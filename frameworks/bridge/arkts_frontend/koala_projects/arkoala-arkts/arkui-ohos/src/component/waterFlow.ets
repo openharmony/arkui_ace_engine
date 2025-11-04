@@ -30,8 +30,8 @@ export interface SectionChangeInfo {
 
 export class WaterFlowSections implements MaterializedBase {
     peer?: Finalizable | undefined = undefined
-    public sectionArray: Array<SectionOptions> = new Array<SectionOptions>();
-    public changeArray: Array<SectionChangeInfo> = new Array<SectionChangeInfo>();
+    public sectionArray: Array<SectionOptions> = [];
+    public changeArray: Array<SectionChangeInfo> = [];
 
     public getPeer(): Finalizable | undefined {
         return this.peer
@@ -144,7 +144,7 @@ export class WaterFlowSections implements MaterializedBase {
         return this.sectionArray;
     }
 
-    public length(): number {
+    public length(): int32 {
         return this.sectionArray.length;
     }
 }
