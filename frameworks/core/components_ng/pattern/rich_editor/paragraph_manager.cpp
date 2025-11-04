@@ -77,6 +77,15 @@ std::string ParagraphManager::GetDumpInfo() const
     return dumpInfo;
 }
 
+int32_t ParagraphManager::GetParagraphLength() const
+{
+    int32_t totalLength = 0;
+    for (const auto& info : paragraphs_) {
+        totalLength += (info.end - info.start);
+    }
+    return totalLength;
+}
+
 float ParagraphManager::GetLongestLine() const
 {
     float res = 0.0f;
