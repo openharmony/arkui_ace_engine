@@ -21,6 +21,7 @@
 struct WebResourceResponsePeer {
     OHOS::Ace::RefPtr<OHOS::Ace::WebResponse> handler;
     std::optional<int32_t> responseDataType;
-    std::optional<Ark_Resource> responseDataResEx;
+    Ark_Resource responseDataResEx;
+    uintptr_t convContext;
 };
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_WEB_RESOURCE_RESPONSE_PEER_IMPL_H
