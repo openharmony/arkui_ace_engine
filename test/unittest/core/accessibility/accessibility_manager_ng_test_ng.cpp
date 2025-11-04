@@ -75,8 +75,8 @@ public:
 };
 
 /**
- * @tc.name: accessibilityManagerNgTest001
- * @tc.desc:
+ * @tc.name: AccessibilityManagerNgTest001
+ * @tc.desc: AccessibilityManagerNG component handles mouse events under different conditions.
  * @tc.type: FUNC
  */
 HWTEST_F(AccessibilityManagerNgTestNg, AccessibilityManagerNgTest001, TestSize.Level1)
@@ -122,8 +122,8 @@ HWTEST_F(AccessibilityManagerNgTestNg, AccessibilityManagerNgTest001, TestSize.L
 }
 
 /**
- * @tc.name: accessibilityManagerNgTest002
- * @tc.desc:
+ * @tc.name: AccessibilityManagerNgTest002
+ * @tc.desc: AccessibilityManagerNG component handles touch events under different conditions.
  * @tc.type: FUNC
  */
 HWTEST_F(AccessibilityManagerNgTestNg, AccessibilityManagerNgTest002, TestSize.Level1)
@@ -183,7 +183,7 @@ HWTEST_F(AccessibilityManagerNgTestNg, AccessibilityManagerNgTest002, TestSize.L
 }
 
 /**
- * @tc.name: accessibilityManagerNgTest003
+ * @tc.name: AccessibilityManagerNgTest003
  * @tc.desc:
  * @tc.type: FUNC
  */
