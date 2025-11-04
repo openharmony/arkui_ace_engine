@@ -527,8 +527,9 @@ constexpr Dimension TOOLTIP_BORDER_WIDTH = 1.0_vp;
 constexpr Dimension TOOLTIP_BORDER_RADIUS = 8.0_vp;
 constexpr Dimension TOOLTIP_FONT_SIZE = 14.0_vp;
 constexpr Dimension TOOLTIP_PADDING = 8.0_vp;
+constexpr Dimension TOOLTIP_MOUSE_HEIGHT = 24.0_vp;
+constexpr Dimension TOOLTIP_MARGIN = 8.0_vp;
 constexpr float TOOLTIP_MAX_PORTION = 0.35f;
-constexpr float TOOLTIP_MARGIN = 10.0f;
 constexpr float TOOLTIP_DELAY_MS = 700;
 constexpr uint32_t ADJUST_WEB_DRAW_LENGTH = 3000;
 constexpr int32_t FIT_CONTENT_LIMIT_LENGTH = 8000;
@@ -5994,7 +5995,7 @@ void WebPattern::HandleShowTooltip(const std::string& tooltip, int64_t tooltipTi
     CalculateTooltipOffset(tooltipNode, tooltipOffset);
     textRenderContext->UpdatePosition(OffsetT<Dimension>(Dimension(tooltipOffset.GetX()),
         Dimension(tooltipOffset.GetY())));
- 
+
     BorderRadiusProperty borderRadius;
     borderRadius.SetRadius(TOOLTIP_BORDER_RADIUS);
     textRenderContext->SetBorderRadius(borderRadius);
@@ -6082,14 +6083,16 @@ void WebPattern::CalculateTooltipOffset(RefPtr<FrameNode>& tooltipNode, OffsetF&
     CHECK_NULL_VOID(rootNode);
     auto root = rootNode->GetTransformRectRelativeToWindow();
 
-    auto offsetX = offset.GetX() - root.GetX() + mouseHoveredX_ + TOOLTIP_MARGIN;
-    auto offsetY = offset.GetY() - root.GetY() + mouseHoveredY_ + TOOLTIP_MARGIN;
+    auto offsetX = offset.GetX() - root.GetX() + mouseHoveredX_;
+    auto offsetY = offset.GetY() - root.GetY() + mouseHoveredY_ + TOOLTIP_MARGIN.ConvertToPx() +
+                   TOOLTIP_MOUSE_HEIGHT.ConvertToPx();
 
     ScopedLayout scope(Referenced::RawPtr(pipeline));
     if (GreatNotEqual(offsetX + textWidth, root.Width())) {
         offsetX = root.Width() - textWidth;
     }
     if (GreatNotEqual(offsetY + textHeight, root.Height())) {
+        offsetX = offsetX + TOOLTIP_MARGIN.ConvertToPx();
         offsetY = root.Height() - textHeight;
     }
     tooltipOffset.SetX(offsetX);
