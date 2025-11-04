@@ -286,4 +286,46 @@ HWTEST_F(ContainerPickerPaintMethodTest, CheckMarginAndLengthTest003, TestSize.L
     AceApplicationInfo::GetInstance().isRightToLeft_ = originalRtl;
 }
 
+/**
+ * @tc.name: PaintSelectionIndicatorDividerTest002
+ * @tc.desc: Test ContainerPickerPaintMethod PaintSelectionIndicatorDivider with stroke width limitation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPaintMethodTest, PaintSelectionIndicatorDividerTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ContainerPicker
+     */
+    auto node = CreateContainerPickerNode();
+    auto paintWrapper = CreateMockPaintWrapper(node);
+    Testing::MockCanvas rsCanvas;
+
+    // Set indicator type to divider
+    auto layoutProperty = node->GetLayoutProperty<ContainerPickerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateIndicatorType(static_cast<int32_t>(PickerIndicatorType::DIVIDER));
+
+    // Mock pipeline context and theme
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    float defaultThickness = 2.0f;
+    mockTheme_->dividerThickness_ = Dimension(defaultThickness);
+
+    /**
+     * @tc.steps: step2. Test with stroke width equal to half of item height
+     * @tc.expected: step2. Stroke width should remain as set, not be reset to default
+     */
+    float itemHeightHalf = PICKER_ITEM_HEIGHT.ConvertToPx() / HALF;
+    layoutProperty->UpdateIndicatorDividerWidth(Dimension(itemHeightHalf));
+    EXPECT_CALL(rsCanvas, DrawLine(_, _)).Times(AnyNumber());
+    paintMethod_->PaintSelectionIndicatorDivider(AceType::RawPtr(paintWrapper), rsCanvas);
+
+    /**
+     * @tc.steps: step3. Test with stroke width greater than half of item height
+     * @tc.expected: step3. Stroke width should be reset to default
+     */
+    float excessiveWidth = itemHeightHalf + 1.0f;
+    layoutProperty->UpdateIndicatorDividerWidth(Dimension(excessiveWidth));
+    paintMethod_->PaintSelectionIndicatorDivider(AceType::RawPtr(paintWrapper), rsCanvas);
+}
+
 } // namespace OHOS::Ace::NG
