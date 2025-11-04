@@ -16,7 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { AccessibilityHoverEvent_serializer, TouchTestInfo_serializer, TouchResult_serializer, AxisEvent_serializer, HoverEvent_serializer, ClickEvent_serializer, CrownEvent_serializer, DismissContentCoverAction_serializer, DismissPopupAction_serializer, DismissSheetAction_serializer, DragEvent_serializer, FocusAxisEvent_serializer, ItemDragInfo_serializer, KeyEvent_serializer, MouseEvent_serializer, GeometryInfo_serializer, Measurable_serializer, SizeResult_serializer, Layoutable_serializer, ScrollResult_serializer, SheetDismiss_serializer, SpringBackAction_serializer, TerminationInfo_serializer, TouchEvent_serializer, DragItemInfo_serializer, PopupStateChangeParam_serializer, AccessibilityActionInterceptCallback, AccessibilityAction, AccessibilityActionInterceptResult, AccessibilityCallback, AccessibilityHoverEvent, AccessibilityFocusCallback, TouchTestInfo, TouchResult, AxisEvent, HoverEvent, ClickEvent, CrownEvent, DismissContentCoverAction, DismissPopupAction, DismissSheetAction, DragEvent, FocusAxisEvent, ItemDragInfo, KeyEvent, MouseEvent, GeometryInfo, Measurable, SizeResult, Layoutable, ScrollResult, PreDragStatus, SheetDismiss, SheetType, SpringBackAction, TerminationInfo, TouchEvent, DragItemInfo, GestureRecognizerJudgeBeginCallback, HoverCallback, ModifierKeyStateGetter, OnDragEventCallback, OnItemDragStartCallback, OnMoveHandler, OnScrollCallback, OnWillScrollCallback, PopupStateChangeCallback, PopupStateChangeParam, ReuseIdCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TransitionFinishCallback, VisibleAreaChangeCallback } from "./../../component/common"
+import { AccessibilityHoverEvent_serializer, TouchTestInfo_serializer, TouchResult_serializer, AxisEvent_serializer, HoverEvent_serializer, ClickEvent_serializer, CrownEvent_serializer, DismissContentCoverAction_serializer, DismissPopupAction_serializer, DismissSheetAction_serializer, DragEvent_serializer, FocusAxisEvent_serializer, ItemDragInfo_serializer, KeyEvent_serializer, MouseEvent_serializer, GeometryInfo_serializer, Measurable_serializer, SizeResult_serializer, Layoutable_serializer, ScrollResult_serializer, SheetDismiss_serializer, SpringBackAction_serializer, TerminationInfo_serializer, TouchEvent_serializer, DragItemInfo_serializer, PopupStateChangeParam_serializer, AccessibilityActionInterceptCallback, AccessibilityAction, AccessibilityActionInterceptResult, AccessibilityCallback, AccessibilityHoverEvent, AccessibilityTransparentCallback, AccessibilityFocusCallback, TouchTestInfo, TouchResult, AxisEvent, HoverEvent, ClickEvent, CrownEvent, DismissContentCoverAction, DismissPopupAction, DismissSheetAction, DragEvent, FocusAxisEvent, ItemDragInfo, KeyEvent, MouseEvent, GeometryInfo, Measurable, SizeResult, Layoutable, ScrollResult, PreDragStatus, SheetDismiss, SheetType, SpringBackAction, TerminationInfo, TouchEvent, DragItemInfo, GestureRecognizerJudgeBeginCallback, HoverCallback, ModifierKeyStateGetter, OnDragEventCallback, OnItemDragStartCallback, OnMoveHandler, OnScrollCallback, OnWillScrollCallback, PopupStateChangeCallback, PopupStateChangeParam, ReuseIdCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TransitionFinishCallback, VisibleAreaChangeCallback } from "./../../component/common"
 import { image_PixelMap_serializer } from "./../ohos.multimedia.image"
 import { ButtonConfiguration_serializer, ButtonConfiguration, ButtonTriggerClickCallback } from "./../../component/button"
 import { Area_serializer, ConstraintSizeOptions_serializer, SizeOptions_serializer, Area, ConstraintSizeOptions, Length, ResourceStr, SizeOptions, VoidCallback } from "./../../component/units"
@@ -119,6 +119,12 @@ export function deserializeAndCallAccessibilityFocusCallback(thisDeserializer: D
     const _call  = (ResourceHolder.instance().get(_resourceId) as AccessibilityFocusCallback)
     let isFocus : boolean = thisDeserializer.readBoolean()
     _call(isFocus)
+}
+export function deserializeAndCallAccessibilityTransparentCallback(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as AccessibilityTransparentCallback)
+    let event : TouchEvent = (TouchEvent_serializer.read(thisDeserializer) as TouchEvent)
+    _call(event)
 }
 export function deserializeAndCallArcScrollIndexHandler(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
@@ -3506,6 +3512,7 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.Kind_AccessibilityActionInterceptCallback: return deserializeAndCallAccessibilityActionInterceptCallback(thisDeserializer);
         case CallbackKind.Kind_AccessibilityCallback: return deserializeAndCallAccessibilityCallback(thisDeserializer);
         case CallbackKind.Kind_AccessibilityFocusCallback: return deserializeAndCallAccessibilityFocusCallback(thisDeserializer);
+        case CallbackKind.Kind_AccessibilityTransparentCallback: return deserializeAndCallAccessibilityTransparentCallback(thisDeserializer);
         case CallbackKind.Kind_ArcScrollIndexHandler: return deserializeAndCallArcScrollIndexHandler(thisDeserializer);
         case CallbackKind.Kind_AsyncCallback_image_PixelMap_Void: return deserializeAndCallAsyncCallback_image_PixelMap_Void(thisDeserializer);
         case CallbackKind.Kind_AsyncCallback_Void: return deserializeAndCallAsyncCallback_Void(thisDeserializer);

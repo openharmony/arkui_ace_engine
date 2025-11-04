@@ -19,7 +19,7 @@
 import { AttributeModifier, DrawModifier, extractors, GestureModifier, hookAllowDrop, hookDragPreviewOptions } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
-import { ArkCommonMethodPeer, LayoutPolicy, Rectangle, ResponseRegion, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, BorderImageOption, OutlineStyle, ClickEvent, HoverEvent, AccessibilityCallback, AccessibilityHoverEvent, MouseEvent, TouchEvent, KeyEvent, CrownEvent, FocusAxisEvent, AxisEvent, FocusMovement, AnimateParam, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, RotateAngleOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, DragEvent, DragItemInfo, PreDragStatus, LinearGradientOptions, SweepGradientOptions, RadialGradientOptions, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, AccessibilitySamePageMode, AccessibilityRoleType, AccessibilityFocusCallback, AccessibilityActionInterceptCallback, AccessibilityAction, ReuseOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, CustomProperty, SafeAreaType, SafeAreaEdge, BackgroundOptions, BackgroundImageOptions, BlurStyle, BackgroundBlurStyleOptions, SystemAdaptiveOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, OnDragEventCallback, DropOptions, PreviewConfiguration, DragPreviewOptions, DragInteractionOptions, OverlayOptions, BlendMode, BlendApplyType, GeometryTransitionOptions, TipsMessageType, TipsOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, Bindable, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, VisibleAreaEventOptions, CommonMethod } from "./component/common"
+import { ArkCommonMethodPeer, LayoutPolicy, Rectangle, ResponseRegion, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, BorderImageOption, OutlineStyle, ClickEvent, HoverEvent, AccessibilityCallback, AccessibilityHoverEvent, AccessibilityTransparentCallback, MouseEvent, TouchEvent, KeyEvent, CrownEvent, FocusAxisEvent, AxisEvent, FocusMovement, AnimateParam, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, RotateAngleOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, DragEvent, DragItemInfo, PreDragStatus, LinearGradientOptions, SweepGradientOptions, RadialGradientOptions, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, AccessibilitySamePageMode, AccessibilityRoleType, AccessibilityFocusCallback, AccessibilityActionInterceptCallback, AccessibilityAction, ReuseOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, CustomProperty, SafeAreaType, SafeAreaEdge, BackgroundOptions, BackgroundImageOptions, BlurStyle, BackgroundBlurStyleOptions, SystemAdaptiveOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, OnDragEventCallback, DropOptions, PreviewConfiguration, DragPreviewOptions, DragInteractionOptions, OverlayOptions, BlendMode, BlendApplyType, GeometryTransitionOptions, TipsMessageType, TipsOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, Bindable, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, VisibleAreaEventOptions, CommonMethod } from "./component/common"
 import { int32 } from "@koalaui/common"
 import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, VoidCallback, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions } from "./component/units"
 import { Resource } from "global.resource"
@@ -126,6 +126,8 @@ export class CommonMethodModifier implements CommonMethod {
     _onHoverMove_0_0value?: ((value0: HoverEvent) => void) | undefined
     _onAccessibilityHover_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onAccessibilityHover_0_0value?: AccessibilityCallback | undefined
+    _onAccessibilityHoverTransparent_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onAccessibilityHoverTransparent_0_0value?: AccessibilityTransparentCallback | undefined
     _hoverEffect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _hoverEffect_0_0value?: HoverEffect | undefined
     _onMouse_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -1240,6 +1242,24 @@ export class CommonMethodModifier implements CommonMethod {
                 default: {
                     this._onAccessibilityHover_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.setOnAccessibilityHoverAttribute((undefined as AccessibilityCallback | undefined));
+                }
+            }
+        }
+        if (this._onAccessibilityHoverTransparent_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onAccessibilityHoverTransparent_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnAccessibilityHoverTransparentAttribute((this._onAccessibilityHoverTransparent_0_0value as AccessibilityTransparentCallback | undefined));
+                    this._onAccessibilityHoverTransparent_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onAccessibilityHoverTransparent_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onAccessibilityHoverTransparent_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnAccessibilityHoverTransparentAttribute((undefined as AccessibilityTransparentCallback | undefined));
                 }
             }
         }
@@ -4563,6 +4583,19 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
+        if (modifier._onAccessibilityHoverTransparent_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onAccessibilityHoverTransparent_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onAccessibilityHoverTransparent(modifier._onAccessibilityHoverTransparent_0_0value);
+                    break;
+                }
+                default: {
+                    this.onAccessibilityHoverTransparent((undefined as AccessibilityTransparentCallback | undefined));
+                }
+            }
+        }
         if (modifier._hoverEffect_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._hoverEffect_0_flag) {
@@ -7025,6 +7058,17 @@ export class CommonMethodModifier implements CommonMethod {
         } else
         {
             this._onAccessibilityHover_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    onAccessibilityHoverTransparent(value: AccessibilityTransparentCallback | undefined): this {
+        if (((this._onAccessibilityHoverTransparent_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onAccessibilityHoverTransparent_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onAccessibilityHoverTransparent_0_0value = value
+        } else
+        {
+            this._onAccessibilityHoverTransparent_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

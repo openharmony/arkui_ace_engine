@@ -70,6 +70,27 @@ void callManagedAccessibilityCallbackSync(Ark_VMContext vmContext, Ark_Int32 res
     AccessibilityHoverEvent_serializer::write(argsSerializer, event);
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
 }
+void callManagedAccessibilityTransparentCallback(Ark_Int32 resourceId, Ark_TouchEvent event)
+{
+    CallbackBuffer callbackBuffer = {{}, {}};
+    const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
+    callbackBuffer.resourceHolder.holdCallbackResource(&callbackResourceSelf);
+    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
+    argsSerializer.writeInt32(Kind_AccessibilityTransparentCallback);
+    argsSerializer.writeInt32(resourceId);
+    TouchEvent_serializer::write(argsSerializer, event);
+    enqueueCallback(10, &callbackBuffer);
+}
+void callManagedAccessibilityTransparentCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_TouchEvent event)
+{
+    uint8_t dataBuffer[4096];
+    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&dataBuffer, sizeof(dataBuffer), nullptr);
+    argsSerializer.writeInt32(10);
+    argsSerializer.writeInt32(Kind_AccessibilityTransparentCallback);
+    argsSerializer.writeInt32(resourceId);
+    TouchEvent_serializer::write(argsSerializer, event);
+    KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
+}
 void callManagedAccessibilityFocusCallback(Ark_Int32 resourceId, Ark_Boolean isFocus)
 {
     CallbackBuffer callbackBuffer = {{}, {}};
@@ -7973,6 +7994,7 @@ Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
         case Kind_AccessibilityActionInterceptCallback: return reinterpret_cast<Ark_NativePointer>(callManagedAccessibilityActionInterceptCallback);
         case Kind_AccessibilityCallback: return reinterpret_cast<Ark_NativePointer>(callManagedAccessibilityCallback);
         case Kind_AccessibilityFocusCallback: return reinterpret_cast<Ark_NativePointer>(callManagedAccessibilityFocusCallback);
+        case Kind_AccessibilityTransparentCallback: return reinterpret_cast<Ark_NativePointer>(callManagedAccessibilityTransparentCallback);
         case Kind_ArcScrollIndexHandler: return reinterpret_cast<Ark_NativePointer>(callManagedArcScrollIndexHandler);
         case Kind_AsyncCallback_image_PixelMap_Void: return reinterpret_cast<Ark_NativePointer>(callManagedAsyncCallback_image_PixelMap_Void);
         case Kind_AsyncCallback_Void: return reinterpret_cast<Ark_NativePointer>(callManagedAsyncCallback_Void);
@@ -8292,6 +8314,7 @@ Ark_NativePointer getManagedCallbackCallerSync(CallbackKind kind)
         case Kind_AccessibilityActionInterceptCallback: return reinterpret_cast<Ark_NativePointer>(callManagedAccessibilityActionInterceptCallbackSync);
         case Kind_AccessibilityCallback: return reinterpret_cast<Ark_NativePointer>(callManagedAccessibilityCallbackSync);
         case Kind_AccessibilityFocusCallback: return reinterpret_cast<Ark_NativePointer>(callManagedAccessibilityFocusCallbackSync);
+        case Kind_AccessibilityTransparentCallback: return reinterpret_cast<Ark_NativePointer>(callManagedAccessibilityTransparentCallbackSync);
         case Kind_ArcScrollIndexHandler: return reinterpret_cast<Ark_NativePointer>(callManagedArcScrollIndexHandlerSync);
         case Kind_AsyncCallback_image_PixelMap_Void: return reinterpret_cast<Ark_NativePointer>(callManagedAsyncCallback_image_PixelMap_VoidSync);
         case Kind_AsyncCallback_Void: return reinterpret_cast<Ark_NativePointer>(callManagedAsyncCallback_VoidSync);

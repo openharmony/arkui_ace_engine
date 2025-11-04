@@ -276,6 +276,8 @@ typedef struct AccessibilityCallback AccessibilityCallback;
 typedef struct Opt_AccessibilityCallback Opt_AccessibilityCallback;
 typedef struct AccessibilityFocusCallback AccessibilityFocusCallback;
 typedef struct Opt_AccessibilityFocusCallback Opt_AccessibilityFocusCallback;
+typedef struct AccessibilityTransparentCallback AccessibilityTransparentCallback;
+typedef struct Opt_AccessibilityTransparentCallback Opt_AccessibilityTransparentCallback;
 typedef struct ArcScrollIndexHandler ArcScrollIndexHandler;
 typedef struct Opt_ArcScrollIndexHandler Opt_ArcScrollIndexHandler;
 typedef struct AttributeModifierPeer AttributeModifierPeer;
@@ -7111,6 +7113,16 @@ typedef struct Opt_AccessibilityFocusCallback {
     Ark_Tag tag;
     AccessibilityFocusCallback value;
 } Opt_AccessibilityFocusCallback;
+typedef struct AccessibilityTransparentCallback {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_TouchEvent event);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_TouchEvent event);
+} AccessibilityTransparentCallback;
+typedef struct Opt_AccessibilityTransparentCallback {
+    Ark_Tag tag;
+    AccessibilityTransparentCallback value;
+} Opt_AccessibilityTransparentCallback;
 typedef struct ArcScrollIndexHandler {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -21856,6 +21868,8 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                            const Opt_Callback_HoverEvent_Void* value);
     void (*setOnAccessibilityHover)(Ark_NativePointer node,
                                     const Opt_AccessibilityCallback* value);
+    void (*setOnAccessibilityHoverTransparent)(Ark_NativePointer node,
+                                               const Opt_AccessibilityTransparentCallback* value);
     void (*setHoverEffect)(Ark_NativePointer node,
                            const Opt_HoverEffect* value);
     void (*setOnMouse)(Ark_NativePointer node,
