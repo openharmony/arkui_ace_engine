@@ -13,16 +13,18 @@
  * limitations under the License.
  */
 
-import { RuntimeType, runtimeType } from "@koalaui/interop";
-import { ArkScrollableNode } from "./ArkScrollableNode";
-import { Length } from "../component/units";
-import { Color, BarState, EdgeEffect } from "../component/enums";
-import { CustomBuilder } from "../component/builder";
-import { ItemDragInfo, NestedScrollOptions, OnWillScrollCallback, OnScrollCallback, EdgeEffectOptions, AttributeModifier,
-    ScrollableCommonMethod, CommonMethod } from "../component/common";
-import { Scroller, OnScrollFrameBeginCallback } from "../component/scroll";
-import { ArkGridPeer, ComputedBarAttribute, GridDirection, GridItemAlignment, GridAttribute, GridLayoutOptions } from "../component/grid";
-import { Resource } from "global.resource"
+import { RuntimeType, runtimeType } from '@koalaui/interop';
+import { ArkScrollableNode } from './ArkScrollableNode';
+import { Length } from '../component/units';
+import { Color, BarState, EdgeEffect } from '../component/enums';
+import { CustomBuilder } from '../component/builder';
+import { ItemDragInfo, NestedScrollOptions, OnWillScrollCallback,
+    OnScrollCallback, EdgeEffectOptions, AttributeModifier,
+    ScrollableCommonMethod, CommonMethod } from '../component/common';
+import { Scroller, OnScrollFrameBeginCallback } from '../component/scroll';
+import { ArkGridPeer, ComputedBarAttribute, GridDirection, GridItemAlignment,
+    GridAttribute, GridLayoutOptions } from '../component/grid';
+import { Resource } from 'global.resource'
 export class ArkGridNode extends ArkScrollableNode implements GridAttribute {
     constructParam(...param: Object[]): this {
         if (param.length > 2) {
@@ -52,7 +54,7 @@ export class ArkGridNode extends ArkScrollableNode implements GridAttribute {
         return this;
     }
     allowChildTypes(): string[] {
-        return ["GridItem"];
+        return ['GridItem'];
     }
     columnsTemplate(value: string | undefined): this {
         const value_casted = value as (string | undefined)
@@ -130,7 +132,7 @@ export class ArkGridNode extends ArkScrollableNode implements GridAttribute {
             this.markDirty()
             return this
         }
-        throw new Error("Can not select appropriate overload")
+        throw new Error('Can not select appropriate overload')
     }
     editMode(value: boolean | undefined): this {
         const value_casted = value as (boolean | undefined)
@@ -277,7 +279,8 @@ export class ArkGridNode extends ArkScrollableNode implements GridAttribute {
         this.markDirty()
         return this
     }
-    attributeModifier(value: AttributeModifier<GridAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Unimplemented method attributeModifier")
+    attributeModifier(value: AttributeModifier<GridAttribute> | AttributeModifier<ScrollableCommonMethod> |
+        AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error('Unimplemented method attributeModifier')
     }
 }
