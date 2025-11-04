@@ -40,18 +40,17 @@ Ark_NativePointer GetFinalizerImpl()
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void ChangeIndexImpl(Ark_TabsController peer,
-                     const Ark_Number* value)
+                     const Ark_Int32 value)
 {
     auto peerImpl = reinterpret_cast<TabsControllerPeerImpl *>(peer);
     CHECK_NULL_VOID(peerImpl);
-    CHECK_NULL_VOID(value);
-    auto index = Converter::Convert<Ark_Int32>(*value);
+    auto index = Converter::Convert<Ark_Int32>(value);
     peerImpl->TriggerChangeIndex(index);
 }
 void PreloadItemsImpl(Ark_VMContext vmContext,
                       Ark_AsyncWorkerPtr asyncWorker,
                       Ark_TabsController peer,
-                      const Opt_Array_Number* indices,
+                      const Opt_Array_Int32* indices,
                       const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
     CHECK_NULL_VOID(asyncWorker);
@@ -90,12 +89,11 @@ void SetTabBarTranslateImpl(Ark_TabsController peer,
     peerImpl->TriggerSetTabBarTranslate(convValue);
 }
 void SetTabBarOpacityImpl(Ark_TabsController peer,
-                          const Ark_Number* opacity)
+                          const Ark_Float64 opacity)
 {
     auto peerImpl = reinterpret_cast<TabsControllerPeerImpl *>(peer);
     CHECK_NULL_VOID(peerImpl);
-    CHECK_NULL_VOID(opacity);
-    auto convValue = Converter::Convert<float>(*opacity);
+    auto convValue = Converter::Convert<float>(opacity);
     peerImpl->TriggerSetTabBarOpacity(convValue);
 }
 } // TabsControllerAccessor

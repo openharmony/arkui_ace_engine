@@ -249,7 +249,7 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         this.getPeer().setOnBlurAttribute(value);
         return this
     }
-    public tabIndex(value: number | undefined): this {
+    public tabIndex(value: int | undefined): this {
         this.getPeer().setTabIndexAttribute(value);
         return this
     }

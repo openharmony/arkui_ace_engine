@@ -720,7 +720,7 @@ export class PersistenceV2Impl {
             if (newValue === undefined) {
                 throw new Error("unable to deserialize object for the key: " + key);
             }
-            let newObservedValue = uiUtils.autoProxyObject(newValue!);
+            let newObservedValue = uiUtils.autoProxyObject(newValue);
             property.set(newObservedValue);
 
             // Collect dependencies

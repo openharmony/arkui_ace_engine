@@ -18,7 +18,7 @@ export interface AttributeModifier<T> {
 export interface AnimatableArithmetic<T> {
     plus(rhs:AnimatableArithmetic<T>): AnimatableArithmetic<T>;
     subtract(rhs:AnimatableArithmetic<T>): AnimatableArithmetic<T>;
-    multiply(scale:number): AnimatableArithmetic<T>;
+    multiply(scale:double): AnimatableArithmetic<T>;
     equals(rhs:AnimatableArithmetic<T>): boolean;
 }
 

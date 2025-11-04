@@ -1583,10 +1583,10 @@ export class ProgressMask implements MaterializedBase {
     constructor(_0: boolean, _1: boolean, _2: boolean, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, ProgressMask.getFinalizer())
     }
-    constructor(value: number, total: number, color: ResourceColor) {
+    constructor(value: double, total: double, color: ResourceColor) {
         this(false, false, false, ProgressMask.construct(value, total, color))
     }
-    static construct(value: number, total: number, color: ResourceColor): KPointer {
+    static construct(value: double, total: double, color: ResourceColor): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (color instanceof Color) {
             thisSerializer.writeInt8((0).toByte())
@@ -1612,8 +1612,8 @@ export class ProgressMask implements MaterializedBase {
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._ProgressMask_getFinalizer()
     }
-    public updateProgress(value: number): void {
-        const value_casted = value as (number)
+    public updateProgress(value: double): void {
+        const value_casted = value as (double)
         this.updateProgress_serialize(value_casted)
         return
     }
@@ -1627,7 +1627,7 @@ export class ProgressMask implements MaterializedBase {
         this.enableBreathingAnimation_serialize(value_casted)
         return
     }
-    updateProgress_serialize(value: number): void {
+    updateProgress_serialize(value: double): void {
         ArkUIGeneratedNativeModule._ProgressMask_updateProgress(this.peer!.ptr, value)
     }
     updateColor_serialize(value: ResourceColor): void {
@@ -1858,7 +1858,7 @@ export class TransitionEffect implements MaterializedBase {
     constructor(type: string) {
         this(false, TransitionEffect.construct0(type))
     }
-    constructor(effect: number) {
+    constructor(effect: double) {
         this(false, TransitionEffect.construct1(effect))
     }
     constructor(effect: TransitionEdge) {
@@ -1880,7 +1880,7 @@ export class TransitionEffect implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._TransitionEffect_construct0(type)
         return retval
     }
-    static construct1(effect: number): KPointer {
+    static construct1(effect: double): KPointer {
         const retval  = ArkUIGeneratedNativeModule._TransitionEffect_construct1(effect)
         return retval
     }
@@ -1943,7 +1943,7 @@ export class TransitionEffect implements MaterializedBase {
         const obj : TransitionEffect = TransitionEffectInternal.fromPtr(retval)
         return obj
     }
-    static opacity_serialize(alpha: number): TransitionEffect {
+    static opacity_serialize(alpha: double): TransitionEffect {
         const retval  = ArkUIGeneratedNativeModule._TransitionEffect_opacity(alpha)
         const obj : TransitionEffect = TransitionEffectInternal.fromPtr(retval)
         return obj
@@ -2002,8 +2002,8 @@ export class TransitionEffect implements MaterializedBase {
         const options_casted = options as (ScaleOptions)
         return TransitionEffect.scale_serialize(options_casted)
     }
-    public static opacity(alpha: number): TransitionEffect {
-        const alpha_casted = alpha as (number)
+    public static opacity(alpha: double): TransitionEffect {
+        const alpha_casted = alpha as (double)
         return TransitionEffect.opacity_serialize(alpha_casted)
     }
     public static move(edge: TransitionEdge): TransitionEffect {
@@ -2767,15 +2767,15 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setCompositingFilter(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOpacityAttribute(value: number | Resource | undefined): void {
+    setOpacityAttribute(value: double | Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
+            if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+                const valueTmpValueForIdx0  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as Resource
@@ -3331,12 +3331,12 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setOnBlur(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setTabIndexAttribute(value: number | undefined): void {
+    setTabIndexAttribute(value: int32 | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeNumber(valueTmpValue)
+            thisSerializer.writeInt32(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -3427,36 +3427,36 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setMotionBlur(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setBrightnessAttribute(value: number | undefined): void {
+    setBrightnessAttribute(value: double | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeNumber(valueTmpValue)
+            thisSerializer.writeFloat64(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._CommonMethod_setBrightness(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setContrastAttribute(value: number | undefined): void {
+    setContrastAttribute(value: double | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeNumber(valueTmpValue)
+            thisSerializer.writeFloat64(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._CommonMethod_setContrast(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setGrayscaleAttribute(value: number | undefined): void {
+    setGrayscaleAttribute(value: double | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeNumber(valueTmpValue)
+            thisSerializer.writeFloat64(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -3487,39 +3487,39 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setColorBlend(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setSaturateAttribute(value: number | undefined): void {
+    setSaturateAttribute(value: double | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeNumber(valueTmpValue)
+            thisSerializer.writeFloat64(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._CommonMethod_setSaturate(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setSepiaAttribute(value: number | undefined): void {
+    setSepiaAttribute(value: double | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeNumber(valueTmpValue)
+            thisSerializer.writeFloat64(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._CommonMethod_setSepia(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setInvertAttribute(value: number | InvertOptions | undefined): void {
+    setInvertAttribute(value: double | InvertOptions | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
+            if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+                const valueTmpValueForIdx0  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof InvertOptions) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as InvertOptions
@@ -3531,15 +3531,15 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setInvert(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setHueRotateAttribute(value: number | string | undefined): void {
+    setHueRotateAttribute(value: double | string | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
+            if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+                const valueTmpValueForIdx0  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as string
@@ -4283,24 +4283,24 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setRestoreId(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setSphericalEffectAttribute(value: number | undefined): void {
+    setSphericalEffectAttribute(value: double | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeNumber(valueTmpValue)
+            thisSerializer.writeFloat64(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._CommonMethod_setSphericalEffect(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setLightUpEffectAttribute(value: number | undefined): void {
+    setLightUpEffectAttribute(value: double | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeNumber(valueTmpValue)
+            thisSerializer.writeFloat64(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -4974,7 +4974,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         if (blurRadius !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const blurRadiusTmpValue  = blurRadius!
-            thisSerializer.writeNumber(blurRadiusTmpValue)
+            thisSerializer.writeFloat64(blurRadiusTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -4995,12 +4995,12 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setBlur(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setLinearGradientBlurAttribute(value: number | undefined, options: LinearGradientBlurOptions | undefined): void {
+    setLinearGradientBlurAttribute(value: double | undefined, options: LinearGradientBlurOptions | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeNumber(valueTmpValue)
+            thisSerializer.writeFloat64(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -5036,12 +5036,12 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setUseEffect1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setBackdropBlurAttribute(radius: number | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): void {
+    setBackdropBlurAttribute(radius: double | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (radius !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const radiusTmpValue  = radius!
-            thisSerializer.writeNumber(radiusTmpValue)
+            thisSerializer.writeFloat64(radiusTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -6175,9 +6175,9 @@ export interface Rectangle {
     height?: Length;
 }
 export interface ExpectedFrameRateRange {
-    min: number;
-    max: number;
-    expected: number;
+    min: int32;
+    max: int32;
+    expected: int32;
 }
 export enum AccessibilitySamePageMode {
     SEMI_SILENT = 0,
@@ -6331,11 +6331,11 @@ export enum TouchTestStrategy {
     FORWARD = 2
 }
 export interface AnimateParam {
-    duration?: number;
-    tempo?: number;
+    duration?: int32;
+    tempo?: double;
     curve?: curves.Curve | string | curves.ICurve;
-    delay?: number;
-    iterations?: number;
+    delay?: int32;
+    iterations?: int32;
     playMode?: PlayMode;
     onFinish?: (() => void);
     finishCallbackType?: FinishCallbackType;
@@ -6345,16 +6345,16 @@ export type ICurve = curves.ICurve;
 export type Matrix4Transit = matrix4.Matrix4Transit;
 export interface MotionPathOptions {
     path: string;
-    from?: number;
-    to?: number;
+    from?: double;
+    to?: double;
     rotatable?: boolean;
 }
 export interface sharedTransitionOptions {
-    duration?: number;
+    duration?: int32;
     curve?: curves.Curve | string | curves.ICurve;
-    delay?: number;
+    delay?: int32;
     motionPath?: MotionPathOptions;
-    zIndex?: number;
+    zIndex?: int32;
     type?: SharedTransitionEffectType;
 }
 export interface GeometryTransitionOptions {
@@ -6373,29 +6373,29 @@ export enum TransitionHierarchyStrategy {
 }
 export interface SweepGradientOptions {
     center: [ Length, Length ];
-    start?: number | string;
-    end?: number | string;
-    rotation?: number | string;
-    colors: Array<[ ResourceColor, number ]>;
+    start?: double | string;
+    end?: double | string;
+    rotation?: double | string;
+    colors: Array<[ ResourceColor, double ]>;
     repeating?: boolean;
 }
 export interface RadialGradientOptions {
     center: [ Length, Length ];
     radius: Length;
-    colors: Array<[ ResourceColor, number ]>;
+    colors: Array<[ ResourceColor, double ]>;
     repeating?: boolean;
 }
 export interface TranslateOptions {
-    x?: number | string;
-    y?: number | string;
-    z?: number | string;
+    x?: double | string;
+    y?: double | string;
+    z?: double | string;
 }
 export interface ScaleOptions {
-    x?: number;
-    y?: number;
-    z?: number;
-    centerX?: number | string;
-    centerY?: number | string;
+    x?: double;
+    y?: double;
+    z?: double;
+    centerX?: double | string;
+    centerY?: double | string;
 }
 export interface VerticalAlignParam {
     anchor: string;
@@ -6437,14 +6437,14 @@ export enum ChainStyle {
     PACKED = 2
 }
 export interface RotateOptions {
-    x?: number;
-    y?: number;
-    z?: number;
-    centerX?: number | string;
-    centerY?: number | string;
-    centerZ?: number;
-    perspective?: number;
-    angle: number | string;
+    x?: double;
+    y?: double;
+    z?: double;
+    centerX?: double | string;
+    centerY?: double | string;
+    centerZ?: double;
+    perspective?: double;
+    angle: double | string;
 }
 export interface RotateAngleOptions {
     angleX?: number | string;
@@ -6568,7 +6568,7 @@ export interface BackgroundBlurStyleOptions extends BlurStyleOptions {
 export interface ForegroundBlurStyleOptions extends BlurStyleOptions {
 }
 export interface BlurOptions {
-    grayscale: [ number, number ];
+    grayscale: [ double, double ];
 }
 export interface SystemAdaptiveOptions {
     disableSystemAdaptation?: boolean;
@@ -6576,13 +6576,13 @@ export interface SystemAdaptiveOptions {
 export interface BlurStyleOptions {
     colorMode?: ThemeColorMode;
     adaptiveColor?: AdaptiveColor;
-    scale?: number;
+    scale?: double;
     blurOptions?: BlurOptions;
 }
 export interface BackgroundEffectOptions {
-    radius: number;
-    saturation?: number;
-    brightness?: number;
+    radius: double;
+    saturation?: double;
+    brightness?: double;
     color?: ResourceColor;
     adaptiveColor?: AdaptiveColor;
     blurOptions?: BlurOptions;
@@ -6590,7 +6590,7 @@ export interface BackgroundEffectOptions {
     inactiveColor?: ResourceColor;
 }
 export interface ForegroundEffectOptions {
-    radius: number;
+    radius: double;
 }
 export interface PickerTextStyle {
     color?: ResourceColor;
@@ -6614,11 +6614,11 @@ export enum ShadowType {
     BLUR = 1
 }
 export interface ShadowOptions {
-    radius: number | Resource;
+    radius: double | Resource;
     type?: ShadowType;
     color?: Color | string | Resource | ColoringStrategy;
-    offsetX?: number | Resource;
-    offsetY?: number | Resource;
+    offsetX?: double | Resource;
+    offsetY?: double | Resource;
     fill?: boolean;
 }
 export enum ShadowStyle {
@@ -6631,8 +6631,8 @@ export enum ShadowStyle {
 }
 export interface MultiShadowOptions {
     radius?: number | Resource;
-    offsetX?: number | Resource;
-    offsetY?: number | Resource;
+    offsetX?: double | Resource;
+    offsetY?: double | Resource;
 }
 export enum SafeAreaType {
     SYSTEM = 0,
@@ -6840,18 +6840,18 @@ export interface SheetOptions extends BindOptions {
     borderColor?: ResourceColor | EdgeColors | LocalizedEdgeColors;
     borderStyle?: BorderStyle | EdgeStyles;
     shadow?: ShadowOptions | ShadowStyle;
-    onHeightDidChange?: ((value0: number) => void);
+    onHeightDidChange?: ((value0: int32) => void);
     mode?: SheetMode;
     scrollSizeMode?: ScrollSizeMode;
-    onDetentsDidChange?: ((value0: number) => void);
-    onWidthDidChange?: ((value0: number) => void);
+    onDetentsDidChange?: ((value0: int32) => void);
+    onWidthDidChange?: ((value0: int32) => void);
     onTypeDidChange?: ((value0: SheetType) => void);
     uiContext?: UIContext;
     keyboardAvoidMode?: SheetKeyboardAvoidMode;
     enableHoverMode?: boolean;
     hoverModeArea?: HoverModeAreaType;
     offset?: Position;
-    effectEdge?: number;
+    effectEdge?: int32;
     radius?: LengthMetrics | BorderRadiuses | LocalizedBorderRadiuses;
     detentSelection?: SheetSize | Length;
     showInSubWindow?: boolean;
@@ -7097,10 +7097,10 @@ export interface PreviewConfiguration {
     delayCreating?: boolean;
 }
 export interface InvertOptions {
-    low: number;
-    high: number;
-    threshold: number;
-    thresholdRange: number;
+    low: double;
+    high: double;
+    threshold: double;
+    thresholdRange: double;
 }
 export type TipsMessageType = ResourceStr | StyledString;
 export interface BackgroundImageOptions {
@@ -7189,7 +7189,7 @@ export interface CommonMethod {
     compositingFilter(value: uiEffect.Filter | undefined): this {
         throw new Error("Unimplemented method compositingFilter")
     }
-    opacity(value: number | Resource | undefined): this {
+    opacity(value: double | Resource | undefined): this {
         throw new Error("Unimplemented method opacity")
     }
     border(value: BorderOptions | undefined): this {
@@ -7282,7 +7282,7 @@ export interface CommonMethod {
     onBlur(value: (() => void) | undefined): this {
         throw new Error("Unimplemented method onBlur")
     }
-    tabIndex(value: number | undefined): this {
+    tabIndex(value: int32 | undefined): this {
         throw new Error("Unimplemented method tabIndex")
     }
     defaultFocus(value: boolean | undefined): this {
@@ -7317,28 +7317,28 @@ export interface CommonMethod {
     motionBlur(value: MotionBlurOptions | undefined): this {
         throw new Error("Unimplemented method motionBlur")
     }
-    brightness(value: number | undefined): this {
+    brightness(value: double | undefined): this {
         throw new Error("Unimplemented method brightness")
     }
-    contrast(value: number | undefined): this {
+    contrast(value: double | undefined): this {
         throw new Error("Unimplemented method contrast")
     }
-    grayscale(value: number | undefined): this {
+    grayscale(value: double | undefined): this {
         throw new Error("Unimplemented method grayscale")
     }
     colorBlend(value: Color | string | Resource | undefined): this {
         throw new Error("Unimplemented method colorBlend")
     }
-    saturate(value: number | undefined): this {
+    saturate(value: double | undefined): this {
         throw new Error("Unimplemented method saturate")
     }
-    sepia(value: number | undefined): this {
+    sepia(value: double | undefined): this {
         throw new Error("Unimplemented method sepia")
     }
-    invert(value: number | InvertOptions | undefined): this {
+    invert(value: double | InvertOptions | undefined): this {
         throw new Error("Unimplemented method invert")
     }
-    hueRotate(value: number | string | undefined): this {
+    hueRotate(value: double | string | undefined): this {
         throw new Error("Unimplemented method hueRotate")
     }
     useShadowBatching(value: boolean | undefined): this {
@@ -7503,10 +7503,10 @@ export interface CommonMethod {
     restoreId(value: number | undefined): this {
         throw new Error("Unimplemented method restoreId")
     }
-    sphericalEffect(value: number | undefined): this {
+    sphericalEffect(value: double | undefined): this {
         throw new Error("Unimplemented method sphericalEffect")
     }
-    lightUpEffect(value: number | undefined): this {
+    lightUpEffect(value: double | undefined): this {
         throw new Error("Unimplemented method lightUpEffect")
     }
     pixelStretchEffect(value: PixelStretchEffectOptions | undefined): this {
@@ -7650,10 +7650,10 @@ export interface CommonMethod {
     parallelGesture(gesture: GestureType | undefined, mask?: GestureMask): this {
         throw new Error("Unimplemented method parallelGesture")
     }
-    blur(blurRadius: number | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {
+    blur(blurRadius: double | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {
         throw new Error("Unimplemented method blur")
     }
-    linearGradientBlur(value: number | undefined, options: LinearGradientBlurOptions | undefined): this {
+    linearGradientBlur(value: double | undefined, options: LinearGradientBlurOptions | undefined): this {
         throw new Error("Unimplemented method linearGradientBlur")
     }
     systemBarEffect(): this {
@@ -7662,7 +7662,7 @@ export interface CommonMethod {
     useEffect(useEffect: boolean | undefined, effectType: EffectType | undefined): this {
         throw new Error("Unimplemented method useEffect")
     }
-    backdropBlur(radius: number | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {
+    backdropBlur(radius: double | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {
         throw new Error("Unimplemented method backdropBlur")
     }
     sharedTransition(id: string | undefined, options?: sharedTransitionOptions): this {
@@ -7774,7 +7774,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     backgroundFilter_value?: uiEffect.Filter | undefined
     foregroundFilter_value?: uiEffect.Filter | undefined
     compositingFilter_value?: uiEffect.Filter | undefined
-    opacity_value?: number | Resource | undefined
+    opacity_value?: double | Resource | undefined
     border_value?: BorderOptions | undefined
     borderStyle_value?: BorderStyle | EdgeStyles | undefined
     borderWidth_value?: Length | EdgeWidths | LocalizedEdgeWidths | undefined
@@ -7805,7 +7805,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     tabStop_value?: boolean | undefined
     onFocus_value?: (() => void) | undefined
     onBlur_value?: (() => void) | undefined
-    tabIndex_value?: number | undefined
+    tabIndex_value?: int32 | undefined
     defaultFocus_value?: boolean | undefined
     groupDefaultFocus_value?: boolean | undefined
     focusOnTouch_value?: boolean | undefined
@@ -7813,14 +7813,14 @@ export class ArkCommonMethodStyle implements CommonMethod {
     animation_value?: AnimateParam | undefined
     transition_value?: TransitionEffect | undefined
     motionBlur_value?: MotionBlurOptions | undefined
-    brightness_value?: number | undefined
-    contrast_value?: number | undefined
-    grayscale_value?: number | undefined
+    brightness_value?: double | undefined
+    contrast_value?: double | undefined
+    grayscale_value?: double | undefined
     colorBlend_value?: Color | string | Resource | undefined
-    saturate_value?: number | undefined
-    sepia_value?: number | undefined
-    invert_value?: number | InvertOptions | undefined
-    hueRotate_value?: number | string | undefined
+    saturate_value?: double | undefined
+    sepia_value?: double | undefined
+    invert_value?: double | InvertOptions | undefined
+    hueRotate_value?: double | string | undefined
     useShadowBatching_value?: boolean | undefined
     useEffect_value?: boolean | undefined
     renderGroup_value?: boolean | undefined
@@ -7875,8 +7875,8 @@ export class ArkCommonMethodStyle implements CommonMethod {
     geometryTransition_value?: string | undefined
     stateStyles_value?: StateStyles | undefined
     restoreId_value?: number | undefined
-    sphericalEffect_value?: number | undefined
-    lightUpEffect_value?: number | undefined
+    sphericalEffect_value?: double | undefined
+    lightUpEffect_value?: double | undefined
     pixelStretchEffect_value?: PixelStretchEffectOptions | undefined
     accessibilityGroup_value?: boolean | undefined
     accessibilityText_value?: string | undefined
@@ -7981,7 +7981,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     compositingFilter(value: uiEffect.Filter | undefined): this {
         return this
     }
-    opacity(value: number | Resource | undefined): this {
+    opacity(value: double | Resource | undefined): this {
         return this
     }
     border(value: BorderOptions | undefined): this {
@@ -8074,7 +8074,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     onBlur(value: (() => void) | undefined): this {
         return this
     }
-    tabIndex(value: number | undefined): this {
+    tabIndex(value: int32 | undefined): this {
         return this
     }
     defaultFocus(value: boolean | undefined): this {
@@ -8107,28 +8107,28 @@ export class ArkCommonMethodStyle implements CommonMethod {
     motionBlur(value: MotionBlurOptions | undefined): this {
         return this
     }
-    brightness(value: number | undefined): this {
+    brightness(value: double | undefined): this {
         return this
     }
-    contrast(value: number | undefined): this {
+    contrast(value: double | undefined): this {
         return this
     }
-    grayscale(value: number | undefined): this {
+    grayscale(value: double | undefined): this {
         return this
     }
     colorBlend(value: Color | string | Resource | undefined): this {
         return this
     }
-    saturate(value: number | undefined): this {
+    saturate(value: double | undefined): this {
         return this
     }
-    sepia(value: number | undefined): this {
+    sepia(value: double | undefined): this {
         return this
     }
-    invert(value: number | InvertOptions | undefined): this {
+    invert(value: double | InvertOptions | undefined): this {
         return this
     }
-    hueRotate(value: number | string | undefined): this {
+    hueRotate(value: double | string | undefined): this {
         return this
     }
     useShadowBatching(value: boolean | undefined): this {
@@ -8293,10 +8293,10 @@ export class ArkCommonMethodStyle implements CommonMethod {
     restoreId(value: number | undefined): this {
         return this
     }
-    sphericalEffect(value: number | undefined): this {
+    sphericalEffect(value: double | undefined): this {
         return this
     }
-    lightUpEffect(value: number | undefined): this {
+    lightUpEffect(value: double | undefined): this {
         return this
     }
     pixelStretchEffect(value: PixelStretchEffectOptions | undefined): this {
@@ -8440,10 +8440,10 @@ export class ArkCommonMethodStyle implements CommonMethod {
     parallelGesture(gesture: GestureType | undefined, mask?: GestureMask): this {
         return this
     }
-    blur(blurRadius: number | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {
+    blur(blurRadius: double | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {
         return this
     }
-    linearGradientBlur(value: number | undefined, options: LinearGradientBlurOptions | undefined): this {
+    linearGradientBlur(value: double | undefined, options: LinearGradientBlurOptions | undefined): this {
         return this
     }
     systemBarEffect(): this {
@@ -8452,7 +8452,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     useEffect(useEffect: boolean | undefined, effectType: EffectType | undefined): this {
         return this
     }
-    backdropBlur(radius: number | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {
+    backdropBlur(radius: double | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {
         return this
     }
     sharedTransition(id: string | undefined, options?: sharedTransitionOptions): this {
@@ -8538,8 +8538,8 @@ export interface OverlayOffset {
     y?: number;
 }
 export type FractionStop = [
-    number,
-    number
+    double,
+    double
 ]
 export interface CommonShapeMethod extends CommonMethod {
     stroke(value: ResourceColor | undefined): this {
@@ -8639,11 +8639,11 @@ export interface LinearGradientBlurOptions {
     direction: GradientDirection;
 }
 export interface MotionBlurAnchor {
-    x: number;
-    y: number;
+    x: double;
+    y: double;
 }
 export interface MotionBlurOptions {
-    radius: number;
+    radius: double;
     anchor: MotionBlurAnchor;
 }
 export interface GeometryInfo extends SizeResult {
@@ -8812,8 +8812,8 @@ export enum EffectEdge {
     END = 2
 }
 export interface BackgroundBrightnessOptions {
-    rate: number;
-    lightUpDegree: number;
+    rate: double;
+    lightUpDegree: double;
 }
 export interface PointLightStyle {
     lightSource?: LightSource;
@@ -8827,13 +8827,13 @@ export interface LightSource {
     color?: ResourceColor;
 }
 export interface KeyframeAnimateParam {
-    delay?: number;
-    iterations?: number;
+    delay?: int32;
+    iterations?: int32;
     onFinish?: (() => void);
     expectedFrameRateRange?: ExpectedFrameRateRange;
 }
 export interface KeyframeState {
-    duration: number;
+    duration: int32;
     curve?: curves.Curve | string | curves.ICurve;
     event: (() => void);
 }
@@ -9084,9 +9084,9 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public opacity(value: number | Resource | undefined): this {
+    public opacity(value: double | Resource | undefined): this {
         if (this.checkPriority("opacity")) {
-            const value_casted = value as (number | Resource | undefined)
+            const value_casted = value as (double | Resource | undefined)
             this.getPeer()?.setOpacityAttribute(value_casted)
             return this
         }
@@ -9332,9 +9332,9 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public tabIndex(value: number | undefined): this {
+    public tabIndex(value: int32 | undefined): this {
         if (this.checkPriority("tabIndex")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (int32 | undefined)
             this.getPeer()?.setTabIndexAttribute(value_casted)
             return this
         }
@@ -9424,25 +9424,25 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public brightness(value: number | undefined): this {
+    public brightness(value: double | undefined): this {
         if (this.checkPriority("brightness")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (double | undefined)
             this.getPeer()?.setBrightnessAttribute(value_casted)
             return this
         }
         return this
     }
-    public contrast(value: number | undefined): this {
+    public contrast(value: double | undefined): this {
         if (this.checkPriority("contrast")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (double | undefined)
             this.getPeer()?.setContrastAttribute(value_casted)
             return this
         }
         return this
     }
-    public grayscale(value: number | undefined): this {
+    public grayscale(value: double | undefined): this {
         if (this.checkPriority("grayscale")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (double | undefined)
             this.getPeer()?.setGrayscaleAttribute(value_casted)
             return this
         }
@@ -9456,33 +9456,33 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public saturate(value: number | undefined): this {
+    public saturate(value: double | undefined): this {
         if (this.checkPriority("saturate")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (double | undefined)
             this.getPeer()?.setSaturateAttribute(value_casted)
             return this
         }
         return this
     }
-    public sepia(value: number | undefined): this {
+    public sepia(value: double | undefined): this {
         if (this.checkPriority("sepia")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (double | undefined)
             this.getPeer()?.setSepiaAttribute(value_casted)
             return this
         }
         return this
     }
-    public invert(value: number | InvertOptions | undefined): this {
+    public invert(value: double | InvertOptions | undefined): this {
         if (this.checkPriority("invert")) {
-            const value_casted = value as (number | InvertOptions | undefined)
+            const value_casted = value as (double | InvertOptions | undefined)
             this.getPeer()?.setInvertAttribute(value_casted)
             return this
         }
         return this
     }
-    public hueRotate(value: number | string | undefined): this {
+    public hueRotate(value: double | string | undefined): this {
         if (this.checkPriority("hueRotate")) {
-            const value_casted = value as (number | string | undefined)
+            const value_casted = value as (double | string | undefined)
             this.getPeer()?.setHueRotateAttribute(value_casted)
             return this
         }
@@ -9919,17 +9919,17 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public sphericalEffect(value: number | undefined): this {
+    public sphericalEffect(value: double | undefined): this {
         if (this.checkPriority("sphericalEffect")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (double | undefined)
             this.getPeer()?.setSphericalEffectAttribute(value_casted)
             return this
         }
         return this
     }
-    public lightUpEffect(value: number | undefined): this {
+    public lightUpEffect(value: double | undefined): this {
         if (this.checkPriority("lightUpEffect")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (double | undefined)
             this.getPeer()?.setLightUpEffectAttribute(value_casted)
             return this
         }
@@ -10343,9 +10343,9 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public blur(blurRadius: number | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {
+    public blur(blurRadius: double | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {
         if (this.checkPriority("blur")) {
-            const blurRadius_casted = blurRadius as (number | undefined)
+            const blurRadius_casted = blurRadius as (double | undefined)
             const options_casted = options as (BlurOptions | undefined)
             const sysOptions_casted = sysOptions as (SystemAdaptiveOptions | undefined)
             this.getPeer()?.setBlurAttribute(blurRadius_casted, options_casted, sysOptions_casted)
@@ -10353,9 +10353,9 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public linearGradientBlur(value: number | undefined, options: LinearGradientBlurOptions | undefined): this {
+    public linearGradientBlur(value: double | undefined, options: LinearGradientBlurOptions | undefined): this {
         if (this.checkPriority("linearGradientBlur")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (double | undefined)
             const options_casted = options as (LinearGradientBlurOptions | undefined)
             this.getPeer()?.setLinearGradientBlurAttribute(value_casted, options_casted)
             return this
@@ -10378,9 +10378,9 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public backdropBlur(radius: number | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {
+    public backdropBlur(radius: double | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {
         if (this.checkPriority("backdropBlur")) {
-            const radius_casted = radius as (number | undefined)
+            const radius_casted = radius as (double | undefined)
             const options_casted = options as (BlurOptions | undefined)
             const sysOptions_casted = sysOptions as (SystemAdaptiveOptions | undefined)
             this.getPeer()?.setBackdropBlurAttribute(radius_casted, options_casted, sysOptions_casted)
@@ -10893,6 +10893,41 @@ export function vp2px(value: number): number {
 export function px2vp(value: number): number {
     return GlobalScope.px2vp(value)
 }
+export class ForegroundEffectOptions_serializer {
+    public static write(buffer: SerializerBase, value: ForegroundEffectOptions): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForRadius  = value.radius
+        valueSerializer.writeFloat64(valueHolderForRadius)
+    }
+    public static read(buffer: DeserializerBase): ForegroundEffectOptions {
+        let valueDeserializer : DeserializerBase = buffer
+        const radiusTmpResult : double = valueDeserializer.readFloat64()
+        let value : ForegroundEffectOptions = ({radius: radiusTmpResult} as ForegroundEffectOptions)
+        return value
+    }
+}
+export class InvertOptions_serializer {
+    public static write(buffer: SerializerBase, value: InvertOptions): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForLow  = value.low
+        valueSerializer.writeFloat64(valueHolderForLow)
+        const valueHolderForHigh  = value.high
+        valueSerializer.writeFloat64(valueHolderForHigh)
+        const valueHolderForThreshold  = value.threshold
+        valueSerializer.writeFloat64(valueHolderForThreshold)
+        const valueHolderForThresholdRange  = value.thresholdRange
+        valueSerializer.writeFloat64(valueHolderForThresholdRange)
+    }
+    public static read(buffer: DeserializerBase): InvertOptions {
+        let valueDeserializer : DeserializerBase = buffer
+        const lowTmpResult : double = valueDeserializer.readFloat64()
+        const highTmpResult : double = valueDeserializer.readFloat64()
+        const thresholdTmpResult : double = valueDeserializer.readFloat64()
+        const thresholdRangeTmpResult : double = valueDeserializer.readFloat64()
+        let value : InvertOptions = ({low: lowTmpResult, high: highTmpResult, threshold: thresholdTmpResult, thresholdRange: thresholdRangeTmpResult} as InvertOptions)
+        return value
+    }
+}
 export class LayoutPolicy_serializer {
     public static write(buffer: SerializerBase, value: LayoutPolicy): void {
         let valueSerializer : SerializerBase = buffer
@@ -10902,6 +10937,22 @@ export class LayoutPolicy_serializer {
         let valueDeserializer : DeserializerBase = buffer
         let ptr : KPointer = valueDeserializer.readPointer()
         return LayoutPolicyInternal.fromPtr(ptr)
+    }
+}
+export class MotionBlurAnchor_serializer {
+    public static write(buffer: SerializerBase, value: MotionBlurAnchor): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForX  = value.x
+        valueSerializer.writeFloat64(valueHolderForX)
+        const valueHolderForY  = value.y
+        valueSerializer.writeFloat64(valueHolderForY)
+    }
+    public static read(buffer: DeserializerBase): MotionBlurAnchor {
+        let valueDeserializer : DeserializerBase = buffer
+        const xTmpResult : double = valueDeserializer.readFloat64()
+        const yTmpResult : double = valueDeserializer.readFloat64()
+        let value : MotionBlurAnchor = ({x: xTmpResult, y: yTmpResult} as MotionBlurAnchor)
+        return value
     }
 }
 export class NestedScrollOptions_serializer {
@@ -11107,14 +11158,14 @@ export class BackgroundBrightnessOptions_serializer {
     public static write(buffer: SerializerBase, value: BackgroundBrightnessOptions): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForRate  = value.rate
-        valueSerializer.writeNumber(valueHolderForRate)
+        valueSerializer.writeFloat64(valueHolderForRate)
         const valueHolderForLightUpDegree  = value.lightUpDegree
-        valueSerializer.writeNumber(valueHolderForLightUpDegree)
+        valueSerializer.writeFloat64(valueHolderForLightUpDegree)
     }
     public static read(buffer: DeserializerBase): BackgroundBrightnessOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const rateTmpResult : number = (valueDeserializer.readNumber() as number)
-        const lightUpDegreeTmpResult : number = (valueDeserializer.readNumber() as number)
+        const rateTmpResult : double = valueDeserializer.readFloat64()
+        const lightUpDegreeTmpResult : double = valueDeserializer.readFloat64()
         let value : BackgroundBrightnessOptions = ({rate: rateTmpResult, lightUpDegree: lightUpDegreeTmpResult} as BackgroundBrightnessOptions)
         return value
     }
@@ -11461,15 +11512,15 @@ export class BlurOptions_serializer {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForGrayscale  = value.grayscale
         const valueHolderForGrayscale_0  = valueHolderForGrayscale[0]
-        valueSerializer.writeNumber(valueHolderForGrayscale_0)
+        valueSerializer.writeFloat64(valueHolderForGrayscale_0)
         const valueHolderForGrayscale_1  = valueHolderForGrayscale[1]
-        valueSerializer.writeNumber(valueHolderForGrayscale_1)
+        valueSerializer.writeFloat64(valueHolderForGrayscale_1)
     }
     public static read(buffer: DeserializerBase): BlurOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const grayscaleTmpBufValue0 : number = (valueDeserializer.readNumber() as number)
-        const grayscaleTmpBufValue1 : number = (valueDeserializer.readNumber() as number)
-        const grayscaleTmpResult : [ number, number ] = ([grayscaleTmpBufValue0, grayscaleTmpBufValue1] as [ number, number ])
+        const grayscaleTmpBufValue0 : double = valueDeserializer.readFloat64()
+        const grayscaleTmpBufValue1 : double = valueDeserializer.readFloat64()
+        const grayscaleTmpResult : [ double, double ] = ([grayscaleTmpBufValue0, grayscaleTmpBufValue1] as [ double, double ])
         let value : BlurOptions = ({grayscale: grayscaleTmpResult} as BlurOptions)
         return value
     }
@@ -11879,17 +11930,17 @@ export class ExpectedFrameRateRange_serializer {
     public static write(buffer: SerializerBase, value: ExpectedFrameRateRange): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForMin  = value.min
-        valueSerializer.writeNumber(valueHolderForMin)
+        valueSerializer.writeInt32(valueHolderForMin)
         const valueHolderForMax  = value.max
-        valueSerializer.writeNumber(valueHolderForMax)
+        valueSerializer.writeInt32(valueHolderForMax)
         const valueHolderForExpected  = value.expected
-        valueSerializer.writeNumber(valueHolderForExpected)
+        valueSerializer.writeInt32(valueHolderForExpected)
     }
     public static read(buffer: DeserializerBase): ExpectedFrameRateRange {
         let valueDeserializer : DeserializerBase = buffer
-        const minTmpResult : number = (valueDeserializer.readNumber() as number)
-        const maxTmpResult : number = (valueDeserializer.readNumber() as number)
-        const expectedTmpResult : number = (valueDeserializer.readNumber() as number)
+        const minTmpResult : int32 = valueDeserializer.readInt32()
+        const maxTmpResult : int32 = valueDeserializer.readInt32()
+        const expectedTmpResult : int32 = valueDeserializer.readInt32()
         let value : ExpectedFrameRateRange = ({min: minTmpResult, max: maxTmpResult, expected: expectedTmpResult} as ExpectedFrameRateRange)
         return value
     }
@@ -11988,19 +12039,6 @@ export class FocusMovement_serializer {
         return value
     }
 }
-export class ForegroundEffectOptions_serializer {
-    public static write(buffer: SerializerBase, value: ForegroundEffectOptions): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForRadius  = value.radius
-        valueSerializer.writeNumber(valueHolderForRadius)
-    }
-    public static read(buffer: DeserializerBase): ForegroundEffectOptions {
-        let valueDeserializer : DeserializerBase = buffer
-        const radiusTmpResult : number = (valueDeserializer.readNumber() as number)
-        let value : ForegroundEffectOptions = ({radius: radiusTmpResult} as ForegroundEffectOptions)
-        return value
-    }
-}
 export class GeometryTransitionOptions_serializer {
     public static write(buffer: SerializerBase, value: GeometryTransitionOptions): void {
         let valueSerializer : SerializerBase = buffer
@@ -12090,28 +12128,6 @@ export class InputCounterOptions_serializer {
         }
         const highlightBorderTmpResult : boolean | undefined = highlightBorderTmpBuf
         let value : InputCounterOptions = ({thresholdPercentage: thresholdPercentageTmpResult, highlightBorder: highlightBorderTmpResult} as InputCounterOptions)
-        return value
-    }
-}
-export class InvertOptions_serializer {
-    public static write(buffer: SerializerBase, value: InvertOptions): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForLow  = value.low
-        valueSerializer.writeNumber(valueHolderForLow)
-        const valueHolderForHigh  = value.high
-        valueSerializer.writeNumber(valueHolderForHigh)
-        const valueHolderForThreshold  = value.threshold
-        valueSerializer.writeNumber(valueHolderForThreshold)
-        const valueHolderForThresholdRange  = value.thresholdRange
-        valueSerializer.writeNumber(valueHolderForThresholdRange)
-    }
-    public static read(buffer: DeserializerBase): InvertOptions {
-        let valueDeserializer : DeserializerBase = buffer
-        const lowTmpResult : number = (valueDeserializer.readNumber() as number)
-        const highTmpResult : number = (valueDeserializer.readNumber() as number)
-        const thresholdTmpResult : number = (valueDeserializer.readNumber() as number)
-        const thresholdRangeTmpResult : number = (valueDeserializer.readNumber() as number)
-        let value : InvertOptions = ({low: lowTmpResult, high: highTmpResult, threshold: thresholdTmpResult, thresholdRange: thresholdRangeTmpResult} as InvertOptions)
         return value
     }
 }
@@ -12261,7 +12277,7 @@ export class KeyframeState_serializer {
     public static write(buffer: SerializerBase, value: KeyframeState): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForDuration  = value.duration
-        valueSerializer.writeNumber(valueHolderForDuration)
+        valueSerializer.writeInt32(valueHolderForDuration)
         const valueHolderForCurve  = value.curve
         if (valueHolderForCurve !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
@@ -12287,7 +12303,7 @@ export class KeyframeState_serializer {
     }
     public static read(buffer: DeserializerBase): KeyframeState {
         let valueDeserializer : DeserializerBase = buffer
-        const durationTmpResult : number = (valueDeserializer.readNumber() as number)
+        const durationTmpResult : int32 = valueDeserializer.readInt32()
         const curveTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let curveTmpBuf : curves.Curve | string | curves.ICurve | undefined = undefined
         if ((curveTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -12329,9 +12345,9 @@ export class LinearGradientBlurOptions_serializer {
         for (let valueHolderForFractionStopsCounterI = 0; valueHolderForFractionStopsCounterI < valueHolderForFractionStops.length; valueHolderForFractionStopsCounterI++) {
             const valueHolderForFractionStopsTmpElement : FractionStop = valueHolderForFractionStops[valueHolderForFractionStopsCounterI]
             const valueHolderForFractionStopsTmpElement_0  = valueHolderForFractionStopsTmpElement[0]
-            valueSerializer.writeNumber(valueHolderForFractionStopsTmpElement_0)
+            valueSerializer.writeFloat64(valueHolderForFractionStopsTmpElement_0)
             const valueHolderForFractionStopsTmpElement_1  = valueHolderForFractionStopsTmpElement[1]
-            valueSerializer.writeNumber(valueHolderForFractionStopsTmpElement_1)
+            valueSerializer.writeFloat64(valueHolderForFractionStopsTmpElement_1)
         }
         const valueHolderForDirection  = value.direction
         valueSerializer.writeInt32(valueHolderForDirection.valueOf())
@@ -12341,8 +12357,8 @@ export class LinearGradientBlurOptions_serializer {
         const fractionStopsTmpBufLength : int32 = valueDeserializer.readInt32()
         let fractionStopsTmpBuf : Array<FractionStop> = new Array<FractionStop>(fractionStopsTmpBufLength)
         for (let fractionStopsTmpBufBufCounterI = 0; fractionStopsTmpBufBufCounterI < fractionStopsTmpBufLength; fractionStopsTmpBufBufCounterI++) {
-            const fractionStopsTmpBufTempBufValue0 : number = (valueDeserializer.readNumber() as number)
-            const fractionStopsTmpBufTempBufValue1 : number = (valueDeserializer.readNumber() as number)
+            const fractionStopsTmpBufTempBufValue0 : double = valueDeserializer.readFloat64()
+            const fractionStopsTmpBufTempBufValue1 : double = valueDeserializer.readFloat64()
             fractionStopsTmpBuf[fractionStopsTmpBufBufCounterI] = ([fractionStopsTmpBufTempBufValue0, fractionStopsTmpBufTempBufValue1] as FractionStop)
         }
         const fractionStopsTmpResult : Array<FractionStop> = fractionStopsTmpBuf
@@ -12525,22 +12541,6 @@ export class MeasureResult_serializer {
         return value
     }
 }
-export class MotionBlurAnchor_serializer {
-    public static write(buffer: SerializerBase, value: MotionBlurAnchor): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForX  = value.x
-        valueSerializer.writeNumber(valueHolderForX)
-        const valueHolderForY  = value.y
-        valueSerializer.writeNumber(valueHolderForY)
-    }
-    public static read(buffer: DeserializerBase): MotionBlurAnchor {
-        let valueDeserializer : DeserializerBase = buffer
-        const xTmpResult : number = (valueDeserializer.readNumber() as number)
-        const yTmpResult : number = (valueDeserializer.readNumber() as number)
-        let value : MotionBlurAnchor = ({x: xTmpResult, y: yTmpResult} as MotionBlurAnchor)
-        return value
-    }
-}
 export class MotionBlurOptions_serializer {
     public static write(buffer: SerializerBase, value: MotionBlurOptions): void {
         let valueSerializer : SerializerBase = buffer
@@ -12566,7 +12566,7 @@ export class MotionPathOptions_serializer {
         if (valueHolderForFrom !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForFromTmpValue  = valueHolderForFrom!
-            valueSerializer.writeNumber(valueHolderForFromTmpValue)
+            valueSerializer.writeFloat64(valueHolderForFromTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -12574,7 +12574,7 @@ export class MotionPathOptions_serializer {
         if (valueHolderForTo !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForToTmpValue  = valueHolderForTo!
-            valueSerializer.writeNumber(valueHolderForToTmpValue)
+            valueSerializer.writeFloat64(valueHolderForToTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -12591,17 +12591,17 @@ export class MotionPathOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const pathTmpResult : string = (valueDeserializer.readString() as string)
         const fromTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let fromTmpBuf : number | undefined = undefined
+        let fromTmpBuf : double | undefined = undefined
         if ((fromTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            fromTmpBuf = (valueDeserializer.readNumber() as number)
+            fromTmpBuf = valueDeserializer.readFloat64()
         }
-        const fromTmpResult : number | undefined = fromTmpBuf
+        const fromTmpResult : double | undefined = fromTmpBuf
         const toTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let toTmpBuf : number | undefined = undefined
+        let toTmpBuf : double | undefined = undefined
         if ((toTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            toTmpBuf = (valueDeserializer.readNumber() as number)
+            toTmpBuf = valueDeserializer.readFloat64()
         }
-        const toTmpResult : number | undefined = toTmpBuf
+        const toTmpResult : double | undefined = toTmpBuf
         const rotatableTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let rotatableTmpBuf : boolean | undefined = undefined
         if ((rotatableTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -12981,7 +12981,7 @@ export class RotateOptions_serializer {
         if (valueHolderForX !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForXTmpValue  = valueHolderForX!
-            valueSerializer.writeNumber(valueHolderForXTmpValue)
+            valueSerializer.writeFloat64(valueHolderForXTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -12989,7 +12989,7 @@ export class RotateOptions_serializer {
         if (valueHolderForY !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForYTmpValue  = valueHolderForY!
-            valueSerializer.writeNumber(valueHolderForYTmpValue)
+            valueSerializer.writeFloat64(valueHolderForYTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -12997,7 +12997,7 @@ export class RotateOptions_serializer {
         if (valueHolderForZ !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForZTmpValue  = valueHolderForZ!
-            valueSerializer.writeNumber(valueHolderForZTmpValue)
+            valueSerializer.writeFloat64(valueHolderForZTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -13005,10 +13005,10 @@ export class RotateOptions_serializer {
         if (valueHolderForCenterX !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForCenterXTmpValue  = valueHolderForCenterX!
-            if (valueHolderForCenterXTmpValue instanceof number) {
+            if (valueHolderForCenterXTmpValue instanceof double) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForCenterXTmpValueForIdx0  = valueHolderForCenterXTmpValue as number
-                valueSerializer.writeNumber(valueHolderForCenterXTmpValueForIdx0)
+                const valueHolderForCenterXTmpValueForIdx0  = valueHolderForCenterXTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForCenterXTmpValueForIdx0)
             } else if (valueHolderForCenterXTmpValue instanceof string) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForCenterXTmpValueForIdx1  = valueHolderForCenterXTmpValue as string
@@ -13021,10 +13021,10 @@ export class RotateOptions_serializer {
         if (valueHolderForCenterY !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForCenterYTmpValue  = valueHolderForCenterY!
-            if (valueHolderForCenterYTmpValue instanceof number) {
+            if (valueHolderForCenterYTmpValue instanceof double) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForCenterYTmpValueForIdx0  = valueHolderForCenterYTmpValue as number
-                valueSerializer.writeNumber(valueHolderForCenterYTmpValueForIdx0)
+                const valueHolderForCenterYTmpValueForIdx0  = valueHolderForCenterYTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForCenterYTmpValueForIdx0)
             } else if (valueHolderForCenterYTmpValue instanceof string) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForCenterYTmpValueForIdx1  = valueHolderForCenterYTmpValue as string
@@ -13037,7 +13037,7 @@ export class RotateOptions_serializer {
         if (valueHolderForCenterZ !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForCenterZTmpValue  = valueHolderForCenterZ!
-            valueSerializer.writeNumber(valueHolderForCenterZTmpValue)
+            valueSerializer.writeFloat64(valueHolderForCenterZTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -13045,15 +13045,15 @@ export class RotateOptions_serializer {
         if (valueHolderForPerspective !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForPerspectiveTmpValue  = valueHolderForPerspective!
-            valueSerializer.writeNumber(valueHolderForPerspectiveTmpValue)
+            valueSerializer.writeFloat64(valueHolderForPerspectiveTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const valueHolderForAngle  = value.angle
-        if (valueHolderForAngle instanceof number) {
+        if (valueHolderForAngle instanceof double) {
             valueSerializer.writeInt8((0).toByte())
-            const valueHolderForAngleForIdx0  = valueHolderForAngle as number
-            valueSerializer.writeNumber(valueHolderForAngleForIdx0)
+            const valueHolderForAngleForIdx0  = valueHolderForAngle as double
+            valueSerializer.writeFloat64(valueHolderForAngleForIdx0)
         } else if (valueHolderForAngle instanceof string) {
             valueSerializer.writeInt8((1).toByte())
             const valueHolderForAngleForIdx1  = valueHolderForAngle as string
@@ -13063,75 +13063,75 @@ export class RotateOptions_serializer {
     public static read(buffer: DeserializerBase): RotateOptions {
         let valueDeserializer : DeserializerBase = buffer
         const xTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let xTmpBuf : number | undefined = undefined
+        let xTmpBuf : double | undefined = undefined
         if ((xTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            xTmpBuf = (valueDeserializer.readNumber() as number)
+            xTmpBuf = valueDeserializer.readFloat64()
         }
-        const xTmpResult : number | undefined = xTmpBuf
+        const xTmpResult : double | undefined = xTmpBuf
         const yTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let yTmpBuf : number | undefined = undefined
+        let yTmpBuf : double | undefined = undefined
         if ((yTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            yTmpBuf = (valueDeserializer.readNumber() as number)
+            yTmpBuf = valueDeserializer.readFloat64()
         }
-        const yTmpResult : number | undefined = yTmpBuf
+        const yTmpResult : double | undefined = yTmpBuf
         const zTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let zTmpBuf : number | undefined = undefined
+        let zTmpBuf : double | undefined = undefined
         if ((zTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            zTmpBuf = (valueDeserializer.readNumber() as number)
+            zTmpBuf = valueDeserializer.readFloat64()
         }
-        const zTmpResult : number | undefined = zTmpBuf
+        const zTmpResult : double | undefined = zTmpBuf
         const centerXTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let centerXTmpBuf : number | string | undefined = undefined
+        let centerXTmpBuf : double | string | undefined = undefined
         if ((centerXTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const centerXTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let centerXTmpBuf_ : number | string | undefined
+            let centerXTmpBuf_ : double | string | undefined
             if (centerXTmpBuf_UnionSelector == (0).toChar()) {
-                centerXTmpBuf_ = (valueDeserializer.readNumber() as number)
+                centerXTmpBuf_ = valueDeserializer.readFloat64()
             } else if (centerXTmpBuf_UnionSelector == (1).toChar()) {
                 centerXTmpBuf_ = (valueDeserializer.readString() as string)
             } else {
                 throw new Error("One of the branches for centerXTmpBuf_ has to be chosen through deserialisation.")
             }
-            centerXTmpBuf = (centerXTmpBuf_ as number | string)
+            centerXTmpBuf = (centerXTmpBuf_ as double | string)
         }
-        const centerXTmpResult : number | string | undefined = centerXTmpBuf
+        const centerXTmpResult : double | string | undefined = centerXTmpBuf
         const centerYTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let centerYTmpBuf : number | string | undefined = undefined
+        let centerYTmpBuf : double | string | undefined = undefined
         if ((centerYTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const centerYTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let centerYTmpBuf_ : number | string | undefined
+            let centerYTmpBuf_ : double | string | undefined
             if (centerYTmpBuf_UnionSelector == (0).toChar()) {
-                centerYTmpBuf_ = (valueDeserializer.readNumber() as number)
+                centerYTmpBuf_ = valueDeserializer.readFloat64()
             } else if (centerYTmpBuf_UnionSelector == (1).toChar()) {
                 centerYTmpBuf_ = (valueDeserializer.readString() as string)
             } else {
                 throw new Error("One of the branches for centerYTmpBuf_ has to be chosen through deserialisation.")
             }
-            centerYTmpBuf = (centerYTmpBuf_ as number | string)
+            centerYTmpBuf = (centerYTmpBuf_ as double | string)
         }
-        const centerYTmpResult : number | string | undefined = centerYTmpBuf
+        const centerYTmpResult : double | string | undefined = centerYTmpBuf
         const centerZTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let centerZTmpBuf : number | undefined = undefined
+        let centerZTmpBuf : double | undefined = undefined
         if ((centerZTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            centerZTmpBuf = (valueDeserializer.readNumber() as number)
+            centerZTmpBuf = valueDeserializer.readFloat64()
         }
-        const centerZTmpResult : number | undefined = centerZTmpBuf
+        const centerZTmpResult : double | undefined = centerZTmpBuf
         const perspectiveTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let perspectiveTmpBuf : number | undefined = undefined
+        let perspectiveTmpBuf : double | undefined = undefined
         if ((perspectiveTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            perspectiveTmpBuf = (valueDeserializer.readNumber() as number)
+            perspectiveTmpBuf = valueDeserializer.readFloat64()
         }
-        const perspectiveTmpResult : number | undefined = perspectiveTmpBuf
+        const perspectiveTmpResult : double | undefined = perspectiveTmpBuf
         const angleTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
-        let angleTmpBuf : number | string | undefined
+        let angleTmpBuf : double | string | undefined
         if (angleTmpBufUnionSelector == (0).toChar()) {
-            angleTmpBuf = (valueDeserializer.readNumber() as number)
+            angleTmpBuf = valueDeserializer.readFloat64()
         } else if (angleTmpBufUnionSelector == (1).toChar()) {
             angleTmpBuf = (valueDeserializer.readString() as string)
         } else {
             throw new Error("One of the branches for angleTmpBuf has to be chosen through deserialisation.")
         }
-        const angleTmpResult : number | string = (angleTmpBuf as number | string)
+        const angleTmpResult : double | string = (angleTmpBuf as double | string)
         let value : RotateOptions = ({x: xTmpResult, y: yTmpResult, z: zTmpResult, centerX: centerXTmpResult, centerY: centerYTmpResult, centerZ: centerZTmpResult, perspective: perspectiveTmpResult, angle: angleTmpResult} as RotateOptions)
         return value
     }
@@ -13143,7 +13143,7 @@ export class ScaleOptions_serializer {
         if (valueHolderForX !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForXTmpValue  = valueHolderForX!
-            valueSerializer.writeNumber(valueHolderForXTmpValue)
+            valueSerializer.writeFloat64(valueHolderForXTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -13151,7 +13151,7 @@ export class ScaleOptions_serializer {
         if (valueHolderForY !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForYTmpValue  = valueHolderForY!
-            valueSerializer.writeNumber(valueHolderForYTmpValue)
+            valueSerializer.writeFloat64(valueHolderForYTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -13159,7 +13159,7 @@ export class ScaleOptions_serializer {
         if (valueHolderForZ !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForZTmpValue  = valueHolderForZ!
-            valueSerializer.writeNumber(valueHolderForZTmpValue)
+            valueSerializer.writeFloat64(valueHolderForZTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -13167,10 +13167,10 @@ export class ScaleOptions_serializer {
         if (valueHolderForCenterX !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForCenterXTmpValue  = valueHolderForCenterX!
-            if (valueHolderForCenterXTmpValue instanceof number) {
+            if (valueHolderForCenterXTmpValue instanceof double) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForCenterXTmpValueForIdx0  = valueHolderForCenterXTmpValue as number
-                valueSerializer.writeNumber(valueHolderForCenterXTmpValueForIdx0)
+                const valueHolderForCenterXTmpValueForIdx0  = valueHolderForCenterXTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForCenterXTmpValueForIdx0)
             } else if (valueHolderForCenterXTmpValue instanceof string) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForCenterXTmpValueForIdx1  = valueHolderForCenterXTmpValue as string
@@ -13183,10 +13183,10 @@ export class ScaleOptions_serializer {
         if (valueHolderForCenterY !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForCenterYTmpValue  = valueHolderForCenterY!
-            if (valueHolderForCenterYTmpValue instanceof number) {
+            if (valueHolderForCenterYTmpValue instanceof double) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForCenterYTmpValueForIdx0  = valueHolderForCenterYTmpValue as number
-                valueSerializer.writeNumber(valueHolderForCenterYTmpValueForIdx0)
+                const valueHolderForCenterYTmpValueForIdx0  = valueHolderForCenterYTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForCenterYTmpValueForIdx0)
             } else if (valueHolderForCenterYTmpValue instanceof string) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForCenterYTmpValueForIdx1  = valueHolderForCenterYTmpValue as string
@@ -13199,53 +13199,53 @@ export class ScaleOptions_serializer {
     public static read(buffer: DeserializerBase): ScaleOptions {
         let valueDeserializer : DeserializerBase = buffer
         const xTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let xTmpBuf : number | undefined = undefined
+        let xTmpBuf : double | undefined = undefined
         if ((xTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            xTmpBuf = (valueDeserializer.readNumber() as number)
+            xTmpBuf = valueDeserializer.readFloat64()
         }
-        const xTmpResult : number | undefined = xTmpBuf
+        const xTmpResult : double | undefined = xTmpBuf
         const yTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let yTmpBuf : number | undefined = undefined
+        let yTmpBuf : double | undefined = undefined
         if ((yTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            yTmpBuf = (valueDeserializer.readNumber() as number)
+            yTmpBuf = valueDeserializer.readFloat64()
         }
-        const yTmpResult : number | undefined = yTmpBuf
+        const yTmpResult : double | undefined = yTmpBuf
         const zTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let zTmpBuf : number | undefined = undefined
+        let zTmpBuf : double | undefined = undefined
         if ((zTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            zTmpBuf = (valueDeserializer.readNumber() as number)
+            zTmpBuf = valueDeserializer.readFloat64()
         }
-        const zTmpResult : number | undefined = zTmpBuf
+        const zTmpResult : double | undefined = zTmpBuf
         const centerXTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let centerXTmpBuf : number | string | undefined = undefined
+        let centerXTmpBuf : double | string | undefined = undefined
         if ((centerXTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const centerXTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let centerXTmpBuf_ : number | string | undefined
+            let centerXTmpBuf_ : double | string | undefined
             if (centerXTmpBuf_UnionSelector == (0).toChar()) {
-                centerXTmpBuf_ = (valueDeserializer.readNumber() as number)
+                centerXTmpBuf_ = valueDeserializer.readFloat64()
             } else if (centerXTmpBuf_UnionSelector == (1).toChar()) {
                 centerXTmpBuf_ = (valueDeserializer.readString() as string)
             } else {
                 throw new Error("One of the branches for centerXTmpBuf_ has to be chosen through deserialisation.")
             }
-            centerXTmpBuf = (centerXTmpBuf_ as number | string)
+            centerXTmpBuf = (centerXTmpBuf_ as double | string)
         }
-        const centerXTmpResult : number | string | undefined = centerXTmpBuf
+        const centerXTmpResult : double | string | undefined = centerXTmpBuf
         const centerYTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let centerYTmpBuf : number | string | undefined = undefined
+        let centerYTmpBuf : double | string | undefined = undefined
         if ((centerYTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const centerYTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let centerYTmpBuf_ : number | string | undefined
+            let centerYTmpBuf_ : double | string | undefined
             if (centerYTmpBuf_UnionSelector == (0).toChar()) {
-                centerYTmpBuf_ = (valueDeserializer.readNumber() as number)
+                centerYTmpBuf_ = valueDeserializer.readFloat64()
             } else if (centerYTmpBuf_UnionSelector == (1).toChar()) {
                 centerYTmpBuf_ = (valueDeserializer.readString() as string)
             } else {
                 throw new Error("One of the branches for centerYTmpBuf_ has to be chosen through deserialisation.")
             }
-            centerYTmpBuf = (centerYTmpBuf_ as number | string)
+            centerYTmpBuf = (centerYTmpBuf_ as double | string)
         }
-        const centerYTmpResult : number | string | undefined = centerYTmpBuf
+        const centerYTmpResult : double | string | undefined = centerYTmpBuf
         let value : ScaleOptions = ({x: xTmpResult, y: yTmpResult, z: zTmpResult, centerX: centerXTmpResult, centerY: centerYTmpResult} as ScaleOptions)
         return value
     }
@@ -13508,10 +13508,10 @@ export class TranslateOptions_serializer {
         if (valueHolderForX !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForXTmpValue  = valueHolderForX!
-            if (valueHolderForXTmpValue instanceof number) {
+            if (valueHolderForXTmpValue instanceof double) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForXTmpValueForIdx0  = valueHolderForXTmpValue as number
-                valueSerializer.writeNumber(valueHolderForXTmpValueForIdx0)
+                const valueHolderForXTmpValueForIdx0  = valueHolderForXTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForXTmpValueForIdx0)
             } else if (valueHolderForXTmpValue instanceof string) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForXTmpValueForIdx1  = valueHolderForXTmpValue as string
@@ -13524,10 +13524,10 @@ export class TranslateOptions_serializer {
         if (valueHolderForY !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForYTmpValue  = valueHolderForY!
-            if (valueHolderForYTmpValue instanceof number) {
+            if (valueHolderForYTmpValue instanceof double) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForYTmpValueForIdx0  = valueHolderForYTmpValue as number
-                valueSerializer.writeNumber(valueHolderForYTmpValueForIdx0)
+                const valueHolderForYTmpValueForIdx0  = valueHolderForYTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForYTmpValueForIdx0)
             } else if (valueHolderForYTmpValue instanceof string) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForYTmpValueForIdx1  = valueHolderForYTmpValue as string
@@ -13540,10 +13540,10 @@ export class TranslateOptions_serializer {
         if (valueHolderForZ !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForZTmpValue  = valueHolderForZ!
-            if (valueHolderForZTmpValue instanceof number) {
+            if (valueHolderForZTmpValue instanceof double) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForZTmpValueForIdx0  = valueHolderForZTmpValue as number
-                valueSerializer.writeNumber(valueHolderForZTmpValueForIdx0)
+                const valueHolderForZTmpValueForIdx0  = valueHolderForZTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForZTmpValueForIdx0)
             } else if (valueHolderForZTmpValue instanceof string) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForZTmpValueForIdx1  = valueHolderForZTmpValue as string
@@ -13556,50 +13556,50 @@ export class TranslateOptions_serializer {
     public static read(buffer: DeserializerBase): TranslateOptions {
         let valueDeserializer : DeserializerBase = buffer
         const xTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let xTmpBuf : number | string | undefined = undefined
+        let xTmpBuf : double | string | undefined = undefined
         if ((xTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const xTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let xTmpBuf_ : number | string | undefined
+            let xTmpBuf_ : double | string | undefined
             if (xTmpBuf_UnionSelector == (0).toChar()) {
-                xTmpBuf_ = (valueDeserializer.readNumber() as number)
+                xTmpBuf_ = valueDeserializer.readFloat64()
             } else if (xTmpBuf_UnionSelector == (1).toChar()) {
                 xTmpBuf_ = (valueDeserializer.readString() as string)
             } else {
                 throw new Error("One of the branches for xTmpBuf_ has to be chosen through deserialisation.")
             }
-            xTmpBuf = (xTmpBuf_ as number | string)
+            xTmpBuf = (xTmpBuf_ as double | string)
         }
-        const xTmpResult : number | string | undefined = xTmpBuf
+        const xTmpResult : double | string | undefined = xTmpBuf
         const yTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let yTmpBuf : number | string | undefined = undefined
+        let yTmpBuf : double | string | undefined = undefined
         if ((yTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const yTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let yTmpBuf_ : number | string | undefined
+            let yTmpBuf_ : double | string | undefined
             if (yTmpBuf_UnionSelector == (0).toChar()) {
-                yTmpBuf_ = (valueDeserializer.readNumber() as number)
+                yTmpBuf_ = valueDeserializer.readFloat64()
             } else if (yTmpBuf_UnionSelector == (1).toChar()) {
                 yTmpBuf_ = (valueDeserializer.readString() as string)
             } else {
                 throw new Error("One of the branches for yTmpBuf_ has to be chosen through deserialisation.")
             }
-            yTmpBuf = (yTmpBuf_ as number | string)
+            yTmpBuf = (yTmpBuf_ as double | string)
         }
-        const yTmpResult : number | string | undefined = yTmpBuf
+        const yTmpResult : double | string | undefined = yTmpBuf
         const zTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let zTmpBuf : number | string | undefined = undefined
+        let zTmpBuf : double | string | undefined = undefined
         if ((zTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const zTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let zTmpBuf_ : number | string | undefined
+            let zTmpBuf_ : double | string | undefined
             if (zTmpBuf_UnionSelector == (0).toChar()) {
-                zTmpBuf_ = (valueDeserializer.readNumber() as number)
+                zTmpBuf_ = valueDeserializer.readFloat64()
             } else if (zTmpBuf_UnionSelector == (1).toChar()) {
                 zTmpBuf_ = (valueDeserializer.readString() as string)
             } else {
                 throw new Error("One of the branches for zTmpBuf_ has to be chosen through deserialisation.")
             }
-            zTmpBuf = (zTmpBuf_ as number | string)
+            zTmpBuf = (zTmpBuf_ as double | string)
         }
-        const zTmpResult : number | string | undefined = zTmpBuf
+        const zTmpResult : double | string | undefined = zTmpBuf
         let value : TranslateOptions = ({x: xTmpResult, y: yTmpResult, z: zTmpResult} as TranslateOptions)
         return value
     }
@@ -13755,7 +13755,7 @@ export class AnimateParam_serializer {
         if (valueHolderForDuration !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForDurationTmpValue  = valueHolderForDuration!
-            valueSerializer.writeNumber(valueHolderForDurationTmpValue)
+            valueSerializer.writeInt32(valueHolderForDurationTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -13763,7 +13763,7 @@ export class AnimateParam_serializer {
         if (valueHolderForTempo !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForTempoTmpValue  = valueHolderForTempo!
-            valueSerializer.writeNumber(valueHolderForTempoTmpValue)
+            valueSerializer.writeFloat64(valueHolderForTempoTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -13791,7 +13791,7 @@ export class AnimateParam_serializer {
         if (valueHolderForDelay !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForDelayTmpValue  = valueHolderForDelay!
-            valueSerializer.writeNumber(valueHolderForDelayTmpValue)
+            valueSerializer.writeInt32(valueHolderForDelayTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -13799,7 +13799,7 @@ export class AnimateParam_serializer {
         if (valueHolderForIterations !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForIterationsTmpValue  = valueHolderForIterations!
-            valueSerializer.writeNumber(valueHolderForIterationsTmpValue)
+            valueSerializer.writeInt32(valueHolderForIterationsTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -13839,17 +13839,17 @@ export class AnimateParam_serializer {
     public static read(buffer: DeserializerBase): AnimateParam {
         let valueDeserializer : DeserializerBase = buffer
         const durationTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let durationTmpBuf : number | undefined = undefined
+        let durationTmpBuf : int32 | undefined = undefined
         if ((durationTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            durationTmpBuf = (valueDeserializer.readNumber() as number)
+            durationTmpBuf = valueDeserializer.readInt32()
         }
-        const durationTmpResult : number | undefined = durationTmpBuf
+        const durationTmpResult : int32 | undefined = durationTmpBuf
         const tempoTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let tempoTmpBuf : number | undefined = undefined
+        let tempoTmpBuf : double | undefined = undefined
         if ((tempoTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            tempoTmpBuf = (valueDeserializer.readNumber() as number)
+            tempoTmpBuf = valueDeserializer.readFloat64()
         }
-        const tempoTmpResult : number | undefined = tempoTmpBuf
+        const tempoTmpResult : double | undefined = tempoTmpBuf
         const curveTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let curveTmpBuf : curves.Curve | string | curves.ICurve | undefined = undefined
         if ((curveTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -13868,17 +13868,17 @@ export class AnimateParam_serializer {
         }
         const curveTmpResult : curves.Curve | string | curves.ICurve | undefined = curveTmpBuf
         const delayTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let delayTmpBuf : number | undefined = undefined
+        let delayTmpBuf : int32 | undefined = undefined
         if ((delayTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            delayTmpBuf = (valueDeserializer.readNumber() as number)
+            delayTmpBuf = valueDeserializer.readInt32()
         }
-        const delayTmpResult : number | undefined = delayTmpBuf
+        const delayTmpResult : int32 | undefined = delayTmpBuf
         const iterationsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let iterationsTmpBuf : number | undefined = undefined
+        let iterationsTmpBuf : int32 | undefined = undefined
         if ((iterationsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            iterationsTmpBuf = (valueDeserializer.readNumber() as number)
+            iterationsTmpBuf = valueDeserializer.readInt32()
         }
-        const iterationsTmpResult : number | undefined = iterationsTmpBuf
+        const iterationsTmpResult : int32 | undefined = iterationsTmpBuf
         const playModeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let playModeTmpBuf : PlayMode | undefined = undefined
         if ((playModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -13941,7 +13941,7 @@ export class BackgroundBlurStyleOptions_serializer {
         if (valueHolderForScale !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForScaleTmpValue  = valueHolderForScale!
-            valueSerializer.writeNumber(valueHolderForScaleTmpValue)
+            valueSerializer.writeFloat64(valueHolderForScaleTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -14001,11 +14001,11 @@ export class BackgroundBlurStyleOptions_serializer {
         }
         const adaptiveColorTmpResult : AdaptiveColor | undefined = adaptiveColorTmpBuf
         const scaleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let scaleTmpBuf : number | undefined = undefined
+        let scaleTmpBuf : double | undefined = undefined
         if ((scaleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            scaleTmpBuf = (valueDeserializer.readNumber() as number)
+            scaleTmpBuf = valueDeserializer.readFloat64()
         }
-        const scaleTmpResult : number | undefined = scaleTmpBuf
+        const scaleTmpResult : double | undefined = scaleTmpBuf
         const blurOptionsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let blurOptionsTmpBuf : BlurOptions | undefined = undefined
         if ((blurOptionsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -14045,12 +14045,12 @@ export class BackgroundEffectOptions_serializer {
     public static write(buffer: SerializerBase, value: BackgroundEffectOptions): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForRadius  = value.radius
-        valueSerializer.writeNumber(valueHolderForRadius)
+        valueSerializer.writeFloat64(valueHolderForRadius)
         const valueHolderForSaturation  = value.saturation
         if (valueHolderForSaturation !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForSaturationTmpValue  = valueHolderForSaturation!
-            valueSerializer.writeNumber(valueHolderForSaturationTmpValue)
+            valueSerializer.writeFloat64(valueHolderForSaturationTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -14058,7 +14058,7 @@ export class BackgroundEffectOptions_serializer {
         if (valueHolderForBrightness !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBrightnessTmpValue  = valueHolderForBrightness!
-            valueSerializer.writeNumber(valueHolderForBrightnessTmpValue)
+            valueSerializer.writeFloat64(valueHolderForBrightnessTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -14137,19 +14137,19 @@ export class BackgroundEffectOptions_serializer {
     }
     public static read(buffer: DeserializerBase): BackgroundEffectOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const radiusTmpResult : number = (valueDeserializer.readNumber() as number)
+        const radiusTmpResult : double = valueDeserializer.readFloat64()
         const saturationTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let saturationTmpBuf : number | undefined = undefined
+        let saturationTmpBuf : double | undefined = undefined
         if ((saturationTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            saturationTmpBuf = (valueDeserializer.readNumber() as number)
+            saturationTmpBuf = valueDeserializer.readFloat64()
         }
-        const saturationTmpResult : number | undefined = saturationTmpBuf
+        const saturationTmpResult : double | undefined = saturationTmpBuf
         const brightnessTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let brightnessTmpBuf : number | undefined = undefined
+        let brightnessTmpBuf : double | undefined = undefined
         if ((brightnessTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            brightnessTmpBuf = (valueDeserializer.readNumber() as number)
+            brightnessTmpBuf = valueDeserializer.readFloat64()
         }
-        const brightnessTmpResult : number | undefined = brightnessTmpBuf
+        const brightnessTmpResult : double | undefined = brightnessTmpBuf
         const colorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let colorTmpBuf : ResourceColor | undefined = undefined
         if ((colorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -14730,7 +14730,7 @@ export class ForegroundBlurStyleOptions_serializer {
         if (valueHolderForScale !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForScaleTmpValue  = valueHolderForScale!
-            valueSerializer.writeNumber(valueHolderForScaleTmpValue)
+            valueSerializer.writeFloat64(valueHolderForScaleTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -14758,11 +14758,11 @@ export class ForegroundBlurStyleOptions_serializer {
         }
         const adaptiveColorTmpResult : AdaptiveColor | undefined = adaptiveColorTmpBuf
         const scaleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let scaleTmpBuf : number | undefined = undefined
+        let scaleTmpBuf : double | undefined = undefined
         if ((scaleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            scaleTmpBuf = (valueDeserializer.readNumber() as number)
+            scaleTmpBuf = valueDeserializer.readFloat64()
         }
-        const scaleTmpResult : number | undefined = scaleTmpBuf
+        const scaleTmpResult : double | undefined = scaleTmpBuf
         const blurOptionsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let blurOptionsTmpBuf : BlurOptions | undefined = undefined
         if ((blurOptionsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -14802,7 +14802,7 @@ export class KeyframeAnimateParam_serializer {
         if (valueHolderForDelay !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForDelayTmpValue  = valueHolderForDelay!
-            valueSerializer.writeNumber(valueHolderForDelayTmpValue)
+            valueSerializer.writeInt32(valueHolderForDelayTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -14810,7 +14810,7 @@ export class KeyframeAnimateParam_serializer {
         if (valueHolderForIterations !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForIterationsTmpValue  = valueHolderForIterations!
-            valueSerializer.writeNumber(valueHolderForIterationsTmpValue)
+            valueSerializer.writeInt32(valueHolderForIterationsTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -14834,17 +14834,17 @@ export class KeyframeAnimateParam_serializer {
     public static read(buffer: DeserializerBase): KeyframeAnimateParam {
         let valueDeserializer : DeserializerBase = buffer
         const delayTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let delayTmpBuf : number | undefined = undefined
+        let delayTmpBuf : int32 | undefined = undefined
         if ((delayTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            delayTmpBuf = (valueDeserializer.readNumber() as number)
+            delayTmpBuf = valueDeserializer.readInt32()
         }
-        const delayTmpResult : number | undefined = delayTmpBuf
+        const delayTmpResult : int32 | undefined = delayTmpBuf
         const iterationsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let iterationsTmpBuf : number | undefined = undefined
+        let iterationsTmpBuf : int32 | undefined = undefined
         if ((iterationsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            iterationsTmpBuf = (valueDeserializer.readNumber() as number)
+            iterationsTmpBuf = valueDeserializer.readInt32()
         }
-        const iterationsTmpResult : number | undefined = iterationsTmpBuf
+        const iterationsTmpResult : int32 | undefined = iterationsTmpBuf
         const onFinishTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let onFinishTmpBuf : (() => void) | undefined = undefined
         if ((onFinishTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -15326,10 +15326,10 @@ export class ShadowOptions_serializer {
     public static write(buffer: SerializerBase, value: ShadowOptions): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForRadius  = value.radius
-        if (valueHolderForRadius instanceof number) {
+        if (valueHolderForRadius instanceof double) {
             valueSerializer.writeInt8((0).toByte())
-            const valueHolderForRadiusForIdx0  = valueHolderForRadius as number
-            valueSerializer.writeNumber(valueHolderForRadiusForIdx0)
+            const valueHolderForRadiusForIdx0  = valueHolderForRadius as double
+            valueSerializer.writeFloat64(valueHolderForRadiusForIdx0)
         } else if (valueHolderForRadius instanceof Resource) {
             valueSerializer.writeInt8((1).toByte())
             const valueHolderForRadiusForIdx1  = valueHolderForRadius as Resource
@@ -15371,10 +15371,10 @@ export class ShadowOptions_serializer {
         if (valueHolderForOffsetX !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForOffsetXTmpValue  = valueHolderForOffsetX!
-            if (valueHolderForOffsetXTmpValue instanceof number) {
+            if (valueHolderForOffsetXTmpValue instanceof double) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForOffsetXTmpValueForIdx0  = valueHolderForOffsetXTmpValue as number
-                valueSerializer.writeNumber(valueHolderForOffsetXTmpValueForIdx0)
+                const valueHolderForOffsetXTmpValueForIdx0  = valueHolderForOffsetXTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForOffsetXTmpValueForIdx0)
             } else if (valueHolderForOffsetXTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForOffsetXTmpValueForIdx1  = valueHolderForOffsetXTmpValue as Resource
@@ -15387,10 +15387,10 @@ export class ShadowOptions_serializer {
         if (valueHolderForOffsetY !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForOffsetYTmpValue  = valueHolderForOffsetY!
-            if (valueHolderForOffsetYTmpValue instanceof number) {
+            if (valueHolderForOffsetYTmpValue instanceof double) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForOffsetYTmpValueForIdx0  = valueHolderForOffsetYTmpValue as number
-                valueSerializer.writeNumber(valueHolderForOffsetYTmpValueForIdx0)
+                const valueHolderForOffsetYTmpValueForIdx0  = valueHolderForOffsetYTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForOffsetYTmpValueForIdx0)
             } else if (valueHolderForOffsetYTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForOffsetYTmpValueForIdx1  = valueHolderForOffsetYTmpValue as Resource
@@ -15411,15 +15411,15 @@ export class ShadowOptions_serializer {
     public static read(buffer: DeserializerBase): ShadowOptions {
         let valueDeserializer : DeserializerBase = buffer
         const radiusTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
-        let radiusTmpBuf : number | Resource | undefined
+        let radiusTmpBuf : double | Resource | undefined
         if (radiusTmpBufUnionSelector == (0).toChar()) {
-            radiusTmpBuf = (valueDeserializer.readNumber() as number)
+            radiusTmpBuf = valueDeserializer.readFloat64()
         } else if (radiusTmpBufUnionSelector == (1).toChar()) {
             radiusTmpBuf = Resource_serializer.read(valueDeserializer)
         } else {
             throw new Error("One of the branches for radiusTmpBuf has to be chosen through deserialisation.")
         }
-        const radiusTmpResult : number | Resource = (radiusTmpBuf as number | Resource)
+        const radiusTmpResult : double | Resource = (radiusTmpBuf as double | Resource)
         const typeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let typeTmpBuf : ShadowType | undefined = undefined
         if ((typeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -15446,35 +15446,35 @@ export class ShadowOptions_serializer {
         }
         const colorTmpResult : Color | string | Resource | ColoringStrategy | undefined = colorTmpBuf
         const offsetXTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let offsetXTmpBuf : number | Resource | undefined = undefined
+        let offsetXTmpBuf : double | Resource | undefined = undefined
         if ((offsetXTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const offsetXTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let offsetXTmpBuf_ : number | Resource | undefined
+            let offsetXTmpBuf_ : double | Resource | undefined
             if (offsetXTmpBuf_UnionSelector == (0).toChar()) {
-                offsetXTmpBuf_ = (valueDeserializer.readNumber() as number)
+                offsetXTmpBuf_ = valueDeserializer.readFloat64()
             } else if (offsetXTmpBuf_UnionSelector == (1).toChar()) {
                 offsetXTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for offsetXTmpBuf_ has to be chosen through deserialisation.")
             }
-            offsetXTmpBuf = (offsetXTmpBuf_ as number | Resource)
+            offsetXTmpBuf = (offsetXTmpBuf_ as double | Resource)
         }
-        const offsetXTmpResult : number | Resource | undefined = offsetXTmpBuf
+        const offsetXTmpResult : double | Resource | undefined = offsetXTmpBuf
         const offsetYTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let offsetYTmpBuf : number | Resource | undefined = undefined
+        let offsetYTmpBuf : double | Resource | undefined = undefined
         if ((offsetYTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const offsetYTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let offsetYTmpBuf_ : number | Resource | undefined
+            let offsetYTmpBuf_ : double | Resource | undefined
             if (offsetYTmpBuf_UnionSelector == (0).toChar()) {
-                offsetYTmpBuf_ = (valueDeserializer.readNumber() as number)
+                offsetYTmpBuf_ = valueDeserializer.readFloat64()
             } else if (offsetYTmpBuf_UnionSelector == (1).toChar()) {
                 offsetYTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for offsetYTmpBuf_ has to be chosen through deserialisation.")
             }
-            offsetYTmpBuf = (offsetYTmpBuf_ as number | Resource)
+            offsetYTmpBuf = (offsetYTmpBuf_ as double | Resource)
         }
-        const offsetYTmpResult : number | Resource | undefined = offsetYTmpBuf
+        const offsetYTmpResult : double | Resource | undefined = offsetYTmpBuf
         const fillTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let fillTmpBuf : boolean | undefined = undefined
         if ((fillTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -15492,7 +15492,7 @@ export class sharedTransitionOptions_serializer {
         if (valueHolderForDuration !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForDurationTmpValue  = valueHolderForDuration!
-            valueSerializer.writeNumber(valueHolderForDurationTmpValue)
+            valueSerializer.writeInt32(valueHolderForDurationTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -15520,7 +15520,7 @@ export class sharedTransitionOptions_serializer {
         if (valueHolderForDelay !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForDelayTmpValue  = valueHolderForDelay!
-            valueSerializer.writeNumber(valueHolderForDelayTmpValue)
+            valueSerializer.writeInt32(valueHolderForDelayTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -15536,7 +15536,7 @@ export class sharedTransitionOptions_serializer {
         if (valueHolderForZIndex !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForZIndexTmpValue  = valueHolderForZIndex!
-            valueSerializer.writeNumber(valueHolderForZIndexTmpValue)
+            valueSerializer.writeInt32(valueHolderForZIndexTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -15552,11 +15552,11 @@ export class sharedTransitionOptions_serializer {
     public static read(buffer: DeserializerBase): sharedTransitionOptions {
         let valueDeserializer : DeserializerBase = buffer
         const durationTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let durationTmpBuf : number | undefined = undefined
+        let durationTmpBuf : int32 | undefined = undefined
         if ((durationTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            durationTmpBuf = (valueDeserializer.readNumber() as number)
+            durationTmpBuf = valueDeserializer.readInt32()
         }
-        const durationTmpResult : number | undefined = durationTmpBuf
+        const durationTmpResult : int32 | undefined = durationTmpBuf
         const curveTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let curveTmpBuf : curves.Curve | string | curves.ICurve | undefined = undefined
         if ((curveTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -15575,11 +15575,11 @@ export class sharedTransitionOptions_serializer {
         }
         const curveTmpResult : curves.Curve | string | curves.ICurve | undefined = curveTmpBuf
         const delayTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let delayTmpBuf : number | undefined = undefined
+        let delayTmpBuf : int32 | undefined = undefined
         if ((delayTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            delayTmpBuf = (valueDeserializer.readNumber() as number)
+            delayTmpBuf = valueDeserializer.readInt32()
         }
-        const delayTmpResult : number | undefined = delayTmpBuf
+        const delayTmpResult : int32 | undefined = delayTmpBuf
         const motionPathTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let motionPathTmpBuf : MotionPathOptions | undefined = undefined
         if ((motionPathTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -15587,11 +15587,11 @@ export class sharedTransitionOptions_serializer {
         }
         const motionPathTmpResult : MotionPathOptions | undefined = motionPathTmpBuf
         const zIndexTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let zIndexTmpBuf : number | undefined = undefined
+        let zIndexTmpBuf : int32 | undefined = undefined
         if ((zIndexTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            zIndexTmpBuf = (valueDeserializer.readNumber() as number)
+            zIndexTmpBuf = valueDeserializer.readInt32()
         }
-        const zIndexTmpResult : number | undefined = zIndexTmpBuf
+        const zIndexTmpResult : int32 | undefined = zIndexTmpBuf
         const typeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let typeTmpBuf : SharedTransitionEffectType | undefined = undefined
         if ((typeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -16257,7 +16257,7 @@ export class RadialGradientOptions_serializer {
         const valueHolderForColors  = value.colors
         valueSerializer.writeInt32((valueHolderForColors.length).toInt())
         for (let valueHolderForColorsCounterI = 0; valueHolderForColorsCounterI < valueHolderForColors.length; valueHolderForColorsCounterI++) {
-            const valueHolderForColorsTmpElement : [ ResourceColor, number ] = valueHolderForColors[valueHolderForColorsCounterI]
+            const valueHolderForColorsTmpElement : [ ResourceColor, double ] = valueHolderForColors[valueHolderForColorsCounterI]
             const valueHolderForColorsTmpElement_0  = valueHolderForColorsTmpElement[0]
             if (valueHolderForColorsTmpElement_0 instanceof Color) {
                 valueSerializer.writeInt8((0).toByte())
@@ -16277,7 +16277,7 @@ export class RadialGradientOptions_serializer {
                 Resource_serializer.write(valueSerializer, valueHolderForColorsTmpElement_0ForIdx3)
             }
             const valueHolderForColorsTmpElement_1  = valueHolderForColorsTmpElement[1]
-            valueSerializer.writeNumber(valueHolderForColorsTmpElement_1)
+            valueSerializer.writeFloat64(valueHolderForColorsTmpElement_1)
         }
         const valueHolderForRepeating  = value.repeating
         if (valueHolderForRepeating !== undefined) {
@@ -16328,7 +16328,7 @@ export class RadialGradientOptions_serializer {
         }
         const radiusTmpResult : Length = (radiusTmpBuf as string | number | Resource)
         const colorsTmpBufLength : int32 = valueDeserializer.readInt32()
-        let colorsTmpBuf : Array<[ ResourceColor, number ]> = new Array<[ ResourceColor, number ]>(colorsTmpBufLength)
+        let colorsTmpBuf : Array<[ ResourceColor, double ]> = new Array<[ ResourceColor, double ]>(colorsTmpBufLength)
         for (let colorsTmpBufBufCounterI = 0; colorsTmpBufBufCounterI < colorsTmpBufLength; colorsTmpBufBufCounterI++) {
             const colorsTmpBufTempBufValue0TempBufUnionSelector : int32 = valueDeserializer.readInt8()
             let colorsTmpBufTempBufValue0TempBuf : Color | number | string | Resource | undefined
@@ -16344,10 +16344,10 @@ export class RadialGradientOptions_serializer {
                 throw new Error("One of the branches for colorsTmpBufTempBufValue0TempBuf has to be chosen through deserialisation.")
             }
             const colorsTmpBufTempBufValue0 : ResourceColor = (colorsTmpBufTempBufValue0TempBuf as Color | number | string | Resource)
-            const colorsTmpBufTempBufValue1 : number = (valueDeserializer.readNumber() as number)
-            colorsTmpBuf[colorsTmpBufBufCounterI] = ([colorsTmpBufTempBufValue0, colorsTmpBufTempBufValue1] as [ ResourceColor, number ])
+            const colorsTmpBufTempBufValue1 : double = valueDeserializer.readFloat64()
+            colorsTmpBuf[colorsTmpBufBufCounterI] = ([colorsTmpBufTempBufValue0, colorsTmpBufTempBufValue1] as [ ResourceColor, double ])
         }
-        const colorsTmpResult : Array<[ ResourceColor, number ]> = colorsTmpBuf
+        const colorsTmpResult : Array<[ ResourceColor, double ]> = colorsTmpBuf
         const repeatingTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let repeatingTmpBuf : boolean | undefined = undefined
         if ((repeatingTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -16552,10 +16552,10 @@ export class SweepGradientOptions_serializer {
         if (valueHolderForStart !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForStartTmpValue  = valueHolderForStart!
-            if (valueHolderForStartTmpValue instanceof number) {
+            if (valueHolderForStartTmpValue instanceof double) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForStartTmpValueForIdx0  = valueHolderForStartTmpValue as number
-                valueSerializer.writeNumber(valueHolderForStartTmpValueForIdx0)
+                const valueHolderForStartTmpValueForIdx0  = valueHolderForStartTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForStartTmpValueForIdx0)
             } else if (valueHolderForStartTmpValue instanceof string) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForStartTmpValueForIdx1  = valueHolderForStartTmpValue as string
@@ -16568,10 +16568,10 @@ export class SweepGradientOptions_serializer {
         if (valueHolderForEnd !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForEndTmpValue  = valueHolderForEnd!
-            if (valueHolderForEndTmpValue instanceof number) {
+            if (valueHolderForEndTmpValue instanceof double) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForEndTmpValueForIdx0  = valueHolderForEndTmpValue as number
-                valueSerializer.writeNumber(valueHolderForEndTmpValueForIdx0)
+                const valueHolderForEndTmpValueForIdx0  = valueHolderForEndTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForEndTmpValueForIdx0)
             } else if (valueHolderForEndTmpValue instanceof string) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForEndTmpValueForIdx1  = valueHolderForEndTmpValue as string
@@ -16584,10 +16584,10 @@ export class SweepGradientOptions_serializer {
         if (valueHolderForRotation !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForRotationTmpValue  = valueHolderForRotation!
-            if (valueHolderForRotationTmpValue instanceof number) {
+            if (valueHolderForRotationTmpValue instanceof double) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForRotationTmpValueForIdx0  = valueHolderForRotationTmpValue as number
-                valueSerializer.writeNumber(valueHolderForRotationTmpValueForIdx0)
+                const valueHolderForRotationTmpValueForIdx0  = valueHolderForRotationTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForRotationTmpValueForIdx0)
             } else if (valueHolderForRotationTmpValue instanceof string) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForRotationTmpValueForIdx1  = valueHolderForRotationTmpValue as string
@@ -16599,7 +16599,7 @@ export class SweepGradientOptions_serializer {
         const valueHolderForColors  = value.colors
         valueSerializer.writeInt32((valueHolderForColors.length).toInt())
         for (let valueHolderForColorsCounterI = 0; valueHolderForColorsCounterI < valueHolderForColors.length; valueHolderForColorsCounterI++) {
-            const valueHolderForColorsTmpElement : [ ResourceColor, number ] = valueHolderForColors[valueHolderForColorsCounterI]
+            const valueHolderForColorsTmpElement : [ ResourceColor, double ] = valueHolderForColors[valueHolderForColorsCounterI]
             const valueHolderForColorsTmpElement_0  = valueHolderForColorsTmpElement[0]
             if (valueHolderForColorsTmpElement_0 instanceof Color) {
                 valueSerializer.writeInt8((0).toByte())
@@ -16619,7 +16619,7 @@ export class SweepGradientOptions_serializer {
                 Resource_serializer.write(valueSerializer, valueHolderForColorsTmpElement_0ForIdx3)
             }
             const valueHolderForColorsTmpElement_1  = valueHolderForColorsTmpElement[1]
-            valueSerializer.writeNumber(valueHolderForColorsTmpElement_1)
+            valueSerializer.writeFloat64(valueHolderForColorsTmpElement_1)
         }
         const valueHolderForRepeating  = value.repeating
         if (valueHolderForRepeating !== undefined) {
@@ -16658,52 +16658,52 @@ export class SweepGradientOptions_serializer {
         const centerTmpBufValue1 : Length = (centerTmpBufValue1TempBuf as string | number | Resource)
         const centerTmpResult : [ Length, Length ] = ([centerTmpBufValue0, centerTmpBufValue1] as [ Length, Length ])
         const startTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let startTmpBuf : number | string | undefined = undefined
+        let startTmpBuf : double | string | undefined = undefined
         if ((startTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const startTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let startTmpBuf_ : number | string | undefined
+            let startTmpBuf_ : double | string | undefined
             if (startTmpBuf_UnionSelector == (0).toChar()) {
-                startTmpBuf_ = (valueDeserializer.readNumber() as number)
+                startTmpBuf_ = valueDeserializer.readFloat64()
             } else if (startTmpBuf_UnionSelector == (1).toChar()) {
                 startTmpBuf_ = (valueDeserializer.readString() as string)
             } else {
                 throw new Error("One of the branches for startTmpBuf_ has to be chosen through deserialisation.")
             }
-            startTmpBuf = (startTmpBuf_ as number | string)
+            startTmpBuf = (startTmpBuf_ as double | string)
         }
-        const startTmpResult : number | string | undefined = startTmpBuf
+        const startTmpResult : double | string | undefined = startTmpBuf
         const endTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let endTmpBuf : number | string | undefined = undefined
+        let endTmpBuf : double | string | undefined = undefined
         if ((endTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const endTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let endTmpBuf_ : number | string | undefined
+            let endTmpBuf_ : double | string | undefined
             if (endTmpBuf_UnionSelector == (0).toChar()) {
-                endTmpBuf_ = (valueDeserializer.readNumber() as number)
+                endTmpBuf_ = valueDeserializer.readFloat64()
             } else if (endTmpBuf_UnionSelector == (1).toChar()) {
                 endTmpBuf_ = (valueDeserializer.readString() as string)
             } else {
                 throw new Error("One of the branches for endTmpBuf_ has to be chosen through deserialisation.")
             }
-            endTmpBuf = (endTmpBuf_ as number | string)
+            endTmpBuf = (endTmpBuf_ as double | string)
         }
-        const endTmpResult : number | string | undefined = endTmpBuf
+        const endTmpResult : double | string | undefined = endTmpBuf
         const rotationTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let rotationTmpBuf : number | string | undefined = undefined
+        let rotationTmpBuf : double | string | undefined = undefined
         if ((rotationTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const rotationTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let rotationTmpBuf_ : number | string | undefined
+            let rotationTmpBuf_ : double | string | undefined
             if (rotationTmpBuf_UnionSelector == (0).toChar()) {
-                rotationTmpBuf_ = (valueDeserializer.readNumber() as number)
+                rotationTmpBuf_ = valueDeserializer.readFloat64()
             } else if (rotationTmpBuf_UnionSelector == (1).toChar()) {
                 rotationTmpBuf_ = (valueDeserializer.readString() as string)
             } else {
                 throw new Error("One of the branches for rotationTmpBuf_ has to be chosen through deserialisation.")
             }
-            rotationTmpBuf = (rotationTmpBuf_ as number | string)
+            rotationTmpBuf = (rotationTmpBuf_ as double | string)
         }
         const rotationTmpResult : number | string | undefined = rotationTmpBuf
         const colorsTmpBufLength : int32 = valueDeserializer.readInt32()
-        let colorsTmpBuf : Array<[ ResourceColor, number ]> = new Array<[ ResourceColor, number ]>(colorsTmpBufLength)
+        let colorsTmpBuf : Array<[ ResourceColor, double ]> = new Array<[ ResourceColor, double ]>(colorsTmpBufLength)
         for (let colorsTmpBufBufCounterI = 0; colorsTmpBufBufCounterI < colorsTmpBufLength; colorsTmpBufBufCounterI++) {
             const colorsTmpBufTempBufValue0TempBufUnionSelector : int32 = valueDeserializer.readInt8()
             let colorsTmpBufTempBufValue0TempBuf : Color | number | string | Resource | undefined
@@ -16719,10 +16719,10 @@ export class SweepGradientOptions_serializer {
                 throw new Error("One of the branches for colorsTmpBufTempBufValue0TempBuf has to be chosen through deserialisation.")
             }
             const colorsTmpBufTempBufValue0 : ResourceColor = (colorsTmpBufTempBufValue0TempBuf as Color | number | string | Resource)
-            const colorsTmpBufTempBufValue1 : number = (valueDeserializer.readNumber() as number)
-            colorsTmpBuf[colorsTmpBufBufCounterI] = ([colorsTmpBufTempBufValue0, colorsTmpBufTempBufValue1] as [ ResourceColor, number ])
+            const colorsTmpBufTempBufValue1 : double = valueDeserializer.readFloat64()
+            colorsTmpBuf[colorsTmpBufBufCounterI] = ([colorsTmpBufTempBufValue0, colorsTmpBufTempBufValue1] as [ ResourceColor, double ])
         }
-        const colorsTmpResult : Array<[ ResourceColor, number ]> = colorsTmpBuf
+        const colorsTmpResult : Array<[ ResourceColor, double ]> = colorsTmpBuf
         const repeatingTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let repeatingTmpBuf : boolean | undefined = undefined
         if ((repeatingTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -20711,7 +20711,7 @@ export class SheetOptions_serializer {
         if (valueHolderForEffectEdge !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForEffectEdgeTmpValue  = valueHolderForEffectEdge!
-            valueSerializer.writeNumber(valueHolderForEffectEdgeTmpValue)
+            valueSerializer.writeInt32(valueHolderForEffectEdgeTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -21317,23 +21317,23 @@ export class SheetOptions_serializer {
         }
         const shadowTmpResult : ShadowOptions | ShadowStyle | undefined = shadowTmpBuf
         const onHeightDidChangeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let onHeightDidChangeTmpBuf : ((value0: number) => void) | undefined = undefined
+        let onHeightDidChangeTmpBuf : ((value0: int32) => void) | undefined = undefined
         if ((onHeightDidChangeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const onHeightDidChangeTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onHeightDidChangeTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onHeightDidChangeTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onHeightDidChangeTmpBuf = (value0: number):void => {
+            onHeightDidChangeTmpBuf = (value0: int32):void => {
                 const onHeightDidChangeTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onHeightDidChangeTmpBuf_BufArgsSerializer.writeInt32(onHeightDidChangeTmpBuf_BufResource.resourceId);
                 onHeightDidChangeTmpBuf_BufArgsSerializer.writePointer(onHeightDidChangeTmpBuf_BufCall);
                 onHeightDidChangeTmpBuf_BufArgsSerializer.writePointer(onHeightDidChangeTmpBuf_BufCallSync);
-                onHeightDidChangeTmpBuf_BufArgsSerializer.writeNumber(value0);
-                InteropNativeModule._CallCallbackSync(10, 36519084, onHeightDidChangeTmpBuf_BufArgsSerializer.asBuffer(), onHeightDidChangeTmpBuf_BufArgsSerializer.length());
+                onHeightDidChangeTmpBuf_BufArgsSerializer.writeInt32(value0);
+                InteropNativeModule._CallCallbackSync(10, 1148910599, onHeightDidChangeTmpBuf_BufArgsSerializer.asBuffer(), onHeightDidChangeTmpBuf_BufArgsSerializer.length());
                 onHeightDidChangeTmpBuf_BufArgsSerializer.release();
                 return;
             }
         }
-        const onHeightDidChangeTmpResult : ((value0: number) => void) | undefined = onHeightDidChangeTmpBuf
+        const onHeightDidChangeTmpResult : ((value0: int32) => void) | undefined = onHeightDidChangeTmpBuf
         const modeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let modeTmpBuf : SheetMode | undefined = undefined
         if ((modeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -21347,41 +21347,41 @@ export class SheetOptions_serializer {
         }
         const scrollSizeModeTmpResult : ScrollSizeMode | undefined = scrollSizeModeTmpBuf
         const onDetentsDidChangeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let onDetentsDidChangeTmpBuf : ((value0: number) => void) | undefined = undefined
+        let onDetentsDidChangeTmpBuf : ((value0: int32) => void) | undefined = undefined
         if ((onDetentsDidChangeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const onDetentsDidChangeTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onDetentsDidChangeTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onDetentsDidChangeTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onDetentsDidChangeTmpBuf = (value0: number):void => {
+            onDetentsDidChangeTmpBuf = (value0: int32):void => {
                 const onDetentsDidChangeTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onDetentsDidChangeTmpBuf_BufArgsSerializer.writeInt32(onDetentsDidChangeTmpBuf_BufResource.resourceId);
                 onDetentsDidChangeTmpBuf_BufArgsSerializer.writePointer(onDetentsDidChangeTmpBuf_BufCall);
                 onDetentsDidChangeTmpBuf_BufArgsSerializer.writePointer(onDetentsDidChangeTmpBuf_BufCallSync);
-                onDetentsDidChangeTmpBuf_BufArgsSerializer.writeNumber(value0);
-                InteropNativeModule._CallCallbackSync(10, 36519084, onDetentsDidChangeTmpBuf_BufArgsSerializer.asBuffer(), onDetentsDidChangeTmpBuf_BufArgsSerializer.length());
+                onDetentsDidChangeTmpBuf_BufArgsSerializer.writeInt32(value0);
+                InteropNativeModule._CallCallbackSync(10, 1148910599, onDetentsDidChangeTmpBuf_BufArgsSerializer.asBuffer(), onDetentsDidChangeTmpBuf_BufArgsSerializer.length());
                 onDetentsDidChangeTmpBuf_BufArgsSerializer.release();
                 return;
             }
         }
-        const onDetentsDidChangeTmpResult : ((value0: number) => void) | undefined = onDetentsDidChangeTmpBuf
+        const onDetentsDidChangeTmpResult : ((value0: int32) => void) | undefined = onDetentsDidChangeTmpBuf
         const onWidthDidChangeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let onWidthDidChangeTmpBuf : ((value0: number) => void) | undefined = undefined
+        let onWidthDidChangeTmpBuf : ((value0: int32) => void) | undefined = undefined
         if ((onWidthDidChangeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const onWidthDidChangeTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onWidthDidChangeTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onWidthDidChangeTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onWidthDidChangeTmpBuf = (value0: number):void => {
+            onWidthDidChangeTmpBuf = (value0: int32):void => {
                 const onWidthDidChangeTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onWidthDidChangeTmpBuf_BufArgsSerializer.writeInt32(onWidthDidChangeTmpBuf_BufResource.resourceId);
                 onWidthDidChangeTmpBuf_BufArgsSerializer.writePointer(onWidthDidChangeTmpBuf_BufCall);
                 onWidthDidChangeTmpBuf_BufArgsSerializer.writePointer(onWidthDidChangeTmpBuf_BufCallSync);
-                onWidthDidChangeTmpBuf_BufArgsSerializer.writeNumber(value0);
-                InteropNativeModule._CallCallbackSync(10, 36519084, onWidthDidChangeTmpBuf_BufArgsSerializer.asBuffer(), onWidthDidChangeTmpBuf_BufArgsSerializer.length());
+                onWidthDidChangeTmpBuf_BufArgsSerializer.writeInt32(value0);
+                InteropNativeModule._CallCallbackSync(10, 1148910599, onWidthDidChangeTmpBuf_BufArgsSerializer.asBuffer(), onWidthDidChangeTmpBuf_BufArgsSerializer.length());
                 onWidthDidChangeTmpBuf_BufArgsSerializer.release();
                 return;
             }
         }
-        const onWidthDidChangeTmpResult : ((value0: number) => void) | undefined = onWidthDidChangeTmpBuf
+        const onWidthDidChangeTmpResult : ((value0: int32) => void) | undefined = onWidthDidChangeTmpBuf
         const onTypeDidChangeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let onTypeDidChangeTmpBuf : ((value0: SheetType) => void) | undefined = undefined
         if ((onTypeDidChangeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -21431,11 +21431,11 @@ export class SheetOptions_serializer {
         }
         const offsetTmpResult : Position | undefined = offsetTmpBuf
         const effectEdgeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let effectEdgeTmpBuf : number | undefined = undefined
+        let effectEdgeTmpBuf : int32 | undefined = undefined
         if ((effectEdgeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            effectEdgeTmpBuf = (valueDeserializer.readNumber() as number)
+            effectEdgeTmpBuf = valueDeserializer.readInt32()
         }
-        const effectEdgeTmpResult : number | undefined = effectEdgeTmpBuf
+        const effectEdgeTmpResult : int32 | undefined = effectEdgeTmpBuf
         const radiusTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let radiusTmpBuf : LengthMetrics | BorderRadiuses | LocalizedBorderRadiuses | undefined = undefined
         if ((radiusTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {

@@ -677,7 +677,7 @@ export abstract class BaseCustomComponent<T_Options> extends ExtendableComponent
         this.__commonStyles.push((instance: CommonMethod): void => instance.onBlur(value));
         return this
     }
-    tabIndex(value: number | undefined): this {
+    tabIndex(value: int32 | undefined): this {
         this.__commonStyles.push((instance: CommonMethod): void => instance.tabIndex(value));
         return this
     }

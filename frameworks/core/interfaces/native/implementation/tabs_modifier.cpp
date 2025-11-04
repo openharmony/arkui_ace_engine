@@ -28,21 +28,21 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-std::optional<int32_t> ProcessBindableIndex(FrameNode* frameNode, const Opt_Union_Number_Bindable& value)
+std::optional<int32_t> ProcessBindableIndex(FrameNode* frameNode, const Opt_Union_I32_Bindable& value)
 {
     std::optional<int32_t> result;
     Converter::VisitUnion(value,
-        [&result](const Ark_Number& src) {
+        [&result](const Ark_Int32& src) {
             result = Converter::OptConvert<int32_t>(src);
         },
-        [&result, frameNode](const Ark_Bindable_Number& src) {
+        [&result, frameNode](const Ark_Bindable_I32& src) {
             result = Converter::OptConvert<int32_t>(src.value);
             WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
             auto onEvent = [arkCallback = CallbackHelper(src.onChange), weakNode](const BaseEventInfo* info) {
                 const auto* tabsInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
                 CHECK_NULL_VOID(tabsInfo);
                 PipelineContext::SetCallBackNode(weakNode);
-                arkCallback.Invoke(Converter::ArkValue<Ark_Number>(tabsInfo->GetIndex()));
+                arkCallback.Invoke(Converter::ArkValue<Ark_Int32>(tabsInfo->GetIndex()));
             };
             TabsModelStatic::SetOnChangeEvent(frameNode, std::move(onEvent));
         },
@@ -250,11 +250,11 @@ void SetAnimationCurveImpl(Ark_NativePointer node,
     TabsModelStatic::SetAnimationCurve(frameNode, curve);
 }
 void SetAnimationDurationImpl(Ark_NativePointer node,
-                              const Opt_Number* value)
+                              const Opt_Int32* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<float>(value);
+    auto convValue = Converter::OptConvertPtr<int32_t>(value);
     if (!convValue) {
         TabsModelStatic::SetAnimationDuration(frameNode, -1);
         return;
@@ -277,7 +277,7 @@ void SetEdgeEffectImpl(Ark_NativePointer node,
     TabsModelStatic::SetEdgeEffect(frameNode, OHOS::Ace::NG::EnumToInt(edgeEffectOpt));
 }
 void SetOnChangeImpl(Ark_NativePointer node,
-                     const Opt_Callback_Number_Void* value)
+                     const Opt_Callback_I32_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -292,13 +292,13 @@ void SetOnChangeImpl(Ark_NativePointer node,
         if (tabsInfo) {
             indexInt = tabsInfo->GetIndex();
         }
-        auto index = Converter::ArkValue<Ark_Number>(indexInt);
+        auto index = Converter::ArkValue<Ark_Int32>(indexInt);
         arkCallback.Invoke(index);
     };
     TabsModelStatic::SetOnChange(frameNode, std::move(onChange));
 }
 void SetOnSelectedImpl(Ark_NativePointer node,
-                       const Opt_Callback_Number_Void* value)
+                       const Opt_Callback_I32_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -315,13 +315,13 @@ void SetOnSelectedImpl(Ark_NativePointer node,
             return;
         }
         PipelineContext::SetCallBackNode(node);
-        auto index = Converter::ArkValue<Ark_Number>(tabsInfo->GetIndex());
+        auto index = Converter::ArkValue<Ark_Int32>(tabsInfo->GetIndex());
         arkCallback.Invoke(index);
     };
     TabsModelStatic::SetOnSelected(frameNode, std::move(onSelected));
 }
 void SetOnTabBarClickImpl(Ark_NativePointer node,
-                          const Opt_Callback_Number_Void* value)
+                          const Opt_Callback_I32_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -336,13 +336,13 @@ void SetOnTabBarClickImpl(Ark_NativePointer node,
         if (tabsInfo) {
             indexInt = tabsInfo->GetIndex();
         }
-        auto index = Converter::ArkValue<Ark_Number>(indexInt);
+        auto index = Converter::ArkValue<Ark_Int32>(indexInt);
         arkCallback.Invoke(index);
     };
     TabsModelStatic::SetOnTabBarClick(frameNode, std::move(onTabBarClick));
 }
 void SetOnUnselectedImpl(Ark_NativePointer node,
-                         const Opt_Callback_Number_Void* value)
+                         const Opt_Callback_I32_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -359,7 +359,7 @@ void SetOnUnselectedImpl(Ark_NativePointer node,
             return;
         }
         PipelineContext::SetCallBackNode(node);
-        auto index = Converter::ArkValue<Ark_Number>(tabsInfo->GetIndex());
+        auto index = Converter::ArkValue<Ark_Int32>(tabsInfo->GetIndex());
         arkCallback.Invoke(index);
     };
     TabsModelStatic::SetOnUnselected(frameNode, std::move(onUnselected));
@@ -376,12 +376,12 @@ void SetOnAnimationStartImpl(Ark_NativePointer node,
     }
     auto onAnimationStart = [arkCallback = CallbackHelper(*optValue)](
         int32_t index, int32_t targetIndex, const AnimationCallbackInfo& info) {
-        auto arkIndex = Converter::ArkValue<Ark_Number>(index);
-        auto arkTargetIndex = Converter::ArkValue<Ark_Number>(targetIndex);
+        auto arkIndex = Converter::ArkValue<Ark_Int32>(index);
+        auto arkTargetIndex = Converter::ArkValue<Ark_Int32>(targetIndex);
         Ark_TabsAnimationEvent tabsAnimationEvent;
-        tabsAnimationEvent.currentOffset = Converter::ArkValue<Ark_Number>(info.currentOffset.value_or(0.00f));
-        tabsAnimationEvent.targetOffset = Converter::ArkValue<Ark_Number>(info.targetOffset.value_or(0.00f));
-        tabsAnimationEvent.velocity = Converter::ArkValue<Ark_Number>(info.velocity.value_or(0.00f));
+        tabsAnimationEvent.currentOffset = Converter::ArkValue<Ark_Float64>(info.currentOffset.value_or(0.00f));
+        tabsAnimationEvent.targetOffset = Converter::ArkValue<Ark_Float64>(info.targetOffset.value_or(0.00f));
+        tabsAnimationEvent.velocity = Converter::ArkValue<Ark_Float64>(info.velocity.value_or(0.00f));
         arkCallback.Invoke(arkIndex, arkTargetIndex, tabsAnimationEvent);
     };
     TabsModelStatic::SetOnAnimationStart(frameNode, std::move(onAnimationStart));
@@ -397,11 +397,11 @@ void SetOnAnimationEndImpl(Ark_NativePointer node,
         return;
     }
     auto onAnimationEnd = [arkCallback = CallbackHelper(*optValue)](int32_t index, const AnimationCallbackInfo& info) {
-        auto arkIndex = Converter::ArkValue<Ark_Number>(index);
+        auto arkIndex = Converter::ArkValue<Ark_Int32>(index);
         Ark_TabsAnimationEvent tabsAnimationEvent;
-        tabsAnimationEvent.currentOffset = Converter::ArkValue<Ark_Number>(info.currentOffset.value_or(0.00f));
-        tabsAnimationEvent.targetOffset = Converter::ArkValue<Ark_Number>(info.targetOffset.value_or(0.00f));
-        tabsAnimationEvent.velocity = Converter::ArkValue<Ark_Number>(info.velocity.value_or(0.00f));
+        tabsAnimationEvent.currentOffset = Converter::ArkValue<Ark_Float64>(info.currentOffset.value_or(0.00f));
+        tabsAnimationEvent.targetOffset = Converter::ArkValue<Ark_Float64>(info.targetOffset.value_or(0.00f));
+        tabsAnimationEvent.velocity = Converter::ArkValue<Ark_Float64>(info.velocity.value_or(0.00f));
         arkCallback.Invoke(arkIndex, tabsAnimationEvent);
     };
     TabsModelStatic::SetOnAnimationEnd(frameNode, std::move(onAnimationEnd));
@@ -417,11 +417,11 @@ void SetOnGestureSwipeImpl(Ark_NativePointer node,
         return;
     }
     auto onGestureSwipe = [arkCallback = CallbackHelper(*optValue)](int32_t index, const AnimationCallbackInfo& info) {
-        auto arkIndex = Converter::ArkValue<Ark_Number>(index);
+        auto arkIndex = Converter::ArkValue<Ark_Int32>(index);
         Ark_TabsAnimationEvent tabsAnimationEvent;
-        tabsAnimationEvent.currentOffset = Converter::ArkValue<Ark_Number>(info.currentOffset.value_or(0.00f));
-        tabsAnimationEvent.targetOffset = Converter::ArkValue<Ark_Number>(info.targetOffset.value_or(0.00f));
-        tabsAnimationEvent.velocity = Converter::ArkValue<Ark_Number>(info.velocity.value_or(0.00f));
+        tabsAnimationEvent.currentOffset = Converter::ArkValue<Ark_Float64>(info.currentOffset.value_or(0.00f));
+        tabsAnimationEvent.targetOffset = Converter::ArkValue<Ark_Float64>(info.targetOffset.value_or(0.00f));
+        tabsAnimationEvent.velocity = Converter::ArkValue<Ark_Float64>(info.velocity.value_or(0.00f));
         arkCallback.Invoke(arkIndex, tabsAnimationEvent);
     };
     TabsModelStatic::SetOnGestureSwipe(frameNode, std::move(onGestureSwipe));
@@ -509,8 +509,8 @@ void SetCustomContentTransitionImpl(Ark_NativePointer node,
         int32_t from, int32_t to) -> TabContentAnimatedTransition {
         peerImplPtr->SetFrom(from);
         peerImplPtr->SetTo(to);
-        Ark_Number arkFrom = Converter::ArkValue<Ark_Number>(from);
-        Ark_Number arkTo = Converter::ArkValue<Ark_Number>(to);
+        Ark_Int32 arkFrom = Converter::ArkValue<Ark_Int32>(from);
+        Ark_Int32 arkTo = Converter::ArkValue<Ark_Int32>(to);
         TabContentAnimatedTransition transitionInfo;
         transitionInfo =
             callback.InvokeWithOptConvertResult<TabContentAnimatedTransition, Opt_TabContentAnimatedTransition,
@@ -579,8 +579,8 @@ void SetOnContentWillChangeImpl(Ark_NativePointer node,
     }
     auto callback = [callback = CallbackHelper(*optValue)](
         int32_t currentIndex, int32_t comingIndex) -> bool {
-        Ark_Number arkCurrentIndex = Converter::ArkValue<Ark_Number>(currentIndex);
-        Ark_Number arkComingIndex = Converter::ArkValue<Ark_Number>(comingIndex);
+        Ark_Int32 arkCurrentIndex = Converter::ArkValue<Ark_Int32>(currentIndex);
+        Ark_Int32 arkComingIndex = Converter::ArkValue<Ark_Int32>(comingIndex);
         return callback.InvokeWithOptConvertResult<
             bool, Ark_Boolean, Callback_Boolean_Void>(arkCurrentIndex, arkComingIndex)
             .value_or(false);
@@ -639,7 +639,7 @@ void SetBarBackgroundBlurStyle1Impl(Ark_NativePointer node,
     TabsModelStatic::SetBarBackgroundBlurStyle(frameNode, option);
 }
 void SetCachedMaxCountImpl(Ark_NativePointer node,
-                           const Opt_Number* count,
+                           const Opt_Int32* count,
                            const Opt_TabsCacheMode* mode)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);

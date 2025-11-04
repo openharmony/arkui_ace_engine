@@ -1009,6 +1009,12 @@ InvertVariant Convert(const Ark_Number& value)
     return std::variant<float, InvertOption>(fDst);
 }
 template<>
+InvertVariant Convert(const Ark_Float64& value)
+{
+    float fDst = Converter::Convert<float>(value);
+    return std::variant<float, InvertOption>(fDst);
+}
+template<>
 InvertVariant Convert(const Ark_InvertOptions& value)
 {
     InvertOption invertOption = {
@@ -2395,7 +2401,7 @@ void SetCompositingFilterImpl(Ark_NativePointer node,
     ViewAbstractModelStatic::SetCompositingFilter(frameNode, ptrOpt.value());
 }
 void SetOpacityImpl(Ark_NativePointer node,
-                    const Opt_Union_Number_Resource* value)
+                    const Opt_Union_F64_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -3127,7 +3133,7 @@ void SetOnBlurImpl(Ark_NativePointer node,
     ViewAbstract::SetOnBlur(frameNode, std::move(onEvent));
 }
 void SetTabIndexImpl(Ark_NativePointer node,
-                     const Opt_Number* value)
+                     const Opt_Int32* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -3251,7 +3257,7 @@ void SetMotionBlurImpl(Ark_NativePointer node,
     }
 }
 void SetBrightnessImpl(Ark_NativePointer node,
-                       const Opt_Number* value)
+                       const Opt_Float64* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -3267,7 +3273,7 @@ void SetBrightnessImpl(Ark_NativePointer node,
     ViewAbstractModelStatic::SetBrightness(frameNode, convValue);
 }
 void SetContrastImpl(Ark_NativePointer node,
-                     const Opt_Number* value)
+                     const Opt_Float64* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -3283,7 +3289,7 @@ void SetContrastImpl(Ark_NativePointer node,
     ViewAbstractModelStatic::SetContrast(frameNode, convValue);
 }
 void SetGrayscaleImpl(Ark_NativePointer node,
-                      const Opt_Number* value)
+                      const Opt_Float64* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -3308,7 +3314,7 @@ void SetColorBlendImpl(Ark_NativePointer node,
     ViewAbstractModelStatic::SetColorBlend(frameNode, convValue);
 }
 void SetSaturateImpl(Ark_NativePointer node,
-                     const Opt_Number* value)
+                     const Opt_Float64* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -3323,7 +3329,7 @@ void SetSaturateImpl(Ark_NativePointer node,
     ViewAbstract::SetSaturate(frameNode, convValue.value());
 }
 void SetSepiaImpl(Ark_NativePointer node,
-                  const Opt_Number* value)
+                  const Opt_Float64* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -3332,7 +3338,7 @@ void SetSepiaImpl(Ark_NativePointer node,
     ViewAbstract::SetSepia(frameNode, convValue.value_or(0._vp));
 }
 void SetInvertImpl(Ark_NativePointer node,
-                   const Opt_Union_Number_InvertOptions* value)
+                   const Opt_Union_F64_InvertOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -3343,7 +3349,7 @@ void SetInvertImpl(Ark_NativePointer node,
     ViewAbstractModelStatic::SetInvert(frameNode, convValue);
 }
 void SetHueRotateImpl(Ark_NativePointer node,
-                      const Opt_Union_Number_String* value)
+                      const Opt_Union_F64_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -3351,7 +3357,7 @@ void SetHueRotateImpl(Ark_NativePointer node,
     auto convValue = std::optional<float>();
     if (optValue.has_value()) {
         Converter::VisitUnion(optValue.value(),
-            [&convValue](const Ark_Number& val) {
+            [&convValue](const Ark_Float64& val) {
                 convValue = Converter::Convert<float>(val);
             },
             [&convValue](const Ark_String& val) {
@@ -3451,7 +3457,7 @@ void SetRotateImpl(Ark_NativePointer node,
                     auto dim = StringUtils::StringToCalcDimension(degreeStr);
                     convValue->center->SetX(dim);
                 },
-                [](const Ark_Number& val) {}, []() {});
+                [](const Ark_Float64& val) {}, []() {});
         }
         auto yValue = Converter::GetOptPtr(&(value->value.value0.centerY));
         if (yValue.has_value()) {
@@ -3462,7 +3468,7 @@ void SetRotateImpl(Ark_NativePointer node,
                     auto dim = StringUtils::StringToCalcDimension(degreeStr);
                     convValue->center->SetY(dim);
                 },
-                [](const Ark_Number& val) {}, []() {});
+                [](const Ark_Float64& val) {}, []() {});
         }
         auto angleValue = value->value.value0.angle;
         Converter::VisitUnion(
@@ -3475,7 +3481,7 @@ void SetRotateImpl(Ark_NativePointer node,
                     convValue->vec5f[indA] = angle;
                 }
             },
-            [](const Ark_Number& val) {}, []() {});
+            [](const Ark_Float64& val) {}, []() {});
         ViewAbstractModelStatic::SetRotate(frameNode, convValue->vec5f);
         ViewAbstractModelStatic::SetPivot(frameNode, convValue->center);
     } else {
@@ -4308,7 +4314,7 @@ void SetRestoreIdImpl(Ark_NativePointer node,
     ViewAbstract::SetRestoreId(frameNode, *convValue);
 }
 void SetSphericalEffectImpl(Ark_NativePointer node,
-                            const Opt_Number* value)
+                            const Opt_Float64* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -4326,7 +4332,7 @@ void SetSphericalEffectImpl(Ark_NativePointer node,
     ViewAbstractModelStatic::SetSphericalEffect(frameNode, convValue);
 }
 void SetLightUpEffectImpl(Ark_NativePointer node,
-                          const Opt_Number* value)
+                          const Opt_Float64* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -4991,7 +4997,7 @@ void SetTransition1Impl(Ark_NativePointer node,
     }
 }
 void SetBlurImpl(Ark_NativePointer node,
-                 const Opt_Number* blurRadius,
+                 const Opt_Float64* blurRadius,
                  const Opt_BlurOptions* options,
                  const Opt_SystemAdaptiveOptions* sysOptions)
 {
@@ -5003,7 +5009,7 @@ void SetBlurImpl(Ark_NativePointer node,
     ViewAbstractModelStatic::SetFrontBlur(frameNode, blurRadiusOpt, optionsOpt, sysOptionsOpt);
 }
 void SetLinearGradientBlurImpl(Ark_NativePointer node,
-                               const Opt_Number* value,
+                               const Opt_Float64* value,
                                const Opt_LinearGradientBlurOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -5037,7 +5043,7 @@ void SetUseEffect1Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
 }
 void SetBackdropBlurImpl(Ark_NativePointer node,
-                         const Opt_Number* radius,
+                         const Opt_Float64* radius,
                          const Opt_BlurOptions* options,
                          const Opt_SystemAdaptiveOptions* sysOptions)
 {

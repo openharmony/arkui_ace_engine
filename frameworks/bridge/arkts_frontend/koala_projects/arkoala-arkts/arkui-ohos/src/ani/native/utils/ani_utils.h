@@ -83,6 +83,8 @@ public:
     // The return value means the parse result. True means success.
     // If the ref is undefined, it will return false.
     static bool GetOptionalDouble(ani_env* env, ani_ref value, double& result);
+    // If the ref is undefined, it will return false.
+    static bool GetOptionalInt(ani_env* env, ani_ref value, int32_t& result);
     /**
      * Get std/core/Double.
      */
