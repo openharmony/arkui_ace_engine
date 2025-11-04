@@ -318,7 +318,7 @@ void TextFieldSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOv
     menuInfo.showTranslate = menuInfo.showCopy && pattern->IsShowTranslate() && IsNeedMenuTranslate();
     menuInfo.showSearch = menuInfo.showCopy && pattern->IsShowSearch() && IsNeedMenuSearch();
     menuInfo.showShare = menuInfo.showCopy && IsSupportMenuShare() && IsNeedMenuShare();
-    menuInfo.showAIWrite = pattern->IsShowAIWrite() && pattern->IsSelected();
+    menuInfo.showAIWrite = pattern->IsShowAIWrite();
     if (pattern->IsShowAIMenuOption() && !pattern->GetAIItemOption().empty()) {
         menuInfo.aiMenuOptionType = pattern->GetAIItemOption().begin()->second.type;
     } else {
