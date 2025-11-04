@@ -1376,6 +1376,11 @@ public:
         return !isAppendContent;
     }
 
+    bool GetDefaultClipValue() const override
+    {
+        return true;
+    }
+
     void SetTextDetectEnable(bool enable) override
     {
         auto currentEnable = textDetectEnable_;
