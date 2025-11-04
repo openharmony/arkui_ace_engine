@@ -699,10 +699,20 @@ void JsThirdProviderInteractionOperation::SetBelongTreeId(const int32_t treeId)
     belongTreeId_ = treeId;
 }
 
+int32_t JsThirdProviderInteractionOperation::GetParentWindowId()
+{
+    return 0;
+}
+
 void JsThirdProviderInteractionOperation::FocusMoveSearchWithCondition(
-    const int64_t elementId, const AccessibilityFocusMoveParam param,
+    const AccessibilityElementInfo& info, const AccessibilityFocusMoveParam param,
     const int32_t requestId, AccessibilityElementOperatorCallback &callback)
 {
+    auto elementId = info.GetAccessibilityId();
+    int64_t splitElementId = AccessibilityElementInfo::UNDEFINED_ACCESSIBILITY_ID;
+    int32_t splitTreeId = AccessibilityElementInfo::UNDEFINED_TREE_ID;
+    AccessibilitySystemAbilityClient::GetTreeIdAndElementIdBySplitElementId(
+        elementId, splitElementId, splitTreeId);
     Accessibility::AccessibilityElementInfo nodeInfo;
     std::list<Accessibility::AccessibilityElementInfo> infos;
     auto jsAccessibilityManager = jsAccessibilityManager_.Upgrade();
@@ -711,32 +721,35 @@ void JsThirdProviderInteractionOperation::FocusMoveSearchWithCondition(
     GetNodeConfig(config);
     FocusStrategyOsalThird strategy(jsAccessibilityManager, accessibilityProvider, config);
     if (FocusStrategyOsal::IsProcessGetScrollAncestor(param)) {
-        strategy.ProcessGetScrollAncestor(elementId, param, infos);
-        auto result = FocusMoveResult::SEARCH_SUCCESS;
-        if (infos.empty()) {
-            nodeInfo.SetValidElement(false);
-            infos.emplace_back(nodeInfo);
-            result = FocusMoveResult::SEARCH_FAIL;
-        }
-        HILOG_INFO_FOCUS("focus move search third result id %{public}" PRId64 ", "
-            "ret %{public}d requestID %{public}d",
-            nodeInfo.GetAccessibilityId(), result, requestId);
+        auto result = strategy.ProcessGetScrollAncestor(splitElementId, param, infos);
+        result.nowLevelBelongTreeId = GetBelongTreeId();
+        result.parentWindowId = GetParentWindowId();
+        HILOG_INFO_FOCUS("focus move search third scroll result id %{public}" PRId64 ", "
+            "ret %{public}d treeId %{public}d parentWindowId %{public}d requestID %{public}d",
+            nodeInfo.GetAccessibilityId(), result.resultType, result.nowLevelBelongTreeId,
+            result.nowLevelBelongTreeId, requestId);
         callback.SetFocusMoveSearchWithConditionResult(infos, result, requestId);
         return;
     }
-    auto result = strategy.ExecuteFocusMoveSearch(elementId, param, nodeInfo);
+    if (FocusStrategyOsal::IsProcessDetectFocusable(param)) {
+        FocusMoveResult result = {
+            .resultType = FocusMoveResultType::NOT_SUPPORT,
+            .nowLevelBelongTreeId = -1,
+            .parentWindowId = 0,
+            .changeToNewInfo = false,
+            .needTerminate = true,
+        };
+        callback.SetFocusMoveSearchWithConditionResult(infos, result, requestId);
+    }
+    auto result = strategy.ExecuteFocusMoveSearch(splitElementId, param, nodeInfo);
     infos.emplace_back(nodeInfo);
+    result.nowLevelBelongTreeId = GetBelongTreeId();
+    result.parentWindowId = GetParentWindowId();
     HILOG_INFO_FOCUS("focus move search third result id %{public}" PRId64 ", "
-        "ret %{public}d requestID %{public}d",
-        nodeInfo.GetAccessibilityId(), result, requestId);
+        "ret %{public}d treeId %{public}d parentWindowId %{public}d requestID %{public}d",
+        nodeInfo.GetAccessibilityId(), result.resultType, result.nowLevelBelongTreeId,
+        result.nowLevelBelongTreeId, requestId);
     callback.SetFocusMoveSearchWithConditionResult(infos, result, requestId);
-}
-
-void JsThirdProviderInteractionOperation::DetectElementInfoFocusableThroughAncestor(
-    const AccessibilityElementInfo &info, const int64_t parentId, const int32_t requestId,
-    AccessibilityElementOperatorCallback &callback)
-{
-    callback.SetDetectElementInfoFocusableThroughAncestorResult(true, requestId, info);
 }
 
 int32_t JsThirdProviderInteractionOperation::SendAccessibilityAsyncEventForThird(

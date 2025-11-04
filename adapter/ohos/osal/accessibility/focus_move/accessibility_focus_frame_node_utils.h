@@ -136,5 +136,44 @@ private:
     WeakPtr<NG::FrameNode> customizedParentNode_;
 };
 
+
+class DetectParentMockChildNode : public FocusRulesCheckNode {
+public:
+    explicit DetectParentMockChildNode(int64_t accessibilityId)
+        : FocusRulesCheckNode(accessibilityId) {}
+    ~DetectParentMockChildNode() override = default;
+
+    bool GetPropText(Accessibility::PropValue& value) override;
+
+    bool GetPropHintText(Accessibility::PropValue& value) override;
+
+    bool GetPropDesc(Accessibility::PropValue& value) override;
+
+    bool GetPropAccessibilityText(Accessibility::PropValue& value) override;
+
+    bool GetPropType(Accessibility::PropValue& value) override;
+
+    bool GetPropAccessibilityLevel(Accessibility::PropValue& value) override;
+
+    bool GetPropAccessibilityGroup(Accessibility::PropValue& value) override;
+
+    bool GetPropIsEnable(Accessibility::PropValue& value) override;
+
+    bool GetPropChildrenCount(Accessibility::PropValue& value) override;
+
+    bool GetPropActionNames(Accessibility::PropValue& value) override;
+
+    std::vector<std::shared_ptr<Accessibility::ReadableRulesNode>> GetChildren() override;
+
+    std::shared_ptr<Accessibility::ReadableRulesNode> GetParent() override;
+
+    std::vector<std::shared_ptr<FocusRulesCheckNode>> GetAceChildren() override;
+
+    std::shared_ptr<FocusRulesCheckNode> GetAceParent() override;
+
+private:
+};
+
+
 } // OHOS::Ace::Framework
 #endif // FOUNDATION_ACE_ADAPTER_OHOS_OSAL_ACCESSIBILITY_FOCUS_MOVE_ACCESSIBILITY_FOCUS_FRAME_NODE_UTILS_H

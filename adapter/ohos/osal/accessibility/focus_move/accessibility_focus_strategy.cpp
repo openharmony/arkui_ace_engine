@@ -38,18 +38,23 @@ std::shared_ptr<FocusRulesCheckNode> GetLastChildNode(
 }
 
 bool IsSupportScroll(
-    const std::shared_ptr<FocusRulesCheckNode>& currentNode, const std::string& scrollActionName)
+    const std::shared_ptr<FocusRulesCheckNode>& currentNode, const std::list<std::string>& scrollActionNames)
 {
     CHECK_NULL_RETURN(currentNode, false);
     Accessibility::PropValue value;
     if (!currentNode->GetPropActionNames(value)) {
         return false;
     }
-
-    auto findResult = value.valueArray.find(scrollActionName);
-    if (findResult == value.valueArray.end()) {
-        return false;
+    bool find = false;
+    for (auto& scrollActionName : scrollActionNames) {
+        auto findResult = value.valueArray.find(scrollActionName);
+        if (findResult == value.valueArray.end()) {
+            continue;
+        }
+        find = true;
+        break;
     }
+    CHECK_EQUAL_RETURN(find, false, false);
 #if !defined(ACE_UNITTEST)
     bool isHit = false;
     auto client = Accessibility::AccessibilitySystemAbilityClient::GetInstance();
@@ -63,24 +68,34 @@ bool IsSupportScroll(
 #endif
 }
 
-AceFocusMoveResult FindScrollAncestor(
-    AceFocusMoveDetailCondition condition,
-    const std::shared_ptr<FocusRulesCheckNode>& currentNode,
-    std::list<std::shared_ptr<FocusRulesCheckNode>>& targetNodes,
-    std::string scrollActionName)
+bool IsSupportScrollForward(const std::shared_ptr<FocusRulesCheckNode>& currentNode)
 {
-    CHECK_NULL_RETURN(currentNode, AceFocusMoveResult::FIND_FAIL);
-    auto parent = currentNode->GetAceParent();
-    while (parent) {
-        if (parent->IsAccessibiltyVisible()) {
-            if (IsSupportScroll(parent, scrollActionName)) {
-                targetNodes.emplace_back(parent);
-            }
-        }
-        parent = parent->GetAceParent();
-    }
-    return AceFocusMoveResult::FIND_SUCCESS;
+    std::list<std::string> scrollActionNames;
+    scrollActionNames.emplace_back("scrollForward");
+    return IsSupportScroll(currentNode, scrollActionNames);
 }
+
+bool IsSupportScrollBackward(const std::shared_ptr<FocusRulesCheckNode>& currentNode)
+{
+    std::list<std::string> scrollActionNames;
+    scrollActionNames.emplace_back("scrollBackward");
+    return IsSupportScroll(currentNode, scrollActionNames);
+}
+
+bool IsSupportScrollForwardAndBackward(const std::shared_ptr<FocusRulesCheckNode>& currentNode)
+{
+    std::list<std::string> scrollActionNames;
+    scrollActionNames.emplace_back("scrollForward");
+    scrollActionNames.emplace_back("scrollBackward");
+    return IsSupportScroll(currentNode, scrollActionNames);
+}
+
+const std::map<CheckSupportScrollAction,
+    std::function<bool(const std::shared_ptr<FocusRulesCheckNode>& currentNode)>> supportScrollActionFuncs = {
+    { CheckSupportScrollAction::FIND_FORWARD, IsSupportScrollForward },
+    { CheckSupportScrollAction::FIND_BACKWARD, IsSupportScrollBackward },
+    { CheckSupportScrollAction::FIND_ANY, IsSupportScrollForwardAndBackward },
+};
 
 bool CheckIsLevelHideDescendants(const std::shared_ptr<FocusRulesCheckNode>& currentNode)
 {
@@ -98,6 +113,43 @@ bool NoNeedSearchChild(const std::shared_ptr<FocusRulesCheckNode>& currentNode)
     return CheckIsLevelHideDescendants(currentNode) || !currentNode->IsAccessibiltyVisible();
 }
 } // namespace
+
+bool AccessibilityFocusStrategy::IsForceSupportScrollType(
+    const std::shared_ptr<FocusRulesCheckNode>& currentNode)
+{
+    CHECK_NULL_RETURN(currentNode, false);
+    bool isHit = false;
+    auto client = Accessibility::AccessibilitySystemAbilityClient::GetInstance();
+    CHECK_NULL_RETURN(client, false);
+    auto checkResult = client->CheckNodeIsSpecificType(
+        currentNode, Accessibility::ReadableSpecificType::SCROLLABLE_TYPE, isHit);
+    CHECK_NE_RETURN(checkResult, Accessibility::RET_OK, false);
+    return isHit;
+}
+
+AceFocusMoveResult AccessibilityFocusStrategy::FindScrollAncestor(
+    AceFocusMoveDetailCondition condition,
+    const std::shared_ptr<FocusRulesCheckNode>& currentNode,
+    std::list<std::shared_ptr<FocusRulesCheckNode>>& targetNodes,
+    CheckSupportScrollAction checkAction,
+    bool checkType)
+{
+    CHECK_NULL_RETURN(currentNode, AceFocusMoveResult::FIND_FAIL);
+    auto supportScrollActionFunc = supportScrollActionFuncs.find(checkAction);
+    CHECK_EQUAL_RETURN(supportScrollActionFunc, supportScrollActionFuncs.end(), AceFocusMoveResult::FIND_FAIL);
+    auto parent = currentNode->GetAceParent();
+    while (parent) {
+        if (parent->IsAccessibiltyVisible()) {
+            if (supportScrollActionFunc->second(parent)) {
+                targetNodes.emplace_back(parent);
+            } else if (checkType && IsForceSupportScrollType(parent)) {
+                targetNodes.emplace_back(parent);
+            }
+        }
+        parent = parent->GetAceParent();
+    }
+    return AceFocusMoveResult::FIND_SUCCESS;
+}
 
 const std::map<AceAction, std::string> AccessibilityFocusStrategy::aceActionToFocusActionName = {
     { AceAction::ACTION_CLICK, "click" },
@@ -287,7 +339,7 @@ AceFocusMoveResult AccessibilityFocusStrategy::FindNextReadableNodeToHigherLevel
                 parent->GetAccessibilityId());
         }
         // need check node whether in scroll container
-        if (IsSupportScroll(higherParent, "scrollForward")) {
+        if (IsSupportScrollForward(higherParent)) {
             HILOG_INFO_FOCUS("result: search fail in scroll forward container");
             targetNode = higherParent;
             return AceFocusMoveResult::FIND_FAIL_IN_SCROLL;
@@ -330,7 +382,7 @@ AceFocusMoveResult AccessibilityFocusStrategy::FindNextReadableNode(
         return AceFocusMoveResult::FIND_EMBED_TARGET;
     }
     // need check node whether in scroll container
-    if (IsSupportScroll(parent, "scrollForward")) {
+    if (IsSupportScrollForward(parent)) {
         HILOG_INFO_FOCUS("result: search fail in scroll forward container");
         targetNode = parent;
         return AceFocusMoveResult::FIND_FAIL_IN_SCROLL;
@@ -406,7 +458,7 @@ AceFocusMoveResult AccessibilityFocusStrategy::FindPrevReadableNodeToHigherLevel
             }
         }
         // 2.2 the same level is checked， should check parent
-        if (IsSupportScroll(parent, "scrollBackward")) {
+        if (IsSupportScrollBackward(parent)) {
             HILOG_INFO_FOCUS("result: search fail in scroll backward container"); // check in scroll container
             targetNode = parent;
             return AceFocusMoveResult::FIND_FAIL_IN_SCROLL;
@@ -490,7 +542,8 @@ AceFocusMoveResult AccessibilityFocusStrategy::FindForwardScrollAncestor(
     const std::shared_ptr<FocusRulesCheckNode>& currentNode,
     std::list<std::shared_ptr<FocusRulesCheckNode>>& targetNodes)
 {
-    return FindScrollAncestor(condition, currentNode, targetNodes, "scrollForward");
+    return FindScrollAncestor(condition,
+        currentNode, targetNodes, CheckSupportScrollAction::FIND_FORWARD, false);
 }
 
 AceFocusMoveResult AccessibilityFocusStrategy::FindBackwardScrollAncestor(
@@ -498,6 +551,16 @@ AceFocusMoveResult AccessibilityFocusStrategy::FindBackwardScrollAncestor(
     const std::shared_ptr<FocusRulesCheckNode>& currentNode,
     std::list<std::shared_ptr<FocusRulesCheckNode>>& targetNodes)
 {
-    return FindScrollAncestor(condition, currentNode, targetNodes, "scrollBackward");
+    return FindScrollAncestor(condition,
+        currentNode, targetNodes, CheckSupportScrollAction::FIND_BACKWARD, false);
+}
+
+AceFocusMoveResult AccessibilityFocusStrategy::FindAnyScrollAncestor(
+    AceFocusMoveDetailCondition condition,
+    const std::shared_ptr<FocusRulesCheckNode>& currentNode,
+    std::list<std::shared_ptr<FocusRulesCheckNode>>& targetNodes)
+{
+    return FindScrollAncestor(condition,
+        currentNode, targetNodes, CheckSupportScrollAction::FIND_ANY, true);
 }
 } // OHOS::Ace::Framework

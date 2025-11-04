@@ -75,10 +75,8 @@ public:
     void SetChildTreeIdAndWinId(
         const int64_t nodeId, const int32_t treeId, const int32_t childWindowId) override;
     void SetBelongTreeId(const int32_t treeId) override;
-    void FocusMoveSearchWithCondition(const int64_t elementId, const AccessibilityFocusMoveParam param,
+    void FocusMoveSearchWithCondition(const AccessibilityElementInfo& info, const AccessibilityFocusMoveParam param,
         const int32_t requestId, AccessibilityElementOperatorCallback &callback) override;
-    void DetectElementInfoFocusableThroughAncestor(const AccessibilityElementInfo &info,
-        const int64_t parentId, const int32_t requestId, AccessibilityElementOperatorCallback &callback) override;
     int32_t SendAccessibilityAsyncEvent(
         const ArkUI_AccessibilityEventInfo& nativeAccessibilityEvent,
         void (*callback)(int32_t errorCode)) override;
@@ -166,6 +164,8 @@ private:
         const ArkUI_AccessibilityEventInfo& nativeAccessibilityEvent,
         Accessibility::AccessibilityEventInfo& accessibilityEventInfo);
     void HandleActionWhenFindNodeFail(const int32_t action);
+
+    int32_t GetParentWindowId();
 
     WeakPtr<AccessibilityProvider> accessibilityProvider_;
     WeakPtr<JsAccessibilityManager> jsAccessibilityManager_;

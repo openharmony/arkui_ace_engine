@@ -395,6 +395,11 @@ std::vector<std::shared_ptr<FocusRulesCheckNode>> DetectParentRulesCheckNode::Ge
 std::vector<std::shared_ptr<Accessibility::ReadableRulesNode>> DetectParentRulesCheckNode::GetChildren()
 {
     std::vector<std::shared_ptr<Accessibility::ReadableRulesNode>> checkNodeChildren;
+    auto extraElementInfo = elementInfo_.GetExtraElement();
+    auto extraElementInfoValue = extraElementInfo.GetExtraElementInfoValueStr();
+    auto hasChildTextStr = extraElementInfoValue.find("childText");
+    CHECK_EQUAL_RETURN(hasChildTextStr, extraElementInfoValue.end(), checkNodeChildren);
+    checkNodeChildren.push_back(std::make_shared<DetectParentMockChildNode>(-1));
     return checkNodeChildren;
 }
 
@@ -410,5 +415,97 @@ std::shared_ptr<FocusRulesCheckNode> DetectParentRulesCheckNode::GetAceParent()
 std::shared_ptr<Accessibility::ReadableRulesNode> DetectParentRulesCheckNode::GetParent()
 {
     return GetAceParent();
+}
+
+bool DetectParentMockChildNode::GetPropText(Accessibility::PropValue& value)
+{
+    value.valueType = Accessibility::ValueType::STRING;
+    value.valueStr = "mockText";
+    return true;
+}
+
+bool DetectParentMockChildNode::GetPropHintText(Accessibility::PropValue& value)
+{
+    value.valueType = Accessibility::ValueType::STRING;
+    value.valueStr = "";
+    return true;
+}
+
+bool DetectParentMockChildNode::GetPropDesc(Accessibility::PropValue& value)
+{
+    value.valueType = Accessibility::ValueType::STRING;
+    value.valueStr = "";
+    return true;
+}
+
+bool DetectParentMockChildNode::GetPropAccessibilityText(Accessibility::PropValue& value)
+{
+    value.valueType = Accessibility::ValueType::STRING;
+    value.valueStr = "";
+    return true;
+}
+
+bool DetectParentMockChildNode::GetPropType(Accessibility::PropValue& value)
+{
+    value.valueType = Accessibility::ValueType::STRING;
+    value.valueStr = "";
+    return true;
+}
+
+bool DetectParentMockChildNode::GetPropAccessibilityLevel(Accessibility::PropValue& value)
+{
+    value.valueType = Accessibility::ValueType::STRING;
+    value.valueStr = NG::AccessibilityProperty::Level::AUTO;
+    return true;
+}
+
+bool DetectParentMockChildNode::GetPropAccessibilityGroup(Accessibility::PropValue& value)
+{
+    value.valueType = Accessibility::ValueType::BOOL;
+    value.valueBool = false;
+    return true;
+}
+
+bool DetectParentMockChildNode::GetPropIsEnable(Accessibility::PropValue& value)
+{
+    value.valueType = Accessibility::ValueType::BOOL;
+    value.valueBool = true;
+    return true;
+}
+
+bool DetectParentMockChildNode::GetPropChildrenCount(Accessibility::PropValue& value)
+{
+    value.valueType = Accessibility::ValueType::NUMBER;
+    value.valueNum = 0;
+    return true;
+}
+
+bool DetectParentMockChildNode::GetPropActionNames(Accessibility::PropValue& value)
+{
+    value.valueType = Accessibility::ValueType::ARRAY;
+    value.valueArray.clear();
+    return true;
+}
+
+std::vector<std::shared_ptr<FocusRulesCheckNode>> DetectParentMockChildNode::GetAceChildren()
+{
+    std::vector<std::shared_ptr<FocusRulesCheckNode>> checkNodeChildren;
+    return checkNodeChildren;
+}
+
+std::vector<std::shared_ptr<Accessibility::ReadableRulesNode>> DetectParentMockChildNode::GetChildren()
+{
+    std::vector<std::shared_ptr<Accessibility::ReadableRulesNode>> checkNodeChildren;
+    return checkNodeChildren;
+}
+
+std::shared_ptr<FocusRulesCheckNode> DetectParentMockChildNode::GetAceParent()
+{
+    return nullptr;
+}
+
+std::shared_ptr<Accessibility::ReadableRulesNode> DetectParentMockChildNode::GetParent()
+{
+    return nullptr;
 }
 } // OHOS::Ace::Framework

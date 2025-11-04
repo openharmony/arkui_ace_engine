@@ -1466,6 +1466,7 @@ void JsAccessibilityManager::UpdateAccessibilityElementInfo(
     }
     CheckStateTakeOver(node, nodeInfo);
     CheckActionTakeOver(node, nodeInfo);
+    UpdateHasChildText(node, nodeInfo);
 }
 #ifdef WEB_SUPPORTED
 
@@ -5583,21 +5584,21 @@ void JsAccessibilityManager::WebInteractionOperation::SetChildTreeIdAndWinId(con
 void JsAccessibilityManager::WebInteractionOperation::SetBelongTreeId(const int32_t treeId) {}
 
 void JsAccessibilityManager::WebInteractionOperation::FocusMoveSearchWithCondition(
-    const int64_t elementId, const AccessibilityFocusMoveParam param,
+    const AccessibilityElementInfo& info, const AccessibilityFocusMoveParam param,
     const int32_t requestId, AccessibilityElementOperatorCallback &callback)
 {
     std::list<AccessibilityElementInfo> infos;
-    Accessibility::AccessibilityElementInfo info;
-    info.SetValidElement(false);
-    infos.emplace_back(info);
-    callback.SetFocusMoveSearchWithConditionResult(infos, FocusMoveResult::NOT_SUPPORT, requestId);
-}
-
-void JsAccessibilityManager::WebInteractionOperation::DetectElementInfoFocusableThroughAncestor(
-    const AccessibilityElementInfo &info, const int64_t parentId, const int32_t requestId,
-    AccessibilityElementOperatorCallback &callback)
-{
-    callback.SetDetectElementInfoFocusableThroughAncestorResult(true, requestId, info);
+    Accessibility::AccessibilityElementInfo elementInfo;
+    elementInfo.SetValidElement(false);
+    infos.emplace_back(elementInfo);
+    FocusMoveResult result = {
+        .resultType = FocusMoveResultType::NOT_SUPPORT,
+        .nowLevelBelongTreeId = -1,
+        .parentWindowId = 0,
+        .changeToNewInfo = false,
+        .needTerminate = true,
+    };
+    callback.SetFocusMoveSearchWithConditionResult(infos, result, requestId);
 }
 
 void JsAccessibilityManager::WebInteractionOperation::GetCursorPosition(
@@ -7742,23 +7743,27 @@ void JsAccessibilityManager::JsInteractionOperation::SetBelongTreeId(const int32
 }
 
 void JsAccessibilityManager::JsInteractionOperation::FocusMoveSearchWithCondition(
-    const int64_t elementId, const AccessibilityFocusMoveParam param,
+    const AccessibilityElementInfo& info, const AccessibilityFocusMoveParam param,
     const int32_t requestId, AccessibilityElementOperatorCallback& callback)
 {
     HILOG_INFO_FOCUS(
         "focus move search with condition %{public}" PRId64 ", "
-        "direction: %{public}d, condition %{public}d requestId %{public}d",
-        elementId, param.direction, param.condition, requestId);
-    int64_t splitElementId = AccessibilityElementInfo::UNDEFINED_ACCESSIBILITY_ID;
-    int32_t splitTreeId = AccessibilityElementInfo::UNDEFINED_TREE_ID;
-    AccessibilitySystemAbilityClient::GetTreeIdAndElementIdBySplitElementId(elementId, splitElementId, splitTreeId);
+        "direction: %{public}d, condition %{public}d parentId %{public}" PRId64 ", requestId %{public}d",
+        info.GetAccessibilityId(), param.direction, param.condition, param.parentId, requestId);
     auto jsAccessibilityManager = GetHandler().Upgrade();
     std::list<AccessibilityElementInfo> infos;
+    FocusMoveResult errorResult = {
+        .resultType = FocusMoveResultType::SEARCH_FAIL_LOST_NODE,
+        .nowLevelBelongTreeId = -1,
+        .parentWindowId = 0,
+        .changeToNewInfo = false,
+        .needTerminate = true,
+    };
     if (!jsAccessibilityManager) {
         Accessibility::AccessibilityElementInfo info;
         info.SetValidElement(false);
         infos.emplace_back(info);
-        callback.SetFocusMoveSearchWithConditionResult(infos, FocusMoveResult::SEARCH_FAIL, requestId);
+        callback.SetFocusMoveSearchWithConditionResult(infos, errorResult, requestId);
         return;
     }
     auto context = jsAccessibilityManager->GetPipelineContext().Upgrade();
@@ -7766,59 +7771,26 @@ void JsAccessibilityManager::JsInteractionOperation::FocusMoveSearchWithConditio
         Accessibility::AccessibilityElementInfo info;
         info.SetValidElement(false);
         infos.emplace_back(info);
-        callback.SetFocusMoveSearchWithConditionResult(infos, FocusMoveResult::SEARCH_FAIL, requestId);
+        callback.SetFocusMoveSearchWithConditionResult(infos, errorResult, requestId);
     }
     auto windowId = windowId_;
     context->GetTaskExecutor()->PostTask(
-        [weak = GetHandler(), splitElementId, param, requestId, &callback, windowId] {
+        [weak = GetHandler(), elementInfo = info, param, requestId, &callback, windowId, errorResult] {
             auto jsAccessibilityManager = weak.Upgrade();
             if (!jsAccessibilityManager) {
                 Accessibility::AccessibilityElementInfo info;
                 std::list<AccessibilityElementInfo> infos;
                 info.SetValidElement(false);
                 infos.emplace_back(info);
-                callback.SetFocusMoveSearchWithConditionResult(infos, FocusMoveResult::SEARCH_FAIL, requestId);
+                callback.SetFocusMoveSearchWithConditionResult(infos, errorResult, requestId);
                 return;
             }
             ACE_SCOPED_TRACE("FocusMoveSearchWithCondition");
-            jsAccessibilityManager->FocusMoveSearchWithCondition(splitElementId, param, requestId, callback, windowId);
+            jsAccessibilityManager->FocusMoveSearchWithCondition(elementInfo, param, requestId, callback, windowId);
         },
         TaskExecutor::TaskType::UI, "ArkUIAccessibilityFocusMoveSearchWithCondition");
 }
 
-void JsAccessibilityManager::JsInteractionOperation::DetectElementInfoFocusableThroughAncestor(
-    const AccessibilityElementInfo &info, const int64_t parentId, const int32_t requestId,
-    AccessibilityElementOperatorCallback &callback)
-{
-    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
-        "Detect ElementInfo start by parent %{public}" PRId64 " to root", parentId);
-    int64_t splitElementId = AccessibilityElementInfo::UNDEFINED_ACCESSIBILITY_ID;
-    int32_t splitTreeId = AccessibilityElementInfo::UNDEFINED_TREE_ID;
-    AccessibilitySystemAbilityClient::GetTreeIdAndElementIdBySplitElementId(parentId, splitElementId, splitTreeId);
-    auto jsAccessibilityManager = GetHandler().Upgrade();
-    if (!jsAccessibilityManager) {
-        callback.SetDetectElementInfoFocusableThroughAncestorResult(true, requestId, info);
-        return;
-    }
-    auto context = jsAccessibilityManager->GetPipelineContext().Upgrade();
-    if (!context || !context->GetTaskExecutor()) {
-        callback.SetDetectElementInfoFocusableThroughAncestorResult(true, requestId, info);
-        return;
-    }
-    auto windowId = windowId_;
-    context->GetTaskExecutor()->PostTask(
-        [weak = GetHandler(), info, splitElementId, requestId, &callback, windowId] {
-            auto jsAccessibilityManager = weak.Upgrade();
-            if (!jsAccessibilityManager) {
-                callback.SetDetectElementInfoFocusableThroughAncestorResult(true, requestId, info);
-                return;
-            }
-            ACE_SCOPED_TRACE("DetectElementInfoFocusableThroughAncestor");
-            jsAccessibilityManager->DetectElementInfoFocusableThroughAncestor(
-                info, splitElementId, requestId, callback, windowId);
-        },
-        TaskExecutor::TaskType::UI, "ArkUIAccessibilityDetectElementInfo");
-}
 void JsAccessibilityManager::UpdateElementInfoTreeId(Accessibility::AccessibilityElementInfo& info)
 {
     int32_t treeId = info.GetBelongTreeId();
