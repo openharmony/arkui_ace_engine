@@ -245,7 +245,12 @@ void FormManagerDelegate::CheckWhetherSurfaceChangeFailed()
     }
     if (needRedispatch) {
         uint32_t reason = static_cast<uint32_t>(WindowSizeChangeReason::UNDEFINED);
-        formRendererDispatcher_->DispatchSurfaceChangeEvent(formSurfaceInfo, reason, nullptr);
+        auto formRendererDispatcher = GetFormRendererDispatcher();
+        if (formRendererDispatcher == nullptr) {
+            TAG_LOGE(AceLogTag::ACE_FORM, "dispatcher is null");
+            return;
+        }
+        formRendererDispatcher->DispatchSurfaceChangeEvent(formSurfaceInfo, reason, nullptr);
     }
 }
 
@@ -764,7 +769,7 @@ void FormManagerDelegate::DispatchPointerEvent(const
     TAG_LOGI(AceLogTag::ACE_FORM, "form pan gesture disabled, dispatch event action=%{public}d",
         pointerEvent->GetPointerAction());
     SerializedGesture ignoredGesture;
-    formRendererDispatcher_->DispatchPointerEvent(pointerEvent, ignoredGesture);
+    formRendererDispatcher->DispatchPointerEvent(pointerEvent, ignoredGesture);
     SetGestureInnerFlag();
 }
 
