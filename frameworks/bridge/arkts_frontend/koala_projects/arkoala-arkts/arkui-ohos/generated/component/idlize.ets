@@ -973,10 +973,10 @@ export class FrameNodeExtender {
     static dispose_serialize(peer: FrameNode): void {
         ArkUIGeneratedNativeModule._FrameNodeExtender_dispose(extractors.toFrameNodePtr(peer))
     }
-    static getPositionToWindow_serialize(peer: FrameNode): Position {
+    static getPositionToWindow_serialize(peer: FrameNode): Vector2 {
         const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getPositionToWindow(extractors.toFrameNodePtr(peer))
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const returnResult : Position = Position_serializer.read(retvalDeserializer)
+        const returnResult : Vector2 = Vector2_serializer.read(retvalDeserializer)
         return returnResult
     }
     static getPositionToParent_serialize(peer: FrameNode): Position {
@@ -1226,7 +1226,7 @@ export class FrameNodeExtender {
         FrameNodeExtender.dispose_serialize(peer_casted)
         return
     }
-    public static getPositionToWindow(peer: FrameNode): Position {
+    public static getPositionToWindow(peer: FrameNode): Vector2 {
         const peer_casted = peer as (FrameNode)
         return FrameNodeExtender.getPositionToWindow_serialize(peer_casted)
     }

@@ -244,6 +244,12 @@ void AssignArkValue(Ark_Tuple_Dimension_Dimension& dst, const std::pair<const Di
     dst.value1 = ArkValue<Ark_Dimension>(src.second, ctx);
 }
 
+void AssignArkValue(Ark_Vector2& dst, const OffsetF& src)
+{
+    dst.x = Converter::ArkValue<Ark_Float64>(src.GetX());
+    dst.y = Converter::ArkValue<Ark_Float64>(src.GetY());
+}
+
 void AssignArkValue(Ark_uiObserver_NavigationInfo& dst, const std::shared_ptr<OHOS::Ace::NG::NavigationInfo>& src)
 {
     CHECK_NULL_VOID(src);
