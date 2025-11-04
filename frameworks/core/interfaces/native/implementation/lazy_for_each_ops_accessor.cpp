@@ -92,9 +92,13 @@ void SyncImpl(Ark_NativePointer node,
 
     lazyNode->SetTotalCount(totalCount);
     lazyNode->SetCallbacks(
-        [callback = CallbackHelper(*creator)](
-            int32_t index) { return AceType::DynamicCast<UINode>(callback.BuildSync(index)); },
-        [cb = CallbackHelper(*updater)](int32_t start, int32_t end) { cb.InvokeSync(start, end); });
+        [callback = CallbackHelper(*creator)](int32_t index) {
+            return AceType::DynamicCast<UINode>(callback.BuildSync(index));
+        },
+        [cb = CallbackHelper(*updater)](
+            int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool isLoop) {
+            cb.InvokeSync(start, end, cacheStart, cacheEnd, isLoop);
+        });
 }
 void SyncOnMoveOpsImpl(Ark_NativePointer node,
                        const Callback_OnMoveFromTo* onMoveFromToOps,

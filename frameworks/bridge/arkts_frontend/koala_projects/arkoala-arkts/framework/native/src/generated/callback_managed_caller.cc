@@ -3498,7 +3498,7 @@ void callManagedCallback_PreparedInfo_VoidSync(Ark_VMContext vmContext, Ark_Int3
     KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
     callData.dispose(callData.data, callData.length);
 }
-void callManagedCallback_RangeUpdate(Ark_Int32 resourceId, Ark_Int32 start, Ark_Int32 end)
+void callManagedCallback_RangeUpdate(Ark_Int32 resourceId, Ark_Int32 start, Ark_Int32 end, Ark_Int32 cacheStart, Ark_Int32 cacheEnd, Ark_Boolean isLoop)
 {
     CallbackBuffer callbackBuffer = {{}, {}};
     const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
@@ -3508,19 +3508,24 @@ void callManagedCallback_RangeUpdate(Ark_Int32 resourceId, Ark_Int32 start, Ark_
     argsSerializer.writeInt32(resourceId);
     argsSerializer.writeInt32(start);
     argsSerializer.writeInt32(end);
+    argsSerializer.writeInt32(cacheStart);
+    argsSerializer.writeInt32(cacheEnd);
+    argsSerializer.writeBoolean(isLoop);
     enqueueCallback(10, &callbackBuffer);
 }
-void callManagedCallback_RangeUpdateSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Int32 start, Ark_Int32 end)
+void callManagedCallback_RangeUpdateSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Int32 start, Ark_Int32 end, Ark_Int32 cacheStart, Ark_Int32 cacheEnd, Ark_Boolean isLoop)
 {
-    SerializerBase argsSerializer = SerializerBase(nullptr);
+    uint8_t dataBuffer[4096];
+    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&dataBuffer, sizeof(dataBuffer), nullptr);
     argsSerializer.writeInt32(10);
     argsSerializer.writeInt32(Kind_Callback_RangeUpdate);
     argsSerializer.writeInt32(resourceId);
     argsSerializer.writeInt32(start);
     argsSerializer.writeInt32(end);
-    KInteropReturnBuffer callData = argsSerializer.toReturnBuffer();
-    KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
-    callData.dispose(callData.data, callData.length);
+    argsSerializer.writeInt32(cacheStart);
+    argsSerializer.writeInt32(cacheEnd);
+    argsSerializer.writeBoolean(isLoop);
+    KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
 }
 void callManagedCallback_RefreshStatus_Void(Ark_Int32 resourceId, Ark_RefreshStatus state)
 {
