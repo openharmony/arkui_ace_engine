@@ -3329,7 +3329,7 @@ frameworks/core/interfaces/native/implementation/baseline_offset_style_accessor.
 frameworks/core/interfaces/native/implementation/baseline_offset_style_peer.h @huawei_g_five
 frameworks/core/interfaces/native/implementation/paragraph_style_accessor.cpp @huawei_g_five
 frameworks/core/interfaces/native/implementation/paragraph_style_peer.h @huawei_g_five
-frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/text_based_modifier @huawei_g_five
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/text_based_modifier/ @huawei_g_five
 frameworks/core/interfaces/native/ani/text_based_ani_modifier.cpp @huawei_g_five
 frameworks/core/interfaces/native/ani/text_based_ani_modifier.h @huawei_g_five
 frameworks/core/interfaces/native/implementation/symbol_glyph_modifier_peer.h @huawei_g_five
