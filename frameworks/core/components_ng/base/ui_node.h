@@ -1154,12 +1154,29 @@ public:
         return isFree_;
     }
 
+    void SetIsFree(bool isFree)
+    {
+        isFree_ = isFree;
+    }
+
     void PostAfterAttachMainTreeTask(std::function<void()>&& task)
     {
-        if (IsOnMainTree()) {
+        if (!IsFree()) {
+            TAG_LOGW(AceLogTag::ACE_NATIVE_NODE,
+                "PostAfterAttachMainTreeTask failed, node: %{public}d is not free", GetId());
             return;
         }
         afterAttachMainTreeTasks_.emplace_back(std::move(task));
+    }
+
+    void ExecuteAfterAttachMainTreeTasks()
+    {
+        for (auto& task : afterAttachMainTreeTasks_) {
+            if (task) {
+                task();
+            }
+        }
+        afterAttachMainTreeTasks_.clear();
     }
 
     void FindTopNavDestination(RefPtr<FrameNode>& result);
@@ -1285,15 +1302,6 @@ private:
         }
     }
     
-    void ExecuteAfterAttachMainTreeTasks()
-    {
-        for (auto& task : afterAttachMainTreeTasks_) {
-            if (task) {
-                task();
-            }
-        }
-        afterAttachMainTreeTasks_.clear();
-    }
     bool CheckThreadSafeNodeTree(bool needCheck);
     virtual bool MaybeRelease() override;
 

@@ -38,7 +38,7 @@ bool ElementRegisterMultiThread::AddThreadSafeNode(const RefPtr<NG::UINode>& nod
     std::unique_lock<std::shared_mutex> lock(threadSafeNodeMapMutex_);
     auto result = threadSafeNodeMap_.emplace(node->GetId(), node);
     if (!result.second) {
-        LOGE("Duplicate elmtId %{public}d error.", node->GetId());
+        LOGE("Duplicate safe node elmtId %{public}d error.", node->GetId());
     }
     return result.second;
 }

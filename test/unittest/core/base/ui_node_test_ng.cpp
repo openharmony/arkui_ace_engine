@@ -1366,4 +1366,36 @@ HWTEST_F(UINodeTestNg, GetPerformanceCheckData002, TestSize.Level1)
     parent->UINode::GetPerformanceCheckData(nodeMap);
     EXPECT_FALSE(parent->isBuildByJS_);
 }
+
+/**
+ * @tc.name: TestPostAfterAttachMainTreeTask001
+ * @tc.desc: Test PostAfterAttachMainTreeTask
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, TestPostAfterAttachMainTreeTask001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create a uinode
+     */
+    const std::string& existingId = "testNode";
+    const RefPtr<FrameNode> testNode =
+        FrameNode::CreateFrameNode(existingId, 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(testNode, nullptr);
+    testNode->afterAttachMainTreeTasks_.clear();
+
+    /**
+     * @tc.steps: step2. Test free node PostAfterAttachMainTreeTask
+     */
+    testNode->SetIsFree(true);
+    testNode->PostAfterAttachMainTreeTask([]() { return; });
+    EXPECT_EQ(testNode->afterAttachMainTreeTasks_.size(), 1);
+
+    /**
+     * @tc.steps: step2. Test not free node PostAfterAttachMainTreeTask
+     */
+    testNode->afterAttachMainTreeTasks_.clear();
+    testNode->SetIsFree(false);
+    testNode->PostAfterAttachMainTreeTask([]() { return; });
+    EXPECT_EQ(testNode->afterAttachMainTreeTasks_.size(), 0);
+}
 } // namespace OHOS::Ace::NG

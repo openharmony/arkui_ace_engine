@@ -7836,6 +7836,7 @@ struct ArkUIMultiThreadManagerAPI {
         void* asyncUITaskData, void (*asyncUITask)(void* asyncUITaskData), void(*onFinish)(void* asyncUITaskData));
     ArkUI_Int32 (*postUITask)(ArkUI_Int32 contextId, void* taskData, void(*task)(void* taskData));
     ArkUI_Int32 (*postUITaskAndWait)(ArkUI_Int32 contextId, void* taskData, void(*task)(void* taskData));
+    void (*executeAfterAttachTasks)(ArkUINodeHandle node);
 };
 
 struct ArkUIDialogAPI {
