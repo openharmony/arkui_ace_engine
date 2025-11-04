@@ -541,34 +541,34 @@ HWTEST_F(AccessibilityManagerNgTestNg, AccessibilityManagerNgTest011, TestSize.L
     PointF point;
     TouchEvent touchEvent;
 
-    auto ret = accessibilityManagerNg.HandleAccessibilityHoverTransparentCallback(true,
+    auto result = accessibilityManagerNg.HandleAccessibilityHoverTransparentCallback(true,
         frameNode,
         param,
         point,
         touchEvent);
-    EXPECT_FALSE(ret);
+    EXPECT_FALSE(result);
 
-    ret = accessibilityManagerNg.HandleAccessibilityHoverTransparentCallback(false,
+    result = accessibilityManagerNg.HandleAccessibilityHoverTransparentCallback(false,
         frameNode,
         param,
         point,
         touchEvent);
-    EXPECT_FALSE(ret);
+    EXPECT_FALSE(result);
 
     param = {-1, -1};
-    ret = accessibilityManagerNg.HandleAccessibilityHoverTransparentCallback(false,
+    result = accessibilityManagerNg.HandleAccessibilityHoverTransparentCallback(false,
         frameNode,
         param,
         point,
         touchEvent);
-    EXPECT_TRUE(ret);
+    EXPECT_TRUE(result);
 
-    ret = accessibilityManagerNg.HandleAccessibilityHoverTransparentCallback(false,
+    result = accessibilityManagerNg.HandleAccessibilityHoverTransparentCallback(false,
         nullptr,
         param,
         point,
         touchEvent);
-    EXPECT_FALSE(ret);
+    EXPECT_FALSE(result);
 }
 
 /**
