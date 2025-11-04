@@ -18,8 +18,8 @@
  * Writer: renxiaowen
  */
 
-#ifndef SWIPEACTION_SWIPE_ACTION_TEST_H
-#define SWIPEACTION_SWIPE_ACTION_TEST_H
+#ifndef SWIPEACTION_TEST_H
+#define SWIPEACTION_TEST_H
 
 #include <napi/native_api.h>
 namespace ArkUICApiDemo {
