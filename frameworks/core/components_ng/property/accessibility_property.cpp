@@ -594,7 +594,7 @@ bool AccessibilityProperty::IsAccessibilityFocusableDebug(const RefPtr<FrameNode
     bool focusable = IsAccessibilityFocusable(node);
     info->Put("id", node->GetAccessibilityId());
     info->Put("tag", node->GetTag().c_str());
-    if (!node->IsRootNode()) {
+    if (!node->IsRootNode() && node->GetParent()) {
         info->Put("parent", node->GetParent()->GetAccessibilityId());
     }
     info->Put("selected", focusable);

@@ -123,6 +123,7 @@ const OHOS::sptr<OHOS::Rosen::Window> GetWindow(int32_t containerId)
         if (aceContainer != nullptr) {
             return OHOS::Rosen::Window::Find(aceContainer->GetWindowName());
         }
+        CHECK_NULL_RETURN(container, nullptr);
         return OHOS::Rosen::Window::GetTopWindowWithId(container->GetWindowId());
     }
     return nullptr;
