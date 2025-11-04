@@ -536,7 +536,10 @@ export class ArkThemeScopeManager {
     public applyWithThemeForCompatibleComponent(view: ESValue):void {
         const currentThemeOptions = this.currentThemeOptions();
         if (!currentThemeOptions) {
-            view.invokeMethod('forceCompleteRerender', true);
+            const uiContext = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+            if (uiContext.isUpdateConfiguration()) {
+                view.invokeMethod('forceCompleteRerender', true);
+            }
             return;
         }
         const global = ESValue.getGlobal();
