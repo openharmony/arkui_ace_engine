@@ -207,7 +207,8 @@ Local<panda::ObjectRef> JSLayoutManager::CreateJSTextStyleResult(const TextStyle
     }
 
     const char* keysTextStyle[] = { "decoration", "color", "fontWeight", "fontStyle", "baseline", "fontSize",
-        "letterSpacing", "wordSpacing", "heightScale", "halfLeading", "heightOnly", "ellipsisMode", "locale"};
+        "letterSpacing", "wordSpacing", "heightScale", "halfLeading", "heightOnly", "ellipsis",
+        "ellipsisMode", "locale"};
 
     Local<JSValueRef> valuesOfFontMetrics[] = { panda::NumberRef::New(
         vm, static_cast<int32_t>(textStyle.GetTextDecorationFirst())),
