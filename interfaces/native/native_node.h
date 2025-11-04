@@ -7923,6 +7923,17 @@ typedef enum {
     NODE_ON_COASTING_AXIS_EVENT = 31,
 
     /**
+     * @brief Defines the pre-touch test of sub component in touch events. Called to specify how to perform the touch
+     * test on the children of this component.
+     *
+     * The event is triggered when the component is touched. \n
+     * When the event callback occurs, the {@link ArkUI_NodeEvent} object can be obtained from the
+     * {@link ArkUI_TouchTestInfo} object. \n
+     * @since 23
+     */
+    NODE_ON_CHILD_TOUCH_TEST = 32,
+
+    /**
      * @brief Triggers onDetectResultUpdate callback
      * when the text is set to TextDataDetectorConfig and recognized successfully.
      *
@@ -9218,6 +9229,16 @@ int32_t OH_ArkUI_NodeEvent_GetStringValue(ArkUI_NodeEvent* event, int32_t index,
     * @since 12
     */
 int32_t OH_ArkUI_NodeEvent_SetReturnNumberValue(ArkUI_NodeEvent* event, ArkUI_NumberValue* value, int32_t size);
+
+/**
+ * @brief Obtains a <b>ArkUI_TouchTestInfo</b> object from the specified <b>ArkUI_NodeEvent</b> object.
+ *
+ * @param nodeEvent Indicates the pointer to an <b>ArkUI_NodeEvent</b> object.
+ * @return Returns the pointer to an <b>ArkUI_TouchTestInfo</b> object.
+ *         Returns <b>null</b> if the parameter passed in is invalid or is not a touch test info.
+ * @since 23
+ */
+ArkUI_TouchTestInfo* OH_ArkUI_NodeEvent_GetTouchTestInfo(ArkUI_NodeEvent* nodeEvent);
 
 /**
     * @brief Defines the dirty area flag passed in the <b>::markDirty</b> API.

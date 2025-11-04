@@ -1460,5 +1460,27 @@ void GetBaseGestureEvent(ArkUIAPIEventGestureAsyncEvent* ret, ArkUITouchEvent& r
         ret->rawPointerEvent = &inputEvent;
     }
 }
+
+ArkUITouchTestInfoItemHandle CreateTouchTestInfoItem(const TouchTestInfo& info)
+{
+    ArkUITouchTestInfoItem* touchTestInfo = nullptr;
+    touchTestInfo = new ArkUITouchTestInfoItem();
+    CHECK_NULL_RETURN(touchTestInfo, nullptr);
+    touchTestInfo->nodeX = info.subCmpPoint.GetX();
+    touchTestInfo->nodeY = info.subCmpPoint.GetY();
+    touchTestInfo->windowX = info.windowPoint.GetX();
+    touchTestInfo->windowY = info.windowPoint.GetY();
+    touchTestInfo->parentNodeX = info.currentCmpPoint.GetX();
+    touchTestInfo->parentNodeY = info.currentCmpPoint.GetY();
+    ArkUIRect rect;
+    rect.x = info.subRect.GetX();
+    rect.y = info.subRect.GetY();
+    rect.width = info.subRect.Width();
+    rect.height = info.subRect.Height();
+    touchTestInfo->rect = rect;
+    touchTestInfo->id = info.id.c_str();
+    return touchTestInfo;
+}
+
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG
