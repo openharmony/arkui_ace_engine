@@ -4492,13 +4492,9 @@ export class ArkUIGeneratedNativeModule {
     native static _ListScroller_construct(): KPointer
     @ani.unsafe.Direct
     native static _ListScroller_getFinalizer(): KPointer
-    @ani.unsafe.Quick
     native static _ListScroller_getItemRectInGroup(ptr: KPointer, index: KInt, indexInGroup: KInt): KInteropReturnBuffer
-    @ani.unsafe.Direct
     native static _ListScroller_scrollToItemInGroup(ptr: KPointer, index: KInt, indexInGroup: KInt, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
     native static _ListScroller_closeAllSwipeActions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Quick
     native static _ListScroller_getVisibleListContentInfo(ptr: KPointer, x: KDouble, y: KDouble): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _LongPressGestureEvent_construct(): KPointer
@@ -5293,25 +5289,15 @@ export class ArkUIGeneratedNativeModule {
     native static _Scroller_construct(): KPointer
     @ani.unsafe.Direct
     native static _Scroller_getFinalizer(): KPointer
-    @ani.unsafe.Direct
     native static _Scroller_scrollTo(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
     native static _Scroller_scrollEdge(ptr: KPointer, value: KInt, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Quick
     native static _Scroller_fling(ptr: KPointer, velocity: KDouble): void
-    @ani.unsafe.Direct
     native static _Scroller_scrollPage(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Quick
     native static _Scroller_currentOffset(ptr: KPointer): KInteropReturnBuffer
-    @ani.unsafe.Direct
     native static _Scroller_scrollToIndex(ptr: KPointer, value: KInt, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
     native static _Scroller_scrollBy(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
     native static _Scroller_isAtEnd(ptr: KPointer): boolean
-    @ani.unsafe.Quick
     native static _Scroller_getItemRect(ptr: KPointer, index: KInt): KInteropReturnBuffer
-    @ani.unsafe.Quick
     native static _Scroller_getItemIndex(ptr: KPointer, x: KDouble, y: KDouble): int32
     @ani.unsafe.Direct
     native static _ScrollMotion_construct(position: number, velocity: number, min: number, max: number, prop: KPointer): KPointer

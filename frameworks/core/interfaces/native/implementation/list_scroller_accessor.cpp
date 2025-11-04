@@ -13,11 +13,14 @@
  * limitations under the License.
  */
 
+#include "arkoala_api_generated.h"
+#include "list_scroller_peer_impl.h"
+#include "scroller_peer_impl.h"
+
 #include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/ani/ani_api.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "list_scroller_peer_impl.h"
-#include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::Converter {
 template<>
@@ -45,16 +48,19 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_RectResult GetItemRectInGroupImpl(Ark_ListScroller peer,
+Ark_RectResult GetItemRectInGroupImpl(Ark_VMContext vmContext,
+                                      Ark_ListScroller peer,
                                       Ark_Int32 index,
                                       Ark_Int32 indexInGroup)
 {
     auto errValue = Converter::ArkValue<Ark_RectResult>(Rect{});
     CHECK_NULL_RETURN(peer, errValue);
+    CHECK_NULL_RETURN(vmContext, errValue);
 
     auto scrollController = peer->GetController().Upgrade();
     if (!scrollController) {
         LOGE("ListScrollerAccessor::GetItemRectInGroupImpl. Controller isn't bound to a component.");
+        ScrollerPeerImpl::ThrowControllerError(reinterpret_cast<ani_env*>(vmContext));
         return errValue;
     }
 
@@ -63,7 +69,8 @@ Ark_RectResult GetItemRectInGroupImpl(Ark_ListScroller peer,
     auto rect = scrollController->GetItemRectInGroup(convIndex, convIndexInGroup);
     return Converter::ArkValue<Ark_RectResult>(rect);
 }
-void ScrollToItemInGroupImpl(Ark_ListScroller peer,
+void ScrollToItemInGroupImpl(Ark_VMContext vmContext,
+                             Ark_ListScroller peer,
                              Ark_Int32 index,
                              Ark_Int32 indexInGroup,
                              const Opt_Boolean* smooth,
@@ -74,6 +81,7 @@ void ScrollToItemInGroupImpl(Ark_ListScroller peer,
     auto scrollController = peer->GetController().Upgrade();
     if (!scrollController) {
         LOGE("ListScrollerAccessor::ScrollToItemInGroupImpl. Controller isn't bound to a component.");
+        ScrollerPeerImpl::ThrowControllerError(reinterpret_cast<ani_env*>(vmContext));
         return;
     }
 
@@ -84,13 +92,15 @@ void ScrollToItemInGroupImpl(Ark_ListScroller peer,
     scrollController->JumpToItemInGroup(indexValue, indexInGroupValue,
         smoothValue.value_or(false), alignValue.value_or(ScrollAlign::NONE));
 }
-void CloseAllSwipeActionsImpl(Ark_ListScroller peer,
+void CloseAllSwipeActionsImpl(Ark_VMContext vmContext,
+                              Ark_ListScroller peer,
                               const Opt_CloseSwipeActionOptions* options)
 {
     CHECK_NULL_VOID(peer);
     auto scrollController = peer->GetController().Upgrade();
     if (!scrollController) {
         LOGE("ListScrollerAccessor::CloseAllSwipeActionsImpl. Controller isn't bound to a component.");
+        ScrollerPeerImpl::ThrowControllerError(reinterpret_cast<ani_env*>(vmContext));
         return;
     }
 
@@ -99,10 +109,11 @@ void CloseAllSwipeActionsImpl(Ark_ListScroller peer,
         auto func =  [arkCallback = CallbackHelper(funcOpt.value())]() { arkCallback.Invoke(); };
         scrollController->CloseAllSwipeActions(std::move(func));
     } else {
-        scrollController->CloseAllSwipeActions(nullptr);
+        ScrollerPeerImpl::ThrowParamsError(reinterpret_cast<ani_env*>(vmContext));
     }
 }
-Ark_VisibleListContentInfo GetVisibleListContentInfoImpl(Ark_ListScroller peer,
+Ark_VisibleListContentInfo GetVisibleListContentInfoImpl(Ark_VMContext vmContext,
+                                                         Ark_ListScroller peer,
                                                          Ark_Float64 x,
                                                          Ark_Float64 y)
 {
@@ -112,6 +123,7 @@ Ark_VisibleListContentInfo GetVisibleListContentInfoImpl(Ark_ListScroller peer,
     auto scrollController = peer->GetController().Upgrade();
     if (!scrollController) {
         LOGE("ListScrollerPeerAccessor::GetVisibleListContentInfoImpl. Controller isn't bound to a component.");
+        ScrollerPeerImpl::ThrowControllerError(reinterpret_cast<ani_env*>(vmContext));
         return errValue;
     }
 
