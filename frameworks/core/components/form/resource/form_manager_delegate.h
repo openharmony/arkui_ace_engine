@@ -202,11 +202,13 @@ private:
     void CheckWhetherSurfaceChangeFailed();
     void UpdateFormSizeWantCache(float width, float height, float formViewScale, float borderWidth);
     void HandleDueControlForm(bool isDisablePolicy, bool isControl);
+    
     inline void SetFormRendererDispatcher(sptr<IFormRendererDispatcher> &rendererDispatcher)
     {
         std::lock_guard<std::mutex> lock(formRenderDispatcherMutex_);
         formRendererDispatcher_ = rendererDispatcher;
     }
+
     inline void ClearFormRendererDispatcher()
     {
         std::lock_guard<std::mutex> lock(formRenderDispatcherMutex_);
