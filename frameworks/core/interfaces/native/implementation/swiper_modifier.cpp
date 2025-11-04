@@ -22,6 +22,7 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/validators.h"
+#include "core/interfaces/native/utility/peer_utils.h"
 #include "core/interfaces/native/implementation/swiper_content_transition_proxy_peer.h"
 #include "core/interfaces/native/implementation/swiper_controller_modifier_peer_impl.h"
 #include "core/interfaces/native/implementation/indicator_component_controller_peer.h"
@@ -616,7 +617,7 @@ void SetCustomContentTransitionImpl(Ark_NativePointer node,
 
     transitionInfo.transition =
         [arkCallback = CallbackHelper(optValue->transition)](const RefPtr<SwiperContentTransitionProxy>& proxy) {
-        auto peer = new SwiperContentTransitionProxyPeer();
+        auto peer = PeerUtils::CreatePeer<SwiperContentTransitionProxyPeer>();
         CHECK_NULL_VOID(peer);
         peer->SetHandler(proxy);
         arkCallback.Invoke(peer);
