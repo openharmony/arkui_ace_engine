@@ -1610,6 +1610,84 @@ HWTEST_F(WebPatternSelectTestNg, CreateSnapshotImageFrameNode_002, TestSize.Leve
 }
 
 /**
+ * @tc.name: InitSnapshotGesture_001
+ * @tc.desc: InitSnapshotGesture.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternSelectTestNg, InitSnapshotGesture_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    WeakPtr<EventHub> eventHub = nullptr;
+    RefPtr<GestureEventHub> gestureHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+    EXPECT_NE(gestureHub, nullptr);
+
+    MockPipelineContext::SetUp();
+    webPattern->InitSnapshotGesture(nullptr);
+    webPattern->InitSnapshotGesture(gestureHub);
+    EXPECT_NE(gestureHub, nullptr);
+    MockPipelineContext::TearDown();
+#endif
+}
+
+/**
+ * @tc.name: SnapshotTouchReporter_001
+ * @tc.desc: SnapshotTouchReporter.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternSelectTestNg, SnapshotTouchReporter_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto reporter = std::make_unique<SnapshotTouchReporter>();
+
+    reporter->OnAppear();
+    EXPECT_TRUE(reporter->appearTime_.has_value());
+    EXPECT_NE(reporter->appearTime_.value(), 0);
+    EXPECT_FALSE(reporter->infos_ == nullptr);
+
+    reporter->OnClick();
+    reporter->OnPan();
+    EXPECT_EQ(reporter->infos_->GetArraySize(), 2);
+
+    auto item0 = reporter->infos_->GetArrayItem(0);
+    EXPECT_TRUE(item0->Contains("time"));
+    EXPECT_TRUE(item0->Contains("type"));
+    EXPECT_EQ(item0->GetUInt("type"), static_cast<uint32_t>(GestureType::CLICK));
+
+    auto item1 = reporter->infos_->GetArrayItem(1);
+    EXPECT_TRUE(item1->Contains("time"));
+    EXPECT_TRUE(item1->Contains("type"));
+    EXPECT_EQ(item1->GetUInt("type"), static_cast<uint32_t>(GestureType::PAN));
+
+    reporter->OnDisappear();
+    EXPECT_FALSE(reporter->appearTime_.has_value());
+    EXPECT_TRUE(reporter->infos_ == nullptr);
+
+    reporter->OnClick();
+    reporter->OnPan();
+    EXPECT_TRUE(reporter->infos_ == nullptr);
+
+    reporter->appearTime_ = std::optional<uint64_t>(1000);
+    reporter->OnDisappear();
+    EXPECT_FALSE(reporter->appearTime_.has_value());
+    EXPECT_TRUE(reporter->infos_ == nullptr);
+
+    reporter->OnAppear();
+    reporter->appearTime_ = std::nullopt;
+    reporter->OnDisappear();
+    EXPECT_FALSE(reporter->appearTime_.has_value());
+    EXPECT_TRUE(reporter->infos_ == nullptr);
+#endif
+}
+
+/**
  * @tc.name: GetShadowFromTheme_001
  * @tc.desc: GetShadowFromTheme when get type none.
  * @tc.type: FUNC
