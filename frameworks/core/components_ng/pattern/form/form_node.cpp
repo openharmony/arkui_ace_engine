@@ -201,11 +201,11 @@ private:
     WeakPtr<FormNode> weakFormNode_;
 };
 
-class FormAccessibilitySAObserverCallback : public AccessibilitySAObserverCallback {
+class FormAccessibilityScreenReaderObserverCallback : public AccessibilityScreenReaderObserverCallback {
 public:
-    explicit FormAccessibilitySAObserverCallback(const WeakPtr<FormNode> &formNode, int64_t accessibilityId)
-        : AccessibilitySAObserverCallback(accessibilityId), weakFormNode_(formNode) {}
-    ~FormAccessibilitySAObserverCallback() override = default;
+    explicit FormAccessibilityScreenReaderObserverCallback(const WeakPtr<FormNode> &formNode, int64_t accessibilityId)
+        : AccessibilityScreenReaderObserverCallback(accessibilityId), weakFormNode_(formNode) {}
+    ~FormAccessibilityScreenReaderObserverCallback() override = default;
 
     bool OnState(bool state) override
     {
@@ -228,7 +228,7 @@ FormNode::~FormNode()
     auto accessibilityManager = pipeline->GetAccessibilityManager();
     CHECK_NULL_VOID(accessibilityManager);
     accessibilityManager->DeregisterAccessibilityChildTreeCallback(GetAccessibilityId());
-    accessibilityManager->DeregisterAccessibilitySAObserverCallback(GetAccessibilityId());
+    accessibilityManager->DeregisterScreenReaderObserverCallback(GetAccessibilityId());
 }
 
 HitTestResult FormNode::AxisTest(const PointF& globalPoint, const PointF& parentLocalPoint,
@@ -471,9 +471,9 @@ void FormNode::RegisterFormAccessibilityCallback()
     auto accessibilityManager = pipeline->GetAccessibilityManager();
     CHECK_NULL_VOID(accessibilityManager);
 
-    accessibilitySAObserverCallback_ = std::make_shared<FormAccessibilitySAObserverCallback>(
+    accessibilityScreenReaderObserverCallback_ = std::make_shared<FormAccessibilityScreenReaderObserverCallback>(
         WeakClaim(this), GetAccessibilityId());
-    accessibilityManager->RegisterAccessibilitySAObserverCallback(GetAccessibilityId(),
-        accessibilitySAObserverCallback_);
+    accessibilityManager->RegisterScreenReaderObserverCallback(GetAccessibilityId(),
+        accessibilityScreenReaderObserverCallback_);
 }
 } // namespace OHOS::Ace::NG

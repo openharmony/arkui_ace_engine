@@ -2179,4 +2179,23 @@ HWTEST_F(FormPatternTest, FormPatternTest_061, TestSize.Level0)
     pattern->SetAccessibilityState(true);
     EXPECT_TRUE(pattern->IsAccessibilityState());
 }
+
+/**
+ * @tc.name: FormPatternTest_062
+ * @tc.desc: SetObscured
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormPatternTest, FormPatternTest_062, TestSize.Level0)
+{
+    RefPtr<FormNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    // pattern not null
+    EXPECT_NE(pattern, nullptr);
+
+    pattern->SetObscured(false);
+    EXPECT_FALSE(pattern->isFormObscured_);
+
+    pattern->SetObscured(true);
+    EXPECT_TRUE(pattern->isFormObscured_);
+}
 } // namespace OHOS::Ace::NG

@@ -568,7 +568,7 @@ void FormPattern::RequestRender()
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
- 
+
     host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     auto parent = host->GetParent();
     if (parent) {
@@ -3060,7 +3060,7 @@ void FormPattern::SetFormAccessibilityAction()
     CHECK_NULL_VOID(accessibilityProperty);
     if (isDynamic_ || formSpecialStyle_.IsForbidden() || formSpecialStyle_.IsLocked()) {
         accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
-    } else {
+    } else if (IsAccessibilityState()) {
         accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::YES_STR);
         accessibilityProperty->SetAccessibilityRole(COLUMN_ROLE);
     }
