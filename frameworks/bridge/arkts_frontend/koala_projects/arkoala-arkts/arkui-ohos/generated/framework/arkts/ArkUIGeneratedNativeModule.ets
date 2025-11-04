@@ -4455,6 +4455,14 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _LetterSpacingStyle_getLetterSpacing(ptr: KPointer): double
     @ani.unsafe.Direct
+    native static _LevelOrderExtender_construct(): KPointer
+    @ani.unsafe.Direct
+    native static _LevelOrderExtender_getFinalizer(): KPointer
+    @ani.unsafe.Direct
+    native static _LevelOrderExtender_clamp(order: number): KPointer
+    @ani.unsafe.Direct
+    native static _LevelOrderExtender_getOrder(ptr: KPointer): number
+    @ani.unsafe.Direct
     native static _LifeCycle_construct(): KPointer
     @ani.unsafe.Direct
     native static _LifeCycle_getFinalizer(): KPointer

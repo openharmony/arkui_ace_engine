@@ -21,7 +21,7 @@ import { BlurStyle, ShadowOptions, ShadowStyle, HoverModeAreaType, Rectangle, Tr
     DismissReason, BackgroundBlurStyleOptions, BackgroundEffectOptions } from 'arkui/framework'
 import { CustomBuilder } from 'arkui/framework'
 import { DialogAlignment } from 'arkui/framework'
-import { DismissDialogAction } from 'arkui/framework'
+import { DismissDialogAction, LevelOrderExtender } from 'arkui/framework'
 import { BorderStyle, Alignment } from 'arkui/framework'
 import { Resource } from 'global.resource';
 import { LengthMetrics } from 'arkui/Graphics';
@@ -38,23 +38,13 @@ export enum ImmersiveMode {
     EXTEND = 1,
 }
 
-export class LevelOrder {
-    private order_: number = 0.0;
-    private static ORDER_MIN: number = -100000.0;
-    private static ORDER_MAX: number = 100000.0;
-    constructor() {}
+export class LevelOrder extends LevelOrderExtender {
+    constructor(peerPtr: KPointer) {
+        super(peerPtr)
+    }
     public static clamp(order: number): LevelOrder {
-        let levelOrderImpl = new LevelOrder();
-        levelOrderImpl.setOrder(order);
-        return levelOrderImpl;
-    }
-    public getOrder(): number {
-        return this.order_;
-    }
-
-    private setOrder(order: number): void {
-        this.order_ = order < LevelOrder.ORDER_MIN ?
-            LevelOrder.ORDER_MIN : (order > LevelOrder.ORDER_MAX ? LevelOrder.ORDER_MAX : order);
+        const extender = LevelOrderExtender.clamp(order)
+        return new LevelOrder(extender.getPeer()!.ptr)
     }
 }
 

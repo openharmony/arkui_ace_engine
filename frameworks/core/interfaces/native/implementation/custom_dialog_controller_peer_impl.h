@@ -76,6 +76,7 @@ public:
     void SetLevelUniqueId(Opt_Int32 levelUniqueId);
     void SetImersiveMode(Opt_ImmersiveMode immersiveMode);
     void SetLevelOrder(Opt_LevelOrder levelOrder);
+    void SetLevelOrderExtender(Opt_LevelOrderExtender levelOrderExtender);
     void SetFocusable(Opt_Boolean focusable);
 
     DialogProperties GetDialogProperties() const;

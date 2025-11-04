@@ -13981,6 +13981,31 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     } // LetterSpacingStyleAccessor
+    namespace LevelOrderExtenderAccessor {
+    void DestroyPeerImpl(Ark_LevelOrderExtender peer)
+    {
+        auto peerImpl = reinterpret_cast<LevelOrderExtenderPeerImpl *>(peer);
+        if (peerImpl) {
+            delete peerImpl;
+        }
+    }
+    Ark_LevelOrderExtender ConstructImpl()
+    {
+        return {};
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        return reinterpret_cast<void *>(&DestroyPeerImpl);
+    }
+    Ark_LevelOrderExtender ClampImpl(const Ark_Number* order)
+    {
+        return {};
+    }
+    Ark_Number GetOrderImpl(Ark_LevelOrderExtender peer)
+    {
+        return {};
+    }
+    } // LevelOrderExtenderAccessor
     namespace LifeCycleAccessor {
     void DestroyPeerImpl(Ark_LifeCycle peer)
     {
@@ -19856,6 +19881,22 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct LetterSpacingStylePeer {
         virtual ~LetterSpacingStylePeer() = default;
     };
+
+    const GENERATED_ArkUILevelOrderExtenderAccessor* GetLevelOrderExtenderAccessor()
+    {
+        static const GENERATED_ArkUILevelOrderExtenderAccessor LevelOrderExtenderAccessorImpl {
+            LevelOrderExtenderAccessor::DestroyPeerImpl,
+            LevelOrderExtenderAccessor::ConstructImpl,
+            LevelOrderExtenderAccessor::GetFinalizerImpl,
+            LevelOrderExtenderAccessor::ClampImpl,
+            LevelOrderExtenderAccessor::GetOrderImpl,
+        };
+        return &LevelOrderExtenderAccessorImpl;
+    }
+
+    struct LevelOrderExtenderPeer {
+        virtual ~LevelOrderExtenderPeer() = default;
+    };
     const GENERATED_ArkUILifeCycleAccessor* GetLifeCycleAccessor()
     {
         static const GENERATED_ArkUILifeCycleAccessor LifeCycleAccessorImpl {
@@ -21859,6 +21900,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetLazyBuildAccessor,
             GetLazyForEachOpsAccessor,
             GetLetterSpacingStyleAccessor,
+            GetLevelOrderExtenderAccessor,
             GetLifeCycleAccessor,
             GetLinearGradientAccessor,
             GetLinearIndicatorControllerAccessor,
