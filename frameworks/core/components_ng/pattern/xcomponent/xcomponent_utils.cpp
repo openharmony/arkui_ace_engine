@@ -238,4 +238,38 @@ ArkUI_XComponent_ImageAnalyzerState XComponentUtils::ConvertNativeXComponentAnal
             return ArkUI_XComponent_ImageAnalyzerState::ARKUI_XCOMPONENT_AI_ANALYSIS_DISABLED;
     }
 }
+
+std::string XComponentUtils::XComponentTypeToString(XComponentType type)
+{
+    switch (type) {
+        case XComponentType::UNKNOWN:
+            return "unknown";
+        case XComponentType::SURFACE:
+            return "surface";
+        case XComponentType::COMPONENT:
+            return "component";
+        case XComponentType::TEXTURE:
+            return "texture";
+        case XComponentType::NODE:
+            return "node";
+        default:
+            return "unknown";
+    }
+}
+
+std::string XComponentUtils::XComponentNodeTypeToString(XComponentNodeType type)
+{
+    switch (type) {
+        case XComponentNodeType::UNKNOWN:
+            return "unknown";
+        case XComponentNodeType::TYPE_NODE:
+            return "type_node";
+        case XComponentNodeType::DECLARATIVE_NODE:
+            return "declarative_node";
+        case XComponentNodeType::CNODE:
+            return "cnode";
+        default:
+            return "unknown";
+    }
+}
 } // namespace OHOS::Ace::NG

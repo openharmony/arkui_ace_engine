@@ -90,40 +90,6 @@ XComponentPattern::XComponentPattern(const std::optional<std::string>& id, XComp
     RegisterSurfaceCallbackModeEvent();
 }
 
-std::string XComponentPattern::XComponentTypeToString(XComponentType type)
-{
-    switch (type) {
-        case XComponentType::UNKNOWN:
-            return "unknown";
-        case XComponentType::SURFACE:
-            return "surface";
-        case XComponentType::COMPONENT:
-            return "component";
-        case XComponentType::TEXTURE:
-            return "texture";
-        case XComponentType::NODE:
-            return "node";
-        default:
-            return "unknown";
-    }
-}
-
-std::string XComponentPattern::XComponentNodeTypeToString(XComponentNodeType type)
-{
-    switch (type) {
-        case XComponentNodeType::UNKNOWN:
-            return "unknown";
-        case XComponentNodeType::TYPE_NODE:
-            return "type_node";
-        case XComponentNodeType::DECLARATIVE_NODE:
-            return "declarative_node";
-        case XComponentNodeType::CNODE:
-            return "cnode";
-        default:
-            return "unknown";
-    }
-}
-
 void XComponentPattern::AdjustNativeWindowSize(float width, float height)
 {
     auto host = GetHost();
@@ -676,7 +642,8 @@ void XComponentPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& conf
 void XComponentPattern::DumpInfo()
 {
     DumpLog::GetInstance().AddDesc(std::string("xcomponentId: ").append(id_.value_or("no id")));
-    DumpLog::GetInstance().AddDesc(std::string("xcomponentType: ").append(XComponentTypeToString(type_)));
+    DumpLog::GetInstance().AddDesc(std::string("xcomponentType: ").append(
+        XComponentUtils::XComponentTypeToString(type_)));
     DumpLog::GetInstance().AddDesc(std::string("libraryName: ").append(libraryname_.value_or("no library name")));
     DumpLog::GetInstance().AddDesc(std::string("surfaceId: ").append(surfaceId_));
     DumpLog::GetInstance().AddDesc(std::string("surfaceRect: ").append(paintRect_.ToString()));
@@ -1378,9 +1345,9 @@ void XComponentPattern::SetHandlingRenderContextForSurface(const RefPtr<RenderCo
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
+    renderContext->ClearChildren();
     auto pipeline = host->GetContext();
     handlingSurfaceRenderContext_->SetRSUIContext(pipeline);
-    renderContext->ClearChildren();
     renderContext->AddChild(handlingSurfaceRenderContext_, 0);
     handlingSurfaceRenderContext_->SetBounds(
         paintRect_.GetX(), paintRect_.GetY(), paintRect_.Width(), paintRect_.Height());
@@ -1546,9 +1513,9 @@ bool XComponentPattern::StopTextureExport()
     CHECK_NULL_RETURN(host, false);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
+    renderContext->ClearChildren();
     auto pipeline = host->GetContext();
     handlingSurfaceRenderContext_->SetRSUIContext(pipeline);
-    renderContext->ClearChildren();
     renderContext->AddChild(handlingSurfaceRenderContext_, 0);
     renderContext->SetIsNeedRebuildRSTree(true);
     return true;
@@ -2151,7 +2118,7 @@ void XComponentPattern::SetRenderFit(RenderFit renderFit)
 void XComponentPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
 {
     json->Put("xcomponentId", id_.value_or("no id").c_str());
-    json->Put("xcomponentType", XComponentTypeToString(type_).c_str());
+    json->Put("xcomponentType", XComponentUtils::XComponentTypeToString(type_).c_str());
     json->Put("libraryName", libraryname_.value_or("no library name").c_str());
     json->Put("surfaceId", surfaceId_.c_str());
     json->Put("surfaceRect", paintRect_.ToString().c_str());

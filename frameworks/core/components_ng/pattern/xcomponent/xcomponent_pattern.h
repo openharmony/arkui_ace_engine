@@ -386,8 +386,6 @@ protected:
     void AddAfterLayoutTaskForExportTexture();
     void UpdateTransformHint();
     void DumpInfo() override;
-    static std::string XComponentTypeToString(XComponentType type);
-    static std::string XComponentNodeTypeToString(XComponentNodeType type);
     void AdjustNativeWindowSize(float width, float height);
     bool IsSupportImageAnalyzerFeature();
     void UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode);

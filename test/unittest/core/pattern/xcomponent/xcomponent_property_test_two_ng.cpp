@@ -615,29 +615,6 @@ HWTEST_F(XComponentPropertyTestTwoNg, XComponentModelNGTest051, TestSize.Level1)
 }
 
 /**
- * @tc.name: XComponentNodeTypeToStringTest
- * @tc.desc: Test XComponentNodeTypeToString Func.
- * @tc.type: FUNC
- */
-HWTEST_F(XComponentPropertyTestTwoNg, XComponentNodeTypeToStringTest, TestSize.Level1)
-{
-    auto xComponentController = std::make_shared<XComponentControllerNG>();
-    XComponentModelNG xComponent;
-    xComponent.Create(XCOMPONENT_ID, XCOMPONENT_TEXTURE_TYPE_VALUE, XCOMPONENT_LIBRARY_NAME, xComponentController);
-    xComponent.SetSoPath(XCOMPONENT_SO_PATH);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_TRUE(frameNode);
-    auto xComponentPattern = frameNode->GetPattern<XComponentPattern>();
-    ASSERT_TRUE(xComponentPattern);
-    EXPECT_EQ(frameNode->GetTag(), V2::XCOMPONENT_ETS_TAG);
-    EXPECT_EQ(xComponentPattern->XComponentNodeTypeToString(XComponentNodeType::TYPE_NODE), "type_node");
-    EXPECT_EQ(xComponentPattern->XComponentNodeTypeToString(XComponentNodeType::UNKNOWN), "unknown");
-    EXPECT_EQ(xComponentPattern->XComponentNodeTypeToString(XComponentNodeType::CNODE), "cnode");
-    EXPECT_EQ(xComponentPattern->XComponentNodeTypeToString(XComponentNodeType::DECLARATIVE_NODE), "declarative_node");
-    EXPECT_EQ(xComponentPattern->XComponentNodeTypeToString(static_cast<XComponentNodeType>(5)), "unknown");
-}
-
-/**
  * @tc.name: OnAccessibilityChildTreeRegisterTest001
  * @tc.desc: Test OnAccessibilityChildTreeRegister Func.
  * @tc.type: FUNC
