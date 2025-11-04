@@ -1032,7 +1032,7 @@ HWTEST_F(MenuItemTestNg, MenuItemPatternUpdatePasteDisabledOpacity001, TestSize.
             return nullptr;
         }
     });
-    MenuView::CreatePasteButton({false, false}, option, row, []() {});
+    MenuView::CreatePasteButton(false, option, row, []() {});
     auto optionFirstChild = option->GetChildAtIndex(0);
     ASSERT_NE(optionFirstChild, nullptr);
     auto pasteButtonChildren = optionFirstChild->GetChildren();

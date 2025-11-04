@@ -239,6 +239,7 @@ void SelectContentOverlayManager::UpdateStatusInfos(SelectOverlayInfo& overlayIn
         overlayInfo.secondHandle.isShow = false;
     }
     SelectMenuInfo menuInfo;
+    // for menuInfo update, some AI update logic in BaseTextSelectOverlay::OnUpdateSelectOverlayInfo
     selectOverlayHolder_->OnUpdateMenuInfo(menuInfo, DIRTY_ALL_MENU_ITEM);
     overlayInfo.menuInfo = menuInfo;
     overlayInfo.callerFrameNode = selectOverlayHolder_->GetOwner();

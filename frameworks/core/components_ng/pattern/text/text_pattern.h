@@ -641,6 +641,16 @@ public:
         return isAskCeliaEnabled_;
     }
 
+    void SetIsShowAskCeliaInRightClick(bool isShowAskCeliaInRightClick)
+    {
+        isShowAskCeliaInRightClick_ = isShowAskCeliaInRightClick && IsNeedAskCelia();
+    }
+
+    bool IsShowAskCeliaInRightClick() const
+    {
+        return isShowAskCeliaInRightClick_;
+    }
+
     void HandleOnCopySpanString();
     virtual void HandleOnSelectAll();
     bool IsShowTranslate();
@@ -1068,6 +1078,7 @@ protected:
     bool keyEventInitialized_ = false;
     bool isShowAIMenuOption_ = false;
     bool isAskCeliaEnabled_ = false;
+    bool isShowAskCeliaInRightClick_ = false;
     std::unordered_map<TextDataDetectType, AISpan> aiMenuOptions_;
 
     RefPtr<FrameNode> dragNode_;

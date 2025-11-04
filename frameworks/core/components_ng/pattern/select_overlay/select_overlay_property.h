@@ -241,6 +241,7 @@ struct SelectMenuInfo {
     OptionMenuType menuType = OptionMenuType::TOUCH_MENU;
     bool isAskCeliaEnabled = false;
     bool isShowAIMenuOptionChanged = false;
+    bool isShowAskCeliaInRightClick = false;
 
     // Customize menu information.
     std::optional<int32_t> responseType;
@@ -257,7 +258,8 @@ struct SelectMenuInfo {
                  (showSearch == info.showSearch) && (showShare == info.showShare) &&
                  (showCameraInput == info.showCameraInput) && (showAIWrite == info.showAIWrite) &&
                  (aiMenuOptionType == info.aiMenuOptionType) && !info.hasOnPrepareMenuCallback &&
-                 (isAskCeliaEnabled == info.isAskCeliaEnabled));
+                 (isAskCeliaEnabled == info.isAskCeliaEnabled) &&
+                 (isShowAskCeliaInRightClick == info.isShowAskCeliaInRightClick));
     }
 
     std::string ToString() const

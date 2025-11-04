@@ -525,7 +525,7 @@ HWTEST_F(MenuItemPatternOptionTestNg, CreatePasteButton001, TestSize.Level1)
             return nullptr;
         }
     });
-    MenuView::CreatePasteButton({false, false}, option, row, []() {});
+    MenuView::CreatePasteButton(false, option, row, []() {});
     auto PasteButtonNode = option->GetChildAtIndex(0)->GetChildren();
     EXPECT_FALSE(PasteButtonNode.empty());
 }
@@ -710,7 +710,7 @@ HWTEST_F(MenuItemPatternOptionTestNg, OptionPaintMethodTestNg006, TestSize.Level
 {
     /**
      * @tc.steps: step1. create option node and next node.
-     * @tc.expected: option node and next node are not null
+     * @tc.expected: option node and next node are not null.
      */
 
     MockPipelineContextGetTheme();
@@ -764,7 +764,7 @@ HWTEST_F(MenuItemPatternOptionTestNg, OptionPaintMethodTestNg007, TestSize.Level
 {
     /**
      * @tc.steps: step1. create option node and next node.
-     * @tc.expected: option node and next node are not null
+     * @tc.expected: option node and next node are not null.
      */
 
     MockPipelineContextGetTheme();
@@ -818,7 +818,7 @@ HWTEST_F(MenuItemPatternOptionTestNg, OptionPaintMethodTestNg008, TestSize.Level
 {
     /**
      * @tc.steps: step1. create option node and next node.
-     * @tc.expected: option node and next node are not null
+     * @tc.expected: option node and next node are not null.
      */
 
     MockPipelineContextGetTheme();
@@ -872,7 +872,7 @@ HWTEST_F(MenuItemPatternOptionTestNg, OptionPaintMethodTestNg009, TestSize.Level
 {
     /**
      * @tc.steps: step1. create option node and next node.
-     * @tc.expected: option node and next node are not null
+     * @tc.expected: option node and next node are not null.
      */
 
     MockPipelineContextGetTheme();

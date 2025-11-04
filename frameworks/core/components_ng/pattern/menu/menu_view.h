@@ -77,8 +77,8 @@ public:
         const RefPtr<FrameNode>& child = nullptr);
     static RefPtr<FrameNode> CreateText(const std::string& value, const RefPtr<FrameNode>& parent,
         bool autoWrapFlag = false, bool isAIMenuOption = false);
-    static void CreatePasteButton(std::pair<bool, bool> optionsHasIconInfo, const RefPtr<FrameNode>& option,
-        const RefPtr<FrameNode>& row, const std::function<void()>& onClickFunc, const std::string& icon = "");
+    static void CreatePasteButton(bool optionsHasIcon, const RefPtr<FrameNode>& option, const RefPtr<FrameNode>& row,
+        const std::function<void()>& onClickFunc, const std::string& icon = "");
     static RefPtr<FrameNode> CreateSelectOption(const SelectParam& param, int32_t index, bool autoWrapFlag = false);
     static RefPtr<FrameNode> CreateSymbol(const std::function<void(WeakPtr<NG::FrameNode>)>& symbol,
         const RefPtr<FrameNode>& parent, const RefPtr<FrameNode>& child = nullptr,

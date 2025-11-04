@@ -319,7 +319,7 @@ void TextFieldSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOv
     menuInfo.showSearch = menuInfo.showCopy && pattern->IsShowSearch() && IsNeedMenuSearch();
     menuInfo.showShare = menuInfo.showCopy && IsSupportMenuShare() && IsNeedMenuShare();
     menuInfo.showAIWrite = pattern->IsShowAIWrite();
-    if (pattern->IsShowAIMenuOption() && !pattern->GetAIItemOption().empty()) {
+    if (pattern->IsShowAIMenuOption() && !pattern->GetAIItemOption().empty() && !pattern->IsInPasswordMode()) {
         menuInfo.aiMenuOptionType = pattern->GetAIItemOption().begin()->second.type;
     } else {
         menuInfo.aiMenuOptionType = TextDataDetectType::INVALID;

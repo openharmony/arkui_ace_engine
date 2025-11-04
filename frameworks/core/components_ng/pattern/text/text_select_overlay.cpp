@@ -342,6 +342,7 @@ void TextSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOverlay
         menuInfo.aiMenuOptionType = TextDataDetectType::INVALID;
     }
     menuInfo.isAskCeliaEnabled = textPattern->IsAskCeliaEnabled();
+    menuInfo.isShowAskCeliaInRightClick = textPattern->IsShowAskCeliaInRightClick();
     menuInfo.menuIsShow = IsShowMenu();
     menuInfo.showCut = false;
     menuInfo.showPaste = false;
