@@ -5338,6 +5338,12 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _SearchOps_registerSearchValueCallback(node: KPointer, value: KStringPtr, thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
+    native static _SpringBackAction_construct(): KPointer
+    @ani.unsafe.Direct
+    native static _SpringBackAction_getFinalizer(): KPointer
+    @ani.unsafe.Direct
+    native static _SpringBackAction_springBack(ptr: KPointer): void
+    @ani.unsafe.Direct
     native static _SpringMotion_construct(start: number, end: number, velocity: number, prop: KPointer): KPointer
     @ani.unsafe.Direct
     native static _SpringMotion_getFinalizer(): KPointer
