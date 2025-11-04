@@ -401,9 +401,6 @@ void ContainerPickerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pickerLayoutProperty);
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-    if (pickerLayoutProperty->GetPositionProperty()) {
-        align_ = pickerLayoutProperty->GetPositionProperty()->GetAlignment().value_or(Alignment::CENTER);
-    }
 
     CalcMainAndMiddlePos();
     auto padding = pickerLayoutProperty->CreatePaddingAndBorder();
