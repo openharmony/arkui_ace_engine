@@ -3107,6 +3107,8 @@ interfaces/native/node/textpicker_option.cpp @arkui001
 interfaces/native/node/waterflow_section_option.cpp @arkuiscroll
 interfaces/native/node/waterflow_section_option.h @arkuiscroll
 interfaces/native/ui_input_event.h @ArkUI_Event
+interfaces/native/node/text_native_impl.h @huawei_g_five
+interfaces/native/node/text_native_impl.cpp @huawei_g_five
 
 [Innerkits Interfaces]
 interfaces/inner_api/ace/ace_forward_compatibility.cpp @arkui_framework_xnode
