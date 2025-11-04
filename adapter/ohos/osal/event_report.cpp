@@ -134,6 +134,12 @@ constexpr char EVENT_KEY_GENERAL_INTERACTION_ERROR[] = "GENERAL_INTERACTION_ERRO
 constexpr char EVENT_KEY_TOUCHEVENT_ID[] = "TOUCHEVENT_ID";
 constexpr char EVENT_KEY_FINGER_ID[] = "FINGER_ID";
 constexpr char EVENT_KEY_TAG[] = "TAG";
+constexpr char EVENT_KEY_BLANKLESS_SNAPSHOT_TOUCH[] = "BLANKLESS_SNAPSHOT_TOUCH";
+constexpr char EVENT_KEY_PNAMEID[] = "PNAMEID";
+constexpr char EVENT_KEY_PVERSIONID[] = "PVERSIONID";
+constexpr char EVENT_KEY_APPEAR_TIMESTAMP[] = "APPEAR_TIMESTAMP";
+constexpr char EVENT_KEY_TOUCH_EVENTS[] = "TOUCH_EVENTS";
+constexpr char EVENT_KEY_DISAPPEAR_TIMESTAMP[] = "DISAPPEAR_TIMESTAMP";
 constexpr int32_t WAIT_MODIFY_TIMEOUT = 10;
 constexpr int32_t WAIT_MODIFY_FAILED = 1;
 
@@ -717,5 +723,19 @@ void EventReport::ReportGeneralInteractionError(const GeneralInteractionErrorInf
         EVENT_KEY_TOUCHEVENT_ID, generalEventErrorInfo.touchEventId,
         EVENT_KEY_FINGER_ID, generalEventErrorInfo.fingerId,
         EVENT_KEY_TAG, generalEventErrorInfo.tag);
+}
+
+void EventReport::ReportWebBlanklessSnapshotTouchEvent(uint64_t startTime, const std::string& touchInfo,
+    uint64_t endTime)
+{
+    auto packageName = Container::CurrentBundleName();
+    auto versionName = AceApplicationInfo::GetInstance().GetAppVersionName();
+    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::WEBVIEW, EVENT_KEY_BLANKLESS_SNAPSHOT_TOUCH,
+        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+        EVENT_KEY_PNAMEID, packageName,
+        EVENT_KEY_PVERSIONID, versionName,
+        EVENT_KEY_APPEAR_TIMESTAMP, startTime,
+        EVENT_KEY_TOUCH_EVENTS, touchInfo,
+        EVENT_KEY_DISAPPEAR_TIMESTAMP, endTime);
 }
 } // namespace OHOS::Ace

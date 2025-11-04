@@ -126,6 +126,17 @@ struct PipInfo {
     int height;
 };
 
+class SnapshotTouchReporter {
+public:
+    void OnAppear();
+    void OnDisappear();
+    void OnClick();
+    void OnPan();
+private:
+    std::optional<uint64_t> appearTime_;
+    std::unique_ptr<JsonValue> infos_;
+};
+
 enum class WebWindowMaximizeReason : uint32_t {
     MAXIMIZE = 0,
     EXIT_FREE_MULTI_MODE,
@@ -957,6 +968,7 @@ public:
     void CreateSnapshotImageFrameNode(const std::string& snapshotPath, uint32_t width, uint32_t height);
     void RemoveSnapshotFrameNode(bool isAnimate = false);
     void RealRemoveSnapshotFrameNode();
+    void InitSnapshotGesture(const RefPtr<GestureEventHub>& gestureHub);
 
     void OnPip(int status, int delegateId, int childId, int frameRoutingId, int width, int height);
     void SetPipNativeWindow(int delegateId, int childId, int frameRoutingId, void* window);
@@ -1384,6 +1396,7 @@ private:
     ResponseType curResponseType_ = ResponseType::LONG_PRESS;
     bool curContextMenuResult_ = false;
     bool isSnapshotImageAnimating_ = false;
+    std::shared_ptr<SnapshotTouchReporter> snapshotReporter_ = nullptr;
 
     bool isWindowShow_ = true;
     bool isActive_ = true;

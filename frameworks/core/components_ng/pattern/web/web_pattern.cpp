@@ -42,6 +42,7 @@
 #include "base/geometry/rect.h"
 #include "base/image/file_uri_helper.h"
 #include "base/log/dump_log.h"
+#include "base/log/event_report.h"
 #include "base/utils/utils.h"
 #include "base/mousestyle/mouse_style.h"
 #include "base/utils/date_util.h"
@@ -909,8 +910,7 @@ void WebPattern::CreateSnapshotImageFrameNode(const std::string& snapshotPath, u
 
     snapshotNode->SetDraggable(false);
     auto gesture = snapshotNode->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gesture);
-    gesture->SetDragEvent(nullptr, { PanDirection::DOWN }, 0, Dimension(0));
+    InitSnapshotGesture(gesture);
 
     auto imageLayoutProperty = snapshotNode->GetLayoutProperty<ImageLayoutProperty>();
     auto imageRenderProperty = snapshotNode->GetPaintProperty<ImageRenderProperty>();
@@ -923,6 +923,12 @@ void WebPattern::CreateSnapshotImageFrameNode(const std::string& snapshotPath, u
     imageRenderProperty->UpdateImageMatrix(WEB_SNAPSHOT_IMAGE_SCALE_MATRIX);
     snapshotNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     snapshotNode->MarkModifyDone();
+
+    if (!snapshotReporter_) {
+        snapshotReporter_ = std::make_shared<SnapshotTouchReporter>();
+    }
+    CHECK_NULL_VOID(snapshotReporter_);
+    snapshotReporter_->OnAppear();
 }
 
 void WebPattern::RemoveSnapshotFrameNode(bool isAnimate)
@@ -981,6 +987,39 @@ void WebPattern::RealRemoveSnapshotFrameNode()
     CHECK_NULL_VOID(parent);
     parent->RemoveChild(snapshotNode);
     parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+
+    CHECK_NULL_VOID(snapshotReporter_);
+    snapshotReporter_->OnDisappear();
+}
+
+void WebPattern::InitSnapshotGesture(const RefPtr<GestureEventHub>& gestureHub)
+{
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetDragEvent(nullptr, { PanDirection::DOWN }, 0, Dimension(0));
+
+    auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& /*unused*/) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        // For blankless report
+        auto reporter = pattern->snapshotReporter_;
+        CHECK_NULL_VOID(reporter);
+        reporter->OnPan();
+    };
+    auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& /*unused*/) { return; };
+    auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& /*unused*/) { return; };
+    auto actionCancelTask = [weak = WeakClaim(this)]() { return; };
+    auto panEvent = MakeRefPtr<PanEvent>(std::move(actionStartTask), std::move(actionUpdateTask),
+        std::move(actionEndTask), std::move(actionCancelTask));
+    gestureHub->AddPanEvent(panEvent, { PanDirection::ALL }, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
+
+    auto clickTask = [weak = WeakClaim(this)](const GestureEvent& /*unused*/) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto reporter = pattern->snapshotReporter_;
+        CHECK_NULL_VOID(reporter);
+        reporter->OnClick();
+    };
+    gestureHub->SetUserOnClick(std::move(clickTask));
 }
 
 void WebPattern::SetActiveStatusInner(bool isActive, bool isForce)
@@ -9511,5 +9550,41 @@ void WebPattern::OnStatusBarClick()
         delegate_->WebScrollStopFling();
         delegate_->OnStatusBarClick();
     }
+}
+
+void SnapshotTouchReporter::OnAppear()
+{
+    appearTime_ = GetMilliseconds();
+    infos_ = JsonUtil::CreateArray(true);
+}
+
+void SnapshotTouchReporter::OnDisappear()
+{
+    if (appearTime_.has_value() && infos_) {
+        const uint64_t disappearTime = GetMilliseconds();
+        EventReport::ReportWebBlanklessSnapshotTouchEvent(appearTime_.value(), infos_->ToString(), disappearTime);
+    }
+    appearTime_.reset();
+    infos_ = nullptr;
+}
+
+void SnapshotTouchReporter::OnClick()
+{
+    CHECK_NULL_VOID(infos_);
+    auto item = JsonUtil::Create(false);
+    CHECK_NULL_VOID(item);
+    item->Put("time", static_cast<int64_t>(GetMilliseconds()));
+    item->Put("type", static_cast<uint8_t>(GestureType::CLICK));
+    infos_->Put(item);
+}
+
+void SnapshotTouchReporter::OnPan()
+{
+    CHECK_NULL_VOID(infos_);
+    auto item = JsonUtil::Create(false);
+    CHECK_NULL_VOID(item);
+    item->Put("time", static_cast<int64_t>(GetMilliseconds()));
+    item->Put("type", static_cast<uint8_t>(GestureType::PAN));
+    infos_->Put(item);
 }
 } // namespace OHOS::Ace::NG

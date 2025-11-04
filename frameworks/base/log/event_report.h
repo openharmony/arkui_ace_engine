@@ -270,6 +270,8 @@ public:
     static void StartFormModifyTimeoutReportTimer(int64_t formId, const std::string &bundleName,
         const std::string &formName);
     static void StopFormModifyTimeoutReportTimer(int64_t formId);
+    static void ReportWebBlanklessSnapshotTouchEvent(uint64_t startTime, const std::string& touchInfo,
+        uint64_t endTime);
 private:
     static void SendEventInner(const EventInfo& eventInfo);
     static FRCSceneFpsInfo curFRCSceneFpsInfo_;

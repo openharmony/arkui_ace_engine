@@ -117,4 +117,8 @@ void EventReport::StartFormModifyTimeoutReportTimer(int64_t formId, const std::s
 {}
 
 void EventReport::ReportGeneralInteractionError(const GeneralInteractionErrorInfo& generalEventErrorInfo) {}
+
+void EventReport::ReportWebBlanklessSnapshotTouchEvent(uint64_t startTime, const std::string& touchInfo,
+    uint64_t endTime)
+{}
 } // namespace OHOS::Ace
