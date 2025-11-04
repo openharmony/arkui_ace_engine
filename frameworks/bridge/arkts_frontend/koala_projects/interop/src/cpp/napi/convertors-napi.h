@@ -163,7 +163,8 @@ template<>
 struct InteropTypeConverter<KSerializerBuffer> {
     using InteropType = napi_value;
     static KSerializerBuffer convertFrom(napi_env env, InteropType value) {
-        return (KSerializerBuffer)getSerializerBufferPointer(env, value); // Improve: we are receiving Uint8Array from the native side
+        // Improve: we are receiving Uint8Array from the native side
+        return (KSerializerBuffer)getSerializerBufferPointer(env, value);
     }
     static InteropType convertTo(napi_env env, KSerializerBuffer value) {
       return makePointer(env, value);
