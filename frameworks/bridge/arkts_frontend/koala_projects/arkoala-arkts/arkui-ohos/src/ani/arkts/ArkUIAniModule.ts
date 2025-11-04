@@ -347,6 +347,8 @@ export class ArkUIAniModule {
     native static _TraceEnd(): void
     native static _AsyncTraceBegin(traceName: string, taskId: KInt): void
     native static _AsyncTraceEnd(traceName: string, taskId: KInt): void
+    native static _StartProfiler(asptFileName: string, interva: KInt): void
+    native static _StopProfiler(): void
     native static _GetColorValue(color: number | string): KUInt
     native static _GetStringColorValue(color: string): KUInt
     native static _GetNumberColorValue(color: number): KUInt

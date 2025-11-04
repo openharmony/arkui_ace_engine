@@ -48,6 +48,7 @@
 #include "xcomponent/xcomponent_module_methods.h"
 #include "condition_scope/condition_scope.h"
 #include "utils/ani_trace.h"
+#include "utils/ani_profiler.h"
 #include "UINode/uinode_module_methods.h"
 #include "node_adapter/node_adapter_module.h"
 #include "visual_effect/visual_effect_module.h"
@@ -1173,6 +1174,16 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_AsyncTraceEnd",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::AniTrace::AsyncTraceEnd)
+        },
+        ani_native_function {
+            "_StartProfiler",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::AniProfiler::StartProfiler)
+        },
+        ani_native_function {
+            "_StopProfiler",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::AniProfiler::StopProfiler)
         },
         ani_native_function {
             "_GetStringColorValue",
