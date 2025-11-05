@@ -1621,26 +1621,26 @@ void SetTextInputUserUnderlineColor(ArkUINodeHandle node, const ArkUI_Uint32* va
     if (hasValues[CALL_ARG_0]) {
         Color result = Color(values[CALL_ARG_0]);
         userColor.typing = result;
-        SetTextInputUserUnderlineColorRegister(frameNode, underlineColorObj, underlineColorObj->typingColorObj, result,
-            "underlineColorTyping");
+        SetTextInputUserUnderlineColorRegister(frameNode, underlineColorObj,
+            underlineColorObj ? underlineColorObj->typingColorObj : nullptr, result, "underlineColorTyping");
     }
     if (hasValues[CALL_ARG_1]) {
         Color result = Color(values[CALL_ARG_1]);
         userColor.normal = result;
-        SetTextInputUserUnderlineColorRegister(frameNode, underlineColorObj, underlineColorObj->normalColorObj, result,
-            "underlineColorNormal");
+        SetTextInputUserUnderlineColorRegister(frameNode, underlineColorObj,
+            underlineColorObj ? underlineColorObj->normalColorObj : nullptr, result, "underlineColorNormal");
     }
     if (hasValues[CALL_ARG_2]) {
         Color result = Color(values[CALL_ARG_2]);
         userColor.error = result;
-        SetTextInputUserUnderlineColorRegister(frameNode, underlineColorObj, underlineColorObj->errorColorObj, result,
-            "underlineColorError");
+        SetTextInputUserUnderlineColorRegister(frameNode, underlineColorObj,
+            underlineColorObj ? underlineColorObj->errorColorObj : nullptr, result, "underlineColorError");
     }
     if (hasValues[CALL_ARG_3]) {
         Color result = Color(values[CALL_ARG_3]);
         userColor.disable = result;
-        SetTextInputUserUnderlineColorRegister(frameNode, underlineColorObj, underlineColorObj->disableColorObj, result,
-            "underlineColorDisable");
+        SetTextInputUserUnderlineColorRegister(frameNode, underlineColorObj,
+            underlineColorObj ? underlineColorObj->disableColorObj : nullptr, result, "underlineColorDisable");
     }
     TextFieldModelNG::SetUserUnderlineColor(frameNode, userColor);
 }
