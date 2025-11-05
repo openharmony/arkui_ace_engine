@@ -2379,6 +2379,19 @@ FingerInfo Convert(const Ark_FingerInfo& src)
 }
 
 template<>
+EventLocationInfo Convert(const Ark_EventLocationInfo& src)
+{
+    EventLocationInfo dst;
+    dst.localLocation_.SetX(Converter::Convert<double>(src.x));
+    dst.localLocation_.SetY(Converter::Convert<double>(src.y));
+    dst.windowLocation_.SetX(Converter::Convert<double>(src.windowX));
+    dst.windowLocation_.SetY(Converter::Convert<double>(src.windowY));
+    dst.globalDisplayLocation_.SetX(Converter::Convert<double>(src.displayX));
+    dst.globalDisplayLocation_.SetY(Converter::Convert<double>(src.displayY));
+    return dst;
+}
+
+template<>
 PaddingProperty Convert(const Ark_Padding& src)
 {
     PaddingProperty padding;

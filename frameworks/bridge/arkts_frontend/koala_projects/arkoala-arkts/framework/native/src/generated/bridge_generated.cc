@@ -26950,6 +26950,23 @@ void impl_BaseGestureEvent_setFingerList(Ark_NativePointer thisPtr, KSerializerB
         GetAccessors()->getBaseGestureEventAccessor()->setFingerList(self, static_cast<Array_FingerInfo*>(&fingerListValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(BaseGestureEvent_setFingerList, Ark_NativePointer, KSerializerBuffer, int32_t)
+KInteropReturnBuffer impl_BaseGestureEvent_getFingerInfos(Ark_NativePointer thisPtr) {
+        Ark_BaseGestureEvent self = reinterpret_cast<Ark_BaseGestureEvent>(thisPtr);
+        const auto &retValue = GetAccessors()->getBaseGestureEventAccessor()->getFingerInfos(self);
+        SerializerBase _retSerializer {};
+        if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+            _retSerializer.writeInt32(retValue.length);
+            for (int retValueTmpValueCounterI = 0; retValueTmpValueCounterI < retValue.length; retValueTmpValueCounterI++) {
+                const Ark_FingerInfo retValueTmpValueTmpElement = retValue.array[retValueTmpValueCounterI];
+                FingerInfo_serializer::write(_retSerializer, retValueTmpValueTmpElement);
+            }
+        } else {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+        }
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(BaseGestureEvent_getFingerInfos, KInteropReturnBuffer, Ark_NativePointer)
 Ark_NativePointer impl_BaselineOffsetStyle_construct(KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         Ark_LengthMetrics valueValueTemp = LengthMetrics_serializer::read(thisDeserializer);;
@@ -29789,6 +29806,23 @@ void impl_GestureEvent_setFingerList(Ark_NativePointer thisPtr, KSerializerBuffe
         GetAccessors()->getGestureEventAccessor()->setFingerList(self, static_cast<Array_FingerInfo*>(&fingerListValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(GestureEvent_setFingerList, Ark_NativePointer, KSerializerBuffer, int32_t)
+KInteropReturnBuffer impl_GestureEvent_getFingerInfos(Ark_NativePointer thisPtr) {
+        Ark_GestureEvent self = reinterpret_cast<Ark_GestureEvent>(thisPtr);
+        const auto &retValue = GetAccessors()->getGestureEventAccessor()->getFingerInfos(self);
+        SerializerBase _retSerializer {};
+        if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+            _retSerializer.writeInt32(retValue.length);
+            for (int retValueTmpValueCounterI = 0; retValueTmpValueCounterI < retValue.length; retValueTmpValueCounterI++) {
+                const Ark_FingerInfo retValueTmpValueTmpElement = retValue.array[retValueTmpValueCounterI];
+                FingerInfo_serializer::write(_retSerializer, retValueTmpValueTmpElement);
+            }
+        } else {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+        }
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(GestureEvent_getFingerInfos, KInteropReturnBuffer, Ark_NativePointer)
 Ark_Int32 impl_GestureEvent_getOffsetX(Ark_NativePointer thisPtr) {
         Ark_GestureEvent self = reinterpret_cast<Ark_GestureEvent>(thisPtr);
         return GetAccessors()->getGestureEventAccessor()->getOffsetX(self);
@@ -29889,6 +29923,19 @@ void impl_GestureEvent_setVelocity(Ark_NativePointer thisPtr, KDouble velocity) 
         GetAccessors()->getGestureEventAccessor()->setVelocity(self, velocity);
 }
 KOALA_INTEROP_DIRECT_V2(GestureEvent_setVelocity, Ark_NativePointer, KDouble)
+KInteropReturnBuffer impl_GestureEvent_getTapLocation(Ark_NativePointer thisPtr) {
+        Ark_GestureEvent self = reinterpret_cast<Ark_GestureEvent>(thisPtr);
+        const auto &retValue = GetAccessors()->getGestureEventAccessor()->getTapLocation(self);
+        SerializerBase _retSerializer {};
+        if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+            EventLocationInfo_serializer::write(_retSerializer, retValue);
+        } else {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+        }
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(GestureEvent_getTapLocation, KInteropReturnBuffer, Ark_NativePointer)
 Ark_NativePointer impl_GestureOps_createTapGesture(KInteropNumber fingers, KInteropNumber count, KInteropNumber distanceThreshold, Ark_Boolean isFingerCountLimited) {
         return GetAccessors()->getGestureOpsAccessor()->createTapGesture((const Ark_Number*) (&fingers), (const Ark_Number*) (&count), (const Ark_Number*) (&distanceThreshold), isFingerCountLimited);
 }
@@ -35678,6 +35725,19 @@ Ark_NativePointer impl_TapGestureEvent_getFinalizer() {
         return GetAccessors()->getTapGestureEventAccessor()->getFinalizer();
 }
 KOALA_INTEROP_DIRECT_0(TapGestureEvent_getFinalizer, Ark_NativePointer)
+KInteropReturnBuffer impl_TapGestureEvent_getTapLocation(Ark_NativePointer thisPtr) {
+        Ark_TapGestureEvent self = reinterpret_cast<Ark_TapGestureEvent>(thisPtr);
+        const auto &retValue = GetAccessors()->getTapGestureEventAccessor()->getTapLocation(self);
+        SerializerBase _retSerializer {};
+        if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+            EventLocationInfo_serializer::write(_retSerializer, retValue);
+        } else {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+        }
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(TapGestureEvent_getTapLocation, KInteropReturnBuffer, Ark_NativePointer)
 Ark_NativePointer impl_TapRecognizer_construct() {
         return GetAccessors()->getTapRecognizerAccessor()->construct();
 }

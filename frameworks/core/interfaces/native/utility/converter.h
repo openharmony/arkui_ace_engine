@@ -557,6 +557,7 @@ namespace Converter {
     template<> EffectOption Convert(const Ark_BackgroundEffectOptions& src);
     template<> EventTarget Convert(const Ark_EventTarget& src);
     template<> FingerInfo Convert(const Ark_FingerInfo& src);
+    template<> EventLocationInfo Convert(const Ark_EventLocationInfo& src);
     template<> Font Convert(const Ark_Font& src);
     template<> FontFamilies Convert(const Ark_String& src);
     template<> FontInfo Convert(const Ark_font_FontInfo& src);

@@ -43,7 +43,7 @@ import { ChainEdgeEffect, ListItemAlign, ListItemGroupArea, ListScroller, CloseS
 import { CircleShape, ShapeSize, EllipseShape, PathShape, RectShape, CommonShapeMethod, PathShapeOptions, RectShapeOptions, RoundRectShapeOptions } from "@ohos.arkui.shape"
 import { ColorContent, ResizableOptions, DynamicRangeMode, ImageContent, ImageInterpolation, ImageAttribute, ImageRenderMode, ImageRotateOrientation, ImageCompleteEvent, ImageSourceSize, ImageError } from "./../../component/image"
 import { default as uniformTypeDescriptor } from "@ohos.data.uniformTypeDescriptor"
-import { GestureRecognizer, GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureType, Gesture, GestureGroup, GestureMask, EventTargetInfo, GestureControl, GestureMode, GesturePriority, GestureRecognizerState, LongPressRecognizer, PanDirection, PanGestureOptions, PanGestureHandlerOptions, PanRecognizer, PinchRecognizer, RotationGesture, RotationGestureHandlerOptions, GestureEvent, RotationRecognizer, ScrollableTargetInfo, SwipeDirection, SwipeGesture, SwipeGestureHandlerOptions, SwipeRecognizer, TapRecognizer, GestureHandler, FingerInfo, BaseHandlerOptions, LongPressGestureEvent, PanGestureEvent, PinchGestureEvent, RotationGestureEvent, SwipeGestureEvent, TapGestureEvent } from "./../../component/gesture"
+import { GestureRecognizer, GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureType, Gesture, GestureGroup, GestureMask, EventTargetInfo, GestureControl, GestureMode, GesturePriority, GestureRecognizerState, LongPressRecognizer, PanDirection, PanGestureOptions, PanGestureHandlerOptions, PanRecognizer, PinchRecognizer, RotationGesture, RotationGestureHandlerOptions, GestureEvent, RotationRecognizer, ScrollableTargetInfo, SwipeDirection, SwipeGesture, SwipeGestureHandlerOptions, SwipeRecognizer, TapRecognizer, EventLocationInfo, GestureHandler, FingerInfo, BaseHandlerOptions, LongPressGestureEvent, PanGestureEvent, PinchGestureEvent, RotationGestureEvent, SwipeGestureEvent, TapGestureEvent } from "./../../component/gesture"
 import { LengthMetrics, LengthMetricsUnit, LengthUnit, Size, ColorMetrics, DrawContext, Frame, Vector2, SizeT } from "arkui.Graphics"
 import { default as uiEffect } from "@ohos.graphics.uiEffect"
 import { FocusBoxStyle, FocusPriority, KeyProcessingMode } from "./../../component/focus"
@@ -410,7 +410,7 @@ export class TypeChecker {
     static isBaseEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean, arg10: boolean, arg11: boolean, arg12: boolean): boolean {
         return value instanceof BaseEvent
     }
-    static isBaseGestureEvent(value: Object | string | number | undefined, arg0: boolean): boolean {
+    static isBaseGestureEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
         return value instanceof BaseGestureEvent
     }
     static isBaselineOffsetStyle(value: Object | string | number | undefined, arg0: boolean): boolean {
@@ -1058,6 +1058,9 @@ export class TypeChecker {
     static isEventHub(value: Object | string | number | undefined): boolean {
         return value instanceof EventHub
     }
+    static isEventLocationInfo(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean): boolean {
+        return value instanceof EventLocationInfo
+    }
     static isEventResult(value: Object | string | number | undefined): boolean {
         return value instanceof EventResult
     }
@@ -1244,7 +1247,7 @@ export class TypeChecker {
     static isGestureControl_GestureType(value: Object | string | number | undefined): boolean {
         return value instanceof GestureControl.GestureType
     }
-    static isGestureEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean, arg10: boolean, arg11: boolean): boolean {
+    static isGestureEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean, arg10: boolean, arg11: boolean, arg12: boolean, arg13: boolean): boolean {
         return value instanceof GestureEvent
     }
     static isGestureGroup(value: Object | string | number | undefined): boolean {
@@ -3035,7 +3038,7 @@ export class TypeChecker {
     static isTabsOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
         return value instanceof TabsOptions
     }
-    static isTapGestureEvent(value: Object | string | number | undefined): boolean {
+    static isTapGestureEvent(value: Object | string | number | undefined, arg0: boolean): boolean {
         return value instanceof TapGestureEvent
     }
     static isTapRecognizer(value: Object | string | number | undefined): boolean {

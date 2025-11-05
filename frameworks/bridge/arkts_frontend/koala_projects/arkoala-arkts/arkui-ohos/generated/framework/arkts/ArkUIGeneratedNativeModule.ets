@@ -3363,6 +3363,8 @@ export class ArkUIGeneratedNativeModule {
     native static _BaseGestureEvent_getFingerList(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _BaseGestureEvent_setFingerList(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Quick
+    native static _BaseGestureEvent_getFingerInfos(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _BaselineOffsetStyle_construct(thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
@@ -4177,6 +4179,8 @@ export class ArkUIGeneratedNativeModule {
     native static _GestureEvent_getFingerList(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _GestureEvent_setFingerList(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Quick
+    native static _GestureEvent_getFingerInfos(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _GestureEvent_getOffsetX(ptr: KPointer): double
     @ani.unsafe.Direct
@@ -4217,6 +4221,8 @@ export class ArkUIGeneratedNativeModule {
     native static _GestureEvent_getVelocity(ptr: KPointer): double
     @ani.unsafe.Direct
     native static _GestureEvent_setVelocity(ptr: KPointer, velocity: KDouble): void
+    @ani.unsafe.Quick
+    native static _GestureEvent_getTapLocation(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _GestureOps_createTapGesture(fingers: number, count: number, distanceThreshold: number, isFingerCountLimited: KInt): KPointer
     @ani.unsafe.Direct
@@ -5627,6 +5633,8 @@ export class ArkUIGeneratedNativeModule {
     native static _TapGestureEvent_construct(): KPointer
     @ani.unsafe.Direct
     native static _TapGestureEvent_getFinalizer(): KPointer
+    @ani.unsafe.Quick
+    native static _TapGestureEvent_getTapLocation(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _TapRecognizer_construct(): KPointer
     @ani.unsafe.Direct

@@ -1913,6 +1913,8 @@ typedef struct Ark_ErrorInformation Ark_ErrorInformation;
 typedef struct Opt_ErrorInformation Opt_ErrorInformation;
 typedef struct Ark_Event Ark_Event;
 typedef struct Opt_Event Opt_Event;
+typedef struct Ark_EventLocationInfo Ark_EventLocationInfo;
+typedef struct Opt_EventLocationInfo Opt_EventLocationInfo;
 typedef struct Ark_ExpectedFrameRateRange Ark_ExpectedFrameRateRange;
 typedef struct Opt_ExpectedFrameRateRange Opt_ExpectedFrameRateRange;
 typedef struct Ark_FingerInfo Ark_FingerInfo;
@@ -13565,6 +13567,19 @@ typedef struct Opt_Event {
     Ark_Tag tag;
     Ark_Event value;
 } Opt_Event;
+typedef struct Ark_EventLocationInfo {
+    /* kind: Interface */
+    Ark_Float64 x;
+    Ark_Float64 y;
+    Ark_Float64 windowX;
+    Ark_Float64 windowY;
+    Ark_Float64 displayX;
+    Ark_Float64 displayY;
+} Ark_EventLocationInfo;
+typedef struct Opt_EventLocationInfo {
+    Ark_Tag tag;
+    Ark_EventLocationInfo value;
+} Opt_EventLocationInfo;
 typedef struct Ark_ExpectedFrameRateRange {
     /* kind: Interface */
     Ark_Number min;
@@ -25170,6 +25185,7 @@ typedef struct GENERATED_ArkUIBaseGestureEventAccessor {
     Array_FingerInfo (*getFingerList)(Ark_BaseGestureEvent peer);
     void (*setFingerList)(Ark_BaseGestureEvent peer,
                           const Array_FingerInfo* fingerList);
+    Array_FingerInfo (*getFingerInfos)(Ark_BaseGestureEvent peer);
 } GENERATED_ArkUIBaseGestureEventAccessor;
 
 typedef struct GENERATED_ArkUIBaselineOffsetStyleAccessor {
@@ -26036,6 +26052,7 @@ typedef struct GENERATED_ArkUIGestureEventAccessor {
     Array_FingerInfo (*getFingerList)(Ark_GestureEvent peer);
     void (*setFingerList)(Ark_GestureEvent peer,
                           const Array_FingerInfo* fingerList);
+    Array_FingerInfo (*getFingerInfos)(Ark_GestureEvent peer);
     Ark_Float64 (*getOffsetX)(Ark_GestureEvent peer);
     void (*setOffsetX)(Ark_GestureEvent peer,
                        Ark_Float64 offsetX);
@@ -26066,6 +26083,7 @@ typedef struct GENERATED_ArkUIGestureEventAccessor {
     Ark_Float64 (*getVelocity)(Ark_GestureEvent peer);
     void (*setVelocity)(Ark_GestureEvent peer,
                         Ark_Float64 velocity);
+    Ark_EventLocationInfo (*getTapLocation)(Ark_GestureEvent peer);
 } GENERATED_ArkUIGestureEventAccessor;
 
 typedef struct GENERATED_ArkUIGestureOpsAccessor {
@@ -27742,6 +27760,7 @@ typedef struct GENERATED_ArkUITapGestureEventAccessor {
     void (*destroyPeer)(Ark_TapGestureEvent peer);
     Ark_TapGestureEvent (*construct)();
     Ark_NativePointer (*getFinalizer)();
+    Ark_EventLocationInfo (*getTapLocation)(Ark_TapGestureEvent peer);
 } GENERATED_ArkUITapGestureEventAccessor;
 
 typedef struct GENERATED_ArkUITapRecognizerAccessor {

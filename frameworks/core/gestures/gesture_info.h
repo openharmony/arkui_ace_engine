@@ -287,6 +287,11 @@ struct FingerInfo {
     SourceType sourceType_ = SourceType::NONE;
     SourceTool sourceTool_ = SourceTool::UNKNOWN;
 };
+struct EventLocationInfo {
+    Offset localLocation_;
+    Offset windowLocation_;
+    Offset globalDisplayLocation_;
+};
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_GESTURES_GESTURE_INFO_H
