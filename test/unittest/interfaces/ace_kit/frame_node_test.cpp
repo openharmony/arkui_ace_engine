@@ -273,62 +273,6 @@ HWTEST_F(FrameNodeTest, FrameNodeTestTest009, TestSize.Level1)
 }
 
 /**
- * @tc.name: TransformPosition
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(FrameNodeTest, TransformPositionTest001, TestSize.Level1)
-{
-    const std::string tag = "TEST9";
-    const int32_t id = 9;
-    auto mockPattern = AceType::MakeRefPtr<MockAceKitPattern>();
-    auto frameNode = AbstractViewFactory::CreateFrameNode(tag, id, mockPattern);
-    EXPECT_NE(frameNode, nullptr);
-
-    NG::OffsetF offset;
-    offset.Reset();
-    auto newOffset = frameNode->GetPositionToWindowWithTransform(offset);
-    SUCCEED();
-}
-
-/**
- * @tc.name: GetRectToScreenTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(FrameNodeTest, GetRectToScreenTest001, TestSize.Level1)
-{
-    const std::string tag = "TEST9";
-    const int32_t id = 9;
-    auto mockPattern = AceType::MakeRefPtr<MockAceKitPattern>();
-    auto frameNode = AbstractViewFactory::CreateFrameNode(tag, id, mockPattern);
-    EXPECT_NE(frameNode, nullptr);
-
-    NG::RectF rect;
-    rect.Reset();
-    auto newRect = frameNode->GetRectToScreen(rect);
-    SUCCEED();
-}
-
-/**
- * @tc.name: GetRectToWindowWithTransformTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(FrameNodeTest, GetRectToWindowWithTransformTest001, TestSize.Level1)
-{
-    const std::string tag = "TEST9";
-    const int32_t id = 9;
-    auto mockPattern = AceType::MakeRefPtr<MockAceKitPattern>();
-    auto frameNode = AbstractViewFactory::CreateFrameNode(tag, id, mockPattern);
-    EXPECT_NE(frameNode, nullptr);
-    NG::RectF rect;
-    rect.Reset();
-    auto newRect = frameNode->GetRectToWindowWithTransform(rect);
-    SUCCEED();
-}
-
-/**
  * @tc.name: FrameNodeTestTest100
  * @tc.desc:
  * @tc.type: FUNC
