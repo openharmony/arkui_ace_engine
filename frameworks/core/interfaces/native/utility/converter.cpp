@@ -890,7 +890,11 @@ std::vector<NG::BarItem> Convert(const Array_NavigationMenuItem& src)
         NG::BarItem item;
         item.text = Converter::OptConvert<std::string>(menuItem.value).value_or("");
         item.icon = Converter::OptConvert<std::string>(menuItem.icon);
-        // iconSymbol is not dealt
+        auto iconSymbol = Converter::OptConvert<Ark_SymbolGlyphModifier>(menuItem.symbolIcon);
+        if (iconSymbol && *iconSymbol) {
+            item.iconSymbol = (*iconSymbol)->symbolApply;
+            PeerUtils::DestroyPeer(*iconSymbol);
+        }
         item.isEnabled = Converter::OptConvert<bool>(menuItem.isEnabled);
         if (menuItem.action.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
             auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
@@ -915,7 +919,11 @@ std::vector<NG::BarItem> Convert(const Array_ToolbarItem& src)
         NG::BarItem item;
         item.text = Converter::OptConvert<std::string>(toolbarItem.value).value_or("");
         item.icon = Converter::OptConvert<std::string>(toolbarItem.icon);
-        //item.iconSymbol = Converter::OptConvert<std::function<void(WeakPtr<NG::FrameNode>)>>(toolbarItem.symbolIcon);
+        auto iconSymbol = Converter::OptConvert<Ark_SymbolGlyphModifier>(toolbarItem.symbolIcon);
+        if (iconSymbol && *iconSymbol) {
+            item.iconSymbol = (*iconSymbol)->symbolApply;
+            PeerUtils::DestroyPeer(*iconSymbol);
+        }
         if (toolbarItem.action.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
             auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
             auto actionCallback = [changeCallback = CallbackHelper(toolbarItem.action.value), node = targetNode]() {
@@ -926,7 +934,11 @@ std::vector<NG::BarItem> Convert(const Array_ToolbarItem& src)
         }
         item.status = Converter::OptConvert<NavToolbarItemStatus>(toolbarItem.status).value_or(item.status);
         item.activeIcon = Converter::OptConvert<std::string>(toolbarItem.activeIcon);
-        //item.activeIconSymbol = Converter::OptConvert<std::function<void(WeakPtr<NG::FrameNode>)>>(toolbarItem.activeSymbolIcon);
+        auto activeIconSymbol = Converter::OptConvert<Ark_SymbolGlyphModifier>(toolbarItem.activeSymbolIcon);
+        if (activeIconSymbol && *activeIconSymbol) {
+            item.activeIconSymbol = (*activeIconSymbol)->symbolApply;
+            PeerUtils::DestroyPeer(*activeIconSymbol);
+        }
         dst.push_back(item);
     }
     return dst;
@@ -1696,12 +1708,10 @@ NG::NavigationBackgroundOptions Convert(const Ark_MoreButtonOptions& src)
 
     if (src.backgroundBlurStyle.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
         auto blurStyle = static_cast<int32_t>(src.backgroundBlurStyle.value);
-        if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
-            blurStyle <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
-            styleOptions.blurStyle = static_cast<BlurStyle>(blurStyle);
-            options.blurStyleOption = styleOptions;
-        }
+        styleOptions.blurStyle =
+            Converter::OptConvert<BlurStyle>(src.backgroundBlurStyle.value).value_or(BlurStyle::NO_MATERIAL);
     }
+    options.blurStyleOption = styleOptions;
 
     if (src.backgroundEffect.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
         effectOption = Converter::Convert<EffectOption>(src.backgroundEffect.value);
@@ -1731,12 +1741,10 @@ NG::NavigationBackgroundOptions Convert(const Ark_NavigationToolbarOptions& src)
 
     if (src.backgroundBlurStyle.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
         auto blurStyle = static_cast<int32_t>(src.backgroundBlurStyle.value);
-        if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
-            blurStyle <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
-            styleOptions.blurStyle = static_cast<BlurStyle>(blurStyle);
-            options.blurStyleOption = styleOptions;
-        }
+        styleOptions.blurStyle =
+            Converter::OptConvert<BlurStyle>(src.backgroundBlurStyle.value).value_or(BlurStyle::NO_MATERIAL);
     }
+    options.blurStyleOption = styleOptions;
 
     if (src.backgroundEffect.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
         effectOption = Converter::Convert<EffectOption>(src.backgroundEffect.value);
@@ -3327,12 +3335,10 @@ NG::NavigationBackgroundOptions Convert(const Ark_NavigationTitleOptions& src)
 
     if (src.backgroundBlurStyle.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
         auto blurStyle = static_cast<int32_t>(src.backgroundBlurStyle.value);
-        if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
-            blurStyle <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
-            styleOptions.blurStyle = static_cast<BlurStyle>(blurStyle);
-            options.blurStyleOption = styleOptions;
-        }
+        styleOptions.blurStyle =
+            Converter::OptConvert<BlurStyle>(src.backgroundBlurStyle.value).value_or(BlurStyle::NO_MATERIAL);
     }
+    options.blurStyleOption = styleOptions;
 
     if (src.backgroundEffect.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
         effectOption = Converter::Convert<EffectOption>(src.backgroundEffect.value);

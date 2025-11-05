@@ -2547,7 +2547,7 @@ export class NavExtender {
     static popToIndex_serialize(pathStack: NavPathStack, index: int32, animated: boolean): void {
         ArkUIGeneratedNativeModule._NavExtender_popToIndex(toPeerPtr(pathStack), index, animated ? 1 : 0)
     }
-    static popToName_serialize(pathStack: NavPathStack, name: string, animated: boolean): number {
+    static popToName_serialize(pathStack: NavPathStack, name: string, animated: boolean): int32 {
         const retval  = ArkUIGeneratedNativeModule._NavExtender_popToName(toPeerPtr(pathStack), name, animated ? 1 : 0)
         return retval
     }
@@ -2628,7 +2628,7 @@ export class NavExtender {
         NavExtender.popToIndex_serialize(pathStack_casted, index_casted, animated_casted)
         return
     }
-    public static popToName(pathStack: NavPathStack, name: string, animated: boolean): number {
+    public static popToName(pathStack: NavPathStack, name: string, animated: boolean): int32 {
         const pathStack_casted = pathStack as (NavPathStack)
         const name_casted = name as (string)
         const animated_casted = animated as (boolean)

@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_transition_proxy.h"
 #include "core/interfaces/native/implementation/nav_path_stack_peer_impl.h"
+#include "core/interfaces/native/implementation/symbol_glyph_modifier_peer.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
@@ -388,6 +389,8 @@ void SetBackButtonIconImpl(Ark_NativePointer node,
                 break;
             }
             case symbolType: {
+                iconSymbol = icon->value.value3->symbolApply;
+                PeerUtils::DestroyPeer(icon->value.value3);
                 break;
             }
             default:
@@ -418,6 +421,17 @@ void SetTitleImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(options);
     NavigationTitlebarOptions titleOptions;
     if (options->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        auto pipelineContext = frameNode->GetContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto theme = pipelineContext->GetTheme<NavigationBarTheme>();
+        CHECK_NULL_VOID(theme);
+        auto blurStyle = static_cast<BlurStyle>(theme->GetTitlebarBackgroundBlurStyle());
+        if (blurStyle != BlurStyle::NO_MATERIAL) {
+            BlurStyleOption blurStyleOption;
+            blurStyleOption.blurStyle = blurStyle;
+            titleOptions.bgOptions.blurStyleOption = blurStyleOption;
+            titleOptions.bgOptions.color = Color::TRANSPARENT;
+        }
         titleOptions = Converter::OptConvert<NavigationTitlebarOptions>(options->value).value_or(titleOptions);
     }
     NavigationModelStatic::SetTitlebarOptions(frameNode, std::move(titleOptions));
@@ -532,6 +546,12 @@ void SetToolbarConfigurationImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     CHECK_NULL_VOID(options);
+    if (options->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        auto isHideItemText = Converter::OptConvert<bool>(options->value.hideItemValue).value_or(false);
+        NavigationModelStatic::SetHideItemText(frameNode, isHideItemText);
+    } else {
+        NavigationModelStatic::SetHideItemText(frameNode, false);
+    }
     NG::NavigationToolbarOptions toolbarOptions;
     if (value->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
         auto typeValue = value->value.selector;
@@ -559,10 +579,6 @@ void SetToolbarConfigurationImpl(Ark_NativePointer node,
         NavigationModelStatic::SetCustomToolBar(frameNode, nullptr);
     }
 
-    if (options->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        auto isHideItemText = Converter::OptConvert<bool>(options->value.hideItemValue).value_or(false);
-        NavigationModelStatic::SetHideItemText(frameNode, isHideItemText);
-    }
     if (options->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
         NG::NavigationBackgroundOptions bgOptions =
             Converter::Convert<NG::NavigationBackgroundOptions>(options->value);

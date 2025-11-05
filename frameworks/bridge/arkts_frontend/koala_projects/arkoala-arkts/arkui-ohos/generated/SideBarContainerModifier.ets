@@ -19,11 +19,13 @@
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
+import { PeerNode } from "./PeerNode"
 import { ArkSideBarContainerPeer, ButtonStyle, SideBarPosition, SideBarContainerAttribute } from "./component/sidebar"
 import { int32 } from "@koalaui/common"
 import { CommonMethod, Bindable, DividerStyle } from "./component/common"
 import { Length, Dimension } from "./component/units"
 import { Resource } from "global.resource"
+import { PeerNode } from "./PeerNode"
 export class SideBarContainerModifier extends CommonMethodModifier implements SideBarContainerAttribute,AttributeModifier<SideBarContainerAttribute> {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
@@ -57,8 +59,9 @@ export class SideBarContainerModifier extends CommonMethodModifier implements Si
     _divider_0_0value?: DividerStyle | null | undefined
     _minContentWidth_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _minContentWidth_0_0value?: Dimension | undefined
-    applyModifierPatch(peer: ArkSideBarContainerPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(node: PeerNode): void {
+        super.applyModifierPatch(node)
+        const peer = node as ArkSideBarContainerPeer;
         if (this._showSideBar_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._showSideBar_0_flag) {

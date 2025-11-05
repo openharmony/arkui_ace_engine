@@ -72,6 +72,7 @@ public:
     bool fromRecovery_ = false;
     int32_t mode_ = 0;
     bool needDelete_ = false;
+    std::function<void(int32_t errorCode, std::string errorMessage)> promise_;
 
     void InvokeOnPop(const PopInfo& popInfo);
 };
@@ -268,6 +269,8 @@ private:
     void SetNeedUpdatePathInfo(int32_t index, bool need);
     bool CreateNavDestinationByRouterMap(
         const std::string& name, int32_t index, RefPtr<NG::UINode>& node);
+    std::string ErrorToMessage(int32_t code);
+    void FirePromise(PathInfo*, int32_t errorCode);
 };
 } // namespace OHOS::Ace::NG::GeneratedModifier::NavigationContext
 

@@ -16826,36 +16826,36 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     void FinishTransitionImpl(Ark_SwiperContentTransitionProxy peer)
     {
     }
-    Ark_Number GetSelectedIndexImpl(Ark_SwiperContentTransitionProxy peer)
+    Ark_Int32 GetSelectedIndexImpl(Ark_SwiperContentTransitionProxy peer)
     {
         return {};
     }
     void SetSelectedIndexImpl(Ark_SwiperContentTransitionProxy peer,
-                              const Ark_Number* selectedIndex)
+                              Ark_Int32 selectedIndex)
     {
     }
-    Ark_Number GetIndexImpl(Ark_SwiperContentTransitionProxy peer)
+    Ark_Int32 GetIndexImpl(Ark_SwiperContentTransitionProxy peer)
     {
         return {};
     }
     void SetIndexImpl(Ark_SwiperContentTransitionProxy peer,
-                      const Ark_Number* index)
+                      Ark_Int32 index)
     {
     }
-    Ark_Number GetPositionImpl(Ark_SwiperContentTransitionProxy peer)
+    Ark_Float64 GetPositionImpl(Ark_SwiperContentTransitionProxy peer)
     {
         return {};
     }
     void SetPositionImpl(Ark_SwiperContentTransitionProxy peer,
-                         const Ark_Number* position)
+                         Ark_Float64 position)
     {
     }
-    Ark_Number GetMainAxisLengthImpl(Ark_SwiperContentTransitionProxy peer)
+    Ark_Float64 GetMainAxisLengthImpl(Ark_SwiperContentTransitionProxy peer)
     {
         return {};
     }
     void SetMainAxisLengthImpl(Ark_SwiperContentTransitionProxy peer,
-                               const Ark_Number* mainAxisLength)
+                               Ark_Float64 mainAxisLength)
     {
     }
     } // SwiperContentTransitionProxyAccessor
