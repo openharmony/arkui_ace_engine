@@ -32,18 +32,13 @@ import { ExtendableComponent } from '../component/extendableComponent'
 let globalLazyItems = new Map<ComputableState<LazyItemNode>, int32>() // V: age
 
 export function updateLazyItems() {
-    let postponed = false
     globalLazyItems.forEach((age, node, map) => {
         if (age === 0) {
-            postponed = true
             map.set(node, 1)
         } else {
             node.value
         }
     })
-    if (postponed) {
-        // requestFrame()
-    }
 }
 
 /** @memo:intrinsic */
