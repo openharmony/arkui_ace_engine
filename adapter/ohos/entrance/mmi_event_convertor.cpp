@@ -147,6 +147,11 @@ uint64_t GetPointerSensorTime(const std::shared_ptr<MMI::PointerEvent>& pointerE
     return inputTime;
 }
 
+inline float NonZeroOrInteger(const double& value, const int32_t& integer)
+{
+    return NearZero(value) ? integer : static_cast<float>(value);
+}
+
 TouchPoint ConvertTouchPoint(const MMI::PointerEvent::PointerItem& pointerItem, int32_t sourceType,
     bool useHighPrecision)
 {
@@ -155,24 +160,25 @@ TouchPoint ConvertTouchPoint(const MMI::PointerEvent::PointerItem& pointerItem, 
     touchPoint.size = std::max(pointerItem.GetWidth(), pointerItem.GetHeight()) / 2.0;
     touchPoint.id = pointerItem.GetPointerId();
     touchPoint.downTime = TimeStamp(std::chrono::microseconds(pointerItem.GetDownTime()));
-    if (useHighPrecision && sourceType == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
-        touchPoint.x = NearZero(pointerItem.GetWindowXPos()) ? pointerItem.GetWindowX()
-                                                             : static_cast<float>(pointerItem.GetWindowXPos());
-        touchPoint.y = NearZero(pointerItem.GetWindowYPos()) ? pointerItem.GetWindowY()
-                                                             : static_cast<float>(pointerItem.GetWindowYPos());
-        touchPoint.screenX = NearZero(pointerItem.GetDisplayXPos()) ? pointerItem.GetDisplayX()
-                                                                    : static_cast<float>(pointerItem.GetDisplayXPos());
-        touchPoint.screenY = NearZero(pointerItem.GetDisplayYPos()) ? pointerItem.GetDisplayY()
-                                                                    : static_cast<float>(pointerItem.GetDisplayYPos());
-    } else {
-        touchPoint.x = pointerItem.GetWindowX();
-        touchPoint.y = pointerItem.GetWindowY();
-        touchPoint.screenX = pointerItem.GetDisplayX();
-        touchPoint.screenY = pointerItem.GetDisplayY();
-    }
     if (pointerItem.GetPredictExist()) {
+        // Predict is for window X/Y coordinates only.
         touchPoint.x = pointerItem.GetWindowXPredict();
         touchPoint.y = pointerItem.GetWindowYPredict();
+    } else {
+        if (useHighPrecision && sourceType == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
+            touchPoint.x = NonZeroOrInteger(pointerItem.GetWindowXPos(), pointerItem.GetWindowX());
+            touchPoint.y = NonZeroOrInteger(pointerItem.GetWindowYPos(), pointerItem.GetWindowY());
+        } else {
+            touchPoint.x = pointerItem.GetWindowX();
+            touchPoint.y = pointerItem.GetWindowY();
+        }
+    }
+    if (useHighPrecision && sourceType == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
+        touchPoint.screenX = NonZeroOrInteger(pointerItem.GetDisplayXPos(), pointerItem.GetDisplayX());
+        touchPoint.screenY = NonZeroOrInteger(pointerItem.GetDisplayYPos(), pointerItem.GetDisplayY());
+    } else {
+        touchPoint.screenX = pointerItem.GetDisplayX();
+        touchPoint.screenY = pointerItem.GetDisplayY();
     }
     touchPoint.globalDisplayX = pointerItem.GetGlobalX();
     touchPoint.globalDisplayY = pointerItem.GetGlobalY();
