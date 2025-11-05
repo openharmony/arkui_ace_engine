@@ -158,17 +158,28 @@ class ObserveV2 {
   // return true given value is @ObservedV2 object
   // return true when including @Trace, but exclude @Monitor and @Computed
   public static IsObservedObjectV2(value: any): boolean {
+    //let v = (value && typeof (value) === 'object' && value[ObserveV2.V2_DECO_META]);
+    // prints:  {"propA":{"deco":"@Trace"},"propB":{"deco":"@Trace"}}
+    //console.log("### IsObservedObjectV2 res: " + JSON.stringify(v));
     return (value && typeof (value) === 'object' && value[ObserveV2.V2_DECO_META]);
+    //return !!(value && typeof (value) === 'object' && value[ObserveV2.V2_DECO_META]);
   }
 
   // return true if given value is proxied observed object, either makeObserved or autoProxyObject
   public static IsProxiedObservedV2(value: any): boolean {
-    return (value && typeof value === 'object' && value[ObserveV2.SYMBOL_PROXY_GET_TARGET]);
+    //console.log("### IsProxiedObservedV2 " + JSON.stringify(value));
+    //console.log("### IsProxiedObservedV2 typeof: " + (typeof value));
+    //console.log("### IsProxiedObservedV2 typeof value === 'object' " + (typeof value === 'object'));
+    return ((value !== undefined) 
+      && (typeof value === 'object')
+      && (value[ObserveV2.SYMBOL_PROXY_GET_TARGET] !== undefined));
   }
 
   // return true given value is the return value of makeObserved
   public static IsMakeObserved(value: any): boolean {
-    return (value && typeof (value) === 'object' && value[ObserveV2.SYMBOL_MAKE_OBSERVED]);
+    return (value
+      && typeof (value) === 'object'
+      && (value[ObserveV2.SYMBOL_MAKE_OBSERVED] !== undefined));
   }
 
   public static getCurrentRecordedId(): number {
@@ -382,6 +393,7 @@ class ObserveV2 {
     }
 
     stateMgmtConsole.propertyAccess(`ObserveV2.addRef '${attrName}' for id ${bound[0]}...`);
+    console.log(`### ObserveV2.addRef '${attrName}' for id ${bound[0]}...`);
 
     // run in idle time or now
     if (this.idleTasks_) {
@@ -427,6 +439,7 @@ class ObserveV2 {
 
   private addRef4IdInternal(id: number, target: object, attrName: string): void {
     // Map: attribute/symbol -> dependent id
+    //TODO: in case we create here new obj for symref, we have to put that back to target[ObserveV2.SYMBOL_REFS]
     const symRefs = target[ObserveV2.SYMBOL_REFS] ??= {};
     symRefs[attrName] ??= new Set();
     symRefs[attrName].add(id);
@@ -537,6 +550,13 @@ class ObserveV2 {
   */
   public fireChange(target: object, attrName: string, excludeElmtIds?: Set<number>,
     ignoreOnProfiler: boolean = false): void {
+    console.error("### fireChange start attr: " + attrName + " target name: " + target.constructor.name);
+    console.error("### fireChange IsProxiedObservedV2 " + ObserveV2.IsProxiedObservedV2(target) +
+      " IsMakeObserved " + ObserveV2.IsMakeObserved(target));
+    console.error("### fireChange  target: " + JSON.stringify(target));
+    console.error("### fireChange  defined RefInfo.MAKE_OBSERVED_PROXY: " + (target[RefInfo.MAKE_OBSERVED_PROXY] !== undefined));
+    console.error("### fireChange  defined ObserveV2.SYMBOL_REFS: " + (target[ObserveV2.SYMBOL_REFS] !== undefined));
+  
     // forcibly run idle time tasks if any
     if (this.idleTasks_?.end) {
       this.runIdleTasks();
@@ -559,9 +579,11 @@ class ObserveV2 {
     }
 
     if (!target[ObserveV2.SYMBOL_REFS]) {
+      console.error("### fireChange NO ObserveV2.SYMBOL_REFS return");
       return;
     }
 
+    //console.error("### fireChange stack top  ");
     const bound = this.stackOfRenderedComponents_.top();
     if (this.calculatingComputedProp_) {
       const prop = bound ? (bound[1] as ComputedV2).getProp() : 'unknown computed property';
@@ -570,15 +592,19 @@ class ObserveV2 {
       throw new Error(error);
     }
 
+    //console.error("### fireChange targetSymbolRefs");
     let targetSymbolRefs = target[ObserveV2.SYMBOL_REFS];
     // enable this trace marker for more fine grained tracing of the update pipeline
     // note: two (!) end markers need to be enabled
 
+    //console.error("### fireChange  empty set");
     let changedIdSet: Set<number> | undefined = undefined;
     if (targetSymbolRefs[attrName] != undefined) {
+      console.error("### fireChange  ref for attr exists");
       changedIdSet = targetSymbolRefs[attrName];
     }
     if (targetSymbolRefs[MonitorV2.OB_ANY] !== undefined) {
+      console.error("### fireChange  ref for MonitorV2.OB_ANY exists");
       if (changedIdSet === undefined) {
         changedIdSet = new Set<number>();
       }
@@ -593,11 +619,13 @@ class ObserveV2 {
     for (const id of changedIdSet) {
       // Cannot fireChange the object that is being created.
       if (bound && id === bound[0]) {
+        console.error("### fireChange object is being created...  " + id);
         continue;
       }
 
       // exclude given elementIds
       if (excludeElmtIds?.has(id)) {
+        console.error("### fireChange object exclude...  " + id);
         stateMgmtConsole.propertyAccess(`... exclude id ${id}`);
         continue;
       }
@@ -629,6 +657,7 @@ class ObserveV2 {
       } else if (id < MonitorV2.MIN_SYNC_WATCH_FROM_API_ID) {
         this.monitorIdsChangedForAddMonitor_.add(id);
       } else if (id < PersistenceV2Impl.MIN_PERSISTENCE_ID) {
+        console.error("### fireChange adding to sync id list...  " + id);
         this.monitorSyncIdsChangedForAddMonitor_.add(id);
       } else {
         this.persistenceChanged_.add(id);
@@ -655,6 +684,7 @@ class ObserveV2 {
     if (stateMgmtDFX.enableProfiler && !ignoreOnProfiler) {
       stateMgmtDFX.reportStateInfoToProfilerV2(target, attrName, changedIdSet);
     }
+    console.error("### fireChange END attr: " + attrName + " target name: " + target.constructor.name);
   }
 
   /**
@@ -1122,19 +1152,24 @@ class ObserveV2 {
   }
 
   public constructSyncMonitors(owningObject: Object, owningObjectName: string): void {
+    console.log("### constructSyncMonitors start owningObjectName: " + owningObject.constructor.name + "  " + owningObjectName);
     let watchProp = Symbol.for(MonitorV2.SYNC_MONITOR_PREFIX + owningObjectName);
     if (owningObject && (typeof owningObject === 'object') && owningObject[watchProp]) {
+      console.log("### constructSyncMonitors will iterate entries");
       Object.entries(owningObject[watchProp]).forEach(([pathString, monitorFunc]) => {
         if (monitorFunc && pathString && typeof monitorFunc === 'function') {
+            console.log("### constructSyncMonitors --> AddMonitorPath");
             this.AddMonitorPath(owningObject, pathString,
                 monitorFunc as MonitorCallback, {isSynchronous: true});
         }
       });
       delete owningObject[watchProp];
+      console.log("### constructSyncMonitors end");
     }
   }
 
   public AddMonitorPath(target: object, path: string | string[], monitorFunc: MonitorCallback, options?: MonitorOptions): void {
+    console.log("### AddMonitorPath " + JSON.stringify(path));
     const funcName = monitorFunc.name;
     const refs = target[ObserveV2.ADD_MONITOR_REFS] ??= {};
     let monitor = refs[funcName];
@@ -1147,6 +1182,7 @@ class ObserveV2 {
         return;
       }
       paths.forEach(path => {
+        console.log("### AddMonitorPath addPath... " + path);
         monitor.addPath(path);
       });
       monitor.InitRun();
