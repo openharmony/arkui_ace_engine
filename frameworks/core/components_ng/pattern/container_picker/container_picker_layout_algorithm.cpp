@@ -57,6 +57,7 @@ void ContainerPickerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         itemPosition_.clear();
     }
     MeasureWidth(layoutWrapper, contentIdealSize);
+    HandleAspectRatio(layoutWrapper, contentIdealSize);
 
     const auto& padding = pickerLayoutProperty->CreatePaddingAndBorder();
     AddPaddingToSize(padding, contentIdealSize);
@@ -85,6 +86,31 @@ void ContainerPickerLayoutAlgorithm::HandleLayoutPolicy(LayoutWrapper* layoutWra
                 contentConstraint, widthLayoutPolicy, LayoutCalPolicy::MATCH_PARENT, axis_);
             contentIdealSize.UpdateIllegalSizeWithCheck(layoutPolicySize);
         }
+    }
+}
+
+void ContainerPickerLayoutAlgorithm::HandleAspectRatio(LayoutWrapper* layoutWrapper, OptionalSizeF& contentIdealSize)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto pickerLayoutProperty = AceType::DynamicCast<ContainerPickerLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(pickerLayoutProperty);
+    if (!pickerLayoutProperty->HasAspectRatio() || LessOrEqual(pickerLayoutProperty->GetAspectRatio(), 0)) {
+        return;
+    }
+    auto newHeight = contentCrossSize_ / pickerLayoutProperty->GetAspectRatio();
+    if (NearEqual(newHeight, height_)) {
+        return;
+    }
+    SetHeight(newHeight);
+    contentMainSize_ = newHeight;
+    contentIdealSize.SetMainSize(newHeight, axis_);
+    reMeasure_ = true;
+    itemPosition_.clear();
+    CalcMainAndMiddlePos();
+    if (totalItemCount_ > 0) {
+        MeasurePickerItems(layoutWrapper, childLayoutConstraint_);
+    } else {
+        itemPosition_.clear();
     }
 }
 
@@ -323,8 +349,9 @@ bool ContainerPickerLayoutAlgorithm::MeasureBelowItem(LayoutWrapper* layoutWrapp
     auto measureIndex = ContainerPickerUtils::GetLoopIndex(currentIndex + 1, totalItemCount_);
     auto wrapper = layoutWrapper->GetOrCreateChildByIndex(measureIndex);
     ++currentIndex;
-    wrapper->Measure(layoutConstraint);
-    measuredItems_.insert(measureIndex);
+    if (!reMeasure_) {
+        wrapper->Measure(layoutConstraint);
+    }
 
     auto pickerLayoutProperty = AceType::DynamicCast<ContainerPickerLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(pickerLayoutProperty, false);
@@ -346,8 +373,9 @@ bool ContainerPickerLayoutAlgorithm::MeasureAboveItem(LayoutWrapper* layoutWrapp
     auto measureIndex = ContainerPickerUtils::GetLoopIndex(currentIndex - 1, totalItemCount_);
     auto wrapper = layoutWrapper->GetOrCreateChildByIndex(measureIndex);
     --currentIndex;
-    wrapper->Measure(layoutConstraint);
-    measuredItems_.insert(measureIndex);
+    if (!reMeasure_) {
+        wrapper->Measure(layoutConstraint);
+    }
 
     startPos = endPos - pickerItemHeight_;
     itemPosition_[currentIndex] = { startPos, endPos, wrapper->GetHostNode() };
