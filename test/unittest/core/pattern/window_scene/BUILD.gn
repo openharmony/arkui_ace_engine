@@ -63,5 +63,6 @@ ace_unittest("window_scene_test") {
     "window_manager:scene_session_manager",
     "window_manager:screen_session",
     "window_manager:screen_session_manager",
+    "init:libbegetutil",
   ]
 }

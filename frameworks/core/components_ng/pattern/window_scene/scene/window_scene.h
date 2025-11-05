@@ -79,6 +79,8 @@ private:
     bool IsMainSessionRecent();
     void InsertSurfaceNodeId(uint64_t nodeId);
     void ClearSurfaceNodeId(uint64_t nodeId);
+    bool CheckPrelaunchForBufferAvailableCallback(CancelableCallback<void()>& task,
+        const std::function<void()>& uiTask);
 
     bool destroyed_ = false;
     OHOS::Rosen::WindowMode initWindowMode_ = OHOS::Rosen::WindowMode::WINDOW_MODE_UNDEFINED;
