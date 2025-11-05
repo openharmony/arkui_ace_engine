@@ -47,6 +47,7 @@
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#include "core/components_ng/syntax/arkoala_parallelize_ui_adapter_node.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -4788,7 +4789,7 @@ void ScrollablePattern::GetRepeatCountInfo(
             totalChildCount += repeatRealCount;
         } else if (AceType::InstanceOf<FrameNode>(child) || AceType::InstanceOf<LazyForEachNode>(child) ||
                    AceType::InstanceOf<RepeatVirtualScrollNode>(child) || AceType::InstanceOf<ForEachNode>(child) ||
-                   AceType::InstanceOf<CustomNode>(child)
+                   AceType::InstanceOf<CustomNode>(child) || AceType::InstanceOf<ParallelizeUIAdapterNode>(child)
 #ifdef ACE_STATIC
                    || InstanceOf<ArkoalaLazyNode>(child)
 #endif
