@@ -199,6 +199,21 @@ bool QueryNavDestinationInfo1(ArkUI_Int32 uniqueId, ArkUINavDestinationInfo& inf
     info.mode = static_cast<ani_size>(navDestinationResult->mode);
     return true;
 }
+
+void OnReuse(ani_long node)
+{
+    auto customNode = reinterpret_cast<CustomNode*>(node);
+    CHECK_NULL_VOID(customNode);
+    customNode->OnReuse();
+}
+
+void OnRecycle(ani_long node)
+{
+    auto customNode = reinterpret_cast<CustomNode*>(node);
+    CHECK_NULL_VOID(customNode);
+    customNode->OnRecycle();
+}
+
 const ArkUIAniCustomNodeModifier* GetCustomNodeAniModifier()
 {
     static const ArkUIAniCustomNodeModifier impl = {
@@ -209,7 +224,9 @@ const ArkUIAniCustomNodeModifier* GetCustomNodeAniModifier()
         .queryNavDestinationInfo0 = OHOS::Ace::NG::QueryNavDestinationInfo0,
         .queryRouterPageInfo = OHOS::Ace::NG::QueryRouterPageInfo,
         .queryNavDestinationInfo1 = OHOS::Ace::NG::QueryNavDestinationInfo1,
-        .queryRouterPageInfo1 = OHOS::Ace::NG::QueryRouterPageInfo1
+        .queryRouterPageInfo1 = OHOS::Ace::NG::QueryRouterPageInfo1,
+        .onReuse = OHOS::Ace::NG::OnReuse,
+        .onRecycle = OHOS::Ace::NG::OnRecycle,
     };
     return &impl;
 }

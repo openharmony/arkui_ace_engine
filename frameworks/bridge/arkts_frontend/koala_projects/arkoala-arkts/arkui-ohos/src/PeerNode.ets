@@ -111,10 +111,6 @@ export class PeerNode extends IncrementalNode {
 
     /* reuse and recycle object on RootPeers */
     override reuse(reuseKey: string, id: KoalaCallsiteKey): Disposable | undefined {
-        if (reuseKey === undefined) {
-            return undefined;
-        }
-
         if (!this.isKind(RootPeerType))
             return this.parent?.reuse(reuseKey, id)
 
@@ -128,10 +124,6 @@ export class PeerNode extends IncrementalNode {
     }
 
     override recycle(reuseKey: string, child: Disposable, id: KoalaCallsiteKey): boolean {
-        if (reuseKey === undefined) {
-            return false;
-        }
-
         if (!this.isKind(RootPeerType)) {
             return this.parent?.recycle(reuseKey, child, id) ?? false
         }
@@ -240,10 +232,10 @@ export class PeerNode extends IncrementalNode {
             }
         }
         this.onChildRemoved = (child: IncrementalNode) => {
-            let peer = findPeerNode(child)
-            if (peer && !peer!.disposed) {
-                peer!.onRecycle()
-                this.peer.removeChild(peer!.peer.ptr)
+            if (child.isKind(PeerNodeType) && !child.disposed) {
+                const peer = child as PeerNode
+                peer.onRecycle()
+                this.peer.removeChild(peer.peer.ptr)
             }
         }
         this.name = name

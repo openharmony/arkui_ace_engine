@@ -17,7 +17,7 @@ import { KoalaCallsiteKey, int32 } from '@koalaui/common'
 import { KPointer } from "@koalaui/interop"
 import { __context, __id, Disposable, IncrementalNode, NodeAttach } from '@koalaui/runtime';
 import { ArkUIAniModule } from "arkui.ani"
-import { PeerNode, PeerNodeType, findPeerNode } from '../PeerNode';
+import { PeerNode, PeerNodeType } from '../PeerNode';
 import { IncrementalScope } from 'arkui.incremental.runtime.state';
 
 class ConditionScopePeer extends PeerNode {
@@ -42,7 +42,7 @@ class ConditionScopePeer extends PeerNode {
     }
 
     /* reuse and recycle object on RootPeers */
-    override reuse(reuseKey: string | undefined, id: KoalaCallsiteKey): Disposable | undefined {
+    override reuse(reuseKey: string, id: KoalaCallsiteKey): Disposable | undefined {
         if (reuseKey !== undefined) {
             return super.reuse(reuseKey, id);
         }
@@ -55,7 +55,7 @@ class ConditionScopePeer extends PeerNode {
         return result;
     }
 
-    override recycle(reuseKey: string | undefined, child: Disposable, id: KoalaCallsiteKey): boolean {
+    override recycle(reuseKey: string, child: Disposable, id: KoalaCallsiteKey): boolean {
         if (reuseKey !== undefined) {
             return super.recycle(reuseKey, child, id);
         }
@@ -123,11 +123,10 @@ class ConditionBranchNode extends IncrementalNode {
         super();
         this.builder = builder;
         this.onChildInserted = (node: IncrementalNode) => {
-            let peerNode = findPeerNode(node)
-            if (!peerNode) {
+            if (!node.isKind(PeerNodeType)) {
                 return
             }
-            const peer = peerNode as PeerNode
+            const peer = node as PeerNode
             if (peer.reusable) {
                 peer.onReuse(false)
             } else {
@@ -135,11 +134,10 @@ class ConditionBranchNode extends IncrementalNode {
             } 
         }
         this.onChildRemoved = (node: IncrementalNode) => {
-            let peerNode = findPeerNode(node)
-            if (!peerNode) {
+            if (!node.isKind(PeerNodeType)) {
                 return
             }
-            const peer = peerNode as PeerNode
+            const peer = node as PeerNode
             if (!peer.disposed) {
                 peer.onRecycle()
             }
