@@ -144,6 +144,7 @@ public:
     void CloseModalUIExtension(int32_t sessionId) override;
 
     void SetParentToken(sptr<IRemoteObject> token) override {}
+    void SetFrameMetricsCallBack(std::function<void(FrameMetrics info)>&& callback) override;
     sptr<IRemoteObject> GetParentToken() override
     {
         return nullptr;

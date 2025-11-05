@@ -646,7 +646,7 @@ int32_t UIContentImpl::CreateModalUIExtension(
 }
 
 void UIContentImpl::CloseModalUIExtension(int32_t sessionId) {}
-
+void UIContentImpl::SetFrameMetricsCallBack(std::function<void(FrameMetrics info)>&& callback) {}
 void UIContentImpl::SetStatusBarItemColor(uint32_t color)
 {
     ContainerScope scope(instanceId_);

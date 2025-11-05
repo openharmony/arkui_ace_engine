@@ -73,6 +73,7 @@
 #ifdef COMPONENT_TEST_ENABLED
 #include "component_test/pipeline_status.h"
 #endif // COMPONENT_TEST_ENABLED
+#include "interfaces/inner_api/ace/ui_content_config.h"
 #include "interfaces/inner_api/ace_kit/src/view/ui_context_impl.h"
 #include "interfaces/inner_api/ace_kit/include/ui/view/ai_caller_helper.h"
 
@@ -816,11 +817,16 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
     FlushAnimation(nanoTimestamp);
     FlushFrameCallback(nanoTimestamp, frameCount);
     auto hasRunningAnimation = FlushModifierAnimation(nanoTimestamp);
+    FrameMetrics frameMetrics;
+    frameMetrics.vsyncTimestamp = nanoTimestamp;
+    int64_t startTimestamp = GetSysTimestamp();
     FlushTouchEvents();
     FlushDragEvents();
+    frameMetrics.inputHandlingDuration = GetSysTimestamp() - startTimestamp;
     UpdateDVSyncTime(nanoTimestamp, abilityName, vsyncPeriod);
     lastVSyncTime_ = nanoTimestamp;
     FlushFrameCallbackFromCAPI(nanoTimestamp, frameCount);
+    startTimestamp = GetSysTimestamp();
     FlushBuild();
     if (isFormRender_ && drawDelegate_ && rootNode_) {
         auto renderContext = AceType::DynamicCast<NG::RenderContext>(rootNode_->GetRenderContext());
@@ -866,7 +872,9 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
         isFirstFlushMessages_ = false;
         LOGI("ArkUi flush first frame messages.");
     }
+    frameMetrics.firstDrawFrame = isFirstFlushMessages_;
     taskScheduler_->FlushAfterModifierTask();
+    frameMetrics.layoutMeasureDuration = GetSysTimestamp() - startTimestamp;
     // the application is in the background and the dark and light colors are switched.
     if (!onShow_ && backgroundColorModeUpdated_) {
         backgroundColorModeUpdated_ = false;
@@ -933,6 +941,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
         ACE_SCOPED_TRACE("TpFlush RequestFrame");
         RequestFrame();
     }
+    FireFrameMetricsCallBack(frameMetrics);
 }
 
 void PipelineContext::FlushMouseEventVoluntarily()
