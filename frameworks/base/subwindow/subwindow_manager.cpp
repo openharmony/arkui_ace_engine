@@ -1763,7 +1763,8 @@ RefPtr<Subwindow> SubwindowManager::GetSubwindowBySearchkey(int32_t instanceId, 
     std::lock_guard<std::mutex> lock(subwindowMutex_);
     auto result = subwindowMap_.find(searchKey);
     if (result != subwindowMap_.end()) {
-        return CheckSubwindowDisplayId(searchKey, result->second);
+        auto subwindow = result->second;
+        return CheckSubwindowDisplayId(searchKey, subwindow);
     }
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "Fail to find subwindow by key in subwindowMap_, searchKey is %{public}s.",
         searchKey.ToString().c_str());
