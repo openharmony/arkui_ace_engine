@@ -86,7 +86,6 @@ private:
     struct MovingPhotoControllerPeer {
         OHOS::Ace::RePtr<OHOS::Ace::NG::MovingPhotoController> controller;
     };
-
     static MovingPhotoFormat ParsePixelMapFormat(ani_env *env, ani_object options);
     static DynamicRangeMode ParseDynamicRangeModeFormat(ani_env *env, ani_object options);
     static bool SetMovingPhotoObject(ani_env *env, NG::MovingPhotoNode *movingPhotoNode, ani_object obj);
