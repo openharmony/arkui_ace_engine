@@ -4045,8 +4045,6 @@ OffsetF FrameNode::GetPositionToWindowWithTransform(OffsetF offset) const
 {
     auto context = GetRenderContext();
     CHECK_NULL_RETURN(context, OffsetF());
-    // auto rect = context->GetPaintRectWithoutTransform();
-    // offset = rect.GetOffset();
 
     PointF pointNode(offset.GetX(), offset.GetY());
     context->GetPointTransformRotate(pointNode);
