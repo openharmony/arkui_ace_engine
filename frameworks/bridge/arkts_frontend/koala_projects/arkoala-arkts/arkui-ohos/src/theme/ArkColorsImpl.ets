@@ -258,8 +258,13 @@ export class ArkColorsImpl implements Colors {
                 result.fifth = ArkColorsImpl.makeResourceWithOpacity(brandColor as Resource, 0.1) as Resource;
                 result.sixth = ArkColorsImpl.makeResourceWithOpacity(brandColor as Resource, 0.05) as Resource;
             } else {
-                const brandColorValue = brandColor as number | string;
-                const argbColor = ArkUIAniModule._GetColorValue(brandColorValue);
+                const brandColorValue = brandColor as int32 | string;
+                let argbColor = 0xff000000 as int32;
+                if (brandColorValue instanceof int32) {
+                    argbColor = brandColorValue as int32;
+                } else if (brandColorValue instanceof string) {
+                    argbColor = ArkUIAniModule._GetStringColorValue(brandColorValue) as int32;
+                }
                 result.primary = argbColor;
                 result.secondary = ArkColorsImpl.blendOpacity(argbColor, 0.6);
                 result.tertiary = ArkColorsImpl.blendOpacity(argbColor, 0.4);
