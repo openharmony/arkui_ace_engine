@@ -1636,4 +1636,34 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Rese
     // Test with invalid index
     algorithm_->ResetOffscreenItemPosition(layoutWrapper, 10);
 }
+
+/**
+ * @tc.name: ContainerPickerLayoutAlgorithm_LayoutTest002
+ * @tc.desc: Test Layout method without position property alignment
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_LayoutTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ContainerPicker and set up layoutWrapper
+     */
+    CreateContainerPickerNode(5);
+    auto refLayoutWrapper = frameNode_->CreateLayoutWrapper();
+    ASSERT_NE(refLayoutWrapper, nullptr);
+    LayoutWrapper* layoutWrapper = Referenced::RawPtr(refLayoutWrapper);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    auto layoutProperty = AceType::DynamicCast<ContainerPickerLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->contentConstraint_ = layoutConstraintF;
+
+    /**
+     * @tc.steps: step2. Call Layout method
+     * @tc.expected: step2. align_ should be Alignment::CENTER
+     */
+    layoutProperty->UpdateAlignment(Alignment::TOP_LEFT);
+    algorithm_->Layout(layoutWrapper);
+    EXPECT_EQ(algorithm_->align_, Alignment::CENTER);
+}
+
 } // namespace OHOS::Ace::NG

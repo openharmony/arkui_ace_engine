@@ -432,6 +432,23 @@ HWTEST_F(RichEditorAITestOneNg, CanStartAITask003, TestSize.Level2)
 }
 
 /**
+ * @tc.name: StartAITask001
+ * @tc.desc: test StartAITask
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorAITestOneNg, StartAITask001, TestSize.Level2)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    ASSERT_NE(richEditorPattern->dataDetectorAdapter_, nullptr);
+    AISpan aiSpan;
+    richEditorPattern->dataDetectorAdapter_->aiSpanMap_[0] = aiSpan;
+    richEditorPattern->dataDetectorAdapter_->StartAITask();
+    EXPECT_FALSE(richEditorPattern->dataDetectorAdapter_->aiSpanMap_.empty());
+}
+
+/**
  * @tc.name: NeedShowAIDetect001
  * @tc.desc: test NeedShowAIDetect
  * @tc.type: FUNC

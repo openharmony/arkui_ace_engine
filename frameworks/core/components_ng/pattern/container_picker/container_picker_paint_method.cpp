@@ -132,7 +132,7 @@ void ContainerPickerPaintMethod::PaintSelectionIndicatorDivider(PaintWrapper* pa
     CHECK_NULL_VOID(pickerGeometryNode);
     auto pickerRect = pickerGeometryNode->GetFrameRect();
     auto strokeWidth = layoutProperty->GetIndicatorDividerWidth().value_or(theme->GetDividerThickness()).ConvertToPx();
-    if (GreatOrEqual(strokeWidth, PICKER_ITEM_HEIGHT.ConvertToPx() / HALF)) {
+    if (GreatNotEqual(strokeWidth, PICKER_ITEM_HEIGHT.ConvertToPx() / HALF)) {
         strokeWidth = theme->GetDividerThickness().ConvertToPx();
     }
     auto dividerColor = layoutProperty->GetIndicatorDividerColor().value_or(theme->GetDividerColor());

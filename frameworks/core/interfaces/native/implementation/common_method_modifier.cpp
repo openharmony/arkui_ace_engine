@@ -64,6 +64,7 @@
 #include "core/interfaces/native/implementation/swipe_recognizer_peer.h"
 #include "core/interfaces/native/implementation/tap_gesture_event_peer.h"
 #include "core/interfaces/native/implementation/tap_recognizer_peer.h"
+#include "core/interfaces/native/implementation/text_field_modifier.h"
 #include "core/interfaces/native/implementation/transition_effect_peer_impl.h"
 #include "frameworks/core/interfaces/native/implementation/bind_sheet_utils.h"
 #include "base/log/log_wrapper.h"
@@ -137,19 +138,23 @@ Ark_GestureRecognizer CreateArkGestureRecognizer(const RefPtr<NGGestureRecognize
     peer = Converter::ArkValue<Ark_GestureRecognizer>(recognizer);
     return peer;
 }
-std::optional<bool> ProcessBindableIsShow(FrameNode* frameNode, const Opt_Union_Boolean_Bindable *value)
+std::optional<bool> ProcessBindableIsShow(FrameNode* frameNode,
+                                          const Opt_Union_Boolean_Bindable *value,
+                                          std::function<void(const std::string&)>& outEvent)
 {
     std::optional<bool> result;
     Converter::VisitUnionPtr(value,
-        [&result](const Ark_Boolean& src) {
+        [&result, &outEvent](const Ark_Boolean& src) {
             result = Converter::OptConvert<bool>(src);
+            outEvent = nullptr;
         },
-        [&result, frameNode](const Ark_Bindable_Boolean& src) {
+        [&result, frameNode, &outEvent](const Ark_Bindable_Boolean& src) {
             result = Converter::OptConvert<bool>(src.value);
             WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-            auto onEvent = [arkCallback = CallbackHelper(src.onChange), weakNode](const bool value) {
+            outEvent = [arkCallback = CallbackHelper(src.onChange), weakNode](const std::string& param) {
                 PipelineContext::SetCallBackNode(weakNode);
-                arkCallback.Invoke(Converter::ArkValue<Ark_Boolean>(value));
+                bool isShow = (param == "true");
+                arkCallback.Invoke(Converter::ArkValue<Ark_Boolean>(isShow));
             };
         },
         [] {});
@@ -1915,6 +1920,10 @@ void SetWidthImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetTag() == V2::TEXTINPUT_ETS_TAG || frameNode->GetTag() == V2::TEXTAREA_ETS_TAG) {
+        TextFieldModifier::SetWidthImpl(node, value);
+        return;
+    }
     Converter::VisitUnionPtr(value,
         [frameNode](const Ark_Length& src) {
             auto result = Converter::OptConvert<CalcDimension>(src);
@@ -1949,6 +1958,10 @@ void SetHeightImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetTag() == V2::TEXTINPUT_ETS_TAG || frameNode->GetTag() == V2::TEXTAREA_ETS_TAG) {
+        TextFieldModifier::SetHeightImpl(node, value);
+        return;
+    }
     Converter::VisitUnionPtr(value,
         [frameNode](const Ark_Length& src) {
             auto result = Converter::OptConvert<CalcDimension>(src);
@@ -2124,7 +2137,11 @@ void SetPaddingImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstractModelStatic::SetPadding(frameNode, Converter::OptConvertPtr<PaddingProperty>(value));
+    if (frameNode->GetTag() == V2::TEXTINPUT_ETS_TAG || frameNode->GetTag() == V2::TEXTAREA_ETS_TAG) {
+        TextFieldModifier::SetPaddingImpl(node, value);
+    } else {
+        ViewAbstractModelStatic::SetPadding(frameNode, Converter::OptConvertPtr<PaddingProperty>(value));
+    }
 }
 void SetSafeAreaPaddingImpl(Ark_NativePointer node,
                             const Opt_Union_Padding_LengthMetrics_LocalizedPadding* value)
@@ -2153,7 +2170,11 @@ void SetMarginImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstractModelStatic::SetMargin(frameNode, Converter::OptConvertPtr<PaddingProperty>(value));
+    if (frameNode->GetTag() == V2::TEXTINPUT_ETS_TAG || frameNode->GetTag() == V2::TEXTAREA_ETS_TAG) {
+        TextFieldModifier::SetMarginImpl(node, value);
+    } else {
+        ViewAbstractModelStatic::SetMargin(frameNode, Converter::OptConvertPtr<PaddingProperty>(value));
+    }
 }
 void SetBackgroundColorImpl(Ark_NativePointer node,
                             const Opt_Union_ResourceColor_ColorMetrics* value)
@@ -2166,6 +2187,8 @@ void SetBackgroundColorImpl(Ark_NativePointer node,
     }
     if (frameNode->GetTag() == V2::SELECT_ETS_TAG) {
         SelectModelStatic::SetBackgroundColor(frameNode, colorValue);
+    } else if (frameNode->GetTag() == V2::TEXTINPUT_ETS_TAG || frameNode->GetTag() == V2::TEXTAREA_ETS_TAG) {
+        TextFieldModifier::SetBackgroundColorImpl(node, value);
     } else {
         ViewAbstractModelStatic::SetBackgroundColor(frameNode, colorValue);
     }
@@ -2339,6 +2362,10 @@ void SetBorderImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetTag() == V2::TEXTINPUT_ETS_TAG || frameNode->GetTag() == V2::TEXTAREA_ETS_TAG) {
+        TextFieldModifier::SetBorderImpl(node, value);
+        return;
+    }
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
         ViewAbstract::SetBorderStyle(frameNode, BorderStyle::SOLID);
@@ -2394,6 +2421,10 @@ void SetBorderStyleImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetTag() == V2::TEXTINPUT_ETS_TAG || frameNode->GetTag() == V2::TEXTAREA_ETS_TAG) {
+        TextFieldModifier::SetBorderStyleImpl(node, value);
+        return;
+    }
     auto style = Converter::OptConvertPtr<BorderStyleProperty>(value);
     if (!style) {
         ViewAbstract::SetBorderStyle(frameNode, BorderStyle::SOLID);
@@ -2406,6 +2437,10 @@ void SetBorderWidthImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetTag() == V2::TEXTINPUT_ETS_TAG || frameNode->GetTag() == V2::TEXTAREA_ETS_TAG) {
+        TextFieldModifier::SetBorderWidthImpl(node, value);
+        return;
+    }
     auto width = Converter::OptConvertPtr<BorderWidthProperty>(value);
     if (width) {
         FixBorderWidthProperty(width.value(), true, true, true);
@@ -2419,6 +2454,10 @@ void SetBorderColorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetTag() == V2::TEXTINPUT_ETS_TAG || frameNode->GetTag() == V2::TEXTAREA_ETS_TAG) {
+        TextFieldModifier::SetBorderColorImpl(node, value);
+        return;
+    }
     auto color = Converter::OptConvertPtr<BorderColorProperty>(value);
     if (color) {
         ViewAbstractModelStatic::SetBorderColor(frameNode, color.value());
@@ -2431,6 +2470,10 @@ void SetBorderRadiusImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetTag() == V2::TEXTINPUT_ETS_TAG || frameNode->GetTag() == V2::TEXTAREA_ETS_TAG) {
+        TextFieldModifier::SetBorderRadiusImpl(node, value);
+        return;
+    }
     auto radiuses = Converter::OptConvertPtr<BorderRadiusProperty>(value);
     if (radiuses) {
         if (frameNode->GetTag() == V2::BUTTON_ETS_TAG) {
@@ -5382,7 +5425,8 @@ void SetBindContentCover0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(builder);
-    auto isShowValue = ProcessBindableIsShow(frameNode, isShow);
+    std::function<void(const std::string&)> changeEvent;
+    auto isShowValue = ProcessBindableIsShow(frameNode, isShow, changeEvent);
     ModalStyle modalStyle;
     modalStyle.modalTransition = (Converter::OptConvertPtr<ModalTransition>(type))
         .value_or(ModalTransition::DEFAULT);
@@ -5414,7 +5458,8 @@ void SetBindContentCover1Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(builder);
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto isShowValue = ProcessBindableIsShow(frameNode, isShow);
+    std::function<void(const std::string&)> changeEvent;
+    auto isShowValue = ProcessBindableIsShow(frameNode, isShow, changeEvent);
     ModalStyle modalStyle;
     modalStyle.modalTransition = ModalTransition::DEFAULT;
     std::function<void()> onShowCallback;
@@ -5440,6 +5485,7 @@ void SetBindContentCover1Impl(Ark_NativePointer node,
     auto optBuilder = Converter::GetOptPtr(builder);
     if (isShowValue && *isShowValue && optBuilder) {
         CallbackHelper(*optBuilder).BuildAsync([weakNode, frameNode, modalStyle, contentCoverParam,
+            changeEvent = std::move(changeEvent),
             onShowCallback = std::move(onShowCallback),
             onDismissCallback = std::move(onDismissCallback),
             onWillShowCallback = std::move(onWillShowCallback),
@@ -5449,12 +5495,12 @@ void SetBindContentCover1Impl(Ark_NativePointer node,
             auto buildFunc = [uiNode]() -> RefPtr<UINode> {
                 return uiNode;
             };
-            ViewAbstractModelStatic::BindContentCover(frameNode, true, nullptr, std::move(buildFunc),
+            ViewAbstractModelStatic::BindContentCover(frameNode, true, std::move(changeEvent), std::move(buildFunc),
                 modalStyle, std::move(onShowCallback), std::move(onDismissCallback), std::move(onWillShowCallback),
                 std::move(onWillDismissCallback), contentCoverParam);
             }, node);
     } else {
-        ViewAbstractModelStatic::BindContentCover(frameNode, false, nullptr, nullptr,
+        ViewAbstractModelStatic::BindContentCover(frameNode, false, std::move(changeEvent), nullptr,
             modalStyle, std::move(onShowCallback), std::move(onDismissCallback),
             std::move(onWillShowCallback), std::move(onWillDismissCallback), contentCoverParam);
     }
@@ -5467,7 +5513,8 @@ void SetBindSheetImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(builder);
-    auto isShowValue = ProcessBindableIsShow(frameNode, isShow);
+    std::function<void(const std::string&)> changeEvent;
+    auto isShowValue = ProcessBindableIsShow(frameNode, isShow, changeEvent);
     if (!isShowValue) {
         // Implement Reset value
         return;
@@ -5503,13 +5550,14 @@ void SetBindSheetImpl(Ark_NativePointer node,
         // Implement Reset value
         return;
     }
-    CallbackHelper(*optBuilder).BuildAsync([frameNode, isShowValue, sheetStyle, cb = std::move(cbs)](
+    CallbackHelper(*optBuilder).BuildAsync([frameNode, isShowValue, sheetStyle, changeEvent = std::move(changeEvent),
+        cb = std::move(cbs)](
         const RefPtr<UINode>& uiNode) mutable {
         auto buildFunc = [frameNode, uiNode]() {
             PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
             ViewStackProcessor::GetInstance()->Push(uiNode);
         };
-        ViewAbstractModelStatic::BindSheet(frameNode, *isShowValue, nullptr, std::move(buildFunc),
+        ViewAbstractModelStatic::BindSheet(frameNode, *isShowValue, std::move(changeEvent), std::move(buildFunc),
             std::move(cb.titleBuilder), sheetStyle, std::move(cb.onAppear), std::move(cb.onDisappear),
             std::move(cb.shouldDismiss), std::move(cb.onWillDismiss), std::move(cb.onWillAppear),
             std::move(cb.onWillDisappear), std::move(cb.onHeightDidChange), std::move(cb.onDetentsDidChange),

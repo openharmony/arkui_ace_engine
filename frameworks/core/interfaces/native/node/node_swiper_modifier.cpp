@@ -150,7 +150,7 @@ void SetArrowBackgroundInfo(SwiperArrowParameters& swiperArrowParameters,
             ? dimension : arrowBackgroundSize;
     parseOk = Color::ParseColorString(backgroundColorValue, color) &&
         arrowInfo[ARROW_ISSET_BACKGROUND_COLOR] == "1";
-    color = backgroundColorValue != "" ? Color(std::stoul(backgroundColorValue)) : color;
+    color = backgroundColorValue != "" ? Color(StringUtils::StringToLongInt(backgroundColorValue)) : color;
     swiperArrowParameters.backgroundColor = parseOk || color == Color(0x00000000)
         ? (swiperArrowParameters.parametersByUser.insert("backgroundColor"), color) : arrowBackgroundColor;
     if (swiperArrowParameters.isShowBackground.value()) {
@@ -163,7 +163,7 @@ void SetArrowBackgroundInfo(SwiperArrowParameters& swiperArrowParameters,
         swiperArrowParameters.backgroundSize = swiperArrowParameters.arrowSize;
     }
     parseOk = Color::ParseColorString(arrowColorValue, color) && arrowInfo[ARROW_ISSET_COLOR] == "1";
-    color = arrowColorValue != "" ? Color(std::stoul(arrowColorValue)) : color;
+    color = arrowColorValue != "" ? Color(StringUtils::StringToLongInt(arrowColorValue)) : color;
     swiperArrowParameters.arrowColor = parseOk || color == Color(0x00000000)
         ? (swiperArrowParameters.parametersByUser.insert("arrowColor"), color) : arrowColor;
 }

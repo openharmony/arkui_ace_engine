@@ -108,7 +108,7 @@ struct TextArea32dev2 {
           .onChange((value: string, previewRange: PreviewText, options: TextChangeOptions) => {
             this.value = value
             this.previewRangeStart = options.rangeAfter.start + ''
-            this.previewRangeEnd = options.rangeAfter.start + ''
+            this.previewRangeEnd = options.rangeAfter.end + ''
           })
           .decoration({
             type: this.decorationType[this.typeIndex],
@@ -148,7 +148,7 @@ struct TextArea32dev2 {
           .onChange((value: string, previewRange: PreviewText, options: TextChangeOptions) => {
             this.value = value
             this.previewRangeStart = options.rangeAfter.start + ''
-            this.previewRangeEnd = options.rangeAfter.start + ''
+            this.previewRangeEnd = options.rangeAfter.end + ''
           })
           .decoration({
             type: this.decorationType[this.typeIndex],
