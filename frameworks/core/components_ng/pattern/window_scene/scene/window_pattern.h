@@ -122,6 +122,7 @@ protected:
     const std::string newAppWindowName_ = "NewAppWindow";
     bool attachToFrameNodeFlag_ = false;
     bool isBlankForSnapshot_ = false;
+    bool isPrelaunch_ = false;
 
     sptr<Rosen::Session> session_;
     int32_t instanceId_ = Container::CurrentId();

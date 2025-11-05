@@ -293,6 +293,39 @@ HWTEST_F(WindowSceneTest, BufferAvailableCallback04, TestSize.Level1)
 }
 
 /**
+ * @tc.name: BufferAvailableCallback05
+ * @tc.desc: Buffer aviliable callback for prelaunch
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneTest, BufferAvailableCallback05, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create windowScene.
+     */
+    Rosen::SessionInfo sessionInfo = {
+        .abilityName_ = ABILITY_NAME,
+        .bundleName_ = BUNDLE_NAME,
+        .moduleName_ = MODULE_NAME,
+        .isPrelaunch_ = true,
+    };
+    auto windowScene = CreateWindowSceneForStartingWindowTest(sessionInfo);
+    ASSERT_NE(windowScene, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), windowScene);
+    windowScene->frameNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    ASSERT_NE(windowScene->GetHost(), nullptr);
+    windowScene->session_->enableRemoveStartingWindow_ = true;
+    windowScene->session_->appBufferReady_ = true;
+    /**
+     * @tc.steps: step2. Test and check starting window.
+     */
+    windowScene->session_->prelaunchStart_ = 0;
+    windowScene->BufferAvailableCallback();
+    usleep(WAIT_SYNC_IN_NS);
+    EXPECT_EQ(windowScene->startingWindow_, nullptr);
+}
+
+/**
  * @tc.name: AddPersistentImage
  * @tc.desc: add persistent image
  * @tc.type: FUNC
@@ -867,10 +900,9 @@ HWTEST_F(WindowSceneTest, OnAttachToFrameNodeForPrelaunch01, TestSize.Level0)
     windowScene->frameNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
     ASSERT_NE(windowScene->GetHost(), nullptr);
 
-    session->state_ = Rosen::SessionState::STATE_BACKGROUND;
+    session->prelaunchStart_ = 0;
+    session->state_ = Rosen::SessionState::STATE_DISCONNECT;
     session->SetShowRecent(true);
-    auto key = Rosen::defaultStatus;
-    session->scenePersistence_->hasSnapshot_[key] = true;
     windowScene->WindowPattern::OnAttachToFrameNode();
     EXPECT_EQ(session->GetShowRecent(), true);
 }
@@ -902,7 +934,8 @@ HWTEST_F(WindowSceneTest, OnAttachToFrameNodeForPrelaunch02, TestSize.Level0)
     };
     session->surfaceNode_ = Rosen::RSSurfaceNode::Create(config);
 
-    session->state_ = Rosen::SessionState::STATE_BACKGROUND;
+    session->prelaunchStart_ = 0;
+    session->state_ = Rosen::SessionState::STATE_CONNECT;
     windowScene->WindowPattern::OnAttachToFrameNode();
     EXPECT_EQ(windowScene->session_->surfaceNode_->bufferAvailable_, false);
 }
