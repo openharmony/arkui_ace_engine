@@ -561,7 +561,9 @@ std::function<void()> DataDetectorAdapter::GetDetectDelayTask(const std::map<int
     return [aiSpanMap, weak = WeakClaim(this), taskId]() {
         TAG_LOGD(AceLogTag::ACE_TEXT, "startDetectDelayTask, taskId=%{public}" PRIu64 "", taskId);
         auto dataDetectorAdapter = weak.Upgrade();
-        CHECK_NULL_VOID(dataDetectorAdapter && !dataDetectorAdapter->textForAI_.empty());
+        CHECK_NULL_VOID(dataDetectorAdapter);
+        dataDetectorAdapter->aiSpanMap_.clear();
+        CHECK_NULL_VOID(!dataDetectorAdapter->textForAI_.empty());
         TAG_LOGI(AceLogTag::ACE_TEXT, "DataDetectorAdapter, delayed whole task executed, id: %{public}i",
             dataDetectorAdapter->GetHost() ? dataDetectorAdapter->GetHost()->GetId() : -1);
         dataDetectorAdapter->lastTextForAI_ = dataDetectorAdapter->textForAI_;
@@ -624,9 +626,6 @@ void DataDetectorAdapter::StartAITask(bool clearAISpanMap, bool isSelectDetect)
         aiSpanMapCopy = aiSpanMap_;
     }
     detectTexts_.clear();
-    if (clearAISpanMap) {
-        aiSpanMap_.clear();
-    }
     typeChanged_ = false;
     startDetectorTimeStamp_ = std::chrono::high_resolution_clock::now();
     auto context = PipelineContext::GetCurrentContextSafely();

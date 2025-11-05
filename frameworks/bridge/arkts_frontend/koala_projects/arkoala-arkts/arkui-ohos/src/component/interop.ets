@@ -479,6 +479,7 @@ export function compatibleWrappedBuilderInternal(builder: Any, ...args: FixedArr
         }
         const stateParam = instance.getProperty('arg1') as ESValue;
         const rawValue = param.unwrap()!;
+        const global = ESValue.getGlobal();
         if (isDynamicObject(rawValue)) {
             let it = param.keys();
             while (true) {
@@ -492,12 +493,14 @@ export function compatibleWrappedBuilderInternal(builder: Any, ...args: FixedArr
         else {
             const target = (reflect.Value.of(rawValue) as ClassValue).getFieldByName('@target').getData() as Object;
             const keys = Object.keys(target);
+            const invokeObserveFireChange = global.getProperty('invokeObserveFireChange');
             if (rawValue instanceof IObservedObject) {
                 const PREFIX = '__backing_';
                 keys.forEach((key)=>{
                     if(key.startsWith(PREFIX)){
                         const value = (reflect.Value.of(target) as ClassValue).getFieldByName(key).getData() as Object;
                         stateParam.setProperty(key.slice(PREFIX.length), value);
+                        invokeObserveFireChange.invoke(stateParam, ESValue.wrap(key.slice(PREFIX.length)));
                     }
                 })
             }
@@ -505,10 +508,10 @@ export function compatibleWrappedBuilderInternal(builder: Any, ...args: FixedArr
                 keys.forEach((key)=>{
                     const value = (reflect.Value.of(target) as ClassValue).getFieldByName(key).getData() as Object;
                     stateParam.setProperty(key, value);
+                    invokeObserveFireChange.invoke(stateParam, ESValue.wrap(key));
                 })
             }
         }
-        const global = ESValue.getGlobal();
         const runPendingJobs = global.getProperty('runPendingJobs');
         runPendingJobs.invoke();
     }));

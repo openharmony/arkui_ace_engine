@@ -529,13 +529,9 @@ void TextContentModifier::DrawText(
     RSRecordingCanvas* recordingCanvas = static_cast<RSRecordingCanvas*>(&canvas);
     if (recordingCanvas != nullptr && recordingCanvas->GetDrawCmdList() != nullptr &&
         recordingCanvas->GetDrawCmdList()->IsEmpty()) {
-        TAG_LOGI(AceLogTag::ACE_TEXT,
-            "TextContentModifier::DrawText GetDrawCmdList empty! id:%{public}d LongestLineWithIndent:%{public}f "
-            "MaxIntrinsicWidth:%{public}f MaxWidth:%{public}f height:%{public}f lineCount:%{public}d paragraphs "
-            "size:%{public}d",
-            host->GetId(), pManager->GetLongestLineWithIndent(), pManager->GetMaxIntrinsicWidth(),
-            pManager->GetMaxWidth(), pManager->GetHeight(), static_cast<int32_t>(pManager->GetLineCount()),
-            static_cast<int32_t>(paragraphs.size()));
+        auto nowTime = textPattern->GetSystemTimestamp();
+        textPattern->DumpRecord(
+            "TextContentModifier::DrawText GetDrawCmdList empty! DrawText time:" + std::to_string(nowTime));
     }
 }
 

@@ -17,6 +17,8 @@
 
 arkui_files = [
   "arkui-preprocessed/@ohos.animator.ets",
+  "arkui-preprocessed/@ohos.arkui.ArcList.ets",
+  "arkui-preprocessed/@ohos.arkui.ArcScrollBar.ets",
   "arkui-preprocessed/@ohos.arkui.Parallelize.ets",
   "arkui-preprocessed/@ohos.arkui.Prefetcher.ets",
   "arkui-preprocessed/@ohos.arkui.UIContext.ets",
@@ -357,6 +359,8 @@ arkui_files = [
   "arkui-preprocessed/arkui/framework/index.ets",
   "arkui-preprocessed/arkui/framework/ohos.app.ability.Configuration.ets",
   "arkui-preprocessed/arkui/framework/ohos.app.ability.Want.ets",
+  "arkui-preprocessed/arkui/framework/ohos.arkui.ArcList.ets",
+  "arkui-preprocessed/arkui/framework/ohos.arkui.ArcScrollBar.ets",
   "arkui-preprocessed/arkui/framework/ohos.arkui.UIContext.ets",
   "arkui-preprocessed/arkui/framework/ohos.arkui.drawableDescriptor.ets",
   "arkui-preprocessed/arkui/framework/ohos.arkui.observer.ets",

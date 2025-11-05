@@ -211,11 +211,12 @@ void ExecuteSharedRuntimeAnimation(const RefPtr<Container>& container, const Ref
             TaskExecutor::TaskType::UI, "ArkUIAnimateToForStageMode", PriorityType::IMMEDIATE);
         return;
     }
-    StartAnimationForStageMode(pipelineContextBase, option, onEventFinish, count, true);
+    StartAnimationForStageMode(pipelineContextBase, option, onEventFinish, count, immediately);
 }
 
-void AnimateToImmediatelyImplImpl(const Ark_AnimateParam* param, const Callback_Void* event)
+void AnimateToImmediatelyImplImpl(const Ark_AnimateParam* param, const Callback_Void* event, Ark_Boolean arkImmediately)
 {
+    bool immediately = Converter::Convert<bool>(arkImmediately);
     std::function<void()> onEventFinish;
     if (event) {
         onEventFinish = [arkCallback = CallbackHelper(*event)]() {
@@ -249,7 +250,7 @@ void AnimateToImmediatelyImplImpl(const Ark_AnimateParam* param, const Callback_
         option.SetOnFinishEvent(onFinishEvent);
     }
 
-    ExecuteSharedRuntimeAnimation(container, pipelineContextBase, option, onEventFinish, count, true);
+    ExecuteSharedRuntimeAnimation(container, pipelineContextBase, option, onEventFinish, count, immediately);
 }
 
 void OpenImplicitAnimationImpl(const Ark_AnimateParam* param)

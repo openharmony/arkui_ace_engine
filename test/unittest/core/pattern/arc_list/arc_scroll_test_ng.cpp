@@ -521,8 +521,8 @@ HWTEST_F(ArcScrollBarTestNg, ArcScrollBarTestNg013, TestSize.Level1)
     float radius = 5;
     ArcRound arcBarRect(centerPoint, radius, radius, radius, radius);
     ArcScrollBarOverlayModifier modifer;
-    modifer.StartArcBarAnimation(HoverAnimationType::GROW,
-        OpacityAnimationType::APPEAR, needAdaptAnimation, arcBarRect, arcBarRect);
+    modifer.StartArcBarAnimation(
+        HoverAnimationType::GROW, OpacityAnimationType::APPEAR, needAdaptAnimation, arcBarRect, arcBarRect);
     EXPECT_EQ(modifer.backgroundStrokeWidth_->Get(), 5);
     EXPECT_EQ(modifer.backgroundCurveRadius_->Get(), 5);
     EXPECT_EQ(modifer.backgroundStartAngle_->Get(), 5);
