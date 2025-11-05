@@ -18,6 +18,7 @@
 #include "ui/base/geometry/dimension.h"
 #include "ui/properties/color.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/search/search_layout_property.h"
 #include "core/components_ng/pattern/search/search_model_ng.h"
 #include "core/components_ng/pattern/search/search_node.h"

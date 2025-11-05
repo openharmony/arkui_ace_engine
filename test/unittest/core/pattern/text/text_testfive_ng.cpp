@@ -24,6 +24,7 @@
 #include "text_base.h"
 
 #include "core/components/common/properties/text_style_parser.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/text/paragraph_util.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/render/adapter/pixelmap_image.h"

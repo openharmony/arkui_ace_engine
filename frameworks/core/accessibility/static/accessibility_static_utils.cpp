@@ -13,7 +13,11 @@
  * limitations under the License.
  */
 #include "core/accessibility/static/accessibility_static_utils.h"
-#include "core/components/common/layout/constants.h"
+
+#include <unordered_map>
+#include <vector>
+
+#include "ui/focus/focus_constants.h"
 
 namespace OHOS::Ace {
 const std::unordered_map<AccessibilityRoleType, std::string> accessibilityRoleMap {

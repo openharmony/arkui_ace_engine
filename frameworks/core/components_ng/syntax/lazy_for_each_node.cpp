@@ -16,6 +16,7 @@
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 
 #include "core/components_ng/pattern/list/list_item_pattern.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/element_register.h"

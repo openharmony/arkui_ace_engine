@@ -19,6 +19,7 @@
 #include "base/log/ace_performance_check.h"
 #include "base/log/ace_performance_monitor.h"
 #include "base/log/dump_log.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {

@@ -16,7 +16,9 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_ACCESSIBILITY_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_ACCESSIBILITY_H
 
-#include "core/components/common/layout/constants.h"
+#include <string>
+
+#include "ui/accessibility/accessibility_constants.h"
 
 namespace OHOS::Ace::Framework {
     class JSAccessibilityAbstract {

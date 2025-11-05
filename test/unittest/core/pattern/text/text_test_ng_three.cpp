@@ -24,6 +24,7 @@
 
 #include "core/components/common/layout/constants.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/text/paragraph_util.h"

@@ -16,6 +16,7 @@
 #include "arc_list_test_ng.h"
 #include "gtest/gtest.h"
 
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar.h"
 #include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar_overlay_modifier.h"
 #include "core/components_v2/inspector/inspector_constants.h"

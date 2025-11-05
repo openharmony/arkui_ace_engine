@@ -27,6 +27,7 @@
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/action_sheet/action_sheet_model_ng.h"
 #include "core/components_ng/pattern/dialog/alert_dialog_model_ng.h"
 #include "core/components_ng/pattern/dialog/custom_dialog_controller_model_ng.h"

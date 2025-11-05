@@ -16,7 +16,8 @@
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
-#include "frameworks/core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 
 using namespace testing;
 using namespace testing::ext;

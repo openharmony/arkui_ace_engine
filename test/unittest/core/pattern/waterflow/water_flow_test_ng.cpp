@@ -28,6 +28,7 @@
 #include "water_flow_test_ng.h"
 
 #include "core/components/scroll/scroll_controller_base.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/button/button_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/row_model_ng.h"
 #include "core/components_ng/pattern/refresh/refresh_theme_ng.h"

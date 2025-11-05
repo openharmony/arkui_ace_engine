@@ -22,6 +22,7 @@
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
 #include "core/components_ng/pattern/navigation/title_bar_layout_algorithm.h"
 #include "core/components_ng/pattern/navigation/title_bar_layout_property.h"

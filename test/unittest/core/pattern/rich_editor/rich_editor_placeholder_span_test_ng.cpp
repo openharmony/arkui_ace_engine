@@ -18,6 +18,7 @@
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_paragraph.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 
 using namespace testing;
 using namespace testing::ext;

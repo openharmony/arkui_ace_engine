@@ -14,6 +14,7 @@
  */
 #include "test/unittest/core/base/frame_node_test_ng.h"
 #include "gtest/gtest.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/marquee/marquee_paint_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"

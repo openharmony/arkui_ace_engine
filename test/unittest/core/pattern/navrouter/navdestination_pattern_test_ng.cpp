@@ -20,6 +20,7 @@
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
 #include "core/common/multi_thread_build_manager.h"
 #include "core/components/dialog/dialog_properties.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
