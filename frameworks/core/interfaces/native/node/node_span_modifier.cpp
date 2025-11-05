@@ -275,7 +275,6 @@ void SetSpanFontColor(ArkUINodeHandle node, uint32_t textColor, void* fontColorR
     auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(uiNode);
     Color result = Color(textColor);
-    SpanModelNG::SetTextColor(uiNode, result);
     if (SystemProperties::ConfigChangePerform()) {
         auto spanNode = AceType::DynamicCast<NG::SpanNode>(uiNode);
         CHECK_NULL_VOID(spanNode);
@@ -289,6 +288,7 @@ void SetSpanFontColor(ArkUINodeHandle node, uint32_t textColor, void* fontColorR
             spanNode->RegisterResource<Color>("fontColor", resObj, result);
         }
     }
+    SpanModelNG::SetTextColor(uiNode, result);
 }
 
 uint32_t GetSpanFontColor(ArkUINodeHandle node)

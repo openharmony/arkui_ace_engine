@@ -92,12 +92,14 @@ HWTEST_F(TextTestNgEleven, TextModelStaticTest003, TestSize.Level0)
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
+
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     EXPECT_NE(layoutProperty, nullptr);
 
     std::optional<bool> validValue = true;
     TextModelStatic::SetEnableVariableFontWeight(frameNode.GetRawPtr(), validValue);
     EXPECT_FALSE(layoutProperty->GetAdaptMaxFontSize().has_value());
+
     std::optional<bool> emptyValue = std::nullopt;
     TextModelStatic::SetEnableVariableFontWeight(frameNode.GetRawPtr(), emptyValue);
     EXPECT_FALSE(layoutProperty->GetAdaptMaxFontSize().has_value());
@@ -113,12 +115,14 @@ HWTEST_F(TextTestNgEleven, TextModelStaticTest004, TestSize.Level0)
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
+
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     EXPECT_NE(layoutProperty, nullptr);
 
     std::optional<float> validValue = 1.0f;
     TextModelStatic::SetMinFontScale(frameNode.GetRawPtr(), validValue);
     EXPECT_FALSE(layoutProperty->GetAdaptMinFontSize().has_value());
+
     std::optional<float> emptyValue = std::nullopt;
     TextModelStatic::SetMinFontScale(frameNode.GetRawPtr(), emptyValue);
     EXPECT_FALSE(layoutProperty->GetAdaptMinFontSize().has_value());
@@ -134,6 +138,7 @@ HWTEST_F(TextTestNgEleven, TextModelStaticTest005, TestSize.Level0)
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
+
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     EXPECT_NE(layoutProperty, nullptr);
 
@@ -155,6 +160,7 @@ HWTEST_F(TextTestNgEleven, TextModelStaticTest006, TestSize.Level0)
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
+
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     EXPECT_NE(layoutProperty, nullptr);
 

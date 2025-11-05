@@ -279,7 +279,6 @@ void SetFontColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* fontColorRawPt
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     Color result = Color(color);
-    TextModelNG::SetTextColor(frameNode, Color(color));
     if (SystemProperties::ConfigChangePerform()) {
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
@@ -293,6 +292,7 @@ void SetFontColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* fontColorRawPt
             pattern->RegisterResource<Color>("TextColor", resObj, result);
         }
     }
+    TextModelNG::SetTextColor(frameNode, result);
 }
 
 void ResetFontColor(ArkUINodeHandle node)
@@ -1365,7 +1365,6 @@ void SetTextSelectedBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color, vo
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     Color result = Color(color);
-    TextModelNG::SetSelectedBackgroundColor(frameNode, Color(color));
     if (SystemProperties::ConfigChangePerform()) {
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
@@ -1379,6 +1378,7 @@ void SetTextSelectedBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color, vo
             pattern->RegisterResource<Color>("SelectedBackgroundColor", resObj, result);
         }
     }
+    TextModelNG::SetSelectedBackgroundColor(frameNode, result);
 }
 
 ArkUI_Uint32 GetTextSelectedBackgroundColor(ArkUINodeHandle node)
