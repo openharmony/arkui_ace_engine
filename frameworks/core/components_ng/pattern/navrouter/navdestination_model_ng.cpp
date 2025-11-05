@@ -1355,9 +1355,6 @@ void NavDestinationModelNG::SetIgnoreLayoutSafeArea(const NG::IgnoreLayoutSafeAr
     CHECK_NULL_VOID(frameNode);
     auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
     CHECK_NULL_VOID(navDestination);
-    auto navdestinationLayoutProperty = navDestination->GetLayoutProperty<NavDestinationLayoutProperty>();
-    CHECK_NULL_VOID(navdestinationLayoutProperty);
-    navdestinationLayoutProperty->UpdateIgnoreLayoutSafeAreaOpts(opts);
     auto content = AceType::DynamicCast<FrameNode>(navDestination->GetContentNode());
     CHECK_NULL_VOID(content);
     auto contentLayoutProperty = content->GetLayoutProperty();
@@ -1369,9 +1366,6 @@ void NavDestinationModelNG::SetIgnoreLayoutSafeArea(FrameNode* frameNode, const 
 {
     auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
     CHECK_NULL_VOID(navDestination);
-    auto navdestinationLayoutProperty = navDestination->GetLayoutProperty<NavDestinationLayoutProperty>();
-    CHECK_NULL_VOID(navdestinationLayoutProperty);
-    navdestinationLayoutProperty->UpdateIgnoreLayoutSafeArea(opts);
     auto content = AceType::DynamicCast<FrameNode>(navDestination->GetContentNode());
     CHECK_NULL_VOID(content);
     auto contentLayoutProperty = content->GetLayoutProperty();
