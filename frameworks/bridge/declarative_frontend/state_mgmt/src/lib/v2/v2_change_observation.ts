@@ -158,28 +158,17 @@ class ObserveV2 {
   // return true given value is @ObservedV2 object
   // return true when including @Trace, but exclude @Monitor and @Computed
   public static IsObservedObjectV2(value: any): boolean {
-    //let v = (value && typeof (value) === 'object' && value[ObserveV2.V2_DECO_META]);
-    // prints:  {"propA":{"deco":"@Trace"},"propB":{"deco":"@Trace"}}
-    //console.log("### IsObservedObjectV2 res: " + JSON.stringify(v));
-    return (value && typeof (value) === 'object' && value[ObserveV2.V2_DECO_META]);
-    //return !!(value && typeof (value) === 'object' && value[ObserveV2.V2_DECO_META]);
+    return !!(value && typeof (value) === 'object' && value[ObserveV2.V2_DECO_META]);
   }
 
   // return true if given value is proxied observed object, either makeObserved or autoProxyObject
   public static IsProxiedObservedV2(value: any): boolean {
-    //console.log("### IsProxiedObservedV2 " + JSON.stringify(value));
-    //console.log("### IsProxiedObservedV2 typeof: " + (typeof value));
-    //console.log("### IsProxiedObservedV2 typeof value === 'object' " + (typeof value === 'object'));
-    return ((value !== undefined) 
-      && (typeof value === 'object')
-      && (value[ObserveV2.SYMBOL_PROXY_GET_TARGET] !== undefined));
+    return !!(value && typeof value === 'object' && value[ObserveV2.SYMBOL_PROXY_GET_TARGET]);
   }
 
   // return true given value is the return value of makeObserved
   public static IsMakeObserved(value: any): boolean {
-    return (value
-      && typeof (value) === 'object'
-      && (value[ObserveV2.SYMBOL_MAKE_OBSERVED] !== undefined));
+    return !!(value && typeof (value) === 'object' && value[ObserveV2.SYMBOL_MAKE_OBSERVED]);
   }
 
   public static getCurrentRecordedId(): number {
