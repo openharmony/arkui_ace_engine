@@ -6309,12 +6309,12 @@ typedef enum {
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
      * .value[0].i32: number of columns at different breakpoint specifications.
      * The data type is {@link ArkUI_ItemFillPolicy}. \n
-     * .value[1]?.f32: column spacing. Default value: <b>0</b>, unit: vp. \n
+     * .value[1]?.f32: column spacing. unit: vp. Default value: <b>0</b>. \n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .value[0].i32: number of columns at different breakpoint specifications.
      * The data type is {@link ArkUI_ItemFillPolicy}. \n
-     * .value[1].f32: column spacing. Default value: <b>0</b>, unit: vp. \n
+     * .value[1].f32: column spacing. unit: vp. \n
      *
      * @since 22
      */

@@ -7410,14 +7410,18 @@ int32_t SetListItemFillPolicy(ArkUI_NodeHandle node, const ArkUI_AttributeItem* 
     ArkUIDimensionType gutterType;
     gutterType.value = 0.0f;
     gutterType.units = UNIT_VP;
-    if ((item->size > 0) && GreatOrEqual(item->value[NUM_0].u32, ZERO_F) &&
-        LessOrEqual(item->value[NUM_0].u32, NUM_2)) {
-        fillType = item->value[NUM_0].u32;
+    auto* fullImpl = GetFullImpl();
+    if (item->size < NUM_1 || !InRegion(-1, NUM_2, item->value[NUM_0].i32)) {
+        return ERROR_CODE_PARAM_INVALID;
+    } else if (item->value[NUM_0].i32 == -1) {
+        fullImpl->getNodeModifiers()->getListModifier()->resetListItemFillPolicy(node->uiNodeHandle);
+        return ERROR_CODE_NO_ERROR;
+    } else {
+        fillType = item->value[NUM_0].i32;
     }
     if ((item->size > NUM_1) && GreatOrEqual(item->value[NUM_1].f32, ZERO_F)) {
         gutterType.value = item->value[NUM_1].f32;
     }
-    auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getListModifier()->setListItemFillPolicy(
         node->uiNodeHandle, fillType, &gutterType);
     return ERROR_CODE_NO_ERROR;
@@ -16320,11 +16324,14 @@ const ArkUI_AttributeItem* GetColumnsTemplateItemFillPolicy(ArkUI_NodeHandle nod
 int32_t SetColumnsTemplateItemFillPolicy(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
-    if (item->size != NUM_1 ||
-        (item->value[NUM_0].i32 < 0 || item->value[NUM_0].i32 > static_cast<int32_t>(ARKUI_ITEMFILLPOLICY_SM2MD3LG5))) {
-        return ERROR_CODE_PARAM_INVALID;
-    }
     auto* fullImpl = GetFullImpl();
+    if (item->size != NUM_1 || (item->value[NUM_0].i32 < -1 ||
+                                   item->value[NUM_0].i32 > static_cast<int32_t>(ARKUI_ITEMFILLPOLICY_SM2MD3LG5))) {
+        return ERROR_CODE_PARAM_INVALID;
+    } else if (item->value[NUM_0].i32 == -1) {
+        fullImpl->getNodeModifiers()->getWaterFlowModifier()->resetItemFillPolicy(node->uiNodeHandle);
+        return ERROR_CODE_NO_ERROR;
+    }
     fullImpl->getNodeModifiers()->getWaterFlowModifier()->setItemFillPolicy(node->uiNodeHandle, item->value[NUM_0].i32);
     return ERROR_CODE_NO_ERROR;
 }
@@ -17156,15 +17163,16 @@ const ArkUI_AttributeItem* GetGridLayoutOptions(ArkUI_NodeHandle node)
 
 int32_t SetGridColumnTemplateItemFillPolicy(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    ArkUI_Int32 itemFillPolicy = static_cast<ArkUI_Int32>(PresetFillType::BREAKPOINT_DEFAULT);
-    if (item == nullptr || item->size < NUM_1 || !InRegion(NUM_0, NUM_2, item->value[NUM_0].i32)) {
-        GetFullImpl()->getNodeModifiers()->getGridModifier()->setItemFillPolicy(node->uiNodeHandle, itemFillPolicy);
+    CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
+    auto* fullImpl = GetFullImpl();
+    if (item->size != NUM_1 || !InRegion(-1, NUM_2, item->value[NUM_0].i32)) {
         return ERROR_CODE_PARAM_INVALID;
-    } else {
-        itemFillPolicy = item->value[0].i32;
-        GetFullImpl()->getNodeModifiers()->getGridModifier()->setItemFillPolicy(node->uiNodeHandle, itemFillPolicy);
+    } else if (item->value[NUM_0].i32 == -1) {
+        fullImpl->getNodeModifiers()->getGridModifier()->resetItemFillPolicy(node->uiNodeHandle);
         return ERROR_CODE_NO_ERROR;
     }
+    fullImpl->getNodeModifiers()->getGridModifier()->setItemFillPolicy(node->uiNodeHandle, item->value[NUM_0].i32);
+    return ERROR_CODE_NO_ERROR;
 }
 
 void ResetGridColumnTemplateItemFillPolicy(ArkUI_NodeHandle node)

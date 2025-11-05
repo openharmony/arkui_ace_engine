@@ -868,13 +868,15 @@ void WaterFlowModelNG::ResetItemFillPolicy(FrameNode* frameNode)
     ACE_RESET_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ItemFillPolicy, frameNode);
 }
 
-PresetFillType WaterFlowModelNG::GetItemFillPolicy(FrameNode* frameNode)
+int32_t WaterFlowModelNG::GetItemFillPolicy(FrameNode* frameNode)
 {
-    PresetFillType value = PresetFillType::BREAKPOINT_DEFAULT;
+    CHECK_NULL_RETURN(frameNode, -1);
     auto layoutProperty = frameNode->GetLayoutProperty<WaterFlowLayoutProperty>();
-    CHECK_NULL_RETURN(layoutProperty, value);
-    auto itemFillPolicy = layoutProperty->GetItemFillPolicy();
-    return itemFillPolicy.value_or(value);
+    CHECK_NULL_RETURN(layoutProperty, -1);
+    if (layoutProperty->GetItemFillPolicy().has_value()) {
+        return static_cast<int32_t>(layoutProperty->GetItemFillPolicy().value());
+    }
+    return -1;
 }
 
 void WaterFlowModelNG::ParseResObjRowsGap(const RefPtr<ResourceObject>& resObj)
