@@ -37,7 +37,7 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
-LayoutConstraintF layoutConstraintF = { .maxSize = { 200, 910 },
+LayoutConstraintF layoutConstraintF = { .maxSize = { 400, 910 },
     .parentIdealSize = { 200, 910 },
     .selfIdealSize = { 200, 910 } };
 
@@ -1664,6 +1664,128 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Layo
     layoutProperty->UpdateAlignment(Alignment::TOP_LEFT);
     algorithm_->Layout(layoutWrapper);
     EXPECT_EQ(algorithm_->align_, Alignment::CENTER);
+}
+
+/**
+ * @tc.name: ContainerPickerLayoutAlgorithm_MeasureAspectRatioTest001
+ * @tc.desc: Test aspect ratio processing when aspect ratio is valid and height changes
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_MeasureAspectRatioTest001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create ContainerPicker and get layoutWrapper
+     */
+    CreateContainerPickerNode(3);
+    auto refLayoutWrapper = frameNode_->CreateLayoutWrapper();
+    ASSERT_NE(refLayoutWrapper, nullptr);
+    LayoutWrapper* layoutWrapper = Referenced::RawPtr(refLayoutWrapper);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    auto layoutProperty = AceType::DynamicCast<ContainerPickerLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->contentConstraint_ = layoutConstraintF;
+
+    /**
+     * @tc.steps: step2. Set aspectRatio/height/width
+     */
+    layoutProperty->contentConstraint_ = layoutConstraintF;
+    layoutProperty->UpdateAspectRatio(2);
+    algorithm_->height_ = 200;
+    algorithm_->contentCrossSize_ = 300;
+    algorithm_->totalItemCount_ = 0;
+
+    /**
+     * @tc.steps: step3. Call HandleAspectRatio to trigger aspect ratio processing
+     * @tc.expected: step3. Height should be updated, reMeasure_ should be true
+     */
+    OptionalSizeF contentIdealSize;
+    algorithm_->HandleAspectRatio(layoutWrapper, contentIdealSize);
+
+    EXPECT_TRUE(NearEqual(algorithm_->GetHeight(), 150));
+    EXPECT_TRUE(NearEqual(algorithm_->contentCrossSize_, 300));
+    EXPECT_TRUE(algorithm_->reMeasure_);
+    EXPECT_TRUE(algorithm_->itemPosition_.empty());
+}
+
+/**
+ * @tc.name: ContainerPickerLayoutAlgorithm_MeasureAspectRatioTest002
+ * @tc.desc: Test aspect ratio processing when aspect ratio is valid but height doesn't change
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_MeasureAspectRatioTest002, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create ContainerPicker and get layoutWrapper
+     */
+    CreateContainerPickerNode(3);
+    auto refLayoutWrapper = frameNode_->CreateLayoutWrapper();
+    ASSERT_NE(refLayoutWrapper, nullptr);
+    LayoutWrapper* layoutWrapper = Referenced::RawPtr(refLayoutWrapper);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    auto layoutProperty = AceType::DynamicCast<ContainerPickerLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->contentConstraint_ = layoutConstraintF;
+
+    /**
+     * @tc.steps: step2. Set aspectRatio/height/width
+     */
+    layoutProperty->contentConstraint_ = layoutConstraintF;
+    layoutProperty->UpdateAspectRatio(2);
+    algorithm_->height_ = 200;
+    algorithm_->contentCrossSize_ = 400;
+
+    /**
+     * @tc.steps: step3. Call HandleAspectRatio to trigger aspect ratio processing
+     * @tc.expected: step3. Height should not be updated, reMeasure_ should be false
+     */
+    OptionalSizeF contentIdealSize;
+    algorithm_->HandleAspectRatio(layoutWrapper, contentIdealSize);
+
+    EXPECT_TRUE(NearEqual(algorithm_->GetHeight(), 200));
+    EXPECT_TRUE(NearEqual(algorithm_->contentCrossSize_, 400));
+    EXPECT_FALSE(algorithm_->reMeasure_);
+}
+
+/**
+ * @tc.name: ContainerPickerLayoutAlgorithm_MeasureAspectRatioTest003
+ * @tc.desc: Test aspect ratio processing when aspect ratio is invalid (zero)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_MeasureAspectRatioTest003, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create ContainerPicker and get layoutWrapper
+     */
+    CreateContainerPickerNode(3);
+    auto refLayoutWrapper = frameNode_->CreateLayoutWrapper();
+    ASSERT_NE(refLayoutWrapper, nullptr);
+    LayoutWrapper* layoutWrapper = Referenced::RawPtr(refLayoutWrapper);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    auto layoutProperty = AceType::DynamicCast<ContainerPickerLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->contentConstraint_ = layoutConstraintF;
+
+    /**
+     * @tc.steps: step2. Set aspectRatio/height/width
+     */
+    layoutProperty->contentConstraint_ = layoutConstraintF;
+    layoutProperty->UpdateAspectRatio(0);
+    algorithm_->height_ = 200;
+    algorithm_->contentCrossSize_ = 300;
+
+    /**
+     * @tc.steps: step3. Call HandleAspectRatio to trigger aspect ratio processing
+     * @tc.expected: step3. Height should not be updated, reMeasure_ should be false
+     */
+    OptionalSizeF contentIdealSize;
+    algorithm_->HandleAspectRatio(layoutWrapper, contentIdealSize);
+
+    EXPECT_TRUE(NearEqual(algorithm_->GetHeight(), 200));
+    EXPECT_TRUE(NearEqual(algorithm_->contentCrossSize_, 300));
+    EXPECT_FALSE(algorithm_->reMeasure_);
 }
 
 } // namespace OHOS::Ace::NG

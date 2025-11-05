@@ -102,7 +102,7 @@ RefPtr<FrameNode> ContainerPickerPatternTestTwo::CreateChildNode(const std::stri
  * @tc.desc: Test ContainerPickerModel SetCanLoop
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerPickerPatternTestTwo, ContainerPickerLayoutPropertyTest001, TestSize.Level0)
+HWTEST_F(ContainerPickerPatternTestTwo, SetCanLoopTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create picker and get frameNode.
@@ -127,7 +127,7 @@ HWTEST_F(ContainerPickerPatternTestTwo, ContainerPickerLayoutPropertyTest001, Te
  * @tc.desc: Test ContainerPickerModel SetEnableHapticFeedback
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerPickerPatternTestTwo, ContainerPickerLayoutPropertyTest002, TestSize.Level0)
+HWTEST_F(ContainerPickerPatternTestTwo, SetEnableHapticFeedbackTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create picker and get frameNode.
@@ -224,7 +224,7 @@ HWTEST_F(ContainerPickerPatternTestTwo, GetTextOfCurrentChildTest002, TestSize.L
     std::string result = pattern->GetTextOfCurrentChild();
 
     // Verify the result handling for invalid index
-    EXPECT_TRUE(result.empty() || !result.empty());
+    EXPECT_TRUE(result.empty());
 }
 
 /**

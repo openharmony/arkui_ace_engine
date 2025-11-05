@@ -177,6 +177,7 @@ public:
 private:
     void LayoutItem(LayoutWrapper* layoutWrapper, OffsetF offset, std::pair<int32_t, PickerItemInfo> pos);
     void HandleLayoutPolicy(LayoutWrapper* layoutWrapper, OptionalSizeF& contentIdealSize);
+    void HandleAspectRatio(LayoutWrapper* layoutWrapper, OptionalSizeF& contentIdealSize);
     void MeasureHeight(LayoutWrapper* layoutWrapper, OptionalSizeF& contentIdealSize);
     void MeasureWidth(LayoutWrapper* layoutWrapper, OptionalSizeF& contentIdealSize);
     float GetChildMaxWidth(LayoutWrapper* layoutWrapper) const;
@@ -206,7 +207,6 @@ private:
     Alignment align_ = Alignment::CENTER;
 
     std::optional<int32_t> targetIndex_;
-    std::set<int32_t> measuredItems_;
     std::vector<int32_t> offScreenItemsIndex_;
 
     int32_t totalItemCount_ = 0;
@@ -216,7 +216,7 @@ private:
     float startMainPos_ = 0.0f;
     float endMainPos_ = 0.0f;
     float topPadding_ = 0.0f;
-    float height_ = 0.0f;           // usage: record picker real height
+    float height_ = 0.0f; // usage: record picker real height
     float contentMainSize_ = 0.0f;  // usage: picker content area height
     float contentCrossSize_ = 0.0f; // usage: picker content area width
     float middleItemStartPos_ = 0.0f;
@@ -232,6 +232,7 @@ private:
     bool measured_ = false;
     bool isLoop_ = false;
     bool canOverScroll_ = true;
+    bool reMeasure_ = false;
 
     std::mutex pickerMutex_;
 };
