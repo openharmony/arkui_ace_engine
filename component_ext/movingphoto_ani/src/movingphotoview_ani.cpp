@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,10 +40,17 @@ ani_long MovingPhotoAni::CreateMovingPhotoNode([[maybe_unused]] ani_env *env, [[
     return reinterpret_cast<ani_long>(ptr);
 }
 
-NG::MovingPhotoController* MovingPhotoAni::CreateMovingPhotoController(ani_env* env, ani_ref ref)
+ani_long MovingPhotoAni::CreateMovingPhotoController([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_class object)
+{
+    auto controller = Ace::AceType::MakeRefPtr<NG::MovingPhotoController>();
+    controller->IncRefCount();
+    return reinterpret_cast<ani_long>(Ace::AceType::RawPtr(controller));
+}
+
+NG::MovingPhotoController* MovingPhotoAni::GetMovingPhotoController(ani_env* env, ani_ref ref)
 {
     auto object = static_cast<ani_object>(ref);
-    if (MovingPhotoAni::GetIsUnderfinedObject(env, object)) {
+    if (AniUtils::GetIsUndefinedObject(env, object)) {
         return nullptr;
     }
     ani_ref peerOptRef;
@@ -74,12 +81,12 @@ void MovingPhotoAni::SetMuted([[maybe_unused]] ani_env *env, [[maybe_unused]] an
 {
     auto movingPhotoNode = reinterpret_cast<NG::MovingPhotoNode *>(nodeptr);
     CHECK_NULL_VOID(movingPhotoNode);
-    if (MovingPhotoAni::GetIsUnderfinedObject(env, options)) {
+    if (AniUtils::GetIsUndefinedObject(env, options)) {
         NG::MovingPhotoModelNG::SetMuted(movingPhotoNode, false);
         return;
     }
     std::optional<bool> mutedOpt;
-    if (!MovingPhotoAni::ParseOptionalBool(env, options, mutedOpt)) {
+    if (!AniUtils::ParseOptionalBool(env, options, mutedOpt)) {
         NG::MovingPhotoModelNG::SetMuted(movingPhotoNode, false);
         return;
     }
@@ -95,41 +102,23 @@ void MovingPhotoAni::SetObjectFit([[maybe_unused]] ani_env *env, [[maybe_unused]
 {
     auto movingPhotoNode = reinterpret_cast<NG::MovingPhotoNode *>(nodeptr);
     CHECK_NULL_VOID(movingPhotoNode);
-    if (MovingPhotoAni::GetIsUnderfinedObject(env, options)) {
+    if (AniUtils::GetIsUndefinedObject(env, options)) {
         NG::MovingPhotoModelNG::SetObjectFit(movingPhotoNode, ImageFit::COVER);
         return;
     }
     ani_ref objectFitAni;
     ImageFit imageFit = ImageFit::COVER;
 
-    if (ANI_OK != env->Object_GetFieldByName_Ref(options, "value", &objectFitAni)) {
-        if (GetIsImageFitEnum(env, objectFitAni)) {
+    if (ANI_OK != env->Object_GetPropertyByName_Ref(options, "value", &objectFitAni)) {
+        if (AniUtils::GetIsEnum(env, objectFitAni, OHOS::Ace::ANI_ARKUI_COMPONENT_ENUMS_IMAGEFIT)) {
             ani_int imageFitNum;
-                if (ANI_OK != env->EnumItem_GetValue_Int(static_cast<ani_enum_item>(objectFitAni), &imageFitNum)) {
-                    imageFit = ImageFit::COVER;
-                }
+            if (ANI_OK != env->EnumItem_GetValue_Int(static_cast<ani_enum_item>(objectFitAni), &imageFitNum)) {
+                imageFit = ImageFit::COVER;
+            }
+            imageFit = static_cast<ImageFit>(static_cast<int32_t>(imageFitNum));
         }
-        imageFit = static_cast<ImageFit>(static_cast<int32_t>(imageFitNum));
     }
     NG::MovingPhotoModelNG::SetObjectFit(movingPhotoNode, imageFit);
-}
-
-void MovingPhotoAni::SetObjectFit([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_class object, ani_long nodeptr,
-                                  ani_object options)
-{
-    auto movingPhotoNode = reinterpret_cast<NG::MovingPhotoNode *>(nodeptr);
-    CHECK_NULL_VOID(movingPhotoNode);
-    if (MovingPhotoAni::GetIsUnderfinedObject(env, options)) {
-        NG::MovingPhotoModelNG::SetOnComplete(movingPhotoNode, nullptr);
-        return;
-    }
-
-    auto asyncEvent = std::make_shared<AniAsyncEvent>(env, options);
-    CHECK_NULL_VOID(asyncEvent);
-    auto onComplete = [asyncEvent]() {
-        asyncEvent->Call(0, nullptr);
-    };
-    NG::MovingPhotoModelNG::SetOnComplete(movingPhotoNode, std::move(onComplete));
 }
 
 void MovingPhotoAni::SetOnComplete([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_class object, ani_long nodeptr,
@@ -137,7 +126,7 @@ void MovingPhotoAni::SetOnComplete([[maybe_unused]] ani_env *env, [[maybe_unused
 {
     auto movingPhotoNode = reinterpret_cast<NG::MovingPhotoNode *>(nodeptr);
     CHECK_NULL_VOID(movingPhotoNode);
-    if (MovingPhotoAni::GetIsUnderfinedObject(env, options)) {
+    if (AniUtils::GetIsUndefinedObject(env, options)) {
         NG::MovingPhotoModelNG::SetOnComplete(movingPhotoNode, nullptr);
         return;
     }
@@ -155,7 +144,7 @@ void MovingPhotoAni::SetOnStart([[maybe_unused]] ani_env *env, [[maybe_unused]] 
 {
     auto movingPhotoNode = reinterpret_cast<NG::MovingPhotoNode *>(nodeptr);
     CHECK_NULL_VOID(movingPhotoNode);
-    if (MovingPhotoAni::GetIsUnderfinedObject(env, options)) {
+    if (AniUtils::GetIsUndefinedObject(env, options)) {
         NG::MovingPhotoModelNG::SetOnStart(movingPhotoNode, nullptr);
         return;
     }
@@ -173,7 +162,7 @@ void MovingPhotoAni::SetOnStop([[maybe_unused]] ani_env *env, [[maybe_unused]] a
 {
     auto movingPhotoNode = reinterpret_cast<NG::MovingPhotoNode *>(nodeptr);
     CHECK_NULL_VOID(movingPhotoNode);
-    if (MovingPhotoAni::GetIsUnderfinedObject(env, options)) {
+    if (AniUtils::GetIsUndefinedObject(env, options)) {
         NG::MovingPhotoModelNG::SetOnStop(movingPhotoNode, nullptr);
         return;
     }
@@ -191,7 +180,7 @@ void MovingPhotoAni::SetOnPause([[maybe_unused]] ani_env *env, [[maybe_unused]] 
 {
     auto movingPhotoNode = reinterpret_cast<NG::MovingPhotoNode *>(nodeptr);
     CHECK_NULL_VOID(movingPhotoNode);
-    if (MovingPhotoAni::GetIsUnderfinedObject(env, options)) {
+    if (AniUtils::GetIsUndefinedObject(env, options)) {
         NG::MovingPhotoModelNG::SetOnPause(movingPhotoNode, nullptr);
         return;
     }
@@ -209,7 +198,7 @@ void MovingPhotoAni::SetOnFinish([[maybe_unused]] ani_env *env, [[maybe_unused]]
 {
     auto movingPhotoNode = reinterpret_cast<NG::MovingPhotoNode *>(nodeptr);
     CHECK_NULL_VOID(movingPhotoNode);
-    if (MovingPhotoAni::GetIsUnderfinedObject(env, options)) {
+    if (AniUtils::GetIsUndefinedObject(env, options)) {
         NG::MovingPhotoModelNG::SetOnFinish(movingPhotoNode, nullptr);
         return;
     }
@@ -227,7 +216,7 @@ void MovingPhotoAni::SetOnError([[maybe_unused]] ani_env *env, [[maybe_unused]] 
 {
     auto movingPhotoNode = reinterpret_cast<NG::MovingPhotoNode *>(nodeptr);
     CHECK_NULL_VOID(movingPhotoNode);
-    if (MovingPhotoAni::GetIsUnderfinedObject(env, options)) {
+    if (AniUtils::GetIsUndefinedObject(env, options)) {
         NG::MovingPhotoModelNG::SetOnError(movingPhotoNode, nullptr);
         return;
     }
@@ -245,7 +234,7 @@ void MovingPhotoAni::SetOnPrepared([[maybe_unused]] ani_env *env, [[maybe_unused
 {
     auto movingPhotoNode = reinterpret_cast<NG::MovingPhotoNode *>(nodeptr);
     CHECK_NULL_VOID(movingPhotoNode);
-    if (MovingPhotoAni::GetIsUnderfinedObject(env, options)) {
+    if (AniUtils::GetIsUndefinedObject(env, options)) {
         NG::MovingPhotoModelNG::SetOnPrepared(movingPhotoNode, nullptr);
         return;
     }
@@ -263,66 +252,60 @@ void MovingPhotoAni::SetAutoPlayPeriod([[maybe_unused]] ani_env *env, [[maybe_un
 {
     auto movingPhotoNode = reinterpret_cast<NG::MovingPhotoNode *>(nodeptr);
     CHECK_NULL_VOID(movingPhotoNode);
-    double startTime = static_cast<double>(startTimeAni)
-    double endTime = static_cast<double>(endTimeAni)
-    NG::MovingPhotoModelNG::SetAutoPlayPeriod(movingPhotoNode, startTime, endTime);
+    double startTime = static_cast<double>(startTimeAni);
+    double endTime = static_cast<double>(endTimeAni);
+    NG::MovingPhotoModelNG::AutoPlayPeriod(movingPhotoNode, static<int64_t>(startTime), static<int64_t>(endTime));
 }
 
 void MovingPhotoAni::SetAutoPlay([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_class object, ani_long nodeptr,
-                                  ani_double options)
+                                  ani_object options)
 {
     auto movingPhotoNode = reinterpret_cast<NG::MovingPhotoNode *>(nodeptr);
     CHECK_NULL_VOID(movingPhotoNode);
-    if (MovingPhotoAni::GetIsUnderfinedObject(env, options)) {
+    if (AniUtils::GetIsUndefinedObject(env, options)) {
         NG::MovingPhotoModelNG::AutoPlay(movingPhotoNode, false);
         return;
     }
     ani_boolean isAutoPlayAni {};
     bool isAutoPlay = false;
-    if (ANI_OK != env->Object_GetPropertyByName_Boolean(options, "value", &isAutoPlayAni)) {
+    if (ANI_OK == env->Object_GetPropertyByName_Boolean(options, "value", &isAutoPlayAni)) {
         isAutoPlay = static_cast<bool>(isAutoPlayAni);
     }
     NG::MovingPhotoModelNG::AutoPlay(movingPhotoNode, isAutoPlay);
 }
 
 void MovingPhotoAni::SetRepeatPlay([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_class object, ani_long nodeptr,
-                                  ani_double options)
+                                  ani_object options)
 {
     auto movingPhotoNode = reinterpret_cast<NG::MovingPhotoNode *>(nodeptr);
     CHECK_NULL_VOID(movingPhotoNode);
-    if (MovingPhotoAni::GetIsUnderfinedObject(env, options)) {
-        NG::MovingPhotoModelNG::SetRepeatPlay(movingPhotoNode, false);
+    if (AniUtils::GetIsUndefinedObject(env, options)) {
+        NG::MovingPhotoModelNG::RepeatPlay(movingPhotoNode, false);
         return;
     }
     ani_boolean isRepeatPlayAni {};
     bool isRepeatPlay = false;
-    if (ANI_OK != env->Object_GetPropertyByName_Boolean(options, "value", &isRepeatPlayAni)) {
+    if (ANI_OK == env->Object_GetPropertyByName_Boolean(options, "value", &isRepeatPlayAni)) {
         isRepeatPlay = static_cast<bool>(isRepeatPlayAni);
     }
     NG::MovingPhotoModelNG::RepeatPlay(movingPhotoNode, isRepeatPlay);
 }
 
 void MovingPhotoAni::SetEnableAnalyzer([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_class object, ani_long nodeptr,
-                                  ani_double options)
+                                  ani_object options)
 {
     auto movingPhotoNode = reinterpret_cast<NG::MovingPhotoNode *>(nodeptr);
     CHECK_NULL_VOID(movingPhotoNode);
-    if (MovingPhotoAni::GetIsUnderfinedObject(env, options)) {
+    if (AniUtils::GetIsUndefinedObject(env, options)) {
         NG::MovingPhotoModelNG::EnableAnalyzer(movingPhotoNode, false);
         return;
     }
     ani_boolean enabledAni {};
     bool enabled = false;
-    if (ANI_OK != env->Object_GetPropertyByName_Boolean(options, "value", &enabledAni)) {
+    if (ANI_OK == env->Object_GetPropertyByName_Boolean(options, "value", &enabledAni)) {
         enabled = static_cast<bool>(enabledAni);
     }
     NG::MovingPhotoModelNG::EnableAnalyzer(movingPhotoNode, enabled);
-}
-
-void MovingPhotoAni::StartPlayback([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_class object, ani_long nodeptr)
-{
-    NG::MovingPhotoController* controller = reinterpret_cast<NG::MovingPhotoController*>(nodeptr);
-    controller->StartPlayback();
 }
 
 void MovingPhotoAni::StartPlayback([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_class object, ani_long nodeptr)
@@ -340,7 +323,7 @@ void MovingPhotoAni::StopPlayback([[maybe_unused]] ani_env *env, [[maybe_unused]
 void MovingPhotoAni::PausePlayback([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_class object, ani_long nodeptr)
 {
     NG::MovingPhotoController* controller = reinterpret_cast<NG::MovingPhotoController*>(nodeptr);
-    controller->PausePlayback();
+    controller->Pause();
 }
 
 void MovingPhotoAni::Reset([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_class object, ani_long nodeptr)
@@ -372,7 +355,9 @@ void MovingPhotoAni::SetPlaybackPeriod([[maybe_unused]] ani_env *env, [[maybe_un
                                         ani_long options, ani_double startTimeAni, ani_double endTimeAni)
 {
     NG::MovingPhotoController* controller = reinterpret_cast<NG::MovingPhotoController*>(nodeptr);
-    controller->SetPlaybackPeriod(static_cast<double>(startTimeAni), static_cast<double>(endTimeAni));
+    double startTime = static_cast<double>(startTimeAni);
+    double endTime = static_cast<double>(endTimeAni);
+    controller->SetPlaybackPeriod(static_cast<int64_t>(startTime), static_cast<int64_t>(endTime));
 }
 
 void MovingPhotoAni::EnableAutoPlay([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_class object, ani_long nodeptr,
@@ -385,41 +370,56 @@ void MovingPhotoAni::EnableAutoPlay([[maybe_unused]] ani_env *env, [[maybe_unuse
 void MovingPhotoAni::SetMovingPhotoViewOptions([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_class object, ani_long nodeptr,
                                         ani_long options)
 {
-    if (GetIsUndefinedObject(env, options)) {
+    if (AniUtils::GetIsUndefinedObject(env, options)) {
         return;
     }
     auto movingPhotoNode = reinterpret_cast<NG::MovingPhotoNode *>(nodeptr);
     CHECK_NULL_VOID(movingPhotoNode);
+
+    // movingphoto
+    ani_ref movingPhotoRef;
+    if (ANI_OK != env->Object_GetPropertyByName_Ref(options, "movingphoto", &movingPhotoRef)) {
+        return;
+    }
+    ani_object movingPhotoObj = static_cast<ani_object>(movingPhotoRef);
+    if (AniUtils::GetIsUndefinedObject(env, movingPhotoObj)) {
+        return;
+    }
+    SetMovingPhotoUri(env, movingPhotoNode, movingPhotoObj);
+    // controller
     ani_ref objRef;
     if (ANI_OK == env->Object_GetPropertyByName_Ref(options, "controller", &objRef)) {
         auto controller = Ace::Referenced::Claim(MovingPhotoAni::GetMovingPhotoController(env, objRef));
         NG::MovingPhotoModelNG::SetMovingPhotoController(movingPhotoNode, controller);
     }
+    // imageAIOptions
     ani_ref imageAIOptionsRef;
-    if (ANI_OK == env->Object_GetPropertyByName_Ref(options, "controller", &objRef)) {
-        auto controller = Ace::Referenced::Claim(MovingPhotoAni::GetMovingPhotoController(env, objRef));
-        NG::MovingPhotoModelNG::SetImageAIOptions(movingPhotoNode, reinterpret_cast<void*>(imageAIOptionRef));
+    if (ANI_OK == env->Object_GetPropertyByName_Ref(options, "imageAIOptions", &imageAIOptionsRef)) {
+        NG::MovingPhotoModelNG::SetImageAIOptions(movingPhotoNode, reinterpret_cast<void*>(imageAIOptionsRef));
     }
+    // movingphotoFormat
     NG::MovingPhotoModelNG::SetMovingPhotoFormat(movingPhotoNode, ParsePixelMapFormat(env, options));
+    // dynamicRangeMode
     NG::MovingPhotoModelNG::SetDynamicRangeMode(movingPhotoNode, ParseDynamicRangeMode(env, options));
+    // waterMask
     ani_ref playWithMaskRef;
     if (ANI_OK != env->Object_GetPropertyByName_Ref(options, "playWithMask", &playWithMaskRef)) {
         return;
     }
     std::optional<bool> playWithMaskOpt;
-    if (!MovingPhotoAni::ParseOptionalBool(env, static_cast<ani_object>(playWithMaskRef), playWithMaskOpt)) {
+    if (!AniUtils::ParseOptionalBool(env, static_cast<ani_object>(playWithMaskRef), playWithMaskOpt)) {
         return;
     }
     bool playWithMaskValue = false;
-    if (playWithMaskRef) {
-        playWithMaskValue = playWithMaskRef.value();
+    if (playWithMaskOpt) {
+        playWithMaskValue = playWithMaskOpt.value();
     }
     NG::MovingPhotoModelNG::SetWaterMask(movingPhotoNode, playWithMaskValue);
 }
 
 bool MovingPhotoAni::SetMovingPhotoObject(ani_env env, NG::MovingPhotoNode* movingPhotoNode, ani_object obj)
 {
-    if (GetIsUndefinedObject(env, options)) {
+    if (AniUtils::GetIsUndefinedObject(env, options)) {
         return false;
     }
     arkts::ani_signature::Type classType = 
@@ -439,74 +439,28 @@ bool MovingPhotoAni::SetMovingPhotoObject(ani_env env, NG::MovingPhotoNode* movi
     if (env->Object_CallMethod_Ref(obj, getMethod, &imageUriRef) != ANI_OK) {
         return false;
     }
-    std::string imageUriStr = AniStringToStdString(env, static_cast<ani_string>(imageUriRef));
+    std::string imageUriStr = AniUtils::AniStringToStdString(env, static_cast<ani_string>(imageUriRef));
     NG::MovingPhotoModelNG::SetMovingPhotoObject(movingPhotoNode, imageUriStr);
     return true;
-}
-
-bool MovingPhotoAni::GetIsUndefinedObject(ani_env *env, ani_ref objectRef)
-{
-    ani_boolean isUndefined;
-    if (ANI_OK != env->Reference_IsUndefined(objectRef, isUndefined)) {
-        return true;
-    }
-    return (bool)isUndefined;
-}
-
-void MovingPhotoAni::GetIsImageFitEnum(ani_env *env, ani_ref objectRef) {
-    ani_enum ImageFitEnum;
-    if (ANI_OK != env->FindEnum('arkui.component.enums.ImageFit', &ImageFitEnum)) {
-        return false;
-    }
-    ani_boolean isEnum;
-    if (env->Object_InstanceOf(static_cast<ani_object>(objectRef), ImageFitEnum, &isEnum)) {
-        return false;
-    }
-    return (bool)isEnum;
-}
-
-void MovingPhotoAni::GetIsPixelMapFormatEnum(ani_env *env, ani_ref objectRef) {
-    arkts::ani_signature::Type enumType = 
-        arkts::ani_signature::Builder::BuildClass({"@ohos.multimedia.movingphotoview.PixelMapFormat"});
-    ani_enum formatEnum;
-    if (ANI_OK != env->FindEnum(enumType.Descriptor().c_str(), &formatEnum)) {
-        return false;
-    }
-    ani_boolean isEnum;
-    if (env->Object_InstanceOf(static_cast<ani_object>(objectRef), formatEnum, &isEnum)) {
-        return false;
-    }
-    return (bool)isEnum;
-}
-
-void MovingPhotoAni::GetIsDynamicRangeModeEnum(ani_env *env, ani_ref objectRef) {
-    arkts::ani_signature::Type enumType = 
-        arkts::ani_signature::Builder::BuildClass({"@ohos.multimedia.movingphotoview.DynamicRangeMode"});
-    ani_enum dynamicRangeMode;
-    if (ANI_OK != env->FindEnum(enumType.Descriptor().c_str(), &dynamicRangeMode)) {
-        return false;
-    }
-    ani_boolean isEnum;
-    if (env->Object_InstanceOf(static_cast<ani_object>(objectRef), dynamicRangeMode, &isEnum)) {
-        return false;
-    }
-    return (bool)isEnum;
 }
 
 MovingPhotoFormat MovingPhotoAni::ParsePixelMapFormat(ani_env *env, ani_object options)
 {
     ani_ref format_ref;
     auto format = MovingPhotoFormat::UNKNOWN;
-    if (ANI_OK == env->Object_GetPropertyByName_Ref(options, "movingPhotoFormat", &format_ref)) {
+    if (ANI_OK != env->Object_GetPropertyByName_Ref(options, "movingPhotoFormat", &format_ref)) {
         return format;
     }
-    if (GetIsPixelMapFormatEnum(env, format_ref)) {
+    if (AniUtils::GetIsUndefinedObject(env, options)) {
+        return format;
+    }
+    if (AniUtils::GetIsEnum(env, format_ref, OHOS::Ace::ANI_MOVINGPHOTO_PIXELMAPFORMAT)) {
         ani_int formatAni;
         if (ANI_OK != env->EnumItem_GetValue_Int(static_cast<ani_enum_item>(format_ref), &formatAni)) {
             return format;
         }
         int32_t formatNum;
-        if (ANI_OK != GetInt32(env, formatAni, formatNum)) {
+        if (ANI_OK != AniUtils::GetInt32(env, formatAni, formatNum)) {
             return format;
         }
         return static_cast<MovingPhotoFormat>(formatNum);
@@ -514,91 +468,28 @@ MovingPhotoFormat MovingPhotoAni::ParsePixelMapFormat(ani_env *env, ani_object o
     return format;
 }
 
-MovingPhotoFormat MovingPhotoAni::ParsePixelMapFormat(ani_env *env, ani_object options)
+DynamicRangeMode MovingPhotoAni::ParseDynamicRangeModeFormat(ani_env *env, ani_object options)
 {
     ani_ref dynamicRangeMode_ref;
     auto dynamicRangeMode = DynamicRangeMode::HIGH;
-    if (ANI_OK == env->Object_GetPropertyByName_Ref(options, "dynamicRangeMode", &dynamicRangeMode_ref)) {
+    if (ANI_OK != env->Object_GetPropertyByName_Ref(options, "dynamicRangeMode", &dynamicRangeMode_ref)) {
         return dynamicRangeMode;
     }
-    if (GetIsPixelMapFormatEnum(env, dynamicRangeMode_ref)) {
+    if (AniUtils::GetIsUndefinedObject(env, options)) {
+        return dynamicRangeMode;
+    }
+    if (AniUtils::GetIsEnum(env, dynamicRangeMode_ref, OHOS::Ace::ANI_MOVINGPHOTO_DYNAMICRANGEMODE)) {
         ani_int dynamicRangeModeAni;
         if (ANI_OK != env->EnumItem_GetValue_Int(static_cast<ani_enum_item>(dynamicRangeMode_ref), &dynamicRangeModeAni)) {
             return dynamicRangeMode;
         }
         int32_t dynamicRangeModeNum;
-        if (ANI_OK != GetInt32(env, dynamicRangeModeAni, dynamicRangeModeNum)) {
+        if (ANI_OK != AniUtils::GetInt32(env, dynamicRangeModeAni, dynamicRangeModeNum)) {
             return dynamicRangeMode;
         }
         return static_cast<MovingPhotoFormat>(dynamicRangeModeNum);
     }
     return dynamicRangeMode;
-}
-
-ani_status MovingPhotoAni::GetInt32(ani_env *env, ani_int arg, int32_t &value)
-{
-    value = static_cast<int32_t>(arg);
-    return ANI_OK;
-}
-
-std::string MovingPhotoAni::AniStringToStdString(ani_env *env, ani_string ani_str)
-{
-    ani_size strSize;
-    env->String_GetUTF8Size(ani_str, &strSize);
-    std::vector<char> buffer(strSize + 1);
-    char* utf8Buffer = buffer.data();
-    ani_size bytesWrittern = 0;
-    env->String_GetUTF8(ani_str, utf8Buffer, strSize + 1, &bytesWrittern);
-    utf8Buffer[bytesWrittern] = '\0';
-    std::string content = std::string(utf8Buffer);
-    return content;
-}
-
-bool MovingPhotoAni::ParseOptionalBool(ani_env *env, ani_object object, std::optional<bool> &result)
-{
-    if (MovingPhotoAni::GetIsUndefinedObject(env, object)) {
-        result.reset();
-        return true;
-    }
-    bool boolValue;
-    if (ANI_OK != MovingPhotoAni::GetBool(env, object, boolValue)) {
-        return false;
-    }
-    result = boolValue;
-    return true;
-}
-
-ani_status MovingPhotoAni::GetBool(ani_env *env, ani_boolean arg, bool &value)
-{
-    value = (arg == ANI_TRUE);
-    return ANI_OK;
-}
-
-ani_status MovingPhotoAni::GetBool(ani_env *env, ani_object arg, bool &value)
-{
-    if (MovingPhotoAni::GetIsUndefinedObject(env, object)) {
-        return ANI_ERROR;
-    }
-
-    ani_class cls {};
-    static const std::string className = "std.core.Boolean";
-    ani_status status = env->FindClass(className.c_str(), &cls);
-    if (ANI_OK != status) {
-        return status;
-    }
-
-    ani_method method {};
-    status = env->Class_FindMethod(cls, "valueOf", nullptr, &method);
-    if (ANI_OK != status) {
-        return status;
-    }
-    
-    ani_boolean result = 0;
-    status = env->Object_CallMethod_Boolean(arg, method, &result);
-    if (ANI_OK != status) {
-        return status;
-    }
-    return GetBool(env, result, value);
 }
 
 } // namespace OHOS::Ace
@@ -609,9 +500,8 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     if (ANI_OK != vm->GetEnv(ANI_VERSION_1, &env)) {
         return ANI_OUT_OF_REF;
     }
-    static const char *className = "@ohos.multimedia.movingphotoview.MovingPhotoNative";
     ani_class cls;
-    ani_status isOk = env->FinClass(className, &cls);
+    ani_status isOk = env->FinClass(OHOS::Ace::ANI_MOVINGPHOTO_NATIVE, &cls);
     if (ANI_OK != isOk) {
         return isOk;
     }
@@ -668,10 +558,10 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(OHOS::Ace::MovingPhotoAni::SetPlaybackPeriod)},
         ani_native_function{"enableAutoPlay", nullptr,
             reinterpret_cast<void *>(OHOS::Ace::MovingPhotoAni::EnableAutoPlay)},
-    }
-    if (ANI_OK != env->Class_BindStaticNativeMethods(cls, method.data(), methods.size())) {
+    };
+    if (ANI_OK != env->Class_BindStaticNativeMethods(cls, methods.data(), methods.size())) {
         return ANI_INVALID_TYPE;
-    }
+    };
     *result = ANI_VERSION_1;
     return ANI_OK;
 }

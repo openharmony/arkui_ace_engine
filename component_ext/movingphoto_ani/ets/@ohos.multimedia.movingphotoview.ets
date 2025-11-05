@@ -1,11 +1,26 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import photoAccessHelper from "@ohos.file.photoAccessHelper";
 import { NodeAttach } from "@koalaui/runtime/memo/node";
 import { remember } from "@koalaui/runtime/memo/remember";
 import { Finalizable } from "@koalaui/interop/Finalizable";
 import { int32 } from "@koalaui/common";
 import { ImageAIOptions } from "arkui.component.imageCommon";
-import { ArkCommonMethodPeer, ArkCommonMethodComponent } form "arkui/component/common";
-import { CommonMethod } from "arkui.component.enums";
+import { ArkCommonMethodPeer, ArkCommonMethodComponent } from "arkui/component/common";
+import { CommonMethod } from "arkui.component.common";
 import { ImageFit } from "arkui.component.enums";
 import { ComponentBase } from "arkui/ComponentBase";
 import { PeerNode } from "arkui/PeerNode";
@@ -28,12 +43,6 @@ export enum PixelMapFormat {
     YCRCB_P010 = 5,
 }
 
-export enum DynamicRangeMode {
-    HIGH = 0,
-    CONSTRAINT = 1,
-    STANDARD = 2,
-}
-
 export class MovingPhotoViewController {
     peer?: (Finalizable | undefined) = undefined;
 
@@ -47,8 +56,8 @@ export class MovingPhotoViewController {
 
     public constructor() {
         const ctorPtr: KPointer = MovingPhotoViewController.getMovingPhotoViewController();
-        const finalizerPtr: KPointer = MovingPhotoController.getFinalizer();
-        this.peer = new Finalizable(ctoPtr, finalizerPtr);
+        const finalizerPtr: KPointer = MovingPhotoViewController.getFinalizer();
+        this.peer = new Finalizable(ctorPtr, finalizerPtr);
     }
     
     public startPlayback(): void {
@@ -89,17 +98,17 @@ export class MovingPhotoViewController {
 }
 
 export interface MovingphotoviewOptions {
-    movingPhoto: photoAccessHelper.MovingPhoto;
+    movingPhoto: photoAccessHelper.MovingPhoto
 
-    controller?: MovingPhotoViewController;
+    controller?: MovingPhotoViewController
 
-    imageAIOptions?: ImageAIOptions;
+    imageAIOptions?: ImageAIOptions
 
-    movingPhotoFormat?: PixelMapFormat;
+    movingPhotoFormat?: PixelMapFormat
 
-    dynamicRangeMode?: DynamicRangeMode;
+    dynamicRangeMode?: DynamicRangeMode
 
-    playWithMask?: boolean;
+    playWithMask?: boolean
 }
 
 export class ArkMovingPhotoViewPeer extends ArkCommonMethodPeer {
@@ -120,7 +129,7 @@ export type MovingPhotoViewEventCallback = () => void;
 
 export interface MovingPhotoViewAttribute extends CommonMethod {
 
-    setMovingPhotoViewOptions(option: MovingPhotoViewOptions): this
+    setMovingPhotoViewOptions(options: MovingPhotoViewOptions): this
 
     muted(isMuted: boolean): this
 
@@ -168,7 +177,7 @@ export class ArkMovingPhotoViewComponent extends ArkCommonMethodComponent implem
     }
 
     public objectFit(value: ImageFit): this {
-        MovingPhotoNative.objectFit(this.getPeer().peer.ptr, isMuted);
+        MovingPhotoNative.objectFit(this.getPeer().peer.ptr, value);
         return this;
     }
 
@@ -178,7 +187,7 @@ export class ArkMovingPhotoViewComponent extends ArkCommonMethodComponent implem
     }
 
     public onStart(callback: MovingPhotoViewEventCallback): this {
-        MovingPhotoNative.objectFit(this.getPeer().peer.ptr, callback);
+        MovingPhotoNative.onStart(this.getPeer().peer.ptr, callback);
         return this;
     }
 
@@ -240,9 +249,9 @@ export function MovingPhotoViewImpl(
     content_?: () => void,
 ) {
     const receiver = remember<ArkMovingPhotoViewComponent>((): ArkMovingPhotoViewComponent => {
-        return new ArkMovingPhotoViewComponent
+        return new ArkMovingPhotoViewComponent()
     })
-    NodeAttach<ArkMovingPhotoViewComponent>((): ArkMovingPhotoViewPeer => ArkMovingPhotoViewPeer.create(receiver), (peer: ArkMovingPhotoViewPeer): void => {
+    NodeAttach<ArkMovingPhotoViewPeer>((): ArkMovingPhotoViewPeer => ArkMovingPhotoViewPeer.create(receiver), (peer: ArkMovingPhotoViewPeer): void => {
         style?.(receiver)
         content_?.()
     })
@@ -251,7 +260,7 @@ export function MovingPhotoViewImpl(
 export class MovingPhotoNative {
     static {loadLibrary("movingphotoview_ani")}
     
-    native static createMovingPhoto(peerId: int32, flag: int32): KPointer;
+    native static createMovingPhoto(peerId: int32, flags: int32): KPointer;
     native static setMovingPhotoViewOptions(node: KPointer, value: MovingPhotoViewOptions | undefined): void;
     native static muted(node: KPointer, value: boolean | undefined): void;
     native static objectFit(node: KPointer, value: ImageFit): void;

@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/config/components/ets_frontend/es2abc_config.gni")
+import("//build/config/components/ets_frontend/ets2abc_config.gni")
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 import("//foundation/arkui/ace_engine/build/ace_gen_obj.gni")
@@ -20,12 +20,11 @@ component_ext_path = "${ace_root}/component_ext"
 
 additional_include_dirs = [ "${ace_root}" ]
 
-ohos_shared_library("movingphotoview") {
+ohos_shared_library("movingphotoview_ani") {
   defines = [ "USE_ARK_ENGINE" ]
   sources = [
     "./src/movingphotoview_ani.cpp",
-    "./src/hds_ani_utils.cpp",
-    "$ace_root/frameworks/core/components_ng/base/inspector_filter.cpp",
+    "./src/ani_utils.cpp",
     "${component_ext_path}/movingphoto/movingphoto_layout_algorithm.cpp",
     "${component_ext_path}/movingphoto/movingphoto_model_ng.cpp",
     "${component_ext_path}/movingphoto/movingphoto_node.cpp",
@@ -45,7 +44,6 @@ ohos_shared_library("movingphotoview") {
     ":movingphotoview_abc_etc",
     "${component_ext_path}/movingphoto:movingphotoview_platform",
     "$ace_root/build:libace_compatible",
-    "$ace_root/frameworks/core:ace_container_scope",
     "$ace_root/interfaces/inner_api/ace:ace_uicontent",
     "$ace_root/interfaces/napi/kits/plugincomponent:plugincomponent",
   ]
@@ -58,11 +56,10 @@ ohos_shared_library("movingphotoview") {
     "hilog:libhilog",
     "image_framework:image",
     "image_framework:image_native",
-    "napi:ace_napi",
   ]
 
   if (defined(global_parts_info) &&
-      !defined(global_parts_info.multimedia_media_library)) {
+      defined(global_parts_info.multimedia_media_library)) {
     external_deps += [ "media_library:media_library_manager" ]
   }
 
@@ -86,34 +83,12 @@ ohos_shared_library("movingphotoview") {
   output_extension = "so"
 }
 
-action("gen_arkts_config") {
-  script = "./gen_arkts_config.py"
-
-  inputs = [ "./arktsconfig.json" ]
-  outputs = [ "$target_out_dir/arktsconfig.json" ]
-  args = [
-    # Paths: 0 base dir
-    rebase_path(".")
-
-    # Paths: 1 source config file
-    rebase_path("./arktsconfig.json")
-
-    # Paths: 2 output dir
-    rebase_path("$target_out_dir")
-
-    # Paths: 3 innerkits config path
-    rebase_path("$root_out_dir/arkui/innerkits")
-  ]
-
-  external_deps = ["ace_engine:libace_compatible"]
-}
-
 generate_static_abc("movingphotoview_abc") {
   base_url = "./ets"
   files = [
     "./ets/@ohos.multimedia.movingphotoview.ets"
   ]
-  path_keys = [
+  paths_keys = [
     "arkui/component/common",
     "arkui/ComponentBase",
     "arkui/PeerNode",
@@ -134,7 +109,7 @@ generate_static_abc("movingphotoview_abc") {
     "@koalaui/runtime/internals"
   ]
 
-  path_values = [
+  paths_values = [
     "$ohos_ets_inner_path/arkui/component/common.d.ets",
     "$ohos_ets_inner_path/arkui/ComponentBase.d.ets",
     "$ohos_ets_inner_path/arkui/PeerNode.d.ets",
@@ -154,9 +129,9 @@ generate_static_abc("movingphotoview_abc") {
     "$ohos_ets_inner_path/@koalaui/common/koalaKey.d.ets",
     "$ohos_ets_inner_path/@koalaui/runtime/internals.d.ets"
   ]
-  device_dst_file = "/system/frameworks/@ohos.multimedia.movingphotoview.abc"
-  dst_file = target_out_dir + "./@ohos.multimedia.movingphotoview.abc"
-  out_puts = [ target_out_dir + "./@ohos.multimedia.movingphotoview.abc" ]
+  device_dst_file = "/system/framework/@ohos.multimedia.movingphotoview.abc"
+  dst_file = target_out_dir + "/@ohos.multimedia.movingphotoview.abc"
+  out_puts = [ target_out_dir + "/@ohos.multimedia.movingphotoview.abc" ]
   is_boot_abc = "True"
   external_dependencies = [ "ace_engine:copy_arkui_ets" ]
   ui_enable = "True"
@@ -166,7 +141,7 @@ generate_static_abc("movingphotoview_abc") {
 ohos_prebuilt_etc("movingphotoview_abc_etc") {
   source = target_out_dir + "/@ohos.multimedia.movingphotoview.abc"
   deps = [ ":movingphotoview_abc" ]
-  module_install_dir = "frameworks"
+  module_install_dir = "framework"
   subsystem_name = "arkui"
   part_name = "ace_engine"
 }

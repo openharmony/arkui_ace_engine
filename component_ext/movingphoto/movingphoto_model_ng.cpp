@@ -274,7 +274,7 @@ void MovingPhotoModelNG::SetXmagePosition()
     movingPhotoPattern->SetXmagePosition();
 }
 
-RePtr<MovingPhotoNode> MovingPhotoModelNG::CreateMovingPhotoNode(int32_t nodeId, const std::u16string& content)
+RefPtr<MovingPhotoNode> MovingPhotoModelNG::CreateMovingPhotoNode(int32_t nodeId, const std::u16string& content)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::MOVING_PHOTO_ETS_TAG, nodeId);
@@ -349,7 +349,7 @@ void MovingPhotoModelNG::SetImageSrc(MovingPhotoNode* frameNode, const std::stri
 
     int32_t fd = dataProvider->ReadMovingPhotoVideo(value);
     ACE_UPDATE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, VideoSource, fd);
-    SetXmagePosition();
+    SetXmagePosition(frameNode);
 }
 
 void MovingPhotoModelNG::SetHdrBrightness(MovingPhotoNode* frameNode, float hdrBrightness)
@@ -363,11 +363,13 @@ void MovingPhotoModelNG::SetMuted(MovingPhotoNode* frameNode, bool value)
 {
     CHECK_NULL_VOID(frameNode);
     auto movingPhotoPattern = AceType::DynamicCast<MovingPhotoPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(movingPhotoPattern);
     movingPhotoPattern->UpdateMuted(value);
 }
 
 void MovingPhotoModelNG::SetObjectFit(MovingPhotoNode* frameNode, ImageFit objectFit)
 {
+    CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, ObjectFit, objectFit);
 }
 
