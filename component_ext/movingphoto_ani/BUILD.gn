@@ -56,6 +56,7 @@ ohos_shared_library("movingphotoview_ani") {
     "hilog:libhilog",
     "image_framework:image",
     "image_framework:image_native",
+    "napi:ace_container_scope",
   ]
 
   if (defined(global_parts_info) &&
