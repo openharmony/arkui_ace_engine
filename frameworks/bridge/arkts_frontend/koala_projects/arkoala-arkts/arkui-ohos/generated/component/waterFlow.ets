@@ -29,112 +29,14 @@ import { Resource } from "global.resource"
 import { FlexDirection, ScrollSource } from "./enums"
 import { OnScrollFrameBeginCallback, Scroller, Scroller_serializer } from "./scroll"
 import { ScrollState } from "./list"
-import { AttributeModifier, hookWaterFlowAttributeModifier, AttributeUpdater } from "#handwritten"
+import { AttributeModifier, hookWaterFlowAttributeModifier, AttributeUpdater, hookWaterFlowOptionsImpl } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { CustomBuilder } from "./builder"
-import { ComponentContent } from "arkui.ComponentContent"
+import { ComponentContentBase } from "arkui.ComponentContent"
 import { WaterFlowModifier } from "./../WaterFlowModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
-export class WaterFlowSectionsInternal {
-    public static fromPtr(ptr: KPointer): WaterFlowSections {
-        return new WaterFlowSections(ptr)
-    }
-}
-export class WaterFlowSections implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
-    constructor(peerPtr: KPointer) {
-        this.peer = new Finalizable(peerPtr, WaterFlowSections.getFinalizer())
-    }
-    constructor() {
-        this(WaterFlowSections.construct())
-    }
-    static construct(): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._WaterFlowSections_construct()
-        return retval
-    }
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._WaterFlowSections_getFinalizer()
-    }
-    public splice(start: number, deleteCount?: number, sections?: Array<SectionOptions>): boolean {
-        const start_casted = start as (number)
-        const deleteCount_casted = deleteCount as (number | undefined)
-        const sections_casted = sections as (Array<SectionOptions> | undefined)
-        return this.splice_serialize(start_casted, deleteCount_casted, sections_casted)
-    }
-    public push(section: SectionOptions): boolean {
-        const section_casted = section as (SectionOptions)
-        return this.push_serialize(section_casted)
-    }
-    public update(sectionIndex: number, section: SectionOptions): boolean {
-        const sectionIndex_casted = sectionIndex as (number)
-        const section_casted = section as (SectionOptions)
-        return this.update_serialize(sectionIndex_casted, section_casted)
-    }
-    public values(): Array<SectionOptions> {
-        return this.values_serialize()
-    }
-    public length(): number {
-        return this.length_serialize()
-    }
-    splice_serialize(start: number, deleteCount?: number, sections?: Array<SectionOptions>): boolean {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (deleteCount !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const deleteCountTmpValue  = deleteCount!
-            thisSerializer.writeNumber(deleteCountTmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        if (sections !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const sectionsTmpValue  = sections!
-            thisSerializer.writeInt32((sectionsTmpValue.length).toInt())
-            for (let sectionsTmpValueCounterI = 0; sectionsTmpValueCounterI < sectionsTmpValue.length; sectionsTmpValueCounterI++) {
-                const sectionsTmpValueTmpElement : SectionOptions = sectionsTmpValue[sectionsTmpValueCounterI]
-                SectionOptions_serializer.write(thisSerializer, sectionsTmpValueTmpElement)
-            }
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const retval  = ArkUIGeneratedNativeModule._WaterFlowSections_splice(this.peer!.ptr, start, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-        return retval
-    }
-    push_serialize(section: SectionOptions): boolean {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        SectionOptions_serializer.write(thisSerializer, section)
-        const retval  = ArkUIGeneratedNativeModule._WaterFlowSections_push(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-        return retval
-    }
-    update_serialize(sectionIndex: number, section: SectionOptions): boolean {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        SectionOptions_serializer.write(thisSerializer, section)
-        const retval  = ArkUIGeneratedNativeModule._WaterFlowSections_update(this.peer!.ptr, sectionIndex, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-        return retval
-    }
-    values_serialize(): Array<SectionOptions> {
-        const retval  = ArkUIGeneratedNativeModule._WaterFlowSections_values(this.peer!.ptr)
-        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const bufferLength : int32 = retvalDeserializer.readInt32()
-        let buffer : Array<SectionOptions> = new Array<SectionOptions>(bufferLength)
-        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
-            buffer[bufferBufCounterI] = SectionOptions_serializer.read(retvalDeserializer)
-        }
-        const returnResult : Array<SectionOptions> = buffer
-        return returnResult
-    }
-    length_serialize(): number {
-        const retval  = ArkUIGeneratedNativeModule._WaterFlowSections_length(this.peer!.ptr)
-        return retval
-    }
-}
 export class ArkWaterFlowPeer extends ArkScrollableCommonMethodPeer {
     attributeSet?: WaterFlowModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -336,7 +238,7 @@ export class ArkWaterFlowPeer extends ArkScrollableCommonMethodPeer {
     }
 }
 export type GetItemMainSizeByIndex = (index: number) => number;
-export interface SectionOptions {
+export class SectionOptions {
     itemsCount: number;
     crossCount?: number | undefined;
     onGetItemMainSizeByIndex?: GetItemMainSizeByIndex | undefined;
@@ -350,7 +252,7 @@ export enum WaterFlowLayoutMode {
 }
 export interface WaterFlowOptions {
     footer?: CustomBuilder;
-    footerContent?: ComponentContent;
+    footerContent?: ComponentContentBase;
     scroller?: Scroller;
     sections?: WaterFlowSections;
     layoutMode?: WaterFlowLayoutMode;
@@ -466,7 +368,7 @@ export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent im
     public setWaterFlowOptions(options?: WaterFlowOptions): this {
         if (this.checkPriority("setWaterFlowOptions")) {
             const options_casted = options as (WaterFlowOptions | undefined)
-            this.getPeer()?.setWaterFlowOptionsAttribute(options_casted)
+            hookWaterFlowOptionsImpl(this, options);
             return this
         }
         return this
@@ -671,11 +573,11 @@ export class WaterFlowOptions_serializer {
         }
         const footerTmpResult : CustomBuilder | undefined = footerTmpBuf
         const footerContentTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let footerContentTmpBuf : ComponentContent | undefined = undefined
+        let footerContentTmpBuf : ComponentContentBase | undefined = undefined
         if ((footerContentTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            footerContentTmpBuf = (valueDeserializer.readObject() as ComponentContent)
+            footerContentTmpBuf = (valueDeserializer.readObject() as ComponentContentBase)
         }
-        const footerContentTmpResult : ComponentContent | undefined = footerContentTmpBuf
+        const footerContentTmpResult : ComponentContentBase | undefined = footerContentTmpBuf
         const scrollerTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let scrollerTmpBuf : Scroller | undefined = undefined
         if ((scrollerTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
