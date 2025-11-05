@@ -224,6 +224,7 @@ const ArkUIAniCustomNodeModifier* GetCustomNodeAniModifier()
         .queryNavDestinationInfo0 = OHOS::Ace::NG::QueryNavDestinationInfo0,
         .queryRouterPageInfo = OHOS::Ace::NG::QueryRouterPageInfo,
         .queryNavDestinationInfo1 = OHOS::Ace::NG::QueryNavDestinationInfo1,
+        .queryRouterPageInfo1 = OHOS::Ace::NG::QueryRouterPageInfo1,
         .onReuse = OHOS::Ace::NG::OnReuse,
         .onRecycle = OHOS::Ace::NG::OnRecycle,
     };
