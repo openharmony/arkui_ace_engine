@@ -72,6 +72,8 @@ template("ace_core_interfaces_native") {
       external_deps += [ "graphic_3d:lib3dWidgetAdapter" ]
     }
 
+    external_deps += [ "runtime_core:ani" ]
+
     if (use_hilog) {
       external_deps += [ "hilog:libhilog" ]
     }

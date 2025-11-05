@@ -14096,24 +14096,28 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
-    Ark_RectResult GetItemRectInGroupImpl(Ark_ListScroller peer,
+    Ark_RectResult GetItemRectInGroupImpl(Ark_VMContext vmContext,
+                                          Ark_ListScroller peer,
                                           Ark_Int32 index,
                                           Ark_Int32 indexInGroup)
     {
         return {};
     }
-    void ScrollToItemInGroupImpl(Ark_ListScroller peer,
+    void ScrollToItemInGroupImpl(Ark_VMContext vmContext,
+                                 Ark_ListScroller peer,
                                  Ark_Int32 index,
                                  Ark_Int32 indexInGroup,
                                  const Opt_Boolean* smooth,
                                  const Opt_ScrollAlign* align)
     {
     }
-    void CloseAllSwipeActionsImpl(Ark_ListScroller peer,
+    void CloseAllSwipeActionsImpl(Ark_VMContext vmContext,
+                                  Ark_ListScroller peer,
                                   const Opt_CloseSwipeActionOptions* options)
     {
     }
-    Ark_VisibleListContentInfo GetVisibleListContentInfoImpl(Ark_ListScroller peer,
+    Ark_VisibleListContentInfo GetVisibleListContentInfoImpl(Ark_VMContext vmContext,
+                                                             Ark_ListScroller peer,
                                                              Ark_Float64 x,
                                                              Ark_Float64 y)
     {
@@ -16382,49 +16386,59 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
-    void ScrollToImpl(Ark_Scroller peer,
+    void ScrollToImpl(Ark_VMContext vmContext,
+                      Ark_Scroller peer,
                       const Ark_ScrollOptions* options)
     {
     }
-    void ScrollEdgeImpl(Ark_Scroller peer,
+    void ScrollEdgeImpl(Ark_VMContext vmContext,
+                        Ark_Scroller peer,
                         Ark_Edge value,
                         const Opt_ScrollEdgeOptions* options)
     {
     }
-    void FlingImpl(Ark_Scroller peer,
+    void FlingImpl(Ark_VMContext vmContext,
+                   Ark_Scroller peer,
                    Ark_Float64 velocity)
     {
     }
-    void ScrollPageImpl(Ark_Scroller peer,
+    void ScrollPageImpl(Ark_VMContext vmContext,
+                        Ark_Scroller peer,
                         const Ark_ScrollPageOptions* value)
     {
     }
-    Opt_OffsetResult CurrentOffsetImpl(Ark_Scroller peer)
+    Opt_OffsetResult CurrentOffsetImpl(Ark_VMContext vmContext,
+                                       Ark_Scroller peer)
     {
         return {};
     }
-    void ScrollToIndexImpl(Ark_Scroller peer,
+    void ScrollToIndexImpl(Ark_VMContext vmContext,
+                           Ark_Scroller peer,
                            Ark_Int32 value,
                            const Opt_Boolean* smooth,
                            const Opt_ScrollAlign* align,
                            const Opt_ScrollToIndexOptions* options)
     {
     }
-    void ScrollByImpl(Ark_Scroller peer,
+    void ScrollByImpl(Ark_VMContext vmContext,
+                      Ark_Scroller peer,
                       const Ark_Length* dx,
                       const Ark_Length* dy)
     {
     }
-    Ark_Boolean IsAtEndImpl(Ark_Scroller peer)
+    Ark_Boolean IsAtEndImpl(Ark_VMContext vmContext,
+                            Ark_Scroller peer)
     {
         return {};
     }
-    Ark_RectResult GetItemRectImpl(Ark_Scroller peer,
+    Ark_RectResult GetItemRectImpl(Ark_VMContext vmContext,
+                                   Ark_Scroller peer,
                                    Ark_Int32 index)
     {
         return {};
     }
-    Ark_Int32 GetItemIndexImpl(Ark_Scroller peer,
+    Ark_Int32 GetItemIndexImpl(Ark_VMContext vmContext,
+                               Ark_Scroller peer,
                                Ark_Float64 x,
                                Ark_Float64 y)
     {

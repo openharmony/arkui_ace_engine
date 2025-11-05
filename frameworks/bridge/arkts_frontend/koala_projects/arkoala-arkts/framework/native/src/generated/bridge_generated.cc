@@ -30626,15 +30626,15 @@ Ark_NativePointer impl_ListScroller_getFinalizer() {
         return GetAccessors()->getListScrollerAccessor()->getFinalizer();
 }
 KOALA_INTEROP_DIRECT_0(ListScroller_getFinalizer, Ark_NativePointer)
-KInteropReturnBuffer impl_ListScroller_getItemRectInGroup(Ark_NativePointer thisPtr, Ark_Int32 index, Ark_Int32 indexInGroup) {
+KInteropReturnBuffer impl_ListScroller_getItemRectInGroup(KVMContext vmContext, Ark_NativePointer thisPtr, Ark_Int32 index, Ark_Int32 indexInGroup) {
         Ark_ListScroller self = reinterpret_cast<Ark_ListScroller>(thisPtr);
-        const auto &retValue = GetAccessors()->getListScrollerAccessor()->getItemRectInGroup(self, index, indexInGroup);
+        const auto &retValue = GetAccessors()->getListScrollerAccessor()->getItemRectInGroup(reinterpret_cast<Ark_VMContext>(vmContext), self, index, indexInGroup);
         SerializerBase _retSerializer {};
         RectResult_serializer::write(_retSerializer, retValue);
         return _retSerializer.toReturnBuffer();
 }
-KOALA_INTEROP_3(ListScroller_getItemRectInGroup, KInteropReturnBuffer, Ark_NativePointer, Ark_Int32, Ark_Int32)
-void impl_ListScroller_scrollToItemInGroup(Ark_NativePointer thisPtr, Ark_Int32 index, Ark_Int32 indexInGroup, KSerializerBuffer thisArray, int32_t thisLength) {
+KOALA_INTEROP_CTX_3(ListScroller_getItemRectInGroup, KInteropReturnBuffer, Ark_NativePointer, Ark_Int32, Ark_Int32)
+void impl_ListScroller_scrollToItemInGroup(KVMContext vmContext, Ark_NativePointer thisPtr, Ark_Int32 index, Ark_Int32 indexInGroup, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_ListScroller self = reinterpret_cast<Ark_ListScroller>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto smoothValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
@@ -30651,10 +30651,10 @@ void impl_ListScroller_scrollToItemInGroup(Ark_NativePointer thisPtr, Ark_Int32 
             alignValueTempTmpBuf.value = static_cast<Ark_ScrollAlign>(thisDeserializer.readInt32());
         }
         Opt_ScrollAlign alignValueTemp = alignValueTempTmpBuf;;
-        GetAccessors()->getListScrollerAccessor()->scrollToItemInGroup(self, index, indexInGroup, static_cast<Opt_Boolean*>(&smoothValueTemp), static_cast<Opt_ScrollAlign*>(&alignValueTemp));
+        GetAccessors()->getListScrollerAccessor()->scrollToItemInGroup(reinterpret_cast<Ark_VMContext>(vmContext), self, index, indexInGroup, static_cast<Opt_Boolean*>(&smoothValueTemp), static_cast<Opt_ScrollAlign*>(&alignValueTemp));
 }
-KOALA_INTEROP_DIRECT_V5(ListScroller_scrollToItemInGroup, Ark_NativePointer, Ark_Int32, Ark_Int32, KSerializerBuffer, int32_t)
-void impl_ListScroller_closeAllSwipeActions(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+KOALA_INTEROP_CTX_V5(ListScroller_scrollToItemInGroup, Ark_NativePointer, Ark_Int32, Ark_Int32, KSerializerBuffer, int32_t)
+void impl_ListScroller_closeAllSwipeActions(KVMContext vmContext, Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_ListScroller self = reinterpret_cast<Ark_ListScroller>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto optionsValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
@@ -30664,17 +30664,17 @@ void impl_ListScroller_closeAllSwipeActions(Ark_NativePointer thisPtr, KSerializ
             optionsValueTempTmpBuf.value = CloseSwipeActionOptions_serializer::read(thisDeserializer);
         }
         Opt_CloseSwipeActionOptions optionsValueTemp = optionsValueTempTmpBuf;;
-        GetAccessors()->getListScrollerAccessor()->closeAllSwipeActions(self, static_cast<Opt_CloseSwipeActionOptions*>(&optionsValueTemp));
+        GetAccessors()->getListScrollerAccessor()->closeAllSwipeActions(reinterpret_cast<Ark_VMContext>(vmContext), self, static_cast<Opt_CloseSwipeActionOptions*>(&optionsValueTemp));
 }
-KOALA_INTEROP_DIRECT_V3(ListScroller_closeAllSwipeActions, Ark_NativePointer, KSerializerBuffer, int32_t)
-KInteropReturnBuffer impl_ListScroller_getVisibleListContentInfo(Ark_NativePointer thisPtr, KDouble x, KDouble y) {
+KOALA_INTEROP_CTX_V3(ListScroller_closeAllSwipeActions, Ark_NativePointer, KSerializerBuffer, int32_t)
+KInteropReturnBuffer impl_ListScroller_getVisibleListContentInfo(KVMContext vmContext, Ark_NativePointer thisPtr, KDouble x, KDouble y) {
         Ark_ListScroller self = reinterpret_cast<Ark_ListScroller>(thisPtr);
-        const auto &retValue = GetAccessors()->getListScrollerAccessor()->getVisibleListContentInfo(self, x, y);
+        const auto &retValue = GetAccessors()->getListScrollerAccessor()->getVisibleListContentInfo(reinterpret_cast<Ark_VMContext>(vmContext), self, x, y);
         SerializerBase _retSerializer {};
         VisibleListContentInfo_serializer::write(_retSerializer, retValue);
         return _retSerializer.toReturnBuffer();
 }
-KOALA_INTEROP_3(ListScroller_getVisibleListContentInfo, KInteropReturnBuffer, Ark_NativePointer, KDouble, KDouble)
+KOALA_INTEROP_CTX_3(ListScroller_getVisibleListContentInfo, KInteropReturnBuffer, Ark_NativePointer, KDouble, KDouble)
 Ark_NativePointer impl_LongPressGestureEvent_construct() {
         return GetAccessors()->getLongPressGestureEventAccessor()->construct();
 }
@@ -34259,14 +34259,14 @@ Ark_NativePointer impl_Scroller_getFinalizer() {
         return GetAccessors()->getScrollerAccessor()->getFinalizer();
 }
 KOALA_INTEROP_DIRECT_0(Scroller_getFinalizer, Ark_NativePointer)
-void impl_Scroller_scrollTo(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+void impl_Scroller_scrollTo(KVMContext vmContext, Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_Scroller self = reinterpret_cast<Ark_Scroller>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         Ark_ScrollOptions optionsValueTemp = ScrollOptions_serializer::read(thisDeserializer);;
-        GetAccessors()->getScrollerAccessor()->scrollTo(self, static_cast<Ark_ScrollOptions*>(&optionsValueTemp));
+        GetAccessors()->getScrollerAccessor()->scrollTo(reinterpret_cast<Ark_VMContext>(vmContext), self, static_cast<Ark_ScrollOptions*>(&optionsValueTemp));
 }
-KOALA_INTEROP_DIRECT_V3(Scroller_scrollTo, Ark_NativePointer, KSerializerBuffer, int32_t)
-void impl_Scroller_scrollEdge(Ark_NativePointer thisPtr, Ark_Int32 value, KSerializerBuffer thisArray, int32_t thisLength) {
+KOALA_INTEROP_CTX_V3(Scroller_scrollTo, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_Scroller_scrollEdge(KVMContext vmContext, Ark_NativePointer thisPtr, Ark_Int32 value, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_Scroller self = reinterpret_cast<Ark_Scroller>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto optionsValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
@@ -34276,24 +34276,24 @@ void impl_Scroller_scrollEdge(Ark_NativePointer thisPtr, Ark_Int32 value, KSeria
             optionsValueTempTmpBuf.value = ScrollEdgeOptions_serializer::read(thisDeserializer);
         }
         Opt_ScrollEdgeOptions optionsValueTemp = optionsValueTempTmpBuf;;
-        GetAccessors()->getScrollerAccessor()->scrollEdge(self, static_cast<Ark_Edge>(value), static_cast<Opt_ScrollEdgeOptions*>(&optionsValueTemp));
+        GetAccessors()->getScrollerAccessor()->scrollEdge(reinterpret_cast<Ark_VMContext>(vmContext), self, static_cast<Ark_Edge>(value), static_cast<Opt_ScrollEdgeOptions*>(&optionsValueTemp));
 }
-KOALA_INTEROP_DIRECT_V4(Scroller_scrollEdge, Ark_NativePointer, Ark_Int32, KSerializerBuffer, int32_t)
-void impl_Scroller_fling(Ark_NativePointer thisPtr, KDouble velocity) {
+KOALA_INTEROP_CTX_V4(Scroller_scrollEdge, Ark_NativePointer, Ark_Int32, KSerializerBuffer, int32_t)
+void impl_Scroller_fling(KVMContext vmContext, Ark_NativePointer thisPtr, KDouble velocity) {
         Ark_Scroller self = reinterpret_cast<Ark_Scroller>(thisPtr);
-        GetAccessors()->getScrollerAccessor()->fling(self, velocity);
+        GetAccessors()->getScrollerAccessor()->fling(reinterpret_cast<Ark_VMContext>(vmContext), self, velocity);
 }
-KOALA_INTEROP_V2(Scroller_fling, Ark_NativePointer, KDouble)
-void impl_Scroller_scrollPage(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+KOALA_INTEROP_CTX_V2(Scroller_fling, Ark_NativePointer, KDouble)
+void impl_Scroller_scrollPage(KVMContext vmContext, Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_Scroller self = reinterpret_cast<Ark_Scroller>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         Ark_ScrollPageOptions valueValueTemp = ScrollPageOptions_serializer::read(thisDeserializer);;
-        GetAccessors()->getScrollerAccessor()->scrollPage(self, static_cast<Ark_ScrollPageOptions*>(&valueValueTemp));
+        GetAccessors()->getScrollerAccessor()->scrollPage(reinterpret_cast<Ark_VMContext>(vmContext), self, static_cast<Ark_ScrollPageOptions*>(&valueValueTemp));
 }
-KOALA_INTEROP_DIRECT_V3(Scroller_scrollPage, Ark_NativePointer, KSerializerBuffer, int32_t)
-KInteropReturnBuffer impl_Scroller_currentOffset(Ark_NativePointer thisPtr) {
+KOALA_INTEROP_CTX_V3(Scroller_scrollPage, Ark_NativePointer, KSerializerBuffer, int32_t)
+KInteropReturnBuffer impl_Scroller_currentOffset(KVMContext vmContext, Ark_NativePointer thisPtr) {
         Ark_Scroller self = reinterpret_cast<Ark_Scroller>(thisPtr);
-        const auto &retValue = GetAccessors()->getScrollerAccessor()->currentOffset(self);
+        const auto &retValue = GetAccessors()->getScrollerAccessor()->currentOffset(reinterpret_cast<Ark_VMContext>(vmContext), self);
         SerializerBase _retSerializer {};
         if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
             _retSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
@@ -34304,8 +34304,8 @@ KInteropReturnBuffer impl_Scroller_currentOffset(Ark_NativePointer thisPtr) {
         }
         return _retSerializer.toReturnBuffer();
 }
-KOALA_INTEROP_1(Scroller_currentOffset, KInteropReturnBuffer, Ark_NativePointer)
-void impl_Scroller_scrollToIndex(Ark_NativePointer thisPtr, Ark_Int32 value, KSerializerBuffer thisArray, int32_t thisLength) {
+KOALA_INTEROP_CTX_1(Scroller_currentOffset, KInteropReturnBuffer, Ark_NativePointer)
+void impl_Scroller_scrollToIndex(KVMContext vmContext, Ark_NativePointer thisPtr, Ark_Int32 value, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_Scroller self = reinterpret_cast<Ark_Scroller>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto smoothValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
@@ -34329,10 +34329,10 @@ void impl_Scroller_scrollToIndex(Ark_NativePointer thisPtr, Ark_Int32 value, KSe
             optionsValueTempTmpBuf.value = ScrollToIndexOptions_serializer::read(thisDeserializer);
         }
         Opt_ScrollToIndexOptions optionsValueTemp = optionsValueTempTmpBuf;;
-        GetAccessors()->getScrollerAccessor()->scrollToIndex(self, value, static_cast<Opt_Boolean*>(&smoothValueTemp), static_cast<Opt_ScrollAlign*>(&alignValueTemp), static_cast<Opt_ScrollToIndexOptions*>(&optionsValueTemp));
+        GetAccessors()->getScrollerAccessor()->scrollToIndex(reinterpret_cast<Ark_VMContext>(vmContext), self, value, static_cast<Opt_Boolean*>(&smoothValueTemp), static_cast<Opt_ScrollAlign*>(&alignValueTemp), static_cast<Opt_ScrollToIndexOptions*>(&optionsValueTemp));
 }
-KOALA_INTEROP_DIRECT_V4(Scroller_scrollToIndex, Ark_NativePointer, Ark_Int32, KSerializerBuffer, int32_t)
-void impl_Scroller_scrollBy(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+KOALA_INTEROP_CTX_V4(Scroller_scrollToIndex, Ark_NativePointer, Ark_Int32, KSerializerBuffer, int32_t)
+void impl_Scroller_scrollBy(KVMContext vmContext, Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_Scroller self = reinterpret_cast<Ark_Scroller>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const Ark_Int8 dxValueTempTmpBufUnionSelector = thisDeserializer.readInt8();
@@ -34367,27 +34367,27 @@ void impl_Scroller_scrollBy(Ark_NativePointer thisPtr, KSerializerBuffer thisArr
             INTEROP_FATAL("One of the branches for dyValueTempTmpBuf has to be chosen through deserialisation.");
         }
         Ark_Length dyValueTemp = static_cast<Ark_Length>(dyValueTempTmpBuf);;
-        GetAccessors()->getScrollerAccessor()->scrollBy(self, static_cast<Ark_Length*>(&dxValueTemp), static_cast<Ark_Length*>(&dyValueTemp));
+        GetAccessors()->getScrollerAccessor()->scrollBy(reinterpret_cast<Ark_VMContext>(vmContext), self, static_cast<Ark_Length*>(&dxValueTemp), static_cast<Ark_Length*>(&dyValueTemp));
 }
-KOALA_INTEROP_DIRECT_V3(Scroller_scrollBy, Ark_NativePointer, KSerializerBuffer, int32_t)
-Ark_Boolean impl_Scroller_isAtEnd(Ark_NativePointer thisPtr) {
+KOALA_INTEROP_CTX_V3(Scroller_scrollBy, Ark_NativePointer, KSerializerBuffer, int32_t)
+Ark_Boolean impl_Scroller_isAtEnd(KVMContext vmContext, Ark_NativePointer thisPtr) {
         Ark_Scroller self = reinterpret_cast<Ark_Scroller>(thisPtr);
-        return GetAccessors()->getScrollerAccessor()->isAtEnd(self);
+        return GetAccessors()->getScrollerAccessor()->isAtEnd(reinterpret_cast<Ark_VMContext>(vmContext), self);
 }
-KOALA_INTEROP_DIRECT_1(Scroller_isAtEnd, Ark_Boolean, Ark_NativePointer)
-KInteropReturnBuffer impl_Scroller_getItemRect(Ark_NativePointer thisPtr, Ark_Int32 index) {
+KOALA_INTEROP_CTX_1(Scroller_isAtEnd, Ark_Boolean, Ark_NativePointer)
+KInteropReturnBuffer impl_Scroller_getItemRect(KVMContext vmContext, Ark_NativePointer thisPtr, Ark_Int32 index) {
         Ark_Scroller self = reinterpret_cast<Ark_Scroller>(thisPtr);
-        const auto &retValue = GetAccessors()->getScrollerAccessor()->getItemRect(self, index);
+        const auto &retValue = GetAccessors()->getScrollerAccessor()->getItemRect(reinterpret_cast<Ark_VMContext>(vmContext), self, index);
         SerializerBase _retSerializer {};
         RectResult_serializer::write(_retSerializer, retValue);
         return _retSerializer.toReturnBuffer();
 }
-KOALA_INTEROP_2(Scroller_getItemRect, KInteropReturnBuffer, Ark_NativePointer, Ark_Int32)
-Ark_Int32 impl_Scroller_getItemIndex(Ark_NativePointer thisPtr, KDouble x, KDouble y) {
+KOALA_INTEROP_CTX_2(Scroller_getItemRect, KInteropReturnBuffer, Ark_NativePointer, Ark_Int32)
+Ark_Int32 impl_Scroller_getItemIndex(KVMContext vmContext, Ark_NativePointer thisPtr, KDouble x, KDouble y) {
         Ark_Scroller self = reinterpret_cast<Ark_Scroller>(thisPtr);
-        return GetAccessors()->getScrollerAccessor()->getItemIndex(self, x, y);
+        return GetAccessors()->getScrollerAccessor()->getItemIndex(reinterpret_cast<Ark_VMContext>(vmContext), self, x, y);
 }
-KOALA_INTEROP_3(Scroller_getItemIndex, Ark_Int32, Ark_NativePointer, KDouble, KDouble)
+KOALA_INTEROP_CTX_3(Scroller_getItemIndex, Ark_Int32, Ark_NativePointer, KDouble, KDouble)
 Ark_NativePointer impl_ScrollMotion_construct(KInteropNumber position, KInteropNumber velocity, KInteropNumber min, KInteropNumber max, Ark_NativePointer prop) {
         return GetAccessors()->getScrollMotionAccessor()->construct((const Ark_Number*) (&position), (const Ark_Number*) (&velocity), (const Ark_Number*) (&min), (const Ark_Number*) (&max), static_cast<Ark_SpringProp>(prop));
 }

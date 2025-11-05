@@ -26011,17 +26011,21 @@ typedef struct GENERATED_ArkUIListScrollerAccessor {
     void (*destroyPeer)(Ark_ListScroller peer);
     Ark_ListScroller (*construct)();
     Ark_NativePointer (*getFinalizer)();
-    Ark_RectResult (*getItemRectInGroup)(Ark_ListScroller peer,
+    Ark_RectResult (*getItemRectInGroup)(Ark_VMContext vmContext,
+                                         Ark_ListScroller peer,
                                          Ark_Int32 index,
                                          Ark_Int32 indexInGroup);
-    void (*scrollToItemInGroup)(Ark_ListScroller peer,
+    void (*scrollToItemInGroup)(Ark_VMContext vmContext,
+                                Ark_ListScroller peer,
                                 Ark_Int32 index,
                                 Ark_Int32 indexInGroup,
                                 const Opt_Boolean* smooth,
                                 const Opt_ScrollAlign* align);
-    void (*closeAllSwipeActions)(Ark_ListScroller peer,
+    void (*closeAllSwipeActions)(Ark_VMContext vmContext,
+                                 Ark_ListScroller peer,
                                  const Opt_CloseSwipeActionOptions* options);
-    Ark_VisibleListContentInfo (*getVisibleListContentInfo)(Ark_ListScroller peer,
+    Ark_VisibleListContentInfo (*getVisibleListContentInfo)(Ark_VMContext vmContext,
+                                                            Ark_ListScroller peer,
                                                             Ark_Float64 x,
                                                             Ark_Float64 y);
 } GENERATED_ArkUIListScrollerAccessor;
@@ -26993,28 +26997,38 @@ typedef struct GENERATED_ArkUIScrollerAccessor {
     void (*destroyPeer)(Ark_Scroller peer);
     Ark_Scroller (*construct)();
     Ark_NativePointer (*getFinalizer)();
-    void (*scrollTo)(Ark_Scroller peer,
+    void (*scrollTo)(Ark_VMContext vmContext,
+                     Ark_Scroller peer,
                      const Ark_ScrollOptions* options);
-    void (*scrollEdge)(Ark_Scroller peer,
+    void (*scrollEdge)(Ark_VMContext vmContext,
+                       Ark_Scroller peer,
                        Ark_Edge value,
                        const Opt_ScrollEdgeOptions* options);
-    void (*fling)(Ark_Scroller peer,
+    void (*fling)(Ark_VMContext vmContext,
+                  Ark_Scroller peer,
                   Ark_Float64 velocity);
-    void (*scrollPage)(Ark_Scroller peer,
+    void (*scrollPage)(Ark_VMContext vmContext,
+                       Ark_Scroller peer,
                        const Ark_ScrollPageOptions* value);
-    Opt_OffsetResult (*currentOffset)(Ark_Scroller peer);
-    void (*scrollToIndex)(Ark_Scroller peer,
+    Opt_OffsetResult (*currentOffset)(Ark_VMContext vmContext,
+                                      Ark_Scroller peer);
+    void (*scrollToIndex)(Ark_VMContext vmContext,
+                          Ark_Scroller peer,
                           Ark_Int32 value,
                           const Opt_Boolean* smooth,
                           const Opt_ScrollAlign* align,
                           const Opt_ScrollToIndexOptions* options);
-    void (*scrollBy)(Ark_Scroller peer,
+    void (*scrollBy)(Ark_VMContext vmContext,
+                     Ark_Scroller peer,
                      const Ark_Length* dx,
                      const Ark_Length* dy);
-    Ark_Boolean (*isAtEnd)(Ark_Scroller peer);
-    Ark_RectResult (*getItemRect)(Ark_Scroller peer,
+    Ark_Boolean (*isAtEnd)(Ark_VMContext vmContext,
+                           Ark_Scroller peer);
+    Ark_RectResult (*getItemRect)(Ark_VMContext vmContext,
+                                  Ark_Scroller peer,
                                   Ark_Int32 index);
-    Ark_Int32 (*getItemIndex)(Ark_Scroller peer,
+    Ark_Int32 (*getItemIndex)(Ark_VMContext vmContext,
+                              Ark_Scroller peer,
                               Ark_Float64 x,
                               Ark_Float64 y);
 } GENERATED_ArkUIScrollerAccessor;
