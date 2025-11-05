@@ -216,12 +216,6 @@ export class Router {
     public hideAlertBeforeBackPage(): void {
         throw Error("hideAlertBeforeBackPage not implemented in Router!");
     }
-    public getPageInfoByUniqueId(id: int): PageInfo {
-         throw Error("getPageInfoByUniqueId not implemented in UIContext!")
-     }
-     getNavigationInfoByUniqueId(id: int): uiObserver.NavigationInfo | undefined {
-        throw Error("getNavigationInfoByUniqueId not implemented in UIContext!")
-     }
 }
 
 export interface AtomicServiceBar {
@@ -540,7 +534,7 @@ export class UIContext {
     getFrameNodeByNodeId(id: number): FrameNode | null {
         throw Error("getFrameNodeByNodeId not implemented in UIContext!")
     }
-    getFrameNodeByUniqueId(id: long): FrameNode | null {
+    public getFrameNodeByUniqueId(id: int): FrameNode | null {
         throw Error("getFrameNodeByUniqueId not implemented in UIContext!")
     }
     getHostContext(): Context | undefined {
@@ -723,6 +717,13 @@ export class UIContext {
 
     public requireDynamicSyncScene(id: string): Array<DynamicSyncScene> {
         throw Error("requireDynamicSyncScene not implemented in UIContext!");
+    }
+
+    public getPageInfoByUniqueId(id: int): PageInfo {
+        throw Error("getPageInfoByUniqueId not implemented in UIContext!")
+    }
+    public getNavigationInfoByUniqueId(id: int): uiObserver.NavigationInfo | undefined {
+        throw Error("getNavigationInfoByUniqueId not implemented in UIContext!")
     }
 }
 export abstract class FrameCallback {
