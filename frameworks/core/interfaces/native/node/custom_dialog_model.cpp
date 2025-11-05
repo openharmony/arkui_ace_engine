@@ -150,7 +150,7 @@ ArkUIDialogHandle CreateDialog()
         .effectOption = std::nullopt,
         .keyboardAvoidMode = OHOS::Ace::KeyboardAvoidMode::DEFAULT,
         .enableHoverMode = std::nullopt,
-        .hoverModeAreaType = OHOS::Ace::HoverModeAreaType::TOP_SCREEN,
+        .hoverModeAreaType = std::nullopt,
         .focusable = true,
         .dialogState = nullptr,
     });
