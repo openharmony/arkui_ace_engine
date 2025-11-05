@@ -3083,15 +3083,16 @@ bool FormPattern::OnAccessibilityStateChange(bool state)
     CHECK_NULL_RETURN(host, false);
     auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
-    auto taskExecutor = SingleTaskExecutor::Make(pipeline->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
 
+    if (state) {
+        UnregisterAccessibility();
+    }
+
+    auto taskExecutor = SingleTaskExecutor::Make(pipeline->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
     taskExecutor.PostTask([weak = WeakClaim(this)] {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         CHECK_NULL_VOID(pattern->formManagerBridge_);
-        if (pattern->IsAccessibilityState()) {
-            pattern->UnregisterAccessibility();
-        }
         pattern->formManagerBridge_->ReAddForm();
         }, "ReAddForm");
     return true;
