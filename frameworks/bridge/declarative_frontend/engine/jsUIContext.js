@@ -1140,7 +1140,7 @@ class ComponentUtils {
         if (typeof this.ohos_componentUtils.getRectangleById !== 'function'){
             throw Error('getRectangleById is not callable');
         }
-        let componentInformation = this.ohos_componentUtils?.getRectangleById?.(id);
+        let componentInformation = this.ohos_componentUtils?.getRectangleById?.(id, this.instanceId_);
         __JSScopeUtil__.restoreInstanceId();
         return componentInformation;
     }
