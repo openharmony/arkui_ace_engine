@@ -87,6 +87,9 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
     ResponseLinkResult responseLinkResult;
     // For root node, the parent local point is the same as global point.
     frameNode->TouchTest(point, point, point, touchRestrict, hitTestResult, touchPoint.id, responseLinkResult);
+    if (touchPoint.type == TouchType::DOWN && coastingAxisEventGenerator_) {
+        coastingAxisEventGenerator_->NotifyTouchTestResult(hitTestResult, point);
+    }
     TouchTestResult savePrevHitTestResult = touchTestResults_[touchPoint.id];
     SetResponseLinkRecognizers(hitTestResult, responseLinkResult);
     ExecuteTouchTestDoneCallback(touchPoint, responseLinkResult);
@@ -1509,6 +1512,10 @@ void EventManager::MouseTest(
             }
             frameNode->TouchTest(
                 point, point, point, touchRestrict, testResult, event.GetPointerId(event.id), responseLinkResult);
+            if (event.action == MouseAction::PRESS && event.button == MouseButton::LEFT_BUTTON &&
+                coastingAxisEventGenerator_) {
+                coastingAxisEventGenerator_->NotifyTouchTestResult(testResult, point);
+            }
             SetResponseLinkRecognizers(testResult, responseLinkResult);
             mouseTestResults_[event.GetPointerId(event.id)] = testResult;
         }

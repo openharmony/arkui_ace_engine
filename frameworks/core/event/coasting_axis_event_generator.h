@@ -30,7 +30,7 @@ public:
 
     void NotifyAxisEvent(const AxisEvent& event, const RefPtr<NG::FrameNode>& node);
     void NotifyStop() const;
-    void NotifyTouchTestResult(const TouchTestResult& touchTestResult);
+    void NotifyTouchTestResult(const TouchTestResult& touchTestResult, const NG::PointF& point);
     void SetAxisToTouchConverter(std::function<TouchEvent(const AxisEvent&)>&& axisToTouchConverter)
     {
         axisToTouchConverter_ = std::move(axisToTouchConverter);
