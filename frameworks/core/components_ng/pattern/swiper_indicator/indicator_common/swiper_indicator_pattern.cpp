@@ -744,8 +744,8 @@ void SwiperIndicatorPattern::HandleDragEnd(double dragVelocity)
     CHECK_NULL_VOID(swiperNode);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(swiperPattern);
-    swiperPattern->SetTurnPageRate(0.0f);
-    swiperPattern->SetGroupTurnPageRate(0.0f);
+    swiperPattern->SetTurnPageRate(swiperPattern->IsHorizontalAndRightToLeft() ? -1.0f : 0.0f);
+    swiperPattern->SetGroupTurnPageRate(swiperPattern->IsHorizontalAndRightToLeft() ? -1.0f : 0.0f);
     auto swiperPaintProperty = swiperPattern->GetPaintProperty<SwiperPaintProperty>();
     CHECK_NULL_VOID(swiperPaintProperty);
     auto autoPlay = swiperPaintProperty->GetAutoPlay().value_or(false);
@@ -863,8 +863,8 @@ bool SwiperIndicatorPattern::CheckIsTouchBottom(const TouchLocationInfo& info)
                               ? touchOffset / INDICATOR_TOUCH_BOTTOM_MAX_DISTANCE.ConvertToPx() : 1;
     }
 
-    swiperPattern->SetTurnPageRate(0);
-    swiperPattern->SetGroupTurnPageRate(0.0f);
+    swiperPattern->SetTurnPageRate(swiperPattern->IsHorizontalAndRightToLeft() ? -1.0f : 0.0f);
+    swiperPattern->SetGroupTurnPageRate(swiperPattern->IsHorizontalAndRightToLeft() ? -1.0f : 0.0f);
     swiperPattern->SetTouchBottomRate(std::abs(touchBottomRate));
     TouchBottomType touchBottomType = TouchBottomType::NONE;
 
