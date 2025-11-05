@@ -77,7 +77,7 @@ static ani_ref CreateStsError(ani_env* env, ani_int code, const std::string& msg
 {
     ani_class cls;
     ani_status status = ANI_OK;
-    if ((status = env->FindClass("C{@ohos.base.BusinessError}", &cls)) != ANI_OK) {
+    if ((status = env->FindClass("@ohos.base.BusinessError", &cls)) != ANI_OK) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "FindClass failed %{public}d", status);
     }
     ani_method ctor;
