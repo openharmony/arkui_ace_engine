@@ -91,7 +91,7 @@ ani_ref AceWrapStringToObject(ani_env* env, const std::string str)
     ani_ref undefinedResult;
     env->GetUndefined(&undefinedResult);
     ani_class cls = nullptr;
-    if (ANI_OK != env->FindClass("@ohos.app.ability.Want.RecordSerializeTool", &cls)) {
+    if (ANI_OK != env->FindClass("@ohos.arkui.inspector.InspetorTreeSerializeTool", &cls)) {
         LOGE("plugin-ani FindClass RecordSerializeTool failed");
         return undefinedResult;
     }
@@ -147,7 +147,7 @@ ani_status GetAniKVObjectPropertyByName(ani_env* env, ani_object parameters, std
         return ANI_ERROR;
     }
     ani_class cls = nullptr;
-    if (ANI_OK != env->FindClass("@ohos.app.ability.Want.RecordSerializeTool", &cls)) {
+    if (ANI_OK != env->FindClass("@ohos.arkui.inspector.InspetorTreeSerializeTool", &cls)) {
         LOGE("plugin-ani FindClass RecordSerializeTool failed");
         return ANI_ERROR;
     }
