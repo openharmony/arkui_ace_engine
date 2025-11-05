@@ -3496,7 +3496,6 @@ std::vector<RectF> FrameNode::GetResponseRegionListForTouch(const RectF& windowR
         ACE_LAYOUT_TRACE_END()
         return responseRegionList;
     }
-
     auto context = GetRenderContext();
     CHECK_NULL_RETURN(context, responseRegionList);
     auto rawRect = context->GetPaintRectWithoutTransform();
@@ -3512,7 +3511,6 @@ std::vector<RectF> FrameNode::GetResponseRegionListForTouch(const RectF& windowR
         ACE_LAYOUT_TRACE_END()
         return responseRegionList;
     }
-
     auto scaleProperty = ScaleProperty::CreateScaleProperty();
     for (const auto& region : gestureHub->GetResponseRegion()) {
         auto x = ConvertToPx(region.GetOffset().GetX(), scaleProperty, rawRect.Width());
@@ -3522,10 +3520,8 @@ std::vector<RectF> FrameNode::GetResponseRegionListForTouch(const RectF& windowR
         if (!x.has_value() || !y.has_value() || !width.has_value() || !height.has_value()) {
             continue;
         }
-
         RectF rawRegion(round(rawRect.GetX() + x.value()), round(rawRect.GetY() + y.value()),
             round(width.value()), round(height.value()));
-        
         RectF regionToScreen = rectToScreen;
         if (rawRegion != rawRect) {
             auto regionWithTransform = GetRectToWindowWithTransform(rawRegion);

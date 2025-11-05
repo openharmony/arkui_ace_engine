@@ -285,9 +285,9 @@ HWTEST_F(FrameNodeTest, TransformPositionTest001, TestSize.Level1)
     auto frameNode = AbstractViewFactory::CreateFrameNode(tag, id, mockPattern);
     EXPECT_NE(frameNode, nullptr);
 
-    OffsetF offset;
+    NG::OffsetF offset;
     offset.Reset();
-    OffsetF newOffset = frameNode->GetPositionToWindowWithTransform();
+    auto newOffset = frameNode->GetPositionToWindowWithTransform(offset);
     SUCCEED();
 }
 
@@ -304,9 +304,9 @@ HWTEST_F(FrameNodeTest, GetRectToScreenTest001, TestSize.Level1)
     auto frameNode = AbstractViewFactory::CreateFrameNode(tag, id, mockPattern);
     EXPECT_NE(frameNode, nullptr);
 
-    RectF rect;
+    NG::RectF rect;
     rect.Reset();
-    RectF newRect = frameNode->GetRectToScreen(rect);
+    auto newRect = frameNode->GetRectToScreen(rect);
     SUCCEED();
 }
 
@@ -322,9 +322,9 @@ HWTEST_F(FrameNodeTest, GetRectToWindowWithTransformTest001, TestSize.Level1)
     auto mockPattern = AceType::MakeRefPtr<MockAceKitPattern>();
     auto frameNode = AbstractViewFactory::CreateFrameNode(tag, id, mockPattern);
     EXPECT_NE(frameNode, nullptr);
-    RectF rect;
+    NG::RectF rect;
     rect.Reset();
-    RectF newRect = frameNode->GetRectToWindowWithTransform(rect);
+    auto newRect = frameNode->GetRectToWindowWithTransform(rect);
     SUCCEED();
 }
 
