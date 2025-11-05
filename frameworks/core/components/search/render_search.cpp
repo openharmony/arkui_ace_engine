@@ -561,6 +561,9 @@ bool RenderSearch::HandleMouseEvent(const MouseEvent& event)
     auto upBound = searchReactRect_.GetOffset().GetX() + searchReactRect_.GetSize().Width();
     RefPtr mouseStyle = MouseStyle::CreateMouseStyle();
     auto context = GetContext().Upgrade();
+    if (!context) {
+        return false;
+    }
     auto windowId = context->GetWindowId();
     int32_t curPointerStyle = 0;
 

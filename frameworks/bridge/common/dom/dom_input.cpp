@@ -540,7 +540,11 @@ void DOMInput::SetFormValueListener()
 
 bool DOMInput::CheckPseduo(RefPtr<Decoration> decoration) const
 {
-    auto assetManager = GetPipelineContext().Upgrade()->GetAssetManager();
+    auto context = GetPipelineContext().Upgrade();
+    if (!context) {
+        return false;
+    }
+    auto assetManager = context->GetAssetManager();
     if (!assetManager) {
         return false;
     }

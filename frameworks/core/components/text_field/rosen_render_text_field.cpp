@@ -589,6 +589,9 @@ void RosenRenderTextField::Paint(RenderContext& context, const Offset& offset)
         LOGE("Paint canvas or paragraph is null");
         return;
     }
+    if (!pipelineContext) {
+        return;
+    }
     auto viewScale = pipelineContext->GetViewScale();
     if (lastLayoutSize_ != GetLayoutSize() || !magnifierCanvas_) {
 #ifndef USE_ROSEN_DRAWING
