@@ -295,6 +295,7 @@ private:
     void GetInnerFocusPaintRect(RoundRect& paintRect);
 
     void InitDisabled();
+    void InitAreaChangeEvent();
 
     RefPtr<PanEvent> panEvent_;
     PanDirection panDirection_;

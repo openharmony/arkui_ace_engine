@@ -356,4 +356,68 @@ HWTEST_F(ContainerPickerPatternTestTwo, ShowPreviousTest002, TestSize.Level1)
     // Verify targetIndex_ remains the same (non-loop case)
     EXPECT_FALSE(pattern->targetIndex_.has_value());
 }
+
+/**
+ * @tc.name: ContainerPickerPatternTestTwo_InitAreaChangeEvent001
+ * @tc.desc: Test InitAreaChangeEvent function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTestTwo, InitAreaChangeEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto layoutProperty = frameNode->GetLayoutProperty<ContainerPickerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->CleanDirty();
+
+    /**
+     * @tc.steps: step2. Call InitAreaChangeEvent
+     */
+    pattern->InitAreaChangeEvent();
+
+    /**
+     * @tc.steps: step3. Trigger the area change event by calling the callback manually
+     * @tc.expected: step3. MarkDirtyNode should be called with correct parameters
+     */
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    RectF oldRect = {10.0f, 10.0f, 10.0f, 10.0f};
+    RectF rect = {20.0f, 20.0f, 20.0f, 20.0f};
+    OffsetF oldOrigin = {50.0f, 50.0f};
+    OffsetF origin = {30.0f, 30.0f};
+    eventHub->FireInnerOnAreaChanged(oldRect, oldOrigin, rect, origin);
+    EXPECT_EQ(layoutProperty->GetPropertyChangeFlag(), PROPERTY_UPDATE_MEASURE_SELF | PROPERTY_UPDATE_RENDER);
+}
+
+/**
+ * @tc.name: ContainerPickerPatternTestTwo_InitAreaChangeEvent002
+ * @tc.desc: Test that InitAreaChangeEvent is called during OnAttachToFrameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTestTwo, InitAreaChangeEvent002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call OnAttachToFrameNode
+     * @tc.expected: step2. InitAreaChangeEvent should be called
+     */
+    pattern->OnAttachToFrameNode();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    EXPECT_TRUE(eventHub->onAreaChangedInnerCallbacks_.count(frameNode->nodeId_));
+}
+
 } // namespace OHOS::Ace::NG
