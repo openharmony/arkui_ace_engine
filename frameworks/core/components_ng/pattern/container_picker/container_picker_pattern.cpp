@@ -239,6 +239,7 @@ void ContainerPickerPattern::OnAttachToFrameNode()
     UpdatePanEvent();
     UpdateClipEdge();
     InitDefaultParams();
+    InitAreaChangeEvent();
 }
 
 void ContainerPickerPattern::OnModifyDone()
@@ -1549,6 +1550,23 @@ void ContainerPickerPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
         static_cast<RSScalar>(DEFAULT_RADIUS.ConvertToPx()), static_cast<RSScalar>(DEFAULT_RADIUS.ConvertToPx()));
     paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS,
         static_cast<RSScalar>(DEFAULT_RADIUS.ConvertToPx()), static_cast<RSScalar>(DEFAULT_RADIUS.ConvertToPx()));
+}
+
+void ContainerPickerPattern::InitAreaChangeEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    OnAreaChangedFunc onAreaChangedFunc = [pickerNodeWk = WeakPtr<FrameNode>(host)](const RectF& /* oldRect */,
+                                            const OffsetF& /* oldOrigin */, const RectF& /* rect */,
+                                            const OffsetF& /* origin */) {
+        auto pickerNode = pickerNodeWk.Upgrade();
+        CHECK_NULL_VOID(pickerNode);
+        pickerNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        pickerNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    };
+    eventHub->AddInnerOnAreaChangedCallback(host->GetId(), std::move(onAreaChangedFunc));
 }
 
 } // namespace OHOS::Ace::NG
