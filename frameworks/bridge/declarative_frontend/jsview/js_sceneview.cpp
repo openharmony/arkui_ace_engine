@@ -27,6 +27,7 @@
 
 #include "base/geometry/quaternion.h"
 #include "base/geometry/vec3.h"
+#include "core/components/common/properties/color.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/model/model_view_ng.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_click_function.h"
@@ -449,6 +450,32 @@ void JSSceneView::JsShaderInputBuffer(const JSCallbackInfo& info)
 
 void JSSceneView::JsOnError(const JSCallbackInfo& info) {}
 
+namespace {
+uint32_t CombineARGB(uint8_t a, uint8_t r, uint8_t g, uint8_t b)
+{
+    return (static_cast<uint32_t>(a) << 24) |  // 24: move 3bit
+           (static_cast<uint32_t>(r) << 16) |  // 16: move 2bit
+           (static_cast<uint32_t>(g) << 8) |   // 8: move 1bit
+           static_cast<uint32_t>(b);
+}
+} // namespace
+
+void JSSceneView::JsBackgroundColor(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsBackgroundColor(info);
+
+    if (info.Length() < 1) {
+        return;
+    }
+    Color backgroundColor;
+    if (!ParseJsColor(info[0], backgroundColor)) {
+        backgroundColor = Color::TRANSPARENT;
+    }
+    uint32_t argb = CombineARGB(backgroundColor.GetAlpha(), backgroundColor.GetRed(), backgroundColor.GetGreen(),
+        backgroundColor.GetBlue());
+    ModelView::GetInstance()->SetBackgroundColor(argb);
+}
+
 void JSSceneView::JSBind(BindingTarget globalObj)
 {
     JSClass<JSSceneView>::Declare("Component3D");
@@ -464,6 +491,7 @@ void JSSceneView::JSBind(BindingTarget globalObj)
     JSClass<JSSceneView>::StaticMethod("shaderImageTexture", &JSSceneView::JsShaderImageTexture);
     JSClass<JSSceneView>::StaticMethod("shaderInputBuffer", &JSSceneView::JsShaderInputBuffer);
     JSClass<JSSceneView>::StaticMethod("OnError", &JSSceneView::JsOnError);
+    JSClass<JSSceneView>::StaticMethod("backgroundColor", &JSSceneView::JsBackgroundColor);
     JSClass<JSSceneView>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSSceneView>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSSceneView>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
