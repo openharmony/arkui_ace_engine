@@ -197,7 +197,6 @@ void SetTextAreaPlaceholderColor(ArkUINodeHandle node, ArkUI_Uint32 color, void*
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     Color result = Color(color);
-    TextFieldModelNG::SetPlaceholderColor(frameNode, result);
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
     if (SystemProperties::ConfigChangePerform()) {
@@ -211,6 +210,7 @@ void SetTextAreaPlaceholderColor(ArkUINodeHandle node, ArkUI_Uint32 color, void*
             pattern->RegisterResource<Color>("placeholderColor", resObj, result);
         }
     }
+    TextFieldModelNG::SetPlaceholderColor(frameNode, result);
 }
 
 void ResetTextAreaPlaceholderColor(ArkUINodeHandle node)
@@ -449,7 +449,6 @@ void SetTextAreaCaretColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* color
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     Color result = Color(color);
-    TextFieldModelNG::SetCaretColor(frameNode, result);
     if (SystemProperties::ConfigChangePerform()) {
         RefPtr<ResourceObject> resObj;
         if (!colorRawPtr) {
@@ -463,6 +462,7 @@ void SetTextAreaCaretColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* color
             pattern->RegisterResource<Color>("caretColor", resObj, result);
         }
     }
+    TextFieldModelNG::SetCaretColor(frameNode, result);
 }
 
 void ResetTextAreaCaretColor(ArkUINodeHandle node)
@@ -496,7 +496,6 @@ void SetTextAreaFontColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRaw
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     Color result = Color(color);
-    TextFieldModelNG::SetTextColor(frameNode, result);
     if (SystemProperties::ConfigChangePerform()) {
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
@@ -510,6 +509,7 @@ void SetTextAreaFontColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRaw
             pattern->RegisterResource<Color>("fontColor", resObj, result);
         }
     }
+    TextFieldModelNG::SetTextColor(frameNode, result);
 }
 
 void ResetTextAreaFontColor(ArkUINodeHandle node)
@@ -721,20 +721,20 @@ void SetTextAreaBackgroundColor(ArkUINodeHandle node, uint32_t color, void* resR
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    RefPtr<ResourceObject> resObj;
     Color result = Color(color);
-    TextFieldModelNG::SetBackgroundColor(frameNode, result);
     if (SystemProperties::ConfigChangePerform()) {
-        RefPtr<ResourceObject> resObj;
         if (!resRawPtr) {
             ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
         } else {
             resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
         }
+    }
+    TextFieldModelNG::SetBackgroundColor(frameNode, result);
+    if (SystemProperties::ConfigChangePerform() && resObj) {
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
-        if (resObj) {
-            pattern->RegisterResource<Color>("backgroundColor", resObj, result);
-        }
+        pattern->RegisterResource<Color>("backgroundColor", resObj, result);
     }
 }
 
@@ -2038,8 +2038,19 @@ void SetTextAreaBorderColor(ArkUINodeHandle node, uint32_t topColorInt, uint32_t
     borderColors.bottomColor = Color(bottomColorInt);
     borderColors.leftColor = Color(leftColorInt);
     borderColors.multiValued = true;
-    if (SystemProperties::ConfigChangePerform() && rawPtr) {
-        auto objs = *(reinterpret_cast<const std::vector<RefPtr<ResourceObject>>*>(rawPtr));
+    if (SystemProperties::ConfigChangePerform()) {
+        std::vector<RefPtr<ResourceObject>> objs;
+        if (rawPtr) {
+            objs = *(reinterpret_cast<const std::vector<RefPtr<ResourceObject>>*>(rawPtr));
+        }
+        if (objs.empty()) {
+            objs.resize(NUM_4);
+            auto tag = frameNode->GetTag();
+            ResourceParseUtils::CompleteResourceObjectFromColor(objs[NUM_0], borderColors.topColor.value(), tag);
+            ResourceParseUtils::CompleteResourceObjectFromColor(objs[NUM_1], borderColors.rightColor.value(), tag);
+            ResourceParseUtils::CompleteResourceObjectFromColor(objs[NUM_2], borderColors.bottomColor.value(), tag);
+            ResourceParseUtils::CompleteResourceObjectFromColor(objs[NUM_3], borderColors.leftColor.value(), tag);
+        }
         ParseBorderColor(borderColors, objs[NUM_0], objs[NUM_1], objs[NUM_2], objs[NUM_3]);
     }
     TextFieldModelNG::SetBorderColor(frameNode, borderColors);
