@@ -245,8 +245,8 @@ HWTEST_F(GridScrollLayoutTestNg, GridScrollTest002, TestSize.Level1)
     auto gridScrollLayoutAlgorithm = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(pattern_->info_);
     ASSERT_NE(gridScrollLayoutAlgorithm, nullptr);
     auto ret = gridScrollLayoutAlgorithm->CalculateLargeItemOffset(OffsetF(100, 100), 0, 1, 0);
-    EXPECT_EQ(ret.GetY(), 100.f - ITEM_MAIN_SIZE);
-    EXPECT_EQ(ret.GetX(), 100.f);
+    EXPECT_EQ(ret.GetX(), 100.f - ITEM_MAIN_SIZE);
+    EXPECT_EQ(ret.GetY(), 100.f);
 }
 
 /**
@@ -292,7 +292,7 @@ HWTEST_F(GridScrollLayoutTestNg, GridScrollTest004, TestSize.Level1)
     model.SetRowsGap(Dimension(5));
     UpdateLayoutInfo();
     auto gridScrollLayoutAlgorithm = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(pattern_->info_);
-    gridScrollLayoutAlgorithm->crossCount_ = 2;
+    gridScrollLayoutAlgorithm->info_.crossCount_ = 2;
     auto ret1 = gridScrollLayoutAlgorithm->CalculateLargeItemOffset(OffsetF(0, 100), 1, 1, 0);
     EXPECT_EQ(ret1.GetY(), 100.0f);
     EXPECT_EQ(ret1.GetX(), 0.0f);
