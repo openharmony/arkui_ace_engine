@@ -15988,19 +15988,6 @@ void impl_SelectAttribute_setControlSize(Ark_NativePointer thisPtr, KSerializerB
         GetNodeModifiers()->getSelectModifier()->setControlSize(self, static_cast<Opt_ControlSize*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(SelectAttribute_setControlSize, Ark_NativePointer, KSerializerBuffer, int32_t)
-void impl_SelectAttribute_setDivider(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
-        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
-        DeserializerBase thisDeserializer(thisArray, thisLength);
-        const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_DividerOptions valueValueTempTmpBuf = {};
-        valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-        if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            valueValueTempTmpBuf.value = DividerOptions_serializer::read(thisDeserializer);
-        }
-        Opt_DividerOptions valueValueTemp = valueValueTempTmpBuf;;
-        GetNodeModifiers()->getSelectModifier()->setDivider(self, static_cast<Opt_DividerOptions*>(&valueValueTemp));
-}
-KOALA_INTEROP_DIRECT_V3(SelectAttribute_setDivider, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_SelectAttribute_setTextModifier(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -34674,6 +34661,18 @@ Ark_NativePointer impl_SearchOps_registerSearchValueCallback(Ark_NativePointer n
         return GetAccessors()->getSearchOpsAccessor()->registerSearchValueCallback(node, (const Ark_String*) (&value), static_cast<SearchValueCallback*>(&callbackValueTemp));
 }
 KOALA_INTEROP_4(SearchOps_registerSearchValueCallback, Ark_NativePointer, Ark_NativePointer, KStringPtr, KSerializerBuffer, int32_t)
+void impl_SelectExtender_setDivider(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto optionsValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_DividerOptions optionsValueTempTmpBuf = {};
+        optionsValueTempTmpBuf.tag = optionsValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((optionsValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            optionsValueTempTmpBuf.value = DividerOptions_serializer::read(thisDeserializer);
+        }
+        Opt_DividerOptions optionsValueTemp = optionsValueTempTmpBuf;;
+        GetAccessors()->getSelectExtenderAccessor()->setDivider(node, static_cast<Opt_DividerOptions*>(&optionsValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(SelectExtender_setDivider, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_SpringMotion_construct(KInteropNumber start, KInteropNumber end, KInteropNumber velocity, Ark_NativePointer prop) {
         return GetAccessors()->getSpringMotionAccessor()->construct((const Ark_Number*) (&start), (const Ark_Number*) (&end), (const Ark_Number*) (&velocity), static_cast<Ark_SpringProp>(prop));
 }
