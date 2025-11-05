@@ -17,6 +17,7 @@
 
 #include "node/node_extened.h"
 #include "node/node_model.h"
+#include "node/resource.h"
 
 #include "base/error/error_code.h"
 #include "base/log/log.h"
@@ -134,6 +135,53 @@ int32_t GetNodeHandleFromBuilderNode(ani_env* env, ani_object builderNode, ArkUI
     }
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
 }
+
+std::string ANIStringToStdString(ani_env* env, ani_string ani_str)
+{
+    ani_size sz {};
+    env->String_GetUTF8Size(ani_str, &sz);
+
+    std::string result(sz + 1, 0);
+    env->String_GetUTF8(ani_str, result.data(), result.size(), &sz);
+    result.resize(sz);
+    return result;
+}
+
+std::string GetPropertyByName(ani_env* env, ani_object value, const char* name)
+{
+    std::string result;
+    ani_ref nameRef;
+    if (env->Object_GetPropertyByName_Ref(value, name, &nameRef) != ANI_OK) {
+        LOGE("drawable descriptor fail to get name");
+    } else {
+        result = ANIStringToStdString(env, static_cast<ani_string>(nameRef));
+    }
+    return result;
+}
+
+std::string GetArrayPropertyByNameRef(ani_env* env, ani_object value)
+{
+    std::string params;
+    ani_ref paramsRef;
+    if (env->Object_GetPropertyByName_Ref(value, "params", &paramsRef) != ANI_OK) {
+        return params;
+    }
+    ani_boolean isUndefined;
+    env->Reference_IsUndefined(paramsRef, &isUndefined);
+    if (isUndefined) {
+        return params;
+    }
+    ani_size size = 0;
+    ani_status sta = env->Array_GetLength(static_cast<ani_array>(paramsRef), &size);
+    if (sta == ANI_OK && size > 0) {
+        ani_ref result;
+        if (env->Array_Get(static_cast<ani_array>(paramsRef), 0, &result) == ANI_OK) {
+            params = ANIStringToStdString(env, static_cast<ani_string>(result));
+        }
+    }
+    return params;
+}
+
 } // namespace
 
 extern "C" {
@@ -278,8 +326,40 @@ int32_t OH_ArkUI_NativeModule_GetDrawableDescriptorFromAniValue(
 int32_t OH_ArkUI_NativeModule_GetDrawableDescriptorFromResourceAniValue(
     ani_env* env, ani_object value, ArkUI_DrawableDescriptor** drawableDescriptor)
 {
-    ani_double id = 0.0;
-    env->Object_GetPropertyByName_Double(value, "id", &id);
+    std::string bundleName = GetPropertyByName(env, value, "bundleName");
+    std::string moduleName = GetPropertyByName(env, value, "moduleName");
+
+    ani_long resId = 0;
+    if (env->Object_GetPropertyByName_Long(value, "_id", &resId) != ANI_OK) {
+        LOGE("drawable descriptor fail to get id ");
+    }
+    ani_ref typeRef = 0;
+    int32_t resType = -1;
+    if (env->Object_GetPropertyByName_Ref(value, "type", &typeRef) == ANI_OK) {
+        ani_boolean isUndefined;
+        env->Reference_IsUndefined(typeRef, &isUndefined);
+        if (!isUndefined) {
+            ani_int type = -1;
+            if (env->Object_CallMethodByName_Int(static_cast<ani_object>(typeRef), "toInt", ":i", &type) == ANI_OK) {
+                resType = type;
+            }
+        }
+    }
+    std::string param = GetArrayPropertyByNameRef(env, value);
+
+    auto parseStaticApi = reinterpret_cast<void (*)(int32_t, int32_t, const char*, void*)>(
+        OHOS::Ace::NodeModel::GetParseStaticResource());
+    if (!parseStaticApi) {
+        return OHOS::Ace::ERROR_CODE_INTERNAL_ERROR;
+    }
+    ArkUI_DrawableDescriptor* drawable =
+        new ArkUI_DrawableDescriptor { nullptr, nullptr, 0, nullptr, nullptr, nullptr, nullptr };
+    drawable->resource = std::make_shared<ArkUI_Resource>();
+    drawable->resource->resId = resId;
+    drawable->resource->bundleName = bundleName;
+    drawable->resource->moduleName = moduleName;
+    parseStaticApi(resType, resId, param.c_str(), drawable->resource.get());
+    *drawableDescriptor = drawable;
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
 }
 }
