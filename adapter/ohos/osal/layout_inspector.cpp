@@ -692,6 +692,7 @@ void LayoutInspector::HandleStartRecord()
         TAG_LOGD(AceLogTag::ACE_LAYOUT_INSPECTOR, "Get nodes size:%{public}zu", recTreeNodes.size());
         NG::Inspector::GetOffScreenTreeNodes(offScreenTreeNodes);
         TAG_LOGD(AceLogTag::ACE_LAYOUT_INSPECTOR, "Get offscreen nodes size:%{public}zu", offScreenTreeNodes.size());
+        NG::Inspector::GetElementRegisterNodes(recTreeNodes);
         LayoutInspector::recNodeInfos_.swap(recTreeNodes);
         for (auto& item : offScreenTreeNodes) {
             recNodeInfos_.emplace(item);
@@ -715,6 +716,6 @@ void LayoutInspector::HandleInnerCallback(FrameNodeInfo node)
     recNode->SetDebugLine(node.debugline);
     recNode->SetParentId(node.parentNodeId);
     std::lock_guard<std::mutex> lock(recMutex_);
-    recNodeInfos_.emplace(node.rsNodeId, recNode);
+    recNodeInfos_[node.frameNodeId] = recNode;
 }
 } // namespace OHOS::Ace

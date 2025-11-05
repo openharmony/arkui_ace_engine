@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/render/render_context.h"
+#include "core/pipeline/base/element_register.h"
 #include "foundation/arkui/ace_engine/frameworks/base/utils/utf.h"
 
 namespace OHOS::Ace::NG {
@@ -906,6 +907,19 @@ void Inspector::RecordOnePageNodes(const RefPtr<NG::UINode>& pageNode, Inspector
     }
     GetInspectorTreeInfo(children, pageId, treesInfo);
 }
+void Inspector::GetElementRegisterNodes(InspectorTreeMap& treesInfo)
+{
+    std::vector<std::int32_t> keys;
+    keys.reserve(treesInfo.size());
+    for (const auto& [key, value] : treesInfo) {
+        keys.push_back(key);
+    }
+    
+    auto uiNodes = ElementRegister::GetInstance()->GetUINodesFromItemMap(keys);
+    for (auto& uiNode : uiNodes) {
+        AddInspectorTreeNode(uiNode, treesInfo);
+    }
+}
 
 void Inspector::GetRecordAllPagesNodes(InspectorTreeMap& treesInfo)
 {
@@ -939,6 +953,10 @@ RefPtr<RecNode> Inspector::AddInspectorTreeNode(const RefPtr<NG::UINode>& uiNode
     CHECK_NULL_RETURN(recNode, nullptr);
     recNode->SetNodeId(uiNode->GetId());
     std::string strTag = uiNode->GetTag();
+    auto customNode = AceType::DynamicCast<CustomNode>(uiNode);
+    if (customNode) {
+        strTag = customNode->GetCustomTag();
+    }
     ConvertIllegalStr(strTag);
     recNode->SetName(strTag);
     std::string strDebugLine = uiNode->GetDebugLine();

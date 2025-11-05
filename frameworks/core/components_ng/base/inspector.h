@@ -58,6 +58,7 @@ public:
     static void GetInspectorTree(InspectorTreeMap& treesInfo);
     static void GetOffScreenTreeNodes(InspectorTreeMap& nodes);
     static void GetRecordAllPagesNodes(InspectorTreeMap& treesInfo);
+    static void GetElementRegisterNodes(InspectorTreeMap& treesInfo);
     static std::pair<uint32_t, int32_t> ParseWindowIdFromMsg(const std::string& message);
     static RefPtr<UINode> GetInspectorByKey(
         const RefPtr<FrameNode>& root, const std::string& key, bool notDetach = false);
