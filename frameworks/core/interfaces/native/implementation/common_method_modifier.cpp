@@ -138,6 +138,29 @@ Ark_GestureRecognizer CreateArkGestureRecognizer(const RefPtr<NGGestureRecognize
     peer = Converter::ArkValue<Ark_GestureRecognizer>(recognizer);
     return peer;
 }
+template<typename Container>
+Array_GestureRecognizer CreateArkGestureRecognizerArray(const Container& recognizers)
+{
+    Array_GestureRecognizer result = {nullptr, 0};
+    if (!Converter::FC) {
+        return result;
+    }
+    result.length = static_cast<Ark_Int32>(recognizers.size());
+    if (result.length <= 0) {
+        return result;
+    }
+    result.array = static_cast<Ark_GestureRecognizer*>(
+        Converter::FC->Allocate(result.length * sizeof(Ark_GestureRecognizer)));
+    if (result.array == nullptr) {
+        result.length = 0;
+        return result;
+    }
+    size_t i = 0;
+    for (const auto& recognizer : recognizers) {
+        result.array[i++] = CreateArkGestureRecognizer(recognizer);
+    }
+    return result;
+}
 std::optional<bool> ProcessBindableIsShow(FrameNode* frameNode,
                                           const Opt_Union_Boolean_Bindable *value,
                                           std::function<void(const std::string&)>& outEvent)
@@ -4635,8 +4658,8 @@ void SetShouldBuiltInRecognizerParallelWithImpl(Ark_NativePointer node,
     ) -> RefPtr<NG::NGGestureRecognizer> {
         PipelineContext::SetCallBackNode(node);
 
-        auto arkValCurrent = Converter::ArkValue<Ark_GestureRecognizer>(current);
-        auto arkValOthers = ArkValue<Array_GestureRecognizer>(others, Converter::FC);
+        auto arkValCurrent = CreateArkGestureRecognizer(current);
+        auto arkValOthers = CreateArkGestureRecognizerArray(others);
         auto resultOpt = callback.InvokeWithOptConvertResult<RefPtr<NG::NGGestureRecognizer>, Ark_GestureRecognizer,
             Callback_GestureRecognizer_Void>(arkValCurrent, arkValOthers);
         return resultOpt.value_or(nullptr);
@@ -5728,7 +5751,7 @@ void SetOnGestureRecognizerJudgeBegin1Impl(Ark_NativePointer node,
         auto arkGestEvent = CreateArkBaseGestureEvent(info, gestureInfo->GetRecognizerType());
         CHECK_NULL_RETURN(arkGestEvent, defVal);
         auto arkValCurrent = CreateArkGestureRecognizer(current);
-        auto arkValOthers = Converter::ArkValue<Array_GestureRecognizer>(others, Converter::FC);
+        auto arkValOthers = CreateArkGestureRecognizerArray(others);
         auto resultOpt = callback.InvokeWithOptConvertResult<GestureJudgeResult, Ark_GestureJudgeResult,
             Callback_GestureJudgeResult_Void>(arkGestEvent, arkValCurrent, arkValOthers);
         return resultOpt.value_or(defVal);
