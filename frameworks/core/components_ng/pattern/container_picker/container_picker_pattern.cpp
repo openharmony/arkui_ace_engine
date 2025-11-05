@@ -22,6 +22,7 @@
 #include "core/common/resource/resource_object.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/pattern/container_picker/container_picker_paint_method.h"
+#include "core/components_ng/pattern/container_picker/container_picker_theme.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -341,9 +342,9 @@ void ContainerPickerPattern::SetDefaultTextStyle(bool isUpdateTextStyle)
     CHECK_NULL_VOID(host);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
-    auto theme = context->GetTheme<PickerTheme>();
+    auto theme = context->GetTheme<ContainerPickerTheme>();
     CHECK_NULL_VOID(theme);
-    Color defaultColor = theme->GetDividerColor();
+    Color defaultColor = theme->GetFontColor();
     for (const auto& item : itemPosition_) {
         auto index = ContainerPickerUtils::GetLoopIndex(item.first, totalItemCount_);
         auto child = DynamicCast<FrameNode>(host->GetOrCreateChildByIndex(index));
@@ -1361,9 +1362,9 @@ void ContainerPickerPattern::UpdateDividerWidthWithResObj(const RefPtr<ResourceO
     } else {
         auto context = pickerNode->GetContext();
         CHECK_NULL_VOID(context);
-        auto theme = context->GetTheme<PickerTheme>();
+        auto theme = context->GetTheme<ContainerPickerTheme>();
         CHECK_NULL_VOID(theme);
-        property->UpdateIndicatorDividerWidth(theme->GetDividerThickness());
+        property->UpdateIndicatorDividerWidth(theme->GetStrokeWidth());
     }
 }
 
@@ -1380,9 +1381,9 @@ void ContainerPickerPattern::UpdateDividerColorWithResObj(const RefPtr<ResourceO
     } else {
         auto context = pickerNode->GetContext();
         CHECK_NULL_VOID(context);
-        auto theme = context->GetTheme<PickerTheme>();
+        auto theme = context->GetTheme<ContainerPickerTheme>();
         CHECK_NULL_VOID(theme);
-        property->UpdateIndicatorDividerColor(theme->GetDividerColor());
+        property->UpdateIndicatorDividerColor(theme->GetIndicatorDividerColor());
     }
 }
 
@@ -1429,9 +1430,9 @@ void ContainerPickerPattern::UpdateBackgroundColorWithResObj(const RefPtr<Resour
     } else {
         auto context = pickerNode->GetContext();
         CHECK_NULL_VOID(context);
-        auto theme = context->GetTheme<PickerTheme>();
+        auto theme = context->GetTheme<ContainerPickerTheme>();
         CHECK_NULL_VOID(theme);
-        property->UpdateIndicatorBackgroundColor(theme->GetSelectedBackgroundColor());
+        property->UpdateIndicatorBackgroundColor(theme->GetIndicatorBackgroundColor());
     }
 }
 

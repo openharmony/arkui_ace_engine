@@ -45,7 +45,7 @@ public:
         {
             RefPtr<ContainerPickerTheme> theme = AceType::MakeRefPtr<ContainerPickerTheme>();
             if (!themeConstants) {
-                LOGE("Build ContainerPickerTheme error, themeConstants is null!");
+                TAG_LOGE(AceLogTag::ACE_CONTAINER_PICKER, "Build ContainerPickerTheme error, themeConstants is null!");
                 return theme;
             }
             ParsePattern(themeConstants, theme);
@@ -99,7 +99,7 @@ private:
     {
         RefPtr<ThemeStyle> containerPickerPattern = themeConstants->GetPatternByName(THEME_PATTERN_CONTAINER_PICKER);
         if (!containerPickerPattern) {
-            LOGE("Pattern of container picker is null, please check!");
+            TAG_LOGE(AceLogTag::ACE_CONTAINER_PICKER, "Pattern of container picker is null, please check!");
             return;
         }
         theme->indicatorBackgroundColor_ =
