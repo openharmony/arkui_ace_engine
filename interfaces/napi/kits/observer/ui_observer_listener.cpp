@@ -412,6 +412,51 @@ void UIObserverListener::OnTextChangeEvent(const NG::TextChangeEventInfo& info)
     napi_close_handle_scope(env_, scope);
 }
 
+void UIObserverListener::HandleSwiperContentUpdate(const NG::SwiperContentInfo& info)
+{
+    if (!env_ || !callback_) {
+        TAG_LOGW(AceLogTag::ACE_OBSERVER,
+            "Handle swiper content update failed, runtime or callback function invalid!");
+        return;
+    }
+    napi_handle_scope scope = nullptr;
+    auto status = napi_open_handle_scope(env_, &scope);
+    if (status != napi_ok) {
+        return;
+    }
+    napi_value callback = nullptr;
+    napi_get_reference_value(env_, callback_, &callback);
+    napi_value objValue = nullptr;
+    napi_value id = nullptr;
+    napi_value uniqueId = nullptr;
+    napi_create_object(env_, &objValue);
+    napi_create_string_utf8(env_, info.id.c_str(), info.id.length(), &id);
+    napi_create_int32(env_, info.uniqueId, &uniqueId);
+    // set id and uniqueId
+    napi_set_named_property(env_, objValue, "id", id);
+    napi_set_named_property(env_, objValue, "uniqueId", uniqueId);
+    // set swiperItemInfos
+    napi_value swiperItemInfos = nullptr;
+    napi_create_array(env_, &swiperItemInfos);
+    int32_t index = 0;
+    for (auto eachItemInfo: info.swiperItemInfos) {
+        napi_value swiperItemInfo = nullptr;
+        napi_value uniqueId = nullptr;
+        napi_value itemIndex = nullptr;
+        napi_create_object(env_, &swiperItemInfo);
+        napi_create_int32(env_, eachItemInfo.uniqueId, &uniqueId);
+        napi_create_int32(env_, eachItemInfo.index, &itemIndex);
+        napi_set_named_property(env_, swiperItemInfo, "uniqueId", uniqueId);
+        napi_set_named_property(env_, swiperItemInfo, "index", itemIndex);
+        napi_set_element(env_, swiperItemInfos, index++, swiperItemInfo);
+    }
+    napi_set_named_property(env_, objValue, "swiperItemInfos", swiperItemInfos);
+    // call observer callback in js side
+    napi_value argv[] = { objValue };
+    napi_call_function(env_, nullptr, callback, 1, argv, nullptr);
+    napi_close_handle_scope(env_, scope);
+}
+
 napi_value UIObserverListener::CreateNavDestinationSwitchInfoObj(const NG::NavDestinationSwitchInfo& switchInfo)
 {
     napi_value objValue = nullptr;

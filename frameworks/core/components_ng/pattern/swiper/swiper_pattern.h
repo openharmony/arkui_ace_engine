@@ -16,38 +16,24 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWIPER_SWIPER_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWIPER_SWIPER_PATTERN_H
 
-#include <functional>
-#include <optional>
-#include <vector>
-
-#include "base/geometry/axis.h"
-#include "base/geometry/ng/offset_t.h"
-#include "base/memory/referenced.h"
-#include "core/components/common/layout/constants.h"
 #include "core/components/swiper/swiper_controller.h"
 #include "core/components/swiper/swiper_indicator_theme.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/base/inspector_filter.h"
-#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/input_event.h"
-#include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
 #include "core/components_ng/pattern/swiper/swiper_accessibility_property.h"
 #include "core/components_ng/pattern/swiper/swiper_event_hub.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_algorithm.h"
-#include "core/components_ng/pattern/swiper/swiper_layout_property.h"
-#include "core/components_ng/pattern/swiper/swiper_model.h"
-#include "core/components_ng/pattern/swiper/swiper_paint_property.h"
 #include "core/components_ng/pattern/swiper/swiper_utils.h"
 #include "core/components_ng/pattern/tabs/tab_content_transition_proxy.h"
-#include "core/components_v2/inspector/utils.h"
 
 #ifdef SUPPORT_DIGITAL_CROWN
 #include "core/event/crown_event.h"
 #endif
 namespace OHOS::Ace::NG {
 class JSIndicatorControllerBase;
+struct SwiperItemInfoNG;
 
 enum class GestureStatus {
     INIT = 0,
@@ -865,6 +851,7 @@ public:
         mainSizeIsMeasured_ = mainSizeIsMeasured;
     }
 
+    std::vector<SwiperItemInfoNG> GetShownItemInfoFromIndex(int32_t index);
 protected:
     void MarkDirtyNodeSelf();
     void OnPropertyTranslateAnimationFinish(const OffsetF& offset);

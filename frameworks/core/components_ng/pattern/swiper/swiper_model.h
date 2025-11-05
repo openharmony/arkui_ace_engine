@@ -18,9 +18,7 @@
 
 #include <mutex>
 
-#include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
-#include "base/memory/referenced.h"
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/declaration/swiper/swiper_declaration.h"

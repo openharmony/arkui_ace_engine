@@ -59,6 +59,7 @@ public:
     void OnNodeRenderStateChange(NG::FrameNode* frameNode, NG::NodeRenderState nodeRenderState);
     void OnNavDestinationSwitch(const NG::NavDestinationSwitchInfo& switchInfo);
     void OnTextChangeEvent(const NG::TextChangeEventInfo& info);
+    void HandleSwiperContentUpdate(const NG::SwiperContentInfo& info);
     bool NapiEqual(napi_value cb);
     void OnDrawOrLayout();
 

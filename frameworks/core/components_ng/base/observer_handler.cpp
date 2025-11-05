@@ -477,6 +477,12 @@ void UIObserverHandler::NotifyTextChangeEvent(const TextChangeEventInfo& info)
     textChangeEventHandleFunc_(info);
 }
 
+void UIObserverHandler::NotifySwiperContentUpdate(const SwiperContentInfo& info)
+{
+    CHECK_NULL_VOID(swiperContentUpdateHandleFunc_);
+    swiperContentUpdateHandleFunc_(info);
+}
+
 void UIObserverHandler::NotifyWinSizeLayoutBreakpointChangeFunc(
     int32_t instanceId, const WindowSizeBreakpoint& breakpoint)
 {
@@ -607,6 +613,11 @@ void UIObserverHandler::SetHandleTabChangeFuncForAni(TabChangeHandleFuncForAni f
 void UIObserverHandler::SetHandleTextChangeEventFunc(TextChangeEventHandleFunc&& func)
 {
     textChangeEventHandleFunc_ = std::move(func);
+}
+
+void UIObserverHandler::SetSwiperContentUpdateHandleFunc(SwiperContentUpdateHandleFunc&& func)
+{
+    swiperContentUpdateHandleFunc_ = std::move(func);
 }
 
 napi_value UIObserverHandler::GetUIContextValue()
