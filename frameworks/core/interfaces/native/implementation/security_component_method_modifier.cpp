@@ -70,6 +70,8 @@ void SetWidthImpl(Ark_NativePointer node,
     const Opt_Union_Length_LayoutPolicy* value);
 void SetHeightImpl(Ark_NativePointer node,
     const Opt_Union_Length_LayoutPolicy* value);
+void SetAlignRulesImpl(Ark_NativePointer node,
+    const Opt_Union_AlignRuleOption_LocalizedAlignRuleOptions* value);
 } // namespace CommonMethodModifier
 namespace SecurityComponentMethodModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
@@ -332,6 +334,7 @@ void SetAlignImpl(Ark_NativePointer node,
 void SetAlignRulesImpl(Ark_NativePointer node,
                        const Opt_Union_AlignRuleOption_LocalizedAlignRuleOptions* alignRule)
 {
+    CommonMethodModifier::SetAlignRulesImpl(node, alignRule);
 }
 void SetIdImpl(Ark_NativePointer node,
                const Opt_String* description)
