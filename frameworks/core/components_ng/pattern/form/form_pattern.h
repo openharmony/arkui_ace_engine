@@ -20,7 +20,6 @@
 
 #include "transaction/rs_interfaces.h"
 
-#include "core/common/container.h"
 #include "core/common/ace_application_info.h"
 #include "core/components/form/resource/form_request_data.h"
 #include "core/components_ng/event/event_hub.h"
@@ -28,6 +27,7 @@
 #include "core/components_ng/pattern/form/form_event_hub.h"
 #include "core/components_ng/pattern/form/form_layout_property.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/form/form_layout_wrapper.h"
 #include "core/components_ng/pattern/form/form_special_style.h"
 #include "core/components/common/properties/color.h"
 #include "form_skeleton_params.h"
@@ -107,7 +107,7 @@ enum class FormChildNodeType : int32_t {
     DUE_CONTROL_IMAGE_NODE,
 };
 
-class FormPattern : public Pattern {
+class FormPattern : public Pattern, public FormLayoutWrapper {
     DECLARE_ACE_TYPE(FormPattern, Pattern);
 
 public:
@@ -201,6 +201,9 @@ public:
         return accessibilityState_.load();
     }
 
+    // FormLayoutWrapper functions
+    void ProcessCheckForm() override;
+
 private:
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -286,7 +289,7 @@ private:
     double GetTimeLimitFontSize();
     bool IsMaskEnableForm(const RequestFormInfo &info);
     void UpdateChildNodeOpacity(FormChildNodeType formChildNodeType, double opacity);
-    void SnapshotSurfaceNode();
+    void SnapshotSurfaceNode(std::shared_ptr<Rosen::SurfaceCaptureCallback> callback);
     bool CheckFormBundleForbidden(const std::string &bundleName);
     void DelayResetManuallyClickFlag();
     void RemoveDelayResetManuallyClickFlagTask();
@@ -349,7 +352,6 @@ private:
     bool shouldResponseClick_ = false;
     Offset lastTouchLocation_;
     ColorMode colorMode = ColorMode::LIGHT;
-    int32_t instanceId_ = Container::CurrentId();
 
     bool isFormObscured_ = false;
     bool isJsCard_ = true;

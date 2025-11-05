@@ -374,7 +374,7 @@ void SubContainer::UpdateCard(
     const std::string& content, const std::map<std::string, sptr<AppExecFwk::FormAshmem>>& imageDataMap)
 {
     if (!frontend_) {
-        LOGE("update card fial due to could not find card front end");
+        LOGE("update card fail due to could not find card front end");
         return;
     }
     if (allowUpdate_) {

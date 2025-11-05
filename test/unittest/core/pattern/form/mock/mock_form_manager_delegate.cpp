@@ -158,6 +158,9 @@ bool FormManagerDelegate::CheckFormDueControl(const std::string &bundleName, con
     return false;
 }
 
+void FormManagerDelegate::SendNonTransparencyRatio(int32_t ratio)
+{}
+
 void SetFormRendererDispatcher(sptr<IFormRendererDispatcher> &rendererDispatcher) {}
 
 void ClearFormRendererDispatcher() {}

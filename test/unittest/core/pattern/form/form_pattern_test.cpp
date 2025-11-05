@@ -39,6 +39,7 @@
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/form/form_node.h"
 #include "core/components_ng/pattern/form/form_pattern.h"
+#include "core/components_ng/pattern/form/form_snapshot_check.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 
@@ -477,7 +478,7 @@ HWTEST_F(FormPatternTest, FormPatternTest_011, TestSize.Level1)
     EXPECT_NE(pattern, nullptr);
 
     auto host = pattern->GetHost();
-    pattern->SnapshotSurfaceNode();
+    pattern->SnapshotSurfaceNode(std::make_shared<FormSnapshotCheck>(pattern->formManagerBridge_));
     EXPECT_NE(host, nullptr);
 }
 
