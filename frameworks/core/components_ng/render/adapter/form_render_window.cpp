@@ -142,6 +142,7 @@ void FormRenderWindow::Destroy()
     if (receiver_) {
         LOGI("VSync destroyed, remained counter:%{public}d", --vsyncCounter);
     }
+    receiver_.reset();
     callbacks_.clear();
 #endif
 }
