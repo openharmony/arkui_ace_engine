@@ -223,6 +223,7 @@ export class Application {
         this.startParam = startParam
         this.userView = userView
         this.entryPoint = entryPoint
+        setUIDetachedRootCreator(createUiDetachedRoot)
     }
 
     static createMemoRootState(manager: StateManager,
