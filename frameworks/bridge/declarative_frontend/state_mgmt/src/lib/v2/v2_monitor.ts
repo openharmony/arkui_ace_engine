@@ -305,14 +305,12 @@ class MonitorV2 {
   }
 
   InitRun(): MonitorV2 {
-    console.log("### InitRun  start ");
     // if @Monitor, run the bindRun which is the same logic as before
     if (this.isDecorator_) {
       this.bindRun(true);
       return this;
     }
 
-    console.log("### InitRun  not decorator ");
     // AddMonitor, record dependencies for all path
     ObserveV2.getObserve().registerMonitor(this, this.watchId_);
     this.values_.forEach((monitorValue: MonitorValueV2<unknown>) => {
@@ -321,7 +319,6 @@ class MonitorV2 {
       if (!(this.target_ instanceof PUV2ViewBase)) {
         WeakRefPool.addMonitorId(this.target_, monitorValue.id);
       }
-      console.log("### InitRun  ==>  recordDependenciesForProp ", monitorValue.path);
       this.recordDependenciesForProp(monitorValue, true);
     })
     return this;
@@ -371,40 +368,24 @@ class MonitorV2 {
   // record dependencies for given MonitorValue, when any monitored path
   // has changed and notifyChange is called
   private recordDependenciesForProp(monitoredValue: MonitorValueV2<unknown>, initRun = false): boolean {
-    console.log("### recordDependenciesForProp start: " + monitoredValue.path);
     let success: boolean = false;
     let value = undefined;
     if (this.isSync_ && monitoredValue.isWildcard()) {
-      console.log("### recordDependenciesForProp  SYNC + * " + monitoredValue.path);
       let sureValue = monitoredValue.getLastSureValuePath()?.now
       if (sureValue === undefined && MonitorPathHelper.isWildcardPath(monitoredValue.path)) {
         // For single top level wildcard
-        console.log("### recordDependenciesForProp toplevel " + monitoredValue.path);
         sureValue = this.target_;
       }
-      console.log("### recordDependenciesForProp  instanceof Object? " + (sureValue instanceof Object));
       if (sureValue !== undefined && (sureValue instanceof Object)) {
-        console.log("### recordDependenciesForProp: " + monitoredValue.path);
-        console.error("### recordDependenciesForProp IsObservedObjectV2 " + ObserveV2.IsObservedObjectV2(sureValue));
-        console.error("### recordDependenciesForProp IsProxiedObservedV2 " + ObserveV2.IsProxiedObservedV2(sureValue));
-        console.error("### recordDependenciesForProp IsMakeObserved " + ObserveV2.IsMakeObserved(sureValue));
-        console.error("### recordDependenciesForProp  defined RefInfo.MAKE_OBSERVED_PROXY: " + (sureValue[RefInfo.MAKE_OBSERVED_PROXY] !== undefined));
-        console.error("### recordDependenciesForProp  defined ObserveV2.SYMBOL_REFS: " + (sureValue[ObserveV2.SYMBOL_REFS] !== undefined));
-
         ObserveV2.getObserve().startRecordDependencies(this, monitoredValue.id);
         if (ObserveV2.IsObservedObjectV2(sureValue)) {
-          // TODO: maybe we want to check first that it is @ObservedV2 decorated object
-          // before we start making proxy checks with IsProxiedObservedV2, IsMakeObserved
-          console.error("### recordDependenciesForProp >>> ObservedObjectV2 addref path");
-          console.error("### recordDependenciesForProp sureValue: " + JSON.stringify(sureValue));
           ObserveV2.getObserve().addRef(sureValue as unknown as Object, MonitorV2.OB_ANY);
         } else if (ObserveV2.IsProxiedObservedV2(sureValue) || ObserveV2.IsMakeObserved(sureValue)) {
           // Proxy handler will add ref to "make observed" container object
-          console.error("### recordDependenciesForProp >>> proxy addref path");
           sureValue[MonitorV2.OB_ANY];
         } else {
           // That should not happen
-          console.error("### recordDependenciesForProp >>> NOR proxy NOR observed");
+          // TODO: do we need it?
           ObserveV2.getObserve().addRef(sureValue as unknown as Object, MonitorV2.OB_ANY);
         }
         ObserveV2.getObserve().stopRecordDependencies();
@@ -429,7 +410,6 @@ class MonitorV2 {
     if (!initRun && (monitoredValue.getWildcardPath() !== undefined)) {
       this.recordDependenciesForProp(monitoredValue.getWildcardPath()!, true);
     }
-    console.log("### recordDependenciesForProp end: " + monitoredValue.path);
     return retValue;
   }
 
@@ -467,9 +447,6 @@ class MonitorV2 {
     let obj = this.target_;
     for (let prop of monitoredValue.props) {
       if (obj && typeof obj === 'object' && Reflect.has(obj, prop)) {
-        console.error("### analysisProp  testing prop: " + prop);
-        console.error("### analysisProp  defined RefInfo.MAKE_OBSERVED_PROXY: " + (obj[RefInfo.MAKE_OBSERVED_PROXY] !== undefined));
-        console.error("### analysisProp  defined ObserveV2.SYMBOL_REFS: " + (obj[ObserveV2.SYMBOL_REFS] !== undefined));
         obj = obj[prop];
       } else {
         isInit && stateMgmtConsole.frequentApplicationError(`${this.debugInfo()} path ${monitoredValue.path} initialize not found, make sure it exists!`);

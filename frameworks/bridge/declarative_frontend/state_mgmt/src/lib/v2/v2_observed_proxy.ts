@@ -32,8 +32,6 @@ class ObjectProxyHandler {
     //
     // this function is used to get the correct object that can be observed
     private getTarget(obj: any): any {
-        console.log("### getTarget this.isMakeObserved_ " + this.isMakeObserved_ 
-            + ((this.isMakeObserved_) ? " ==> RefInfo.get(obj) " : "return obj itself"));
         return this.isMakeObserved_ ? RefInfo.get(obj) : obj;
     }
 
@@ -66,9 +64,6 @@ class ObjectProxyHandler {
         // do not addref for function type, it will make such huge unnecessary dependency collection
         // for some common function attributes, e.g. toString etc.
         if (typeof (ret) !== 'function') {
-            console.log("### ObjectProxyHandler.get, will addref conditionalTarget, MAKE_OBSERVED_PROXY? "
-                + (conditionalTarget[RefInfo.MAKE_OBSERVED_PROXY] !== undefined));
-
             ObserveV2.getObserve().addRef(conditionalTarget, key);
             return (typeof (ret) === 'object' && this.isMakeObserved_) ? RefInfo.get(ret)[RefInfo.MAKE_OBSERVED_PROXY] : ret;
         }
@@ -89,28 +84,21 @@ class ObjectProxyHandler {
         }
 
         // function
-        console.log("### ObjectProxyHandler.get, return bound function " + JSON.stringify(key));
         return ret.bind(receiver);
     }
 
     set(target: any, key: string | symbol, value: any): boolean {
-        console.error("### ObjectProxyHandler.set for " + JSON.stringify(key));
         if (typeof key === 'symbol') {
             if (!this.isMakeObserved_ && key !== ObserveV2.SYMBOL_PROXY_GET_TARGET) {
                 target[key] = value;
             }
-            console.error("### ObjectProxyHandler.set return symbol, " + JSON.stringify(key));
             return true;
         }
 
         if (target[key] === value) {
-            console.error("### ObjectProxyHandler.set return same value,  " + JSON.stringify(key));
             return true;
         }
         target[key] = value;
-        console.error("### ObjectProxyHandler.set setting value and -> fireChange");
-        console.error("### ObjectProxyHandler.set target: " + JSON.stringify(target));
-        console.error("### ObjectProxyHandler.set this.getTarget(target) " + JSON.stringify(this.getTarget(target)));
         ObserveV2.getObserve().fireChange(this.getTarget(target), key.toString());
         return true;
     }

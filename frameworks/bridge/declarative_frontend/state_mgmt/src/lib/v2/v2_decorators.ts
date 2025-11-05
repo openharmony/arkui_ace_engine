@@ -269,8 +269,6 @@ const SyncMonitor = function (key : string, ...keys: string[]): (target: any, _:
   const pathsUniqueString = keys ? [key, ...keys].join(' ') : key;
   return function (target, _, descriptor): void {
     stateMgmtConsole.debug(`@SyncMonitor('${pathsUniqueString}')`);
-    console.log("### SyncMonitor " + pathsUniqueString);
-    console.log("### SyncMonitor target name: " + target.constructor.name);
     let watchProp = Symbol.for(MonitorV2.SYNC_MONITOR_PREFIX + target.constructor.name);
     const monitorFunc = descriptor.value;
     target[watchProp] ? target[watchProp][pathsUniqueString] = monitorFunc
