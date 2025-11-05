@@ -1220,6 +1220,9 @@ HWTEST_F(SwiperIndicatorModifierTestNg, AdjustPointCenterXForTouchBottom001, Tes
  */
 HWTEST_F(SwiperIndicatorModifierTestNg, AdjustPointCenterXForTouchBottomNew001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
     CreateSwiper();
     CreateSwiperItems();
     CreateSwiperDone();
@@ -1242,11 +1245,15 @@ HWTEST_F(SwiperIndicatorModifierTestNg, AdjustPointCenterXForTouchBottomNew001, 
     paintMethod->touchBottomPageRate_ = 0.2;
     pointCenter = { 0.0f, 0.0f, 0.0f, 0.0f };
     paintMethod->touchBottomPageRate_ = 0;
-    EXPECT_TRUE(paintMethod->AdjustPointCenterXForTouchBottomNew(pointCenter, endVectorBlackPointCenterX,
+    EXPECT_FALSE(paintMethod->AdjustPointCenterXForTouchBottomNew(pointCenter, endVectorBlackPointCenterX,
         endCurrentIndex, selectedItemWidth));
 
     paintMethod->touchBottomPageRate_ = 0.2;
     EXPECT_FALSE(paintMethod->AdjustPointCenterXForTouchBottomNew(pointCenter, endVectorBlackPointCenterX,
+        endCurrentIndex, selectedItemWidth));
+
+    paintMethod->touchBottomPageRate_ = 0;
+    EXPECT_TRUE(paintMethod->AdjustPointCenterXForTouchBottomNew(pointCenter, endVectorBlackPointCenterX,
         endCurrentIndex, selectedItemWidth));
 }
 
