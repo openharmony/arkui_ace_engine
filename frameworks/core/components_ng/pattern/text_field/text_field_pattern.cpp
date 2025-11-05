@@ -6343,14 +6343,8 @@ bool TextFieldPattern::HandleEditingEventCrossPlatform(const std::shared_ptr<Tex
 #ifdef IOS_PLATFORM
     if (value->isDelete && !value->discardedMarkedText) {
         if (value->compose.IsValid()) {
-            EmojiRelation relation = GetEmojiRelation(value->selection.GetEnd());
-            if (relation == EmojiRelation::IN_EMOJI || relation == EmojiRelation::MIDDLE_EMOJI ||
-                relation == EmojiRelation::BEFORE_EMOJI || value->selection.GetEnd() != value->compose.GetStart()) {
-                HandleOnDelete(true);
-            } else {
-                DeleteBackward(value->compose.GetEnd() - value->compose.GetStart());
-                value->compose.Update(-1);
-            }
+            DeleteBackward(value->compose.GetEnd() - value->compose.GetStart());
+            value->compose.Update(-1);
         } else {
             HandleOnDelete(true);
         }
