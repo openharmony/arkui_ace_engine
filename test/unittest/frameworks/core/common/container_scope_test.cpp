@@ -376,4 +376,41 @@ HWTEST_F(ContainerScopeTest, ContainerScopeTest009, TestSize.Level1)
     EXPECT_EQ(ContainerScope::RecentForegroundId(), INSTANCE_ID_UNDEFINED);
 }
 
+/**
+ * @tc.name: ContainerScopeTest010
+ * @tc.desc: GetAllUIContexts
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerScopeTest, ContainerScopeTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Get GetAllUIContexts while containerCount equals 0
+     * @tc.expected: GetAllUIContexts size equals 0
+     */
+    EXPECT_EQ(ContainerScope::GetAllUIContexts().size(), 0);
+
+    /**
+     * @tc.steps: step2. Add two containers to containerSet
+     * @tc.expected: GetAllUIContexts item equals inserted items
+     */
+    ContainerScope::Add(TEST_INSTANCE_ID_CONTAINER);
+    ContainerScope::Add(TEST_INSTANCE_ID_SUB_CONTAINER);
+    auto allUIContexts = ContainerScope::GetAllUIContexts();
+    auto index = 0;
+    for (auto item : allUIContexts) {
+        if (index == 0) {
+            EXPECT_EQ(item, TEST_INSTANCE_ID_CONTAINER);
+        } else {
+            EXPECT_EQ(item, TEST_INSTANCE_ID_SUB_CONTAINER);
+        }
+        index++;
+    }
+    /**
+     * @tc.steps: step3. Clear containerSet
+     */
+    ContainerScope::Remove(TEST_INSTANCE_ID_SUB_CONTAINER);
+    ContainerScope::Remove(TEST_INSTANCE_ID_CONTAINER);
+    EXPECT_EQ(ContainerScope::GetAllUIContexts().size(), 0);
+}
+
 } // namespace OHOS::Ace
