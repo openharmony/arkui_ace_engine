@@ -124,7 +124,9 @@ void SetButtonOptions1Impl(Ark_NativePointer node,
         ButtonModelStatic::SetType(frameNode, EnumToInt(buttonOptions.type));
         ButtonModelStatic::SetStateEffect(frameNode, buttonOptions.stateEffect);
         ButtonModelStatic::SetRole(frameNode, buttonOptions.role);
-        ButtonModelStatic::SetControlSize(frameNode, buttonOptions.controlSize);
+        if (buttonOptions.controlSize.has_value()) {
+            ButtonModelStatic::SetControlSize(frameNode, buttonOptions.controlSize);
+        }
         ButtonModelStatic::SetButtonStyle(frameNode, buttonOptions.buttonStyle);
     }
     ButtonModelStatic::SetCreateWithLabel(frameNode, false);
