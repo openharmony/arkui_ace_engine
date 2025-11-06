@@ -424,7 +424,7 @@ HWTEST_F(MenuViewTwoTestNg, ReloadMenuParam001, TestSize.Level1)
     EXPECT_EQ(menuParamValue.outlineColor, NG::BorderColorProperty());
     EXPECT_EQ(menuParamValue.outlineWidth, NG::BorderWidthProperty());
 
-    ResourceParseUtils::SetIsReloading(true);
+    ResourceParseUtils::SetNeedReload(true);
     MenuView::ReloadMenuParam(menuFrameNode_, menuParam);
     g_isConfigChangePerform = data;
 
@@ -522,10 +522,10 @@ HWTEST_F(MenuViewTwoTestNg, ReloadMenuParam003, TestSize.Level1)
     EXPECT_EQ(menuParamValue.outlineWidth, NG::BorderWidthProperty());
     EXPECT_TRUE(menuParamValue.isDarkMode);
 
-    ResourceParseUtils::SetIsReloading(true);
+    ResourceParseUtils::SetNeedReload(true);
     MenuView::ReloadMenuParam(menuFrameNode_, menuParam);
     g_isConfigChangePerform = data;
-    ResourceParseUtils::SetIsReloading(false);
+    ResourceParseUtils::SetNeedReload(false);
 
     menuParamValue = const_cast<MenuParam&>(menuParam);
     EXPECT_EQ(menuParamValue.borderRadius, NG::BorderRadiusProperty(0.0_vp));

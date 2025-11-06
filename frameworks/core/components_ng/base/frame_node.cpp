@@ -1538,15 +1538,17 @@ void FrameNode::NotifyColorModeChange(uint32_t colorMode)
 
     auto parentNode = AceType::DynamicCast<FrameNode>(GetParent());
     bool parentRerender = parentNode ? parentNode->GetRerenderable() : GetRerenderable();
-    // bool parentActive = parentNode ? parentNode->IsActive() : true;
     SetRerenderable(parentRerender && ((IsVisible() && IsActive()) || CheckMeasureAnyway()));
 
     if (GetRerenderable() && GetContext()) {
         SetDarkMode(GetContext()->GetColorMode() == ColorMode::DARK);
     }
 
+    bool needReload = ResourceParseUtils::NeedReload();
     if (!GetForceDarkAllowed()) {
-        ResourceParseUtils::SetIsReloading(false);
+        ResourceParseUtils::SetNeedReload(false);
+    } else {
+        ResourceParseUtils::SetNeedReload(true);
     }
     if (pattern_) {
         pattern_->OnThemeScopeUpdate(GetThemeScopeId());
@@ -1559,9 +1561,7 @@ void FrameNode::NotifyColorModeChange(uint32_t colorMode)
         frameNode->GetOverlayNode()->NotifyColorModeChange(colorMode);
     }
 
-    if (!GetForceDarkAllowed()) {
-        ResourceParseUtils::SetIsReloading(true);
-    }
+    ResourceParseUtils::SetNeedReload(needReload);
     UINode::NotifyColorModeChange(colorMode);
 }
 

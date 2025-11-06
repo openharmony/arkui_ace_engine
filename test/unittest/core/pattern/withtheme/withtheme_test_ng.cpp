@@ -470,7 +470,7 @@ HWTEST_F(WithThemeTestNg, WithThemeTest013, TestSize.Level1)
     TokenThemeStorage::GetInstance()->SetIsThemeColorAvailable(0, 0, true);
     TokenThemeStorage::GetInstance()->SetIsThemeColorAvailable(1, 0, true);
     TokenThemeStorage::GetInstance()->defaultLightTheme_ = nullptr;
-    ResourceParseUtils::SetIsReloading(true);
+    ResourceParseUtils::SetNeedReload(true);
     TokenThemeStorage::GetInstance()->CacheResetColor();
 
     /**
@@ -530,7 +530,7 @@ HWTEST_F(WithThemeTestNg, WithThemeTest013, TestSize.Level1)
     TokenThemeStorage::GetInstance()->ResetThemeColor(1, theme, theme, colorMode);
     EXPECT_EQ(TokenThemeStorage::GetInstance()->CacheGet(1)->Colors()->Brand(), Color::BLACK);
 
-    ResourceParseUtils::SetIsReloading(false);
+    ResourceParseUtils::SetNeedReload(false);
 }
 
 /**

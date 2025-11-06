@@ -194,7 +194,7 @@ HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest004, TestSize.Level1)
      * @tc.steps: step2. ParseResColor with isReloading_ true.
      * @tc.expect: ParseResColor return true.
      */
-    ResourceParseUtils::SetIsReloading(true);
+    ResourceParseUtils::SetNeedReload(true);
     EXPECT_TRUE(ResourceParseUtils::ParseResColor(resObj, color));
 
     /**
@@ -210,7 +210,7 @@ HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest004, TestSize.Level1)
     resObjWithName->SetIsResource(false);
     resObjWithName->SetColorMode(ColorMode::DARK);
     EXPECT_TRUE(ResourceParseUtils::ParseResColor(resObjWithName, color));
-    ResourceParseUtils::SetIsReloading(false);
+    ResourceParseUtils::SetNeedReload(false);
     EXPECT_TRUE(ResourceParseUtils::ParseResColor(resObjWithName, color));
 
     /**
@@ -220,9 +220,9 @@ HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest004, TestSize.Level1)
     RefPtr<ResourceObject> resObjWithStr = AceType::MakeRefPtr<ResourceObject>(1, 10003,
         resObjParamsList, "com.example.test", "entry", 100000);
     resObjWithStr->SetColor(color);
-    ResourceParseUtils::SetIsReloading(true);
+    ResourceParseUtils::SetNeedReload(true);
     EXPECT_FALSE(ResourceParseUtils::ParseResColor(resObjWithStr, color));
-    ResourceParseUtils::SetIsReloading(false);
+    ResourceParseUtils::SetNeedReload(false);
     EXPECT_FALSE(ResourceParseUtils::ParseResColor(resObjWithStr, color));
 
     /**
@@ -232,9 +232,9 @@ HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest004, TestSize.Level1)
     RefPtr<ResourceObject> resObjWithInt = AceType::MakeRefPtr<ResourceObject>(1, 10007,
         resObjParamsList, "com.example.test", "entry", 100000);
     resObjWithInt->SetColor(color);
-    ResourceParseUtils::SetIsReloading(true);
+    ResourceParseUtils::SetNeedReload(true);
     EXPECT_TRUE(ResourceParseUtils::ParseResColor(resObjWithInt, color));
-    ResourceParseUtils::SetIsReloading(false);
+    ResourceParseUtils::SetNeedReload(false);
     EXPECT_TRUE(ResourceParseUtils::ParseResColor(resObjWithInt, color));
 
     /**
@@ -244,9 +244,9 @@ HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest004, TestSize.Level1)
     RefPtr<ResourceObject> resObjWithColor = AceType::MakeRefPtr<ResourceObject>(1, 10001,
         resObjParamsList, "com.example.test", "entry", 100000);
     resObjWithColor->SetColor(color);
-    ResourceParseUtils::SetIsReloading(true);
+    ResourceParseUtils::SetNeedReload(true);
     EXPECT_TRUE(ResourceParseUtils::ParseResColor(resObjWithColor, color));
-    ResourceParseUtils::SetIsReloading(false);
+    ResourceParseUtils::SetNeedReload(false);
     EXPECT_TRUE(ResourceParseUtils::ParseResColor(resObjWithColor, color));
 }
 
@@ -265,7 +265,7 @@ HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest005, TestSize.Level1)
     Color color = Color::WHITE;
     resObj->SetColor(color);
     resObj->SetIsResource(false);
-    ResourceParseUtils::SetIsReloading(false);
+    ResourceParseUtils::SetNeedReload(false);
     resObj->SetColorMode(ColorMode::LIGHT);
     Color result;
     ResourceParseUtils::ParseResColor(resObj, result);
@@ -288,11 +288,11 @@ HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest006, TestSize.Level1)
     resObj->SetColor(color);
     resObj->SetIsResource(false);
     resObj->SetColorMode(ColorMode::COLOR_MODE_UNDEFINED);
-    ResourceParseUtils::SetIsReloading(false);
+    ResourceParseUtils::SetNeedReload(false);
     EXPECT_FALSE(ResourceParseUtils::ParseResColor(resObj, color));
     resObj->SetColorMode(ColorMode::DARK);
     EXPECT_TRUE(ResourceParseUtils::ParseResColor(resObj, color));
-    ResourceParseUtils::SetIsReloading(true);
+    ResourceParseUtils::SetNeedReload(true);
     EXPECT_TRUE(ResourceParseUtils::ParseResColor(resObj, color));
 }
 
