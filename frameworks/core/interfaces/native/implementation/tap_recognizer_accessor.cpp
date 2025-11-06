@@ -33,11 +33,11 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Number GetTapCountImpl(Ark_TapRecognizer peer)
+Ark_Int32 GetTapCountImpl(Ark_TapRecognizer peer)
 {
-    auto errorValue = Converter::ArkValue<Ark_Number>(DEFAULT_COUNT);
+    auto errorValue = Converter::ArkValue<Ark_Int32>(DEFAULT_COUNT);
     CHECK_NULL_RETURN(peer, errorValue);
-    return Converter::ArkValue<Ark_Number>(peer->GetCount());
+    return Converter::ArkValue<Ark_Int32>(peer->GetCount());
 }
 } // TapRecognizerAccessor
 const GENERATED_ArkUITapRecognizerAccessor* GetTapRecognizerAccessor()

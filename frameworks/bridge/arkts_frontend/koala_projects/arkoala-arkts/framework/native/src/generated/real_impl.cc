@@ -13322,84 +13322,84 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                            const Array_FingerInfo* fingerList)
     {
     }
-    Ark_Number GetOffsetXImpl(Ark_GestureEvent peer)
+    Ark_Float64 GetOffsetXImpl(Ark_GestureEvent peer)
     {
         return {};
     }
     void SetOffsetXImpl(Ark_GestureEvent peer,
-                        const Ark_Number* offsetX)
+                        Ark_Float64 offsetX)
     {
     }
-    Ark_Number GetOffsetYImpl(Ark_GestureEvent peer)
+    Ark_Float64 GetOffsetYImpl(Ark_GestureEvent peer)
     {
         return {};
     }
     void SetOffsetYImpl(Ark_GestureEvent peer,
-                        const Ark_Number* offsetY)
+                        Ark_Float64 offsetY)
     {
     }
-    Ark_Number GetAngleImpl(Ark_GestureEvent peer)
+    Ark_Float64 GetAngleImpl(Ark_GestureEvent peer)
     {
         return {};
     }
     void SetAngleImpl(Ark_GestureEvent peer,
-                      const Ark_Number* angle)
+                      Ark_Float64 angle)
     {
     }
-    Ark_Number GetSpeedImpl(Ark_GestureEvent peer)
+    Ark_Float64 GetSpeedImpl(Ark_GestureEvent peer)
     {
         return {};
     }
     void SetSpeedImpl(Ark_GestureEvent peer,
-                      const Ark_Number* speed)
+                      Ark_Float64 speed)
     {
     }
-    Ark_Number GetScaleImpl(Ark_GestureEvent peer)
+    Ark_Float64 GetScaleImpl(Ark_GestureEvent peer)
     {
         return {};
     }
     void SetScaleImpl(Ark_GestureEvent peer,
-                      const Ark_Number* scale)
+                      Ark_Float64 scale)
     {
     }
-    Ark_Number GetPinchCenterXImpl(Ark_GestureEvent peer)
+    Ark_Float64 GetPinchCenterXImpl(Ark_GestureEvent peer)
     {
         return {};
     }
     void SetPinchCenterXImpl(Ark_GestureEvent peer,
-                             const Ark_Number* pinchCenterX)
+                             Ark_Float64 pinchCenterX)
     {
     }
-    Ark_Number GetPinchCenterYImpl(Ark_GestureEvent peer)
+    Ark_Float64 GetPinchCenterYImpl(Ark_GestureEvent peer)
     {
         return {};
     }
     void SetPinchCenterYImpl(Ark_GestureEvent peer,
-                             const Ark_Number* pinchCenterY)
+                             Ark_Float64 pinchCenterY)
     {
     }
-    Ark_Number GetVelocityXImpl(Ark_GestureEvent peer)
+    Ark_Float64 GetVelocityXImpl(Ark_GestureEvent peer)
     {
         return {};
     }
     void SetVelocityXImpl(Ark_GestureEvent peer,
-                          const Ark_Number* velocityX)
+                          Ark_Float64 velocityX)
     {
     }
-    Ark_Number GetVelocityYImpl(Ark_GestureEvent peer)
+    Ark_Float64 GetVelocityYImpl(Ark_GestureEvent peer)
     {
         return {};
     }
     void SetVelocityYImpl(Ark_GestureEvent peer,
-                          const Ark_Number* velocityY)
+                          Ark_Float64 velocityY)
     {
     }
-    Ark_Number GetVelocityImpl(Ark_GestureEvent peer)
+    Ark_Float64 GetVelocityImpl(Ark_GestureEvent peer)
     {
         return {};
     }
     void SetVelocityImpl(Ark_GestureEvent peer,
-                         const Ark_Number* velocity)
+                         Ark_Float64 velocity)
     {
     }
     } // GestureEventAccessor
@@ -13479,7 +13479,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
-    Ark_Number GetFingerCountImpl(Ark_GestureRecognizer peer)
+    Ark_Int32 GetFingerCountImpl(Ark_GestureRecognizer peer)
     {
         return {};
     }
@@ -14378,7 +14378,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
-    Ark_Number GetDurationImpl(Ark_LongPressRecognizer peer)
+    Ark_Int32 GetDurationImpl(Ark_LongPressRecognizer peer)
     {
         return {};
     }
@@ -15324,44 +15324,44 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
-    Ark_Number GetOffsetXImpl(Ark_PanGestureEvent peer)
+    Ark_Float64 GetOffsetXImpl(Ark_PanGestureEvent peer)
     {
         return {};
     }
     void SetOffsetXImpl(Ark_PanGestureEvent peer,
-                        const Ark_Number* offsetX)
+                        Ark_Float64 offsetX)
     {
     }
-    Ark_Number GetOffsetYImpl(Ark_PanGestureEvent peer)
+    Ark_Float64 GetOffsetYImpl(Ark_PanGestureEvent peer)
     {
         return {};
     }
     void SetOffsetYImpl(Ark_PanGestureEvent peer,
-                        const Ark_Number* offsetY)
+                        Ark_Float64 offsetY)
     {
     }
-    Ark_Number GetVelocityXImpl(Ark_PanGestureEvent peer)
+    Ark_Float64 GetVelocityXImpl(Ark_PanGestureEvent peer)
     {
         return {};
     }
     void SetVelocityXImpl(Ark_PanGestureEvent peer,
-                          const Ark_Number* velocityX)
+                          Ark_Float64 velocityX)
     {
     }
-    Ark_Number GetVelocityYImpl(Ark_PanGestureEvent peer)
+    Ark_Float64 GetVelocityYImpl(Ark_PanGestureEvent peer)
     {
         return {};
     }
     void SetVelocityYImpl(Ark_PanGestureEvent peer,
-                          const Ark_Number* velocityY)
+                          Ark_Float64 velocityY)
     {
     }
-    Ark_Number GetVelocityImpl(Ark_PanGestureEvent peer)
+    Ark_Float64 GetVelocityImpl(Ark_PanGestureEvent peer)
     {
         return {};
     }
     void SetVelocityImpl(Ark_PanGestureEvent peer,
-                         const Ark_Number* velocity)
+                         Ark_Float64 velocity)
     {
     }
     } // PanGestureEventAccessor
@@ -15386,18 +15386,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetDistanceImpl(Ark_PanGestureOptions peer,
-                         const Ark_Number* value)
+                         Ark_Float64 value)
     {
     }
     void SetFingersImpl(Ark_PanGestureOptions peer,
-                        const Ark_Number* value)
+                        Ark_Int32 value)
     {
     }
     Ark_PanDirection GetDirectionImpl(Ark_PanGestureOptions peer)
     {
         return {};
     }
-    Ark_Number GetDistanceImpl(Ark_PanGestureOptions peer)
+    Ark_Float64 GetDistanceImpl(Ark_PanGestureOptions peer)
     {
         return {};
     }
@@ -15604,28 +15604,28 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
-    Ark_Number GetScaleImpl(Ark_PinchGestureEvent peer)
+    Ark_Float64 GetScaleImpl(Ark_PinchGestureEvent peer)
     {
         return {};
     }
     void SetScaleImpl(Ark_PinchGestureEvent peer,
-                      const Ark_Number* scale)
+                      Ark_Float64 scale)
     {
     }
-    Ark_Number GetPinchCenterXImpl(Ark_PinchGestureEvent peer)
+    Ark_Float64 GetPinchCenterXImpl(Ark_PinchGestureEvent peer)
     {
         return {};
     }
     void SetPinchCenterXImpl(Ark_PinchGestureEvent peer,
-                             const Ark_Number* pinchCenterX)
+                             Ark_Float64 pinchCenterX)
     {
     }
-    Ark_Number GetPinchCenterYImpl(Ark_PinchGestureEvent peer)
+    Ark_Float64 GetPinchCenterYImpl(Ark_PinchGestureEvent peer)
     {
         return {};
     }
     void SetPinchCenterYImpl(Ark_PinchGestureEvent peer,
-                             const Ark_Number* pinchCenterY)
+                             Ark_Float64 pinchCenterY)
     {
     }
     } // PinchGestureEventAccessor
@@ -15645,7 +15645,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
-    Ark_Number GetDistanceImpl(Ark_PinchRecognizer peer)
+    Ark_Float64 GetDistanceImpl(Ark_PinchRecognizer peer)
     {
         return {};
     }
@@ -16169,12 +16169,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
-    Ark_Number GetAngleImpl(Ark_RotationGestureEvent peer)
+    Ark_Float64 GetAngleImpl(Ark_RotationGestureEvent peer)
     {
         return {};
     }
     void SetAngleImpl(Ark_RotationGestureEvent peer,
-                      const Ark_Number* angle)
+                      Ark_Float64 angle)
     {
     }
     } // RotationGestureEventAccessor
@@ -16194,7 +16194,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
-    Ark_Number GetAngleImpl(Ark_RotationRecognizer peer)
+    Ark_Float64 GetAngleImpl(Ark_RotationRecognizer peer)
     {
         return {};
     }
@@ -16795,20 +16795,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
-    Ark_Number GetAngleImpl(Ark_SwipeGestureEvent peer)
+    Ark_Float64 GetAngleImpl(Ark_SwipeGestureEvent peer)
     {
         return {};
     }
     void SetAngleImpl(Ark_SwipeGestureEvent peer,
-                      const Ark_Number* angle)
+                      Ark_Float64 angle)
     {
     }
-    Ark_Number GetSpeedImpl(Ark_SwipeGestureEvent peer)
+    Ark_Float64 GetSpeedImpl(Ark_SwipeGestureEvent peer)
     {
         return {};
     }
     void SetSpeedImpl(Ark_SwipeGestureEvent peer,
-                      const Ark_Number* speed)
+                      Ark_Float64 speed)
     {
     }
     } // SwipeGestureEventAccessor
@@ -16919,7 +16919,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
-    Ark_Number GetVelocityThresholdImpl(Ark_SwipeRecognizer peer)
+    Ark_Float64 GetVelocityThresholdImpl(Ark_SwipeRecognizer peer)
     {
         return {};
     }
@@ -17122,7 +17122,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
-    Ark_Number GetTapCountImpl(Ark_TapRecognizer peer)
+    Ark_Int32 GetTapCountImpl(Ark_TapRecognizer peer)
     {
         return {};
     }

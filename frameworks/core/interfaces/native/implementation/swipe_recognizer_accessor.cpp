@@ -32,11 +32,11 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Number GetVelocityThresholdImpl(Ark_SwipeRecognizer peer)
+Ark_Float64 GetVelocityThresholdImpl(Ark_SwipeRecognizer peer)
 {
-    auto errorValue = Converter::ArkValue<Ark_Number>(DEFAULT_SPEED);
+    auto errorValue = Converter::ArkValue<Ark_Float64>(DEFAULT_SPEED);
     CHECK_NULL_RETURN(peer, errorValue);
-    return Converter::ArkValue<Ark_Number>(peer->GetSpeed());
+    return Converter::ArkValue<Ark_Float64>(peer->GetSpeed());
 }
 Ark_SwipeDirection GetDirectionImpl(Ark_SwipeRecognizer peer)
 {
