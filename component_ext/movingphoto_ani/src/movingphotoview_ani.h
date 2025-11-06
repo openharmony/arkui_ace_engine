@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#ifndef COMPONENT_EXT_MOVING_PHOTO_MOVING_PHOTO_ANI_H
+#define COMPONENT_EXT_MOVING_PHOTO_MOVING_PHOTO_ANI_H
+
 #include <ani.h>
 #include "movingphoto_controller.h"
 #include "movingphoto_model_ng.h"
@@ -91,3 +94,4 @@ private:
     static OHOS::Ace::NG::MovingPhotoController* GetMovingPhotoController(ani_env* env, ani_ref ref);
 };
 }
+#endif // COMPONENT_EXT_MOVING_PHOTO_MOVING_PHOTO_ANI_H

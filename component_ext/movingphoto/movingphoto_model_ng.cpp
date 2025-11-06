@@ -313,7 +313,7 @@ RefPtr<MovingPhotoNode> MovingPhotoModelNG::CreateMovingPhotoNode(int32_t nodeId
     return movingPhotoNode;
 }
 
-void MovingPhotoModelNG::SetMovingPhotoController(MovingPhotoNode *frameNode, 
+void MovingPhotoModelNG::SetMovingPhotoController(MovingPhotoNode *frameNode,
                                                   const RefPtr<MovingPhotoController> &controller)
 {
     CHECK_NULL_VOID(frameNode);
