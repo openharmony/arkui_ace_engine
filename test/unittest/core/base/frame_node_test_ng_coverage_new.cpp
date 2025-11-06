@@ -1117,8 +1117,6 @@ HWTEST_F(FrameNodeTestNg, FrameNodeNotifyColorModeChange02, TestSize.Level1)
     EXPECT_TRUE(ResourceParseUtils::NeedReload());
 }
 
-
-
 /**
  * @tc.name: FrameNodeNotifyColorModeChange03
  * @tc.desc: Test the function NotifyColorModeChange
