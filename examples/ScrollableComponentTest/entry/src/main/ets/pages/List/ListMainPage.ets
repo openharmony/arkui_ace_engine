@@ -84,7 +84,11 @@ struct IndexPage {
     new TextList(50, 'scrollBarColor(ListModifier)', 'pages/List/ListModifier/scrollBarColor'),
     new TextList(51, 'ListModifierIndex', 'pages/List/ListModifier/ListModifierIndex'),
     new TextList(52, 'LayoutConstraints', 'pages/List/LayoutConstraints/LayoutConstraints_MainPage'),
-    new TextList(53, 'SwipeAction', 'pages/List/SwipeAction/SwipeAction_MainPage')
+    new TextList(53, 'SwipeAction', 'pages/List/SwipeAction/SwipeAction_MainPage'),
+    new TextList(54, 'SnapSpeed', 'pages/List/SnapSpeed/SnapSpeed_MainPage'),
+    new TextList(55, 'SwipeActionC', 'pages/List/CAPI/SwipeAction'),
+    new TextList(56, 'SnapSpeedC', 'pages/List/CAPI/SnapSpeed'),
+    new TextList(57, 'SnapSpeedNoLazy', 'pages/List/CAPI/SnapSpeedNoLazy'),
   ]
   @State fontSize: Resource | undefined = undefined
   build() {

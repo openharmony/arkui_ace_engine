@@ -30,7 +30,9 @@ namespace ArkUICApiDemo {
 #define PARAM_10 10
 #define PARAM_11 11
 #define PARAM_12 12
+#define PARAM_13 13
 #define PARAM_16 16
+#define PARAM_20 20
 #define PARAM_32 32
 #define PARAM_64 64
 #define DEFAULT_MARGIN 10
@@ -41,6 +43,7 @@ namespace ArkUICApiDemo {
 #define SIZE_40 40
 #define SIZE_50 50
 #define SIZE_70 70
+#define SIZE_80 80
 #define SIZE_100 100
 #define SIZE_120 120
 #define SIZE_150 150

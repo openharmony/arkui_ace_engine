@@ -21,7 +21,7 @@
 #include <functional>
 #include <vector>
 
-#include "component.h"
+#include "components/component.h"
 
 namespace ArkUICApiDemo {
 

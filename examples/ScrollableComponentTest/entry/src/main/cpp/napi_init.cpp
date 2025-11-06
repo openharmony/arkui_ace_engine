@@ -15,6 +15,12 @@
 
 #include "manager.h"
 #include "napi/native_api.h"
+#include "manager/plugin_manager.h"
+#include "common.h"
+#include "snap_speed/snap_speed_test.h"
+#include "swipe_action/swipe_action_test.h"
+
+#include <hilog/log.h>
 
 namespace ScrollableNDK {
 EXTERN_C_START
@@ -28,6 +34,8 @@ static napi_value Init(napi_env env, napi_value exports)
         // —— Grid 示例 —— //
         {"CreateScrollableGrid", nullptr, Manager::CreateScrollableGrid, nullptr, nullptr, nullptr, napi_default,
          nullptr},
+        { "gridTest", nullptr, GridTest::CreateNativeNode, nullptr, nullptr, nullptr,
+            napi_default, nullptr },
 
         // —— List 示例 —— //
         {"CreateAlphabetIndexedList", nullptr, Manager::CreateAlphabetIndexedList, nullptr, nullptr, nullptr,
@@ -39,6 +47,14 @@ static napi_value Init(napi_env env, napi_value exports)
         {"createListItemGroupExample", nullptr, Manager::CreateListItemGroupExample, nullptr, nullptr, nullptr,
          napi_default, nullptr},
         {"destroyListExample", nullptr, Manager::DestroyListExample, nullptr, nullptr, nullptr, napi_default, nullptr},
+        { "SwipeActionTest", nullptr, SwipeActionTest::CreateNativeNode, nullptr, nullptr,
+            nullptr, napi_default, nullptr },
+        { "SwipeActionTestWithDirection", nullptr, SwipeActionTest::CreateNativeNode, nullptr, nullptr,
+            nullptr, napi_default, nullptr },
+        { "SnapSpeedTest", nullptr, SnapSpeedTest::CreateNativeNode, nullptr, nullptr,
+            nullptr, napi_default, nullptr },
+        { "SnapSpeedTestNoLazyForeach", nullptr, SnapSpeedTest::CreateNativeNodeNoLazyForeach, nullptr, nullptr,
+            nullptr, napi_default, nullptr },
 
         // —— Refresh 示例 —— //
         {"CreateRefreshList", nullptr, Manager::CreateRefreshList, nullptr, nullptr, nullptr, napi_default, nullptr},

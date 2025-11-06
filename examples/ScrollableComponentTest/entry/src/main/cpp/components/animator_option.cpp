@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "animator_option.h"
+#include "components/animator_option.h"
 
 namespace ArkUICApiDemo {
 bool Animator::SetOptionParam(const AnimatorOption& param)
