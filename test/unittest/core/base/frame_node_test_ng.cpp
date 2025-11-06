@@ -2817,6 +2817,31 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg312, TestSize.Level1)
     EXPECT_EQ(frameNode->CallAIFunction("OTHERFunction", "params1: 1"), AI_CALL_FUNCNAME_INVALID);
 }
 
+/**
+ * @tc.name: FrameNodeTestNg313
+ * @tc.desc: Test RebuildRenderContextTree.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg313, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+
+    /**
+     * @tc.steps2: test RebuildRenderContextTree.
+     */
+    frameNode->needSyncRenderTree_ = true;
+    frameNode->isDeleteRsNode_ = FrameNode::RsNodeDeleteFlag::ALLOWED;
+    frameNode->RebuildRenderContextTree();
+    EXPECT_EQ(frameNode->needSyncRenderTree_, false);
+
+    frameNode->needSyncRenderTree_ = true;
+    frameNode->isDeleteRsNode_ = FrameNode::RsNodeDeleteFlag::PROHIBITED;
+    frameNode->RebuildRenderContextTree();
+    EXPECT_EQ(frameNode->needSyncRenderTree_, false);
+}
 
 /**
  * @tc.name: FrameNodeOnDelteTest
