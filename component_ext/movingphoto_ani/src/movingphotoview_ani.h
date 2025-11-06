@@ -69,7 +69,7 @@ public:
     static void Restart([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_class object,
                                                 ani_long peer);
     static void EnableTransition([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_class object,
-                                                ani_long peer, ani_boolean options) 
+                                                ani_long peer, ani_boolean options);
     static void RefreshMovingPhoto([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_class object,
                                                 ani_long peer);
     static void SetPlaybackPeriod([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_class object,

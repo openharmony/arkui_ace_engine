@@ -66,7 +66,7 @@ bool AniUtils::GetIsUndefinedObject(ani_env *env, ani_ref objectRef)
     return (bool)isUndefined;
 }
 
-bool AniUtils::GetIsEnum(ani_env *env, ani_ref objectRef, const char* enumName) 
+bool AniUtils::GetIsEnum(ani_env *env, ani_ref objectRef, const char* enumName)
 {
     ani_enum enumAni;
     if (ANI_OK != env->FindEnum(enumName, &enumAni)) {
