@@ -55,6 +55,7 @@ public:
     RefPtr<FrameNode> frameNode_;
     void CreateContainerPickerNode(int32_t itemCount = 9);
     void AddChildNodes(RefPtr<FrameNode>& parentNode, int32_t count);
+    void SetChildNodeFrameSize(LayoutWrapper* layoutWrapper, int32_t childIndex, float width, float height);
 };
 
 class TestNode : public UINode {
@@ -150,6 +151,16 @@ void ContainerPickerLayoutAlgorithmTest::AddChildNodes(RefPtr<FrameNode>& parent
     }
 }
 
+void ContainerPickerLayoutAlgorithmTest::SetChildNodeFrameSize(
+    LayoutWrapper* layoutWrapper, int32_t childIndex, float width, float height)
+{
+    auto childLayoutWrapper = layoutWrapper->GetOrCreateChildByIndex(childIndex);
+    ASSERT_NE(childLayoutWrapper, nullptr);
+    auto childGeometryNode = childLayoutWrapper->GetGeometryNode();
+    ASSERT_NE(childGeometryNode, nullptr);
+    childGeometryNode->SetFrameSize({ width, height });
+}
+
 /**
  * @tc.name: ContainerPickerLayoutAlgorithm_MeasureHeightTest001
  * @tc.desc: Test MeasureHeight method with default height
@@ -177,7 +188,7 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
     OptionalSizeF contentIdealSize;
     algorithm_->MeasureHeight(layoutWrapper, contentIdealSize);
     EXPECT_TRUE(contentIdealSize.Height().has_value());
-    EXPECT_FALSE(Negative(algorithm_->GetHeight()));
+    EXPECT_EQ(algorithm_->GetHeight(), 910);
     EXPECT_FALSE(Negative(algorithm_->GetContentMainSize()));
 }
 
@@ -209,7 +220,7 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
     OptionalSizeF contentIdealSize;
     algorithm_->MeasureHeight(layoutWrapper, contentIdealSize);
     EXPECT_TRUE(contentIdealSize.Height().has_value());
-    EXPECT_FALSE(Negative(algorithm_->GetHeight()));
+    EXPECT_EQ(algorithm_->GetHeight(), 910);
 }
 
 /**
@@ -360,7 +371,7 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
     OptionalSizeF contentIdealSize;
     algorithm_->MeasureHeight(layoutWrapper, contentIdealSize);
     EXPECT_TRUE(contentIdealSize.Height().has_value());
-    EXPECT_FALSE(Negative(algorithm_->GetHeight()));
+    EXPECT_EQ(algorithm_->GetHeight(), 910);
 }
 
 /**
@@ -532,6 +543,7 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
     OptionalSizeF contentIdealSize;
     algorithm_->MeasureWidth(layoutWrapper, contentIdealSize);
     EXPECT_TRUE(contentIdealSize.Width().has_value());
+    EXPECT_EQ(contentIdealSize.Width().value(), 200);
 }
 
 /**
@@ -549,6 +561,9 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
     ASSERT_NE(refLayoutWrapper, nullptr);
     LayoutWrapper* layoutWrapper = Referenced::RawPtr(refLayoutWrapper);
     ASSERT_NE(layoutWrapper, nullptr);
+    SetChildNodeFrameSize(layoutWrapper, 0, 150, 40);
+    auto childNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(0));
+    algorithm_->itemPosition_[0] = { 100.0f, 150.0f, childNode };
 
     auto layoutProperty = AceType::DynamicCast<ContainerPickerLayoutProperty>(layoutWrapper->GetLayoutProperty());
     ASSERT_NE(layoutProperty, nullptr);
@@ -562,6 +577,7 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
     OptionalSizeF contentIdealSize;
     algorithm_->MeasureWidth(layoutWrapper, contentIdealSize);
     EXPECT_TRUE(contentIdealSize.Width().has_value());
+    EXPECT_EQ(contentIdealSize.Width().value(), 150);
 }
 
 /**
@@ -579,6 +595,9 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
     ASSERT_NE(refLayoutWrapper, nullptr);
     LayoutWrapper* layoutWrapper = Referenced::RawPtr(refLayoutWrapper);
     ASSERT_NE(layoutWrapper, nullptr);
+    SetChildNodeFrameSize(layoutWrapper, 0, 150, 40);
+    auto childNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(0));
+    algorithm_->itemPosition_[0] = { 100.0f, 150.0f, childNode };
 
     auto layoutProperty = AceType::DynamicCast<ContainerPickerLayoutProperty>(layoutWrapper->GetLayoutProperty());
     ASSERT_NE(layoutProperty, nullptr);
@@ -592,6 +611,7 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
     OptionalSizeF contentIdealSize;
     algorithm_->MeasureWidth(layoutWrapper, contentIdealSize);
     EXPECT_TRUE(contentIdealSize.Width().has_value());
+    EXPECT_EQ(contentIdealSize.Width().value(), 150);
 }
 
 /**
@@ -626,11 +646,7 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
     auto childNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(0));
     algorithm_->itemPosition_[0] = { 100.0f, 150.0f, childNode };
 
-    auto childLayoutWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
-    ASSERT_NE(childLayoutWrapper, nullptr);
-    auto childGeometryNode = childLayoutWrapper->GetGeometryNode();
-    ASSERT_NE(childGeometryNode, nullptr);
-    childGeometryNode->SetFrameSize({ 150, 40 });
+    SetChildNodeFrameSize(layoutWrapper, 0, 150, 40);
 
     algorithm_->MeasureWidth(layoutWrapper, contentIdealSize);
     EXPECT_TRUE(contentIdealSize.Width().has_value());
@@ -639,7 +655,7 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
 
 /**
  * @tc.name: ContainerPickerLayoutAlgorithm_MeasureWidthTest005
- * @tc.desc: Test MeasureWidth method with infinity cross size
+ * @tc.desc: Test MeasureWidth method when self cross size is greater then parent cross size
  * @tc.type: FUNC
  */
 HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_MeasureWidthTest005, TestSize.Level0)
@@ -655,28 +671,24 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
 
     auto layoutProperty = AceType::DynamicCast<ContainerPickerLayoutProperty>(layoutWrapper->GetLayoutProperty());
     ASSERT_NE(layoutProperty, nullptr);
-    layoutProperty->contentConstraint_ = layoutConstraintF;
-    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::WRAP_CONTENT, true);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
 
     /**
-     * @tc.steps: step2. Set infinity cross size
-     * @tc.expected: step2. The width should be set to child max width
+     * @tc.steps: step2. Set self cross size greater than parent cross size
+     * @tc.expected: step2. The width should be set to default width
      */
+    layoutConstraintF.selfIdealSize = { 500, 910 };
+    layoutProperty->contentConstraint_ = layoutConstraintF;
     OptionalSizeF contentIdealSize;
-    contentIdealSize.SetCrossSize(INFINITY, Axis::VERTICAL);
-
-    // Set item positions to simulate measured items
-    auto childNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(0));
-    algorithm_->itemPosition_[0] = { 100.0f, 150.0f, childNode };
 
     algorithm_->MeasureWidth(layoutWrapper, contentIdealSize);
     EXPECT_TRUE(contentIdealSize.Width().has_value());
-    EXPECT_TRUE(algorithm_->crossMatchChild_);
+    EXPECT_EQ(contentIdealSize.Width().value(), 500);
 }
 
 /**
  * @tc.name: ContainerPickerLayoutAlgorithm_MeasureWidthTest006
- * @tc.desc: Test MeasureWidth method with negative cross size
+ * @tc.desc: Test MeasureWidth method with WRAP_CONTENT and parent cross size
  * @tc.type: FUNC
  */
 HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_MeasureWidthTest006, TestSize.Level0)
@@ -689,37 +701,7 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
     ASSERT_NE(refLayoutWrapper, nullptr);
     LayoutWrapper* layoutWrapper = Referenced::RawPtr(refLayoutWrapper);
     ASSERT_NE(layoutWrapper, nullptr);
-
-    auto layoutProperty = AceType::DynamicCast<ContainerPickerLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    ASSERT_NE(layoutProperty, nullptr);
-    layoutProperty->contentConstraint_ = layoutConstraintF;
-    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
-
-    /**
-     * @tc.steps: step2. Set negative cross size
-     * @tc.expected: step2. The width should be set to default width
-     */
-    OptionalSizeF contentIdealSize;
-
-    algorithm_->MeasureWidth(layoutWrapper, contentIdealSize);
-    EXPECT_TRUE(contentIdealSize.Width().has_value());
-}
-
-/**
- * @tc.name: ContainerPickerLayoutAlgorithm_MeasureWidthTest007
- * @tc.desc: Test MeasureWidth method with WRAP_CONTENT and parent cross size
- * @tc.type: FUNC
- */
-HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_MeasureWidthTest007, TestSize.Level0)
-{
-    /**
-     * @tc.steps: step1. Create ContainerPicker and set up layoutWrapper
-     */
-    CreateContainerPickerNode(3);
-    auto refLayoutWrapper = frameNode_->CreateLayoutWrapper();
-    ASSERT_NE(refLayoutWrapper, nullptr);
-    LayoutWrapper* layoutWrapper = Referenced::RawPtr(refLayoutWrapper);
-    ASSERT_NE(layoutWrapper, nullptr);
+    SetChildNodeFrameSize(layoutWrapper, 0, 500, 40);
 
     auto layoutProperty = AceType::DynamicCast<ContainerPickerLayoutProperty>(layoutWrapper->GetLayoutProperty());
     ASSERT_NE(layoutProperty, nullptr);
@@ -738,15 +720,16 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
 
     algorithm_->MeasureWidth(layoutWrapper, contentIdealSize);
     EXPECT_TRUE(contentIdealSize.Width().has_value());
+    EXPECT_EQ(contentIdealSize.Width().value(), 400);
     EXPECT_TRUE(algorithm_->crossMatchChild_);
 }
 
 /**
- * @tc.name: ContainerPickerLayoutAlgorithm_MeasureWidthTest008
+ * @tc.name: ContainerPickerLayoutAlgorithm_MeasureWidthTest007
  * @tc.desc: Test MeasureWidth method with FIX_AT_IDEAL_SIZE and parent cross size
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_MeasureWidthTest008, TestSize.Level0)
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_MeasureWidthTest007, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create ContainerPicker and set up layoutWrapper
@@ -756,6 +739,7 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
     ASSERT_NE(refLayoutWrapper, nullptr);
     LayoutWrapper* layoutWrapper = Referenced::RawPtr(refLayoutWrapper);
     ASSERT_NE(layoutWrapper, nullptr);
+    SetChildNodeFrameSize(layoutWrapper, 0, 400, 40);
 
     auto layoutProperty = AceType::DynamicCast<ContainerPickerLayoutProperty>(layoutWrapper->GetLayoutProperty());
     ASSERT_NE(layoutProperty, nullptr);
@@ -774,15 +758,16 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
 
     algorithm_->MeasureWidth(layoutWrapper, contentIdealSize);
     EXPECT_TRUE(contentIdealSize.Width().has_value());
+    EXPECT_EQ(contentIdealSize.Width().value(), 400);
     EXPECT_TRUE(algorithm_->crossMatchChild_);
 }
 
 /**
- * @tc.name: ContainerPickerLayoutAlgorithm_MeasureWidthTest009
+ * @tc.name: ContainerPickerLayoutAlgorithm_MeasureWidthTest008
  * @tc.desc: Test MeasureWidth method with negative cross size with MATCH_PARENT policy
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_MeasureWidthTest009, TestSize.Level0)
+HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_MeasureWidthTest008, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create ContainerPicker and set up layoutWrapper
@@ -795,6 +780,8 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
 
     auto layoutProperty = AceType::DynamicCast<ContainerPickerLayoutProperty>(layoutWrapper->GetLayoutProperty());
     ASSERT_NE(layoutProperty, nullptr);
+    std::optional<float> width;
+    layoutConstraintF.selfIdealSize = { width, 910 };
     layoutProperty->contentConstraint_ = layoutConstraintF;
     layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
 
@@ -803,10 +790,9 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, ContainerPickerLayoutAlgorithm_Meas
      * @tc.expected: step2. The width should be set to parent width
      */
     OptionalSizeF contentIdealSize;
-
     algorithm_->MeasureWidth(layoutWrapper, contentIdealSize);
     EXPECT_TRUE(contentIdealSize.Width().has_value());
-    EXPECT_TRUE(NearEqual(algorithm_->GetContentCrossSize(), 200.0f));
+    EXPECT_EQ(algorithm_->GetContentCrossSize(), 200);
 }
 
 /**
