@@ -51,7 +51,9 @@ static inline RefPtr<FrameNode> GetSecCompChildNode(RefPtr<FrameNode>& parent, c
 
 static inline RefPtr<FrameNode> GetCurSecCompChildNode(const std::string& tag)
 {
-    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto stack = ViewStackProcessor::GetInstance();
+    CHECK_NULL_RETURN(stack, nullptr);
+    auto frameNode = AceType::Claim(stack->GetMainFrameNode());
     CHECK_NULL_RETURN(frameNode, nullptr);
     return GetSecCompChildNode(frameNode, tag);
 }
