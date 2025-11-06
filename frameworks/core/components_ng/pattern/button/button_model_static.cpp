@@ -522,13 +522,20 @@ void ButtonModelStatic::ResetButtonFontColor(FrameNode* frameNode)
 void ButtonModelStatic::ResetButtonFontSize(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->ResetFontSize();
+    auto isCreateWithLabel = layoutProperty->GetCreateWithLabelValue(false);
+    if (!isCreateWithLabel) {
+        return;
+    }
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(buttonTheme);
-    auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
+    CHECK_NULL_VOID(textNode);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
 
     ControlSize controlSize = layoutProperty->GetControlSize().value_or(ControlSize::NORMAL);
