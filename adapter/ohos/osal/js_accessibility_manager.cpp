@@ -7668,7 +7668,7 @@ void JsAccessibilityManager::DeregisterInteractionOperationAsChildTree()
     Register(false);
     currentFocusNodeId_ = -1;
     instance->DeregisterElementOperator(windowId, treeId_);
-    InitAccessibilityEnabledAndScreenReadEnabled();
+    InitAccessibilityEnabledAndScreenReadEnabled(); // for many subtrees under the same instance
     parentElementId_ = INVALID_PARENT_ID;
     parentTreeId_ = 0;
     parentWindowId_ = 0;
