@@ -36,6 +36,23 @@ class FrameNode;
 
 namespace OHOS::Ace {
 
+enum class MouseAction : int32_t {
+    NONE = 0,
+    PRESS = 1,
+    RELEASE = 2,
+    MOVE = 3,
+    WINDOW_ENTER = 4,
+    WINDOW_LEAVE = 5,
+    HOVER,
+    HOVER_ENTER,
+    HOVER_MOVE,
+    HOVER_EXIT,
+    PULL_DOWN,
+    PULL_MOVE,
+    PULL_UP,
+    CANCEL
+};
+
 struct TouchPoint final {
     int32_t id = 0;
     float x = 0.0f;
@@ -203,6 +220,7 @@ struct TouchRestrict final {
     std::list<std::string> childTouchTestList = {};
     SourceType sourceType = SourceType::NONE;
     SourceType hitTestType = SourceType::TOUCH;
+    MouseAction mouseAction = MouseAction::NONE;
     InputEventType inputEventType = InputEventType::TOUCH_SCREEN;
     // use to dump event tree
     NG::EventTreeType touchTestType = NG::EventTreeType::TOUCH;
