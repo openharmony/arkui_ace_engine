@@ -141,6 +141,56 @@ HWTEST_F(GestureEventHubTestNg, CalcFrameNodeOffsetAndSize_002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CalcFrameNodeOffsetAndSize_003
+ * @tc.desc: Test CalcFrameNodeOffsetAndSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, CalcFrameNodeOffsetAndSize_003, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Create GestureEventHub.
+    * @tc.expected: gestureEventHub is not null.
+    */
+    auto parentNode = FrameNode::CreateFrameNode(
+        "stack", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(parentNode, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 102, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MountToParent(parentNode);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(guestureEventHub, nullptr);
+
+   /**
+     * @tc.steps: step2. updates event and pipeline attributes.
+     */
+    auto event = guestureEventHub->eventHub_.Upgrade();
+    event->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    EXPECT_TRUE(pipeline);
+    renderContext->UpdateTransformRotate({ 0.0f, 0.0f, 1.0f, 1.0f, 0.0f });
+
+    /**
+     * @tc.steps: step3. set onlyForLifting true.
+     */
+    DragDropInfo info;
+    info.onlyForLifting = true;
+    frameNode->SetDragPreview(info);
+
+    /**
+     * @tc.steps: step4. call CalcFrameNodeOffsetAndSize.
+     */
+    guestureEventHub->CalcFrameNodeOffsetAndSize(frameNode, true);
+    EXPECT_EQ(guestureEventHub->frameNodeSize_.Width(), 0.0);
+    guestureEventHub->CalcFrameNodeOffsetAndSize(frameNode, false);
+    EXPECT_EQ(guestureEventHub->frameNodeSize_.Width(), 0.0);
+    EXPECT_EQ(guestureEventHub->frameNodeOffset_.GetX(), 0.0);
+    EXPECT_EQ(guestureEventHub->frameNodeOffset_.GetY(), 0.0);
+}
+
+/**
  * @tc.name: GetDefaultPixelMapScale_001
  * @tc.desc: Test GetDefaultPixelMapScale
  * @tc.type: FUNC
