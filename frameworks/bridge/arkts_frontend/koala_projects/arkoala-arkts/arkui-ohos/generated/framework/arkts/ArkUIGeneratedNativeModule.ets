@@ -2035,6 +2035,20 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _SpanAttribute_setTextShadow(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _SpanAttribute_setTextBackgroundStyle(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _SpanAttribute_setBaselineOffset(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _SpanAttribute_setKey(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _SpanAttribute_setId(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _SpanAttribute_setOnClick0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _SpanAttribute_setOnHover(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _SpanAttribute_setOnClick1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _Stack_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
     native static _StackInterface_setStackOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
@@ -2168,6 +2182,10 @@ export class ArkUIGeneratedNativeModule {
     native static _SymbolSpanAttribute_setEffectStrategy(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _SymbolSpanAttribute_setRenderingStrategy(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _SymbolSpanAttribute_setKey(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _SymbolSpanAttribute_setId(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _TabContent_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
@@ -5438,6 +5456,8 @@ export class ArkUIGeneratedNativeModule {
     native static _StyledString_unmarshalling1(thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _StyledString_getLength(ptr: KPointer): int32
+    @ani.unsafe.Direct
+    native static _StyledString_setLength(ptr: KPointer, length: KInt): void
     @ani.unsafe.Direct
     native static _StyledStringController_construct(): KPointer
     @ani.unsafe.Direct

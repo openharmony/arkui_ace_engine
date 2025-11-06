@@ -1203,10 +1203,7 @@ Font Convert(const Ark_Font& src)
         font.fontFamilies = fontfamiliesOpt->families;
         font.fontFamiliesNG = std::optional<std::vector<std::string>>(fontfamiliesOpt->families);
     }
-    std::optional<Dimension> fontSize = std::nullopt;
-    if (src.size.tag != INTEROP_TAG_UNDEFINED) {
-        fontSize = Converter::OptConvertFromArkNumStrRes<Ark_Length, Ark_Number>(src.size.value, DimensionUnit::FP);
-    }
+    auto fontSize = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(src.size);
     if (fontSize) {
         Validator::ValidateNonNegative(fontSize);
         Validator::ValidateNonPercent(fontSize);
@@ -1444,7 +1441,7 @@ CaretStyle Convert(const Ark_CaretStyle& src)
 {
     CaretStyle caretStyle;
     caretStyle.color = OptConvert<Color> (src.color);
-    caretStyle.width = OptConvert<Dimension> (src.width);
+    caretStyle.width = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(src.width, DimensionUnit::VP);
     return caretStyle;
 }
 
@@ -2107,6 +2104,50 @@ Dimension ConvertFromString(const std::string& str, DimensionUnit unit)
     return Dimension(value, unit);
 }
 
+bool ConvertFromString(const std::string& str, DimensionUnit unit, Dimension& dimensionRseult)
+{
+    static const int32_t percentUnit = 100;
+    static const std::unordered_map<std::string, DimensionUnit> uMap {
+        { "px", DimensionUnit::PX },
+        { "vp", DimensionUnit::VP },
+        { "fp", DimensionUnit::FP },
+        { "%", DimensionUnit::PERCENT },
+        { "lpx", DimensionUnit::LPX },
+        { "auto", DimensionUnit::AUTO },
+    };
+
+    double value = 0.0;
+
+    if (str.empty()) {
+        LOGE("UITree |ERROR| empty string");
+        dimensionRseult = Dimension(value, unit);
+        return false;
+    }
+    int32_t i = -1;
+    for (i = static_cast<int32_t>(str.length() - 1); i >= 0; --i) {
+        if (str[i] >= '0' && str[i] <= '9') {
+            auto result = StringUtils::StringToDouble(str.substr(0, i + 1), value);
+            if (!result) {
+                dimensionRseult = Dimension(value, unit);
+                return false;
+            }
+            auto subStr = str.substr(i + 1);
+            auto iter = uMap.find(subStr);
+            if (iter != uMap.end()) {
+                unit = iter->second;
+            }
+            value = unit == DimensionUnit::PERCENT ? value / percentUnit : value;
+            break;
+        }
+    }
+    if (i == -1) {
+        dimensionRseult = Dimension(value, unit);
+        return false;
+    }
+    dimensionRseult = Dimension(value, unit);
+    return true;
+}
+
 std::optional<Dimension> OptConvertFromArkResource(const Ark_Resource& src, DimensionUnit defaultUnit)
 {
     ResourceConverter converter(src);
@@ -2174,7 +2215,11 @@ std::optional<Dimension> OptConvertFromArkNumStrRes(const T& src, DimensionUnit 
         [&dimension, defaultUnit](const Ark_String& value) {
             std::optional<std::string> optStr = Converter::OptConvert<std::string>(value);
             if (optStr.has_value()) {
-                dimension = ConvertFromString(optStr.value(), defaultUnit);
+                Dimension value;
+                auto result = ConvertFromString(optStr.value(), defaultUnit, value);
+                if (result) {
+                    dimension = value;
+                }
             }
         },
         [&dimension, defaultUnit](const Ark_Resource& value) {

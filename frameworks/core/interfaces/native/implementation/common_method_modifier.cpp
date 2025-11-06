@@ -2748,9 +2748,7 @@ void SetOnClick0Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        if (frameNode->GetTag() == V2::SPAN_ETS_TAG) {
-            SpanModelNG::ClearOnClick(frameNode);
-        } else if (frameNode->GetTag() == V2::TEXT_ETS_TAG) {
+        if (frameNode->GetTag() == V2::TEXT_ETS_TAG) {
             TextModelNG::ClearOnClick(frameNode);
         }  else {
             ViewAbstract::DisableOnClick(frameNode);
@@ -2761,9 +2759,7 @@ void SetOnClick0Impl(Ark_NativePointer node,
         const auto event = Converter::ArkClickEventSync(info);
         callback.InvokeSync(event.ArkValue());
     };
-    if (frameNode->GetTag() == V2::SPAN_ETS_TAG) {
-        SpanModelNG::SetOnClick(frameNode, std::move(onClick));
-    } else if (frameNode->GetTag() == V2::TEXT_ETS_TAG) {
+    if (frameNode->GetTag() == V2::TEXT_ETS_TAG) {
         TextModelNG::SetOnClick(frameNode, std::move(onClick));
     }  else {
         ViewAbstract::SetOnClick(frameNode, std::move(onClick));
@@ -2776,11 +2772,7 @@ void SetOnHoverImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        if (frameNode->GetTag() == V2::SPAN_ETS_TAG) {
-            SpanModelNG::ResetOnHover(frameNode);
-        } else {
-            ViewAbstract::DisableOnHover(frameNode);
-        }
+        ViewAbstract::DisableOnHover(frameNode);
         return;
     }
     auto weakNode = AceType::WeakClaim(frameNode);
@@ -2790,11 +2782,7 @@ void SetOnHoverImpl(Ark_NativePointer node,
         const auto event = Converter::ArkHoverEventSync(hoverInfo);
         arkCallback.InvokeSync(arkIsHover, event.ArkValue());
     };
-    if (frameNode->GetTag() == V2::SPAN_ETS_TAG) {
-        SpanModelNG::SetOnHover(frameNode, std::move(onHover));
-    }  else {
-        ViewAbstract::SetOnHover(frameNode, std::move(onHover));
-    }
+    ViewAbstract::SetOnHover(frameNode, std::move(onHover));
 }
 void SetOnHoverMoveImpl(Ark_NativePointer node,
                         const Opt_Callback_HoverEvent_Void* value)
@@ -4872,18 +4860,14 @@ void SetOnClick1Impl(Ark_NativePointer node,
         callback.InvokeSync(event.ArkValue());
     };
     auto convValue = Converter::OptConvertPtr<float>(distanceThreshold);
-
-    if (frameNode->GetTag() == "Span") {
-        SpanModelNG::SetOnClick(static_cast<UINode *>(node), std::move(onEvent));
+    double threshold = convValue.value_or(std::numeric_limits<double>::infinity());
+    if (threshold != std::numeric_limits<double>::infinity() && threshold >= 0) {
+        threshold = Dimension(threshold, DimensionUnit::VP).ConvertToPx();
     } else {
-        double threshold = convValue.value_or(std::numeric_limits<double>::infinity());
-        if (threshold != std::numeric_limits<double>::infinity() && threshold >= 0) {
-            threshold = Dimension(threshold, DimensionUnit::VP).ConvertToPx();
-        } else {
-            threshold = std::numeric_limits<double>::infinity();
-        }
-        ViewAbstract::SetOnClick(frameNode, std::move(onEvent), threshold);
+        threshold = std::numeric_limits<double>::infinity();
     }
+    ViewAbstract::SetOnClick(frameNode, std::move(onEvent), threshold);
+    ViewAbstract::SetOnClick(frameNode, std::move(onEvent), *convValue);
 }
 void SetFocusScopeIdImpl(Ark_NativePointer node,
                          const Opt_String* id,

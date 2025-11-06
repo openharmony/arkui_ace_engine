@@ -3163,7 +3163,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     } // HyperlinkModifier
     namespace HyperlinkInterfaceModifier {
     void SetHyperlinkOptionsImpl(Ark_NativePointer node,
-                                 const Ark_Union_String_Resource* address,
+                                 const Opt_Union_String_Resource* address,
                                  const Opt_Union_String_Resource* content)
     {
     }
@@ -5774,6 +5774,35 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                            const Opt_Union_ShadowOptions_Array_ShadowOptions* value)
     {
     }
+    void SetTextBackgroundStyleImpl(Ark_NativePointer node,
+                                    const Opt_TextBackgroundStyle* value)
+    {
+    }
+    void SetBaselineOffsetImpl(Ark_NativePointer node,
+                               const Opt_LengthMetrics* value)
+    {
+    }
+    void SetKeyImpl(Ark_NativePointer node,
+                    const Opt_String* value)
+    {
+    }
+    void SetIdImpl(Ark_NativePointer node,
+                   const Opt_String* value)
+    {
+    }
+    void SetOnClick0Impl(Ark_NativePointer node,
+                         const Opt_Callback_ClickEvent_Void* value)
+    {
+    }
+    void SetOnHoverImpl(Ark_NativePointer node,
+                        const Opt_HoverCallback* value)
+    {
+    }
+    void SetOnClick1Impl(Ark_NativePointer node,
+                         const Opt_Callback_ClickEvent_Void* event,
+                         const Opt_Float64* distanceThreshold)
+    {
+    }
     } // SpanAttributeModifier
     namespace StackModifier {
     Ark_NativePointer ConstructImpl(Ark_Int32 id,
@@ -6089,6 +6118,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void SetRenderingStrategyImpl(Ark_NativePointer node,
                                   const Opt_SymbolRenderingStrategy* value)
+    {
+    }
+    void SetKeyImpl(Ark_NativePointer node,
+                    const Opt_String* value)
+    {
+    }
+    void SetIdImpl(Ark_NativePointer node,
+                   const Opt_String* value)
     {
     }
     } // SymbolSpanAttributeModifier
@@ -9749,6 +9786,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             SpanAttributeModifier::SetTextCaseImpl,
             SpanAttributeModifier::SetLineHeightImpl,
             SpanAttributeModifier::SetTextShadowImpl,
+            SpanAttributeModifier::SetTextBackgroundStyleImpl,
+            SpanAttributeModifier::SetBaselineOffsetImpl,
+            SpanAttributeModifier::SetKeyImpl,
+            SpanAttributeModifier::SetIdImpl,
+            SpanAttributeModifier::SetOnClick0Impl,
+            SpanAttributeModifier::SetOnHoverImpl,
+            SpanAttributeModifier::SetOnClick1Impl,
         };
         return &ArkUISpanModifierImpl;
     }
@@ -9858,6 +9902,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             SymbolSpanAttributeModifier::SetFontWeightImpl,
             SymbolSpanAttributeModifier::SetEffectStrategyImpl,
             SymbolSpanAttributeModifier::SetRenderingStrategyImpl,
+            SymbolSpanAttributeModifier::SetKeyImpl,
+            SymbolSpanAttributeModifier::SetIdImpl,
         };
         return &ArkUISymbolSpanModifierImpl;
     }
@@ -16703,6 +16749,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
+    void SetLengthImpl(Ark_StyledString peer,
+                       Ark_Int32 length)
+    {
+    }
     } // StyledStringAccessor
     namespace StyledStringControllerAccessor {
     void DestroyPeerImpl(Ark_StyledStringController peer)
@@ -21026,6 +21076,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             StyledStringAccessor::Marshalling1Impl,
             StyledStringAccessor::Unmarshalling1Impl,
             StyledStringAccessor::GetLengthImpl,
+            StyledStringAccessor::SetLengthImpl,
         };
         return &StyledStringAccessorImpl;
     }

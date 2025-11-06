@@ -7048,7 +7048,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     } // HyperlinkModifier
     namespace HyperlinkInterfaceModifier {
     void SetHyperlinkOptionsImpl(Ark_NativePointer node,
-                                 const Ark_Union_String_Resource* address,
+                                 const Opt_Union_String_Resource* address,
                                  const Opt_Union_String_Resource* content)
     {
         if (!needGroupedLog(1))
@@ -14382,6 +14382,93 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SetTextBackgroundStyleImpl(Ark_NativePointer node,
+                                    const Opt_TextBackgroundStyle* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setTextBackgroundStyle(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetBaselineOffsetImpl(Ark_NativePointer node,
+                               const Opt_LengthMetrics* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setBaselineOffset(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetKeyImpl(Ark_NativePointer node,
+                    const Opt_String* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setKey(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetIdImpl(Ark_NativePointer node,
+                   const Opt_String* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setId(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetOnClick0Impl(Ark_NativePointer node,
+                         const Opt_Callback_ClickEvent_Void* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setOnClick0(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetOnHoverImpl(Ark_NativePointer node,
+                        const Opt_HoverCallback* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setOnHover(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetOnClick1Impl(Ark_NativePointer node,
+                         const Opt_Callback_ClickEvent_Void* event,
+                         const Opt_Float64* distanceThreshold)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setOnClick1(");
+        WriteToString(&out, event);
+        out.append(", ");
+        WriteToString(&out, distanceThreshold);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     } // SpanAttributeModifier
     namespace StackModifier {
     Ark_NativePointer ConstructImpl(Ark_Int32 id,
@@ -15264,6 +15351,30 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             return;
         }
         string out("setRenderingStrategy(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetKeyImpl(Ark_NativePointer node,
+                    const Opt_String* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setKey(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetIdImpl(Ark_NativePointer node,
+                   const Opt_String* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setId(");
         WriteToString(&out, value);
         out.append(") \n");
         appendGroupedLog(1, out);
@@ -22787,6 +22898,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             SpanAttributeModifier::SetTextCaseImpl,
             SpanAttributeModifier::SetLineHeightImpl,
             SpanAttributeModifier::SetTextShadowImpl,
+            SpanAttributeModifier::SetTextBackgroundStyleImpl,
+            SpanAttributeModifier::SetBaselineOffsetImpl,
+            SpanAttributeModifier::SetKeyImpl,
+            SpanAttributeModifier::SetIdImpl,
+            SpanAttributeModifier::SetOnClick0Impl,
+            SpanAttributeModifier::SetOnHoverImpl,
+            SpanAttributeModifier::SetOnClick1Impl,
         };
         return &ArkUISpanModifierImpl;
     }
@@ -22896,6 +23014,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             SymbolSpanAttributeModifier::SetFontWeightImpl,
             SymbolSpanAttributeModifier::SetEffectStrategyImpl,
             SymbolSpanAttributeModifier::SetRenderingStrategyImpl,
+            SymbolSpanAttributeModifier::SetKeyImpl,
+            SymbolSpanAttributeModifier::SetIdImpl,
         };
         return &ArkUISymbolSpanModifierImpl;
     }
@@ -39831,6 +39951,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return 0;
     }
+    void SetLengthImpl(Ark_StyledString peer,
+                       Ark_Int32 length)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setLength(");
+        WriteToString(&out, length);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     } // StyledStringAccessor
     namespace StyledStringControllerAccessor {
     void DestroyPeerImpl(Ark_StyledStringController peer)
@@ -47063,6 +47195,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             StyledStringAccessor::Marshalling1Impl,
             StyledStringAccessor::Unmarshalling1Impl,
             StyledStringAccessor::GetLengthImpl,
+            StyledStringAccessor::SetLengthImpl,
         };
         return &StyledStringAccessorImpl;
     }

@@ -237,6 +237,7 @@ advanced_ui_component/progressbuttonv2/ @arkuiadvancedcomponent
 advanced_ui_component/segmentbutton/ @arkui_statemgmt
 advanced_ui_component/segmentbuttonv2/ @arkui_statemgmt
 advanced_ui_component/selectionmenu/ @huawei_g_five
+advanced_ui_component_static/selectionmenu/ @huawei_g_five
 advanced_ui_component/selecttitlebar/ @arkuiadvancedcomponent
 advanced_ui_component/splitlayout/ @arkuiadvancedcomponent
 advanced_ui_component/subheader/ @arkuiadvancedcomponent
