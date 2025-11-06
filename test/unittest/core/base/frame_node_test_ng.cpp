@@ -573,10 +573,10 @@ HWTEST_F(FrameNodeTestNg, TransformPositionTest001, TestSize.Level1)
     node->GetRenderContext()->RequestNextFrame();
     EXPECT_TRUE(node->IsOnMainTree());
 
-    NG::OffsetF offset;
+    OffsetF offset;
     offset.Reset();
     auto newOffset = node->GetPositionToWindowWithTransform(offset);
-    SUCCEED();
+    EXPECT_EQ(newOffset, OffsetF());
 }
 
 /**
@@ -596,10 +596,10 @@ HWTEST_F(FrameNodeTestNg, GetRectToScreenTest001, TestSize.Level1)
     node->GetRenderContext()->RequestNextFrame();
     EXPECT_TRUE(node->IsOnMainTree());
 
-    NG::RectF rect;
+    RectF rect;
     rect.Reset();
     auto newRect = node->GetRectToScreen(rect);
-    SUCCEED();
+    EXPECT_EQ(newRect, RectF());
 }
 
 /**
@@ -619,10 +619,10 @@ HWTEST_F(FrameNodeTestNg, GetRectToWindowWithTransformTest001, TestSize.Level1)
     node->GetRenderContext()->RequestNextFrame();
     EXPECT_TRUE(node->IsOnMainTree());
 
-    NG::RectF rect;
+    RectF rect;
     rect.Reset();
     auto newRect = node->GetRectToWindowWithTransform(rect);
-    SUCCEED();
+    EXPECT_EQ(newRect, RectF());
 }
 
 /**
