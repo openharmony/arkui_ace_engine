@@ -55,7 +55,9 @@ import { PathStackUtils } from "../base/ArkNavPathStack"
 import { PageMapBuilder } from "../component/builder";
 import { NavigationOpsHandWritten } from "./NavigationOpsHandWritten";
 import { ArkImageComponent, ResourceStr, ImageContent, ImageAIOptions } from "#generated";
+import { ArkWaterFlowComponent, WaterFlowOptions } from "#generated";
 import { ImageOpsHandWritten } from "./ImageOpsHandWritten";
+import { WaterFlowHandWritten } from "./WaterFlowHandWritten";
 import { ArkCanvasComponent, CanvasRenderingContext2D, DrawingRenderingContext } from "#generated";
 import { ArkVideoComponent, VideoOptions } from "#generated";
 import { ArkXComponentComponent, XComponentOptions, XComponentParameters, NativeXComponentParameters, XComponentController, ImageAnalyzerConfig } from "#generated";
@@ -345,4 +347,8 @@ export function hookSetXComponentOptions(component: ArkXComponentComponent,
 export function hookXComponentStartImageAnalyzer(
   controller: XComponentController, config: ImageAnalyzerConfig): Promise<void> {
   return XComponentOpsHandWritten.hookXComponentStartImageAnalyzerImpl(controller, config);
+}
+
+export function hookWaterFlowOptionsImpl(node: ArkWaterFlowComponent, options: WaterFlowOptions | undefined): void {
+  WaterFlowHandWritten.hookWaterFlowOptionsImpl(node, options)
 }

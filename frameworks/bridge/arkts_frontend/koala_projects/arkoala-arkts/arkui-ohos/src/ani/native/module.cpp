@@ -494,6 +494,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetWaterFlowFooter)
         },
         ani_native_function {
+            "_ResetWaterFlowFooter",
+            "l:",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ResetWaterFlowFooter)
+        },
+        ani_native_function {
             "_SetWaterFlowScroller",
             "ll:",
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetWaterFlowScroller)

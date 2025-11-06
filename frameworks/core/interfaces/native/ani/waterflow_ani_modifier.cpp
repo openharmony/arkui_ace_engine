@@ -80,6 +80,13 @@ void SetWaterFlowFooter(ArkUINodeHandle node, ArkUINodeHandle footerPtr)
     NG::WaterFlowModelStatic::SetFooter(frameNode, uiNode);
 }
 
+void ResetWaterFlowFooter(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::WaterFlowModelStatic::ResetFooter(frameNode);
+}
+
 void SetWaterFlowSection(ArkUINodeHandle node, int32_t start, int32_t deleteCount, void* section, ArkUI_Int32 size)
 {
     auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
@@ -125,6 +132,7 @@ const ArkUIAniWaterFlowModifier* GetArkUIAniWaterFlowModifier()
         .setWaterFlowSection = OHOS::Ace::NG::SetWaterFlowSection,
         .setWaterFlowFooterContent = OHOS::Ace::NG::SetWaterFlowFooterContent,
         .setWaterFlowFooter = OHOS::Ace::NG::SetWaterFlowFooter,
+        .resetWaterFlowFooter = OHOS::Ace::NG::ResetWaterFlowFooter,
         .setWaterFlowScroller = OHOS::Ace::NG::SetWaterFlowScroller,
         .setWaterFlowLayoutMode = OHOS::Ace::NG::SetWaterFlowLayoutMode,
     };
