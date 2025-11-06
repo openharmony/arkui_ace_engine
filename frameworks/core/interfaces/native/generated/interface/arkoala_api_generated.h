@@ -25912,9 +25912,9 @@ typedef struct GENERATED_ArkUILayoutableAccessor {
     Ark_NativePointer (*getFinalizer)();
     void (*layout)(Ark_Layoutable peer,
                    const Ark_Position* position);
-    Ark_DirectionalEdgesT (*getMargin)(Ark_Layoutable peer);
-    Ark_DirectionalEdgesT (*getPadding)(Ark_Layoutable peer);
-    Ark_DirectionalEdgesT (*getBorderWidth)(Ark_Layoutable peer);
+    Opt_DirectionalEdgesT (*getMargin)(Ark_Layoutable peer);
+    Opt_DirectionalEdgesT (*getPadding)(Ark_Layoutable peer);
+    Opt_DirectionalEdgesT (*getBorderWidth)(Ark_Layoutable peer);
     Ark_MeasureResult (*getMeasureResult)(Ark_Layoutable peer);
     void (*setMeasureResult)(Ark_Layoutable peer,
                              const Ark_MeasureResult* measureResult);
@@ -26092,11 +26092,11 @@ typedef struct GENERATED_ArkUIMeasurableAccessor {
     void (*destroyPeer)(Ark_Measurable peer);
     Ark_Measurable (*construct)();
     Ark_NativePointer (*getFinalizer)();
-    Ark_MeasureResult (*measure)(Ark_Measurable peer,
+    Opt_MeasureResult (*measure)(Ark_Measurable peer,
                                  const Ark_ConstraintSizeOptions* constraint);
-    Ark_DirectionalEdgesT (*getMargin)(Ark_Measurable peer);
-    Ark_DirectionalEdgesT (*getPadding)(Ark_Measurable peer);
-    Ark_DirectionalEdgesT (*getBorderWidth)(Ark_Measurable peer);
+    Opt_DirectionalEdgesT (*getMargin)(Ark_Measurable peer);
+    Opt_DirectionalEdgesT (*getPadding)(Ark_Measurable peer);
+    Opt_DirectionalEdgesT (*getBorderWidth)(Ark_Measurable peer);
     Opt_Number (*getUniqueId)(Ark_Measurable peer);
     void (*setUniqueId)(Ark_Measurable peer,
                         const Opt_Number* uniqueId);

@@ -13828,15 +13828,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                     const Ark_Position* position)
     {
     }
-    Ark_DirectionalEdgesT GetMarginImpl(Ark_Layoutable peer)
+    Opt_DirectionalEdgesT GetMarginImpl(Ark_Layoutable peer)
     {
         return {};
     }
-    Ark_DirectionalEdgesT GetPaddingImpl(Ark_Layoutable peer)
+    Opt_DirectionalEdgesT GetPaddingImpl(Ark_Layoutable peer)
     {
         return {};
     }
-    Ark_DirectionalEdgesT GetBorderWidthImpl(Ark_Layoutable peer)
+    Opt_DirectionalEdgesT GetBorderWidthImpl(Ark_Layoutable peer)
     {
         return {};
     }
@@ -14286,20 +14286,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
-    Ark_MeasureResult MeasureImpl(Ark_Measurable peer,
+    Opt_MeasureResult MeasureImpl(Ark_Measurable peer,
                                   const Ark_ConstraintSizeOptions* constraint)
     {
         return {};
     }
-    Ark_DirectionalEdgesT GetMarginImpl(Ark_Measurable peer)
+    Opt_DirectionalEdgesT GetMarginImpl(Ark_Measurable peer)
     {
         return {};
     }
-    Ark_DirectionalEdgesT GetPaddingImpl(Ark_Measurable peer)
+    Opt_DirectionalEdgesT GetPaddingImpl(Ark_Measurable peer)
     {
         return {};
     }
-    Ark_DirectionalEdgesT GetBorderWidthImpl(Ark_Measurable peer)
+    Opt_DirectionalEdgesT GetBorderWidthImpl(Ark_Measurable peer)
     {
         return {};
     }
