@@ -25,7 +25,7 @@ export class InteropWatchFunc extends WatchFunc {
         super(func);
         let uiContext: UIContextImpl = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
         let instanceId = uiContext.getInstanceId();
-        this.checkThread = () => uiContext.checkThread(instanceId);
+        this.checkThread = (): boolean => uiContext.checkThread(instanceId);
     }
 
     execute(propertyName: string): void {
