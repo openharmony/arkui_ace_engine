@@ -160,14 +160,14 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoPropertyTest001, TestSize.Level1)
 
 /**
  * @tc.name: MovingPhotoModelNgTest002
- * @tc.desc: Create movingPhotoNode, and set its properties
+ * @tc.desc: Create movingPhotoNode, and set its properties.
  * @tc.type: FUNC
  */
 HWTEST_F(MovingphotoTestNg, MovingPhotoPropertyTest002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create MovingPhoto
-     * @tc.expected: step1. Create MovingPhoto successfully
+     * @tc.expected: step1. Create MovingPhoto successfully.
      */
     MovingPhotoModelNG movingphoto;
     auto movingPhotoController = AceType::MakeRefPtr<MovingPhotoController>();
@@ -181,7 +181,7 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoPropertyTest002, TestSize.Level1)
     
     /**
      * @tc.steps: step2. set movingphoto properties
-     * @tc.expected: step2. set movingphoto properties successfully
+     * @tc.expected: step2. set movingphoto properties successfully.
      */
     movingphoto.SetImageSrc(MOVINGPHOTO_IMAGE_SRC);
     movingphoto.SetMuted(MUTED_VALUE);
@@ -254,7 +254,7 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoEventTest003, TestSize.Level1)
 
 /**
  * @tc.name: MovingPhotoLayoutAlgorithmTest004
- * @tc.desc: Create movingPhotoNode, and invoke its Algorithm function to calculate the content size
+ * @tc.desc: Create movingPhotoNode, and invoke its Algorithm function to calculate the content size.
  * @tc.type: FUNC
  */
 HWTEST_F(MovingphotoTestNg, MovingPhotoLayoutAlgorithmTest004, TestSize.Level1)
@@ -390,7 +390,7 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoLayoutAlgorithmTest005, TestSize.Level1)
 
 /**
  * @tc.name:  MovingPhotoPatternTest006
- * @tc.desc: Test OnAttachToFrameNode
+ * @tc.desc: Test OnAttachToFrameNode.
  * @tc.type: FUNC
  */
 HWTEST_F(MovingphotoTestNg,  MovingPhotoPatternTest006, TestSize.Level1)
@@ -425,7 +425,7 @@ HWTEST_F(MovingphotoTestNg,  MovingPhotoPatternTest006, TestSize.Level1)
 
 /**
  * @tc.name: MovingPhotoPatternTest007
- * @tc.desc: Test updateMuted
+ * @tc.desc: Test updateMuted.
  * @tc.type: FUNC
  */
 HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest007, TestSize.Level1)
@@ -452,7 +452,7 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest007, TestSize.Level1)
 
 /**
  * @tc.name: MovingPhotoPatternTest008
- * @tc.desc: Test OnMediaPlayerPrepared
+ * @tc.desc: Test OnMediaPlayerPrepared.
  * @tc.type: FUNC
  */
 HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest008, TestSize.Level1)
@@ -485,7 +485,7 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest008, TestSize.Level1)
 }
 /**
  * @tc.name: MovingPhotoPatternTest009
- * @tc.desc: Test start && stop
+ * @tc.desc: Test start && stop.
  * @tc.type: FUNC
  */
 HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest009, TestSize.Level1)
