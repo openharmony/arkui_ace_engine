@@ -797,7 +797,7 @@ void FormManagerDelegate::SetAllowUpdate(bool allowUpdate)
 void FormManagerDelegate::NotifySurfaceChange(const OHOS::AppExecFwk::FormSurfaceInfo &formSurfaceInfo)
 {
     OHOS::AppExecFwk::FormMgr::GetInstance().UpdateFormSize(runningCardId_, formSurfaceInfo.width,
-        formSurfaceInfo.height, formSurfaceInfo.borderWidth);
+        formSurfaceInfo.height, formSurfaceInfo.borderWidth, formSurfaceInfo.formViewScale);
     UpdateFormSizeWantCache(formSurfaceInfo.width, formSurfaceInfo.height, formSurfaceInfo.formViewScale,
         formSurfaceInfo.borderWidth);
     auto formRendererDispatcher = GetFormRendererDispatcher();

@@ -66,7 +66,7 @@ public:
     void RecoverForm(const std::string& statusData);
     void GetRectRelativeToWindow(AccessibilityParentRectInfo& parentRectInfo) const;
     void SetVisibleChange(bool isVisible);
-    void UpdateFormSize(float width, float height, float borderWidth);
+    void UpdateFormSize(float width, float height, float borderWidth, float formViewScale);
     bool IsManagerDelegateValid(const OHOS::AAFwk::Want& want);
 
 private:

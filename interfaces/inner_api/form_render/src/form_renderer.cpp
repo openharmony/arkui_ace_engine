@@ -54,8 +54,8 @@ void FormRenderer::PreInitUIContent(const OHOS::AAFwk::Want& want, const OHOS::A
 {
     HILOG_WARN("InitUIContent width = %{public}f , height = %{public}f, borderWidth = %{public}f,"
         " formViewScale = %{public}f. formJsInfo.formData.size = %{public}zu."
-        " formJsInfo.imageDataMap.size = %{public}zu.", width_, height_, borderWidth_, formViewScale_,
-        formJsInfo.formData.size(), formJsInfo.imageDataMap.size());
+        " formJsInfo.imageDataMap.size = %{public}zu, formId: %{public}" PRId64, width_, height_, borderWidth_,
+        formViewScale_, formJsInfo.formData.size(), formJsInfo.imageDataMap.size(), formJsInfo.formId);
     SetAllowUpdate(allowUpdate_);
     float uiWidth = width_ - borderWidth_ * DOUBLE;
     float uiHeight = height_ - borderWidth_ * DOUBLE;
@@ -291,7 +291,7 @@ void FormRenderer::Destroy()
     HILOG_INFO("Destroy FormRenderer finish.");
 }
 
-void FormRenderer::UpdateFormSize(float width, float height, float borderWidth)
+void FormRenderer::UpdateFormSize(float width, float height, float borderWidth, float formViewScale)
 {
     if (!uiContent_) {
         HILOG_ERROR("uiContent_ is null");
@@ -299,16 +299,19 @@ void FormRenderer::UpdateFormSize(float width, float height, float borderWidth)
     }
     float resizedWidth = width - borderWidth * DOUBLE;
     float resizedHeight = height - borderWidth * DOUBLE;
-    if (!NearEqual(width, width_) || !NearEqual(height, height_) || !NearEqual(borderWidth, lastBorderWidth_)) {
+    if (!NearEqual(width, width_) || !NearEqual(height, height_) || !NearEqual(borderWidth, lastBorderWidth_) ||
+        !NearEqual(formViewScale, formViewScale_)) {
         width_ = width;
         height_ = height;
         borderWidth_ = borderWidth;
+        formViewScale_ = formViewScale;
         uiContent_->SetFormWidth(resizedWidth);
         uiContent_->SetFormHeight(resizedHeight);
-        uiContent_->SetFormViewScale(resizedWidth, resizedHeight, formViewScale_);
+        uiContent_->SetFormViewScale(resizedWidth, resizedHeight, formViewScale);
         lastBorderWidth_ = borderWidth_;
         std::shared_ptr<EventHandler> eventHandler = eventHandler_.lock();
-        HILOG_WARN("UpdateFormSize after set uiContent, width: %{public}f, height: %{public}f", width, height);
+        HILOG_WARN("UpdateFormSize after set uiContent, width: %{public}f, height: %{public}f,"
+            " formViewScale: %{public}f", width, height, formViewScale);
         if (!eventHandler) {
             HILOG_ERROR("eventHandler is null");
             return;
@@ -567,7 +570,8 @@ int32_t FormRenderer::AttachForm(const OHOS::AAFwk::Want& want, const OHOS::AppE
 void FormRenderer::AttachUIContent(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
 {
     HILOG_WARN("AttachUIContent width = %{public}f , height = %{public}f, borderWidth_ = %{public}f,"
-        " formViewScale_ = %{public}f.", width_, height_, borderWidth_, formViewScale_);
+        " formViewScale_ = %{public}f, formId: %{public}" PRId64, width_, height_, borderWidth_, formViewScale_,
+        formJsInfo.formId);
     SetAllowUpdate(allowUpdate_);
     float width = width_ - borderWidth_ * DOUBLE;
     float height = height_ - borderWidth_ * DOUBLE;
@@ -578,7 +582,9 @@ void FormRenderer::AttachUIContent(const OHOS::AAFwk::Want& want, const OHOS::Ap
         uiContent_->SetFormViewScale(width, height, formViewScale_);
         lastBorderWidth_ = borderWidth_;
         uiContent_->OnFormSurfaceChange(width, height);
-        HILOG_WARN("AttachUIContent after set uiContent, width: %{public}f, height: %{public}f", width, height);
+        HILOG_WARN("AttachUIContent after set uiContent, width: %{public}f, height: %{public}f,"
+            " formViewScale: %{public}f, formId: %{public}" PRId64, width, height, formViewScale_,
+            formJsInfo.formId);
     }
     auto backgroundColor = want.GetStringParam(OHOS::AppExecFwk::Constants::PARAM_FORM_TRANSPARENCY_KEY);
     if (backgroundColor_ != backgroundColor) {

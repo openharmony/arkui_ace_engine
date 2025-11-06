@@ -820,8 +820,8 @@ void FormPattern::GetWantParam(RequestFormInfo& info)
     formViewScale_ = CalculateViewScale(width, height, layoutWidth, layoutHeight);
     info.formViewScale = formViewScale_;
     TAG_LOGD(AceLogTag::ACE_FORM, "FormPattern::GetWantParam FORM_ENABLE_SKELETON_KEY %{public}d,"
-        " layoutWidth %{public}f, layoutHeight %{public}f, viewScale: %{public}f", isEnable,
-        layoutWidth, layoutHeight, formViewScale_);
+        " layoutWidth %{public}f, layoutHeight %{public}f, viewScale: %{public}f, formId: %{public}" PRId64,
+        isEnable, layoutWidth, layoutHeight, formViewScale_, info.id);
 }
 
 float FormPattern::CalculateViewScale(float width, float height, float layoutWidth, float layoutHeight)
