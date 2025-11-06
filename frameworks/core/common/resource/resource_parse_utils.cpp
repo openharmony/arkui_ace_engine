@@ -36,7 +36,7 @@ constexpr int32_t UNKNOWN_INSTANCE_ID = -1;
 constexpr int32_t UNKNOWN_RESOURCE_ID = -1;
 constexpr int32_t UNKNOWN_RESOURCE_TYPE = -1;
 const std::regex FLOAT_PATTERN(R"(-?(0|[1-9]\d*)(\.\d+))", std::regex::icase);
-bool ResourceParseUtils::isReloading_ = false;
+bool ResourceParseUtils::needReload_ = false;
 
 uint32_t ColorAlphaAdapt(uint32_t origin)
 {
@@ -380,7 +380,7 @@ bool ResourceParseUtils::ParseResFontFamilies(const RefPtr<ResourceObject>& resO
 void ResourceParseUtils::InvertColorWithResource(const RefPtr<ResourceObject>& resObj, Color& result,
     const ColorMode& colorMode)
 {
-    if (!isReloading_ || (resObj->GetColorMode() == ColorMode::COLOR_MODE_UNDEFINED)) {
+    if (!needReload_ || (resObj->GetColorMode() == ColorMode::COLOR_MODE_UNDEFINED)) {
         return;
     }
     if ((colorMode == ColorMode::DARK) && !resObj->HasDarkResource()) {
@@ -410,7 +410,7 @@ bool ResourceParseUtils::ParseResColor(const RefPtr<ResourceObject>& resObj, Col
         if (resObj->GetColorMode() == ColorMode::COLOR_MODE_UNDEFINED) {
             return false;
         }
-        if (isReloading_ && (colorMode == ColorMode::DARK)) {
+        if (needReload_ && (colorMode == ColorMode::DARK)) {
             result = ColorInverter::Invert(resObj->GetColor(), resObj->GetInstanceId(), resObj->GetNodeTag());
         } else {
             result = resObj->GetColor();

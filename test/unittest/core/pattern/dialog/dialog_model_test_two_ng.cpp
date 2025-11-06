@@ -1090,7 +1090,7 @@ HWTEST_F(DialogModelTwoTestNg, DialogModelTwoTestNg045, TestSize.Level1)
     auto isConfigChangePerform = g_isConfigChangePerform;
     g_isConfigChangePerform = true;
     MockContainer::SetMockColorMode(ColorMode::DARK);
-    ResourceParseUtils::SetIsReloading(true);
+    ResourceParseUtils::SetNeedReload(true);
     HasInvertColor hasInvertColor {
         .hasMaskColor = true,
     };
@@ -1126,7 +1126,7 @@ HWTEST_F(DialogModelTwoTestNg, DialogModelTwoTestNg046, TestSize.Level1)
     auto isConfigChangePerform = g_isConfigChangePerform;
     g_isConfigChangePerform = true;
     MockContainer::SetMockColorMode(ColorMode::DARK);
-    ResourceParseUtils::SetIsReloading(true);
+    ResourceParseUtils::SetNeedReload(true);
     Shadow shadow;
     shadow.SetColor(Color::BLUE);
     HasInvertColor hasInvertColor {
@@ -1164,7 +1164,7 @@ HWTEST_F(DialogModelTwoTestNg, DialogModelTwoTestNg047, TestSize.Level1)
     auto isConfigChangePerform = g_isConfigChangePerform;
     g_isConfigChangePerform = true;
     MockContainer::SetMockColorMode(ColorMode::DARK);
-    ResourceParseUtils::SetIsReloading(true);
+    ResourceParseUtils::SetNeedReload(true);
     HasInvertColor hasInvertColor {
         .hasBackgroundColor = true,
     };
@@ -1200,7 +1200,7 @@ HWTEST_F(DialogModelTwoTestNg, DialogModelTwoTestNg048, TestSize.Level1)
     auto isConfigChangePerform = g_isConfigChangePerform;
     g_isConfigChangePerform = true;
     MockContainer::SetMockColorMode(ColorMode::DARK);
-    ResourceParseUtils::SetIsReloading(true);
+    ResourceParseUtils::SetNeedReload(true);
     BorderColorProperty borderColor;
     borderColor.SetColor(Color::BLUE);
     HasInvertColor hasInvertColor {
@@ -1248,7 +1248,7 @@ HWTEST_F(DialogModelTwoTestNg, DialogModelTwoTestNg049, TestSize.Level1)
     auto isConfigChangePerform = g_isConfigChangePerform;
     g_isConfigChangePerform = true;
     MockContainer::SetMockColorMode(ColorMode::DARK);
-    ResourceParseUtils::SetIsReloading(true);
+    ResourceParseUtils::SetNeedReload(true);
     BlurStyleOption blurStyleOption;
     blurStyleOption.inactiveColor = Color::BLUE;
     HasInvertColor hasInvertColor {
@@ -1286,7 +1286,7 @@ HWTEST_F(DialogModelTwoTestNg, DialogModelTwoTestNg050, TestSize.Level1)
     auto isConfigChangePerform = g_isConfigChangePerform;
     g_isConfigChangePerform = true;
     MockContainer::SetMockColorMode(ColorMode::DARK);
-    ResourceParseUtils::SetIsReloading(true);
+    ResourceParseUtils::SetNeedReload(true);
     EffectOption effectOption;
     effectOption.color = Color::BLUE;
     effectOption.inactiveColor = Color::BLUE;
