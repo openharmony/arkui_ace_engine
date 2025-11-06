@@ -192,6 +192,18 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg003, TestSize.Level1)
     auto nodeId = stack->ClaimNodeId();
     auto frameNode = FrameNode::CreateFrameNode("Test", nodeId, pattern);
     EXPECT_FALSE(frameNode == nullptr);
+    auto contentNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto sideBarNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto dividerNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::DIVIDER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<DividerPattern>());
+    auto controlBtnNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    frameNode->children_.push_back(contentNode);
+    frameNode->children_.push_back(sideBarNode);
+    frameNode->children_.push_back(dividerNode);
+    frameNode->children_.push_back(controlBtnNode);
     pattern->AttachToFrameNode(frameNode);
     pattern->OnModifyDone();
     SideBarContainerModelInstance.SetShowSideBar(true);
@@ -1072,6 +1084,18 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg034, TestSize.Level1)
     auto nodeId = stack->ClaimNodeId();
     auto frameNode = FrameNode::CreateFrameNode("Test", nodeId, pattern);
     EXPECT_FALSE(frameNode == nullptr);
+    auto contentNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto sideBarNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto dividerNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::DIVIDER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<DividerPattern>());
+    auto controlBtnNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    frameNode->children_.push_back(contentNode);
+    frameNode->children_.push_back(sideBarNode);
+    frameNode->children_.push_back(dividerNode);
+    frameNode->children_.push_back(controlBtnNode);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->minPlatformVersion_ = 12;
