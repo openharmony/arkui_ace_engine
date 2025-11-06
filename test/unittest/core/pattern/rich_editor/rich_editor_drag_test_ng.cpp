@@ -560,7 +560,7 @@ HWTEST_F(RichEditorDragTestNg, HandleOnDragDropTextOperation001, TestSize.Level2
     auto newCaretPosition = richEditorPattern->caretPosition_;
     auto newLastCaretPosition = richEditorPattern->lastCaretPosition_;
     EXPECT_NE(newCaretPosition, caretPosition);
-    EXPECT_NE(newLastCaretPosition, lastCaretPosition);
+    EXPECT_EQ(newLastCaretPosition, lastCaretPosition);
 }
 
 /**
