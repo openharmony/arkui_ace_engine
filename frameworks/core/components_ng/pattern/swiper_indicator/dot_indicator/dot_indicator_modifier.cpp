@@ -63,7 +63,7 @@ const auto LONG_POINT_STEP_FOUR_CURVE = AceType::MakeRefPtr<InterpolatingSpring>
 const auto LONG_POINT_STEP_FIVE_CURVE = AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 148, 28);
 } // namespace
 
-std::tuple<float, float, float, float> DotIndicatorModifier::CalCBoundsRect()
+DotIndicatorModifier::ContentProperty DotIndicatorModifier::UpdateContentProperty()
 {
     ContentProperty contentProperty;
     contentProperty.backgroundColor = backgroundColor_->Get().ToColor();
@@ -73,6 +73,28 @@ std::tuple<float, float, float, float> DotIndicatorModifier::CalCBoundsRect()
     contentProperty.indicatorPadding = indicatorPadding_->Get();
     contentProperty.indicatorMargin = indicatorMargin_->Get();
     contentProperty.itemHalfSizes = itemHalfSizes_->Get();
+    if (!targetContentProperty_.itemHalfSizes.empty()) {
+        contentProperty.itemHalfSizes = targetContentProperty_.itemHalfSizes;
+        targetContentProperty_.itemHalfSizes.clear();
+    }
+    if (targetContentProperty_.indicatorMargin) {
+        contentProperty.indicatorMargin = targetContentProperty_.indicatorMargin.value();
+        targetContentProperty_.indicatorMargin.reset();
+    }
+    if (targetContentProperty_.longPointLeftCenterX) {
+        contentProperty.longPointLeftCenterX = targetContentProperty_.longPointLeftCenterX.value();
+        targetContentProperty_.longPointLeftCenterX.reset();
+    }
+    if (targetContentProperty_.longPointRightCenterX) {
+        contentProperty.longPointRightCenterX = targetContentProperty_.longPointRightCenterX.value();
+        targetContentProperty_.longPointRightCenterX.reset();
+    }
+    return contentProperty;
+}
+
+std::tuple<float, float, float, float> DotIndicatorModifier::CalCBoundsRect()
+{
+    auto contentProperty = UpdateContentProperty();
     // Calculate the size of the dirty area of the background board firstly.
     CalCBackground(contentProperty);
     auto totalCount = contentProperty.vectorBlackPointCenterX.size();
@@ -481,19 +503,22 @@ void DotIndicatorModifier::UpdateShrinkPaintProperty(
     backgroundHeightDilateRatio_->Set(1.0f);
 }
 
-void DotIndicatorModifier::UpdateDilatePaintProperty(
-    const LinearVector<float>& hoverItemHalfSizes, const LinearVector<float>& vectorBlackPointCenterX,
-    const std::pair<float, float>& longPointCenterX)
+void DotIndicatorModifier::UpdateDilatePaintProperty(const LinearVector<float>& hoverItemHalfSizes,
+    const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX)
 {
     indicatorMargin_->Set({ 0, 0 });
+    targetContentProperty_.indicatorMargin = { 0, 0 };
     indicatorPadding_->Set(static_cast<float>(paddingSide_.ConvertToPx()));
 
     vectorBlackPointCenterX_->Set(vectorBlackPointCenterX);
     if (longPointLeftAnimEnd_ && longPointRightAnimEnd_) {
         longPointLeftCenterX_->Set(longPointCenterX.first);
         longPointRightCenterX_->Set(longPointCenterX.second);
+        targetContentProperty_.longPointLeftCenterX = longPointCenterX.first;
+        targetContentProperty_.longPointRightCenterX = longPointCenterX.second;
     }
     itemHalfSizes_->Set(hoverItemHalfSizes);
+    targetContentProperty_.itemHalfSizes = hoverItemHalfSizes;
     backgroundWidthDilateRatio_->Set(1.0f);
     backgroundHeightDilateRatio_->Set(1.0f);
 }
