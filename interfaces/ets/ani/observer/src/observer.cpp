@@ -43,6 +43,9 @@ constexpr char ANI_TABCONTENT_INFO_CLS[] = "@ohos.arkui.observer.uiObserver.TabC
 constexpr char ANI_TABCONTENT_STATE_TYPE[] = "@ohos.arkui.observer.uiObserver.TabContentState";
 constexpr char ANI_NAV_SWITCH_INFO[] = "@ohos.arkui.observer.uiObserver.NavDestinationSwitchInfoImpl";
 constexpr char ANI_NAVIGATION_OPERATION_TYPE[] = "arkui.component.navigation.NavigationOperation";
+constexpr char ANI_SCROLL_EVENT_INFO_CLS[] = "@ohos.arkui.observer.uiObserver.ScrollEventInfoImpl";
+constexpr char ANI_SCROLL_AXIS[] = "arkui.component.enums.Axis";
+constexpr char ANI_SCROLL_EVENT_TYPE[] = "@ohos.arkui.observer.uiObserver.ScrollEventType";
 } // namespace
 namespace OHOS::Ace {
 class UiObserver {
@@ -451,6 +454,90 @@ public:
         }
         holder.erase(std::remove_if(
             holder.begin(), holder.end(), [env, cb](ani_ref cb1) { return AniEqual(env, cb, cb1); }), holder.end());
+    }
+
+    void HandleScrollEvent(ani_env* env, const NG::ScrollEventInfo& info)
+    {
+        auto unspecifiedHolder = unspecifiedScrollEventListeners_;
+        std::vector<ani_ref> cbParam;
+        ani_ref fnRetrunVal;
+        ani_object res;
+        CreateScrollEventInfo(env, info, res);
+        cbParam.emplace_back(res);
+        for (auto& cb : unspecifiedHolder) {
+            env->FunctionalObject_Call(
+                reinterpret_cast<ani_fn_object>(cb), cbParam.size(), cbParam.data(), &fnRetrunVal);
+        }
+
+        auto iter = specifiedScrollEventListeners_.find(info.id);
+        if (iter == specifiedScrollEventListeners_.end()) {
+            return;
+        }
+
+        auto holder = iter->second;
+        std::vector<ani_ref> cbParamsWithId;
+        ani_ref fnReturnValWithId;
+        ani_object resWithId;
+        CreateScrollEventInfo(env, info, resWithId);
+        cbParamsWithId.emplace_back(resWithId);
+        for (auto& cb : holder) {
+            env->FunctionalObject_Call(
+                reinterpret_cast<ani_fn_object>(cb), cbParamsWithId.size(), cbParamsWithId.data(), &fnReturnValWithId);
+        }
+    }
+
+    // UIObserver.on(type: "scrollEvent", callback)
+    void RegisterScrollEventCallback(ani_ref& cb)
+    {
+        if (std::find(unspecifiedScrollEventListeners_.begin(), unspecifiedScrollEventListeners_.end(), cb) !=
+            unspecifiedScrollEventListeners_.end()) {
+            return;
+        }
+        unspecifiedScrollEventListeners_.emplace_back(cb);
+    }
+
+    // UIObserver.off(type: "scrollEvent", callback)
+    void UnRegisterScrollEventCallback(ani_env* env, ani_ref& cb)
+    {
+        if (cb == nullptr) {
+            unspecifiedScrollEventListeners_.clear();
+            return;
+        }
+
+        unspecifiedScrollEventListeners_.erase(
+            std::remove_if(unspecifiedScrollEventListeners_.begin(), unspecifiedScrollEventListeners_.end(),
+                [env, cb, this](ani_ref cb1) { return AniEqual(env, cb, cb1); }),
+            unspecifiedScrollEventListeners_.end());
+    }
+
+    void RegisterScrollEventCallback(std::string scrollEventId, ani_ref& cb)
+    {
+        auto iter = specifiedScrollEventListeners_.find(scrollEventId);
+        if (iter == specifiedScrollEventListeners_.end()) {
+            specifiedScrollEventListeners_.emplace(scrollEventId, std::list<ani_ref>({ cb }));
+            return;
+        }
+        auto& holder = iter->second;
+        if (std::find(holder.begin(), holder.end(), cb) != holder.end()) {
+            return;
+        }
+        holder.emplace_back(cb);
+    }
+
+    void UnRegisterScrollEventCallback(ani_env* env, std::string scrollEventId, ani_ref& cb)
+    {
+        auto iter = specifiedScrollEventListeners_.find(scrollEventId);
+        if (iter == specifiedScrollEventListeners_.end()) {
+            return;
+        }
+        auto& holder = iter->second;
+        if (cb == nullptr) {
+            holder.clear();
+            return;
+        }
+        holder.erase(std::remove_if(
+            holder.begin(), holder.end(), [env, cb, this](ani_ref cb1) { return AniEqual(env, cb, cb1); }),
+            holder.end());
     }
 
     void RegisterTabContentUpdateCallback(const ani_ref& cb)
@@ -1013,6 +1100,35 @@ public:
         env->Object_SetPropertyByName_Ref(res, "operation", operationItem);
     }
 
+    static void CreateScrollEventInfo(ani_env* env, const NG::ScrollEventInfo& info, ani_object& res)
+    {
+        ani_class cls;
+        env->FindClass(ANI_SCROLL_EVENT_INFO_CLS, &cls);
+        ani_method ctor;
+        env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor);
+        env->Object_New(cls, ctor, &res);
+
+        ani_string id {};
+        env->String_NewUTF8(info.id.c_str(), info.id.size(), &id);
+        env->Object_SetPropertyByName_Ref(res, "id", id);
+
+        env->Object_SetPropertyByName_Int(res, "uniqueId", static_cast<ani_int>(info.uniqueId));
+
+        ani_enum scrollEvent;
+        env->FindEnum(ANI_SCROLL_EVENT_TYPE, &scrollEvent);
+        ani_enum_item scrollEventItem;
+        env->Enum_GetEnumItemByIndex(scrollEvent, static_cast<ani_size>(info.scrollEvent), &scrollEventItem);
+        env->Object_SetPropertyByName_Ref(res, "scrollEvent", scrollEventItem);
+
+        env->Object_SetPropertyByName_Double(res, "offset", static_cast<ani_double>(info.offset));
+
+        ani_enum axis;
+        env->FindEnum(ANI_SCROLL_AXIS, &axis);
+        ani_enum_item axisItem;
+        env->Enum_GetEnumItemByIndex(axis, static_cast<ani_size>(info.axis), &axisItem);
+        env->Object_SetPropertyByName_Ref(res, "axis", axisItem);
+    }
+
 private:
     int32_t id_;
     std::unordered_map<int32_t, std::list<ani_ref>> densityCbMap_;
@@ -1031,6 +1147,8 @@ private:
     static std::unordered_map<int32_t, std::list<ani_ref>> specifiedRouterPageListeners_;
     std::unordered_map<int32_t, std::list<ani_ref>> specifiedWillDrawCbMap_;
     std::unordered_map<int32_t, std::list<ani_ref>> specifiedDidLayoutCbMap_;
+    std::list<ani_ref> unspecifiedScrollEventListeners_;
+    std::unordered_map<std::string, std::list<ani_ref>> specifiedScrollEventListeners_;
     static std::unordered_map<int32_t, NavIdAndListenersMap> uiContextNavDesSwitchListeners_;
 };
 
@@ -1236,6 +1354,80 @@ static void OffDidLayout([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_obj
 
     const int idMs = 100000;
     observer->UnRegisterDidLayoutCallback(env, idMs, fnObjGlobalRef);
+}
+
+static void OnScrollEventType([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object, ani_fn_object fnObj)
+{
+    if (fnObj == nullptr) {
+        LOGE("observer-ani callback is undefined.");
+        return;
+    }
+    auto* observer = Unwrapp(env, object);
+    if (observer == nullptr) {
+        LOGE("observer-ani context is null.");
+        return;
+    }
+    ani_ref fnObjGlobalRef = nullptr;
+    env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
+    observer->RegisterScrollEventCallback(fnObjGlobalRef);
+}
+
+static void OffScrollEvent([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object, ani_fn_object fnObj)
+{
+    auto* observer = Unwrapp(env, object);
+    if (observer == nullptr) {
+        LOGE("observer-ani context is null.");
+        return;
+    }
+    ani_ref fnObjGlobalRef = nullptr;
+    ani_boolean isUndef = ANI_FALSE;
+    env->Reference_IsUndefined(fnObj, &isUndef);
+    if (isUndef != ANI_TRUE) {
+        env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
+    }
+ 
+    observer->UnRegisterScrollEventCallback(env, fnObjGlobalRef);
+}
+
+static void OnScrollEventWithId([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
+    ani_object options, ani_fn_object fnObj)
+{
+    if (fnObj == nullptr) {
+        LOGE("observer-ani callback is undefined.");
+        return;
+    }
+    auto* observer = Unwrapp(env, object);
+    if (observer == nullptr) {
+        LOGE("observer-ani context is null.");
+        return;
+    }
+    ani_ref fnObjGlobalRef = nullptr;
+    env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
+
+    ani_ref aniScrollId;
+    env->Object_GetPropertyByName_Ref(options, "id", &aniScrollId);
+    std::string scrollId = ANIUtils_ANIStringToStdString(env, reinterpret_cast<ani_string>(aniScrollId));
+    observer->RegisterScrollEventCallback(scrollId, fnObjGlobalRef);
+}
+
+static void OffScrollEventWithId([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
+    ani_object options, ani_fn_object fnObj)
+{
+    if (!fnObj) {
+        return;
+    }
+    auto* observer = Unwrapp(env, object);
+    if (!observer) {
+        LOGE("observer-ani context is null.");
+        return;
+    }
+ 
+    ani_ref aniScrollId;
+    env->Object_GetPropertyByName_Ref(options, "id", &aniScrollId);
+    std::string scrollId = ANIUtils_ANIStringToStdString(env, reinterpret_cast<ani_string>(aniScrollId));
+    ani_ref fnObjGlobalRef = nullptr;
+    env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
+    observer->UnRegisterScrollEventCallback(env, scrollId, fnObjGlobalRef);
 }
 
 static void OnTabContentUpdate([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
@@ -1745,6 +1937,10 @@ static ani_object CreateObserver([[maybe_unused]] ani_env* env, ani_int id)
         observer->HandleUIContextNavDestinationSwitch(env, info);
     };
     NG::UIObserverHandler::GetInstance().SetHandleNavDestinationSwitchFuncForAni(navDestinationSwitchCallback);
+    auto scrollEventCallback = [observer, env](const NG::ScrollEventInfo &info) {
+        observer->HandleScrollEvent(env, info);
+    };
+    NG::UIObserverHandler::GetInstance().SetHandleScrollEventChangeFuncForAni(scrollEventCallback);
     ani_object context_object;
     if (ANI_OK != env->Object_New(cls, ctor, &context_object, reinterpret_cast<ani_long>(observer))) {
         LOGE("observer-ani Can not new object.");
@@ -1853,6 +2049,17 @@ bool ANI_ConstructorForAni(ani_env* env)
             "onTabContentUpdate", ANI_TABCONTENT_CLS, reinterpret_cast<void*>(OHOS::Ace::OnTabContentUpdate) },
         ani_native_function {
             "offTabContentUpdate", ANI_TABCONTENT_CLS, reinterpret_cast<void*>(OHOS::Ace::OffTabContentUpdate) },
+        
+        ani_native_function{ "onScrollEvent",
+            "C{@ohos.arkui.observer.uiObserver.ObserverOptions}C{std.core.Function1}:",
+            reinterpret_cast<void *>(OHOS::Ace::OnScrollEventWithId)},
+        ani_native_function{ "offScrollEvent",
+            "C{@ohos.arkui.observer.uiObserver.ObserverOptions}C{std.core.Function1}:",
+            reinterpret_cast<void *>(OHOS::Ace::OffScrollEventWithId)},
+        ani_native_function{
+            "onScrollEvent", "C{std.core.Function1}:", reinterpret_cast<void *>(OHOS::Ace::OnScrollEventType)},
+        ani_native_function{
+            "offScrollEvent", "C{std.core.Function1}:", reinterpret_cast<void *>(OHOS::Ace::OffScrollEvent)},
     };
     if (ANI_OK != env->Class_BindNativeMethods(clsObserver, methodsObserver.data(), methodsObserver.size())) {
         return false;

@@ -134,8 +134,13 @@ void UIObserverHandler::NotifyScrollEventStateChange(const WeakPtr<AceType>& wea
     int32_t uniqueId = host->GetId();
     float offset = pattern->GetTotalOffset();
     Ace::Axis axis = pattern->GetAxis();
-    CHECK_NULL_VOID(scrollEventHandleFunc_);
-    scrollEventHandleFunc_(id, uniqueId, eventType, offset, axis);
+    if (scrollEventHandleFunc_) {
+        scrollEventHandleFunc_(id, uniqueId, eventType, offset, axis);
+    }
+    if (scrollEventHandleFuncForAni_) {
+        ScrollEventInfo info(id, uniqueId, eventType, offset, axis);
+        scrollEventHandleFuncForAni_(info);
+    }
 }
 
 void UIObserverHandler::NotifyRouterPageStateChange(const RefPtr<PageInfo>& pageInfo, RouterPageState state)
@@ -528,6 +533,11 @@ void UIObserverHandler::SetHandleNavigationChangeFuncForAni(NavigationHandleFunc
 void UIObserverHandler::SetHandleScrollEventChangeFunc(ScrollEventHandleFunc func)
 {
     scrollEventHandleFunc_ = func;
+}
+
+void UIObserverHandler::SetHandleScrollEventChangeFuncForAni(ScrollEventHandleFuncForAni func)
+{
+    scrollEventHandleFuncForAni_ = func;
 }
 
 void UIObserverHandler::SetHandleRouterPageChangeFunc(RouterPageHandleFunc func)

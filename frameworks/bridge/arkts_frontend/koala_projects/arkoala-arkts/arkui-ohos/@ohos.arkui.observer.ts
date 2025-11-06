@@ -126,10 +126,17 @@ declare namespace uiObserver {
         uniqueId: number;
         scrollEvent: ScrollEventType;
         offset: number;
+        axis: Axis;
     }
     export enum ScrollEventType {
       SCROLL_START = 0,
       SCROLL_STOP = 1
+    }
+    export enum Axis {
+        VERTICAL = 0,
+        Vertical = 0,
+        HORIZONTAL = 1,
+        Horizontal = 1
     }
 
     export class TabContentInfo {
