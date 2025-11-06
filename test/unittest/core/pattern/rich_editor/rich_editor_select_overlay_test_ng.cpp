@@ -321,6 +321,7 @@ HWTEST_F(RichEditorSelectOverlayTestNg, OnHandleMove003, TestSize.Level0)
     auto focusHub = richEditorPattern->GetHost()->GetOrCreateFocusHub();
     ASSERT_NE(focusHub, nullptr);
     focusHub->currentFocus_ = true;
+    AddImageSpan();
     richEditorPattern->selectOverlay_->handleLevelMode_ = HandleLevelMode::EMBED;
     richEditorPattern->selectOverlay_->hasTransform_ = true;
     richEditorPattern->ShowSelectOverlay(
