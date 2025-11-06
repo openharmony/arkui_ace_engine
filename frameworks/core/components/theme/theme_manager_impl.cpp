@@ -69,6 +69,7 @@
 #include "core/components/video/video_theme.h"
 #include "core/components_ng/pattern/app_bar/app_bar_theme.h"
 #include "core/components_ng/pattern/container_modal/container_modal_theme.h"
+#include "core/components_ng/pattern/container_picker/container_picker_theme.h"
 #include "core/components_ng/pattern/form/form_theme.h"
 #include "core/components_ng/pattern/gauge/gauge_theme.h"
 #include "core/components_ng/pattern/refresh/refresh_theme_ng.h"
@@ -179,6 +180,7 @@ const std::unordered_map<ThemeType, RefPtr<Theme>(*)(const RefPtr<ThemeConstants
     { NG::SwiperTheme::TypeId(), &ThemeBuildFunc<NG::SwiperTheme::Builder> },
     { NG::LinearIndicatorTheme::TypeId(), &ThemeBuildFunc<NG::LinearIndicatorTheme::Builder> },
     { NG::RefreshThemeNG::TypeId(), &ThemeBuildFunc<NG::RefreshThemeNG::Builder> },
+    { NG::ContainerPickerTheme::TypeId(), &ThemeBuildFunc<NG::ContainerPickerTheme::Builder> },
 };
 
 template<class T>
