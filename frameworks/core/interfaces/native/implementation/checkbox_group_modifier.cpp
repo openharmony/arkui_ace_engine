@@ -126,11 +126,12 @@ void SetMarkImpl(Ark_NativePointer node,
     CheckBoxGroupModelStatic::SetCheckMarkSize(frameNode, size);
     auto strokeWidth =
         Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Float64>(optValue->strokeWidth, DimensionUnit::VP);
-    auto context = frameNode->GetContext();
-    CHECK_NULL_VOID(context);
-    auto theme = context->GetTheme<CheckboxTheme>();
-    auto defaultStroke = theme ? theme->GetCheckStroke() : CHECK_BOX_GROUP_MARK_WIDTH_DEFAULT_VALUE;
-    if (!strokeWidth.has_value() || (strokeWidth.value().Unit() == DimensionUnit::PERCENT) || (strokeWidth.value().IsNegative())) {
+    if (!strokeWidth.has_value() || (strokeWidth.value().Unit() == DimensionUnit::PERCENT)
+        || (strokeWidth.value().IsNegative())) {
+        auto context = frameNode->GetContext();
+        CHECK_NULL_VOID(context);
+        auto theme = context->GetTheme<CheckboxTheme>();
+        auto defaultStroke = theme ? theme->GetCheckStroke() : CHECK_BOX_GROUP_MARK_WIDTH_DEFAULT_VALUE;
         strokeWidth = defaultStroke;
     }
     CheckBoxGroupModelStatic::SetCheckMarkWidth(frameNode, strokeWidth);
