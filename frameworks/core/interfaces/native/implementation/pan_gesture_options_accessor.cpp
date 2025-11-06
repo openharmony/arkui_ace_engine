@@ -99,7 +99,7 @@ void SetDistanceImpl(Ark_PanGestureOptions peer,
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(peer->handler);
     auto distance = DEFAULT_PAN_DISTANCE.ConvertToPx();
-    auto convDistance = Converter::OptConvert<float>(value);
+    auto convDistance = Converter::OptConvert<double>(value);
     if (convDistance.has_value()) {
         Dimension dimension = LessNotEqual(convDistance.value(), 0.0) ?
             DEFAULT_PAN_DISTANCE : Dimension(convDistance.value(), DimensionUnit::VP);

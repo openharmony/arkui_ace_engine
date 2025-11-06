@@ -2405,6 +2405,23 @@ HWTEST_F(PanRecognizerTestNg, OnAcceptedTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PanRecognizerTypeTest001
+ * @tc.desc: Test PanRecognizerType
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerTestNg, PanRecognizerTypeTest001, TestSize.Level1)
+{
+    RefPtr<PanGestureOption> panGestureOption = AceType::MakeRefPtr<PanGestureOption>();
+    PanRecognizer panRecognizer = PanRecognizer(panGestureOption);
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
+    panRecognizer.AttachFrameNode(frameNode);
+    panRecognizer.SetRecognizerType(GestureTypeName::PAN_GESTURE);
+    GestureEvent info;
+    panRecognizer.HandleReports(info, GestureCallbackType::END);
+    EXPECT_EQ(panRecognizer.GetRecognizerType(), GestureTypeName::PAN_GESTURE);
+}
+
+/**
  * @tc.name: HandleTouchUpEvent001
  * @tc.desc: Test HandleTouchUpEvent function
  * @tc.type: FUNC
@@ -2426,22 +2443,6 @@ HWTEST_F(PanRecognizerTestNg, HandleTouchUpEvent001, TestSize.Level1)
     panRecognizer.HandleTouchUpEvent(axisEvent);
     EXPECT_EQ(panRecognizer.globalPoint_.GetX(), axisEvent.x);
     EXPECT_EQ(panRecognizer.globalPoint_.GetY(), axisEvent.y);
-}
-/**
- * @tc.name: PanRecognizerTypeTest001
- * @tc.desc: Test PanRecognizerType
- * @tc.type: FUNC
- */
-HWTEST_F(PanRecognizerTestNg, PanRecognizerTypeTest001, TestSize.Level1)
-{
-    RefPtr<PanGestureOption> panGestureOption = AceType::MakeRefPtr<PanGestureOption>();
-    PanRecognizer panRecognizer = PanRecognizer(panGestureOption);
-    auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
-    panRecognizer.AttachFrameNode(frameNode);
-    panRecognizer.SetRecognizerType(GestureTypeName::PAN_GESTURE);
-    GestureEvent info;
-    panRecognizer.HandleReports(info, GestureCallbackType::END);
-    EXPECT_EQ(panRecognizer.GetRecognizerType(), GestureTypeName::PAN_GESTURE);
 }
 
 /**
