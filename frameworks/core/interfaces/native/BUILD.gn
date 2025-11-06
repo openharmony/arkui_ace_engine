@@ -181,6 +181,7 @@ template("ace_core_interfaces_native_node") {
       sources -= [
         "ani/ani_theme.cpp",
         "ani/ani_theme_module.cpp",
+        "ani/canvas_ani_modifier.cpp",
         "ani/common_ani_modifier.cpp",
         "ani/component3d_ani_modifier.cpp",
         "ani/custom_node_ani_modifier.cpp",
