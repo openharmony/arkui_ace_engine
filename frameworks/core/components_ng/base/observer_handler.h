@@ -25,6 +25,7 @@
 #include "base/memory/referenced.h"
 #include "core/common/frontend.h"
 #include "core/common/container.h"
+#include "core/common/window_size_breakpoint.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 
@@ -191,12 +192,6 @@ struct SwiperContentInfo {
     std::string id = "";
     int32_t uniqueId = -1;
     std::vector<SwiperItemInfoNG> swiperItemInfos = {};
-};
-
-
-struct WindowSizeBreakpoint {
-    WidthBreakpoint widthBreakpoint;
-    HeightBreakpoint heightBreakpoint;
 };
 
 enum class GestureListenerType { TAP = 0, LONG_PRESS, PAN, PINCH, SWIPE, ROTATION, UNKNOWN };

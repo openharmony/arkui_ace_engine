@@ -16,6 +16,7 @@
 #include "core/common/window.h"
 
 #include "core/common/container.h"
+#include "core/components_ng/base/observer_handler.h"
 
 namespace OHOS::Ace {
 Window::Window(std::unique_ptr<PlatformWindow> platformWindow) : platformWindow_(std::move(platformWindow))
@@ -157,5 +158,19 @@ HeightBreakpoint Window::GetHeightBreakpoint(const HeightLayoutBreakPoint& layou
         breakpoint = HeightBreakpoint::HEIGHT_LG;
     }
     return breakpoint;
+}
+
+void Window::NotifyBreakpointChangeIfNeeded(int32_t instanceId, const WidthLayoutBreakPoint& widthLayoutBreakpoints,
+    const HeightLayoutBreakPoint& heightLayoutBreakpoints)
+{
+    WindowSizeBreakpoint newBreakpoint;
+    newBreakpoint.widthBreakpoint = GetWidthBreakpoint(widthLayoutBreakpoints);
+    newBreakpoint.heightBreakpoint = GetHeightBreakpoint(heightLayoutBreakpoints);
+
+    if (newBreakpoint.widthBreakpoint != currentBreakpoint_.widthBreakpoint ||
+        newBreakpoint.heightBreakpoint != currentBreakpoint_.heightBreakpoint) {
+        currentBreakpoint_ = newBreakpoint;
+        NG::UIObserverHandler::GetInstance().NotifyWinSizeLayoutBreakpointChangeFunc(instanceId, newBreakpoint);
+    }
 }
 } // namespace OHOS::Ace

@@ -76,7 +76,7 @@ public:
     static void RegisterWinSizeLayoutBreakpointCallback(
         int32_t uiContextInstanceId, const std::shared_ptr<UIObserverListener>& listener);
     static void UnRegisterWinSizeLayoutBreakpointCallback(int32_t uiContextInstanceId, napi_value callback);
-    static void HandleWinSizeLayoutBreakpointChange(int32_t instanceId, const NG::WindowSizeBreakpoint& info);
+    static void HandleWinSizeLayoutBreakpointChange(int32_t instanceId, const WindowSizeBreakpoint& info);
     static void RegisterDrawCallback(int32_t uiContextInstanceId, const std::shared_ptr<UIObserverListener>& listener);
     static void UnRegisterDrawCallback(int32_t uiContextInstanceId, napi_value callback);
     static void RegisterLayoutCallback(
