@@ -1437,12 +1437,14 @@ void TextPattern::UpdateAIMenuOptions()
         isShowAIMenuOption_ = false;
     }
     if (copyOption_ == CopyOptions::Local || copyOption_ == CopyOptions::Distributed) {
+        SetIsShowAskCeliaInRightClick(true);
         if (MaybeNeedShowSelectAIDetect()) {
             SetIsAskCeliaEnabled(!isShowAIMenuOption_);
         } else {
             SetIsAskCeliaEnabled(true);
         }
     } else {
+        SetIsShowAskCeliaInRightClick(false);
         SetIsAskCeliaEnabled(false);
     }
     if (!IsSupportAskCelia()) {
