@@ -24,6 +24,7 @@
 
 #include "frameworks/core/components/theme/theme_manager_impl.h"
 #include "core/components/button/button_theme.h"
+#include "core/common/multi_thread_build_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -60,5 +61,50 @@ HWTEST_F(ThemeManagerTestNg, ThemeManagerTestNg001, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
     auto theme = themeManager->GetThemeOrigin(ButtonTheme::TypeId());
     EXPECT_TRUE(AceType::InstanceOf<ButtonTheme>(theme));
+}
+
+/**
+ * @tc.name: ThemeMangerTestNg002
+ * @tc.desc: GetThemeOrigin
+ * @tc.type: FUNC
+ */
+HWTEST_F(ThemeManagerTestNg, ThemeManagerTestNg002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: create themeManager
+     */
+    auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
+    auto theme = themeManager->GetThemeWithType(ButtonTheme::TypeId());
+    EXPECT_EQ(theme, nullptr);
+}
+
+/**
+ * @tc.name: ThemeMangerTestNg003
+ * @tc.desc: GetThemeOrigin
+ * @tc.type: FUNC
+ */
+HWTEST_F(ThemeManagerTestNg, ThemeManagerTestNg003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: create themeManager
+     */
+    auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
+    auto res = themeManager->IsThemeExists(ButtonTheme::TypeId());
+    EXPECT_FALSE(res);
+}
+
+/**
+ * @tc.name: ThemeMangerTestNg004
+ * @tc.desc: GetThemeOrigin
+ * @tc.type: FUNC
+ */
+HWTEST_F(ThemeManagerTestNg, ThemeManagerTestNg004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: create themeManager
+     */
+    auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
+    themeManager->ClearThemes();
+    EXPECT_TRUE(themeManager->themes_.empty());
 }
 }
