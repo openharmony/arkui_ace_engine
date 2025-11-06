@@ -730,13 +730,13 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionHandleKeyEventValidSession, Test
     ASSERT_NE(pattern, nullptr);
     pattern->AttachToFrameNode(uiExtNode);
     ValidSession(pattern);
-    KeyEvent event;
-    pattern->HandleKeyEvent(event);
-    pattern->DispatchKeyEvent(event);
+    KeyEvent keyEvent;
+    pattern->HandleKeyEvent(keyEvent);
+    pattern->DispatchKeyEvent(keyEvent);
     pattern->isKeyAsync_ = true;
-    EXPECT_EQ(pattern->DispatchKeyEventSync(event), true);
+    EXPECT_EQ(pattern->DispatchKeyEventSync(keyEvent), true);
     pattern->isKeyAsync_ = false;
-    EXPECT_EQ(pattern->DispatchKeyEventSync(event), true);
+    EXPECT_EQ(pattern->DispatchKeyEventSync(keyEvent), true);
     pattern->canFocusSendToUIExtension_ = false;
     pattern->HandleFocusEvent();
     pattern->DispatchFocusActiveEvent(true);
@@ -756,10 +756,10 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionHandleKeyEventValidSession, Test
     ASSERT_TRUE(pipeline->GetIsFocusActive());
     pattern->HandleFocusEvent();
     pattern->isKeyAsync_ = true;
-    event.code = { KeyCode::KEY_TAB };
-    pattern->DispatchKeyEventSync(event);
-    event.code = { KeyCode::KEY_SPACE };
-    pattern->DispatchKeyEventSync(event);
+    keyEvent.code = { KeyCode::KEY_TAB };
+    pattern->DispatchKeyEventSync(keyEvent);
+    keyEvent.code = { KeyCode::KEY_SPACE };
+    pattern->DispatchKeyEventSync(keyEvent);
 #endif
 }
 
