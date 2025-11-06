@@ -14,6 +14,7 @@
  */
 
 #include <ani_signature_builder.h>
+#include "ani_utils.h"
 #include "movingphotoview_ani.h"
 
 extern const char _binary_multimedia_movingphotoview_js_start[];
@@ -389,7 +390,7 @@ void MovingPhotoAni::SetMovingPhotoViewOptions([[maybe_unused]] ani_env *env, [[
     // controller
     ani_ref objRef;
     if (ANI_OK == env->Object_GetPropertyByName_Ref(options, "controller", &objRef)) {
-        auto controller = Ace::Referenced::Claim(MovingPhotoAni::GetMovingPhotoController(env, objRef));
+        auto controller = Ace::Referenced::Claim(GetMovingPhotoController(env, objRef));
         NG::MovingPhotoModelNG::SetMovingPhotoController(movingPhotoNode, controller);
     }
     // imageAIOptions
@@ -417,31 +418,25 @@ void MovingPhotoAni::SetMovingPhotoViewOptions([[maybe_unused]] ani_env *env, [[
     NG::MovingPhotoModelNG::SetWaterMask(movingPhotoNode, playWithMaskValue);
 }
 
-bool MovingPhotoAni::SetMovingPhotoObject(ani_env env, NG::MovingPhotoNode* movingPhotoNode, ani_object obj)
+void MovingPhotoAni::SetMovingPhotoUri(ani_env env, NG::MovingPhotoNode* movingPhotoNode, ani_object obj)
 {
-    if (AniUtils::GetIsUndefinedObject(env, options)) {
-        return false;
+    ani_ref fn_ref;
+    if (ANI_OK != env->Object_GetPropertyByName_Ref(obj, "getUri", &fn_ref)) {
+        return;
     }
-    arkts::ani_signature::Type classType = 
-        arkts::ani_signature::Builder::BuildClass({"@ohos.file.photoAccessHelper.movingPhoto"});
-    ani_class movingPhotoClass;
-    if (ANI_OK != env->FindClass(classType.Descriptor().c_str(), &movingPhotoClass)) {
-        return false;
+    if (AniUtils::GetIsUndefinedObject(env, fn_ref)) {
+        return;
     }
-    arkts::ani_signature::SignatureBuilder sb{};
-    ani_method getMethod;
-    sb.SetReturnLong();
-    if (env->Class_FindMethod(movingPhotoClass, "getUri", sb.BuildSignatureDescriptor().c_str(), &getMethod) !=
-        ANI_OK) {
-        return false;    
+    ani_ref globalRef;
+    env->GlobalReference_Create(fn_ref, &globalRef);
+    std::vector<ani_ref> args;
+    ani_ref getUriRef;
+    if (ANI_OK != env->FunctionalObject_Call(static_cast<ani_fn_object>(globalRef), args.size(), args.data(), &getUriRef)) {
+        return;
     }
-    ani_ref imageUriRef;
-    if (env->Object_CallMethod_Ref(obj, getMethod, &imageUriRef) != ANI_OK) {
-        return false;
-    }
-    std::string imageUriStr = AniUtils::AniStringToStdString(env, static_cast<ani_string>(imageUriRef));
-    NG::MovingPhotoModelNG::SetMovingPhotoObject(movingPhotoNode, imageUriStr);
-    return true;
+    auto imageUriStr = AniUtils::AniStringToStdString(env, static_cast<ani_string>(getUriRef));
+    env->GlobalReference_Delete(globalRef);
+    NG::MovingPhotoModelNG::SetImageSrc(movingPhotoNode, imageUriStr);
 }
 
 MovingPhotoFormat MovingPhotoAni::ParsePixelMapFormat(ani_env *env, ani_object options)
@@ -451,7 +446,7 @@ MovingPhotoFormat MovingPhotoAni::ParsePixelMapFormat(ani_env *env, ani_object o
     if (ANI_OK != env->Object_GetPropertyByName_Ref(options, "movingPhotoFormat", &format_ref)) {
         return format;
     }
-    if (AniUtils::GetIsUndefinedObject(env, options)) {
+    if (AniUtils::GetIsUndefinedObject(env, format_ref)) {
         return format;
     }
     if (AniUtils::GetIsEnum(env, format_ref, OHOS::Ace::ANI_MOVINGPHOTO_PIXELMAPFORMAT)) {
@@ -468,14 +463,14 @@ MovingPhotoFormat MovingPhotoAni::ParsePixelMapFormat(ani_env *env, ani_object o
     return format;
 }
 
-DynamicRangeMode MovingPhotoAni::ParseDynamicRangeModeFormat(ani_env *env, ani_object options)
+DynamicRangeMode MovingPhotoAni::ParseDynamicRangeMode(ani_env *env, ani_object options)
 {
     ani_ref dynamicRangeMode_ref;
     auto dynamicRangeMode = DynamicRangeMode::HIGH;
     if (ANI_OK != env->Object_GetPropertyByName_Ref(options, "dynamicRangeMode", &dynamicRangeMode_ref)) {
         return dynamicRangeMode;
     }
-    if (AniUtils::GetIsUndefinedObject(env, options)) {
+    if (AniUtils::GetIsUndefinedObject(env, dynamicRangeMode_ref)) {
         return dynamicRangeMode;
     }
     if (AniUtils::GetIsEnum(env, dynamicRangeMode_ref, OHOS::Ace::ANI_MOVINGPHOTO_DYNAMICRANGEMODE)) {
@@ -487,7 +482,7 @@ DynamicRangeMode MovingPhotoAni::ParseDynamicRangeModeFormat(ani_env *env, ani_o
         if (ANI_OK != AniUtils::GetInt32(env, dynamicRangeModeAni, dynamicRangeModeNum)) {
             return dynamicRangeMode;
         }
-        return static_cast<MovingPhotoFormat>(dynamicRangeModeNum);
+        return static_cast<DynamicRangeMode>(dynamicRangeModeNum);
     }
     return dynamicRangeMode;
 }
@@ -501,7 +496,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         return ANI_OUT_OF_REF;
     }
     ani_class cls;
-    ani_status isOk = env->FinClass(OHOS::Ace::ANI_MOVINGPHOTO_NATIVE, &cls);
+    ani_status isOk = env->FindClass(OHOS::Ace::ANI_MOVINGPHOTO_NATIVE, &cls);
     if (ANI_OK != isOk) {
         return isOk;
     }

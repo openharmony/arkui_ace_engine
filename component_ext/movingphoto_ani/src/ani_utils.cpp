@@ -66,14 +66,14 @@ bool AniUtils::GetIsUndefinedObject(ani_env *env, ani_ref objectRef)
     return (bool)isUndefined;
 }
 
-void AniUtils::GetIsEnum(ani_env *env, ani_ref objectRef, const char* enumName) 
+bool AniUtils::GetIsEnum(ani_env *env, ani_ref objectRef, const char* enumName) 
 {
     ani_enum enumAni;
     if (ANI_OK != env->FindEnum(enumName, &enumAni)) {
         return false;
     }
     ani_boolean isEnum;
-    if (env->Object_InstanceOf(static_cast<ani_object>(objectRef), enumAni, &isEnum)) {
+    if (ANI_OK != env->Object_InstanceOf(static_cast<ani_object>(objectRef), enumAni, &isEnum)) {
         return false;
     }
     return (bool)isEnum;
@@ -91,21 +91,21 @@ std::string AniUtils::AniStringToStdString(ani_env *env, ani_string ani_str)
     env->String_GetUTF8Size(ani_str, &strSize);
     std::vector<char> buffer(strSize + 1);
     char* utf8Buffer = buffer.data();
-    ani_size bytesWrittern = 0;
+    ani_size bytesWritten = 0;
     env->String_GetUTF8(ani_str, utf8Buffer, strSize + 1, &bytesWrittern);
-    utf8Buffer[bytesWrittern] = '\0';
+    utf8Buffer[bytesWritten] = '\0';
     std::string content = std::string(utf8Buffer);
     return content;
 }
 
 bool AniUtils::ParseOptionalBool(ani_env *env, ani_object object, std::optional<bool> &result)
 {
-    if (AniUtils::GetIsUndefinedObject(env, object)) {
+    if (GetIsUndefinedObject(env, object)) {
         result.reset();
         return true;
     }
     bool boolValue;
-    if (ANI_OK != AniUtils::GetBool(env, object, boolValue)) {
+    if (ANI_OK != GetBool(env, object, boolValue)) {
         return false;
     }
     result = boolValue;
@@ -120,7 +120,7 @@ ani_status AniUtils::GetBool(ani_env *env, ani_boolean arg, bool &value)
 
 ani_status AniUtils::GetBool(ani_env *env, ani_object arg, bool &value)
 {
-    if (AniUtils::GetIsUndefinedObject(env, object)) {
+    if (GetIsUndefinedObject(env, arg)) {
         return ANI_ERROR;
     }
 

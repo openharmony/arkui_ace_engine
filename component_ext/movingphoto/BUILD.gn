@@ -138,7 +138,6 @@ ohos_shared_library("movingphotoview_platform") {
     "hilog:libhilog",
     "image_framework:image",
     "image_framework:image_native",
-    "napi:ace_napi",
   ]
 
   if (defined(global_parts_info) &&

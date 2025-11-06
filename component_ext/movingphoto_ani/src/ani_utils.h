@@ -29,7 +29,7 @@ public:
 
 private:
     ani_env* env_;
-    ani_ref ref_;    
+    ani_ref ref_;
 };
 
 class AniUtils {
@@ -41,6 +41,6 @@ public:
     static ani_status GetInt32(ani_env *env, ani_int arg, int32_t &value);
     static std::string AniStringToStdString(ani_env *env, ani_string ani_str);
     static bool GetIsEnum(ani_env *env, ani_ref objectRef, const char* enumName);
-}
+};
 }
 #endif

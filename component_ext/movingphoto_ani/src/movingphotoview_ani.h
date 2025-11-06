@@ -50,7 +50,7 @@ public:
     static void SetOnPrepared([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_class object,
                                                 ani_long nodeptr, ani_object options);
     static void SetAutoPlayPeriod([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_class object,
-                                                ani_long nodeptr, ani_object options);
+                                                ani_long nodeptr, ani_double startTimeAni, ani_double endTimeAni);
     static void SetAutoPlay([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_class object,
                                                 ani_long nodeptr, ani_object options);
     static void SetRepeatPlay([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_class object,
@@ -73,13 +73,12 @@ public:
     static void RefreshMovingPhoto([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_class object,
                                                 ani_long peer);
     static void SetPlaybackPeriod([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_class object,
-                                                ani_long peer, ani_int startTimeAni, ani_int endTimeAni);
+                                                ani_long peer, ani_double startTimeAni, ani_double endTimeAni);
     static void EnableAutoPlay([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_class object,
                                                 ani_long peer, ani_boolean options);
 
     static void MovingPhotoControllerConstructor([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_class object);
     static ani_long CreateMovingPhotoController([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_class object);
-    static void GetFunctionSignature(const std::string& str);
 
 private:
     static void DestroyPeerImpl(void* peer);
@@ -87,8 +86,8 @@ private:
         OHOS::Ace::RePtr<OHOS::Ace::NG::MovingPhotoController> controller;
     };
     static MovingPhotoFormat ParsePixelMapFormat(ani_env *env, ani_object options);
-    static DynamicRangeMode ParseDynamicRangeModeFormat(ani_env *env, ani_object options);
-    static bool SetMovingPhotoObject(ani_env *env, NG::MovingPhotoNode *movingPhotoNode, ani_object obj);
+    static DynamicRangeMode ParseDynamicRangeMode(ani_env *env, ani_object options);
+    static void SetMovingPhotoUri(ani_env *env, NG::MovingPhotoNode *movingPhotoNode, ani_object obj);
     static OHOS::Ace::NG::MovingPhotoController* GetMovingPhotoController(ani_env* env, ani_ref ref);
-}
+};
 }
