@@ -1767,7 +1767,7 @@ void FrontendDelegateDeclarative::ShowDialogInner(DialogProperties& dialogProper
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show dialog inner enter");
     auto pipelineContext = pipelineContextHolder_.Get();
     if (Container::IsCurrentUseNewPipeline()) {
-        LOGI("Dialog IsCurrentUseNewPipeline.");
+        LOGD("Dialog IsCurrentUseNewPipeline.");
         dialogProperties.onSuccess = std::move(callback);
         dialogProperties.onCancel = [callback, taskExecutor = taskExecutor_] {
             taskExecutor->PostTask([callback]() { callback(CALLBACK_ERRORCODE_CANCEL, CALLBACK_DATACODE_ZERO); },
