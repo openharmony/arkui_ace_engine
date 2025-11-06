@@ -712,7 +712,8 @@ namespace Converter {
     // SORTED_SECTION: No multiline declarations, please!
     template<> void AssignCast(std::optional<AIImageQuality>& dst, const Ark_image_ResolutionQuality& src);
     template<> void AssignCast(std::optional<AccessibilityInterfaceAction>& dst, const Ark_AccessibilityAction& src);
-    template<> void AssignCast(std::optional<AccessibilityActionInterceptResult>& dst, const Ark_AccessibilityActionInterceptResult& src);
+    template<> void AssignCast(std::optional<AccessibilityActionInterceptResult>& dst,
+        const Ark_AccessibilityActionInterceptResult& src);
     template<> void AssignCast(std::optional<AccessibilityHoverAction>& dst, const Ark_AccessibilityHoverType& src);
     template<> void AssignCast(std::optional<Ace::CanvasUnit>& dst, const Ark_LengthMetricsUnit& src);
     template<> void AssignCast(std::optional<AdaptiveColor>& dst, const Ark_AdaptiveColor& src);
