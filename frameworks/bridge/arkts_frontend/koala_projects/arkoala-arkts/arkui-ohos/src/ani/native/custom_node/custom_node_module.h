@@ -30,6 +30,8 @@ ani_object QueryNavDestinationInfo0(ani_env* env, [[maybe_unused]] ani_object, a
 ani_object QueryNavDestinationInfo1(ani_env* env, [[maybe_unused]] ani_object, ani_int uniqueId);
 ani_object QueryRouterPageInfo(ani_env* env, [[maybe_unused]] ani_object, ani_long pointer);
 ani_object QueryRouterPageInfo1(ani_env* env, [[maybe_unused]] ani_object, ani_int uniqueId);
+void OnReuse(ani_env* env, [[maybe_unused]] ani_object, ani_long node);
+void OnRecycle(ani_env* env, [[maybe_unused]] ani_object, ani_long node);
 } // namespace OHOS::Ace::Ani
 
 #endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_CUSTOM_NODE_MODULE

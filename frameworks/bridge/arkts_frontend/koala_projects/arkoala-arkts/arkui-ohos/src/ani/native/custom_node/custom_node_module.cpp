@@ -425,4 +425,26 @@ ani_object QueryRouterPageInfo(ani_env* env, [[maybe_unused]] ani_object, ani_lo
 
     return res;
 }
+
+void OnReuse(ani_env* env, [[maybe_unused]] ani_object, ani_long node)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        return;
+    }
+
+    modifier->getCustomNodeAniModifier()->onReuse(node);
+    return;
+}
+
+void OnRecycle(ani_env* env, [[maybe_unused]] ani_object, ani_long node)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        return;
+    }
+
+    modifier->getCustomNodeAniModifier()->onRecycle(node);
+    return;
+}
 } // namespace OHOS::Ace::Ani
