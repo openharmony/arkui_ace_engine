@@ -138,10 +138,8 @@ HWTEST_F(TextTestNg, SetTextDetectEnable003, TestSize.Level1)
     RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
     ASSERT_NE(textLayoutProperty, nullptr);
     EXPECT_EQ(textLayoutProperty->GetContentValue(), CREATE_VALUE_W);
-
     textModelNG.SetFontSize(frameNode, ADAPT_ZERO_FONT_SIZE_VALUE);
     EXPECT_EQ(textModelNG.GetFontSize(frameNode), ADAPT_ZERO_FONT_SIZE_VALUE);
-
     textModelNG.SetTextDetectConfig(frameNode, TEXT_DETECT_TYPES);
     EXPECT_EQ(textModelNG.GetTextDetectConfig(frameNode), TEXT_DETECT_TYPES);
 
@@ -150,29 +148,22 @@ HWTEST_F(TextTestNg, SetTextDetectEnable003, TestSize.Level1)
     textDetectConfig.onResult = [](const std::string&) {};
     textModelNG.SetTextDetectConfig(frameNode, textDetectConfig);
     EXPECT_EQ(textModelNG.GetTextDetectConfig(frameNode), TEXT_DETECT_TYPES);
-
     auto textPattern = frameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
     textModelNG.SetOnDetectResultUpdate(frameNode, std::move(textDetectConfig.onResult));
     ASSERT_NE(textPattern->GetDataDetectorAdapter(), nullptr);
     EXPECT_NE(textPattern->dataDetectorAdapter_->onResult_, nullptr);
-
     FONT_FEATURES_LIST value;
     ASSERT_EQ(textModelNG.GetFontFeature(frameNode), value);
     ASSERT_EQ(textModelNG.GetLineBreakStrategy(frameNode), TEXT_LINE_BREAK_STRATEGY);
-
     textModelNG.SetCaretColor(frameNode, Color::BLACK);
     ASSERT_EQ(textModelNG.GetCaretColor(frameNode), Color::BLACK);
-
     textModelNG.ResetCaretColor(frameNode);
     ASSERT_EQ(textModelNG.GetCaretColor(frameNode), Color::BLACK);
-
     textModelNG.SetSelectedBackgroundColor(frameNode, Color::BLACK);
     ASSERT_EQ(textModelNG.GetSelectedBackgroundColor(frameNode), Color::BLACK);
-
     textModelNG.ResetSelectedBackgroundColor(frameNode);
     ASSERT_EQ(textModelNG.GetSelectedBackgroundColor(frameNode), Color::BLACK);
-
     textModelNG.SetTextContentWithStyledString(frameNode, nullptr);
     ASSERT_EQ(textPattern->GetExternalParagraph(), nullptr);
 

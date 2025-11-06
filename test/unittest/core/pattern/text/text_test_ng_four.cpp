@@ -49,6 +49,7 @@ HWTEST_F(TextTestNgFour, HandleMouseEvent001, TestSize.Level1)
     pattern->CreateHandles();
     pattern->textSelector_.Update(0, 20);
     pattern->OnVisibleChange(false);
+
     EXPECT_EQ(pattern->textSelector_.GetTextStart(), -1);
     EXPECT_EQ(pattern->textSelector_.GetTextEnd(), -1);
 
@@ -60,6 +61,7 @@ HWTEST_F(TextTestNgFour, HandleMouseEvent001, TestSize.Level1)
     info.localLocation_ = Offset(1, 1);
     pattern->copyOption_ = copyOption;
     pattern->HandleMouseEvent(info);
+
     EXPECT_EQ(pattern->textSelector_.GetTextStart(), -1);
     EXPECT_EQ(pattern->textSelector_.GetTextEnd(), -1);
 }
@@ -96,6 +98,7 @@ HWTEST_F(TextTestNgFour, HandleMouseEvent002, TestSize.Level1)
     info.button_ = MouseButton::RIGHT_BUTTON;
     info.action_ = MouseAction::PRESS;
     pattern->HandleMouseEvent(info);
+
     EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
     EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 3);
     pattern->pManager_->Reset();
@@ -134,6 +137,7 @@ HWTEST_F(TextTestNgFour, HandleMouseEvent003, TestSize.Level1)
     info.button_ = MouseButton::NONE_BUTTON;
     info.action_ = MouseAction::NONE;
     pattern->HandleMouseEvent(info);
+
     EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
     EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 3);
 
@@ -143,6 +147,7 @@ HWTEST_F(TextTestNgFour, HandleMouseEvent003, TestSize.Level1)
     info.button_ = MouseButton::LEFT_BUTTON;
     info.action_ = MouseAction::NONE;
     pattern->HandleMouseEvent(info);
+
     EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
     EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 3);
 
@@ -151,6 +156,7 @@ HWTEST_F(TextTestNgFour, HandleMouseEvent003, TestSize.Level1)
     info.button_ = MouseButton::RIGHT_BUTTON;
     info.action_ = MouseAction::NONE;
     pattern->HandleMouseEvent(info);
+
     EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
     EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 3);
 
