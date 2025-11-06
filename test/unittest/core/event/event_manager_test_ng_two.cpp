@@ -1466,4 +1466,52 @@ HWTEST_F(EventManagerTestNg, NotifyAxisEvent001, TestSize.Level1)
     eventManager->NotifyAxisEvent(axisEvent, frameNode);
     EXPECT_EQ(eventManager->coastingAxisEventGenerator_->velocityTracker_.GetMainAxisPos(), 50);
 }
+
+/**
+ * @tc.name: EventManagerTest100
+ * @tc.desc: Test HandleGlobalEventNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest100, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    ASSERT_NE(eventManager->coastingAxisEventGenerator_, nullptr);
+    eventManager->coastingAxisEventGenerator_->animationHandler_->phase_ = CoastingAxisPhase::BEGIN;
+
+    /**
+     * @tc.steps: step2. Create FrameNode and Call TouchTest to add touchTestResults_[touchPoint.id].
+     * @tc.expected: touchTestResults_ has the touchPoint.id of instance.
+     */
+    TouchEvent touchPoint;
+    touchPoint.id = 1000;
+    touchPoint.type = TouchType::UP;
+
+    const int nodeId = 10003;
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::LOCATION_BUTTON_ETS_TAG, nodeId, nullptr);
+    TouchRestrict touchRestrict;
+    Offset offset;
+
+    eventManager->TouchTest(touchPoint, frameNode, touchRestrict, offset, 0, true);
+    EXPECT_EQ(eventManager->coastingAxisEventGenerator_->touchId_, -1);
+
+    MouseEvent event;
+    event.action = MouseAction::PRESS;
+    event.button = MouseButton::RIGHT_BUTTON;
+    eventManager->MouseTest(event, frameNode, touchRestrict);
+    EXPECT_EQ(eventManager->coastingAxisEventGenerator_->touchId_, -1);
+
+    touchPoint.type = TouchType::DOWN;
+    eventManager->coastingAxisEventGenerator_ = nullptr;
+    eventManager->TouchTest(touchPoint, frameNode, touchRestrict, offset, 0, true);
+    EXPECT_EQ(eventManager->touchTestResults_.size(), 1);
+
+    event.button = MouseButton::LEFT_BUTTON;
+    eventManager->MouseTest(event, frameNode, touchRestrict);
+    EXPECT_EQ(eventManager->touchTestResults_.size(), 1);
+}
 } // namespace OHOS::Ace::NG
