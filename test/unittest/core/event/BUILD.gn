@@ -99,6 +99,8 @@ ace_unittest("focus_hub_test_ng") {
     "focus_hub_test_ng_for_property_config.cpp",
     "focus_hub_test_ng_for_property_config_two.cpp",
     "focus_hub_test_ng_new.cpp",
+    "focus_hub_test_ng_new_three.cpp",
+    "focus_hub_test_ng_new_two.cpp",
   ]
 }
 
