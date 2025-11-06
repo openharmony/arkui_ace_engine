@@ -57,6 +57,7 @@
 #include "core/components_ng/gestures/pinch_gesture.h"
 #include "core/components_ng/pattern/select_overlay/magnifier.h"
 #include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
+#include "core/components_ng/pattern/web/web_agent_event_reporter.h"
 #include "core/components_ng/pattern/web/web_data_detector_adapter.h"
 #include "ui/rs_surface_node.h"
 #include "core/components_ng/pattern/web/web_select_overlay.h"
@@ -91,6 +92,7 @@ namespace OHOS::NWeb {
     enum class CursorType;
 }
 namespace OHOS::Ace::NG {
+class WebAgentEventReporter;
 class WebAccessibilityChildTreeCallback;
 class ViewDataCommon;
 class TransitionalNodeInfo;
@@ -973,6 +975,12 @@ public:
     void SetTextEventAccessibilityEnable(bool enable);
     bool IsAccessibilityUsedByEventReport();
 
+    // WebAgentEventReporter funcs
+    RefPtr<WebAgentEventReporter> GetAgentEventReporter();
+    // WebAgentEventReporter reference
+    void ReportSelectedText() override;
+    std::pair<int32_t, RectF> GetScrollAreaInfoFromDocument(int32_t id);
+
     // Data Detector funcs
     RefPtr<WebDataDetectorAdapter> GetDataDetectorAdapter();
 
@@ -1035,6 +1043,7 @@ private:
     friend class WebSelectOverlay;
     friend class WebDataDetectorAdapter;
     friend class WebAccessibilityEventReport;
+    friend class WebAgentEventReporter;
 
     void FakePageNodeInfo();
     bool Pip(int status, int delegateId, int childId, int frameRoutingId, int width, int height);
@@ -1575,6 +1584,9 @@ private:
 
     // properties for WebAccessibilityEventReport
     RefPtr<WebAccessibilityEventReport> webAccessibilityEventReport_ = nullptr;
+    // properties for WebAgentEventReporter
+    RefPtr<WebAgentEventReporter> webAgentEventReporter_ = nullptr;
+    int64_t lastTouchDownTime_ = 0;
 
     // properties for AI data detector
     bool isAILinkMenuShow_ = false;

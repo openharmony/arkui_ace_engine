@@ -4902,6 +4902,7 @@ void WebPattern::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
     if (!ParseTouchInfo(info, touchInfos)) {
         return;
     }
+    lastTouchDownTime_ = GetCurrentTimestamp();
     for (auto& touchPoint : touchInfos) {
         if (fromOverlay) {
             touchPoint.x -= webOffset_.GetX();
@@ -9389,6 +9390,32 @@ bool WebPattern::IsAccessibilityUsedByEventReport()
         return webAccessibilityEventReport_->GetEventReportEnable();
     }
     return false;
+}
+
+
+RefPtr<WebAgentEventReporter> WebPattern::GetAgentEventReporter()
+{
+    if (!webAgentEventReporter_) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::GetAgentEventReporter, create new agent report instance");
+        webAgentEventReporter_ = AceType::MakeRefPtr<WebAgentEventReporter>(WeakClaim(this));
+    }
+    return webAgentEventReporter_;
+}
+
+void WebPattern::ReportSelectedText()
+{
+    if (UiSessionManager::GetInstance()->GetSelectTextEventRegistered()) {
+        CHECK_NULL_VOID(delegate_);
+        auto text = delegate_->GetLastSelectionText();
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::ReportSelectedText %{public}zu", text.size());
+        UiSessionManager::GetInstance()->ReportSelectTextEvent(text);
+    }
+}
+
+std::pair<int32_t, RectF> WebPattern::GetScrollAreaInfoFromDocument(int32_t id)
+{
+    CHECK_NULL_RETURN(webDomDocument_, std::make_pair(-1, RectF()));
+    return webDomDocument_->GetScrollAreaInfoById(id);
 }
 
 RefPtr<WebDataDetectorAdapter> WebPattern::GetDataDetectorAdapter()
