@@ -45,24 +45,16 @@ export class ArkButtonPeer extends ArkCommonMethodPeer {
         component?.setPeer(_peer)
         return _peer
     }
-    setButtonOptionsAttribute(label: ButtonOptions | ResourceStr, options?: ButtonOptions): void {
+    setButtonOptions0Attribute(label: ResourceStr, options?: ButtonOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (label instanceof ButtonOptions) {
+        if (label instanceof string) {
             thisSerializer.writeInt8((0).toByte())
-            const labelForIdx0  = label as ButtonOptions
-            ButtonOptions_serializer.write(thisSerializer, labelForIdx0)
-        } else if (label instanceof ResourceStr) {
+            const labelForIdx0  = label as string
+            thisSerializer.writeString(labelForIdx0)
+        } else if (label instanceof Resource) {
             thisSerializer.writeInt8((1).toByte())
-            const labelForIdx1  = label as ResourceStr
-            if (labelForIdx1 instanceof string) {
-                thisSerializer.writeInt8((0).toByte())
-                const labelForIdx1ForIdx0  = labelForIdx1 as string
-                thisSerializer.writeString(labelForIdx1ForIdx0)
-            } else if (labelForIdx1 instanceof Resource) {
-                thisSerializer.writeInt8((1).toByte())
-                const labelForIdx1ForIdx1  = labelForIdx1 as Resource
-                Resource_serializer.write(thisSerializer, labelForIdx1ForIdx1)
-            }
+            const labelForIdx1  = label as Resource
+            Resource_serializer.write(thisSerializer, labelForIdx1)
         }
         if (options !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -71,7 +63,19 @@ export class ArkButtonPeer extends ArkCommonMethodPeer {
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._ButtonInterface_setButtonOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._ButtonInterface_setButtonOptions0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setButtonOptions1Attribute(options?: ButtonOptions): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue  = options!
+            ButtonOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ButtonInterface_setButtonOptions1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setTypeAttribute(value: ButtonType | undefined): void {
@@ -339,7 +343,10 @@ export interface ButtonLabelStyle {
     font?: Font;
 }
 export interface ButtonAttribute extends CommonMethod {
-    setButtonOptions(label: ButtonOptions | ResourceStr, options?: ButtonOptions): this {
+    setButtonOptions(label: ResourceStr, options?: ButtonOptions): this {
+        throw new Error("Unimplemented method setButtonOptions")
+    }
+    setButtonOptions(options?: ButtonOptions): this {
         throw new Error("Unimplemented method setButtonOptions")
     }
     type(value: ButtonType | undefined): this {
@@ -404,7 +411,10 @@ export class ArkButtonStyle extends ArkCommonMethodStyle implements ButtonAttrib
     minFontScale_value?: number | Resource | undefined
     maxFontScale_value?: number | Resource | undefined
     attributeModifier_value?: AttributeModifier<ButtonAttribute> | AttributeModifier<CommonMethod> | undefined
-    setButtonOptions(label: ButtonOptions | ResourceStr, options?: ButtonOptions): this {
+    setButtonOptions(label: ResourceStr, options?: ButtonOptions): this {
+        return this
+    }
+    setButtonOptions(options?: ButtonOptions): this {
         return this
     }
     type(value: ButtonType | undefined): this {
@@ -461,11 +471,19 @@ export class ArkButtonComponent extends ArkCommonMethodComponent implements Butt
         }
         return (this.peer as ArkButtonPeer)
     }
-    public setButtonOptions(label: ButtonOptions | ResourceStr, options?: ButtonOptions): this {
+    public setButtonOptions(label: ResourceStr, options?: ButtonOptions): this {
         if (this.checkPriority("setButtonOptions")) {
-            const label_casted = label as (ButtonOptions | ResourceStr)
+            const label_casted = label as (ResourceStr)
             const options_casted = options as (ButtonOptions | undefined)
-            this.getPeer()?.setButtonOptionsAttribute(label_casted, options_casted)
+            this.getPeer()?.setButtonOptions0Attribute(label_casted, options_casted)
+            return this
+        }
+        return this
+    }
+    public setButtonOptions(options?: ButtonOptions): this {
+        if (this.checkPriority("setButtonOptions")) {
+            const options_casted = options as (ButtonOptions | undefined)
+            this.getPeer()?.setButtonOptions1Attribute(options_casted)
             return this
         }
         return this

@@ -293,7 +293,6 @@ void SetBlockStyleImpl(Ark_NativePointer node, const Opt_SliderBlockStyle* value
             SliderModelNG::ResetBlockImage(frameNode);
             SliderModelNG::ResetBlockShape(frameNode);
         }
-        LOGE("SliderModifier::BlockStyleImpl is not implemented, raw pointer is not supported!");
     } else {
         SliderModelStatic::SetBlockType(frameNode, std::nullopt);
         SliderModelNG::ResetBlockImage(frameNode);
