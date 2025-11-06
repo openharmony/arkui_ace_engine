@@ -663,12 +663,12 @@ bool CheckAndParseSecondParams(ani_env* env, ArkUIDragControllerAsync& asyncCtx,
     if (AniUtils::IsUndefined(env, dragInfo)) {
         return false;
     }
-    ani_double pointerIdAni;
+    ani_int pointerIdAni;
     ani_ref extraParamsAni;
     ani_ref dataAni;
     ani_ref touchPointAni;
     ani_ref previewOptionsAni;
-    if (ANI_OK != env->Object_GetPropertyByName_Double(dragInfo, "pointerId", &pointerIdAni)) {
+    if (ANI_OK != env->Object_GetPropertyByName_Int(dragInfo, "pointerId", &pointerIdAni)) {
         HILOGE("AceDrag, get pointerId failed.");
         return false;
     }

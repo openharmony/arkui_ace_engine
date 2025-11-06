@@ -32,7 +32,7 @@ export namespace dragController {
     }
 
     export interface AnimationOptions {
-        duration?: number;
+        duration?: int;
         curve?: Curve | ICurve;
     }
 
@@ -88,7 +88,7 @@ export namespace dragController {
     }
     
     export interface DragInfo {
-        pointerId: number;
+        pointerId: int;
         data?: UnifiedData;
         extraParams?: string;
         touchPoint?: TouchPoint;
