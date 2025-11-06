@@ -13,13 +13,36 @@
  * limitations under the License.
  */
 
-import { RuntimeType, runtimeType } from "@koalaui/interop";
-import { ArkScrollableNode } from "./ArkScrollableNode";
-import { ListAttribute, ArkListPeer, ListOptions, ListItemAlign, Axis, BarState, ListDividerOptions, ChainAnimationOptions, StickyStyle,
-    ScrollSnapAlign, NestedScrollOptions, ChildrenMainSize, OnScrollVisibleContentChangeCallback, ItemDragInfo, CustomBuilder,
-    OnScrollFrameBeginCallback, OnWillScrollCallback, OnScrollCallback, LengthConstrain, Dimension, EdgeEffect, EdgeEffectOptions,
-    AttributeModifier, ScrollableCommonMethod, CommonMethod } from "../framework";
-import { Resource } from "global.resource"
+import { RuntimeType, runtimeType } from '@koalaui/interop';
+import { ArkScrollableNode } from './ArkScrollableNode';
+import {
+  ListAttribute,
+  ArkListPeer,
+  ListOptions,
+  ListItemAlign,
+  Axis,
+  BarState,
+  ListDividerOptions,
+  ChainAnimationOptions,
+  StickyStyle,
+  ScrollSnapAlign,
+  NestedScrollOptions,
+  ChildrenMainSize,
+  OnScrollVisibleContentChangeCallback,
+  ItemDragInfo,
+  CustomBuilder,
+  OnScrollFrameBeginCallback,
+  OnWillScrollCallback,
+  OnScrollCallback,
+  LengthConstrain,
+  Dimension,
+  EdgeEffect,
+  EdgeEffectOptions,
+  AttributeModifier,
+  ScrollableCommonMethod,
+  CommonMethod
+} from '../framework';
+import { Resource } from 'global.resource'
 export class ArkListNode extends ArkScrollableNode implements ListAttribute {
     constructParam(...param: Object[]): this {
         if (param.length > 1) {
@@ -43,7 +66,7 @@ export class ArkListNode extends ArkScrollableNode implements ListAttribute {
         return this;
     }
     allowChildTypes(): string[] {
-        return ["ListItem", "ListItemGroup"];
+        return ['ListItem', 'ListItemGroup'];
     }
     alignListItem(value: ListItemAlign | undefined): this {
         const value_casted = value as (ListItemAlign | undefined)
@@ -105,7 +128,7 @@ export class ArkListNode extends ArkScrollableNode implements ListAttribute {
             this.markDirty()
             return this
         }
-        throw new Error("Can not select appropriate overload")
+        throw new Error('Can not select appropriate overload')
     }
     cachedCount(value: number | undefined): this {
         const count_type = runtimeType(value)
@@ -115,7 +138,7 @@ export class ArkListNode extends ArkScrollableNode implements ListAttribute {
             this.markDirty()
             return this
         }
-        throw new Error("Can not select appropriate overload")
+        throw new Error('Can not select appropriate overload')
     }
     chainAnimation(value: boolean | undefined): this {
         const value_casted = value as (boolean | undefined)
@@ -281,7 +304,8 @@ export class ArkListNode extends ArkScrollableNode implements ListAttribute {
         this.markDirty()
         return this
     }
-    attributeModifier(value: AttributeModifier<ListAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Unimplemented method attributeModifier")
+    attributeModifier(value: AttributeModifier<ListAttribute> | AttributeModifier<ScrollableCommonMethod> |
+        AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error('Unimplemented method attributeModifier')
     }
 }
