@@ -1234,7 +1234,7 @@ public:
     }
 
     void SetFrameMetricsCallBack(std::function<void(OHOS::Ace::FrameMetrics info)>&& callback);
-    void FireFrameMetricsCallBack(OHOS::Ace::FrameMetrics info);
+    void FireFrameMetricsCallBack(const OHOS::Ace::FrameMetrics& info);
 
     void SetForegroundCalled(bool isForegroundCalled)
     {

@@ -130,7 +130,6 @@
 #include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_container_handler.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
-#include "interfaces/inner_api/ace/ui_content_config.h"
 #include "core/image/image_file_cache.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #ifdef FORM_SUPPORTED
@@ -145,6 +144,7 @@
 #endif
 
 #include "core/components_ng/render/adapter/rosen_render_context.h"
+#include "interfaces/inner_api/ace/ui_content_config.h"
 #include "screen_session_manager_client.h"
 #include "pointer_event.h"
 

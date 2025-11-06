@@ -1201,7 +1201,7 @@ void PipelineBase::SetFrameMetricsCallBack(std::function<void(OHOS::Ace::FrameMe
     frameMetricsCallBack_ = std::move(callback);
 }
 
-void PipelineBase::FireFrameMetricsCallBack(OHOS::Ace::FrameMetrics info)
+void PipelineBase::FireFrameMetricsCallBack(const OHOS::Ace::FrameMetrics& info)
 {
     if (frameMetricsCallBack_) {
         frameMetricsCallBack_(info);
