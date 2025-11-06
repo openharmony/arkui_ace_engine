@@ -2425,4 +2425,27 @@ HWTEST_F(RosenRenderContextTest, OnZindexUpdate001, TestSize.Level1)
     positionZ = stagingProperties.GetPositionZ();
     EXPECT_EQ(positionZ, 3);
 }
+
+/**
+ * @tc.name: IsOnRenderTreeTest001
+ * @tc.desc: Test IsOnRenderTree Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, IsOnRenderTreeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get RenderContext.
+     * @tc.expected: step1. RenderContext is not null .
+     */
+    auto frameNode = FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr rosenRenderContext = InitRosenRenderContext(frameNode);
+    ASSERT_NE(rosenRenderContext, nullptr);
+    /**
+     * @tc.steps: step2. get isOnRenderTree.
+     * @tc.expected: step1. isOnRenderTree is false .
+     */
+    auto isOnRenderTree = rosenRenderContext->IsOnRenderTree();
+    EXPECT_EQ(isOnRenderTree, false);
+}
 } // namespace OHOS::Ace::NG

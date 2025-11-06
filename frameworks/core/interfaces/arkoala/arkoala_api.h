@@ -7381,6 +7381,7 @@ struct ArkUIFrameNodeModifier {
     void (*setFocusDependence)(ArkUINodeHandle node, ArkUI_Uint32 focusDependence);
     void (*resetFocusDependence)(ArkUINodeHandle node);
     void (*applyAttributesFinish)(ArkUINodeHandle node);
+    ArkUI_Bool (*isOnRenderTree)(ArkUINodeHandle node);
 };
 
 struct ArkUINodeContentEvent {

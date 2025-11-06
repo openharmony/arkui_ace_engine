@@ -13225,6 +13225,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
+    Ark_Boolean IsOnRenderTreeImpl(Ark_FrameNode peer)
+    {
+       return {};
+    }
     } // FrameNodeExtenderAccessor
     namespace FrictionMotionAccessor {
     void DestroyPeerImpl(Ark_FrictionMotion peer)
@@ -19482,6 +19486,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             FrameNodeExtenderAccessor::CreateByRawPtrImpl,
             FrameNodeExtenderAccessor::UnWrapRawPtrImpl,
             FrameNodeExtenderAccessor::GetCommonEventImpl,
+            FrameNodeExtenderAccessor::IsOnRenderTreeImpl,
         };
         return &FrameNodeExtenderAccessorImpl;
     }

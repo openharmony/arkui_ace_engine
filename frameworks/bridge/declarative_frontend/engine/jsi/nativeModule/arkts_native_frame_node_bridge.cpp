@@ -527,6 +527,17 @@ ArkUINativeModuleValue FrameNodeBridge::RemoveAdoptedChild(ArkUIRuntimeCallInfo*
     return panda::NumberRef::New(vm, result);
 }
 
+ArkUINativeModuleValue FrameNodeBridge::IsOnRenderTree(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    auto defaultReturnValue = panda::NumberRef::New(vm, false);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(!firstArg.IsNull(), defaultReturnValue);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto result = GetArkUINodeModifiers()->getFrameNodeModifier()->isOnRenderTree(nativeNode);
+    return panda::BooleanRef::New(vm, result);
+}
+
 ArkUINativeModuleValue FrameNodeBridge::ConvertPoint(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();

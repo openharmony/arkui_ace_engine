@@ -4744,6 +4744,8 @@ void ArkUINativeModule::RegisterFrameNodeAttributes(Local<panda::ObjectRef> obje
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::AdoptChild));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "removeAdoptedChild"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::RemoveAdoptedChild));
+    frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "isOnRenderTree"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::IsOnRenderTree));
 }
 
 void ArkUINativeModule::RegisterLineAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)

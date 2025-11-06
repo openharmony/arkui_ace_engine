@@ -1660,6 +1660,10 @@ export class FrameNodeExtender {
         const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_adoptChild(extractors.toFrameNodePtr(peer), extractors.toFrameNodePtr(child))
         return retval
     }
+    static isOnRenderTree_serialize(peer: FrameNode): boolean {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_isOnRenderTree(extractors.toFrameNodePtr(peer))
+        return retval
+    }
     static removeAdoptedChild_serialize(peer: FrameNode, child: FrameNode): int32 {
         const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_removeAdoptedChild(extractors.toFrameNodePtr(peer), extractors.toFrameNodePtr(child))
         return retval
@@ -1959,6 +1963,10 @@ export class FrameNodeExtender {
         const peer_casted = peer as (FrameNode)
         const child_casted = child as (FrameNode)
         return FrameNodeExtender.removeAdoptedChild_serialize(peer_casted, child_casted)
+    }
+    public static isOnRenderTree(peer: FrameNode): boolean {
+        const peer_casted = peer as (FrameNode)
+        return FrameNodeExtender.isOnRenderTree_serialize(peer_casted)
     }
 }
 export class GestureOps {

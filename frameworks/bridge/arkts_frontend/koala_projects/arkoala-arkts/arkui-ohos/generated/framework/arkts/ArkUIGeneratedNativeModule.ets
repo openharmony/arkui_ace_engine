@@ -4131,6 +4131,8 @@ export class ArkUIGeneratedNativeModule {
     native static _FrameNodeExtender_getCommonEvent(peer: KPointer): KPointer
     @ani.unsafe.Direct
     native static _FrameNodeExtender_getRenderNode(peer: KPointer): KPointer
+    @ani.unsafe.Direct
+    native static _FrameNodeExtender_isOnRenderTree(peer: KPointer): boolean
     @ani.unsafe.Quick
     native static _FrameNodeExtender_convertPoint(peer: KPointer, node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KInteropReturnBuffer
     @ani.unsafe.Direct

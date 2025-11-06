@@ -841,6 +841,8 @@ public:
 
     virtual void RemoveFromTree() {}
 
+    virtual bool IsOnRenderTree() {return false;}
+
     virtual void SetNeedUseCmdlistDrawRegion(bool needUseCmdlistDrawRegion) {}
 
     virtual void UpdateCustomBackground() {}
