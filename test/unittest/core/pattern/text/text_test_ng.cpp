@@ -463,7 +463,7 @@ HWTEST_F(TextTestNg, OnAttachToFrameNode001, TestSize.Level1)
 HWTEST_F(TextTestNg, OnHandleMoveDone001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create frameNode and pattern
+     * @tc.steps: step1. create frameNode and pattern.
      */
     auto [frameNode, pattern] = Init();
     pattern->textSelector_.Update(0, TEXT_SIZE_INT);
@@ -678,11 +678,11 @@ HWTEST_F(TextTestNg, TryLinkJump001, TestSize.Level1)
     spanNode->UpdateContent(NORMAL_URL);
     EXPECT_FALSE(textPattern->TryLinkJump(spanItem));
 
-    // jump link: "http://www.baidu.com"
+    // jump link: "http://www.baidu.com".
     spanNode->UpdateContent(JUMP_LINK_HTTP);
     EXPECT_TRUE(textPattern->TryLinkJump(spanItem));
 
-    // jump link: "https://www.baidu.com"
+    // jump link: "https://www.baidu.com".
     spanNode->UpdateContent(JUMP_LINK_HTTPS);
     EXPECT_TRUE(textPattern->TryLinkJump(spanItem));
 }
@@ -718,7 +718,7 @@ HWTEST_F(TextTestNg, ActTextOnClick001, TestSize.Level1)
 
 /**
  * @tc.name: HandleUserTouchEvent001
- * @tc.desc: test HandleUserTouchEvent
+ * @tc.desc: test HandleUserTouchEvent.
  * @tc.type: FUNC
  */
 HWTEST_F(TextTestNg, HandleUserTouchEvent001, TestSize.Level1)
@@ -949,7 +949,7 @@ HWTEST_F(TextTestNg, OnDirtyLayoutWrapperSwap003, TestSize.Level1)
 HWTEST_F(TextTestNg, TextLayoutAlgorithm001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. spans is empty and call function
+     * @tc.steps: step1. spans is empty and call function.
      */
     std::list<RefPtr<SpanItem>> spans1_;
     auto pManager_ = AceType::MakeRefPtr<ParagraphManager>();
@@ -1019,7 +1019,7 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithm002, TestSize.Level1)
 HWTEST_F(TextTestNg, UpdateSensitiveContent001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. init and Create function
+     * @tc.steps: step1. init and Create function.
      */
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
