@@ -15,13 +15,13 @@
 
 import entry from 'libentry.so';
 import { StatusClickComponent } from './PublishStatusClick';
+
 @Entry
 @Component
 struct Index {
   build() {
     Column() {
       Column() {
-        // StatusClickComponent()
         XComponent({
           id: 'xComponentId',
           type: XComponentType.NODE,
@@ -29,7 +29,6 @@ struct Index {
         }).onDestroy(() => {
           console.log('onDestroy');
         }).onAppear(() => {
-          // render.scrollScrollEdgeVerticalTest('xComponentId');
           render.gridTest('xComponentId');
         }).width('100%')
           .height('100%')

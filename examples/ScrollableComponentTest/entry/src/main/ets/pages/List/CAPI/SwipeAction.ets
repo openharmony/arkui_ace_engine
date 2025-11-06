@@ -13,17 +13,17 @@
  * limitations under the License.
  */
 
- /*
-  * Description: List支持展开指定ListItem的swipeAction
-  * Writer: renxiaowen
-  */
+/*
+ * Description: List支持展开指定ListItem的swipeAction
+ * Writer: renxiaowen
+ */
 
 import entry from 'libentry.so';
 
 @Entry
 @Component
 struct NativePage {
-  @State text: string = "Hello, Native";
+  @State text: string = 'Hello, Native';
   @State tag: string = 'NativePage';
 
   build() {

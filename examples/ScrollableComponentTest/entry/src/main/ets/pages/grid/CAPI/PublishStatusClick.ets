@@ -18,7 +18,7 @@
  * Writer: renxiaowen
  */
 
-import { BusinessError,commonEventManager } from '@kit.BasicServicesKit';
+import { BusinessError, commonEventManager } from '@kit.BasicServicesKit';
 
 @Component
 export struct StatusClickComponent {
@@ -26,11 +26,11 @@ export struct StatusClickComponent {
     Button('publicClick').onClick(() => {
       // 发布公共事件
       try {
-        commonEventManager.publish("usual.event.STATUSBAR_CLICKED", (err: BusinessError)=>{
+        commonEventManager.publish('usual.event.STATUSBAR_CLICKED', (err: BusinessError) => {
           if (err) {
             console.error(`wangyu publish failed, code is ${err.code}, message is ${err.message}`);
           } else {
-            console.info("wangyu publish success");
+            console.info('wangyu publish success');
           }
         });
       } catch (error) {
