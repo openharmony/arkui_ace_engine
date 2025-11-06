@@ -4567,6 +4567,40 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _Measurable_setUniqueId(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _MenuItemConfiguration_construct(): KPointer
+    @ani.unsafe.Direct
+    native static _MenuItemConfiguration_getFinalizer(): KPointer
+    @ani.unsafe.Quick
+    native static _MenuItemConfiguration_triggerSelect(ptr: KPointer, index: KInt, value: KStringPtr): void
+    @ani.unsafe.Direct
+    native static _MenuItemConfiguration_getEnabled(ptr: KPointer): boolean
+    @ani.unsafe.Direct
+    native static _MenuItemConfiguration_setEnabled(ptr: KPointer, enabled: KInt): void
+    @ani.unsafe.Quick
+    native static _MenuItemConfiguration_getContentModifier(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Direct
+    native static _MenuItemConfiguration_setContentModifier(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _MenuItemConfiguration_getValue(ptr: KPointer): KPointer
+    @ani.unsafe.Direct
+    native static _MenuItemConfiguration_setValue(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Quick
+    native static _MenuItemConfiguration_getIcon(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Direct
+    native static _MenuItemConfiguration_setIcon(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Quick
+    native static _MenuItemConfiguration_getSymbolIcon(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Direct
+    native static _MenuItemConfiguration_setSymbolIcon(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _MenuItemConfiguration_getSelected(ptr: KPointer): boolean
+    @ani.unsafe.Direct
+    native static _MenuItemConfiguration_setSelected(ptr: KPointer, selected: KInt): void
+    @ani.unsafe.Direct
+    native static _MenuItemConfiguration_getIndex(ptr: KPointer): int32
+    @ani.unsafe.Direct
+    native static _MenuItemConfiguration_setIndex(ptr: KPointer, index: KInt): void
+    @ani.unsafe.Direct
     native static _MouseEvent_construct(): KPointer
     @ani.unsafe.Direct
     native static _MouseEvent_getFinalizer(): KPointer
