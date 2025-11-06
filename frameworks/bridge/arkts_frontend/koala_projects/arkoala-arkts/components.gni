@@ -392,6 +392,7 @@ arkui_files = [
   "arkui-preprocessed/arkui/handwritten/index.ets",
   "arkui-preprocessed/arkui/handwritten/transfer/ColorMetricsTransfer.ets",
   "arkui-preprocessed/arkui/handwritten/transfer/LengthMetricsTransfer.ets",
+  "arkui-preprocessed/arkui/handwritten/transfer/RenderNodeTransfer.ets",
   "arkui-preprocessed/arkui/handwritten/transfer/ResourceTransfer.ets",
   "arkui-preprocessed/arkui/handwritten/transfer/ShapeBaseTransfer.ets",
   "arkui-preprocessed/arkui/handwritten/transfer/ShapeClipTransfer.ets",
