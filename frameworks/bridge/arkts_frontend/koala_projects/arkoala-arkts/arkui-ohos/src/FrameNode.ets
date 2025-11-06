@@ -22,10 +22,8 @@ import {
 import { finalizerRegister, int32 } from "@koalaui/common"
 import { ArkUIAniModule } from "arkui.ani"
 import { RenderNode } from "./RenderNode"
-import {
-    CommonAttribute, ArkCommonMethodPeer, CommonMethod, UIGestureEvent, UICommonEvent, UICommonEventInternal,
-    CustomProperty, AnimateParam
-} from './component/common'
+import { CommonAttribute, ArkCommonMethodPeer, CommonMethod, UIGestureEvent, UICommonEvent, UICommonEventInternal,
+    CustomProperty, AnimateParam } from './component/common';
 import { ArkButtonNode } from './typedNode/ArkButtonNode'
 import { ButtonOptions, ButtonAttribute, ArkButtonPeer} from './component/button'
 import { ArkCheckboxNode } from './typedNode/ArkCheckboxNode'
@@ -84,8 +82,8 @@ import { GridLayoutOptions, GridAttribute, ArkGridPeer } from './component/grid'
 import { GridItemOptions, GridItemAttribute, ArkGridItemPeer } from './component/gridItem'
 import { WaterFlowOptions, WaterFlowAttribute, ArkWaterFlowPeer } from './component/waterFlow'
 import { FlowItemAttribute, ArkFlowItemPeer } from './component/flowItem'
-import { ColumnOptions, ColumnAttribute, ArkColumnPeer } from './component/column'
-import { RowOptions, RowAttribute, ArkRowPeer } from './component/row'
+import { ColumnOptions, ColumnOptionsV2, ColumnAttribute, ArkColumnPeer } from './component/column'
+import { RowOptions, RowOptionsV2, RowAttribute, ArkRowPeer } from './component/row'
 import { StackOptions, StackAttribute, ArkStackPeer } from './component/stack'
 import { FlexOptions, FlexAttribute, ArkFlexPeer } from './component/flex'
 import { RelativeContainerAttribute, ArkRelativeContainerPeer } from './component/relativeContainer'
@@ -937,7 +935,7 @@ export namespace typeNode {
         constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkColumnNode) {
             super(uiContext, type, attrCreator);
         }
-        initialize(options: ColumnOptions): ColumnAttribute {
+        initialize(options: ColumnOptions | ColumnOptionsV2): ColumnAttribute {
             let arkColumnNode = this.attribute as ArkColumnNode;
             return arkColumnNode!.initialize(options);
         }
@@ -947,7 +945,7 @@ export namespace typeNode {
         constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkRowNode) {
             super(uiContext, type, attrCreator);
         }
-        initialize(options: RowOptions): RowAttribute {
+        initialize(options: RowOptions | RowOptionsV2): RowAttribute {
             let arkRowNode = this.attribute as ArkRowNode;
             return arkRowNode!.initialize(options);
         }
@@ -1007,9 +1005,9 @@ export namespace typeNode {
         constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkBlankNode) {
             super(uiContext, type, attrCreator);
         }
-        initialize(): BlankAttribute {
+        initialize(min: double | string): BlankAttribute {
             let arkBlankNode = this.attribute as ArkBlankNode;
-            return arkBlankNode!.initialize();
+            return arkBlankNode!.initialize(min);
         }
     }
 
