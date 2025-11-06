@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-
+#include "core/common/container_scope.h"
 #include "interfaces/napi/kits/utils/napi_utils.h"
 
 #include "frameworks/bridge/common/utils/engine_helper.h"
@@ -26,21 +26,34 @@ constexpr size_t STR_BUFFER_SIZE = 1024;
 }
 static napi_value JSGetRectangleById(napi_env env, napi_callback_info info)
 {
-    size_t argc = 1;
-    napi_value argv = nullptr;
+    size_t argc = 2;
+    napi_value argv[2] = { nullptr };
     napi_value thisVar = nullptr;
     void* data = nullptr;
-    napi_get_cb_info(env, info, &argc, &argv, &thisVar, &data);
-    NAPI_ASSERT(env, argc == 1, "requires 1 parameter");
+    napi_get_cb_info(env, info, &argc, argv, &thisVar, &data);
+
     napi_valuetype type = napi_undefined;
-    napi_typeof(env, argv, &type);
+    napi_typeof(env, argv[0], &type);
     NAPI_ASSERT(env, type == napi_string, "the type of arg is not string");
     char outBuffer[STR_BUFFER_SIZE] = { 0 };
     size_t outSize = 0;
-    napi_get_value_string_utf8(env, argv, outBuffer, STR_BUFFER_SIZE, &outSize);
+    napi_get_value_string_utf8(env, argv[0], outBuffer, STR_BUFFER_SIZE, &outSize);
     std::string key = std::string(outBuffer);
     OHOS::Ace::NG::Rectangle rectangle;
-    auto delegate = EngineHelper::GetCurrentDelegateSafely();
+
+    int32_t safelyId = -1;
+    int32_t currentId = ContainerScope::CurrentId();
+    if (currentId >= 0) {
+        safelyId = currentId;
+    } else {
+        safelyId = Container::SafelyId();
+        int32_t idNum = 0;
+        napi_get_value_int32(env, argv[1], &idNum);
+        TAG_LOGW(AceLogTag::ACE_DEFAULT_DOMAIN, "JSGetRectangleById instanceId_: %{public}d,"
+            "currentId: %{public}d, safelyId: %{public}d", idNum, currentId, safelyId);
+    }
+    auto container = Container::GetContainer(safelyId);
+    auto delegate = EngineHelper::GetDelegateByContainer(container);
     if (!delegate) {
         NapiThrow(env, "UI execution context not found.", ERROR_CODE_INTERNAL_ERROR);
         return nullptr;

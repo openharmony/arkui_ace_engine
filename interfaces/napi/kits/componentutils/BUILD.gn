@@ -39,6 +39,7 @@ template("napi_componentutils_static") {
     }
 
     deps += [ "../utils:napi_utils_static_${platform}" ]
+    deps += [ "$ace_root/frameworks/core:ace_container_scope" ]
 
     subsystem_name = ace_engine_subsystem
     part_name = ace_engine_part
