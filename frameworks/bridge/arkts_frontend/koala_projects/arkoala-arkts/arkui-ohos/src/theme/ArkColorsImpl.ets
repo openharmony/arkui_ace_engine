@@ -20,6 +20,7 @@ import { Resource } from 'global.resource';
 import { ArkUIAniModule } from 'arkui.ani';
 import { Colors, CustomColors } from '@ohos/arkui/theme';
 import { _r } from 'arkui/component/resources';
+import { int32 } from "@koalaui/common"
 
 export class ArkColorsImpl implements Colors {
     brand: ResourceColor = _r(125830976, 10001, '', '');
