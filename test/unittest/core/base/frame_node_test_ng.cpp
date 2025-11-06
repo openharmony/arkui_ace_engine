@@ -575,7 +575,7 @@ HWTEST_F(FrameNodeTestNg, TransformPositionTest001, TestSize.Level1)
 
     NG::OffsetF offset;
     offset.Reset();
-    auto newOffset = frameNode->GetPositionToWindowWithTransform(offset);
+    auto newOffset = node->GetPositionToWindowWithTransform(offset);
     SUCCEED();
 }
 
@@ -584,7 +584,7 @@ HWTEST_F(FrameNodeTestNg, TransformPositionTest001, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FrameNodeTest, GetRectToScreenTest001, TestSize.Level1)
+HWTEST_F(FrameNodeTestNg, GetRectToScreenTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create framenode and initialize the params used in Test.
@@ -598,7 +598,7 @@ HWTEST_F(FrameNodeTest, GetRectToScreenTest001, TestSize.Level1)
 
     NG::RectF rect;
     rect.Reset();
-    auto newRect = frameNode->GetRectToScreen(rect);
+    auto newRect = node->GetRectToScreen(rect);
     SUCCEED();
 }
 
@@ -607,7 +607,7 @@ HWTEST_F(FrameNodeTest, GetRectToScreenTest001, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FrameNodeTest, GetRectToWindowWithTransformTest001, TestSize.Level1)
+HWTEST_F(FrameNodeTestNg, GetRectToWindowWithTransformTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create framenode and initialize the params used in Test.
@@ -621,7 +621,7 @@ HWTEST_F(FrameNodeTest, GetRectToWindowWithTransformTest001, TestSize.Level1)
 
     NG::RectF rect;
     rect.Reset();
-    auto newRect = frameNode->GetRectToWindowWithTransform(rect);
+    auto newRect = node->GetRectToWindowWithTransform(rect);
     SUCCEED();
 }
 
