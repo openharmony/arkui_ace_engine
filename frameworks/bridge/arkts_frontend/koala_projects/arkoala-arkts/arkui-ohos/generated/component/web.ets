@@ -2944,7 +2944,7 @@ export enum ContextMenuInputFieldType {
     PASSWORD = 2,
     Password = 2,
     NUMBER_DATA = 3,
-    Number = 3,
+    NumberData = 3,
     TELEPHONE = 4,
     Telephone = 4,
     OTHER = 5,
