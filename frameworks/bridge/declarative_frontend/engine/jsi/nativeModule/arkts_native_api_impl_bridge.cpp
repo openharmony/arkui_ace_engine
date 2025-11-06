@@ -1024,8 +1024,6 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetKeyBoardShortCut));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetKeyBoardShortCut"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetKeyBoardShortCut));
-    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetKeyBoardShortCutAll"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetKeyBoardShortCutAll));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setClipWithEdge"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetClipWithEdge));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetClipWithEdge"),
