@@ -8051,6 +8051,17 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
+    accessibilityText(value: Resource | string | undefined): this {
+        if (value instanceof Resource) {
+            const value_casted = value as (Resource | undefined)
+            this.accessibilityText(value_casted)
+            return this
+        } else {
+            const value_casted = value as (string | undefined)
+            this.accessibilityText(value_casted)
+            return this
+        }
+    }
     accessibilityRole(value: AccessibilityRoleType | undefined): this {
         if (((this._accessibilityRole_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
@@ -8116,6 +8127,17 @@ export class CommonMethodModifier implements CommonMethod {
             this._accessibilityDescription_1_flag = AttributeUpdaterFlag.SKIP
         }
         return this
+    }
+    accessibilityDescription(value: Resource | string | undefined): this {
+        if (value instanceof Resource) {
+            const value_casted = value as (Resource | undefined)
+            this.accessibilityDescription(value_casted)
+            return this
+        } else {
+            const value_casted = value as (string | undefined)
+            this.accessibilityDescription(value_casted)
+            return this
+        }
     }
     accessibilityLevel(value: string | undefined): this {
         if (((this._accessibilityLevel_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._accessibilityLevel_0_0value) !== (value)))

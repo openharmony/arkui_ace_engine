@@ -330,6 +330,7 @@ arkui_files = [
   "arkui-preprocessed/arkui/component/toggle.ets",
   "arkui-preprocessed/arkui/component/toolbar.ets",
   "arkui-preprocessed/arkui/component/uiExtensionComponent.ets",
+  "arkui-preprocessed/arkui/component/securityUIExtensionComponent.ets",
   "arkui-preprocessed/arkui/component/units.ets",
   "arkui-preprocessed/arkui/component/video.ets",
   "arkui-preprocessed/arkui/component/waterFlow.ets",

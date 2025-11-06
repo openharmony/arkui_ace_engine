@@ -70,37 +70,37 @@ export class UIExtensionProxyInternal implements MaterializedBase,UIExtensionPro
         const data_casted = data as (Record<string, RecordData>)
         return ArkUIAniUiextensionProxyModal._Send_Data_Sync(this.peer!.ptr, data_casted)
     }
-    public onAsyncReceiverRegister(callback_: ((value0: UIExtensionProxy) => void)): void {
+    public onAsyncReceiverRegisterAsyncReceiverRegister(callback_: ((value0: UIExtensionProxy) => void)): void {
         const callback__casted = callback_ as (((value0: UIExtensionProxy) => void))
         this.onAsyncReceiverRegisterAsyncReceiverRegister_serialize(callback__casted)
         return
     }
-    public onSyncReceiverRegister(callback_: ((value0: UIExtensionProxy) => void)): void {
+    public onSyncReceiverRegisterSyncReceiverRegister(callback_: ((value0: UIExtensionProxy) => void)): void {
         const callback__casted = callback_ as (((value0: UIExtensionProxy) => void))
         this.onSyncReceiverRegisterSyncReceiverRegister_serialize(callback__casted)
         return
     }
-    public offAsyncReceiverRegister(callback_?: ((value0: UIExtensionProxy) => void)): void {
+    public offAsyncReceiverRegisterAsyncReceiverRegister(callback_?: ((value0: UIExtensionProxy) => void)): void {
         const callback__casted = callback_ as (((value0: UIExtensionProxy) => void) | undefined)
         this.offAsyncReceiverRegisterAsyncReceiverRegister_serialize(callback__casted)
         return
     }
-    public offSyncReceiverRegister(callback_?: ((value0: UIExtensionProxy) => void)): void {
+    public offSyncReceiverRegisterSyncReceiverRegister(callback_?: ((value0: UIExtensionProxy) => void)): void {
         const callback__casted = callback_ as (((value0: UIExtensionProxy) => void) | undefined)
         this.offSyncReceiverRegisterSyncReceiverRegister_serialize(callback__casted)
         return
     }
-    onAsyncReceiverRegister(type: string, callback_: ((value0: UIExtensionProxy) => void)): void {
-        throw new Error("Improve")
+    public onAsyncReceiverRegister(callback_: ((value0: UIExtensionProxy) => void)): void {
+        this.onAsyncReceiverRegisterAsyncReceiverRegister(callback_)
     }
-    onSyncReceiverRegister(type: string, callback_: ((value0: UIExtensionProxy) => void)): void {
-        throw new Error("Improve")
+    public onSyncReceiverRegister(callback_: ((value0: UIExtensionProxy) => void)): void {
+        this.onSyncReceiverRegisterSyncReceiverRegister(callback_)
     }
-    offAsyncReceiverRegister(type: string, callback_: ((value0: UIExtensionProxy) => void)): void {
-        throw new Error("Improve")
+    public offAsyncReceiverRegister(callback_?: ((value0: UIExtensionProxy) => void)): void {
+        this.offAsyncReceiverRegisterAsyncReceiverRegister(callback_)
     }
-    offSyncReceiverRegister(type: string, callback_: ((value0: UIExtensionProxy) => void)): void {
-        throw new Error("Improve")
+    public offSyncReceiverRegister(callback_?: ((value0: UIExtensionProxy) => void)): void {
+        this.offSyncReceiverRegisterSyncReceiverRegister(callback_)
     }
     send_serialize(data: Map<string, RecordData>): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
