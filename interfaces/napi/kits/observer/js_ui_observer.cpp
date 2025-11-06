@@ -1499,6 +1499,7 @@ napi_value ObserverProcess::ProcessNodeRenderStateRegister(napi_env env, napi_ca
     auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(pipeline);
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     auto monitor = pipelineContext->GetNodeRenderStatusMonitor();
+    CHECK_NULL_RETURN(monitor, nullptr);
     if (monitor->IsRegisterNodeRenderStateChangeCallbackExceedLimit()) {
         TAG_LOGE(AceLogTag::ACE_OBSERVER, "register node render state change callback exceed limit.");
         NapiThrow(env, NODE_RENDER_STATE_REGISTER_ERR_MSG, NODE_RENDER_STATE_REGISTER_ERR_CODE);
