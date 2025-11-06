@@ -728,9 +728,6 @@ void SetTextInputSelectedBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 colo
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     Color result = Color(color);
-    if (result.GetAlpha() == DEFAULT_ALPHA) {
-        result = result.ChangeOpacity(DEFAULT_OPACITY);
-    }
     if (SystemProperties::ConfigChangePerform()) {
         RefPtr<ResourceObject> resObj;
         if (!resRawPtr) {
