@@ -30,6 +30,7 @@ import promptAction from '@ohos/promptAction';
 import { RecordData } from "@ohos.base"
 import { UIContextImpl } from "arkui/base/UIContextImpl"
 import { UIContextUtil } from "arkui/base/UIContextUtil"
+import { ArkThemeScopeManager } from '../theme/ArkThemeScopeManager';
 
 export class ReuseObject {
     readonly _raw: RecordData;
@@ -111,6 +112,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
         this.uiContext = uiContext;
         this.instance = instance;
         this.instance.setDelegate(this);
+        ArkThemeScopeManager.getInstance().registerThemeScopeComponent(this);
     }
 
     get isCustomLayout(): boolean {
@@ -161,6 +163,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
     build(): void {
         const current = ExtendableComponent.current;
         ExtendableComponent.current = this.instance as object;
+        this.onWillApplyTheme(ArkThemeScopeManager.getInstance().getFinalTheme(this));
         this.instance.build();
         ExtendableComponent.current = current;
     }
