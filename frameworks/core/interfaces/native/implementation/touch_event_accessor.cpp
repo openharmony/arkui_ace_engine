@@ -54,14 +54,14 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Array_HistoricalPoint GetHistoricalPointsImpl(Ark_TouchEvent peer)
+Opt_Array_HistoricalPoint GetHistoricalPointsImpl(Ark_TouchEvent peer)
 {
     CHECK_NULL_RETURN(peer, {});
     auto info = peer->GetEventInfo();
     CHECK_NULL_RETURN(info, {});
     std::list<TouchLocationInfo> history;
     history = info->GetHistory();
-    return Converter::ArkValue<Array_HistoricalPoint>(history, Converter::FC);
+    return Converter::ArkValue<Opt_Array_HistoricalPoint>(history, Converter::FC);
 }
 Ark_TouchType GetTypeImpl(Ark_TouchEvent peer)
 {
