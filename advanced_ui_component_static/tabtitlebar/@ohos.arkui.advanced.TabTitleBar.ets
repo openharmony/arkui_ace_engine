@@ -89,8 +89,7 @@ class ButtonGestureModifier implements GestureModifier {
 export struct TabTitleBar {
   tabItems: Array<TabTitleBarTabItem> = new Array<TabTitleBarTabItem>();
   menuItems: Array<TabTitleBarMenuItem> = new Array<TabTitleBarMenuItem>();
-  @BuilderParam swiperContent: () => void = () => {
-  };
+  @BuilderParam swiperContent: () => void = this.emptyBuilder;
   @State tabWidth: number = 0;
   @State currentIndex: number = 0;
   @State swiperCurrentIndex: int = 0;
