@@ -31410,7 +31410,7 @@ KOALA_INTEROP_DIRECT_V3(NavExtender_setUpdateStackCallback, Ark_NativePointer, K
 void impl_NavExtender_syncStack(Ark_NativePointer peer) {
         GetAccessors()->getNavExtenderAccessor()->syncStack(static_cast<Ark_NavPathStack>(peer));
 }
-KOALA_INTEROP_DIRECT_V1(NavExtender_syncStack, Ark_NativePointer)
+KOALA_INTEROP_V1(NavExtender_syncStack, Ark_NativePointer)
 Ark_Boolean impl_NavExtender_checkNeedCreate(Ark_NativePointer navigation, Ark_Int32 index) {
         return GetAccessors()->getNavExtenderAccessor()->checkNeedCreate(navigation, index);
 }
