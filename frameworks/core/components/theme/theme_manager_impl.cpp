@@ -324,9 +324,8 @@ RefPtr<Theme> ThemeManagerImpl::GetThemeOrigin(ThemeType type, int32_t themeScop
     ColorMode currentMode = GetCurrentColorMode();
     ColorMode themeMode = tokenTheme->GetColorMode();
     auto& themeWrappers = GetThemeWrappers(themeMode == ColorMode::COLOR_MODE_UNDEFINED ? currentMode : themeMode);
-    auto findIter = themeWrappers.find(type);
-    if (findIter != themeWrappers.end()) {
-        auto wrapper = findIter->second;
+    auto wrapper = themeWrappers.Find(type);
+    if (wrapper != nullptr) {
         wrapper->ApplyTokenTheme(*tokenTheme);
         return AceType::DynamicCast<Theme>(wrapper);
     }
@@ -345,7 +344,7 @@ RefPtr<Theme> ThemeManagerImpl::GetThemeOrigin(ThemeType type, int32_t themeScop
         pipeline->SetLocalColorMode(themeMode);
         needRestore = true;
     }
-    auto wrapper = builderIter->second(themeConstants_);
+    wrapper = builderIter->second(themeConstants_);
     if (needRestore) {
         // Switching resource manager back into system color mode
         pipeline->SetLocalColorMode(ColorMode::COLOR_MODE_UNDEFINED);
@@ -353,7 +352,7 @@ RefPtr<Theme> ThemeManagerImpl::GetThemeOrigin(ThemeType type, int32_t themeScop
             pipeline->GetBundleName(), pipeline->GetModuleName(), pipeline->GetInstanceId(), currentMode);
     }
     wrapper->ApplyTokenTheme(*tokenTheme);
-    themeWrappers.emplace(type, wrapper);
+    themeWrappers.Emplace(type, wrapper);
     return AceType::DynamicCast<Theme>(wrapper);
 }
 
@@ -369,9 +368,8 @@ RefPtr<Theme> ThemeManagerImpl::GetThemeKit(ThemeType type, int32_t themeScopeId
     ColorMode currentMode = GetCurrentColorMode();
     ColorMode themeMode = tokenTheme->GetColorMode();
     auto& themeWrappers = GetThemeWrappers(themeMode == ColorMode::COLOR_MODE_UNDEFINED ? currentMode : themeMode);
-    auto findIter = themeWrappers.find(type);
-    if (findIter != themeWrappers.end()) {
-        auto wrapper = findIter->second;
+    auto wrapper = themeWrappers.Find(type);
+    if (wrapper != nullptr) {
         wrapper->ApplyTokenTheme(*tokenTheme);
         return AceType::DynamicCast<Theme>(wrapper);
     }
@@ -390,7 +388,7 @@ RefPtr<Theme> ThemeManagerImpl::GetThemeKit(ThemeType type, int32_t themeScopeId
         pipeline->SetLocalColorMode(themeMode);
         needRestore = true;
     }
-    auto wrapper = builderIter->second();
+    wrapper = builderIter->second();
     if (needRestore) {
         // Switching resource manager back into system color mode
         pipeline->SetLocalColorMode(ColorMode::COLOR_MODE_UNDEFINED);
@@ -398,7 +396,7 @@ RefPtr<Theme> ThemeManagerImpl::GetThemeKit(ThemeType type, int32_t themeScopeId
             pipeline->GetBundleName(), pipeline->GetModuleName(), pipeline->GetInstanceId(), currentMode);
     }
     wrapper->ApplyTokenTheme(*tokenTheme);
-    themeWrappers.emplace(type, wrapper);
+    themeWrappers.Emplace(type, wrapper);
     return AceType::DynamicCast<Theme>(wrapper);
 }
 
@@ -429,12 +427,12 @@ Color ThemeManagerImpl::GetBackgroundColor() const
 void ThemeManagerImpl::LoadResourceThemes()
 {
     ClearThemes();
-    themeWrappersLight_.clear();
-    themeWrappersDark_.clear();
+    themeWrappersLight_.Clear();
+    themeWrappersDark_.Clear();
     themeConstants_->LoadTheme(currentThemeId_);
 }
 
-ThemeManagerImpl::ThemeWrappers& ThemeManagerImpl::GetThemeWrappers(ColorMode mode)
+ThemeWrappers& ThemeManagerImpl::GetThemeWrappers(ColorMode mode)
 {
     return mode == ColorMode::DARK ? themeWrappersDark_ : themeWrappersLight_;
 }
@@ -500,5 +498,42 @@ void ThemeManagerImpl::ClearThemes()
         return;
     }
     themes_.clear();
+}
+
+void ThemeWrappers::Emplace(ThemeType type, const RefPtr<TokenThemeWrapper>& themeWrapper)
+{
+    if (MultiThreadBuildManager::IsThreadSafeNodeScope()) {
+        std::unique_lock<std::shared_mutex> lock(themesMutex_);
+        themesWrappersMulti_.emplace(type, themeWrapper);
+        return;
+    }
+    themesWrappers_.emplace(type, themeWrapper);
+}
+
+RefPtr<TokenThemeWrapper> ThemeWrappers::Find(ThemeType type)
+{
+    if (MultiThreadBuildManager::IsThreadSafeNodeScope()) {
+        std::shared_lock<std::shared_mutex> lock(themesMutex_);
+        auto findIter = themesWrappersMulti_.find(type);
+        if (findIter == themesWrappersMulti_.end()) {
+            return nullptr;
+        }
+        return findIter->second;
+    }
+    auto findIter = themesWrappers_.find(type);
+    if (findIter == themesWrappers_.end()) {
+        return nullptr;
+    }
+    return findIter->second;
+}
+
+void ThemeWrappers::Clear()
+{
+    if (MultiThreadBuildManager::IsThreadSafeNodeScope()) {
+        std::unique_lock<std::shared_mutex> lock(themesMutex_);
+        themesWrappersMulti_.clear();
+        return;
+    }
+    themesWrappers_.clear();
 }
 } // namespace OHOS::Ace

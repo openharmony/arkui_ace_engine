@@ -22,6 +22,18 @@
 #include "core/components_ng/token_theme/token_theme_wrapper.h"
 
 namespace OHOS::Ace {
+class ThemeWrappers final {
+public:
+    void Emplace(ThemeType type, const RefPtr<TokenThemeWrapper>& themeWrapper);
+    RefPtr<TokenThemeWrapper> Find(ThemeType type);
+    void Clear();
+private:
+    std::unordered_map<ThemeType, RefPtr<TokenThemeWrapper>> themesWrappers_;
+    std::unordered_map<ThemeType, RefPtr<TokenThemeWrapper>> themesWrappersMulti_;
+
+    mutable std::shared_mutex themesMutex_;
+};
+
 class ACE_EXPORT ThemeManagerImpl : public ThemeManager {
     DECLARE_ACE_TYPE(ThemeManagerImpl, ThemeManager);
 
@@ -142,7 +154,6 @@ public:
     void ClearThemes();
 
 private:
-    using ThemeWrappers = std::unordered_map<ThemeType, RefPtr<TokenThemeWrapper>>;
     std::unordered_map<ThemeType, RefPtr<Theme>> themes_;
     std::unordered_map<ThemeType, RefPtr<Theme>> themesMulti_;
     ThemeWrappers themeWrappersLight_;
