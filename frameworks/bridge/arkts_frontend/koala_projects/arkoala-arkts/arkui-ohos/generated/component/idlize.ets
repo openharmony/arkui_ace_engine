@@ -991,10 +991,10 @@ export class FrameNodeExtender {
         const returnResult : Size = Size_serializer.read(retvalDeserializer)
         return returnResult
     }
-    static getLayoutPosition_serialize(peer: FrameNode): Position {
+    static getLayoutPosition_serialize(peer: FrameNode): Vector2 {
         const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getLayoutPosition(extractors.toFrameNodePtr(peer))
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const returnResult : Position = Position_serializer.read(retvalDeserializer)
+        const returnResult : Vector2 = Vector2_serializer.read(retvalDeserializer)
         return returnResult
     }
     static getId_serialize(peer: FrameNode): string {
@@ -1238,7 +1238,7 @@ export class FrameNodeExtender {
         const peer_casted = peer as (FrameNode)
         return FrameNodeExtender.getMeasuredSize_serialize(peer_casted)
     }
-    public static getLayoutPosition(peer: FrameNode): Position {
+    public static getLayoutPosition(peer: FrameNode): Vector2 {
         const peer_casted = peer as (FrameNode)
         return FrameNodeExtender.getLayoutPosition_serialize(peer_casted)
     }

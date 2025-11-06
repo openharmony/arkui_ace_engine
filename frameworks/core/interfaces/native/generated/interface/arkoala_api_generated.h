@@ -25521,7 +25521,7 @@ typedef struct GENERATED_ArkUIFrameNodeExtenderAccessor {
     Ark_Vector2 (*getPositionToWindow)(Ark_FrameNode peer);
     Ark_Position (*getPositionToParent)(Ark_FrameNode peer);
     Ark_Size (*getMeasuredSize)(Ark_FrameNode peer);
-    Ark_Position (*getLayoutPosition)(Ark_FrameNode peer);
+    Ark_Vector2 (*getLayoutPosition)(Ark_FrameNode peer);
     Ark_String (*getId)(Ark_FrameNode peer);
     Ark_Int32 (*getUniqueId)(Ark_FrameNode peer);
     Ark_String (*getNodeType)(Ark_FrameNode peer);

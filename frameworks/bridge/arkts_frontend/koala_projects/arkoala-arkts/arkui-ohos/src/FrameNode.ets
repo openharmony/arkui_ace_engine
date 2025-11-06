@@ -457,8 +457,7 @@ export class FrameNode implements MaterializedBase {
         return FrameNodeExtender.getMeasuredSize(this)
     }
     public getLayoutPosition(): NodePosition {
-        // return FrameNodeExtender.getLayoutPosition(this)
-        return { x: 0, y: 0 } as NodePosition;
+        return FrameNodeExtender.getLayoutPosition(this);
     }
    public getUserConfigBorderWidth(): NodeEdges<LengthMetrics> {
         // return FrameNodeExtender.getUserConfigBorderWidth()
