@@ -316,6 +316,9 @@ typedef struct Opt_CommonMethod Opt_CommonMethod;
 typedef struct CommonShapePeer CommonShapePeer;
 typedef struct CommonShapePeer* Ark_CommonShape;
 typedef struct Opt_CommonShape Opt_CommonShape;
+typedef struct ComponentContentPeer ComponentContentPeer;
+typedef struct ComponentContentPeer* Ark_ComponentContent;
+typedef struct Opt_ComponentContent Opt_ComponentContent;
 typedef struct ConsoleMessagePeer ConsoleMessagePeer;
 typedef struct ConsoleMessagePeer* Ark_ConsoleMessage;
 typedef struct Opt_ConsoleMessage Opt_ConsoleMessage;
@@ -623,6 +626,9 @@ typedef struct Ark_Size Ark_Size;
 typedef struct Opt_Size Opt_Size;
 typedef struct Ark_SizeResult Ark_SizeResult;
 typedef struct Opt_SizeResult Opt_SizeResult;
+typedef struct SpringBackActionPeer SpringBackActionPeer;
+typedef struct SpringBackActionPeer* Ark_SpringBackAction;
+typedef struct Opt_SpringBackAction Opt_SpringBackAction;
 typedef struct SpringMotionPeer SpringMotionPeer;
 typedef struct SpringMotionPeer* Ark_SpringMotion;
 typedef struct Opt_SpringMotion Opt_SpringMotion;
@@ -799,6 +805,8 @@ typedef struct Ark_Union_I32_TextOverflow Ark_Union_I32_TextOverflow;
 typedef struct Opt_Union_I32_TextOverflow Opt_Union_I32_TextOverflow;
 typedef struct Ark_Union_I64_String Ark_Union_I64_String;
 typedef struct Opt_Union_I64_String Opt_Union_I64_String;
+typedef struct Ark_Union_Int32_String Ark_Union_Int32_String;
+typedef struct Opt_Union_Int32_String Opt_Union_Int32_String;
 typedef struct Ark_Union_ImageAnalyzerController_Object Ark_Union_ImageAnalyzerController_Object;
 typedef struct Opt_Union_ImageAnalyzerController_Object Opt_Union_ImageAnalyzerController_Object;
 typedef struct Ark_Union_Number_FontWeight_String Ark_Union_Number_FontWeight_String;
@@ -2261,7 +2269,6 @@ typedef struct Ark_SliderConfiguration Ark_SliderConfiguration;
 typedef struct Opt_SliderConfiguration Opt_SliderConfiguration;
 typedef struct Ark_SnapshotOptions Ark_SnapshotOptions;
 typedef struct Opt_SnapshotOptions Opt_SnapshotOptions;
-typedef struct Ark_SpringBackAction Ark_SpringBackAction;
 typedef struct Opt_SpringBackAction Opt_SpringBackAction;
 typedef struct Ark_SslErrorEvent Ark_SslErrorEvent;
 typedef struct Opt_SslErrorEvent Opt_SslErrorEvent;
@@ -3295,8 +3302,6 @@ typedef struct Ark_Union_RichEditorTextSpanResult_RichEditorImageSpanResult Ark_
 typedef struct Opt_Union_RichEditorTextSpanResult_RichEditorImageSpanResult Opt_Union_RichEditorTextSpanResult_RichEditorImageSpanResult;
 typedef struct Ark_RichEditorSpan Ark_RichEditorSpan;
 typedef struct Opt_RichEditorSpan Opt_RichEditorSpan;
-typedef Ark_Object Ark_ComponentContent;
-typedef Opt_Object Opt_ComponentContent;
 typedef Ark_Object Ark_ContentModifier;
 typedef Opt_Object Opt_ContentModifier;
 typedef Ark_Object Ark_UserDataSpan;
@@ -4078,7 +4083,7 @@ typedef enum Ark_ContextMenuInputFieldType {
     ARK_CONTEXT_MENU_INPUT_FIELD_TYPE_NONE = 0,
     ARK_CONTEXT_MENU_INPUT_FIELD_TYPE_PLAIN_TEXT = 1,
     ARK_CONTEXT_MENU_INPUT_FIELD_TYPE_PASSWORD = 2,
-    ARK_CONTEXT_MENU_INPUT_FIELD_TYPE_NUMBER = 3,
+    ARK_CONTEXT_MENU_INPUT_FIELD_TYPE_NUMBER_DATA = 3,
     ARK_CONTEXT_MENU_INPUT_FIELD_TYPE_TELEPHONE = 4,
     ARK_CONTEXT_MENU_INPUT_FIELD_TYPE_OTHER = 5,
 } Ark_ContextMenuInputFieldType;
@@ -7089,6 +7094,10 @@ typedef struct Opt_CommonShape {
     Ark_Tag tag;
     Ark_CommonShape value;
 } Opt_CommonShape;
+typedef struct Opt_ComponentContent {
+    Ark_Tag tag;
+    Ark_ComponentContent value;
+} Opt_ComponentContent;
 typedef struct Opt_ConsoleMessage {
     Ark_Tag tag;
     Ark_ConsoleMessage value;
@@ -8455,6 +8464,18 @@ typedef struct Opt_Union_ImageAnalyzerController_Object {
     Ark_Tag tag;
     Ark_Union_ImageAnalyzerController_Object value;
 } Opt_Union_ImageAnalyzerController_Object;
+typedef struct Ark_Union_Int32_String {
+    /* kind: UnionType */
+    Ark_Int32 selector;
+    union {
+        Ark_Int32 value0;
+        Ark_String value1;
+    };
+} Ark_Union_Int32_String;
+typedef struct Opt_Union_Int32_String {
+    Ark_Tag tag;
+    Ark_Union_Int32_String value;
+} Opt_Union_Int32_String;
 typedef struct Ark_Union_Number_FontWeight_String {
     /* kind: UnionType */
     Ark_Int32 selector;
@@ -10965,8 +10986,8 @@ typedef struct Opt_Callback_PreparedInfo_Void {
 typedef struct Callback_RangeUpdate {
     /* kind: Callback */
     Ark_CallbackResource resource;
-    void (*call)(const Ark_Int32 resourceId, const Ark_Int32 start, const Ark_Int32 end);
-    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 start, const Ark_Int32 end);
+    void (*call)(const Ark_Int32 resourceId, const Ark_Int32 start, const Ark_Int32 end, const Ark_Int32 cacheStart, const Ark_Int32 cacheEnd, const Ark_Boolean isLoop);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 start, const Ark_Int32 end, const Ark_Int32 cacheStart, const Ark_Int32 cacheEnd, const Ark_Boolean isLoop);
 } Callback_RangeUpdate;
 typedef struct Opt_Callback_RangeUpdate {
     Ark_Tag tag;
@@ -15122,10 +15143,6 @@ typedef struct Opt_SnapshotOptions {
     Ark_Tag tag;
     Ark_SnapshotOptions value;
 } Opt_SnapshotOptions;
-typedef struct Ark_SpringBackAction {
-    /* kind: Interface */
-    VoidCallback springBack;
-} Ark_SpringBackAction;
 typedef struct Opt_SpringBackAction {
     Ark_Tag tag;
     Ark_SpringBackAction value;
@@ -17624,8 +17641,8 @@ typedef struct Opt_SliderOptions {
 } Opt_SliderOptions;
 typedef struct Ark_StarStyleOptions {
     /* kind: Interface */
-    Ark_ResourceStr backgroundUri;
-    Ark_ResourceStr foregroundUri;
+    Opt_ResourceStr backgroundUri;
+    Opt_ResourceStr foregroundUri;
     Opt_ResourceStr secondaryUri;
 } Ark_StarStyleOptions;
 typedef struct Opt_StarStyleOptions {
@@ -25501,12 +25518,12 @@ typedef struct GENERATED_ArkUIFrameNodeExtenderAccessor {
     Ark_NativePointer (*getParent)(Ark_FrameNode peer);
     Ark_Int32 (*getChildrenCount)(Ark_FrameNode peer);
     void (*dispose)(Ark_FrameNode peer);
-    Ark_Position (*getPositionToWindow)(Ark_FrameNode peer);
+    Ark_Vector2 (*getPositionToWindow)(Ark_FrameNode peer);
     Ark_Position (*getPositionToParent)(Ark_FrameNode peer);
     Ark_Size (*getMeasuredSize)(Ark_FrameNode peer);
     Ark_Position (*getLayoutPosition)(Ark_FrameNode peer);
     Ark_String (*getId)(Ark_FrameNode peer);
-    Ark_Number (*getUniqueId)(Ark_FrameNode peer);
+    Ark_Int32 (*getUniqueId)(Ark_FrameNode peer);
     Ark_String (*getNodeType)(Ark_FrameNode peer);
     Ark_Number (*getOpacity)(Ark_FrameNode peer);
     Ark_Boolean (*isVisible)(Ark_FrameNode peer);
@@ -25540,7 +25557,7 @@ typedef struct GENERATED_ArkUIFrameNodeExtenderAccessor {
     Ark_Number (*getLastChildIndexWithoutExpand)(Ark_FrameNode peer);
     Ark_NativePointer (*getAttachedFrameNodeById)(const Ark_String* id);
     Ark_NativePointer (*getFrameNodeById)(const Ark_Number* id);
-    Ark_NativePointer (*getFrameNodeByUniqueId)(const Ark_Number* id);
+    Ark_NativePointer (*getFrameNodeByUniqueId)(Ark_Int32 id);
     void (*reuse)(Ark_FrameNode peer);
     void (*recycle)(Ark_FrameNode peer);
     Ark_NativePointer (*getFrameNodePtr)(Ark_FrameNode node);
@@ -25835,7 +25852,7 @@ typedef struct GENERATED_ArkUIIUIContextAccessor {
                           Ark_Boolean isFrozen);
     void (*freezeUINode1)(Ark_Int64 id,
                           Ark_Boolean isFrozen);
-    Ark_Boolean (*dispatchKeyEvent)(const Ark_Union_Number_String* node,
+    Ark_Boolean (*dispatchKeyEvent)(const Ark_Union_Int32_String* node,
                                     Ark_KeyEvent event);
 } GENERATED_ArkUIIUIContextAccessor;
 
@@ -26008,17 +26025,21 @@ typedef struct GENERATED_ArkUIListScrollerAccessor {
     void (*destroyPeer)(Ark_ListScroller peer);
     Ark_ListScroller (*construct)();
     Ark_NativePointer (*getFinalizer)();
-    Ark_RectResult (*getItemRectInGroup)(Ark_ListScroller peer,
+    Ark_RectResult (*getItemRectInGroup)(Ark_VMContext vmContext,
+                                         Ark_ListScroller peer,
                                          Ark_Int32 index,
                                          Ark_Int32 indexInGroup);
-    void (*scrollToItemInGroup)(Ark_ListScroller peer,
+    void (*scrollToItemInGroup)(Ark_VMContext vmContext,
+                                Ark_ListScroller peer,
                                 Ark_Int32 index,
                                 Ark_Int32 indexInGroup,
                                 const Opt_Boolean* smooth,
                                 const Opt_ScrollAlign* align);
-    void (*closeAllSwipeActions)(Ark_ListScroller peer,
+    void (*closeAllSwipeActions)(Ark_VMContext vmContext,
+                                 Ark_ListScroller peer,
                                  const Opt_CloseSwipeActionOptions* options);
-    Ark_VisibleListContentInfo (*getVisibleListContentInfo)(Ark_ListScroller peer,
+    Ark_VisibleListContentInfo (*getVisibleListContentInfo)(Ark_VMContext vmContext,
+                                                            Ark_ListScroller peer,
                                                             Ark_Float64 x,
                                                             Ark_Float64 y);
 } GENERATED_ArkUIListScrollerAccessor;
@@ -26990,28 +27011,38 @@ typedef struct GENERATED_ArkUIScrollerAccessor {
     void (*destroyPeer)(Ark_Scroller peer);
     Ark_Scroller (*construct)();
     Ark_NativePointer (*getFinalizer)();
-    void (*scrollTo)(Ark_Scroller peer,
+    void (*scrollTo)(Ark_VMContext vmContext,
+                     Ark_Scroller peer,
                      const Ark_ScrollOptions* options);
-    void (*scrollEdge)(Ark_Scroller peer,
+    void (*scrollEdge)(Ark_VMContext vmContext,
+                       Ark_Scroller peer,
                        Ark_Edge value,
                        const Opt_ScrollEdgeOptions* options);
-    void (*fling)(Ark_Scroller peer,
+    void (*fling)(Ark_VMContext vmContext,
+                  Ark_Scroller peer,
                   Ark_Float64 velocity);
-    void (*scrollPage)(Ark_Scroller peer,
+    void (*scrollPage)(Ark_VMContext vmContext,
+                       Ark_Scroller peer,
                        const Ark_ScrollPageOptions* value);
-    Opt_OffsetResult (*currentOffset)(Ark_Scroller peer);
-    void (*scrollToIndex)(Ark_Scroller peer,
+    Opt_OffsetResult (*currentOffset)(Ark_VMContext vmContext,
+                                      Ark_Scroller peer);
+    void (*scrollToIndex)(Ark_VMContext vmContext,
+                          Ark_Scroller peer,
                           Ark_Int32 value,
                           const Opt_Boolean* smooth,
                           const Opt_ScrollAlign* align,
                           const Opt_ScrollToIndexOptions* options);
-    void (*scrollBy)(Ark_Scroller peer,
+    void (*scrollBy)(Ark_VMContext vmContext,
+                     Ark_Scroller peer,
                      const Ark_Length* dx,
                      const Ark_Length* dy);
-    Ark_Boolean (*isAtEnd)(Ark_Scroller peer);
-    Ark_RectResult (*getItemRect)(Ark_Scroller peer,
+    Ark_Boolean (*isAtEnd)(Ark_VMContext vmContext,
+                           Ark_Scroller peer);
+    Ark_RectResult (*getItemRect)(Ark_VMContext vmContext,
+                                  Ark_Scroller peer,
                                   Ark_Int32 index);
-    Ark_Int32 (*getItemIndex)(Ark_Scroller peer,
+    Ark_Int32 (*getItemIndex)(Ark_VMContext vmContext,
+                              Ark_Scroller peer,
                               Ark_Float64 x,
                               Ark_Float64 y);
 } GENERATED_ArkUIScrollerAccessor;
@@ -27053,6 +27084,13 @@ typedef struct GENERATED_ArkUISearchOpsAccessor {
                                                      const Ark_String* value,
                                                      const SearchValueCallback* callback);
 } GENERATED_ArkUISearchOpsAccessor;
+
+typedef struct GENERATED_ArkUISpringBackActionAccessor {
+    void (*destroyPeer)(Ark_SpringBackAction peer);
+    Ark_SpringBackAction (*construct)();
+    Ark_NativePointer (*getFinalizer)();
+    void (*springBack)(Ark_SpringBackAction peer);
+} GENERATED_ArkUISpringBackActionAccessor;
 
 typedef struct GENERATED_ArkUISpringMotionAccessor {
     void (*destroyPeer)(Ark_SpringMotion peer);
@@ -27119,6 +27157,8 @@ typedef struct GENERATED_ArkUIStyledStringAccessor {
                            const Ark_Buffer* buffer,
                            const Callback_Opt_StyledString_Opt_Array_String_Void* outputArgumentForReturningPromise);
     Ark_Int32 (*getLength)(Ark_StyledString peer);
+    void (*setLength)(Ark_StyledString peer,
+                      Ark_Int32 length);
 } GENERATED_ArkUIStyledStringAccessor;
 
 typedef struct GENERATED_ArkUIStyledStringControllerAccessor {
@@ -28007,6 +28047,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIScrollResultAccessor* (*getScrollResultAccessor)();
     const GENERATED_ArkUISearchControllerAccessor* (*getSearchControllerAccessor)();
     const GENERATED_ArkUISearchOpsAccessor* (*getSearchOpsAccessor)();
+    const GENERATED_ArkUISpringBackActionAccessor* (*getSpringBackActionAccessor)();
     const GENERATED_ArkUISpringMotionAccessor* (*getSpringMotionAccessor)();
     const GENERATED_ArkUISpringPropAccessor* (*getSpringPropAccessor)();
     const GENERATED_ArkUISslErrorHandlerAccessor* (*getSslErrorHandlerAccessor)();

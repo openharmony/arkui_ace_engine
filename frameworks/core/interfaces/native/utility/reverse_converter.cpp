@@ -244,6 +244,12 @@ void AssignArkValue(Ark_Tuple_Dimension_Dimension& dst, const std::pair<const Di
     dst.value1 = ArkValue<Ark_Dimension>(src.second, ctx);
 }
 
+void AssignArkValue(Ark_Vector2& dst, const OffsetF& src)
+{
+    dst.x = Converter::ArkValue<Ark_Float64>(src.GetX());
+    dst.y = Converter::ArkValue<Ark_Float64>(src.GetY());
+}
+
 void AssignArkValue(Ark_uiObserver_NavigationInfo& dst, const std::shared_ptr<OHOS::Ace::NG::NavigationInfo>& src)
 {
     CHECK_NULL_VOID(src);
@@ -491,8 +497,10 @@ void AssignArkValue(Ark_EventTarget& dst, const EventTarget& src, ConvContext *c
     position.y = Converter::ArkValue<Opt_Length>(src.area.GetOffset().GetY().ConvertToVp(), ctx);
     area.position = Converter::ArkValue<Ark_Position>(position);
     Ark_Position globPosition;
-    globPosition.x = Converter::ArkValue<Opt_Length>(src.origin.GetX().ConvertToVp(), ctx);
-    globPosition.y = Converter::ArkValue<Opt_Length>(src.origin.GetY().ConvertToVp(), ctx);
+    globPosition.x = Converter::ArkValue<Opt_Length>(
+        src.origin.GetX().ConvertToVp() + src.area.GetOffset().GetX().ConvertToVp(), ctx);
+    globPosition.y = Converter::ArkValue<Opt_Length>(
+        src.origin.GetY().ConvertToVp() + src.area.GetOffset().GetY().ConvertToVp(), ctx);
     area.globalPosition = Converter::ArkValue<Ark_Position>(globPosition);
     dst.area = area;
     if (!src.id.empty()) {

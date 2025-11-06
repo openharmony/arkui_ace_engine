@@ -114,7 +114,7 @@ export struct ComposeTitleBar {
   menuItems?: Array<ComposeTitleBarMenuItem> = [] as Array<ComposeTitleBarMenuItem>;
   @State titleMaxWidth: number = 0;
   @State fontSize: number = 1;
-  @Provide uniqueId?: long = -1;
+  @Provide uniqueId?: int = -1;
 
   build() {
     Flex({

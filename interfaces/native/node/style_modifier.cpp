@@ -11858,6 +11858,13 @@ int32_t SetResourceSrc(ArkUI_NodeHandle node, const std::shared_ptr<ArkUI_Resour
     return ERROR_CODE_NO_ERROR;
 }
 
+int32_t SetDrawableSrc(ArkUI_NodeHandle node, void* newDrawableDescriptor)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getImageModifier()->setDrawableDescriptor(node->uiNodeHandle, newDrawableDescriptor);
+    return ERROR_CODE_NO_ERROR;
+}
+
 int32_t SetImageSrc(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     bool isString = CheckAttributeString(item);
@@ -11877,13 +11884,15 @@ int32_t SetImageSrc(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     }
     node->drawableDescriptor = drawableDescriptor;
     if (!drawableDescriptor->drawableDescriptor && !drawableDescriptor->resource &&
-        !drawableDescriptor->animatedDrawableDescriptor) {
+        !drawableDescriptor->animatedDrawableDescriptor && !drawableDescriptor->newDrawableDescriptor) {
         return ERROR_CODE_PARAM_INVALID;
     }
     if (drawableDescriptor->drawableDescriptor) {
         return SetPixelMapSrc(node, drawableDescriptor->drawableDescriptor);
     } else if (drawableDescriptor->animatedDrawableDescriptor) {
         return SetPixelMapArraySrc(node, drawableDescriptor->animatedDrawableDescriptor);
+    } else if(drawableDescriptor->newDrawableDescriptor) {
+        return SetDrawableSrc(node, drawableDescriptor->newDrawableDescriptor);
     } else {
         return SetResourceSrc(node, drawableDescriptor->resource);
     }

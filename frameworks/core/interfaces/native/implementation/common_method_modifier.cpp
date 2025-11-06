@@ -37,6 +37,7 @@
 #include "core/components_ng/pattern/counter/counter_model_ng.h"
 #include "core/components_ng/pattern/counter/counter_node.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
+#include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_model_static.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
@@ -435,7 +436,7 @@ auto g_bindMenuOptionsParamCallbacks = [](
     if (onAppearValue) {
         auto onAppear = [arkCallback = CallbackHelper(onAppearValue.value()), weakNode]() {
             PipelineContext::SetCallBackNode(weakNode);
-            arkCallback.Invoke();
+            arkCallback.InvokeSync();
         };
         menuParam.onAppear = std::move(onAppear);
     }
@@ -451,7 +452,7 @@ auto g_bindMenuOptionsParamCallbacks = [](
     if (aboutToAppearValue) {
         auto aboutToAppear = [arkCallback = CallbackHelper(aboutToAppearValue.value()), weakNode]() {
             PipelineContext::SetCallBackNode(weakNode);
-            arkCallback.Invoke();
+            arkCallback.InvokeSync();
         };
         menuParam.aboutToAppear = std::move(aboutToAppear);
     }
@@ -3407,7 +3408,7 @@ void SetOnAppearImpl(Ark_NativePointer node,
         return;
     }
     auto onEvent = [arkCallback = CallbackHelper(*optValue)]() {
-        arkCallback.Invoke();
+        arkCallback.InvokeSync();
     };
     ViewAbstract::SetOnAppear(frameNode, std::move(onEvent));
 }
@@ -3422,7 +3423,7 @@ void SetOnDisAppearImpl(Ark_NativePointer node,
         return;
     }
     auto onEvent = [arkCallback = CallbackHelper(*optValue)]() {
-        arkCallback.Invoke();
+        arkCallback.InvokeSync();
     };
     ViewAbstract::SetOnDisappear(frameNode, std::move(onEvent));
 }
@@ -3439,7 +3440,7 @@ void SetOnAttachImpl(Ark_NativePointer node,
     auto weakNode = AceType::WeakClaim(frameNode);
     auto onAttach = [arkCallback = CallbackHelper(*optValue), node = weakNode]() {
         PipelineContext::SetCallBackNode(node);
-        arkCallback.Invoke();
+        arkCallback.InvokeSync();
     };
     ViewAbstract::SetOnAttach(frameNode, std::move(onAttach));
 }
@@ -3456,7 +3457,7 @@ void SetOnDetachImpl(Ark_NativePointer node,
     auto weakNode = AceType::WeakClaim(frameNode);
     auto onDetach = [arkCallback = CallbackHelper(*optValue), node = weakNode]() {
         PipelineContext::SetCallBackNode(node);
-        arkCallback.Invoke();
+        arkCallback.InvokeSync();
     };
     ViewAbstract::SetOnDetach(frameNode, std::move(onDetach));
 }
@@ -5217,6 +5218,20 @@ void SetBindPopupImpl(Ark_NativePointer node,
             ViewAbstractModelStatic::BindPopup(frameNode, popupParam, nullptr);
         });
 }
+void CallMenuOnModifyDone(RefPtr<UINode> uiNode)
+{
+    CHECK_NULL_VOID(uiNode);
+    auto child = uiNode->GetFirstChild();
+    CHECK_NULL_VOID(child);
+    auto menuNode = child->GetFirstChild();
+    if (menuNode && menuNode->GetTag() == V2::MENU_ETS_TAG) {
+        auto menuFrameNode = AceType::DynamicCast<FrameNode>(menuNode);
+        CHECK_NULL_VOID(menuFrameNode);
+        auto menuPattern = menuFrameNode->GetPattern<InnerMenuPattern>();
+        CHECK_NULL_VOID(menuPattern);
+        menuPattern->OnModifyDone();
+    }
+}
 void BindMenuBase(Ark_NativePointer node,
     const Opt_Boolean *isShow,
     const bool setShow,
@@ -5252,6 +5267,7 @@ void BindMenuBase(Ark_NativePointer node,
         [frameNode, node, menuParam](const CustomNodeBuilder& value) {
             CallbackHelper(value).BuildAsync([frameNode, menuParam, node](const RefPtr<UINode>& uiNode) {
                 auto builder = [uiNode]() {
+                    CallMenuOnModifyDone(uiNode);
                     ViewStackProcessor::GetInstance()->Push(uiNode);
                 };
                 ViewAbstractModelStatic::BindMenu(frameNode, {}, std::move(builder), menuParam);
@@ -5312,6 +5328,7 @@ void BindContextMenuBase(Ark_NativePointer node,
                 [frameNode, type, menuParam, previewBuildFunc](const RefPtr<UINode>& uiNode) mutable {
                     auto builder = [frameNode, uiNode]() {
                         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+                        CallMenuOnModifyDone(uiNode);
                         ViewStackProcessor::GetInstance()->Push(uiNode);
                     };
                     ViewAbstractModelStatic::BindContextMenuStatic(

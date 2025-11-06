@@ -44,10 +44,13 @@ Ark_TextStyle ConstructImpl(const Opt_TextStyleInterface* value)
         if (!font.fontColor) {
             font.fontColor = theme->GetTextStyle().GetTextColor();
         }
-        font.fontSize = Converter::OptConvert<Dimension>(options->fontSize);
-        Validator::ValidateNonNegative(font.fontSize);
-        if (!font.fontSize) {
-            font.fontSize = theme->GetTextStyle().GetFontSize();
+        if (auto optFontSize = Converter::GetOpt(options->fontSize); optFontSize) {
+            font.fontSize = Converter::Convert<Dimension>(optFontSize.value());
+            Validator::ValidateNonNegative(font.fontSize);
+            Validator::ValidateNonPercent(font.fontSize);
+            if (!font.fontSize) {
+                font.fontSize = theme->GetTextStyle().GetFontSize();
+            }
         }
         font.fontWeight = Converter::OptConvert<FontWeight>(options->fontWeight);
         if (!font.fontWeight) {

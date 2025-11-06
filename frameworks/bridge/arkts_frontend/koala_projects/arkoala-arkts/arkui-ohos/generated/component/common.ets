@@ -35,6 +35,7 @@ import { FocusBoxStyle_serializer, FocusBoxStyle, FocusPriority } from "./focus"
 import { matrix4_Matrix4Transit_serializer } from "./../framework/ohos.matrix4"
 import { CircleShape_serializer, EllipseShape_serializer, PathShape_serializer, RectShape_serializer } from "./../framework/ohos.arkui.shape"
 import { image_PixelMap_serializer } from "./../framework/ohos.multimedia.image"
+import { ComponentContent_serializer } from "./../ComponentContent"
 import { StyledString_serializer, StyledString, ImageAttachment, CustomSpan, StyleOptions, StyledStringKey, SpanStyle, StyledStringMarshallCallback, UserDataSpan, StyledStringUnmarshallCallback } from "./styledString"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
@@ -516,90 +517,6 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
         }
         ArkUIGeneratedNativeModule._BaseEvent_setTargetDisplayId(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
-    }
-}
-export class ChildrenMainSizeInternal {
-    public static fromPtr(ptr: KPointer): ChildrenMainSize {
-        return new ChildrenMainSize(false, ptr)
-    }
-}
-export class ChildrenMainSize implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
-    get childDefaultSize(): double {
-        return this.getChildDefaultSize()
-    }
-    set childDefaultSize(childDefaultSize: double) {
-        this.setChildDefaultSize(childDefaultSize)
-    }
-    constructor(_0: boolean, peerPtr: KPointer) {
-        this.peer = new Finalizable(peerPtr, ChildrenMainSize.getFinalizer())
-    }
-    constructor(childDefaultSize: double) {
-        this(false, ChildrenMainSize.construct(childDefaultSize))
-    }
-    static construct(childDefaultSize: double): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._ChildrenMainSize_construct(childDefaultSize)
-        return retval
-    }
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._ChildrenMainSize_getFinalizer()
-    }
-    public splice(start: int32, deleteCount?: int32, childrenSize?: Array<double>): void {
-        const start_casted = start as (int32)
-        const deleteCount_casted = deleteCount as (int32 | undefined)
-        const childrenSize_casted = childrenSize as (Array<double> | undefined)
-        this.splice_serialize(start_casted, deleteCount_casted, childrenSize_casted)
-        return
-    }
-    public update(index: int32, childSize: double): void {
-        const index_casted = index as (int32)
-        const childSize_casted = childSize as (double)
-        this.update_serialize(index_casted, childSize_casted)
-        return
-    }
-    private getChildDefaultSize(): double {
-        return this.getChildDefaultSize_serialize()
-    }
-    private setChildDefaultSize(childDefaultSize: double): void {
-        const childDefaultSize_casted = childDefaultSize as (double)
-        this.setChildDefaultSize_serialize(childDefaultSize_casted)
-        return
-    }
-    splice_serialize(start: int32, deleteCount?: int32, childrenSize?: Array<double>): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (deleteCount !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const deleteCountTmpValue  = deleteCount!
-            thisSerializer.writeInt32(deleteCountTmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        if (childrenSize !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const childrenSizeTmpValue  = childrenSize!
-            thisSerializer.writeInt32((childrenSizeTmpValue.length).toInt())
-            for (let childrenSizeTmpValueCounterI = 0; childrenSizeTmpValueCounterI < childrenSizeTmpValue.length; childrenSizeTmpValueCounterI++) {
-                const childrenSizeTmpValueTmpElement : double = childrenSizeTmpValue[childrenSizeTmpValueCounterI]
-                thisSerializer.writeFloat64(childrenSizeTmpValueTmpElement)
-            }
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._ChildrenMainSize_splice(this.peer!.ptr, start, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    update_serialize(index: int32, childSize: double): void {
-        ArkUIGeneratedNativeModule._ChildrenMainSize_update(this.peer!.ptr, index, childSize)
-    }
-    private getChildDefaultSize_serialize(): double {
-        const retval  = ArkUIGeneratedNativeModule._ChildrenMainSize_getChildDefaultSize(this.peer!.ptr)
-        return retval
-    }
-    private setChildDefaultSize_serialize(childDefaultSize: double): void {
-        ArkUIGeneratedNativeModule._ChildrenMainSize_setChildDefaultSize(this.peer!.ptr, childDefaultSize)
     }
 }
 export interface DismissPopupAction {
@@ -5141,7 +5058,7 @@ export class ArkCommonMethodPeer extends PeerNode {
             } else if (valueTmpValue instanceof ComponentContent) {
                 thisSerializer.writeInt8((2).toChar())
                 const valueTmpValueForIdx2  = valueTmpValue as ComponentContent
-                thisSerializer.holdAndWriteObject(valueTmpValueForIdx2)
+                ComponentContent_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -6766,7 +6683,36 @@ export interface DismissSheetAction {
     reason: DismissReason;
 }
 export interface SpringBackAction {
-    springBack: VoidCallback;
+    springBack(): void
+}
+export class SpringBackActionInternal implements MaterializedBase,SpringBackAction {
+    peer?: Finalizable | undefined = undefined
+    public getPeer(): Finalizable | undefined {
+        return this.peer
+    }
+    constructor(peerPtr: KPointer) {
+        this.peer = new Finalizable(peerPtr, SpringBackActionInternal.getFinalizer())
+    }
+    constructor() {
+        this(SpringBackActionInternal.construct())
+    }
+    static construct(): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._SpringBackAction_construct()
+        return retval
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._SpringBackAction_getFinalizer()
+    }
+    public static fromPtr(ptr: KPointer): SpringBackActionInternal {
+        return new SpringBackActionInternal(ptr)
+    }
+    public springBack(): void {
+        this.springBack_serialize()
+        return
+    }
+    springBack_serialize(): void {
+        ArkUIGeneratedNativeModule._SpringBackAction_springBack(this.peer!.ptr)
+    }
 }
 export type SingleLengthDetent = [
     SheetSize | Length
@@ -7755,7 +7701,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     tabStop_value?: boolean | undefined
     onFocus_value?: (() => void) | undefined
     onBlur_value?: (() => void) | undefined
-    tabIndex_value?: number | undefined
+    tabIndex_value?: int32 | undefined
     defaultFocus_value?: boolean | undefined
     groupDefaultFocus_value?: boolean | undefined
     focusOnTouch_value?: boolean | undefined
@@ -8023,7 +7969,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     onBlur(value: (() => void) | undefined): this {
         return this
     }
-    tabIndex(value: number | undefined): this {
+    tabIndex(value: int32 | undefined): this {
         return this
     }
     defaultFocus(value: boolean | undefined): this {
@@ -13073,25 +13019,12 @@ export class SheetDismiss_serializer {
 export class SpringBackAction_serializer {
     public static write(buffer: SerializerBase, value: SpringBackAction): void {
         let valueSerializer : SerializerBase = buffer
-        const valueHolderForSpringBack  = value.springBack
-        valueSerializer.holdAndWriteCallback(valueHolderForSpringBack)
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     public static read(buffer: DeserializerBase): SpringBackAction {
         let valueDeserializer : DeserializerBase = buffer
-        const springBackTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
-        const springBackTmpBufBufCall : KPointer = valueDeserializer.readPointer()
-        const springBackTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
-        const springBackTmpResult : VoidCallback = ():void => {
-            const springBackTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
-            springBackTmpBufBufArgsSerializer.writeInt32(springBackTmpBufBufResource.resourceId);
-            springBackTmpBufBufArgsSerializer.writePointer(springBackTmpBufBufCall);
-            springBackTmpBufBufArgsSerializer.writePointer(springBackTmpBufBufCallSync);
-            InteropNativeModule._CallCallbackSync(10, -2038961969, springBackTmpBufBufArgsSerializer.asBuffer(), springBackTmpBufBufArgsSerializer.length());
-            springBackTmpBufBufArgsSerializer.release();
-            return;
-        }
-        let value : SpringBackAction = ({springBack: springBackTmpResult} as SpringBackAction)
-        return value
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return SpringBackActionInternal.fromPtr(ptr)
     }
 }
 export class SystemAdaptiveOptions_serializer {

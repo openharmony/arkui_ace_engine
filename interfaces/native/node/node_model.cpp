@@ -806,6 +806,23 @@ void* GetParseJsMedia()
     return reinterpret_cast<void*>(parseJsMedia);
 }
 
+void* GetParseStaticResource()
+{
+    void* module = FindModule();
+    if (!module) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get module");
+        return nullptr;
+    }
+    void (*parseJsMedia)(int32_t, int32_t, const char* paramC, void* resource) = nullptr;
+    parseJsMedia = reinterpret_cast<void (*)(int32_t, int32_t, const char*, void*)>(
+        FindFunction(module, "OHOS_ACE_ParseStaticMedia"));
+    if (!parseJsMedia) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Cannot find OHOS_ACE_ParseStaticMedia");
+        return nullptr;
+    }
+    return reinterpret_cast<void*>(parseJsMedia);
+}
+
 void IncreaseRefDrawable(void* object)
 {
     void* module = FindModule();

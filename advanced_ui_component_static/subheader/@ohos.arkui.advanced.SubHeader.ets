@@ -217,11 +217,11 @@ RESOURCE_CACHE_MAP.set('sys.float.subheader_title_font_weight', { resourceId: 12
 @CustomLayout
 @Component
 export struct SubHeader {
-  @PropRef icon?: ResourceStr;
+  @PropRef icon: ResourceStr | undefined = undefined;
   iconSymbolOptions?: SymbolOptions;
-  @PropRef primaryTitle?: ResourceStr;
+  @PropRef primaryTitle: ResourceStr | undefined = undefined;
   @State primaryTitleModifier: TextModifier = new TextModifier();
-  @PropRef secondaryTitle?: ResourceStr;
+  @PropRef secondaryTitle: ResourceStr | undefined = undefined;
   @State secondaryTitleModifier: TextModifier = new TextModifier();
   @State subHeaderModifier: SubHeaderModifier = new SubHeaderModifier();
   select?: SelectOptions;
@@ -236,8 +236,8 @@ export struct SubHeader {
   @State selectedIndex: int = -1;
   @State selectValue: ResourceStr | undefined = '';
   @BuilderParam titleBuilder?: () => void;
-  @PropRef contentMargin?: LocalizedMargin;
-  @PropRef contentPadding?: LocalizedPadding;
+  @PropRef contentMargin: LocalizedMargin | undefined = undefined;
+  @PropRef contentPadding: LocalizedPadding | undefined = undefined;
   subHeaderMargin: LocalizedMargin = {
     start: LengthMetrics.vp(getResourceValue('sys.float.margin_left')),
     end: LengthMetrics.vp(getResourceValue('sys.float.margin_right')),

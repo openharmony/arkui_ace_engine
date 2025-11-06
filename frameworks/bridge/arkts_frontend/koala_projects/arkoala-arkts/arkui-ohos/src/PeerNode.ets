@@ -53,7 +53,7 @@ export class PeerNode extends IncrementalNode {
     private _reusePool?: Map<string, ReusablePool>
     public reusable: boolean = false
     private _uiStateStyle?: MutableState<int32>;
-    private _disabledStateUpdates: MutableState<boolean> | undefined  = undefined;
+    private _disabledStateUpdates: MutableState<boolean> = GlobalStateManager.instance.mutableState<boolean>(false, true);
 
     getPeerPtr(): pointer {
         return this.peer.ptr
@@ -62,15 +62,10 @@ export class PeerNode extends IncrementalNode {
         return this._uiStateStyle;
     }
     override get disabledStateUpdates(): boolean {
-        return this._disabledStateUpdates?.value ?? false
+        return this._disabledStateUpdates.value
     }
     set disabledStateUpdates(disabled: boolean) {
-        let state = this._disabledStateUpdates
-        if (state) {
-            state.value = disabled
-        } else {
-            this._disabledStateUpdates = GlobalStateManager.instance.mutableState<boolean>(disabled, true)
-        }
+        this._disabledStateUpdates.value = disabled
     }
     setId(id: int32) {
         PeerNode.updatePeerNodeMap()
@@ -116,10 +111,6 @@ export class PeerNode extends IncrementalNode {
 
     /* reuse and recycle object on RootPeers */
     override reuse(reuseKey: string, id: KoalaCallsiteKey): Disposable | undefined {
-        if (reuseKey === undefined) {
-            return undefined;
-        }
-
         if (!this.isKind(RootPeerType))
             return this.parent?.reuse(reuseKey, id)
 
@@ -133,10 +124,6 @@ export class PeerNode extends IncrementalNode {
     }
 
     override recycle(reuseKey: string, child: Disposable, id: KoalaCallsiteKey): boolean {
-        if (reuseKey === undefined) {
-            return false;
-        }
-
         if (!this.isKind(RootPeerType)) {
             return this.parent?.recycle(reuseKey, child, id) ?? false
         }
@@ -245,10 +232,10 @@ export class PeerNode extends IncrementalNode {
             }
         }
         this.onChildRemoved = (child: IncrementalNode) => {
-            let peer = findPeerNode(child)
-            if (peer && !peer!.disposed) {
-                peer!.onRecycle()
-                this.peer.removeChild(peer!.peer.ptr)
+            if (child.isKind(PeerNodeType) && !child.disposed) {
+                const peer = child as PeerNode
+                peer.onRecycle()
+                this.peer.removeChild(peer.peer.ptr)
             }
         }
         this.name = name
@@ -272,8 +259,6 @@ export class PeerNode extends IncrementalNode {
         this._reusePool = undefined
         this._onRecycle = undefined
         this._onReuse = undefined
-        this._disabledStateUpdates?.dispose()
-        this._disabledStateUpdates = undefined
         super.dispose()
     }
 

@@ -129,10 +129,10 @@ export class UIUtilsImpl {
 
     private static makeObservedWrappedBaseMap: Map<string, (value: object, allowDeep: boolean, isAPI: boolean) => object> = 
         new Map<string, (value: object, allowDeep: boolean, isAPI: boolean) => object>([
-            [ArrayTypeName, (value: object, allowDeep: boolean, isAPI: boolean) => UIUtilsImpl.makeObservedArray(value as Array<Any>, allowDeep, isAPI)],
-            [DateTypeName, (value: object, allowDeep: boolean, isAPI: boolean) => UIUtilsImpl.makeObservedDate(value as Date, allowDeep, isAPI)],
-            [MapTypeName, (value: object, allowDeep: boolean, isAPI: boolean) => UIUtilsImpl.makeObservedMap(value as Map<Any, Any>, allowDeep, isAPI)],
-            [SetTypeName, (value: object, allowDeep: boolean, isAPI: boolean) => UIUtilsImpl.makeObservedSet(value as Set<Any>, allowDeep, isAPI)],
+            [ArrayTypeName, (value: object, allowDeep: boolean, isAPI: boolean): object => UIUtilsImpl.makeObservedArray(value as Array<Any>, allowDeep, isAPI)],
+            [DateTypeName, (value: object, allowDeep: boolean, isAPI: boolean): object => UIUtilsImpl.makeObservedDate(value as Date, allowDeep, isAPI)],
+            [MapTypeName, (value: object, allowDeep: boolean, isAPI: boolean): object => UIUtilsImpl.makeObservedMap(value as Map<Any, Any>, allowDeep, isAPI)],
+            [SetTypeName, (value: object, allowDeep: boolean, isAPI: boolean): object => UIUtilsImpl.makeObservedSet(value as Set<Any>, allowDeep, isAPI)],
         ]);
 
     public makeV1Observed<T>(value: T): T {

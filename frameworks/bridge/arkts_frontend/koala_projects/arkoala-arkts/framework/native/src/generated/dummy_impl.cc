@@ -29591,7 +29591,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Position GetPositionToWindowImpl(Ark_FrameNode peer)
+    Ark_Vector2 GetPositionToWindowImpl(Ark_FrameNode peer)
     {
         if (!needGroupedLog(1))
         {
@@ -30012,7 +30012,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return nullptr;
     }
-    Ark_NativePointer GetFrameNodeByUniqueIdImpl(const Ark_Number* id)
+    Ark_NativePointer GetFrameNodeByUniqueIdImpl(Ark_Int32 id)
     {
         if (!needGroupedLog(1))
         {
@@ -31828,7 +31828,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Boolean DispatchKeyEventImpl(const Ark_Union_Number_String* node,
+    Ark_Boolean DispatchKeyEventImpl(const Ark_Union_Int32_String* node,
                                      Ark_KeyEvent event)
     {
         if (!needGroupedLog(1))
@@ -32977,7 +32977,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return fnPtr<KNativePointer>(dummyClassFinalizer);
     }
-    Ark_RectResult GetItemRectInGroupImpl(Ark_ListScroller peer,
+    Ark_RectResult GetItemRectInGroupImpl(Ark_VMContext vmContext,
+                                          Ark_ListScroller peer,
                                           Ark_Int32 index,
                                           Ark_Int32 indexInGroup)
     {
@@ -32994,7 +32995,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {};
     }
-    void ScrollToItemInGroupImpl(Ark_ListScroller peer,
+    void ScrollToItemInGroupImpl(Ark_VMContext vmContext,
+                                 Ark_ListScroller peer,
                                  Ark_Int32 index,
                                  Ark_Int32 indexInGroup,
                                  const Opt_Boolean* smooth,
@@ -33015,7 +33017,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void CloseAllSwipeActionsImpl(Ark_ListScroller peer,
+    void CloseAllSwipeActionsImpl(Ark_VMContext vmContext,
+                                  Ark_ListScroller peer,
                                   const Opt_CloseSwipeActionOptions* options)
     {
         if (!needGroupedLog(1))
@@ -33027,7 +33030,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_VisibleListContentInfo GetVisibleListContentInfoImpl(Ark_ListScroller peer,
+    Ark_VisibleListContentInfo GetVisibleListContentInfoImpl(Ark_VMContext vmContext,
+                                                             Ark_ListScroller peer,
                                                              Ark_Float64 x,
                                                              Ark_Float64 y)
     {
@@ -39174,7 +39178,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return fnPtr<KNativePointer>(dummyClassFinalizer);
     }
-    void ScrollToImpl(Ark_Scroller peer,
+    void ScrollToImpl(Ark_VMContext vmContext,
+                      Ark_Scroller peer,
                       const Ark_ScrollOptions* options)
     {
         if (!needGroupedLog(1))
@@ -39186,7 +39191,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void ScrollEdgeImpl(Ark_Scroller peer,
+    void ScrollEdgeImpl(Ark_VMContext vmContext,
+                        Ark_Scroller peer,
                         Ark_Edge value,
                         const Opt_ScrollEdgeOptions* options)
     {
@@ -39201,7 +39207,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void FlingImpl(Ark_Scroller peer,
+    void FlingImpl(Ark_VMContext vmContext,
+                   Ark_Scroller peer,
                    Ark_Float64 velocity)
     {
         if (!needGroupedLog(1))
@@ -39213,7 +39220,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void ScrollPageImpl(Ark_Scroller peer,
+    void ScrollPageImpl(Ark_VMContext vmContext,
+                        Ark_Scroller peer,
                         const Ark_ScrollPageOptions* value)
     {
         if (!needGroupedLog(1))
@@ -39225,7 +39233,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Opt_OffsetResult CurrentOffsetImpl(Ark_Scroller peer)
+    Opt_OffsetResult CurrentOffsetImpl(Ark_VMContext vmContext,
+                                       Ark_Scroller peer)
     {
         if (!needGroupedLog(1))
         {
@@ -39237,7 +39246,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {};
     }
-    void ScrollToIndexImpl(Ark_Scroller peer,
+    void ScrollToIndexImpl(Ark_VMContext vmContext,
+                           Ark_Scroller peer,
                            Ark_Int32 value,
                            const Opt_Boolean* smooth,
                            const Opt_ScrollAlign* align,
@@ -39258,7 +39268,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void ScrollByImpl(Ark_Scroller peer,
+    void ScrollByImpl(Ark_VMContext vmContext,
+                      Ark_Scroller peer,
                       const Ark_Length* dx,
                       const Ark_Length* dy)
     {
@@ -39273,7 +39284,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Boolean IsAtEndImpl(Ark_Scroller peer)
+    Ark_Boolean IsAtEndImpl(Ark_VMContext vmContext,
+                            Ark_Scroller peer)
     {
         if (!needGroupedLog(1))
         {
@@ -39285,7 +39297,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return 0;
     }
-    Ark_RectResult GetItemRectImpl(Ark_Scroller peer,
+    Ark_RectResult GetItemRectImpl(Ark_VMContext vmContext,
+                                   Ark_Scroller peer,
                                    Ark_Int32 index)
     {
         if (!needGroupedLog(1))
@@ -39299,7 +39312,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {};
     }
-    Ark_Int32 GetItemIndexImpl(Ark_Scroller peer,
+    Ark_Int32 GetItemIndexImpl(Ark_VMContext vmContext,
+                               Ark_Scroller peer,
                                Ark_Float64 x,
                                Ark_Float64 y)
     {
@@ -39902,6 +39916,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append("[return 0] \n");
         appendGroupedLog(1, out);
         return 0;
+    }
+    void SetLengthImpl(Ark_StyledString peer,
+                       Ark_Int32 length)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setLength(");
+        WriteToString(&out, length);
+        out.append(") \n");
+        appendGroupedLog(1, out);
     }
     } // StyledStringAccessor
     namespace StyledStringControllerAccessor {
@@ -47051,6 +47077,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             StyledStringAccessor::Marshalling1Impl,
             StyledStringAccessor::Unmarshalling1Impl,
             StyledStringAccessor::GetLengthImpl,
+            StyledStringAccessor::SetLengthImpl,
         };
         return &StyledStringAccessorImpl;
     }

@@ -2914,21 +2914,27 @@ void deserializeAndCallCallback_RangeUpdate(KSerializerBuffer thisArray, Ark_Int
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
     const Ark_Int32 _resourceId = thisDeserializer.readInt32();
-    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Int32 start, const Ark_Int32 end)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_RangeUpdate))));
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Int32 start, const Ark_Int32 end, const Ark_Int32 cacheStart, const Ark_Int32 cacheEnd, const Ark_Boolean isLoop)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_RangeUpdate))));
     thisDeserializer.readPointer();
     Ark_Int32 start = thisDeserializer.readInt32();
     Ark_Int32 end = thisDeserializer.readInt32();
-    _call(_resourceId, start, end);
+    Ark_Int32 cacheStart = thisDeserializer.readInt32();
+    Ark_Int32 cacheEnd = thisDeserializer.readInt32();
+    Ark_Boolean isLoop = thisDeserializer.readBoolean();
+    _call(_resourceId, start, end, cacheStart, cacheEnd, isLoop);
 }
 void deserializeAndCallSyncCallback_RangeUpdate(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
     const Ark_Int32 resourceId = thisDeserializer.readInt32();
     thisDeserializer.readPointer();
-    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 start, const Ark_Int32 end)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_RangeUpdate))));
+    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 start, const Ark_Int32 end, const Ark_Int32 cacheStart, const Ark_Int32 cacheEnd, const Ark_Boolean isLoop)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_RangeUpdate))));
     Ark_Int32 start = thisDeserializer.readInt32();
     Ark_Int32 end = thisDeserializer.readInt32();
-    callSyncMethod(vmContext, resourceId, start, end);
+    Ark_Int32 cacheStart = thisDeserializer.readInt32();
+    Ark_Int32 cacheEnd = thisDeserializer.readInt32();
+    Ark_Boolean isLoop = thisDeserializer.readBoolean();
+    callSyncMethod(vmContext, resourceId, start, end, cacheStart, cacheEnd, isLoop);
 }
 void deserializeAndCallCallback_RefreshStatus_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
@@ -3140,7 +3146,8 @@ void deserializeAndCallCallback_SpringBackAction_Void(KSerializerBuffer thisArra
     const Ark_Int32 _resourceId = thisDeserializer.readInt32();
     const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_SpringBackAction value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_SpringBackAction_Void))));
     thisDeserializer.readPointer();
-    Ark_SpringBackAction value0 = SpringBackAction_serializer::read(thisDeserializer);
+    Ark_SpringBackAction value0 = static_cast<Ark_SpringBackAction>(
+        SpringBackAction_serializer::read(thisDeserializer));
     _call(_resourceId, value0);
 }
 void deserializeAndCallSyncCallback_SpringBackAction_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
@@ -3149,7 +3156,8 @@ void deserializeAndCallSyncCallback_SpringBackAction_Void(Ark_VMContext vmContex
     const Ark_Int32 resourceId = thisDeserializer.readInt32();
     thisDeserializer.readPointer();
     const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_SpringBackAction value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_SpringBackAction_Void))));
-    Ark_SpringBackAction value0 = SpringBackAction_serializer::read(thisDeserializer);
+    Ark_SpringBackAction value0 = static_cast<Ark_SpringBackAction>(
+        SpringBackAction_serializer::read(thisDeserializer));
     callSyncMethod(vmContext, resourceId, value0);
 }
 void deserializeAndCallCallback_StateStylesChange(KSerializerBuffer thisArray, Ark_Int32 thisLength)

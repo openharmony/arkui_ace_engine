@@ -235,6 +235,20 @@ ani_int GetCanvasId(ArkUICanvasRenderingContext peer)
     CHECK_NULL_RETURN(peerImpl, -1);
     return peerImpl->GetCanvasId();
 }
+
+void SetAttachCallbackId(ArkUICanvasRenderingContext peer, ani_int attachCallbackId)
+{
+    auto peerImpl = reinterpret_cast<GeneratedModifier::CanvasRenderingContext2DPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    peerImpl->SetAttachCallbackId(attachCallbackId);
+}
+
+void SetDetachCallbackId(ArkUICanvasRenderingContext peer, ani_int detachCallbackId)
+{
+    auto peerImpl = reinterpret_cast<GeneratedModifier::CanvasRenderingContext2DPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    peerImpl->SetDetachCallbackId(detachCallbackId);
+}
 } // namespace CanvasAniModifier
 
 const ArkUIAniCanvasModifier* GetCanvasAniModifier()
@@ -251,6 +265,8 @@ const ArkUIAniCanvasModifier* GetCanvasAniModifier()
         .putImageData1 = CanvasAniModifier::PutImageData1,
         .getDrawingCanvas = CanvasAniModifier::GetDrawingCanvas,
         .getCanvasId = CanvasAniModifier::GetCanvasId,
+        .setAttachCallbackId = CanvasAniModifier::SetAttachCallbackId,
+        .setDetachCallbackId = CanvasAniModifier::SetDetachCallbackId,
     };
     return &impl;
 }

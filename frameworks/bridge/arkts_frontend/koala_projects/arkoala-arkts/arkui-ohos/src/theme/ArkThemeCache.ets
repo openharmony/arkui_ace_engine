@@ -65,7 +65,6 @@ export class ArkThemeCache {
         this.cache.splice(index, 1);
         // remove theme from native side cache
         // TODO: Use ANI IMPL
-        // getUINativeModule().theme.removeFromCache(theme.id);
     }
 
     /**

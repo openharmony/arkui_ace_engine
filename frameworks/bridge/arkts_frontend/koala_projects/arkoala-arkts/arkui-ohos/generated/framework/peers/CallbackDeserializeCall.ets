@@ -1452,7 +1452,10 @@ export function deserializeAndCallCallback_RangeUpdate(thisDeserializer: Deseria
     const _call  = (ResourceHolder.instance().get(_resourceId) as Callback_RangeUpdate)
     let start : int32 = thisDeserializer.readInt32()
     let end : int32 = thisDeserializer.readInt32()
-    _call(start, end)
+    let cacheStart : int32 = thisDeserializer.readInt32()
+    let cacheEnd : int32 = thisDeserializer.readInt32()
+    let isLoop : boolean = thisDeserializer.readBoolean()
+    _call(start, end, cacheStart, cacheEnd, isLoop)
 }
 export function deserializeAndCallCallback_RefreshStatus_Void(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
@@ -1565,7 +1568,7 @@ export function deserializeAndCallCallback_SizeResult_Void(thisDeserializer: Des
 export function deserializeAndCallCallback_SpringBackAction_Void(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: SpringBackAction) => void))
-    let value0 : SpringBackAction = SpringBackAction_serializer.read(thisDeserializer)
+    let value0 : SpringBackAction = (SpringBackAction_serializer.read(thisDeserializer) as SpringBackAction)
     _call(value0)
 }
 export function deserializeAndCallCallback_StateStylesChange(thisDeserializer: DeserializerBase): void {

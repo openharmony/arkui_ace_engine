@@ -973,10 +973,10 @@ export class FrameNodeExtender {
     static dispose_serialize(peer: FrameNode): void {
         ArkUIGeneratedNativeModule._FrameNodeExtender_dispose(extractors.toFrameNodePtr(peer))
     }
-    static getPositionToWindow_serialize(peer: FrameNode): Position {
+    static getPositionToWindow_serialize(peer: FrameNode): Vector2 {
         const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getPositionToWindow(extractors.toFrameNodePtr(peer))
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const returnResult : Position = Position_serializer.read(retvalDeserializer)
+        const returnResult : Vector2 = Vector2_serializer.read(retvalDeserializer)
         return returnResult
     }
     static getPositionToParent_serialize(peer: FrameNode): Position {
@@ -1001,7 +1001,7 @@ export class FrameNodeExtender {
         const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getId(extractors.toFrameNodePtr(peer))
         return retval
     }
-    static getUniqueId_serialize(peer: FrameNode): number {
+    static getUniqueId_serialize(peer: FrameNode): int32 {
         const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getUniqueId(extractors.toFrameNodePtr(peer))
         return retval
     }
@@ -1121,7 +1121,7 @@ export class FrameNodeExtender {
         const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getFrameNodeById(id)
         return retval
     }
-    static getFrameNodeByUniqueId_serialize(id: number): KPointer {
+    static getFrameNodeByUniqueId_serialize(id: int32): KPointer {
         const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getFrameNodeByUniqueId(id)
         return retval
     }
@@ -1226,7 +1226,7 @@ export class FrameNodeExtender {
         FrameNodeExtender.dispose_serialize(peer_casted)
         return
     }
-    public static getPositionToWindow(peer: FrameNode): Position {
+    public static getPositionToWindow(peer: FrameNode): Vector2 {
         const peer_casted = peer as (FrameNode)
         return FrameNodeExtender.getPositionToWindow_serialize(peer_casted)
     }
@@ -1246,7 +1246,7 @@ export class FrameNodeExtender {
         const peer_casted = peer as (FrameNode)
         return FrameNodeExtender.getId_serialize(peer_casted)
     }
-    public static getUniqueId(peer: FrameNode): number {
+     public static getUniqueId(peer: FrameNode): int32 {
         const peer_casted = peer as (FrameNode)
         return FrameNodeExtender.getUniqueId_serialize(peer_casted)
     }
@@ -1369,8 +1369,8 @@ export class FrameNodeExtender {
         const id_casted = id as (number)
         return FrameNodeExtender.getFrameNodeById_serialize(id_casted)
     }
-    public static getFrameNodeByUniqueId(id: number): KPointer {
-        const id_casted = id as (number)
+    public static getFrameNodeByUniqueId(id: int32): KPointer {
+        const id_casted = id as (int32)
         return FrameNodeExtender.getFrameNodeByUniqueId_serialize(id_casted)
     }
     public static reuse(peer: FrameNode): void {
@@ -1810,12 +1810,12 @@ export class IUIContext {
     static freezeUINode1_serialize(id: int64, isFrozen: boolean): void {
         ArkUIGeneratedNativeModule._IUIContext_freezeUINode1(id, isFrozen ? 1 : 0)
     }
-    static dispatchKeyEvent_serialize(node: number | string, event: KeyEvent): boolean {
+    static dispatchKeyEvent_serialize(node: int32 | string, event: KeyEvent): boolean {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (node instanceof number) {
+        if (node instanceof int32) {
             thisSerializer.writeInt8((0).toChar())
-            const nodeForIdx0  = node as number
-            thisSerializer.writeNumber(nodeForIdx0)
+            const nodeForIdx0  = node as int32
+            thisSerializer.writeInt32(nodeForIdx0)
         } else if (node instanceof string) {
             thisSerializer.writeInt8((1).toChar())
             const nodeForIdx1  = node as string
@@ -1837,8 +1837,8 @@ export class IUIContext {
         IUIContext.freezeUINode1_serialize(id_casted, isFrozen_casted)
         return
     }
-    public static dispatchKeyEvent(node: number | string, event: KeyEvent): boolean {
-        const node_casted = node as (number | string)
+    public static dispatchKeyEvent(node: int32 | string, event: KeyEvent): boolean {
+        const node_casted = node as (int32 | string)
         const event_casted = event as (KeyEvent)
         return IUIContext.dispatchKeyEvent_serialize(node_casted, event_casted)
     }
@@ -4014,7 +4014,7 @@ export interface CustomDialogControllerOptionsExtender {
 export interface CustomDialogControllerExternalOptionsExtender {
     customStyle?: boolean;
 }
-export type Callback_RangeUpdate = (start: int32, end: int32) => void;
+export type Callback_RangeUpdate = (start: int32, end: int32, cacheStart: int32, cacheEnd: int32, isLoop: boolean) => void;
 export type Callback_CreateItem = (index: int32) => KPointer;
 export type Callback_OnMoveFromTo = (from: int32, to: int32) => void;
 export interface LengthMetricsCustom {

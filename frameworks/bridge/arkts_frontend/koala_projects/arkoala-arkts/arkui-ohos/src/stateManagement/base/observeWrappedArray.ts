@@ -379,6 +379,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
     public override $_iterator(): IterableIterator<T> {
         // NOTE! addRef for OB_LENGTH similarly to V2!
         this.meta_.addRef(CONSTANT.OB_LENGTH);
+        this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
         return this.store_.values();
     }
 

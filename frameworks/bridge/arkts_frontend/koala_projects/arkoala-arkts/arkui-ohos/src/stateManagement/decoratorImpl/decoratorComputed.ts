@@ -70,7 +70,7 @@ export class ComputedDecoratedVariable<T> implements IComputedDecoratedVariable<
         return this.cachedValue_ as T;
     }
 
-    setOwner(owningView: IVariableOwner) {
+    setOwner(owningView: IVariableOwner): void {
         this.owningComponent_ = owningView;
     }
 

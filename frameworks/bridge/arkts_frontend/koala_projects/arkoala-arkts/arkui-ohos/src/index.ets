@@ -19,8 +19,15 @@ export {
   CustomStyles,
   GestureModifier,
   UIGestureEvent,
-  DrawModifier
+  DrawModifier,
+  TouchTestInfo,
+  TouchResult
 } from "./component/common";
+export {
+  GestureType,
+  Gesture,
+  GestureGroup
+} from "./component/gesture";
 export {
   LifeCycle,
   ExtendableComponent,

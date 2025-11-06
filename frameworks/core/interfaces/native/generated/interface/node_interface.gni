@@ -246,6 +246,7 @@ generated_sources = [
   "implementation/side_bar_container_modifier.cpp",
   "implementation/slider_modifier.cpp",
   "implementation/span_modifier.cpp",
+  "implementation/spring_back_action_accessor.cpp",
   "implementation/spring_motion_accessor.cpp",
   "implementation/spring_prop_accessor.cpp",
   "implementation/ssl_error_handler_accessor.cpp",

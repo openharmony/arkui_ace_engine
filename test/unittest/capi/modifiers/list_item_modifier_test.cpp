@@ -22,6 +22,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/blank/blank_model_ng.h"
 #include "core/components_ng/pattern/list/list_item_event_hub.h"
+#include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_v2/list/list_properties.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
@@ -84,6 +85,22 @@ public:
         return customBuilder;
     }
 };
+
+/*
+ * @tc.name: Construct
+ * @tc.desc: Check the functionality of ListItemModifier.Construct
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemModifierTest, ConstructTest, TestSize.Level1)
+{
+    const auto id = GetId();
+    auto node = modifier_->construct(id, 0);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    ASSERT_TRUE(node);
+    EXPECT_EQ(frameNode->GetId(), id);
+    EXPECT_EQ(frameNode->GetTag(), V2::LIST_ITEM_ETS_TAG);
+    auto pattern = frameNode->GetPattern<ListItemPattern>();
+}
 
 /*
  * @tc.name: setListItemOptionsTest
