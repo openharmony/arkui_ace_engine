@@ -137,10 +137,17 @@ Dimension ResetItemGroupDividerDimension()
 }
 V2::ItemDivider ConvertDivider(const Ark_DividerStyleOptions& src, DividerMode mode, bool isGroupDivider)
 {
-    auto dst = V2::ItemDivider{}; // this struct is initialized by default
+    auto dst = isGroupDivider
+        ? V2::ItemDivider {
+            .strokeWidth = Dimension(0.0f, DimensionUnit::INVALID),
+            .color = Color::FOREGROUND,
+        }
+        : V2::ItemDivider{}; // this struct is initialized by default
     auto colorOpt = Converter::OptConvert<Color>(src.color);
     if (colorOpt.has_value()) {
         dst.color = colorOpt.value();
+    } else {
+        dst.color = Color::FOREGROUND;
     }
     auto defaultDimension = isGroupDivider
         ? ResetItemGroupDividerDimension()

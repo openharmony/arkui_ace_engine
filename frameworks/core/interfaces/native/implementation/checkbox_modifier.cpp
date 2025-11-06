@@ -97,6 +97,10 @@ void SetCheckboxOptionsImpl(Ark_NativePointer node,
 }
 } // CheckboxInterfaceModifier
 namespace CheckboxAttributeModifier {
+namespace {
+constexpr float CHECK_BOX_MARK_SIZE_INVALID_VALUE = -1.0f;
+const Dimension CHECK_BOX_MARK_WIDTH_DEFAULT_VALUE = 2.0_vp;
+}
 void SetSelectImpl(Ark_NativePointer node,
                    const Opt_Union_Boolean_Bindable* value)
 {
@@ -148,13 +152,20 @@ void SetMarkImpl(Ark_NativePointer node,
     }
 
     auto size = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Float64>(optValue->size, DimensionUnit::VP);
-    Validator::ValidateNonPercent(size);
-    Validator::ValidateNonNegative(size);
-    CheckBoxModelStatic::SetCheckMarkSize(frameNode, size.value());
-    auto width =
-        Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Float64>(optValue->strokeWidth, DimensionUnit::VP);
-    Validator::ValidateNonPercent(width);
-    Validator::ValidateNonNegative(width);
+    if (!size.has_value() || (size.value().Unit() == DimensionUnit::PERCENT) || (size.value().IsNegative())) {
+        size = Dimension(CHECK_BOX_MARK_SIZE_INVALID_VALUE);
+    }
+    CheckBoxModelStatic::SetCheckMarkSize(frameNode, size);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<CheckboxTheme>();
+    auto defaultStroke = theme ? theme->GetCheckStroke() : CHECK_BOX_MARK_WIDTH_DEFAULT_VALUE;
+    auto width = optValue->strokeWidth.tag == INTEROP_TAG_UNDEFINED
+        ? defaultStroke
+        : Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Float64>(optValue->strokeWidth, DimensionUnit::VP);
+    if (!width.has_value() || (width.value().Unit() == DimensionUnit::PERCENT) || (width.value().IsNegative())) {
+        width = defaultStroke;
+    }
     CheckBoxModelStatic::SetCheckMarkWidth(frameNode, width);
 }
 void SetOnChangeImpl(Ark_NativePointer node,
