@@ -503,6 +503,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _CommonMethod_setOnAccessibilityFocus(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _CommonMethod_setOnAccessibilityActionIntercept(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _CommonMethod_setAccessibilityTextHint(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _CommonMethod_setAccessibilityDescriptionOfStringType(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void

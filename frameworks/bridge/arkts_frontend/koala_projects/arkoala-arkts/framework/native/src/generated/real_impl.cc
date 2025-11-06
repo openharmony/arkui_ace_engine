@@ -2111,6 +2111,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                      const Opt_AccessibilityFocusCallback* value)
     {
     }
+    void SetOnAccessibilityActionInterceptImpl(Ark_NativePointer node,
+                                               const Opt_AccessibilityActionInterceptCallback* value)
+    {
+    }
     void SetAccessibilityTextHintImpl(Ark_NativePointer node,
                                       const Opt_String* value)
     {
@@ -8490,6 +8494,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetAccessibilityTextOfResourceTypeImpl,
             CommonMethodModifier::SetAccessibilityRoleImpl,
             CommonMethodModifier::SetOnAccessibilityFocusImpl,
+            CommonMethodModifier::SetOnAccessibilityActionInterceptImpl,
             CommonMethodModifier::SetAccessibilityTextHintImpl,
             CommonMethodModifier::SetAccessibilityDescriptionOfStringTypeImpl,
             CommonMethodModifier::SetAccessibilityDescriptionOfResourceTypeImpl,

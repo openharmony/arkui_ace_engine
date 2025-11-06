@@ -20,6 +20,26 @@
 #include "callbacks.h"
 #include "common-interop.h"
 #include "arkoala_api_generated.h"
+void deserializeAndCallAccessibilityActionInterceptCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, Ark_AccessibilityAction action, const Callback_AccessibilityActionInterceptResult_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_AccessibilityActionInterceptCallback))));
+    thisDeserializer.readPointer();
+    Ark_AccessibilityAction action = static_cast<Ark_AccessibilityAction>(thisDeserializer.readInt32());
+    Callback_AccessibilityActionInterceptResult_Void continuationResult = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, Ark_AccessibilityActionInterceptResult value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_AccessibilityActionInterceptResult_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, Ark_AccessibilityActionInterceptResult value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_AccessibilityActionInterceptResult_Void))))};
+    _call(_resourceId, action, continuationResult);
+}
+void deserializeAndCallSyncAccessibilityActionInterceptCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, Ark_AccessibilityAction action, const Callback_AccessibilityActionInterceptResult_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_AccessibilityActionInterceptCallback))));
+    Ark_AccessibilityAction action = static_cast<Ark_AccessibilityAction>(thisDeserializer.readInt32());
+    Callback_AccessibilityActionInterceptResult_Void continuationResult = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, Ark_AccessibilityActionInterceptResult value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_AccessibilityActionInterceptResult_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, Ark_AccessibilityActionInterceptResult value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_AccessibilityActionInterceptResult_Void))))};
+    callSyncMethod(vmContext, resourceId, action, continuationResult);
+}
 void deserializeAndCallAccessibilityCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
@@ -183,6 +203,24 @@ void deserializeAndCallSyncButtonTriggerClickCallback(Ark_VMContext vmContext, K
     Ark_Number xPos = static_cast<Ark_Number>(thisDeserializer.readNumber());
     Ark_Number yPos = static_cast<Ark_Number>(thisDeserializer.readNumber());
     callSyncMethod(vmContext, resourceId, xPos, yPos);
+}
+void deserializeAndCallCallback_AccessibilityActionInterceptResult_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, Ark_AccessibilityActionInterceptResult value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_AccessibilityActionInterceptResult_Void))));
+    thisDeserializer.readPointer();
+    Ark_AccessibilityActionInterceptResult value = static_cast<Ark_AccessibilityActionInterceptResult>(thisDeserializer.readInt32());
+    _call(_resourceId, value);
+}
+void deserializeAndCallSyncCallback_AccessibilityActionInterceptResult_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, Ark_AccessibilityActionInterceptResult value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_AccessibilityActionInterceptResult_Void))));
+    Ark_AccessibilityActionInterceptResult value = static_cast<Ark_AccessibilityActionInterceptResult>(thisDeserializer.readInt32());
+    callSyncMethod(vmContext, resourceId, value);
 }
 void deserializeAndCallCallback_Area_Area_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
@@ -6845,6 +6883,7 @@ void deserializeAndCallSyncWorkerEventListener(Ark_VMContext vmContext, KSeriali
 void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     switch (static_cast<CallbackKind>(kind)) {
+        case Kind_AccessibilityActionInterceptCallback: return deserializeAndCallAccessibilityActionInterceptCallback(thisArray, thisLength);
         case Kind_AccessibilityCallback: return deserializeAndCallAccessibilityCallback(thisArray, thisLength);
         case Kind_AccessibilityFocusCallback: return deserializeAndCallAccessibilityFocusCallback(thisArray, thisLength);
         case Kind_ArcScrollIndexHandler: return deserializeAndCallArcScrollIndexHandler(thisArray, thisLength);
@@ -6852,6 +6891,7 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
         case Kind_AsyncCallback_Void: return deserializeAndCallAsyncCallback_Void(thisArray, thisLength);
         case Kind_ButtonModifierBuilder: return deserializeAndCallButtonModifierBuilder(thisArray, thisLength);
         case Kind_ButtonTriggerClickCallback: return deserializeAndCallButtonTriggerClickCallback(thisArray, thisLength);
+        case Kind_Callback_AccessibilityActionInterceptResult_Void: return deserializeAndCallCallback_AccessibilityActionInterceptResult_Void(thisArray, thisLength);
         case Kind_Callback_Area_Area_Void: return deserializeAndCallCallback_Area_Area_Void(thisArray, thisLength);
         case Kind_Callback_Array_Number_Void: return deserializeAndCallCallback_Array_Number_Void(thisArray, thisLength);
         case Kind_Callback_Array_String_Void: return deserializeAndCallCallback_Array_String_Void(thisArray, thisLength);
@@ -7158,12 +7198,14 @@ KOALA_EXECUTE(deserializeAndCallCallback, setCallbackCaller(10, static_cast<Call
 void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     switch (kind) {
+        case Kind_AccessibilityActionInterceptCallback: return deserializeAndCallSyncAccessibilityActionInterceptCallback(vmContext, thisArray, thisLength);
         case Kind_AccessibilityCallback: return deserializeAndCallSyncAccessibilityCallback(vmContext, thisArray, thisLength);
         case Kind_AccessibilityFocusCallback: return deserializeAndCallSyncAccessibilityFocusCallback(vmContext, thisArray, thisLength);
         case Kind_ArcScrollIndexHandler: return deserializeAndCallSyncArcScrollIndexHandler(vmContext, thisArray, thisLength);
         case Kind_AsyncCallback_image_PixelMap_Void: return deserializeAndCallSyncAsyncCallback_image_PixelMap_Void(vmContext, thisArray, thisLength);
         case Kind_AsyncCallback_Void: return deserializeAndCallSyncAsyncCallback_Void(vmContext, thisArray, thisLength);
         case Kind_ButtonModifierBuilder: return deserializeAndCallSyncButtonModifierBuilder(vmContext, thisArray, thisLength);
+        case Kind_Callback_AccessibilityActionInterceptResult_Void: return deserializeAndCallSyncCallback_AccessibilityActionInterceptResult_Void(vmContext, thisArray, thisLength);
         case Kind_ButtonTriggerClickCallback: return deserializeAndCallSyncButtonTriggerClickCallback(vmContext, thisArray, thisLength);
         case Kind_Callback_Area_Area_Void: return deserializeAndCallSyncCallback_Area_Area_Void(vmContext, thisArray, thisLength);
         case Kind_Callback_Array_Number_Void: return deserializeAndCallSyncCallback_Array_Number_Void(vmContext, thisArray, thisLength);

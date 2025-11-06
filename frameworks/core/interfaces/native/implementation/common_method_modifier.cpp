@@ -19,6 +19,7 @@
 
 #include "base/utils/system_properties.h"
 #include "base/utils/time_util.h"
+#include "core/accessibility/accessibility_utils.h"
 #include "core/accessibility/static/accessibility_static_utils.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/border_image.h"
@@ -4421,6 +4422,23 @@ void SetOnAccessibilityFocusImpl(Ark_NativePointer node,
     };
     ViewAbstractModelNG::SetOnAccessibilityFocus(frameNode, std::move(onFocus));
 }
+void SetOnAccessibilityActionInterceptImpl(Ark_NativePointer node,
+                                           const Opt_AccessibilityActionInterceptCallback* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        ViewAbstractModelNG::SetOnAccessibilityActionIntercept(frameNode, nullptr);
+        return;
+    }
+    auto accessibilityActionInterceptCallback = [callback = CallbackHelper(*optValue)](AccessibilityInterfaceAction action) -> AccessibilityActionInterceptResult {
+        auto arkAccessibilityAction = Converter::ArkValue<Ark_AccessibilityAction>(action);
+        auto resultOpt = callback.InvokeWithOptConvertResult<AccessibilityActionInterceptResult, Ark_AccessibilityActionInterceptResult, Callback_AccessibilityActionInterceptResult_Void>(arkAccessibilityAction);
+        return resultOpt.value_or(AccessibilityActionInterceptResult::ACTION_CONTINUE);
+    };
+    ViewAbstractModelNG::SetOnAccessibilityActionIntercept(frameNode, std::move(accessibilityActionInterceptCallback));
+}
 void SetAccessibilityTextHintImpl(Ark_NativePointer node,
                                   const Opt_String* value)
 {
@@ -5867,6 +5885,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetAccessibilityTextOfResourceTypeImpl,
         CommonMethodModifier::SetAccessibilityRoleImpl,
         CommonMethodModifier::SetOnAccessibilityFocusImpl,
+        CommonMethodModifier::SetOnAccessibilityActionInterceptImpl,
         CommonMethodModifier::SetAccessibilityTextHintImpl,
         CommonMethodModifier::SetAccessibilityDescriptionOfStringTypeImpl,
         CommonMethodModifier::SetAccessibilityDescriptionOfResourceTypeImpl,

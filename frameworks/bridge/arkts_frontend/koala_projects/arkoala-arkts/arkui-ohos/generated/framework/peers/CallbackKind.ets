@@ -1,5 +1,6 @@
 import { int32, float32 } from "@koalaui/common"
 export enum CallbackKind {
+    Kind_AccessibilityActionInterceptCallback = -321958515,
     Kind_AccessibilityCallback = 589030517,
     Kind_AccessibilityFocusCallback = 1715445305,
     Kind_ArcScrollIndexHandler = -274386039,
@@ -7,6 +8,7 @@ export enum CallbackKind {
     Kind_AsyncCallback_Void = 1075219926,
     Kind_ButtonModifierBuilder = -2004118094,
     Kind_ButtonTriggerClickCallback = -1964292933,
+    Kind_Callback_AccessibilityActionInterceptResult_Void = -1365174832,
     Kind_Callback_Area_Area_Void = -2024393616,
     Kind_Callback_Array_Number_Void = 582384234,
     Kind_Callback_Array_String_Void = -440782244,

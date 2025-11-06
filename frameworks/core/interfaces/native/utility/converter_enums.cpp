@@ -1137,6 +1137,27 @@ void AssignCast(std::optional<AccessibilityHoverAction>& dst, const Ark_Accessib
 }
 
 template<>
+void AssignCast(std::optional<AccessibilityInterfaceAction>& dst, const Ark_AccessibilityAction& src)
+{
+    switch (src) {
+        case ARK_ACCESSIBILITY_ACTION_UNDEFINED_ACTION: dst = AccessibilityInterfaceAction::UNDEFINED_ACTION; break;
+        case ARK_ACCESSIBILITY_ACTION_ACCESSIBILITY_CLICK: dst = AccessibilityInterfaceAction::ACCESSIBILITY_CLICK; break;
+        default: LOGE("Unexpected enum value in Ark_AccessibilityAction: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<AccessibilityActionInterceptResult>& dst, const Ark_AccessibilityActionInterceptResult& src)
+{
+    switch (src) {
+        case ARK_ACCESSIBILITY_ACTION_INTERCEPT_RESULT_ACTION_INTERCEPT: dst = AccessibilityActionInterceptResult::ACTION_INTERCEPT; break;
+        case ARK_ACCESSIBILITY_ACTION_INTERCEPT_RESULT_ACTION_CONTINUE: dst = AccessibilityActionInterceptResult::ACTION_CONTINUE; break;
+        case ARK_ACCESSIBILITY_ACTION_INTERCEPT_RESULT_ACTION_RISE: dst = AccessibilityActionInterceptResult::ACTION_RISE; break;
+        default: LOGE("Unexpected enum value in Ark_AccessibilityActionInterceptResult: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<AdaptiveColor>& dst, const Ark_AdaptiveColor& src)
 {
     switch (src) {

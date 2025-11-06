@@ -4096,6 +4096,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SetOnAccessibilityActionInterceptImpl(Ark_NativePointer node,
+                                               const Opt_AccessibilityActionInterceptCallback* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setOnAccessibilityActionIntercept(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     void SetAccessibilityTextHintImpl(Ark_NativePointer node,
                                       const Opt_String* value)
     {
@@ -21602,6 +21614,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetAccessibilityTextOfResourceTypeImpl,
             CommonMethodModifier::SetAccessibilityRoleImpl,
             CommonMethodModifier::SetOnAccessibilityFocusImpl,
+            CommonMethodModifier::SetOnAccessibilityActionInterceptImpl,
             CommonMethodModifier::SetAccessibilityTextHintImpl,
             CommonMethodModifier::SetAccessibilityDescriptionOfStringTypeImpl,
             CommonMethodModifier::SetAccessibilityDescriptionOfResourceTypeImpl,

@@ -270,6 +270,8 @@ typedef struct _Ark_Canvas* Ark_CanvasHandle;
 
 
 typedef struct Opt_Int32 Opt_Int32;
+typedef struct AccessibilityActionInterceptCallback AccessibilityActionInterceptCallback;
+typedef struct Opt_AccessibilityActionInterceptCallback Opt_AccessibilityActionInterceptCallback;
 typedef struct AccessibilityCallback AccessibilityCallback;
 typedef struct Opt_AccessibilityCallback Opt_AccessibilityCallback;
 typedef struct AccessibilityFocusCallback AccessibilityFocusCallback;
@@ -1062,6 +1064,8 @@ typedef struct ButtonModifierBuilder ButtonModifierBuilder;
 typedef struct Opt_ButtonModifierBuilder Opt_ButtonModifierBuilder;
 typedef struct ButtonTriggerClickCallback ButtonTriggerClickCallback;
 typedef struct Opt_ButtonTriggerClickCallback Opt_ButtonTriggerClickCallback;
+typedef struct Callback_AccessibilityActionInterceptResult_Void Callback_AccessibilityActionInterceptResult_Void;
+typedef struct Opt_Callback_AccessibilityActionInterceptResult_Void Opt_Callback_AccessibilityActionInterceptResult_Void;
 typedef struct Callback_Area_Area_Void Callback_Area_Area_Void;
 typedef struct Opt_Callback_Area_Area_Void Opt_Callback_Area_Area_Void;
 typedef struct Callback_Array_Number_Void Callback_Array_Number_Void;
@@ -3337,6 +3341,23 @@ typedef Ark_Object Ark_ComponentContent;
 typedef Opt_Object Opt_ComponentContent;
 typedef Ark_Object Ark_ContentModifier;
 typedef Opt_Object Opt_ContentModifier;
+typedef enum Ark_AccessibilityAction {
+    ARK_ACCESSIBILITY_ACTION_UNDEFINED_ACTION = 0,
+    ARK_ACCESSIBILITY_ACTION_ACCESSIBILITY_CLICK = 1,
+} Ark_AccessibilityAction;
+typedef struct Opt_AccessibilityAction {
+    Ark_Tag tag;
+    Ark_AccessibilityAction value;
+} Opt_AccessibilityAction;
+typedef enum Ark_AccessibilityActionInterceptResult {
+    ARK_ACCESSIBILITY_ACTION_INTERCEPT_RESULT_ACTION_INTERCEPT = 0,
+    ARK_ACCESSIBILITY_ACTION_INTERCEPT_RESULT_ACTION_CONTINUE = 1,
+    ARK_ACCESSIBILITY_ACTION_INTERCEPT_RESULT_ACTION_RISE = 2,
+} Ark_AccessibilityActionInterceptResult;
+typedef struct Opt_AccessibilityActionInterceptResult {
+    Ark_Tag tag;
+    Ark_AccessibilityActionInterceptResult value;
+} Opt_AccessibilityActionInterceptResult;
 typedef enum Ark_AccessibilityHoverType {
     ARK_ACCESSIBILITY_HOVER_TYPE_HOVER_ENTER = 0,
     ARK_ACCESSIBILITY_HOVER_TYPE_HOVER_MOVE = 1,
@@ -7001,6 +7022,16 @@ typedef struct Opt_Int32 {
     Ark_Tag tag;
     Ark_Int32 value;
 } Opt_Int32;
+typedef struct AccessibilityActionInterceptCallback {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, Ark_AccessibilityAction action, const Callback_AccessibilityActionInterceptResult_Void continuation);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, Ark_AccessibilityAction action, const Callback_AccessibilityActionInterceptResult_Void continuation);
+} AccessibilityActionInterceptCallback;
+typedef struct Opt_AccessibilityActionInterceptCallback {
+    Ark_Tag tag;
+    AccessibilityActionInterceptCallback value;
+} Opt_AccessibilityActionInterceptCallback;
 typedef struct AccessibilityCallback {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -9506,6 +9537,16 @@ typedef struct Opt_ButtonTriggerClickCallback {
     Ark_Tag tag;
     ButtonTriggerClickCallback value;
 } Opt_ButtonTriggerClickCallback;
+typedef struct Callback_AccessibilityActionInterceptResult_Void {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, Ark_AccessibilityActionInterceptResult value);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, Ark_AccessibilityActionInterceptResult value);
+} Callback_AccessibilityActionInterceptResult_Void;
+typedef struct Opt_Callback_AccessibilityActionInterceptResult_Void {
+    Ark_Tag tag;
+    Callback_AccessibilityActionInterceptResult_Void value;
+} Opt_Callback_AccessibilityActionInterceptResult_Void;
 typedef struct Callback_Area_Area_Void {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -21702,6 +21743,8 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                                  const Opt_AccessibilityRoleType* value);
     void (*setOnAccessibilityFocus)(Ark_NativePointer node,
                                     const Opt_AccessibilityFocusCallback* value);
+    void (*setOnAccessibilityActionIntercept)(Ark_NativePointer node,
+                                              const Opt_AccessibilityActionInterceptCallback* value);                                
     void (*setAccessibilityTextHint)(Ark_NativePointer node,
                                      const Opt_String* value);
     void (*setAccessibilityDescriptionOfStringType)(Ark_NativePointer node,
