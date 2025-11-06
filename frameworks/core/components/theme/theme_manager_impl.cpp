@@ -104,6 +104,7 @@
 #include "core/components_ng/pattern/navigation/navigation_bar_theme_wrapper.h"
 #include "core/common/agingadapation/aging_adapation_dialog_theme_wrapper.h"
 #include "core/components_ng/pattern/side_bar/side_bar_theme_wrapper.h"
+#include "core/common/multi_thread_build_manager.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -449,16 +450,25 @@ ColorMode ThemeManagerImpl::GetCurrentColorMode() const
 
 void ThemeManagerImpl::AddThemeWithType(ThemeType type, const RefPtr<Theme>& theme)
 {
-    std::unique_lock<std::shared_mutex> lock(themesMutex_);
-    auto key = GetThemesMapKey(type);
-    themes_.emplace(key, theme);
+    if (MultiThreadBuildManager::IsThreadSafeNodeScope()) {
+        std::unique_lock<std::shared_mutex> lock(themesMutex_);
+        themesMulti_.emplace(type, theme);
+        return;
+    }
+    themes_.emplace(type, theme);
 }
 
 RefPtr<Theme> ThemeManagerImpl::GetThemeWithType(ThemeType type) const
 {
-    std::shared_lock<std::shared_mutex> lock(themesMutex_);
-    auto key = GetThemesMapKey(type);
-    auto findIter = themes_.find(key);
+    if (MultiThreadBuildManager::IsThreadSafeNodeScope()) {
+        std::shared_lock<std::shared_mutex> lock(themesMutex_);
+        auto findIter = themesMulti_.find(type);
+        if (findIter == themesMulti_.end()) {
+            return nullptr;
+        }
+        return findIter->second;
+    }
+    auto findIter = themes_.find(type);
     if (findIter == themes_.end()) {
         return nullptr;
     }
@@ -467,9 +477,15 @@ RefPtr<Theme> ThemeManagerImpl::GetThemeWithType(ThemeType type) const
 
 bool ThemeManagerImpl::IsThemeExists(ThemeType type) const
 {
-    std::shared_lock<std::shared_mutex> lock(themesMutex_);
-    auto key = GetThemesMapKey(type);
-    auto findIter = themes_.find(key);
+    if (MultiThreadBuildManager::IsThreadSafeNodeScope()) {
+        std::shared_lock<std::shared_mutex> lock(themesMutex_);
+        auto findIter = themesMulti_.find(type);
+        if (findIter == themesMulti_.end()) {
+            return false;
+        }
+        return true;
+    }
+    auto findIter = themes_.find(type);
     if (findIter == themes_.end()) {
         return false;
     }
@@ -478,7 +494,11 @@ bool ThemeManagerImpl::IsThemeExists(ThemeType type) const
 
 void ThemeManagerImpl::ClearThemes()
 {
-    std::unique_lock<std::shared_mutex> lock(themesMutex_);
+    if (MultiThreadBuildManager::IsThreadSafeNodeScope()) {
+        std::unique_lock<std::shared_mutex> lock(themesMutex_);
+        themesMulti_.clear();
+        return;
+    }
     themes_.clear();
 }
 } // namespace OHOS::Ace

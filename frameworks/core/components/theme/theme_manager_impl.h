@@ -144,6 +144,7 @@ public:
 private:
     using ThemeWrappers = std::unordered_map<ThemeType, RefPtr<TokenThemeWrapper>>;
     std::unordered_map<ThemeType, RefPtr<Theme>> themes_;
+    std::unordered_map<ThemeType, RefPtr<Theme>> themesMulti_;
     ThemeWrappers themeWrappersLight_;
     ThemeWrappers themeWrappersDark_;
 
