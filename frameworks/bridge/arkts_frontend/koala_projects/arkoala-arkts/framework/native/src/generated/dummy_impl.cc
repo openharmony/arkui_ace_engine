@@ -10793,7 +10793,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetBarrierImpl(Ark_NativePointer node,
-                        const Opt_Array_BarrierStyle* value)
+                        const Opt_Union_Array_BarrierStyle_Array_LocalizedBarrierStyle* value)
     {
         if (!needGroupedLog(1))
         {
