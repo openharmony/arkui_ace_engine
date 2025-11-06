@@ -105,14 +105,14 @@ export class ArkGridNode extends ArkScrollableNode implements GridAttribute {
         this.markDirty()
         return this
     }
-    onScrollBarUpdate(value: ((index: number,offset: number) => ComputedBarAttribute) | undefined): this {
+    onScrollBarUpdate(value: ((index: number, offset: number) => ComputedBarAttribute) | undefined): this {
         const value_casted = value as (((index: number,offset: number) => ComputedBarAttribute) | undefined)
         this.getPeer()?.setOnScrollBarUpdateAttribute(value_casted)
         this.markDirty()
         return this
     }
-    onScrollIndex(value: ((first: number,last: number) => void) | undefined): this {
-        const value_casted = value as (((first: number,last: number) => void) | undefined)
+    onScrollIndex(value: ((first: number, last: number) => void) | undefined): this {
+        const value_casted = value as (((first: number, last: number) => void) | undefined)
         this.getPeer()?.setOnScrollIndexAttribute(value_casted)
         this.markDirty()
         return this
@@ -185,8 +185,8 @@ export class ArkGridNode extends ArkScrollableNode implements GridAttribute {
         this.markDirty()
         return this
     }
-    onItemDragStart(value: ((event: ItemDragInfo,itemIndex: number) => CustomBuilder) | undefined): this {
-        const value_casted = value as (((event: ItemDragInfo,itemIndex: number) => CustomBuilder) | undefined)
+    onItemDragStart(value: ((event: ItemDragInfo, itemIndex: number) => CustomBuilder) | undefined): this {
+        const value_casted = value as (((event: ItemDragInfo, itemIndex: number) => CustomBuilder) | undefined)
         this.getPeer()?.setOnItemDragStartAttribute(value_casted)
         this.markDirty()
         return this
@@ -197,21 +197,21 @@ export class ArkGridNode extends ArkScrollableNode implements GridAttribute {
         this.markDirty()
         return this
     }
-    onItemDragMove(value: ((event: ItemDragInfo,itemIndex: number,insertIndex: number) => void) | undefined): this {
-        const value_casted = value as (((event: ItemDragInfo,itemIndex: number,insertIndex: number) => void) | undefined)
+    onItemDragMove(value: ((event: ItemDragInfo, itemIndex: number, insertIndex: number) => void) | undefined): this {
+        const value_casted = value as (((event: ItemDragInfo, itemIndex: number, insertIndex: number) => void) | undefined)
         this.getPeer()?.setOnItemDragMoveAttribute(value_casted)
         this.markDirty()
         return this
     }
-    onItemDragLeave(value: ((event: ItemDragInfo,itemIndex: number) => void) | undefined): this {
-        const value_casted = value as (((event: ItemDragInfo,itemIndex: number) => void) | undefined)
+    onItemDragLeave(value: ((event: ItemDragInfo, itemIndex: number) => void) | undefined): this {
+        const value_casted = value as (((event: ItemDragInfo, itemIndex: number) => void) | undefined)
         this.getPeer()?.setOnItemDragLeaveAttribute(value_casted)
         this.markDirty()
         return this
     }
-    onItemDrop(value: ((event: ItemDragInfo,itemIndex: number,insertIndex: number,isSuccess: boolean) => void) | undefined): this {
-        const value_casted = value as (((event: ItemDragInfo,itemIndex: number,
-        insertIndex: number,isSuccess: boolean) => void) | undefined)
+    onItemDrop(value: ((event: ItemDragInfo, itemIndex: number, insertIndex: number, isSuccess: boolean) => void) | undefined): this {
+        const value_casted = value as (((event: ItemDragInfo, itemIndex: number,
+        insertIndex: number, isSuccess: boolean) => void) | undefined)
         this.getPeer()?.setOnItemDropAttribute(value_casted)
         this.markDirty()
         return this

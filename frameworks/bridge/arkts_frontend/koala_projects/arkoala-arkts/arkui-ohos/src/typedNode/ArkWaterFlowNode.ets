@@ -158,8 +158,8 @@ export class ArkWaterFlowNode extends ArkScrollableNode implements WaterFlowAttr
         this.markDirty()
         return this
     }
-    onScrollIndex(value: ((first: number,last: number) => void) | undefined): this {
-        const value_casted = value as (((first: number,last: number) => void) | undefined)
+    onScrollIndex(value: ((first: number, last: number) => void) | undefined): this {
+        const value_casted = value as (((first: number, last: number) => void) | undefined)
         this.getPeer()?.setOnScrollIndexAttribute(value_casted)
         this.markDirty()
         return this
