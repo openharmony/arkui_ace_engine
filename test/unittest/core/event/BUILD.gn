@@ -91,6 +91,8 @@ ace_unittest("focus_hub_test_ng") {
     "focus_core/page_focus_switch_test.cpp",
     "focus_core/passive_last_focus_test.cpp",
     "focus_hub_test_ng.cpp",
+    "focus_hub_test_ng_three.cpp",
+    "focus_hub_test_ng_two.cpp",
     "focus_hub_test_ng_branch_coverage.cpp",
     "focus_hub_test_ng_for_paint_focus_state.cpp",
     "focus_hub_test_ng_for_property_config.cpp",
