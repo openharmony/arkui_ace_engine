@@ -171,6 +171,7 @@ public:
     static void UnRegisterSwiperContentUpdateCallback(
         const std::string& id, napi_value callback = nullptr);
     static void HandleSwiperContentUpdate(const NG::SwiperContentInfo& info);
+    static bool IsSwiperContentObserverEmpty();
 
     using PanGestureListenersPair =
         std::pair<std::unordered_map<napi_ref, std::list<std::shared_ptr<UIObserverListener>>>&,

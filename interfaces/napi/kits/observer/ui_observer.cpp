@@ -2125,6 +2125,11 @@ void UIObserver::HandleSwiperContentUpdate(const NG::SwiperContentInfo& info)
     }
 }
 
+bool UIObserver::IsSwiperContentObserverEmpty()
+{
+    return unspecifiedSwiperContentListeners_.empty() && specifiedSwiperContentListeners_.empty();
+}
+
 
 void UIObserver::HandleTextChangeEvent(const NG::TextChangeEventInfo& info)
 {

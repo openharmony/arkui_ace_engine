@@ -7797,23 +7797,10 @@ std::vector<SwiperItemInfoNG> SwiperPattern::GetShownItemInfoFromIndex(int32_t i
     std::vector<SwiperItemInfoNG> infos = {};
     auto host = GetHost();
     CHECK_NULL_RETURN(host, infos);
-    auto targetNode = FindLazyForEachNode(host);
     auto displayCount = GetDisplayCount();
-    if (targetNode.has_value()) {
-        auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(targetNode.value());
-        if (!lazyForEachNode) {
-            return infos;
-        } 
-        for (int32_t count = 0; count < displayCount; count++) {
-            auto swiperItemNode = AceType::DynamicCast<FrameNode>(lazyForEachNode->GetFrameChildByIndex(index, false));
-            if (swiperItemNode) {
-                infos.push_back(SwiperItemInfoNG(swiperItemNode->GetId(), index + count));
-            }
-        }
-        return infos;
-    }
-    for (int32_t count = 0; count < displayCount; count++) {
-        auto swiperItemNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(index));
+    auto totalCount = TotalCount();
+    for (int32_t count = 0; (count < displayCount) && (count + index < totalCount); count++) {
+        auto swiperItemNode = AceType::DynamicCast<FrameNode>(host->GetOrCreateChildByIndex(index + count, false));
         if (!swiperItemNode) {
             TAG_LOGW(AceLogTag::ACE_SWIPER, "empty swiper item [index: %{public}d] while collecting shownInfos",
                 index + count);

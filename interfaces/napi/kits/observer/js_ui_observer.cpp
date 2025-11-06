@@ -1621,10 +1621,15 @@ napi_value ObserverProcess::ProcessSwiperContentUpdateRegister(napi_env env, nap
 
     if (!isSwiperContentUpdateHandleFuncSetted_) {
         NG::UIObserverHandler::GetInstance().SetSwiperContentUpdateHandleFunc(&UIObserver::HandleSwiperContentUpdate);
+        NG::UIObserverHandler::GetInstance().SetSwiperContentObservrEmptyFunc(
+            &UIObserver::IsSwiperContentObserverEmpty);
         isSwiperContentUpdateHandleFuncSetted_ = true;
     }
 
     if (argc == PARAM_SIZE_ONE) {
+        if (!MatchValueType(env, argv[PARAM_INDEX_ZERO], napi_function)) {
+            return nullptr;
+        }
         auto listener = std::make_shared<UIObserverListener>(env, argv[PARAM_INDEX_ZERO]);
         UIObserver::RegisterSwiperContentUpdateCallback(listener);
     }

@@ -235,6 +235,7 @@ public:
         std::optional<NavDestinationInfo>&& to, NavigationOperation operation);
     void NotifyTextChangeEvent(const TextChangeEventInfo& info);
     void NotifySwiperContentUpdate(const SwiperContentInfo& info);
+    bool IsSwiperContentObserverEmpty();
     void NotifyWinSizeLayoutBreakpointChangeFunc(int32_t instanceId, const WindowSizeBreakpoint& info);
     using NavigationHandleFunc = void (*)(const NavDestinationInfo& info);
     using ScrollEventHandleFunc = void (*)(const std::string&, int32_t, ScrollEventType, float, Ace::Axis);
@@ -258,6 +259,7 @@ public:
     using NavigationHandleFuncForAni = std::function<void(const NG::NavDestinationInfo& info)>;
     using TextChangeEventHandleFunc = void (*)(const TextChangeEventInfo&);
     using SwiperContentUpdateHandleFunc = void (*)(const SwiperContentInfo&);
+    using SwiperContentObservrEmptyFunc = bool (*)();
     NavDestinationSwitchHandleFunc GetHandleNavDestinationSwitchFunc();
     void SetHandleNavigationChangeFunc(NavigationHandleFunc func);
     void SetHandleNavigationChangeFuncForAni(NavigationHandleFuncForAni func);
@@ -298,6 +300,7 @@ public:
     void SetDidClickHandleFuncForAni(DidClickHandleFuncForAni func);
     void SetHandleTextChangeEventFunc(TextChangeEventHandleFunc&& func);
     void SetSwiperContentUpdateHandleFunc(SwiperContentUpdateHandleFunc&& func);
+    void SetSwiperContentObservrEmptyFunc(SwiperContentObservrEmptyFunc&& func);
 private:
     NavigationHandleFunc navigationHandleFunc_ = nullptr;
     NavigationHandleFuncForAni navigationHandleFuncForAni_ = nullptr;
@@ -319,6 +322,7 @@ private:
     GestureHandleFunc gestureHandleFunc_ = nullptr;
     TextChangeEventHandleFunc textChangeEventHandleFunc_ = nullptr;
     SwiperContentUpdateHandleFunc swiperContentUpdateHandleFunc_ = nullptr;
+    SwiperContentObservrEmptyFunc swiperContentObservrEmptyFunc_ = nullptr;
 
     BeforePanStartHandleFuncForAni beforePanStartHandleFuncForAni_ = nullptr;
     AfterPanStartHandleFuncForAni afterPanStartHandleFuncForAni_ = nullptr;

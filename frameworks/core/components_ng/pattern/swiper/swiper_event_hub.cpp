@@ -238,6 +238,9 @@ void SwiperEventHub::FireJSChangeEvent(int32_t preIndex, int32_t index)
 
 void SwiperEventHub::NotifySwiperObserver(const RefPtr<FrameNode>& hostNode, int32_t index)
 {
+    if (UIObserverHandler::GetInstance().IsSwiperContentObserverEmpty()) {
+        return;
+    }
     CHECK_NULL_VOID(hostNode);
     auto swiperPattern = hostNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(swiperPattern);
