@@ -27,6 +27,7 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/callback_helper.h"
+#include "core/interfaces/native/implementation/paste_event_peer.h"
 #include "core/interfaces/native/implementation/search_controller_accessor_peer.h"
 #include "base/utils/string_utils.h"
 
@@ -311,10 +312,8 @@ HWTEST_F(SearchModifierCallbackTest, setOnPasteTestCallEvent, TestSize.Level1)
             .resourceId = resourceId,
             .content = Convert<std::u16string>(content),
         };
-        auto arkCallback = OptConvert<Callback_Void>(event.preventDefault);
-        if (arkCallback) {
-            auto helper = CallbackHelper(*arkCallback);
-            helper.Invoke();
+        if (event) {
+            event->HandlePreventDefault();
         }
     };
     auto arkCallback = ArkValue<OnPasteCallback>(testCallback, contextId);

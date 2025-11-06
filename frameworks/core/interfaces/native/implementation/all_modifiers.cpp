@@ -222,9 +222,11 @@ const GENERATED_ArkUICommonShapeAccessor* GetCommonShapeAccessor();
 const GENERATED_ArkUIConsoleMessageAccessor* GetConsoleMessageAccessor();
 const GENERATED_ArkUIContentModifierHelperAccessor* GetContentModifierHelperAccessor();
 const GENERATED_ArkUIControllerHandlerAccessor* GetControllerHandlerAccessor();
+const GENERATED_ArkUICopyEventAccessor* GetCopyEventAccessor();
 const GENERATED_ArkUICustomDialogControllerAccessor* GetCustomDialogControllerAccessor();
 const GENERATED_ArkUICustomDialogControllerExtenderAccessor* GetCustomDialogControllerExtenderAccessor();
 const GENERATED_ArkUICustomSpanAccessor* GetCustomSpanAccessor();
+const GENERATED_ArkUICutEventAccessor* GetCutEventAccessor();
 const GENERATED_ArkUIDataResubmissionHandlerAccessor* GetDataResubmissionHandlerAccessor();
 const GENERATED_ArkUIDatePickerDialogAccessor* GetDatePickerDialogAccessor();
 const GENERATED_ArkUIDecorationStyleAccessor* GetDecorationStyleAccessor();
@@ -299,6 +301,7 @@ const GENERATED_ArkUIPanGestureEventAccessor* GetPanGestureEventAccessor();
 const GENERATED_ArkUIPanGestureOptionsAccessor* GetPanGestureOptionsAccessor();
 const GENERATED_ArkUIPanRecognizerAccessor* GetPanRecognizerAccessor();
 const GENERATED_ArkUIParagraphStyleAccessor* GetParagraphStyleAccessor();
+const GENERATED_ArkUIPasteEventAccessor* GetPasteEventAccessor();
 const GENERATED_ArkUIPath2DAccessor* GetPath2DAccessor();
 const GENERATED_ArkUIPatternLockControllerAccessor* GetPatternLockControllerAccessor();
 const GENERATED_ArkUIPermissionRequestAccessor* GetPermissionRequestAccessor();
@@ -531,9 +534,11 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetConsoleMessageAccessor,
         GetContentModifierHelperAccessor,
         GetControllerHandlerAccessor,
+        GetCopyEventAccessor,
         GetCustomDialogControllerAccessor,
         GetCustomDialogControllerExtenderAccessor,
         GetCustomSpanAccessor,
+        GetCutEventAccessor,
         GetDataResubmissionHandlerAccessor,
         GetDatePickerDialogAccessor,
         GetDecorationStyleAccessor,
@@ -608,6 +613,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetPanGestureOptionsAccessor,
         GetPanRecognizerAccessor,
         GetParagraphStyleAccessor,
+        GetPasteEventAccessor,
         GetPath2DAccessor,
         GetPatternLockControllerAccessor,
         GetPermissionRequestAccessor,

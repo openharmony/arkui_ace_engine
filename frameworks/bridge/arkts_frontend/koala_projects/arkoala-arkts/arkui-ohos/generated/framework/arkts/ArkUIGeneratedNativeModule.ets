@@ -3715,6 +3715,12 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _ControllerHandler_setWebController(ptr: KPointer, controller: KPointer): void
     @ani.unsafe.Direct
+    native static _CopyEvent_construct(): KPointer
+    @ani.unsafe.Direct
+    native static _CopyEvent_getFinalizer(): KPointer
+    @ani.unsafe.Direct
+    native static _CopyEvent_preventDefault(ptr: KPointer): void
+    @ani.unsafe.Direct
     native static _CustomDialogController_construct(thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
     native static _CustomDialogController_getFinalizer(): KPointer
@@ -3750,6 +3756,12 @@ export class ArkUIGeneratedNativeModule {
     native static _CustomSpan_getOnDraw_callback(ptr: KPointer): KPointer
     @ani.unsafe.Direct
     native static _CustomSpan_setOnDraw_callback(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _CutEvent_construct(): KPointer
+    @ani.unsafe.Direct
+    native static _CutEvent_getFinalizer(): KPointer
+    @ani.unsafe.Direct
+    native static _CutEvent_preventDefault(ptr: KPointer): void
     @ani.unsafe.Direct
     native static _DataResubmissionHandler_construct(): KPointer
     @ani.unsafe.Direct
@@ -4919,6 +4931,12 @@ export class ArkUIGeneratedNativeModule {
     native static _ParagraphStyle_getLeadingMargin(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Quick
     native static _ParagraphStyle_getParagraphSpacing(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Direct
+    native static _PasteEvent_construct(): KPointer
+    @ani.unsafe.Direct
+    native static _PasteEvent_getFinalizer(): KPointer
+    @ani.unsafe.Direct
+    native static _PasteEvent_preventDefault(ptr: KPointer): void
     @ani.unsafe.Direct
     native static _Path2D_construct0(): KPointer
     @ani.unsafe.Direct

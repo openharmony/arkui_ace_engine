@@ -27899,6 +27899,52 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     } // ControllerHandlerAccessor
+    namespace CopyEventAccessor {
+    void DestroyPeerImpl(Ark_CopyEvent peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("destroyPeer(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    Ark_CopyEvent ConstructImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return reinterpret_cast<Ark_CopyEvent>(100);
+        }
+        string out("new CopyEvent(");
+        out.append(") \n");
+        out.append("[return reinterpret_cast<Ark_CopyEvent>(100)] \n");
+        appendGroupedLog(1, out);
+        return reinterpret_cast<Ark_CopyEvent>(100);
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return fnPtr<KNativePointer>(dummyClassFinalizer);
+        }
+        string out("getFinalizer(");
+        out.append(") \n");
+        out.append("[return fnPtr<KNativePointer>(dummyClassFinalizer)] \n");
+        appendGroupedLog(1, out);
+        return fnPtr<KNativePointer>(dummyClassFinalizer);
+    }
+    void PreventDefaultImpl(Ark_CopyEvent peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("preventDefault(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    } // CopyEventAccessor
     namespace CustomDialogControllerAccessor {
     void DestroyPeerImpl(Ark_CustomDialogController peer)
     {
@@ -28143,6 +28189,52 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     } // CustomSpanAccessor
+    namespace CutEventAccessor {
+    void DestroyPeerImpl(Ark_CutEvent peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("destroyPeer(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    Ark_CutEvent ConstructImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return reinterpret_cast<Ark_CutEvent>(100);
+        }
+        string out("new CutEvent(");
+        out.append(") \n");
+        out.append("[return reinterpret_cast<Ark_CutEvent>(100)] \n");
+        appendGroupedLog(1, out);
+        return reinterpret_cast<Ark_CutEvent>(100);
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return fnPtr<KNativePointer>(dummyClassFinalizer);
+        }
+        string out("getFinalizer(");
+        out.append(") \n");
+        out.append("[return fnPtr<KNativePointer>(dummyClassFinalizer)] \n");
+        appendGroupedLog(1, out);
+        return fnPtr<KNativePointer>(dummyClassFinalizer);
+    }
+    void PreventDefaultImpl(Ark_CutEvent peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("preventDefault(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    } // CutEventAccessor
     namespace DataResubmissionHandlerAccessor {
     void DestroyPeerImpl(Ark_DataResubmissionHandler peer)
     {
@@ -36126,6 +36218,52 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     } // ParagraphStyleAccessor
+    namespace PasteEventAccessor {
+    void DestroyPeerImpl(Ark_PasteEvent peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("destroyPeer(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    Ark_PasteEvent ConstructImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return reinterpret_cast<Ark_PasteEvent>(100);
+        }
+        string out("new PasteEvent(");
+        out.append(") \n");
+        out.append("[return reinterpret_cast<Ark_PasteEvent>(100)] \n");
+        appendGroupedLog(1, out);
+        return reinterpret_cast<Ark_PasteEvent>(100);
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return fnPtr<KNativePointer>(dummyClassFinalizer);
+        }
+        string out("getFinalizer(");
+        out.append(") \n");
+        out.append("[return fnPtr<KNativePointer>(dummyClassFinalizer)] \n");
+        appendGroupedLog(1, out);
+        return fnPtr<KNativePointer>(dummyClassFinalizer);
+    }
+    void PreventDefaultImpl(Ark_PasteEvent peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("preventDefault(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    } // PasteEventAccessor
     namespace Path2DAccessor {
     void DestroyPeerImpl(Ark_Path2D peer)
     {
@@ -45111,6 +45249,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct ControllerHandlerPeer {
         virtual ~ControllerHandlerPeer() = default;
     };
+    const GENERATED_ArkUICopyEventAccessor* GetCopyEventAccessor()
+    {
+        static const GENERATED_ArkUICopyEventAccessor CopyEventAccessorImpl {
+            CopyEventAccessor::DestroyPeerImpl,
+            CopyEventAccessor::ConstructImpl,
+            CopyEventAccessor::GetFinalizerImpl,
+            CopyEventAccessor::PreventDefaultImpl,
+        };
+        return &CopyEventAccessorImpl;
+    }
+
+    struct CopyEventPeer {
+        virtual ~CopyEventPeer() = default;
+    };
     const GENERATED_ArkUICustomDialogControllerAccessor* GetCustomDialogControllerAccessor()
     {
         static const GENERATED_ArkUICustomDialogControllerAccessor CustomDialogControllerAccessorImpl {
@@ -45161,6 +45313,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 
     struct CustomSpanPeer {
         virtual ~CustomSpanPeer() = default;
+    };
+    const GENERATED_ArkUICutEventAccessor* GetCutEventAccessor()
+    {
+        static const GENERATED_ArkUICutEventAccessor CutEventAccessorImpl {
+            CutEventAccessor::DestroyPeerImpl,
+            CutEventAccessor::ConstructImpl,
+            CutEventAccessor::GetFinalizerImpl,
+            CutEventAccessor::PreventDefaultImpl,
+        };
+        return &CutEventAccessorImpl;
+    }
+
+    struct CutEventPeer {
+        virtual ~CutEventPeer() = default;
     };
     const GENERATED_ArkUIDataResubmissionHandlerAccessor* GetDataResubmissionHandlerAccessor()
     {
@@ -46469,6 +46635,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 
     struct ParagraphStylePeer {
         virtual ~ParagraphStylePeer() = default;
+    };
+    const GENERATED_ArkUIPasteEventAccessor* GetPasteEventAccessor()
+    {
+        static const GENERATED_ArkUIPasteEventAccessor PasteEventAccessorImpl {
+            PasteEventAccessor::DestroyPeerImpl,
+            PasteEventAccessor::ConstructImpl,
+            PasteEventAccessor::GetFinalizerImpl,
+            PasteEventAccessor::PreventDefaultImpl,
+        };
+        return &PasteEventAccessorImpl;
+    }
+
+    struct PasteEventPeer {
+        virtual ~PasteEventPeer() = default;
     };
     const GENERATED_ArkUIPath2DAccessor* GetPath2DAccessor()
     {
@@ -47931,9 +48111,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetConsoleMessageAccessor,
             GetContentModifierHelperAccessor,
             GetControllerHandlerAccessor,
+            GetCopyEventAccessor,
             GetCustomDialogControllerAccessor,
             GetCustomDialogControllerExtenderAccessor,
             GetCustomSpanAccessor,
+            GetCutEventAccessor,
             GetDataResubmissionHandlerAccessor,
             GetDatePickerDialogAccessor,
             GetDecorationStyleAccessor,
@@ -48007,6 +48189,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetPanGestureOptionsAccessor,
             GetPanRecognizerAccessor,
             GetParagraphStyleAccessor,
+            GetPasteEventAccessor,
             GetPath2DAccessor,
             GetPatternLockControllerAccessor,
             GetPermissionRequestAccessor,
