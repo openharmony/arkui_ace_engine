@@ -35,6 +35,11 @@ public:
         handler_ = WeakPtr(handler);
     }
 
+    WeakPtr<RichEditorBaseControllerBase> GetTargetController() const
+    {
+        return handler_;
+    }
+
     int32_t GetCaretOffset() override
     {
         if (auto controller = handler_.Upgrade(); controller) {

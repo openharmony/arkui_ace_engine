@@ -16,6 +16,7 @@
 #include "core/interfaces/native/implementation/text_base_controller_peer.h"
 #include "core/interfaces/native/implementation/layout_manager_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -51,13 +52,13 @@ void CloseSelectionMenuImpl(Ark_TextBaseController peer)
     CHECK_NULL_VOID(peer);
     peer->CloseSelectionMenu();
 }
-Ark_LayoutManager GetLayoutManagerImpl(Ark_TextBaseController peer)
+Opt_LayoutManager GetLayoutManagerImpl(Ark_TextBaseController peer)
 {
-    CHECK_NULL_RETURN(peer && GetLayoutManagerAccessor(), nullptr);
-    auto layoutManagerPeer = reinterpret_cast<LayoutManagerPeer*>(GetLayoutManagerAccessor()->construct());
-    CHECK_NULL_RETURN(layoutManagerPeer, nullptr);
+    CHECK_NULL_RETURN(peer && GetLayoutManagerAccessor(), Converter::ArkValue<Opt_LayoutManager>(Ark_Empty()));
+    auto layoutManagerPeer = GetLayoutManagerAccessor()->construct();
+    CHECK_NULL_RETURN(layoutManagerPeer,  Converter::ArkValue<Opt_LayoutManager>(Ark_Empty()));
     layoutManagerPeer->handler = peer->GetLayoutInfoInterface();
-    return layoutManagerPeer;
+    return Converter::ArkValue<Opt_LayoutManager>(layoutManagerPeer);
 }
 } // TextBaseControllerAccessor
 const GENERATED_ArkUITextBaseControllerAccessor* GetTextBaseControllerAccessor()

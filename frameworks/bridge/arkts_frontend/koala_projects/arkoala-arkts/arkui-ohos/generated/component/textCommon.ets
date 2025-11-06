@@ -22,7 +22,7 @@ import { default as text } from "@ohos.graphics.text"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
-import { StyledString, StyledStringInternal, MutableStyledString, MutableStyledStringInternal, DecorationStyleInterface, StyledString_serializer, DecorationStyleInterface_serializer } from "./styledString"
+import { MutableStyledString_serializer, StyledString, StyledStringInternal, MutableStyledString, MutableStyledStringInternal, DecorationStyleInterface, StyledString_serializer, DecorationStyleInterface_serializer } from "./styledString"
 import { SelectionOptions_serializer, SelectionOptions } from "./common"
 import { Resource_serializer } from "./../framework/resource"
 import { ResourceStr, ResourceColor, Length } from "./units"
@@ -108,7 +108,7 @@ export class LayoutManagerInternal implements MaterializedBase,LayoutManager {
 }
 export interface StyledStringController {
     setStyledString(styledString: StyledString): void
-    getStyledString(): MutableStyledString
+    getStyledString(): MutableStyledString | undefined
 }
 export class StyledStringControllerInternal implements MaterializedBase,StyledStringController {
     peer?: Finalizable | undefined = undefined
@@ -136,22 +136,28 @@ export class StyledStringControllerInternal implements MaterializedBase,StyledSt
         this.setStyledString_serialize(styledString_casted)
         return
     }
-    public getStyledString(): MutableStyledString {
+    public getStyledString(): MutableStyledString | undefined {
         return this.getStyledString_serialize()
     }
     setStyledString_serialize(styledString: StyledString): void {
         ArkUIGeneratedNativeModule._StyledStringController_setStyledString(this.peer!.ptr, toPeerPtr(styledString))
     }
-    getStyledString_serialize(): MutableStyledString {
+    getStyledString_serialize(): MutableStyledString | undefined {
         const retval  = ArkUIGeneratedNativeModule._StyledStringController_getStyledString(this.peer!.ptr)
-        const obj : MutableStyledString = MutableStyledStringInternal.fromPtr(retval)
-        return obj
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : MutableStyledString | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = (MutableStyledString_serializer.read(retvalDeserializer) as MutableStyledString)
+        }
+        const returnResult : MutableStyledString | undefined = buffer
+        return returnResult
     }
 }
 export interface TextBaseController {
     setSelection(selectionStart: number, selectionEnd: number, options: SelectionOptions | undefined): void
     closeSelectionMenu(): void
-    getLayoutManager(): LayoutManager
+    getLayoutManager(): LayoutManager | undefined
 }
 export class TextBaseControllerInternal implements MaterializedBase,TextBaseController {
     peer?: Finalizable | undefined = undefined
@@ -185,7 +191,7 @@ export class TextBaseControllerInternal implements MaterializedBase,TextBaseCont
         this.closeSelectionMenu_serialize()
         return
     }
-    public getLayoutManager(): LayoutManager {
+    public getLayoutManager(): LayoutManager | undefined {
         return this.getLayoutManager_serialize()
     }
     setSelection_serialize(selectionStart: number, selectionEnd: number, options?: SelectionOptions): void {
@@ -203,10 +209,16 @@ export class TextBaseControllerInternal implements MaterializedBase,TextBaseCont
     closeSelectionMenu_serialize(): void {
         ArkUIGeneratedNativeModule._TextBaseController_closeSelectionMenu(this.peer!.ptr)
     }
-    getLayoutManager_serialize(): LayoutManager {
+    getLayoutManager_serialize(): LayoutManager | undefined {
         const retval  = ArkUIGeneratedNativeModule._TextBaseController_getLayoutManager(this.peer!.ptr)
-        const obj : LayoutManager = LayoutManagerInternal.fromPtr(retval)
-        return obj
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : LayoutManager | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = (LayoutManager_serializer.read(retvalDeserializer) as LayoutManager)
+        }
+        const returnResult : LayoutManager | undefined = buffer
+        return returnResult
     }
 }
 export class TextMenuItemIdInternal {
@@ -1270,11 +1282,11 @@ export class TextDataDetectorConfig_serializer {
     }
 }
 export interface TextEditControllerEx {
-    isEditing(): boolean
+    isEditing(): boolean | undefined
     stopEditing(): void
-    setCaretOffset(offset: number): boolean
-    getCaretOffset(): number
-    getPreviewText(): PreviewText
+    setCaretOffset(offset: number): boolean | undefined
+    getCaretOffset(): number | undefined
+    getPreviewText(): PreviewText | undefined
 }
 export class TextEditControllerExInternal extends TextBaseControllerInternal implements MaterializedBase,TextEditControllerEx {
     constructor(peerPtr: KPointer) {
@@ -1293,42 +1305,68 @@ export class TextEditControllerExInternal extends TextBaseControllerInternal imp
     public static fromPtr(ptr: KPointer): TextEditControllerExInternal {
         return new TextEditControllerExInternal(ptr)
     }
-    public isEditing(): boolean {
+    public isEditing(): boolean | undefined {
         return this.isEditing_serialize()
     }
     public stopEditing(): void {
         this.stopEditing_serialize()
         return
     }
-    public setCaretOffset(offset: number): boolean {
+    public setCaretOffset(offset: number): boolean | undefined {
         const offset_casted = offset as (number)
         return this.setCaretOffset_serialize(offset_casted)
     }
-    public getCaretOffset(): number {
+    public getCaretOffset(): number | undefined {
         return this.getCaretOffset_serialize()
     }
-    public getPreviewText(): PreviewText {
+    public getPreviewText(): PreviewText | undefined {
         return this.getPreviewText_serialize()
     }
-    isEditing_serialize(): boolean {
+    isEditing_serialize(): boolean | undefined {
         const retval  = ArkUIGeneratedNativeModule._TextEditControllerEx_isEditing(this.peer!.ptr)
-        return retval
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : boolean | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = retvalDeserializer.readBoolean()
+        }
+        const returnResult : boolean | undefined = buffer
+        return returnResult
     }
     stopEditing_serialize(): void {
         ArkUIGeneratedNativeModule._TextEditControllerEx_stopEditing(this.peer!.ptr)
     }
-    setCaretOffset_serialize(offset: number): boolean {
+    setCaretOffset_serialize(offset: number): boolean | undefined {
         const retval  = ArkUIGeneratedNativeModule._TextEditControllerEx_setCaretOffset(this.peer!.ptr, offset)
-        return retval
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : boolean | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = retvalDeserializer.readBoolean()
+        }
+        const returnResult : boolean | undefined = buffer
+        return returnResult
     }
-    getCaretOffset_serialize(): number {
+    getCaretOffset_serialize(): number | undefined {
         const retval  = ArkUIGeneratedNativeModule._TextEditControllerEx_getCaretOffset(this.peer!.ptr)
-        return retval
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : number | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = (retvalDeserializer.readNumber() as number)
+        }
+        const returnResult : number | undefined = buffer
+        return returnResult
     }
-    getPreviewText_serialize(): PreviewText {
+    getPreviewText_serialize(): PreviewText | undefined {
         const retval  = ArkUIGeneratedNativeModule._TextEditControllerEx_getPreviewText(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const returnResult : PreviewText = PreviewText_serializer.read(retvalDeserializer)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : PreviewText | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = PreviewText_serializer.read(retvalDeserializer)
+        }
+        const returnResult : PreviewText | undefined = buffer
         return returnResult
     }
 }
