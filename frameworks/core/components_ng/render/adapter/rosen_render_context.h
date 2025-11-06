@@ -687,6 +687,9 @@ protected:
     void SetRsParticleImage(std::shared_ptr<Rosen::RSImage>& rsImagePtr, std::string& imageSource);
     void PaintRSBgImage();
     void PaintPixmapBgImage();
+    void OnPaintBackgroundDynamic(bool requestNextFrame = true);
+    void ScheduleBackgroundPaint(bool requestNextFrame = true);
+    bool CancelDynamicImageLoadingTasks();
     void PaintBorderImageGradient();
     void PaintMouseSelectRect(const RectF& rect, const Color& fillColor, const Color& strokeColor);
     void UpdateForeBlurStyleForColorMode(const std::optional<BlurStyleOption>& fgBlurStyle,
@@ -901,6 +904,9 @@ private:
     bool ShouldSkipAffineTransformation(std::shared_ptr<RSNode> rsNode);
 
     uint32_t backgroundTaskId_ = 0;
+    static std::timed_mutex taskMtx_;
+    CancelableCallback<void()> pendingDecodeTask_;
+    CancelableCallback<void()> pendingUITask_;
 };
 } // namespace OHOS::Ace::NG
 

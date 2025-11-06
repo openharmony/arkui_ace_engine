@@ -332,4 +332,11 @@ void AnimatedPixmap::UseCachedFrame(RefPtr<CanvasImage>&& image)
     std::scoped_lock<std::mutex> lock(frameMtx_);
     currentFrame_ = DynamicCast<PixelMapImage>(image)->GetPixelMap();
 }
+
+RefPtr<PixelMap> AnimatedPixmap::GetFirstPixelMap()
+{
+    std::scoped_lock<std::mutex> lock(decodeMtx_);
+    DecodeImpl(0);
+    return currentFrame_;
+}
 } // namespace OHOS::Ace::NG

@@ -131,6 +131,7 @@ constexpr uint16_t NO_FORCE_ROUND = static_cast<uint16_t>(PixelRoundPolicy::NO_F
                                     static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_END) |
                                     static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_BOTTOM);
 const int FACTOR_TWO = 2;
+constexpr uint64_t MAX_WAITING_TIME_FOR_TASKS = 1000; // 1000ms
 
 static void DrawNodeChangeCallback(std::shared_ptr<RSNode> rsNode, bool isPositionZ)
 {
@@ -278,6 +279,7 @@ void CancelModifierAnimation(std::shared_ptr<ModifierName>& modifier, Rosen::Mod
 }
 } // namespace
 
+std::timed_mutex RosenRenderContext::taskMtx_;
 bool RosenRenderContext::initDrawNodeChangeCallback_ = SetDrawNodeChangeCallback();
 bool RosenRenderContext::initPropertyNodeChangeCallback_ = SetPropertyNodeChangeCallback();
 
@@ -746,7 +748,7 @@ void RosenRenderContext::SyncAdditionalGeometryProperties(const RectF& paintRect
     }
 
     if (bgLoadingCtx_ && bgImage_) {
-        PaintBackground();
+        ScheduleBackgroundPaint(false);
     }
 
     auto sourceFromImage = GetBorderSourceFromImage().value_or(false);
@@ -922,6 +924,38 @@ DataReadyNotifyTask RosenRenderContext::CreateBgImageDataReadyCallback()
     return task;
 }
 
+void RosenRenderContext::ScheduleBackgroundPaint(bool requestNextFrame)
+{
+    if (bgImage_->IsStatic()) {
+        PaintBackground();
+        CHECK_EQUAL_VOID(requestNextFrame, false);
+        RequestNextFrame();
+    } else {
+        auto syncMode = GetBackgroundImageSyncMode().value_or(false);
+        if (syncMode) {
+            auto decodeImage = bgImage_->GetFirstPixelMap();
+            CHECK_NULL_VOID(decodeImage);
+            PaintBackground();
+            CHECK_EQUAL_VOID(requestNextFrame, false);
+            RequestNextFrame();
+        } else {
+            auto image = bgImage_;
+            pendingDecodeTask_.Reset([weakCtx = WeakClaim(this), image, requestNextFrame]() {
+                auto ctx = weakCtx.Upgrade();
+                CHECK_NULL_VOID(ctx);
+                auto host = ctx->GetHost();
+                CHECK_NULL_VOID(host);
+                auto decodeImage = image->GetFirstPixelMap();
+                CHECK_NULL_VOID(decodeImage);
+                ctx->OnPaintBackgroundDynamic(requestNextFrame);
+            });
+            auto taskExecutor = Container::CurrentTaskExecutor();
+            CHECK_NULL_VOID(taskExecutor);
+            taskExecutor->PostTask(pendingDecodeTask_, TaskExecutor::TaskType::BACKGROUND, "ArkUIDecodeImplPixelMap");
+        }
+    }
+}
+
 LoadSuccessNotifyTask RosenRenderContext::CreateBgImageLoadSuccessCallback()
 {
     auto task = [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
@@ -935,17 +969,56 @@ LoadSuccessNotifyTask RosenRenderContext::CreateBgImageLoadSuccessCallback()
         if (imageSourceInfo != sourceInfo) {
             return;
         }
+        CHECK_EQUAL_VOID(ctx->CancelDynamicImageLoadingTasks(), false);
         CHECK_NULL_VOID(ctx->bgLoadingCtx_);
         ctx->bgImage_ = ctx->bgLoadingCtx_->MoveCanvasImage();
         CHECK_NULL_VOID(ctx->bgImage_);
         CHECK_NULL_VOID(ctx->GetHost());
         CHECK_NULL_VOID(ctx->GetHost()->GetGeometryNode());
         if (ctx->GetHost()->GetGeometryNode()->GetFrameSize().IsPositive()) {
-            ctx->PaintBackground();
-            ctx->RequestNextFrame();
+            ctx->ScheduleBackgroundPaint();
         }
     };
     return task;
+}
+
+void RosenRenderContext::OnPaintBackgroundDynamic(bool requestNextFrame)
+{
+    if (!taskMtx_.try_lock_for(std::chrono::milliseconds(MAX_WAITING_TIME_FOR_TASKS))) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "Lock timeout in setTask.");
+        return;
+    }
+    // Adopt the already acquired lock
+    std::scoped_lock lock(std::adopt_lock, taskMtx_);
+    pendingUITask_.Reset([weakCtx = WeakClaim(this), requestNextFrame]() {
+        auto ctx = weakCtx.Upgrade();
+        CHECK_NULL_VOID(ctx);
+        auto host = ctx->GetHost();
+        CHECK_NULL_VOID(host);
+        ctx->PaintBackground();
+        CHECK_EQUAL_VOID(requestNextFrame, false);
+        ctx->RequestNextFrame();
+    });
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(pendingUITask_, TaskExecutor::TaskType::UI, "ArkUIPaintImplPixelMap");
+}
+
+bool RosenRenderContext::CancelDynamicImageLoadingTasks()
+{
+    if (!taskMtx_.try_lock_for(std::chrono::milliseconds(MAX_WAITING_TIME_FOR_TASKS))) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "Lock timeout in cancelTask.");
+        return false;
+    }
+    // Adopt the already acquired lock
+    std::scoped_lock lock(std::adopt_lock, taskMtx_);
+    if (pendingDecodeTask_) {
+        pendingDecodeTask_.Cancel();
+    }
+    if (pendingUITask_) {
+        pendingUITask_.Cancel();
+    }
+    return true;
 }
 
 void RosenRenderContext::PaintBackground()

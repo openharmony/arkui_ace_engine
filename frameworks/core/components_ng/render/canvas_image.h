@@ -144,6 +144,11 @@ public:
 
     virtual void SetRawCompressData(void* dataPtr, int32_t w, int32_t h) {}
 
+    virtual RefPtr<PixelMap> GetFirstPixelMap()
+    {
+        return nullptr;
+    }
+
     inline void SetImageDfxConfig(const ImageDfxConfig& imageDfxConfig)
     {
         imageDfxConfig_ = imageDfxConfig;

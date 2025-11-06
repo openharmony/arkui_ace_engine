@@ -18,6 +18,8 @@
 
 #include "test/mock/base/mock_system_properties.h"
 #include "test/unittest/core/rosen/rosen_render_context_test.h"
+#include "test/unittest/core/rosen/mock_animated_image.h"
+#include "core/components_ng/render/adapter/pixelmap_image.h"
 #include "core/components_ng/render/drawing.h"
 
 #include "core/components_ng/pattern/stage/page_pattern.h"
@@ -28,6 +30,9 @@
 
 using namespace testing;
 using namespace testing::ext;
+namespace {
+constexpr uint64_t MAX_WAITING_TIME_FOR_TASKS = 1000; // 1000ms
+} // namespace
 
 namespace OHOS::Ace::NG {
 namespace {} // namespace
@@ -1223,4 +1228,53 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew045, TestSize.Level1)
     EXPECT_EQ(canBeDeleted, false);
 }
 
+/**
+ * @tc.name: RosenRenderContextTestNew046
+ * @tc.desc: CancelTask().
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew046, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<PagePattern>(nullptr); });
+    RefPtr<RosenRenderContext> rosenRenderContext = InitRosenRenderContext(frameNode);
+    EXPECT_EQ(rosenRenderContext->CancelDynamicImageLoadingTasks(), true);
+    rosenRenderContext->pendingDecodeTask_.Reset([]() {});
+    rosenRenderContext->pendingUITask_.Reset([]() {});
+    rosenRenderContext->OnPaintBackgroundDynamic();
+    EXPECT_EQ(rosenRenderContext->CancelDynamicImageLoadingTasks(), true);
+    {
+        if (!rosenRenderContext->taskMtx_.try_lock_for(std::chrono::milliseconds(MAX_WAITING_TIME_FOR_TASKS))) {
+            return;
+        }
+        // Adopt the already acquired lock
+        std::scoped_lock lock(std::adopt_lock, rosenRenderContext->taskMtx_);
+        rosenRenderContext->OnPaintBackgroundDynamic();
+        EXPECT_EQ(rosenRenderContext->CancelDynamicImageLoadingTasks(), false);
+    }
+}
+
+/**
+ * @tc.name: RosenRenderContextTestNew047
+ * @tc.desc: ScheduleBackgroundPaint().
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew047, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<PagePattern>(nullptr); });
+    RefPtr<RosenRenderContext> rosenRenderContext = InitRosenRenderContext(frameNode);
+    rosenRenderContext->rsNode_ = nullptr;
+    rosenRenderContext->pendingDecodeTask_.Reset({});
+    rosenRenderContext->bgImage_ = AceType::MakeRefPtr<PixelMapImage>();
+    rosenRenderContext->ScheduleBackgroundPaint();
+    EXPECT_FALSE(rosenRenderContext->pendingDecodeTask_);
+    rosenRenderContext->bgImage_ = AceType::MakeRefPtr<MockAnimatedImage>();
+    rosenRenderContext->UpdateBackgroundImageSyncMode(true);
+    rosenRenderContext->ScheduleBackgroundPaint();
+    EXPECT_FALSE(rosenRenderContext->pendingDecodeTask_);
+    rosenRenderContext->UpdateBackgroundImageSyncMode(false);
+    rosenRenderContext->ScheduleBackgroundPaint();
+    EXPECT_TRUE(rosenRenderContext->pendingDecodeTask_);
+}
 } // namespace OHOS::Ace::NG
