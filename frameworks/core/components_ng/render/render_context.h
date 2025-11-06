@@ -202,6 +202,7 @@ public:
         ContextType type;
         std::optional<std::string> surfaceName;
         PatternType patternType = PatternType::DEFAULT;
+        bool isSkipCheckInMultiInstance = false;
     };
 
     virtual void InitContext(bool isRoot, const std::optional<ContextParam>& param) {}

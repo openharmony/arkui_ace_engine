@@ -80,7 +80,7 @@ void XComponentPattern::InitSurfaceMultiThread(const RefPtr<FrameNode>& host)
     std::string xComponentType = GetType() == XComponentType::SURFACE ? "s" : "t";
     renderSurface_->SetBufferUsage(BUFFER_USAGE_XCOMPONENT + "-" + xComponentType + "-" + GetId());
     if (type_ == XComponentType::SURFACE) {
-        InitializeRenderContext();
+        InitializeRenderContext(true);
         if (!SystemProperties::GetExtSurfaceEnabled()) {
             renderSurface_->SetRenderContext(renderContextForSurface_);
         } else {
@@ -157,23 +157,6 @@ void XComponentPattern::OnAttachToMainTreeMultiThread(const RefPtr<FrameNode>& h
             needRecoverDisplaySync_ = false;
         }
     }
-}
-
-void XComponentPattern::OnModifyDoneMultiThread(const RefPtr<FrameNode>& host)
-{
-    CHECK_EQUAL_VOID(host->IsThreadSafeNode(), false);
-#ifdef ENABLE_ROSEN_BACKEND
-    auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(renderContextForSurface_);
-    multiThreadModifier_ = multiThreadModifier_ == nullptr ?
-        std::make_shared<Rosen::ModifierNG::RSFrameClipModifier>() :
-        multiThreadModifier_;
-    CHECK_NULL_VOID(multiThreadModifier_);
-    multiThreadModifier_->SetFrameGravity(static_cast<Rosen::Gravity>(renderFit_));
-    multiThreadModifier_->SetClipToFrame(true);
-    std::shared_ptr<Rosen::RSNode> rsNode = rosenRenderContext->GetRSNode();
-    CHECK_NULL_VOID(rsNode);
-    rsNode->AddModifier(multiThreadModifier_);
-#endif
 }
 
 void XComponentPattern::OnDetachFromMainTreeMultiThread(const RefPtr<FrameNode>& host)

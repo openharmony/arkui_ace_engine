@@ -287,7 +287,7 @@ void XComponentPattern::OnDetachFromMainTree()
     displaySync_->NotifyXComponentExpectedFrameRate(GetId(), 0);
 }
 
-void XComponentPattern::InitializeRenderContext()
+void XComponentPattern::InitializeRenderContext(bool isThreadSafeNode)
 {
     renderContextForSurface_ = RenderContext::Create();
 #ifdef RENDER_EXTRACT_SUPPORTED
@@ -297,6 +297,11 @@ void XComponentPattern::InitializeRenderContext()
 #else
     RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE,
                                           GetId() + "Surface", RenderContext::PatternType::XCOM };
+    if (isThreadSafeNode) {
+        TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "Create SurfaceNode[%{public}s] with SkipCheckInMultiInstance",
+            GetId().c_str());
+        param.isSkipCheckInMultiInstance = true;
+    }
 #endif
 
     renderContextForSurface_->InitContext(false, param);

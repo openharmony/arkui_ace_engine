@@ -294,7 +294,6 @@ void XComponentStaticPattern::OnModifyDone()
     CHECK_NULL_VOID(renderContextForSurface_);
     renderFit_ = renderContext->GetRenderFit().value_or(RenderFit::RESIZE_FILL);
     renderContextForSurface_->UpdateRenderFit(renderFit_);
-    OnModifyDoneMultiThread(host);
 }
 
 void XComponentStaticPattern::DumpInfo()
