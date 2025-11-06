@@ -125,11 +125,11 @@ void ToggleModelNG::SetSelectedColor(const std::optional<Color>& selectedColor)
     }
 
     if (!selectedColor.has_value()) {
-        ACE_RESET_PAINT_PROPERTY_WITH_FLAG(SwitchPaintProperty, SelectedColor, PROPERTY_UPDATE_RENDER);
-        ACE_UPDATE_PAINT_PROPERTY(SwitchPaintProperty, SelectedColorSetByUser, false);
+        ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(SwitchPaintProperty, SelectedColor, PROPERTY_UPDATE_RENDER, frameNode);
+        ACE_UPDATE_NODE_PAINT_PROPERTY(SwitchPaintProperty, SelectedColorSetByUser, false, frameNode);
     } else {
-        ACE_UPDATE_PAINT_PROPERTY(SwitchPaintProperty, SelectedColor, color);
-        ACE_UPDATE_PAINT_PROPERTY(SwitchPaintProperty, SelectedColorSetByUser, true);
+        ACE_UPDATE_NODE_PAINT_PROPERTY(SwitchPaintProperty, SelectedColor, color, frameNode);
+        ACE_UPDATE_NODE_PAINT_PROPERTY(SwitchPaintProperty, SelectedColorSetByUser, true, frameNode);
     }
 }
 
