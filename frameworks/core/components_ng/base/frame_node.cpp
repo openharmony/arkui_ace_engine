@@ -776,6 +776,34 @@ void FrameNode::DumpLayoutInfo()
     }
 }
 
+void FrameNode::DumpVisibleAreaInfo()
+{
+    CHECK_NULL_VOID(eventHub_);
+    auto hasInnerCallback = eventHub_->HasVisibleAreaCallback(false);
+    auto hasUserCallback = eventHub_->HasVisibleAreaCallback(true);
+    auto hasThrottledCallback = eventHub_->HasThrottledVisibleAreaCallback();
+    std::string info = "VisibleAreaInfo:";
+    bool dump = false;
+    if (hasUserCallback) {
+        info += (" User:" + std::to_string(lastVisibleCallbackRatio_) + "-" +
+                 std::to_string(static_cast<int32_t>(visibleAreaChangeTriggerReason_)));
+        dump = true;
+    }
+    if (hasInnerCallback) {
+        info += (" Inner:" + std::to_string(lastInnerVisibleCallbackRatio_) + "-" +
+                 std::to_string(static_cast<int32_t>(visibleAreaChangeTriggerReason_)));
+        dump = true;
+    }
+    if (hasThrottledCallback) {
+        info += (" Throttled:" + std::to_string(lastThrottledVisibleCbRatio_) + "-" +
+                 std::to_string(static_cast<int32_t>(visibleAreaChangeTriggerReason_)));
+        dump = true;
+    }
+    if (dump) {
+        DumpLog::GetInstance().AddDesc(info);
+    }
+}
+
 void FrameNode::DumpSafeAreaInfo()
 {
     auto&& opts = layoutProperty_->GetSafeAreaExpandOpts();
@@ -861,6 +889,7 @@ void FrameNode::DumpCommonInfo()
             DumpLog::GetInstance().AddDesc(std::string("UserFreeze: 1"));
         }
     }
+    DumpVisibleAreaInfo();
     if (static_cast<int32_t>(layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE)) != 0) {
         DumpLog::GetInstance().AddDesc(std::string("Visible: ")
                                            .append(std::to_string(static_cast<int32_t>(
@@ -1973,7 +2002,7 @@ bool FrameNode::IsFrameDisappear() const
 {
     auto context = GetContext();
     CHECK_NULL_RETURN(context, true);
-    bool isFrameDisappear = !context->GetOnShow() || !IsOnMainTree() || !IsVisible();
+    bool isFrameDisappear = !context->GetOnShow() || !AllowVisibleAreaCheck() || !IsVisible();
     if (isFrameDisappear) {
         return true;
     }
@@ -2209,6 +2238,17 @@ void FrameNode::ProcessAllVisibleCallback(const std::vector<double>& visibleArea
             TAG_LOGI(AceLogTag::ACE_UIEVENT, "exp=%{public}d ratio=%{public}s %{public}d-%{public}s reason=%{public}d",
                 isVisible, std::to_string(currentVisibleRatio).c_str(), nodeId_,
                 std::to_string(accessibilityId_).c_str(), static_cast<int32_t>(visibleAreaChangeTriggerReason_));
+        } else if (SystemProperties::GetDebugEnabled()) {
+            TAG_LOGI(AceLogTag::ACE_UIEVENT,
+                "visibleAreaCallback_node(%{public}s/%{public}d/%{public}s/%{public}s) exp=%{public}d ratio=%{public}s"
+                " reason=%{public}d %{public}d/%{public}d",
+                GetTag().c_str(), GetId(), std::to_string(GetAccessibilityId()).c_str(),
+                GetInspectorId().value_or("").c_str(), isVisible, std::to_string(currentVisibleRatio).c_str(),
+                static_cast<int32_t>(visibleAreaChangeTriggerReason_), isInner, isThrottled);
+            ACE_SCOPED_TRACE("visibleAreaCallback_node(%s/%d/%s/%s) exp=%d ratio=%s reason=%d %d/%d", GetTag().c_str(),
+                GetId(), std::to_string(GetAccessibilityId()).c_str(), GetInspectorId().value_or("").c_str(), isVisible,
+                std::to_string(currentVisibleRatio).c_str(), static_cast<int32_t>(visibleAreaChangeTriggerReason_),
+                isInner, isThrottled);
         }
         callback(isVisible, currentVisibleRatio);
     }
@@ -7039,6 +7079,35 @@ void FrameNode::DumpAlignRulesInfo(std::unique_ptr<JsonValue>& json)
     json->Put("AlignRules", rulesToString.c_str());
 }
 
+void FrameNode::DumpVisibleAreaInfo(std::unique_ptr<JsonValue>& json)
+{
+    CHECK_NULL_VOID(eventHub_);
+    auto hasInnerCallback = eventHub_->HasVisibleAreaCallback(false);
+    auto hasUserCallback = eventHub_->HasVisibleAreaCallback(true);
+    auto hasThrottledCallback = eventHub_->HasThrottledVisibleAreaCallback();
+    if (hasUserCallback) {
+        std::string str = "";
+        str += std::to_string(lastVisibleCallbackRatio_);
+        str += "-";
+        str += std::to_string(static_cast<int32_t>(visibleAreaChangeTriggerReason_));
+        json->Put("UserVisibleAreaInfo", str.c_str());
+    }
+    if (hasInnerCallback) {
+        std::string str = "";
+        str += std::to_string(lastInnerVisibleCallbackRatio_);
+        str += "-";
+        str += std::to_string(static_cast<int32_t>(visibleAreaChangeTriggerReason_));
+        json->Put("InnerVisibleAreaInfo", str.c_str());
+    }
+    if (hasThrottledCallback) {
+        std::string str = "";
+        str += std::to_string(lastThrottledVisibleCbRatio_);
+        str += "-";
+        str += std::to_string(static_cast<int32_t>(visibleAreaChangeTriggerReason_));
+        json->Put("ThrottledVisibleAreaInfo", str.c_str());
+    }
+}
+
 void FrameNode::DumpSafeAreaInfo(std::unique_ptr<JsonValue>& json)
 {
     if (layoutProperty_->GetSafeAreaExpandOpts()) {
@@ -7119,6 +7188,7 @@ void FrameNode::DumpCommonInfo(std::unique_ptr<JsonValue>& json)
     BuildLayoutInfo(json);
     DumpExtensionHandlerInfo(json);
     DumpSafeAreaInfo(json);
+    DumpVisibleAreaInfo(json);
     if (layoutProperty_->GetCalcLayoutConstraint()) {
         json->Put("User defined constraint", layoutProperty_->GetCalcLayoutConstraint()->ToString().c_str());
     }
