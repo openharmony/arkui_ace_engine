@@ -277,6 +277,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
 
     aboutToReuse(param: RecordData, initializers?: T_Options): void {
         if (this.instance instanceof ReusableLifeCycle) {
+            ArkUIAniModule._CustomNode_OnReuse(this.getPeer()!.peer.ptr);
             const reusable = this.instance as ReusableLifeCycle;
             if (param) {
                 reusable.aboutToReuse(new ReuseObject(param))
@@ -291,6 +292,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
                 reusable.aboutToReuse(new ReuseObject(params));
             }
         } else if (this.instance instanceof ReusableV2LifeCycle) {
+            ArkUIAniModule._CustomNode_OnReuse(this.getPeer()!.peer.ptr);
             const reusable = this.instance as ReusableV2LifeCycle;
             reusable.aboutToReuse();
         } else {
@@ -299,6 +301,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
     }
     aboutToRecycle(): void {
         if (this.instance instanceof BaseCustomComponent<T_Options>) {
+            ArkUIAniModule._CustomNode_OnRecycle(this.getPeer()!.peer.ptr);
             const component = this.instance as BaseCustomComponent<T_Options>;
             component.aboutToRecycle()
         } else {
