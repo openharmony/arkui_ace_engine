@@ -222,9 +222,9 @@ void WindowSceneLayoutManager::FillWindowSceneInfo(const RefPtr<FrameNode>& node
     uiParam.needSync_ = ancestorInfo.notSyncPosition ? false : true;
     auto matrix = globalGeometry->GetAbsMatrix();
     // based on transform scene coordinate system to compute trans pos
-    uiParam.transX_ = std::round(matrix.Get(Rosen::Drawing::Matrix::TRANS_X) -
+    uiParam.transX_ = std::floor(matrix.Get(Rosen::Drawing::Matrix::TRANS_X) -
         (rsNode->GetGlobalPositionX() - ancestorInfo.transScenePosX));
-    uiParam.transY_ = std::round(matrix.Get(Rosen::Drawing::Matrix::TRANS_Y) -
+    uiParam.transY_ = std::floor(matrix.Get(Rosen::Drawing::Matrix::TRANS_Y) -
         (rsNode->GetGlobalPositionY() - ancestorInfo.transScenePosY));
     uiParam.pivotX_ = globalGeometry->GetPivotX();
     uiParam.pivotY_ = globalGeometry->GetPivotY();
@@ -423,7 +423,7 @@ void WindowSceneLayoutManager::TraverseTree(const RefPtr<FrameNode>& rootNode, T
             TAG_LOGI(AceLogTag::ACE_WINDOW_PIPELINE, "finish TraverseTree winId:%{public}d name:%{public}s"
                 "nodeName:%{public}s tag:%{public}s zorder:%{public}u isAncestorRecent:%{public}d "
                 "isAncestorDirty:%{public}d hasWindowSession:%{public}d, notSyncPosition:%{public}d "
-                "transScenePosX:%{public}d, transScenePosY:%{public}d",
+                "transScenePosX:%{public}f, transScenePosY:%{public}f",
                 GetWindowId(node), GetWindowName(node).c_str(),
                 node->GetInspectorId()->c_str(), node->GetTag().c_str(), res.zOrderCnt,
                 ancestorInfo.isAncestorRecent, ancestorInfo.isAncestorDirty, hasWindowSession,
