@@ -26,7 +26,7 @@ export class ProviderDecoratedVariable<T> extends DecoratedV2VariableBase implem
         super('@Provider', owningView, varName);
         this.provideAlias_ = provideAlias;
         this.backing_ = FactoryInternal.mkDecoratorValue(varName, initValue);
-        owningView.addProvider(provideAlias, this);
+        owningView.__addProvider__Internal(provideAlias, this);
     }
 
     get(): T {

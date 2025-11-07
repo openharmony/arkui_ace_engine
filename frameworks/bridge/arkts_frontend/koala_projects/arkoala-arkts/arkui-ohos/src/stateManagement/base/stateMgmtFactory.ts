@@ -502,7 +502,7 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
         defaultValue: T,
         watchFunc?: WatchFuncType
     ): ILocalStorageLinkDecoratedVariable<T> {
-        const result: ILocalStorageLinkDecoratedVariable<T> | undefined = owningView.getLocalStorage().__makeStorageLink<T>(
+        const result: ILocalStorageLinkDecoratedVariable<T> | undefined = owningView.__getLocalStorage__Internal().__makeStorageLink<T>(
             owningView,
             propertyNameInAppStorage,
             varName,
@@ -547,7 +547,7 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
         initValue: T,
         watchFunc?: WatchFuncType
     ): ILocalStoragePropRefDecoratedVariable<T> {
-        const ref = owningView.getLocalStorage().setAndRef<T>(propName, uiUtils.makeV1Observed(initValue));
+        const ref = owningView.__getLocalStorage__Internal().setAndRef<T>(propName, uiUtils.makeV1Observed(initValue));
         if (ref === undefined) {
             throw new TypeError(`@LocalStoragePropRef('${propName}') ${varName} makeLocalStoragePropRef`);
         }

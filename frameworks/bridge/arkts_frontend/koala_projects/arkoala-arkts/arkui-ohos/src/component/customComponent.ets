@@ -129,7 +129,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
         super();
         this.uiContext = uiContext;
         this.instance = instance;
-        this.instance.setDelegate(this);
+        this.instance.__setDelegate__Internal(this);
         this.styles = styles;
     }
  
@@ -159,12 +159,12 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
     }
 
     __removeChildWhenDispose__IExtendableComponent_Internal(): void {
-        this.instance.removeMeFromParent();
-        this.instance.removeAllChild();
+        this.instance.__removeMeFromParent__Internal();
+        this.instance.__removeAllChild__Internal();
     }
 
     __addMeToParent__IExtendableComponent_Internal(): void {
-        this.instance.addMeToParent();
+        this.instance.__addMeToParent__Internal();
     }
 
     queryNavigationInfo(): uiObserver.NavigationInfo {
@@ -231,18 +231,18 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
         }
     }
     isValidActiveCount(): boolean {
-        return this.instance.getActive() < 2;
+        return this.instance.__getActive__Internal() < 2;
     }
     setActiveCount(active: boolean): void {
-        let activeCount: number = this.instance.getActive();
+        let activeCount: number = this.instance.__getActive__Internal();
         activeCount += active ? 1 : -1;
-        this.instance.setActive(activeCount);
+        this.instance.__setActive__Internal(activeCount);
         if (!this.isValidActiveCount()) {
-            console.log(`activeCount_error: ${this.instance.getActive()}`);
+            console.log(`activeCount_error: ${this.instance.__getActive__Internal()}`);
         }
     }
     isViewActive(): boolean {
-        return this.instance.getActive() > 0;
+        return this.instance.__getActive__Internal() > 0;
     }
     setActiveInternal(active: boolean, isReuse: boolean): void {
         this.setActiveCount(active);
@@ -255,7 +255,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
         if (peer) {
             peer.disabledStateUpdates = !this.isViewActive();
         }
-        this.instance.propagateToChild(active, isReuse);
+        this.instance.__propagateToChild__Internal(active, isReuse);
     }
     pageTransition(): void {
         if (this.instance instanceof PageLifeCycle) {
@@ -328,7 +328,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
     }
 
     onDumpInspector(): string {
-        return this.instance.onDumpInspector();
+        return this.instance.__onDumpInspector__Internal();
     }
 
     onWillApplyTheme(theme: Theme): void {

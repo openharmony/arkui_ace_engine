@@ -71,13 +71,13 @@ export class CompatiblePeerNode extends PeerNode {
     };
     public setStaticParent(parent: ExtendableComponent): void {
         this.staticParent = parent;
-        this.staticParent!.addActiveChangeListenerForInterop(this.onActiveChange);
+        this.staticParent!.__addActiveChangeListenerForInterop__Internal(this.onActiveChange);
     }
     public setActive(active: boolean): void {
         this.view.invokeMethod('setActiveInternal', ESValue.wrap(active));
     }
     public dispose(): void {
-        this.staticParent!.removeActiveChangeListenerForInterop(this.onActiveChange);
+        this.staticParent!.__removeActiveChangeListenerForInterop__Internal(this.onActiveChange);
         this.staticParent = undefined;
         super.dispose();
     }

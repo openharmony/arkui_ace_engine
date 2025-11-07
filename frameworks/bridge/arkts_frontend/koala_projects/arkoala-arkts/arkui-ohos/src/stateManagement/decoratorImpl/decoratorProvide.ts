@@ -48,9 +48,9 @@ export class ProvideDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
         this.provideAlias_ = provideAliasName;
         this.allowOverride_ = allowOverride ? allowOverride : false;
         this.registerWatchForObservedObjectChanges(initValue);
-        owningView.addProvide(provideAliasName, this, allowOverride);
+        owningView.__addProvide__Internal(provideAliasName, this, allowOverride);
         if (varName !== provideAliasName) {
-            owningView.addProvide(varName, this, allowOverride);
+            owningView.__addProvide__Internal(varName, this, allowOverride);
         }
     }
     public get(): T {
