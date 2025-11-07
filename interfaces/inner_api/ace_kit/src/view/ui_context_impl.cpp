@@ -115,6 +115,14 @@ RefPtr<OverlayManager> UIContextImpl::GetOverlayManager()
     return overlayManager_;
 }
 
+RefPtr<PipelineBase> UIContextImpl::GetPipelineContext()
+{
+    if (context_) {
+        return AceType::Claim(context_);
+    }
+    return nullptr;
+}
+
 void UIContextImpl::AddAfterLayoutTask(Task&& task, bool isFlushInImplicitAnimationTask)
 {
     CHECK_NULL_VOID(context_);

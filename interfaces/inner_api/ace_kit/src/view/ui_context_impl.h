@@ -23,6 +23,10 @@ namespace OHOS::Ace::NG {
 class PipelineContext;
 }
 
+namespace OHOS::Ace {
+class PipelineBase;
+}
+
 namespace OHOS::Ace::Kit {
 
 class UIContextImpl : public UIContext {
@@ -32,6 +36,8 @@ public:
     ~UIContextImpl();
 
     void Reset();
+
+    RefPtr<PipelineBase> GetPipelineContext();
 
     void RunScopeUITaskSync(Task&& task, const std::string& name) override;
     void RunScopeUITask(Task&& task, const std::string& name) override;
