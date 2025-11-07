@@ -1406,6 +1406,28 @@ HWTEST_F(TextFieldUXTest, testShowUnderline001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: testShowUnderline002
+ * @tc.desc: test testInput showUnderline
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, testShowUnderline002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node
+     * @tc.expected: showUnderline is true
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetShowUnderline(false);
+    });
+
+    /**
+     * @tc.step: step2. Set showUnderline
+     */
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(layoutProperty_->GetShowUnderline(), false);
+}
+
+/**
  * @tc.name: testUnderlineColor001
  * @tc.desc: test testInput underlineColor
  * @tc.type: FUNC
