@@ -5442,10 +5442,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                             const Opt_ControlSize* value)
     {
     }
-    void SetDividerImpl(Ark_NativePointer node,
-                        const Opt_DividerOptions* value)
-    {
-    }
     void SetTextModifierImpl(Ark_NativePointer node,
                              const Opt_TextModifier* value)
     {
@@ -9683,7 +9679,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             SelectAttributeModifier::SetMenuBackgroundColorImpl,
             SelectAttributeModifier::SetMenuBackgroundBlurStyleImpl,
             SelectAttributeModifier::SetControlSizeImpl,
-            SelectAttributeModifier::SetDividerImpl,
             SelectAttributeModifier::SetTextModifierImpl,
             SelectAttributeModifier::SetArrowModifierImpl,
             SelectAttributeModifier::SetOptionTextModifierImpl,
@@ -16600,6 +16595,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     } // SearchOpsAccessor
+    namespace SelectExtenderAccessor {
+    void SetDividerImpl(Ark_NativePointer node,
+                        const Opt_DividerOptions* options)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    } // SelectExtenderAccessor
     namespace SpringMotionAccessor {
     void DestroyPeerImpl(Ark_SpringMotion peer)
     {
@@ -21009,6 +21012,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return &SearchOpsAccessorImpl;
     }
 
+    const GENERATED_ArkUISelectExtenderAccessor* GetSelectExtenderAccessor()
+    {
+        static const GENERATED_ArkUISelectExtenderAccessor SelectExtenderAccessorImpl {
+            SelectExtenderAccessor::SetDividerImpl,
+        };
+        return &SelectExtenderAccessorImpl;
+    }
+
     const GENERATED_ArkUISpringMotionAccessor* GetSpringMotionAccessor()
     {
         static const GENERATED_ArkUISpringMotionAccessor SpringMotionAccessorImpl {
@@ -22049,6 +22060,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetScrollResultAccessor,
             GetSearchControllerAccessor,
             GetSearchOpsAccessor,
+            GetSelectExtenderAccessor,
             GetSpringMotionAccessor,
             GetSpringPropAccessor,
             GetSslErrorHandlerAccessor,

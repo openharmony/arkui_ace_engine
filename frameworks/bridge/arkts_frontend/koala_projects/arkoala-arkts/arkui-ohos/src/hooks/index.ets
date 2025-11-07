@@ -67,6 +67,8 @@ import { XComponentOpsHandWritten } from "./XComponentOpsHandWritten";
 import { PeerNode } from '../PeerNode';
 import { int32 } from "@koalaui/common";
 import { DrawModifier } from "arkui/component/common";
+import { ArkSelectComponent, ArkSelectPeer, DividerOptions } from "#generated";
+import { SelectExtender } from "#generated"
 
 export function hookId(component: object, value?: string) {}
 
@@ -349,6 +351,27 @@ export function hookSetXComponentOptions(component: ArkXComponentComponent,
 export function hookXComponentStartImageAnalyzer(
   controller: XComponentController, config: ImageAnalyzerConfig): Promise<void> {
   return XComponentOpsHandWritten.hookXComponentStartImageAnalyzerImpl(controller, config);
+}
+
+export function hookSelectSetDividerMethod(
+  receiver: ArkSelectComponent | ArkSelectPeer, value?: DividerOptions | null | undefined): void {
+    const selectPeer: ArkSelectPeer = receiver instanceof ArkSelectComponent ? (receiver as ArkSelectComponent).getPeer() :
+       (receiver as ArkSelectPeer);
+    if (!selectPeer) {
+      return;
+    }
+    let value_casted: DividerOptions | undefined;
+    if (value === null) {
+      value_casted = {
+        strokeWidth: '0px',
+        startMargin: 0,
+        endMargin: 0,
+        color: '#00000000',
+      }
+    } else {
+      value_casted = value as (DividerOptions | undefined)
+    }
+    SelectExtender.setDivider(selectPeer.peer.ptr, value_casted)
 }
 
 export function hookWaterFlowOptionsImpl(node: ArkWaterFlowComponent, options: WaterFlowOptions | undefined): void {

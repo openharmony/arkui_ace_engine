@@ -17,7 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
-import { AttributeModifier, ContentModifier, extractors } from "#handwritten"
+import { AttributeModifier, ContentModifier, extractors, hookSelectSetDividerMethod } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkSelectPeer, OnSelectCallback, ArrowPosition, MenuItemConfiguration, AvoidanceMode, MenuOutlineOptions, SelectAttribute, MenuAlignType } from "./component/select"
@@ -429,7 +429,7 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
         {
             switch (this._divider_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setDividerAttribute((this._divider_0_0value as DividerOptions | null | undefined));
+                    hookSelectSetDividerMethod(peer, (this._divider_0_0value as DividerOptions | null | undefined));
                     this._divider_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -439,7 +439,7 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
                 }
                 default: {
                     this._divider_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setDividerAttribute((undefined as DividerOptions | null | undefined));
+                    hookSelectSetDividerMethod(peer, (undefined as DividerOptions | null | undefined));
                 }
             }
         }

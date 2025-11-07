@@ -1883,8 +1883,6 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _SelectAttribute_setControlSize(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _SelectAttribute_setDivider(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
     native static _SelectAttribute_setTextModifier(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _SelectAttribute_setArrowModifier(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
@@ -5413,6 +5411,8 @@ export class ArkUIGeneratedNativeModule {
     native static _SearchController_setTextSelection(ptr: KPointer, selectionStart: KInt, selectionEnd: KInt, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Quick
     native static _SearchOps_registerSearchValueCallback(node: KPointer, value: KStringPtr, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
+    native static _SelectExtender_setDivider(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _SpringMotion_construct(start: number, end: number, velocity: number, prop: KPointer): KPointer
     @ani.unsafe.Direct

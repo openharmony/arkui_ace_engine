@@ -13430,18 +13430,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void SetDividerImpl(Ark_NativePointer node,
-                        const Opt_DividerOptions* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setDivider(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
     void SetTextModifierImpl(Ark_NativePointer node,
                              const Opt_TextModifier* value)
     {
@@ -22795,7 +22783,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             SelectAttributeModifier::SetMenuBackgroundColorImpl,
             SelectAttributeModifier::SetMenuBackgroundBlurStyleImpl,
             SelectAttributeModifier::SetControlSizeImpl,
-            SelectAttributeModifier::SetDividerImpl,
             SelectAttributeModifier::SetTextModifierImpl,
             SelectAttributeModifier::SetArrowModifierImpl,
             SelectAttributeModifier::SetOptionTextModifierImpl,
@@ -39571,6 +39558,23 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return nullptr;
     }
     } // SearchOpsAccessor
+
+    namespace SelectExtenderAccessor {
+    void SetDividerImpl(Ark_NativePointer node,
+                        const Opt_DividerOptions* options)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setDivider(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, options);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    } // SelectExtenderAccessor
     namespace SpringMotionAccessor {
     void DestroyPeerImpl(Ark_SpringMotion peer)
     {
@@ -47128,6 +47132,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return &SearchOpsAccessorImpl;
     }
 
+    const GENERATED_ArkUISelectExtenderAccessor* GetSelectExtenderAccessor()
+    {
+        static const GENERATED_ArkUISelectExtenderAccessor SelectExtenderAccessorImpl {
+            SelectExtenderAccessor::SetDividerImpl,
+        };
+        return &SelectExtenderAccessorImpl;
+    }
+
     const GENERATED_ArkUISpringMotionAccessor* GetSpringMotionAccessor()
     {
         static const GENERATED_ArkUISpringMotionAccessor SpringMotionAccessorImpl {
@@ -48168,6 +48180,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetScrollResultAccessor,
             GetSearchControllerAccessor,
             GetSearchOpsAccessor,
+            GetSelectExtenderAccessor,
             GetSpringMotionAccessor,
             GetSpringPropAccessor,
             GetSslErrorHandlerAccessor,

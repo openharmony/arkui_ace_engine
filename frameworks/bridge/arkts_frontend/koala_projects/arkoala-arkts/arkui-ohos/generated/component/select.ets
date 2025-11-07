@@ -20,7 +20,7 @@ import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KS
 import { Resource_serializer } from "./../framework/resource"
 import { Bindable_Number_serializer, Bindable_Global_Resource_Resource_serializer, Bindable_String_serializer, ArkCommonMethodPeer, CommonMethod, Bindable, BlurStyle, CommonConfiguration, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { Font_serializer, DividerStyleOptions_serializer, Offset_serializer, ResourceStr, Font, ResourceColor, Length, Dimension, DividerStyleOptions, Offset, EdgeOutlineWidths, EdgeColors, EdgeOutlineWidths_serializer, EdgeColors_serializer } from "./units"
-import { DividerOptions_serializer, DividerOptions } from "./textPicker"
+import { DividerOptions } from "./textPicker"
 import { TextModifier_serializer } from "./../TextModifier"
 import { SymbolGlyphModifier_serializer } from "./../SymbolGlyphModifier"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
@@ -30,7 +30,7 @@ import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { Resource } from "global.resource"
 import { Color, OptionWidthMode } from "./enums"
 import { ControlSize } from "./button"
-import { ContentModifier, extractors, AttributeModifier, hookSelectContentModifier, hookSelectAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ContentModifier, extractors, AttributeModifier, hookSelectContentModifier, hookSelectSetDividerMethod, hookSelectAttributeModifier, AttributeUpdater } from "#handwritten"
 import { TextModifier } from "arkui.TextModifier"
 import { SymbolGlyphModifier } from "arkui.SymbolGlyphModifier"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
@@ -451,18 +451,6 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SelectAttribute_setControlSize(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    setDividerAttribute(value: DividerOptions | null | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (value !== undefined && value !== null) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
-            DividerOptions_serializer.write(thisSerializer, valueTmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._SelectAttribute_setDivider(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setTextModifierAttribute(value: TextModifier | undefined): void {
@@ -1012,9 +1000,7 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements Sele
     }
     public divider(value: DividerOptions | null | undefined): this {
         if (this.checkPriority("divider")) {
-            const value_casted = value as (DividerOptions | null | undefined)
-            this.getPeer()?.setDividerAttribute(value_casted)
-            return this
+            hookSelectSetDividerMethod(this, value)
         }
         return this
     }

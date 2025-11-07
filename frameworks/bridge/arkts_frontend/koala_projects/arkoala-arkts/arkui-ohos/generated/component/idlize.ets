@@ -88,7 +88,7 @@ import { ComponentContentBase_serializer } from "./../ComponentContent"
 import { curves_ICurve_serializer } from "./../framework/ohos.curves"
 import { LevelOrder_serializer } from "./../framework/ohos.promptAction"
 import { TimePickerDialogOptions_serializer, TimePickerDialogOptions } from "./timePicker"
-import { TextPickerDialogOptions_serializer, TextPickerDialogOptions } from "./textPicker"
+import { TextPickerDialogOptions_serializer, TextPickerDialogOptions,DividerOptions_serializer, DividerOptions } from "./textPicker"
 import { DatePickerDialogOptions_serializer, DatePickerDialogOptions } from "./datePicker"
 import { common2D_Rect_serializer } from "./../framework/ohos.graphics.common2D"
 export class ActionSheet {
@@ -4189,6 +4189,26 @@ export class ScreenshotService {
         const target_casted = target as (string)
         const name_casted = name as (string)
         return ScreenshotService.requestScreenshot_serialize(target_casted, name_casted)
+    }
+}
+export class SelectExtender {
+    static setDivider_serialize(node: KPointer, options?: DividerOptions): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue  = options!
+            DividerOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SelectExtender_setDivider(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    public static setDivider(node: KPointer, options?: DividerOptions): void {
+        const node_casted = node as (KPointer)
+        const options_casted = options as (DividerOptions | undefined)
+        SelectExtender.setDivider_serialize(node_casted, options_casted)
+        return
     }
 }
 export class StateStylesOps {

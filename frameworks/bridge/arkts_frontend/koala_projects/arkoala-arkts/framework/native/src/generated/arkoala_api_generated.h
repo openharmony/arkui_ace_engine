@@ -23499,8 +23499,6 @@ typedef struct GENERATED_ArkUISelectModifier {
                                        const Opt_BlurStyle* value);
     void (*setControlSize)(Ark_NativePointer node,
                            const Opt_ControlSize* value);
-    void (*setDivider)(Ark_NativePointer node,
-                       const Opt_DividerOptions* value);
     void (*setTextModifier)(Ark_NativePointer node,
                             const Opt_TextModifier* value);
     void (*setArrowModifier)(Ark_NativePointer node,
@@ -27380,6 +27378,11 @@ typedef struct GENERATED_ArkUISearchOpsAccessor {
                                                      const SearchValueCallback* callback);
 } GENERATED_ArkUISearchOpsAccessor;
 
+typedef struct GENERATED_ArkUISelectExtenderAccessor {
+    void (*setDivider)(Ark_NativePointer node,
+                       const Opt_DividerOptions* options);
+} GENERATED_ArkUISelectExtenderAccessor;
+
 typedef struct GENERATED_ArkUISpringMotionAccessor {
     void (*destroyPeer)(Ark_SpringMotion peer);
     Ark_SpringMotion (*construct)(const Ark_Number* start,
@@ -28344,6 +28347,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIScrollResultAccessor* (*getScrollResultAccessor)();
     const GENERATED_ArkUISearchControllerAccessor* (*getSearchControllerAccessor)();
     const GENERATED_ArkUISearchOpsAccessor* (*getSearchOpsAccessor)();
+    const GENERATED_ArkUISelectExtenderAccessor* (*getSelectExtenderAccessor)();
     const GENERATED_ArkUISpringMotionAccessor* (*getSpringMotionAccessor)();
     const GENERATED_ArkUISpringPropAccessor* (*getSpringPropAccessor)();
     const GENERATED_ArkUISslErrorHandlerAccessor* (*getSslErrorHandlerAccessor)();

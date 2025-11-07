@@ -24,7 +24,7 @@ import {
     Bindable
 } from "../framework";
 import { Resource } from "global.resource";
-import { ContentModifier } from "#handwritten";
+import { ContentModifier, hookSelectSetDividerMethod } from "#handwritten";
 
 export class ArkSelectNode extends ArkBaseNode implements SelectAttribute {
     constructParam(...param: Object[]): this {
@@ -164,8 +164,7 @@ export class ArkSelectNode extends ArkBaseNode implements SelectAttribute {
         return this;
     }
     divider(value: DividerOptions | null | undefined): this {
-        const value_casted = value as ( DividerOptions | null | undefined);
-        this.getPeer()?.setDividerAttribute(value_casted);  
+        hookSelectSetDividerMethod(this.getPeer(), value);
         this.markDirty();
         return this;
     }
