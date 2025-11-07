@@ -5043,10 +5043,10 @@ void SetBackdropBlurImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto optRadius = Converter::OptConvertPtr<Dimension>(radius);
+    double radiusValue = Converter::OptConvertPtr<double>(radius).value_or(0.0);
     auto optOption = Converter::OptConvertPtr<BlurOption>(options);
     auto sysOpts = Converter::OptConvertPtr<SysOptions>(sysOptions).value_or(SysOptions());
-    ViewAbstractModelStatic::SetBackdropBlur(frameNode, optRadius, optOption, sysOpts);
+    ViewAbstractModelStatic::SetBackdropBlur(frameNode, Dimension(radiusValue, DimensionUnit::PX), optOption, sysOpts);
 }
 void SetSharedTransitionImpl(Ark_NativePointer node,
                              const Opt_String* id,

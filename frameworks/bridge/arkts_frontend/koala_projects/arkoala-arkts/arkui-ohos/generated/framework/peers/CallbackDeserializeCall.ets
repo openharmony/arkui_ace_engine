@@ -1585,7 +1585,7 @@ export function deserializeAndCallCallback_SizeResult_Void(thisDeserializer: Des
 export function deserializeAndCallCallback_SpringBackAction_Void(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: SpringBackAction) => void))
-    let value0 : SpringBackAction = SpringBackAction_serializer.read(thisDeserializer)
+    let value0 : SpringBackAction = (SpringBackAction_serializer.read(thisDeserializer) as SpringBackAction)
     _call(value0)
 }
 export function deserializeAndCallCallback_StateStylesChange(thisDeserializer: DeserializerBase): void {

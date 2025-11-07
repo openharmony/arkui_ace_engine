@@ -83,6 +83,15 @@ RefPtr<TabsNode> TabsModelStatic::GetOrCreateTabsNode(
     return tabsNode;
 }
 
+void TabsModelStatic::InitImageIndicatorNode(const RefPtr<FrameNode>& indicatorNode)
+{
+    CHECK_NULL_VOID(indicatorNode);
+    auto pattern = indicatorNode->GetPattern<ImagePattern>();
+    CHECK_NULL_VOID(pattern);
+    indicatorNode->SetDraggable(false);
+    pattern->SetNeedLoadAlt(false);
+}
+
 void TabsModelStatic::InitTabsNode(RefPtr<TabsNode> tabsNode, const RefPtr<SwiperController>& swiperController)
 {
     bool hasSwiperNode = tabsNode->HasSwiperNode();
@@ -90,25 +99,19 @@ void TabsModelStatic::InitTabsNode(RefPtr<TabsNode> tabsNode, const RefPtr<Swipe
     bool hasDividerNode = tabsNode->HasDividerNode();
     bool hasSelectedMaskNode = tabsNode->HasSelectedMaskNode();
     bool hasUnselectedMaskNode = tabsNode->HasUnselectedMaskNode();
-    auto swiperId = tabsNode->GetSwiperId();
-    auto tabBarId = tabsNode->GetTabBarId();
-    auto dividerId = tabsNode->GetDividerId();
-    auto selectedMaskId = tabsNode->GetSelectedMaskId();
-    auto unselectedMaskId = tabsNode->GetUnselectedMaskId();
+    bool hasIndicatorNode = tabsNode->HasIndicatorNode();
 
     // Create Swiper node to contain TabContent.
     auto swiperNode = FrameNode::GetOrCreateFrameNode(
-        V2::SWIPER_ETS_TAG, swiperId, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
-    auto controller = GetSwiperController(swiperNode, swiperController);
+        V2::SWIPER_ETS_TAG, tabsNode->GetSwiperId(), []() { return AceType::MakeRefPtr<SwiperPattern>(); });
     auto dividerNode = FrameNode::GetOrCreateFrameNode(
-        V2::DIVIDER_ETS_TAG, dividerId, []() { return AceType::MakeRefPtr<DividerPattern>(); });
+        V2::DIVIDER_ETS_TAG, tabsNode->GetDividerId(), []() { return AceType::MakeRefPtr<DividerPattern>(); });
 
     // Create TabBar to contain TabBar of TabContent.
     auto tabBarNode = FrameNode::GetOrCreateFrameNode(
-        V2::TAB_BAR_ETS_TAG, tabBarId, []() { return AceType::MakeRefPtr<TabBarPattern>(); });
-    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
-    if (tabBarPattern) {
-        tabBarPattern->SetController(controller);
+        V2::TAB_BAR_ETS_TAG, tabsNode->GetTabBarId(), []() { return AceType::MakeRefPtr<TabBarPattern>(); });
+    if (auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>(); tabBarPattern) {
+        tabBarPattern->SetController(GetSwiperController(swiperNode, swiperController));
     }
 
     auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty();
@@ -117,11 +120,14 @@ void TabsModelStatic::InitTabsNode(RefPtr<TabsNode> tabsNode, const RefPtr<Swipe
         tabBarLayoutProperty->UpdatePixelRound(PIXEL_ROUND);
     }
 
-    auto selectedMaskNode = FrameNode::GetOrCreateFrameNode(
-        V2::COLUMN_ETS_TAG, selectedMaskId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    auto selectedMaskNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, tabsNode->GetSelectedMaskId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
 
-    auto unselectedMaskNode = FrameNode::GetOrCreateFrameNode(
-        V2::COLUMN_ETS_TAG, unselectedMaskId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    auto unselectedMaskNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, tabsNode->GetUnselectedMaskId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, tabsNode->GetIndicatorId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
 
     if (!hasSwiperNode) {
         swiperNode->MountToParent(tabsNode);
@@ -140,7 +146,11 @@ void TabsModelStatic::InitTabsNode(RefPtr<TabsNode> tabsNode, const RefPtr<Swipe
         unselectedMaskNode->MountToParent(tabBarNode);
         InitUnselectedMaskNode(unselectedMaskNode);
     }
-    InitAccessibilityZIndex(swiperNode, tabBarNode);
+
+    if (!hasIndicatorNode) {
+        indicatorNode->MountToParent(tabBarNode);
+        InitImageIndicatorNode(indicatorNode);
+    }
 }
 
 RefPtr<SwiperController> TabsModelStatic::GetSwiperController(const RefPtr<FrameNode>& swiperNode,
@@ -357,6 +367,11 @@ void TabsModelStatic::SetTabBarMode(FrameNode* frameNode, const std::optional<Ta
     } else {
         tabBarLayoutProperty->ResetTabBarMode();
     }
+    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
+    CHECK_NULL_VOID(tabsNode);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    CHECK_NULL_VOID(tabBarNode);
+    tabBarNode->MarkModifyDone();
 }
 
 void TabsModelStatic::SetTabBarWidth(FrameNode* frameNode, const std::optional<Dimension>& tabBarWidthOpt)

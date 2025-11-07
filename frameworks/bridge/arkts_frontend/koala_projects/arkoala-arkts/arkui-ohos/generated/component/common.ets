@@ -6806,7 +6806,36 @@ export interface DismissSheetAction {
     reason: DismissReason;
 }
 export interface SpringBackAction {
-    springBack: VoidCallback;
+    springBack(): void
+}
+export class SpringBackActionInternal implements MaterializedBase,SpringBackAction {
+    peer?: Finalizable | undefined = undefined
+    public getPeer(): Finalizable | undefined {
+        return this.peer
+    }
+    constructor(peerPtr: KPointer) {
+        this.peer = new Finalizable(peerPtr, SpringBackActionInternal.getFinalizer())
+    }
+    constructor() {
+        this(SpringBackActionInternal.construct())
+    }
+    static construct(): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._SpringBackAction_construct()
+        return retval
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._SpringBackAction_getFinalizer()
+    }
+    public static fromPtr(ptr: KPointer): SpringBackActionInternal {
+        return new SpringBackActionInternal(ptr)
+    }
+    public springBack(): void {
+        this.springBack_serialize()
+        return
+    }
+    springBack_serialize(): void {
+        ArkUIGeneratedNativeModule._SpringBackAction_springBack(this.peer!.ptr)
+    }
 }
 export type SingleLengthDetent = [
     SheetSize | Length
@@ -13301,25 +13330,12 @@ export class SheetDismiss_serializer {
 export class SpringBackAction_serializer {
     public static write(buffer: SerializerBase, value: SpringBackAction): void {
         let valueSerializer : SerializerBase = buffer
-        const valueHolderForSpringBack  = value.springBack
-        valueSerializer.holdAndWriteCallback(valueHolderForSpringBack)
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     public static read(buffer: DeserializerBase): SpringBackAction {
         let valueDeserializer : DeserializerBase = buffer
-        const springBackTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
-        const springBackTmpBufBufCall : KPointer = valueDeserializer.readPointer()
-        const springBackTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
-        const springBackTmpResult : VoidCallback = ():void => {
-            const springBackTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
-            springBackTmpBufBufArgsSerializer.writeInt32(springBackTmpBufBufResource.resourceId);
-            springBackTmpBufBufArgsSerializer.writePointer(springBackTmpBufBufCall);
-            springBackTmpBufBufArgsSerializer.writePointer(springBackTmpBufBufCallSync);
-            InteropNativeModule._CallCallbackSync(10, -2038961969, springBackTmpBufBufArgsSerializer.asBuffer(), springBackTmpBufBufArgsSerializer.length());
-            springBackTmpBufBufArgsSerializer.release();
-            return;
-        }
-        let value : SpringBackAction = ({springBack: springBackTmpResult} as SpringBackAction)
-        return value
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return SpringBackActionInternal.fromPtr(ptr)
     }
 }
 export class SystemAdaptiveOptions_serializer {

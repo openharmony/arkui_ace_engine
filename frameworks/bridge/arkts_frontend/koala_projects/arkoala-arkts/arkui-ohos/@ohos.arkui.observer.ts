@@ -48,6 +48,11 @@ declare namespace uiObserver {
         offTabChange(callback?: object): void;
         onTabChange(options: ObserverOptions, callback: object): void;
         offTabChange(options: ObserverOptions, callback?: object): void;
+
+        onTabContentUpdate(callback: Callback<TabContentInfo>): void;
+        offTabContentUpdate(callback?: Callback<TabContentInfo>): void;
+        onTabContentUpdate(options: ObserverOptions, callback: Callback<TabContentInfo>): void;
+        offTabContentUpdate(options: ObserverOptions, callback?: Callback<TabContentInfo>): void;
     }
     export function createUIObserver(id: number): UIObserver;
 

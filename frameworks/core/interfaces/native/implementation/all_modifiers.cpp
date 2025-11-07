@@ -331,6 +331,7 @@ const GENERATED_ArkUIScrollResultAccessor* GetScrollResultAccessor();
 const GENERATED_ArkUISearchControllerAccessor* GetSearchControllerAccessor();
 const GENERATED_ArkUISearchOpsAccessor* GetSearchOpsAccessor();
 const GENERATED_ArkUISelectExtenderAccessor* GetSelectExtenderAccessor();
+const GENERATED_ArkUISpringBackActionAccessor* GetSpringBackActionAccessor();
 const GENERATED_ArkUISpringMotionAccessor* GetSpringMotionAccessor();
 const GENERATED_ArkUISpringPropAccessor* GetSpringPropAccessor();
 const GENERATED_ArkUISslErrorHandlerAccessor* GetSslErrorHandlerAccessor();
@@ -642,6 +643,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetSearchControllerAccessor,
         GetSearchOpsAccessor,
         GetSelectExtenderAccessor,
+        GetSpringBackActionAccessor,
         GetSpringMotionAccessor,
         GetSpringPropAccessor,
         GetSslErrorHandlerAccessor,
