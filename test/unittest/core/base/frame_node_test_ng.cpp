@@ -557,6 +557,75 @@ HWTEST_F(FrameNodeTestNg, FrameNodeNotifyVisibleChange009, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TransformPosition
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, TransformPositionTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create framenode and initialize the params used in Test.
+     */
+    auto node = FrameNode::CreateFrameNode("childNode", 10, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(node, nullptr);
+
+    node->AttachToMainTree();
+    node->GetRenderContext()->RequestNextFrame();
+    EXPECT_TRUE(node->IsOnMainTree());
+
+    OffsetF offset;
+    offset.Reset();
+    auto newOffset = node->GetPositionToWindowWithTransform(offset);
+    EXPECT_EQ(newOffset, OffsetF());
+}
+
+/**
+ * @tc.name: GetRectToScreenTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, GetRectToScreenTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create framenode and initialize the params used in Test.
+     */
+    auto node = FrameNode::CreateFrameNode("childNode", 10, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(node, nullptr);
+
+    node->AttachToMainTree();
+    node->GetRenderContext()->RequestNextFrame();
+    EXPECT_TRUE(node->IsOnMainTree());
+
+    RectF rect;
+    rect.Reset();
+    auto newRect = node->GetRectToScreen(rect);
+    EXPECT_EQ(newRect, RectF());
+}
+
+/**
+ * @tc.name: GetRectToWindowWithTransformTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, GetRectToWindowWithTransformTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create framenode and initialize the params used in Test.
+     */
+    auto node = FrameNode::CreateFrameNode("childNode", 10, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(node, nullptr);
+
+    node->AttachToMainTree();
+    node->GetRenderContext()->RequestNextFrame();
+    EXPECT_TRUE(node->IsOnMainTree());
+
+    RectF rect;
+    rect.Reset();
+    auto newRect = node->GetRectToWindowWithTransform(rect);
+    EXPECT_EQ(newRect, RectF());
+}
+
+/**
  * @tc.name: FrameNodeTestNg_SwapDirtyLayoutWrapperOnMainThread0010
  * @tc.desc: Test frame node method
  * @tc.type: FUNC
