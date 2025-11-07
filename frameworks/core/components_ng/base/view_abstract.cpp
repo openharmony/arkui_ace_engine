@@ -134,16 +134,14 @@ void ViewAbstract::SetWidth(const RefPtr<ResourceObject>& resObj)
             ResourceParseUtils::ParseResDimensionVpNG(resObj, value);
             pattern->AddResCache("width", value.ToString());
         } else {
-            if (std::strcmp(widthString.c_str(), "0.00auto") == 0) {
-                value = Dimension(0.0f, DimensionUnit::AUTO);
-            } else if(!StringUtils::StringToCalcDimensionNG(widthString, value)) {
-                ClearWidthOrHeight(true);
+            if(!StringUtils::UnstringifyCalcDimension(widthString, value)) {
+                ClearWidthOrHeight(AceType::RawPtr(frameNode), true);
                 return;
             }
         }
         if (LessNotEqual(value.Value(), 0.0)) {
             if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-                ClearWidthOrHeight(true);
+                ClearWidthOrHeight(AceType::RawPtr(frameNode), true);
                 return;
             } else {
                 value.SetValue(0.0);
@@ -204,16 +202,14 @@ void ViewAbstract::SetHeight(const RefPtr<ResourceObject>& resObj)
             ResourceParseUtils::ParseResDimensionVpNG(resObj, value);
             pattern->AddResCache("height", value.ToString());
         } else {
-            if (std::strcmp(heightString.c_str(), "0.00auto") == 0) {
-                value = Dimension(0.0f, DimensionUnit::AUTO);
-            } else if(!StringUtils::StringToCalcDimensionNG(heightString, value)) {
-                ClearWidthOrHeight(false);
+            if(!StringUtils::UnstringifyCalcDimension(heightString, value)) {
+                ClearWidthOrHeight(AceType::RawPtr(frameNode), false);
                 return;
             }
         }
         if (LessNotEqual(value.Value(), 0.0)) {
             if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-                ClearWidthOrHeight(false);
+                ClearWidthOrHeight(AceType::RawPtr(frameNode), false);
                 return;
             } else {
                 value.SetValue(0.0);
@@ -293,7 +289,10 @@ void ViewAbstract::SetMinWidth(const RefPtr<ResourceObject>& resObj)
             ResourceParseUtils::ParseResDimensionVp(resObj, value);
             pattern->AddResCache("constraintSize.minWidth", value.ToString());
         } else {
-            value = StringUtils::StringToCalcDimension(minWidthString);
+            if(!StringUtils::UnstringifyCalcDimension(minWidthString, value)) {
+                ResetMinSize(AceType::RawPtr(frameNode), true);
+                return;
+            }
         }
         NG::CalcLength width;
         width = (value.Unit() == DimensionUnit::CALC) ? NG::CalcLength(value.CalcValue()) : NG::CalcLength(value);
@@ -337,7 +336,10 @@ void ViewAbstract::SetMinHeight(const RefPtr<ResourceObject>& resObj)
             ResourceParseUtils::ParseResDimensionVp(resObj, value);
             pattern->AddResCache("constraintSize.minHeight", value.ToString());
         } else {
-            value = StringUtils::StringToCalcDimension(minWidthString);
+            if(!StringUtils::UnstringifyCalcDimension(minWidthString, value)) {
+                ResetMinSize(AceType::RawPtr(frameNode), false);
+                return;
+            }
         }
         NG::CalcLength height;
         height = (value.Unit() == DimensionUnit::CALC) ? NG::CalcLength(value.CalcValue()) : NG::CalcLength(value);
@@ -393,7 +395,10 @@ void ViewAbstract::SetMaxWidth(const RefPtr<ResourceObject>& resObj)
             ResourceParseUtils::ParseResDimensionVp(resObj, value);
             pattern->AddResCache("constraintSize.maxWidth", value.ToString());
         } else {
-            value = StringUtils::StringToCalcDimension(minWidthString);
+            if(!StringUtils::UnstringifyCalcDimension(minWidthString, value)) {
+                ResetMaxSize(AceType::RawPtr(frameNode), true);
+                return;
+            }
         }
         NG::CalcLength width;
         width = (value.Unit() == DimensionUnit::CALC) ? NG::CalcLength(value.CalcValue()) : NG::CalcLength(value);
@@ -437,7 +442,10 @@ void ViewAbstract::SetMaxHeight(const RefPtr<ResourceObject>& resObj)
             ResourceParseUtils::ParseResDimensionVp(resObj, value);
             pattern->AddResCache("constraintSize.maxHeight", value.ToString());
         } else {
-            value = StringUtils::StringToCalcDimension(minWidthString);
+            if(!StringUtils::UnstringifyCalcDimension(minWidthString, value)) {
+                ResetMaxSize(AceType::RawPtr(frameNode), false);
+                return;
+            }
         }
         NG::CalcLength height;
         height = (value.Unit() == DimensionUnit::CALC) ? NG::CalcLength(value.CalcValue()) : NG::CalcLength(value);
@@ -1285,7 +1293,9 @@ void ViewAbstract::SetPadding(const RefPtr<ResourceObject>& resObj)
             ResourceParseUtils::ParseResDimensionVp(resObj, result);
             pattern->AddResCache("padding", result.ToString());
         } else {
-            result = StringUtils::StringToCalcDimension(padding);
+            if(!StringUtils::UnstringifyCalcDimension(padding, result)) {
+                result.Reset();
+            }
         }
         CalcLength paddingLength;
         if (result.Unit() == DimensionUnit::CALC) {
@@ -1455,7 +1465,9 @@ void ViewAbstract::SetMargin(const RefPtr<ResourceObject>& resObj)
             ResourceParseUtils::ParseResDimensionVp(resObj, result);
             pattern->AddResCache("margin", result.ToString());
         } else {
-            result = StringUtils::StringToCalcDimension(margin);
+            if(!StringUtils::UnstringifyCalcDimension(margin, result)) {
+                result.Reset();
+            }
         }
         CalcLength marginLength;
         if (result.Unit() == DimensionUnit::CALC) {
@@ -6119,7 +6131,10 @@ void ViewAbstract::SetWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& 
             ResourceParseUtils::ParseResDimensionVpNG(resObj, value);
             pattern->AddResCache("width", value.ToString());
         } else {
-            value = StringUtils::StringToCalcDimension(widthString);
+            if(!StringUtils::UnstringifyCalcDimension(widthString, value)) {
+                ClearWidthOrHeight(AceType::RawPtr(frameNode), true);
+                return;
+            }
         }
         CalcLength width;
         if (value.Unit() == DimensionUnit::CALC) {
@@ -6175,7 +6190,10 @@ void ViewAbstract::SetHeight(FrameNode* frameNode, const RefPtr<ResourceObject>&
             ResourceParseUtils::ParseResDimensionVpNG(resObj, value);
             pattern->AddResCache("height", value.ToString());
         } else {
-            value = StringUtils::StringToCalcDimension(heightString);
+            if(!StringUtils::UnstringifyCalcDimension(heightString, value)) {
+                ClearWidthOrHeight(AceType::RawPtr(frameNode), false);
+                return;
+            }
         }
         if (LessNotEqual(value.Value(), 0.0)) {
             ClearWidthOrHeight(AceType::RawPtr(frameNode), false);
@@ -7507,7 +7525,10 @@ void ViewAbstract::SetMinWidth(FrameNode* frameNode, const RefPtr<ResourceObject
             ResourceParseUtils::ParseResDimensionVp(resObj, value);
             pattern->AddResCache("constraintSize.minWidth", value.ToString());
         } else {
-            value = StringUtils::StringToCalcDimension(minWidthString);
+            if(!StringUtils::UnstringifyCalcDimension(minWidthString, value)) {
+                ResetMinSize(AceType::RawPtr(frameNode), true);
+                return;
+            }
         }
         NG::CalcLength width;
         width = (value.Unit() == DimensionUnit::CALC) ? NG::CalcLength(value.CalcValue()) : NG::CalcLength(value);
@@ -7543,7 +7564,10 @@ void ViewAbstract::SetMaxWidth(FrameNode* frameNode, const RefPtr<ResourceObject
             ResourceParseUtils::ParseResDimensionVp(resObj, value);
             pattern->AddResCache("constraintSize.maxWidth", value.ToString());
         } else {
-            value = StringUtils::StringToCalcDimension(minWidthString);
+            if(!StringUtils::UnstringifyCalcDimension(minWidthString, value)) {
+                ResetMaxSize(AceType::RawPtr(frameNode), true);
+                return;
+            }
         }
         NG::CalcLength width;
         width = (value.Unit() == DimensionUnit::CALC) ? NG::CalcLength(value.CalcValue()) : NG::CalcLength(value);
@@ -7579,7 +7603,10 @@ void ViewAbstract::SetMinHeight(FrameNode* frameNode, const RefPtr<ResourceObjec
             ResourceParseUtils::ParseResDimensionVp(resObj, value);
             pattern->AddResCache("constraintSize.minHeight", value.ToString());
         } else {
-            value = StringUtils::StringToCalcDimension(minWidthString);
+            if(!StringUtils::UnstringifyCalcDimension(minWidthString, value)) {
+                ResetMinSize(AceType::RawPtr(frameNode), false);
+                return;
+            }
         }
         NG::CalcLength height;
         height = (value.Unit() == DimensionUnit::CALC) ? NG::CalcLength(value.CalcValue()) : NG::CalcLength(value);
@@ -7615,7 +7642,10 @@ void ViewAbstract::SetMaxHeight(FrameNode* frameNode, const RefPtr<ResourceObjec
             ResourceParseUtils::ParseResDimensionVp(resObj, value);
             pattern->AddResCache("constraintSize.maxHeight", value.ToString());
         } else {
-            value = StringUtils::StringToCalcDimension(minWidthString);
+            if(!StringUtils::UnstringifyCalcDimension(minWidthString, value)) {
+                ResetMaxSize(AceType::RawPtr(frameNode), false);
+                return;
+            }
         }
         NG::CalcLength height;
         height = (value.Unit() == DimensionUnit::CALC) ? NG::CalcLength(value.CalcValue()) : NG::CalcLength(value);

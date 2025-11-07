@@ -3881,9 +3881,13 @@ void JSViewAbstract::JsMargin(const JSCallbackInfo& info)
 
 void JSViewAbstract::ParseMarginOrPadding(const JSCallbackInfo& info, EdgeType type)
 {
-    ViewAbstractModel::GetInstance()->ResetResObj("margin");
-    ViewAbstractModel::GetInstance()->ResetResObj("padding");
-    ViewAbstractModel::GetInstance()->ResetResObj("safeAreaPadding");
+    if (type == EdgeType::MARGIN) {
+        ViewAbstractModel::GetInstance()->ResetResObj("margin");
+    } else if (type == EdgeType::PADDING) {
+        ViewAbstractModel::GetInstance()->ResetResObj("padding");
+    } else if (type == EdgeType::SAFE_AREA_PADDING) {
+        ViewAbstractModel::GetInstance()->ResetResObj("safeAreaPadding");
+    }
     static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT, JSCallbackInfoType::STRING,
         JSCallbackInfoType::NUMBER };
     auto jsVal = info[0];
