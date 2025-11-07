@@ -679,6 +679,7 @@ function createCompatibleStaticState<T>(dynamicValue: Object): ProvideDecoratedV
           uiUtils.makeV1Observed(value.invokeMethod("get").unwrap()) as T,
           false
         );
+        stateVar.setProxy(value);
         value.invokeMethod('setProxy', ESValue.wrap(stateVar));
         const setProxyValue = ((newVal: T): void => {
             value.invokeMethod('set', ESValue.wrap(newVal));
