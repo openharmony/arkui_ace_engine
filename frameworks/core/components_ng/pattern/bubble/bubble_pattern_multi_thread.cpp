@@ -16,11 +16,6 @@
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 
 namespace OHOS::Ace::NG {
-void BubblePattern::OnAttachToFrameNodeMultiThread()
-{
-    // nothing, thread unsafe
-}
-
 void BubblePattern::OnDetachFromFrameNodeMultiThread(FrameNode* frameNode)
 {
     // nothing, thread unsafe
@@ -28,7 +23,7 @@ void BubblePattern::OnDetachFromFrameNodeMultiThread(FrameNode* frameNode)
 
 void BubblePattern::OnAttachToMainTreeMultiThread()
 {
-    OnAttachToFrameNodeImpl();
+    // nothing, thread unsafe
 }
 
 void BubblePattern::OnDetachFromMainTreeMultiThread()
