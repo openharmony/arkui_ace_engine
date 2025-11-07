@@ -2587,7 +2587,7 @@ void MovingPhotoPattern::SetMovingPhotoController(const RefPtr<MovingPhotoContro
     RegisterVisibleAreaChange();
 }
 
-RePtr<MovingPhotoController> MovingPhotoPattern::GetMovingPhotoController()
+RefPtr<MovingPhotoController> MovingPhotoPattern::GetMovingPhotoController()
 {
     return controller_;
 }
