@@ -7527,8 +7527,12 @@ void JsAccessibilityManager::NotifySetChildTreeIdAndWinId(
 
 void JsAccessibilityManager::NotifyScreenReaderObserverStateChange(bool state)
 {
-    std::lock_guard<std::mutex> lock(componentScreenReaderCallbackMutex_);
-    for (auto &item : componentScreenReaderCallbackMap_) {
+    std::unordered_map<int64_t, std::shared_ptr<AccessibilityScreenReaderObserverCallback>> locals;
+    {
+        std::lock_guard<std::mutex> lock(componentScreenReaderCallbackMutex_);
+        locals = componentScreenReaderCallbackMap_;
+    }
+    for (auto& item : locals) {
         CHECK_NULL_CONTINUE(item.second);
         item.second->OnState(state);
     }
