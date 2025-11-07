@@ -291,7 +291,47 @@ class UIContext {
      * @since 10
      */
     constructor(instanceId) {
-        this.instanceId_ = instanceId;
+        this.instanceId_ = instanceId ?? -1;
+    }
+
+    static getCallingScopeUIContext() {
+        let containerId = __JSScopeUtil__.getCallingScopeUIContext();
+        if (containerId < 0) {
+            return undefined;
+        }
+        return new UIContext(containerId);
+    }
+
+    static getLastFocusedUIContext() {
+        let containerId = __JSScopeUtil__.getLastFocusedUIContext();
+        if (containerId < 0) {
+            return undefined;
+        }
+        return new UIContext(containerId);
+    }
+
+    static getLastForegroundUIContext() {
+        let containerId = __JSScopeUtil__.getLastForegroundUIContext();
+        if (containerId < 0) {
+            return undefined;
+        }
+        return new UIContext(containerId);
+    }
+
+    static getAllUIContexts() {
+        let allContainerId = __JSScopeUtil__.getAllUIContexts();
+        let contextArray = new Array();
+        for (let item of allContainerId) {
+            if (item >= 0) {
+                contextArray.push(new UIContext(item));
+            }
+        }
+        return contextArray;
+    }
+
+    static resolveUIContext() {
+        let contextInfo = __JSScopeUtil__.resolveUIContext();
+        return new ResolvedUIContext(contextInfo[0], contextInfo[1]);
     }
 
     static createUIContextWithoutWindow(context) {
@@ -910,6 +950,13 @@ class UIContext {
             this.magnifier_ = new Magnifier(this.instanceId_);
         }
         return this.magnifier_;
+    }
+}
+
+class ResolvedUIContext extends UIContext {
+    constructor(instanceId, strategy) {
+        super(instanceId);
+        this.strategy = strategy;
     }
 }
 

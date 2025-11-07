@@ -67,6 +67,7 @@ public:
     static int32_t RecentActiveId();
     static int32_t RecentForegroundId();
     static std::pair<int32_t, InstanceIdGenReason> CurrentIdWithReason();
+    static const std::set<int32_t> GetAllUIContexts();
 
     static void Add(int32_t id);
     static void Remove(int32_t id);

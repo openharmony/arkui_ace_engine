@@ -100,6 +100,11 @@ std::pair<int32_t, InstanceIdGenReason> ContainerScope::CurrentIdWithReason()
     return { ContainerScope::DefaultId(), InstanceIdGenReason::DEFAULT };
 }
 
+const std::set<int32_t> ContainerScope::GetAllUIContexts()
+{
+    return containerSet_;
+}
+
 void ContainerScope::UpdateCurrent(int32_t id)
 {
     currentId_ = id;
