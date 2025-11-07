@@ -1137,7 +1137,7 @@ class ObserveV2 {
   public AddMonitorPath(target: object, path: string | string[], monitorFunc: MonitorCallback, options?: MonitorOptions): void {
     const funcName = monitorFunc.name;
     const refs = target[ObserveV2.ADD_MONITOR_REFS] ??= {};
-    let monitor = refs[funcName];
+    let monitor = refs[funcName] as MonitorV2;
     const pathsUniqueString = Array.isArray(path) ? path.join(' ') : path;
     const isSync: boolean = options ? options.isSynchronous : false;
     const paths = Array.isArray(path) ? path : [path];
@@ -1147,7 +1147,7 @@ class ObserveV2 {
         return;
       }
       paths.forEach(path => {
-        monitor.addPath(path);
+        monitor.addPath(path, true);
       });
       monitor.InitRun();
       return;
