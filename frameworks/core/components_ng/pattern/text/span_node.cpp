@@ -389,6 +389,29 @@ void ContainerSpanNode::RegisterResource(const std::string& key, const RefPtr<Re
     AddResObj(key, resObj, std::move(updateFunc));
 }
 
+void ContainerSpanNode::NotifyColorModeChange(uint32_t colorMode)
+{
+    UINode::NotifyColorModeChange(colorMode);
+    if (GetLocalColorMode() != ColorMode::COLOR_MODE_UNDEFINED) {
+        return;
+    }
+    if (GetRerenderable() && GetContext()) {
+        SetDarkMode(GetContext()->GetColorMode() == ColorMode::DARK);
+    }
+
+    bool needReload = ResourceParseUtils::NeedReload();
+    if (!GetForceDarkAllowed()) {
+        ResourceParseUtils::SetNeedReload(false);
+    } else {
+        ResourceParseUtils::SetNeedReload(true);
+    }
+    auto resourceMgr = GetResourceManager();
+    if (resourceMgr) {
+        resourceMgr->ReloadResources();
+    }
+    ResourceParseUtils::SetNeedReload(needReload);
+}
+
 template void ContainerSpanNode::RegisterResource<Color>(
     const std::string&, const RefPtr<ResourceObject>&, Color);
 template void ContainerSpanNode::RegisterResource<CalcDimension>(
@@ -476,6 +499,29 @@ void SpanNode::UpdateSpanResource(const std::string& key, const RefPtr<ResourceO
         textPattern->MarkDirtyNodeRender();
         textPattern->MarkDirtyNodeMeasure();
     }
+}
+
+void SpanNode::NotifyColorModeChange(uint32_t colorMode)
+{
+    UINode::NotifyColorModeChange(colorMode);
+    if (GetLocalColorMode() != ColorMode::COLOR_MODE_UNDEFINED) {
+        return;
+    }
+    if (GetRerenderable() && GetContext()) {
+        SetDarkMode(GetContext()->GetColorMode() == ColorMode::DARK);
+    }
+
+    bool needReload = ResourceParseUtils::NeedReload();
+    if (!GetForceDarkAllowed()) {
+        ResourceParseUtils::SetNeedReload(false);
+    } else {
+        ResourceParseUtils::SetNeedReload(true);
+    }
+    auto resourceMgr = GetResourceManager();
+    if (resourceMgr) {
+        resourceMgr->ReloadResources();
+    }
+    ResourceParseUtils::SetNeedReload(needReload);
 }
 
 void SpanItem::AddResObj(const std::string& key, const RefPtr<ResourceObject>& resObj,
