@@ -165,6 +165,7 @@ public:
     static void SetCallbackFromController(const JSRef<JSObject> controller);
     static void SetForceEnableZoom(const JSCallbackInfo& args);
     static void JSBackToTop(const JSCallbackInfo& info);
+    static void OnCameraCaptureStateChanged(const JSCallbackInfo& args);
     static JSRef<JSVal> CreateJSWindowNewHandler(const WebWindowNewEvent& eventInfo);
     static bool HandleWindowNewEvent(const WebWindowNewEvent* eventInfo);
     static JSRef<JSVal> CreateScreenCaptureHandler(const WebScreenCaptureRequestEvent& eventInfo);

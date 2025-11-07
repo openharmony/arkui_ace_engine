@@ -1380,6 +1380,15 @@ void WebModelNG::SetViewportFitChangedId(std::function<void(const BaseEventInfo*
     webEventHub->SetOnViewportFitChangedEvent(std::move(uiCallback));
 }
 
+void WebModelNG::SetCameraCaptureStateChangedId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto func = jsCallback;
+    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnCameraCaptureStateChangedEvent(std::move(uiCallback));
+}
+
 void WebModelNG::SetSelectionMenuOptions(const WebMenuOptionsParam& webMenuOption)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
@@ -2702,5 +2711,16 @@ void WebModelNG::SetOnVerifyPinRequest(std::function<bool(const BaseEventInfo* i
     auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnVerifyPinRequestEvent(std::move(uiCallback));
+}
+
+void WebModelNG::SetCameraCaptureStateChangedId(
+    FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto func = jsCallback;
+    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnCameraCaptureStateChangedEvent(std::move(uiCallback));
 }
 } // namespace OHOS::Ace::NG

@@ -2405,6 +2405,36 @@ void ResetBackToTop(ArkUINodeHandle node)
     WebModelNG::SetBackToTop(frameNode, DEFAULT_BACK_TO_TOP_ENABLED);
 }
 
+void SetOnCameraCaptureStateChanged(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto* onCameraCaptureStateChangedCallBackPtr =
+            reinterpret_cast<std::function<void(const CameraCaptureStateEvent&)>*>(extraParam);
+        CHECK_NULL_VOID(onCameraCaptureStateChangedCallBackPtr);
+        auto onCameraCaptureStateChangedCallBack = *onCameraCaptureStateChangedCallBackPtr;
+        auto callback = [onCameraCaptureStateChangedCallBack](const BaseEventInfo* event) {
+            CHECK_NULL_VOID(event);
+            auto cameraCaptureStateEvent = static_cast<const CameraCaptureStateEvent*>(event);
+            if (cameraCaptureStateEvent) {
+                auto& nonConstEvent = const_cast<CameraCaptureStateEvent&>(*cameraCaptureStateEvent);
+                onCameraCaptureStateChangedCallBack(nonConstEvent);
+            }
+        };
+        WebModelNG::SetCameraCaptureStateChangedId(frameNode, std::move(callback));
+    } else {
+        WebModelNG::SetCameraCaptureStateChangedId(frameNode, nullptr);
+    }
+}
+
+void ResetOnCameraCaptureStateChanged(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetCameraCaptureStateChangedId(frameNode, nullptr);
+}
+
 namespace NodeModifier {
 const ArkUIWebModifier* GetWebModifier()
 {
@@ -2632,6 +2662,8 @@ const ArkUIWebModifier* GetWebModifier()
         .resetForceEnableZoom = ResetForceEnableZoom,
         .setBackToTop = SetBackToTop,
         .resetBackToTop = ResetBackToTop,
+        .setOnCameraCaptureStateChanged = SetOnCameraCaptureStateChanged,
+        .resetOnCameraCaptureStateChanged = ResetOnCameraCaptureStateChanged,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -2863,6 +2895,8 @@ const CJUIWebModifier* GetCJUIWebModifier()
         .resetForceEnableZoom = ResetForceEnableZoom,
         .setBackToTop = SetBackToTop,
         .resetBackToTop = ResetBackToTop,
+        .setOnCameraCaptureStateChanged = SetOnCameraCaptureStateChanged,
+        .resetOnCameraCaptureStateChanged = ResetOnCameraCaptureStateChanged,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

@@ -183,6 +183,7 @@ public:
     ACE_WEB_EVENT_PROPERTY(OnPdfLoad, void);
     ACE_WEB_EVENT_PROPERTY(OnSafeBrowsingCheckFinish, void);
     ACE_WEB_EVENT_PROPERTY(OnVerifyPinRequest, bool);
+    ACE_WEB_EVENT_PROPERTY(OnCameraCaptureStateChanged, void);
 
 private:
     std::function<void(KeyEventInfo& keyEventInfo)> propOnKeyEvent_;
