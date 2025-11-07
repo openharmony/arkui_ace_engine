@@ -4941,7 +4941,6 @@ void SetOnClick1Impl(Ark_NativePointer node,
         threshold = std::numeric_limits<double>::infinity();
     }
     ViewAbstract::SetOnClick(frameNode, std::move(onEvent), threshold);
-    ViewAbstract::SetOnClick(frameNode, std::move(onEvent), *convValue);
 }
 void SetFocusScopeIdImpl(Ark_NativePointer node,
                          const Opt_String* id,

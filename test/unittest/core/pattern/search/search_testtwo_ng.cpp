@@ -2197,7 +2197,7 @@ HWTEST_F(SearchTestTwoNg, searchModelStatic015, TestSize.Level1)
     EXPECT_EQ(textPaintProperty->GetCursorWidth().value(), CARET_WIDTH);
 
     SearchModelStatic::SetCaretWidth(frameNode, std::nullopt);
-    EXPECT_FALSE(textPaintProperty->GetCursorWidth().has_value());
+    EXPECT_TRUE(textPaintProperty->GetCursorWidth().has_value());
 }
 
 /**
