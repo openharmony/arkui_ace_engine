@@ -68,7 +68,7 @@ int32_t ParseTargetInfo(const Ark_TargetInfo* targetInfo, int32_t& targetId)
     auto targetInfoComponentId = targetInfo->componentId;
     int result = ERROR_CODE_NO_ERROR;
     Converter::VisitUnion(targetInfoID,
-        [&targetId](const Ark_Number& value) {
+        [&targetId](const Ark_Int32& value) {
             targetId = Converter::Convert<int32_t>(value);
         },
         [&targetId, targetInfoComponentId, &result](const Ark_String& value) {

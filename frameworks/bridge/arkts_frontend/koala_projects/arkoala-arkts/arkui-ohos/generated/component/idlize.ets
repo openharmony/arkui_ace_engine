@@ -4591,7 +4591,7 @@ export interface CustomDialogControllerOptionsExtender {
     alignment?: DialogAlignment;
     offset?: Offset;
     customStyle?: boolean;
-    gridCount?: number;
+    gridCount?: int32;
     maskColor?: ResourceColor;
     maskRect?: Rectangle;
     openAnimation?: AnimateParam;
@@ -4619,7 +4619,7 @@ export interface CustomDialogControllerOptionsExtender {
     onWillDisappear?: (() => void);
     keyboardAvoidDistance?: LengthMetrics;
     levelMode?: LevelMode;
-    levelUniqueId?: number;
+    levelUniqueId?: int32;
     immersiveMode?: ImmersiveMode;
     levelOrder?: LevelOrder;
     focusable?: boolean;
@@ -6611,7 +6611,7 @@ export class CustomDialogControllerOptionsExtender_serializer {
         if (valueHolderForGridCount !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForGridCountTmpValue  = valueHolderForGridCount!
-            valueSerializer.writeNumber(valueHolderForGridCountTmpValue)
+            valueSerializer.writeInt32(valueHolderForGridCountTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -6971,7 +6971,7 @@ export class CustomDialogControllerOptionsExtender_serializer {
         if (valueHolderForLevelUniqueId !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForLevelUniqueIdTmpValue  = valueHolderForLevelUniqueId!
-            valueSerializer.writeNumber(valueHolderForLevelUniqueIdTmpValue)
+            valueSerializer.writeInt32(valueHolderForLevelUniqueIdTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -7056,11 +7056,11 @@ export class CustomDialogControllerOptionsExtender_serializer {
         }
         const customStyleTmpResult : boolean | undefined = customStyleTmpBuf
         const gridCountTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let gridCountTmpBuf : number | undefined = undefined
+        let gridCountTmpBuf : int32 | undefined = undefined
         if ((gridCountTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            gridCountTmpBuf = (valueDeserializer.readNumber() as number)
+            gridCountTmpBuf = valueDeserializer.readInt32()
         }
-        const gridCountTmpResult : number | undefined = gridCountTmpBuf
+        const gridCountTmpResult : int32 | undefined = gridCountTmpBuf
         const maskColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let maskColorTmpBuf : ResourceColor | undefined = undefined
         if ((maskColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -7408,11 +7408,11 @@ export class CustomDialogControllerOptionsExtender_serializer {
         }
         const levelModeTmpResult : LevelMode | undefined = levelModeTmpBuf
         const levelUniqueIdTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let levelUniqueIdTmpBuf : number | undefined = undefined
+        let levelUniqueIdTmpBuf : int32 | undefined = undefined
         if ((levelUniqueIdTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            levelUniqueIdTmpBuf = (valueDeserializer.readNumber() as number)
+            levelUniqueIdTmpBuf = valueDeserializer.readInt32()
         }
-        const levelUniqueIdTmpResult : number | undefined = levelUniqueIdTmpBuf
+        const levelUniqueIdTmpResult : int32 | undefined = levelUniqueIdTmpBuf
         const immersiveModeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let immersiveModeTmpBuf : ImmersiveMode | undefined = undefined
         if ((immersiveModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {

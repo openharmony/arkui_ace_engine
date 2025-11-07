@@ -121,7 +121,7 @@ static ani_object OpenToast(ani_env* env, ani_object options)
     return result;
 }
 
-static void CloseToast(ani_env* env, ani_double toastId)
+static void CloseToast(ani_env* env, ani_int toastId)
 {
     TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] closeToast enter.");
     std::function<void(int32_t)> toastCloseCallback = nullptr;
@@ -462,10 +462,10 @@ static ani_object CloseCustomDialogContent(ani_env* env, ani_long content)
     return result;
 }
 
-static void CloseCustomDialog(ani_env* env, ani_double dialogId)
+static void CloseCustomDialog(ani_env* env, ani_int dialogId)
 {
     TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] CloseCustomDialog enter.");
-    int32_t customDialogId = static_cast<int32_t>(static_cast<double>(dialogId));
+    int32_t customDialogId = static_cast<int32_t>(dialogId);
     if ((OHOS::Ace::SystemProperties::GetExtSurfaceEnabled() || !OHOS::Ace::NG::ContainerIsService())
         && !OHOS::Ace::NG::ContainerIsScenceBoard()) {
         OHOS::Ace::NG::DialogManagerStatic::CloseCustomDialogStatic(customDialogId, OHOS::Ace::INSTANCE_ID_UNDEFINED);

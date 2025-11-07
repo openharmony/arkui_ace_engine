@@ -28,18 +28,18 @@ struct StarStyleOptions {
     std::string foregroundUri = {};
     std::string secondaryUri = {};
 };
-std::optional<float> ProcessBindableRating(FrameNode* frameNode, const Opt_Union_Number_Bindable& value)
+std::optional<float> ProcessBindableRating(FrameNode* frameNode, const Opt_Union_F64_Bindable& value)
 {
     std::optional<float> result;
     Converter::VisitUnion(value,
-        [&result](const Ark_Number& src) {
+        [&result](const Ark_Float64& src) {
             result = Converter::Convert<float>(src);
         },
-        [&result, frameNode](const Ark_Bindable_Number& src) {
+        [&result, frameNode](const Ark_Bindable_F64& src) {
             result = Converter::Convert<float>(src.value);
             WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
             auto onEvent = [arkCallback = CallbackHelper(src.onChange), weakNode](const std::string& value) {
-                auto nValue = Converter::ArkValue<Ark_Number>(std::stof(value));
+                auto nValue = Converter::ArkValue<Ark_Float64>(std::stof(value));
                 PipelineContext::SetCallBackNode(weakNode);
                 arkCallback.Invoke(nValue);
             };
@@ -65,8 +65,8 @@ StarStyleOptions Convert(const Ark_StarStyleOptions& value)
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RatingAttributeModifier {
-    void Stars1Impl(Ark_NativePointer node, const Opt_Number* value);
-    void StepSize1Impl(Ark_NativePointer node, const Opt_Number* value);
+    void Stars1Impl(Ark_NativePointer node, const Opt_Int32* value);
+    void StepSize1Impl(Ark_NativePointer node, const Opt_Float64* value);
     void StarStyle1Impl(Ark_NativePointer node, const Opt_StarStyleOptions* value);
 }
 namespace RatingModifier {
@@ -95,7 +95,7 @@ void SetRatingOptionsImpl(Ark_NativePointer node,
 } // RatingInterfaceModifier
 namespace RatingAttributeModifier {
 void SetStarsImpl(Ark_NativePointer node,
-                  const Opt_Number* value)
+                  const Opt_Int32* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -105,7 +105,7 @@ void SetStarsImpl(Ark_NativePointer node,
     RatingModelStatic::SetStars(frameNode,  optdVal);
 }
 void SetStepSizeImpl(Ark_NativePointer node,
-                     const Opt_Number* value)
+                     const Opt_Float64* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -134,7 +134,7 @@ void SetOnChangeImpl(Ark_NativePointer node,
     RatingChangeEvent onChange = {};
     if (optValue) {
         onChange = [arkCallback = CallbackHelper(*optValue)](const std::string& value) {
-            Ark_Number convValue = Converter::ArkValue<Ark_Number>(std::stof(value));
+            Ark_Float64 convValue = Converter::ArkValue<Ark_Float64>(std::stof(value));
             arkCallback.Invoke(convValue);
         };
     }

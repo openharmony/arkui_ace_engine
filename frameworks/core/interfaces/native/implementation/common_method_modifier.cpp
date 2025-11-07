@@ -3722,7 +3722,7 @@ void SetDisplayPriorityImpl(Ark_NativePointer node,
     ViewAbstractModelStatic::SetDisplayIndex(frameNode, result.value());
 }
 void SetZIndexImpl(Ark_NativePointer node,
-                   const Opt_Number* value)
+                   const Opt_Int32* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

@@ -1023,6 +1023,13 @@ Color Convert(const Ark_String& src)
 }
 
 template<>
+Color Convert(const Ark_Int64& src)
+{
+    uint32_t value = static_cast<uint32_t>(src);
+    return Color(ColorAlphaAdapt(value));
+}
+
+template<>
 std::tuple<Ark_Float32, Ark_Int32> Convert(const Ark_String& src)
 {
     auto str = Convert<std::string>(src);

@@ -55,7 +55,7 @@ void ContentModifierButtonImpl(Ark_NativePointer node,
         arkConfig.enabled = Converter::ArkValue<Ark_Boolean>(config.enabled_);
         arkConfig.label = Converter::ArkValue<Ark_String>(config.label_, Converter::FC);
         arkConfig.pressed = Converter::ArkValue<Ark_Boolean>(config.pressed_);
-        std::function<void(Ark_Number, Ark_Number)> handler = [frameNode](Ark_Number arkX, Ark_Number arkY) {
+        std::function<void(Ark_Float64, Ark_Float64)> handler = [frameNode](Ark_Float64 arkX, Ark_Float64 arkY) {
             auto x = Converter::Convert<int32_t>(arkX);
             auto y = Converter::Convert<int32_t>(arkY);
             ButtonModelNG::TriggerClick(frameNode, x, y);
@@ -280,15 +280,15 @@ void ContentModifierRatingImpl(Ark_NativePointer node,
         Ark_RatingConfiguration arkConfig;
         arkConfig.enabled = Converter::ArkValue<Ark_Boolean>(config.enabled_);
         arkConfig.contentModifier = contentModifier;
-        arkConfig.rating = Converter::ArkValue<Ark_Number>(config.rating_);
+        arkConfig.rating = Converter::ArkValue<Ark_Float64>(config.rating_);
         arkConfig.indicator = Converter::ArkValue<Ark_Boolean>(config.isIndicator_);
-        arkConfig.stars = Converter::ArkValue<Ark_Number>(config.starNum_);
-        arkConfig.stepSize = Converter::ArkValue<Ark_Number>(config.stepSize_);
+        arkConfig.stars = Converter::ArkValue<Ark_Int32>(config.starNum_);
+        arkConfig.stepSize = Converter::ArkValue<Ark_Float64>(config.stepSize_);
         CallbackKeeper::AnyResultHandlerType handler = [frameNode](const void *valuePtr) {
-            Ark_Number retValue = *(reinterpret_cast<const Ark_Number *>(valuePtr));
+            Ark_Float64 retValue = *(reinterpret_cast<const Ark_Float64 *>(valuePtr));
             RatingModelStatic::TriggerChange(frameNode, Converter::Convert<double>(retValue));
         };
-        arkConfig.triggerChange = CallbackKeeper::RegisterReverseCallback<Callback_Number_Void>(handler);
+        arkConfig.triggerChange = CallbackKeeper::RegisterReverseCallback<Callback_F64_Void>(handler);
         auto boxNode = CommonViewModelNG::CreateFrameNode(ViewStackProcessor::GetInstance()->ClaimNodeId());
         arkBuilder.BuildAsync([boxNode](const RefPtr<UINode>& uiNode) mutable {
             boxNode->AddChild(uiNode);
@@ -322,7 +322,7 @@ void ContentModifierMenuItemImpl(Ark_NativePointer node,
         LOGE("Opt_SymbolGlyphModifiers is a stub.");
         arkConfig.symbolIcon = Converter::ArkValue<Opt_SymbolGlyphModifier>(std::nullopt);
         arkConfig.selected = Converter::ArkValue<Ark_Boolean>(config.selected_);
-        arkConfig.index = Converter::ArkValue<Ark_Number>(config.index_);
+        arkConfig.index = Converter::ArkValue<Ark_Int32>(config.index_);
         auto boxNode = CommonViewModelNG::CreateFrameNode(ViewStackProcessor::GetInstance()->ClaimNodeId());
         arkBuilder.BuildAsync([boxNode](const RefPtr<UINode>& uiNode) mutable {
             boxNode->AddChild(uiNode);
@@ -350,13 +350,13 @@ void ContentModifierSliderImpl(Ark_NativePointer node,
         Ark_ContentModifier contentModifier = (*objectKeeper).get();
         Ark_SliderConfiguration arkConfig;
         arkConfig.contentModifier = contentModifier;
-        arkConfig.value = Converter::ArkValue<Ark_Number>(config.value_);
-        arkConfig.min = Converter::ArkValue<Ark_Number>(config.min_);
-        arkConfig.max = Converter::ArkValue<Ark_Number>(config.max_);
+        arkConfig.value = Converter::ArkValue<Ark_Float64>(config.value_);
+        arkConfig.min = Converter::ArkValue<Ark_Float64>(config.min_);
+        arkConfig.max = Converter::ArkValue<Ark_Float64>(config.max_);
         arkConfig.enabled = Converter::ArkValue<Ark_Boolean>(config.enabled_);
-        arkConfig.step = Converter::ArkValue<Ark_Number>(config.step_);
+        arkConfig.step = Converter::ArkValue<Ark_Float64>(config.step_);
         arkConfig.triggerChange = CallbackKeeper::DefineSliderTriggerChangeCallback<SliderTriggerChangeCallback>(
-            [frameNode](Ark_Number value, Ark_SliderChangeMode mode) {
+            [frameNode](Ark_Float64 value, Ark_SliderChangeMode mode) {
                 SliderModelNG::SetChangeValue(frameNode, Converter::Convert<double>(value), mode);
         });
 

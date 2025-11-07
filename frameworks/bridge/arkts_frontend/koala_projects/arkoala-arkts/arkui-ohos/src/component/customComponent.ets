@@ -825,7 +825,7 @@ export abstract class BaseCustomComponent<T_Options> extends ExtendableComponent
         this.__commonStyles.push((instance: CommonMethod): void => instance.displayPriority(value));
         return this
     }
-    zIndex(value: number | undefined): this {
+    zIndex(value: int32 | undefined): this {
         this.__commonStyles.push((instance: CommonMethod): void => instance.zIndex(value));
         return this
     }

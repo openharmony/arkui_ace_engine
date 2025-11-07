@@ -112,9 +112,8 @@ bool GetShowToastOptions(ani_env* env, ani_object object, OHOS::Ace::NG::ToastIn
     }
 
     GetResourceStrParam(env, object, "message", result.message);
-    double duration = -1.0f;
-    GetDoubleParam(env, object, "duration", duration);
-    result.duration = static_cast<int32_t>(duration);
+    result.duration = -1;
+    GetInt32Param(env, object, "duration", result.duration);
     GetToastBottom(env, object, result.bottom);
     GetToastShowMode(env, object, result.showMode);
     GetToastAlignment(env, object, result.alignment);
@@ -165,8 +164,7 @@ std::function<void(int32_t)> GetToastPromise(std::shared_ptr<PromptActionAsyncCo
             }
 
             if (toastId > 0) {
-                double returnToastId = static_cast<double>(toastId);
-                ani_object toastIdObj = CreateANIDoubleObject(env, returnToastId);
+                ani_object toastIdObj = CreateANIIntObject(env, toastId);
                 ani_ref toastRef = static_cast<ani_ref>(toastIdObj);
                 status = env->PromiseResolver_Resolve(asyncContext->deferred, toastRef);
                 if (status != ANI_OK) {

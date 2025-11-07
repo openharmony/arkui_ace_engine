@@ -38,7 +38,7 @@ public:
     void SetOffset(Opt_Offset offset);
     void SetCustomStyle(Opt_Boolean customStyle);
     Opt_Boolean GetCustomStyle();
-    void SetGridCount(Opt_Number gridCount);
+    void SetGridCount(Opt_Int32 gridCount);
     void SetMaskColor(Opt_ResourceColor maskColor);
     void SetMaskRect(Opt_Rectangle maskRect);
     void SetOpenAnimation(Opt_AnimateParam openAnimation);
@@ -73,7 +73,7 @@ public:
         const RefPtr<CustomDialogControllerExtenderPeer>& peer);
     void SetKeyboardAvoidDistance(Opt_LengthMetrics keyboardAvoidDistance);
     void SetLevelMode(Opt_Boolean showInSubWindow, Opt_LevelMode levelMode);
-    void SetLevelUniqueId(Opt_Number levelUniqueId);
+    void SetLevelUniqueId(Opt_Int32 levelUniqueId);
     void SetImersiveMode(Opt_ImmersiveMode immersiveMode);
     void SetLevelOrder(Opt_LevelOrder levelOrder);
     void SetFocusable(Opt_Boolean focusable);

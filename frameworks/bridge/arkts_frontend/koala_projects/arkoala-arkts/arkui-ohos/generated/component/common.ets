@@ -3807,12 +3807,12 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setDisplayPriority(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setZIndexAttribute(value: number | undefined): void {
+    setZIndexAttribute(value: int32 | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeNumber(valueTmpValue)
+            thisSerializer.writeInt32(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -6884,6 +6884,10 @@ export type PopupStateChangeCallback = (event: PopupStateChangeParam) => void;
 export interface PopupMaskType {
     color: ResourceColor;
 }
+export interface PopupBorderLinearGradient {
+    direction?: GradientDirection;
+    colors: Array<[ ResourceColor, double ]>;
+}
 export interface PopupCommonOptions {
     placement?: Placement;
     popupColor?: ResourceColor;
@@ -6909,10 +6913,10 @@ export interface PopupCommonOptions {
     followTransformOfTarget?: boolean;
 }
 export interface TipsOptions {
-    appearingTime?: number;
-    disappearingTime?: number;
-    appearingTimeWithContinuousOperation?: number;
-    disappearingTimeWithContinuousOperation?: number;
+    appearingTime?: int32;
+    disappearingTime?: int32;
+    appearingTimeWithContinuousOperation?: int32;
+    disappearingTimeWithContinuousOperation?: int32;
     enableArrow?: boolean;
     arrowPointPosition?: ArrowPointPosition;
     arrowWidth?: Dimension;
@@ -6935,7 +6939,7 @@ export interface PopupOptions {
     targetSpace?: Length;
     enableArrow?: boolean;
     offset?: Position;
-    popupColor?: Color | string | Resource | number;
+    popupColor?: Color | string | Resource | int64;
     autoCancel?: boolean;
     width?: Dimension;
     arrowPointPosition?: ArrowPointPosition;
@@ -6953,7 +6957,7 @@ export interface PopupOptions {
 export interface CustomPopupOptions {
     builder: CustomBuilder;
     placement?: Placement;
-    popupColor?: Color | string | Resource | number;
+    popupColor?: Color | string | Resource | int64;
     enableArrow?: boolean;
     autoCancel?: boolean;
     onStateChange?: PopupStateChangeCallback;
@@ -6981,8 +6985,8 @@ export enum MenuPreviewMode {
     IMAGE = 1
 }
 export type AnimationNumberRange = [
-    number,
-    number
+    double,
+    double
 ]
 export interface ContextMenuAnimationOptions {
     scale?: AnimationNumberRange;
@@ -7397,7 +7401,7 @@ export interface CommonMethod {
     displayPriority(value: number | undefined): this {
         throw new Error("Unimplemented method displayPriority")
     }
-    zIndex(value: number | undefined): this {
+    zIndex(value: int32 | undefined): this {
         throw new Error("Unimplemented method zIndex")
     }
     direction(value: Direction | undefined): this {
@@ -7837,7 +7841,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     flexBasis_value?: number | string | undefined
     alignSelf_value?: ItemAlign | undefined
     displayPriority_value?: number | undefined
-    zIndex_value?: number | undefined
+    zIndex_value?: int32 | undefined
     direction_value?: Direction | undefined
     align_value?: Alignment | undefined
     position_value?: Position | Edges | LocalizedEdges | undefined
@@ -8187,7 +8191,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     displayPriority(value: number | undefined): this {
         return this
     }
-    zIndex(value: number | undefined): this {
+    zIndex(value: int32 | undefined): this {
         return this
     }
     direction(value: Direction | undefined): this {
@@ -9645,9 +9649,9 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public zIndex(value: number | undefined): this {
+    public zIndex(value: int32 | undefined): this {
         if (this.checkPriority("zIndex")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (int32 | undefined)
             this.getPeer()?.setZIndexAttribute(value_casted)
             return this
         }
@@ -11281,6 +11285,34 @@ export class Bindable_Array_Number_serializer {
             return;
         }
         let value : Bindable<Array<number>> = ({value: valueTmpResult, onChange: onChangeTmpResult} as Bindable<Array<number>>)
+        return value
+    }
+}
+export class Bindable_F64_serializer {
+    public static write(buffer: SerializerBase, value: Bindable<double>): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForValue  = value.value
+        valueSerializer.writeFloat64(valueHolderForValue)
+        const valueHolderForOnChange  = value.onChange
+        valueSerializer.holdAndWriteCallback(valueHolderForOnChange)
+    }
+    public static read(buffer: DeserializerBase): Bindable<double> {
+        let valueDeserializer : DeserializerBase = buffer
+        const valueTmpResult : double = valueDeserializer.readFloat64()
+        const onChangeTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
+        const onChangeTmpBufBufCall : KPointer = valueDeserializer.readPointer()
+        const onChangeTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
+        const onChangeTmpResult : ((value0: double) => void) = (value0: double):void => {
+            const onChangeTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
+            onChangeTmpBufBufArgsSerializer.writeInt32(onChangeTmpBufBufResource.resourceId);
+            onChangeTmpBufBufArgsSerializer.writePointer(onChangeTmpBufBufCall);
+            onChangeTmpBufBufArgsSerializer.writePointer(onChangeTmpBufBufCallSync);
+            onChangeTmpBufBufArgsSerializer.writeFloat64(value0);
+            InteropNativeModule._CallCallbackSync(10, -747300352, onChangeTmpBufBufArgsSerializer.asBuffer(), onChangeTmpBufBufArgsSerializer.length());
+            onChangeTmpBufBufArgsSerializer.release();
+            return;
+        }
+        let value : Bindable<double> = ({value: valueTmpResult, onChange: onChangeTmpResult} as Bindable<double>)
         return value
     }
 }
@@ -14488,9 +14520,9 @@ export class ContextMenuAnimationOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForScaleTmpValue  = valueHolderForScale!
             const valueHolderForScaleTmpValue_0  = valueHolderForScaleTmpValue[0]
-            valueSerializer.writeNumber(valueHolderForScaleTmpValue_0)
+            valueSerializer.writeFloat64(valueHolderForScaleTmpValue_0)
             const valueHolderForScaleTmpValue_1  = valueHolderForScaleTmpValue[1]
-            valueSerializer.writeNumber(valueHolderForScaleTmpValue_1)
+            valueSerializer.writeFloat64(valueHolderForScaleTmpValue_1)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -14507,9 +14539,9 @@ export class ContextMenuAnimationOptions_serializer {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForHoverScaleTmpValue  = valueHolderForHoverScale!
             const valueHolderForHoverScaleTmpValue_0  = valueHolderForHoverScaleTmpValue[0]
-            valueSerializer.writeNumber(valueHolderForHoverScaleTmpValue_0)
+            valueSerializer.writeFloat64(valueHolderForHoverScaleTmpValue_0)
             const valueHolderForHoverScaleTmpValue_1  = valueHolderForHoverScaleTmpValue[1]
-            valueSerializer.writeNumber(valueHolderForHoverScaleTmpValue_1)
+            valueSerializer.writeFloat64(valueHolderForHoverScaleTmpValue_1)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -14519,8 +14551,8 @@ export class ContextMenuAnimationOptions_serializer {
         const scaleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let scaleTmpBuf : AnimationNumberRange | undefined = undefined
         if ((scaleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const scaleTmpBuf_Value0 : number = (valueDeserializer.readNumber() as number)
-            const scaleTmpBuf_Value1 : number = (valueDeserializer.readNumber() as number)
+            const scaleTmpBuf_Value0 : double = valueDeserializer.readFloat64()
+            const scaleTmpBuf_Value1 : double = valueDeserializer.readFloat64()
             scaleTmpBuf = ([scaleTmpBuf_Value0, scaleTmpBuf_Value1] as AnimationNumberRange)
         }
         const scaleTmpResult : AnimationNumberRange | undefined = scaleTmpBuf
@@ -14533,8 +14565,8 @@ export class ContextMenuAnimationOptions_serializer {
         const hoverScaleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let hoverScaleTmpBuf : AnimationNumberRange | undefined = undefined
         if ((hoverScaleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const hoverScaleTmpBuf_Value0 : number = (valueDeserializer.readNumber() as number)
-            const hoverScaleTmpBuf_Value1 : number = (valueDeserializer.readNumber() as number)
+            const hoverScaleTmpBuf_Value0 : double = valueDeserializer.readFloat64()
+            const hoverScaleTmpBuf_Value1 : double = valueDeserializer.readFloat64()
             hoverScaleTmpBuf = ([hoverScaleTmpBuf_Value0, hoverScaleTmpBuf_Value1] as AnimationNumberRange)
         }
         const hoverScaleTmpResult : AnimationNumberRange | undefined = hoverScaleTmpBuf
@@ -15903,9 +15935,9 @@ export class DividerStyle_serializer {
                 strokeWidthTmpBuf_ = (valueDeserializer.readNumber() as number)
             } else if (strokeWidthTmpBuf_UnionSelector == (2).toChar()) {
                 strokeWidthTmpBuf_ = Resource_serializer.read(valueDeserializer)
-        } else {
+            } else {
                 throw new Error("One of the branches for strokeWidthTmpBuf_ has to be chosen through deserialisation.")
-        }
+            }
             strokeWidthTmpBuf = (strokeWidthTmpBuf_ as string | number | Resource)
         }
         const strokeWidthTmpResult : Length | undefined = strokeWidthTmpBuf
@@ -16708,7 +16740,7 @@ export class TipsOptions_serializer {
         if (valueHolderForAppearingTime !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForAppearingTimeTmpValue  = valueHolderForAppearingTime!
-            valueSerializer.writeNumber(valueHolderForAppearingTimeTmpValue)
+            valueSerializer.writeInt32(valueHolderForAppearingTimeTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -16716,7 +16748,7 @@ export class TipsOptions_serializer {
         if (valueHolderForDisappearingTime !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForDisappearingTimeTmpValue  = valueHolderForDisappearingTime!
-            valueSerializer.writeNumber(valueHolderForDisappearingTimeTmpValue)
+            valueSerializer.writeInt32(valueHolderForDisappearingTimeTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -16724,7 +16756,7 @@ export class TipsOptions_serializer {
         if (valueHolderForAppearingTimeWithContinuousOperation !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForAppearingTimeWithContinuousOperationTmpValue  = valueHolderForAppearingTimeWithContinuousOperation!
-            valueSerializer.writeNumber(valueHolderForAppearingTimeWithContinuousOperationTmpValue)
+            valueSerializer.writeInt32(valueHolderForAppearingTimeWithContinuousOperationTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -16732,7 +16764,7 @@ export class TipsOptions_serializer {
         if (valueHolderForDisappearingTimeWithContinuousOperation !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForDisappearingTimeWithContinuousOperationTmpValue  = valueHolderForDisappearingTimeWithContinuousOperation!
-            valueSerializer.writeNumber(valueHolderForDisappearingTimeWithContinuousOperationTmpValue)
+            valueSerializer.writeInt32(valueHolderForDisappearingTimeWithContinuousOperationTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -16796,29 +16828,29 @@ export class TipsOptions_serializer {
     public static read(buffer: DeserializerBase): TipsOptions {
         let valueDeserializer : DeserializerBase = buffer
         const appearingTimeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let appearingTimeTmpBuf : number | undefined = undefined
+        let appearingTimeTmpBuf : int32 | undefined = undefined
         if ((appearingTimeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            appearingTimeTmpBuf = (valueDeserializer.readNumber() as number)
+            appearingTimeTmpBuf = valueDeserializer.readInt32()
         }
-        const appearingTimeTmpResult : number | undefined = appearingTimeTmpBuf
+        const appearingTimeTmpResult : int32 | undefined = appearingTimeTmpBuf
         const disappearingTimeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let disappearingTimeTmpBuf : number | undefined = undefined
+        let disappearingTimeTmpBuf : int32 | undefined = undefined
         if ((disappearingTimeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            disappearingTimeTmpBuf = (valueDeserializer.readNumber() as number)
+            disappearingTimeTmpBuf = valueDeserializer.readInt32()
         }
-        const disappearingTimeTmpResult : number | undefined = disappearingTimeTmpBuf
+        const disappearingTimeTmpResult : int32 | undefined = disappearingTimeTmpBuf
         const appearingTimeWithContinuousOperationTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let appearingTimeWithContinuousOperationTmpBuf : number | undefined = undefined
+        let appearingTimeWithContinuousOperationTmpBuf : int32 | undefined = undefined
         if ((appearingTimeWithContinuousOperationTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            appearingTimeWithContinuousOperationTmpBuf = (valueDeserializer.readNumber() as number)
+            appearingTimeWithContinuousOperationTmpBuf = valueDeserializer.readInt32()
         }
-        const appearingTimeWithContinuousOperationTmpResult : number | undefined = appearingTimeWithContinuousOperationTmpBuf
+        const appearingTimeWithContinuousOperationTmpResult : int32 | undefined = appearingTimeWithContinuousOperationTmpBuf
         const disappearingTimeWithContinuousOperationTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let disappearingTimeWithContinuousOperationTmpBuf : number | undefined = undefined
+        let disappearingTimeWithContinuousOperationTmpBuf : int32 | undefined = undefined
         if ((disappearingTimeWithContinuousOperationTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            disappearingTimeWithContinuousOperationTmpBuf = (valueDeserializer.readNumber() as number)
+            disappearingTimeWithContinuousOperationTmpBuf = valueDeserializer.readInt32()
         }
-        const disappearingTimeWithContinuousOperationTmpResult : number | undefined = disappearingTimeWithContinuousOperationTmpBuf
+        const disappearingTimeWithContinuousOperationTmpResult : int32 | undefined = disappearingTimeWithContinuousOperationTmpBuf
         const enableArrowTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let enableArrowTmpBuf : boolean | undefined = undefined
         if ((enableArrowTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -17773,10 +17805,10 @@ export class CustomPopupOptions_serializer {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForPopupColorTmpValueForIdx2  = valueHolderForPopupColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForPopupColorTmpValueForIdx2)
-            } else if (valueHolderForPopupColorTmpValue instanceof number) {
+            } else if (valueHolderForPopupColorTmpValue instanceof int64) {
                 valueSerializer.writeInt8((3).toByte())
-                const valueHolderForPopupColorTmpValueForIdx3  = valueHolderForPopupColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForPopupColorTmpValueForIdx3)
+                const valueHolderForPopupColorTmpValueForIdx3  = valueHolderForPopupColorTmpValue as int64
+                valueSerializer.writeInt64(valueHolderForPopupColorTmpValueForIdx3)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -18067,10 +18099,10 @@ export class CustomPopupOptions_serializer {
         }
         const placementTmpResult : Placement | undefined = placementTmpBuf
         const popupColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let popupColorTmpBuf : Color | string | Resource | number | undefined = undefined
+        let popupColorTmpBuf : Color | string | Resource | int64 | undefined = undefined
         if ((popupColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const popupColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let popupColorTmpBuf_ : Color | string | Resource | number | undefined
+            let popupColorTmpBuf_ : Color | string | Resource | int64 | undefined
             if (popupColorTmpBuf_UnionSelector == (0).toChar()) {
                 popupColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (popupColorTmpBuf_UnionSelector == (1).toChar()) {
@@ -18078,13 +18110,13 @@ export class CustomPopupOptions_serializer {
             } else if (popupColorTmpBuf_UnionSelector == (2).toChar()) {
                 popupColorTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else if (popupColorTmpBuf_UnionSelector == (3).toChar()) {
-                popupColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                popupColorTmpBuf_ = valueDeserializer.readInt64()
             } else {
                 throw new Error("One of the branches for popupColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            popupColorTmpBuf = (popupColorTmpBuf_ as Color | string | Resource | number)
+            popupColorTmpBuf = (popupColorTmpBuf_ as Color | string | Resource | int64)
         }
-        const popupColorTmpResult : Color | string | Resource | number | undefined = popupColorTmpBuf
+        const popupColorTmpResult : Color | string | Resource | int64 | undefined = popupColorTmpBuf
         const enableArrowTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let enableArrowTmpBuf : boolean | undefined = undefined
         if ((enableArrowTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -21665,10 +21697,10 @@ export class PopupOptions_serializer {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForPopupColorTmpValueForIdx2  = valueHolderForPopupColorTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderForPopupColorTmpValueForIdx2)
-            } else if (valueHolderForPopupColorTmpValue instanceof number) {
+            } else if (valueHolderForPopupColorTmpValue instanceof int64) {
                 valueSerializer.writeInt8((3).toByte())
-                const valueHolderForPopupColorTmpValueForIdx3  = valueHolderForPopupColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForPopupColorTmpValueForIdx3)
+                const valueHolderForPopupColorTmpValueForIdx3  = valueHolderForPopupColorTmpValue as int64
+                valueSerializer.writeInt64(valueHolderForPopupColorTmpValueForIdx3)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -21955,10 +21987,10 @@ export class PopupOptions_serializer {
         }
         const offsetTmpResult : Position | undefined = offsetTmpBuf
         const popupColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let popupColorTmpBuf : Color | string | Resource | number | undefined = undefined
+        let popupColorTmpBuf : Color | string | Resource | int64 | undefined = undefined
         if ((popupColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const popupColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let popupColorTmpBuf_ : Color | string | Resource | number | undefined
+            let popupColorTmpBuf_ : Color | string | Resource | int64 | undefined
             if (popupColorTmpBuf_UnionSelector == (0).toChar()) {
                 popupColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
             } else if (popupColorTmpBuf_UnionSelector == (1).toChar()) {
@@ -21966,13 +21998,13 @@ export class PopupOptions_serializer {
             } else if (popupColorTmpBuf_UnionSelector == (2).toChar()) {
                 popupColorTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else if (popupColorTmpBuf_UnionSelector == (3).toChar()) {
-                popupColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+                popupColorTmpBuf_ = valueDeserializer.readInt64()
             } else {
                 throw new Error("One of the branches for popupColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            popupColorTmpBuf = (popupColorTmpBuf_ as Color | string | Resource | number)
+            popupColorTmpBuf = (popupColorTmpBuf_ as Color | string | Resource | int64)
         }
-        const popupColorTmpResult : Color | string | Resource | number | undefined = popupColorTmpBuf
+        const popupColorTmpResult : Color | string | Resource | int64 | undefined = popupColorTmpBuf
         const autoCancelTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let autoCancelTmpBuf : boolean | undefined = undefined
         if ((autoCancelTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {

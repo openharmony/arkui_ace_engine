@@ -737,13 +737,13 @@ export class OverlayManagerImpl extends OverlayManager {
         return retval;
     }
 
-    addComponentContent(content: ComponentContent, index?: number): void {
+    addComponentContent(content: ComponentContent, index?: int32): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         let ptr: KPointer = 0
         if (content.getNodePtr() !== undefined) {
             ptr = content.getNodePtr() as (KPointer)
         }
-        let idx: number = -1
+        let idx: int32 = -1
         if (index !== undefined) {
             idx = index
         }
@@ -825,14 +825,14 @@ export class PromptActionImpl extends PromptAction {
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 
-    openToast(options: promptAction.ShowToastOptions): Promise<number> {
+    openToast(options: promptAction.ShowToastOptions): Promise<int32> {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         let promise = promptAction.openToast(options);
         ArkUIAniModule._Common_Restore_InstanceId();
         return promise;
     }
 
-    closeToast(toastId: number): void {
+    closeToast(toastId: int32): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         promptAction.closeToast(toastId);
         ArkUIAniModule._Common_Restore_InstanceId();
@@ -911,7 +911,7 @@ export class PromptActionImpl extends PromptAction {
     }
 
     //@ts-ignore
-    openCustomDialog(options: promptAction.CustomDialogOptions): Promise<number> {
+    openCustomDialog(options: promptAction.CustomDialogOptions): Promise<int32> {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         let builderOptions: promptAction.DialogBuilderOptions = {};
         const peerNode = createUiDetachedRoot((): PeerNode => {
@@ -968,7 +968,7 @@ export class PromptActionImpl extends PromptAction {
     }
 
     //@ts-ignore
-    closeCustomDialog(dialogId: number): void {
+    closeCustomDialog(dialogId: int32): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         promptAction.closeCustomDialog(dialogId);
         ArkUIAniModule._Common_Restore_InstanceId();
@@ -1004,8 +1004,8 @@ export class PromptActionImpl extends PromptAction {
         return retval;
     }
 
-    presentCustomDialog(builder: CustomBuilder | CustomBuilderT<number>, controller?: promptAction.DialogController,
-        options?: promptAction.DialogOptions): Promise<number> {
+    presentCustomDialog(builder: CustomBuilder | CustomBuilderT<int32>, controller?: promptAction.DialogController,
+        options?: promptAction.DialogOptions): Promise<int32> {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         let builderOptions: promptAction.DialogBuilderOptions = {};
         if (builder instanceof CustomBuilder) {
@@ -1014,10 +1014,10 @@ export class PromptActionImpl extends PromptAction {
             }, builder as CustomBuilder, this.instanceId_);
             builderOptions.builder = peerNode.peer.ptr;
         } else {
-            builderOptions.builderWithId = (dialogId: number): KPointer => {
-                const peerNode = createUiDetachedRootT<number>((): PeerNode => {
+            builderOptions.builderWithId = (dialogId: int32): KPointer => {
+                const peerNode = createUiDetachedRootT<int32>((): PeerNode => {
                     return ArkComponentRootPeer.create(undefined);
-                }, builder as CustomBuilderT<number>, dialogId, this.instanceId_);
+                }, builder as CustomBuilderT<int32>, dialogId, this.instanceId_);
                 return peerNode.peer.ptr;
             };
         }

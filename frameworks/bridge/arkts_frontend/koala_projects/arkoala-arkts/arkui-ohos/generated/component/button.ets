@@ -190,15 +190,15 @@ export class ArkButtonPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._ButtonAttribute_setFontSize(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setFontWeightAttribute(value: number | FontWeight | string | undefined): void {
+    setFontWeightAttribute(value: int32 | FontWeight | string | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
+            if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+                const valueTmpValueForIdx0  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof FontWeight) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as FontWeight
@@ -258,15 +258,15 @@ export class ArkButtonPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._ButtonAttribute_setLabelStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setMinFontScaleAttribute(value: number | Resource | undefined): void {
+    setMinFontScaleAttribute(value: double | Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
+            if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+                const valueTmpValueForIdx0  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as Resource
@@ -278,15 +278,15 @@ export class ArkButtonPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._ButtonAttribute_setMinFontScale(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setMaxFontScaleAttribute(value: number | Resource | undefined): void {
+    setMaxFontScaleAttribute(value: double | Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
+            if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+                const valueTmpValueForIdx0  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as Resource
@@ -317,7 +317,7 @@ export enum ButtonRole {
     NORMAL = 0,
     ERROR = 1
 }
-export type ButtonTriggerClickCallback = (xPos: number, yPos: number) => void;
+export type ButtonTriggerClickCallback = (xPos: double, yPos: double) => void;
 export interface ButtonConfiguration extends CommonConfiguration<ButtonConfiguration> {
     label: string;
     pressed: boolean;
@@ -336,9 +336,9 @@ export interface ButtonOptions {
 }
 export interface ButtonLabelStyle {
     overflow?: TextOverflow;
-    maxLines?: number;
-    minFontSize?: number | ResourceStr;
-    maxFontSize?: number | ResourceStr;
+    maxLines?: int32;
+    minFontSize?: double | ResourceStr;
+    maxFontSize?: double | ResourceStr;
     heightAdaptivePolicy?: TextHeightAdaptivePolicy;
     font?: Font;
 }
@@ -370,7 +370,7 @@ export interface ButtonAttribute extends CommonMethod {
     fontSize(value: Length | undefined): this {
         throw new Error("Unimplemented method fontSize")
     }
-    fontWeight(value: number | FontWeight | string | undefined): this {
+    fontWeight(value: int32 | FontWeight | string | undefined): this {
         throw new Error("Unimplemented method fontWeight")
     }
     fontStyle(value: FontStyle | undefined): this {
@@ -385,10 +385,10 @@ export interface ButtonAttribute extends CommonMethod {
     labelStyle(value: ButtonLabelStyle | undefined): this {
         throw new Error("Unimplemented method labelStyle")
     }
-    minFontScale(value: number | Resource | undefined): this {
+    minFontScale(value: double | Resource | undefined): this {
         throw new Error("Unimplemented method minFontScale")
     }
-    maxFontScale(value: number | Resource | undefined): this {
+    maxFontScale(value: double | Resource | undefined): this {
         throw new Error("Unimplemented method maxFontScale")
     }
     attributeModifier(value: AttributeModifier<ButtonAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -403,13 +403,13 @@ export class ArkButtonStyle extends ArkCommonMethodStyle implements ButtonAttrib
     role_value?: ButtonRole | undefined
     fontColor_value?: ResourceColor | undefined
     fontSize_value?: Length | undefined
-    fontWeight_value?: number | FontWeight | string | undefined
+    fontWeight_value?: int32 | FontWeight | string | undefined
     fontStyle_value?: FontStyle | undefined
     fontFamily_value?: string | Resource | undefined
     contentModifier_value?: ContentModifier<ButtonConfiguration> | undefined
     labelStyle_value?: ButtonLabelStyle | undefined
-    minFontScale_value?: number | Resource | undefined
-    maxFontScale_value?: number | Resource | undefined
+    minFontScale_value?: double | Resource | undefined
+    maxFontScale_value?: double | Resource | undefined
     attributeModifier_value?: AttributeModifier<ButtonAttribute> | AttributeModifier<CommonMethod> | undefined
     setButtonOptions(label: ResourceStr, options?: ButtonOptions): this {
         return this
@@ -438,7 +438,7 @@ export class ArkButtonStyle extends ArkCommonMethodStyle implements ButtonAttrib
     fontSize(value: Length | undefined): this {
         return this
     }
-    fontWeight(value: number | FontWeight | string | undefined): this {
+    fontWeight(value: int32 | FontWeight | string | undefined): this {
         return this
     }
     fontStyle(value: FontStyle | undefined): this {
@@ -453,10 +453,10 @@ export class ArkButtonStyle extends ArkCommonMethodStyle implements ButtonAttrib
     labelStyle(value: ButtonLabelStyle | undefined): this {
         return this
     }
-    minFontScale(value: number | Resource | undefined): this {
+    minFontScale(value: double | Resource | undefined): this {
         return this
     }
-    maxFontScale(value: number | Resource | undefined): this {
+    maxFontScale(value: double | Resource | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<ButtonAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -544,9 +544,9 @@ export class ArkButtonComponent extends ArkCommonMethodComponent implements Butt
         }
         return this
     }
-    public fontWeight(value: number | FontWeight | string | undefined): this {
+    public fontWeight(value: int32 | FontWeight | string | undefined): this {
         if (this.checkPriority("fontWeight")) {
-            const value_casted = value as (number | FontWeight | string | undefined)
+            const value_casted = value as (int32 | FontWeight | string | undefined)
             this.getPeer()?.setFontWeightAttribute(value_casted)
             return this
         }
@@ -582,17 +582,17 @@ export class ArkButtonComponent extends ArkCommonMethodComponent implements Butt
         }
         return this
     }
-    public minFontScale(value: number | Resource | undefined): this {
+    public minFontScale(value: double | Resource | undefined): this {
         if (this.checkPriority("minFontScale")) {
-            const value_casted = value as (number | Resource | undefined)
+            const value_casted = value as (double | Resource | undefined)
             this.getPeer()?.setMinFontScaleAttribute(value_casted)
             return this
         }
         return this
     }
-    public maxFontScale(value: number | Resource | undefined): this {
+    public maxFontScale(value: double | Resource | undefined): this {
         if (this.checkPriority("maxFontScale")) {
-            const value_casted = value as (number | Resource | undefined)
+            const value_casted = value as (double | Resource | undefined)
             this.getPeer()?.setMaxFontScaleAttribute(value_casted)
             return this
         }
@@ -649,13 +649,13 @@ export class ButtonConfiguration_serializer {
         const triggerClickTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
         const triggerClickTmpBufBufCall : KPointer = valueDeserializer.readPointer()
         const triggerClickTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
-        const triggerClickTmpResult : ButtonTriggerClickCallback = (xPos: number, yPos: number):void => {
+        const triggerClickTmpResult : ButtonTriggerClickCallback = (xPos: double, yPos: double):void => {
             const triggerClickTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
             triggerClickTmpBufBufArgsSerializer.writeInt32(triggerClickTmpBufBufResource.resourceId);
             triggerClickTmpBufBufArgsSerializer.writePointer(triggerClickTmpBufBufCall);
             triggerClickTmpBufBufArgsSerializer.writePointer(triggerClickTmpBufBufCallSync);
-            triggerClickTmpBufBufArgsSerializer.writeNumber(xPos);
-            triggerClickTmpBufBufArgsSerializer.writeNumber(yPos);
+            triggerClickTmpBufBufArgsSerializer.writeFloat64(xPos);
+            triggerClickTmpBufBufArgsSerializer.writeFloat64(yPos);
             InteropNativeModule._CallCallbackSync(10, -1964292933, triggerClickTmpBufBufArgsSerializer.asBuffer(), triggerClickTmpBufBufArgsSerializer.length());
             triggerClickTmpBufBufArgsSerializer.release();
             return;
@@ -759,7 +759,7 @@ export class ButtonLabelStyle_serializer {
         if (valueHolderForMaxLines !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForMaxLinesTmpValue  = valueHolderForMaxLines!
-            valueSerializer.writeNumber(valueHolderForMaxLinesTmpValue)
+            valueSerializer.writeInt32(valueHolderForMaxLinesTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -767,10 +767,10 @@ export class ButtonLabelStyle_serializer {
         if (valueHolderForMinFontSize !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForMinFontSizeTmpValue  = valueHolderForMinFontSize!
-            if (valueHolderForMinFontSizeTmpValue instanceof number) {
+            if (valueHolderForMinFontSizeTmpValue instanceof double) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForMinFontSizeTmpValueForIdx0  = valueHolderForMinFontSizeTmpValue as number
-                valueSerializer.writeNumber(valueHolderForMinFontSizeTmpValueForIdx0)
+                const valueHolderForMinFontSizeTmpValueForIdx0  = valueHolderForMinFontSizeTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForMinFontSizeTmpValueForIdx0)
             } else if (valueHolderForMinFontSizeTmpValue instanceof ResourceStr) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForMinFontSizeTmpValueForIdx1  = valueHolderForMinFontSizeTmpValue as ResourceStr
@@ -791,10 +791,10 @@ export class ButtonLabelStyle_serializer {
         if (valueHolderForMaxFontSize !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForMaxFontSizeTmpValue  = valueHolderForMaxFontSize!
-            if (valueHolderForMaxFontSizeTmpValue instanceof number) {
+            if (valueHolderForMaxFontSizeTmpValue instanceof double) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForMaxFontSizeTmpValueForIdx0  = valueHolderForMaxFontSizeTmpValue as number
-                valueSerializer.writeNumber(valueHolderForMaxFontSizeTmpValueForIdx0)
+                const valueHolderForMaxFontSizeTmpValueForIdx0  = valueHolderForMaxFontSizeTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForMaxFontSizeTmpValueForIdx0)
             } else if (valueHolderForMaxFontSizeTmpValue instanceof ResourceStr) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForMaxFontSizeTmpValueForIdx1  = valueHolderForMaxFontSizeTmpValue as ResourceStr
@@ -837,18 +837,18 @@ export class ButtonLabelStyle_serializer {
         }
         const overflowTmpResult : TextOverflow | undefined = overflowTmpBuf
         const maxLinesTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let maxLinesTmpBuf : number | undefined = undefined
+        let maxLinesTmpBuf : int32 | undefined = undefined
         if ((maxLinesTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            maxLinesTmpBuf = (valueDeserializer.readNumber() as number)
+            maxLinesTmpBuf = valueDeserializer.readInt32()
         }
-        const maxLinesTmpResult : number | undefined = maxLinesTmpBuf
+        const maxLinesTmpResult : int32 | undefined = maxLinesTmpBuf
         const minFontSizeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let minFontSizeTmpBuf : number | ResourceStr | undefined = undefined
+        let minFontSizeTmpBuf : double | ResourceStr | undefined = undefined
         if ((minFontSizeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const minFontSizeTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let minFontSizeTmpBuf_ : number | ResourceStr | undefined
+            let minFontSizeTmpBuf_ : double | ResourceStr | undefined
             if (minFontSizeTmpBuf_UnionSelector == (0).toChar()) {
-                minFontSizeTmpBuf_ = (valueDeserializer.readNumber() as number)
+                minFontSizeTmpBuf_ = valueDeserializer.readFloat64()
             } else if (minFontSizeTmpBuf_UnionSelector == (1).toChar()) {
                 const minFontSizeTmpBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
                 let minFontSizeTmpBuf_BufU : string | Resource | undefined
@@ -863,16 +863,16 @@ export class ButtonLabelStyle_serializer {
             } else {
                 throw new Error("One of the branches for minFontSizeTmpBuf_ has to be chosen through deserialisation.")
             }
-            minFontSizeTmpBuf = (minFontSizeTmpBuf_ as number | ResourceStr)
+            minFontSizeTmpBuf = (minFontSizeTmpBuf_ as double | ResourceStr)
         }
-        const minFontSizeTmpResult : number | ResourceStr | undefined = minFontSizeTmpBuf
+        const minFontSizeTmpResult : double | ResourceStr | undefined = minFontSizeTmpBuf
         const maxFontSizeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let maxFontSizeTmpBuf : number | ResourceStr | undefined = undefined
+        let maxFontSizeTmpBuf : double | ResourceStr | undefined = undefined
         if ((maxFontSizeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const maxFontSizeTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let maxFontSizeTmpBuf_ : number | ResourceStr | undefined
+            let maxFontSizeTmpBuf_ : double | ResourceStr | undefined
             if (maxFontSizeTmpBuf_UnionSelector == (0).toChar()) {
-                maxFontSizeTmpBuf_ = (valueDeserializer.readNumber() as number)
+                maxFontSizeTmpBuf_ = valueDeserializer.readFloat64()
             } else if (maxFontSizeTmpBuf_UnionSelector == (1).toChar()) {
                 const maxFontSizeTmpBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
                 let maxFontSizeTmpBuf_BufU : string | Resource | undefined
@@ -887,9 +887,9 @@ export class ButtonLabelStyle_serializer {
             } else {
                 throw new Error("One of the branches for maxFontSizeTmpBuf_ has to be chosen through deserialisation.")
             }
-            maxFontSizeTmpBuf = (maxFontSizeTmpBuf_ as number | ResourceStr)
+            maxFontSizeTmpBuf = (maxFontSizeTmpBuf_ as double | ResourceStr)
         }
-        const maxFontSizeTmpResult : number | ResourceStr | undefined = maxFontSizeTmpBuf
+        const maxFontSizeTmpResult : double | ResourceStr | undefined = maxFontSizeTmpBuf
         const heightAdaptivePolicyTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let heightAdaptivePolicyTmpBuf : TextHeightAdaptivePolicy | undefined = undefined
         if ((heightAdaptivePolicyTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
