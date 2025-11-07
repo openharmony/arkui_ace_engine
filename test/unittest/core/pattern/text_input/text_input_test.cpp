@@ -941,6 +941,25 @@ HWTEST_F(TextFieldUXTest, MaxLength006, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NeedSoftKeyboard002
+ * @tc.desc: Test NeedSoftKeyboard
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, NeedSoftKeyboard002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: step2. Test whether text field need soft keyboard.
+     */
+    ASSERT_NE(pattern_, nullptr);
+    EXPECT_TRUE(pattern_->NeedSoftKeyboard());
+}
+
+/**
  * @tc.name: CopyOption001
  * @tc.desc: test testInput CopyOption
  * @tc.type: FUNC
