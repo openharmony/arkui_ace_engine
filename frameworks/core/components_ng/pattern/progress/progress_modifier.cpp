@@ -743,7 +743,7 @@ void ProgressModifier::ContentDrawWithFunction(DrawingContext& context)
     auto contentSize = contentSize_->Get();
     auto& canvas = context.canvas;
     if (progressType_->Get() == static_cast<int32_t>(ProgressType::LINEAR)) {
-        Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_TWO)
+        Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_THREE)
             ? PaintLinearWithGradient(canvas, offset_->Get(), contentSize)
             : PaintLinear(canvas, offset_->Get(), contentSize);
     } else if (progressType_->Get() == static_cast<int32_t>(ProgressType::RING)) {
@@ -769,7 +769,7 @@ void ProgressModifier::ContentDrawWithFunction(DrawingContext& context)
             } else {
                 PaintVerticalCapsule(canvas, offset_->Get(), contentSize, contentSize.Width() / INT32_TWO);
             }
-        } else if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_TWO)) {
+        } else if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_THREE)) {
             if (contentSize.Width() >= contentSize.Height()) {
                 PaintCapsuleWithGradient(canvas, offset_->Get(), contentSize, capsuleBorderRadius_->Get());
             } else {
@@ -783,7 +783,7 @@ void ProgressModifier::ContentDrawWithFunction(DrawingContext& context)
             }
         }
     } else {
-        Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_TWO)
+        Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_THREE)
             ? PaintLinearWithGradient(canvas, offset_->Get(), contentSize)
             : PaintLinear(canvas, offset_->Get(), contentSize);
     }
