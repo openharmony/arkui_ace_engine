@@ -84,7 +84,10 @@ public:
         return true;
     }
 
-    virtual void OnHostChildUpdateDone() {}
+    virtual void OnHostChildUpdateDone()
+    {
+        PropagateForegroundColorToChildren();
+    }
 
     virtual bool ConsumeChildrenAdjustment(const OffsetF& /* offset */)
     {
@@ -218,6 +221,11 @@ public:
     virtual void OnModifyDone()
     {
         CheckLocalized();
+        PropagateForegroundColorToChildren();
+    }
+
+    void PropagateForegroundColorToChildren()
+    {
         auto frameNode = GetHost();
         const auto& children = frameNode->GetChildren();
         if (children.empty()) {

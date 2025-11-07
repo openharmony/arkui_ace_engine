@@ -15,8 +15,10 @@
 
 #include "ui/animation/animation_utils.h"
 
+#include "interfaces/inner_api/ace_kit/src/view/ui_context_impl.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/pipeline/pipeline_base.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::Kit {
 
@@ -55,12 +57,13 @@ void AnimationUtils::Animate(const AnimationOption& option, const AnimationCallb
 
 std::shared_ptr<AnimationUtils::Animation> AnimationUtils::StartAnimation(const AnimationOption& option,
     const AnimationCallback& callback, const AnimationCallback& finishCallback,
-    const AnimationCallback& repeatCallback, bool flushUITasks)
+    const AnimationCallback& repeatCallback, bool flushUITasks, const RefPtr<UIContext>& uiContext)
 {
     auto propertyCallback = GetWrappedCallback(callback, flushUITasks);
+    auto pipelineConetxt = uiContext ? AceType::DynamicCast<UIContextImpl>(uiContext)->GetPipelineContext() : nullptr;
     std::shared_ptr<AnimationUtils::Animation> animation = std::make_shared<AnimationUtils::Animation>();
     auto animations = OHOS::Ace::AnimationUtils::StartAnimation(option, propertyCallback,
-        finishCallback, repeatCallback);
+        finishCallback, repeatCallback, pipelineConetxt);
     animation->animation_ = animations;
     return animation;
 }

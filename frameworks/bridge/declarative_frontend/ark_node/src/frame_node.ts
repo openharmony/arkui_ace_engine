@@ -750,7 +750,7 @@ class FrameNode extends Disposable {
   isTransferred(): boolean {
     return false;
   }
-  convertPoint(position, targetNode): Position {
+  convertPosition(position, targetNode): Position {
     if (targetNode === null) {
         throw { message: "The parameter 'targetNode' is invalid: it cannot be null. Please pass a non-null FrameNode object.", code: 100025 };
     }
@@ -770,7 +770,10 @@ class FrameNode extends Disposable {
     const offsetPosition = getUINativeModule().frameNode.convertPoint(
         this.getNodePtr(), position.x, position.y, targetNode.nodePtr_);
     __JSScopeUtil__.restoreInstanceId();
-    return { x: offsetPosition[0], y: offsetPosition[1] };
+    if (offsetPosition[0] === 0) {
+        throw { message: 'The current FrameNode and the target FrameNode do not have a common ancestor node.', code: 100024 };
+    }
+    return { x: offsetPosition[1], y: offsetPosition[2] };
   }
   adoptChild(child: FrameNode): void{
     if (child === undefined || child === null) {

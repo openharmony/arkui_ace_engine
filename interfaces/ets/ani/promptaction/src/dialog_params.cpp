@@ -119,46 +119,14 @@ bool GetMaskRect(ani_env *env, ani_object object, std::optional<OHOS::Ace::Dimen
     }
 
     ani_object resultObj = static_cast<ani_object>(resultRef);
-    ani_ref dxRef;
-    status = env->Object_GetPropertyByName_Ref(resultObj, "x", &dxRef);
-    if (status != ANI_OK) {
-        return false;
-    }
     OHOS::Ace::CalcDimension dx;
-    if (!GetLengthParam(env, dxRef, dx)) {
-        return false;
-    }
-
-    ani_ref dyRef;
-    status = env->Object_GetPropertyByName_Ref(resultObj, "y", &dyRef);
-    if (status != ANI_OK) {
-        return false;
-    }
+    GetLengthParam(env, resultObj, "x", dx);
     OHOS::Ace::CalcDimension dy;
-    if (!GetLengthParam(env, dyRef, dy)) {
-        return false;
-    }
-
-    ani_ref widthRef;
-    status = env->Object_GetPropertyByName_Ref(resultObj, "width", &widthRef);
-    if (status != ANI_OK) {
-        return false;
-    }
+    GetLengthParam(env, resultObj, "y", dy);
     OHOS::Ace::CalcDimension width;
-    if (!GetLengthParam(env, widthRef, width)) {
-        return false;
-    }
-
-    ani_ref heightRef;
-    status = env->Object_GetPropertyByName_Ref(resultObj, "height", &heightRef);
-    if (status != ANI_OK) {
-        return false;
-    }
+    GetLengthParam(env, resultObj, "width", width);
     OHOS::Ace::CalcDimension height;
-    if (!GetLengthParam(env, heightRef, height)) {
-        return false;
-    }
-
+    GetLengthParam(env, resultObj, "height", height);
     maskRect.SetOffset(OHOS::Ace::DimensionOffset(dx, dy));
     maskRect.SetSize(OHOS::Ace::DimensionSize(width, height));
     result = std::make_optional<OHOS::Ace::DimensionRect>(maskRect);
@@ -222,9 +190,8 @@ bool GetGrayscale(ani_env* env, ani_object object, std::vector<float>& result)
             continue;
         }
 
-        ani_object itemObj = static_cast<ani_object>(itemRef);
         double itemValue;
-        if (GetDoubleParam(env, itemObj, itemValue)) {
+        if (GetDoubleParam(env, itemRef, itemValue)) {
             uint32_t itemInt32 = static_cast<int32_t>(itemValue);
             floatArray.emplace_back(static_cast<float>(itemInt32));
         }
@@ -1229,14 +1196,14 @@ bool GetCornerRadius(ani_env *env, ani_object object, std::optional<OHOS::Ace::N
         return false;
     }
 
-    ani_object resultObj = static_cast<ani_object>(resultRef);
     OHOS::Ace::CalcDimension dimension;
-    if (GetDimensionParam(env, resultObj, dimension)) {
+    if (GetDimensionParam(env, resultRef, dimension)) {
         CheckDimension(dimension);
         result = OHOS::Ace::NG::BorderRadiusProperty(dimension);
         return true;
     }
 
+    ani_object resultObj = static_cast<ani_object>(resultRef);
     OHOS::Ace::NG::BorderRadiusProperty borderRadius;
     OHOS::Ace::CalcDimension topLeft;
     if (GetDimensionParam(env, resultObj, "topLeft", topLeft)) {
@@ -1328,14 +1295,14 @@ bool GetBorderColor(ani_env *env, ani_object object, std::optional<OHOS::Ace::NG
     }
 
     OHOS::Ace::NG::BorderColorProperty borderColor;
-    ani_object resultObj = static_cast<ani_object>(resultRef);
     OHOS::Ace::Color color;
-    if (GetResourceColorParam(env, resultObj, color)) {
+    if (GetResourceColorParam(env, resultRef, color)) {
         borderColor.SetColor(color);
         result = std::make_optional<OHOS::Ace::NG::BorderColorProperty>(borderColor);
         return true;
     }
 
+    ani_object resultObj = static_cast<ani_object>(resultRef);
     OHOS::Ace::Color left;
     if (GetResourceColorParam(env, resultObj, "left", left)) {
         borderColor.leftColor = left;

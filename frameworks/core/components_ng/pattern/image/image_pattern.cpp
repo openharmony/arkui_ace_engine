@@ -1186,12 +1186,16 @@ void ImagePattern::OnKeyEvent(const KeyEvent& event)
 std::optional<SizeF> ImagePattern::GetImageSizeForMeasure()
 {
     if ((!loadingCtx_ || !loadingCtx_->GetImageSize().IsPositive()) &&
+        (!altErrorCtx_ || !altErrorCtx_->GetImageSize().IsPositive()) &&
         (!altLoadingCtx_ || !altLoadingCtx_->GetImageSize().IsPositive())) {
         return std::nullopt;
     }
     auto rawImageSize = SizeF(-1.0, -1.0);
     if (loadingCtx_) {
         rawImageSize = loadingCtx_->GetImageSize();
+    }
+    if (rawImageSize.IsNegative() && altErrorCtx_) {
+        rawImageSize = altErrorCtx_->GetImageSize();
     }
     if (rawImageSize.IsNegative() && altLoadingCtx_) {
         rawImageSize = altLoadingCtx_->GetImageSize();
@@ -2610,6 +2614,7 @@ void ImagePattern::LoadAltErrorImage(const ImageSourceInfo& altErrorImageSourceI
             altErrorImageSourceInfo, std::move(altLoadNotifier), false, isSceneBoardWindow_, altErrorImageDfxConfig_);
         CHECK_NULL_VOID(altErrorCtx_);
         altErrorCtx_->FinishMeasure();
+        altErrorCtx_->SetSupportSvg2(supportSvg2_);
         altErrorCtx_->LoadImageData();
     }
 }
@@ -2640,8 +2645,9 @@ DataReadyNotifyTask ImagePattern::CreateDataReadyCallbackForAltError()
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             return;
         }
+        bool autoResize = imageLayoutProperty->GetAutoResize().value_or(pattern->autoResizeDefault_);
         pattern->altErrorCtx_->MakeCanvasImageIfNeed(
-            geometryNode->GetContentSize(), true, imageLayoutProperty->GetImageFit().value_or(ImageFit::COVER));
+            geometryNode->GetContentSize(), autoResize, imageLayoutProperty->GetImageFit().value_or(ImageFit::COVER));
     };
 }
 
@@ -2667,8 +2673,8 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallbackForAltError()
         pattern->altErrorImage_ = pattern->altErrorCtx_->MoveCanvasImage();
         CHECK_NULL_VOID(pattern->altErrorImage_);
         pattern->altErrorImage_->SetImageDfxConfig(pattern->altErrorImageDfxConfig_);
-        pattern->altErrorDstRect_ = std::make_unique<RectF>(pattern->altErrorCtx_->GetSrcRect());
-        pattern->altErrorSrcRect_ = std::make_unique<RectF>(pattern->altErrorCtx_->GetDstRect());
+        pattern->altErrorSrcRect_ = std::make_unique<RectF>(pattern->altErrorCtx_->GetSrcRect());
+        pattern->altErrorDstRect_ = std::make_unique<RectF>(pattern->altErrorCtx_->GetDstRect());
         pattern->SetImagePaintConfig(pattern->altErrorImage_, *pattern->altErrorSrcRect_, *pattern->altErrorDstRect_,
             pattern->altErrorCtx_->GetSourceInfo(), pattern->altErrorCtx_->GetFrameCount());
 

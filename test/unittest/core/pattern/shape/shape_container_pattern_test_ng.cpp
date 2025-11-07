@@ -540,7 +540,7 @@ HWTEST_F(ShapeContainerPatternTestNg, SetStroke001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto paintProperty = frameNode->GetPaintProperty<ShapeContainerPaintProperty>();
     ASSERT_NE(paintProperty, nullptr);
-    auto pattern = frameNode->GetPattern<ShapePattern>();
+    auto pattern = frameNode->GetPattern<ShapeContainerPattern>();
     ASSERT_NE(pattern, nullptr);
 
     g_isConfigChangePerform = true;
@@ -551,9 +551,9 @@ HWTEST_F(ShapeContainerPatternTestNg, SetStroke001, TestSize.Level1)
     EXPECT_EQ(paintProperty->GetStrokeValue(), Color::TRANSPARENT);
 
     std::vector<ResourceObjectParams> params;
-    AddMockResourceData(0, Color::BLUE);
+    AddMockResourceData(ID_COLOR, Color::BLUE);
     auto resObjWithString = AceType::MakeRefPtr<ResourceObject>(
-        0, static_cast<int32_t>(ResourceType::COLOR), params, "", "", Container::CurrentIdSafely());
+        ID_COLOR, static_cast<int32_t>(ResourceType::COLOR), params, "", "", Container::CurrentIdSafely());
     shapeModelNG.SetStroke(resObjWithString);
     pattern->resourceMgr_->ReloadResources();
     EXPECT_TRUE(paintProperty->HasStroke());
@@ -580,7 +580,7 @@ HWTEST_F(ShapeContainerPatternTestNg, SetFill001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto paintProperty = frameNode->GetPaintProperty<ShapeContainerPaintProperty>();
     ASSERT_NE(paintProperty, nullptr);
-    auto pattern = frameNode->GetPattern<ShapePattern>();
+    auto pattern = frameNode->GetPattern<ShapeContainerPattern>();
     ASSERT_NE(pattern, nullptr);
 
     g_isConfigChangePerform = true;
@@ -591,9 +591,9 @@ HWTEST_F(ShapeContainerPatternTestNg, SetFill001, TestSize.Level1)
     EXPECT_EQ(paintProperty->GetFillValue(), Color::BLACK);
 
     std::vector<ResourceObjectParams> params;
-    AddMockResourceData(0, Color::BLUE);
+    AddMockResourceData(ID_COLOR, Color::BLUE);
     auto resObjWithString = AceType::MakeRefPtr<ResourceObject>(
-        0, static_cast<int32_t>(ResourceType::COLOR), params, "", "", Container::CurrentIdSafely());
+        ID_COLOR, static_cast<int32_t>(ResourceType::COLOR), params, "", "", Container::CurrentIdSafely());
     shapeModelNG.SetFill(resObjWithString);
     pattern->resourceMgr_->ReloadResources();
     EXPECT_TRUE(paintProperty->HasFill());
@@ -620,7 +620,7 @@ HWTEST_F(ShapeContainerPatternTestNg, SetForegroundColor001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto paintProperty = frameNode->GetPaintProperty<ShapeContainerPaintProperty>();
     ASSERT_NE(paintProperty, nullptr);
-    auto pattern = frameNode->GetPattern<ShapePattern>();
+    auto pattern = frameNode->GetPattern<ShapeContainerPattern>();
     ASSERT_NE(pattern, nullptr);
 
     g_isConfigChangePerform = true;
@@ -631,9 +631,9 @@ HWTEST_F(ShapeContainerPatternTestNg, SetForegroundColor001, TestSize.Level1)
     EXPECT_EQ(paintProperty->GetFillValue(), Color::BLACK);
 
     std::vector<ResourceObjectParams> params;
-    AddMockResourceData(0, Color::BLUE);
+    AddMockResourceData(ID_COLOR, Color::BLUE);
     auto resObjWithString = AceType::MakeRefPtr<ResourceObject>(
-        0, static_cast<int32_t>(ResourceType::COLOR), params, "", "", Container::CurrentIdSafely());
+        ID_COLOR, static_cast<int32_t>(ResourceType::COLOR), params, "", "", Container::CurrentIdSafely());
     shapeModelNG.SetForegroundColor(resObjWithString);
     pattern->resourceMgr_->ReloadResources();
     EXPECT_TRUE(paintProperty->HasFill());
@@ -660,7 +660,7 @@ HWTEST_F(ShapeContainerPatternTestNg, SetStrokeDashOffset001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto paintProperty = frameNode->GetPaintProperty<ShapeContainerPaintProperty>();
     ASSERT_NE(paintProperty, nullptr);
-    auto pattern = frameNode->GetPattern<ShapePattern>();
+    auto pattern = frameNode->GetPattern<ShapeContainerPattern>();
     ASSERT_NE(pattern, nullptr);
 
     g_isConfigChangePerform = true;
@@ -671,9 +671,9 @@ HWTEST_F(ShapeContainerPatternTestNg, SetStrokeDashOffset001, TestSize.Level1)
     EXPECT_EQ(paintProperty->GetStrokeDashOffset()->ConvertToPx(), 0.0f);
 
     std::vector<ResourceObjectParams> params;
-    AddMockResourceData(0, Dimension(DASHOFFSET));
+    AddMockResourceData(ID_DASH_OFFSET, Dimension(DASHOFFSET));
     auto resObjWithString = AceType::MakeRefPtr<ResourceObject>(
-        0, static_cast<int32_t>(ResourceType::FLOAT), params, "", "", Container::CurrentIdSafely());
+        ID_DASH_OFFSET, static_cast<int32_t>(ResourceType::FLOAT), params, "", "", Container::CurrentIdSafely());
     shapeModelNG.SetStrokeDashOffset(resObjWithString);
     pattern->resourceMgr_->ReloadResources();
     EXPECT_TRUE(paintProperty->HasStrokeDashOffset());
@@ -700,7 +700,7 @@ HWTEST_F(ShapeContainerPatternTestNg, SetStrokeMiterLimit001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto paintProperty = frameNode->GetPaintProperty<ShapeContainerPaintProperty>();
     ASSERT_NE(paintProperty, nullptr);
-    auto pattern = frameNode->GetPattern<ShapePattern>();
+    auto pattern = frameNode->GetPattern<ShapeContainerPattern>();
     ASSERT_NE(pattern, nullptr);
 
     g_isConfigChangePerform = true;
@@ -711,9 +711,9 @@ HWTEST_F(ShapeContainerPatternTestNg, SetStrokeMiterLimit001, TestSize.Level1)
     EXPECT_FLOAT_EQ(static_cast<float>(paintProperty->GetStrokeMiterLimitValue()), DEFAULT_STROKE_LIMIT);
 
     std::vector<ResourceObjectParams> params;
-    AddMockResourceData(0, STROKE_LIMIT);
+    AddMockResourceData(ID_STROKE_LIMIT, STROKE_LIMIT);
     auto resObjWithString = AceType::MakeRefPtr<ResourceObject>(
-        0, static_cast<int32_t>(ResourceType::FLOAT), params, "", "", Container::CurrentIdSafely());
+        ID_STROKE_LIMIT, static_cast<int32_t>(ResourceType::FLOAT), params, "", "", Container::CurrentIdSafely());
     shapeModelNG.SetStrokeMiterLimit(resObjWithString);
     pattern->resourceMgr_->ReloadResources();
     EXPECT_TRUE(paintProperty->HasStrokeMiterLimit());
@@ -740,7 +740,7 @@ HWTEST_F(ShapeContainerPatternTestNg, SetStrokeOpacity001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto paintProperty = frameNode->GetPaintProperty<ShapeContainerPaintProperty>();
     ASSERT_NE(paintProperty, nullptr);
-    auto pattern = frameNode->GetPattern<ShapePattern>();
+    auto pattern = frameNode->GetPattern<ShapeContainerPattern>();
     ASSERT_NE(pattern, nullptr);
 
     g_isConfigChangePerform = true;
@@ -751,9 +751,9 @@ HWTEST_F(ShapeContainerPatternTestNg, SetStrokeOpacity001, TestSize.Level1)
     EXPECT_FLOAT_EQ(static_cast<float>(paintProperty->GetStrokeOpacityValue()), 1.0);
 
     std::vector<ResourceObjectParams> params;
-    AddMockResourceData(0, OPACITY);
+    AddMockResourceData(ID_OPACITY, OPACITY);
     auto resObjWithString = AceType::MakeRefPtr<ResourceObject>(
-        0, static_cast<int32_t>(ResourceType::FLOAT), params, "", "", Container::CurrentIdSafely());
+        ID_OPACITY, static_cast<int32_t>(ResourceType::FLOAT), params, "", "", Container::CurrentIdSafely());
     shapeModelNG.SetStrokeOpacity(resObjWithString);
     pattern->resourceMgr_->ReloadResources();
     EXPECT_TRUE(paintProperty->HasStrokeOpacity());
@@ -780,7 +780,7 @@ HWTEST_F(ShapeContainerPatternTestNg, SetFillOpacity001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto paintProperty = frameNode->GetPaintProperty<ShapeContainerPaintProperty>();
     ASSERT_NE(paintProperty, nullptr);
-    auto pattern = frameNode->GetPattern<ShapePattern>();
+    auto pattern = frameNode->GetPattern<ShapeContainerPattern>();
     ASSERT_NE(pattern, nullptr);
 
     g_isConfigChangePerform = true;
@@ -791,9 +791,9 @@ HWTEST_F(ShapeContainerPatternTestNg, SetFillOpacity001, TestSize.Level1)
     EXPECT_FLOAT_EQ(static_cast<float>(paintProperty->GetFillOpacityValue()), 1.0);
 
     std::vector<ResourceObjectParams> params;
-    AddMockResourceData(0, OPACITY);
+    AddMockResourceData(ID_OPACITY, OPACITY);
     auto resObjWithString = AceType::MakeRefPtr<ResourceObject>(
-        0, static_cast<int32_t>(ResourceType::FLOAT), params, "", "", Container::CurrentIdSafely());
+        ID_OPACITY, static_cast<int32_t>(ResourceType::FLOAT), params, "", "", Container::CurrentIdSafely());
     shapeModelNG.SetFillOpacity(resObjWithString);
     pattern->resourceMgr_->ReloadResources();
     EXPECT_TRUE(paintProperty->HasFillOpacity());
@@ -831,9 +831,9 @@ HWTEST_F(ShapeContainerPatternTestNg, SetStrokeWidth001, TestSize.Level1)
     EXPECT_FLOAT_EQ(static_cast<float>(paintProperty->GetStrokeWidthValue().ConvertToVp()), 1.0);
 
     std::vector<ResourceObjectParams> params;
-    AddMockResourceData(0, Dimension(STROKE_WIDTH));
+    AddMockResourceData(ID_STROKE_WIDTH, Dimension(STROKE_WIDTH));
     auto resObjWithString = AceType::MakeRefPtr<ResourceObject>(
-        0, static_cast<int32_t>(ResourceType::FLOAT), params, "", "", Container::CurrentIdSafely());
+        ID_STROKE_WIDTH, static_cast<int32_t>(ResourceType::FLOAT), params, "", "", Container::CurrentIdSafely());
     shapeModelNG.SetStrokeWidth(resObjWithString);
     pattern->resourceMgr_->ReloadResources();
     EXPECT_TRUE(paintProperty->HasStrokeWidth());

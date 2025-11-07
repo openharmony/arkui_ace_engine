@@ -90,7 +90,7 @@ void SetRatingOptionsImpl(Ark_NativePointer node,
     auto indicator = OPT_CONVERT_FIELD(bool, optOptions, indicator);
     Validator::ValidateNonNegative(rating);
     auto dRating = FloatToDouble(rating);
-    RatingModelStatic::SetRatingOptions(frameNode, dRating, indicator);
+    RatingModelStatic::SetRatingOptions(frameNode, dRating.value_or(0), indicator);
 }
 } // RatingInterfaceModifier
 namespace RatingAttributeModifier {
