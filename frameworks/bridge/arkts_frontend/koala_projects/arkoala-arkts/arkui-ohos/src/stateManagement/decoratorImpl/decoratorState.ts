@@ -28,6 +28,7 @@ import { UIUtils } from '../utils';
 import { CompatibleStateChangeCallback, getObservedObject, isDynamicObject } from '../../component/interop';
 import { StateMgmtTool } from '../tools/arkts/stateMgmtTool';
 import { uiUtils } from '../base/uiUtilsImpl';
+import { StateMgmtDFX } from '../tools/stateMgmtDFX';
 export interface __MkPropReturnType<T> {
     prop: PropDecoratedVariable<T>;
     watchId: WatchIdType;
@@ -61,6 +62,7 @@ export class StateDecoratedVariable<T> extends DecoratedV1VariableBase<T> implem
     }
 
     public get(): T {
+        StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`State ${this.getTraceInfo()}`);
         const value = this.backing_.get(this.shouldAddRef());
         ObserveSingleton.instance.setV1RenderId(value as NullableObject);
         return value;
@@ -68,6 +70,7 @@ export class StateDecoratedVariable<T> extends DecoratedV1VariableBase<T> implem
 
     public set(newValue: T): void {
         const oldValue = this.backing_.get(false);
+        StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`State ${oldValue === newValue} ${this.setTraceInfo()}`);
         if (oldValue === newValue) {
             return;
         }

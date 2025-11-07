@@ -25,6 +25,7 @@ import { FactoryInternal } from '../base/iFactoryInternal';
 import { StateUpdateLoop } from '../base/stateUpdateLoop';
 import { uiUtils } from '../base/uiUtilsImpl';
 import { CompatibleStateChangeCallback, getObservedObject, isDynamicObject } from '../../component/interop';
+import { StateMgmtDFX } from '../tools/stateMgmtDFX';
 
 export class PropRefDecoratedVariable<T> extends DecoratedV1VariableBase<T> implements IPropRefDecoratedVariable<T> {
     sourceValue: T;
@@ -48,6 +49,7 @@ export class PropRefDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
     }
 
     get(): T {
+        StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`PropRef ${this.getTraceInfo()}`);
         const value = this.localValue.get(this.shouldAddRef());
         ObserveSingleton.instance.setV1RenderId(value as NullableObject);
         return value;
@@ -55,6 +57,7 @@ export class PropRefDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
 
     set(newValue: T): void {
         const oldValue = this.localValue.get(false);
+        StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`PropRef ${oldValue === newValue} ${this.setTraceInfo()}`);
         if (oldValue === newValue) {
             return;
         }
@@ -75,6 +78,7 @@ export class PropRefDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
 
     update(newValue: T): void {
         const sourceValue = this.sourceValue;
+        StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`PropRef ${sourceValue === newValue} ${this.updateTraceInfo()}`);
         if (sourceValue !== newValue || this.isForceRender) {
             this.isForceRender = false;
             let value = newValue;

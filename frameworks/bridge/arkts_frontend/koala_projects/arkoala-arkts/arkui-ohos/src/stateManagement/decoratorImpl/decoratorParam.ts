@@ -19,6 +19,7 @@ import { IParamDecoratedVariable, IVariableOwner } from '../decorator';
 import { UIUtils } from '../utils';
 import { DecoratedV2VariableBase } from './decoratorBase';
 import { uiUtils } from '../base/uiUtilsImpl';
+import { StateMgmtDFX } from '../tools/stateMgmtDFX';
 export class ParamDecoratedVariable<T> extends DecoratedV2VariableBase implements IParamDecoratedVariable<T> {
     public readonly backing_: IBackingValue<T>;
     constructor(owningView: IVariableOwner | undefined, varName: string, initValue: T) {
@@ -27,12 +28,14 @@ export class ParamDecoratedVariable<T> extends DecoratedV2VariableBase implement
     }
 
     get(): T {
+        StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`Param ${this.getTraceInfo()}`);
         const value = this.backing_.get(this.shouldAddRef());
         return value;
     }
 
     update(newValue: T): void {
         const value = this.backing_.get(false);
+        StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`Param ${value === newValue} ${this.updateTraceInfo()}`);
         if (value === newValue) {
             return;
         }

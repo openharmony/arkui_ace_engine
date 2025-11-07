@@ -23,6 +23,7 @@ import { WatchFuncType } from '../decorator';
 import { NullableObject } from '../base/types';
 import { UIUtils } from '../utils';
 import { uiUtils } from '../base/uiUtilsImpl';
+import { StateMgmtDFX } from '../tools/stateMgmtDFX';
 /**
  * implementation of V1 @ObjectLink
  * @ObjectLink has no local inot
@@ -54,6 +55,7 @@ export class ObjectLinkDecoratedVariable<T>
     }
 
     public get(): T {
+        StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`ObjectLink ${this.getTraceInfo()}`);
         // @State V1: if this.__value instanceof IObservedObject limit permissible addRef depth to 1
         const value = this.backing_.get(this.shouldAddRef());
         ObserveSingleton.instance.setV1RenderId(value as NullableObject);
@@ -64,6 +66,7 @@ export class ObjectLinkDecoratedVariable<T>
     // @ObjectLink updates from parent
     public update(newValue: T): void {
         const oldValue = this.backing_.get(false);
+        StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`ObjectLink ${oldValue === newValue} ${this.updateTraceInfo()}`);
         if (oldValue === newValue) {
             return;
         }
