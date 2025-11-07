@@ -14,6 +14,7 @@
  */
 #include "securec.h"
 #include "drag_controller_module.h"
+#include <memory>
 #include "drag_and_drop/native_drag_drop_global.h"
 #include "load.h"
 #include "log/log.h"
@@ -33,6 +34,13 @@ constexpr int32_t TWO_ARGS = 2;
 constexpr int32_t MAX_ESCAPE_NUM = 1;
 }
 
+class DragAction;
+
+class JSDragAction {
+public:
+    std::shared_ptr<DragAction> dragAction = nullptr;
+};
+
 class DragAction {
 public:
     explicit DragAction(ArkUIDragControllerAsync& asyncCtx) : asyncCtx_(asyncCtx) {}
@@ -49,6 +57,7 @@ public:
 
     void OnANICallback(ani_ref resultRef)
     {
+        CHECK_NULL_VOID(env_);
         std::vector<ani_ref> cbList;
         for (auto& cbRef : cbList_) {
             ani_wref cbWref;
@@ -102,7 +111,7 @@ public:
             env->DestroyLocalScope();
             return;
         }
-        DragAction* dragAction = reinterpret_cast<DragAction*>(dragActionPtr);
+        auto dragAction = ConvertDragAction(dragActionPtr);
         if (!dragAction) {
             AniUtils::AniThrow(env, "convert drag action failed.", ERROR_CODE_PARAM_INVALID);
             HILOGE("AceDrag, convert drag action failed.");
@@ -134,7 +143,7 @@ public:
         if (ANI_OK != env->CreateLocalScope(SPECIFIED_CAPACITY)) {
             return;
         }
-        DragAction* dragAction = reinterpret_cast<DragAction*>(dragActionPtr);
+        auto dragAction = ConvertDragAction(dragActionPtr);
         if (!dragAction) {
             HILOGE("AceDrag, convert drag action failed.");
             AniUtils::AniThrow(env, "convert drag action failed.", ERROR_CODE_PARAM_INVALID);
@@ -174,7 +183,7 @@ public:
             return nullptr;
         }
         ani_ref escapedObj;
-        DragAction* dragAction = reinterpret_cast<DragAction*>(dragActionPtr);
+        auto dragAction = ConvertDragAction(dragActionPtr);
         if (!dragAction) {
             AniUtils::AniThrow(env, "convert drag action failed.", ERROR_CODE_PARAM_INVALID);
             HILOGE("AceDrag, convert drag action failed.");
@@ -229,15 +238,12 @@ private:
         return TWO_ARGS;
     }
 
-    static DragAction* ConvertDragAction(ani_env* env, ani_object object)
+    static std::shared_ptr<DragAction> ConvertDragAction(ani_long ptr)
     {
-        CHECK_NULL_RETURN(env, nullptr);
-        ani_long serializer;
-        ani_status status = ANI_OK;
-        if ((status = env->Object_GetFieldByName_Long(object, "dragAction", &serializer)) != ANI_OK) {
-            return nullptr;
-        }
-        return reinterpret_cast<DragAction*>(serializer);
+        CHECK_NULL_RETURN(ptr, nullptr);
+        JSDragAction* jsDragAction = reinterpret_cast<JSDragAction*>(ptr);
+        CHECK_NULL_RETURN(jsDragAction, nullptr);
+        return jsDragAction->dragAction;
     }
 
     void StartDragInternal(ArkUIDragControllerAsync& asyncCtx)
@@ -757,7 +763,7 @@ ani_object ANIExecuteDragWithCallback(ani_env* env, [[maybe_unused]] ani_object 
     }
     dragAsyncContext.env = env;
     auto jsCallback =
-        [=](std::shared_ptr<ArkUIDragControllerAsync> asyncCtx, const ArkUIDragNotifyMessage& dragNotifyMsg,
+        [](std::shared_ptr<ArkUIDragControllerAsync> asyncCtx, const ArkUIDragNotifyMessage& dragNotifyMsg,
             const ArkUIDragStatus dragStatus) { CallBackJsFunction(asyncCtx, dragNotifyMsg, dragStatus); };
     dragAsyncContext.callBackJsFunction = jsCallback;
 
@@ -807,7 +813,7 @@ ani_object ANICreateDragAction([[maybe_unused]] ani_env* env, [[maybe_unused]] a
     }
     dragAsyncContext.env = env;
     auto jsCallback =
-        [=](std::shared_ptr<ArkUIDragControllerAsync> asyncCtx, const ArkUIDragNotifyMessage& dragNotifyMsg,
+        [](std::shared_ptr<ArkUIDragControllerAsync> asyncCtx, const ArkUIDragNotifyMessage& dragNotifyMsg,
             const ArkUIDragStatus dragStatus) { CallBackJsFunction(asyncCtx, dragNotifyMsg, dragStatus); };
     dragAsyncContext.callBackJsFunction = jsCallback;
     const auto* modifier = GetNodeAniModifier();
@@ -821,11 +827,14 @@ ani_object ANICreateDragAction([[maybe_unused]] ani_env* env, [[maybe_unused]] a
         env->DestroyEscapeLocalScope(dragActionObj, &escapedObj);
         return dragActionObj;
     }
-    DragAction* dragAction = new DragAction(dragAsyncContext);
+    auto dragAction = std::make_shared<DragAction>(dragAsyncContext);
     CHECK_NULL_RETURN(dragAction, nullptr);
+    JSDragAction* jsDragAction = new JSDragAction();
+    CHECK_NULL_RETURN(jsDragAction, nullptr);
+    jsDragAction->dragAction = dragAction;
     dragAsyncContext.dragAction = dragAction;
     dragAction->SetAsyncCtx(dragAsyncContext);
-    dragAction->AniSerializer(env, dragActionObj, reinterpret_cast<ani_long>(dragAction));
+    dragAction->AniSerializer(env, dragActionObj, reinterpret_cast<ani_long>(jsDragAction));
     env->DestroyEscapeLocalScope(dragActionObj, &escapedObj);
     return dragActionObj;
 }
@@ -916,7 +925,7 @@ void ANICleanDragAction([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_obje
     if (dragActionPtr == 0) {
         return;
     }
-    DragAction* ptr = reinterpret_cast<DragAction *>(dragActionPtr);
+    JSDragAction* ptr = reinterpret_cast<JSDragAction *>(dragActionPtr);
     delete ptr;
     ptr = nullptr;
 }
