@@ -119,8 +119,13 @@ bool IsEnum(ani_env *env, ani_object object, const char *enum_descriptor)
     return (bool)isEnum;
 }
 
-bool GetBoolParam(ani_env* env, ani_object object, bool& result)
+bool GetBoolParam(ani_env* env, ani_ref ref, bool& result)
 {
+    if (IsUndefinedObject(env, ref)) {
+        return false;
+    }
+
+    ani_object object = static_cast<ani_object>(ref);
     if (!IsClassObject(env, object, "std.core.Boolean")) {
         return false;
     }
@@ -141,16 +146,16 @@ bool GetBoolParam(ani_env* env, ani_object object, const char *name, bool& resul
     if (status != ANI_OK) {
         return false;
     }
-
-    if (IsUndefinedObject(env, resultRef)) {
-        return false;
-    }
-    ani_object resultObj = static_cast<ani_object>(resultRef);
-    return GetBoolParam(env, resultObj, result);
+    return GetBoolParam(env, resultRef, result);
 }
 
-bool GetInt32Param(ani_env* env, ani_object object, int32_t& result)
+bool GetInt32Param(ani_env* env, ani_ref ref, int32_t& result)
 {
+    if (IsUndefinedObject(env, ref)) {
+        return false;
+    }
+
+    ani_object object = static_cast<ani_object>(ref);
     if (!IsClassObject(env, object, "std.core.Int")) {
         return false;
     }
@@ -171,16 +176,16 @@ bool GetInt32Param(ani_env* env, ani_object object, const char *name, int32_t& r
     if (status != ANI_OK) {
         return false;
     }
-
-    if (IsUndefinedObject(env, resultRef)) {
-        return false;
-    }
-    ani_object resultObj = static_cast<ani_object>(resultRef);
-    return GetInt32Param(env, resultObj, result);
+    return GetInt32Param(env, resultRef, result);
 }
 
-bool GetInt64Param(ani_env* env, ani_object object, int64_t& result)
+bool GetInt64Param(ani_env* env, ani_ref ref, int64_t& result)
 {
+    if (IsUndefinedObject(env, ref)) {
+        return false;
+    }
+
+    ani_object object = static_cast<ani_object>(ref);
     if (!IsClassObject(env, object, "std.core.Long")) {
         return false;
     }
@@ -201,16 +206,16 @@ bool GetInt64Param(ani_env* env, ani_object object, const char *name, int64_t& r
     if (status != ANI_OK) {
         return false;
     }
-
-    if (IsUndefinedObject(env, resultRef)) {
-        return false;
-    }
-    ani_object resultObj = static_cast<ani_object>(resultRef);
-    return GetInt64Param(env, resultObj, result);
+    return GetInt64Param(env, resultRef, result);
 }
 
-bool GetDoubleParam(ani_env* env, ani_object object, double& result)
+bool GetDoubleParam(ani_env* env, ani_ref ref, double& result)
 {
+    if (IsUndefinedObject(env, ref)) {
+        return false;
+    }
+
+    ani_object object = static_cast<ani_object>(ref);
     if (!IsClassObject(env, object, "std.core.Double")) {
         return false;
     }
@@ -231,12 +236,7 @@ bool GetDoubleParam(ani_env* env, ani_object object, const char *name, double& r
     if (status != ANI_OK) {
         return false;
     }
-
-    if (IsUndefinedObject(env, resultRef)) {
-        return false;
-    }
-    ani_object resultObj = static_cast<ani_object>(resultRef);
-    return GetDoubleParam(env, resultObj, result);
+    return GetDoubleParam(env, resultRef, result);
 }
 
 bool GetDoubleParamOpt(ani_env *env, ani_object object, const char *name, std::optional<double>& result)
@@ -265,8 +265,13 @@ std::string ANIStringToStdString(ani_env *env, ani_string ani_str)
     return content;
 }
 
-bool GetStringParam(ani_env *env, ani_object object, std::string& result)
+bool GetStringParam(ani_env *env, ani_ref ref, std::string& result)
 {
+    if (IsUndefinedObject(env, ref)) {
+        return false;
+    }
+
+    ani_object object = static_cast<ani_object>(ref);
     if (!IsClassObject(env, object, "std.core.String")) {
         return false;
     }
@@ -281,12 +286,7 @@ bool GetStringParam(ani_env *env, ani_object object, const char *name, std::stri
     if (status != ANI_OK) {
         return false;
     }
-
-    if (IsUndefinedObject(env, resultRef)) {
-        return false;
-    }
-    ani_object resultObj = static_cast<ani_object>(resultRef);
-    return GetStringParam(env, resultObj, result);
+    return GetStringParam(env, resultRef, result);
 }
 
 bool GetStringParamOpt(ani_env *env, ani_object object, const char *name, std::optional<std::string>& result)
@@ -532,11 +532,10 @@ bool ConvertResourceType(const std::string& typeName, ResourceType& resType)
     return true;
 }
 
-bool GetDollarResource(
-    ani_env *env, ani_object object, ResourceType& resType, std::string& resName, std::string& moduleName)
+bool GetDollarResource(ani_env *env, ani_ref ref, ResourceType& resType, std::string& resName, std::string& moduleName)
 {
     std::string resPath;
-    if (!GetStringParam(env, object, resPath)) {
+    if (!GetStringParam(env, ref, resPath)) {
         return false;
     }
 
@@ -665,7 +664,7 @@ void CompleteResourceParamV1(ani_env *env, ani_object object)
     std::string resName;
     std::string moduleName;
     ResourceType resType;
-    if (!GetDollarResource(env, static_cast<ani_object>(idRef), resType, resName, moduleName)) {
+    if (!GetDollarResource(env, idRef, resType, resName, moduleName)) {
         return;
     }
 
@@ -723,7 +722,7 @@ void CompleteResourceParamV2(ani_env *env, ani_object object)
     std::string resName;
     std::string moduleName;
     ResourceType resType;
-    if (!GetDollarResource(env, paramsObj, resType, resName, moduleName)) {
+    if (!GetDollarResource(env, paramsRef, resType, resName, moduleName)) {
         return;
     }
 
@@ -957,21 +956,26 @@ bool ResourceToString(const ResourceInfo resourceInfo, std::string& result)
     return false;
 }
 
-bool GetResourceStrParam(ani_env *env, ani_object object, std::string& result)
+bool GetResourceStrParam(ani_env *env, ani_ref ref, std::string& result)
 {
+    if (IsUndefinedObject(env, ref)) {
+        return false;
+    }
+
     ani_class resultClass;
     ani_status status = env->FindClass("global.resource.Resource", &resultClass);
     if (status != ANI_OK) {
         return false;
     }
 
+    ani_object object = static_cast<ani_object>(ref);
     ani_boolean isInstance = false;
     status = env->Object_InstanceOf(object, resultClass, &isInstance);
     if (status != ANI_OK) {
         return false;
     }
 
-    if (GetStringParam(env, object, result)) {
+    if (GetStringParam(env, ref, result)) {
         return true;
     }
 
@@ -994,35 +998,37 @@ bool GetResourceStrParam(ani_env *env, ani_object object, const char *name, std:
         return false;
     }
 
-    if (IsUndefinedObject(env, resultRef)) {
-        return false;
-    }
-
-    ani_object resultObj = static_cast<ani_object>(resultRef);
-    return GetResourceStrParam(env, resultObj, result);
+    return GetResourceStrParam(env, resultRef, result);
 }
 
-bool GetLengthParam(ani_env *env, ani_object object, OHOS::Ace::CalcDimension& result)
+bool GetLengthParam(ani_env *env, ani_ref ref, OHOS::Ace::CalcDimension& result)
 {
+    if (IsUndefinedObject(env, ref)) {
+        return false;
+    }
     double resultDouble;
-    if (GetDoubleParam(env, object, resultDouble)) {
+    if (GetDoubleParam(env, ref, resultDouble)) {
         result.SetUnit(OHOS::Ace::DimensionUnit::VP);
         result.SetValue(resultDouble);
         return true;
     }
 
     std::string resultStr;
-    if (GetResourceStrParam(env, object, resultStr)) {
+    if (GetResourceStrParam(env, ref, resultStr)) {
         result = OHOS::Ace::StringUtils::StringToCalcDimension(resultStr, false, OHOS::Ace::DimensionUnit::VP);
         return true;
     }
     return false;
 }
 
-bool GetLengthParam(ani_env *env, ani_ref ref, OHOS::Ace::CalcDimension& result)
+bool GetLengthParam(ani_env *env, ani_object object, const char *name, OHOS::Ace::CalcDimension& result)
 {
-    ani_object object = static_cast<ani_object>(ref);
-    return GetLengthParam(env, object, result);
+    ani_ref resultRef;
+    ani_status status = env->Object_GetPropertyByName_Ref(object, name, &resultRef);
+    if (status != ANI_OK) {
+        return false;
+    }
+    return GetLengthParam(env, resultRef, result);
 }
 
 bool GetColorParam(ani_env* env, ani_object object, PromptActionColor& result)
@@ -1035,15 +1041,19 @@ bool GetColorParam(ani_env* env, ani_object object, PromptActionColor& result)
     return true;
 }
 
-bool GetResourceColorParam(ani_env *env, ani_object object, OHOS::Ace::Color& result)
+bool GetResourceColorParam(ani_env *env, ani_ref ref, OHOS::Ace::Color& result)
 {
+    if (IsUndefinedObject(env, ref)) {
+        return false;
+    }
     std::string resultStr;
-    if (GetStringParam(env, object, resultStr)) {
+    if (GetStringParam(env, ref, resultStr)) {
         OHOS::Ace::Color::ParseColorString(resultStr, result);
         return true;
     }
 
     PromptActionColor resultColor;
+    ani_object object = static_cast<ani_object>(ref);
     if (GetColorParam(env, object, resultColor)) {
         auto iter = colorMap.find(resultColor);
         if (iter != colorMap.end()) {
@@ -1053,12 +1063,12 @@ bool GetResourceColorParam(ani_env *env, ani_object object, OHOS::Ace::Color& re
     }
 
     double resultDouble;
-    if (GetDoubleParam(env, object, resultDouble)) {
+    if (GetDoubleParam(env, ref, resultDouble)) {
         result = static_cast<OHOS::Ace::Color>(resultDouble);
         return true;
     }
 
-    if (GetResourceStrParam(env, object, resultStr)) {
+    if (GetResourceStrParam(env, ref, resultStr)) {
         if (resultStr.size() == 0) {
             return false;
         }
@@ -1068,21 +1078,11 @@ bool GetResourceColorParam(ani_env *env, ani_object object, OHOS::Ace::Color& re
     return false;
 }
 
-bool GetResourceColorParam(ani_env *env, ani_ref ref, OHOS::Ace::Color& result)
-{
-    ani_object object = static_cast<ani_object>(ref);
-    return GetResourceColorParam(env, object, result);
-}
-
 bool GetResourceColorParam(ani_env* env, ani_object object, const char *name, OHOS::Ace::Color& result)
 {
     ani_ref resultRef;
     ani_status status = env->Object_GetPropertyByName_Ref(object, name, &resultRef);
     if (status != ANI_OK) {
-        return false;
-    }
-
-    if (IsUndefinedObject(env, resultRef)) {
         return false;
     }
     return GetResourceColorParam(env, resultRef, result);
@@ -1276,12 +1276,17 @@ bool GetShadowOptionsColor(ani_env *env, ani_object object, OHOS::Ace::Shadow& r
     return true;
 }
 
-bool GetShadowOptionsOffset(ani_env *env, ani_object object, double& result)
+bool GetShadowOptionsOffset(ani_env *env, ani_ref ref, double& result)
 {
-    if (GetDoubleParam(env, object, result)) {
+    if (IsUndefinedObject(env, ref)) {
+        return false;
+    }
+
+    if (GetDoubleParam(env, ref, result)) {
         return true;
     }
 
+    ani_object object = static_cast<ani_object>(ref);
     if (!IsClassObject(env, object, "global.resource.Resource")) {
         return false;
     }
@@ -1298,35 +1303,11 @@ bool GetShadowOptionsOffset(ani_env *env, ani_object object, double& result)
     return true;
 }
 
-bool GetShadowOptionsOffset(ani_env *env, ani_ref ref, double& result)
-{
-    ani_object object = static_cast<ani_object>(ref);
-    return GetShadowOptionsOffset(env, object, result);
-}
-
-bool GetShadowOptionsOffsetX(ani_env *env, ani_object object, double& result)
+bool GetShadowOptionsOffset(ani_env *env, ani_object object, const char *name, double& result)
 {
     ani_ref resultRef;
-    ani_status status = env->Object_GetPropertyByName_Ref(object, "offsetX", &resultRef);
+    ani_status status = env->Object_GetPropertyByName_Ref(object, name, &resultRef);
     if (status != ANI_OK) {
-        return false;
-    }
-
-    if (IsUndefinedObject(env, resultRef)) {
-        return false;
-    }
-    return GetShadowOptionsOffset(env, resultRef, result);
-}
-
-bool GetShadowOptionsOffsetY(ani_env *env, ani_object object, double& result)
-{
-    ani_ref resultRef;
-    ani_status status = env->Object_GetPropertyByName_Ref(object, "offsetY", &resultRef);
-    if (status != ANI_OK) {
-        return false;
-    }
-
-    if (IsUndefinedObject(env, resultRef)) {
         return false;
     }
     return GetShadowOptionsOffset(env, resultRef, result);
@@ -1345,12 +1326,12 @@ bool GetShadowOptionsParam(ani_env *env, ani_object object, OHOS::Ace::Shadow& r
     GetShadowOptionsColor(env, object, result);
 
     double offsetX = 0.0;
-    if (GetShadowOptionsOffsetX(env, object, offsetX)) {
+    if (GetShadowOptionsOffset(env, object, "offsetX", offsetX)) {
         result.SetOffsetX(offsetX);
     }
 
     double offsetY = 0.0;
-    if (GetShadowOptionsOffsetY(env, object, offsetY)) {
+    if (GetShadowOptionsOffset(env, object, "offsetY", offsetY)) {
         result.SetOffsetY(offsetY);
     }
 
@@ -1405,22 +1386,27 @@ bool ResourceIntegerToString(const ResourceInfo& resourceInfo, std::string& resu
     return true;
 }
 
-bool GetDimensionParam(ani_env* env, ani_object object, OHOS::Ace::CalcDimension& result)
+bool GetDimensionParam(ani_env* env, ani_ref ref, OHOS::Ace::CalcDimension& result)
 {
+    if (IsUndefinedObject(env, ref)) {
+        return false;
+    }
+
     double resultDouble;
-    if (GetDoubleParam(env, object, resultDouble)) {
+    if (GetDoubleParam(env, ref, resultDouble)) {
         OHOS::Ace::CalcDimension dimension(resultDouble, OHOS::Ace::DimensionUnit::VP);
         result = dimension;
         return true;
     }
 
     std::string resultStr;
-    if (GetStringParam(env, object, resultStr)) {
+    if (GetStringParam(env, ref, resultStr)) {
         if (OHOS::Ace::StringUtils::StringToCalcDimensionNG(resultStr, result, false, OHOS::Ace::DimensionUnit::VP)) {
             return true;
         }
     }
 
+    ani_object object = static_cast<ani_object>(ref);
     ResourceInfo resourceInfo;
     if (!GetResourceParam(env, object, resourceInfo)) {
         return false;
@@ -1438,21 +1424,11 @@ bool GetDimensionParam(ani_env* env, ani_object object, OHOS::Ace::CalcDimension
     return true;
 }
 
-bool GetDimensionParam(ani_env* env, ani_ref ref, OHOS::Ace::CalcDimension& result)
-{
-    ani_object object = static_cast<ani_object>(ref);
-    return GetDimensionParam(env, object, result);
-}
-
 bool GetDimensionParam(ani_env* env, ani_object object, const char *name, OHOS::Ace::CalcDimension& result)
 {
     ani_ref resultRef;
     ani_status status = env->Object_GetPropertyByName_Ref(object, name, &resultRef);
     if (status != ANI_OK) {
-        return false;
-    }
-
-    if (IsUndefinedObject(env, resultRef)) {
         return false;
     }
     return GetDimensionParam(env, resultRef, result);
@@ -1524,24 +1500,10 @@ bool GetOffsetParam(ani_env *env, ani_object object, OHOS::Ace::DimensionOffset&
     }
 
     ani_object resultObj = static_cast<ani_object>(resultRef);
-    ani_ref dxRef;
-    if (ANI_OK != env->Object_GetPropertyByName_Ref(resultObj, "dx", &dxRef)) {
-        return false;
-    }
     OHOS::Ace::CalcDimension dx;
-    if (!GetLengthParam(env, dxRef, dx)) {
-        return false;
-    }
-
-    ani_ref dyRef;
-    if (ANI_OK != env->Object_GetPropertyByName_Ref(resultObj, "dy", &dyRef)) {
-        return false;
-    }
-
+    GetLengthParam(env, resultObj, "dx", dx);
     OHOS::Ace::CalcDimension dy;
-    if (!GetLengthParam(env, dyRef, dy)) {
-        return false;
-    }
+    GetLengthParam(env, resultObj, "dy", dy);
     result = OHOS::Ace::DimensionOffset { dx, dy };
     return true;
 }

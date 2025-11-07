@@ -52,24 +52,14 @@ export class ArkSelectNode extends ArkBaseNode implements SelectAttribute {
         return this;
     }
     selected(value: number | Resource | Bindable<number> | Bindable<Resource> | undefined): this {
-        const value_type = runtimeType(value);
-        if ((RuntimeType.BOOLEAN === value_type) || (RuntimeType.UNDEFINED === value_type)) {
-            const value_casted = value as (number | Resource | undefined);
-            this.getPeer()?.setSelectedAttribute(value_casted);
-            this.markDirty();
-            return this;
-        }
+        const value_casted = value as (number | Resource | Bindable<number> | Bindable<Resource> | undefined);
+        this.getPeer()?.setSelectedAttribute(value_casted);
         this.markDirty();
         return this;
     }
     value(value: ResourceStr | Bindable<string> | Bindable<Resource> | undefined): this {
-        const value_type = runtimeType(value);
-        if ((RuntimeType.BOOLEAN === value_type) || (RuntimeType.UNDEFINED === value_type)) {
-            const value_casted = value as (ResourceStr | undefined);
-            this.getPeer()?.setValueAttribute(value_casted);
-            this.markDirty();
-            return this;
-        }
+        const value_casted = value as (ResourceStr | Bindable<string> | Bindable<Resource> | undefined);
+        this.getPeer()?.setValueAttribute(value_casted);
         this.markDirty();
         return this;
     }

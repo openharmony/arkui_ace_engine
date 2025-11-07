@@ -30,7 +30,7 @@ Ark_NativePointer RegisterRatingCallbackImpl(Ark_NativePointer node,
     CHECK_NULL_RETURN(frameNode, nullptr);
     std::optional<double> ratingOpt = Converter::Convert<double>(*rating);
     std::optional<bool> indicator = false;
-    RatingModelStatic::SetRatingOptions(frameNode, ratingOpt, indicator);
+    RatingModelStatic::SetRatingOptions(frameNode, ratingOpt.value_or(0), indicator);
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
     auto onEvent = [arkCallback = CallbackHelper(*callback), weakNode](const std::string& value) {
         Ark_Number nValue = Converter::ArkValue<Ark_Number>(std::stof(value));
