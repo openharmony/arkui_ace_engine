@@ -4725,7 +4725,7 @@ void SetBackgroundImpl(Ark_NativePointer node,
     auto optAlign = Converter::OptConvertPtr<Alignment>(options);
     auto optBuilder = Converter::GetOptPtr(builder);
     if (!optBuilder) {
-        // Implement Reset value
+        ViewAbstractModelStatic::ResetBackground(frameNode);
         return;
     }
     CallbackHelper(*optBuilder).BuildAsync([frameNode, optAlign](const RefPtr<UINode>& uiNode) {
