@@ -158,7 +158,7 @@ public:
 
     void SetMovingPhotoController(const RefPtr<MovingPhotoController>& movingPhotoController);
 
-    RefPtr<MovingPhotocontroller> GetMovingPhotoController();
+    RefPtr<MovingPhotoController> GetMovingPhotoController();
 
 protected:
     int32_t instanceId_;

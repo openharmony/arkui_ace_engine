@@ -52,7 +52,7 @@ public:
     void GetXmageHeight();
     void SetXmagePosition();
 
-    static RePtr<MovingPhotoNode> CreateMovingPhotoNode(int32_t nodeId, const std::u16string& content);
+    static RefPtr<MovingPhotoNode> CreateMovingPhotoNode(int32_t nodeId, const std::u16string& content);
     static void SetImageSrc(MovingPhotoNode* framenode, const std::string& src);
     static void SetMuted(MovingPhotoNode* framenode, bool muted);
     static void SetHdrBrightness(MovingPhotoNode* framenode, float hdrBrightness);
