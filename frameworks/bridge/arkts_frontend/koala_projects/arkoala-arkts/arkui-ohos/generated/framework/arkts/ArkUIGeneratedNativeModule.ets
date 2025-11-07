@@ -427,9 +427,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _CommonMethod_setEnabled(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _CommonMethod_setAlignRulesWithAlignRuleOptionTypedValue(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
-    native static _CommonMethod_setAlignRulesWithLocalizedAlignRuleOptionsTypedValue(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _CommonMethod_setAlignRules(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _CommonMethod_setAspectRatio(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct

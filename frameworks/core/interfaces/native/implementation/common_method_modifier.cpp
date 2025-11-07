@@ -1129,6 +1129,18 @@ void AssignCast(std::optional<VerticalAlign>& dst, const Ark_VerticalAlign& src)
 }
 
 template<>
+AlignRule Convert(const Ark_HorizontalAlignParam& src)
+{
+    AlignRule rule;
+    rule.anchor = Convert<std::string>(src.anchor);
+    auto align = OptConvert<HorizontalAlign>(src.align);
+    if (align.has_value()) {
+        rule.horizontal = align.value();
+    }
+    return rule;
+}
+
+template<>
 AlignRule Convert(const Ark_LocalizedHorizontalAlignParam& src)
 {
     AlignRule rule;
@@ -1136,6 +1148,18 @@ AlignRule Convert(const Ark_LocalizedHorizontalAlignParam& src)
     auto align = OptConvert<HorizontalAlign>(src.align);
     if (align.has_value()) {
         rule.horizontal = align.value();
+    }
+    return rule;
+}
+
+template<>
+AlignRule Convert(const Ark_VerticalAlignParam& src)
+{
+    AlignRule rule;
+    rule.anchor = Convert<std::string>(src.anchor);
+    auto align = OptConvert<VerticalAlign>(src.align);
+    if (align.has_value()) {
+        rule.vertical = align.value();
     }
     return rule;
 }
@@ -1155,9 +1179,7 @@ AlignRule Convert(const Ark_LocalizedVerticalAlignParam& src)
 template<>
 std::map<AlignDirection, AlignRule> Convert(const Ark_AlignRuleOption& src)
 {
-    LOGE("Ark_AlignRuleOption is stubbed");
     std::map<AlignDirection, AlignRule> rulesMap;
-#ifdef WRONG_GEN
     auto rule = OptConvert<AlignRule>(src.left);
     if (rule.has_value()) {
         rulesMap[AlignDirection::LEFT] = rule.value();
@@ -1182,7 +1204,6 @@ std::map<AlignDirection, AlignRule> Convert(const Ark_AlignRuleOption& src)
     if (rule.has_value()) {
         rulesMap[AlignDirection::CENTER] = rule.value();
     }
-#endif
     return rulesMap;
 }
 
@@ -3814,37 +3835,49 @@ void SetEnabledImpl(Ark_NativePointer node,
     }
     ViewAbstract::SetEnabled(frameNode, *convValue);
 }
-void SetAlignRulesWithAlignRuleOptionTypedValueImpl(Ark_NativePointer node,
-                                                    const Opt_AlignRuleOption* value)
+void SetAlignRulesInternal(FrameNode *frameNode, std::optional<std::map<AlignDirection, AlignRule>> convMapValue,
+                           std::optional<BiasOpt> convBiasValue)
 {
-    LOGE("Ark_AlignRuleOption is stubbed");
-#ifdef WRONG_GEN
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convMapValue = Converter::OptConvertPtr<std::map<AlignDirection, AlignRule>>(value);
-    ViewAbstractModelStatic::SetAlignRules(frameNode, convMapValue);
-    auto optValue = Converter::GetOptPtr(value);
-    auto convBiasValue = optValue ? Converter::OptConvert<BiasOpt>(optValue->bias) : std::nullopt;
+    if (convMapValue) {
+        ViewAbstractModelStatic::SetAlignRules(frameNode, convMapValue);
+    } else {
+        ViewAbstractModelStatic::SetAlignRules(frameNode, std::map<AlignDirection, AlignRule>());
+    }
     if (convBiasValue.has_value()) {
         ViewAbstractModelStatic::SetBias(frameNode, convBiasValue.value().first, convBiasValue.value().second);
     } else {
         ViewAbstractModelStatic::SetBias(frameNode, std::nullopt);
     }
-#endif
 }
-void SetAlignRulesWithLocalizedAlignRuleOptionsTypedValueImpl(Ark_NativePointer node,
-                                                              const Opt_LocalizedAlignRuleOptions* value)
+void SetAlignRulesImpl(Ark_NativePointer node,
+                       const Opt_Union_AlignRuleOption_LocalizedAlignRuleOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convMapValue = Converter::OptConvertPtr<std::map<AlignDirection, AlignRule>>(value);
-    ViewAbstractModelStatic::SetAlignRules(frameNode, convMapValue);
     auto optValue = Converter::GetOptPtr(value);
-    auto convBiasValue = optValue ? Converter::OptConvert<BiasOpt>(optValue->bias) : std::nullopt;
-    if (convBiasValue.has_value()) {
-        ViewAbstractModelStatic::SetBias(frameNode, convBiasValue.value().first, convBiasValue.value().second);
-    } else {
+    if (!optValue) {
+        ViewAbstractModelStatic::SetAlignRules(frameNode, std::map<AlignDirection, AlignRule>());
         ViewAbstractModelStatic::SetBias(frameNode, std::nullopt);
+        return;
+    }
+    switch (optValue->selector) {
+        case CASE_0: {
+            auto alignRulesvalue = optValue->value0;
+            auto convMapValue = Converter::OptConvert<std::map<AlignDirection, AlignRule>>(alignRulesvalue);
+            auto convBiasValue = optValue ? Converter::OptConvert<BiasOpt>(alignRulesvalue.bias) : std::nullopt;
+            SetAlignRulesInternal(frameNode, convMapValue, convBiasValue);
+            break;
+        }
+        case CASE_1: {
+            auto alignRulesvalue = optValue->value1;
+            auto convMapValue = Converter::OptConvert<std::map<AlignDirection, AlignRule>>(alignRulesvalue);
+            auto convBiasValue = optValue ? Converter::OptConvert<BiasOpt>(alignRulesvalue.bias) : std::nullopt;
+            SetAlignRulesInternal(frameNode, convMapValue, convBiasValue);
+            break;
+        }
+        default:
+            LOGE("ARKOALA:SetAlignRulesImpl: Unexpected value->selector: %{public}d\n", optValue->selector);
+            return;
     }
 }
 void SetAspectRatioImpl(Ark_NativePointer node,
@@ -5870,8 +5903,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetMarkAnchorImpl,
         CommonMethodModifier::SetOffsetImpl,
         CommonMethodModifier::SetEnabledImpl,
-        CommonMethodModifier::SetAlignRulesWithAlignRuleOptionTypedValueImpl,
-        CommonMethodModifier::SetAlignRulesWithLocalizedAlignRuleOptionsTypedValueImpl,
+        CommonMethodModifier::SetAlignRulesImpl,
         CommonMethodModifier::SetAspectRatioImpl,
         CommonMethodModifier::SetClickEffectImpl,
         CommonMethodModifier::SetOnDragStartImpl,

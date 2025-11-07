@@ -3923,28 +3923,24 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setEnabled(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setAlignRulesWithAlignRuleOptionTypedValueAttribute(value: AlignRuleOption | undefined): void {
+    setAlignRulesAttribute(value: AlignRuleOption | LocalizedAlignRuleOptions | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            AlignRuleOption_serializer.write(thisSerializer, valueTmpValue)
+            if (valueTmpValue instanceof AlignRuleOption) {
+                thisSerializer.writeInt8((0).toByte())
+                const valueTmpValueForIdx0  = valueTmpValue as AlignRuleOption
+                AlignRuleOption_serializer.write(thisSerializer, valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof LocalizedAlignRuleOptions) {
+                thisSerializer.writeInt8((1).toByte())
+                const valueTmpValueForIdx1  = valueTmpValue as LocalizedAlignRuleOptions
+                LocalizedAlignRuleOptions_serializer.write(thisSerializer, valueTmpValueForIdx1)
+            }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_setAlignRulesWithAlignRuleOptionTypedValue(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    setAlignRulesWithLocalizedAlignRuleOptionsTypedValueAttribute(value: LocalizedAlignRuleOptions | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (value !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
-            LocalizedAlignRuleOptions_serializer.write(thisSerializer, valueTmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._CommonMethod_setAlignRulesWithLocalizedAlignRuleOptionsTypedValue(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_setAlignRules(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setAspectRatioAttribute(value: number | undefined): void {
@@ -7422,10 +7418,7 @@ export interface CommonMethod {
     enabled(value: boolean | undefined): this {
         throw new Error("Unimplemented method enabled")
     }
-    alignRulesWithAlignRuleOptionTypedValue(value: AlignRuleOption | undefined): this {
-        throw new Error("Unimplemented method alignRules")
-    }
-    alignRulesWithLocalizedAlignRuleOptionsTypedValue(value: LocalizedAlignRuleOptions | undefined): this {
+    alignRules(value: AlignRuleOption | LocalizedAlignRuleOptions | undefined): this {
         throw new Error("Unimplemented method alignRules")
     }
     aspectRatio(value: number | undefined): this {
@@ -7737,7 +7730,6 @@ export interface CommonMethod {
     onGestureRecognizerJudgeBegin(callback_: GestureRecognizerJudgeBeginCallback | undefined, exposeInnerGesture: boolean | undefined): this {
         throw new Error("Unimplemented method onGestureRecognizerJudgeBegin")
     }
-    overload alignRules { alignRulesWithAlignRuleOptionTypedValue, alignRulesWithLocalizedAlignRuleOptionsTypedValue }
     accessibilityGroup(isGroup: boolean | undefined, accessibilityOptions?: AccessibilityOptions): this {
         throw new Error("Unimplemented method accessibilityGroup")
     }
@@ -7852,7 +7844,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     markAnchor_value?: Position | LocalizedPosition | undefined
     offset_value?: Position | Edges | LocalizedEdges | undefined
     enabled_value?: boolean | undefined
-    alignRules_value?: AlignRuleOption | undefined
+    alignRules_value?: AlignRuleOption | LocalizedAlignRuleOptions | undefined
     aspectRatio_value?: number | undefined
     clickEffect_value?: ClickEffect | null | undefined
     onDragStart_value?: ((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) | undefined
@@ -8216,10 +8208,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     enabled(value: boolean | undefined): this {
         return this
     }
-    alignRules(value: AlignRuleOption | undefined): this {
-        return this
-    }
-    alignRules(value: LocalizedAlignRuleOptions | undefined): this {
+    alignRules(value: AlignRuleOption | LocalizedAlignRuleOptions | undefined): this {
         return this
     }
     aspectRatio(value: number | undefined): this {
@@ -9712,18 +9701,10 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public alignRulesWithAlignRuleOptionTypedValue(value: AlignRuleOption | undefined): this {
-        if (this.checkPriority("alignRulesWithAlignRuleOptionTypedValue")) {
-            const value_casted = value as (AlignRuleOption | undefined)
-            this.getPeer()?.setAlignRulesWithAlignRuleOptionTypedValueAttribute(value_casted)
-            return this
-        }
-        return this
-    }
-    public alignRulesWithLocalizedAlignRuleOptionsTypedValue(value: LocalizedAlignRuleOptions | undefined): this {
-        if (this.checkPriority("alignRulesWithLocalizedAlignRuleOptionsTypedValue")) {
-            const value_casted = value as (LocalizedAlignRuleOptions | undefined)
-            this.getPeer()?.setAlignRulesWithLocalizedAlignRuleOptionsTypedValueAttribute(value_casted)
+    public alignRules(value: AlignRuleOption | LocalizedAlignRuleOptions | undefined): this {
+        if (this.checkPriority("alignRules")) {
+            const value_casted = value as (AlignRuleOption | LocalizedAlignRuleOptions | undefined)
+            this.getPeer()?.setAlignRulesAttribute(value_casted)
             return this
         }
         return this

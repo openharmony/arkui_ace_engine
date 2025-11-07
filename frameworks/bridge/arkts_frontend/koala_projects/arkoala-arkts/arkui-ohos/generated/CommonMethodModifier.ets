@@ -239,9 +239,7 @@ export class CommonMethodModifier implements CommonMethod {
     _enabled_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _enabled_0_0value?: boolean | undefined
     _alignRules_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _alignRules_0_0value?: AlignRuleOption | undefined
-    _alignRules_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _alignRules_1_0value?: LocalizedAlignRuleOptions | undefined
+    _alignRules_0_0value?: AlignRuleOption | LocalizedAlignRuleOptions | undefined
     _aspectRatio_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _aspectRatio_0_0value?: number | undefined
     _clickEffect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -2255,7 +2253,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (this._alignRules_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setAlignRulesWithAlignRuleOptionTypedValueAttribute((this._alignRules_0_0value as AlignRuleOption | undefined));
+                    peer.setAlignRulesAttribute((this._alignRules_0_0value as AlignRuleOption | LocalizedAlignRuleOptions | undefined));
                     this._alignRules_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -2265,25 +2263,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     this._alignRules_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setAlignRulesWithAlignRuleOptionTypedValueAttribute((undefined as AlignRuleOption | undefined));
-                }
-            }
-        }
-        if (this._alignRules_1_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._alignRules_1_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setAlignRulesWithLocalizedAlignRuleOptionsTypedValueAttribute((this._alignRules_1_0value as LocalizedAlignRuleOptions | undefined));
-                    this._alignRules_1_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._alignRules_1_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._alignRules_1_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setAlignRulesWithLocalizedAlignRuleOptionsTypedValueAttribute((undefined as LocalizedAlignRuleOptions | undefined));
+                    peer.setAlignRulesAttribute((undefined as AlignRuleOption | LocalizedAlignRuleOptions | undefined));
                 }
             }
         }
@@ -5300,20 +5280,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.alignRules((undefined as AlignRuleOption | undefined));
-                }
-            }
-        }
-        if (modifier._alignRules_1_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._alignRules_1_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.alignRules(modifier._alignRules_1_0value);
-                    break;
-                }
-                default: {
-                    this.alignRules((undefined as LocalizedAlignRuleOptions | undefined));
+                    this.alignRules((undefined as AlignRuleOption | LocalizedAlignRuleOptions | undefined));
                 }
             }
         }
@@ -7644,7 +7611,7 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    alignRules(value: AlignRuleOption | undefined): this {
+    alignRules(value: AlignRuleOption | LocalizedAlignRuleOptions | undefined): this {
         if (((this._alignRules_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._alignRules_0_flag = AttributeUpdaterFlag.UPDATE
@@ -7652,17 +7619,6 @@ export class CommonMethodModifier implements CommonMethod {
         } else
         {
             this._alignRules_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    alignRules(value: LocalizedAlignRuleOptions | undefined): this {
-        if (((this._alignRules_1_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._alignRules_1_flag = AttributeUpdaterFlag.UPDATE
-            this._alignRules_1_0value = value
-        } else
-        {
-            this._alignRules_1_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

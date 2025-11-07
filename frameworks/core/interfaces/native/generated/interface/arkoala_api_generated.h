@@ -21667,10 +21667,8 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                       const Opt_Union_Position_Edges_LocalizedEdges* value);
     void (*setEnabled)(Ark_NativePointer node,
                        const Opt_Boolean* value);
-    void (*setAlignRulesWithAlignRuleOptionTypedValue)(Ark_NativePointer node,
-                                                       const Opt_AlignRuleOption* value);
-    void (*setAlignRulesWithLocalizedAlignRuleOptionsTypedValue)(Ark_NativePointer node,
-                                                                 const Opt_LocalizedAlignRuleOptions* value);
+    void (*setAlignRules)(Ark_NativePointer node,
+                          const Opt_Union_AlignRuleOption_LocalizedAlignRuleOptions* value);
     void (*setAspectRatio)(Ark_NativePointer node,
                            const Opt_Number* value);
     void (*setClickEffect)(Ark_NativePointer node,

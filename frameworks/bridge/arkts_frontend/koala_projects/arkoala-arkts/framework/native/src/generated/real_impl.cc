@@ -1959,12 +1959,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                         const Opt_Boolean* value)
     {
     }
-    void SetAlignRulesWithAlignRuleOptionTypedValueImpl(Ark_NativePointer node,
-                                                        const Opt_AlignRuleOption* value)
-    {
-    }
-    void SetAlignRulesWithLocalizedAlignRuleOptionsTypedValueImpl(Ark_NativePointer node,
-                                                                  const Opt_LocalizedAlignRuleOptions* value)
+    void SetAlignRulesImpl(Ark_NativePointer node,
+                           const Opt_Union_AlignRuleOption_LocalizedAlignRuleOptions* value)
     {
     }
     void SetAspectRatioImpl(Ark_NativePointer node,
@@ -8456,8 +8452,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetMarkAnchorImpl,
             CommonMethodModifier::SetOffsetImpl,
             CommonMethodModifier::SetEnabledImpl,
-            CommonMethodModifier::SetAlignRulesWithAlignRuleOptionTypedValueImpl,
-            CommonMethodModifier::SetAlignRulesWithLocalizedAlignRuleOptionsTypedValueImpl,
+            CommonMethodModifier::SetAlignRulesImpl,
             CommonMethodModifier::SetAspectRatioImpl,
             CommonMethodModifier::SetClickEffectImpl,
             CommonMethodModifier::SetOnDragStartImpl,

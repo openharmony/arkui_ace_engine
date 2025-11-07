@@ -3585,32 +3585,31 @@ void impl_CommonMethod_setEnabled(Ark_NativePointer thisPtr, KSerializerBuffer t
         GetNodeModifiers()->getCommonMethodModifier()->setEnabled(self, static_cast<Opt_Boolean*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(CommonMethod_setEnabled, Ark_NativePointer, KSerializerBuffer, int32_t)
-void impl_CommonMethod_setAlignRulesWithAlignRuleOptionTypedValue(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+void impl_CommonMethod_setAlignRules(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_AlignRuleOption valueValueTempTmpBuf = {};
+        Opt_Union_AlignRuleOption_LocalizedAlignRuleOptions valueValueTempTmpBuf = {};
         valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            valueValueTempTmpBuf.value = AlignRuleOption_serializer::read(thisDeserializer);
+            const Ark_Int8 valueValueTempTmpBuf_UnionSelector = thisDeserializer.readInt8();
+            Ark_Union_AlignRuleOption_LocalizedAlignRuleOptions valueValueTempTmpBuf_ = {};
+            valueValueTempTmpBuf_.selector = valueValueTempTmpBuf_UnionSelector;
+            if (valueValueTempTmpBuf_UnionSelector == 0) {
+                valueValueTempTmpBuf_.selector = 0;
+                valueValueTempTmpBuf_.value0 = AlignRuleOption_serializer::read(thisDeserializer);
+            } else if (valueValueTempTmpBuf_UnionSelector == 1) {
+                valueValueTempTmpBuf_.selector = 1;
+                valueValueTempTmpBuf_.value1 = LocalizedAlignRuleOptions_serializer::read(thisDeserializer);
+            } else {
+                INTEROP_FATAL("One of the branches for valueValueTempTmpBuf_ has to be chosen through deserialisation.");
+            }
+            valueValueTempTmpBuf.value = static_cast<Ark_Union_AlignRuleOption_LocalizedAlignRuleOptions>(valueValueTempTmpBuf_);
         }
-        Opt_AlignRuleOption valueValueTemp = valueValueTempTmpBuf;;
-        GetNodeModifiers()->getCommonMethodModifier()->setAlignRulesWithAlignRuleOptionTypedValue(self, static_cast<Opt_AlignRuleOption*>(&valueValueTemp));
+        Opt_Union_AlignRuleOption_LocalizedAlignRuleOptions valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getCommonMethodModifier()->setAlignRules(self, static_cast<Opt_Union_AlignRuleOption_LocalizedAlignRuleOptions*>(&valueValueTemp));
 }
-KOALA_INTEROP_DIRECT_V3(CommonMethod_setAlignRulesWithAlignRuleOptionTypedValue, Ark_NativePointer, KSerializerBuffer, int32_t)
-void impl_CommonMethod_setAlignRulesWithLocalizedAlignRuleOptionsTypedValue(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
-        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
-        DeserializerBase thisDeserializer(thisArray, thisLength);
-        const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_LocalizedAlignRuleOptions valueValueTempTmpBuf = {};
-        valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-        if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            valueValueTempTmpBuf.value = LocalizedAlignRuleOptions_serializer::read(thisDeserializer);
-        }
-        Opt_LocalizedAlignRuleOptions valueValueTemp = valueValueTempTmpBuf;;
-        GetNodeModifiers()->getCommonMethodModifier()->setAlignRulesWithLocalizedAlignRuleOptionsTypedValue(self, static_cast<Opt_LocalizedAlignRuleOptions*>(&valueValueTemp));
-}
-KOALA_INTEROP_DIRECT_V3(CommonMethod_setAlignRulesWithLocalizedAlignRuleOptionsTypedValue, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_DIRECT_V3(CommonMethod_setAlignRules, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_CommonMethod_setAspectRatio(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
