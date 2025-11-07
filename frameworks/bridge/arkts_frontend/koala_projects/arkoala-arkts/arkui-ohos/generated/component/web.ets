@@ -3250,6 +3250,7 @@ export interface WebOptions {
     renderMode?: RenderMode;
     incognitoMode?: boolean;
     sharedRenderProcessToken?: string;
+    emulateTouchFromMouseEvent?: boolean;
 }
 export interface ScriptItem {
     script: string;
@@ -7584,6 +7585,14 @@ export class WebOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForEmulateTouchFromMouseEvent  = value.emulateTouchFromMouseEvent
+        if (valueHolderForEmulateTouchFromMouseEvent !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForEmulateTouchFromMouseEventTmpValue  = valueHolderForEmulateTouchFromMouseEvent!
+            valueSerializer.writeBoolean(valueHolderForEmulateTouchFromMouseEventTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): WebOptions {
         let valueDeserializer : DeserializerBase = buffer
@@ -7616,7 +7625,15 @@ export class WebOptions_serializer {
             sharedRenderProcessTokenTmpBuf = (valueDeserializer.readString() as string)
         }
         const sharedRenderProcessTokenTmpResult : string | undefined = sharedRenderProcessTokenTmpBuf
-        let value : WebOptions = ({src: srcTmpResult, controller: controllerTmpResult, renderMode: renderModeTmpResult, incognitoMode: incognitoModeTmpResult, sharedRenderProcessToken: sharedRenderProcessTokenTmpResult} as WebOptions)
+        const emulateTouchFromMouseEventTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let emulateTouchFromMouseEventTmpBuf : boolean | undefined = undefined
+        if ((emulateTouchFromMouseEventTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            emulateTouchFromMouseEventTmpBuf = valueDeserializer.readBoolean()
+        }
+        const emulateTouchFromMouseEventTmpResult : boolean | undefined = emulateTouchFromMouseEventTmpBuf
+        let value : WebOptions = ({src: srcTmpResult, controller: controllerTmpResult, renderMode: renderModeTmpResult,
+            incognitoMode: incognitoModeTmpResult, sharedRenderProcessToken: sharedRenderProcessTokenTmpResult,
+            emulateTouchFromMouseEvent: emulateTouchFromMouseEventTmpResult} as WebOptions)
         return value
     }
 }

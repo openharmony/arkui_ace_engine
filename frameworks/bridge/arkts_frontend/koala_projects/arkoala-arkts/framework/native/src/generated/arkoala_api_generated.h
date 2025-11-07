@@ -16660,6 +16660,7 @@ typedef struct Ark_WebOptions {
     Opt_RenderMode renderMode;
     Opt_Boolean incognitoMode;
     Opt_String sharedRenderProcessToken;
+    Opt_Boolean emulateTouchFromMouseEvent;
 } Ark_WebOptions;
 typedef struct Opt_WebOptions {
     Ark_Tag tag;

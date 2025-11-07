@@ -34,6 +34,8 @@ public:
     static void SetIncognitoMode(FrameNode* frameNode, const std::optional<bool>& incognitoMode);
     static void SetSharedRenderProcessToken(FrameNode* frameNode,
         const std::optional<std::string>& sharedRenderProcessToken);
+    static void SetEmulateTouchFromMouseEvent(FrameNode* frameNode,
+        const std::optional<bool>& emulateTouchFromMouseEvent);
     static void SetWebController(FrameNode* frameNode, const RefPtr<WebController>& webController);
     static void SetOnLineImageAccessEnabled(FrameNode* frameNode, bool isOnLineImageAccessEnabled);
     static void SetImageAccessEnabled(FrameNode* frameNode, bool isImageAccessEnabled);

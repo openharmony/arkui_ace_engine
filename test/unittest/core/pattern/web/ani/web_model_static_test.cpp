@@ -1767,6 +1767,28 @@ HWTEST_F(WebModelStaticTest, SetSharedRenderProcessToken001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetEmulateTouchFromMouseEvent001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetEmulateTouchFromMouseEvent001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    auto emulateTouchFromMouseEvent = true;
+    WebModelStatic::SetEmulateTouchFromMouseEvent(AccessibilityManager::RawPtr(frameNode), emulateTouchFromMouseEvent);
+    auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
+    ASSERT_NE(webPatternStatic, nullptr);
+    EXPECT_EQ(webPatternStatic->GetEmulateTouchFromMouseEvent(), true);
+#endif
+}
+
+/**
  * @tc.name: SetOverlayScrollbarEnabled001
  * @tc.desc: Test web_model_static.cpp
  * @tc.type: FUNC

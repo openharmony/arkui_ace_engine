@@ -236,6 +236,8 @@ void SetWebOptionsImpl(Ark_NativePointer node,
     WebModelStatic::SetIncognitoMode(frameNode, incognitoMode);
     auto sharedRenderProcessToken = Converter::OptConvert<std::string>(value->sharedRenderProcessToken);
     WebModelStatic::SetSharedRenderProcessToken(frameNode, sharedRenderProcessToken);
+    auto emulateTouchFromMouseEvent = Converter::OptConvert<bool>(value->emulateTouchFromMouseEvent);
+    WebModelStatic::SetEmulateTouchFromMouseEvent(frameNode, emulateTouchFromMouseEvent);
 #endif // WEB_SUPPORTED
 }
 } // WebInterfaceModifier

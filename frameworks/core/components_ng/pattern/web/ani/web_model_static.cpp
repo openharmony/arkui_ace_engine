@@ -134,6 +134,15 @@ void WebModelStatic::SetSharedRenderProcessToken(FrameNode* frameNode,
     webPatternStatic->SetSharedRenderProcessToken(sharedRenderProcessToken.value_or(""));
 }
 
+void WebModelStatic::SetEmulateTouchFromMouseEvent(FrameNode* frameNode,
+    const std::optional<bool>& emulateTouchFromMouseEvent)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->SetEmulateTouchFromMouseEvent(emulateTouchFromMouseEvent.value_or(false));
+}
+
 void WebModelStatic::SetWebController(FrameNode* frameNode, const RefPtr<WebController>& webController)
 {
     CHECK_NULL_VOID(frameNode);
