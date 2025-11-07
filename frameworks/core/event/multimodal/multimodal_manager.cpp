@@ -144,7 +144,10 @@ void MultiModalManager::DumpMultimodalScene()
         DumpLog::GetInstance().AddDesc("registered: ", isRegistered_);
         DumpLog::GetInstance().Print(0, GetTypeName(), multiModalScenes_.size());
     }
-    GetCurrentMultiModalScene()->Dump();
+    auto currentMultiModalScene = GetCurrentMultiModalScene();
+    if (currentMultiModalScene) {
+        currentMultiModalScene->Dump();
+    }
 }
 
 } // namespace OHOS::Ace

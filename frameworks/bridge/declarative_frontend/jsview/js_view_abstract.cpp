@@ -6863,6 +6863,7 @@ void JSViewAbstract::ParseJsSymbolCustomFamilyNames(std::vector<std::string>& cu
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     CompleteResourceObjectWithResIdType(jsObj, resIdNum, resType);
     auto resourceObject = GetResourceObject(jsObj);
+    CHECK_NULL_VOID(resourceObject);
     std::string bundleName = resourceObject->GetBundleName();
     std::string moduleName = resourceObject->GetModuleName();
     auto customSymbolFamilyName = bundleName + "_" + moduleName + CUSTOM_SYMBOL_SUFFIX;
