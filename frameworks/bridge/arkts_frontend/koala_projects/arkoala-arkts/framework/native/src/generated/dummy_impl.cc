@@ -40287,20 +40287,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetSelectedIndexImpl(Ark_SwiperContentTransitionProxy peer)
+    Ark_Int32 GetSelectedIndexImpl(Ark_SwiperContentTransitionProxy peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getSelectedIndex(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetSelectedIndexImpl(Ark_SwiperContentTransitionProxy peer,
-                              const Ark_Number* selectedIndex)
+                              Ark_Int32 selectedIndex)
     {
         if (!needGroupedLog(1))
         {
@@ -40311,20 +40311,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetIndexImpl(Ark_SwiperContentTransitionProxy peer)
+    Ark_Int32 GetIndexImpl(Ark_SwiperContentTransitionProxy peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getIndex(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetIndexImpl(Ark_SwiperContentTransitionProxy peer,
-                      const Ark_Number* index)
+                      Ark_Int32 index)
     {
         if (!needGroupedLog(1))
         {
@@ -40335,20 +40335,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetPositionImpl(Ark_SwiperContentTransitionProxy peer)
+    Ark_Float64 GetPositionImpl(Ark_SwiperContentTransitionProxy peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getPosition(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetPositionImpl(Ark_SwiperContentTransitionProxy peer,
-                         const Ark_Number* position)
+                         Ark_Float64 position)
     {
         if (!needGroupedLog(1))
         {
@@ -40359,20 +40359,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetMainAxisLengthImpl(Ark_SwiperContentTransitionProxy peer)
+    Ark_Float64 GetMainAxisLengthImpl(Ark_SwiperContentTransitionProxy peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getMainAxisLength(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetMainAxisLengthImpl(Ark_SwiperContentTransitionProxy peer,
-                               const Ark_Number* mainAxisLength)
+                               Ark_Float64 mainAxisLength)
     {
         if (!needGroupedLog(1))
         {

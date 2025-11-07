@@ -44,12 +44,15 @@ void ShowPreviousImpl(Ark_IndicatorComponentController peer)
     peer->ShowPrevious();
 }
 void ChangeIndexImpl(Ark_IndicatorComponentController peer,
-                     const Ark_Number* index,
+                     const Opt_Int32* index,
                      const Opt_Boolean* useAnimation)
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(index);
-    auto idx = Converter::Convert<int32_t>(*index);
+    int32_t idx = 0;
+    if (index->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        idx = Converter::Convert<int32_t>(index->value);
+    }
     idx = idx < 0 ? 0 : idx;
     auto useAnim = Converter::OptConvertPtr<bool>(useAnimation).value_or(false);
     peer->ChangeIndex(idx, useAnim);

@@ -21,7 +21,7 @@ import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, Bindable, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable_Number_serializer } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, Bindable, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable_I32_serializer } from "./common"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -77,7 +77,7 @@ export class ArkStepperPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._StepperAttribute_setOnSkip(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnChangeAttribute(value: ((prevIndex: number,index: number) => void) | undefined): void {
+    setOnChangeAttribute(value: ((prevIndex: int32,index: int32) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -89,7 +89,7 @@ export class ArkStepperPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._StepperAttribute_setOnChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnNextAttribute(value: ((prevIndex: number,index: number) => void) | undefined): void {
+    setOnNextAttribute(value: ((prevIndex: int32,index: int32) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -101,7 +101,7 @@ export class ArkStepperPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._StepperAttribute_setOnNext(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnPreviousAttribute(value: ((prevIndex: number,index: number) => void) | undefined): void {
+    setOnPreviousAttribute(value: ((prevIndex: int32,index: int32) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -115,7 +115,7 @@ export class ArkStepperPeer extends ArkCommonMethodPeer {
     }
 }
 export interface StepperOptions {
-    index?: number | Bindable<number>;
+    index?: int32 | Bindable<int32>;
 }
 export interface StepperAttribute extends CommonMethod {
     setStepperOptions(value?: StepperOptions): this {
@@ -127,13 +127,13 @@ export interface StepperAttribute extends CommonMethod {
     onSkip(value: (() => void) | undefined): this {
         throw new Error("Unimplemented method onSkip")
     }
-    onChange(value: ((prevIndex: number,index: number) => void) | undefined): this {
+    onChange(value: ((prevIndex: int32,index: int32) => void) | undefined): this {
         throw new Error("Unimplemented method onChange")
     }
-    onNext(value: ((prevIndex: number,index: number) => void) | undefined): this {
+    onNext(value: ((prevIndex: int32,index: int32) => void) | undefined): this {
         throw new Error("Unimplemented method onNext")
     }
-    onPrevious(value: ((prevIndex: number,index: number) => void) | undefined): this {
+    onPrevious(value: ((prevIndex: int32,index: int32) => void) | undefined): this {
         throw new Error("Unimplemented method onPrevious")
     }
     attributeModifier(value: AttributeModifier<StepperAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -143,9 +143,9 @@ export interface StepperAttribute extends CommonMethod {
 export class ArkStepperStyle extends ArkCommonMethodStyle implements StepperAttribute {
     onFinish_value?: (() => void) | undefined
     onSkip_value?: (() => void) | undefined
-    onChange_value?: ((prevIndex: number,index: number) => void) | undefined
-    onNext_value?: ((prevIndex: number,index: number) => void) | undefined
-    onPrevious_value?: ((prevIndex: number,index: number) => void) | undefined
+    onChange_value?: ((prevIndex: int32,index: int32) => void) | undefined
+    onNext_value?: ((prevIndex: int32,index: int32) => void) | undefined
+    onPrevious_value?: ((prevIndex: int32,index: int32) => void) | undefined
     setStepperOptions(value?: StepperOptions): this {
         return this
     }
@@ -155,13 +155,13 @@ export class ArkStepperStyle extends ArkCommonMethodStyle implements StepperAttr
     onSkip(value: (() => void) | undefined): this {
         return this
     }
-    onChange(value: ((prevIndex: number,index: number) => void) | undefined): this {
+    onChange(value: ((prevIndex: int32,index: int32) => void) | undefined): this {
         return this
     }
-    onNext(value: ((prevIndex: number,index: number) => void) | undefined): this {
+    onNext(value: ((prevIndex: int32,index: int32) => void) | undefined): this {
         return this
     }
-    onPrevious(value: ((prevIndex: number,index: number) => void) | undefined): this {
+    onPrevious(value: ((prevIndex: int32,index: int32) => void) | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<StepperAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -200,25 +200,25 @@ export class ArkStepperComponent extends ArkCommonMethodComponent implements Ste
         }
         return this
     }
-    public onChange(value: ((prevIndex: number,index: number) => void) | undefined): this {
+    public onChange(value: ((prevIndex: int32,index: int32) => void) | undefined): this {
         if (this.checkPriority("onChange")) {
-            const value_casted = value as (((prevIndex: number,index: number) => void) | undefined)
+            const value_casted = value as (((prevIndex: int32,index: int32) => void) | undefined)
             this.getPeer()?.setOnChangeAttribute(value_casted)
             return this
         }
         return this
     }
-    public onNext(value: ((prevIndex: number,index: number) => void) | undefined): this {
+    public onNext(value: ((prevIndex: int32,index: int32) => void) | undefined): this {
         if (this.checkPriority("onNext")) {
-            const value_casted = value as (((prevIndex: number,index: number) => void) | undefined)
+            const value_casted = value as (((prevIndex: int32,index: int32) => void) | undefined)
             this.getPeer()?.setOnNextAttribute(value_casted)
             return this
         }
         return this
     }
-    public onPrevious(value: ((prevIndex: number,index: number) => void) | undefined): this {
+    public onPrevious(value: ((prevIndex: int32,index: int32) => void) | undefined): this {
         if (this.checkPriority("onPrevious")) {
-            const value_casted = value as (((prevIndex: number,index: number) => void) | undefined)
+            const value_casted = value as (((prevIndex: int32,index: int32) => void) | undefined)
             this.getPeer()?.setOnPreviousAttribute(value_casted)
             return this
         }
@@ -259,14 +259,14 @@ export class StepperOptions_serializer {
         if (valueHolderForIndex !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForIndexTmpValue  = valueHolderForIndex!
-            if (valueHolderForIndexTmpValue instanceof number) {
+            if (valueHolderForIndexTmpValue instanceof int32) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForIndexTmpValueForIdx0  = valueHolderForIndexTmpValue as number
-                valueSerializer.writeNumber(valueHolderForIndexTmpValueForIdx0)
-            } else if (valueHolderForIndexTmpValue instanceof Bindable<number>) {
+                const valueHolderForIndexTmpValueForIdx0  = valueHolderForIndexTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForIndexTmpValueForIdx0)
+            } else if (valueHolderForIndexTmpValue instanceof Bindable<int32>) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForIndexTmpValueForIdx1  = valueHolderForIndexTmpValue as Bindable<number>
-                Bindable_Number_serializer.write(valueSerializer, valueHolderForIndexTmpValueForIdx1)
+                const valueHolderForIndexTmpValueForIdx1  = valueHolderForIndexTmpValue as Bindable<int32>
+                Bindable_I32_serializer.write(valueSerializer, valueHolderForIndexTmpValueForIdx1)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -275,20 +275,20 @@ export class StepperOptions_serializer {
     public static read(buffer: DeserializerBase): StepperOptions {
         let valueDeserializer : DeserializerBase = buffer
         const indexTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let indexTmpBuf : number | Bindable<number> | undefined = undefined
+        let indexTmpBuf : int32 | Bindable<int32> | undefined = undefined
         if ((indexTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const indexTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let indexTmpBuf_ : number | Bindable<number> | undefined
+            let indexTmpBuf_ : int32 | Bindable<int32> | undefined
             if (indexTmpBuf_UnionSelector == (0).toChar()) {
-                indexTmpBuf_ = (valueDeserializer.readNumber() as number)
+                indexTmpBuf_ = valueDeserializer.readInt32()
             } else if (indexTmpBuf_UnionSelector == (1).toChar()) {
-                indexTmpBuf_ = Bindable_Number_serializer.read(valueDeserializer)
+                indexTmpBuf_ = Bindable_I32_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for indexTmpBuf_ has to be chosen through deserialisation.")
             }
-            indexTmpBuf = (indexTmpBuf_ as number | Bindable<number>)
+            indexTmpBuf = (indexTmpBuf_ as int32 | Bindable<int32>)
         }
-        const indexTmpResult : number | Bindable<number> | undefined = indexTmpBuf
+        const indexTmpResult : int32 | Bindable<int32> | undefined = indexTmpBuf
         let value : StepperOptions = ({index: indexTmpResult} as StepperOptions)
         return value
     }

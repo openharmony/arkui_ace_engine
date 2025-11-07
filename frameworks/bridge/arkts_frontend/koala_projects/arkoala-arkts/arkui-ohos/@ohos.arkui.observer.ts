@@ -1,8 +1,9 @@
 import { ResourceStr } from '/arkui/component/units';
-import { NavPathStack } from 'arkui/framework'
+import { NavPathStack, NavigationOperation, NavBar } from 'arkui/framework'
 import { UIContext } from '@ohos/arkui/UIContext';
 import UIAbilityContext from 'application.UIAbilityContext';
 import { NavDestinationMode } from 'arkui/framework'
+import { int32 } from "@koalaui/common"
 
 declare namespace uiObserver {
     export class DensityInfo {
@@ -16,6 +17,32 @@ declare namespace uiObserver {
         
         on(type: string, options: NavDestinationSwitchObserverOptions, callback: object): void;
         off(type: string, options: NavDestinationSwitchObserverOptions, callback?: object): void;
+
+        onNavDestinationUpdate(callback: Callback<NavDestinationInfo>): void;
+
+        offNavDestinationUpdate(callback?: Callback<NavDestinationInfo>): void;
+        onNavDestinationUpdate(
+            options: NavDestinationSwitchObserverOptions,
+            callback: Callback<NavDestinationInfo>
+        ): void;
+        offNavDestinationUpdate(
+            options: NavDestinationSwitchObserverOptions,
+            callback?: Callback<NavDestinationInfo>
+        ): void;
+
+        onRouterPageUpdate(callback: Callback<RouterPageInfo>): void;
+        offRouterPageUpdate(callback?: Callback<RouterPageInfo>): void;
+
+        onNavDestinationSwitch(callback: Callback<NavDestinationSwitchInfo>): void;
+        offNavDestinationSwitch(callback?: Callback<NavDestinationSwitchInfo>): void;
+        onNavDestinationSwitch(
+            observerOptions: NavDestinationSwitchObserverOptions,
+            callback: Callback<NavDestinationSwitchInfo>
+          ): void;
+        offNavDestinationSwitch(
+            observerOptions: NavDestinationSwitchObserverOptions,
+            callback?: Callback<NavDestinationSwitchInfo>
+          ): void;
 
         onTabChange(callback: object): void;
         offTabChange(callback?: object): void;
@@ -41,9 +68,17 @@ declare namespace uiObserver {
         pathStack: NavPathStack;
     }
 
+    export interface NavDestinationSwitchInfo {
+
+        context: UIAbilityContext | UIContext;
+        from: NavDestinationInfo | NavBar;
+        to: NavDestinationInfo | NavBar;
+        operation: NavigationOperation;
+    }
+
     export class RouterPageInfo {
         context: UIAbilityContext | UIContext;
-        index: number;
+        index: int32;
         name: string;
         path: string;
         state: RouterPageState;
@@ -54,10 +89,10 @@ declare namespace uiObserver {
         navigationId: ResourceStr;
         name: ResourceStr;
         state: NavDestinationState;
-        index: number;
+        index: int32;
         param?: Object;
         navDestinationId: string;
-        uniqueId: number;
+        uniqueId?: int32;
         mode?: NavDestinationMode;
     }
 

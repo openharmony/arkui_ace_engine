@@ -835,7 +835,7 @@ void AssignArkValue(Ark_NavContentInfo& dst, const RefPtr<NG::NavDestinationCont
         dst.param.tag = InteropTag::INTEROP_TAG_UNDEFINED;
         dst.mode.tag = InteropTag::INTEROP_TAG_UNDEFINED;
         dst.navDestinationId.tag = InteropTag::INTEROP_TAG_UNDEFINED;
-        dst.index = Converter::ArkValue<Ark_Number>(-1);
+        dst.index = Converter::ArkValue<Ark_Int32>(-1);
         return;
     }
     auto navPathInfo = src->GetNavPathInfo();
@@ -850,7 +850,7 @@ void AssignArkValue(Ark_NavContentInfo& dst, const RefPtr<NG::NavDestinationCont
         dst.param.tag = InteropTag::INTEROP_TAG_UNDEFINED;
     }
     auto index = src->GetIndex();
-    dst.index = Converter::ArkValue<Ark_Number>(index);
+    dst.index = Converter::ArkValue<Ark_Int32>(index);
     auto mode = src->GetMode();
     dst.mode.tag = InteropTag::INTEROP_TAG_INT32;
     dst.mode.value = static_cast<Ark_NavDestinationMode>(mode);

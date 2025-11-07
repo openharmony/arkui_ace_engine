@@ -11340,6 +11340,34 @@ export class Bindable_Date_serializer {
         return value
     }
 }
+export class Bindable_I32_serializer {
+    public static write(buffer: SerializerBase, value: Bindable<int32>): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForValue  = value.value
+        valueSerializer.writeInt32(valueHolderForValue)
+        const valueHolderForOnChange  = value.onChange
+        valueSerializer.holdAndWriteCallback(valueHolderForOnChange)
+    }
+    public static read(buffer: DeserializerBase): Bindable<int32> {
+        let valueDeserializer : DeserializerBase = buffer
+        const valueTmpResult : int32 = valueDeserializer.readInt32()
+        const onChangeTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
+        const onChangeTmpBufBufCall : KPointer = valueDeserializer.readPointer()
+        const onChangeTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
+        const onChangeTmpResult : ((value0: int32) => void) = (value0: int32):void => {
+            const onChangeTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
+            onChangeTmpBufBufArgsSerializer.writeInt32(onChangeTmpBufBufResource.resourceId);
+            onChangeTmpBufBufArgsSerializer.writePointer(onChangeTmpBufBufCall);
+            onChangeTmpBufBufArgsSerializer.writePointer(onChangeTmpBufBufCallSync);
+            onChangeTmpBufBufArgsSerializer.writeInt32(value0);
+            InteropNativeModule._CallCallbackSync(10, -747290452, onChangeTmpBufBufArgsSerializer.asBuffer(), onChangeTmpBufBufArgsSerializer.length());
+            onChangeTmpBufBufArgsSerializer.release();
+            return;
+        }
+        let value : Bindable<int32> = ({value: valueTmpResult, onChange: onChangeTmpResult} as Bindable<int32>)
+        return value
+    }
+}
 export class Bindable_Number_serializer {
     public static write(buffer: SerializerBase, value: Bindable<number>): void {
         let valueSerializer : SerializerBase = buffer

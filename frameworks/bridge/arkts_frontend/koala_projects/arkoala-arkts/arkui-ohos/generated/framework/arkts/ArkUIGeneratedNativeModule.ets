@@ -4426,7 +4426,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _IndicatorComponentController_showPrevious(ptr: KPointer): void
     @ani.unsafe.Direct
-    native static _IndicatorComponentController_changeIndex(ptr: KPointer, index: number, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _IndicatorComponentController_changeIndex(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Quick
     native static _IUIContext_freezeUINode0(id: KStringPtr, isFrozen: KInt): void
     @ani.unsafe.Direct
@@ -4788,7 +4788,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _NavExtender_popToIndex(pathStack: KPointer, index: KInt, animated: KInt): void
     @ani.unsafe.Quick
-    native static _NavExtender_popToName(pathStack: KPointer, name: KStringPtr, animated: KInt): number
+    native static _NavExtender_popToName(pathStack: KPointer, name: KStringPtr, animated: KInt): int32
     @ani.unsafe.Direct
     native static _NavExtender_setCreateNavDestinationCallback(peer: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
@@ -4851,15 +4851,15 @@ export class ArkUIGeneratedNativeModule {
     native static _NavPathStack_pushDestinationByName1(ptr: KPointer, name: KStringPtr, thisArray: KSerializerBuffer, thisLength: int32): void
     native static _NavPathStack_replaceDestination(ptr: KPointer, info: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _NavPathStack_removeByIndexes(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): number
+    native static _NavPathStack_removeByIndexes(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): int32
     @ani.unsafe.Quick
-    native static _NavPathStack_removeByName(ptr: KPointer, name: KStringPtr): number
+    native static _NavPathStack_removeByName(ptr: KPointer, name: KStringPtr): int32
     @ani.unsafe.Quick
     native static _NavPathStack_removeByNavDestinationId(ptr: KPointer, navDestinationId: KStringPtr): boolean
     @ani.unsafe.Quick
-    native static _NavPathStack_moveToTop(ptr: KPointer, name: KStringPtr, thisArray: KSerializerBuffer, thisLength: int32): number
+    native static _NavPathStack_moveToTop(ptr: KPointer, name: KStringPtr, thisArray: KSerializerBuffer, thisLength: int32): int32
     @ani.unsafe.Direct
-    native static _NavPathStack_moveIndexToTop(ptr: KPointer, index: number, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _NavPathStack_moveIndexToTop(ptr: KPointer, index: KInt, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _NavPathStack_clear(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Quick
@@ -4869,7 +4869,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _NavPathStack_getParent(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
-    native static _NavPathStack_size(ptr: KPointer): number
+    native static _NavPathStack_size(ptr: KPointer): int32
     @ani.unsafe.Direct
     native static _NavPathStack_disableAnimation(ptr: KPointer, value: KInt): void
     @ani.unsafe.Direct
@@ -5495,21 +5495,21 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _SwiperContentTransitionProxy_finishTransition(ptr: KPointer): void
     @ani.unsafe.Direct
-    native static _SwiperContentTransitionProxy_getSelectedIndex(ptr: KPointer): number
+    native static _SwiperContentTransitionProxy_getSelectedIndex(ptr: KPointer): int32
     @ani.unsafe.Direct
-    native static _SwiperContentTransitionProxy_setSelectedIndex(ptr: KPointer, selectedIndex: number): void
+    native static _SwiperContentTransitionProxy_setSelectedIndex(ptr: KPointer, selectedIndex: KInt): void
     @ani.unsafe.Direct
-    native static _SwiperContentTransitionProxy_getIndex(ptr: KPointer): number
+    native static _SwiperContentTransitionProxy_getIndex(ptr: KPointer): int32
     @ani.unsafe.Direct
-    native static _SwiperContentTransitionProxy_setIndex(ptr: KPointer, index: number): void
-    @ani.unsafe.Direct
-    native static _SwiperContentTransitionProxy_getPosition(ptr: KPointer): number
-    @ani.unsafe.Direct
-    native static _SwiperContentTransitionProxy_setPosition(ptr: KPointer, position: number): void
-    @ani.unsafe.Direct
-    native static _SwiperContentTransitionProxy_getMainAxisLength(ptr: KPointer): number
-    @ani.unsafe.Direct
-    native static _SwiperContentTransitionProxy_setMainAxisLength(ptr: KPointer, mainAxisLength: number): void
+    native static _SwiperContentTransitionProxy_setIndex(ptr: KPointer, index: KInt): void
+    @ani.unsafe.Quick
+    native static _SwiperContentTransitionProxy_getPosition(ptr: KPointer): double
+    @ani.unsafe.Quick
+    native static _SwiperContentTransitionProxy_setPosition(ptr: KPointer, position: KDouble): void
+    @ani.unsafe.Quick
+    native static _SwiperContentTransitionProxy_getMainAxisLength(ptr: KPointer): double
+    @ani.unsafe.Quick
+    native static _SwiperContentTransitionProxy_setMainAxisLength(ptr: KPointer, mainAxisLength: KDouble): void
     @ani.unsafe.Direct
     native static _SwiperController_construct(): KPointer
     @ani.unsafe.Direct

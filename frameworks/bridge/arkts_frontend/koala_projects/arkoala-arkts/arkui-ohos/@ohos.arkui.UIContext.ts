@@ -164,7 +164,7 @@ export class Router {
         throw Error("getState not implemented in Router!");
     }
 
-    public getStateByIndex(index: number): router.RouterState | undefined {
+    public getStateByIndex(index: int): router.RouterState | undefined {
         throw Error("getStateByIndex not implemented in Router!");
     }
 
@@ -729,6 +729,78 @@ export class UIObserver {
     public off(type: string, options: uiObserver.NavDestinationSwitchObserverOptions, callback?: ((param: object) => void)): void {
         if (this.observerImpl) {
             this.observerImpl!.off(type, options, callback);
+        }
+    }
+
+    public onNavDestinationUpdate(
+        options: uiObserver.NavDestinationSwitchObserverOptions,
+        callback: Callback<uiObserver.NavDestinationInfo>
+    ): void {
+        if (this.observerImpl) {
+            this.observerImpl!.onNavDestinationUpdate(options, callback);
+        }
+    }
+
+    public offNavDestinationUpdate(
+        options: uiObserver.NavDestinationSwitchObserverOptions,
+        callback?: Callback<uiObserver.NavDestinationInfo>
+    ): void {
+        if (this.observerImpl) {
+            this.observerImpl!.offNavDestinationUpdate(options, callback);
+        }
+    }
+
+    public onNavDestinationUpdate(callback: Callback<uiObserver.NavDestinationInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.onNavDestinationUpdate(callback);
+        }
+    }
+
+    public offNavDestinationUpdate(callback?: Callback<uiObserver.NavDestinationInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.offNavDestinationUpdate(callback);
+        }
+    }
+
+    public onRouterPageUpdate(callback: Callback<uiObserver.RouterPageInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.onRouterPageUpdate(callback);
+        }
+    }
+
+    public offRouterPageUpdate(callback?: Callback<uiObserver.RouterPageInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.offRouterPageUpdate(callback);
+        }
+    }
+
+    public onNavDestinationSwitch(callback: Callback<uiObserver.NavDestinationSwitchInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.onNavDestinationSwitch(callback);
+        }
+    }
+
+    public offNavDestinationSwitch(callback?: Callback<uiObserver.NavDestinationSwitchInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.offNavDestinationSwitch(callback);
+        }
+    }
+
+    public onNavDestinationSwitch(
+        observerOptions: uiObserver.NavDestinationSwitchObserverOptions,
+        callback: Callback<uiObserver.NavDestinationSwitchInfo>
+    ): void {
+        if (this.observerImpl) {
+            this.observerImpl!.onNavDestinationSwitch(observerOptions, callback);
+        }
+    }
+
+    public offNavDestinationSwitch(
+        observerOptions: uiObserver.NavDestinationSwitchObserverOptions,
+        callback?: Callback<uiObserver.NavDestinationSwitchInfo>
+    ): void {
+        if (this.observerImpl) {
+            this.observerImpl!.offNavDestinationSwitch(observerOptions, callback);
         }
     }
 

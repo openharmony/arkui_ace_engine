@@ -190,18 +190,18 @@ void PopToIndexImpl(Ark_NavPathStack pathStack,
     auto animatedVal = Converter::Convert<bool>(animated);
     navStack->NavigationContext::PathStack::PopToIndex(indexVal, animatedVal);
 }
-Ark_Number PopToNameImpl(Ark_NavPathStack pathStack,
+Ark_Int32 PopToNameImpl(Ark_NavPathStack pathStack,
                          const Ark_String* name,
                          Ark_Boolean animated)
 {
-    static Ark_Number invalidVal = Converter::ArkValue<Ark_Number>(-1);
+    static Ark_Int32 invalidVal = Converter::ArkValue<Ark_Int32>(-1);
     CHECK_NULL_RETURN(pathStack, invalidVal);
     auto navStack = pathStack->GetNavPathStack();
     CHECK_NULL_RETURN(navStack, invalidVal);
     auto nameVal = Converter::Convert<std::string>(*name);
     auto animatedVal = Converter::Convert<bool>(animated);
     auto index = navStack->NavigationContext::PathStack::PopToName(nameVal, animatedVal);
-    return Converter::ArkValue<Ark_Number>(index);
+    return Converter::ArkValue<Ark_Int32>(index);
 }
 } // NavExtenderAccessor
 const GENERATED_ArkUINavExtenderAccessor* GetNavExtenderAccessor()
