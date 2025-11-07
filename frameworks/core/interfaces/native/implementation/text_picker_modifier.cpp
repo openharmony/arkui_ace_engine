@@ -444,9 +444,7 @@ void SetTextPickerOptionsImpl(Ark_NativePointer node,
         TextPickerModelStatic::SetHasSelectAttr(frameNode, textPickerOptions.hasSelected);
         TextPickerModelStatic::SetColumns(frameNode, textPickerOptions.options);
         TextPickerModelStatic::SetValues(frameNode, textPickerOptions.values);
-        if (textPickerOptions.isCascade || textPickerOptions.hasSelected) {
-            TextPickerModelStatic::SetSelecteds(frameNode, textPickerOptions.selecteds);
-        }
+        TextPickerModelStatic::SetSelecteds(frameNode, textPickerOptions.selecteds);
         TextPickerModelStatic::SetColumnWidths(frameNode, textPickerOptions.columnWidths);
     }
 }
