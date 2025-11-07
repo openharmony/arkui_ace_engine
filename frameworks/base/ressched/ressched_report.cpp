@@ -45,6 +45,7 @@ constexpr int32_t SLIDE_DETECTING = 2;
 constexpr int32_t AUTO_PLAY_ON_EVENT = 5;
 constexpr int32_t AUTO_PLAY_OFF_EVENT = 6;
 constexpr int32_t MOVE_DETECTING = 7;
+constexpr int32_t SWIPER_SLIDE_OFF_EVENT = 8;
 constexpr int32_t PUSH_PAGE_START_EVENT = 0;
 constexpr int32_t PUSH_PAGE_COMPLETE_EVENT = 1;
 constexpr int32_t POP_PAGE_EVENT = 0;
@@ -75,6 +76,7 @@ constexpr char PAGE_END_FLUSH[] = "page_end_flush";
 constexpr char AUTO_PLAY_ON[] = "auto_play_on";
 constexpr char AUTO_PLAY_OFF[] = "auto_play_off";
 constexpr char SLIDE_OFF[] = "slide_off";
+constexpr char SWIPER_SLIDE_OFF[] = "swiper_slide_off";
 constexpr char OVERLAY_ADD[] = "overlay_add";
 constexpr char OVERLAY_REMOVE[] = "overlay_remove";
 constexpr char TOUCH[] = "touch";
@@ -204,6 +206,11 @@ void ResSchedReport::ResSchedDataReport(const char* name, const std::unordered_m
             { SLIDE_OFF,
                 [this](std::unordered_map<std::string, std::string>& payload) {
                     reportDataFunc_(RES_TYPE_SLIDE, SLIDE_OFF_EVENT, payload);
+                }
+            },
+            { SWIPER_SLIDE_OFF,
+                [this](std::unordered_map<std::string, std::string>& payload) {
+                    reportDataFunc_(RES_TYPE_SLIDE, SWIPER_SLIDE_OFF_EVENT, payload);
                 }
             },
             { POP_PAGE,
