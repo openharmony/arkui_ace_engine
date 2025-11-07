@@ -133,12 +133,10 @@ void ContainerPickerLayoutAlgorithm::MeasureHeight(LayoutWrapper* layoutWrapper,
             height = parentMainSize.has_value() ? std::min(pickerDefaultHeight_, parentMainSize.value())
                                                 : pickerDefaultHeight_;
         } else {
-            height = Negative(mainSize) ? std::min(pickerDefaultHeight_, parentMainSize.value())
-                                        : std::min(mainSize, parentMainSize.value());
+            height = Negative(mainSize) ? std::min(pickerDefaultHeight_, parentMainSize.value()) : mainSize;
         }
     } else {
-        height = Negative(mainSize) ? std::min(pickerDefaultHeight_, parentMainSize.value())
-                                    : std::min(mainSize, parentMainSize.value());
+        height = Negative(mainSize) ? std::min(pickerDefaultHeight_, parentMainSize.value()) : mainSize;
     }
 
     if (!NearEqual(height, height_)) {
@@ -166,11 +164,11 @@ void ContainerPickerLayoutAlgorithm::MeasureWidth(LayoutWrapper* layoutWrapper, 
 
     auto commonSetWidth = [crossSize, parentCrossSize, childMaxWidth, &width]() -> bool {
         bool crossMatchChild = false;
-        if ((NonNegative(crossSize) && GreaterOrEqualToInfinity(crossSize)) || Negative(crossSize)) {
+        if (Negative(crossSize)) {
             width = parentCrossSize.has_value() ? std::min(childMaxWidth, parentCrossSize.value()) : childMaxWidth;
             crossMatchChild = true;
         } else {
-            width = parentCrossSize.has_value() ? std::min(crossSize, parentCrossSize.value()) : crossSize;
+            width = crossSize;
         }
         return crossMatchChild;
     };
