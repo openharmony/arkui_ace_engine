@@ -870,12 +870,18 @@ HWTEST_F(StyledStringAccessorUnionStringTest, styledStringGetStyles, TestSize.Le
     auto start = Converter::ArkValue<Ark_Int32>(TEST_START_TSH);
     auto length = Converter::ArkValue<Ark_Int32>(TEST_LENGTH);
     auto key = Converter::ArkValue<Opt_StyledStringKey>(Ace::SpanType::ParagraphStyle);
-    auto resultArk = accessor_->getStyles(peer_, start, length, &key);
+    Opt_Array_SpanStyle StylesOpt = accessor_->getStyles(peer_, start, length, &key);
+    auto StylesArk = Converter::GetOpt(StylesOpt);
+    ASSERT_TRUE(StylesArk.has_value());
+    auto resultArk = StylesArk.value();
     auto result = Converter::Convert<std::vector<RefPtr<SpanBase>>>(resultArk);
     EXPECT_EQ(result.size(), 0);
-    resultArk = accessor_->getStyles(peer_, start, length, nullptr);
-    result = Converter::Convert<std::vector<RefPtr<SpanBase>>>(resultArk);
-    EXPECT_EQ(result.size(), 1);
+    Opt_Array_SpanStyle StylesNullptrOpt = accessor_->getStyles(peer_, start, length, nullptr);
+    auto StylesNullptrArk = Converter::GetOpt(StylesNullptrOpt);
+    ASSERT_TRUE(StylesNullptrArk.has_value());
+    auto resultNullptrArk = StylesArk.value();
+    result = Converter::Convert<std::vector<RefPtr<SpanBase>>>(resultNullptrArk);
+    EXPECT_EQ(result.size(), 0);
 }
 
 /**
@@ -1003,7 +1009,10 @@ HWTEST_F(StyledStringAccessorUnionStringTest, styledStringMarshalling1Test, Test
     peer_->spanString->EncodeTlv(tlvData);
     ASSERT_FALSE(tlvData.empty());
 
-    Ark_Buffer arkBuffer = accessor_->marshalling1(peer_);
+    Opt_Buffer arkBufferOpt = accessor_->marshalling1(peer_);
+    auto arkBufferArk = Converter::GetOpt(arkBufferOpt);
+    ASSERT_TRUE(arkBufferArk.has_value());
+    auto arkBuffer = arkBufferArk.value();
     ASSERT_EQ(arkBuffer.length, tlvData.size());
     auto arkBufferData = static_cast<uint8_t*>(arkBuffer.data);
     auto arkBufferDataEnd = arkBufferData + arkBuffer.length;
@@ -1037,7 +1046,10 @@ HWTEST_F(StyledStringAccessorUnionStringTest, styledStringMarshalling0Unmarshall
     };
     auto arkMarshUserDataCallback = Converter::ArkValue<StyledStringMarshallCallback>(
         nullptr, marshallUserDataFunc, EXPECTED_NODE_ID);
-    Ark_Buffer arkBuffer = accessor_->marshalling0(peer_, &arkMarshUserDataCallback);
+    Opt_Buffer optBuffer = accessor_->marshalling0(peer_, &arkMarshUserDataCallback);
+    auto arkBufferOpt = Converter::GetOpt(optBuffer);
+    ASSERT_TRUE(arkBufferOpt.has_value());
+    Ark_Buffer arkBuffer = arkBufferOpt.value();
 
     static RefPtr<OHOS::Ace::SpanString> checkSpanString = nullptr;
     auto unmarshallUserDataFunc = [](Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Buffer buf,

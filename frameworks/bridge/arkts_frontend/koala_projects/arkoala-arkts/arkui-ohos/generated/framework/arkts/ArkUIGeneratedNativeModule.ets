@@ -4422,8 +4422,8 @@ export class ArkUIGeneratedNativeModule {
     native static _LayoutManager_construct(): KPointer
     @ani.unsafe.Direct
     native static _LayoutManager_getFinalizer(): KPointer
-    @ani.unsafe.Direct
-    native static _LayoutManager_getLineCount(ptr: KPointer): int32
+    @ani.unsafe.Quick
+    native static _LayoutManager_getLineCount(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Quick
     native static _LayoutManager_getGlyphPositionAtCoordinate(ptr: KPointer, x: KDouble, y: KDouble): KInteropReturnBuffer
     @ani.unsafe.Quick
@@ -5392,8 +5392,8 @@ export class ArkUIGeneratedNativeModule {
     native static _StyledString_getStyles(ptr: KPointer, start: KInt, length: KInt, thisArray: KSerializerBuffer, thisLength: int32): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _StyledString_equals(ptr: KPointer, other: KPointer): boolean
-    @ani.unsafe.Direct
-    native static _StyledString_subStyledString(ptr: KPointer, start: KInt, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Quick
+    native static _StyledString_subStyledString(ptr: KPointer, start: KInt, thisArray: KSerializerBuffer, thisLength: int32): KInteropReturnBuffer
     native static _StyledString_fromHtml(html: KStringPtr, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Quick
     native static _StyledString_toHtml(styledString: KPointer): string
@@ -5589,10 +5589,10 @@ export class ArkUIGeneratedNativeModule {
     native static _TextContentControllerBase_getCaretOffset(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Quick
     native static _TextContentControllerBase_getTextContentRect(ptr: KPointer): KInteropReturnBuffer
-    @ani.unsafe.Direct
-    native static _TextContentControllerBase_getTextContentLineCount(ptr: KPointer): int32
     @ani.unsafe.Quick
-    native static _TextContentControllerBase_addText(ptr: KPointer, text: KStringPtr, thisArray: KSerializerBuffer, thisLength: int32): int32
+    native static _TextContentControllerBase_getTextContentLineCount(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _TextContentControllerBase_addText(ptr: KPointer, text: KStringPtr, thisArray: KSerializerBuffer, thisLength: int32): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _TextContentControllerBase_deleteText(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Quick
@@ -5600,7 +5600,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _TextContentControllerBase_clearPreviewText(ptr: KPointer): void
     @ani.unsafe.Quick
-    native static _TextContentControllerBase_getText(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): string
+    native static _TextContentControllerBase_getText(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _TextController_construct(): KPointer
     @ani.unsafe.Direct
@@ -5609,8 +5609,8 @@ export class ArkUIGeneratedNativeModule {
     native static _TextController_closeSelectionMenu(ptr: KPointer): void
     @ani.unsafe.Direct
     native static _TextController_setStyledString(ptr: KPointer, value: KPointer): void
-    @ani.unsafe.Direct
-    native static _TextController_getLayoutManager(ptr: KPointer): KPointer
+    @ani.unsafe.Quick
+    native static _TextController_getLayoutManager(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _TextEditControllerEx_construct(): KPointer
     @ani.unsafe.Direct
