@@ -415,7 +415,7 @@ auto g_bindMenuOptionsParamCallbacks = [](
     if (onAppearValue) {
         auto onAppear = [arkCallback = CallbackHelper(onAppearValue.value()), weakNode]() {
             PipelineContext::SetCallBackNode(weakNode);
-            arkCallback.Invoke();
+            arkCallback.InvokeSync();
         };
         menuParam.onAppear = std::move(onAppear);
     }
@@ -431,7 +431,7 @@ auto g_bindMenuOptionsParamCallbacks = [](
     if (aboutToAppearValue) {
         auto aboutToAppear = [arkCallback = CallbackHelper(aboutToAppearValue.value()), weakNode]() {
             PipelineContext::SetCallBackNode(weakNode);
-            arkCallback.Invoke();
+            arkCallback.InvokeSync();
         };
         menuParam.aboutToAppear = std::move(aboutToAppear);
     }
@@ -5393,8 +5393,9 @@ void BindContextMenuBase(Ark_NativePointer node,
                 contentBuilder(menuParam, std::move(previewBuildFunc));
                 }, node);
         },
-        [&menuParam, contentBuilder]() {
+        [&menuParam, menuOption, type, node, contentBuilder]() {
             std::function<void()> previewBuildFunc = nullptr;
+            ParseContextMenuParam(menuParam, menuOption, type, node);
             contentBuilder(menuParam, std::move(previewBuildFunc));
         });
 }

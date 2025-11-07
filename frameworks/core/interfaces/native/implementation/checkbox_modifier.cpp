@@ -20,6 +20,7 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/converter2.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/validators.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -145,11 +146,13 @@ void SetMarkImpl(Ark_NativePointer node,
     }
 
     auto size = Converter::OptConvert<Dimension>(optValue->size);
+    Validator::ValidateNonNegative(size);
     if (size) {
         CheckBoxModelStatic::SetCheckMarkSize(frameNode, size.value());
     }
 
     auto width = Converter::OptConvert<Dimension>(optValue->strokeWidth);
+    Validator::ValidateNonNegative(width);
     if (width) {
         CheckBoxModelStatic::SetCheckMarkWidth(frameNode, width.value());
     }
