@@ -722,7 +722,7 @@ export class FrameNode implements MaterializedBase {
         }
         return ArkUIAniModule._Common_getCustomProperty(this!.peer!.ptr, name_casted);
     }
-    public convertPoint(position: NodePosition, targetNode: FrameNode): NodePosition {
+    public convertPosition(position: NodePosition, targetNode: FrameNode): NodePosition {
         if (targetNode === null) {
             const error = Error("The parameter 'targetNode' is invalid: it cannot be null. Please pass a non-null FrameNode object.");
             throw new BusinessError(100025, error);
