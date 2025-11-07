@@ -104,9 +104,14 @@ inline KFloat getArgument<KFloat>(JSContextRef context, size_t argumentCount, co
 }
 
 template<>
-inline KDouble getArgument<KDouble>(JSContextRef context, size_t argumentCount, const JSValueRef arguments[], int index) {
-  ASSERT(index < argumentCount);
-  return getDouble(context, arguments[index]);
+inline KDouble getArgument<KDouble>(
+    JSContextRef context,
+    size_t argumentCount,
+    const JSValueRef arguments[],
+    int index)
+{
+    ASSERT(index < argumentCount);
+    return getDouble(context, arguments[index]);
 }
 
 template <>
@@ -672,29 +677,33 @@ void InitExports(JSGlobalContextRef globalContext);
 
 // Improve: implement properly
 #define KOALA_INTEROP_CTX_3(name, Ret, P0, P1, P2)                                                                                                                 \
-  JSValueRef Jsc_##name(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception) \
-  {                                                                                                                                                                \
-    printf("Improve: implement KOALA_INTEROP_CTX_3 for jsc");                                                                                                         \
-    KOALA_MAYBE_LOG(name)                                                                                                                                          \
-    P0 p0 = getArgument<P0>(ctx, argumentCount, arguments, 0);                                                                                                     \
-    P1 p1 = getArgument<P1>(ctx, argumentCount, arguments, 1);                                                                                                     \
-    P2 p2 = getArgument<P2>(ctx, argumentCount, arguments, 2);                                                                                                     \
-    return makeResult<Ret>(ctx, impl_##name(nullptr, p0, p1, p2));                                                                                                          \
-  }                                                                                                                                                                \
-  MAKE_JSC_EXPORT(name)
+    JSValueRef Jsc_##name( \
+        JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, \
+        size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception) \
+    {                                                                                                                                                                \
+        printf("Improve: implement KOALA_INTEROP_CTX_3 for jsc");                                                                                                         \
+        KOALA_MAYBE_LOG(name)                                                                                                                                          \
+        P0 p0 = getArgument<P0>(ctx, argumentCount, arguments, 0);                                                                                                     \
+        P1 p1 = getArgument<P1>(ctx, argumentCount, arguments, 1);                                                                                                     \
+        P2 p2 = getArgument<P2>(ctx, argumentCount, arguments, 2);                                                                                                     \
+        return makeResult<Ret>(ctx, impl_##name(nullptr, p0, p1, p2));                                                                                                          \
+    }                                                                                                                                                                \
+    MAKE_JSC_EXPORT(name)
 
 #define KOALA_INTEROP_CTX_4(name, Ret, P0, P1, P2, P4)                                                                                                             \
-  JSValueRef Jsc_##name(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception) \
-  {                                                                                                                                                                \
-    printf("Improve: implement KOALA_INTEROP_CTX_4 for jsc");                                                                                                         \
-    KOALA_MAYBE_LOG(name)                                                                                                                                          \
-    P0 p0 = getArgument<P0>(ctx, argumentCount, arguments, 0);                                                                                                     \
-    P1 p1 = getArgument<P1>(ctx, argumentCount, arguments, 1);                                                                                                     \
-    P2 p2 = getArgument<P2>(ctx, argumentCount, arguments, 2);                                                                                                     \
-    P3 p3 = getArgument<P3>(ctx, argumentCount, arguments, 3);                                                                                                     \
-    return makeResult<Ret>(ctx, impl_##name(nullptr, p0, p1, p2, p3));                                                                                             \
-  }                                                                                                                                                                \
-  MAKE_JSC_EXPORT(name)
+    JSValueRef Jsc_##name( \
+        JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, \
+        size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception) \
+    {                                                                                                                                                                \
+        printf("Improve: implement KOALA_INTEROP_CTX_4 for jsc");                                                                                                         \
+        KOALA_MAYBE_LOG(name)                                                                                                                                          \
+        P0 p0 = getArgument<P0>(ctx, argumentCount, arguments, 0);                                                                                                     \
+        P1 p1 = getArgument<P1>(ctx, argumentCount, arguments, 1);                                                                                                     \
+        P2 p2 = getArgument<P2>(ctx, argumentCount, arguments, 2);                                                                                                     \
+        P3 p3 = getArgument<P3>(ctx, argumentCount, arguments, 3);                                                                                                     \
+        return makeResult<Ret>(ctx, impl_##name(nullptr, p0, p1, p2, p3));                                                                                             \
+    }                                                                                                                                                                \
+    MAKE_JSC_EXPORT(name)
 
 // Improve: implement properly
 #define KOALA_INTEROP_CTX_V3(name, P0, P1, P2) \
