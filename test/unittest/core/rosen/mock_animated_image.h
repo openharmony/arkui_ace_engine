@@ -48,6 +48,13 @@ public:
         RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY) override {};
 
     void DrawRect(RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect) override {};
+
+    RefPtr<PixelMap> GetFirstPixelMap() override
+    {
+        return firstPixelMap;
+    }
+
+    RefPtr<PixelMap> firstPixelMap;
 };
 } // namespace OHOS::Ace::NG
 
