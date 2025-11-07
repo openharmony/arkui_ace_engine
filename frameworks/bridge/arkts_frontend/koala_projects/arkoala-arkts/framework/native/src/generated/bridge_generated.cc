@@ -28119,6 +28119,19 @@ void impl_ControllerHandler_setWebController(Ark_NativePointer thisPtr, Ark_Nati
         GetAccessors()->getControllerHandlerAccessor()->setWebController(self, static_cast<Ark_webview_WebviewController>(controller));
 }
 KOALA_INTEROP_DIRECT_V2(ControllerHandler_setWebController, Ark_NativePointer, Ark_NativePointer)
+Ark_NativePointer impl_CopyEvent_construct() {
+        return GetAccessors()->getCopyEventAccessor()->construct();
+}
+KOALA_INTEROP_DIRECT_0(CopyEvent_construct, Ark_NativePointer)
+Ark_NativePointer impl_CopyEvent_getFinalizer() {
+        return GetAccessors()->getCopyEventAccessor()->getFinalizer();
+}
+KOALA_INTEROP_DIRECT_0(CopyEvent_getFinalizer, Ark_NativePointer)
+void impl_CopyEvent_preventDefault(Ark_NativePointer thisPtr) {
+        Ark_CopyEvent self = reinterpret_cast<Ark_CopyEvent>(thisPtr);
+        GetAccessors()->getCopyEventAccessor()->preventDefault(self);
+}
+KOALA_INTEROP_DIRECT_V1(CopyEvent_preventDefault, Ark_NativePointer)
 Ark_NativePointer impl_CustomDialogController_construct(KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         Ark_CustomDialogControllerOptions valueValueTemp = CustomDialogControllerOptions_serializer::read(thisDeserializer);;
@@ -28221,6 +28234,19 @@ void impl_CustomSpan_setOnDraw_callback(Ark_NativePointer thisPtr, KSerializerBu
         GetAccessors()->getCustomSpanAccessor()->setOnDraw_callback(self, static_cast<Callback_DrawContext_CustomSpanDrawInfo_Void*>(&onDraw_callbackValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(CustomSpan_setOnDraw_callback, Ark_NativePointer, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_CutEvent_construct() {
+        return GetAccessors()->getCutEventAccessor()->construct();
+}
+KOALA_INTEROP_DIRECT_0(CutEvent_construct, Ark_NativePointer)
+Ark_NativePointer impl_CutEvent_getFinalizer() {
+        return GetAccessors()->getCutEventAccessor()->getFinalizer();
+}
+KOALA_INTEROP_DIRECT_0(CutEvent_getFinalizer, Ark_NativePointer)
+void impl_CutEvent_preventDefault(Ark_NativePointer thisPtr) {
+        Ark_CutEvent self = reinterpret_cast<Ark_CutEvent>(thisPtr);
+        GetAccessors()->getCutEventAccessor()->preventDefault(self);
+}
+KOALA_INTEROP_DIRECT_V1(CutEvent_preventDefault, Ark_NativePointer)
 Ark_NativePointer impl_DataResubmissionHandler_construct() {
         return GetAccessors()->getDataResubmissionHandlerAccessor()->construct();
 }
@@ -32829,6 +32855,19 @@ KInteropReturnBuffer impl_ParagraphStyle_getParagraphSpacing(Ark_NativePointer t
         return _retSerializer.toReturnBuffer();
 }
 KOALA_INTEROP_1(ParagraphStyle_getParagraphSpacing, KInteropReturnBuffer, Ark_NativePointer)
+Ark_NativePointer impl_PasteEvent_construct() {
+        return GetAccessors()->getPasteEventAccessor()->construct();
+}
+KOALA_INTEROP_DIRECT_0(PasteEvent_construct, Ark_NativePointer)
+Ark_NativePointer impl_PasteEvent_getFinalizer() {
+        return GetAccessors()->getPasteEventAccessor()->getFinalizer();
+}
+KOALA_INTEROP_DIRECT_0(PasteEvent_getFinalizer, Ark_NativePointer)
+void impl_PasteEvent_preventDefault(Ark_NativePointer thisPtr) {
+        Ark_PasteEvent self = reinterpret_cast<Ark_PasteEvent>(thisPtr);
+        GetAccessors()->getPasteEventAccessor()->preventDefault(self);
+}
+KOALA_INTEROP_DIRECT_V1(PasteEvent_preventDefault, Ark_NativePointer)
 Ark_NativePointer impl_Path2D_construct0() {
         return GetAccessors()->getPath2DAccessor()->construct0();
 }

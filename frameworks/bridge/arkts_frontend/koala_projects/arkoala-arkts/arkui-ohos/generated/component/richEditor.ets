@@ -765,7 +765,36 @@ export interface RichEditorParagraphStyle {
     paragraphSpacing?: double;
 }
 export interface PasteEvent {
-    preventDefault?: VoidCallback;
+    preventDefault(): void
+}
+export class PasteEventInternal implements MaterializedBase,PasteEvent {
+    peer?: Finalizable | undefined = undefined
+    public getPeer(): Finalizable | undefined {
+        return this.peer
+    }
+    constructor(peerPtr: KPointer) {
+        this.peer = new Finalizable(peerPtr, PasteEventInternal.getFinalizer())
+    }
+    constructor() {
+        this(PasteEventInternal.construct())
+    }
+    static construct(): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._PasteEvent_construct()
+        return retval
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._PasteEvent_getFinalizer()
+    }
+    public static fromPtr(ptr: KPointer): PasteEventInternal {
+        return new PasteEventInternal(ptr)
+    }
+    public preventDefault(): void {
+        this.preventDefault_serialize()
+        return
+    }
+    preventDefault_serialize(): void {
+        ArkUIGeneratedNativeModule._PasteEvent_preventDefault(this.peer!.ptr)
+    }
 }
 export interface RichEditorTextSpan {
     spanPosition: RichEditorSpanPosition;
@@ -1181,10 +1210,68 @@ export class ArkRichEditorStyle extends ArkCommonMethodStyle implements RichEdit
     }
 }
 export interface CutEvent {
-    preventDefault?: VoidCallback;
+    preventDefault(): void
+}
+export class CutEventInternal implements MaterializedBase,CutEvent {
+    peer?: Finalizable | undefined = undefined
+    public getPeer(): Finalizable | undefined {
+        return this.peer
+    }
+    constructor(peerPtr: KPointer) {
+        this.peer = new Finalizable(peerPtr, CutEventInternal.getFinalizer())
+    }
+    constructor() {
+        this(CutEventInternal.construct())
+    }
+    static construct(): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._CutEvent_construct()
+        return retval
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._CutEvent_getFinalizer()
+    }
+    public static fromPtr(ptr: KPointer): CutEventInternal {
+        return new CutEventInternal(ptr)
+    }
+    public preventDefault(): void {
+        this.preventDefault_serialize()
+        return
+    }
+    preventDefault_serialize(): void {
+        ArkUIGeneratedNativeModule._CutEvent_preventDefault(this.peer!.ptr)
+    }
 }
 export interface CopyEvent {
-    preventDefault?: VoidCallback;
+    preventDefault(): void
+}
+export class CopyEventInternal implements MaterializedBase,CopyEvent {
+    peer?: Finalizable | undefined = undefined
+    public getPeer(): Finalizable | undefined {
+        return this.peer
+    }
+    constructor(peerPtr: KPointer) {
+        this.peer = new Finalizable(peerPtr, CopyEventInternal.getFinalizer())
+    }
+    constructor() {
+        this(CopyEventInternal.construct())
+    }
+    static construct(): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._CopyEvent_construct()
+        return retval
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._CopyEvent_getFinalizer()
+    }
+    public static fromPtr(ptr: KPointer): CopyEventInternal {
+        return new CopyEventInternal(ptr)
+    }
+    public preventDefault(): void {
+        this.preventDefault_serialize()
+        return
+    }
+    preventDefault_serialize(): void {
+        ArkUIGeneratedNativeModule._CopyEvent_preventDefault(this.peer!.ptr)
+    }
 }
 export interface RichEditorUrlStyle {
     url?: ResourceStr;
@@ -1893,106 +1980,34 @@ export class RichEditorSpanPosition_serializer {
 export class CopyEvent_serializer {
     public static write(buffer: SerializerBase, value: CopyEvent): void {
         let valueSerializer : SerializerBase = buffer
-        const valueHolderForPreventDefault  = value.preventDefault
-        if (valueHolderForPreventDefault !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForPreventDefaultTmpValue  = valueHolderForPreventDefault!
-            valueSerializer.holdAndWriteCallback(valueHolderForPreventDefaultTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     public static read(buffer: DeserializerBase): CopyEvent {
         let valueDeserializer : DeserializerBase = buffer
-        const preventDefaultTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let preventDefaultTmpBuf : VoidCallback | undefined = undefined
-        if ((preventDefaultTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const preventDefaultTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
-            const preventDefaultTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
-            const preventDefaultTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            preventDefaultTmpBuf = ():void => {
-                const preventDefaultTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
-                preventDefaultTmpBuf_BufArgsSerializer.writeInt32(preventDefaultTmpBuf_BufResource.resourceId);
-                preventDefaultTmpBuf_BufArgsSerializer.writePointer(preventDefaultTmpBuf_BufCall);
-                preventDefaultTmpBuf_BufArgsSerializer.writePointer(preventDefaultTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallbackSync(10, -2038961969, preventDefaultTmpBuf_BufArgsSerializer.asBuffer(), preventDefaultTmpBuf_BufArgsSerializer.length());
-                preventDefaultTmpBuf_BufArgsSerializer.release();
-                return;
-            }
-        }
-        const preventDefaultTmpResult : VoidCallback | undefined = preventDefaultTmpBuf
-        let value : CopyEvent = ({preventDefault: preventDefaultTmpResult} as CopyEvent)
-        return value
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return CopyEventInternal.fromPtr(ptr)
     }
 }
 export class CutEvent_serializer {
     public static write(buffer: SerializerBase, value: CutEvent): void {
         let valueSerializer : SerializerBase = buffer
-        const valueHolderForPreventDefault  = value.preventDefault
-        if (valueHolderForPreventDefault !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForPreventDefaultTmpValue  = valueHolderForPreventDefault!
-            valueSerializer.holdAndWriteCallback(valueHolderForPreventDefaultTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     public static read(buffer: DeserializerBase): CutEvent {
         let valueDeserializer : DeserializerBase = buffer
-        const preventDefaultTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let preventDefaultTmpBuf : VoidCallback | undefined = undefined
-        if ((preventDefaultTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const preventDefaultTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
-            const preventDefaultTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
-            const preventDefaultTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            preventDefaultTmpBuf = ():void => {
-                const preventDefaultTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
-                preventDefaultTmpBuf_BufArgsSerializer.writeInt32(preventDefaultTmpBuf_BufResource.resourceId);
-                preventDefaultTmpBuf_BufArgsSerializer.writePointer(preventDefaultTmpBuf_BufCall);
-                preventDefaultTmpBuf_BufArgsSerializer.writePointer(preventDefaultTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallbackSync(10, -2038961969, preventDefaultTmpBuf_BufArgsSerializer.asBuffer(), preventDefaultTmpBuf_BufArgsSerializer.length());
-                preventDefaultTmpBuf_BufArgsSerializer.release();
-                return;
-            }
-        }
-        const preventDefaultTmpResult : VoidCallback | undefined = preventDefaultTmpBuf
-        let value : CutEvent = ({preventDefault: preventDefaultTmpResult} as CutEvent)
-        return value
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return CutEventInternal.fromPtr(ptr)
     }
 }
 export class PasteEvent_serializer {
     public static write(buffer: SerializerBase, value: PasteEvent): void {
         let valueSerializer : SerializerBase = buffer
-        const valueHolderForPreventDefault  = value.preventDefault
-        if (valueHolderForPreventDefault !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForPreventDefaultTmpValue  = valueHolderForPreventDefault!
-            valueSerializer.holdAndWriteCallback(valueHolderForPreventDefaultTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     public static read(buffer: DeserializerBase): PasteEvent {
         let valueDeserializer : DeserializerBase = buffer
-        const preventDefaultTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let preventDefaultTmpBuf : VoidCallback | undefined = undefined
-        if ((preventDefaultTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const preventDefaultTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
-            const preventDefaultTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
-            const preventDefaultTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            preventDefaultTmpBuf = ():void => {
-                const preventDefaultTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
-                preventDefaultTmpBuf_BufArgsSerializer.writeInt32(preventDefaultTmpBuf_BufResource.resourceId);
-                preventDefaultTmpBuf_BufArgsSerializer.writePointer(preventDefaultTmpBuf_BufCall);
-                preventDefaultTmpBuf_BufArgsSerializer.writePointer(preventDefaultTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallbackSync(10, -2038961969, preventDefaultTmpBuf_BufArgsSerializer.asBuffer(), preventDefaultTmpBuf_BufArgsSerializer.length());
-                preventDefaultTmpBuf_BufArgsSerializer.release();
-                return;
-            }
-        }
-        const preventDefaultTmpResult : VoidCallback | undefined = preventDefaultTmpBuf
-        let value : PasteEvent = ({preventDefault: preventDefaultTmpResult} as PasteEvent)
-        return value
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return PasteEventInternal.fromPtr(ptr)
     }
 }
 export class RichEditorBuilderSpanOptions_serializer {
