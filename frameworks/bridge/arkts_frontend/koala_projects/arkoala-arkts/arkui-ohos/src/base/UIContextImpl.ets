@@ -57,7 +57,7 @@ import { KeyProcessingMode } from "arkui/component/focus"
 import { componentUtils } from "@ohos/arkui/componentUtils"
 import { componentSnapshot } from "@ohos/arkui/componentSnapshot"
 import { dragController } from "@ohos/arkui/dragController"
-import { UIContextAtomicServiceBar } from "#generated"
+import { UIContextAtomicServiceBar } from "arkui/component/idlize"
 import { GlobalScope } from "#generated"
 import { default as mediaquery } from '@ohos/mediaquery'
 import { CustomBuilder, CustomBuilderT, ArkComponentRootPeer, DragItemInfo, Callback } from 'arkui/framework'
@@ -151,14 +151,18 @@ export class TextMenuControllerImpl extends TextMenuController {
     }
 }
 
-// export class AtomicServiceBarInternal implements AtomicServiceBar {
-    // instanceId_: int32;
-    // constructor(instanceId: int32) {
-    // }
-    // public getBarRect(): Frame {
-    //     return frame;
-    // }
-// }
+export class AtomicServiceBarInternal implements AtomicServiceBar {
+    instanceId_: int32;
+    constructor(instanceId: int32) {
+        this.instanceId_ = instanceId;
+    }
+    public getBarRect(): Frame {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let frame = UIContextAtomicServiceBar.getBarRect();
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return frame;
+    }
+}
 
 export class FocusControllerImpl extends FocusController {
     instanceId_: int32
@@ -1313,7 +1317,7 @@ export class UIContextImpl extends UIContext {
     componentUtils_: ComponentUtilsImpl;
     componentSnapshot_: ComponentSnapshotImpl;
     dragController_: DragControllerImpl;
-    // atomicServiceBar_: AtomicServiceBarInternal;
+    atomicServiceBar_: AtomicServiceBarInternal;
     uiInspector_: UIInspectorImpl | null = null;
     contextMenuController_: ContextMenuControllerImpl;
     overlayManager_: OverlayManagerImpl | null = null;
@@ -1338,6 +1342,7 @@ export class UIContextImpl extends UIContext {
         this.componentUtils_ = new ComponentUtilsImpl(instanceId);
         this.componentSnapshot_ = new ComponentSnapshotImpl(instanceId);
         this.dragController_ = new DragControllerImpl(instanceId);
+        this.atomicServiceBar_ = new AtomicServiceBarInternal(instanceId);
         this.contextMenuController_ = new ContextMenuControllerImpl(instanceId);
         this.cursorController_ = new CursorControllerImpl(instanceId);
         this.font_ = new FontImpl(instanceId);
@@ -1495,8 +1500,7 @@ export class UIContextImpl extends UIContext {
     }
 
     public getAtomicServiceBar(): Nullable<AtomicServiceBar> {
-        throw new Error("no impl");
-        
+        return this.atomicServiceBar_;
     }
 
     public dispatchKeyEvent(node: int | string, event: KeyEvent): boolean {

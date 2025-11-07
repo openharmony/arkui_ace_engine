@@ -243,6 +243,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_font_FontInfo& dst, const FontInfo& src, ConvContext *ctx);
     void AssignArkValue(Ark_FontStyle& dst, const OHOS::Ace::FontStyle& src);
     void AssignArkValue(Ark_FontWeight& dst, OHOS::Ace::FontWeight src);
+    void AssignArkValue(Ark_Frame& dst, const RectF& src);
     void AssignArkValue(Ark_GestureControl_GestureType &dst, const GestureTypeName &src);
     void AssignArkValue(Ark_GestureInfo &dst, const GestureInfo &src);
     void AssignArkValue(Ark_GestureRecognizer &dst, const RefPtr<NG::NGGestureRecognizer>& src);

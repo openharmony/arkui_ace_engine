@@ -1848,6 +1848,17 @@ Rect Convert(const Ark_RectResult& src)
 }
 
 template<>
+RectF Convert(const Ark_Frame& src)
+{
+    return RectF(
+        Converter::Convert<float>(src.x),
+        Converter::Convert<float>(src.x),
+        Converter::Convert<float>(src.width),
+        Converter::Convert<float>(src.height)
+    );
+}
+
+template<>
 ShapePoint Convert(const Ark_ShapePoint& src)
 {
     return ShapePoint(

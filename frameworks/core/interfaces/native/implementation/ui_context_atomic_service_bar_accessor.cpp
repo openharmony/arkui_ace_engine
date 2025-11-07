@@ -15,13 +15,31 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+static RefPtr<NG::AppBarView> ObtainAppBar()
+{
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, nullptr);
+    return container->GetAppBar();
+}
 namespace UIContextAtomicServiceBarAccessor {
 Ark_Frame GetBarRectImpl()
 {
-    return {};
+    auto appBar = ObtainAppBar();
+    CHECK_NULL_RETURN(appBar, {});
+    std::optional<NG::RectF> rectOpt = appBar->GetAppBarRect();
+    NG::RectF barRect(0, 0, 0, 0);
+    if (rectOpt) {
+        const NG::RectF& rect = rectOpt.value();
+        barRect.SetLeft(Dimension(rect.Left(), DimensionUnit::PX).ConvertToVp());
+        barRect.SetTop(Dimension(rect.Top(), DimensionUnit::PX).ConvertToVp());
+        barRect.SetWidth(Dimension(rect.Width(), DimensionUnit::PX).ConvertToVp());
+        barRect.SetHeight(Dimension(rect.Height(), DimensionUnit::PX).ConvertToVp());
+    }
+    return Converter::ArkValue<Ark_Frame>(barRect);
 }
 } // UIContextAtomicServiceBarAccessor
 const GENERATED_ArkUIUIContextAtomicServiceBarAccessor* GetUIContextAtomicServiceBarAccessor()

@@ -550,6 +550,14 @@ void AssignArkValue(Ark_RectResult& dst, const RectF& src)
     dst.height = ArkValue<Ark_Float64>(src.Height());
 }
 
+void AssignArkValue(Ark_Frame& dst, const RectF& src)
+{
+    dst.x = ArkValue<Ark_Float64>(src.GetX());
+    dst.y = ArkValue<Ark_Float64>(src.GetY());
+    dst.width = ArkValue<Ark_Float64>(src.Width());
+    dst.height = ArkValue<Ark_Float64>(src.Height());
+}
+
 template<typename PeerType, typename AceSpan>
 void CreateStylePeer(Ark_SpanStyle& dst, const RefPtr<OHOS::Ace::SpanBase>& src)
 {
