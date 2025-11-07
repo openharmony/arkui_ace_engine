@@ -480,20 +480,30 @@ export function compatibleWrappedBuilderInternal(builder: Any, ...args: FixedArr
         const stateParam = instance.getProperty('arg1') as ESValue;
         const rawValue = param.unwrap()!;
         const global = ESValue.getGlobal();
+        const invokeObserveFireChange = global.getProperty('invokeObserveFireChange');
         if (isDynamicObject(rawValue)) {
-            let it = param.keys();
-            while (true) {
-                const result = it.next();
-                if (result.done) {
-                    break;
+            const isDynamicBuilderProxy = global.getProperty('isDynamicBuilderProxy').invoke(param).unwrap() as boolean;
+            if (isDynamicBuilderProxy) {
+                const getBuilderParamProxyEntries = global.getProperty('getBuilderParamProxyEntries');
+                const entries = getBuilderParamProxyEntries.invoke(param).unwrap()! as Array<Any>;
+                entries.forEach((entry)=>{
+                    entry = entry as Array<Any>;
+                    stateParam.setProperty(ESValue.wrap(entry[0]), ESValue.wrap(entry[1]));
+                    invokeObserveFireChange.invoke(stateParam, ESValue.wrap(entry[0]));
+                })
+            } else {
+                let it = param.keys();
+                while (true) {
+                    const result = it.next();
+                    if (result.done) {
+                        break;
+                    }
+                    stateParam.setProperty(result.value as ESValue, param.getProperty(result.value as ESValue));
                 }
-                stateParam.setProperty(result.value as ESValue, param.getProperty(result.value as ESValue));
             }
-        }
-        else {
+        } else {
             const target = (reflect.Value.of(rawValue) as ClassValue).getFieldByName('@target').getData() as Object;
             const keys = Object.keys(target);
-            const invokeObserveFireChange = global.getProperty('invokeObserveFireChange');
             if (rawValue instanceof IObservedObject) {
                 const PREFIX = '__backing_';
                 keys.forEach((key)=>{
@@ -503,8 +513,7 @@ export function compatibleWrappedBuilderInternal(builder: Any, ...args: FixedArr
                         invokeObserveFireChange.invoke(stateParam, ESValue.wrap(key.slice(PREFIX.length)));
                     }
                 })
-            }
-            else {
+            } else {
                 keys.forEach((key)=>{
                     const value = (reflect.Value.of(target) as ClassValue).getFieldByName(key).getData() as Object;
                     stateParam.setProperty(key, value);

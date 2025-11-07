@@ -88,3 +88,23 @@ function createCompatibleStateMetaForStaticObservedV2(): [()=>void, ()=>void] {
   let fireChange = (): void => { stateMeta.value++ }
   return [addRef, fireChange]
 }
+
+function isDynamicBuilderProxy(value: Object): boolean {
+    return !!(value && value['__builder_param_get_target']);
+}
+
+function getBuilderParamProxyEntries(value: Object): any[] {
+    const res: any[] = [];
+    if (isDynamicBuilderProxy(value)) {
+        const raw = value['__builder_param_get_target'];
+        if (raw instanceof Map) {
+            const entries = Array.from(raw.entries());
+            entries.forEach((entry)=>{
+                if(typeof entry[1] === 'function') {
+                    res.push([entry[0], entry[1]()]);
+                }
+            })
+        }
+    }
+    return res;
+}
