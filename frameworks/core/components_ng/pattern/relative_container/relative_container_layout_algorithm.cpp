@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "base/log/event_report.h"
 #include "core/components_ng/pattern/relative_container/relative_container_layout_algorithm.h"
 
 #include "core/components_ng/pattern/relative_container/relative_container_pattern.h"
@@ -147,6 +148,8 @@ void RelativeContainerLayoutAlgorithm::DetermineTopologicalOrder(LayoutWrapper* 
     }
     GetDependencyRelationship();
     if (!PreTopologicalLoopDetection(layoutWrapper)) {
+        LOGE("RelativeContainer has interdependent child components");
+        EventReport::SendComponentExceptionNG(ComponentExcepTypeNG::RELATIVE_CONTAINER_LOOP_ERR);
         auto relativeContainerLayoutProperty = layoutWrapper->GetLayoutProperty();
         CHECK_NULL_VOID(relativeContainerLayoutProperty);
         const auto& childrenWrappers = layoutWrapper->GetAllChildrenWithBuild();
