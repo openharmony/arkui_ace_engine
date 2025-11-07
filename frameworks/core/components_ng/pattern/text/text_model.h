@@ -53,6 +53,11 @@ const std::unordered_map<TextDataDetectType, std::string> TEXT_DETECT_MAP = {
     { TextDataDetectType::EMAIL, "email" }, { TextDataDetectType::ADDRESS, "location" },
     { TextDataDetectType::DATE_TIME, "datetime" }
 };
+struct TextSelectionOptions {
+    int32_t start = 0;
+    int32_t end = 0;
+    MenuPolicy menuPolicy = MenuPolicy::DEFAULT;
+};
 struct TextDetectConfig {
     std::string types;
     std::function<void(const std::string&)> onResult;
@@ -144,6 +149,8 @@ class ACE_EXPORT TextControllerBase : public AceType {
 
 public:
     virtual void CloseSelectionMenu() = 0;
+    virtual void SetTextSelection(
+        int32_t selectionStart, int32_t selectionEnd, const SelectionOptions options) = 0;
     virtual void SetStyledString(const RefPtr<SpanStringBase>& value, bool closeSelectOverlay) = 0;
     virtual WeakPtr<NG::LayoutInfoInterface> GetLayoutInfoInterface() = 0;
 };

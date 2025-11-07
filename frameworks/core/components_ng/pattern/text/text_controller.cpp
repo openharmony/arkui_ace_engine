@@ -31,6 +31,15 @@ void TextController::CloseSelectionMenu()
     }
 }
 
+void TextController::SetTextSelection(
+    int32_t selectionStart, int32_t selectionEnd, const SelectionOptions options)
+{
+    auto textPattern = pattern_.Upgrade();
+    if (textPattern) {
+        textPattern->SetSelectionFlag(selectionStart, selectionEnd, options);
+    }
+}
+
 void TextController::SetStyledString(const RefPtr<SpanStringBase>& value, bool closeSelectOverlay)
 {
     auto textPattern = pattern_.Upgrade();

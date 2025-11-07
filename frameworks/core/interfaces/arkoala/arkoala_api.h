@@ -1415,6 +1415,12 @@ union ArkUIAPIValue {
     ArkUI_Float32 f64;
 };
 
+enum ArkUIMenuPolicy {
+    MENU_POLICY_DEFAULT = 0,
+    MENU_POLICY_HIDE = 1,
+    MENU_POLICY_SHOW = 2,
+};
+
 enum ArkUIAPIValueKind {
     VALUE_KIND_INT32 = 0,
     VALUE_KIND_FLOAT32 = 1,
@@ -2204,6 +2210,12 @@ typedef ArkUI_SystemFontStyleEvent* ArkUISystemFontStyleEvent;
 typedef struct ArkUI_Params {
     ArkUINodeType nodeType;
 } ArkUI_Params;
+
+typedef struct ArkUISelectionOptions {
+    ArkUI_Int32 start;
+    ArkUI_Int32 end;
+    ArkUIMenuPolicy menuPolicy;
+} ArkUISelectionOptions;
 
 struct ArkUINavigationTitlebarOptions {
     ArkUIOptionalUint colorValue;
@@ -3221,6 +3233,10 @@ struct ArkUITextModifier {
         ArkUINodeHandle node, ArkUI_Float32 number, void* lineHeightMultiplyRawPtr);
     ArkUI_Float64 (*getTextLineHeightMultiply)(ArkUINodeHandle node);
     void (*resetTextLineHeightMultiply)(ArkUINodeHandle node);
+    void (*setTextTextSelection)(
+        ArkUINodeHandle node, ArkUISelectionOptions* options);
+    void (*getTextTextSelection)(ArkUINodeHandle node, ArkUISelectionOptions* options);
+    void (*resetTextTextSelection)(ArkUINodeHandle node);
     void (*setTextMinimumLineHeight)(
         ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit, void* minimumlineHeightRawPtr);
     ArkUI_Float32 (*getTextMinimumLineHeight)(ArkUINodeHandle node);

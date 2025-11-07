@@ -6119,6 +6119,80 @@ ResultObject TextPattern::GetBuilderResultObject(RefPtr<UINode> uiNode, int32_t 
     return resultObject;
 }
 
+void TextPattern::SetSelectionFlag(int32_t selectionStart, int32_t selectionEnd, const SelectionOptions options)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    textSelectionOptions_.start = selectionStart;
+    textSelectionOptions_.end = selectionEnd;
+    textSelectionOptions_.menuPolicy = options.menuPolicy;
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto frameRect = geometryNode->GetFrameRect();
+    if (frameRect.IsEmpty()) {
+        return;
+    }
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto mode = textLayoutProperty->GetTextSelectableModeValue(TextSelectableMode::SELECTABLE_UNFOCUSABLE);
+    if (mode == TextSelectableMode::UNSELECTABLE ||
+        textLayoutProperty->GetCopyOptionValue(CopyOptions::None) == CopyOptions::None ||
+        textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE || GetTextEffect()) {
+        TAG_LOGI(AceLogTag::ACE_TEXT, "Text is unselectable or has invalid state");
+        return;
+    }
+    if (!IsSetObscured()) {
+        ActSetSelectionFlag(selectionStart, selectionEnd, options);
+    }
+}
+void TextPattern::ActSetSelectionFlag(int32_t selectionStart, int32_t selectionEnd, const SelectionOptions options)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto length = static_cast<int32_t>(textForDisplay_.length()) + placeholderCount_;
+    selectionStart = std::clamp(selectionStart, 0, length);
+    selectionEnd = std::clamp(selectionEnd, 0, length);
+    if (selectionStart >= selectionEnd) {
+        ResetSelection();
+        CloseSelectOverlay();
+        return;
+    }
+    HandleSelectionChange(selectionStart, selectionEnd);
+    UpdateSelectionSpanType(selectionStart, selectionEnd);
+    CalculateHandleOffsetAndShowOverlay();
+    if (textSelector_.firstHandle == textSelector_.secondHandle && pManager_) {
+        ResetSelection();
+        CloseSelectOverlay();
+        return;
+    }
+
+    if (!IsShowHandle()) {
+        CloseSelectOverlay();
+        if (IsSelected()) {
+            selectOverlay_->SetSelectionHoldCallback();
+        }
+    } else {
+        bool isShowMenu = IsShowMenu(options.menuPolicy, selectOverlay_->IsCurrentMenuVisibile());
+        if (!isShowMenu && IsUsingMouse()) {
+            CloseSelectOverlay();
+        } else {
+            ShowSelectOverlay({ .menuIsShow = isShowMenu, .animation = true });
+        }
+    }
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+bool TextPattern::IsShowMenu(MenuPolicy options, bool defaultValue)
+{
+    if (options == MenuPolicy::HIDE) {
+        return false;
+    }
+    if (options == MenuPolicy::SHOW) {
+        return true;
+    }
+    return defaultValue;
+}
+
 void TextPattern::SetStyledString(const RefPtr<SpanString>& value, bool closeSelectOverlay)
 {
     auto host = GetHost();

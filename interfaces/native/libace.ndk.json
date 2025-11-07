@@ -4373,6 +4373,22 @@
     },
     {
         "first_introduced": "23",
+        "name": "OH_ArkUI_SelectionOptions_Create"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_SelectionOptions_Dispose"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_SelectionOptions_SetMenuPolicy"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_SelectionOptions_GetMenuPolicy"
+    },
+    {
+        "first_introduced": "23",
         "name": "OH_ArkUI_RenderNodeUtils_GetRenderNode"
     },
     {

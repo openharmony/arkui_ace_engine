@@ -146,6 +146,7 @@ public:
 
     void CloseSelectionMenu();
 
+    void SetTextSelection(const JSCallbackInfo& info);
     void SetStyledString(const JSCallbackInfo& info);
     void GetLayoutManager(const JSCallbackInfo& args);
 private:

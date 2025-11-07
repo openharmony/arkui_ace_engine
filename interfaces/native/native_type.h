@@ -2808,6 +2808,20 @@ typedef enum {
 } ArkUI_PixelRoundCalcPolicy;
 
 /**
+ * @brief Menu pop-up strategy.
+ *
+ * @since 23
+ */
+typedef enum {
+    /** Determine whether to pop up the menu according to the underlying default logic. */
+    ARKUI_MENU_POLICY_DEFAULT = 0,
+    /** Never pop up the menu. */
+    ARKUI_MENU_POLICY_HIDE = 1,
+    /** Always pop up the menu. */
+    ARKUI_MENU_POLICY_SHOW = 2,
+} ArkUI_MenuPolicy;
+
+/**
  * @brief Define the direction to expand the swipe action.
  *
  * @since 21
@@ -2872,6 +2886,13 @@ typedef struct ArkUI_TextPickerRangeContentArray ArkUI_TextPickerRangeContentArr
    * @since 19
    */
 typedef struct ArkUI_TextCascadePickerRangeContentArray ArkUI_TextCascadePickerRangeContentArray;
+
+/**
+  * @brief Defines the selection options.
+  *
+  * @since 23
+  */
+typedef struct ArkUI_SelectionOptions ArkUI_SelectionOptions;
 
 typedef struct {
     float x;
@@ -5933,6 +5954,40 @@ void OH_ArkUI_SelectedDataDetectorConfig_SetTypes(
 int32_t OH_ArkUI_SelectedDataDetectorConfig_GetTypes(
     ArkUI_SelectedDataDetectorConfig* config, uint32_t* types, uint32_t length);
 
+/**
+ * @brief Create selection options.
+ *
+ * @return A pointer to the selection options object.
+ * @since 23
+ */
+ArkUI_SelectionOptions* OH_ArkUI_SelectionOptions_Create();
+
+/**
+ * @brief Dispose selection options object.
+ *
+ * @param options Pointer to the selection options object. to be disposed.
+ * @since 23
+ */
+void OH_ArkUI_SelectionOptions_Dispose(ArkUI_SelectionOptions* options);
+
+/**
+ * @brief Sets the menu policy for selection options.
+ *
+ * @param options Pointer to the selection options.
+ * @param menuPolicy The menu policy.
+ * @since 23
+ */
+void OH_ArkUI_SelectionOptions_SetMenuPolicy(
+    ArkUI_SelectionOptions* options, ArkUI_MenuPolicy menuPolicy);
+
+/**
+ * @brief Gets the menu policy of selection options.
+ *
+ * @param options Pointer to the selection options object.
+ * @return Returns the menu policy.
+ * @since 23
+ */
+ArkUI_MenuPolicy OH_ArkUI_SelectionOptions_GetMenuPolicy(ArkUI_SelectionOptions* options);
 /**
  * @brief Defines the text menu item for edit menu item.
  *

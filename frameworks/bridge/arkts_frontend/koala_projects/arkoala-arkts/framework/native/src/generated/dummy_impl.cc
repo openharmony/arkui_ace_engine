@@ -42295,6 +42295,24 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return reinterpret_cast<Ark_LayoutManager>(300);
     }
+    void SetTextSelectionImpl(Ark_TextController peer,
+                              const Opt_Int32* selectionStart,
+                              const Opt_Int32* selectionEnd,
+                              const Opt_SelectionOptions* options)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setTextSelection(");
+        WriteToString(&out, selectionStart);
+        out.append(", ");
+        WriteToString(&out, selectionEnd);
+        out.append(", ");
+        WriteToString(&out, options);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     } // TextControllerAccessor
     namespace TextEditControllerExAccessor {
     void DestroyPeerImpl(Ark_TextEditControllerEx peer)
@@ -48403,6 +48421,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TextControllerAccessor::CloseSelectionMenuImpl,
             TextControllerAccessor::SetStyledStringImpl,
             TextControllerAccessor::GetLayoutManagerImpl,
+            TextControllerAccessor::SetTextSelectionImpl,
         };
         return &TextControllerAccessorImpl;
     }
