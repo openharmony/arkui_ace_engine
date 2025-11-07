@@ -39,6 +39,7 @@ using namespace testing::ext;
 const std::string COLOR_RED = "#FFFF0000";
 const std::string COLOR_BLACK = "#FF000000";
 const std::string COLOR_TRANSPARENT = "#00000000";
+const std::string COLOR_FOREGROUND = "#00000001";
 const auto COLOR_COLOR_RES = CreateResource("color_name", ResourceType::COLOR);
 const auto COLOR_ID_RES = CreateResource(1234, ResourceType::COLOR);
 const auto COLOR_STRING_RES = CreateResource("color_name", ResourceType::STRING);
@@ -781,7 +782,7 @@ HWTEST_F(MenuModifierTest, setMenuItemGroupDividerUndefinedTest, TestSize.Level1
     endMarginCheckValue = GetAttrValue<std::string>(dividerObject, "endMargin");
     EXPECT_EQ(endMarginCheckValue, DIVIDER_DEFAULT_0_INVALID);
     colorCheckValue = GetAttrValue<std::string>(dividerObject, "color");
-    EXPECT_EQ(colorCheckValue, COLOR_TRANSPARENT);
+    EXPECT_EQ(colorCheckValue, COLOR_FOREGROUND);
 }
 
 /**
