@@ -52,6 +52,7 @@ export class PropRefDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
         StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`PropRef ${this.getTraceInfo()}`);
         const value = this.localValue.get(this.shouldAddRef());
         ObserveSingleton.instance.setV1RenderId(value as NullableObject);
+        uiUtils.builtinContainersAddRefAnyKey(value);
         return value;
     }
 
