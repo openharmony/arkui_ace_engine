@@ -50,6 +50,7 @@ export class DumpInfo {
 }
 
 export class StateMgmtDFX {
+    public static enableDebug: boolean = false;
     static getDecoratedVariableInfo(view: Any, dumpInfo: DumpInfo, isV2: boolean): void {
         if (isV2) {
             StateMgmtDFX.dumpV2VariableInfo(view, dumpInfo);
