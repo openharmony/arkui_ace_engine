@@ -286,6 +286,7 @@ private:
     void UpdateSearchSymbolIconColor();
     void UpdateCancelSymbolIconColor();
     void UpdateSearchSymbol();
+    void UpdateTextFieldColor();
 
     void CreateOrUpdateSymbol(int32_t index, bool isCreateNode, bool isFromModifier);
     void CreateOrUpdateImage(int32_t index, bool isCreateNode);

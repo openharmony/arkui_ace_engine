@@ -2511,4 +2511,13 @@ std::string LayoutProperty::GetAlignmentStringFromLocalized(
     }
     return "center";
 }
+
+void LayoutProperty::UpdateIsUserSetBackgroundColor(bool value)
+{
+    isUserSetBackgroundColor_ = value;
+}
+bool LayoutProperty::GetIsUserSetBackgroundColor() const
+{
+    return isUserSetBackgroundColor_;
+}
 } // namespace OHOS::Ace::NG

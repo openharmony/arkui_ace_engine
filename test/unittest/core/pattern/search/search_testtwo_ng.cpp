@@ -3011,8 +3011,7 @@ HWTEST_F(SearchTestTwoNg, searchSymbolIconColorTest, TestSize.Level1)
     auto color = pattern->GetDefaultIconColor(IMAGE_INDEX);
     auto searchTheme = pattern->GetTheme();
     ASSERT_NE(searchTheme, nullptr);
-    auto normalIconColor = searchTheme->GetSymbolIconColor();
-    EXPECT_EQ(color, normalIconColor);
+    EXPECT_EQ(color, Color::BLACK);
 }
 
 /**

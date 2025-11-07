@@ -5089,7 +5089,11 @@ void TextPattern::DumpTextStyleInfo()
                 textLayoutProp->HasTextColor() ? textLayoutProp->GetTextColorValue(Color::BLACK).ColorToString() : "Na")
             .append(" ForegroundColor: ")
             .append(
-                renderContext->HasForegroundColor() ? renderContext->GetForegroundColorValue().ColorToString() : "Na"));
+            renderContext->HasForegroundColor() ? renderContext->GetForegroundColorValue().ColorToString() : "Na")
+            .append(" TextColorFlagByUser: ")
+            .append(textLayoutProp->HasTextColorFlagByUser()
+                ? std::to_string(textLayoutProp->GetTextColorFlagByUserValue(false))
+                : "Na"));
     if (renderContext->HasForegroundColorStrategy()) {
         auto strategy = static_cast<int32_t>(renderContext->GetForegroundColorStrategyValue());
         DumpLog::GetInstance().AddDesc(std::string("ForegroundColorStrategy: ").append(std::to_string(strategy)));
@@ -5248,7 +5252,7 @@ void TextPattern::DumpTextStyleInfo4()
         dumpLog.AddDesc(
             std::string("SymbolColorList: ")
                 .append(StringUtils::SymbolColorListToString(textStyle_->GetSymbolColorList()))
-                .append("prop: ")
+                .append(" prop: ")
                 .append(textLayoutProp->HasSymbolColorList()
                             ? StringUtils::SymbolColorListToString(textLayoutProp->GetSymbolColorList().value())
                             : "Na"));

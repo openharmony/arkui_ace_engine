@@ -623,6 +623,7 @@ void ViewAbstract::SetBackgroundColor(const Color& color)
     }
 
     ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, updateColor);
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, IsUserSetBackgroundColor, true);
 }
 
 void ViewAbstract::SetBackgroundColorWithResourceObj(const Color& color, const RefPtr<ResourceObject>& resObj)
@@ -661,6 +662,7 @@ void ViewAbstract::SetBackgroundColor(FrameNode* frameNode, const Color& color)
     CHECK_NULL_VOID(pattern);
     pattern->RemoveResObj("backgroundColor");
     ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, color, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, IsUserSetBackgroundColor, true, frameNode);
 }
 
 void ViewAbstract::SetBackgroundColor(FrameNode* frameNode, const Color& color, const RefPtr<ResourceObject>& resObj)
@@ -681,6 +683,7 @@ void ViewAbstract::SetBackgroundColor(FrameNode* frameNode, const Color& color, 
     };
     pattern->AddResObj("backgroundColor", resObj, std::move(updateFunc));
     ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, color, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, IsUserSetBackgroundColor, true, frameNode);
 }
 
 void ViewAbstract::SetBackgroundImage(const ImageSourceInfo& src)
