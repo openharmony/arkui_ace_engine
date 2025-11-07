@@ -464,13 +464,13 @@ HWTEST_F(IndicatorComponentModifierTests, setStyleTestDigitPaintValid, TestSize.
     EXPECT_EQ(layoutProperty->GetSelectedFontColor().value(), Color(0x11223344));
 
     ASSERT_TRUE(layoutProperty->GetFontSize().has_value());
-    EXPECT_EQ(layoutProperty->GetFontSize().value(), 123.4_vp);
+    EXPECT_EQ(layoutProperty->GetFontSize().value(), 123.4_fp);
 
     ASSERT_TRUE(layoutProperty->GetFontWeight().has_value());
     EXPECT_EQ(layoutProperty->GetFontWeight().value(), FontWeight::REGULAR);
 
     ASSERT_TRUE(layoutProperty->GetSelectedFontSize().has_value());
-    EXPECT_EQ(layoutProperty->GetSelectedFontSize().value(), 43.21_vp);
+    EXPECT_EQ(layoutProperty->GetSelectedFontSize().value(), 43.21_fp);
 
     ASSERT_TRUE(layoutProperty->GetSelectedFontWeight().has_value());
     EXPECT_EQ(layoutProperty->GetSelectedFontWeight().value(), FontWeight::BOLD);

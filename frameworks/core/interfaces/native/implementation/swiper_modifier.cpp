@@ -221,7 +221,7 @@ bool CheckSwiperParameters(SwiperParameters& p)
     ResetIfInvalid(p.selectedItemWidth);
     p.selectedItemWidth = p.selectedItemWidth ? p.selectedItemWidth : 6.0_vp;
     ResetIfInvalid(p.selectedItemHeight);
-    p.selectedItemHeight = p.selectedItemHeight ? p.itemWidth : 6.0_vp;
+    p.selectedItemHeight = p.selectedItemHeight ? p.selectedItemHeight : 6.0_vp;
 
     if (p.maxDisplayCountVal && (*(p.maxDisplayCountVal) < 6 || *(p.maxDisplayCountVal) > 9)) {
         p.maxDisplayCountVal.reset();
