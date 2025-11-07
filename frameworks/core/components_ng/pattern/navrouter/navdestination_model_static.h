@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/navigation/navigation_options.h"
 #include "core/components_ng/pattern/navrouter/navdestination_context.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
+#include "core/components_ng/pattern/navrouter/navdestination_scrollable_processor.h"
 
 namespace OHOS::Ace::NG {
 
@@ -34,9 +35,14 @@ public:
         const std::string& backButtonAccessibilityText = "");
     static void SetMenuItems(FrameNode* frameNode, std::vector<NG::BarItem>&& menuItems);
     static void SetMenuOptions(FrameNode* frameNode, NavigationMenuOptions&& opt);
+    static void UpdateBindingWithScrollable(FrameNode* frameNode,
+        std::function<void(const RefPtr<NG::NavDestinationScrollableProcessor>& processor)>&& callback);
+    static void SetScrollableProcessor(const RefPtr<FrameNode> frameNode,
+        const std::function<RefPtr<NG::NavDestinationScrollableProcessor>()>& creator);
     static void CreateBackButton(const RefPtr<NavDestinationGroupNode>& navDestinationNode);
     static void CreateImageButton(const RefPtr<NavDestinationGroupNode>& navDestinationNode);
-    static RefPtr<NG::FrameNode> CreateFrameNode(int32_t nodeId, std::function<void()>&& deepRenderFunc = nullptr);
+    static RefPtr<NG::FrameNode> CreateFrameNode(
+        int32_t nodeId, const RefPtr<NavPathInfo>& navPathInfo, std::function<void()>&& deepRenderFunc = nullptr);
     static void SetSystemTransitionType(FrameNode* frameNode, NG::NavigationSystemTransitionType type);
     static void SetOnActive(FrameNode* frameNode, std::function<void(int32_t)>&& onActive);
     static void SetOnInactive(FrameNode* frameNode, std::function<void(int32_t)>&& onInactive);

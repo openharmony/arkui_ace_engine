@@ -200,8 +200,8 @@ export class SwiperController implements MaterializedBase {
         this.finishAnimation_serialize(callback__casted)
         return
     }
-    public preloadItems(indices: KInt32ArrayPtr | undefined): Promise<void> {
-        const indices_casted = indices as (KInt32ArrayPtr | undefined)
+    public preloadItems(indices: Array<int32> | undefined): Promise<void> {
+        const indices_casted = indices as (Array<int32> | undefined)
         return this.preloadItems_serialize(indices_casted)
     }
     showNext_serialize(): void {
@@ -249,7 +249,7 @@ export class SwiperController implements MaterializedBase {
         ArkUIGeneratedNativeModule._SwiperController_finishAnimation(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    preloadItems_serialize(indices: KInt32ArrayPtr | undefined): Promise<void> {
+    preloadItems_serialize(indices: Array<int32> | undefined): Promise<void> {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (indices !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)

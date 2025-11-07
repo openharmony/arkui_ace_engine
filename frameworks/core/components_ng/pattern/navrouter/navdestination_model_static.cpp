@@ -195,6 +195,37 @@ void NavDestinationModelStatic::SetMenuOptions(FrameNode* frameNode, NavigationM
     navDestinationPattern->SetMenuOptions(opt);
 }
 
+void NavDestinationModelStatic::UpdateBindingWithScrollable(FrameNode* frameNode,
+    std::function<void(const RefPtr<NG::NavDestinationScrollableProcessor>& processor)>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto node = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(node);
+    auto pattern = node->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto processor = pattern->GetScrollableProcessor();
+    callback(processor);
+}
+
+void NavDestinationModelStatic::SetScrollableProcessor(const RefPtr<FrameNode> frameNode,
+    const std::function<RefPtr<NG::NavDestinationScrollableProcessor>()>& creator)
+{
+    CHECK_NULL_VOID(creator);
+    CHECK_NULL_VOID(frameNode);
+    auto node = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(node);
+    auto pattern = node->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (!pattern->GetScrollableProcessor()) {
+        auto processor = creator();
+        if (processor) {
+            processor->SetNodeId(node->GetId());
+            processor->SetNavDestinationPattern(WeakPtr(pattern));
+        }
+        pattern->SetScrollableProcessor(processor);
+    }
+}
+
 void NavDestinationModelStatic::CreateBackButton(const RefPtr<NavDestinationGroupNode>& navDestinationNode)
 {
     int32_t titleBarNodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -292,7 +323,8 @@ void NavDestinationModelStatic::CreateImageButton(const RefPtr<NavDestinationGro
     backButtonNode->MarkModifyDone();
 }
 
-RefPtr<FrameNode> NavDestinationModelStatic::CreateFrameNode(int32_t nodeId, std::function<void()>&& deepRenderFunc)
+RefPtr<FrameNode> NavDestinationModelStatic::CreateFrameNode(
+    int32_t nodeId, const RefPtr<NavPathInfo>& navPathInfo, std::function<void()>&& deepRenderFunc)
 {
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVDESTINATION_VIEW_ETS_TAG, nodeId);
     auto deepRender = [nodeId, deepRenderFunc = std::move(deepRenderFunc)]() -> RefPtr<UINode> {
@@ -312,7 +344,6 @@ RefPtr<FrameNode> NavDestinationModelStatic::CreateFrameNode(int32_t nodeId, std
         return parent;
     };
     auto ctx = AceType::MakeRefPtr<NG::NavDestinationContext>();
-    auto navPathInfo = AceType::MakeRefPtr<NavPathInfo>();
     ctx->SetNavPathInfo(navPathInfo);
     auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG, nodeId,
         [shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(std::move(deepRender)), ctx]() {

@@ -43,7 +43,7 @@ class UiObserver {
 public:
     explicit UiObserver(int32_t instanceId) : id_(instanceId) {}
 
-    void CallJsFunction(ani_env* env, std::list<ani_ref>& cbList)
+    static void CallJsFunction(ani_env* env, std::list<ani_ref>& cbList)
     {
         std::vector<ani_ref> vec;
         ani_ref fnReturnVal;
@@ -415,7 +415,7 @@ public:
     }
 
     // UIObserver.on(type: "navDestinationUpdate", callback)
-    void RegisterNavigationCallback(ani_ref& cb)
+    static void RegisterNavigationCallback(ani_ref& cb)
     {
         if (std::find(unspecifiedNavigationListeners_.begin(), unspecifiedNavigationListeners_.end(), cb) !=
             unspecifiedNavigationListeners_.end()) {
@@ -425,7 +425,7 @@ public:
     }
 
     // UIObserver.off(type: "navDestinationUpdate", callback)
-    void UnRegisterNavigationCallback(ani_env* env, ani_ref& cb)
+    static void UnRegisterNavigationCallback(ani_env* env, ani_ref& cb)
     {
         if (cb == nullptr) {
             unspecifiedNavigationListeners_.clear();
@@ -434,12 +434,12 @@ public:
 
         unspecifiedNavigationListeners_.erase(
             std::remove_if(unspecifiedNavigationListeners_.begin(), unspecifiedNavigationListeners_.end(),
-                [env, cb, this](ani_ref cb1) { return AniEqual(env, cb, cb1); }),
+                [env, cb](ani_ref cb1) { return AniEqual(env, cb, cb1); }),
             unspecifiedNavigationListeners_.end());
     }
 
     // UIObserver.on(type: "navDestinationUpdate", options, callback)
-    void RegisterNavigationCallback(std::string navigationId, ani_ref& cb)
+    static void RegisterNavigationCallback(std::string navigationId, ani_ref& cb)
     {
         auto iter = specifiedCNavigationListeners_.find(navigationId);
         if (iter == specifiedCNavigationListeners_.end()) {
@@ -454,7 +454,7 @@ public:
     }
 
     // UIObserver.off(type: "navDestinationUpdate", optisons, callback)
-    void UnRegisterNavigationCallback(ani_env* env, std::string navigationId, ani_ref& cb)
+    static void UnRegisterNavigationCallback(ani_env* env, std::string navigationId, ani_ref& cb)
     {
         auto iter = specifiedCNavigationListeners_.find(navigationId);
         if (iter == specifiedCNavigationListeners_.end()) {
@@ -466,8 +466,7 @@ public:
             return;
         }
         holder.erase(std::remove_if(
-            holder.begin(), holder.end(), [env, cb, this](ani_ref cb1) { return AniEqual(env, cb, cb1); }),
-            holder.end());
+            holder.begin(), holder.end(), [env, cb](ani_ref cb1) { return AniEqual(env, cb, cb1); }), holder.end());
     }
 
     void RegisterTabChangeCallback(ani_ref& cb)
@@ -543,7 +542,7 @@ public:
     }
 
     // UIObserver.on(type: "routerPageUpdate", UIContext, callback)
-    void RegisterRouterPageCallback(int32_t uiContextInstanceId, ani_ref& cb)
+    static void RegisterRouterPageCallback(int32_t uiContextInstanceId, ani_ref& cb)
     {
         if (uiContextInstanceId == 0) {
             uiContextInstanceId = Container::CurrentIdSafelyWithCheck();
@@ -561,7 +560,7 @@ public:
     }
 
     // UIObserver.off(type: "routerPageUpdate", UIContext, callback)
-    void UnRegisterRouterPageCallback(ani_env* env, int32_t uiContextInstanceId, ani_ref& cb)
+    static void UnRegisterRouterPageCallback(ani_env* env, int32_t uiContextInstanceId, ani_ref& cb)
     {
         if (uiContextInstanceId == 0) {
             uiContextInstanceId = Container::CurrentIdSafelyWithCheck();
@@ -576,8 +575,7 @@ public:
             return;
         }
         holder.erase(std::remove_if(
-                         holder.begin(), holder.end(), [env, cb, this](ani_ref cb1) { return AniEqual(env, cb, cb1); }),
-            holder.end());
+            holder.begin(), holder.end(), [env, cb](ani_ref cb1) { return AniEqual(env, cb, cb1); }), holder.end());
     }
 
     void HandleDensityChange(ani_env* env, double density)
@@ -666,7 +664,7 @@ public:
         CallJsFunction(env, holder);
     }
 
-    void HandleNavigationStateChange(ani_env* env, const NG::NavDestinationInfo& info)
+    static void HandleNavigationStateChange(ani_env* env, const NG::NavDestinationInfo& info)
     {
         auto unspecifiedHolder = unspecifiedNavigationListeners_;
         std::vector<ani_ref> cbParam;
@@ -696,7 +694,8 @@ public:
         }
     }
 
-    void HandleRouterPageStateChange(ani_env* env, NG::AbilityContextInfo& info, const NG::RouterPageInfoNG& pageInfo)
+    static void HandleRouterPageStateChange(ani_env* env, NG::AbilityContextInfo& info,
+        const NG::RouterPageInfoNG& pageInfo)
     {
         auto currentId = Container::CurrentIdSafelyWithCheck();
         auto iter = specifiedRouterPageListeners_.find(currentId);
@@ -749,7 +748,7 @@ public:
         }
     }
 
-    ani_boolean AniEqual(ani_env* env, ani_ref cb, ani_ref cb1)
+    static ani_boolean AniEqual(ani_env* env, ani_ref cb, ani_ref cb1)
     {
         ani_boolean isEquals = false;
         env->Reference_StrictEquals(cb, cb1, &isEquals);
@@ -767,7 +766,7 @@ public:
         env->Object_SetPropertyByName_Double(obj, "density", ani_double(density));
     }
 
-    void CreateNavigationInfo(ani_env* env, const NG::NavDestinationInfo& info, ani_object& res)
+    static void CreateNavigationInfo(ani_env* env, const NG::NavDestinationInfo& info, ani_object& res)
     {
         ani_class cls;
         env->FindClass(ANI_NAVDESTINATION_INFO_CLS, &cls);
@@ -803,7 +802,7 @@ public:
         env->Object_SetPropertyByName_Ref(res, "mode", navModeItem);
     }
 
-    void CreateRouterPageInfo(ani_env* env, const NG::RouterPageInfoNG& pageInfo, ani_object& res)
+    static void CreateRouterPageInfo(ani_env* env, const NG::RouterPageInfoNG& pageInfo, ani_object& res)
     {
         ani_class cls;
         env->FindClass(ANI_ROUTER_INFO_CLS, &cls);
@@ -921,9 +920,9 @@ private:
 
     std::unordered_map<int32_t, std::list<ani_ref>> specifiedWillClickCbMap_;
     std::unordered_map<int32_t, std::list<ani_ref>> specifiedDidClickCbMap_;
-    std::list<ani_ref> unspecifiedNavigationListeners_;
-    std::unordered_map<std::string, std::list<ani_ref>> specifiedCNavigationListeners_;
-    std::unordered_map<int32_t, std::list<ani_ref>> specifiedRouterPageListeners_;
+    static std::list<ani_ref> unspecifiedNavigationListeners_;
+    static std::unordered_map<std::string, std::list<ani_ref>> specifiedCNavigationListeners_;
+    static std::unordered_map<int32_t, std::list<ani_ref>> specifiedRouterPageListeners_;
     std::unordered_map<int32_t, std::list<ani_ref>> specifiedWillDrawCbMap_;
     std::unordered_map<int32_t, std::list<ani_ref>> specifiedDidLayoutCbMap_;
 
@@ -931,6 +930,10 @@ private:
     std::list<ani_ref> unspecifiedTabChangeListeners_;
     std::unordered_map<std::string, std::list<ani_ref>> specifiedTabChangeListeners_;
 };
+
+std::list<ani_ref> UiObserver::unspecifiedNavigationListeners_;
+std::unordered_map<std::string, std::list<ani_ref>> UiObserver::specifiedCNavigationListeners_;
+std::unordered_map<int32_t, std::list<ani_ref>> UiObserver::specifiedRouterPageListeners_;
 
 static UiObserver* Unwrapp(ani_env* env, ani_object object)
 {
@@ -941,7 +944,7 @@ static UiObserver* Unwrapp(ani_env* env, ani_object object)
     return reinterpret_cast<UiObserver*>(nativeAddr);
 }
 
-std::string ANIUtils_ANIStringToStdString(ani_env* env, ani_string ani_str)
+static std::string ANIUtils_ANIStringToStdString(ani_env* env, ani_string ani_str)
 {
     ani_size strSize;
     env->String_GetUTF8Size(ani_str, &strSize);
@@ -1071,6 +1074,43 @@ static void OffNavDestinationUpdateWithId([[maybe_unused]] ani_env* env, [[maybe
     observer->UnRegisterNavigationCallback(env, navigationId, fnObjGlobalRef);
 }
 
+static void OnNavDestinationUpdateWithIdContext([[maybe_unused]] ani_env* env,
+    ani_string type, ani_object options, ani_fn_object fnObj)
+{
+    if (!fnObj) {
+        return;
+    }
+    ani_ref aniNavId;
+    env->Object_GetPropertyByName_Ref(options, "navigationId", &aniNavId);
+    std::string navigationId = ANIUtils_ANIStringToStdString(env, reinterpret_cast<ani_string>(aniNavId));
+    ani_ref fnObjGlobalRef = nullptr;
+    env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
+
+    static std::once_flag onceFlag;
+    std::call_once(onceFlag, [&env]() {
+        auto navigationStateChangeCalback = [env](const NG::NavDestinationInfo& info) {
+            UiObserver::HandleNavigationStateChange(env, info);
+        };
+        NG::UIObserverHandler::GetInstance().SetHandleNavigationChangeFuncForAni(navigationStateChangeCalback);
+    });
+
+    UiObserver::RegisterNavigationCallback(navigationId, fnObjGlobalRef);
+}
+
+static void OffNavDestinationUpdateWithIdContext([[maybe_unused]] ani_env* env,
+    ani_string type, ani_object options, ani_fn_object fnObj)
+{
+    if (!fnObj) {
+        return;
+    }
+    ani_ref aniNavId;
+    env->Object_GetPropertyByName_Ref(options, "navigationId", &aniNavId);
+    std::string navigationId = ANIUtils_ANIStringToStdString(env, reinterpret_cast<ani_string>(aniNavId));
+    ani_ref fnObjGlobalRef = nullptr;
+    env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
+    UiObserver::UnRegisterNavigationCallback(env, navigationId, fnObjGlobalRef);
+}
+
 static void onNavDestinationUpdate([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
 
     ani_fn_object fnObj)
@@ -1106,6 +1146,38 @@ static void offNavDestinationUpdate([[maybe_unused]] ani_env* env, [[maybe_unuse
     }
 
     observer->UnRegisterNavigationCallback(env, fnObjGlobalRef);
+}
+
+static void onNavDestinationUpdateContext([[maybe_unused]] ani_env* env, ani_fn_object fnObj)
+{
+    if (fnObj == nullptr) {
+        LOGE("observer-ani callback is undefined.");
+        return;
+    }
+    ani_ref fnObjGlobalRef = nullptr;
+    env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
+
+    static std::once_flag onceFlag;
+    std::call_once(onceFlag, [&env]() {
+        auto navigationStateChangeCalback = [env](const NG::NavDestinationInfo& info) {
+            UiObserver::HandleNavigationStateChange(env, info);
+        };
+        NG::UIObserverHandler::GetInstance().SetHandleNavigationChangeFuncForAni(navigationStateChangeCalback);
+    });
+
+    UiObserver::RegisterNavigationCallback(fnObjGlobalRef);
+}
+
+static void offNavDestinationUpdateContext([[maybe_unused]] ani_env* env, ani_fn_object fnObj)
+{
+    ani_ref fnObjGlobalRef = nullptr;
+    ani_boolean isUndef = ANI_FALSE;
+    env->Reference_IsUndefined(fnObj, &isUndef);
+    if (isUndef != ANI_TRUE) {
+        env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
+    }
+
+    UiObserver::UnRegisterNavigationCallback(env, fnObjGlobalRef);
 }
 
 static void onRouterPageUpdate([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object, ani_fn_object fnObj)
@@ -1144,6 +1216,43 @@ static void offRouterPageUpdate([[maybe_unused]] ani_env* env, [[maybe_unused]] 
     observer->UnRegisterRouterPageCallback(env, idMs, fnObjGlobalRef);
 }
 
+static void onRouterPageUpdateContext([[maybe_unused]] ani_env* env, ani_object uiContext, ani_fn_object fnObj)
+{
+    if (fnObj == nullptr) {
+        LOGE("observer-ani callback is undefined.");
+        return;
+    }
+    ani_ref fnObjGlobalRef = nullptr;
+    env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
+
+    static std::once_flag onceFlag;
+    std::call_once(onceFlag, [&env]() {
+        auto routerPageInfoChangeCallback = [env](
+            NG::AbilityContextInfo& context, const NG::RouterPageInfoNG& info) {
+            UiObserver::HandleRouterPageStateChange(env, context, info);
+        };
+        NG::UIObserverHandler::GetInstance().SetHandleRouterPageChangeFuncForAni(routerPageInfoChangeCallback);
+    });
+
+    ani_int idMs = 0;
+    env->Object_GetPropertyByName_Int(uiContext, "instanceId_", &idMs);
+    UiObserver::RegisterRouterPageCallback(idMs, fnObjGlobalRef);
+}
+
+static void offRouterPageUpdateContext([[maybe_unused]] ani_env* env, ani_object uiContext, ani_fn_object fnObj)
+{
+    ani_ref fnObjGlobalRef = nullptr;
+    ani_boolean isUndef = ANI_FALSE;
+    env->Reference_IsUndefined(fnObj, &isUndef);
+    if (isUndef != ANI_TRUE) {
+        env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
+    }
+
+    ani_int idMs = 0;
+    env->Object_GetPropertyByName_Int(uiContext, "instanceId_", &idMs);
+    UiObserver::UnRegisterRouterPageCallback(env, idMs, fnObjGlobalRef);
+}
+
 static void onNavDestinationSwitch([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
     ani_fn_object fnObj)
 {
@@ -1168,6 +1277,26 @@ static void offNavDestinationSwitch([[maybe_unused]] ani_env* env, [[maybe_unuse
         LOGE("observer-ani context is null.");
         return;
     }
+    ani_ref fnObjGlobalRef = nullptr;
+    ani_boolean isUndef = ANI_FALSE;
+    env->Reference_IsUndefined(fnObj, &isUndef);
+    if (isUndef != ANI_TRUE) {
+        env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
+    }
+}
+
+static void onNavDestinationSwitchContext([[maybe_unused]] ani_env* env, ani_fn_object fnObj)
+{
+    if (fnObj == nullptr) {
+        LOGE("observer-ani callback is undefined.");
+        return;
+    }
+    ani_ref fnObjGlobalRef = nullptr;
+    env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
+}
+
+static void offNavDestinationSwitchContext([[maybe_unused]] ani_env* env, ani_fn_object fnObj)
+{
     ani_ref fnObjGlobalRef = nullptr;
     ani_boolean isUndef = ANI_FALSE;
     env->Reference_IsUndefined(fnObj, &isUndef);
@@ -1201,6 +1330,32 @@ static void offNavDestinationSwitchWithId([[maybe_unused]] ani_env* env, [[maybe
     }
     auto* observer = Unwrapp(env, object);
     if (!observer) {
+        return;
+    }
+    ani_ref aniNavId;
+    env->Object_GetPropertyByName_Ref(options, "navigationId", &aniNavId);
+    std::string navigationId = ANIUtils_ANIStringToStdString(env, reinterpret_cast<ani_string>(aniNavId));
+    ani_ref fnObjGlobalRef = nullptr;
+    env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
+}
+
+static void onNavDestinationSwitchWithIdContext([[maybe_unused]] ani_env* env, ani_object options,
+    ani_fn_object fnObj)
+{
+    if (!fnObj) {
+        return;
+    }
+    ani_ref aniNavId;
+    env->Object_GetPropertyByName_Ref(options, "navigationId", &aniNavId);
+    std::string navigationId = ANIUtils_ANIStringToStdString(env, reinterpret_cast<ani_string>(aniNavId));
+    ani_ref fnObjGlobalRef = nullptr;
+    env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
+}
+
+static void offNavDestinationSwitchWithIdContext([[maybe_unused]] ani_env* env, ani_object options,
+    ani_fn_object fnObj)
+{
+    if (!fnObj) {
         return;
     }
     ani_ref aniNavId;
@@ -1362,6 +1517,33 @@ bool ANI_ConstructorForAni(ani_env* env)
     }
     std::array methods = {
         ani_native_function { "createUIObserver", nullptr, reinterpret_cast<void*>(OHOS::Ace::CreateObserver) },
+        ani_native_function {
+            "onRouterPageUpdate", nullptr, reinterpret_cast<void*>(OHOS::Ace::onRouterPageUpdateContext) },
+        ani_native_function {
+            "offRouterPageUpdate", nullptr, reinterpret_cast<void*>(OHOS::Ace::offRouterPageUpdateContext) },
+        ani_native_function { "onNavDestinationUpdate", "C{std.core.Function1}:",
+            reinterpret_cast<void*>(OHOS::Ace::onNavDestinationUpdateContext) },
+        ani_native_function { "offNavDestinationUpdate", "C{std.core.Function1}:",
+            reinterpret_cast<void*>(OHOS::Ace::offNavDestinationUpdateContext) },
+        ani_native_function {
+            "onNavDestinationUpdate",
+            "C{@ohos.arkui.observer.uiObserver.NavDestinationSwitchObserverOptions}C{std.core.Function1}:",
+            reinterpret_cast<void*>(OHOS::Ace::OnNavDestinationUpdateWithIdContext) },
+        ani_native_function { "offNavDestinationUpdate",
+            "C{@ohos.arkui.observer.uiObserver.NavDestinationSwitchObserverOptions}C{std.core.Function1}:",
+            reinterpret_cast<void*>(OHOS::Ace::OffNavDestinationUpdateWithIdContext) },
+        ani_native_function { "onNavDestinationSwitch", "C{std.core.Function1}:",
+            reinterpret_cast<void*>(OHOS::Ace::onNavDestinationSwitchContext) },
+        ani_native_function { "offNavDestinationSwitch", "C{std.core.Function1}:",
+            reinterpret_cast<void*>(OHOS::Ace::offNavDestinationSwitchContext) },
+        ani_native_function {
+            "onNavDestinationSwitch",
+            "C{@ohos.arkui.observer.uiObserver.NavDestinationSwitchObserverOptions}C{std.core.Function1}:",
+            reinterpret_cast<void*>(OHOS::Ace::onNavDestinationSwitchWithIdContext) },
+        ani_native_function {
+            "offNavDestinationSwitch",
+            "C{@ohos.arkui.observer.uiObserver.NavDestinationSwitchObserverOptions}C{std.core.Function1}:",
+            reinterpret_cast<void*>(OHOS::Ace::offNavDestinationSwitchWithIdContext) },
     };
 
     if (ANI_OK != env->Namespace_BindNativeFunctions(ns, methods.data(), methods.size())) {
