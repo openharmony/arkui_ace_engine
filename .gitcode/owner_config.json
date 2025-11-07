@@ -186,6 +186,8 @@
         ],
         "arkuicodepulse": [
             "xi-heqiong",
+            "CCFFWW",
+            "hehongyang3",
             "ilyaerokhin",
             "spirinandrey",
             "huaweimaxuchu"
@@ -279,8 +281,11 @@
         "Hu_ZeQi": {
             "info": "[swiper huzeqi]"
         },
-        "cheng-feiwang": {
-            "info": "[模态类组件 chenfeiwang]"
+        "CCFFWW": {
+            "info": "[模态类组件 chengfeiwang]"
+        },
+        "hehongyang3": {
+            "info": "[视效动效组件 hehongyang]"
         },
         "H-xinwei": {
             "info": "[模态类组件 huangxinwei]"
