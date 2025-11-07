@@ -2444,9 +2444,17 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight,
 {
     CHECK_RUN_ON(UI);
     // prevent repeated trigger with same keyboardHeight
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
+    if (!forceChange && NearEqual(keyboardHeight, safeAreaManager_->GetKeyboardInset().Length()) &&
+        prevKeyboardAvoidMode_ == safeAreaManager_->GetKeyBoardAvoidMode()) {
+        return;
+    }
+    prevKeyboardAvoidMode_ = safeAreaManager_->GetKeyBoardAvoidMode();
+#else
     if (!forceChange && NearEqual(keyboardHeight, safeAreaManager_->GetKeyboardInset().Length())) {
         return;
     }
+#endif
 
     ACE_FUNCTION_TRACE();
 #ifdef ENABLE_ROSEN_BACKEND
