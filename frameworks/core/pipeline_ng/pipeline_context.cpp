@@ -823,6 +823,10 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
     FlushTouchEvents();
     FlushDragEvents();
     frameMetrics.inputHandlingDuration = GetSysTimestamp() - startTimestamp;
+    ACE_SCOPED_TRACE_COMMERCIAL("UIVsyncTask[timestamp:%" PRIu64 "][vsyncID:%" PRIu64
+                                "][inputHandlingDurationTimestamp:%" PRIu64
+                                "][inputHandlingDurationEndTimestamp:%" PRIu64 "]",
+        nanoTimestamp, frameCount, startTimestamp, GetSysTimestamp());
     UpdateDVSyncTime(nanoTimestamp, abilityName, vsyncPeriod);
     lastVSyncTime_ = nanoTimestamp;
     FlushFrameCallbackFromCAPI(nanoTimestamp, frameCount);
@@ -875,6 +879,10 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
     frameMetrics.firstDrawFrame = isFirstFlushMessages_;
     taskScheduler_->FlushAfterModifierTask();
     frameMetrics.layoutMeasureDuration = GetSysTimestamp() - startTimestamp;
+    ACE_SCOPED_TRACE_COMMERCIAL("UIVsyncTask[timestamp:%" PRIu64 "][vsyncID:%" PRIu64
+                                "][layoutMeasureDurationStartTimestamp:%" PRIu64
+                                "][layoutMeasureDurationEndTimestamp:%" PRIu64 "][firstDrawFrame:%d]",
+        nanoTimestamp, frameCount, startTimestamp, GetSysTimestamp(), isFirstFlushMessages_);
     // the application is in the background and the dark and light colors are switched.
     if (!onShow_ && backgroundColorModeUpdated_) {
         backgroundColorModeUpdated_ = false;
