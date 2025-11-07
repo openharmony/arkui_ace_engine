@@ -36,7 +36,7 @@ import { UIContextImpl } from 'arkui/base/UIContextImpl';
 import { UIContextUtil } from 'arkui/base/UIContextUtil';
 
 export interface WithThemeScopeItem {
-    options: WithThemeOptions,
+    options: WithThemeOptions | undefined,
     themeScopeId: int32
 }
 
