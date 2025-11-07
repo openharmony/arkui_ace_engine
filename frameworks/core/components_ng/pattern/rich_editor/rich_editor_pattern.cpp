@@ -7386,7 +7386,7 @@ bool RichEditorPattern::HandleOnKeyBack()
 void RichEditorPattern::HandleOnUndoAction()
 {
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleOnUndoAction, IsSupportStyledUndo:%{public}d", IsSupportStyledUndo());
-    if (IsSupportStyledUndo()) {
+    if (undoManager_) {
         undoManager_->UndoByRecords();
         return;
     }
@@ -7429,7 +7429,7 @@ void RichEditorPattern::HandleOnUndoAction()
 void RichEditorPattern::HandleOnRedoAction()
 {
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleOnRedoAction, IsSupportStyledUndo:%{public}d", IsSupportStyledUndo());
-    if (IsSupportStyledUndo()) {
+    if (undoManager_) {
         undoManager_->RedoByRecords();
         return;
     }
