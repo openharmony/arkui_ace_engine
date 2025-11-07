@@ -20,7 +20,6 @@
 
 namespace OHOS::Ace::Framework {
 class JsAccessibilityManager;
-
 class FocusStrategyOsalNG : public FocusStrategyOsal {
     DECLARE_ACE_TYPE(FocusStrategyOsalNG, AceType);
 public:
@@ -39,12 +38,21 @@ public:
         const std::shared_ptr<FocusRulesCheckNode>& resultNode, Accessibility::AccessibilityElementInfo& info) override;
     bool UpdateElementInfo(
         const std::shared_ptr<FocusRulesCheckNode>& resultNode, Accessibility::AccessibilityElementInfo& info) override;
-    bool DetectElementInfoFocusableThroughAncestor(
-        const Accessibility::AccessibilityElementInfo& info, const int64_t parentId,
-        Accessibility::AccessibilityElementInfo& targetInfo);
+    Accessibility::FocusMoveResult DetectElementInfoFocusableThroughAncestor(
+        const Accessibility::AccessibilityElementInfo& info,
+        const Accessibility::AccessibilityFocusMoveParam& param,
+        std::list<Accessibility::AccessibilityElementInfo>& targetInfos,
+        const int32_t windowId);
+
 private:
-    bool CheckAndGetReadableInfoToRoot(
-        const RefPtr<NG::FrameNode>& currentFrameNode, Accessibility::AccessibilityElementInfo& targetInfo);
+    Accessibility::FocusMoveResult CheckAndGetReadableInfoToRoot(
+        const RefPtr<NG::FrameNode>& currentFrameNode, std::list<Accessibility::AccessibilityElementInfo>& targetInfos,
+        const int32_t windowId);
+    void UpdateBelongTreeIdAndParentWindowId(const int32_t windowId, Accessibility::FocusMoveResult &result);
+
+    virtual bool CheckNodeIsAvailable(const std::shared_ptr<FocusRulesCheckNode>& node);
+
+    RefPtr<NG::FrameNode> GetRootNodeFromContext();
 
     WeakPtr<JsAccessibilityManager> jsAccessibilityManager_;
     WeakPtr<PipelineBase> context_;
