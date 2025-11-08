@@ -198,7 +198,7 @@ void JSContainerPicker::SetSelectedBackground(const JSRef<JSObject>& paramObj, N
                 indicatorStyle.isDefaultBorderRadius = false;
             }
         } else if (ParseBindSheetBorderRadiusProps(borderRadius, borderRadiusProperty)) {
-            SetBorderRadiusWithCheck(indicatorStyle.borderRadius, borderRadiusProperty);
+            indicatorStyle.borderRadius = borderRadiusProperty;
             indicatorStyle.isDefaultBorderRadius = false;
         }
         RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
