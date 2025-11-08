@@ -591,4 +591,43 @@ TEST_F(ArkoalaLazyNodeTest, IsInActiveRange001)
     isInRange = lazyNode->IsInActiveRange(9, activeRangeParam);
     EXPECT_FALSE(isInRange);
 }
+
+/**
+ * @tc.name: IsInActiveRange002
+ * @tc.desc: Test ArkoalaLazyNode IsInActiveRange with isLoop = true.
+ * @tc.type: FUNC
+ */
+TEST_F(ArkoalaLazyNodeTest, IsInActiveRange002)
+{
+    auto lazyNode = AceType::MakeRefPtr<ArkoalaLazyNode>(GetNextId());
+    lazyNode->totalCount_ = 10;
+    lazyNode->isLoop_ = true;
+    int32_t cachedCount = 2;
+    int32_t activeStart = 7;
+    int32_t activeEnd = 1;
+    ActiveRangeParam activeRangeParam = {activeStart, activeEnd, cachedCount, cachedCount};
+    bool isInRange;
+
+    /**
+     * @tc.steps: step1. Test index in active range
+     * @tc.expected: index [7,9] & [0,1] should be in active range
+     */
+    isInRange = lazyNode->IsInActiveRange(7, activeRangeParam);
+    EXPECT_TRUE(isInRange);
+    isInRange = lazyNode->IsInActiveRange(9, activeRangeParam);
+    EXPECT_TRUE(isInRange);
+    isInRange = lazyNode->IsInActiveRange(0, activeRangeParam);
+    EXPECT_TRUE(isInRange);
+    isInRange = lazyNode->IsInActiveRange(1, activeRangeParam);
+    EXPECT_TRUE(isInRange);
+
+    /**
+     * @tc.steps: step2. Test index out of active range
+     * @tc.expected: index [2,6] should be out of active range
+     */
+    isInRange = lazyNode->IsInActiveRange(2, activeRangeParam);
+    EXPECT_FALSE(isInRange);
+    isInRange = lazyNode->IsInActiveRange(6, activeRangeParam);
+    EXPECT_FALSE(isInRange);
+}
 } // namespace OHOS::Ace::NG
