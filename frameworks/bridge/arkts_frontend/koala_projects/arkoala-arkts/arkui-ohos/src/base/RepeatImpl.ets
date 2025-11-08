@@ -300,8 +300,8 @@ function virtualRender<T>(
             itemBuilder(ri);
         }
     };
-    LazyForEachImplForOptions<T>(dataSource, itemGen, attributes.keyGenFunc_, true,
-        attributes.onMove_, attributes.itemDragEvent_);
+    LazyForEachImplForOptions<T>(dataSource, itemGen, attributes.keyGenFunc_,
+        attributes.onMove_, attributes.itemDragEvent_, true);
 }
 
 // onMoveFromTo has no operation in non-virtual mode
