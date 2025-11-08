@@ -27,6 +27,7 @@ import { Resource } from 'global.resource';
 import { LengthMetrics } from 'arkui/Graphics';
 import { AsyncCallback } from 'arkui/base';
 import { int32 } from "@koalaui/compat";
+import { ArkUIGeneratedNativeModule } from "#components"
 
 export enum LevelMode {
     OVERLAY = 0,
@@ -43,8 +44,9 @@ export class LevelOrder extends LevelOrderExtender {
         super(peerPtr)
     }
     public static clamp(order: number): LevelOrder {
-        const extender = LevelOrderExtender.clamp(order)
-        return new LevelOrder(extender.getPeer()!.ptr)
+        const order_casted = order as (number)
+        const retval = ArkUIGeneratedNativeModule._LevelOrderExtender_clamp(order_casted)
+        return new LevelOrder(retval)
     }
 }
 
