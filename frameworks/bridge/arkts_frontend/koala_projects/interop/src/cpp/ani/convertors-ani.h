@@ -31,6 +31,9 @@
 do {                                                                                             \
   ani_status ___res___ = (result);                                                               \
   if (___res___ != ANI_OK) {                                                                     \
+    if (env) {                                                                                   \
+      env->DescribeError();                                                                      \
+    }                                                                                            \
     INTEROP_FATAL("ANI function failed (status: %d) at " __FILE__ ": %d", ___res___,  __LINE__); \
   }                                                                                              \
 }                                                                                                \

@@ -59,6 +59,7 @@ bool registerAllModules(ani_env *aniEnv) {
     for (auto it = moduleNames.begin(); it != moduleNames.end(); ++it) {
         std::string classpath = AniExports::getInstance()->getClasspath(*it);
         ani_class nativeModule = nullptr;
+        auto& env = aniEnv;
         CHECK_ANI_FATAL(aniEnv->FindClass(classpath.c_str(), &nativeModule));
         if (nativeModule == nullptr) {
             LOGE("Cannot find managed class %s", classpath.c_str());
@@ -75,6 +76,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result) {
     LOGE("Use ANI")
     ani_env* aniEnv = nullptr;
     *result = 1;
+    auto& env = aniEnv;
     CHECK_ANI_FATAL(vm->GetEnv(/* version */ 1, (ani_env**)&aniEnv));
     if (!registerAllModules(aniEnv)) {
         LOGE("Failed to register ANI modules");
@@ -178,6 +180,7 @@ bool setKoalaANICallbackDispatcher(
     const char* dispatcherMethodSig
 ) {
     g_koalaANICallbackDispatcher.clazz = clazz;
+    auto& env = aniEnv;
     CHECK_ANI_FATAL(aniEnv->Class_FindStaticMethod(
         clazz, dispatcherMethodName, dispatcherMethodSig,
         &g_koalaANICallbackDispatcher.method
