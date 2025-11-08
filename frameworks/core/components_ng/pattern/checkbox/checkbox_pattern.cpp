@@ -656,7 +656,7 @@ void CheckBoxPattern::ChangeSelfStatusAndNotify(const RefPtr<CheckBoxPaintProper
             SetLastSelect(isSelected);
             auto checkboxEventHub = GetEventHub<CheckBoxEventHub>();
             CHECK_NULL_VOID(checkboxEventHub);
-            TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "checkbox node %{public}d update change event %{public}d",
+            TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "checkbox node %{public}d update change event %{public}d",
                 host->GetId(), isSelected);
             checkboxEventHub->UpdateChangeEvent(isSelected);
         }
