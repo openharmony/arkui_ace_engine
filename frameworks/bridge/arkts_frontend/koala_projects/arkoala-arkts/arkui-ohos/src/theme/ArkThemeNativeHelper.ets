@@ -32,7 +32,7 @@ export class ArkThemeNativeHelper {
         ThemeOps.sendThemeToNative(colorArray, elmtId);
     }
     static setDefaultTheme(theme: CustomTheme | undefined): void {
-        const colorArray = ArkThemeNativeHelper.convertThemeToColorArray(theme!);
+        const colorArray = ArkThemeNativeHelper.convertThemeToColorArray(theme);
         ArkThemeScopeManager.getInstance().onEnterLocalColorMode(ThemeColorMode.LIGHT);
         ThemeOps.setDefaultTheme(colorArray, false);
 
@@ -51,7 +51,6 @@ export class ArkThemeNativeHelper {
         if (colorMode && colorMode !== ThemeColorMode.SYSTEM) {
             ArkThemeScopeManager.getInstance().onEnterLocalColorMode(colorMode);
         }
-        // const thisSerializer : Serializer = Serializer.hold();
         const colorArray = ArkThemeNativeHelper.convertThemeToColorArray(theme);
         ThemeOps.createAndBindTheme(themeScopeId, themeId, colorArray, colorMode, onThemeScopeDestroy);
 

@@ -349,6 +349,7 @@ HWTEST_F(SecuritySessionWrapperImplTestNg, SecuritySessionWrapperImplTestNg004, 
 
     sessionWrapper->instanceId_ = 2;
     container = Platform::AceContainer::GetContainer(sessionWrapper->instanceId_);
+    ASSERT_NE(container, nullptr);
     EXPECT_FALSE(container->IsUIExtensionWindow());
     sessionWrapper->CreateSession(want, config);
 
@@ -433,6 +434,7 @@ HWTEST_F(SecuritySessionWrapperImplTestNg, SecuritySessionWrapperImplTestNg006, 
     sessionWrapper->NotifySizeChangeReason(type, rsTransaction);
     EXPECT_TRUE(sessionWrapper->transaction_.expired());
 
+    // set WindowSizeChangeReason for ROTATION, test NotifySizeChangeReason again
     type = OHOS::Ace::WindowSizeChangeReason::ROTATION;
     sessionWrapper->NotifySizeChangeReason(type, rsTransaction);
     EXPECT_FALSE(sessionWrapper->transaction_.expired());
@@ -457,13 +459,14 @@ HWTEST_F(SecuritySessionWrapperImplTestNg, SecuritySessionWrapperImplTestNg007, 
     /**
      * @tc.steps: step2. test NotifyOccupiedAreaChangeInfo
      */
-    sptr<Rosen::OccupiedAreaChangeInfo> info = sptr<Rosen::OccupiedAreaChangeInfo>::MakeSptr();
-    EXPECT_NE(info, nullptr);
-    EXPECT_EQ(sessionWrapper->isNotifyOccupiedAreaChange_, true);
-    info->rect_ = { 0, 0, 0, -1 };
-    EXPECT_TRUE(sessionWrapper->NotifyOccupiedAreaChangeInfo(info, false));
-    info->rect_ = { 0, 0, 0, 2 };
-    EXPECT_TRUE(sessionWrapper->NotifyOccupiedAreaChangeInfo(info, false));
+    sptr<Rosen::OccupiedAreaChangeInfo> occupiedAreaInfo = sptr<Rosen::OccupiedAreaChangeInfo>::MakeSptr();
+    EXPECT_NE(occupiedAreaInfo, nullptr);
+    EXPECT_TRUE(sessionWrapper->isNotifyOccupiedAreaChange_);
+    // -1 indicates an invalid or special height value for testing boundary conditions.
+    occupiedAreaInfo->rect_ = { 0, 0, 0, -1 };
+    EXPECT_TRUE(sessionWrapper->NotifyOccupiedAreaChangeInfo(occupiedAreaInfo, false));
+    occupiedAreaInfo->rect_ = { 0, 0, 0, 2 };
+    EXPECT_TRUE(sessionWrapper->NotifyOccupiedAreaChangeInfo(occupiedAreaInfo, false));
 
     /**
      * @tc.steps: step3. test SetDensityDpiImpl

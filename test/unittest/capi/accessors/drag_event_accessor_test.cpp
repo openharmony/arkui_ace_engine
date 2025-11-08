@@ -203,9 +203,11 @@ HWTEST_F(DragEventAccessorTest, GetDataTest, TestSize.Level1)
     auto unifiedData = AceType::MakeRefPtr<UnifiedDataMock>();
     auto arkUnifiedData = ArkValue<Ark_unifiedDataChannel_UnifiedData>(unifiedData);
     accessor_->setData(peer_, arkUnifiedData);
-    auto getData = accessor_->getData(peer_);
-    ASSERT_NE(getData, nullptr);
-    auto dataPeer = getData;
+    auto getDataOpt = accessor_->getData(peer_);
+    auto getData = Converter::GetOpt(getDataOpt);
+    ASSERT_NE(getData, std::nullopt);
+    auto dataPeer = getData.value();
+    ASSERT_NE(dataPeer, nullptr);
     ASSERT_NE(dataPeer->unifiedData, nullptr);
     EXPECT_EQ(dataPeer->unifiedData->GetSize(), COUNTER_NUMBER_TEN_HANDLE) <<
         "Input value is: " << COUNTER_NUMBER_TEN_HANDLE << ", method: getData";
@@ -218,9 +220,9 @@ HWTEST_F(DragEventAccessorTest, GetDataTest, TestSize.Level1)
  */
 HWTEST_F(DragEventAccessorTest, GetDataInvalidTest, TestSize.Level1)
 {
-    auto dataPeer = accessor_->getData(nullptr);
-    ASSERT_NE(dataPeer, nullptr);
-    ASSERT_EQ(dataPeer->unifiedData, nullptr);
+    auto dataPeerOpt = accessor_->getData(nullptr);
+    auto dataPeer = Converter::GetOpt(dataPeerOpt);
+    ASSERT_EQ(dataPeer, std::nullopt);
 }
 
 /**
@@ -412,11 +414,15 @@ HWTEST_F(DragEventAccessorTest, DISABLED_GetSummaryTestDefault, TestSize.Level1)
 {
 #ifdef WRONG_GEN
     ASSERT_NE(accessor_->getSummary, nullptr);
-    auto check = accessor_->getSummary(peer_);
-    EXPECT_EQ(check.summary.size, 0);
-    EXPECT_EQ(check.summary.keys, nullptr);
-    EXPECT_EQ(check.summary.values, nullptr);
-    EXPECT_EQ(check.totalSize, 0);
+    auto checkOpt = accessor_->getSummary(peer_);
+    auto check = Converter::GetOpt(checkOpt).value();
+    ASSERT_NE(check, std::nullopt);
+    auto checkValue = check.value();
+    ASSERT_NE(checkValue, nullptr);
+    EXPECT_EQ(checkValue.summary.size, 0);
+    EXPECT_EQ(checkValue.summary.keys, nullptr);
+    EXPECT_EQ(checkValue.summary.values, nullptr);
+    EXPECT_EQ(checkValue.totalSize, 0);
 #endif
 }
 
@@ -437,10 +443,14 @@ HWTEST_F(DragEventAccessorTest, DISABLED_GetSummaryTestValid, TestSize.Level1)
     peer_->dragInfo->SetSummary(expectedMap);
 
     ASSERT_NE(accessor_->getSummary, nullptr);
-    auto check = accessor_->getSummary(peer_);
-    EXPECT_EQ(check.summary.size, expectedMap.size());
-    ASSERT_NE(check.summary.keys, nullptr);
-    ASSERT_NE(check.summary.values, nullptr);
+    auto checkOpt = accessor_->getSummary(peer_);
+    auto check = Converter::GetOpt(checkOpt);
+    ASSERT_NE(check, std::nullopt);
+    auto checkValue = check.value();
+    ASSERT_NE(checkValue, nullptr);
+    EXPECT_EQ(checkValue.summary.size, expectedMap.size());
+    EXPECT_EQ(checkValue.summary.keys, nullptr);
+    EXPECT_EQ(checkValue.summary.values, nullptr);
 
     int64_t expectedTotal = 0;
     int idx = 0;

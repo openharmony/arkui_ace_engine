@@ -173,7 +173,7 @@ export struct ToolBar {
   controller: TabsController = new TabsController();
   @PropRef activateIndex: int = -1;
   @Observed
-  @PropRef dividerModifier: DividerModifier;
+  @PropRef dividerModifier: DividerModifier | undefined;
   @Observed
   @PropRef toolBarModifier: ToolBarModifier = new ToolBarModifier();
   @Observed
@@ -522,9 +522,11 @@ export struct ToolBar {
     let sizeResult: SizeResult = { height: 0, width: 0 };
     if (Double.toInt(children.length) > 0) {
       children.forEach((child) => {
-        let childMeasureResult: MeasureResult = child.measure(constraint);
-        sizeResult.width = childMeasureResult.width;
-        sizeResult.height = childMeasureResult.height;
+        let childMeasureResult: MeasureResult | undefined = child.measure(constraint);
+        if (childMeasureResult) {
+          sizeResult.width = childMeasureResult.width;
+          sizeResult.height = childMeasureResult.height;
+        }
       });
     }
     return sizeResult;

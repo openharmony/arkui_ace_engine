@@ -34,6 +34,7 @@ import { ComponentContent } from "arkui.ComponentContent"
 import { RefreshModifier } from "./../RefreshModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Resource_serializer } from "./../framework/resource"
+import { ComponentContent_serializer } from "./../ComponentContent"
 export class ArkRefreshPeer extends ArkCommonMethodPeer {
     attributeSet?: RefreshModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -339,7 +340,7 @@ export class RefreshOptions_serializer {
         if (valueHolderForRefreshingContent !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForRefreshingContentTmpValue  = valueHolderForRefreshingContent!
-            valueSerializer.holdAndWriteObject(valueHolderForRefreshingContentTmpValue)
+            ComponentContent_serializer.write(valueSerializer, valueHolderForRefreshingContentTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -391,7 +392,7 @@ export class RefreshOptions_serializer {
         const refreshingContentTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let refreshingContentTmpBuf : ComponentContent | undefined = undefined
         if ((refreshingContentTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            refreshingContentTmpBuf = (valueDeserializer.readObject() as ComponentContent)
+            refreshingContentTmpBuf = (ComponentContent_serializer.read(valueDeserializer) as ComponentContent)
         }
         const refreshingContentTmpResult : ComponentContent | undefined = refreshingContentTmpBuf
         let value : RefreshOptions = ({refreshing: refreshingTmpResult, promptText: promptTextTmpResult, builder: builderTmpResult, refreshingContent: refreshingContentTmpResult} as RefreshOptions)

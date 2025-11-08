@@ -66,7 +66,7 @@ Ark_CustomDialogControllerExtender ConstructImpl(const Ark_CustomDialogControlle
     peer->SetLevelMode(value->showInSubWindow, value->levelMode);
     peer->SetLevelUniqueId(value->levelUniqueId);
     peer->SetImersiveMode(value->immersiveMode);
-    peer->SetLevelOrder(value->levelOrder);
+    peer->SetLevelOrderExtender(value->levelOrderExtender);
     peer->SetFocusable(value->focusable);
 
     return AceType::RawPtr(peer);

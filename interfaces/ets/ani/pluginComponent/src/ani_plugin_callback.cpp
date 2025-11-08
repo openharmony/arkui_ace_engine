@@ -134,7 +134,7 @@ bool ANIPluginCallback::OnEventStrictEquals(CallBackType eventType, const AAFwk:
 
 void ANIPluginCallback::OnPushEventInner(const OnPluginUvWorkData* workData)
 {
-    LOGI("plugin-ani OnPushEventInner start");
+    LOGI("plugin-ani OnPushEventInner start.");
     PluginComponentTemplate componentTemplate;
     componentTemplate.SetSource(workData->sourceName);
     componentTemplate.SetAbility(workData->abilityName);
@@ -154,7 +154,7 @@ void ANIPluginCallback::OnPushEventInner(const OnPluginUvWorkData* workData)
 void ANIPluginCallback::OnPushEvent(const AAFwk::Want& want, const PluginComponentTemplate& pluginTemplate,
     const std::string& data, const std::string& extraData)
 {
-    LOGI("plugin-ani OnPushEvent start");
+    LOGI("plugin-ani OnPushEvent start.");
     if (cbInfo_.env == nullptr || cbInfo_.callback == nullptr) {
         return;
     }

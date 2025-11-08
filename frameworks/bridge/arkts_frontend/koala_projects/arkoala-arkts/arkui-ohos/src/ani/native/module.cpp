@@ -48,6 +48,7 @@
 #include "xcomponent/xcomponent_module_methods.h"
 #include "condition_scope/condition_scope.h"
 #include "utils/ani_trace.h"
+#include "utils/ani_profiler.h"
 #include "UINode/uinode_module_methods.h"
 #include "node_adapter/node_adapter_module.h"
 #include "visual_effect/visual_effect_module.h"
@@ -337,6 +338,16 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::QueryNavDestinationInfo1)
         },
         ani_native_function {
+            "_CustomNode_OnReuse",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::OnReuse)
+        },
+        ani_native_function {
+            "_CustomNode_OnRecycle",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::OnRecycle)
+        },
+        ani_native_function {
             "_CustomNode_QueryRouterPageInfo",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::QueryRouterPageInfo)
@@ -533,7 +544,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
         },
         ani_native_function {
             "_DragEvent_Get_Summary",
-            "l:C{@ohos.data.unifiedDataChannel.unifiedDataChannel.Summary}",
+            nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::DragEventGetSummary)
         },
         ani_native_function {
@@ -1135,6 +1146,16 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::CanvasModule::GetCanvasId)
         },
         ani_native_function {
+            "_CanvasRenderingContext_setAttachCallbackId",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CanvasModule::SetAttachCallbackId)
+        },
+        ani_native_function {
+            "_CanvasRenderingContext_setDetachCallbackId",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CanvasModule::SetDetachCallbackId)
+        },
+        ani_native_function {
             "_FrameNode_MarkDirtyNode",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::FrameNodeMarkDirtyNode)
@@ -1163,6 +1184,16 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_AsyncTraceEnd",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::AniTrace::AsyncTraceEnd)
+        },
+        ani_native_function {
+            "_StartProfiler",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::AniProfiler::StartProfiler)
+        },
+        ani_native_function {
+            "_StopProfiler",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::AniProfiler::StopProfiler)
         },
         ani_native_function {
             "_GetStringColorValue",

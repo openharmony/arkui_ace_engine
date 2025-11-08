@@ -98,6 +98,8 @@ export class ArkUIAniModule {
     native static _CustomNode_QueryNavigationInfo(ptr: KPointer): uiObserver.NavigationInfo
     native static _CustomNode_QueryNavDestinationInfo(ptr: KPointer): uiObserver.NavDestinationInfo
     native static _CustomNode_QueryNavDestinationInfo0(ptr: KPointer, isInner: boolean): uiObserver.NavDestinationInfo
+    native static _CustomNode_OnReuse(ptr: KPointer): void
+    native static _CustomNode_OnRecycle(ptr: KPointer): void
     native static _CustomNode_QueryNavDestinationInfo1(uniqueId: KInt): uiObserver.NavDestinationInfo
     native static _CustomNode_QueryRouterPageInfo(ptr: KPointer): uiObserver.RouterPageInfo
     native static _CustomNode_QueryRouterPageInfo1(uniqueId: KInt): uiObserver.RouterPageInfo
@@ -169,8 +171,8 @@ export class ArkUIAniModule {
     // for Drag
     native static _DragEvent_Set_Data(ptr: KLong, data : unifiedDataChannel.UnifiedData) : void
     native static _DragEvent_Get_Data(ptr: KLong) : unifiedDataChannel.UnifiedData
-    native static _DragEvent_Get_Summary(ptr: KLong) : unifiedDataChannel.Summary
-    native static _DragEvent_Start_Data_Loading(ptr: KLong, data : unifiedDataChannel.GetDataParams) : string
+    native static _DragEvent_Get_Summary(ptr: KLong) : unifiedDataChannel.Summary | undefined
+    native static _DragEvent_Start_Data_Loading(ptr: KLong, data : unifiedDataChannel.GetDataParams) : string | undefined
     native static _DragEvent_Set_PixelMap(ptr: KLong, pixelMap: image.PixelMap) : void
     native static _DragEvent_Set_ExtraInfo(ptr: KLong, extraInfo: string) : void
     native static _DragEvent_Set_CustomNode(ptr: KLong, customNode: KPointer) : void
@@ -186,14 +188,14 @@ export class ArkUIAniModule {
 
     // for componentSnapshot
     native static _ComponentSnapshot_createFromBuilderWithCallback(ptr: KPointer, destroyCallback: () => void,
-        callback: AsyncCallback<image.PixelMap>, delay?: number, checkImageStatus?: boolean,
+        callback: AsyncCallback<image.PixelMap>, delay?: int, checkImageStatus?: boolean,
         options?: componentSnapshot.SnapshotOptions): void
     native static _ComponentSnapshot_createFromBuilderWithPromise(ptr: KPointer, destroyCallback: () => void,
-        delay?: number, checkImageStatus?: boolean,
-        options?: componentSnapshot.SnapshotOptions): Promise<image.PixelMap>
+        delay?: int, checkImageStatus?: boolean,
+        options?: componentSnapshot.SnapshotOptions): Promise<image.PixelMap> | null
     native static _ComponentSnapshot_createFromComponentWithPromise(ptr: KPointer, destroyCallback: () => void,
-        delay?: number, checkImageStatus?: boolean,
-        options?: componentSnapshot.SnapshotOptions): Promise<image.PixelMap>
+        delay?: int, checkImageStatus?: boolean,
+        options?: componentSnapshot.SnapshotOptions): Promise<image.PixelMap> | null
 
     // for dragController
     native static _DragController_executeDragWithCallback(custom: DragItemInfo, builder: KPointer,
@@ -203,7 +205,7 @@ export class ArkUIAniModule {
         destroyCallback: () => void, dragInfo: dragController.DragInfo): Promise<dragController.DragEventParam>
     native static _DragController_createDragAction(customArray: Array<DragItemInfo>, builderArray: Array<KPointer>,
         destroyCallback: () => void, dragInfo: dragController.DragInfo): dragController.DragAction
-    native static _DragController_startDrag(dragActionPtr: KPointer): Promise<void>
+    native static _DragController_startDrag(dragActionPtr: KPointer): Promise<void> | null
     native static _DragController_on(callback: Callback<dragController.DragAndDropInfo>,
         dragActionPtr: KPointer): void
     native static _DragController_off(callback: Callback<dragController.DragAndDropInfo> | undefined,
@@ -336,6 +338,8 @@ export class ArkUIAniModule {
         dirtyX: number, dirtyY: number, dirtyWidth: number, dirtyHeight: number): void
     native static _DrawingRenderingContext_GetCanvas(peerPtr: KPointer): drawing.Canvas
     native static _CanvasRenderingContext_GetCanvasId(peerPtr: KPointer): KInt
+    native static _CanvasRenderingContext_setAttachCallbackId(peerPtr: KPointer, attachCallbackId: KInt): void
+    native static _CanvasRenderingContext_setDetachCallbackId(peerPtr: KPointer, detachCallbackId: KInt): void
     native static _Extractors_ToDrawingCanvasPtr(value: drawing.Canvas): KPointer
     native static _Extractors_FromDrawingCanvasPtr(ptr: KPointer): drawing.Canvas
 
@@ -345,6 +349,8 @@ export class ArkUIAniModule {
     native static _TraceEnd(): void
     native static _AsyncTraceBegin(traceName: string, taskId: KInt): void
     native static _AsyncTraceEnd(traceName: string, taskId: KInt): void
+    native static _StartProfiler(asptFileName: string, interva: KInt): void
+    native static _StopProfiler(): void
     native static _GetColorValue(color: number | string): KUInt
     native static _GetStringColorValue(color: string): KUInt
     native static _GetNumberColorValue(color: number): KUInt

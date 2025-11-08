@@ -56,7 +56,7 @@ export class GaugeModifier extends CommonMethodModifier implements GaugeAttribut
     _trackShadow_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _trackShadow_0_0value?: GaugeShadowOptions | undefined
     _indicator_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _indicator_0_0value?: GaugeIndicatorOptions | undefined
+    _indicator_0_0value?: GaugeIndicatorOptions | null | undefined
     _privacySensitive_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _privacySensitive_0_0value?: boolean | undefined
     _contentModifier_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -195,7 +195,7 @@ export class GaugeModifier extends CommonMethodModifier implements GaugeAttribut
         {
             switch (this._indicator_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setIndicatorAttribute((this._indicator_0_0value as GaugeIndicatorOptions | undefined));
+                    peer.setIndicatorAttribute((this._indicator_0_0value as GaugeIndicatorOptions | null | undefined));
                     this._indicator_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -205,7 +205,7 @@ export class GaugeModifier extends CommonMethodModifier implements GaugeAttribut
                 }
                 default: {
                     this._indicator_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setIndicatorAttribute((undefined as GaugeIndicatorOptions | undefined));
+                    peer.setIndicatorAttribute((undefined as GaugeIndicatorOptions | null | undefined));
                 }
             }
         }
@@ -348,7 +348,7 @@ export class GaugeModifier extends CommonMethodModifier implements GaugeAttribut
                     break;
                 }
                 default: {
-                    this.indicator((undefined as GaugeIndicatorOptions | undefined));
+                    this.indicator((undefined as GaugeIndicatorOptions | null | undefined));
                 }
             }
         }
@@ -463,7 +463,7 @@ export class GaugeModifier extends CommonMethodModifier implements GaugeAttribut
         }
         return this
     }
-    indicator(value: GaugeIndicatorOptions | undefined): this {
+    indicator(value: GaugeIndicatorOptions | null | undefined): this {
         if (((this._indicator_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._indicator_0_flag = AttributeUpdaterFlag.UPDATE

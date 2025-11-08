@@ -77,11 +77,10 @@ export class LazyItemNode extends IncrementalNode {
         super(LazyItemNodeType)
         this._container = parent
         this.onChildInserted = (node: IncrementalNode) => {
-            let peerNode = findPeerNode(node)
-            if (!peerNode) {
+            if (!node.isKind(PeerNodeType)) {
                 return
             }
-            const peer = peerNode as PeerNode
+            const peer = node as PeerNode
             if (peer.reusable) {
                 peer.onReuse(false)
             } else {
@@ -89,11 +88,10 @@ export class LazyItemNode extends IncrementalNode {
             } 
         }
         this.onChildRemoved = (node: IncrementalNode) => {
-            let peerNode = findPeerNode(node)
-            if (!peerNode) {
+            if (!node.isKind(PeerNodeType)) {
                 return
             }
-            const peer = peerNode as PeerNode
+            const peer = node as PeerNode
             if (!peer.disposed) {
                 peer.onRecycle()
             }

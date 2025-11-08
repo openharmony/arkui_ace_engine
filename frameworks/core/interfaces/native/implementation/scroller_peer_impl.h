@@ -19,6 +19,7 @@
 #include "core/common/container_consts.h"
 #include "core/components/scroll/scroll_controller_base.h"
 #include "core/components/scroll_bar/scroll_proxy.h"
+#include "core/interfaces/ani/ani_api.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "interfaces/inner_api/ace_kit/include/ui/base/ace_type.h"
@@ -30,18 +31,18 @@ public:
     ScrollerPeerImpl() = default;
     ~ScrollerPeerImpl() override = default;
 
-    void TriggerScrollTo(const Ark_ScrollOptions* options);
-    void TriggerScrollEdge(Ark_Edge value, const Opt_ScrollEdgeOptions* options);
-    void TriggerFling(const Ark_Float64 velocity);
-    void TriggerScrollPage0(const Ark_ScrollPageOptions* value);
+    void TriggerScrollTo(ani_env* env, const Ark_ScrollOptions* options);
+    void TriggerScrollEdge(ani_env* env, Ark_Edge value, const Opt_ScrollEdgeOptions* options);
+    void TriggerFling(ani_env* env, const Ark_Float64 velocity);
+    void TriggerScrollPage0(ani_env* env, const Ark_ScrollPageOptions* value);
     void TriggerScrollPage1(bool next);
-    Opt_OffsetResult TriggerCurrentOffset();
-    void TriggerScrollToIndex(const Ark_Int32 value, const Opt_Boolean* smooth,
+    Opt_OffsetResult TriggerCurrentOffset(ani_env* env);
+    void TriggerScrollToIndex(ani_env* env, const Ark_Int32 value, const Opt_Boolean* smooth,
         const Opt_ScrollAlign* align, const Opt_ScrollToIndexOptions* options);
-    void TriggerScrollBy(const Dimension& xOffset, const Dimension& yOffset);
-    Ark_Boolean TriggerIsAtEnd();
-    Ark_RectResult TriggerGetItemRect(const Ark_Int32 index);
-    Ark_Int32 TriggerGetItemIndex(const Ark_Float64 x, const Ark_Float64 y);
+    void TriggerScrollBy(ani_env* env, const Dimension& xOffset, const Dimension& yOffset);
+    Ark_Boolean TriggerIsAtEnd(ani_env* env);
+    Ark_RectResult TriggerGetItemRect(ani_env* env, const Ark_Int32 index);
+    Ark_Int32 TriggerGetItemIndex(ani_env* env, const Ark_Float64 x, const Ark_Float64 y);
 
     const WeakPtr<ScrollControllerBase>& GetController() const
     {
@@ -82,6 +83,11 @@ public:
     {
         return instanceId_;
     }
+    static void ThrowParamsError(ani_env *env);
+    static void ThrowControllerError(ani_env *env);
+    static ani_object CreateError(ani_env *env, ani_int code, const std::string &msg);
+    static void ThrowError(ani_env *env, int32_t errCode, const std::string &errorMsg = "");
+    static ani_object WrapError(ani_env *env, const std::string &msg);
 
     void SetObserver(const ScrollerObserver& observer)
     {

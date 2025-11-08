@@ -33,6 +33,7 @@ import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { ComponentContent } from "arkui.ComponentContent"
 import { UIExtensionComponentModifier } from "./../UIExtensionComponentModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ComponentContent_serializer } from "./../ComponentContent"
 export interface UIExtensionProxy {
     send(data: Map<string, RecordData>): void
     sendSync(data: Map<string, RecordData>): Map<string, RecordData>
@@ -464,7 +465,7 @@ export class UIExtensionOptions_serializer {
         if (valueHolderForPlaceholder !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForPlaceholderTmpValue  = valueHolderForPlaceholder!
-            valueSerializer.holdAndWriteObject(valueHolderForPlaceholderTmpValue)
+            ComponentContent_serializer.write(valueSerializer, valueHolderForPlaceholderTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -477,7 +478,7 @@ export class UIExtensionOptions_serializer {
                 const valueHolderForAreaChangePlaceholderTmpValueKeyVar = pair[0]
                 const valueHolderForAreaChangePlaceholderTmpValueValueVar = pair[1]
                 valueSerializer.writeString(valueHolderForAreaChangePlaceholderTmpValueKeyVar)
-                valueSerializer.holdAndWriteObject(valueHolderForAreaChangePlaceholderTmpValueValueVar)
+                ComponentContent_serializer.write(valueSerializer, valueHolderForAreaChangePlaceholderTmpValueValueVar)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -510,7 +511,7 @@ export class UIExtensionOptions_serializer {
         const placeholderTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let placeholderTmpBuf : ComponentContent | undefined = undefined
         if ((placeholderTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            placeholderTmpBuf = (valueDeserializer.readObject() as ComponentContent)
+            placeholderTmpBuf = (ComponentContent_serializer.read(valueDeserializer) as ComponentContent)
         }
         const placeholderTmpResult : ComponentContent | undefined = placeholderTmpBuf
         const areaChangePlaceholderTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -521,7 +522,7 @@ export class UIExtensionOptions_serializer {
             // TODO: TS map resize
             for (let areaChangePlaceholderTmpBuf_IVar = 0; areaChangePlaceholderTmpBuf_IVar < areaChangePlaceholderTmpBuf_SizeVar; areaChangePlaceholderTmpBuf_IVar++) {
                 const areaChangePlaceholderTmpBuf_KeyVar : string = (valueDeserializer.readString() as string)
-                const areaChangePlaceholderTmpBuf_ValueVar : ComponentContent = (valueDeserializer.readObject() as ComponentContent)
+                const areaChangePlaceholderTmpBuf_ValueVar : ComponentContent = (ComponentContent_serializer.read(valueDeserializer) as ComponentContent)
                 areaChangePlaceholderTmpBuf_.set(areaChangePlaceholderTmpBuf_KeyVar, areaChangePlaceholderTmpBuf_ValueVar)
             }
             areaChangePlaceholderTmpBuf = areaChangePlaceholderTmpBuf_

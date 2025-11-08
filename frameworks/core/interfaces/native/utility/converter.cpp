@@ -1848,6 +1848,17 @@ Rect Convert(const Ark_RectResult& src)
 }
 
 template<>
+RectF Convert(const Ark_Frame& src)
+{
+    return RectF(
+        Converter::Convert<float>(src.x),
+        Converter::Convert<float>(src.x),
+        Converter::Convert<float>(src.width),
+        Converter::Convert<float>(src.height)
+    );
+}
+
+template<>
 ShapePoint Convert(const Ark_ShapePoint& src)
 {
     return ShapePoint(
@@ -3588,6 +3599,14 @@ RectHeightStyle Convert(const Ark_text_RectHeightStyle& src)
 }
 template<>
 void AssignCast(std::optional<double>& dst, const Ark_LevelOrder& src)
+{
+    auto peer = src;
+    if (peer && peer->levelOrder) {
+        dst = peer->levelOrder->GetOrder();
+    }
+}
+template<>
+void AssignCast(std::optional<double>& dst, const Ark_LevelOrderExtender& src)
 {
     auto peer = src;
     if (peer && peer->levelOrder) {

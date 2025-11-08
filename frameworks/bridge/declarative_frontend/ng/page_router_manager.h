@@ -179,15 +179,16 @@ public:
     // router operation
     void Push(const RouterPageInfo& target);
 
-    // For ArkTS1.2
-    void PushExtender(const RouterPageInfo& target, std::function<void()>&& finishCallback, void* jsNode);
-    void PushNamedRouteExtender(const RouterPageInfo& target, std::function<void()>&& finishCallback, void* jsNode);
-    void ReplaceExtender(
-        const RouterPageInfo& target, std::function<void()>&& enterFinishCallback, void* jsNode);
+    // For ArkTS static
+    void PushExtender(const RouterPageInfo& target, const std::function<void()>&& finishCallback, void* jsNode);
+    void PushNamedRouteExtender(
+        const RouterPageInfo& target, const std::function<void()>&& finishCallback, void* jsNode);
+    void ReplaceExtender(const RouterPageInfo& target, const std::function<void()>&& enterFinishCallback, void* jsNode);
     void ReplaceNamedRouteExtender(
-        const RouterPageInfo& target, std::function<void()>&& enterFinishCallback, void* jsNode);
-    void RunPageExtender(
-        const RouterPageInfo& target, std::function<void()>&& finishCallback, void* jsNode);
+        const RouterPageInfo& target, const std::function<void()>&& enterFinishCallback, void* jsNode);
+    void RunPageExtender(const RouterPageInfo& target, const std::function<void()>&& finishCallback, void* jsNode);
+    void BackWithTargetExtender(const RouterPageInfo& target);
+    void BackToIndexWithTargetExtender(int32_t index, const std::string& params);
 
     void PushNamedRoute(const RouterPageInfo& target);
     bool Pop();
@@ -286,6 +287,7 @@ protected:
     void StartPush(const RouterPageInfo& target);
     void StartReplace(const RouterPageInfo& target);
     void StartBack(const RouterPageInfo& target);
+    void StartBackExtender(const RouterPageInfo& target);
     void StartBackToIndex(int32_t index, const std::string& params);
     bool StartPop();
     void StartRestore(const RouterPageInfo& target);
@@ -328,7 +330,7 @@ protected:
     static bool OnPopPageToIndex(int32_t index, bool needShowNext, bool needTransition);
     static bool OnCleanPageStack();
 
-    // For ArkTS1.2
+    // For ArkTS static
     virtual bool LoadPageExtender(int32_t pageId, const RouterPageInfo& target, void* jsNode,
         bool needHideLast = true, bool needTransition = true);
     RefPtr<FrameNode> CreatePageExtender(int32_t pageId, const RouterPageInfo& target);

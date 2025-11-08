@@ -64,8 +64,8 @@ public:
         return true;
     }
 
-    // For ArkTS1.2
-    void SetOnNodeDisposeCallback(std::function<void()>&& disposeCallback)
+    // For ArkTS static
+    void SetOnNodeDisposeCallback(const std::function<void()>&& disposeCallback)
     {
         disposeCallback_ = std::move(disposeCallback);
     }

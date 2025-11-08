@@ -252,4 +252,27 @@ ani_int CanvasModule::GetCanvasId(ani_env* env, [[maybe_unused]] ani_object aniC
     CHECK_NULL_RETURN(canvasModifier, -1);
     return canvasModifier->getCanvasId(peer);
 }
+
+void CanvasModule::SetAttachCallbackId(
+    ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long peerPtr, ani_int attachCallbackId)
+{
+    auto* peer = reinterpret_cast<ArkUICanvasRenderingContext>(peerPtr);
+    CHECK_NULL_VOID(peer);
+    const auto* modifier = GetNodeAniModifier();
+    CHECK_NULL_VOID(modifier);
+    auto* canvasModifier = modifier->getCanvasAniModifier();
+    CHECK_NULL_VOID(canvasModifier);
+    canvasModifier->setAttachCallbackId(peer, attachCallbackId);
+}
+void CanvasModule::SetDetachCallbackId(
+    ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long peerPtr, ani_int detachCallbackId)
+{
+    auto* peer = reinterpret_cast<ArkUICanvasRenderingContext>(peerPtr);
+    CHECK_NULL_VOID(peer);
+    const auto* modifier = GetNodeAniModifier();
+    CHECK_NULL_VOID(modifier);
+    auto* canvasModifier = modifier->getCanvasAniModifier();
+    CHECK_NULL_VOID(canvasModifier);
+    canvasModifier->setDetachCallbackId(peer, detachCallbackId);
+}
 } // namespace OHOS::Ace::Ani

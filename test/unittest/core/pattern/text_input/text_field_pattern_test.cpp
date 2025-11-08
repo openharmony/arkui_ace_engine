@@ -30,7 +30,7 @@ public:
 
 /**
  * @tc.name: TextPattern001
- * @tc.desc: Test TextPattern UpdateCaretRect.
+ * @tc.desc: Test TextPattern UpdateCaretRect
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTest, TextPattern001, TestSize.Level1)
@@ -49,7 +49,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern001, TestSize.Level1)
 
 /**
  * @tc.name: TextPattern002
- * @tc.desc: Test TextPattern CheckSelectAreaVisible.
+ * @tc.desc: Test TextPattern CheckSelectAreaVisible
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTest, TextPattern002, TestSize.Level1)
@@ -69,7 +69,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern002, TestSize.Level1)
 
 /**
  * @tc.name: TextPattern003
- * @tc.desc: Test TextPattern OnIsFocusActiveUpdate.
+ * @tc.desc: Test TextPattern OnIsFocusActiveUpdate
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTest, TextPattern003, TestSize.Level1)
@@ -88,7 +88,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern003, TestSize.Level1)
 
 /**
  * @tc.name: TextPattern004
- * @tc.desc: Test TextPattern HandleExtendAction.
+ * @tc.desc: Test TextPattern HandleExtendAction
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTest, TextPattern004, TestSize.Level1)
@@ -108,7 +108,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern004, TestSize.Level1)
 
 /**
  * @tc.name: TextPattern005
- * @tc.desc: Test TextPattern HandleBlurEvent.
+ * @tc.desc: Test TextPattern HandleBlurEvent
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTest, TextPattern005, TestSize.Level1)
@@ -133,7 +133,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern005, TestSize.Level1)
 
 /**
  * @tc.name: TextPattern006
- * @tc.desc: Test TextPattern HandleOnUndoAction.
+ * @tc.desc: Test TextPattern HandleOnUndoAction
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTest, TextPattern006, TestSize.Level1)

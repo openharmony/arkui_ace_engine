@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/stage/page_event_hub.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "core/interfaces/native/implementation/paste_event_peer.h"
 #include "core/interfaces/native/implementation/text_area_controller_peer.h"
 #include "core/interfaces/native/implementation/submit_event_peer.h"
 #include "core/interfaces/native/utility/converter.h"
@@ -1777,10 +1778,8 @@ HWTEST_F(TextAreaModifierTest, setOnPasteTestCallEvent, TestSize.Level1)
             .resourceId = resourceId,
             .content = Converter::Convert<std::u16string>(content)
         };
-        auto arkCallback = Converter::OptConvert<Callback_Void>(event.preventDefault);
-        if (arkCallback) {
-            auto helper = CallbackHelper(*arkCallback);
-            helper.Invoke();
+        if (event) {
+            event->HandlePreventDefault();
         }
     };
 

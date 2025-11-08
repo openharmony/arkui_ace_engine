@@ -80,6 +80,21 @@ HWTEST_F(MutableStyledStringAccessorTest, DISABLED_ctorTest, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ctorTestCustomSpan
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(MutableStyledStringAccessorTest, ctorTestCustomSpan, TestSize.Level1)
+{
+    auto styles = Converter::ArkValue<Opt_Array_StyleOptions>();
+    Ark_CustomSpan customSpan = accessors_->getCustomSpanAccessor()->construct();
+    auto value = Converter::ArkUnion<Ark_Union_String_ImageAttachment_CustomSpan, Ark_CustomSpan>(customSpan);
+    auto peer = this->accessor_->construct(&value, &styles);
+    ASSERT_NE(peer, nullptr);
+    ASSERT_NE(peer->GetMutableString(), nullptr);
+}
+
+/**
  * @tc.name: replaceStringTest
  * @tc.desc:
  * @tc.type: FUNC

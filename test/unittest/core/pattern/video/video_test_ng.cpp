@@ -128,7 +128,7 @@ constexpr uint32_t CURRENT_TIME = 100;
 constexpr int32_t SLIDER_INDEX = 2;
 constexpr int32_t VIDEO_NODE_ID_1 = 1;
 constexpr int32_t VIDEO_NODE_ID_2 = 2;
-TestProperty testProperty;
+TestProperty g_testProperty;
 } // namespace
 
 class VideoTestNg : public testing::Test {
@@ -144,13 +144,13 @@ protected:
 
 void VideoTestNg::SetUpTestSuite()
 {
-    testProperty.progressRate = VIDEO_PROGRESS_RATE;
-    testProperty.showFirstFrame = SHOW_FIRST_FRAME;
-    testProperty.muted = MUTED_VALUE;
-    testProperty.autoPlay = AUTO_PLAY;
-    testProperty.controls = CONTROL_VALUE;
-    testProperty.loop = LOOP_VALUE;
-    testProperty.objectFit = VIDEO_IMAGE_FIT;
+    g_testProperty.progressRate = VIDEO_PROGRESS_RATE;
+    g_testProperty.showFirstFrame = SHOW_FIRST_FRAME;
+    g_testProperty.muted = MUTED_VALUE;
+    g_testProperty.autoPlay = AUTO_PLAY;
+    g_testProperty.controls = CONTROL_VALUE;
+    g_testProperty.loop = LOOP_VALUE;
+    g_testProperty.objectFit = VIDEO_IMAGE_FIT;
     MockPipelineContext::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
@@ -226,7 +226,7 @@ HWTEST_F(VideoTestNg, VideoPropertyTest001, TestSize.Level1)
      * @tc.steps: step1. Create Video
      * @tc.expected: step1. Create Video successfully
      */
-    auto frameNode = CreateVideoNode(testProperty);
+    auto frameNode = CreateVideoNode(g_testProperty);
     EXPECT_TRUE(frameNode);
     EXPECT_EQ(frameNode->GetTag(), V2::VIDEO_ETS_TAG);
 }
@@ -246,7 +246,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest006, TestSize.Level1)
      * @tc.steps: step1. Create Video
      * @tc.expected: step1. Create Video successfully
      */
-    auto frameNode = CreateVideoNode(testProperty);
+    auto frameNode = CreateVideoNode(g_testProperty);
     ASSERT_TRUE(frameNode);
     EXPECT_EQ(frameNode->GetTag(), V2::VIDEO_ETS_TAG);
     auto pattern = frameNode->GetPattern<VideoPattern>();
@@ -273,7 +273,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest007, TestSize.Level1)
      * @tc.steps: step1. Create Video
      * @tc.expected: step1. Create Video successfully
      */
-    auto frameNode = CreateVideoNode(testProperty);
+    auto frameNode = CreateVideoNode(g_testProperty);
     ASSERT_TRUE(frameNode);
     EXPECT_EQ(frameNode->GetTag(), V2::VIDEO_ETS_TAG);
     auto pattern = frameNode->GetPattern<VideoPattern>();
@@ -300,7 +300,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest008, TestSize.Level1)
      * @tc.steps: step1. Create Video
      * @tc.expected: step1. Create Video successfully
      */
-    auto frameNode = CreateVideoNode(testProperty);
+    auto frameNode = CreateVideoNode(g_testProperty);
     ASSERT_TRUE(frameNode);
     EXPECT_EQ(frameNode->GetTag(), V2::VIDEO_ETS_TAG);
     auto pattern = frameNode->GetPattern<VideoPattern>();
@@ -426,7 +426,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest009, TestSize.Level1)
      * @tc.steps: step1. Create Video
      * @tc.expected: step1. Create Video successfully
      */
-    auto frameNode = CreateVideoNode(testProperty);
+    auto frameNode = CreateVideoNode(g_testProperty);
     ASSERT_TRUE(frameNode);
     EXPECT_EQ(frameNode->GetTag(), V2::VIDEO_ETS_TAG);
     auto pattern = frameNode->GetPattern<VideoPattern>();
@@ -484,7 +484,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest010, TestSize.Level1)
      * @tc.steps: step1. Create Video
      * @tc.expected: step1. Create Video successfully
      */
-    auto frameNode = CreateVideoNode(testProperty);
+    auto frameNode = CreateVideoNode(g_testProperty);
     ASSERT_TRUE(frameNode);
     EXPECT_EQ(frameNode->GetTag(), V2::VIDEO_ETS_TAG);
     auto pattern = frameNode->GetPattern<VideoPattern>();
@@ -580,7 +580,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest011, TestSize.Level1)
      * @tc.steps: step1. Create Video
      * @tc.expected: step1. Create Video successfully
      */
-    auto frameNode = CreateVideoNode(testProperty);
+    auto frameNode = CreateVideoNode(g_testProperty);
     ASSERT_TRUE(frameNode);
     EXPECT_EQ(frameNode->GetTag(), V2::VIDEO_ETS_TAG);
     auto pattern = frameNode->GetPattern<VideoPattern>();
@@ -640,7 +640,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest012, TestSize.Level1)
      * @tc.steps: step1. Create Video
      * @tc.expected: step1. Create Video successfully
      */
-    auto frameNode = CreateVideoNode(testProperty);
+    auto frameNode = CreateVideoNode(g_testProperty);
     ASSERT_TRUE(frameNode);
     EXPECT_EQ(frameNode->GetTag(), V2::VIDEO_ETS_TAG);
     auto pattern = frameNode->GetPattern<VideoPattern>();
@@ -745,8 +745,8 @@ HWTEST_F(VideoTestNg, VideoPatternTest013, TestSize.Level1)
      * @tc.expected: step1. Create Video successfully
      */
     auto videoController = AceType::MakeRefPtr<VideoControllerV2>();
-    testProperty.videoController = videoController;
-    auto frameNode = CreateVideoNode(testProperty);
+    g_testProperty.videoController = videoController;
+    auto frameNode = CreateVideoNode(g_testProperty);
     ASSERT_TRUE(frameNode);
     EXPECT_EQ(frameNode->GetTag(), V2::VIDEO_ETS_TAG);
     auto pattern = frameNode->GetPattern<VideoPattern>();
@@ -804,7 +804,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest014, TestSize.Level1)
      * @tc.steps: step1. Create Video
      * @tc.expected: step1. Create Video successfully
      */
-    auto frameNode = CreateVideoNode(testProperty);
+    auto frameNode = CreateVideoNode(g_testProperty);
     ASSERT_TRUE(frameNode);
     EXPECT_EQ(frameNode->GetTag(), V2::VIDEO_ETS_TAG);
     auto pattern = frameNode->GetPattern<VideoPattern>();
@@ -833,7 +833,7 @@ HWTEST_F(VideoTestNg, VideoFocusTest001, TestSize.Level1)
      * @tc.steps: step1. Create Video
      * @tc.expected: step1. Create Video successfully
      */
-    auto frameNode = CreateVideoNode(testProperty);
+    auto frameNode = CreateVideoNode(g_testProperty);
     EXPECT_TRUE(frameNode);
     EXPECT_EQ(frameNode->GetTag(), V2::VIDEO_ETS_TAG);
     frameNode->GetOrCreateFocusHub()->currentFocus_ = true;
@@ -853,7 +853,7 @@ HWTEST_F(VideoTestNg, VideoFocusTest002, TestSize.Level1)
      * @tc.steps: step1. Create Video
      * @tc.expected: step1. Create Video successfully
      */
-    auto frameNode = CreateVideoNode(testProperty);
+    auto frameNode = CreateVideoNode(g_testProperty);
     EXPECT_TRUE(frameNode);
     EXPECT_EQ(frameNode->GetTag(), V2::VIDEO_ETS_TAG);
     frameNode->GetOrCreateFocusHub()->currentFocus_ = true;
@@ -937,7 +937,7 @@ HWTEST_F(VideoTestNg, VideoAccessibilityPropertyTest001, TestSize.Level1)
  */
 HWTEST_F(VideoTestNg, VideoAccessibilityPropertyTest002, TestSize.Level1)
 {
-    auto frameNode = CreateVideoNode(testProperty);
+    auto frameNode = CreateVideoNode(g_testProperty);
     ASSERT_NE(frameNode, nullptr);
     auto videoAccessibilitProperty = frameNode->GetAccessibilityProperty<VideoAccessibilityProperty>();
     ASSERT_NE(videoAccessibilitProperty, nullptr);
@@ -984,8 +984,8 @@ HWTEST_F(VideoTestNg, VideoPatternTest016, TestSize.Level1)
      * @tc.expected: step1. Create Video successfully
      */
     auto videoController = AceType::MakeRefPtr<VideoControllerV2>();
-    testProperty.videoController = videoController;
-    auto frameNode = CreateVideoNode(testProperty);
+    g_testProperty.videoController = videoController;
+    auto frameNode = CreateVideoNode(g_testProperty);
     ASSERT_TRUE(frameNode);
     EXPECT_EQ(frameNode->GetTag(), V2::VIDEO_ETS_TAG);
     auto pattern = frameNode->GetPattern<VideoPattern>();
@@ -1265,7 +1265,7 @@ HWTEST_F(VideoTestNg, CallVideoPatternOnWindowHide, TestSize.Level1)
      * @tc.steps: step1. Create Video
      * @tc.expected: step1. Create Video successfully
      */
-    auto frameNode = CreateVideoNode(testProperty);
+    auto frameNode = CreateVideoNode(g_testProperty);
     ASSERT_TRUE(frameNode);
     auto pattern = frameNode->GetPattern<VideoPattern>();
     ASSERT_TRUE(pattern);
@@ -1291,7 +1291,7 @@ HWTEST_F(VideoTestNg, CallVideoPatternToJsonValue, TestSize.Level1)
      * @tc.steps: step1. Create Video
      * @tc.expected: step1. Create Video successfully
      */
-    auto frameNode = CreateVideoNode(testProperty);
+    auto frameNode = CreateVideoNode(g_testProperty);
     ASSERT_TRUE(frameNode);
     auto pattern = frameNode->GetPattern<VideoPattern>();
     ASSERT_TRUE(pattern);
@@ -1328,7 +1328,7 @@ HWTEST_F(VideoTestNg, CallVideoPatternOnStartRenderFrameCb, TestSize.Level1)
      * @tc.steps: step1. Create Video
      * @tc.expected: step1. Create Video successfully
      */
-    auto frameNode = CreateVideoNode(testProperty);
+    auto frameNode = CreateVideoNode(g_testProperty);
     ASSERT_TRUE(frameNode);
     auto pattern = frameNode->GetPattern<VideoPattern>();
     ASSERT_TRUE(pattern);
@@ -1353,7 +1353,7 @@ HWTEST_F(VideoTestNg, CallVideoPatternMoveByStepFunc, TestSize.Level1)
      * @tc.steps: step1. Create Video
      * @tc.expected: Create Video successfully
      */
-    auto frameNode = CreateVideoNode(testProperty);
+    auto frameNode = CreateVideoNode(g_testProperty);
     ASSERT_TRUE(frameNode);
     auto pattern = frameNode->GetPattern<VideoPattern>();
     ASSERT_TRUE(pattern);
@@ -1382,7 +1382,7 @@ HWTEST_F(VideoTestNg, CallVideoPatternAdjustVolumeFunc, TestSize.Level1)
      * @tc.steps: step1. Create Video
      * @tc.expected: Create Video successfully
      */
-    auto frameNode = CreateVideoNode(testProperty);
+    auto frameNode = CreateVideoNode(g_testProperty);
     ASSERT_TRUE(frameNode);
     auto pattern = frameNode->GetPattern<VideoPattern>();
     ASSERT_TRUE(pattern);
@@ -1412,8 +1412,8 @@ HWTEST_F(VideoTestNg, CallVideoPatternSetVideoControllerFunc, TestSize.Level1)
      * @tc.steps: step1. Create Video
      * @tc.expected: Create Video successfully
      */
-    testProperty.videoController = nullptr;
-    auto frameNode = CreateVideoNode(testProperty);
+    g_testProperty.videoController = nullptr;
+    auto frameNode = CreateVideoNode(g_testProperty);
     ASSERT_TRUE(frameNode);
     auto pattern = frameNode->GetPattern<VideoPattern>();
     ASSERT_TRUE(pattern);

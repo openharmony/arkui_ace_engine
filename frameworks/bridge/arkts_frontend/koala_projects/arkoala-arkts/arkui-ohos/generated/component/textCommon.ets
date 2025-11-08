@@ -22,7 +22,7 @@ import { default as text } from "@ohos.graphics.text"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
-import { StyledString, StyledStringInternal, MutableStyledString, MutableStyledStringInternal, DecorationStyleInterface, StyledString_serializer, DecorationStyleInterface_serializer } from "./styledString"
+import { MutableStyledString_serializer, StyledString, StyledStringInternal, MutableStyledString, MutableStyledStringInternal, DecorationStyleInterface, StyledString_serializer, DecorationStyleInterface_serializer } from "./styledString"
 import { SelectionOptions_serializer, SelectionOptions } from "./common"
 import { Resource_serializer } from "./../framework/resource"
 import { ResourceStr, ResourceColor, Length } from "./units"
@@ -31,10 +31,10 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { Color, TextDecorationType, TextDecorationStyle } from "./enums"
 export interface LayoutManager {
-    getLineCount(): int32
-    getGlyphPositionAtCoordinate(x: double, y: double): PositionWithAffinity
-    getLineMetrics(lineNumber: int32): text.LineMetrics
-    getRectsForRange(range: TextRange, widthStyle: text.RectWidthStyle, heightStyle: text.RectHeightStyle): Array<text.TextBox>
+    getLineCount(): int32 | undefined
+    getGlyphPositionAtCoordinate(x: double, y: double): PositionWithAffinity | undefined
+    getLineMetrics(lineNumber: int32): text.LineMetrics | undefined
+    getRectsForRange(range: TextRange, widthStyle: text.RectWidthStyle, heightStyle: text.RectHeightStyle): Array<text.TextBox> | undefined
 }
 export class LayoutManagerInternal implements MaterializedBase,LayoutManager {
     peer?: Finalizable | undefined = undefined
@@ -57,58 +57,80 @@ export class LayoutManagerInternal implements MaterializedBase,LayoutManager {
     public static fromPtr(ptr: KPointer): LayoutManagerInternal {
         return new LayoutManagerInternal(ptr)
     }
-    public getLineCount(): int32 {
+    public getLineCount(): int32 | undefined {
         return this.getLineCount_serialize()
     }
-    public getGlyphPositionAtCoordinate(x: double, y: double): PositionWithAffinity {
+    public getGlyphPositionAtCoordinate(x: double, y: double): PositionWithAffinity | undefined {
         const x_casted = x as (double)
         const y_casted = y as (double)
         return this.getGlyphPositionAtCoordinate_serialize(x_casted, y_casted)
     }
-    public getLineMetrics(lineNumber: int32): text.LineMetrics {
+    public getLineMetrics(lineNumber: int32): text.LineMetrics | undefined {
         const lineNumber_casted = lineNumber as (int32)
         return this.getLineMetrics_serialize(lineNumber_casted)
     }
-    public getRectsForRange(range: TextRange, widthStyle: text.RectWidthStyle, heightStyle: text.RectHeightStyle): Array<text.TextBox> {
+    public getRectsForRange(range: TextRange, widthStyle: text.RectWidthStyle, heightStyle: text.RectHeightStyle): Array<text.TextBox> | undefined {
         const range_casted = range as (TextRange)
         const widthStyle_casted = widthStyle as (text.RectWidthStyle)
         const heightStyle_casted = heightStyle as (text.RectHeightStyle)
         return this.getRectsForRange_serialize(range_casted, widthStyle_casted, heightStyle_casted)
     }
-    getLineCount_serialize(): int32 {
+    getLineCount_serialize(): int32 | undefined {
         const retval  = ArkUIGeneratedNativeModule._LayoutManager_getLineCount(this.peer!.ptr)
-        return retval
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : int32 | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = retvalDeserializer.readInt32()
+        }
+        const returnResult : int32 | undefined = buffer
+        return returnResult
     }
-    getGlyphPositionAtCoordinate_serialize(x: double, y: double): PositionWithAffinity {
+    getGlyphPositionAtCoordinate_serialize(x: double, y: double): PositionWithAffinity | undefined {
         const retval  = ArkUIGeneratedNativeModule._LayoutManager_getGlyphPositionAtCoordinate(this.peer!.ptr, x, y)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const returnResult : PositionWithAffinity = PositionWithAffinity_serializer.read(retvalDeserializer)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : PositionWithAffinity | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = PositionWithAffinity_serializer.read(retvalDeserializer)
+        }
+        const returnResult : PositionWithAffinity | undefined = buffer
         return returnResult
     }
-    getLineMetrics_serialize(lineNumber: int32): text.LineMetrics {
+    getLineMetrics_serialize(lineNumber: int32): text.LineMetrics | undefined {
         const retval  = ArkUIGeneratedNativeModule._LayoutManager_getLineMetrics(this.peer!.ptr, lineNumber)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const returnResult : text.LineMetrics = text_LineMetrics_serializer.read(retvalDeserializer)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : text.LineMetrics | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = text_LineMetrics_serializer.read(retvalDeserializer)
+        }
+        const returnResult : text.LineMetrics | undefined = buffer
         return returnResult
     }
-    getRectsForRange_serialize(range: TextRange, widthStyle: text.RectWidthStyle, heightStyle: text.RectHeightStyle): Array<text.TextBox> {
+    getRectsForRange_serialize(range: TextRange, widthStyle: text.RectWidthStyle, heightStyle: text.RectHeightStyle): Array<text.TextBox> | undefined {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         TextRange_serializer.write(thisSerializer, range)
         const retval  = ArkUIGeneratedNativeModule._LayoutManager_getRectsForRange(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length(), widthStyle.valueOf(), heightStyle.valueOf())
         thisSerializer.release()
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const bufferLength : int32 = retvalDeserializer.readInt32()
-        let buffer : Array<text.TextBox> = new Array<text.TextBox>(bufferLength)
-        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
-            buffer[bufferBufCounterI] = text_TextBox_serializer.read(retvalDeserializer)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : Array<text.TextBox> | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const buffer_Length : int32 = retvalDeserializer.readInt32()
+            let buffer_ : Array<text.TextBox> = new Array<text.TextBox>(buffer_Length)
+            for (let buffer_BufCounterI = 0; buffer_BufCounterI < buffer_Length; buffer_BufCounterI++) {
+                buffer_[buffer_BufCounterI] = text_TextBox_serializer.read(retvalDeserializer)
+            }
+            buffer = buffer_
         }
-        const returnResult : Array<text.TextBox> = buffer
+        const returnResult : Array<text.TextBox> | undefined = buffer
         return returnResult
     }
 }
 export interface StyledStringController {
     setStyledString(styledString: StyledString): void
-    getStyledString(): MutableStyledString
+    getStyledString(): MutableStyledString | undefined
 }
 export class StyledStringControllerInternal implements MaterializedBase,StyledStringController {
     peer?: Finalizable | undefined = undefined
@@ -136,22 +158,28 @@ export class StyledStringControllerInternal implements MaterializedBase,StyledSt
         this.setStyledString_serialize(styledString_casted)
         return
     }
-    public getStyledString(): MutableStyledString {
+    public getStyledString(): MutableStyledString | undefined {
         return this.getStyledString_serialize()
     }
     setStyledString_serialize(styledString: StyledString): void {
         ArkUIGeneratedNativeModule._StyledStringController_setStyledString(this.peer!.ptr, toPeerPtr(styledString))
     }
-    getStyledString_serialize(): MutableStyledString {
+    getStyledString_serialize(): MutableStyledString | undefined {
         const retval  = ArkUIGeneratedNativeModule._StyledStringController_getStyledString(this.peer!.ptr)
-        const obj : MutableStyledString = MutableStyledStringInternal.fromPtr(retval)
-        return obj
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : MutableStyledString | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = (MutableStyledString_serializer.read(retvalDeserializer) as MutableStyledString)
+        }
+        const returnResult : MutableStyledString | undefined = buffer
+        return returnResult
     }
 }
 export interface TextBaseController {
     setSelection(selectionStart: number, selectionEnd: number, options: SelectionOptions | undefined): void
     closeSelectionMenu(): void
-    getLayoutManager(): LayoutManager
+    getLayoutManager(): LayoutManager | undefined
 }
 export class TextBaseControllerInternal implements MaterializedBase,TextBaseController {
     peer?: Finalizable | undefined = undefined
@@ -185,7 +213,7 @@ export class TextBaseControllerInternal implements MaterializedBase,TextBaseCont
         this.closeSelectionMenu_serialize()
         return
     }
-    public getLayoutManager(): LayoutManager {
+    public getLayoutManager(): LayoutManager | undefined {
         return this.getLayoutManager_serialize()
     }
     setSelection_serialize(selectionStart: number, selectionEnd: number, options?: SelectionOptions): void {
@@ -203,10 +231,16 @@ export class TextBaseControllerInternal implements MaterializedBase,TextBaseCont
     closeSelectionMenu_serialize(): void {
         ArkUIGeneratedNativeModule._TextBaseController_closeSelectionMenu(this.peer!.ptr)
     }
-    getLayoutManager_serialize(): LayoutManager {
+    getLayoutManager_serialize(): LayoutManager | undefined {
         const retval  = ArkUIGeneratedNativeModule._TextBaseController_getLayoutManager(this.peer!.ptr)
-        const obj : LayoutManager = LayoutManagerInternal.fromPtr(retval)
-        return obj
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : LayoutManager | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = (LayoutManager_serializer.read(retvalDeserializer) as LayoutManager)
+        }
+        const returnResult : LayoutManager | undefined = buffer
+        return returnResult
     }
 }
 export class TextMenuItemIdInternal {
@@ -1270,11 +1304,11 @@ export class TextDataDetectorConfig_serializer {
     }
 }
 export interface TextEditControllerEx {
-    isEditing(): boolean
+    isEditing(): boolean | undefined
     stopEditing(): void
-    setCaretOffset(offset: number): boolean
-    getCaretOffset(): number
-    getPreviewText(): PreviewText
+    setCaretOffset(offset: number): boolean | undefined
+    getCaretOffset(): number | undefined
+    getPreviewText(): PreviewText | undefined
 }
 export class TextEditControllerExInternal extends TextBaseControllerInternal implements MaterializedBase,TextEditControllerEx {
     constructor(peerPtr: KPointer) {
@@ -1293,42 +1327,68 @@ export class TextEditControllerExInternal extends TextBaseControllerInternal imp
     public static fromPtr(ptr: KPointer): TextEditControllerExInternal {
         return new TextEditControllerExInternal(ptr)
     }
-    public isEditing(): boolean {
+    public isEditing(): boolean | undefined {
         return this.isEditing_serialize()
     }
     public stopEditing(): void {
         this.stopEditing_serialize()
         return
     }
-    public setCaretOffset(offset: number): boolean {
+    public setCaretOffset(offset: number): boolean | undefined {
         const offset_casted = offset as (number)
         return this.setCaretOffset_serialize(offset_casted)
     }
-    public getCaretOffset(): number {
+    public getCaretOffset(): number | undefined {
         return this.getCaretOffset_serialize()
     }
-    public getPreviewText(): PreviewText {
+    public getPreviewText(): PreviewText | undefined {
         return this.getPreviewText_serialize()
     }
-    isEditing_serialize(): boolean {
+    isEditing_serialize(): boolean | undefined {
         const retval  = ArkUIGeneratedNativeModule._TextEditControllerEx_isEditing(this.peer!.ptr)
-        return retval
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : boolean | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = retvalDeserializer.readBoolean()
+        }
+        const returnResult : boolean | undefined = buffer
+        return returnResult
     }
     stopEditing_serialize(): void {
         ArkUIGeneratedNativeModule._TextEditControllerEx_stopEditing(this.peer!.ptr)
     }
-    setCaretOffset_serialize(offset: number): boolean {
+    setCaretOffset_serialize(offset: number): boolean | undefined {
         const retval  = ArkUIGeneratedNativeModule._TextEditControllerEx_setCaretOffset(this.peer!.ptr, offset)
-        return retval
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : boolean | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = retvalDeserializer.readBoolean()
+        }
+        const returnResult : boolean | undefined = buffer
+        return returnResult
     }
-    getCaretOffset_serialize(): number {
+    getCaretOffset_serialize(): number | undefined {
         const retval  = ArkUIGeneratedNativeModule._TextEditControllerEx_getCaretOffset(this.peer!.ptr)
-        return retval
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : number | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = (retvalDeserializer.readNumber() as number)
+        }
+        const returnResult : number | undefined = buffer
+        return returnResult
     }
-    getPreviewText_serialize(): PreviewText {
+    getPreviewText_serialize(): PreviewText | undefined {
         const retval  = ArkUIGeneratedNativeModule._TextEditControllerEx_getPreviewText(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const returnResult : PreviewText = PreviewText_serializer.read(retvalDeserializer)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : PreviewText | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = PreviewText_serializer.read(retvalDeserializer)
+        }
+        const returnResult : PreviewText | undefined = buffer
         return returnResult
     }
 }

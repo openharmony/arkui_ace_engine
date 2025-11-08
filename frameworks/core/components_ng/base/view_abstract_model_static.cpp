@@ -197,7 +197,7 @@ bool ViewAbstractModelStatic::CheckMenuIsShow(
         renderContext->UpdateChainedTransition(menuParam.transition);
     }
     if (wrapperPattern->IsShow() && !wrapperPattern->GetIsOpenMenu() &&
-        ((menuParam.setShow && !menuParam.isShow) || !menuParam.setShow)) {
+        !(menuParam.setShow && menuParam.isShow)) {
         TAG_LOGI(AceLogTag::ACE_MENU, "execute hide menu.");
         overlayManager->HideMenu(menuNode, targetId, false);
     }
@@ -903,6 +903,21 @@ void ViewAbstractModelStatic::BindBackground(FrameNode* frameNode,
     } else {
         ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, BackgroundAlign, frameNode);
     }
+}
+
+void ViewAbstractModelStatic::ResetBackground(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(IsTransitionBackground, true, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BuilderBackgroundFlag, false, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundAlign, Alignment::CENTER, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+        LayoutProperty, BackgroundIgnoresLayoutSafeAreaEdges, LAYOUT_SAFE_AREA_EDGE_ALL, frameNode);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj("customBackgroundColor");
+    ACE_UPDATE_NODE_RENDER_CONTEXT(CustomBackgroundColor, Color::TRANSPARENT, frameNode);
 }
 
 void ViewAbstractModelStatic::SetFlexGrow(FrameNode* frameNode, float value)

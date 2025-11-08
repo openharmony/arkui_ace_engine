@@ -45,6 +45,10 @@ public:
         ani_double dirtyWidth, ani_double dirtyHeight);
     static ani_object GetDrawingCanvas(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long peerPtr);
     static ani_int GetCanvasId(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long peerPtr);
+    static void SetAttachCallbackId(
+        ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long peerPtr, ani_int attachCallbackId);
+    static void SetDetachCallbackId(
+        ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long peerPtr, ani_int detachCallbackId);
 };
 } // namespace OHOS::Ace::Ani
 

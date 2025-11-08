@@ -194,14 +194,17 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
     }
 
     public get localStorage_(): LocalStorage {
+        // When the current component has no localStorage instance and has parent component.
         if (!this.localStoragebackStore_ && this.parent_) {
-            this.localStoragebackStore_ = this.parent_!.localStorage_;
+            this.localStoragebackStore_ = this.backLocalStorage_ ? this.backLocalStorage_ : this.parent_!.localStorage_;
         }
-
+        // When the current component has no localStorage instance and no parent component.
         if (!this.localStoragebackStore_) {
+            // When the useSharedStorage parameter is set to true.
             if (this.useSharedStorage_) {
                 this.localStoragebackStore_ = this.getUIContext().getSharedLocalStorage();
             }
+            // When the useSharedStorage parameter is set to false, or when it is set to true but the localStorage instance obtained from UIContext is undefined.
             if (!this.localStoragebackStore_) {
                 this.localStoragebackStore_ = this.backLocalStorage_ ? this.backLocalStorage_ : new LocalStorage();
             }

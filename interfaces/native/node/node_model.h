@@ -171,6 +171,7 @@ int32_t SetLengthMetricUnit(ArkUI_NodeHandle nodePtr, ArkUI_LengthMetricUnit uni
 int32_t AddNodeEventReceiver(ArkUI_NodeHandle node, void (*eventReceiver)(ArkUI_NodeEvent* event));
 int32_t RemoveNodeEventReceiver(ArkUI_NodeHandle node, void (*eventReceiver)(ArkUI_NodeEvent* event));
 void* GetParseJsMedia();
+void* GetParseStaticResource();
 void IncreaseRefDrawable(void* object);
 void DecreaseRefDrawable(void* object);
 bool CheckIsCNode(ArkUI_NodeHandle node);

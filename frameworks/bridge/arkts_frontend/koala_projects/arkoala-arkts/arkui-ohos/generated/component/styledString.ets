@@ -688,10 +688,14 @@ export class StyledString implements MaterializedBase {
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    readonly length: int32
+    get length(): int32 {
+        return this.getLength()
+    }
+    set length(length: int32) {
+        this.setLength(length)
+    }
     constructor(_0: boolean, _1: boolean, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, StyledString.getFinalizer())
-        this.length = this.getLength()
     }
     constructor(value: string | ImageAttachment | CustomSpan, styles?: Array<StyleOptions>) {
         this(false, false, StyledString.construct(value, styles))
@@ -729,9 +733,9 @@ export class StyledString implements MaterializedBase {
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._StyledString_getFinalizer()
     }
-    static fromHtml_serialize(html: string): Promise<StyledString> {
+    static fromHtml_serialize(html: string): Promise<StyledString | undefined> {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        const retval  = thisSerializer.holdAndWriteCallbackForPromise<StyledString>()[0]
+        const retval  = thisSerializer.holdAndWriteCallbackForPromise<StyledString | undefined>()[0]
         ArkUIGeneratedNativeModule._StyledString_fromHtml(html, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
@@ -740,30 +744,44 @@ export class StyledString implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._StyledString_toHtml(toPeerPtr(styledString))
         return retval
     }
-    static marshalling0_serialize(styledString: StyledString, callback_: StyledStringMarshallCallback): ArrayBuffer {
+    static marshalling0_serialize(styledString: StyledString, callback_: StyledStringMarshallCallback): ArrayBuffer | undefined {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.holdAndWriteCallback(callback_)
         const retval  = ArkUIGeneratedNativeModule._StyledString_marshalling0(toPeerPtr(styledString), thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
-        return new DeserializerBase(retval, retval.length).readBuffer()
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : ArrayBuffer | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = (retvalDeserializer.readBuffer() as ArrayBuffer)
+        }
+        const returnResult : ArrayBuffer | undefined = buffer
+        return returnResult
     }
-    static unmarshalling0_serialize(buffer: ArrayBuffer, callback_: StyledStringUnmarshallCallback): Promise<StyledString> {
+    static unmarshalling0_serialize(buffer: ArrayBuffer, callback_: StyledStringUnmarshallCallback): Promise<StyledString | undefined> {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.writeBuffer(buffer)
         thisSerializer.holdAndWriteCallback(callback_)
-        const retval  = thisSerializer.holdAndWriteCallbackForPromise<StyledString>()[0]
+        const retval  = thisSerializer.holdAndWriteCallbackForPromise<StyledString | undefined>()[0]
         ArkUIGeneratedNativeModule._StyledString_unmarshalling0(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
-    static marshalling1_serialize(styledString: StyledString): ArrayBuffer {
+    static marshalling1_serialize(styledString: StyledString): ArrayBuffer | undefined {
         const retval  = ArkUIGeneratedNativeModule._StyledString_marshalling1(toPeerPtr(styledString))
-        return new DeserializerBase(retval, retval.length).readBuffer()
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : ArrayBuffer | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = (retvalDeserializer.readBuffer() as ArrayBuffer)
+        }
+        const returnResult : ArrayBuffer | undefined = buffer
+        return returnResult
     }
-    static unmarshalling1_serialize(buffer: ArrayBuffer): Promise<StyledString> {
+    static unmarshalling1_serialize(buffer: ArrayBuffer): Promise<StyledString | undefined> {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.writeBuffer(buffer)
-        const retval  = thisSerializer.holdAndWriteCallbackForPromise<StyledString>()[0]
+        const retval  = thisSerializer.holdAndWriteCallbackForPromise<StyledString | undefined>()[0]
         ArkUIGeneratedNativeModule._StyledString_unmarshalling1(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
@@ -771,7 +789,7 @@ export class StyledString implements MaterializedBase {
     public getString(): string {
         return this.getString_serialize()
     }
-    public getStyles(start: int32, length: int32, styledKey?: StyledStringKey): Array<SpanStyle> {
+    public getStyles(start: int32, length: int32, styledKey?: StyledStringKey): Array<SpanStyle> | undefined {
         const start_casted = start as (int32)
         const length_casted = length as (int32)
         const styledKey_casted = styledKey as (StyledStringKey | undefined)
@@ -781,12 +799,12 @@ export class StyledString implements MaterializedBase {
         const other_casted = other as (StyledString)
         return this.equals_serialize(other_casted)
     }
-    public subStyledString(start: int32, length?: int32): StyledString {
+    public subStyledString(start: int32, length?: int32): StyledString | undefined {
         const start_casted = start as (int32)
         const length_casted = length as (int32 | undefined)
         return this.subStyledString_serialize(start_casted, length_casted)
     }
-    public static fromHtml(html: string): Promise<StyledString> {
+    public static fromHtml(html: string): Promise<StyledString | undefined> {
         const html_casted = html as (string)
         return StyledString.fromHtml_serialize(html_casted)
     }
@@ -794,32 +812,37 @@ export class StyledString implements MaterializedBase {
         const styledString_casted = styledString as (StyledString)
         return StyledString.toHtml_serialize(styledString_casted)
     }
-    public static marshalling(styledString: StyledString, callback_: StyledStringMarshallCallback): ArrayBuffer {
+    public static marshalling(styledString: StyledString, callback_: StyledStringMarshallCallback): ArrayBuffer | undefined {
         const styledString_casted = styledString as (StyledString)
         const callback__casted = callback_ as (StyledStringMarshallCallback)
         return StyledString.marshalling0_serialize(styledString_casted, callback__casted)
     }
-    public static unmarshalling(buffer: ArrayBuffer, callback_: StyledStringUnmarshallCallback): Promise<StyledString> {
+    public static unmarshalling(buffer: ArrayBuffer, callback_: StyledStringUnmarshallCallback): Promise<StyledString | undefined> {
         const buffer_casted = buffer as (ArrayBuffer)
         const callback__casted = callback_ as (StyledStringUnmarshallCallback)
         return StyledString.unmarshalling0_serialize(buffer_casted, callback__casted)
     }
-    public static marshalling(styledString: StyledString): ArrayBuffer {
+    public static marshalling(styledString: StyledString): ArrayBuffer | undefined {
         const styledString_casted = styledString as (StyledString)
         return StyledString.marshalling1_serialize(styledString_casted)
     }
-    public static unmarshalling(buffer: ArrayBuffer): Promise<StyledString> {
+    public static unmarshalling(buffer: ArrayBuffer): Promise<StyledString | undefined> {
         const buffer_casted = buffer as (ArrayBuffer)
         return StyledString.unmarshalling1_serialize(buffer_casted)
     }
     private getLength(): int32 {
         return this.getLength_serialize()
     }
+    private setLength(length: int32): void {
+        const length_casted = length as (int32)
+        this.setLength_serialize(length_casted)
+        return
+    }
     getString_serialize(): string {
         const retval  = ArkUIGeneratedNativeModule._StyledString_getString(this.peer!.ptr)
         return retval
     }
-    getStyles_serialize(start: int32, length: int32, styledKey?: StyledStringKey): Array<SpanStyle> {
+    getStyles_serialize(start: int32, length: int32, styledKey?: StyledStringKey): Array<SpanStyle> | undefined {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (styledKey !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -831,19 +854,24 @@ export class StyledString implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._StyledString_getStyles(this.peer!.ptr, start, length, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const bufferLength : int32 = retvalDeserializer.readInt32()
-        let buffer : Array<SpanStyle> = new Array<SpanStyle>(bufferLength)
-        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
-            buffer[bufferBufCounterI] = SpanStyle_serializer.read(retvalDeserializer)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : Array<SpanStyle> | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const buffer_Length : int32 = retvalDeserializer.readInt32()
+            let buffer_ : Array<SpanStyle> = new Array<SpanStyle>(buffer_Length)
+            for (let buffer_BufCounterI = 0; buffer_BufCounterI < buffer_Length; buffer_BufCounterI++) {
+                buffer_[buffer_BufCounterI] = SpanStyle_serializer.read(retvalDeserializer)
+            }
+            buffer = buffer_
         }
-        const returnResult : Array<SpanStyle> = buffer
+        const returnResult : Array<SpanStyle> | undefined = buffer
         return returnResult
     }
     equals_serialize(other: StyledString): boolean {
         const retval  = ArkUIGeneratedNativeModule._StyledString_equals(this.peer!.ptr, toPeerPtr(other))
         return retval
     }
-    subStyledString_serialize(start: int32, length?: int32): StyledString {
+    subStyledString_serialize(start: int32, length?: int32): StyledString | undefined {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (length !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -854,12 +882,21 @@ export class StyledString implements MaterializedBase {
         }
         const retval  = ArkUIGeneratedNativeModule._StyledString_subStyledString(this.peer!.ptr, start, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
-        const obj : StyledString = StyledStringInternal.fromPtr(retval)
-        return obj
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : StyledString | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = (StyledString_serializer.read(retvalDeserializer) as StyledString)
+        }
+        const returnResult : StyledString | undefined = buffer
+        return returnResult
     }
     private getLength_serialize(): int32 {
         const retval  = ArkUIGeneratedNativeModule._StyledString_getLength(this.peer!.ptr)
         return retval
+    }
+    private setLength_serialize(length: int32): void {
+        ArkUIGeneratedNativeModule._StyledString_setLength(this.peer!.ptr, length)
     }
 }
 export class TextShadowStyleInternal {

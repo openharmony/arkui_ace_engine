@@ -77,7 +77,7 @@ static ani_ref CreateStsError(ani_env* env, ani_int code, const std::string& msg
 {
     ani_class cls;
     ani_status status = ANI_OK;
-    if ((status = env->FindClass("C{@ohos.base.BusinessError}", &cls)) != ANI_OK) {
+    if ((status = env->FindClass("@ohos.base.BusinessError", &cls)) != ANI_OK) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "FindClass failed %{public}d", status);
     }
     ani_method ctor;
@@ -614,13 +614,9 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
         .AddClass("@ohos.arkui.componentSnapshot.componentSnapshot.SnapshotOptions");
     std::string get_SignatureStr = get_SignatureBuilder.BuildSignatureDescriptor();
 
-    SignatureBuilder getWithPromise_SignatureBuilder {};
-    getWithPromise_SignatureBuilder
-        .AddClass("std.core.String")
-        .AddClass("@ohos.arkui.componentSnapshot.componentSnapshot.SnapshotOptions")
-        .SetReturnClass("std.core.Promise");
-    std::string getWithPromise_SignatureStr = getWithPromise_SignatureBuilder.BuildSignatureDescriptor();
-
+    std::string getWithPromise_SignatureStr =
+        "C{std.core.String}C{@ohos.arkui.componentSnapshot.componentSnapshot.SnapshotOptions}:"
+        "X{C{std.core.Null}}";
     std::array methods = {
         ani_native_function { "get", get_SignatureStr.c_str(), reinterpret_cast<void*>(ANI_GetWithCallback) },
         ani_native_function { "get", getWithPromise_SignatureStr.c_str(), reinterpret_cast<void*>(ANI_GetWithPromise) },

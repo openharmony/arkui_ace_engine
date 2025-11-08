@@ -172,7 +172,7 @@ struct ArkUINavigationInfo {
 };
 
 struct ArkUINavDestinationInfo {
-    ani_double uniqueId;
+    ani_int uniqueId;
     ani_int index;
     std::string name;
     std::string navDestinationId;
@@ -246,7 +246,7 @@ struct ArkUIDragPointerEvent {
 struct ArkUIDragControllerAsync {
     ani_env* env = nullptr;
     bool isArray = false;
-    const char* extraParams;
+    std::string extraParams;
     bool hasHandle = false;
     SharedPointerWrapper touchPoint;
     SharedPointerWrapper unifiedData;
@@ -548,6 +548,8 @@ struct ArkUIAniCustomNodeModifier {
     void (*queryRouterPageInfo)(ani_long node, ArkUIRouterPageInfo& info);
     bool (*queryNavDestinationInfo1)(ArkUI_Int32 uniqueId, ArkUINavDestinationInfo& info);
     bool (*queryRouterPageInfo1)(ArkUI_Int32 uniqueId, ArkUIRouterPageInfo& info);
+    void (*onReuse)(ani_long node);
+    void (*onRecycle)(ani_long node);
 };
 struct ArkUIAniKeyboardAvoidModeModifier {
     ArkUI_Int32 (*getKeyboardAvoidMode)();
@@ -695,6 +697,8 @@ struct ArkUIAniCanvasModifier {
         ani_double dirtyHeight);
     void* (*getDrawingCanvas)(ArkUIDrawingRenderingContext peer);
     ani_int (*getCanvasId)(ArkUICanvasRenderingContext peer);
+    void (*setAttachCallbackId)(ArkUICanvasRenderingContext peer, ani_int attachCallbackId);
+    void (*setDetachCallbackId)(ArkUICanvasRenderingContext peer, ani_int detachCallbackId);
 };
 
 struct ArkUIAniTraceModifier {

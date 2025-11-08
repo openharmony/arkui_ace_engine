@@ -849,7 +849,9 @@ void SetFillStyleImpl(Ark_CanvasRenderer peer,
         },
         [peerImpl](const Ark_Int32& style) {
             auto colorNum = Converter::Convert<int32_t>(style);
-            peerImpl->SetFillStyle(colorNum);
+            if (colorNum >= 0) {
+                peerImpl->SetFillStyle(static_cast<uint32_t>(colorNum));
+            }
         },
         [peerImpl](const Ark_CanvasGradient& gradient) {
             CHECK_NULL_VOID(gradient);
@@ -857,7 +859,7 @@ void SetFillStyleImpl(Ark_CanvasRenderer peer,
         },
         [peerImpl](const Ark_CanvasPattern& pattern) {
             CHECK_NULL_VOID(pattern);
-            peerImpl->SetFillStyle(pattern->GetId());
+            peerImpl->SetFillStylePattern(pattern->GetId());
         },
         []() {});
 }
@@ -886,7 +888,9 @@ void SetStrokeStyleImpl(Ark_CanvasRenderer peer,
         },
         [peerImpl](const Ark_Int32& style) {
             auto colorNum = Converter::Convert<int32_t>(style);
-            peerImpl->SetStrokeStyle(colorNum);
+            if (colorNum >= 0) {
+                peerImpl->SetStrokeStyle(static_cast<uint32_t>(colorNum));
+            }
         },
         [peerImpl](const Ark_CanvasGradient& gradient) {
             CHECK_NULL_VOID(gradient);
@@ -894,7 +898,7 @@ void SetStrokeStyleImpl(Ark_CanvasRenderer peer,
         },
         [peerImpl](const Ark_CanvasPattern& pattern) {
             CHECK_NULL_VOID(pattern);
-            peerImpl->SetStrokeStyle(pattern->GetId());
+            peerImpl->SetStrokeStylePattern(pattern->GetId());
         },
         []() {});
 }

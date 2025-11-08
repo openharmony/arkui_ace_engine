@@ -35,6 +35,7 @@ import { FocusBoxStyle_serializer, FocusBoxStyle, FocusPriority } from "./focus"
 import { matrix4_Matrix4Transit_serializer } from "./../framework/ohos.matrix4"
 import { CircleShape_serializer, EllipseShape_serializer, PathShape_serializer, RectShape_serializer } from "./../framework/ohos.arkui.shape"
 import { image_PixelMap_serializer } from "./../framework/ohos.multimedia.image"
+import { ComponentContent_serializer } from "./../ComponentContent"
 import { StyledString_serializer, StyledString, ImageAttachment, CustomSpan, StyleOptions, StyledStringKey, SpanStyle, StyledStringMarshallCallback, UserDataSpan, StyledStringUnmarshallCallback } from "./styledString"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
@@ -76,6 +77,7 @@ import { curves_ICurve_serializer } from "./../framework/ohos.curves"
 import { SymbolGlyphModifier_serializer } from "./../SymbolGlyphModifier"
 import { Want_serializer } from "./../framework/ohos.app.ability.Want"
 import { UIContext_serializer } from "./../framework/ohos.arkui.UIContext"
+import { unifiedDataChannel_UnifiedData_serializer, unifiedDataChannel_Summary_serializer } from "./../framework/ohos.data.unifiedDataChannel"
 // instructive change start
 import { _animateTo, _animationStart, _animationStop } from "arkui/base/ArkAnimation"
 import { AnimationExtender } from '#generated';
@@ -518,90 +520,6 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
         thisSerializer.release()
     }
 }
-export class ChildrenMainSizeInternal {
-    public static fromPtr(ptr: KPointer): ChildrenMainSize {
-        return new ChildrenMainSize(false, ptr)
-    }
-}
-export class ChildrenMainSize implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
-    get childDefaultSize(): double {
-        return this.getChildDefaultSize()
-    }
-    set childDefaultSize(childDefaultSize: double) {
-        this.setChildDefaultSize(childDefaultSize)
-    }
-    constructor(_0: boolean, peerPtr: KPointer) {
-        this.peer = new Finalizable(peerPtr, ChildrenMainSize.getFinalizer())
-    }
-    constructor(childDefaultSize: double) {
-        this(false, ChildrenMainSize.construct(childDefaultSize))
-    }
-    static construct(childDefaultSize: double): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._ChildrenMainSize_construct(childDefaultSize)
-        return retval
-    }
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._ChildrenMainSize_getFinalizer()
-    }
-    public splice(start: int32, deleteCount?: int32, childrenSize?: Array<double>): void {
-        const start_casted = start as (int32)
-        const deleteCount_casted = deleteCount as (int32 | undefined)
-        const childrenSize_casted = childrenSize as (Array<double> | undefined)
-        this.splice_serialize(start_casted, deleteCount_casted, childrenSize_casted)
-        return
-    }
-    public update(index: int32, childSize: double): void {
-        const index_casted = index as (int32)
-        const childSize_casted = childSize as (double)
-        this.update_serialize(index_casted, childSize_casted)
-        return
-    }
-    private getChildDefaultSize(): double {
-        return this.getChildDefaultSize_serialize()
-    }
-    private setChildDefaultSize(childDefaultSize: double): void {
-        const childDefaultSize_casted = childDefaultSize as (double)
-        this.setChildDefaultSize_serialize(childDefaultSize_casted)
-        return
-    }
-    splice_serialize(start: int32, deleteCount?: int32, childrenSize?: Array<double>): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (deleteCount !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const deleteCountTmpValue  = deleteCount!
-            thisSerializer.writeInt32(deleteCountTmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        if (childrenSize !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const childrenSizeTmpValue  = childrenSize!
-            thisSerializer.writeInt32((childrenSizeTmpValue.length).toInt())
-            for (let childrenSizeTmpValueCounterI = 0; childrenSizeTmpValueCounterI < childrenSizeTmpValue.length; childrenSizeTmpValueCounterI++) {
-                const childrenSizeTmpValueTmpElement : double = childrenSizeTmpValue[childrenSizeTmpValueCounterI]
-                thisSerializer.writeFloat64(childrenSizeTmpValueTmpElement)
-            }
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._ChildrenMainSize_splice(this.peer!.ptr, start, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    update_serialize(index: int32, childSize: double): void {
-        ArkUIGeneratedNativeModule._ChildrenMainSize_update(this.peer!.ptr, index, childSize)
-    }
-    private getChildDefaultSize_serialize(): double {
-        const retval  = ArkUIGeneratedNativeModule._ChildrenMainSize_getChildDefaultSize(this.peer!.ptr)
-        return retval
-    }
-    private setChildDefaultSize_serialize(childDefaultSize: double): void {
-        ArkUIGeneratedNativeModule._ChildrenMainSize_setChildDefaultSize(this.peer!.ptr, childDefaultSize)
-    }
-}
 export interface DismissPopupAction {
     reason: DismissReason
     dismiss(): void
@@ -665,8 +583,8 @@ export interface DragEvent {
     getWindowX(): double
     getWindowY(): double
     setData(unifiedData: unifiedDataChannel.UnifiedData): void
-    getData(): unifiedDataChannel.UnifiedData
-    getSummary(): unifiedDataChannel.Summary
+    getData(): unifiedDataChannel.UnifiedData | undefined
+    getSummary(): unifiedDataChannel.Summary | undefined
     setResult(dragResult: DragResult): void
     getResult(): DragResult
     getPreviewRect(): Rectangle
@@ -674,7 +592,7 @@ export interface DragEvent {
     getVelocityY(): double
     getVelocity(): double
     executeDropAnimation(customDropAnimation: (() => void)): void
-    startDataLoading(options: unifiedDataChannel.GetDataParams): string
+    startDataLoading(options: unifiedDataChannel.GetDataParams): string | undefined
     enableInternalDropAnimation(configuration: string): void
 }
 export class DragEventInternal implements MaterializedBase,DragEvent {
@@ -734,10 +652,10 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
         this.setData_serialize(unifiedData_casted)
         return
     }
-    public getData(): unifiedDataChannel.UnifiedData {
+    public getData(): unifiedDataChannel.UnifiedData | undefined {
         return this.getData_serialize()
     }
-    public getSummary(): unifiedDataChannel.Summary {
+    public getSummary(): unifiedDataChannel.Summary | undefined {
         return hookDragEventGetSummary(this)
     }
     public setResult(dragResult: DragResult): void {
@@ -765,7 +683,7 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
         this.executeDropAnimation_serialize(customDropAnimation_casted)
         return
     }
-    public startDataLoading(options: unifiedDataChannel.GetDataParams): string {
+    public startDataLoading(options: unifiedDataChannel.GetDataParams): string | undefined {
         return hookDragEventStartDataLoading(this, options)
     }
     public enableInternalDropAnimation(configuration: string): void {
@@ -816,15 +734,16 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
     setData_serialize(unifiedData: unifiedDataChannel.UnifiedData): void {
         ArkUIGeneratedNativeModule._DragEvent_setData(this.peer!.ptr, extractors.toUnifiedDataChannelUnifiedDataPtr(unifiedData))
     }
-    getData_serialize(): unifiedDataChannel.UnifiedData {
+    getData_serialize(): unifiedDataChannel.UnifiedData | undefined {
         const retval  = ArkUIGeneratedNativeModule._DragEvent_getData(this.peer!.ptr)
-        const obj : unifiedDataChannel.UnifiedData = extractors.fromUnifiedDataChannelUnifiedDataPtr(retval)
-        return obj
-    }
-    getSummary_serialize(): unifiedDataChannel.Summary {
-        const retval  = ArkUIGeneratedNativeModule._DragEvent_getSummary(this.peer!.ptr)
-        const obj : unifiedDataChannel.Summary = extractors.fromUnifiedDataChannelSummaryPtr(retval)
-        return obj
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : unifiedDataChannel.UnifiedData | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = (unifiedDataChannel_UnifiedData_serializer.read(retvalDeserializer) as unifiedDataChannel.UnifiedData)
+        }
+        const returnResult : unifiedDataChannel.UnifiedData | undefined = buffer
+        return returnResult
     }
     setResult_serialize(dragResult: DragResult): void {
         ArkUIGeneratedNativeModule._DragEvent_setResult(this.peer!.ptr, dragResult.valueOf())
@@ -1269,9 +1188,9 @@ export interface Layoutable {
     measureResult: MeasureResult
     uniqueId?: number | undefined
     layout(position: Position): void
-    getMargin(): DirectionalEdgesT<number>
-    getPadding(): DirectionalEdgesT<number>
-    getBorderWidth(): DirectionalEdgesT<number>
+    getMargin(): DirectionalEdgesT<number> | undefined
+    getPadding(): DirectionalEdgesT<number> | undefined
+    getBorderWidth(): DirectionalEdgesT<number> | undefined
 }
 export class LayoutableInternal implements MaterializedBase,Layoutable {
     peer?: Finalizable | undefined = undefined
@@ -1312,13 +1231,13 @@ export class LayoutableInternal implements MaterializedBase,Layoutable {
         this.layout_serialize(position_casted)
         return
     }
-    public getMargin(): DirectionalEdgesT<number> {
+    public getMargin(): DirectionalEdgesT<number> | undefined {
         return this.getMargin_serialize()
     }
-    public getPadding(): DirectionalEdgesT<number> {
+    public getPadding(): DirectionalEdgesT<number> | undefined {
         return this.getPadding_serialize()
     }
-    public getBorderWidth(): DirectionalEdgesT<number> {
+    public getBorderWidth(): DirectionalEdgesT<number> | undefined {
         return this.getBorderWidth_serialize()
     }
     private getMeasureResult(): MeasureResult {
@@ -1343,19 +1262,19 @@ export class LayoutableInternal implements MaterializedBase,Layoutable {
         ArkUIGeneratedNativeModule._Layoutable_layout(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    getMargin_serialize(): DirectionalEdgesT<number> {
+    getMargin_serialize(): DirectionalEdgesT<number> | undefined {
         const retval  = ArkUIGeneratedNativeModule._Layoutable_getMargin(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult : DirectionalEdgesT<number> = DirectionalEdgesT_serializer.read(retvalDeserializer)
         return returnResult
     }
-    getPadding_serialize(): DirectionalEdgesT<number> {
+    getPadding_serialize(): DirectionalEdgesT<number> | undefined {
         const retval  = ArkUIGeneratedNativeModule._Layoutable_getPadding(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult : DirectionalEdgesT<number> = DirectionalEdgesT_serializer.read(retvalDeserializer)
         return returnResult
     }
-    getBorderWidth_serialize(): DirectionalEdgesT<number> {
+    getBorderWidth_serialize(): DirectionalEdgesT<number> | undefined {
         const retval  = ArkUIGeneratedNativeModule._Layoutable_getBorderWidth(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult : DirectionalEdgesT<number> = DirectionalEdgesT_serializer.read(retvalDeserializer)
@@ -1432,10 +1351,10 @@ export class LayoutPolicy implements MaterializedBase {
 }
 export interface Measurable {
     uniqueId?: number | undefined
-    measure(constraint: ConstraintSizeOptions): MeasureResult
-    getMargin(): DirectionalEdgesT<number>
-    getPadding(): DirectionalEdgesT<number>
-    getBorderWidth(): DirectionalEdgesT<number>
+    measure(constraint: ConstraintSizeOptions): MeasureResult | undefined
+    getMargin(): DirectionalEdgesT<number> | undefined
+    getPadding(): DirectionalEdgesT<number> | undefined
+    getBorderWidth(): DirectionalEdgesT<number> | undefined
 }
 export class MeasurableInternal implements MaterializedBase,Measurable {
     peer?: Finalizable | undefined = undefined
@@ -1465,17 +1384,17 @@ export class MeasurableInternal implements MaterializedBase,Measurable {
     public static fromPtr(ptr: KPointer): MeasurableInternal {
         return new MeasurableInternal(ptr)
     }
-    public measure(constraint: ConstraintSizeOptions): MeasureResult {
+    public measure(constraint: ConstraintSizeOptions): MeasureResult | undefined {
         const constraint_casted = constraint as (ConstraintSizeOptions)
         return this.measure_serialize(constraint_casted)
     }
-    public getMargin(): DirectionalEdgesT<number> {
+    public getMargin(): DirectionalEdgesT<number> | undefined {
         return this.getMargin_serialize()
     }
-    public getPadding(): DirectionalEdgesT<number> {
+    public getPadding(): DirectionalEdgesT<number> | undefined {
         return this.getPadding_serialize()
     }
-    public getBorderWidth(): DirectionalEdgesT<number> {
+    public getBorderWidth(): DirectionalEdgesT<number> | undefined {
         return this.getBorderWidth_serialize()
     }
     private getUniqueId(): number | undefined {
@@ -1495,19 +1414,19 @@ export class MeasurableInternal implements MaterializedBase,Measurable {
         const returnResult : MeasureResult = MeasureResult_serializer.read(retvalDeserializer)
         return returnResult
     }
-    getMargin_serialize(): DirectionalEdgesT<number> {
+    getMargin_serialize(): DirectionalEdgesT<number> | undefined {
         const retval  = ArkUIGeneratedNativeModule._Measurable_getMargin(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult : DirectionalEdgesT<number> = DirectionalEdgesT_serializer.read(retvalDeserializer)
         return returnResult
     }
-    getPadding_serialize(): DirectionalEdgesT<number> {
+    getPadding_serialize(): DirectionalEdgesT<number> | undefined {
         const retval  = ArkUIGeneratedNativeModule._Measurable_getPadding(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult : DirectionalEdgesT<number> = DirectionalEdgesT_serializer.read(retvalDeserializer)
         return returnResult
     }
-    getBorderWidth_serialize(): DirectionalEdgesT<number> {
+    getBorderWidth_serialize(): DirectionalEdgesT<number> | undefined {
         const retval  = ArkUIGeneratedNativeModule._Measurable_getBorderWidth(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult : DirectionalEdgesT<number> = DirectionalEdgesT_serializer.read(retvalDeserializer)
@@ -1723,16 +1642,16 @@ export class TextContentControllerBase implements MaterializedBase {
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._TextContentControllerBase_getFinalizer()
     }
-    public getCaretOffset(): CaretOffset {
+    public getCaretOffset(): CaretOffset | undefined {
         return this.getCaretOffset_serialize()
     }
-    public getTextContentRect(): RectResult {
+    public getTextContentRect(): RectResult | undefined {
         return this.getTextContentRect_serialize()
     }
-    public getTextContentLineCount(): int32 {
+    public getTextContentLineCount(): int32 | undefined {
         return this.getTextContentLineCount_serialize()
     }
-    public addText(text: string, textOperationOptions?: TextContentControllerOptions): int32 {
+    public addText(text: string, textOperationOptions?: TextContentControllerOptions): int32 | undefined {
         const text_casted = text as (string)
         const textOperationOptions_casted = textOperationOptions as (TextContentControllerOptions | undefined)
         return this.addText_serialize(text_casted, textOperationOptions_casted)
@@ -1742,34 +1661,51 @@ export class TextContentControllerBase implements MaterializedBase {
         this.deleteText_serialize(range_casted)
         return
     }
-    public getSelection(): TextRange {
+    public getSelection(): TextRange | undefined {
         return this.getSelection_serialize()
     }
     public clearPreviewText(): void {
         this.clearPreviewText_serialize()
         return
     }
-    public getText(range?: TextRange): string {
+    public getText(range?: TextRange): string | undefined {
         const range_casted = range as (TextRange | undefined)
         return this.getText_serialize(range_casted)
     }
-    getCaretOffset_serialize(): CaretOffset {
+    getCaretOffset_serialize(): CaretOffset | undefined {
         const retval  = ArkUIGeneratedNativeModule._TextContentControllerBase_getCaretOffset(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const returnResult : CaretOffset = CaretOffset_serializer.read(retvalDeserializer)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : CaretOffset | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = CaretOffset_serializer.read(retvalDeserializer)
+        }
+        const returnResult : CaretOffset | undefined = buffer
         return returnResult
     }
-    getTextContentRect_serialize(): RectResult {
+    getTextContentRect_serialize(): RectResult | undefined {
         const retval  = ArkUIGeneratedNativeModule._TextContentControllerBase_getTextContentRect(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const returnResult : RectResult = RectResult_serializer.read(retvalDeserializer)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : RectResult | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = RectResult_serializer.read(retvalDeserializer)
+        }
+        const returnResult : RectResult | undefined = buffer
         return returnResult
     }
-    getTextContentLineCount_serialize(): int32 {
+    getTextContentLineCount_serialize(): int32 | undefined {
         const retval  = ArkUIGeneratedNativeModule._TextContentControllerBase_getTextContentLineCount(this.peer!.ptr)
-        return retval
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : int32 | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = retvalDeserializer.readInt32()
+        }
+        const returnResult : int32 | undefined = buffer
+        return returnResult
     }
-    addText_serialize(text: string, textOperationOptions?: TextContentControllerOptions): int32 {
+    addText_serialize(text: string, textOperationOptions?: TextContentControllerOptions): int32 | undefined {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (textOperationOptions !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -1780,7 +1716,14 @@ export class TextContentControllerBase implements MaterializedBase {
         }
         const retval  = ArkUIGeneratedNativeModule._TextContentControllerBase_addText(this.peer!.ptr, text, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
-        return retval
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : int32 | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = retvalDeserializer.readInt32()
+        }
+        const returnResult : int32 | undefined = buffer
+        return returnResult
     }
     deleteText_serialize(range?: TextRange): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
@@ -1794,16 +1737,21 @@ export class TextContentControllerBase implements MaterializedBase {
         ArkUIGeneratedNativeModule._TextContentControllerBase_deleteText(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    getSelection_serialize(): TextRange {
+    getSelection_serialize(): TextRange | undefined {
         const retval  = ArkUIGeneratedNativeModule._TextContentControllerBase_getSelection(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const returnResult : TextRange = TextRange_serializer.read(retvalDeserializer)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : TextRange | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = TextRange_serializer.read(retvalDeserializer)
+        }
+        const returnResult : TextRange | undefined = buffer
         return returnResult
     }
     clearPreviewText_serialize(): void {
         ArkUIGeneratedNativeModule._TextContentControllerBase_clearPreviewText(this.peer!.ptr)
     }
-    getText_serialize(range?: TextRange): string {
+    getText_serialize(range?: TextRange): string | undefined {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (range !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -1814,7 +1762,14 @@ export class TextContentControllerBase implements MaterializedBase {
         }
         const retval  = ArkUIGeneratedNativeModule._TextContentControllerBase_getText(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
-        return retval
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : string | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = (retvalDeserializer.readString() as string)
+        }
+        const returnResult : string | undefined = buffer
+        return returnResult
     }
 }
 export class TransitionEffectInternal {
@@ -5141,7 +5096,7 @@ export class ArkCommonMethodPeer extends PeerNode {
             } else if (valueTmpValue instanceof ComponentContent) {
                 thisSerializer.writeInt8((2).toChar())
                 const valueTmpValueForIdx2  = valueTmpValue as ComponentContent
-                thisSerializer.holdAndWriteObject(valueTmpValueForIdx2)
+                ComponentContent_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -6766,7 +6721,36 @@ export interface DismissSheetAction {
     reason: DismissReason;
 }
 export interface SpringBackAction {
-    springBack: VoidCallback;
+    springBack(): void
+}
+export class SpringBackActionInternal implements MaterializedBase,SpringBackAction {
+    peer?: Finalizable | undefined = undefined
+    public getPeer(): Finalizable | undefined {
+        return this.peer
+    }
+    constructor(peerPtr: KPointer) {
+        this.peer = new Finalizable(peerPtr, SpringBackActionInternal.getFinalizer())
+    }
+    constructor() {
+        this(SpringBackActionInternal.construct())
+    }
+    static construct(): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._SpringBackAction_construct()
+        return retval
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._SpringBackAction_getFinalizer()
+    }
+    public static fromPtr(ptr: KPointer): SpringBackActionInternal {
+        return new SpringBackActionInternal(ptr)
+    }
+    public springBack(): void {
+        this.springBack_serialize()
+        return
+    }
+    springBack_serialize(): void {
+        ArkUIGeneratedNativeModule._SpringBackAction_springBack(this.peer!.ptr)
+    }
 }
 export type SingleLengthDetent = [
     SheetSize | Length
@@ -7591,13 +7575,13 @@ export interface CommonMethod {
     transition(effect: TransitionEffect | undefined, onFinish: TransitionFinishCallback | undefined): this {
         throw new Error("Unimplemented method transition")
     }
-    gesture(gesture: GestureType | undefined, mask?: GestureMask): this {
+    gesture(gesture: GestureType, mask?: GestureMask): this {
         throw new Error("Unimplemented method gesture")
     }
-    priorityGesture(gesture: GestureType | undefined, mask?: GestureMask): this {
+    priorityGesture(gesture: GestureType, mask?: GestureMask): this {
         throw new Error("Unimplemented method priorityGesture")
     }
-    parallelGesture(gesture: GestureType | undefined, mask?: GestureMask): this {
+    parallelGesture(gesture: GestureType, mask?: GestureMask): this {
         throw new Error("Unimplemented method parallelGesture")
     }
     blur(blurRadius: double | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {
@@ -7755,7 +7739,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     tabStop_value?: boolean | undefined
     onFocus_value?: (() => void) | undefined
     onBlur_value?: (() => void) | undefined
-    tabIndex_value?: number | undefined
+    tabIndex_value?: int32 | undefined
     defaultFocus_value?: boolean | undefined
     groupDefaultFocus_value?: boolean | undefined
     focusOnTouch_value?: boolean | undefined
@@ -8023,7 +8007,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     onBlur(value: (() => void) | undefined): this {
         return this
     }
-    tabIndex(value: number | undefined): this {
+    tabIndex(value: int32 | undefined): this {
         return this
     }
     defaultFocus(value: boolean | undefined): this {
@@ -8375,13 +8359,13 @@ export class ArkCommonMethodStyle implements CommonMethod {
     transition(effect: TransitionEffect | undefined, onFinish: TransitionFinishCallback | undefined): this {
         return this
     }
-    gesture(gesture: GestureType | undefined, mask?: GestureMask): this {
+    gesture(gesture: GestureType, mask?: GestureMask): this {
         return this
     }
-    priorityGesture(gesture: GestureType | undefined, mask?: GestureMask): this {
+    priorityGesture(gesture: GestureType, mask?: GestureMask): this {
         return this
     }
-    parallelGesture(gesture: GestureType | undefined, mask?: GestureMask): this {
+    parallelGesture(gesture: GestureType, mask?: GestureMask): this {
         return this
     }
     blur(blurRadius: double | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {
@@ -10240,19 +10224,19 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public gesture(gesture: GestureType | undefined, mask?: GestureMask): this {
+    public gesture(gesture: GestureType, mask?: GestureMask): this {
         if (this.checkPriority("gesture")) {
             hookGesture(this, gesture, mask)
         }
         return this
     }
-    public priorityGesture(gesture: GestureType | undefined, mask?: GestureMask): this {
+    public priorityGesture(gesture: GestureType, mask?: GestureMask): this {
         if (this.checkPriority("priorityGesture")) {
             hookPriorityGesture(this, gesture, mask)
         }
         return this
     }
-    public parallelGesture(gesture: GestureType | undefined, mask?: GestureMask): this {
+    public parallelGesture(gesture: GestureType, mask?: GestureMask): this {
         if (this.checkPriority("parallelGesture")) {
             hookParallelGesture(this, gesture, mask)
         }
@@ -13073,25 +13057,12 @@ export class SheetDismiss_serializer {
 export class SpringBackAction_serializer {
     public static write(buffer: SerializerBase, value: SpringBackAction): void {
         let valueSerializer : SerializerBase = buffer
-        const valueHolderForSpringBack  = value.springBack
-        valueSerializer.holdAndWriteCallback(valueHolderForSpringBack)
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     public static read(buffer: DeserializerBase): SpringBackAction {
         let valueDeserializer : DeserializerBase = buffer
-        const springBackTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
-        const springBackTmpBufBufCall : KPointer = valueDeserializer.readPointer()
-        const springBackTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
-        const springBackTmpResult : VoidCallback = ():void => {
-            const springBackTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
-            springBackTmpBufBufArgsSerializer.writeInt32(springBackTmpBufBufResource.resourceId);
-            springBackTmpBufBufArgsSerializer.writePointer(springBackTmpBufBufCall);
-            springBackTmpBufBufArgsSerializer.writePointer(springBackTmpBufBufCallSync);
-            InteropNativeModule._CallCallbackSync(10, -2038961969, springBackTmpBufBufArgsSerializer.asBuffer(), springBackTmpBufBufArgsSerializer.length());
-            springBackTmpBufBufArgsSerializer.release();
-            return;
-        }
-        let value : SpringBackAction = ({springBack: springBackTmpResult} as SpringBackAction)
-        return value
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return SpringBackActionInternal.fromPtr(ptr)
     }
 }
 export class SystemAdaptiveOptions_serializer {
@@ -23061,7 +23032,7 @@ export interface TouchEvent {
     changedTouches: Array<TouchObject>
     stopPropagation(): void
     preventDefault(): void
-    getHistoricalPoints(): Array<HistoricalPoint>
+    getHistoricalPoints(): Array<HistoricalPoint> | undefined
 }
 export class TouchEventInternal extends BaseEventInternal implements MaterializedBase,TouchEvent {
     get type(): TouchType {
@@ -23106,7 +23077,7 @@ export class TouchEventInternal extends BaseEventInternal implements Materialize
     public static fromPtr(ptr: KPointer): TouchEventInternal {
         return new TouchEventInternal(ptr)
     }
-    public getHistoricalPoints(): Array<HistoricalPoint> {
+    public getHistoricalPoints(): Array<HistoricalPoint> | undefined {
         return this.getHistoricalPoints_serialize()
     }
     private getType(): TouchType {
@@ -23133,15 +23104,20 @@ export class TouchEventInternal extends BaseEventInternal implements Materialize
         this.setChangedTouches_serialize(changedTouches_casted)
         return
     }
-    getHistoricalPoints_serialize(): Array<HistoricalPoint> {
+    getHistoricalPoints_serialize(): Array<HistoricalPoint> | undefined {
         const retval  = ArkUIGeneratedNativeModule._TouchEvent_getHistoricalPoints(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const bufferLength : int32 = retvalDeserializer.readInt32()
-        let buffer : Array<HistoricalPoint> = new Array<HistoricalPoint>(bufferLength)
-        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
-            buffer[bufferBufCounterI] = HistoricalPoint_serializer.read(retvalDeserializer)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : Array<HistoricalPoint> | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const buffer_Length : int32 = retvalDeserializer.readInt32()
+            let buffer_ : Array<HistoricalPoint> = new Array<HistoricalPoint>(buffer_Length)
+            for (let buffer_BufCounterI = 0; buffer_BufCounterI < buffer_Length; buffer_BufCounterI++) {
+                buffer_[buffer_BufCounterI] = HistoricalPoint_serializer.read(retvalDeserializer)
+            }
+            buffer = buffer_
         }
-        const returnResult : Array<HistoricalPoint> = buffer
+        const returnResult : Array<HistoricalPoint> | undefined = buffer
         return returnResult
     }
     private getType_serialize(): TouchType {

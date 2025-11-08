@@ -20,7 +20,24 @@
 #include <memory>
  
 namespace OHOS::Ace::Ani {
- 
+
+ani_object CreateInt(ani_env* env, ani_int value)
+{
+    ani_class cls;
+    if (env->FindClass("std.core.Int", &cls) != ANI_OK) {
+        return nullptr;
+    }
+    ani_method ctor;
+    if (env->Class_FindMethod(cls, "<ctor>", "i:", &ctor) != ANI_OK) {
+        return nullptr;
+    }
+    ani_object rs;
+    if (env->Object_New(cls, ctor, &rs, value) != ANI_OK) {
+        return nullptr;
+    }
+    return rs;
+}
+
 ani_long ConstructCustomNode(ani_env* env, [[maybe_unused]] ani_object aniClass,
                              ani_int id, ani_object obj)
 {
@@ -225,7 +242,8 @@ ani_object QueryNavDestinationInfo(ani_env* env, [[maybe_unused]] ani_object, an
     env->Class_FindMethod(cls, "<ctor>", nullptr, &routerInfoCtor);
     env->Object_New(cls, routerInfoCtor, &res);
 
-    env->Object_SetPropertyByName_Double(res, "uniqueId", info.uniqueId);
+    ani_object uniqueId_obj = CreateInt(env, info.uniqueId);
+    env->Object_SetPropertyByName_Ref(res, "uniqueId", uniqueId_obj);
     env->Object_SetPropertyByName_Int(res, "index", info.index);
 
     ani_string navDesName {};
@@ -250,7 +268,10 @@ ani_object QueryNavDestinationInfo(ani_env* env, [[maybe_unused]] ani_object, an
     env->FindEnum("@ohos.arkui.component.navDestination.NavDestinationMode", &navMode);
     ani_enum_item navModeItem;
     env->Enum_GetEnumItemByIndex(navMode, info.mode, &navModeItem);
-    env->Object_SetPropertyByName_Ref(res, "mode", navModeItem);
+    ani_int navModeInt;
+    env->EnumItem_GetValue_Int(navModeItem, &navModeInt);
+    ani_object mode_obj = CreateInt(env, navModeInt);
+    env->Object_SetPropertyByName_Ref(res, "mode", mode_obj);
     return res;
 }
 
@@ -271,7 +292,8 @@ ani_object QueryNavDestinationInfo0(ani_env* env, [[maybe_unused]] ani_object, a
     env->Class_FindMethod(cls, "<ctor>", nullptr, &routerInfoCtor);
     env->Object_New(cls, routerInfoCtor, &res);
 
-    env->Object_SetPropertyByName_Double(res, "uniqueId", info.uniqueId);
+    ani_object uniqueId_obj = CreateInt(env, info.uniqueId);
+    env->Object_SetPropertyByName_Ref(res, "uniqueId", uniqueId_obj);
     env->Object_SetPropertyByName_Int(res, "index", info.index);
 
     ani_string navDesName {};
@@ -296,7 +318,10 @@ ani_object QueryNavDestinationInfo0(ani_env* env, [[maybe_unused]] ani_object, a
     env->FindEnum("@ohos.arkui.component.navDestination.NavDestinationMode", &navMode);
     ani_enum_item navModeItem;
     env->Enum_GetEnumItemByIndex(navMode, info.mode, &navModeItem);
-    env->Object_SetPropertyByName_Ref(res, "mode", navModeItem);
+    ani_int navModeInt;
+    env->EnumItem_GetValue_Int(navModeItem, &navModeInt);
+    ani_object mode_obj = CreateInt(env, navModeInt);
+    env->Object_SetPropertyByName_Ref(res, "mode", mode_obj);
     return res;
 }
 
@@ -318,7 +343,8 @@ ani_object QueryNavDestinationInfo1(ani_env* env, [[maybe_unused]] ani_object, a
     ani_method routerInfoCtor;
     env->Class_FindMethod(cls, "<ctor>", nullptr, &routerInfoCtor);
     env->Object_New(cls, routerInfoCtor, &res);
-    env->Object_SetPropertyByName_Double(res, "uniqueId", info.uniqueId);
+    ani_object uniqueId_obj = CreateInt(env, info.uniqueId);
+    env->Object_SetPropertyByName_Ref(res, "uniqueId", uniqueId_obj);
     env->Object_SetPropertyByName_Int(res, "index", info.index);
     ani_string navDesName {};
     env->String_NewUTF8(info.name.c_str(), info.name.size(), &navDesName);
@@ -338,8 +364,10 @@ ani_object QueryNavDestinationInfo1(ani_env* env, [[maybe_unused]] ani_object, a
     env->FindEnum("@ohos.arkui.component.navDestination.NavDestinationMode", &navMode);
     ani_enum_item navModeItem;
     env->Enum_GetEnumItemByIndex(navMode, info.mode, &navModeItem);
-
-    env->Object_SetPropertyByName_Ref(res, "mode", navModeItem);
+    ani_int navModeInt;
+    env->EnumItem_GetValue_Int(navModeItem, &navModeInt);
+    ani_object mode_obj = CreateInt(env, navModeInt);
+    env->Object_SetPropertyByName_Ref(res, "mode", mode_obj);
     return res;
 }
 
@@ -424,5 +452,27 @@ ani_object QueryRouterPageInfo(ani_env* env, [[maybe_unused]] ani_object, ani_lo
     env->Object_SetPropertyByName_Ref(res, "state", enumItem);
 
     return res;
+}
+
+void OnReuse(ani_env* env, [[maybe_unused]] ani_object, ani_long node)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        return;
+    }
+
+    modifier->getCustomNodeAniModifier()->onReuse(node);
+    return;
+}
+
+void OnRecycle(ani_env* env, [[maybe_unused]] ani_object, ani_long node)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        return;
+    }
+
+    modifier->getCustomNodeAniModifier()->onRecycle(node);
+    return;
 }
 } // namespace OHOS::Ace::Ani
