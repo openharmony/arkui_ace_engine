@@ -955,6 +955,12 @@ void JSTextField::JsWidth(const JSCallbackInfo& info)
         SetLayoutPolicy(jsValue, true);
         return;
     }
+    if (value.Unit() == DimensionUnit::AUTO) {
+        ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
+        TextFieldModel::GetInstance()->SetWidthAuto(true);
+        SetLayoutPolicy(jsValue, true);
+        return;
+    }
     if (SystemProperties::ConfigChangePerform() && resourceObject) {
         RegisterResource<CalcDimension>("width", resourceObject, value);
     }

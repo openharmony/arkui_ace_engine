@@ -1254,12 +1254,15 @@ void SetMenuItemSymbolIcon(const RefPtr<FrameNode>& menuItem, const OptionParam&
         layoutProperty->UpdateSymbolColorList({ theme->GetMenuIconColor() });
     }
     layoutProperty->UpdateAlignment(Alignment::CENTER_LEFT);
+    auto isRTL = (layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL);
     MarginProperty margin;
     if (param.symbolId != 0) {
         layoutProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(param.symbolId));
-        margin.right = CalcLength(theme->GetIconContentPadding());
+        margin.left = isRTL ? CalcLength(theme->GetIconContentPadding()) : margin.left;
+        margin.right = isRTL ? margin.right : CalcLength(theme->GetIconContentPadding());
     } else {
-        margin.right = CalcLength(theme->GetIconContentPadding() + theme->GetIconSideLength());
+        margin.left = isRTL ? CalcLength(theme->GetIconContentPadding() + theme->GetIconSideLength()) : margin.left;
+        margin.right = isRTL ? margin.right : CalcLength(theme->GetIconContentPadding() + theme->GetIconSideLength());
     }
     layoutProperty->UpdateMargin(margin);
     symbol->MountToParent(leftRow);
@@ -1299,7 +1302,12 @@ void SetMenuItemImageIcon(const RefPtr<FrameNode>& menuItem, const OptionParam& 
         ImageSourceInfo imageSourceInfo(param.icon, pipeline->GetBundleName(), pipeline->GetModuleName());
         props->UpdateImageSourceInfo(imageSourceInfo);
     }
-    margin.right = CalcLength(theme->GetIconContentPadding());
+    auto isRTL = (props->GetNonAutoLayoutDirection() == TextDirection::RTL);
+    if (isRTL) {
+        margin.left = CalcLength(theme->GetIconContentPadding());
+    } else {
+        margin.right = CalcLength(theme->GetIconContentPadding());
+    }
     Ace::NG::UpdateIconSrc(
         iconNode, theme->GetIconSideLength(), theme->GetIconSideLength(), theme->GetMenuIconColor(), iconIsEmpty);
     props->UpdateMargin(margin);
