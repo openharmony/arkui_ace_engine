@@ -76,7 +76,7 @@ import { default as curves } from "@ohos.curves"
 import { Scroller, Scroller_serializer } from "./scroll"
 import { ComponentContentBase } from "arkui.ComponentContent"
 import { CustomDialogController } from "./customDialogController"
-import { LevelMode, ImmersiveMode, LevelOrder } from "@ohos.promptAction"
+import { LevelMode, ImmersiveMode } from "@ohos.promptAction"
 import { ParticleUpdater, ParticleColorOptions, VelocityOptions, EmitterParticleOptions, ParticleEmitterShape, DistributionType, DisturbanceFieldShape, ParticleColorOptions_serializer, EmitterParticleOptions_serializer, VelocityOptions_serializer } from "./particle"
 import { RootModifier } from "./../RootModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
@@ -86,7 +86,6 @@ import { CustomLayoutRootModifier } from "./../CustomLayoutRootModifier"
 import { GlobalScope } from "./../framework/GlobalScope"
 import { ComponentContentBase_serializer } from "./../ComponentContent"
 import { curves_ICurve_serializer } from "./../framework/ohos.curves"
-import { LevelOrder_serializer } from "./../framework/ohos.promptAction"
 import { TimePickerDialogOptions_serializer, TimePickerDialogOptions } from "./timePicker"
 import { TextPickerDialogOptions_serializer, TextPickerDialogOptions,DividerOptions_serializer, DividerOptions } from "./textPicker"
 import { DatePickerDialogOptions_serializer, DatePickerDialogOptions } from "./datePicker"
@@ -2495,6 +2494,46 @@ export class LazyForEachOps {
         return
     }
 }
+export class LevelOrderExtenderInternal {
+    public static fromPtr(ptr: KPointer): LevelOrderExtender {
+        return new LevelOrderExtender(ptr)
+    }
+}
+export class LevelOrderExtender implements MaterializedBase {
+    peer?: Finalizable | undefined = undefined
+    public getPeer(): Finalizable | undefined {
+        return this.peer
+    }
+    constructor(peerPtr: KPointer) {
+        this.peer = new Finalizable(peerPtr, LevelOrderExtender.getFinalizer())
+    }
+    constructor() {
+        this(LevelOrderExtender.construct())
+    }
+    static construct(): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._LevelOrderExtender_construct()
+        return retval
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._LevelOrderExtender_getFinalizer()
+    }
+    static clamp_serialize(order: number): LevelOrderExtender {
+        const retval  = ArkUIGeneratedNativeModule._LevelOrderExtender_clamp(order)
+        const obj : LevelOrderExtender = LevelOrderExtenderInternal.fromPtr(retval)
+        return obj
+    }
+    public static clamp(order: number): LevelOrderExtender {
+        const order_casted = order as (number)
+        return LevelOrderExtender.clamp_serialize(order_casted)
+    }
+    public getOrder(): number {
+        return this.getOrder_serialize()
+    }
+    getOrder_serialize(): number {
+        const retval  = ArkUIGeneratedNativeModule._LevelOrderExtender_getOrder(this.peer!.ptr)
+        return retval
+    }
+}
 export class NavExtender {
     static setNavigationOptions_serialize(ptr: KPointer, pathStack: NavPathStack): void {
         ArkUIGeneratedNativeModule._NavExtender_setNavigationOptions(ptr, toPeerPtr(pathStack))
@@ -4641,7 +4680,7 @@ export interface CustomDialogControllerOptionsExtender {
     levelMode?: LevelMode;
     levelUniqueId?: int32;
     immersiveMode?: ImmersiveMode;
-    levelOrder?: LevelOrder;
+    levelOrderExtender?: LevelOrderExtender;
     focusable?: boolean;
 }
 export interface CustomDialogControllerExternalOptionsExtender {
@@ -5083,6 +5122,17 @@ export class CustomDialogControllerExtender_serializer {
         let valueDeserializer : DeserializerBase = buffer
         let ptr : KPointer = valueDeserializer.readPointer()
         return CustomDialogControllerExtenderInternal.fromPtr(ptr)
+    }
+}
+export class LevelOrderExtender_serializer {
+    public static write(buffer: SerializerBase, value: LevelOrderExtender): void {
+        let valueSerializer : SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    public static read(buffer: DeserializerBase): LevelOrderExtender {
+        let valueDeserializer : DeserializerBase = buffer
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return LevelOrderExtenderInternal.fromPtr(ptr)
     }
 }
 export class NodeEdgeStyles_serializer {
@@ -7003,11 +7053,11 @@ export class CustomDialogControllerOptionsExtender_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const valueHolderForLevelOrder  = value.levelOrder
-        if (valueHolderForLevelOrder !== undefined) {
+        const valueHolderForLevelOrderExtender  = value.levelOrderExtender
+        if (valueHolderForLevelOrderExtender !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForLevelOrderTmpValue  = valueHolderForLevelOrder!
-            LevelOrder_serializer.write(valueSerializer, valueHolderForLevelOrderTmpValue)
+            const valueHolderForLevelOrderExtenderTmpValue  = valueHolderForLevelOrderExtender!
+            LevelOrderExtender_serializer.write(valueSerializer, valueHolderForLevelOrderExtenderTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -7439,19 +7489,19 @@ export class CustomDialogControllerOptionsExtender_serializer {
             immersiveModeTmpBuf = ImmersiveMode.fromValue(valueDeserializer.readInt32())
         }
         const immersiveModeTmpResult : ImmersiveMode | undefined = immersiveModeTmpBuf
-        const levelOrderTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let levelOrderTmpBuf : LevelOrder | undefined = undefined
-        if ((levelOrderTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            levelOrderTmpBuf = (LevelOrder_serializer.read(valueDeserializer) as LevelOrder)
+        const levelOrderExtenderTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let levelOrderExtenderTmpBuf : LevelOrderExtender | undefined = undefined
+        if ((levelOrderExtenderTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            levelOrderExtenderTmpBuf = (LevelOrderExtender_serializer.read(valueDeserializer) as LevelOrderExtender)
         }
-        const levelOrderTmpResult : LevelOrder | undefined = levelOrderTmpBuf
+        const levelOrderExtenderTmpResult : LevelOrderExtender | undefined = levelOrderExtenderTmpBuf
         const focusableTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let focusableTmpBuf : boolean | undefined = undefined
         if ((focusableTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             focusableTmpBuf = valueDeserializer.readBoolean()
         }
         const focusableTmpResult : boolean | undefined = focusableTmpBuf
-        let value : CustomDialogControllerOptionsExtender = ({builder: builderTmpResult, cancel: cancelTmpResult, autoCancel: autoCancelTmpResult, alignment: alignmentTmpResult, offset: offsetTmpResult, customStyle: customStyleTmpResult, gridCount: gridCountTmpResult, maskColor: maskColorTmpResult, maskRect: maskRectTmpResult, openAnimation: openAnimationTmpResult, closeAnimation: closeAnimationTmpResult, showInSubWindow: showInSubWindowTmpResult, backgroundColor: backgroundColorTmpResult, cornerRadius: cornerRadiusTmpResult, isModal: isModalTmpResult, onWillDismiss: onWillDismissTmpResult, width: widthTmpResult, height: heightTmpResult, borderWidth: borderWidthTmpResult, borderColor: borderColorTmpResult, borderStyle: borderStyleTmpResult, shadow: shadowTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, backgroundBlurStyleOptions: backgroundBlurStyleOptionsTmpResult, backgroundEffect: backgroundEffectTmpResult, keyboardAvoidMode: keyboardAvoidModeTmpResult, enableHoverMode: enableHoverModeTmpResult, hoverModeArea: hoverModeAreaTmpResult, onDidAppear: onDidAppearTmpResult, onDidDisappear: onDidDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, keyboardAvoidDistance: keyboardAvoidDistanceTmpResult, levelMode: levelModeTmpResult, levelUniqueId: levelUniqueIdTmpResult, immersiveMode: immersiveModeTmpResult, levelOrder: levelOrderTmpResult, focusable: focusableTmpResult} as CustomDialogControllerOptionsExtender)
+        let value : CustomDialogControllerOptionsExtender = ({builder: builderTmpResult, cancel: cancelTmpResult, autoCancel: autoCancelTmpResult, alignment: alignmentTmpResult, offset: offsetTmpResult, customStyle: customStyleTmpResult, gridCount: gridCountTmpResult, maskColor: maskColorTmpResult, maskRect: maskRectTmpResult, openAnimation: openAnimationTmpResult, closeAnimation: closeAnimationTmpResult, showInSubWindow: showInSubWindowTmpResult, backgroundColor: backgroundColorTmpResult, cornerRadius: cornerRadiusTmpResult, isModal: isModalTmpResult, onWillDismiss: onWillDismissTmpResult, width: widthTmpResult, height: heightTmpResult, borderWidth: borderWidthTmpResult, borderColor: borderColorTmpResult, borderStyle: borderStyleTmpResult, shadow: shadowTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, backgroundBlurStyleOptions: backgroundBlurStyleOptionsTmpResult, backgroundEffect: backgroundEffectTmpResult, keyboardAvoidMode: keyboardAvoidModeTmpResult, enableHoverMode: enableHoverModeTmpResult, hoverModeArea: hoverModeAreaTmpResult, onDidAppear: onDidAppearTmpResult, onDidDisappear: onDidDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, keyboardAvoidDistance: keyboardAvoidDistanceTmpResult, levelMode: levelModeTmpResult, levelUniqueId: levelUniqueIdTmpResult, immersiveMode: immersiveModeTmpResult, levelOrderExtender: levelOrderExtenderTmpResult, focusable: focusableTmpResult} as CustomDialogControllerOptionsExtender)
         return value
     }
 }

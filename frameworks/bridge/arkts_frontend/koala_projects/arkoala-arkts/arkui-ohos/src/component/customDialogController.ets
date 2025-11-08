@@ -15,14 +15,14 @@
 
 import { ExtendableComponent } from "./extendableComponent"
 import { CustomDialogControllerExtender, CustomDialogControllerOptionsExtender,
-    CustomDialogControllerExternalOptionsExtender } from '#generated' 
+    CustomDialogControllerExternalOptionsExtender, LevelOrderExtender } from '#generated'
+import { LevelOrder } from '@ohos.promptAction';
 
 export class CustomDialogController extends CustomDialogControllerExtender {
     customComponent?: ExtendableComponent | undefined = undefined
     constructor(value: CustomDialogControllerOptions) {
-        super(value)
-        if ((value) !== (undefined) && (value.baseComponent) !== (undefined))
-        {            
+        super(convert(value))
+        if ((value) !== (undefined) && (value.baseComponent) !== (undefined)) {
             this.customComponent = (value.baseComponent)!
         }
     }
@@ -40,7 +40,15 @@ export class CustomDialogController extends CustomDialogControllerExtender {
         return {customStyle: options.customStyle} as CustomDialogControllerExternalOptions
     }
 }
+function convert(value: CustomDialogControllerOptions): CustomDialogControllerOptionsExtender {
+    let extender: CustomDialogControllerOptionsExtender = value as CustomDialogControllerOptionsExtender
+    if (value.levelOrder !== undefined) {
+        extender.levelOrderExtender = value.levelOrder as LevelOrderExtender
+    }
+    return extender
+}
 export interface CustomDialogControllerOptions extends CustomDialogControllerOptionsExtender {
-    baseComponent?: ExtendableComponent
+    baseComponent?: ExtendableComponent,
+    levelOrder?: LevelOrder,
 }
 export interface CustomDialogControllerExternalOptions extends CustomDialogControllerExternalOptionsExtender {}

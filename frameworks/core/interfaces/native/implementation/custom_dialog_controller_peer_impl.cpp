@@ -580,6 +580,12 @@ void CustomDialogControllerPeerImpl::SetLevelOrder(Opt_LevelOrder levelOrder)
     dialogProperties_.levelOrder = result.value_or(NG::LevelOrder::ORDER_DEFAULT);
 }
 
+void CustomDialogControllerPeerImpl::SetLevelOrderExtender(Opt_LevelOrderExtender levelOrderExtender)
+{
+    auto result = Converter::OptConvert<double>(levelOrderExtender);
+    dialogProperties_.levelOrder = result.value_or(NG::LevelOrder::ORDER_DEFAULT);
+}
+
 void CustomDialogControllerPeerImpl::SetFocusable(Opt_Boolean focusable)
 {
     auto result = Converter::OptConvert<bool>(focusable);
