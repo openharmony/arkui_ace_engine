@@ -86,7 +86,7 @@ public:
 private:
     static void DestroyPeerImpl(void* peer);
     struct MovingPhotoControllerPeer {
-        OHOS::Ace::RePtr<OHOS::Ace::NG::MovingPhotoController> controller;
+        OHOS::Ace::RefPtr<OHOS::Ace::NG::MovingPhotoController> controller;
     };
     static MovingPhotoFormat ParsePixelMapFormat(ani_env *env, ani_object options);
     static DynamicRangeMode ParseDynamicRangeMode(ani_env *env, ani_object options);

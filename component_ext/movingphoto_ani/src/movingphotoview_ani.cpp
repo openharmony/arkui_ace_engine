@@ -245,7 +245,7 @@ void MovingPhotoAni::SetAutoPlayPeriod([[maybe_unused]] ani_env *env, [[maybe_un
     CHECK_NULL_VOID(movingPhotoNode);
     double startTime = static_cast<double>(startTimeAni);
     double endTime = static_cast<double>(endTimeAni);
-    NG::MovingPhotoModelNG::AutoPlayPeriod(movingPhotoNode, static<int64_t>(startTime), static<int64_t>(endTime));
+    NG::MovingPhotoModelNG::AutoPlayPeriod(movingPhotoNode, static_cast<int64_t>(startTime), static_cast<int64_t>(endTime));
 }
 
 void MovingPhotoAni::SetAutoPlay([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_class object, ani_long nodeptr,
@@ -336,7 +336,7 @@ void MovingPhotoAni::RefreshMovingPhoto([[maybe_unused]] ani_env *env, [[maybe_u
     controller->RefreshMovingPhoto();
 }
 
-void MovingPhotoAni::EnableTransition([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_class object, ani_long nodeptr
+void MovingPhotoAni::EnableTransition([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_class object, ani_long nodeptr,
     ani_boolean options)
 {
     NG::MovingPhotoController* controller = reinterpret_cast<NG::MovingPhotoController*>(nodeptr);
@@ -353,14 +353,14 @@ void MovingPhotoAni::SetPlaybackPeriod([[maybe_unused]] ani_env *env, [[maybe_un
 }
 
 void MovingPhotoAni::EnableAutoPlay([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_class object, ani_long nodeptr,
-    ani_long options)
+    ani_boolean options)
 {
     NG::MovingPhotoController* controller = reinterpret_cast<NG::MovingPhotoController*>(nodeptr);
     controller->EnableAutoPlay(static_cast<bool>(options));
 }
 
 void MovingPhotoAni::SetMovingPhotoViewOptions([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_class object,
-    ani_long nodeptr, ani_long options)
+    ani_long nodeptr, ani_object options)
 {
     if (AniUtils::GetIsUndefinedObject(env, options)) {
         return;
@@ -409,7 +409,7 @@ void MovingPhotoAni::SetMovingPhotoViewOptions([[maybe_unused]] ani_env *env, [[
     NG::MovingPhotoModelNG::SetWaterMask(movingPhotoNode, playWithMaskValue);
 }
 
-void MovingPhotoAni::SetMovingPhotoUri(ani_env env, NG::MovingPhotoNode* movingPhotoNode, ani_object obj)
+void MovingPhotoAni::SetMovingPhotoUri(ani_env *env, NG::MovingPhotoNode* movingPhotoNode, ani_object obj)
 {
     ani_ref fn_ref;
     if (ANI_OK != env->Object_GetPropertyByName_Ref(obj, "getUri", &fn_ref)) {
