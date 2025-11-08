@@ -41,6 +41,16 @@ struct DynamicInitialConfig {
     std::vector<std::string> registerComponents;
     HostWindowInfo hostWindowInfo;
 };
+
+struct FrameMetrics {
+    bool firstDrawFrame = false; // Indicates whether the first frame of the window.
+    uint64_t vsyncTimestamp = 0; // Indicates the timestamp of the actual vaync for this frame. The value is expressed
+                                 // in nanoseconds.
+    uint64_t inputHandlingDuration =
+        0; // Indicates the number of nanoseconds elapsed in the input handling stage of a frame.
+    uint64_t layoutMeasureDuration =
+        0; // Indicates the number of nanoseconds elapsed in the layout measure stage of a frame.
+};
 } // namespace Ace
 } // namespace OHOS
 

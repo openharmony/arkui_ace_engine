@@ -30,6 +30,7 @@
 #include "core/components_ng/base/ui_node_gc.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/image/image_provider.h"
+#include "interfaces/inner_api/ace/ui_content_config.h"
 
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/common/plugin_manager.h"
@@ -1192,6 +1193,18 @@ void PipelineBase::ForceUpdateDesignWidthScale(int32_t width)
         windowConfig.designWidthScale = designWidthScale_;
     } else {
         viewScale_ = windowConfig.autoDesignWidth ? density_ : static_cast<double>(width) / windowConfig.designWidth;
+    }
+}
+
+void PipelineBase::SetFrameMetricsCallBack(std::function<void(OHOS::Ace::FrameMetrics info)>&& callback)
+{
+    frameMetricsCallBack_ = std::move(callback);
+}
+
+void PipelineBase::FireFrameMetricsCallBack(const OHOS::Ace::FrameMetrics& info)
+{
+    if (frameMetricsCallBack_) {
+        frameMetricsCallBack_(info);
     }
 }
 } // namespace OHOS::Ace

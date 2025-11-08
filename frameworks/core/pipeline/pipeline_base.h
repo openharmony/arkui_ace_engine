@@ -95,6 +95,7 @@ constexpr int32_t DEFAULT_DELAY_THP = 300;  // 300ms
 
 struct FontInfo;
 struct FontConfigJsonInfo;
+struct FrameMetrics;
 class Frontend;
 class OffscreenCanvas;
 class Window;
@@ -1232,6 +1233,9 @@ public:
         nextFrameLayoutCallback_ = std::move(callback);
     }
 
+    void SetFrameMetricsCallBack(std::function<void(OHOS::Ace::FrameMetrics info)>&& callback);
+    void FireFrameMetricsCallBack(const OHOS::Ace::FrameMetrics& info);
+
     void SetForegroundCalled(bool isForegroundCalled)
     {
         isForegroundCalled_ = isForegroundCalled;
@@ -1790,6 +1794,7 @@ protected:
     KeyboardAnimationConfig keyboardAnimationConfig_;
 
     std::function<void()> nextFrameLayoutCallback_ = nullptr;
+    std::function<void(OHOS::Ace::FrameMetrics info)> frameMetricsCallBack_ = nullptr;
     SharePanelCallback sharePanelCallback_ = nullptr;
     std::atomic<bool> isForegroundCalled_ = false;
     std::atomic<bool> onFocus_ = false;

@@ -331,6 +331,9 @@ public:
      */
     virtual void SetParentToken(sptr<IRemoteObject> token);
 
+    virtual void SetFrameMetricsCallBack(
+        std::function<void(FrameMetrics info)>&& callback) {}
+
     /**
      * @description: Get parent ability token.
      * @return return parent ability token.
