@@ -82,7 +82,7 @@ void RadioModelNG::SetChecked(bool isChecked)
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCurrentUIState(UI_STATE_SELECTED, isChecked);
 
-    ACE_UPDATE_PAINT_PROPERTY(RadioPaintProperty, RadioCheck, isChecked);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioCheck, isChecked, frameNode);
 }
 
 void RadioModelNG::SetOnChange(ChangeEvent&& onChange)
