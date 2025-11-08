@@ -1282,7 +1282,8 @@ public:
     std::string GetDumpTextValue() const;
     void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData = false) override;
     void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
-        RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType) override;
+        RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType,
+        AceAutoFillTriggerType triggerType = AceAutoFillTriggerType::AUTO_REQUEST) override;
     void NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent = "", bool isPopup = false) override;
     bool CheckAutoSave() override;
     void OnColorConfigurationUpdate() override;
@@ -1460,7 +1461,8 @@ public:
         return transformContentRect;
     }
 
-    bool ProcessAutoFill(bool& isPopup, bool isFromKeyBoard = false, bool isNewPassWord = false);
+    bool ProcessAutoFill(bool& isPopup, bool ignoreFillType = false, bool isNewPassWord = false,
+        AceAutoFillTriggerType triggerType = AceAutoFillTriggerType::AUTO_REQUEST);
     void SetAutoFillUserName(const std::string& userName)
     {
         autoFillUserName_ = userName;
@@ -1484,7 +1486,6 @@ public:
     {
         autoFillOtherAccount_ = otherAccount;
     }
-
     std::vector<RectF> GetPreviewTextRects() const;
 
     bool GetIsPreviewText() const
@@ -2033,7 +2034,8 @@ private:
     void ProcessCancelButton();
     bool HasInputOperation();
     AceAutoFillType ConvertToAceAutoFillType(TextInputType type);
-    bool CheckAutoFill(bool isFromKeyBoard = false);
+    bool CheckAutoFill(bool ignoreFillType = false,
+        AceAutoFillTriggerType triggerType = AceAutoFillTriggerType::AUTO_REQUEST);
     void ScrollToSafeArea() const override;
     void RecordSubmitEvent() const;
     void UpdateCancelNode();
@@ -2044,7 +2046,7 @@ private:
     void InitDragDropEventWithOutDragStart();
     void UpdateBlurReason();
     AceAutoFillType TextContentTypeToAceAutoFillType(const TextContentType& type);
-    bool CheckAutoFillType(const AceAutoFillType& aceAutoFillAllType, bool isFromKeyBoard = false);
+    bool CheckAutoFillType(const AceAutoFillType& aceAutoFillAllType);
     void ToJsonValueForApi22(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     bool GetAutoFillTriggeredStateByType(const AceAutoFillType& autoFillType);
     void SetAutoFillTriggeredStateByType(const AceAutoFillType& autoFillType);
@@ -2116,6 +2118,8 @@ private:
     void OnReportPasteEvent(const RefPtr<FrameNode>& frameNode);
     void OnReportSubmitEvent(const RefPtr<FrameNode>& frameNode);
     void BeforeAutoFillAnimation(const std::u16string& content, const AceAutoFillType& type);
+    void ProcessAutoFillOnPaste();
+    void HandleOnPasteCommon(const std::string& data);
     void RemoveFillContentMap();
     bool NeedsSendFillContent();
     void UpdateSelectOverlay(const RefPtr<OHOS::Ace::TextFieldTheme>& textFieldTheme);

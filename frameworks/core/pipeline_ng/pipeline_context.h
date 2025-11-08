@@ -840,7 +840,8 @@ public:
         bool skipSubAutoFillContainer = false, bool needsRecordData = false);
     bool CheckNeedAutoSave();
     bool CheckOverlayFocus();
-    void NotifyFillRequestSuccess(AceAutoFillType autoFillType, RefPtr<ViewDataWrap> viewDataWrap);
+    void NotifyFillRequestSuccess(AceAutoFillType autoFillType, RefPtr<ViewDataWrap> viewDataWrap,
+        AceAutoFillTriggerType triggerType, RefPtr<FrameNode> requestNode);
     void NotifyFillRequestFailed(RefPtr<FrameNode> node, int32_t errCode,
         const std::string& fillContent = "", bool isPopup = false);
 

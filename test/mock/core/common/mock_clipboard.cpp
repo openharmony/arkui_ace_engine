@@ -69,8 +69,18 @@ void MockClipBoard::SetData(const std::string& data, CopyOptions /* copyOption *
 
 void MockClipBoard::GetData(const std::function<void(const std::string&)>& callback, bool syncMode)
 {
+    CHECK_NULL_VOID(callback);
+    auto callbackWith2Args = [callback](const std::string& data, bool isFromAutoFill) {
+        (void)isFromAutoFill;
+        callback(data);
+    };
+    GetData(callbackWith2Args, syncMode);
+}
+
+void MockClipBoard::GetData(const std::function<void(const std::string&, bool)>& callback, bool syncMode)
+{
     if (callback) {
-        callback(saveData.value_or(""));
+        callback(saveData.value_or(""), false);
     }
 }
 

@@ -1405,7 +1405,7 @@ HWTEST_F(TextFieldModifyTest, DumpViewDataPageNode001, TestSize.Level1)
     /**
      * @tc.steps: step3. call DumpViewDataPageNode.
      */
-    pattern_->NotifyFillRequestSuccess(viewData, info, autoFillType);
+    pattern_->NotifyFillRequestSuccess(viewData, info, autoFillType, AceAutoFillTriggerType::AUTO_REQUEST);
     EXPECT_EQ(pattern_->selectController_->caretInfo_.index, 0);
 }
 

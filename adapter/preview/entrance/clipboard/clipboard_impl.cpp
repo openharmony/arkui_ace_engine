@@ -55,6 +55,16 @@ void ClipboardImpl::SetData(const std::string& data, CopyOptions copyOption, boo
 
 void ClipboardImpl::GetData(const std::function<void(const std::string&)>& callback, bool syncMode)
 {
+    CHECK_NULL_VOID(callback);
+    auto callbackWith2Args = [callback](const std::string& data, bool isFromAutoFill) {
+        (void)isFromAutoFill;
+        callback(data);
+    };
+    GetData(callbackWith2Args, syncMode);
+}
+
+void ClipboardImpl::GetData(const std::function<void(const std::string&, bool)>& callback, bool syncMode)
+{
     if (!taskExecutor_ || !callback) {
         return;
     }
@@ -62,7 +72,7 @@ void ClipboardImpl::GetData(const std::function<void(const std::string&)>& callb
         [callback] {
             auto getClipboardData = AcePreviewHelper::GetInstance()->GetCallbackOfGetClipboardData();
             if (callback && getClipboardData) {
-                callback(getClipboardData());
+                callback(getClipboardData(), false);
             }
         },
         TaskExecutor::TaskType::UI, "ArkUIClipboardGetData");

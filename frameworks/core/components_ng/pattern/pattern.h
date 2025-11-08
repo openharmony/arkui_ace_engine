@@ -429,7 +429,8 @@ public:
         std::shared_ptr<JsonValue>& json, ParamConfig config = ParamConfig())
     {}
     virtual void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
-        RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType) {}
+        RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType,
+        AceAutoFillTriggerType triggerType = AceAutoFillTriggerType::AUTO_REQUEST) {}
     virtual void NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent = "", bool isPopup = false) {}
     virtual bool CheckAutoSave()
     {

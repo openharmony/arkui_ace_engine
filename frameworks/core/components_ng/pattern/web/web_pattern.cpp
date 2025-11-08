@@ -5199,7 +5199,7 @@ void WebPattern::DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool ne
 }
 
 void WebPattern::NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
-    RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType)
+    RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType, AceAutoFillTriggerType triggerType)
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "called");
     CHECK_NULL_VOID(viewDataWrap);

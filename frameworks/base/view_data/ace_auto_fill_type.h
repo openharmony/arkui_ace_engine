@@ -61,5 +61,12 @@ enum class AceAutoFillType {
     ACE_LICENSE_CHASSIS_NUMBER,
     END = ACE_LICENSE_CHASSIS_NUMBER,
 };
+
+enum class AceAutoFillTriggerType {
+    AUTO_REQUEST,
+    MANUAL_REQUEST,
+    PASTE_REQUEST,
+    UNSPECIFIED
+};
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_ACE_AUTO_FILL_TYPE_H

@@ -1688,9 +1688,10 @@ bool AceContainer::UpdatePage(int32_t instanceId, int32_t pageId, const std::str
 class FillRequestCallback : public AbilityRuntime::IFillRequestCallback {
 public:
     FillRequestCallback(WeakPtr<NG::PipelineContext> pipelineContext, const RefPtr<NG::FrameNode>& node,
-        AceAutoFillType autoFillType, bool isNative = true, const std::function<void()>& onFinish = nullptr)
-        : pipelineContext_(pipelineContext), node_(node), autoFillType_(autoFillType), isNative_(isNative),
-          onFinish_(onFinish)
+        AceAutoFillType autoFillType, AceAutoFillTriggerType triggerType, bool isNative = true,
+        const std::function<void()>& onFinish = nullptr)
+        : pipelineContext_(pipelineContext), node_(node), autoFillType_(autoFillType), triggerType_(triggerType),
+          isNative_(isNative), onFinish_(onFinish)
     {}
     virtual ~FillRequestCallback() = default;
     void OnFillRequestSuccess(const AbilityBase::ViewData& viewData) override
@@ -1716,11 +1717,12 @@ public:
                 TaskExecutor::TaskType::UI, "ArkUINotifyWebFillRequestSuccess");
             return;
         }
-
+        auto node = node_.Upgrade();
+        CHECK_NULL_VOID(node);
         taskExecutor->PostTask(
-            [viewDataWrap, pipelineContext, autoFillType = autoFillType_]() {
+            [viewDataWrap, pipelineContext, autoFillType = autoFillType_, triggerType = triggerType_, node]() {
                 if (pipelineContext) {
-                    pipelineContext->NotifyFillRequestSuccess(autoFillType, viewDataWrap);
+                    pipelineContext->NotifyFillRequestSuccess(autoFillType, viewDataWrap, triggerType, node);
                 }
             },
             TaskExecutor::TaskType::UI, "ArkUINotifyFillRequestSuccess");
@@ -1889,6 +1891,7 @@ private:
     WeakPtr<NG::PipelineContext> pipelineContext_ = nullptr;
     WeakPtr<NG::FrameNode> node_ = nullptr;
     AceAutoFillType autoFillType_ = AceAutoFillType::ACE_UNSPECIFIED;
+    AceAutoFillTriggerType triggerType_ = AceAutoFillTriggerType::AUTO_REQUEST;
     bool isNative_ = true;
     AbilityBase::Rect rect_;
     Rosen::Rect windowRect_ { 0, 0, 0, 0 };
@@ -2048,7 +2051,8 @@ void GetFocusedElementRect(const AbilityBase::ViewData& viewData, AbilityBase::R
 
 int32_t AceContainer::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType,
     bool isNewPassWord, bool& isPopup, uint32_t& autoFillSessionId, bool isNative,
-    const std::function<void()>& onFinish, const std::function<void()>& onUIExtNodeBindingCompleted)
+    const std::function<void()>& onFinish, const std::function<void()>& onUIExtNodeBindingCompleted,
+    AceAutoFillTriggerType triggerType)
 {
     TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called, autoFillType: %{public}d", static_cast<int32_t>(autoFillType));
     auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
@@ -2064,7 +2068,8 @@ int32_t AceContainer::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAuto
     auto autoFillContainerNode = node->GetFirstAutoFillContainerNode();
     uiContentImpl->DumpViewData(autoFillContainerNode, viewDataWrap, true);
     FillAutoFillViewData(node, viewDataWrap);
-    auto callback = std::make_shared<FillRequestCallback>(pipelineContext, node, autoFillType, isNative, onFinish);
+    auto callback = std::make_shared<FillRequestCallback>(pipelineContext, node, autoFillType, triggerType, isNative,
+        onFinish);
     auto viewDataWrapOhos = AceType::DynamicCast<ViewDataWrapOhos>(viewDataWrap);
     CHECK_NULL_RETURN(viewDataWrapOhos, AceAutoFillError::ACE_AUTO_FILL_DEFAULT);
     auto viewData = viewDataWrapOhos->GetViewData();
@@ -2088,6 +2093,7 @@ int32_t AceContainer::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAuto
     autoFillRequest.autoFillCommand = AbilityRuntime::AutoFill::AutoFillCommand::FILL;
     autoFillRequest.viewData = viewData;
     autoFillRequest.doAfterAsyncModalBinding = std::move(onUIExtNodeBindingCompleted);
+    autoFillRequest.autoFillTriggerType = static_cast<AbilityRuntime::AutoFill::AutoFillTriggerType>(triggerType);
     AbilityRuntime::AutoFill::AutoFillResult result;
     auto resultCode =
         AbilityRuntime::AutoFillManager::GetInstance().RequestAutoFill(uiContent, autoFillRequest, callback, result);

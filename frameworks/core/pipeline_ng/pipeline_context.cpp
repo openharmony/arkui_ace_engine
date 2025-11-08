@@ -3508,9 +3508,10 @@ bool PipelineContext::CheckOverlayFocus()
     return overlayNode->GetFocusHub() && overlayNode->GetFocusHub()->IsCurrentFocus();
 }
 
-void PipelineContext::NotifyFillRequestSuccess(AceAutoFillType autoFillType, RefPtr<ViewDataWrap> viewDataWrap)
+void PipelineContext::NotifyFillRequestSuccess(AceAutoFillType autoFillType, RefPtr<ViewDataWrap> viewDataWrap,
+    AceAutoFillTriggerType triggerType, RefPtr<FrameNode> requestNode)
 {
-    CHECK_NULL_VOID(viewDataWrap);
+    CHECK_NULL_VOID(viewDataWrap && requestNode);
     auto pageNodeInfoWraps = viewDataWrap->GetPageNodeInfoWraps();
     for (const auto& item : pageNodeInfoWraps) {
         if (item == nullptr) {
@@ -3521,7 +3522,10 @@ void PipelineContext::NotifyFillRequestSuccess(AceAutoFillType autoFillType, Ref
             TAG_LOGW(AceLogTag::ACE_AUTO_FILL, "frameNode is not found, id=%{public}d", item->GetId());
             continue;
         }
-        frameNode->NotifyFillRequestSuccess(viewDataWrap, item, autoFillType);
+        if (triggerType == AceAutoFillTriggerType::PASTE_REQUEST && frameNode->GetId() != requestNode->GetId()) {
+            continue;
+        }
+        frameNode->NotifyFillRequestSuccess(viewDataWrap, item, autoFillType, triggerType);
     }
 }
 
