@@ -1490,8 +1490,9 @@ bool GetBackgroundBlurStyleParam(ani_env* env, ani_object object, int32_t& resul
     auto iter = blurStyleMap.find(resultInt);
     if (iter != blurStyleMap.end()) {
         result = static_cast<int32_t>(iter->second);
+        return true;
     }
-    return true;
+    return false;
 }
 
 bool GetBackgroundBlurStyleParamOpt(ani_env* env, ani_object object, std::optional<int32_t>& result)
