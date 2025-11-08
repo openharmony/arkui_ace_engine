@@ -1396,4 +1396,31 @@ HWTEST_F(UINodeTestNgTwo, AddFunc_API01, TestSize.Level1)
     EXPECT_EQ(res, true);
 }
 
+/**
+ * @tc.name: UpdateBuilderNodeColorMode001
+ * @tc.desc: Test UpdateBuilderNodeColorMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNgTwo, UpdateBuilderNodeColorMode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare the environment variables for the function.
+     */
+    auto parentNode = FrameNode::CreateFrameNode("parentNode", 10000, AceType::MakeRefPtr<Pattern>());
+    auto childNode = FrameNode::CreateFrameNode("parentNode", 10000, AceType::MakeRefPtr<Pattern>());
+    parentNode->AddChild(childNode);
+    parentNode->onMainTree_ = false;
+    parentNode->nodeStatus_ = NodeStatus::BUILDER_NODE_OFF_MAINTREE;
+    parentNode->SetDarkMode(true);
+    childNode->SetDarkMode(false);
+    g_isConfigChangePerform = true;
+
+    /**
+     * @tc.steps: step2. parentNode AttachToMainTree
+     * @tc.expected: parentNode->CheckIsDarkMode() equles childNode->CheckIsDarkMode()
+     */
+    PipelineContext* context = parentNode->GetContextWithCheck();
+    parentNode->AttachToMainTree(true, context);
+    EXPECT_EQ(parentNode->CheckIsDarkMode(), childNode->CheckIsDarkMode());
+}
 } // namespace OHOS::Ace::NG
