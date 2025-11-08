@@ -120,6 +120,7 @@ ace_unittest("capi_all_accessors_test") {
     # "shape_mask_accessor_test.cpp",
     # "slider_content_modifier_accessor_test.cpp",
     #"ssl_error_handler_accessor_test.cpp",
+    "state_styles_ops_accessor_test.cpp",
     "styled_string_accessor_test.cpp",
     "submit_event_accessor_test.cpp",
     #"swipe_gesture_event_accessor_test.cpp",

@@ -1409,7 +1409,14 @@ void ViewAbstractModelStatic::SetFocusBoxStyle(FrameNode* frameNode, const std::
         focusHub->GetFocusBox().SetStyle(paintStyle);
         return;
     }
-    focusHub->GetFocusBox().SetStyle(style.value());
+    auto paintStyle = style.value();
+    if (paintStyle.strokeWidth.has_value() && paintStyle.strokeWidth.value().Unit() == DimensionUnit::PERCENT) {
+        paintStyle.strokeWidth.value().SetUnit(DimensionUnit::FP);
+    }
+    if (paintStyle.margin.has_value() && paintStyle.margin.value().Unit() == DimensionUnit::PERCENT) {
+        paintStyle.margin.value().SetUnit(DimensionUnit::FP);
+    }
+    focusHub->GetFocusBox().SetStyle(paintStyle);
 }
 
 void ViewAbstractModelStatic::SetFocusScopeId(FrameNode* frameNode, const std::optional<std::string>& focusScopeId,
