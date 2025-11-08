@@ -16,11 +16,24 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_THEME_THEME_MANAGER_IMPL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_THEME_THEME_MANAGER_IMPL_H
 
+#include <shared_mutex>
 #include "core/components/theme/resource_adapter.h"
 #include "core/components/theme/theme_manager.h"
 #include "core/components_ng/token_theme/token_theme_wrapper.h"
 
 namespace OHOS::Ace {
+class ThemeWrappers final {
+public:
+    void Emplace(ThemeType type, const RefPtr<TokenThemeWrapper>& themeWrapper);
+    RefPtr<TokenThemeWrapper> Find(ThemeType type);
+    void Clear();
+private:
+    std::unordered_map<ThemeType, RefPtr<TokenThemeWrapper>> themesWrappers_;
+    std::unordered_map<ThemeType, RefPtr<TokenThemeWrapper>> themesWrappersMulti_;
+
+    mutable std::shared_mutex themesMutex_;
+};
+
 class ACE_EXPORT ThemeManagerImpl : public ThemeManager {
     DECLARE_ACE_TYPE(ThemeManagerImpl, ThemeManager);
 
@@ -135,11 +148,14 @@ public:
 
     RefPtr<Theme> GetThemeKit(ThemeType type, int32_t themeScopeId);
 
-    std::string GetThemesMapKey(ThemeType type) const;
+    void AddThemeWithType(ThemeType type, const RefPtr<Theme>& theme);
+    RefPtr<Theme> GetThemeWithType(ThemeType type) const;
+    bool IsThemeExists(ThemeType type) const;
+    void ClearThemes();
 
 private:
-    using ThemeWrappers = std::unordered_map<ThemeType, RefPtr<TokenThemeWrapper>>;
-    std::unordered_map<std::string, RefPtr<Theme>> themes_;
+    std::unordered_map<ThemeType, RefPtr<Theme>> themes_;
+    std::unordered_map<ThemeType, RefPtr<Theme>> themesMulti_;
     ThemeWrappers themeWrappersLight_;
     ThemeWrappers themeWrappersDark_;
 
@@ -150,6 +166,8 @@ private:
 
     ThemeWrappers& GetThemeWrappers(ColorMode mode);
     ColorMode GetCurrentColorMode() const;
+
+    mutable std::shared_mutex themesMutex_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_THEME_THEME_MANAGER_H
