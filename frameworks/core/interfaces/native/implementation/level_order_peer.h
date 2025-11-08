@@ -20,7 +20,7 @@
 #include "core/interfaces/native/utility/peer_utils.h"
 #include "core/components_ng/pattern/overlay/level_order.h"
 
-struct LevelOrderPeer final {
+struct LevelOrderPeer {
     OHOS::Ace::NG::LevelOrder* levelOrder;
 
 protected:
@@ -28,5 +28,7 @@ protected:
     ~LevelOrderPeer() = default;
     friend OHOS::Ace::NG::PeerUtils;
 };
+
+struct LevelOrderExtenderPeer final : LevelOrderPeer {};
 
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_LEVEL_ORDER_PEER_IMPL_H

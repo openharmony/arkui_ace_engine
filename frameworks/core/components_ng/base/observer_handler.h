@@ -50,6 +50,7 @@ struct NavDestinationInfo {
     NavDestinationState state;
     int32_t index;
     napi_value param;
+    std::string interopParam;
     std::string navDestinationId;
     NavDestinationMode mode;
     int32_t uniqueId;
@@ -202,13 +203,17 @@ public:
     std::shared_ptr<RouterPageInfoNG> GetRouterPageState(const RefPtr<AceType>& node);
     void NotifyNavDestinationSwitch(std::optional<NavDestinationInfo>&& from,
         std::optional<NavDestinationInfo>&& to, NavigationOperation operation);
+    void NotifyNavDestinationSwitchForAni(std::optional<NavDestinationInfo>& from,
+        std::optional<NavDestinationInfo>& to, NavigationOperation operation);
     using NavigationHandleFunc = void (*)(const NavDestinationInfo& info);
     using ScrollEventHandleFunc = void (*)(const std::string&, int32_t, ScrollEventType, float, Ace::Axis);
+    using ScrollEventHandleFuncForAni = std::function<void(const ScrollEventInfo& info)>;
     using RouterPageHandleFunc = void (*)(AbilityContextInfo&, const RouterPageInfoNG&);
     using RouterPageHandleFuncForAni = std::function<void(AbilityContextInfo&, const RouterPageInfoNG&)>;
     using DrawCommandSendHandleFunc = std::function<void()>;
     using LayoutDoneHandleFunc = std::function<void()>;
     using NavDestinationSwitchHandleFunc = void (*)(const AbilityContextInfo&, NavDestinationSwitchInfo&);
+    using NavDestinationSwitchHandleFuncForAni = std::function<void(NavDestinationSwitchInfo&)>;
     using WillClickHandleFunc = void (*)(
         AbilityContextInfo&, const GestureEvent&, const ClickInfo&, const RefPtr<FrameNode>&);
     using DidClickHandleFunc = void (*)(
@@ -222,9 +227,11 @@ public:
     using NavigationHandleFuncForAni = std::function<void(const NG::NavDestinationInfo& info)>;
     using TabContentHandleFuncForAni = std::function<void(const NG::TabContentInfo& info)>;
     NavDestinationSwitchHandleFunc GetHandleNavDestinationSwitchFunc();
+    NavDestinationSwitchHandleFuncForAni GetHandleNavDestinationSwitchFuncForAni();
     void SetHandleNavigationChangeFunc(NavigationHandleFunc func);
     void SetHandleNavigationChangeFuncForAni(NavigationHandleFuncForAni func);
     void SetHandleScrollEventChangeFunc(ScrollEventHandleFunc func);
+    void SetHandleScrollEventChangeFuncForAni(ScrollEventHandleFuncForAni func);
     void SetHandleRouterPageChangeFunc(RouterPageHandleFunc func);
     void SetHandleRouterPageChangeFuncForAni(RouterPageHandleFuncForAni func);
     using DensityHandleFunc = void (*)(AbilityContextInfo&, double);
@@ -237,6 +244,7 @@ public:
     void SetDrawCommandSendHandleFunc(LayoutDoneHandleFunc func);
     void HandleDrawCommandSendCallBack();
     void SetHandleNavDestinationSwitchFunc(NavDestinationSwitchHandleFunc func);
+    void SetHandleNavDestinationSwitchFuncForAni(NavDestinationSwitchHandleFuncForAni func);
     void SetWillClickFunc(WillClickHandleFunc func);
     void SetDidClickFunc(DidClickHandleFunc func);
     void SetPanGestureHandleFunc(PanGestureHandleFunc func);
@@ -260,6 +268,7 @@ private:
     NavigationHandleFunc navigationHandleFunc_ = nullptr;
     NavigationHandleFuncForAni navigationHandleFuncForAni_ = nullptr;
     ScrollEventHandleFunc scrollEventHandleFunc_ = nullptr;
+    ScrollEventHandleFuncForAni scrollEventHandleFuncForAni_ = nullptr;
     RouterPageHandleFunc routerPageHandleFunc_ = nullptr;
     RouterPageHandleFuncForAni routerPageHandleFuncForAni_ = nullptr;
     LayoutDoneHandleFunc layoutDoneHandleFunc_ = nullptr;
@@ -267,6 +276,7 @@ private:
     DensityHandleFunc densityHandleFunc_ = nullptr;
     DensityHandleFuncForAni densityHandleFuncForAni_ = nullptr;
     NavDestinationSwitchHandleFunc navDestinationSwitchHandleFunc_ = nullptr;
+    NavDestinationSwitchHandleFuncForAni navDestinationSwitchHandleFuncForAni_ = nullptr;
     WillClickHandleFunc willClickHandleFunc_ = nullptr;
     DidClickHandleFunc didClickHandleFunc_ = nullptr;
     PanGestureHandleFunc panGestureHandleFunc_ = nullptr;

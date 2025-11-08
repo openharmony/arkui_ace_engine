@@ -95,7 +95,10 @@ HWTEST_F(RichEditorStyledStringControllerAccessorTest, DISABLED_setAndGetStyledS
 
     accessor_->setStyledString(peer_, stringPeer);
 
-    const auto stringPeer2 = reinterpret_cast<MutableStyledStringPeer*>(accessor_->getStyledString(peer_));
+    Opt_MutableStyledString result = accessor_->getStyledString(peer_);
+    auto resultOpt = Converter::GetOpt(result);
+    ASSERT_TRUE(resultOpt.has_value());
+    const auto stringPeer2 = reinterpret_cast<MutableStyledStringPeer*>(resultOpt.value());
 
     ASSERT_NE(stringPeer2, nullptr);
     EXPECT_NE(stringPeer, stringPeer2);
@@ -178,7 +181,10 @@ HWTEST_F(RichEditorStyledStringControllerAccessorTest, getSelectionTest, TestSiz
     raw->SetStyledString(AceType::MakeRefPtr<SpanString>(TEST_TEXT));
     raw->UpdateSelector(TEST_SELECTION_START, TEST_SELECTION_END);
 
-    Ark_RichEditorRange selection = accessor_->getSelection(peer_);
+    Opt_RichEditorRange result = accessor_->getSelection(peer_);
+    auto resultOpt = Converter::GetOpt(result);
+    ASSERT_TRUE(resultOpt.has_value());
+    Ark_RichEditorRange selection = resultOpt.value();
     int32_t start = Converter::OptConvert<int32_t>(selection.start).value_or(-1);
     int32_t end = Converter::OptConvert<int32_t>(selection.end).value_or(-1);
     EXPECT_EQ(start, TEST_SELECTION_START);

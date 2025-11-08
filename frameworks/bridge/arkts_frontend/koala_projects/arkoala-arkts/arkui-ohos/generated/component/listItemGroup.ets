@@ -23,7 +23,7 @@ import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { AttributeModifier, hookListItemGroupAttributeModifier, AttributeUpdater } from "#handwritten"
+import { AttributeModifier, extractors, hookListItemGroupAttributeModifier, AttributeUpdater, hookListItemGroupChildrenMainSizeImpl } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -32,6 +32,7 @@ import { CustomBuilder } from "./builder"
 import { ComponentContent } from "arkui.ComponentContent"
 import { ListItemGroupModifier } from "./../ListItemGroupModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ComponentContent_serializer } from "./../ComponentContent"
 export class ArkListItemGroupPeer extends ArkCommonMethodPeer {
     attributeSet?: ListItemGroupModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -152,7 +153,7 @@ export class ArkListItemGroupComponent extends ArkCommonMethodComponent implemen
     public childrenMainSize(value: ChildrenMainSize | undefined): this {
         if (this.checkPriority("childrenMainSize")) {
             const value_casted = value as (ChildrenMainSize | undefined)
-            this.getPeer()?.setChildrenMainSizeAttribute(value_casted)
+            hookListItemGroupChildrenMainSizeImpl(this, value);
             return this
         }
         return this
@@ -203,7 +204,7 @@ export class ListItemGroupOptions_serializer {
         if (valueHolderForHeaderComponent !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForHeaderComponentTmpValue  = valueHolderForHeaderComponent!
-            valueSerializer.holdAndWriteObject(valueHolderForHeaderComponentTmpValue)
+            ComponentContent_serializer.write(valueSerializer, valueHolderForHeaderComponentTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -219,7 +220,7 @@ export class ListItemGroupOptions_serializer {
         if (valueHolderForFooterComponent !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForFooterComponentTmpValue  = valueHolderForFooterComponent!
-            valueSerializer.holdAndWriteObject(valueHolderForFooterComponentTmpValue)
+            ComponentContent_serializer.write(valueSerializer, valueHolderForFooterComponentTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -270,7 +271,7 @@ export class ListItemGroupOptions_serializer {
         const headerComponentTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let headerComponentTmpBuf : ComponentContent | undefined = undefined
         if ((headerComponentTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            headerComponentTmpBuf = (valueDeserializer.readObject() as ComponentContent)
+            headerComponentTmpBuf = (ComponentContent_serializer.read(valueDeserializer) as ComponentContent)
         }
         const headerComponentTmpResult : ComponentContent | undefined = headerComponentTmpBuf
         const footerTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -293,7 +294,7 @@ export class ListItemGroupOptions_serializer {
         const footerComponentTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let footerComponentTmpBuf : ComponentContent | undefined = undefined
         if ((footerComponentTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            footerComponentTmpBuf = (valueDeserializer.readObject() as ComponentContent)
+            footerComponentTmpBuf = (ComponentContent_serializer.read(valueDeserializer) as ComponentContent)
         }
         const footerComponentTmpResult : ComponentContent | undefined = footerComponentTmpBuf
         const spaceTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()

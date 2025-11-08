@@ -81,6 +81,10 @@ void SetCheckboxGroupOptionsImpl(Ark_NativePointer node,
 }
 } // CheckboxGroupInterfaceModifier
 namespace CheckboxGroupAttributeModifier {
+namespace {
+constexpr float CHECK_BOX_GROUP_MARK_SIZE_INVALID_VALUE = -1.0f;
+const Dimension CHECK_BOX_GROUP_MARK_WIDTH_DEFAULT_VALUE = 2.0_vp;
+}
 void SetSelectAllImpl(Ark_NativePointer node,
                       const Opt_Union_Boolean_Bindable* value)
 {
@@ -116,13 +120,20 @@ void SetMarkImpl(Ark_NativePointer node,
         CheckBoxGroupModelStatic::SetCheckMarkColor(frameNode, color);
     }
     auto size = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Float64>(optValue->size, DimensionUnit::VP);
-    Validator::ValidateNonPercent(size);
-    Validator::ValidateNonNegative(size);
+    if (!size.has_value() || (size.value().Unit() == DimensionUnit::PERCENT) || (size.value().IsNegative())) {
+        size = Dimension(CHECK_BOX_GROUP_MARK_SIZE_INVALID_VALUE);
+    }
     CheckBoxGroupModelStatic::SetCheckMarkSize(frameNode, size);
     auto strokeWidth =
         Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Float64>(optValue->strokeWidth, DimensionUnit::VP);
-    Validator::ValidateNonPercent(strokeWidth);
-    Validator::ValidateNonNegative(strokeWidth);
+    if (!strokeWidth.has_value() || (strokeWidth.value().Unit() == DimensionUnit::PERCENT)
+        || (strokeWidth.value().IsNegative())) {
+        auto context = frameNode->GetContext();
+        CHECK_NULL_VOID(context);
+        auto theme = context->GetTheme<CheckboxTheme>();
+        auto defaultStroke = theme ? theme->GetCheckStroke() : CHECK_BOX_GROUP_MARK_WIDTH_DEFAULT_VALUE;
+        strokeWidth = defaultStroke;
+    }
     CheckBoxGroupModelStatic::SetCheckMarkWidth(frameNode, strokeWidth);
 }
 void SetOnChangeImpl(Ark_NativePointer node,

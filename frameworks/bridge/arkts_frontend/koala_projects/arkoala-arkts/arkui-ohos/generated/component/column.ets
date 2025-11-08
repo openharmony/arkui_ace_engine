@@ -31,6 +31,7 @@ import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { Resource } from "global.resource"
 import { ColumnModifier } from "./../ColumnModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ModifierStateManager } from '../CommonModifier';
 export class ArkColumnPeer extends ArkCommonMethodPeer {
     attributeSet?: ColumnModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -187,7 +188,9 @@ export class ArkColumnComponent extends ArkCommonMethodComponent implements Colu
         return this
     }
     public attributeModifier(value: AttributeModifier<ColumnAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookColumnAttributeModifier(this, value);
+         ModifierStateManager.INSTANCE.scope(() => {
+            hookColumnAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

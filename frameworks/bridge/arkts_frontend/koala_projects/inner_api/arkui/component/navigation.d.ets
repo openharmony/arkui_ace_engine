@@ -28,7 +28,7 @@ import { KPointer } from '@koalaui/interop';
 import { int32 } from '@koalaui/compat';
 import { ComponentBase } from 'arkui/ComponentBase';
 import { LayoutSafeAreaEdge, LayoutSafeAreaType } from 'arkui.component.common';
-import { CustomBuilder, PageMapBuilder } from 'arkui/component/builder';
+import { CustomBuilder, PageMapBuilder } from 'arkui.component.builder';
 import {
     NavBarPosition,
     NavigationMenuItem,

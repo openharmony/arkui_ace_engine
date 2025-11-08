@@ -66,9 +66,9 @@ public:
  */
 HWTEST_F(AccessibilityNodeTestNg, accessibilityNodeTest001, TestSize.Level1)
 {
-    NodeId id = 0;
+    NodeId nodeId = 0;
     std::string nodeName = "accessibilityNodeTest";
-    AccessibilityNode accessibilityNode(id, nodeName);
+    AccessibilityNode accessibilityNode(nodeId, nodeName);
     EXPECT_FALSE(accessibilityNode.ActionClick());
     accessibilityNode.SetActionClickImpl([]() {});
     EXPECT_TRUE(accessibilityNode.ActionClick());
@@ -109,9 +109,9 @@ HWTEST_F(AccessibilityNodeTestNg, accessibilityNodeTest001, TestSize.Level1)
  */
 HWTEST_F(AccessibilityNodeTestNg, accessibilityNodeTest002, TestSize.Level1)
 {
-    NodeId id = 0;
+    NodeId nodeId = 0;
     std::string nodeName = "accessibilityNodeTest";
-    AccessibilityNode accessibilityNode(id, nodeName);
+    AccessibilityNode accessibilityNode(nodeId, nodeName);
 
     PositionInfo positionInfo;
     positionInfo.height = TEST_NUMBER;
@@ -180,9 +180,9 @@ HWTEST_F(AccessibilityNodeTestNg, accessibilityNodeTest003, TestSize.Level1)
  */
 HWTEST_F(AccessibilityNodeTestNg, accessibilityNodeTest004, TestSize.Level1)
 {
-    NodeId id = 0;
+    NodeId nodeId = 0;
     std::string nodeName = "text";
-    AccessibilityNode accessibilityNode(id, nodeName);
+    AccessibilityNode accessibilityNode(nodeId, nodeName);
 
     std::vector<std::string> vec;
     vec.emplace_back(EVENT);

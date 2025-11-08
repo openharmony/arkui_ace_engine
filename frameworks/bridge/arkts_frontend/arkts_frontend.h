@@ -113,16 +113,18 @@ public:
 
     void AddPage(const RefPtr<AcePage>& page) override {}
 
-    void PushExtender(const PageRouterOptions& options, std::function<void()>&& finishCallback, void* jsNode) override;
+    void PushExtender(
+        const PageRouterOptions& options, const std::function<void()>&& finishCallback, void* jsNode) override;
     void PushNamedRouteExtender(
-        const PageRouterOptions& options, std::function<void()>&& finishCallback, void* jsNode) override;
+        const PageRouterOptions& options, const std::function<void()>&& finishCallback, void* jsNode) override;
     void ReplaceExtender(
-        const PageRouterOptions& options, std::function<void()>&& finishCallback, void* jsNode) override;
+        const PageRouterOptions& options, const std::function<void()>&& finishCallback, void* jsNode) override;
     void ReplaceNamedRouteExtender(
-        const PageRouterOptions& options, std::function<void()>&& finishCallback, void* jsNode) override;
+        const PageRouterOptions& options, const std::function<void()>&& finishCallback, void* jsNode) override;
     void RunPageExtender(
-        const PageRouterOptions& options, std::function<void()>&& finishCallback, void* jsNode) override;
+        const PageRouterOptions& options, const std::function<void()>&& finishCallback, void* jsNode) override;
     void BackExtender(const std::string& url, const std::string& params) override;
+    void BackToIndexExtender(int32_t index, const std::string& params) override;
     void ClearExtender() override;
     void ShowAlertBeforeBackPageExtender(const std::string& url) override;
     void HideAlertBeforeBackPageExtender() override;

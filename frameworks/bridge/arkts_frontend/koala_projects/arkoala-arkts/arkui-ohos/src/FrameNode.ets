@@ -183,6 +183,9 @@ export class FrameNode implements MaterializedBase {
     checkValid(node: FrameNode): boolean {
         return true;
     }
+    getComponentContent() {
+        
+    }
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
@@ -440,8 +443,7 @@ export class FrameNode implements MaterializedBase {
         return { x: 0, y: 0 } as NodePosition;
     }
     public getPositionToWindow(): NodePosition {
-        // return FrameNodeExtender.getPositionToWindow(this)
-        return { x: 0, y: 0 } as NodePosition;
+        return FrameNodeExtender.getPositionToWindow(this);
     }
     public getPositionToParentWithTransform(): NodePosition {
         // return FrameNodeExtender.getPositionToParentWithTransform(this)
@@ -455,8 +457,7 @@ export class FrameNode implements MaterializedBase {
         return FrameNodeExtender.getMeasuredSize(this)
     }
     public getLayoutPosition(): NodePosition {
-        // return FrameNodeExtender.getLayoutPosition(this)
-        return { x: 0, y: 0 } as NodePosition;
+        return FrameNodeExtender.getLayoutPosition(this);
     }
    public getUserConfigBorderWidth(): NodeEdges<LengthMetrics> {
         // return FrameNodeExtender.getUserConfigBorderWidth()
@@ -484,8 +485,8 @@ export class FrameNode implements MaterializedBase {
     public getId(): string {
         return FrameNodeExtender.getId(this);
     }
-    public getUniqueId(): long {
-        return FrameNodeExtender.getUniqueId(this) as long;
+    public getUniqueId(): int {
+        return FrameNodeExtender.getUniqueId(this);
     }
     public isVisible(): boolean {
         return FrameNodeExtender.isVisible(this);

@@ -30,23 +30,39 @@ void ArkoalaLazyNode::DoSetActiveChildRange(
     TAG_LOGD(AceLogTag::ACE_LAZY_FOREACH, "ArkoalaLazyNode[self:%{public}d].DoSetActiveChildRange"
         "(%{public}d, %{public}d, %{public}d, %{public}d, %{public}d)",
         GetId(), start, end, cacheStart, cacheEnd, static_cast<int32_t>(showCache));
-    // range of screen node & preload node
-    const RangeType cacheRange { start - cacheStart, end + cacheEnd };
+    if (showCache) {
+        start -= cacheStart;
+        end += cacheEnd;
+        cacheStart = 0;
+        cacheEnd = 0;
+    }
+    const ActiveRangeParam newParam = { start, end, cacheStart, cacheEnd };
+    if (newParam == activeRangeParam_) {
+        TAG_LOGD(AceLogTag::ACE_LAZY_FOREACH, "active range not changed, return directly.");
+        return;
+    }
+    TAG_LOGD(AceLogTag::ACE_LAZY_FOREACH,
+        "TRACE DoSetActiveChildRange(%{public}d, %{public}d, %{public}d, %{public}d, %{public}d)",
+        start, end, cacheStart, cacheEnd, static_cast<int32_t>(showCache));
+    activeRangeParam_ = newParam;
+
     if (updateRange_) {
         // trigger TS-side
-        updateRange_(cacheRange.first, cacheRange.second);
+        updateRange_(start, end, cacheStart, cacheEnd, isLoop_);
     }
 
-    // range of screen node
-    const RangeType activeRange = showCache ? cacheRange : std::make_pair(start, end);
     std::list<RefPtr<UINode>> toRemove;
     for (const auto& [index, node] : node4Index_) {
-        if (!node) {
-            continue;
-        }
+        CHECK_NULL_CONTINUE(node);
         const auto indexMapped = ConvertFromToIndexRevert(index);
-        const bool isInCacheRange = IsNodeInRange(indexMapped, cacheRange);
-        const bool isInActiveRange = IsNodeInRange(indexMapped, activeRange);
+        // range of visible items
+        const bool isInActiveRange = IsInActiveRange(indexMapped, newParam);
+        // range of cached items
+        const bool isInCacheRange = IsInCacheRange(indexMapped, newParam);
+        TAG_LOGD(AceLogTag::ACE_LAZY_FOREACH,
+            "isInActiveRange & isInCacheRange -> [%{public}d, %{public}d] for index %{public}d",
+            static_cast<int32_t>(isInActiveRange), static_cast<int32_t>(isInCacheRange), indexMapped);
+
         if (!isInCacheRange || (!isRepeat_ && !isInActiveRange)) { // LazyForEach need to remove inactive nodes
             RemoveChild(node);
         }
@@ -57,12 +73,11 @@ void ArkoalaLazyNode::DoSetActiveChildRange(
         }
     }
 
-    node4Index_.RemoveIf([cacheRange, weak = WeakClaim(this)](const uint32_t& k, const auto& _) {
-        const auto idx = static_cast<int32_t>(k);
+    node4Index_.RemoveIf([&newParam, weak = WeakClaim(this)](const uint32_t& k, const auto& _) {
         auto arkoalaLazyNode = weak.Upgrade();
         CHECK_NULL_RETURN(arkoalaLazyNode, true);
-        const auto indexMapped = arkoalaLazyNode->ConvertFromToIndexRevert(idx);
-        return !arkoalaLazyNode->IsNodeInRange(indexMapped, cacheRange);
+        const auto indexMapped = arkoalaLazyNode->ConvertFromToIndexRevert(static_cast<int32_t>(k));
+        return !arkoalaLazyNode->IsInCacheRange(indexMapped, newParam);
     });
 }
 
@@ -452,6 +467,69 @@ void ArkoalaLazyNode::InitAllChildrenDragManager(bool init)
             pattern->InitDragManager(AceType::Claim(this));
         } else {
             pattern->DeInitDragManager();
+        }
+    }
+}
+
+bool ArkoalaLazyNode::IsInActiveRange(int32_t index, const ActiveRangeParam& param)
+{
+    if (isLoop_ && param.start > param.end) {
+        return index >= param.start || index <= param.end;
+    }
+    return index >= param.start && index <= param.end;
+}
+
+bool ArkoalaLazyNode::IsInCacheRange(int32_t index, const ActiveRangeParam& param)
+{
+    const auto total = totalCount_;
+    if (total <= 0 || index < 0 || index >= total) {
+        return false;
+    }
+
+    // calculate cache boundaries
+    int32_t cacheStartBound = param.start - param.cacheStart;
+    int32_t cacheEndBound = param.end + param.cacheEnd;
+
+    if (!isLoop_) {
+        // non-loop mode: simple calmping
+        int32_t actualStart = std::max(0, cacheStartBound);
+        int32_t actualEnd = std::min(total - 1, cacheEndBound);
+        return index >= actualStart && index <= actualEnd;
+    } else {
+        // loop mode
+        auto normalize = [total](int32_t idx) -> int32_t {
+            return (idx % total + total) % total;
+        };
+
+        int32_t normIndex = normalize(index);
+        int32_t normStart = normalize(param.start);
+        int32_t normEnd = normalize(param.end);
+
+        // check if visible region is wrapped
+        bool isWrapped = normStart > normEnd;
+        if (isWrapped) {
+            // wrapped case: visible region is [start, totalCount-1] + [0, end]
+            // cache region is [start-cacheStart, totalCount-1] + [0, end+cacheEnd]
+            // full coverage condition: cache regions connect or overlap
+            if (cacheStartBound <= cacheEndBound + 1) {
+                return true;
+            }
+        } else {
+            // normal case: check if cache region covers entire list
+            if (cacheStartBound - cacheEndBound + 1 >= total) {
+                return true;
+            }
+        }
+
+        // non-full coverage case
+        int32_t normCacheStart = normalize(cacheStartBound);
+        int32_t normCacheEnd = normalize(cacheEndBound);
+        if (normCacheStart <= normCacheEnd) {
+            // single continuous region
+            return normIndex >= normCacheStart && normIndex <= normCacheEnd;
+        } else {
+            // two regions: [0, normCacheEnd] + [normCacheStart, totalCount-1]
+            return normIndex >= normCacheStart || normIndex <= normCacheEnd;
         }
     }
 }

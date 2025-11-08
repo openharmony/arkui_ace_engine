@@ -105,15 +105,16 @@ RefPtr<FrameNode> PluginPatternTestNg::CreatePluginParagraph()
 
 /**
  * @tc.name: ReplaceAll
- * @tc.desc: Test SplitString in Plugin Pattern.
+ * @tc.desc: Test ReplaceAll function in PluginPattern to ensure all occurrences of a substring are replaced correctly.
+ *           This test verifies that the ReplaceAll method replaces every instance of 'oldPattern' with 'newPattern'
+ *           in the given string, and the final string matches the expected result.
  * @tc.type: FUNC
  */
-HWTEST_F(PluginPatternTestNg, ReplaceAll, TestSize.Level1)
+HWTEST_F(PluginPatternTestNg, ReplaceAll_ReplacesAllOccurrencesOfPattern, TestSize.Level1)
 {
     RefPtr<FrameNode> frameNode = CreatePluginParagraph();
     auto pattern = frameNode->GetPattern<PluginPattern>();
     ASSERT_NE(pattern, nullptr);
-    std::vector<std::string> strList;
     std::string oldPattern = "com";
     std::string newPattern = "sys";
     std::string string = "com.example.providerTest/assets/com.exampe.service";
@@ -148,12 +149,12 @@ HWTEST_F(PluginPatternTestNg, PluginEventHubTestNg, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     auto eventHub = AceType::DynamicCast<PluginEventHub>(pattern->CreateEventHub());
     EXPECT_NE(eventHub, nullptr);
-    auto onFuntion = [](const std::string& param) { EXPECT_EQ(param, "TestText"); };
+    auto onFunction = [](const std::string& param) { EXPECT_EQ(param, "TestText"); };
 
     eventHub->FireOnComplete("");
     eventHub->FireOnError("");
-    pluginModel.SetOnComplete(onFuntion);
-    pluginModel.SetOnError(onFuntion);
+    pluginModel.SetOnComplete(onFunction);
+    pluginModel.SetOnError(onFunction);
     eventHub->FireOnComplete("TestText");
     eventHub->FireOnError("TestText");
     pattern->FireOnCompleteEvent();

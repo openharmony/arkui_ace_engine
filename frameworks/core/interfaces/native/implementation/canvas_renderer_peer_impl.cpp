@@ -764,7 +764,7 @@ void CanvasRendererPeerImpl::SetFillStyle(const std::shared_ptr<Ace::Gradient>& 
     renderingContext2DModel_->SetFillGradient(gradient);
 }
 
-void CanvasRendererPeerImpl::SetFillStyle(int32_t id)
+void CanvasRendererPeerImpl::SetFillStylePattern(int32_t id)
 {
     CHECK_NULL_VOID(renderingContext2DModel_);
     renderingContext2DModel_->SetFillPattern(GetPatternPtr(id));
@@ -795,7 +795,7 @@ void CanvasRendererPeerImpl::SetStrokeStyle(const std::shared_ptr<Ace::Gradient>
     CHECK_NULL_VOID(gradient);
     renderingContext2DModel_->SetStrokeGradient(gradient);
 }
-void CanvasRendererPeerImpl::SetStrokeStyle(int32_t id)
+void CanvasRendererPeerImpl::SetStrokeStylePattern(int32_t id)
 {
     CHECK_NULL_VOID(renderingContext2DModel_);
     renderingContext2DModel_->SetStrokePattern(GetPatternPtr(id));

@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 
-import { NodeAttach, remember, IncrementalNode } from "@koalaui/runtime"
+import { NodeAttach, remember } from "@koalaui/runtime"
 import { ArkCustomComponent } from "./ArkCustomComponent"
+import { SyntaxItemPeer } from "./base/RepeatImpl"
 import { ArkComponentRoot } from "./ArkComponentRoot"
 import { ArkColumnPeer } from "#generated";
 import { ObserveSingleton } from "./stateManagement/base/observeSingleton";
@@ -90,7 +91,9 @@ export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent 
             this.build();
             OBSERVE.renderingComponent = savedRenderingComponent
             remember(() => {
-                this.onDidBuild();
+                ObserveSingleton.instance.applyTaskDelayMutableStateChange(() => {
+                    this.onDidBuild();
+                })
             });
             node.setOnRecycle(() =>
                 this.aboutToRecycle()
@@ -114,12 +117,20 @@ export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent 
         initializers?: T_Options,
     ): void {
         /* need to wrap both states and build() of @Component */
-        NodeAttach(() => new IncrementalNode(), (node: IncrementalNode) => { // replace with Frontend Node later
+        NodeAttach(() => SyntaxItemPeer.create(), (node: SyntaxItemPeer) => {
             const component = remember(() => {
                 const instance = factory()
                 instance.__initializeStruct(content, initializers);
+                node.setOnRecycle(() =>
+                    instance.aboutToRecycle()
+                )
                 return instance
             });
+            node.setOnReuse(
+                (param?: RecordData) => {
+                    component.aboutToReuse(param, initializers)
+                }
+            )
             component._buildWrapper(content, initializers);
         }, reuseId)
     }

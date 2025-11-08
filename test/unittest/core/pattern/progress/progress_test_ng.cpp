@@ -2351,4 +2351,49 @@ HWTEST_F(ProgressTestNg, ProgressModelStaticSetValue, TestSize.Level0)
     ProgressModelStatic::SetValue(AceType::RawPtr(frameNode_), value);
     EXPECT_FALSE(paintProperty_->GetValue().has_value());
 }
+
+/**
+ * @tc.name: ProgressModelStaticSetText
+ * @tc.desc: Test ProgressModelStatic SetText
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ProgressModelStaticSetText, TestSize.Level0)
+{
+    /**
+     * @tc.step: step1. create instance and update property.
+     */
+    ProgressModelNG model = CreateProgress(VALUE_OF_PROGRESS_2, 100.0, PROGRESS_TYPE_CAPSULE);
+    model.SetStrokeWidth(LARG_STROKE_WIDTH);
+    model.SetStrokeRadius(LARG_STROKE_WIDTH / 5.0);
+    model.SetShowText(true);
+    CreateDone();
+    auto textNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(0));
+    auto* stack = ViewStackProcessor::GetInstance();
+    stack->Push(frameNode_);
+
+    /**
+     * @tc.case: case1 call to  static function SetText.
+     * @tc.expected: it should be as we set.
+     */
+    pattern_->SetTextFromUser(true);
+    paintProperty_->UpdateMaxValue(100);
+    paintProperty_->UpdateValue(50);
+    ProgressModelStatic::SetText(Referenced::RawPtr(frameNode_), std::nullopt);
+    EXPECT_FALSE(pattern_->IsTextFromUser());
+
+    pattern_->SetTextFromUser(true);
+    paintProperty_->ResetMaxValue();
+    ProgressModelStatic::SetText(Referenced::RawPtr(frameNode_), std::nullopt);
+    EXPECT_TRUE(pattern_->IsTextFromUser());
+
+    paintProperty_->UpdateMaxValue(100);
+    paintProperty_->ResetValue();
+    ProgressModelStatic::SetText(Referenced::RawPtr(frameNode_), std::nullopt);
+    EXPECT_TRUE(pattern_->IsTextFromUser());
+
+    paintProperty_->ResetMaxValue();
+    paintProperty_->ResetValue();
+    ProgressModelStatic::SetText(Referenced::RawPtr(frameNode_), std::nullopt);
+    EXPECT_TRUE(pattern_->IsTextFromUser());
+}
 } // namespace OHOS::Ace::NG

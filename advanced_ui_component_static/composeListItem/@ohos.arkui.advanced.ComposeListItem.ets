@@ -235,24 +235,24 @@ class EnvironmentCallbackEntry implements EnvironmentCallback {
 
 @Component
 struct ContentItemStruct {
-  @PropRef @Watch('onPropChange') iconStyle: IconType | null = null;
-  @PropRef @Watch('onPropChange') icon: ResourceStr | null = null;
-  @PropRef @Watch('onPropChange') symbolStyle: SymbolGlyphModifier | null = null;
-  @PropRef @Watch('onPropChange') primaryText: ResourceStr | null = null;
-  @PropRef @Watch('onPropChange') secondaryText: ResourceStr | null = null;
-  @PropRef @Watch('onPropChange') description: ResourceStr | null = null;
+  @PropRef @Watch('onPropChange') iconStyle: IconType | undefined = undefined;
+  @PropRef @Watch('onPropChange') icon: ResourceStr | undefined = undefined;
+  @PropRef @Watch('onPropChange') symbolStyle: SymbolGlyphModifier | undefined = undefined;
+  @PropRef @Watch('onPropChange') primaryText: ResourceStr | undefined = undefined;
+  @PropRef @Watch('onPropChange') secondaryText: ResourceStr | undefined = undefined;
+  @PropRef @Watch('onPropChange') description: ResourceStr | undefined = undefined;
   @State itemRowSpace: number = NORMAL_ITEM_ROW_SPACE;
   @PropRef leftWidth: string = LEFT_PART_WIDTH;
   @State @Watch('onPropChange') primaryTextColor: ResourceColor = $r('sys.color.ohos_id_color_text_primary');
   @State @Watch('onPropChange') secondaryTextColor: ResourceColor = $r('sys.color.ohos_id_color_text_secondary');
   @State @Watch('onPropChange') descriptionColor: ResourceColor = $r('sys.color.ohos_id_color_text_secondary');
-  @PropRef fontSizeScale: number | null = 0;
-  @PropRef parentDirection?: FlexDirection | null = null;
-  @PropRef itemDirection?: FlexDirection | null = null;
+  @PropRef fontSizeScale: number | undefined = 0;
+  @PropRef parentDirection: FlexDirection | undefined = undefined;
+  @PropRef itemDirection: FlexDirection | undefined = undefined;
   @PropRef @Watch('onPropChange') isFocus: boolean = false;
   @State primaryTextSize: string | number | Resource = $r('sys.float.ohos_id_text_size_body1');
   @State primaryTextColors: ResourceColor = $r('sys.color.font_primary');
-  @PropRef itemHeight: number | null = null;
+  @PropRef itemHeight: number | undefined = undefined;
   @State iconColor: ResourceColor | null = null;
   @State secondaryTextColors: ResourceColor = $r('sys.color.font_secondary');
   @State secondaryThirdTextSize: string | number | Resource =
@@ -393,7 +393,7 @@ struct ContentItemStruct {
           .draggable(false)
           .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
             if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
-              this.isWrapFirstText = this.judgeIsWrap(this.primaryText, this.primaryTextSize,
+              this.isWrapFirstText = this.judgeIsWrap(this.primaryText as ResourceStr, this.primaryTextSize,
                 newValue.height as number);
             }
           } as SizeChangeCallback)
@@ -409,7 +409,7 @@ struct ContentItemStruct {
           .draggable(false)
           .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
             if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
-              this.isWrapSecondText = this.judgeIsWrap(this.secondaryText, this.secondaryThirdTextSize,
+              this.isWrapSecondText = this.judgeIsWrap(this.secondaryText as ResourceStr, this.secondaryThirdTextSize,
                 newValue.height as number);
             }
           } as SizeChangeCallback)
@@ -425,7 +425,7 @@ struct ContentItemStruct {
           .draggable(false)
           .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
             if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
-              this.isWrapThirdText = this.judgeIsWrap(this.description, this.secondaryThirdTextSize,
+              this.isWrapThirdText = this.judgeIsWrap(this.description as ResourceStr, this.secondaryThirdTextSize,
                 newValue.height as number);
             }
           } as SizeChangeCallback)
@@ -491,17 +491,17 @@ class OperateItemStructController {
 }
 
 @Component
-export struct OperateItemStruct {
-  @PropRef @Watch('onPropChange') arrow: OperateIcon | null = null;
-  @PropRef @Watch('onPropChange') icon: OperateIcon | null = null;
-  @PropRef @Watch('onPropChange') subIcon: OperateIcon | null = null;
-  @PropRef @Watch('onPropChange') button: OperateButton | null = null;
-  @PropRef @Watch('onPropChange') toggle: OperateCheck | null = null;
-  @PropRef @Watch('onPropChange') checkBox: OperateCheck | null = null;
-  @PropRef @Watch('onPropChange') radio: OperateCheck | null = null;
-  @PropRef @Watch('onPropChange') image: ResourceStr | null = null;
-  @PropRef @Watch('onPropChange') symbolStyle: SymbolGlyphModifier | null = null;
-  @PropRef @Watch('onPropChange') text: ResourceStr | null = null;
+struct OperateItemStruct {
+  @PropRef @Watch('onPropChange') arrow: OperateIcon | undefined = undefined;
+  @PropRef @Watch('onPropChange') icon: OperateIcon | undefined = undefined;
+  @PropRef @Watch('onPropChange') subIcon: OperateIcon | undefined = undefined;
+  @PropRef @Watch('onPropChange') button: OperateButton | undefined = undefined;
+  @PropRef @Watch('onPropChange') toggle: OperateCheck | undefined = undefined;
+  @PropRef @Watch('onPropChange') checkBox: OperateCheck | undefined = undefined;
+  @PropRef @Watch('onPropChange') radio: OperateCheck | undefined = undefined;
+  @PropRef @Watch('onPropChange') image: ResourceStr | undefined = undefined;
+  @PropRef @Watch('onPropChange') symbolStyle: SymbolGlyphModifier | undefined = undefined;
+  @PropRef @Watch('onPropChange') text: ResourceStr | undefined = undefined;
   @State switchState: boolean = false;
   @State radioState: boolean = false;
   @State checkBoxState: boolean = false;
@@ -523,7 +523,7 @@ export struct OperateItemStruct {
   @State iconColor: ResourceColor = $r('sys.color.composeListItem_right_icon_normal_color');
   @Link @Watch('onPropChange') isChecked: boolean;
   private controller: OperateItemStructController = new OperateItemStructController();
-  @State @Watch('onPropChange') contentItem?: ContentItem;
+  @State @Watch('onPropChange') contentItem?: ContentItem = undefined;
   @Link containerDirection: FlexDirection
   @State flexTextWidth: number = 0
   @State rowTextWidth: number = 0
@@ -1176,8 +1176,8 @@ function getAccessibilityLevelOnAction(accessibilityLevel?: string, onAction?: (
 
 @Component
 export struct ComposeListItem {
-  @PropRef @Watch('onPropChange') contentItem?: ContentItem;
-  @PropRef @Watch('onPropChange') operateItem?: OperateItem;
+  @PropRef @Watch('onPropChange') contentItem: ContentItem | undefined = undefined;
+  @PropRef @Watch('onPropChange') operateItem: OperateItem | undefined = undefined;
   @State frontColor: ResourceColor | undefined = $r('sys.color.composeListItem_container_normal_color');
   @State borderSize: number = 0;
   @State canFocus: boolean = false;

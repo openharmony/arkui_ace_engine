@@ -20,6 +20,9 @@
 
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
+#include "core/interfaces/native/implementation/copy_event_peer.h"
+#include "core/interfaces/native/implementation/cut_event_peer.h"
+#include "core/interfaces/native/implementation/paste_event_peer.h"
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
 #include "core/interfaces/native/implementation/submit_event_peer.h"
 #include "core/interfaces/native/utility/converter.h"
@@ -586,10 +589,8 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnPasteTest, TestSize.Level1)
             .resourceId = Converter::Convert<int32_t>(resourceId),
         };
         auto pasteEvent = Converter::GetOpt(event);
-        auto arkCallback = pasteEvent ? Converter::GetOpt(pasteEvent->preventDefault) : std::nullopt;
-        if (arkCallback) {
-            auto helper = CallbackHelper(*arkCallback);
-            helper.Invoke();
+        if (pasteEvent.has_value() && pasteEvent.value()) {
+            pasteEvent.value()->HandlePreventDefault();
         }
     };
     auto arkCallback = Converter::ArkValue<PasteEventCallback>(testCallback, frameNode->GetId());
@@ -852,10 +853,8 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnCopyTest, TestSize.Level1)
         checkEvent = CheckEvent{
             .resourceId = Converter::Convert<int32_t>(resourceId),
         };
-        auto arkCallback = Converter::GetOpt(parameter.preventDefault);
-        if (arkCallback) {
-            auto helper = CallbackHelper(*arkCallback);
-            helper.Invoke();
+        if (parameter) {
+            parameter->HandlePreventDefault();
         }
     };
     auto arkCallback = Converter::ArkValue<Callback_CopyEvent_Void>(nullptr, testCallback, frameNode->GetId());
@@ -889,10 +888,8 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnCutTest, TestSize.Level1)
         checkEvent = CheckEvent{
             .resourceId = Converter::Convert<int32_t>(resourceId),
         };
-        auto arkCallback = Converter::GetOpt(parameter.preventDefault);
-        if (arkCallback) {
-            auto helper = CallbackHelper(*arkCallback);
-            helper.Invoke();
+        if (parameter) {
+            parameter->HandlePreventDefault();
         }
     };
     auto arkCallback = Converter::ArkValue<Callback_CutEvent_Void>(testCallback, frameNode->GetId());

@@ -90,7 +90,7 @@ enum class FrontendType {
 struct PageTarget;
 
 
-// for Arkts1.2
+// for Arkts static
 struct PageRouterOptions {
     std::string url;
     std::string params;
@@ -185,28 +185,19 @@ public:
 
     virtual void PushPage(const std::string& url, const std::string& params) = 0;
 
-    // For ArkTS1.2
-    virtual void PushExtender(const PageRouterOptions& options, std::function<void()>&& finishCallback, void* jsNode)
-    {
-        return;
-    }
-    virtual void PushNamedRouteExtender(const PageRouterOptions& options, std::function<void()>&& finishCallback, void* jsNode)
-    {
-        return;
-    }
-    virtual void ReplaceExtender(const PageRouterOptions& options, std::function<void()>&& finishCallback, void* jsNode)
-    {
-        return;
-    }
-    virtual void ReplaceNamedRouteExtender(const PageRouterOptions& options, std::function<void()>&& finishCallback, void* jsNode)
-    {
-        return;
-    }
-    virtual void RunPageExtender(const PageRouterOptions& options, std::function<void()>&& finishCallback, void* jsNode)
-    {
-        return;
-    }
+    // For ArkTS static
+    virtual void PushExtender(
+        const PageRouterOptions& options, const std::function<void()>&& finishCallback, void* jsNode) {};
+    virtual void PushNamedRouteExtender(
+        const PageRouterOptions& options, const std::function<void()>&& finishCallback, void* jsNode) {};
+    virtual void ReplaceExtender(
+        const PageRouterOptions& options, const std::function<void()>&& finishCallback, void* jsNode) {};
+    virtual void ReplaceNamedRouteExtender(
+        const PageRouterOptions& options, const std::function<void()>&& finishCallback, void* jsNode) {};
+    virtual void RunPageExtender(
+        const PageRouterOptions& options, const std::function<void()>&& finishCallback, void* jsNode) {};
     virtual void BackExtender(const std::string& url, const std::string& params) {};
+    virtual void BackToIndexExtender(int32_t index, const std::string& params) {};
     virtual void ClearExtender() {};
     virtual void ShowAlertBeforeBackPageExtender(const std::string& url) {};
     virtual void HideAlertBeforeBackPageExtender() {};
@@ -445,7 +436,7 @@ public:
 
     virtual void OpenStateMgmtInterop() {}
 
-    // For arkts 1.2
+    // For arkts static
     virtual void NotifyArkoalaConfigurationChange() {}
     virtual void InitXBarProxy() {}
 protected:

@@ -27,7 +27,18 @@
 
 namespace OHOS::Ace::NG {
 
-using RangeType = std::pair<int32_t, int32_t>;
+struct ActiveRangeParam {
+    int32_t start;
+    int32_t end;
+    int32_t cacheStart;
+    int32_t cacheEnd;
+
+    bool operator==(const ActiveRangeParam& other) const
+    {
+        return std::tie(start, end, cacheStart, cacheEnd) ==
+               std::tie(other.start, other.end, other.cacheStart, other.cacheEnd);
+    }
+};
 
 /**
  * @brief Backend node representation to access and manage lazy items in Arkoala frontend
@@ -41,7 +52,7 @@ public:
     ~ArkoalaLazyNode() override = default;
 
     using CreateItemCb = std::function<RefPtr<UINode>(int32_t)>;
-    using UpdateRangeCb = std::function<void(int32_t, int32_t)>;
+    using UpdateRangeCb = std::function<void(int32_t, int32_t, int32_t, int32_t, bool)>;
 
     void SetTotalCount(int32_t value)
     {
@@ -78,6 +89,11 @@ public:
         return totalCount_;
     }
 
+    void SetIsLoop(bool isLoop)
+    {
+        isLoop_ = isLoop;
+    }
+
     /**
      * GetChildren re-assembles children_ and cleanup the L1 cache
      * active items remain in L1 cache and are added to RepeatVirtualScroll.children_
@@ -111,10 +127,8 @@ public:
     void DumpInfo() override;
 
 private:
-    bool IsNodeInRange(int32_t index, const RangeType range)
-    {
-        return index >= range.first && index <= range.second;
-    }
+    bool IsInActiveRange(int32_t index, const ActiveRangeParam& param);
+    bool IsInCacheRange(int32_t index, const ActiveRangeParam& param);
     void UpdateIsCache(const RefPtr<UINode>& node, bool isCache, bool shouldTrigger = true);
 
     void UpdateMoveFromTo(int32_t from, int32_t to);
@@ -140,9 +154,13 @@ private:
 
     std::string DumpUINode(const RefPtr<UINode>& node) const;
 
+    // false if in LazyForEach, true if in Repeat
     bool isRepeat_ = false;
     // ArkoalaLazyNode is not instance of FrameNode, needs to propagate active state to all items inside
     bool isActive_ = true;
+    // true if in Swiper loop mode
+    bool isLoop_ = false;
+    ActiveRangeParam activeRangeParam_ = { -1, -1, -1, -1 };
 
     UniqueValuedMap<int32_t, RefPtr<UINode>, WeakPtr<UINode>::Hash> node4Index_;
     CreateItemCb createItem_;

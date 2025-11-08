@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace {
-std::optional<std::string> ConvertString(const Ark_Union_Number_String& src)
+std::optional<std::string> ConvertString(const Ark_Union_Int32_String& src)
 {
     std::optional<std::string> value;
     auto selector = src.selector;
@@ -30,12 +30,12 @@ std::optional<std::string> ConvertString(const Ark_Union_Number_String& src)
     }
     return value;
 }
-std::optional<int32_t> ConvertNumber(const Ark_Union_Number_String& src)
+std::optional<int32_t> ConvertInt(const Ark_Union_Int32_String& src)
 {
     std::optional<int32_t> value;
     auto selector = src.selector;
     if (selector == 0) {
-        value = OHOS::Ace::NG::Converter::OptConvert<int32_t>(src.value0);
+        value = static_cast<int32_t>(src.value0);
     }
     return value;
 }
@@ -51,7 +51,7 @@ void FreezeUINode1Impl(Ark_Int64 id, Ark_Boolean isFrozen)
     CHECK_NULL_VOID(id);
     ViewAbstract::FreezeUINodeByUniqueId(static_cast<int32_t>(id), Converter::Convert<bool>(isFrozen));
 }
-Ark_Boolean DispatchKeyEventImpl(const Ark_Union_Number_String* node, Ark_KeyEvent event)
+Ark_Boolean DispatchKeyEventImpl(const Ark_Union_Int32_String* node, Ark_KeyEvent event)
 {
     auto result = false;
     RefPtr<NG::FrameNode> frameNode = nullptr;
@@ -59,7 +59,7 @@ Ark_Boolean DispatchKeyEventImpl(const Ark_Union_Number_String* node, Ark_KeyEve
     if (convId) {
         frameNode = NG::Inspector::GetFrameNodeByKey(*convId);
     } else {
-        auto numberId = ConvertNumber(*node);
+        auto numberId = ConvertInt(*node);
         if (numberId) {
             auto node = ElementRegister::GetInstance()->GetNodeById(*numberId);
             frameNode = AceType::DynamicCast<NG::FrameNode>(node);

@@ -974,6 +974,7 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .getClickEventPointer = OHOS::Ace::NG::GetClickEventPointer,
         .getHoverEventPointer = OHOS::Ace::NG::GetHoverEventPointer,
         .frameNodeMarkDirtyNode = OHOS::Ace::NG::FrameNodeMarkDirtyNode,
+        .getColorValueByString = OHOS::Ace::NG::GetColorValueByString,
         .getColorValueByNumber = OHOS::Ace::NG::GetColorValueByNumber,
         .sendThemeToNative = OHOS::Ace::NG::SendThemeToNative,
         .removeThemeInNative = OHOS::Ace::NG::RemoveThemeInNative,

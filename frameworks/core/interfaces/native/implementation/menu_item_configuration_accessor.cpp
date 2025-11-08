@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/implementation/menu_item_configuration_peer.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -22,22 +23,30 @@ namespace MenuItemConfigurationAccessor {
 void DestroyPeerImpl(Ark_MenuItemConfiguration peer)
 {
 }
-Ark_MenuItemConfiguration CtorImpl()
+Ark_MenuItemConfiguration ConstructImpl()
 {
-    return nullptr;
+    return PeerUtils::CreatePeer<MenuItemConfigurationPeer>();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void TriggerSelectImpl(Ark_MenuItemConfiguration peer,
-                       const Ark_Number* index,
+                       const Ark_Int32 index,
                        const Ark_String* value)
 {
+    CHECK_NULL_VOID(value);
+    auto convValue = Converter::Convert<std::string>(*value);
+    CHECK_NULL_VOID(peer);
+    auto node = peer->node;
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    SelectModelNG::SetChangeValue(frameNode, index, convValue);
 }
 Ark_Boolean GetEnabledImpl(Ark_MenuItemConfiguration peer)
 {
-    return {};
+    CHECK_NULL_RETURN(peer, {});
+    return peer->enabled;
 }
 void SetEnabledImpl(Ark_MenuItemConfiguration peer,
                     Ark_Boolean enabled)
@@ -45,7 +54,8 @@ void SetEnabledImpl(Ark_MenuItemConfiguration peer,
 }
 Ark_ContentModifier GetContentModifierImpl(Ark_MenuItemConfiguration peer)
 {
-    return {};
+    CHECK_NULL_RETURN(peer, {});
+    return peer->contentModifier;
 }
 void SetContentModifierImpl(Ark_MenuItemConfiguration peer,
                             const Ark_Object* contentModifier)
@@ -53,7 +63,8 @@ void SetContentModifierImpl(Ark_MenuItemConfiguration peer,
 }
 Ark_ResourceStr GetValueImpl(Ark_MenuItemConfiguration peer)
 {
-    return {};
+    CHECK_NULL_RETURN(peer, {});
+    return peer->value;
 }
 void SetValueImpl(Ark_MenuItemConfiguration peer,
                   const Ark_ResourceStr* value)
@@ -61,34 +72,38 @@ void SetValueImpl(Ark_MenuItemConfiguration peer,
 }
 Opt_ResourceStr GetIconImpl(Ark_MenuItemConfiguration peer)
 {
-    return {};
+    CHECK_NULL_RETURN(peer, {});
+    return peer->icon;
 }
 void SetIconImpl(Ark_MenuItemConfiguration peer,
-                 const Ark_ResourceStr* icon)
+                 const Opt_ResourceStr* icon)
 {
 }
 Opt_SymbolGlyphModifier GetSymbolIconImpl(Ark_MenuItemConfiguration peer)
 {
-    return {};
+    CHECK_NULL_RETURN(peer, {});
+    return peer->symbolIcon;
 }
 void SetSymbolIconImpl(Ark_MenuItemConfiguration peer,
-                       const Ark_SymbolGlyphModifier* symbolIcon)
+                       const Opt_SymbolGlyphModifier* symbolIcon)
 {
 }
 Ark_Boolean GetSelectedImpl(Ark_MenuItemConfiguration peer)
 {
-    return {};
+    CHECK_NULL_RETURN(peer, {});
+    return peer->selected;
 }
 void SetSelectedImpl(Ark_MenuItemConfiguration peer,
                      Ark_Boolean selected)
 {
 }
-Ark_Number GetIndexImpl(Ark_MenuItemConfiguration peer)
+Ark_Int32 GetIndexImpl(Ark_MenuItemConfiguration peer)
 {
-    return {};
+    CHECK_NULL_RETURN(peer, {});
+    return peer->index;
 }
 void SetIndexImpl(Ark_MenuItemConfiguration peer,
-                  const Ark_Number* index)
+                  const Ark_Int32 index)
 {
 }
 } // MenuItemConfigurationAccessor
@@ -96,7 +111,7 @@ const GENERATED_ArkUIMenuItemConfigurationAccessor* GetMenuItemConfigurationAcce
 {
     static const GENERATED_ArkUIMenuItemConfigurationAccessor MenuItemConfigurationAccessorImpl {
         MenuItemConfigurationAccessor::DestroyPeerImpl,
-        MenuItemConfigurationAccessor::CtorImpl,
+        MenuItemConfigurationAccessor::ConstructImpl,
         MenuItemConfigurationAccessor::GetFinalizerImpl,
         MenuItemConfigurationAccessor::TriggerSelectImpl,
         MenuItemConfigurationAccessor::GetEnabledImpl,
