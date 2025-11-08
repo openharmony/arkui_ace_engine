@@ -143,17 +143,23 @@ Ark_GestureRecognizer CreateArkGestureRecognizer(const RefPtr<NGGestureRecognize
 template<typename Container>
 Array_GestureRecognizer CreateArkGestureRecognizerArray(const Container& recognizers)
 {
-    Array_GestureRecognizer result;
+    Array_GestureRecognizer result = {nullptr, 0};
+    if (!Converter::FC) {
+        return result;
+    }
     result.length = static_cast<Ark_Int32>(recognizers.size());
-    if (result.length > 0) {
-        result.array = static_cast<Ark_GestureRecognizer*>(
-            Converter::FC->Allocate(result.length * sizeof(Ark_GestureRecognizer)));
-        size_t i = 0;
-        for (const auto& recognizer : recognizers) {
-            result.array[i++] = CreateArkGestureRecognizer(recognizer);
-        }
-    } else {
-        result.array = nullptr;
+    if (result.length <= 0) {
+        return result;
+    }
+    result.array = static_cast<Ark_GestureRecognizer*>(
+        Converter::FC->Allocate(result.length * sizeof(Ark_GestureRecognizer)));
+    if (result.array == nullptr) {
+        result.length = 0;
+        return result;
+    }
+    size_t i = 0;
+    for (const auto& recognizer : recognizers) {
+        result.array[i++] = CreateArkGestureRecognizer(recognizer);
     }
     return result;
 }
