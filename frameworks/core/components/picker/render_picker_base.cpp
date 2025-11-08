@@ -167,6 +167,7 @@ void RenderPickerBase::SetButtonHandler()
     BackEndEventManager<void()>::GetInstance().RemoveBackEndEvent(data_->GetOnOkClickId());
 
     auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
     if (context->GetIsDeclarative()) {
         BackEndEventManager<void(const ClickInfo& info)>::GetInstance().BindBackendEvent(
             data_->GetOnCancelClickId(), [weak = WeakClaim(this)](const ClickInfo& info) {
