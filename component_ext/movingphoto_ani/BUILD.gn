@@ -87,7 +87,7 @@ ohos_shared_library("movingphotoview_ani") {
 generate_static_abc("movingphotoview_abc") {
   base_url = "./ets"
   files = [
-    "./ets/@ohos.multimedia.movingphotoview.ets"
+    "./ets/movingphotoview.ets"
   ]
   paths_keys = [
     "arkui/component/common",
@@ -130,9 +130,9 @@ generate_static_abc("movingphotoview_abc") {
     "$ohos_ets_inner_path/@koalaui/common/koalaKey.d.ets",
     "$ohos_ets_inner_path/@koalaui/runtime/internals.d.ets"
   ]
-  device_dst_file = "/system/framework/@ohos.multimedia.movingphotoview.abc"
-  dst_file = target_out_dir + "/@ohos.multimedia.movingphotoview.abc"
-  out_puts = [ target_out_dir + "/@ohos.multimedia.movingphotoview.abc" ]
+  device_dst_file = "/system/framework/movingphotoview.abc"
+  dst_file = target_out_dir + "/movingphotoview.abc"
+  out_puts = [ target_out_dir + "/movingphotoview.abc" ]
   is_boot_abc = "True"
   external_dependencies = [ "ace_engine:copy_arkui_ets" ]
   ui_enable = "True"
@@ -140,7 +140,7 @@ generate_static_abc("movingphotoview_abc") {
 }
 
 ohos_prebuilt_etc("movingphotoview_abc_etc") {
-  source = target_out_dir + "/@ohos.multimedia.movingphotoview.abc"
+  source = target_out_dir + "/movingphotoview.abc"
   deps = [ ":movingphotoview_abc" ]
   module_install_dir = "framework"
   subsystem_name = "arkui"
