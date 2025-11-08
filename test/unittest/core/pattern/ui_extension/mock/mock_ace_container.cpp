@@ -131,6 +131,10 @@ void AceContainer::DumpHeapSnapshot(bool isPrivate) {}
 
 void AceContainer::DestroyHeapProfiler() {}
 
+void AceContainer::DumpSimplifyTreeWithParamConfig(
+    std::shared_ptr<JsonValue>& root, ParamConfig config, bool isInSubWindow)
+{}
+
 void AceContainer::ForceFullGC() {}
 void AceContainer::CheckAndSetFontFamily() {}
 void AceContainer::HotReload() {}

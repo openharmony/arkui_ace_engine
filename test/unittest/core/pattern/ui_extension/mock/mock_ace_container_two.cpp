@@ -127,6 +127,10 @@ bool AceContainer::Dump(const std::vector<std::string>& params, std::vector<std:
     return true;
 }
 
+void AceContainer::DumpSimplifyTreeWithParamConfig(
+    std::shared_ptr<JsonValue>& root, ParamConfig config, bool isInSubWindow)
+{}
+
 void AceContainer::TriggerGarbageCollection() {}
 
 void AceContainer::DumpHeapSnapshot(bool isPrivate) {}

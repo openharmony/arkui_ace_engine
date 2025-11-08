@@ -1125,7 +1125,18 @@ public:
         isNeedReloadDensity_ = isNeedReloadDensity;
     }
 
+    void GetOverlayInfo(bool hasOverlay, std::shared_ptr<JsonValue>& root, std::shared_ptr<JsonValue>& overlayContent,
+        std::unique_ptr<JsonValue>& overlayChildrenArray, std::unique_ptr<JsonValue>& overlayArray) const;
+
+    bool IsTagInOverlay(const std::string& tag) const;
+
+    void GetComponentOverlayInspector(
+        std::shared_ptr<JsonValue>& root, ParamConfig config, bool isInSubWindow) const override;
+
+    void GetOverlayInspector(std::shared_ptr<JsonValue>& root, ParamConfig config) const override;
+
     void GetInspectorTree(bool onlyNeedVisible, ParamConfig config = ParamConfig());
+
     void NotifyAllWebPattern(bool isRegister);
     void AddFrameNodeChangeListener(const WeakPtr<FrameNode>& node);
     void RemoveFrameNodeChangeListener(int32_t nodeId);

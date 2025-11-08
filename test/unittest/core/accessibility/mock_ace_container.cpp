@@ -104,6 +104,10 @@ bool AceContainer::IsKeyboard()
     return true;
 }
 
+void AceContainer::DumpSimplifyTreeWithParamConfig(
+    std::shared_ptr<JsonValue>& root, ParamConfig config, bool isInSubWindow)
+{}
+
 void AceContainer::DestroyView() {}
 
 void AceContainer::Dispatch(const std::string& group, std::vector<uint8_t>&& data,

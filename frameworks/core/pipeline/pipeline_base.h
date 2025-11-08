@@ -61,6 +61,7 @@
 #include "core/pipeline/container_window_manager.h"
 #include "core/components_ng/manager/display_sync/ui_display_sync_manager.h"
 #include "interfaces/inner_api/ace/serialized_gesture.h"
+#include "interfaces/inner_api/ui_session/param_config.h"
 
 namespace OHOS::Rosen {
 class RSTransaction;
@@ -1472,6 +1473,11 @@ public:
     virtual bool IsNeedReloadDensity() const = 0;
 
     virtual void SetIsNeedReloadDensity(bool isNeedReloadDensity) = 0;
+
+    virtual void GetComponentOverlayInspector(
+        std::shared_ptr<JsonValue>& root, ParamConfig config, bool isInSubWindow) const {};
+
+    virtual void GetOverlayInspector(std::shared_ptr<JsonValue>& root, ParamConfig config) const {};
 
     virtual std::string GetResponseRegion(const RefPtr<NG::FrameNode>& rootNode)
     {
