@@ -696,7 +696,7 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         this.getPeer().setOnClick0Attribute(event);
         return this;
     }
-    zIndex(value: number | undefined): this {
+    zIndex(value: int | undefined): this {
         this.getPeer().setZIndexAttribute(value);
         return this;
     }

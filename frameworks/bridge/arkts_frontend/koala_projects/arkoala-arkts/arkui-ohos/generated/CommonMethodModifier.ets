@@ -32,7 +32,7 @@ import { default as matrix4 } from "@ohos.matrix4"
 import { CustomBuilder } from "./component/builder"
 import { default as uniformTypeDescriptor } from "@ohos.data.uniformTypeDescriptor"
 import { CircleShape, EllipseShape, PathShape, RectShape } from "@ohos.arkui.shape"
-import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureRecognizer, GestureType, Gesture, GestureGroup, GestureMask } from "./component/gesture"
+import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureRecognizer, GestureType, GestureMask } from "./component/gesture"
 import { default as image } from "@ohos.multimedia.image"
 import { ComponentContent } from "arkui.ComponentContent"
 import { StyledString } from "./component/styledString"
@@ -225,7 +225,7 @@ export class CommonMethodModifier implements CommonMethod {
     _displayPriority_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _displayPriority_0_0value?: number | undefined
     _zIndex_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _zIndex_0_0value?: number | undefined
+    _zIndex_0_0value?: int32 | undefined
     _direction_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _direction_0_0value?: Direction | undefined
     _align_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -2127,7 +2127,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (this._zIndex_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setZIndexAttribute((this._zIndex_0_0value as number | undefined));
+                    peer.setZIndexAttribute((this._zIndex_0_0value as int32 | undefined));
                     this._zIndex_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -2137,7 +2137,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     this._zIndex_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setZIndexAttribute((undefined as number | undefined));
+                    peer.setZIndexAttribute((undefined as int32 | undefined));
                 }
             }
         }
@@ -5189,7 +5189,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.zIndex((undefined as number | undefined));
+                    this.zIndex((undefined as int32 | undefined));
                 }
             }
         }
@@ -7534,7 +7534,7 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    zIndex(value: number | undefined): this {
+    zIndex(value: int32 | undefined): this {
         if (((this._zIndex_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._zIndex_0_0value) !== (value)))
         {
             this._zIndex_0_flag = AttributeUpdaterFlag.UPDATE

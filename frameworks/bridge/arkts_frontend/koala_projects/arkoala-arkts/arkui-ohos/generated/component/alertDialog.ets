@@ -81,7 +81,7 @@ export interface AlertDialogParam {
     cancel?: VoidCallback;
     alignment?: DialogAlignment;
     offset?: Offset;
-    gridCount?: number;
+    gridCount?: int32;
     maskRect?: Rectangle;
     showInSubWindow?: boolean;
     isModal?: boolean;
@@ -106,7 +106,7 @@ export interface AlertDialogParam {
     onWillAppear?: (() => void);
     onWillDisappear?: (() => void);
     levelMode?: LevelMode;
-    levelUniqueId?: number;
+    levelUniqueId?: int32;
     immersiveMode?: ImmersiveMode;
     levelOrder?: LevelOrder;
 }
@@ -584,7 +584,7 @@ export class AlertDialogParamWithButtons_serializer {
         if (valueHolderForGridCount !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForGridCountTmpValue  = valueHolderForGridCount!
-            valueSerializer.writeNumber(valueHolderForGridCountTmpValue)
+            valueSerializer.writeInt32(valueHolderForGridCountTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -916,7 +916,7 @@ export class AlertDialogParamWithButtons_serializer {
         if (valueHolderForLevelUniqueId !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForLevelUniqueIdTmpValue  = valueHolderForLevelUniqueId!
-            valueSerializer.writeNumber(valueHolderForLevelUniqueIdTmpValue)
+            valueSerializer.writeInt32(valueHolderForLevelUniqueIdTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -1019,11 +1019,11 @@ export class AlertDialogParamWithButtons_serializer {
         }
         const offsetTmpResult : Offset | undefined = offsetTmpBuf
         const gridCountTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let gridCountTmpBuf : number | undefined = undefined
+        let gridCountTmpBuf : int32 | undefined = undefined
         if ((gridCountTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            gridCountTmpBuf = (valueDeserializer.readNumber() as number)
+            gridCountTmpBuf = valueDeserializer.readInt32()
         }
-        const gridCountTmpResult : number | undefined = gridCountTmpBuf
+        const gridCountTmpResult : int32 | undefined = gridCountTmpBuf
         const maskRectTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let maskRectTmpBuf : Rectangle | undefined = undefined
         if ((maskRectTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -1346,11 +1346,11 @@ export class AlertDialogParamWithButtons_serializer {
         }
         const levelModeTmpResult : LevelMode | undefined = levelModeTmpBuf
         const levelUniqueIdTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let levelUniqueIdTmpBuf : number | undefined = undefined
+        let levelUniqueIdTmpBuf : int32 | undefined = undefined
         if ((levelUniqueIdTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            levelUniqueIdTmpBuf = (valueDeserializer.readNumber() as number)
+            levelUniqueIdTmpBuf = valueDeserializer.readInt32()
         }
-        const levelUniqueIdTmpResult : number | undefined = levelUniqueIdTmpBuf
+        const levelUniqueIdTmpResult : int32 | undefined = levelUniqueIdTmpBuf
         const immersiveModeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let immersiveModeTmpBuf : ImmersiveMode | undefined = undefined
         if ((immersiveModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -1450,7 +1450,7 @@ export class AlertDialogParamWithConfirm_serializer {
         if (valueHolderForGridCount !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForGridCountTmpValue  = valueHolderForGridCount!
-            valueSerializer.writeNumber(valueHolderForGridCountTmpValue)
+            valueSerializer.writeInt32(valueHolderForGridCountTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -1782,7 +1782,7 @@ export class AlertDialogParamWithConfirm_serializer {
         if (valueHolderForLevelUniqueId !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForLevelUniqueIdTmpValue  = valueHolderForLevelUniqueId!
-            valueSerializer.writeNumber(valueHolderForLevelUniqueIdTmpValue)
+            valueSerializer.writeInt32(valueHolderForLevelUniqueIdTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -1889,11 +1889,11 @@ export class AlertDialogParamWithConfirm_serializer {
         }
         const offsetTmpResult : Offset | undefined = offsetTmpBuf
         const gridCountTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let gridCountTmpBuf : number | undefined = undefined
+        let gridCountTmpBuf : int32 | undefined = undefined
         if ((gridCountTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            gridCountTmpBuf = (valueDeserializer.readNumber() as number)
+            gridCountTmpBuf = valueDeserializer.readInt32()
         }
-        const gridCountTmpResult : number | undefined = gridCountTmpBuf
+        const gridCountTmpResult : int32 | undefined = gridCountTmpBuf
         const maskRectTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let maskRectTmpBuf : Rectangle | undefined = undefined
         if ((maskRectTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -2216,11 +2216,11 @@ export class AlertDialogParamWithConfirm_serializer {
         }
         const levelModeTmpResult : LevelMode | undefined = levelModeTmpBuf
         const levelUniqueIdTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let levelUniqueIdTmpBuf : number | undefined = undefined
+        let levelUniqueIdTmpBuf : int32 | undefined = undefined
         if ((levelUniqueIdTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            levelUniqueIdTmpBuf = (valueDeserializer.readNumber() as number)
+            levelUniqueIdTmpBuf = valueDeserializer.readInt32()
         }
-        const levelUniqueIdTmpResult : number | undefined = levelUniqueIdTmpBuf
+        const levelUniqueIdTmpResult : int32 | undefined = levelUniqueIdTmpBuf
         const immersiveModeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let immersiveModeTmpBuf : ImmersiveMode | undefined = undefined
         if ((immersiveModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -2324,7 +2324,7 @@ export class AlertDialogParamWithOptions_serializer {
         if (valueHolderForGridCount !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForGridCountTmpValue  = valueHolderForGridCount!
-            valueSerializer.writeNumber(valueHolderForGridCountTmpValue)
+            valueSerializer.writeInt32(valueHolderForGridCountTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -2656,7 +2656,7 @@ export class AlertDialogParamWithOptions_serializer {
         if (valueHolderForLevelUniqueId !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForLevelUniqueIdTmpValue  = valueHolderForLevelUniqueId!
-            valueSerializer.writeNumber(valueHolderForLevelUniqueIdTmpValue)
+            valueSerializer.writeInt32(valueHolderForLevelUniqueIdTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -2769,11 +2769,11 @@ export class AlertDialogParamWithOptions_serializer {
         }
         const offsetTmpResult : Offset | undefined = offsetTmpBuf
         const gridCountTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let gridCountTmpBuf : number | undefined = undefined
+        let gridCountTmpBuf : int32 | undefined = undefined
         if ((gridCountTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            gridCountTmpBuf = (valueDeserializer.readNumber() as number)
+            gridCountTmpBuf = valueDeserializer.readInt32()
         }
-        const gridCountTmpResult : number | undefined = gridCountTmpBuf
+        const gridCountTmpResult : int32 | undefined = gridCountTmpBuf
         const maskRectTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let maskRectTmpBuf : Rectangle | undefined = undefined
         if ((maskRectTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -3096,11 +3096,11 @@ export class AlertDialogParamWithOptions_serializer {
         }
         const levelModeTmpResult : LevelMode | undefined = levelModeTmpBuf
         const levelUniqueIdTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let levelUniqueIdTmpBuf : number | undefined = undefined
+        let levelUniqueIdTmpBuf : int32 | undefined = undefined
         if ((levelUniqueIdTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            levelUniqueIdTmpBuf = (valueDeserializer.readNumber() as number)
+            levelUniqueIdTmpBuf = valueDeserializer.readInt32()
         }
-        const levelUniqueIdTmpResult : number | undefined = levelUniqueIdTmpBuf
+        const levelUniqueIdTmpResult : int32 | undefined = levelUniqueIdTmpBuf
         const immersiveModeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let immersiveModeTmpBuf : ImmersiveMode | undefined = undefined
         if ((immersiveModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {

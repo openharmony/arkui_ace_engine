@@ -532,6 +532,7 @@ namespace Converter {
     template<> ButtonInfo Convert(const Ark_PickerDialogButtonStyle& src);
     template<> CalcDimension Convert(const Ark_LengthMetrics& src);
     template<> CalcDimension Convert(const Ark_Number& src);
+    template<> CalcDimension Convert(const Ark_Float64& src);
     template<> CalcDimension Convert(const Ark_String& src);
     template<> CalcLength Convert(const Ark_LengthMetrics& src);
     template<> CalcLength Convert(const Ark_Number& src);
@@ -539,11 +540,13 @@ namespace Converter {
     template<> CaretStyle Convert(const Ark_CaretStyle& src);
     template<> Color Convert(const Ark_Number& src);
     template<> Color Convert(const Ark_Int32& src);
+    template<> Color Convert(const Ark_Int64& src);
     template<> Color Convert(const Ark_String& src);
     template<> Dimension Convert(const Ark_Float64& src);
     template<> Dimension Convert(const Ark_LengthMetrics& src);
     template<> Dimension Convert(const Ark_Number& src);
     template<> Dimension Convert(const Ark_Int32& src);
+    template<> Dimension Convert(const Ark_Float64& src);
     template<> Dimension Convert(const Ark_String& src);
     template<> DimensionOffset Convert(const Ark_Offset& src);
     template<> DimensionOffset Convert(const Ark_Position& src);

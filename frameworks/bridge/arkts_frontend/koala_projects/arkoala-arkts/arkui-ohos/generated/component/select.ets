@@ -18,7 +18,7 @@
 
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { Resource_serializer } from "./../framework/resource"
-import { Bindable_Number_serializer, Bindable_Global_Resource_Resource_serializer, Bindable_String_serializer, ArkCommonMethodPeer, CommonMethod, Bindable, BlurStyle, CommonConfiguration, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { Bindable_I32_serializer, Bindable_Global_Resource_Resource_serializer, Bindable_String_serializer, ArkCommonMethodPeer, CommonMethod, Bindable, BlurStyle, CommonConfiguration, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { Font_serializer, DividerStyleOptions_serializer, Offset_serializer, ResourceStr, Font, ResourceColor, Length, Dimension, DividerStyleOptions, Offset, EdgeOutlineWidths, EdgeColors, EdgeOutlineWidths_serializer, EdgeColors_serializer } from "./units"
 import { DividerOptions } from "./textPicker"
 import { TextModifier_serializer } from "./../TextModifier"
@@ -61,23 +61,23 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SelectInterface_setSelectOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setSelectedAttribute(value: number | Resource | Bindable<number> | Bindable<Resource> | undefined): void {
+    setSelectedAttribute(value: int32 | Resource | Bindable<int32> | Bindable<Resource> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
+            if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
+                const valueTmpValueForIdx0  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx1)
-            } else if (valueTmpValue instanceof Bindable<number>) {
+            } else if (valueTmpValue instanceof Bindable<int32>) {
                 thisSerializer.writeInt8((2).toByte())
-                const valueTmpValueForIdx2  = valueTmpValue as Bindable<number>
-                Bindable_Number_serializer.write(thisSerializer, valueTmpValueForIdx2)
+                const valueTmpValueForIdx2  = valueTmpValue as Bindable<int32>
+                Bindable_I32_serializer.write(thisSerializer, valueTmpValueForIdx2)
             } else if (valueTmpValue instanceof Bindable<Resource>) {
                 thisSerializer.writeInt8((3).toByte())
                 const valueTmpValueForIdx3  = valueTmpValue as Bindable<Resource>
@@ -603,7 +603,7 @@ export enum AvoidanceMode {
     COVER_TARGET = 0,
     AVOID_AROUND_TARGET = 1
 }
-export type OnSelectCallback = (index: number, selectStr: string) => void;
+export type OnSelectCallback = (index: int32, selectStr: string) => void;
 export interface MenuOutlineOptions {
     width?: Dimension | EdgeOutlineWidths;
     color?: ResourceColor | EdgeColors;
@@ -612,7 +612,7 @@ export interface SelectAttribute extends CommonMethod {
     setSelectOptions(options: Array<SelectOption>): this {
         throw new Error("Unimplemented method setSelectOptions")
     }
-    selected(value: number | Resource | Bindable<number> | Bindable<Resource> | undefined): this {
+    selected(value: int32 | Resource | Bindable<int32> | Bindable<Resource> | undefined): this {
         throw new Error("Unimplemented method selected")
     }
     value(value: ResourceStr | Bindable<string> | Bindable<Resource> | undefined): this {
@@ -702,7 +702,7 @@ export interface SelectAttribute extends CommonMethod {
     }
 }
 export class ArkSelectStyle extends ArkCommonMethodStyle implements SelectAttribute {
-    selected_value?: number | Resource | Bindable<number> | Bindable<Resource> | undefined
+    selected_value?: int32 | Resource | Bindable<int32> | Bindable<Resource> | undefined
     value_value?: ResourceStr | Bindable<string> | Bindable<Resource> | undefined
     font_value?: Font | undefined
     fontColor_value?: ResourceColor | undefined
@@ -734,7 +734,7 @@ export class ArkSelectStyle extends ArkCommonMethodStyle implements SelectAttrib
     setSelectOptions(options: Array<SelectOption>): this {
         return this
     }
-    selected(value: number | Resource | Bindable<number> | Bindable<Resource> | undefined): this {
+    selected(value: int32 | Resource | Bindable<int32> | Bindable<Resource> | undefined): this {
         return this
     }
     value(value: ResourceStr | Bindable<string> | Bindable<Resource> | undefined): this {
@@ -830,7 +830,7 @@ export interface MenuItemConfiguration extends CommonConfiguration<MenuItemConfi
     icon?: ResourceStr;
     symbolIcon?: SymbolGlyphModifier;
     selected: boolean;
-    index: number;
+    index: int32;
 }
 
 export class ArkSelectComponent extends ArkCommonMethodComponent implements SelectAttribute {
@@ -848,9 +848,9 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements Sele
         }
         return this
     }
-    public selected(value: number | Resource | Bindable<number> | Bindable<Resource> | undefined): this {
+    public selected(value: int32 | Resource | Bindable<int32> | Bindable<Resource> | undefined): this {
         if (this.checkPriority("selected")) {
-            const value_casted = value as (number | Resource | Bindable<number> | Bindable<Resource> | undefined)
+            const value_casted = value as (int32 | Resource | Bindable<int32> | Bindable<Resource> | undefined)
             this.getPeer()?.setSelectedAttribute(value_casted)
             return this
         }
@@ -1149,7 +1149,7 @@ export class MenuItemConfiguration_serializer {
         const valueHolderForSelected  = value.selected
         valueSerializer.writeBoolean(valueHolderForSelected)
         const valueHolderForIndex  = value.index
-        valueSerializer.writeNumber(valueHolderForIndex)
+        valueSerializer.writeInt32(valueHolderForIndex)
     }
     public static read(buffer: DeserializerBase): MenuItemConfiguration {
         let valueDeserializer : DeserializerBase = buffer
@@ -1187,7 +1187,7 @@ export class MenuItemConfiguration_serializer {
         }
         const symbolIconTmpResult : SymbolGlyphModifier | undefined = symbolIconTmpBuf
         const selectedTmpResult : boolean = valueDeserializer.readBoolean()
-        const indexTmpResult : number = (valueDeserializer.readNumber() as number)
+        const indexTmpResult : int32 = valueDeserializer.readInt32()
         let value : MenuItemConfiguration = ({enabled: enabledTmpResult, contentModifier: contentModifierTmpResult, value: valueTmpResult, icon: iconTmpResult, symbolIcon: symbolIconTmpResult, selected: selectedTmpResult, index: indexTmpResult} as MenuItemConfiguration)
         return value
     }

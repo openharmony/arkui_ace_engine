@@ -111,8 +111,8 @@ export class ArkButtonNode extends ArkBaseNode implements ButtonAttribute {
         this.markDirty();
         return this;
     }
-    fontWeight(value: number | FontWeight | string | undefined): this {
-        const value_casted = value as (number | FontWeight | string | undefined);
+    fontWeight(value: int | FontWeight | string | undefined): this {
+        const value_casted = value as (int | FontWeight | string | undefined);
         this.getPeer()?.setFontWeightAttribute(value_casted);
         this.markDirty();
         return this;

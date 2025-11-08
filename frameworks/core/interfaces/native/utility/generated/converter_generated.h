@@ -441,6 +441,21 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_String_I32& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Union_String_F64& src)
 {
     switch (src.selector) {
@@ -829,7 +844,7 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
-                   const Ark_Union_Color_String_Resource_Number& src)
+                   const Ark_Union_Color_String_Resource_I64& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -967,7 +982,37 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_F64_Bindable& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Union_F64_Resource& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_F64_ResourceStr& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -2038,7 +2083,7 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
-                   const Ark_Union_Number_Resource_Bindable_Bindable& src)
+                   const Ark_Union_I32_Resource_Bindable_Bindable& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -3764,6 +3809,7 @@ ASSIGN_OPT(Opt_Union_PixelMap_String)
 ASSIGN_OPT(Opt_Union_ResponseType_RichEditorResponseType)
 ASSIGN_OPT(Opt_Union_RichEditorOptions_RichEditorStyledStringOptions)
 ASSIGN_OPT(Opt_Union_SpringMotion_FrictionMotion_ScrollMotion)
+ASSIGN_OPT(Opt_Union_String_I32)
 ASSIGN_OPT(Opt_Union_String_F64)
 ASSIGN_OPT(Opt_Union_String_FunctionKey)
 ASSIGN_OPT(Opt_Union_String_I32_CanvasGradient_CanvasPattern)
@@ -3816,6 +3862,7 @@ ASSIGN_OPT(Opt_Array_BlankScreenDetectionMethod)
 ASSIGN_OPT(Opt_Array_Buffer)
 ASSIGN_OPT(Opt_Array_bundleManager_SupportWindowMode)
 ASSIGN_OPT(Opt_Array_ColorStop)
+ASSIGN_OPT(Opt_Array_CustomObject)
 ASSIGN_OPT(Opt_Array_DataItem)
 ASSIGN_OPT(Opt_Array_DateRange)
 ASSIGN_OPT(Opt_Array_Dependency)
@@ -3936,6 +3983,7 @@ ASSIGN_OPT(Opt_Callback_ErrorInformation_Void)
 ASSIGN_OPT(Opt_Callback_Extender_OnFinish)
 ASSIGN_OPT(Opt_Callback_Extender_OnProgress)
 ASSIGN_OPT(Opt_Callback_F64_F64_Void)
+ASSIGN_OPT(Opt_Callback_F64_SliderChangeMode_Void)
 ASSIGN_OPT(Opt_Callback_FocusAxisEvent_Void)
 ASSIGN_OPT(Opt_Callback_FormCallbackInfo_Void)
 ASSIGN_OPT(Opt_Callback_FullscreenInfo_Void)
@@ -3970,7 +4018,6 @@ ASSIGN_OPT(Opt_Callback_Number_Number_Boolean)
 ASSIGN_OPT(Opt_Callback_Number_Number_ComputedBarAttribute)
 ASSIGN_OPT(Opt_Callback_Number_Number_Number_Void)
 ASSIGN_OPT(Opt_Callback_Number_Number_Void)
-ASSIGN_OPT(Opt_Callback_Number_SliderChangeMode_Void)
 ASSIGN_OPT(Opt_Callback_Number_Tuple_Number_Number)
 ASSIGN_OPT(Opt_Callback_Number_Tuple_Number_Number_Number_Number)
 ASSIGN_OPT(Opt_Callback_Number_Void)
@@ -4087,7 +4134,7 @@ ASSIGN_OPT(Opt_Callback_WebResourceResponse_Void)
 ASSIGN_OPT(Opt_CheckBoxModifierBuilder)
 ASSIGN_OPT(Opt_ContentDidScrollCallback)
 ASSIGN_OPT(Opt_ContentWillScrollCallback)
-ASSIGN_OPT(Opt_CustomBuilderT_Number)
+ASSIGN_OPT(Opt_CustomBuilderT_I32)
 ASSIGN_OPT(Opt_CustomNodeBuilder)
 ASSIGN_OPT(Opt_CustomStyles)
 ASSIGN_OPT(Opt_DataPanelModifierBuilder)
@@ -4528,7 +4575,7 @@ ASSIGN_OPT(Opt_Union_BorderStyle_EdgeStyles)
 ASSIGN_OPT(Opt_Union_Color_I32_String_Resource)
 ASSIGN_OPT(Opt_Union_Color_String_Resource)
 ASSIGN_OPT(Opt_Union_Color_String_Resource_ColoringStrategy)
-ASSIGN_OPT(Opt_Union_Color_String_Resource_Number)
+ASSIGN_OPT(Opt_Union_Color_String_Resource_I64)
 ASSIGN_OPT(Opt_Union_ColumnOptions_ColumnOptionsV2)
 ASSIGN_OPT(Opt_Union_CustomBuilder_DragItemInfo)
 ASSIGN_OPT(Opt_Union_CustomBuilder_DragItemInfo_String)
@@ -4538,6 +4585,7 @@ ASSIGN_OPT(Opt_Union_DragPreviewMode_Array_DragPreviewMode)
 ASSIGN_OPT(Opt_Union_EdgeOutlineStyles_OutlineStyle)
 ASSIGN_OPT(Opt_Union_EdgeStyles_BorderStyle)
 ASSIGN_OPT(Opt_Union_F64_Resource)
+ASSIGN_OPT(Opt_Union_F64_ResourceStr)
 ASSIGN_OPT(Opt_Union_F64_String_Resource)
 ASSIGN_OPT(Opt_Union_I32_Bindable)
 ASSIGN_OPT(Opt_Union_I32_FontWeight_String_Resource)
@@ -4737,13 +4785,13 @@ ASSIGN_OPT(Opt_Union_CanvasRenderingContext2D_DrawingRenderingContext)
 ASSIGN_OPT(Opt_Union_Dimension_Array_Dimension)
 ASSIGN_OPT(Opt_Union_Dimension_OptionWidthMode)
 ASSIGN_OPT(Opt_Union_EdgeColors_ResourceColor_LocalizedEdgeColors)
+ASSIGN_OPT(Opt_Union_I32_Resource_Bindable_Bindable)
 ASSIGN_OPT(Opt_Union_Length_Array_RadiusItem)
 ASSIGN_OPT(Opt_Union_Length_LayoutPolicy)
 ASSIGN_OPT(Opt_Union_Length_Number)
 ASSIGN_OPT(Opt_Union_MenuItemOptions_CustomBuilder)
 ASSIGN_OPT(Opt_Union_NavDestinationContext_NavBar)
 ASSIGN_OPT(Opt_Union_Number_LengthConstrain)
-ASSIGN_OPT(Opt_Union_Number_Resource_Bindable_Bindable)
 ASSIGN_OPT(Opt_Union_ResourceColor_EdgeColors)
 ASSIGN_OPT(Opt_Union_ResourceColor_EdgeColors_LocalizedEdgeColors)
 ASSIGN_OPT(Opt_Union_ResourceColor_UnderlineColor)

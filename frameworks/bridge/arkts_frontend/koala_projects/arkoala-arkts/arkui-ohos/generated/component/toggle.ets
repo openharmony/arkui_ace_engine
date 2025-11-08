@@ -141,10 +141,10 @@ export enum ToggleType {
     Button = 2
 }
 export interface SwitchStyle {
-    pointRadius?: number | Resource;
+    pointRadius?: double | Resource;
     unselectedColor?: ResourceColor;
     pointColor?: ResourceColor;
-    trackBorderRadius?: number | Resource;
+    trackBorderRadius?: double | Resource;
 }
 export interface ToggleConfiguration extends CommonConfiguration<ToggleConfiguration> {
     isOn: boolean;
@@ -333,10 +333,10 @@ export class SwitchStyle_serializer {
         if (valueHolderForPointRadius !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForPointRadiusTmpValue  = valueHolderForPointRadius!
-            if (valueHolderForPointRadiusTmpValue instanceof number) {
+            if (valueHolderForPointRadiusTmpValue instanceof double) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForPointRadiusTmpValueForIdx0  = valueHolderForPointRadiusTmpValue as number
-                valueSerializer.writeNumber(valueHolderForPointRadiusTmpValueForIdx0)
+                const valueHolderForPointRadiusTmpValueForIdx0  = valueHolderForPointRadiusTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForPointRadiusTmpValueForIdx0)
             } else if (valueHolderForPointRadiusTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForPointRadiusTmpValueForIdx1  = valueHolderForPointRadiusTmpValue as Resource
@@ -397,10 +397,10 @@ export class SwitchStyle_serializer {
         if (valueHolderForTrackBorderRadius !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForTrackBorderRadiusTmpValue  = valueHolderForTrackBorderRadius!
-            if (valueHolderForTrackBorderRadiusTmpValue instanceof number) {
+            if (valueHolderForTrackBorderRadiusTmpValue instanceof double) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForTrackBorderRadiusTmpValueForIdx0  = valueHolderForTrackBorderRadiusTmpValue as number
-                valueSerializer.writeNumber(valueHolderForTrackBorderRadiusTmpValueForIdx0)
+                const valueHolderForTrackBorderRadiusTmpValueForIdx0  = valueHolderForTrackBorderRadiusTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForTrackBorderRadiusTmpValueForIdx0)
             } else if (valueHolderForTrackBorderRadiusTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForTrackBorderRadiusTmpValueForIdx1  = valueHolderForTrackBorderRadiusTmpValue as Resource
@@ -413,20 +413,20 @@ export class SwitchStyle_serializer {
     public static read(buffer: DeserializerBase): SwitchStyle {
         let valueDeserializer : DeserializerBase = buffer
         const pointRadiusTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let pointRadiusTmpBuf : number | Resource | undefined = undefined
+        let pointRadiusTmpBuf : double | Resource | undefined = undefined
         if ((pointRadiusTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const pointRadiusTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let pointRadiusTmpBuf_ : number | Resource | undefined
+            let pointRadiusTmpBuf_ : double | Resource | undefined
             if (pointRadiusTmpBuf_UnionSelector == (0).toChar()) {
-                pointRadiusTmpBuf_ = (valueDeserializer.readNumber() as number)
+                pointRadiusTmpBuf_ = valueDeserializer.readFloat64()
             } else if (pointRadiusTmpBuf_UnionSelector == (1).toChar()) {
                 pointRadiusTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for pointRadiusTmpBuf_ has to be chosen through deserialisation.")
             }
-            pointRadiusTmpBuf = (pointRadiusTmpBuf_ as number | Resource)
+            pointRadiusTmpBuf = (pointRadiusTmpBuf_ as double | Resource)
         }
-        const pointRadiusTmpResult : number | Resource | undefined = pointRadiusTmpBuf
+        const pointRadiusTmpResult : double | Resource | undefined = pointRadiusTmpBuf
         const unselectedColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let unselectedColorTmpBuf : ResourceColor | undefined = undefined
         if ((unselectedColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -466,20 +466,20 @@ export class SwitchStyle_serializer {
         }
         const pointColorTmpResult : ResourceColor | undefined = pointColorTmpBuf
         const trackBorderRadiusTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let trackBorderRadiusTmpBuf : number | Resource | undefined = undefined
+        let trackBorderRadiusTmpBuf : double | Resource | undefined = undefined
         if ((trackBorderRadiusTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const trackBorderRadiusTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let trackBorderRadiusTmpBuf_ : number | Resource | undefined
+            let trackBorderRadiusTmpBuf_ : double | Resource | undefined
             if (trackBorderRadiusTmpBuf_UnionSelector == (0).toChar()) {
-                trackBorderRadiusTmpBuf_ = (valueDeserializer.readNumber() as number)
+                trackBorderRadiusTmpBuf_ = valueDeserializer.readFloat64()
             } else if (trackBorderRadiusTmpBuf_UnionSelector == (1).toChar()) {
                 trackBorderRadiusTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for trackBorderRadiusTmpBuf_ has to be chosen through deserialisation.")
             }
-            trackBorderRadiusTmpBuf = (trackBorderRadiusTmpBuf_ as number | Resource)
+            trackBorderRadiusTmpBuf = (trackBorderRadiusTmpBuf_ as double | Resource)
         }
-        const trackBorderRadiusTmpResult : number | Resource | undefined = trackBorderRadiusTmpBuf
+        const trackBorderRadiusTmpResult : double | Resource | undefined = trackBorderRadiusTmpBuf
         let value : SwitchStyle = ({pointRadius: pointRadiusTmpResult, unselectedColor: unselectedColorTmpResult, pointColor: pointColorTmpResult, trackBorderRadius: trackBorderRadiusTmpResult} as SwitchStyle)
         return value
     }

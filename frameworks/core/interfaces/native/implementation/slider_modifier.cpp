@@ -24,19 +24,19 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-std::optional<float> ProcessBindableValue(FrameNode* frameNode, const Opt_Union_Number_Bindable& value)
+std::optional<float> ProcessBindableValue(FrameNode* frameNode, const Opt_Union_F64_Bindable& value)
 {
     std::optional<float> result;
     Converter::VisitUnion(value,
-        [&result](const Ark_Number& src) {
+        [&result](const Ark_Float64& src) {
             result = Converter::OptConvert<float>(src);
         },
-        [&result, frameNode](const Ark_Bindable_Number& src) {
+        [&result, frameNode](const Ark_Bindable_F64& src) {
             result = Converter::OptConvert<float>(src.value);
             WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
             auto onEvent = [arkCallback = CallbackHelper(src.onChange), weakNode](float value) {
                 PipelineContext::SetCallBackNode(weakNode);
-                arkCallback.Invoke(Converter::ArkValue<Ark_Number>(value));
+                arkCallback.Invoke(Converter::ArkValue<Ark_Float64>(value));
             };
             SliderModelStatic::SetOnChangeEvent(frameNode, std::move(onEvent));
         },
@@ -207,7 +207,7 @@ void SetTrackThicknessImpl(Ark_NativePointer node,
     SliderModelStatic::SetThickness(frameNode, convValue);
 }
 void SetOnChangeImpl(Ark_NativePointer node,
-                     const Opt_Callback_Number_SliderChangeMode_Void* value)
+                     const Opt_Callback_F64_SliderChangeMode_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -217,7 +217,7 @@ void SetOnChangeImpl(Ark_NativePointer node,
         return;
     }
     auto onChange = [arkCallback = CallbackHelper(*optValue)](float newValue, int32_t mode) {
-        Ark_Number arkValue = Converter::ArkValue<Ark_Number>(newValue);
+        Ark_Float64 arkValue = Converter::ArkValue<Ark_Float64>(newValue);
         Ark_SliderChangeMode arkMode = Converter::ArkValue<Ark_SliderChangeMode>(
             static_cast<SliderModel::SliderChangeMode>(mode));
         arkCallback.Invoke(arkValue, arkMode);
@@ -316,7 +316,7 @@ void SetSliderInteractionModeImpl(Ark_NativePointer node,
     SliderModelStatic::SetSliderInteractionMode(frameNode, convValue);
 }
 void SetMinResponsiveDistanceImpl(Ark_NativePointer node,
-                                  const Opt_Number* value)
+                                  const Opt_Float64* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

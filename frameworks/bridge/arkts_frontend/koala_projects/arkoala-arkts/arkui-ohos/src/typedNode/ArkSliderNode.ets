@@ -75,8 +75,8 @@ export class ArkSliderNode extends ArkBaseNode implements SliderAttribute {
         this.markDirty();
         return this;
     }
-    onChange(value: ((value: number, mode: SliderChangeMode) => void) | undefined): this {
-        const value_casted = value as (((value: number, mode: SliderChangeMode) => void) | undefined);
+    onChange(value: ((value: double, mode: SliderChangeMode) => void) | undefined): this {
+        const value_casted = value as (((value: double, mode: SliderChangeMode) => void) | undefined);
         this.getPeer()?.setOnChangeAttribute(value_casted);
         this.markDirty();
         return this;
@@ -135,8 +135,8 @@ export class ArkSliderNode extends ArkBaseNode implements SliderAttribute {
         this.markDirty();
         return this;
     }
-    minResponsiveDistance(value: number | undefined): this {
-        const value_casted = value as (number | undefined);
+    minResponsiveDistance(value: double | undefined): this {
+        const value_casted = value as (double | undefined);
         this.getPeer()?.setMinResponsiveDistanceAttribute(value_casted);
         this.markDirty();
         return this;

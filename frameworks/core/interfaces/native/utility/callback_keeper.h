@@ -30,8 +30,8 @@ public:
     AutoCallbackKeeper(std::function<void()>&& handler);
     AutoCallbackKeeper(std::function<void(bool)>&& handler);
     AutoCallbackKeeper(std::function<void(Ark_Number)>&& handler);
-    AutoCallbackKeeper(std::function<void(Ark_Number, Ark_Number)>&& handler);
-    AutoCallbackKeeper(std::function<void(Ark_Number, Ark_SliderChangeMode)>&& handler);
+    AutoCallbackKeeper(std::function<void(Ark_Float64, Ark_Float64)>&& handler);
+    AutoCallbackKeeper(std::function<void(Ark_Float64, Ark_SliderChangeMode)>&& handler);
     ~AutoCallbackKeeper();
 
     TCallbackType ArkValue() const&;
@@ -49,8 +49,8 @@ using ReverseResultHandler = std::variant<
     std::function<void(Ark_Number)>,
     std::function<void(Ark_Float64)>,
     std::function<void(Ark_DrawContext)>,
-    std::function<void(Ark_Number, Ark_Number)>,
-    std::function<void(Ark_Number, Ark_SliderChangeMode)>,
+    std::function<void(Ark_Float64, Ark_Float64)>,
+    std::function<void(Ark_Float64, Ark_SliderChangeMode)>,
     std::function<void(Ark_Number, Callback_Number_Void)>,
     std::function<void(Ark_DrawContext, Ark_CustomSpanDrawInfo)>,
     std::function<void(Ark_CustomSpanMeasureInfo, Callback_CustomSpanMetrics_Void)>,
@@ -64,8 +64,8 @@ public:
     using ReverseHandler = std::function<void()>;
     using BooleanHandlerType = std::function<void(Ark_Boolean)>;
     using NumberHandlerType = std::function<void(Ark_Number)>;
-    using ButtonTriggerClickHandlerType = std::function<void(Ark_Number, Ark_Number)>;
-    using SliderTriggerChangeHandlerType = std::function<void(Ark_Number, Ark_SliderChangeMode)>;
+    using ButtonTriggerClickHandlerType = std::function<void(Ark_Float64, Ark_Float64)>;
+    using SliderTriggerChangeHandlerType = std::function<void(Ark_Float64, Ark_SliderChangeMode)>;
 
     template <typename ArkResultType, typename ContinuationType, typename CallbackHelper, typename... Params>
     static void InvokeWithResultHandler(
@@ -209,7 +209,7 @@ inline AutoCallbackKeeper<TCallbackType>::AutoCallbackKeeper(std::function<void(
     : arkCallback_(CallbackKeeper::DefineBooleanCallback<TCallbackType>(std::move(handler))) {}
 
 template<typename TCallbackType>
-inline AutoCallbackKeeper<TCallbackType>::AutoCallbackKeeper(std::function<void(Ark_Number, Ark_Number)>&& handler)
+inline AutoCallbackKeeper<TCallbackType>::AutoCallbackKeeper(std::function<void(Ark_Float64, Ark_Float64)>&& handler)
     : arkCallback_(CallbackKeeper::DefineButtonTriggerClickCallback<TCallbackType>(std::move(handler))) {}
 
 template<typename TCallbackType>
@@ -218,7 +218,7 @@ inline AutoCallbackKeeper<TCallbackType>::AutoCallbackKeeper(std::function<void(
 
 template<typename TCallbackType>
 inline AutoCallbackKeeper<TCallbackType>::AutoCallbackKeeper(
-    std::function<void(Ark_Number, Ark_SliderChangeMode)>&& handler)
+    std::function<void(Ark_Float64, Ark_SliderChangeMode)>&& handler)
     : arkCallback_(CallbackKeeper::DefineSliderTriggerChangeCallback<TCallbackType>(std::move(handler))) {}
 
 template<typename TCallbackType>
