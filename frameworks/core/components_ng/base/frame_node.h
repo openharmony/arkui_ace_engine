@@ -45,6 +45,7 @@
 #include "core/components_ng/property/accessibility_property.h"
 #include "core/components_ng/property/flex_property.h"
 #include "core/components_ng/property/layout_constraint.h"
+#include "core/components_ng/property/menu_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paint_property.h"
 #include "core/components_ng/render/render_context.h"
@@ -1477,6 +1478,7 @@ public:
     void MountToParent(const RefPtr<UINode>& parent, int32_t slot = DEFAULT_NODE_SLOT, bool silently = false,
         bool addDefaultTransition = false, bool addModalUiextension = false) override;
     void MergeAttributesIntoJson(std::shared_ptr<JsonValue>& json, const std::shared_ptr<JsonValue>& child);
+    void NotifyMenuLifeCycleEvent(NG::MenuLifeCycleEvent menuLifeCycleEvent);
 
 protected:
     void DumpInfo() override;

@@ -7650,6 +7650,12 @@ void FrameNode::UpdateIgnoreCount(int inc)
     }
 }
 
+void FrameNode::NotifyMenuLifeCycleEvent(NG::MenuLifeCycleEvent menuLifeCycleEvent)
+{
+    CHECK_NULL_VOID(pattern_);
+    pattern_->NotifyMenuLifeCycleEvent(menuLifeCycleEvent);
+}
+
 void FrameNode::MountToParent(const RefPtr<UINode>& parent,
     int32_t slot, bool silently, bool addDefaultTransition, bool addModalUiextension)
 {

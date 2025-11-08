@@ -340,6 +340,9 @@ public:
         if (onAppearCallback_) {
             onAppearCallback_();
         }
+        auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
+        CHECK_NULL_VOID(targetNode);
+        targetNode->NotifyMenuLifeCycleEvent(MenuLifeCycleEvent::ON_APPEAR);
     }
 
     void CallMenuDisappearCallback()
@@ -347,6 +350,9 @@ public:
         if (onDisappearCallback_) {
             onDisappearCallback_();
         }
+        auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
+        CHECK_NULL_VOID(targetNode);
+        targetNode->NotifyMenuLifeCycleEvent(MenuLifeCycleEvent::ON_DISAPPEAR);
     }
 
     void CallMenuAboutToAppearCallback()
@@ -354,6 +360,9 @@ public:
         if (aboutToAppearCallback_) {
             aboutToAppearCallback_();
         }
+        auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
+        CHECK_NULL_VOID(targetNode);
+        targetNode->NotifyMenuLifeCycleEvent(MenuLifeCycleEvent::ABOUT_TO_APPEAR);
     }
 
     void CallMenuAboutToDisappearCallback()
@@ -361,6 +370,9 @@ public:
         if (aboutToDisappearCallback_) {
             aboutToDisappearCallback_();
         }
+        auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
+        CHECK_NULL_VOID(targetNode);
+        targetNode->NotifyMenuLifeCycleEvent(MenuLifeCycleEvent::ABOUT_TO_DISAPPEAR);
     }
 
    void CallMenuOnWillAppearCallback()
@@ -368,6 +380,9 @@ public:
        if (onWillAppearCallback_) {
            onWillAppearCallback_();
        }
+       auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
+       CHECK_NULL_VOID(targetNode);
+       targetNode->NotifyMenuLifeCycleEvent(MenuLifeCycleEvent::ON_WILL_APPEAR);
    }
 
    void CallMenuOnDidAppearCallback()
@@ -375,6 +390,9 @@ public:
        if (onDidAppearCallback_) {
            onDidAppearCallback_();
        }
+       auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
+       CHECK_NULL_VOID(targetNode);
+       targetNode->NotifyMenuLifeCycleEvent(MenuLifeCycleEvent::ON_DID_APPEAR);
    }
 
    void CallMenuOnWillDisappearCallback()
@@ -382,6 +400,9 @@ public:
        if (onWillDisappearCallback_) {
            onWillDisappearCallback_();
        }
+       auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
+       CHECK_NULL_VOID(targetNode);
+       targetNode->NotifyMenuLifeCycleEvent(MenuLifeCycleEvent::ON_WILL_DISAPPEAR);
    }
 
    void CallMenuOnDidDisappearCallback()
@@ -389,6 +410,9 @@ public:
        if (onDidDisappearCallback_) {
            onDidDisappearCallback_();
        }
+       auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
+       CHECK_NULL_VOID(targetNode);
+       targetNode->NotifyMenuLifeCycleEvent(MenuLifeCycleEvent::ON_DID_DISAPPEAR);
    }
 
     void CallMenuStateChangeCallback(const std::string& value)

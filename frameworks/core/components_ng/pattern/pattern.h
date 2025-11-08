@@ -33,6 +33,7 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/layout/vertical_overflow_handler.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_ng/property/menu_property.h"
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/components_ng/render/paint_property.h"
 #include "core/event/pointer_event.h"
@@ -102,6 +103,8 @@ public:
     {
         return false;
     }
+
+    virtual void NotifyMenuLifeCycleEvent(NG::MenuLifeCycleEvent menuLifeCycleEvent) {}
 
     virtual bool CheckCustomAvoidKeyboard() const
     {
