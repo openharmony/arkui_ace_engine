@@ -57,11 +57,17 @@ ButtonParameters Convert(const Ark_ButtonLabelStyle& src)
     }
     parameters.maxLines = maxLines;
     parameters.heightAdaptivePolicy = Converter::OptConvert<TextHeightAdaptivePolicy>(src.heightAdaptivePolicy);
-    auto minFontSize = Converter::OptConvert<Dimension>(src.minFontSize);
+    std::optional<Dimension> minFontSize = std::nullopt;
+    if (src.minFontSize.tag != INTEROP_TAG_UNDEFINED) {
+        minFontSize = Converter::OptConvertFromArkNumResStr(src.minFontSize.value);
+    }
     Validator::ValidateNonNegative(minFontSize);
     Validator::ValidateNonPercent(minFontSize);
     parameters.minFontSize = minFontSize;
-    auto maxFontSize = Converter::OptConvert<Dimension>(src.maxFontSize);
+    std::optional<Dimension> maxFontSize = std::nullopt;
+    if (src.maxFontSize.tag != INTEROP_TAG_UNDEFINED) {
+        maxFontSize = Converter::OptConvertFromArkNumResStr(src.maxFontSize.value);
+    }
     Validator::ValidateNonNegative(maxFontSize);
     Validator::ValidateNonPercent(maxFontSize);
     parameters.maxFontSize = maxFontSize;
