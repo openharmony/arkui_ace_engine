@@ -28,7 +28,7 @@ export class ConsumeDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
     constructor(owningView: IVariableOwner, varName: string, provideAliasName: string, watchFunc?: WatchFuncType) {
         super('@Consume', owningView, varName, watchFunc);
         this.provideAliasName = provideAliasName;
-        this.sourceProvide_ = owningView.findProvide<T>(provideAliasName);
+        this.sourceProvide_ = owningView.__findProvide__Internal<T>(provideAliasName);
         if (this.sourceProvide_ === undefined) {
             throw new Error('no Provide found for Consume');
         }

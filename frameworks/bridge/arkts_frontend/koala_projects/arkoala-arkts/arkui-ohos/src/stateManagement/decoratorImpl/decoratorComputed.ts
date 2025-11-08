@@ -46,7 +46,7 @@ export class ComputedDecoratedVariable<T> implements IComputedDecoratedVariable<
     }
 
     isFreeze(): boolean {
-        return !!(this.owningComponent_ && !this.owningComponent_!.isViewActive());
+        return !!(this.owningComponent_ && !this.owningComponent_!.__isViewActive__Internal());
     }
 
     fireChange(): void {

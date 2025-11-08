@@ -26,7 +26,7 @@ export class ConsumerDecoratedVariable<T> extends DecoratedV2VariableBase implem
     constructor(owningView: IVariableOwner, varName: string, provideAlias: string, initValue: T) {
         super('@Consumer', owningView, varName);
         this.provideAlias_ = provideAlias;
-        this.sourceProvider_ = owningView.findProvider<T>(provideAlias);
+        this.sourceProvider_ = owningView.__findProvider__Internal<T>(provideAlias);
         if (this.sourceProvider_ === undefined) {
             this.backing_ = FactoryInternal.mkDecoratorValue(varName, initValue);
         }

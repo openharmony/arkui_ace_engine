@@ -179,7 +179,7 @@ export abstract class DecoratedV1VariableBase<T> extends DecoratedVariableBase i
     }
     
     public isViewActive(): boolean {
-        return this.owningComponent_!.isViewActive();
+        return this.owningComponent_!.__isViewActive__Internal();
     }
 
     /* compiler BUG: change to protcted */

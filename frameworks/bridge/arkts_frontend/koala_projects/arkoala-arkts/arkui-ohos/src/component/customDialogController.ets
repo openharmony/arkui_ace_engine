@@ -28,7 +28,7 @@ export class CustomDialogController extends CustomDialogControllerExtender {
     }
     open(): void {
         if (this.customComponent) {
-            const peerNode = this.customComponent!.getPeerNode()
+            const peerNode = this.customComponent!.__getPeerNode__Internal()
             if (peerNode) {
                 super.setOwnerView(peerNode!.getPeerPtr())
                 super.open()

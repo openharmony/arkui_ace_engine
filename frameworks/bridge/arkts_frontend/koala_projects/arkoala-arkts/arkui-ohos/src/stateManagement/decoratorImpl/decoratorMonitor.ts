@@ -41,7 +41,7 @@ export class MonitorFunctionDecorator implements IMonitorDecoratedVariable, IMon
     }
 
     public isFreeze(): boolean {
-        return !!(this.owningComponent_ && !this.owningComponent_!.isViewActive());
+        return !!(this.owningComponent_ && !this.owningComponent_!.__isViewActive__Internal());
     }
 
     public value<T>(path?: string): IMonitorValue<T> | undefined {
