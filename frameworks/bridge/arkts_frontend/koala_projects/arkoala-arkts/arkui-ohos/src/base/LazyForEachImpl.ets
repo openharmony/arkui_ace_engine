@@ -29,20 +29,16 @@ import { ObserveSingleton } from '../stateManagement/base/observeSingleton'
 import { ExtendableComponent } from '../component/extendableComponent'
 
 let globalLazyItems = new Map<ComputableState<LazyItemNode>, int32>() // V: age
+let arkLazyTotalCount: int32 = 0 // update dataSource totalCount changes
 
 export function updateLazyItems() {
-    let postponed = false
     globalLazyItems.forEach((age, node, map) => {
         if (age === 0) {
-            postponed = true
             map.set(node, 1)
         } else {
             node.value
         }
     })
-    if (postponed) {
-        // requestFrame()
-    }
 }
 
 /** @memo:intrinsic */
@@ -55,9 +51,13 @@ export function LazyForEachImplForOptions<T>(dataSource: IDataSource<T>,
     isRepeat: boolean = false,
 ) {
     const node = createLazyNode(isRepeat)
+    if (arkLazyTotalCount !== dataSource.totalCount()) {
+        console.log(`dataSource totalCount changed from ${arkLazyTotalCount} to ${dataSource.totalCount()}`)
+        arkLazyTotalCount = dataSource.totalCount()
+    }
 
     let pool = rememberDisposable(
-        () => new LazyItemPool(node, dataSource.totalCount(), CustomComponent.current),
+        () => new LazyItemPool(node, CustomComponent.current),
         (pool?: LazyItemPool) => {
             pool?.dispose()
         }
@@ -91,6 +91,7 @@ export function LazyForEachImplForOptions<T>(dataSource: IDataSource<T>,
                 currentRenderingComponent, currentExtendableComponent)
         } catch (error) {
             InteropNativeModule._NativeLog(`error during createLazyItem: ${error}`)
+            InteropNativeModule._NativeLog(`${(error as Error).stack}`)
             return nullptr
         } finally {
             ObserveSingleton.instance.renderingComponent = lastRenderingComponent
@@ -143,7 +144,6 @@ class LazyItemCompositionContext {
 class LazyItemPool implements Disposable {
     private _activeItems = new Map<int32, ComputableState<LazyItemNode>>()
     private _parent: PeerNode
-    private _totalCount: int32
     private _componentRoot?: Object
     private _moveFromTo?: [int32, int32] = undefined // used to track moveFromTo in onMove event
     disposed: boolean = false
@@ -153,9 +153,8 @@ class LazyItemPool implements Disposable {
      * @param parent direct parent node (should be the scroll container node)
      * @param root root object of the current CustomComponent
      */
-    constructor(parent: PeerNode, totalCount: int32, root?: Object) {
+    constructor(parent: PeerNode, root?: Object) {
         this._parent = parent
-        this._totalCount = totalCount
         this._componentRoot = root
     }
 
@@ -216,6 +215,7 @@ class LazyItemPool implements Disposable {
     pruneBy(criteria: (index: int32) => boolean) {
         this._activeItems.forEach((node, index) => {
             if (criteria(index)) {
+                console.log(`LazyItemPool.pruneBy(): node will be disposed for index ${index}`)
                 node.dispose()
                 this._activeItems.delete(index)
                 globalLazyItems.delete(node)
@@ -229,13 +229,18 @@ class LazyItemPool implements Disposable {
      * @param end 
      */
     updateActiveRange(start: int32, end: int32, cacheStart: int32, cacheEnd: int32, isLoop: boolean) {
-        if (start > end) {
-            return
-        }
         try {
             this.pruneBy(index => {
                 index = this.convertFromToIndexRevert(index)
-                return !this.isInCacheRange(index, start, end, cacheStart, cacheEnd, isLoop, this._totalCount);
+                return !this.isInCacheRange(
+                    index,
+                    start,
+                    end,
+                    cacheStart,
+                    cacheEnd,
+                    isLoop,
+                    arkLazyTotalCount
+                )
             })
         } catch (error) {
             InteropNativeModule._NativeLog(`error during LazyItem pruning: ${error}`)
