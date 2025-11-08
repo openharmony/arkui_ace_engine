@@ -66,7 +66,7 @@ export class router_RouterState_serializer {
     public static write(buffer: SerializerBase, value: router.RouterState): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForIndex  = value.index
-        valueSerializer.writeNumber(valueHolderForIndex)
+        valueSerializer.writeInt32(valueHolderForIndex)
         const valueHolderForName  = value.name
         valueSerializer.writeString(valueHolderForName)
         const valueHolderForPath  = value.path
@@ -76,7 +76,7 @@ export class router_RouterState_serializer {
     }
     public static read(buffer: DeserializerBase): router.RouterState {
         let valueDeserializer : DeserializerBase = buffer
-        const indexTmpResult : number = (valueDeserializer.readNumber() as number)
+        const indexTmpResult : int32 = (valueDeserializer.readInt32() as int32)
         const nameTmpResult : string = (valueDeserializer.readString() as string)
         const pathTmpResult : string = (valueDeserializer.readString() as string)
         const paramsTmpResult : Object = (valueDeserializer.readObject() as object)

@@ -456,9 +456,10 @@ class RenderNode extends Disposable {
   private markNodeGroupValue: boolean;
   private apiTargetVersion: number;
 
-  constructor(type: string) {
+  constructor(type: string, cptrVal: number = 0) {
     super();
     this.nodePtr = null;
+    this.type = type;     // for transfer to arkts1.2
     this.childrenList = [];
     this.parentRenderNode = null;
     this.backgroundColorValue = 0;
@@ -488,13 +489,18 @@ class RenderNode extends Disposable {
     if (type === 'BuilderRootFrameNode' || type === 'CustomFrameNode') {
       return;
     }
-    this._nativeRef = getUINativeModule().renderNode.createRenderNode(this);
+
+    if (cptrVal == 0) {
+      this._nativeRef = getUINativeModule().renderNode.createRenderNode(this);
+    } else {
+      this._nativeRef = getUINativeModule().renderNode.createRenderNodeWithPtrVal(this, cptrVal);
+    }
     this.nodePtr = this._nativeRef?.getNativeHandle();
     if (this.apiTargetVersion && this.apiTargetVersion < 12) {
       this.clipToFrame = false;
-  } else {
+    } else {
       this.clipToFrame = true;
-  }
+    }
   }
 
   set backgroundColor(color: number) {
@@ -995,6 +1001,13 @@ class RenderNode extends Disposable {
     this.shapeClipValue = this.shapeClipValue ? this.shapeClipValue : new ShapeClip();
     return this.shapeClipValue;
   }
+}
+
+function nodeDeref(ref): RenderNode {
+  return ref?.deref?.() ?? undefined
+}
+function getNodePtrValue(nativeRef): number {
+    return nativeRef?.getNativeHandleVal?.() ?? undefined
 }
 
 function edgeColors(all: number): EdgeColors {

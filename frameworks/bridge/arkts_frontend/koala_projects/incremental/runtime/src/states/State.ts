@@ -1233,12 +1233,12 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
         } catch (cause) {
             error = cause as Error
         }
-        this.node?.dispose() // dispose parent before its children
         for (let child = this.child; child; child = child!.next) {
             this.recycleOrDispose(child!!)
         }
         this.child = undefined
         this.parentScope = undefined
+        this.node?.dispose()
         this.node = undefined
         this.nodeRef = undefined
         this.scopeInternal = undefined

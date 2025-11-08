@@ -19,7 +19,7 @@
 import { AttributeModifier, DrawModifier, extractors, GestureModifier, hookAllowDrop, hookDragPreviewOptions } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
-import { ArkCommonMethodPeer, LayoutPolicy, Rectangle, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, BorderImageOption, OutlineStyle, ClickEvent, HoverEvent, AccessibilityCallback, AccessibilityHoverEvent, MouseEvent, TouchEvent, KeyEvent, CrownEvent, FocusAxisEvent, AxisEvent, FocusMovement, AnimateParam, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, RotateAngleOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, DragEvent, DragItemInfo, PreDragStatus, LinearGradientOptions, SweepGradientOptions, RadialGradientOptions, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, AccessibilitySamePageMode, AccessibilityRoleType, AccessibilityFocusCallback, ReuseOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, CustomProperty, SafeAreaType, SafeAreaEdge, BackgroundOptions, BackgroundImageOptions, BlurStyle, BackgroundBlurStyleOptions, SystemAdaptiveOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, OnDragEventCallback, DropOptions, PreviewConfiguration, DragPreviewOptions, DragInteractionOptions, OverlayOptions, BlendMode, BlendApplyType, GeometryTransitionOptions, TipsMessageType, TipsOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, Bindable, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, VisibleAreaEventOptions, CommonMethod } from "./component/common"
+import { ArkCommonMethodPeer, LayoutPolicy, Rectangle, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, BorderImageOption, OutlineStyle, ClickEvent, HoverEvent, AccessibilityCallback, AccessibilityHoverEvent, MouseEvent, TouchEvent, KeyEvent, CrownEvent, FocusAxisEvent, AxisEvent, FocusMovement, AnimateParam, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, RotateAngleOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, DragEvent, DragItemInfo, PreDragStatus, LinearGradientOptions, SweepGradientOptions, RadialGradientOptions, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, AccessibilitySamePageMode, AccessibilityRoleType, AccessibilityFocusCallback, AccessibilityActionInterceptCallback, AccessibilityAction, ReuseOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, CustomProperty, SafeAreaType, SafeAreaEdge, BackgroundOptions, BackgroundImageOptions, BlurStyle, BackgroundBlurStyleOptions, SystemAdaptiveOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, OnDragEventCallback, DropOptions, PreviewConfiguration, DragPreviewOptions, DragInteractionOptions, OverlayOptions, BlendMode, BlendApplyType, GeometryTransitionOptions, TipsMessageType, TipsOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, Bindable, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, VisibleAreaEventOptions, CommonMethod } from "./component/common"
 import { int32 } from "@koalaui/common"
 import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, VoidCallback, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions } from "./component/units"
 import { Resource } from "global.resource"
@@ -239,9 +239,7 @@ export class CommonMethodModifier implements CommonMethod {
     _enabled_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _enabled_0_0value?: boolean | undefined
     _alignRules_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _alignRules_0_0value?: AlignRuleOption | undefined
-    _alignRules_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _alignRules_1_0value?: LocalizedAlignRuleOptions | undefined
+    _alignRules_0_0value?: AlignRuleOption | LocalizedAlignRuleOptions | undefined
     _aspectRatio_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _aspectRatio_0_0value?: number | undefined
     _clickEffect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -316,6 +314,8 @@ export class CommonMethodModifier implements CommonMethod {
     _accessibilityRole_0_0value?: AccessibilityRoleType | undefined
     _onAccessibilityFocus_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onAccessibilityFocus_0_0value?: AccessibilityFocusCallback | undefined
+    _onAccessibilityActionIntercept_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onAccessibilityActionIntercept_0_0value?: AccessibilityActionInterceptCallback | undefined
     _accessibilityTextHint_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _accessibilityTextHint_0_0value?: string | undefined
     _accessibilityDescription_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -2253,7 +2253,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (this._alignRules_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setAlignRulesWithAlignRuleOptionTypedValueAttribute((this._alignRules_0_0value as AlignRuleOption | undefined));
+                    peer.setAlignRulesAttribute((this._alignRules_0_0value as AlignRuleOption | LocalizedAlignRuleOptions | undefined));
                     this._alignRules_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -2263,25 +2263,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     this._alignRules_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setAlignRulesWithAlignRuleOptionTypedValueAttribute((undefined as AlignRuleOption | undefined));
-                }
-            }
-        }
-        if (this._alignRules_1_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._alignRules_1_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setAlignRulesWithLocalizedAlignRuleOptionsTypedValueAttribute((this._alignRules_1_0value as LocalizedAlignRuleOptions | undefined));
-                    this._alignRules_1_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._alignRules_1_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._alignRules_1_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setAlignRulesWithLocalizedAlignRuleOptionsTypedValueAttribute((undefined as LocalizedAlignRuleOptions | undefined));
+                    peer.setAlignRulesAttribute((undefined as AlignRuleOption | LocalizedAlignRuleOptions | undefined));
                 }
             }
         }
@@ -2948,6 +2930,24 @@ export class CommonMethodModifier implements CommonMethod {
                 default: {
                     this._onAccessibilityFocus_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.setOnAccessibilityFocusAttribute((undefined as AccessibilityFocusCallback | undefined));
+                }
+            }
+        }
+        if (this._onAccessibilityActionIntercept_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onAccessibilityActionIntercept_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnAccessibilityActionInterceptAttribute((this._onAccessibilityActionIntercept_0_0value as AccessibilityActionInterceptCallback | undefined));
+                    this._onAccessibilityActionIntercept_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onAccessibilityActionIntercept_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onAccessibilityActionIntercept_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnAccessibilityActionInterceptAttribute((undefined as AccessibilityActionInterceptCallback | undefined));
                 }
             }
         }
@@ -5280,20 +5280,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.alignRules((undefined as AlignRuleOption | undefined));
-                }
-            }
-        }
-        if (modifier._alignRules_1_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._alignRules_1_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.alignRules(modifier._alignRules_1_0value);
-                    break;
-                }
-                default: {
-                    this.alignRules((undefined as LocalizedAlignRuleOptions | undefined));
+                    this.alignRules((undefined as AlignRuleOption | LocalizedAlignRuleOptions | undefined));
                 }
             }
         }
@@ -5788,6 +5775,19 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     this.onAccessibilityFocus((undefined as AccessibilityFocusCallback | undefined));
+                }
+            }
+        }
+        if (modifier._onAccessibilityActionIntercept_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onAccessibilityActionIntercept_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onAccessibilityActionIntercept(modifier._onAccessibilityActionIntercept_0_0value);
+                    break;
+                }
+                default: {
+                    this.onAccessibilityActionIntercept((undefined as AccessibilityActionInterceptCallback | undefined));
                 }
             }
         }
@@ -7611,7 +7611,7 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    alignRules(value: AlignRuleOption | undefined): this {
+    alignRules(value: AlignRuleOption | LocalizedAlignRuleOptions | undefined): this {
         if (((this._alignRules_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._alignRules_0_flag = AttributeUpdaterFlag.UPDATE
@@ -7619,17 +7619,6 @@ export class CommonMethodModifier implements CommonMethod {
         } else
         {
             this._alignRules_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    alignRules(value: LocalizedAlignRuleOptions | undefined): this {
-        if (((this._alignRules_1_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._alignRules_1_flag = AttributeUpdaterFlag.UPDATE
-            this._alignRules_1_0value = value
-        } else
-        {
-            this._alignRules_1_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
@@ -8037,6 +8026,17 @@ export class CommonMethodModifier implements CommonMethod {
         } else
         {
             this._onAccessibilityFocus_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    onAccessibilityActionIntercept(value: AccessibilityActionInterceptCallback | undefined): this {
+        if (((this._onAccessibilityActionIntercept_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onAccessibilityActionIntercept_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onAccessibilityActionIntercept_0_0value = value
+        } else
+        {
+            this._onAccessibilityActionIntercept_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

@@ -36,57 +36,53 @@ void FinishTransitionImpl(Ark_SwiperContentTransitionProxy peer)
     CHECK_NULL_VOID(peer && peer->handler);
     peer->handler->FinishTransition();
 }
-Ark_Number GetSelectedIndexImpl(Ark_SwiperContentTransitionProxy peer)
+Ark_Int32 GetSelectedIndexImpl(Ark_SwiperContentTransitionProxy peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    const auto errValue = Converter::ArkValue<Ark_Int32>(0);
     CHECK_NULL_RETURN(peer && peer->handler, errValue);
-    return Converter::ArkValue<Ark_Number>(peer->handler->GetSelectedIndex());
+    return Converter::ArkValue<Ark_Int32>(peer->handler->GetSelectedIndex());
 }
 void SetSelectedIndexImpl(Ark_SwiperContentTransitionProxy peer,
-                          const Ark_Number* selectedIndex)
+                          Ark_Int32 selectedIndex)
 {
     CHECK_NULL_VOID(peer && peer->handler);
-    CHECK_NULL_VOID(selectedIndex);
-    peer->handler->SetSelectedIndex(Converter::Convert<int32_t>(*selectedIndex));
+    peer->handler->SetSelectedIndex(Converter::Convert<int32_t>(selectedIndex));
 }
-Ark_Number GetIndexImpl(Ark_SwiperContentTransitionProxy peer)
+Ark_Int32 GetIndexImpl(Ark_SwiperContentTransitionProxy peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    const auto errValue = Converter::ArkValue<Ark_Int32>(0);
     CHECK_NULL_RETURN(peer && peer->handler, errValue);
-    return Converter::ArkValue<Ark_Number>(peer->handler->GetIndex());
+    return Converter::ArkValue<Ark_Int32>(peer->handler->GetIndex());
 }
 void SetIndexImpl(Ark_SwiperContentTransitionProxy peer,
-                  const Ark_Number* index)
+                  Ark_Int32 index)
 {
     CHECK_NULL_VOID(peer && peer->handler);
-    CHECK_NULL_VOID(index);
-    peer->handler->SetIndex(Converter::Convert<float>(*index));
+    peer->handler->SetIndex(Converter::Convert<float>(index));
 }
-Ark_Number GetPositionImpl(Ark_SwiperContentTransitionProxy peer)
+Ark_Float64 GetPositionImpl(Ark_SwiperContentTransitionProxy peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    const auto errValue = Converter::ArkValue<Ark_Float64>(0);
     CHECK_NULL_RETURN(peer && peer->handler, errValue);
-    return Converter::ArkValue<Ark_Number>(peer->handler->GetPosition());
+    return Converter::ArkValue<Ark_Float64>(peer->handler->GetPosition());
 }
 void SetPositionImpl(Ark_SwiperContentTransitionProxy peer,
-                     const Ark_Number* position)
+                     Ark_Float64 position)
 {
     CHECK_NULL_VOID(peer && peer->handler);
-    CHECK_NULL_VOID(position);
-    peer->handler->SetPosition(Converter::Convert<float>(*position));
+    peer->handler->SetPosition(Converter::Convert<float>(position));
 }
-Ark_Number GetMainAxisLengthImpl(Ark_SwiperContentTransitionProxy peer)
+Ark_Float64 GetMainAxisLengthImpl(Ark_SwiperContentTransitionProxy peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    const auto errValue = Converter::ArkValue<Ark_Float64>(0);
     CHECK_NULL_RETURN(peer && peer->handler, errValue);
-    return Converter::ArkValue<Ark_Number>(peer->handler->GetMainAxisLength());
+    return Converter::ArkValue<Ark_Float64>(peer->handler->GetMainAxisLength());
 }
 void SetMainAxisLengthImpl(Ark_SwiperContentTransitionProxy peer,
-                           const Ark_Number* mainAxisLength)
+                           Ark_Float64 mainAxisLength)
 {
     CHECK_NULL_VOID(peer && peer->handler);
-    CHECK_NULL_VOID(mainAxisLength);
-    peer->handler->SetMainAxisLength(Converter::Convert<float>(*mainAxisLength));
+    peer->handler->SetMainAxisLength(Converter::Convert<float>(mainAxisLength));
 }
 } // SwiperContentTransitionProxyAccessor
 const GENERATED_ArkUISwiperContentTransitionProxyAccessor* GetSwiperContentTransitionProxyAccessor()

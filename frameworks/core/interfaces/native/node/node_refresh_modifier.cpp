@@ -197,12 +197,12 @@ ArkUI_Float32 GetMaxPullDownDistance(ArkUINodeHandle node)
 }
 
 void SetOnStepOffsetChangeCallback(ArkUINodeHandle node,
-    void (*callback)(const ArkUI_Float32 offset, void* extraData), void* extraData)
+    void (*callback)(const ArkUI_Float32 offset, void* extraData, const bool isDrag), void* extraData)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode && callback);
-    auto onChange = [callback, extraData](const float offset) {
-        callback(offset, extraData);
+    auto onChange = [callback, extraData](const float offset, const bool isDrag) {
+        callback(offset, extraData, isDrag);
     };
     RefreshModelNG::SetStepOffsetChange(frameNode, std::move(onChange));
 }

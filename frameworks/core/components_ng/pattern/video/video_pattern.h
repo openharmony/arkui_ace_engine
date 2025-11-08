@@ -32,12 +32,6 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/base/geometry/rect.h"
 
-#ifdef ENABLE_ROSEN_BACKEND
-namespace OHOS::Rosen::ModifierNG {
-class RSFrameClipModifier;
-}
-#endif
-
 namespace OHOS::Ace {
 class ImageAnalyzerManager;
 }
@@ -465,9 +459,7 @@ private:
 
     ContentTransitionType contentTransition_ = ContentTransitionType::IDENTITY;
     Color surfaceBgColor_ = Color::BLACK;
-#ifdef ENABLE_ROSEN_BACKEND
-    std::shared_ptr<Rosen::ModifierNG::RSFrameClipModifier> multiThreadModifier_;
-#endif
+
     ACE_DISALLOW_COPY_AND_MOVE(VideoPattern);
 };
 } // namespace OHOS::Ace::NG

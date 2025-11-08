@@ -98,6 +98,8 @@ export class ArkUIAniModule {
     native static _CustomNode_QueryNavigationInfo(ptr: KPointer): uiObserver.NavigationInfo
     native static _CustomNode_QueryNavDestinationInfo(ptr: KPointer): uiObserver.NavDestinationInfo
     native static _CustomNode_QueryNavDestinationInfo0(ptr: KPointer, isInner: boolean): uiObserver.NavDestinationInfo
+    native static _CustomNode_OnReuse(ptr: KPointer): void
+    native static _CustomNode_OnRecycle(ptr: KPointer): void
     native static _CustomNode_QueryNavDestinationInfo1(uniqueId: KInt): uiObserver.NavDestinationInfo
     native static _CustomNode_QueryRouterPageInfo(ptr: KPointer): uiObserver.RouterPageInfo
     native static _CustomNode_QueryRouterPageInfo1(uniqueId: KInt): uiObserver.RouterPageInfo
@@ -111,6 +113,7 @@ export class ArkUIAniModule {
     native static _SetWaterFlowSection(ptr: KPointer, sections: WaterFlowSections): void
     native static _SetWaterFlowFooterContent(ptr: KPointer, footerContent: KPointer): void
     native static _SetWaterFlowFooter(ptr: KPointer, footer: KPointer): void
+    native static _ResetWaterFlowFooter(ptr: KPointer): void
     native static _SetWaterFlowScroller(ptr: KPointer, scroller: KPointer): void
     native static _SetWaterFlowLayoutMode(ptr: KPointer, mode: KInt): void
     native static _SetListChildrenMainSize(ptr: KPointer, value: ChildrenMainSize): void

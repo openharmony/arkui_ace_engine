@@ -88,7 +88,7 @@ import { ComponentContentBase_serializer } from "./../ComponentContent"
 import { curves_ICurve_serializer } from "./../framework/ohos.curves"
 import { LevelOrder_serializer } from "./../framework/ohos.promptAction"
 import { TimePickerDialogOptions_serializer, TimePickerDialogOptions } from "./timePicker"
-import { TextPickerDialogOptions_serializer, TextPickerDialogOptions } from "./textPicker"
+import { TextPickerDialogOptions_serializer, TextPickerDialogOptions,DividerOptions_serializer, DividerOptions } from "./textPicker"
 import { DatePickerDialogOptions_serializer, DatePickerDialogOptions } from "./datePicker"
 import { common2D_Rect_serializer } from "./../framework/ohos.graphics.common2D"
 export class ActionSheet {
@@ -1660,6 +1660,10 @@ export class FrameNodeExtender {
         const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_adoptChild(extractors.toFrameNodePtr(peer), extractors.toFrameNodePtr(child))
         return retval
     }
+    static isOnRenderTree_serialize(peer: FrameNode): boolean {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_isOnRenderTree(extractors.toFrameNodePtr(peer))
+        return retval
+    }
     static removeAdoptedChild_serialize(peer: FrameNode, child: FrameNode): int32 {
         const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_removeAdoptedChild(extractors.toFrameNodePtr(peer), extractors.toFrameNodePtr(child))
         return retval
@@ -1959,6 +1963,10 @@ export class FrameNodeExtender {
         const peer_casted = peer as (FrameNode)
         const child_casted = child as (FrameNode)
         return FrameNodeExtender.removeAdoptedChild_serialize(peer_casted, child_casted)
+    }
+    public static isOnRenderTree(peer: FrameNode): boolean {
+        const peer_casted = peer as (FrameNode)
+        return FrameNodeExtender.isOnRenderTree_serialize(peer_casted)
     }
 }
 export class GestureOps {
@@ -2547,7 +2555,7 @@ export class NavExtender {
     static popToIndex_serialize(pathStack: NavPathStack, index: int32, animated: boolean): void {
         ArkUIGeneratedNativeModule._NavExtender_popToIndex(toPeerPtr(pathStack), index, animated ? 1 : 0)
     }
-    static popToName_serialize(pathStack: NavPathStack, name: string, animated: boolean): number {
+    static popToName_serialize(pathStack: NavPathStack, name: string, animated: boolean): int32 {
         const retval  = ArkUIGeneratedNativeModule._NavExtender_popToName(toPeerPtr(pathStack), name, animated ? 1 : 0)
         return retval
     }
@@ -2628,7 +2636,7 @@ export class NavExtender {
         NavExtender.popToIndex_serialize(pathStack_casted, index_casted, animated_casted)
         return
     }
-    public static popToName(pathStack: NavPathStack, name: string, animated: boolean): number {
+    public static popToName(pathStack: NavPathStack, name: string, animated: boolean): int32 {
         const pathStack_casted = pathStack as (NavPathStack)
         const name_casted = name as (string)
         const animated_casted = animated as (boolean)
@@ -4181,6 +4189,26 @@ export class ScreenshotService {
         const target_casted = target as (string)
         const name_casted = name as (string)
         return ScreenshotService.requestScreenshot_serialize(target_casted, name_casted)
+    }
+}
+export class SelectExtender {
+    static setDivider_serialize(node: KPointer, options?: DividerOptions): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue  = options!
+            DividerOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SelectExtender_setDivider(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    public static setDivider(node: KPointer, options?: DividerOptions): void {
+        const node_casted = node as (KPointer)
+        const options_casted = options as (DividerOptions | undefined)
+        SelectExtender.setDivider_serialize(node_casted, options_casted)
+        return
     }
 }
 export class StateStylesOps {

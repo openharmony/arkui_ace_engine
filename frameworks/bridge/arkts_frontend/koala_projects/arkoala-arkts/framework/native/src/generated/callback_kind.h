@@ -19,6 +19,7 @@
 #define _CALLBACK_KIND_H
 
 typedef enum CallbackKind {
+    Kind_AccessibilityActionInterceptCallback = -321958515,
     Kind_AccessibilityCallback = 589030517,
     Kind_AccessibilityFocusCallback = 1715445305,
     Kind_ArcScrollIndexHandler = -274386039,
@@ -26,6 +27,7 @@ typedef enum CallbackKind {
     Kind_AsyncCallback_Void = 1075219926,
     Kind_ButtonModifierBuilder = -2004118094,
     Kind_ButtonTriggerClickCallback = -1964292933,
+    Kind_Callback_AccessibilityActionInterceptResult_Void = -1365174832,
     Kind_Callback_Area_Area_Void = -2024393616,
     Kind_Callback_Array_Number_Void = 582384234,
     Kind_Callback_Array_String_Void = -440782244,
@@ -69,6 +71,7 @@ typedef enum CallbackKind {
     Kind_Callback_HitTestMode_Void = -1755111025,
     Kind_Callback_HoverEvent_Void = -1576788379,
     Kind_Callback_I32_I32_Void = 1591865008,
+    Kind_Callback_I32_Void = 1148910599,
     Kind_Callback_InsertValue_Boolean = -383025085,
     Kind_Callback_InsertValue_Void = -1121207885,
     Kind_Callback_ItemDragInfo_Number_Number_Boolean_Void = -1627362945,
@@ -186,6 +189,7 @@ typedef enum CallbackKind {
     Kind_Callback_T_Void_Boolean = 217914240,
     Kind_Callback_T_Void_Date = 1108733360,
     Kind_Callback_T_Void_Global_Resource_Resource = -941798353,
+    Kind_Callback_T_Void_I32 = -747290452,
     Kind_Callback_T_Void_Number = 1090440167,
     Kind_Callback_T_Void_String = 1477958353,
     Kind_Callback_TabContentTransitionProxy_Void = -1223938478,

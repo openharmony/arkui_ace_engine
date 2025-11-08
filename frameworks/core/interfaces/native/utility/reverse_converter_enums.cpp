@@ -24,6 +24,31 @@
 #include "reverse_converter.h"
 
 namespace OHOS::Ace::NG::Converter {
+void AssignArkValue(Ark_AccessibilityAction& dst, const AccessibilityInterfaceAction& src)
+{
+    switch (src) {
+        case AccessibilityInterfaceAction::UNDEFINED_ACTION: dst = ARK_ACCESSIBILITY_ACTION_UNDEFINED_ACTION; break;
+        case AccessibilityInterfaceAction::ACCESSIBILITY_CLICK: dst = ARK_ACCESSIBILITY_ACTION_ACCESSIBILITY_CLICK; break;
+        default:
+            dst = static_cast<Ark_AccessibilityAction>(-1);
+            LOGE("Unexpected enum value in Ark_AccessibilityAction: %{public}d", src);
+            break;
+    }
+}
+
+void AssignArkValue(Ark_AccessibilityActionInterceptResult& dst, const AccessibilityActionInterceptResult& src)
+{
+    switch (src) {
+        case AccessibilityActionInterceptResult::ACTION_INTERCEPT: dst =  ARK_ACCESSIBILITY_ACTION_INTERCEPT_RESULT_ACTION_INTERCEPT; break;
+        case AccessibilityActionInterceptResult::ACTION_CONTINUE: dst = ARK_ACCESSIBILITY_ACTION_INTERCEPT_RESULT_ACTION_CONTINUE; break;
+        case AccessibilityActionInterceptResult::ACTION_RISE: dst = ARK_ACCESSIBILITY_ACTION_INTERCEPT_RESULT_ACTION_RISE; break;
+        default:
+            dst = static_cast<Ark_AccessibilityActionInterceptResult>(-1);
+            LOGE("Unexpected enum value in Ark_AccessibilityActionInterceptResult: %{public}d", src);
+            break;
+    }
+}
+
 void AssignArkValue(Ark_AccessibilityHoverType& dst, const AccessibilityHoverAction& src)
 {
     switch (src) {

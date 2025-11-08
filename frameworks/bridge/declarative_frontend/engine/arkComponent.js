@@ -3368,20 +3368,14 @@ class KeyBoardShortCutModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
-  applyPeer(node, reset, component) {
+  applyPeer(node, reset) {
     if (reset) {
-      getUINativeModule().common.resetKeyBoardShortCutAll(node);
+      getUINativeModule().common.resetKeyBoardShortCut(node);
+    } else if (this.value.action === undefined) {
+      getUINativeModule().common.setKeyBoardShortCut(node, this.value.value, this.value.keys);
     } else {
-      for (let index = 0; index < this.value.length; index++) {
-        if (this.value[index].action === undefined) {
-          getUINativeModule().common.setKeyBoardShortCut(node, this.value[index].value, this.value[index].keys);
-        } else {
-          getUINativeModule().common.setKeyBoardShortCut(node, this.value[index].value, this.value[index].keys,
-            this.value[index].action);
-        }
-      }
+      getUINativeModule().common.setKeyBoardShortCut(node, this.value.value, this.value.keys, this.value.action);
     }
-    component._keyboardShortcutList = [];
   }
   checkObjectDiff() {
     return !this.value.isEqual(this.stageValue);
@@ -3770,7 +3764,6 @@ class ArkComponent {
     this._changed = false;
     this._classType = classType;
     this._needDiff = true;
-    this._keyboardShortcutList = new Array();
     if (classType === ModifierType.FRAME_NODE) {
       this._instanceId = -1;
       this._modifiersWithKeys = new ObservedMap();
@@ -5170,9 +5163,7 @@ class ArkComponent {
     keyboardShortCut.value = value;
     keyboardShortCut.keys = keys;
     keyboardShortCut.action = action;
-    this._keyboardShortcutList.push(keyboardShortCut);
-    modifierWithKey(this._modifiersWithKeys, KeyBoardShortCutModifier.identity, KeyBoardShortCutModifier,
-      this._keyboardShortcutList);
+    modifierWithKey(this._modifiersWithKeys, KeyBoardShortCutModifier.identity, KeyBoardShortCutModifier, keyboardShortCut);
     return this;
   }
   accessibilityGroup(value) {

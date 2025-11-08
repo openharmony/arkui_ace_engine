@@ -546,6 +546,12 @@ public:
 
     OffsetF GetPositionToWindowWithTransform(bool fromBottom = false) const;
 
+    OffsetF GetPositionToWindowWithTransform(OffsetF offset) const;
+
+    RectF GetRectToScreen(RectF rectToWin) const;
+
+    RectF GetRectToWindowWithTransform(RectF rawRect) const;
+
     OffsetF GetTransformRelativeOffset() const;
 
     VectorF GetTransformScaleRelativeToWindow() const;

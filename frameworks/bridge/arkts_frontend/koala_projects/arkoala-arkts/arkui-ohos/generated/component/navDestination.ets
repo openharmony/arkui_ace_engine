@@ -756,9 +756,9 @@ export interface NestedScrollInfo {
 }
 export interface NavDestinationTransition {
     onTransitionEnd?: (() => void);
-    duration?: number;
+    duration?: int32;
     curve?: curves.Curve;
-    delay?: number;
+    delay?: int32;
     event: (() => void);
 }
 export interface NavDestinationAttribute extends CommonMethod {
@@ -1322,7 +1322,7 @@ export class NavDestinationTransition_serializer {
         if (valueHolderForDuration !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForDurationTmpValue  = valueHolderForDuration!
-            valueSerializer.writeNumber(valueHolderForDurationTmpValue)
+            valueSerializer.writeInt32(valueHolderForDurationTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -1338,7 +1338,7 @@ export class NavDestinationTransition_serializer {
         if (valueHolderForDelay !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForDelayTmpValue  = valueHolderForDelay!
-            valueSerializer.writeNumber(valueHolderForDelayTmpValue)
+            valueSerializer.writeInt32(valueHolderForDelayTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -1365,11 +1365,11 @@ export class NavDestinationTransition_serializer {
         }
         const onTransitionEndTmpResult : (() => void) | undefined = onTransitionEndTmpBuf
         const durationTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let durationTmpBuf : number | undefined = undefined
+        let durationTmpBuf : int32 | undefined = undefined
         if ((durationTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            durationTmpBuf = (valueDeserializer.readNumber() as number)
+            durationTmpBuf = valueDeserializer.readInt32()
         }
-        const durationTmpResult : number | undefined = durationTmpBuf
+        const durationTmpResult : int32 | undefined = durationTmpBuf
         const curveTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let curveTmpBuf : curves.Curve | undefined = undefined
         if ((curveTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -1377,11 +1377,11 @@ export class NavDestinationTransition_serializer {
         }
         const curveTmpResult : curves.Curve | undefined = curveTmpBuf
         const delayTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let delayTmpBuf : number | undefined = undefined
+        let delayTmpBuf : int32 | undefined = undefined
         if ((delayTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            delayTmpBuf = (valueDeserializer.readNumber() as number)
+            delayTmpBuf = valueDeserializer.readInt32()
         }
-        const delayTmpResult : number | undefined = delayTmpBuf
+        const delayTmpResult : int32 | undefined = delayTmpBuf
         const eventTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
         const eventTmpBufBufCall : KPointer = valueDeserializer.readPointer()
         const eventTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()

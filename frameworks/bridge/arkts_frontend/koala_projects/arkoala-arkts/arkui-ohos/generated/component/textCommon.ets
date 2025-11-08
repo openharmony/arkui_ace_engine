@@ -325,7 +325,7 @@ export enum TextDataDetectorType {
     DATE_TIME = 4
 }
 export interface TextDataDetectorConfig {
-    types: Array<TextDataDetectorType>;
+    types: Array<TextDataDetectorType> | null | undefined;
     onDetectResultUpdate?: ((value0: string) => void);
     color?: ResourceColor;
     decoration?: DecorationStyleInterface;
@@ -1092,10 +1092,16 @@ export class TextDataDetectorConfig_serializer {
     public static write(buffer: SerializerBase, value: TextDataDetectorConfig): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForTypes  = value.types
-        valueSerializer.writeInt32((valueHolderForTypes.length).toInt())
-        for (let valueHolderForTypesCounterI = 0; valueHolderForTypesCounterI < valueHolderForTypes.length; valueHolderForTypesCounterI++) {
-            const valueHolderForTypesTmpElement : TextDataDetectorType = valueHolderForTypes[valueHolderForTypesCounterI]
-            valueSerializer.writeInt32(valueHolderForTypesTmpElement.valueOf())
+        if (valueHolderForTypes !== undefined && valueHolderForTypes !== null) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForTypesTmpValue  = valueHolderForTypes!
+            valueSerializer.writeInt32((valueHolderForTypesTmpValue.length).toInt())
+            for (let valueHolderForTypesTmpValueCounterI = 0; valueHolderForTypesTmpValueCounterI < valueHolderForTypesTmpValue.length; valueHolderForTypesTmpValueCounterI++) {
+                const valueHolderForTypesTmpValueTmpElement : TextDataDetectorType = valueHolderForTypesTmpValue[valueHolderForTypesTmpValueCounterI]
+                valueSerializer.writeInt32(valueHolderForTypesTmpValueTmpElement.valueOf())
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const valueHolderForOnDetectResultUpdate  = value.onDetectResultUpdate
         if (valueHolderForOnDetectResultUpdate !== undefined) {
@@ -1140,12 +1146,17 @@ export class TextDataDetectorConfig_serializer {
     }
     public static read(buffer: DeserializerBase): TextDataDetectorConfig {
         let valueDeserializer : DeserializerBase = buffer
-        const typesTmpBufLength : int32 = valueDeserializer.readInt32()
-        let typesTmpBuf : Array<TextDataDetectorType> = new Array<TextDataDetectorType>(typesTmpBufLength)
-        for (let typesTmpBufBufCounterI = 0; typesTmpBufBufCounterI < typesTmpBufLength; typesTmpBufBufCounterI++) {
-            typesTmpBuf[typesTmpBufBufCounterI] = TextDataDetectorType.fromValue(valueDeserializer.readInt32())
+        const typesTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let typesTmpBuf : Array<TextDataDetectorType> | null | undefined = undefined
+        if ((typesTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const typesTmpBuf_Length : int32 = valueDeserializer.readInt32()
+            let typesTmpBuf_ : Array<TextDataDetectorType> = new Array<TextDataDetectorType>(typesTmpBuf_Length)
+            for (let typesTmpBuf_BufCounterI = 0; typesTmpBuf_BufCounterI < typesTmpBuf_Length; typesTmpBuf_BufCounterI++) {
+                typesTmpBuf_[typesTmpBuf_BufCounterI] = TextDataDetectorType.fromValue(valueDeserializer.readInt32())
+            }
+            typesTmpBuf = typesTmpBuf_
         }
-        const typesTmpResult : Array<TextDataDetectorType> = typesTmpBuf
+        const typesTmpResult : Array<TextDataDetectorType> | null | undefined = typesTmpBuf
         const onDetectResultUpdateTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let onDetectResultUpdateTmpBuf : ((value0: string) => void) | undefined = undefined
         if ((onDetectResultUpdateTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {

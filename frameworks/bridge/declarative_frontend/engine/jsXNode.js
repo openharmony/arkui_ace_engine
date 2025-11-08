@@ -1641,7 +1641,7 @@ class FrameNode extends Disposable {
         }
         getUINativeModule().frameNode.applyAttributesFinish(this.nodePtr_);
     }
-    convertPoint(position, targetNode) {
+    convertPosition(position, targetNode) {
         if (targetNode === null) {
             throw { message: "The parameter 'targetNode' is invalid: it cannot be null. Please pass a non-null FrameNode object.", code: 100025 };
         }
@@ -1660,7 +1660,10 @@ class FrameNode extends Disposable {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         const offsetPosition = getUINativeModule().frameNode.convertPoint(this.getNodePtr(), position.x, position.y, targetNode.nodePtr_);
         __JSScopeUtil__.restoreInstanceId();
-        return { x: offsetPosition[0], y: offsetPosition[1] };
+        if (offsetPosition[0] === 0) {
+            throw { message: 'The current FrameNode and the target FrameNode do not have a common ancestor node.', code: 100024 };
+        }
+        return { x: offsetPosition[1], y: offsetPosition[2] };
     }
     isTransferred() {
         return false;
@@ -1712,6 +1715,9 @@ class FrameNode extends Disposable {
         if (errorInfo !== undefined) {
             throw { message: errorInfo, code: 100025 };
         }
+    }
+    isInRenderState() {
+        return getUINativeModule().frameNode.isOnRenderTree(this.nodePtr_);
     }
 }
 class ImmutableFrameNode extends FrameNode {
@@ -2756,9 +2762,10 @@ class ShapeMask extends BaseShape {
     }
 }
 class RenderNode extends Disposable {
-    constructor(type) {
+    constructor(type, cptrVal = 0) {
         super();
         this.nodePtr = null;
+        this.type = type; // use for transfer 
         this.childrenList = [];
         this.parentRenderNode = null;
         this.backgroundColorValue = 0;
@@ -2788,7 +2795,11 @@ class RenderNode extends Disposable {
         if (type === 'BuilderRootFrameNode' || type === 'CustomFrameNode') {
             return;
         }
-        this._nativeRef = getUINativeModule().renderNode.createRenderNode(this);
+        if (cptrVal === 0 || cptrVal === null || cptrVal === undefined) {
+            this._nativeRef = getUINativeModule().renderNode.createRenderNode(this);
+        } else {
+            this._nativeRef = getUINativeModule().renderNode.createRenderNodeWithPtrVal(this, cptrVal);
+        }
         this.nodePtr = this._nativeRef?.getNativeHandle();
         if (this.apiTargetVersion && this.apiTargetVersion < 12) {
             this.clipToFrame = false;
@@ -3274,6 +3285,12 @@ class RenderNode extends Disposable {
         return this.shapeClipValue;
     }
 }
+function nodeDeref(ref) {
+    return ref?.deref?.() ?? undefined;
+}
+function getNodePtrValue(nativeRef) {
+    return nativeRef?.getNativeHandleVal?.() ?? undefined;
+}
 function edgeColors(all) {
     return { left: all, top: all, right: all, bottom: all };
 }
@@ -3576,6 +3593,6 @@ globalThis.__deleteBuilderNodeFromBuilder__ = function __deleteBuilderNodeFromBu
 export default {
     NodeController, BuilderNode, BaseNode, RenderNode, FrameNode, FrameNodeUtils,
     NodeRenderType, XComponentNode, LengthMetrics, ColorMetrics, LengthUnit, LengthMetricsUnit, ShapeMask, ShapeClip,
-    edgeColors, edgeWidths, borderStyles, borderRadiuses, Content, ComponentContent, NodeContent,
+    getNodePtrValue, nodeDeref, edgeColors, edgeWidths, borderStyles, borderRadiuses, Content, ComponentContent, NodeContent,
     typeNode, NodeAdapter, ExpandMode, UIState, getFrameNodeRawPtr, ReactiveBuilderNode, ReactiveComponentContent
 };

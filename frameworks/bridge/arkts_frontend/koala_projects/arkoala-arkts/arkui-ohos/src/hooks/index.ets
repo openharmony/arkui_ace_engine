@@ -55,7 +55,9 @@ import { PathStackUtils } from "../base/ArkNavPathStack"
 import { PageMapBuilder } from "../component/builder";
 import { NavigationOpsHandWritten } from "./NavigationOpsHandWritten";
 import { ArkImageComponent, ResourceStr, ImageContent, ImageAIOptions } from "#generated";
+import { ArkWaterFlowComponent, WaterFlowOptions } from "#generated";
 import { ImageOpsHandWritten } from "./ImageOpsHandWritten";
+import { WaterFlowHandWritten } from "./WaterFlowHandWritten";
 import { ArkCanvasComponent, CanvasRenderingContext2D, DrawingRenderingContext } from "#generated";
 import { ArkVideoComponent, VideoOptions } from "#generated";
 import { ArkXComponentComponent, XComponentOptions, XComponentParameters, NativeXComponentParameters, XComponentController, ImageAnalyzerConfig } from "#generated";
@@ -65,6 +67,8 @@ import { XComponentOpsHandWritten } from "./XComponentOpsHandWritten";
 import { PeerNode } from '../PeerNode';
 import { int32 } from "@koalaui/common";
 import { DrawModifier } from "arkui/component/common";
+import { ArkSelectComponent, ArkSelectPeer, DividerOptions } from "#generated";
+import { SelectExtender } from "#generated"
 
 export function hookId(component: object, value?: string) {}
 
@@ -108,6 +112,8 @@ export function hookGestureModifier(commonMethod: ArkCommonMethodComponent, valu
         gestureEvent = new UIGestureEvent();
         gestureEvent.setPeer(commonMethod.getPeer());
         commonMethod.setGestureEvent(gestureEvent);
+    } else {
+        gestureEvent = commonMethod.getGestureEvent();
     }
     gestureEvent!.clearGestures();
     value_casted.applyGesture(gestureEvent as UIGestureEvent);
@@ -299,13 +305,13 @@ export function hookReplacePathByNameMethod(pathStack: NavPathStack, name: strin
 export function hookPopMethod(pathStack: NavPathStack, result?: boolean | undefined | Object, animated?: boolean): NavPathInfo | undefined {
   return PathStackUtils.pop(pathStack, result, animated);
 }
-export function hookPopToNameMethod(pathStack: NavPathStack, name: string, result?: boolean | undefined | Object, animated?: boolean): number {
+export function hookPopToNameMethod(pathStack: NavPathStack, name: string, result?: boolean | undefined | Object, animated?: boolean): int32 {
   return PathStackUtils.popToName(pathStack, name, result, animated);
 }
-export function hookPopToIndexMethod(pathStack: NavPathStack, index: number, result?: boolean | undefined | Object, animated?: boolean) {
+export function hookPopToIndexMethod(pathStack: NavPathStack, index: int32, result?: boolean | undefined | Object, animated?: boolean) {
   PathStackUtils.popToIndex(pathStack, index, result, animated);
 }
-export function hookGetParamByIndexMethod(pathStack: NavPathStack, index: number): Object | undefined {
+export function hookGetParamByIndexMethod(pathStack: NavPathStack, index: int32): Object | undefined {
   return PathStackUtils.getParamByIndex(pathStack, index);
 }
 export function hookGetParamByNameMethod(pathStack: NavPathStack, name: string): Array<Object | null | undefined> {
@@ -345,4 +351,29 @@ export function hookSetXComponentOptions(component: ArkXComponentComponent,
 export function hookXComponentStartImageAnalyzer(
   controller: XComponentController, config: ImageAnalyzerConfig): Promise<void> {
   return XComponentOpsHandWritten.hookXComponentStartImageAnalyzerImpl(controller, config);
+}
+
+export function hookSelectSetDividerMethod(
+  receiver: ArkSelectComponent | ArkSelectPeer, value?: DividerOptions | null | undefined): void {
+    const selectPeer: ArkSelectPeer = receiver instanceof ArkSelectComponent ? (receiver as ArkSelectComponent).getPeer() :
+       (receiver as ArkSelectPeer);
+    if (!selectPeer) {
+      return;
+    }
+    let value_casted: DividerOptions | undefined;
+    if (value === null) {
+      value_casted = {
+        strokeWidth: '0px',
+        startMargin: 0,
+        endMargin: 0,
+        color: '#00000000',
+      }
+    } else {
+      value_casted = value as (DividerOptions | undefined)
+    }
+    SelectExtender.setDivider(selectPeer.peer.ptr, value_casted)
+}
+
+export function hookWaterFlowOptionsImpl(node: ArkWaterFlowComponent, options: WaterFlowOptions | undefined): void {
+  WaterFlowHandWritten.hookWaterFlowOptionsImpl(node, options)
 }

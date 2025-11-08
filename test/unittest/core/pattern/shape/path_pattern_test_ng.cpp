@@ -198,9 +198,9 @@ HWTEST_F(PathPatternTestNg, SetCommands001, TestSize.Level1)
     EXPECT_EQ(pathPaintProperty->HasCommands(), false);
 
     std::vector<ResourceObjectParams> params;
-    AddMockResourceData(0, PATH_CMD);
+    AddMockResourceData(ID_COMMANDS, PATH_CMD);
     auto resObjWithString = AceType::MakeRefPtr<ResourceObject>(
-        0, static_cast<int32_t>(ResourceType::STRING), params, "", "", Container::CurrentIdSafely());
+        ID_COMMANDS, static_cast<int32_t>(ResourceType::STRING), params, "", "", Container::CurrentIdSafely());
     pathModelNG.SetCommands(resObjWithString);
     pattern->resourceMgr_->ReloadResources();
     EXPECT_EQ(pathPaintProperty->HasCommands(), true);

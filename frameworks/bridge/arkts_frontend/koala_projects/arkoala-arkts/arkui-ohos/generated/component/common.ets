@@ -3923,28 +3923,24 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setEnabled(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setAlignRulesWithAlignRuleOptionTypedValueAttribute(value: AlignRuleOption | undefined): void {
+    setAlignRulesAttribute(value: AlignRuleOption | LocalizedAlignRuleOptions | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            AlignRuleOption_serializer.write(thisSerializer, valueTmpValue)
+            if (valueTmpValue instanceof AlignRuleOption) {
+                thisSerializer.writeInt8((0).toByte())
+                const valueTmpValueForIdx0  = valueTmpValue as AlignRuleOption
+                AlignRuleOption_serializer.write(thisSerializer, valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof LocalizedAlignRuleOptions) {
+                thisSerializer.writeInt8((1).toByte())
+                const valueTmpValueForIdx1  = valueTmpValue as LocalizedAlignRuleOptions
+                LocalizedAlignRuleOptions_serializer.write(thisSerializer, valueTmpValueForIdx1)
+            }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_setAlignRulesWithAlignRuleOptionTypedValue(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    setAlignRulesWithLocalizedAlignRuleOptionsTypedValueAttribute(value: LocalizedAlignRuleOptions | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (value !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
-            LocalizedAlignRuleOptions_serializer.write(thisSerializer, valueTmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._CommonMethod_setAlignRulesWithLocalizedAlignRuleOptionsTypedValue(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_setAlignRules(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setAspectRatioAttribute(value: number | undefined): void {
@@ -4429,6 +4425,18 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._CommonMethod_setOnAccessibilityFocus(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnAccessibilityActionInterceptAttribute(value: AccessibilityActionInterceptCallback | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setOnAccessibilityActionIntercept(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setAccessibilityTextHintAttribute(value: string | undefined): void {
@@ -6303,6 +6311,16 @@ export enum AccessibilityRoleType {
     ROLE_NONE = 124
 }
 export type AccessibilityFocusCallback = (isFocus: boolean) => void;
+export enum AccessibilityAction {
+    UNDEFINED_ACTION = 0,
+    ACCESSIBILITY_CLICK = 1
+}
+export enum AccessibilityActionInterceptResult {
+    ACTION_INTERCEPT = 0,
+    ACTION_CONTINUE = 1,
+    ACTION_RISE = 2
+}
+export type AccessibilityActionInterceptCallback = (action: AccessibilityAction) => AccessibilityActionInterceptResult;
 export enum FinishCallbackType {
     REMOVED = 0,
     LOGICALLY = 1
@@ -7400,10 +7418,7 @@ export interface CommonMethod {
     enabled(value: boolean | undefined): this {
         throw new Error("Unimplemented method enabled")
     }
-    alignRulesWithAlignRuleOptionTypedValue(value: AlignRuleOption | undefined): this {
-        throw new Error("Unimplemented method alignRules")
-    }
-    alignRulesWithLocalizedAlignRuleOptionsTypedValue(value: LocalizedAlignRuleOptions | undefined): this {
+    alignRules(value: AlignRuleOption | LocalizedAlignRuleOptions | undefined): this {
         throw new Error("Unimplemented method alignRules")
     }
     aspectRatio(value: number | undefined): this {
@@ -7519,6 +7534,9 @@ export interface CommonMethod {
     }
     onAccessibilityFocus(value: AccessibilityFocusCallback | undefined): this {
         throw new Error("Unimplemented method onAccessibilityFocus")
+    }
+    onAccessibilityActionIntercept(value: AccessibilityActionInterceptCallback | undefined): this {
+        throw new Error("Unimplemented method onAccessibilityActionIntercept")
     }
     accessibilityTextHint(value: string | undefined): this {
         throw new Error("Unimplemented method accessibilityTextHint")
@@ -7712,7 +7730,6 @@ export interface CommonMethod {
     onGestureRecognizerJudgeBegin(callback_: GestureRecognizerJudgeBeginCallback | undefined, exposeInnerGesture: boolean | undefined): this {
         throw new Error("Unimplemented method onGestureRecognizerJudgeBegin")
     }
-    overload alignRules { alignRulesWithAlignRuleOptionTypedValue, alignRulesWithLocalizedAlignRuleOptionsTypedValue }
     accessibilityGroup(isGroup: boolean | undefined, accessibilityOptions?: AccessibilityOptions): this {
         throw new Error("Unimplemented method accessibilityGroup")
     }
@@ -7827,7 +7844,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     markAnchor_value?: Position | LocalizedPosition | undefined
     offset_value?: Position | Edges | LocalizedEdges | undefined
     enabled_value?: boolean | undefined
-    alignRules_value?: AlignRuleOption | undefined
+    alignRules_value?: AlignRuleOption | LocalizedAlignRuleOptions | undefined
     aspectRatio_value?: number | undefined
     clickEffect_value?: ClickEffect | null | undefined
     onDragStart_value?: ((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) | undefined
@@ -7865,6 +7882,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     accessibilityScrollTriggerable_value?: boolean | undefined
     accessibilityRole_value?: AccessibilityRoleType | undefined
     onAccessibilityFocus_value?: AccessibilityFocusCallback | undefined
+    onAccessibilityActionIntercept_value?: AccessibilityActionInterceptCallback | undefined
     accessibilityTextHint_value?: string | undefined
     accessibilityDescription_value?: string | undefined
     accessibilityLevel_value?: string | undefined
@@ -8190,10 +8208,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     enabled(value: boolean | undefined): this {
         return this
     }
-    alignRules(value: AlignRuleOption | undefined): this {
-        return this
-    }
-    alignRules(value: LocalizedAlignRuleOptions | undefined): this {
+    alignRules(value: AlignRuleOption | LocalizedAlignRuleOptions | undefined): this {
         return this
     }
     aspectRatio(value: number | undefined): this {
@@ -8308,6 +8323,9 @@ export class ArkCommonMethodStyle implements CommonMethod {
         return this
     }
     onAccessibilityFocus(value: AccessibilityFocusCallback | undefined): this {
+        return this
+    }
+    onAccessibilityActionIntercept(value: AccessibilityActionInterceptCallback | undefined): this {
         return this
     }
     accessibilityTextHint(value: string | undefined): this {
@@ -9683,18 +9701,10 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public alignRulesWithAlignRuleOptionTypedValue(value: AlignRuleOption | undefined): this {
-        if (this.checkPriority("alignRulesWithAlignRuleOptionTypedValue")) {
-            const value_casted = value as (AlignRuleOption | undefined)
-            this.getPeer()?.setAlignRulesWithAlignRuleOptionTypedValueAttribute(value_casted)
-            return this
-        }
-        return this
-    }
-    public alignRulesWithLocalizedAlignRuleOptionsTypedValue(value: LocalizedAlignRuleOptions | undefined): this {
-        if (this.checkPriority("alignRulesWithLocalizedAlignRuleOptionsTypedValue")) {
-            const value_casted = value as (LocalizedAlignRuleOptions | undefined)
-            this.getPeer()?.setAlignRulesWithLocalizedAlignRuleOptionsTypedValueAttribute(value_casted)
+    public alignRules(value: AlignRuleOption | LocalizedAlignRuleOptions | undefined): this {
+        if (this.checkPriority("alignRules")) {
+            const value_casted = value as (AlignRuleOption | LocalizedAlignRuleOptions | undefined)
+            this.getPeer()?.setAlignRulesAttribute(value_casted)
             return this
         }
         return this
@@ -10011,6 +10021,14 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         if (this.checkPriority("onAccessibilityFocus")) {
             const value_casted = value as (AccessibilityFocusCallback | undefined)
             this.getPeer()?.setOnAccessibilityFocusAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onAccessibilityActionIntercept(value: AccessibilityActionInterceptCallback | undefined): this {
+        if (this.checkPriority("onAccessibilityActionIntercept")) {
+            const value_casted = value as (AccessibilityActionInterceptCallback | undefined)
+            this.getPeer()?.setOnAccessibilityActionInterceptAttribute(value_casted)
             return this
         }
         return this
@@ -11319,6 +11337,34 @@ export class Bindable_Date_serializer {
             return;
         }
         let value : Bindable<Date> = ({value: valueTmpResult, onChange: onChangeTmpResult} as Bindable<Date>)
+        return value
+    }
+}
+export class Bindable_I32_serializer {
+    public static write(buffer: SerializerBase, value: Bindable<int32>): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForValue  = value.value
+        valueSerializer.writeInt32(valueHolderForValue)
+        const valueHolderForOnChange  = value.onChange
+        valueSerializer.holdAndWriteCallback(valueHolderForOnChange)
+    }
+    public static read(buffer: DeserializerBase): Bindable<int32> {
+        let valueDeserializer : DeserializerBase = buffer
+        const valueTmpResult : int32 = valueDeserializer.readInt32()
+        const onChangeTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
+        const onChangeTmpBufBufCall : KPointer = valueDeserializer.readPointer()
+        const onChangeTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
+        const onChangeTmpResult : ((value0: int32) => void) = (value0: int32):void => {
+            const onChangeTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
+            onChangeTmpBufBufArgsSerializer.writeInt32(onChangeTmpBufBufResource.resourceId);
+            onChangeTmpBufBufArgsSerializer.writePointer(onChangeTmpBufBufCall);
+            onChangeTmpBufBufArgsSerializer.writePointer(onChangeTmpBufBufCallSync);
+            onChangeTmpBufBufArgsSerializer.writeInt32(value0);
+            InteropNativeModule._CallCallbackSync(10, -747290452, onChangeTmpBufBufArgsSerializer.asBuffer(), onChangeTmpBufBufArgsSerializer.length());
+            onChangeTmpBufBufArgsSerializer.release();
+            return;
+        }
+        let value : Bindable<int32> = ({value: valueTmpResult, onChange: onChangeTmpResult} as Bindable<int32>)
         return value
     }
 }

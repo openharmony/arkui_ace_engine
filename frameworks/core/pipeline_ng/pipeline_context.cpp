@@ -769,9 +769,9 @@ void PipelineContext::ReloadNodesResource()
             auto pattern = frameNode->GetPattern();
             if (pattern) {
                 bool forceDarkAllowed = frameNode->GetForceDarkAllowed();
-                ResourceParseUtils::SetIsReloading(forceDarkAllowed);
+                ResourceParseUtils::SetNeedReload(forceDarkAllowed);
                 pattern->OnColorModeChange(static_cast<int32_t>(GetColorMode()));
-                ResourceParseUtils::SetIsReloading(false);
+                ResourceParseUtils::SetNeedReload(false);
             }
         }
     }
@@ -2444,9 +2444,17 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight,
 {
     CHECK_RUN_ON(UI);
     // prevent repeated trigger with same keyboardHeight
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
+    if (!forceChange && NearEqual(keyboardHeight, safeAreaManager_->GetKeyboardInset().Length()) &&
+        prevKeyboardAvoidMode_ == safeAreaManager_->GetKeyBoardAvoidMode()) {
+        return;
+    }
+    prevKeyboardAvoidMode_ = safeAreaManager_->GetKeyBoardAvoidMode();
+#else
     if (!forceChange && NearEqual(keyboardHeight, safeAreaManager_->GetKeyboardInset().Length())) {
         return;
     }
+#endif
 
     ACE_FUNCTION_TRACE();
 #ifdef ENABLE_ROSEN_BACKEND
@@ -6335,12 +6343,12 @@ void PipelineContext::NotifyColorModeChange(uint32_t colorMode)
             auto rootNode = weak.Upgrade();
             CHECK_NULL_VOID(rootNode);
             ContainerScope scope(instanceId);
-            ResourceParseUtils::SetIsReloading(true);
+            ResourceParseUtils::SetNeedReload(true);
             pipeline->SetIsReloading(true);
             rootNode->SetDarkMode(rootColorMode == ColorMode::DARK);
             rootNode->NotifyColorModeChange(colorMode);
             pipeline->SetIsReloading(false);
-            ResourceParseUtils::SetIsReloading(false);
+            ResourceParseUtils::SetNeedReload(false);
             pipeline->FlushUITasks();
         },
         [weak = WeakClaim(this), instanceId = instanceId_]() {

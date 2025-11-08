@@ -1121,4 +1121,30 @@ HWTEST_F(XComponentV2TestNg, OnModifyDoneTest002, TestSize.Level1)
     pattern->OnModifyDone();
     EXPECT_EQ(pattern->renderContextForSurface_->propBackgroundColor_, Color::BLACK);
 }
+
+/**
+ * @tc.name: InitializeRenderContextTest
+ * @tc.desc: Test XComponentPatternV2 InitializeRenderContextTest func when isThreadSafeNode is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentV2TestNg, InitializeRenderContextTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. call CreateXComponentNode
+     * @tc.expected: xcomponent frameNode create successfully
+     */
+    auto frameNode = CreateXComponentNode();
+    ASSERT_TRUE(frameNode);
+    EXPECT_EQ(frameNode->GetTag(), V2::XCOMPONENT_ETS_TAG);
+    auto pattern = frameNode->GetPattern<XComponentPatternV2>();
+    ASSERT_TRUE(pattern);
+    pattern->usesSuperMethod_ = true;
+    pattern->renderContextForSurface_ = nullptr;
+    /**
+     * @tc.steps: step2. call InitializeRenderContext when isThreadSafeNode is true
+     * @tc.expected: renderContextForSurface_ is initialized
+     */
+    pattern->InitializeRenderContext(true);
+    EXPECT_TRUE(pattern->renderContextForSurface_);
+}
 } // namespace OHOS::Ace::NG

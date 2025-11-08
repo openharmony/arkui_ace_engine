@@ -1437,12 +1437,14 @@ void TextPattern::UpdateAIMenuOptions()
         isShowAIMenuOption_ = false;
     }
     if (copyOption_ == CopyOptions::Local || copyOption_ == CopyOptions::Distributed) {
+        SetIsShowAskCeliaInRightClick(true);
         if (MaybeNeedShowSelectAIDetect()) {
             SetIsAskCeliaEnabled(!isShowAIMenuOption_);
         } else {
             SetIsAskCeliaEnabled(true);
         }
     } else {
+        SetIsShowAskCeliaInRightClick(false);
         SetIsAskCeliaEnabled(false);
     }
     if (!IsSupportAskCelia()) {
@@ -4520,7 +4522,8 @@ void TextPattern::ParseOriText(const std::u16string& currentText)
     CHECK_NULL_VOID(GetDataDetectorAdapter());
     auto entityJson = JsonUtil::ParseJsonString(UtfUtils::Str16DebugToStr8(currentText));
     bool entityIsJson = !entityJson->IsNull();
-    TAG_LOGI(AceLogTag::ACE_TEXT, "text content is the json format: %{public}d", entityIsJson);
+    TAG_LOGI(AceLogTag::ACE_TEXT, "TextAI: text content is the json format: %{public}d, id: %{public}i",
+        entityIsJson, GetHost() ? GetHost()->GetId() : -1);
     if (entityIsJson && !entityJson->GetValue("bundleName")->IsNull() &&
         dataDetectorAdapter_->ParseOriText(entityJson, textForDisplay_)) {
         if (childNodes_.empty()) {
@@ -5847,6 +5850,8 @@ void TextPattern::SetTextDetectEnable(bool enable)
         };
         pipeline->SetConfigChangedCallback(host->GetId(), callback);
     } else {
+        TAG_LOGI(AceLogTag::ACE_TEXT,
+            "TextAI: CancelAITask is called by SetTextDetectEnable, id: %{public}i", host->GetId());
         dataDetectorAdapter_->CancelAITask();
     }
     host->MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE);

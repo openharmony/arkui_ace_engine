@@ -4651,3 +4651,13 @@ let SystemProperties;
 (function (SystemProperties) {
   SystemProperties.BREAK_POINT = 'system.arkui.breakpoint';
 })(SystemProperties || (SystemProperties = {}));
+
+let ResolveStrategy;
+(function (ResolveStrategy) {
+    ResolveStrategy[ResolveStrategy.CALLING_SCOPE = 0] = 'CALLING_SCOPE';
+    ResolveStrategy[ResolveStrategy.LAST_FOCUS = 1] = 'LAST_FOCUS';
+    ResolveStrategy[ResolveStrategy.MAX_INSTANCE_ID = 2] = 'MAX_INSTANCE_ID';
+    ResolveStrategy[ResolveStrategy.UNIQUE = 3] = 'UNIQUE';
+    ResolveStrategy[ResolveStrategy.LAST_FOREGROUND = 4] = 'LAST_FOREGROUND';
+    ResolveStrategy[ResolveStrategy.UNDEFINED = 5] = 'UNDEFINED';
+})(ResolveStrategy || (ResolveStrategy = {}));

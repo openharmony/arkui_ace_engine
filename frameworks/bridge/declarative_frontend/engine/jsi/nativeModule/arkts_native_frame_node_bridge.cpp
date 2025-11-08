@@ -527,6 +527,17 @@ ArkUINativeModuleValue FrameNodeBridge::RemoveAdoptedChild(ArkUIRuntimeCallInfo*
     return panda::NumberRef::New(vm, result);
 }
 
+ArkUINativeModuleValue FrameNodeBridge::IsOnRenderTree(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    auto defaultReturnValue = panda::NumberRef::New(vm, false);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(!firstArg.IsNull(), defaultReturnValue);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto result = GetArkUINodeModifiers()->getFrameNodeModifier()->isOnRenderTree(nativeNode);
+    return panda::BooleanRef::New(vm, result);
+}
+
 ArkUINativeModuleValue FrameNodeBridge::ConvertPoint(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -546,7 +557,7 @@ ArkUINativeModuleValue FrameNodeBridge::ConvertPoint(ArkUIRuntimeCallInfo* runti
     CHECK_NULL_RETURN(!thirdArg.IsNull(), panda::JSValueRef::Undefined(vm));
     auto targetNativeNode = nodePtr(thirdArg->ToNativePointer(vm)->Value());
 
-    Local<Framework::ArrayRef> valueArray = Framework::ArrayRef::New(vm, 2);
+    Local<Framework::ArrayRef> valueArray = Framework::ArrayRef::New(vm, 3);
     ArkUI_Float32 targetNodePositionOffset[2];
     if (!nativeNode || !targetNativeNode) {
         return valueArray;
@@ -554,12 +565,12 @@ ArkUINativeModuleValue FrameNodeBridge::ConvertPoint(ArkUIRuntimeCallInfo* runti
     auto success = GetArkUINodeModifiers()->getFrameNodeModifier()->convertPoint(
         nativeNode, &position, targetNativeNode, &targetNodePositionOffset);
     if (!success) {
-        ArkTSUtils::ThrowError(
-            vm, "The current FrameNode and the target FrameNode do not have a common ancestor node.", 100024);
+        Framework::ArrayRef::SetValueAt(vm, valueArray, 0, panda::NumberRef::New(vm, 0));
         return valueArray;
     }
-    Framework::ArrayRef::SetValueAt(vm, valueArray, 0, panda::NumberRef::New(vm, targetNodePositionOffset[0]));
-    Framework::ArrayRef::SetValueAt(vm, valueArray, 1, panda::NumberRef::New(vm, targetNodePositionOffset[1]));
+    Framework::ArrayRef::SetValueAt(vm, valueArray, 0, panda::NumberRef::New(vm, 1));
+    Framework::ArrayRef::SetValueAt(vm, valueArray, 1, panda::NumberRef::New(vm, targetNodePositionOffset[0]));
+    Framework::ArrayRef::SetValueAt(vm, valueArray, 2, panda::NumberRef::New(vm, targetNodePositionOffset[1]));
     return valueArray;
 }
 

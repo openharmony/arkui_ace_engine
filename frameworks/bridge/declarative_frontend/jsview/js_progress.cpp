@@ -146,7 +146,7 @@ void JSProgress::SetColor(const JSCallbackInfo& info)
         if (info[0]->IsNull() || info[0]->IsUndefined() || !ParseJsColor(info[0], colorVal, resObj)) {
             colorVal = (g_progressType == ProgressType::CAPSULE) ? theme->GetCapsuleParseFailedSelectColor()
                                                                  : theme->GetTrackParseFailedSelectedColor();
-            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_TWO)) {
+            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_THREE)) {
                 endColor = (g_progressType == ProgressType::RING || g_progressType == ProgressType::SCALE)
                                ? theme->GetRingProgressEndSideColor()
                                : colorVal;

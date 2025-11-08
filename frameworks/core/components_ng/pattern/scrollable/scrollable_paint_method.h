@@ -56,6 +56,7 @@ public:
 
 protected:
     void UpdateFadingGradient(const RefPtr<RenderContext>& renderContext);
+    void UpdateOverlayFadingGradient();
 
     /**
      * @brief Try to set content clip to render context.

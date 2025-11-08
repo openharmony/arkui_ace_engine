@@ -36,8 +36,9 @@ export function ConditionBranch(
 
 export function makeBuilderParameterProxy<T extends Object>(instance: T, source: Map<string, () => Any>, initializer?: (t: T) => void): T {
     if (isDynamicObject(instance)) {
-        initializer!(instance);
-        return instance;
+        const makeBuilderParameterProxy = ESValue.getGlobal().getProperty('makeBuilderParameterProxy');
+        const proxy = makeBuilderParameterProxy.invoke(ESValue.wrap('interopBuilderProxy'), ESValue.wrap(source)).unwrap() as T;
+        return proxy;
     }
     if (StateMgmtTool.isObjectLiteral(instance)) {
         const ifaces: FixedArray<Class> = Class.of(instance).getInterfaces();

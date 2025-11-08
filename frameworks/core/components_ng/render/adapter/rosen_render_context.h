@@ -532,6 +532,11 @@ public:
         reDraggingFlag_ = reDraggingFlag;
     }
 
+    bool IsOnRenderTree() override
+    {
+        return rsNode_->GetIsOnTheTree();
+    }
+
     void SetAnimationPropertyValue(AnimationPropertyType property, const std::vector<float>& value) override;
     void CancelPropertyAnimation(AnimationPropertyType property) override;
     std::vector<float> GetRenderNodePropertyValue(AnimationPropertyType property) override;

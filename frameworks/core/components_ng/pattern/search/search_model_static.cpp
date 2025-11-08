@@ -294,10 +294,12 @@ void SearchModelStatic::SetCaretWidth(FrameNode* frameNode, const std::optional<
         return;
     }
     CHECK_NULL_VOID(frameNode);
-    auto textFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
-    CHECK_NULL_VOID(textFrameNode);
-    ACE_RESET_NODE_PAINT_PROPERTY(TextFieldPaintProperty, CursorWidth, textFrameNode);
-    textFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(textFieldTheme);
+    auto caretWidth = textFieldTheme->GetCursorWidth();
+    SearchModelNG::SetCaretWidth(frameNode, caretWidth);
 }
 
 void SearchModelStatic::ResetCaretColor(FrameNode* frameNode)

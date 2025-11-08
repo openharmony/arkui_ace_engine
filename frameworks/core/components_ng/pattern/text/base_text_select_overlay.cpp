@@ -241,6 +241,10 @@ void BaseTextSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& overlay
     overlayInfo.recreateOverlay = isUsingMouse_;
     overlayInfo.rightClickOffset = mouseMenuOffset_;
     overlayInfo.isUsingMouse = isUsingMouse_;
+    if (overlayInfo.isUsingMouse) { // do not show AI menu in right click menu
+        overlayInfo.menuInfo.aiMenuOptionType = TextDataDetectType::INVALID;
+        overlayInfo.menuInfo.isAskCeliaEnabled = overlayInfo.menuInfo.isShowAskCeliaInRightClick;
+    }
     overlayInfo.isNewAvoid = true;
     overlayInfo.hitTestMode = HitTestMode::HTMDEFAULT;
     if (hasTransform_) {

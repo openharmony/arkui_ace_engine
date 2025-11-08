@@ -19,6 +19,7 @@
 
 #include "base/utils/system_properties.h"
 #include "base/utils/time_util.h"
+#include "core/accessibility/accessibility_utils.h"
 #include "core/accessibility/static/accessibility_static_utils.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/border_image.h"
@@ -137,6 +138,29 @@ Ark_GestureRecognizer CreateArkGestureRecognizer(const RefPtr<NGGestureRecognize
     }
     peer = Converter::ArkValue<Ark_GestureRecognizer>(recognizer);
     return peer;
+}
+template<typename Container>
+Array_GestureRecognizer CreateArkGestureRecognizerArray(const Container& recognizers)
+{
+    Array_GestureRecognizer result = {nullptr, 0};
+    if (!Converter::FC) {
+        return result;
+    }
+    result.length = static_cast<Ark_Int32>(recognizers.size());
+    if (result.length <= 0) {
+        return result;
+    }
+    result.array = static_cast<Ark_GestureRecognizer*>(
+        Converter::FC->Allocate(result.length * sizeof(Ark_GestureRecognizer)));
+    if (result.array == nullptr) {
+        result.length = 0;
+        return result;
+    }
+    size_t i = 0;
+    for (const auto& recognizer : recognizers) {
+        result.array[i++] = CreateArkGestureRecognizer(recognizer);
+    }
+    return result;
 }
 std::optional<bool> ProcessBindableIsShow(FrameNode* frameNode,
                                           const Opt_Union_Boolean_Bindable *value,
@@ -414,7 +438,7 @@ auto g_bindMenuOptionsParamCallbacks = [](
     if (onAppearValue) {
         auto onAppear = [arkCallback = CallbackHelper(onAppearValue.value()), weakNode]() {
             PipelineContext::SetCallBackNode(weakNode);
-            arkCallback.Invoke();
+            arkCallback.InvokeSync();
         };
         menuParam.onAppear = std::move(onAppear);
     }
@@ -430,7 +454,7 @@ auto g_bindMenuOptionsParamCallbacks = [](
     if (aboutToAppearValue) {
         auto aboutToAppear = [arkCallback = CallbackHelper(aboutToAppearValue.value()), weakNode]() {
             PipelineContext::SetCallBackNode(weakNode);
-            arkCallback.Invoke();
+            arkCallback.InvokeSync();
         };
         menuParam.aboutToAppear = std::move(aboutToAppear);
     }
@@ -1105,6 +1129,18 @@ void AssignCast(std::optional<VerticalAlign>& dst, const Ark_VerticalAlign& src)
 }
 
 template<>
+AlignRule Convert(const Ark_HorizontalAlignParam& src)
+{
+    AlignRule rule;
+    rule.anchor = Convert<std::string>(src.anchor);
+    auto align = OptConvert<HorizontalAlign>(src.align);
+    if (align.has_value()) {
+        rule.horizontal = align.value();
+    }
+    return rule;
+}
+
+template<>
 AlignRule Convert(const Ark_LocalizedHorizontalAlignParam& src)
 {
     AlignRule rule;
@@ -1112,6 +1148,18 @@ AlignRule Convert(const Ark_LocalizedHorizontalAlignParam& src)
     auto align = OptConvert<HorizontalAlign>(src.align);
     if (align.has_value()) {
         rule.horizontal = align.value();
+    }
+    return rule;
+}
+
+template<>
+AlignRule Convert(const Ark_VerticalAlignParam& src)
+{
+    AlignRule rule;
+    rule.anchor = Convert<std::string>(src.anchor);
+    auto align = OptConvert<VerticalAlign>(src.align);
+    if (align.has_value()) {
+        rule.vertical = align.value();
     }
     return rule;
 }
@@ -1131,9 +1179,7 @@ AlignRule Convert(const Ark_LocalizedVerticalAlignParam& src)
 template<>
 std::map<AlignDirection, AlignRule> Convert(const Ark_AlignRuleOption& src)
 {
-    LOGE("Ark_AlignRuleOption is stubbed");
     std::map<AlignDirection, AlignRule> rulesMap;
-#ifdef WRONG_GEN
     auto rule = OptConvert<AlignRule>(src.left);
     if (rule.has_value()) {
         rulesMap[AlignDirection::LEFT] = rule.value();
@@ -1158,7 +1204,6 @@ std::map<AlignDirection, AlignRule> Convert(const Ark_AlignRuleOption& src)
     if (rule.has_value()) {
         rulesMap[AlignDirection::CENTER] = rule.value();
     }
-#endif
     return rulesMap;
 }
 
@@ -2748,9 +2793,7 @@ void SetOnClick0Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        if (frameNode->GetTag() == V2::SPAN_ETS_TAG) {
-            SpanModelNG::ClearOnClick(frameNode);
-        } else if (frameNode->GetTag() == V2::TEXT_ETS_TAG) {
+        if (frameNode->GetTag() == V2::TEXT_ETS_TAG) {
             TextModelNG::ClearOnClick(frameNode);
         }  else {
             ViewAbstract::DisableOnClick(frameNode);
@@ -2761,9 +2804,7 @@ void SetOnClick0Impl(Ark_NativePointer node,
         const auto event = Converter::ArkClickEventSync(info);
         callback.InvokeSync(event.ArkValue());
     };
-    if (frameNode->GetTag() == V2::SPAN_ETS_TAG) {
-        SpanModelNG::SetOnClick(frameNode, std::move(onClick));
-    } else if (frameNode->GetTag() == V2::TEXT_ETS_TAG) {
+    if (frameNode->GetTag() == V2::TEXT_ETS_TAG) {
         TextModelNG::SetOnClick(frameNode, std::move(onClick));
     }  else {
         ViewAbstract::SetOnClick(frameNode, std::move(onClick));
@@ -2776,11 +2817,7 @@ void SetOnHoverImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        if (frameNode->GetTag() == V2::SPAN_ETS_TAG) {
-            SpanModelNG::ResetOnHover(frameNode);
-        } else {
-            ViewAbstract::DisableOnHover(frameNode);
-        }
+        ViewAbstract::DisableOnHover(frameNode);
         return;
     }
     auto weakNode = AceType::WeakClaim(frameNode);
@@ -2790,11 +2827,7 @@ void SetOnHoverImpl(Ark_NativePointer node,
         const auto event = Converter::ArkHoverEventSync(hoverInfo);
         arkCallback.InvokeSync(arkIsHover, event.ArkValue());
     };
-    if (frameNode->GetTag() == V2::SPAN_ETS_TAG) {
-        SpanModelNG::SetOnHover(frameNode, std::move(onHover));
-    }  else {
-        ViewAbstract::SetOnHover(frameNode, std::move(onHover));
-    }
+    ViewAbstract::SetOnHover(frameNode, std::move(onHover));
 }
 void SetOnHoverMoveImpl(Ark_NativePointer node,
                         const Opt_Callback_HoverEvent_Void* value)
@@ -3802,37 +3835,49 @@ void SetEnabledImpl(Ark_NativePointer node,
     }
     ViewAbstract::SetEnabled(frameNode, *convValue);
 }
-void SetAlignRulesWithAlignRuleOptionTypedValueImpl(Ark_NativePointer node,
-                                                    const Opt_AlignRuleOption* value)
+void SetAlignRulesInternal(FrameNode *frameNode, std::optional<std::map<AlignDirection, AlignRule>> convMapValue,
+                           std::optional<BiasOpt> convBiasValue)
 {
-    LOGE("Ark_AlignRuleOption is stubbed");
-#ifdef WRONG_GEN
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convMapValue = Converter::OptConvertPtr<std::map<AlignDirection, AlignRule>>(value);
-    ViewAbstractModelStatic::SetAlignRules(frameNode, convMapValue);
-    auto optValue = Converter::GetOptPtr(value);
-    auto convBiasValue = optValue ? Converter::OptConvert<BiasOpt>(optValue->bias) : std::nullopt;
+    if (convMapValue) {
+        ViewAbstractModelStatic::SetAlignRules(frameNode, convMapValue);
+    } else {
+        ViewAbstractModelStatic::SetAlignRules(frameNode, std::map<AlignDirection, AlignRule>());
+    }
     if (convBiasValue.has_value()) {
         ViewAbstractModelStatic::SetBias(frameNode, convBiasValue.value().first, convBiasValue.value().second);
     } else {
         ViewAbstractModelStatic::SetBias(frameNode, std::nullopt);
     }
-#endif
 }
-void SetAlignRulesWithLocalizedAlignRuleOptionsTypedValueImpl(Ark_NativePointer node,
-                                                              const Opt_LocalizedAlignRuleOptions* value)
+void SetAlignRulesImpl(Ark_NativePointer node,
+                       const Opt_Union_AlignRuleOption_LocalizedAlignRuleOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convMapValue = Converter::OptConvertPtr<std::map<AlignDirection, AlignRule>>(value);
-    ViewAbstractModelStatic::SetAlignRules(frameNode, convMapValue);
     auto optValue = Converter::GetOptPtr(value);
-    auto convBiasValue = optValue ? Converter::OptConvert<BiasOpt>(optValue->bias) : std::nullopt;
-    if (convBiasValue.has_value()) {
-        ViewAbstractModelStatic::SetBias(frameNode, convBiasValue.value().first, convBiasValue.value().second);
-    } else {
+    if (!optValue) {
+        ViewAbstractModelStatic::SetAlignRules(frameNode, std::map<AlignDirection, AlignRule>());
         ViewAbstractModelStatic::SetBias(frameNode, std::nullopt);
+        return;
+    }
+    switch (optValue->selector) {
+        case CASE_0: {
+            auto alignRulesvalue = optValue->value0;
+            auto convMapValue = Converter::OptConvert<std::map<AlignDirection, AlignRule>>(alignRulesvalue);
+            auto convBiasValue = optValue ? Converter::OptConvert<BiasOpt>(alignRulesvalue.bias) : std::nullopt;
+            SetAlignRulesInternal(frameNode, convMapValue, convBiasValue);
+            break;
+        }
+        case CASE_1: {
+            auto alignRulesvalue = optValue->value1;
+            auto convMapValue = Converter::OptConvert<std::map<AlignDirection, AlignRule>>(alignRulesvalue);
+            auto convBiasValue = optValue ? Converter::OptConvert<BiasOpt>(alignRulesvalue.bias) : std::nullopt;
+            SetAlignRulesInternal(frameNode, convMapValue, convBiasValue);
+            break;
+        }
+        default:
+            LOGE("ARKOALA:SetAlignRulesImpl: Unexpected value->selector: %{public}d\n", optValue->selector);
+            return;
     }
 }
 void SetAspectRatioImpl(Ark_NativePointer node,
@@ -4433,6 +4478,23 @@ void SetOnAccessibilityFocusImpl(Ark_NativePointer node,
     };
     ViewAbstractModelNG::SetOnAccessibilityFocus(frameNode, std::move(onFocus));
 }
+void SetOnAccessibilityActionInterceptImpl(Ark_NativePointer node,
+                                           const Opt_AccessibilityActionInterceptCallback* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        ViewAbstractModelNG::SetOnAccessibilityActionIntercept(frameNode, nullptr);
+        return;
+    }
+    auto accessibilityActionInterceptCallback = [callback = CallbackHelper(*optValue)](AccessibilityInterfaceAction action) -> AccessibilityActionInterceptResult {
+        auto arkAccessibilityAction = Converter::ArkValue<Ark_AccessibilityAction>(action);
+        auto resultOpt = callback.InvokeWithOptConvertResult<AccessibilityActionInterceptResult, Ark_AccessibilityActionInterceptResult, Callback_AccessibilityActionInterceptResult_Void>(arkAccessibilityAction);
+        return resultOpt.value_or(AccessibilityActionInterceptResult::ACTION_CONTINUE);
+    };
+    ViewAbstractModelNG::SetOnAccessibilityActionIntercept(frameNode, std::move(accessibilityActionInterceptCallback));
+}
 void SetAccessibilityTextHintImpl(Ark_NativePointer node,
                                   const Opt_String* value)
 {
@@ -4635,8 +4697,8 @@ void SetShouldBuiltInRecognizerParallelWithImpl(Ark_NativePointer node,
     ) -> RefPtr<NG::NGGestureRecognizer> {
         PipelineContext::SetCallBackNode(node);
 
-        auto arkValCurrent = Converter::ArkValue<Ark_GestureRecognizer>(current);
-        auto arkValOthers = ArkValue<Array_GestureRecognizer>(others, Converter::FC);
+        auto arkValCurrent = CreateArkGestureRecognizer(current);
+        auto arkValOthers = CreateArkGestureRecognizerArray(others);
         auto resultOpt = callback.InvokeWithOptConvertResult<RefPtr<NG::NGGestureRecognizer>, Ark_GestureRecognizer,
             Callback_GestureRecognizer_Void>(arkValCurrent, arkValOthers);
         return resultOpt.value_or(nullptr);
@@ -4872,18 +4934,14 @@ void SetOnClick1Impl(Ark_NativePointer node,
         callback.InvokeSync(event.ArkValue());
     };
     auto convValue = Converter::OptConvertPtr<float>(distanceThreshold);
-
-    if (frameNode->GetTag() == "Span") {
-        SpanModelNG::SetOnClick(static_cast<UINode *>(node), std::move(onEvent));
+    double threshold = convValue.value_or(std::numeric_limits<double>::infinity());
+    if (threshold != std::numeric_limits<double>::infinity() && threshold >= 0) {
+        threshold = Dimension(threshold, DimensionUnit::VP).ConvertToPx();
     } else {
-        double threshold = convValue.value_or(std::numeric_limits<double>::infinity());
-        if (threshold != std::numeric_limits<double>::infinity() && threshold >= 0) {
-            threshold = Dimension(threshold, DimensionUnit::VP).ConvertToPx();
-        } else {
-            threshold = std::numeric_limits<double>::infinity();
-        }
-        ViewAbstract::SetOnClick(frameNode, std::move(onEvent), threshold);
+        threshold = std::numeric_limits<double>::infinity();
     }
+    ViewAbstract::SetOnClick(frameNode, std::move(onEvent), threshold);
+    ViewAbstract::SetOnClick(frameNode, std::move(onEvent), *convValue);
 }
 void SetFocusScopeIdImpl(Ark_NativePointer node,
                          const Opt_String* id,
@@ -5391,8 +5449,9 @@ void BindContextMenuBase(Ark_NativePointer node,
                 contentBuilder(menuParam, std::move(previewBuildFunc));
                 }, node);
         },
-        [&menuParam, contentBuilder]() {
+        [&menuParam, menuOption, type, node, contentBuilder]() {
             std::function<void()> previewBuildFunc = nullptr;
+            ParseContextMenuParam(menuParam, menuOption, type, node);
             contentBuilder(menuParam, std::move(previewBuildFunc));
         });
 }
@@ -5728,7 +5787,7 @@ void SetOnGestureRecognizerJudgeBegin1Impl(Ark_NativePointer node,
         auto arkGestEvent = CreateArkBaseGestureEvent(info, gestureInfo->GetRecognizerType());
         CHECK_NULL_RETURN(arkGestEvent, defVal);
         auto arkValCurrent = CreateArkGestureRecognizer(current);
-        auto arkValOthers = Converter::ArkValue<Array_GestureRecognizer>(others, Converter::FC);
+        auto arkValOthers = CreateArkGestureRecognizerArray(others);
         auto resultOpt = callback.InvokeWithOptConvertResult<GestureJudgeResult, Ark_GestureJudgeResult,
             Callback_GestureJudgeResult_Void>(arkGestEvent, arkValCurrent, arkValOthers);
         return resultOpt.value_or(defVal);
@@ -5845,8 +5904,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetMarkAnchorImpl,
         CommonMethodModifier::SetOffsetImpl,
         CommonMethodModifier::SetEnabledImpl,
-        CommonMethodModifier::SetAlignRulesWithAlignRuleOptionTypedValueImpl,
-        CommonMethodModifier::SetAlignRulesWithLocalizedAlignRuleOptionsTypedValueImpl,
+        CommonMethodModifier::SetAlignRulesImpl,
         CommonMethodModifier::SetAspectRatioImpl,
         CommonMethodModifier::SetClickEffectImpl,
         CommonMethodModifier::SetOnDragStartImpl,
@@ -5883,6 +5941,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetAccessibilityTextOfResourceTypeImpl,
         CommonMethodModifier::SetAccessibilityRoleImpl,
         CommonMethodModifier::SetOnAccessibilityFocusImpl,
+        CommonMethodModifier::SetOnAccessibilityActionInterceptImpl,
         CommonMethodModifier::SetAccessibilityTextHintImpl,
         CommonMethodModifier::SetAccessibilityDescriptionOfStringTypeImpl,
         CommonMethodModifier::SetAccessibilityDescriptionOfResourceTypeImpl,

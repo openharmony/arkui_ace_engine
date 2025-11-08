@@ -329,6 +329,16 @@ void SetWaterFlowFooter(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_
     modifier->getArkUIAniWaterFlowModifier()->setWaterFlowFooter(arkNode, footerNode);
 }
 
+void ResetWaterFlowFooter(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr)
+{
+    const auto* modifier = GetNodeAniModifier();
+    auto* arkNode = reinterpret_cast<ArkUINodeHandle>(ptr);
+    if (!modifier || !arkNode) {
+        return;
+    }
+    modifier->getArkUIAniWaterFlowModifier()->resetWaterFlowFooter(arkNode);
+}
+
 void SetWaterFlowScroller(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr, ani_long scrollerPtr)
 {
     auto* arkNode = reinterpret_cast<ArkUINodeHandle>(ptr);

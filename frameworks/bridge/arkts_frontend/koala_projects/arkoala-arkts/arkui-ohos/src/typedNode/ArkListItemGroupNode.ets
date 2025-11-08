@@ -13,9 +13,16 @@
  * limitations under the License.
  */
 
-import { ArkBaseNode } from "./ArkBaseNode";
-import { ListItemGroupAttribute, ArkListItemGroupPeer, ListItemGroupOptions, ListDividerOptions,
-    ChildrenMainSize, AttributeModifier, CommonMethod } from "../framework";
+import { ArkBaseNode } from './ArkBaseNode';
+import {
+  ListItemGroupAttribute,
+  ArkListItemGroupPeer,
+  ListItemGroupOptions,
+  ListDividerOptions,
+  ChildrenMainSize,
+  AttributeModifier,
+  CommonMethod
+} from '../framework';
 export class ArkListItemGroupNode extends ArkBaseNode implements ListItemGroupAttribute {
     constructParam(...param: Object[]): this {
         if (param.length > 1) {
@@ -39,7 +46,7 @@ export class ArkListItemGroupNode extends ArkBaseNode implements ListItemGroupAt
         return this
     }
     allowChildTypes(): string[] {
-        return ["ListItem"];
+        return ['ListItem'];
     }
     divider(value: ListDividerOptions | undefined): this {
         const value_casted = value as (ListDividerOptions | undefined)
@@ -53,7 +60,8 @@ export class ArkListItemGroupNode extends ArkBaseNode implements ListItemGroupAt
         this.markDirty()
         return this
     }
-    attributeModifier(value: AttributeModifier<ListItemGroupAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Unimplemented method attributeModifier")
+    attributeModifier(value: AttributeModifier<ListItemGroupAttribute> |
+        AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error('Unimplemented method attributeModifier')
     }
 }

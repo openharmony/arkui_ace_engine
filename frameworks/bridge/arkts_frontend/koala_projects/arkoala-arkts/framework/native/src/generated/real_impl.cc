@@ -1959,12 +1959,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                         const Opt_Boolean* value)
     {
     }
-    void SetAlignRulesWithAlignRuleOptionTypedValueImpl(Ark_NativePointer node,
-                                                        const Opt_AlignRuleOption* value)
-    {
-    }
-    void SetAlignRulesWithLocalizedAlignRuleOptionsTypedValueImpl(Ark_NativePointer node,
-                                                                  const Opt_LocalizedAlignRuleOptions* value)
+    void SetAlignRulesImpl(Ark_NativePointer node,
+                           const Opt_Union_AlignRuleOption_LocalizedAlignRuleOptions* value)
     {
     }
     void SetAspectRatioImpl(Ark_NativePointer node,
@@ -2109,6 +2105,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void SetOnAccessibilityFocusImpl(Ark_NativePointer node,
                                      const Opt_AccessibilityFocusCallback* value)
+    {
+    }
+    void SetOnAccessibilityActionInterceptImpl(Ark_NativePointer node,
+                                               const Opt_AccessibilityActionInterceptCallback* value)
     {
     }
     void SetAccessibilityTextHintImpl(Ark_NativePointer node,
@@ -3163,7 +3163,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     } // HyperlinkModifier
     namespace HyperlinkInterfaceModifier {
     void SetHyperlinkOptionsImpl(Ark_NativePointer node,
-                                 const Ark_Union_String_Resource* address,
+                                 const Opt_Union_String_Resource* address,
                                  const Opt_Union_String_Resource* content)
     {
     }
@@ -5442,10 +5442,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                             const Opt_ControlSize* value)
     {
     }
-    void SetDividerImpl(Ark_NativePointer node,
-                        const Opt_DividerOptions* value)
-    {
-    }
     void SetTextModifierImpl(Ark_NativePointer node,
                              const Opt_TextModifier* value)
     {
@@ -5774,6 +5770,35 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                            const Opt_Union_ShadowOptions_Array_ShadowOptions* value)
     {
     }
+    void SetTextBackgroundStyleImpl(Ark_NativePointer node,
+                                    const Opt_TextBackgroundStyle* value)
+    {
+    }
+    void SetBaselineOffsetImpl(Ark_NativePointer node,
+                               const Opt_LengthMetrics* value)
+    {
+    }
+    void SetKeyImpl(Ark_NativePointer node,
+                    const Opt_String* value)
+    {
+    }
+    void SetIdImpl(Ark_NativePointer node,
+                   const Opt_String* value)
+    {
+    }
+    void SetOnClick0Impl(Ark_NativePointer node,
+                         const Opt_Callback_ClickEvent_Void* value)
+    {
+    }
+    void SetOnHoverImpl(Ark_NativePointer node,
+                        const Opt_HoverCallback* value)
+    {
+    }
+    void SetOnClick1Impl(Ark_NativePointer node,
+                         const Opt_Callback_ClickEvent_Void* event,
+                         const Opt_Float64* distanceThreshold)
+    {
+    }
     } // SpanAttributeModifier
     namespace StackModifier {
     Ark_NativePointer ConstructImpl(Ark_Int32 id,
@@ -6089,6 +6114,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void SetRenderingStrategyImpl(Ark_NativePointer node,
                                   const Opt_SymbolRenderingStrategy* value)
+    {
+    }
+    void SetKeyImpl(Ark_NativePointer node,
+                    const Opt_String* value)
+    {
+    }
+    void SetIdImpl(Ark_NativePointer node,
+                   const Opt_String* value)
     {
     }
     } // SymbolSpanAttributeModifier
@@ -8415,8 +8448,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetMarkAnchorImpl,
             CommonMethodModifier::SetOffsetImpl,
             CommonMethodModifier::SetEnabledImpl,
-            CommonMethodModifier::SetAlignRulesWithAlignRuleOptionTypedValueImpl,
-            CommonMethodModifier::SetAlignRulesWithLocalizedAlignRuleOptionsTypedValueImpl,
+            CommonMethodModifier::SetAlignRulesImpl,
             CommonMethodModifier::SetAspectRatioImpl,
             CommonMethodModifier::SetClickEffectImpl,
             CommonMethodModifier::SetOnDragStartImpl,
@@ -8453,6 +8485,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetAccessibilityTextOfResourceTypeImpl,
             CommonMethodModifier::SetAccessibilityRoleImpl,
             CommonMethodModifier::SetOnAccessibilityFocusImpl,
+            CommonMethodModifier::SetOnAccessibilityActionInterceptImpl,
             CommonMethodModifier::SetAccessibilityTextHintImpl,
             CommonMethodModifier::SetAccessibilityDescriptionOfStringTypeImpl,
             CommonMethodModifier::SetAccessibilityDescriptionOfResourceTypeImpl,
@@ -9646,7 +9679,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             SelectAttributeModifier::SetMenuBackgroundColorImpl,
             SelectAttributeModifier::SetMenuBackgroundBlurStyleImpl,
             SelectAttributeModifier::SetControlSizeImpl,
-            SelectAttributeModifier::SetDividerImpl,
             SelectAttributeModifier::SetTextModifierImpl,
             SelectAttributeModifier::SetArrowModifierImpl,
             SelectAttributeModifier::SetOptionTextModifierImpl,
@@ -9749,6 +9781,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             SpanAttributeModifier::SetTextCaseImpl,
             SpanAttributeModifier::SetLineHeightImpl,
             SpanAttributeModifier::SetTextShadowImpl,
+            SpanAttributeModifier::SetTextBackgroundStyleImpl,
+            SpanAttributeModifier::SetBaselineOffsetImpl,
+            SpanAttributeModifier::SetKeyImpl,
+            SpanAttributeModifier::SetIdImpl,
+            SpanAttributeModifier::SetOnClick0Impl,
+            SpanAttributeModifier::SetOnHoverImpl,
+            SpanAttributeModifier::SetOnClick1Impl,
         };
         return &ArkUISpanModifierImpl;
     }
@@ -9858,6 +9897,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             SymbolSpanAttributeModifier::SetFontWeightImpl,
             SymbolSpanAttributeModifier::SetEffectStrategyImpl,
             SymbolSpanAttributeModifier::SetRenderingStrategyImpl,
+            SymbolSpanAttributeModifier::SetKeyImpl,
+            SymbolSpanAttributeModifier::SetIdImpl,
         };
         return &ArkUISymbolSpanModifierImpl;
     }
@@ -13225,6 +13266,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
+    Ark_Boolean IsOnRenderTreeImpl(Ark_FrameNode peer)
+    {
+       return {};
+    }
     } // FrameNodeExtenderAccessor
     namespace FrictionMotionAccessor {
     void DestroyPeerImpl(Ark_FrictionMotion peer)
@@ -16550,6 +16595,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     } // SearchOpsAccessor
+    namespace SelectExtenderAccessor {
+    void SetDividerImpl(Ark_NativePointer node,
+                        const Opt_DividerOptions* options)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    } // SelectExtenderAccessor
     namespace SpringMotionAccessor {
     void DestroyPeerImpl(Ark_SpringMotion peer)
     {
@@ -16699,6 +16752,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
+    void SetLengthImpl(Ark_StyledString peer,
+                       Ark_Int32 length)
+    {
+    }
     } // StyledStringAccessor
     namespace StyledStringControllerAccessor {
     void DestroyPeerImpl(Ark_StyledStringController peer)
@@ -16831,36 +16888,36 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     void FinishTransitionImpl(Ark_SwiperContentTransitionProxy peer)
     {
     }
-    Ark_Number GetSelectedIndexImpl(Ark_SwiperContentTransitionProxy peer)
+    Ark_Int32 GetSelectedIndexImpl(Ark_SwiperContentTransitionProxy peer)
     {
         return {};
     }
     void SetSelectedIndexImpl(Ark_SwiperContentTransitionProxy peer,
-                              const Ark_Number* selectedIndex)
+                              Ark_Int32 selectedIndex)
     {
     }
-    Ark_Number GetIndexImpl(Ark_SwiperContentTransitionProxy peer)
+    Ark_Int32 GetIndexImpl(Ark_SwiperContentTransitionProxy peer)
     {
         return {};
     }
     void SetIndexImpl(Ark_SwiperContentTransitionProxy peer,
-                      const Ark_Number* index)
+                      Ark_Int32 index)
     {
     }
-    Ark_Number GetPositionImpl(Ark_SwiperContentTransitionProxy peer)
+    Ark_Float64 GetPositionImpl(Ark_SwiperContentTransitionProxy peer)
     {
         return {};
     }
     void SetPositionImpl(Ark_SwiperContentTransitionProxy peer,
-                         const Ark_Number* position)
+                         Ark_Float64 position)
     {
     }
-    Ark_Number GetMainAxisLengthImpl(Ark_SwiperContentTransitionProxy peer)
+    Ark_Float64 GetMainAxisLengthImpl(Ark_SwiperContentTransitionProxy peer)
     {
         return {};
     }
     void SetMainAxisLengthImpl(Ark_SwiperContentTransitionProxy peer,
-                               const Ark_Number* mainAxisLength)
+                               Ark_Float64 mainAxisLength)
     {
     }
     } // SwiperContentTransitionProxyAccessor
@@ -19482,6 +19539,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             FrameNodeExtenderAccessor::CreateByRawPtrImpl,
             FrameNodeExtenderAccessor::UnWrapRawPtrImpl,
             FrameNodeExtenderAccessor::GetCommonEventImpl,
+            FrameNodeExtenderAccessor::IsOnRenderTreeImpl,
         };
         return &FrameNodeExtenderAccessorImpl;
     }
@@ -20954,6 +21012,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return &SearchOpsAccessorImpl;
     }
 
+    const GENERATED_ArkUISelectExtenderAccessor* GetSelectExtenderAccessor()
+    {
+        static const GENERATED_ArkUISelectExtenderAccessor SelectExtenderAccessorImpl {
+            SelectExtenderAccessor::SetDividerImpl,
+        };
+        return &SelectExtenderAccessorImpl;
+    }
+
     const GENERATED_ArkUISpringMotionAccessor* GetSpringMotionAccessor()
     {
         static const GENERATED_ArkUISpringMotionAccessor SpringMotionAccessorImpl {
@@ -21021,6 +21087,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             StyledStringAccessor::Marshalling1Impl,
             StyledStringAccessor::Unmarshalling1Impl,
             StyledStringAccessor::GetLengthImpl,
+            StyledStringAccessor::SetLengthImpl,
         };
         return &StyledStringAccessorImpl;
     }
@@ -21993,6 +22060,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetScrollResultAccessor,
             GetSearchControllerAccessor,
             GetSearchOpsAccessor,
+            GetSelectExtenderAccessor,
             GetSpringMotionAccessor,
             GetSpringPropAccessor,
             GetSslErrorHandlerAccessor,

@@ -33,6 +33,30 @@ import hilog from '@ohos.hilog'
         on(type: string, options: NavDestinationSwitchObserverOptions, callback: object): void;
         off(type: string, options: NavDestinationSwitchObserverOptions, callback?: object): void;
 
+        onNavDestinationUpdate(callback: Callback<NavDestinationInfo>): void;
+
+        offNavDestinationUpdate(callback?: Callback<NavDestinationInfo>): void;
+        onNavDestinationUpdate(
+            options: NavDestinationSwitchObserverOptions,
+            callback: Callback<NavDestinationInfo>
+        ): void;
+        offNavDestinationUpdate(
+            options: NavDestinationSwitchObserverOptions,
+            callback?: Callback<NavDestinationInfo>
+        ): void;
+        onRouterPageUpdate(callback: Callback<RouterPageInfo>): void;
+        offRouterPageUpdate(callback?: Callback<RouterPageInfo>): void;
+        onNavDestinationSwitch(callback: Callback<NavDestinationSwitchInfo>): void;
+        offNavDestinationSwitch(callback?: Callback<NavDestinationSwitchInfo>): void;
+        onNavDestinationSwitch(
+            observerOptions: NavDestinationSwitchObserverOptions,
+            callback: Callback<NavDestinationSwitchInfo>
+          ): void;
+        offNavDestinationSwitch(
+            observerOptions: NavDestinationSwitchObserverOptions,
+            callback?: Callback<NavDestinationSwitchInfo>
+          ): void;
+
         onTabChange(callback: object): void;
         offTabChange(callback?: object): void;
         onTabChange(options: ObserverOptions, callback: object): void;
@@ -54,6 +78,32 @@ import hilog from '@ohos.hilog'
         
         public native on(type: string, options: NavDestinationSwitchObserverOptions, callback: object): void;
         public native off(type: string, options: NavDestinationSwitchObserverOptions, callback?: object): void;
+
+        public native onNavDestinationUpdate(callback: Callback<NavDestinationInfo>): void;
+
+        public native offNavDestinationUpdate(callback?: Callback<NavDestinationInfo>): void;
+        public native onNavDestinationUpdate(
+            options: NavDestinationSwitchObserverOptions,
+            callback: Callback<NavDestinationInfo>
+        ): void;
+        public native offNavDestinationUpdate(
+            options: NavDestinationSwitchObserverOptions,
+            callback?: Callback<NavDestinationInfo>
+        ): void;
+
+        public native onRouterPageUpdate(callback: Callback<RouterPageInfo>): void;
+        public native offRouterPageUpdate(callback?: Callback<RouterPageInfo>): void;
+
+        public native onNavDestinationSwitch(callback: Callback<NavDestinationSwitchInfo>): void;
+        public native offNavDestinationSwitch(callback?: Callback<NavDestinationSwitchInfo>): void;
+        public native onNavDestinationSwitch(
+            observerOptions: NavDestinationSwitchObserverOptions,
+            callback: Callback<NavDestinationSwitchInfo>
+          ): void;
+        public native offNavDestinationSwitch(
+            observerOptions: NavDestinationSwitchObserverOptions,
+            callback?: Callback<NavDestinationSwitchInfo>
+          ): void;
 
         public native onTabChange(callback: object): void;
         public native offTabChange(callback?: object): void;
@@ -127,8 +177,8 @@ import hilog from '@ohos.hilog'
         index: number;
         param?: Object;
         navDestinationId: string;
-        uniqueId: number;
-        mode: NavDestinationMode;
+        uniqueId?: number;
+        mode?: NavDestinationMode;
     }
 
     export class NavDestinationInfoImpl implements NavDestinationInfo {
@@ -138,8 +188,8 @@ import hilog from '@ohos.hilog'
         index: number;
         param?: Object;
         navDestinationId: string;
-        uniqueId: number;
-        mode: NavDestinationMode;
+        uniqueId?: number;
+        mode?: NavDestinationMode;
         static castToNavDestinationInfo(value: number): NavDestinationState {
             if (value === 0) {
                 return NavDestinationState.ON_SHOWN;

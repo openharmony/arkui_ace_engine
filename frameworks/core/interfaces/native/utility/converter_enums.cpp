@@ -863,6 +863,18 @@ void AssignCast(std::optional<TextContentType>& dst, const Ark_ContentType& src)
         case ARK_CONTENT_TYPE_NICKNAME: dst = TextContentType::NICKNAME; break;
         case ARK_CONTENT_TYPE_DETAIL_INFO_WITHOUT_STREET: dst = TextContentType::DETAIL_INFO_WITHOUT_STREET; break;
         case ARK_CONTENT_TYPE_FORMAT_ADDRESS: dst = TextContentType::FORMAT_ADDRESS; break;
+        case ARK_CONTENT_TYPE_PASSPORT_NUMBER: dst = TextContentType::PASSPORT_NUMBER; break;
+        case ARK_CONTENT_TYPE_VALIDITY: dst = TextContentType::VALIDITY; break;
+        case ARK_CONTENT_TYPE_ISSUE_AT: dst = TextContentType::ISSUE_AT; break;
+        case ARK_CONTENT_TYPE_ORGANIZATION: dst = TextContentType::ORGANIZATION; break;
+        case ARK_CONTENT_TYPE_TAX_ID: dst = TextContentType::TAX_ID; break;
+        case ARK_CONTENT_TYPE_ADDRESS_CITY_AND_STATE: dst = TextContentType::ADDRESS_CITY_AND_STATE; break;
+        case ARK_CONTENT_TYPE_FLIGHT_NUMBER: dst = TextContentType::FLIGHT_NUMBER; break;
+        case ARK_CONTENT_TYPE_LICENSE_NUMBER: dst = TextContentType::LICENSE_NUMBER; break;
+        case ARK_CONTENT_TYPE_LICENSE_FILE_NUMBER: dst = TextContentType::LICENSE_FILE_NUMBER; break;
+        case ARK_CONTENT_TYPE_LICENSE_PLATE: dst = TextContentType::LICENSE_PLATE; break;
+        case ARK_CONTENT_TYPE_ENGINE_NUMBER: dst = TextContentType::ENGINE_NUMBER; break;
+        case ARK_CONTENT_TYPE_LICENSE_CHASSIS_NUMBER: dst = TextContentType::LICENSE_CHASSIS_NUMBER; break;
         default: LOGE("Unexpected enum value in Ark_ContentType: %{public}d", src);
     }
 }
@@ -1121,6 +1133,27 @@ void AssignCast(std::optional<AccessibilityHoverAction>& dst, const Ark_Accessib
         case ARK_ACCESSIBILITY_HOVER_TYPE_HOVER_EXIT: dst = AccessibilityHoverAction::HOVER_EXIT; break;
         case ARK_ACCESSIBILITY_HOVER_TYPE_HOVER_CANCEL: dst = AccessibilityHoverAction::HOVER_CANCEL; break;
         default: LOGE("Unexpected enum value in Ark_AccessibilityHoverType: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<AccessibilityInterfaceAction>& dst, const Ark_AccessibilityAction& src)
+{
+    switch (src) {
+        case ARK_ACCESSIBILITY_ACTION_UNDEFINED_ACTION: dst = AccessibilityInterfaceAction::UNDEFINED_ACTION; break;
+        case ARK_ACCESSIBILITY_ACTION_ACCESSIBILITY_CLICK: dst = AccessibilityInterfaceAction::ACCESSIBILITY_CLICK; break;
+        default: LOGE("Unexpected enum value in Ark_AccessibilityAction: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<AccessibilityActionInterceptResult>& dst, const Ark_AccessibilityActionInterceptResult& src)
+{
+    switch (src) {
+        case ARK_ACCESSIBILITY_ACTION_INTERCEPT_RESULT_ACTION_INTERCEPT: dst = AccessibilityActionInterceptResult::ACTION_INTERCEPT; break;
+        case ARK_ACCESSIBILITY_ACTION_INTERCEPT_RESULT_ACTION_CONTINUE: dst = AccessibilityActionInterceptResult::ACTION_CONTINUE; break;
+        case ARK_ACCESSIBILITY_ACTION_INTERCEPT_RESULT_ACTION_RISE: dst = AccessibilityActionInterceptResult::ACTION_RISE; break;
+        default: LOGE("Unexpected enum value in Ark_AccessibilityActionInterceptResult: %{public}d", src);
     }
 }
 

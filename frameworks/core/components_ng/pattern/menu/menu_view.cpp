@@ -1536,8 +1536,8 @@ void MenuView::ReloadMenuParam(const RefPtr<FrameNode>& menuNode, const MenuPara
     if (SystemProperties::ConfigChangePerform() && menuParam.isDarkMode != isCurDarkMode && !menuParam.isWithTheme) {
         //Because the Menu is created outside the light/dark mode switching process,
         //it is necessary to manually set the reloading state to trigger the color inversion process.
-        bool isReloading = ResourceParseUtils::IsReloading();
-        ResourceParseUtils::SetIsReloading(true);
+        bool isReloading = ResourceParseUtils::NeedReload();
+        ResourceParseUtils::SetNeedReload(true);
         menuParamValue.ReloadResources();
         if (menuParamValue.borderRadius) {
             menuParamValue.borderRadius->ReloadResources();
@@ -1558,7 +1558,7 @@ void MenuView::ReloadMenuParam(const RefPtr<FrameNode>& menuNode, const MenuPara
             menuParamValue.outlineWidth->ReloadResources();
         }
         menuParamValue.isDarkMode = !menuParamValue.isDarkMode;
-        ResourceParseUtils::SetIsReloading(isReloading);
+        ResourceParseUtils::SetNeedReload(isReloading);
     }
 }
 
@@ -1894,7 +1894,7 @@ RefPtr<FrameNode> MenuView::CreateMenuOption(bool optionsHasIcon, std::vector<Op
         }
     }
     if (params[index].value == buttonPasteText) {
-        CreatePasteButton({optionsHasIcon, optionsHasIcon}, option, row, params[index].action);
+        CreatePasteButton(optionsHasIcon, option, row, params[index].action);
         auto accessibilityProperty = option->GetAccessibilityProperty<AccessibilityProperty>();
         if (accessibilityProperty) {
             accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
@@ -1919,19 +1919,14 @@ RefPtr<FrameNode> MenuView::CreateMenuOption(const OptionValueInfo& value,
 #ifdef OHOS_PLATFORM
     std::string buttonPasteText = "Paste";
     auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
-    bool showPasteIcon = value.optionsHasIcon;
     if (pipeline) {
-        auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
-        if (buttonTheme) {
-            buttonPasteText = buttonTheme->GetPasteText();
-        }
-        auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
-        if (textOverlayTheme) {
-            showPasteIcon = textOverlayTheme->GetShowShortcut();
+        auto theme = pipeline->GetTheme<ButtonTheme>();
+        if (theme) {
+            buttonPasteText = theme->GetPasteText();
         }
     }
     if (value.content == buttonPasteText) {
-        CreatePasteButton({value.optionsHasIcon, showPasteIcon}, option, row, onClickFunc, icon);
+        CreatePasteButton(value.optionsHasIcon, option, row, onClickFunc, icon);
         auto accessibilityProperty = option->GetAccessibilityProperty<AccessibilityProperty>();
         if (accessibilityProperty) {
             accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
@@ -1998,8 +1993,8 @@ void MenuView::MountOptionToColumn(std::vector<OptionParam>& params, const RefPt
     }
 }
 
-void MenuView::CreatePasteButton(std::pair<bool, bool> optionsHasIconInfo, const RefPtr<FrameNode>& option,
-    const RefPtr<FrameNode>& row, const std::function<void()>& onClickFunc, const std::string& icon)
+void MenuView::CreatePasteButton(bool optionsHasIcon, const RefPtr<FrameNode>& option, const RefPtr<FrameNode>& row,
+    const std::function<void()>& onClickFunc, const std::string& icon)
 {
     auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
@@ -2007,12 +2002,12 @@ void MenuView::CreatePasteButton(std::pair<bool, bool> optionsHasIconInfo, const
     CHECK_NULL_VOID(theme);
     auto overlayTheme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_VOID(overlayTheme);
-    auto optionsHasIcon = optionsHasIconInfo.first;
-    auto isShowIcon = optionsHasIconInfo.second;
     RefPtr<FrameNode> pasteNode;
     pasteNode = PasteButtonModelNG::GetInstance()->CreateNode(static_cast<int32_t>(PasteButtonPasteDescription::PASTE),
-        static_cast<int32_t>(PasteButtonIconStyle::ICON_NULL), static_cast<int32_t>(ButtonType::NORMAL), true,
-        isShowIcon ? overlayTheme->GetPasteSymbolId() : static_cast<int32_t>(PasteButtonIconStyle::ICON_NULL));
+        static_cast<int32_t>(PasteButtonIconStyle::ICON_NULL),
+        static_cast<int32_t>(ButtonType::NORMAL),
+        true,
+        optionsHasIcon ? overlayTheme->GetPasteSymbolId() : static_cast<int32_t>(PasteButtonIconStyle::ICON_NULL));
     CHECK_NULL_VOID(pasteNode);
     auto pattern = option->GetPattern<MenuItemPattern>();
     CHECK_NULL_VOID(pattern);
@@ -2030,11 +2025,8 @@ void MenuView::CreatePasteButton(std::pair<bool, bool> optionsHasIconInfo, const
     pastePaintProperty->UpdateIconColor(theme->GetMenuIconColor());
     pasteLayoutProperty->UpdateStateEffect(false);
     pasteLayoutProperty->UpdateHoverEffect(HoverEffectType::NONE);
-    if (isShowIcon) {
+    if (optionsHasIcon) {
         pasteLayoutProperty->UpdateTextIconSpace(theme->GetIconContentPadding());
-    }
-    if (optionsHasIcon && !isShowIcon) { // Other option has icon, while this option not, need add some space
-        pasteLayoutProperty->UpdatePlaceholderIconSpace(theme->GetIconSideLength() + theme->GetIconContentPadding());
     }
     pasteNode->MountToParent(row);
     pasteNode->MarkModifyDone();
@@ -2043,7 +2035,9 @@ void MenuView::CreatePasteButton(std::pair<bool, bool> optionsHasIconInfo, const
     auto eventHub = option->GetEventHub<MenuItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     pasteNode->GetOrCreateGestureEventHub()->SetUserOnClick([onClickFunc](GestureEvent& info) {
-        CHECK_EQUAL_VOID(!PasteButtonModelNG::GetInstance()->IsClickResultSuccess(info), true);
+        if (!PasteButtonModelNG::GetInstance()->IsClickResultSuccess(info)) {
+            return;
+        }
         if (onClickFunc) {
             onClickFunc();
         }

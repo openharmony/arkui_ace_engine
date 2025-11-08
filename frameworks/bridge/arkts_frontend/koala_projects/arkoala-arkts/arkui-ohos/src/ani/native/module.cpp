@@ -339,6 +339,16 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::QueryNavDestinationInfo1)
         },
         ani_native_function {
+            "_CustomNode_OnReuse",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::OnReuse)
+        },
+        ani_native_function {
+            "_CustomNode_OnRecycle",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::OnRecycle)
+        },
+        ani_native_function {
             "_CustomNode_QueryRouterPageInfo",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::QueryRouterPageInfo)
@@ -492,6 +502,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_SetWaterFlowFooter",
             "ll:",
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetWaterFlowFooter)
+        },
+        ani_native_function {
+            "_ResetWaterFlowFooter",
+            "l:",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ResetWaterFlowFooter)
         },
         ani_native_function {
             "_SetWaterFlowScroller",

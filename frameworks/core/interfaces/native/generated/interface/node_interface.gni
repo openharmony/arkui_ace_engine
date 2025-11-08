@@ -189,6 +189,7 @@ generated_sources = [
   "implementation/pattern_lock_controller_accessor.cpp",
   "implementation/pattern_lock_modifier.cpp",
   "implementation/permission_request_accessor.cpp",
+  "implementation/select_extender_accessor.cpp",
   "implementation/persistent_storage_backend_accessor.cpp",
   "implementation/pinch_gesture_event_accessor.cpp",
   "implementation/pinch_recognizer_accessor.cpp",

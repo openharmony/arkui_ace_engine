@@ -36,7 +36,7 @@ import { updateLazyItems } from "arkui/base/LazyForEachImpl"
 import { UIContextUtil } from "arkui/base/UIContextUtil"
 import { deserializeAndCallCallback, registerArkuiApiHandler } from './framework/peers/CallbackDeserializeCall'
 import { ObserveSingleton } from './stateManagement/base/observeSingleton'
-import { StateUpdateLoop } from './stateManagement'
+import { StateMgmtDFX, StateUpdateLoop } from './stateManagement'
 import { AceTrace } from 'arkui/base/AceTrace'
 
 setCustomEventsChecker(checkArkoalaCallbacks)
@@ -561,6 +561,21 @@ export class Application {
         }
         return new Application(useNativeLog, moduleName, startUrl, startParams, userView, entryPoint)
     }
+
+    static createApplication(param: ApplicationConstructorParam): Application {
+        if (param.enableDebug) {
+            console.log('StateMgmt set enableDebug true');
+            StateMgmtDFX.enableDebug = param.enableDebug;
+        }
+        return Application.createApplication(
+            param.startUrl,
+            param.startParams,
+            param.useNativeLog,
+            param.moduleName,
+            param.userView,
+            param.entryPoint
+        );
+    }
     static registerNativeModulePreloader(): void {
         registerNativeModuleLibraryName('InteropNativeModule', 'ArkoalaNative_ark.z');
         registerNativeModuleLibraryName('ArkUINativeModule', 'ArkoalaNative_ark.z');
@@ -578,4 +593,31 @@ function makeClickEvent(x: number, y: number): ClickEvent {
     result.x = x
     result.y = y
     return result
+}
+
+class ApplicationConstructorParam {
+    public startUrl: string;
+    public startParams: string;
+    public useNativeLog: boolean;
+    public moduleName: string;
+    public userView: UserView | undefined;
+    public entryPoint: EntryPoint | undefined;
+    public enableDebug: boolean;
+    constructor(
+        startUrl: string,
+        startParams: string,
+        useNativeLog: boolean,
+        moduleName: string,
+        userView: UserView | undefined,
+        entryPoint: EntryPoint | undefined,
+        enableDebug: boolean
+    ) {
+        this.startUrl = startUrl;
+        this.startParams = startParams;
+        this.useNativeLog = useNativeLog;
+        this.moduleName = moduleName;
+        this.userView = userView;
+        this.entryPoint = entryPoint;
+        this.enableDebug = enableDebug;
+    }
 }

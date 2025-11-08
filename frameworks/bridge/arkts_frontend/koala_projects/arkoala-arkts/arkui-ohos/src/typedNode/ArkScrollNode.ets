@@ -13,11 +13,29 @@
  * limitations under the License.
  */
 
-import { ArkScrollableNode } from "./ArkScrollableNode";
-import { ScrollAttribute, ArkScrollPeer, Scroller, ScrollDirection, ScrollOnWillScrollCallback, ScrollOnScrollCallback,
-    OnScrollEdgeCallback, VoidCallback, BarState, Color, OnScrollFrameBeginCallback, NestedScrollOptions, ScrollSnapOptions,
-    OffsetOptions, EdgeEffect, EdgeEffectOptions, AttributeModifier, ScrollableCommonMethod, CommonMethod } from "../framework";
-import { Resource } from "global.resource"
+import { ArkScrollableNode } from './ArkScrollableNode';
+import {
+  ScrollAttribute,
+  ArkScrollPeer,
+  Scroller,
+  ScrollDirection,
+  ScrollOnWillScrollCallback,
+  ScrollOnScrollCallback,
+  OnScrollEdgeCallback,
+  VoidCallback,
+  BarState,
+  Color,
+  OnScrollFrameBeginCallback,
+  NestedScrollOptions,
+  ScrollSnapOptions,
+  OffsetOptions,
+  EdgeEffect,
+  EdgeEffectOptions,
+  AttributeModifier,
+  ScrollableCommonMethod,
+  CommonMethod
+} from '../framework';
+import { Resource } from 'global.resource'
 export class ArkScrollNode extends ArkScrollableNode implements ScrollAttribute {
     constructParam(...param: Object[]): this {
         if (param.length > 1) {
@@ -146,7 +164,8 @@ export class ArkScrollNode extends ArkScrollableNode implements ScrollAttribute 
         this.markDirty()
         return this
     }
-    attributeModifier(value: AttributeModifier<ScrollAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Unimplemented method attributeModifier")
+    attributeModifier(value: AttributeModifier<ScrollAttribute> | AttributeModifier<ScrollableCommonMethod> |
+        AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error('Unimplemented method attributeModifier')
     }
 }

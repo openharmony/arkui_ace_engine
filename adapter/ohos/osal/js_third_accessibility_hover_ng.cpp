@@ -523,11 +523,6 @@ public:
         const FocusMoveResult &result, const int32_t requestId) override
     {
     }
-
-    void SetDetectElementInfoFocusableThroughAncestorResult(bool isFocusable, const int32_t requestId,
-        const Accessibility::AccessibilityElementInfo& info) override
-    {
-    }
 };
 
 void DumpHandleAction(

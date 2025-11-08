@@ -49,6 +49,17 @@ struct AceFocusMoveDetailCondition {
     bool bypassDescendants = false;
 };
 
+enum class CheckSupportScrollAction : int32_t {
+    FIND_FORWARD = 0,
+    FIND_BACKWARD,
+    FIND_ANY,
+};
+
+struct AceDetectThroughAncestorParam {
+    bool changeToAncestorFocusable = false; // change to parent's focusable component
+    bool needCheckValid = false; // check node is valid in detect
+};
+
 class FocusRulesCheckNode : public Accessibility::ReadableRulesNode {
 public:
     explicit FocusRulesCheckNode(int64_t accessibilityId)
@@ -127,6 +138,12 @@ public:
         AceFocusMoveDetailCondition condition,
         const std::shared_ptr<FocusRulesCheckNode>& currentNode,
         std::list<std::shared_ptr<FocusRulesCheckNode>>& targetNodes);
+
+    AceFocusMoveResult FindAnyScrollAncestor(
+        AceFocusMoveDetailCondition condition,
+        const std::shared_ptr<FocusRulesCheckNode>& currentNode,
+        std::list<std::shared_ptr<FocusRulesCheckNode>>& targetNodes);
+
 private:
     AceFocusMoveResult FindNextReadableNodeBySelfAndSameLevel (
         AceFocusMoveDetailCondition condition,
@@ -145,6 +162,16 @@ private:
     AceFocusMoveResult FindPrevReadableNodeToHigherLevel(
         const std::shared_ptr<FocusRulesCheckNode>& currentNode,
         std::shared_ptr<FocusRulesCheckNode>& targetNode);
+
+    virtual bool IsForceSupportScrollType(
+        const std::shared_ptr<FocusRulesCheckNode>& currentNode);
+
+    AceFocusMoveResult FindScrollAncestor(
+        AceFocusMoveDetailCondition condition,
+        const std::shared_ptr<FocusRulesCheckNode>& currentNode,
+        std::list<std::shared_ptr<FocusRulesCheckNode>>& targetNodes,
+        CheckSupportScrollAction checkAction,
+        bool checkType);
 
     std::string GetChildrenIdsStr(
         const std::vector<std::shared_ptr<FocusRulesCheckNode>>& children);

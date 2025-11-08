@@ -941,6 +941,25 @@ HWTEST_F(TextFieldUXTest, MaxLength006, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NeedSoftKeyboard002
+ * @tc.desc: Test NeedSoftKeyboard
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, NeedSoftKeyboard002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: step2. Test whether text field need soft keyboard.
+     */
+    ASSERT_NE(pattern_, nullptr);
+    EXPECT_TRUE(pattern_->NeedSoftKeyboard());
+}
+
+/**
  * @tc.name: CopyOption001
  * @tc.desc: test testInput CopyOption
  * @tc.type: FUNC
@@ -1401,6 +1420,28 @@ HWTEST_F(TextFieldUXTest, testShowUnderline001, TestSize.Level1)
      * @tc.step: step2. Set showUnderline
      */
     layoutProperty_->UpdateShowUnderline(false);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(layoutProperty_->GetShowUnderline(), false);
+}
+
+/**
+ * @tc.name: testShowUnderline002
+ * @tc.desc: test testInput showUnderline
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, testShowUnderline002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node
+     * @tc.expected: showUnderline is true
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetShowUnderline(false);
+    });
+
+    /**
+     * @tc.step: step2. Set showUnderline
+     */
     frameNode_->MarkModifyDone();
     EXPECT_EQ(layoutProperty_->GetShowUnderline(), false);
 }

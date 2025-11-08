@@ -265,7 +265,8 @@ void DataDetectorAdapter::SetTextDetectTypes(const std::string& textDetectTypes)
 
 bool DataDetectorAdapter::ParseOriText(const std::unique_ptr<JsonValue>& entityJson, std::u16string& text)
 {
-    TAG_LOGI(AceLogTag::ACE_TEXT, "Parse origin text entry");
+    TAG_LOGI(AceLogTag::ACE_TEXT, "TextAI: Parse origin text entry, id: %{public}i",
+        GetHost() ? GetHost()->GetId() : -1);
     auto runtimeContext = Platform::AceContainer::GetRuntimeContext(Container::CurrentId());
     CHECK_NULL_RETURN(runtimeContext, false);
     if (runtimeContext->GetBundleName() != entityJson->GetString("bundleName")) {
@@ -276,7 +277,7 @@ bool DataDetectorAdapter::ParseOriText(const std::unique_ptr<JsonValue>& entityJ
     }
     auto aiSpanArray = entityJson->GetValue("entity");
     if (aiSpanArray->IsNull() || !aiSpanArray->IsArray()) {
-        TAG_LOGW(AceLogTag::ACE_TEXT, "Wrong AI entity");
+        TAG_LOGW(AceLogTag::ACE_TEXT, "TextAI: Wrong AI entity");
         return false;
     }
 
@@ -300,7 +301,7 @@ bool DataDetectorAdapter::ParseOriText(const std::unique_ptr<JsonValue>& entityJ
         GetAIEntityMenu();
     }
 
-    TAG_LOGI(AceLogTag::ACE_TEXT, "Parse origin text successful");
+    TAG_LOGI(AceLogTag::ACE_TEXT, "TextAI: Parse origin text successful");
     return true;
 }
 
@@ -424,7 +425,8 @@ void DataDetectorAdapter::HandleTextUrlDetect(uint64_t taskId)
     auto backgroundExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
     backgroundExecutor.PostTask(
         [text = UtfUtils::Str16DebugToStr8(textForAI_), func = std::move(textFunc), taskId] {
-            TAG_LOGI(AceLogTag::ACE_TEXT, "Start url entity detect using AI");
+            TAG_LOGI(AceLogTag::ACE_TEXT,
+                "TextAI: Start url entity detect using AI, length: %{public}zu", text.length());
             TAG_LOGD(AceLogTag::ACE_TEXT, "urlBackgroundTask, taskId=%{public}" PRIu64 "", taskId);
             func(DataUrlAnalyzerMgr::GetInstance().AnalyzeUrls(text));
         },
@@ -433,6 +435,8 @@ void DataDetectorAdapter::HandleTextUrlDetect(uint64_t taskId)
 
 void DataDetectorAdapter::HandleUrlResult(std::vector<UrlEntity> urlEntities)
 {
+    TAG_LOGI(AceLogTag::ACE_TEXT, "DataDetectorAdapter::HandleUrlResult, id: %{public}i",
+        GetHost() ? GetHost()->GetId() : -1);
     for (const auto& entity : urlEntities) {
         auto iter = aiSpanMap_.find(entity.charOffset);
         if (iter != aiSpanMap_.end() && iter->second.content.length() >= entity.text.length()) {
@@ -445,6 +449,7 @@ void DataDetectorAdapter::HandleUrlResult(std::vector<UrlEntity> urlEntities)
         aiSpan.content = entity.text;
         aiSpan.type = TextDataDetectType::URL;
         aiSpanMap_[aiSpan.start] = aiSpan;
+        TAG_LOGI(AceLogTag::ACE_TEXT, "TextAI: the url entity length is: %{public}zu", aiSpan.content.length());
     }
     if (textDetectResult_.menuOptionAndAction.empty()) {
         GetAIEntityMenu();
@@ -477,6 +482,8 @@ void DataDetectorAdapter::ParseAIResult(const TextDataDetectResult& result, int3
 
 void DataDetectorAdapter::FireFinalResult()
 {
+    TAG_LOGI(AceLogTag::ACE_TEXT,
+        "TextAI: FireFinalResult, id: %{public}i", GetHost() ? GetHost()->GetId() : -1);
     aiDetectInitialized_ = true;
     auto entityJsonArray = JsonUtil::CreateArray(true);
     // process with overlapping entities, leaving only the earlier ones
@@ -508,7 +515,7 @@ void DataDetectorAdapter::ParseAIJson(
     const std::unique_ptr<JsonValue>& jsonValue, TextDataDetectType type, int32_t startPos)
 {
     if (!jsonValue || !jsonValue->IsArray()) {
-        TAG_LOGW(AceLogTag::ACE_TEXT, "Wrong AI result");
+        TAG_LOGW(AceLogTag::ACE_TEXT, "TextAI: Wrong AI result");
         return;
     }
 
@@ -541,7 +548,7 @@ void DataDetectorAdapter::ParseAIJson(
         item->Put("costTime", costTime.count());
         item->Put("resultCode", textDetectResult_.code);
         entityJson_[start] = item->ToString();
-        TAG_LOGI(AceLogTag::ACE_TEXT, "size of the entity json is: %{public}zu", entityJson_[start].size());
+        TAG_LOGI(AceLogTag::ACE_TEXT, "TextAI: length of the entity oriText is: %{public}zu", oriText.length());
 
         AISpan aiSpan;
         aiSpan.start = start;
@@ -612,6 +619,7 @@ std::function<void()> DataDetectorAdapter::GetDetectDelayTask(const std::map<int
 
 void DataDetectorAdapter::StartAITask(bool clearAISpanMap, bool isSelectDetect)
 {
+    TAG_LOGI(AceLogTag::ACE_TEXT, "DataDetectorAdapter::StartAITask, prepare to post task");
     if (!isSelectDetect && (textForAI_.empty() || (!typeChanged_ && lastTextForAI_ == textForAI_))) {
         MarkDirtyNode();
         return;

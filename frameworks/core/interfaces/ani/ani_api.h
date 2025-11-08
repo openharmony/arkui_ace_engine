@@ -558,6 +558,8 @@ struct ArkUIAniCustomNodeModifier {
     void (*queryRouterPageInfo)(ani_long node, ArkUIRouterPageInfo& info);
     bool (*queryNavDestinationInfo1)(ArkUI_Int32 uniqueId, ArkUINavDestinationInfo& info);
     bool (*queryRouterPageInfo1)(ArkUI_Int32 uniqueId, ArkUIRouterPageInfo& info);
+    void (*onReuse)(ani_long node);
+    void (*onRecycle)(ani_long node);
 };
 struct ArkUIAniKeyboardAvoidModeModifier {
     ArkUI_Int32 (*getKeyboardAvoidMode)();
@@ -580,6 +582,7 @@ struct ArkUIAniWaterFlowModifier {
         ArkUINodeHandle node, int32_t start, int32_t deleteCount, void* section, ArkUI_Int32 size);
     void (*setWaterFlowFooterContent)(ArkUINodeHandle node, ArkUINodeHandle footerPtr);
     void (*setWaterFlowFooter)(ArkUINodeHandle node, ArkUINodeHandle footerPtr);
+    void (*resetWaterFlowFooter)(ArkUINodeHandle node);
     void (*setWaterFlowScroller)(ArkUINodeHandle node, void* scroller);
     void (*setWaterFlowLayoutMode)(ArkUINodeHandle node, int32_t mode);
 };

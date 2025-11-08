@@ -84,21 +84,32 @@ void CoastingAxisEventGenerator::NotifyStop() const
     animationHandler_->StopFrictionAnimation(StopReason::TOUCHPAD_OR_MOUSEWHEEL);
 }
 
-void CoastingAxisEventGenerator::NotifyTouchTestResult(const TouchTestResult& touchTestResult)
+void CoastingAxisEventGenerator::NotifyTouchTestResult(const TouchTestResult& touchTestResult, const NG::PointF& point)
 {
-    CHECK_EQUAL_VOID(touchTestResult.empty(), true);
     CHECK_NULL_VOID(animationHandler_);
     CHECK_EQUAL_VOID(animationHandler_->IsAnimationRunning(), false);
-    auto it = std::find_if(touchTestResult.begin(), touchTestResult.end(), [](const auto& result) {
-        auto frameNode = result->GetAttachedNode().Upgrade();
-        CHECK_NULL_RETURN(frameNode, false);
-        auto inputHub = frameNode->GetOrCreateInputEventHub();
-        CHECK_NULL_RETURN(inputHub, false);
-        return inputHub->HasCoastingAxisEvent();
+    const auto matchIt =
+        std::find_if(touchTestResult.begin(), touchTestResult.end(), [&axisResult = axisResult_](const auto& result) {
+            return std::any_of(axisResult.begin(), axisResult.end(), [&result](const auto& axisTarget) {
+                return axisTarget && axisTarget->GetFrameId() == result->GetNodeId();
+            });
+        });
+    if (matchIt != touchTestResult.end() && *matchIt) {
+        touchId_ = (*matchIt)->GetNodeId();
+        LOGI("coasting axis match touchTestResult, touchId: %{public}d.", touchId_);
+        return;
+    }
+
+    const auto hitIt = std::find_if(axisResult_.begin(), axisResult_.end(), [&point](const auto& axisTarget) {
+        CHECK_NULL_RETURN(axisTarget, false);
+        auto node = OHOS::Ace::ElementRegister::GetInstance()->GetNodeById(axisTarget->GetFrameId());
+        CHECK_NULL_RETURN(node, false);
+        auto frameNode = AceType::DynamicCast<NG::FrameNode>(node);
+        return frameNode && frameNode->GetPaintRectWithTransform().IsInRegion(point);
     });
-    CHECK_EQUAL_VOID(it, touchTestResult.end());
-    CHECK_NULL_VOID(*it);
-    touchId_ = (*it)->GetNodeId();
+
+    touchId_ = (hitIt != axisResult_.end() && *hitIt) ? (*hitIt)->GetFrameId() : -1;
+    LOGI("coasting axis match region, touchId: %{public}d.", touchId_);
 }
 
 void CoastingAxisEventGenerator::HandleAxisBeginEvent(const AxisEvent& event)
@@ -413,10 +424,12 @@ void CoastingAxisEventGenerator::FrictionAnimationHandler::CalculateFinalPositio
         auto velocity = generator->velocityTracker_.GetVelocity();
         double rawVelocityX = velocity.GetVelocityX();
         double rawVelocityY = velocity.GetVelocityY();
-        velocityRatioX_ = generator->axisDirection_.GetX() > 0 ? abs(rawVelocityX / generator->originVelocity_)
-                                                               : -abs(rawVelocityX / generator->originVelocity_);
-        velocityRatioY_ = generator->axisDirection_.GetY() > 0 ? abs(rawVelocityY / generator->originVelocity_)
-                                                               : -abs(rawVelocityY / generator->originVelocity_);
+        velocityRatioX_ = GreatOrEqual(generator->axisDirection_.GetX(), 0)
+                              ? abs(rawVelocityX / generator->originVelocity_)
+                              : -abs(rawVelocityX / generator->originVelocity_);
+        velocityRatioY_ = GreatOrEqual(generator->axisDirection_.GetY(), 0)
+                              ? abs(rawVelocityY / generator->originVelocity_)
+                              : -abs(rawVelocityY / generator->originVelocity_);
     }
 }
 

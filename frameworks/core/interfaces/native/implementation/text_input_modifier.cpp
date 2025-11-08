@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/implementation/text_input_controller_peer.h"
+#include "core/interfaces/native/implementation/symbol_glyph_modifier_peer.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/converter_union.h"
@@ -34,6 +35,7 @@ namespace {
 constexpr int32_t MIN_THRESHOLD_PERCENTAGE = 1;
 constexpr int32_t MAX_THRESHOLD_PERCENTAGE = 100;
 constexpr float SCALE_LIMIT = 1.f;
+constexpr uint32_t ILLEGAL_VALUE = 0;
 
 struct InputCounterOptions {
     std::optional<int> thresholdPercentage;
@@ -627,14 +629,13 @@ void SetCancelButton1Impl(Ark_NativePointer node, const Opt_CancelButtonSymbolOp
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     auto cleanButtonStyle = optValue ? Converter::OptConvert<CleanNodeStyle>(optValue->style) : std::nullopt;
-    auto symbol = optValue ? Converter::OptConvert<Ark_SymbolGlyphModifier>(optValue->icon) : std::nullopt;
+    auto symbolModifier = optValue ? Converter::OptConvert<Ark_SymbolGlyphModifier>(optValue->icon) : std::nullopt;
     TextFieldModelStatic::SetCleanNodeStyle(frameNode, cleanButtonStyle);
     TextFieldModelNG::SetIsShowCancelButton(frameNode, true);
     TextFieldModelNG::SetCancelButtonSymbol(frameNode, true);
-    if (symbol) {
-        // Implement Reset value
-        TextFieldModelNG::SetCancelSymbolIcon(frameNode, nullptr);
-        LOGE("TextInputModifier::CancelButton1Impl need to know what data is in value->icon");
+    if (symbolModifier && *symbolModifier) {
+        TextFieldModelNG::SetCancelSymbolIcon(frameNode, (*symbolModifier)->symbolApply);
+        PeerUtils::DestroyPeer(*symbolModifier);
     }
 }
 void SetSelectAllImpl(Ark_NativePointer node,
@@ -993,9 +994,10 @@ void SetCustomKeyboardImpl(Ark_NativePointer node,
         return;
     }
     CallbackHelper(*optValue).BuildAsync([frameNode, supportAvoidance](const RefPtr<UINode>& uiNode) {
-        // auto customNode = AceType::DynamicCast<FrameNode>(uiNode);
-        // auto customFrameNode = Referenced::RawPtr(customNode);
-        // TextFieldModelNG::SetCustomKeyboard(frameNode, customFrameNode, supportAvoidance);
+        auto customNodeBuilder = [uiNode]() {
+            NG::ViewStackProcessor::GetInstance()->Push(uiNode);
+        };
+        TextFieldModelStatic::SetCustomKeyboard(frameNode, std::move(customNodeBuilder), supportAvoidance);
         }, node);
 }
 void SetShowCounterImpl(Ark_NativePointer node,
@@ -1015,7 +1017,7 @@ void SetShowCounterImpl(Ark_NativePointer node,
     if (counterOptions && counterOptions->thresholdPercentage.has_value()) {
         int32_t thresholdValue = counterOptions->thresholdPercentage.value();
         if (thresholdValue < MIN_THRESHOLD_PERCENTAGE || thresholdValue > MAX_THRESHOLD_PERCENTAGE) {
-            counterOptions->thresholdPercentage = std::nullopt;
+            counterOptions->thresholdPercentage = ILLEGAL_VALUE;
             isShowCounter = false;
         }
     }

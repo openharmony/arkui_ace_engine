@@ -728,9 +728,6 @@ void SetTextInputSelectedBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 colo
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     Color result = Color(color);
-    if (result.GetAlpha() == DEFAULT_ALPHA) {
-        result = result.ChangeOpacity(DEFAULT_OPACITY);
-    }
     if (SystemProperties::ConfigChangePerform()) {
         RefPtr<ResourceObject> resObj;
         if (!resRawPtr) {
@@ -1625,26 +1622,26 @@ void SetTextInputUserUnderlineColor(ArkUINodeHandle node, const ArkUI_Uint32* va
     }
     if (hasValues[CALL_ARG_0]) {
         Color result = Color(values[CALL_ARG_0]);
-        SetTextInputUserUnderlineColorRegister(frameNode, underlineColorObj, underlineColorObj->typingColorObj, result,
-            "underlineColorTyping");
+        SetTextInputUserUnderlineColorRegister(frameNode, underlineColorObj,
+            underlineColorObj ? underlineColorObj->typingColorObj : nullptr, result, "underlineColorTyping");
         userColor.typing = result;
     }
     if (hasValues[CALL_ARG_1]) {
         Color result = Color(values[CALL_ARG_1]);
-        SetTextInputUserUnderlineColorRegister(frameNode, underlineColorObj, underlineColorObj->normalColorObj, result,
-            "underlineColorNormal");
+        SetTextInputUserUnderlineColorRegister(frameNode, underlineColorObj,
+            underlineColorObj ? underlineColorObj->normalColorObj : nullptr, result, "underlineColorNormal");
         userColor.normal = result;
     }
     if (hasValues[CALL_ARG_2]) {
         Color result = Color(values[CALL_ARG_2]);
-        SetTextInputUserUnderlineColorRegister(frameNode, underlineColorObj, underlineColorObj->errorColorObj, result,
-            "underlineColorError");
+        SetTextInputUserUnderlineColorRegister(frameNode, underlineColorObj,
+            underlineColorObj ? underlineColorObj->errorColorObj : nullptr, result, "underlineColorError");
         userColor.error = result;
     }
     if (hasValues[CALL_ARG_3]) {
         Color result = Color(values[CALL_ARG_3]);
-        SetTextInputUserUnderlineColorRegister(frameNode, underlineColorObj, underlineColorObj->disableColorObj, result,
-            "underlineColorDisable");
+        SetTextInputUserUnderlineColorRegister(frameNode, underlineColorObj,
+            underlineColorObj ? underlineColorObj->disableColorObj : nullptr, result, "underlineColorDisable");
         userColor.disable = result;
     }
     TextFieldModelNG::SetUserUnderlineColor(frameNode, userColor);

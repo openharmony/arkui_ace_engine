@@ -6002,7 +6002,7 @@ struct ArkUIRefreshModifier {
     void (*resetMaxPullDownDistance)(ArkUINodeHandle node);
     ArkUI_Float32 (*getMaxPullDownDistance)(ArkUINodeHandle node);
     void (*setOnStepOffsetChangeCallback)(ArkUINodeHandle node,
-        void (*callback)(const ArkUI_Float32 offset, void* extraData), void* extraData);
+        void (*callback)(const ArkUI_Float32 offset, void* extraData, const bool isDrag), void* extraData);
     void (*resetOnStepOffsetChangeCallback)(ArkUINodeHandle node);
 };
 
@@ -7381,6 +7381,7 @@ struct ArkUIFrameNodeModifier {
     void (*setFocusDependence)(ArkUINodeHandle node, ArkUI_Uint32 focusDependence);
     void (*resetFocusDependence)(ArkUINodeHandle node);
     void (*applyAttributesFinish)(ArkUINodeHandle node);
+    ArkUI_Bool (*isOnRenderTree)(ArkUINodeHandle node);
 };
 
 struct ArkUINodeContentEvent {

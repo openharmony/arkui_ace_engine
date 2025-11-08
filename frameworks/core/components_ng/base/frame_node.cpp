@@ -1538,15 +1538,17 @@ void FrameNode::NotifyColorModeChange(uint32_t colorMode)
 
     auto parentNode = AceType::DynamicCast<FrameNode>(GetParent());
     bool parentRerender = parentNode ? parentNode->GetRerenderable() : GetRerenderable();
-    // bool parentActive = parentNode ? parentNode->IsActive() : true;
     SetRerenderable(parentRerender && ((IsVisible() && IsActive()) || CheckMeasureAnyway()));
 
     if (GetRerenderable() && GetContext()) {
         SetDarkMode(GetContext()->GetColorMode() == ColorMode::DARK);
     }
 
+    bool needReload = ResourceParseUtils::NeedReload();
     if (!GetForceDarkAllowed()) {
-        ResourceParseUtils::SetIsReloading(false);
+        ResourceParseUtils::SetNeedReload(false);
+    } else {
+        ResourceParseUtils::SetNeedReload(true);
     }
     if (pattern_) {
         pattern_->OnThemeScopeUpdate(GetThemeScopeId());
@@ -1559,9 +1561,7 @@ void FrameNode::NotifyColorModeChange(uint32_t colorMode)
         frameNode->GetOverlayNode()->NotifyColorModeChange(colorMode);
     }
 
-    if (!GetForceDarkAllowed()) {
-        ResourceParseUtils::SetIsReloading(true);
-    }
+    ResourceParseUtils::SetNeedReload(needReload);
     UINode::NotifyColorModeChange(colorMode);
 }
 
@@ -3560,33 +3560,38 @@ std::vector<RectF> FrameNode::GetResponseRegionListForTouch(const RectF& windowR
         ACE_LAYOUT_TRACE_END()
         return responseRegionList;
     }
-    auto offset = GetPositionToScreenWithTransform();
-    auto rect = renderContext_->GetPaintRectWithoutTransform();
-    RectF rectToScreen{offset.GetX(), offset.GetY(), rect.Width(), rect.Height()};
+    auto context = GetRenderContext();
+    CHECK_NULL_RETURN(context, responseRegionList);
+    auto rawRect = context->GetPaintRectWithoutTransform();
+    auto rectWithTransform = GetRectToWindowWithTransform(rawRect);
+    auto rectToScreen = GetRectToScreen(rectWithTransform);
     if (rectToScreen.Left() >= windowRect.Right() || rectToScreen.Right() <= windowRect.Left() ||
         rectToScreen.Top() >= windowRect.Bottom() || rectToScreen.Bottom() <= windowRect.Top()) {
         ACE_LAYOUT_TRACE_END()
         return responseRegionList;
     }
     if (gestureHub->GetResponseRegion().empty()) {
-        RectF rectToScreen{round(offset.GetX()), round(offset.GetY()), round(rect.Width()), round(rect.Height())};
         responseRegionList.emplace_back(rectToScreen);
         ACE_LAYOUT_TRACE_END()
         return responseRegionList;
     }
-
     auto scaleProperty = ScaleProperty::CreateScaleProperty();
     for (const auto& region : gestureHub->GetResponseRegion()) {
-        auto x = ConvertToPx(region.GetOffset().GetX(), scaleProperty, rect.Width());
-        auto y = ConvertToPx(region.GetOffset().GetY(), scaleProperty, rect.Height());
-        auto width = ConvertToPx(region.GetWidth(), scaleProperty, rect.Width());
-        auto height = ConvertToPx(region.GetHeight(), scaleProperty, rect.Height());
+        auto x = ConvertToPx(region.GetOffset().GetX(), scaleProperty, rawRect.Width());
+        auto y = ConvertToPx(region.GetOffset().GetY(), scaleProperty, rawRect.Height());
+        auto width = ConvertToPx(region.GetWidth(), scaleProperty, rawRect.Width());
+        auto height = ConvertToPx(region.GetHeight(), scaleProperty, rawRect.Height());
         if (!x.has_value() || !y.has_value() || !width.has_value() || !height.has_value()) {
             continue;
         }
-        RectF responseRegion(round(offset.GetX() + x.value()), round(offset.GetY() + y.value()),
+        RectF rawRegion(round(rawRect.GetX() + x.value()), round(rawRect.GetY() + y.value()),
             round(width.value()), round(height.value()));
-        responseRegionList.emplace_back(responseRegion);
+        RectF regionToScreen = rectToScreen;
+        if (rawRegion != rawRect) {
+            auto regionWithTransform = GetRectToWindowWithTransform(rawRegion);
+            regionToScreen = GetRectToScreen(regionWithTransform);
+        }
+        responseRegionList.emplace_back(regionToScreen);
     }
     ACE_LAYOUT_TRACE_END()
     return responseRegionList;
@@ -4034,6 +4039,72 @@ OffsetF FrameNode::GetPositionToWindowWithTransform(bool fromBottom) const
         OffsetF offsetBottom(rect.GetX() + rect.Width(), rect.GetY() + rect.Height());
         offset = offsetBottom;
     }
+
+    PointF pointNode(offset.GetX(), offset.GetY());
+    context->GetPointTransformRotate(pointNode);
+    auto parent = GetAncestorNodeOfFrame(true);
+    while (parent) {
+        auto parentRenderContext = parent->GetRenderContext();
+        offset = parentRenderContext->GetPaintRectWithoutTransform().GetOffset();
+        PointF pointTmp(offset.GetX() + pointNode.GetX(), offset.GetY() + pointNode.GetY());
+        parentRenderContext->GetPointTransformRotate(pointTmp);
+        pointNode.SetX(pointTmp.GetX());
+        pointNode.SetY(pointTmp.GetY());
+        parent = parent->GetAncestorNodeOfFrame(true);
+    }
+    offset.SetX(pointNode.GetX());
+    offset.SetY(pointNode.GetY());
+    return offset;
+}
+
+// returns a node's rect to window
+RectF FrameNode::GetRectToWindowWithTransform(RectF rawRect) const
+{
+    // get new position after transform
+    OffsetF pt0 = GetPositionToWindowWithTransform(rawRect.GetOffset());
+    OffsetF pt1 = GetPositionToWindowWithTransform(rawRect.GetOffset() + OffsetF(rawRect.Width(), rawRect.Height()));
+
+    // Recalculate Position leftTop and rightBottom;
+    OffsetF leftTop;
+    OffsetF rightBottom;
+    leftTop.SetX(pt0.GetX() < pt1.GetX() ? pt0.GetX() : pt1.GetX());
+    leftTop.SetY(pt0.GetY() < pt1.GetY() ? pt0.GetY() : pt1.GetY());
+    rightBottom.SetX(pt0.GetX() > pt1.GetX() ? pt0.GetX() : pt1.GetX());
+    rightBottom.SetY(pt0.GetY() > pt1.GetY() ? pt0.GetY() : pt1.GetY());
+
+    // finally, calculate rect
+    auto width = rightBottom.GetX() - leftTop.GetX();
+    auto height = rightBottom.GetY() - leftTop.GetY();
+    RectF rectToWin(leftTop.GetX(), leftTop.GetY(), width,  height);
+    return rectToWin;
+}
+
+// returns a node's rect collected offset
+// then plus window's offset relative to screen
+RectF FrameNode::GetRectToScreen(RectF rectToWin) const
+{
+    auto pipelineContext = GetContext();
+    CHECK_NULL_RETURN(pipelineContext, RectF());
+    // window scale
+    auto windowManager = pipelineContext->GetWindowManager();
+    auto container = Container::CurrentSafely();
+    if (container && windowManager && windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
+        auto windowScale = container->GetWindowScale();
+        rectToWin = rectToWin * windowScale;
+    }
+    auto windowOffset = pipelineContext->GetCurrentWindowRect().GetOffset();
+    RectF rectRes(windowOffset.GetX() + rectToWin.GetX(), windowOffset.GetY() + rectToWin.GetY(),
+        rectToWin.Width(), rectToWin.Height());
+    return rectRes;
+}
+
+// returns a node's offset relative to window
+// and consider every ancestor node's graphic transform rotate properties
+// ancestor will check boundary of window scene(exclude)
+OffsetF FrameNode::GetPositionToWindowWithTransform(OffsetF offset) const
+{
+    auto context = GetRenderContext();
+    CHECK_NULL_RETURN(context, OffsetF());
 
     PointF pointNode(offset.GetX(), offset.GetY());
     context->GetPointTransformRotate(pointNode);
@@ -5742,13 +5813,7 @@ void FrameNode::LayoutOverlay()
     auto childLayoutProperty = overlayNode_->GetLayoutProperty();
     CHECK_NULL_VOID(childLayoutProperty);
     childLayoutProperty->GetOverlayOffset(offsetX, offsetY);
-    auto renderContext = GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto options = renderContext->GetOverlayTextValue(NG::OverlayOptions());
-    auto direction = options.direction;
-    if (direction == TextDirection::AUTO) {
-        direction = AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR;
-    }
+    auto direction = childLayoutProperty->GetNonAutoLayoutDirection();
     if (direction == TextDirection::RTL) {
         offsetX = -offsetX;
     }
@@ -5761,8 +5826,6 @@ void FrameNode::LayoutOverlay()
     auto translate = Alignment::GetAlignPositionWithDirection(size, childSize, align, direction) + offset;
     overlayNode_->GetGeometryNode()->SetMarginFrameOffset(translate);
     overlayNode_->Layout();
-    overlayNode_->SetActive(true);
-    overlayNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void FrameNode::DoRemoveChildInRenderTree(uint32_t index, bool isAll)

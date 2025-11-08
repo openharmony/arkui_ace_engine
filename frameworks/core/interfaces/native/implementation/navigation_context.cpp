@@ -608,6 +608,29 @@ bool NavigationStack::CreateNavDestinationByRouterMap(
     return true;
 }
 
+std::string NavigationStack::ErrorToMessage(int32_t code)
+{
+    switch (code) {
+        case ERROR_CODE_INTERNAL_ERROR:
+            return "Internal error. Create NavDestination failed, probably caused by wrong UIContext.";
+        case ERROR_CODE_DESTINATION_NOT_FOUND:
+            return "NavDestination not found.";
+        case ERROR_CODE_BUILDER_FUNCTION_NOT_REGISTERED:
+            return "Builder function not registered.";
+        case ERROR_CODE_PARAM_INVALID:
+            return "Paramter error.";
+        default:
+            return "Error code is not supported.";
+    }
+}
+
+void NavigationStack::FirePromise(PathInfo* pathInfo, int32_t errorCode)
+{
+    if (pathInfo->promise_) {
+        pathInfo->promise_(errorCode, ErrorToMessage(errorCode));
+    }
+}
+
 bool NavigationStack::CreateNodeByIndex(int32_t index, const WeakPtr<NG::UINode>& customNode,
     RefPtr<NG::UINode>& node)
 {
@@ -638,6 +661,7 @@ bool NavigationStack::CreateNodeByIndex(int32_t index, const WeakPtr<NG::UINode>
     if (errorCode != ERROR_CODE_NO_ERROR) {
         TAG_LOGE(AceLogTag::ACE_NAVIGATION, "can't find target destination by index, create empty node");
         node = AceType::DynamicCast<NG::UINode>(NavDestinationModelStatic::CreateFrameNode(0));
+        FirePromise(pathInfo, errorCode);
         return true;
     }
     node = targetNode;
@@ -650,6 +674,7 @@ bool NavigationStack::CreateNodeByIndex(int32_t index, const WeakPtr<NG::UINode>
         pattern->SetNavPathInfo(pathInfoData);
         pattern->SetNavigationStack(WeakClaim(this));
     }
+    FirePromise(pathInfo, errorCode);
     return true;
 }
 

@@ -489,6 +489,8 @@ HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest007, TestSize.Lev
     ASSERT_NE(richEditorPattern, nullptr);
     auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
+    richEditorPattern->isStyledUndoSupported_ = true;
+    richEditorPattern->RecreateUndoManager();
     bool isWillCalled = false;
     int32_t originalCount = 0;
     int32_t replacedCount = 0;
@@ -500,10 +502,10 @@ HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest007, TestSize.Lev
     };
     richEditorModel.SetOnWillChange(std::move(onWillChange));
     bool isDidCalled = false;
-    int32_t afterCount = 0;
-    auto onDidChange = [&isDidCalled, &afterCount](const RichEditorChangeValue& afterResult) {
+    int32_t afterLength = 0;
+    auto onDidChange = [&isDidCalled, &afterLength](const RichEditorChangeValue& afterResult) {
         isDidCalled = true;
-        afterCount = afterResult.GetRichEditorReplacedSpans().size();
+        afterLength = afterResult.GetRangeAfter().GetLength();
     };
     richEditorModel.SetOnDidChange(std::move(onDidChange));
 
@@ -526,13 +528,13 @@ HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest007, TestSize.Lev
     isDidCalled = false;
     originalCount = 0;
     replacedCount = 0;
-    afterCount = 0;
+    afterLength = 0;
     richEditorPattern->HandleOnRedoAction();
     EXPECT_EQ(isWillCalled, true);
     EXPECT_EQ(isDidCalled, true);
     EXPECT_EQ(originalCount, 0);
     EXPECT_EQ(replacedCount, 1);
-    EXPECT_EQ(afterCount, 1);
+    EXPECT_EQ(afterLength, 6);
 }
 
 /**

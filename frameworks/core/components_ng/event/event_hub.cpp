@@ -1131,11 +1131,6 @@ void EventHub::ClearSingleKeyboardShortcut()
     }
 }
 
-void EventHub::ClearSingleKeyboardShortcutAll()
-{
-    keyboardShortcut_.clear();
-}
-
 std::vector<KeyboardShortcut>& EventHub::GetKeyboardShortcut()
 {
     return keyboardShortcut_;

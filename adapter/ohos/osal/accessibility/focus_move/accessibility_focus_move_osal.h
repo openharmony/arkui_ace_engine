@@ -55,16 +55,18 @@ public:
         const Accessibility::AccessibilityFocusMoveParam& param,
         Accessibility::AccessibilityElementInfo& info);
 
-    void ProcessGetScrollAncestor(
+    Accessibility::FocusMoveResult ProcessGetScrollAncestor(
         const int64_t elementId,
         const Accessibility::AccessibilityFocusMoveParam& param,
         std::list<Accessibility::AccessibilityElementInfo>& infos);
 
     static bool IsProcessGetScrollAncestor(const Accessibility::AccessibilityFocusMoveParam& param);
+
+    static bool IsProcessDetectFocusable(const Accessibility::AccessibilityFocusMoveParam& param);
 private:
     AceFocusMoveDetailCondition GetAceCondition(
         const Accessibility::AccessibilityFocusMoveParam& param);
-    Accessibility::FocusMoveResult HandleFocusMoveSearchResult(
+    Accessibility::FocusMoveResultType HandleFocusMoveSearchResult(
         const Accessibility::AccessibilityFocusMoveParam& param,
         const std::shared_ptr<FocusRulesCheckNode>& targetNode,
         AceFocusMoveResult result,

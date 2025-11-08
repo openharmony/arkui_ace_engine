@@ -475,7 +475,7 @@ ScrollResult RefreshPattern::HandleDragUpdate(float delta, float mainSpeed)
         scrollOffset_ = std::clamp(scrollOffset_ + delta * pullDownRatio, 0.0f, GetMaxPullDownDistance());
         UpdateFirstChildPlacement();
         FireOnOffsetChange(scrollOffset_);
-        FireOnStepOffsetChange(scrollOffset_ - lastOffset);
+        FireOnStepOffsetChange(scrollOffset_ - lastOffset, true);
         if (!isSourceFromAnimation_) {
             if (isRefreshing_) {
                 UpdateLoadingProgressStatus(RefreshAnimationState::RECYCLE, GetFollowRatio());
@@ -571,11 +571,11 @@ void RefreshPattern::FireOnOffsetChange(float value)
     }
 }
 
-void RefreshPattern::FireOnStepOffsetChange(float value)
+void RefreshPattern::FireOnStepOffsetChange(float value, bool isDrag)
 {
     auto refreshEventHub = GetEventHub<RefreshEventHub>();
     CHECK_NULL_VOID(refreshEventHub);
-    refreshEventHub->FireOnStepOffsetChange(value);
+    refreshEventHub->FireOnStepOffsetChange(value, isDrag);
 }
 
 void RefreshPattern::AddCustomBuilderNode(const RefPtr<NG::UINode>& builder)
@@ -735,9 +735,11 @@ void RefreshPattern::InitOffsetProperty()
             if (NearEqual(scrollOffsetLimit, pattern->scrollOffset_, 1.f)) {
                 pattern->BeginTrailingTrace();
             }
+            float lastOffset = pattern->scrollOffset_;
             pattern->scrollOffset_ = scrollOffsetLimit;
             pattern->UpdateFirstChildPlacement();
             pattern->FireOnOffsetChange(scrollOffsetLimit);
+            pattern->FireOnStepOffsetChange(scrollOffsetLimit - lastOffset, false);
         };
         offsetProperty_ = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
         auto host = GetHost();

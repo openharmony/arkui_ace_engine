@@ -688,10 +688,14 @@ export class StyledString implements MaterializedBase {
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    readonly length: int32
+    get length(): int32 {
+        return this.getLength()
+    }
+    set length(length: int32) {
+        this.setLength(length)
+    }
     constructor(_0: boolean, _1: boolean, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, StyledString.getFinalizer())
-        this.length = this.getLength()
     }
     constructor(value: string | ImageAttachment | CustomSpan, styles?: Array<StyleOptions>) {
         this(false, false, StyledString.construct(value, styles))
@@ -815,6 +819,11 @@ export class StyledString implements MaterializedBase {
     private getLength(): int32 {
         return this.getLength_serialize()
     }
+    private setLength(length: int32): void {
+        const length_casted = length as (int32)
+        this.setLength_serialize(length_casted)
+        return
+    }
     getString_serialize(): string {
         const retval  = ArkUIGeneratedNativeModule._StyledString_getString(this.peer!.ptr)
         return retval
@@ -860,6 +869,9 @@ export class StyledString implements MaterializedBase {
     private getLength_serialize(): int32 {
         const retval  = ArkUIGeneratedNativeModule._StyledString_getLength(this.peer!.ptr)
         return retval
+    }
+    private setLength_serialize(length: int32): void {
+        ArkUIGeneratedNativeModule._StyledString_setLength(this.peer!.ptr, length)
     }
 }
 export class TextShadowStyleInternal {

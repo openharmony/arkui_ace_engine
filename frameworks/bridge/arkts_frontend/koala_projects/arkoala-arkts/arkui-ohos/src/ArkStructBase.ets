@@ -15,6 +15,7 @@
 
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ArkCustomComponent } from "./ArkCustomComponent"
+import { SyntaxItemPeer } from "./base/RepeatImpl"
 import { ArkComponentRoot } from "./ArkComponentRoot"
 import { ArkColumnPeer } from "#generated";
 import { ObserveSingleton } from "./stateManagement/base/observeSingleton";
@@ -149,7 +150,7 @@ export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent 
         initializers?: () => T_Options,
     ): void {
         /* need to wrap both states and build() of @Component */
-        NodeAttach(() => ArkColumnPeer.create(undefined), (node: ArkColumnPeer) => { // replace with Frontend Node later
+        NodeAttach(() => SyntaxItemPeer.create(), (node: SyntaxItemPeer) => {
             const component = remember(() => {
                 const instance = factory()
                 instance.__initializeStruct(content, initializers?.());
