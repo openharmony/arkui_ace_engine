@@ -197,7 +197,7 @@ bool ViewAbstractModelStatic::CheckMenuIsShow(
         renderContext->UpdateChainedTransition(menuParam.transition);
     }
     if (wrapperPattern->IsShow() && !wrapperPattern->GetIsOpenMenu() &&
-        ((menuParam.setShow && !menuParam.isShow) || !menuParam.setShow)) {
+        !(menuParam.setShow && menuParam.isShow)) {
         TAG_LOGI(AceLogTag::ACE_MENU, "execute hide menu.");
         overlayManager->HideMenu(menuNode, targetId, false);
     }
