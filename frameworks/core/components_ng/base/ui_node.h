@@ -343,6 +343,7 @@ public:
         return hostRootId_;
     }
 
+    int32_t GetHostPageId() const;
     int32_t GetPageId() const
     {
         return hostPageId_;

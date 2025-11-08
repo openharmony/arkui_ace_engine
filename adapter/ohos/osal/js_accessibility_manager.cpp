@@ -6188,7 +6188,7 @@ void JsAccessibilityManager::SearchDefaultFocusByWindowIdNG(const int32_t pageId
             checkPageId = -1;
         }
 
-        if (node->GetPageId() == checkPageId) {
+        if (node->GetHostPageId() == checkPageId) {
             AccessibilityElementInfo nodeInfo;
 
             CommonProperty commonProperty;
