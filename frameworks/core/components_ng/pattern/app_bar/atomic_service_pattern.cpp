@@ -227,6 +227,8 @@ void AtomicServicePattern::OnColorConfigurationUpdate()
 void AtomicServicePattern::OnLanguageConfigurationUpdate()
 {
     AppInfoCallBack();
+    CHECK_NULL_VOID(customAppBarNodeNode_);
+    customAppBarNodeNode_->FireReloadFunction(true);
 }
 
 RefPtr<CustomAppBarNode> AtomicServicePattern::GetJSAppBarContainer()
