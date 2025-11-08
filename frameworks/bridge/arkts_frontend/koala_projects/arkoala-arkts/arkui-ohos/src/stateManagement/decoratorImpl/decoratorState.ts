@@ -61,6 +61,7 @@ export class StateDecoratedVariable<T> extends DecoratedV1VariableBase<T> implem
     public get(): T {
         const value = this.backing_.get(this.shouldAddRef());
         ObserveSingleton.instance.setV1RenderId(value as NullableObject);
+        uiUtils.builtinContainersAddRefAnyKey(value);
         return value;
     }
 

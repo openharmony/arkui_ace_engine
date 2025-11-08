@@ -28,6 +28,7 @@ export class ParamDecoratedVariable<T> extends DecoratedV2VariableBase implement
 
     get(): T {
         const value = this.backing_.get(this.shouldAddRef());
+        uiUtils.builtinContainersAddRefLength(value);
         return value;
     }
 

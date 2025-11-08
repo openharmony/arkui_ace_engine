@@ -229,6 +229,26 @@ export class UIUtilsImpl {
     public makeBindingMutable<T>(getter: () => T, setter: (newValue: T) => void): MutableBinding<T> {
         return new MutableBinding<T>(getter, setter);
     }
+
+    public builtinContainersAddRefAnyKey(value: Any): void {
+        if (value instanceof WrappedArray) {
+            value.keys();
+        } else if (value instanceof WrappedMap) {
+            value.keys();
+        } else if (value instanceof WrappedSet) {
+            value.keys();
+        }
+    }
+
+    public builtinContainersAddRefLength(value: Any): void {
+        if (value instanceof WrappedArray) {
+            value.length;
+        } else if (value instanceof WrappedMap) {
+            value.size;
+        } else if (value instanceof WrappedSet) {
+            value.size;
+        }
+    }
 }
 
 export const uiUtils: UIUtilsImpl = new UIUtilsImpl();

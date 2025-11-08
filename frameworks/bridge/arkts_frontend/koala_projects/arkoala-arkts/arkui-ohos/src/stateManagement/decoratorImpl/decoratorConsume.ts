@@ -38,7 +38,10 @@ export class ConsumeDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
         this.registerWatchForObservedObjectChanges(initValue);
         this.sourceProvide_!.registerWatchToSource(this);
     }
+    
     public get(): T {
+        const value = this.sourceProvide_!.get();
+        uiUtils.builtinContainersAddRefAnyKey(value);
         return this.sourceProvide_!.get();
     }
 
