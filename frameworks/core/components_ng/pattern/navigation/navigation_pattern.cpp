@@ -155,6 +155,27 @@ int32_t TriggerNavDestinationTransition(const RefPtr<NavDestinationGroupNode>& n
     CHECK_NULL_RETURN(navDestination, INVALID_ANIMATION_ID);
     return navDestination->DoTransition(operation, isEnter);
 }
+
+void BuildConfigParams(const RefPtr<NavDestinationNodeBase>& node, PageViewportConfigParams& params)
+{
+    auto statusBarConfig = node->GetStatusBarConfig();
+    auto navIndicatorConfig = node->GetNavigationIndicatorConfig();
+    std::optional<bool> enableStatusBar;
+    std::optional<bool> statusBarAnimated;
+    if (statusBarConfig.has_value()) {
+        enableStatusBar = statusBarConfig.value().first;
+        statusBarAnimated = statusBarConfig.value().second;
+    }
+    std::optional<bool> enableNavIndicator;
+    if (navIndicatorConfig.has_value()) {
+        enableNavIndicator = navIndicatorConfig.value();
+    }
+
+    params.orientation = node->GetOrientation();
+    params.enableStatusBar = enableStatusBar;
+    params.statusBarAnimation = statusBarAnimated;
+    params.enableNavIndicator = enableNavIndicator;
+}
 } // namespace
 
 void NavigationPattern::ReplaceNodeWithProxyNodeIfNeeded(
@@ -4780,34 +4801,31 @@ void NavigationPattern::UpdatePageViewportConfigIfNeeded(const RefPtr<NavDestina
         return;
     }
 
-    auto statusBarConfig = curFirstVisibleNode->GetStatusBarConfig();
-    auto navIndicatorConfig = curFirstVisibleNode->GetNavigationIndicatorConfig();
-    std::optional<bool> enableStatusBar;
-    std::optional<bool> statusBarAnimated;
-    if (statusBarConfig.has_value()) {
-        enableStatusBar = statusBarConfig.value().first;
-        statusBarAnimated = statusBarConfig.value().second;
-    }
-    std::optional<bool> enableNavIndicator;
-    if (navIndicatorConfig.has_value()) {
-        enableNavIndicator = navIndicatorConfig.value();
-    }
-    auto currConfig = manager->GetCurrentViewportConfig();
     /**
      * During the NavDestination transition with page-level orientation, the orientation should be locked.
-     * Calling the GetTargetViewportConfig marks the start of locking, while calling SetRequestedOrientation marks
+     * Calling the GetPageViewportConfig marks the start of locking, while calling SetRequestedOrientation marks
      * the end of the locking.
      * @see SetRequestedOrientationIfNeeded
      */
     enableLockOrientation_ = true;
-    auto config = manager->GetTargetViewportConfig(curNodeOri, enableStatusBar, statusBarAnimated, enableNavIndicator);
-    if (!currConfig || !config) {
+    RefPtr<PageViewportConfig> currentConfig = nullptr;
+    RefPtr<PageViewportConfig> targetConfig = nullptr;
+    PageViewportConfigParams currentParams;
+    BuildConfigParams(preFirstVisibleNode, currentParams);
+    PageViewportConfigParams targetParams;
+    BuildConfigParams(curFirstVisibleNode, targetParams);
+    auto ret = manager->GetPageViewportConfig(currentParams, currentConfig, targetParams, targetConfig);
+    if (!ret || !currentConfig || !targetConfig) {
+        TAG_LOGE(ACE_NAVIGATION, "failed to get pageViewportConfig");
         return;
     }
 
     auto curDisplayOrientation = container->GetCurrentDisplayOrientation();
-    auto targetDisplayOrientation = config->GetOrientation();
+    auto targetDisplayOrientation = targetConfig->GetOrientation();
     auto angle = CalcRotateAngleWithDisplayOrientation(curDisplayOrientation, targetDisplayOrientation);
+    TAG_LOGI(ACE_NAVIGATION, "curOri:%{public}d, targetOri:%{public}d, rotateAngle:%{public}s",
+        curDisplayOrientation, targetDisplayOrientation,
+        (angle.has_value() ? (std::to_string(angle.value()).c_str()) : "NA"));
     if (!angle.has_value()) {
         return;
     }
@@ -4816,11 +4834,11 @@ void NavigationPattern::UpdatePageViewportConfigIfNeeded(const RefPtr<NavDestina
     if (pageNode) {
         auto pageConfig = pageNode->GetPageViewportConfig();
         if (!pageConfig) {
-            pageNode->SetPageViewportConfig(currConfig->Clone());
+            pageNode->SetPageViewportConfig(currentConfig->Clone());
         }
     }
     if (!viewportConfig_) {
-        SetPageViewportConfig(currConfig->Clone());
+        SetPageViewportConfig(currentConfig->Clone());
     }
 
     for (auto& weakNode : preVisibleNodes_) {
@@ -4828,14 +4846,14 @@ void NavigationPattern::UpdatePageViewportConfigIfNeeded(const RefPtr<NavDestina
         CHECK_NULL_CONTINUE(node);
         auto preConfig = node->GetPageViewportConfig();
         if (!preConfig) {
-            node->SetPageViewportConfig(currConfig->Clone());
+            node->SetPageViewportConfig(currentConfig->Clone());
             node->SetPageRotateAngle(ROTATION_0);
         }
     }
     for (auto& weakNode : newVisibleNodes) {
         auto node = weakNode.Upgrade();
         CHECK_NULL_CONTINUE(node);
-        node->SetPageViewportConfig(config->Clone());
+        node->SetPageViewportConfig(targetConfig->Clone());
         node->SetPageRotateAngle(angle);
         node->SetIsRotated(false);
     }
@@ -4986,7 +5004,6 @@ void NavigationPattern::SetRequestedOrientationIfNeeded()
         if (!windowSizeChanged) {
             return;
         }
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "reset Page Constraint");
         auto pageNode = pattern->GetNavBasePageNode();
         CHECK_NULL_VOID(pageNode);
         auto geometryNode = pageNode->GetGeometryNode();
@@ -4996,6 +5013,7 @@ void NavigationPattern::SetRequestedOrientationIfNeeded()
          * Therefore, if the window size changes during the transition, the page size needs to be forcibly
          * refreshed upon the completion of the transition.
          */
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "reset Page Constraint");
         geometryNode->ResetParentLayoutConstraint();
     };
     if (!windowMgr->IsSetOrientationNeeded(targetOrientation)) {
@@ -5005,10 +5023,10 @@ void NavigationPattern::SetRequestedOrientationIfNeeded()
     }
     /**
      * During the NavDestination transition with page-level orientation, the orientation should be locked.
-     * Calling the GetTargetViewportConfig marks the start of locking, while calling SetRequestedOrientation marks
+     * Calling the GetPageViewportConfig marks the start of locking, while calling SetRequestedOrientation marks
      * the end of the locking.
-     * GetTargetViewportConfig and SetRequestedOrientation have a one-to-one or multi-to-one relationship.
-     * @see GetTargetViewportConfig
+     * GetPageViewportConfig and SetRequestedOrientation have a one-to-one or multi-to-one relationship.
+     * @see UpdatePageViewportConfigIfNeeded
      */
     windowMgr->SetRequestedOrientation(targetOrientation, false);
 }
