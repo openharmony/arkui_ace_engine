@@ -60,6 +60,20 @@ protected:
     JSRef<JSVal> param_;
 };
 
+class JSNavigationStackExtend : public NG::NavigationStackExtend {
+    DECLARE_ACE_TYPE(JSNavigationStackExtend, NG::NavigationStackExtend);
+public:
+    JSNavigationStackExtend(napi_value navPathStackExtendObj);
+    ~JSNavigationStackExtend() override = default;
+
+    std::string GetSerializedParamByIndex(int32_t index) override;
+    napi_value GetNavPathStackExtendObj() override;
+
+    static RefPtr<JSNavigationStackExtend> GetOrCreateNavigationStackExtend(const RefPtr<NG::NavigationStack>& stack);
+private:
+    napi_ref navPathStackExtendObjRef_ = nullptr;
+};
+
 class JSNavigationStack : public NG::NavigationStack {
     DECLARE_ACE_TYPE(JSNavigationStack, NG::NavigationStack)
 public:
@@ -145,6 +159,11 @@ public:
         homePathInfo_ = std::move(pathInfo);
     }
     bool CreateHomeDestination(const WeakPtr<NG::UINode>& customNode, RefPtr<NG::UINode>& node) override;
+
+    bool IsStaticStack() override
+    {
+        return false;
+    }
 
 protected:
     JSRef<JSObject> dataSourceObj_;

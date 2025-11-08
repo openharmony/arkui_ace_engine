@@ -82,7 +82,10 @@ HWTEST_F(TextBaseControllerAccessorTest, GetLayoutManagerTest, TestSize.Level1)
     ASSERT_NE(accessor_->getLayoutManager, nullptr);
     auto layoutInfo = OHOS::Ace::NG::LayoutInfoInterface();
     EXPECT_CALL(*peer_, GetLayoutInfoInterface()).Times(1).WillOnce(Return(layoutInfo.GetLayoutInfoInterface()));
-    Ark_NativePointer manager = accessor_->getLayoutManager(peer_);
+    Opt_LayoutManager layoutManager = accessor_->getLayoutManager(peer_);
+    auto managerOpt = Converter::GetOpt(layoutManager);
+    ASSERT_TRUE(managerOpt.has_value());
+    auto manager = managerOpt.value();
     ASSERT_NE(manager, nullptr);
 }
 

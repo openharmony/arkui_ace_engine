@@ -32,6 +32,22 @@ std::unordered_map<int, uint32_t> colorMap = {
     {PromptActionColor::PROMPT_ACTION_COLOR_TRANSPARENT, 0x00000000},
 };
 
+std::unordered_map<int, OHOS::Ace::BlurStyle> blurStyleMap = {
+    { PromptActionBlurStyle::THIN, OHOS::Ace::BlurStyle::THIN },
+    { PromptActionBlurStyle::REGULAR, OHOS::Ace::BlurStyle::REGULAR },
+    { PromptActionBlurStyle::THICK, OHOS::Ace::BlurStyle::THICK },
+    { PromptActionBlurStyle::BACKGROUND_THIN, OHOS::Ace::BlurStyle::BACKGROUND_THIN },
+    { PromptActionBlurStyle::BACKGROUND_REGULAR, OHOS::Ace::BlurStyle::BACKGROUND_REGULAR },
+    { PromptActionBlurStyle::BACKGROUND_THICK, OHOS::Ace::BlurStyle::BACKGROUND_THICK },
+    { PromptActionBlurStyle::BACKGROUND_ULTRA_THICK, OHOS::Ace::BlurStyle::BACKGROUND_ULTRA_THICK },
+    { PromptActionBlurStyle::NONE, OHOS::Ace::BlurStyle::NO_MATERIAL },
+    { PromptActionBlurStyle::COMPONENT_ULTRA_THIN, OHOS::Ace::BlurStyle::COMPONENT_ULTRA_THIN },
+    { PromptActionBlurStyle::COMPONENT_THIN, OHOS::Ace::BlurStyle::COMPONENT_THIN },
+    { PromptActionBlurStyle::COMPONENT_REGULAR, OHOS::Ace::BlurStyle::COMPONENT_REGULAR },
+    { PromptActionBlurStyle::COMPONENT_THICK, OHOS::Ace::BlurStyle::COMPONENT_THICK },
+    { PromptActionBlurStyle::COMPONENT_ULTRA_THICK, OHOS::Ace::BlurStyle::COMPONENT_ULTRA_THICK },
+};
+
 ani_object CreateANIIntObject(ani_env *env, int32_t intValue)
 {
     ani_class intCls {};
@@ -1466,7 +1482,16 @@ void CheckDimension(OHOS::Ace::CalcDimension value)
 
 bool GetBackgroundBlurStyleParam(ani_env* env, ani_object object, int32_t& result)
 {
-    return GetEnumInt(env, object, "backgroundBlurStyle", "arkui.component.common.BlurStyle", result);
+    int32_t resultInt;
+    if (!GetEnumInt(env, object, "backgroundBlurStyle", "arkui.component.common.BlurStyle", resultInt)) {
+        return false;
+    }
+
+    auto iter = blurStyleMap.find(resultInt);
+    if (iter != blurStyleMap.end()) {
+        result = static_cast<int32_t>(iter->second);
+    }
+    return true;
 }
 
 bool GetBackgroundBlurStyleParamOpt(ani_env* env, ani_object object, std::optional<int32_t>& result)

@@ -216,19 +216,18 @@ void SetMeshImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto mesh = Converter::OptConvertPtr<std::vector<float>>(value);
-    CHECK_NULL_VOID(mesh);
+    auto mesh = Converter::OptConvertPtr<std::vector<float>>(value).value_or(std::vector<float>());
     auto columnValue = Converter::OptConvertPtr<int32_t>(column).value_or(0);
     auto rowValue = Converter::OptConvertPtr<int32_t>(row).value_or(0);
-    auto meshSize = mesh->size();
+    auto meshSize = mesh.size();
     columnValue = columnValue > 0 ? columnValue : 0;
     rowValue = rowValue > 0 ? rowValue : 0;
     auto tempMeshSize = (columnValue + 1) * (rowValue + 1) * 2;
     if (static_cast<size_t>(tempMeshSize) != meshSize) {
-        ShapeModelNG::SetBitmapMesh(frameNode, std::move(*mesh), 0, 0);
+        ShapeModelNG::SetBitmapMesh(frameNode, std::move(mesh), 0, 0);
         return;
     }
-    ShapeModelNG::SetBitmapMesh(frameNode, std::move(*mesh), columnValue, rowValue);
+    ShapeModelNG::SetBitmapMesh(frameNode, std::move(mesh), columnValue, rowValue);
 }
 } // ShapeAttributeModifier
 const GENERATED_ArkUIShapeModifier* GetShapeModifier()

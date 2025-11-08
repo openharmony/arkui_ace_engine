@@ -380,7 +380,7 @@ void SetSurfaceBackgroundColorImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto colorValue = Converter::OptConvertPtr<Color>(value);
     auto color = colorValue.value_or(Color::BLACK);
-    VideoModelNG::SetSurfaceBackgroundColor(frameNode, (color == Color::BLACK ? color : Color::TRANSPARENT));
+    VideoModelNG::SetSurfaceBackgroundColor(frameNode, (color == Color::TRANSPARENT ? color : Color::BLACK));
 }
 void SetEnableShortcutKeyImpl(Ark_NativePointer node,
                               const Opt_Boolean* value)

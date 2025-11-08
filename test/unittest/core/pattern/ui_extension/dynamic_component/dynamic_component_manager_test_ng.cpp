@@ -77,6 +77,7 @@ HWTEST_F(DynamicPatternManagerTestNg, DynamicPatternManagerTestNg001, TestSize.L
     EXPECT_NE(stageNode, nullptr);
     auto geometryNode = stageNode->GetGeometryNode();
     EXPECT_NE(geometryNode, nullptr);
+    // At this point, the geometryNode's margin frame size should not be positive (default or uninitialized state).
     EXPECT_FALSE(geometryNode->GetMarginFrameSize().IsPositive());
     auto frameNodeRef = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
     ASSERT_NE(frameNodeRef, nullptr);
@@ -88,6 +89,7 @@ HWTEST_F(DynamicPatternManagerTestNg, DynamicPatternManagerTestNg001, TestSize.L
     EXPECT_TRUE(geometryNode->GetMarginFrameSize().IsPositive());
     DynamicComponentManager::TriggerOnAreaChangeCallback(frameNode, 1);
 
+    // eventHub is of type RefPtr<EventHub>
     auto eventHub = frameNode->GetEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     ASSERT_FALSE(eventHub->HasOnAreaChanged());
@@ -101,7 +103,7 @@ HWTEST_F(DynamicPatternManagerTestNg, DynamicPatternManagerTestNg001, TestSize.L
 
 /**
  * @tc.name: DynamicPatternManagerTestNg002
- * @tc.desc: Test DynamicPattern HandleDynamicRenderOnAreaChange
+ * @tc.desc: Test DynamicPattern TriggerOnAreaChangeCallback and HandleDynamicRenderOnAreaChange
  * @tc.type: FUNC
  */
 HWTEST_F(DynamicPatternManagerTestNg, DynamicPatternManagerTestNg002, TestSize.Level1)
@@ -123,9 +125,9 @@ HWTEST_F(DynamicPatternManagerTestNg, DynamicPatternManagerTestNg002, TestSize.L
     RectF rectF(5, 5, 1, 1);
     OffsetF offsetF(2.0, 3.0);
     OffsetF offsetF2(2.0, 3.0);
-    frameNode->lastFrameRect_ = std::make_unique<RectF>();
+    frameNode->lastFrameRect_ = std::make_unique<RectF>(0.0f, 0.0f, 1.0f, 1.0f);
     frameNode->lastParentOffsetToWindow_ = std::make_unique<OffsetF>(OffsetF(50.0f, 50.0f));
-    frameNode->lastHostParentOffsetToWindow_ = std::make_shared<OffsetF>();
+    frameNode->lastHostParentOffsetToWindow_ = std::make_shared<OffsetF>(OffsetF(10.0f, 20.0f));
     DynamicComponentManager::HandleDynamicRenderOnAreaChange(frameNode, rectF, offsetF, offsetF2);
 
     auto func = [](const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin) {};
@@ -175,6 +177,7 @@ HWTEST_F(DynamicPatternManagerTestNg, DynamicPatternManagerTestNg003, TestSize.L
     ASSERT_NE(frameNode->GetLastHostParentOffsetToWindow(), nullptr);
     auto renderContext = frameNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
+    // At this point, the position property should be nullptr since no offset edges have been set yet.
     ASSERT_EQ(renderContext->GetPositionProperty(), nullptr);
 
     auto top = CalcDimension(1.0);

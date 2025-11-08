@@ -1,5 +1,5 @@
 import { int32 } from "@koalaui/common";
-import { KPointer } from "@koalaui/interop";
+import { KPointer, nullptr } from "@koalaui/interop";
 import { default as image } from "@ohos.multimedia.image";
 import { ColorMetrics, DrawContext, LengthMetrics, Size } from "arkui.Graphics";
 import { NodeController } from "arkui.NodeController";
@@ -79,6 +79,7 @@ import { int32 } from '@koalaui/common';
 import { FrameNodeUtils, FrameNodeInternal } from './../FrameNode';
 import { toPeerPtr } from '@koalaui/interop';
 import { applySymbolGlyphModifierToNode, applyTextModifierToNode } from "./../ApplyModifierToNode"
+import { ComponentContent } from 'arkui.ComponentContent';
 
 export namespace extractors {
   export function toImagePixelMapPtr(value: image.PixelMap): KPointer {
@@ -358,11 +359,10 @@ export namespace extractors {
   }
 
   export function toLevelOrderPtr(value: LevelOrder): KPointer {
-    return 123;
+    return toPeerPtr(value);
   }
   export function fromLevelOrderPtr(ptr: KPointer): LevelOrder {
-    const x: Object = {};
-    return x as LevelOrder;
+    return new LevelOrder(ptr);
   }
 
   export function toWindowWindowStagePtr(value: window.WindowStage): KPointer {
@@ -574,4 +574,17 @@ export namespace extractors {
     const x: Object = {};
     return x as Environment;
   }
+
+  export function toComponentContentPtr(value: ComponentContent): KPointer {
+    const pointer = value.getNodePtr();
+    if (pointer === undefined) {
+      return nullptr;
+    }
+    return pointer;
+  }
+  export function fromComponentContentPtr(ptr: KPointer): ComponentContent {
+    const x: Object = {};
+    return x as ComponentContent;
+  }
+
 }

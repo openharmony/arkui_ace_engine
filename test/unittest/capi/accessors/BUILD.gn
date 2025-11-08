@@ -150,6 +150,7 @@ ace_unittest("capi_all_accessors_test") {
     #"touch_event_accessor_test.cpp",
     "transition_effect_accessor_test.cpp",
     #"ui_common_event_accessor_test.cpp",
+    "ui_context_atomic_service_bar_accessor_test.cpp",
     "url_style_accessor_test.cpp",
     #"video_controller_accessor_test.cpp",
     #"water_flow_section_accessor_test.cpp",

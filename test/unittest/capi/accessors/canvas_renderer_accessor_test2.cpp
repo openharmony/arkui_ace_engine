@@ -140,6 +140,14 @@ std::vector<std::tuple<Ark_Int32, Color>> STYLE_NUMBER_TEST_PLAN = {
     { Converter::ArkValue<Ark_Int32>(0x80ffffff), Color(0x80ffffff) },
     { Converter::ArkValue<Ark_Int32>(0xffffffff), Color(0xffffffff) },
     { Converter::ArkValue<Ark_Int32>(0x11111111), Color(0x11111111) },
+    { Converter::ArkValue<Ark_Int32>(-1), Color() },
+};
+std::vector<std::tuple<Ark_Color, Color>> STYLE_COLOR_TEST_PLAN = {
+    { Ark_Color::ARK_COLOR_RED, Color::RED },
+    { Ark_Color::ARK_COLOR_WHITE, Color::WHITE },
+    { Ark_Color::ARK_COLOR_TRANSPARENT, Color::TRANSPARENT },
+    { Ark_Color::ARK_COLOR_BLACK, Color::BLACK },
+    { Ark_Color::ARK_COLOR_BLUE, Color::BLUE },
 };
 class MockPixelMap : public PixelMap {
 public:
@@ -1470,6 +1478,25 @@ HWTEST_F(CanvasRendererAccessorTest2, DISABLED_setFillStyleNumberTest, TestSize.
         accessor_->setFillStyle(peer_, &style);
         EXPECT_EQ(target, expected);
         EXPECT_FALSE(targetFlag);
+    }
+}
+
+/**
+ * @tc.name: setFillStyleColorTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasRendererAccessorTest2, setFillStyleColorTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->setFillStyle, nullptr);
+    for (const auto& [actual, expected] : STYLE_COLOR_TEST_PLAN) {
+        Ace::Color target;
+        bool targetFlag = false;
+        EXPECT_CALL(*renderingModel_, SetFillColor(_, _)).WillOnce(DoAll(SaveArg<0>(&target), SaveArg<1>(&targetFlag)));
+        auto style = Converter::ArkUnion<Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern, Ark_Color>(actual);
+        accessor_->setFillStyle(peer_, &style);
+        EXPECT_EQ(target, expected);
+        EXPECT_TRUE(targetFlag);
     }
 }
 

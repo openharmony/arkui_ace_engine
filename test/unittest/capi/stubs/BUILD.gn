@@ -20,6 +20,7 @@ ohos_source_set("capi-ut-stubs") {
   defines = [ "ARKUI_CAPI_UNITTEST" ]
   sources = [
     "capi-ut-stubs.cpp",
+    "mock_app_bar_view.cpp",
     "mock_component_snapshot.cpp",
     "mock_custom_render_descriptor.cpp",
     "mock_date_picker_dialog.cpp",

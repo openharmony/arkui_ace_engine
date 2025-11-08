@@ -644,6 +644,7 @@ namespace Converter {
     template<> RadioStyle Convert(const Ark_RadioStyle& src);
     template<> RangeContent Convert(const Ark_TextPickerRangeContent& src);
     template<> Rect Convert(const Ark_RectResult& src);
+    template<> RectF Convert(const Ark_Frame& src);
     template<> RefPtr<BasicShape> Convert(const Ark_CircleShape& src);
     template<> RefPtr<BasicShape> Convert(const Ark_EllipseShape& src);
     template<> RefPtr<BasicShape> Convert(const Ark_PathShape& src);
@@ -712,7 +713,8 @@ namespace Converter {
     // SORTED_SECTION: No multiline declarations, please!
     template<> void AssignCast(std::optional<AIImageQuality>& dst, const Ark_image_ResolutionQuality& src);
     template<> void AssignCast(std::optional<AccessibilityInterfaceAction>& dst, const Ark_AccessibilityAction& src);
-    template<> void AssignCast(std::optional<AccessibilityActionInterceptResult>& dst, const Ark_AccessibilityActionInterceptResult& src);
+    template<> void AssignCast(std::optional<AccessibilityActionInterceptResult>& dst,
+        const Ark_AccessibilityActionInterceptResult& src);
     template<> void AssignCast(std::optional<AccessibilityHoverAction>& dst, const Ark_AccessibilityHoverType& src);
     template<> void AssignCast(std::optional<Ace::CanvasUnit>& dst, const Ark_LengthMetricsUnit& src);
     template<> void AssignCast(std::optional<AdaptiveColor>& dst, const Ark_AdaptiveColor& src);
@@ -906,6 +908,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<WordBreak>& dst, const Ark_WordBreak& src);
     template<> void AssignCast(std::optional<XComponentType>& dst, const Ark_XComponentType& src);
     template<> void AssignCast(std::optional<double>& dst, const Ark_LevelOrder& src);
+    template<> void AssignCast(std::optional<double>& dst, const Ark_LevelOrderExtender& src);
     template<> void AssignCast(std::optional<double>& dst, const Ark_String& src);
     template<> void AssignCast(std::optional<double>& dst, const Ark_Float64& src);
     template<> void AssignCast(std::optional<float>& dst, const Ark_Float64& src);

@@ -763,9 +763,11 @@ export struct ToolBarV2 {
     let sizeResult: SizeResult = { height: 0, width: 0 };
     if (Double.toInt(children.length) > 0) {
       children.forEach((child) => {
-        let childMeasureResult: MeasureResult = child.measure(constraint);
-        sizeResult.width = childMeasureResult.width;
-        sizeResult.height = childMeasureResult.height;
+        let childMeasureResult: MeasureResult | undefined = child.measure(constraint);
+        if (childMeasureResult) {
+          sizeResult.width = childMeasureResult.width;
+          sizeResult.height = childMeasureResult.height;
+        }
       });
     }
     return sizeResult;

@@ -217,11 +217,11 @@ RESOURCE_CACHE_MAP.set('sys.float.subheader_title_font_weight', { resourceId: 12
 @CustomLayout
 @Component
 export struct SubHeader {
-  @PropRef icon?: ResourceStr;
+  @PropRef icon: ResourceStr | undefined = undefined;
   iconSymbolOptions?: SymbolOptions;
-  @PropRef primaryTitle?: ResourceStr;
+  @PropRef primaryTitle: ResourceStr | undefined = undefined;
   @State primaryTitleModifier: TextModifier = new TextModifier();
-  @PropRef secondaryTitle?: ResourceStr;
+  @PropRef secondaryTitle: ResourceStr | undefined = undefined;
   @State secondaryTitleModifier: TextModifier = new TextModifier();
   @State subHeaderModifier: SubHeaderModifier = new SubHeaderModifier();
   select?: SelectOptions;
@@ -236,8 +236,8 @@ export struct SubHeader {
   @State selectedIndex: int = -1;
   @State selectValue: ResourceStr | undefined = '';
   @BuilderParam titleBuilder?: () => void;
-  @PropRef contentMargin?: LocalizedMargin;
-  @PropRef contentPadding?: LocalizedPadding;
+  @PropRef contentMargin: LocalizedMargin | undefined = undefined;
+  @PropRef contentPadding: LocalizedPadding | undefined = undefined;
   subHeaderMargin: LocalizedMargin = {
     start: LengthMetrics.vp(getResourceValue('sys.float.margin_left')),
     end: LengthMetrics.vp(getResourceValue('sys.float.margin_right')),
@@ -570,7 +570,10 @@ export struct SubHeader {
     children.forEach((child) => {
       if (constraint.maxHeight !== undefined) {
         constraint.minHeight = Math.min(Number(this.getMinHeight() as number), Number(constraint.maxHeight as number));
-        result.height = child?.measure(constraint).height as number;
+        let childMeasureResult = child?.measure(constraint);
+        if (childMeasureResult) {
+          result.height = childMeasureResult.height;
+        }
         result.width = Number(constraint.maxWidth as number);
       }
     })
@@ -1318,9 +1321,11 @@ struct TextArrowLayout {
       minHeight: Math.max(textArrowHeight, Number(constraint.minHeight as number)),
       maxHeight: constraint.maxHeight,
     };
-    let textMeasureResult: MeasureResult = textChild.measure(textConstraint);
-    textArrowWidth = Math.max(textArrowWidth, textMeasureResult.width);
-    textArrowHeight = Math.max(textArrowHeight, textMeasureResult.height);
+    let textMeasureResult: MeasureResult | undefined = textChild.measure(textConstraint);
+    if (textMeasureResult) {
+      textArrowWidth = Math.max(textArrowWidth, textMeasureResult.width);
+      textArrowHeight = Math.max(textArrowHeight, textMeasureResult.height);
+    }
 
     let arrowChild: Measurable = children[INDEX_ONE];
     let arrowConstraint: ConstraintSizeOptions = {

@@ -404,7 +404,7 @@ ani_vm *ArktsFrontend::GetVM()
 }
 
 void ArktsFrontend::PushExtender(
-    const PageRouterOptions& options, std::function<void()>&& finishCallback, void* jsNode)
+    const PageRouterOptions& options, const std::function<void()>&& finishCallback, void* jsNode)
 {
     CHECK_NULL_VOID(pageRouterManager_);
     NG::RouterPageInfo routerPageInfo;
@@ -418,7 +418,7 @@ void ArktsFrontend::PushExtender(
 }
 
 void ArktsFrontend::PushNamedRouteExtender(
-    const PageRouterOptions& options, std::function<void()>&& finishCallback, void* jsNode)
+    const PageRouterOptions& options, const std::function<void()>&& finishCallback, void* jsNode)
 {
     CHECK_NULL_VOID(pageRouterManager_);
     NG::RouterPageInfo routerPageInfo;
@@ -432,7 +432,7 @@ void ArktsFrontend::PushNamedRouteExtender(
 }
 
 void ArktsFrontend::ReplaceExtender(
-    const PageRouterOptions& options, std::function<void()>&& finishCallback, void* jsNode)
+    const PageRouterOptions& options, const std::function<void()>&& finishCallback, void* jsNode)
 {
     CHECK_NULL_VOID(pageRouterManager_);
     NG::RouterPageInfo routerPageInfo;
@@ -446,7 +446,7 @@ void ArktsFrontend::ReplaceExtender(
 }
 
 void ArktsFrontend::ReplaceNamedRouteExtender(
-    const PageRouterOptions& options, std::function<void()>&& finishCallback, void* jsNode)
+    const PageRouterOptions& options, const std::function<void()>&& finishCallback, void* jsNode)
 {
     CHECK_NULL_VOID(pageRouterManager_);
     NG::RouterPageInfo routerPageInfo;
@@ -460,7 +460,7 @@ void ArktsFrontend::ReplaceNamedRouteExtender(
 }
 
 void ArktsFrontend::RunPageExtender(
-    const PageRouterOptions& options, std::function<void()>&& finishCallback, void* jsNode)
+    const PageRouterOptions& options, const std::function<void()>&& finishCallback, void* jsNode)
 {
     CHECK_NULL_VOID(pageRouterManager_);
     NG::RouterPageInfo routerPageInfo;
@@ -479,7 +479,13 @@ void ArktsFrontend::BackExtender(const std::string& url, const std::string& para
     NG::RouterPageInfo routerPageInfo;
     routerPageInfo.url = url;
     routerPageInfo.params = params;
-    pageRouterManager_->BackWithTarget(routerPageInfo);
+    pageRouterManager_->BackWithTargetExtender(routerPageInfo);
+}
+
+void ArktsFrontend::BackToIndexExtender(int32_t index, const std::string& params)
+{
+    CHECK_NULL_VOID(pageRouterManager_);
+    pageRouterManager_->BackToIndexWithTargetExtender(index, params);
 }
 
 void ArktsFrontend::ClearExtender()

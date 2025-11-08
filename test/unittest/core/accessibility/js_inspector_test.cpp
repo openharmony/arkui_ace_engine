@@ -108,6 +108,7 @@ public:
         EXPECT_EQ(inspectToggle.styles_["font-style"], "normal");
         EXPECT_EQ(inspectToggle.styles_["font-weight"], "normal");
         EXPECT_EQ(inspectToggle.styles_["font-family"], "sans-serif");
+        
         EXPECT_EQ(inspectToggle.styles_.find("border"), inspectToggle.styles_.end());
         EXPECT_EQ(inspectToggle.styles_.find("border-left-style"), inspectToggle.styles_.end());
         EXPECT_EQ(inspectToggle.styles_.find("border-top-style"), inspectToggle.styles_.end());
@@ -121,6 +122,7 @@ public:
         EXPECT_EQ(inspectToggle.styles_.find("border-top-color"), inspectToggle.styles_.end());
         EXPECT_EQ(inspectToggle.styles_.find("border-right-color"), inspectToggle.styles_.end());
         EXPECT_EQ(inspectToggle.styles_.find("border-bottom-color"), inspectToggle.styles_.end());
+
         EXPECT_EQ(inspectToggle.attrs_.size(), attrsSize + attrsSizeInsert);
         EXPECT_EQ(inspectToggle.styles_.size(), stylesSize + stylesSizeInsert);
     }
@@ -149,6 +151,7 @@ public:
         EXPECT_EQ(inspectTextArea.styles_["allow-scale"], "true");
         EXPECT_EQ(inspectTextArea.styles_["font-weight"], "normal");
         EXPECT_EQ(inspectTextArea.styles_["font-family"], "sans-serif");
+
         EXPECT_EQ(inspectTextArea.attrs_.size(), attrsSize + attrsSizeInsert);
         EXPECT_EQ(inspectTextArea.styles_.size(), stylesSize + stylesSizeInsert);
     }
@@ -181,6 +184,7 @@ public:
         EXPECT_EQ(inspectText.styles_["text-overflow"], "clip");
         EXPECT_EQ(inspectText.styles_["font-family"], "sans-serif");
         EXPECT_EQ(inspectText.styles_["font-size-step"], "1px");
+
         EXPECT_EQ(inspectText.attrs_.size(), attrsSize + attrsSizeInsert);
         EXPECT_EQ(inspectText.styles_.size(), stylesSize + stylesSizeInsert);
     }
@@ -231,6 +235,7 @@ public:
             stylesSizeInsert++;
         }
         EXPECT_EQ(inspectSwiper.styles_["indicator-size"], "4px");
+        
         EXPECT_EQ(inspectSwiper.attrs_.size(), attrsSize + attrsSizeInsert);
         EXPECT_EQ(inspectSwiper.styles_.size(), stylesSize + stylesSizeInsert);
     }
@@ -251,6 +256,7 @@ public:
         EXPECT_EQ(inspectSlider.attrs_["showtips"], "false");
         EXPECT_EQ(inspectSlider.attrs_["disabled"], "false");
         EXPECT_EQ(inspectSlider.attrs_["focusable"], "true");
+        
         if (deviceType == DeviceType::PHONE) {
             EXPECT_EQ(inspectSlider.styles_["color"], "#19000000");
             EXPECT_EQ(inspectSlider.styles_["selected-color"], "#ff007dff");

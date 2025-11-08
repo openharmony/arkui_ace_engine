@@ -106,14 +106,14 @@ HWTEST_F(PluginNodeTestNg, GetOrCreatePluginNode, TestSize.Level1)
     auto parentPluginNode = PluginNode::GetOrCreatePluginNode(
         "PluginComponent", NODE_ID_OF_PARENT_NODE, []() { return AceType::MakeRefPtr<PluginPattern>(); });
     ASSERT_NE(parentPluginNode, nullptr);
-    auto PluginNode = PluginNode::GetOrCreatePluginNode(
+    auto pluginNode = PluginNode::GetOrCreatePluginNode(
         "PluginComponent", NODE_ID_OF_PLUGIN_NODE, []() { return AceType::MakeRefPtr<PluginPattern>(); });
-    PluginNode->SetParent(parentPluginNode);
-    parentPluginNode->AddChild(PluginNode);
-    ASSERT_EQ(parentPluginNode->GetFirstChild(), PluginNode);
+    pluginNode->SetParent(parentPluginNode);
+    parentPluginNode->AddChild(pluginNode);
+    ASSERT_EQ(parentPluginNode->GetFirstChild(), pluginNode);
     diffPluginNode = PluginNode::GetOrCreatePluginNode(
         "PluginComponent1", NODE_ID_OF_PLUGIN_NODE, []() { return AceType::MakeRefPtr<PluginPattern>(); });
-    EXPECT_NE(PluginNode == diffPluginNode, true);
+    EXPECT_NE(pluginNode == diffPluginNode, true);
     ASSERT_EQ(AceType::TypeName(diffPluginNode->GetPattern()), "PluginPattern");
     ASSERT_EQ(parentPluginNode->GetFirstChild(), nullptr);
 
@@ -121,8 +121,8 @@ HWTEST_F(PluginNodeTestNg, GetOrCreatePluginNode, TestSize.Level1)
      * @tc.steps: step5. Remove a Plugin node by GetOrCreatePluginNode without  patternCreator.
      * @tc.expected: Get a different node success.
      */
-    PluginNode = PluginNode::GetOrCreatePluginNode("PluginComponent", NODE_ID_OF_PLUGIN_NODE, nullptr);
-    auto pattrn = PluginNode->GetPattern();
+    pluginNode = PluginNode::GetOrCreatePluginNode("PluginComponent", NODE_ID_OF_PLUGIN_NODE, nullptr);
+    auto pattrn = pluginNode->GetPattern();
     ASSERT_EQ(AceType::TypeName(pattrn), "Pattern");
 }
 } // namespace OHOS::Ace::NG

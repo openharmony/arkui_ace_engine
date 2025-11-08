@@ -214,6 +214,15 @@ import hilog from '@ohos.hilog'
                 throw Error("state in NavDestinationInfo type Error");
             }
         }
+        static castToNavDestinationMode(value: number): NavDestinationMode {
+            if (value === 0) {
+                return NavDestinationMode.STANDARD;
+            } else if (value === 1) {
+                return NavDestinationMode.DIALOG;
+            } else {
+                throw Error("mode in NavDestinationInfo type Error");
+            }
+        }
         static transferStatic(input: Any): Object {
             let dynamicValue = ESValue.wrap(input);
             let staticValue = new NavDestinationInfoImpl();
@@ -263,6 +272,22 @@ import hilog from '@ohos.hilog'
             }
             staticValue.navDestinationId = navDestinationId.toString();
 
+            let uniqueId = dynamicValue.getProperty("uniqueId");
+            if (!uniqueId.isNumber()) {
+                throw Error("uniqueId in NavDestinationInfo type Error");
+            } else if (!(uniqueId.isUndefined() || uniqueId.isNull())) {
+                throw Error("uniqueId in NavDestinationInfo type Error");
+            }
+            staticValue.uniqueId = uniqueId.toNumber() as int;
+
+            let mode = dynamicValue.getProperty("mode");
+            if (!mode.isNumber()) {
+                throw Error("mode in NavDestinationInfo type Error");
+            } else if (!(mode.isUndefined() || mode.isNull())) {
+                throw Error("mode in NavDestinationInfo type Error");
+            }
+            staticValue.mode = NavDestinationInfoImpl.castToNavDestinationMode(mode.toNumber());
+
             return staticValue;
         }
 
@@ -285,6 +310,16 @@ import hilog from '@ohos.hilog'
                 dynamicValue.setProperty('param', ESValue.wrap(staticValue.param));
             }
             dynamicValue.setProperty('navDestinationId', ESValue.wrap(staticValue.navDestinationId));
+            if (staticValue.uniqueId === null || staticValue.uniqueId === undefined) {
+                dynamicValue.setProperty('uniqueId', ESValue.Null);
+            } else {
+                dynamicValue.setProperty('uniqueId', ESValue.wrap(staticValue.uniqueId));
+            }
+            if (staticValue.mode === null || staticValue.mode === undefined) {
+                dynamicValue.setProperty('mode', ESValue.Null);
+            } else {
+                dynamicValue.setProperty('mode', ESValue.wrapNumber(staticValue.mode!));
+            }
             return dynamicValue as Any;
         }
     }
@@ -390,16 +425,140 @@ import hilog from '@ohos.hilog'
 
     export interface ObserverOptions {}
 
-    export interface ScrollEventInfo {}
+    export enum ScrollEventType {
+      SCROLL_START = 0,
+      SCROLL_STOP = 1
+    }
 
-    export interface NavDestinationSwitchInfo {}
+    export enum Axis {
+        VERTICAL = 0,
+        Vertical = 0,
+        HORIZONTAL = 1,
+        Horizontal = 1
+    }
+
+    export interface ScrollEventInfo {
+        id: string;
+        uniqueId: number;
+        scrollEvent: ScrollEventType;
+        offset: number;
+        axis: Axis;
+    }
+
+    export class ScrollEventInfoImpl implements ScrollEventInfo{
+        id: string;
+        uniqueId: number;
+        scrollEvent: ScrollEventType;
+        offset: number;
+        axis: Axis;
+
+        static castToScrollEventType(value: number): ScrollEventType {
+            if (value === 0) {
+                return ScrollEventType.SCROLL_START;
+            } else if (value === 1) {
+                return ScrollEventType.SCROLL_STOP;
+            } else {
+                throw Error("mode in ScrollEventInfo type Error");
+            }
+        }
+
+        static castToAxis(value: number): Axis {
+            if (value === 0) {
+                return Axis.Vertical;
+            } else if (value === 1) {
+                return Axis.Horizontal;
+            } else {
+                throw Error("mode in ScrollEventInfo type Error");
+            }
+        }
+        
+        static transferStatic(input: Any): Object {
+            let dynamicValue = ESValue.wrap(input);
+            let staticValue = new ScrollEventInfoImpl();
+            if (dynamicValue.isUndefined() || dynamicValue.isNull()) {
+                return staticValue;
+            }
+            let id = dynamicValue.getProperty("id");
+            if (!id.isString()) {
+                throw Error("id in ScrollEventInfo type Error");
+            }
+
+            let uniqueId = dynamicValue.getProperty("uniqueId");
+            if (!uniqueId.isNumber()) {
+                throw Error("uniqueId in ScrollEventInfo type Error");
+            }
+            staticValue.uniqueId = uniqueId.toNumber();
+
+            let scrollEvent = dynamicValue.getProperty("scrollEvent");
+            if (!scrollEvent.isNumber()) {
+                throw Error("scrollEvent in ScrollEventInfo type Error");
+            }
+            staticValue.scrollEvent = ScrollEventInfoImpl.castToScrollEventType(scrollEvent.toNumber());
+
+            let offset = dynamicValue.getProperty("offset");
+            if (!offset.isNumber()) {
+                throw Error("offset in ScrollEventInfo type Error");
+            }
+            staticValue.offset = offset.toNumber();
+
+            let axis = dynamicValue.getProperty("axis");
+            if (!axis.isNumber()) {
+                throw Error("axis in ScrollEventInfo type Error");
+            }
+            staticValue.axis = ScrollEventInfoImpl.castToAxis(axis.toNumber());
+
+            return staticValue;
+        }
+
+        static transferDynamic(input: Object): Any {
+            let dynamicValue = ESValue.instantiateEmptyObject();
+            if (input == null || input == undefined) {
+                return dynamicValue;
+            }
+            let staticValue = input as ScrollEventInfoImpl;
+            if (staticValue == null || staticValue == undefined) {
+                return dynamicValue;
+            }
+            dynamicValue.setProperty('id', ESValue.wrap(staticValue.id));
+            dynamicValue.setProperty('uniqueId', ESValue.wrap(staticValue.uniqueId));
+            dynamicValue.setProperty('scrollEvent', ESValue.wrapNumber(staticValue.scrollEvent));
+            dynamicValue.setProperty('offset', ESValue.wrap(staticValue.offset));
+            dynamicValue.setProperty('axis', ESValue.wrapNumber(staticValue.axis));
+
+
+            return dynamicValue as Any;
+        }
+    }
+
+    export interface NavDestinationSwitchInfo {
+        context: UIAbilityContext | UIContext;
+        from: NavDestinationInfo | NavBar;
+        to: NavDestinationInfo | NavBar;
+        operation: NavigationOperation;
+    }
+
+    export class NavDestinationSwitchInfoImpl implements NavDestinationSwitchInfo {
+        context: UIAbilityContext | UIContext;
+        from: NavDestinationInfo | NavBar;
+        to: NavDestinationInfo | NavBar;
+        operation: NavigationOperation;
+    }
 
     export enum TabContentState {
         ON_SHOW = 0,
         ON_HIDE = 1
     }
 
-    export class TabContentInfo {
+    export interface TabContentInfo {
+        tabContentId: string;
+        tabContentUniqueId: int;
+        state: TabContentState;
+        index: int;
+        id: string;
+        uniqueId: int;
+    }
+
+    export class TabContentInfoImpl implements TabContentInfo {
         tabContentId: string;
         tabContentUniqueId: int;
         state: TabContentState;

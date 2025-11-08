@@ -89,25 +89,25 @@ HWTEST_F(JsThirdAccessibilityHoverNgTest, JsThirdAccessibilityHoverNgTest001, Te
         ohAccessibilityProvider, jsAccessibilityManager, frameNode);
     jsInteractionOperation->SetBelongTreeId(0);
 
-    bool ret;
+    bool result;
 
     int64_t elementId = 0;
     Accessibility::AccessibilityElementInfo info;
     int64_t hostElementId = 0;
     // 1 jsThirdProviderOperator not registered
-    ret = jsAccessibilityManager->GetElementInfoForThird(elementId, info, hostElementId);
-    EXPECT_EQ(ret, false);
+    result = jsAccessibilityManager->GetElementInfoForThird(elementId, info, hostElementId);
+    EXPECT_EQ(result, false);
 
     jsAccessibilityManager->RegisterJsThirdProviderInteractionOperation(hostElementId, jsInteractionOperation);
     // 2 FindAccessibilityNodeInfosByIdFromProvider not ok
     ohAccessibilityProvider->SetInjectResult(-1);
-    ret = jsAccessibilityManager->GetElementInfoForThird(elementId, info, hostElementId);
-    EXPECT_EQ(ret, false);
+    result = jsAccessibilityManager->GetElementInfoForThird(elementId, info, hostElementId);
+    EXPECT_EQ(result, false);
 
     // 3 FindAccessibilityNodeInfosByIdFromProvider ok, info equals to mock element info
     ohAccessibilityProvider->providerMockResult_.Reset();
-    ret = jsAccessibilityManager->GetElementInfoForThird(elementId, info, hostElementId);
-    EXPECT_EQ(ret, true);
+    result = jsAccessibilityManager->GetElementInfoForThird(elementId, info, hostElementId);
+    EXPECT_EQ(result, true);
 
     EXPECT_EQ(info.GetAccessibilityId(),
         ohAccessibilityProvider->providerMockResult_.elementInfosList_[elementId].GetElementId());
