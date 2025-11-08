@@ -29,6 +29,7 @@
 #include "core/components_ng/pattern/container_picker/container_picker_model.h"
 #include "core/components_ng/pattern/container_picker/container_picker_utils.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/scrollable/axis/axis_animator.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
 #include "core/gestures/gesture_event.h"
 
@@ -169,6 +170,14 @@ public:
     std::string GetTextOfCurrentChild();
     void ShowNext();
     void ShowPrevious();
+    void InitAxisAnimator();
+    void StopAxisAnimation();
+    bool IsAxisAnimationRunning()
+    {
+        return axisAnimator_ && axisAnimator_->IsRunning();
+    }
+    void ProcessScrollMotion(double position);
+    void ProcessScrollMotionStart();
 
 protected:
     bool ChildPreMeasureHelperEnabled() override
@@ -306,6 +315,7 @@ private:
 
     ContainerPickerUtils::PositionMap itemPosition_;
 
+    RefPtr<AxisAnimator> axisAnimator_;
     RefPtr<NodeAnimatablePropertyFloat> scrollProperty_;
     std::shared_ptr<AnimationUtils::Animation> scrollAnimation_;
 
@@ -340,6 +350,7 @@ private:
     double dragStartTime_ = 0.0;
     double dragEndTime_ = 0.0;
     double dragVelocity_ = 0.0f;
+    double currentPos_ = 0.0f;
 
     float lastAnimationScroll_ = 0.0f;
     float currentDelta_ = 0.0f;
