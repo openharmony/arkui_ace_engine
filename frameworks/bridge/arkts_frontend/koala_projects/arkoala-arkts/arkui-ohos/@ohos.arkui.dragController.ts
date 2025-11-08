@@ -139,7 +139,7 @@ export namespace dragController {
     }
 
     export interface DragAction {
-        startDrag(): Promise<void>;
+        startDrag(): Promise<void> | null;
         onStatusChange(callback: Callback<DragAndDropInfo>): void;
         offStatusChange(callback?: Callback<DragAndDropInfo>): void;
     }
@@ -151,7 +151,7 @@ export namespace dragController {
             this.dragAction = result;
             this.registerCleaner(this.dragAction)
         }
-        public startDrag(): Promise<void> {
+        public startDrag(): Promise<void> | null {
             let promise = ArkUIAniModule._DragController_startDrag(this.dragAction);
             return promise;
         }

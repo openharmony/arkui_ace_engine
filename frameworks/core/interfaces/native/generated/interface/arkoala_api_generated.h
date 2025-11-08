@@ -25375,8 +25375,8 @@ typedef struct GENERATED_ArkUIDragEventAccessor {
     Ark_Float64 (*getWindowY)(Ark_DragEvent peer);
     void (*setData)(Ark_DragEvent peer,
                     Ark_unifiedDataChannel_UnifiedData unifiedData);
-    Ark_unifiedDataChannel_UnifiedData (*getData)(Ark_DragEvent peer);
-    Ark_unifiedDataChannel_Summary (*getSummary)(Ark_DragEvent peer);
+    Opt_unifiedDataChannel_UnifiedData (*getData)(Ark_DragEvent peer);
+    Opt_unifiedDataChannel_Summary (*getSummary)(Ark_DragEvent peer);
     void (*setResult)(Ark_DragEvent peer,
                       Ark_DragResult dragResult);
     Ark_DragResult (*getResult)(Ark_DragEvent peer);
@@ -27556,7 +27556,7 @@ typedef struct GENERATED_ArkUITouchEventAccessor {
     void (*destroyPeer)(Ark_TouchEvent peer);
     Ark_TouchEvent (*construct)();
     Ark_NativePointer (*getFinalizer)();
-    Array_HistoricalPoint (*getHistoricalPoints)(Ark_TouchEvent peer);
+    Opt_Array_HistoricalPoint (*getHistoricalPoints)(Ark_TouchEvent peer);
     Ark_TouchType (*getType)(Ark_TouchEvent peer);
     void (*setType)(Ark_TouchEvent peer,
                     Ark_TouchType type);

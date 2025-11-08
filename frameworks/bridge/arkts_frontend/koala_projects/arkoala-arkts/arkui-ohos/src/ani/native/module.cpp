@@ -544,7 +544,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
         },
         ani_native_function {
             "_DragEvent_Get_Summary",
-            "l:C{@ohos.data.unifiedDataChannel.unifiedDataChannel.Summary}",
+            nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::DragEventGetSummary)
         },
         ani_native_function {
