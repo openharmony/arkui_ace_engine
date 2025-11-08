@@ -42,7 +42,7 @@ export class ConsumeDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
     public get(): T {
         const value = this.sourceProvide_!.get();
         uiUtils.builtinContainersAddRefAnyKey(value);
-        return this.sourceProvide_!.get();
+        return value;
     }
 
     public set(newValue: T): void {
