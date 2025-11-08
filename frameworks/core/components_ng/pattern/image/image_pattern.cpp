@@ -429,6 +429,10 @@ void ImagePattern::OnImageLoadSuccess()
     CHECK_NULL_VOID(host);
     const auto& geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
+    {
+        ACE_IMAGE_SCOPED_TRACE(
+            "report image load success event %d, %" PRId64 "", imageDfxConfig_.GetNodeId(), GetSysTimestamp());
+    }
 
     image_ = loadingCtx_->MoveCanvasImage();
     if (!image_) {
@@ -624,6 +628,9 @@ void ImagePattern::OnImageLoadFail(const std::string& errorMsg, const ImageError
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    // report fail event
+    ACE_IMAGE_SCOPED_TRACE(
+        "report image load fail event %d, %" PRId64 "", imageDfxConfig_.GetNodeId(), GetSysTimestamp());
     const auto& geometryNode = host->GetGeometryNode();
     auto imageEventHub = GetEventHub<ImageEventHub>();
     CHECK_NULL_VOID(imageEventHub);
