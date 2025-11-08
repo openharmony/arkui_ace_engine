@@ -72,7 +72,7 @@ bool FocusStrategyOsalThird::UpdateElementInfo(
     CHECK_NULL_RETURN(checkTarget, false);
     auto nativeInfo = checkTarget->GetNodeInfo();
     CHECK_NULL_RETURN(nativeInfo, false);
-    TransformAccessbilityElementInfo(*nativeInfo, info);
+    AccessibilityThirdProviderUtils::TransformAccessibilityElementInfo(*nativeInfo, info);
     JsThirdProviderInteractionOperation::FillNodeConfig(config_, info);
     return true;
 }

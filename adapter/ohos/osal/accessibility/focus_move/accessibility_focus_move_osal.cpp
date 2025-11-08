@@ -111,6 +111,7 @@ FocusMoveResult FocusStrategyOsal::ExecuteFocusMoveSearch(
     auto checkNode = GetCurrentCheckNode();
     errorResult.resultType = FocusMoveResultType::SEARCH_FAIL_LOST_NODE;
     errorResult.needTerminate = true;
+    CHECK_NULL_RETURN(checkNode, errorResult);
     UpdateNextFocus(checkNode);
     std::shared_ptr<FocusRulesCheckNode> targetNode;
     AccessibilityFocusStrategy strategy;
@@ -155,7 +156,7 @@ FocusMoveResult FocusStrategyOsal::ProcessGetScrollAncestor(
     auto checkNode = GetCurrentCheckNode();
     errorResult.resultType = FocusMoveResultType::SEARCH_FAIL_LOST_NODE;
     errorResult.needTerminate = true;
-    CHECK_NULL_RETURN(accessibilityManager, errorResult);
+    CHECK_NULL_RETURN(checkNode, errorResult);
     std::list<std::shared_ptr<FocusRulesCheckNode>> targetNodes;
     AccessibilityFocusStrategy strategy;
     AceFocusMoveDetailCondition condition = {.bypassSelf = true, .bypassDescendants = false};

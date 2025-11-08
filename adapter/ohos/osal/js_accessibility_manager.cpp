@@ -1861,6 +1861,7 @@ void JsAccessibilityManager::UpdateElementInfo(
     const RefPtr<NG::FrameNode>& node, const CommonProperty& commonProperty,
     AccessibilityElementInfo& nodeInfo, const RefPtr<NG::PipelineContext>& ngPipeline)
 {
+    CHECK_NULL_VOID(node);
     if (node->IsAccessibilityVirtualNode()) {
         auto parentUinode = node->GetVirtualNodeParent().Upgrade();
         CHECK_NULL_VOID(parentUinode);

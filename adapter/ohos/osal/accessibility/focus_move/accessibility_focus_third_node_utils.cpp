@@ -97,7 +97,7 @@ bool ThirdRulesCheckNode::GetPropChildrenCount(Accessibility::PropValue& value)
     CHECK_NULL_RETURN(nodeInfo_, false);
     value.valueType = Accessibility::ValueType::NUMBER;
     auto children = nodeInfo_->GetChildNodeIds();
-    value.valueNum = children.size();
+    value.valueNum = static_cast<int32_t>(children.size());
     return true;
 }
 
