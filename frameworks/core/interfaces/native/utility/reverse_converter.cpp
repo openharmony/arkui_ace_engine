@@ -490,8 +490,10 @@ void AssignArkValue(Ark_EventTarget& dst, const EventTarget& src, ConvContext *c
     position.y = Converter::ArkValue<Opt_Length>(src.area.GetOffset().GetY().ConvertToVp(), ctx);
     area.position = Converter::ArkValue<Ark_Position>(position);
     Ark_Position globPosition;
-    globPosition.x = Converter::ArkValue<Opt_Length>(src.origin.GetX().ConvertToVp(), ctx);
-    globPosition.y = Converter::ArkValue<Opt_Length>(src.origin.GetY().ConvertToVp(), ctx);
+    globPosition.x = Converter::ArkValue<Opt_Length>(
+        src.origin.GetX().ConvertToVp() + src.area.GetOffset().GetX().ConvertToVp(), ctx);
+    globPosition.y = Converter::ArkValue<Opt_Length>(
+        src.origin.GetY().ConvertToVp() + src.area.GetOffset().GetY().ConvertToVp(), ctx);
     area.globalPosition = Converter::ArkValue<Ark_Position>(globPosition);
     dst.area = area;
     if (!src.id.empty()) {
