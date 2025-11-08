@@ -1408,7 +1408,6 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("enableDataDetector", &JSText::JsEnableDataDetector);
     JSClass<JSText>::StaticMethod("dataDetectorConfig", &JSText::JsDataDetectorConfig);
     JSClass<JSText>::StaticMethod("enableSelectedDataDetector", &JSText::SetSelectDetectEnable);
-    JSClass<JSText>::StaticMethod("selectedDataDetectorConfig", &JSText::SetSelectDetectConfig);
     JSClass<JSText>::StaticMethod("bindSelectionMenu", &JSText::BindSelectionMenu);
     JSClass<JSText>::StaticMethod("onTextSelectionChange", &JSText::SetOnTextSelectionChange);
     JSClass<JSText>::StaticMethod("clip", &JSText::JsClip);

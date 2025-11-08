@@ -47,7 +47,6 @@ void JSTextArea::JSBind(BindingTarget globalObj)
     JSClass<JSTextArea>::StaticMethod("backgroundColor", &JSTextField::SetBackgroundColor);
     JSClass<JSTextArea>::StaticMethod("textAlign", &JSTextField::SetTextAlign);
     JSClass<JSTextArea>::StaticMethod("enableSelectedDataDetector", &JSTextField::SetSelectDetectEnable);
-    JSClass<JSTextArea>::StaticMethod("selectedDataDetectorConfig", &JSTextField::SetSelectDetectConfig);
     JSClass<JSTextArea>::StaticMethod("caretColor", &JSTextField::SetCaretColor);
     JSClass<JSTextArea>::StaticMethod("height", &JSTextField::JsHeight);
     JSClass<JSTextArea>::StaticMethod("width", &JSTextField::JsWidth);

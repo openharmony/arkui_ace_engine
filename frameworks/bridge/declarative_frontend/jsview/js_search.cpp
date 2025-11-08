@@ -174,7 +174,6 @@ void JSSearch::JSBindMore()
     JSClass<JSSearch>::StaticMethod("enableAutoSpacing", &JSSearch::SetEnableAutoSpacing);
     JSClass<JSSearch>::StaticMethod("onWillAttachIME", &JSSearch::SetOnWillAttachIME);
     JSClass<JSSearch>::StaticMethod("enableSelectedDataDetector", &JSSearch::SetSelectDetectEnable);
-    JSClass<JSSearch>::StaticMethod("selectedDataDetectorConfig", &JSSearch::SetSelectDetectConfig);
 }
 
 void ParseSearchValueObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
