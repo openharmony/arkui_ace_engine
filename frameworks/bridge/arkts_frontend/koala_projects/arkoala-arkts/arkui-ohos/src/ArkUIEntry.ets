@@ -38,6 +38,7 @@ import { deserializeAndCallCallback, registerArkuiApiHandler } from './framework
 import { ObserveSingleton } from './stateManagement/base/observeSingleton'
 import { StateMgmtDFX, StateUpdateLoop } from './stateManagement'
 import { AceTrace } from 'arkui/base/AceTrace'
+import { flushBuilderRootNode } from './BuilderNode'
 
 setCustomEventsChecker(checkArkoalaCallbacks)
 
@@ -397,7 +398,7 @@ export class Application {
             detachedRoot.compute()
         }
         updateLazyItems()
-        // flushBuilderRootNode()
+        flushBuilderRootNode()
         this.uiContext!.updateParallelizeItemNode()
         if (partialUpdates.length > 0) {
             // If there are pending partial updates - we apply them one by one and provide update context.
