@@ -19,6 +19,7 @@ import { ObserveSingleton } from '../base/observeSingleton';
 import { NullableObject } from '../base/types';
 import { UIUtils } from '../utils';
 import { uiUtils } from '../base/uiUtilsImpl';
+import { StateMgmtDFX } from '../tools/stateMgmtDFX';
 
 /**
  * implementation of V1 @Link
@@ -67,11 +68,13 @@ export class LinkDecoratedVariable<T> extends DecoratedV1VariableBase<T> impleme
     }
 
     public get(): T {
+        StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`${this.decorator} ${this.getTraceInfo()}`);
         return this.sourceGet_();
     }
 
     public set(newValue: T): void {
         const oldValue = this.sourceGet_();
+        StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`${this.decorator} ${oldValue === newValue} ${this.setTraceInfo()}`);
         if (oldValue !== newValue) {
             if (this.sourceSet_ === undefined) {
                 throw new Error(`${this.getInfo()}: Can not set @Link value. @Link source is immutable error.`);

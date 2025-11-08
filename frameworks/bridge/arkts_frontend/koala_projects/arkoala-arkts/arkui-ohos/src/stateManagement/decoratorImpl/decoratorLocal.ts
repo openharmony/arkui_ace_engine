@@ -18,6 +18,7 @@ import { ILocalDecoratedVariable, IVariableOwner } from '../decorator';
 import { UIUtils } from '../utils';
 import { DecoratedV2VariableBase } from './decoratorBase';
 import { uiUtils } from '../base/uiUtilsImpl';
+import { StateMgmtDFX } from '../tools/stateMgmtDFX';
 export class LocalDecoratedVariable<T> extends DecoratedV2VariableBase implements ILocalDecoratedVariable<T> {
     public readonly backing_: IBackingValue<T>;
     constructor(owningView: IVariableOwner | undefined, varName: string, initValue: T) {
@@ -26,12 +27,14 @@ export class LocalDecoratedVariable<T> extends DecoratedV2VariableBase implement
     }
 
     get(): T {
+        StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`Local ${this.getTraceInfo()}`);
         const value = this.backing_.get(this.shouldAddRef());
         return value;
     }
 
     set(newValue: T): void {
         const value = this.backing_.get(false);
+        StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`Local ${value === newValue} ${this.setTraceInfo()}`);
         if (value === newValue) {
             return;
         }

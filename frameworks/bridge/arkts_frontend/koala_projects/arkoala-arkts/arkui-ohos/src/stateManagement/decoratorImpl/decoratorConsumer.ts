@@ -18,6 +18,7 @@ import { IConsumerDecoratedVariable, IProviderDecoratedVariable, IVariableOwner 
 import { UIUtils } from '../utils';
 import { DecoratedV2VariableBase } from './decoratorBase';
 import { uiUtils } from '../base/uiUtilsImpl';
+import { StateMgmtDFX } from '../tools/stateMgmtDFX';
 export class ConsumerDecoratedVariable<T> extends DecoratedV2VariableBase implements IConsumerDecoratedVariable<T> {
     provideAlias_: string;
     sourceProvider_: IProviderDecoratedVariable<T> | undefined;
@@ -32,6 +33,7 @@ export class ConsumerDecoratedVariable<T> extends DecoratedV2VariableBase implem
     }
 
     get(): T {
+        StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`Consumer ${this.getTraceInfo()}`);
         if (this.sourceProvider_) {
             const value = this.sourceProvider_!.get();
             return value;
@@ -43,12 +45,14 @@ export class ConsumerDecoratedVariable<T> extends DecoratedV2VariableBase implem
     set(newValue: T): void {
         if (this.sourceProvider_) {
             const value = this.sourceProvider_!.get();
+            StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`Consumer ${value === newValue} ${this.setTraceInfo()}`);
             if (value !== newValue) {
                 this.sourceProvider_!.set(newValue);
             }
             return;
         }
         const value = this.backing_!.get(false);
+        StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`Consumer ${value === newValue} ${this.setTraceInfo()}`);
         if (value === newValue) {
             return;
         }

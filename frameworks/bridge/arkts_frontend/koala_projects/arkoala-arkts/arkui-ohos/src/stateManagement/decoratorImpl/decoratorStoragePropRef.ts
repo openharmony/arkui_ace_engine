@@ -32,6 +32,7 @@ import { UIUtils } from '../utils';
 import { FactoryInternal } from '../base/iFactoryInternal';
 import { uiUtils } from '../base/uiUtilsImpl';
 import { getObservedObject, isDynamicObject } from '../../component/interop';
+import { StateMgmtDFX } from '../tools/stateMgmtDFX';
 
 export class StoragePropRefDecoratedVariable<T>
     extends DecoratedV1VariableBase<T>
@@ -78,6 +79,7 @@ export class StoragePropRefDecoratedVariable<T>
     }
 
     get(): T {
+        StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`${this.decorator} ${this.getTraceInfo()}`);
         const value = this.backing_.get(this.shouldAddRef());
         ObserveSingleton.instance.setV1RenderId(value as NullableObject);
         return value;
@@ -85,6 +87,7 @@ export class StoragePropRefDecoratedVariable<T>
 
     set(newValue: T): void {
         const oldValue = this.backing_.get(false);
+        StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`${this.decorator} ${oldValue === newValue} ${this.setTraceInfo()}`);
         if (oldValue === newValue) {
             return;
         }

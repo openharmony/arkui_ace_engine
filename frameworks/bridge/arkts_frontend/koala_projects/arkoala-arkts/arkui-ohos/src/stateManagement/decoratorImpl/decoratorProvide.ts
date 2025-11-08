@@ -25,6 +25,7 @@ import { CompatibleStateChangeCallback, getObservedObject, isDynamicObject } fro
 import { WatchFunc } from './decoratorWatch';
 import { StateMgmtTool } from '../tools/arkts/stateMgmtTool';
 import { uiUtils } from '../base/uiUtilsImpl';
+import { StateMgmtDFX } from '../tools/stateMgmtDFX';
 
 export class ProvideDecoratedVariable<T> extends DecoratedV1VariableBase<T> implements IProvideDecoratedVariable<T> {
     private readonly provideAlias_: string;
@@ -54,12 +55,14 @@ export class ProvideDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
         }
     }
     public get(): T {
+        StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`Provide ${this.getTraceInfo()}`);
         const value = this.backing_.get(this.shouldAddRef());
         ObserveSingleton.instance.setV1RenderId(value as NullableObject);
         return value;
     }
     public set(newValue: T): void {
         const oldValue = this.backing_.get(false);
+        StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`Provide ${oldValue === newValue} ${this.setTraceInfo()}`);
         if (oldValue === newValue) {
             return;
         }

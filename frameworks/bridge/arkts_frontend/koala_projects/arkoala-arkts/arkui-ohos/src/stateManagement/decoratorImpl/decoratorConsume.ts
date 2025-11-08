@@ -21,6 +21,7 @@ import { ObserveSingleton } from '../base/observeSingleton';
 import { NullableObject } from '../base/types';
 import { UIUtils } from '../utils';
 import { uiUtils } from '../base/uiUtilsImpl';
+import { StateMgmtDFX } from '../tools/stateMgmtDFX';
 export class ConsumeDecoratedVariable<T> extends DecoratedV1VariableBase<T> implements IConsumeDecoratedVariable<T> {
     provideAliasName: string;
     sourceProvide_: IProvideDecoratedVariable<T> | undefined;
@@ -39,11 +40,13 @@ export class ConsumeDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
         this.sourceProvide_!.registerWatchToSource(this);
     }
     public get(): T {
+        StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`Consume ${this.getTraceInfo()}`);
         return this.sourceProvide_!.get();
     }
 
     public set(newValue: T): void {
         const oldValue = this.sourceProvide_!.get();
+        StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`Consume ${oldValue === newValue} ${this.setTraceInfo()}`);
         if (oldValue !== newValue) {
             const value = uiUtils.makeV1Observed(newValue);
             this.unregisterWatchFromObservedObjectChanges(oldValue);

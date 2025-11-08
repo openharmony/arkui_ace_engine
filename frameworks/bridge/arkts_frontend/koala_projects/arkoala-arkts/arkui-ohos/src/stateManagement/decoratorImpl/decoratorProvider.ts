@@ -18,6 +18,7 @@ import { IProviderDecoratedVariable, IVariableOwner } from '../decorator';
 import { UIUtils } from '../utils';
 import { DecoratedV2VariableBase } from './decoratorBase';
 import { uiUtils } from '../base/uiUtilsImpl';
+import { StateMgmtDFX } from '../tools/stateMgmtDFX';
 export class ProviderDecoratedVariable<T> extends DecoratedV2VariableBase implements IProviderDecoratedVariable<T> {
     private readonly provideAlias_: string;
     private readonly backing_: IBackingValue<T>;
@@ -30,12 +31,14 @@ export class ProviderDecoratedVariable<T> extends DecoratedV2VariableBase implem
     }
 
     get(): T {
+        StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`Provider ${this.getTraceInfo()}`);
         const value = this.backing_.get(this.shouldAddRef());
         return value;
     }
 
     set(newValue: T): void {
         const value = this.backing_.get(false);
+        StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`Provider ${value === newValue} ${this.setTraceInfo()}`);
         if (value === newValue) {
             return;
         }
