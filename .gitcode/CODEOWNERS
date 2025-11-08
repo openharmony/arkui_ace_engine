@@ -3676,6 +3676,9 @@ test/unittest/core/pattern/test_ng.cpp @arkuiscroll
 test/unittest/core/pattern/test_ng.h @arkuiscroll
 test/unittest/core/pipeline/ @arkui_framework_xnode
 test/unittest/core/property/templates_parser_test_ng.cpp @arkuiscroll
+test/unittest/core/property/accessibility_property_test_ng.cpp @ArkUI_ability_group
+test/unittest/core/property/accessibility_property_test_three_ng.cpp @ArkUI_ability_group
+test/unittest/core/property/accessibility_property_testtwo_ng.cpp @ArkUI_ability_group
 test/unittest/core/render/ @arkui_framework_xnode
 test/unittest/core/rosen/ @arkui_framework_xnode
 test/unittest/core/svg/ @arkui001
