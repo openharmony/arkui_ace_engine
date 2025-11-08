@@ -657,7 +657,9 @@ napi_value JsDrawableDescriptor::AnimatedConstructor(napi_env env, napi_callback
         napi_is_array(env, argv[0], &isArray);
         if (isArray) {
             auto pixelMapsPtr = Media::PixelMapNapi::GetPixelMaps(env, argv[0]);
-            AnimatedSetPixelMapListC(animatedDrawable, *pixelMapsPtr);
+            if (pixelMapsPtr) {
+                AnimatedSetPixelMapListC(animatedDrawable, *pixelMapsPtr);
+            }
         } else {
             auto resourceObject = ParseResourceObject(argv[0]);
             if (resourceObject != nullptr) {

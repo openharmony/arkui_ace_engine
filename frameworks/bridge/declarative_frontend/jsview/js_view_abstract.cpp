@@ -12848,6 +12848,9 @@ extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_ParseResourceObject(void* value)
         return nullptr;
     }
     JSRef<JSVal> jsVal = JsConverter::ConvertNapiValueToJsVal(napiValue);
+    if (!jsVal->IsObject()) {
+        return nullptr;
+    }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsVal);
     auto resourceObject = JSViewAbstract::GetResourceObject(jsObj);
     CHECK_NULL_RETURN(resourceObject, nullptr);
