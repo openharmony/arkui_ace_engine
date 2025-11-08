@@ -1191,7 +1191,7 @@ std::shared_ptr<AnimationUtils::Animation> NavigationGroupNode::MaskAnimation(co
                 auto context = weakRender.Upgrade();
                 CHECK_NULL_VOID(context);
                 context->SetActualForegroundColor(Color::TRANSPARENT);
-            });
+            }, nullptr /* finishCallback */, nullptr /* repeatCallback */, GetContextRefPtr());
     }
     renderContext->SetActualForegroundColor(Color::TRANSPARENT);
     return AnimationUtils::StartAnimation(
