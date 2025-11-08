@@ -616,7 +616,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
 
     std::string getWithPromise_SignatureStr =
         "C{std.core.String}C{@ohos.arkui.componentSnapshot.componentSnapshot.SnapshotOptions}:"
-        "X{C{std.core.Null}}";
+        "X{C{std.core.Null}C{std.core.Promise}}";
     std::array methods = {
         ani_native_function { "get", get_SignatureStr.c_str(), reinterpret_cast<void*>(ANI_GetWithCallback) },
         ani_native_function { "get", getWithPromise_SignatureStr.c_str(), reinterpret_cast<void*>(ANI_GetWithPromise) },
