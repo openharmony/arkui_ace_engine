@@ -4384,7 +4384,9 @@ void TextFieldPattern::InitEditingValueText(std::u16string content)
     if (GetIsPreviewText() && GetTextUtf16Value().empty()) {
         FinishTextPreviewOperation();
     }
-    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
 bool TextFieldPattern::InitValueText(std::u16string content)
@@ -4411,7 +4413,10 @@ bool TextFieldPattern::InitValueText(std::u16string content)
     }
     contentController_->SetTextValueOnly(std::move(content));
     selectController_->UpdateCaretIndex(GetTextUtf16Value().length());
-    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+    auto host = GetHost();
+    if (host) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+    }
     return true;
 }
 
@@ -12430,6 +12435,7 @@ void TextFieldPattern::SetBackBorderRadius()
 void TextFieldPattern::UpdateBorderResource()
 {
     auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
     auto renderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     if (renderContext->HasBorderRadius()) {

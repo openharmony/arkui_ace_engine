@@ -2434,6 +2434,7 @@ void TextPattern::InitFocusEvent()
 {
     CHECK_NULL_VOID(!focusInitialized_);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     auto focusTask = [weak = WeakClaim(this)](FocusReason reason) {
@@ -3288,11 +3289,11 @@ void TextPattern::CloseOperate()
 
 DragDropInfo TextPattern::OnDragStartNoChild(const RefPtr<Ace::DragEvent>& event, const std::string& extraParams)
 {
-    auto weakPtr = WeakClaim(this);
     DragDropInfo itemInfo;
-    auto pattern = weakPtr.Upgrade();
-    auto host = pattern->GetHost();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, itemInfo);
     auto hub = host->GetEventHub<EventHub>();
+    CHECK_NULL_RETURN(hub, itemInfo);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(gestureHub, itemInfo);
     if (!gestureHub->GetIsTextDraggable()) {
@@ -3300,16 +3301,16 @@ DragDropInfo TextPattern::OnDragStartNoChild(const RefPtr<Ace::DragEvent>& event
     }
     auto layoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
     dragBoxes_ = GetTextBoxes();
-    pattern->status_ = Status::DRAGGING;
-    pattern->contentMod_->ChangeDragStatus();
-    pattern->showSelect_ = false;
+    status_ = Status::DRAGGING;
+    contentMod_->ChangeDragStatus();
+    showSelect_ = false;
     auto [start, end] = GetSelectedStartAndEnd();
-    pattern->recoverStart_ = start;
-    pattern->recoverEnd_ = end;
+    recoverStart_ = start;
+    recoverEnd_ = end;
     auto beforeStr = GetSelectedText(0, start, false, true);
     auto selectedStr = GetSelectedText(start, end, false, true);
     auto afterStr = GetSelectedText(end, textForDisplay_.length(), false, true);
-    pattern->dragContents_ = { beforeStr, selectedStr, afterStr };
+    dragContents_ = { beforeStr, selectedStr, afterStr };
     auto selectedUtf8Str = UtfUtils::Str16DebugToStr8(selectedStr);
     itemInfo.extraInfo = selectedUtf8Str;
     RefPtr<UnifiedData> unifiedData = UdmfClient::GetInstance()->CreateUnifiedData();
@@ -3431,11 +3432,9 @@ void TextPattern::OnDragEndNoChild(const RefPtr<Ace::DragEvent>& event)
 
 void TextPattern::OnDragMove(const RefPtr<Ace::DragEvent>& event)
 {
-    auto weakPtr = WeakClaim(this);
-    auto pattern = weakPtr.Upgrade();
-    if (pattern->status_ == Status::DRAGGING) {
+    if (status_ == Status::DRAGGING) {
         CloseSelectOverlay();
-        pattern->showSelect_ = false;
+        showSelect_ = false;
     }
 }
 
@@ -5578,7 +5577,9 @@ void TextPattern::UpdateRectForSymbolShadow(RectF& rect, float offsetX, float of
 
 void TextPattern::ProcessBoundRectByTextShadow(RectF& rect)
 {
-    auto property = GetHost()->GetLayoutProperty<TextLayoutProperty>();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto property = host->GetLayoutProperty<TextLayoutProperty>();
     auto shadowOpt  = property->GetSymbolShadow();
     if (shadowOpt.has_value()) {
         const auto& symbolShadow = shadowOpt.value();

@@ -560,8 +560,8 @@ public:                                                               \
             }                                                         \
         }                                                             \
         auto flag = static_cast<int32_t>(changeflag);                 \
-        if (GreatOrEqual(flag, 0)) {                                  \
-            reLayoutTextStyleBitmap_.set(flag);                       \
+        if (flag >= 0) {                                              \
+            reLayoutTextStyleBitmap_.set(static_cast<size_t>(flag));  \
         } else {                                                      \
             needReCreateParagraph_ = true;                            \
         }                                                             \

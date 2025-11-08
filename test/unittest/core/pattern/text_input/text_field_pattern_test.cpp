@@ -3116,4 +3116,32 @@ HWTEST_F(TextFieldPatternTest, TextFieldPatternTestMultiThread2, TestSize.Level1
     ASSERT_NE(pattern, nullptr);
     pattern->OnAttachToMainTreeMultiThread();
 }
+
+/**
+ * @tc.name: TextInputResponseAreaGetChildOffset
+ * @tc.desc: test TextInputResponseArea GetChildOffset method.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTest, TextInputResponseAreaGetChildOffset, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    CreateTextField();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<TextInputResponseArea> responseArea = AceType::MakeRefPtr<CleanNodeResponseArea>(pattern);
+    SizeF parentSize = SizeF(100.0f, 100.0f);
+    RectF contentRect = RectF(20.0f, 20.0f, 60.0f, 60.0f);
+    SizeF childSize = SizeF(70.0f, 40.0f);
+    float nodeWidth = 10.0f;
+    auto offset = responseArea->GetChildOffset(parentSize, contentRect, childSize, nodeWidth);
+    EXPECT_EQ(offset, OffsetF(75.0f, 20.0f));
+    responseArea->hostPattern_.Reset();
+    offset = responseArea->GetChildOffset(parentSize, contentRect, childSize, nodeWidth);
+    EXPECT_EQ(offset, OffsetF(40.0f, 40.0f));
+}
 } // namespace OHOS::Ace::NG
