@@ -96,6 +96,18 @@ HWTEST_F(SideBarPatternTestTwoNg, OnColorConfigurationUpdate001, TestSize.Level1
     auto sideBarLayoutProperty = sideBarFrameNode->GetLayoutProperty<SideBarContainerLayoutProperty>();
     ASSERT_NE(sideBarLayoutProperty, nullptr);
 
+    auto contentNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto sideBarNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto dividerNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::DIVIDER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<DividerPattern>());
+    auto controlBtnNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    sideBarFrameNode->children_.push_back(contentNode);
+    sideBarFrameNode->children_.push_back(sideBarNode);
+    sideBarFrameNode->children_.push_back(dividerNode);
+    sideBarFrameNode->children_.push_back(controlBtnNode);
     sideBarPattern->OnColorConfigurationUpdate();
     EXPECT_EQ(sideBarPattern->dragEvent_, nullptr);
     g_isConfigChangePerform = true;
