@@ -820,9 +820,9 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
     FrameMetrics frameMetrics;
     frameMetrics.vsyncTimestamp = nanoTimestamp;
     int64_t startTimestamp = GetSysTimestamp();
-    int64_t endTimestamp = GetSysTimestamp();
     FlushTouchEvents();
     FlushDragEvents();
+    int64_t endTimestamp = GetSysTimestamp();
     frameMetrics.inputHandlingDuration = endTimestamp - startTimestamp;
     {
         ACE_SCOPED_TRACE_COMMERCIAL("UIVsyncTask[timestamp:%" PRIu64 "][vsyncID:%" PRIu64
