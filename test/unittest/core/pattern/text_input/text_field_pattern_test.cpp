@@ -197,7 +197,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern007, TestSize.Level1)
 
 /**
  * @tc.name: TextPattern008
- * @tc.desc: Test TextPattern CheckAutoFillType.
+ * @tc.desc: Test TextPattern CheckAutoFillType
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTest, TextPattern008, TestSize.Level1)
@@ -217,7 +217,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern008, TestSize.Level1)
 
 /**
  * @tc.name: TextPattern009
- * @tc.desc: Test TextPattern InitDragDropCallBack.
+ * @tc.desc: Test TextPattern InitDragDropCallBack
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTest, TextPattern009, TestSize.Level1)
@@ -238,7 +238,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern009, TestSize.Level1)
 
 /**
  * @tc.name: TextPattern010
- * @tc.desc: Test TextPattern InitDragDropCallBack.
+ * @tc.desc: Test TextPattern InitDragDropCallBack
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTest, TextPattern010, TestSize.Level1)
@@ -260,7 +260,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern010, TestSize.Level1)
 
 /**
  * @tc.name: TextPattern011
- * @tc.desc: Test TextPattern InitDragDropCallBack.
+ * @tc.desc: Test TextPattern InitDragDropCallBack
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTest, TextPattern011, TestSize.Level1)
@@ -282,7 +282,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern011, TestSize.Level1)
 
 /**
  * @tc.name: TextPattern012
- * @tc.desc: Test TextPattern HandleDoubleClickEvent.
+ * @tc.desc: Test TextPattern HandleDoubleClickEvent
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTest, TextPattern012, TestSize.Level1)
