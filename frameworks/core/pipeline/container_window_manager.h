@@ -27,6 +27,13 @@
 namespace OHOS::Ace {
 class PageViewportConfig;
 
+struct PageViewportConfigParams {
+    std::optional<Orientation> orientation;
+    std::optional<bool> enableStatusBar;
+    std::optional<bool> statusBarAnimation;
+    std::optional<bool> enableNavIndicator;
+};
+
 using WindowCallback = std::function<void(void)>;
 using WindowModeCallback = std::function<WindowMode(void)>;
 using WindowMidSceneCallback = std::function<int32_t(bool&)>;
@@ -39,9 +46,9 @@ using GetFreeMultiWindowModeEnabledStateCallback = std::function<bool(void)>;
 using WindowIsStartMovingCallback = std::function<bool(void)>;
 using WindowCallNativeCallback = std::function<void(const std::string&, const std::string&)>;
 using WindowSetSystemBarEnabledCallback = std::function<bool(SystemBarType, std::optional<bool>, std::optional<bool>)>;
-using GetCurrentViewportConfigCallback = std::function<RefPtr<PageViewportConfig>(void)>;
-using GetTargetViewportConfigCallback = std::function<RefPtr<PageViewportConfig>(std::optional<Orientation>,
-    std::optional<bool>, std::optional<bool>, std::optional<bool>)>;
+using GetPageViewportConfigCallback = std::function<bool(
+    const PageViewportConfigParams& currentParams, RefPtr<PageViewportConfig>& currentConfig,
+    const PageViewportConfigParams& targetParams, RefPtr<PageViewportConfig>& targetConfig)>;
 using IsSetOrientationNeededCallback = std::function<bool(std::optional<Orientation>)>;
 using SetRequestedOrientationCallback = std::function<void(std::optional<Orientation>, bool)>;
 using GetRequestedOrientationCallback = std::function<Orientation(void)>;
@@ -172,14 +179,9 @@ public:
         windowSetSystemBarEnabledCallback_ = std::move(callback);
     }
 
-    void SetGetCurrentViewportConfigCallback(GetCurrentViewportConfigCallback&& callback)
+    void SetGetPageViewportConfigCallback(GetPageViewportConfigCallback&& callback)
     {
-        getCurrentViewportConfigCallback_ = std::move(callback);
-    }
-
-    void SetGetTargetViewportConfigCallback(GetTargetViewportConfigCallback&& callback)
-    {
-        getTargetViewportConfigCallback_ = std::move(callback);
+        getPageViewportConfigCallback_ = std::move(callback);
     }
 
     void SetIsSetOrientationNeededCallback(IsSetOrientationNeededCallback&& callback)
@@ -366,10 +368,9 @@ public:
         return false;
     }
 
-    RefPtr<PageViewportConfig> GetCurrentViewportConfig();
-    RefPtr<PageViewportConfig> GetTargetViewportConfig(
-        std::optional<Orientation> orientation, std::optional<bool> enableStatusBar,
-        std::optional<bool> statusBarAnimation, std::optional<bool> enableNavIndicator);
+    bool GetPageViewportConfig(
+        const PageViewportConfigParams& currentParams, RefPtr<PageViewportConfig>& currentConfig,
+        const PageViewportConfigParams& targetParams, RefPtr<PageViewportConfig>& targetConfig);
 
     bool IsSetOrientationNeeded(std::optional<Orientation> orientation)
     {
@@ -490,8 +491,7 @@ private:
     GetSystemBarStyleCallback getSystemBarStyleCallback_;
     SetSystemBarStyleCallback setSystemBarStyleCallback_;
     WindowSetSystemBarEnabledCallback windowSetSystemBarEnabledCallback_;
-    GetCurrentViewportConfigCallback getCurrentViewportConfigCallback_;
-    GetTargetViewportConfigCallback getTargetViewportConfigCallback_;
+    GetPageViewportConfigCallback getPageViewportConfigCallback_;
     IsSetOrientationNeededCallback isSetOrientationNeededCallback_;
     SetRequestedOrientationCallback setRequestedOrientationCallback_;
     GetRequestedOrientationCallback getRequestedOrientationCallback_;

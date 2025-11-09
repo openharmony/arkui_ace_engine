@@ -1554,23 +1554,14 @@ void PipelineBase::StartImplicitAnimation(const AnimationOption& option, const R
 
 // WindowManager ===============================================================
 namespace OHOS::Ace {
-RefPtr<PageViewportConfig> WindowManager::GetCurrentViewportConfig()
+bool WindowManager::GetPageViewportConfig(
+    const PageViewportConfigParams& currentParams, RefPtr<PageViewportConfig>& currentConfig,
+    const PageViewportConfigParams& targetParams, RefPtr<PageViewportConfig>& targetConfig)
 {
-    if (getCurrentViewportConfigCallback_) {
-        return getCurrentViewportConfigCallback_();
+    if (getPageViewportConfigCallback_) {
+        return getPageViewportConfigCallback_(currentParams, currentConfig, targetParams, targetConfig);
     }
-    return nullptr;
-}
-
-RefPtr<PageViewportConfig> WindowManager::GetTargetViewportConfig(
-    std::optional<Orientation> orientation, std::optional<bool> enableStatusBar,
-    std::optional<bool> statusBarAnimation, std::optional<bool> enableNavIndicator)
-{
-    if (getTargetViewportConfigCallback_) {
-        return getTargetViewportConfigCallback_(
-            orientation, enableStatusBar, statusBarAnimation, enableNavIndicator);
-    }
-    return nullptr;
+    return false;
 }
 } // namespace OHOS::Ace
 // WindowManager ===============================================================
