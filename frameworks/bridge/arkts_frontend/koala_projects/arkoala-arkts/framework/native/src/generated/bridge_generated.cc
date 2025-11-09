@@ -31886,6 +31886,162 @@ void impl_Measurable_setUniqueId(Ark_NativePointer thisPtr, KSerializerBuffer th
         GetAccessors()->getMeasurableAccessor()->setUniqueId(self, static_cast<Opt_Number*>(&uniqueIdValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(Measurable_setUniqueId, Ark_NativePointer, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_MenuItemConfiguration_construct() {
+return GetAccessors()->getMenuItemConfigurationAccessor()->construct();
+}
+KOALA_INTEROP_DIRECT_0(MenuItemConfiguration_construct, Ark_NativePointer)
+Ark_NativePointer impl_MenuItemConfiguration_getFinalizer() {
+        return GetAccessors()->getMenuItemConfigurationAccessor()->getFinalizer();
+}
+KOALA_INTEROP_DIRECT_0(MenuItemConfiguration_getFinalizer, Ark_NativePointer)
+void impl_MenuItemConfiguration_triggerSelect(Ark_NativePointer thisPtr, Ark_Int32 index, const KStringPtr& value) {
+        Ark_MenuItemConfiguration self = reinterpret_cast<Ark_MenuItemConfiguration>(thisPtr);
+        GetAccessors()->getMenuItemConfigurationAccessor()->triggerSelect(self, index, (const Ark_String*) (&value));
+}
+KOALA_INTEROP_V3(MenuItemConfiguration_triggerSelect, Ark_NativePointer, Ark_Int32, KStringPtr)
+Ark_Boolean impl_MenuItemConfiguration_getEnabled(Ark_NativePointer thisPtr) {
+        Ark_MenuItemConfiguration self = reinterpret_cast<Ark_MenuItemConfiguration>(thisPtr);
+        return GetAccessors()->getMenuItemConfigurationAccessor()->getEnabled(self);
+}
+KOALA_INTEROP_DIRECT_1(MenuItemConfiguration_getEnabled, Ark_Boolean, Ark_NativePointer)
+void impl_MenuItemConfiguration_setEnabled(Ark_NativePointer thisPtr, Ark_Boolean enabled) {
+        Ark_MenuItemConfiguration self = reinterpret_cast<Ark_MenuItemConfiguration>(thisPtr);
+        GetAccessors()->getMenuItemConfigurationAccessor()->setEnabled(self, enabled);
+}
+KOALA_INTEROP_DIRECT_V2(MenuItemConfiguration_setEnabled, Ark_NativePointer, Ark_Boolean)
+KInteropReturnBuffer impl_MenuItemConfiguration_getContentModifier(Ark_NativePointer thisPtr) {
+        Ark_MenuItemConfiguration self = reinterpret_cast<Ark_MenuItemConfiguration>(thisPtr);
+        const auto &retValue = GetAccessors()->getMenuItemConfigurationAccessor()->getContentModifier(self);
+        SerializerBase _retSerializer {};
+        _retSerializer.writeObject(retValue);
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(MenuItemConfiguration_getContentModifier, KInteropReturnBuffer, Ark_NativePointer)
+void impl_MenuItemConfiguration_setContentModifier(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_MenuItemConfiguration self = reinterpret_cast<Ark_MenuItemConfiguration>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        Ark_Object contentModifierValueTemp = static_cast<Ark_ContentModifier>(thisDeserializer.readObject());;
+        GetAccessors()->getMenuItemConfigurationAccessor()->setContentModifier(self, static_cast<Ark_Object*>(&contentModifierValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(MenuItemConfiguration_setContentModifier, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_MenuItemConfiguration_getValue(Ark_NativePointer thisPtr) {
+        Ark_MenuItemConfiguration self = reinterpret_cast<Ark_MenuItemConfiguration>(thisPtr);
+        GetAccessors()->getMenuItemConfigurationAccessor()->getValue(self);
+}
+KOALA_INTEROP_DIRECT_V1(MenuItemConfiguration_getValue, Ark_NativePointer)
+void impl_MenuItemConfiguration_setValue(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_MenuItemConfiguration self = reinterpret_cast<Ark_MenuItemConfiguration>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const Ark_Int8 valueValueTempTmpBufUnionSelector = thisDeserializer.readInt8();
+        Ark_ResourceStr valueValueTempTmpBuf = {};
+        valueValueTempTmpBuf.selector = valueValueTempTmpBufUnionSelector;
+        if (valueValueTempTmpBufUnionSelector == 0) {
+            valueValueTempTmpBuf.selector = 0;
+            valueValueTempTmpBuf.value0 = static_cast<Ark_String>(thisDeserializer.readString());
+        } else if (valueValueTempTmpBufUnionSelector == 1) {
+            valueValueTempTmpBuf.selector = 1;
+            valueValueTempTmpBuf.value1 = Resource_serializer::read(thisDeserializer);
+        } else {
+            INTEROP_FATAL("One of the branches for valueValueTempTmpBuf has to be chosen through deserialisation.");
+        }
+        Ark_ResourceStr valueValueTemp = static_cast<Ark_ResourceStr>(valueValueTempTmpBuf);;
+        GetAccessors()->getMenuItemConfigurationAccessor()->setValue(self, static_cast<Ark_ResourceStr*>(&valueValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(MenuItemConfiguration_setValue, Ark_NativePointer, KSerializerBuffer, int32_t)
+KInteropReturnBuffer impl_MenuItemConfiguration_getIcon(Ark_NativePointer thisPtr) {
+        Ark_MenuItemConfiguration self = reinterpret_cast<Ark_MenuItemConfiguration>(thisPtr);
+        const auto &retValue = GetAccessors()->getMenuItemConfigurationAccessor()->getIcon(self);
+        SerializerBase _retSerializer {};
+        if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+            const auto retValueTmpValue = retValue.value;
+            if (retValueTmpValue.selector == 0) {
+                _retSerializer.writeInt8(0);
+                const auto retValueTmpValueForIdx0 = retValueTmpValue.value0;
+                _retSerializer.writeString(retValueTmpValueForIdx0);
+            } else if (retValueTmpValue.selector == 1) {
+                _retSerializer.writeInt8(1);
+                const auto retValueTmpValueForIdx1 = retValueTmpValue.value1;
+                Resource_serializer::write(_retSerializer, retValueTmpValueForIdx1);
+            }
+        } else {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+        }
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(MenuItemConfiguration_getIcon, KInteropReturnBuffer, Ark_NativePointer)
+void impl_MenuItemConfiguration_setIcon(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_MenuItemConfiguration self = reinterpret_cast<Ark_MenuItemConfiguration>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto iconValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_ResourceStr iconValueTempTmpBuf = {};
+        iconValueTempTmpBuf.tag = iconValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((iconValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            const Ark_Int8 iconValueTempTmpBuf_UnionSelector = thisDeserializer.readInt8();
+            Ark_ResourceStr iconValueTempTmpBuf_ = {};
+            iconValueTempTmpBuf_.selector = iconValueTempTmpBuf_UnionSelector;
+            if (iconValueTempTmpBuf_UnionSelector == 0) {
+                iconValueTempTmpBuf_.selector = 0;
+                iconValueTempTmpBuf_.value0 = static_cast<Ark_String>(thisDeserializer.readString());
+            } else if (iconValueTempTmpBuf_UnionSelector == 1) {
+                iconValueTempTmpBuf_.selector = 1;
+                iconValueTempTmpBuf_.value1 = Resource_serializer::read(thisDeserializer);
+            } else {
+                INTEROP_FATAL("One of the branches for iconValueTempTmpBuf_ has to be chosen through deserialisation.");
+            }
+            iconValueTempTmpBuf.value = static_cast<Ark_ResourceStr>(iconValueTempTmpBuf_);
+        }
+        Opt_ResourceStr iconValueTemp = iconValueTempTmpBuf;;
+        GetAccessors()->getMenuItemConfigurationAccessor()->setIcon(self, static_cast<Opt_ResourceStr*>(&iconValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(MenuItemConfiguration_setIcon, Ark_NativePointer, KSerializerBuffer, int32_t)
+KInteropReturnBuffer impl_MenuItemConfiguration_getSymbolIcon(Ark_NativePointer thisPtr) {
+        Ark_MenuItemConfiguration self = reinterpret_cast<Ark_MenuItemConfiguration>(thisPtr);
+        const auto &retValue = GetAccessors()->getMenuItemConfigurationAccessor()->getSymbolIcon(self);
+        SerializerBase _retSerializer {};
+        if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+            const auto retValueTmpValue = retValue.value;
+            SymbolGlyphModifier_serializer::write(_retSerializer, retValueTmpValue);
+        } else {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+        }
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(MenuItemConfiguration_getSymbolIcon, KInteropReturnBuffer, Ark_NativePointer)
+void impl_MenuItemConfiguration_setSymbolIcon(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_MenuItemConfiguration self = reinterpret_cast<Ark_MenuItemConfiguration>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto symbolIconValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_SymbolGlyphModifier symbolIconValueTempTmpBuf = {};
+        symbolIconValueTempTmpBuf.tag = symbolIconValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((symbolIconValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            symbolIconValueTempTmpBuf.value = static_cast<Ark_SymbolGlyphModifier>(SymbolGlyphModifier_serializer::read(thisDeserializer));
+        }
+        Opt_SymbolGlyphModifier symbolIconValueTemp = symbolIconValueTempTmpBuf;;
+        GetAccessors()->getMenuItemConfigurationAccessor()->setSymbolIcon(self, static_cast<Opt_SymbolGlyphModifier*>(&symbolIconValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(MenuItemConfiguration_setSymbolIcon, Ark_NativePointer, KSerializerBuffer, int32_t)
+Ark_Boolean impl_MenuItemConfiguration_getSelected(Ark_NativePointer thisPtr) {
+        Ark_MenuItemConfiguration self = reinterpret_cast<Ark_MenuItemConfiguration>(thisPtr);
+        return GetAccessors()->getMenuItemConfigurationAccessor()->getSelected(self);
+}
+KOALA_INTEROP_DIRECT_1(MenuItemConfiguration_getSelected, Ark_Boolean, Ark_NativePointer)
+void impl_MenuItemConfiguration_setSelected(Ark_NativePointer thisPtr, Ark_Boolean selected) {
+        Ark_MenuItemConfiguration self = reinterpret_cast<Ark_MenuItemConfiguration>(thisPtr);
+        GetAccessors()->getMenuItemConfigurationAccessor()->setSelected(self, selected);
+}
+KOALA_INTEROP_DIRECT_V2(MenuItemConfiguration_setSelected, Ark_NativePointer, Ark_Boolean)
+Ark_Int32 impl_MenuItemConfiguration_getIndex(Ark_NativePointer thisPtr) {
+        Ark_MenuItemConfiguration self = reinterpret_cast<Ark_MenuItemConfiguration>(thisPtr);
+        return GetAccessors()->getMenuItemConfigurationAccessor()->getIndex(self);
+}
+KOALA_INTEROP_DIRECT_1(MenuItemConfiguration_getIndex, Ark_Int32, Ark_NativePointer)
+void impl_MenuItemConfiguration_setIndex(Ark_NativePointer thisPtr, Ark_Int32 index) {
+        Ark_MenuItemConfiguration self = reinterpret_cast<Ark_MenuItemConfiguration>(thisPtr);
+        GetAccessors()->getMenuItemConfigurationAccessor()->setIndex(self, index);
+}
+KOALA_INTEROP_DIRECT_V2(MenuItemConfiguration_setIndex, Ark_NativePointer, Ark_Int32)
 Ark_NativePointer impl_MouseEvent_construct() {
         return GetAccessors()->getMouseEventAccessor()->construct();
 }

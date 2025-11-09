@@ -4563,7 +4563,7 @@ void deserializeAndCallMenuItemModifierBuilder(KSerializerBuffer thisArray, Ark_
     const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Ark_MenuItemConfiguration config, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_MenuItemModifierBuilder))));
     thisDeserializer.readPointer();
     Ark_NativePointer parentNode = thisDeserializer.readPointer();
-    Ark_MenuItemConfiguration config = MenuItemConfiguration_serializer::read(thisDeserializer);
+    Ark_MenuItemConfiguration config = static_cast<Ark_MenuItemConfiguration>(MenuItemConfiguration_serializer::read(thisDeserializer));
     Callback_Pointer_Void continuationResult = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Pointer_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Pointer_Void))))};
     _call(_resourceId, parentNode, config, continuationResult);
 }
@@ -4574,7 +4574,7 @@ void deserializeAndCallSyncMenuItemModifierBuilder(Ark_VMContext vmContext, KSer
     thisDeserializer.readPointer();
     const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Ark_MenuItemConfiguration config, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_MenuItemModifierBuilder))));
     Ark_NativePointer parentNode = thisDeserializer.readPointer();
-    Ark_MenuItemConfiguration config = MenuItemConfiguration_serializer::read(thisDeserializer);
+    Ark_MenuItemConfiguration config = static_cast<Ark_MenuItemConfiguration>(MenuItemConfiguration_serializer::read(thisDeserializer));
     Callback_Pointer_Void continuationResult = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Pointer_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Pointer_Void))))};
     callSyncMethod(vmContext, resourceId, parentNode, config, continuationResult);
 }
