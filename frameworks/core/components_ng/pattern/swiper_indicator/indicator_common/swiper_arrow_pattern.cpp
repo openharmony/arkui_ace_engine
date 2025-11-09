@@ -272,6 +272,7 @@ int32_t SwiperArrowPattern::TotalCount() const
 
 void SwiperArrowPattern::ButtonTouchEvent(RefPtr<FrameNode> buttonNode, TouchType touchType)
 {
+    NotifySwiperTouchState(touchType);
     auto swiperArrowLayoutProperty = GetSwiperArrowLayoutProperty();
     CHECK_NULL_VOID(swiperArrowLayoutProperty);
     const auto& renderContext = buttonNode->GetRenderContext();
@@ -589,5 +590,17 @@ RefPtr<SwiperPattern> SwiperArrowPattern::GetSwiperPattern() const
     auto swiperNode = GetSwiperNode();
     CHECK_NULL_RETURN(swiperNode, nullptr);
     return swiperNode->GetPattern<SwiperPattern>();
+}
+
+void SwiperArrowPattern::NotifySwiperTouchState(TouchType touchType) const
+{
+    auto swiperPattern = GetSwiperPattern();
+    CHECK_NULL_VOID(swiperPattern);
+    if (touchType == TouchType::DOWN) {
+        swiperPattern->SetArrowTouched(true);
+    }
+    if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
+        swiperPattern->SetArrowTouched(false);
+    }
 }
 } // namespace OHOS::Ace::NG

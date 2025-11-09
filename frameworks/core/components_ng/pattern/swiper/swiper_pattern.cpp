@@ -3329,6 +3329,9 @@ void SwiperPattern::HandleTouchDown(const TouchLocationInfo& locationInfo)
 {
     ACE_SCOPED_TRACE("Swiper HandleTouchDown");
     TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper HandleTouchDown id: %{public}d", swiperId_);
+    if (isArrowTouched_) {
+        return;
+    }
     isTouchDown_ = true;
     isTouchDownOnOverlong_ = true;
     if (InsideIndicatorRegion(locationInfo)) {
