@@ -38,46 +38,47 @@
   if (std::strcmp(func, "sigType") == 0 && std::strcmp(lang, "jni") == 0) if (type == (CPP_TYPE)) return JNI_SIG_TYPE; \
   if (std::strcmp(func, "codeType") == 0 && std::strcmp(lang, "jni") == 0) if (type == (CPP_TYPE)) return JNI_CODE_TYPE;
 
-#define KOALA_INTEROP_TYPEDEFS(func, lang) \
-  KOALA_INTEROP_TYPEDEF(func, lang, "void", "V", "void") \
-  KOALA_INTEROP_TYPEDEF(func, lang, "KBoolean", "Z", "boolean") \
-  KOALA_INTEROP_TYPEDEF(func, lang, "OH_Boolean", "Z", "boolean") \
-  KOALA_INTEROP_TYPEDEF(func, lang, "Ark_Boolean", "Z", "boolean") \
-  KOALA_INTEROP_TYPEDEF(func, lang, "int32_t", "I", "int") \
-  KOALA_INTEROP_TYPEDEF(func, lang, "uint32_t", "I", "int") \
-  KOALA_INTEROP_TYPEDEF(func, lang, "int", "I", "int") \
-  KOALA_INTEROP_TYPEDEF(func, lang, "KInt", "I", "int") \
-  KOALA_INTEROP_TYPEDEF(func, lang, "KUInt", "I", "int") \
-  KOALA_INTEROP_TYPEDEF(func, lang, "KLong", "J", "long") \
-  KOALA_INTEROP_TYPEDEF(func, lang, "OH_Int32", "I", "int") \
-  KOALA_INTEROP_TYPEDEF(func, lang, "OH_Int64", "J", "long") \
-  KOALA_INTEROP_TYPEDEF(func, lang, "Ark_Int32", "I", "int") \
-  KOALA_INTEROP_TYPEDEF(func, lang, "Ark_Int64", "J", "long") \
-  KOALA_INTEROP_TYPEDEF(func, lang, "KNativePointer", "J", "long") \
-  KOALA_INTEROP_TYPEDEF(func, lang, "KSerializerBuffer", "J", "long") \
-  KOALA_INTEROP_TYPEDEF(func, lang, "Ark_NativePointer", "J", "long") \
-  KOALA_INTEROP_TYPEDEF(func, lang, "OH_NativePointer", "J", "long") \
-  KOALA_INTEROP_TYPEDEF(func, lang, "float", "F", "float") \
-  KOALA_INTEROP_TYPEDEF(func, lang, "KFloat", "F", "float") \
-  KOALA_INTEROP_TYPEDEF(func, lang, "Ark_Float32", "F", "float") \
-  KOALA_INTEROP_TYPEDEF(func, lang, "double", "D", "double") \
-  KOALA_INTEROP_TYPEDEF(func, lang, "KDouble", "D", "double") \
-  KOALA_INTEROP_TYPEDEF(func, lang, "KInteropNumber", "D", "double") \
-  KOALA_INTEROP_TYPEDEF(func, lang, "KVMObjectHandle", "Ljava/lang/Object;", "Object") \
-  KOALA_INTEROP_TYPEDEF(func, lang, "uint8_t*", "[B", "byte[]") \
-  KOALA_INTEROP_TYPEDEF(func, lang, "KByte*", "[B", "byte[]") \
-  KOALA_INTEROP_TYPEDEF(func, lang, "KInteropBuffer", "[B", "byte[]") \
-  KOALA_INTEROP_TYPEDEF(func, lang, "KShort*", "[S", "short[]") \
-  KOALA_INTEROP_TYPEDEF(func, lang, "KUShort*", "[S", "short[]") \
-  KOALA_INTEROP_TYPEDEF(func, lang, "int32_t*", "[I", "int[]") \
-  KOALA_INTEROP_TYPEDEF(func, lang, "KInt*", "[I", "int[]") \
-  KOALA_INTEROP_TYPEDEF(func, lang, "KNativePointerArray", "[J", "long[]") \
-  KOALA_INTEROP_TYPEDEF(func, lang, "KInteropReturnBuffer", "[B", "byte[]") \
-  KOALA_INTEROP_TYPEDEF(func, lang, "float*", "[F", "float[]") \
-  KOALA_INTEROP_TYPEDEF(func, lang, "KFloatArray", "[F", "float[]") \
-  KOALA_INTEROP_TYPEDEF(func, lang, "KFloat*", "[F", "float[]") \
-  KOALA_INTEROP_TYPEDEF_LS(func, lang, "KStringPtr", "Lstd/core/String;", "String", "Ljava/lang/String;", "String") \
-  KOALA_INTEROP_TYPEDEF_LS(func, lang, "KStringArray", "[Lstd/core/String;", "String[]", "[Ljava/lang/String;", "String[]")
+#define KOALA_INTEROP_TYPEDEFS(func, lang)                                                                           \
+  KOALA_INTEROP_TYPEDEF(func, lang, "void", "V", "void")                                                             \
+  KOALA_INTEROP_TYPEDEF(func, lang, "KBoolean", "Z", "boolean")                                                      \
+  KOALA_INTEROP_TYPEDEF(func, lang, "OH_Boolean", "Z", "boolean")                                                    \
+  KOALA_INTEROP_TYPEDEF(func, lang, "Ark_Boolean", "Z", "boolean")                                                   \
+  KOALA_INTEROP_TYPEDEF(func, lang, "int32_t", "I", "int")                                                           \
+  KOALA_INTEROP_TYPEDEF(func, lang, "uint32_t", "I", "int")                                                          \
+  KOALA_INTEROP_TYPEDEF(func, lang, "int", "I", "int")                                                               \
+  KOALA_INTEROP_TYPEDEF(func, lang, "KInt", "I", "int")                                                              \
+  KOALA_INTEROP_TYPEDEF(func, lang, "KUInt", "I", "int")                                                             \
+  KOALA_INTEROP_TYPEDEF(func, lang, "KLong", "J", "long")                                                            \
+  KOALA_INTEROP_TYPEDEF(func, lang, "OH_Int32", "I", "int")                                                          \
+  KOALA_INTEROP_TYPEDEF(func, lang, "OH_Int64", "J", "long")                                                         \
+  KOALA_INTEROP_TYPEDEF(func, lang, "Ark_Int32", "I", "int")                                                         \
+  KOALA_INTEROP_TYPEDEF(func, lang, "Ark_Int64", "J", "long")                                                        \
+  KOALA_INTEROP_TYPEDEF(func, lang, "KNativePointer", "J", "long")                                                   \
+  KOALA_INTEROP_TYPEDEF(func, lang, "KSerializerBuffer", "J", "long")                                                \
+  KOALA_INTEROP_TYPEDEF(func, lang, "Ark_NativePointer", "J", "long")                                                \
+  KOALA_INTEROP_TYPEDEF(func, lang, "OH_NativePointer", "J", "long")                                                 \
+  KOALA_INTEROP_TYPEDEF(func, lang, "float", "F", "float")                                                           \
+  KOALA_INTEROP_TYPEDEF(func, lang, "KFloat", "F", "float")                                                          \
+  KOALA_INTEROP_TYPEDEF(func, lang, "Ark_Float32", "F", "float")                                                     \
+  KOALA_INTEROP_TYPEDEF(func, lang, "double", "D", "double")                                                         \
+  KOALA_INTEROP_TYPEDEF(func, lang, "KDouble", "D", "double")                                                        \
+  KOALA_INTEROP_TYPEDEF(func, lang, "KInteropNumber", "D", "double")                                                 \
+  KOALA_INTEROP_TYPEDEF(func, lang, "KVMObjectHandle", "Ljava/lang/Object;", "Object")                               \
+  KOALA_INTEROP_TYPEDEF(func, lang, "uint8_t*", "[B", "byte[]")                                                      \
+  KOALA_INTEROP_TYPEDEF(func, lang, "KByte*", "[B", "byte[]")                                                        \
+  KOALA_INTEROP_TYPEDEF(func, lang, "KInteropBuffer", "[B", "byte[]")                                                \
+  KOALA_INTEROP_TYPEDEF(func, lang, "KShort*", "[S", "short[]")                                                      \
+  KOALA_INTEROP_TYPEDEF(func, lang, "KUShort*", "[S", "short[]")                                                     \
+  KOALA_INTEROP_TYPEDEF(func, lang, "int32_t*", "[I", "int[]")                                                       \
+  KOALA_INTEROP_TYPEDEF(func, lang, "KInt*", "[I", "int[]")                                                          \
+  KOALA_INTEROP_TYPEDEF(func, lang, "KNativePointerArray", "[J", "long[]")                                           \
+  KOALA_INTEROP_TYPEDEF(func, lang, "KInteropReturnBuffer", "[B", "byte[]")                                          \
+  KOALA_INTEROP_TYPEDEF(func, lang, "float*", "[F", "float[]")                                                       \
+  KOALA_INTEROP_TYPEDEF(func, lang, "KFloatArray", "[F", "float[]")                                                  \
+  KOALA_INTEROP_TYPEDEF(func, lang, "KFloat*", "[F", "float[]")                                                      \
+  KOALA_INTEROP_TYPEDEF_LS(func, lang, "KStringPtr", "Lstd/core/String;", "String", "Ljava/lang/String;", "String")  \
+  KOALA_INTEROP_TYPEDEF_LS(func, lang, "KStringArray", "[Lstd/core/String;", "String[]", "[Ljava/lang/String;",      \
+      "String[]")
 
 std::string sigType(const std::string &type) {
 #if KOALA_USE_PANDA_VM

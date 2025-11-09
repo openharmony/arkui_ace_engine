@@ -344,7 +344,8 @@ extern "C" DLL_EXPORT KInt LoadVirtualMachine(KInt vmKind, const char* bootFiles
         return -1;
     }
 
-    LOGI("Starting VM %" LOG_PUBLIC "d with bootFilesDir=%" LOG_PUBLIC "s userFilesDir=%" LOG_PUBLIC "s native=%" LOG_PUBLIC "s", vmKind, bootFilesDir, userFilesDir, appLibPath);
+    LOGI("Starting VM %" LOG_PUBLIC "d with bootFilesDir=%" LOG_PUBLIC "s userFilesDir=%" LOG_PUBLIC "s native=%"
+        LOG_PUBLIC "s", vmKind, bootFilesDir, userFilesDir, appLibPath);
 
     std::string libPath =
 #if USE_SYSTEM_ARKVM
@@ -505,26 +506,6 @@ extern "C" DLL_EXPORT KInt LoadVirtualMachine(KInt vmKind, const char* bootFiles
     }
 #endif
 
-#ifdef KOALA_KOTLIN
-    if (vmKind == KOTLIN_KIND) {
-        g_vmEntry.vmKind = vmKind;
-        (void)vm;
-
-        kotlin_exported_symbols_t kotlin_exported_symbols = (kotlin_exported_symbols_t)findSymbol(handle, "kotlin_koala_symbols");
-        env = kotlin_exported_symbols();
-
-        set_user_view_factory_t set_user_view_factory = (set_user_view_factory_t)findSymbol(handle, "set_user_view_factory");
-        set_user_view_factory();
-
-        g_vmEntry.create = findSymbol(handle, "application_create");
-        g_vmEntry.start = findSymbol(handle, "application_start");
-        g_vmEntry.enter = findSymbol(handle, "application_enter");
-        g_vmEntry.emitEvent = findSymbol(handle, "application_emit_event");
-
-        result = 0;
-    }
-#endif
-
     if (result != 0) {
         LOGE("Error creating a VM of kind %" LOG_PUBLIC "d: %" LOG_PUBLIC "d\n", vmKind, result);
         return result;
@@ -598,7 +579,8 @@ const AppInfo harnessAppInfo = {
 const AppInfo harnessAniAppInfo = {
     "@koalaui.ets-harness.src.EtsHarnessApplication.EtsHarnessApplication",
     "createApplication",
-    "C{std.core.String}C{std.core.String}C{std.core.String}zi:C{@koalaui.ets-harness.src.EtsHarnessApplication.EtsHarnessApplication}",
+    "C{std.core.String}C{std.core.String}C{std.core.String}zi: \
+        C{@koalaui.ets-harness.src.EtsHarnessApplication.EtsHarnessApplication}",
     "start",
     "li:l",
     "enter",
