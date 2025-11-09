@@ -55,6 +55,7 @@ const std::string AMPM = "amPm";
 void TimePickerColumnPattern::OnModifyDone()
 {
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     auto pipeline = GetContext();

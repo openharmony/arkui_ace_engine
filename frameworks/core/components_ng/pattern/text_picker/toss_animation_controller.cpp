@@ -35,6 +35,7 @@ void TextPickerTossAnimationController::SetStart(double y)
 {
     auto weak = AceType::WeakClaim(this);
     auto ref = weak.Upgrade();
+    CHECK_NULL_VOID(ref);
     auto column = AceType::DynamicCast<TextPickerColumnPattern>(ref->column_.Upgrade());
     CHECK_NULL_VOID(column);
     auto isTouchBreak = column->GetTouchBreakStatus();
@@ -62,6 +63,7 @@ bool TextPickerTossAnimationController::Play()
 {
     auto weak = AceType::WeakClaim(this);
     auto ref = weak.Upgrade();
+    CHECK_NULL_RETURN(ref, false);
     auto column = AceType::DynamicCast<TextPickerColumnPattern>(ref->column_.Upgrade());
     CHECK_NULL_RETURN(column, false);
     auto timeDiff = timeEnd_ - timeStart_;
@@ -82,6 +84,7 @@ void TextPickerTossAnimationController::StartSpringMotion()
 {
     auto weak = AceType::WeakClaim(this);
     auto ref = weak.Upgrade();
+    CHECK_NULL_VOID(ref);
     auto column = AceType::DynamicCast<TextPickerColumnPattern>(ref->column_.Upgrade());
     CHECK_NULL_VOID(column);
     auto columnNode = column->GetHost();
@@ -120,14 +123,11 @@ void TextPickerTossAnimationController::StartSpringMotion()
             column->SetYOffset(0.0);
         }
     };
-    AnimationUtils::Animate(
-        option,
-        [weak]() {
+    AnimationUtils::Animate(option, [weak]() {
             auto ref = weak.Upgrade();
             CHECK_NULL_VOID(ref);
             ref->property_->Set(ref->end_);
-        },
-        finishCallback, nullptr, context);
+        }, finishCallback, nullptr, context);
 }
 
 void TextPickerTossAnimationController::StopTossAnimation()
@@ -144,11 +144,15 @@ void TextPickerTossAnimationController::StopTossAnimation()
     option.SetDelay(0);
     auto columnNode = column->GetHost();
     auto context = columnNode? columnNode->GetContextRefPtr(): nullptr;
-    AnimationUtils::Animate(option, [weak]() {
-        auto ref = weak.Upgrade();
-        ref->isManualStopToss_ = true;
-        ref->property_->Set(0.0);
-    }, nullptr, nullptr, context);
+    AnimationUtils::Animate(
+        option,
+        [weak]() {
+            auto ref = weak.Upgrade();
+            CHECK_NULL_VOID(ref);
+            ref->isManualStopToss_ = true;
+            ref->property_->Set(0.0);
+        },
+        nullptr, nullptr, context);
 }
 
 RefPtr<Curve> TextPickerTossAnimationController::UpdatePlayAnimationValue()
@@ -180,6 +184,7 @@ void TextPickerTossAnimationController::CreatePropertyCallback()
     }
     auto weak = AceType::WeakClaim(this);
     auto ref = weak.Upgrade();
+    CHECK_NULL_VOID(ref);
     auto column = AceType::DynamicCast<TextPickerColumnPattern>(ref->column_.Upgrade());
     CHECK_NULL_VOID(column);
     auto propertyCallback = [weak, column](float position) {

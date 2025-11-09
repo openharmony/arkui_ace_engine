@@ -84,7 +84,9 @@ public:
     void SetShowCount(const uint32_t showCount)
     {
         showCount_ = showCount;
-        GetHost()->MarkModifyDone();
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkModifyDone();
     }
 
     FocusPattern GetFocusPattern() const override
