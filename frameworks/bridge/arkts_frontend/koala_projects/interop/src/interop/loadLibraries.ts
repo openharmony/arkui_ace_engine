@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,19 +26,23 @@ export function loadNativeLibrary(name: string): Record<string, object> {
         `${nameWithoutSuffix}_${os.platform()}_${os.arch()}.node`,
     ]
     const errors: { candidate: string, command: string, error: any }[] = []
-    if (!isHZVM)
+    if (!isHZVM) {
         try {
-            candidates.push(eval(`require.resolve(${JSON.stringify((nameWithoutSuffix + '.node'))})`))
+            return (globalThis as any).require.resolve(nameWithoutSuffix + '.node')
         } catch (e) {
             errors.push({ candidate: `${nameWithoutSuffix}.node`, command: `resolve(...)`, error: e })
         }
+    }
 
     for (const candidate of candidates) {
         try {
-            if (isHZVM)
+            if (isHZVM) {
                 return (globalThis as any).requireNapi(candidate, true)
-            else
-                return eval(`let exports = {}; process.dlopen({ exports }, ${JSON.stringify(candidate)}, 2); exports`)
+            } else {
+                const exports = {};
+                (globalThis as any).process.dlopen({ exports }, candidate, 2);
+                return exports
+            }
         } catch (e) {
             errors.push({ candidate: candidate, command: `dlopen`, error: e })
         }
@@ -54,8 +58,9 @@ export function registerNativeModuleLibraryName(nativeModule: string, libraryNam
 }
 
 export function loadNativeModuleLibrary(moduleName: string, module?: object) {
-    if (!module)
+    if (!module) {
         throw new Error('<module> argument is required and optional only for compatibility with ArkTS')
+    }
     const library = loadNativeLibrary(nativeModuleLibraries.get(moduleName) ?? moduleName)
     if (!library || !library[moduleName]) {
         console.error(`Failed to load library for module ${moduleName}`)
