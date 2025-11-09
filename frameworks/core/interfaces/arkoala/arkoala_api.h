@@ -1201,6 +1201,7 @@ enum ArkUIEventCategory {
     CLICK_EVENT = 17,
     AXIS_EVENT = 18,
     COASTING_AXIS_EVENT = 19,
+    CHILD_TOUCH_TEST_EVENT = 20,
 };
 
 #define ARKUI_MAX_EVENT_NUM 1000
@@ -1240,6 +1241,7 @@ enum ArkUIEventSubKind {
     ON_HOVER_MOVE,
     ON_SIZE_CHANGE,
     ON_COASTING_AXIS_EVENT,
+    ON_CHILD_TOUCH_TEST,
     ON_DETECT_RESULT_UPDATE = ARKUI_MAX_EVENT_NUM * ARKUI_TEXT,
     ON_TEXT_SPAN_LONG_PRESS,
     ON_IMAGE_COMPLETE = ARKUI_MAX_EVENT_NUM * ARKUI_IMAGE,
@@ -1661,6 +1663,33 @@ struct ArkUIHoverEvent {
     ArkUI_Float64 globalDisplayY;
 };
 
+struct ArkUITouchTestInfoItem {
+    ArkUI_Float32 nodeX;
+    ArkUI_Float32 nodeY;
+    ArkUI_Float32 windowX;
+    ArkUI_Float32 windowY;
+    ArkUI_Float32 parentNodeX;
+    ArkUI_Float32 parentNodeY;
+    ArkUIRect rect;
+    ArkUI_CharPtr id;
+};
+typedef ArkUITouchTestInfoItem* ArkUITouchTestInfoItemHandle;
+typedef ArkUITouchTestInfoItemHandle* ArkUITouchTestInfoItemArray;
+
+enum ArkUITouchTestStrategy {
+    TOUCH_TEST_STRATEGY_DEFAULT = 0,
+    TOUCH_TEST_STRATEGY_FORWARD_COMPETITION = 1,
+    TOUCH_TEST_STRATEGY_FORWARD = 2,
+};
+
+struct ArkUITouchTestInfo {
+    ArkUITouchTestInfoItemArray array;
+    ArkUI_Int32 subKind;
+    ArkUI_Int32 size;
+    ArkUITouchTestStrategy strategy;
+    ArkUI_CommonCharPtr resultId;
+};
+
 struct ArkUINodeEvent {
     ArkUI_Int32 kind; // Actually ArkUIEventCategory.
     ArkUI_Int32 nodeId;
@@ -1685,6 +1714,7 @@ struct ArkUINodeEvent {
         ArkUIHoverEvent hoverEvent;
         ArkUIAxisEvent axisEvent;
         ArkUICoastingAxisEvent coastingAxisEvent;
+        ArkUITouchTestInfo touchTestInfo;
     };
 };
 

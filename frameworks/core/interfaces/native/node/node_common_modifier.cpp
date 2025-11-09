@@ -11333,6 +11333,50 @@ void SetOnFocusAxisEvent(ArkUINodeHandle node, void* extraParam)
     ViewAbstract::SetOnFocusAxisEvent(frameNode, onFocusAxisEvent);
 }
 
+void SetOnChildTouchTest(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onChildTouchTest = [frameNode, nodeId, extraParam](
+                                const std::vector<TouchTestInfo>& touchInfo) -> NG::TouchResult {
+        ArkUINodeEvent event;
+        event.kind = CHILD_TOUCH_TEST_EVENT;
+        event.nodeId = nodeId;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        auto size = static_cast<int32_t>(touchInfo.size());
+
+        ArkUITouchTestInfoItemArray touchTestInfoItemArray = nullptr;
+        if (size > 0) {
+            touchTestInfoItemArray = new ArkUITouchTestInfoItemHandle[size];
+            int32_t index = 0;
+            for (const auto& info : touchInfo) {
+                touchTestInfoItemArray[index] = NodeModifier::CreateTouchTestInfoItem(info);
+                index++;
+            }
+        }
+        ArkUITouchTestInfo touchTestInfo;
+        touchTestInfo.array = touchTestInfoItemArray;
+        touchTestInfo.subKind = ON_CHILD_TOUCH_TEST;
+        touchTestInfo.strategy = ArkUITouchTestStrategy::TOUCH_TEST_STRATEGY_DEFAULT;
+        touchTestInfo.size = size;
+        event.touchTestInfo = touchTestInfo;
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        SendArkUISyncEvent(&event);
+        TouchResult touchRes;
+        touchRes.strategy = static_cast<TouchTestStrategy>(event.touchTestInfo.strategy);
+        if (event.touchTestInfo.resultId) {
+            touchRes.id = event.touchTestInfo.resultId;
+            delete event.touchTestInfo.resultId;
+            event.touchTestInfo.resultId = nullptr;
+        }
+        delete[] touchTestInfoItemArray;
+        touchTestInfoItemArray = nullptr;
+        return touchRes;
+    };
+    ViewAbstract::SetOnTouchTestFunc(frameNode, std::move(onChildTouchTest));
+}
+
 void ResetOnKeyEvent(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -12061,6 +12105,13 @@ void ResetOnCoastingAxisEvent(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::DisableOnCoastingAxisEvent(frameNode);
+}
+
+void ResetOnChildTouchTest(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetOnTouchTestFunc(frameNode, nullptr);
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

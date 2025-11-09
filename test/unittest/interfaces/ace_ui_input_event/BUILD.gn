@@ -50,6 +50,7 @@ ohos_unittest("ui_input_event_test") {
     "oh_arkui_pointerevent_createclonedevent_test.cpp",
     "oh_arkui_pointerevent_destroyclonedevent_test.cpp",
     "oh_arkui_pointerevent_getdisplayx_test.cpp",
+    "oh_arkui_touchtestinfo_test.cpp",
   ]
 
   configs = [

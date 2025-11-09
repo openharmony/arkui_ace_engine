@@ -410,6 +410,8 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_GRID_SCROLL_BAR_UPDATE;
         case NODE_ON_COASTING_AXIS_EVENT:
             return ON_COASTING_AXIS_EVENT;
+        case NODE_ON_CHILD_TOUCH_TEST:
+            return ON_CHILD_TOUCH_TEST;
         default:
             return -1;
     }
@@ -690,6 +692,8 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_GRID_ON_SCROLL_BAR_UPDATE;
         case ON_COASTING_AXIS_EVENT:
             return NODE_ON_COASTING_AXIS_EVENT;
+        case ON_CHILD_TOUCH_TEST:
+            return NODE_ON_CHILD_TOUCH_TEST;
         default:
             return -1;
     }
@@ -799,6 +803,12 @@ bool ConvertEvent(ArkUINodeEvent* origin, ArkUI_NodeEvent* event)
         case COASTING_AXIS_EVENT: {
             event->category = static_cast<int32_t>(NODE_EVENT_CATEGORY_INPUT_EVENT);
             ArkUIEventSubKind subKind = static_cast<ArkUIEventSubKind>(origin->coastingAxisEvent.subKind);
+            event->kind = ConvertToNodeEventType(subKind);
+            return true;
+        }
+        case CHILD_TOUCH_TEST_EVENT: {
+            event->category = static_cast<int32_t>(NODE_EVENT_CATEGORY_INPUT_EVENT);
+            ArkUIEventSubKind subKind = static_cast<ArkUIEventSubKind>(origin->touchTestInfo.subKind);
             event->kind = ConvertToNodeEventType(subKind);
             return true;
         }
@@ -1168,6 +1178,24 @@ ArkUI_DragEvent* OH_ArkUI_NodeEvent_GetDragEvent(ArkUI_NodeEvent* nodeEvent)
     return const_cast<ArkUI_DragEvent*>(reinterpret_cast<const ArkUI_DragEvent*>(&(originNodeEvent->dragEvent)));
 }
 
+ArkUI_TouchTestInfo* OH_ArkUI_NodeEvent_GetTouchTestInfo(ArkUI_NodeEvent* nodeEvent)
+{
+    if (!nodeEvent) {
+        return nullptr;
+    }
+    if (nodeEvent->category != static_cast<int32_t>(NODE_EVENT_CATEGORY_INPUT_EVENT)) {
+        return nullptr;
+    }
+    auto* originNodeEvent = reinterpret_cast<ArkUINodeEvent*>(nodeEvent->origin);
+    if (!originNodeEvent) {
+        return nullptr;
+    }
+    auto* touchTestInfo = reinterpret_cast<ArkUI_TouchTestInfo*>(&originNodeEvent->touchTestInfo);
+    if (!touchTestInfo) {
+        return nullptr;
+    }
+    return touchTestInfo;
+}
 #ifdef __cplusplus
 };
 #endif
