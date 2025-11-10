@@ -195,7 +195,7 @@ class FrameNode extends Disposable {
     }
   }
   dispose(): void {
-    if (this.isDisposed_) {
+    if (this.isDisposed()) {
       return;
     }
     super.dispose();

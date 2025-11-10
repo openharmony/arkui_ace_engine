@@ -47,7 +47,7 @@ class BuilderNodeCommonBase extends Disposable {
     return ret;
   }
   public dispose(): void {
-    if (this.isDisposed_) {
+    if (this.isDisposed()) {
       return;
     }
     super.dispose();
