@@ -1269,8 +1269,13 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew047, TestSize.Level1)
     rosenRenderContext->bgImage_ = AceType::MakeRefPtr<PixelMapImage>();
     rosenRenderContext->ScheduleBackgroundPaint();
     EXPECT_FALSE(rosenRenderContext->pendingDecodeTask_);
-    rosenRenderContext->bgImage_ = AceType::MakeRefPtr<MockAnimatedImage>();
+    auto bgImage = AceType::MakeRefPtr<MockAnimatedImage>();
+    rosenRenderContext->bgImage_ = bgImage;
     rosenRenderContext->UpdateBackgroundImageSyncMode(true);
+    bgImage->firstPixelMap = nullptr;
+    rosenRenderContext->ScheduleBackgroundPaint();
+    EXPECT_FALSE(rosenRenderContext->pendingDecodeTask_);
+    bgImage->firstPixelMap = AceType::MakeRefPtr<MockPixelMap>();
     rosenRenderContext->ScheduleBackgroundPaint();
     EXPECT_FALSE(rosenRenderContext->pendingDecodeTask_);
     rosenRenderContext->UpdateBackgroundImageSyncMode(false);

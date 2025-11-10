@@ -925,6 +925,16 @@ DataReadyNotifyTask RosenRenderContext::CreateBgImageDataReadyCallback()
     return task;
 }
 
+bool CheckFirstPixelMap(RefPtr<CanvasImage>& bgImage)
+{
+    auto decodeImage = bgImage->GetFirstPixelMap();
+    if (!decodeImage) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "Image decoding failed.");
+        return false;
+    }
+    return true;
+}
+
 void RosenRenderContext::ScheduleBackgroundPaint(bool requestNextFrame)
 {
     if (bgImage_->IsStatic()) {
@@ -934,8 +944,7 @@ void RosenRenderContext::ScheduleBackgroundPaint(bool requestNextFrame)
     } else {
         auto syncMode = GetBackgroundImageSyncMode().value_or(false);
         if (syncMode) {
-            auto decodeImage = bgImage_->GetFirstPixelMap();
-            CHECK_NULL_VOID(decodeImage);
+            CHECK_EQUAL_VOID(CheckFirstPixelMap(bgImage_), false);
             PaintBackground();
             CHECK_EQUAL_VOID(requestNextFrame, false);
             RequestNextFrame();
@@ -946,8 +955,7 @@ void RosenRenderContext::ScheduleBackgroundPaint(bool requestNextFrame)
                 CHECK_NULL_VOID(ctx);
                 auto host = ctx->GetHost();
                 CHECK_NULL_VOID(host);
-                auto decodeImage = image->GetFirstPixelMap();
-                CHECK_NULL_VOID(decodeImage);
+                CHECK_EQUAL_VOID(CheckFirstPixelMap(ctx->bgImage_), false);
                 ctx->OnPaintBackgroundDynamic(requestNextFrame);
             });
             auto taskExecutor = Container::CurrentTaskExecutor();
