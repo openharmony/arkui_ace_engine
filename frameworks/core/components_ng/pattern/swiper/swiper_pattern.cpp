@@ -7791,4 +7791,29 @@ void SwiperPattern::OnFontScaleConfigurationUpdate()
         pattern->MarkDirtyNodeSelf();
     });
 }
+
+std::vector<SwiperItemInfoNG> SwiperPattern::GetShownItemInfoFromIndex(int32_t index)
+{
+    std::vector<SwiperItemInfoNG> infos = {};
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, infos);
+    auto displayCount = GetDisplayCount();
+    auto totalCount = TotalCount();
+    for (int32_t count = 0; (count < displayCount) && (count + index < totalCount); count++) {
+        auto swiperItemNode = AceType::DynamicCast<FrameNode>(host->GetOrCreateChildByIndex(index + count, false));
+        if (!swiperItemNode) {
+            TAG_LOGW(AceLogTag::ACE_SWIPER, "empty swiper item [index: %{public}d] while collecting shownInfos",
+                index + count);
+            continue;
+        }
+        auto tag = swiperItemNode->GetTag();
+        if (tag == V2::SWIPER_INDICATOR_ETS_TAG ||
+            tag == V2::SWIPER_LEFT_ARROW_ETS_TAG ||
+            tag == V2::SWIPER_RIGHT_ARROW_ETS_TAG) {
+            break;
+        }
+        infos.push_back(SwiperItemInfoNG(swiperItemNode->GetId(), index + count));
+    }
+    return infos;
+}
 } // namespace OHOS::Ace::NG

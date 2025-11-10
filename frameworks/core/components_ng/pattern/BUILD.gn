@@ -594,6 +594,7 @@ build_component_ng("pattern_ng") {
     "stepper/stepper_pattern.cpp",
     "swiper/arc_swiper_pattern.cpp",
     "swiper/swiper_accessibility_property.cpp",
+    "swiper/swiper_event_hub.cpp",
     "swiper/swiper_helper.cpp",
     "swiper/swiper_layout_algorithm.cpp",
     "swiper/swiper_model_ng.cpp",

@@ -29,8 +29,8 @@ public:
     ObserverProcess();
     ~ObserverProcess() = default;
     static ObserverProcess& GetInstance();
-    napi_value ProcessRegister(napi_env env, napi_callback_info info);
-    napi_value ProcessUnRegister(napi_env env, napi_callback_info info);
+    napi_value ProcessRegister(napi_env env, napi_callback_info info, std::string type = "");
+    napi_value ProcessUnRegister(napi_env env, napi_callback_info info, std::string type = "");
 private:
     napi_value ProcessNavigationRegister(napi_env env, napi_callback_info info);
     napi_value ProcessNavigationRegisterByUniqueId(napi_env env, napi_callback_info info);
@@ -71,6 +71,8 @@ private:
     napi_value ProcessNodeRenderStateUnRegister(napi_env env, napi_callback_info info);
     napi_value ProcessTextChangeEventRegister(napi_env env, napi_callback_info info);
     napi_value ProcessTextChangeEventUnRegister(napi_env env, napi_callback_info info);
+    napi_value ProcessSwiperContentUpdateRegister(napi_env env, napi_callback_info info);
+    napi_value ProcessSwiperContentUpdateUnRegister(napi_env env, napi_callback_info info);
     napi_value AddToScrollEventType(napi_env env);
     napi_value AddToRouterPageState(napi_env env);
     napi_value CreateNavDestinationState(napi_env env);
@@ -88,6 +90,7 @@ private:
     bool isRouterPageHandleFuncSetted_ = false;
     bool isDestinationSwitchHandleFuncSetted_ = false;
     bool isTextChangeEventHandleFuncSetted_ = false;
+    bool isSwiperContentUpdateHandleFuncSetted_ = false;
     std::map<std::string, Func> registerProcessMap_;
     std::map<std::string, Func> unregisterProcessMap_;
 };
