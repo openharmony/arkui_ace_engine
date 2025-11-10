@@ -314,7 +314,7 @@ void FormPattern::HandleSnapshot(uint32_t delayTime, const std::string& nodeIdSt
                 formPattern->UnregisterAccessibility();
                 formPattern->isSnapshot_ = true;
                 formPattern->needSnapshotAgain_ = false;
-                }, "ArkUIFormRemoveFrsNode");
+                }, "ArkUIFormRemoveFrsNode", PriorityType::HIGH);
             return;
         }
     }
@@ -460,7 +460,7 @@ void FormPattern::OnSnapshot(std::shared_ptr<Media::PixelMap> pixelMap)
         auto formPattern = weak.Upgrade();
         CHECK_NULL_VOID(formPattern);
         formPattern->HandleOnSnapshot(pixelMap);
-        }, "ArkUIFormHandleOnSnapshot");
+        }, "ArkUIFormHandleOnSnapshot", PriorityType::HIGH);
 }
 
 void FormPattern::HandleOnSnapshot(std::shared_ptr<Media::PixelMap> pixelMap)
@@ -1659,7 +1659,7 @@ void FormPattern::InitFormManagerDelegate()
             CHECK_NULL_VOID(container);
             container->SetWindowConfig({ formJsInfo.formWindow.designWidth, formJsInfo.formWindow.autoDesignWidth });
             container->RunCard(id, path, module, data, imageDataMap, formJsInfo.formSrc, frontendType, uiSyntax);
-            }, "ArkUIFormRunCard");
+            }, "ArkUIFormRunCard", PriorityType::HIGH);
     });
 
     InitAddFormUpdateAndErrorCallback(instanceID);
@@ -2036,7 +2036,7 @@ void FormPattern::OnLoadEvent()
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->FireOnLoadEvent();
-        }, "ArkUIFormFireLoadEvent");
+        }, "ArkUIFormFireLoadEvent", PriorityType::HIGH);
 }
 
 void FormPattern::OnActionEvent(const std::string& action)
@@ -2090,7 +2090,7 @@ void FormPattern::OnActionEvent(const std::string& action)
                 auto eventAction = JsonUtil::ParseJsonString(action);
                 TAG_LOGI(AceLogTag::ACE_FORM, "UI task execute begin.");
                 pattern->FireOnRouterEvent(eventAction);
-                }, "ArkUIFormFireRouterEvent");
+                }, "ArkUIFormFireRouterEvent", PriorityType::HIGH);
         }
     }
 
@@ -2544,7 +2544,7 @@ void FormPattern::InitAddFormUpdateAndErrorCallback(int32_t instanceID)
                         form->GetSubContainer()->UpdateCard(data, imageDataMap);
                     }
                 },
-                "ArkUIFormUpdateCard");
+                "ArkUIFormUpdateCard", PriorityType::HIGH);
         });
 
     formManagerBridge_->AddFormErrorCallback(
@@ -2559,7 +2559,7 @@ void FormPattern::InitAddFormUpdateAndErrorCallback(int32_t instanceID)
                     CHECK_NULL_VOID(form);
                     form->FireOnErrorEvent(code, msg);
                 },
-                "ArkUIFormFireErrorEvent");
+                "ArkUIFormFireErrorEvent", PriorityType::HIGH);
         });
 }
 
@@ -2580,7 +2580,7 @@ void FormPattern::InitAddUninstallAndSurfaceNodeCallback(int32_t instanceID)
                 CHECK_NULL_VOID(form);
                 form->FireOnUninstallEvent(formId);
             },
-            "ArkUIFormFireUninstallEvent");
+            "ArkUIFormFireUninstallEvent", PriorityType::HIGH);
     });
 
     formManagerBridge_->AddFormSurfaceNodeCallback(
@@ -2599,7 +2599,7 @@ void FormPattern::InitAddUninstallAndSurfaceNodeCallback(int32_t instanceID)
                     CHECK_NULL_VOID(form);
                     form->FireFormSurfaceNodeCallback(node, want);
                 },
-                "ArkUIFormFireSurfaceNodeCallback");
+                "ArkUIFormFireSurfaceNodeCallback", PriorityType::HIGH);
         });
 }
 
@@ -2621,7 +2621,7 @@ void FormPattern::InitAddFormSurfaceChangeAndDetachCallback(int32_t instanceID)
                     CHECK_NULL_VOID(form);
                     form->FireFormSurfaceChangeCallback(width, height, borderWidth);
                 },
-                "ArkUIFormFireSurfaceChange");
+                "ArkUIFormFireSurfaceChange", PriorityType::HIGH);
         });
 
     formManagerBridge_->AddFormSurfaceDetachCallback([weak = WeakClaim(this), instanceID]() {
@@ -2656,7 +2656,7 @@ void FormPattern::InitAddUnTrustAndSnapshotCallback(int32_t instanceID)
                 CHECK_NULL_VOID(formPattern);
                 formPattern->HandleUnTrustForm();
             },
-            "ArkUIFormHandleUnTrust");
+            "ArkUIFormHandleUnTrust", PriorityType::HIGH);
     });
 
     formManagerBridge_->AddSnapshotCallback([weak = WeakClaim(this), instanceID](const uint32_t& delayTime) {
@@ -2709,7 +2709,7 @@ void FormPattern::InitOtherCallback(int32_t instanceID)
             auto formPattern = weak.Upgrade();
             CHECK_NULL_VOID(formPattern);
             formPattern->HandleEnableForm(enable);
-            }, "ArkUIFormHandleEnableForm");
+            }, "ArkUIFormHandleEnableForm", PriorityType::HIGH);
         });
 
     formManagerBridge_->AddLockFormCallback([weak = WeakClaim(this), instanceID, pipeline](const bool lock) {
@@ -2722,7 +2722,7 @@ void FormPattern::InitOtherCallback(int32_t instanceID)
             auto formPattern = weak.Upgrade();
             CHECK_NULL_VOID(formPattern);
             formPattern->HandleLockEvent(lock);
-            }, "ArkUIFormHandleLockForm");
+            }, "ArkUIFormHandleLockForm", PriorityType::HIGH);
         });
 }
 
@@ -2741,7 +2741,7 @@ void FormPattern::InitUpdateFormDoneCallback(int32_t instanceID)
             auto formPattern = weak.Upgrade();
             CHECK_NULL_VOID(formPattern);
             formPattern->FireOnUpdateFormDone(formId);
-            }, "ArkUIFormFireUpdateDoneEvent");
+            }, "ArkUIFormFireUpdateDoneEvent", PriorityType::HIGH);
     });
 }
 
@@ -2769,7 +2769,7 @@ void FormPattern::enhancesSubContainer(bool hasContainer)
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->FireOnAcquiredEvent(id);
-            }, "ArkUIFormFireAcquiredEvent");
+            }, "ArkUIFormFireAcquiredEvent", PriorityType::HIGH);
     });
 
     subContainer_->SetFormLoadCallback([weak = WeakClaim(this)]() {
@@ -3094,7 +3094,7 @@ bool FormPattern::OnAccessibilityStateChange(bool state)
         CHECK_NULL_VOID(pattern);
         CHECK_NULL_VOID(pattern->formManagerBridge_);
         pattern->formManagerBridge_->ReAddForm();
-        }, "ReAddForm");
+        }, "ReAddForm", PriorityType::HIGH);
     return true;
 }
 
@@ -3114,7 +3114,7 @@ void FormPattern::InitDueControlFormCallback(int32_t instanceID)
             auto formPattern = weak.Upgrade();
             CHECK_NULL_VOID(formPattern);
             formPattern->HandleFormDueControl(isDisablePolicy, isControl);
-            }, "ArkUIFormHandleDueControlEvent");
+            }, "ArkUIFormHandleDueControlEvent", PriorityType::HIGH);
     });
 }
 
