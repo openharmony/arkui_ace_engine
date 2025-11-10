@@ -151,6 +151,7 @@ void JSSearch::JSBindMore()
     JSClass<JSSearch>::StaticMethod("maxFontSize", &JSSearch::SetMaxFontSize);
     JSClass<JSSearch>::StaticMethod("minFontScale", &JSSearch::SetMinFontScale);
     JSClass<JSSearch>::StaticMethod("maxFontScale", &JSSearch::SetMaxFontScale);
+    JSClass<JSSearch>::StaticMethod("dividerColor", &JSSearch::SetDividerColor);
     JSClass<JSSearch>::StaticMethod("letterSpacing", &JSSearch::SetLetterSpacing);
     JSClass<JSSearch>::StaticMethod("lineHeight", &JSSearch::SetLineHeight);
     JSClass<JSSearch>::StaticMethod("halfLeading", &JSSearch::SetHalfLeading);
@@ -1507,6 +1508,24 @@ void JSSearch::SetDecoration(const JSCallbackInfo& info)
     SearchModel::GetInstance()->SetTextDecorationColor(result);
     if (textDecorationStyle) {
         SearchModel::GetInstance()->SetTextDecorationStyle(textDecorationStyle.value());
+    }
+}
+
+void JSSearch::SetDividerColor(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    Color color;
+    RefPtr<ResourceObject> resObj;
+    UnregisterResource("dividerColor");
+    if (ParseJsColor(info[0], color, resObj)) {
+        if (SystemProperties::ConfigChangePerform() && resObj) {
+            RegisterResource<Color>("dividerColor", resObj, color);
+        }
+        SearchModel::GetInstance()->SetDividerColor(color);
+    } else {
+        SearchModel::GetInstance()->ResetDividerColor();
     }
 }
 

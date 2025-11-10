@@ -90,6 +90,8 @@ public:
     virtual void SetLetterSpacing(const Dimension& value) {};
     virtual void SetLineHeight(const Dimension& value) {};
     virtual void SetHalfLeading(bool value) {};
+    virtual void SetDividerColor(const Color& color) = 0;
+    virtual void ResetDividerColor() = 0;
     virtual void SetAdaptMinFontSize(const Dimension& value) {};
     virtual void SetAdaptMaxFontSize(const Dimension& value) {};
     virtual void SetTextDecoration(Ace::TextDecoration value) {};
