@@ -21,14 +21,14 @@
 #include "arkoala_api_generated.h"
 
 struct MenuItemConfigurationPeer {
-    Ark_Boolean enabled;
-    Ark_ContentModifier contentModifier;
-    Ark_ResourceStr value;
-    Opt_ResourceStr icon;
-    Opt_SymbolGlyphModifier symbolIcon;
-    Ark_Boolean selected;
-    Ark_Int32 index;
-    Ark_NativePointer node;
+    Ark_Boolean enabled{};
+    Ark_ContentModifier contentModifier{};
+    Ark_ResourceStr value{};
+    Opt_ResourceStr icon{};
+    Opt_SymbolGlyphModifier symbolIcon{};
+    Ark_Boolean selected{};
+    Ark_Int32 index{};
+    Ark_NativePointer node{};
 protected:
     MenuItemConfigurationPeer() {}
     ~MenuItemConfigurationPeer() {}
