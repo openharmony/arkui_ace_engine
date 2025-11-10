@@ -64,7 +64,7 @@ class MonitorValueV2<T> {
   // Flag telling that this path is wildcard path
   // Wildcard path: objLevel00.objectLevel01.*
   // Last sure value path: objLevel00.objectLevel01
-  private readonly wildCard: boolean;
+  private readonly wildCard_: boolean;
 
   // Points from MonitorValueV2 with Last Sure Value path
   // to MonitorValueV2 with path including wildcard, "parent" path.
@@ -86,7 +86,7 @@ class MonitorValueV2<T> {
     this.path = path;
     this.dirty = false;
     this.props = path.split('.');
-    this.wildCard = MonitorPathHelper.isWildcardPath(this.props[this.props.length - 1]);
+    this.wildCard_ = MonitorPathHelper.isWildcardPath(this.props[this.props.length - 1]);
     this.id = id ? id : -1;
     this.isAccessible = false;
     this.wildcardPath_ = undefined;
@@ -111,7 +111,7 @@ class MonitorValueV2<T> {
     } else {
       // AddMonitor
       // consider value dirty if it wasn't accessible before setting the new value
-      this.dirty = this.wildCard || (!this.isAccessible) || (this.before !== this.now);
+      this.dirty = this.wildCard_ || (!this.isAccessible) || (this.before !== this.now);
       this.isAccessible = true;
     }
     return this.dirty;
@@ -137,7 +137,7 @@ class MonitorValueV2<T> {
   }
 
   isWildcard(): boolean {
-    return this.wildCard;
+    return this.wildCard_;
   }
 
   isLastSureValue(): boolean {
@@ -235,14 +235,21 @@ class MonitorV2 {
     return this.isSync_;
   }
 
+  //TODO: check where that is called from
   public addPath(path: string, apiAdded: boolean): MonitorValueV2<unknown> {
+    console.error("### addPath: " + path + " api: " + apiAdded);
     if (!MonitorPathHelper.isValid(path)) {
       stateMgmtConsole.applicationError(`AddMonitor/@SyncMonitor - not a valid path string '${path}'`);
       throw new Error(`AddMonitor/@SyncMonitor - not a valid path string  '${path}'`);
     }
     if (this.values_.has(path)) {
+      console.error("### addPath: PATH EXISTS, return");
       stateMgmtConsole.applicationError(`AddMonitor ${this.getMonitorFuncName()} failed when adding path ${path} because duplicate key`);
-      return this.values_.get(path)!;
+      let monitorPath = this.values_.get(path)!;
+      if (apiAdded) {
+        monitorPath.setAddedByAPI();
+      }
+      return monitorPath;
     }
     let monitorValue = new MonitorValueV2<unknown>(path, apiAdded, this.isSync_ ? ++MonitorV2.nextSyncWatchApiId_ : ++MonitorV2.nextWatchApiId_)
     if (this.isSync_ && MonitorPathHelper.hasWildcardEnding(path)) {
@@ -263,7 +270,7 @@ class MonitorV2 {
       return false;
     }
 
-    console.log("### doRemovePath: " + monitorValue.path + " LSV " + monitorValue.isLastSureValue() + " API " + monitorValue.isAddedByAPi());
+    console.log("### doRemovePath, start: " + monitorValue.path + " LSV " + monitorValue.isLastSureValue() + " API " + monitorValue.isAddedByAPi());
 
     if (monitorValue.isLastSureValue() && monitorValue.isAddedByAPi())
     {
@@ -278,10 +285,12 @@ class MonitorV2 {
     }
 
     if (!lastSurePath && !monitorValue.isAddedByAPi()) {
+      console.log("### doRemovePath - !lastSurePath && !monitorValue.isAddedByAPi(), return");
       return false;
     }
 
     if (lastSurePath && !monitorValue.isLastSureValue()) {
+      console.log("### doRemovePath - lastSurePath && !monitorValue.isLastSureValue(), return");
       return false;
     }
 
@@ -297,6 +306,7 @@ class MonitorV2 {
     ObserveV2.getObserve().clearBinding(monitorValue.id);
     delete ObserveV2.getObserve().id2Others_[monitorValue.id];
     this.values_.delete(path);
+    console.log("### doRemovePath, end " + monitorValue.path);
     return true;
   }
 
