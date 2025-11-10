@@ -7654,7 +7654,7 @@ void FrameNode::UpdateIgnoreCount(int inc)
 void FrameNode::NotifyMenuLifeCycleEvent(NG::MenuLifeCycleEvent menuLifeCycleEvent)
 {
     CHECK_NULL_VOID(pattern_);
-    pattern_->OnMenuLifeCycleCallback(menuLifeCycleEvent);
+    pattern_->OnMenuLifeCycleChanged(menuLifeCycleEvent);
 }
 
 void FrameNode::MountToParent(const RefPtr<UINode>& parent,

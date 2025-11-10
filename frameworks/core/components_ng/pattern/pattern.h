@@ -105,7 +105,7 @@ public:
         return false;
     }
 
-    virtual void OnMenuLifeCycleCallback(NG::MenuLifeCycleEvent menuLifeCycleEvent) {}
+    virtual void OnMenuLifeCycleChanged(NG::MenuLifeCycleEvent menuLifeCycleEvent) {}
 
     virtual bool CheckCustomAvoidKeyboard() const
     {
