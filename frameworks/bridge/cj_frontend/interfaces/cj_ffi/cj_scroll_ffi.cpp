@@ -252,6 +252,7 @@ void FfiOHOSAceFrameworkScrollCreate(int64_t scrollerID)
         std::pair<bool, Dimension> barWidth;
         barWidth.first = false;
         auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
         auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
         ScrollModel::GetInstance()->InitScrollBar(theme, barColor, barWidth, EdgeEffect::NONE);
         return;
@@ -276,6 +277,7 @@ void FfiOHOSAceFrameworkScrollCreate(int64_t scrollerID)
     std::pair<bool, Dimension> barWidth;
     barWidth.first = false;
     auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
     ScrollModel::GetInstance()->InitScrollBar(theme, barColor, barWidth, EdgeEffect::NONE);
 }

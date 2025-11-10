@@ -298,6 +298,7 @@ void CalendarPickerDialogShow(const NativeCalendarDialogOptions& options,
     auto theme = GetTheme<DialogTheme>();
     CHECK_NULL_VOID(theme);
     auto calendarTheme = pipelineContext->GetTheme<CalendarTheme>();
+    CHECK_NULL_VOID(calendarTheme);
     NG::CalendarSettingData settingData;
     auto parseSelectedDate = ParseDate(options.selected);
     if (parseSelectedDate.GetYear() != 0) {
