@@ -17,10 +17,13 @@
 #include "adapter/ohos/entrance/ace_container.h"
 #include "base/log/dump_log.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "bool_wrapper.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 constexpr char UIEXTENSION_HOST_UICONTENT_TYPE[] = "ohos.ace.uiextension.hostUicontentType";
+constexpr char UIEXTENSION_HOST_UICONTENT_ALLOW_CROSS_PROCESS_NESTING[] =
+    "ohos.ace.uiextension.allowCrossProcessNesting";
 constexpr char UI_CONTENT_TYPE_FORM[] = "FORM";
 constexpr char UI_CONTENT_TYPE_UI_EXTENSION[] = "UI_EXTENSION";
 constexpr char UI_CONTENT_TYPE_SECURITY_UI_EXTENSION[] = "SECURITY_UI_EXTENSION";
@@ -71,6 +74,7 @@ void UIExtensionContainerHandler::SetHostParams(const std::shared_ptr<OHOS::AAFw
 {
     CHECK_NULL_VOID(params);
     SetHostUIContentType(params);
+    SetAllowCrossProcessNesting(params);
 }
 
 void UIExtensionContainerHandler::SetHostUIContentType(
@@ -80,5 +84,14 @@ void UIExtensionContainerHandler::SetHostUIContentType(
     auto str = params->GetStringParam(UIEXTENSION_HOST_UICONTENT_TYPE);
     TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "SetHostUIContentType: %{public}s.", str.c_str());
     hostUIContentType_ = FromStrToUIContentType(str);
+}
+
+void UIExtensionContainerHandler::SetAllowCrossProcessNesting(
+    const std::shared_ptr<OHOS::AAFwk::Want>& params)
+{
+    CHECK_NULL_VOID(params);
+    auto allowCrossProcessNesting =
+        params->GetBoolParam(UIEXTENSION_HOST_UICONTENT_ALLOW_CROSS_PROCESS_NESTING, false);
+    allowCrossProcessNesting_ = allowCrossProcessNesting;
 }
 } // namespace OHOS::Ace::NG

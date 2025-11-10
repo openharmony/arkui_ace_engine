@@ -1116,4 +1116,20 @@ HWTEST_F(DynamicPatternTestNg, DynamicPatternTest029, TestSize.Level1)
     EXPECT_TRUE(dynamicPattern->lastPointerEvent_);
 }
 
+/**
+ * @tc.name: GetAccessibilityParentRect031
+ * @tc.desc: Test PlatformContainerHandler GetAccessibilityParentRect pattern nullptr return false
+ * @tc.type: FUNC
+ */
+HWTEST_F(DynamicPatternTestNg, DynamicPatternTest031, TestSize.Level1)
+{
+    PlatformContainerHandler handler;
+    EXPECT_FALSE(handler.IsAllowCrossProcessNesting());
+
+    handle.allowCrossProcessNesting_ = true;
+    EXPECT_TRUE(handler.IsAllowCrossProcessNesting());
+
+    handler.allowCrossProcessNesting_ = false;
+    EXPECT_FALSE(handler.IsAllowCrossProcessNesting());
+}
 } // namespace OHOS::Ace::NG

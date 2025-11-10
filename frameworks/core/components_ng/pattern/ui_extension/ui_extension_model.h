@@ -51,6 +51,7 @@ struct UIExtensionConfig {
     bool densityDpi = false;
     NG::SessionType sessionType = NG::SessionType::UI_EXTENSION_ABILITY;
     bool backgroundTransparent = true;
+    bool allowCrossProcessNesting = false;
 };
 }
 
