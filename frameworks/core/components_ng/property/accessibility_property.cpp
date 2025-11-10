@@ -296,14 +296,12 @@ bool AccessibilityProperty::IsMatchAccessibilityResponseRegion(bool isAccessibil
 {
     auto host = host_.Upgrade();
     CHECK_NULL_RETURN(host, false);
+    // virtual node get response region based on transform rect
+    CHECK_EQUAL_RETURN(isAccessibilityVirtualNode, true, false);
     NG::RectF origRect;
-    if (isAccessibilityVirtualNode) {
-        origRect = host->GetTransformRectRelativeToWindow();
-    } else {
-        RefPtr<NG::RenderContext> renderContext = host->GetRenderContext();
-        CHECK_NULL_RETURN(renderContext, false);
-        origRect = renderContext->GetPaintRectWithoutTransform();
-    }
+    RefPtr<NG::RenderContext> renderContext = host->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+    origRect = renderContext->GetPaintRectWithoutTransform();
     auto responseRegionList = host->GetResponseRegionList(origRect, static_cast<int32_t>(SourceType::TOUCH));
     if (responseRegionList.size() != 1) {
         return false;

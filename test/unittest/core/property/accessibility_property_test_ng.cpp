@@ -1288,4 +1288,21 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest042, TestSize.Lev
     result = accessibilityProperty.IsMatchAccessibilityResponseRegion(false);
     EXPECT_EQ(result, false);
 }
+
+/**
+ * @tc.name: AccessibilityPropertyTest043
+ * @tc.desc: IsMatchAccessibilityResponseRegion
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest043, TestSize.Level1)
+{
+    AccessibilityProperty accessibilityProperty;
+    auto host = FrameNode::GetOrCreateFrameNode(
+        V2::BUTTON_ETS_TAG, 1, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    host->isActive_ = true;
+    WeakPtr<FrameNode> hostBak = host;
+    accessibilityProperty.SetHost(hostBak);
+    auto result = accessibilityProperty.IsMatchAccessibilityResponseRegion(true);
+    EXPECT_EQ(result, false);
+}
 } // namespace OHOS::Ace::NG
