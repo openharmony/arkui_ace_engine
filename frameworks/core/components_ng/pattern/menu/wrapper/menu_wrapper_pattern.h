@@ -380,9 +380,9 @@ public:
        if (onWillAppearCallback_) {
            onWillAppearCallback_();
        }
-       auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
-       CHECK_NULL_VOID(targetNode);
-       targetNode->NotifyMenuLifeCycleEvent(MenuLifeCycleEvent::ON_WILL_APPEAR);
+        auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
+        CHECK_NULL_VOID(targetNode);
+        targetNode->NotifyMenuLifeCycleEvent(MenuLifeCycleEvent::ON_WILL_APPEAR);
    }
 
    void CallMenuOnDidAppearCallback()
@@ -390,9 +390,9 @@ public:
        if (onDidAppearCallback_) {
            onDidAppearCallback_();
        }
-       auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
-       CHECK_NULL_VOID(targetNode);
-       targetNode->NotifyMenuLifeCycleEvent(MenuLifeCycleEvent::ON_DID_APPEAR);
+        auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
+        CHECK_NULL_VOID(targetNode);
+        targetNode->NotifyMenuLifeCycleEvent(MenuLifeCycleEvent::ON_DID_APPEAR);
    }
 
    void CallMenuOnWillDisappearCallback()
@@ -400,9 +400,9 @@ public:
        if (onWillDisappearCallback_) {
            onWillDisappearCallback_();
        }
-       auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
-       CHECK_NULL_VOID(targetNode);
-       targetNode->NotifyMenuLifeCycleEvent(MenuLifeCycleEvent::ON_WILL_DISAPPEAR);
+        auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
+        CHECK_NULL_VOID(targetNode);
+        targetNode->NotifyMenuLifeCycleEvent(MenuLifeCycleEvent::ON_WILL_DISAPPEAR);
    }
 
    void CallMenuOnDidDisappearCallback()
@@ -410,9 +410,9 @@ public:
        if (onDidDisappearCallback_) {
            onDidDisappearCallback_();
        }
-       auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
-       CHECK_NULL_VOID(targetNode);
-       targetNode->NotifyMenuLifeCycleEvent(MenuLifeCycleEvent::ON_DID_DISAPPEAR);
+        auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
+        CHECK_NULL_VOID(targetNode);
+        targetNode->NotifyMenuLifeCycleEvent(MenuLifeCycleEvent::ON_DID_DISAPPEAR);
    }
 
     void CallMenuStateChangeCallback(const std::string& value)
