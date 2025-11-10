@@ -16742,7 +16742,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     } // SslErrorHandlerAccessor
     namespace StateStylesOpsAccessor {
     void OnStateStyleChangeImpl(Ark_NativePointer node,
-                                const Callback_StateStylesChange* stateStyleChange)
+                                const Callback_StateStylesChange* stateStyleChange,
+                                Ark_Int32 allState)
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);

@@ -171,15 +171,33 @@ export function hookStateStyleImpl(
   receiver: ArkCommonMethodComponent,
   value: StateStyles | undefined
 ) {
-    let currentState = receiver.getPeer().getOrCreateStateStyleMutable();
-    if (currentState === undefined) {
-      return;
-    }
     const UI_STATE_NORMAL = 0;
     const UI_STATE_PRESSED = 1;
     const UI_STATE_FOCUSED = 1 << 1;
     const UI_STATE_DISABLED = 1 << 2;
     const UI_STATE_SELECTED = 1 << 3;
+    
+    let curState = 0;
+    if (value?.normal) {
+        curState |= UI_STATE_NORMAL;
+    }
+    if (value?.pressed) {
+        curState |= UI_STATE_PRESSED;
+    }
+    if (value?.focused) {
+        curState |= UI_STATE_FOCUSED;
+    }
+    if (value?.disabled) {
+        curState |= UI_STATE_DISABLED;
+    }
+    if (value?.selected) {
+        curState |= UI_STATE_SELECTED;
+    }
+
+    let currentState = receiver.getPeer().getOrCreateStateStyleMutable(curState);
+    if (currentState === undefined) {
+      return;
+    }
 
     let cm = new CommonMethodModifier();
 

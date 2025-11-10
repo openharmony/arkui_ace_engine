@@ -40114,7 +40114,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     } // SslErrorHandlerAccessor
     namespace StateStylesOpsAccessor {
     void OnStateStyleChangeImpl(Ark_NativePointer node,
-                                const Callback_StateStylesChange* stateStyleChange)
+                                const Callback_StateStylesChange* stateStyleChange,
+                                Ark_Int32 allState)
     {
         if (!needGroupedLog(1))
         {
@@ -40124,6 +40125,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         WriteToString(&out, node);
         out.append(", ");
         WriteToString(&out, stateStyleChange);
+        out.append(", ");
+        WriteToString(&out, allState);
         out.append(") \n");
         appendGroupedLog(1, out);
     }

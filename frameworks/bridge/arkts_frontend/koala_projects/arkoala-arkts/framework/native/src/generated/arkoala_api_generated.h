@@ -27155,7 +27155,8 @@ typedef struct GENERATED_ArkUISslErrorHandlerAccessor {
 
 typedef struct GENERATED_ArkUIStateStylesOpsAccessor {
     void (*onStateStyleChange)(Ark_NativePointer node,
-                               const Callback_StateStylesChange* stateStyleChange);
+                               const Callback_StateStylesChange* stateStyleChange,
+                               Ark_Int32 allState);
 } GENERATED_ArkUIStateStylesOpsAccessor;
 
 typedef struct GENERATED_ArkUIStyledStringAccessor {
