@@ -53,7 +53,7 @@ enum class MenuLifeCycleEvent {
     ON_WILL_DISAPPEAR,
     ON_DISAPPEAR,
     ON_DID_DISAPPEAR,
-}
+};
 
 enum class ContextMenuRegisterType : char {
     NORMAL_TYPE = 0,
