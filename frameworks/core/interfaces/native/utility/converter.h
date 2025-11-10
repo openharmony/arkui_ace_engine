@@ -63,6 +63,7 @@
 #include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_v2/list/list_properties.h"
+#include "core/drawable/drawable_descriptor.h"
 #include "core/gestures/gesture_info.h"
 #include "core/image/image_source_info.h"
 #include "core/interfaces/native/implementation/circle_shape_peer.h"
@@ -398,10 +399,9 @@ namespace Converter {
     }
 
     template<>
-    inline ImageSourceInfo Convert(const Ark_DrawableDescriptor& value)
+    inline DrawableDescriptor* Convert(const Ark_DrawableDescriptor& value)
     {
-        LOGW("Convert [Ark_DrawableDescriptor] to [ImageSourceInfo] is not supported");
-        return ImageSourceInfo();
+        return reinterpret_cast<DrawableDescriptor*>(value);
     }
 
     template<>

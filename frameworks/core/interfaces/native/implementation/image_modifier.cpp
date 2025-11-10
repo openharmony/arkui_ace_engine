@@ -25,12 +25,10 @@
 #include "core/interfaces/native/utility/ace_engine_types.h"
 #include "core/interfaces/native/implementation/drawing_color_filter_peer.h"
 #include "core/interfaces/native/implementation/drawing_lattice_peer.h"
-#include "core/interfaces/native/implementation/drawable_descriptor_peer.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t UNION_ONE = 1;
-constexpr int32_t UNION_TWO = 2;
 // similar as in the js_image.cpp
 constexpr float CEIL_SMOOTHEDGE_VALUE = 1.333f;
 constexpr float FLOOR_SMOOTHEDGE_VALUE = 0.334f;
@@ -103,22 +101,25 @@ void SetImageOptionsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(src);
+    Converter::VisitUnion(*src,
+        [frameNode](const Ark_DrawableDescriptor& value) {
+            auto desc = Converter::Convert<DrawableDescriptor *>(value);
+            ImageModelStatic::SetDrawableDescriptor(frameNode, desc);
+        },
+        [frameNode](const auto& value) {
+            auto info = Converter::OptConvert<ImageSourceInfo>(value);
+            // Note.
+            // This function should skip InitImage invocation if info's optional is empty.
+            CHECK_NULL_VOID(info);
+            if (auto pixelMap = info->GetPixmap(); pixelMap) {
+                ImageModelNG::SetInitialPixelMap(frameNode, pixelMap);
+            } else {
+                ImageModelNG::SetInitialSrc(frameNode, info->GetSrc(), info->GetBundleName(),
+                    info->GetModuleName(), info->GetIsUriPureNumber());
+            }
+        },
+        []() {});
     CHECK_NULL_VOID(imageAIOptions);
-    if (src->selector == UNION_TWO) {
-        auto drawable = src->value2;
-        CHECK_NULL_VOID(drawable);
-        ImageModelStatic::SetDrawableDescriptor(frameNode, drawable->data, drawable->type);
-        DrawableDescriptorPeer::Destroy(drawable);
-        return;
-    }
-    auto info = Converter::OptConvert<ImageSourceInfo>(*src);
-    // Note.
-    // This function should skip InitImage invocation if info's optional is empty.
-    if (info) {
-        ImageModelStatic::SetSrc(frameNode, info);
-    } else {
-        ImageModelNG::ResetImageSrc(frameNode);
-    }
 }
 } // ImageInterfaceModifier
 namespace ImageAttributeModifier {

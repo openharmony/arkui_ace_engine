@@ -366,7 +366,7 @@ struct ArkUIXComponentParams {
 
 struct ArkUIAniImageModifier {
     void (*setPixelMap)(ArkUINodeHandle node, void* pixelmap);
-    void (*setDrawableDescriptor)(ArkUINodeHandle node, void* drawablem, int type);
+    void (*setDrawableDescriptor)(ArkUINodeHandle node, void* drawablem);
     void (*setResizableLattice)(ArkUINodeHandle node, void* lattice);
     void (*setDrawingColorFilter)(ArkUINodeHandle node, void* colorFilter);
     void* (*getPixelMapPeer)(void* pixelMap);
@@ -374,7 +374,6 @@ struct ArkUIAniImageModifier {
     ani_long (*getColorFilter)(ani_long colorFilterPeer);
     void* (*getDrawingColorFilterPeer)(void* colorFilter);
     void* (*getDrawingLatticePeer)(void* latticePeer);
-    void* (*getDrawableDescriptorPeer)(void* drawableDescriptorPeer, int32_t type);
 };
 
 struct ArkUIWaterFlowSectionGap {

@@ -22,6 +22,8 @@
 #include "core/components/image/image_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
+#include "core/components_ng/pattern/image/image_model_static.h"
+#include "core/drawable/drawable_descriptor.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -990,18 +992,20 @@ void SetPixelMap(ArkUINodeHandle node, void* drawableDescriptor)
     ImageModelNG::SetPixelMap(frameNode, drawableDescriptor);
 }
 
-void SetPixelMapArray(ArkUINodeHandle node, void* animatedDrawableDescriptor)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    ImageModelNG::SetPixelMapArray(frameNode, animatedDrawableDescriptor);
-}
-
 void SetResourceSrc(ArkUINodeHandle node, void* resource)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ImageModelNG::SetResource(frameNode, resource);
+}
+
+void SetDrawableDescriptor(ArkUINodeHandle node, void* newDrawableDescriptor)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto drawableDescriptor = reinterpret_cast<DrawableDescriptor*>(newDrawableDescriptor);
+    CHECK_NULL_VOID(drawableDescriptor);
+    ImageModelNG::SetDrawableDescriptor(frameNode, drawableDescriptor);
 }
 
 void SetAltSourceInfo(ArkUINodeHandle node, const ArkUIImageSourceInfo* sourceInfo)
@@ -1455,8 +1459,8 @@ const ArkUIImageModifier* GetImageModifier()
         .getFitOriginalSize = GetFitOriginalSize,
         .getFillColor = GetFillColor,
         .setPixelMap = SetPixelMap,
-        .setPixelMapArray = SetPixelMapArray,
         .setResourceSrc = SetResourceSrc,
+        .setDrawableDescriptor = SetDrawableDescriptor,
         .enableAnalyzer = EnableAnalyzer,
         .resetEnableAnalyzer = ResetEnableAnalyzer,
         .setImagePrivacySensitive = SetImagePrivacySensitve,
@@ -1577,8 +1581,8 @@ const CJUIImageModifier* GetCJUIImageModifier()
         .getFitOriginalSize = GetFitOriginalSize,
         .getFillColor = GetFillColor,
         .setPixelMap = SetPixelMap,
-        .setPixelMapArray = SetPixelMapArray,
         .setResourceSrc = SetResourceSrc,
+        .setDrawableDescriptor = SetDrawableDescriptor,
         .enableAnalyzer = EnableAnalyzer,
         .resetEnableAnalyzer = ResetEnableAnalyzer,
         .setImagePrivacySensitive = SetImagePrivacySensitve,
