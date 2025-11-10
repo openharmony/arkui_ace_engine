@@ -1009,6 +1009,11 @@ void FfiOHOSAceFrameworkViewAbstractSetAspectRatio(double value)
     ViewAbstractModel::GetInstance()->SetAspectRatio(static_cast<float>(value));
 }
 
+void FfiOHOSAceFrameworkViewAbstractResetAspectRatio()
+{
+    ViewAbstractModel::GetInstance()->ResetAspectRatio();
+}
+
 void FfiOHOSAceFrameworkViewAbstractSetDisplayPriority(int32_t value)
 {
     ViewAbstractModel::GetInstance()->SetDisplayIndex(value);

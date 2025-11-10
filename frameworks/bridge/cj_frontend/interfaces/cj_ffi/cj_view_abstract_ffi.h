@@ -604,6 +604,7 @@ CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetAlignRules(CJAlignRuleOption op
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetChainMode(CJChainInfo option);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetEnabled(bool value);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetAspectRatio(double value);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractResetAspectRatio();
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetDisplayPriority(int32_t value);
 
 struct CJMotionPathOptions {
