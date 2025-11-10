@@ -5593,6 +5593,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _TabsController_setTabBarOpacity(ptr: KPointer, opacity: number): void
     @ani.unsafe.Direct
+    native static _TabsExtender_ApplyAttributesFinish(node: KPointer): void
+    @ani.unsafe.Direct
     native static _TapGestureEvent_construct(): KPointer
     @ani.unsafe.Direct
     native static _TapGestureEvent_getFinalizer(): KPointer

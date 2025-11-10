@@ -35438,6 +35438,10 @@ Ark_NativePointer impl_TapGestureEvent_construct() {
         return GetAccessors()->getTapGestureEventAccessor()->construct();
 }
 KOALA_INTEROP_DIRECT_0(TapGestureEvent_construct, Ark_NativePointer)
+void impl_TabsExtender_ApplyAttributesFinish(Ark_NativePointer node) {
+        GetAccessors()->getTabsExtenderAccessor()->ApplyAttributesFinish(node);
+}
+KOALA_INTEROP_DIRECT_V1(TabsExtender_ApplyAttributesFinish, Ark_NativePointer)
 Ark_NativePointer impl_TapGestureEvent_getFinalizer() {
         return GetAccessors()->getTapGestureEventAccessor()->getFinalizer();
 }

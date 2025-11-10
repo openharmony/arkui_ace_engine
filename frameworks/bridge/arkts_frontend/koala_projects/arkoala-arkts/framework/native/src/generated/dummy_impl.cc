@@ -40969,6 +40969,19 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     } // TabsControllerAccessor
+    namespace TabsExtenderAccessor {
+    void ApplyAttributesFinishImpl(Ark_NativePointer node)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("ApplyAttributesFinish(");
+        WriteToString(&out, node);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    } // TabsExtenderAccessor
     namespace TapGestureEventAccessor {
     void DestroyPeerImpl(Ark_TapGestureEvent peer)
     {
@@ -47414,6 +47427,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct TabsControllerPeer {
         virtual ~TabsControllerPeer() = default;
     };
+    const GENERATED_ArkUITabsExtenderAccessor* GetTabsExtenderAccessor()
+    {
+        static const GENERATED_ArkUITabsExtenderAccessor TabsExtenderAccessorImpl {
+            TabsExtenderAccessor::ApplyAttributesFinishImpl,
+        };
+        return &TabsExtenderAccessorImpl;
+    }
+
     const GENERATED_ArkUITapGestureEventAccessor* GetTapGestureEventAccessor()
     {
         static const GENERATED_ArkUITapGestureEventAccessor TapGestureEventAccessorImpl {
@@ -48198,6 +48219,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetTabBarSymbolAccessor,
             GetTabContentTransitionProxyAccessor,
             GetTabsControllerAccessor,
+            GetTabsExtenderAccessor,
             GetTapGestureEventAccessor,
             GetTapRecognizerAccessor,
             GetTextAreaControllerAccessor,

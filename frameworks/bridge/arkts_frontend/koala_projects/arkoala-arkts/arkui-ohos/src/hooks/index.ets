@@ -54,9 +54,10 @@ import { NavPathStack, NavigationModuleInfo, NavPathInfo, NavigationOptions, Pop
 import { PathStackUtils } from "../base/ArkNavPathStack"
 import { PageMapBuilder } from "../component/builder";
 import { NavigationOpsHandWritten } from "./NavigationOpsHandWritten";
-import { ArkImageComponent, ResourceStr, ImageContent, ImageAIOptions } from "#generated";
+import { ArkImageComponent, ResourceStr, ImageContent, ImageAIOptions, ArkTabsComponent  } from "#generated";
 import { ArkWaterFlowComponent, WaterFlowOptions } from "#generated";
 import { ImageOpsHandWritten } from "./ImageOpsHandWritten";
+import { TabsOpsHandWritten } from "./TabsOpsHandWritten";
 import { WaterFlowHandWritten } from "./WaterFlowHandWritten";
 import { ArkCanvasComponent, CanvasRenderingContext2D, DrawingRenderingContext } from "#generated";
 import { ArkVideoComponent, VideoOptions } from "#generated";
@@ -287,6 +288,10 @@ export { NavDestinationBuilder, NavigationRouterMap } from "./NavigationOpsHandW
 
 export function hookImageSetImageOptions(component: ArkImageComponent, src: image.PixelMap | ResourceStr | DrawableDescriptor | ImageContent, imageAIOptions?: ImageAIOptions): void {
     ImageOpsHandWritten.hookImageSetImageOptionsImpl(component, src, imageAIOptions);
+}
+
+export function hookTabsApplyAttributesFinish(node: ArkTabsComponent): void  {
+    TabsOpsHandWritten.hookTabsApplyAttributesFinish(node);
 }
 
 export function hookPushPathMethod(pathStack: NavPathStack, info: NavPathInfo, animated?: boolean | NavigationOptions | undefined): void {
