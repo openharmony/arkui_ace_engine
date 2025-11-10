@@ -19,6 +19,7 @@
 #include "core/components_ng/base/node_render_status_monitor.h"
 #include "core/components_ng/event/event_constants.h"
 #include "core/components_ng/layout/layout_algorithm.h"
+#include "core/components_ng/property/menu_property.h"
 #include "core/components_ng/render/paint_wrapper.h"
 #include "core/pipeline/base/element_register.h"
 
