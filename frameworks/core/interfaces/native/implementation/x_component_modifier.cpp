@@ -112,6 +112,7 @@ void SetOnLoadImpl(Ark_NativePointer node,
     }
     auto onLoad =
         [arkCallback = CallbackHelper(*optValue)](const std::string& xcomponentId) {
+            CHECK_NULL_VOID(CallbackHelper<VoidCallback>::GetVMContext());
             arkCallback.InvokeSync();
             TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] onLoad triggers", xcomponentId.c_str());
     };
@@ -131,6 +132,7 @@ void SetOnDestroyImpl(Ark_NativePointer node,
     }
     auto onDestroy =
         [arkCallback = CallbackHelper(*optValue)](const std::string&) {
+            CHECK_NULL_VOID(CallbackHelper<VoidCallback>::GetVMContext());
             arkCallback.InvokeSync();
     };
     XComponentModelNG::SetOnDestroy(frameNode, std::move(onDestroy));
