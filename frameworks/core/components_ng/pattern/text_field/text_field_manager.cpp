@@ -636,4 +636,14 @@ void TextFieldManagerNG::RemoveFillContentMap(int32_t id)
         textFieldFillContentMaps_.erase(fillContentMapIter);
     }
 }
+
+void TextFieldManagerNG::SetIsAskCeliaSupported(bool isAskCeliaSupported)
+{
+    isAskCeliaSupported_ = isAskCeliaSupported;
+}
+
+std::optional<bool> TextFieldManagerNG::IsAskCeliaSupported()
+{
+    return isAskCeliaSupported_;
+}
 } // namespace OHOS::Ace::NG

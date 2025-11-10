@@ -635,7 +635,7 @@ public:
     {
         isAskCeliaEnabled_ = isAskCeliaEnabled && IsNeedAskCelia();
     }
-    
+
     bool IsAskCeliaEnabled() const
     {
         return isAskCeliaEnabled_;
@@ -650,6 +650,8 @@ public:
     {
         return isShowAskCeliaInRightClick_;
     }
+
+    bool IsAskCeliaSupported();
 
     void HandleOnCopySpanString();
     virtual void HandleOnSelectAll();

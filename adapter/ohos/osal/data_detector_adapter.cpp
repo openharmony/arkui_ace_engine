@@ -659,4 +659,10 @@ void DataDetectorAdapter::MarkDirtyNode() const
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->OnPropertyChangeMeasure();
 }
+
+bool DataDetectorAdapter::IsAskCeliaSupported()
+{
+    return DataDetectorMgr::GetInstance().IsAskCeliaSupported();
+}
+
 } // namespace OHOS::Ace
