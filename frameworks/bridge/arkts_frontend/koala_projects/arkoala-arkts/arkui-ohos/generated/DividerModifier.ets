@@ -126,6 +126,7 @@ export class DividerModifier extends CommonMethodModifier implements DividerAttr
     }
     mergeModifier(modifier: DividerModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._vertical_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._vertical_0_flag) {

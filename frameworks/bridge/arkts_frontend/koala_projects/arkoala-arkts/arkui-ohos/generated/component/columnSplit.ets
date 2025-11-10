@@ -31,6 +31,7 @@ import { Dimension } from "./units"
 import { Resource } from "global.resource"
 import { ColumnSplitModifier } from "./../ColumnSplitModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ModifierStateManager } from '../CommonModifier'
 import { Resource_serializer } from "./../framework/resource"
 export class ArkColumnSplitPeer extends ArkCommonMethodPeer {
     attributeSet?: ColumnSplitModifier;
@@ -140,7 +141,9 @@ export class ArkColumnSplitComponent extends ArkCommonMethodComponent implements
         return this
     }
     public attributeModifier(value: AttributeModifier<ColumnSplitAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookColumnSplitAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookColumnSplitAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

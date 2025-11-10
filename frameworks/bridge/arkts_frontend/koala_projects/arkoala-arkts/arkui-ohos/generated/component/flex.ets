@@ -31,6 +31,7 @@ import { FlexDirection, FlexWrap, FlexAlign, ItemAlign } from "./enums"
 import { LengthMetrics } from "arkui.Graphics"
 import { FlexModifier } from "./../FlexModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ModifierStateManager } from '../CommonModifier'
 import { LengthMetrics_serializer } from "./../Graphics"
 export class ArkFlexPeer extends ArkCommonMethodPeer {
     attributeSet?: FlexModifier;
@@ -104,7 +105,9 @@ export class ArkFlexComponent extends ArkCommonMethodComponent implements FlexAt
         return this
     }
     public attributeModifier(value: AttributeModifier<FlexAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookFlexAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookFlexAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

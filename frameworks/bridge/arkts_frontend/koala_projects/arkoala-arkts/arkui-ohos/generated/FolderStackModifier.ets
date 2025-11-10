@@ -144,6 +144,7 @@ export class FolderStackModifier extends CommonMethodModifier implements FolderS
     }
     mergeModifier(modifier: FolderStackModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._alignContent_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._alignContent_0_flag) {

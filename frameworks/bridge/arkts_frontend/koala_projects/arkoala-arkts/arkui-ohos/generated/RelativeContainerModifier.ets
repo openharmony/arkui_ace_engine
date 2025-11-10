@@ -83,6 +83,7 @@ export class RelativeContainerModifier extends CommonMethodModifier implements R
     }
     mergeModifier(modifier: RelativeContainerModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._guideLine_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._guideLine_0_flag) {

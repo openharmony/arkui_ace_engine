@@ -66,6 +66,7 @@ export class BlankModifier extends CommonMethodModifier implements BlankAttribut
     }
     mergeModifier(modifier: BlankModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state
         if (modifier._color_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._color_0_flag) {

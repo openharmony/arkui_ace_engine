@@ -43,6 +43,7 @@ export class FlexModifier extends CommonMethodModifier implements FlexAttribute,
     }
     mergeModifier(modifier: FlexModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
     }
     public attributeModifier(value: AttributeModifier<FlexAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")

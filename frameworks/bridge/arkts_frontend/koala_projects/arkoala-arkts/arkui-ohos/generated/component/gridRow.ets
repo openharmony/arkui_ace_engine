@@ -32,6 +32,7 @@ import { Length } from "./units"
 import { Resource } from "global.resource"
 import { GridRowModifier } from "./../GridRowModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ModifierStateManager } from '../CommonModifier';
 import { Resource_serializer } from "./../framework/resource"
 export class ArkGridRowPeer extends ArkCommonMethodPeer {
     attributeSet?: GridRowModifier;
@@ -189,7 +190,9 @@ export class ArkGridRowComponent extends ArkCommonMethodComponent implements Gri
         return this
     }
     public attributeModifier(value: AttributeModifier<GridRowAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookGridRowAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookGridRowAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

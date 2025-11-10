@@ -29,6 +29,7 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { RowSplitModifier } from "./../RowSplitModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ModifierStateManager } from '../CommonModifier'
 export class ArkRowSplitPeer extends ArkCommonMethodPeer {
     attributeSet?: RowSplitModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -106,7 +107,9 @@ export class ArkRowSplitComponent extends ArkCommonMethodComponent implements Ro
         return this
     }
     public attributeModifier(value: AttributeModifier<RowSplitAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookRowSplitAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookRowSplitAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

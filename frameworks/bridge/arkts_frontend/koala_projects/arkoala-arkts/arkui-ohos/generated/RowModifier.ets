@@ -104,6 +104,7 @@ export class RowModifier extends CommonMethodModifier implements RowAttribute,At
     }
     mergeModifier(modifier: RowModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._alignItems_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._alignItems_0_flag) {

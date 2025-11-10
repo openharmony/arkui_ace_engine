@@ -30,6 +30,7 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { RowModifier } from "./../RowModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ModifierStateManager } from '../CommonModifier'
 export class ArkRowPeer extends ArkCommonMethodPeer {
     attributeSet?: RowModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -185,7 +186,9 @@ export class ArkRowComponent extends ArkCommonMethodComponent implements RowAttr
         return this
     }
     public attributeModifier(value: AttributeModifier<RowAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookRowAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookRowAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

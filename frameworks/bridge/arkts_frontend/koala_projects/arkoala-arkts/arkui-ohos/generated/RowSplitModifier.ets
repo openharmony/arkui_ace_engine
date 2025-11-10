@@ -63,6 +63,7 @@ export class RowSplitModifier extends CommonMethodModifier implements RowSplitAt
     }
     mergeModifier(modifier: RowSplitModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._resizeable_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._resizeable_0_flag) {

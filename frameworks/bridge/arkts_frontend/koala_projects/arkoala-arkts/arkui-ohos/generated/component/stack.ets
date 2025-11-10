@@ -30,6 +30,7 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { StackModifier } from "./../StackModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ModifierStateManager } from '../CommonModifier'
 export class ArkStackPeer extends ArkCommonMethodPeer {
     attributeSet?: StackModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -120,7 +121,9 @@ export class ArkStackComponent extends ArkCommonMethodComponent implements Stack
         return this
     }
     public attributeModifier(value: AttributeModifier<StackAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookStackAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookStackAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

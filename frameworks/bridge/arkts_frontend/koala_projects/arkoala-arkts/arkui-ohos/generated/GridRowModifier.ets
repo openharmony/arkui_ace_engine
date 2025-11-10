@@ -84,6 +84,7 @@ export class GridRowModifier extends CommonMethodModifier implements GridRowAttr
     }
     mergeModifier(modifier: GridRowModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._onBreakpointChange_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._onBreakpointChange_0_flag) {
