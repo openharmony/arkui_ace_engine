@@ -7990,7 +7990,7 @@ typedef struct Opt_TextOptions {
 } Opt_TextOptions;
 typedef struct Ark_TextOverflowOptions {
     /* kind: Interface */
-    Ark_TextOverflow overflow;
+    Opt_TextOverflow overflow;
 } Ark_TextOverflowOptions;
 typedef struct Opt_TextOverflowOptions {
     Ark_Tag tag;
@@ -13513,8 +13513,8 @@ typedef struct Opt_EdgeStyles {
 } Opt_EdgeStyles;
 typedef struct Ark_EditMenuOptions {
     /* kind: Interface */
-    OnCreateMenuCallback onCreateMenu;
-    OnMenuItemClickCallback onMenuItemClick;
+    Opt_OnCreateMenuCallback onCreateMenu;
+    Opt_OnMenuItemClickCallback onMenuItemClick;
 } Ark_EditMenuOptions;
 typedef struct Opt_EditMenuOptions {
     Ark_Tag tag;
@@ -17071,7 +17071,7 @@ typedef struct Opt_DecorationStyle {
 } Opt_DecorationStyle;
 typedef struct Ark_DecorationStyleInterface {
     /* kind: Interface */
-    Ark_TextDecorationType type;
+    Opt_TextDecorationType type;
     Opt_ResourceColor color;
     Opt_TextDecorationStyle style;
 } Ark_DecorationStyleInterface;
