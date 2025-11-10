@@ -60,7 +60,7 @@ ani_env* AniAsyncEvent::GetEnv()
 bool AniUtils::GetIsUndefinedObject(ani_env *env, ani_ref objectRef)
 {
     ani_boolean isUndefined;
-    if (ANI_OK != env->Reference_IsUndefined(objectRef, isUndefined)) {
+    if (ANI_OK != env->Reference_IsUndefined(objectRef, &isUndefined)) {
         return true;
     }
     return (bool)isUndefined;
@@ -92,7 +92,7 @@ std::string AniUtils::AniStringToStdString(ani_env *env, ani_string ani_str)
     std::vector<char> buffer(strSize + 1);
     char* utf8Buffer = buffer.data();
     ani_size bytesWritten = 0;
-    env->String_GetUTF8(ani_str, utf8Buffer, strSize + 1, &bytesWrittern);
+    env->String_GetUTF8(ani_str, utf8Buffer, strSize + 1, &bytesWritten);
     utf8Buffer[bytesWritten] = '\0';
     std::string content = std::string(utf8Buffer);
     return content;
