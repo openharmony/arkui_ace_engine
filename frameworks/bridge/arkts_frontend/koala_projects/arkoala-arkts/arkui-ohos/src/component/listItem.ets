@@ -29,10 +29,11 @@ export function ListItemImpl(
     const receiver = remember<ArkListItemComponent>((): ArkListItemComponent => {
         return new ArkListItemComponent()
     })
-    NodeAttach<ArkListItemPeer>((): ArkListItemPeer => ArkListItemPeer.create(receiver), (peer: ArkListItemPeer): void => {
-        receiver.setPeer(peer)
-        style?.(receiver)
-        receiver.setPeer(undefined)
-        content_?.()
+    NodeAttach<ArkListItemPeer>((): ArkListItemPeer =>
+        ArkListItemPeer.create(receiver), (peer: ArkListItemPeer): void => {
+            receiver.setPeer(peer)
+            style?.(receiver)
+            receiver.setPeer(undefined)
+            content_?.()
     })
 }
