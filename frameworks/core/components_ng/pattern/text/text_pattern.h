@@ -160,7 +160,6 @@ public:
     }
 
     void OnModifyDone() override;
-    void MultiThreadDelayedExecution();
 
     void OnWindowHide() override;
 
@@ -361,7 +360,6 @@ public:
     virtual void CloseSelectOverlay() override;
     void CloseSelectOverlay(bool animation);
     void CloseSelectOverlayMultiThread(bool animation);
-    void CloseSelectOverlayMultiThreadAction(bool animation);
     void CreateHandles() override;
     bool BetweenSelectedPosition(const Offset& globalOffset) override;
 
@@ -496,7 +494,6 @@ public:
     OffsetF GetDragUpperLeftCoordinates() override;
     void SetTextSelection(int32_t selectionStart, int32_t selectionEnd);
     void SetTextSelectionMultiThread(int32_t selectionStart, int32_t selectionEnd);
-    void SetTextSelectionMultiThreadAction(int32_t selectionStart, int32_t selectionEnd);
 
     // Deprecated: Use the TextSelectOverlay::OnHandleMove() instead.
     // It is currently used by RichEditorPattern.
@@ -1294,15 +1291,6 @@ private:
     bool isRegisteredAreaCallback_ = false;
 
     // ----- multi thread state variables -----
-    bool setTextDetectEnableMultiThread_ = false;
-    bool setExternalSpanItemMultiThread_ = false;
-    bool closeSelectOverlayMultiThread_ = false;
-    bool closeSelectOverlayMultiThreadValue_ = false;
-    bool setTextSelectionMultiThread_ = true;
-    int32_t setTextSelectionMultiThreadValue0_ = -1;
-    int32_t setTextSelectionMultiThreadValue1_ = -1;
-    bool textDetectConfigMultiThread_ = false;
-    TextDetectConfig textDetectConfigMultiThreadValue_;
     // ----- multi thread state variables end -----
 };
 } // namespace OHOS::Ace::NG

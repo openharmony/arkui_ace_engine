@@ -209,9 +209,7 @@ public:
     void UpdateFontSizeResource(const Dimension& value);
     void UpdateBorderResource() override;
     void ProcessTextFieldDefaultStyleAndBehaviors();
-    void ProcessTextFieldDefaultStyleAndBehaviorsMultiThread();
     void ProcessDividerDefaultStyleAndBehaviors();
-    void ProcessDividerDefaultStyleAndBehaviorsMultiThread();
 
 private:
     void OnModifyDone() override;
@@ -317,9 +315,6 @@ private:
 
     bool IsSearchAttached();
     RefPtr<SearchTheme> GetTheme() const;
-    
-    void OnAttachToMainTree() override;
-    void OnAttachToMainTreeMultiThread();
 
     uint32_t GetMaxLength() const;
     std::string SearchTypeToString() const;
@@ -376,8 +371,6 @@ private:
     bool cancelIconUsingThemeColor_ = false;
 
     // ----- multi thread state variables -----
-    bool processTextFieldDefaultStyleAndBehaviorsMultiThread_ = false;
-    bool processDividerDefaultStyleAndBehaviorsMultiThread_ = false;
     // ----- multi thread state variables end -----
 };
 

@@ -3552,11 +3552,4 @@ void SearchPattern::InitMargin(const RefPtr<SearchLayoutProperty>& property)
     }
     property->UpdateMargin(margin);
 }
-
-void SearchPattern::OnAttachToMainTree()
-{
-    auto host = GetHost();
-    // call OnAttachToMainTreeMultiThread() by multi thread Pattern::OnAttachToMainTree()
-    THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
-}
 } // namespace OHOS::Ace::NG
