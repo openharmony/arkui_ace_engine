@@ -112,12 +112,11 @@ void JSContainerPicker::SetSelectionIndicator(const JSCallbackInfo& info)
 void JSContainerPicker::SetDivider(const JSRef<JSObject>& paramObj, NG::PickerIndicatorStyle& indicatorStyle)
 {
     auto pickerTheme = GetTheme<NG::ContainerPickerTheme>();
-    if (pickerTheme) {
-        indicatorStyle.strokeWidth = pickerTheme->GetStrokeWidth();
-        indicatorStyle.dividerColor = pickerTheme->GetIndicatorDividerColor();
-        indicatorStyle.startMargin = Dimension();
-        indicatorStyle.endMargin = Dimension();
-    }
+    CHECK_NULL_VOID(pickerTheme);
+    indicatorStyle.strokeWidth = pickerTheme->GetStrokeWidth();
+    indicatorStyle.dividerColor = pickerTheme->GetIndicatorDividerColor();
+    indicatorStyle.startMargin = Dimension();
+    indicatorStyle.endMargin = Dimension();
     UnRegisterResource("containerPicker.strokeWidth");
     UnRegisterResource("containerPicker.dividerColor");
     UnRegisterResource("containerPicker.startMargin");
@@ -172,10 +171,9 @@ void JSContainerPicker::SetDivider(const JSRef<JSObject>& paramObj, NG::PickerIn
 void JSContainerPicker::SetSelectedBackground(const JSRef<JSObject>& paramObj, NG::PickerIndicatorStyle& indicatorStyle)
 {
     auto pickerTheme = GetTheme<NG::ContainerPickerTheme>();
-    if (pickerTheme) {
-        indicatorStyle.backgroundColor = pickerTheme->GetIndicatorBackgroundColor();
-        indicatorStyle.borderRadius = NG::BorderRadiusProperty(pickerTheme->GetIndicatorBackgroundRadius());
-    }
+    CHECK_NULL_VOID(pickerTheme);
+    indicatorStyle.backgroundColor = pickerTheme->GetIndicatorBackgroundColor();
+    indicatorStyle.borderRadius = NG::BorderRadiusProperty(pickerTheme->GetIndicatorBackgroundRadius());
     UnRegisterResource("containerPicker.backgroundColor");
     UnRegisterResource("containerPicker.borderRadius");
 

@@ -316,7 +316,8 @@ HWTEST_F(ContainerPickerPaintMethodTest, PaintSelectionIndicatorDividerTest002, 
      */
     float itemHeightHalf = PICKER_ITEM_HEIGHT.ConvertToPx() / HALF;
     layoutProperty->UpdateIndicatorDividerWidth(Dimension(itemHeightHalf));
-    EXPECT_CALL(rsCanvas, DrawLine(_, _)).Times(AnyNumber());
+    EXPECT_CALL(rsCanvas, DrawRect(_)).Times(AnyNumber());
+    EXPECT_CALL(rsCanvas, DetachBrush()).Times(AnyNumber());
     paintMethod_->PaintSelectionIndicatorDivider(AceType::RawPtr(paintWrapper), rsCanvas);
 
     /**
@@ -326,6 +327,39 @@ HWTEST_F(ContainerPickerPaintMethodTest, PaintSelectionIndicatorDividerTest002, 
     float excessiveWidth = itemHeightHalf + 1.0f;
     layoutProperty->UpdateIndicatorDividerWidth(Dimension(excessiveWidth));
     paintMethod_->PaintSelectionIndicatorDivider(AceType::RawPtr(paintWrapper), rsCanvas);
+}
+
+/**
+ * @tc.name: PaintLineWithNormalParametersTest
+ * @tc.desc: Test ContainerPickerPaintMethod PaintLine with normal parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPaintMethodTest, PaintLineWithNormalParametersTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create mock canvas and set up PaintLine parameters
+     */
+    Testing::MockCanvas rsCanvas;
+    OffsetF offset(10.0f, 20.0f);
+    PickerDividerPaintInfo dividerInfo;
+    dividerInfo.dividerLength = 100.0f;
+    dividerInfo.strokeWidth = 2.0f;
+    dividerInfo.dividerColor = Color::RED;
+
+    /**
+     * @tc.steps: step2. Mock canvas operations
+     */
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, Restore()).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Save()).Times(1);
+    EXPECT_CALL(rsCanvas, DrawRect(_)).Times(1);
+
+    /**
+     * @tc.steps: step3. Call PaintLine method
+     * @tc.expected: step3. Canvas methods should be called with correct parameters
+     */
+    paintMethod_->PaintLine(offset, dividerInfo, rsCanvas);
 }
 
 } // namespace OHOS::Ace::NG
