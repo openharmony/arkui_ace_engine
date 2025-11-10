@@ -110,7 +110,6 @@ ohos_shared_library("movingphotoview_platform") {
     "$ace_root/frameworks/core/components_ng/base/inspector_filter.cpp",
     "${component_ext_path}/movingphoto/movingphoto_layout_algorithm.cpp",
     "${component_ext_path}/movingphoto/movingphoto_model_ng.cpp",
-    "${component_ext_path}/movingphoto/movingphoto_napi.cpp",
     "${component_ext_path}/movingphoto/movingphoto_node.cpp",
     "${component_ext_path}/movingphoto/movingphoto_pattern.cpp",
   ]
