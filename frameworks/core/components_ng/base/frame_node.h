@@ -1479,7 +1479,7 @@ public:
     void MountToParent(const RefPtr<UINode>& parent, int32_t slot = DEFAULT_NODE_SLOT, bool silently = false,
         bool addDefaultTransition = false, bool addModalUiextension = false) override;
     void MergeAttributesIntoJson(std::shared_ptr<JsonValue>& json, const std::shared_ptr<JsonValue>& child);
-    void NotifyMenuLifeCycleEvent(NG::MenuLifeCycleEvent menuLifeCycleEvent);
+    void NotifyMenuLifeCycleEvent(const NG::MenuLifeCycleEvent& menuLifeCycleEvent);
 
 protected:
     void DumpInfo() override;

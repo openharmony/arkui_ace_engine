@@ -7651,7 +7651,7 @@ void FrameNode::UpdateIgnoreCount(int inc)
     }
 }
 
-void FrameNode::NotifyMenuLifeCycleEvent(NG::MenuLifeCycleEvent menuLifeCycleEvent)
+void FrameNode::NotifyMenuLifeCycleEvent(const NG::MenuLifeCycleEvent& menuLifeCycleEvent)
 {
     CHECK_NULL_VOID(pattern_);
     pattern_->OnMenuLifeCycleChanged(menuLifeCycleEvent);
