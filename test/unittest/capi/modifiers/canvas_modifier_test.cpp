@@ -71,15 +71,16 @@ HWTEST_F(CanvasModifierTest, setOnReadyTest, TestSize.Level1)
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     const int32_t contextId = 123;
-    void (*checkCallback)(const Ark_Int32) = [](const Ark_Int32 resourceId) {
-            checkEvent = {
-                .nodeId = resourceId,
-            };
+    auto checkCallback = [](Ark_VMContext context, const Ark_Int32 resourceId) {
+        checkEvent = {
+            .nodeId = resourceId,
         };
+    };
     auto func = Converter::ArkValue<VoidCallback>(checkCallback, contextId);
     auto optFunk = Converter::ArkValue<Opt_VoidCallback>(func);
-    EXPECT_FALSE(checkEvent.has_value());
     modifier_->setOnReady(node_, &optFunk);
+
+    EXPECT_FALSE(checkEvent.has_value());
     eventHub->FireReadyEvent();
     EXPECT_TRUE(checkEvent.has_value());
     EXPECT_EQ(checkEvent->nodeId, contextId);
