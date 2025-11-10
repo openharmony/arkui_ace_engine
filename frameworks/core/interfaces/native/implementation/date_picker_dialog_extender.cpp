@@ -174,6 +174,7 @@ DatePickerSettingData BuildSettingData(const Ark_DatePickerDialogOptions& option
     if (pickerMode) {
         settingData.mode = *pickerMode;
     }
+    settingData.isEnableHapticFeedback = true;
     auto enableHapticFeedback = Converter::OptConvert<bool>(options.enableHapticFeedback);
     if (enableHapticFeedback) {
         settingData.isEnableHapticFeedback = enableHapticFeedback.value();
