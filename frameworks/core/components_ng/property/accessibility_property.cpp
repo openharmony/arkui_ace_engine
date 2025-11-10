@@ -358,11 +358,8 @@ NG::RectF AccessibilityProperty::UpdateHoverTestRect(const RefPtr<FrameNode>& no
     CHECK_NULL_RETURN(accessibilityProperty, origRect);
     auto renderContext = node->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, origRect);
-    if (IsAccessibilityVirtualNode) {
-        origRect = node->GetTransformRectRelativeToWindow();
-    } else {
-        origRect = renderContext->GetPaintRectWithoutTransform();
-    }
+    origRect = renderContext->GetPaintRectWithoutTransform();
+    CHECK_EQUAL_RETURN(IsAccessibilityVirtualNode, true, origRect); // virtual node not use response region
     if (accessibilityProperty->IsMatchAccessibilityResponseRegion(IsAccessibilityVirtualNode)) {
         auto responseRegionList = node->GetResponseRegionList(origRect, static_cast<int32_t>(SourceType::TOUCH));
         CHECK_EQUAL_RETURN(responseRegionList.size(), 0, origRect);

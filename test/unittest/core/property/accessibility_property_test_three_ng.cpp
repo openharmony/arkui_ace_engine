@@ -382,7 +382,7 @@ HWTEST_F(AccessibilityPropertyTestThreeNg, AccessibilityPropertyTestThree014, Te
     auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
     node->renderContext_ = mockRenderContext;
     RectF rect1(100, 100, 100, 100);
-    mockRenderContext->SetPaintRectWithTransform(rect1);
+    mockRenderContext->UpdatePaintRect(rect1);
 
     PointF selfPoint = parentPoint;
     mockRenderContext->GetPointWithRevert(selfPoint);
@@ -510,5 +510,39 @@ HWTEST_F(AccessibilityPropertyTestThreeNg, AccessibilityPropertyTestThree020, Te
     std::string accessibilityLevel = "auto";
     accessibilityProperty.SetAccessibilityLevel(accessibilityLevel);
     EXPECT_EQ(accessibilityProperty.accessibilityLevel_.value_or(""), accessibilityLevel);
+}
+
+/**
+ * @tc.name: AccessibilityPropertyTestThree021
+ * @tc.desc: HoverTestRecursive
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestThreeNg, AccessibilityPropertyTestThree021, TestSize.Level1)
+{
+    AccessibilityProperty accessibilityProperty;
+    NG::PointF parentPoint(150, 160);
+    auto node = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<ButtonPattern>(), false);
+    AccessibilityHoverTestPath path;
+    auto debugInfo = std::make_unique<AccessibilityProperty::HoverTestDebugTraceInfo>();
+    bool ancestorGroupFlag = false;
+    node->SetAccessibilityNodeVirtual();
+    
+    auto eventHub = node->GetEventHub<EventHub>();
+    eventHub->enabled_ = false;
+
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    node->renderContext_ = mockRenderContext;
+    RectF rect(100, 100, 100, 100);
+    mockRenderContext->UpdatePaintRect(rect);
+
+    PointF selfPoint = parentPoint;
+    mockRenderContext->GetPointWithRevert(selfPoint);
+
+    auto property = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    property->accessibilityLevel_ = AccessibilityProperty::Level::YES_STR;
+
+    auto result = accessibilityProperty.HoverTestRecursive(parentPoint, node, path, debugInfo, ancestorGroupFlag);
+    EXPECT_TRUE(result);
 }
 } // namespace OHOS::Ace::NG
