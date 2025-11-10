@@ -201,15 +201,14 @@ void WindowPattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto state = session_->GetSessionState();
-    auto key = Rosen::WSSnapshotHelper::GetInstance()->GetScreenStatus();
+    auto key = session_->GetScreenSnapshotStatus();
     TAG_LOGW(AceLogTag::ACE_WINDOW_SCENE, "OnAttachToFrameNode id: %{public}d, node id: %{public}d, "
         "name: %{public}s, state: %{public}u, in recents: %{public}d", session_->GetPersistentId(), host->GetId(),
         session_->GetSessionInfo().bundleName_.c_str(), state, session_->GetShowRecent());
     if (state == Rosen::SessionState::STATE_DISCONNECT) {
         CHECK_EQUAL_VOID(HasStartingPage(), false);
         if (session_->GetShowRecent() && session_->GetScenePersistence() &&
-            (session_->GetScenePersistence()->IsSnapshotExisted(key) ||
-            session_->GetScenePersistence()->IsSavingSnapshot(key) ||
+            (session_->GetScenePersistence()->IsSavingSnapshot(key) ||
             session_->GetScenePersistence()->HasSnapshot() || session_->HasSnapshot())) {
             CreateSnapshotWindow();
             AddChild(host, snapshotWindow_, snapshotWindowName_);
@@ -662,18 +661,18 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
         ImageSourceInfo sourceInfo;
         auto scenePersistence = session_->GetScenePersistence();
         CHECK_NULL_VOID(scenePersistence);
-        auto key = Rosen::WSSnapshotHelper::GetInstance()->GetScreenStatus();
+        auto key = session_->GetScreenSnapshotStatus();
         auto freeMultiWindow = session_->freeMultiWindow_.load();
         auto isSavingSnapshot = scenePersistence->IsSavingSnapshot(key, freeMultiWindow);
         auto hasSnapshot = scenePersistence->HasSnapshot(key, freeMultiWindow);
         TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
-            "id: %{public}d isSavingSnapshot: %{public}d, hasSnapshot: %{public}d",
-            persistentId, isSavingSnapshot, hasSnapshot);
+            "id: %{public}d isSavingSnapshot: %{public}d, hasSnapshot: %{public}d, key: %{public}d",
+            persistentId, isSavingSnapshot, hasSnapshot, key);
         const bool matchSnapshot = isSavingSnapshot || hasSnapshot;
         ImageRotateOrientation rotate;
         auto lastRotation = session_->GetLastOrientation();
         auto windowRotation = session_->GetWindowSnapshotOrientation();
-        bool needRotate = (!freeMultiWindow) && (!matchSnapshot);
+        bool needRotate = !freeMultiWindow;
         if (isSavingSnapshot) {
             auto snapshotPixelMap = session_->GetSnapshotPixelMap();
             CHECK_NULL_VOID(snapshotPixelMap);
