@@ -275,7 +275,7 @@ void UIObserverListener::OnDensityChange(double density)
     napi_close_handle_scope(env_, scope);
 }
 
-void UIObserverListener::OnWinSizeLayoutBreakpointChange(const NG::WindowSizeBreakpoint info)
+void UIObserverListener::OnWinSizeLayoutBreakpointChange(const WindowSizeBreakpoint info)
 {
     if (!env_ || !callback_) {
         TAG_LOGW(AceLogTag::ACE_OBSERVER,

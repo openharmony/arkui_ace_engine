@@ -1972,6 +1972,7 @@ frameworks/core/common/watch_dog_mingw.cpp @arkui_framework_xnode
 frameworks/core/common/window_animation_config.h @arkui_framework_xnode
 frameworks/core/common/window.cpp @arkui_framework_xnode
 frameworks/core/common/window.h @arkui_framework_xnode
+frameworks/core/common/window_size_breakpoint.h @arkui_framework_xnode
 frameworks/core/common/window_ng/ @arkui_framework_xnode
 frameworks/core/common/window/ @arkui_framework_xnode
 frameworks/core/common/xcollie/ @arkui_framework_xnode

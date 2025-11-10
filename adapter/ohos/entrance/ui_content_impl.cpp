@@ -3657,24 +3657,32 @@ void KeyboardAvoid(OHOS::Rosen::WindowSizeChangeReason reason, int32_t instanceI
 
 void UIContentImpl::ProcessWindowSizeLayoutBreakPointChange()
 {
-    WidthLayoutBreakPoint layoutWidthBreakpoints = SystemProperties::GetWidthLayoutBreakpoints();
-    HeightLayoutBreakPoint layoutHeightBreakpoints = SystemProperties::GetHeightLayoutBreakpoints();
-    double density = PipelineBase::GetCurrentDensity();
     auto container = Platform::AceContainer::GetContainer(GetInstanceId());
     CHECK_NULL_VOID(container);
-    auto pipelineContext = container->GetPipelineContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto window = pipelineContext->GetWindow();
-    CHECK_NULL_VOID(window);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
 
-    NG::WindowSizeBreakpoint breakpoint;
-    breakpoint.widthBreakpoint = window->GetWidthBreakpoint(layoutWidthBreakpoints);
-    breakpoint.heightBreakpoint = window->GetHeightBreakpoint(layoutHeightBreakpoints);
+    auto uiTaskRunner = SingleTaskExecutor::Make(taskExecutor, TaskExecutor::TaskType::UI);
 
-    if (breakpoint.widthBreakpoint != lastBreakpoint_.widthBreakpoint ||
-        breakpoint.heightBreakpoint != lastBreakpoint_.heightBreakpoint) {
-        NG::UIObserverHandler::GetInstance().NotifyWinSizeLayoutBreakpointChangeFunc(GetInstanceId(), breakpoint);
-        lastBreakpoint_ = breakpoint;
+    auto task = [instanceId = GetInstanceId()]() {
+        auto container = Platform::AceContainer::GetContainer(instanceId);
+        CHECK_NULL_VOID(container);
+
+        WidthLayoutBreakPoint layoutWidthBreakpoints = SystemProperties::GetWidthLayoutBreakpoints();
+        HeightLayoutBreakPoint layoutHeightBreakpoints = SystemProperties::GetHeightLayoutBreakpoints();
+        auto pipelineContext = container->GetPipelineContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto window = pipelineContext->GetWindow();
+        CHECK_NULL_VOID(window);
+
+        window->NotifyBreakpointChangeIfNeeded(instanceId, layoutWidthBreakpoints, layoutHeightBreakpoints);
+    };
+
+    if (uiTaskRunner.IsRunOnCurrentThread()) {
+        task();
+    } else {
+        taskExecutor->PostTask(
+            std::move(task), TaskExecutor::TaskType::UI, "ArkUIProcessWindowSizeLayoutBreakPointChange");
     }
 }
 
