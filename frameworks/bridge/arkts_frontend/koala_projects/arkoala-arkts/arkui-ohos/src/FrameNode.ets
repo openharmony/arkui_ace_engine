@@ -197,7 +197,7 @@ export class FrameNode implements MaterializedBase {
             this._gestureEvent = new UIGestureEvent();
             const retval = FrameNodeExtender.getFrameNodePtr(this)
             let peer = new ArkFrameNodePeer(retval, this._nodeId as int32, "FrameNode", 0);
-            // this._gestureEvent!.setPeer(peer);
+            this._gestureEvent!.setPeer(peer);
         }
         return this._gestureEvent as UIGestureEvent;
     }
