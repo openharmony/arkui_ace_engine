@@ -414,8 +414,6 @@ protected:
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
-    void OnAttachToFrameNodeMultiThread();
-    void OnAttachToFrameNodeImpl();
     void OnDetachFromFrameNodeMultiThread(FrameNode* frameNode);
     void OnDetachFromFrameNodeImpl(FrameNode* frameNode);
     void OnAttachToMainTree() override;
