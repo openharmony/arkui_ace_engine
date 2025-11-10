@@ -61,7 +61,8 @@ public:
     static void SetDataDetectorConfig(FrameNode* frameNode, const TextDetectConfig& config);
     static void JavaScriptOnDocumentStart(FrameNode* frameNode, const ScriptItems& scriptItems);
     static void JavaScriptOnDocumentEnd(FrameNode* frameNode, const ScriptItems& scriptItems);
-    static void JavaScriptOnHeadEnd(FrameNode *frameNode, const ScriptItems& scriptItems);
+    static void JavaScriptOnHeadEnd(
+        FrameNode* frameNode, const ScriptItems& scriptItems, const ScriptItemsByOrder& scriptItemsByOrder);
     static void SetNativeEmbedOptions(
         FrameNode *frameNode, bool supportDefaultIntrinsicSize, bool supportCssDisplayChange);
     static void SetBypassVsyncCondition(FrameNode *frameNode, const std::optional<WebBypassVsyncCondition>& condition);
@@ -231,6 +232,7 @@ public:
         FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
     static void SetSafeBrowsingCheckFinishId(FrameNode* frameNode,
         std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& safeBrowsingCheckFinishId);
+    static void SetJavaScriptProxy(FrameNode* frameNode, std::function<void()>&& callback);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_ANI_WEB_MODEL_STATIC_H

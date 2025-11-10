@@ -42,6 +42,7 @@ import curves from '@ohos.curves';
 import matrix4 from '@ohos.matrix4';
 import uiEffect from '@ohos.graphics.uiEffect';
 import { DrawModifier } from "#handwritten"
+import { JavaScriptProxy } from '#generated';
 
 export class ArkUIAniModule {
     static {
@@ -68,6 +69,7 @@ export class ArkUIAniModule {
     native static _Extractors_FromDrawContextPtr(ptr: KPointer): DrawContext;
     native static _Extractors_ToWebviewWebviewControllerPtr(value: webview.WebviewController): KPointer;
     native static _Extractors_FromWebviewWebviewControllerPtr(ptr: KPointer): webview.WebviewController;
+    native static _Web_SetJavaScriptProxyController(ptr: KPointer, value: JavaScriptProxy | undefined): void;
     native static _Image_ColorFilter_TransferStatic(ptr: KPointer): KPointer
     native static _Image_ColorFilter_TransferDynamic(ptr: KPointer): KPointer
     native static _Image_ResizableOptions(ptr: KPointer, value: drawing.Lattice): void

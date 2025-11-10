@@ -25,7 +25,6 @@
 #include "utils/ani_utils.h"
 
 namespace OHOS::Ace::Ani {
-static const char* ANI_CLASS_WEBVIEW_CONTROLLER = "L@ohos/web/webview/webview/WebviewController;";
 
 static ani_env* GetAniEnv(ani_vm* vm)
 {
@@ -153,6 +152,104 @@ ani_object ExtractorsFromWebviewWebviewControllerPtr(ani_env* env, [[maybe_unuse
     HILOGD("ExtractorsFromWebviewWebviewControllerPtr entry");
     ani_ref resultRef = nullptr;
     return static_cast<ani_object>(resultRef);
+}
+
+static ani_status FindJavaScriptProxyPropertyAndGetGlobalRef(
+    ani_env* env, ani_object object, const char* propertyName, ani_ref* globalRef)
+{
+    ani_ref tempRef = nullptr;
+    ani_status status = env->Object_GetPropertyByName_Ref(object, propertyName, &tempRef);
+    if (status != ANI_OK) {
+        HILOGE("Find JavaScriptProxy property: %{public}s failed, errno: %{public}d", propertyName, status);
+        return status;
+    }
+    status = env->GlobalReference_Create(tempRef, globalRef);
+    if (status != ANI_OK) {
+        HILOGE("Create global reference failed, errno: %{public}d", status);
+        return status;
+    }
+    return ANI_OK;
+}
+
+static void DestroyJavaScriptProxyPropertyRef(ani_env* env, JavaScriptProxyProperyRef& properyRef)
+{
+    env->GlobalReference_Delete(properyRef.objectRef);
+    env->GlobalReference_Delete(properyRef.nameRef);
+    env->GlobalReference_Delete(properyRef.methodListRef);
+    env->GlobalReference_Delete(properyRef.controllerRef);
+    env->GlobalReference_Delete(properyRef.asyncMethodListRef);
+    env->GlobalReference_Delete(properyRef.permissionRef);
+}
+
+static int32_t GetJavaScriptProxyProperty(ani_env* env, ani_object object, JavaScriptProxyProperyRef& properyRef)
+{
+    if (FindJavaScriptProxyPropertyAndGetGlobalRef(env, object, "jsObject", &properyRef.objectRef) != ANI_OK) {
+        return -1;
+    }
+    if (FindJavaScriptProxyPropertyAndGetGlobalRef(env, object, "name", &properyRef.nameRef) != ANI_OK) {
+        DestroyJavaScriptProxyPropertyRef(env, properyRef);
+        return -1;
+    }
+    if (FindJavaScriptProxyPropertyAndGetGlobalRef(env, object, "methodList", &properyRef.methodListRef) != ANI_OK) {
+        DestroyJavaScriptProxyPropertyRef(env, properyRef);
+        return -1;
+    }
+    if (FindJavaScriptProxyPropertyAndGetGlobalRef(env, object, "controller", &properyRef.controllerRef) != ANI_OK) {
+        DestroyJavaScriptProxyPropertyRef(env, properyRef);
+        return -1;
+    }
+    if (FindJavaScriptProxyPropertyAndGetGlobalRef(env, object, "asyncMethodList", &properyRef.asyncMethodListRef) !=
+        ANI_OK) {
+        DestroyJavaScriptProxyPropertyRef(env, properyRef);
+        return -1;
+    }
+    if (FindJavaScriptProxyPropertyAndGetGlobalRef(env, object, "permission", &properyRef.permissionRef) != ANI_OK) {
+        DestroyJavaScriptProxyPropertyRef(env, properyRef);
+        return -1;
+    }
+    return 0;
+}
+
+static void GetJavaScriptProxyFunc(ani_env* env, ani_vm* vm, ani_object object, ani_long node)
+{
+    const auto* modifier = GetNodeAniModifier();
+    JavaScriptProxyProperyRef properyRef = { 0 };
+    if (GetJavaScriptProxyProperty(env, object, properyRef) != 0) {
+        return;
+    }
+
+    auto jsProxyCallback = [vm, controller = properyRef.controllerRef, jsObject = properyRef.objectRef,
+                               name = properyRef.nameRef, methodList = properyRef.methodListRef,
+                               asyncMethodList = properyRef.asyncMethodListRef,
+                               permission = properyRef.permissionRef]() {
+        ani_env* envTemp = GetAniEnv(vm);
+        if (!envTemp) {
+            HILOGE("jsProxyCallback callback envTemp is nullptr");
+            return;
+        }
+        envTemp->GlobalReference_Delete(jsObject);
+        envTemp->GlobalReference_Delete(name);
+        envTemp->GlobalReference_Delete(methodList);
+        envTemp->GlobalReference_Delete(controller);
+        envTemp->GlobalReference_Delete(asyncMethodList);
+        envTemp->GlobalReference_Delete(permission);
+    };
+
+    modifier->getWebAniModifier()->setJavaScriptProxyController(
+        reinterpret_cast<void*>(node), std::move(jsProxyCallback));
+}
+
+void SetJavaScriptProxyController(ani_env* env, ani_class aniClass, ani_long node, ani_object object)
+{
+    HILOGD("SetJavaScriptProxyController entry");
+    ani_vm* vm = nullptr;
+
+    if (env->GetVM(&vm) != ANI_OK) {
+        HILOGE("SetJavaScriptProxyController get global object failed");
+        return;
+    }
+
+    GetJavaScriptProxyFunc(env, vm, object, node);
 }
 
 ani_boolean TransferScreenCaptureHandlerToStatic(ani_env* env, ani_class aniClass, ani_long node, ani_object input)

@@ -76,7 +76,7 @@ void OnScaleChange(const CallbackHelper<Callback_OnScaleChangeEvent_Void>& arkCa
 bool OnHttpAuthRequest(const CallbackHelper<Callback_OnHttpAuthRequestEvent_Boolean>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
 RefPtr<WebResponse> OnInterceptRequest(
-    const CallbackHelper<Callback_OnInterceptRequestEvent_WebResourceResponse>& arkCallback,
+    const CallbackHelper<Type_WebAttribute_onInterceptRequest>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
 std::string OnOverrideErrorPage(
     const CallbackHelper<OnOverrideErrorPageCallback>& arkCallback,

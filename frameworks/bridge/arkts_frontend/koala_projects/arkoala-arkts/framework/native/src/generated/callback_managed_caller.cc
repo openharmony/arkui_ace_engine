@@ -2331,33 +2331,6 @@ void callManagedCallback_OnHttpErrorReceiveEvent_VoidSync(Ark_VMContext vmContex
     OnHttpErrorReceiveEvent_serializer::write(argsSerializer, value0);
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
 }
-void callManagedCallback_OnInterceptRequestEvent_WebResourceResponse(Ark_Int32 resourceId, Ark_OnInterceptRequestEvent value0, Callback_WebResourceResponse_Void continuation)
-{
-    CallbackBuffer callbackBuffer = {{}, {}};
-    const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
-    callbackBuffer.resourceHolder.holdCallbackResource(&callbackResourceSelf);
-    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
-    argsSerializer.writeInt32(Kind_Callback_OnInterceptRequestEvent_WebResourceResponse);
-    argsSerializer.writeInt32(resourceId);
-    OnInterceptRequestEvent_serializer::write(argsSerializer, value0);
-    argsSerializer.writeCallbackResource(continuation.resource);
-    argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.call));
-    argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.callSync));
-    enqueueCallback(10, &callbackBuffer);
-}
-void callManagedCallback_OnInterceptRequestEvent_WebResourceResponseSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_OnInterceptRequestEvent value0, Callback_WebResourceResponse_Void continuation)
-{
-    uint8_t dataBuffer[4096];
-    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&dataBuffer, sizeof(dataBuffer), nullptr);
-    argsSerializer.writeInt32(10);
-    argsSerializer.writeInt32(Kind_Callback_OnInterceptRequestEvent_WebResourceResponse);
-    argsSerializer.writeInt32(resourceId);
-    OnInterceptRequestEvent_serializer::write(argsSerializer, value0);
-    argsSerializer.writeCallbackResource(continuation.resource);
-    argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.call));
-    argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.callSync));
-    KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
-}
 void callManagedCallback_OnLoadFinishedEvent_Void(Ark_Int32 resourceId, Ark_OnLoadFinishedEvent value0)
 {
     CallbackBuffer callbackBuffer = {{}, {}};
@@ -2425,6 +2398,39 @@ void callManagedCallback_OnLoadStartedEvent_VoidSync(Ark_VMContext vmContext, Ar
     argsSerializer.writeInt32(Kind_Callback_OnLoadStartedEvent_Void);
     argsSerializer.writeInt32(resourceId);
     OnLoadStartedEvent_serializer::write(argsSerializer, value0);
+    KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
+}
+void callManagedCallback_Opt_WebResourceResponse_Void(Ark_Int32 resourceId, Opt_WebResourceResponse value)
+{
+    CallbackBuffer callbackBuffer = {{}, {}};
+    const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
+    callbackBuffer.resourceHolder.holdCallbackResource(&callbackResourceSelf);
+    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
+    argsSerializer.writeInt32(Kind_Callback_Opt_WebResourceResponse_Void);
+    argsSerializer.writeInt32(resourceId);
+    if (runtimeType(value) != INTEROP_RUNTIME_UNDEFINED) {
+        argsSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+        const auto valueTmpValue = value.value;
+        WebResourceResponse_serializer::write(argsSerializer, valueTmpValue);
+    } else {
+        argsSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+    }
+    enqueueCallback(10, &callbackBuffer);
+}
+void callManagedCallback_Opt_WebResourceResponse_VoidSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Opt_WebResourceResponse value)
+{
+    uint8_t dataBuffer[4096];
+    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&dataBuffer, sizeof(dataBuffer), nullptr);
+    argsSerializer.writeInt32(10);
+    argsSerializer.writeInt32(Kind_Callback_Opt_WebResourceResponse_Void);
+    argsSerializer.writeInt32(resourceId);
+    if (runtimeType(value) != INTEROP_RUNTIME_UNDEFINED) {
+        argsSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+        const auto valueTmpValue = value.value;
+        WebResourceResponse_serializer::write(argsSerializer, valueTmpValue);
+    } else {
+        argsSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+    }
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
 }
 void callManagedCallback_onMeasureSize_SizeResult(Ark_Int32 resourceId, Ark_GeometryInfo selfLayoutInfo, Array_Measurable children, Ark_ConstraintSizeOptions constraint, Callback_SizeResult_Void continuation)
@@ -4632,25 +4638,31 @@ void callManagedCallback_WebKeyboardOptions_VoidSync(Ark_VMContext vmContext, Ar
     WebKeyboardOptions_serializer::write(argsSerializer, value);
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
 }
-void callManagedCallback_WebResourceResponse_Void(Ark_Int32 resourceId, Ark_WebResourceResponse value)
+void callManagedType_WebAttribute_onInterceptRequest(Ark_Int32 resourceId, Ark_OnInterceptRequestEvent value0, Callback_Opt_WebResourceResponse_Void continuation)
 {
     CallbackBuffer callbackBuffer = {{}, {}};
     const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
     callbackBuffer.resourceHolder.holdCallbackResource(&callbackResourceSelf);
     SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
-    argsSerializer.writeInt32(Kind_Callback_WebResourceResponse_Void);
+    argsSerializer.writeInt32(Kind_Type_WebAttribute_onInterceptRequest);
     argsSerializer.writeInt32(resourceId);
-    WebResourceResponse_serializer::write(argsSerializer, value);
+    OnInterceptRequestEvent_serializer::write(argsSerializer, value0);
+    argsSerializer.writeCallbackResource(continuation.resource);
+    argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.call));
+    argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.callSync));
     enqueueCallback(10, &callbackBuffer);
 }
-void callManagedCallback_WebResourceResponse_VoidSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_WebResourceResponse value)
+void callManagedType_WebAttribute_onInterceptRequestSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_OnInterceptRequestEvent value0, Callback_Opt_WebResourceResponse_Void continuation)
 {
     uint8_t dataBuffer[4096];
     SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&dataBuffer, sizeof(dataBuffer), nullptr);
     argsSerializer.writeInt32(10);
-    argsSerializer.writeInt32(Kind_Callback_WebResourceResponse_Void);
+    argsSerializer.writeInt32(Kind_Type_WebAttribute_onInterceptRequest);
     argsSerializer.writeInt32(resourceId);
-    WebResourceResponse_serializer::write(argsSerializer, value);
+    OnInterceptRequestEvent_serializer::write(argsSerializer, value0);
+    argsSerializer.writeCallbackResource(continuation.resource);
+    argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.call));
+    argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.callSync));
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
 }
 void callManagedCheckBoxModifierBuilder(Ark_Int32 resourceId, Ark_NativePointer parentNode, Ark_CheckBoxConfiguration config, Callback_Pointer_Void continuation)
@@ -8017,7 +8029,6 @@ Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
         case Kind_Callback_OnGeolocationShowEvent_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_OnGeolocationShowEvent_Void);
         case Kind_Callback_OnHttpAuthRequestEvent_Boolean: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_OnHttpAuthRequestEvent_Boolean);
         case Kind_Callback_OnHttpErrorReceiveEvent_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_OnHttpErrorReceiveEvent_Void);
-        case Kind_Callback_OnInterceptRequestEvent_WebResourceResponse: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_OnInterceptRequestEvent_WebResourceResponse);
         case Kind_Callback_OnLoadFinishedEvent_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_OnLoadFinishedEvent_Void);
         case Kind_Callback_OnLoadInterceptEvent_Boolean: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_OnLoadInterceptEvent_Boolean);
         case Kind_Callback_OnLoadStartedEvent_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_OnLoadStartedEvent_Void);
@@ -8054,6 +8065,7 @@ Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
         case Kind_Callback_Opt_ScrollResult_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Opt_ScrollResult_Void);
         case Kind_Callback_Opt_StyledString_Opt_Array_String_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Opt_StyledString_Opt_Array_String_Void);
         case Kind_Callback_Opt_TabContentAnimatedTransition_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Opt_TabContentAnimatedTransition_Void);
+        case Kind_Callback_Opt_WebResourceResponse_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Opt_WebResourceResponse_Void);
         case Kind_Callback_PlaybackInfo_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_PlaybackInfo_Void);
         case Kind_Callback_Pointer_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Pointer_Void);
         case Kind_Callback_PopInfo_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_PopInfo_Void);
@@ -8109,7 +8121,6 @@ Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
         case Kind_Callback_Union_Object_Idlize_Stdlib_Null_Undefined_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Union_Object_Idlize_Stdlib_Null_Undefined_Void);
         case Kind_Callback_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Void);
         case Kind_Callback_WebKeyboardOptions_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_WebKeyboardOptions_Void);
-        case Kind_Callback_WebResourceResponse_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_WebResourceResponse_Void);
         case Kind_CheckBoxModifierBuilder: return reinterpret_cast<Ark_NativePointer>(callManagedCheckBoxModifierBuilder);
         case Kind_ContentDidScrollCallback: return reinterpret_cast<Ark_NativePointer>(callManagedContentDidScrollCallback);
         case Kind_ContentWillScrollCallback: return reinterpret_cast<Ark_NativePointer>(callManagedContentWillScrollCallback);
@@ -8226,6 +8237,7 @@ Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
         case Kind_TransitionFinishCallback: return reinterpret_cast<Ark_NativePointer>(callManagedTransitionFinishCallback);
         case Kind_Type_CommonMethod_onDragStart: return reinterpret_cast<Ark_NativePointer>(callManagedType_CommonMethod_onDragStart);
         case Kind_Type_NavigationAttribute_customNavContentTransition: return reinterpret_cast<Ark_NativePointer>(callManagedType_NavigationAttribute_customNavContentTransition);
+        case Kind_Type_WebAttribute_onInterceptRequest: return reinterpret_cast<Ark_NativePointer>(callManagedType_WebAttribute_onInterceptRequest);
         case Kind_UpdateTransitionCallback: return reinterpret_cast<Ark_NativePointer>(callManagedUpdateTransitionCallback);
         case Kind_VisibleAreaChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedVisibleAreaChangeCallback);
         case Kind_VoidCallback: return reinterpret_cast<Ark_NativePointer>(callManagedVoidCallback);
@@ -8335,7 +8347,6 @@ Ark_NativePointer getManagedCallbackCallerSync(CallbackKind kind)
         case Kind_Callback_OnGeolocationShowEvent_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_OnGeolocationShowEvent_VoidSync);
         case Kind_Callback_OnHttpAuthRequestEvent_Boolean: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_OnHttpAuthRequestEvent_BooleanSync);
         case Kind_Callback_OnHttpErrorReceiveEvent_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_OnHttpErrorReceiveEvent_VoidSync);
-        case Kind_Callback_OnInterceptRequestEvent_WebResourceResponse: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_OnInterceptRequestEvent_WebResourceResponseSync);
         case Kind_Callback_OnLoadFinishedEvent_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_OnLoadFinishedEvent_VoidSync);
         case Kind_Callback_OnLoadInterceptEvent_Boolean: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_OnLoadInterceptEvent_BooleanSync);
         case Kind_Callback_OnLoadStartedEvent_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_OnLoadStartedEvent_VoidSync);
@@ -8372,6 +8383,7 @@ Ark_NativePointer getManagedCallbackCallerSync(CallbackKind kind)
         case Kind_Callback_Opt_ScrollResult_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Opt_ScrollResult_VoidSync);
         case Kind_Callback_Opt_StyledString_Opt_Array_String_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Opt_StyledString_Opt_Array_String_VoidSync);
         case Kind_Callback_Opt_TabContentAnimatedTransition_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Opt_TabContentAnimatedTransition_VoidSync);
+        case Kind_Callback_Opt_WebResourceResponse_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Opt_WebResourceResponse_VoidSync);
         case Kind_Callback_PlaybackInfo_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_PlaybackInfo_VoidSync);
         case Kind_Callback_Pointer_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Pointer_VoidSync);
         case Kind_Callback_PopInfo_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_PopInfo_VoidSync);
@@ -8427,7 +8439,6 @@ Ark_NativePointer getManagedCallbackCallerSync(CallbackKind kind)
         case Kind_Callback_Union_Object_Idlize_Stdlib_Null_Undefined_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Union_Object_Idlize_Stdlib_Null_Undefined_VoidSync);
         case Kind_Callback_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_VoidSync);
         case Kind_Callback_WebKeyboardOptions_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_WebKeyboardOptions_VoidSync);
-        case Kind_Callback_WebResourceResponse_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_WebResourceResponse_VoidSync);
         case Kind_CheckBoxModifierBuilder: return reinterpret_cast<Ark_NativePointer>(callManagedCheckBoxModifierBuilderSync);
         case Kind_ContentDidScrollCallback: return reinterpret_cast<Ark_NativePointer>(callManagedContentDidScrollCallbackSync);
         case Kind_ContentWillScrollCallback: return reinterpret_cast<Ark_NativePointer>(callManagedContentWillScrollCallbackSync);
@@ -8544,6 +8555,7 @@ Ark_NativePointer getManagedCallbackCallerSync(CallbackKind kind)
         case Kind_TransitionFinishCallback: return reinterpret_cast<Ark_NativePointer>(callManagedTransitionFinishCallbackSync);
         case Kind_Type_CommonMethod_onDragStart: return reinterpret_cast<Ark_NativePointer>(callManagedType_CommonMethod_onDragStartSync);
         case Kind_Type_NavigationAttribute_customNavContentTransition: return reinterpret_cast<Ark_NativePointer>(callManagedType_NavigationAttribute_customNavContentTransitionSync);
+        case Kind_Type_WebAttribute_onInterceptRequest: return reinterpret_cast<Ark_NativePointer>(callManagedType_WebAttribute_onInterceptRequestSync);
         case Kind_UpdateTransitionCallback: return reinterpret_cast<Ark_NativePointer>(callManagedUpdateTransitionCallbackSync);
         case Kind_VisibleAreaChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedVisibleAreaChangeCallbackSync);
         case Kind_VoidCallback: return reinterpret_cast<Ark_NativePointer>(callManagedVoidCallbackSync);

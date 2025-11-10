@@ -7714,7 +7714,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetOnInterceptRequestImpl(Ark_NativePointer node,
-                                   const Opt_Callback_OnInterceptRequestEvent_WebResourceResponse* value)
+                                   const Opt_Type_WebAttribute_onInterceptRequest* value)
     {
     }
     void SetOnPermissionRequestImpl(Ark_NativePointer node,
