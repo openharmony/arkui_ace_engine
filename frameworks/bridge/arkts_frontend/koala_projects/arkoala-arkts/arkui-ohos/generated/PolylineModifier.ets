@@ -288,6 +288,7 @@ export class PolylineModifier extends CommonMethodModifier implements PolylineAt
     }
     mergeModifier(modifier: PolylineModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._points_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._points_0_flag) {

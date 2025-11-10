@@ -40,6 +40,7 @@ import { CanvasModifier } from "./../CanvasModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Color } from "./enums"
 import { FrameNode } from "arkui.FrameNode"
+import { ModifierStateManager } from '../CommonModifier';
 export class CanvasGradientInternal {
     public static fromPtr(ptr: KPointer): CanvasGradient {
         return new CanvasGradient(ptr)
@@ -788,7 +789,9 @@ export class ArkCanvasComponent extends ArkCommonMethodComponent implements Canv
         return this
     }
     public attributeModifier(value: AttributeModifier<CanvasAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookCanvasAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookCanvasAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

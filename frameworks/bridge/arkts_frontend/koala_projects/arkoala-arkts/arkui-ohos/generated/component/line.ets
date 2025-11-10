@@ -32,6 +32,7 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { LineModifier } from "./../LineModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ModifierStateManager } from '../CommonModifier';
 export class ArkLinePeer extends ArkCommonShapeMethodPeer {
     attributeSet?: LineModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -208,7 +209,9 @@ export class ArkLineComponent extends ArkCommonShapeMethodComponent implements L
         return this
     }
     public attributeModifier(value: AttributeModifier<LineAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        hookLineAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookLineAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

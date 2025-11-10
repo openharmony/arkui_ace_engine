@@ -32,6 +32,7 @@ import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { XComponentType } from "./enums"
 import { XComponentModifier } from "./../XComponentModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ModifierStateManager } from '../CommonModifier';
 export class XComponentControllerInternal {
     public static fromPtr(ptr: KPointer): XComponentController {
         return new XComponentController(ptr)
@@ -405,7 +406,9 @@ export class ArkXComponentComponent extends ArkCommonMethodComponent implements 
         return this
     }
     public attributeModifier(value: AttributeModifier<XComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookXComponentAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookXComponentAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

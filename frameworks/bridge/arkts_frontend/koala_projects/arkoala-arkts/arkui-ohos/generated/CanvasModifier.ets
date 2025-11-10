@@ -84,6 +84,7 @@ export class CanvasModifier extends CommonMethodModifier implements CanvasAttrib
     }
     mergeModifier(modifier: CanvasModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._onReady_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._onReady_0_flag) {

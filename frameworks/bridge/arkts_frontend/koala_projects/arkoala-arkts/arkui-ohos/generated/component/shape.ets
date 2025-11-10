@@ -35,6 +35,7 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { ShapeModifier } from "./../ShapeModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ModifierStateManager } from '../CommonModifier';
 export class ArkShapePeer extends ArkCommonMethodPeer {
     attributeSet?: ShapeModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -567,7 +568,9 @@ export class ArkShapeComponent extends ArkCommonMethodComponent implements Shape
         return this
     }
     public attributeModifier(value: AttributeModifier<ShapeAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookShapeAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookShapeAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

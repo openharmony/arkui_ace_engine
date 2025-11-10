@@ -29,6 +29,7 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { CircleModifier } from "./../CircleModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ModifierStateManager } from '../CommonModifier';
 export class ArkCirclePeer extends ArkCommonShapeMethodPeer {
     attributeSet?: CircleModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -93,7 +94,9 @@ export class ArkCircleComponent extends ArkCommonShapeMethodComponent implements
         return this
     }
     public attributeModifier(value: AttributeModifier<CircleAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        hookCircleAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookCircleAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

@@ -32,6 +32,7 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { RectModifier } from "./../RectModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ModifierStateManager } from '../CommonModifier';
 export class ArkRectPeer extends ArkCommonShapeMethodPeer {
     attributeSet?: RectModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -263,7 +264,9 @@ export class ArkRectComponent extends ArkCommonShapeMethodComponent implements R
         return this
     }
     public attributeModifier(value: AttributeModifier<RectAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        hookRectAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookRectAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

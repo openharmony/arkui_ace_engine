@@ -428,6 +428,7 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
     }
     mergeModifier(modifier: VideoModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._muted_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._muted_0_flag) {

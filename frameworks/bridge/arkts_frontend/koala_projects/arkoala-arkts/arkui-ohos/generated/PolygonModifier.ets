@@ -288,6 +288,7 @@ export class PolygonModifier extends CommonMethodModifier implements PolygonAttr
     }
     mergeModifier(modifier: PolygonModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._points_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._points_0_flag) {

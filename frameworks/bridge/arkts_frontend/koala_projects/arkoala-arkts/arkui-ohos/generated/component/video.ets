@@ -39,6 +39,7 @@ import { VideoModifier } from "./../VideoModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Resource_serializer } from "./../framework/resource"
 import { image_PixelMap_serializer } from "./../framework/ohos.multimedia.image"
+import { ModifierStateManager } from '../CommonModifier';
 export class VideoControllerInternal {
     public static fromPtr(ptr: KPointer): VideoController {
         return new VideoController(ptr)
@@ -741,7 +742,9 @@ export class ArkVideoComponent extends ArkCommonMethodComponent implements Video
         return this
     }
     public attributeModifier(value: AttributeModifier<VideoAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookVideoAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookVideoAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
