@@ -56,7 +56,7 @@ Ark_NativePointer GetFinalizerImpl()
 Ark_Buffer GetDataImpl(Ark_ImageData peer)
 {
     CHECK_NULL_RETURN(peer, {});
-    size_t size = peer->value.data.size() * sizeof(decltype(peer->value.data)::value_type);
+    int64_t size = peer->value.data.size() * sizeof(decltype(peer->value.data)::value_type);
     Ark_Buffer result = BufferKeeper::Allocate(size);
     if (!result.data || result.length < size) {
         return {};
