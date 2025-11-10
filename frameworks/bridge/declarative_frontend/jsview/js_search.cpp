@@ -523,6 +523,9 @@ void JSSearch::SetCancelImageIcon(const JSCallbackInfo& info)
     if (SystemProperties::ConfigChangePerform() && srcObject) {
         RegisterResource<std::string>("cancelButtonIconSrc", srcObject, iconSrc);
     }
+    std::string bundleName;
+    std::string moduleName;
+    GetJsMediaBundleInfo(iconSrcProp, bundleName, moduleName);
 
     // set icon color
     Color iconColor;
@@ -533,10 +536,10 @@ void JSSearch::SetCancelImageIcon(const JSCallbackInfo& info)
     if (!iconColorProp->IsUndefined() && !iconColorProp->IsNull() &&
         ParseJsColor(iconColorProp, iconColor, colorObject)) {
         SearchModel::GetInstance()->SetCancelIconColor(iconColor);
-        cancelIconOptions = NG::IconOptions(iconColor, iconSize, iconSrc, "", "");
+        cancelIconOptions = NG::IconOptions(iconColor, iconSize, iconSrc, bundleName, moduleName);
     } else {
         SearchModel::GetInstance()->ResetCancelIconColor();
-        cancelIconOptions = NG::IconOptions(iconSize, iconSrc, "", "");
+        cancelIconOptions = NG::IconOptions(iconSize, iconSrc, bundleName, moduleName);
     }
     if (SystemProperties::ConfigChangePerform() && colorObject) {
         RegisterResource<Color>("cancelButtonIconColor", colorObject, iconColor);
