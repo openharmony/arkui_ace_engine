@@ -737,10 +737,11 @@ void SubwindowOhos::ShowTipsNG(int32_t targetId, const NG::PopupInfo& popupInfo,
 
 void SubwindowOhos::HideTipsNG(int32_t targetId, int32_t disappearingTime)
 {
-    CHECK_NULL_VOID(window_);
-    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW,
-        "hide tips ng enter, subwindowId: %{public}d, subwindowName: %{public}s",
-        window_->GetWindowId(), window_->GetWindowName().c_str());
+    if (window_) {
+        TAG_LOGI(AceLogTag::ACE_SUB_WINDOW,
+            "hide tips ng enter, subwindowId: %{public}d, subwindowName: %{public}s",
+            window_->GetWindowId(), window_->GetWindowName().c_str());
+    }
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
     CHECK_NULL_VOID(aceContainer);
     auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
