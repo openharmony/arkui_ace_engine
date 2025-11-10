@@ -28,6 +28,20 @@ import { memo } from "@koalaui/runtime/annotations";
 
 type KPointer = long;
 
+export interface MovingPhotoViewOptions {
+    movingPhoto: photoAccessHelper.MovingPhoto
+
+    controller?: MovingPhotoViewController
+
+    imageAIOptions?: ImageAIOptions
+
+    movingPhotoFormat?: PixelMapFormat
+
+    dynamicRangeMode?: DynamicRangeMode
+
+    playWithMask?: boolean
+}
+
 export enum DynamicRangeMode {
     HIGH = 0,
     CONSTRAINT = 1,
@@ -95,20 +109,6 @@ export class MovingPhotoViewController {
     public enableAutoPlay(enabled: boolean): void {
         MovingPhotoNative.enableAutoPlay(this.peer!.ptr, enabled);
     }
-}
-
-export interface MovingphotoviewOptions {
-    movingPhoto: photoAccessHelper.MovingPhoto
-
-    controller?: MovingPhotoViewController
-
-    imageAIOptions?: ImageAIOptions
-
-    movingPhotoFormat?: PixelMapFormat
-
-    dynamicRangeMode?: DynamicRangeMode
-
-    playWithMask?: boolean
 }
 
 export class ArkMovingPhotoViewPeer extends ArkCommonMethodPeer {
