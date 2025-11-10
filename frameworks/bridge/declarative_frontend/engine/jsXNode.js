@@ -166,7 +166,7 @@ class BuilderNodeCommonBase extends Disposable {
         return ret;
     }
     dispose() {
-        if (this.isDisposed_) {
+        if (this.isDisposed()) {
             return;
         }
         super.dispose();
@@ -605,7 +605,7 @@ class JSBuilderNode extends BaseNode {
         return this._nativeRef?.getNativeHandle();
     }
     dispose() {
-        if (this.isDisposed_) {
+        if (this.isDisposed()) {
             return;
         }
         this.disposable_.dispose();
@@ -1140,7 +1140,7 @@ class FrameNode extends Disposable {
         }
     }
     dispose() {
-        if (this.isDisposed_) {
+        if (this.isDisposed()) {
             return;
         }
         super.dispose();
@@ -3135,7 +3135,7 @@ class RenderNode extends Disposable {
         return getUINativeModule().renderNode.getNodeType(this.nodePtr);
     }
     dispose() {
-        if (this.isDisposed_) {
+        if (this.isDisposed()) {
             return;
         }
         super.dispose();
