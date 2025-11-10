@@ -13,8 +13,10 @@
  * limitations under the License.
  */
 
-#pragma once
+#ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPLEMENTATION_COPY_EVENT_PEER_H
+#define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPLEMENTATION_COPY_EVENT_PEER_H
 
+#include "base/utils/utils.h"
 #include "core/interfaces/native/utility/peer_utils.h"
 
 struct CopyEventPeer {
@@ -40,3 +42,4 @@ private:
     std::function<void()> preventDefault_;
     friend OHOS::Ace::NG::PeerUtils;
 };
+#endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPLEMENTATION_COPY_EVENT_PEER_H
