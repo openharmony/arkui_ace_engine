@@ -340,12 +340,12 @@ void IsolatedPattern::InitializeAccessibilityInner(bool forceReinit)
     accessibilityChildTreeCallback_ = std::make_shared<PlatformAccessibilityChildTreeCallback>(
         WeakClaim(this), accessibilityId);
     CHECK_NULL_VOID(accessibilityChildTreeCallback_);
+    accessibilityManager->RegisterAccessibilityChildTreeCallback(accessibilityId, accessibilityChildTreeCallback_);
     auto realHostWindowId = ngPipeline->GetRealHostWindowId();
     CHECK_EQUAL_VOID(accessibilityManager->IsRegister(), false);
     accessibilityChildTreeCallback_->OnRegister(realHostWindowId, accessibilityManager->GetTreeId());
     PLATFORM_LOGD("Isolated: %{public}" PRId64 " register child tree, realHostWindowId: %{public}u",
         accessibilityId, realHostWindowId);
-    accessibilityManager->RegisterAccessibilityChildTreeCallback(accessibilityId, accessibilityChildTreeCallback_);
 }
 
 void IsolatedPattern::OnAccessibilityChildTreeRegister(
