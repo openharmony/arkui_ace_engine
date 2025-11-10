@@ -8122,6 +8122,7 @@ typedef struct Ark_uiObserver_NavigationInfo {
     /* kind: Interface */
     Ark_String navigationId;
     Ark_NavPathStack pathStack;
+    Opt_Int32 uniqueId;
 } Ark_uiObserver_NavigationInfo;
 typedef struct Opt_uiObserver_NavigationInfo {
     Ark_Tag tag;
@@ -28026,6 +28027,10 @@ typedef struct GENERATED_ArkUIUIContextAtomicServiceBarAccessor {
     Ark_Frame (*getBarRect)();
 } GENERATED_ArkUIUIContextAtomicServiceBarAccessor;
 
+typedef struct GENERATED_ArkUIUIContextGetInfoAccessor {
+    Opt_uiObserver_NavigationInfo (*getNavigationInfoByUniqueId)(Ark_Int64 id);
+} GENERATED_ArkUIUIContextGetInfoAccessor;
+
 typedef struct GENERATED_ArkUIUIExtensionProxyAccessor {
     void (*destroyPeer)(Ark_UIExtensionProxy peer);
     Ark_UIExtensionProxy (*construct)();
@@ -28539,6 +28544,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUITransitionEffectAccessor* (*getTransitionEffectAccessor)();
     const GENERATED_ArkUIUICommonEventAccessor* (*getUICommonEventAccessor)();
     const GENERATED_ArkUIUIContextAtomicServiceBarAccessor* (*getUIContextAtomicServiceBarAccessor)();
+    const GENERATED_ArkUIUIContextGetInfoAccessor* (*getUIContextGetInfoAccessor)();
     const GENERATED_ArkUIUIExtensionProxyAccessor* (*getUIExtensionProxyAccessor)();
     const GENERATED_ArkUIUrlStyleAccessor* (*getUrlStyleAccessor)();
     const GENERATED_ArkUIUserDataSpanAccessor* (*getUserDataSpanAccessor)();

@@ -248,6 +248,7 @@ void AssignArkValue(Ark_uiObserver_NavigationInfo& dst, const std::shared_ptr<OH
     CHECK_NULL_VOID(src);
     dst.navigationId = ArkValue<Ark_String>(src->navigationId);
     dst.pathStack = new NavPathStackPeer(src->pathStack.Upgrade());
+    dst.uniqueId = ArkValue<Opt_Int32>(src->uniqueId);
 }
 
 void AssignArkValue(Ark_ShadowOptions& dst, const Shadow& src, ConvContext* ctx)

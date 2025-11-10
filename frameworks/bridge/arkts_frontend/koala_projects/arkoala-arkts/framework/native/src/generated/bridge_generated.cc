@@ -37042,6 +37042,19 @@ Ark_NativePointer impl_UIExtensionProxy_getFinalizer() {
         return GetAccessors()->getUIExtensionProxyAccessor()->getFinalizer();
 }
 KOALA_INTEROP_DIRECT_0(UIExtensionProxy_getFinalizer, Ark_NativePointer)
+KInteropReturnBuffer impl_UIContextGetInfo_getNavigationInfoByUniqueId(KLong id) {
+        const auto &retValue = GetAccessors()->getUIContextGetInfoAccessor()->getNavigationInfoByUniqueId(id);
+        SerializerBase _retSerializer {};
+        if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+            const auto retValueTmpValue = retValue.value;
+            uiObserver_NavigationInfo_serializer::write(_retSerializer, retValueTmpValue);
+        } else {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+        }
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(UIContextGetInfo_getNavigationInfoByUniqueId, KInteropReturnBuffer, KLong)
 void impl_UIExtensionProxy_send(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_UIExtensionProxy self = reinterpret_cast<Ark_UIExtensionProxy>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);

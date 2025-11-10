@@ -693,7 +693,7 @@ void SetEnableStatusBarImpl(Ark_NativePointer node,
         if (animated->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
             animate = Converter::Convert<bool>(animated->value);
         }
-        auto statusBar = std::make_pair(enable, animate);
+        statusBar = std::make_pair(enable, animate);
     }
     NavDestinationModelStatic::SetEnableStatusBar(frameNode, statusBar);
 }

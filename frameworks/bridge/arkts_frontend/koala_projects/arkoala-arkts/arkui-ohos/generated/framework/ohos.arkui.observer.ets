@@ -34,12 +34,26 @@ export class uiObserver_NavigationInfo_serializer {
         valueSerializer.writeString(valueHolderForNavigationId)
         const valueHolderForPathStack  = value.pathStack
         NavPathStack_serializer.write(valueSerializer, valueHolderForPathStack)
+        const valueHolderForUniqueId  = value.uniqueId
+        if (valueHolderForUniqueId !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForUniqueIdTmpValue  = valueHolderForUniqueId!
+            valueSerializer.writeInt32(valueHolderForUniqueIdTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): uiObserver.NavigationInfo {
         let valueDeserializer : DeserializerBase = buffer
         const navigationIdTmpResult : string = (valueDeserializer.readString() as string)
         const pathStackTmpResult : NavPathStack = (NavPathStack_serializer.read(valueDeserializer) as NavPathStack)
-        let value : uiObserver.NavigationInfo = ({navigationId: navigationIdTmpResult, pathStack: pathStackTmpResult} as uiObserver.NavigationInfo)
+        const uniqueIdTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let uniqueIdTmpBuf : int32 | undefined = undefined
+        if ((uniqueIdTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            uniqueIdTmpBuf = valueDeserializer.readInt32()
+        }
+        const uniqueIdTmpResult : int32 | undefined = uniqueIdTmpBuf
+        let value : uiObserver.NavigationInfo = ({navigationId: navigationIdTmpResult, pathStack: pathStackTmpResult, uniqueId: uniqueIdTmpResult} as uiObserver.NavigationInfo)
         return value
     }
 }

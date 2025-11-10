@@ -64,6 +64,8 @@ import { CustomBuilder } from "./builder"
 import { NavigationOptions_serializer, NavPathStack, NavPathStackInternal, NavPathInfo, NavPathInfoInternal, NavigationOptions } from "./navigation"
 import { TargetInfo_serializer } from "./../framework/ohos.arkui.UIContext"
 import { TargetInfo } from "@ohos.arkui.UIContext"
+import { uiObserver_NavigationInfo_serializer } from "./../framework/ohos.arkui.observer"
+import { default as uiObserver } from "@ohos.arkui.observer"
 import { router_RouterOptions_serializer, router_RouterState_serializer } from "./../framework/ohos.router"
 import { AsyncCallback, BusinessError } from "@ohos.base"
 import { default as router } from "@ohos.router"
@@ -4472,6 +4474,23 @@ export class UIContextAtomicServiceBar {
     }
     public static getBarRect(): Frame {
         return UIContextAtomicServiceBar.getBarRect_serialize()
+    }
+}
+export class UIContextGetInfo {
+    static getNavigationInfoByUniqueId_serialize(id: int64): uiObserver.NavigationInfo | undefined {
+        const retval  = ArkUIGeneratedNativeModule._UIContextGetInfo_getNavigationInfoByUniqueId(id)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : uiObserver.NavigationInfo | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = uiObserver_NavigationInfo_serializer.read(retvalDeserializer)
+        }
+        const returnResult : uiObserver.NavigationInfo | undefined = buffer
+        return returnResult
+    }
+    public static getNavigationInfoByUniqueId(id: int64): uiObserver.NavigationInfo | undefined {
+        const id_casted = id as (int64)
+        return UIContextGetInfo.getNavigationInfoByUniqueId_serialize(id_casted)
     }
 }
 export class ArkRootPeer extends PeerNode {
