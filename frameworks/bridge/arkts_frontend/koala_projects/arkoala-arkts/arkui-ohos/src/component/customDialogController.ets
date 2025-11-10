@@ -16,7 +16,7 @@
 import { ExtendableComponent } from "./extendableComponent"
 import { CustomDialogControllerExtender, CustomDialogControllerOptionsExtender,
     CustomDialogControllerExternalOptionsExtender, LevelOrderExtender } from '#generated'
-import { LevelOrder } from "@ohos.promptAction";
+import { LevelOrder } from '@ohos.promptAction';
 import { ObserveSingleton } from '../stateManagement/base/observeSingleton'
 
 export class CustomDialogController extends CustomDialogControllerExtender {
@@ -63,7 +63,7 @@ function convert(value: CustomDialogControllerOptions): CustomDialogControllerOp
     };
     extender.builder = cb;
     if (value.levelOrder !== undefined) {
-        extender.levelOrderExtender = new LevelOrderExtender(value.levelOrder!.getPeer()!.ptr)
+        extender.levelOrderExtender = value.levelOrder as LevelOrderExtender
     }
     return extender
 }

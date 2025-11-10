@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+import { ArkUIGeneratedNativeModule } from '#components'
 import { Finalizable, SerializerBase, toPeerPtr, KPointer, MaterializedBase, DeserializerBase } from "@koalaui/interop"
 import { ResourceColor, Offset, Dimension, EdgeStyles, EdgeColors, EdgeWidths,
     BorderRadiuses } from 'arkui/framework'
@@ -27,7 +28,6 @@ import { Resource } from 'global.resource';
 import { LengthMetrics } from 'arkui/Graphics';
 import { AsyncCallback } from 'arkui/base';
 import { int32 } from "@koalaui/compat";
-import { ArkUIGeneratedNativeModule } from "#components"
 
 export enum LevelMode {
     OVERLAY = 0,

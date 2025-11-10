@@ -17,21 +17,6 @@
 
 #include "core/pipeline/pipeline_base.h"
 
-std::unordered_map<int, uint32_t> colorMap = {
-    {PromptActionColor::PROMPT_ACTION_COLOR_WHITE, 0xffffff | 0xFF000000},
-    {PromptActionColor::PROMPT_ACTION_COLOR_BLACK, 0x000000 | 0xFF000000},
-    {PromptActionColor::PROMPT_ACTION_COLOR_BLUE, 0x0000ff | 0xFF000000},
-    {PromptActionColor::PROMPT_ACTION_COLOR_BROWN, 0xa52a2a | 0xFF000000},
-    {PromptActionColor::PROMPT_ACTION_COLOR_GRAY, 0x808080 | 0xFF000000},
-    {PromptActionColor::PROMPT_ACTION_COLOR_GREEN, 0x008000 | 0xFF000000},
-    {PromptActionColor::PROMPT_ACTION_COLOR_GREY, 0x808080 | 0xFF000000},
-    {PromptActionColor::PROMPT_ACTION_COLOR_ORANGE, 0xffa500 | 0xFF000000},
-    {PromptActionColor::PROMPT_ACTION_COLOR_PINK, 0xffc0cb | 0xFF000000},
-    {PromptActionColor::PROMPT_ACTION_COLOR_RED, 0xff0000 | 0xFF000000},
-    {PromptActionColor::PROMPT_ACTION_COLOR_YELLOW, 0xffff00 | 0xFF000000},
-    {PromptActionColor::PROMPT_ACTION_COLOR_TRANSPARENT, 0x00000000},
-};
-
 std::unordered_map<int, OHOS::Ace::BlurStyle> blurStyleMap = {
     { PromptActionBlurStyle::THIN, OHOS::Ace::BlurStyle::THIN },
     { PromptActionBlurStyle::REGULAR, OHOS::Ace::BlurStyle::REGULAR },
@@ -46,6 +31,21 @@ std::unordered_map<int, OHOS::Ace::BlurStyle> blurStyleMap = {
     { PromptActionBlurStyle::COMPONENT_REGULAR, OHOS::Ace::BlurStyle::COMPONENT_REGULAR },
     { PromptActionBlurStyle::COMPONENT_THICK, OHOS::Ace::BlurStyle::COMPONENT_THICK },
     { PromptActionBlurStyle::COMPONENT_ULTRA_THICK, OHOS::Ace::BlurStyle::COMPONENT_ULTRA_THICK },
+};
+
+std::unordered_map<int, uint32_t> colorMap = {
+    {PromptActionColor::PROMPT_ACTION_COLOR_WHITE, 0xffffff | 0xFF000000},
+    {PromptActionColor::PROMPT_ACTION_COLOR_BLACK, 0x000000 | 0xFF000000},
+    {PromptActionColor::PROMPT_ACTION_COLOR_BLUE, 0x0000ff | 0xFF000000},
+    {PromptActionColor::PROMPT_ACTION_COLOR_BROWN, 0xa52a2a | 0xFF000000},
+    {PromptActionColor::PROMPT_ACTION_COLOR_GRAY, 0x808080 | 0xFF000000},
+    {PromptActionColor::PROMPT_ACTION_COLOR_GREEN, 0x008000 | 0xFF000000},
+    {PromptActionColor::PROMPT_ACTION_COLOR_GREY, 0x808080 | 0xFF000000},
+    {PromptActionColor::PROMPT_ACTION_COLOR_ORANGE, 0xffa500 | 0xFF000000},
+    {PromptActionColor::PROMPT_ACTION_COLOR_PINK, 0xffc0cb | 0xFF000000},
+    {PromptActionColor::PROMPT_ACTION_COLOR_RED, 0xff0000 | 0xFF000000},
+    {PromptActionColor::PROMPT_ACTION_COLOR_YELLOW, 0xffff00 | 0xFF000000},
+    {PromptActionColor::PROMPT_ACTION_COLOR_TRANSPARENT, 0x00000000},
 };
 
 ani_object CreateANIIntObject(ani_env *env, int32_t intValue)
