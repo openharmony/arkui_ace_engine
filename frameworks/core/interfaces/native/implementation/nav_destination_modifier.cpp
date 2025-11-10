@@ -24,6 +24,8 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
+#include "nav_destination_scrollable_processor_static.h"
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace {
 constexpr uint32_t SAFE_AREA_TYPE_LIMIT = 3;
@@ -40,9 +42,12 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
     auto contentCreator = []() {
         // empty content creator to be done
     };
-    frameNode = NavDestinationModelStatic::CreateFrameNode(id, std::move(contentCreator));
+    auto navPathInfo = AceType::MakeRefPtr<NavigationContext::JSNavPathInfoStatic>();
+    frameNode = NavDestinationModelStatic::CreateFrameNode(id, navPathInfo, std::move(contentCreator));
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
+    NavDestinationModelStatic::SetScrollableProcessor(frameNode,
+        []() { return AceType::MakeRefPtr<NavDestinationScrollableProcessorStatic>(); });
     return AceType::RawPtr(frameNode);
 }
 } // namespace NavDestinationModifier
@@ -275,12 +280,24 @@ void SetBindToScrollableImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    auto bindFunc = [&value](const RefPtr<NG::NavDestinationScrollableProcessor>& processor) {
+        auto jsProcessor = AceType::DynamicCast<NavDestinationScrollableProcessorStatic>(processor);
+        CHECK_NULL_VOID(jsProcessor);
+        jsProcessor->BindToScrollable(value);
+    };
+    NavDestinationModelStatic::UpdateBindingWithScrollable(frameNode, std::move(bindFunc));
 }
 void SetBindToNestedScrollableImpl(Ark_NativePointer node,
                                    const Opt_Array_NestedScrollInfo* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    auto bindFunc = [&value](const RefPtr<NG::NavDestinationScrollableProcessor>& processor) {
+        auto jsProcessor = AceType::DynamicCast<NavDestinationScrollableProcessorStatic>(processor);
+        CHECK_NULL_VOID(jsProcessor);
+        jsProcessor->BindToNestedScrollable(value);
+    };
+    NavDestinationModelStatic::UpdateBindingWithScrollable(frameNode, std::move(bindFunc));
 }
 void SetOnActiveImpl(Ark_NativePointer node,
                      const Opt_Callback_NavDestinationActiveReason_Void* value)

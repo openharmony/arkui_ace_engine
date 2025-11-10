@@ -20,6 +20,7 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_stack.h"
+#include "core/components_ng/pattern/navrouter/navdestination_context.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 
@@ -28,13 +29,25 @@ namespace OHOS::Ace::NG::GeneratedModifier::NavigationContext {
 class ExternalDataKeeper : public virtual Referenced {
 public:
     ExternalDataKeeper() = default;
-    ~ExternalDataKeeper() override = default;
-    explicit ExternalDataKeeper(const Ark_Object& data): data_(data) {}
-    Ark_Object data_;
+    ~ExternalDataKeeper() override
+    {
+        if (data_.value.resource.release) {
+            (*data_.value.resource.release)(data_.value.resource.resourceId);
+        }
+    }
+    explicit ExternalDataKeeper(const Ark_Object& data)
+    {
+        data_.tag = InteropTag::INTEROP_TAG_OBJECT;
+        data_.value = data;
+        if (data_.value.resource.hold) {
+            (*data_.value.resource.hold)(data_.value.resource.resourceId);
+        }
+    }
+    Opt_Object data_ = { .tag = InteropTag::INTEROP_TAG_UNDEFINED };
     ACE_DISALLOW_COPY_AND_MOVE(ExternalDataKeeper);
 };
 using ExternalData = RefPtr<ExternalDataKeeper>;
-using OnPopCallback = CallbackHelper<Callback_PopInfo_Void>;
+using OnPopCallback = RefPtr<CallbackHelper<Callback_PopInfo_Void>>;
 
 struct Interception {
     std::function<void(NG::NavigationMode)> modeChange;
@@ -53,17 +66,17 @@ struct PopInfo;
 class PathInfo {
 public:
     explicit PathInfo(const std::string& name) : PathInfo(name, nullptr) {}
-    PathInfo(std::string name, const ParamType& param, OnPopCallback onPop = OnPopCallback(),
+    PathInfo(std::string name, const ParamType& param, OnPopCallback onPop = nullptr,
         bool isEntry = false) : name_(name), param_(param), onPop_(onPop), index_(-1), needUpdate_(false),
         needBuildNewInstance_(false), navDestinationId_(""), isEntry_(isEntry),
         fromRecovery_(false), mode_(0), needDelete_(false) {}
-    PathInfo() : name_(), param_(), onPop_(OnPopCallback()), index_(-1), needUpdate_(false),
+    PathInfo() : name_(), param_(), onPop_(nullptr), index_(-1), needUpdate_(false),
         needBuildNewInstance_(false), navDestinationId_(""), isEntry_(false),
         fromRecovery_(false), mode_(0), needDelete_(false) {}
 
     std::string name_;
     ParamType param_;
-    OnPopCallback onPop_;
+    OnPopCallback onPop_ = nullptr;
     int index_ = -1;
     bool needUpdate_ = false;
     bool needBuildNewInstance_ = false;
@@ -75,6 +88,50 @@ public:
     std::function<void(int32_t errorCode, std::string errorMessage)> promise_;
 
     void InvokeOnPop(const PopInfo& popInfo);
+};
+
+class JSNavPathInfoStatic : public NG::NavPathInfo {
+    DECLARE_ACE_TYPE(JSNavPathInfoStatic, NG::NavPathInfo);
+public:
+    JSNavPathInfoStatic() = default;
+    JSNavPathInfoStatic(const std::string& name, ParamType param) : NG::NavPathInfo(name), param_(param) {}
+    JSNavPathInfoStatic(const std::string& name, ParamType param, OnPopCallback onPop, bool isEntry = false)
+        : NG::NavPathInfo(name, isEntry), param_(param), onPop_(onPop) {}
+    ~JSNavPathInfoStatic() = default;
+
+    void SetParam(const ParamType& param)
+    {
+        param_ = param;
+    }
+
+    ParamType GetParam() const
+    {
+        return param_;
+    }
+
+    void SetOnPop(const OnPopCallback& onPop)
+    {
+        onPop_ = onPop;
+    }
+
+    OnPopCallback GetOnPop() const
+    {
+        return onPop_;
+    }
+
+    void UpdateNavPathInfo(const RefPtr<NG::NavPathInfo>& info) override
+    {
+        NG::NavPathInfo::UpdateNavPathInfo(info);
+        auto tsPathInfo = AceType::DynamicCast<JSNavPathInfoStatic>(info);
+        if (!tsPathInfo) {
+            return;
+        }
+        param_ = tsPathInfo->GetParam();
+        onPop_ = tsPathInfo->GetOnPop();
+    }
+
+    ParamType param_;
+    OnPopCallback onPop_;
 };
 
 using PopResultType = ExternalData;
@@ -128,10 +185,14 @@ public:
     void SetIsReplace(enum IsReplace value);
     void SetAnimated(bool value);
     PathInfo Pop(bool isAnimated);
+    PathInfo Pop(bool isAnimated, Ark_Object result);
     void PopTo(const std::string& name, const std::optional<bool>& animated);
     int PopToName(const std::string& name, const std::optional<bool>& animated);
+    int PopToName(const std::string& name, const std::optional<bool>& animated, Ark_Object result);
     void PopToIndex(size_t index, const std::optional<bool>& animated);
+    void PopToIndex(size_t index, const std::optional<bool>& animated, Ark_Object result);
     void PopToInternal(std::vector<PathInfo>::iterator it, const std::optional<bool>& animated);
+    void PopToInternal(std::vector<PathInfo>::iterator it, const std::optional<bool>& animated, Ark_Object result);
     int MoveToTop(const std::string& name, const std::optional<bool>& animated);
     void MoveIndexToTop(size_t index, const std::optional<bool>& animated);
     void MoveToTopInternal(std::vector<PathInfo>::iterator it, const std::optional<bool>& animated);
@@ -247,6 +308,7 @@ public:
     {
         nodes_.clear();
     }
+    ParamType GetParamByIndex(int32_t index) const;
 protected:
     std::map<int32_t, RefPtr<NG::UINode>> nodes_;
     RefPtr<PathStack> dataSourceObj_;
@@ -260,7 +322,6 @@ private:
     }
     int32_t GetSize() const override;
     std::string GetNameByIndex(int32_t index) const;
-    ParamType GetParamByIndex(int32_t index) const;
     OnPopCallback GetOnPopByIndex(int32_t index) const;
     bool GetIsEntryByIndex(int32_t index);
     std::string ConvertParamToString(const ParamType& param, bool needLimit = false) const;

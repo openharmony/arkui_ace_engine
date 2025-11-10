@@ -21,6 +21,7 @@
 #include "core/components/scroll_bar/scroll_proxy.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "interfaces/inner_api/ace_kit/include/ui/base/ace_type.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 
@@ -49,6 +50,16 @@ public:
 
     void SetController(const RefPtr<ScrollControllerBase>& controller)
     {
+        auto oldController = controllerWeak_.Upgrade();
+        if (oldController) {
+            ScrollerObserver observer;
+            oldController->SetObserver(observer);
+            oldController->SetObserverManager(nullptr);
+        }
+        if (controller) {
+            controller->SetObserver(observer_);
+            controller->SetObserverManager(observerMgr_);
+        }
         controllerWeak_ = WeakPtr(controller);
     }
 
@@ -72,6 +83,25 @@ public:
         return instanceId_;
     }
 
+    void SetObserver(const ScrollerObserver& observer)
+    {
+        observer_ = observer;
+        auto controller = controllerWeak_.Upgrade();
+        if (controller) {
+            controller->SetObserver(observer);
+        }
+    }
+
+    void AddObserver(const ScrollerObserver& observer, int32_t id)
+    {
+        observerMgr_->AddObserver(observer, id);
+    }
+
+    void RemoveObserver(int32_t id)
+    {
+        observerMgr_->RemoveObserver(id);
+    }
+
 private:
     WeakPtr<ScrollControllerBase> controllerWeak_;
     WeakPtr<ScrollProxy> scrollBarProxyWeak_;
@@ -79,6 +109,9 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(ScrollerPeerImpl);
 
     int32_t instanceId_ = INSTANCE_ID_UNDEFINED;
+
+    ScrollerObserver observer_;
+    RefPtr<ScrollerObserverManager> observerMgr_ = MakeRefPtr<ScrollerObserverManager>();
 };
 
 } // namespace OHOS::Ace::NG::GeneratedModifier

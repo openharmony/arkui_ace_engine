@@ -25,6 +25,13 @@ namespace Nav = OHOS::Ace::NG::GeneratedModifier::NavigationContext;
 namespace OHOS::Ace::NG::Converter {
 void AssignArkValue(Ark_Object& dst, const Nav::ExternalData& src)
 {
+    if (src && src->data_.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        dst = src->data_.value;
+    }
+}
+
+void AssignArkValue(Opt_Object& dst, const Nav::ExternalData& src)
+{
     if (src) {
         dst = src->data_;
     }
@@ -57,10 +64,19 @@ Ark_NavPathInfo ConstructImpl(const Ark_String* name,
                               const Opt_Boolean* isEntry)
 {
     CHECK_NULL_RETURN(name, nullptr);
+    CHECK_NULL_RETURN(param, nullptr);
+    CHECK_NULL_RETURN(onPop, nullptr);
+    CHECK_NULL_RETURN(isEntry, nullptr);
     auto peer = new NavPathInfoPeer();
     CHECK_NULL_RETURN(peer, nullptr);
     peer->data.name_ = Convert<std::string>(*name);
-    peer->data.isEntry_ = Converter::OptConvertPtr<bool>(isEntry).value_or(peer->data.isEntry_);
+    peer->data.param_ = OptConvertPtr<Nav::ExternalData>(param).value_or(Nav::ExternalData{});
+    if (onPop->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        peer->data.onPop_ = AceType::MakeRefPtr<CallbackHelper<Callback_PopInfo_Void>>(onPop->value);
+    } else {
+        peer->data.onPop_ = nullptr;
+    }
+    peer->data.isEntry_ = Converter::OptConvertPtr<bool>(isEntry).value_or(false);
     return peer;
 }
 Ark_NativePointer GetFinalizerImpl()
@@ -81,9 +97,18 @@ void SetNameImpl(Ark_NavPathInfo peer,
 }
 Opt_Object GetParamImpl(Ark_NavPathInfo peer)
 {
-    auto invalid = ArkValue<Opt_Object>();
+    Opt_Object invalid = {
+        .tag = InteropTag::INTEROP_TAG_UNDEFINED
+    };
     CHECK_NULL_RETURN(peer && peer->data.param_, invalid);
-    return ArkValue<Opt_Object>(peer->data.param_->data_);
+    if (peer->data.param_->data_.tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+        return invalid;
+    }
+    Opt_Object retVal = {
+        .tag = InteropTag::INTEROP_TAG_OBJECT,
+        .value = peer->data.param_->data_.value
+    };
+    return retVal;
 }
 void SetParamImpl(Ark_NavPathInfo peer,
                   const Opt_Object* param)
@@ -94,17 +119,22 @@ void SetParamImpl(Ark_NavPathInfo peer,
 }
 Opt_Callback_PopInfo_Void GetOnPopImpl(Ark_NavPathInfo peer)
 {
-    auto invalid = Converter::ArkValue<Opt_Callback_PopInfo_Void>();
+    Opt_Callback_PopInfo_Void invalid = {
+        .tag = InteropTag::INTEROP_TAG_UNDEFINED
+    };
     CHECK_NULL_RETURN(peer, invalid);
-    return Converter::ArkValue<Opt_Callback_PopInfo_Void>(peer->data.onPop_.GetCallback());
+    return Converter::ArkValue<Opt_Callback_PopInfo_Void>(peer->data.onPop_->GetCallback());
 }
 void SetOnPopImpl(Ark_NavPathInfo peer,
                   const Opt_Callback_PopInfo_Void* onPop)
 {
     CHECK_NULL_VOID(peer);
-    auto optVal = Converter::GetOptPtr(onPop);
-    CHECK_NULL_VOID(optVal);
-    peer->data.onPop_ = CallbackHelper(*optVal);
+    CHECK_NULL_VOID(onPop);
+    if (onPop->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+        peer->data.onPop_ = nullptr;
+        return;
+    }
+    peer->data.onPop_ = AceType::MakeRefPtr<CallbackHelper<Callback_PopInfo_Void>>(onPop->value);
 }
 Opt_Boolean GetIsEntryImpl(Ark_NavPathInfo peer)
 {
@@ -116,9 +146,12 @@ void SetIsEntryImpl(Ark_NavPathInfo peer,
                     const Opt_Boolean* isEntry)
 {
     CHECK_NULL_VOID(peer);
-    auto convValue = Converter::OptConvertPtr<bool>(isEntry);
-    CHECK_NULL_VOID(convValue);
-    peer->data.isEntry_ = *convValue;
+    CHECK_NULL_VOID(isEntry);
+    if (isEntry->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+        peer->data.isEntry_ = false;
+        return;
+    }
+    peer->data.isEntry_ = Converter::Convert<bool>(isEntry->value);
 }
 Opt_String GetNavDestinationIdImpl(Ark_NavPathInfo peer)
 {
@@ -130,9 +163,12 @@ void SetNavDestinationIdImpl(Ark_NavPathInfo peer,
                              const Opt_String* navDestinationId)
 {
     CHECK_NULL_VOID(peer);
-    auto id = Converter::OptConvertPtr<std::string>(navDestinationId);
-    CHECK_NULL_VOID(id);
-    peer->data.navDestinationId_ = *id;
+    CHECK_NULL_VOID(navDestinationId);
+    if (navDestinationId->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+        peer->data.navDestinationId_ = "";
+        return;
+    }
+    peer->data.navDestinationId_ = Converter::Convert<std::string>(navDestinationId->value);
 }
 } // NavPathInfoAccessor
 const GENERATED_ArkUINavPathInfoAccessor* GetNavPathInfoAccessor()

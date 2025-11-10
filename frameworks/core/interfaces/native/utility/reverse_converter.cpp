@@ -838,13 +838,13 @@ void AssignArkValue(Ark_NavContentInfo& dst, const RefPtr<NG::NavDestinationCont
         dst.index = Converter::ArkValue<Ark_Int32>(-1);
         return;
     }
-    auto navPathInfo = src->GetNavPathInfo();
+    auto navPathInfo =
+        AceType::DynamicCast<GeneratedModifier::NavigationContext::JSNavPathInfoStatic>(src->GetNavPathInfo());
     if (navPathInfo) {
         auto name = navPathInfo->GetName();
         dst.name.tag = InteropTag::INTEROP_TAG_STRING;
         dst.name.value = Converter::ArkValue<Ark_String>(name, Converter::FC);
-        dst.param.tag = InteropTag::INTEROP_TAG_UNDEFINED;
-        // tbd: param info
+        dst.param = navPathInfo->GetParam()->data_;
     } else {
         dst.name.tag = InteropTag::INTEROP_TAG_UNDEFINED;
         dst.param.tag = InteropTag::INTEROP_TAG_UNDEFINED;
@@ -928,6 +928,14 @@ void AssignArkValue(Ark_TextChangeOptions& dst, const ChangeValueInfo& value, Co
     dst.rangeAfter = Converter::ArkValue<Ark_TextRange>(value.rangeAfter);
     dst.oldContent = Converter::ArkValue<Ark_String>(value.oldContent, ctx);
     dst.oldPreviewText = Converter::ArkValue<Ark_PreviewText>(value.oldPreviewText, ctx);
+}
+
+void AssignArkValue(
+    Ark_NavPathStack& dst, const RefPtr<NG::GeneratedModifier::NavigationContext::NavigationStack>& src)
+{
+    const auto peer = PeerUtils::CreatePeer<NavPathStackPeer>();
+    peer->SetNavigationStack(src);
+    dst = peer;
 }
 
 void AssignArkValue(Ark_LengthMetricsCustom& dst, const CalcDimension& src)

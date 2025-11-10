@@ -14,6 +14,7 @@
  */
 
 #include "navigation_context.h"
+#include "nav_path_info_peer_impl.h"
 #include "core/components_ng/pattern/navrouter/navdestination_model_static.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -25,7 +26,9 @@ void PathInfo::InvokeOnPop(const PopInfo& popInfo)
         .info = ::OHOS::Ace::NG::Converter::ArkValue<Ark_NavPathInfo>(popInfo.info),
         .result = ::OHOS::Ace::NG::Converter::ArkValue<Ark_Object>(popInfo.result),
     };
-    onPop_.Invoke(arkPopInfo);
+    if (onPop_) {
+        onPop_->Invoke(arkPopInfo);
+    }
 }
 
 int PathStack::GetJsIndexFromNativeIndex(int index)
@@ -283,6 +286,30 @@ PathInfo PathStack::Pop(bool animated)
     return pathInfo;
 }
 
+PathInfo PathStack::Pop(bool animated, Ark_Object result)
+{
+    if (pathArray_.empty()) {
+        return PathInfo();
+    }
+    PathInfo currentPathInfo = pathArray_.back();
+    PathInfo pathInfo = pathArray_.back();
+    pathArray_.pop_back();
+    popArray_.push_back(pathInfo);
+    isReplace_ = NO_ANIM_NO_REPLACE;
+    animated_ = animated;
+    auto arkPathInfo = Converter::ArkValue<Ark_NavPathInfo>(pathInfo);
+    Ark_PopInfo popInfo = {
+        .info = arkPathInfo,
+        .result = result
+    };
+    if (currentPathInfo.onPop_) {
+        currentPathInfo.onPop_->InvokeSync(popInfo);
+    }
+    
+    InvokeOnStateChanged();
+    return pathInfo;
+}
+
 void PathStack::PopTo(const std::string& name, const std::optional<bool>& animated)
 {
     PopToName(name, animated);
@@ -299,6 +326,17 @@ int PathStack::PopToName(const std::string& name, const std::optional<bool>& ani
     return idx;
 }
 
+int PathStack::PopToName(const std::string& name, const std::optional<bool>& animated, Ark_Object result)
+{
+    auto it = FindNameInternal(name);
+    if (it == pathArray_.end()) {
+        return -1;
+    }
+    auto idx = std::distance(pathArray_.begin(), it);
+    PopToInternal(it, animated, result);
+    return idx;
+}
+
 void PathStack::PopToIndex(size_t index, const std::optional<bool>& animated)
 {
     auto it = std::next(pathArray_.begin(), index);
@@ -308,12 +346,44 @@ void PathStack::PopToIndex(size_t index, const std::optional<bool>& animated)
     PopToInternal(it, animated);
 }
 
+void PathStack::PopToIndex(size_t index, const std::optional<bool>& animated, Ark_Object result)
+{
+    auto it = std::next(pathArray_.begin(), index);
+    if (it >= pathArray_.end()) {
+        return;
+    }
+    PopToInternal(it, animated, result);
+}
+
 void PathStack::PopToInternal(std::vector<PathInfo>::iterator it,
     const std::optional<bool>& animated)
 {
     auto currentPathInfo = pathArray_.back();
     pathArray_.erase(std::next(it, 1), pathArray_.end());
     isReplace_ = NO_ANIM_NO_REPLACE;
+
+    if (onPopCallback_) {
+        onPopCallback_(currentPathInfo.navDestinationId_.value_or(""));
+    }
+    animated_ = animated.value_or(DEFAULT_ANIMATED);
+    InvokeOnStateChanged();
+}
+
+void PathStack::PopToInternal(std::vector<PathInfo>::iterator it,
+    const std::optional<bool>& animated, Ark_Object result)
+{
+    auto currentPathInfo = pathArray_.back();
+    pathArray_.erase(std::next(it, 1), pathArray_.end());
+    isReplace_ = NO_ANIM_NO_REPLACE;
+
+    auto arkPathInfo = Converter::ArkValue<Ark_NavPathInfo>(currentPathInfo);
+    Ark_PopInfo popInfo = {
+        .info = arkPathInfo,
+        .result = result
+    };
+    if (currentPathInfo.onPop_) {
+        currentPathInfo.onPop_->InvokeSync(popInfo);
+    }
 
     if (onPopCallback_) {
         onPopCallback_(currentPathInfo.navDestinationId_.value_or(""));
@@ -660,7 +730,9 @@ bool NavigationStack::CreateNodeByIndex(int32_t index, const WeakPtr<NG::UINode>
     }
     if (errorCode != ERROR_CODE_NO_ERROR) {
         TAG_LOGE(AceLogTag::ACE_NAVIGATION, "can't find target destination by index, create empty node");
-        node = AceType::DynamicCast<NG::UINode>(NavDestinationModelStatic::CreateFrameNode(0));
+        auto navPathInfo = AceType::MakeRefPtr<JSNavPathInfoStatic>();
+        node = AceType::DynamicCast<NG::UINode>(
+            NavDestinationModelStatic::CreateFrameNode(0, navPathInfo));
         FirePromise(pathInfo, errorCode);
         return true;
     }
@@ -670,7 +742,9 @@ bool NavigationStack::CreateNodeByIndex(int32_t index, const WeakPtr<NG::UINode>
     if (pattern) {
         pattern->SetName(name);
         pattern->SetIndex(index);
-        auto pathInfoData = AceType::MakeRefPtr<NavPathInfo>(name, isEntry); // `param` and `onPop` data may be added
+        auto onPop = pathInfo->onPop_;
+        auto param = pathInfo->param_;
+        auto pathInfoData = AceType::MakeRefPtr<JSNavPathInfoStatic>(name, param, onPop, isEntry);
         pattern->SetNavPathInfo(pathInfoData);
         pattern->SetNavigationStack(WeakClaim(this));
     }
@@ -693,7 +767,7 @@ ParamType NavigationStack::GetParamByIndex(int32_t index) const
 OnPopCallback NavigationStack::GetOnPopByIndex(int32_t index) const
 {
     auto pathInfo = PathStack::GetPathInfo(index);
-    return pathInfo ? pathInfo->onPop_ : OnPopCallback();
+    return pathInfo ? pathInfo->onPop_ : nullptr;
 }
 
 bool NavigationStack::GetIsEntryByIndex(int32_t index)
@@ -866,7 +940,9 @@ void NavigationStack::UpdatePathInfoIfNeeded(RefPtr<NG::UINode>& uiNode, int32_t
         return;
     }
     // temp stub WITHOUT `param` and `onPop` from pathInfo
-    auto pathInfoData = AceType::MakeRefPtr<NavPathInfo>(pathInfo->name_, pathInfo->isEntry_);
+    auto onPop = pathInfo->onPop_;
+    auto param = pathInfo->param_;
+    auto pathInfoData = AceType::MakeRefPtr<JSNavPathInfoStatic>(pathInfo->name_, param, onPop, pathInfo->isEntry_);
     pattern->SetNavPathInfo(pathInfoData);
 }
 

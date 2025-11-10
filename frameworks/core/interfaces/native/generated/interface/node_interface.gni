@@ -169,6 +169,7 @@ generated_sources = [
   "implementation/mutable_styled_string_accessor.cpp",
   "implementation/nav_destination_context_accessor.cpp",
   "implementation/nav_destination_modifier.cpp",
+  "implementation/nav_destination_scrollable_processor_static.cpp",
   "implementation/nav_extender_accessor.cpp",
   "implementation/nav_path_info_accessor.cpp",
   "implementation/nav_path_stack_accessor.cpp",

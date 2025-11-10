@@ -1569,7 +1569,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    function createSwiperNode(context: UIContext, type: string): SwiperFrameNode {
+    function createSwiperNode(context: UIContext): SwiperFrameNode {
         return new SwiperFrameNode(context, 'Swiper', (node: FrameNode, type: ModifierType): ArkSwiperNode => {
             let arknode = new ArkSwiperNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);

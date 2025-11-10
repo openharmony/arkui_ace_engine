@@ -4843,17 +4843,43 @@ export class ArkUIGeneratedNativeModule {
     native static _NavPathStack_construct(): KPointer
     @ani.unsafe.Direct
     native static _NavPathStack_getFinalizer(): KPointer
+    @ani.unsafe.Direct
+    native static _NavPathStack_pushPath0(ptr: KPointer, info: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _NavPathStack_pushPath1(ptr: KPointer, info: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     native static _NavPathStack_pushDestination0(ptr: KPointer, info: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     native static _NavPathStack_pushDestination1(ptr: KPointer, info: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Quick
+    native static _NavPathStack_pushPathByName0(ptr: KPointer, name: KStringPtr, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Quick
+    native static _NavPathStack_pushPathByName1(ptr: KPointer, name: KStringPtr, thisArray: KSerializerBuffer, thisLength: int32): void
     native static _NavPathStack_pushDestinationByName0(ptr: KPointer, name: KStringPtr, thisArray: KSerializerBuffer, thisLength: int32): void
     native static _NavPathStack_pushDestinationByName1(ptr: KPointer, name: KStringPtr, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _NavPathStack_replacePath0(ptr: KPointer, info: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _NavPathStack_replacePath1(ptr: KPointer, info: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     native static _NavPathStack_replaceDestination(ptr: KPointer, info: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Quick
+    native static _NavPathStack_replacePathByName(ptr: KPointer, name: KStringPtr, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _NavPathStack_removeByIndexes(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): int32
     @ani.unsafe.Quick
     native static _NavPathStack_removeByName(ptr: KPointer, name: KStringPtr): int32
     @ani.unsafe.Quick
     native static _NavPathStack_removeByNavDestinationId(ptr: KPointer, navDestinationId: KStringPtr): boolean
+    @ani.unsafe.Quick
+    native static _NavPathStack_pop0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _NavPathStack_pop1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _NavPathStack_popToName0(ptr: KPointer, name: KStringPtr, thisArray: KSerializerBuffer, thisLength: int32): int32
+    @ani.unsafe.Quick
+    native static _NavPathStack_popToName1(ptr: KPointer, name: KStringPtr, thisArray: KSerializerBuffer, thisLength: int32): int32
+    @ani.unsafe.Direct
+    native static _NavPathStack_popToIndex0(ptr: KPointer, index: KInt, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _NavPathStack_popToIndex1(ptr: KPointer, index: KInt, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Quick
     native static _NavPathStack_moveToTop(ptr: KPointer, name: KStringPtr, thisArray: KSerializerBuffer, thisLength: int32): int32
     @ani.unsafe.Direct
@@ -4862,6 +4888,10 @@ export class ArkUIGeneratedNativeModule {
     native static _NavPathStack_clear(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Quick
     native static _NavPathStack_getAllPathName(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _NavPathStack_getParamByIndex(ptr: KPointer, index: KInt): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _NavPathStack_getParamByName(ptr: KPointer, name: KStringPtr): KInteropReturnBuffer
     @ani.unsafe.Quick
     native static _NavPathStack_getIndexByName(ptr: KPointer, name: KStringPtr): KInteropReturnBuffer
     @ani.unsafe.Quick
@@ -5311,7 +5341,6 @@ export class ArkUIGeneratedNativeModule {
     native static _RouterExtender_back(): void
     @ani.unsafe.Quick
     native static _RouterExtender_backWithOptions(url: KStringPtr, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Quick
     native static _RouterExtender_runPage(jsView: KPointer, url: KStringPtr, thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
     native static _RouterExtender_clear(): void
