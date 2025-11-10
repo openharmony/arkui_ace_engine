@@ -16,6 +16,7 @@
 
 #include "core/components_ng/pattern/overlay/modal_style.h"
 #include "core/components_ng/pattern/overlay/sheet_theme.h"
+#include "core/interfaces/native/implementation/spring_back_action_peer.h"
 
 namespace OHOS::Ace::NG {
 constexpr int32_t EFFECT_EDGE_ZERO = 0;
@@ -94,9 +95,7 @@ void BindSheetUtil::ParseFunctionalCallbacks(SheetCallbacks& callbacks, const Ar
         sheetOptions.onWillSpringBackWhenDismiss);
     if (onWillSpringBackWhenDismiss) {
         callbacks.sheetSpringBack = [arkCallback = CallbackHelper(onWillSpringBackWhenDismiss.value())]() {
-            Ark_SpringBackAction parameter;
-            const auto keeper = CallbackKeeper::Claim(std::move(ViewAbstractModelStatic::SheetSpringBackStatic));
-            parameter.springBack = keeper.ArkValue();
+            Ark_SpringBackAction parameter = &g_springBackPeer;
             arkCallback.Invoke(parameter);
         };
     }

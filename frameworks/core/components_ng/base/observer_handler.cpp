@@ -287,8 +287,15 @@ void UIObserverHandler::NotifyGestureStateChange(NG::GestureListenerType gesture
 
 void UIObserverHandler::NotifyTabContentStateUpdate(const TabContentInfo& info)
 {
+    NotifyTabContentStateUpdateForAni(info);
     CHECK_NULL_VOID(tabContentStateHandleFunc_);
     tabContentStateHandleFunc_(info);
+}
+
+void UIObserverHandler::NotifyTabContentStateUpdateForAni(const TabContentInfo& info)
+{
+    CHECK_NULL_VOID(tabContentHandleFuncForAni_);
+    tabContentHandleFuncForAni_(info);
 }
 
 void UIObserverHandler::NotifyTabChange(const TabContentInfo& info)
@@ -304,6 +311,11 @@ void UIObserverHandler::NotifyTabChange(const TabContentInfo& info)
 UIObserverHandler::NavDestinationSwitchHandleFunc UIObserverHandler::GetHandleNavDestinationSwitchFunc()
 {
     return navDestinationSwitchHandleFunc_;
+}
+
+void UIObserverHandler::SetHandleTabContentUpdateFuncForAni(TabContentHandleFuncForAni func)
+{
+    tabContentHandleFuncForAni_ = func;
 }
 
 std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetNavDestinationInfo(const RefPtr<UINode>& current)

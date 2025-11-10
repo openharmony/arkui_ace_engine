@@ -1019,6 +1019,8 @@ void AssignCast(std::optional<TabAnimateMode>& dst, const Ark_AnimationMode& src
         case ARK_ANIMATION_MODE_CONTENT_FIRST: dst = TabAnimateMode::CONTENT_FIRST; break;
         case ARK_ANIMATION_MODE_ACTION_FIRST: dst = TabAnimateMode::ACTION_FIRST; break;
         case ARK_ANIMATION_MODE_NO_ANIMATION: dst = TabAnimateMode::NO_ANIMATION; break;
+        case ARK_ANIMATION_MODE_CONTENT_FIRST_WITH_JUMP: dst = TabAnimateMode::CONTENT_FIRST_WITH_JUMP; break;
+        case ARK_ANIMATION_MODE_ACTION_FIRST_WITH_JUMP: dst = TabAnimateMode::ACTION_FIRST_WITH_JUMP; break;
         default: LOGE("Unexpected enum value in Ark_AnimationMode: %{public}d", src);
     }
 }

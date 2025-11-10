@@ -89,6 +89,11 @@ import hilog from '@ohos.hilog'
         offTabChange(callback?: object): void;
         onTabChange(options: ObserverOptions, callback: object): void;
         offTabChange(options: ObserverOptions, callback?: object): void;
+
+        onTabContentUpdate(callback: Callback<TabContentInfo>): void;
+        offTabContentUpdate(callback?: Callback<TabContentInfo>): void;
+        onTabContentUpdate(options: ObserverOptions, callback: Callback<TabContentInfo>): void;
+        offTabContentUpdate(options: ObserverOptions, callback?: Callback<TabContentInfo>): void;
     }
     
     class UIObserverImpl implements UIObserver
@@ -137,6 +142,11 @@ import hilog from '@ohos.hilog'
         public native offTabChange(callback?: object): void;
         public native onTabChange(options: ObserverOptions, callback: object): void;
         public native offTabChange(options: ObserverOptions, callback?: object): void;
+
+        public native onTabContentUpdate(callback: Callback<TabContentInfo>): void;
+        public native offTabContentUpdate(callback?: Callback<TabContentInfo>): void;
+        public native onTabContentUpdate(options: ObserverOptions, callback: Callback<TabContentInfo>): void;
+        public native offTabContentUpdate(options: ObserverOptions, callback?: Callback<TabContentInfo>): void;
     }
 
     export interface NavigationInfo {

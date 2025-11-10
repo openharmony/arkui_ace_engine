@@ -217,6 +217,7 @@ public:
         const RefPtr<PanRecognizer>& current, const RefPtr<FrameNode>& frameNode,
         const PanGestureInfo& panGestureInfo);
     void NotifyTabContentStateUpdate(const TabContentInfo& info);
+    void NotifyTabContentStateUpdateForAni(const TabContentInfo& info);
     void NotifyTabChange(const TabContentInfo& info);
     void NotifyGestureStateChange(NG::GestureListenerType gestureListenerType, const GestureEvent& gestureEventInfo,
         const RefPtr<NGGestureRecognizer>& current, const RefPtr<FrameNode>& frameNode, NG::GestureActionPhase phase);
@@ -252,6 +253,7 @@ public:
     using TabChangeHandleFunc = void (*)(const TabContentInfo&);
     using TabChangeHandleFuncForAni = std::function<void(const TabContentInfo& info)>;
     using NavigationHandleFuncForAni = std::function<void(const NG::NavDestinationInfo& info)>;
+    using TabContentHandleFuncForAni = std::function<void(const NG::TabContentInfo& info)>;
     using TextChangeEventHandleFunc = void (*)(const TextChangeEventInfo&);
     using SwiperContentUpdateHandleFunc = void (*)(const SwiperContentInfo&);
     using SwiperContentObservrEmptyFunc = bool (*)();
@@ -266,6 +268,7 @@ public:
     using DensityHandleFuncForAni = std::function<void(AbilityContextInfo&, double)>;
     void SetHandleDensityChangeFunc(DensityHandleFunc func);
     void SetHandleDensityChangeFuncForAni(DensityHandleFuncForAni func);
+    void SetHandleTabContentUpdateFuncForAni(TabContentHandleFuncForAni func);
     void SetWinSizeLayoutBreakpointChangeFunc(WinSizeLayoutBreakpointHandleFunc func);
     void SetLayoutDoneHandleFunc(DrawCommandSendHandleFunc func);
     void HandleLayoutDoneCallBack();
@@ -312,6 +315,7 @@ private:
     DidClickHandleFunc didClickHandleFunc_ = nullptr;
     PanGestureHandleFunc panGestureHandleFunc_ = nullptr;
     TabContentStateHandleFunc tabContentStateHandleFunc_ = nullptr;
+    TabContentHandleFuncForAni tabContentHandleFuncForAni_ = nullptr;
     TabChangeHandleFunc tabChangeHandleFunc_ = nullptr;
     TabChangeHandleFuncForAni tabChangeHandleFuncForAni_ = nullptr;
     GestureHandleFunc gestureHandleFunc_ = nullptr;

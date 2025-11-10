@@ -612,6 +612,9 @@ typedef struct Ark_SizeNumberInner Ark_SizeNumberInner;
 typedef struct Opt_SizeNumberInner Opt_SizeNumberInner;
 typedef struct Ark_SizeResult Ark_SizeResult;
 typedef struct Opt_SizeResult Opt_SizeResult;
+typedef struct SpringBackActionPeer SpringBackActionPeer;
+typedef struct SpringBackActionPeer* Ark_SpringBackAction;
+typedef struct Opt_SpringBackAction Opt_SpringBackAction;
 typedef struct SpringMotionPeer SpringMotionPeer;
 typedef struct SpringMotionPeer* Ark_SpringMotion;
 typedef struct Opt_SpringMotion Opt_SpringMotion;
@@ -2300,7 +2303,6 @@ typedef struct Ark_SliderConfiguration Ark_SliderConfiguration;
 typedef struct Opt_SliderConfiguration Opt_SliderConfiguration;
 typedef struct Ark_SnapshotOptions Ark_SnapshotOptions;
 typedef struct Opt_SnapshotOptions Opt_SnapshotOptions;
-typedef struct Ark_SpringBackAction Ark_SpringBackAction;
 typedef struct Opt_SpringBackAction Opt_SpringBackAction;
 typedef struct Ark_SslErrorEvent Ark_SslErrorEvent;
 typedef struct Opt_SslErrorEvent Opt_SslErrorEvent;
@@ -15325,10 +15327,6 @@ typedef struct Opt_SnapshotOptions {
     Ark_Tag tag;
     Ark_SnapshotOptions value;
 } Opt_SnapshotOptions;
-typedef struct Ark_SpringBackAction {
-    /* kind: Interface */
-    VoidCallback springBack;
-} Ark_SpringBackAction;
 typedef struct Opt_SpringBackAction {
     Ark_Tag tag;
     Ark_SpringBackAction value;
@@ -27523,6 +27521,13 @@ typedef struct GENERATED_ArkUISelectExtenderAccessor {
                        const Opt_DividerOptions* options);
 } GENERATED_ArkUISelectExtenderAccessor;
 
+typedef struct GENERATED_ArkUISpringBackActionAccessor {
+    void (*destroyPeer)(Ark_SpringBackAction peer);
+    Ark_SpringBackAction (*construct)();
+    Ark_NativePointer (*getFinalizer)();
+    void (*springBack)(Ark_SpringBackAction peer);
+} GENERATED_ArkUISpringBackActionAccessor;
+
 typedef struct GENERATED_ArkUISpringMotionAccessor {
     void (*destroyPeer)(Ark_SpringMotion peer);
     Ark_SpringMotion (*construct)(const Ark_Number* start,
@@ -28492,6 +28497,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUISearchControllerAccessor* (*getSearchControllerAccessor)();
     const GENERATED_ArkUISearchOpsAccessor* (*getSearchOpsAccessor)();
     const GENERATED_ArkUISelectExtenderAccessor* (*getSelectExtenderAccessor)();
+    const GENERATED_ArkUISpringBackActionAccessor* (*getSpringBackActionAccessor)();
     const GENERATED_ArkUISpringMotionAccessor* (*getSpringMotionAccessor)();
     const GENERATED_ArkUISpringPropAccessor* (*getSpringPropAccessor)();
     const GENERATED_ArkUISslErrorHandlerAccessor* (*getSslErrorHandlerAccessor)();

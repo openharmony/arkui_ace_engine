@@ -32,6 +32,7 @@ constexpr uint16_t PIXEL_ROUND = static_cast<uint16_t>(PixelRoundPolicy::NO_FORC
                                 static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_BOTTOM);
 constexpr uint32_t DEFAULT_RENDERING_STRATEGY = 2;
 const auto MASK_COUNT = 2;
+const auto IMAGE_INDICATOR_COUNT = 1;
 }
 void TabContentModelStatic::SetShallowBuilder(FrameNode* frameNode, const RefPtr<ShallowBuilder>& shallowBuilder)
 {
@@ -325,6 +326,8 @@ void TabContentModelStatic::AddTabBarItem(const RefPtr<UINode>& tabContent, int3
     tabBarPattern->AddTabBarItemCallBack(columnNode);
     auto selectedMode = tabContentPattern->GetSelectedMode();
     auto indicatorStyle = tabContentPattern->GetIndicatorStyle();
+    auto drawableIndicatorConfig = tabContentPattern->GetDrawableIndicatorConfig();
+    auto isDrawableIndicator = tabContentPattern->IsDrawableIndicator();
     auto boardStyle = tabContentPattern->GetBoardStyle();
     auto bottomTabBarStyle = tabContentPattern->GetBottomTabBarStyle();
     auto padding = tabContentPattern->GetPadding();
@@ -386,6 +389,8 @@ void TabContentModelStatic::AddTabBarItem(const RefPtr<UINode>& tabContent, int3
     }
     tabBarPattern->SetSelectedMode(selectedMode, myIndex, newTabBar);
     tabBarPattern->SetIndicatorStyle(indicatorStyle, myIndex, newTabBar);
+    tabBarPattern->SetDrawableIndicatorConfig(drawableIndicatorConfig, myIndex, newTabBar);
+    tabBarPattern->SetDrawableIndicatorFlag(isDrawableIndicator, myIndex, newTabBar);
 
     if (tabBarParam.GetTabBarStyle() == TabBarStyle::NOSTYLE && !tabBarParam.HasBuilder() &&
         !tabBarParam.HasContent() && tabBarParam.GetIcon().empty() && tabBarParam.GetText().empty()) {
@@ -415,7 +420,8 @@ void TabContentModelStatic::AddTabBarItem(const RefPtr<UINode>& tabContent, int3
         if (oldColumnNode != columnNode) {
             if (!oldColumnNode) {
                 auto index =
-                    std::clamp(myIndex, 0, static_cast<int32_t>(tabBarNode->GetChildren().size()) - MASK_COUNT);
+                    std::clamp(myIndex, 0, static_cast<int32_t>(tabBarNode->GetChildren().size()) -
+                    MASK_COUNT - IMAGE_INDICATOR_COUNT);
                 columnNode->MountToParent(tabBarNode, index);
             } else if (oldColumnNode != columnNode) {
                 tabBarNode->ReplaceChild(oldColumnNode, columnNode);
@@ -426,13 +432,17 @@ void TabContentModelStatic::AddTabBarItem(const RefPtr<UINode>& tabContent, int3
         layoutProperty->UpdatePadding({ CalcLength(tabBarItemPadding), CalcLength(tabBarItemPadding),
             CalcLength(tabBarItemPadding), CalcLength(tabBarItemPadding), {}, {} });
         columnNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
-        tabBarPattern->HandleTabBarItemType(columnNode->GetId(), TabBarParamType::COMPONENT_CONTENT);
+        tabBarPattern->AddTabBarItemType(columnNode->GetId(), TabBarParamType::COMPONENT_CONTENT);
         tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
         return;
     }
 
     // Create tab bar with builder.
     if (tabBarParam.HasBuilder()) {
+        auto layoutProperty = columnNode->GetLayoutProperty();
+        CHECK_NULL_VOID(layoutProperty);
+        PaddingProperty initPadding;
+        layoutProperty->UpdatePadding(initPadding);
         ScopedViewStackProcessor builderViewStackProcessor;
         tabBarParam.ExecuteBuilder();
         auto builderNode = ViewStackProcessor::GetInstance()->Finish();
@@ -444,13 +454,14 @@ void TabContentModelStatic::AddTabBarItem(const RefPtr<UINode>& tabContent, int3
         }
         auto oldColumnNode = tabsNode->GetBuilderByContentId(tabContentId, columnNode);
         if (!oldColumnNode) {
-            auto index = std::clamp(myIndex, 0, static_cast<int32_t>(tabBarNode->GetChildren().size()) - MASK_COUNT);
+            auto index = std::clamp(myIndex, 0, static_cast<int32_t>(tabBarNode->GetChildren().size()) -
+                MASK_COUNT - IMAGE_INDICATOR_COUNT);
             columnNode->MountToParent(tabBarNode, index);
         } else if (oldColumnNode != columnNode) {
             tabBarNode->ReplaceChild(oldColumnNode, columnNode);
         }
         columnNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
-        tabBarPattern->HandleTabBarItemType(columnNode->GetId(), TabBarParamType::CUSTOM_BUILDER);
+        tabBarPattern->AddTabBarItemType(columnNode->GetId(), TabBarParamType::CUSTOM_BUILDER);
         tabBarPattern->SetIsExecuteBuilder(true);
         tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
         return;
@@ -477,9 +488,9 @@ void TabContentModelStatic::AddTabBarItem(const RefPtr<UINode>& tabContent, int3
 
     bool isFrameNode = tabBarStyle == TabBarStyle::SUBTABBATSTYLE && tabContentPattern->HasSubTabBarStyleNode();
     if (isFrameNode) {
-        tabBarPattern->HandleTabBarItemType(columnNode->GetId(), TabBarParamType::SUB_COMPONENT_CONTENT);
+        tabBarPattern->AddTabBarItemType(columnNode->GetId(), TabBarParamType::SUB_COMPONENT_CONTENT);
     } else {
-        tabBarPattern->HandleTabBarItemType(columnNode->GetId(), TabBarParamType::NORMAL);
+        tabBarPattern->AddTabBarItemType(columnNode->GetId(), TabBarParamType::NORMAL);
     }
     if (static_cast<int32_t>(columnNode->GetChildren().size()) == 0) {
         if (tabBarParam.GetSymbol().has_value()) {
@@ -497,7 +508,8 @@ void TabContentModelStatic::AddTabBarItem(const RefPtr<UINode>& tabContent, int3
         }
         CHECK_NULL_VOID(textNode);
         CHECK_NULL_VOID(iconNode);
-        auto index = std::clamp(position, 0, static_cast<int32_t>(tabBarNode->GetChildren().size()) - MASK_COUNT);
+        auto index = std::clamp(position, 0, static_cast<int32_t>(tabBarNode->GetChildren().size()) -
+            MASK_COUNT - IMAGE_INDICATOR_COUNT);
         columnNode->MountToParent(tabBarNode, index);
         iconNode->MountToParent(columnNode);
         textNode->MountToParent(columnNode);

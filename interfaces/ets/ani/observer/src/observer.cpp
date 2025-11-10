@@ -37,6 +37,9 @@ constexpr char ANI_TABCONTENT_INFO_CLS[] = "@ohos.arkui.observer.uiObserver.TabC
 constexpr char ANI_TABCONTENT_STATE_TYPE[] = "@ohos.arkui.observer.uiObserver.TabContentState";
 constexpr char TAB_CHANGE_PARAM[] = "C{std.core.Object}:";
 constexpr char TAB_CHANGE_PARAM_WITHID[] = "C{@ohos.arkui.observer.uiObserver.ObserverOptions}C{std.core.Object}:";
+constexpr char ANI_TABCONTENT_WITH_OPTIONS_CLS[] =
+    "C{@ohos.arkui.observer.uiObserver.ObserverOptions}C{std.core.Function1}:";
+constexpr char ANI_TABCONTENT_CLS[] = "C{std.core.Function1}:";
 } // namespace
 namespace OHOS::Ace {
 class UiObserver {
@@ -541,6 +544,58 @@ public:
             holder.end());
     }
 
+    void RegisterTabContentUpdateCallback(const ani_ref& cb)
+    {
+        if (std::find(unspecifiedTabContentListeners_.begin(), unspecifiedTabContentListeners_.end(), cb) !=
+            unspecifiedTabContentListeners_.end()) {
+            return;
+        }
+        unspecifiedTabContentListeners_.emplace_back(cb);
+    }
+
+    void RegisterTabContentUpdateCallback(const std::string& id, const ani_ref& cb)
+    {
+        auto iter = specifiedTabContentUpdateListeners_.find(id);
+        if (iter == specifiedTabContentUpdateListeners_.end()) {
+            specifiedTabContentUpdateListeners_.emplace(id, std::list<ani_ref>({ cb }));
+            return;
+        }
+        auto& holder = iter->second;
+        if (std::find(holder.begin(), holder.end(), cb) != holder.end()) {
+            return;
+        }
+        holder.emplace_back(cb);
+    }
+
+    void UnRegisterTabContentUpdateCallback(ani_env* env, const ani_ref& cb)
+    {
+        if (cb == nullptr) {
+            unspecifiedTabContentListeners_.clear();
+            return;
+        }
+        unspecifiedTabContentListeners_.erase(
+            std::remove_if(unspecifiedTabContentListeners_.begin(), unspecifiedTabContentListeners_.end(),
+                [env, cb, this](ani_ref cb1) { return AniEqual(env, cb, cb1); }),
+            unspecifiedTabContentListeners_.end());
+    }
+
+    void UnRegisterTabContentUpdateCallback(ani_env* env, const std::string& id, const ani_ref& cb)
+    {
+        auto iter = specifiedTabContentUpdateListeners_.find(id);
+        if (iter == specifiedTabContentUpdateListeners_.end()) {
+            return;
+        }
+        auto& holder = iter->second;
+        if (cb == nullptr) {
+            holder.clear();
+            return;
+        }
+        holder.erase(std::remove_if(holder.begin(),
+                                    holder.end(),
+                                    [env, cb, this](ani_ref cb1) { return AniEqual(env, cb, cb1); }),
+                     holder.end());
+    }
+
     // UIObserver.on(type: "routerPageUpdate", UIContext, callback)
     static void RegisterRouterPageCallback(int32_t uiContextInstanceId, ani_ref& cb)
     {
@@ -694,6 +749,34 @@ public:
         }
     }
 
+    void HandleTabContentUpdate(ani_env* env, const NG::TabContentInfo& tabContentInfo)
+    {
+        auto unspecifiedHolder = unspecifiedTabContentListeners_;
+        std::vector<ani_ref> cbParam;
+        ani_ref fnRetrunVal;
+        ani_object res;
+        CreateTabContentUpdateInfo(env, tabContentInfo, res);
+        cbParam.emplace_back(res);
+        for (auto& cb : unspecifiedHolder) {
+            env->FunctionalObject_Call(
+                reinterpret_cast<ani_fn_object>(cb), cbParam.size(), cbParam.data(), &fnRetrunVal);
+        }
+        auto iter = specifiedTabContentUpdateListeners_.find(tabContentInfo.id);
+        if (iter == specifiedTabContentUpdateListeners_.end()) {
+            return;
+        }
+        auto holder = iter->second;
+        std::vector<ani_ref> cbParamsWithId;
+        ani_ref fnReturnValWithId;
+        ani_object resWithId = nullptr;
+        CreateTabContentUpdateInfo(env, tabContentInfo, resWithId);
+        cbParamsWithId.emplace_back(resWithId);
+        for (auto& cb : holder) {
+            env->FunctionalObject_Call(
+                reinterpret_cast<ani_fn_object>(cb), cbParamsWithId.size(), cbParamsWithId.data(), &fnReturnValWithId);
+        }
+    }
+
     static void HandleRouterPageStateChange(ani_env* env, NG::AbilityContextInfo& info,
         const NG::RouterPageInfoNG& pageInfo)
     {
@@ -800,6 +883,34 @@ public:
         ani_enum_item navModeItem;
         env->Enum_GetEnumItemByIndex(navMode, static_cast<ani_size>(info.mode), &navModeItem);
         env->Object_SetPropertyByName_Ref(res, "mode", navModeItem);
+    }
+
+    void CreateTabContentUpdateInfo(ani_env* env, const NG::TabContentInfo& tabContentInfo, ani_object& res)
+    {
+        ani_class cls;
+        env->FindClass(ANI_TABCONTENT_INFO_CLS, &cls);
+        ani_method tabContentInfoCtor;
+        env->Class_FindMethod(cls, "<ctor>", nullptr, &tabContentInfoCtor);
+        env->Object_New(cls, tabContentInfoCtor, &res);
+
+        env->Object_SetPropertyByName_Int(res, "tabContentUniqueId",
+            static_cast<ani_int>(tabContentInfo.tabContentUniqueId));
+        env->Object_SetPropertyByName_Int(res, "index", static_cast<ani_int>(tabContentInfo.index));
+        env->Object_SetPropertyByName_Int(res, "uniqueId", static_cast<ani_int>(tabContentInfo.uniqueId));
+
+        ani_string tabContentId {};
+        env->String_NewUTF8(tabContentInfo.tabContentId.c_str(), tabContentInfo.tabContentId.size(), &tabContentId);
+        env->Object_SetPropertyByName_Ref(res, "tabContentId", tabContentId);
+
+        ani_string id {};
+        env->String_NewUTF8(tabContentInfo.id.c_str(), tabContentInfo.id.size(), &id);
+        env->Object_SetPropertyByName_Ref(res, "id", id);
+
+        ani_enum tabState;
+        env->FindEnum(ANI_TABCONTENT_STATE_TYPE, &tabState);
+        ani_enum_item tabStateItem;
+        env->Enum_GetEnumItemByIndex(tabState, static_cast<ani_size>(tabContentInfo.state), &tabStateItem);
+        env->Object_SetPropertyByName_Ref(res, "state", tabStateItem);
     }
 
     static void CreateRouterPageInfo(ani_env* env, const NG::RouterPageInfoNG& pageInfo, ani_object& res)
@@ -923,6 +1034,8 @@ private:
     static std::list<ani_ref> unspecifiedNavigationListeners_;
     static std::unordered_map<std::string, std::list<ani_ref>> specifiedCNavigationListeners_;
     static std::unordered_map<int32_t, std::list<ani_ref>> specifiedRouterPageListeners_;
+    std::list<ani_ref> unspecifiedTabContentListeners_;
+    std::unordered_map<std::string, std::list<ani_ref>> specifiedTabContentUpdateListeners_;
     std::unordered_map<int32_t, std::list<ani_ref>> specifiedWillDrawCbMap_;
     std::unordered_map<int32_t, std::list<ani_ref>> specifiedDidLayoutCbMap_;
 
@@ -1036,6 +1149,74 @@ static void Off([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object objec
     } else if (typeStr == "didLayout") {
         observer->UnRegisterDidLayoutCallback(env, idMs, fnObjGlobalRef);
     }
+}
+
+static void OnTabContentUpdate([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
+    ani_fn_object fnObj)
+{
+    if (!fnObj) {
+        return;
+    }
+    auto* observer = Unwrapp(env, object);
+    if (!observer) {
+        return;
+    }
+    ani_ref fnObjGlobalRef = nullptr;
+    env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
+    observer->RegisterTabContentUpdateCallback(fnObjGlobalRef);
+}
+
+static void OnTabContentUpdateWithOptions([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
+    ani_object options, ani_fn_object fnObj)
+{
+    if (!fnObj) {
+        return;
+    }
+    auto* observer = Unwrapp(env, object);
+    if (!observer) {
+        return;
+    }
+    ani_ref aniTabId;
+    env->Object_GetPropertyByName_Ref(options, "id", &aniTabId);
+    std::string tabContentId = ANIUtils_ANIStringToStdString(env, reinterpret_cast<ani_string>(aniTabId));
+    ani_ref fnObjGlobalRef = nullptr;
+    env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
+    observer->RegisterTabContentUpdateCallback(tabContentId, fnObjGlobalRef);
+}
+
+static void OffTabContentUpdate([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
+    ani_fn_object fnObj)
+{
+    auto* observer = Unwrapp(env, object);
+    if (!observer) {
+        return;
+    }
+    ani_ref fnObjGlobalRef = nullptr;
+    ani_boolean isUndef = ANI_FALSE;
+    env->Reference_IsUndefined(fnObj, &isUndef);
+    if (isUndef != ANI_TRUE) {
+        env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
+    }
+    observer->UnRegisterTabContentUpdateCallback(env, fnObjGlobalRef);
+}
+
+static void OffTabContentUpdateWithOptions([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
+    ani_object options, ani_fn_object fnObj)
+{
+    auto* observer = Unwrapp(env, object);
+    if (!observer) {
+        return;
+    }
+    ani_ref aniTabId;
+    env->Object_GetPropertyByName_Ref(options, "id", &aniTabId);
+    std::string tabContentId = ANIUtils_ANIStringToStdString(env, reinterpret_cast<ani_string>(aniTabId));
+    ani_ref fnObjGlobalRef = nullptr;
+    ani_boolean isUndef = ANI_FALSE;
+    env->Reference_IsUndefined(fnObj, &isUndef);
+    if (isUndef != ANI_TRUE) {
+        env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
+    }
+    observer->UnRegisterTabContentUpdateCallback(env, tabContentId, fnObjGlobalRef);
 }
 
 static void OnNavDestinationUpdateWithId([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
@@ -1500,6 +1681,10 @@ static ani_object CreateObserver([[maybe_unused]] ani_env* env, ani_int id)
         observer->HandleRouterPageStateChange(env, context, info);
     };
     NG::UIObserverHandler::GetInstance().SetHandleRouterPageChangeFuncForAni(routerPageInfoChangeCallback);
+    auto tabContentCallback = [observer, env](const NG::TabContentInfo& info) {
+        observer->HandleTabContentUpdate(env, info);
+    };
+    NG::UIObserverHandler::GetInstance().SetHandleTabContentUpdateFuncForAni(tabContentCallback);
     ani_object context_object;
     if (ANI_OK != env->Object_New(cls, ctor, &context_object, reinterpret_cast<ani_long>(observer))) {
         LOGE("observer-ani Can not new object.");
@@ -1596,6 +1781,14 @@ bool ANI_ConstructorForAni(ani_env* env)
             "onTabChange", TAB_CHANGE_PARAM_WITHID, reinterpret_cast<void*>(OHOS::Ace::OnTabChangeWithId) },
         ani_native_function {
             "offTabChange", TAB_CHANGE_PARAM_WITHID, reinterpret_cast<void*>(OHOS::Ace::OffTabChangeWithId) },
+        ani_native_function { "onTabContentUpdate",
+            ANI_TABCONTENT_WITH_OPTIONS_CLS, reinterpret_cast<void*>(OHOS::Ace::OnTabContentUpdateWithOptions) },
+        ani_native_function { "offTabContentUpdate",
+            ANI_TABCONTENT_WITH_OPTIONS_CLS, reinterpret_cast<void*>(OHOS::Ace::OffTabContentUpdateWithOptions) },
+        ani_native_function {
+            "onTabContentUpdate", ANI_TABCONTENT_CLS, reinterpret_cast<void*>(OHOS::Ace::OnTabContentUpdate) },
+        ani_native_function {
+            "offTabContentUpdate", ANI_TABCONTENT_CLS, reinterpret_cast<void*>(OHOS::Ace::OffTabContentUpdate) },
     };
     if (ANI_OK != env->Class_BindNativeMethods(clsObserver, methodsObserver.data(), methodsObserver.size())) {
         return false;
