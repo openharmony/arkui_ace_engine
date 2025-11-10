@@ -22,7 +22,7 @@ import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { AlertDialogParamWithConfirm_serializer, AlertDialogParamWithButtons_serializer, AlertDialogParamWithOptions_serializer, AlertDialogParamWithConfirm, AlertDialogParamWithButtons, AlertDialogParamWithOptions, DialogAlignment } from "./alertDialog"
-import { AnimateParam_serializer, TranslateOptions_serializer, KeyframeAnimateParam_serializer, KeyframeState_serializer, AnimateParam, TranslateOptions, KeyframeAnimateParam, KeyframeState, TouchEvent, TouchEventInternal, ClickEvent, ClickEventInternal, UICommonEvent, UICommonEventInternal, ItemDragEventHandler_serializer, OnMoveHandler, ItemDragEventHandler, PopupCommonOptions_serializer, MenuOptions_serializer, PopupCommonOptions, MenuOptions, ThemeColorMode, GeometryInfo, Measurable, Layoutable, Rectangle, ShadowOptions, ShadowStyle, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, KeyboardAvoidMode, HoverModeAreaType, SizeResult, TouchObject, KeyEvent, KeyEventInternal, MouseEvent, MouseEventInternal, SourceTool, Rectangle_serializer, ShadowOptions_serializer, BackgroundBlurStyleOptions_serializer, BackgroundEffectOptions_serializer, ChildrenMainSize_serializer, ChildrenMainSize, ChildrenMainSizeInternal, OnWillScrollCallback, OnScrollCallback } from "./common"
+import { AnimateParam_serializer, TranslateOptions_serializer, KeyframeAnimateParam_serializer, KeyframeState_serializer, AnimateParam, TranslateOptions, KeyframeAnimateParam, KeyframeState, TouchEvent, TouchEventInternal, ClickEvent, ClickEventInternal, UICommonEvent, UICommonEventInternal, ItemDragEventHandler_serializer, OnMoveHandler, ItemDragEventHandler, PopupCommonOptions_serializer, MenuOptions_serializer, PopupCommonOptions, MenuOptions, ThemeColorMode, GeometryInfo, Measurable, Layoutable, Rectangle, ShadowOptions, ShadowStyle, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, KeyboardAvoidMode, HoverModeAreaType, SizeResult, TouchObject, KeyEvent, KeyEventInternal, MouseEvent, MouseEventInternal, SourceTool, Rectangle_serializer, ShadowOptions_serializer, BackgroundBlurStyleOptions_serializer, BackgroundEffectOptions_serializer, ChildrenMainSize_serializer, ChildrenMainSize, ChildrenMainSizeInternal, OnWillScrollCallback, OnScrollCallback, SheetOptions_serializer, SheetOptions } from "./common"
 import { ArkListOptions_serializer } from "./../framework/ohos.arkui.ArcList"
 import { ArkListOptions, ArcScrollIndexHandler } from "@ohos.arkui.ArcList"
 import { SwipeActionOptions_serializer, SwipeActionOptions } from "./listItem"
@@ -2389,6 +2389,49 @@ export class IUIContext {
         thisSerializer.release()
         return retval
     }
+    static openBindSheet_serialize(bindSheetContent: KPointer, sheetOptions?: SheetOptions, targetId?: int32): Promise<void> {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (sheetOptions !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const sheetOptionsTmpValue  = sheetOptions!
+            SheetOptions_serializer.write(thisSerializer, sheetOptionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (targetId !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const targetIdTmpValue  = targetId!
+            thisSerializer.writeInt32(targetIdTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const retval  = thisSerializer.holdAndWriteCallbackForPromiseVoid()[0]
+        ArkUIGeneratedNativeModule._IUIContext_openBindSheet(bindSheetContent, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    static updateBindSheet_serialize(bindSheetContent: KPointer, sheetOptions: SheetOptions, partialUpdate?: boolean): Promise<void> {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        SheetOptions_serializer.write(thisSerializer, sheetOptions)
+        if (partialUpdate !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const partialUpdateTmpValue  = partialUpdate!
+            thisSerializer.writeBoolean(partialUpdateTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const retval  = thisSerializer.holdAndWriteCallbackForPromiseVoid()[0]
+        ArkUIGeneratedNativeModule._IUIContext_updateBindSheet(bindSheetContent, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    static closeBindSheet_serialize(bindSheetContent: KPointer): Promise<void> {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const retval  = thisSerializer.holdAndWriteCallbackForPromiseVoid()[0]
+        ArkUIGeneratedNativeModule._IUIContext_closeBindSheet(bindSheetContent, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
     public static freezeUINode(id: string, isFrozen: boolean): void {
         const id_casted = id as (string)
         const isFrozen_casted = isFrozen as (boolean)
@@ -2405,6 +2448,22 @@ export class IUIContext {
         const node_casted = node as (number | string)
         const event_casted = event as (KeyEvent)
         return IUIContext.dispatchKeyEvent_serialize(node_casted, event_casted)
+    }
+    public static openBindSheet(bindSheetContent: KPointer, sheetOptions?: SheetOptions, targetId?: int32): Promise<void> {
+        const bindSheetContent_casted = bindSheetContent as (KPointer)
+        const sheetOptions_casted = sheetOptions as (SheetOptions | undefined)
+        const targetId_casted = targetId as (int32 | undefined)
+        return IUIContext.openBindSheet_serialize(bindSheetContent_casted, sheetOptions_casted, targetId_casted)
+    }
+    public static updateBindSheet(bindSheetContent: KPointer, sheetOptions: SheetOptions, partialUpdate?: boolean): Promise<void> {
+        const bindSheetContent_casted = bindSheetContent as (KPointer)
+        const sheetOptions_casted = sheetOptions as (SheetOptions)
+        const partialUpdate_casted = partialUpdate as (boolean | undefined)
+        return IUIContext.updateBindSheet_serialize(bindSheetContent_casted, sheetOptions_casted, partialUpdate_casted)
+    }
+    public static closeBindSheet(bindSheetContent: KPointer): Promise<void> {
+        const bindSheetContent_casted = bindSheetContent as (KPointer)
+        return IUIContext.closeBindSheet_serialize(bindSheetContent_casted)
     }
 }
 export class LazyBuild {
