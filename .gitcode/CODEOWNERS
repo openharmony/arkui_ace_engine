@@ -3151,6 +3151,7 @@ frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/com
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ArkComponentRoot.ets @arkui_statemgmt
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/component/web.ts @arkwebinarkuireview
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/component/customDialogController.ts @arkuipopupwindow_all
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/customDialogController.ets @arkuipopupwindow_all
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/@ohos.overlayManager.ts @arkuipopupwindow_all
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/@ohos.promptAction.ts @arkuipopupwindow_all
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/@ohos.arkui.dragController.ts @ArkUI_Event
@@ -3197,6 +3198,7 @@ frameworks/core/interfaces/native/implementation/grid_modifier.cpp @arkuiscroll
 frameworks/core/interfaces/native/implementation/grid_row_modifier.cpp @ArkUI_Layout
 frameworks/core/interfaces/native/implementation/for_each_ops_accessor.cpp @arkuieco3
 frameworks/core/interfaces/native/implementation/level_order_accessor.cpp @arkuipopupwindow_all
+frameworks/core/interfaces/native/implementation/level_order_extender_accessor.cpp @arkuipopupwindow_all
 frameworks/core/interfaces/native/implementation/level_order_peer.h @arkuipopupwindow_all
 frameworks/core/interfaces/native/implementation/list_item_group_modifier.cpp @arkuiscroll
 frameworks/core/interfaces/native/implementation/list_item_modifier.cpp @arkuiscroll
