@@ -533,16 +533,14 @@ std::optional<CalcDimension> ResourceConverter::GetDimensionInner()
 std::optional<CalcLength> ResourceConverter::ToCalcLength()
 {
     CHECK_NULL_RETURN(resWrapper_, std::nullopt);
-    if (type_ == ResourceType::STRING) {
-        auto str = GetStringResource();
-        if (str) {
-            return CalcLength(*str);
-        }
-        LOGE("ResourceConverter::ToCalcLength Unknown resource value");
+    auto dimOpt = ToCalcDimension();
+    if (!dimOpt.has_value()) {
         return std::nullopt;
     }
-    auto dimOpt = ToDimension();
-    return dimOpt ? std::make_optional(CalcLength(*dimOpt)) : std::nullopt;
+    if (dimOpt.value().Unit() == DimensionUnit::CALC) {
+        return std::make_optional(CalcLength(dimOpt.value().CalcValue()));
+    }
+    return std::make_optional(CalcLength(dimOpt.value()));
 }
 
 std::optional<float> ResourceConverter::ToFloat()
