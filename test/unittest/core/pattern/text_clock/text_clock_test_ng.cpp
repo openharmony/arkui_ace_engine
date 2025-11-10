@@ -31,6 +31,7 @@
 #include "core/components_ng/pattern/text/text_theme_wrapper.h"
 #include "core/components_ng/pattern/text_clock/text_clock_layout_property.h"
 #include "core/components_ng/pattern/text_clock/text_clock_model_ng.h"
+#include "core/components_ng/pattern/text_clock/text_clock_model_static.h"
 #include "core/components_ng/pattern/text_clock/text_clock_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "frameworks/core/components/text_clock/text_clock_theme.h"
@@ -1985,5 +1986,58 @@ HWTEST_F(TextClockTestNG, TextClockTest019, TestSize.Level0)
     model.RemoveResObjByKey("textClockFormat");
     std::string result = pattern->GetResCacheMapByKey("textClockFormat");
     EXPECT_EQ(result, "");
+}
+
+HWTEST_F(TextClockTestNG, TextClockStaticTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textClock and set event.
+     */
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    std::string utc = UTC_1;
+    auto onChange = [&utc](const std::string& isUtc) { utc = UTC_2; };
+    textClockModel.SetOnDateChange(onChange);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get textClock frameNode and event.
+     * @tc.expected: function is called.
+     */
+    std::optional<float> zoneOffset = 9.8;
+    TextClockModelStatic::SetHoursWest(frameNode, zoneOffset);
+    RefPtr<TextClockLayoutProperty> layoutProperty = frameNode->GetLayoutProperty<TextClockLayoutProperty>();
+    EXPECT_EQ(layoutProperty->GetHoursWestValue(), 9.0);
+    MockPipelineContext::TearDown();
+}
+
+/**
+ * @tc.name: TextClockStaticTest002
+ * @tc.desc: Test SetHoursWest.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockTestNG, TextClockStaticTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textClock and set event.
+     */
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    std::string utc = UTC_1;
+    auto onChange = [&utc](const std::string& isUtc) { utc = UTC_2; };
+    textClockModel.SetOnDateChange(onChange);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get textClock frameNode and event.
+     * @tc.expected: function is called.
+     */
+    std::optional<float> zoneOffset = 9.5;
+    TextClockModelStatic::SetHoursWest(frameNode, zoneOffset);
+    RefPtr<TextClockLayoutProperty> layoutProperty = frameNode->GetLayoutProperty<TextClockLayoutProperty>();
+    EXPECT_EQ(layoutProperty->GetHoursWestValue(), 9.5);
+    MockPipelineContext::TearDown();
 }
 } // namespace OHOS::Ace::NG

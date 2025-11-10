@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/text_clock/text_clock_pattern.h"
 
 namespace OHOS::Ace::NG {
+constexpr float HOURS_WEST[] = { 9.5f, 3.5f, -3.5f, -4.5f, -5.5f, -5.75f, -6.5f, -9.5f, -10.5f, -12.75f };
 void TextClockModelStatic::SetFormat(FrameNode* frameNode, const std::optional<std::string>& format)
 {
     if (!format.has_value() || format.value().empty()) {
@@ -30,10 +31,22 @@ void TextClockModelStatic::SetFormat(FrameNode* frameNode, const std::optional<s
     }
 }
 
+float GetHoursWest(float hoursWest)
+{
+    for (float i : HOURS_WEST) {
+        if (NearEqual(hoursWest, i)) {
+            return hoursWest;
+        }
+    }
+
+    return int32_t(hoursWest);
+}
+
 void TextClockModelStatic::SetHoursWest(FrameNode* frameNode, const std::optional<float>& hoursWest)
 {
     if (hoursWest.has_value()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, HoursWest, hoursWest.value(), frameNode);
+        auto hourWestValue = GetHoursWest(hoursWest.value());
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, HoursWest, hourWestValue, frameNode);
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, HoursWest, frameNode);
     }
