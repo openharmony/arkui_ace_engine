@@ -813,7 +813,7 @@ HWTEST_F(IsolatedPatternTestNg, IsolatedPatternTest017, TestSize.Level1)
 }
 
 /**
- * @tc.name: IsolatedPatternTest017
+ * @tc.name: IsolatedPatternTest018
  * @tc.desc: Test InitializeAccessibility
  * @tc.type: FUNC
  */
@@ -853,5 +853,31 @@ HWTEST_F(IsolatedPatternTestNg, IsolatedPatternTest018, TestSize.Level1)
     isolatedPattern->ResetAccessibilityChildTreeCallback();
     isolatedPattern->OnAttachContext(AceType::RawPtr(pipe));
     ASSERT_NE(isolatedPattern->accessibilityChildTreeCallback_, nullptr);
+}
+
+/**
+ * @tc.name: IsolatedPatternTest019
+ * @tc.desc: Test InitializeAccessibilityInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(IsolatedPatternTestNg, IsolatedPatternTest019, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. construct a IsolatedComponent Node
+    */
+    auto isolatedNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto isolatedNode = FrameNode::GetOrCreateFrameNode(
+        V2::ISOLATED_COMPONENT_ETS_TAG, isolatedNodeId, []() { return AceType::MakeRefPtr<IsolatedPattern>(); });
+    ASSERT_NE(isolatedNode, nullptr);
+    EXPECT_EQ(isolatedNode->GetTag(), V2::ISOLATED_COMPONENT_ETS_TAG);
+    /**
+    * @tc.steps: step2. init dynamicComponentRenderer_
+    */
+    auto isolatedPattern = isolatedNode->GetPattern<IsolatedPattern>();
+    isolatedPattern->accessibilityChildTreeCallback_ = std::make_shared<PlatformAccessibilityChildTreeCallback>(
+        AceType::WeakClaim(AceType::RawPtr(isolatedPattern)), isolatedNode->GetAccessibilityId());
+    ASSERT_NE(isolatedPattern->accessibilityChildTreeCallback_, nullptr);
+    isolatedPattern->ResetAccessibilityChildTreeCallback();
+    ASSERT_EQ(isolatedPattern->accessibilityChildTreeCallback_, nullptr);
 }
 } // namespace OHOS::Ace::NG
