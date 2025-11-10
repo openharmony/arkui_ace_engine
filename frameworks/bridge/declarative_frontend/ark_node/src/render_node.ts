@@ -829,7 +829,7 @@ class RenderNode extends Disposable {
     return getUINativeModule().renderNode.getNodeType(this.nodePtr);
   }
   dispose() {
-    if (this.isDisposed_) {
+    if (this.isDisposed()) {
       return;
     }
     super.dispose();
