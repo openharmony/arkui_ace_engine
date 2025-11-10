@@ -907,4 +907,91 @@ HWTEST_F(WaterFlowSWTest, AnimateToIndexAutoWithContentOffsetTest, TestSize.Leve
     EXPECT_EQ(pattern_->layoutInfo_->Offset(), CONTENT_START_OFFSET);
     EXPECT_EQ(pattern_->GetTotalOffset(), -20);
 }
+
+/**
+ * @tc.name: GetContentHeightWithContentOffset
+ * @tc.desc: Test GetContentHeight with contentStartOffset and contentEndOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, GetContentHeightWithContentOffset, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    ScrollableModelNG::SetContentStartOffset(CONTENT_START_OFFSET);
+    ScrollableModelNG::SetContentEndOffset(CONTENT_END_OFFSET);
+    CreateWaterFlowItems(20);
+    CreateDone();
+
+    AnimateToIndexWithTicks(19, ScrollAlign::END);
+    EXPECT_EQ(pattern_->GetChildrenExpandedSize().Height(), 1600);
+    EXPECT_EQ(pattern_->layoutInfo_->GetContentHeight(), 1600);
+
+    layoutProperty_->UpdateContentStartOffset(0);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->GetChildrenExpandedSize().Height(), 1600);
+    EXPECT_EQ(pattern_->layoutInfo_->GetContentHeight(), 1600);
+
+    layoutProperty_->UpdateContentEndOffset(0);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->GetChildrenExpandedSize().Height(), 1600);
+    EXPECT_EQ(pattern_->layoutInfo_->GetContentHeight(), 1600);
+}
+
+/**
+ * @tc.name: GetContentHeightWithContentOffset
+ * @tc.desc: Test GetContentHeight with contentStartOffset and contentEndOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, GetContentHeightWithContentStartOffsetChange, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    ScrollableModelNG::SetContentStartOffset(CONTENT_START_OFFSET);
+    ScrollableModelNG::SetContentEndOffset(CONTENT_END_OFFSET);
+    CreateWaterFlowItems(20);
+    CreateDone();
+
+    AnimateToIndexWithTicks(19, ScrollAlign::END);
+    EXPECT_EQ(pattern_->GetChildrenExpandedSize().Height(), 1600);
+    EXPECT_EQ(pattern_->layoutInfo_->GetContentHeight(), 1600);
+
+    layoutProperty_->UpdateContentStartOffset(CONTENT_START_OFFSET + 20);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->GetChildrenExpandedSize().Height(), 1600);
+    EXPECT_EQ(pattern_->layoutInfo_->GetContentHeight(), 1600);
+
+    layoutProperty_->UpdateContentStartOffset(CONTENT_START_OFFSET - 20);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->GetChildrenExpandedSize().Height(), 1600);
+    EXPECT_EQ(pattern_->layoutInfo_->GetContentHeight(), 1600);
+}
+
+/**
+ * @tc.name: GetContentHeightWithContentEndOffsetChange
+ * @tc.desc: Test GetContentHeight with contentStartOffset change
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, GetContentHeightWithContentEndOffsetChange, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    ScrollableModelNG::SetContentStartOffset(CONTENT_START_OFFSET);
+    ScrollableModelNG::SetContentEndOffset(CONTENT_END_OFFSET);
+    CreateWaterFlowItems(20);
+    CreateDone();
+
+    AnimateToIndexWithTicks(19, ScrollAlign::END);
+    EXPECT_EQ(pattern_->GetChildrenExpandedSize().Height(), 1600);
+    EXPECT_EQ(pattern_->layoutInfo_->GetContentHeight(), 1600);
+  
+    layoutProperty_->UpdateContentEndOffset(CONTENT_END_OFFSET + 20);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->GetChildrenExpandedSize().Height(), 1600);
+    EXPECT_EQ(pattern_->layoutInfo_->GetContentHeight(), 1600);
+
+    layoutProperty_->UpdateContentEndOffset(CONTENT_END_OFFSET - 20);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->GetChildrenExpandedSize().Height(), 1600);
+    EXPECT_EQ(pattern_->layoutInfo_->GetContentHeight(), 1600);
+}
 } // namespace OHOS::Ace::NG
