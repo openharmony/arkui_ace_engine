@@ -188,6 +188,9 @@ void SetOnStartImpl(Ark_NativePointer node,
         return;
     }
     auto onStart = [arkCallback = CallbackHelper(*optValue)](const std::string& param) {
+#ifndef ACE_UNITTEST
+        CHECK_NULL_VOID(CallbackHelper<VoidCallback>::GetVMContext());
+#endif
         arkCallback.InvokeSync();
     };
     VideoModelStatic::SetOnStart(frameNode, onStart);
@@ -203,6 +206,9 @@ void SetOnPauseImpl(Ark_NativePointer node,
         return;
     }
     auto onPause = [arkCallback = CallbackHelper(*optValue)](const std::string& param) {
+#ifndef ACE_UNITTEST
+        CHECK_NULL_VOID(CallbackHelper<VoidCallback>::GetVMContext());
+#endif
         arkCallback.InvokeSync();
     };
     VideoModelStatic::SetOnPause(frameNode, onPause);
@@ -218,6 +224,9 @@ void SetOnFinishImpl(Ark_NativePointer node,
         return;
     }
     auto onFinish = [arkCallback = CallbackHelper(*optValue)](const std::string& param) {
+#ifndef ACE_UNITTEST
+        CHECK_NULL_VOID(CallbackHelper<VoidCallback>::GetVMContext());
+#endif
         arkCallback.InvokeSync();
     };
     VideoModelStatic::SetOnFinish(frameNode, onFinish);
@@ -233,6 +242,9 @@ void SetOnFullscreenChangeImpl(Ark_NativePointer node,
         return;
     }
     auto onFullscreenChange = [arkCallback = CallbackHelper(*optValue)](const std::string& param) {
+#ifndef ACE_UNITTEST
+        CHECK_NULL_VOID(CallbackHelper<Callback_FullscreenInfo_Void>::GetVMContext());
+#endif
         auto data = JsonUtil::ParseJsonString(param);
         CHECK_NULL_VOID(data);
         auto fullscreen = data->GetValue("fullscreen")->GetBool();
@@ -254,6 +266,9 @@ void SetOnPreparedImpl(Ark_NativePointer node,
         return;
     }
     auto onPrepared = [arkCallback = CallbackHelper(*optValue)](const std::string& param) {
+#ifndef ACE_UNITTEST
+        CHECK_NULL_VOID(CallbackHelper<Callback_PreparedInfo_Void>::GetVMContext());
+#endif
         auto data = JsonUtil::ParseJsonString(param);
         CHECK_NULL_VOID(data);
         auto duration = data->GetValue("duration")->GetDouble();
@@ -275,6 +290,9 @@ void SetOnSeekingImpl(Ark_NativePointer node,
         return;
     }
     auto onSeeking = [arkCallback = CallbackHelper(*optValue)](const std::string& param) {
+#ifndef ACE_UNITTEST
+        CHECK_NULL_VOID(CallbackHelper<Callback_PlaybackInfo_Void>::GetVMContext());
+#endif
         auto data = JsonUtil::ParseJsonString(param);
         auto time = data->GetValue("time")->GetDouble();
         Ark_PlaybackInfo event = {
@@ -295,6 +313,9 @@ void SetOnSeekedImpl(Ark_NativePointer node,
         return;
     }
     auto onSeeked = [arkCallback = CallbackHelper(*optValue)](const std::string& param) {
+#ifndef ACE_UNITTEST
+        CHECK_NULL_VOID(CallbackHelper<Callback_PlaybackInfo_Void>::GetVMContext());
+#endif
         auto data = JsonUtil::ParseJsonString(param);
         auto time = data->GetValue("time")->GetDouble();
         Ark_PlaybackInfo event = {
@@ -315,6 +336,9 @@ void SetOnUpdateImpl(Ark_NativePointer node,
         return;
     }
     auto onUpdate = [arkCallback = CallbackHelper(*optValue)](const std::string& param) {
+#ifndef ACE_UNITTEST
+        CHECK_NULL_VOID(CallbackHelper<Callback_PlaybackInfo_Void>::GetVMContext());
+#endif
         auto data = JsonUtil::ParseJsonString(param);
         auto time = data->GetValue("time")->GetDouble();
         Ark_PlaybackInfo event = {
@@ -335,6 +359,9 @@ void SetOnErrorImpl(Ark_NativePointer node,
         return;
     }
     auto onError = [arkCallback = CallbackHelper(*optValue)](const std::string& param) {
+#ifndef ACE_UNITTEST
+        CHECK_NULL_VOID(CallbackHelper<VoidCallback>::GetVMContext());
+#endif
         arkCallback.InvokeSync();
     };
     VideoModelStatic::SetOnError(frameNode, onError);
@@ -350,6 +377,9 @@ void SetOnStopImpl(Ark_NativePointer node,
         return;
     }
     auto onStop = [arkCallback = CallbackHelper(*optValue)](const std::string& param) {
+#ifndef ACE_UNITTEST
+        CHECK_NULL_VOID(CallbackHelper<VoidCallback>::GetVMContext());
+#endif
         arkCallback.InvokeSync();
     };
     VideoModelStatic::SetOnStop(frameNode, onStop);
