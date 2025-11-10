@@ -327,6 +327,9 @@ typedef struct Opt_ConsoleMessage Opt_ConsoleMessage;
 typedef struct ControllerHandlerPeer ControllerHandlerPeer;
 typedef struct ControllerHandlerPeer* Ark_ControllerHandler;
 typedef struct Opt_ControllerHandler Opt_ControllerHandler;
+typedef struct CopyEventPeer CopyEventPeer;
+typedef struct CopyEventPeer* Ark_CopyEvent;
+typedef struct Opt_CopyEvent Opt_CopyEvent;
 typedef struct curves_ICurvePeer curves_ICurvePeer;
 typedef struct curves_ICurvePeer* Ark_curves_ICurve;
 typedef struct Opt_curves_ICurve Opt_curves_ICurve;
@@ -337,6 +340,9 @@ typedef struct CustomDialogControllerExtenderPeer CustomDialogControllerExtender
 typedef struct CustomDialogControllerExtenderPeer* Ark_CustomDialogControllerExtender;
 typedef struct Opt_CustomDialogControllerExtender Opt_CustomDialogControllerExtender;
 typedef struct Opt_CustomObject Opt_CustomObject;
+typedef struct CutEventPeer CutEventPeer;
+typedef struct CutEventPeer* Ark_CutEvent;
+typedef struct Opt_CutEvent Opt_CutEvent;
 typedef struct DataResubmissionHandlerPeer DataResubmissionHandlerPeer;
 typedef struct DataResubmissionHandlerPeer* Ark_DataResubmissionHandler;
 typedef struct Opt_DataResubmissionHandler Opt_DataResubmissionHandler;
@@ -518,6 +524,9 @@ typedef struct Opt_PanGestureOptions Opt_PanGestureOptions;
 typedef struct PanRecognizerPeer PanRecognizerPeer;
 typedef struct PanRecognizerPeer* Ark_PanRecognizer;
 typedef struct Opt_PanRecognizer Opt_PanRecognizer;
+typedef struct PasteEventPeer PasteEventPeer;
+typedef struct PasteEventPeer* Ark_PasteEvent;
+typedef struct Opt_PasteEvent Opt_PasteEvent;
 typedef struct Path2DPeer Path2DPeer;
 typedef struct Path2DPeer* Ark_Path2D;
 typedef struct Opt_Path2D Opt_Path2D;
@@ -2604,10 +2613,6 @@ typedef struct Ark_ContentCoverOptions Ark_ContentCoverOptions;
 typedef struct Opt_ContentCoverOptions Opt_ContentCoverOptions;
 typedef struct Ark_ContextMenuAnimationOptions Ark_ContextMenuAnimationOptions;
 typedef struct Opt_ContextMenuAnimationOptions Opt_ContextMenuAnimationOptions;
-typedef struct Ark_CopyEvent Ark_CopyEvent;
-typedef struct Opt_CopyEvent Opt_CopyEvent;
-typedef struct Ark_CutEvent Ark_CutEvent;
-typedef struct Opt_CutEvent Opt_CutEvent;
 typedef struct Ark_DataPanelShadowOptions Ark_DataPanelShadowOptions;
 typedef struct Opt_DataPanelShadowOptions Opt_DataPanelShadowOptions;
 typedef struct Ark_DatePickerOptions Ark_DatePickerOptions;
@@ -2727,8 +2732,6 @@ typedef struct Ark_PasteButtonOptions Ark_PasteButtonOptions;
 typedef struct Opt_PasteButtonOptions Opt_PasteButtonOptions;
 typedef struct Ark_SaveButtonOptions Ark_SaveButtonOptions;
 typedef struct Opt_SaveButtonOptions Opt_SaveButtonOptions;
-typedef struct Ark_PasteEvent Ark_PasteEvent;
-typedef struct Opt_PasteEvent Opt_PasteEvent;
 typedef struct Ark_PluginComponentOptions Ark_PluginComponentOptions;
 typedef struct Opt_PluginComponentOptions Opt_PluginComponentOptions;
 typedef struct Ark_PopupMaskType Ark_PopupMaskType;
@@ -7166,6 +7169,10 @@ typedef struct Opt_ControllerHandler {
     Ark_Tag tag;
     Ark_ControllerHandler value;
 } Opt_ControllerHandler;
+typedef struct Opt_CopyEvent {
+    Ark_Tag tag;
+    Ark_CopyEvent value;
+} Opt_CopyEvent;
 typedef struct Opt_curves_ICurve {
     Ark_Tag tag;
     Ark_curves_ICurve value;
@@ -7182,6 +7189,10 @@ typedef struct Opt_CustomObject {
     Ark_Tag tag;
     Ark_CustomObject value;
 } Opt_CustomObject;
+typedef struct Opt_CutEvent {
+    Ark_Tag tag;
+    Ark_CutEvent value;
+} Opt_CutEvent;
 typedef struct Opt_DataResubmissionHandler {
     Ark_Tag tag;
     Ark_DataResubmissionHandler value;
@@ -7583,6 +7594,10 @@ typedef struct Opt_PanRecognizer {
     Ark_Tag tag;
     Ark_PanRecognizer value;
 } Opt_PanRecognizer;
+typedef struct Opt_PasteEvent {
+    Ark_Tag tag;
+    Ark_PasteEvent value;
+} Opt_PasteEvent;
 typedef struct Opt_Path2D {
     Ark_Tag tag;
     Ark_Path2D value;
@@ -17018,22 +17033,6 @@ typedef struct Opt_ContextMenuAnimationOptions {
     Ark_Tag tag;
     Ark_ContextMenuAnimationOptions value;
 } Opt_ContextMenuAnimationOptions;
-typedef struct Ark_CopyEvent {
-    /* kind: Interface */
-    Opt_VoidCallback preventDefault;
-} Ark_CopyEvent;
-typedef struct Opt_CopyEvent {
-    Ark_Tag tag;
-    Ark_CopyEvent value;
-} Opt_CopyEvent;
-typedef struct Ark_CutEvent {
-    /* kind: Interface */
-    Opt_VoidCallback preventDefault;
-} Ark_CutEvent;
-typedef struct Opt_CutEvent {
-    Ark_Tag tag;
-    Ark_CutEvent value;
-} Opt_CutEvent;
 typedef struct Ark_DataPanelShadowOptions {
     /* kind: Interface */
     Opt_Union_Number_Resource radius;
@@ -17624,14 +17623,6 @@ typedef struct Opt_SaveButtonOptions {
     Ark_Tag tag;
     Ark_SaveButtonOptions value;
 } Opt_SaveButtonOptions;
-typedef struct Ark_PasteEvent {
-    /* kind: Interface */
-    Opt_VoidCallback preventDefault;
-} Ark_PasteEvent;
-typedef struct Opt_PasteEvent {
-    Ark_Tag tag;
-    Ark_PasteEvent value;
-} Opt_PasteEvent;
 typedef struct Ark_PluginComponentOptions {
     /* kind: Interface */
     Ark_PluginComponentTemplate template_;
@@ -25700,6 +25691,13 @@ typedef struct GENERATED_ArkUIControllerHandlerAccessor {
                              Ark_webview_WebviewController controller);
 } GENERATED_ArkUIControllerHandlerAccessor;
 
+typedef struct GENERATED_ArkUICopyEventAccessor {
+    void (*destroyPeer)(Ark_CopyEvent peer);
+    Ark_CopyEvent (*construct)();
+    Ark_NativePointer (*getFinalizer)();
+    void (*preventDefault)(Ark_CopyEvent peer);
+} GENERATED_ArkUICopyEventAccessor;
+
 typedef struct GENERATED_ArkUICustomDialogControllerAccessor {
     void (*destroyPeer)(Ark_CustomDialogController peer);
     Ark_CustomDialogController (*construct)(const Ark_CustomDialogControllerOptions* value);
@@ -25732,6 +25730,13 @@ typedef struct GENERATED_ArkUICustomSpanAccessor {
     void (*setOnDraw_callback)(Ark_CustomSpan peer,
                                const Callback_DrawContext_CustomSpanDrawInfo_Void* onDraw_callback);
 } GENERATED_ArkUICustomSpanAccessor;
+
+typedef struct GENERATED_ArkUICutEventAccessor {
+    void (*destroyPeer)(Ark_CutEvent peer);
+    Ark_CutEvent (*construct)();
+    Ark_NativePointer (*getFinalizer)();
+    void (*preventDefault)(Ark_CutEvent peer);
+} GENERATED_ArkUICutEventAccessor;
 
 typedef struct GENERATED_ArkUIDataResubmissionHandlerAccessor {
     void (*destroyPeer)(Ark_DataResubmissionHandler peer);
@@ -26904,6 +26909,13 @@ typedef struct GENERATED_ArkUIParagraphStyleAccessor {
     Opt_Union_F64_LeadingMarginPlaceholder (*getLeadingMargin)(Ark_ParagraphStyle peer);
     Opt_Float64 (*getParagraphSpacing)(Ark_ParagraphStyle peer);
 } GENERATED_ArkUIParagraphStyleAccessor;
+
+typedef struct GENERATED_ArkUIPasteEventAccessor {
+    void (*destroyPeer)(Ark_PasteEvent peer);
+    Ark_PasteEvent (*construct)();
+    Ark_NativePointer (*getFinalizer)();
+    void (*preventDefault)(Ark_PasteEvent peer);
+} GENERATED_ArkUIPasteEventAccessor;
 
 typedef struct GENERATED_ArkUIParticleHelperAccessor {
     void (*SetDisturbanceFields)(Ark_NativePointer node,
@@ -28332,9 +28344,11 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIConsoleMessageAccessor* (*getConsoleMessageAccessor)();
     const GENERATED_ArkUIContentModifierHelperAccessor* (*getContentModifierHelperAccessor)();
     const GENERATED_ArkUIControllerHandlerAccessor* (*getControllerHandlerAccessor)();
+    const GENERATED_ArkUICopyEventAccessor* (*getCopyEventAccessor)();
     const GENERATED_ArkUICustomDialogControllerAccessor* (*getCustomDialogControllerAccessor)();
     const GENERATED_ArkUICustomDialogControllerExtenderAccessor* (*getCustomDialogControllerExtenderAccessor)();
     const GENERATED_ArkUICustomSpanAccessor* (*getCustomSpanAccessor)();
+    const GENERATED_ArkUICutEventAccessor* (*getCutEventAccessor)();
     const GENERATED_ArkUIDataResubmissionHandlerAccessor* (*getDataResubmissionHandlerAccessor)();
     const GENERATED_ArkUIDatePickerDialogAccessor* (*getDatePickerDialogAccessor)();
     const GENERATED_ArkUIDecorationStyleAccessor* (*getDecorationStyleAccessor)();
@@ -28409,6 +28423,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIPanRecognizerAccessor* (*getPanRecognizerAccessor)();
     const GENERATED_ArkUIParagraphStyleAccessor* (*getParagraphStyleAccessor)();
     const GENERATED_ArkUIParticleHelperAccessor* (*getParticleHelperAccessor)();
+    const GENERATED_ArkUIPasteEventAccessor* (*getPasteEventAccessor)();
     const GENERATED_ArkUIPath2DAccessor* (*getPath2DAccessor)();
     const GENERATED_ArkUIPatternLockControllerAccessor* (*getPatternLockControllerAccessor)();
     const GENERATED_ArkUIPermissionRequestAccessor* (*getPermissionRequestAccessor)();

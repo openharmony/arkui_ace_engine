@@ -3716,6 +3716,12 @@ frameworks/core/interfaces/native/implementation/rich_editor_styled_string_contr
 frameworks/core/interfaces/native/implementation/rich_editor_base_controller_peer_impl.h @arkui_rich_editor
 frameworks/core/interfaces/native/implementation/rich_editor_controller_peer_impl.h @arkui_rich_editor
 frameworks/core/interfaces/native/implementation/rich_editor_styled_string_controller_peer_impl.h @arkui_rich_editor
+frameworks/core/interfaces/native/implementation/copy_event_accessor.cpp @arkui_rich_editor
+frameworks/core/interfaces/native/implementation/copy_event_peer.h @arkui_rich_editor
+frameworks/core/interfaces/native/implementation/cut_event_accessor.cpp @arkui_rich_editor
+frameworks/core/interfaces/native/implementation/cut_event_peer.h @arkui_rich_editor
+frameworks/core/interfaces/native/implementation/paste_event_accessor.cpp @arkui_rich_editor
+frameworks/core/interfaces/native/implementation/paste_event_peer.h @arkui_rich_editor
 
 [StateMgmt ArkTS1.2]
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/ @arkui_statemgmt
