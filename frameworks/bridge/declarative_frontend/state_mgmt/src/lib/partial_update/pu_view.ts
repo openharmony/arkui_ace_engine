@@ -540,7 +540,7 @@ abstract class ViewPU extends PUV2ViewBase
     stateMgmtProfiler.begin('ViewPU.viewPropertyHasChanged');
     aceDebugTrace.begin('ViewPU.viewPropertyHasChanged', this.constructor.name, varName, dependentElmtIds.size, this.id__(), this.dirtDescendantElementIds_.size, this.runReuse_);
     if (this.isRenderInProgress) {
-      stateMgmtConsole.frequentApplicationError(`@Component '${this.constructor.name}: State variable '${varName}' has changed during render! It's illegal to change @Component state while build (initial render or re-render) is on-going. Application error!`);
+      stateMgmtConsole.frequentApplicationError(`@Component '${this.constructor.name}': State variable '${varName}' has changed during render! It's illegal to change @Component state while build (initial render or re-render) is on-going. Application error!`);
     } else if (this.isPrebuilding_) {
       const propertyChangedFunc: PrebuildFunc = () => {
         this.viewPropertyHasChanged(varName, dependentElmtIds);
