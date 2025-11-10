@@ -320,7 +320,7 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
       this.activeCount_ = active ? 1 : 0;
     }
     if (this.activeCount_ > 1) {
-      stateMgmtConsole.warn(`${this.debugInfo__()} activeCount_ error:${this.activeCount_}`);
+      stateMgmtConsole.frequentWarn(`${this.constructor.name} activeCount_ error:${this.activeCount_}`);
     }
   }
 

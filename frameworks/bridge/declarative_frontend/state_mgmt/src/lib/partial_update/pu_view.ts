@@ -900,7 +900,7 @@ abstract class ViewPU extends PUV2ViewBase
       return;
     }
     if (this.isDeleting_) {
-      stateMgmtConsole.error(`View ${this.constructor.name} elmtId ${this.id__()} is already in process of destruction, will not execute observeComponentCreation2 `);
+      stateMgmtConsole.frequentError(`View ${this.constructor.name} is already in process of destruction, will not execute observeComponentCreation2 `);
       return;
     }
     const _componentName: string = (classObject && ('name' in classObject)) ? Reflect.get(classObject, 'name') as string : 'unspecified UINode';
