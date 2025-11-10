@@ -41,7 +41,9 @@ void ParticlePattern::OnVisibleChange(bool isVisible)
     SetHaveUnVisibleParent(!isVisible);
     if (isVisible) {
         auto host = GetHost();
+        CHECK_NULL_VOID(host);
         auto context = host->GetRenderContext();
+        CHECK_NULL_VOID(context);
         context->OnParticleOptionArrayUpdate(context->GetParticleOptionArray().value());
     }
 }
@@ -49,6 +51,7 @@ void ParticlePattern::OnVisibleChange(bool isVisible)
 void ParticlePattern::OnAttachToMainTree()
 {
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto parent = host->GetParent();
     while (parent) {
         if (InstanceOf<FrameNode>(parent)) {

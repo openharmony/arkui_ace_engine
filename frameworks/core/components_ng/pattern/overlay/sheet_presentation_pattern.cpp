@@ -3045,7 +3045,9 @@ float SheetPresentationPattern::GetTopAreaInWindow() const
 
 void SheetPresentationPattern::MarkSheetPageNeedRender()
 {
-    auto parentHost = GetHost()->GetParent();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto parentHost = host->GetParent();
     CHECK_NULL_VOID(parentHost);
     auto frameNode = AceType::DynamicCast<FrameNode>(parentHost);
     CHECK_NULL_VOID(frameNode);

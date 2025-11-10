@@ -191,9 +191,10 @@ void SlidingPanelLayoutAlgorithm::MeasureCloseIcon(
 float SlidingPanelLayoutAlgorithm::GetMaxWidthByScreenSizeType(const SizeF& maxSize, const SizeF& idealSize) const
 {
     RefPtr<GridColumnInfo> columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::PANEL);
+    auto width = 0.0f;
+    CHECK_NULL_RETURN(columnInfo, width);
     columnInfo->GetParent()->BuildColumnWidth(maxSize.Width());
     auto gridSizeType = ScreenSystemManager::GetInstance().GetSize(maxSize.Width());
-    auto width = 0.0f;
     uint32_t columns = 0;
     switch (gridSizeType) {
         case ScreenSizeType::UNDEFINED:
