@@ -17,6 +17,7 @@
 #include "core/components_ng/pattern/tabs/tabs_model.h"
 #include "core/interfaces/native/node/node_container_picker_modifier.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/pattern/container_picker/container_picker_theme.h"
 #include "core/components_ng/pattern/container_picker/container_picker_model.h"
 #include "core/components_ng/pattern/container_picker/container_picker_utils.h"
 #include "core/common/resource/resource_parse_utils.h"
@@ -220,7 +221,17 @@ void ResetContainerPickerSelectionIndicator(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto pickerTheme = context->GetTheme<ContainerPickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
     PickerIndicatorStyle indicatorStyle;
+    indicatorStyle.strokeWidth = pickerTheme->GetStrokeWidth();
+    indicatorStyle.dividerColor = pickerTheme->GetIndicatorDividerColor();
+    indicatorStyle.startMargin = Dimension();
+    indicatorStyle.endMargin = Dimension();
+    indicatorStyle.backgroundColor = pickerTheme->GetIndicatorBackgroundColor();
+    indicatorStyle.borderRadius = NG::BorderRadiusProperty(pickerTheme->GetIndicatorBackgroundRadius());
     ContainerPickerModel::SetIndicatorStyle(frameNode, indicatorStyle);
     if (SystemProperties::ConfigChangePerform()) {
         auto pattern = frameNode->GetPattern();
