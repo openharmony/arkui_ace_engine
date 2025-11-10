@@ -1181,6 +1181,7 @@ DimensionOffset Convert(const Ark_Position& src)
 template<>
 FontMetaData Convert(const Ark_Font& src)
 {
+    DefaultDimensionUnit defaultUnit(DimensionUnit::FP);
     return { OptConvert<Dimension>(src.size), OptConvert<FontWeight>(src.weight) };
 }
 
@@ -2380,7 +2381,7 @@ void AssignCast(std::optional<std::u16string>& dst, const Ark_Resource& src)
 template<>
 Dimension Convert(const Ark_Float64& src)
 {
-    return Dimension(src, DimensionUnit::VP);
+    return Dimension(src, ConverterStatus::DEFAULT_UNIT);
 }
 
 template<>
