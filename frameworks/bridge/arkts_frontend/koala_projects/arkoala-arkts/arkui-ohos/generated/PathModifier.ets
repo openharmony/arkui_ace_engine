@@ -287,6 +287,7 @@ export class PathModifier extends CommonMethodModifier implements PathAttribute,
     }
     mergeModifier(modifier: PathModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._commands_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._commands_0_flag) {

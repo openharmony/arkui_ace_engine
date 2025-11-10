@@ -308,6 +308,7 @@ export class ShapeModifier extends CommonMethodModifier implements ShapeAttribut
     }
     mergeModifier(modifier: ShapeModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._viewPort_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._viewPort_0_flag) {

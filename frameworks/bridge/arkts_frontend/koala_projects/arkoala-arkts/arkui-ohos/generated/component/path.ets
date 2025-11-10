@@ -29,6 +29,7 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { PathModifier } from "./../PathModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ModifierStateManager } from '../CommonModifier';
 export class ArkPathPeer extends ArkCommonShapeMethodPeer {
     attributeSet?: PathModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -121,7 +122,9 @@ export class ArkPathComponent extends ArkCommonShapeMethodComponent implements P
         return this
     }
     public attributeModifier(value: AttributeModifier<PathAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        hookPathAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookPathAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

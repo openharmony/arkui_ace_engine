@@ -33,6 +33,7 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { PolylineModifier } from "./../PolylineModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ModifierStateManager } from '../CommonModifier';
 export class ArkPolylinePeer extends ArkCommonShapeMethodPeer {
     attributeSet?: PolylineModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -155,7 +156,9 @@ export class ArkPolylineComponent extends ArkCommonShapeMethodComponent implemen
         return this
     }
     public attributeModifier(value: AttributeModifier<PolylineAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        hookPolylineAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookPolylineAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

@@ -267,6 +267,7 @@ export class CircleModifier extends CommonMethodModifier implements CircleAttrib
     }
     mergeModifier(modifier: CircleModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._stroke_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._stroke_0_flag) {

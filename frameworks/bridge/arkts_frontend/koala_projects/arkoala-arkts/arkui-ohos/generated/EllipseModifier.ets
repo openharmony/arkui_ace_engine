@@ -267,6 +267,7 @@ export class EllipseModifier extends CommonMethodModifier implements EllipseAttr
     }
     mergeModifier(modifier: EllipseModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._stroke_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._stroke_0_flag) {

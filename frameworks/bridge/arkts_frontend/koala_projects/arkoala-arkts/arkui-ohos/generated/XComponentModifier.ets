@@ -144,6 +144,7 @@ export class XComponentModifier extends CommonMethodModifier implements XCompone
     }
     mergeModifier(modifier: XComponentModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._onLoad_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._onLoad_0_flag) {

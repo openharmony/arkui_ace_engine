@@ -33,6 +33,7 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { PolygonModifier } from "./../PolygonModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ModifierStateManager } from '../CommonModifier';
 export class ArkPolygonPeer extends ArkCommonShapeMethodPeer {
     attributeSet?: PolygonModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -155,7 +156,9 @@ export class ArkPolygonComponent extends ArkCommonShapeMethodComponent implement
         return this
     }
     public attributeModifier(value: AttributeModifier<PolygonAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        hookPolygonAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookPolygonAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

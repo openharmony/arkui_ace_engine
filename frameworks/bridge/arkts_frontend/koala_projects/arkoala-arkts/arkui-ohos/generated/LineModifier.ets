@@ -307,6 +307,7 @@ export class LineModifier extends CommonMethodModifier implements LineAttribute,
     }
     mergeModifier(modifier: LineModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._startPoint_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._startPoint_0_flag) {

@@ -327,6 +327,7 @@ export class RectModifier extends CommonMethodModifier implements RectAttribute,
     }
     mergeModifier(modifier: RectModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._radiusWidth_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._radiusWidth_0_flag) {

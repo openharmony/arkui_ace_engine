@@ -29,6 +29,7 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { EllipseModifier } from "./../EllipseModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ModifierStateManager } from '../CommonModifier';
 export class ArkEllipsePeer extends ArkCommonShapeMethodPeer {
     attributeSet?: EllipseModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -93,7 +94,9 @@ export class ArkEllipseComponent extends ArkCommonShapeMethodComponent implement
         return this
     }
     public attributeModifier(value: AttributeModifier<EllipseAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        hookEllipseAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookEllipseAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
