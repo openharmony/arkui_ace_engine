@@ -4178,45 +4178,45 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _GestureEvent_setFingerList(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _GestureEvent_getOffsetX(ptr: KPointer): number
+    native static _GestureEvent_getOffsetX(ptr: KPointer): double
     @ani.unsafe.Direct
-    native static _GestureEvent_setOffsetX(ptr: KPointer, offsetX: number): void
+    native static _GestureEvent_setOffsetX(ptr: KPointer, offsetX: KDouble): void
     @ani.unsafe.Direct
-    native static _GestureEvent_getOffsetY(ptr: KPointer): number
+    native static _GestureEvent_getOffsetY(ptr: KPointer): double
     @ani.unsafe.Direct
-    native static _GestureEvent_setOffsetY(ptr: KPointer, offsetY: number): void
+    native static _GestureEvent_setOffsetY(ptr: KPointer, offsetY: KDouble): void
     @ani.unsafe.Direct
-    native static _GestureEvent_getAngle(ptr: KPointer): number
+    native static _GestureEvent_getAngle(ptr: KPointer): double
     @ani.unsafe.Direct
-    native static _GestureEvent_setAngle(ptr: KPointer, angle: number): void
+    native static _GestureEvent_setAngle(ptr: KPointer, angle: KDouble): void
     @ani.unsafe.Direct
-    native static _GestureEvent_getSpeed(ptr: KPointer): number
+    native static _GestureEvent_getSpeed(ptr: KPointer): double
     @ani.unsafe.Direct
-    native static _GestureEvent_setSpeed(ptr: KPointer, speed: number): void
+    native static _GestureEvent_setSpeed(ptr: KPointer, speed: KDouble): void
     @ani.unsafe.Direct
-    native static _GestureEvent_getScale(ptr: KPointer): number
+    native static _GestureEvent_getScale(ptr: KPointer): double
     @ani.unsafe.Direct
-    native static _GestureEvent_setScale(ptr: KPointer, scale: number): void
+    native static _GestureEvent_setScale(ptr: KPointer, scale: KDouble): void
     @ani.unsafe.Direct
-    native static _GestureEvent_getPinchCenterX(ptr: KPointer): number
+    native static _GestureEvent_getPinchCenterX(ptr: KPointer): double
     @ani.unsafe.Direct
-    native static _GestureEvent_setPinchCenterX(ptr: KPointer, pinchCenterX: number): void
+    native static _GestureEvent_setPinchCenterX(ptr: KPointer, pinchCenterX: KDouble): void
     @ani.unsafe.Direct
-    native static _GestureEvent_getPinchCenterY(ptr: KPointer): number
+    native static _GestureEvent_getPinchCenterY(ptr: KPointer): double
     @ani.unsafe.Direct
-    native static _GestureEvent_setPinchCenterY(ptr: KPointer, pinchCenterY: number): void
+    native static _GestureEvent_setPinchCenterY(ptr: KPointer, pinchCenterY: KDouble): void
     @ani.unsafe.Direct
-    native static _GestureEvent_getVelocityX(ptr: KPointer): number
+    native static _GestureEvent_getVelocityX(ptr: KPointer): double
     @ani.unsafe.Direct
-    native static _GestureEvent_setVelocityX(ptr: KPointer, velocityX: number): void
+    native static _GestureEvent_setVelocityX(ptr: KPointer, velocityX: KDouble): void
     @ani.unsafe.Direct
-    native static _GestureEvent_getVelocityY(ptr: KPointer): number
+    native static _GestureEvent_getVelocityY(ptr: KPointer): double
     @ani.unsafe.Direct
-    native static _GestureEvent_setVelocityY(ptr: KPointer, velocityY: number): void
+    native static _GestureEvent_setVelocityY(ptr: KPointer, velocityY: KDouble): void
     @ani.unsafe.Direct
-    native static _GestureEvent_getVelocity(ptr: KPointer): number
+    native static _GestureEvent_getVelocity(ptr: KPointer): double
     @ani.unsafe.Direct
-    native static _GestureEvent_setVelocity(ptr: KPointer, velocity: number): void
+    native static _GestureEvent_setVelocity(ptr: KPointer, velocity: KDouble): void
     @ani.unsafe.Direct
     native static _GestureOps_createTapGesture(fingers: number, count: number, distanceThreshold: number, isFingerCountLimited: KInt): KPointer
     @ani.unsafe.Direct
@@ -4282,7 +4282,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _GestureRecognizer_isValid(ptr: KPointer): boolean
     @ani.unsafe.Direct
-    native static _GestureRecognizer_getFingerCount(ptr: KPointer): number
+    native static _GestureRecognizer_getFingerCount(ptr: KPointer): int32
     @ani.unsafe.Direct
     native static _GestureRecognizer_isFingerCountLimit(ptr: KPointer): boolean
     @ani.unsafe.Direct
@@ -4608,7 +4608,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _LongPressRecognizer_isRepeat(ptr: KPointer): boolean
     @ani.unsafe.Direct
-    native static _LongPressRecognizer_getDuration(ptr: KPointer): number
+    native static _LongPressRecognizer_getDuration(ptr: KPointer): int32
     @ani.unsafe.Direct
     native static _Matrix2D_construct0(): KPointer
     @ani.unsafe.Direct
@@ -4963,25 +4963,25 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _PanGestureEvent_getFinalizer(): KPointer
     @ani.unsafe.Direct
-    native static _PanGestureEvent_getOffsetX(ptr: KPointer): number
+    native static _PanGestureEvent_getOffsetX(ptr: KPointer): double
     @ani.unsafe.Direct
-    native static _PanGestureEvent_setOffsetX(ptr: KPointer, offsetX: number): void
+    native static _PanGestureEvent_setOffsetX(ptr: KPointer, offsetX: KDouble): void
     @ani.unsafe.Direct
-    native static _PanGestureEvent_getOffsetY(ptr: KPointer): number
+    native static _PanGestureEvent_getOffsetY(ptr: KPointer): double
     @ani.unsafe.Direct
-    native static _PanGestureEvent_setOffsetY(ptr: KPointer, offsetY: number): void
+    native static _PanGestureEvent_setOffsetY(ptr: KPointer, offsetY: KDouble): void
     @ani.unsafe.Direct
-    native static _PanGestureEvent_getVelocityX(ptr: KPointer): number
+    native static _PanGestureEvent_getVelocityX(ptr: KPointer): double
     @ani.unsafe.Direct
-    native static _PanGestureEvent_setVelocityX(ptr: KPointer, velocityX: number): void
+    native static _PanGestureEvent_setVelocityX(ptr: KPointer, velocityX: KDouble): void
     @ani.unsafe.Direct
-    native static _PanGestureEvent_getVelocityY(ptr: KPointer): number
+    native static _PanGestureEvent_getVelocityY(ptr: KPointer): double
     @ani.unsafe.Direct
-    native static _PanGestureEvent_setVelocityY(ptr: KPointer, velocityY: number): void
+    native static _PanGestureEvent_setVelocityY(ptr: KPointer, velocityY: KDouble): void
     @ani.unsafe.Direct
-    native static _PanGestureEvent_getVelocity(ptr: KPointer): number
+    native static _PanGestureEvent_getVelocity(ptr: KPointer): double
     @ani.unsafe.Direct
-    native static _PanGestureEvent_setVelocity(ptr: KPointer, velocity: number): void
+    native static _PanGestureEvent_setVelocity(ptr: KPointer, velocity: KDouble): void
     @ani.unsafe.Direct
     native static _PanGestureOptions_construct(thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
@@ -4989,13 +4989,13 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _PanGestureOptions_setDirection(ptr: KPointer, value: KInt): void
     @ani.unsafe.Direct
-    native static _PanGestureOptions_setDistance(ptr: KPointer, value: number): void
+    native static _PanGestureOptions_setDistance(ptr: KPointer, value: KDouble): void
     @ani.unsafe.Direct
-    native static _PanGestureOptions_setFingers(ptr: KPointer, value: number): void
+    native static _PanGestureOptions_setFingers(ptr: KPointer, value: KInt): void
     @ani.unsafe.Direct
     native static _PanGestureOptions_getDirection(ptr: KPointer): int32
     @ani.unsafe.Direct
-    native static _PanGestureOptions_getDistance(ptr: KPointer): number
+    native static _PanGestureOptions_getDistance(ptr: KPointer): double
     @ani.unsafe.Direct
     native static _PanRecognizer_construct(): KPointer
     @ani.unsafe.Direct
@@ -5079,23 +5079,23 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _PinchGestureEvent_getFinalizer(): KPointer
     @ani.unsafe.Direct
-    native static _PinchGestureEvent_getScale(ptr: KPointer): number
+    native static _PinchGestureEvent_getScale(ptr: KPointer): double
     @ani.unsafe.Direct
-    native static _PinchGestureEvent_setScale(ptr: KPointer, scale: number): void
+    native static _PinchGestureEvent_setScale(ptr: KPointer, scale: KDouble): void
     @ani.unsafe.Direct
-    native static _PinchGestureEvent_getPinchCenterX(ptr: KPointer): number
+    native static _PinchGestureEvent_getPinchCenterX(ptr: KPointer): double
     @ani.unsafe.Direct
-    native static _PinchGestureEvent_setPinchCenterX(ptr: KPointer, pinchCenterX: number): void
+    native static _PinchGestureEvent_setPinchCenterX(ptr: KPointer, pinchCenterX: KDouble): void
     @ani.unsafe.Direct
-    native static _PinchGestureEvent_getPinchCenterY(ptr: KPointer): number
+    native static _PinchGestureEvent_getPinchCenterY(ptr: KPointer): double
     @ani.unsafe.Direct
-    native static _PinchGestureEvent_setPinchCenterY(ptr: KPointer, pinchCenterY: number): void
+    native static _PinchGestureEvent_setPinchCenterY(ptr: KPointer, pinchCenterY: KDouble): void
     @ani.unsafe.Direct
     native static _PinchRecognizer_construct(): KPointer
     @ani.unsafe.Direct
     native static _PinchRecognizer_getFinalizer(): KPointer
     @ani.unsafe.Direct
-    native static _PinchRecognizer_getDistance(ptr: KPointer): number
+    native static _PinchRecognizer_getDistance(ptr: KPointer): double
     @ani.unsafe.Direct
     native static _PixelMapMock_construct(): KPointer
     @ani.unsafe.Direct
@@ -5322,15 +5322,15 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _RotationGestureEvent_getFinalizer(): KPointer
     @ani.unsafe.Direct
-    native static _RotationGestureEvent_getAngle(ptr: KPointer): number
+    native static _RotationGestureEvent_getAngle(ptr: KPointer): double
     @ani.unsafe.Direct
-    native static _RotationGestureEvent_setAngle(ptr: KPointer, angle: number): void
+    native static _RotationGestureEvent_setAngle(ptr: KPointer, angle: KDouble): void
     @ani.unsafe.Direct
     native static _RotationRecognizer_construct(): KPointer
     @ani.unsafe.Direct
     native static _RotationRecognizer_getFinalizer(): KPointer
     @ani.unsafe.Direct
-    native static _RotationRecognizer_getAngle(ptr: KPointer): number
+    native static _RotationRecognizer_getAngle(ptr: KPointer): double
     @ani.unsafe.Quick
     native static _RouterExtender_push(jsView: KPointer, url: KStringPtr, thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Quick
@@ -5510,13 +5510,13 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _SwipeGestureEvent_getFinalizer(): KPointer
     @ani.unsafe.Direct
-    native static _SwipeGestureEvent_getAngle(ptr: KPointer): number
+    native static _SwipeGestureEvent_getAngle(ptr: KPointer): double
     @ani.unsafe.Direct
-    native static _SwipeGestureEvent_setAngle(ptr: KPointer, angle: number): void
+    native static _SwipeGestureEvent_setAngle(ptr: KPointer, angle: KDouble): void
     @ani.unsafe.Direct
-    native static _SwipeGestureEvent_getSpeed(ptr: KPointer): number
+    native static _SwipeGestureEvent_getSpeed(ptr: KPointer): double
     @ani.unsafe.Direct
-    native static _SwipeGestureEvent_setSpeed(ptr: KPointer, speed: number): void
+    native static _SwipeGestureEvent_setSpeed(ptr: KPointer, speed: KDouble): void
     @ani.unsafe.Direct
     native static _SwiperContentTransitionProxy_construct(): KPointer
     @ani.unsafe.Direct
@@ -5557,7 +5557,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _SwipeRecognizer_getFinalizer(): KPointer
     @ani.unsafe.Direct
-    native static _SwipeRecognizer_getVelocityThreshold(ptr: KPointer): number
+    native static _SwipeRecognizer_getVelocityThreshold(ptr: KPointer): double
     @ani.unsafe.Direct
     native static _SwipeRecognizer_getDirection(ptr: KPointer): int32
     @ani.unsafe.Direct
@@ -5632,7 +5632,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _TapRecognizer_getFinalizer(): KPointer
     @ani.unsafe.Direct
-    native static _TapRecognizer_getTapCount(ptr: KPointer): number
+    native static _TapRecognizer_getTapCount(ptr: KPointer): int32
     @ani.unsafe.Direct
     native static _TextAreaController_construct(): KPointer
     @ani.unsafe.Direct

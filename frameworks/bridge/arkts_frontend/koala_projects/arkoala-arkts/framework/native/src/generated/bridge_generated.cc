@@ -29789,106 +29789,106 @@ void impl_GestureEvent_setFingerList(Ark_NativePointer thisPtr, KSerializerBuffe
         GetAccessors()->getGestureEventAccessor()->setFingerList(self, static_cast<Array_FingerInfo*>(&fingerListValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(GestureEvent_setFingerList, Ark_NativePointer, KSerializerBuffer, int32_t)
-Ark_Number impl_GestureEvent_getOffsetX(Ark_NativePointer thisPtr) {
+Ark_Int32 impl_GestureEvent_getOffsetX(Ark_NativePointer thisPtr) {
         Ark_GestureEvent self = reinterpret_cast<Ark_GestureEvent>(thisPtr);
         return GetAccessors()->getGestureEventAccessor()->getOffsetX(self);
 }
-KOALA_INTEROP_DIRECT_1(GestureEvent_getOffsetX, KInteropNumber, Ark_NativePointer)
-void impl_GestureEvent_setOffsetX(Ark_NativePointer thisPtr, KInteropNumber offsetX) {
+KOALA_INTEROP_DIRECT_1(GestureEvent_getOffsetX, Ark_Int32, Ark_NativePointer)
+void impl_GestureEvent_setOffsetX(Ark_NativePointer thisPtr, KDouble offsetX) {
         Ark_GestureEvent self = reinterpret_cast<Ark_GestureEvent>(thisPtr);
-        GetAccessors()->getGestureEventAccessor()->setOffsetX(self, (const Ark_Number*) (&offsetX));
+        GetAccessors()->getGestureEventAccessor()->setOffsetX(self, offsetX);
 }
-KOALA_INTEROP_DIRECT_V2(GestureEvent_setOffsetX, Ark_NativePointer, KInteropNumber)
-Ark_Number impl_GestureEvent_getOffsetY(Ark_NativePointer thisPtr) {
+KOALA_INTEROP_DIRECT_V2(GestureEvent_setOffsetX, Ark_NativePointer, KDouble)
+Ark_Int32 impl_GestureEvent_getOffsetY(Ark_NativePointer thisPtr) {
         Ark_GestureEvent self = reinterpret_cast<Ark_GestureEvent>(thisPtr);
         return GetAccessors()->getGestureEventAccessor()->getOffsetY(self);
 }
-KOALA_INTEROP_DIRECT_1(GestureEvent_getOffsetY, KInteropNumber, Ark_NativePointer)
-void impl_GestureEvent_setOffsetY(Ark_NativePointer thisPtr, KInteropNumber offsetY) {
+KOALA_INTEROP_DIRECT_1(GestureEvent_getOffsetY, Ark_Int32, Ark_NativePointer)
+void impl_GestureEvent_setOffsetY(Ark_NativePointer thisPtr, KDouble offsetY) {
         Ark_GestureEvent self = reinterpret_cast<Ark_GestureEvent>(thisPtr);
-        GetAccessors()->getGestureEventAccessor()->setOffsetY(self, (const Ark_Number*) (&offsetY));
+        GetAccessors()->getGestureEventAccessor()->setOffsetY(self, offsetY);
 }
-KOALA_INTEROP_DIRECT_V2(GestureEvent_setOffsetY, Ark_NativePointer, KInteropNumber)
-Ark_Number impl_GestureEvent_getAngle(Ark_NativePointer thisPtr) {
+KOALA_INTEROP_DIRECT_V2(GestureEvent_setOffsetY, Ark_NativePointer, KDouble)
+Ark_Int32 impl_GestureEvent_getAngle(Ark_NativePointer thisPtr) {
         Ark_GestureEvent self = reinterpret_cast<Ark_GestureEvent>(thisPtr);
         return GetAccessors()->getGestureEventAccessor()->getAngle(self);
 }
-KOALA_INTEROP_DIRECT_1(GestureEvent_getAngle, KInteropNumber, Ark_NativePointer)
-void impl_GestureEvent_setAngle(Ark_NativePointer thisPtr, KInteropNumber angle) {
+KOALA_INTEROP_DIRECT_1(GestureEvent_getAngle, Ark_Int32, Ark_NativePointer)
+void impl_GestureEvent_setAngle(Ark_NativePointer thisPtr, KDouble angle) {
         Ark_GestureEvent self = reinterpret_cast<Ark_GestureEvent>(thisPtr);
-        GetAccessors()->getGestureEventAccessor()->setAngle(self, (const Ark_Number*) (&angle));
+        GetAccessors()->getGestureEventAccessor()->setAngle(self, angle);
 }
-KOALA_INTEROP_DIRECT_V2(GestureEvent_setAngle, Ark_NativePointer, KInteropNumber)
-Ark_Number impl_GestureEvent_getSpeed(Ark_NativePointer thisPtr) {
+KOALA_INTEROP_DIRECT_V2(GestureEvent_setAngle, Ark_NativePointer, KDouble)
+Ark_Int32 impl_GestureEvent_getSpeed(Ark_NativePointer thisPtr) {
         Ark_GestureEvent self = reinterpret_cast<Ark_GestureEvent>(thisPtr);
         return GetAccessors()->getGestureEventAccessor()->getSpeed(self);
 }
-KOALA_INTEROP_DIRECT_1(GestureEvent_getSpeed, KInteropNumber, Ark_NativePointer)
-void impl_GestureEvent_setSpeed(Ark_NativePointer thisPtr, KInteropNumber speed) {
+KOALA_INTEROP_DIRECT_1(GestureEvent_getSpeed, Ark_Int32, Ark_NativePointer)
+void impl_GestureEvent_setSpeed(Ark_NativePointer thisPtr, KDouble speed) {
         Ark_GestureEvent self = reinterpret_cast<Ark_GestureEvent>(thisPtr);
-        GetAccessors()->getGestureEventAccessor()->setSpeed(self, (const Ark_Number*) (&speed));
+        GetAccessors()->getGestureEventAccessor()->setSpeed(self, speed);
 }
-KOALA_INTEROP_DIRECT_V2(GestureEvent_setSpeed, Ark_NativePointer, KInteropNumber)
-Ark_Number impl_GestureEvent_getScale(Ark_NativePointer thisPtr) {
+KOALA_INTEROP_DIRECT_V2(GestureEvent_setSpeed, Ark_NativePointer, KDouble)
+Ark_Int32 impl_GestureEvent_getScale(Ark_NativePointer thisPtr) {
         Ark_GestureEvent self = reinterpret_cast<Ark_GestureEvent>(thisPtr);
         return GetAccessors()->getGestureEventAccessor()->getScale(self);
 }
-KOALA_INTEROP_DIRECT_1(GestureEvent_getScale, KInteropNumber, Ark_NativePointer)
-void impl_GestureEvent_setScale(Ark_NativePointer thisPtr, KInteropNumber scale) {
+KOALA_INTEROP_DIRECT_1(GestureEvent_getScale, Ark_Int32, Ark_NativePointer)
+void impl_GestureEvent_setScale(Ark_NativePointer thisPtr, KDouble scale) {
         Ark_GestureEvent self = reinterpret_cast<Ark_GestureEvent>(thisPtr);
-        GetAccessors()->getGestureEventAccessor()->setScale(self, (const Ark_Number*) (&scale));
+        GetAccessors()->getGestureEventAccessor()->setScale(self, scale);
 }
-KOALA_INTEROP_DIRECT_V2(GestureEvent_setScale, Ark_NativePointer, KInteropNumber)
-Ark_Number impl_GestureEvent_getPinchCenterX(Ark_NativePointer thisPtr) {
+KOALA_INTEROP_DIRECT_V2(GestureEvent_setScale, Ark_NativePointer, KDouble)
+Ark_Int32 impl_GestureEvent_getPinchCenterX(Ark_NativePointer thisPtr) {
         Ark_GestureEvent self = reinterpret_cast<Ark_GestureEvent>(thisPtr);
         return GetAccessors()->getGestureEventAccessor()->getPinchCenterX(self);
 }
-KOALA_INTEROP_DIRECT_1(GestureEvent_getPinchCenterX, KInteropNumber, Ark_NativePointer)
-void impl_GestureEvent_setPinchCenterX(Ark_NativePointer thisPtr, KInteropNumber pinchCenterX) {
+KOALA_INTEROP_DIRECT_1(GestureEvent_getPinchCenterX, Ark_Int32, Ark_NativePointer)
+void impl_GestureEvent_setPinchCenterX(Ark_NativePointer thisPtr, KDouble pinchCenterX) {
         Ark_GestureEvent self = reinterpret_cast<Ark_GestureEvent>(thisPtr);
-        GetAccessors()->getGestureEventAccessor()->setPinchCenterX(self, (const Ark_Number*) (&pinchCenterX));
+        GetAccessors()->getGestureEventAccessor()->setPinchCenterX(self, pinchCenterX);
 }
-KOALA_INTEROP_DIRECT_V2(GestureEvent_setPinchCenterX, Ark_NativePointer, KInteropNumber)
-Ark_Number impl_GestureEvent_getPinchCenterY(Ark_NativePointer thisPtr) {
+KOALA_INTEROP_DIRECT_V2(GestureEvent_setPinchCenterX, Ark_NativePointer, KDouble)
+Ark_Int32 impl_GestureEvent_getPinchCenterY(Ark_NativePointer thisPtr) {
         Ark_GestureEvent self = reinterpret_cast<Ark_GestureEvent>(thisPtr);
         return GetAccessors()->getGestureEventAccessor()->getPinchCenterY(self);
 }
-KOALA_INTEROP_DIRECT_1(GestureEvent_getPinchCenterY, KInteropNumber, Ark_NativePointer)
-void impl_GestureEvent_setPinchCenterY(Ark_NativePointer thisPtr, KInteropNumber pinchCenterY) {
+KOALA_INTEROP_DIRECT_1(GestureEvent_getPinchCenterY, Ark_Int32, Ark_NativePointer)
+void impl_GestureEvent_setPinchCenterY(Ark_NativePointer thisPtr, KDouble pinchCenterY) {
         Ark_GestureEvent self = reinterpret_cast<Ark_GestureEvent>(thisPtr);
-        GetAccessors()->getGestureEventAccessor()->setPinchCenterY(self, (const Ark_Number*) (&pinchCenterY));
+        GetAccessors()->getGestureEventAccessor()->setPinchCenterY(self, pinchCenterY);
 }
-KOALA_INTEROP_DIRECT_V2(GestureEvent_setPinchCenterY, Ark_NativePointer, KInteropNumber)
-Ark_Number impl_GestureEvent_getVelocityX(Ark_NativePointer thisPtr) {
+KOALA_INTEROP_DIRECT_V2(GestureEvent_setPinchCenterY, Ark_NativePointer, KDouble)
+Ark_Int32 impl_GestureEvent_getVelocityX(Ark_NativePointer thisPtr) {
         Ark_GestureEvent self = reinterpret_cast<Ark_GestureEvent>(thisPtr);
         return GetAccessors()->getGestureEventAccessor()->getVelocityX(self);
 }
-KOALA_INTEROP_DIRECT_1(GestureEvent_getVelocityX, KInteropNumber, Ark_NativePointer)
-void impl_GestureEvent_setVelocityX(Ark_NativePointer thisPtr, KInteropNumber velocityX) {
+KOALA_INTEROP_DIRECT_1(GestureEvent_getVelocityX, Ark_Int32, Ark_NativePointer)
+void impl_GestureEvent_setVelocityX(Ark_NativePointer thisPtr, KDouble velocityX) {
         Ark_GestureEvent self = reinterpret_cast<Ark_GestureEvent>(thisPtr);
-        GetAccessors()->getGestureEventAccessor()->setVelocityX(self, (const Ark_Number*) (&velocityX));
+        GetAccessors()->getGestureEventAccessor()->setVelocityX(self, velocityX);
 }
-KOALA_INTEROP_DIRECT_V2(GestureEvent_setVelocityX, Ark_NativePointer, KInteropNumber)
-Ark_Number impl_GestureEvent_getVelocityY(Ark_NativePointer thisPtr) {
+KOALA_INTEROP_DIRECT_V2(GestureEvent_setVelocityX, Ark_NativePointer, KDouble)
+Ark_Int32 impl_GestureEvent_getVelocityY(Ark_NativePointer thisPtr) {
         Ark_GestureEvent self = reinterpret_cast<Ark_GestureEvent>(thisPtr);
         return GetAccessors()->getGestureEventAccessor()->getVelocityY(self);
 }
-KOALA_INTEROP_DIRECT_1(GestureEvent_getVelocityY, KInteropNumber, Ark_NativePointer)
-void impl_GestureEvent_setVelocityY(Ark_NativePointer thisPtr, KInteropNumber velocityY) {
+KOALA_INTEROP_DIRECT_1(GestureEvent_getVelocityY, Ark_Int32, Ark_NativePointer)
+void impl_GestureEvent_setVelocityY(Ark_NativePointer thisPtr, KDouble velocityY) {
         Ark_GestureEvent self = reinterpret_cast<Ark_GestureEvent>(thisPtr);
-        GetAccessors()->getGestureEventAccessor()->setVelocityY(self, (const Ark_Number*) (&velocityY));
+        GetAccessors()->getGestureEventAccessor()->setVelocityY(self, velocityY);
 }
-KOALA_INTEROP_DIRECT_V2(GestureEvent_setVelocityY, Ark_NativePointer, KInteropNumber)
-Ark_Number impl_GestureEvent_getVelocity(Ark_NativePointer thisPtr) {
+KOALA_INTEROP_DIRECT_V2(GestureEvent_setVelocityY, Ark_NativePointer, KDouble)
+Ark_Int32 impl_GestureEvent_getVelocity(Ark_NativePointer thisPtr) {
         Ark_GestureEvent self = reinterpret_cast<Ark_GestureEvent>(thisPtr);
         return GetAccessors()->getGestureEventAccessor()->getVelocity(self);
 }
-KOALA_INTEROP_DIRECT_1(GestureEvent_getVelocity, KInteropNumber, Ark_NativePointer)
-void impl_GestureEvent_setVelocity(Ark_NativePointer thisPtr, KInteropNumber velocity) {
+KOALA_INTEROP_DIRECT_1(GestureEvent_getVelocity, Ark_Int32, Ark_NativePointer)
+void impl_GestureEvent_setVelocity(Ark_NativePointer thisPtr, KDouble velocity) {
         Ark_GestureEvent self = reinterpret_cast<Ark_GestureEvent>(thisPtr);
-        GetAccessors()->getGestureEventAccessor()->setVelocity(self, (const Ark_Number*) (&velocity));
+        GetAccessors()->getGestureEventAccessor()->setVelocity(self, velocity);
 }
-KOALA_INTEROP_DIRECT_V2(GestureEvent_setVelocity, Ark_NativePointer, KInteropNumber)
+KOALA_INTEROP_DIRECT_V2(GestureEvent_setVelocity, Ark_NativePointer, KDouble)
 Ark_NativePointer impl_GestureOps_createTapGesture(KInteropNumber fingers, KInteropNumber count, KInteropNumber distanceThreshold, Ark_Boolean isFingerCountLimited) {
         return GetAccessors()->getGestureOpsAccessor()->createTapGesture((const Ark_Number*) (&fingers), (const Ark_Number*) (&count), (const Ark_Number*) (&distanceThreshold), isFingerCountLimited);
 }
@@ -30046,11 +30046,11 @@ Ark_Boolean impl_GestureRecognizer_isValid(Ark_NativePointer thisPtr) {
         return GetAccessors()->getGestureRecognizerAccessor()->isValid(self);
 }
 KOALA_INTEROP_DIRECT_1(GestureRecognizer_isValid, Ark_Boolean, Ark_NativePointer)
-Ark_Number impl_GestureRecognizer_getFingerCount(Ark_NativePointer thisPtr) {
+Ark_Int32 impl_GestureRecognizer_getFingerCount(Ark_NativePointer thisPtr) {
         Ark_GestureRecognizer self = reinterpret_cast<Ark_GestureRecognizer>(thisPtr);
         return GetAccessors()->getGestureRecognizerAccessor()->getFingerCount(self);
 }
-KOALA_INTEROP_DIRECT_1(GestureRecognizer_getFingerCount, KInteropNumber, Ark_NativePointer)
+KOALA_INTEROP_DIRECT_1(GestureRecognizer_getFingerCount, Ark_Int32, Ark_NativePointer)
 Ark_Boolean impl_GestureRecognizer_isFingerCountLimit(Ark_NativePointer thisPtr) {
         Ark_GestureRecognizer self = reinterpret_cast<Ark_GestureRecognizer>(thisPtr);
         return GetAccessors()->getGestureRecognizerAccessor()->isFingerCountLimit(self);
@@ -31275,11 +31275,11 @@ Ark_Boolean impl_LongPressRecognizer_isRepeat(Ark_NativePointer thisPtr) {
         return GetAccessors()->getLongPressRecognizerAccessor()->isRepeat(self);
 }
 KOALA_INTEROP_DIRECT_1(LongPressRecognizer_isRepeat, Ark_Boolean, Ark_NativePointer)
-Ark_Number impl_LongPressRecognizer_getDuration(Ark_NativePointer thisPtr) {
+Ark_Int32 impl_LongPressRecognizer_getDuration(Ark_NativePointer thisPtr) {
         Ark_LongPressRecognizer self = reinterpret_cast<Ark_LongPressRecognizer>(thisPtr);
         return GetAccessors()->getLongPressRecognizerAccessor()->getDuration(self);
 }
-KOALA_INTEROP_DIRECT_1(LongPressRecognizer_getDuration, KInteropNumber, Ark_NativePointer)
+KOALA_INTEROP_DIRECT_1(LongPressRecognizer_getDuration, Ark_Int32, Ark_NativePointer)
 Ark_NativePointer impl_Matrix2D_construct0() {
         return GetAccessors()->getMatrix2DAccessor()->construct0();
 }
@@ -32963,56 +32963,56 @@ Ark_NativePointer impl_PanGestureEvent_getFinalizer() {
         return GetAccessors()->getPanGestureEventAccessor()->getFinalizer();
 }
 KOALA_INTEROP_DIRECT_0(PanGestureEvent_getFinalizer, Ark_NativePointer)
-Ark_Number impl_PanGestureEvent_getOffsetX(Ark_NativePointer thisPtr) {
+Ark_Int32 impl_PanGestureEvent_getOffsetX(Ark_NativePointer thisPtr) {
         Ark_PanGestureEvent self = reinterpret_cast<Ark_PanGestureEvent>(thisPtr);
         return GetAccessors()->getPanGestureEventAccessor()->getOffsetX(self);
 }
-KOALA_INTEROP_DIRECT_1(PanGestureEvent_getOffsetX, KInteropNumber, Ark_NativePointer)
-void impl_PanGestureEvent_setOffsetX(Ark_NativePointer thisPtr, KInteropNumber offsetX) {
+KOALA_INTEROP_DIRECT_1(PanGestureEvent_getOffsetX, Ark_Int32, Ark_NativePointer)
+void impl_PanGestureEvent_setOffsetX(Ark_NativePointer thisPtr, KDouble offsetX) {
         Ark_PanGestureEvent self = reinterpret_cast<Ark_PanGestureEvent>(thisPtr);
-        GetAccessors()->getPanGestureEventAccessor()->setOffsetX(self, (const Ark_Number*) (&offsetX));
+        GetAccessors()->getPanGestureEventAccessor()->setOffsetX(self, offsetX);
 }
-KOALA_INTEROP_DIRECT_V2(PanGestureEvent_setOffsetX, Ark_NativePointer, KInteropNumber)
-Ark_Number impl_PanGestureEvent_getOffsetY(Ark_NativePointer thisPtr) {
+KOALA_INTEROP_DIRECT_V2(PanGestureEvent_setOffsetX, Ark_NativePointer, KDouble)
+Ark_Int32 impl_PanGestureEvent_getOffsetY(Ark_NativePointer thisPtr) {
         Ark_PanGestureEvent self = reinterpret_cast<Ark_PanGestureEvent>(thisPtr);
         return GetAccessors()->getPanGestureEventAccessor()->getOffsetY(self);
 }
-KOALA_INTEROP_DIRECT_1(PanGestureEvent_getOffsetY, KInteropNumber, Ark_NativePointer)
-void impl_PanGestureEvent_setOffsetY(Ark_NativePointer thisPtr, KInteropNumber offsetY) {
+KOALA_INTEROP_DIRECT_1(PanGestureEvent_getOffsetY, Ark_Int32, Ark_NativePointer)
+void impl_PanGestureEvent_setOffsetY(Ark_NativePointer thisPtr, KDouble offsetY) {
         Ark_PanGestureEvent self = reinterpret_cast<Ark_PanGestureEvent>(thisPtr);
-        GetAccessors()->getPanGestureEventAccessor()->setOffsetY(self, (const Ark_Number*) (&offsetY));
+        GetAccessors()->getPanGestureEventAccessor()->setOffsetY(self, offsetY);
 }
-KOALA_INTEROP_DIRECT_V2(PanGestureEvent_setOffsetY, Ark_NativePointer, KInteropNumber)
-Ark_Number impl_PanGestureEvent_getVelocityX(Ark_NativePointer thisPtr) {
+KOALA_INTEROP_DIRECT_V2(PanGestureEvent_setOffsetY, Ark_NativePointer, KDouble)
+Ark_Int32 impl_PanGestureEvent_getVelocityX(Ark_NativePointer thisPtr) {
         Ark_PanGestureEvent self = reinterpret_cast<Ark_PanGestureEvent>(thisPtr);
         return GetAccessors()->getPanGestureEventAccessor()->getVelocityX(self);
 }
-KOALA_INTEROP_DIRECT_1(PanGestureEvent_getVelocityX, KInteropNumber, Ark_NativePointer)
-void impl_PanGestureEvent_setVelocityX(Ark_NativePointer thisPtr, KInteropNumber velocityX) {
+KOALA_INTEROP_DIRECT_1(PanGestureEvent_getVelocityX, Ark_Int32, Ark_NativePointer)
+void impl_PanGestureEvent_setVelocityX(Ark_NativePointer thisPtr, KDouble velocityX) {
         Ark_PanGestureEvent self = reinterpret_cast<Ark_PanGestureEvent>(thisPtr);
-        GetAccessors()->getPanGestureEventAccessor()->setVelocityX(self, (const Ark_Number*) (&velocityX));
+        GetAccessors()->getPanGestureEventAccessor()->setVelocityX(self, velocityX);
 }
-KOALA_INTEROP_DIRECT_V2(PanGestureEvent_setVelocityX, Ark_NativePointer, KInteropNumber)
-Ark_Number impl_PanGestureEvent_getVelocityY(Ark_NativePointer thisPtr) {
+KOALA_INTEROP_DIRECT_V2(PanGestureEvent_setVelocityX, Ark_NativePointer, KDouble)
+Ark_Int32 impl_PanGestureEvent_getVelocityY(Ark_NativePointer thisPtr) {
         Ark_PanGestureEvent self = reinterpret_cast<Ark_PanGestureEvent>(thisPtr);
         return GetAccessors()->getPanGestureEventAccessor()->getVelocityY(self);
 }
-KOALA_INTEROP_DIRECT_1(PanGestureEvent_getVelocityY, KInteropNumber, Ark_NativePointer)
-void impl_PanGestureEvent_setVelocityY(Ark_NativePointer thisPtr, KInteropNumber velocityY) {
+KOALA_INTEROP_DIRECT_1(PanGestureEvent_getVelocityY, Ark_Int32, Ark_NativePointer)
+void impl_PanGestureEvent_setVelocityY(Ark_NativePointer thisPtr, KDouble velocityY) {
         Ark_PanGestureEvent self = reinterpret_cast<Ark_PanGestureEvent>(thisPtr);
-        GetAccessors()->getPanGestureEventAccessor()->setVelocityY(self, (const Ark_Number*) (&velocityY));
+        GetAccessors()->getPanGestureEventAccessor()->setVelocityY(self, velocityY);
 }
-KOALA_INTEROP_DIRECT_V2(PanGestureEvent_setVelocityY, Ark_NativePointer, KInteropNumber)
-Ark_Number impl_PanGestureEvent_getVelocity(Ark_NativePointer thisPtr) {
+KOALA_INTEROP_DIRECT_V2(PanGestureEvent_setVelocityY, Ark_NativePointer, KDouble)
+Ark_Int32 impl_PanGestureEvent_getVelocity(Ark_NativePointer thisPtr) {
         Ark_PanGestureEvent self = reinterpret_cast<Ark_PanGestureEvent>(thisPtr);
         return GetAccessors()->getPanGestureEventAccessor()->getVelocity(self);
 }
-KOALA_INTEROP_DIRECT_1(PanGestureEvent_getVelocity, KInteropNumber, Ark_NativePointer)
-void impl_PanGestureEvent_setVelocity(Ark_NativePointer thisPtr, KInteropNumber velocity) {
+KOALA_INTEROP_DIRECT_1(PanGestureEvent_getVelocity, Ark_Int32, Ark_NativePointer)
+void impl_PanGestureEvent_setVelocity(Ark_NativePointer thisPtr, KDouble velocity) {
         Ark_PanGestureEvent self = reinterpret_cast<Ark_PanGestureEvent>(thisPtr);
-        GetAccessors()->getPanGestureEventAccessor()->setVelocity(self, (const Ark_Number*) (&velocity));
+        GetAccessors()->getPanGestureEventAccessor()->setVelocity(self, velocity);
 }
-KOALA_INTEROP_DIRECT_V2(PanGestureEvent_setVelocity, Ark_NativePointer, KInteropNumber)
+KOALA_INTEROP_DIRECT_V2(PanGestureEvent_setVelocity, Ark_NativePointer, KDouble)
 Ark_NativePointer impl_PanGestureOptions_construct(KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
@@ -33034,26 +33034,26 @@ void impl_PanGestureOptions_setDirection(Ark_NativePointer thisPtr, Ark_Int32 va
         GetAccessors()->getPanGestureOptionsAccessor()->setDirection(self, static_cast<Ark_PanDirection>(value));
 }
 KOALA_INTEROP_DIRECT_V2(PanGestureOptions_setDirection, Ark_NativePointer, Ark_Int32)
-void impl_PanGestureOptions_setDistance(Ark_NativePointer thisPtr, KInteropNumber value) {
+void impl_PanGestureOptions_setDistance(Ark_NativePointer thisPtr, KDouble value) {
         Ark_PanGestureOptions self = reinterpret_cast<Ark_PanGestureOptions>(thisPtr);
-        GetAccessors()->getPanGestureOptionsAccessor()->setDistance(self, (const Ark_Number*) (&value));
+        GetAccessors()->getPanGestureOptionsAccessor()->setDistance(self, value);
 }
-KOALA_INTEROP_DIRECT_V2(PanGestureOptions_setDistance, Ark_NativePointer, KInteropNumber)
-void impl_PanGestureOptions_setFingers(Ark_NativePointer thisPtr, KInteropNumber value) {
+KOALA_INTEROP_DIRECT_V2(PanGestureOptions_setDistance, Ark_NativePointer, KDouble)
+void impl_PanGestureOptions_setFingers(Ark_NativePointer thisPtr, Ark_Int32 value) {
         Ark_PanGestureOptions self = reinterpret_cast<Ark_PanGestureOptions>(thisPtr);
-        GetAccessors()->getPanGestureOptionsAccessor()->setFingers(self, (const Ark_Number*) (&value));
+        GetAccessors()->getPanGestureOptionsAccessor()->setFingers(self, value);
 }
-KOALA_INTEROP_DIRECT_V2(PanGestureOptions_setFingers, Ark_NativePointer, KInteropNumber)
+KOALA_INTEROP_DIRECT_V2(PanGestureOptions_setFingers, Ark_NativePointer, Ark_Int32)
 Ark_Int32 impl_PanGestureOptions_getDirection(Ark_NativePointer thisPtr) {
         Ark_PanGestureOptions self = reinterpret_cast<Ark_PanGestureOptions>(thisPtr);
         return GetAccessors()->getPanGestureOptionsAccessor()->getDirection(self);
 }
 KOALA_INTEROP_DIRECT_1(PanGestureOptions_getDirection, Ark_Int32, Ark_NativePointer)
-Ark_Number impl_PanGestureOptions_getDistance(Ark_NativePointer thisPtr) {
+Ark_Int32 impl_PanGestureOptions_getDistance(Ark_NativePointer thisPtr) {
         Ark_PanGestureOptions self = reinterpret_cast<Ark_PanGestureOptions>(thisPtr);
         return GetAccessors()->getPanGestureOptionsAccessor()->getDistance(self);
 }
-KOALA_INTEROP_DIRECT_1(PanGestureOptions_getDistance, KInteropNumber, Ark_NativePointer)
+KOALA_INTEROP_DIRECT_1(PanGestureOptions_getDistance, Ark_Int32, Ark_NativePointer)
 Ark_NativePointer impl_PanRecognizer_construct() {
         return GetAccessors()->getPanRecognizerAccessor()->construct();
 }
@@ -33377,36 +33377,36 @@ Ark_NativePointer impl_PinchGestureEvent_getFinalizer() {
         return GetAccessors()->getPinchGestureEventAccessor()->getFinalizer();
 }
 KOALA_INTEROP_DIRECT_0(PinchGestureEvent_getFinalizer, Ark_NativePointer)
-Ark_Number impl_PinchGestureEvent_getScale(Ark_NativePointer thisPtr) {
+Ark_Int32 impl_PinchGestureEvent_getScale(Ark_NativePointer thisPtr) {
         Ark_PinchGestureEvent self = reinterpret_cast<Ark_PinchGestureEvent>(thisPtr);
         return GetAccessors()->getPinchGestureEventAccessor()->getScale(self);
 }
-KOALA_INTEROP_DIRECT_1(PinchGestureEvent_getScale, KInteropNumber, Ark_NativePointer)
-void impl_PinchGestureEvent_setScale(Ark_NativePointer thisPtr, KInteropNumber scale) {
+KOALA_INTEROP_DIRECT_1(PinchGestureEvent_getScale, Ark_Int32, Ark_NativePointer)
+void impl_PinchGestureEvent_setScale(Ark_NativePointer thisPtr, KDouble scale) {
         Ark_PinchGestureEvent self = reinterpret_cast<Ark_PinchGestureEvent>(thisPtr);
-        GetAccessors()->getPinchGestureEventAccessor()->setScale(self, (const Ark_Number*) (&scale));
+        GetAccessors()->getPinchGestureEventAccessor()->setScale(self, scale);
 }
-KOALA_INTEROP_DIRECT_V2(PinchGestureEvent_setScale, Ark_NativePointer, KInteropNumber)
-Ark_Number impl_PinchGestureEvent_getPinchCenterX(Ark_NativePointer thisPtr) {
+KOALA_INTEROP_DIRECT_V2(PinchGestureEvent_setScale, Ark_NativePointer, KDouble)
+Ark_Int32 impl_PinchGestureEvent_getPinchCenterX(Ark_NativePointer thisPtr) {
         Ark_PinchGestureEvent self = reinterpret_cast<Ark_PinchGestureEvent>(thisPtr);
         return GetAccessors()->getPinchGestureEventAccessor()->getPinchCenterX(self);
 }
-KOALA_INTEROP_DIRECT_1(PinchGestureEvent_getPinchCenterX, KInteropNumber, Ark_NativePointer)
-void impl_PinchGestureEvent_setPinchCenterX(Ark_NativePointer thisPtr, KInteropNumber pinchCenterX) {
+KOALA_INTEROP_DIRECT_1(PinchGestureEvent_getPinchCenterX, Ark_Int32, Ark_NativePointer)
+void impl_PinchGestureEvent_setPinchCenterX(Ark_NativePointer thisPtr, KDouble pinchCenterX) {
         Ark_PinchGestureEvent self = reinterpret_cast<Ark_PinchGestureEvent>(thisPtr);
-        GetAccessors()->getPinchGestureEventAccessor()->setPinchCenterX(self, (const Ark_Number*) (&pinchCenterX));
+        GetAccessors()->getPinchGestureEventAccessor()->setPinchCenterX(self, pinchCenterX);
 }
-KOALA_INTEROP_DIRECT_V2(PinchGestureEvent_setPinchCenterX, Ark_NativePointer, KInteropNumber)
-Ark_Number impl_PinchGestureEvent_getPinchCenterY(Ark_NativePointer thisPtr) {
+KOALA_INTEROP_DIRECT_V2(PinchGestureEvent_setPinchCenterX, Ark_NativePointer, KDouble)
+Ark_Int32 impl_PinchGestureEvent_getPinchCenterY(Ark_NativePointer thisPtr) {
         Ark_PinchGestureEvent self = reinterpret_cast<Ark_PinchGestureEvent>(thisPtr);
         return GetAccessors()->getPinchGestureEventAccessor()->getPinchCenterY(self);
 }
-KOALA_INTEROP_DIRECT_1(PinchGestureEvent_getPinchCenterY, KInteropNumber, Ark_NativePointer)
-void impl_PinchGestureEvent_setPinchCenterY(Ark_NativePointer thisPtr, KInteropNumber pinchCenterY) {
+KOALA_INTEROP_DIRECT_1(PinchGestureEvent_getPinchCenterY, Ark_Int32, Ark_NativePointer)
+void impl_PinchGestureEvent_setPinchCenterY(Ark_NativePointer thisPtr, KDouble pinchCenterY) {
         Ark_PinchGestureEvent self = reinterpret_cast<Ark_PinchGestureEvent>(thisPtr);
-        GetAccessors()->getPinchGestureEventAccessor()->setPinchCenterY(self, (const Ark_Number*) (&pinchCenterY));
+        GetAccessors()->getPinchGestureEventAccessor()->setPinchCenterY(self, pinchCenterY);
 }
-KOALA_INTEROP_DIRECT_V2(PinchGestureEvent_setPinchCenterY, Ark_NativePointer, KInteropNumber)
+KOALA_INTEROP_DIRECT_V2(PinchGestureEvent_setPinchCenterY, Ark_NativePointer, KDouble)
 Ark_NativePointer impl_PinchRecognizer_construct() {
         return GetAccessors()->getPinchRecognizerAccessor()->construct();
 }
@@ -33415,7 +33415,7 @@ Ark_NativePointer impl_PinchRecognizer_getFinalizer() {
         return GetAccessors()->getPinchRecognizerAccessor()->getFinalizer();
 }
 KOALA_INTEROP_DIRECT_0(PinchRecognizer_getFinalizer, Ark_NativePointer)
-Ark_Number impl_PinchRecognizer_getDistance(Ark_NativePointer thisPtr) {
+Ark_Int32 impl_PinchRecognizer_getDistance(Ark_NativePointer thisPtr) {
         Ark_PinchRecognizer self = reinterpret_cast<Ark_PinchRecognizer>(thisPtr);
         return GetAccessors()->getPinchRecognizerAccessor()->getDistance(self);
 }
@@ -34499,16 +34499,16 @@ Ark_NativePointer impl_RotationGestureEvent_getFinalizer() {
         return GetAccessors()->getRotationGestureEventAccessor()->getFinalizer();
 }
 KOALA_INTEROP_DIRECT_0(RotationGestureEvent_getFinalizer, Ark_NativePointer)
-Ark_Number impl_RotationGestureEvent_getAngle(Ark_NativePointer thisPtr) {
+Ark_Int32 impl_RotationGestureEvent_getAngle(Ark_NativePointer thisPtr) {
         Ark_RotationGestureEvent self = reinterpret_cast<Ark_RotationGestureEvent>(thisPtr);
         return GetAccessors()->getRotationGestureEventAccessor()->getAngle(self);
 }
-KOALA_INTEROP_DIRECT_1(RotationGestureEvent_getAngle, KInteropNumber, Ark_NativePointer)
-void impl_RotationGestureEvent_setAngle(Ark_NativePointer thisPtr, KInteropNumber angle) {
+KOALA_INTEROP_DIRECT_1(RotationGestureEvent_getAngle, Ark_Int32, Ark_NativePointer)
+void impl_RotationGestureEvent_setAngle(Ark_NativePointer thisPtr, KDouble angle) {
         Ark_RotationGestureEvent self = reinterpret_cast<Ark_RotationGestureEvent>(thisPtr);
-        GetAccessors()->getRotationGestureEventAccessor()->setAngle(self, (const Ark_Number*) (&angle));
+        GetAccessors()->getRotationGestureEventAccessor()->setAngle(self, angle);
 }
-KOALA_INTEROP_DIRECT_V2(RotationGestureEvent_setAngle, Ark_NativePointer, KInteropNumber)
+KOALA_INTEROP_DIRECT_V2(RotationGestureEvent_setAngle, Ark_NativePointer, KDouble)
 Ark_NativePointer impl_RotationRecognizer_construct() {
         return GetAccessors()->getRotationRecognizerAccessor()->construct();
 }
@@ -34517,11 +34517,11 @@ Ark_NativePointer impl_RotationRecognizer_getFinalizer() {
         return GetAccessors()->getRotationRecognizerAccessor()->getFinalizer();
 }
 KOALA_INTEROP_DIRECT_0(RotationRecognizer_getFinalizer, Ark_NativePointer)
-Ark_Number impl_RotationRecognizer_getAngle(Ark_NativePointer thisPtr) {
+Ark_Int32 impl_RotationRecognizer_getAngle(Ark_NativePointer thisPtr) {
         Ark_RotationRecognizer self = reinterpret_cast<Ark_RotationRecognizer>(thisPtr);
         return GetAccessors()->getRotationRecognizerAccessor()->getAngle(self);
 }
-KOALA_INTEROP_DIRECT_1(RotationRecognizer_getAngle, KInteropNumber, Ark_NativePointer)
+KOALA_INTEROP_DIRECT_1(RotationRecognizer_getAngle, Ark_Int32, Ark_NativePointer)
 Ark_NativePointer impl_RouterExtender_push(Ark_NativePointer jsView, const KStringPtr& url, KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto recoverValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
@@ -35286,26 +35286,26 @@ Ark_NativePointer impl_SwipeGestureEvent_getFinalizer() {
         return GetAccessors()->getSwipeGestureEventAccessor()->getFinalizer();
 }
 KOALA_INTEROP_DIRECT_0(SwipeGestureEvent_getFinalizer, Ark_NativePointer)
-Ark_Number impl_SwipeGestureEvent_getAngle(Ark_NativePointer thisPtr) {
+Ark_Int32 impl_SwipeGestureEvent_getAngle(Ark_NativePointer thisPtr) {
         Ark_SwipeGestureEvent self = reinterpret_cast<Ark_SwipeGestureEvent>(thisPtr);
         return GetAccessors()->getSwipeGestureEventAccessor()->getAngle(self);
 }
-KOALA_INTEROP_DIRECT_1(SwipeGestureEvent_getAngle, KInteropNumber, Ark_NativePointer)
-void impl_SwipeGestureEvent_setAngle(Ark_NativePointer thisPtr, KInteropNumber angle) {
+KOALA_INTEROP_DIRECT_1(SwipeGestureEvent_getAngle, Ark_Int32, Ark_NativePointer)
+void impl_SwipeGestureEvent_setAngle(Ark_NativePointer thisPtr, KDouble angle) {
         Ark_SwipeGestureEvent self = reinterpret_cast<Ark_SwipeGestureEvent>(thisPtr);
-        GetAccessors()->getSwipeGestureEventAccessor()->setAngle(self, (const Ark_Number*) (&angle));
+        GetAccessors()->getSwipeGestureEventAccessor()->setAngle(self, angle);
 }
-KOALA_INTEROP_DIRECT_V2(SwipeGestureEvent_setAngle, Ark_NativePointer, KInteropNumber)
-Ark_Number impl_SwipeGestureEvent_getSpeed(Ark_NativePointer thisPtr) {
+KOALA_INTEROP_DIRECT_V2(SwipeGestureEvent_setAngle, Ark_NativePointer, KDouble)
+Ark_Int32 impl_SwipeGestureEvent_getSpeed(Ark_NativePointer thisPtr) {
         Ark_SwipeGestureEvent self = reinterpret_cast<Ark_SwipeGestureEvent>(thisPtr);
         return GetAccessors()->getSwipeGestureEventAccessor()->getSpeed(self);
 }
-KOALA_INTEROP_DIRECT_1(SwipeGestureEvent_getSpeed, KInteropNumber, Ark_NativePointer)
-void impl_SwipeGestureEvent_setSpeed(Ark_NativePointer thisPtr, KInteropNumber speed) {
+KOALA_INTEROP_DIRECT_1(SwipeGestureEvent_getSpeed, Ark_Int32, Ark_NativePointer)
+void impl_SwipeGestureEvent_setSpeed(Ark_NativePointer thisPtr, KDouble speed) {
         Ark_SwipeGestureEvent self = reinterpret_cast<Ark_SwipeGestureEvent>(thisPtr);
-        GetAccessors()->getSwipeGestureEventAccessor()->setSpeed(self, (const Ark_Number*) (&speed));
+        GetAccessors()->getSwipeGestureEventAccessor()->setSpeed(self, speed);
 }
-KOALA_INTEROP_DIRECT_V2(SwipeGestureEvent_setSpeed, Ark_NativePointer, KInteropNumber)
+KOALA_INTEROP_DIRECT_V2(SwipeGestureEvent_setSpeed, Ark_NativePointer, KDouble)
 Ark_NativePointer impl_SwiperContentTransitionProxy_construct() {
         return GetAccessors()->getSwiperContentTransitionProxyAccessor()->construct();
 }
@@ -35451,11 +35451,11 @@ Ark_NativePointer impl_SwipeRecognizer_getFinalizer() {
         return GetAccessors()->getSwipeRecognizerAccessor()->getFinalizer();
 }
 KOALA_INTEROP_DIRECT_0(SwipeRecognizer_getFinalizer, Ark_NativePointer)
-Ark_Number impl_SwipeRecognizer_getVelocityThreshold(Ark_NativePointer thisPtr) {
+Ark_Int32 impl_SwipeRecognizer_getVelocityThreshold(Ark_NativePointer thisPtr) {
         Ark_SwipeRecognizer self = reinterpret_cast<Ark_SwipeRecognizer>(thisPtr);
         return GetAccessors()->getSwipeRecognizerAccessor()->getVelocityThreshold(self);
 }
-KOALA_INTEROP_DIRECT_1(SwipeRecognizer_getVelocityThreshold, KInteropNumber, Ark_NativePointer)
+KOALA_INTEROP_DIRECT_1(SwipeRecognizer_getVelocityThreshold, Ark_Int32, Ark_NativePointer)
 Ark_Int32 impl_SwipeRecognizer_getDirection(Ark_NativePointer thisPtr) {
         Ark_SwipeRecognizer self = reinterpret_cast<Ark_SwipeRecognizer>(thisPtr);
         return GetAccessors()->getSwipeRecognizerAccessor()->getDirection(self);
@@ -35686,11 +35686,11 @@ Ark_NativePointer impl_TapRecognizer_getFinalizer() {
         return GetAccessors()->getTapRecognizerAccessor()->getFinalizer();
 }
 KOALA_INTEROP_DIRECT_0(TapRecognizer_getFinalizer, Ark_NativePointer)
-Ark_Number impl_TapRecognizer_getTapCount(Ark_NativePointer thisPtr) {
+Ark_Int32 impl_TapRecognizer_getTapCount(Ark_NativePointer thisPtr) {
         Ark_TapRecognizer self = reinterpret_cast<Ark_TapRecognizer>(thisPtr);
         return GetAccessors()->getTapRecognizerAccessor()->getTapCount(self);
 }
-KOALA_INTEROP_DIRECT_1(TapRecognizer_getTapCount, KInteropNumber, Ark_NativePointer)
+KOALA_INTEROP_DIRECT_1(TapRecognizer_getTapCount, Ark_Int32, Ark_NativePointer)
 Ark_NativePointer impl_TextAreaController_construct() {
         return GetAccessors()->getTextAreaControllerAccessor()->construct();
 }

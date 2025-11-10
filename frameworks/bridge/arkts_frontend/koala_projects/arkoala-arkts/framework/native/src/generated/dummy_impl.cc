@@ -31024,20 +31024,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetOffsetXImpl(Ark_GestureEvent peer)
+    Ark_Float64 GetOffsetXImpl(Ark_GestureEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getOffsetX(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetOffsetXImpl(Ark_GestureEvent peer,
-                        const Ark_Number* offsetX)
+                        Ark_Float64 offsetX)
     {
         if (!needGroupedLog(1))
         {
@@ -31048,20 +31048,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetOffsetYImpl(Ark_GestureEvent peer)
+    Ark_Float64 GetOffsetYImpl(Ark_GestureEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getOffsetY(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetOffsetYImpl(Ark_GestureEvent peer,
-                        const Ark_Number* offsetY)
+                        Ark_Float64 offsetY)
     {
         if (!needGroupedLog(1))
         {
@@ -31072,20 +31072,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetAngleImpl(Ark_GestureEvent peer)
+    Ark_Float64 GetAngleImpl(Ark_GestureEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getAngle(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetAngleImpl(Ark_GestureEvent peer,
-                      const Ark_Number* angle)
+                      Ark_Float64 angle)
     {
         if (!needGroupedLog(1))
         {
@@ -31096,20 +31096,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetSpeedImpl(Ark_GestureEvent peer)
+    Ark_Float64 GetSpeedImpl(Ark_GestureEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getSpeed(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetSpeedImpl(Ark_GestureEvent peer,
-                      const Ark_Number* speed)
+                      Ark_Float64 speed)
     {
         if (!needGroupedLog(1))
         {
@@ -31120,20 +31120,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetScaleImpl(Ark_GestureEvent peer)
+    Ark_Float64 GetScaleImpl(Ark_GestureEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getScale(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetScaleImpl(Ark_GestureEvent peer,
-                      const Ark_Number* scale)
+                      Ark_Float64 scale)
     {
         if (!needGroupedLog(1))
         {
@@ -31144,20 +31144,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetPinchCenterXImpl(Ark_GestureEvent peer)
+    Ark_Float64 GetPinchCenterXImpl(Ark_GestureEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getPinchCenterX(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetPinchCenterXImpl(Ark_GestureEvent peer,
-                             const Ark_Number* pinchCenterX)
+                             Ark_Float64 pinchCenterX)
     {
         if (!needGroupedLog(1))
         {
@@ -31168,20 +31168,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetPinchCenterYImpl(Ark_GestureEvent peer)
+    Ark_Float64 GetPinchCenterYImpl(Ark_GestureEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getPinchCenterY(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetPinchCenterYImpl(Ark_GestureEvent peer,
-                             const Ark_Number* pinchCenterY)
+                             Ark_Float64 pinchCenterY)
     {
         if (!needGroupedLog(1))
         {
@@ -31192,20 +31192,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetVelocityXImpl(Ark_GestureEvent peer)
+    Ark_Float64 GetVelocityXImpl(Ark_GestureEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getVelocityX(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetVelocityXImpl(Ark_GestureEvent peer,
-                          const Ark_Number* velocityX)
+                          Ark_Float64 velocityX)
     {
         if (!needGroupedLog(1))
         {
@@ -31216,20 +31216,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetVelocityYImpl(Ark_GestureEvent peer)
+    Ark_Float64 GetVelocityYImpl(Ark_GestureEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getVelocityY(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetVelocityYImpl(Ark_GestureEvent peer,
-                          const Ark_Number* velocityY)
+                          Ark_Float64 velocityY)
     {
         if (!needGroupedLog(1))
         {
@@ -31240,20 +31240,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetVelocityImpl(Ark_GestureEvent peer)
+    Ark_Float64 GetVelocityImpl(Ark_GestureEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getVelocity(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetVelocityImpl(Ark_GestureEvent peer,
-                         const Ark_Number* velocity)
+                         Ark_Float64 velocity)
     {
         if (!needGroupedLog(1))
         {
@@ -31465,17 +31465,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return 0;
     }
-    Ark_Number GetFingerCountImpl(Ark_GestureRecognizer peer)
+    Ark_Int32 GetFingerCountImpl(Ark_GestureRecognizer peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getFingerCount(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     Ark_Boolean IsFingerCountLimitImpl(Ark_GestureRecognizer peer)
     {
@@ -33799,17 +33799,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return 0;
     }
-    Ark_Number GetDurationImpl(Ark_LongPressRecognizer peer)
+    Ark_Int32 GetDurationImpl(Ark_LongPressRecognizer peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getDuration(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     } // LongPressRecognizerAccessor
     namespace Matrix2DAccessor {
@@ -36396,20 +36396,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return fnPtr<KNativePointer>(dummyClassFinalizer);
     }
-    Ark_Number GetOffsetXImpl(Ark_PanGestureEvent peer)
+    Ark_Float64 GetOffsetXImpl(Ark_PanGestureEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getOffsetX(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetOffsetXImpl(Ark_PanGestureEvent peer,
-                        const Ark_Number* offsetX)
+                        Ark_Float64 offsetX)
     {
         if (!needGroupedLog(1))
         {
@@ -36420,20 +36420,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetOffsetYImpl(Ark_PanGestureEvent peer)
+    Ark_Float64 GetOffsetYImpl(Ark_PanGestureEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getOffsetY(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetOffsetYImpl(Ark_PanGestureEvent peer,
-                        const Ark_Number* offsetY)
+                        Ark_Float64 offsetY)
     {
         if (!needGroupedLog(1))
         {
@@ -36444,20 +36444,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetVelocityXImpl(Ark_PanGestureEvent peer)
+    Ark_Float64 GetVelocityXImpl(Ark_PanGestureEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getVelocityX(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetVelocityXImpl(Ark_PanGestureEvent peer,
-                          const Ark_Number* velocityX)
+                          Ark_Float64 velocityX)
     {
         if (!needGroupedLog(1))
         {
@@ -36468,20 +36468,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetVelocityYImpl(Ark_PanGestureEvent peer)
+    Ark_Float64 GetVelocityYImpl(Ark_PanGestureEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getVelocityY(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetVelocityYImpl(Ark_PanGestureEvent peer,
-                          const Ark_Number* velocityY)
+                          Ark_Float64 velocityY)
     {
         if (!needGroupedLog(1))
         {
@@ -36492,20 +36492,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetVelocityImpl(Ark_PanGestureEvent peer)
+    Ark_Float64 GetVelocityImpl(Ark_PanGestureEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getVelocity(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetVelocityImpl(Ark_PanGestureEvent peer,
-                         const Ark_Number* velocity)
+                         Ark_Float64 velocity)
     {
         if (!needGroupedLog(1))
         {
@@ -36566,7 +36566,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetDistanceImpl(Ark_PanGestureOptions peer,
-                         const Ark_Number* value)
+                         Ark_Float64 value)
     {
         if (!needGroupedLog(1))
         {
@@ -36578,7 +36578,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetFingersImpl(Ark_PanGestureOptions peer,
-                        const Ark_Number* value)
+                        Ark_Int32 value)
     {
         if (!needGroupedLog(1))
         {
@@ -36601,17 +36601,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {};
     }
-    Ark_Number GetDistanceImpl(Ark_PanGestureOptions peer)
+    Ark_Float64 GetDistanceImpl(Ark_PanGestureOptions peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getDistance(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     } // PanGestureOptionsAccessor
     namespace PanRecognizerAccessor {
@@ -37143,20 +37143,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return fnPtr<KNativePointer>(dummyClassFinalizer);
     }
-    Ark_Number GetScaleImpl(Ark_PinchGestureEvent peer)
+    Ark_Float64 GetScaleImpl(Ark_PinchGestureEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getScale(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetScaleImpl(Ark_PinchGestureEvent peer,
-                      const Ark_Number* scale)
+                      Ark_Float64 scale)
     {
         if (!needGroupedLog(1))
         {
@@ -37167,20 +37167,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetPinchCenterXImpl(Ark_PinchGestureEvent peer)
+    Ark_Float64 GetPinchCenterXImpl(Ark_PinchGestureEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getPinchCenterX(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetPinchCenterXImpl(Ark_PinchGestureEvent peer,
-                             const Ark_Number* pinchCenterX)
+                             Ark_Float64 pinchCenterX)
     {
         if (!needGroupedLog(1))
         {
@@ -37191,20 +37191,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetPinchCenterYImpl(Ark_PinchGestureEvent peer)
+    Ark_Float64 GetPinchCenterYImpl(Ark_PinchGestureEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getPinchCenterY(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetPinchCenterYImpl(Ark_PinchGestureEvent peer,
-                             const Ark_Number* pinchCenterY)
+                             Ark_Float64 pinchCenterY)
     {
         if (!needGroupedLog(1))
         {
@@ -37251,17 +37251,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return fnPtr<KNativePointer>(dummyClassFinalizer);
     }
-    Ark_Number GetDistanceImpl(Ark_PinchRecognizer peer)
+    Ark_Float64 GetDistanceImpl(Ark_PinchRecognizer peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getDistance(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     } // PinchRecognizerAccessor
     namespace PixelMapMockAccessor {
@@ -38600,20 +38600,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return fnPtr<KNativePointer>(dummyClassFinalizer);
     }
-    Ark_Number GetAngleImpl(Ark_RotationGestureEvent peer)
+    Ark_Float64 GetAngleImpl(Ark_RotationGestureEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getAngle(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetAngleImpl(Ark_RotationGestureEvent peer,
-                      const Ark_Number* angle)
+                      Ark_Float64 angle)
     {
         if (!needGroupedLog(1))
         {
@@ -38660,17 +38660,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return fnPtr<KNativePointer>(dummyClassFinalizer);
     }
-    Ark_Number GetAngleImpl(Ark_RotationRecognizer peer)
+    Ark_Float64 GetAngleImpl(Ark_RotationRecognizer peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getAngle(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     } // RotationRecognizerAccessor
     namespace RouterExtenderAccessor {
@@ -40197,20 +40197,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return fnPtr<KNativePointer>(dummyClassFinalizer);
     }
-    Ark_Number GetAngleImpl(Ark_SwipeGestureEvent peer)
+    Ark_Float64 GetAngleImpl(Ark_SwipeGestureEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getAngle(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetAngleImpl(Ark_SwipeGestureEvent peer,
-                      const Ark_Number* angle)
+                      Ark_Float64 angle)
     {
         if (!needGroupedLog(1))
         {
@@ -40221,20 +40221,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetSpeedImpl(Ark_SwipeGestureEvent peer)
+    Ark_Float64 GetSpeedImpl(Ark_SwipeGestureEvent peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getSpeed(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetSpeedImpl(Ark_SwipeGestureEvent peer,
-                      const Ark_Number* speed)
+                      Ark_Float64 speed)
     {
         if (!needGroupedLog(1))
         {
@@ -40523,17 +40523,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return fnPtr<KNativePointer>(dummyClassFinalizer);
     }
-    Ark_Number GetVelocityThresholdImpl(Ark_SwipeRecognizer peer)
+    Ark_Float64 GetVelocityThresholdImpl(Ark_SwipeRecognizer peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getVelocityThreshold(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     Ark_SwipeDirection GetDirectionImpl(Ark_SwipeRecognizer peer)
     {
@@ -41053,17 +41053,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return fnPtr<KNativePointer>(dummyClassFinalizer);
     }
-    Ark_Number GetTapCountImpl(Ark_TapRecognizer peer)
+    Ark_Int32 GetTapCountImpl(Ark_TapRecognizer peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getTapCount(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     } // TapRecognizerAccessor
     namespace TextAreaControllerAccessor {

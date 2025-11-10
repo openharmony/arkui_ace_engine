@@ -13586,13 +13586,13 @@ typedef struct Opt_ExpectedFrameRateRange {
 } Opt_ExpectedFrameRateRange;
 typedef struct Ark_FingerInfo {
     /* kind: Interface */
-    Ark_Number id;
-    Ark_Number globalX;
-    Ark_Number globalY;
-    Ark_Number localX;
-    Ark_Number localY;
-    Ark_Number displayX;
-    Ark_Number displayY;
+    Ark_Int32 id;
+    Ark_Float64 globalX;
+    Ark_Float64 globalY;
+    Ark_Float64 localX;
+    Ark_Float64 localY;
+    Ark_Float64 displayX;
+    Ark_Float64 displayY;
     Opt_InteractionHand hand;
 } Ark_FingerInfo;
 typedef struct Opt_FingerInfo {
@@ -14753,9 +14753,9 @@ typedef struct Opt_OverlayOffset {
 typedef struct Ark_PanGestureHandlerOptions {
     /* kind: Interface */
     Opt_Boolean isFingerCountLimited;
-    Opt_Number fingers;
+    Opt_Int32 fingers;
     Opt_PanDirection direction;
-    Opt_Number distance;
+    Opt_Float64 distance;
 } Ark_PanGestureHandlerOptions;
 typedef struct Opt_PanGestureHandlerOptions {
     Ark_Tag tag;
@@ -26044,36 +26044,36 @@ typedef struct GENERATED_ArkUIGestureEventAccessor {
     Array_FingerInfo (*getFingerList)(Ark_GestureEvent peer);
     void (*setFingerList)(Ark_GestureEvent peer,
                           const Array_FingerInfo* fingerList);
-    Ark_Number (*getOffsetX)(Ark_GestureEvent peer);
+    Ark_Float64 (*getOffsetX)(Ark_GestureEvent peer);
     void (*setOffsetX)(Ark_GestureEvent peer,
-                       const Ark_Number* offsetX);
-    Ark_Number (*getOffsetY)(Ark_GestureEvent peer);
+                       Ark_Float64 offsetX);
+    Ark_Float64 (*getOffsetY)(Ark_GestureEvent peer);
     void (*setOffsetY)(Ark_GestureEvent peer,
-                       const Ark_Number* offsetY);
-    Ark_Number (*getAngle)(Ark_GestureEvent peer);
+                       Ark_Float64 offsetY);
+    Ark_Float64 (*getAngle)(Ark_GestureEvent peer);
     void (*setAngle)(Ark_GestureEvent peer,
-                     const Ark_Number* angle);
-    Ark_Number (*getSpeed)(Ark_GestureEvent peer);
+                     Ark_Float64 angle);
+    Ark_Float64 (*getSpeed)(Ark_GestureEvent peer);
     void (*setSpeed)(Ark_GestureEvent peer,
-                     const Ark_Number* speed);
-    Ark_Number (*getScale)(Ark_GestureEvent peer);
+                     Ark_Float64 speed);
+    Ark_Float64 (*getScale)(Ark_GestureEvent peer);
     void (*setScale)(Ark_GestureEvent peer,
-                     const Ark_Number* scale);
-    Ark_Number (*getPinchCenterX)(Ark_GestureEvent peer);
+                     Ark_Float64 scale);
+    Ark_Float64 (*getPinchCenterX)(Ark_GestureEvent peer);
     void (*setPinchCenterX)(Ark_GestureEvent peer,
-                            const Ark_Number* pinchCenterX);
-    Ark_Number (*getPinchCenterY)(Ark_GestureEvent peer);
+                            Ark_Float64 pinchCenterX);
+    Ark_Float64 (*getPinchCenterY)(Ark_GestureEvent peer);
     void (*setPinchCenterY)(Ark_GestureEvent peer,
-                            const Ark_Number* pinchCenterY);
-    Ark_Number (*getVelocityX)(Ark_GestureEvent peer);
+                            Ark_Float64 pinchCenterY);
+    Ark_Float64 (*getVelocityX)(Ark_GestureEvent peer);
     void (*setVelocityX)(Ark_GestureEvent peer,
-                         const Ark_Number* velocityX);
-    Ark_Number (*getVelocityY)(Ark_GestureEvent peer);
+                         Ark_Float64 velocityX);
+    Ark_Float64 (*getVelocityY)(Ark_GestureEvent peer);
     void (*setVelocityY)(Ark_GestureEvent peer,
-                         const Ark_Number* velocityY);
-    Ark_Number (*getVelocity)(Ark_GestureEvent peer);
+                         Ark_Float64 velocityY);
+    Ark_Float64 (*getVelocity)(Ark_GestureEvent peer);
     void (*setVelocity)(Ark_GestureEvent peer,
-                        const Ark_Number* velocity);
+                        Ark_Float64 velocity);
 } GENERATED_ArkUIGestureEventAccessor;
 
 typedef struct GENERATED_ArkUIGestureOpsAccessor {
@@ -26144,7 +26144,7 @@ typedef struct GENERATED_ArkUIGestureRecognizerAccessor {
     Ark_GestureRecognizerState (*getState)(Ark_GestureRecognizer peer);
     Ark_EventTargetInfo (*getEventTargetInfo)(Ark_GestureRecognizer peer);
     Ark_Boolean (*isValid)(Ark_GestureRecognizer peer);
-    Ark_Number (*getFingerCount)(Ark_GestureRecognizer peer);
+    Ark_Int32 (*getFingerCount)(Ark_GestureRecognizer peer);
     Ark_Boolean (*isFingerCountLimit)(Ark_GestureRecognizer peer);
 } GENERATED_ArkUIGestureRecognizerAccessor;
 
@@ -26499,7 +26499,7 @@ typedef struct GENERATED_ArkUILongPressRecognizerAccessor {
     Ark_LongPressRecognizer (*construct)();
     Ark_NativePointer (*getFinalizer)();
     Ark_Boolean (*isRepeat)(Ark_LongPressRecognizer peer);
-    Ark_Number (*getDuration)(Ark_LongPressRecognizer peer);
+    Ark_Int32 (*getDuration)(Ark_LongPressRecognizer peer);
 } GENERATED_ArkUILongPressRecognizerAccessor;
 
 typedef struct GENERATED_ArkUIMatrix2DAccessor {
@@ -26910,21 +26910,21 @@ typedef struct GENERATED_ArkUIPanGestureEventAccessor {
     void (*destroyPeer)(Ark_PanGestureEvent peer);
     Ark_PanGestureEvent (*construct)();
     Ark_NativePointer (*getFinalizer)();
-    Ark_Number (*getOffsetX)(Ark_PanGestureEvent peer);
+    Ark_Float64 (*getOffsetX)(Ark_PanGestureEvent peer);
     void (*setOffsetX)(Ark_PanGestureEvent peer,
-                       const Ark_Number* offsetX);
-    Ark_Number (*getOffsetY)(Ark_PanGestureEvent peer);
+                       Ark_Float64 offsetX);
+    Ark_Float64 (*getOffsetY)(Ark_PanGestureEvent peer);
     void (*setOffsetY)(Ark_PanGestureEvent peer,
-                       const Ark_Number* offsetY);
-    Ark_Number (*getVelocityX)(Ark_PanGestureEvent peer);
+                       Ark_Float64 offsetY);
+    Ark_Float64 (*getVelocityX)(Ark_PanGestureEvent peer);
     void (*setVelocityX)(Ark_PanGestureEvent peer,
-                         const Ark_Number* velocityX);
-    Ark_Number (*getVelocityY)(Ark_PanGestureEvent peer);
+                         Ark_Float64 velocityX);
+    Ark_Float64 (*getVelocityY)(Ark_PanGestureEvent peer);
     void (*setVelocityY)(Ark_PanGestureEvent peer,
-                         const Ark_Number* velocityY);
-    Ark_Number (*getVelocity)(Ark_PanGestureEvent peer);
+                         Ark_Float64 velocityY);
+    Ark_Float64 (*getVelocity)(Ark_PanGestureEvent peer);
     void (*setVelocity)(Ark_PanGestureEvent peer,
-                        const Ark_Number* velocity);
+                        Ark_Float64 velocity);
 } GENERATED_ArkUIPanGestureEventAccessor;
 
 typedef struct GENERATED_ArkUIPanGestureOptionsAccessor {
@@ -26934,11 +26934,11 @@ typedef struct GENERATED_ArkUIPanGestureOptionsAccessor {
     void (*setDirection)(Ark_PanGestureOptions peer,
                          Ark_PanDirection value);
     void (*setDistance)(Ark_PanGestureOptions peer,
-                        const Ark_Number* value);
+                        Ark_Float64 value);
     void (*setFingers)(Ark_PanGestureOptions peer,
-                       const Ark_Number* value);
+                       Ark_Int32 value);
     Ark_PanDirection (*getDirection)(Ark_PanGestureOptions peer);
-    Ark_Number (*getDistance)(Ark_PanGestureOptions peer);
+    Ark_Float64 (*getDistance)(Ark_PanGestureOptions peer);
 } GENERATED_ArkUIPanGestureOptionsAccessor;
 
 typedef struct GENERATED_ArkUIPanRecognizerAccessor {
@@ -27021,22 +27021,22 @@ typedef struct GENERATED_ArkUIPinchGestureEventAccessor {
     void (*destroyPeer)(Ark_PinchGestureEvent peer);
     Ark_PinchGestureEvent (*construct)();
     Ark_NativePointer (*getFinalizer)();
-    Ark_Number (*getScale)(Ark_PinchGestureEvent peer);
+    Ark_Float64 (*getScale)(Ark_PinchGestureEvent peer);
     void (*setScale)(Ark_PinchGestureEvent peer,
-                     const Ark_Number* scale);
-    Ark_Number (*getPinchCenterX)(Ark_PinchGestureEvent peer);
+                     Ark_Float64 scale);
+    Ark_Float64 (*getPinchCenterX)(Ark_PinchGestureEvent peer);
     void (*setPinchCenterX)(Ark_PinchGestureEvent peer,
-                            const Ark_Number* pinchCenterX);
-    Ark_Number (*getPinchCenterY)(Ark_PinchGestureEvent peer);
+                            Ark_Float64 pinchCenterX);
+    Ark_Float64 (*getPinchCenterY)(Ark_PinchGestureEvent peer);
     void (*setPinchCenterY)(Ark_PinchGestureEvent peer,
-                            const Ark_Number* pinchCenterY);
+                            Ark_Float64 pinchCenterY);
 } GENERATED_ArkUIPinchGestureEventAccessor;
 
 typedef struct GENERATED_ArkUIPinchRecognizerAccessor {
     void (*destroyPeer)(Ark_PinchRecognizer peer);
     Ark_PinchRecognizer (*construct)();
     Ark_NativePointer (*getFinalizer)();
-    Ark_Number (*getDistance)(Ark_PinchRecognizer peer);
+    Ark_Float64 (*getDistance)(Ark_PinchRecognizer peer);
 } GENERATED_ArkUIPinchRecognizerAccessor;
 
 typedef struct GENERATED_ArkUIPixelMapMockAccessor {
@@ -27357,16 +27357,16 @@ typedef struct GENERATED_ArkUIRotationGestureEventAccessor {
     void (*destroyPeer)(Ark_RotationGestureEvent peer);
     Ark_RotationGestureEvent (*construct)();
     Ark_NativePointer (*getFinalizer)();
-    Ark_Number (*getAngle)(Ark_RotationGestureEvent peer);
+    Ark_Float64 (*getAngle)(Ark_RotationGestureEvent peer);
     void (*setAngle)(Ark_RotationGestureEvent peer,
-                     const Ark_Number* angle);
+                     Ark_Float64 angle);
 } GENERATED_ArkUIRotationGestureEventAccessor;
 
 typedef struct GENERATED_ArkUIRotationRecognizerAccessor {
     void (*destroyPeer)(Ark_RotationRecognizer peer);
     Ark_RotationRecognizer (*construct)();
     Ark_NativePointer (*getFinalizer)();
-    Ark_Number (*getAngle)(Ark_RotationRecognizer peer);
+    Ark_Float64 (*getAngle)(Ark_RotationRecognizer peer);
 } GENERATED_ArkUIRotationRecognizerAccessor;
 
 typedef struct GENERATED_ArkUIRouterExtenderAccessor {
@@ -27623,12 +27623,12 @@ typedef struct GENERATED_ArkUISwipeGestureEventAccessor {
     void (*destroyPeer)(Ark_SwipeGestureEvent peer);
     Ark_SwipeGestureEvent (*construct)();
     Ark_NativePointer (*getFinalizer)();
-    Ark_Number (*getAngle)(Ark_SwipeGestureEvent peer);
+    Ark_Float64 (*getAngle)(Ark_SwipeGestureEvent peer);
     void (*setAngle)(Ark_SwipeGestureEvent peer,
-                     const Ark_Number* angle);
-    Ark_Number (*getSpeed)(Ark_SwipeGestureEvent peer);
+                     Ark_Float64 angle);
+    Ark_Float64 (*getSpeed)(Ark_SwipeGestureEvent peer);
     void (*setSpeed)(Ark_SwipeGestureEvent peer,
-                     const Ark_Number* speed);
+                     Ark_Float64 speed);
 } GENERATED_ArkUISwipeGestureEventAccessor;
 
 typedef struct GENERATED_ArkUISwiperContentTransitionProxyAccessor {
@@ -27672,7 +27672,7 @@ typedef struct GENERATED_ArkUISwipeRecognizerAccessor {
     void (*destroyPeer)(Ark_SwipeRecognizer peer);
     Ark_SwipeRecognizer (*construct)();
     Ark_NativePointer (*getFinalizer)();
-    Ark_Number (*getVelocityThreshold)(Ark_SwipeRecognizer peer);
+    Ark_Float64 (*getVelocityThreshold)(Ark_SwipeRecognizer peer);
     Ark_SwipeDirection (*getDirection)(Ark_SwipeRecognizer peer);
 } GENERATED_ArkUISwipeRecognizerAccessor;
 
@@ -27757,7 +27757,7 @@ typedef struct GENERATED_ArkUITapRecognizerAccessor {
     void (*destroyPeer)(Ark_TapRecognizer peer);
     Ark_TapRecognizer (*construct)();
     Ark_NativePointer (*getFinalizer)();
-    Ark_Number (*getTapCount)(Ark_TapRecognizer peer);
+    Ark_Int32 (*getTapCount)(Ark_TapRecognizer peer);
 } GENERATED_ArkUITapRecognizerAccessor;
 
 typedef struct GENERATED_ArkUITextAreaControllerAccessor {

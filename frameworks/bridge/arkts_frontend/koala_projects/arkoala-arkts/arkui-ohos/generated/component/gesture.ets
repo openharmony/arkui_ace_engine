@@ -107,7 +107,7 @@ export class GestureRecognizer implements MaterializedBase {
     public isValid(): boolean {
         return this.isValid_serialize()
     }
-    public getFingerCount(): number {
+    public getFingerCount(): int32 {
         return this.getFingerCount_serialize()
     }
     public isFingerCountLimit(): boolean {
@@ -151,7 +151,7 @@ export class GestureRecognizer implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._GestureRecognizer_isValid(this.peer!.ptr)
         return retval
     }
-    getFingerCount_serialize(): number {
+    getFingerCount_serialize(): int32 {
         const retval  = ArkUIGeneratedNativeModule._GestureRecognizer_getFingerCount(this.peer!.ptr)
         return retval
     }
@@ -215,16 +215,16 @@ export class PanGestureOptions implements MaterializedBase {
         // instructive change end
         return
     }
-    public setDistance(value: number): void {
-        const value_casted = value as (number)
+    public setDistance(value: double): void {
+        const value_casted = value as (double)
         this.setDistance_serialize(value_casted)
         // instructive change end
         this.setOptionState()
         // instructive change end
         return
     }
-    public setFingers(value: number): void {
-        const value_casted = value as (number)
+    public setFingers(value: int32): void {
+        const value_casted = value as (int32)
         this.setFingers_serialize(value_casted)
         // instructive change start
         this.setOptionState()
@@ -234,23 +234,23 @@ export class PanGestureOptions implements MaterializedBase {
     public getDirection(): PanDirection {
         return this.getDirection_serialize()
     }
-    public getDistance(): number {
+    public getDistance(): double {
         return this.getDistance_serialize()
     }
     setDirection_serialize(value: PanDirection): void {
         ArkUIGeneratedNativeModule._PanGestureOptions_setDirection(this.peer!.ptr, value.valueOf())
     }
-    setDistance_serialize(value: number): void {
+    setDistance_serialize(value: double): void {
         ArkUIGeneratedNativeModule._PanGestureOptions_setDistance(this.peer!.ptr, value)
     }
-    setFingers_serialize(value: number): void {
+    setFingers_serialize(value: int32): void {
         ArkUIGeneratedNativeModule._PanGestureOptions_setFingers(this.peer!.ptr, value)
     }
     getDirection_serialize(): PanDirection {
         const retval  = ArkUIGeneratedNativeModule._PanGestureOptions_getDirection(this.peer!.ptr)
         return PanDirection.fromValue(retval)
     }
-    getDistance_serialize(): number {
+    getDistance_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._PanGestureOptions_getDistance(this.peer!.ptr)
         return retval
     }
@@ -315,49 +315,49 @@ export interface GestureInfo {
     isSystemGesture: boolean;
 }
 export interface FingerInfo {
-    id: number;
-    globalX: number;
-    globalY: number;
-    localX: number;
-    localY: number;
-    displayX: number;
-    displayY: number;
+    id: int32;
+    globalX: double;
+    globalY: double;
+    localX: double;
+    localY: double;
+    displayX: double;
+    displayY: double;
     hand?: InteractionHand;
 }
 export interface BaseHandlerOptions {
     isFingerCountLimited?: boolean;
 }
 export interface TapGestureParameters extends BaseHandlerOptions {
-    count?: number;
-    fingers?: number;
-    distanceThreshold?: number;
+    count?: int32;
+    fingers?: int32;
+    distanceThreshold?: double;
 }
 export interface TapGestureHandlerOptions extends BaseHandlerOptions {
-    count?: number;
-    fingers?: number;
+    count?: int32;
+    fingers?: int32;
 }
 export interface LongPressGestureHandlerOptions extends BaseHandlerOptions {
-    fingers?: number;
+    fingers?: int32;
     repeat?: boolean;
-    duration?: number;
+    duration?: int32;
 }
 export interface PanGestureHandlerOptions extends BaseHandlerOptions {
-    fingers?: number;
+    fingers?: int32;
     direction?: PanDirection;
-    distance?: number;
+    distance?: double;
 }
 export interface SwipeGestureHandlerOptions extends BaseHandlerOptions {
-    fingers?: number;
+    fingers?: int32;
     direction?: SwipeDirection;
-    speed?: number;
+    speed?: double;
 }
 export interface PinchGestureHandlerOptions extends BaseHandlerOptions {
-    fingers?: number;
-    distance?: number;
+    fingers?: int32;
+    distance?: double;
 }
 export interface RotationGestureHandlerOptions extends BaseHandlerOptions {
-    fingers?: number;
-    angle?: number;
+    fingers?: int32;
+    angle?: double;
 }
 export interface GestureGroupGestureHandlerOptions {
     mode: GestureMode;
@@ -510,19 +510,19 @@ export class FingerInfo_serializer {
     public static write(buffer: SerializerBase, value: FingerInfo): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForId  = value.id
-        valueSerializer.writeNumber(valueHolderForId)
+        valueSerializer.writeInt32(valueHolderForId)
         const valueHolderForGlobalX  = value.globalX
-        valueSerializer.writeNumber(valueHolderForGlobalX)
+        valueSerializer.writeFloat64(valueHolderForGlobalX)
         const valueHolderForGlobalY  = value.globalY
-        valueSerializer.writeNumber(valueHolderForGlobalY)
+        valueSerializer.writeFloat64(valueHolderForGlobalY)
         const valueHolderForLocalX  = value.localX
-        valueSerializer.writeNumber(valueHolderForLocalX)
+        valueSerializer.writeFloat64(valueHolderForLocalX)
         const valueHolderForLocalY  = value.localY
-        valueSerializer.writeNumber(valueHolderForLocalY)
+        valueSerializer.writeFloat64(valueHolderForLocalY)
         const valueHolderForDisplayX  = value.displayX
-        valueSerializer.writeNumber(valueHolderForDisplayX)
+        valueSerializer.writeFloat64(valueHolderForDisplayX)
         const valueHolderForDisplayY  = value.displayY
-        valueSerializer.writeNumber(valueHolderForDisplayY)
+        valueSerializer.writeFloat64(valueHolderForDisplayY)
         const valueHolderForHand  = value.hand
         if (valueHolderForHand !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
@@ -534,13 +534,13 @@ export class FingerInfo_serializer {
     }
     public static read(buffer: DeserializerBase): FingerInfo {
         let valueDeserializer : DeserializerBase = buffer
-        const idTmpResult : number = (valueDeserializer.readNumber() as number)
-        const globalXTmpResult : number = (valueDeserializer.readNumber() as number)
-        const globalYTmpResult : number = (valueDeserializer.readNumber() as number)
-        const localXTmpResult : number = (valueDeserializer.readNumber() as number)
-        const localYTmpResult : number = (valueDeserializer.readNumber() as number)
-        const displayXTmpResult : number = (valueDeserializer.readNumber() as number)
-        const displayYTmpResult : number = (valueDeserializer.readNumber() as number)
+        const idTmpResult : int32 = valueDeserializer.readInt32()
+        const globalXTmpResult : double = valueDeserializer.readFloat64()
+        const globalYTmpResult : double = valueDeserializer.readFloat64()
+        const localXTmpResult : double = valueDeserializer.readFloat64()
+        const localYTmpResult : double = valueDeserializer.readFloat64()
+        const displayXTmpResult : double = valueDeserializer.readFloat64()
+        const displayYTmpResult : double = valueDeserializer.readFloat64()
         const handTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let handTmpBuf : InteractionHand | undefined = undefined
         if ((handTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -596,7 +596,7 @@ export class PanGestureHandlerOptions_serializer {
         if (valueHolderForFingers !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForFingersTmpValue  = valueHolderForFingers!
-            valueSerializer.writeNumber(valueHolderForFingersTmpValue)
+            valueSerializer.writeInt32(valueHolderForFingersTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -612,7 +612,7 @@ export class PanGestureHandlerOptions_serializer {
         if (valueHolderForDistance !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForDistanceTmpValue  = valueHolderForDistance!
-            valueSerializer.writeNumber(valueHolderForDistanceTmpValue)
+            valueSerializer.writeFloat64(valueHolderForDistanceTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -626,11 +626,11 @@ export class PanGestureHandlerOptions_serializer {
         }
         const isFingerCountLimitedTmpResult : boolean | undefined = isFingerCountLimitedTmpBuf
         const fingersTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let fingersTmpBuf : number | undefined = undefined
+        let fingersTmpBuf : int32 | undefined = undefined
         if ((fingersTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            fingersTmpBuf = (valueDeserializer.readNumber() as number)
+            fingersTmpBuf = valueDeserializer.readInt32()
         }
-        const fingersTmpResult : number | undefined = fingersTmpBuf
+        const fingersTmpResult : int32 | undefined = fingersTmpBuf
         const directionTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let directionTmpBuf : PanDirection | undefined = undefined
         if ((directionTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -638,11 +638,11 @@ export class PanGestureHandlerOptions_serializer {
         }
         const directionTmpResult : PanDirection | undefined = directionTmpBuf
         const distanceTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let distanceTmpBuf : number | undefined = undefined
+        let distanceTmpBuf : double | undefined = undefined
         if ((distanceTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            distanceTmpBuf = (valueDeserializer.readNumber() as number)
+            distanceTmpBuf = valueDeserializer.readFloat64()
         }
-        const distanceTmpResult : number | undefined = distanceTmpBuf
+        const distanceTmpResult : double | undefined = distanceTmpBuf
         let value : PanGestureHandlerOptions = ({isFingerCountLimited: isFingerCountLimitedTmpResult, fingers: fingersTmpResult, direction: directionTmpResult, distance: distanceTmpResult} as PanGestureHandlerOptions)
         return value
     }
@@ -815,16 +815,16 @@ export class BaseGestureEventInternal extends BaseEventInternal implements Mater
 export interface GestureEvent {
     repeat: boolean
     fingerList: Array<FingerInfo>
-    offsetX: number
-    offsetY: number
-    angle: number
-    speed: number
-    scale: number
-    pinchCenterX: number
-    pinchCenterY: number
-    velocityX: number
-    velocityY: number
-    velocity: number
+    offsetX: double
+    offsetY: double
+    angle: double
+    speed: double
+    scale: double
+    pinchCenterX: double
+    pinchCenterY: double
+    velocityX: double
+    velocityY: double
+    velocity: double
 }
 export class GestureEventInternal extends BaseEventInternal implements MaterializedBase,GestureEvent {
     get repeat(): boolean {
@@ -839,64 +839,64 @@ export class GestureEventInternal extends BaseEventInternal implements Materiali
     set fingerList(fingerList: Array<FingerInfo>) {
         this.setFingerList(fingerList)
     }
-    get offsetX(): number {
+    get offsetX(): double {
         return this.getOffsetX()
     }
-    set offsetX(offsetX: number) {
+    set offsetX(offsetX: double) {
         this.setOffsetX(offsetX)
     }
-    get offsetY(): number {
+    get offsetY(): double {
         return this.getOffsetY()
     }
-    set offsetY(offsetY: number) {
+    set offsetY(offsetY: double) {
         this.setOffsetY(offsetY)
     }
-    get angle(): number {
+    get angle(): double {
         return this.getAngle()
     }
-    set angle(angle: number) {
+    set angle(angle: double) {
         this.setAngle(angle)
     }
-    get speed(): number {
+    get speed(): double {
         return this.getSpeed()
     }
-    set speed(speed: number) {
+    set speed(speed: double) {
         this.setSpeed(speed)
     }
-    get scale(): number {
+    get scale(): double {
         return this.getScale()
     }
-    set scale(scale: number) {
+    set scale(scale: double) {
         this.setScale(scale)
     }
-    get pinchCenterX(): number {
+    get pinchCenterX(): double {
         return this.getPinchCenterX()
     }
-    set pinchCenterX(pinchCenterX: number) {
+    set pinchCenterX(pinchCenterX: double) {
         this.setPinchCenterX(pinchCenterX)
     }
-    get pinchCenterY(): number {
+    get pinchCenterY(): double {
         return this.getPinchCenterY()
     }
-    set pinchCenterY(pinchCenterY: number) {
+    set pinchCenterY(pinchCenterY: double) {
         this.setPinchCenterY(pinchCenterY)
     }
-    get velocityX(): number {
+    get velocityX(): double {
         return this.getVelocityX()
     }
-    set velocityX(velocityX: number) {
+    set velocityX(velocityX: double) {
         this.setVelocityX(velocityX)
     }
-    get velocityY(): number {
+    get velocityY(): double {
         return this.getVelocityY()
     }
-    set velocityY(velocityY: number) {
+    set velocityY(velocityY: double) {
         this.setVelocityY(velocityY)
     }
-    get velocity(): number {
+    get velocity(): double {
         return this.getVelocity()
     }
-    set velocity(velocity: number) {
+    set velocity(velocity: double) {
         this.setVelocity(velocity)
     }
     constructor(peerPtr: KPointer) {
@@ -931,83 +931,83 @@ export class GestureEventInternal extends BaseEventInternal implements Materiali
         this.setFingerList_serialize(fingerList_casted)
         return
     }
-    private getOffsetX(): number {
+    private getOffsetX(): double {
         return this.getOffsetX_serialize()
     }
-    private setOffsetX(offsetX: number): void {
-        const offsetX_casted = offsetX as (number)
+    private setOffsetX(offsetX: double): void {
+        const offsetX_casted = offsetX as (double)
         this.setOffsetX_serialize(offsetX_casted)
         return
     }
-    private getOffsetY(): number {
+    private getOffsetY(): double {
         return this.getOffsetY_serialize()
     }
-    private setOffsetY(offsetY: number): void {
-        const offsetY_casted = offsetY as (number)
+    private setOffsetY(offsetY: double): void {
+        const offsetY_casted = offsetY as (double)
         this.setOffsetY_serialize(offsetY_casted)
         return
     }
-    private getAngle(): number {
+    private getAngle(): double {
         return this.getAngle_serialize()
     }
-    private setAngle(angle: number): void {
-        const angle_casted = angle as (number)
+    private setAngle(angle: double): void {
+        const angle_casted = angle as (double)
         this.setAngle_serialize(angle_casted)
         return
     }
-    private getSpeed(): number {
+    private getSpeed(): double {
         return this.getSpeed_serialize()
     }
-    private setSpeed(speed: number): void {
-        const speed_casted = speed as (number)
+    private setSpeed(speed: double): void {
+        const speed_casted = speed as (double)
         this.setSpeed_serialize(speed_casted)
         return
     }
-    private getScale(): number {
+    private getScale(): double {
         return this.getScale_serialize()
     }
-    private setScale(scale: number): void {
-        const scale_casted = scale as (number)
+    private setScale(scale: double): void {
+        const scale_casted = scale as (double)
         this.setScale_serialize(scale_casted)
         return
     }
-    private getPinchCenterX(): number {
+    private getPinchCenterX(): double {
         return this.getPinchCenterX_serialize()
     }
-    private setPinchCenterX(pinchCenterX: number): void {
-        const pinchCenterX_casted = pinchCenterX as (number)
+    private setPinchCenterX(pinchCenterX: double): void {
+        const pinchCenterX_casted = pinchCenterX as (double)
         this.setPinchCenterX_serialize(pinchCenterX_casted)
         return
     }
-    private getPinchCenterY(): number {
+    private getPinchCenterY(): double {
         return this.getPinchCenterY_serialize()
     }
-    private setPinchCenterY(pinchCenterY: number): void {
-        const pinchCenterY_casted = pinchCenterY as (number)
+    private setPinchCenterY(pinchCenterY: double): void {
+        const pinchCenterY_casted = pinchCenterY as (double)
         this.setPinchCenterY_serialize(pinchCenterY_casted)
         return
     }
-    private getVelocityX(): number {
+    private getVelocityX(): double {
         return this.getVelocityX_serialize()
     }
-    private setVelocityX(velocityX: number): void {
-        const velocityX_casted = velocityX as (number)
+    private setVelocityX(velocityX: double): void {
+        const velocityX_casted = velocityX as (double)
         this.setVelocityX_serialize(velocityX_casted)
         return
     }
-    private getVelocityY(): number {
+    private getVelocityY(): double {
         return this.getVelocityY_serialize()
     }
-    private setVelocityY(velocityY: number): void {
-        const velocityY_casted = velocityY as (number)
+    private setVelocityY(velocityY: double): void {
+        const velocityY_casted = velocityY as (double)
         this.setVelocityY_serialize(velocityY_casted)
         return
     }
-    private getVelocity(): number {
+    private getVelocity(): double {
         return this.getVelocity_serialize()
     }
-    private setVelocity(velocity: number): void {
-        const velocity_casted = velocity as (number)
+    private setVelocity(velocity: double): void {
+        const velocity_casted = velocity as (double)
         this.setVelocity_serialize(velocity_casted)
         return
     }
@@ -1039,74 +1039,74 @@ export class GestureEventInternal extends BaseEventInternal implements Materiali
         ArkUIGeneratedNativeModule._GestureEvent_setFingerList(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private getOffsetX_serialize(): number {
+    private getOffsetX_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._GestureEvent_getOffsetX(this.peer!.ptr)
         return retval
     }
-    private setOffsetX_serialize(offsetX: number): void {
+    private setOffsetX_serialize(offsetX: double): void {
         ArkUIGeneratedNativeModule._GestureEvent_setOffsetX(this.peer!.ptr, offsetX)
     }
-    private getOffsetY_serialize(): number {
+    private getOffsetY_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._GestureEvent_getOffsetY(this.peer!.ptr)
         return retval
     }
-    private setOffsetY_serialize(offsetY: number): void {
+    private setOffsetY_serialize(offsetY: double): void {
         ArkUIGeneratedNativeModule._GestureEvent_setOffsetY(this.peer!.ptr, offsetY)
     }
-    private getAngle_serialize(): number {
+    private getAngle_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._GestureEvent_getAngle(this.peer!.ptr)
         return retval
     }
-    private setAngle_serialize(angle: number): void {
+    private setAngle_serialize(angle: double): void {
         ArkUIGeneratedNativeModule._GestureEvent_setAngle(this.peer!.ptr, angle)
     }
-    private getSpeed_serialize(): number {
+    private getSpeed_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._GestureEvent_getSpeed(this.peer!.ptr)
         return retval
     }
-    private setSpeed_serialize(speed: number): void {
+    private setSpeed_serialize(speed: double): void {
         ArkUIGeneratedNativeModule._GestureEvent_setSpeed(this.peer!.ptr, speed)
     }
-    private getScale_serialize(): number {
+    private getScale_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._GestureEvent_getScale(this.peer!.ptr)
         return retval
     }
-    private setScale_serialize(scale: number): void {
+    private setScale_serialize(scale: double): void {
         ArkUIGeneratedNativeModule._GestureEvent_setScale(this.peer!.ptr, scale)
     }
-    private getPinchCenterX_serialize(): number {
+    private getPinchCenterX_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._GestureEvent_getPinchCenterX(this.peer!.ptr)
         return retval
     }
-    private setPinchCenterX_serialize(pinchCenterX: number): void {
+    private setPinchCenterX_serialize(pinchCenterX: double): void {
         ArkUIGeneratedNativeModule._GestureEvent_setPinchCenterX(this.peer!.ptr, pinchCenterX)
     }
-    private getPinchCenterY_serialize(): number {
+    private getPinchCenterY_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._GestureEvent_getPinchCenterY(this.peer!.ptr)
         return retval
     }
-    private setPinchCenterY_serialize(pinchCenterY: number): void {
+    private setPinchCenterY_serialize(pinchCenterY: double): void {
         ArkUIGeneratedNativeModule._GestureEvent_setPinchCenterY(this.peer!.ptr, pinchCenterY)
     }
-    private getVelocityX_serialize(): number {
+    private getVelocityX_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._GestureEvent_getVelocityX(this.peer!.ptr)
         return retval
     }
-    private setVelocityX_serialize(velocityX: number): void {
+    private setVelocityX_serialize(velocityX: double): void {
         ArkUIGeneratedNativeModule._GestureEvent_setVelocityX(this.peer!.ptr, velocityX)
     }
-    private getVelocityY_serialize(): number {
+    private getVelocityY_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._GestureEvent_getVelocityY(this.peer!.ptr)
         return retval
     }
-    private setVelocityY_serialize(velocityY: number): void {
+    private setVelocityY_serialize(velocityY: double): void {
         ArkUIGeneratedNativeModule._GestureEvent_setVelocityY(this.peer!.ptr, velocityY)
     }
-    private getVelocity_serialize(): number {
+    private getVelocity_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._GestureEvent_getVelocity(this.peer!.ptr)
         return retval
     }
-    private setVelocity_serialize(velocity: number): void {
+    private setVelocity_serialize(velocity: double): void {
         ArkUIGeneratedNativeModule._GestureEvent_setVelocity(this.peer!.ptr, velocity)
     }
 }
@@ -1132,14 +1132,14 @@ export class LongPressRecognizer extends GestureRecognizer implements Materializ
     public isRepeat(): boolean {
         return this.isRepeat_serialize()
     }
-    public getDuration(): number {
+    public getDuration(): int32 {
         return this.getDuration_serialize()
     }
     isRepeat_serialize(): boolean {
         const retval  = ArkUIGeneratedNativeModule._LongPressRecognizer_isRepeat(this.peer!.ptr)
         return retval
     }
-    getDuration_serialize(): number {
+    getDuration_serialize(): int32 {
         const retval  = ArkUIGeneratedNativeModule._LongPressRecognizer_getDuration(this.peer!.ptr)
         return retval
     }
@@ -1191,10 +1191,10 @@ export class PinchRecognizer extends GestureRecognizer implements MaterializedBa
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._PinchRecognizer_getFinalizer()
     }
-    public getDistance(): number {
+    public getDistance(): double {
         return this.getDistance_serialize()
     }
-    getDistance_serialize(): number {
+    getDistance_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._PinchRecognizer_getDistance(this.peer!.ptr)
         return retval
     }
@@ -1218,10 +1218,10 @@ export class RotationRecognizer extends GestureRecognizer implements Materialize
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._RotationRecognizer_getFinalizer()
     }
-    public getAngle(): number {
+    public getAngle(): double {
         return this.getAngle_serialize()
     }
-    getAngle_serialize(): number {
+    getAngle_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._RotationRecognizer_getAngle(this.peer!.ptr)
         return retval
     }
@@ -1279,13 +1279,13 @@ export class SwipeRecognizer extends GestureRecognizer implements MaterializedBa
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._SwipeRecognizer_getFinalizer()
     }
-    public getVelocityThreshold(): number {
+    public getVelocityThreshold(): double {
         return this.getVelocityThreshold_serialize()
     }
     public getDirection(): SwipeDirection {
         return this.getDirection_serialize()
     }
-    getVelocityThreshold_serialize(): number {
+    getVelocityThreshold_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._SwipeRecognizer_getVelocityThreshold(this.peer!.ptr)
         return retval
     }
@@ -1313,10 +1313,10 @@ export class TapRecognizer extends GestureRecognizer implements MaterializedBase
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._TapRecognizer_getFinalizer()
     }
-    public getTapCount(): number {
+    public getTapCount(): int32 {
         return this.getTapCount_serialize()
     }
-    getTapCount_serialize(): number {
+    getTapCount_serialize(): int32 {
         const retval  = ArkUIGeneratedNativeModule._TapRecognizer_getTapCount(this.peer!.ptr)
         return retval
     }
@@ -1364,41 +1364,41 @@ export class LongPressGestureEventInternal extends BaseGestureEventInternal impl
     }
 }
 export interface PanGestureEvent {
-    offsetX: number
-    offsetY: number
-    velocityX: number
-    velocityY: number
-    velocity: number
+    offsetX: double
+    offsetY: double
+    velocityX: double
+    velocityY: double
+    velocity: double
 }
 export class PanGestureEventInternal extends BaseGestureEventInternal implements MaterializedBase,PanGestureEvent {
-    get offsetX(): number {
+    get offsetX(): double {
         return this.getOffsetX()
     }
-    set offsetX(offsetX: number) {
+    set offsetX(offsetX: double) {
         this.setOffsetX(offsetX)
     }
-    get offsetY(): number {
+    get offsetY(): double {
         return this.getOffsetY()
     }
-    set offsetY(offsetY: number) {
+    set offsetY(offsetY: double) {
         this.setOffsetY(offsetY)
     }
-    get velocityX(): number {
+    get velocityX(): double {
         return this.getVelocityX()
     }
-    set velocityX(velocityX: number) {
+    set velocityX(velocityX: double) {
         this.setVelocityX(velocityX)
     }
-    get velocityY(): number {
+    get velocityY(): double {
         return this.getVelocityY()
     }
-    set velocityY(velocityY: number) {
+    set velocityY(velocityY: double) {
         this.setVelocityY(velocityY)
     }
-    get velocity(): number {
+    get velocity(): double {
         return this.getVelocity()
     }
-    set velocity(velocity: number) {
+    set velocity(velocity: double) {
         this.setVelocity(velocity)
     }
     constructor(peerPtr: KPointer) {
@@ -1417,104 +1417,104 @@ export class PanGestureEventInternal extends BaseGestureEventInternal implements
     public static fromPtr(ptr: KPointer): PanGestureEventInternal {
         return new PanGestureEventInternal(ptr)
     }
-    private getOffsetX(): number {
+    private getOffsetX(): double {
         return this.getOffsetX_serialize()
     }
-    private setOffsetX(offsetX: number): void {
-        const offsetX_casted = offsetX as (number)
+    private setOffsetX(offsetX: double): void {
+        const offsetX_casted = offsetX as (double)
         this.setOffsetX_serialize(offsetX_casted)
         return
     }
-    private getOffsetY(): number {
+    private getOffsetY(): double {
         return this.getOffsetY_serialize()
     }
-    private setOffsetY(offsetY: number): void {
-        const offsetY_casted = offsetY as (number)
+    private setOffsetY(offsetY: double): void {
+        const offsetY_casted = offsetY as (double)
         this.setOffsetY_serialize(offsetY_casted)
         return
     }
-    private getVelocityX(): number {
+    private getVelocityX(): double {
         return this.getVelocityX_serialize()
     }
-    private setVelocityX(velocityX: number): void {
-        const velocityX_casted = velocityX as (number)
+    private setVelocityX(velocityX: double): void {
+        const velocityX_casted = velocityX as (double)
         this.setVelocityX_serialize(velocityX_casted)
         return
     }
-    private getVelocityY(): number {
+    private getVelocityY(): double {
         return this.getVelocityY_serialize()
     }
-    private setVelocityY(velocityY: number): void {
-        const velocityY_casted = velocityY as (number)
+    private setVelocityY(velocityY: double): void {
+        const velocityY_casted = velocityY as (double)
         this.setVelocityY_serialize(velocityY_casted)
         return
     }
-    private getVelocity(): number {
+    private getVelocity(): double {
         return this.getVelocity_serialize()
     }
-    private setVelocity(velocity: number): void {
-        const velocity_casted = velocity as (number)
+    private setVelocity(velocity: double): void {
+        const velocity_casted = velocity as (double)
         this.setVelocity_serialize(velocity_casted)
         return
     }
-    private getOffsetX_serialize(): number {
+    private getOffsetX_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._PanGestureEvent_getOffsetX(this.peer!.ptr)
         return retval
     }
-    private setOffsetX_serialize(offsetX: number): void {
+    private setOffsetX_serialize(offsetX: double): void {
         ArkUIGeneratedNativeModule._PanGestureEvent_setOffsetX(this.peer!.ptr, offsetX)
     }
-    private getOffsetY_serialize(): number {
+    private getOffsetY_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._PanGestureEvent_getOffsetY(this.peer!.ptr)
         return retval
     }
-    private setOffsetY_serialize(offsetY: number): void {
+    private setOffsetY_serialize(offsetY: double): void {
         ArkUIGeneratedNativeModule._PanGestureEvent_setOffsetY(this.peer!.ptr, offsetY)
     }
-    private getVelocityX_serialize(): number {
+    private getVelocityX_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._PanGestureEvent_getVelocityX(this.peer!.ptr)
         return retval
     }
-    private setVelocityX_serialize(velocityX: number): void {
+    private setVelocityX_serialize(velocityX: double): void {
         ArkUIGeneratedNativeModule._PanGestureEvent_setVelocityX(this.peer!.ptr, velocityX)
     }
-    private getVelocityY_serialize(): number {
+    private getVelocityY_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._PanGestureEvent_getVelocityY(this.peer!.ptr)
         return retval
     }
-    private setVelocityY_serialize(velocityY: number): void {
+    private setVelocityY_serialize(velocityY: double): void {
         ArkUIGeneratedNativeModule._PanGestureEvent_setVelocityY(this.peer!.ptr, velocityY)
     }
-    private getVelocity_serialize(): number {
+    private getVelocity_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._PanGestureEvent_getVelocity(this.peer!.ptr)
         return retval
     }
-    private setVelocity_serialize(velocity: number): void {
+    private setVelocity_serialize(velocity: double): void {
         ArkUIGeneratedNativeModule._PanGestureEvent_setVelocity(this.peer!.ptr, velocity)
     }
 }
 export interface PinchGestureEvent {
-    scale: number
-    pinchCenterX: number
-    pinchCenterY: number
+    scale: double
+    pinchCenterX: double
+    pinchCenterY: double
 }
 export class PinchGestureEventInternal extends BaseGestureEventInternal implements MaterializedBase,PinchGestureEvent {
-    get scale(): number {
+    get scale(): double {
         return this.getScale()
     }
-    set scale(scale: number) {
+    set scale(scale: double) {
         this.setScale(scale)
     }
-    get pinchCenterX(): number {
+    get pinchCenterX(): double {
         return this.getPinchCenterX()
     }
-    set pinchCenterX(pinchCenterX: number) {
+    set pinchCenterX(pinchCenterX: double) {
         this.setPinchCenterX(pinchCenterX)
     }
-    get pinchCenterY(): number {
+    get pinchCenterY(): double {
         return this.getPinchCenterY()
     }
-    set pinchCenterY(pinchCenterY: number) {
+    set pinchCenterY(pinchCenterY: double) {
         this.setPinchCenterY(pinchCenterY)
     }
     constructor(peerPtr: KPointer) {
@@ -1533,60 +1533,60 @@ export class PinchGestureEventInternal extends BaseGestureEventInternal implemen
     public static fromPtr(ptr: KPointer): PinchGestureEventInternal {
         return new PinchGestureEventInternal(ptr)
     }
-    private getScale(): number {
+    private getScale(): double {
         return this.getScale_serialize()
     }
-    private setScale(scale: number): void {
-        const scale_casted = scale as (number)
+    private setScale(scale: double): void {
+        const scale_casted = scale as (double)
         this.setScale_serialize(scale_casted)
         return
     }
-    private getPinchCenterX(): number {
+    private getPinchCenterX(): double {
         return this.getPinchCenterX_serialize()
     }
-    private setPinchCenterX(pinchCenterX: number): void {
-        const pinchCenterX_casted = pinchCenterX as (number)
+    private setPinchCenterX(pinchCenterX: double): void {
+        const pinchCenterX_casted = pinchCenterX as (double)
         this.setPinchCenterX_serialize(pinchCenterX_casted)
         return
     }
-    private getPinchCenterY(): number {
+    private getPinchCenterY(): double {
         return this.getPinchCenterY_serialize()
     }
-    private setPinchCenterY(pinchCenterY: number): void {
-        const pinchCenterY_casted = pinchCenterY as (number)
+    private setPinchCenterY(pinchCenterY: double): void {
+        const pinchCenterY_casted = pinchCenterY as (double)
         this.setPinchCenterY_serialize(pinchCenterY_casted)
         return
     }
-    private getScale_serialize(): number {
+    private getScale_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._PinchGestureEvent_getScale(this.peer!.ptr)
         return retval
     }
-    private setScale_serialize(scale: number): void {
+    private setScale_serialize(scale: double): void {
         ArkUIGeneratedNativeModule._PinchGestureEvent_setScale(this.peer!.ptr, scale)
     }
-    private getPinchCenterX_serialize(): number {
+    private getPinchCenterX_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._PinchGestureEvent_getPinchCenterX(this.peer!.ptr)
         return retval
     }
-    private setPinchCenterX_serialize(pinchCenterX: number): void {
+    private setPinchCenterX_serialize(pinchCenterX: double): void {
         ArkUIGeneratedNativeModule._PinchGestureEvent_setPinchCenterX(this.peer!.ptr, pinchCenterX)
     }
-    private getPinchCenterY_serialize(): number {
+    private getPinchCenterY_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._PinchGestureEvent_getPinchCenterY(this.peer!.ptr)
         return retval
     }
-    private setPinchCenterY_serialize(pinchCenterY: number): void {
+    private setPinchCenterY_serialize(pinchCenterY: double): void {
         ArkUIGeneratedNativeModule._PinchGestureEvent_setPinchCenterY(this.peer!.ptr, pinchCenterY)
     }
 }
 export interface RotationGestureEvent {
-    angle: number
+    angle: double
 }
 export class RotationGestureEventInternal extends BaseGestureEventInternal implements MaterializedBase,RotationGestureEvent {
-    get angle(): number {
+    get angle(): double {
         return this.getAngle()
     }
-    set angle(angle: number) {
+    set angle(angle: double) {
         this.setAngle(angle)
     }
     constructor(peerPtr: KPointer) {
@@ -1605,37 +1605,37 @@ export class RotationGestureEventInternal extends BaseGestureEventInternal imple
     public static fromPtr(ptr: KPointer): RotationGestureEventInternal {
         return new RotationGestureEventInternal(ptr)
     }
-    private getAngle(): number {
+    private getAngle(): double {
         return this.getAngle_serialize()
     }
-    private setAngle(angle: number): void {
-        const angle_casted = angle as (number)
+    private setAngle(angle: double): void {
+        const angle_casted = angle as (double)
         this.setAngle_serialize(angle_casted)
         return
     }
-    private getAngle_serialize(): number {
+    private getAngle_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._RotationGestureEvent_getAngle(this.peer!.ptr)
         return retval
     }
-    private setAngle_serialize(angle: number): void {
+    private setAngle_serialize(angle: double): void {
         ArkUIGeneratedNativeModule._RotationGestureEvent_setAngle(this.peer!.ptr, angle)
     }
 }
 export interface SwipeGestureEvent {
-    angle: number
-    speed: number
+    angle: double
+    speed: double
 }
 export class SwipeGestureEventInternal extends BaseGestureEventInternal implements MaterializedBase,SwipeGestureEvent {
-    get angle(): number {
+    get angle(): double {
         return this.getAngle()
     }
-    set angle(angle: number) {
+    set angle(angle: double) {
         this.setAngle(angle)
     }
-    get speed(): number {
+    get speed(): double {
         return this.getSpeed()
     }
-    set speed(speed: number) {
+    set speed(speed: double) {
         this.setSpeed(speed)
     }
     constructor(peerPtr: KPointer) {
@@ -1654,34 +1654,34 @@ export class SwipeGestureEventInternal extends BaseGestureEventInternal implemen
     public static fromPtr(ptr: KPointer): SwipeGestureEventInternal {
         return new SwipeGestureEventInternal(ptr)
     }
-    private getAngle(): number {
+    private getAngle(): double {
         return this.getAngle_serialize()
     }
-    private setAngle(angle: number): void {
-        const angle_casted = angle as (number)
+    private setAngle(angle: double): void {
+        const angle_casted = angle as (double)
         this.setAngle_serialize(angle_casted)
         return
     }
-    private getSpeed(): number {
+    private getSpeed(): double {
         return this.getSpeed_serialize()
     }
-    private setSpeed(speed: number): void {
-        const speed_casted = speed as (number)
+    private setSpeed(speed: double): void {
+        const speed_casted = speed as (double)
         this.setSpeed_serialize(speed_casted)
         return
     }
-    private getAngle_serialize(): number {
+    private getAngle_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._SwipeGestureEvent_getAngle(this.peer!.ptr)
         return retval
     }
-    private setAngle_serialize(angle: number): void {
+    private setAngle_serialize(angle: double): void {
         ArkUIGeneratedNativeModule._SwipeGestureEvent_setAngle(this.peer!.ptr, angle)
     }
-    private getSpeed_serialize(): number {
+    private getSpeed_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._SwipeGestureEvent_getSpeed(this.peer!.ptr)
         return retval
     }
-    private setSpeed_serialize(speed: number): void {
+    private setSpeed_serialize(speed: double): void {
         ArkUIGeneratedNativeModule._SwipeGestureEvent_setSpeed(this.peer!.ptr, speed)
     }
 }
