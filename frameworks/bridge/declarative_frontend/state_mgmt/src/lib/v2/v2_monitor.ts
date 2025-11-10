@@ -243,12 +243,13 @@ class MonitorV2 {
       throw new Error(`AddMonitor/@SyncMonitor - not a valid path string  '${path}'`);
     }
     if (this.values_.has(path)) {
-      console.error("### addPath: PATH EXISTS, return");
       stateMgmtConsole.applicationError(`AddMonitor ${this.getMonitorFuncName()} failed when adding path ${path} because duplicate key`);
       let monitorPath = this.values_.get(path)!;
       if (apiAdded) {
+        console.error("### addPath: PATH EXISTS setting apiAdded to true");
         monitorPath.setAddedByAPI();
       }
+      console.error("### addPath: PATH EXISTS, return");
       return monitorPath;
     }
     let monitorValue = new MonitorValueV2<unknown>(path, apiAdded, this.isSync_ ? ++MonitorV2.nextSyncWatchApiId_ : ++MonitorV2.nextWatchApiId_)
@@ -264,7 +265,7 @@ class MonitorV2 {
     return monitorValue;
   }
 
-  // lastSurePath true if we want to remove injected path to last sure value
+  // lastSurePath === true if we want to remove injected path to last sure value
   private doRemovePath(monitorValue: MonitorValueV2<unknown> | undefined, lastSurePath: boolean): boolean {
     if(monitorValue === undefined) {
       return false;
@@ -275,8 +276,9 @@ class MonitorV2 {
     if (monitorValue.isLastSureValue() && monitorValue.isAddedByAPi())
     {
       if (lastSurePath) {
-        console.log("### doRemovePath - clear setLastSureValuePath");
-        monitorValue.setLastSureValuePath(undefined);
+        console.log("### doRemovePath - clear setWildcardPath");
+        // LSV path has a wildcardPath set, mark path as a non LSV path anymore
+        monitorValue.setWildcardPath(undefined);
       } else {
         console.log("### doRemovePath - clear clearAddedByAPI");
         monitorValue.clearAddedByAPI();
