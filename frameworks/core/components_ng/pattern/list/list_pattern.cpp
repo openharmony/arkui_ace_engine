@@ -1307,10 +1307,10 @@ WeakPtr<FocusHub> ListPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
         CHECK_NULL_RETURN(parentNode, nullptr);
         auto parentPattern = AceType::DynamicCast<ListItemGroupPattern>(parentNode->GetPattern());
         CHECK_NULL_RETURN(parentPattern, nullptr);
-        if (parentPattern->GetHeader() == curFrame) {
+        if (parentPattern->GetHeaderNode() == curFrame) {
             curIndex = parentPattern->GetIndexInList();
             curIndexInGroup = -1;
-        } else if (parentPattern->GetFooter() == curFrame) {
+        } else if (parentPattern->GetFooterNode() == curFrame) {
             curIndex = parentPattern->GetIndexInList();
             curIndexInGroup = parentPattern->GetTotalItemCount();
         } else {
@@ -1511,8 +1511,9 @@ WeakPtr<FocusHub> ListPattern::GetChildFocusNodeByIndex(int32_t tarMainIndex, in
             auto parentPattern = AceType::DynamicCast<ListItemGroupPattern>(parentNode->GetPattern());
             CHECK_NULL_RETURN(parentPattern, false);
             if (parentPattern->GetIndexInList() == tarMainIndex) {
-                if ((parentPattern->GetHeader() == childFrame && tarGroupIndex == -1) ||
-                    (parentPattern->GetFooter() == childFrame && tarGroupIndex == parentPattern->GetTotalItemCount())) {
+                if ((parentPattern->GetHeaderNode() == childFrame && tarGroupIndex == -1) ||
+                    (parentPattern->GetFooterNode() == childFrame &&
+                     tarGroupIndex == parentPattern->GetTotalItemCount())) {
                     target = childFocus;
                     return true;
                 }
@@ -4193,7 +4194,7 @@ bool ListPattern::CheckFocusOnHeaderOrFooter(const RefPtr<FocusHub>& childFocusH
     auto curItemPattern = AceType::DynamicCast<ListItemPattern>(curPattern);
     CHECK_NULL_RETURN(curFrame, false);
 
-    if (groupPattern->GetHeader() == curFrame || groupPattern->GetFooter() == curFrame) {
+    if (groupPattern->GetHeaderNode() == curFrame || groupPattern->GetFooterNode() == curFrame) {
         return true;
     }
     return false;
