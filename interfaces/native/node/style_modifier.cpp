@@ -24,6 +24,7 @@
 #include "node_model.h"
 #include "node_transition.h"
 #include "progress_option.h"
+#include "text_native_impl.h"
 #include "waterflow_section_option.h"
 
 #include "base/utils/utils.h"
@@ -12854,6 +12855,124 @@ void ResetFontFeature(ArkUI_NodeHandle node)
     }
 }
 
+ArkUITextMenuItemArray TextMenuItemArrayAdpaterCallback(
+    void* userCallback, void* userData, const ArkUITextMenuItemArray* inItems)
+{
+    if (!userCallback || !inItems || inItems->length == 0 || !inItems->items) {
+        return { .items = nullptr, .length = 0 };
+    }
+    ArkUI_TextMenuItemArray itemArray;
+    for (uint32_t i = 0; i < inItems->length; ++i) {
+        auto inItem = inItems->items[i];
+        ArkUI_TextMenuItem item;
+        item.content = inItem.content;
+        item.isDelContent = false;
+        item.icon = inItem.icon;
+        item.isDelIcon = false;
+        item.labelInfo = inItem.labelInfo;
+        item.isDelLabel = false;
+        item.id = inItem.id;
+        itemArray.items.push_back(item);
+    }
+    auto userCallbackImpl = reinterpret_cast<void (*)(ArkUI_TextMenuItemArray*, void*)>(userCallback);
+    userCallbackImpl(&itemArray, userData);
+    size_t len = itemArray.items.size();
+    if (len == 0) {
+        return { .items = nullptr, .length = 0 };
+    }
+    ArkUITextMenuItem* itemOut = new ArkUITextMenuItem[len];
+    for (size_t i = 0; i < len; ++i) {
+        itemOut[i].content = itemArray.items[i].content;
+        itemOut[i].isDelContent = itemArray.items[i].isDelContent;
+        itemOut[i].icon = itemArray.items[i].icon;
+        itemOut[i].isDelIcon = itemArray.items[i].isDelIcon;
+        itemOut[i].labelInfo = itemArray.items[i].labelInfo;
+        itemOut[i].isDelLabel = itemArray.items[i].isDelLabel;
+        itemOut[i].id = itemArray.items[i].id;
+    };
+    return { .items = itemOut, .length = len };
+}
+
+bool OnMenuItemClickImpl(
+    void* onMenuItemClick, void* userData, const ArkUITextMenuItem* item, ArkUI_Int32 start, ArkUI_Int32 end)
+{
+    if (!onMenuItemClick || !item) {
+        return false;
+    }
+    ArkUI_TextMenuItem menuItem;
+    menuItem.content = item->content;
+    menuItem.isDelContent = false;
+    menuItem.icon = item->icon;
+    menuItem.isDelIcon = false;
+    menuItem.labelInfo = item->labelInfo;
+    menuItem.isDelLabel = false;
+    menuItem.id = item->id;
+    auto onMenuItemClickCallback =
+        reinterpret_cast<bool (*)(const ArkUI_TextMenuItem*, int32_t, int32_t, void*)>(onMenuItemClick);
+    return onMenuItemClickCallback(&menuItem, start, end, userData);
+}
+
+int32_t SetEditMenuOption(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(item->object, ERROR_CODE_PARAM_INVALID);
+    auto* menuOptions = reinterpret_cast<ArkUI_TextEditMenuOptions*>(item->object);
+
+    ArkUIEditOptionsParam editMenuParam;
+    if (menuOptions->onCreateMenu) {
+        editMenuParam.createAdapterCallback = TextMenuItemArrayAdpaterCallback;
+        editMenuParam.onCreateMenu = reinterpret_cast<void*>(menuOptions->onCreateMenu);
+        editMenuParam.createUserData = menuOptions->createUserData;
+    }
+
+    if (menuOptions->onPrepareMenu) {
+        editMenuParam.prepareAdapterCallback = TextMenuItemArrayAdpaterCallback;
+        editMenuParam.onPrepareMenu = reinterpret_cast<void*>(menuOptions->onPrepareMenu);
+        editMenuParam.prepareUserData = menuOptions->prepareUserData;
+    }
+
+    if (menuOptions->onMenuItemClick) {
+        editMenuParam.itemClickAdapterCallback = OnMenuItemClickImpl;
+        editMenuParam.onMenuItemClick = reinterpret_cast<void*>(menuOptions->onMenuItemClick);
+        editMenuParam.clickUserData = menuOptions->clickUserData;
+    }
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getTextModifier()->setTextEditMenuOptions(node->uiNodeHandle, &editMenuParam);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetEditMenuOption(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getTextModifier()->resetTextEditMenuOptions(node->uiNodeHandle);
+}
+
+int32_t SetTextBindSelectionMenu(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(item->object, ERROR_CODE_PARAM_INVALID);
+    auto* menuOptions = reinterpret_cast<ArkUI_TextSelectionMenuOptions*>(item->object);
+    CHECK_NULL_RETURN(menuOptions->contentNode, ERROR_CODE_PARAM_INVALID);
+    ArkUITextBindMenuParam textBindMenuParam;
+    textBindMenuParam.textSpanType = static_cast<ArkUI_Int32>(menuOptions->textSpanType);
+    textBindMenuParam.textResponseType = static_cast<ArkUI_Int32>(menuOptions->textResponseType);
+    textBindMenuParam.hapticFeedbackMode = static_cast<ArkUI_Int32>(menuOptions->hapticFeedbackMode);
+    textBindMenuParam.contentNode = menuOptions->contentNode->uiNodeHandle;
+    textBindMenuParam.onMenuShow = menuOptions->onMenuShow;
+    textBindMenuParam.onMenuShowUserData = menuOptions->onMenuShowUserData;
+    textBindMenuParam.onMenuHide = menuOptions->onMenuHide;
+    textBindMenuParam.onMenuHideUserData = menuOptions->onMenuHideUserData;
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getTextModifier()->setTextBindSelectionMenu(node->uiNodeHandle, &textBindMenuParam);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetTextBindSelectionMenu(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getTextModifier()->resetTextBindSelectionMenu(node->uiNodeHandle);
+}
+
 int32_t SetSpanContent(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     auto* fullImpl = GetFullImpl();
@@ -17840,7 +17959,7 @@ int32_t SetTextAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_A
         SetTextContentWithStyledString, SetHalfLeading, SetImmutableFontWeight, SetLineCount, SetOptimizeTrailingSpace,
         SetTextLinearGradient, SetTextRadialGradient, SetTextVerticalAlign, SetTextContentAlign, SetTextMinLines,
         SetSelectDetectorEnable, SetSelectDetectorConfig, SetMinLineHeight, SetMaxLineHeight, SetLineHeightMultiple,
-        nullptr };
+        nullptr, SetEditMenuOption, SetTextBindSelectionMenu };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "text node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -17857,7 +17976,8 @@ const ArkUI_AttributeItem* GetTextAttribute(ArkUI_NodeHandle node, int32_t subTy
         GetFontFeature, GetTextEnableDateDetector, GetTextDataDetectorConfig, GetTextSelectedBackgroundColor, nullptr,
         GetHalfLeading, GetFontWeight, GetLineCount, GetOptimizeTrailingSpace, GetTextLinearGradient,
         GetTextRadialGradient, GetTextVerticalAlign, GetTextContentAlign, GetTextMinLines, GetSelectDetectorEnable,
-        GetSelectDetectorConfig, GetMinLineHeight, GetMaxLineHeight, GetLineHeightMultiple, GetTextLayoutManager };
+        GetSelectDetectorConfig, GetMinLineHeight, GetMaxLineHeight, GetLineHeightMultiple, GetTextLayoutManager,
+        nullptr, nullptr };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*) || !getters[subTypeId]) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "text node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -17877,7 +17997,7 @@ void ResetTextAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetHalfLeading, ResetFontWeight, ResetLineCount, ResetOptimizeTrailingSpace, ResetTextLinearGradient,
         ResetTextRadialGradient, ResetTextVerticalAlign, ResetTextContentAlign, ResetTextMinLines,
         ResetSelectDetectorEnable, ResetSelectDetectorConfig, ResetMinLineHeight, ResetMaxLineHeight,
-        ResetLineHeightMultiple, nullptr };
+        ResetLineHeightMultiple, nullptr, ResetEditMenuOption, ResetTextBindSelectionMenu };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "text node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;

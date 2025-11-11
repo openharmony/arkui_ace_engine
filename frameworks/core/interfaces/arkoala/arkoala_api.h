@@ -3133,6 +3133,49 @@ struct ArkUIShapeModifier {
     void (*resetShapeMesh)(ArkUINodeHandle node);
 };
 
+struct ArkUITextMenuItem {
+    ArkUI_CharPtr content;
+    ArkUI_Bool isDelContent;
+    ArkUI_CharPtr icon;
+    ArkUI_Bool isDelIcon;
+    ArkUI_CharPtr labelInfo;
+    ArkUI_Bool isDelLabel;
+    ArkUI_Int32 id;
+};
+
+struct ArkUITextMenuItemArray {
+    const ArkUITextMenuItem* items;
+    ArkUI_Uint32 length;
+};
+
+struct ArkUIEditOptionsParam {
+    ArkUITextMenuItemArray (*createAdapterCallback)(
+        void* userCallback, void* userData, const ArkUITextMenuItemArray* inItemArray);
+    void* onCreateMenu;
+    void* createUserData;
+
+    ArkUITextMenuItemArray (*prepareAdapterCallback)(
+        void* userCallback, void* userData, const ArkUITextMenuItemArray* inItemArray);
+    void* onPrepareMenu;
+    void* prepareUserData;
+
+    bool (*itemClickAdapterCallback)(
+        void* onMenuItemClick, void* userData, const ArkUITextMenuItem* item, ArkUI_Int32 start, ArkUI_Int32 end);
+    void* onMenuItemClick;
+    void* clickUserData;
+};
+
+struct ArkUITextBindMenuParam {
+    ArkUI_Int32 textSpanType;
+    ArkUI_Int32 textResponseType;
+    ArkUI_Int32 hapticFeedbackMode;
+    ArkUINodeHandle contentNode;
+    void* onMenuShow;
+    void* onMenuShowUserData;
+    void* onMenuHide;
+    void* onMenuHideUserData;
+};
+
 struct ArkUITextModifier {
     void (*setContent)(ArkUINodeHandle node, ArkUI_CharPtr value, void* contentRawPtr);
     void (*setFontWeight)(ArkUINodeHandle node, ArkUI_Int32 weight);
@@ -3326,6 +3369,10 @@ struct ArkUITextModifier {
         ArkUINodeHandle node, ArkUI_Int32 start, ArkUI_Int32 end, ArkUI_Int32 heightStyle, ArkUI_Int32 widthStyle);
     void* (*getGlyphPositionAtCoordinate)(ArkUINodeHandle node, ArkUI_Float64 dx, ArkUI_Float64 dy);
     ArkUITextLineMetrics (*getLineMetrics)(ArkUINodeHandle node, ArkUI_Int32 lineNumber);
+    void (*setTextEditMenuOptions)(ArkUINodeHandle node, ArkUIEditOptionsParam* optionsParam);
+    void (*resetTextEditMenuOptions)(ArkUINodeHandle node);
+    void (*setTextBindSelectionMenu)(ArkUINodeHandle node, ArkUITextBindMenuParam* menuParam);
+    void (*resetTextBindSelectionMenu)(ArkUINodeHandle node);
 };
 
 struct ArkUIButtonModifier {

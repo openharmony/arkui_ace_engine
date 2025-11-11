@@ -2758,6 +2758,27 @@ typedef enum {
     NODE_TEXT_LAYOUT_MANAGER = 1043,
 
     /**
+     * @brief Set the edit menu options of the text.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .object: the edit menu options of text. The parameter type is {@link OH_ArkUI_EditMenuOptions}.\n
+     *
+     * @since 23
+     */
+     NODE_TEXT_EDIT_MENU_OPTIONS = 1044,
+
+     /**
+      * @brief Bind the selection menu for text.
+      *
+      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+      * .object: the custom selection menu of text.
+      *     The parameter type is {@link ArkUI_TextSelectionMenuOptions}.\n
+      *
+      * @since 23
+      */
+     NODE_TEXT_BIND_SELECTION_MENU = 1045,
+
+    /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n

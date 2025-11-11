@@ -24,6 +24,7 @@
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/i18n/localization.h"
+#include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "core/animation/curves.h"
 #include "core/components/common/layout/constants.h"
@@ -3670,5 +3671,64 @@ void SelectOverlayNode::ShowAskCelia(
     } else {
         isShowInDefaultMenu_[OPTION_INDEX_ASK_CELIA] = true;
     }
+}
+
+int32_t SelectOverlayNode::ConvertToIntMenuId(const std::string& menuId)
+{
+    static std::unordered_map<std::string, NativeMenuId> menuIdMap = {
+        { OH_DEFAULT_CUT, NativeMenuId::ID_CUT },
+        { OH_DEFAULT_COPY, NativeMenuId::ID_COPY },
+        { OH_DEFAULT_PASTE, NativeMenuId::ID_PASTE },
+        { OH_DEFAULT_SELECT_ALL, NativeMenuId::ID_SELECT_ALL },
+        { OH_DEFAULT_COLLABORATION_SERVICE, NativeMenuId::ID_COLLABORATION_SERVICE },
+        { OH_DEFAULT_CAMERA_INPUT, NativeMenuId::ID_CAMERA_INPUT },
+        { OH_DEFAULT_AI_WRITE, NativeMenuId::ID_AI_WRITE },
+        { OH_DEFAULT_TRANSLATE, NativeMenuId::ID_TRANSLATE },
+        { OH_DEFAULT_SEARCH, NativeMenuId::ID_SEARCH },
+        { OH_DEFAULT_SHARE, NativeMenuId::ID_SHARE },
+        { OH_DEFAULT_AI_MENU_URL, NativeMenuId::ID_AI_MENU_URL },
+        { OH_DEFAULT_AI_MENU_EMAIL, NativeMenuId::ID_AI_MENU_EMAIL },
+        { OH_DEFAULT_AI_MENU_PHONE, NativeMenuId::ID_AI_MENU_PHONE },
+        { OH_DEFAULT_AI_MENU_ADDRESS, NativeMenuId::ID_AI_MENU_ADDRESS },
+        { OH_DEFAULT_AI_MENU_DATETIME, NativeMenuId::ID_AI_MENU_DATETIME },
+        { OH_DEFAULT_ASK_CELIA, NativeMenuId::ID_ASK_CELIA },
+    };
+    auto iter = menuIdMap.find(menuId);
+    if (iter != menuIdMap.end()) {
+        return static_cast<int32_t>(iter->second);
+    }
+    return StringUtils::StringToInt(menuId, -1);
+}
+
+std::string SelectOverlayNode::ConvertToStrMenuId(int32_t menuId)
+{
+    static std::unordered_map<NativeMenuId, std::string> menuIdMap = {
+        { NativeMenuId::ID_CUT, OH_DEFAULT_CUT },
+        { NativeMenuId::ID_COPY, OH_DEFAULT_COPY },
+        { NativeMenuId::ID_PASTE, OH_DEFAULT_PASTE },
+        { NativeMenuId::ID_SELECT_ALL, OH_DEFAULT_SELECT_ALL },
+        { NativeMenuId::ID_COLLABORATION_SERVICE, OH_DEFAULT_COLLABORATION_SERVICE },
+        { NativeMenuId::ID_CAMERA_INPUT, OH_DEFAULT_CAMERA_INPUT },
+        { NativeMenuId::ID_AI_WRITE, OH_DEFAULT_AI_WRITE },
+        { NativeMenuId::ID_TRANSLATE, OH_DEFAULT_TRANSLATE },
+        { NativeMenuId::ID_SEARCH, OH_DEFAULT_SEARCH },
+        { NativeMenuId::ID_SHARE, OH_DEFAULT_SHARE },
+        { NativeMenuId::ID_AI_MENU_URL, OH_DEFAULT_AI_MENU_URL },
+        { NativeMenuId::ID_AI_MENU_EMAIL, OH_DEFAULT_AI_MENU_EMAIL },
+        { NativeMenuId::ID_AI_MENU_PHONE, OH_DEFAULT_AI_MENU_PHONE },
+        { NativeMenuId::ID_AI_MENU_ADDRESS, OH_DEFAULT_AI_MENU_ADDRESS },
+        { NativeMenuId::ID_AI_MENU_DATETIME, OH_DEFAULT_AI_MENU_DATETIME },
+        { NativeMenuId::ID_ASK_CELIA, OH_DEFAULT_ASK_CELIA },
+    };
+    auto nativeMenuIdStart = static_cast<int32_t>(NativeMenuId::ID_CUT);
+    auto nativeMenuIdEnd = static_cast<int32_t>(NativeMenuId::ID_ASK_CELIA);
+    if (menuId < nativeMenuIdStart || menuId > nativeMenuIdEnd) {
+        return std::to_string(menuId);
+    }
+    auto iter = menuIdMap.find(static_cast<NativeMenuId>(menuId));
+    if (iter != menuIdMap.end()) {
+        return iter->second;
+    }
+    return std::to_string(menuId);
 }
 } // namespace OHOS::Ace::NG
