@@ -59,10 +59,10 @@ import { PageMapBuilder } from "../component/builder";
 import { NavigationOpsHandWritten } from "./NavigationOpsHandWritten";
 import { int32 } from "@koalaui/common"
 import { ArkImageComponent, ResourceStr, ImageContent, ImageAIOptions, ArkTabsComponent } from "#generated";
-import { ArkWaterFlowComponent, WaterFlowOptions } from "#generated";
+import { ArkWaterFlowComponent, WaterFlowOptions } from '#generated';
 import { ImageOpsHandWritten } from "./ImageOpsHandWritten";
 import { TabsOpsHandWritten } from "./TabsOpsHandWritten";
-import { WaterFlowHandWritten } from "./WaterFlowHandWritten";
+import { WaterFlowHandWritten } from './WaterFlowHandWritten';
 import { XComponentOpsHandWritten } from "./XComponentOpsHandWritten";
 import { PeerNode } from '../PeerNode';
 import { int32 } from "@koalaui/common";

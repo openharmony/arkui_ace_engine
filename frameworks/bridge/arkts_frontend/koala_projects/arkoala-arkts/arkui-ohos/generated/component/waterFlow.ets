@@ -37,6 +37,7 @@ import { CustomBuilder } from "./builder"
 import { ComponentContentBase } from "arkui.ComponentContent"
 import { WaterFlowModifier } from "./../WaterFlowModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ModifierStateManager } from '../CommonModifier';
 export class ArkWaterFlowPeer extends ArkScrollableCommonMethodPeer {
     attributeSet?: WaterFlowModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -472,7 +473,9 @@ export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent im
         return this
     }
     public attributeModifier(value: AttributeModifier<WaterFlowAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        hookWaterFlowAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookWaterFlowAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

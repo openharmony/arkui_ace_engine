@@ -141,11 +141,11 @@ ArkUIWaterFlowSectionPadding ParseMargin(ani_env* env, ani_ref marginRef)
 ArkUIWaterFlowSection ParseSectionOptions(ani_env* env, ani_ref section)
 {
     ArkUIWaterFlowSection curSection;
-    ani_double itemsCount;
-    if (env->Object_GetPropertyByName_Double(static_cast<ani_object>(section), "itemsCount", &itemsCount) != ANI_OK) {
+    ani_int itemsCount;
+    if (env->Object_GetPropertyByName_Int(static_cast<ani_object>(section), "itemsCount", &itemsCount) != ANI_OK) {
         return curSection;
     }
-    curSection.itemsCount = static_cast<int32_t>(itemsCount);
+    curSection.itemsCount = itemsCount;
 
     ani_ref crossCount;
     if (env->Object_GetPropertyByName_Ref(static_cast<ani_object>(section), "crossCount", &crossCount) != ANI_OK) {
@@ -204,7 +204,7 @@ ArkUIWaterFlowSection ParseSectionOptions(ani_env* env, ani_ref section)
         env->GlobalReference_Create(func, &fnObjGlobalRef);
         auto onGetItemMainSizeByIndex = [fnObjGlobalRef, env](int32_t index) {
             ani_ref aniRes;
-            ani_ref aniIndex = AniUtils::CreateDouble(env, ani_double(index));
+            ani_ref aniIndex = AniUtils::CreateInt32(env, index);
 
             env->FunctionalObject_Call(static_cast<ani_fn_object>(fnObjGlobalRef), 1, &aniIndex, &aniRes);
             ani_double res;
@@ -241,6 +241,7 @@ void SetWaterFlowSection(ani_env* env, [[maybe_unused]] ani_object aniClass, ani
     }
     ani_size changeArrayLength;
     if (env->Array_GetLength(static_cast<ani_array>(changeArray), &changeArrayLength) != ANI_OK) {
+        return;
     }
 
     ani_class sectionChangeInfo;
