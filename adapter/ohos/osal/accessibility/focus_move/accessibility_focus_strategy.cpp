@@ -122,7 +122,7 @@ bool CheckNodeAvailable(const std::shared_ptr<FocusRulesCheckNode>& currentNode)
     auto checkResult = client->CheckNodeIsSpecificType(
         currentNode, Accessibility::ReadableSpecificType::AVAILABLE_TYPE, isAvailable);
     CHECK_NE_RETURN(checkResult, Accessibility::RET_OK, false);
-    return !isAvailable;
+    return isAvailable;
 }
 } // namespace
 
