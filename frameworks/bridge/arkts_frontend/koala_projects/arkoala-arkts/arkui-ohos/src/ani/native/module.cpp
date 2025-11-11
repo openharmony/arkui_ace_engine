@@ -1157,6 +1157,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::FrameNodeMarkDirtyNode)
         },
         ani_native_function {
+            "_GetAttributeSetTraceEnabled",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::AniTrace::GetAttributeSetTraceEnabled)
+        },
+        ani_native_function {
             "_TraceBegin",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::AniTrace::TraceBegin)

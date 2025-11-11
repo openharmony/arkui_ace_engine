@@ -124,6 +124,11 @@ bool IsLayoutTraceEnabled()
     return (system::GetParameter("persist.ace.trace.layout.enabled", "false") == "true");
 }
 
+bool IsAttributeSetTraceEnabled()
+{
+    return (system::GetParameter("persist.ace.trace.attribute_set.enabled", "false") == "true");
+}
+
 bool IsTextTraceEnabled()
 {
     return (system::GetParameter("persist.ace.trace.text.enabled", "false") == "true");
@@ -664,6 +669,7 @@ std::string InitSysDeviceType()
 bool SystemProperties::svgTraceEnable_ = IsSvgTraceEnabled();
 bool SystemProperties::developerModeOn_ = IsDeveloperModeOn();
 std::atomic<bool> SystemProperties::layoutTraceEnable_(IsLayoutTraceEnabled() && developerModeOn_);
+std::atomic<bool> SystemProperties::attributeSetTraceEnable_(IsAttributeSetTraceEnabled() && developerModeOn_);
 bool SystemProperties::imageFrameworkEnable_ = IsImageFrameworkEnabled();
 std::atomic<bool> SystemProperties::traceInputEventEnable_(IsTraceInputEventEnabled() && developerModeOn_);
 std::atomic<bool> SystemProperties::stateManagerEnable_(IsStateManagerEnable());
@@ -902,6 +908,7 @@ void SystemProperties::InitDeviceInfo(
     multiInstanceEnabled_ = IsMultiInstanceEnabled();
     svgTraceEnable_ = IsSvgTraceEnabled();
     layoutTraceEnable_.store(IsLayoutTraceEnabled() && developerModeOn_);
+    attributeSetTraceEnable_.store(IsAttributeSetTraceEnabled() && developerModeOn_);
     traceInputEventEnable_.store(IsTraceInputEventEnabled() && developerModeOn_);
     stateManagerEnable_.store(IsStateManagerEnable());
     buildTraceEnable_ = IsBuildTraceEnabled() && developerModeOn_;
