@@ -70,6 +70,8 @@ import { int32 } from "@koalaui/common";
 import { DrawModifier } from "arkui/component/common";
 import { ArkSelectComponent, ArkSelectPeer, DividerOptions } from "#generated";
 import { SelectExtender } from "#generated"
+import { ArkWebComponent, JavaScriptProxy } from "#generated";
+import { WebHandWritten } from "./WebHandWritten";
 
 export function hookId(component: object, value?: string) {}
 
@@ -381,4 +383,9 @@ export function hookSelectSetDividerMethod(
 
 export function hookWaterFlowOptionsImpl(node: ArkWaterFlowComponent, options: WaterFlowOptions | undefined): void {
   WaterFlowHandWritten.hookWaterFlowOptionsImpl(node, options)
+}
+
+export function hookJavaScriptProxy(
+  component: ArkWebComponent, value: JavaScriptProxy | undefined): void {
+  WebHandWritten.hookJavaScriptProxyImpl(component, value);
 }

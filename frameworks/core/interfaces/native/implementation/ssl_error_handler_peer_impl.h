@@ -17,7 +17,14 @@
 
 #include "core/components/web/web_event.h"
 
+enum SslErrorHandlerType {
+    SSL_ERROR_HANDLER = 0,
+    ALL_SSL_ERROR_HANDLER = 1,
+};
+
 struct SslErrorHandlerPeer {
-    OHOS::Ace::RefPtr<OHOS::Ace::SslErrorResult> handler;
+    SslErrorHandlerType type;
+    OHOS::Ace::RefPtr<OHOS::Ace::SslErrorResult> sslErrorHandler;
+    OHOS::Ace::RefPtr<OHOS::Ace::AllSslErrorResult> allSslErrorHandler;
 };
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_SSL_ERROR_HANDLER_PEER_IMPL_H

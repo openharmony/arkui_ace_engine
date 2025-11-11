@@ -2822,7 +2822,6 @@ export class ArkUIGeneratedNativeModule {
     native static _WaterFlowAttribute_setCachedCount1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _Web_construct(id: KInt, flags: KInt): KPointer
-    @ani.unsafe.Direct
     native static _WebInterface_setWebOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _WebAttribute_setJavaScriptAccess(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void

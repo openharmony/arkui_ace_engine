@@ -34,17 +34,26 @@ Ark_NativePointer GetFinalizerImpl()
 }
 void HandleConfirmImpl(Ark_SslErrorHandler peer)
 {
-    CHECK_NULL_VOID(peer && peer->handler);
-    peer->handler->HandleConfirm();
+    CHECK_NULL_VOID(peer);
+    if (peer->type == SSL_ERROR_HANDLER && peer->sslErrorHandler) {
+        peer->sslErrorHandler->HandleConfirm();
+    } else if (peer->type == ALL_SSL_ERROR_HANDLER && peer->allSslErrorHandler) {
+        peer->allSslErrorHandler->HandleConfirm();
+    }
 }
 void HandleCancel0Impl(Ark_SslErrorHandler peer)
 {
-    CHECK_NULL_VOID(peer && peer->handler);
+    CHECK_NULL_VOID(peer);
+    if (peer->type == SSL_ERROR_HANDLER && peer->sslErrorHandler) {
+        peer->sslErrorHandler->HandleCancel(false);
+    }
 }
 void HandleCancel1Impl(Ark_SslErrorHandler peer, Ark_Boolean abortLoading)
 {
-    CHECK_NULL_VOID(peer && peer->handler);
-    peer->handler->HandleCancel(abortLoading);
+    CHECK_NULL_VOID(peer);
+    if (peer->type == ALL_SSL_ERROR_HANDLER && peer->allSslErrorHandler) {
+        peer->allSslErrorHandler->HandleCancel(abortLoading);
+    }
 }
 } // SslErrorHandlerAccessor
 const GENERATED_ArkUISslErrorHandlerAccessor* GetSslErrorHandlerAccessor()

@@ -1052,26 +1052,6 @@ export function deserializeAndCallCallback_OnHttpErrorReceiveEvent_Void(thisDese
     let value0 : OnHttpErrorReceiveEvent = OnHttpErrorReceiveEvent_serializer.read(thisDeserializer)
     _call(value0)
 }
-export function deserializeAndCallCallback_OnInterceptRequestEvent_WebResourceResponse(thisDeserializer: DeserializerBase): void {
-    const _resourceId : int32 = thisDeserializer.readInt32()
-    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: OnInterceptRequestEvent) => WebResourceResponse))
-    let value0 : OnInterceptRequestEvent = OnInterceptRequestEvent_serializer.read(thisDeserializer)
-    const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
-    const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
-    const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value: WebResourceResponse) => void) = (value: WebResourceResponse):void => {
-        const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
-        continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
-        continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
-        continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
-        WebResourceResponse_serializer.write(continuationBufferBufArgsSerializer, value);
-        InteropNativeModule._CallCallbackSync(10, 831645046, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
-        continuationBufferBufArgsSerializer.release();
-        return;
-    }
-    const _callResult  = _call(value0)
-    continuationResult(_callResult)
-}
 export function deserializeAndCallCallback_OnLoadFinishedEvent_Void(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: OnLoadFinishedEvent) => void))
@@ -1429,6 +1409,17 @@ export function deserializeAndCallCallback_Opt_TabContentAnimatedTransition_Void
         valueTmpBuf = TabContentAnimatedTransition_serializer.read(thisDeserializer)
     }
     let value : TabContentAnimatedTransition | undefined = valueTmpBuf
+    _call(value)
+}
+export function deserializeAndCallCallback_Opt_WebResourceResponse_Void(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value: WebResourceResponse | null) => void))
+    const valueTmpBuf_runtimeType  = thisDeserializer.readInt8().toInt()
+    let valueTmpBuf : WebResourceResponse | null = null
+    if ((valueTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+        valueTmpBuf = (WebResourceResponse_serializer.read(thisDeserializer) as WebResourceResponse)
+    }
+    let value : WebResourceResponse | null = valueTmpBuf
     _call(value)
 }
 export function deserializeAndCallCallback_PlaybackInfo_Void(thisDeserializer: DeserializerBase): void {
@@ -1911,12 +1902,6 @@ export function deserializeAndCallCallback_WebKeyboardOptions_Void(thisDeseriali
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((value: WebKeyboardOptions) => void))
     let value : WebKeyboardOptions = WebKeyboardOptions_serializer.read(thisDeserializer)
-    _call(value)
-}
-export function deserializeAndCallCallback_WebResourceResponse_Void(thisDeserializer: DeserializerBase): void {
-    const _resourceId : int32 = thisDeserializer.readInt32()
-    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value: WebResourceResponse) => void))
-    let value : WebResourceResponse = (WebResourceResponse_serializer.read(thisDeserializer) as WebResourceResponse)
     _call(value)
 }
 export function deserializeAndCallCheckBoxModifierBuilder(thisDeserializer: DeserializerBase): void {
@@ -3433,6 +3418,32 @@ export function deserializeAndCallType_NavigationAttribute_customNavContentTrans
     const _callResult  = _call(from, to, operation)
     continuationResult(_callResult)
 }
+export function deserializeAndCallType_WebAttribute_onInterceptRequest(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: OnInterceptRequestEvent) => WebResourceResponse | null))
+    let value0 : OnInterceptRequestEvent = OnInterceptRequestEvent_serializer.read(thisDeserializer)
+    const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
+    const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
+    const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
+    let continuationResult : ((value: WebResourceResponse | null) => void) = (value?: WebResourceResponse | null):void => {
+        const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
+        continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
+        continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
+        continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
+        if (value !== null) {
+            continuationBufferBufArgsSerializer.writeInt8(RuntimeType.OBJECT);
+            const valueTmpValue  = value!;
+            WebResourceResponse_serializer.write(continuationBufferBufArgsSerializer, valueTmpValue);
+        } else {
+            continuationBufferBufArgsSerializer.writeInt8(RuntimeType.UNDEFINED);
+        }
+        InteropNativeModule._CallCallbackSync(10, 1022161794, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        continuationBufferBufArgsSerializer.release();
+        return;
+    }
+    const _callResult  = _call(value0)
+    continuationResult(_callResult)
+}
 export function deserializeAndCallUpdateTransitionCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as UpdateTransitionCallback)
@@ -3578,7 +3589,6 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.Kind_Callback_OnGeolocationShowEvent_Void: return deserializeAndCallCallback_OnGeolocationShowEvent_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_OnHttpAuthRequestEvent_Boolean: return deserializeAndCallCallback_OnHttpAuthRequestEvent_Boolean(thisDeserializer);
         case CallbackKind.Kind_Callback_OnHttpErrorReceiveEvent_Void: return deserializeAndCallCallback_OnHttpErrorReceiveEvent_Void(thisDeserializer);
-        case CallbackKind.Kind_Callback_OnInterceptRequestEvent_WebResourceResponse: return deserializeAndCallCallback_OnInterceptRequestEvent_WebResourceResponse(thisDeserializer);
         case CallbackKind.Kind_Callback_OnLoadFinishedEvent_Void: return deserializeAndCallCallback_OnLoadFinishedEvent_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_OnLoadInterceptEvent_Boolean: return deserializeAndCallCallback_OnLoadInterceptEvent_Boolean(thisDeserializer);
         case CallbackKind.Kind_Callback_OnLoadStartedEvent_Void: return deserializeAndCallCallback_OnLoadStartedEvent_Void(thisDeserializer);
@@ -3615,6 +3625,7 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.Kind_Callback_Opt_ScrollResult_Void: return deserializeAndCallCallback_Opt_ScrollResult_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_Opt_StyledString_Opt_Array_String_Void: return deserializeAndCallCallback_Opt_StyledString_Opt_Array_String_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_Opt_TabContentAnimatedTransition_Void: return deserializeAndCallCallback_Opt_TabContentAnimatedTransition_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_Opt_WebResourceResponse_Void: return deserializeAndCallCallback_Opt_WebResourceResponse_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_PlaybackInfo_Void: return deserializeAndCallCallback_PlaybackInfo_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_Pointer_Void: return deserializeAndCallCallback_Pointer_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_PopInfo_Void: return deserializeAndCallCallback_PopInfo_Void(thisDeserializer);
@@ -3670,7 +3681,6 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.Kind_Callback_Union_Object_Idlize_Stdlib_Null_Undefined_Void: return deserializeAndCallCallback_Union_Object_Idlize_Stdlib_Null_Undefined_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_Void: return deserializeAndCallCallback_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_WebKeyboardOptions_Void: return deserializeAndCallCallback_WebKeyboardOptions_Void(thisDeserializer);
-        case CallbackKind.Kind_Callback_WebResourceResponse_Void: return deserializeAndCallCallback_WebResourceResponse_Void(thisDeserializer);
         case CallbackKind.Kind_CheckBoxModifierBuilder: return deserializeAndCallCheckBoxModifierBuilder(thisDeserializer);
         case CallbackKind.Kind_ContentDidScrollCallback: return deserializeAndCallContentDidScrollCallback(thisDeserializer);
         case CallbackKind.Kind_ContentWillScrollCallback: return deserializeAndCallContentWillScrollCallback(thisDeserializer);
@@ -3787,6 +3797,7 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.Kind_TransitionFinishCallback: return deserializeAndCallTransitionFinishCallback(thisDeserializer);
         case CallbackKind.Kind_Type_CommonMethod_onDragStart: return deserializeAndCallType_CommonMethod_onDragStart(thisDeserializer);
         case CallbackKind.Kind_Type_NavigationAttribute_customNavContentTransition: return deserializeAndCallType_NavigationAttribute_customNavContentTransition(thisDeserializer);
+        case CallbackKind.Kind_Type_WebAttribute_onInterceptRequest: return deserializeAndCallType_WebAttribute_onInterceptRequest(thisDeserializer);
         case CallbackKind.Kind_UpdateTransitionCallback: return deserializeAndCallUpdateTransitionCallback(thisDeserializer);
         case CallbackKind.Kind_VisibleAreaChangeCallback: return deserializeAndCallVisibleAreaChangeCallback(thisDeserializer);
         case CallbackKind.Kind_VoidCallback: return deserializeAndCallVoidCallback(thisDeserializer);

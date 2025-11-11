@@ -134,6 +134,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsFromWebviewWebviewControllerPtr)
         },
         ani_native_function {
+            "_Web_SetJavaScriptProxyController",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetJavaScriptProxyController)
+        },
+        ani_native_function {
             "_TransferScreenCaptureHandlerToStatic",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::TransferScreenCaptureHandlerToStatic)

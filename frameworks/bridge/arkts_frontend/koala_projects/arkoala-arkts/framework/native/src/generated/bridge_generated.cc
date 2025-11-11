@@ -23999,7 +23999,7 @@ void impl_WebInterface_setWebOptions(Ark_NativePointer thisPtr, KSerializerBuffe
         Ark_WebOptions valueValueTemp = WebOptions_serializer::read(thisDeserializer);;
         GetNodeModifiers()->getWebModifier()->setWebOptions(self, static_cast<Ark_WebOptions*>(&valueValueTemp));
 }
-KOALA_INTEROP_DIRECT_V3(WebInterface_setWebOptions, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_V3(WebInterface_setWebOptions, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_WebAttribute_setJavaScriptAccess(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -24615,13 +24615,13 @@ void impl_WebAttribute_setOnInterceptRequest(Ark_NativePointer thisPtr, KSeriali
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Callback_OnInterceptRequestEvent_WebResourceResponse valueValueTempTmpBuf = {};
+        Opt_Type_WebAttribute_onInterceptRequest valueValueTempTmpBuf = {};
         valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            valueValueTempTmpBuf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_OnInterceptRequestEvent value0, const Callback_WebResourceResponse_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_OnInterceptRequestEvent_WebResourceResponse)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_OnInterceptRequestEvent value0, const Callback_WebResourceResponse_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_OnInterceptRequestEvent_WebResourceResponse))))};
+            valueValueTempTmpBuf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_OnInterceptRequestEvent value0, const Callback_Opt_WebResourceResponse_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Type_WebAttribute_onInterceptRequest)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_OnInterceptRequestEvent value0, const Callback_Opt_WebResourceResponse_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Type_WebAttribute_onInterceptRequest))))};
         }
-        Opt_Callback_OnInterceptRequestEvent_WebResourceResponse valueValueTemp = valueValueTempTmpBuf;;
-        GetNodeModifiers()->getWebModifier()->setOnInterceptRequest(self, static_cast<Opt_Callback_OnInterceptRequestEvent_WebResourceResponse*>(&valueValueTemp));
+        Opt_Type_WebAttribute_onInterceptRequest valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getWebModifier()->setOnInterceptRequest(self, static_cast<Opt_Type_WebAttribute_onInterceptRequest*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(WebAttribute_setOnInterceptRequest, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_WebAttribute_setOnPermissionRequest(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {

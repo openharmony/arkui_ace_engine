@@ -398,6 +398,7 @@ struct ArkUIWaterFlowSection {
     std::function<float(int32_t)> onGetItemMainSizeByIndex;
 };
 struct ArkUIAniWebModifier {
+    void (*setJavaScriptProxyController)(void* node, std::function<void()>&& callback);
     bool (*transferScreenCaptureHandlerToStatic)(void* peer, void* nativePtr);
     bool (*transferJsGeolocationToStatic)(void* peer, void* nativePtr);
     bool (*transferJsResultToStatic)(void* peer, void* nativePtr);

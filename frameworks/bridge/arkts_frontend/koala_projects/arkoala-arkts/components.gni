@@ -401,6 +401,7 @@ arkui_files = [
   "arkui-preprocessed/arkui/handwritten/transfer/TransferUtil.ets",
   "arkui-preprocessed/arkui/handwritten/transfer/UIContextTransfer.ets",
   "arkui-preprocessed/arkui/handwritten/transfer/WebTransfer.ets",
+  "arkui-preprocessed/arkui/hooks/WebHandWritten.ets",
   "arkui-preprocessed/arkui/hooks/NavigationOpsHandWritten.ets",
   "arkui-preprocessed/arkui/hooks/WaterFlowHandWritten.ets",
   "arkui-preprocessed/arkui/hooks/TabsOpsHandWritten.ets",

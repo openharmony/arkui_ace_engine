@@ -348,10 +348,14 @@ void WebModelStatic::JavaScriptOnDocumentEnd(FrameNode* frameNode, const ScriptI
     webPatternStatic->JavaScriptOnDocumentEnd(scriptItems);
 }
 
-void WebModelStatic::JavaScriptOnHeadEnd(FrameNode *frameNode, const ScriptItems& scriptItems)
+void WebModelStatic::JavaScriptOnHeadEnd(
+    FrameNode* frameNode, const ScriptItems& scriptItems, const ScriptItemsByOrder& scriptItemsByOrder)
 {
-    (void)frameNode;
-    (void)scriptItems;
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->JavaScriptOnHeadReadyByOrder(scriptItems, scriptItemsByOrder);
 }
 
 void WebModelStatic::SetNativeEmbedOptions(FrameNode *frameNode,
@@ -1531,5 +1535,10 @@ void WebModelStatic::SetSafeBrowsingCheckFinishId(FrameNode* frameNode,
     auto webEventHub = frameNode->GetEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnSafeBrowsingCheckFinishEvent(std::move(safeBrowsingCheckFinishId));
+}
+
+void WebModelStatic::SetJavaScriptProxy(FrameNode* frameNode, std::function<void()>&& callback)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "SetJavaScriptProxy");
 }
 } // namespace OHOS::Ace::NG
