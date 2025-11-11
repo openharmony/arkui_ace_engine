@@ -33,6 +33,7 @@ export class ProviderDecoratedVariable<T> extends DecoratedV2VariableBase implem
     get(): T {
         StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`Provider ${this.getTraceInfo()}`);
         const value = this.backing_.get(this.shouldAddRef());
+        uiUtils.builtinContainersAddRefLength(value);
         return value;
     }
 

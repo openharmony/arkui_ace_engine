@@ -30,6 +30,7 @@ export class ParamDecoratedVariable<T> extends DecoratedV2VariableBase implement
     get(): T {
         StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`Param ${this.getTraceInfo()}`);
         const value = this.backing_.get(this.shouldAddRef());
+        uiUtils.builtinContainersAddRefLength(value);
         return value;
     }
 
