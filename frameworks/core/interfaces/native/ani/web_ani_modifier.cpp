@@ -506,9 +506,6 @@ void SetJavaScriptProxyController(void* node, std::function<void()>&& callback)
 #ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    if (!frameNode) {
-        return;
-    }
     WebModelStatic::SetJavaScriptProxy(frameNode, std::move(callback));
 #endif // WEB_SUPPORTED
 }

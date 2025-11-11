@@ -1545,7 +1545,7 @@ HWTEST_F(WebModelStaticTest, JavaScriptOnHeadEnd001, TestSize.Level1)
     WebModelStatic::JavaScriptOnHeadEnd(AccessibilityManager::RawPtr(frameNode), scriptItemsEnd, scriptItemsByOrder);
     auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
     ASSERT_NE(webPatternStatic, nullptr);
-    EXPECT_NE(webPatternStatic->onDocumentEndScriptItems_, std::nullopt);
+    EXPECT_EQ(webPatternStatic->onDocumentEndScriptItems_, std::nullopt);
 #endif
 }
 
@@ -2977,6 +2977,32 @@ HWTEST_F(WebModelStaticTest, SetSafeBrowsingCheckFinishId001, TestSize.Level1)
     auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
     ASSERT_NE(webEventHub, nullptr);
     webEventHub->FireOnSafeBrowsingCheckFinishEvent(mockEventInfo);
+    EXPECT_TRUE(callbackCalled);
+#endif
+}
+
+/**
+ * @tc.name: SetJavaScriptProxy001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetJavaScriptProxy001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
+    ASSERT_NE(webPatternStatic, nullptr);
+
+    bool callbackCalled = false;
+    auto callback = [&callbackCalled]() {
+        callbackCalled = true;
+    };
+    WebModelStatic::SetJavaScriptProxy(AccessibilityManager::RawPtr(frameNode), callback);
+    webPatternStatic->CallJsProxyCallback();
     EXPECT_TRUE(callbackCalled);
 #endif
 }

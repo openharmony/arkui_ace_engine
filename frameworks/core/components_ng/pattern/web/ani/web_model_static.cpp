@@ -1539,6 +1539,9 @@ void WebModelStatic::SetSafeBrowsingCheckFinishId(FrameNode* frameNode,
 
 void WebModelStatic::SetJavaScriptProxy(FrameNode* frameNode, std::function<void()>&& callback)
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "SetJavaScriptProxy");
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->SetJsProxyCallback(std::move(callback));
 }
 } // namespace OHOS::Ace::NG
