@@ -112,6 +112,18 @@ bool NoNeedSearchChild(const std::shared_ptr<FocusRulesCheckNode>& currentNode)
     // level is HideDescendants means no need search child
     return CheckIsLevelHideDescendants(currentNode) || !currentNode->IsAccessibiltyVisible();
 }
+
+bool CheckNodeAvailable(const std::shared_ptr<FocusRulesCheckNode>& currentNode)
+{
+    CHECK_NULL_RETURN(currentNode, false);
+    bool isAvailable = false;
+    auto client = Accessibility::AccessibilitySystemAbilityClient::GetInstance();
+    CHECK_NULL_RETURN(client, false);
+    auto checkResult = client->CheckNodeIsSpecificType(
+        currentNode, Accessibility::ReadableSpecificType::AVAILABLE_TYPE, isAvailable);
+    CHECK_NE_RETURN(checkResult, Accessibility::RET_OK, false);
+    return !isAvailable;
+}
 } // namespace
 
 bool AccessibilityFocusStrategy::IsForceSupportScrollType(
@@ -358,6 +370,7 @@ AceFocusMoveResult AccessibilityFocusStrategy::FindNextReadableNode(
     HILOG_INFO_FOCUS("-- FindNextReadableNode Main Entry Id %{public}" PRId64
         " bypassSelf %{public}d bypassDescentants %{public}d", currentNode->GetAccessibilityId(),
         condition.bypassSelf, condition.bypassDescendants);
+    CHECK_EQUAL_RETURN(CheckNodeAvailable(currentNode), false, AceFocusMoveResult::FIND_FAIL_LOST_NODE);
     // no need to check parent in find next proccess due to forward traversal algorithm
     auto parent = GetParentNodeStopByRootType(currentNode);
     std::vector<std::shared_ptr<FocusRulesCheckNode>> sameLevelNodes;
@@ -494,6 +507,7 @@ AceFocusMoveResult AccessibilityFocusStrategy::FindPrevReadableNode(
     HILOG_INFO_FOCUS("-- FindPrevReadableNode Main Entry Id %{public}" PRId64
         " bypassSelf %{public}d bypassDescentants %{public}d", currentNode->GetAccessibilityId(),
         condition.bypassSelf, condition.bypassDescendants);
+    CHECK_EQUAL_RETURN(CheckNodeAvailable(currentNode), false, AceFocusMoveResult::FIND_FAIL_LOST_NODE);
     // 1 check self when !condition.bypassSelf
     // 1.1 hit childtree container, should firstly check whether need search in childtree.
     if (currentNode->IsChildTreeContainer() && !condition.bypassDescendants && !condition.bypassSelf) {
