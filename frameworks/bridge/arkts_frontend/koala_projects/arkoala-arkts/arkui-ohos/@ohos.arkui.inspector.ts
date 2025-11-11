@@ -1,24 +1,25 @@
 import { Callback } from '@ohos.base';
+import { VoidCallback } from 'arkui/component/units';
 declare namespace inspector {
     export interface ComponentObserver {
-        on(type: 'layout' | 'draw' | 'drawChildren', callback: Callback<void>): void;
+        on(type: 'layout' | 'draw' | 'drawChildren', callback: VoidCallback): void;
 
-        off(type: 'layout' | 'draw' | 'drawChildren', callback?: Callback<void>): void;
+        off(type: 'layout' | 'draw' | 'drawChildren', callback?: VoidCallback): void;
 
-        onLayout(callback: Callback<void>): void;
+        onLayout(callback: VoidCallback): void;
 
-        offLayout(callback?: Callback<void>): void;
+        offLayout(callback?: VoidCallback): void;
 
-        onDraw(callback: Callback<void>): void;
+        onDraw(callback: VoidCallback): void;
 
-        offDraw(callback?: Callback<void>): void;
+        offDraw(callback?: VoidCallback): void;
 
-        onDrawChildren(callback: Callback<void>): void;
+        onDrawChildren(callback: VoidCallback): void;
 
-        offDrawChildren(callback?: Callback<void>): void;
+        offDrawChildren(callback?: VoidCallback): void;
     }
     export function createComponentObserver(id: string): ComponentObserver | undefined;
     export function getFilteredInspectorTree(filters?: Array<string>): string;
-    export function getFilteredInspectorTreeById(id: string, depth: number, filters?: Array<string>): string;
+    export function getFilteredInspectorTreeById(id: string, depth: int, filters?: Array<string>): string;
 }
 export default inspector;
