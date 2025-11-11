@@ -281,7 +281,8 @@ private:
     void InitFocusEvent();
     void AddIsFocusActiveUpdateEvent();
     void RemoveIsFocusActiveUpdateEvent();
-    void UpdateMenuScrollColorConfiguration(const RefPtr<FrameNode>& menuNode);
+    void UpdateMenuChildColorConfiguration(
+        const RefPtr<FrameNode>& menuNode, const ConfigurationChange& configurationChange);
     void SetOptionTextModifierByUser(const RefPtr<SelectTheme>& theme, const RefPtr<SelectPaintProperty>& props);
     void SetSelectedOptionTextModifierByUser(
         const RefPtr<SelectTheme>& theme, const RefPtr<SelectPaintProperty>& props);
