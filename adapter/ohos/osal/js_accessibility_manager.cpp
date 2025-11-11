@@ -3457,7 +3457,7 @@ bool JsAccessibilityManager::CheckHoverTransparentCallbackListEmpty(int32_t cont
 int64_t JsAccessibilityManager::CheckAndGetEmbedFrameNode(const RefPtr<NG::FrameNode>& node)
 {
     auto surfaceId = GetSurfaceIdByEmbedNode(node);
-    if (surfaceId == "0") {
+    if (surfaceId == "0" || surfaceId.empty()) {
         return INVALID_NODE_ID;
     }
 #ifdef WEB_SUPPORTED
