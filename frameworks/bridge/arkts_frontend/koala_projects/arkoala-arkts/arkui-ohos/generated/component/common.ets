@@ -4644,6 +4644,33 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setExpandSafeArea(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setIgnoreLayoutSafeAreaAttribute(types?: Array<LayoutSafeAreaType>, edges?: Array<LayoutSafeAreaEdge>): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (types !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const typesTmpValue  = types!
+            thisSerializer.writeInt32((typesTmpValue.length).toInt())
+            for (let typesTmpValueCounterI = 0; typesTmpValueCounterI < typesTmpValue.length; typesTmpValueCounterI++) {
+                const typesTmpValueTmpElement : LayoutSafeAreaType = typesTmpValue[typesTmpValueCounterI]
+                thisSerializer.writeInt32(typesTmpValueTmpElement.valueOf())
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (edges !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const edgesTmpValue  = edges!
+            thisSerializer.writeInt32((edgesTmpValue.length).toInt())
+            for (let edgesTmpValueCounterI = 0; edgesTmpValueCounterI < edgesTmpValue.length; edgesTmpValueCounterI++) {
+                const edgesTmpValueTmpElement : LayoutSafeAreaEdge = edgesTmpValue[edgesTmpValueCounterI]
+                thisSerializer.writeInt32(edgesTmpValueTmpElement.valueOf())
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setIgnoreLayoutSafeArea(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setBackgroundAttribute(builder: CustomBuilder | undefined, options?: BackgroundOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (builder !== undefined) {
@@ -6596,7 +6623,12 @@ export enum LayoutSafeAreaType {
 }
 export enum LayoutSafeAreaEdge {
     TOP = 0,
-    BOTTOM = 1
+    BOTTOM = 1,
+    START = 2,
+    END = 3,
+    VERTICAL = 4,
+    HORIZONTAL = 5,
+    ALL = 6
 }
 export enum SheetSize {
     MEDIUM = 0,
@@ -7597,6 +7629,9 @@ export interface CommonMethod {
     expandSafeArea(types?: Array<SafeAreaType>, edges?: Array<SafeAreaEdge>): this {
         throw new Error("Unimplemented method expandSafeArea")
     }
+    ignoreLayoutSafeArea(types?: Array<LayoutSafeAreaType>, edges?: Array<LayoutSafeAreaEdge>): this {
+        throw new Error("Unimplemented method ignoreLayoutSafeArea")
+    }
     background(builder: CustomBuilder | undefined, options?: BackgroundOptions): this {
         throw new Error("Unimplemented method background")
     }
@@ -8389,6 +8424,9 @@ export class ArkCommonMethodStyle implements CommonMethod {
         return this
     }
     expandSafeArea(types?: Array<SafeAreaType>, edges?: Array<SafeAreaEdge>): this {
+        return this
+    }
+    ignoreLayoutSafeArea(types?: Array<LayoutSafeAreaType>, edges?: Array<LayoutSafeAreaEdge>): this {
         return this
     }
     background(builder: CustomBuilder | undefined, options?: BackgroundOptions): this {
@@ -10228,6 +10266,15 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
             const types_casted = types as (Array<SafeAreaType> | undefined)
             const edges_casted = edges as (Array<SafeAreaEdge> | undefined)
             this.getPeer()?.setExpandSafeAreaAttribute(types_casted, edges_casted)
+            return this
+        }
+        return this
+    }
+    public ignoreLayoutSafeArea(types?: Array<LayoutSafeAreaType>, edges?: Array<LayoutSafeAreaEdge>): this {
+        if (this.checkPriority("ignoreLayoutSafeArea")) {
+            const types_casted = types as (Array<LayoutSafeAreaType> | undefined)
+            const edges_casted = edges as (Array<LayoutSafeAreaEdge> | undefined)
+            this.getPeer()?.setIgnoreLayoutSafeAreaAttribute(types_casted, edges_casted)
             return this
         }
         return this

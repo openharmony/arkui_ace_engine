@@ -294,6 +294,7 @@ public:
     static void SetOffsetEdges(FrameNode* frameNode, const EdgesParam& value);
     static void SetOffsetLocalizedEdges(FrameNode* frameNode, bool needLocalized);
     static void UpdateSafeAreaExpandOpts(FrameNode* frameNode, const SafeAreaExpandOpts& opts);
+    static void UpdateIgnoreLayoutSafeAreaOpts(FrameNode* frameNode, const IgnoreLayoutSafeAreaOpts& opts);
     static void SetAlignRules(FrameNode* frameNode,
         const std::optional<std::map<AlignDirection, AlignRule>>& alignRules);
     static void SetBias(FrameNode* frameNode, const std::optional<BiasPair>& biasPair);

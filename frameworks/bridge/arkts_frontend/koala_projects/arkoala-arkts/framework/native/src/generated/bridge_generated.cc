@@ -4476,6 +4476,40 @@ void impl_CommonMethod_setExpandSafeArea(Ark_NativePointer thisPtr, KSerializerB
         GetNodeModifiers()->getCommonMethodModifier()->setExpandSafeArea(self, static_cast<Opt_Array_SafeAreaType*>(&typesValueTemp), static_cast<Opt_Array_SafeAreaEdge*>(&edgesValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(CommonMethod_setExpandSafeArea, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_CommonMethod_setIgnoreLayoutSafeArea(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto typesValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Array_LayoutSafeAreaType typesValueTempTmpBuf = {};
+        typesValueTempTmpBuf.tag = typesValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((typesValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            const Ark_Int32 typesValueTempTmpBuf_Length = thisDeserializer.readInt32();
+            Array_LayoutSafeAreaType typesValueTempTmpBuf_ = {};
+            thisDeserializer.resizeArray<std::decay<decltype(typesValueTempTmpBuf_)>::type,
+        std::decay<decltype(*typesValueTempTmpBuf_.array)>::type>(&typesValueTempTmpBuf_, typesValueTempTmpBuf_Length);
+            for (int typesValueTempTmpBuf_BufCounterI = 0; typesValueTempTmpBuf_BufCounterI < typesValueTempTmpBuf_Length; typesValueTempTmpBuf_BufCounterI++) {
+                typesValueTempTmpBuf_.array[typesValueTempTmpBuf_BufCounterI] = static_cast<Ark_LayoutSafeAreaType>(thisDeserializer.readInt32());
+            }
+            typesValueTempTmpBuf.value = typesValueTempTmpBuf_;
+        }
+        Opt_Array_LayoutSafeAreaType typesValueTemp = typesValueTempTmpBuf;;
+        const auto edgesValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Array_LayoutSafeAreaEdge edgesValueTempTmpBuf = {};
+        edgesValueTempTmpBuf.tag = edgesValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((edgesValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            const Ark_Int32 edgesValueTempTmpBuf_Length = thisDeserializer.readInt32();
+            Array_LayoutSafeAreaEdge edgesValueTempTmpBuf_ = {};
+            thisDeserializer.resizeArray<std::decay<decltype(edgesValueTempTmpBuf_)>::type,
+        std::decay<decltype(*edgesValueTempTmpBuf_.array)>::type>(&edgesValueTempTmpBuf_, edgesValueTempTmpBuf_Length);
+            for (int edgesValueTempTmpBuf_BufCounterI = 0; edgesValueTempTmpBuf_BufCounterI < edgesValueTempTmpBuf_Length; edgesValueTempTmpBuf_BufCounterI++) {
+                edgesValueTempTmpBuf_.array[edgesValueTempTmpBuf_BufCounterI] = static_cast<Ark_LayoutSafeAreaEdge>(thisDeserializer.readInt32());
+            }
+            edgesValueTempTmpBuf.value = edgesValueTempTmpBuf_;
+        }
+        Opt_Array_LayoutSafeAreaEdge edgesValueTemp = edgesValueTempTmpBuf;;
+        GetNodeModifiers()->getCommonMethodModifier()->setIgnoreLayoutSafeArea(self, static_cast<Opt_Array_LayoutSafeAreaType*>(&typesValueTemp), static_cast<Opt_Array_LayoutSafeAreaEdge*>(&edgesValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(CommonMethod_setIgnoreLayoutSafeArea, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_CommonMethod_setBackground(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
