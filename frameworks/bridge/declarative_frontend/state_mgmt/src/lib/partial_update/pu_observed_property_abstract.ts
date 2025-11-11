@@ -42,8 +42,20 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
   // install when current value is ObservedObject and the value type is not using compatibility mode
   // note value may change for union type variables when switching an object from one class to another.
   protected shouldInstallTrackedObjectReadCb : boolean = false;
-  private dependentElmtIdsByProperty_ = new PropertyDependencies();
+  private dependentElmtIdsByProperty__: PropertyDependencies = new PropertyDependencies();
 
+  private get dependentElmtIdsByProperty_(): PropertyDependencies {
+    if (!this.dependentElmtIdsByProperty__) {
+      // for stability dfx
+      try {
+        stateMgmtConsole.error('get dependentElemtIdsByProperty fails', this.dependentElmtIdsByProperty_, this.info());
+      } catch(e) {
+        stateMgmtConsole.error('fail to get error info', e);
+      }
+      this.dependentElmtIdsByProperty__ = new PropertyDependencies();
+    }
+    return this.dependentElmtIdsByProperty__;
+  }
   // for interop
 
   private proxy?: Object;
