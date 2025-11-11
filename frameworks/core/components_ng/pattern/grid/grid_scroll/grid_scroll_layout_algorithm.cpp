@@ -470,7 +470,6 @@ void GridScrollLayoutAlgorithm::InitialItemsCrossSize(const RefPtr<GridLayoutPro
 
     // info_ will be reset in the second measure of flex
     info_.crossCount_ = static_cast<int32_t>(crossLens.size());
-    
     int32_t index = 0;
     for (const auto& len : crossLens) {
         itemsCrossSize_.try_emplace(index, len);
