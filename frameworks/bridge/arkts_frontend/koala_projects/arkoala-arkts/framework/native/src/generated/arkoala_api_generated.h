@@ -441,6 +441,9 @@ typedef struct Opt_LetterSpacingStyle Opt_LetterSpacingStyle;
 typedef struct LevelOrderPeer LevelOrderPeer;
 typedef struct LevelOrderPeer* Ark_LevelOrder;
 typedef struct Opt_LevelOrder Opt_LevelOrder;
+typedef struct LevelOrderExtenderPeer LevelOrderExtenderPeer;
+typedef struct LevelOrderExtenderPeer* Ark_LevelOrderExtender;
+typedef struct Opt_LevelOrderExtender Opt_LevelOrderExtender;
 typedef struct LifeCyclePeer LifeCyclePeer;
 typedef struct LifeCyclePeer* Ark_LifeCycle;
 typedef struct Opt_LifeCycle Opt_LifeCycle;
@@ -7360,6 +7363,10 @@ typedef struct Opt_LevelOrder {
     Ark_Tag tag;
     Ark_LevelOrder value;
 } Opt_LevelOrder;
+typedef struct Opt_LevelOrderExtender {
+    Ark_Tag tag;
+    Ark_LevelOrderExtender value;
+} Opt_LevelOrderExtender;
 typedef struct Opt_LifeCycle {
     Ark_Tag tag;
     Ark_LifeCycle value;
@@ -20176,7 +20183,7 @@ typedef struct Ark_CustomDialogControllerOptionsExtender {
     Opt_LevelMode levelMode;
     Opt_Int32 levelUniqueId;
     Opt_ImmersiveMode immersiveMode;
-    Opt_LevelOrder levelOrder;
+    Opt_LevelOrderExtender levelOrderExtender;
     Opt_Boolean focusable;
 } Ark_CustomDialogControllerOptionsExtender;
 typedef struct Opt_CustomDialogControllerOptionsExtender {
@@ -26425,6 +26432,14 @@ typedef struct GENERATED_ArkUILetterSpacingStyleAccessor {
     Ark_Float64 (*getLetterSpacing)(Ark_LetterSpacingStyle peer);
 } GENERATED_ArkUILetterSpacingStyleAccessor;
 
+typedef struct GENERATED_ArkUILevelOrderExtenderAccessor {
+    void (*destroyPeer)(Ark_LevelOrderExtender peer);
+    Ark_LevelOrderExtender (*construct)();
+    Ark_NativePointer (*getFinalizer)();
+    Ark_LevelOrderExtender (*clamp)(const Ark_Number* order);
+    Ark_Number (*getOrder)(Ark_LevelOrderExtender peer);
+} GENERATED_ArkUILevelOrderExtenderAccessor;
+
 typedef struct GENERATED_ArkUILifeCycleAccessor {
     void (*destroyPeer)(Ark_LifeCycle peer);
     Ark_LifeCycle (*construct)();
@@ -28455,6 +28470,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUILazyBuildAccessor* (*getLazyBuildAccessor)();
     const GENERATED_ArkUILazyForEachOpsAccessor* (*getLazyForEachOpsAccessor)();
     const GENERATED_ArkUILetterSpacingStyleAccessor* (*getLetterSpacingStyleAccessor)();
+    const GENERATED_ArkUILevelOrderExtenderAccessor* (*getLevelOrderExtenderAccessor)();
     const GENERATED_ArkUILifeCycleAccessor* (*getLifeCycleAccessor)();
     const GENERATED_ArkUILinearGradientAccessor* (*getLinearGradientAccessor)();
     const GENERATED_ArkUILinearIndicatorControllerAccessor* (*getLinearIndicatorControllerAccessor)();

@@ -381,11 +381,10 @@ export namespace extractors {
   }
 
   export function toLevelOrderPtr(value: LevelOrder): KPointer {
-    return 123;
+    return toPeerPtr(value);
   }
   export function fromLevelOrderPtr(ptr: KPointer): LevelOrder {
-    const x: Object = {};
-    return x as LevelOrder;
+    return new LevelOrder(ptr);
   }
 
   export function toWindowWindowStagePtr(value: window.WindowStage): KPointer {

@@ -144,6 +144,7 @@ generated_sources = [
   "implementation/lazy_build_accessor.cpp",
   "implementation/lazy_for_each_ops_accessor.cpp",
   "implementation/letter_spacing_style_accessor.cpp",
+  "implementation/level_order_extender_accessor.cpp",
   "implementation/life_cycle_accessor.cpp",
   "implementation/line_height_style_accessor.cpp",
   "implementation/line_modifier.cpp",

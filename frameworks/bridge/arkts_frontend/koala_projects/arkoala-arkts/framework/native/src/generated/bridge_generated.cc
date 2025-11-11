@@ -31117,6 +31117,23 @@ Ark_Int32 impl_LetterSpacingStyle_getLetterSpacing(Ark_NativePointer thisPtr) {
         return GetAccessors()->getLetterSpacingStyleAccessor()->getLetterSpacing(self);
 }
 KOALA_INTEROP_1(LetterSpacingStyle_getLetterSpacing, Ark_Int32, Ark_NativePointer)
+Ark_NativePointer impl_LevelOrderExtender_construct() {
+        return GetAccessors()->getLevelOrderExtenderAccessor()->construct();
+}
+KOALA_INTEROP_DIRECT_0(LevelOrderExtender_construct, Ark_NativePointer)
+Ark_NativePointer impl_LevelOrderExtender_getFinalizer() {
+        return GetAccessors()->getLevelOrderExtenderAccessor()->getFinalizer();
+}
+KOALA_INTEROP_DIRECT_0(LevelOrderExtender_getFinalizer, Ark_NativePointer)
+Ark_NativePointer impl_LevelOrderExtender_clamp(KInteropNumber order) {
+        return GetAccessors()->getLevelOrderExtenderAccessor()->clamp((const Ark_Number*) (&order));
+}
+KOALA_INTEROP_DIRECT_1(LevelOrderExtender_clamp, Ark_NativePointer, KInteropNumber)
+Ark_Number impl_LevelOrderExtender_getOrder(Ark_NativePointer thisPtr) {
+        Ark_LevelOrderExtender self = reinterpret_cast<Ark_LevelOrderExtender>(thisPtr);
+        return GetAccessors()->getLevelOrderExtenderAccessor()->getOrder(self);
+}
+KOALA_INTEROP_DIRECT_1(LevelOrderExtender_getOrder, KInteropNumber, Ark_NativePointer)
 Ark_NativePointer impl_LifeCycle_construct() {
         return GetAccessors()->getLifeCycleAccessor()->construct();
 }

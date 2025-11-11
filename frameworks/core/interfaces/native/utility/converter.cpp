@@ -3500,6 +3500,14 @@ void AssignCast(std::optional<double>& dst, const Ark_LevelOrder& src)
         dst = peer->levelOrder->GetOrder();
     }
 }
+template<>
+void AssignCast(std::optional<double>& dst, const Ark_LevelOrderExtender& src)
+{
+    auto peer = src;
+    if (peer && peer->levelOrder) {
+        dst = peer->levelOrder->GetOrder();
+    }
+}
 
 template<>
 void AssignCast(std::optional<Color>& dst, const Ark_ColorMetrics& src)

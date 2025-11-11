@@ -33436,6 +33436,67 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return 0;
     }
     } // LetterSpacingStyleAccessor
+    namespace LevelOrderExtenderAccessor {
+    void DestroyPeerImpl(Ark_LevelOrderExtender peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("destroyPeer(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    Ark_LevelOrderExtender ConstructImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return reinterpret_cast<Ark_LevelOrderExtender>(100);
+        }
+        string out("new LevelOrderExtender(");
+        out.append(") \n");
+        out.append("[return reinterpret_cast<Ark_LevelOrderExtender>(100)] \n");
+        appendGroupedLog(1, out);
+        return reinterpret_cast<Ark_LevelOrderExtender>(100);
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return fnPtr<KNativePointer>(dummyClassFinalizer);
+        }
+        string out("getFinalizer(");
+        out.append(") \n");
+        out.append("[return fnPtr<KNativePointer>(dummyClassFinalizer)] \n");
+        appendGroupedLog(1, out);
+        return fnPtr<KNativePointer>(dummyClassFinalizer);
+    }
+    Ark_LevelOrderExtender ClampImpl(const Ark_Number* order)
+    {
+        if (!needGroupedLog(1))
+        {
+            return reinterpret_cast<Ark_LevelOrderExtender>(300);
+        }
+        string out("clamp(");
+        WriteToString(&out, order);
+        out.append(") \n");
+        out.append("[return reinterpret_cast<Ark_LevelOrderExtender>(300)] \n");
+        appendGroupedLog(1, out);
+        return reinterpret_cast<Ark_LevelOrderExtender>(300);
+    }
+    Ark_Number GetOrderImpl(Ark_LevelOrderExtender peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return {42};
+        }
+        string out("getOrder(");
+        out.append(") \n");
+        out.append("[return {42}] \n");
+        appendGroupedLog(1, out);
+        return {42};
+    }
+    } // LevelOrderExtenderAccessor
     namespace LifeCycleAccessor {
     void DestroyPeerImpl(Ark_LifeCycle peer)
     {
@@ -46329,6 +46390,22 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct LetterSpacingStylePeer {
         virtual ~LetterSpacingStylePeer() = default;
     };
+
+    const GENERATED_ArkUILevelOrderExtenderAccessor* GetLevelOrderExtenderAccessor()
+    {
+        static const GENERATED_ArkUILevelOrderExtenderAccessor LevelOrderExtenderAccessorImpl {
+            LevelOrderExtenderAccessor::DestroyPeerImpl,
+            LevelOrderExtenderAccessor::ConstructImpl,
+            LevelOrderExtenderAccessor::GetFinalizerImpl,
+            LevelOrderExtenderAccessor::ClampImpl,
+            LevelOrderExtenderAccessor::GetOrderImpl,
+        };
+        return &LevelOrderExtenderAccessorImpl;
+    }
+
+    struct LevelOrderExtenderPeer {
+        virtual ~LevelOrderExtenderPeer() = default;
+    };
     const GENERATED_ArkUILifeCycleAccessor* GetLifeCycleAccessor()
     {
         static const GENERATED_ArkUILifeCycleAccessor LifeCycleAccessorImpl {
@@ -48329,6 +48406,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetLazyBuildAccessor,
             GetLazyForEachOpsAccessor,
             GetLetterSpacingStyleAccessor,
+            GetLevelOrderExtenderAccessor,
             GetLifeCycleAccessor,
             GetLinearGradientAccessor,
             GetLinearIndicatorControllerAccessor,
