@@ -9836,9 +9836,25 @@ void ViewAbstract::SetPositionLocalizedEdges(bool needLocalized)
     layoutProperty->UpdateNeedPositionLocalizedEdges(needLocalized);
 }
 
+void ViewAbstract::SetPositionLocalizedEdges(FrameNode* frameNode, bool needLocalized)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateNeedPositionLocalizedEdges(needLocalized);
+}
+
 void ViewAbstract::SetMarkAnchorStart(Dimension& markAnchorStart)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateMarkAnchorStart(markAnchorStart);
+}
+
+void ViewAbstract::SetMarkAnchorStart(FrameNode* frameNode, Dimension& markAnchorStart)
+{
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
@@ -9854,9 +9870,25 @@ void ViewAbstract::ResetMarkAnchorStart()
     layoutProperty->ResetMarkAnchorStart();
 }
 
+void ViewAbstract::ResetMarkAnchorStart(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->ResetMarkAnchorStart();
+}
+
 void ViewAbstract::SetOffsetLocalizedEdges(bool needLocalized)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateNeedOffsetLocalizedEdges(needLocalized);
+}
+
+void ViewAbstract::SetOffsetLocalizedEdges(FrameNode* frameNode, bool needLocalized)
+{
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);

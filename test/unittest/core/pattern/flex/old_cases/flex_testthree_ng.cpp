@@ -413,6 +413,7 @@ HWTEST_F(FlexTestThreeNg, FlexColumnLayoutTest006, TestSize.Level0)
     EXPECT_FALSE(columnLayoutPattern == nullptr);
     auto columnLayoutProperty = columnLayoutPattern->GetLayoutProperty<LinearLayoutProperty>();
     EXPECT_FALSE(columnLayoutProperty == nullptr);
+
     columnLayoutProperty->UpdateFlexDirection(FlexDirection::COLUMN);
     columnLayoutProperty->UpdateMainAxisAlign(FlexAlign::FLEX_START);
     columnLayoutProperty->UpdateCrossAxisAlign(FlexAlign::FLEX_START);
@@ -460,6 +461,7 @@ HWTEST_F(FlexTestThreeNg, FlexColumnLayoutTest006, TestSize.Level0)
     firstItemLayoutWrapper->GetLayoutProperty()->UpdatePadding(noPadding);
     auto boxLayoutAlgorithm = firstItemFrameNode->GetPattern<Pattern>()->CreateLayoutAlgorithm();
     EXPECT_FALSE(boxLayoutAlgorithm == nullptr);
+
     firstItemLayoutWrapper->SetLayoutAlgorithm(
         AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(boxLayoutAlgorithm));
     columnFrameNode->AddChild(firstItemFrameNode);
@@ -688,6 +690,7 @@ HWTEST_F(FlexTestThreeNg, FlexRowLayoutTest019, TestSize.Level0)
     rowLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
     EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(), SizeF(RK356_WIDTH, ROW_HEIGHT));
     EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameOffset(), OFFSET_TOP_LEFT);
+
     for (int32_t i = START_INDEX; i < THREE_ITEM_SIZE; i++) {
         auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(i + THREE_ITEM_SIZE);
         auto childSize = childWrapper->GetGeometryNode()->GetFrameSize();
