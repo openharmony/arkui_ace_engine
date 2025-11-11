@@ -12,9 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "gmock/gmock.h"
+
 #include "accessor_test_base.h"
 #include "test/unittest/capi/accessors/accessor_test_fixtures.h"
 #include "core/interfaces/native/implementation/color_filter_peer.h"
+#include "core/interfaces/native/implementation/custom_span_peer.h"
+#include "core/interfaces/native/implementation/styled_string_peer.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -24,6 +28,15 @@ namespace OHOS::Ace::NG {
 using namespace testing;
 using namespace testing::ext;
 using namespace Converter;
+
+namespace {
+class MockFrameNode : public FrameNode {
+public:
+    MockFrameNode() : FrameNode("TEST", 0, AceType::MakeRefPtr<Pattern>()) {}
+
+    MOCK_METHOD(void, MarkDirtyNode, (PropertyChangeFlag));
+};
+}
 
 class CustomSpanAccessorTest : public AccessorTestBase<GENERATED_ArkUICustomSpanAccessor,
                                     &GENERATED_ArkUIAccessors::getCustomSpanAccessor, CustomSpanPeer> {};
@@ -106,5 +119,28 @@ HWTEST_F(CustomSpanAccessorTest, DISABLED_OnDrawTest, TestSize.Level1)
     CallbackHelper(checkCallback).InvokeSync(inputCtx, inputData);
     ASSERT_TRUE(checkData.has_value());
     EXPECT_FLOAT_EQ(Converter::Convert<float>(checkData->x), expectedValue);
+}
+
+/**
+ * @tc.name: CustomSpanAccessorTest.InvalidateTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomSpanAccessorTest, InvalidateTest, TestSize.Level1)
+{
+    auto value = Converter::ArkUnion<Ark_Union_String_ImageAttachment_CustomSpan, Ark_CustomSpan>(peer_);
+    auto inputStyles = Converter::ArkValue<Opt_Array_StyleOptions>();
+    Ark_StyledString styledStringPeer =
+        accessors_->getStyledStringAccessor()->construct(&value, &inputStyles);
+    ASSERT_NE(styledStringPeer, nullptr);
+
+    auto frameNode = AceType::MakeRefPtr<MockFrameNode>();
+    auto spanString = styledStringPeer->spanString;
+    ASSERT_NE(spanString, nullptr);
+    spanString->SetFramNode(frameNode);
+    spanString->AddCustomSpan();
+
+    EXPECT_CALL(*frameNode, MarkDirtyNode(_)).Times(1);
+    accessor_->invalidate(peer_);
 }
 } // namespace OHOS::Ace::NG
