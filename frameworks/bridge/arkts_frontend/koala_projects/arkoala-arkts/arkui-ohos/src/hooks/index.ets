@@ -1,6 +1,6 @@
-import { KPointer } from "@koalaui/interop";
+import { runtimeType, RuntimeType, KPointer } from "@koalaui/interop";
 import { default as image } from "@ohos.multimedia.image";
-import { ColorMetrics, DrawContext, LengthMetrics, Size } from "arkui.Graphics";
+import { ColorMetrics, DrawContext, LengthMetrics, LengthMetricsUnit, Size } from "arkui.Graphics";
 import { NodeController } from "arkui.NodeController";
 import { default as curves } from "@ohos.curves";
 import { default as matrix4 } from "@ohos.matrix4";
@@ -47,6 +47,7 @@ import { CommonMethod, StateStyles, ArkCommonMethodComponent, ArkCommonMethodPee
 import { CommonMethodModifier } from "../CommonMethodModifier"
 import { AnimateParam } from "#generated";
 import { GestureModifier } from "#generated";
+import { CanvasRenderer, ImageData, OffscreenCanvas, RenderingContextSettings, CanvasRenderingContext2D, OffscreenCanvasRenderingContext2D, VoidCallback } from "#generated";
 import { pointer } from "@koalaui/interop";
 import { ArkUIAniModule } from "arkui.ani"
 import { InteropNativeModule } from "@koalaui/interop"
@@ -330,6 +331,184 @@ export function hookSetNavDestination(component: ArkNavigationComponent, value: 
   NavigationOpsHandWritten.hookSetNavDestinationImpl(component, value);
 }
 
+const DIFF: number = 1e-10
+const int_MAX: number = 2147483647
+const PIXEL_SIZE: int = 4
+export function getCanvasDensity(peerPtr: CanvasRenderer): number {
+    return ArkUIAniModule._CanvasRenderer_GetCanvasDensity(peerPtr.peer!.ptr)
+}
+export function getSystemDensity(): number {
+    return ArkUIAniModule._GetSystemDensity()
+}
+export function convertDimensionStrToNumber(value: string): number {
+    const regex : RegExp = new RegExp('(-?\\d+\\.?\\d+)(px|vp)?$', 'i')
+    const match: RegExpMatchArray | null = value.match(regex)
+    if (!match) {
+        return 0
+    }
+    let numericValue : number = 0
+    let unitPart : string = ''
+    if (match.length > 1) {
+        numericValue = Number.parseFloat(match[1] as string);
+    }
+    if (match.length > 2) {
+        unitPart = match[2] as string;
+    }
+    if (unitPart === 'px' || !unitPart) {
+        return numericValue;
+    }
+    if (unitPart === 'vp') {
+        return numericValue * getSystemDensity();
+    }
+    return 0;
+}
+export function hookCreateImageData(peerPtr: CanvasRenderer, sw: number, sh: number): ImageData {
+    const density = getCanvasDensity(peerPtr)
+    const width_value: number = sw * density + DIFF
+    const height_value: number = sh * density + DIFF
+    if ((width_value > int_MAX) || (height_value > int_MAX) ||
+        ((width_value > 0) && (height_value > (int_MAX / width_value / PIXEL_SIZE)))) {
+        const resObj = new ImageData(0, 0)
+        return resObj
+    }
+    const width_cast: int = width_value as int
+    const height_cast: int = height_value as int
+    const length: int = width_cast * height_cast * PIXEL_SIZE
+    const arrayBuffer: ArrayBuffer = new ArrayBuffer(length)
+    const uint8View = new Uint8Array(arrayBuffer)
+    for (let i = 0; i < length; i++) {
+        uint8View[i] = 0xffffffff
+    }
+    const data: Uint8ClampedArray = new Uint8ClampedArray(arrayBuffer)
+    const resObj: ImageData = new ImageData(width_cast, height_cast, data, LengthMetricsUnit.PX)
+    return resObj
+}
+export function hookCreateImageData(peerPtr: CanvasRenderer, imagedata: ImageData): ImageData {
+    const width_cast: int = imagedata.width as int
+    const height_cast: int = imagedata.height as int
+    const length: int = width_cast * height_cast * PIXEL_SIZE
+    const arrayBuffer: ArrayBuffer = new ArrayBuffer(length)
+    const uint8View = new Uint8Array(arrayBuffer)
+    for (let i = 0; i < length; i++) {
+        uint8View[i] = 0xffffffff
+    }
+    const data: Uint8ClampedArray = new Uint8ClampedArray(arrayBuffer)
+    const resObj: ImageData = new ImageData(width_cast, height_cast, data, LengthMetricsUnit.PX)
+    return resObj
+}
+export function hookGetImageData(peerPtr: CanvasRenderer, sx: number, sy: number, sw: number, sh: number): ImageData {
+    const data: Uint8ClampedArray = ArkUIAniModule._CanvasRenderer_GetImageData(peerPtr.peer!.ptr, sx, sy, sw, sh)
+    const density = getCanvasDensity(peerPtr)
+    const width_value: number = sw * density + DIFF
+    const height_value: number = sh * density + DIFF
+    if ((width_value > int_MAX) || (height_value > int_MAX) ||
+        ((width_value > 0) && (height_value > (int_MAX / width_value / PIXEL_SIZE)))) {
+        const resObj = new ImageData(0, 0)
+        return resObj
+    }
+    const width_cast: int = width_value as int
+    const height_cast: int = height_value as int
+    const resObj: ImageData = new ImageData(width_cast, height_cast, data, LengthMetricsUnit.PX)
+    return resObj
+}
+export function hookPutImageData(peerPtr: CanvasRenderer, imagedata: ImageData, dx: number | string, dy: number | string): void {
+    let dx_type: int = RuntimeType.UNDEFINED
+    let dy_type: int = RuntimeType.UNDEFINED
+    dx_type = runtimeType(dx)
+    dy_type = runtimeType(dy)
+    let dx_val: number = (dx_type == RuntimeType.STRING) ? convertDimensionStrToNumber(dx as string) : (dx as number)
+    let dy_val: number = (dy_type == RuntimeType.STRING) ? convertDimensionStrToNumber(dy as string) : (dy as number)
+    ArkUIAniModule._CanvasRenderer_PutImageData0(peerPtr.peer!.ptr, imagedata.data, dx_val, dy_val, imagedata.width as int, imagedata.height as int)
+}
+export function hookPutImageData(peerPtr: CanvasRenderer, imagedata: ImageData, dx: number | string, dy: number | string, dirtyX: number | string, dirtyY: number | string, dirtyWidth: number | string, dirtyHeight: number | string): void {
+
+    let dx_type: int = RuntimeType.UNDEFINED
+    let dy_type: int = RuntimeType.UNDEFINED
+    let dirtyX_type: int = RuntimeType.UNDEFINED
+    let dirtyY_type: int = RuntimeType.UNDEFINED
+    let dirtyWidth_type: int = RuntimeType.UNDEFINED
+    let dirtyHeight_type: int = RuntimeType.UNDEFINED
+    dx_type = runtimeType(dx)
+    dy_type = runtimeType(dy)
+    dirtyX_type = runtimeType(dirtyX)
+    dirtyY_type = runtimeType(dirtyY)
+    dirtyWidth_type = runtimeType(dirtyWidth)
+    dirtyHeight_type = runtimeType(dirtyHeight)
+    let dx_val: number = (dx_type == RuntimeType.STRING) ? convertDimensionStrToNumber(dx as string) : (dx as number)
+    let dy_val: number = (dy_type == RuntimeType.STRING) ? convertDimensionStrToNumber(dy as string) : (dy as number)
+    let dirtyX_val: number = (dirtyX_type == RuntimeType.STRING) ? convertDimensionStrToNumber(dirtyX as string) : (dirtyX as number)
+    let dirtyY_val: number = (dirtyY_type == RuntimeType.STRING) ? convertDimensionStrToNumber(dirtyY as string) : (dirtyY as number)
+    let dirtyWidth_val: number = (dirtyWidth_type == RuntimeType.STRING) ? convertDimensionStrToNumber(dirtyWidth as string) : (dirtyWidth as number)
+    let dirtyHeight_val: number = (dirtyHeight_type == RuntimeType.STRING) ? convertDimensionStrToNumber(dirtyHeight as string) : (dirtyHeight as number)
+    ArkUIAniModule._CanvasRenderer_PutImageData1(peerPtr.peer!.ptr, imagedata.data, dx_val, dy_val, imagedata.width as int, imagedata.height as int, dirtyX_val, dirtyY_val, dirtyWidth_val, dirtyHeight_val)
+}
+export function hookGetContext(
+  peerPtr: OffscreenCanvas,
+  contextType: string,
+  options: RenderingContextSettings
+): OffscreenCanvasRenderingContext2D {
+  return peerPtr.getContext2d(options)
+}
+let attachCallbackId: int = 0;
+let detachCallbackId: int = 0;
+const attachCallbackMap: Map<VoidCallback, int> = new Map<VoidCallback, int>()
+const detachCallbackMap: Map<VoidCallback, int> = new Map<VoidCallback, int>()
+export function registerAttach(peerPtr: CanvasRenderingContext2D, callback: VoidCallback): void {
+  let id: int = -1
+  if (attachCallbackMap.has(callback)) {
+    let res = attachCallbackMap.get(callback)
+    if (res !== undefined) {
+      id = res as int
+    }
+  } else {
+    id = attachCallbackId
+    attachCallbackMap.set(callback, attachCallbackId++)    
+  }
+  ArkUIAniModule._CanvasRenderingContext_setAttachCallbackId(peerPtr.peer!.ptr, id)
+}
+export function unregisterAttach(peerPtr: CanvasRenderingContext2D, callback?: VoidCallback): void {
+  if (callback === undefined) {
+    attachCallbackMap.clear()
+    return
+  }
+  let id: int = -1
+  if (attachCallbackMap.has(callback)) {
+    let res = attachCallbackMap.get(callback)
+    if (res !== undefined) {
+      id = res as int
+    }
+    attachCallbackMap.delete(callback)
+  }
+  ArkUIAniModule._CanvasRenderingContext_setAttachCallbackId(peerPtr.peer!.ptr, id)
+}
+export function registerDetach(peerPtr: CanvasRenderingContext2D, callback: VoidCallback): void {
+  let id: int = -1
+  if (detachCallbackMap.has(callback)) {
+    let res = detachCallbackMap.get(callback)
+    if (res !== undefined) {
+      id = res as int
+    }
+  } else {
+    id = detachCallbackId
+    detachCallbackMap.set(callback, detachCallbackId++)    
+  }
+  ArkUIAniModule._CanvasRenderingContext_setDetachCallbackId(peerPtr.peer!.ptr, id)
+}
+export function unregisterDetach(peerPtr: CanvasRenderingContext2D, callback?: VoidCallback): void {
+  if (callback === undefined) {
+    detachCallbackMap.clear()
+    return
+  }
+  let id: int = -1
+  if (detachCallbackMap.has(callback)) {
+    let res = detachCallbackMap.get(callback)
+    if (res !== undefined) {
+      id = res as int
+    }
+    detachCallbackMap.delete(callback)
+  }
+  ArkUIAniModule._CanvasRenderingContext_setDetachCallbackId(peerPtr.peer!.ptr, id)
+}
 export function hookSetCanvasOptions(component: ArkCanvasComponent,
   context?: CanvasRenderingContext2D | DrawingRenderingContext, imageAIOptions?: ImageAIOptions): void {
   CanvasOpsHandWritten.hookSetCanvasOptionsImpl(component, context, imageAIOptions);

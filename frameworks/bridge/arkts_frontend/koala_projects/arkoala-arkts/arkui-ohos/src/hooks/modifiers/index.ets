@@ -30,7 +30,7 @@ import { ArkButtonComponent, ButtonAttribute } from "./../../component/button"
 import { ButtonModifier } from "./../../ButtonModifier"
 import { ArkCalendarPickerComponent, CalendarPickerAttribute } from "./../../component/calendarPicker"
 import { CalendarPickerModifier } from "./../../CalendarPickerModifier"
-import { ArkCanvasComponent, CanvasAttribute } from "./../../component/canvas"
+import { ArkCanvasComponent, CanvasAttribute, CanvasRenderingContext2D, DrawingRenderingContext, ArkCanvasPeer } from "./../../component/canvas"
 import { CanvasModifier } from "./../../CanvasModifier"
 import { ArkCheckboxComponent, CheckboxAttribute } from "./../../component/checkbox"
 import { CheckboxModifier } from "./../../CheckboxModifier"
@@ -294,7 +294,50 @@ export function hookAlphabetIndexerAttributeModifier(component: ArkAlphabetIndex
 }
 export function hookAnimatorAttributeModifier(componenet: ArkAnimatorComponent, value: AttributeModifier<AnimatorAttribute> | AttributeModifier<CommonMethod> | undefined):void {}
 export function hookBadgeAttributeModifier(componenet: ArkBadgeComponent, value: AttributeModifier<BadgeAttribute> | AttributeModifier<CommonMethod> | undefined):void {}
-export function hookCanvasAttributeModifier(componenet: ArkCanvasComponent, value: AttributeModifier<CanvasAttribute> | AttributeModifier<CommonMethod> | undefined):void {}
+export function hookCanvasAttributeModifier(component: ArkCanvasComponent, modifier: AttributeModifier<CanvasAttribute> | AttributeModifier<CommonMethod> | undefined):void {
+    if (modifier === undefined) {
+        return;
+    }
+    let isCommonModifier: boolean = modifier instanceof CommonModifier;
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
+        return;
+    }
+    let attributeSet = (): CanvasModifier => {
+        let isCanvasModifier: boolean = modifier instanceof CanvasModifier;
+        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new CanvasModifier();
+        if (isCanvasModifier) {
+            let canvasModifier = modifier as object as CanvasModifier;
+            initModifier.mergeModifier(canvasModifier);
+            component.getPeer().attributeSet = initModifier;
+            return initModifier;
+        } else {
+            component.getPeer().attributeSet = initModifier;
+            return initModifier;
+        }
+    }
+    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+        if (params.length < 1) {
+            return;
+        }
+        let context_casted: CanvasRenderingContext2D | DrawingRenderingContext | undefined = undefined
+        let imageAIOptions_casted: ImageAIOptions | undefined = undefined
+        if (params.length >= 1) {
+            context_casted = params[0] as CanvasRenderingContext2D | DrawingRenderingContext | undefined
+        }
+        if (params.length == 2) {
+            imageAIOptions_casted = params[1] as ImageAIOptions | undefined
+        }
+        let peer: ArkCanvasPeer = component.getPeer() as Object as ArkCanvasPeer;
+        peer?.setCanvasOptionsAttribute(context_casted, imageAIOptions_casted)
+    };
+    let updaterReceiver = (): ArkCanvasComponent => {
+        let componentNew: ArkCanvasComponent = new ArkCanvasComponent();
+        componentNew.setPeer(component.getPeer());
+        return componentNew;
+    };
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<CanvasAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
+}
 export function hookCircleAttributeModifier(component: ArkCircleComponent, modifier: AttributeModifier<CircleAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined):void {
         if (modifier === undefined) {
         return;
