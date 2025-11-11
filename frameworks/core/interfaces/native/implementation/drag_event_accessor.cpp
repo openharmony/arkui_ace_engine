@@ -120,11 +120,11 @@ Opt_unifiedDataChannel_UnifiedData GetDataImpl(Ark_DragEvent peer)
 {
     Opt_unifiedDataChannel_UnifiedData arkUnifiedData =
         Converter::ArkValue<Opt_unifiedDataChannel_UnifiedData>();
-    const auto unifiedPeer = PeerUtils::CreatePeer<unifiedDataChannel_UnifiedDataPeer>();
     CHECK_NULL_RETURN(peer, arkUnifiedData);
     CHECK_NULL_RETURN(peer->dragInfo, arkUnifiedData);
     auto data = peer->dragInfo->GetData();
     CHECK_NULL_RETURN(data, arkUnifiedData);
+    const auto unifiedPeer = PeerUtils::CreatePeer<unifiedDataChannel_UnifiedDataPeer>();
     unifiedPeer->unifiedData = data;
     return Converter::ArkValue<Opt_unifiedDataChannel_UnifiedData>(unifiedPeer);
 }
