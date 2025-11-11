@@ -20,6 +20,9 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "arkoala_api_generated.h"
+#include "core/interfaces/native/implementation/copy_event_peer.h"
+#include "core/interfaces/native/implementation/cut_event_peer.h"
+#include "core/interfaces/native/implementation/paste_event_peer.h"
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
@@ -129,7 +132,9 @@ void AssignArkValue(Ark_RichEditorImageSpanResult& dst, const RichEditorAbstract
     dst.imageStyle.size.value0 = Converter::ArkValue<Ark_Number>(src.GetSizeWidth());
     dst.imageStyle.size.value1 = Converter::ArkValue<Ark_Number>(src.GetSizeHeight());
     dst.imageStyle.objectFit = Converter::ArkValue<Ark_ImageFit>(src.GetObjectFit());
-    dst.imageStyle.verticalAlign = Converter::ArkValue<Ark_ImageSpanAlignment>(src.GetVerticalAlign());
+    bool isBuilderSpan = (valueResourceStr.empty() && src.GetValuePixelMap() == nullptr);
+    auto imageVerticalAlign = isBuilderSpan ? VerticalAlign::BOTTOM : src.GetVerticalAlign();
+    dst.imageStyle.verticalAlign = Converter::ArkValue<Ark_ImageSpanAlignment>(imageVerticalAlign);
     ImageStyleResult imageStyleResult {
         .borderRadius = src.GetBorderRadius(),
         .margin = src.GetMargin()
@@ -440,13 +445,10 @@ void SetOnPasteImpl(Ark_NativePointer node,
         return;
     }
     auto onPaste = [arkCallback = CallbackHelper(*optValue)](NG::TextCommonEvent& event) -> void {
-        Converter::ConvContext ctx;
-        auto keeper = CallbackKeeper::Claim([&event]() {
-            event.SetPreventDefault(true);
-        });
-        Ark_PasteEvent arkEvent = {
-            .preventDefault = Converter::ArkValue<Opt_VoidCallback>(keeper.ArkValue())
-        };
+        Ark_PasteEvent arkEvent = PasteEventPeer::Create();
+        CHECK_NULL_VOID(arkEvent);
+        auto preventDefault = [&event]() { event.SetPreventDefault(true); };
+        arkEvent->SetPreventDefault(preventDefault);
         arkCallback.InvokeSync(Converter::ArkValue<Opt_PasteEvent>(arkEvent));
     };
     RichEditorModelStatic::SetOnPaste(frameNode, std::move(onPaste));
@@ -596,13 +598,10 @@ void SetOnCutImpl(Ark_NativePointer node,
         return;
     }
     auto onCut = [arkCallback = CallbackHelper(*optValue)](NG::TextCommonEvent& event) {
-        Converter::ConvContext ctx;
-        auto keeper = CallbackKeeper::Claim([&event]() {
-            event.SetPreventDefault(true);
-        });
-        Ark_CutEvent arkEvent = {
-            .preventDefault = Converter::ArkValue<Opt_VoidCallback>(keeper.ArkValue())
-        };
+        Ark_CutEvent arkEvent = CutEventPeer::Create();
+        CHECK_NULL_VOID(arkEvent);
+        auto preventDefault = [&event]() { event.SetPreventDefault(true); };
+        arkEvent->SetPreventDefault(preventDefault);
         arkCallback.InvokeSync(arkEvent);
     };
     RichEditorModelStatic::SetOnCut(frameNode, std::move(onCut));
@@ -618,13 +617,10 @@ void SetOnCopyImpl(Ark_NativePointer node,
         return;
     }
     auto onCopy = [arkCallback = CallbackHelper(*optValue)](NG::TextCommonEvent& event) {
-        Converter::ConvContext ctx;
-        auto keeper = CallbackKeeper::Claim([&event]() {
-            event.SetPreventDefault(true);
-        });
-        Ark_CopyEvent arkEvent = {
-            .preventDefault = Converter::ArkValue<Opt_VoidCallback>(keeper.ArkValue())
-        };
+        Ark_CopyEvent arkEvent = CopyEventPeer::Create();
+        CHECK_NULL_VOID(arkEvent);
+        auto preventDefault = [&event]() { event.SetPreventDefault(true); };
+        arkEvent->SetPreventDefault(preventDefault);
         arkCallback.InvokeSync(arkEvent);
     };
     RichEditorModelStatic::SetOnCopy(frameNode, std::move(onCopy));

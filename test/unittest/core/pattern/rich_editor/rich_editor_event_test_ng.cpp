@@ -725,12 +725,53 @@ HWTEST_F(RichEditorEventTestNg, RichEditorEventHub005, TestSize.Level0)
     eventHub->FireOnDidChange(value);
     eventHub->FireOnCut(event);
     eventHub->FireOnCopy(event);
+    EXPECT_FALSE(event.IsPreventDefault());
     EXPECT_TRUE(eventHub->FireOnWillChange(value));
     EXPECT_TRUE(eventHub->FireOnStyledStringWillChange(info));
 
     while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
         ViewStackProcessor::GetInstance()->elementsStack_.pop();
     }
+}
+
+/**
+ * @tc.name: RichEditorEventHub006
+ * @tc.desc: test fire event
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEventTestNg, RichEditorEventHub006, TestSize.Level0)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto onPaste = [](OHOS::Ace::NG::TextCommonEvent& event) {
+        event.SetPreventDefault(true);
+        return;
+    };
+    auto onCut = [](OHOS::Ace::NG::TextCommonEvent& event) {
+        event.SetPreventDefault(false);
+        return;
+    };
+    auto onCopy = [](OHOS::Ace::NG::TextCommonEvent& event) {
+        event.SetPreventDefault(true);
+        return;
+    };
+    eventHub->SetOnPaste(onPaste);
+    eventHub->SetOnCut(onCut);
+    eventHub->SetOnCopy(onCopy);
+    TextCommonEvent event;
+    EXPECT_FALSE(event.IsPreventDefault());
+    eventHub->FireOnPaste(event);
+    EXPECT_TRUE(event.IsPreventDefault());
+    eventHub->FireOnCut(event);
+    EXPECT_FALSE(event.IsPreventDefault());
+    eventHub->FireOnCopy(event);
+    EXPECT_TRUE(event.IsPreventDefault());
 }
 
 /**

@@ -469,12 +469,10 @@ void AssignArkValue(Ark_RichEditorParagraphStyle& dst, const ParagraphInfo& src,
 {
     dst.textAlign = Converter::ArkValue<Opt_TextAlign>(static_cast<TextAlign>(src.textAlign));
     // read pixel map is not supported
-    std::pair<const Dimension, const Dimension> pair = { Dimension::FromString(src.leadingMarginSize[0]),
-        Dimension::FromString(src.leadingMarginSize[1]) };
-    Ark_LeadingMarginPlaceholder arkLeadingMargin = {
-        .pixelMap = image_PixelMapPeer::Create(src.leadingMarginPixmap),
-        .size = Converter::ArkValue<Ark_Tuple_Dimension_Dimension>(pair, ctx)
-    };
+    Ark_LeadingMarginPlaceholder arkLeadingMargin;
+    arkLeadingMargin.pixelMap = image_PixelMapPeer::Create(src.leadingMarginPixmap);
+    arkLeadingMargin.size.value0 = Converter::ArkValue<Ark_Dimension>(src.leadingMarginSize[0]);
+    arkLeadingMargin.size.value1 = Converter::ArkValue<Ark_Dimension>(src.leadingMarginSize[1]);
     dst.leadingMargin = Converter::ArkUnion<
         Opt_Union_Dimension_LeadingMarginPlaceholder, Ark_LeadingMarginPlaceholder>(arkLeadingMargin, ctx);
     dst.wordBreak = Converter::ArkValue<Opt_WordBreak>(static_cast<WordBreak>(src.wordBreak));

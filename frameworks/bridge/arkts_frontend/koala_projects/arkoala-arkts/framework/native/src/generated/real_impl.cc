@@ -12382,6 +12382,26 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     } // ControllerHandlerAccessor
+    namespace CopyEventAccessor {
+    void DestroyPeerImpl(Ark_CopyEvent peer)
+    {
+        auto peerImpl = reinterpret_cast<CopyEventPeerImpl *>(peer);
+        if (peerImpl) {
+            delete peerImpl;
+        }
+    }
+    Ark_CopyEvent ConstructImpl()
+    {
+        return {};
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        return reinterpret_cast<void *>(&DestroyPeerImpl);
+    }
+    void PreventDefaultImpl(Ark_CopyEvent peer)
+    {
+    }
+    } // CopyEventAccessor
     namespace CustomDialogControllerAccessor {
     void DestroyPeerImpl(Ark_CustomDialogController peer)
     {
@@ -12476,6 +12496,26 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     } // CustomSpanAccessor
+    namespace CutEventAccessor {
+    void DestroyPeerImpl(Ark_CutEvent peer)
+    {
+        auto peerImpl = reinterpret_cast<CutEventPeerImpl *>(peer);
+        if (peerImpl) {
+            delete peerImpl;
+        }
+    }
+    Ark_CutEvent ConstructImpl()
+    {
+        return {};
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        return reinterpret_cast<void *>(&DestroyPeerImpl);
+    }
+    void PreventDefaultImpl(Ark_CutEvent peer)
+    {
+    }
+    } // CutEventAccessor
     namespace DataResubmissionHandlerAccessor {
     void DestroyPeerImpl(Ark_DataResubmissionHandler peer)
     {
@@ -19152,6 +19192,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct ControllerHandlerPeer {
         virtual ~ControllerHandlerPeer() = default;
     };
+    const GENERATED_ArkUICopyEventAccessor* GetCopyEventAccessor()
+    {
+        static const GENERATED_ArkUICopyEventAccessor CopyEventAccessorImpl {
+            CopyEventAccessor::DestroyPeerImpl,
+            CopyEventAccessor::ConstructImpl,
+            CopyEventAccessor::GetFinalizerImpl,
+            CopyEventAccessor::PreventDefaultImpl,
+        };
+        return &CopyEventAccessorImpl;
+    }
+
+    struct CopyEventPeer {
+        virtual ~CopyEventPeer() = default;
+    };
     const GENERATED_ArkUICustomDialogControllerAccessor* GetCustomDialogControllerAccessor()
     {
         static const GENERATED_ArkUICustomDialogControllerAccessor CustomDialogControllerAccessorImpl {
@@ -19202,6 +19256,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 
     struct CustomSpanPeer {
         virtual ~CustomSpanPeer() = default;
+    };
+    const GENERATED_ArkUICutEventAccessor* GetCutEventAccessor()
+    {
+        static const GENERATED_ArkUICutEventAccessor CutEventAccessorImpl {
+            CutEventAccessor::DestroyPeerImpl,
+            CutEventAccessor::ConstructImpl,
+            CutEventAccessor::GetFinalizerImpl,
+            CutEventAccessor::PreventDefaultImpl,
+        };
+        return &CutEventAccessorImpl;
+    }
+
+    struct CutEventPeer {
+        virtual ~CutEventPeer() = default;
     };
     const GENERATED_ArkUIDataResubmissionHandlerAccessor* GetDataResubmissionHandlerAccessor()
     {
@@ -20527,6 +20595,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 
     struct ParagraphStylePeer {
         virtual ~ParagraphStylePeer() = default;
+    };
+    const GENERATED_ArkUIPasteEventAccessor* GetPasteEventAccessor()
+    {
+        static const GENERATED_ArkUIPasteEventAccessor PasteEventAccessorImpl {
+            PasteEventAccessor::DestroyPeerImpl,
+            PasteEventAccessor::ConstructImpl,
+            PasteEventAccessor::GetFinalizerImpl,
+            PasteEventAccessor::PreventDefaultImpl,
+        };
+        return &PasteEventAccessorImpl;
+    }
+
+    struct PasteEventPeer {
+        virtual ~PasteEventPeer() = default;
     };
     const GENERATED_ArkUIPath2DAccessor* GetPath2DAccessor()
     {
@@ -21968,9 +22050,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetConsoleMessageAccessor,
             GetContentModifierHelperAccessor,
             GetControllerHandlerAccessor,
+            GetCopyEventAccessor,
             GetCustomDialogControllerAccessor,
             GetCustomDialogControllerExtenderAccessor,
             GetCustomSpanAccessor,
+            GetCutEventAccessor,
             GetDataResubmissionHandlerAccessor,
             GetDatePickerDialogAccessor,
             GetDecorationStyleAccessor,
@@ -22045,6 +22129,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetPanGestureOptionsAccessor,
             GetPanRecognizerAccessor,
             GetParagraphStyleAccessor,
+            GetPasteEventAccessor,
             GetPath2DAccessor,
             GetPatternLockControllerAccessor,
             GetPermissionRequestAccessor,
