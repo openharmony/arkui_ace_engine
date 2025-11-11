@@ -25,15 +25,6 @@
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/jsview/js_view.h"
 
-#define CHECK_LAZYFOREACH_LISTENER(ptr, message)           \
-    do {                                                    \
-        if (!(ptr)) {                                       \
-            ACE_SCOPED_TRACE(message);                      \
-            TAG_LOGE(AceLogTag::ACE_LAZY_FOREACH, message); \
-            return;                                         \
-        }                                                   \
-    } while (0)
-
 namespace OHOS::Ace::Framework {
 
 class JSDataChangeListener : public Referenced {
@@ -142,7 +133,6 @@ private:
 
     void OnDataChanged(const JSCallbackInfo& args)
     {
-        CHECK_LAZYFOREACH_LISTENER(this, "Error: JSDataChangeListener::OnDataChanged, listener is nullptr");
         useOldInterface = true;
         if (useAnotherInterface(useNewInterface)) {
             return;
