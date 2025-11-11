@@ -99,6 +99,11 @@ constexpr float MAX_ANGEL = 360.0f;
 const uint32_t FOCUS_PRIORITY_AUTO = 0;
 const uint32_t FOCUS_PRIORITY_PRIOR = 2000;
 const uint32_t FOCUS_PRIORITY_PREVIOUS = 3000;
+enum class PixelroundRule {
+    NO_FORCE_ROUND,
+    FORCE_FLOOR,
+    FORCE_CEIL,
+};
 }
 
 namespace OHOS::Ace::NG {
@@ -916,16 +921,17 @@ std::vector<DimensionRect> Convert(const Ark_Rectangle &src)
     return { Convert<DimensionRect>(src) };
 }
 
-using PixelRoundPolicyOneRule = bool; // let rule 'Ceil' is false, rool 'FLoor' is true
-
 template<>
-void AssignCast(std::optional<PixelRoundPolicyOneRule>& dst, const Ark_PixelRoundCalcPolicy& src)
+void AssignCast(std::optional<PixelroundRule>& dst, const Ark_PixelRoundCalcPolicy& src)
 {
     if (src == Ark_PixelRoundCalcPolicy::ARK_PIXEL_ROUND_CALC_POLICY_FORCE_CEIL) {
-        dst = false;
+        dst = PixelroundRule::FORCE_CEIL;
     }
     if (src == Ark_PixelRoundCalcPolicy::ARK_PIXEL_ROUND_CALC_POLICY_FORCE_FLOOR) {
-        dst = true;
+        dst = PixelroundRule::FORCE_FLOOR;
+    }
+    if (src == Ark_PixelRoundCalcPolicy::ARK_PIXEL_ROUND_CALC_POLICY_NO_FORCE_ROUND) {
+        dst = PixelroundRule::NO_FORCE_ROUND;
     }
 }
 
@@ -933,20 +939,28 @@ template<>
 uint16_t Convert(const Ark_PixelRoundPolicy& src)
 {
     uint16_t dst = 0;
-    if (auto rule = OptConvert<PixelRoundPolicyOneRule>(src.start); rule) {
-        auto policy = *rule ? PixelRoundPolicy::FORCE_FLOOR_START : PixelRoundPolicy::FORCE_CEIL_START;
+    if (auto rule = OptConvert<PixelroundRule>(src.start); rule) {
+        auto policy = (*rule == PixelroundRule::FORCE_FLOOR) ? PixelRoundPolicy::FORCE_FLOOR_START :
+                      (*rule == PixelroundRule::FORCE_CEIL) ? PixelRoundPolicy::FORCE_CEIL_START :
+                      PixelRoundPolicy::NO_FORCE_ROUND_START;
         dst |= static_cast<uint16_t>(policy);
     }
-    if (auto rule = OptConvert<PixelRoundPolicyOneRule>(src.end); rule) {
-        auto policy = *rule ? PixelRoundPolicy::FORCE_FLOOR_END : PixelRoundPolicy::FORCE_CEIL_END;
+    if (auto rule = OptConvert<PixelroundRule>(src.end); rule) {
+        auto policy = (*rule == PixelroundRule::FORCE_FLOOR) ? PixelRoundPolicy::FORCE_FLOOR_END :
+                      (*rule == PixelroundRule::FORCE_CEIL) ? PixelRoundPolicy::FORCE_CEIL_END :
+                      PixelRoundPolicy::NO_FORCE_ROUND_END;
         dst |= static_cast<uint16_t>(policy);
     }
-    if (auto rule = OptConvert<PixelRoundPolicyOneRule>(src.top); rule) {
-        auto policy = *rule ? PixelRoundPolicy::FORCE_FLOOR_TOP : PixelRoundPolicy::FORCE_CEIL_TOP;
+    if (auto rule = OptConvert<PixelroundRule>(src.top); rule) {
+        auto policy = (*rule == PixelroundRule::FORCE_FLOOR) ? PixelRoundPolicy::FORCE_FLOOR_TOP :
+                      (*rule == PixelroundRule::FORCE_CEIL) ? PixelRoundPolicy::FORCE_CEIL_TOP :
+                      PixelRoundPolicy::NO_FORCE_ROUND_TOP;
         dst |= static_cast<uint16_t>(policy);
     }
-    if (auto rule = OptConvert<PixelRoundPolicyOneRule>(src.bottom); rule) {
-        auto policy = *rule ? PixelRoundPolicy::FORCE_FLOOR_BOTTOM : PixelRoundPolicy::FORCE_CEIL_BOTTOM;
+    if (auto rule = OptConvert<PixelroundRule>(src.bottom); rule) {
+        auto policy = (*rule == PixelroundRule::FORCE_FLOOR) ? PixelRoundPolicy::FORCE_FLOOR_BOTTOM :
+                      (*rule == PixelroundRule::FORCE_CEIL) ? PixelRoundPolicy::FORCE_CEIL_BOTTOM :
+                      PixelRoundPolicy::NO_FORCE_ROUND_BOTTOM;
         dst |= static_cast<uint16_t>(policy);
     }
     return dst;
