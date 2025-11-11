@@ -362,4 +362,49 @@ HWTEST_F(ContainerPickerPaintMethodTest, PaintLineWithNormalParametersTest, Test
     paintMethod_->PaintLine(offset, dividerInfo, rsCanvas);
 }
 
+/**
+ * @tc.name: PaintSelectionIndicatorBackgroundWithPaddingTest
+ * @tc.desc: Test ContainerPickerPaintMethod PaintSelectionIndicatorBackground with padding
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPaintMethodTest, PaintSelectionIndicatorBackgroundWithPaddingTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ContainerPicker with background indicator type and padding
+     */
+    auto node = CreateContainerPickerNode();
+    auto paintWrapper = CreateMockPaintWrapper(node);
+    Testing::MockCanvas rsCanvas;
+
+    auto layoutProperty = node->GetLayoutProperty<ContainerPickerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateIndicatorType(static_cast<int32_t>(PickerIndicatorType::BACKGROUND));
+
+    PaddingProperty padding;
+    padding.left = CalcLength(20.0f);
+    padding.right = CalcLength(20.0f);
+    padding.top = CalcLength(10.0f);
+    padding.bottom = CalcLength(10.0f);
+    layoutProperty->UpdatePadding(padding);
+
+    auto geometryNode = node->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(300.0f, 500.0f));
+
+    /**
+     * @tc.steps: step2. Mock canvas operations
+     */
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, Save()).Times(1);
+    EXPECT_CALL(rsCanvas, DrawRoundRect(_)).Times(1);
+    EXPECT_CALL(rsCanvas, Restore()).Times(1);
+
+    /**
+     * @tc.steps: step3. Call PaintSelectionIndicatorBackground method
+     * @tc.expected: step3. Should use contentRect with padding applied
+     */
+    paintMethod_->PaintSelectionIndicatorBackground(AceType::RawPtr(paintWrapper), rsCanvas);
+}
+
 } // namespace OHOS::Ace::NG

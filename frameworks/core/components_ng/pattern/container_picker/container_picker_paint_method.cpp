@@ -86,9 +86,12 @@ void ContainerPickerPaintMethod::PaintSelectionIndicatorBackground(PaintWrapper*
     SetDefaultIndicatorBackground(pickerNode, backgroundColor, borderRadius);
 
     float height = PICKER_ITEM_HEIGHT.ConvertToPx();
-    float width = pickerRect.Width();
+    PaddingPropertyF padding = layoutProperty->CreatePaddingAndBorder();
+    RectF contentRect = { padding.left.value_or(0), padding.top.value_or(0),
+        pickerRect.Width() - padding.Width(), pickerRect.Height() - padding.Height() };
+    float width = contentRect.Width();
     float maxRadius = std::min(height, width) / 2;
-    float left = 0.0f;
+    float left = contentRect.GetX();
     float top = pickerRect.Height() / 2 - height / 2;
     auto topLeft = GreatNotEqual(borderRadius.radiusTopLeft->ConvertToPx(), maxRadius) ?
         maxRadius : borderRadius.radiusTopLeft->ConvertToPx();
