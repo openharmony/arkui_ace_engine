@@ -1282,8 +1282,6 @@ typedef struct Callback_OnHttpAuthRequestEvent_Boolean Callback_OnHttpAuthReques
 typedef struct Opt_Callback_OnHttpAuthRequestEvent_Boolean Opt_Callback_OnHttpAuthRequestEvent_Boolean;
 typedef struct Callback_OnHttpErrorReceiveEvent_Void Callback_OnHttpErrorReceiveEvent_Void;
 typedef struct Opt_Callback_OnHttpErrorReceiveEvent_Void Opt_Callback_OnHttpErrorReceiveEvent_Void;
-typedef struct Callback_OnInterceptRequestEvent_WebResourceResponse Callback_OnInterceptRequestEvent_WebResourceResponse;
-typedef struct Opt_Callback_OnInterceptRequestEvent_WebResourceResponse Opt_Callback_OnInterceptRequestEvent_WebResourceResponse;
 typedef struct Callback_OnLoadFinishedEvent_Void Callback_OnLoadFinishedEvent_Void;
 typedef struct Opt_Callback_OnLoadFinishedEvent_Void Opt_Callback_OnLoadFinishedEvent_Void;
 typedef struct Callback_OnLoadInterceptEvent_Boolean Callback_OnLoadInterceptEvent_Boolean;
@@ -1352,6 +1350,8 @@ typedef struct Callback_Opt_StyledString_Opt_Array_String_Void Callback_Opt_Styl
 typedef struct Opt_Callback_Opt_StyledString_Opt_Array_String_Void Opt_Callback_Opt_StyledString_Opt_Array_String_Void;
 typedef struct Callback_Opt_TabContentAnimatedTransition_Void Callback_Opt_TabContentAnimatedTransition_Void;
 typedef struct Opt_Callback_Opt_TabContentAnimatedTransition_Void Opt_Callback_Opt_TabContentAnimatedTransition_Void;
+typedef struct Callback_Opt_WebResourceResponse_Void Callback_Opt_WebResourceResponse_Void;
+typedef struct Opt_Callback_Opt_WebResourceResponse_Void Opt_Callback_Opt_WebResourceResponse_Void;
 typedef struct Callback_PlaybackInfo_Void Callback_PlaybackInfo_Void;
 typedef struct Opt_Callback_PlaybackInfo_Void Opt_Callback_PlaybackInfo_Void;
 typedef struct Callback_Pointer_Void Callback_Pointer_Void;
@@ -1464,8 +1464,6 @@ typedef struct Callback_Void Callback_Void;
 typedef struct Opt_Callback_Void Opt_Callback_Void;
 typedef struct Callback_WebKeyboardOptions_Void Callback_WebKeyboardOptions_Void;
 typedef struct Opt_Callback_WebKeyboardOptions_Void Opt_Callback_WebKeyboardOptions_Void;
-typedef struct Callback_WebResourceResponse_Void Callback_WebResourceResponse_Void;
-typedef struct Opt_Callback_WebResourceResponse_Void Opt_Callback_WebResourceResponse_Void;
 typedef struct CheckBoxModifierBuilder CheckBoxModifierBuilder;
 typedef struct Opt_CheckBoxModifierBuilder Opt_CheckBoxModifierBuilder;
 typedef struct ContentDidScrollCallback ContentDidScrollCallback;
@@ -1712,6 +1710,8 @@ typedef struct Type_CommonMethod_onDragStart Type_CommonMethod_onDragStart;
 typedef struct Opt_Type_CommonMethod_onDragStart Opt_Type_CommonMethod_onDragStart;
 typedef struct Type_NavigationAttribute_customNavContentTransition Type_NavigationAttribute_customNavContentTransition;
 typedef struct Opt_Type_NavigationAttribute_customNavContentTransition Opt_Type_NavigationAttribute_customNavContentTransition;
+typedef struct Type_WebAttribute_onInterceptRequest Type_WebAttribute_onInterceptRequest;
+typedef struct Opt_Type_WebAttribute_onInterceptRequest Opt_Type_WebAttribute_onInterceptRequest;
 typedef struct UpdateTransitionCallback UpdateTransitionCallback;
 typedef struct Opt_UpdateTransitionCallback Opt_UpdateTransitionCallback;
 typedef struct VisibleAreaChangeCallback VisibleAreaChangeCallback;
@@ -10592,16 +10592,6 @@ typedef struct Opt_Callback_OnHttpErrorReceiveEvent_Void {
     Ark_Tag tag;
     Callback_OnHttpErrorReceiveEvent_Void value;
 } Opt_Callback_OnHttpErrorReceiveEvent_Void;
-typedef struct Callback_OnInterceptRequestEvent_WebResourceResponse {
-    /* kind: Callback */
-    Ark_CallbackResource resource;
-    void (*call)(const Ark_Int32 resourceId, const Ark_OnInterceptRequestEvent value0, const Callback_WebResourceResponse_Void continuation);
-    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_OnInterceptRequestEvent value0, const Callback_WebResourceResponse_Void continuation);
-} Callback_OnInterceptRequestEvent_WebResourceResponse;
-typedef struct Opt_Callback_OnInterceptRequestEvent_WebResourceResponse {
-    Ark_Tag tag;
-    Callback_OnInterceptRequestEvent_WebResourceResponse value;
-} Opt_Callback_OnInterceptRequestEvent_WebResourceResponse;
 typedef struct Callback_OnLoadFinishedEvent_Void {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -10942,6 +10932,16 @@ typedef struct Opt_Callback_Opt_TabContentAnimatedTransition_Void {
     Ark_Tag tag;
     Callback_Opt_TabContentAnimatedTransition_Void value;
 } Opt_Callback_Opt_TabContentAnimatedTransition_Void;
+typedef struct Callback_Opt_WebResourceResponse_Void {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Opt_WebResourceResponse value);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Opt_WebResourceResponse value);
+} Callback_Opt_WebResourceResponse_Void;
+typedef struct Opt_Callback_Opt_WebResourceResponse_Void {
+    Ark_Tag tag;
+    Callback_Opt_WebResourceResponse_Void value;
+} Opt_Callback_Opt_WebResourceResponse_Void;
 typedef struct Callback_PlaybackInfo_Void {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -11492,16 +11492,6 @@ typedef struct Opt_Callback_WebKeyboardOptions_Void {
     Ark_Tag tag;
     Callback_WebKeyboardOptions_Void value;
 } Opt_Callback_WebKeyboardOptions_Void;
-typedef struct Callback_WebResourceResponse_Void {
-    /* kind: Callback */
-    Ark_CallbackResource resource;
-    void (*call)(const Ark_Int32 resourceId, const Ark_WebResourceResponse value);
-    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_WebResourceResponse value);
-} Callback_WebResourceResponse_Void;
-typedef struct Opt_Callback_WebResourceResponse_Void {
-    Ark_Tag tag;
-    Callback_WebResourceResponse_Void value;
-} Opt_Callback_WebResourceResponse_Void;
 typedef struct CheckBoxModifierBuilder {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -12732,6 +12722,16 @@ typedef struct Opt_Type_NavigationAttribute_customNavContentTransition {
     Ark_Tag tag;
     Type_NavigationAttribute_customNavContentTransition value;
 } Opt_Type_NavigationAttribute_customNavContentTransition;
+typedef struct Type_WebAttribute_onInterceptRequest {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_OnInterceptRequestEvent value0, const Callback_Opt_WebResourceResponse_Void continuation);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_OnInterceptRequestEvent value0, const Callback_Opt_WebResourceResponse_Void continuation);
+} Type_WebAttribute_onInterceptRequest;
+typedef struct Opt_Type_WebAttribute_onInterceptRequest {
+    Ark_Tag tag;
+    Type_WebAttribute_onInterceptRequest value;
+} Opt_Type_WebAttribute_onInterceptRequest;
 typedef struct UpdateTransitionCallback {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -24370,7 +24370,7 @@ typedef struct GENERATED_ArkUIWebModifier {
     void (*setOnHttpAuthRequest)(Ark_NativePointer node,
                                  const Opt_Callback_OnHttpAuthRequestEvent_Boolean* value);
     void (*setOnInterceptRequest)(Ark_NativePointer node,
-                                  const Opt_Callback_OnInterceptRequestEvent_WebResourceResponse* value);
+                                  const Opt_Type_WebAttribute_onInterceptRequest* value);
     void (*setOnPermissionRequest)(Ark_NativePointer node,
                                    const Opt_Callback_OnPermissionRequestEvent_Void* value);
     void (*setOnScreenCaptureRequest)(Ark_NativePointer node,

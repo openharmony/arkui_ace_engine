@@ -20017,7 +20017,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetOnInterceptRequestImpl(Ark_NativePointer node,
-                                   const Opt_Callback_OnInterceptRequestEvent_WebResourceResponse* value)
+                                   const Opt_Type_WebAttribute_onInterceptRequest* value)
     {
         if (!needGroupedLog(1))
         {

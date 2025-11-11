@@ -988,7 +988,7 @@ void SetOnHttpAuthRequestImpl(Ark_NativePointer node,
 #endif // WEB_SUPPORTED
 }
 void SetOnInterceptRequestImpl(Ark_NativePointer node,
-                               const Opt_Callback_OnInterceptRequestEvent_WebResourceResponse* value)
+                               const Opt_Type_WebAttribute_onInterceptRequest* value)
 {
 #ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
