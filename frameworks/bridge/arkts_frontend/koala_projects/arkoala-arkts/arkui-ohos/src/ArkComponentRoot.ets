@@ -21,8 +21,7 @@ import { InteropNativeModule } from '@koalaui/interop';
 import { __context, GlobalStateManager, StateManager } from '@koalaui/runtime';
 import { ObserveSingleton } from "arkui/stateManagement/base/observeSingleton";
 
-export function setNeedCreate(isNeedCreate: boolean): boolean
-{
+export function setNeedCreate(isNeedCreate: boolean): boolean {
     const temp = GlobalStateManager.instance._isNeedCreate
     GlobalStateManager.instance._isNeedCreate = isNeedCreate
     return temp
