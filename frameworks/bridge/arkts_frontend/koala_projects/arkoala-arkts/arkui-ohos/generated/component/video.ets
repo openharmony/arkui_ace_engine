@@ -312,7 +312,9 @@ export class ArkVideoPeer extends ArkCommonMethodPeer {
                 thisSerializer.holdAndWriteCallback(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof ErrorCallback<BusinessError>) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as ErrorCallback<BusinessError<void>>
+                // instructive change start
+                const valueTmpValueForIdx1  = valueTmpValue as object as ErrorCallback<BusinessError<void>>
+                // instructive change end
                 thisSerializer.holdAndWriteCallback(valueTmpValueForIdx1)
             }
         } else {

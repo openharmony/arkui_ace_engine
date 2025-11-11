@@ -51,6 +51,9 @@ import { NodeAttach, remember } from '@koalaui/runtime'
 import { ModifierStateManager } from './../CommonModifier'
 import { arkui_Graphics_LengthMetrics_serializer } from './../framework/Graphics'
 import { TextModifier_serializer } from './../framework/TextModifier'
+// instructive change begin
+import { NavExtender } from './idlize'
+// instructive change end
 export interface NavigationTransitionProxy {
     from: NavContentInfo
     to: NavContentInfo
@@ -300,6 +303,12 @@ export class NavPathInfo implements MaterializedBase {
     get navDestinationId(): string | undefined {
         return this.getNavDestinationId()
     }
+    // instructive change begin
+    set navDestinationId(navDestinationId: string | undefined) {
+        const navDestinationId_NonNull  = (navDestinationId as string | undefined)
+        this.setNavDestinationId(navDestinationId_NonNull)
+    }
+    // instructive change end
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, NavPathInfo.getFinalizer())
     }
@@ -371,6 +380,17 @@ export class NavPathInfo implements MaterializedBase {
     private getNavDestinationId(): string | undefined {
         return this.getNavDestinationId_serialize()
     }
+    // instructive change begin
+    private setNavDestinationId(navDestinationId: string | undefined): void {
+        const navDestinationId_casted = navDestinationId as (string | undefined)
+        NavExtender.setNavDestinationId(this.peer!.ptr, navDestinationId_casted)
+    }
+    updateNavPathInfo(): void {
+        this.setName_serialize(this.name)
+        this.setIsEntry_serialize(this.isEntry!)
+        NavExtender.setNavDestinationId(this.peer!.ptr, this.navDestinationId!)
+    }
+    // instructive change end
     private getName_serialize(): string {
         const retval  = ArkUIGeneratedNativeModule._NavPathInfo_getName(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
@@ -1851,6 +1871,15 @@ export interface NavContentInfo {
 }
 
 export class ArkNavigationComponent extends ArkCommonMethodComponent implements NavigationAttribute {
+    // instructive change begin
+    /** @memo */
+    _navDestination: (name: string, param: Object | null | undefined) => void =
+        /** @memo */
+        (name: string, param: object | null | undefined) => {
+            InteropNativeModule._NativeLog("_navDestination attribute is undefined")
+        }
+    _needSync: boolean = false
+    // instructive change end
     getPeer(): ArkNavigationPeer {
         return (this.peer as ArkNavigationPeer)
     }
@@ -2097,6 +2126,19 @@ export class ArkNavigationComponent extends ArkCommonMethodComponent implements 
     public applyOptionsFinish(traceName: string): void {
         super.applyOptionsFinish(traceName)
     }
+    // instructive change begin
+    public updateNeedSync(needSync: boolean): void {
+        this._needSync = needSync;
+    }
+
+    public isNeedSync(): boolean {
+        return this._needSync;
+    }
+
+    public updateNavDestination(navdestination: PageMapBuilder): void {
+        this._navDestination = navdestination;
+    }
+    // instructive change end
 }
 
 @memo

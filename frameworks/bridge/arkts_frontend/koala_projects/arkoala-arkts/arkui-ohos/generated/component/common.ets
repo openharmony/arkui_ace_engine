@@ -79,6 +79,12 @@ import { Want_serializer } from './../framework/ohos.app.ability.Want'
 import { ImageModifier_serializer } from './../framework/ImageModifier'
 import { SymbolGlyphModifier_serializer } from './../framework/SymbolGlyphModifier'
 import { ohos_arkui_UIContext_UIContext_serializer } from './../framework/ohos.arkui.UIContext'
+// instructive change start
+import { _animateTo, _animationStart, _animationStop } from "arkui/base/ArkAnimation"
+import { AnimationExtender } from '#generated';
+import { ModifierStateManager } from '../CommonModifier';
+// instructive change end
+
 export interface BaseEvent {
     target: EventTarget
     timestamp: int64
@@ -239,7 +245,12 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
         return
     }
     private getGetModifierKeyState(): ModifierKeyStateGetter | undefined {
-        return this.getGetModifierKeyState_serialize()
+        // instructive change start
+        let returnResult: ModifierKeyStateGetter = (keys: Array<string>) => {
+            return ArkUIAniModule._BaseEvent_getModifierKeyState(this!.peer!.ptr, keys);
+        }
+        return returnResult
+        // instructive change end
     }
     private setGetModifierKeyState(getModifierKeyState: ModifierKeyStateGetter | undefined): void {
         const getModifierKeyState_casted = getModifierKeyState as (ModifierKeyStateGetter | undefined)
@@ -793,7 +804,12 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
         return
     }
     private getGetModifierKeyState(): ModifierKeyStateGetter | undefined {
-        return this.getGetModifierKeyState_serialize()
+        // instructive change start
+        let returnResult: ModifierKeyStateGetter = (keys: Array<string>) => {
+            return ArkUIAniModule._DragEvent_getModifierKeyState(this!.peer!.ptr, keys);
+        }
+        return returnResult
+        // instructive change end
     }
     private setGetModifierKeyState(getModifierKeyState: ModifierKeyStateGetter | undefined): void {
         const getModifierKeyState_casted = getModifierKeyState as (ModifierKeyStateGetter | undefined)
@@ -1090,7 +1106,12 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
         return
     }
     private getGetModifierKeyState(): ModifierKeyStateGetter | undefined {
-        return this.getGetModifierKeyState_serialize()
+        // instructive change start
+        let returnResult: ModifierKeyStateGetter = (keys: Array<string>) => {
+            return ArkUIAniModule._KeyEvent_getModifierKeyState(this!.peer!.ptr, keys);
+        }
+        return returnResult
+        // instructive change end
     }
     private setGetModifierKeyState(getModifierKeyState: ModifierKeyStateGetter | undefined): void {
         const getModifierKeyState_casted = getModifierKeyState as (ModifierKeyStateGetter | undefined)
@@ -7120,7 +7141,9 @@ export interface BackgroundImageOptions {
 export interface BackgroundOptions {
     align?: Alignment;
 }
-export type CustomProperty = Object | undefined;
+// instructive change start
+export type CustomProperty = undefined | null | Object | Record<string, CustomProperty> | Array<CustomProperty>;
+// instructive change end
 export interface CommonMethod {
     width(value: Length | LayoutPolicy | undefined): this {
         throw new Error('Unimplemented method width')
@@ -7308,9 +7331,14 @@ export interface CommonMethod {
     focusBox(value: FocusBoxStyle | undefined): this {
         throw new Error('Unimplemented method focusBox')
     }
-    animation(value: AnimateParam | undefined): this {
-        throw new Error('Unimplemented method animation')
+    // instructive change start
+    animationStart(value: AnimateParam | undefined): this {
+        throw new Error("Unimplemented method animationStart")
     }
+    animationStop(value: AnimateParam | undefined): this {
+        throw new Error("Unimplemented method animationStop")
+    }
+    // instructive change end
     transition(value: TransitionEffect | undefined): this {
         throw new Error('Unimplemented method transition')
     }
@@ -8466,14 +8494,22 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public animation(value: AnimateParam | undefined): this {
-        if (this.checkPriority('animation')) {
-            const value_casted = value as (AnimateParam | undefined)
-            this.getPeer()?.setAnimationAttribute(value_casted)
+    // instructive change start
+    public animationStart(value: AnimateParam | undefined): this {
+        if (this.checkPriority("animationStart")) {
+            _animationStart(this.getPeer()?.getPeerPtr(), value, this.isFirstBuild);
             return this
         }
         return this
     }
+    public animationStop(value: AnimateParam | undefined): this {
+        if (this.checkPriority("animationStop")) {
+            _animationStop(this.getPeer()?.getPeerPtr(), value, this.isFirstBuild);
+            return this
+        }
+        return this
+    }
+    // instructive change end
     public transition(value: TransitionEffect | undefined): this {
         if (this.checkPriority('transition')) {
             const value_casted = value as (TransitionEffect | undefined)
@@ -9865,10 +9901,14 @@ export function $rawfile(value: string): global_resource_Resource {
     return GlobalScope.$rawfile(value)
 }
 export function animateTo(value: AnimateParam, event: (() => void)): void {
-    GlobalScope.animateTo(value, event)
+    // instructive change start
+    _animateTo(value, event)
+    // instructive change end
 }
 export function animateToImmediately(value: AnimateParam, event: (() => void)): void {
-    GlobalScope.animateToImmediately(value, event)
+    // instructive change start
+    AnimationExtender.AnimateToImmediatelyImpl(value, event)
+    // instructive change end
 }
 export class AccessibilityHoverEvent_serializer {
     public static write(buffer: SerializerBase, value: AccessibilityHoverEvent): void {
@@ -21449,7 +21489,9 @@ export class ClickEventInternal extends BaseEventInternal implements Materialize
         return new ClickEventInternal(MaterializedBaseTag.NOP, ptr)
     }
     public preventDefault(): void {
-        this.preventDefault_serialize()
+        // instructive change start
+        ArkUIAniModule._ClickEvent_preventDefault(this!.peer!.ptr);
+        // instructive change end
         return
     }
     private getDisplayX(): double {
@@ -22246,7 +22288,9 @@ export class TouchEventInternal extends BaseEventInternal implements Materialize
         return this.getHistoricalPoints_serialize()
     }
     public preventDefault(): void {
-        this.preventDefault_serialize()
+        // instructive change start
+        ArkUIAniModule._TouchEvent_preventDefault(this!.peer!.ptr);
+        // instructive change end
         return
     }
     private getType(): TouchType {

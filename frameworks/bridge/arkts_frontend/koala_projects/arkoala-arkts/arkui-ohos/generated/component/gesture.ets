@@ -25,6 +25,9 @@ import { memo, memo_stable } from 'arkui.stateManagement.runtime'
 import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
 import { InteractionHand } from './enums'
 import { BaseEvent, BaseEventInternal } from './common'
+// instructive change start
+import { GlobalStateManager, MutableState } from '@koalaui/runtime'
+// instructive change end
 export class EventTargetInfoInternal {
     public static fromPtr(ptr: KPointer): EventTargetInfo {
         return new EventTargetInfo(MaterializedBaseTag.NOP, ptr)
@@ -144,8 +147,14 @@ export class GestureRecognizer implements MaterializedBase {
     }
     private getEventTargetInfo_serialize(): EventTargetInfo {
         const retval  = ArkUIGeneratedNativeModule._GestureRecognizer_getEventTargetInfo(this.peer!.ptr)
-        const obj : EventTargetInfo = EventTargetInfoInternal.fromPtr(retval)
-        return obj
+        // instructive change start
+        const isScorllableComponent = ArkUIGeneratedNativeModule._GestureOps_isScrollableComponent(retval)
+        if (isScorllableComponent) {
+            const scrollableTargetInfoObj : ScrollableTargetInfo = ScrollableTargetInfoInternal.fromPtr(retval)
+            return scrollableTargetInfoObj
+        }
+        return EventTargetInfoInternal.fromPtr(retval)
+        // instructive change end
     }
     private isValid_serialize(): boolean {
         const retval  = ArkUIGeneratedNativeModule._GestureRecognizer_isValid(this.peer!.ptr)
@@ -170,6 +179,9 @@ export class PanGestureOptionsInternal {
 }
 export class PanGestureOptions implements MaterializedBase {
     public peer?: Finalizable | undefined = undefined
+    // instructive change start
+    public optionState: MutableState<int32> | undefined
+    // instructive change end
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
@@ -178,6 +190,10 @@ export class PanGestureOptions implements MaterializedBase {
     }
     constructor(value?: PanGestureHandlerOptions) {
         this(MaterializedBaseTag.NOP, PanGestureOptions.construct(value))
+        // instructive change start
+        const manager = GlobalStateManager.instance
+        this.optionState = manager.mutableState<int32>(0 as int32, true)
+        // instructive change end
     }
     static construct(value?: PanGestureHandlerOptions): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
@@ -195,19 +211,36 @@ export class PanGestureOptions implements MaterializedBase {
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._PanGestureOptions_getFinalizer()
     }
+    // instructive change start
+    public getOptionState(): number {
+        return this.optionState!.value
+    }
+    public setOptionState(): void {
+        this.optionState!.value = this.optionState!.value % 100 + 1
+    }
+    // instructive change end
     public setDirection(value: PanDirection): void {
         const value_casted = value as (PanDirection)
         this.setDirection_serialize(value_casted)
+        // instructive change start
+        this.setOptionState()
+        // instructive change end
         return
     }
     public setDistance(value: double): void {
         const value_casted = value as (double)
         this.setDistance_serialize(value_casted)
+        // instructive change end
+        this.setOptionState()
+        // instructive change end
         return
     }
     public setFingers(value: int32): void {
         const value_casted = value as (int32)
         this.setFingers_serialize(value_casted)
+        // instructive change start
+        this.setOptionState()
+        // instructive change end
         return
     }
     public getDirection(): PanDirection {
@@ -417,7 +450,28 @@ export class BaseGestureEvent_serializer {
     public static read(buffer: DeserializerBase): BaseGestureEvent {
         let valueDeserializer : DeserializerBase = buffer
         let ptr : KPointer = valueDeserializer.readPointer()
-        return BaseGestureEventInternal.fromPtr(ptr)
+        // instructive change start
+        let type = ArkUIGeneratedNativeModule._GestureOps_getGestureEventType(ptr)
+        let recognizerType = GestureControl.GestureType.fromValue(type as int32)
+        switch(recognizerType) {
+            case GestureControl.GestureType.TAP_GESTURE:
+                return TapGestureEventInternal.fromPtr(ptr)
+            case GestureControl.GestureType.LONG_PRESS_GESTURE:
+                return LongPressGestureEventInternal.fromPtr(ptr)
+            case GestureControl.GestureType.PAN_GESTURE:
+                return PanGestureEventInternal.fromPtr(ptr)
+            case GestureControl.GestureType.PINCH_GESTURE:
+                return PinchGestureEventInternal.fromPtr(ptr)
+            case GestureControl.GestureType.SWIPE_GESTURE:
+                return SwipeGestureEventInternal.fromPtr(ptr)
+            case GestureControl.GestureType.ROTATION_GESTURE:
+                return RotationGestureEventInternal.fromPtr(ptr)
+            case GestureControl.GestureType.CLICK:
+            case GestureControl.GestureType.DRAG:
+            default:
+                return BaseGestureEventInternal.fromPtr(ptr)
+        }
+        // instructive change end
     }
 }
 export class EventTargetInfo_serializer {
@@ -450,7 +504,28 @@ export class GestureRecognizer_serializer {
     public static read(buffer: DeserializerBase): GestureRecognizer {
         let valueDeserializer : DeserializerBase = buffer
         let ptr : KPointer = valueDeserializer.readPointer()
-        return GestureRecognizerInternal.fromPtr(ptr)
+        // instructive change start
+        const retval  = ArkUIGeneratedNativeModule._GestureRecognizer_getType(ptr)
+        let recognizerType =  GestureControl.GestureType.fromValue(retval)
+        switch(recognizerType) {
+            case GestureControl.GestureType.TAP_GESTURE:
+                return TapRecognizerInternal.fromPtr(ptr)
+            case GestureControl.GestureType.LONG_PRESS_GESTURE:
+                return LongPressRecognizerInternal.fromPtr(ptr)
+            case GestureControl.GestureType.PAN_GESTURE:
+                return PanRecognizerInternal.fromPtr(ptr)
+            case GestureControl.GestureType.PINCH_GESTURE:
+                return PinchRecognizerInternal.fromPtr(ptr)
+            case GestureControl.GestureType.SWIPE_GESTURE:
+                return SwipeRecognizerInternal.fromPtr(ptr)
+            case GestureControl.GestureType.ROTATION_GESTURE:
+                return RotationRecognizerInternal.fromPtr(ptr)
+            case GestureControl.GestureType.CLICK:
+            case GestureControl.GestureType.DRAG:
+            default:
+                return GestureRecognizerInternal.fromPtr(ptr)
+        }
+        // instructive change end
     }
 }
 export class LongPressGestureEvent_serializer {

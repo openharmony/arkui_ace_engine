@@ -2968,7 +2968,9 @@ export class CommonMethodModifier implements CommonMethod {
         if (flagArray[155] != 0) {
             switch (flagArray[155]) {
                 case 1: {
-                    hookCustomPropertyImpl(peer, (this._customProperty_0_0value as string), (this._customProperty_0_1value as CustomProperty));
+                    // instructive change start
+                    hookCustomPropertyImpl(peer, (this._customProperty_0_0value as string), (this._customProperty_0_1value as CustomProperty), this);
+                    // instructive change end
                     flagArray[155] = 2;
                     break;
                 }
