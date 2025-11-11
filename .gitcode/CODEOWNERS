@@ -360,7 +360,7 @@ frameworks/bridge/common/dom/dom_camera.cpp @arkuieco3
 frameworks/bridge/common/dom/dom_camera.h @arkuieco3
 frameworks/bridge/common/dom/dom_canvas.cpp @arkuieco3
 frameworks/bridge/common/dom/dom_canvas.h @arkuieco3
-frameworks/bridge/common/dom/dom_chart.cpp @arkui001
+frameworks/bridge/common/dom/dom_chart.cpp @huawei_g_five
 frameworks/bridge/common/dom/dom_chart.h @arkui001
 frameworks/bridge/common/dom/dom_clock.cpp @arkui001
 frameworks/bridge/common/dom/dom_clock.h @arkui001
