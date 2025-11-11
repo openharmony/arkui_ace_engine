@@ -1998,6 +1998,14 @@ HWTEST_F(ContainerModelToolBarTestNg, AdjustContainerModalTitleHeight, TestSize.
     titleMgr_->itemsOnTree_[parentNode].push_back(toolbarItem);
 
     // test the title height of different toolbar items
+    const int32_t height = 37;
+    pattern_->IsSetContainerModalTitleHeight(true);
+    titleMgr_->toolbarItemMaxHeight_ = 40.0f;
+    titleMgr_->AdjustContainerModalTitleHeight();
+    EXPECT_EQ(pattern_->GetContainerModalTitleHeight(), height);
+
+    pattern_->IsSetContainerModalTitleHeight(false);
+    titleMgr_->hasNavOrSideBarNodes_ = true;
     titleMgr_->toolbarItemMaxHeight_ = 40.0f;
     titleMgr_->AdjustContainerModalTitleHeight();
     EXPECT_EQ(pattern_->titleHeight_, Dimension(TITLE_ITEM_HEIGT_S, DimensionUnit::VP));
@@ -2009,15 +2017,6 @@ HWTEST_F(ContainerModelToolBarTestNg, AdjustContainerModalTitleHeight, TestSize.
     titleMgr_->toolbarItemMaxHeight_ = 60.0f;
     titleMgr_->AdjustContainerModalTitleHeight();
     EXPECT_EQ(pattern_->titleHeight_, Dimension(TITLE_ITEM_HEIGT_L, DimensionUnit::VP));
-    // set the maximum height of toolbar items to 0
-    titleMgr_->toolbarItemMaxHeight_ = 0;
-    titleMgr_->AdjustContainerModalTitleHeight();
-    EXPECT_EQ(pattern_->titleHeight_, CONTAINER_TITLE_HEIGHT);
-
-    // set to default height if there are no toolbar items
-    titleMgr_->itemsOnTree_.clear();
-    titleMgr_->AdjustContainerModalTitleHeight();
-    EXPECT_EQ(pattern_->titleHeight_, CONTAINER_TITLE_HEIGHT);
 }
 
 /**
@@ -2040,6 +2039,7 @@ HWTEST_F(ContainerModelToolBarTestNg, AdjustContainerModalTitleHeight_002, TestS
         FrameNode::CreateFrameNode(V2::TOOLBARITEM_ETS_TAG, 2, AceType::MakeRefPtr<ToolBarItemPattern>());
     parentNode->AddChild(toolbarItem);
     floatTitleMgr_->itemsOnTree_[parentNode].push_back(toolbarItem);
+    floatTitleMgr_->hasNavOrSideBarNodes_ = true;
 
     // test the title height of different toolbar items
     floatTitleMgr_->toolbarItemMaxHeight_ = 40.0f;
@@ -2047,8 +2047,10 @@ HWTEST_F(ContainerModelToolBarTestNg, AdjustContainerModalTitleHeight_002, TestS
     pattern_->InitTitleRowLayoutProperty(pattern_->GetFloatingTitleRow(), true);
     EXPECT_EQ(pattern_->titleHeight_, Dimension(TITLE_ITEM_HEIGT_S, DimensionUnit::VP));
 
+    pattern_->SetIsHaveToolBar(true);
     floatTitleMgr_->toolbarItemMaxHeight_ = 50.0f;
     floatTitleMgr_->AdjustContainerModalTitleHeight();
+    pattern_->InitTitleRowLayoutProperty(pattern_->GetFloatingTitleRow(), true);
     EXPECT_EQ(pattern_->titleHeight_, Dimension(TITLE_ITEM_HEIGT_M, DimensionUnit::VP));
 
     floatTitleMgr_->toolbarItemMaxHeight_ = 60.0f;
@@ -2064,6 +2066,85 @@ HWTEST_F(ContainerModelToolBarTestNg, AdjustContainerModalTitleHeight_002, TestS
     floatTitleMgr_->itemsOnTree_.clear();
     floatTitleMgr_->AdjustContainerModalTitleHeight();
     EXPECT_EQ(pattern_->titleHeight_, CONTAINER_TITLE_HEIGHT);
+}
+
+/**
+ * @tc.name: AdjustContainerModalTitleHeight_003
+ * @tc.desc: Test AdjustContainerModalTitleHeight.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelToolBarTestNg, AdjustContainerModalTitleHeight_003, TestSize.Level1)
+{
+    CreateContainerModal();
+    ASSERT_NE(titleMgr_, nullptr);
+
+    titleMgr_->InitToolBarManager();
+    ASSERT_NE(titleMgr_->toolbarManager_, nullptr);
+
+    titleMgr_->toolbarManager_->SetHasNavBar(true);
+
+    auto parentNode = FrameNode::CreateFrameNode(V2::NAVBAR_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    auto toolbarItem =
+        FrameNode::CreateFrameNode(V2::TOOLBARITEM_ETS_TAG, 2, AceType::MakeRefPtr<ToolBarItemPattern>());
+    parentNode->AddChild(toolbarItem);
+    titleMgr_->itemsOnTree_[parentNode].push_back(toolbarItem);
+    titleMgr_->hasNavOrSideBarNodes_ = true;
+
+    // set the maximum height of toolbar items to 0
+    titleMgr_->toolbarItemMaxHeight_ = 0;
+    titleMgr_->AdjustContainerModalTitleHeight();
+    EXPECT_EQ(pattern_->titleHeight_, CONTAINER_TITLE_HEIGHT);
+
+    // set to default height if there are no toolbar items
+    titleMgr_->itemsOnTree_.clear();
+    titleMgr_->AdjustContainerModalTitleHeight();
+    EXPECT_EQ(pattern_->titleHeight_, CONTAINER_TITLE_HEIGHT);
+
+    // test the title height of different toolbar items
+    pattern_->IsSetContainerModalTitleHeight(true);
+    pattern_->SetContainerModalTitleHeight(80.0f);
+    pattern_->SetContainerModalTitleVisible(true, true);
+    titleMgr_->AdjustContainerModalTitleHeight();
+    EXPECT_EQ(pattern_->GetContainerModalTitleHeight(), 80.0f);
+}
+
+/**
+ * @tc.name: AdjustContainerModalTitleHeight_004
+ * @tc.desc: Test AdjustContainerModalTitleHeight.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelToolBarTestNg, AdjustContainerModalTitleHeight_004, TestSize.Level1)
+{
+    CreateContainerModal();
+    ASSERT_NE(titleMgr_, nullptr);
+
+    titleMgr_->InitToolBarManager();
+    ASSERT_NE(titleMgr_->toolbarManager_, nullptr);
+
+    titleMgr_->toolbarManager_->SetHasNavBar(true);
+
+    auto parentNode = FrameNode::CreateFrameNode(V2::NAVBAR_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    auto toolbarItem =
+        FrameNode::CreateFrameNode(V2::TOOLBARITEM_ETS_TAG, 2, AceType::MakeRefPtr<ToolBarItemPattern>());
+    parentNode->AddChild(toolbarItem);
+    titleMgr_->itemsOnTree_[parentNode].push_back(toolbarItem);
+    titleMgr_->hasNavOrSideBarNodes_ = true;
+    pattern_->isTitleShow_ = true;
+    std::vector<std::pair<bool, bool>> vec { { true, false }, { true, true }, { false, true }, { false, false } };
+    for (auto& pair : vec) {
+        pattern_->customTitleSettedShow_ = pair.first;
+        pattern_->isSetContainerModalTitleHeight_ = pair.second;
+        titleMgr_->toolbarItemMaxHeight_ = 50.0f;
+        titleMgr_->AdjustContainerModalTitleHeight();
+
+        if (pair.second) {
+            const int32_t height = 100;
+            pattern_->SetContainerModalTitleHeight(height);
+            EXPECT_EQ(pattern_->GetContainerModalTitleHeight(), height);
+        } else {
+            EXPECT_EQ(pattern_->titleHeight_, Dimension(TITLE_ITEM_HEIGT_M, DimensionUnit::VP));
+        }
+    }
 }
 
 /**
