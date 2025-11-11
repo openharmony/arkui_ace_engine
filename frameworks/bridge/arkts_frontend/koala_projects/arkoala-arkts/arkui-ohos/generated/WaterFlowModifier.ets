@@ -613,6 +613,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
     }
     mergeModifier(modifier: WaterFlowModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._columnsTemplate_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._columnsTemplate_0_flag) {

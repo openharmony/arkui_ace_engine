@@ -58,6 +58,25 @@ ani_object AniUtils::CreateLong(ani_env *env, ani_long value)
     return longObj;
 }
 
+ani_object AniUtils::CreateInt32(ani_env *env, int32_t value)
+{
+    CHECK_NULL_RETURN(env, nullptr);
+    static const char *className = "std.core.Int";
+    ani_class int_cls;
+    if (ANI_OK != env->FindClass(className, &int_cls)) {
+        return nullptr;
+    }
+    ani_method intCtor;
+    if (ANI_OK != env->Class_FindMethod(int_cls, "<ctor>", "i:", &intCtor)) {
+        return nullptr;
+    }
+    ani_object intObj;
+    if (ANI_OK != env->Object_New(int_cls, intCtor, &intObj, value)) {
+        return nullptr;
+    }
+    return intObj;
+}
+
 bool AniUtils::CheckType(ani_env *env, ani_object obj, const std::string& type)
 {
     CHECK_NULL_RETURN(env, false);
