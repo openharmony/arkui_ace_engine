@@ -150,7 +150,6 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_GetComponentImageInfo(
 namespace Recorder {
 constexpr char HA_CLIENT_SO_PATH[] = "libha_ace_engine.z.so";
 
-static bool g_loaded = false;
 static void* g_handle = nullptr;
 static std::once_flag g_loadFlag;
 
@@ -179,11 +178,7 @@ void InitHandler()
 
 void Init()
 {
-    if (g_loaded) {
-        return;
-    }
     std::call_once(g_loadFlag, [] { InitHandler(); });
-    g_loaded = true;
 }
 
 void DeInit()
@@ -191,7 +186,6 @@ void DeInit()
     if (g_handle) {
         dlclose(g_handle);
         g_handle = nullptr;
-        g_loaded = false;
     }
 }
 } // namespace OHOS::Ace::Recorder
