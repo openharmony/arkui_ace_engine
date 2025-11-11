@@ -195,6 +195,15 @@ void ExecuteDropAnimationImpl(Ark_DragEvent peer,
     };
     info->SetDropAnimation(std::move(customDropAnimationCallback));
 }
+Ark_Int32 GetDisplayIdImpl(Ark_DragEvent peer)
+{
+    const auto errValue = Converter::ArkValue<Ark_Int32>(-1);
+    CHECK_NULL_RETURN(peer, errValue);
+    auto info = peer->dragInfo;
+    CHECK_NULL_RETURN(info, errValue);
+    const auto value = info->GetDisplayId();
+    return Converter::ArkValue<Ark_Int32>(value);
+}
 void EnableInternalDropAnimationImpl(Ark_DragEvent peer,
                                      const Ark_String* configuration)
 {
@@ -274,6 +283,7 @@ const GENERATED_ArkUIDragEventAccessor* GetDragEventAccessor()
         DragEventAccessor::GetVelocityXImpl,
         DragEventAccessor::GetVelocityYImpl,
         DragEventAccessor::GetVelocityImpl,
+        DragEventAccessor::GetDisplayIdImpl,
         DragEventAccessor::ExecuteDropAnimationImpl,
         DragEventAccessor::EnableInternalDropAnimationImpl,
         DragEventAccessor::GetDragBehaviorImpl,

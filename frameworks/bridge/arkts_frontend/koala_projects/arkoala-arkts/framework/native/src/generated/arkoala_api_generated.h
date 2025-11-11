@@ -27171,6 +27171,7 @@ typedef struct GENERATED_ArkUIDragEventAccessor {
     Ark_Float64 (*getVelocityX)(Ark_DragEvent peer);
     Ark_Float64 (*getVelocityY)(Ark_DragEvent peer);
     Ark_Float64 (*getVelocity)(Ark_DragEvent peer);
+    Ark_Int32 (*getDisplayId)(Ark_DragEvent peer);
     void (*executeDropAnimation)(Ark_DragEvent peer,
                                  const Callback_Void* customDropAnimation);
     void (*enableInternalDropAnimation)(Ark_DragEvent peer,
