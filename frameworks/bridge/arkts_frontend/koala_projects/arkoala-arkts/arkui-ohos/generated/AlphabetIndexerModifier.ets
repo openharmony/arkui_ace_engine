@@ -62,7 +62,7 @@ export class AlphabetIndexerModifier extends CommonMethodModifier implements Alp
     _popupItemFont_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _popupItemFont_0_0value?: Font | undefined
     _itemSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _itemSize_0_0value?: string | number | undefined
+    _itemSize_0_0value?: string | double | undefined
     _font_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _font_0_0value?: Font | undefined
     _onSelect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -72,15 +72,15 @@ export class AlphabetIndexerModifier extends CommonMethodModifier implements Alp
     _onPopupSelect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onPopupSelect_0_0value?: OnAlphabetIndexerPopupSelectCallback | undefined
     _selected_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _selected_0_0value?: number | Bindable<number> | undefined
+    _selected_0_0value?: int32 | Bindable<int32> | undefined
     _popupPosition_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _popupPosition_0_0value?: Position | undefined
     _autoCollapse_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _autoCollapse_0_0value?: boolean | undefined
     _popupItemBorderRadius_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _popupItemBorderRadius_0_0value?: number | undefined
+    _popupItemBorderRadius_0_0value?: double | undefined
     _itemBorderRadius_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _itemBorderRadius_0_0value?: number | undefined
+    _itemBorderRadius_0_0value?: double | undefined
     _popupBackgroundBlurStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _popupBackgroundBlurStyle_0_0value?: BlurStyle | undefined
     _popupTitleBackground_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -313,7 +313,7 @@ export class AlphabetIndexerModifier extends CommonMethodModifier implements Alp
         {
             switch (this._itemSize_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setItemSizeAttribute((this._itemSize_0_0value as string | number | undefined));
+                    peer.setItemSizeAttribute((this._itemSize_0_0value as string | double | undefined));
                     this._itemSize_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -323,7 +323,7 @@ export class AlphabetIndexerModifier extends CommonMethodModifier implements Alp
                 }
                 default: {
                     this._itemSize_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setItemSizeAttribute((undefined as string | number | undefined));
+                    peer.setItemSizeAttribute((undefined as string | double | undefined));
                 }
             }
         }
@@ -403,7 +403,7 @@ export class AlphabetIndexerModifier extends CommonMethodModifier implements Alp
         {
             switch (this._selected_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setSelectedAttribute((this._selected_0_0value as number | Bindable<number> | undefined));
+                    peer.setSelectedAttribute((this._selected_0_0value as int32 | Bindable<int32> | undefined));
                     this._selected_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -413,7 +413,7 @@ export class AlphabetIndexerModifier extends CommonMethodModifier implements Alp
                 }
                 default: {
                     this._selected_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setSelectedAttribute((undefined as number | Bindable<number> | undefined));
+                    peer.setSelectedAttribute((undefined as int32 | Bindable<int32> | undefined));
                 }
             }
         }
@@ -457,7 +457,7 @@ export class AlphabetIndexerModifier extends CommonMethodModifier implements Alp
         {
             switch (this._popupItemBorderRadius_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setPopupItemBorderRadiusAttribute((this._popupItemBorderRadius_0_0value as number | undefined));
+                    peer.setPopupItemBorderRadiusAttribute((this._popupItemBorderRadius_0_0value as double | undefined));
                     this._popupItemBorderRadius_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -467,7 +467,7 @@ export class AlphabetIndexerModifier extends CommonMethodModifier implements Alp
                 }
                 default: {
                     this._popupItemBorderRadius_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setPopupItemBorderRadiusAttribute((undefined as number | undefined));
+                    peer.setPopupItemBorderRadiusAttribute((undefined as double | undefined));
                 }
             }
         }
@@ -475,7 +475,7 @@ export class AlphabetIndexerModifier extends CommonMethodModifier implements Alp
         {
             switch (this._itemBorderRadius_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setItemBorderRadiusAttribute((this._itemBorderRadius_0_0value as number | undefined));
+                    peer.setItemBorderRadiusAttribute((this._itemBorderRadius_0_0value as double | undefined));
                     this._itemBorderRadius_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -485,7 +485,7 @@ export class AlphabetIndexerModifier extends CommonMethodModifier implements Alp
                 }
                 default: {
                     this._itemBorderRadius_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setItemBorderRadiusAttribute((undefined as number | undefined));
+                    peer.setItemBorderRadiusAttribute((undefined as double | undefined));
                 }
             }
         }
@@ -729,7 +729,7 @@ export class AlphabetIndexerModifier extends CommonMethodModifier implements Alp
                     break;
                 }
                 default: {
-                    this.itemSize((undefined as string | number | undefined));
+                    this.itemSize((undefined as string | double | undefined));
                 }
             }
         }
@@ -794,7 +794,7 @@ export class AlphabetIndexerModifier extends CommonMethodModifier implements Alp
                     break;
                 }
                 default: {
-                    this.selected((undefined as number | Bindable<number> | undefined));
+                    this.selected((undefined as int32 | Bindable<int32> | undefined));
                 }
             }
         }
@@ -833,7 +833,7 @@ export class AlphabetIndexerModifier extends CommonMethodModifier implements Alp
                     break;
                 }
                 default: {
-                    this.popupItemBorderRadius((undefined as number | undefined));
+                    this.popupItemBorderRadius((undefined as double | undefined));
                 }
             }
         }
@@ -846,7 +846,7 @@ export class AlphabetIndexerModifier extends CommonMethodModifier implements Alp
                     break;
                 }
                 default: {
-                    this.itemBorderRadius((undefined as number | undefined));
+                    this.itemBorderRadius((undefined as double | undefined));
                 }
             }
         }
@@ -1035,7 +1035,7 @@ export class AlphabetIndexerModifier extends CommonMethodModifier implements Alp
         }
         return this
     }
-    itemSize(value: string | number | undefined): this {
+    itemSize(value: string | double | undefined): this {
         if (((this._itemSize_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._itemSize_0_0value) !== (value)))
         {
             this._itemSize_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1090,7 +1090,7 @@ export class AlphabetIndexerModifier extends CommonMethodModifier implements Alp
         }
         return this
     }
-    selected(value: number | Bindable<number> | undefined): this {
+    selected(value: int32 | Bindable<int32> | undefined): this {
         if (((this._selected_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._selected_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1123,7 +1123,7 @@ export class AlphabetIndexerModifier extends CommonMethodModifier implements Alp
         }
         return this
     }
-    popupItemBorderRadius(value: number | undefined): this {
+    popupItemBorderRadius(value: double | undefined): this {
         if (((this._popupItemBorderRadius_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._popupItemBorderRadius_0_0value) !== (value)))
         {
             this._popupItemBorderRadius_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1134,7 +1134,7 @@ export class AlphabetIndexerModifier extends CommonMethodModifier implements Alp
         }
         return this
     }
-    itemBorderRadius(value: number | undefined): this {
+    itemBorderRadius(value: double | undefined): this {
         if (((this._itemBorderRadius_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._itemBorderRadius_0_0value) !== (value)))
         {
             this._itemBorderRadius_0_flag = AttributeUpdaterFlag.UPDATE

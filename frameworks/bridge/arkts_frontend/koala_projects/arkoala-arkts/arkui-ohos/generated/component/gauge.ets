@@ -558,10 +558,10 @@ export class GaugeShadowOptions_serializer {
         if (valueHolderForOffsetX !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForOffsetXTmpValue  = valueHolderForOffsetX!
-            if (valueHolderForOffsetXTmpValue instanceof number) {
+            if (valueHolderForOffsetXTmpValue instanceof double) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForOffsetXTmpValueForIdx0  = valueHolderForOffsetXTmpValue as number
-                valueSerializer.writeNumber(valueHolderForOffsetXTmpValueForIdx0)
+                const valueHolderForOffsetXTmpValueForIdx0  = valueHolderForOffsetXTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForOffsetXTmpValueForIdx0)
             } else if (valueHolderForOffsetXTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForOffsetXTmpValueForIdx1  = valueHolderForOffsetXTmpValue as Resource
@@ -574,10 +574,10 @@ export class GaugeShadowOptions_serializer {
         if (valueHolderForOffsetY !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForOffsetYTmpValue  = valueHolderForOffsetY!
-            if (valueHolderForOffsetYTmpValue instanceof number) {
+            if (valueHolderForOffsetYTmpValue instanceof double) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForOffsetYTmpValueForIdx0  = valueHolderForOffsetYTmpValue as number
-                valueSerializer.writeNumber(valueHolderForOffsetYTmpValueForIdx0)
+                const valueHolderForOffsetYTmpValueForIdx0  = valueHolderForOffsetYTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForOffsetYTmpValueForIdx0)
             } else if (valueHolderForOffsetYTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForOffsetYTmpValueForIdx1  = valueHolderForOffsetYTmpValue as Resource
@@ -605,35 +605,35 @@ export class GaugeShadowOptions_serializer {
         }
         const radiusTmpResult : number | Resource | undefined = radiusTmpBuf
         const offsetXTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let offsetXTmpBuf : number | Resource | undefined = undefined
+        let offsetXTmpBuf : double | Resource | undefined = undefined
         if ((offsetXTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const offsetXTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let offsetXTmpBuf_ : number | Resource | undefined
+            let offsetXTmpBuf_ : double | Resource | undefined
             if (offsetXTmpBuf_UnionSelector == (0).toChar()) {
-                offsetXTmpBuf_ = (valueDeserializer.readNumber() as number)
+                offsetXTmpBuf_ = valueDeserializer.readFloat64()
             } else if (offsetXTmpBuf_UnionSelector == (1).toChar()) {
                 offsetXTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for offsetXTmpBuf_ has to be chosen through deserialisation.")
             }
-            offsetXTmpBuf = (offsetXTmpBuf_ as number | Resource)
+            offsetXTmpBuf = (offsetXTmpBuf_ as double | Resource)
         }
-        const offsetXTmpResult : number | Resource | undefined = offsetXTmpBuf
+        const offsetXTmpResult : double | Resource | undefined = offsetXTmpBuf
         const offsetYTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let offsetYTmpBuf : number | Resource | undefined = undefined
+        let offsetYTmpBuf : double | Resource | undefined = undefined
         if ((offsetYTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const offsetYTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let offsetYTmpBuf_ : number | Resource | undefined
+            let offsetYTmpBuf_ : double | Resource | undefined
             if (offsetYTmpBuf_UnionSelector == (0).toChar()) {
-                offsetYTmpBuf_ = (valueDeserializer.readNumber() as number)
+                offsetYTmpBuf_ = valueDeserializer.readFloat64()
             } else if (offsetYTmpBuf_UnionSelector == (1).toChar()) {
                 offsetYTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for offsetYTmpBuf_ has to be chosen through deserialisation.")
             }
-            offsetYTmpBuf = (offsetYTmpBuf_ as number | Resource)
+            offsetYTmpBuf = (offsetYTmpBuf_ as double | Resource)
         }
-        const offsetYTmpResult : number | Resource | undefined = offsetYTmpBuf
+        const offsetYTmpResult : double | Resource | undefined = offsetYTmpBuf
         let value : GaugeShadowOptions = ({radius: radiusTmpResult, offsetX: offsetXTmpResult, offsetY: offsetYTmpResult} as GaugeShadowOptions)
         return value
     }

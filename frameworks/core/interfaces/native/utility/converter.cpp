@@ -225,6 +225,25 @@ void AssignGradientColors(Gradient *gradient,
     }
 }
 
+void AssignGradientColors(Gradient *gradient,
+    const Array_Tuple_ResourceColor_F64 *colors)
+{
+    for (int32_t i = 0; i < colors->length; i++) {
+        auto color = OptConvert<Color>(colors->array[i].value0);
+        auto position = Convert<float>(colors->array[i].value1);
+        if (LessOrEqual(position, GRADIENT_MIN_POSITION)) {
+            position = GRADIENT_DEFAULT_MIN_POSITION;
+        }
+        if (color.has_value()) {
+            NG::GradientColor gradientColor;
+            gradientColor.SetColor(color.value());
+            gradientColor.SetHasValue(true);
+            gradientColor.SetDimension(CalcDimension(position * Converter::PERCENT_100, DimensionUnit::PERCENT));
+            gradient->AddColor(gradientColor);
+        }
+    }
+}
+
 void AssignLinearGradientDirection(std::shared_ptr<OHOS::Ace::NG::LinearGradient> linear,
     const GradientDirection &direction)
 {
@@ -974,6 +993,12 @@ CalcDimension Convert(const Ark_Number& src)
 }
 
 template<>
+CalcDimension Convert(const Ark_Float64& src)
+{
+    return Convert<Dimension>(src);
+}
+
+template<>
 CalcLength Convert(const Ark_Number& src)
 {
     return CalcLength(Convert<Dimension>(src));
@@ -1009,6 +1034,13 @@ Color Convert(const Ark_Number& src)
 
 template<>
 Color Convert(const Ark_Int32& src)
+{
+    uint32_t value = static_cast<uint32_t>(src);
+    return Color(ColorAlphaAdapt(value));
+}
+
+template<>
+Color Convert(const Ark_Float64& src)
 {
     uint32_t value = static_cast<uint32_t>(src);
     return Color(ColorAlphaAdapt(value));
@@ -1386,6 +1418,28 @@ Gradient Convert(const Ark_LinearGradientOptions& value)
 
 template<>
 GradientColor Convert(const Ark_Tuple_ResourceColor_Number& src)
+{
+    GradientColor gradientColor;
+    gradientColor.SetHasValue(false);
+
+    // color
+    std::optional<Color> colorOpt = Converter::OptConvert<Color>(src.value0);
+    if (colorOpt) {
+        gradientColor.SetColor(colorOpt.value());
+        gradientColor.SetHasValue(true);
+    }
+
+    // stop value
+    float value = Converter::Convert<float>(src.value1);
+    value = std::clamp(value, 0.0f, 1.0f);
+    //  [0, 1] -> [0, 100.0];
+    gradientColor.SetDimension(CalcDimension(value * Converter::PERCENT_100, DimensionUnit::PERCENT));
+
+    return gradientColor;
+}
+
+template<>
+GradientColor Convert(const Ark_Tuple_ResourceColor_F64& src)
 {
     GradientColor gradientColor;
     gradientColor.SetHasValue(false);

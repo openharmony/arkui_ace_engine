@@ -43,11 +43,10 @@ Ark_TransitionEffect Construct0Impl(const Ark_String* type)
     }
     return peer;
 }
-Ark_TransitionEffect Construct1Impl(const Ark_Number* effect)
+Ark_TransitionEffect Construct1Impl(const Ark_Float64 effect)
 {
-    CHECK_NULL_RETURN(effect, nullptr);
     TransitionEffectPeer* peer = PeerUtils::CreatePeer<TransitionEffectPeer>();
-    auto opacity = Converter::Convert<float>(*effect);
+    auto opacity = Converter::Convert<float>(effect);
     peer->handler = AceType::MakeRefPtr<ChainedOpacityEffect>(opacity);
     return peer;
 }
@@ -128,7 +127,7 @@ Ark_TransitionEffect ScaleImpl(const Ark_ScaleOptions* options)
 {
     return Construct5Impl(options);
 }
-Ark_TransitionEffect OpacityImpl(const Ark_Number* alpha)
+Ark_TransitionEffect OpacityImpl(const Ark_Float64 alpha)
 {
     return Construct1Impl(alpha);
 }

@@ -2308,13 +2308,13 @@ export function deserializeAndCallOnAdsBlockedCallback(thisDeserializer: Deseria
 export function deserializeAndCallOnAlphabetIndexerPopupSelectCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as OnAlphabetIndexerPopupSelectCallback)
-    let index : number = (thisDeserializer.readNumber() as number)
+    let index : int32 = thisDeserializer.readInt32()
     _call(index)
 }
 export function deserializeAndCallOnAlphabetIndexerRequestPopupDataCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as OnAlphabetIndexerRequestPopupDataCallback)
-    let index : number = (thisDeserializer.readNumber() as number)
+    let index : int32 = thisDeserializer.readInt32()
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
@@ -2338,7 +2338,7 @@ export function deserializeAndCallOnAlphabetIndexerRequestPopupDataCallback(this
 export function deserializeAndCallOnAlphabetIndexerSelectCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as OnAlphabetIndexerSelectCallback)
-    let index : number = (thisDeserializer.readNumber() as number)
+    let index : int32 = thisDeserializer.readInt32()
     _call(index)
 }
 export function deserializeAndCallOnCheckboxChangeCallback(thisDeserializer: DeserializerBase): void {
@@ -2704,23 +2704,23 @@ export function deserializeAndCallOnSwiperGestureSwipeCallback(thisDeserializer:
 export function deserializeAndCallOnTabsAnimationEndCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as OnTabsAnimationEndCallback)
-    let index : number = (thisDeserializer.readNumber() as number)
+    let index : int32 = thisDeserializer.readInt32()
     let extraInfo : TabsAnimationEvent = TabsAnimationEvent_serializer.read(thisDeserializer)
     _call(index, extraInfo)
 }
 export function deserializeAndCallOnTabsAnimationStartCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as OnTabsAnimationStartCallback)
-    let index : number = (thisDeserializer.readNumber() as number)
-    let targetIndex : number = (thisDeserializer.readNumber() as number)
+    let index : int32 = thisDeserializer.readInt32()
+    let targetIndex : int32 = thisDeserializer.readInt32()
     let extraInfo : TabsAnimationEvent = TabsAnimationEvent_serializer.read(thisDeserializer)
     _call(index, targetIndex, extraInfo)
 }
 export function deserializeAndCallOnTabsContentWillChangeCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as OnTabsContentWillChangeCallback)
-    let currentIndex : number = (thisDeserializer.readNumber() as number)
-    let comingIndex : number = (thisDeserializer.readNumber() as number)
+    let currentIndex : int32 = thisDeserializer.readInt32()
+    let comingIndex : int32 = thisDeserializer.readInt32()
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
@@ -2740,7 +2740,7 @@ export function deserializeAndCallOnTabsContentWillChangeCallback(thisDeserializ
 export function deserializeAndCallOnTabsGestureSwipeCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as OnTabsGestureSwipeCallback)
-    let index : number = (thisDeserializer.readNumber() as number)
+    let index : int32 = thisDeserializer.readInt32()
     let extraInfo : TabsAnimationEvent = TabsAnimationEvent_serializer.read(thisDeserializer)
     _call(index, extraInfo)
 }
@@ -2842,7 +2842,7 @@ export function deserializeAndCallPageTransitionCallback(thisDeserializer: Deser
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as PageTransitionCallback)
     let type : RouteType = RouteType.fromValue(thisDeserializer.readInt32())
-    let progress : number = (thisDeserializer.readNumber() as number)
+    let progress : double = thisDeserializer.readFloat64()
     _call(type, progress)
 }
 export function deserializeAndCallPasteButtonCallback(thisDeserializer: DeserializerBase): void {
@@ -3166,8 +3166,8 @@ export function deserializeAndCallSubmitCallback(thisDeserializer: DeserializerB
 export function deserializeAndCallTabsCustomContentTransitionCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as TabsCustomContentTransitionCallback)
-    let from : number = (thisDeserializer.readNumber() as number)
-    let to : number = (thisDeserializer.readNumber() as number)
+    let from : int32 = thisDeserializer.readInt32()
+    let to : int32 = thisDeserializer.readInt32()
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()

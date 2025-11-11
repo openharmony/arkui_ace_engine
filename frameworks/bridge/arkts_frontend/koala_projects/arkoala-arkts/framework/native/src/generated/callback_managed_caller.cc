@@ -5424,7 +5424,7 @@ void callManagedOnAdsBlockedCallbackSync(Ark_VMContext vmContext, Ark_Int32 reso
     AdsBlockedDetails_serializer::write(argsSerializer, details);
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
 }
-void callManagedOnAlphabetIndexerPopupSelectCallback(Ark_Int32 resourceId, Ark_Number index)
+void callManagedOnAlphabetIndexerPopupSelectCallback(Ark_Int32 resourceId, Ark_Int32 index)
 {
     CallbackBuffer callbackBuffer = {{}, {}};
     const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
@@ -5432,20 +5432,20 @@ void callManagedOnAlphabetIndexerPopupSelectCallback(Ark_Int32 resourceId, Ark_N
     SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
     argsSerializer.writeInt32(Kind_OnAlphabetIndexerPopupSelectCallback);
     argsSerializer.writeInt32(resourceId);
-    argsSerializer.writeNumber(index);
+    argsSerializer.writeInt32(index);
     enqueueCallback(10, &callbackBuffer);
 }
-void callManagedOnAlphabetIndexerPopupSelectCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Number index)
+void callManagedOnAlphabetIndexerPopupSelectCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Int32 index)
 {
     uint8_t dataBuffer[4096];
     SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&dataBuffer, sizeof(dataBuffer), nullptr);
     argsSerializer.writeInt32(10);
     argsSerializer.writeInt32(Kind_OnAlphabetIndexerPopupSelectCallback);
     argsSerializer.writeInt32(resourceId);
-    argsSerializer.writeNumber(index);
+    argsSerializer.writeInt32(index);
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
 }
-void callManagedOnAlphabetIndexerRequestPopupDataCallback(Ark_Int32 resourceId, Ark_Number index, Callback_Array_String_Void continuation)
+void callManagedOnAlphabetIndexerRequestPopupDataCallback(Ark_Int32 resourceId, Ark_Int32 index, Callback_Array_String_Void continuation)
 {
     CallbackBuffer callbackBuffer = {{}, {}};
     const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
@@ -5453,26 +5453,26 @@ void callManagedOnAlphabetIndexerRequestPopupDataCallback(Ark_Int32 resourceId, 
     SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
     argsSerializer.writeInt32(Kind_OnAlphabetIndexerRequestPopupDataCallback);
     argsSerializer.writeInt32(resourceId);
-    argsSerializer.writeNumber(index);
+    argsSerializer.writeInt32(index);
     argsSerializer.writeCallbackResource(continuation.resource);
     argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.call));
     argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.callSync));
     enqueueCallback(10, &callbackBuffer);
 }
-void callManagedOnAlphabetIndexerRequestPopupDataCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Number index, Callback_Array_String_Void continuation)
+void callManagedOnAlphabetIndexerRequestPopupDataCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Int32 index, Callback_Array_String_Void continuation)
 {
     uint8_t dataBuffer[4096];
     SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&dataBuffer, sizeof(dataBuffer), nullptr);
     argsSerializer.writeInt32(10);
     argsSerializer.writeInt32(Kind_OnAlphabetIndexerRequestPopupDataCallback);
     argsSerializer.writeInt32(resourceId);
-    argsSerializer.writeNumber(index);
+    argsSerializer.writeInt32(index);
     argsSerializer.writeCallbackResource(continuation.resource);
     argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.call));
     argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.callSync));
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
 }
-void callManagedOnAlphabetIndexerSelectCallback(Ark_Int32 resourceId, Ark_Number index)
+void callManagedOnAlphabetIndexerSelectCallback(Ark_Int32 resourceId, Ark_Int32 index)
 {
     CallbackBuffer callbackBuffer = {{}, {}};
     const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
@@ -5480,17 +5480,17 @@ void callManagedOnAlphabetIndexerSelectCallback(Ark_Int32 resourceId, Ark_Number
     SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
     argsSerializer.writeInt32(Kind_OnAlphabetIndexerSelectCallback);
     argsSerializer.writeInt32(resourceId);
-    argsSerializer.writeNumber(index);
+    argsSerializer.writeInt32(index);
     enqueueCallback(10, &callbackBuffer);
 }
-void callManagedOnAlphabetIndexerSelectCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Number index)
+void callManagedOnAlphabetIndexerSelectCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Int32 index)
 {
     uint8_t dataBuffer[4096];
     SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&dataBuffer, sizeof(dataBuffer), nullptr);
     argsSerializer.writeInt32(10);
     argsSerializer.writeInt32(Kind_OnAlphabetIndexerSelectCallback);
     argsSerializer.writeInt32(resourceId);
-    argsSerializer.writeNumber(index);
+    argsSerializer.writeInt32(index);
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
 }
 void callManagedOnCheckboxChangeCallback(Ark_Int32 resourceId, Ark_Boolean value)
@@ -6421,7 +6421,7 @@ void callManagedOnSwiperGestureSwipeCallbackSync(Ark_VMContext vmContext, Ark_In
     SwiperAnimationEvent_serializer::write(argsSerializer, extraInfo);
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
 }
-void callManagedOnTabsAnimationEndCallback(Ark_Int32 resourceId, Ark_Number index, Ark_TabsAnimationEvent extraInfo)
+void callManagedOnTabsAnimationEndCallback(Ark_Int32 resourceId, Ark_Int32 index, Ark_TabsAnimationEvent extraInfo)
 {
     CallbackBuffer callbackBuffer = {{}, {}};
     const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
@@ -6429,22 +6429,22 @@ void callManagedOnTabsAnimationEndCallback(Ark_Int32 resourceId, Ark_Number inde
     SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
     argsSerializer.writeInt32(Kind_OnTabsAnimationEndCallback);
     argsSerializer.writeInt32(resourceId);
-    argsSerializer.writeNumber(index);
+    argsSerializer.writeInt32(index);
     TabsAnimationEvent_serializer::write(argsSerializer, extraInfo);
     enqueueCallback(10, &callbackBuffer);
 }
-void callManagedOnTabsAnimationEndCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Number index, Ark_TabsAnimationEvent extraInfo)
+void callManagedOnTabsAnimationEndCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Int32 index, Ark_TabsAnimationEvent extraInfo)
 {
     uint8_t dataBuffer[4096];
     SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&dataBuffer, sizeof(dataBuffer), nullptr);
     argsSerializer.writeInt32(10);
     argsSerializer.writeInt32(Kind_OnTabsAnimationEndCallback);
     argsSerializer.writeInt32(resourceId);
-    argsSerializer.writeNumber(index);
+    argsSerializer.writeInt32(index);
     TabsAnimationEvent_serializer::write(argsSerializer, extraInfo);
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
 }
-void callManagedOnTabsAnimationStartCallback(Ark_Int32 resourceId, Ark_Number index, Ark_Number targetIndex, Ark_TabsAnimationEvent extraInfo)
+void callManagedOnTabsAnimationStartCallback(Ark_Int32 resourceId, Ark_Int32 index, Ark_Int32 targetIndex, Ark_TabsAnimationEvent extraInfo)
 {
     CallbackBuffer callbackBuffer = {{}, {}};
     const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
@@ -6452,24 +6452,24 @@ void callManagedOnTabsAnimationStartCallback(Ark_Int32 resourceId, Ark_Number in
     SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
     argsSerializer.writeInt32(Kind_OnTabsAnimationStartCallback);
     argsSerializer.writeInt32(resourceId);
-    argsSerializer.writeNumber(index);
-    argsSerializer.writeNumber(targetIndex);
+    argsSerializer.writeInt32(index);
+    argsSerializer.writeInt32(targetIndex);
     TabsAnimationEvent_serializer::write(argsSerializer, extraInfo);
     enqueueCallback(10, &callbackBuffer);
 }
-void callManagedOnTabsAnimationStartCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Number index, Ark_Number targetIndex, Ark_TabsAnimationEvent extraInfo)
+void callManagedOnTabsAnimationStartCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Int32 index, Ark_Int32 targetIndex, Ark_TabsAnimationEvent extraInfo)
 {
     uint8_t dataBuffer[4096];
     SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&dataBuffer, sizeof(dataBuffer), nullptr);
     argsSerializer.writeInt32(10);
     argsSerializer.writeInt32(Kind_OnTabsAnimationStartCallback);
     argsSerializer.writeInt32(resourceId);
-    argsSerializer.writeNumber(index);
-    argsSerializer.writeNumber(targetIndex);
+    argsSerializer.writeInt32(index);
+    argsSerializer.writeInt32(targetIndex);
     TabsAnimationEvent_serializer::write(argsSerializer, extraInfo);
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
 }
-void callManagedOnTabsContentWillChangeCallback(Ark_Int32 resourceId, Ark_Number currentIndex, Ark_Number comingIndex, Callback_Boolean_Void continuation)
+void callManagedOnTabsContentWillChangeCallback(Ark_Int32 resourceId, Ark_Int32 currentIndex, Ark_Int32 comingIndex, Callback_Boolean_Void continuation)
 {
     CallbackBuffer callbackBuffer = {{}, {}};
     const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
@@ -6477,28 +6477,28 @@ void callManagedOnTabsContentWillChangeCallback(Ark_Int32 resourceId, Ark_Number
     SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
     argsSerializer.writeInt32(Kind_OnTabsContentWillChangeCallback);
     argsSerializer.writeInt32(resourceId);
-    argsSerializer.writeNumber(currentIndex);
-    argsSerializer.writeNumber(comingIndex);
+    argsSerializer.writeInt32(currentIndex);
+    argsSerializer.writeInt32(comingIndex);
     argsSerializer.writeCallbackResource(continuation.resource);
     argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.call));
     argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.callSync));
     enqueueCallback(10, &callbackBuffer);
 }
-void callManagedOnTabsContentWillChangeCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Number currentIndex, Ark_Number comingIndex, Callback_Boolean_Void continuation)
+void callManagedOnTabsContentWillChangeCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Int32 currentIndex, Ark_Int32 comingIndex, Callback_Boolean_Void continuation)
 {
     uint8_t dataBuffer[4096];
     SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&dataBuffer, sizeof(dataBuffer), nullptr);
     argsSerializer.writeInt32(10);
     argsSerializer.writeInt32(Kind_OnTabsContentWillChangeCallback);
     argsSerializer.writeInt32(resourceId);
-    argsSerializer.writeNumber(currentIndex);
-    argsSerializer.writeNumber(comingIndex);
+    argsSerializer.writeInt32(currentIndex);
+    argsSerializer.writeInt32(comingIndex);
     argsSerializer.writeCallbackResource(continuation.resource);
     argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.call));
     argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.callSync));
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
 }
-void callManagedOnTabsGestureSwipeCallback(Ark_Int32 resourceId, Ark_Number index, Ark_TabsAnimationEvent extraInfo)
+void callManagedOnTabsGestureSwipeCallback(Ark_Int32 resourceId, Ark_Int32 index, Ark_TabsAnimationEvent extraInfo)
 {
     CallbackBuffer callbackBuffer = {{}, {}};
     const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
@@ -6506,18 +6506,18 @@ void callManagedOnTabsGestureSwipeCallback(Ark_Int32 resourceId, Ark_Number inde
     SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
     argsSerializer.writeInt32(Kind_OnTabsGestureSwipeCallback);
     argsSerializer.writeInt32(resourceId);
-    argsSerializer.writeNumber(index);
+    argsSerializer.writeInt32(index);
     TabsAnimationEvent_serializer::write(argsSerializer, extraInfo);
     enqueueCallback(10, &callbackBuffer);
 }
-void callManagedOnTabsGestureSwipeCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Number index, Ark_TabsAnimationEvent extraInfo)
+void callManagedOnTabsGestureSwipeCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Int32 index, Ark_TabsAnimationEvent extraInfo)
 {
     uint8_t dataBuffer[4096];
     SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&dataBuffer, sizeof(dataBuffer), nullptr);
     argsSerializer.writeInt32(10);
     argsSerializer.writeInt32(Kind_OnTabsGestureSwipeCallback);
     argsSerializer.writeInt32(resourceId);
-    argsSerializer.writeNumber(index);
+    argsSerializer.writeInt32(index);
     TabsAnimationEvent_serializer::write(argsSerializer, extraInfo);
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
 }
@@ -6723,19 +6723,22 @@ void callManagedPageMapBuilderSync(Ark_VMContext vmContext, Ark_Int32 resourceId
     }
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
 }
-void callManagedPageTransitionCallback(Ark_Int32 resourceId, Ark_RouteType type, Ark_Number progress)
+void callManagedPageTransitionCallback(Ark_Int32 resourceId, Ark_RouteType type, Ark_Float64 progress)
 {
-    CallbackBuffer callbackBuffer = {{}, {}};
-    const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
+    CallbackBuffer callbackBuffer = { {}, {} };
+    const Ark_CallbackResource callbackResourceSelf = { resourceId, holdManagedCallbackResource,
+        releaseManagedCallbackResource };
     callbackBuffer.resourceHolder.holdCallbackResource(&callbackResourceSelf);
-    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
+    SerializerBase argsSerializer = SerializerBase(
+        (KSerializerBuffer) & (callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
     argsSerializer.writeInt32(Kind_PageTransitionCallback);
     argsSerializer.writeInt32(resourceId);
     argsSerializer.writeInt32(static_cast<Ark_RouteType>(type));
-    argsSerializer.writeNumber(progress);
+    argsSerializer.writeFloat64(progress);
     enqueueCallback(10, &callbackBuffer);
 }
-void callManagedPageTransitionCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_RouteType type, Ark_Number progress)
+void callManagedPageTransitionCallbackSync(
+    Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_RouteType type, Ark_Float64 progress)
 {
     uint8_t dataBuffer[4096];
     SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&dataBuffer, sizeof(dataBuffer), nullptr);
@@ -6743,8 +6746,10 @@ void callManagedPageTransitionCallbackSync(Ark_VMContext vmContext, Ark_Int32 re
     argsSerializer.writeInt32(Kind_PageTransitionCallback);
     argsSerializer.writeInt32(resourceId);
     argsSerializer.writeInt32(static_cast<Ark_RouteType>(type));
-    argsSerializer.writeNumber(progress);
-    KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
+    argsSerializer.writeFloat64(progress);
+    KInteropReturnBuffer callData = argsSerializer.toReturnBuffer();
+    KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
+    callData.dispose(callData.data, callData.length);
 }
 void callManagedPasteButtonCallback(Ark_Int32 resourceId, Ark_ClickEvent event, Ark_PasteButtonOnClickResult result, Opt_BusinessError error)
 {
@@ -7394,7 +7399,7 @@ void callManagedSubmitCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId
     SubmitEvent_serializer::write(argsSerializer, event);
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
 }
-void callManagedTabsCustomContentTransitionCallback(Ark_Int32 resourceId, Ark_Number from, Ark_Number to, Callback_Opt_TabContentAnimatedTransition_Void continuation)
+void callManagedTabsCustomContentTransitionCallback(Ark_Int32 resourceId, Ark_Int32 from, Ark_Int32 to, Callback_Opt_TabContentAnimatedTransition_Void continuation)
 {
     CallbackBuffer callbackBuffer = {{}, {}};
     const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
@@ -7402,22 +7407,22 @@ void callManagedTabsCustomContentTransitionCallback(Ark_Int32 resourceId, Ark_Nu
     SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
     argsSerializer.writeInt32(Kind_TabsCustomContentTransitionCallback);
     argsSerializer.writeInt32(resourceId);
-    argsSerializer.writeNumber(from);
-    argsSerializer.writeNumber(to);
+    argsSerializer.writeInt32(from);
+    argsSerializer.writeInt32(to);
     argsSerializer.writeCallbackResource(continuation.resource);
     argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.call));
     argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.callSync));
     enqueueCallback(10, &callbackBuffer);
 }
-void callManagedTabsCustomContentTransitionCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Number from, Ark_Number to, Callback_Opt_TabContentAnimatedTransition_Void continuation)
+void callManagedTabsCustomContentTransitionCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Int32 from, Ark_Int32 to, Callback_Opt_TabContentAnimatedTransition_Void continuation)
 {
     uint8_t dataBuffer[4096];
     SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&dataBuffer, sizeof(dataBuffer), nullptr);
     argsSerializer.writeInt32(10);
     argsSerializer.writeInt32(Kind_TabsCustomContentTransitionCallback);
     argsSerializer.writeInt32(resourceId);
-    argsSerializer.writeNumber(from);
-    argsSerializer.writeNumber(to);
+    argsSerializer.writeInt32(from);
+    argsSerializer.writeInt32(to);
     argsSerializer.writeCallbackResource(continuation.resource);
     argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.call));
     argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.callSync));

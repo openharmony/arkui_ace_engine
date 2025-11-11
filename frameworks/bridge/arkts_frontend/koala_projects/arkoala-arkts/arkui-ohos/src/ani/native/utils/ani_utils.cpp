@@ -368,6 +368,24 @@ bool AniUtils::GetOptionalDouble(ani_env* env, ani_ref value, double& result)
     return true;
 }
 
+bool AniUtils::GetOptionalInt(ani_env* env, ani_ref value, int32_t& result)
+{
+    CHECK_NULL_RETURN(env, false);
+    ani_boolean isUndefined;
+    if (env->Reference_IsUndefined(value, &isUndefined) != ANI_OK) {
+        return false;
+    }
+    if (isUndefined) {
+        return false;
+    }
+    ani_int aniResult;
+    if (env->Object_CallMethodByName_Int(static_cast<ani_object>(value), "toInt", ":i", &aniResult) != ANI_OK) {
+        return false;
+    }
+    result = static_cast<int32_t>(aniResult);
+    return true;
+}
+
 ani_object AniUtils::CreateDoubleObject(ani_env* env, double value)
 {
     ani_status state;

@@ -222,9 +222,9 @@ export interface BoardStyle {
 }
 export interface TabBarLabelStyle {
     overflow?: TextOverflow;
-    maxLines?: number;
-    minFontSize?: number | ResourceStr;
-    maxFontSize?: number | ResourceStr;
+    maxLines?: int32;
+    minFontSize?: double | ResourceStr;
+    maxFontSize?: double | ResourceStr;
     heightAdaptivePolicy?: TextHeightAdaptivePolicy;
     font?: Font;
     selectedColor?: ResourceColor;
@@ -851,7 +851,7 @@ export class TabBarLabelStyle_serializer {
         if (valueHolderForMaxLines !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForMaxLinesTmpValue  = valueHolderForMaxLines!
-            valueSerializer.writeNumber(valueHolderForMaxLinesTmpValue)
+            valueSerializer.writeInt32(valueHolderForMaxLinesTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -859,10 +859,10 @@ export class TabBarLabelStyle_serializer {
         if (valueHolderForMinFontSize !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForMinFontSizeTmpValue  = valueHolderForMinFontSize!
-            if (valueHolderForMinFontSizeTmpValue instanceof number) {
+            if (valueHolderForMinFontSizeTmpValue instanceof double) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForMinFontSizeTmpValueForIdx0  = valueHolderForMinFontSizeTmpValue as number
-                valueSerializer.writeNumber(valueHolderForMinFontSizeTmpValueForIdx0)
+                const valueHolderForMinFontSizeTmpValueForIdx0  = valueHolderForMinFontSizeTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForMinFontSizeTmpValueForIdx0)
             } else if (valueHolderForMinFontSizeTmpValue instanceof ResourceStr) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForMinFontSizeTmpValueForIdx1  = valueHolderForMinFontSizeTmpValue as ResourceStr
@@ -883,10 +883,10 @@ export class TabBarLabelStyle_serializer {
         if (valueHolderForMaxFontSize !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForMaxFontSizeTmpValue  = valueHolderForMaxFontSize!
-            if (valueHolderForMaxFontSizeTmpValue instanceof number) {
+            if (valueHolderForMaxFontSizeTmpValue instanceof double) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForMaxFontSizeTmpValueForIdx0  = valueHolderForMaxFontSizeTmpValue as number
-                valueSerializer.writeNumber(valueHolderForMaxFontSizeTmpValueForIdx0)
+                const valueHolderForMaxFontSizeTmpValueForIdx0  = valueHolderForMaxFontSizeTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForMaxFontSizeTmpValueForIdx0)
             } else if (valueHolderForMaxFontSizeTmpValue instanceof ResourceStr) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForMaxFontSizeTmpValueForIdx1  = valueHolderForMaxFontSizeTmpValue as ResourceStr
@@ -977,18 +977,18 @@ export class TabBarLabelStyle_serializer {
         }
         const overflowTmpResult : TextOverflow | undefined = overflowTmpBuf
         const maxLinesTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let maxLinesTmpBuf : number | undefined = undefined
+        let maxLinesTmpBuf : int32 | undefined = undefined
         if ((maxLinesTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            maxLinesTmpBuf = (valueDeserializer.readNumber() as number)
+            maxLinesTmpBuf = valueDeserializer.readInt32()
         }
-        const maxLinesTmpResult : number | undefined = maxLinesTmpBuf
+        const maxLinesTmpResult : int32 | undefined = maxLinesTmpBuf
         const minFontSizeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let minFontSizeTmpBuf : number | ResourceStr | undefined = undefined
+        let minFontSizeTmpBuf : double | ResourceStr | undefined = undefined
         if ((minFontSizeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const minFontSizeTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let minFontSizeTmpBuf_ : number | ResourceStr | undefined
+            let minFontSizeTmpBuf_ : double | ResourceStr | undefined
             if (minFontSizeTmpBuf_UnionSelector == (0).toChar()) {
-                minFontSizeTmpBuf_ = (valueDeserializer.readNumber() as number)
+                minFontSizeTmpBuf_ = valueDeserializer.readFloat64()
             } else if (minFontSizeTmpBuf_UnionSelector == (1).toChar()) {
                 const minFontSizeTmpBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
                 let minFontSizeTmpBuf_BufU : string | Resource | undefined
@@ -1003,16 +1003,16 @@ export class TabBarLabelStyle_serializer {
             } else {
                 throw new Error("One of the branches for minFontSizeTmpBuf_ has to be chosen through deserialisation.")
             }
-            minFontSizeTmpBuf = (minFontSizeTmpBuf_ as number | ResourceStr)
+            minFontSizeTmpBuf = (minFontSizeTmpBuf_ as double | ResourceStr)
         }
-        const minFontSizeTmpResult : number | ResourceStr | undefined = minFontSizeTmpBuf
+        const minFontSizeTmpResult : double | ResourceStr | undefined = minFontSizeTmpBuf
         const maxFontSizeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let maxFontSizeTmpBuf : number | ResourceStr | undefined = undefined
+        let maxFontSizeTmpBuf : double | ResourceStr | undefined = undefined
         if ((maxFontSizeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const maxFontSizeTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let maxFontSizeTmpBuf_ : number | ResourceStr | undefined
+            let maxFontSizeTmpBuf_ : double | ResourceStr | undefined
             if (maxFontSizeTmpBuf_UnionSelector == (0).toChar()) {
-                maxFontSizeTmpBuf_ = (valueDeserializer.readNumber() as number)
+                maxFontSizeTmpBuf_ = valueDeserializer.readFloat64()
             } else if (maxFontSizeTmpBuf_UnionSelector == (1).toChar()) {
                 const maxFontSizeTmpBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
                 let maxFontSizeTmpBuf_BufU : string | Resource | undefined
@@ -1027,9 +1027,9 @@ export class TabBarLabelStyle_serializer {
             } else {
                 throw new Error("One of the branches for maxFontSizeTmpBuf_ has to be chosen through deserialisation.")
             }
-            maxFontSizeTmpBuf = (maxFontSizeTmpBuf_ as number | ResourceStr)
+            maxFontSizeTmpBuf = (maxFontSizeTmpBuf_ as double | ResourceStr)
         }
-        const maxFontSizeTmpResult : number | ResourceStr | undefined = maxFontSizeTmpBuf
+        const maxFontSizeTmpResult : double | ResourceStr | undefined = maxFontSizeTmpBuf
         const heightAdaptivePolicyTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let heightAdaptivePolicyTmpBuf : TextHeightAdaptivePolicy | undefined = undefined
         if ((heightAdaptivePolicyTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {

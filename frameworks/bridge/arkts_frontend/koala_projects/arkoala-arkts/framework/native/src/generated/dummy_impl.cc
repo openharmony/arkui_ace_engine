@@ -1293,7 +1293,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetSelectedImpl(Ark_NativePointer node,
-                         const Opt_Union_Number_Bindable* value)
+                         const Opt_Union_I32_Bindable* value)
     {
         if (!needGroupedLog(1))
         {
@@ -1341,7 +1341,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetItemBorderRadiusImpl(Ark_NativePointer node,
-                                 const Opt_Number* value)
+                                 const Opt_Float64* value)
     {
         if (!needGroupedLog(1))
         {
@@ -2753,7 +2753,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetOpacityImpl(Ark_NativePointer node,
-                        const Opt_Union_Number_Resource* value)
+                        const Opt_Union_F64_Resource* value)
     {
         if (!needGroupedLog(1))
         {
@@ -3125,7 +3125,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetTabIndexImpl(Ark_NativePointer node,
-                         const Opt_Number* value)
+                         const Opt_Int32* value)
     {
         if (!needGroupedLog(1))
         {
@@ -3221,7 +3221,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetBrightnessImpl(Ark_NativePointer node,
-                           const Opt_Number* value)
+                           const Opt_Float64* value)
     {
         if (!needGroupedLog(1))
         {
@@ -3233,7 +3233,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetContrastImpl(Ark_NativePointer node,
-                         const Opt_Number* value)
+                         const Opt_Float64* value)
     {
         if (!needGroupedLog(1))
         {
@@ -3245,7 +3245,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetGrayscaleImpl(Ark_NativePointer node,
-                          const Opt_Number* value)
+                          const Opt_Float64* value)
     {
         if (!needGroupedLog(1))
         {
@@ -3269,7 +3269,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetSaturateImpl(Ark_NativePointer node,
-                         const Opt_Number* value)
+                         const Opt_Float64* value)
     {
         if (!needGroupedLog(1))
         {
@@ -3281,7 +3281,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetSepiaImpl(Ark_NativePointer node,
-                      const Opt_Number* value)
+                      const Opt_Float64* value)
     {
         if (!needGroupedLog(1))
         {
@@ -3293,7 +3293,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetInvertImpl(Ark_NativePointer node,
-                       const Opt_Union_Number_InvertOptions* value)
+                       const Opt_Union_F64_InvertOptions* value)
     {
         if (!needGroupedLog(1))
         {
@@ -3305,7 +3305,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetHueRotateImpl(Ark_NativePointer node,
-                          const Opt_Union_Number_String* value)
+                          const Opt_Union_F64_String* value)
     {
         if (!needGroupedLog(1))
         {
@@ -3941,7 +3941,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetSphericalEffectImpl(Ark_NativePointer node,
-                                const Opt_Number* value)
+                                const Opt_Float64* value)
     {
         if (!needGroupedLog(1))
         {
@@ -3953,7 +3953,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetLightUpEffectImpl(Ark_NativePointer node,
-                              const Opt_Number* value)
+                              const Opt_Float64* value)
     {
         if (!needGroupedLog(1))
         {
@@ -4556,7 +4556,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetBlurImpl(Ark_NativePointer node,
-                     const Opt_Number* blurRadius,
+                     const Opt_Float64* blurRadius,
                      const Opt_BlurOptions* options,
                      const Opt_SystemAdaptiveOptions* sysOptions)
     {
@@ -4574,7 +4574,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetLinearGradientBlurImpl(Ark_NativePointer node,
-                                   const Opt_Number* value,
+                                   const Opt_Float64* value,
                                    const Opt_LinearGradientBlurOptions* options)
     {
         if (!needGroupedLog(1))
@@ -4614,7 +4614,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetBackdropBlurImpl(Ark_NativePointer node,
-                             const Opt_Number* radius,
+                             const Opt_Float64* radius,
                              const Opt_BlurOptions* options,
                              const Opt_SystemAdaptiveOptions* sysOptions)
     {
@@ -15530,7 +15530,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetAnimationDurationImpl(Ark_NativePointer node,
-                                  const Opt_Number* value)
+                                  const Opt_Int32* value)
     {
         if (!needGroupedLog(1))
         {
@@ -15566,7 +15566,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetOnChangeImpl(Ark_NativePointer node,
-                         const Opt_Callback_Number_Void* value)
+                         const Opt_Callback_I32_Void* value)
     {
         if (!needGroupedLog(1))
         {
@@ -15578,7 +15578,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetOnSelectedImpl(Ark_NativePointer node,
-                           const Opt_Callback_Number_Void* value)
+                           const Opt_Callback_I32_Void* value)
     {
         if (!needGroupedLog(1))
         {
@@ -15590,7 +15590,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetOnTabBarClickImpl(Ark_NativePointer node,
-                              const Opt_Callback_Number_Void* value)
+                              const Opt_Callback_I32_Void* value)
     {
         if (!needGroupedLog(1))
         {
@@ -15602,7 +15602,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetOnUnselectedImpl(Ark_NativePointer node,
-                             const Opt_Callback_Number_Void* value)
+                             const Opt_Callback_I32_Void* value)
     {
         if (!needGroupedLog(1))
         {
@@ -15815,7 +15815,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetCachedMaxCountImpl(Ark_NativePointer node,
-                               const Opt_Number* count,
+                               const Opt_Int32* count,
                                const Opt_TabsCacheMode* mode)
     {
         if (!needGroupedLog(1))
@@ -37520,8 +37520,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_ProgressMask ConstructImpl(const Ark_Number* value,
-                                   const Ark_Number* total,
+    Ark_ProgressMask ConstructImpl(Ark_Float64 value,
+                                   Ark_Float64 total,
                                    const Ark_ResourceColor* color)
     {
         if (!needGroupedLog(1))
@@ -37552,7 +37552,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return fnPtr<KNativePointer>(dummyClassFinalizer);
     }
     void UpdateProgressImpl(Ark_ProgressMask peer,
-                            const Ark_Number* value)
+                            Ark_Float64 value)
     {
         if (!needGroupedLog(1))
         {
@@ -41030,20 +41030,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetFromImpl(Ark_TabContentTransitionProxy peer)
+    Ark_Int32 GetFromImpl(Ark_TabContentTransitionProxy peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getFrom(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetFromImpl(Ark_TabContentTransitionProxy peer,
-                     const Ark_Number* from)
+                     const Ark_Int32 from)
     {
         if (!needGroupedLog(1))
         {
@@ -41054,20 +41054,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_Number GetToImpl(Ark_TabContentTransitionProxy peer)
+    Ark_Int32 GetToImpl(Ark_TabContentTransitionProxy peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getTo(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     void SetToImpl(Ark_TabContentTransitionProxy peer,
-                   const Ark_Number* to)
+                   const Ark_Int32 to)
     {
         if (!needGroupedLog(1))
         {
@@ -41115,7 +41115,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return fnPtr<KNativePointer>(dummyClassFinalizer);
     }
     void ChangeIndexImpl(Ark_TabsController peer,
-                         const Ark_Number* value)
+                         const Ark_Int32 value)
     {
         if (!needGroupedLog(1))
         {
@@ -41129,7 +41129,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     void PreloadItemsImpl(Ark_VMContext vmContext,
                           Ark_AsyncWorkerPtr asyncWorker,
                           Ark_TabsController peer,
-                          const Opt_Array_Number* indices,
+                          const Opt_Array_Int32* indices,
                           const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
     {
         if (!needGroupedLog(1))
@@ -41156,7 +41156,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetTabBarOpacityImpl(Ark_TabsController peer,
-                              const Ark_Number* opacity)
+                              const Ark_Float64 opacity)
     {
         if (!needGroupedLog(1))
         {
@@ -42731,7 +42731,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return reinterpret_cast<Ark_TransitionEffect>(300);
     }
-    Ark_TransitionEffect Construct1Impl(const Ark_Number* effect)
+    Ark_TransitionEffect Construct1Impl(Ark_Float64 effect)
     {
         if (!needGroupedLog(1))
         {
@@ -42860,7 +42860,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return reinterpret_cast<Ark_TransitionEffect>(300);
     }
-    Ark_TransitionEffect OpacityImpl(const Ark_Number* alpha)
+    Ark_TransitionEffect OpacityImpl(Ark_Float64 alpha)
     {
         if (!needGroupedLog(1))
         {
@@ -46057,7 +46057,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GlobalScope_ohos_fontAccessor::RegisterFontImpl,
             GlobalScope_ohos_fontAccessor::GetSystemFontListImpl,
             GlobalScope_ohos_fontAccessor::GetFontByNameImpl,
-            GlobalScope_ohos_fontAccessor::GetUIFontConfigImpl,
         };
         return &GlobalScope_ohos_fontAccessorImpl;
     }
@@ -46069,23 +46068,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GlobalScope_ohos_measure_utilsAccessor::MeasureTextSizeImpl,
         };
         return &GlobalScope_ohos_measure_utilsAccessorImpl;
-    }
-
-    const GENERATED_ArkUIGlobalScopeUicontextFontScaleAccessor* GetGlobalScopeUicontextFontScaleAccessor()
-    {
-        static const GENERATED_ArkUIGlobalScopeUicontextFontScaleAccessor GlobalScopeUicontextFontScaleAccessorImpl {
-            GlobalScopeUicontextFontScaleAccessor::IsFollowingSystemFontScaleImpl,
-            GlobalScopeUicontextFontScaleAccessor::GetMaxFontScaleImpl,
-        };
-        return &GlobalScopeUicontextFontScaleAccessorImpl;
-    }
-
-    const GENERATED_ArkUIGlobalScopeUicontextTextMenuAccessor* GetGlobalScopeUicontextTextMenuAccessor()
-    {
-        static const GENERATED_ArkUIGlobalScopeUicontextTextMenuAccessor GlobalScopeUicontextTextMenuAccessorImpl {
-            GlobalScopeUicontextTextMenuAccessor::SetMenuOptionsImpl,
-        };
-        return &GlobalScopeUicontextTextMenuAccessorImpl;
     }
 
     const GENERATED_ArkUIHierarchicalSymbolEffectAccessor* GetHierarchicalSymbolEffectAccessor()
@@ -48386,8 +48368,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetGlobalScope_ohos_arkui_performanceMonitorAccessor,
             GetGlobalScope_ohos_fontAccessor,
             GetGlobalScope_ohos_measure_utilsAccessor,
-            GetGlobalScopeUicontextFontScaleAccessor,
-            GetGlobalScopeUicontextTextMenuAccessor,
             GetHierarchicalSymbolEffectAccessor,
             GetHoverEventAccessor,
             GetHttpAuthHandlerAccessor,

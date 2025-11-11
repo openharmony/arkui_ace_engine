@@ -20,7 +20,7 @@ import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, DeserializerBase, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
-import { TranslateOptions_serializer, TranslateOptions, DividerStyle_serializer, BackgroundEffectOptions_serializer, BackgroundBlurStyleOptions_serializer, ArkCommonMethodPeer, CommonMethod, DividerStyle, BlurStyle, BackgroundEffectOptions, BackgroundBlurStyleOptions, BlurStyleOptions, BlurStyleActivePolicy, Bindable, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable_Number_serializer } from "./common"
+import { TranslateOptions_serializer, TranslateOptions, DividerStyle_serializer, BackgroundEffectOptions_serializer, BackgroundBlurStyleOptions_serializer, ArkCommonMethodPeer, CommonMethod, DividerStyle, BlurStyle, BackgroundEffectOptions, BackgroundBlurStyleOptions, BlurStyleOptions, BlurStyleActivePolicy, Bindable, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable_I32_serializer } from "./common"
 import { Resource_serializer } from "./../framework/resource"
 import { curves_ICurve_serializer } from "./../framework/ohos.curves"
 import { ComponentBase } from "./../ComponentBase"
@@ -36,9 +36,10 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { TabsModifier } from "./../TabsModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { KInt32ArrayPtr } from "@koalaui/interop"
 export interface TabContentTransitionProxy {
-    from: number
-    to: number
+    from: int32
+    to: int32
     finishTransition(): void
 }
 export class TabContentTransitionProxyInternal implements MaterializedBase,TabContentTransitionProxy {
@@ -46,16 +47,16 @@ export class TabContentTransitionProxyInternal implements MaterializedBase,TabCo
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    get from(): number {
+    get from(): int32 {
         return this.getFrom()
     }
-    set from(from: number) {
+    set from(from: int32) {
         this.setFrom(from)
     }
-    get to(): number {
+    get to(): int32 {
         return this.getTo()
     }
-    set to(to: number) {
+    set to(to: int32) {
         this.setTo(to)
     }
     constructor(peerPtr: KPointer) {
@@ -78,37 +79,37 @@ export class TabContentTransitionProxyInternal implements MaterializedBase,TabCo
         this.finishTransition_serialize()
         return
     }
-    private getFrom(): number {
+    private getFrom(): int32 {
         return this.getFrom_serialize()
     }
-    private setFrom(from: number): void {
-        const from_casted = from as (number)
+    private setFrom(from: int32): void {
+        const from_casted = from as (int32)
         this.setFrom_serialize(from_casted)
         return
     }
-    private getTo(): number {
+    private getTo(): int32 {
         return this.getTo_serialize()
     }
-    private setTo(to: number): void {
-        const to_casted = to as (number)
+    private setTo(to: int32): void {
+        const to_casted = to as (int32)
         this.setTo_serialize(to_casted)
         return
     }
     finishTransition_serialize(): void {
         ArkUIGeneratedNativeModule._TabContentTransitionProxy_finishTransition(this.peer!.ptr)
     }
-    private getFrom_serialize(): number {
+    private getFrom_serialize(): int32 {
         const retval  = ArkUIGeneratedNativeModule._TabContentTransitionProxy_getFrom(this.peer!.ptr)
         return retval
     }
-    private setFrom_serialize(from: number): void {
+    private setFrom_serialize(from: int32): void {
         ArkUIGeneratedNativeModule._TabContentTransitionProxy_setFrom(this.peer!.ptr, from)
     }
-    private getTo_serialize(): number {
+    private getTo_serialize(): int32 {
         const retval  = ArkUIGeneratedNativeModule._TabContentTransitionProxy_getTo(this.peer!.ptr)
         return retval
     }
-    private setTo_serialize(to: number): void {
+    private setTo_serialize(to: int32): void {
         ArkUIGeneratedNativeModule._TabContentTransitionProxy_setTo(this.peer!.ptr, to)
     }
 }
@@ -135,13 +136,13 @@ export class TabsController implements MaterializedBase {
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._TabsController_getFinalizer()
     }
-    public changeIndex(value: number): void {
-        const value_casted = value as (number)
+    public changeIndex(value: int32): void {
+        const value_casted = value as (int32)
         this.changeIndex_serialize(value_casted)
         return
     }
-    public preloadItems(indices: Array<number> | undefined): Promise<void> {
-        const indices_casted = indices as (Array<number> | undefined)
+    public preloadItems(indices: KInt32ArrayPtr | undefined): Promise<void> {
+        const indices_casted = indices as (KInt32ArrayPtr | undefined)
         return this.preloadItems_serialize(indices_casted)
     }
     public setTabBarTranslate(translate: TranslateOptions): void {
@@ -149,23 +150,23 @@ export class TabsController implements MaterializedBase {
         this.setTabBarTranslate_serialize(translate_casted)
         return
     }
-    public setTabBarOpacity(opacity: number): void {
-        const opacity_casted = opacity as (number)
+    public setTabBarOpacity(opacity: double): void {
+        const opacity_casted = opacity as (double)
         this.setTabBarOpacity_serialize(opacity_casted)
         return
     }
-    changeIndex_serialize(value: number): void {
+    changeIndex_serialize(value: int32): void {
         ArkUIGeneratedNativeModule._TabsController_changeIndex(this.peer!.ptr, value)
     }
-    preloadItems_serialize(indices: Array<number> | undefined): Promise<void> {
+    preloadItems_serialize(indices: KInt32ArrayPtr | undefined): Promise<void> {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (indices !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const indicesTmpValue  = indices!
             thisSerializer.writeInt32((indicesTmpValue.length).toInt())
             for (let indicesTmpValueCounterI = 0; indicesTmpValueCounterI < indicesTmpValue.length; indicesTmpValueCounterI++) {
-                const indicesTmpValueTmpElement : number = indicesTmpValue[indicesTmpValueCounterI]
-                thisSerializer.writeNumber(indicesTmpValueTmpElement)
+                const indicesTmpValueTmpElement : int32 = indicesTmpValue[indicesTmpValueCounterI]
+                thisSerializer.writeInt32(indicesTmpValueTmpElement)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -181,7 +182,7 @@ export class TabsController implements MaterializedBase {
         ArkUIGeneratedNativeModule._TabsController_setTabBarTranslate(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setTabBarOpacity_serialize(opacity: number): void {
+    setTabBarOpacity_serialize(opacity: double): void {
         ArkUIGeneratedNativeModule._TabsController_setTabBarOpacity(this.peer!.ptr, opacity)
     }
 }
@@ -289,12 +290,12 @@ export class ArkTabsPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TabsAttribute_setAnimationCurve(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setAnimationDurationAttribute(value: number | undefined): void {
+    setAnimationDurationAttribute(value: int32 | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeNumber(valueTmpValue)
+            thisSerializer.writeInt32(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -325,7 +326,7 @@ export class ArkTabsPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TabsAttribute_setEdgeEffect(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnChangeAttribute(value: ((value0: number) => void) | undefined): void {
+    setOnChangeAttribute(value: ((value0: int32) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -337,7 +338,7 @@ export class ArkTabsPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TabsAttribute_setOnChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnSelectedAttribute(value: ((value0: number) => void) | undefined): void {
+    setOnSelectedAttribute(value: ((value0: int32) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -349,7 +350,7 @@ export class ArkTabsPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TabsAttribute_setOnSelected(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnTabBarClickAttribute(value: ((value0: number) => void) | undefined): void {
+    setOnTabBarClickAttribute(value: ((value0: int32) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -361,7 +362,7 @@ export class ArkTabsPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TabsAttribute_setOnTabBarClick(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnUnselectedAttribute(value: ((value0: number) => void) | undefined): void {
+    setOnUnselectedAttribute(value: ((value0: int32) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -614,12 +615,12 @@ export class ArkTabsPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TabsAttribute_setBarBackgroundBlurStyle1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setCachedMaxCountAttribute(count: number | undefined, mode: TabsCacheMode | undefined): void {
+    setCachedMaxCountAttribute(count: int32 | undefined, mode: TabsCacheMode | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (count !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const countTmpValue  = count!
-            thisSerializer.writeNumber(countTmpValue)
+            thisSerializer.writeInt32(countTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -664,18 +665,18 @@ export enum TabsCacheMode {
 }
 export interface TabsOptions {
     barPosition?: BarPosition;
-    index?: number | Bindable<number>;
+    index?: int32 | Bindable<int32>;
     controller?: TabsController;
 }
 export interface TabsAnimationEvent {
-    currentOffset: number;
-    targetOffset: number;
-    velocity: number;
+    currentOffset: double;
+    targetOffset: double;
+    velocity: double;
 }
 export interface BarGridColumnOptions {
-    sm?: number;
-    md?: number;
-    lg?: number;
+    sm?: int32;
+    md?: int32;
+    lg?: int32;
     margin?: Dimension;
     gutter?: Dimension;
 }
@@ -683,11 +684,11 @@ export interface ScrollableBarModeOptions {
     margin?: Dimension;
     nonScrollableLayoutStyle?: LayoutStyle;
 }
-export type OnTabsAnimationStartCallback = (index: number, targetIndex: number, extraInfo: TabsAnimationEvent) => void;
-export type OnTabsAnimationEndCallback = (index: number, extraInfo: TabsAnimationEvent) => void;
-export type OnTabsGestureSwipeCallback = (index: number, extraInfo: TabsAnimationEvent) => void;
-export type TabsCustomContentTransitionCallback = (from: number, to: number) => TabContentAnimatedTransition | undefined;
-export type OnTabsContentWillChangeCallback = (currentIndex: number, comingIndex: number) => boolean;
+export type OnTabsAnimationStartCallback = (index: int32, targetIndex: int32, extraInfo: TabsAnimationEvent) => void;
+export type OnTabsAnimationEndCallback = (index: int32, extraInfo: TabsAnimationEvent) => void;
+export type OnTabsGestureSwipeCallback = (index: int32, extraInfo: TabsAnimationEvent) => void;
+export type TabsCustomContentTransitionCallback = (from: int32, to: int32) => TabContentAnimatedTransition | undefined;
+export type OnTabsContentWillChangeCallback = (currentIndex: int32, comingIndex: int32) => boolean;
 export interface TabsAttribute extends CommonMethod {
     setTabsOptions(options?: TabsOptions): this {
         throw new Error("Unimplemented method setTabsOptions")
@@ -707,7 +708,7 @@ export interface TabsAttribute extends CommonMethod {
     animationCurve(value: curves.Curve | curves.ICurve | undefined): this {
         throw new Error("Unimplemented method animationCurve")
     }
-    animationDuration(value: number | undefined): this {
+    animationDuration(value: int32 | undefined): this {
         throw new Error("Unimplemented method animationDuration")
     }
     animationMode(value: AnimationMode | undefined): this {
@@ -716,16 +717,16 @@ export interface TabsAttribute extends CommonMethod {
     edgeEffect(value: EdgeEffect | undefined): this {
         throw new Error("Unimplemented method edgeEffect")
     }
-    onChange(value: ((value0: number) => void) | undefined): this {
+    onChange(value: ((value0: int32) => void) | undefined): this {
         throw new Error("Unimplemented method onChange")
     }
-    onSelected(value: ((value0: number) => void) | undefined): this {
+    onSelected(value: ((value0: int32) => void) | undefined): this {
         throw new Error("Unimplemented method onSelected")
     }
-    onTabBarClick(value: ((value0: number) => void) | undefined): this {
+    onTabBarClick(value: ((value0: int32) => void) | undefined): this {
         throw new Error("Unimplemented method onTabBarClick")
     }
-    onUnselected(value: ((value0: number) => void) | undefined): this {
+    onUnselected(value: ((value0: int32) => void) | undefined): this {
         throw new Error("Unimplemented method onUnselected")
     }
     onAnimationStart(value: OnTabsAnimationStartCallback | undefined): this {
@@ -776,7 +777,7 @@ export interface TabsAttribute extends CommonMethod {
     barBackgroundBlurStyle(style: BlurStyle | undefined, options: BackgroundBlurStyleOptions | undefined): this {
         throw new Error("Unimplemented method barBackgroundBlurStyle")
     }
-    cachedMaxCount(count: number | undefined, mode: TabsCacheMode | undefined): this {
+    cachedMaxCount(count: int32 | undefined, mode: TabsCacheMode | undefined): this {
         throw new Error("Unimplemented method cachedMaxCount")
     }
     attributeModifier(value: AttributeModifier<TabsAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -788,14 +789,14 @@ export class ArkTabsStyle extends ArkCommonMethodStyle implements TabsAttribute 
     barPosition_value?: BarPosition | undefined
     scrollable_value?: boolean | undefined
     barWidth_value?: Length | undefined
-    animationCurve_value?: curves.Curve | curves.ICurve | undefined
-    animationDuration_value?: number | undefined
+    barHeight_value?: Length | undefined
+    animationDuration_value?: int32 | undefined
     animationMode_value?: AnimationMode | undefined
     edgeEffect_value?: EdgeEffect | undefined
-    onChange_value?: ((value0: number) => void) | undefined
-    onSelected_value?: ((value0: number) => void) | undefined
-    onTabBarClick_value?: ((value0: number) => void) | undefined
-    onUnselected_value?: ((value0: number) => void) | undefined
+    onChange_value?: ((value0: int32) => void) | undefined
+    onSelected_value?: ((value0: int32) => void) | undefined
+    onTabBarClick_value?: ((value0: int32) => void) | undefined
+    onUnselected_value?: ((value0: int32) => void) | undefined
     onAnimationStart_value?: OnTabsAnimationStartCallback | undefined
     onAnimationEnd_value?: OnTabsAnimationEndCallback | undefined
     onGestureSwipe_value?: OnTabsGestureSwipeCallback | undefined
@@ -828,7 +829,7 @@ export class ArkTabsStyle extends ArkCommonMethodStyle implements TabsAttribute 
     animationCurve(value: curves.Curve | curves.ICurve | undefined): this {
         return this
     }
-    animationDuration(value: number | undefined): this {
+    animationDuration(value: int32 | undefined): this {
         return this
     }
     animationMode(value: AnimationMode | undefined): this {
@@ -837,16 +838,16 @@ export class ArkTabsStyle extends ArkCommonMethodStyle implements TabsAttribute 
     edgeEffect(value: EdgeEffect | undefined): this {
         return this
     }
-    onChange(value: ((value0: number) => void) | undefined): this {
+    onChange(value: ((value0: int32) => void) | undefined): this {
         return this
     }
-    onSelected(value: ((value0: number) => void) | undefined): this {
+    onSelected(value: ((value0: int32) => void) | undefined): this {
         return this
     }
-    onTabBarClick(value: ((value0: number) => void) | undefined): this {
+    onTabBarClick(value: ((value0: int32) => void) | undefined): this {
         return this
     }
-    onUnselected(value: ((value0: number) => void) | undefined): this {
+    onUnselected(value: ((value0: int32) => void) | undefined): this {
         return this
     }
     onAnimationStart(value: OnTabsAnimationStartCallback | undefined): this {
@@ -897,7 +898,7 @@ export class ArkTabsStyle extends ArkCommonMethodStyle implements TabsAttribute 
     barBackgroundBlurStyle(style: BlurStyle | undefined, options: BackgroundBlurStyleOptions | undefined): this {
         return this
     }
-    cachedMaxCount(count: number | undefined, mode: TabsCacheMode | undefined): this {
+    cachedMaxCount(count: int32 | undefined, mode: TabsCacheMode | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<TabsAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -905,7 +906,7 @@ export class ArkTabsStyle extends ArkCommonMethodStyle implements TabsAttribute 
     }
 }
 export interface TabContentAnimatedTransition {
-    timeout?: number;
+    timeout?: int32;
     transition: ((value0: TabContentTransitionProxy) => void);
 }
 
@@ -964,9 +965,9 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements TabsAt
         }
         return this
     }
-    public animationDuration(value: number | undefined): this {
+    public animationDuration(value: int32 | undefined): this {
         if (this.checkPriority("animationDuration")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (int32 | undefined)
             this.getPeer()?.setAnimationDurationAttribute(value_casted)
             return this
         }
@@ -988,33 +989,33 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements TabsAt
         }
         return this
     }
-    public onChange(value: ((value0: number) => void) | undefined): this {
+    public onChange(value: ((value0: int32) => void) | undefined): this {
         if (this.checkPriority("onChange")) {
-            const value_casted = value as (((value0: number) => void) | undefined)
+            const value_casted = value as (((value0: int32) => void) | undefined)
             this.getPeer()?.setOnChangeAttribute(value_casted)
             return this
         }
         return this
     }
-    public onSelected(value: ((value0: number) => void) | undefined): this {
+    public onSelected(value: ((value0: int32) => void) | undefined): this {
         if (this.checkPriority("onSelected")) {
-            const value_casted = value as (((value0: number) => void) | undefined)
+            const value_casted = value as (((value0: int32) => void) | undefined)
             this.getPeer()?.setOnSelectedAttribute(value_casted)
             return this
         }
         return this
     }
-    public onTabBarClick(value: ((value0: number) => void) | undefined): this {
+    public onTabBarClick(value: ((value0: int32) => void) | undefined): this {
         if (this.checkPriority("onTabBarClick")) {
-            const value_casted = value as (((value0: number) => void) | undefined)
+            const value_casted = value as (((value0: int32) => void) | undefined)
             this.getPeer()?.setOnTabBarClickAttribute(value_casted)
             return this
         }
         return this
     }
-    public onUnselected(value: ((value0: number) => void) | undefined): this {
+    public onUnselected(value: ((value0: int32) => void) | undefined): this {
         if (this.checkPriority("onUnselected")) {
-            const value_casted = value as (((value0: number) => void) | undefined)
+            const value_casted = value as (((value0: int32) => void) | undefined)
             this.getPeer()?.setOnUnselectedAttribute(value_casted)
             return this
         }
@@ -1151,9 +1152,9 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements TabsAt
         }
         return this
     }
-    public cachedMaxCount(count: number | undefined, mode: TabsCacheMode | undefined): this {
+    public cachedMaxCount(count: int32 | undefined, mode: TabsCacheMode | undefined): this {
         if (this.checkPriority("cachedMaxCount")) {
-            const count_casted = count as (number | undefined)
+            const count_casted = count as (int32 | undefined)
             const mode_casted = mode as (TabsCacheMode | undefined)
             this.getPeer()?.setCachedMaxCountAttribute(count_casted, mode_casted)
             return this
@@ -1204,17 +1205,17 @@ export class TabsAnimationEvent_serializer {
     public static write(buffer: SerializerBase, value: TabsAnimationEvent): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForCurrentOffset  = value.currentOffset
-        valueSerializer.writeNumber(valueHolderForCurrentOffset)
+        valueSerializer.writeFloat64(valueHolderForCurrentOffset)
         const valueHolderForTargetOffset  = value.targetOffset
-        valueSerializer.writeNumber(valueHolderForTargetOffset)
+        valueSerializer.writeFloat64(valueHolderForTargetOffset)
         const valueHolderForVelocity  = value.velocity
-        valueSerializer.writeNumber(valueHolderForVelocity)
+        valueSerializer.writeFloat64(valueHolderForVelocity)
     }
     public static read(buffer: DeserializerBase): TabsAnimationEvent {
         let valueDeserializer : DeserializerBase = buffer
-        const currentOffsetTmpResult : number = (valueDeserializer.readNumber() as number)
-        const targetOffsetTmpResult : number = (valueDeserializer.readNumber() as number)
-        const velocityTmpResult : number = (valueDeserializer.readNumber() as number)
+        const currentOffsetTmpResult : double = valueDeserializer.readFloat64()
+        const targetOffsetTmpResult : double = valueDeserializer.readFloat64()
+        const velocityTmpResult : double = valueDeserializer.readFloat64()
         let value : TabsAnimationEvent = ({currentOffset: currentOffsetTmpResult, targetOffset: targetOffsetTmpResult, velocity: velocityTmpResult} as TabsAnimationEvent)
         return value
     }
@@ -1237,7 +1238,7 @@ export class TabContentAnimatedTransition_serializer {
         if (valueHolderForTimeout !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForTimeoutTmpValue  = valueHolderForTimeout!
-            valueSerializer.writeNumber(valueHolderForTimeoutTmpValue)
+            valueSerializer.writeInt32(valueHolderForTimeoutTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -1247,11 +1248,11 @@ export class TabContentAnimatedTransition_serializer {
     public static read(buffer: DeserializerBase): TabContentAnimatedTransition {
         let valueDeserializer : DeserializerBase = buffer
         const timeoutTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let timeoutTmpBuf : number | undefined = undefined
+        let timeoutTmpBuf : int32 | undefined = undefined
         if ((timeoutTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            timeoutTmpBuf = (valueDeserializer.readNumber() as number)
+            timeoutTmpBuf = valueDeserializer.readInt32()
         }
-        const timeoutTmpResult : number | undefined = timeoutTmpBuf
+        const timeoutTmpResult : int32 | undefined = timeoutTmpBuf
         const transitionTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
         const transitionTmpBufBufCall : KPointer = valueDeserializer.readPointer()
         const transitionTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
@@ -1284,14 +1285,14 @@ export class TabsOptions_serializer {
         if (valueHolderForIndex !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForIndexTmpValue  = valueHolderForIndex!
-            if (valueHolderForIndexTmpValue instanceof number) {
+            if (valueHolderForIndexTmpValue instanceof int32) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForIndexTmpValueForIdx0  = valueHolderForIndexTmpValue as number
-                valueSerializer.writeNumber(valueHolderForIndexTmpValueForIdx0)
-            } else if (valueHolderForIndexTmpValue instanceof Bindable<number>) {
+                const valueHolderForIndexTmpValueForIdx0  = valueHolderForIndexTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForIndexTmpValueForIdx0)
+            } else if (valueHolderForIndexTmpValue instanceof Bindable<int32>) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForIndexTmpValueForIdx1  = valueHolderForIndexTmpValue as Bindable<number>
-                Bindable_Number_serializer.write(valueSerializer, valueHolderForIndexTmpValueForIdx1)
+                const valueHolderForIndexTmpValueForIdx1  = valueHolderForIndexTmpValue as Bindable<int32>
+                Bindable_I32_serializer.write(valueSerializer, valueHolderForIndexTmpValueForIdx1)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -1314,20 +1315,20 @@ export class TabsOptions_serializer {
         }
         const barPositionTmpResult : BarPosition | undefined = barPositionTmpBuf
         const indexTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let indexTmpBuf : number | Bindable<number> | undefined = undefined
+        let indexTmpBuf : int32 | Bindable<int32> | undefined = undefined
         if ((indexTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const indexTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let indexTmpBuf_ : number | Bindable<number> | undefined
+            let indexTmpBuf_ : int32 | Bindable<int32> | undefined
             if (indexTmpBuf_UnionSelector == (0).toChar()) {
-                indexTmpBuf_ = (valueDeserializer.readNumber() as number)
+                indexTmpBuf_ = valueDeserializer.readInt32()
             } else if (indexTmpBuf_UnionSelector == (1).toChar()) {
-                indexTmpBuf_ = Bindable_Number_serializer.read(valueDeserializer)
+                indexTmpBuf_ = Bindable_I32_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for indexTmpBuf_ has to be chosen through deserialisation.")
             }
-            indexTmpBuf = (indexTmpBuf_ as number | Bindable<number>)
+            indexTmpBuf = (indexTmpBuf_ as int32 | Bindable<int32>)
         }
-        const indexTmpResult : number | Bindable<number> | undefined = indexTmpBuf
+        const indexTmpResult : int32 | Bindable<int32> | undefined = indexTmpBuf
         const controllerTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let controllerTmpBuf : TabsController | undefined = undefined
         if ((controllerTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -1345,7 +1346,7 @@ export class BarGridColumnOptions_serializer {
         if (valueHolderForSm !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForSmTmpValue  = valueHolderForSm!
-            valueSerializer.writeNumber(valueHolderForSmTmpValue)
+            valueSerializer.writeInt32(valueHolderForSmTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -1353,7 +1354,7 @@ export class BarGridColumnOptions_serializer {
         if (valueHolderForMd !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForMdTmpValue  = valueHolderForMd!
-            valueSerializer.writeNumber(valueHolderForMdTmpValue)
+            valueSerializer.writeInt32(valueHolderForMdTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -1361,7 +1362,7 @@ export class BarGridColumnOptions_serializer {
         if (valueHolderForLg !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForLgTmpValue  = valueHolderForLg!
-            valueSerializer.writeNumber(valueHolderForLgTmpValue)
+            valueSerializer.writeInt32(valueHolderForLgTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -1409,23 +1410,23 @@ export class BarGridColumnOptions_serializer {
     public static read(buffer: DeserializerBase): BarGridColumnOptions {
         let valueDeserializer : DeserializerBase = buffer
         const smTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let smTmpBuf : number | undefined = undefined
+        let smTmpBuf : int32 | undefined = undefined
         if ((smTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            smTmpBuf = (valueDeserializer.readNumber() as number)
+            smTmpBuf = valueDeserializer.readInt32()
         }
-        const smTmpResult : number | undefined = smTmpBuf
+        const smTmpResult : int32 | undefined = smTmpBuf
         const mdTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let mdTmpBuf : number | undefined = undefined
+        let mdTmpBuf : int32 | undefined = undefined
         if ((mdTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            mdTmpBuf = (valueDeserializer.readNumber() as number)
+            mdTmpBuf = valueDeserializer.readInt32()
         }
-        const mdTmpResult : number | undefined = mdTmpBuf
+        const mdTmpResult : int32 | undefined = mdTmpBuf
         const lgTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let lgTmpBuf : number | undefined = undefined
+        let lgTmpBuf : int32 | undefined = undefined
         if ((lgTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            lgTmpBuf = (valueDeserializer.readNumber() as number)
+            lgTmpBuf = valueDeserializer.readInt32()
         }
-        const lgTmpResult : number | undefined = lgTmpBuf
+        const lgTmpResult : int32 | undefined = lgTmpBuf
         const marginTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let marginTmpBuf : Dimension | undefined = undefined
         if ((marginTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
