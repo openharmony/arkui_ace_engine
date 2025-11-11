@@ -58,7 +58,6 @@ import {
   TouchEvent,
   SourceType,
   TouchType,
-  animateTo,
   Curve,
   MouseEvent,
   MouseAction,
@@ -1268,11 +1267,11 @@ struct SegmentButtonItemArrayComponent {
                   return;
                 }
                 if (event.type === TouchType.Down) {
-                  animateTo({ curve: curves.interpolatingSpring(10.0, 1.0, 410.0, 38.0) as ICurve }, () => {
+                  this.getUIContext()?.animateTo({ curve: curves.interpolatingSpring(10.0, 1.0, 410.0, 38.0) as ICurve }, () => {
                     this.zoomScaleArray[index as int] = 0.95;
                   })
                 } else if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-                  animateTo({ curve: curves.interpolatingSpring(10.0, 1.0, 410.0, 38.0) as ICurve}, () => {
+                  this.getUIContext()?.animateTo({ curve: curves.interpolatingSpring(10.0, 1.0, 410.0, 38.0) as ICurve}, () => {
                     this.zoomScaleArray[index as int] = 1.0;
                   })
                 } else {
@@ -1281,13 +1280,13 @@ struct SegmentButtonItemArrayComponent {
               .onHover((isHover: boolean, event: HoverEvent) => {
                 this.hoverArray[index as int] = isHover
                 if (isHover) {
-                  animateTo({ duration: 250.0, curve: Curve.Friction }, () => {
+                  this.getUIContext()?.animateTo({ duration: 250.0, curve: Curve.Friction }, () => {
                     this.hoverColorArray[index as int].hoverColor =
                       this.isSegmentFocusStyleCustomized && this.focusIndex === index ?
                         segmentButtonTheme.SEGMENT_BUTTON_FOCUS_CUSTOMIZED_BG_COLOR : segmentButtonTheme.HOVER_COLOR;
                   })
                 } else {
-                  animateTo({ duration: 250.0, curve: Curve.Friction }, () => {
+                  this.getUIContext()?.animateTo({ duration: 250.0, curve: Curve.Friction }, () => {
                     this.hoverColorArray[index as int].hoverColor =
                       this.isSegmentFocusStyleCustomized && this.focusIndex === index ?
                         segmentButtonTheme.SEGMENT_BUTTON_FOCUS_CUSTOMIZED_BG_COLOR : Color.Transparent;
@@ -1297,18 +1296,18 @@ struct SegmentButtonItemArrayComponent {
               .onMouse((event: MouseEvent) => {
                 switch (event.action) {
                   case MouseAction.Press:
-                    animateTo({ curve: curves.springMotion(0.347, 0.99) as ICurve }, () => {
+                    this.getUIContext()?.animateTo({ curve: curves.springMotion(0.347, 0.99) as ICurve }, () => {
                       this.zoomScaleArray[index as int] = 0.95;
                     })
-                    animateTo({ duration: 100.0, curve: Curve.Sharp }, () => {
+                    this.getUIContext()?.animateTo({ duration: 100.0, curve: Curve.Sharp }, () => {
                       this.pressArray[index as int] = true;
                     })
                     break;
                   case MouseAction.Release:
-                    animateTo({ curve: curves.springMotion(0.347, 0.99) as ICurve }, () => {
+                    this.getUIContext()?.animateTo({ curve: curves.springMotion(0.347, 0.99) as ICurve }, () => {
                       this.zoomScaleArray[index as int] = 1.0;
                     })
-                    animateTo({ duration: 100.0, curve: Curve.Sharp }, () => {
+                    this.getUIContext()?.animateTo({ duration: 100.0, curve: Curve.Sharp }, () => {
                       this.pressArray[index as int] = false;
                     })
                     break;
@@ -1783,11 +1782,11 @@ export struct SegmentButton {
             }
             this.zoomScaleArray.forEach((_, index) => {
               if (index === this.selectedIndexes[0]) {
-                animateTo({ curve: curves.interpolatingSpring(10.0, 1.0, 410.0, 38.0) as ICurve }, () => {
+                this.getUIContext()?.animateTo({ curve: curves.interpolatingSpring(10.0, 1.0, 410.0, 38.0) as ICurve }, () => {
                   this.zoomScaleArray[index as int] = 0.95;
                 });
               } else {
-                animateTo({ curve: curves.interpolatingSpring(10.0, 1.0, 410.0, 38.0) as ICurve }, () => {
+                this.getUIContext()?.animateTo({ curve: curves.interpolatingSpring(10.0, 1.0, 410.0, 38.0) as ICurve }, () => {
                   this.zoomScaleArray[index as int] = 1.0;
                 });
               }
@@ -1822,7 +1821,7 @@ export struct SegmentButton {
               }
               this.doSelectedChangeAnimate = false
             }
-            animateTo({ curve: curves.interpolatingSpring(10.0, 1.0, 410.0, 38.0) as ICurve }, () => {
+            this.getUIContext()?.animateTo({ curve: curves.interpolatingSpring(10.0, 1.0, 410.0, 38.0) as ICurve }, () => {
               this.zoomScaleArray[this.selectedIndexes[0] as int] = 1.0;
             })
             this.isCurrentPositionSelected = false;
@@ -1835,7 +1834,7 @@ export struct SegmentButton {
             if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
               return;
             }
-            animateTo({ curve: curves.interpolatingSpring(10.0, 1.0, 410.0, 38.0) as ICurve }, () => {
+            this.getUIContext()?.animateTo({ curve: curves.interpolatingSpring(10.0, 1.0, 410.0, 38.0) as ICurve }, () => {
               this.zoomScaleArray[this.selectedIndexes[0] as int] = 1.0;
             })
             this.isCurrentPositionSelected = false;
@@ -1889,7 +1888,7 @@ export struct SegmentButton {
       })
     }
     if (curve) {
-      animateTo({ curve: curve }, setAnimatedPropertyFunc);
+      this.getUIContext()?.animateTo({ curve: curve }, setAnimatedPropertyFunc);
     } else {
       setAnimatedPropertyFunc();
     }
