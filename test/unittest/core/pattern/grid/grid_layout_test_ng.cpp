@@ -765,4 +765,130 @@ HWTEST_F(GridLayoutTestNg, GridLayoutInfo002, TestSize.Level1)
     EXPECT_EQ(pattern_->info_.startMainLineIndex_, 1);
     EXPECT_EQ(pattern_->info_.endMainLineIndex_, 2);
 }
+
+/**
+ * @tc.name: ItemFillPolicy001
+ * @tc.desc: Test specify the number of columns on grid for different responsive breakpoints
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, ItemFillPolicy001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();;
+    CreateFixedItems(10);
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. Set ItemFillPolicy to BREAKPOINT_DEFAULT and set width to 300.
+     * @tc.expected: The number of columns should be two.
+     */
+    ViewAbstract::SetWidth(AceType::RawPtr(frameNode_), CalcLength(300));
+    model.SetItemFillPolicy(AceType::RawPtr(frameNode_), PresetFillType::BREAKPOINT_DEFAULT);
+    FlushUITasks();
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 1), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 2), ITEM_MAIN_SIZE);
+
+    /**
+     * @tc.steps: step2. Set ItemFillPolicy to BREAKPOINT_SM2MD3LG5.
+     * @tc.expected: The number of columns should be two.
+     */
+    model.SetItemFillPolicy(AceType::RawPtr(frameNode_), PresetFillType::BREAKPOINT_SM2MD3LG5);
+    FlushUITasks();
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 1), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 2), ITEM_MAIN_SIZE);
+
+    /**
+     * @tc.steps: step3. Set ItemFillPolicy to BREAKPOINT_SM1MD2LG3.
+     * @tc.expected: The number of columns should be one.
+     */
+    model.SetItemFillPolicy(AceType::RawPtr(frameNode_), PresetFillType::BREAKPOINT_SM1MD2LG3);
+    FlushUITasks();
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 1), ITEM_MAIN_SIZE);
+}
+
+/**
+ * @tc.name: ItemFillPolicy002
+ * @tc.desc: Test specify the number of columns on grid for different responsive breakpoints and widths
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, ItemFillPolicy002, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();;
+    CreateFixedItems(10);
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. Set ItemFillPolicy to BREAKPOINT_SM1MD2LG3 and set width to 800.
+     * @tc.expected: The number of columns should be two.
+     */
+    model.SetItemFillPolicy(AceType::RawPtr(frameNode_), PresetFillType::BREAKPOINT_SM1MD2LG3);
+    ViewAbstract::SetWidth(AceType::RawPtr(frameNode_), CalcLength(800));
+    FlushUITasks();
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 1), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 2), ITEM_MAIN_SIZE);
+
+    /**
+     * @tc.steps: step2. Set width to 1000.
+     * @tc.expected: The number of columns should be three.
+     */
+    ViewAbstract::SetWidth(AceType::RawPtr(frameNode_), CalcLength(1000));
+    FlushUITasks();
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 1), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 2), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 3), ITEM_MAIN_SIZE);
+
+    /**
+     * @tc.steps: step3. Set ItemFillPolicy to BREAKPOINT_SM2MD3LG5 and set width to 800.
+     * @tc.expected: The number of columns should be three.
+     */
+    model.SetItemFillPolicy(AceType::RawPtr(frameNode_), PresetFillType::BREAKPOINT_SM2MD3LG5);
+    ViewAbstract::SetWidth(AceType::RawPtr(frameNode_), CalcLength(800));
+    FlushUITasks();
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 1), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 2), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 3), ITEM_MAIN_SIZE);
+
+    /**
+     * @tc.steps: step4. Set width to 1000.
+     * @tc.expected: The number of columns should be five.
+     */
+    ViewAbstract::SetWidth(AceType::RawPtr(frameNode_), CalcLength(1000));
+    FlushUITasks();
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 1), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 2), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 3), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 4), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 5), ITEM_MAIN_SIZE);
+
+    /**
+     * @tc.steps: step5. Set ItemFillPolicy to BREAKPOINT_DEFAULT and set width to 800.
+     * @tc.expected: The number of columns should be three.
+     */
+    model.SetItemFillPolicy(AceType::RawPtr(frameNode_), PresetFillType::BREAKPOINT_DEFAULT);
+    ViewAbstract::SetWidth(AceType::RawPtr(frameNode_), CalcLength(800));
+    FlushUITasks();
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 1), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 2), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 3), ITEM_MAIN_SIZE);
+
+    /**
+     * @tc.steps: step6. Set width to 1000.
+     * @tc.expected: The number of columns should be five.
+     */
+    ViewAbstract::SetWidth(AceType::RawPtr(frameNode_), CalcLength(1000));
+    FlushUITasks();
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 1), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 2), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 3), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 4), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 5), ITEM_MAIN_SIZE);
+}
 } // namespace OHOS::Ace::NG

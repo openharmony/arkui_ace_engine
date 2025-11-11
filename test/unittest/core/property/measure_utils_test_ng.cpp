@@ -1282,4 +1282,120 @@ HWTEST_F(MeasureUtilsTestNg, AdjacentExpandToRectTest, TestSize.Level0)
     auto filteredExpand = AdjacentExpandToRect(adjustingRect, frameExpand, frameRect);
     EXPECT_EQ(filteredExpand, expectRes);
 }
+
+/**
+ * @tc.name: GetCommonWidthBreakpointTest001
+ * @tc.desc: Test GetCommonWidthBreakpoint with default breakpoints and different widths
+ * @tc.type: FUNC
+ */
+HWTEST_F(MeasureUtilsTestNg, GetCommonWidthBreakpointTest001, TestSize.Level1)
+{
+    // Test WIDTH_XS breakpoint (< 320)
+    auto result1 = GetCommonWidthBreakpoint(300.0, 1.0);
+    EXPECT_EQ(result1, WidthBreakpoint::WIDTH_XS);
+
+    // Test WIDTH_SM breakpoint (>= 320 and < 600)
+    auto result2 = GetCommonWidthBreakpoint(320.0, 1.0);
+    EXPECT_EQ(result2, WidthBreakpoint::WIDTH_SM);
+    
+    // Test WIDTH_MD breakpoint (600-839)
+    auto result3 = GetCommonWidthBreakpoint(600.0, 1.0);
+    EXPECT_EQ(result3, WidthBreakpoint::WIDTH_MD);
+    
+    // Test WIDTH_LG breakpoint (840-1439)
+    auto result4 = GetCommonWidthBreakpoint(840.0, 1.0);
+    EXPECT_EQ(result4, WidthBreakpoint::WIDTH_LG);
+    
+    // Test WIDTH_XL breakpoint (1440+)
+    auto result5 = GetCommonWidthBreakpoint(1440.0, 1.0);
+    EXPECT_EQ(result5, WidthBreakpoint::WIDTH_XL);
+}
+
+/**
+ * @tc.name: GetCommonWidthBreakpointTest002
+ * @tc.desc: Test GetCommonWidthBreakpoint with different densities
+ * @tc.type: FUNC
+ */
+HWTEST_F(MeasureUtilsTestNg, GetCommonWidthBreakpointTest002, TestSize.Level1)
+{
+    // Test WIDTH_XS breakpoint (< 320 * 2.0 = 640)
+    auto result1 = GetCommonWidthBreakpoint(600.0, 2.0);
+    EXPECT_EQ(result1, WidthBreakpoint::WIDTH_XS);
+
+    // Test WIDTH_SM breakpoint (640-1199)
+    auto result2 = GetCommonWidthBreakpoint(640.0, 2.0);
+    EXPECT_EQ(result2, WidthBreakpoint::WIDTH_SM);
+    
+    // Test WIDTH_MD breakpoint (1200-1679)
+    auto result3 = GetCommonWidthBreakpoint(1200.0, 2.0);
+    EXPECT_EQ(result3, WidthBreakpoint::WIDTH_MD);
+    
+    // Test WIDTH_LG breakpoint (1680-2879)
+    auto result4 = GetCommonWidthBreakpoint(1680.0, 2.0);
+    EXPECT_EQ(result4, WidthBreakpoint::WIDTH_LG);
+    
+    // Test WIDTH_XL breakpoint (2880+)
+    auto result5 = GetCommonWidthBreakpoint(2880.0, 2.0);
+    EXPECT_EQ(result5, WidthBreakpoint::WIDTH_XL);
+}
+
+/**
+ * @tc.name: GetCommonWidthBreakpointTest003
+ * @tc.desc: Test GetCommonWidthBreakpoint with boundary values
+ * @tc.type: FUNC
+ */
+HWTEST_F(MeasureUtilsTestNg, GetCommonWidthBreakpointTest003, TestSize.Level1)
+{
+    // Test at XS/SM boundary (320)
+    auto result1 = GetCommonWidthBreakpoint(319.9, 1.0);
+    EXPECT_EQ(result1, WidthBreakpoint::WIDTH_XS);
+    
+    auto result2 = GetCommonWidthBreakpoint(320.0, 1.0);
+    EXPECT_EQ(result2, WidthBreakpoint::WIDTH_SM);
+
+    // Test at SM/MD boundary (600)
+    auto result3 = GetCommonWidthBreakpoint(599.9, 1.0);
+    EXPECT_EQ(result3, WidthBreakpoint::WIDTH_SM);
+    
+    auto result4 = GetCommonWidthBreakpoint(600.0, 1.0);
+    EXPECT_EQ(result4, WidthBreakpoint::WIDTH_MD);
+
+    // Test at MD/LG boundary (840)
+    auto result5 = GetCommonWidthBreakpoint(839.9, 1.0);
+    EXPECT_EQ(result5, WidthBreakpoint::WIDTH_MD);
+    
+    auto result6 = GetCommonWidthBreakpoint(840.0, 1.0);
+    EXPECT_EQ(result6, WidthBreakpoint::WIDTH_LG);
+
+    // Test at LG/XL boundary (1440)
+    auto result7 = GetCommonWidthBreakpoint(1439.9, 1.0);
+    EXPECT_EQ(result7, WidthBreakpoint::WIDTH_LG);
+    
+    auto result8 = GetCommonWidthBreakpoint(1440.0, 1.0);
+    EXPECT_EQ(result8, WidthBreakpoint::WIDTH_XL);
+}
+
+/**
+ * @tc.name: GetCommonWidthBreakpointTest004
+ * @tc.desc: Test GetCommonWidthBreakpoint with extreme values
+ * @tc.type: FUNC
+ */
+HWTEST_F(MeasureUtilsTestNg, GetCommonWidthBreakpointTest004, TestSize.Level1)
+{
+    // Test with very small width
+    auto result1 = GetCommonWidthBreakpoint(1.0, 1.0);
+    EXPECT_EQ(result1, WidthBreakpoint::WIDTH_XS);
+
+    // Test with very large width
+    auto result2 = GetCommonWidthBreakpoint(5000.0, 1.0);
+    EXPECT_EQ(result2, WidthBreakpoint::WIDTH_XL);
+
+    // Test with very small density
+    auto result3 = GetCommonWidthBreakpoint(1000.0, 0.1);
+    EXPECT_EQ(result3, WidthBreakpoint::WIDTH_XL);
+
+    // Test with large density
+    auto result4 = GetCommonWidthBreakpoint(1000.0, 3.0);
+    EXPECT_EQ(result4, WidthBreakpoint::WIDTH_SM);
+}
 } // namespace OHOS::Ace::NG
