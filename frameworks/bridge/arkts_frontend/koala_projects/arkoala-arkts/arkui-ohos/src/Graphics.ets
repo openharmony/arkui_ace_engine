@@ -192,15 +192,13 @@ export class ColorMetrics {
             const g = ColorMetrics.clamp(Number.parseInt(rgbMatch[2]!, 10));
             const b = ColorMetrics.clamp(Number.parseInt(rgbMatch[3]!, 10));
             return ColorMetrics.rgba(r, g, b);
-        }
-        else if (rgbaMatch) {
+        } else if (rgbaMatch) {
             const r = ColorMetrics.clamp(Number.parseInt(rgbaMatch[1]!, 10));
             const g = ColorMetrics.clamp(Number.parseInt(rgbaMatch[2]!, 10));
             const b = ColorMetrics.clamp(Number.parseInt(rgbaMatch[3]!, 10));
             const a = ColorMetrics.clamp(Number.parseFloat(rgbaMatch[4]!));
             return ColorMetrics.rgba(r, g, b, a);
-        }
-        else {
+        } else {
             const error = new Error('Parameter error. The format of the input color string is not RGB or RGBA.');
             throw new BusinessError(ERROR_CODE_COLOR_PARAMETER_INCORRECT, error);
         }

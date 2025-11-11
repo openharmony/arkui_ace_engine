@@ -25,7 +25,9 @@ static const char* callCallbackFromNativeSig = "ili:i";
 const bool registerByOne = true;
 
 static bool registerNatives(
-    ani_env *env, const ani_class clazz, const std::vector<std::tuple<std::string, std::string, void*, int>> impls)
+    ani_env *env,
+    const ani_class clazz,
+    const std::vector<std::tuple<std::string, std::string, void*, int>> impls)
 {
     std::vector<ani_native_function> methods;
     methods.reserve(impls.size());
