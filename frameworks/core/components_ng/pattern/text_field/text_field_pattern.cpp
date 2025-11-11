@@ -11328,9 +11328,6 @@ void TextFieldPattern::AddInsertCommand(const std::u16string& insertValue, Input
         if (!HasFocus()) {
             int32_t frameId = host->GetId();
             TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "textfield %{public}d on blur, can't insert value", frameId);
-            int32_t depth = host->GetDepth();
-            std::string errorType = "textfield on blur, can't insert value";
-            EventReport::ReportTextFieldErrorEvent(frameId, depth, errorType);
             auto currentFocusNode = InputMethodManager::GetInstance()->GetCurFocusNode();
             auto curFocusNode = currentFocusNode.Upgrade();
             CHECK_NULL_VOID(curFocusNode);
