@@ -3483,7 +3483,8 @@ frameworks/core/interfaces/native/implementation/toggle_modifier.cpp @arkuipopup
 frameworks/core/interfaces/native/implementation/toggle_ops_accessor.cpp @arkuipopupwindow_all
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/@ohos.arkui.inspector.ts @arkui-idlize
 
-interfaces/ets/ani/observer @arkui_framework_resource
+interfaces/ets/ani/observer/ @arkui_framework_resource
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/@ohos.arkui.observer.ts @arkui_framework_resource
 
 [Test source]
 test/mock/base @arkui_framework_xnode
