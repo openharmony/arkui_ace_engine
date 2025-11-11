@@ -50,7 +50,7 @@ template<>
 ButtonParameters Convert(const Ark_ButtonLabelStyle& src)
 {
     ButtonParameters parameters;
-    parameters.textOverflow = Converter::OptConvert<TextOverflow>(src.overflow);
+    parameters.textOverflow = Converter::OptConvert<TextOverflow>(src.overflow).value_or(TextOverflow::ELLIPSIS);
     auto maxLines = Converter::OptConvert<int32_t>(src.maxLines);
     if (maxLines) {
         maxLines = std::max(maxLines.value(), 1);
