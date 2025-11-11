@@ -33,6 +33,7 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { DividerModifier } from "./../DividerModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ModifierStateManager } from '../CommonModifier';
 export class ArkDividerPeer extends ArkCommonMethodPeer {
     attributeSet?: DividerModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -215,7 +216,9 @@ export class ArkDividerComponent extends ArkCommonMethodComponent implements Div
         return this
     }
     public attributeModifier(value: AttributeModifier<DividerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookDividerAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookDividerAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

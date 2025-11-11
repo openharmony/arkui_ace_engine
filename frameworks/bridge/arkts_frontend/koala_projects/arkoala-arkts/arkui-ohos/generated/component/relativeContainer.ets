@@ -32,6 +32,7 @@ import { Resource } from "global.resource"
 import { Axis } from "./enums"
 import { RelativeContainerModifier } from "./../RelativeContainerModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ModifierStateManager } from '../CommonModifier'
 import { Resource_serializer } from "./../framework/resource"
 export class ArkRelativeContainerPeer extends ArkCommonMethodPeer {
     attributeSet?: RelativeContainerModifier;
@@ -188,7 +189,9 @@ export class ArkRelativeContainerComponent extends ArkCommonMethodComponent impl
         return this
     }
     public attributeModifier(value: AttributeModifier<RelativeContainerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookRelativeContainerAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookRelativeContainerAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

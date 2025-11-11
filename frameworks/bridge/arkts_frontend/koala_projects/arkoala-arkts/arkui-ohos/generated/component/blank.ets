@@ -33,6 +33,7 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { BlankModifier } from "./../BlankModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ModifierStateManager } from '../CommonModifier'
 export class ArkBlankPeer extends ArkCommonMethodPeer {
     attributeSet?: BlankModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -144,7 +145,9 @@ export class ArkBlankComponent extends ArkCommonMethodComponent implements Blank
         return this
     }
     public attributeModifier(value: AttributeModifier<BlankAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookBlankAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookBlankAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

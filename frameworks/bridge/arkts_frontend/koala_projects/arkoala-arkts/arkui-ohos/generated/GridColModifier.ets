@@ -103,6 +103,7 @@ export class GridColModifier extends CommonMethodModifier implements GridColAttr
     }
     mergeModifier(modifier: GridColModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._span_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._span_0_flag) {

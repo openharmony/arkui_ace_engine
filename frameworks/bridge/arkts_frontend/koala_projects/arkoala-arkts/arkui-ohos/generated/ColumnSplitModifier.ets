@@ -83,6 +83,7 @@ export class ColumnSplitModifier extends CommonMethodModifier implements ColumnS
     }
     mergeModifier(modifier: ColumnSplitModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._resizeable_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._resizeable_0_flag) {

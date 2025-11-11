@@ -29,6 +29,7 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { GridColModifier } from "./../GridColModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ModifierStateManager } from '../CommonModifier';
 export class ArkGridColPeer extends ArkCommonMethodPeer {
     attributeSet?: GridColModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -207,7 +208,9 @@ export class ArkGridColComponent extends ArkCommonMethodComponent implements Gri
         return this
     }
     public attributeModifier(value: AttributeModifier<GridColAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookGridColAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookGridColAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

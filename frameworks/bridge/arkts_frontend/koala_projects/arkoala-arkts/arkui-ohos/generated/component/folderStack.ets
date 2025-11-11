@@ -31,6 +31,7 @@ import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { default as window } from "@ohos.window"
 import { FolderStackModifier } from "./../FolderStackModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ModifierStateManager } from '../CommonModifier';
 export class ArkFolderStackPeer extends ArkCommonMethodPeer {
     attributeSet?: FolderStackModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -241,7 +242,9 @@ export class ArkFolderStackComponent extends ArkCommonMethodComponent implements
         return this
     }
     public attributeModifier(value: AttributeModifier<FolderStackAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookFolderStackAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookFolderStackAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
