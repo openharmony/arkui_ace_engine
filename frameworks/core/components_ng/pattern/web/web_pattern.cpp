@@ -5306,6 +5306,7 @@ HintToTypeWrap WebPattern::GetHintTypeAndMetadata(const std::string& attribute, 
             }
         }
         hintToTypeWrap.autoFillType = type;
+        hintToTypeWrap.metadata = node->GetMetadata();
     } else if (!placeholder.empty()) {
         // try hint2Type
         auto host = GetHost();
@@ -5341,7 +5342,13 @@ void WebPattern::ParseNWebViewDataNode(std::unique_ptr<JsonValue> child,
             continue;
         }
         for (auto child = object->GetChild(); child && !child->IsNull(); child = child->GetNext()) {
-            if (child->IsString()) {
+            if (child->IsArray() && child->GetKey() ==
+                    OHOS::NWeb::NWEB_VIEW_DATA_KEY_SELECTABLE_USER_NAMES) {
+                TAG_LOGI(AceLogTag::ACE_WEB,
+                    "[Password Autofill] the number of selectable usernames: %{public}d",
+                        child->GetArraySize());
+                node->SetMetadata(object->ToString());
+            } else if (child->IsString()) {
                 ParseViewDataString(child->GetKey(), child->GetString(), node);
             } else if (child->IsNumber()) {
                 ParseViewDataNumber(child->GetKey(), child->GetInt(), node, rect, viewScale);
