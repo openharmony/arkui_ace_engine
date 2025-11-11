@@ -20,13 +20,12 @@ export {
   GestureModifier,
   UIGestureEvent,
   DrawModifier,
-  TouchTestInfo,
-  TouchResult
 } from "./component/common";
 export {
   GestureType,
   Gesture,
-  GestureGroup
+  GestureGroup,
+  GestureControl
 } from "./component/gesture";
 export {
   LifeCycle,
@@ -48,7 +47,14 @@ export { LocalStorage } from "./stateManagement"
 
 export * from "./extractors";
 export * from "./hooks"
-
 export {
   ArkUIExtensionComponentPeerBase
 } from "./component/uiExtensionComponent"
+export * from "./component/initializers"
+export * from "./component/securityUIExtensionComponent"
+export * from "./component/common"
+export * from "./component/canvas"
+export * from "./component/waterFlow"
+export * from "./component/embeddedComponent"
+export * from "./component/nodeContainer"
+export * from "./ComponentContent"

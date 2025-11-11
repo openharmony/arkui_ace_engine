@@ -19,6 +19,8 @@ import { Resource } from 'global.resource';
 import { CustomTheme, Theme, CustomColors } from '@ohos/arkui/theme';
 import { int32 } from "@koalaui/common"
 
+export * from './ArkThemeScopeManager'
+
 export type Dimension = Resource;
 
 export interface CornerRadius {

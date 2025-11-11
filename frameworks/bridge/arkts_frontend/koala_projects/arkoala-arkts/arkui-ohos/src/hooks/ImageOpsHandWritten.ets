@@ -19,7 +19,7 @@ import { ArkImageComponent, ResourceStr, ImageContent, ImageAIOptions } from "#g
 import { default as image } from "@ohos.multimedia.image"
 import { Resource } from "global.resource"
 import { DrawableDescriptor } from "@ohos.arkui.drawableDescriptor"
-import { DrawableDescriptor_serializer, image_PixelMap_serializer, Resource_serializer, ImageAIOptions_serializer } from "#generated"
+import { DrawableDescriptor_serializer, image_PixelMap_serializer, global_resource_Resource_serializer, ImageAIOptions_serializer } from "#generated"
 
 export class ImageOpsHandWritten {
     static hookImageSetImageOptionsImpl(component: ArkImageComponent,
@@ -39,7 +39,7 @@ export class ImageOpsHandWritten {
             } else if (srcForIdx1 instanceof Resource) {
                 thisSerializer.writeInt8((1).toByte())
                 const srcForIdx1ForIdx1 = srcForIdx1 as Resource
-                Resource_serializer.write(thisSerializer, srcForIdx1ForIdx1)
+                global_resource_Resource_serializer.write(thisSerializer, srcForIdx1ForIdx1)
             }
         } else if (src instanceof DrawableDescriptor) {
             thisSerializer.writeInt8((2).toByte())

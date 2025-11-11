@@ -1,7 +1,7 @@
 import { int32 } from "@koalaui/common";
 import { KPointer, nullptr } from "@koalaui/interop";
 import { default as image } from "@ohos.multimedia.image";
-import { ColorMetrics, DrawContext, LengthMetrics, Size } from "arkui.Graphics";
+import { ColorMetrics, DrawContext, LengthMetrics, Size } from "@arkui.Graphics";
 import { NodeController } from "arkui.NodeController";
 import { default as curves } from "@ohos.curves";
 import { default as matrix4 } from "@ohos.matrix4";
@@ -45,7 +45,7 @@ import {
 import { FrameNode } from "arkui.FrameNode";
 import { RenderNode } from "arkui.RenderNode";
 import { default as resourceManager } from "@ohos.resourceManager";
-import { LevelOrder } from "@ohos.promptAction";
+import { LevelOrder, default as promptAction } from "@ohos.promptAction";
 import { SymbolGlyphModifier } from "../SymbolGlyphModifier";
 import { TextModifier } from "../TextModifier";
 import { ImageModifier } from "../ImageModifier";
@@ -79,7 +79,10 @@ import { int32 } from '@koalaui/common';
 import { FrameNodeUtils, FrameNodeInternal } from './../FrameNode';
 import { toPeerPtr } from '@koalaui/interop';
 import { applySymbolGlyphModifierToNode, applyTextModifierToNode } from "./../ApplyModifierToNode"
-import { ComponentContent, ComponentContentBase } from 'arkui.ComponentContent';
+import { ComponentContent, ComponentContentBase } from '@arkui.ComponentContent';
+import { BusinessErrorInterface, BusinessError } from "#generated";
+import { WaterFlowSections } from "#handwritten";
+import { WaterFlowSectionsInterface } from "#generated";
 
 export namespace extractors {
   export function toImagePixelMapPtr(value: image.PixelMap): KPointer {
@@ -110,14 +113,6 @@ export namespace extractors {
   }
   export function fromDrawContextPtr(ptr: KPointer): DrawContext {
     return ArkUIAniModule._Extractors_FromDrawContextPtr(ptr);
-  }
-
-  export function toLengthMetricsPtr(ptr: LengthMetrics): KPointer {
-    return 123;
-  }
-  export function fromLengthMetricsPtr(ptr: KPointer): LengthMetrics {
-    const x: Object = {};
-    return x as LengthMetrics;
   }
 
   export function toNodeControllerPtr(value: NodeController): KPointer {
@@ -372,6 +367,12 @@ export namespace extractors {
   export function fromLevelOrderPtr(ptr: KPointer): LevelOrder {
     return new LevelOrder(ptr);
   }
+  export function toPromptActionDialogControllerPtr(value: promptAction.DialogController): KPointer {
+    throw new Error("Not implemented")
+  }
+  export function fromPromptActionDialogControllerPtr(ptr: KPointer): promptAction.DialogController {
+    throw new Error("Not implemented")
+  }
 
   export function toWindowWindowStagePtr(value: window.WindowStage): KPointer {
     return 123;
@@ -594,5 +595,22 @@ export namespace extractors {
     const x: Object = {};
     return x as ComponentContent;
   }
-
+  export function transform_Ark_BusinessError_Void_to_Ark_BusinessErrorInterface_Void(from: BusinessError<void>): BusinessErrorInterface<void> {
+        return {
+            name: from.name,
+            message: from.message,
+            stack: from.stack,
+            code: from.code,
+            data: undefined,
+        }
+    }
+  export function transform_Ark_BusinessErrorInterface_Void_to_Ark_BusinessError_Void(from: BusinessErrorInterface<void>): BusinessError<void> {
+    return new BusinessError(from.code, new Error()) // TODO how to construct error correctly?
+  }
+  export function transform_Ark_WaterFlowSections_to_Ark_WaterFlowSectionsInterface(from: WaterFlowSections): WaterFlowSectionsInterface {
+    throw new Error("Not implemented")
+  }
+  export function transform_Ark_WaterFlowSectionsInterface_to_Ark_WaterFlowSections(from: WaterFlowSectionsInterface): WaterFlowSections {
+    throw new Error("Not implemented")
+  }
 }

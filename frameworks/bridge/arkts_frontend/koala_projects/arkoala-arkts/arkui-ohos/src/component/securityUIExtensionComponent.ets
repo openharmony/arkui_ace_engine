@@ -15,15 +15,15 @@
 
 import { ArkUIAniSecurityUiextensionModal, ArkUIAniUIExtensionOptions } from "arkui.ani"
 import { KPointer, InteropNativeModule } from "@koalaui/interop"
-import { RecordData } from "./pluginComponent"
+import { RecordData } from "@ohos.base"
 import { int32 } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { ArkCommonMethodPeer, CommonMethod, TerminationInfo, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, TerminationInfo, ArkCommonMethodComponent } from "./common"
 import { ErrorCallback, BusinessError } from "@ohos.base"
 import { AttributeModifier } from "#handwritten"
 import { default as Want } from "@ohos.app.ability.Want"
-import { ComponentContent } from "arkui.ComponentContent"
+import { ComponentContent } from "@arkui.ComponentContent"
 import { NodeAttach, remember } from "@koalaui/runtime"
 export interface SecurityUIExtensionProxy {
     send(data: Record<string, RecordData>): void

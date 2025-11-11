@@ -45,7 +45,7 @@ import {
     NavDestinationCustomTitle,
 } from 'arkui.component.navDestination';
 import { ResourceStr } from 'arkui.component.units';
-import { SymbolGlyphModifier } from 'arkui.SymbolGlyphModifier';
+import { SymbolGlyphModifier } from '@arkui.SymbolGlyphModifier';
 import window from '@ohos.window';
 import { Scroller } from 'arkui.component.scroll';
 import { Resource } from 'global.resource';

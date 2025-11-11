@@ -289,6 +289,6 @@ export class PathStackUtils {
         }
         let index = NavExtender.popToName(pathStack, name, animated_value)
         PathStackUtils.popPage(index)
-        return index
+        return index as int32
     }
 }

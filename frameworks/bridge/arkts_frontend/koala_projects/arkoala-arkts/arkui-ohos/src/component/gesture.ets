@@ -4,8 +4,8 @@ import { GestureOps } from "./idlize"
 import { PeerNode } from "../PeerNode"
 import { GlobalStateManager, MutableState } from '@koalaui/runtime'
 import { KeyEventInternal, TouchTestInfo } from "arkui/component/common"
-import { TypeChecker } from "#components"
 import { ArkUIAniModule } from "arkui.ani"
+import { SourceTool } from "#generated"
 
 export type GestureType = Gesture | GestureGroup;
 export class GestureHandler {
@@ -535,7 +535,7 @@ export class PanGesture extends Gesture {
     onActionCancelCallback?: Callback<GestureEvent>;
     static $_instantiate(factory: () => PanGesture, value?: PanGestureHandlerOptions | PanGestureOptions): PanGesture {
         const pan = factory();
-        if (TypeChecker.isPanGestureHandlerOptions(value, false, false, false)) {
+        if (value instanceof PanGestureHandlerOptions) {
             let options = value as PanGestureHandlerOptions;
             pan.finger = options?.fingers;
             pan.direction = options?.direction;
@@ -894,5 +894,18 @@ export class EventTargetInfoTransfer {
         }
         let retValue = wrapFunc.invoke(objectInternal.getId());
         return retValue;
+    }
+}
+
+export namespace GestureControl {
+    export enum GestureType {
+        TAP_GESTURE = 0,
+        LONG_PRESS_GESTURE = 1,
+        PAN_GESTURE = 2,
+        PINCH_GESTURE = 3,
+        SWIPE_GESTURE = 4,
+        ROTATION_GESTURE = 5,
+        DRAG = 6,
+        CLICK = 7
     }
 }

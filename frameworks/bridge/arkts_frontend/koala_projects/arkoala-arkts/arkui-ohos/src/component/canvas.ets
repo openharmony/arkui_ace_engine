@@ -14,6 +14,7 @@
  */
 
 import { ArkUIAniModule } from "arkui.ani";
+import { LengthMetricsUnit as arkui_component_units_LengthMetricsUnit } from '#generated'
 
 const DIFF: number = 1e-10
 const int_MAX: number = 2147483647
@@ -27,7 +28,7 @@ export class ImageData {
     private data_val: Uint8ClampedArray = new Uint8ClampedArray()
     private finalWidth: int = 0
     private finalHeight: int = 0
-    private unit_val: LengthMetricsUnit = LengthMetricsUnit.DEFAULT
+    private unit_val: arkui_component_units_LengthMetricsUnit = arkui_component_units_LengthMetricsUnit.DEFAULT
 
     get data(): Uint8ClampedArray {
         return this.data_val
@@ -38,7 +39,7 @@ export class ImageData {
     get width(): int {
         return this.finalWidth
     }
-    constructor(width: number, height: number, data?: Uint8ClampedArray, unit?: LengthMetricsUnit) {
+    constructor(width: number, height: number, data?: Uint8ClampedArray, unit?: arkui_component_units_LengthMetricsUnit) {
         if (width == undefined || height == undefined) {
             return
         }
@@ -61,7 +62,7 @@ export class ImageData {
         if (data == undefined) {
             this.data_val = new Uint8ClampedArray(length)
         } else {
-            if (this.unit_val == LengthMetricsUnit.PX && data.length != length) {
+            if (this.unit_val == arkui_component_units_LengthMetricsUnit.PX && data.length != length) {
                 return
             }
             this.data_val = data
@@ -69,7 +70,7 @@ export class ImageData {
     }
     private GetDensity(): number {
         const density = getSystemDensity()
-        if ((this.unit_val == LengthMetricsUnit.DEFAULT) && density !== 0.0) {
+        if ((this.unit_val == arkui_component_units_LengthMetricsUnit.DEFAULT) && density !== 0.0) {
             return density
         } else {
             return 1.0

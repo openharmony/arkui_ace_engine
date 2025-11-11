@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-import { TypeChecker, ArkUIGeneratedNativeModule } from '#components'
+import { ArkUIGeneratedNativeModule } from '#components'
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KLong, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, InteropNativeModule } from '@koalaui/interop'
 import { unsafeCast, int32, int64, float32 } from '@koalaui/common'
 import { ComponentBase } from '../ComponentBase'
 import { PeerNode } from '../PeerNode'
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from './common'
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent } from './common'
 import { BusinessError, Callback } from '#external'
 import { ErrorCallback } from '@ohos.base'
 import { NodeAttach, remember } from '@koalaui/runtime'
@@ -120,17 +120,6 @@ export interface DynamicComponentAttribute extends CommonMethod {
     }
     onError(value: ((e: BusinessError) => void) | undefined): this
     isReportFrameEvent(value: boolean | undefined): this
-}
-export class ArkDynamicComponentStyle extends ArkCommonMethodStyle implements DynamicComponentAttribute {
-    public setDynamicComponentOptions(options: DynamicOptions): this {
-        return this
-    }
-    public onError(value: ((e: BusinessError) => void) | undefined): this {
-        return this
-    }
-    public isReportFrameEvent(value: boolean | undefined) : this {
-        return this
-    }
 }
 export class ArkDynamicComponent extends ArkCommonMethodComponent implements DynamicComponentAttribute {
     getPeer(): ArkDynamicComponentPeer {

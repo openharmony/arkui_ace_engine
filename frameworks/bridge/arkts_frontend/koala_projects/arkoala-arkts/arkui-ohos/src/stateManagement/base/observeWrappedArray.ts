@@ -28,7 +28,7 @@ final class CONSTANT {
 export class WrappedArray<T> extends Array<T> implements IObservedObject, ObserveWrappedKeyedMeta, ISubscribedWatches {
     public store_: Array<T>;
     @JSONStringifyIgnore
-    private meta_: IMutableKeyedStateMeta;
+    meta_: IMutableKeyedStateMeta;
     // support for @Watch
     // each IObservedObject manages a set of @Wtch subscribers
     // when a object property changes need to call execureOnSubscribingWatches
@@ -37,7 +37,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
     private subscribedWatches: SubscribedWatches = new SubscribedWatches();
     // IObservedObject interface
     @JSONStringifyIgnore
-    private ____V1RenderId: RenderIdType = 0;
+    ____V1RenderId: RenderIdType = 0;
     @JSONStringifyIgnore
     private allowDeep_: boolean;
     private isAPI_: boolean;

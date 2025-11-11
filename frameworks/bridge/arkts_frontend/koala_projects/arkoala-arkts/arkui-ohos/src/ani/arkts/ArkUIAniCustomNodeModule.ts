@@ -37,7 +37,7 @@ export class MeasurableLayoutableInner implements Measurable, Layoutable {
         }
     }
     
-    uniqueId?: number | undefined;
+    uniqueId?: int64 | undefined;
     measureResult: MeasureResult = {width: 0, height: 0};
 
     public override measure(constraint: ConstraintSizeOptions): MeasureResult | undefined {
@@ -46,13 +46,13 @@ export class MeasurableLayoutableInner implements Measurable, Layoutable {
     public override layout(position: Position) {
         this.layoutInner(position)
     }
-    public override getMargin(): DirectionalEdgesT<number> | undefined {
+    public override getMargin(): DirectionalEdgesT<double> | undefined {
         return this.getMarginInner()
     }
-    public override getPadding(): DirectionalEdgesT<number> | undefined {
+    public override getPadding(): DirectionalEdgesT<double> | undefined {
         return this.getPaddingInner()
     }
-    public override getBorderWidth(): DirectionalEdgesT<number> | undefined {
+    public override getBorderWidth(): DirectionalEdgesT<double> | undefined {
         return this.getBorderWidthInner()
     }
     
@@ -150,9 +150,9 @@ export class GeometryInfoInner implements GeometryInfo {
 }
 
 export class SizeResultInner implements SizeResult {
-    width: number;
-    height: number;
-    constructor(width: number, height: number)
+    width: double;
+    height: double;
+    constructor(width: double, height: double)
     {
         this.height = height;
         this.width = width;
@@ -160,9 +160,9 @@ export class SizeResultInner implements SizeResult {
 }
 
 export class MeasureResultInner implements MeasureResult {
-    width: number;
-    height: number;
-    constructor(width: number, height: number)
+    width: double;
+    height: double;
+    constructor(width: double, height: double)
     {
         this.height = height;
         this.width = width;

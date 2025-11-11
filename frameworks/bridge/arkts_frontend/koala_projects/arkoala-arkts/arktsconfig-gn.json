@@ -13,11 +13,20 @@
             "#stateMgmtTool": [
                 "./arkui/stateManagement/tools/arkts"
             ],
+            "#StateMgmtConsole": [
+                "./arkui/stateManagement/tools/stateMgmtDFX"
+            ],
             "#handwritten": [
                 "./arkui/"
             ],
             "#generated": [
                 "./arkui/framework"
+            ],
+            "#arktheme": [
+                "./arkui/theme"
+            ],
+            "#interop": [
+                "./arkui/component/interop"
             ],
             "arkui.ani": [
                 "./arkui/ani/arkts"
@@ -91,19 +100,19 @@
             "@ohos/arkui/theme": [
                 "@ohos.arkui.theme.ets"
             ],
-            "arkui.Graphics": [
+            "@arkui.Graphics": [
                 "./arkui/Graphics.ets"
             ],
             "arkui.FrameNode": [
                 "./arkui/FrameNode.ets"
             ],
-            "arkui.ComponentContent": [
+            "@arkui.ComponentContent": [
                 "./arkui/ComponentContent.ets"
             ],
             "arkui.BuilderNode": [
                 "./arkui/BuilderNode.ets"
             ],
-            "arkui.SymbolGlyphModifier": [
+            "@arkui.SymbolGlyphModifier": [
                 "./arkui/SymbolGlyphModifier.ets"
             ],
             "arkui.Content": [
@@ -126,6 +135,18 @@
             ],
             "@ohos.arkui.stateManagement": [
                 "./arkui/stateManagement"
+            ],
+            "@factoryInternal/factoryInternal": [
+                "./arkui/stateManagement/base/factoryInternal"
+            ],
+            "@uicontext/UIContextUtil": [
+                "./arkui/base/UIContextUtil"
+            ],
+            "@uicontext/UIContextImpl": [
+                "./arkui/base/UIContextImpl"
+            ],
+            "@interopStorage/interopStorageV2": [
+                "./arkui/stateManagement/interop/interopStorageV2"
             ]
         }
     },

@@ -16,7 +16,6 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { Resource } from "global.resource"
-import { TypeChecker } from "#components"
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, pointer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { ResourceColor } from '#generated';
@@ -143,6 +142,9 @@ export class ColorMetrics {
     }
     get alpha(): int32 {
         return this.alpha_!;
+    }
+    set color(color: string) {
+        // stub (v140)
     }
     set red(red: int32) {
         this.red_ = red;

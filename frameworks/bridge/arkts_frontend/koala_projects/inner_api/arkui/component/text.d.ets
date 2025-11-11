@@ -46,7 +46,7 @@ import {
     TextSelectableMode,
 } from 'arkui.component.enums';
 import { TextDataDetectorConfig, EditMenuOptions, FontSettingOptions } from 'arkui.component.textCommon';
-import { LengthMetrics } from 'arkui.Graphics';
+import { LengthMetrics } from '@arkui.Graphics';
 import { SelectionMenuOptions } from 'arkui.component.richEditor';
 import { DecorationStyleInterface } from 'arkui.component.styledString';
 

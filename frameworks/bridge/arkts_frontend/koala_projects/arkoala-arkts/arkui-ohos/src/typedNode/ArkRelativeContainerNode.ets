@@ -15,7 +15,6 @@
 
 import { InteropNativeModule, runtimeType, RuntimeType } from '@koalaui/interop';
 import { ArkBaseNode } from './ArkBaseNode';
-import { TypeChecker } from "#components"
 import { RelativeContainerAttribute, ArkRelativeContainerPeer, GuideLineStyle, BarrierStyle,
     LocalizedBarrierStyle } from '../framework';
 
@@ -47,7 +46,7 @@ export class ArkRelativeContainerNode extends ArkBaseNode implements RelativeCon
 
     barrier(value: Array<BarrierStyle> | undefined): this {
         const value_type = runtimeType(value);
-        if ((RuntimeType.OBJECT == value_type && TypeChecker.isArray_BarrierStyle(value)) || (RuntimeType.UNDEFINED == value_type)) {
+        if ((RuntimeType.OBJECT == value_type && (value instanceof Array)) || (RuntimeType.UNDEFINED == value_type)) {
             const value_casted = value as (Array<BarrierStyle> | undefined);
             this.getPeer()?.setBarrierAttribute(value_casted);
             return this;

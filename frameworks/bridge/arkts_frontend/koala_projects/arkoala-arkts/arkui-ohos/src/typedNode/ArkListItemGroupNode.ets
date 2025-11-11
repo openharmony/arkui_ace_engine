@@ -48,10 +48,11 @@ export class ArkListItemGroupNode extends ArkBaseNode implements ListItemGroupAt
         return this
     }
     childrenMainSize(value: ChildrenMainSize | undefined): this {
-        const value_casted = value as (ChildrenMainSize | undefined)
-        this.getPeer()?.setChildrenMainSizeAttribute(value_casted);
-        this.markDirty()
-        return this
+        // const value_casted = value as (ChildrenMainSize | undefined)
+        // this.getPeer()?.setChildrenMainSizeAttribute(value_casted);
+        // this.markDirty()
+        // return this
+        throw new Error("Unimplemented method childrenMainSize")
     }
     attributeModifier(value: AttributeModifier<ListItemGroupAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Unimplemented method attributeModifier")
