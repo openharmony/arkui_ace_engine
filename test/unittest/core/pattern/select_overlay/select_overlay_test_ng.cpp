@@ -71,7 +71,6 @@ int32_t callBackFlag = 0;
 constexpr float RK356_HEIGHT = 1136.0f;
 const OffsetF OFFSET_ITEM1 = OffsetF(5, 5);
 const Rect WINDOW_RECT(0, 0, 280, 1280);
-constexpr Dimension OVERLAY_MAX_WIDTH = 280.0_vp;
 } // namespace
 
 class SelectOverlayTestNg : public testing::Test {
@@ -93,6 +92,13 @@ void SelectOverlayTestNg::SetUpTestCase()
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(selectTheme));
+    auto rootNode = MockPipelineContext::GetCurrent()->rootNode_;
+    if (rootNode) {
+        auto rootRenderContext = rootNode->GetRenderContext();
+        if (rootRenderContext) {
+            rootRenderContext->UpdatePaintRect(RectF(0.0f, 0.0f, 1280.0f, 2480.0f));
+        }
+    }
 }
 
 void SelectOverlayTestNg::TearDownTestCase()
@@ -5321,9 +5327,10 @@ HWTEST_F(SelectOverlayTestNg, GetDefaultButtonAndMenuWidth001, TestSize.Level1)
 
     auto backButtonWidth = textOverlayTheme->GetMenuToolbarHeight().ConvertToPx() - menuPadding.Top().ConvertToPx() -
                            menuPadding.Bottom().ConvertToPx();
+    auto gap = textOverlayTheme->GetOverlayMenuHorizontalGap().ConvertToPx() * 2;
     selectOverlayNode->GetDefaultButtonAndMenuWidth(maxWidth);
-    EXPECT_EQ(maxWidth,
-        WINDOW_RECT.Width() - menuPadding.Left().ConvertToPx() - menuPadding.Right().ConvertToPx() - backButtonWidth);
+    EXPECT_EQ(maxWidth, WINDOW_RECT.Width() - gap - menuPadding.Left().ConvertToPx() -
+                            menuPadding.Right().ConvertToPx() - backButtonWidth);
 }
 
 /**
@@ -5371,7 +5378,7 @@ HWTEST_F(SelectOverlayTestNg, GetDefaultButtonAndMenuWidth002, TestSize.Level1)
     auto backButtonWidth = textOverlayTheme->GetMenuToolbarHeight().ConvertToPx() - menuPadding.Top().ConvertToPx() -
                            menuPadding.Bottom().ConvertToPx();
     selectOverlayNode->GetDefaultButtonAndMenuWidth(maxWidth);
-    EXPECT_EQ(maxWidth, OVERLAY_MAX_WIDTH.ConvertToPx() - menuPadding.Left().ConvertToPx() -
+    EXPECT_EQ(maxWidth, textOverlayTheme->GetMaxOverlayMenuWidth().ConvertToPx() - menuPadding.Left().ConvertToPx() -
                             menuPadding.Right().ConvertToPx() - backButtonWidth);
 }
 
@@ -6481,5 +6488,37 @@ HWTEST_F(SelectOverlayTestNg, AdjustToInfo, TestSize.Level1)
     auto windowOffset = OffsetF();
     auto ret = newNode->AdjustToInfo(layoutWrapperPtr, menuOffset, menuRect, windowOffset, infoPtr);
     EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: InitSurfaceChangedCallback
+ * @tc.desc: Test InitSurfaceChangedCallback with RTL layout direction
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, InitSurfaceChangedCallback, TestSize.Level1)
+{
+    SelectOverlayInfo selectInfo;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    ASSERT_NE(frameNode, nullptr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    ASSERT_NE(selectOverlayNode, nullptr);
+    auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->overlayMode_ = SelectOverlayMode::HANDLE_ONLY;
+    pattern->surfaceChangeCallbackId_.reset();
+    pattern->InitSurfaceChangedCallback();
+    EXPECT_FALSE(pattern->surfaceChangeCallbackId_.has_value());
+
+    pattern->overlayMode_ = SelectOverlayMode::MENU_ONLY;
+    infoPtr->menuInfo.menuBuilder = []() {};
+    pattern->InitSurfaceChangedCallback();
+    EXPECT_FALSE(pattern->surfaceChangeCallbackId_.has_value());
+
+    infoPtr->menuInfo.menuBuilder = nullptr;
+    pattern->pipeline_ = MockPipelineContext::GetCurrent();
+    pattern->InitSurfaceChangedCallback();
+    pattern->HandleSurfaceChanged();
+    EXPECT_TRUE(pattern->surfaceChangeCallbackId_.has_value());
 }
 } // namespace OHOS::Ace::NG
