@@ -44,6 +44,14 @@ void SetPrevFocusIdToElementInfo(const RefPtr<NG::UINode>& prevNode, Accessibili
     }
     nodeInfo.SetAccessibilityPreviousFocusId(elementId);
 }
+
+int64_t GetRealId(int64_t elementId)
+{
+    int64_t splitElementId = AccessibilityElementInfo::UNDEFINED_ACCESSIBILITY_ID;
+    int32_t splitTreeId = AccessibilityElementInfo::UNDEFINED_TREE_ID;
+    AccessibilitySystemAbilityClient::GetTreeIdAndElementIdBySplitElementId(elementId, splitElementId, splitTreeId);
+    return splitElementId;
+}
 } // namespace
 
 void FocusStrategyOsalNG::InvailidElementInfo(Accessibility::AccessibilityElementInfo& info)
@@ -255,7 +263,7 @@ Accessibility::FocusMoveResult FocusStrategyOsalNG::DetectElementInfoFocusableTh
     UpdateBelongTreeIdAndParentWindowId(windowId, result);
     auto rootNode = GetRootNodeFromContext();
     CHECK_NULL_RETURN(rootNode, result);
-    auto baseNode = NG::AccessibilityFrameNodeUtils::GetFramenodeByAccessibilityId(rootNode, param.parentId);
+    auto baseNode = NG::AccessibilityFrameNodeUtils::GetFramenodeByAccessibilityId(rootNode, GetRealId(param.parentId));
     CHECK_NULL_RETURN(baseNode, result);
     AceDetectThroughAncestorParam detectParam;
     bool isInFocusMove = param.direction == FocusMoveDirection::DETECT_FOCUSABLE_IN_FOCUS_MOVE;

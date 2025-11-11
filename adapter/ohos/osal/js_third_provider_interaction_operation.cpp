@@ -91,7 +91,7 @@ void CopyNativeInfoToAccessibilityElementInfo(
     const NodeConfig& config,
     Accessibility::AccessibilityElementInfo& info)
 {
-    TransformAccessbilityElementInfo(elementInfo, info);
+    AccessibilityThirdProviderUtils::TransformAccessibilityElementInfo(elementInfo, info);
     JsThirdProviderInteractionOperation::FillNodeConfig(config, info);
 }
 
@@ -102,7 +102,7 @@ void CopyNativeInfosToAccessibilityElementInfos(
 {
     for (const auto& nativeInfo : nativeInfos) {
         Accessibility::AccessibilityElementInfo info;
-        TransformAccessbilityElementInfo(nativeInfo, info);
+        AccessibilityThirdProviderUtils::TransformAccessibilityElementInfo(nativeInfo, info);
         JsThirdProviderInteractionOperation::FillNodeConfig(config, info);
         infos.push_back(info);
     }
@@ -138,6 +138,107 @@ void RemoveKeysForClickAction(
     args.erase(ACTION_ARGU_CLICK_TIMESTAMP);
 }
 } // namespace
+
+void AccessibilityThirdProviderUtils::TransformAccessibilityElementInfoBasic(
+    const ArkUI_AccessibilityElementInfo& nativeInfo,
+    OHOS::Accessibility::AccessibilityElementInfo& accessibilityElementInfo)
+{
+    accessibilityElementInfo.SetParent(nativeInfo.GetParentId());
+    accessibilityElementInfo.SetComponentType(nativeInfo.GetComponentType());
+    accessibilityElementInfo.SetContent(nativeInfo.GetContents());
+    accessibilityElementInfo.SetHint(nativeInfo.GetHintText());
+    accessibilityElementInfo.SetAccessibilityText(nativeInfo.GetAccessibilityText());
+    accessibilityElementInfo.SetDescriptionInfo(nativeInfo.GetAccessibilityDescription());
+    accessibilityElementInfo.SetOriginalText(nativeInfo.GetContents());
+
+    auto nodeList = nativeInfo.GetChildNodeIds();
+    for (const auto& node : nodeList) {
+        accessibilityElementInfo.AddChild(node);
+    }
+
+    auto actionList = nativeInfo.GetOperationActions();
+    for (const auto& actionItem : actionList) {
+        auto action = OHOS::Accessibility::AccessibleAction(
+            static_cast<OHOS::Accessibility::ActionType>(actionItem.actionType),
+            actionItem.description ? actionItem.description : "");
+        accessibilityElementInfo.AddAction(action);
+    }
+}
+
+void AccessibilityThirdProviderUtils::TransformAccessibilityElementInfo(
+    const ArkUI_AccessibilityElementInfo& nativeInfo,
+    OHOS::Accessibility::AccessibilityElementInfo& accessibilityElementInfo)
+{
+    TransformAccessibilityElementInfoBasic(nativeInfo, accessibilityElementInfo);
+
+    auto rect = nativeInfo.GetScreenRect();
+    auto transformedRect = OHOS::Accessibility::Rect(
+        rect.leftTopX, rect.leftTopY, rect.rightBottomX, rect.rightBottomY);
+    accessibilityElementInfo.SetRectInScreen(transformedRect);
+    accessibilityElementInfo.SetCheckable(nativeInfo.IsCheckable());
+    accessibilityElementInfo.SetChecked(nativeInfo.IsChecked());
+    accessibilityElementInfo.SetFocusable(nativeInfo.IsFocusable());
+    accessibilityElementInfo.SetFocused(nativeInfo.IsFocused());
+    accessibilityElementInfo.SetVisible(nativeInfo.IsVisible());
+    accessibilityElementInfo.SetAccessibilityFocus(nativeInfo.IsAccessibilityFocused());
+    accessibilityElementInfo.SetSelected(nativeInfo.IsSelected());
+    accessibilityElementInfo.SetClickable(nativeInfo.IsClickable());
+    accessibilityElementInfo.SetLongClickable(nativeInfo.IsLongClickable());
+    accessibilityElementInfo.SetEnabled(nativeInfo.IsEnabled());
+    accessibilityElementInfo.SetPassword(nativeInfo.IsPassword());
+    accessibilityElementInfo.SetScrollable(nativeInfo.IsScrollable());
+    accessibilityElementInfo.SetEditable(nativeInfo.IsEditable());
+    accessibilityElementInfo.SetHinting(nativeInfo.IsHint());
+
+    auto range = nativeInfo.GetRangeInfo();
+    auto transformedRange = OHOS::Accessibility::RangeInfo(range.min, range.max, range.current);
+    accessibilityElementInfo.SetRange(transformedRange);
+
+    auto grid = nativeInfo.GetGridInfo();
+    auto transformedGrid = OHOS::Accessibility::GridInfo(
+        grid.rowCount, grid.columnCount, grid.selectionMode);
+    accessibilityElementInfo.SetGrid(transformedGrid);
+
+    auto gridItem = nativeInfo.GetGridItemInfo();
+    auto transformedGirdItemInfo = OHOS::Accessibility::GridItemInfo(
+        gridItem.rowIndex, gridItem.rowSpan, gridItem.columnIndex,
+        gridItem.columnSpan, gridItem.heading, gridItem.selected);
+    accessibilityElementInfo.SetGridItem(transformedGirdItemInfo);
+    accessibilityElementInfo.SetSelectedBegin(nativeInfo.GetTextBeginSelected());
+    accessibilityElementInfo.SetSelectedEnd(nativeInfo.GetTextEndSelected());
+    accessibilityElementInfo.SetCurrentIndex(nativeInfo.GetCurrentIndex());
+    accessibilityElementInfo.SetBeginIndex(nativeInfo.GetBeginIndex());
+    accessibilityElementInfo.SetEndIndex(nativeInfo.GetEndIndex());
+    accessibilityElementInfo.SetItemCounts(nativeInfo.GetItemCount());
+    accessibilityElementInfo.SetOffset(nativeInfo.GetOffset());
+    accessibilityElementInfo.SetAccessibilityGroup(nativeInfo.GetAccessibilityGroup());
+    accessibilityElementInfo.SetAccessibilityLevel(nativeInfo.GetAccessibilityLevel());
+    accessibilityElementInfo.SetZIndex(nativeInfo.GetZIndex());
+    accessibilityElementInfo.SetOpacity(nativeInfo.GetOpacity());
+    accessibilityElementInfo.SetBackgroundColor(nativeInfo.GetBackgroundColor());
+    accessibilityElementInfo.SetBackgroundImage(nativeInfo.GetBackgroundImage());
+    accessibilityElementInfo.SetBlur(nativeInfo.GetBlur());
+    accessibilityElementInfo.SetHitTestBehavior(nativeInfo.GetHitTestBehavior());
+    accessibilityElementInfo.SetAccessibilityId(nativeInfo.GetElementId());
+}
+
+void AccessibilityThirdProviderUtils::TransformAccessbilityEventInfo(
+    const ArkUI_AccessibilityEventInfo& nativeEventInfo,
+    OHOS::Accessibility::AccessibilityEventInfo& accessibilityEventInfo)
+{
+    accessibilityEventInfo.SetEventType(
+        static_cast<OHOS::Accessibility::EventType>(nativeEventInfo.GetEventType()));
+    OHOS::Accessibility::AccessibilityElementInfo elementInfo;
+    auto info = nativeEventInfo.GetElementInfo();
+    if (info != nullptr) {
+        TransformAccessibilityElementInfo(*info, elementInfo);
+    }
+
+    accessibilityEventInfo.SetElementInfo(elementInfo);
+    accessibilityEventInfo.SetTextAnnouncedForAccessibility(
+        nativeEventInfo.GetTextAnnouncedForAccessibility());
+    accessibilityEventInfo.SetRequestFocusElementId(nativeEventInfo.GetRequestFocusId());
+}
 
 JsThirdProviderInteractionOperation::JsThirdProviderInteractionOperation(
     const WeakPtr<AccessibilityProvider>& accessibilityProvider,
@@ -727,7 +828,7 @@ void JsThirdProviderInteractionOperation::FocusMoveSearchWithCondition(
         HILOG_INFO_FOCUS("focus move search third scroll result id %{public}" PRId64 ", "
             "ret %{public}d treeId %{public}d parentWindowId %{public}d requestID %{public}d",
             nodeInfo.GetAccessibilityId(), result.resultType, result.nowLevelBelongTreeId,
-            result.nowLevelBelongTreeId, requestId);
+            result.parentWindowId, requestId);
         callback.SetFocusMoveSearchWithConditionResult(infos, result, requestId);
         return;
     }
@@ -740,6 +841,7 @@ void JsThirdProviderInteractionOperation::FocusMoveSearchWithCondition(
             .needTerminate = true,
         };
         callback.SetFocusMoveSearchWithConditionResult(infos, result, requestId);
+        return;
     }
     auto result = strategy.ExecuteFocusMoveSearch(splitElementId, param, nodeInfo);
     infos.emplace_back(nodeInfo);
@@ -748,7 +850,7 @@ void JsThirdProviderInteractionOperation::FocusMoveSearchWithCondition(
     HILOG_INFO_FOCUS("focus move search third result id %{public}" PRId64 ", "
         "ret %{public}d treeId %{public}d parentWindowId %{public}d requestID %{public}d",
         nodeInfo.GetAccessibilityId(), result.resultType, result.nowLevelBelongTreeId,
-        result.nowLevelBelongTreeId, requestId);
+        result.parentWindowId, requestId);
     callback.SetFocusMoveSearchWithConditionResult(infos, result, requestId);
 }
 
@@ -888,7 +990,7 @@ void JsThirdProviderInteractionOperation::GetAccessibilityEventInfoFromNativeEve
     bool ignoreHostOffset)
 {
     // 1. Transform native event to OHOS::Accessibility::AccessibilityEventInfo
-    TransformAccessbilityEventInfo(
+    AccessibilityThirdProviderUtils::TransformAccessbilityEventInfo(
         nativeEventInfo, accessibilityEventInfo);
 
     // 2. Transform Accessibility::AccessibilityEventInfo with host info
