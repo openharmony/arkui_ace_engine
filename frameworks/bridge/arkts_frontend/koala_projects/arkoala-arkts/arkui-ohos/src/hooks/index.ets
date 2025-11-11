@@ -225,15 +225,58 @@ export class ElementIdToCustomProperties {
     constructor() { }
     static instance_: ElementIdToCustomProperties = new ElementIdToCustomProperties();
     static _elementIdToCustomProperties = new Map<number, Map<string, CustomProperty>>();
+    static _commonMethodModifierMap = new Map<CommonMethodModifier, Map<string, CustomProperty>>();
 }
-export function hookCustomPropertyImpl(component: ArkCommonMethodComponent, name: string, value: CustomProperty): void {
-    const nodeId = component.getPeer().getId();
+export function hookCustomPropertyImpl(component: ArkCommonMethodComponent | ArkCommonMethodPeer, name: string, value: CustomProperty, modifier?: CommonMethodModifier | undefined): void {
+    let commonMethodModifier: CommonMethodModifier;
+    if (component instanceof ArkCommonMethodComponent) {
+        const nodeId = component.getPeer().getId();
+        if (!ElementIdToCustomProperties._elementIdToCustomProperties.has(nodeId)) {
+            ElementIdToCustomProperties._elementIdToCustomProperties.set(nodeId, new Map<string, CustomProperty>());
+        };
+        const customProperties = ElementIdToCustomProperties._elementIdToCustomProperties.get(nodeId);
+        if (customProperties) {
+            customProperties.set(name, value);
+        }
+        const removeCallback: () => void = () => {
+            ElementIdToCustomProperties._elementIdToCustomProperties.delete(nodeId);
+        };
+        const getCallback: (name: string) => string | undefined = (name: string) => {
+            if (ElementIdToCustomProperties._elementIdToCustomProperties.has(nodeId)) {
+                const customPropertiesGet = ElementIdToCustomProperties._elementIdToCustomProperties.get(nodeId);
+                if (customPropertiesGet) {
+                    const propertyValue = customPropertiesGet.get(name);
+                    return propertyValue !== undefined ? JSON.stringify(propertyValue) : undefined;
+                }
+            }
+            return undefined;
+        };
+        ArkUIAniModule._Common_SetCustomPropertyCallBack(component.getPeer().getPeerPtr(), removeCallback, getCallback);
+        return;
+    } else {
+        commonMethodModifier = (modifier as CommonMethodModifier)
+    }
+
+    if (!ElementIdToCustomProperties._commonMethodModifierMap.has(commonMethodModifier)) {
+        return;
+    }
+    const commonMethodModifierMap = ElementIdToCustomProperties._commonMethodModifierMap.get(commonMethodModifier);
+
+    let nodeId = -1;
+    if (component instanceof ArkCommonMethodPeer) {
+        let nodeComponent = component as ArkCommonMethodPeer
+        nodeId = nodeComponent.getId();
+    }
     if (!ElementIdToCustomProperties._elementIdToCustomProperties.has(nodeId)) {
         ElementIdToCustomProperties._elementIdToCustomProperties.set(nodeId, new Map<string, CustomProperty>());
     }
     const customProperties = ElementIdToCustomProperties._elementIdToCustomProperties.get(nodeId);
-    if (customProperties) {
-        customProperties.set(name, value);
+    if (commonMethodModifierMap) {
+        if (customProperties) {
+            commonMethodModifierMap.forEach((value, key)=>{
+              customProperties.set(key, value);
+            })
+        }
     }
     const removeCallback: () => void = () => {
         ElementIdToCustomProperties._elementIdToCustomProperties.delete(nodeId);
@@ -248,7 +291,21 @@ export function hookCustomPropertyImpl(component: ArkCommonMethodComponent, name
         }
         return undefined;
     };
-    ArkUIAniModule._Common_SetCustomPropertyCallBack(component.getPeer().getPeerPtr(), removeCallback, getCallback);
+    if (component instanceof ArkCommonMethodPeer) {
+        let nodeComponent = component as ArkCommonMethodPeer
+        ArkUIAniModule._Common_SetCustomPropertyCallBack(nodeComponent.getPeerPtr(), removeCallback, getCallback);
+    }
+    
+}
+
+export function hookCommonMethodModifierCustomProperty(component: CommonMethodModifier, name: string, value: CustomProperty): void {
+    if (!ElementIdToCustomProperties._commonMethodModifierMap.has(component)) {
+        ElementIdToCustomProperties._commonMethodModifierMap.set(component, new Map<string, CustomProperty>());
+    }
+    const customProperties = ElementIdToCustomProperties._commonMethodModifierMap.get(component);
+    if (customProperties) {
+        customProperties.set(name, value);
+    }
 }
 
 export function hookDrawModifier(arkComponent: ArkCommonMethodComponent, value: DrawModifier | undefined): void {
