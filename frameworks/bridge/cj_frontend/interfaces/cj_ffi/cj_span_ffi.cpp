@@ -115,6 +115,16 @@ void FfiOHOSAceFrameworkSpanSetFontSize(double fontSize, int32_t unit)
     SpanModel::GetInstance()->SetFontSize(value);
 }
 
+void FfiOHOSAceFrameworkSpanResetFontSize()
+{
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
+    CalcDimension fontSize = theme->GetTextStyle().GetFontSize();
+    SpanModel::GetInstance()->SetFontSize(fontSize);
+}
+
 void FfiOHOSAceFrameworkSpanSetOnClick(void (*callback)(CJClickInfo clickInfo))
 {
     auto lambda = [ffiOnClick = CJLambda::Create(callback)](const GestureEvent& event) -> void {
@@ -152,6 +162,16 @@ void FfiOHOSAceFrameworkSpanSetFontWeight(const char* fontWeight)
 void FfiOHOSAceFrameworkSpanSetFontColor(uint32_t textColor)
 {
     SpanModel::GetInstance()->SetTextColor(Color(textColor));
+}
+
+void FfiOHOSAceFrameworkSpanResetFontColor()
+{
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
+    Color textColor = theme->GetTextStyle().GetTextColor();
+    SpanModel::GetInstance()->SetTextColor(textColor);
 }
 
 void FfiOHOSAceFrameworkSpanSetFontStyle(int32_t fontStyle)

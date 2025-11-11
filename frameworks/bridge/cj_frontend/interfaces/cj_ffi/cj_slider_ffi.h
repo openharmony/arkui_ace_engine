@@ -31,8 +31,11 @@ struct CJSliderCreate {
 };
 CJ_EXPORT void FfiOHOSAceFrameworkSliderCreate(CJSliderCreate value);
 CJ_EXPORT void FfiOHOSAceFrameworkSliderBlockColor(uint32_t color);
+CJ_EXPORT void FfiOHOSAceFrameworkSliderResetBlockColor();
 CJ_EXPORT void FfiOHOSAceFrameworkSliderTrackColor(uint32_t color);
+CJ_EXPORT void FfiOHOSAceFrameworkSliderResetTrackColor();
 CJ_EXPORT void FfiOHOSAceFrameworkSliderSelectedColor(uint32_t color);
+CJ_EXPORT void FfiOHOSAceFrameworkSliderResetSelectedColor();
 CJ_EXPORT void FfiOHOSAceFrameworkSliderShowSteps(bool isShow);
 CJ_EXPORT void FfiOHOSAceFrameworkSliderShowTips(bool isShow);
 CJ_EXPORT void FfiOHOSAceFrameworkSliderShowTipsNew(bool isShow, const char* content, bool contentExist);

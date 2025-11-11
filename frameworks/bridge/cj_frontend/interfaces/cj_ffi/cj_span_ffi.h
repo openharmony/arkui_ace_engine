@@ -44,8 +44,10 @@ CJ_EXPORT void FFICJVectorNativeTextShadowsDelete(VectorNativeTextShadows vec);
 
 CJ_EXPORT void FfiOHOSAceFrameworkSpanCreate(const char* content);
 CJ_EXPORT void FfiOHOSAceFrameworkSpanSetFontSize(double fontSize, int32_t unit);
+CJ_EXPORT void FfiOHOSAceFrameworkSpanResetFontSize();
 CJ_EXPORT void FfiOHOSAceFrameworkSpanSetFontWeight(const char* fontWeight);
 CJ_EXPORT void FfiOHOSAceFrameworkSpanSetFontColor(uint32_t textColor);
+CJ_EXPORT void FfiOHOSAceFrameworkSpanResetFontColor();
 CJ_EXPORT void FfiOHOSAceFrameworkSpanSetFontStyle(int32_t fontStyle);
 CJ_EXPORT void FfiOHOSAceFrameworkSpanSetFontFamily(const char* fontFamily);
 CJ_EXPORT void FfiOHOSAceFrameworkSpanSetLetterSpacing(double space, int32_t unit);

@@ -25,6 +25,7 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_view_abstract_ffi.h"
 #include "bridge/common/utils/utils.h"
 #include "core/components/common/properties/text_style_parser.h"
+#include "core/components/search/search_theme.h"
 #include "core/components_ng/pattern/search/search_model.h"
 
 using namespace OHOS::Ace;
@@ -127,6 +128,14 @@ void FfiOHOSAceFrameworkSearchSetSearchButton(const char* text)
 void FfiOHOSAceFrameworkSearchSetPlaceholderColor(uint32_t color)
 {
     SearchModel::GetInstance()->SetPlaceholderColor(Color(color));
+}
+
+void FfiOHOSAceFrameworkSearchResetPlaceholderColor()
+{
+    auto theme = GetTheme<SearchTheme>();
+    CHECK_NULL_VOID(theme);
+    Color colorval = theme->GetPlaceholderColor();
+    SearchModel::GetInstance()->SetPlaceholderColor(colorval);
 }
 
 void FfiOHOSAceFrameworkSearchSetPlaceholderFont(

@@ -129,6 +129,16 @@ void FfiOHOSAceFrameworkTextSetFontSize(double fontSize, int32_t unit)
     TextModel::GetInstance()->SetFontSize(value);
 }
 
+void FfiOHOSAceFrameworkTextResetFontSize()
+{
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
+    CalcDimension fontSize = theme->GetTextStyle().GetFontSize();
+    TextModel::GetInstance()->SetFontSize(fontSize);
+}
+
 void FfiOHOSAceFrameworkTextSetFontWeight(const char* fontWeight)
 {
     TextModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(fontWeight));
@@ -137,6 +147,11 @@ void FfiOHOSAceFrameworkTextSetFontWeight(const char* fontWeight)
 void FfiOHOSAceFrameworkTextSetFontColor(uint32_t textColor)
 {
     TextModel::GetInstance()->SetTextColor(Color(textColor));
+}
+
+void FfiOHOSAceFrameworkTextResetFontColor()
+{
+    TextModel::GetInstance()->ResetTextColor();
 }
 
 void FfiOHOSAceFrameworkTextSetTextOverflow(int32_t overflow)
@@ -224,10 +239,30 @@ void FfiOHOSAceFrameworkTextSetMinFontSize(double fontSize, int32_t unit)
     TextModel::GetInstance()->SetAdaptMinFontSize(dimValue);
 }
 
+void FfiOHOSAceFrameworkTextResetMinFontSize()
+{
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
+    CalcDimension minFontSize = theme->GetTextStyle().GetAdaptMinFontSize();
+    TextModel::GetInstance()->SetAdaptMinFontSize(minFontSize);
+}
+
 void FfiOHOSAceFrameworkTextSetMaxFontSize(double fontSize, int32_t unit)
 {
     Dimension dimValue(fontSize, static_cast<DimensionUnit>(unit));
     TextModel::GetInstance()->SetAdaptMaxFontSize(dimValue);
+}
+
+void FfiOHOSAceFrameworkTextResetMaxFontSize()
+{
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
+    CalcDimension maxFontSize = theme->GetTextStyle().GetAdaptMaxFontSize();
+    TextModel::GetInstance()->SetAdaptMaxFontSize(maxFontSize);
 }
 
 void FfiOHOSAceFrameworkTextSetTextCase(int32_t textCase)

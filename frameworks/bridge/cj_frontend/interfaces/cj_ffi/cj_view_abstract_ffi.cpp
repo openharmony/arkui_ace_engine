@@ -562,6 +562,12 @@ void FfiOHOSAceFrameworkViewAbstractSetBorderWidthWithCJEdge(CJEdge params)
     ViewAbstractModel::GetInstance()->SetBorderWidth(leftDimen, rightDimen, topDimen, bottomDimen);
 }
 
+void FfiOHOSAceFrameworkViewAbstractResetBorderWidth()
+{
+    CalcDimension value = {};
+    ViewAbstractModel::GetInstance()->SetBorderWidth(value);
+}
+
 void FfiOHOSAceFrameworkViewAbstractSetBorderColor(uint32_t color)
 {
     ViewAbstractModel::GetInstance()->SetBorderColor(Color(color));
@@ -883,6 +889,12 @@ void FfiOHOSAceFrameworkViewAbstractTransitionWithBack(int64_t id, void (*onFini
         lambda(isTransitionIn);
     };
     ViewAbstractModel::GetInstance()->SetChainedTransition(chainedEffect, std::move(finishCallback));
+}
+
+void FfiOHOSAceFrameworkViewAbstractResetTransition()
+{
+    ViewAbstractModel::GetInstance()->CleanTransition();
+    ViewAbstractModel::GetInstance()->SetChainedTransition(nullptr, nullptr);
 }
 
 void FfiOHOSAceFrameworkViewAbstractSetTransform(int64_t id)
@@ -1397,6 +1409,13 @@ void FfiOHOSAceFrameworkViewAbstractSetFlexBasis(double value, int32_t unit)
 {
     Dimension radius(value, static_cast<DimensionUnit>(unit));
     ViewAbstractModel::GetInstance()->SetFlexBasis(radius);
+}
+
+void FfiOHOSAceFrameworkViewAbstractResetFlexBasis()
+{
+    CalcDimension value;
+    value.SetUnit(DimensionUnit::AUTO);
+    ViewAbstractModel::GetInstance()->SetFlexBasis(value);
 }
 
 void FfiOHOSAceFrameworkViewAbstractSetFlexGrow(double value)
@@ -2371,6 +2390,22 @@ void FfiOHOSAceFrameworkViewAbstractRadialGradient(RadialGradientParam radialGra
 {
     NG::Gradient newGradient;
     NewCjRadialGradient(radialGradientParam, newGradient);
+    ViewAbstractModel::GetInstance()->SetRadialGradient(newGradient);
+}
+
+void FfiOHOSAceFrameworkViewAbstractResetRadialGradient(RadialGradientParam radialGradientParam,
+    bool needResetCenter, bool needResetRadius)
+{
+    NG::Gradient newGradient;
+    NewCjRadialGradient(radialGradientParam, newGradient);
+    if (needResetCenter) {
+        newGradient.GetRadialGradient()->radialCenterX.reset();
+        newGradient.GetRadialGradient()->radialCenterY.reset();
+    }
+    if (needResetRadius) {
+        newGradient.GetRadialGradient()->radialVerticalSize.reset();
+        newGradient.GetRadialGradient()->radialHorizontalSize.reset();
+    }
     ViewAbstractModel::GetInstance()->SetRadialGradient(newGradient);
 }
 
