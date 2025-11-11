@@ -2838,4 +2838,31 @@ HWTEST_F(ImagePatternTestNg, ImagePatternAltError004, TestSize.Level0)
     EXPECT_EQ(imageSize->Width(), IMAGE_SOURCESIZE_WIDTH);
     EXPECT_EQ(imageSize->Height(), IMAGE_SOURCESIZE_HEIGHT);
 }
+
+/**
+ * @tc.name: ImagePatternAltError005
+ * @tc.desc: Test function for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, ImagePatternAltError005, TestSize.Level0)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    auto imageLayoutProperty = imagePattern->GetLayoutProperty<ImageLayoutProperty>();
+
+    ImageModelNG image;
+    image.SetAltError(ImageSourceInfo { RESOURCE_URL });
+    imagePattern->OnConfigurationUpdate();
+
+    image.SetAlt(ImageSourceInfo { RESOURCE_URL });
+    imagePattern->OnConfigurationUpdate();
+
+    image.SetAltPlaceholder(ImageSourceInfo { RESOURCE_URL });
+    imagePattern->OnConfigurationUpdate();
+
+    EXPECT_FALSE(imagePattern->isFullyInitializedFromTheme_);
+}
 } // namespace OHOS::Ace::NG

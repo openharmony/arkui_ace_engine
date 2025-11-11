@@ -2097,12 +2097,26 @@ void ImagePattern::OnConfigurationUpdate()
     bool needLayout = host->CheckNeedForceMeasureAndLayout() &&
                       imageLayoutProperty->GetVisibility().value_or(VisibleType::VISIBLE) != VisibleType::GONE;
     LoadImage(src, needLayout);
-    if (loadingCtx_->NeedAlt() && imageLayoutProperty->GetAlt()) {
-        auto altImageSourceInfo = imageLayoutProperty->GetAlt().value_or(ImageSourceInfo(""));
+    if (loadingCtx_->NeedAlt() && ((imageLayoutProperty->GetAltPlaceholder()) || imageLayoutProperty->GetAlt())) {
+        ImageSourceInfo altImageSourceInfo;
+        if (imageLayoutProperty->GetAltPlaceholder()) {
+            altImageSourceInfo = imageLayoutProperty->GetAltPlaceholder().value_or(ImageSourceInfo(""));
+            isLoadAlt_ = false;
+        } else if (imageLayoutProperty->GetAlt()) {
+            altImageSourceInfo = imageLayoutProperty->GetAlt().value_or(ImageSourceInfo(""));
+            isLoadAlt_ = true;
+        }
         if (altLoadingCtx_ && altLoadingCtx_->GetSourceInfo() == altImageSourceInfo) {
             altLoadingCtx_.Reset();
         }
         LoadAltImage(altImageSourceInfo);
+    }
+    if (imageLayoutProperty->GetAltError()) {
+        auto altImageSourceInfo = imageLayoutProperty->GetAltError().value_or(ImageSourceInfo(""));
+        if (altErrorCtx_ && altErrorCtx_->GetSourceInfo() == altImageSourceInfo) {
+            altErrorCtx_.Reset();
+        }
+        LoadAltErrorImage(altImageSourceInfo);
     }
 }
 
