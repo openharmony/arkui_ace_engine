@@ -340,9 +340,7 @@ public:
         if (onAppearCallback_) {
             onAppearCallback_();
         }
-        auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
-        CHECK_NULL_VOID(targetNode);
-        targetNode->NotifyMenuLifeCycleEvent(MenuLifeCycleEvent::ON_APPEAR);
+        NotifyMenuLifeCycleEventToTarget(MenuLifeCycleEvent::ON_APPEAR);
     }
 
     void CallMenuDisappearCallback()
@@ -350,9 +348,7 @@ public:
         if (onDisappearCallback_) {
             onDisappearCallback_();
         }
-        auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
-        CHECK_NULL_VOID(targetNode);
-        targetNode->NotifyMenuLifeCycleEvent(MenuLifeCycleEvent::ON_DISAPPEAR);
+        NotifyMenuLifeCycleEventToTarget(MenuLifeCycleEvent::ON_DISAPPEAR);
     }
 
     void CallMenuAboutToAppearCallback()
@@ -360,9 +356,7 @@ public:
         if (aboutToAppearCallback_) {
             aboutToAppearCallback_();
         }
-        auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
-        CHECK_NULL_VOID(targetNode);
-        targetNode->NotifyMenuLifeCycleEvent(MenuLifeCycleEvent::ABOUT_TO_APPEAR);
+        NotifyMenuLifeCycleEventToTarget(MenuLifeCycleEvent::ABOUT_TO_APPEAR);
     }
 
     void CallMenuAboutToDisappearCallback()
@@ -370,9 +364,7 @@ public:
         if (aboutToDisappearCallback_) {
             aboutToDisappearCallback_();
         }
-        auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
-        CHECK_NULL_VOID(targetNode);
-        targetNode->NotifyMenuLifeCycleEvent(MenuLifeCycleEvent::ABOUT_TO_DISAPPEAR);
+        NotifyMenuLifeCycleEventToTarget(MenuLifeCycleEvent::ABOUT_TO_DISAPPEAR);
     }
 
    void CallMenuOnWillAppearCallback()
@@ -380,9 +372,7 @@ public:
        if (onWillAppearCallback_) {
            onWillAppearCallback_();
        }
-        auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
-        CHECK_NULL_VOID(targetNode);
-        targetNode->NotifyMenuLifeCycleEvent(MenuLifeCycleEvent::ON_WILL_APPEAR);
+        NotifyMenuLifeCycleEventToTarget(MenuLifeCycleEvent::ON_WILL_APPEAR);
     }
 
    void CallMenuOnDidAppearCallback()
@@ -390,9 +380,7 @@ public:
        if (onDidAppearCallback_) {
            onDidAppearCallback_();
        }
-        auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
-        CHECK_NULL_VOID(targetNode);
-        targetNode->NotifyMenuLifeCycleEvent(MenuLifeCycleEvent::ON_DID_APPEAR);
+        NotifyMenuLifeCycleEventToTarget(MenuLifeCycleEvent::ON_DID_APPEAR);
     }
 
    void CallMenuOnWillDisappearCallback()
@@ -400,9 +388,7 @@ public:
        if (onWillDisappearCallback_) {
            onWillDisappearCallback_();
        }
-        auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
-        CHECK_NULL_VOID(targetNode);
-        targetNode->NotifyMenuLifeCycleEvent(MenuLifeCycleEvent::ON_WILL_DISAPPEAR);
+        NotifyMenuLifeCycleEventToTarget(MenuLifeCycleEvent::ON_WILL_DISAPPEAR);
     }
 
    void CallMenuOnDidDisappearCallback()
@@ -410,9 +396,7 @@ public:
        if (onDidDisappearCallback_) {
            onDidDisappearCallback_();
        }
-        auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
-        CHECK_NULL_VOID(targetNode);
-        targetNode->NotifyMenuLifeCycleEvent(MenuLifeCycleEvent::ON_DID_DISAPPEAR);
+        NotifyMenuLifeCycleEventToTarget(MenuLifeCycleEvent::ON_DID_DISAPPEAR);
     }
 
     void CallMenuStateChangeCallback(const std::string& value)
@@ -768,6 +752,12 @@ private:
     void AddTargetWindowHotArea(std::vector<Rect>& rects);
     void AddWrapperChildHotArea(std::vector<Rect>& rects, const RefPtr<LayoutWrapper>& layoutWrapper);
     void AddFilterHotArea(std::vector<Rect>& rects);
+    void NotifyMenuLifeCycleEventToTarget(const NG::MenuLifeCycleEvent& menuLifeCycleEvent)
+    {
+        auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
+        CHECK_NULL_VOID(targetNode);
+        targetNode->NotifyMenuLifeCycleEvent(menuLifeCycleEvent);
+    }
     std::function<void()> onAppearCallback_ = nullptr;
     std::function<void()> onDisappearCallback_ = nullptr;
     std::function<void()> aboutToAppearCallback_ = nullptr;
