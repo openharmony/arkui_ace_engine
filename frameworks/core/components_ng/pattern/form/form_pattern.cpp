@@ -3072,7 +3072,7 @@ void FormPattern::SetForbiddenRootNodeAccessibilityAction(RefPtr<FrameNode> &for
             GetResourceContent(DUE_CONTROL_RESOURCE_NAME, content);
             break;
         default:
-            TAG_LOGW(AceLogTag::ACE_FORM, "set accessibility action dismatch: %{public}d.", attribution);
+            TAG_LOGW(AceLogTag::ACE_FORM, "AccessibilityProperty content dismatch: %{public}d.", attribution);
             break;
     }
     accessibilityProperty->SetAccessibilityText(content);
