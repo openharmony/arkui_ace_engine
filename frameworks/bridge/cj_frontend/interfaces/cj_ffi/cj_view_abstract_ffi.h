@@ -666,6 +666,7 @@ CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetOutlineRadiuses(CJOutlineRadius
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetFlexBasis(double value, int32_t unit);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetFlexGrow(double value);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetFlexShrink(double value);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractResetFlexShrink();
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetAlignSelf(int32_t alignValue);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetZIndex(int32_t zIndex);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetVisibility(int32_t visibility);

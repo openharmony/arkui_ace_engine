@@ -1409,6 +1409,11 @@ void FfiOHOSAceFrameworkViewAbstractSetFlexShrink(double value)
     ViewAbstractModel::GetInstance()->SetFlexShrink(static_cast<float>(value));
 }
 
+void FfiOHOSAceFrameworkViewAbstractResetFlexShrink()
+{
+    ViewAbstractModel::GetInstance()->ResetFlexShrink();
+}
+
 void FfiOHOSAceFrameworkViewAbstractSetAlignSelf(int32_t alignValue)
 {
     if (!Utils::CheckParamsValid(alignValue, ITEM_ALIGNS.size())) {
