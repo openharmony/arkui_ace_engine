@@ -41,11 +41,14 @@ export class PeerNode extends IncrementalNode {
     protected static cursor: int32 = UNINITIALIZE_CURSOR
     private static staticLock = new Mutex()
     static nextId(): int32 {
+        PeerNode.staticLock.lock();
         if (PeerNode.cursor === UNINITIALIZE_CURSOR || PeerNode.currentId >= PeerNode.cursor + ID_CAPACITY) {
             PeerNode.cursor = ArkUIAniModule._RequireArkoalaNodeId(ID_CAPACITY)
             PeerNode.currentId = PeerNode.cursor
         }
-        return PeerNode.currentId++;
+        let resId = PeerNode.currentId++;
+        PeerNode.staticLock.unlock();
+        return resId;
     }
     private id: int32
     private _onReuse?: (param?: RecordData) => void
