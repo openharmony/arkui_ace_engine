@@ -40,17 +40,12 @@ function main(argv) {
         process.exit(1);
     }
 
+    const configFileNameBase = './ark_breakpoint/tsconfig.json';
     // Modify file paths
     const files = config.files || [];
     const modifiedFiles = files.map(file =>
-        file.replace(
-            'src/',
-            '//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/ark_breakpoint/src/'
-        )
+        file.replace('src/', './ark_breakpoint/src/')
     );
-
-    // Prepare content for files_to_watch.gni.
-    const configFileNameBase = '//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/ark_breakpoint/tsconfig.json';
 
     let newContent = `# Copyright (c) 2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License")

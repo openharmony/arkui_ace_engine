@@ -80,10 +80,10 @@ def main(argv):
     print(f"ark_breakpoint: Copying {built_file} to {output_file}")
 
     try:
-        shutil.copy(built_file, output_file)
-        print(f"ark_breakpoint: File successfully copied to {output_file}")
+        shutil.move(built_file, output_file)
+        print(f"ark_breakpoint: File successfully moved to {output_file}")
     except Exception as e:
-        print(f"Error: Failed to copy file: {e}")
+        print(f"Error: Failed to move file: {e}")
         sys.exit(1)
 
 if __name__ == '__main__':
