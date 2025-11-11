@@ -227,6 +227,7 @@ enum PictureInPictureState {
 };
 
 struct PipData {
+    int32_t nodeId;
     uint32_t mainWindowId;
     int delegateId = -1;
     int childId = -1;
@@ -3935,6 +3936,19 @@ void WebPattern::OnAttachContext(PipelineContext *context)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     int32_t nodeId = host->GetId();
+    {
+        std::lock_guard<std::mutex> lock(pipCallbackMapMutex_);
+        for (auto& iter : pipCallbackMap_) {
+            if (iter.second.nodeId == nodeId && iter.second.mainWindowId != windowId_) {
+                TAG_LOGI(AceLogTag::ACE_WEB, "Pip old windowId:%{public}u, nodeId:%{public}d,"
+                    "windowId_:%{public}u", iter.second.mainWindowId, nodeId, windowId_);
+                auto errCode = OH_PictureInPicture_SetParentWindowId(iter.first, windowId_);
+                if (errCode == 0) {
+                    iter.second.mainWindowId = windowId_;
+                }
+            }
+        }
+    }
 
     pipelineContext->AddWindowStateChangedCallback(nodeId);
     pipelineContext->AddWindowSizeChangeCallback(nodeId);
@@ -9164,7 +9178,9 @@ bool WebPattern::Pip(int status,
         case PIP_STATE_HLS_ENTER: {
             napi_env env = CreateEnv();
             CHECK_NULL_RETURN(env, false);
-            PipInfo pipInfo{windowId_, delegateId, childId,
+            auto host = GetHost();
+            CHECK_NULL_RETURN(host, false);
+            PipInfo pipInfo{host->GetId(), windowId_, delegateId, childId,
                             frameRoutingId, width, height};
             result = CreatePip(status, env, init, pipController, pipInfo);
             WEB_CHECK_FALSE_RETURN(result, false);
@@ -9245,6 +9261,7 @@ bool WebPattern::CreatePip(int status, napi_env env, bool& init, uint32_t &pipCo
     pipData.childId = pipInfo.childId;
     pipData.mainWindowId = pipInfo.mainWindowId;
     pipData.frameRoutingId = pipInfo.frameRoutingId;
+    pipData.nodeId = pipInfo.nodeId;
     {
         std::lock_guard<std::mutex> lock(pipCallbackMapMutex_);
         g_currentControllerId = pipController;

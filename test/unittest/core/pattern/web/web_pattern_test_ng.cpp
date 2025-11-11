@@ -4152,7 +4152,7 @@ HWTEST_F(WebPatternTestNg, OnPipPip_001, TestSize.Level1)
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
-    PipInfo pipInfo{0, 0, 0, 0, PIP_WIDTH, PIP_HEIGHT};
+    PipInfo pipInfo{0, 0, 0, 0, 0, PIP_WIDTH, PIP_HEIGHT};
     bool ret = webPattern.CreatePip(PIP_STATE_ENTER, env, init, pipController, pipInfo);
     ASSERT_EQ(ret, true);
     webPattern.OnPip(0, 0, 0, 0, 0, 0);
@@ -4171,7 +4171,7 @@ HWTEST_F(WebPatternTestNg, OnPipPip_002, TestSize.Level1)
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
-    PipInfo pipInfo{0, 0, 0, 0, PIP_WIDTH, PIP_HEIGHT};
+    PipInfo pipInfo{0, 0, 0, 0, 0, PIP_WIDTH, PIP_HEIGHT};
     bool ret = webPattern.CreatePip(PIP_STATE_ENTER, env, init, pipController, pipInfo);
     ASSERT_EQ(ret, true);
     webPattern.OnPip(PIP_STATE_EXIT, 0, 0, 0, 0, 0);
@@ -4190,7 +4190,7 @@ HWTEST_F(WebPatternTestNg, OnPipPip_003, TestSize.Level1)
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
-    PipInfo pipInfo{0, 0, 0, 0, PIP_WIDTH, PIP_HEIGHT};
+    PipInfo pipInfo{0, 0, 0, 0, 0, PIP_WIDTH, PIP_HEIGHT};
     bool ret = webPattern.CreatePip(PIP_STATE_ENTER, env, init, pipController, pipInfo);
     ASSERT_EQ(ret, true);
     webPattern.OnPip(PIP_STATE_PLAY, 0, 0, 0, 0, 0);
@@ -4209,7 +4209,7 @@ HWTEST_F(WebPatternTestNg, OnPipPip_004, TestSize.Level1)
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
-    PipInfo pipInfo{0, 0, 0, 0, PIP_WIDTH, PIP_HEIGHT};
+    PipInfo pipInfo{0, 0, 0, 0, 0, PIP_WIDTH, PIP_HEIGHT};
     bool ret = webPattern.CreatePip(PIP_STATE_ENTER, env, init, pipController, pipInfo);
     ASSERT_EQ(ret, true);
     webPattern.OnPip(PIP_STATE_PAUSE, 0, 0, 0, 0, 0);
@@ -4228,7 +4228,7 @@ HWTEST_F(WebPatternTestNg, OnPipPip_005, TestSize.Level1)
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
-    PipInfo pipInfo{0, 0, 0, 0, PIP_WIDTH, PIP_HEIGHT};
+    PipInfo pipInfo{0, 0, 0, 0, 0, PIP_WIDTH, PIP_HEIGHT};
     bool ret = webPattern.CreatePip(PIP_STATE_ENTER, env, init, pipController, pipInfo);
     ASSERT_EQ(ret, true);
     webPattern.OnPip(PIP_STATE_NONE, 0, 0, 0, 0, 0);
@@ -4247,7 +4247,7 @@ HWTEST_F(WebPatternTestNg, SetPipNativeWindowPip_001, TestSize.Level1)
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
-    PipInfo pipInfo{0, 0, 0, 0, PIP_WIDTH, PIP_HEIGHT};
+    PipInfo pipInfo{0, 0, 0, 0, 0, PIP_WIDTH, PIP_HEIGHT};
     bool ret = webPattern.CreatePip(PIP_STATE_ENTER, env, init, pipController, pipInfo);
     EXPECT_EQ(ret, true);
     auto delegateMock = AceType::MakeRefPtr<WebDelegateMock>(
@@ -4269,7 +4269,7 @@ HWTEST_F(WebPatternTestNg, SetPipNativeWindowPip_002, TestSize.Level1)
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
-    PipInfo pipInfo{0, 0, 0, 0, PIP_WIDTH, PIP_HEIGHT};
+    PipInfo pipInfo{0, 0, 0, 0, 0, PIP_WIDTH, PIP_HEIGHT};
     bool ret = webPattern.CreatePip(PIP_STATE_ENTER, env, init, pipController, pipInfo);
     EXPECT_EQ(ret, true);
     webPattern.SetPipNativeWindow(0, 0, 0, 0);
@@ -4288,7 +4288,7 @@ HWTEST_F(WebPatternTestNg, SendPipEventPip_001, TestSize.Level1)
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
-    PipInfo pipInfo{0, 0, 0, 0, PIP_WIDTH, PIP_HEIGHT};
+    PipInfo pipInfo{0, 0, 0, 0, 0, PIP_WIDTH, PIP_HEIGHT};
     bool ret = webPattern.CreatePip(PIP_STATE_ENTER, env, init, pipController, pipInfo);
     EXPECT_EQ(ret, true);
     auto delegateMock = AceType::MakeRefPtr<WebDelegateMock>(
@@ -4310,7 +4310,7 @@ HWTEST_F(WebPatternTestNg, SendPipEventPip_002, TestSize.Level1)
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
-    PipInfo pipInfo{0, 0, 0, 0, PIP_WIDTH, PIP_HEIGHT};
+    PipInfo pipInfo{0, 0, 0, 0, 0, PIP_WIDTH, PIP_HEIGHT};
     bool ret = webPattern.CreatePip(PIP_STATE_ENTER, env, init, pipController, pipInfo);
     EXPECT_EQ(ret, true);
     webPattern.SendPipEvent(0, 0, 0, 0);
@@ -4459,7 +4459,7 @@ HWTEST_F(WebPatternTestNg, EnablePip_001, TestSize.Level1)
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
-    PipInfo pipInfo{0, 0, 0, 0, PIP_WIDTH, PIP_HEIGHT};
+    PipInfo pipInfo{0, 0, 0, 0, 0, PIP_WIDTH, PIP_HEIGHT};
     bool ret = webPattern.CreatePip(PIP_STATE_ENTER, env, init, pipController, pipInfo);
     EXPECT_EQ(ret, true);
     webPattern.EnablePip(0);
@@ -4478,7 +4478,7 @@ HWTEST_F(WebPatternTestNg, StopPipPip_001, TestSize.Level1)
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
-    PipInfo pipInfo{0, 0, 0, 0, PIP_WIDTH, PIP_HEIGHT};
+    PipInfo pipInfo{0, 0, 0, 0, 0, PIP_WIDTH, PIP_HEIGHT};
     bool ret = webPattern.CreatePip(PIP_STATE_ENTER, env, init, pipController, pipInfo);
     EXPECT_EQ(ret, true);
     ret = webPattern.StopPip(0, 0, 0);
@@ -4498,7 +4498,7 @@ HWTEST_F(WebPatternTestNg, StopPipPip_002, TestSize.Level1)
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
-    PipInfo pipInfo{0, 0, 0, 0, PIP_WIDTH, PIP_HEIGHT};
+    PipInfo pipInfo{0, 0, 0, 0, 0, PIP_WIDTH, PIP_HEIGHT};
     bool ret = webPattern.CreatePip(PIP_STATE_ENTER, env, init, pipController, pipInfo);
     EXPECT_EQ(ret, true);
     ret = webPattern.StopPip(1, 0, 0);
@@ -4518,7 +4518,7 @@ HWTEST_F(WebPatternTestNg, StopPipPip_003, TestSize.Level1)
     bool init = false;
     uint32_t pipController = PIP_ID_OK_1;
     napi_env env = nullptr;
-    PipInfo pipInfo{0, 0, 0, 0, PIP_WIDTH, PIP_HEIGHT};
+    PipInfo pipInfo{0, 0, 0, 0, 0, PIP_WIDTH, PIP_HEIGHT};
     bool ret = webPattern.CreatePip(PIP_STATE_ENTER, env, init, pipController, pipInfo);
     EXPECT_EQ(ret, true);
     ret = webPattern.StartPip(PIP_ID_OK_1);
@@ -4540,7 +4540,7 @@ HWTEST_F(WebPatternTestNg, StopPipPip_004, TestSize.Level1)
     bool init = false;
     uint32_t pipController = PIP_ID_OK_1;
     napi_env env = nullptr;
-    PipInfo pipInfo{0, 0, 0, 0, PIP_WIDTH, PIP_HEIGHT};
+    PipInfo pipInfo{0, 0, 0, 0, 0, PIP_WIDTH, PIP_HEIGHT};
     bool ret = webPattern.CreatePip(PIP_STATE_ENTER, env, init, pipController, pipInfo);
     EXPECT_EQ(ret, true);
     ret = webPattern.StartPip(PIP_ID_OK_2);
@@ -4614,7 +4614,7 @@ HWTEST_F(WebPatternTestNg, OnPipPip_007, TestSize.Level1)
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
-    PipInfo pipInfo{0, 0, 0, 0, PIP_WIDTH, PIP_HEIGHT};
+    PipInfo pipInfo{0, 0, 0, 0, 0, PIP_WIDTH, PIP_HEIGHT};
     bool ret = webPattern.CreatePip(PIP_STATE_ENTER, env, init, pipController, pipInfo);
     ASSERT_EQ(ret, true);
     webPattern.OnPip(PIP_STATE_PAGE_CLOSE, 0, 0, 0, 0, 0);
