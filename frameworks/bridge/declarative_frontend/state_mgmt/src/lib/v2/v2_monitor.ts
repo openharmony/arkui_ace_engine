@@ -46,6 +46,10 @@ class MonitorPathHelper {
     return ((count <= 0)
       || (count == 1 && (path.endsWith(".*") || (path == "*"))));
   }
+
+  public static isValidForMonitorDecorator(path: string): boolean {
+    return !path.includes("*");
+  }
 }
 
 class MonitorValueV2<T> {
@@ -216,6 +220,10 @@ class MonitorV2 {
     if (this.isDecorator_) {
       this.watchId_ = ++MonitorV2.nextWatchId_;
       paths.forEach(path => {
+        if (!MonitorPathHelper.isValidForMonitorDecorator(path)) {
+          stateMgmtConsole.applicationError(`AddMonitor/@SyncMonitor - not a valid path string '${path}'`);
+          throw new Error(`AddMonitor/@SyncMonitor - not a valid path string  '${path}'`);
+        }
         this.values_.set(path, new MonitorValueV2<unknown>(path, true));
       });
       this.monitorFunction = func;
@@ -235,7 +243,6 @@ class MonitorV2 {
     return this.isSync_;
   }
 
-  //TODO: check where that is called from
   public addPath(path: string, apiAdded: boolean): MonitorValueV2<unknown> {
     console.error("### addPath: " + path + " api: " + apiAdded);
     if (!MonitorPathHelper.isValid(path)) {
