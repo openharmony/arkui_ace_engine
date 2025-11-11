@@ -314,6 +314,8 @@ public:
         CHECK_NULL_RETURN(host, false);
         return host->GetTag() == V2::RICH_EDITOR_ETS_TAG;
     }
+    void SetIsAskCeliaSupported(bool isAskCeliaSupported);
+    std::optional<bool> IsAskCeliaSupported();
 
 private:
     bool ScrollToSafeAreaHelper(const SafeAreaInsets::Inset& bottomInset, bool isShowKeyboard);
@@ -354,6 +356,7 @@ private:
     float lastKeyboardOffset_ = 0.0f;
     std::unordered_map<int32_t, FillContentMap> textFieldFillContentMaps_;
     int32_t attachInputId_ = -1;
+    std::optional<bool> isAskCeliaSupported_;
 };
 
 } // namespace OHOS::Ace::NG

@@ -58,4 +58,9 @@ std::function<void()> GetDetectDelayTask(const std::map<int32_t, AISpan>& aiSpan
 {
     return []() {};
 }
+
+bool DataDetectorAdapter::IsAskCeliaSupported()
+{
+    return false;
+}
 } // namespace OHOS::Ace

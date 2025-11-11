@@ -64,6 +64,14 @@ void DataDetectorMgr::DataDetect(const TextDataDetectInfo& info, const TextDetec
     }
 }
 
+bool DataDetectorMgr::IsAskCeliaSupported()
+{
+    if (engine_) {
+        return engine_->IsAskCeliaSupported();
+    }
+    return false;
+}
+
 void DataDetectorMgr::AdjustCursorPosition(
     int32_t& caretPos, const std::string& content, TimeStamp& lastAiPosTimeStamp, const TimeStamp& lastClickTimeStamp)
 {

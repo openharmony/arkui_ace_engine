@@ -53,4 +53,6 @@ int8_t DataDetectorMgr::GetCursorPosition(const std::string& text, int8_t offset
 {
     return -1;
 }
+
+bool DataDetectorMgr::IsAskCeliaSupported() { return true; }
 } // namespace OHOS::Ace

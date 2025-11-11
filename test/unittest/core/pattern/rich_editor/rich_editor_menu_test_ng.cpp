@@ -1286,6 +1286,10 @@ HWTEST_F(RichEditorMenuTestNg, UpdateAIMenuOptions002, TestSize.Level0)
     pattern->UpdateAIMenuOptions();
     EXPECT_EQ(pattern->IsShowAIMenuOption(), false);
 
+    /**
+     * @tc.steps: step3. Set different CopyOptions.
+     * @tc.expected: isShowAIMenuOption satisfy expectation in different CopyOptions.
+     */
     pattern->SetTextDetectEnable(true);
     pattern->copyOption_ = CopyOptions::InApp;
     pattern->UpdateAIMenuOptions();
@@ -1304,8 +1308,8 @@ HWTEST_F(RichEditorMenuTestNg, UpdateAIMenuOptions002, TestSize.Level0)
 
 /**
  * @tc.name: UpdateAIMenuOptions
- * @tc.desc: test UpdateAIMenuOptions function with valid textSelector
- *           check multi ai entity in selection range
+ * @tc.desc: test UpdateAIMenuOptions function with valid textSelector.
+ *           check multi ai entity in selection range.
  * @tc.type: FUNC
  */
 HWTEST_F(RichEditorMenuTestNg, UpdateAIMenuOptions003, TestSize.Level0)

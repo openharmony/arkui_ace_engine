@@ -41,6 +41,7 @@ public:
     MOCK_METHOD(void, DataDetect, (const TextDataDetectInfo& info, const TextDetectResultFunc& resultFunc), (override));
     MOCK_METHOD(int8_t, GetCursorPosition, (const std::string& text, int8_t offset), (override));
     MOCK_METHOD(std::vector<int8_t>, GetWordSelection, (const std::string& text, int8_t offset), (override));
+    MOCK_METHOD(bool, IsAskCeliaSupported, (), (override));
 };
 
 class TextAdjustObject : public TextInputBases {
