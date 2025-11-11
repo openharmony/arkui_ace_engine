@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,19 +22,13 @@ import { ReadonlyTreeNode } from './ReadonlyTreeNode'
  * It allows nodes to be added or removed incrementally using the state manager.
  */
 export class IncrementalNode implements Disposable, ReadonlyTreeNode {
+    private _disposing = false
     private _disposed = false
     private _child: IncrementalNode | undefined = undefined
     private _prev: IncrementalNode | undefined = undefined
     private _next: IncrementalNode | undefined = undefined
     private _parent: IncrementalNode | undefined = undefined
     private _incremental: IncrementalNode | undefined = undefined
-
-    /**
-     * It disables parent nodes invalidation and node revalidation.
-     */
-    get disabledStateUpdates(): boolean {
-        return false
-    }
 
     /**
      * This callback is called when a child node is added to this parent.
@@ -85,10 +79,31 @@ export class IncrementalNode implements Disposable, ReadonlyTreeNode {
      * @param scope - The scope to recycle.
      * @param reuseKey - The type of the scope (used as the key in the pool).
      * @param id - The id of the scope to recycle.
-     * @return true if child is successfully recycled
+     * @returns `true` if the given child is successfully recycled
      */
     recycle(reuseKey: string, child: Disposable, id: KoalaCallsiteKey): boolean {
         return false
+    }
+
+    /**
+     * @returns `true` if invalidation of this node should not trigger its revalidation
+     */
+    get disabledStateUpdates(): boolean {
+        return false
+    }
+
+    /**
+     * @returns `true` if this node is removing from the hierarchy
+     */
+    get disposing(): boolean {
+        return this._disposing
+    }
+
+    /**
+     * This method is called to mark this node as being removed
+     */
+    set disposing(value: boolean) {
+        this._disposing = value
     }
 
     /**
@@ -242,10 +257,6 @@ export class IncrementalNode implements Disposable, ReadonlyTreeNode {
                 else {
                     parent._child = this;
                 }
-
-                // TODO: this is to workaround ast dumper bug #24055
-                if (0) {} else {}
-
                 parent.onChildInserted?.(this)
             }
         }
