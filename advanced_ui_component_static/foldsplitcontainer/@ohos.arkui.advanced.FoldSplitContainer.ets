@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { Column, Component, AnimateParam, BuilderParam, Stack, SizeOptions, px2vp, animateTo, Curve,
+import { Column, Component, AnimateParam, BuilderParam, Stack, SizeOptions, px2vp, Curve,
   Callback, LocalizedEdges, Builder, Entry, Text } from '@ohos.arkui.component';
 import { State, Prop, Watch, PropRef } from '@ohos.arkui.stateManagement';
 import { BusinessError } from '@ohos.base';
@@ -628,13 +628,13 @@ export struct FoldSplitContainer {
       this.secondaryLayout = regionLayout.secondary;
       this.extraLayout = regionLayout.extra;
     } else if (this.animationOptions === undefined) {
-      animateTo({ curve: curves.springMotion(0.35, 1, 0) }, () => {
+      this.getUIContext()?.animateTo({ curve: curves.springMotion(0.35, 1, 0) }, () => {
         this.primaryLayout = regionLayout.primary;
         this.secondaryLayout = regionLayout.secondary;
         this.extraLayout = regionLayout.extra;
       });
     } else {
-      animateTo(this.animationOptions as AnimateParam, () => {
+      this.getUIContext()?.animateTo(this.animationOptions as AnimateParam, () => {
         this.primaryLayout = regionLayout.primary;
         this.secondaryLayout = regionLayout.secondary;
         this.extraLayout = regionLayout.extra;
