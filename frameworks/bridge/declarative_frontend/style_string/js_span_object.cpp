@@ -38,6 +38,7 @@
 #include "core/components_ng/pattern/text/span/span_object.h"
 #include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/components_ng/render/paragraph.h"
+#include "frameworks/base/image/image_color_filter.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_span.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_image.h"
@@ -1042,9 +1043,9 @@ void JSImageAttachment::ParseJsImageSpanColorFilterAttribute(const JSRef<JSObjec
             imageStyle.drawingColorFilter = drawingColorFilter;
             return;
         }
-        JSColorFilter* colorFilter;
+        ImageColorFilter* colorFilter;
         if (!colorFilterObj->IsUndefined() && !colorFilterObj->IsNull()) {
-            colorFilter = JSRef<JSObject>::Cast(colorFilterObj)->Unwrap<JSColorFilter>();
+            colorFilter = JSRef<JSObject>::Cast(colorFilterObj)->Unwrap<ImageColorFilter>();
         } else {
             SetImageSpanColorFilterAttribute(imageStyle, DEFAULT_COLORFILTER_MATRIX);
             return;
