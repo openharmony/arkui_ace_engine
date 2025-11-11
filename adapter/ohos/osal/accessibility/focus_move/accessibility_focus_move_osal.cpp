@@ -78,6 +78,8 @@ FocusMoveResultType FocusStrategyOsal::HandleFocusMoveSearchResult(
         useFinalNode = false;
     } else if (result == AceFocusMoveResult::FIND_FAIL_IN_SCROLL) {
         finalResult = FocusMoveResultType::SEARCH_FAIL_IN_SCROLL;
+    } else if (result == AceFocusMoveResult::FIND_FAIL_LOST_NODE) {
+        finalResult = FocusMoveResultType::SEARCH_FAIL_LOST_NODE;
     }
     if (useFinalNode && finalNode) {
         if (!UpdateElementInfo(finalNode, info)) {
