@@ -1080,7 +1080,7 @@ export class TextPickerOptions_serializer {
                         Resource_serializer.write(valueSerializer, valueHolderForValueTmpValueForIdx1TmpElementForIdx1)
                     }
                 }
-            } else if (valueHolderForValueTmpValue instanceof Bindable<ResourceStr>) {
+            } else if (valueHolderForValueTmpValue instanceof Bindable && valueHolderForValueTmpValue.value instanceof ResourceStr) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForValueTmpValueForIdx2  = valueHolderForValueTmpValue as Bindable<ResourceStr>
                 Bindable_Arkui_Component_Units_ResourceStr_serializer.write(valueSerializer, valueHolderForValueTmpValueForIdx2)
@@ -1108,7 +1108,7 @@ export class TextPickerOptions_serializer {
                     const valueHolderForSelectedTmpValueForIdx1TmpElement : number = valueHolderForSelectedTmpValueForIdx1[valueHolderForSelectedTmpValueForIdx1CounterI]
                     valueSerializer.writeNumber(valueHolderForSelectedTmpValueForIdx1TmpElement)
                 }
-            } else if (valueHolderForSelectedTmpValue instanceof Bindable<number>) {
+            } else if (valueHolderForSelectedTmpValue instanceof Bindable && valueHolderForSelectedTmpValue.value instanceof number) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForSelectedTmpValueForIdx2  = valueHolderForSelectedTmpValue as Bindable<number>
                 Bindable_Number_serializer.write(valueSerializer, valueHolderForSelectedTmpValueForIdx2)
@@ -1489,7 +1489,7 @@ export class TextPickerDialogOptions_serializer {
                         Resource_serializer.write(valueSerializer, valueHolderForValueTmpValueForIdx1TmpElementForIdx1)
                     }
                 }
-            } else if (valueHolderForValueTmpValue instanceof Bindable<ResourceStr>) {
+            } else if (valueHolderForValueTmpValue instanceof Bindable && valueHolderForValueTmpValue.value instanceof ResourceStr) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForValueTmpValueForIdx2  = valueHolderForValueTmpValue as Bindable<ResourceStr>
                 Bindable_Arkui_Component_Units_ResourceStr_serializer.write(valueSerializer, valueHolderForValueTmpValueForIdx2)
@@ -1517,7 +1517,7 @@ export class TextPickerDialogOptions_serializer {
                     const valueHolderForSelectedTmpValueForIdx1TmpElement : number = valueHolderForSelectedTmpValueForIdx1[valueHolderForSelectedTmpValueForIdx1CounterI]
                     valueSerializer.writeNumber(valueHolderForSelectedTmpValueForIdx1TmpElement)
                 }
-            } else if (valueHolderForSelectedTmpValue instanceof Bindable<number>) {
+            } else if (valueHolderForSelectedTmpValue instanceof Bindable && valueHolderForSelectedTmpValue.value instanceof number) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForSelectedTmpValueForIdx2  = valueHolderForSelectedTmpValue as Bindable<number>
                 Bindable_Number_serializer.write(valueSerializer, valueHolderForSelectedTmpValueForIdx2)
