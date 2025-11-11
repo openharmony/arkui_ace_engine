@@ -4637,8 +4637,8 @@ struct ArkUIGestureModifier {
         ArkUIGestureRecognizer* (*parallelInnerGesture)(ArkUIParallelInnerGestureEvent* event));
     ArkUI_Int32 (*setGestureRecognizerEnabled)(ArkUIGestureRecognizer* recognizer, bool enabled);
     ArkUI_Int32 (*setGestureRecognizerLimitFingerCount)(ArkUIGesture* gesture, bool limitFingerCount);
-    ArkUI_Int32 (*setLongPressGestureAllowableMovement)(ArkUIGesture* gesture, int32_t allowableMovement);
-    ArkUI_Int32 (*getLongPressGestureAllowableMovement)(ArkUIGesture* gesture, int32_t* allowableMovement);
+    ArkUI_Int32 (*setLongPressGestureAllowableMovement)(ArkUIGesture* gesture, double allowableMovement);
+    ArkUI_Int32 (*getLongPressGestureAllowableMovement)(ArkUIGesture* gesture, double* allowableMovement);
     ArkUI_Bool (*getGestureRecognizerEnabled)(ArkUIGestureRecognizer* recognizer);
     ArkUI_Int32 (*getGestureRecognizerState)(ArkUIGestureRecognizer* recognizer, ArkUIGestureRecognizerState* state);
     ArkUI_Int32 (*gestureEventTargetInfoIsScrollBegin)(ArkUIGestureEventTargetInfo* info, bool* ret);

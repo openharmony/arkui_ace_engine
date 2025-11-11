@@ -41,7 +41,7 @@ public:
 class ACE_EXPORT LongPressGestureModelNG : public OHOS::Ace::LongPressGestureModel {
 public:
     void Create(int32_t fingersNum, bool repeatResult, int32_t durationNum, bool isLimitFingerCount = false,
-        int32_t allowableMovementNum = 15) override;
+        double allowableMovementNum = 15.0) override;
 };
 
 class ACE_EXPORT PanGestureModelNG : public OHOS::Ace::PanGestureModel {
