@@ -27,7 +27,7 @@ import { PeerNode } from "./../PeerNode"
 import { Dimension, ResourceStr, ResourceColor, Offset, Font_serializer, Font, Offset_serializer } from "./units"
 import { Resource } from "global.resource"
 import { CrownSensitivity, Color, TextOverflow } from "./enums"
-import { AttributeModifier, extractors, hookTextPickerAttributeModifier, AttributeUpdater } from "#handwritten"
+import { AttributeModifier, hookTextPickerDivider, extractors, hookTextPickerAttributeModifier, AttributeUpdater } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
@@ -588,8 +588,7 @@ export class ArkTextPickerComponent extends ArkCommonMethodComponent implements 
     }
     public divider(value: DividerOptions | null | undefined): this {
         if (this.checkPriority("divider")) {
-            const value_casted = value as (DividerOptions | null | undefined)
-            this.getPeer()?.setDividerAttribute(value_casted)
+            hookTextPickerDivider(this, value)
             return this
         }
         return this
