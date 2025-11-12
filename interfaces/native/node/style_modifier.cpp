@@ -5956,7 +5956,7 @@ void ResetScrollScrollable(ArkUI_NodeHandle node)
 
 const ArkUI_AttributeItem* GetScrollEdgeEffect(ArkUI_NodeHandle node)
 {
-    ArkUI_Int32 values[2];
+    ArkUI_Int32 values[3];
     if (node->type == ARKUI_NODE_LIST) {
         auto valueSize =
             GetFullImpl()->getNodeModifiers()->getListModifier()->getListEdgeEffect(node->uiNodeHandle, &values);

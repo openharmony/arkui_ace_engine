@@ -658,6 +658,12 @@ int32_t WaterFlowModelNG::GetEdgeEffectAlways(FrameNode* frameNode)
     return ScrollableModelNG::GetAlwaysEnabled(frameNode);
 }
 
+EffectEdge WaterFlowModelNG::GetEffectEdge(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, EffectEdge::ALL);
+    return ScrollableModelNG::GetEffectEdge(frameNode);
+}
+
 Dimension WaterFlowModelNG::GetItemMinWidth(FrameNode* frameNode)
 {
     Dimension value = Dimension(0.0f);

@@ -8521,4 +8521,37 @@ HWTEST_F(NativeNodeTest, MaskTest004, TestSize.Level1)
 
     nodeAPI->disposeNode(swiperNode);
 }
+
+/**
+ * @tc.name: NativeNodeScrollableEdgeEffectTest001
+ * @tc.desc: Test Scrollable EdgeEffect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeScrollableEdgeEffectTest001, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto scroll = nodeAPI->createNode(ARKUI_NODE_SCROLL);
+    auto list = nodeAPI->createNode(ARKUI_NODE_LIST);
+    auto waterFlow = nodeAPI->createNode(ARKUI_NODE_WATER_FLOW);
+    ArkUI_NodeHandle nodes[3] = { scroll, list, waterFlow };
+
+    ArkUI_NumberValue value[] = {
+        {.i32 = ARKUI_EDGE_EFFECT_SPRING},
+        {.i32 = 1},
+        {.i32 = ARKUI_EFFECT_EDGE_START}
+    };
+    ArkUI_AttributeItem item = {value, 3};
+    for (int32_t i = 0; i < 3; i++) {
+        auto ret = nodeAPI->setAttribute(nodes[i], NODE_SCROLL_EDGE_EFFECT, &item);
+        EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+        auto effectParam = nodeAPI->getAttribute(nodes[i], NODE_SCROLL_EDGE_EFFECT);
+        EXPECT_EQ(effectParam->value[0].i32, ARKUI_EDGE_EFFECT_SPRING);
+        EXPECT_EQ(effectParam->value[1].i32, 1);
+        EXPECT_EQ(effectParam->value[2].i32, ARKUI_EFFECT_EDGE_START);
+    }
+    nodeAPI->disposeNode(scroll);
+    nodeAPI->disposeNode(list);
+    nodeAPI->disposeNode(waterFlow);
+}
 } // namespace OHOS::Ace

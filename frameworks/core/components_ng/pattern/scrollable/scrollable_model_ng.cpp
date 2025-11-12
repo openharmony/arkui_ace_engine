@@ -292,6 +292,14 @@ int32_t ScrollableModelNG::GetAlwaysEnabled(FrameNode* frameNode)
     return pattern->GetAlwaysEnabled();
 }
 
+EffectEdge ScrollableModelNG::GetEffectEdge(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, EffectEdge::ALL);
+    const auto& pattern = frameNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_RETURN(pattern, EffectEdge::ALL);
+    return pattern->GetEffectEdge();
+}
+
 void ScrollableModelNG::SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd)
 {
     CHECK_NULL_VOID(frameNode);
