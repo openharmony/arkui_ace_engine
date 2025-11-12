@@ -436,6 +436,24 @@ export abstract class BaseCustomComponent<T_Options> extends ExtendableComponent
     constructor(useSharedStorage?: boolean, storage?: LocalStorage) {
         super(useSharedStorage, storage);
     }
+
+    /** @memo */
+    static _invokeImpl<S extends BaseCustomComponent<S_Options>, S_Options>(
+        /** @memo */
+        style: ((instance: S) => void) | undefined,
+        factory: () => S,
+        initializers?: () => S_Options,
+        reuseKey?: string,
+        /** @memo */
+        content?: () => void
+    ): void {
+        const context: StateManager = __context() as StateManager;
+        const data: ContextRecord | undefined = context.contextData ? context.contextData as ContextRecord : undefined
+        const uiContext = data?.uiContext;
+        CustomDelegate._instantiate(
+            () => createInstance(uiContext, factory, initializers, style), content, initializers, reuseKey);
+    }
+
     aboutToRecycle(): void {}
 
     __toRecord(param: object): Record<string, object> { return {} }
