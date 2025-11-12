@@ -3571,6 +3571,9 @@ struct ArkUIImageModifier {
         ArkUINodeHandle node, ArkUI_CharPtr src, ArkUI_CharPtr bundleName, ArkUI_CharPtr moduleName, void* srcRawPtr);
     void (*setAltError)(
         ArkUINodeHandle node, ArkUI_CharPtr src, ArkUI_CharPtr bundleName, ArkUI_CharPtr moduleName, void* srcRawPtr);
+    void (*setAntiAlias)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetAntiAlias)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getAntiAlias)(ArkUINodeHandle node);
 };
 
 struct ArkUIColumnModifier {

@@ -18068,13 +18068,45 @@ void ResetImageSpanAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
     resetters[subTypeId](node);
 }
 
+int32_t SetAntiAlias(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    CHECK_NULL_RETURN(node, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
+    auto* fullImpl = GetFullImpl();
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    fullImpl->getNodeModifiers()->getImageModifier()->setAntiAlias(
+        node->uiNodeHandle, static_cast<bool>(item->value[0].i32)
+    );
+    return ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetAntiAlias(ArkUI_NodeHandle node)
+{
+    CHECK_NULL_RETURN(node, &g_attributeItem);
+    auto fullImpl = GetFullImpl();
+    auto antiAlias = fullImpl->getNodeModifiers()->getImageModifier()->getAntiAlias(node->uiNodeHandle);
+    g_numberValues[0].i32 = antiAlias;
+    g_attributeItem.size = REQUIRED_ONE_PARAM;
+    return &g_attributeItem;
+}
+
+void ResetAntiAlias(ArkUI_NodeHandle node)
+{
+    CHECK_NULL_VOID(node);
+    auto fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getImageModifier()->resetAntiAlias(node->uiNodeHandle);
+}
+
 int32_t SetImageAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* value)
 {
     static Setter* setters[] = { SetImageSrc, SetObjectFit, SetInterpolation, SetObjectRepeat, SetColorFilter,
         SetAutoResize, SetAlt, SetImageDraggable, SetRenderMode, SetFitOriginalSize, SetFillColor, SetResizable,
         SetSyncLoad, SetSourceSize, SetImageMatrix, SetMatchTextDirection, SetCopyOption, SetEnableAnalyzer,
         SetDynamicRangeMode, SetHdrBrightness, SetImageRotateOrientation, SetSupportSvg2, SetContentTransition,
-        SetAltPlaceholder, SetAltError };
+        SetAltPlaceholder, SetAltError, SetAntiAlias };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "image node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -18088,7 +18120,7 @@ const ArkUI_AttributeItem* GetImageAttribute(ArkUI_NodeHandle node, int32_t subT
         GetAutoResize, GetAlt, GetImageDraggable, GetRenderMode, GetFitOriginalSize, GetFillColor, GetResizable,
         GetSyncLoad, GetSourceSize, GetImageMatrix, GetMatchTextDirection, GetCopyOption, GetEnableAnalyzer,
         GetDynamicRangeMode, GetHdrBrightness, GetImageRotateOrientation, GetSupportSvg2, GetContentTransition,
-        GetAltPlaceholder, GetAltError };
+        GetAltPlaceholder, GetAltError, GetAntiAlias };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "image node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -18103,7 +18135,7 @@ void ResetImageAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetFitOriginalSize, ResetFillColor, ResetResizable, ResetSyncLoad, ResetSourceSize,
         ResetImageMatrix, ResetMatchTextDirection, ResetCopyOption, ResetEnableAnalyzer,
         ResetDynamicRangeMode, ResetHdrBrightness, ResetImageRotateOrientation, ResetSupportSvg2, ResetContentTransition,
-        ResetAltPlaceholder, ResetAltError };
+        ResetAltPlaceholder, ResetAltError, ResetAntiAlias };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "image node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;

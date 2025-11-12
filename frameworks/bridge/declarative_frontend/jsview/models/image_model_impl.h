@@ -82,6 +82,7 @@ public:
     void SetContentTransition(ContentTransitionType contentTransition) override {};
     void SetAltError(const ImageSourceInfo& src) override{};
     void SetAltPlaceholder(const ImageSourceInfo& src) override{};
+    void SetAntiAlias(bool antiAlias) override{};
 };
 
 } // namespace OHOS::Ace::Framework

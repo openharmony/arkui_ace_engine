@@ -3203,6 +3203,19 @@ typedef enum {
      */
     NODE_IMAGE_CONTENT_TRANSITION = 4022,
     /**
+     * @brief Configure image edge anti-aliasing via an enable switch.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: enable switch,the default value is false.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: enable switch.\n
+     *
+     * @since 23
+     */
+    NODE_IMAGE_ANTIALIASED = 4025,
+    /**
      * @brief Defines the color of the component when it is selected.
      * This attribute can be set, reset, and obtained as required through APIs.
      *

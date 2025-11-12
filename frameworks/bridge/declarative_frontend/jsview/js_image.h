@@ -74,6 +74,7 @@ public:
     static void JsSetDraggable(const JSCallbackInfo& info);
     static void JsOnDragStart(const JSCallbackInfo& info);
     static void SetCopyOption(const JSCallbackInfo& info);
+    static void JsAntiAlias(const JSCallbackInfo& info);
 
     static void EnableAnalyzer(bool isEnableAnalyzer);
     static void AnalyzerConfig(const JSCallbackInfo& info);

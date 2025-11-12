@@ -83,6 +83,7 @@ public:
     void SetContentTransition(ContentTransitionType contentTransition) override;
     void SetAltError(const ImageSourceInfo& src) override;
     void SetAltPlaceholder(const ImageSourceInfo& src) override;
+    void SetAntiAlias(bool antiAlias) override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::string& src, RefPtr<PixelMap>& pixMap,
         const std::string& bundleName, const std::string& moduleName, bool isUriPureNumber = false);
     static void InitImage(FrameNode* frameNode, std::string& src);
@@ -177,6 +178,8 @@ public:
     static void SetAltPlaceholderPixelMap(FrameNode* frameNode, void* pixelMap);
     static void SetAltPlaceholderResource(FrameNode* frameNode, void* resource);
     static ImageSourceInfo GetAltPlaceholder(FrameNode* frameNode);
+    static void SetAntiAlias(FrameNode* frameNode, bool antiAlias);
+    static bool GetAntiAlias(FrameNode* frameNode);
 
 private:
     ImagePattern* GetImagePattern();

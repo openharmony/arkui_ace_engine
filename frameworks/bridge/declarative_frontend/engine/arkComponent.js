@@ -8872,6 +8872,22 @@ class ImageContentTransitionModifier extends ModifierWithKey {
   }
 }
 ImageContentTransitionModifier.identity = Symbol('contentTransition');
+class ImageAntiAliasModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().image.resetAntiAlias(node);
+    } else {
+      getUINativeModule().image.setAntiAlias(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return this.stageValue !== this.value;
+  }
+}
+ImageAntiAliasModifier.identity = Symbol('antialiased');
 class ArkImageComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -9029,6 +9045,10 @@ class ArkImageComponent extends ArkComponent {
   }
   contentTransition(value) {
     modifierWithKey(this._modifiersWithKeys, ImageContentTransitionModifier.identity, ImageContentTransitionModifier, value);
+    return this;
+  }
+  antialiased(value) {
+    modifierWithKey(this._modifiersWithKeys, ImageAntiAliasModifier.identity, ImageAntiAliasModifier, value);
     return this;
   }
 }
