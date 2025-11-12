@@ -69,15 +69,15 @@ export class CompatiblePeerNode extends PeerNode {
     private onActiveChange: (active: boolean, isReuse: boolean) => void = (active: boolean, isReuse: boolean): void => {
         this.setActive(active);
     };
-    public setStaticParent(parent: ExtendableComponent): void {
+    public setStaticParent(parent?: ExtendableComponent): void {
         this.staticParent = parent;
-        this.staticParent!.__addActiveChangeListenerForInterop__Internal(this.onActiveChange);
+        this.staticParent?.__addActiveChangeListenerForInterop__Internal(this.onActiveChange);
     }
     public setActive(active: boolean): void {
         this.view.invokeMethod('setActiveInternal', ESValue.wrap(active));
     }
     public dispose(): void {
-        this.staticParent!.__removeActiveChangeListenerForInterop__Internal(this.onActiveChange);
+        this.staticParent?.__removeActiveChangeListenerForInterop__Internal(this.onActiveChange);
         this.staticParent = undefined;
         super.dispose();
     }
@@ -102,12 +102,9 @@ export function compatibleComponent(
         if (staticComponent === undefined) {
             staticComponent = (ExtendableComponent.current) as (ExtendableComponent | undefined);
         }
-        if (staticComponent === undefined) {
-            throw new Error('compatibleComponent error: non current ExtendableComponent');
-        }
         let current = (GlobalStateManager.instance as StateManagerImpl).current;
         (GlobalStateManager.instance as StateManagerImpl).current = undefined;
-        const viewInterop = createInteropView(staticComponent);
+        const viewInterop = staticComponent ? createInteropView(staticComponent) : ESValue.instantiateEmptyObject();
         const result = init(viewInterop);
         (GlobalStateManager.instance as StateManagerImpl).current = current;
         const dynamicComponent = result.component;
