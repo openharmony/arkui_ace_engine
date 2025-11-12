@@ -5814,10 +5814,22 @@ export class TypeChecker {
         return value instanceof Array
     }
     static isArray_BarrierStyle(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>	
+            if (array.length == 0) return true	
+            const e = array[0]	
+            return e instanceof BarrierStyle
+        }
+        return false
     }
     static isArray_LocalizedBarrierStyle(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
+        if (Array.isArray(value)) {
+            const array = value as Array<Object>	
+            if (array.length == 0) return true	
+            const e = array[0]	
+            return e instanceof LocalizedBarrierStyle
+        }
+        return false
     }
     static isArray_ScriptItem(value: Object | string | number | undefined): boolean {
         return value instanceof Array
