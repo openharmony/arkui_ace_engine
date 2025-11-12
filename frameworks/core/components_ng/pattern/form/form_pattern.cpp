@@ -97,6 +97,16 @@ constexpr float DEFAULT_VIEW_SCALE = 1.0f;
 constexpr float MAX_FORM_VIEW_SCALE = 1.0f / 0.85f;
 constexpr char COLUMN_ROLE[] = "column";
 
+// Relationship between form styles and resource text content
+std::unordered_map<FormStyleAttribution, std::pair<const char*, FormChildNodeType>> formStyleResMap_ = {
+    { FormStyleAttribution::PARENT_CONTROL, { TIME_LIMIT_RESOURCE_NAME, FormChildNodeType::TIME_LIMIT_TEXT_NODE } },
+    { FormStyleAttribution::APP_LOCK, { APP_LOCKED_RESOURCE_NAME, FormChildNodeType::APP_LOCKED_TEXT_NODE } },
+    { FormStyleAttribution::DEVELOPER_MODE_TIPS,
+        { DEVELOPER_MODE_TIPS_RESOURCE_NAME, FormChildNodeType::DEVELOPER_MODE_TIPS_TEXT_NODE } },
+    { FormStyleAttribution::DUE_DISABLE, { DUE_CONTROL_RESOURCE_NAME, FormChildNodeType::DUE_CONTROL_TEXT_NODE } },
+    { FormStyleAttribution::DUE_REMOVE, { DUE_CONTROL_RESOURCE_NAME, FormChildNodeType::DUE_CONTROL_TEXT_NODE } }
+};
+
 class FormSnapshotCallback : public Rosen::SurfaceCaptureCallback {
 public:
     explicit FormSnapshotCallback(const WeakPtr<FormPattern>& node) : weakFormPattern_(node) {}
@@ -1263,21 +1273,10 @@ RefPtr<FrameNode> FormPattern::CreateTextNode(bool isRowStyle)
 {
     auto attribution = formSpecialStyle_.GetFormStyleAttribution();
     RefPtr<FrameNode> textNode = nullptr;
-    if (attribution == FormStyleAttribution::PARENT_CONTROL) {
-        textNode = CreateForbiddenTextNode(TIME_LIMIT_RESOURCE_NAME, isRowStyle);
-        AddFormChildNode(FormChildNodeType::TIME_LIMIT_TEXT_NODE, textNode);
-    }
-    if (attribution == FormStyleAttribution::APP_LOCK) {
-        textNode = CreateForbiddenTextNode(APP_LOCKED_RESOURCE_NAME, isRowStyle);
-        AddFormChildNode(FormChildNodeType::APP_LOCKED_TEXT_NODE, textNode);
-    }
-    if (attribution == FormStyleAttribution::DEVELOPER_MODE_TIPS) {
-        textNode = CreateForbiddenTextNode(DEVELOPER_MODE_TIPS_RESOURCE_NAME, isRowStyle);
-        AddFormChildNode(FormChildNodeType::DEVELOPER_MODE_TIPS_TEXT_NODE, textNode);
-    }
-    if (attribution == FormStyleAttribution::DUE_DISABLE || attribution == FormStyleAttribution::DUE_REMOVE) {
-        textNode = CreateForbiddenTextNode(DUE_CONTROL_RESOURCE_NAME, isRowStyle);
-        AddFormChildNode(FormChildNodeType::DUE_CONTROL_TEXT_NODE, textNode);
+    auto it = formStyleResMap_.find(attribution);
+    if (it != formStyleResMap_.end()) {
+        textNode = CreateForbiddenTextNode(it->second.first, isRowStyle);
+        AddFormChildNode(it->second.second, textNode);
     }
     return textNode;
 }
@@ -2189,27 +2188,10 @@ void FormPattern::OnLanguageConfigurationUpdate()
     RefPtr<FrameNode> textNode = nullptr;
     std::string content;
     auto attribution = formSpecialStyle_.GetFormStyleAttribution();
-    switch (attribution) {
-        case FormStyleAttribution::PARENT_CONTROL:
-            GetResourceContent(TIME_LIMIT_RESOURCE_NAME, content);
-            textNode = GetFormChildNode(FormChildNodeType::TIME_LIMIT_TEXT_NODE);
-            break;
-        case FormStyleAttribution::APP_LOCK:
-            GetResourceContent(APP_LOCKED_RESOURCE_NAME, content);
-            textNode = GetFormChildNode(FormChildNodeType::APP_LOCKED_TEXT_NODE);
-            break;
-        case FormStyleAttribution::DEVELOPER_MODE_TIPS:
-            GetResourceContent(DEVELOPER_MODE_TIPS_RESOURCE_NAME, content);
-            textNode = GetFormChildNode(FormChildNodeType::DEVELOPER_MODE_TIPS_TEXT_NODE);
-            break;
-        case FormStyleAttribution::DUE_DISABLE:
-        case FormStyleAttribution::DUE_REMOVE:
-            GetResourceContent(DUE_CONTROL_RESOURCE_NAME, content);
-            textNode = GetFormChildNode(FormChildNodeType::DUE_CONTROL_TEXT_NODE);
-            break;
-        default:
-            // form normal style
-            break;
+    auto it = formStyleResMap_.find(attribution);
+    if (it != formStyleResMap_.end()) {
+        GetResourceContent(it->second.first, content);
+        textNode = GetFormChildNode(it->second.second);
     }
     CHECK_NULL_VOID(textNode);
     auto host = GetHost();
@@ -3057,23 +3039,9 @@ void FormPattern::SetForbiddenRootNodeAccessibilityAction(RefPtr<FrameNode> &for
 
     std::string content;
     auto attribution = formSpecialStyle_.GetFormStyleAttribution();
-    switch (attribution) {
-        case FormStyleAttribution::PARENT_CONTROL:
-            GetResourceContent(TIME_LIMIT_RESOURCE_NAME, content);
-            break;
-        case FormStyleAttribution::APP_LOCK:
-            GetResourceContent(APP_LOCKED_RESOURCE_NAME, content);
-            break;
-        case FormStyleAttribution::DEVELOPER_MODE_TIPS:
-            GetResourceContent(DEVELOPER_MODE_TIPS_RESOURCE_NAME, content);
-            break;
-        case FormStyleAttribution::DUE_DISABLE:
-        case FormStyleAttribution::DUE_REMOVE:
-            GetResourceContent(DUE_CONTROL_RESOURCE_NAME, content);
-            break;
-        default:
-            TAG_LOGW(AceLogTag::ACE_FORM, "AccessibilityProperty content dismatch: %{public}d.", attribution);
-            break;
+    auto it = formStyleResMap_.find(attribution);
+    if (it != formStyleResMap_.end()) {
+        GetResourceContent(it->second.first, content);
     }
     accessibilityProperty->SetAccessibilityText(content);
     accessibilityProperty->SetAccessibilityGroup(true);
