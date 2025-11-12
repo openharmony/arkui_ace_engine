@@ -382,8 +382,11 @@ void RenderNode::RenderWithContext(RenderContext& context, const Offset& offset)
             context.SetNeedRestoreHole(false);
             context.SetClipHole(Rect());
         }
-    } else if (context_.Upgrade()) {
-        context.SetClipHole(context_.Upgrade()->GetTransparentHole());
+    } else {
+        auto pipeline = context_.Upgrade();
+        if (pipeline) {
+            context.SetClipHole(pipeline->GetTransparentHole());
+        }
     }
     Paint(context, offset);
     for (const auto& item : SortChildrenByZIndex(disappearingNodes_)) {
