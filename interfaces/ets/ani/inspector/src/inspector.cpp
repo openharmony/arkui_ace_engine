@@ -28,7 +28,7 @@ const char LAYOUT_TYPE[] = "layout";
 const char DRAW_TYPE[] = "draw";
 const char DRAW_CHILDREN_TYPE[] = "drawChildren";
 const char ANI_INSPECTOR_NS[] = "@ohos.arkui.inspector.inspector";
-const char ANI_COMPONENT_OBSERVER_CLS[] = "@ohos.arkui.inspector.inspector.ComponentObserverImpl";
+const char ANI_COMPONENT_OBSERVER_CLS[] = "@ohos.arkui.inspector.inspector.ComponentObserver";
 const char KOALA_INSPECTOR_CLS[] = "@koalaui.arkts-arkui.generated.arkts.ohos.arkui.inspector.Inspector";
 const char KOALA_COMPONENT_CLS[] = "@koalaui.arkts-arkui.generated.arkts.ohos.arkui.inspector.ComponentObserver";
 } // namespace
@@ -353,7 +353,7 @@ static ani_ref CreateComponentObserver(ani_env *env, ani_string id, const char *
     }
     
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "l:", &ctor)) {
         TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani can not get construct method.");
         return undefinedRef;
     }
@@ -422,17 +422,19 @@ bool ANI_ConstructorForAni(ani_env *env)
         return false;
     }
     std::array methods = {
-        ani_native_function {"createComponentObserver", nullptr,
+        ani_native_function {"createComponentObserver",
+            "C{std.core.String}:C{@ohos.arkui.inspector.inspector.ComponentObserver}",
             reinterpret_cast<void *>(OHOS::Ace::CreateComponentObserverForAni)},
-        ani_native_function {"getInspectorByKey", nullptr,
+        ani_native_function {"getInspectorByKey", "C{std.core.String}:C{std.core.String}",
             reinterpret_cast<void *>(OHOS::Ace::AniGetInspectorByKey)},
-        ani_native_function {"sendEventByKey", nullptr,
+        ani_native_function {"sendEventByKey", "C{std.core.String}iC{std.core.String}:z",
             reinterpret_cast<void *>(OHOS::Ace::AniSendEventByKey)},
-        ani_native_function {"getInspectorTreeNative", nullptr,
+        ani_native_function {"getInspectorTreeNative", ":C{std.core.String}",
             reinterpret_cast<void *>(OHOS::Ace::AniGetInspectorTree)},
-        ani_native_function {"getFilteredInspectorTree", nullptr,
+        ani_native_function {"getFilteredInspectorTree", "C{escompat.Array}:C{std.core.String}",
             reinterpret_cast<void *>(OHOS::Ace::AniGetFilteredInspectorTree)},
-        ani_native_function {"getFilteredInspectorTreeById", nullptr,
+        ani_native_function {"getFilteredInspectorTreeById",
+            "C{std.core.String}iC{escompat.Array}:C{std.core.String}",
             reinterpret_cast<void *>(OHOS::Ace::AniGetFilteredInspectorTreeById)},
     };
     
@@ -448,8 +450,10 @@ bool ANI_ConstructorForAni(ani_env *env)
     }
     
     std::array methodsInspector = {
-        ani_native_function {"on", nullptr, reinterpret_cast<void *>(OHOS::Ace::On)},
-        ani_native_function {"off", nullptr, reinterpret_cast<void *>(OHOS::Ace::Off)},
+        ani_native_function {"on", "C{std.core.String}C{std.core.Function0}:",
+            reinterpret_cast<void *>(OHOS::Ace::On)},
+        ani_native_function {"off", "C{std.core.String}C{std.core.Function0}:",
+            reinterpret_cast<void *>(OHOS::Ace::Off)},
     };
     
     if (ANI_OK != env->Class_BindNativeMethods(clsInspector, methodsInspector.data(), methodsInspector.size())) {
