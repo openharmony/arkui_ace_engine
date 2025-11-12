@@ -1198,4 +1198,39 @@ HWTEST_F(ToggleOneTestNg, GetOrCreateHolderNode, TestSize.Level1)
     toggleBase->MountToHolder(child);
     ASSERT_NE(child, nullptr);
 }
+
+/**
+ * @tc.name: ToggleTypeWrongTest
+ * @tc.desc: Test toggle checkbox update switch property.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleOneTestNg, ToggleTypeWrongTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a toggle checkbox.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(TOGGLE_TYPE[0], IS_ON);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. call set switch property.
+     * @tc.expected: step2. The test suite does not crash.
+     */
+    toggleModelNG.SetUnselectedColorSetByUser(frameNode, true);
+    toggleModelNG.SetSwitchPointColorSetByUser(frameNode, true);
+    toggleModelNG.SetSwitchIsOn(frameNode, true);
+    /**
+     * @tc.steps: step3. call get switch property.
+     * @tc.expected: step3. The test suite does not crash.
+     */
+    auto color = toggleModelNG.GetSelectedColor(frameNode);
+    EXPECT_EQ(color, Color::WHITE);
+    color = toggleModelNG.GetSwitchPointColor(frameNode);
+    EXPECT_EQ(color, Color::WHITE);
+    color = toggleModelNG.GetUnselectedColor(frameNode);
+    EXPECT_EQ(color, Color::WHITE);
+    auto isOn = toggleModelNG.GetSwitchIsOn(frameNode);
+    EXPECT_FALSE(isOn);
+}
 } // namespace OHOS::Ace::NG
