@@ -377,6 +377,7 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
         GlobalStateManager.SetLocalManager(this.__manager);
         this.__updateUseParallel = !(this.__frameNode?.isAttached() ?? true);
         this.__params!.value = arg!;
+        this.__rootStage?.forceCompleteRerender();
         this.__manager!.syncChanges();
         this.__manager!.updateSnapshot();
         this.__rootStage?.value;
