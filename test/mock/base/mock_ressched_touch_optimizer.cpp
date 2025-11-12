@@ -104,4 +104,16 @@ void ResSchedTouchOptimizer::DispatchPointSelect(bool hasResamplePoint, TouchEve
 {
     resultPoint = hasResamplePoint ? resamplePoint : tpPoint;
 }
+
+void ResSchedTouchOptimizer::EndTpFlushVsyncPeriod()
+{
+    lastTpFlush_ = false;
+    vsyncPeriod_ = 0;
+    lastVsyncTimeStamp_ = 0;
+    hisAvgPointTimeStamp_ = 0;
+    vsyncTimeReportExemption_ = false;
+    vsyncFlushed_ = false;
+    isTpFlushFrameDisplayPeriod_ = false;
+    isFristFrameAfterTpFlushFrameDisplayPeriod_ = false;
+}
 } // namespace OHOS::Ace
