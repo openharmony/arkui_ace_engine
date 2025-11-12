@@ -350,7 +350,7 @@ export class DragControllerImpl extends DragController {
             if (customDragInfo.pixelMap !== undefined) {
                 ArkUIAniModule._DragController_executeDragWithCallback(custom as DragItemInfo, nullptr,
                     destroyCallback, dragInfo, callback);
-            } else {
+            } else if (customDragInfo.builder !== undefined) {
                 const peerNode = createUiDetachedRoot((): PeerNode => {
                     return ArkComponentRootPeer.create(undefined);
                 }, customDragInfo.builder as CustomBuilder);
@@ -360,6 +360,11 @@ export class DragControllerImpl extends DragController {
                 }
                 let dragItemInfoNull: DragItemInfo = {};
                 ArkUIAniModule._DragController_executeDragWithCallback(dragItemInfoNull, rootNode,
+                    destroyCallback, dragInfo, callback);
+            } else {
+                destroyCallback = (): void => {}
+                let dragItemInfoNull: DragItemInfo = {};
+                ArkUIAniModule._DragController_executeDragWithCallback(dragItemInfoNull, nullptr,
                     destroyCallback, dragInfo, callback);
             }
         }
@@ -389,7 +394,7 @@ export class DragControllerImpl extends DragController {
             if (customDragInfo.pixelMap !== undefined) {
                 promise = ArkUIAniModule._DragController_executeDragWithPromise(custom as DragItemInfo,
                     nullptr, destroyCallback, dragInfo);
-            } else {
+            } else if (customDragInfo.builder !== undefined) {
                 const peerNode = createUiDetachedRoot((): PeerNode => {
                     return ArkComponentRootPeer.create(undefined);
                 }, customDragInfo.builder as CustomBuilder);
@@ -399,6 +404,11 @@ export class DragControllerImpl extends DragController {
                 }
                 let dragItemInfoNull: DragItemInfo = {};
                 promise = ArkUIAniModule._DragController_executeDragWithPromise(dragItemInfoNull, rootNode,
+                    destroyCallback, dragInfo);
+            } else {
+                destroyCallback = (): void => {}
+                let dragItemInfoNull: DragItemInfo = {};
+                ArkUIAniModule._DragController_executeDragWithPromise(dragItemInfoNull, nullptr,
                     destroyCallback, dragInfo);
             }
         }
@@ -427,7 +437,7 @@ export class DragControllerImpl extends DragController {
                 const dragItemInfo = element as DragItemInfo;
                 if (dragItemInfo.pixelMap !== undefined) {
                     dragItemInfoArray.push(dragItemInfo);
-                } else {
+                } else if (dragItemInfo.builder !== undefined) {
                     const peerNode = createUiDetachedRoot((): PeerNode => {
                         return ArkComponentRootPeer.create(undefined);
                     }, dragItemInfo.builder as CustomBuilder);
