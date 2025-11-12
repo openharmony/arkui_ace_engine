@@ -1289,6 +1289,7 @@ protected:
 private:
     void DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently = false,
         bool addDefaultTransition = false);
+    void UpdateBuilderNodeColorMode(const RefPtr<UINode>& child);
     void UpdateForceDarkAllowedNode(const RefPtr<UINode>& child);
     bool CanAddChildWhenTopNodeIsModalUec(std::list<RefPtr<UINode>>::iterator& curIter);
     void UpdateDrawChildObserver(const RefPtr<UINode>& child);
