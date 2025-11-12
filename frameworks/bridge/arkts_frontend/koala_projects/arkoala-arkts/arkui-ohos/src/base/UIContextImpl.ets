@@ -1451,7 +1451,7 @@ export class UIContextImpl extends UIContext {
         ArkUIAniModule._Common_Restore_InstanceId();
         return node;
     }
-    getFrameNodeByUniqueId(id: int): FrameNode | null {
+    public getFrameNodeByUniqueId(id: int): FrameNode | null {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         const retval = FrameNodeExtender.getFrameNodeByUniqueId(id);
         if (retval === nullptr) {
