@@ -45,6 +45,8 @@ export class XComponentModifier extends CommonMethodModifier implements XCompone
     _enableAnalyzer_0_0value?: boolean | undefined
     _enableSecure_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _enableSecure_0_0value?: boolean | undefined
+    _enableTransparentLayer_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _enableTransparentLayer_0_0value?: boolean | undefined
     _hdrBrightness_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _hdrBrightness_0_0value?: double | undefined
     applyModifierPatch(node: PeerNode): void {
@@ -123,6 +125,24 @@ export class XComponentModifier extends CommonMethodModifier implements XCompone
                 }
             }
         }
+        if (this._enableTransparentLayer_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._enableTransparentLayer_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setEnableTransparentLayerAttribute((this._enableTransparentLayer_0_0value as boolean | undefined));
+                    this._enableTransparentLayer_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._enableTransparentLayer_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._enableTransparentLayer_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setEnableTransparentLayerAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
         if (this._hdrBrightness_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._hdrBrightness_0_flag) {
@@ -197,6 +217,19 @@ export class XComponentModifier extends CommonMethodModifier implements XCompone
                 }
             }
         }
+        if (modifier._enableTransparentLayer_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._enableTransparentLayer_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.enableTransparentLayer(modifier._enableTransparentLayer_0_0value);
+                    break;
+                }
+                default: {
+                    this.enableTransparentLayer((undefined as boolean | undefined));
+                }
+            }
+        }
         if (modifier._hdrBrightness_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._hdrBrightness_0_flag) {
@@ -256,6 +289,17 @@ export class XComponentModifier extends CommonMethodModifier implements XCompone
         } else
         {
             this._enableSecure_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    enableTransparentLayer(value: boolean | undefined): this {
+        if (((this._enableTransparentLayer_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._enableTransparentLayer_0_0value) !== (value)))
+        {
+            this._enableTransparentLayer_0_flag = AttributeUpdaterFlag.UPDATE
+            this._enableTransparentLayer_0_0value = value
+        } else
+        {
+            this._enableTransparentLayer_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
