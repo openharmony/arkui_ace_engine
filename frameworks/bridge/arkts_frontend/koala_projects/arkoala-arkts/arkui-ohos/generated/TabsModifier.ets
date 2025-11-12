@@ -20,7 +20,7 @@ import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier, extractors } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
-import { ArkTabsPeer, BarPosition, AnimationMode, OnTabsAnimationStartCallback, TabsAnimationEvent, OnTabsAnimationEndCallback, OnTabsGestureSwipeCallback, BarGridColumnOptions, TabsCustomContentTransitionCallback, OnTabsContentWillChangeCallback, TabsAttribute, BarMode, ScrollableBarModeOptions, TabsCacheMode } from "./component/tabs"
+import { ArkTabsPeer, BarPosition, AnimationMode, OnTabsAnimationStartCallback, TabsAnimationEvent, OnTabsAnimationEndCallback, OnTabsGestureSwipeCallback, BarGridColumnOptions, TabsCustomContentTransitionCallback, OnTabsContentWillChangeCallback, TabsAttribute, OnTabsContentDidScrollCallback, BarMode, ScrollableBarModeOptions, TabsCacheMode } from "./component/tabs"
 import { int32 } from "@koalaui/common"
 import { CommonMethod, DividerStyle, BlurStyle, BackgroundEffectOptions, BackgroundBlurStyleOptions } from "./component/common"
 import { Length, ResourceColor } from "./component/units"
@@ -88,6 +88,8 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
     _barBackgroundEffect_0_0value?: BackgroundEffectOptions | undefined
     _onContentWillChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onContentWillChange_0_0value?: OnTabsContentWillChangeCallback | undefined
+    _onContentDidScroll_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onContentDidScroll_0_0value?: OnTabsContentDidScrollCallback | undefined
     _barMode_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _barMode_0_0value?: BarMode | undefined
     _barMode_0_1value?: ScrollableBarModeOptions | undefined
@@ -553,6 +555,24 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
                 }
             }
         }
+        if (this._onContentDidScroll_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onContentDidScroll_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnContentDidScrollAttribute((this._onContentDidScroll_0_0value as OnTabsContentDidScrollCallback | undefined));
+                    this._onContentDidScroll_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onContentDidScroll_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onContentDidScroll_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnContentDidScrollAttribute((undefined as OnTabsContentDidScrollCallback | undefined));
+                }
+            }
+        }
         if (this._barMode_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._barMode_0_flag) {
@@ -953,6 +973,19 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
                 }
             }
         }
+        if (modifier._onContentDidScroll_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onContentDidScroll_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onContentDidScroll(modifier._onContentDidScroll_0_0value);
+                    break;
+                }
+                default: {
+                    this.onContentDidScroll((undefined as OnTabsContentDidScrollCallback | undefined));
+                }
+            }
+        }
         if (modifier._barMode_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._barMode_0_flag) {
@@ -1278,6 +1311,17 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
         } else
         {
             this._onContentWillChange_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    onContentDidScroll(value: OnTabsContentDidScrollCallback | undefined): this {
+        if (((this._onContentDidScroll_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onContentDidScroll_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onContentDidScroll_0_0value = value
+        } else
+        {
+            this._onContentDidScroll_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

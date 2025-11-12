@@ -33,7 +33,7 @@ import { NativeEmbedDataInfo_serializer, NativeEmbedTouchInfo_serializer, OnAler
 import { NavDestinationContext_serializer, NavDestinationTransition_serializer, NavDestinationActiveReason, NavDestinationContext, NavDestinationTransition, NavDestinationTransitionDelegate } from "./../../component/navDestination"
 import { NavigationTransitionProxy_serializer, NavigationAnimatedTransition_serializer, PopInfo_serializer, NavContentInfo_serializer, NavigationMode, NavigationTitleMode, NavigationTransitionProxy, NavigationAnimatedTransition, PopInfo, InterceptionModeCallback, InterceptionShowCallback, NavBar, NavigationOperation, NavContentInfo, UpdateTransitionCallback } from "./../../component/navigation"
 import { OnScrollFrameBeginHandlerResult_serializer, OffsetResult_serializer, OnScrollFrameBeginHandlerResult, OffsetResult, OnScrollEdgeCallback, OnScrollFrameBeginCallback, ScrollOnScrollCallback, ScrollOnWillScrollCallback } from "./../../component/scroll"
-import { TabContentAnimatedTransition_serializer, TabContentTransitionProxy_serializer, TabsAnimationEvent_serializer, TabContentAnimatedTransition, TabContentTransitionProxy, OnTabsAnimationEndCallback, TabsAnimationEvent, OnTabsAnimationStartCallback, OnTabsContentWillChangeCallback, OnTabsGestureSwipeCallback, TabsCustomContentTransitionCallback } from "./../../component/tabs"
+import { TabContentAnimatedTransition_serializer, TabContentTransitionProxy_serializer, TabsAnimationEvent_serializer, TabContentAnimatedTransition, TabContentTransitionProxy, OnTabsAnimationEndCallback, TabsAnimationEvent, OnTabsAnimationStartCallback, OnTabsContentDidScrollCallback, OnTabsContentWillChangeCallback, OnTabsGestureSwipeCallback, TabsCustomContentTransitionCallback } from "./../../component/tabs"
 import { SurfaceRect_serializer, NativeXComponentPointer, SurfaceRect } from "./../../component/xcomponent"
 import { SwiperContentTransitionProxy_serializer, SwiperContentWillScrollResult_serializer, SwiperAnimationEvent_serializer, SwiperContentTransitionProxy, ContentDidScrollCallback, ContentWillScrollCallback, SwiperContentWillScrollResult, OnSwiperAnimationEndCallback, SwiperAnimationEvent, OnSwiperAnimationStartCallback, OnSwiperGestureSwipeCallback } from "./../../component/swiper"
 import { Resource_serializer } from "./../resource"
@@ -2716,6 +2716,15 @@ export function deserializeAndCallOnTabsAnimationStartCallback(thisDeserializer:
     let extraInfo : TabsAnimationEvent = TabsAnimationEvent_serializer.read(thisDeserializer)
     _call(index, targetIndex, extraInfo)
 }
+export function deserializeAndCallOnTabsContentDidScrollCallback(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as OnTabsContentDidScrollCallback)
+    let selectedIndex : int32 = thisDeserializer.readInt32()
+    let index : int32 = thisDeserializer.readInt32()
+    let position : double = thisDeserializer.readFloat64()
+    let mainAxisLength : double = thisDeserializer.readFloat64()
+    _call(selectedIndex, index, position, mainAxisLength)
+}
 export function deserializeAndCallOnTabsContentWillChangeCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as OnTabsContentWillChangeCallback)
@@ -3753,6 +3762,7 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.Kind_OnSwiperGestureSwipeCallback: return deserializeAndCallOnSwiperGestureSwipeCallback(thisDeserializer);
         case CallbackKind.Kind_OnTabsAnimationEndCallback: return deserializeAndCallOnTabsAnimationEndCallback(thisDeserializer);
         case CallbackKind.Kind_OnTabsAnimationStartCallback: return deserializeAndCallOnTabsAnimationStartCallback(thisDeserializer);
+        case CallbackKind.Kind_OnTabsContentDidScrollCallback: return deserializeAndCallOnTabsContentDidScrollCallback(thisDeserializer);
         case CallbackKind.Kind_OnTabsContentWillChangeCallback: return deserializeAndCallOnTabsContentWillChangeCallback(thisDeserializer);
         case CallbackKind.Kind_OnTabsGestureSwipeCallback: return deserializeAndCallOnTabsGestureSwipeCallback(thisDeserializer);
         case CallbackKind.Kind_OnTextPickerChangeCallback: return deserializeAndCallOnTextPickerChangeCallback(thisDeserializer);

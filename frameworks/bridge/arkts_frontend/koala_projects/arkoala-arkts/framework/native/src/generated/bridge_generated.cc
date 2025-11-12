@@ -19204,6 +19204,19 @@ void impl_TabsAttribute_setOnContentWillChange(Ark_NativePointer thisPtr, KSeria
         GetNodeModifiers()->getTabsModifier()->setOnContentWillChange(self, static_cast<Opt_OnTabsContentWillChangeCallback*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(TabsAttribute_setOnContentWillChange, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_TabsAttribute_setOnContentDidScroll(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_OnTabsContentDidScrollCallback valueValueTempTmpBuf = {};
+        valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            valueValueTempTmpBuf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Int32 selectedIndex, const Ark_Int32 index, const Ark_Float64 position, const Ark_Float64 mainAxisLength)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_OnTabsContentDidScrollCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 selectedIndex, const Ark_Int32 index, const Ark_Float64 position, const Ark_Float64 mainAxisLength)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_OnTabsContentDidScrollCallback))))};
+        }
+        Opt_OnTabsContentDidScrollCallback valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getTabsModifier()->setOnContentDidScroll(self, static_cast<Opt_OnTabsContentDidScrollCallback*>(&valueValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(TabsAttribute_setOnContentDidScroll, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_TabsAttribute_setBarMode(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);

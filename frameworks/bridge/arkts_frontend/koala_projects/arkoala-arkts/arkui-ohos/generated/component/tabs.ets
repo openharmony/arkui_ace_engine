@@ -546,6 +546,18 @@ export class ArkTabsPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TabsAttribute_setOnContentWillChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setOnContentDidScrollAttribute(value: OnTabsContentDidScrollCallback | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TabsAttribute_setOnContentDidScroll(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setBarModeAttribute(value: BarMode | undefined, options?: ScrollableBarModeOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -689,6 +701,7 @@ export type OnTabsAnimationEndCallback = (index: int32, extraInfo: TabsAnimation
 export type OnTabsGestureSwipeCallback = (index: int32, extraInfo: TabsAnimationEvent) => void;
 export type TabsCustomContentTransitionCallback = (from: int32, to: int32) => TabContentAnimatedTransition | undefined;
 export type OnTabsContentWillChangeCallback = (currentIndex: int32, comingIndex: int32) => boolean;
+export type OnTabsContentDidScrollCallback = (selectedIndex: int32, index: int32, position: double, mainAxisLength: double) => void;
 export interface TabsAttribute extends CommonMethod {
     setTabsOptions(options?: TabsOptions): this {
         throw new Error("Unimplemented method setTabsOptions")
@@ -768,6 +781,9 @@ export interface TabsAttribute extends CommonMethod {
     onContentWillChange(value: OnTabsContentWillChangeCallback | undefined): this {
         throw new Error("Unimplemented method onContentWillChange")
     }
+    onContentDidScroll(value: OnTabsContentDidScrollCallback | undefined): this {
+        throw new Error("Unimplemented method onContentDidScroll")
+    }
     barMode(value: BarMode | undefined, options?: ScrollableBarModeOptions): this {
         throw new Error("Unimplemented method barMode")
     }
@@ -811,6 +827,7 @@ export class ArkTabsStyle extends ArkCommonMethodStyle implements TabsAttribute 
     barBackgroundEffect_value?: BackgroundEffectOptions | undefined
     onContentWillChange_value?: OnTabsContentWillChangeCallback | undefined
     attributeModifier_value?: AttributeModifier<TabsAttribute> | AttributeModifier<CommonMethod> | undefined
+    onContentDidScroll_value?: OnTabsContentDidScrollCallback | undefined
     setTabsOptions(options?: TabsOptions): this {
         return this
     }
@@ -887,6 +904,9 @@ export class ArkTabsStyle extends ArkCommonMethodStyle implements TabsAttribute 
         return this
     }
     onContentWillChange(value: OnTabsContentWillChangeCallback | undefined): this {
+        return this
+    }
+    onContentDidScroll(value: OnTabsContentDidScrollCallback | undefined): this {
         return this
     }
     barMode(value: BarMode | undefined, options?: ScrollableBarModeOptions): this {
@@ -1121,6 +1141,14 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements TabsAt
         if (this.checkPriority("onContentWillChange")) {
             const value_casted = value as (OnTabsContentWillChangeCallback | undefined)
             this.getPeer()?.setOnContentWillChangeAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onContentDidScroll(value: OnTabsContentDidScrollCallback | undefined): this {
+        if (this.checkPriority("onContentDidScroll")) {
+            const value_casted = value as (OnTabsContentDidScrollCallback | undefined)
+            this.getPeer()?.setOnContentDidScrollAttribute(value_casted)
             return this
         }
         return this

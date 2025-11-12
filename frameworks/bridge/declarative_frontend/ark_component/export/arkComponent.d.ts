@@ -1971,6 +1971,7 @@ declare class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     onChange(event: (index: number) => void): TabsAttribute;
     onTabBarClick(event: (index: number) => void): TabsAttribute;
     onUnselected(event: (index: number) => void): TabsAttribute;
+    onContentDidScroll(handler: OnTabsContentDidScrollCallback | undefined): TabsAttribute;
     fadingEdge(value: boolean): TabsAttribute;
     divider(value: DividerStyle | null): TabsAttribute;
     barOverlap(value: boolean): TabsAttribute;

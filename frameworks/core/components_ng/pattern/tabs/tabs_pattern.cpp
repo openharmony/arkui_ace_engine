@@ -988,4 +988,36 @@ void TabsPattern::OnColorModeChange(uint32_t colorMode)
     }
     tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
+
+void TabsPattern::DumpInfo()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(host);
+    CHECK_NULL_VOID(tabsNode);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    auto callbackPtr = swiperPattern->GetOnContentDidScroll();
+    CHECK_NULL_VOID(callbackPtr);
+    DumpLog::GetInstance().AddDesc(std::string("isBindonContentDidScroll: ").append(
+        *callbackPtr ? "true" : "false"));
+}
+
+void TabsPattern::DumpAdvanceInfo()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(host);
+    CHECK_NULL_VOID(tabsNode);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    auto callbackPtr = swiperPattern->GetOnContentDidScroll();
+    CHECK_NULL_VOID(callbackPtr);
+    DumpLog::GetInstance().AddDesc(std::string("isBindonContentDidScroll: ").append(
+        *callbackPtr ? "true" : "false"));
+}
 } // namespace OHOS::Ace::NG

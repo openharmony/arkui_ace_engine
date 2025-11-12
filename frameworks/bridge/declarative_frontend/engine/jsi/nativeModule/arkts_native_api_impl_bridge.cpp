@@ -4989,6 +4989,10 @@ void ArkUINativeModule::RegisterTabAttributes(Local<panda::ObjectRef> object, Ec
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetTabOnUnselected));
     tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTabOnUnselected"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetTabOnUnselected));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTabsOnContentDidScroll"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetOnContentDidScroll));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTabsOnContentDidScroll"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetOnContentDidScroll));
     tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBarBackgroundColor"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetBarBackgroundColor));
     tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBarBackgroundColor"),
