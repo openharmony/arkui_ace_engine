@@ -2012,9 +2012,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg094, TestSize.Level1)
     MockContainer::Current()->SetIsUIExtensionWindow(true);
     context_->ChangeDarkModeBrightness();
     auto rsUIDirector = context_->GetRSUIDirector();
-    context_->RSTransactionBegin(rsUIDirector);
-    context_->SetAppBgColor(Color::BLUE);
-    context_->RSTransactionCommit(rsUIDirector);
+    context_->RSTransactionBeginAndCommit(rsUIDirector);
     context_->ChangeDarkModeBrightness();
     MockContainer::SetMockColorMode(ColorMode::COLOR_MODE_UNDEFINED);
     context_->ChangeDarkModeBrightness();
@@ -2876,6 +2874,40 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_TouchEvent_NoNeedTpFlush_T
     context_->OnTouchEvent(touchEvent, false);
     
     testing::Mock::VerifyAndClearExpectations(mockWindow);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg095
+ * @tc.desc: Test the function ChangeDarkModeBrightness.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg095, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->windowManager_ = AceType::MakeRefPtr<WindowManager>();
+
+    MockContainer::SetMockColorMode(ColorMode::DARK);
+    context_->SetAppBgColor(Color::BLACK);
+    context_->ChangeDarkModeBrightness();
+    context_->SetIsJsCard(true);
+    context_->ChangeDarkModeBrightness();
+    MockContainer::Current()->SetIsFormRender(true);
+    context_->ChangeDarkModeBrightness();
+    MockContainer::Current()->SetIsDynamicRender(true);
+    context_->ChangeDarkModeBrightness();
+    MockContainer::Current()->SetIsUIExtensionWindow(true);
+    context_->ChangeDarkModeBrightness();
+    auto rsUIDirector = context_->GetRSUIDirector();
+    context_->appBgColor_ = Color::TRANSPARENT;
+    context_->RSTransactionBeginAndCommit(rsUIDirector);
+    context_->ChangeDarkModeBrightness();
+    MockContainer::SetMockColorMode(ColorMode::COLOR_MODE_UNDEFINED);
+    context_->ChangeDarkModeBrightness();
+    EXPECT_NE(context_->stageManager_, nullptr);
 }
 } // namespace NG
 } // namespace OHOS::Ace
