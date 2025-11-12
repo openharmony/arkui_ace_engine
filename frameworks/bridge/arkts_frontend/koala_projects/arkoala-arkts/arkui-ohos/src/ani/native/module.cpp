@@ -1147,12 +1147,12 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
         },
         ani_native_function {
             "_CanvasRenderingContext_setAttachCallbackId",
-            nullptr,
+            "li:",
             reinterpret_cast<void*>(OHOS::Ace::Ani::CanvasModule::SetAttachCallbackId)
         },
         ani_native_function {
             "_CanvasRenderingContext_setDetachCallbackId",
-            nullptr,
+            "li:",
             reinterpret_cast<void*>(OHOS::Ace::Ani::CanvasModule::SetDetachCallbackId)
         },
         ani_native_function {
