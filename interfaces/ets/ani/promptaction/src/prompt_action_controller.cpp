@@ -243,7 +243,7 @@ ani_object ANICreateDismissDialogAction(ani_env* env, const int32_t reason, cons
     }
 
     ani_method ctor;
-    status = env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor);
+    status = env->Class_FindMethod(cls, "<ctor>", "l:", &ctor);
     if (status != ANI_OK) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG, "DismissDialogAction FindMethod fail. status: %{public}d", status);
         return result;
