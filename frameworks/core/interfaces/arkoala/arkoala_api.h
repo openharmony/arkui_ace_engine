@@ -1348,6 +1348,13 @@ enum ArkUIEventSubKind {
     ON_GRID_WILL_SCROLL,
     ON_GRID_DID_SCROLL,
     ON_GRID_SCROLL_BAR_UPDATE,
+    ON_GRID_ITEM_DRAG_START,
+    ON_GRID_ITEM_DRAG_ENTER,
+    ON_GRID_ITEM_DRAG_MOVE,
+    ON_GRID_ITEM_DRAG_LEAVE,
+    ON_GRID_ITEM_DROP,
+
+    ON_GRID_ITEM_SELECT = ARKUI_MAX_EVENT_NUM * ARKUI_GRID_ITEM,
 
     ON_SIDEBAR_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_SIDEBAR,
 
@@ -4128,8 +4135,10 @@ struct ArkUIGridModifier {
     ArkUI_Bool (*getShowCached)(ArkUINodeHandle node);
     void (*setGridEditMode)(ArkUINodeHandle node, ArkUI_Bool editMode);
     void (*resetGridEditMode)(ArkUINodeHandle node);
+    ArkUI_Bool (*getGridEditMode)(ArkUINodeHandle node);
     void (*setGridMultiSelectable)(ArkUINodeHandle node, ArkUI_Bool multiSelectable);
     void (*resetGridMultiSelectable)(ArkUINodeHandle node);
+    ArkUI_Bool (*getGridMultiSelectable)(ArkUINodeHandle node);
     void (*setGridMaxCount)(ArkUINodeHandle node, ArkUI_Int32 maxCount);
     void (*resetGridMaxCount)(ArkUINodeHandle node);
     void (*setGridMinCount)(ArkUINodeHandle node, ArkUI_Int32 minCount);
@@ -4140,7 +4149,7 @@ struct ArkUIGridModifier {
     void (*resetGridLayoutDirection)(ArkUINodeHandle node);
     void (*setGridSupportAnimation)(ArkUINodeHandle node, ArkUI_Bool supportAnimation);
     void (*resetGridSupportAnimation)(ArkUINodeHandle node);
-
+    ArkUI_Bool (*getGridSupportAnimation)(ArkUINodeHandle node);
     void (*setEdgeEffect)(
         ArkUINodeHandle node, ArkUI_Int32 edgeEffect, ArkUI_Bool alwaysEnabled, ArkUI_Int32 effectEdge);
     void (*resetEdgeEffect)(ArkUINodeHandle node);
@@ -4206,8 +4215,10 @@ struct ArkUIGridModifier {
 struct ArkUIGridItemModifier {
     void (*setGridItemSelectable)(ArkUINodeHandle node, ArkUI_Bool selectable);
     void (*resetGridItemSelectable)(ArkUINodeHandle node);
+    ArkUI_Bool (*getGridItemSelectable)(ArkUINodeHandle node);
     void (*setGridItemSelected)(ArkUINodeHandle node, ArkUI_Bool selected);
     void (*resetGridItemSelected)(ArkUINodeHandle node);
+    ArkUI_Bool (*getGridItemSelected)(ArkUINodeHandle node);
     void (*setGridItemRowStart)(ArkUINodeHandle node, ArkUI_Int32 rowStart);
     void (*resetGridItemRowStart)(ArkUINodeHandle node);
     void (*setGridItemRowEnd)(ArkUINodeHandle node, ArkUI_Int32 rowEnd);
@@ -4221,6 +4232,8 @@ struct ArkUIGridItemModifier {
     ArkUI_Int32 (*getGridItemOptions)(ArkUINodeHandle node);
     void (*setGridItemOnSelect)(ArkUINodeHandle node, void* callback);
     void (*resetGridItemOnSelect)(ArkUINodeHandle node);
+    void (*setOnGridItemSelect)(ArkUINodeHandle node, void* extraParam);
+    void (*resetOnGridItemSelect)(ArkUINodeHandle node);
 };
 
 struct ArkUIScrollableModifier {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -408,6 +408,18 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_GRID_DID_SCROLL;
         case NODE_GRID_ON_SCROLL_BAR_UPDATE:
             return ON_GRID_SCROLL_BAR_UPDATE;
+        case NODE_GRID_ON_ITEM_DRAG_START:
+            return ON_GRID_ITEM_DRAG_START;
+        case NODE_GRID_ON_ITEM_DRAG_ENTER:
+            return ON_GRID_ITEM_DRAG_ENTER;
+        case NODE_GRID_ON_ITEM_DRAG_MOVE:
+            return ON_GRID_ITEM_DRAG_MOVE;
+        case NODE_GRID_ON_ITEM_DRAG_LEAVE:
+            return ON_GRID_ITEM_DRAG_LEAVE;
+        case NODE_GRID_ON_ITEM_DROP:
+            return ON_GRID_ITEM_DROP;
+        case NODE_GRID_ITEM_ON_SELECT:
+            return ON_GRID_ITEM_SELECT;
         case NODE_ON_COASTING_AXIS_EVENT:
             return ON_COASTING_AXIS_EVENT;
         case NODE_ON_CHILD_TOUCH_TEST:
@@ -690,6 +702,18 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_GRID_ON_DID_SCROLL;
         case ON_GRID_SCROLL_BAR_UPDATE:
             return NODE_GRID_ON_SCROLL_BAR_UPDATE;
+        case ON_GRID_ITEM_DRAG_START:
+            return NODE_GRID_ON_ITEM_DRAG_START;
+        case ON_GRID_ITEM_DRAG_ENTER:
+            return NODE_GRID_ON_ITEM_DRAG_ENTER;
+        case ON_GRID_ITEM_DRAG_MOVE:
+            return NODE_GRID_ON_ITEM_DRAG_MOVE;
+        case ON_GRID_ITEM_DRAG_LEAVE:
+            return NODE_GRID_ON_ITEM_DRAG_LEAVE;
+        case ON_GRID_ITEM_DROP:
+            return NODE_GRID_ON_ITEM_DROP;
+        case ON_GRID_ITEM_SELECT:
+            return NODE_GRID_ITEM_ON_SELECT;
         case ON_COASTING_AXIS_EVENT:
             return NODE_ON_COASTING_AXIS_EVENT;
         case ON_CHILD_TOUCH_TEST:
