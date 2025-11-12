@@ -760,7 +760,7 @@ private:
         CHECK_NULL_VOID(pipeline);
         auto overlayManager = pipeline->GetOverlayManager();
         CHECK_NULL_VOID(overlayManager);
-        auto menuLifeCycleCallback = overlayManager->GetMenuLifeCycleCallback();
+        auto menuLifeCycleCallback = overlayManager->GetMenuLifeCycleCallback(targetId_);
         CHECK_NULL_VOID(menuLifeCycleCallback);
         menuLifeCycleCallback(menuLifeCycleEvent);
     }

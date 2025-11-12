@@ -762,18 +762,18 @@ public:
     bool IsTopOrder(std::optional<double> levelOrder);
     std::optional<double> GetLevelOrder(const RefPtr<FrameNode>& node, std::optional<double> levelOrder = std::nullopt);
     void PopToast(int32_t targetId);
-    void RegisterMenuLifeCycleCallback(
+    void RegisterMenuLifeCycleCallback(int32_t targetId,
         const std::function<void(const MenuLifeCycleEvent& menuLifeCycleEvent)>& callback)
     {
-        menuLifeCycleCallback_ = callback;
+        menuLifeCycleCallbackMap_[targetId] = callback;
     }
-    void UnRegisterMenuLifeCycleCallback()
+    void UnRegisterMenuLifeCycleCallback(int32_t targetId)
     {
-        menuLifeCycleCallback_ = nullptr;
+        menuLifeCycleCallbackMap_.erase(targetId);
     }
-    std::function<void(const MenuLifeCycleEvent&)>& GetMenuLifeCycleCallback()
+    std::function<void(const MenuLifeCycleEvent&)>& GetMenuLifeCycleCallback(int32_t targetId)
     {
-        return menuLifeCycleCallback_;
+        return menuLifeCycleCallbackMap_[targetId];
     }
 
 private:
@@ -1071,7 +1071,7 @@ private:
     std::set<int32_t> skipTargetIds_;
     std::optional<OverlayManagerInfo> overlayInfo_;
     std::unordered_set<int32_t> onDisappearFilterIds_;
-    std::function<void(const MenuLifeCycleEvent&)> menuLifeCycleCallback_ = nullptr;
+    std::map<int32_t, std::function<void(const MenuLifeCycleEvent&)>> menuLifeCycleCallbackMap_;
 };
 } // namespace OHOS::Ace::NG
 
