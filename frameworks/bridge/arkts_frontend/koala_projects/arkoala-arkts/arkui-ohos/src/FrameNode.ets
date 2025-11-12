@@ -122,6 +122,7 @@ import { ElementIdToCustomProperties } from "#handwritten"
 import { ObjectLinkDecoratedVariable } from "./stateManagement/decoratorImpl/decoratorObjectLink"
 import { FrameNodeExtender } from './framework';
 import { extractors } from "#handwritten";
+import { PeerNode } from './PeerNode';
 import hilog from '@ohos.hilog';
 
 export interface CrossLanguageOptions {
@@ -195,9 +196,7 @@ export class FrameNode implements MaterializedBase {
     get gestureEvent(): UIGestureEvent {
         if (this._gestureEvent === undefined) {
             this._gestureEvent = new UIGestureEvent();
-            const retval = FrameNodeExtender.getFrameNodePtr(this)
-            let peer = new ArkFrameNodePeer(retval, this._nodeId as int32, "FrameNode", 0);
-            this._gestureEvent!.setPeer(peer);
+            this._gestureEvent!.setPeer(PeerNode.findPeerByNativeId(this.peer!.ptr as KPointer));
         }
         return this._gestureEvent as UIGestureEvent;
     }
