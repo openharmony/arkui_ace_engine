@@ -1624,7 +1624,8 @@ RefPtr<FrameNode> PageRouterManager::CreateDynamicPage(int32_t pageId, const Rou
             const std::string errorMsg =
                 "Load Page Failed: " + target.url + ", probably caused by reasons as follows:\n"
                 "1. there is a js error in target page;\n"
-                "2. invalid moduleName or bundleName in target page.";
+                "2. invalid moduleName or bundleName in target page;\n"
+                "3. the ability exited unexpectedly.";
             ThrowError(errorMsg, ERROR_CODE_INTERNAL_ERROR);
         }
 #endif
