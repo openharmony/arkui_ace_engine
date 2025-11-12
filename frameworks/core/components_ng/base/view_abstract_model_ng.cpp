@@ -1664,4 +1664,34 @@ void ViewAbstractModelNG::CreateWithResourceObj(
     CreateWithDimensionResourceObj(frameNode, resourceObj, type);
 }
 
+void ViewAbstractModelNG::SetAccessibilityActionOptions(
+    FrameNode* frameNode, AccessibilityActionOptions actionOptions)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityActionOptions(actionOptions);
+}
+
+void ViewAbstractModelNG::ResetAccessibilityActionOptions(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->ResetAccessibilityActionOptions();
+}
+
+void ViewAbstractModelNG::SetAccessibilityActionOptions(AccessibilityActionOptions actionOptions)
+{
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetAccessibilityActionOptions(frameNode, actionOptions);
+}
+
+void ViewAbstractModelNG::ResetAccessibilityActionOptions()
+{
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    ResetAccessibilityActionOptions(frameNode);
+}
 } // namespace OHOS::Ace::NG

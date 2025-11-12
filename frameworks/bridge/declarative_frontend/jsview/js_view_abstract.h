@@ -628,7 +628,7 @@ public:
     static void JsDrawModifier(const JSCallbackInfo& info);
     static void JsDragPreview(const JSCallbackInfo& info);
     static void JsAccessibilityVirtualNode(const JSCallbackInfo& info);
-
+    static void JsAccessibilityActionOptions(const JSCallbackInfo& info);
     static void ParseAccessibilityDescriptionJson(const std::string& description,
         std::pair<bool, std::string>& autoEventPair, std::pair<bool, std::string>& descriptionPair);
 

@@ -58,6 +58,7 @@ constexpr double SLIP_FACTOR_COEFFICIENT = 1.07;
 constexpr uint64_t SCREEN_READ_SENDEVENT_TIMESTAMP = 100;
 constexpr int32_t NONE_POINT_OFFSET = 2;
 constexpr int32_t STEP_POINT_OFFSET = 1;
+constexpr int32_t DEFAULT_STEP = 1;
 const std::string STR_SCREEN_READ_SENDEVENT = "ArkUISliderSendAccessibilityValueEvent";
 const std::string SLIDER_EFFECT_ID_NAME = "haptic.slide";
 #ifdef SUPPORT_DIGITAL_CROWN
@@ -2163,8 +2164,9 @@ void SliderPattern::SetAccessibilityAction()
     accessibilityProperty->SetActionScrollForward([weakPtr = WeakClaim(this)]() {
         const auto& pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
+        int32_t stepCount = pattern->CheckAccessibilityStepCount();
         pattern->FireChangeEvent(SliderChangeMode::Begin);
-        pattern->MoveStep(1);
+        pattern->MoveStep(stepCount);
         pattern->FireChangeEvent(SliderChangeMode::End);
 
         if (pattern->showTips_) {
@@ -2177,8 +2179,9 @@ void SliderPattern::SetAccessibilityAction()
     accessibilityProperty->SetActionScrollBackward([weakPtr = WeakClaim(this)]() {
         const auto& pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
+        int32_t stepCount = pattern->CheckAccessibilityStepCount();
         pattern->FireChangeEvent(SliderChangeMode::Begin);
-        pattern->MoveStep(-1);
+        pattern->MoveStep(-stepCount);
         pattern->FireChangeEvent(SliderChangeMode::End);
 
         if (pattern->showTips_) {
@@ -2802,5 +2805,23 @@ void SliderPattern::UpdateStepPointsAccessibilityText(
     accessibilityProperty->SetAccessibilityText(text);
     TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT,
         "Update step point, index:%{public}u, accessibility text:%{public}s.", nodeIndex, text.c_str());
+}
+
+int32_t SliderPattern::CheckAccessibilityStepCount()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, DEFAULT_STEP);
+    auto sliderPaintProperty = host->GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_RETURN(sliderPaintProperty, DEFAULT_STEP);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_RETURN(accessibilityProperty, DEFAULT_STEP);
+    int32_t scrollStep = accessibilityProperty->GetAccessibilityActionOptions().scrollStep;
+    float step = sliderPaintProperty->GetStep().value_or(1.0f);
+    if (NearZero(step)) {
+        return DEFAULT_STEP;
+    }
+    auto min = sliderPaintProperty->GetMin().value_or(SLIDER_MIN);
+    auto max = sliderPaintProperty->GetMax().value_or(SLIDER_MAX);
+    return (scrollStep > (max - min) / step) ? DEFAULT_STEP : scrollStep;
 }
 } // namespace OHOS::Ace::NG

@@ -3979,6 +3979,19 @@ class CompositingFilterModifier extends ModifierWithKey<Filter> {
   }
 }
 
+class AccessibilityActionOptionsModifier extends ModifierWithKey<object> {
+  constructor(value: object) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('accessibilityActionOptions');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetAccessibilityActionOptions(node);
+    } else {
+      getUINativeModule().common.setAccessibilityActionOptions(node, this.value);
+    }
+  }
+}
 class FreezeModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
@@ -5817,6 +5830,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     } else {
       modifierWithKey(this._modifiersWithKeys, AccessibilitySelectedModifier.identity, AccessibilitySelectedModifier, undefined);
     }
+    return this;
+  }
+
+  accessibilityActionOptions(value: object): this {
+    modifierWithKey(this._modifiersWithKeys, AccessibilityActionOptionsModifier.identity, AccessibilityActionOptionsModifier, value);
     return this;
   }
 

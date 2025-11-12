@@ -516,6 +516,8 @@ public:
     virtual void SetAccessibilityUseSamePage(const std::string& pageMode) = 0;
     virtual void SetAccessibilityScrollTriggerable(bool triggerable, bool resetValue) = 0;
     virtual void SetAccessibilityFocusDrawLevel(int32_t drawLevel) = 0;
+    virtual void SetAccessibilityActionOptions(NG::AccessibilityActionOptions actionOptions) = 0;
+    virtual void ResetAccessibilityActionOptions() = 0;
 
     // progress mask
     virtual void SetProgressMask(const RefPtr<NG::ProgressMaskProperty>& progress) = 0;

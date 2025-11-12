@@ -333,4 +333,24 @@ void JSViewAbstract::JsOnAccessibilityHoverTransparent(const JSCallbackInfo& arg
     };
     ViewAbstractModel::GetInstance()->SetOnAccessibilityHoverTransparent(std::move(onHoverTransparentFunc));
 }
+
+void JSViewAbstract::JsAccessibilityActionOptions(const JSCallbackInfo& args)
+{
+    NG::AccessibilityActionOptions options;
+    if (args.Length() == 0 || args[0]->IsUndefined()) {
+        ViewAbstractModel::GetInstance()->ResetAccessibilityActionOptions();
+        return;
+    }
+    if (args.Length() > 0 && args[0]->IsObject()) {
+        auto obj = JSRef<JSObject>::Cast(args[0]);
+        auto scrollStepVal = obj->GetProperty("scrollStep");
+        if (scrollStepVal->IsNumber()) {
+            int32_t stepCount = scrollStepVal->ToNumber<int32_t>();
+            options.scrollStep = (stepCount >= 1) ? stepCount : 1;
+        }
+        ViewAbstractModel::GetInstance()->SetAccessibilityActionOptions(options);
+    } else {
+        ViewAbstractModel::GetInstance()->ResetAccessibilityActionOptions();
+    }
+}
 }

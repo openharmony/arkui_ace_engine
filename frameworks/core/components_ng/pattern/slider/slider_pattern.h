@@ -459,6 +459,8 @@ private:
 
     void RemoveCallbackOnDetach(FrameNode* frameNode);
 
+    int32_t CheckAccessibilityStepCount();
+
     Axis direction_ = Axis::HORIZONTAL;
     enum SliderChangeMode { Begin = 0, Moving = 1, End = 2, Click = 3 };
     float value_ = 0.0f;

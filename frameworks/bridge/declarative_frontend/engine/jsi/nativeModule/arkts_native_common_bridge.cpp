@@ -4981,6 +4981,42 @@ ArkUINativeModuleValue CommonBridge::ResetOnAccessibilityActionIntercept(ArkUIRu
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue CommonBridge::SetAccessibilityActionOptions(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    auto* frameNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    if (runtimeCallInfo->GetArgsNumber() < 2) {
+        ViewAbstractModelNG::ResetAccessibilityActionOptions(frameNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto argObj = runtimeCallInfo->GetCallArgRef(1);
+    if (!argObj->IsObject(vm)) {
+        ViewAbstractModelNG::ResetAccessibilityActionOptions(frameNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    AccessibilityActionOptions options;
+    auto jsObj = panda::Local<panda::ObjectRef>(argObj->ToObject(vm));
+    auto stepVal = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "scrollStep"));
+    if (!stepVal->IsUndefined() && stepVal->IsNumber()) {
+        int32_t stepCount = stepVal->Int32Value(vm);
+        options.scrollStep = (stepCount >= 1) ? stepCount : 1;
+    }
+    ViewAbstractModelNG::SetAccessibilityActionOptions(frameNode, options);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetAccessibilityActionOptions(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    auto* frameNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    ViewAbstractModelNG::ResetAccessibilityActionOptions(frameNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue CommonBridge::SetAccessibilityHoverTransparent(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
