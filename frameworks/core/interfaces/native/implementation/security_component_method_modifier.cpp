@@ -70,6 +70,10 @@ void SetWidthImpl(Ark_NativePointer node,
     const Opt_Union_Length_LayoutPolicy* value);
 void SetHeightImpl(Ark_NativePointer node,
     const Opt_Union_Length_LayoutPolicy* value);
+void SetFocusBoxImpl(Ark_NativePointer node,
+    const Opt_FocusBoxStyle* value);
+void SetAlignRulesImpl(Ark_NativePointer node,
+    const Opt_Union_AlignRuleOption_LocalizedAlignRuleOptions* value);
 } // namespace CommonMethodModifier
 namespace SecurityComponentMethodModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
@@ -333,6 +337,7 @@ void SetAlignImpl(Ark_NativePointer node,
 void SetAlignRulesImpl(Ark_NativePointer node,
                        const Opt_Union_AlignRuleOption_LocalizedAlignRuleOptions* alignRule)
 {
+    CommonMethodModifier::SetAlignRulesImpl(node, alignRule);
 }
 void SetIdImpl(Ark_NativePointer node,
                const Opt_String* description)
@@ -414,6 +419,14 @@ void SetEnabledImpl(Ark_NativePointer node,
 {
     CommonMethodModifier::SetEnabledImpl(node, respond);
 }
+void SetFocusBoxImpl(Ark_NativePointer node,
+                     const Opt_FocusBoxStyle* style)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CommonMethodModifier::SetFocusBoxImpl(node, style);
+    SecurityComponentModelNG::SetFocusBox(frameNode);
+}
 } // SecurityComponentMethodModifier
 const GENERATED_ArkUISecurityComponentMethodModifier* GetSecurityComponentMethodModifier()
 {
@@ -453,6 +466,7 @@ const GENERATED_ArkUISecurityComponentMethodModifier* GetSecurityComponentMethod
         SecurityComponentMethodModifier::SetMaxFontSizeImpl,
         SecurityComponentMethodModifier::SetHeightAdaptivePolicyImpl,
         SecurityComponentMethodModifier::SetEnabledImpl,
+        SecurityComponentMethodModifier::SetFocusBoxImpl,
     };
     return &ArkUISecurityComponentMethodModifierImpl;
 }

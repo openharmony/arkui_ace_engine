@@ -196,6 +196,15 @@ void SetStateEffectImpl(Ark_NativePointer node,
     }
     SecurityComponentModelNG::SetStateEffect(frameNode, value->value);
 }
+void SetUserCancelEventImpl(Ark_NativePointer node,
+                            const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    SecurityComponentModelNG::SetUserCancelEvent(frameNode, convValue);
+}
 } // SaveButtonAttributeModifier
 const GENERATED_ArkUISaveButtonModifier* GetSaveButtonModifier()
 {
@@ -208,6 +217,7 @@ const GENERATED_ArkUISaveButtonModifier* GetSaveButtonModifier()
         SaveButtonAttributeModifier::SetIconSizeImpl,
         SaveButtonAttributeModifier::SetIconBorderRadiusImpl,
         SaveButtonAttributeModifier::SetStateEffectImpl,
+        SaveButtonAttributeModifier::SetUserCancelEventImpl,
     };
     return &ArkUISaveButtonModifierImpl;
 }

@@ -74,6 +74,7 @@ public:
     static void SetStateEffect(FrameNode* frameNode, const bool& value);
     static void SetTipPosition(const TipPosition& value);
     static void SetUserCancelEvent(const bool& value);
+    static void SetUserCancelEvent(FrameNode* frameNode, const std::optional<bool>& value);
     static void SetFontColor(const Color& value);
     static void SetFontColor(FrameNode* frameNode, const std::optional<Color>& value);
     static void SetBackgroundColor(const Color& value);
@@ -116,6 +117,7 @@ public:
     static void SetHeightAdaptivePolicy(TextHeightAdaptivePolicy value);
     static void SetHeightAdaptivePolicy(FrameNode* frameNode, const std::optional<TextHeightAdaptivePolicy>& value);
     static void SetFocusBox();
+    static void SetFocusBox(FrameNode* frameNode);
 
     virtual bool GetIconResource(int32_t iconStyle, InternalResource::ResourceId& id)
     {

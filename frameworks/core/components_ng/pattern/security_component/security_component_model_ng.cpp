@@ -780,6 +780,16 @@ void SecurityComponentModelNG::SetUserCancelEvent(const bool& value)
     ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, UserCancelEvent, value);
 }
 
+void SecurityComponentModelNG::SetUserCancelEvent(FrameNode* frameNode, const std::optional<bool>& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, UserCancelEvent, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, UserCancelEvent, frameNode);
+    }
+}
+
 void SecurityComponentModelNG::SetFontColor(FrameNode* frameNode, const std::optional<Color>& value)
 {
     CHECK_NULL_VOID(frameNode);
@@ -1195,5 +1205,11 @@ void SecurityComponentModelNG::SetHeightAdaptivePolicy(FrameNode* frameNode,
 void SecurityComponentModelNG::SetFocusBox()
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, FocusBoxFlag, true);
+}
+
+void SecurityComponentModelNG::SetFocusBox(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, FocusBoxFlag, true, frameNode);
 }
 } // namespace OHOS::Ace::NG

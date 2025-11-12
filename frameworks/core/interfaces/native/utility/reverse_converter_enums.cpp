@@ -550,6 +550,9 @@ void AssignArkValue(Ark_SaveButtonOnClickResult& dst, const SecurityComponentHan
         case SecurityComponentHandleResult::CLICK_GRANT_FAILED:
             dst = ARK_SAVE_BUTTON_ON_CLICK_RESULT_TEMPORARY_AUTHORIZATION_FAILED;
             break;
+        case SecurityComponentHandleResult::CLICK_GRANT_CANCELED:
+            dst = ARK_SAVE_BUTTON_ON_CLICK_RESULT_CANCELED_BY_USER;
+            break;
         default:
             dst = static_cast<Ark_SaveButtonOnClickResult>(-1);
             LOGE("Unexpected enum value in SecurityComponentHandleResult: %{public}d", src);
