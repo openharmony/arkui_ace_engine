@@ -1122,7 +1122,7 @@ class StepperModifier extends ArkStepperComponent {
     }
   }
 
-class ContainerPickerModifier extends ArkContainerPickerComponent {
+class PickerModifier extends ArkContainerPickerComponent {
     constructor(nativePtr, classType) {
       super(nativePtr, classType);
       this._modifiersWithKeys = new ModifierMap();
@@ -1143,5 +1143,5 @@ export default { CommonModifier, AlphabetIndexerModifier, BlankModifier, ButtonM
   SwiperModifier, TabsModifier, TextAreaModifier, TextModifier, TextClockModifier, TextInputModifier, TextPickerModifier, TextTimerModifier, TimePickerModifier,
   ToggleModifier, VideoModifier, WaterFlowModifier, FlexModifier, PluginComponentModifier, RefreshModifier, TabContentModifier, ModifierUtils, AttributeUpdater,
   ParticleModifier, MediaCachedImageModifier, SymbolGlyphModifier, SymbolSpanModifier, Component3DModifier, ContainerSpanModifier, ModifierMap,
-  IndicatorComponentModifier, LazyVGridLayoutModifier, StepperModifier, EmbeddedComponentModifier, ContainerPickerModifier
+  IndicatorComponentModifier, LazyVGridLayoutModifier, StepperModifier, EmbeddedComponentModifier, PickerModifier
 };
