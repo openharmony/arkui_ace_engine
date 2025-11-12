@@ -84,7 +84,7 @@ const SizeF CHILD_SIZE(CHILD_WIDTH, CHILD_HEIGHT);
 const float CHILD_OFFSET_WIDTH = 50.0f;
 const float CHILD_OFFSET_HEIGHT = 0.0f;
 const float FORCE = 3.0f;
-TestProperty testProperty;
+TestProperty g_testProperty;
 bool g_isFocus = false;
 int g_surfaceShowNum = 1;
 const float SURFACE_WIDTH = 250.0f;
@@ -176,11 +176,11 @@ public:
     static void TearDownTestSuite();
     void TearDown() override
     {
-        testProperty.loadEvent = std::nullopt;
-        testProperty.destroyEvent = std::nullopt;
-        testProperty.surfaceCreatedEvent = std::nullopt;
-        testProperty.surfaceChangedEvent = std::nullopt;
-        testProperty.surfaceDestroyedEvent = std::nullopt;
+        g_testProperty.loadEvent = std::nullopt;
+        g_testProperty.destroyEvent = std::nullopt;
+        g_testProperty.surfaceCreatedEvent = std::nullopt;
+        g_testProperty.surfaceChangedEvent = std::nullopt;
+        g_testProperty.surfaceDestroyedEvent = std::nullopt;
     }
 
 protected:
@@ -190,9 +190,9 @@ protected:
 void XComponentTestNg::SetUpTestSuite()
 {
     MockPipelineContext::SetUp();
-    testProperty.xcId = XCOMPONENT_ID;
-    testProperty.libraryName = XCOMPONENT_LIBRARY_NAME;
-    testProperty.soPath = XCOMPONENT_SO_PATH;
+    g_testProperty.xcId = XCOMPONENT_ID;
+    g_testProperty.libraryName = XCOMPONENT_LIBRARY_NAME;
+    g_testProperty.soPath = XCOMPONENT_SO_PATH;
 }
 
 void XComponentTestNg::TearDownTestSuite()
@@ -241,10 +241,10 @@ HWTEST_F(XComponentTestNg, RegisterContextEventMultiThreadTest, TestSize.Level1)
      * @tc.steps: step1. create xcomponent pattern
      * @tc.expected: xcomponent pattern created
      */
-    testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
-    testProperty.xcId = std::nullopt;
-    testProperty.libraryName = std::nullopt;
-    auto frameNode = CreateXComponentNode(testProperty);
+    g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    g_testProperty.xcId = std::nullopt;
+    g_testProperty.libraryName = std::nullopt;
+    auto frameNode = CreateXComponentNode(g_testProperty);
     ASSERT_TRUE(frameNode);
     auto pattern = frameNode->GetPattern<XComponentPattern>();
     ASSERT_TRUE(pattern);
@@ -265,7 +265,7 @@ HWTEST_F(XComponentTestNg, RegisterContextEventMultiThreadTest, TestSize.Level1)
 HWTEST_F(XComponentTestNg, XComponentEventTest002, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. set the testProperty and CreateXComponentNode
+     * @tc.steps: step1. set the g_testProperty and CreateXComponentNode
      *            case: type = XCOMPONENT_SURFACE_TYPE
      * @tc.expected: frameNode create successfully
      */
@@ -274,10 +274,10 @@ HWTEST_F(XComponentTestNg, XComponentEventTest002, TestSize.Level1)
     auto onLoad = [&onLoadKey](const std::string& /* xComponentId */) { onLoadKey = CHECK_KEY; };
     auto onDestroy = [&onDestroyKey](const std::string& /* xComponentId */) { onDestroyKey = CHECK_KEY; };
 
-    testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
-    testProperty.loadEvent = std::move(onLoad);
-    testProperty.destroyEvent = std::move(onDestroy);
-    auto frameNode = CreateXComponentNode(testProperty);
+    g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    g_testProperty.loadEvent = std::move(onLoad);
+    g_testProperty.destroyEvent = std::move(onDestroy);
+    auto frameNode = CreateXComponentNode(g_testProperty);
     EXPECT_TRUE(frameNode);
     EXPECT_EQ(frameNode->GetTag(), V2::XCOMPONENT_ETS_TAG);
 
@@ -293,18 +293,18 @@ HWTEST_F(XComponentTestNg, XComponentEventTest002, TestSize.Level1)
     EXPECT_EQ(onDestroyKey, CHECK_KEY);
 
     /**
-     * @tc.steps: step3. reset the testProperty and rerun step1&2
+     * @tc.steps: step3. reset the g_testProperty and rerun step1&2
      *            case: type = XCOMPONENT_COMPONENT_TYPE
      * @tc.expected: three checkKeys has no change
      */
 
     auto onLoad2 = [&onLoadKey](const std::string& /* xComponentId */) { onLoadKey = ""; };
     auto onDestroy2 = [&onDestroyKey](const std::string& /* xComponentId */) { onDestroyKey = ""; };
-    testProperty.xcType = XCOMPONENT_COMPONENT_TYPE_VALUE;
-    testProperty.loadEvent = std::move(onLoad2);
-    testProperty.destroyEvent = std::move(onDestroy2);
+    g_testProperty.xcType = XCOMPONENT_COMPONENT_TYPE_VALUE;
+    g_testProperty.loadEvent = std::move(onLoad2);
+    g_testProperty.destroyEvent = std::move(onDestroy2);
 
-    auto frameNode2 = CreateXComponentNode(testProperty);
+    auto frameNode2 = CreateXComponentNode(g_testProperty);
     EXPECT_TRUE(frameNode2);
     xComponentEventHub = frameNode2->GetEventHub<XComponentEventHub>();
     ASSERT_TRUE(xComponentEventHub);
@@ -325,8 +325,8 @@ HWTEST_F(XComponentTestNg, XComponentLayoutAlgorithmTest006, TestSize.Level1)
      * @tc.steps: step1. set type = XCOMPONENT_SURFACE_TYPE and call CreateXComponentNode
      * @tc.expected: frameNode create successfully
      */
-    testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
-    auto frameNode = CreateXComponentNode(testProperty);
+    g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(g_testProperty);
     ASSERT_TRUE(frameNode);
 
     /**
@@ -414,8 +414,8 @@ HWTEST_F(XComponentTestNg, XComponentMouseEventTest007, TestSize.Level1)
      * @tc.steps: step1. set type = XCOMPONENT_SURFACE_TYPE and call CreateXComponentNode
      * @tc.expected: xcomponent frameNode create successfully
      */
-    testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
-    auto frameNode = CreateXComponentNode(testProperty);
+    g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(g_testProperty);
     ASSERT_TRUE(frameNode);
     auto pattern = frameNode->GetPattern<XComponentPattern>();
     ASSERT_TRUE(pattern);
@@ -463,8 +463,8 @@ HWTEST_F(XComponentTestNg, XComponentTouchEventTest008, TestSize.Level1)
      * @tc.steps: step1. set type = XCOMPONENT_SURFACE_TYPE and call CreateXComponentNode
      * @tc.expected: xcomponent frameNode create successfully
      */
-    testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
-    auto frameNode = CreateXComponentNode(testProperty);
+    g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(g_testProperty);
     ASSERT_TRUE(frameNode);
     auto pattern = frameNode->GetPattern<XComponentPattern>();
     ASSERT_TRUE(pattern);
@@ -544,8 +544,8 @@ HWTEST_F(XComponentTestNg, XComponentTouchEventTest009, TestSize.Level1)
      * @tc.steps: step1. set type = XCOMPONENT_SURFACE_TYPE and call CreateXComponentNode
      * @tc.expected: xcomponent frameNode create successfully
      */
-    testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
-    auto frameNode = CreateXComponentNode(testProperty);
+    g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(g_testProperty);
     ASSERT_TRUE(frameNode);
     auto pattern = frameNode->GetPattern<XComponentPattern>();
     ASSERT_TRUE(pattern);
@@ -567,8 +567,8 @@ HWTEST_F(XComponentTestNg, XComponentKeyEventTest010, TestSize.Level1)
      * @tc.steps: step1. set type = XCOMPONENT_SURFACE_TYPE and call CreateXComponentNode
      * @tc.expected: xcomponent frameNode create successfully
      */
-    testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
-    auto frameNode = CreateXComponentNode(testProperty);
+    g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(g_testProperty);
     ASSERT_TRUE(frameNode);
     auto pattern = frameNode->GetPattern<XComponentPattern>();
     ASSERT_TRUE(pattern);
@@ -634,8 +634,8 @@ HWTEST_F(XComponentTestNg, XComponentTextureTypeTest011, TestSize.Level1)
      * @tc.steps: step1. set type = XCOMPONENT_TEXTURE_TYPE_VALUE and call CreateXComponentNode
      * @tc.expected: xcomponent frameNode create successfully
      */
-    testProperty.xcType = XCOMPONENT_TEXTURE_TYPE_VALUE;
-    auto frameNode = CreateXComponentNode(testProperty);
+    g_testProperty.xcType = XCOMPONENT_TEXTURE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(g_testProperty);
     EXPECT_TRUE(frameNode);
     EXPECT_EQ(frameNode->GetTag(), V2::XCOMPONENT_ETS_TAG);
     auto pattern = frameNode->GetPattern<XComponentPattern>();
@@ -664,7 +664,7 @@ HWTEST_F(XComponentTestNg, XComponentTextureTypeTest011, TestSize.Level1)
 HWTEST_F(XComponentTestNg, XComponentOnAreaChangedInnerTest019, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. set the testProperty and CreateXComponentNode
+     * @tc.steps: step1. set the g_testProperty and CreateXComponentNode
      *            case: type = XCOMPONENT_SURFACE_TYPE
      * @tc.expected: frameNode create successfully
      */
@@ -673,10 +673,10 @@ HWTEST_F(XComponentTestNg, XComponentOnAreaChangedInnerTest019, TestSize.Level1)
     auto onLoad = [&onLoadKey](const std::string& /* xComponentId */) { onLoadKey = CHECK_KEY; };
     auto onDestroy = [&onDestroyKey](const std::string& /* xComponentId */) { onDestroyKey = CHECK_KEY; };
 
-    testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
-    testProperty.loadEvent = std::move(onLoad);
-    testProperty.destroyEvent = std::move(onDestroy);
-    auto frameNode = CreateXComponentNode(testProperty);
+    g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    g_testProperty.loadEvent = std::move(onLoad);
+    g_testProperty.destroyEvent = std::move(onDestroy);
+    auto frameNode = CreateXComponentNode(g_testProperty);
     EXPECT_TRUE(frameNode);
     EXPECT_EQ(frameNode->GetTag(), V2::XCOMPONENT_ETS_TAG);
     auto pattern = frameNode->GetPattern<XComponentPattern>();
@@ -713,8 +713,8 @@ HWTEST_F(XComponentTestNg, XComponentSetHistoryPointTest20, TestSize.Level1)
      * @tc.steps: step1. set type = XCOMPONENT_SURFACE_TYPE and call CreateXComponentNode
      * @tc.expected: xcomponent frameNode create successfully
      */
-    testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
-    auto frameNode = CreateXComponentNode(testProperty);
+    g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(g_testProperty);
     ASSERT_TRUE(frameNode);
     auto pattern = frameNode->GetPattern<XComponentPattern>();
     ASSERT_TRUE(pattern);
@@ -774,12 +774,12 @@ HWTEST_F(XComponentTestNg, XComponentSetHistoryPointTest20, TestSize.Level1)
 HWTEST_F(XComponentTestNg, XComponentSetDetachEventTest021, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. set the testProperty and CreateXComponentNode
+     * @tc.steps: step1. set the g_testProperty and CreateXComponentNode
      *            case: type = XCOMPONENT_SURFACE_TYPE
      * @tc.expected: frameNode create successfully
      */
-    testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
-    auto frameNode = CreateXComponentNode(testProperty);
+    g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(g_testProperty);
     EXPECT_TRUE(frameNode);
     EXPECT_EQ(frameNode->GetTag(), V2::XCOMPONENT_ETS_TAG);
 
@@ -808,12 +808,12 @@ HWTEST_F(XComponentTestNg, XComponentSetDetachEventTest021, TestSize.Level1)
 HWTEST_F(XComponentTestNg, XComponentFrameCallbackTest022, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. set the testProperty and CreateXComponentNode
+     * @tc.steps: step1. set the g_testProperty and CreateXComponentNode
      *            case: type = XCOMPONENT_SURFACE_TYPE
      * @tc.expected: frameNode create successfully
      */
-    testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
-    auto frameNode = CreateXComponentNode(testProperty);
+    g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(g_testProperty);
     EXPECT_TRUE(frameNode);
     EXPECT_EQ(frameNode->GetTag(), V2::XCOMPONENT_ETS_TAG);
 
@@ -857,12 +857,12 @@ HWTEST_F(XComponentTestNg, XComponentEventTest023, TestSize.Level1)
     auto onDestroy = [&onDestroyKey](const std::string& /* xComponentId */) { onDestroyKey = CHECK_KEY; };
 
     /**
-     * @tc.steps: step1. set the testProperty and CreateXComponentNode
+     * @tc.steps: step1. set the g_testProperty and CreateXComponentNode
      *            case: type = XCOMPONENT_COMPONENT_TYPE_VALUE
      * @tc.expected: frameNode create successfully
      */
-    testProperty.xcType = XCOMPONENT_COMPONENT_TYPE_VALUE;
-    auto frameNode = CreateXComponentNode(testProperty);
+    g_testProperty.xcType = XCOMPONENT_COMPONENT_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(g_testProperty);
     EXPECT_TRUE(frameNode);
     EXPECT_EQ(frameNode->GetTag(), V2::XCOMPONENT_ETS_TAG);
 
@@ -917,7 +917,7 @@ HWTEST_F(XComponentTestNg, XComponentDetachCallbackTest024, TestSize.Level1)
     auto onDetach = [&onDetachKey](const std::string& /* xcomponentId */) { onDetachKey = CHECK_KEY; };
 
     /**
-     * @tc.steps: step1. set the testProperty and CreateXComponentNode
+     * @tc.steps: step1. set the g_testProperty and CreateXComponentNode
      *            case: XCOMPONENT_SURFACE_TYPE_VALUE
      * @tc.expected: frameNode create successfully
      */
@@ -1093,8 +1093,8 @@ HWTEST_F(XComponentTestNg, XComponentSurfaceTest, TestSize.Level1)
      * @tc.steps: step1. set type = XCOMPONENT_SURFACE_TYPE and call CreateXComponentNode
      * @tc.expected: xcomponent frameNode create successfully
      */
-    testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
-    auto frameNode = CreateXComponentNode(testProperty);
+    g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(g_testProperty);
     ASSERT_TRUE(frameNode);
     auto pattern = frameNode->GetPattern<XComponentPattern>();
     ASSERT_TRUE(pattern);
@@ -1174,8 +1174,8 @@ HWTEST_F(XComponentTestNg, XComponentControllerTest, TestSize.Level1)
      * @tc.steps: step1. set type = XCOMPONENT_SURFACE_TYPE_VALUE and call CreateXComponentNode
      * @tc.expected: xcomponent frameNode create successfully
      */
-    testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
-    auto frameNode = CreateXComponentNode(testProperty);
+    g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(g_testProperty);
     EXPECT_TRUE(frameNode);
     EXPECT_EQ(frameNode->GetTag(), V2::XCOMPONENT_ETS_TAG);
     auto pattern = frameNode->GetPattern<XComponentPattern>();
@@ -1260,8 +1260,8 @@ HWTEST_F(XComponentTestNg, XComponentAxisEventTest012, TestSize.Level1)
      * @tc.steps: step1. set type = XCOMPONENT_SURFACE_TYPE and call CreateXComponentNode
      * @tc.expected: xcomponent frameNode create successfully
      */
-    testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
-    auto frameNode = CreateXComponentNode(testProperty);
+    g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(g_testProperty);
     ASSERT_TRUE(frameNode);
     auto pattern = frameNode->GetPattern<XComponentPattern>();
     ASSERT_TRUE(pattern);
@@ -1303,8 +1303,8 @@ HWTEST_F(XComponentTestNg, XComponentSourceTypeTest, TestSize.Level1)
      * @tc.steps: step1. set type = XCOMPONENT_SURFACE_TYPE and call CreateXComponentNode
      * @tc.expected: xcomponent frameNode create successfully
      */
-    testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
-    auto frameNode = CreateXComponentNode(testProperty);
+    g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(g_testProperty);
     ASSERT_TRUE(frameNode);
     auto pattern = frameNode->GetPattern<XComponentPattern>();
     ASSERT_TRUE(pattern);
@@ -1340,8 +1340,8 @@ HWTEST_F(XComponentTestNg, XComponentImageAnalyzerTest, TestSize.Level1)
      * @tc.steps: step1. set type = XCOMPONENT_SURFACE_TYPE and call CreateXComponentNode
      * @tc.expected: xcomponent frameNode create successfully
      */
-    testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
-    auto frameNode = CreateXComponentNode(testProperty);
+    g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(g_testProperty);
     ASSERT_TRUE(frameNode);
     auto pattern = frameNode->GetPattern<XComponentPattern>();
     ASSERT_TRUE(pattern);
@@ -1374,9 +1374,9 @@ HWTEST_F(XComponentTestNg, XComponentSurfaceLifeCycleCallback, TestSize.Level1)
      * @tc.steps: step1. set surface life cycle callback, set id&libraryname to null and create XComponent
      * @tc.expected: xcomponent frameNode create successfully
      */
-    testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
-    testProperty.xcId = std::nullopt;
-    testProperty.libraryName = std::nullopt;
+    g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    g_testProperty.xcId = std::nullopt;
+    g_testProperty.libraryName = std::nullopt;
     std::string onSurfaceCreatedSurfaceId = "";
     std::string onSurfaceChangedSurfaceId = "";
     std::string onSurfaceDestroyedSurfaceId = "";
@@ -1389,10 +1389,10 @@ HWTEST_F(XComponentTestNg, XComponentSurfaceLifeCycleCallback, TestSize.Level1)
     auto onSurfaceDestroyed = [&onSurfaceDestroyedSurfaceId](const std::string& surfaceId, const std::string& xcId) {
         onSurfaceDestroyedSurfaceId = surfaceId;
     };
-    testProperty.surfaceCreatedEvent = std::move(onSurfaceCreated);
-    testProperty.surfaceChangedEvent = std::move(onSurfaceChanged);
-    testProperty.surfaceDestroyedEvent = std::move(onSurfaceDestroyed);
-    auto frameNode = CreateXComponentNode(testProperty);
+    g_testProperty.surfaceCreatedEvent = std::move(onSurfaceCreated);
+    g_testProperty.surfaceChangedEvent = std::move(onSurfaceChanged);
+    g_testProperty.surfaceDestroyedEvent = std::move(onSurfaceDestroyed);
+    auto frameNode = CreateXComponentNode(g_testProperty);
     ASSERT_TRUE(frameNode);
     auto xComponentEventHub = frameNode->GetEventHub<XComponentEventHub>();
     ASSERT_TRUE(xComponentEventHub);
@@ -1444,10 +1444,10 @@ HWTEST_F(XComponentTestNg, SetAndGetRenderFitBySurfaceIdTest, TestSize.Level1)
      * @tc.steps: step1. create xcomponent pattern
      * @tc.expected: xcomponent pattern created
      */
-    testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
-    testProperty.xcId = std::nullopt;
-    testProperty.libraryName = std::nullopt;
-    auto frameNode = CreateXComponentNode(testProperty);
+    g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    g_testProperty.xcId = std::nullopt;
+    g_testProperty.libraryName = std::nullopt;
+    auto frameNode = CreateXComponentNode(g_testProperty);
     ASSERT_TRUE(frameNode);
     auto pattern = frameNode->GetPattern<XComponentPattern>();
     ASSERT_TRUE(pattern);
