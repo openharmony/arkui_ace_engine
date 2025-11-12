@@ -53,7 +53,7 @@ public:
     static void SetSheetType(RefPtr<SheetPresentationPattern> sheetPattern, SheetType sheetType);
     static void TearDownTestCase();
     static void SetApiVersion(int32_t apiTargetVersion);
-    std::function<RefPtr<UINode>()> builderFunc_;
+    std::function<RefPtr<UINode>(int32_t id)> builderFunc_;
     std::function<RefPtr<UINode>()> titleBuilderFunc_;
 protected:
     void CreateSheetBuilder(float builderHeight = 800.f, float titleHeight = 800.f);
@@ -126,7 +126,7 @@ void SheetPresentationTestFiveNg::TearDownTestCase()
 
 void SheetPresentationTestFiveNg::CreateSheetBuilder(float builderHeight, float titleHeight)
 {
-    auto builderFunc = [builderHeight]() -> RefPtr<UINode> {
+    auto builderFunc = [builderHeight](int32_t id) -> RefPtr<UINode> {
         auto frameNode =
             FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
                 []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });

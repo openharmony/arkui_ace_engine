@@ -493,7 +493,7 @@ public:
         std::function<void()>&& onWillDisappear, const NG::ContentCoverParam& contentCoverParam,
         const RefPtr<FrameNode>& targetNode, int32_t sessionId = 0);
     void BindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
-        std::function<RefPtr<UINode>()>&& buildNodeFunc, std::function<RefPtr<UINode>()>&& buildTitleNodeFunc,
+        std::function<RefPtr<UINode>(int32_t)>&& buildNodeFunc, std::function<RefPtr<UINode>()>&& buildTitleNodeFunc,
         NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
         std::function<void()>&& shouldDismiss, std::function<void(const int32_t info)>&& onWillDismiss,
         std::function<void()>&& onWillAppear,  std::function<void()>&& onWillDisappear,
@@ -502,7 +502,7 @@ public:
         std::function<void(const float)>&& onTypeDidChange, std::function<void()>&& sheetSpringBack,
         const RefPtr<FrameNode>& targetNode);
     void OnBindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
-        std::function<RefPtr<UINode>()>&& buildNodeFunc, std::function<RefPtr<UINode>()>&& buildtitleNodeFunc,
+        std::function<RefPtr<UINode>(int32_t)>&& buildNodeFunc, std::function<RefPtr<UINode>()>&& buildtitleNodeFunc,
         NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
         std::function<void()>&& shouldDismiss, std::function<void(const int32_t info)>&& onWillDismiss,
         std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,

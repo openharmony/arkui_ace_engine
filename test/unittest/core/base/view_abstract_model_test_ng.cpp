@@ -1127,7 +1127,7 @@ HWTEST_F(ViewAbstractModelTestNg, ViewAbstractModelTestNg020, TestSize.Level1)
      * @tc.steps: step3. create sheetNode, get sheetPattern.
      */
     bool isShow = true;
-    auto builderFunc = []() -> RefPtr<UINode> {
+    auto builderFunc = [](int32_t id) -> RefPtr<UINode> {
         auto frameNode =
             FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
                 []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
@@ -1223,7 +1223,7 @@ HWTEST_F(ViewAbstractModelTestNg, ViewAbstractModelTestNg021, TestSize.Level1)
      * @tc.steps: step3. create sheetNode, get sheetPattern.
      */
     bool isShow = true;
-    auto builderFunc = []() -> RefPtr<UINode> {
+    auto builderFunc = [](int32_t id) -> RefPtr<UINode> {
         auto frameNode =
             FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
                 []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
