@@ -16,6 +16,7 @@
 #include "base/utils/string_utils.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/tabs/tab_content_model_static.h"
+#include "core/interfaces/native/ani/frame_node_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "core/interfaces/native/utility/callback_helper.h"
@@ -344,8 +345,14 @@ void SetTabBarImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     Converter::VisitUnion(
         *value,
-        [](const Ark_ComponentContent& arkContent) {
-            LOGE("TabContentAttributeModifier.TabBar2Impl type Ark_ComponentContent is not supported yet.");
+        [frameNode](const Ark_ComponentContent& arkContent) {
+            auto contentPeer = reinterpret_cast<FrameNodePeer*>(arkContent);
+            CHECK_NULL_VOID(contentPeer);
+            auto contentNode = FrameNodePeer::GetFrameNodeByPeer(contentPeer);
+            CHECK_NULL_VOID(contentNode);
+            TabContentModelStatic::SetTabBarStyle(frameNode, TabBarStyle::NOSTYLE);
+            TabContentModelStatic::SetTabBar(frameNode, std::nullopt, std::nullopt, nullptr);
+            TabContentModelStatic::SetTabBarWithContent(frameNode, contentNode);
         },
         [frameNode](const Ark_SubTabBarStyle& style) { g_setSubTabBarStyle(frameNode, style); },
         [frameNode](const Ark_BottomTabBarStyle& style) { g_setBottomTabBarStyle(frameNode, style); },
