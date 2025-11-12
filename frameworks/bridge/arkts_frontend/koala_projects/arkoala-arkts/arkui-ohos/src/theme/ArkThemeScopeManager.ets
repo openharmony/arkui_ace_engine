@@ -36,7 +36,7 @@ import { UIContextImpl } from 'arkui/base/UIContextImpl';
 import { UIContextUtil } from 'arkui/base/UIContextUtil';
 
 export interface WithThemeScopeItem {
-    options: WithThemeOptions,
+    options: WithThemeOptions | undefined,
     themeScopeId: int32
 }
 
@@ -353,7 +353,7 @@ export class ArkThemeScopeManager {
         });
     }
 
-    setDefaultTheme(customTheme: CustomTheme) {
+    setDefaultTheme(customTheme: CustomTheme | undefined) {
         // unbind previous default theme from 0 theme scope
         this.defaultTheme?.unbindFromScope(0);
         this.defaultTheme = ArkThemeScopeManager.systemTheme;
