@@ -2701,4 +2701,36 @@ HWTEST_F(SearchTestNg, HandleNotifyChildAction, TestSize.Level1)
     notifyFunc(textFieldFrameNode, NotifyChildActionType::ACTION_CLICK);
     EXPECT_TRUE(userClicked);
 }
+
+/**
+* @tc.name: UpdateSearchSymbol001
+* @tc.desc: check onColorconfig
+* @tc.type: FUNC
+*/
+HWTEST_F(SearchTestNg, UpdateSearchSymbol001, TestSize.Level1)
+{
+    SearchModelNG searchModelInstance;
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    searchModelInstance.Create(u"", u"", "");
+    auto searchNode = AceType::DynamicCast<SearchNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    auto iconFrameNode = AceType::DynamicCast<FrameNode>(searchNode->GetChildAtIndex(IMAGE_INDEX));
+    ASSERT_NE(iconFrameNode, nullptr);
+    auto symbolLayoutProperty = iconFrameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(symbolLayoutProperty, nullptr);
+    auto searchPattern = AceType::DynamicCast<SearchPattern>(searchNode->GetPattern());
+
+    symbolLayoutProperty->UpdateSymbolColorList({ Color::BLUE });
+    searchPattern->UpdateSearchSymbol();
+    std::vector<Color> colors = { Color::RED };
+    EXPECT_EQ(symbolLayoutProperty->GetSymbolColorListValue({}), colors);
+
+    symbolLayoutProperty->UpdateSymbolColorList({ Color::BLUE });
+    symbolLayoutProperty->UpdateTextColorFlagByUser(true);
+    searchPattern->UpdateSearchSymbol();
+    colors = { Color::BLUE };
+    EXPECT_EQ(symbolLayoutProperty->GetSymbolColorList().value(), colors);
+
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+}
 } // namespace OHOS::Ace::NG

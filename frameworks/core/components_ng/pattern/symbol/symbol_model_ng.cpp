@@ -68,6 +68,11 @@ void SymbolModelNG::SetSymbolRenderingStrategy(const std::uint32_t renderingStra
 void SymbolModelNG::SetFontColor(std::vector<Color>& symbolColor)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolColorList, symbolColor);
+    if (!symbolColor.empty()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextColorFlagByUser, true);
+    } else {
+        ACE_RESET_LAYOUT_PROPERTY(TextLayoutProperty, TextColorFlagByUser);
+    }
 }
 
 void SymbolModelNG::SetSymbolEffect(const std::uint32_t effectStrategy)
@@ -153,6 +158,11 @@ void SymbolModelNG::RegisterSymbolFontColorResource(FrameNode* frameNode, const 
 void SymbolModelNG::SetFontColor(FrameNode* frameNode, const std::vector<Color>& symbolColor)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolColorList, symbolColor, frameNode);
+    if (!symbolColor.empty()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextColorFlagByUser, true, frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextColorFlagByUser, frameNode);
+    }
 }
 
 void SymbolModelNG::SetFontSize(FrameNode* frameNode, const Dimension& value)
