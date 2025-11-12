@@ -193,7 +193,7 @@ export interface Router {
 
     clear(): void
 
-    getLength(): string
+    getLength(): int
 
     getParams(): Object
 
@@ -951,8 +951,8 @@ class RouterImpl implements Router {
         return curPage.params !== undefined ? curPage.params! : new Object()
     }
 
-    getLength(): string {
-        return String(this.visiblePages.length)
+    getLength(): int {
+        return this.visiblePages.length
     }
 
     getState(): router.RouterState {

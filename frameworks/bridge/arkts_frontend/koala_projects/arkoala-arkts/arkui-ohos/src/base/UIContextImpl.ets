@@ -655,7 +655,7 @@ export class RouterImpl extends Router {
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 
-    public getLength(): string {
+    public getLength(): int {
         if (this.router_ === undefined) {
             throw Error("router set in uiContext is empty");
         }
