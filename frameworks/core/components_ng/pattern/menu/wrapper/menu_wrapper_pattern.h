@@ -756,7 +756,13 @@ private:
     {
         auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
         CHECK_NULL_VOID(targetNode);
-        targetNode->NotifyMenuLifeCycleEvent(menuLifeCycleEvent);
+        auto pipeline = targetNode->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto overlayManager = pipeline->GetOverlayManager();
+        CHECK_NULL_VOID(overlayManager);
+        auto menuLifeCycleCallback = overlayManager->GetMenuLifeCycleCallback();
+        CHECK_NULL_VOID(menuLifeCycleCallback);
+        menuLifeCycleCallback(menuLifeCycleEvent);
     }
     std::function<void()> onAppearCallback_ = nullptr;
     std::function<void()> onDisappearCallback_ = nullptr;

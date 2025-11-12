@@ -100,8 +100,6 @@ enum {
     RET_SUCCESS = 10,
 };
 
-enum class MenuLifeCycleEvent;
-
 // FrameNode will display rendering region in the screen.
 class ACE_FORCE_EXPORT FrameNode : public UINode, public LayoutWrapper {
     DECLARE_ACE_TYPE(FrameNode, UINode, LayoutWrapper);
@@ -1479,7 +1477,6 @@ public:
     void MountToParent(const RefPtr<UINode>& parent, int32_t slot = DEFAULT_NODE_SLOT, bool silently = false,
         bool addDefaultTransition = false, bool addModalUiextension = false) override;
     void MergeAttributesIntoJson(std::shared_ptr<JsonValue>& json, const std::shared_ptr<JsonValue>& child);
-    void NotifyMenuLifeCycleEvent(const NG::MenuLifeCycleEvent& menuLifeCycleEvent);
 
 protected:
     void DumpInfo() override;

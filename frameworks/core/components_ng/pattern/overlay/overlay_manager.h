@@ -123,6 +123,8 @@ struct OverlayManagerInfo {
     bool enableBackPressedEvent = false;
 };
 
+enum class MenuLifeCycleEvent;
+
 // StageManager is the base class for root render node to perform page switch.
 class ACE_FORCE_EXPORT OverlayManager : public virtual AceType {
     DECLARE_ACE_TYPE(OverlayManager, AceType);
@@ -760,6 +762,19 @@ public:
     bool IsTopOrder(std::optional<double> levelOrder);
     std::optional<double> GetLevelOrder(const RefPtr<FrameNode>& node, std::optional<double> levelOrder = std::nullopt);
     void PopToast(int32_t targetId);
+    void RegisterMenuLifeCycleCallback(
+        const std::function<void(const MenuLifeCycleEvent& menuLifeCycleEvent)>& callback)
+    {
+        menuLifeCycleCallback_ = callback;
+    }
+    void UnRegisterMenuLifeCycleCallback()
+    {
+        menuLifeCycleCallback_ = nullptr;
+    }
+    std::function<void(const MenuLifeCycleEvent&)>& GetMenuLifeCycleCallback()
+    {
+        return menuLifeCycleCallback_;
+    }
 
 private:
     RefPtr<PipelineContext> GetPipelineContext() const;
@@ -1056,6 +1071,7 @@ private:
     std::set<int32_t> skipTargetIds_;
     std::optional<OverlayManagerInfo> overlayInfo_;
     std::unordered_set<int32_t> onDisappearFilterIds_;
+    std::function<void(const MenuLifeCycleEvent&)> menuLifeCycleCallback_ = nullptr;
 };
 } // namespace OHOS::Ace::NG
 

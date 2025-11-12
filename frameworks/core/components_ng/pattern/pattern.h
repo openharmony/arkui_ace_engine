@@ -69,8 +69,6 @@ private:
     std::function<void()> callback_;
 };
 
-enum class MenuLifeCycleEvent;
-
 // Pattern is the base class for different measure, layout and paint behavior.
 class ACE_FORCE_EXPORT Pattern : public virtual AceType {
     DECLARE_ACE_TYPE(Pattern, AceType);
@@ -104,8 +102,6 @@ public:
     {
         return false;
     }
-
-    virtual void OnMenuLifeCycleChanged(const NG::MenuLifeCycleEvent& menuLifeCycleEvent) {}
 
     virtual bool CheckCustomAvoidKeyboard() const
     {
