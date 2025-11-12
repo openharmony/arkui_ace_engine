@@ -616,8 +616,14 @@ HWTEST_F(LazyForEachSyntaxTestNg, ForEachSyntaxMoveDataFunctionTest008, TestSize
      * @tc.steps: step7. builder_ is null.
      */
     lazyForEachNode->builder_ = nullptr;
+    lazyForEachNode->children_.push_back(CreateNode(V2::TEXT_ETS_TAG));
     lazyForEachNode->OnDataMoved(INDEX_LESS_THAN_START_INDEX, INDEX_MIDDLE);
     EXPECT_EQ(lazyForEachNode->ids_.size(), DEFAULT_SIZE);
+    EXPECT_EQ(lazyForEachNode->children_.size(), 0);
+    EXPECT_EQ(lazyForEachNode->tempChildren_.size(), 1);
+    lazyForEachNode->OnDataMoved(INDEX_LESS_THAN_START_INDEX, INDEX_MIDDLE);
+    EXPECT_EQ(lazyForEachNode->children_.size(), 0);
+    EXPECT_EQ(lazyForEachNode->tempChildren_.size(), 1);
 }
 
 /**
@@ -1303,8 +1309,14 @@ HWTEST_F(LazyForEachSyntaxTestNg, ForEachSyntaxOnDataBulkAddedTest001, TestSize.
      * @tc.expected: LazyForEachNode ids_ will be cleared.
      */
     lazyForEachNode->builder_=nullptr;
+    lazyForEachNode->children_.push_back(CreateNode(V2::TEXT_ETS_TAG));
     lazyForEachNode->OnDataBulkAdded(INDEX_0, INDEX_0);
     EXPECT_TRUE(lazyForEachNode->ids_.empty());
+    EXPECT_EQ(lazyForEachNode->children_.size(), 0);
+    EXPECT_EQ(lazyForEachNode->tempChildren_.size(), 1);
+    lazyForEachNode->OnDataBulkAdded(INDEX_0, INDEX_0);
+    EXPECT_EQ(lazyForEachNode->children_.size(), 0);
+    EXPECT_EQ(lazyForEachNode->tempChildren_.size(), 1);
 }
 
 /**
@@ -1358,8 +1370,14 @@ HWTEST_F(LazyForEachSyntaxTestNg, ForEachSyntaxOnDataBulkDeletedTest001, TestSiz
      * @tc.expected: LazyForEachNode ids_ will be cleared.
      */
     lazyForEachNode->builder_=nullptr;
+    lazyForEachNode->children_.push_back(CreateNode(V2::TEXT_ETS_TAG));
     lazyForEachNode->OnDataBulkDeleted(INDEX_0, INDEX_0);
     EXPECT_TRUE(lazyForEachNode->ids_.empty());
+    EXPECT_EQ(lazyForEachNode->children_.size(), 0);
+    EXPECT_EQ(lazyForEachNode->tempChildren_.size(), 1);
+    lazyForEachNode->OnDataBulkDeleted(INDEX_0, INDEX_0);
+    EXPECT_EQ(lazyForEachNode->children_.size(), 0);
+    EXPECT_EQ(lazyForEachNode->tempChildren_.size(), 1);
 }
 
 /**
