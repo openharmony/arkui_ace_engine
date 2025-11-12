@@ -40,6 +40,8 @@ public:
         return showedState_;
     }
 
+    bool IsAccessibilityModal() const override;
+
 private:
     int32_t showedState_ = 0;
     ACE_DISALLOW_COPY_AND_MOVE(BubbleAccessibilityProperty);

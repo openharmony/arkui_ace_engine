@@ -450,7 +450,7 @@ static const std::set<std::string> TAGS_MODAL_DIALOG_COMPONENT = {
     V2::MENU_WRAPPER_ETS_TAG,
     V2::SELECT_ETS_TAG,
     V2::DIALOG_ETS_TAG,
-    V2::SHEET_PAGE_TAG,
+    V2::POPUP_ETS_TAG,
     V2::SHEET_WRAPPER_TAG,
 };
 
@@ -469,7 +469,10 @@ bool AccessibilityProperty::IsTagInSubTreeComponent(const std::string& tag)
 bool AccessibilityProperty::IsTagInModalDialog(const RefPtr<FrameNode>& node)
 {
     CHECK_NULL_RETURN(node, false);
-    return TAGS_MODAL_DIALOG_COMPONENT.find(node->GetTag()) != TAGS_MODAL_DIALOG_COMPONENT.end();
+    auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_RETURN(accessibilityProperty, false);
+    auto isModal = accessibilityProperty->IsAccessibilityModal();
+    return TAGS_MODAL_DIALOG_COMPONENT.find(node->GetTag()) != TAGS_MODAL_DIALOG_COMPONENT.end() && isModal;
 }
 
 bool AccessibilityProperty::HitAccessibilityHoverPriority(const RefPtr<FrameNode>& node)
@@ -632,6 +635,8 @@ bool AccessibilityProperty::IsAccessibilityFocusable(const RefPtr<FrameNode>& no
     bool focusable = false;
     do {
         auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
+        bool isModalDialog = (TAGS_MODAL_DIALOG_COMPONENT.find(node->GetTag()) == TAGS_MODAL_DIALOG_COMPONENT.end()) ||
+            (accessibilityProperty == nullptr) || (accessibilityProperty->IsAccessibilityModal());
         if (accessibilityProperty != nullptr) {
             auto level = accessibilityProperty->GetAccessibilityLevel();
             if (level == AccessibilityProperty::Level::YES_STR) {
@@ -641,25 +646,27 @@ bool AccessibilityProperty::IsAccessibilityFocusable(const RefPtr<FrameNode>& no
             if (level == AccessibilityProperty::Level::NO_STR) {
                 break;
             }
-            if (accessibilityProperty->IsAccessibilityGroup() ||
+            if ((accessibilityProperty->IsAccessibilityGroup() ||
                 accessibilityProperty->HasAccessibilityVirtualNode() ||
                 accessibilityProperty->HasAction() ||
                 accessibilityProperty->HasAccessibilityTextOrDescription() ||
-                !accessibilityProperty->GetText().empty()) {
+                !accessibilityProperty->GetText().empty()) &&
+                isModalDialog) {
                 focusable = true;
                 break;
             }
         }
 
         auto eventHub = node->GetEventHub<EventHub>();
-        if (!eventHub->IsEnabled()) {
+        if (!eventHub->IsEnabled() && isModalDialog) {
             focusable = true;
             break;
         }
         auto gestureEventHub = eventHub->GetGestureEventHub();
         if (gestureEventHub != nullptr) {
-            if (gestureEventHub->IsAccessibilityClickable() ||
-                gestureEventHub->IsAccessibilityLongClickable()) {
+            if ((gestureEventHub->IsAccessibilityClickable() ||
+                gestureEventHub->IsAccessibilityLongClickable()) &&
+                isModalDialog) {
                 focusable = true;
                 break;
             }
