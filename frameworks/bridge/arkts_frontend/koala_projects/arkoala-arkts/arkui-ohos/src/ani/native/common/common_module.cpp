@@ -974,6 +974,24 @@ ani_string getWindowName(ani_env* env, ani_object obj, ani_int instanceId)
     return nullptr;
 }
 
+ani_int getWindowWidthBreakpoint(ani_env* env, ani_object obj)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return -1;
+    }
+    return modifier->getCommonAniModifier()->getWindowWidthBreakpoint();
+}
+
+ani_int getWindowHeightBreakpoint(ani_env* env, ani_object obj)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return -1;
+    }
+    return modifier->getCommonAniModifier()->getWindowHeightBreakpoint();
+}
+
 void* TransferKeyEventPointer(ani_env* env, ani_object obj, ani_long pointer)
 {
     const auto* modifier = GetNodeAniModifier();

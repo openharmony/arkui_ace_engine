@@ -1538,13 +1538,12 @@ export class UIContextImpl extends UIContext {
         return ArkUIAniModule._Common_getWindowName(this.instanceId_);
     }
     public getWindowWidthBreakpoint(): WidthBreakpoint {
-
-        return this.getWindowWidthBreakpoint_serialize() as WidthBreakpoint;
-
+        let ret = ArkUIAniModule._Common_getWindowWidthBreakpoint();
+        return ret as WidthBreakpoint;
     }
     public getWindowHeightBreakpoint(): HeightBreakpoint {
-      return this.getWindowHeightBreakpoint_serialize() as HeightBreakpoint;
-
+        let ret = ArkUIAniModule._Common_getWindowHeightBreakpoint();
+        return ret as HeightBreakpoint;
     }
     public vp2px(value: number): number {
          return ArkUIAniModule._Common_vp2px(value, this.instanceId_);
@@ -1567,13 +1566,6 @@ export class UIContextImpl extends UIContext {
 
     public getId() : int32 {
         return this.instanceId_;
-    }
-
-    private getWindowWidthBreakpoint_serialize(): WidthBreakpoint {
-        throw new Error("no impl");
-    }
-    private getWindowHeightBreakpoint_serialize(): HeightBreakpoint {
-        throw new Error("no impl");
     }
     private setFrameCallback_serialize(onFrameCallback: ((index: number) => void),
                                                          onIdleCallback: ((index: number) => void),
