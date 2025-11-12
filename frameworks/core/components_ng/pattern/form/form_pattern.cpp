@@ -98,7 +98,7 @@ constexpr float MAX_FORM_VIEW_SCALE = 1.0f / 0.85f;
 constexpr char COLUMN_ROLE[] = "column";
 
 // Relationship between form styles and resource text content
-std::unordered_map<FormStyleAttribution, std::pair<const char*, FormChildNodeType>> formStyleResMap_ = {
+const static std::unordered_map<FormStyleAttribution, std::pair<const char*, FormChildNodeType>> FORM_STYLE_RES_MAP = {
     { FormStyleAttribution::PARENT_CONTROL, { TIME_LIMIT_RESOURCE_NAME, FormChildNodeType::TIME_LIMIT_TEXT_NODE } },
     { FormStyleAttribution::APP_LOCK, { APP_LOCKED_RESOURCE_NAME, FormChildNodeType::APP_LOCKED_TEXT_NODE } },
     { FormStyleAttribution::DEVELOPER_MODE_TIPS,
@@ -1225,7 +1225,7 @@ void FormPattern::LoadDisableFormStyle(const RequestFormInfo& info, bool isRefre
         rootNode = CreateColumnNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE);
     }
 #endif
-    SetForbiddenRootNodeAccessibilityAction(rootNode);
+    SetMaskRootNodeAccessibilityAction(rootNode);
     CHECK_NULL_VOID(rootNode);
     auto renderContext = rootNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -1273,8 +1273,8 @@ RefPtr<FrameNode> FormPattern::CreateTextNode(bool isRowStyle)
 {
     auto attribution = formSpecialStyle_.GetFormStyleAttribution();
     RefPtr<FrameNode> textNode = nullptr;
-    auto it = formStyleResMap_.find(attribution);
-    if (it != formStyleResMap_.end()) {
+    auto it = FORM_STYLE_RES_MAP.find(attribution);
+    if (it != FORM_STYLE_RES_MAP.end()) {
         textNode = CreateForbiddenTextNode(it->second.first, isRowStyle);
         AddFormChildNode(it->second.second, textNode);
     }
@@ -2188,8 +2188,8 @@ void FormPattern::OnLanguageConfigurationUpdate()
     RefPtr<FrameNode> textNode = nullptr;
     std::string content;
     auto attribution = formSpecialStyle_.GetFormStyleAttribution();
-    auto it = formStyleResMap_.find(attribution);
-    if (it != formStyleResMap_.end()) {
+    auto it = FORM_STYLE_RES_MAP.find(attribution);
+    if (it != FORM_STYLE_RES_MAP.end()) {
         GetResourceContent(it->second.first, content);
         textNode = GetFormChildNode(it->second.second);
     }
@@ -3019,7 +3019,7 @@ void FormPattern::InitializeFormAccessibility()
     formNode->NotifyAccessibilityChildTreeRegister();
 }
 
-void FormPattern::SetForbiddenRootNodeAccessibilityAction(RefPtr<FrameNode> &forbiddenRootNode)
+void FormPattern::SetMaskRootNodeAccessibilityAction(RefPtr<FrameNode> &forbiddenRootNode)
 {
     CHECK_NULL_VOID(forbiddenRootNode);
     auto host = GetHost();
@@ -3039,8 +3039,8 @@ void FormPattern::SetForbiddenRootNodeAccessibilityAction(RefPtr<FrameNode> &for
 
     std::string content;
     auto attribution = formSpecialStyle_.GetFormStyleAttribution();
-    auto it = formStyleResMap_.find(attribution);
-    if (it != formStyleResMap_.end()) {
+    auto it = FORM_STYLE_RES_MAP.find(attribution);
+    if (it != FORM_STYLE_RES_MAP.end()) {
         GetResourceContent(it->second.first, content);
     }
     accessibilityProperty->SetAccessibilityText(content);
