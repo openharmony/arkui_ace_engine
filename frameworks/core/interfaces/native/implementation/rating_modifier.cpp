@@ -123,7 +123,11 @@ void SetStarStyleImpl(Ark_NativePointer node,
     auto options = Converter::OptConvertPtr<StarStyleOptions>(value).value_or(StarStyleOptions());
     RatingModelNG::SetBackgroundSrc(frameNode, options.backgroundUri,  options.backgroundUri.empty());
     RatingModelNG::SetForegroundSrc(frameNode, options.foregroundUri, options.foregroundUri.empty());
-    RatingModelNG::SetSecondarySrc(frameNode, options.secondaryUri, options.secondaryUri.empty());
+    if (options.secondaryUri.empty()) {
+        RatingModelNG::SetSecondarySrc(frameNode, options.backgroundUri, options.backgroundUri.empty());
+    } else {
+        RatingModelNG::SetSecondarySrc(frameNode, options.secondaryUri, false);
+    }
 }
 void SetOnChangeImpl(Ark_NativePointer node,
                      const Opt_OnRatingChangeCallback* value)
