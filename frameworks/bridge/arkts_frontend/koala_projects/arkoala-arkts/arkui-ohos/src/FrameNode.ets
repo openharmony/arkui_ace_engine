@@ -122,6 +122,7 @@ import { ElementIdToCustomProperties } from "#handwritten"
 import { ObjectLinkDecoratedVariable } from "./stateManagement/decoratorImpl/decoratorObjectLink"
 import { FrameNodeExtender } from './framework';
 import { extractors } from "#handwritten";
+import { PeerNode } from './PeerNode';
 import hilog from '@ohos.hilog';
 
 export interface CrossLanguageOptions {
