@@ -115,16 +115,15 @@ void SetMarkImpl(Ark_NativePointer node,
     if (auto color = Converter::OptConvert<Color>(optValue->strokeColor); color) {
         CheckBoxGroupModelStatic::SetCheckMarkColor(frameNode, color);
     }
-    auto size = Converter::OptConvert<Dimension>(optValue->size);
+    auto size = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(optValue->size, DimensionUnit::VP);
+    Validator::ValidateNonPercent(size);
     Validator::ValidateNonNegative(size);
-    if (size) {
-        CheckBoxGroupModelStatic::SetCheckMarkSize(frameNode, size);
-    }
-    auto strokeWidth = Converter::OptConvert<Dimension>(optValue->strokeWidth);
+    CheckBoxGroupModelStatic::SetCheckMarkSize(frameNode, size);
+    auto strokeWidth =
+        Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Number>(optValue->strokeWidth, DimensionUnit::VP);
+    Validator::ValidateNonPercent(strokeWidth);
     Validator::ValidateNonNegative(strokeWidth);
-    if (strokeWidth) {
-        CheckBoxGroupModelStatic::SetCheckMarkWidth(frameNode, strokeWidth);
-    }
+    CheckBoxGroupModelStatic::SetCheckMarkWidth(frameNode, strokeWidth);
 }
 void SetOnChangeImpl(Ark_NativePointer node,
                      const Opt_OnCheckboxGroupChangeCallback* value)

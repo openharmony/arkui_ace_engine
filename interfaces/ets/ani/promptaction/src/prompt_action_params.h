@@ -159,7 +159,7 @@ bool GetResourceStrParam(ani_env *env, ani_object object, std::string& result);
 bool GetResourceStrParam(ani_env *env, ani_object object, const char *name, std::string& result);
 bool GetLengthParam(ani_env *env, ani_ref ref, OHOS::Ace::CalcDimension& result);
 bool GetLengthParam(ani_env *env, ani_object object, const char *name, OHOS::Ace::CalcDimension& result);
-bool GetColorParam(ani_env* env, ani_object object, PromptActionColor& result);
+bool GetColorParam(ani_env* env, ani_object object, std::string& result);
 bool GetResourceColorParam(ani_env *env, ani_ref ref, OHOS::Ace::Color& result);
 bool GetResourceColorParam(ani_env* env, ani_object object, const char *name, OHOS::Ace::Color& result);
 bool GetResourceColorParamOpt(ani_env* env, ani_object object, const char *name,
