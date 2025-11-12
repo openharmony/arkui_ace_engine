@@ -1636,10 +1636,9 @@ class FrameNode extends Disposable {
         __JSScopeUtil__.restoreInstanceId();
     }
     invalidateAttributes() {
-        if (this.nodePtr_ === undefined || this.nodePtr_ === null) {
-            return;
+        if (this.getNodePtr()) {
+            getUINativeModule().frameNode.applyAttributesFinish(this.nodePtr_);
         }
-        getUINativeModule().frameNode.applyAttributesFinish(this.nodePtr_);
     }
     convertPosition(position, targetNode) {
         if (targetNode === null) {
@@ -1717,7 +1716,10 @@ class FrameNode extends Disposable {
         }
     }
     isInRenderState() {
-        return getUINativeModule().frameNode.isOnRenderTree(this.nodePtr_);
+        if (this.getNodePtr()) {
+            return getUINativeModule().frameNode.isOnRenderTree(this.nodePtr_);
+        }
+        return false;
     }
 }
 class ImmutableFrameNode extends FrameNode {

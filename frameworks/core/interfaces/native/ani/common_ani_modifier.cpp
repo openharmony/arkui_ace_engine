@@ -98,18 +98,17 @@ static thread_local std::vector<int32_t> restoreInstanceIds_;
 
 ani_ref* GetHostContext(ArkUI_Int32 key)
 {
-    // auto context = NG::PipelineContext::GetCurrentContextSafely();
-    // if (context == nullptr) {
-    //     TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "GetHostContext-ani can not get current context.");
-    //     return nullptr;
-    // }
-    // auto frontend = context->GetFrontend();
-    // if (frontend == nullptr) {
-    //     TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "GetHostContext-ani can not get current frontend.");
-    //     return nullptr;
-    // }
-    // return frontend->GetHostContext(key);
-    return nullptr;
+    auto context = NG::PipelineContext::GetCurrentContextSafely();
+    if (context == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "GetHostContext-ani can not get current context.");
+        return nullptr;
+    }
+    auto frontend = context->GetFrontend();
+    if (frontend == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "GetHostContext-ani can not get current frontend.");
+        return nullptr;
+    }
+    return frontend->GetHostContext();
 }
 
 void SetFrameRateRange(ani_env* env, ani_long peerPtr, ani_object value, ArkUI_Int32 type)

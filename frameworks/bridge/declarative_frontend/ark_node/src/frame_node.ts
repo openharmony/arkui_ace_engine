@@ -747,6 +747,11 @@ class FrameNode extends Disposable {
     getUINativeModule().frameNode.removeSupportedStates(this.getNodePtr(), uiStates);
     __JSScopeUtil__.restoreInstanceId();
   }
+  invalidateAttributes(): void {
+    if (this.getNodePtr()) {
+      getUINativeModule().frameNode.applyAttributesFinish(this.nodePtr_);
+    }
+  }
   isTransferred(): boolean {
     return false;
   }
@@ -823,6 +828,12 @@ class FrameNode extends Disposable {
       throw { message: errorInfo, code: 100025 };
     }
   }
+   isInRenderState() :boolean {
+        if (this.getNodePtr()) {
+            return getUINativeModule().frameNode.isOnRenderTree(this.nodePtr_);
+        }
+        return false;
+    }
 }
 
 class ImmutableFrameNode extends FrameNode {
