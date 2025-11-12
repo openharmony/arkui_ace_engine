@@ -180,10 +180,7 @@ void SetEnableTransparentLayerImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     #ifdef XCOMPONENT_SUPPORTED
     auto convValue = Converter::OptConvertPtr<bool>(value);
-    if (!convValue) {
-        return;
-    }
-    XComponentModelNG::EnableTransparentLayer(frameNode, *convValue);
+    XComponentModelNG::EnableTransparentLayer(frameNode, convValue.value_or(false));
     #endif // XCOMPONENT_SUPPORTED
 }
 } // XComponentAttributeModifier
@@ -196,6 +193,7 @@ const GENERATED_ArkUIXComponentModifier* GetXComponentModifier()
         XComponentAttributeModifier::SetOnDestroyImpl,
         XComponentAttributeModifier::SetEnableAnalyzerImpl,
         XComponentAttributeModifier::SetEnableSecureImpl,
+        XComponentAttributeModifier::SetEnableTransparentLayerImpl,
         XComponentAttributeModifier::SetHdrBrightnessImpl,
     };
     return &ArkUIXComponentModifierImpl;

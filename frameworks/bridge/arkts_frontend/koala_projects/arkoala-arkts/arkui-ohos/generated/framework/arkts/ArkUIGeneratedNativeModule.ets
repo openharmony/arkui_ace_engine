@@ -3122,6 +3122,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _XComponentAttribute_setEnableSecure(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _XComponentAttribute_setEnableTransparentLayer(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _XComponentAttribute_setHdrBrightness(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _Root_construct(id: KInt, flags: KInt): KPointer
