@@ -439,6 +439,9 @@ void JSSymbol::ParseSymbolShadow(const JSRef<JSObject>& symbolShadowObj, SymbolS
     }
 
     ParseJsValueToFloat(symbolShadowObj, static_cast<int32_t>(ArkUIIndex::RADIUS), symbolShadow.radius);
+    if (std::isnan(symbolShadow.radius) || std::isinf(symbolShadow.radius)) {
+        symbolShadow.radius = 0.0f;
+    }
     ParseJsValueToFloat(symbolShadowObj, static_cast<int32_t>(ArkUIIndex::OFFSET_X), symbolShadow.offset.first);
     ParseJsValueToFloat(symbolShadowObj, static_cast<int32_t>(ArkUIIndex::OFFSET_Y), symbolShadow.offset.second);
 }
