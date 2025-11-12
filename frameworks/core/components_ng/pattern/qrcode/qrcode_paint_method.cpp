@@ -36,13 +36,6 @@ void QRCodePaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     }
     auto value = paintProperty->GetValueValue();
     auto renderContext = paintWrapper->GetRenderContext();
-    if (renderContext->HasForegroundColor()) {
-        if (renderContext->GetForegroundColorValue().GetValue() != paintProperty->GetColorValue().GetValue()) {
-            paintProperty->UpdateColor(Color::FOREGROUND);
-        }
-    } else if (renderContext->HasForegroundColorStrategy()) {
-        paintProperty->UpdateColor(Color::FOREGROUND);
-    }
 
     auto pattern = DynamicCast<QRCodePattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(pattern);
@@ -52,6 +45,15 @@ void QRCodePaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<QrcodeTheme>();
     CHECK_NULL_VOID(theme);
+    if (renderContext->HasForegroundColor()) {
+        if (renderContext->GetForegroundColorValue().GetValue() !=
+            paintProperty->GetColorValue(theme->GetQrcodeColor()).GetValue()) {
+            paintProperty->UpdateColor(Color::FOREGROUND);
+        }
+    } else if (renderContext->HasForegroundColorStrategy()) {
+        paintProperty->UpdateColor(Color::FOREGROUND);
+    }
+
     auto color = paintProperty->GetColorValue(theme->GetQrcodeColor());
     auto backgroundColor = paintProperty->GetBackgroundColorValue(theme->GetBackgroundColor());
     auto opacity = paintProperty->GetOpacityValue(1.0);
