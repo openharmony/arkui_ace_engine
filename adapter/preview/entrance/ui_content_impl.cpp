@@ -604,7 +604,7 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
     viewPtr->NotifyDensityChanged(config.Density());
     viewPtr->NotifySurfaceChanged(config.Width(), config.Height());
     if (deviceConfig_.orientation != runArgs_.deviceConfig.orientation ||
-        deviceConfig_.density != runArgs_.deviceConfig.density) {
+        !NearEqual(deviceConfig_.density, runArgs_.deviceConfig.density)) {
         container->NotifyConfigurationChange(false, ConfigurationChange({ false, false, true }));
         runArgs_.deviceConfig.orientation = deviceConfig_.orientation;
         runArgs_.deviceConfig.density = deviceConfig_.density;
