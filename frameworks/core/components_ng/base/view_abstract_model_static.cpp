@@ -571,8 +571,8 @@ void ViewAbstractModelStatic::BindSheet(FrameNode* frameNode, bool isShow,
     CHECK_NULL_VOID(targetNode);
     auto instanceId = sheetStyle.instanceId.has_value() && !sheetStyle.showInSubWindow.value_or(false) ?
         sheetStyle.instanceId.value() : Container::CurrentId();
-    auto buildNodeFunc = [buildFunc, instanceId]() -> RefPtr<UINode> {
-        NG::ScopedViewStackProcessor builderViewStackProcess(instanceId);
+    auto buildNodeFunc = [buildFunc](int32_t id) -> RefPtr<UINode> {
+        NG::ScopedViewStackProcessor builderViewStackProcess(id);
         buildFunc();
         auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
         return customNode;
