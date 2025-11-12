@@ -16,6 +16,7 @@
 
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
+#include "base/image/image_color_filter.h"
 #include "base/image/pixel_map.h"
 #include "bridge/declarative_frontend/jsview/js_image.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
@@ -351,9 +352,9 @@ ArkUINativeModuleValue ImageSpanBridge::ResetBorderRadius(ArkUIRuntimeCallInfo *
 
 void SetSpanColorFilterObject(const EcmaVM* vm, const Local<JSValueRef>& jsObjArg, ArkUINodeHandle nativeNode)
 {
-    Framework::JSColorFilter* colorFilter = nullptr;
+    OHOS::Ace::ImageColorFilter* colorFilter;
     if (!jsObjArg->IsUndefined() && !jsObjArg->IsNull()) {
-        colorFilter = static_cast<Framework::JSColorFilter*>(jsObjArg->ToObject(vm)->GetNativePointerField(vm, 0));
+        colorFilter = static_cast<OHOS::Ace::ImageColorFilter*>(jsObjArg->ToObject(vm)->GetNativePointerField(vm, 0));
     } else {
         GetArkUINodeModifiers()->getImageSpanModifier()->setImageSpanColorFilter(
             nativeNode, &(*DEFAULT_COLOR_FILTER_MATRIX.begin()), COLOR_FILTER_MATRIX_SIZE);
