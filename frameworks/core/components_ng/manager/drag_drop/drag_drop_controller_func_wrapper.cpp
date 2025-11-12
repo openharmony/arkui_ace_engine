@@ -34,6 +34,8 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr float SCALE_NUMBER = 0.95f;
 constexpr float TOUCH_DRAG_PIXELMAP_SCALE = 1.05f;
+constexpr float FLOAT_2 = 2.0f;
+constexpr float FLOAT_3 = 3.0f;
 constexpr int32_t RESERVED_DEVICEID = 0xAAAAAAFF;
 constexpr Dimension BADGE_RELATIVE_OFFSET = 8.0_vp;
 constexpr int32_t GATHER_COUNT = 2;
@@ -445,10 +447,14 @@ void DragControllerFuncWrapper::UpdateBadgeTextNodePosition(const RefPtr<FrameNo
     auto offset = previewOffset.NonOffset() ? originNodeOffset : previewOffset;
     
     auto badgeLength = std::to_string(data.badgeNumber).size();
-    double textOffsetX = offset.GetX() + width * (data.previewScale / windowScale + 1) / 2 -
-                         BADGE_RELATIVE_OFFSET.ConvertToPx() - (BADGE_RELATIVE_OFFSET.ConvertToPx() * badgeLength);
-    double textOffsetY =
-        offset.GetY() - height * (data.previewScale / windowScale - 1) / 2 - BADGE_RELATIVE_OFFSET.ConvertToPx();
+    auto badgeScale = 1.0f / windowScale;
+    auto previewScale = data.previewScale / windowScale;
+    auto singleLength = BADGE_RELATIVE_OFFSET.ConvertToPx();
+    auto badgeWidth = singleLength * badgeLength;
+    double textOffsetX = offset.GetX() + width * (previewScale + 1.0f) / FLOAT_2 -
+        badgeWidth * (badgeScale + 1.0f) / FLOAT_2 - singleLength;
+    double textOffsetY = offset.GetY() + height * (1.0f - previewScale) / FLOAT_2 -
+        singleLength * (FLOAT_3 - badgeScale) / FLOAT_2;
     textRenderContext->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
     textRenderContext->UpdatePosition(OffsetT<Dimension>(Dimension(textOffsetX), Dimension(textOffsetY)));
 }
