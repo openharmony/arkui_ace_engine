@@ -1041,9 +1041,7 @@ void WebSelectOverlay::OnHandleMoveStart(const GestureEvent& event, bool isFirst
 void WebSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
 {
     HideMagnifier();
-    isSelectAll_ = false;
     selectOverlayDragging_ = false;
-    webSelectInfo_.menuInfo.showCopyAll = true;
     UpdateSelectMenuOptions();
     auto pattern = GetPattern<WebPattern>();
     CHECK_NULL_VOID(pattern);
@@ -1323,6 +1321,7 @@ void WebSelectOverlay::UpdateSelectMenuOptions()
     auto value = GetSelectedText();
     auto queryWord = std::regex_replace(value, std::regex("^\\s+|\\s+$"), "");
     if (isSelectAll_) {
+        webSelectInfo_.menuInfo.showCopyAll = true;
         isSelectAll_ = false;
     }
     if (!queryWord.empty()) {

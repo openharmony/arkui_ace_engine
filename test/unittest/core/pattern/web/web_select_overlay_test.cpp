@@ -5921,12 +5921,16 @@ HWTEST_F(WebSelectOverlayTest, OnTouchSelectionChangedTest011, TestSize.Level1)
     auto nodeId = stack->ClaimNodeId();
     auto frameNode =
         FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
+
     ASSERT_NE(webPattern, nullptr);
     WebSelectOverlay overlay(webPattern);
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
+
     auto insertHandle = nullptr;
     auto startSelectionHandle = std::make_shared<NWebTouchHandleStateBeginTestImpl>();
     ASSERT_NE(startSelectionHandle, nullptr);
@@ -5951,10 +5955,12 @@ HWTEST_F(WebSelectOverlayTest, OnMenuItemActionTestSelectAll, TestSize.Level1)
     auto frameNode =
         FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
     EXPECT_NE(frameNode, nullptr);
+
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
     webPattern->OnModifyDone();
     WebSelectOverlay overlay(webPattern);
+
     std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params =
         std::make_shared<OHOS::NWeb::NWebQuickMenuParamsSelectImpl>();
     std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback =
