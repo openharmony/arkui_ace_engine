@@ -52,6 +52,7 @@ ohos_shared_library("movingphotoview") {
     "${component_ext_path}/movingphoto/movingphoto_node.cpp",
     "${component_ext_path}/movingphoto/movingphoto_pattern.cpp",
   ]
+  
   include_dirs = [
     "${component_ext_path}/ext_common/",
     "${component_ext_path}/movingphoto/",
@@ -68,7 +69,6 @@ ohos_shared_library("movingphotoview") {
     "$ace_root/frameworks/core:ace_container_scope",
     "$ace_root/interfaces/inner_api/ace:ace_uicontent",
     "$ace_root/interfaces/napi/kits/plugincomponent:plugincomponent",
-    ":movingphotoview_platform",
   ]
 
   external_deps = [
@@ -78,64 +78,6 @@ ohos_shared_library("movingphotoview") {
     "image_framework:image",
     "image_framework:image_native",
     "napi:ace_napi",
-  ]
-
-  if (defined(global_parts_info) &&
-      !defined(global_parts_info.multimedia_media_library)) {
-    external_deps += [ "media_library:media_library_manager" ]
-  }
-
-  ldflags = [ "-Wl,--gc-sections" ]
-
-  cflags = [
-    "-fvisibility=hidden",
-    "-fdata-sections",
-    "-ffunction-sections",
-    "-Os",
-  ]
-
-  cflags_cc = [
-    "-fvisibility-inlines-hidden",
-    "-Os",
-  ]
-
-  relative_install_dir = "module/multimedia"
-  subsystem_name = ace_engine_subsystem
-  part_name = ace_engine_part
-}
-
-ohos_shared_library("movingphotoview_platform") {
-  defines = [ "USE_ARK_ENGINE" ]
-  sources = [
-    "$ace_root/frameworks/core/components_ng/base/inspector_filter.cpp",
-    "${component_ext_path}/movingphoto/movingphoto_layout_algorithm.cpp",
-    "${component_ext_path}/movingphoto/movingphoto_model_ng.cpp",
-    "${component_ext_path}/movingphoto/movingphoto_node.cpp",
-    "${component_ext_path}/movingphoto/movingphoto_pattern.cpp",
-  ]
-
-  include_dirs = [
-    "${component_ext_path}/ext_common/",
-    "${component_ext_path}/movingphoto/",
-    "$ace_root/frameworks/",
-  ]
-  include_dirs += additional_include_dirs
-
-  configs = [ "$ace_root/interfaces/inner_api/ace_kit:ace_kit_config" ]
-
-  deps = [
-    "$ace_root/build:libace_compatible",
-    "$ace_root/frameworks/core:ace_container_scope",
-    "$ace_root/interfaces/inner_api/ace:ace_uicontent",
-    "$ace_root/interfaces/napi/kits/plugincomponent:plugincomponent",
-  ]
-
-  external_deps = [
-    "bounds_checking_function:libsec_static",
-    "data_share:datashare_consumer",
-    "hilog:libhilog",
-    "image_framework:image",
-    "image_framework:image_native",
   ]
 
   if (defined(global_parts_info) &&
