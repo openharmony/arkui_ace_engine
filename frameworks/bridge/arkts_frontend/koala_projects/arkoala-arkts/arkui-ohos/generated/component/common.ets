@@ -6742,7 +6742,8 @@ export enum BlendMode {
 }
 export enum BlendApplyType {
     FAST = 0,
-    OFFSCREEN = 1
+    OFFSCREEN = 1,
+    OFFSCREEN_WITH_BACKGROUND = 2
 }
 export type OnDragEventCallback = (event: DragEvent, extraParams?: string) => void;
 export interface DropOptions {

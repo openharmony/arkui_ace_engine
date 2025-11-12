@@ -6950,7 +6950,7 @@ ArkUINativeModuleValue CommonBridge::SetAdvancedBlendMode(ArkUIRuntimeCallInfo *
     if (blendApplyTypeArg->IsNumber()) {
         int32_t blendApplyTypeNum = blendApplyTypeArg->Int32Value(vm);
         if (blendApplyTypeNum >= static_cast<int>(OHOS::Ace::BlendApplyType::FAST) &&
-            blendApplyTypeNum <= static_cast<int>(OHOS::Ace::BlendApplyType::OFFSCREEN)) {
+            blendApplyTypeNum < static_cast<int>(OHOS::Ace::BlendApplyType::MAX)) {
             blendApplyTypeValue = blendApplyTypeNum;
         }
     }

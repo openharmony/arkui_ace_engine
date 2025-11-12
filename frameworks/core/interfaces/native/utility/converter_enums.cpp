@@ -1693,6 +1693,7 @@ void AssignCast(std::optional<BlendApplyType>& dst, const Ark_BlendApplyType& sr
     switch (src) {
         case ARK_BLEND_APPLY_TYPE_FAST: dst = BlendApplyType::FAST; break;
         case ARK_BLEND_APPLY_TYPE_OFFSCREEN: dst = BlendApplyType::OFFSCREEN; break;
+        case ARK_BLEND_APPLY_TYPE_OFFSCREEN_WITH_BACKGROUND: dst = BlendApplyType::OFFSCREEN_WITH_BACKGROUND; break;
         default: LOGE("Unexpected enum value in Ark_BlendApplyType: %{public}d", src);
     }
 }

@@ -3764,6 +3764,7 @@ typedef struct Opt_BlankScreenDetectionMethod {
 typedef enum Ark_BlendApplyType {
     ARK_BLEND_APPLY_TYPE_FAST = 0,
     ARK_BLEND_APPLY_TYPE_OFFSCREEN = 1,
+    ARK_BLEND_APPLY_TYPE_OFFSCREEN_WITH_BACKGROUND = 2,
 } Ark_BlendApplyType;
 typedef struct Opt_BlendApplyType {
     Ark_Tag tag;
