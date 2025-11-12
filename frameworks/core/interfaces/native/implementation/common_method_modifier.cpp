@@ -2049,9 +2049,6 @@ void SetDrawModifierImpl(Ark_NativePointer node,
         return;
     }
     auto convValue = Converter::OptConvertPtr<Ark_DrawModifier>(value);
-    if (!convValue) {
-        return;
-    }
     auto peer = convValue.value();
     CHECK_NULL_VOID(peer);
     if (!peer->drawModifier) {
@@ -3065,7 +3062,10 @@ void SetFocusableImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        // Implement Reset value
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        auto focusable = pattern->GetFocusPattern().GetFocusable();
+        ViewAbstract::SetFocusable(frameNode, focusable);
         return;
     }
     ViewAbstract::SetFocusable(frameNode, *convValue);
@@ -4287,7 +4287,7 @@ void SetIdImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto id = Converter::OptConvertPtr<std::string>(value);
-    ViewAbstract::SetInspectorId(frameNode, *id);
+    ViewAbstract::SetInspectorId(frameNode, id.value_or(""));
 }
 void SetGeometryTransition0Impl(Ark_NativePointer node,
                                 const Opt_String* value)
@@ -4830,7 +4830,7 @@ void SetBackgroundImpl(Ark_NativePointer node,
     auto optAlign = Converter::OptConvertPtr<Alignment>(options);
     auto optBuilder = Converter::GetOptPtr(builder);
     if (!optBuilder) {
-        // Implement Reset value
+        ViewAbstractModelStatic::ResetBackground(frameNode);
         return;
     }
     CallbackHelper(*optBuilder).BuildAsync([frameNode, optAlign](const RefPtr<UINode>& uiNode) {
@@ -5640,10 +5640,24 @@ void SetOnVisibleAreaChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(event);
+    auto optEvent = Converter::GetOptPtr(event);
+    if (!optEvent) {
+        std::vector<double> ratioList;
+        ViewAbstract::SetOnVisibleChange(frameNode, nullptr, ratioList);
+        return;
+    }
+    auto weakNode = AceType::WeakClaim(frameNode);
+    auto onVisibleAreaChange =
+        [arkCallback = CallbackHelper(*optEvent), node = weakNode](bool visible, double ratio) {
+            Ark_Boolean isExpanding = Converter::ArkValue<Ark_Boolean>(visible);
+            Ark_Float64 currentRatio = Converter::ArkValue<Ark_Float64>(static_cast<float>(ratio));
+            PipelineContext::SetCallBackNode(node);
+            arkCallback.InvokeSync(isExpanding, currentRatio);
+        };
     auto rawRatioVec = Converter::OptConvertPtr<std::vector<double>>(ratios);
     if (!rawRatioVec) {
         std::vector<double> ratioList;
-        ViewAbstract::SetOnVisibleChange(frameNode, nullptr, ratioList);
+        ViewAbstract::SetOnVisibleChange(frameNode, std::move(onVisibleAreaChange), ratioList);
         return;
     }
     size_t size = rawRatioVec->size();
@@ -5659,19 +5673,6 @@ void SetOnVisibleAreaChangeImpl(Ark_NativePointer node,
         }
         ratioVec.push_back(ratio);
     }
-    auto optEvent = Converter::GetOptPtr(event);
-    if (!optEvent) {
-        ViewAbstract::SetOnVisibleChange(frameNode, nullptr, ratioVec);
-        return;
-    }
-    auto weakNode = AceType::WeakClaim(frameNode);
-    auto onVisibleAreaChange =
-        [arkCallback = CallbackHelper(*optEvent), node = weakNode](bool visible, double ratio) {
-            Ark_Boolean isExpanding = Converter::ArkValue<Ark_Boolean>(visible);
-            Ark_Float64 currentRatio = Converter::ArkValue<Ark_Float64>(static_cast<float>(ratio));
-            PipelineContext::SetCallBackNode(node);
-            arkCallback.InvokeSync(isExpanding, currentRatio);
-        };
     ViewAbstract::SetOnVisibleChange(frameNode, std::move(onVisibleAreaChange), ratioVec);
 }
 void SetOnVisibleAreaApproximateChangeImpl(Ark_NativePointer node,
@@ -5682,8 +5683,31 @@ void SetOnVisibleAreaApproximateChangeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
     CHECK_NULL_VOID(event);
+    auto expectedUpdateInterval =
+        Converter::OptConvert<int32_t>(options->value.expectedUpdateInterval).value_or(DEFAULT_DURATION);
+    if (expectedUpdateInterval < 0) {
+        expectedUpdateInterval = DEFAULT_DURATION;
+    }
+    auto optEvent = Converter::GetOptPtr(event);
+    if (!optEvent) {
+        std::vector<double> ratioList;
+        ViewAbstract::SetOnVisibleAreaApproximateChange(
+            frameNode, nullptr, ratioList, expectedUpdateInterval);
+        return;
+    }
+    auto weakNode = AceType::WeakClaim(frameNode);
+    auto onVisibleAreaChange =
+        [arkCallback = CallbackHelper(*optEvent), node = weakNode](bool visible, double ratio) {
+            Ark_Boolean isExpanding = Converter::ArkValue<Ark_Boolean>(visible);
+            Ark_Float64 currentRatio = Converter::ArkValue<Ark_Float64>(static_cast<float>(ratio));
+            PipelineContext::SetCallBackNode(node);
+            arkCallback.InvokeSync(isExpanding, currentRatio);
+        };
     auto rawRatioVec = Converter::OptConvert<std::vector<float>>(options->value.ratios);
-    if (!rawRatioVec.has_value()) {
+    if (!rawRatioVec.has_value() || rawRatioVec->empty()) {
+        std::vector<double> ratioList;
+        ViewAbstract::SetOnVisibleAreaApproximateChange(
+            frameNode, std::move(onVisibleAreaChange), ratioList, expectedUpdateInterval);
         return;
     }
     std::vector<float> floatArray = rawRatioVec.value();
@@ -5699,18 +5723,6 @@ void SetOnVisibleAreaApproximateChangeImpl(Ark_NativePointer node,
             ratio = VISIBLE_RATIO_MAX;
         }
         ratioVec.push_back(ratio);
-    }
-    auto expectedUpdateInterval =
-        Converter::OptConvert<int32_t>(options->value.expectedUpdateInterval).value_or(DEFAULT_DURATION);
-    if (expectedUpdateInterval < 0) {
-        expectedUpdateInterval = DEFAULT_DURATION;
-    }
-    std::function<void(bool, double)> onVisibleAreaChange = nullptr;
-    auto optEvent = Converter::GetOptPtr(event);
-    if (!optEvent) {
-        ViewAbstract::SetOnVisibleAreaApproximateChange(
-            frameNode, nullptr, ratioVec, expectedUpdateInterval);
-        return;
     }
     ViewAbstract::SetOnVisibleAreaApproximateChange(
         frameNode, std::move(onVisibleAreaChange), ratioVec, expectedUpdateInterval);

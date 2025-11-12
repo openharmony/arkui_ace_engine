@@ -33,7 +33,7 @@ export class ComponentBase implements UICommonBase {
     getPeer(): PeerNode | undefined {
         return this.peer;
     }
-    setGestureEvent(gestureEvent: UIGestureEvent) {
+    setGestureEvent(gestureEvent: UIGestureEvent | undefined) {
         this.gestureEvent = gestureEvent
     }
     getGestureEvent(): UIGestureEvent | undefined {
