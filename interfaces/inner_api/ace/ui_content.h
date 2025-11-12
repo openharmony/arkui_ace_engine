@@ -331,6 +331,11 @@ public:
      */
     virtual void SetParentToken(sptr<IRemoteObject> token);
 
+    /**
+     * @description: Must be called by the main thread, otherwise there may be multi-threaded issues and undefined
+     * behavior.
+     * @return Return key information for each frame.
+     */
     virtual void SetFrameMetricsCallBack(
         std::function<void(FrameMetrics info)>&& callback) {}
 
