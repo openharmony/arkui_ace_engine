@@ -316,7 +316,7 @@ private:
     float CalculateViewScale(float width, float height, float layoutWidth, float layoutHeight);
     float GetNumberFromParams(const AAFwk::Want& want, const std::string& key, float defaultValue);
     void InitializeFormAccessibility();
-    void SetForbiddenRootNodeAccessibilityAction(RefPtr<FrameNode> &forbiddeRootNode);
+    void SetMaskRootNodeAccessibilityAction(RefPtr<FrameNode> &forbiddeRootNode);
     void SetFormAccessibilityAction();
     void HandleFormDueControl(bool isDisablePolicy, bool isControl);
     bool IsFormDueControl(const std::string &bundleName, const std::string &moduleName, const std::string &abilityName,

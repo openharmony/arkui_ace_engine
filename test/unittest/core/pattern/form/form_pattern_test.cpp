@@ -2198,4 +2198,19 @@ HWTEST_F(FormPatternTest, FormPatternTest_062, TestSize.Level0)
     pattern->SetObscured(true);
     EXPECT_TRUE(pattern->isFormObscured_);
 }
+
+/**
+ * @tc.name: FormPatternTest_063
+ * @tc.desc: OnLanguageConfigurationUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormPatternTest, FormPatternTest_063, TestSize.Level0)
+{
+    RefPtr<FormNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    // pattern not null
+    EXPECT_NE(pattern, nullptr);
+    pattern->OnLanguageConfigurationUpdate();
+    EXPECT_FALSE(pattern->isTibetanLanguage_);
+}
 } // namespace OHOS::Ace::NG
