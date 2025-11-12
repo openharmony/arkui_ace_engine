@@ -1105,7 +1105,7 @@ public:
         ani_class cls;
         env->FindClass(ANI_SCROLL_EVENT_INFO_CLS, &cls);
         ani_method ctor;
-        env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor);
+        env->Class_FindMethod(cls, "<ctor>", ":", &ctor);
         env->Object_New(cls, ctor, &res);
 
         ani_string id {};
