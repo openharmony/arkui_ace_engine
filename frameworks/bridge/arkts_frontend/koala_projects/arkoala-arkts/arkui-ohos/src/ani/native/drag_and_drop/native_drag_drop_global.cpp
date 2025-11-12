@@ -483,7 +483,7 @@ bool ParseNumberBadge(ani_env* env, ArkUIDragPreviewOption& previewOptions, ani_
     if (AniUtils::IsClassObject(env, numberBadgeObj, "std.core.Boolean")) {
         previewOptions.isNumber = false;
         ani_boolean aniValue;
-        if (ANI_OK == env->Object_CallMethodByName_Boolean(numberBadgeObj, "unboxed", nullptr, &aniValue)) {
+        if (ANI_OK == env->Object_CallMethodByName_Boolean(numberBadgeObj, "toBoolean", ":z", &aniValue)) {
             previewOptions.isShowBadge = static_cast<bool>(aniValue);
         }
         return true;
@@ -549,7 +549,7 @@ void SetPropertyValueByName(ani_env* env, ani_object obj, std::string name, bool
         return;
     }
     ani_boolean aniValue;
-    if (ANI_OK != env->Object_CallMethodByName_Boolean(valueObj, "unboxed", nullptr, &aniValue)) {
+    if (ANI_OK != env->Object_CallMethodByName_Boolean(valueObj, "toBoolean", ":z", &aniValue)) {
         return;
     }
     target = static_cast<bool>(aniValue);
