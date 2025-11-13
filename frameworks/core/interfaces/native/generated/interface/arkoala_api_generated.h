@@ -27105,12 +27105,12 @@ typedef struct GENERATED_ArkUIPixelMapMockAccessor {
 
 typedef struct GENERATED_ArkUIProgressMaskAccessor {
     void (*destroyPeer)(Ark_ProgressMask peer);
-    Ark_ProgressMask (*construct)(const Ark_Float64* value,
-                                  const Ark_Float64* total,
+    Ark_ProgressMask (*construct)(Ark_Float64 value,
+                                  Ark_Float64 total,
                                   const Ark_ResourceColor* color);
     Ark_NativePointer (*getFinalizer)();
     void (*updateProgress)(Ark_ProgressMask peer,
-                           const Ark_Float64* value);
+                           Ark_Float64 value);
     void (*updateColor)(Ark_ProgressMask peer,
                         const Ark_ResourceColor* value);
     void (*enableBreathingAnimation)(Ark_ProgressMask peer,
