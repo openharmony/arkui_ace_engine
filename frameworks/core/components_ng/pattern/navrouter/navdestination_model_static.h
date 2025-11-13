@@ -70,6 +70,7 @@ public:
     static void SetCustomToolBar(FrameNode* frameNode, const RefPtr<UINode>& customNode);
     static void SetTitleHeight(FrameNode* frameNode, const Dimension& titleHeight, bool isValid = true);
     static void SetHideBackButton(FrameNode* frameNode, bool hideBackButton);
+    static void SetBackgroundColor(FrameNode* frameNode, const Color& color, bool isVaild = true);
     static void SetEnableStatusBar(FrameNode* frameNode, const std::optional<std::pair<bool, bool>>& statusBar);
     static void SetEnableNavigationIndicator(FrameNode* frameNode, const std::optional<bool>& navigationIndicator);
     static void SetHideItemText(FrameNode* frameNode, bool isHideItemText);

@@ -5939,6 +5939,8 @@ export class ArkUIGeneratedNativeModule {
     native static _UICommonEvent_setOnVisibleAreaApproximateChange(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Quick
     native static _UIContextAtomicServiceBar_getBarRect(): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _UIContextGetInfo_getNavigationInfoByUniqueId(id: KLong): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _UIExtensionProxy_construct(): KPointer
     @ani.unsafe.Direct

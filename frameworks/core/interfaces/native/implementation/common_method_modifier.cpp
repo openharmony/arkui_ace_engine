@@ -37,6 +37,7 @@
 #include "core/components_ng/pattern/counter/counter_model_ng.h"
 #include "core/components_ng/pattern/counter/counter_node.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
+#include "core/components_ng/pattern/navrouter/navdestination_model_static.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/view_context/view_context_model_ng.h"
@@ -2240,6 +2241,14 @@ void SetBackgroundColorImpl(Ark_NativePointer node,
         SelectModelStatic::SetBackgroundColor(frameNode, colorValue);
     } else if (frameNode->GetTag() == V2::TEXTINPUT_ETS_TAG || frameNode->GetTag() == V2::TEXTAREA_ETS_TAG) {
         TextFieldModifier::SetBackgroundColorImpl(node, value);
+    } else if (frameNode->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
+        Color backgroundColor;
+        bool isValid = false;
+        if (colorValue.has_value()) {
+            isValid = true;
+            backgroundColor = colorValue.value();
+        }
+        NavDestinationModelStatic::SetBackgroundColor(frameNode, backgroundColor, isValid);
     } else {
         ViewAbstractModelStatic::SetBackgroundColor(frameNode, colorValue);
     }

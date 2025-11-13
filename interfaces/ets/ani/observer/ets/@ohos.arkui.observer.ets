@@ -255,6 +255,15 @@ import hilog from '@ohos.hilog'
                 throw Error("state in NavDestinationInfo type Error");
             }
         }
+        static castToNavDestinationMode(value: number): NavDestinationMode {
+            if (value === 0) {
+                return NavDestinationMode.STANDARD;
+            } else if (value === 1) {
+                return NavDestinationMode.DIALOG;
+            } else {
+                throw Error("mode in NavDestinationInfo type Error");
+            }
+        }
         static transferStatic(input: Any): Object {
             let dynamicValue = ESValue.wrap(input);
             let staticValue = new NavDestinationInfoImpl();
@@ -304,6 +313,22 @@ import hilog from '@ohos.hilog'
             }
             staticValue.navDestinationId = navDestinationId.toString();
 
+            let uniqueId = dynamicValue.getProperty("uniqueId");
+            if (!uniqueId.isNumber()) {
+                throw Error("uniqueId in NavDestinationInfo type Error");
+            } else if (!(uniqueId.isUndefined() || uniqueId.isNull())) {
+                throw Error("uniqueId in NavDestinationInfo type Error");
+            }
+            staticValue.uniqueId = uniqueId.toNumber() as int;
+
+            let mode = dynamicValue.getProperty("mode");
+            if (!mode.isNumber()) {
+                throw Error("mode in NavDestinationInfo type Error");
+            } else if (!(mode.isUndefined() || mode.isNull())) {
+                throw Error("mode in NavDestinationInfo type Error");
+            }
+            staticValue.mode = NavDestinationInfoImpl.castToNavDestinationMode(mode.toNumber());
+
             return staticValue;
         }
 
@@ -326,6 +351,16 @@ import hilog from '@ohos.hilog'
                 dynamicValue.setProperty('param', ESValue.wrap(staticValue.param));
             }
             dynamicValue.setProperty('navDestinationId', ESValue.wrap(staticValue.navDestinationId));
+            if (staticValue.uniqueId === null || staticValue.uniqueId === undefined) {
+                dynamicValue.setProperty('uniqueId', ESValue.Null);
+            } else {
+                dynamicValue.setProperty('uniqueId', ESValue.wrap(staticValue.uniqueId));
+            }
+            if (staticValue.mode === null || staticValue.mode === undefined) {
+                dynamicValue.setProperty('mode', ESValue.Null);
+            } else {
+                dynamicValue.setProperty('mode', ESValue.wrapNumber(staticValue.mode!));
+            }
             return dynamicValue as Any;
         }
     }

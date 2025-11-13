@@ -259,6 +259,21 @@ public:
     void SetDataSourceObj(const RefPtr<PathStack>& dataSourceObj);
     const RefPtr<PathStack>& GetDataSourceObj();
 
+    bool IsStaticStack() override
+    {
+        return true;
+    }
+
+    void SetStaticStackPtr(void* ptr)
+    {
+        staticStackPtr_ = ptr;
+    }
+
+    void* GetStaticStackPtr() override
+    {
+        return staticStackPtr_;
+    }
+
     bool IsEmpty() override;
     void Pop() override;
     void Push(const std::string& name, const RefPtr<NG::RouteInfo>& routeInfo = nullptr) override;
@@ -332,6 +347,7 @@ private:
         const std::string& name, int32_t index, RefPtr<NG::UINode>& node);
     std::string ErrorToMessage(int32_t code);
     void FirePromise(PathInfo*, int32_t errorCode);
+    void* staticStackPtr_ = nullptr;
 };
 } // namespace OHOS::Ace::NG::GeneratedModifier::NavigationContext
 

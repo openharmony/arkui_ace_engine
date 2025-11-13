@@ -77,6 +77,13 @@ void UIObserverHandler::NotifyNavigationStateChange(const WeakPtr<AceType>& weak
     NavDestinationInfo info(GetNavigationId(pattern), pattern->GetName(), state, context->GetIndex(),
         pathInfo->GetParamObj(), std::to_string(pattern->GetNavDestinationId()), mode, uniqueId,
         GetNavigationUniqueId(pattern));
+    auto navigationStack = context->GetNavigationStack().Upgrade();
+    if (navigationStack && navigationStack->IsStaticStack()) {
+        auto navigationStackExtend = navigationStack->GetNavigationStackExtend();
+        if (navigationStackExtend) {
+            info.interopParam = navigationStackExtend->GetSerializedParamByIndex(context->GetIndex());
+        }
+    }
     navigationHandleFunc_(info);
     pathInfo->CloseScope();
 }
@@ -97,9 +104,16 @@ void UIObserverHandler::NotifyNavigationStateChangeForAni(
     CHECK_NULL_VOID(host);
     NavDestinationMode mode = host->GetNavDestinationMode();
     auto uniqueId = host->GetId();
-    
+
     NavDestinationInfo info(GetNavigationId(pattern), pattern->GetName(), state, context->GetIndex(),
         pathInfo->GetParamObj(), std::to_string(pattern->GetNavDestinationId()), mode, uniqueId);
+    auto navigationStack = context->GetNavigationStack().Upgrade();
+    if (navigationStack && navigationStack->IsStaticStack()) {
+        auto navigationStackExtend = navigationStack->GetNavigationStackExtend();
+        if (navigationStackExtend) {
+            info.interopParam = navigationStackExtend->GetSerializedParamByIndex(context->GetIndex());
+        }
+    }
     navigationHandleFuncForAni_(info);
 }
 
@@ -339,10 +353,18 @@ std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetNavDestinationInfo(con
     } else {
         state = pattern->GetIsOnShow() ? NavDestinationState::ON_SHOWN : NavDestinationState::ON_HIDDEN;
     }
-    return std::make_shared<NavDestinationInfo>(
+    auto infoPtr = std::make_shared<NavDestinationInfo>(
         GetNavigationId(pattern), pattern->GetName(),
         state, host->GetIndex(), pathInfo->GetParamObj(), std::to_string(pattern->GetNavDestinationId()),
         mode, uniqueId);
+    auto navigationStack = pattern->GetNavigationStack().Upgrade();
+    if (navigationStack && navigationStack->IsStaticStack()) {
+        auto navigationStackExtend = navigationStack->GetNavigationStackExtend();
+        if (navigationStackExtend) {
+            infoPtr->interopParam = navigationStackExtend->GetSerializedParamByIndex(host->GetIndex());
+        }
+    }
+    return infoPtr;
 }
 
 std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetNavigationState(const RefPtr<AceType>& node)

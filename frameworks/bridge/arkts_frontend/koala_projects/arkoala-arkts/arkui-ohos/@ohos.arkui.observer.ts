@@ -71,6 +71,7 @@ declare namespace uiObserver {
     export interface NavigationInfo {
         navigationId: string;
         pathStack: NavPathStack;
+        uniqueId: int32 | undefined;
     }
 
     export interface NavDestinationSwitchInfo {

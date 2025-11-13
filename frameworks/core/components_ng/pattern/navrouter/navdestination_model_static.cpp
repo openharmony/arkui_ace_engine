@@ -17,6 +17,7 @@
 
 #include "base/i18n/localization.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_abstract_model_static.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
@@ -659,6 +660,20 @@ void NavDestinationModelStatic::SetHideBackButton(FrameNode* frameNode, bool hid
         SetNeedResetTitleProperty(AceType::DynamicCast<FrameNode>(navDestinationGroupNode->GetTitleBarNode()));
     }
     navDestinationLayoutProperty->UpdateHideBackButton(hideBackButton);
+}
+
+void NavDestinationModelStatic::SetBackgroundColor(FrameNode* frameNode, const Color& color, bool isVaild)
+{
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationNode);
+    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(navDestinationPattern);
+    if (!isVaild) {
+        navDestinationPattern->SetIsUserDefinedBgColor(false);
+        return;
+    }
+    ViewAbstractModelStatic::SetBackgroundColor(frameNode, color);
+    navDestinationPattern->SetIsUserDefinedBgColor(true);
 }
 
 void NavDestinationModelStatic::SetEnableStatusBar(
