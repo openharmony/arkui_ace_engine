@@ -5491,7 +5491,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _SslErrorHandler_handleCancel1(ptr: KPointer, abortLoading: KInt): void
     @ani.unsafe.Direct
-    native static _StateStylesOps_onStateStyleChange(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _StateStylesOps_onStateStyleChange(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32, allState: KInt): void
     @ani.unsafe.Direct
     native static _StyledString_construct(thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct

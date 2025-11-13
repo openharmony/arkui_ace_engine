@@ -4251,16 +4251,17 @@ export class SelectExtender {
     }
 }
 export class StateStylesOps {
-    static onStateStyleChange_serialize(node: KPointer, stateStyleChange: Callback_StateStylesChange): void {
+    static onStateStyleChange_serialize(node: KPointer, stateStyleChange: Callback_StateStylesChange, allState: int32): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.holdAndWriteCallback(stateStyleChange)
-        ArkUIGeneratedNativeModule._StateStylesOps_onStateStyleChange(node, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._StateStylesOps_onStateStyleChange(node, thisSerializer.asBuffer(), thisSerializer.length(), allState)
         thisSerializer.release()
     }
-    public static onStateStyleChange(node: KPointer, stateStyleChange: Callback_StateStylesChange): void {
+    public static onStateStyleChange(node: KPointer, stateStyleChange: Callback_StateStylesChange, allState: int32): void {
         const node_casted = node as (KPointer)
         const stateStyleChange_casted = stateStyleChange as (Callback_StateStylesChange)
-        StateStylesOps.onStateStyleChange_serialize(node_casted, stateStyleChange_casted)
+        const allState_casted = allState as (int32)
+        StateStylesOps.onStateStyleChange_serialize(node_casted, stateStyleChange_casted, allState_casted)
         return
     }
 }

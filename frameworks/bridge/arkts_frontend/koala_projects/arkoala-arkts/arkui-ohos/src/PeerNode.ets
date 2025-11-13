@@ -268,7 +268,7 @@ export class PeerNode extends IncrementalNode {
         super.dispose()
     }
 
-    public getOrCreateStateStyleMutable(): MutableState<int32> | undefined {
+    public getOrCreateStateStyleMutable(curState: int32 = 15): MutableState<int32> | undefined {
         if (this._uiStateStyle !== undefined) {
             return this._uiStateStyle!;
         }
@@ -277,7 +277,7 @@ export class PeerNode extends IncrementalNode {
             this._uiStateStyle = manager.mutableState<int32>(0 as int32, true)
             StateStylesOps.onStateStyleChange(this.getPeerPtr(), (state: int32) => {
                 this._uiStateStyle!.value = state
-            })
+            }, curState)
             return this._uiStateStyle!;
         }
     }
