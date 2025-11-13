@@ -2213,6 +2213,8 @@ struct CJUIWebModifier {
     void (*resetOnBeforeUnload)(ArkUINodeHandle node);
     void (*setJavaScriptProxy)(ArkUINodeHandle node, void* callback);
     void (*resetJavaScriptProxy)(ArkUINodeHandle node);
+    void (*setEnableImageAnalyzer)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetEnableImageAnalyzer)(ArkUINodeHandle node);
     void (*setForceEnableZoom)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetForceEnableZoom)(ArkUINodeHandle node);
     void (*setBackToTop)(ArkUINodeHandle node, ArkUI_Bool value);

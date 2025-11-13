@@ -2297,6 +2297,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("forceEnableZoom", &JSWeb::SetForceEnableZoom);
     JSClass<JSWeb>::StaticMethod("onDetectedBlankScreen", &JSWeb::OnDetectedBlankScreen);
     JSClass<JSWeb>::StaticMethod("blankScreenDetectionConfig", &JSWeb::BlankScreenDetectionConfig);
+    JSClass<JSWeb>::StaticMethod("enableImageAnalyzer", &JSWeb::EnableImageAnalyzer);
     JSClass<JSWeb>::StaticMethod("onSafeBrowsingCheckFinish", &JSWeb::OnSafeBrowsingCheckFinish);
     JSClass<JSWeb>::StaticMethod("backToTop", &JSWeb::JSBackToTop);
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
@@ -6945,6 +6946,16 @@ void JSWeb::BlankScreenDetectionConfig(const JSCallbackInfo& args)
     }
     WebModel::GetInstance()->SetBlankScreenDetectionConfig(
         enable, detectionTiming, detectionMethods, contentfulNodesCountThreshold);
+}
+
+void JSWeb::EnableImageAnalyzer(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsBoolean()) {
+        WebModel::GetInstance()->SetEnableImageAnalyzer(true);
+        return;
+    }
+    bool isEnabled = args[0]->ToBoolean();
+    WebModel::GetInstance()->SetEnableImageAnalyzer(isEnabled);
 }
 
 void JSWeb::OnPdfScrollAtBottom(const JSCallbackInfo& args)

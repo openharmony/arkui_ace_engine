@@ -1538,6 +1538,21 @@ class WebJavaScriptProxyModifier extends ModifierWithKey<JavaScriptProxy> {
     }
   }
 }
+
+class WebEnableImageAnalyzerModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webEnableImageAnalyzerModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetEnableImageAnalyzer(node);
+    } else {
+      getUINativeModule().web.setEnableImageAnalyzer(node, this.value);
+    }
+  }
+}
+
 class WebForceEnableZoomModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
@@ -2092,6 +2107,10 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
   }
   gestureFocusMode(mode: GestureFocusMode): this {
     modifierWithKey(this._modifiersWithKeys, WebGestureFocusModeModifier.identity, WebGestureFocusModeModifier, mode);
+    return this;
+  }
+  enableImageAnalyzer(enabled: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, WebEnableImageAnalyzerModifier.identity, WebEnableImageAnalyzerModifier, enabled);
     return this;
   }
   forceEnableZoom(forceEnableZoom: boolean): this {

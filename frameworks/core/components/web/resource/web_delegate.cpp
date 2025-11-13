@@ -9264,6 +9264,25 @@ void WebDelegate::UpdateBlankScreenDetectionConfig(bool enable, const std::vecto
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebUpdateBlankScreenDetectionConfig");
 }
 
+void WebDelegate::UpdateEnableImageAnalyzer(bool enable)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), enable]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                auto preference = delegate->nweb_->GetPreference();
+                if (preference) {
+                    preference->PutImageAnalyzerEnabled(enable);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebUpdateEnableImageAnalyzer");
+}
+
 void WebDelegate::OnPdfScrollAtBottom(const std::string& url)
 {
     CHECK_NULL_VOID(taskExecutor_);

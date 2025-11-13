@@ -5315,6 +5315,54 @@ HWTEST_F(WebModelTestNg, SetJavaScriptProxy003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetEnableImageAnalyzer001
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetEnableImageAnalyzer001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
+    WebModelNG webModelNG;
+    webModelNG.SetEnableImageAnalyzer(false);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckEnableImageAnalyzer(false), true);
+    webModelNG.SetEnableImageAnalyzer(true);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckEnableImageAnalyzer(true), true);
+#endif
+}
+
+/**
+ * @tc.name: SetEnableImageAnalyzer002
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetEnableImageAnalyzer002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
+    WebModelNG webModelNG;
+    webModelNG.SetEnableImageAnalyzer(AccessibilityManager::RawPtr(frameNode), false);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckEnableImageAnalyzer(false), true);
+    webModelNG.SetEnableImageAnalyzer(AccessibilityManager::RawPtr(frameNode), true);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckEnableImageAnalyzer(true), true);
+#endif
+}
+
+/**
  * @tc.name: SetForceEnableZoom001
  * @tc.desc: Test web_model_ng.cpp
  * @tc.type: FUNC

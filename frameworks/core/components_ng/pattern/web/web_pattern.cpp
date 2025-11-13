@@ -4190,6 +4190,7 @@ void WebPattern::OnModifyDone()
                 GetBlankScreenDetectionConfig().value().detectionMethods,
                 GetBlankScreenDetectionConfig().value().contentfulNodesCountThreshold);
         }
+        delegate_->UpdateEnableImageAnalyzer(GetEnableImageAnalyzerValue(true));
         isAllowWindowOpenMethod_ = SystemProperties::GetAllowWindowOpenMethodEnabled();
         delegate_->UpdateAllowWindowOpenMethod(GetAllowWindowOpenMethodValue(isAllowWindowOpenMethod_));
         delegate_->UpdateNativeEmbedModeEnabled(GetNativeEmbedModeEnabledValue(false));
@@ -5029,6 +5030,16 @@ void WebPattern::OnBlankScreenDetectionConfigUpdate(const BlankScreenDetectionCo
     if (delegate_) {
         delegate_->UpdateBlankScreenDetectionConfig(
             config.enable, config.detectionTiming, config.detectionMethods, config.contentfulNodesCountThreshold);
+    }
+}
+
+void WebPattern::OnEnableImageAnalyzerUpdate(bool isEnabled)
+{
+    if (delegate_) {
+        delegate_->UpdateEnableImageAnalyzer(isEnabled);
+    }
+    if (!isEnabled) {
+        DestroyAnalyzerOverlay();
     }
 }
 
