@@ -1894,6 +1894,18 @@ HWTEST_F(NativeNodeTest, NativeNodeTest006, TestSize.Level1)
     EXPECT_EQ(ret, static_cast<int32_t>(ON_GRID_WILL_SCROLL));
     ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_GRID_ON_DID_SCROLL, nodeType);
     EXPECT_EQ(ret, static_cast<int32_t>(ON_GRID_DID_SCROLL));
+    ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_GRID_ON_ITEM_DRAG_START, nodeType);
+    EXPECT_EQ(ret, static_cast<int32_t>(ON_GRID_ITEM_DRAG_START));
+    ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_GRID_ON_ITEM_DRAG_ENTER, nodeType);
+    EXPECT_EQ(ret, static_cast<int32_t>(ON_GRID_ITEM_DRAG_ENTER));
+    ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_GRID_ON_ITEM_DRAG_MOVE, nodeType);
+    EXPECT_EQ(ret, static_cast<int32_t>(ON_GRID_ITEM_DRAG_MOVE));
+    ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_GRID_ON_ITEM_DRAG_LEAVE, nodeType);
+    EXPECT_EQ(ret, static_cast<int32_t>(ON_GRID_ITEM_DRAG_LEAVE));
+    ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_GRID_ON_ITEM_DROP, nodeType);
+    EXPECT_EQ(ret, static_cast<int32_t>(ON_GRID_ITEM_DROP));
+    ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_GRID_ITEM_ON_SELECT, nodeType);
+    EXPECT_EQ(ret, static_cast<int32_t>(ON_GRID_ITEM_SELECT));
 }
 
 /**
@@ -2136,6 +2148,18 @@ HWTEST_F(NativeNodeTest, NativeNodeTest007, TestSize.Level1)
     EXPECT_EQ(ret, static_cast<int32_t>(NODE_CHECKBOX_GROUP_EVENT_ON_CHANGE));
     ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ArkUIEventSubKind::ON_AXIS);
     EXPECT_EQ(ret, static_cast<int32_t>(NODE_ON_AXIS));
+    ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ON_GRID_ITEM_DRAG_START);
+    EXPECT_EQ(ret, static_cast<int32_t>(NODE_GRID_ON_ITEM_DRAG_START));
+    ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ON_GRID_ITEM_DRAG_ENTER);
+    EXPECT_EQ(ret, static_cast<int32_t>(NODE_GRID_ON_ITEM_DRAG_ENTER));
+    ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ON_GRID_ITEM_DRAG_MOVE);
+    EXPECT_EQ(ret, static_cast<int32_t>(NODE_GRID_ON_ITEM_DRAG_MOVE));
+    ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ON_GRID_ITEM_DRAG_LEAVE);
+    EXPECT_EQ(ret, static_cast<int32_t>(NODE_GRID_ON_ITEM_DRAG_LEAVE));
+    ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ON_GRID_ITEM_DROP);
+    EXPECT_EQ(ret, static_cast<int32_t>(NODE_GRID_ON_ITEM_DROP));
+    ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ON_GRID_ITEM_SELECT);
+    EXPECT_EQ(ret, static_cast<int32_t>(NODE_GRID_ITEM_ON_SELECT));
 }
 
 /**
