@@ -587,6 +587,26 @@ void SetOnContentWillChangeImpl(Ark_NativePointer node,
     };
     TabsModelStatic::SetOnContentWillChange(frameNode, std::move(callback));
 }
+void SetOnContentDidScrollImpl(Ark_NativePointer node,
+                               const Opt_OnTabsContentDidScrollCallback* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        TabsModelStatic::SetOnContentDidScroll(frameNode, nullptr);
+        return;
+    }
+    auto onEvent = [arkCallback = CallbackHelper(*optValue)](
+        int32_t selectedIndex, int32_t index, float position, float mainAxisLength) {
+        auto arkSelectedIndex = Converter::ArkValue<Ark_Int32>(selectedIndex);
+        auto arkIndex = Converter::ArkValue<Ark_Int32>(index);
+        auto arkPosition = Converter::ArkValue<Ark_Float32>(position);
+        auto arkMainAxisLength = Converter::ArkValue<Ark_Float32>(mainAxisLength);
+        arkCallback.Invoke(arkSelectedIndex, arkIndex, arkPosition, arkMainAxisLength);
+    };
+    TabsModelStatic::SetOnContentDidScroll(frameNode, std::move(onEvent));
+}
 void SetBarModeImpl(Ark_NativePointer node,
                     const Opt_BarMode* value,
                     const Opt_ScrollableBarModeOptions* options)
@@ -679,6 +699,7 @@ const GENERATED_ArkUITabsModifier* GetTabsModifier()
         TabsAttributeModifier::SetPageFlipModeImpl,
         TabsAttributeModifier::SetBarBackgroundEffectImpl,
         TabsAttributeModifier::SetOnContentWillChangeImpl,
+        TabsAttributeModifier::SetOnContentDidScrollImpl,
         TabsAttributeModifier::SetBarModeImpl,
         TabsAttributeModifier::SetBarHeightImpl,
         TabsAttributeModifier::SetBarBackgroundBlurStyle1Impl,

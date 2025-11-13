@@ -6265,6 +6265,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                     const Opt_OnTabsContentWillChangeCallback* value)
     {
     }
+    void SetOnContentDidScrollImpl(Ark_NativePointer node,
+                                   const Opt_OnTabsContentDidScrollCallback* value)
+    {
+    }
     void SetBarModeImpl(Ark_NativePointer node,
                         const Opt_BarMode* value,
                         const Opt_ScrollableBarModeOptions* options)
@@ -9945,6 +9949,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TabsAttributeModifier::SetPageFlipModeImpl,
             TabsAttributeModifier::SetBarBackgroundEffectImpl,
             TabsAttributeModifier::SetOnContentWillChangeImpl,
+            TabsAttributeModifier::SetOnContentDidScrollImpl,
             TabsAttributeModifier::SetBarModeImpl,
             TabsAttributeModifier::SetBarHeightImpl,
             TabsAttributeModifier::SetBarBackgroundBlurStyle1Impl,

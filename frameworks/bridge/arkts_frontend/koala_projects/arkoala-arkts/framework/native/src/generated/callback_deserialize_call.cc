@@ -5608,6 +5608,30 @@ void deserializeAndCallSyncOnTabsAnimationStartCallback(Ark_VMContext vmContext,
     Ark_TabsAnimationEvent extraInfo = TabsAnimationEvent_serializer::read(thisDeserializer);
     callSyncMethod(vmContext, resourceId, index, targetIndex, extraInfo);
 }
+void deserializeAndCallOnTabsContentDidScrollCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Int32 selectedIndex, const Ark_Int32 index, const Ark_Float64 position, const Ark_Float64 mainAxisLength)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_OnTabsContentDidScrollCallback))));
+    thisDeserializer.readPointer();
+    Ark_Int32 selectedIndex = thisDeserializer.readInt32();
+    Ark_Int32 index = thisDeserializer.readInt32();
+    Ark_Float64 position = thisDeserializer.readFloat64();
+    Ark_Float64 mainAxisLength = thisDeserializer.readFloat64();
+    _call(_resourceId, selectedIndex, index, position, mainAxisLength);
+}
+void deserializeAndCallSyncOnTabsContentDidScrollCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 selectedIndex, const Ark_Int32 index, const Ark_Float64 position, const Ark_Float64 mainAxisLength)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_OnTabsContentDidScrollCallback))));
+    Ark_Int32 selectedIndex = thisDeserializer.readInt32();
+    Ark_Int32 index = thisDeserializer.readInt32();
+    Ark_Float64 position = thisDeserializer.readFloat64();
+    Ark_Float64 mainAxisLength = thisDeserializer.readFloat64();
+    callSyncMethod(vmContext, resourceId, selectedIndex, index, position, mainAxisLength);
+}
 void deserializeAndCallOnTabsContentWillChangeCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
@@ -7238,6 +7262,7 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
         case Kind_OnSwiperGestureSwipeCallback: return deserializeAndCallOnSwiperGestureSwipeCallback(thisArray, thisLength);
         case Kind_OnTabsAnimationEndCallback: return deserializeAndCallOnTabsAnimationEndCallback(thisArray, thisLength);
         case Kind_OnTabsAnimationStartCallback: return deserializeAndCallOnTabsAnimationStartCallback(thisArray, thisLength);
+        case Kind_OnTabsContentDidScrollCallback: return deserializeAndCallOnTabsContentDidScrollCallback(thisArray, thisLength);
         case Kind_OnTabsContentWillChangeCallback: return deserializeAndCallOnTabsContentWillChangeCallback(thisArray, thisLength);
         case Kind_OnTabsGestureSwipeCallback: return deserializeAndCallOnTabsGestureSwipeCallback(thisArray, thisLength);
         case Kind_OnTextPickerChangeCallback: return deserializeAndCallOnTextPickerChangeCallback(thisArray, thisLength);
@@ -7557,6 +7582,7 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         case Kind_OnSwiperGestureSwipeCallback: return deserializeAndCallSyncOnSwiperGestureSwipeCallback(vmContext, thisArray, thisLength);
         case Kind_OnTabsAnimationEndCallback: return deserializeAndCallSyncOnTabsAnimationEndCallback(vmContext, thisArray, thisLength);
         case Kind_OnTabsAnimationStartCallback: return deserializeAndCallSyncOnTabsAnimationStartCallback(vmContext, thisArray, thisLength);
+        case Kind_OnTabsContentDidScrollCallback: return deserializeAndCallSyncOnTabsContentDidScrollCallback(vmContext, thisArray, thisLength);
         case Kind_OnTabsContentWillChangeCallback: return deserializeAndCallSyncOnTabsContentWillChangeCallback(vmContext, thisArray, thisLength);
         case Kind_OnTabsGestureSwipeCallback: return deserializeAndCallSyncOnTabsGestureSwipeCallback(vmContext, thisArray, thisLength);
         case Kind_OnTextPickerChangeCallback: return deserializeAndCallSyncOnTextPickerChangeCallback(vmContext, thisArray, thisLength);

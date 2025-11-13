@@ -268,6 +268,7 @@ export enum CallbackKind {
     Kind_OnSwiperGestureSwipeCallback = 606029871,
     Kind_OnTabsAnimationEndCallback = 1942856551,
     Kind_OnTabsAnimationStartCallback = -147408344,
+    Kind_OnTabsContentDidScrollCallback = 23493523,
     Kind_OnTabsContentWillChangeCallback = -349727249,
     Kind_OnTabsGestureSwipeCallback = 253696833,
     Kind_OnTextPickerChangeCallback = -1902343417,

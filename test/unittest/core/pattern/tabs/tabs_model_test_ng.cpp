@@ -231,6 +231,65 @@ HWTEST_F(TabsModelTestNg, SetBarBackgroundEffect002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetOnContentDidScroll001
+ * @tc.desc: Test TabsModelNG SetOnContentDidScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsModelTestNg, SetOnContentDidScroll001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create model.
+     */
+    TabsModelNG model = CreateTabs();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto callback = [](int32_t selectedIndex, int32_t index, float position, float mainAxisLength) {};
+    /**
+     * @tc.steps: step2. call SetOnContentDidScroll with callback.
+     * @tc.expected: *callbackPtr is not nullptr.
+     */
+    model.SetOnContentDidScroll(frameNode, std::move(callback));
+    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
+    ASSERT_NE(tabsNode, nullptr);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    ASSERT_NE(swiperNode, nullptr);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    auto callbackPtr = swiperPattern->GetOnContentDidScroll();
+    EXPECT_NE(*callbackPtr, nullptr);
+    CreateDone();
+}
+
+/**
+ * @tc.name: SetOnContentDidScroll002
+ * @tc.desc: Test TabsModelNG SetOnContentDidScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsModelTestNg, SetOnContentDidScroll002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create model.
+     */
+    TabsModelNG model = CreateTabs();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. call SetOnContentDidScroll with nullptr.
+     * @tc.expected: *callbackPtr is nullptr.
+     */
+    model.SetOnContentDidScroll(frameNode, nullptr);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
+    ASSERT_NE(tabsNode, nullptr);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    ASSERT_NE(swiperNode, nullptr);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    auto callbackPtr = swiperPattern->GetOnContentDidScroll();
+    EXPECT_EQ(*callbackPtr, nullptr);
+    CreateDone();
+}
+
+/**
  * @tc.name: HandleBarGridGutterTest001
  * @tc.desc: Verify TabsModelNG::HandleBarGridGutter
  * @tc.type: FUNC

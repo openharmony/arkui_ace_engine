@@ -544,6 +544,18 @@ void TabsModelStatic::SetOnUnselected(FrameNode* frameNode,
     pattern->SetOnUnselectedEvent(std::move(onUnselected));
 }
 
+void TabsModelStatic::SetOnContentDidScroll(FrameNode* frameNode, ContentDidScrollEvent&& onContentDidScroll)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
+    CHECK_NULL_VOID(tabsNode);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    swiperPattern->SetOnContentDidScroll(std::move(onContentDidScroll));
+}
+
 void TabsModelStatic::SetOnAnimationStart(FrameNode* frameNode, AnimationStartEvent&& onAnimationStart)
 {
     CHECK_NULL_VOID(frameNode);

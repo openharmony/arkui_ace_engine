@@ -51,6 +51,7 @@ constexpr int32_t DEFAULT_CUSTOM_ANIMATION_TIMEOUT = 1000;
 constexpr int ANIMATION_CURVE_TYPE_DEFAULT = 0;
 constexpr int ANIMATION_CURVE_TYPE_STR = 1;
 constexpr int ANIMATION_CURVE_TYPE_FUNC = 2;
+constexpr int PARAM_COUNT_FOUR = 4;
 namespace {
 void GetAnimationCurveInfo(ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUI_Uint32& type, std::string& aniTimFunc,
     std::function<float(float)>& customCallBack)
@@ -409,6 +410,53 @@ ArkUINativeModuleValue TabsBridge::ResetTabOnUnselected(ArkUIRuntimeCallInfo* ru
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getTabsModifier()->resetTabOnUnselected(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TabsBridge::SetOnContentDidScroll(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_1);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (!callbackArg->IsFunction(vm)) {
+        if (callbackArg->IsUndefined()) {
+            GetArkUINodeModifiers()->getTabsModifier()->resetTabsOnContentDidScroll(nativeNode);
+        }
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    std::function<void(int32_t, int32_t, float_t, float_t)> callback = [vm, frameNode,
+        func = panda::CopyableGlobal(vm, func)](int32_t selectedIndex, int32_t index,
+        float position, float mainAxisLength) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        panda::Local<panda::NumberRef> selectedIndexParam = panda::NumberRef::New(vm, selectedIndex);
+        panda::Local<panda::NumberRef> indexParam = panda::NumberRef::New(vm, index);
+        panda::Local<panda::NumberRef> positionParam = panda::NumberRef::New(vm, position);
+        panda::Local<panda::NumberRef> mainAxisLengthParam = panda::NumberRef::New(vm, mainAxisLength);
+        panda::Local<panda::JSValueRef> params[PARAM_COUNT_FOUR] = { selectedIndexParam, indexParam,
+            positionParam, mainAxisLengthParam };
+        func->Call(vm, func.ToLocal(), params, PARAM_COUNT_FOUR);
+    };
+    GetArkUINodeModifiers()->getTabsModifier()->setTabsOnContentDidScroll(nativeNode,
+        reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TabsBridge::ResetOnContentDidScroll(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTabsModifier()->resetTabsOnContentDidScroll(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

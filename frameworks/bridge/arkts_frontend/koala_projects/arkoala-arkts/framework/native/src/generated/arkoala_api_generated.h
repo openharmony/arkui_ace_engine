@@ -1627,6 +1627,8 @@ typedef struct OnTabsAnimationEndCallback OnTabsAnimationEndCallback;
 typedef struct Opt_OnTabsAnimationEndCallback Opt_OnTabsAnimationEndCallback;
 typedef struct OnTabsAnimationStartCallback OnTabsAnimationStartCallback;
 typedef struct Opt_OnTabsAnimationStartCallback Opt_OnTabsAnimationStartCallback;
+typedef struct OnTabsContentDidScrollCallback OnTabsContentDidScrollCallback;
+typedef struct Opt_OnTabsContentDidScrollCallback Opt_OnTabsContentDidScrollCallback;
 typedef struct OnTabsContentWillChangeCallback OnTabsContentWillChangeCallback;
 typedef struct Opt_OnTabsContentWillChangeCallback Opt_OnTabsContentWillChangeCallback;
 typedef struct OnTabsGestureSwipeCallback OnTabsGestureSwipeCallback;
@@ -12336,6 +12338,16 @@ typedef struct Opt_OnTabsAnimationStartCallback {
     Ark_Tag tag;
     OnTabsAnimationStartCallback value;
 } Opt_OnTabsAnimationStartCallback;
+typedef struct OnTabsContentDidScrollCallback {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_Int32 selectedIndex, const Ark_Int32 index, const Ark_Float64 position, const Ark_Float64 mainAxisLength);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 selectedIndex, const Ark_Int32 index, const Ark_Float64 position, const Ark_Float64 mainAxisLength);
+} OnTabsContentDidScrollCallback;
+typedef struct Opt_OnTabsContentDidScrollCallback {
+    Ark_Tag tag;
+    OnTabsContentDidScrollCallback value;
+} Opt_OnTabsContentDidScrollCallback;
 typedef struct OnTabsContentWillChangeCallback {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -24031,6 +24043,8 @@ typedef struct GENERATED_ArkUITabsModifier {
                                    const Opt_BackgroundEffectOptions* value);
     void (*setOnContentWillChange)(Ark_NativePointer node,
                                    const Opt_OnTabsContentWillChangeCallback* value);
+    void (*setOnContentDidScroll)(Ark_NativePointer node,
+                                  const Opt_OnTabsContentDidScrollCallback* value);
     void (*setBarMode)(Ark_NativePointer node,
                        const Opt_BarMode* value,
                        const Opt_ScrollableBarModeOptions* options);

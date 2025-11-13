@@ -4423,6 +4423,7 @@ struct ArkUITabsModifier {
     void (*setDividerColorByUser)(ArkUINodeHandle node, ArkUI_Bool colorByUser);
     void (*setFadingEdge)(ArkUINodeHandle node, ArkUI_Bool fadingEdge);
     void (*setTabOnUnselected)(ArkUINodeHandle node, void* callback);
+    void (*setTabsOnContentDidScroll)(ArkUINodeHandle node, void* callback);
     void (*setBarBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*setBarBackgroundBlurStyle)(ArkUINodeHandle node, ArkUITabBarBackgroundBlurStyle* styleOption);
     void (*setBarOverlap)(ArkUINodeHandle node, ArkUI_Bool overlap);
@@ -4444,6 +4445,7 @@ struct ArkUITabsModifier {
     void (*resetDivider)(ArkUINodeHandle node);
     void (*resetFadingEdge)(ArkUINodeHandle node);
     void (*resetTabOnUnselected)(ArkUINodeHandle node);
+    void (*resetTabsOnContentDidScroll)(ArkUINodeHandle node);
     void (*resetBarBackgroundColor)(ArkUINodeHandle node);
     void (*resetBarBackgroundBlurStyle)(ArkUINodeHandle node);
     void (*resetBarOverlap)(ArkUINodeHandle node);

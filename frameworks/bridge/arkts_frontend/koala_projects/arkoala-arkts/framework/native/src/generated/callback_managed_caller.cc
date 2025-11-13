@@ -6469,6 +6469,33 @@ void callManagedOnTabsAnimationStartCallbackSync(Ark_VMContext vmContext, Ark_In
     TabsAnimationEvent_serializer::write(argsSerializer, extraInfo);
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
 }
+void callManagedOnTabsContentDidScrollCallback(Ark_Int32 resourceId, Ark_Int32 selectedIndex, Ark_Int32 index, Ark_Float64 position, Ark_Float64 mainAxisLength)
+{
+    CallbackBuffer callbackBuffer = {{}, {}};
+    const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
+    callbackBuffer.resourceHolder.holdCallbackResource(&callbackResourceSelf);
+    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
+    argsSerializer.writeInt32(Kind_OnTabsContentDidScrollCallback);
+    argsSerializer.writeInt32(resourceId);
+    argsSerializer.writeInt32(selectedIndex);
+    argsSerializer.writeInt32(index);
+    argsSerializer.writeFloat64(position);
+    argsSerializer.writeFloat64(mainAxisLength);
+    enqueueCallback(10, &callbackBuffer);
+}
+void callManagedOnTabsContentDidScrollCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Int32 selectedIndex, Ark_Int32 index, Ark_Float64 position, Ark_Float64 mainAxisLength)
+{
+    uint8_t dataBuffer[4096];
+    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&dataBuffer, sizeof(dataBuffer), nullptr);
+    argsSerializer.writeInt32(10);
+    argsSerializer.writeInt32(Kind_OnTabsContentDidScrollCallback);
+    argsSerializer.writeInt32(resourceId);
+    argsSerializer.writeInt32(selectedIndex);
+    argsSerializer.writeInt32(index);
+    argsSerializer.writeFloat64(position);
+    argsSerializer.writeFloat64(mainAxisLength);
+    KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
+}
 void callManagedOnTabsContentWillChangeCallback(Ark_Int32 resourceId, Ark_Int32 currentIndex, Ark_Int32 comingIndex, Callback_Boolean_Void continuation)
 {
     CallbackBuffer callbackBuffer = {{}, {}};
@@ -8198,6 +8225,7 @@ Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
         case Kind_OnSwiperGestureSwipeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnSwiperGestureSwipeCallback);
         case Kind_OnTabsAnimationEndCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnTabsAnimationEndCallback);
         case Kind_OnTabsAnimationStartCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnTabsAnimationStartCallback);
+        case Kind_OnTabsContentDidScrollCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnTabsContentDidScrollCallback);
         case Kind_OnTabsContentWillChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnTabsContentWillChangeCallback);
         case Kind_OnTabsGestureSwipeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnTabsGestureSwipeCallback);
         case Kind_OnTextPickerChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnTextPickerChangeCallback);
@@ -8516,6 +8544,7 @@ Ark_NativePointer getManagedCallbackCallerSync(CallbackKind kind)
         case Kind_OnSwiperGestureSwipeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnSwiperGestureSwipeCallbackSync);
         case Kind_OnTabsAnimationEndCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnTabsAnimationEndCallbackSync);
         case Kind_OnTabsAnimationStartCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnTabsAnimationStartCallbackSync);
+        case Kind_OnTabsContentDidScrollCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnTabsContentDidScrollCallbackSync);
         case Kind_OnTabsContentWillChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnTabsContentWillChangeCallbackSync);
         case Kind_OnTabsGestureSwipeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnTabsGestureSwipeCallbackSync);
         case Kind_OnTextPickerChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnTextPickerChangeCallbackSync);

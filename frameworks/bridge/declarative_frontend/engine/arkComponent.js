@@ -37418,6 +37418,10 @@ class ArkTabsComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, TabsOnUnselectedModifier.identity, TabsOnUnselectedModifier, value);
     return this;
   }
+  onContentDidScroll(value) {
+    modifierWithKey(this._modifiersWithKeys, TabsOnContentDidScrollModifier.identity, TabsOnContentDidScrollModifier, value);
+    return this;
+  }
   fadingEdge(value) {
     modifierWithKey(this._modifiersWithKeys, FadingEdgeModifier.identity, FadingEdgeModifier, value);
     return this;
@@ -38022,6 +38026,22 @@ class TabsOnUnselectedModifier extends ModifierWithKey {
   }
 }
 TabsOnUnselectedModifier.identity = Symbol('tabOnUnselected');
+class TabsOnContentDidScrollModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().tabs.resetTabsOnContentDidScroll(node);
+    } else {
+      getUINativeModule().tabs.setTabsOnContentDidScroll(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TabsOnContentDidScrollModifier.identity = Symbol('tabsOnContentDidScroll');
 class FadingEdgeModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
