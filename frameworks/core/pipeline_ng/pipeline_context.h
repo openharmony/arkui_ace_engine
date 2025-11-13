@@ -1471,8 +1471,7 @@ private:
     void FlushNodeChangeFlag();
     void CleanNodeChangeFlag();
 
-    void RSTransactionBegin(const std::shared_ptr<Rosen::RSUIDirector>& rsUIDirector);
-    void RSTransactionCommit(const std::shared_ptr<Rosen::RSUIDirector>& rsUIDirector);
+    void RSTransactionBeginAndCommit(const std::shared_ptr<Rosen::RSUIDirector>& rsUIDirector);
 
     uint64_t AdjustVsyncTimeStamp(uint64_t nanoTimestamp);
     bool FlushModifierAnimation(uint64_t nanoTimestamp);

@@ -1567,9 +1567,7 @@ void PipelineContext::SetupRootElement()
     if (!IsJsCard() && !isFormRender_) {
         rsUIDirector = GetRSUIDirector();
         if (rsUIDirector) {
-            RSTransactionBegin(rsUIDirector);
-            rsUIDirector->SetAbilityBGAlpha(appBgColor_.GetAlpha());
-            RSTransactionCommit(rsUIDirector);
+            RSTransactionBeginAndCommit(rsUIDirector);
         }
     }
 #endif
@@ -1636,31 +1634,20 @@ void PipelineContext::SetOnWindowFocused(const std::function<void()>& callback)
         }, TaskExecutor::TaskType::UI, "ArkUISetOnWindowFocusedCallback");
 }
 
-void PipelineContext::RSTransactionBegin(const std::shared_ptr<Rosen::RSUIDirector>& rsUIDirector)
+void PipelineContext::RSTransactionBeginAndCommit(const std::shared_ptr<Rosen::RSUIDirector>& rsUIDirector)
 {
 #ifdef ENABLE_ROSEN_BACKEND
     if (SystemProperties::GetMultiInstanceEnabled() && rsUIDirector) {
         auto surfaceNode = rsUIDirector->GetRSSurfaceNode();
         CHECK_NULL_VOID(surfaceNode);
-        auto rsUIContext = surfaceNode->GetRSUIContext();
+        auto shadowSurface = surfaceNode->CreateShadowSurfaceNode();
+        CHECK_NULL_VOID(shadowSurface);
+        auto rsUIContext = shadowSurface->GetRSUIContext();
         CHECK_NULL_VOID(rsUIContext);
         auto rsTransaction = rsUIContext->GetRSTransaction();
         CHECK_NULL_VOID(rsTransaction);
         rsTransaction->Begin();
-    }
-#endif
-}
-
-void PipelineContext::RSTransactionCommit(const std::shared_ptr<Rosen::RSUIDirector>& rsUIDirector)
-{
-#ifdef ENABLE_ROSEN_BACKEND
-    if (SystemProperties::GetMultiInstanceEnabled() && rsUIDirector) {
-        auto surfaceNode = rsUIDirector->GetRSSurfaceNode();
-        CHECK_NULL_VOID(surfaceNode);
-        auto rsUIContext = surfaceNode->GetRSUIContext();
-        CHECK_NULL_VOID(rsUIContext);
-        auto rsTransaction = rsUIContext->GetRSTransaction();
-        CHECK_NULL_VOID(rsTransaction);
+        shadowSurface->SetAbilityBGAlpha(appBgColor_.GetAlpha());
         rsTransaction->Commit();
     }
 #endif
@@ -1695,9 +1682,7 @@ void PipelineContext::SetupSubRootElement()
     if (!IsJsCard()) {
         rsUIDirector = GetRSUIDirector();
         if (rsUIDirector) {
-            RSTransactionBegin(rsUIDirector);
-            rsUIDirector->SetAbilityBGAlpha(appBgColor_.GetAlpha());
-            RSTransactionCommit(rsUIDirector);
+            RSTransactionBeginAndCommit(rsUIDirector);
         }
     }
 #endif
@@ -4930,9 +4915,7 @@ void PipelineContext::SetAppBgColor(const Color& color)
     if (!IsJsCard()) {
         rsUIDirector = GetRSUIDirector();
         if (rsUIDirector) {
-            RSTransactionBegin(rsUIDirector);
-            rsUIDirector->SetAbilityBGAlpha(appBgColor_.GetAlpha());
-            RSTransactionCommit(rsUIDirector);
+            RSTransactionBeginAndCommit(rsUIDirector);
         }
     }
 #endif
