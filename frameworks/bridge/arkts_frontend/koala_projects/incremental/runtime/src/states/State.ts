@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { Array_from_set, className, float64ToInt, int32, KoalaCallsiteKey, KoalaCallsiteKeys, Observable, ObservableHandler, refEqual, uint32 } from "@koalaui/common"
+import { className, int32, KoalaCallsiteKey, KoalaCallsiteKeys, Observable, ObservableHandler, refEqual, uint32 } from "@koalaui/common"
 import { Dependency, ScopeToStates, StateToScopes } from "./Dependency"
 import { Disposable, disposeContent, disposeContentBackward } from "./Disposable"
 import { Changes, Journal } from "./Journal"
@@ -21,7 +21,6 @@ import { markableQueue } from "../common/MarkableQueue"
 import { RuntimeProfiler } from "../common/RuntimeProfiler"
 import { IncrementalNode } from "../tree/IncrementalNode"
 import { ReadonlyTreeNode } from "../tree/ReadonlyTreeNode"
-import { GlobalStateManager } from "./GlobalStateManager"
 import { ReadableState as State, StateContext as StateContextBase, IncrementalScope } from 'arkui.incremental.runtime.state';
 
 export const CONTEXT_ROOT_SCOPE = "ohos.koala.context.root.scope"
@@ -82,10 +81,10 @@ export interface MutableState<Value> extends Disposable, State<Value> {
  * Individual mutable state, wrapping an array of elements with the specified type.
  */
 export interface ArrayState<Item> extends State<ReadonlyArray<Item>> {
-    length: int
-    at(index: int): Item
-    get(index: int): Item
-    set(index: int, item: Item): void
+    length: int32
+    at(index: int32): Item
+    get(index: int32): Item
+    set(index: int32, item: Item): void
     copyWithin(target: number, start: number, end?: number): Array<Item>
     fill(value: Item, start?: number, end?: number): Array<Item>
     pop(): Item | undefined
@@ -93,7 +92,7 @@ export interface ArrayState<Item> extends State<ReadonlyArray<Item>> {
     reverse(): Array<Item>
     shift(): Item | undefined
     sort(comparator?: (a: Item, b: Item) => number): Array<Item>
-    splice(start: int, deleteCount: int | undefined, ...items: Item[]): Array<Item>
+    splice(start: int32, deleteCount: int32 | undefined, ...items: Item[]): Array<Item>
     unshift(...items: Item[]): number
 }
 
@@ -204,6 +203,7 @@ interface ManagedScope extends Disposable, Dependency, ReadonlyTreeNode {
     forceCompleteRerender(): void
     hasDependencies(): boolean
     readonly id: KoalaCallsiteKey
+    readonly disabledStateUpdates: boolean
     readonly node: IncrementalNode | undefined
     readonly nodeRef: IncrementalNode | undefined
     readonly once: boolean
@@ -388,22 +388,12 @@ export class StateImpl<Value> implements Observable, ManagedState, MutableState<
         if (this.manager?.frozen == true) str += ",frozen"
         return str + "=" + this.value
     }
-
-    checkUIThreadAccess(): void {
-        const manager = this.manager
-        if (manager && manager.isDebugMode) {
-            const local = GlobalStateManager.GetLocalManager();
-            if (manager !== local) {
-                throw new Error('Used a state variable that was created externally');
-            }
-        }
-    }
 }
 
 class ArrayStateImpl<Item> extends StateImpl<Array<Item>> implements ArrayState<Item> {
     constructor(manager: StateManagerImpl, initial: Array<Item>, global: boolean, equivalent?: Equivalent<Item>) {
         super(manager, initial, global, (oldArray: Array<Item>, newArray: Array<Item>): boolean => {
-            let i: int = oldArray.length
+            let i: int32 = oldArray.length
             if (i != newArray.length) return false
             while (0 < i--) {
                 if (isModified<Item>(oldArray[i], newArray[i], equivalent)) return false
@@ -418,24 +408,24 @@ class ArrayStateImpl<Item> extends StateImpl<Array<Item>> implements ArrayState<
         this.myModified = modified
     }
 
-    get length(): int {
+    get length(): int32 {
         return this.value.length
     }
 
-    set length(value: int) {
+    set length(value: int32) {
         this.mutable.length = value
     }
 
-    at(index: int): Item {
+    at(index: int32): Item {
         const array = this.value
         return array[index < 0 ? array.length + index : index]
     }
 
-    get(index: int): Item {
+    get(index: int32): Item {
         return this.value[index]
     }
 
-    set(index: int, item: Item): void {
+    set(index: int32, item: Item): void {
         this.mutable[index] = item
     }
 
@@ -467,7 +457,7 @@ class ArrayStateImpl<Item> extends StateImpl<Array<Item>> implements ArrayState<
         return this.mutable.sort(comparator)
     }
 
-    splice(start: int, deleteCount: int | undefined, ...items: Item[]): Array<Item> {
+    splice(start: int32, deleteCount: int32 | undefined, ...items: Item[]): Array<Item> {
         const array = this.mutable
         return array.splice(start, deleteCount ?? array.length, ...items)
     }
@@ -621,8 +611,7 @@ export class StateManagerImpl implements StateManager {
         let modified: uint32 = 0
         // try to update snapshot for every state, except for parameter states
         const changes = this.journal.getChanges()
-        // Improve: use compat here (toInt cast)
-        const created = float64ToInt(this.statesCreated.size) // amount of created states to update
+        const created = this.statesCreated.size // amount of created states to update
         if (created > 0) {
             const it = this.statesCreated.keys()
             while (true) {
@@ -636,7 +625,7 @@ export class StateManagerImpl implements StateManager {
         RuntimeProfiler.instance?.updateSnapshot(modified, created)
         // recompute dirty scopes only
         while (this.dirtyScopes.size > 0) {
-            const scopes = Array_from_set<ManagedScope>(this.dirtyScopes)
+            const scopes = Array.from<ManagedScope>(this.dirtyScopes)
             this.dirtyScopes.clear()
             const length = scopes.length
             for (let i = 0; i < length; i++) {
@@ -956,6 +945,19 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
         return this._id
     }
 
+    get disabledStateUpdates(): boolean {
+        const node = this.node
+        if (!node) { return false } // enabled for all computable states
+        if (!this.parentScope && !this.myValue) { return false } // enabled for all uninitialized updattable nodes
+        const manager = this.manager
+        if (!manager) { return false } // disposed
+        const scope = manager.current
+        manager.current = this
+        const disabled = node.disabledStateUpdates
+        manager.current = scope
+        return disabled
+    }
+
     get node(): IncrementalNode | undefined {
         return this._node
     }
@@ -1103,7 +1105,7 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
 
     get unchanged(): boolean {
         if (!this.parentScope) this.dependencies?.register(this.manager?.dependency)
-        if (this.recomputeNeeded && !(this.node?.disabledStateUpdates ?? false)) {
+        if (this.recomputeNeeded && !this.disabledStateUpdates) {
             this.incremental = undefined
             this.nodeCount = 0
             const manager = this.manager
@@ -1171,13 +1173,17 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
     private invalidate() {
         const current = this.manager?.current // parameters can update snapshot during recomposition
         let scope: ManagedScope = this
+        if (!current && scope.node && scope.parent) {
+            // invalidate parent scope if node can disable state updates
+            scope.recomputeNeeded = false
+        }
         while (true) {
             if (scope === current) break // parameters should not invalidate whole hierarchy
             if (!scope.recomputeNeeded) RuntimeProfiler.instance?.invalidation()
             else if (current === undefined) break // all parent scopes were already invalidated
             scope.recomputeNeeded = true
-            if (scope.node?.disabledStateUpdates) {
-                break // do not invalidate parent scope
+            if (!current && scope.disabledStateUpdates) {
+                break // do not invalidate parent scope if disabled
             }
             const parent = scope.parent
             if (parent) {
