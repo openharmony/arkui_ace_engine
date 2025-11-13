@@ -31,6 +31,13 @@ void OnStateStyleChangeImpl(Ark_NativePointer node,
     auto weakNode = AceType::WeakClaim(frameNode);
     auto onStateStyleChangeLambda = [arkCallback = CallbackHelper(*stateStyleChange), node = weakNode](
         uint64_t currentState) {
+        auto frameNode = node.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        if (currentState == UI_STATE_FOCUSED) {
+            auto focusHub = frameNode->GetFocusHub();
+            CHECK_NULL_VOID(focusHub);
+            focusHub->PaintFocusStateToRenderContext();
+        }
         PipelineContext::SetCallBackNode(node);
         int state = (int)currentState;
         Ark_Int32 arkState = Converter::ArkValue<Ark_Int32>(state);
