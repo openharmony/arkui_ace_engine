@@ -60,7 +60,7 @@ public:
                 cbList.emplace_back(ref);
             }
         }
-        HILOGI("AceDrag, OnANICallback start cbList.size() = %{public}u.", cbList.size());
+        HILOGI("AceDrag, OnANICallback start cbList.size() = %{public}lu.", cbList.size());
         for (auto& callbackRef : cbList) {
             ani_ref fnReturnVal;
             env_->FunctionalObject_Call(static_cast<ani_fn_object>(callbackRef), 1, &resultRef, &fnReturnVal);
