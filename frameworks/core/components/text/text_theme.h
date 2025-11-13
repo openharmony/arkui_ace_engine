@@ -197,6 +197,7 @@ public:
     {
         return isSupportAskCelia_;
     }
+
 protected:
     TextTheme() = default;
     TextStyle textStyle_;

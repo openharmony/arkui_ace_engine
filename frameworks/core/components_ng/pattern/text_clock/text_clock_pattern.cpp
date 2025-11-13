@@ -135,8 +135,8 @@ void TextClockPattern::OnDetachFromMainTree()
     THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree);
 }
 
-void TextClockPattern::UpdateTextLayoutProperty(RefPtr<TextClockLayoutProperty>& layoutProperty,
-    RefPtr<TextLayoutProperty>& textLayoutProperty, const TextStyle& textStyleTheme)
+void TextClockPattern::UpdateTextLayoutProperty(
+    RefPtr<TextClockLayoutProperty>& layoutProperty, RefPtr<TextLayoutProperty>& textLayoutProperty)
 {
     if (layoutProperty->GetFontSize().has_value()) {
         textLayoutProperty->UpdateFontSize(layoutProperty->GetFontSize().value());
@@ -144,9 +144,9 @@ void TextClockPattern::UpdateTextLayoutProperty(RefPtr<TextClockLayoutProperty>&
     if (layoutProperty->GetFontWeight().has_value()) {
         textLayoutProperty->UpdateFontWeight(layoutProperty->GetFontWeight().value());
     }
-    textLayoutProperty->UpdateTextColor(layoutProperty->GetTextColor().has_value()
-                                            ? layoutProperty->GetTextColor().value()
-                                            : textStyleTheme.GetTextColor());
+    if (layoutProperty->GetTextColor().has_value()) {
+        textLayoutProperty->UpdateTextColor(layoutProperty->GetTextColor().value());
+    }
     if (layoutProperty->GetFontFamily().has_value() && !layoutProperty->GetFontFamily().value().empty()) {
         textLayoutProperty->UpdateFontFamily(layoutProperty->GetFontFamily().value());
     }
@@ -159,23 +159,6 @@ void TextClockPattern::UpdateTextLayoutProperty(RefPtr<TextClockLayoutProperty>&
     if (layoutProperty->GetFontFeature().has_value()) {
         textLayoutProperty->UpdateFontFeature(layoutProperty->GetFontFeature().value());
     }
-}
-
-bool TextClockPattern::OnThemeScopeUpdate(int32_t themeScopeId)
-{
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    auto textNode = GetTextNode();
-    CHECK_NULL_RETURN(textNode, false);
-    auto textClockProperty = host->GetLayoutProperty<TextClockLayoutProperty>();
-    CHECK_NULL_RETURN(textClockProperty, false);
-
-    if (!textClockProperty->HasTextColor()) {
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
-        textNode->MarkModifyDone();
-        OnModifyDone();
-    }
-    return false;
 }
 
 void TextClockPattern::OnModifyDone()
@@ -193,14 +176,8 @@ void TextClockPattern::OnModifyDone()
     CHECK_NULL_VOID(textLayoutProperty);
     auto textClockProperty = host->GetLayoutProperty<TextClockLayoutProperty>();
     CHECK_NULL_VOID(textClockProperty);
-
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto textTheme = pipeline->GetTheme<TextClockTheme>(host->GetThemeScopeId());
-    CHECK_NULL_VOID(textTheme);
-
     textLayoutProperty->UpdateTextOverflow(TextOverflow::NONE);
-    UpdateTextLayoutProperty(textClockProperty, textLayoutProperty, textTheme->GetTextStyleClock());
+    UpdateTextLayoutProperty(textClockProperty, textLayoutProperty);
     hourWest_ = GetHoursWest();
     delayTask_.Cancel();
     UpdateTimeText();
@@ -922,13 +899,13 @@ void TextClockPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<TextClockTheme>();
+    auto theme = pipeline->GetTheme<TextTheme>();
     CHECK_NULL_VOID(theme);
     auto pops = host->GetLayoutProperty<TextClockLayoutProperty>();
     CHECK_NULL_VOID(pops);
     
     if (!pops->HasTextColorSetByUser() || (pops->HasTextColorSetByUser() && !pops->GetTextColorSetByUserValue())) {
-        UpdateTextClockColor(theme->GetTextStyleClock().GetTextColor(), false);
+        UpdateTextClockColor(theme->GetTextStyle().GetTextColor(), false);
     }
 }
 
