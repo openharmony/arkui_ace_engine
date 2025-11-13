@@ -3413,7 +3413,7 @@ void callManagedCallback_PreparedInfo_VoidSync(Ark_VMContext vmContext, Ark_Int3
     PreparedInfo_serializer::write(argsSerializer, value0);
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
 }
-void callManagedCallback_RangeUpdate(Ark_Int32 resourceId, Ark_Int32 start, Ark_Int32 end)
+void callManagedCallback_RangeUpdate(Ark_Int32 resourceId, Ark_Int32 start, Ark_Int32 end, Ark_Int32 cacheStart, Ark_Int32 cacheEnd, Ark_Boolean isLoop)
 {
     CallbackBuffer callbackBuffer = {{}, {}};
     const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
@@ -3423,9 +3423,12 @@ void callManagedCallback_RangeUpdate(Ark_Int32 resourceId, Ark_Int32 start, Ark_
     argsSerializer.writeInt32(resourceId);
     argsSerializer.writeInt32(start);
     argsSerializer.writeInt32(end);
+    argsSerializer.writeInt32(cacheStart);
+    argsSerializer.writeInt32(cacheEnd);
+    argsSerializer.writeBoolean(isLoop);
     enqueueCallback(10, &callbackBuffer);
 }
-void callManagedCallback_RangeUpdateSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Int32 start, Ark_Int32 end)
+void callManagedCallback_RangeUpdateSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Int32 start, Ark_Int32 end, Ark_Int32 cacheStart, Ark_Int32 cacheEnd, Ark_Boolean isLoop)
 {
     uint8_t dataBuffer[4096];
     SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&dataBuffer, sizeof(dataBuffer), nullptr);
@@ -3434,6 +3437,9 @@ void callManagedCallback_RangeUpdateSync(Ark_VMContext vmContext, Ark_Int32 reso
     argsSerializer.writeInt32(resourceId);
     argsSerializer.writeInt32(start);
     argsSerializer.writeInt32(end);
+    argsSerializer.writeInt32(cacheStart);
+    argsSerializer.writeInt32(cacheEnd);
+    argsSerializer.writeBoolean(isLoop);
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
 }
 void callManagedCallback_RefreshStatus_Void(Ark_Int32 resourceId, Ark_RefreshStatus state)

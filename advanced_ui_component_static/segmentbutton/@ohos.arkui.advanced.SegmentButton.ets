@@ -596,7 +596,7 @@ struct MultiSelectBackground {
 
   build() {
     Row({ space: 1.0 } as RowOptions) {
-      ForEach(this.optionsArray._wrappedArray as Array<SegmentButtonItemOptions>, (_: SegmentButtonItemOptions, index: number) => {
+      ForEach(this.optionsArray._wrappedArray as Array<SegmentButtonItemOptions>, (_: SegmentButtonItemOptions, index: int) => {
         if (index < MAX_ITEM_COUNT) {
           Stack()
             .direction(this.options.direction)
@@ -693,7 +693,7 @@ struct MultiSelectItemArray {
 
   build() {
     Row({ space: 1.0 } as RowOptions) {
-      ForEach(this.optionsArray._wrappedArray as Array<SegmentButtonItemOptions>, (_: SegmentButtonItemOptions, index: number) => {
+      ForEach(this.optionsArray._wrappedArray as Array<SegmentButtonItemOptions>, (_: SegmentButtonItemOptions, index: int) => {
         if (index < MAX_ITEM_COUNT) {
           Stack()
             .direction(this.options.direction)
@@ -903,7 +903,7 @@ struct PressAndHoverEffectArray {
 
   build() {
     Row({ space: 1.0 } as RowOptions) {
-      ForEach(this.buttons._wrappedArray as Array<SegmentButtonItemOptions>, (item: SegmentButtonItemOptions, index: number) => {
+      ForEach(this.buttons._wrappedArray as Array<SegmentButtonItemOptions>, (item: SegmentButtonItemOptions, index: int) => {
         if (index < MAX_ITEM_COUNT) {
           Stack() {
             PressAndHoverEffect({
@@ -1165,7 +1165,7 @@ struct SegmentButtonItemArrayComponent {
     if (this.optionsArray !== undefined && this.optionsArray._wrappedArray.length > 1.0) {
       Row({ space: 1.0 } as RowOptions) {
         ForEach(this.optionsArray._wrappedArray as Array<SegmentButtonItemOptions>,
-          (item: SegmentButtonItemOptions, index: number) => {
+          (item: SegmentButtonItemOptions, index: int) => {
             if (index < MAX_ITEM_COUNT) {
               Button({} as ButtonOptions) {
                 SegmentButtonItem({
@@ -1314,7 +1314,7 @@ struct SegmentButtonItemArrayComponent {
                 }
               })
             }
-          },(item:SegmentButtonItemOptions,index:number)=>JSON.stringify(item) + index)
+          },(item:SegmentButtonItemOptions,index: int)=>JSON.stringify(item) + index)
       }
       .id("SegmentButtonItemArrayComponent")
       .direction(this.options.direction)

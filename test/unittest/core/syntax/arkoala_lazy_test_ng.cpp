@@ -60,6 +60,7 @@ public:
         for (int i = 0; i < totalCount; ++i) {
             lazyNode->GetFrameChildByIndex(i, true, false, true);
         }
+        lazyNode->SetTotalCount(totalCount);
     }
 
     RefPtr<TestUINode> CreateTestUINode(int32_t nodeId)
@@ -90,7 +91,8 @@ public:
         uiNode->AddChild(columnNode);
         return uiNode;
     };
-    ArkoalaLazyNode::UpdateRangeCb updateRangeCb_ = [](int32_t start, int32_t end) {};
+    ArkoalaLazyNode::UpdateRangeCb updateRangeCb_ = [](
+        int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool isLoop) {};
 };
 
 const int32_t INDEX_1 = 1;
@@ -113,9 +115,12 @@ TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest001)
     auto lazyNode = AceType::MakeRefPtr<ArkoalaLazyNode>(GetNextId());
     EXPECT_EQ(lazyNode->GetTag(), V2::JS_LAZY_FOR_EACH_ETS_TAG);
     lazyNode->SetCallbacks([](int32_t idx) { return ColumnModelNG::CreateFrameNode(-1); },
-        [](int32_t start, int32_t end) {
+        [](int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool isLoop) {
             EXPECT_EQ(start, INDEX_8);
             EXPECT_EQ(end, INDEX_8);
+            EXPECT_EQ(cacheStart, 0);
+            EXPECT_EQ(cacheEnd, 0);
+            EXPECT_FALSE(isLoop);
         });
     lazyNode->SetTotalCount(TOTAL_COUNT);
     EXPECT_EQ(lazyNode->FrameCount(), TOTAL_COUNT);
@@ -173,7 +178,8 @@ TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest002)
         EXPECT_EQ(uiNode->GetChildren().size(), 1);
         return uiNode;
     };
-    ArkoalaLazyNode::UpdateRangeCb updateRangeCb = [](int32_t start, int32_t end) {};
+    ArkoalaLazyNode::UpdateRangeCb updateRangeCb = [](
+        int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool isLoop) {};
     lazyNode->SetCallbacks(createItemCb, updateRangeCb);
 
     /**
@@ -205,7 +211,8 @@ TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest003)
     ArkoalaLazyNode::CreateItemCb createItemCb = [this](int32_t idx) {
         return ColumnModelNG::CreateFrameNode(GetNextId());
     };
-    ArkoalaLazyNode::UpdateRangeCb updateRangeCb = [](int32_t start, int32_t end) {};
+    ArkoalaLazyNode::UpdateRangeCb updateRangeCb = [](
+        int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool isLoop) {};
     lazyNode->SetCallbacks(createItemCb, updateRangeCb);
     lazyNode->SetTotalCount(TOTAL_COUNT);
 
@@ -248,21 +255,6 @@ TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest005)
     CreateChildren(lazyNode, TOTAL_COUNT);
     lazyNode->OnDataChange(0, TOTAL_COUNT, UINode::NotificationType::START_CHANGE_POSITION);
     EXPECT_EQ(lazyNode->node4Index_.Size(), 0);
-}
-
-/**
- * @tc.name: ArkoalaLazyNodeTest006
- * @tc.desc: Test ArkoalaLazyNode IsNodeInRange.
- * @tc.type: FUNC
- */
-TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest006)
-{
-    auto lazyNode = CreateLazyForEachNode(GetNextId());
-    RangeType range = { INDEX_1, INDEX_9 };
-    bool ret = lazyNode->IsNodeInRange(0, range);
-    EXPECT_FALSE(ret);
-    ret = lazyNode->IsNodeInRange(INDEX_8, range);
-    EXPECT_TRUE(ret);
 }
 
 /**
@@ -417,6 +409,15 @@ TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest015)
     lazyNode->PostIdleTask();
     EXPECT_EQ(lazyNode->children_.size(), 0);
     EXPECT_TRUE(lazyNode->postUpdateTaskHasBeenScheduled_);
+}
+
+TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest016)
+{
+    auto lazyNode = CreateLazyForEachNode(GetNextId());
+    int32_t totalCount = 50;
+    CreateChildren(lazyNode, totalCount);
+    lazyNode->BuildAllChildren();
+    EXPECT_EQ(lazyNode->children_.size(), totalCount);
 }
 
 /**

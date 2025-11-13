@@ -985,6 +985,8 @@ typedef struct Array_MouseButton Array_MouseButton;
 typedef struct Opt_Array_MouseButton Opt_Array_MouseButton;
 typedef struct Array_NativeEmbedParamItem Array_NativeEmbedParamItem;
 typedef struct Opt_Array_NativeEmbedParamItem Opt_Array_NativeEmbedParamItem;
+typedef struct Array_NativePointer Array_NativePointer;
+typedef struct Opt_Array_NativePointer Opt_Array_NativePointer;
 typedef struct Array_NavDestinationTransition Array_NavDestinationTransition;
 typedef struct Opt_Array_NavDestinationTransition Opt_Array_NavDestinationTransition;
 typedef struct Array_NavigationMenuItem Array_NavigationMenuItem;
@@ -9181,6 +9183,15 @@ typedef struct Opt_Array_NativeEmbedParamItem {
     Ark_Tag tag;
     Array_NativeEmbedParamItem value;
 } Opt_Array_NativeEmbedParamItem;
+typedef struct Array_NativePointer {
+    /* kind: ContainerType */
+    Ark_NativePointer* array;
+    Ark_Int32 length;
+} Array_NativePointer;
+typedef struct Opt_Array_NativePointer {
+    Ark_Tag tag;
+    Array_NativePointer value;
+} Opt_Array_NativePointer;
 typedef struct Array_NavDestinationTransition {
     /* kind: ContainerType */
     Ark_NavDestinationTransition* array;
@@ -11021,8 +11032,8 @@ typedef struct Opt_Callback_PreparedInfo_Void {
 typedef struct Callback_RangeUpdate {
     /* kind: Callback */
     Ark_CallbackResource resource;
-    void (*call)(const Ark_Int32 resourceId, const Ark_Int32 start, const Ark_Int32 end);
-    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 start, const Ark_Int32 end);
+    void (*call)(const Ark_Int32 resourceId, const Ark_Int32 start, const Ark_Int32 end, const Ark_Int32 cacheStart, const Ark_Int32 cacheEnd, const Ark_Boolean isLoop);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 start, const Ark_Int32 end, const Ark_Int32 cacheStart, const Ark_Int32 cacheEnd, const Ark_Boolean isLoop);
 } Callback_RangeUpdate;
 typedef struct Opt_Callback_RangeUpdate {
     Ark_Tag tag;
@@ -25979,6 +25990,13 @@ typedef struct GENERATED_ArkUIFocusControllerAccessor {
     void (*requestFocus)(const Ark_String* key);
 } GENERATED_ArkUIFocusControllerAccessor;
 
+typedef struct GENERATED_ArkUIForEachOpsAccessor {
+    void (*SyncOnMoveOps)(Ark_NativePointer node,
+                          const Array_NativePointer* additionalChild,
+                          const Opt_OnMoveHandler* onMoveOps,
+                          const Opt_ItemDragEventHandler* onMoveDragEventOps);
+} GENERATED_ArkUIForEachOpsAccessor;
+
 typedef struct GENERATED_ArkUIFrameNodeExtenderAccessor {
     Ark_NativePointer (*constructorFrameNode)();
     Ark_NativePointer (*getDestroy)();
@@ -28496,6 +28514,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIFileSelectorResultAccessor* (*getFileSelectorResultAccessor)();
     const GENERATED_ArkUIFocusAxisEventAccessor* (*getFocusAxisEventAccessor)();
     const GENERATED_ArkUIFocusControllerAccessor* (*getFocusControllerAccessor)();
+    const GENERATED_ArkUIForEachOpsAccessor* (*getForEachOpsAccessor)();
     const GENERATED_ArkUIFrameNodeExtenderAccessor* (*getFrameNodeExtenderAccessor)();
     const GENERATED_ArkUIFrictionMotionAccessor* (*getFrictionMotionAccessor)();
     const GENERATED_ArkUIFullScreenExitHandlerAccessor* (*getFullScreenExitHandlerAccessor)();

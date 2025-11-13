@@ -398,7 +398,7 @@ struct SelectionMenuComponent {
   IconPanel() {
     Flex({ wrap: FlexWrap.Wrap }) {
       if (this.editorMenuOptions) {
-        ForEach(this.editorMenuOptions!, (item: EditorMenuOptions, index: number) => {
+        ForEach(this.editorMenuOptions!, (item: EditorMenuOptions, index: int) => {
           Button("") {
             if (item.symbolStyle !== undefined) {
               SymbolGlyph()
@@ -586,7 +586,7 @@ struct SelectionMenuComponent {
                 this.showExpandedMenuOptions = true
               })
           } else if (this.showExpandedMenuOptions && this.expandedMenuOptions && this.expandedMenuOptions!.length > 0) {
-            ForEach(this.expandedMenuOptions!, (expandedMenuOptionItem: ExpandedMenuOptions, index: number) => {
+            ForEach(this.expandedMenuOptions!, (expandedMenuOptionItem: ExpandedMenuOptions, index: int) => {
               MenuItem(expandedMenuOptionItem as MenuItemOptions)
                 .height(this.fontScale > MAX_FONT_STANDARD ? 'auto' : this.theme.buttonSize)
                 .borderRadius(this.theme.iconBorderRadius)

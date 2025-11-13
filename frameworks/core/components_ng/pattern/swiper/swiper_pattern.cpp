@@ -56,6 +56,7 @@
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
+#include "core/components_ng/syntax/arkoala_lazy_node.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -5560,10 +5561,13 @@ void SwiperPattern::SetLazyLoadIsLoop() const
         if (repeatVirtualNode) {
             repeatVirtualNode->SetIsLoop(isLoop);
         }
-
         auto repeatVirtualNode2 = AceType::DynamicCast<RepeatVirtualScroll2Node>(targetNode.value());
         if (repeatVirtualNode2) {
             repeatVirtualNode2->SetIsLoop(isLoop);
+        }
+        auto arkoalaLazyNode = AceType::DynamicCast<ArkoalaLazyNode>(targetNode.value());
+        if (arkoalaLazyNode) {
+            arkoalaLazyNode->SetIsLoop(isLoop);
         }
     }
 }

@@ -4034,6 +4034,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _FocusController_requestFocus(key: KStringPtr): void
     @ani.unsafe.Direct
+    native static _ForEachOps_SyncOnMoveOps(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _FrameNodeExtender_constructorFrameNode(): KPointer
     @ani.unsafe.Direct
     native static _FrameNodeExtender_getDestroy(): KPointer

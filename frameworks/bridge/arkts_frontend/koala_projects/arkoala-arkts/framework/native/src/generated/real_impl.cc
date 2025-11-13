@@ -13036,6 +13036,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     } // FocusControllerAccessor
+    namespace ForEachOpsAccessor {
+    void SyncOnMoveOpsImpl(Ark_NativePointer node,
+                           const Array_NativePointer* additionalChild,
+                           const Opt_OnMoveHandler* onMoveOps,
+                           const Opt_ItemDragEventHandler* onMoveDragEventOps)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    } // ForEachOpsAccessor
     namespace FrameNodeExtenderAccessor {
     Ark_NativePointer ConstructorFrameNodeImpl()
     {
@@ -19561,6 +19571,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return &FocusControllerAccessorImpl;
     }
 
+    const GENERATED_ArkUIForEachOpsAccessor* GetForEachOpsAccessor()
+    {
+        static const GENERATED_ArkUIForEachOpsAccessor ForEachOpsAccessorImpl {
+            ForEachOpsAccessor::SyncOnMoveOpsImpl,
+        };
+        return &ForEachOpsAccessorImpl;
+    }
+
     const GENERATED_ArkUIFrameNodeExtenderAccessor* GetFrameNodeExtenderAccessor()
     {
         static const GENERATED_ArkUIFrameNodeExtenderAccessor FrameNodeExtenderAccessorImpl {
@@ -22083,6 +22101,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetFileSelectorResultAccessor,
             GetFocusAxisEventAccessor,
             GetFocusControllerAccessor,
+            GetForEachOpsAccessor,
             GetFrameNodeExtenderAccessor,
             GetFrictionMotionAccessor,
             GetFullScreenExitHandlerAccessor,

@@ -15,64 +15,13 @@
 
 #include <cstdint>
 
-#include "arkoala_api_generated.h"
-#include "ui/base/utils/utils.h"
-
-#include "core/components_ng/base/ui_node.h"
-#include "base/utils/utils.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/utility/callback_helper.h"
-#include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "core/components_ng/syntax/arkoala_for_each_node.h"
 #include "core/components_ng/syntax/arkoala_lazy_node.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LazyForEachOpsAccessor {
-void SyncItemDragEvent(
-    ArkoalaForEachNode* forEachNode, const Opt_ItemDragEventHandler* onMoveDragEventOps)
-{
-    std::function<void(int32_t)> onLongPressCallback;
-    std::function<void(int32_t)> onDragStartCallback;
-    std::function<void(int32_t, int32_t)> onMoveThroughCallback;
-    std::function<void(int32_t)> onDropCallback;
-    auto onMoveDragEventOpt = Converter::GetOptPtr(onMoveDragEventOps);
-    if (!onMoveDragEventOpt) {
-        forEachNode->SetItemDragEvent(nullptr, nullptr, nullptr, nullptr);
-        return;
-    }
-    auto onLongPressOpt = Converter::OptConvert<Callback_Number_Void>(onMoveDragEventOpt->onLongPress);
-    auto onDragStartOpt = Converter::OptConvert<Callback_Number_Void>(onMoveDragEventOpt->onDragStart);
-    auto onMoveThroughOpt = Converter::OptConvert<OnMoveHandler>(onMoveDragEventOpt->onMoveThrough);
-    auto onDropOpt = Converter::OptConvert<Callback_Number_Void>(onMoveDragEventOpt->onDrop);
-    if (onLongPressOpt) {
-        onLongPressCallback = [arkCallback = CallbackHelper(*onLongPressOpt)](int32_t index) {
-            auto arkIndex = Converter::ArkValue<Ark_Number>(index);
-            arkCallback.Invoke(arkIndex);
-        };
-    }
-    if (onDragStartOpt) {
-        onDragStartCallback = [arkCallback = CallbackHelper(*onDragStartOpt)](int32_t index) {
-            auto arkIndex = Converter::ArkValue<Ark_Number>(index);
-            arkCallback.Invoke(arkIndex);
-        };
-    }
-    if (onMoveThroughOpt) {
-        onMoveThroughCallback = [arkCallback = CallbackHelper(*onMoveThroughOpt)](int32_t from, int32_t to) {
-            auto arkFrom = Converter::ArkValue<Ark_Number>(from);
-            auto arkTo = Converter::ArkValue<Ark_Number>(to);
-            arkCallback.Invoke(arkFrom, arkTo);
-        };
-    }
-    if (onDropOpt) {
-        onDropCallback = [arkCallback = CallbackHelper(*onDropOpt)](int32_t index) {
-            auto arkIndex = Converter::ArkValue<Ark_Number>(index);
-            arkCallback.Invoke(arkIndex);
-        };
-    }
-    forEachNode->SetItemDragEvent(std::move(onLongPressCallback), std::move(onDragStartCallback),
-        std::move(onMoveThroughCallback), std::move(onDropCallback));
-}
 void SyncItemDragEvent(
     ArkoalaLazyNode* lazyNode, const Opt_ItemDragEventHandler* onMoveDragEventOps)
 {
@@ -137,33 +86,13 @@ void SyncImpl(Ark_NativePointer node,
 
     lazyNode->SetTotalCount(totalCount);
     lazyNode->SetCallbacks(
-        [callback = CallbackHelper(*creator)](
-            int32_t index) { return AceType::DynamicCast<UINode>(callback.BuildSync(index)); },
-        [cb = CallbackHelper(*updater)](int32_t start, int32_t end) { cb.InvokeSync(start, end); });
-}
-void SyncOnMoveOpsToForEach(Ark_NativePointer node,
-                            const Callback_OnMoveFromTo* onMoveFromToOps,
-                            const Opt_OnMoveHandler* onMoveOps,
-                            const Opt_ItemDragEventHandler* onMoveDragEventOps)
-{
-    auto* uiNode = reinterpret_cast<UINode*>(node);
-    CHECK_NULL_VOID(uiNode && onMoveFromToOps);
-    ArkoalaForEachNode* forEachNode = AceType::DynamicCast<ArkoalaForEachNode>(uiNode);
-    CHECK_NULL_VOID(forEachNode);
-    auto onMoveOpt = Converter::OptConvert<OnMoveHandler>(*onMoveOps);
-    if (!onMoveOpt) {
-        // enable user to disable onMove callback.
-        forEachNode->SetOnMove(nullptr);
-        forEachNode->SetItemDragEvent(nullptr, nullptr, nullptr, nullptr);
-        return;
-    }
-    forEachNode->SetOnMove([callback = CallbackHelper(*onMoveOpt)](int32_t from, int32_t to) {
-        auto arkFrom = Converter::ArkValue<Ark_Number>(from);
-        auto arkTo = Converter::ArkValue<Ark_Number>(to);
-        callback.InvokeSync(arkFrom, arkTo);
-    });
-    // set drag event callback
-    SyncItemDragEvent(forEachNode, onMoveDragEventOps);
+        [callback = CallbackHelper(*creator)](int32_t index) {
+            return AceType::DynamicCast<UINode>(callback.BuildSync(index));
+        },
+        [cb = CallbackHelper(*updater)](
+            int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool isLoop) {
+            cb.InvokeSync(start, end, cacheStart, cacheEnd, isLoop);
+        });
 }
 void SyncOnMoveOpsImpl(Ark_NativePointer node,
                        const Callback_OnMoveFromTo* onMoveFromToOps,
@@ -173,10 +102,7 @@ void SyncOnMoveOpsImpl(Ark_NativePointer node,
     auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(uiNode && onMoveFromToOps);
     ArkoalaLazyNode* lazyNode = AceType::DynamicCast<ArkoalaLazyNode>(uiNode);
-    if (!lazyNode) {
-        SyncOnMoveOpsToForEach(node, onMoveFromToOps, onMoveOps, onMoveDragEventOps);
-        return;
-    }
+    CHECK_NULL_VOID(lazyNode);
     auto onMoveOpt = Converter::OptConvert<OnMoveHandler>(*onMoveOps);
     if (!onMoveOpt) {
         // enable user to disable onMove callback.
