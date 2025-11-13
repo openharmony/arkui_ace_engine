@@ -2378,8 +2378,11 @@ void SetOpacityImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto result = value ? Converter::OptConvert<float>(*value) : std::nullopt;
-    ViewAbstractModelStatic::SetOpacity(frameNode, result);
+    auto opacityOpt = Converter::OptConvertPtr<float>(value);
+    if (opacityOpt) {
+        *opacityOpt = std::clamp(*opacityOpt, 0.0f, 1.0f);
+    }
+    ViewAbstractModelStatic::SetOpacity(frameNode, opacityOpt);
 }
 void SetBorderImpl(Ark_NativePointer node,
                    const Opt_BorderOptions* value)

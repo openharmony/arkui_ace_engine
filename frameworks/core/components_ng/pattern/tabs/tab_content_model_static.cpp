@@ -190,6 +190,14 @@ void TabContentModelStatic::SetOnWillHide(FrameNode* node, std::function<void()>
     tabContentEventHub->SetOnWillHide(onWillHide);
 }
 
+void TabContentModelStatic::SetTabBarWithContent(FrameNode* node, const RefPtr<UINode>& content)
+{
+    CHECK_NULL_VOID(node);
+    auto frameNodePattern = node->GetPattern<TabContentPattern>();
+    CHECK_NULL_VOID(frameNodePattern);
+    frameNodePattern->SetTabBarWithContent(content);
+}
+
 RefPtr<FrameNode> TabContentModelStatic::CreateFrameNode(int32_t nodeId)
 {
     auto frameNode = TabContentNode::GetOrCreateTabContentNode(

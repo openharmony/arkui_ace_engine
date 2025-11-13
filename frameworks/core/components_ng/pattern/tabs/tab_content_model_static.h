@@ -46,6 +46,7 @@ public:
     static void SetIconStyle(FrameNode* node, const std::optional<IconStyle>& iconStyle);
     static void SetOnWillShow(FrameNode* node, std::function<void()>&& onWillShow);
     static void SetOnWillHide(FrameNode* node, std::function<void()>&& onWillHide);
+    static void SetTabBarWithContent(FrameNode* node, const RefPtr<UINode>& content);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void UpdateDefaultSymbol(RefPtr<TabTheme>& tabTheme, RefPtr<TextLayoutProperty> symbolProperty);
     static void UpdateSymbolEffect(RefPtr<TextLayoutProperty> symbolProperty, bool isActive);
