@@ -1994,6 +1994,11 @@ void AceContainer::FillAutoFillViewData(const RefPtr<NG::FrameNode>& node, RefPt
                 metadataObject->Put("username", autoFillUserName.c_str());
                 nodeInfoWrap->SetMetadata(metadataObject->ToString());
                 viewDataWrap->SetUserSelected(true);
+            } else if (nodeInfoWrap->GetAutoFillType() == AceAutoFillType::ACE_PASSWORD) {
+                auto jsonValue = JsonUtil::Create(true);
+                jsonValue->Put("username", autoFillUserName.c_str());
+                nodeInfoWrap->SetMetadata(jsonValue->ToString());
+                viewDataWrap->SetUserSelected(true);
             }
         }
         pattern->SetAutoFillUserName("");
