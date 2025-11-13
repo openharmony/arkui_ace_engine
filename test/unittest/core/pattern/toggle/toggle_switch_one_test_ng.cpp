@@ -27,6 +27,7 @@
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components/toggle/toggle_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/toggle/switch_event_hub.h"
 #include "core/components_ng/pattern/toggle/switch_modifier.h"
 #include "core/components_ng/pattern/toggle/switch_paint_method.h"

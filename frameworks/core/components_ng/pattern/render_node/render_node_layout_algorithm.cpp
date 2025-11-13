@@ -15,6 +15,7 @@
 #include "core/components_ng/pattern/render_node/render_node_layout_algorithm.h"
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/property/position_property.h"
 
 namespace OHOS::Ace::NG {
 void RenderNodeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)

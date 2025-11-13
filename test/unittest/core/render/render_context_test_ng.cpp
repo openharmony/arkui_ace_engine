@@ -23,6 +23,7 @@
 #include "core/components_ng/render/debug_boundary_painter.h"
 #include "core/components_ng/render/render_context.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 
 #undef private

@@ -37,6 +37,7 @@
 #include "core/components_ng/property/property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "test/unittest/core/base/ui_node_test_ng.h"
 

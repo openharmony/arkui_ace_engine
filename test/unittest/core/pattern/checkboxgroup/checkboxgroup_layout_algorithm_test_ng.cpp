@@ -33,6 +33,7 @@
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_layout_algorithm.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_pattern.h"
 #include "core/pipeline/base/render_node.h"

@@ -69,6 +69,7 @@
 #include "core/components/web/resource/web_delegate.h"
 #include "core/components/web/web_property.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/list/list_pattern.h"

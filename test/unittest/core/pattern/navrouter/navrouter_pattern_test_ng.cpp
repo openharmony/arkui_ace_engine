@@ -23,6 +23,7 @@
 #define protected public
 
 #include "test/mock/base/mock_pixel_map.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 #include "core/components_ng/pattern/custom/custom_node.h"

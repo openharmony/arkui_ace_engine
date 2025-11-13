@@ -30,6 +30,7 @@
 #include "test/mock/core/rosen/mock_canvas.h"
 
 #include "core/components/theme/icon_theme.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/time_picker/timepicker_column_pattern.h"
 #include "core/components_ng/pattern/time_picker/timepicker_dialog_view.h"

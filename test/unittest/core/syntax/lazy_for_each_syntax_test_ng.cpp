@@ -29,6 +29,7 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/syntax/lazy_for_each_model_ng.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"

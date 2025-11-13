@@ -22,6 +22,7 @@
 #include "ui/view/frame_node.h"
 
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/search/search_model_static.h"
 #include "core/components_ng/pattern/text/text_pattern.h"

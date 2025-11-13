@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/custom/custom_node_layout_algorithm.h"
 
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 
 namespace OHOS::Ace::NG {
 

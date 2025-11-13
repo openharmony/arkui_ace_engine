@@ -22,6 +22,7 @@
 #include "test/mock/core/render/mock_paragraph.h"
 
 #include "core/components/text_overlay/text_overlay_theme.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"

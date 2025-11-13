@@ -14,6 +14,7 @@
  */
 #include "core/components_ng/pattern/data_panel/data_panel_pattern.h"
 
+#include "core/components_ng/property/position_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {

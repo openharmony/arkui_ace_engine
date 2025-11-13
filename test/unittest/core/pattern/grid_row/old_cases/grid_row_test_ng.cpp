@@ -25,6 +25,7 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/grid_col/grid_col_layout_pattern.h"
 #include "core/components_ng/pattern/grid_col/grid_col_model_ng.h"
 #include "core/components_ng/pattern/grid_row/grid_row_layout_pattern.h"

@@ -21,7 +21,6 @@
 #include <string>
 #include <utility>
 
-#include "core/common/ace_application_info.h"
 #include "ui/properties/ng/measure_property.h"
 
 namespace OHOS::Ace::NG {

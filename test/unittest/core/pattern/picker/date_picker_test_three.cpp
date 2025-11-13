@@ -23,6 +23,7 @@
 #include "test/mock/core/rosen/mock_canvas.h"
 
 #include "core/components/theme/icon_theme.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/picker/datepicker_pattern.h"
 #undef private
 #undef protected

@@ -45,6 +45,7 @@
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_pattern.h"
 #include "core/components_ng/pattern/text/text_styles.h"
+#include "core/components_ng/property/position_property.h"
 #include "core/text/html_utils.h"
 #include "core/components_ng/pattern/text/paragraph_util.h"
 #include "core/text/text_emoji_processor.h"

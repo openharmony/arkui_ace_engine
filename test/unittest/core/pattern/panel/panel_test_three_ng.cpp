@@ -26,6 +26,7 @@
 #include "core/common/container.h"
 #include "core/components/close_icon/close_icon_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/panel/sliding_panel_event_hub.h"
 #include "core/components_ng/pattern/panel/sliding_panel_layout_algorithm.h"
 #include "core/components_ng/pattern/panel/sliding_panel_model_ng.h"

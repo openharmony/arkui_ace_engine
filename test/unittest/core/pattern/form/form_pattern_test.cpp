@@ -36,6 +36,7 @@
 #include "core/common/form_manager.h"
 #include "core/components/form/resource/form_manager_delegate.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/form/form_node.h"
 #include "core/components_ng/pattern/form/form_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"

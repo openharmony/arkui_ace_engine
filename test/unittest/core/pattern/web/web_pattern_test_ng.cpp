@@ -31,6 +31,7 @@
 #include "nweb_handler.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "oh_window_pip.h"
 #include "oh_window_comm.h"
 

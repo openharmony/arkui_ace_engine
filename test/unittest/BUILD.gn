@@ -1244,6 +1244,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor/rich_editor_select_overlay.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor/rich_editor_styled_string_controller.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor/rich_editor_undo_manager.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/render_node/render_node_layout_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor_drag/preview_menu_controller.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor_drag/rich_editor_drag_overlay_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor_drag/rich_editor_drag_paint_method.cpp",

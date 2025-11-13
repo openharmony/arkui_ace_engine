@@ -21,6 +21,7 @@
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/divider/divider_layout_algorithm.h"
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
 #include "core/components_ng/pattern/divider/divider_model_ng.h"

@@ -17,6 +17,7 @@
 
 #define private public
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components/web/resource/web_delegate.h"

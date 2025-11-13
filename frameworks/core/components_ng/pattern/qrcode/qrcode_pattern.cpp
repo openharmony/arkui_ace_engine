@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/qrcode/qrcode_pattern.h"
 
 #include "base/log/dump_log.h"
+#include "core/components_ng/property/position_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {

@@ -39,6 +39,7 @@
 #include "core/components/theme/theme.h"
 #include "core/components/web/web_event.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_node.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"

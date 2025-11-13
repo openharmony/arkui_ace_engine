@@ -20,6 +20,7 @@
 #include "frameworks/core/event/pointer_event.h"
 #include "accessibility_element_info.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "adapter/ohos/osal/want_wrap_ohos.h"
 #include "core/components_ng/pattern/ui_extension/isolated_component/isolated_pattern.h"
 #include "frameworks/core/components_ng/pattern/ui_extension/platform_pattern.h"
