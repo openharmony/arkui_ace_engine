@@ -439,6 +439,15 @@ Color ThemeManagerImpl::GetBackgroundColor() const
 
 void ThemeManagerImpl::LoadResourceThemes()
 {
+    if (MultiThreadBuildManager::IsThreadSafeNodeScope()) {
+        LoadResourceThemesMultiThread();
+        return;
+    }
+    LoadResourceThemesInner();
+}
+
+void ThemeManagerImpl::LoadResourceThemesInner()
+{
     themes_.clear();
     themeWrappersLight_.clear();
     themeWrappersDark_.clear();
