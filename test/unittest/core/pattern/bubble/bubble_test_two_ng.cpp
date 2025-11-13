@@ -1057,10 +1057,11 @@ HWTEST_F(BubbleTestTwoNg, InitBubbleArrow001, TestSize.Level1)
      */
     layoutAlgorithm->enableArrow_ = false;
     layoutAlgorithm->InitBubbleArrow(bubbleLayoutProperty, AceType::RawPtr(layoutWrapper));
-    EXPECT_EQ(layoutAlgorithm->realArrowHeight_, 0.0f);
+    // The arrow height need to be 1.0 when enableArrow_ is false.
+    EXPECT_EQ(layoutAlgorithm->realArrowHeight_, 1.0f);
     layoutAlgorithm->enableArrow_ = true;
     layoutAlgorithm->InitBubbleArrow(bubbleLayoutProperty, AceType::RawPtr(layoutWrapper));
-    EXPECT_NE(layoutAlgorithm->realArrowHeight_, 0.0f);
+    EXPECT_NE(layoutAlgorithm->realArrowHeight_, 1.0f);
 }
 
 /**
