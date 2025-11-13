@@ -96,7 +96,7 @@
  class InspetorTreeSerializeTool {
     public static stringifyNoThrow(obj: Record<string, Object>): String {
         try {
-            return JSON.stringify(obj as Object as Record<string, NullishType>);
+            return JSON.stringify(obj as Object as Record<string, Any>);
         } catch (err) {
             hilog.error(DOMAIN_ID, TAG, `InspetorTreeSerializeTool.stringify error: ${err}`);
             return '';
