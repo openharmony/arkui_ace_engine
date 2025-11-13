@@ -42,7 +42,6 @@ ohos_shared_library("movingphotoview_ani") {
 
   deps = [
     ":movingphotoview_abc_etc",
-    "${component_ext_path}/movingphoto:movingphotoview_platform",
     "$ace_root/build:libace_compatible",
     "$ace_root/frameworks/core:ace_container_scope",
     "$ace_root/interfaces/inner_api/ace:ace_uicontent",

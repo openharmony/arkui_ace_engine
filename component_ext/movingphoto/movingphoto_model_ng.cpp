@@ -20,13 +20,10 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/pipeline/pipeline_base.h"
-#include "foundation/arkui/ace_engine/frameworks/core/interfaces/arkoala/arkoala_api.h"
 
 namespace OHOS::Ace::NG {
 
 namespace {
-    const std::string NODE_CONTROLLER = "MovingPhotoController";
-    const std::string HAS_SET_OPTIONS = "HasSetMovingPhotoOptions";
 }
 
 void MovingPhotoModelNG::Create(const RefPtr<MovingPhotoController>& controller)
