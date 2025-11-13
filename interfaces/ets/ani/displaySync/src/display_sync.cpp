@@ -14,7 +14,6 @@
  */
 
 #include <ani.h>
-#include <ani_signature_builder.h>
 #include "core/components_ng/manager/display_sync/ui_display_sync.h"
 
 namespace OHOS::Ace::Ani {
@@ -36,8 +35,6 @@ const char* CLEANER_CLASS_NAME = "@ohos.graphics.displaySync.displaySync.Cleaner
 ani_ref gCleanerCls {};
 ani_field gCleanerPtrField {};
 }
-
-using namespace arkts::ani_signature;
 
 class DisplaySync final {
 public:
@@ -422,17 +419,17 @@ ani_status CacheExpectedFrameRateRange(ani_env* env)
         return ANI_ERROR;
     }
     if (ANI_OK != env->Class_FindMethod(static_cast<ani_class>(gExpectedFrameRateRangeCls),
-        Builder::BuildGetterName("min").c_str(), nullptr, &gGetMin)) {
+        "<get>min", nullptr, &gGetMin)) {
         TAG_LOGE(AceLogTag::ACE_DISPLAY_SYNC, "[ANI] Create Global ExpectedFrameRateRange gGetMin method failed");
         return ANI_ERROR;
     }
     if (ANI_OK != env->Class_FindMethod(static_cast<ani_class>(gExpectedFrameRateRangeCls),
-        Builder::BuildGetterName("max").c_str(), nullptr, &gGetMax)) {
+        "<get>max", nullptr, &gGetMax)) {
         TAG_LOGE(AceLogTag::ACE_DISPLAY_SYNC, "[ANI] Create Global ExpectedFrameRateRange gGetMax method failed");
         return ANI_ERROR;
     }
     if (ANI_OK != env->Class_FindMethod(static_cast<ani_class>(gExpectedFrameRateRangeCls),
-        Builder::BuildGetterName("expected").c_str(), nullptr, &gGetExpected)) {
+        "<get>expected", nullptr, &gGetExpected)) {
         TAG_LOGE(AceLogTag::ACE_DISPLAY_SYNC, "[ANI] Create Global ExpectedFrameRateRange gGetExpected method failed");
         return ANI_ERROR;
     }
