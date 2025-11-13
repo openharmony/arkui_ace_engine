@@ -268,6 +268,12 @@ struct MoveCaretToContentRectData {
     bool moveContent = true;
 };
 
+struct RelatedLPXInfo {
+    double lastLogicScale = 0;
+    bool hasLPXPadding = false;
+    bool initTextRectWithLPX = false;
+};
+
 class TextFieldPattern : public ScrollablePattern,
                          public TextDragBase,
                          public ValueChangeObserver,
@@ -2122,6 +2128,10 @@ private:
     void UpdateMagnifierWithFloatingCaretPos();
     bool HandleEditingEventCrossPlatform(const std::shared_ptr<TextEditingValue>& value);
     void ApplyInnerBorderColor();
+    void InitTextRect();
+    void HandleInputOperations();
+    void ReprocessAllRelatedToLPX();
+    bool HasLPXBorder();
 #if defined(ENABLE_STANDARD_INPUT)
     void UpdateCaretInfoStandard(bool forceUpdate);
 #endif
@@ -2345,6 +2355,7 @@ private:
     KeyboardFluidLightMode imeFluidLightMode_ = KeyboardFluidLightMode::NONE;
     OverflowMode lastOverflowMode_ = OverflowMode::SCROLL;
     TextOverflow lastTextOverflow_ = TextOverflow::ELLIPSIS;
+    RelatedLPXInfo lpxInfo_;
 
 #if defined(CROSS_PLATFORM)
     std::shared_ptr<TextEditingValue> editingValue_;
