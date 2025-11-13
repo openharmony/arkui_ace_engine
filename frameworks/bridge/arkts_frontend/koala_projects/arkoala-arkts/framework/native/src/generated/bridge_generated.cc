@@ -37124,6 +37124,18 @@ KInteropReturnBuffer impl_UIContextGetInfo_getNavigationInfoByUniqueId(KLong id)
         return _retSerializer.toReturnBuffer();
 }
 KOALA_INTEROP_1(UIContextGetInfo_getNavigationInfoByUniqueId, KInteropReturnBuffer, KLong)
+void impl_UIContextGetInfo_enableSwipeBack(KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto enabledValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Boolean enabledValueTempTmpBuf = {};
+        enabledValueTempTmpBuf.tag = enabledValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((enabledValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            enabledValueTempTmpBuf.value = thisDeserializer.readBoolean();
+        }
+        Opt_Boolean enabledValueTemp = enabledValueTempTmpBuf;;
+        GetAccessors()->getUIContextGetInfoAccessor()->enableSwipeBack(static_cast<Opt_Boolean*>(&enabledValueTemp));
+}
+KOALA_INTEROP_DIRECT_V2(UIContextGetInfo_enableSwipeBack, KSerializerBuffer, int32_t)
 void impl_UIExtensionProxy_send(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_UIExtensionProxy self = reinterpret_cast<Ark_UIExtensionProxy>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
