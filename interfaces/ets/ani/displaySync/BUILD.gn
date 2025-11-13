@@ -28,10 +28,7 @@ ohos_shared_library("display_sync_ani") {
   public_configs = [ ":ani_config" ]
   sources = [ "./src/display_sync.cpp" ]
   deps = [ "$ace_root/build:libace_compatible" ]
-  external_deps = [
-    "runtime_core:ani",
-    "runtime_core:ani_helpers",
-  ]
+  external_deps = [ "runtime_core:ani" ]
   part_name = "ace_engine"
   subsystem_name = "arkui"
   output_extension = "so"

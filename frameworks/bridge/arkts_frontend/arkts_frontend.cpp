@@ -15,7 +15,6 @@
 #include "bridge/arkts_frontend/arkts_frontend.h"
 
 #include <ani.h>
-#include <ani_signature_builder.h>
 #include "interfaces/inner_api/ace/constants.h"
 #include "ui/base/utils/utils.h"
 
@@ -34,9 +33,6 @@ UIContentErrorCode ArktsFrontend::RunPage(
 }
 
 namespace {
-
-using namespace arkts::ani_signature;
-
 /* copied from arkcompiler_ets_frontend vmloader.cc*/
 struct AppInfo {
     const char* className;
@@ -122,9 +118,9 @@ void RunArkoalaEventLoop(ani_env* env, ani_ref app)
         ani_error aniError;
         env->GetUnhandledError(&aniError);
         env->ResetError();
-        std::string errorMsg = GetErrorProperty(env, aniError, Builder::BuildGetterName("message").c_str());
-        std::string errorName = GetErrorProperty(env, aniError, Builder::BuildGetterName("name").c_str());
-        std::string errorStack = GetErrorProperty(env, aniError, Builder::BuildGetterName("stack").c_str());
+        std::string errorMsg = GetErrorProperty(env, aniError, "<get>message");
+        std::string errorName = GetErrorProperty(env, aniError, "<get>name");
+        std::string errorStack = GetErrorProperty(env, aniError, "<get>stack");
         LOGE("[%{public}s] Cannot load main class %{public}s, status: %{public}d, \nerrorMsg: %{public}s, \nerrorName: "
              "%{public}s, \nerrorStack: %{public}s",
             __func__, KOALA_APP_INFO.className, status, errorMsg.c_str(), errorName.c_str(), errorStack.c_str());
