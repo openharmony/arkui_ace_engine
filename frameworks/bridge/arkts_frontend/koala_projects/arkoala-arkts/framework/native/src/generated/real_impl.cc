@@ -12904,7 +12904,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
-    Ark_Position GetPositionToParentImpl(Ark_FrameNode peer)
+    Ark_Vector2 GetPositionToParentImpl(Ark_FrameNode peer)
     {
         return {};
     }

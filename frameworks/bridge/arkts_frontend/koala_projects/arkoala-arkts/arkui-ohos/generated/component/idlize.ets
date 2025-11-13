@@ -978,10 +978,10 @@ export class FrameNodeExtender {
         const returnResult : Vector2 = Vector2_serializer.read(retvalDeserializer)
         return returnResult
     }
-    static getPositionToParent_serialize(peer: FrameNode): Position {
+    static getPositionToParent_serialize(peer: FrameNode): Vector2 {
         const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getPositionToParent(extractors.toFrameNodePtr(peer))
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const returnResult : Position = Position_serializer.read(retvalDeserializer)
+        const returnResult : Vector2 = Vector2_serializer.read(retvalDeserializer)
         return returnResult
     }
     static getMeasuredSize_serialize(peer: FrameNode): Size {
@@ -1229,7 +1229,7 @@ export class FrameNodeExtender {
         const peer_casted = peer as (FrameNode)
         return FrameNodeExtender.getPositionToWindow_serialize(peer_casted)
     }
-    public static getPositionToParent(peer: FrameNode): Position {
+    public static getPositionToParent(peer: FrameNode): Vector2 {
         const peer_casted = peer as (FrameNode)
         return FrameNodeExtender.getPositionToParent_serialize(peer_casted)
     }

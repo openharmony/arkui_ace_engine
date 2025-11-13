@@ -271,7 +271,7 @@ Ark_Vector2 GetPositionToWindowImpl(Ark_FrameNode peer)
     offset.SetY(PipelineBase::Px2VpWithCurrentDensity(offset.GetY()));
     return Converter::ArkValue<Ark_Vector2>(offset);
 }
-Ark_Position GetPositionToParentImpl(Ark_FrameNode peer)
+Ark_Vector2 GetPositionToParentImpl(Ark_FrameNode peer)
 {
     if (!peer) {
         LOGW("This frameNode nullptr when GetPositionToParentImpl!");
@@ -283,7 +283,7 @@ Ark_Position GetPositionToParentImpl(Ark_FrameNode peer)
     auto offset = currFrameRect.GetOffset();
     offset.SetX(PipelineBase::Px2VpWithCurrentDensity(offset.GetX()));
     offset.SetY(PipelineBase::Px2VpWithCurrentDensity(offset.GetY()));
-    return Converter::ArkValue<Ark_Position>(offset);
+    return Converter::ArkValue<Ark_Vector2>(offset);
 }
 Ark_Size GetMeasuredSizeImpl(Ark_FrameNode peer)
 {
