@@ -50,6 +50,23 @@ enum ColorSpace {
     DISPLAY_P3 = 1,
 };
 
+// Predefined dynamic color placeholders. Backend render service resolves these into concrete colors.
+enum class ColorPlaceholder : uint8_t {
+    NONE = 0,
+    SURFACE = 1,
+    SURFACE_CONTRAST = 2,
+    TEXT_CONTRAST = 3,
+    ACCENT = 4,
+};
+
+// Strategy used by dynamic color picker extraction.
+enum class ColorPickStrategy : char {
+    NONE = 0,
+    DOMINANT = 1,
+    AVERAGE = 2,
+    CONTRAST = 3,
+};
+
 // A color value present by 32 bit.
 class ACE_FORCE_EXPORT Color {
 public:
@@ -144,6 +161,9 @@ public:
 
     bool operator==(const Color& color) const
     {
+        if (IsPlaceholder() || color.IsPlaceholder()) {
+            return placeholder_ == color.placeholder_ && colorSpace_ == color.colorSpace_;
+        }
         return colorValue_.value == color.GetValue() && colorSpace_ == color.GetColorSpace();
     }
 
@@ -168,6 +188,24 @@ public:
     static bool MatchColorWithMagic(std::string& colorStr, uint32_t maskAlpha, Color& color);
     static bool MatchColorWithMagicMini(std::string& colorStr, uint32_t maskAlpha, Color& color);
     static bool MatchColorSpecialString(const std::string& colorStr, Color& color);
+    static bool MatchPlaceholderString(const std::string& colorStr, ColorPlaceholder& placeholder);
+
+    // Construct a placeholder Color. Underlying ARGB value initialized to transparent and marked with placeholder.
+    explicit Color(ColorPlaceholder ph)
+    {
+        colorValue_.value = Color::TRANSPARENT.GetValue();
+        placeholder_ = ph;
+    }
+
+    bool IsPlaceholder() const
+    {
+        return placeholder_ != ColorPlaceholder::NONE;
+    }
+
+    ColorPlaceholder GetPlaceholder() const
+    {
+        return placeholder_;
+    }
 
     std::string ToString() const;
 
@@ -193,6 +231,7 @@ private:
     ColorParam colorValue_ { .value = 0xff000000 };
     uint32_t resourceId_ = 0;
     ColorSpace colorSpace_ = ColorSpace::SRGB;
+    ColorPlaceholder placeholder_ = ColorPlaceholder::NONE; // Dynamic placeholder kind, NONE means concrete color.
 };
 
 } // namespace OHOS::Ace

@@ -4153,6 +4153,25 @@ let StyledStringKey;
   StyledStringKey[StyledStringKey.USER_DATA = 500] = 'USER_DATA';
 })(StyledStringKey || (StyledStringKey = {}));
 
+// ColorPlaceholder enum declaration synchronized with units.d.ts as a pure string enum.
+// Using a simple object literal avoids generating numeric reverse mappings.
+const ColorPlaceholder = {
+  NONE: 'NONE',
+  SURFACE: 'SURFACE',
+  SURFACE_CONTRAST: 'SURFACE_CONTRAST',
+  TEXT_CONTRAST: 'TEXT_CONTRAST',
+  ACCENT: 'ACCENT',
+};
+let ColorPickStrategy;
+(function (ColorPickStrategy) {
+  ColorPickStrategy[ColorPickStrategy.NONE = 0] = 'NONE';
+  ColorPickStrategy[ColorPickStrategy.DOMINANT = 1] = 'DOMINANT';
+  ColorPickStrategy[ColorPickStrategy.AVERAGE = 2] = 'AVERAGE';
+  ColorPickStrategy[ColorPickStrategy.CONTRAST = 3] = 'CONTRAST';
+})(ColorPickStrategy || (ColorPickStrategy = {}));
+
+globalThis.ColorPlaceholder = ColorPlaceholder;
+
 class CustomSpan extends NativeCustomSpan {
   type_ = 'CustomSpan';
 }

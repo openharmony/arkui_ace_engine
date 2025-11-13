@@ -190,6 +190,12 @@ public:
     static void RequestFrame();
     static void SetBackgroundColor(const Color &color);
     static void SetBackgroundColorWithResourceObj(const Color& color, const RefPtr<ResourceObject>& resObj);
+    // Bind a dynamic color placeholder to current component's render node. This does NOT set a concrete
+    // color immediately; instead it forwards the placeholder key to the render service which will resolve
+    // the actual color (e.g. dominant image or contrast text) asynchronously. Passing ColorPlaceholder::NONE
+    // clears any existing binding.
+    static void BindColorPicker(ColorPlaceholder placeholder, ColorPickStrategy strategy = ColorPickStrategy::NONE,
+        uint32_t interval = 0);
     static void SetBackgroundImage(const ImageSourceInfo &src);
     static void SetBackgroundImageWithResourceObj(const RefPtr<ResourceObject>& resObj, const ImageSourceInfo& src);
     static void SetBackgroundImageRepeat(const ImageRepeat &imageRepeat);
