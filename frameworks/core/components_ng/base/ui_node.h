@@ -1187,6 +1187,8 @@ public:
         return subtreeIgnoreCount_ != 0;
     }
 
+    virtual void DumpSimplifyInfoWithParamConfig(std::shared_ptr<JsonValue>& json, ParamConfig config = ParamConfig());
+
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -1218,7 +1220,6 @@ protected:
     virtual void DumpInfo() {}
     virtual void DumpInfo(std::unique_ptr<JsonValue>& json) {}
     virtual void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) {}
-    virtual void DumpSimplifyInfoWithParamConfig(std::shared_ptr<JsonValue>& json, ParamConfig config = ParamConfig());
     virtual void DumpSimplifyInfoOnlyForParamConfig(
         std::shared_ptr<JsonValue>& json, ParamConfig config = ParamConfig()) {};
     virtual void DumpAdvanceInfo() {}

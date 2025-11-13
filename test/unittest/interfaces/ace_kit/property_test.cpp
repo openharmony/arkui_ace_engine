@@ -85,21 +85,28 @@ HWTEST_F(PropertyTest, PropertyTest002, TestSize.Level1)
     auto mockPattern = AceType::MakeRefPtr<MockAceKitPattern>();
     auto frameNode = AbstractViewFactory::CreateFrameNode(tag, id, mockPattern);
     EXPECT_NE(frameNode, nullptr);
+
     auto frameNodeImpl = AceType::DynamicCast<FrameNodeImpl>(frameNode);
     ASSERT_TRUE(frameNodeImpl);
 
     auto layoutProperty = frameNodeImpl->GetLayoutProperty();
     ASSERT_TRUE(layoutProperty);
+
     auto propertyChangeFlag = layoutProperty->GetPropertyChangeFlag();
     EXPECT_EQ(propertyChangeFlag, NG::PROPERTY_UPDATE_MEASURE);
+
     auto property = frameNode->GetProperty();
     ASSERT_TRUE(property);
+
     property->UpdateRender();
     EXPECT_EQ(layoutProperty->GetPropertyChangeFlag(), NG::PROPERTY_UPDATE_MEASURE | NG::PROPERTY_UPDATE_RENDER);
+
     auto aceNode = frameNodeImpl->GetAceNodePtr();
     ASSERT_TRUE(aceNode);
+
     auto paintProp = aceNode->GetPaintProperty<NG::Property>();
     ASSERT_TRUE(paintProp);
+
     EXPECT_EQ(paintProp->GetPropertyChangeFlag(), NG::PROPERTY_UPDATE_RENDER);
 }
 

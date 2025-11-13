@@ -223,6 +223,11 @@ void MockPipelineContext::SetContainerCustomTitleVisible(bool visible)
     g_isContainerCustomTitleVisible = visible;
 }
 
+void PipelineContext::GetComponentOverlayInspector(
+    std::shared_ptr<JsonValue>& root, ParamConfig config, bool isInSubWindow) const {}
+
+void PipelineContext::GetOverlayInspector(std::shared_ptr<JsonValue>& root, ParamConfig config) const {}
+
 void MockPipelineContext::SetContainerControlButtonVisible(bool visible)
 {
     g_isContainerControlButtonVisible = visible;

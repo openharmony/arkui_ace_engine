@@ -2418,6 +2418,13 @@ bool AceContainer::OnDumpInfo(const std::vector<std::string>& params)
     return false;
 }
 
+void AceContainer::DumpSimplifyTreeWithParamConfig(
+    std::shared_ptr<JsonValue>& root, ParamConfig config, bool isInSubWindow)
+{
+    CHECK_NULL_VOID(pipelineContext_);
+    pipelineContext_->GetComponentOverlayInspector(root, config, isInSubWindow);
+}
+
 void AceContainer::TriggerGarbageCollection()
 {
     ContainerScope scope(instanceId_);
