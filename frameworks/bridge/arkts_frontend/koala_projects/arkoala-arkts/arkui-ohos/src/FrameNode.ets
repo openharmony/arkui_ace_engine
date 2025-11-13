@@ -1786,11 +1786,11 @@ export class NodeAdapter implements MaterializedBase {
     private count_: int = 0;
     private nodeRefs_: Array<FrameNode> = new Array<FrameNode>();
 
-    onDisposeChild(index: number, node: FrameNode) {
+    onDisposeChild(index: int32, node: FrameNode) {
 
     }
 
-    onUpdateChild(index: number, node: FrameNode) {
+    onUpdateChild(index: int32, node: FrameNode) {
 
     }
 
@@ -1919,7 +1919,7 @@ export class NodeAdapter implements MaterializedBase {
         if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
             let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId);
             if (this.onDisposeChild !== undefined && frameNode !== undefined) {
-                this.onDisposeChild(index, frameNode);
+                this.onDisposeChild((index as int32), frameNode);
                 let index2 = this.nodeRefs_.indexOf(frameNode);
                 if (index2 > -1) {
                     this.nodeRefs_.splice(index2, 1);
@@ -1932,7 +1932,7 @@ export class NodeAdapter implements MaterializedBase {
         if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
             let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId);
             if (this.onUpdateChild !== undefined && frameNode !== undefined) {
-                this.onUpdateChild(index, frameNode!);
+                this.onUpdateChild((index as int32), frameNode!);
             }
         }
     }
