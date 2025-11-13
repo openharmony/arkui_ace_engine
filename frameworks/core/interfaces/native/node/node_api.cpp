@@ -150,24 +150,26 @@ void SetSupportedUIState(ArkUINodeHandle node, ArkUI_Int64 state)
     eventHub->AddSupportedState(static_cast<uint64_t>(state));
 }
 
-void AddSupportedUIState(ArkUINodeHandle node, ArkUI_Int64 state, void* callback, ArkUI_Bool isExcludeInner)
+bool AddSupportedUIState(ArkUINodeHandle node, ArkUI_Int64 state, void* callback, ArkUI_Bool isExcludeInner)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_RETURN(frameNode, false);
     auto eventHub = frameNode->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(eventHub);
+    CHECK_NULL_RETURN(eventHub, false);
     std::function<void(uint64_t)>* func = reinterpret_cast<std::function<void(uint64_t)>*>(callback);
-    eventHub->AddSupportedUIStateWithCallback(static_cast<uint64_t>(state), *func, false, isExcludeInner);
+    auto result = eventHub->AddSupportedUIStateWithCallback(static_cast<uint64_t>(state), *func, false, isExcludeInner);
     func = nullptr;
+    return result;
 }
 
-void RemoveSupportedUIState(ArkUINodeHandle node, ArkUI_Int64 state)
+bool RemoveSupportedUIState(ArkUINodeHandle node, ArkUI_Int64 state)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_RETURN(frameNode, false);
     auto eventHub = frameNode->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->RemoveSupportedUIState(static_cast<uint64_t>(state), false);
+    CHECK_NULL_RETURN(eventHub, false);
+    auto result = eventHub->RemoveSupportedUIState(static_cast<uint64_t>(state), false);
+    return result;
 }
 
 namespace NodeModifier {

@@ -1623,16 +1623,32 @@ class FrameNode extends Disposable {
     recycle() {
         this.triggerOnRecycle();
     }
-    addSupportedUIStates(uistates, statesChangeHandler, excludeInner) {
+    addSupportedUIStates(uiStates, statesChangeHandler, excludeInner) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        getUINativeModule().frameNode.addSupportedStates(this.getNodePtr(), uistates, (currentUIStates) => {
-            statesChangeHandler(this, currentUIStates);
-        }, excludeInner);
+        this.statesChangeHandler_ = (currentUIStates) => {
+            if (statesChangeHandler !== null && statesChangeHandler !== undefined) {
+                statesChangeHandler(this, currentUIStates);
+            }
+        };
+        let result = getUINativeModule().frameNode.addSupportedStates(this.getNodePtr(), uiStates, this.statesChangeHandler_, excludeInner);
+        if (result === true) {
+            this.supportedStates_ |= uiStates;
+        } else {
+            JSXNodeLogConsole.warn('add supported uistates fail');
+        }
         __JSScopeUtil__.restoreInstanceId();
     }
     removeSupportedUIStates(uiStates) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        getUINativeModule().frameNode.removeSupportedStates(this.getNodePtr(), uiStates);
+        let result = getUINativeModule().frameNode.removeSupportedStates(this.getNodePtr(), uiStates);
+        if (result === true) {
+            this.supportedStates_ &= ~uiStates;
+            if (this.supportedStates_ === UIState.NORMAL) {
+                this.statesChangeHandler_ = undefined;
+            }
+        } else {
+            JSXNodeLogConsole.warn('remove supported uistates fail');
+        }
         __JSScopeUtil__.restoreInstanceId();
     }
     invalidateAttributes() {

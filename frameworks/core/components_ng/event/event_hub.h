@@ -248,9 +248,9 @@ public:
     bool HasStateStyle(UIState state) const;
     void AddSupportedState(UIState state);
     void SetSupportedStates(UIState state);
-    void AddSupportedUIStateWithCallback(
+    bool AddSupportedUIStateWithCallback(
         UIState state, std::function<void(uint64_t)>& callback, bool isInner, bool excludeInner = false);
-    void RemoveSupportedUIState(UIState state, bool isInner);
+    bool RemoveSupportedUIState(UIState state, bool isInner);
     bool GetUserSetStateStyle();
     void SetScrollingFeatureForbidden(bool isSetStateStyle);
     bool IsCurrentStateOn(UIState state);

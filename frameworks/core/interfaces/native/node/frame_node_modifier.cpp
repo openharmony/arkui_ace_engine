@@ -1068,7 +1068,9 @@ void AddSupportedUIStates(
     std::function<void(uint64_t)> onStatesChange = [userData, statesChangeHandler](uint64_t currentState) {
         using FuncType = float (*)(int32_t, void*);
         FuncType func = reinterpret_cast<FuncType>(statesChangeHandler);
-        func(static_cast<int32_t >(currentState), userData);
+        if (func != nullptr) {
+            func(static_cast<int32_t >(currentState), userData);
+        }
     };
     eventHub->AddSupportedUIStateWithCallback(static_cast<uint64_t>(state), onStatesChange, false, isExcludeInner);
 }

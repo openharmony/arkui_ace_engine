@@ -74,9 +74,9 @@ public:
         supportedStates_ = state;
     }
 
-    void AddSupportedUIStateWithCallback(
+    bool AddSupportedUIStateWithCallback(
         UIState state, std::function<void(uint64_t)>& callback, bool isInner, bool excludeInner = false);
-    void RemoveSupportedUIState(UIState state, bool isInner);
+    bool RemoveSupportedUIState(UIState state, bool isInner);
 
     bool GetUserSetStateStyle()
     {
