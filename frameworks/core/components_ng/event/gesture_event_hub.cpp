@@ -756,6 +756,13 @@ void GestureEventHub::BindMenu(GestureEventFunc&& showMenu)
     AddClickEvent(showMenu_);
 }
 
+void GestureEventHub::RemoveBindMenu()
+{
+    if (showMenu_) {
+        RemoveClickEvent(showMenu_);
+    }
+}
+
 void GestureEventHub::RegisterMenuOnTouch(TouchEventFunc&& callback)
 {
     if (bindMenuTouch_) {

@@ -170,7 +170,7 @@ void ViewAbstractModelStatic::BindMenuTouch(FrameNode* targetNode, const RefPtr<
 }
 
 bool ViewAbstractModelStatic::CheckMenuIsShow(
-    const MenuParam& menuParam, int32_t targetId, const RefPtr<FrameNode>& targetNode)
+    const MenuParam& menuParam, int32_t targetId, const RefPtr<FrameNode>& targetNode, bool isBuildFuncNull)
 {
     RefPtr<NG::PipelineContext> pipeline = nullptr;
     if (menuParam.isShowInSubWindow) {
@@ -197,7 +197,8 @@ bool ViewAbstractModelStatic::CheckMenuIsShow(
         CHECK_NULL_RETURN(renderContext, false);
         renderContext->UpdateChainedTransition(menuParam.transition);
     }
-    if (wrapperPattern->IsShow() && menuParam.setShow && !menuParam.isShow && !wrapperPattern->GetIsOpenMenu()) {
+    if ((wrapperPattern->IsShow() && !wrapperPattern->GetIsOpenMenu()) &&
+        ((menuParam.setShow && !menuParam.isShow) || isBuildFuncNull)) {
         TAG_LOGI(AceLogTag::ACE_MENU, "execute hide menu.");
         overlayManager->HideMenu(menuNode, targetId, false);
     }
@@ -212,7 +213,8 @@ void ViewAbstractModelStatic::BindMenu(FrameNode* frameNode,
     FREE_NODE_CHECK(frameNode, BindMenu, frameNode, std::move(params), std::move(buildFunc), menuParam);
     auto targetId = targetNode->GetId();
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true, frameNode);
-    if (CheckMenuIsShow(menuParam, targetId, targetNode)) {
+    bool isBuildFuncNull = (buildFunc == nullptr && params.empty());
+    if (CheckMenuIsShow(menuParam, targetId, targetNode, isBuildFuncNull)) {
         TAG_LOGI(AceLogTag::ACE_MENU, "hide menu done %{public}d %{public}d.", menuParam.isShowInSubWindow, targetId);
     } else if (menuParam.isShow) {
         auto pipelineContext = targetNode->GetContext();
@@ -227,6 +229,13 @@ void ViewAbstractModelStatic::BindMenu(FrameNode* frameNode,
             NG::ViewAbstract::BindMenuWithCustomNode(
                 std::move(buildFunc), targetNode, menuParam.positionOffset, menuParam, std::move(previewBuildFunc));
         }
+    }
+    if (isBuildFuncNull) {
+        auto gestureHub = targetNode->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        gestureHub->RemoveBindMenu();
+        gestureHub->RegisterMenuOnTouch(nullptr);
+        return;
     }
     if (!menuParam.setShow) {
         BindMenuGesture(frameNode, std::move(params), std::move(buildFunc), menuParam);
@@ -342,6 +351,16 @@ void ViewAbstractModelStatic::BindContextMenuStatic(const RefPtr<FrameNode>& tar
     FREE_NODE_CHECK(targetNode, BindContextMenuStatic, targetNode, type, std::move(buildFunc), menuParam,
         std::move(previewBuildFunc));
     auto targetId = targetNode->GetId();
+    bool isBuildFuncNull = (buildFunc == nullptr);
+    if (CheckMenuIsShow(menuParam, targetId, targetNode, isBuildFuncNull)) {
+        TAG_LOGI(AceLogTag::ACE_MENU, "hide menu done %{public}d %{public}d.", menuParam.isShowInSubWindow, targetId);
+    }
+    if (isBuildFuncNull) {
+        auto inputHub = targetNode->GetOrCreateInputEventHub();
+        CHECK_NULL_VOID(inputHub);
+        inputHub->BindContextMenu(nullptr);
+        return;
+    }
     auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId());
     if (subwindow) {
         auto childContainerId = subwindow->GetChildContainerId();
