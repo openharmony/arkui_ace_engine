@@ -131,7 +131,7 @@ public:
 
     void LoadResourceThemesInner();
 
-    void LoadResourceThemesMultiThread(); 
+    void LoadResourceThemesMultiThread();
 
     uint32_t GetResourceLimitKeys() const override
     {
