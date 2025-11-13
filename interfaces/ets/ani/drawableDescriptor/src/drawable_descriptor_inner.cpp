@@ -85,7 +85,7 @@ ani_object CreateAnimatedDrawableByPixelMapList(ani_env* env,
     ani_class cls;
     env->FindClass(className, &cls);
     ani_method ctor;
-    env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor);
+    env->Class_FindMethod(cls, "<ctor>", ":", &ctor);
 
     auto durationAni = CreateDouble(env, duration);
     auto iterationsAni = CreateDouble(env, iterations);
