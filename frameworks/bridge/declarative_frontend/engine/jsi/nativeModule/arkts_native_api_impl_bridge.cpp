@@ -3133,6 +3133,14 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::SetOnWillDisappear));
     navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnWillDisappear"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::ResetOnWillDisappear));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBindToScrollable"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::SetBindToScrollable));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBindToScrollable"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::ResetBindToScrollable));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBindToNestedScrollable"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::SetBindToNestedScrollable));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBindToNestedScrollable"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::ResetBindToNestedScrollable));
     navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnActive"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::SetOnActive));
     navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnActive"),

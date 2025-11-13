@@ -731,7 +731,11 @@ void JSNavDestination::BindToScrollable(const JSCallbackInfo& info)
     auto bindFunc = [&info](const RefPtr<NG::NavDestinationScrollableProcessor>& processor) {
         auto jsProcessor = AceType::DynamicCast<JSNavDestinationScrollableProcessor>(processor);
         CHECK_NULL_VOID(jsProcessor);
-        jsProcessor->BindToScrollable(info);
+        if (info.Length() < 1 || !info[0]->IsArray()) {
+            jsProcessor->UnbindScrollable();
+        } else {
+            jsProcessor->BindToScrollable(info[0]);
+        }
     };
     NavDestinationModel::GetInstance()->UpdateBindingWithScrollable(std::move(bindFunc));
 }
@@ -741,7 +745,11 @@ void JSNavDestination::BindToNestedScrollable(const JSCallbackInfo& info)
     auto bindFunc = [&info](const RefPtr<NG::NavDestinationScrollableProcessor>& processor) {
         auto jsProcessor = AceType::DynamicCast<JSNavDestinationScrollableProcessor>(processor);
         CHECK_NULL_VOID(jsProcessor);
-        jsProcessor->BindToNestedScrollable(info);
+        if (info.Length() < 1 || !info[0]->IsArray()) {
+            jsProcessor->UnbindNestedScrollable();
+        } else {
+            jsProcessor->BindToNestedScrollable(info[0]);
+        }
     };
     NavDestinationModel::GetInstance()->UpdateBindingWithScrollable(std::move(bindFunc));
 }

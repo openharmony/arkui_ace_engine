@@ -42,8 +42,10 @@ public:
     }
     void UnbindAllScrollers() override;
 
-    void BindToScrollable(const JSCallbackInfo& info);
-    void BindToNestedScrollable(const JSCallbackInfo& info);
+    void UnbindScrollable() override;
+    void BindToScrollable(const JSRef<JSVal>& param);
+    void UnbindNestedScrollable() override;
+    void BindToNestedScrollable(const JSRef<JSVal>& param);
 
     void HandleOnTouchEvent(WeakPtr<JSScroller> jsScrollerWeak, const TouchEventInfo& info);
     void HandleOnReachEvent(WeakPtr<JSScroller> jsScrollerWeak, bool isTopEvent);
