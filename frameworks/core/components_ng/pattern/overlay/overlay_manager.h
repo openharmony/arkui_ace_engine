@@ -763,9 +763,9 @@ public:
     std::optional<double> GetLevelOrder(const RefPtr<FrameNode>& node, std::optional<double> levelOrder = std::nullopt);
     void PopToast(int32_t targetId);
     void RegisterMenuLifeCycleCallback(int32_t targetId,
-        const std::function<void(const MenuLifeCycleEvent& menuLifeCycleEvent)>& callback)
+        const std::function<void(const MenuLifeCycleEvent& menuLifeCycleEvent)>&& callback)
     {
-        menuLifeCycleCallbackMap_[targetId] = callback;
+        menuLifeCycleCallbackMap_[targetId] = std::move(callback);
     }
     void UnRegisterMenuLifeCycleCallback(int32_t targetId)
     {
@@ -1071,7 +1071,7 @@ private:
     std::set<int32_t> skipTargetIds_;
     std::optional<OverlayManagerInfo> overlayInfo_;
     std::unordered_set<int32_t> onDisappearFilterIds_;
-    std::map<int32_t, std::function<void(const MenuLifeCycleEvent&)>> menuLifeCycleCallbackMap_;
+    std::unordered_map<int32_t, std::function<void(const MenuLifeCycleEvent&)>> menuLifeCycleCallbackMap_;
 };
 } // namespace OHOS::Ace::NG
 
