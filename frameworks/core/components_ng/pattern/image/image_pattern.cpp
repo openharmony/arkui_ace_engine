@@ -29,6 +29,7 @@
 #include "core/components/text/text_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/image_provider/image_utils.h"
+#include "core/components_ng/manager/load_complete/load_complete_manager.h"
 #include "core/components_ng/pattern/image/image_content_modifier.h"
 #include "core/components_ng/pattern/image/image_dfx.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
@@ -422,11 +423,20 @@ void ImagePattern::ReportPerfData(const RefPtr<NG::FrameNode>& host, int32_t sta
     ImagePerf::GetPerfMonitor()->EndRecordImageLoadStat(accessibilityId, srcType, size, state);
 }
 
+void ImagePattern::ReportCompleteLoadEvent(const RefPtr<FrameNode>& host)
+{
+    auto pipeline = host->GetContext();
+    if (pipeline) {
+        pipeline->GetLoadCompleteManager()->CompleteLoadComponent(host->GetId());
+    }
+}
+
 void ImagePattern::OnImageLoadSuccess()
 {
     CHECK_NULL_VOID(loadingCtx_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ReportCompleteLoadEvent(host);
     const auto& geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     {
@@ -628,6 +638,7 @@ void ImagePattern::OnImageLoadFail(const std::string& errorMsg, const ImageError
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ReportCompleteLoadEvent(host);
     // report fail event
     ACE_IMAGE_SCOPED_TRACE(
         "report image load fail event %d, %" PRId64 "", imageDfxConfig_.GetNodeId(), GetSysTimestamp());
@@ -934,6 +945,14 @@ void ImagePattern::LoadImage(const ImageSourceInfo& src, bool needLayout)
     }
     ClearReloadFlagsAfterLoad();
     ImagePerf::GetPerfMonitor()->StartRecordImageLoadStat(imageDfxConfig_.GetAccessibilityId());
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto pipeline = host->GetContext();
+        if (pipeline) {
+            pipeline->GetLoadCompleteManager()->AddLoadComponent(host->GetId());
+        }
+    }
     loadingCtx_->LoadImageData();
 }
 
@@ -1548,6 +1567,10 @@ void ImagePattern::OnDetachFromMainTree()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    if (pipeline) {
+        pipeline->GetLoadCompleteManager()->DeleteLoadComponent(host->GetId());
+    }
     THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode);
     if (isNeedReset_) {
         ResetImageAndAlt();

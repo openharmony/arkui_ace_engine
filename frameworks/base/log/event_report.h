@@ -78,6 +78,7 @@ enum class ComponentExcepType {
     LIST_ITEM_ERR,
     MARQUEE_ERR,
     NAVIGATION_BAR_ERR,
+    COMPONENT_LOAD_TIMEOUT,
 };
 
 // EXCEPTION_API_CHANNEL
@@ -160,6 +161,7 @@ struct EventInfo {
     std::string eventType;
     int32_t errorType = 0;
     std::string pageUrl;
+    int64_t loadCost = 0;
 };
 
 struct DragInfo {
@@ -221,6 +223,7 @@ public:
     static void SendAppStartException(AppStartExcepType type);
     static void SendPageRouterException(PageRouterExcepType type, const std::string& pageUrl = "");
     static void SendComponentException(ComponentExcepType type);
+    static void ReportComponentLoadTimeout(const EventInfo& eventInfo);
     static void SendAPIChannelException(APIChannelExcepType type);
     static void SendRenderException(RenderExcepType type);
     static void SendJsException(JsExcepType type);
