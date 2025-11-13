@@ -1326,11 +1326,7 @@ std::pair<std::optional<Color>, Dimension> Convert(const Ark_ColorStop& src)
     auto color = Converter::OptConvert<Color>(src.color);
     auto offset = Converter::OptConvert<Dimension>(src.offset).value_or(Dimension());
     // normalize the offset in a range [0.0 ... 1.0]
-    if (offset.Unit() == DimensionUnit::PERCENT) {
-        offset = Dimension(std::clamp(offset.Value(), NUM_DOUBLE_0, NUM_DOUBLE_100) / NUM_PERCENT_100);
-    } else {
-        offset = Dimension(std::clamp(offset.Value(), NUM_DOUBLE_0, NUM_DOUBLE_1));
-    }
+    offset = Dimension(std::clamp(offset.Value(), NUM_DOUBLE_0, NUM_DOUBLE_1));
     return std::make_pair(color, offset);
 }
 

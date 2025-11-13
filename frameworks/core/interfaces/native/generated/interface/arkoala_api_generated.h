@@ -18346,8 +18346,8 @@ typedef struct Opt_ChainAnimationOptions {
 } Opt_ChainAnimationOptions;
 typedef struct Ark_ColorStop {
     /* kind: Interface */
-    Ark_ResourceColor color;
-    Ark_Length offset;
+    Opt_ResourceColor color;
+    Opt_Length offset;
 } Ark_ColorStop;
 typedef struct Opt_ColorStop {
     Ark_Tag tag;

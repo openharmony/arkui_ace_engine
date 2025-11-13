@@ -98,6 +98,9 @@ void GaugeModelStatic::SetGradientColors(FrameNode* frameNode, const std::vector
         for (const auto& item2: item1) {
             colorStopArray.push_back(std::make_pair(item2.first.value_or(ERROR_COLOR), item2.second));
         }
+        if (item1.empty()) {
+            colorStopArray.push_back(std::make_pair(ERROR_COLOR, Dimension(0.f)));
+        }
         convColors.push_back(colorStopArray);
     }
     ACE_UPDATE_NODE_PAINT_PROPERTY(GaugePaintProperty, GradientColors, convColors, frameNode);
