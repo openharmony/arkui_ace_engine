@@ -100,7 +100,8 @@ ani_ref AceWrapStringToObject(ani_env* env, const std::string str)
         return undefinedResult;
     }
     ani_static_method parseMethod = nullptr;
-    if (ANI_OK != env->Class_FindStaticMethod(cls, "parseNoThrow", nullptr, &parseMethod)) {
+    if (ANI_OK != env->Class_FindStaticMethod(cls, "parseNoThrow",
+        "C{std.core.String}:X{C{std.core.Null}C{std.core.Object}}", &parseMethod)) {
         LOGE("plugin-ani failed to get parseNoThrow method");
         return undefinedResult;
     }
@@ -156,7 +157,8 @@ ani_status GetAniKVObjectPropertyByName(ani_env* env, ani_object parameters, std
         return ANI_ERROR;
     }
     ani_static_method stringifyMethod = nullptr;
-    if (ANI_OK != env->Class_FindStaticMethod(cls, "stringifyNoThrow", nullptr, &stringifyMethod)) {
+    if (ANI_OK != env->Class_FindStaticMethod(cls, "stringifyNoThrow", "C{std.core.Record}:C{std.core.String}",
+        &stringifyMethod)) {
         LOGE("plugin-ani failed to get stringifyNoThrow method");
         return ANI_ERROR;
     }

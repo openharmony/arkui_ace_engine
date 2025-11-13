@@ -113,7 +113,7 @@ void XBarSetOnWindowEventFunc(ani_env* env, const ani_type& type, ani_vm* vm, st
 {
     ani_status status;
     ani_method onWindowMethod;
-    if ((status = env->Class_FindMethod(static_cast<ani_class>(type), funcName.c_str(), nullptr, &onWindowMethod)) !=
+    if ((status = env->Class_FindMethod(static_cast<ani_class>(type), funcName.c_str(), ":", &onWindowMethod)) !=
         ANI_OK) {
         HILOGE("[ACE_APPBAR]Get %{public}s method of xBar failed status %{public}d", funcName.c_str(), status);
         return;
@@ -161,8 +161,8 @@ void XBarSetAppTitleFunc(
 {
     ani_status status;
     ani_method setAppTitleMethod;
-    if ((status = env->Class_FindMethod(static_cast<ani_class>(type), "setAppTitle", nullptr, &setAppTitleMethod)) !=
-        ANI_OK) {
+    if ((status = env->Class_FindMethod(static_cast<ani_class>(type), "setAppTitle", "C{std.core.String}:",
+        &setAppTitleMethod)) != ANI_OK) {
         HILOGE("[ACE_APPBAR]Get setAppTitle method of xBar failed status %{public}d", status);
         return;
     }
@@ -206,8 +206,8 @@ void XBarSetAppIconFunc(ani_env* env, const ani_type& type, ani_vm* vm, std::sha
 {
     ani_status status;
     ani_method setAppIconMethod;
-    if ((status = env->Class_FindMethod(static_cast<ani_class>(type), "setAppIcon", nullptr, &setAppIconMethod)) !=
-        ANI_OK) {
+    if ((status = env->Class_FindMethod(static_cast<ani_class>(type), "setAppIcon",
+        "C{@ohos.multimedia.image.image.PixelMap}:", &setAppIconMethod)) != ANI_OK) {
         HILOGE("[ACE_APPBAR]Get setAppIcon method of xBar failed status %{public}d", status);
         return;
     }
@@ -261,8 +261,8 @@ void XBarSetCustomCallbackFunc(
 {
     ani_status status;
     ani_method setCustomCallbackMethod;
-    if ((status = env->Class_FindMethod(
-             static_cast<ani_class>(type), "setCustomCallback", nullptr, &setCustomCallbackMethod)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(static_cast<ani_class>(type),
+        "setCustomCallback", "C{std.core.String}C{std.core.String}:", &setCustomCallbackMethod)) != ANI_OK) {
         HILOGE("[ACE_APPBAR]Get setCustomCallback method of xBar failed status %{public}d", status);
         return;
     }
