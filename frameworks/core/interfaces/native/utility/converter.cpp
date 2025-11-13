@@ -3341,7 +3341,7 @@ OHOS::Ace::TextMetrics Convert(const Ark_TextMetrics& src)
 template<>
 TouchLocationInfo Convert(const Ark_TouchObject& src)
 {
-    TouchLocationInfo dst(src.id.i32);
+    TouchLocationInfo dst(src.id);
     double windowX = Converter::Convert<double>(src.windowX);
     double windowY = Converter::Convert<double>(src.windowY);
     double x = Converter::Convert<double>(src.x);
@@ -3355,8 +3355,8 @@ TouchLocationInfo Convert(const Ark_TouchObject& src)
         PipelineBase::Vp2PxWithCurrentDensity(y)));
     dst.SetScreenLocation(Offset(PipelineBase::Vp2PxWithCurrentDensity(displayX),
         PipelineBase::Vp2PxWithCurrentDensity(displayY)));
-    auto pressedTimeOpt = Converter::OptConvert<int32_t>(src.pressedTime);
-    std::chrono::nanoseconds nanoseconds(static_cast<int64_t>(pressedTimeOpt.value_or(0)));
+    auto pressedTimeOpt = Converter::OptConvert<int64_t>(src.pressedTime);
+    std::chrono::nanoseconds nanoseconds(pressedTimeOpt.value_or(0));
     TimeStamp time(nanoseconds);
     dst.SetPressedTime(time);
     dst.SetForce(Converter::OptConvert<float>(src.pressure).value_or(0.0f));

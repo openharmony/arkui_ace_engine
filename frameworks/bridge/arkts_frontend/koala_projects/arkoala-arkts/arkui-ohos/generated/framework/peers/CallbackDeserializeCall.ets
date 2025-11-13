@@ -3463,7 +3463,7 @@ export function deserializeAndCallVisibleAreaChangeCallback(thisDeserializer: De
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as VisibleAreaChangeCallback)
     let isExpanding : boolean = thisDeserializer.readBoolean()
-    let currentRatio : number = (thisDeserializer.readNumber() as number)
+    let currentRatio : double = thisDeserializer.readFloat64()
     _call(isExpanding, currentRatio)
 }
 export function deserializeAndCallVoidCallback(thisDeserializer: DeserializerBase): void {

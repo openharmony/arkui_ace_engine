@@ -3146,29 +3146,29 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _AccessibilityHoverEvent_setType(ptr: KPointer, type: KInt): void
     @ani.unsafe.Direct
-    native static _AccessibilityHoverEvent_getX(ptr: KPointer): number
+    native static _AccessibilityHoverEvent_getX(ptr: KPointer): double
     @ani.unsafe.Direct
-    native static _AccessibilityHoverEvent_setX(ptr: KPointer, x: number): void
+    native static _AccessibilityHoverEvent_setX(ptr: KPointer, x: KDouble): void
     @ani.unsafe.Direct
-    native static _AccessibilityHoverEvent_getY(ptr: KPointer): number
+    native static _AccessibilityHoverEvent_getY(ptr: KPointer): double
     @ani.unsafe.Direct
-    native static _AccessibilityHoverEvent_setY(ptr: KPointer, y: number): void
+    native static _AccessibilityHoverEvent_setY(ptr: KPointer, y: KDouble): void
     @ani.unsafe.Direct
-    native static _AccessibilityHoverEvent_getDisplayX(ptr: KPointer): number
+    native static _AccessibilityHoverEvent_getDisplayX(ptr: KPointer): double
     @ani.unsafe.Direct
-    native static _AccessibilityHoverEvent_setDisplayX(ptr: KPointer, displayX: number): void
+    native static _AccessibilityHoverEvent_setDisplayX(ptr: KPointer, displayX: KDouble): void
     @ani.unsafe.Direct
-    native static _AccessibilityHoverEvent_getDisplayY(ptr: KPointer): number
+    native static _AccessibilityHoverEvent_getDisplayY(ptr: KPointer): double
     @ani.unsafe.Direct
-    native static _AccessibilityHoverEvent_setDisplayY(ptr: KPointer, displayY: number): void
+    native static _AccessibilityHoverEvent_setDisplayY(ptr: KPointer, displayY: KDouble): void
     @ani.unsafe.Direct
-    native static _AccessibilityHoverEvent_getWindowX(ptr: KPointer): number
+    native static _AccessibilityHoverEvent_getWindowX(ptr: KPointer): double
     @ani.unsafe.Direct
-    native static _AccessibilityHoverEvent_setWindowX(ptr: KPointer, windowX: number): void
+    native static _AccessibilityHoverEvent_setWindowX(ptr: KPointer, windowX: KDouble): void
     @ani.unsafe.Direct
-    native static _AccessibilityHoverEvent_getWindowY(ptr: KPointer): number
+    native static _AccessibilityHoverEvent_getWindowY(ptr: KPointer): double
     @ani.unsafe.Direct
-    native static _AccessibilityHoverEvent_setWindowY(ptr: KPointer, windowY: number): void
+    native static _AccessibilityHoverEvent_setWindowY(ptr: KPointer, windowY: KDouble): void
     @ani.unsafe.Direct
     native static _ActionSheet_show(thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
@@ -3254,9 +3254,9 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _AxisEvent_getFinalizer(): KPointer
     @ani.unsafe.Direct
-    native static _AxisEvent_getHorizontalAxisValue(ptr: KPointer): number
+    native static _AxisEvent_getHorizontalAxisValue(ptr: KPointer): double
     @ani.unsafe.Direct
-    native static _AxisEvent_getVerticalAxisValue(ptr: KPointer): number
+    native static _AxisEvent_getVerticalAxisValue(ptr: KPointer): double
     @ani.unsafe.Direct
     native static _AxisEvent_hasAxis(ptr: KPointer, axisType: KInt): boolean    
     @ani.unsafe.Direct
@@ -3264,29 +3264,29 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _AxisEvent_setAction(ptr: KPointer, action: KInt): void
     @ani.unsafe.Direct
-    native static _AxisEvent_getDisplayX(ptr: KPointer): number
+    native static _AxisEvent_getDisplayX(ptr: KPointer): double
     @ani.unsafe.Direct
-    native static _AxisEvent_setDisplayX(ptr: KPointer, displayX: number): void
+    native static _AxisEvent_setDisplayX(ptr: KPointer, displayX: KDouble): void
     @ani.unsafe.Direct
-    native static _AxisEvent_getDisplayY(ptr: KPointer): number
+    native static _AxisEvent_getDisplayY(ptr: KPointer): double
     @ani.unsafe.Direct
-    native static _AxisEvent_setDisplayY(ptr: KPointer, displayY: number): void
+    native static _AxisEvent_setDisplayY(ptr: KPointer, displayY: KDouble): void
     @ani.unsafe.Direct
-    native static _AxisEvent_getWindowX(ptr: KPointer): number
+    native static _AxisEvent_getWindowX(ptr: KPointer): double
     @ani.unsafe.Direct
-    native static _AxisEvent_setWindowX(ptr: KPointer, windowX: number): void
+    native static _AxisEvent_setWindowX(ptr: KPointer, windowX: KDouble): void
     @ani.unsafe.Direct
-    native static _AxisEvent_getWindowY(ptr: KPointer): number
+    native static _AxisEvent_getWindowY(ptr: KPointer): double
     @ani.unsafe.Direct
-    native static _AxisEvent_setWindowY(ptr: KPointer, windowY: number): void
+    native static _AxisEvent_setWindowY(ptr: KPointer, windowY: KDouble): void
     @ani.unsafe.Direct
-    native static _AxisEvent_getX(ptr: KPointer): number
+    native static _AxisEvent_getX(ptr: KPointer): double
     @ani.unsafe.Direct
-    native static _AxisEvent_setX(ptr: KPointer, x: number): void
+    native static _AxisEvent_setX(ptr: KPointer, x: KDouble): void
     @ani.unsafe.Direct
-    native static _AxisEvent_getY(ptr: KPointer): number
+    native static _AxisEvent_getY(ptr: KPointer): double
     @ani.unsafe.Direct
-    native static _AxisEvent_setY(ptr: KPointer, y: number): void
+    native static _AxisEvent_setY(ptr: KPointer, y: KDouble): void
     @ani.unsafe.Quick
     native static _AxisEvent_getScrollStep(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
@@ -3308,9 +3308,9 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _BaseEvent_setTarget(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _BaseEvent_getTimestamp(ptr: KPointer): number
+    native static _BaseEvent_getTimestamp(ptr: KPointer): int64
     @ani.unsafe.Direct
-    native static _BaseEvent_setTimestamp(ptr: KPointer, timestamp: number): void
+    native static _BaseEvent_setTimestamp(ptr: KPointer, timestamp: KLong): void
     @ani.unsafe.Direct
     native static _BaseEvent_getSource(ptr: KPointer): int32
     @ani.unsafe.Direct
@@ -3324,17 +3324,17 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _BaseEvent_setAxisVertical(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _BaseEvent_getPressure(ptr: KPointer): number
+    native static _BaseEvent_getPressure(ptr: KPointer): double
     @ani.unsafe.Direct
-    native static _BaseEvent_setPressure(ptr: KPointer, pressure: number): void
+    native static _BaseEvent_setPressure(ptr: KPointer, pressure: KDouble): void
     @ani.unsafe.Direct
-    native static _BaseEvent_getTiltX(ptr: KPointer): number
+    native static _BaseEvent_getTiltX(ptr: KPointer): double
     @ani.unsafe.Direct
-    native static _BaseEvent_setTiltX(ptr: KPointer, tiltX: number): void
+    native static _BaseEvent_setTiltX(ptr: KPointer, tiltX: KDouble): void
     @ani.unsafe.Direct
-    native static _BaseEvent_getTiltY(ptr: KPointer): number
+    native static _BaseEvent_getTiltY(ptr: KPointer): double
     @ani.unsafe.Direct
-    native static _BaseEvent_setTiltY(ptr: KPointer, tiltY: number): void
+    native static _BaseEvent_setTiltY(ptr: KPointer, tiltY: KDouble): void
     @ani.unsafe.Quick
     native static _BaseEvent_getRollAngle(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
@@ -3662,29 +3662,29 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _ClickEvent_getFinalizer(): KPointer
     @ani.unsafe.Direct
-    native static _ClickEvent_getDisplayX(ptr: KPointer): number
+    native static _ClickEvent_getDisplayX(ptr: KPointer): double
     @ani.unsafe.Direct
-    native static _ClickEvent_setDisplayX(ptr: KPointer, displayX: number): void
+    native static _ClickEvent_setDisplayX(ptr: KPointer, displayX: KDouble): void
     @ani.unsafe.Direct
-    native static _ClickEvent_getDisplayY(ptr: KPointer): number
+    native static _ClickEvent_getDisplayY(ptr: KPointer): double
     @ani.unsafe.Direct
-    native static _ClickEvent_setDisplayY(ptr: KPointer, displayY: number): void
+    native static _ClickEvent_setDisplayY(ptr: KPointer, displayY: KDouble): void
     @ani.unsafe.Direct
-    native static _ClickEvent_getWindowX(ptr: KPointer): number
+    native static _ClickEvent_getWindowX(ptr: KPointer): double
     @ani.unsafe.Direct
-    native static _ClickEvent_setWindowX(ptr: KPointer, windowX: number): void
+    native static _ClickEvent_setWindowX(ptr: KPointer, windowX: KDouble): void
     @ani.unsafe.Direct
-    native static _ClickEvent_getWindowY(ptr: KPointer): number
+    native static _ClickEvent_getWindowY(ptr: KPointer): double
     @ani.unsafe.Direct
-    native static _ClickEvent_setWindowY(ptr: KPointer, windowY: number): void
+    native static _ClickEvent_setWindowY(ptr: KPointer, windowY: KDouble): void
     @ani.unsafe.Direct
-    native static _ClickEvent_getX(ptr: KPointer): number
+    native static _ClickEvent_getX(ptr: KPointer): double
     @ani.unsafe.Direct
-    native static _ClickEvent_setX(ptr: KPointer, x: number): void
+    native static _ClickEvent_setX(ptr: KPointer, x: KDouble): void
     @ani.unsafe.Direct
-    native static _ClickEvent_getY(ptr: KPointer): number
+    native static _ClickEvent_getY(ptr: KPointer): double
     @ani.unsafe.Direct
-    native static _ClickEvent_setY(ptr: KPointer, y: number): void
+    native static _ClickEvent_setY(ptr: KPointer, y: KDouble): void
     @ani.unsafe.Quick
     native static _ClickEvent_getHand(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
@@ -3902,13 +3902,13 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _DragEvent_getFinalizer(): KPointer
     @ani.unsafe.Direct
-    native static _DragEvent_getDisplayX(ptr: KPointer): number
+    native static _DragEvent_getDisplayX(ptr: KPointer): double
     @ani.unsafe.Direct
-    native static _DragEvent_getDisplayY(ptr: KPointer): number
+    native static _DragEvent_getDisplayY(ptr: KPointer): double
     @ani.unsafe.Direct
-    native static _DragEvent_getWindowX(ptr: KPointer): number
+    native static _DragEvent_getWindowX(ptr: KPointer): double
     @ani.unsafe.Direct
-    native static _DragEvent_getWindowY(ptr: KPointer): number
+    native static _DragEvent_getWindowY(ptr: KPointer): double
     @ani.unsafe.Direct
     native static _DragEvent_setData(ptr: KPointer, unifiedData: KPointer): void
     @ani.unsafe.Direct
@@ -3922,11 +3922,11 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _DragEvent_getPreviewRect(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
-    native static _DragEvent_getVelocityX(ptr: KPointer): number
+    native static _DragEvent_getVelocityX(ptr: KPointer): double
     @ani.unsafe.Direct
-    native static _DragEvent_getVelocityY(ptr: KPointer): number
+    native static _DragEvent_getVelocityY(ptr: KPointer): double
     @ani.unsafe.Direct
-    native static _DragEvent_getVelocity(ptr: KPointer): number
+    native static _DragEvent_getVelocity(ptr: KPointer): double
     @ani.unsafe.Direct
     native static _DragEvent_executeDropAnimation(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Quick
@@ -4468,9 +4468,9 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _KeyEvent_setType(ptr: KPointer, type: KInt): void
     @ani.unsafe.Direct
-    native static _KeyEvent_getKeyCode(ptr: KPointer): number
+    native static _KeyEvent_getKeyCode(ptr: KPointer): int32
     @ani.unsafe.Direct
-    native static _KeyEvent_setKeyCode(ptr: KPointer, keyCode: number): void
+    native static _KeyEvent_setKeyCode(ptr: KPointer, keyCode: KInt): void
     @ani.unsafe.Quick
     native static _KeyEvent_getKeyText(ptr: KPointer): string
     @ani.unsafe.Quick
@@ -4480,17 +4480,17 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _KeyEvent_setKeySource(ptr: KPointer, keySource: KInt): void
     @ani.unsafe.Direct
-    native static _KeyEvent_getDeviceId(ptr: KPointer): number
+    native static _KeyEvent_getDeviceId(ptr: KPointer): int32
     @ani.unsafe.Direct
-    native static _KeyEvent_setDeviceId(ptr: KPointer, deviceId: number): void
+    native static _KeyEvent_setDeviceId(ptr: KPointer, deviceId: KInt): void
     @ani.unsafe.Direct
-    native static _KeyEvent_getMetaKey(ptr: KPointer): number
+    native static _KeyEvent_getMetaKey(ptr: KPointer): int32
     @ani.unsafe.Direct
-    native static _KeyEvent_setMetaKey(ptr: KPointer, metaKey: number): void
+    native static _KeyEvent_setMetaKey(ptr: KPointer, metaKey: KInt): void
     @ani.unsafe.Direct
-    native static _KeyEvent_getTimestamp(ptr: KPointer): number
+    native static _KeyEvent_getTimestamp(ptr: KPointer): int64
     @ani.unsafe.Direct
-    native static _KeyEvent_setTimestamp(ptr: KPointer, timestamp: number): void
+    native static _KeyEvent_setTimestamp(ptr: KPointer, timestamp: KLong): void
     @ani.unsafe.Quick
     native static _KeyEvent_getStopPropagation(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
@@ -4698,29 +4698,29 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _MouseEvent_setAction(ptr: KPointer, action: KInt): void
     @ani.unsafe.Direct
-    native static _MouseEvent_getDisplayX(ptr: KPointer): number
+    native static _MouseEvent_getDisplayX(ptr: KPointer): double
     @ani.unsafe.Direct
-    native static _MouseEvent_setDisplayX(ptr: KPointer, displayX: number): void
+    native static _MouseEvent_setDisplayX(ptr: KPointer, displayX: KDouble): void
     @ani.unsafe.Direct
-    native static _MouseEvent_getDisplayY(ptr: KPointer): number
+    native static _MouseEvent_getDisplayY(ptr: KPointer): double
     @ani.unsafe.Direct
-    native static _MouseEvent_setDisplayY(ptr: KPointer, displayY: number): void
+    native static _MouseEvent_setDisplayY(ptr: KPointer, displayY: KDouble): void
     @ani.unsafe.Direct
-    native static _MouseEvent_getWindowX(ptr: KPointer): number
+    native static _MouseEvent_getWindowX(ptr: KPointer): double
     @ani.unsafe.Direct
-    native static _MouseEvent_setWindowX(ptr: KPointer, windowX: number): void
+    native static _MouseEvent_setWindowX(ptr: KPointer, windowX: KDouble): void
     @ani.unsafe.Direct
-    native static _MouseEvent_getWindowY(ptr: KPointer): number
+    native static _MouseEvent_getWindowY(ptr: KPointer): double
     @ani.unsafe.Direct
-    native static _MouseEvent_setWindowY(ptr: KPointer, windowY: number): void
+    native static _MouseEvent_setWindowY(ptr: KPointer, windowY: KDouble): void
     @ani.unsafe.Direct
-    native static _MouseEvent_getX(ptr: KPointer): number
+    native static _MouseEvent_getX(ptr: KPointer): double
     @ani.unsafe.Direct
-    native static _MouseEvent_setX(ptr: KPointer, x: number): void
+    native static _MouseEvent_setX(ptr: KPointer, x: KDouble): void
     @ani.unsafe.Direct
-    native static _MouseEvent_getY(ptr: KPointer): number
+    native static _MouseEvent_getY(ptr: KPointer): double
     @ani.unsafe.Direct
-    native static _MouseEvent_setY(ptr: KPointer, y: number): void
+    native static _MouseEvent_setY(ptr: KPointer, y: KDouble): void
     @ani.unsafe.Quick
     native static _MouseEvent_getStopPropagation(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct

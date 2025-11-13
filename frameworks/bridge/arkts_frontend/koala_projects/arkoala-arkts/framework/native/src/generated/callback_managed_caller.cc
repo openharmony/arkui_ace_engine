@@ -7870,7 +7870,7 @@ void callManagedUpdateTransitionCallbackSync(Ark_VMContext vmContext, Ark_Int32 
     argsSerializer.writeNumber(progress);
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
 }
-void callManagedVisibleAreaChangeCallback(Ark_Int32 resourceId, Ark_Boolean isExpanding, Ark_Number currentRatio)
+void callManagedVisibleAreaChangeCallback(Ark_Int32 resourceId, Ark_Boolean isExpanding, Ark_Float64 currentRatio)
 {
     CallbackBuffer callbackBuffer = {{}, {}};
     const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
@@ -7879,10 +7879,10 @@ void callManagedVisibleAreaChangeCallback(Ark_Int32 resourceId, Ark_Boolean isEx
     argsSerializer.writeInt32(Kind_VisibleAreaChangeCallback);
     argsSerializer.writeInt32(resourceId);
     argsSerializer.writeBoolean(isExpanding);
-    argsSerializer.writeNumber(currentRatio);
+    argsSerializer.writeFloat64(currentRatio);
     enqueueCallback(10, &callbackBuffer);
 }
-void callManagedVisibleAreaChangeCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Boolean isExpanding, Ark_Number currentRatio)
+void callManagedVisibleAreaChangeCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Boolean isExpanding, Ark_Float64 currentRatio)
 {
     uint8_t dataBuffer[4096];
     SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&dataBuffer, sizeof(dataBuffer), nullptr);
@@ -7890,7 +7890,7 @@ void callManagedVisibleAreaChangeCallbackSync(Ark_VMContext vmContext, Ark_Int32
     argsSerializer.writeInt32(Kind_VisibleAreaChangeCallback);
     argsSerializer.writeInt32(resourceId);
     argsSerializer.writeBoolean(isExpanding);
-    argsSerializer.writeNumber(currentRatio);
+    argsSerializer.writeFloat64(currentRatio);
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
 }
 void callManagedVoidCallback(Ark_Int32 resourceId)

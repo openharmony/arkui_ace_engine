@@ -478,7 +478,7 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
     public stateStyles(value: StateStyles | undefined): this {
         return this
     }
-    public restoreId(value: number | undefined): this {
+    public restoreId(value: int | undefined): this {
         this.getPeer().setRestoreIdAttribute(value);
         return this
     }

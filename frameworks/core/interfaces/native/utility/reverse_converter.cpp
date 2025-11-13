@@ -265,8 +265,8 @@ void AssignArkValue(Ark_ShadowOptions& dst, const Shadow& src, ConvContext* ctx)
 
 void AssignArkValue(Ark_ItemDragInfo& dst, const ItemDragInfo& src)
 {
-    dst.x = ArkValue<Ark_Number>(static_cast<float>(src.GetX()));
-    dst.y = ArkValue<Ark_Number>(static_cast<float>(src.GetY()));
+    dst.x = ArkValue<Ark_Float64>(static_cast<float>(src.GetX()));
+    dst.y = ArkValue<Ark_Float64>(static_cast<float>(src.GetY()));
 }
 
 void AssignArkValue(Ark_EdgeEffectOptions& dst, const bool& src)
@@ -644,26 +644,26 @@ void AssignArkValue(Ark_TouchObject& dst, const OHOS::Ace::TouchLocationInfo& sr
     Offset localOffset = src.GetLocalLocation();
     Offset screenOffset = src.GetScreenLocation();
 
-    dst.displayX = ArkValue<Ark_Number>(
+    dst.displayX = ArkValue<Ark_Float64>(
         PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetX()));
-    dst.displayY = ArkValue<Ark_Number>(
+    dst.displayY = ArkValue<Ark_Float64>(
         PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY()));
 
-    dst.id = ArkValue<Ark_Number>(src.GetFingerId());
+    dst.id = ArkValue<Ark_Int32>(src.GetFingerId());
 
     dst.type = ArkValue<Ark_TouchType>(src.GetTouchType());
 
-    dst.windowX = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
-    dst.windowY = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY()));
+    dst.windowX = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
+    dst.windowY = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY()));
 
-    dst.x = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX()));
-    dst.y = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY()));
+    dst.x = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX()));
+    dst.y = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY()));
 
-    dst.pressedTime = ArkValue<Opt_Number>(src.GetPressedTime().time_since_epoch().count());
-    dst.pressure = ArkValue<Opt_Number>(PipelineBase::Px2VpWithCurrentDensity(src.GetForce()));
+    dst.pressedTime = ArkValue<Opt_Int64>(static_cast<int64_t>(src.GetPressedTime().time_since_epoch().count()));
+    dst.pressure = ArkValue<Opt_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.GetForce()));
 
-    dst.width = ArkValue<Opt_Number>(PipelineBase::Px2VpWithCurrentDensity(src.GetWidth()));
-    dst.height = ArkValue<Opt_Number>(PipelineBase::Px2VpWithCurrentDensity(src.GetHeight()));
+    dst.width = ArkValue<Opt_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.GetWidth()));
+    dst.height = ArkValue<Opt_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.GetHeight()));
 
     dst.hand = ArkValue<Opt_InteractionHand>(static_cast<ArkUI_InteractionHand>(src.GetOperatingHand()));
 }
@@ -671,9 +671,9 @@ void AssignArkValue(Ark_TouchObject& dst, const OHOS::Ace::TouchLocationInfo& sr
 void AssignArkValue(Ark_HistoricalPoint& dst, const OHOS::Ace::TouchLocationInfo& src)
 {
     AssignArkValue(dst.touchObject, src);
-    dst.size = ArkValue<Ark_Number>(src.GetSize());
-    dst.force = ArkValue<Ark_Number>(src.GetForce());
-    dst.timestamp = ArkValue<Ark_Number>(static_cast<int32_t>(src.GetTimeStamp().time_since_epoch().count()));
+    dst.size = ArkValue<Ark_Int32>(src.GetSize());
+    dst.force = ArkValue<Ark_Float64>(src.GetForce());
+    dst.timestamp = ArkValue<Ark_Int64>(static_cast<int64_t>(src.GetTimeStamp().time_since_epoch().count()));
 }
 
 void AssignArkValue(Ark_ImageError& dst, const LoadImageFailEvent& src)

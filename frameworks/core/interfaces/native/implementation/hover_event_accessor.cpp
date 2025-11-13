@@ -22,7 +22,7 @@
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace HoverEventAccessor {
 namespace {
-    const Opt_Number INVALID_OPT_NUMBER = Converter::ArkValue<Opt_Number>();
+    const Opt_Float64 INVALID_OPT_FLOAT64 = Converter::ArkValue<Opt_Float64>();
     const float DEFAULT_VALUE = 0.0f;
 } // namespace
 void DestroyPeerImpl(Ark_HoverEvent peer)
@@ -37,16 +37,16 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Opt_Number GetXImpl(Ark_HoverEvent peer)
+Opt_Float64 GetXImpl(Ark_HoverEvent peer)
 {
-    CHECK_NULL_RETURN(peer, INVALID_OPT_NUMBER);
+    CHECK_NULL_RETURN(peer, INVALID_OPT_FLOAT64);
     const auto info = peer->GetEventInfo();
-    CHECK_NULL_RETURN(info, INVALID_OPT_NUMBER);
+    CHECK_NULL_RETURN(info, INVALID_OPT_FLOAT64);
     const auto value = PipelineBase::Px2VpWithCurrentDensity(info->GetLocalLocation().GetX());
-    return Converter::ArkValue<Opt_Number>(value);
+    return Converter::ArkValue<Opt_Float64>(value);
 }
 void SetXImpl(Ark_HoverEvent peer,
-              const Opt_Number* x)
+              const Opt_Float64* x)
 {
     CHECK_NULL_VOID(peer);
     auto info = peer->GetEventInfo();
@@ -57,16 +57,16 @@ void SetXImpl(Ark_HoverEvent peer,
     location.SetX(value, location.GetXAnimationOption());
     info->SetLocalLocation(location);
 }
-Opt_Number GetYImpl(Ark_HoverEvent peer)
+Opt_Float64 GetYImpl(Ark_HoverEvent peer)
 {
-    CHECK_NULL_RETURN(peer, INVALID_OPT_NUMBER);
+    CHECK_NULL_RETURN(peer, INVALID_OPT_FLOAT64);
     const auto info = peer->GetEventInfo();
-    CHECK_NULL_RETURN(info, INVALID_OPT_NUMBER);
+    CHECK_NULL_RETURN(info, INVALID_OPT_FLOAT64);
     const auto value = PipelineBase::Px2VpWithCurrentDensity(info->GetLocalLocation().GetY());
-    return Converter::ArkValue<Opt_Number>(value);
+    return Converter::ArkValue<Opt_Float64>(value);
 }
 void SetYImpl(Ark_HoverEvent peer,
-              const Opt_Number* y)
+              const Opt_Float64* y)
 {
     CHECK_NULL_VOID(peer);
     auto info = peer->GetEventInfo();
@@ -77,16 +77,16 @@ void SetYImpl(Ark_HoverEvent peer,
     location.SetY(value, location.GetYAnimationOption());
     info->SetLocalLocation(location);
 }
-Opt_Number GetWindowXImpl(Ark_HoverEvent peer)
+Opt_Float64 GetWindowXImpl(Ark_HoverEvent peer)
 {
-    CHECK_NULL_RETURN(peer, INVALID_OPT_NUMBER);
+    CHECK_NULL_RETURN(peer, INVALID_OPT_FLOAT64);
     const auto info = peer->GetEventInfo();
-    CHECK_NULL_RETURN(info, INVALID_OPT_NUMBER);
+    CHECK_NULL_RETURN(info, INVALID_OPT_FLOAT64);
     const auto value = PipelineBase::Px2VpWithCurrentDensity(info->GetGlobalLocation().GetX());
-    return Converter::ArkValue<Opt_Number>(value);
+    return Converter::ArkValue<Opt_Float64>(value);
 }
 void SetWindowXImpl(Ark_HoverEvent peer,
-                    const Opt_Number* windowX)
+                    const Opt_Float64* windowX)
 {
     CHECK_NULL_VOID(peer);
     const auto info = peer->GetEventInfo();
@@ -97,16 +97,16 @@ void SetWindowXImpl(Ark_HoverEvent peer,
     location.SetX(value, location.GetXAnimationOption());
     info->SetGlobalLocation(location);
 }
-Opt_Number GetWindowYImpl(Ark_HoverEvent peer)
+Opt_Float64 GetWindowYImpl(Ark_HoverEvent peer)
 {
-    CHECK_NULL_RETURN(peer, INVALID_OPT_NUMBER);
+    CHECK_NULL_RETURN(peer, INVALID_OPT_FLOAT64);
     const auto info = peer->GetEventInfo();
-    CHECK_NULL_RETURN(info, INVALID_OPT_NUMBER);
+    CHECK_NULL_RETURN(info, INVALID_OPT_FLOAT64);
     const auto value = PipelineBase::Px2VpWithCurrentDensity(info->GetGlobalLocation().GetY());
-    return Converter::ArkValue<Opt_Number>(value);
+    return Converter::ArkValue<Opt_Float64>(value);
 }
 void SetWindowYImpl(Ark_HoverEvent peer,
-                    const Opt_Number* windowY)
+                    const Opt_Float64* windowY)
 {
     CHECK_NULL_VOID(peer);
     const auto info = peer->GetEventInfo();
@@ -117,16 +117,16 @@ void SetWindowYImpl(Ark_HoverEvent peer,
     location.SetY(value, location.GetYAnimationOption());
     info->SetGlobalLocation(location);
 }
-Opt_Number GetDisplayXImpl(Ark_HoverEvent peer)
+Opt_Float64 GetDisplayXImpl(Ark_HoverEvent peer)
 {
-    CHECK_NULL_RETURN(peer, INVALID_OPT_NUMBER);
+    CHECK_NULL_RETURN(peer, INVALID_OPT_FLOAT64);
     const auto info = peer->GetEventInfo();
-    CHECK_NULL_RETURN(info, INVALID_OPT_NUMBER);
+    CHECK_NULL_RETURN(info, INVALID_OPT_FLOAT64);
     const auto value = PipelineBase::Px2VpWithCurrentDensity(info->GetScreenLocation().GetX());
-    return Converter::ArkValue<Opt_Number>(value);
+    return Converter::ArkValue<Opt_Float64>(value);
 }
 void SetDisplayXImpl(Ark_HoverEvent peer,
-                     const Opt_Number* displayX)
+                     const Opt_Float64* displayX)
 {
     CHECK_NULL_VOID(peer);
     const auto info = peer->GetEventInfo();
@@ -137,16 +137,16 @@ void SetDisplayXImpl(Ark_HoverEvent peer,
     location.SetX(value, location.GetXAnimationOption());
     info->SetScreenLocation(location);
 }
-Opt_Number GetDisplayYImpl(Ark_HoverEvent peer)
+Opt_Float64 GetDisplayYImpl(Ark_HoverEvent peer)
 {
-    CHECK_NULL_RETURN(peer, INVALID_OPT_NUMBER);
+    CHECK_NULL_RETURN(peer, INVALID_OPT_FLOAT64);
     const auto info = peer->GetEventInfo();
-    CHECK_NULL_RETURN(info, INVALID_OPT_NUMBER);
+    CHECK_NULL_RETURN(info, INVALID_OPT_FLOAT64);
     const auto value = PipelineBase::Px2VpWithCurrentDensity(info->GetScreenLocation().GetY());
-    return Converter::ArkValue<Opt_Number>(value);
+    return Converter::ArkValue<Opt_Float64>(value);
 }
 void SetDisplayYImpl(Ark_HoverEvent peer,
-                     const Opt_Number* displayY)
+                     const Opt_Float64* displayY)
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(displayY);

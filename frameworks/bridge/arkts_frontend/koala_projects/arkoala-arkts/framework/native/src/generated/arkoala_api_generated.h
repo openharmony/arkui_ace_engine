@@ -769,8 +769,8 @@ typedef struct Opt_uiObserver_NavigationInfo Opt_uiObserver_NavigationInfo;
 typedef struct unifiedDataChannel_UnifiedDataPeer unifiedDataChannel_UnifiedDataPeer;
 typedef struct unifiedDataChannel_UnifiedDataPeer* Ark_unifiedDataChannel_UnifiedData;
 typedef struct Opt_unifiedDataChannel_UnifiedData Opt_unifiedDataChannel_UnifiedData;
-typedef struct Ark_Union_Boolean_Number Ark_Union_Boolean_Number;
-typedef struct Opt_Union_Boolean_Number Opt_Union_Boolean_Number;
+typedef struct Ark_Union_Boolean_I64 Ark_Union_Boolean_I64;
+typedef struct Opt_Union_Boolean_I64 Opt_Union_Boolean_I64;
 typedef struct Ark_Union_CircleShape_EllipseShape_PathShape_RectShape Ark_Union_CircleShape_EllipseShape_PathShape_RectShape;
 typedef struct Opt_Union_CircleShape_EllipseShape_PathShape_RectShape Opt_Union_CircleShape_EllipseShape_PathShape_RectShape;
 typedef struct Ark_Union_Color_Number_String Ark_Union_Color_Number_String;
@@ -1505,8 +1505,8 @@ typedef struct InterceptionShowCallback InterceptionShowCallback;
 typedef struct Opt_InterceptionShowCallback Opt_InterceptionShowCallback;
 typedef struct LoadingProgressModifierBuilder LoadingProgressModifierBuilder;
 typedef struct Opt_LoadingProgressModifierBuilder Opt_LoadingProgressModifierBuilder;
-typedef struct Map_AxisModel_Number Map_AxisModel_Number;
-typedef struct Opt_Map_AxisModel_Number Opt_Map_AxisModel_Number;
+typedef struct Map_AxisModel_Float64 Map_AxisModel_Float64;
+typedef struct Opt_Map_AxisModel_Float64 Opt_Map_AxisModel_Float64;
 typedef struct Map_String_ComponentContent Map_String_ComponentContent;
 typedef struct Opt_Map_String_ComponentContent Opt_Map_String_ComponentContent;
 typedef struct Map_String_Int32 Map_String_Int32;
@@ -8109,12 +8109,12 @@ typedef struct Opt_TimePickerResult {
 } Opt_TimePickerResult;
 typedef struct Ark_TouchTestInfo {
     /* kind: Interface */
-    Ark_Number windowX;
-    Ark_Number windowY;
-    Ark_Number parentX;
-    Ark_Number parentY;
-    Ark_Number x;
-    Ark_Number y;
+    Ark_Float64 windowX;
+    Ark_Float64 windowY;
+    Ark_Float64 parentX;
+    Ark_Float64 parentY;
+    Ark_Float64 x;
+    Ark_Float64 y;
     Ark_RectResult rect;
     Ark_String id;
 } Ark_TouchTestInfo;
@@ -8222,18 +8222,18 @@ typedef struct Opt_unifiedDataChannel_UnifiedData {
     Ark_Tag tag;
     Ark_unifiedDataChannel_UnifiedData value;
 } Opt_unifiedDataChannel_UnifiedData;
-typedef struct Ark_Union_Boolean_Number {
+typedef struct Ark_Union_Boolean_I64 {
     /* kind: UnionType */
     Ark_Int32 selector;
     union {
         Ark_Boolean value0;
-        Ark_Number value1;
+        Ark_Int64 value1;
     };
-} Ark_Union_Boolean_Number;
-typedef struct Opt_Union_Boolean_Number {
+} Ark_Union_Boolean_I64;
+typedef struct Opt_Union_Boolean_I64 {
     Ark_Tag tag;
-    Ark_Union_Boolean_Number value;
-} Opt_Union_Boolean_Number;
+    Ark_Union_Boolean_I64 value;
+} Opt_Union_Boolean_I64;
 typedef struct Ark_Union_CircleShape_EllipseShape_PathShape_RectShape {
     /* kind: UnionType */
     Ark_Int32 selector;
@@ -11728,16 +11728,16 @@ typedef struct Opt_LoadingProgressModifierBuilder {
     Ark_Tag tag;
     LoadingProgressModifierBuilder value;
 } Opt_LoadingProgressModifierBuilder;
-typedef struct Map_AxisModel_Number {
+typedef struct Map_AxisModel_Float64 {
     /* kind: ContainerType */
     Ark_Int32 size;
     Ark_AxisModel* keys;
-    Ark_Number* values;
-} Map_AxisModel_Number;
-typedef struct Opt_Map_AxisModel_Number {
+    Ark_Float64* values;
+} Map_AxisModel_Float64;
+typedef struct Opt_Map_AxisModel_Float64 {
     Ark_Tag tag;
-    Map_AxisModel_Number value;
-} Opt_Map_AxisModel_Number;
+    Map_AxisModel_Float64 value;
+} Opt_Map_AxisModel_Float64;
 typedef struct Map_String_ComponentContent {
     /* kind: ContainerType */
     Ark_Int32 size;
@@ -12821,8 +12821,8 @@ typedef struct Opt_UpdateTransitionCallback {
 typedef struct VisibleAreaChangeCallback {
     /* kind: Callback */
     Ark_CallbackResource resource;
-    void (*call)(const Ark_Int32 resourceId, const Ark_Boolean isExpanding, const Ark_Number currentRatio);
-    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Boolean isExpanding, const Ark_Number currentRatio);
+    void (*call)(const Ark_Int32 resourceId, const Ark_Boolean isExpanding, const Ark_Float64 currentRatio);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Boolean isExpanding, const Ark_Float64 currentRatio);
 } VisibleAreaChangeCallback;
 typedef struct Opt_VisibleAreaChangeCallback {
     Ark_Tag tag;
@@ -13252,7 +13252,7 @@ typedef struct Opt_CircleOptions {
 typedef struct Ark_ClickEffect {
     /* kind: Interface */
     Ark_ClickEffectLevel level;
-    Opt_Number scale;
+    Opt_Float64 scale;
 } Ark_ClickEffect;
 typedef struct Opt_ClickEffect {
     Ark_Tag tag;
@@ -13351,9 +13351,9 @@ typedef struct Opt_Corners_Arkui_Graphics_Vector2 {
 } Opt_Corners_Arkui_Graphics_Vector2;
 typedef struct Ark_CrownEvent {
     /* kind: Interface */
-    Ark_Number timestamp;
-    Ark_Number angularVelocity;
-    Ark_Number degree;
+    Ark_Int64 timestamp;
+    Ark_Float64 angularVelocity;
+    Ark_Float64 degree;
     Ark_CrownAction action;
     Callback_Void stopPropagation;
 } Ark_CrownEvent;
@@ -14119,8 +14119,8 @@ typedef struct Opt_ItemDragEventHandler {
 } Opt_ItemDragEventHandler;
 typedef struct Ark_ItemDragInfo {
     /* kind: Interface */
-    Ark_Number x;
-    Ark_Number y;
+    Ark_Float64 x;
+    Ark_Float64 y;
 } Ark_ItemDragInfo;
 typedef struct Opt_ItemDragInfo {
     Ark_Tag tag;
@@ -14810,8 +14810,8 @@ typedef struct Opt_OnWindowNewEvent {
 } Opt_OnWindowNewEvent;
 typedef struct Ark_OverlayOffset {
     /* kind: Interface */
-    Opt_Number x;
-    Opt_Number y;
+    Opt_Float64 x;
+    Opt_Float64 y;
 } Ark_OverlayOffset;
 typedef struct Opt_OverlayOffset {
     Ark_Tag tag;
@@ -15600,18 +15600,18 @@ typedef struct Opt_ToolBarItemOptions {
 typedef struct Ark_TouchObject {
     /* kind: Interface */
     Ark_TouchType type;
-    Ark_Number id;
-    Ark_Number displayX;
-    Ark_Number displayY;
-    Ark_Number windowX;
-    Ark_Number windowY;
-    Ark_Number x;
-    Ark_Number y;
+    Ark_Int32 id;
+    Ark_Float64 displayX;
+    Ark_Float64 displayY;
+    Ark_Float64 windowX;
+    Ark_Float64 windowY;
+    Ark_Float64 x;
+    Ark_Float64 y;
     Opt_InteractionHand hand;
-    Opt_Number pressedTime;
-    Opt_Number pressure;
-    Opt_Number width;
-    Opt_Number height;
+    Opt_Int64 pressedTime;
+    Opt_Float64 pressure;
+    Opt_Float64 width;
+    Opt_Float64 height;
 } Ark_TouchObject;
 typedef struct Opt_TouchObject {
     Ark_Tag tag;
@@ -16752,8 +16752,8 @@ typedef struct Opt_ViewportRect {
 } Opt_ViewportRect;
 typedef struct Ark_VisibleAreaEventOptions {
     /* kind: Interface */
-    Array_Number ratios;
-    Opt_Number expectedUpdateInterval;
+    Array_Float64 ratios;
+    Opt_Int32 expectedUpdateInterval;
 } Ark_VisibleAreaEventOptions;
 typedef struct Opt_VisibleAreaEventOptions {
     Ark_Tag tag;
@@ -17162,7 +17162,7 @@ typedef struct Ark_DragPreviewOptions {
     /* kind: Interface */
     Opt_Union_DragPreviewMode_Array_DragPreviewMode mode;
     Opt_ImageModifier modifier;
-    Opt_Union_Boolean_Number numberBadge;
+    Opt_Union_Boolean_I64 numberBadge;
     Opt_DraggingSizeChangeEffect sizeChangeEffect;
 } Ark_DragPreviewOptions;
 typedef struct Opt_DragPreviewOptions {
@@ -17268,9 +17268,9 @@ typedef struct Opt_GridColOptions {
 typedef struct Ark_HistoricalPoint {
     /* kind: Interface */
     Ark_TouchObject touchObject;
-    Ark_Number size;
-    Ark_Number force;
-    Ark_Number timestamp;
+    Ark_Int32 size;
+    Ark_Float64 force;
+    Ark_Int64 timestamp;
 } Ark_HistoricalPoint;
 typedef struct Opt_HistoricalPoint {
     Ark_Tag tag;
@@ -21931,7 +21931,7 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
     void (*setGeometryTransition0)(Ark_NativePointer node,
                                    const Opt_String* value);
     void (*setRestoreId)(Ark_NativePointer node,
-                         const Opt_Number* value);
+                         const Opt_Int32* value);
     void (*setSphericalEffect)(Ark_NativePointer node,
                                const Opt_Float64* value);
     void (*setLightUpEffect)(Ark_NativePointer node,
@@ -22023,7 +22023,7 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                                    const Opt_SystemAdaptiveOptions* sysOptions);
     void (*setOnClick1)(Ark_NativePointer node,
                         const Opt_Callback_ClickEvent_Void* event,
-                        const Opt_Number* distanceThreshold);
+                        const Opt_Float64* distanceThreshold);
     void (*setFocusScopeId)(Ark_NativePointer node,
                             const Opt_String* id,
                             const Opt_Boolean* isGroup,
@@ -22107,7 +22107,7 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                          const Opt_CustomNodeBuilder* builder,
                          const Opt_SheetOptions* options);
     void (*setOnVisibleAreaChange)(Ark_NativePointer node,
-                                   const Opt_Array_Number* ratios,
+                                   const Opt_Array_Float64* ratios,
                                    const Opt_VisibleAreaChangeCallback* event);
     void (*setOnVisibleAreaApproximateChange)(Ark_NativePointer node,
                                               const Opt_VisibleAreaEventOptions* options,
@@ -25006,24 +25006,24 @@ typedef struct GENERATED_ArkUIAccessibilityHoverEventAccessor {
     Ark_AccessibilityHoverType (*getType)(Ark_AccessibilityHoverEvent peer);
     void (*setType)(Ark_AccessibilityHoverEvent peer,
                     Ark_AccessibilityHoverType type);
-    Ark_Number (*getX)(Ark_AccessibilityHoverEvent peer);
+    Ark_Float64 (*getX)(Ark_AccessibilityHoverEvent peer);
     void (*setX)(Ark_AccessibilityHoverEvent peer,
-                 const Ark_Number* x);
-    Ark_Number (*getY)(Ark_AccessibilityHoverEvent peer);
+                 Ark_Float64 x);
+    Ark_Float64 (*getY)(Ark_AccessibilityHoverEvent peer);
     void (*setY)(Ark_AccessibilityHoverEvent peer,
-                 const Ark_Number* y);
-    Ark_Number (*getDisplayX)(Ark_AccessibilityHoverEvent peer);
+                 Ark_Float64 y);
+    Ark_Float64 (*getDisplayX)(Ark_AccessibilityHoverEvent peer);
     void (*setDisplayX)(Ark_AccessibilityHoverEvent peer,
-                        const Ark_Number* displayX);
-    Ark_Number (*getDisplayY)(Ark_AccessibilityHoverEvent peer);
+                        Ark_Float64 displayX);
+    Ark_Float64 (*getDisplayY)(Ark_AccessibilityHoverEvent peer);
     void (*setDisplayY)(Ark_AccessibilityHoverEvent peer,
-                        const Ark_Number* displayY);
-    Ark_Number (*getWindowX)(Ark_AccessibilityHoverEvent peer);
+                        Ark_Float64 displayY);
+    Ark_Float64 (*getWindowX)(Ark_AccessibilityHoverEvent peer);
     void (*setWindowX)(Ark_AccessibilityHoverEvent peer,
-                       const Ark_Number* windowX);
-    Ark_Number (*getWindowY)(Ark_AccessibilityHoverEvent peer);
+                       Ark_Float64 windowX);
+    Ark_Float64 (*getWindowY)(Ark_AccessibilityHoverEvent peer);
     void (*setWindowY)(Ark_AccessibilityHoverEvent peer,
-                       const Ark_Number* windowY);
+                       Ark_Float64 windowY);
 } GENERATED_ArkUIAccessibilityHoverEventAccessor;
 
 typedef struct GENERATED_ArkUIActionSheetAccessor {
@@ -25127,34 +25127,34 @@ typedef struct GENERATED_ArkUIAxisEventAccessor {
     void (*destroyPeer)(Ark_AxisEvent peer);
     Ark_AxisEvent (*construct)();
     Ark_NativePointer (*getFinalizer)();
-    Ark_Number (*getHorizontalAxisValue)(Ark_AxisEvent peer);
-    Ark_Number (*getVerticalAxisValue)(Ark_AxisEvent peer);
+    Ark_Float64 (*getHorizontalAxisValue)(Ark_AxisEvent peer);
+    Ark_Float64 (*getVerticalAxisValue)(Ark_AxisEvent peer);
     Ark_Boolean (*hasAxis)(Ark_AxisEvent peer,
                            Ark_AxisType axisType);
     Ark_AxisAction (*getAction)(Ark_AxisEvent peer);
     void (*setAction)(Ark_AxisEvent peer,
                       Ark_AxisAction action);
-    Ark_Number (*getDisplayX)(Ark_AxisEvent peer);
+    Ark_Float64 (*getDisplayX)(Ark_AxisEvent peer);
     void (*setDisplayX)(Ark_AxisEvent peer,
-                        const Ark_Number* displayX);
-    Ark_Number (*getDisplayY)(Ark_AxisEvent peer);
+                        Ark_Float64 displayX);
+    Ark_Float64 (*getDisplayY)(Ark_AxisEvent peer);
     void (*setDisplayY)(Ark_AxisEvent peer,
-                        const Ark_Number* displayY);
-    Ark_Number (*getWindowX)(Ark_AxisEvent peer);
+                        Ark_Float64 displayY);
+    Ark_Float64 (*getWindowX)(Ark_AxisEvent peer);
     void (*setWindowX)(Ark_AxisEvent peer,
-                       const Ark_Number* windowX);
-    Ark_Number (*getWindowY)(Ark_AxisEvent peer);
+                       Ark_Float64 windowX);
+    Ark_Float64 (*getWindowY)(Ark_AxisEvent peer);
     void (*setWindowY)(Ark_AxisEvent peer,
-                       const Ark_Number* windowY);
-    Ark_Number (*getX)(Ark_AxisEvent peer);
+                       Ark_Float64 windowY);
+    Ark_Float64 (*getX)(Ark_AxisEvent peer);
     void (*setX)(Ark_AxisEvent peer,
-                 const Ark_Number* x);
-    Ark_Number (*getY)(Ark_AxisEvent peer);
+                 Ark_Float64 x);
+    Ark_Float64 (*getY)(Ark_AxisEvent peer);
     void (*setY)(Ark_AxisEvent peer,
-                 const Ark_Number* y);
-    Opt_Number (*getScrollStep)(Ark_AxisEvent peer);
+                 Ark_Float64 y);
+    Opt_Int32 (*getScrollStep)(Ark_AxisEvent peer);
     void (*setScrollStep)(Ark_AxisEvent peer,
-                          const Opt_Number* scrollStep);
+                          const Opt_Int32* scrollStep);
     void (*propagation)(Ark_AxisEvent peer);
 } GENERATED_ArkUIAxisEventAccessor;
 
@@ -25172,42 +25172,42 @@ typedef struct GENERATED_ArkUIBaseEventAccessor {
     Ark_EventTarget (*getTarget)(Ark_BaseEvent peer);
     void (*setTarget)(Ark_BaseEvent peer,
                       const Ark_EventTarget* target);
-    Ark_Number (*getTimestamp)(Ark_BaseEvent peer);
+    Ark_Int64 (*getTimestamp)(Ark_BaseEvent peer);
     void (*setTimestamp)(Ark_BaseEvent peer,
-                         const Ark_Number* timestamp);
+                         Ark_Int64 timestamp);
     Ark_SourceType (*getSource)(Ark_BaseEvent peer);
     void (*setSource)(Ark_BaseEvent peer,
                       Ark_SourceType source);
-    Opt_Number (*getAxisHorizontal)(Ark_BaseEvent peer);
+    Opt_Float64 (*getAxisHorizontal)(Ark_BaseEvent peer);
     void (*setAxisHorizontal)(Ark_BaseEvent peer,
-                              const Opt_Number* axisHorizontal);
-    Opt_Number (*getAxisVertical)(Ark_BaseEvent peer);
+                              const Opt_Float64* axisHorizontal);
+    Opt_Float64 (*getAxisVertical)(Ark_BaseEvent peer);
     void (*setAxisVertical)(Ark_BaseEvent peer,
-                            const Opt_Number* axisVertical);
-    Ark_Number (*getPressure)(Ark_BaseEvent peer);
+                            const Opt_Float64* axisVertical);
+    Ark_Float64 (*getPressure)(Ark_BaseEvent peer);
     void (*setPressure)(Ark_BaseEvent peer,
-                        const Ark_Number* pressure);
-    Ark_Number (*getTiltX)(Ark_BaseEvent peer);
+                        Ark_Float64 pressure);
+    Ark_Float64 (*getTiltX)(Ark_BaseEvent peer);
     void (*setTiltX)(Ark_BaseEvent peer,
-                     const Ark_Number* tiltX);
-    Ark_Number (*getTiltY)(Ark_BaseEvent peer);
+                     Ark_Float64 tiltX);
+    Ark_Float64 (*getTiltY)(Ark_BaseEvent peer);
     void (*setTiltY)(Ark_BaseEvent peer,
-                     const Ark_Number* tiltY);
-    Opt_Number (*getRollAngle)(Ark_BaseEvent peer);
+                     Ark_Float64 tiltY);
+    Opt_Float64 (*getRollAngle)(Ark_BaseEvent peer);
     void (*setRollAngle)(Ark_BaseEvent peer,
-                         const Opt_Number* rollAngle);
+                         const Opt_Float64* rollAngle);
     Ark_SourceTool (*getSourceTool)(Ark_BaseEvent peer);
     void (*setSourceTool)(Ark_BaseEvent peer,
                           Ark_SourceTool sourceTool);
     Opt_ModifierKeyStateGetter (*getGetModifierKeyState)(Ark_BaseEvent peer);
     void (*setGetModifierKeyState)(Ark_BaseEvent peer,
                                    const Opt_ModifierKeyStateGetter* getModifierKeyState);
-    Opt_Number (*getDeviceId)(Ark_BaseEvent peer);
+    Opt_Int32 (*getDeviceId)(Ark_BaseEvent peer);
     void (*setDeviceId)(Ark_BaseEvent peer,
-                        const Opt_Number* deviceId);
-    Opt_Number (*getTargetDisplayId)(Ark_BaseEvent peer);
+                        const Opt_Int32* deviceId);
+    Opt_Int32 (*getTargetDisplayId)(Ark_BaseEvent peer);
     void (*setTargetDisplayId)(Ark_BaseEvent peer,
-                               const Opt_Number* targetDisplayId);
+                               const Opt_Int32* targetDisplayId);
 } GENERATED_ArkUIBaseEventAccessor;
 
 typedef struct GENERATED_ArkUIBaseGestureEventAccessor {
@@ -25612,24 +25612,24 @@ typedef struct GENERATED_ArkUIClickEventAccessor {
     void (*destroyPeer)(Ark_ClickEvent peer);
     Ark_ClickEvent (*construct)();
     Ark_NativePointer (*getFinalizer)();
-    Ark_Number (*getDisplayX)(Ark_ClickEvent peer);
+    Ark_Float64 (*getDisplayX)(Ark_ClickEvent peer);
     void (*setDisplayX)(Ark_ClickEvent peer,
-                        const Ark_Number* displayX);
-    Ark_Number (*getDisplayY)(Ark_ClickEvent peer);
+                        Ark_Float64 displayX);
+    Ark_Float64 (*getDisplayY)(Ark_ClickEvent peer);
     void (*setDisplayY)(Ark_ClickEvent peer,
-                        const Ark_Number* displayY);
-    Ark_Number (*getWindowX)(Ark_ClickEvent peer);
+                        Ark_Float64 displayY);
+    Ark_Float64 (*getWindowX)(Ark_ClickEvent peer);
     void (*setWindowX)(Ark_ClickEvent peer,
-                       const Ark_Number* windowX);
-    Ark_Number (*getWindowY)(Ark_ClickEvent peer);
+                       Ark_Float64 windowX);
+    Ark_Float64 (*getWindowY)(Ark_ClickEvent peer);
     void (*setWindowY)(Ark_ClickEvent peer,
-                       const Ark_Number* windowY);
-    Ark_Number (*getX)(Ark_ClickEvent peer);
+                       Ark_Float64 windowY);
+    Ark_Float64 (*getX)(Ark_ClickEvent peer);
     void (*setX)(Ark_ClickEvent peer,
-                 const Ark_Number* x);
-    Ark_Number (*getY)(Ark_ClickEvent peer);
+                 Ark_Float64 x);
+    Ark_Float64 (*getY)(Ark_ClickEvent peer);
     void (*setY)(Ark_ClickEvent peer,
-                 const Ark_Number* y);
+                 Ark_Float64 y);
     Opt_InteractionHand (*getHand)(Ark_ClickEvent peer);
     void (*setHand)(Ark_ClickEvent peer,
                     const Opt_InteractionHand* hand);
@@ -25856,10 +25856,10 @@ typedef struct GENERATED_ArkUIDragEventAccessor {
     void (*destroyPeer)(Ark_DragEvent peer);
     Ark_DragEvent (*construct)();
     Ark_NativePointer (*getFinalizer)();
-    Ark_Number (*getDisplayX)(Ark_DragEvent peer);
-    Ark_Number (*getDisplayY)(Ark_DragEvent peer);
-    Ark_Number (*getWindowX)(Ark_DragEvent peer);
-    Ark_Number (*getWindowY)(Ark_DragEvent peer);
+    Ark_Float64 (*getDisplayX)(Ark_DragEvent peer);
+    Ark_Float64 (*getDisplayY)(Ark_DragEvent peer);
+    Ark_Float64 (*getWindowX)(Ark_DragEvent peer);
+    Ark_Float64 (*getWindowY)(Ark_DragEvent peer);
     void (*setData)(Ark_DragEvent peer,
                     Ark_unifiedDataChannel_UnifiedData unifiedData);
     Ark_unifiedDataChannel_UnifiedData (*getData)(Ark_DragEvent peer);
@@ -25868,9 +25868,9 @@ typedef struct GENERATED_ArkUIDragEventAccessor {
                       Ark_DragResult dragResult);
     Ark_DragResult (*getResult)(Ark_DragEvent peer);
     Ark_Rectangle (*getPreviewRect)(Ark_DragEvent peer);
-    Ark_Number (*getVelocityX)(Ark_DragEvent peer);
-    Ark_Number (*getVelocityY)(Ark_DragEvent peer);
-    Ark_Number (*getVelocity)(Ark_DragEvent peer);
+    Ark_Float64 (*getVelocityX)(Ark_DragEvent peer);
+    Ark_Float64 (*getVelocityY)(Ark_DragEvent peer);
+    Ark_Float64 (*getVelocity)(Ark_DragEvent peer);
     void (*executeDropAnimation)(Ark_DragEvent peer,
                                  const Callback_Void* customDropAnimation);
     void (*enableInternalDropAnimation)(Ark_DragEvent peer,
@@ -25969,9 +25969,9 @@ typedef struct GENERATED_ArkUIFocusAxisEventAccessor {
     void (*destroyPeer)(Ark_FocusAxisEvent peer);
     Ark_FocusAxisEvent (*construct)();
     Ark_NativePointer (*getFinalizer)();
-    Map_AxisModel_Number (*getAxisMap)(Ark_FocusAxisEvent peer);
+    Map_AxisModel_Float64 (*getAxisMap)(Ark_FocusAxisEvent peer);
     void (*setAxisMap)(Ark_FocusAxisEvent peer,
-                       const Map_AxisModel_Number* axisMap);
+                       const Map_AxisModel_Float64* axisMap);
     void (*stopPropagation)(Ark_FocusAxisEvent peer);
 } GENERATED_ArkUIFocusAxisEventAccessor;
 
@@ -26257,24 +26257,24 @@ typedef struct GENERATED_ArkUIHoverEventAccessor {
     void (*destroyPeer)(Ark_HoverEvent peer);
     Ark_HoverEvent (*construct)();
     Ark_NativePointer (*getFinalizer)();
-    Opt_Number (*getX)(Ark_HoverEvent peer);
+    Opt_Float64 (*getX)(Ark_HoverEvent peer);
     void (*setX)(Ark_HoverEvent peer,
-                 const Opt_Number* x);
-    Opt_Number (*getY)(Ark_HoverEvent peer);
+                 const Opt_Float64* x);
+    Opt_Float64 (*getY)(Ark_HoverEvent peer);
     void (*setY)(Ark_HoverEvent peer,
-                 const Opt_Number* y);
-    Opt_Number (*getWindowX)(Ark_HoverEvent peer);
+                 const Opt_Float64* y);
+    Opt_Float64 (*getWindowX)(Ark_HoverEvent peer);
     void (*setWindowX)(Ark_HoverEvent peer,
-                       const Opt_Number* windowX);
-    Opt_Number (*getWindowY)(Ark_HoverEvent peer);
+                       const Opt_Float64* windowX);
+    Opt_Float64 (*getWindowY)(Ark_HoverEvent peer);
     void (*setWindowY)(Ark_HoverEvent peer,
-                       const Opt_Number* windowY);
-    Opt_Number (*getDisplayX)(Ark_HoverEvent peer);
+                       const Opt_Float64* windowY);
+    Opt_Float64 (*getDisplayX)(Ark_HoverEvent peer);
     void (*setDisplayX)(Ark_HoverEvent peer,
-                        const Opt_Number* displayX);
-    Opt_Number (*getDisplayY)(Ark_HoverEvent peer);
+                        const Opt_Float64* displayX);
+    Opt_Float64 (*getDisplayY)(Ark_HoverEvent peer);
     void (*setDisplayY)(Ark_HoverEvent peer,
-                        const Opt_Number* displayY);
+                        const Opt_Float64* displayY);
     void (*stopPropagation)(Ark_HoverEvent peer);
 } GENERATED_ArkUIHoverEventAccessor;
 
@@ -26387,24 +26387,24 @@ typedef struct GENERATED_ArkUIKeyEventAccessor {
     Ark_KeyType (*getType)(Ark_KeyEvent peer);
     void (*setType)(Ark_KeyEvent peer,
                     Ark_KeyType type);
-    Ark_Number (*getKeyCode)(Ark_KeyEvent peer);
+    Ark_Int32 (*getKeyCode)(Ark_KeyEvent peer);
     void (*setKeyCode)(Ark_KeyEvent peer,
-                       const Ark_Number* keyCode);
+                       Ark_Int32 keyCode);
     Ark_String (*getKeyText)(Ark_KeyEvent peer);
     void (*setKeyText)(Ark_KeyEvent peer,
                        const Ark_String* keyText);
     Ark_KeySource (*getKeySource)(Ark_KeyEvent peer);
     void (*setKeySource)(Ark_KeyEvent peer,
                          Ark_KeySource keySource);
-    Ark_Number (*getDeviceId)(Ark_KeyEvent peer);
+    Ark_Int32 (*getDeviceId)(Ark_KeyEvent peer);
     void (*setDeviceId)(Ark_KeyEvent peer,
-                        const Ark_Number* deviceId);
-    Ark_Number (*getMetaKey)(Ark_KeyEvent peer);
+                        Ark_Int32 deviceId);
+    Ark_Int32 (*getMetaKey)(Ark_KeyEvent peer);
     void (*setMetaKey)(Ark_KeyEvent peer,
-                       const Ark_Number* metaKey);
-    Ark_Number (*getTimestamp)(Ark_KeyEvent peer);
+                       Ark_Int32 metaKey);
+    Ark_Int64 (*getTimestamp)(Ark_KeyEvent peer);
     void (*setTimestamp)(Ark_KeyEvent peer,
-                         const Ark_Number* timestamp);
+                         Ark_Int64 timestamp);
     Callback_Void (*getStopPropagation)(Ark_KeyEvent peer);
     void (*setStopPropagation)(Ark_KeyEvent peer,
                                const Callback_Void* stopPropagation);
@@ -26414,9 +26414,9 @@ typedef struct GENERATED_ArkUIKeyEventAccessor {
     Opt_ModifierKeyStateGetter (*getGetModifierKeyState)(Ark_KeyEvent peer);
     void (*setGetModifierKeyState)(Ark_KeyEvent peer,
                                    const Opt_ModifierKeyStateGetter* getModifierKeyState);
-    Opt_Number (*getUnicode)(Ark_KeyEvent peer);
+    Opt_Int64 (*getUnicode)(Ark_KeyEvent peer);
     void (*setUnicode)(Ark_KeyEvent peer,
-                       const Opt_Number* unicode);
+                       const Opt_Int64* unicode);
 } GENERATED_ArkUIKeyEventAccessor;
 
 typedef struct GENERATED_ArkUILayoutableAccessor {
@@ -26624,33 +26624,33 @@ typedef struct GENERATED_ArkUIMouseEventAccessor {
     Ark_MouseAction (*getAction)(Ark_MouseEvent peer);
     void (*setAction)(Ark_MouseEvent peer,
                       Ark_MouseAction action);
-    Ark_Number (*getDisplayX)(Ark_MouseEvent peer);
+    Ark_Float64 (*getDisplayX)(Ark_MouseEvent peer);
     void (*setDisplayX)(Ark_MouseEvent peer,
-                        const Ark_Number* displayX);
-    Ark_Number (*getDisplayY)(Ark_MouseEvent peer);
+                        Ark_Float64 displayX);
+    Ark_Float64 (*getDisplayY)(Ark_MouseEvent peer);
     void (*setDisplayY)(Ark_MouseEvent peer,
-                        const Ark_Number* displayY);
-    Ark_Number (*getWindowX)(Ark_MouseEvent peer);
+                        Ark_Float64 displayY);
+    Ark_Float64 (*getWindowX)(Ark_MouseEvent peer);
     void (*setWindowX)(Ark_MouseEvent peer,
-                       const Ark_Number* windowX);
-    Ark_Number (*getWindowY)(Ark_MouseEvent peer);
+                       Ark_Float64 windowX);
+    Ark_Float64 (*getWindowY)(Ark_MouseEvent peer);
     void (*setWindowY)(Ark_MouseEvent peer,
-                       const Ark_Number* windowY);
-    Ark_Number (*getX)(Ark_MouseEvent peer);
+                       Ark_Float64 windowY);
+    Ark_Float64 (*getX)(Ark_MouseEvent peer);
     void (*setX)(Ark_MouseEvent peer,
-                 const Ark_Number* x);
-    Ark_Number (*getY)(Ark_MouseEvent peer);
+                 Ark_Float64 x);
+    Ark_Float64 (*getY)(Ark_MouseEvent peer);
     void (*setY)(Ark_MouseEvent peer,
-                 const Ark_Number* y);
+                 Ark_Float64 y);
     Callback_Void (*getStopPropagation)(Ark_MouseEvent peer);
     void (*setStopPropagation)(Ark_MouseEvent peer,
                                const Callback_Void* stopPropagation);
-    Opt_Number (*getRawDeltaX)(Ark_MouseEvent peer);
+    Opt_Float64 (*getRawDeltaX)(Ark_MouseEvent peer);
     void (*setRawDeltaX)(Ark_MouseEvent peer,
-                         const Opt_Number* rawDeltaX);
-    Opt_Number (*getRawDeltaY)(Ark_MouseEvent peer);
+                         const Opt_Float64* rawDeltaX);
+    Opt_Float64 (*getRawDeltaY)(Ark_MouseEvent peer);
     void (*setRawDeltaY)(Ark_MouseEvent peer,
-                         const Opt_Number* rawDeltaY);
+                         const Opt_Float64* rawDeltaY);
     Opt_Array_MouseButton (*getPressedButtons)(Ark_MouseEvent peer);
     void (*setPressedButtons)(Ark_MouseEvent peer,
                               const Opt_Array_MouseButton* pressedButtons);

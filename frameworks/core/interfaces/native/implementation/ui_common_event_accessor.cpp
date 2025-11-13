@@ -224,7 +224,7 @@ void SetOnVisibleAreaApproximateChangeImpl(
     auto onVisibleChange = [arkCallback = CallbackHelper(arkOnVisibleChange.value())](
                                bool isExpanding, double currentRatio) {
         auto arkIsExpanding = Converter::ArkValue<Ark_Boolean>(isExpanding);
-        auto arkCurrentRatio = Converter::ArkValue<Ark_Number>(currentRatio);
+        auto arkCurrentRatio = Converter::ArkValue<Ark_Float64>(currentRatio);
         arkCallback.InvokeSync(arkIsExpanding, arkCurrentRatio);
     };
     std::vector<double> ratioList = Converter::Convert<std::vector<double>>(options->ratios);

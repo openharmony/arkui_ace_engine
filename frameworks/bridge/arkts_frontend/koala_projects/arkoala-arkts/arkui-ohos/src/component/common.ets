@@ -91,12 +91,12 @@ export function applyStyles<T extends CommonMethod>(this: T, customStyles: Custo
 }
 
 export class TouchTestInfo {
-    windowX: number;
-    windowY: number;
-    parentX: number;
-    parentY: number;
-    x: number;
-    y: number;
+    windowX: double;
+    windowY: double;
+    parentX: double;
+    parentY: double;
+    x: double;
+    y: double;
     rect: RectResult;
     id: string;
     constructor() {
@@ -162,7 +162,7 @@ export class KeyEventTransfer {
         retValue.setProperty('metaKey', objectInternal.metaKey);
         retValue.setProperty('unicode', objectInternal.unicode);
         retValue.setProperty('timestamp', objectInternal.timestamp);
-        retValue.setProperty('intentionCode', objectInternal.intentionCode.valueOf());
+        retValue.setProperty('intentionCode', objectInternal.intentionCode);
         return retValue;
     }
 }
@@ -294,37 +294,37 @@ export class ClickEventTransfer {
         };
         clickEvent.target = target;
         const timestampValue = esValue.getProperty("timestamp").toNumber();
-        clickEvent.timestamp = timestampValue;
+        clickEvent.timestamp = timestampValue as int64;
         const sourceValue = esValue.getProperty("source").toNumber();
         clickEvent.source = TypeChecker.SourceType_FromNumeric(sourceValue as int32);
         const axisVerticalValue = esValue.getProperty("axisVertical").toNumber();
-        clickEvent.axisVertical = axisVerticalValue;
+        clickEvent.axisVertical = axisVerticalValue as double;
         const axisHorizontalValue = esValue.getProperty("axisHorizontal").toNumber();
-        clickEvent.axisHorizontal = axisHorizontalValue;
+        clickEvent.axisHorizontal = axisHorizontalValue as double;
         const pressureValue = esValue.getProperty("pressure").toNumber();
-        clickEvent.pressure = pressureValue;
+        clickEvent.pressure = pressureValue as double;
         const tiltXValue = esValue.getProperty("tiltX").toNumber();
-        clickEvent.tiltX = tiltXValue;
+        clickEvent.tiltX = tiltXValue as double;
         const tiltYValue = esValue.getProperty("tiltY").toNumber();
-        clickEvent.tiltY = tiltYValue;
+        clickEvent.tiltY = tiltYValue as double;
         const sourceToolValue = esValue.getProperty("sourceTool").toNumber();
         clickEvent.sourceTool = TypeChecker.SourceTool_FromNumeric(sourceToolValue as int32);
         const deviceIdValue = esValue.getProperty("deviceId").toNumber();
-        clickEvent.deviceId = deviceIdValue;
+        clickEvent.deviceId = deviceIdValue as int32;
         const targetDisplayIdValue = esValue.getProperty("targetDisplayId").toNumber();
-        clickEvent.targetDisplayId = targetDisplayIdValue;
+        clickEvent.targetDisplayId = targetDisplayIdValue as int32;
         const displayXValue = esValue.getProperty("displayX").toNumber();
-        clickEvent.displayX = displayXValue;
+        clickEvent.displayX = displayXValue as double;
         const displayYValue = esValue.getProperty("displayY").toNumber();
-        clickEvent.displayY = displayYValue;
+        clickEvent.displayY = displayYValue as double;
         const windowXValue = esValue.getProperty("windowX").toNumber();
-        clickEvent.windowX = windowXValue;
+        clickEvent.windowX = windowXValue as double;
         const windowYValue = esValue.getProperty("windowY").toNumber();
-        clickEvent.windowY = windowYValue;
+        clickEvent.windowY = windowYValue as double;
         const xValue = esValue.getProperty("x").toNumber();
-        clickEvent.x = xValue;
+        clickEvent.x = xValue as double;
         const yValue = esValue.getProperty("y").toNumber();
-        clickEvent.y = yValue;
+        clickEvent.y = yValue as double;
         const handValue = esValue.getProperty("hand").toNumber();
         clickEvent.hand = TypeChecker.InteractionHand_FromNumeric(handValue as int32);
         return clickEvent;
@@ -425,37 +425,37 @@ export class HoverEventTransfer {
         };
         hoverEvent.target = target;
         const timestampValue = esValue.getProperty("timestamp").toNumber();
-        hoverEvent.timestamp = timestampValue;
+        hoverEvent.timestamp = timestampValue as int64;
         const sourceValue = esValue.getProperty("source").toNumber();
         hoverEvent.source = TypeChecker.SourceType_FromNumeric(sourceValue as int32);
         const axisVerticalValue = esValue.getProperty("axisVertical").toNumber();
-        hoverEvent.axisVertical = axisVerticalValue;
+        hoverEvent.axisVertical = axisVerticalValue as double;
         const axisHorizontalValue = esValue.getProperty("axisHorizontal").toNumber();
-        hoverEvent.axisHorizontal = axisHorizontalValue;
+        hoverEvent.axisHorizontal = axisHorizontalValue as double;
         const pressureValue = esValue.getProperty("pressure").toNumber();
-        hoverEvent.pressure = pressureValue;
+        hoverEvent.pressure = pressureValue as double;
         const tiltXValue = esValue.getProperty("tiltX").toNumber();
-        hoverEvent.tiltX = tiltXValue;
+        hoverEvent.tiltX = tiltXValue as double;
         const tiltYValue = esValue.getProperty("tiltY").toNumber();
-        hoverEvent.tiltY = tiltYValue;
+        hoverEvent.tiltY = tiltYValue as double;
         const sourceToolValue = esValue.getProperty("sourceTool").toNumber();
         hoverEvent.sourceTool = TypeChecker.SourceTool_FromNumeric(sourceToolValue as int32);
         const deviceIdValue = esValue.getProperty("deviceId").toNumber();
-        hoverEvent.deviceId = deviceIdValue;
+        hoverEvent.deviceId = deviceIdValue as int32;
         const targetDisplayIdValue = esValue.getProperty("targetDisplayId").toNumber();
-        hoverEvent.targetDisplayId = targetDisplayIdValue;
+        hoverEvent.targetDisplayId = targetDisplayIdValue as int32;
         const displayXValue = esValue.getProperty("displayX").toNumber();
-        hoverEvent.displayX = displayXValue;
+        hoverEvent.displayX = displayXValue as double;
         const displayYValue = esValue.getProperty("displayY").toNumber();
-        hoverEvent.displayY = displayYValue;
+        hoverEvent.displayY = displayYValue as double;
         const windowXValue = esValue.getProperty("windowX").toNumber();
-        hoverEvent.windowX = windowXValue;
+        hoverEvent.windowX = windowXValue as double;
         const windowYValue = esValue.getProperty("windowY").toNumber();
-        hoverEvent.windowY = windowYValue;
+        hoverEvent.windowY = windowYValue as double;
         const xValue = esValue.getProperty("x").toNumber();
-        hoverEvent.x = xValue;
+        hoverEvent.x = xValue as double;
         const yValue = esValue.getProperty("y").toNumber();
-        hoverEvent.y = yValue;
+        hoverEvent.y = yValue as double;
         return hoverEvent;
     }
     static transferDynamic(input: Object): Any {
@@ -531,41 +531,41 @@ export class MouseEventTransfer {
         const actionValue = esValue.getProperty("action").toNumber();
         mouseEvent.action = TypeChecker.MouseAction_FromNumeric(actionValue as int32);
         const displayXValue = esValue.getProperty("displayX").toNumber();
-        mouseEvent.displayX = displayXValue;
+        mouseEvent.displayX = displayXValue as double;
         const displayYValue = esValue.getProperty("displayY").toNumber();
-        mouseEvent.displayY = displayYValue;
+        mouseEvent.displayY = displayYValue as double;
         const windowXValue = esValue.getProperty("windowX").toNumber();
-        mouseEvent.windowX = windowXValue;
+        mouseEvent.windowX = windowXValue as double;
         const windowYValue = esValue.getProperty("windowY").toNumber();
-        mouseEvent.windowY = windowYValue;
+        mouseEvent.windowY = windowYValue as double;
         const xValue = esValue.getProperty("x").toNumber();
-        mouseEvent.x = xValue;
+        mouseEvent.x = xValue as double;
         const yValue = esValue.getProperty("y").toNumber();
-        mouseEvent.y = yValue;
+        mouseEvent.y = yValue as double;
         const timestampValue = esValue.getProperty("timestamp").toNumber();
-        mouseEvent.timestamp = timestampValue;
+        mouseEvent.timestamp = timestampValue as int64;
         const deviceIdValue = esValue.getProperty("deviceId").toNumber();
-        mouseEvent.deviceId = deviceIdValue;
+        mouseEvent.deviceId = deviceIdValue as int32;
         const sourceValue = esValue.getProperty("source").toNumber();
         mouseEvent.source = TypeChecker.SourceType_FromNumeric(sourceValue as int32);
         const pressureValue = esValue.getProperty("pressure").toNumber();
-        mouseEvent.pressure = pressureValue;
+        mouseEvent.pressure = pressureValue as double;
         const tiltXValue = esValue.getProperty("tiltX").toNumber();
-        mouseEvent.tiltX = tiltXValue;
+        mouseEvent.tiltX = tiltXValue as double;
         const tiltYValue = esValue.getProperty("tiltY").toNumber();
-        mouseEvent.tiltY = tiltYValue;
+        mouseEvent.tiltY = tiltYValue as double;
         const sourceToolValue = esValue.getProperty("sourceTool").toNumber();
         mouseEvent.sourceTool = TypeChecker.SourceTool_FromNumeric(sourceToolValue as int32);
         const axisVerticalValue = esValue.getProperty("axisVertical").toNumber();
-        mouseEvent.axisVertical = axisVerticalValue;
+        mouseEvent.axisVertical = axisVerticalValue as double;
         const axisHorizontalValue = esValue.getProperty("axisHorizontal").toNumber();
-        mouseEvent.axisHorizontal = axisHorizontalValue;
+        mouseEvent.axisHorizontal = axisHorizontalValue as double;
         const targetDisplayIdValue = esValue.getProperty("targetDisplayId").toNumber();
-        mouseEvent.targetDisplayId = targetDisplayIdValue;
+        mouseEvent.targetDisplayId = targetDisplayIdValue as int32;
         const rawDeltaXValue = esValue.getProperty("rawDeltaX").toNumber();
-        mouseEvent.rawDeltaX = rawDeltaXValue;
+        mouseEvent.rawDeltaX = rawDeltaXValue as double;
         const rawDeltaYValue = esValue.getProperty("rawDeltaY").toNumber();
-        mouseEvent.rawDeltaY = rawDeltaYValue;
+        mouseEvent.rawDeltaY = rawDeltaYValue as double;
         const targetValue = esValue.getProperty("target");
         const areaValue = targetValue.getProperty("area");
         const widthValue = areaValue.getProperty("width").toNumber();
@@ -684,7 +684,7 @@ export class TouchEventTransfer {
         const sourceValue = esValue.getProperty("source").toNumber();
         touchEvent.source = TypeChecker.SourceType_FromNumeric(sourceValue as int32);
         const timestampValue = esValue.getProperty("timestamp").toNumber();
-        touchEvent.timestamp = timestampValue;
+        touchEvent.timestamp = timestampValue as int64;
         const targetValue = esValue.getProperty("target");
         const areaValue = targetValue.getProperty("area");
         const widthValue = areaValue.getProperty("width").toNumber();
@@ -713,21 +713,21 @@ export class TouchEventTransfer {
         };
         touchEvent.target = target;
         const pressureValue = esValue.getProperty("pressure").toNumber();
-        touchEvent.pressure = pressureValue;
+        touchEvent.pressure = pressureValue as double;
         const deviceIdValue = esValue.getProperty("deviceId").toNumber();
-        touchEvent.deviceId = deviceIdValue;
+        touchEvent.deviceId = deviceIdValue as int32;
         const tiltXValue = esValue.getProperty("tiltX").toNumber();
-        touchEvent.tiltX = tiltXValue;
+        touchEvent.tiltX = tiltXValue as double;
         const tiltYValue = esValue.getProperty("tiltY").toNumber();
-        touchEvent.tiltY = tiltYValue;
+        touchEvent.tiltY = tiltYValue as double;
         const sourceToolValue = esValue.getProperty("sourceTool").toNumber();
         touchEvent.sourceTool = TypeChecker.SourceTool_FromNumeric(sourceToolValue as int32);
         const axisVerticalValue = esValue.getProperty("axisVertical").toNumber();
-        touchEvent.axisVertical = axisVerticalValue;
+        touchEvent.axisVertical = axisVerticalValue as double;
         const axisHorizontalValue = esValue.getProperty("axisHorizontal").toNumber();
-        touchEvent.axisHorizontal = axisHorizontalValue;
+        touchEvent.axisHorizontal = axisHorizontalValue as double;
         const targetDisplayIdValue = esValue.getProperty("targetDisplayId").toNumber();
-        touchEvent.targetDisplayId = targetDisplayIdValue;
+        touchEvent.targetDisplayId = targetDisplayIdValue as int32;
         const typeValue = esValue.getProperty("type").toNumber();
         touchEvent.type = TypeChecker.TouchType_FromNumeric(typeValue as int32);
         const changedTouchesValue = esValue.getProperty("changedTouches");
@@ -736,18 +736,18 @@ export class TouchEventTransfer {
         for (let changedTouch of changedTouchesValue) {
             let staticChangedTouch: TouchObject = {
                 type: TypeChecker.TouchType_FromNumeric(changedTouch.getProperty("type").toNumber() as int32),
-                id: changedTouch.getProperty("id").toNumber(),
-                displayX: changedTouch.getProperty("displayX").toNumber(),
-                displayY: changedTouch.getProperty("displayY").toNumber(),
-                windowX: changedTouch.getProperty("windowX").toNumber(),
-                windowY: changedTouch.getProperty("windowY").toNumber(),
-                x: changedTouch.getProperty("x").toNumber(),
-                y: changedTouch.getProperty("y").toNumber(),
+                id: changedTouch.getProperty("id").toNumber() as int32,
+                displayX: changedTouch.getProperty("displayX").toNumber() as double,
+                displayY: changedTouch.getProperty("displayY").toNumber() as double,
+                windowX: changedTouch.getProperty("windowX").toNumber() as double,
+                windowY: changedTouch.getProperty("windowY").toNumber() as double,
+                x: changedTouch.getProperty("x").toNumber() as double,
+                y: changedTouch.getProperty("y").toNumber() as double,
                 hand: TypeChecker.InteractionHand_FromNumeric(changedTouch.getProperty("hand").toNumber() as int32),
-                pressedTime: touchEvent.changedTouches[index].pressedTime,
-                pressure: changedTouch.getProperty("pressure").toNumber(),
-                width: changedTouch.getProperty("width").toNumber(),
-                height: changedTouch.getProperty("height").toNumber(),
+                pressedTime: changedTouch.getProperty("pressedTime").toNumber() as int64,
+                pressure: changedTouch.getProperty("pressure").toNumber() as double,
+                width: changedTouch.getProperty("width").toNumber() as double,
+                height: changedTouch.getProperty("height").toNumber() as double,
             };
             index++;
             changedTouchArray.push(staticChangedTouch)
@@ -759,18 +759,18 @@ export class TouchEventTransfer {
         for (let touch of touchesValue) {
             let staticTouch: TouchObject = {
                 type: TypeChecker.TouchType_FromNumeric(touch.getProperty("type").toNumber() as int32),
-                id: touch.getProperty("id").toNumber(),
-                displayX: touch.getProperty("displayX").toNumber(),
-                displayY: touch.getProperty("displayY").toNumber(),
-                windowX: touch.getProperty("windowX").toNumber(),
-                windowY: touch.getProperty("windowY").toNumber(),
-                x: touch.getProperty("x").toNumber(),
-                y: touch.getProperty("y").toNumber(),
+                id: touch.getProperty("id").toNumber() as int32,
+                displayX: touch.getProperty("displayX").toNumber() as double,
+                displayY: touch.getProperty("displayY").toNumber() as double,
+                windowX: touch.getProperty("windowX").toNumber() as double,
+                windowY: touch.getProperty("windowY").toNumber() as double,
+                x: touch.getProperty("x").toNumber() as double,
+                y: touch.getProperty("y").toNumber() as double,
                 hand: TypeChecker.InteractionHand_FromNumeric(touch.getProperty("hand").toNumber() as int32),
-                pressedTime: touchEvent.touches[index].pressedTime,
-                pressure: touch.getProperty("pressure").toNumber(),
-                width: touch.getProperty("width").toNumber(),
-                height: touch.getProperty("height").toNumber(),
+                pressedTime: touch.getProperty("pressedTime").toNumber() as int64,
+                pressure: touch.getProperty("pressure").toNumber() as double,
+                width: touch.getProperty("width").toNumber() as double,
+                height: touch.getProperty("height").toNumber() as double,
             };
             index++;
             touchesArray.push(staticTouch)
@@ -884,7 +884,7 @@ export class AxisEventTransfer {
         const sourceValue = esValue.getProperty("source").toNumber();
         axisEvent.source = TypeChecker.SourceType_FromNumeric(sourceValue as int32);
         const timestampValue = esValue.getProperty("timestamp").toNumber();
-        axisEvent.timestamp = timestampValue;
+        axisEvent.timestamp = timestampValue as int64;
         const targetValue = esValue.getProperty("target");
         const areaValue = targetValue.getProperty("area");
         const widthValue = areaValue.getProperty("width").toNumber();
@@ -913,37 +913,37 @@ export class AxisEventTransfer {
         };
         axisEvent.target = target;
         const pressureValue = esValue.getProperty("pressure").toNumber();
-        axisEvent.pressure = pressureValue;
+        axisEvent.pressure = pressureValue as double;
         const deviceIdValue = esValue.getProperty("deviceId").toNumber();
-        axisEvent.deviceId = deviceIdValue;
+        axisEvent.deviceId = deviceIdValue as int32;
         const tiltXValue = esValue.getProperty("tiltX").toNumber();
-        axisEvent.tiltX = tiltXValue;
+        axisEvent.tiltX = tiltXValue as double;
         const tiltYValue = esValue.getProperty("tiltY").toNumber();
-        axisEvent.tiltY = tiltYValue;
+        axisEvent.tiltY = tiltYValue as double;
         const sourceToolValue = esValue.getProperty("sourceTool").toNumber();
         axisEvent.sourceTool = TypeChecker.SourceTool_FromNumeric(sourceToolValue as int32);
         const axisVerticalValue = esValue.getProperty("axisVertical").toNumber();
-        axisEvent.axisVertical = axisVerticalValue;
+        axisEvent.axisVertical = axisVerticalValue as double;
         const axisHorizontalValue = esValue.getProperty("axisHorizontal").toNumber();
-        axisEvent.axisHorizontal = axisHorizontalValue;
+        axisEvent.axisHorizontal = axisHorizontalValue as double;
         const targetDisplayIdValue = esValue.getProperty("targetDisplayId").toNumber();
-        axisEvent.targetDisplayId = targetDisplayIdValue;
+        axisEvent.targetDisplayId = targetDisplayIdValue as int32;
         const actionValue = esValue.getProperty("action").toNumber();
         axisEvent.action = TypeChecker.AxisAction_FromNumeric(actionValue as int32);
         const displayXValue = esValue.getProperty("displayX").toNumber();
-        axisEvent.displayX = displayXValue;
+        axisEvent.displayX = displayXValue as double;
         const displayYValue = esValue.getProperty("displayY").toNumber();
-        axisEvent.displayY = displayYValue;
+        axisEvent.displayY = displayYValue as double;
         const windowXValue = esValue.getProperty("windowX").toNumber();
-        axisEvent.windowX = windowXValue;
+        axisEvent.windowX = windowXValue as double;
         const windowYValue = esValue.getProperty("windowY").toNumber();
-        axisEvent.windowY = windowYValue;
+        axisEvent.windowY = windowYValue as double;
         const xValue = esValue.getProperty("x").toNumber();
-        axisEvent.x = xValue;
+        axisEvent.x = xValue as double;
         const yValue = esValue.getProperty("y").toNumber();
-        axisEvent.y = yValue;
+        axisEvent.y = yValue as double;
         const scrollStepValue = esValue.getProperty("scrollStep").toNumber();
-        axisEvent.scrollStep = scrollStepValue;
+        axisEvent.scrollStep = scrollStepValue as int32;
         return axisEvent;
     }
     static transferDynamic(input: Object): Any {
