@@ -45,12 +45,12 @@ export class RenderNode implements MaterializedBase {
     private childrenList: RenderNode[] = []
     private parentRenderNode: WeakRef<RenderNode> | null = null
     private lengthMetricsUnitValue: LengthMetricsUnit = LengthMetricsUnit.DEFAULT
-    private borderStyleValue: NodeEdges<BorderStyle> | null = null
-    private borderWidthValue: NodeEdges<number> = { left: 0, top: 0, right: 0, bottom: 0 }
-    private borderColorValue: NodeEdges<number> = { left: 0XFF000000, top: 0XFF000000, right: 0XFF000000, bottom: 0XFF000000 }
-    private borderRadiusValue: Corners<number> = { topLeft: 0, topRight: 0, bottomLeft: 0, bottomRight: 0 }
-    private shapeMaskValue: ShapeMask | null = null
-    private shapeClipValue: ShapeClip | null = null
+    private borderStyleValue: NodeEdges<BorderStyle> | undefined = undefined
+    private borderWidthValue: NodeEdges<number> | undefined = undefined;
+    private borderColorValue: NodeEdges<number> | undefined = undefined;
+    private borderRadiusValue: Corners<number> | undefined = undefined;
+    private shapeMaskValue: ShapeMask | undefined = undefined;
+    private shapeClipValue: ShapeClip | undefined = undefined;
     private backgroundColorValue: number = 0
     private clipToFrameValue: boolean = true
     private frameValue: Frame = { x: 0, y: 0, width: 0, height: 0 }
@@ -248,18 +248,14 @@ export class RenderNode implements MaterializedBase {
         this.shadowRadiusValue = this.checkUndefinedOrNullWithDefaultValue<number>(shadowRadius, 0)
         this.setShadowRadius(this.shadowRadiusValue)
     }
-    get borderStyle(): NodeEdges<BorderStyle> {
-        return this.borderStyleValue!
+    get borderStyle(): NodeEdges<BorderStyle> | undefined {
+        return this.borderStyleValue
     }
     set borderStyle(borderStyle: NodeEdges<BorderStyle>) {
-        if (borderStyle === undefined || borderStyle === null) {
-            this.borderStyleValue = null;
-        } else {
-            this.borderStyleValue = borderStyle;
-        }
-        this.setBorderStyle(borderStyle!)
+        this.setBorderStyle(borderStyle);
+        this.borderStyleValue = borderStyle;
     }
-    get borderWidth(): NodeEdges<number> {
+    get borderWidth(): NodeEdges<number> | undefined {
         return this.borderWidthValue
     }
     set borderWidth(borderWidth: NodeEdges<number>) {
@@ -271,7 +267,7 @@ export class RenderNode implements MaterializedBase {
         const borderWidth_casted = this.borderWidthValue as NodeEdges<number>
         this.setBorderWidth(borderWidth_casted)
     }
-    get borderColor(): NodeEdges<number> {
+    get borderColor(): NodeEdges<number> | undefined {
         return this.borderColorValue
     }
     set borderColor(borderColor: NodeEdges<number>) {
@@ -283,8 +279,8 @@ export class RenderNode implements MaterializedBase {
         const borderColor_casted = this.borderColorValue as NodeEdges<number>
         this.setBorderColor(borderColor_casted)
     }
-    get borderRadius(): Corners<number> {
-        return this.borderRadiusValue
+    get borderRadius(): Corners<number> | undefined {
+        return this.borderRadiusValue;
     }
     set borderRadius(borderRadius: Corners<number>) {
         if (borderRadius === undefined || borderRadius === null) {
@@ -295,14 +291,14 @@ export class RenderNode implements MaterializedBase {
           const borderRadius_casted = this.borderRadiusValue as Corners<number>
         this.setBorderRadius(borderRadius_casted)
     }
-    get shapeMask(): ShapeMask {
-        return this.shapeMaskValue!
+    get shapeMask(): ShapeMask | undefined {
+        return this.shapeMaskValue;
     }
     set shapeMask(shapeMask: ShapeMask) {
         this.setShapeMask(shapeMask)
     }
-    get shapeClip(): ShapeClip {
-        return this.shapeClipValue!
+    get shapeClip(): ShapeClip | undefined {
+        return this.shapeClipValue;
     }
     set shapeClip(shapeClip: ShapeClip) {
         this.setShapeClip(shapeClip)
