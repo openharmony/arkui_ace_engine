@@ -2993,7 +2993,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetOnKeyEventImpl(Ark_NativePointer node,
-                           const Opt_Callback_KeyEvent_Void* value)
+                           const Opt_Callback_KeyEvent_Boolean* value)
     {
         if (!needGroupedLog(1))
         {

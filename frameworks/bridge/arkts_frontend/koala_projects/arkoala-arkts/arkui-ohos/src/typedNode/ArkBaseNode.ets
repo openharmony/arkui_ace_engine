@@ -206,7 +206,7 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         this.getPeer().setOnTouchAttribute(value);
         return this
     }
-    public onKeyEvent(value: ((parameter: KeyEvent) => void) | undefined): this {
+    public onKeyEvent(value: ((parameter: KeyEvent) => boolean) | undefined): this {
         this.getPeer().setOnKeyEventAttribute(value);
         return this
     }

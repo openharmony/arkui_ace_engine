@@ -21775,7 +21775,7 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
     void (*setOnTouch)(Ark_NativePointer node,
                        const Opt_Callback_TouchEvent_Void* value);
     void (*setOnKeyEvent)(Ark_NativePointer node,
-                          const Opt_Callback_KeyEvent_Void* value);
+                          const Opt_Callback_KeyEvent_Boolean* value);
     void (*setOnDigitalCrown)(Ark_NativePointer node,
                               const Opt_Callback_CrownEvent_Void* value);
     void (*setOnKeyPreIme)(Ark_NativePointer node,

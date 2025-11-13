@@ -654,7 +654,7 @@ export abstract class BaseCustomComponent<T_Options> extends ExtendableComponent
         this.__commonStyles.push((instance: CommonMethod): void => instance.onTouch(value));
         return this
     }
-    onKeyEvent(value: ((event: KeyEvent) => void) | undefined): this {
+    onKeyEvent(value: ((event: KeyEvent) => boolean) | undefined): this {
         this.__commonStyles.push((instance: CommonMethod): void => instance.onKeyEvent(value));
         return this
     }

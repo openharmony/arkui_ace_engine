@@ -3199,7 +3199,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setOnTouch(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnKeyEventAttribute(value: ((event: KeyEvent) => void) | undefined): void {
+    setOnKeyEventAttribute(value: ((event: KeyEvent) => boolean) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -7278,7 +7278,7 @@ export interface CommonMethod {
     onTouch(value: ((event: TouchEvent) => void) | undefined): this {
         throw new Error("Unimplemented method onTouch")
     }
-    onKeyEvent(value: ((event: KeyEvent) => void) | undefined): this {
+    onKeyEvent(value: ((event: KeyEvent) => boolean) | undefined): this {
         throw new Error("Unimplemented method onKeyEvent")
     }
     onDigitalCrown(value: ((value0: CrownEvent) => void) | undefined): this {
@@ -7823,7 +7823,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     hoverEffect_value?: HoverEffect | undefined
     onMouse_value?: ((event: MouseEvent) => void) | undefined
     onTouch_value?: ((event: TouchEvent) => void) | undefined
-    onKeyEvent_value?: ((event: KeyEvent) => void) | undefined
+    onKeyEvent_value?: ((event: KeyEvent) => boolean) | undefined
     onDigitalCrown_value?: ((value0: CrownEvent) => void) | undefined
     onKeyPreIme_value?: ((value0: KeyEvent) => boolean) | undefined
     onKeyEventDispatch_value?: ((value0: KeyEvent) => boolean) | undefined
@@ -8070,7 +8070,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     onTouch(value: ((event: TouchEvent) => void) | undefined): this {
         return this
     }
-    onKeyEvent(value: ((event: KeyEvent) => void) | undefined): this {
+    onKeyEvent(value: ((event: KeyEvent) => boolean) | undefined): this {
         return this
     }
     onDigitalCrown(value: ((value0: CrownEvent) => void) | undefined): this {
@@ -9273,9 +9273,9 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public onKeyEvent(value: ((event: KeyEvent) => void) | undefined): this {
+    public onKeyEvent(value: ((event: KeyEvent) => boolean) | undefined): this {
         if (this.checkPriority("onKeyEvent")) {
-            const value_casted = value as (((event: KeyEvent) => void) | undefined)
+            const value_casted = value as (((event: KeyEvent) => boolean) | undefined)
             this.getPeer()?.setOnKeyEventAttribute(value_casted)
             return this
         }
