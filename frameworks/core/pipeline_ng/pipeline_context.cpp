@@ -57,6 +57,7 @@
 #include "core/components_ng/base/simplified_inspector.h"
 #include "core/components_ng/base/ui_node_gc.h"
 #include "core/components_ng/base/view_advanced_register.h"
+#include "core/components_ng/manager/load_complete/load_complete_manager.h"
 #include "core/components_ng/pattern/app_bar/atomic_service_pattern.h"
 #include "core/components_ng/pattern/container_modal/container_modal_view_factory.h"
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_pattern_enhance.h"
@@ -177,6 +178,7 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
     }
 #endif
     touchOptimizer_ = std::make_unique<ResSchedTouchOptimizer>();
+    loadCompleteMgr_ = std::make_shared<LoadCompleteManager>();
 }
 
 PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
@@ -201,6 +203,7 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
     }
 #endif
     touchOptimizer_ = std::make_unique<ResSchedTouchOptimizer>();
+    loadCompleteMgr_ = std::make_shared<LoadCompleteManager>();
 }
 
 PipelineContext::PipelineContext()
@@ -220,6 +223,7 @@ PipelineContext::PipelineContext()
     }
 #endif
     touchOptimizer_ = std::make_unique<ResSchedTouchOptimizer>();
+    loadCompleteMgr_ = std::make_shared<LoadCompleteManager>();
 }
 
 std::string PipelineContext::GetCurrentPageNameCallback()
@@ -7048,4 +7052,8 @@ const std::unique_ptr<ResSchedTouchOptimizer>& PipelineContext::GetTouchOptimize
     return touchOptimizer_;
 }
 
+const std::shared_ptr<LoadCompleteManager>& PipelineContext::GetLoadCompleteManager() const
+{
+    return loadCompleteMgr_;
+}
 } // namespace OHOS::Ace::NG

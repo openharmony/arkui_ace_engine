@@ -140,6 +140,7 @@ constexpr char EVENT_KEY_PVERSIONID[] = "PVERSIONID";
 constexpr char EVENT_KEY_APPEAR_TIMESTAMP[] = "APPEAR_TIMESTAMP";
 constexpr char EVENT_KEY_TOUCH_EVENTS[] = "TOUCH_EVENTS";
 constexpr char EVENT_KEY_DISAPPEAR_TIMESTAMP[] = "DISAPPEAR_TIMESTAMP";
+constexpr char EVENT_KEY_LOAD_COST[] = "LOAD_COST";
 constexpr int32_t WAIT_MODIFY_TIMEOUT = 10;
 constexpr int32_t WAIT_MODIFY_FAILED = 1;
 
@@ -285,6 +286,20 @@ void EventReport::SendComponentException(ComponentExcepType type)
     };
 
     SendEventInner(eventInfo);
+}
+
+void EventReport::ReportComponentLoadTimeout(const EventInfo& eventInfo)
+{
+    auto packageName = Container::CurrentBundleName();
+    auto abilityName = AceApplicationInfo::GetInstance().GetAbilityName();
+    StrTrim(packageName);
+    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, EXCEPTION_COMPONENT,
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
+        EVENT_KEY_ERROR_TYPE, eventInfo.errorType,
+        EVENT_KEY_PACKAGE_NAME, packageName,
+        EVENT_KEY_ABILITY_NAME, abilityName,
+        EVENT_KEY_PAGE_URL, eventInfo.pageUrl,
+        EVENT_KEY_LOAD_COST, eventInfo.loadCost);
 }
 
 void EventReport::SendAPIChannelException(APIChannelExcepType type)

@@ -460,6 +460,7 @@ private:
     void OnKeyEvent(const KeyEvent& event);
     void InitFromThemeIfNeed();
     void LoadAltErrorImage(const ImageSourceInfo& altErrorImageSourceInfo);
+    void ReportCompleteLoadEvent(const RefPtr<FrameNode>& host);
 
 private:
     RefPtr<DrawableDescriptor> drawable_;

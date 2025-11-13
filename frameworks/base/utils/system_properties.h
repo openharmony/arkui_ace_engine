@@ -801,6 +801,7 @@ public:
 
     static int32_t GetDragDropFrameworkStatus();
     static int32_t GetTouchAccelarate();
+    static int32_t GetPageLoadTimethreshold();
 
     static bool IsSuperFoldDisplayDevice();
 
@@ -944,6 +945,7 @@ private:
     static bool multiInstanceEnabled_;
     static int32_t dragDropFrameworkStatus_;
     static int32_t touchAccelarate_;
+    static int32_t pageLoadTimethreshold_;
     static bool pageTransitionFrzEnabled_;
     static bool forcibleLandscapeEnabled_;
     static bool softPagetransition_;

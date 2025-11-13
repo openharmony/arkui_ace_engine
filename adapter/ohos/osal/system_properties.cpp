@@ -532,6 +532,12 @@ int32_t ReadTouchAccelarateMode()
     return system::GetIntParameter("debug.ace.touch.accelarate", 0);
 }
 
+int32_t ReadPageLoadTimeThreshold()
+{
+    return system::GetIntParameter(
+        "const.arkui.pageload.timethreshold", 1000); // page load max timethreshold is 1000ms.
+}
+
 bool IsAscending(const std::vector<double>& nums)
 {
     for (size_t i = 1; i < nums.size(); ++i) {
@@ -760,6 +766,7 @@ double SystemProperties::scrollableDistance_ = ReadScrollableDistance();
 bool SystemProperties::taskPriorityAdjustmentEnable_ = IsTaskPriorityAdjustmentEnable();
 int32_t SystemProperties::dragDropFrameworkStatus_ = ReadDragDropFrameworkStatus();
 int32_t SystemProperties::touchAccelarate_ = ReadTouchAccelarateMode();
+int32_t SystemProperties::pageLoadTimethreshold_ = ReadPageLoadTimeThreshold();
 bool SystemProperties::pageTransitionFrzEnabled_ = false;
 bool SystemProperties::forcibleLandscapeEnabled_ = false;
 bool SystemProperties::softPagetransition_ = false;
@@ -1420,6 +1427,11 @@ int32_t SystemProperties::GetDragDropFrameworkStatus()
 int32_t SystemProperties::GetTouchAccelarate()
 {
     return touchAccelarate_;
+}
+
+int32_t SystemProperties::GetPageLoadTimethreshold()
+{
+    return pageLoadTimethreshold_;
 }
 
 bool SystemProperties::IsSuperFoldDisplayDevice()

@@ -64,6 +64,9 @@ COMPONENT_EXCEPTION:
   __BASE: { type: FAULT, level: MINOR, desc: component exception }
   ERROR_TYPE: { type: INT32, desc: error type }
   PACKAGE_NAME: { type: STRING, desc: package name }
+  ABILITY_NAME: { type: STRING, desc: ability name }
+  PAGE_URL: { type: STRING, desc: page name }
+  LOAD_COST: { type: INT64, desc: Indicates component loading in nanosecond. }
 
 API_CHANNEL_EXCEPTION:
   __BASE: { type: FAULT, level: MINOR, desc: API channel exception }
@@ -255,3 +258,4 @@ GENERAL_INTERACTION_ERROR:
   TOUCHEVENT_ID: {type: INT32, desc: touchEvent id}
   FINGER_ID: {type: INT32, desc: finger id}
   TAG: {type: STRING, desc: frame tag}
+

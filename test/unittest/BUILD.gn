@@ -411,6 +411,7 @@ ohos_source_set("ace_components_manager") {
     "$ace_root/frameworks/core/components_ng/manager/form_visible/form_visible_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/frame_rate/frame_rate_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/full_screen/full_screen_manager.cpp",
+    "$ace_root/frameworks/core/components_ng/manager/load_complete/load_complete_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/memory/memory_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/navigation/navigation_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/post_event/post_event_manager.cpp",
