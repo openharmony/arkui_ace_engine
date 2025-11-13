@@ -68,7 +68,7 @@ namespace router {
         throw new Error("TBD")
     }
 
-    export function getLength(): string {
+    export function getLength(): int {
         throw new Error("TBD")
     }
 

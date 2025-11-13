@@ -181,7 +181,7 @@ export class Router {
     public clear(): void {
         throw Error("clear not implemented in Router!");
     }
-    public getLength(): string {
+    public getLength(): int {
         throw Error("getLength not implemented in Router!");
     }
 
