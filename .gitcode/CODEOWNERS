@@ -3487,6 +3487,7 @@ frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/@ohos.a
 
 interfaces/ets/ani/observer/ @arkui_framework_resource
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/@ohos.arkui.observer.ts @arkui_framework_resource
+frameworks/core/interfaces/native/implementation/stepper_modifier.cpp @arkui_navigation
 
 [Test source]
 test/mock/base @arkui_framework_xnode
