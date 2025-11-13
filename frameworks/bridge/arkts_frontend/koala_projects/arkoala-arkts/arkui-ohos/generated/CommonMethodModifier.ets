@@ -16,7 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { AttributeModifier, DrawModifier, TouchTestInfo, TouchResult, extractors, GestureModifier, GestureType, Gesture, GestureGroup, hookDrawModifier, hookAllowDrop, hookStateStyleImpl, hookGestureModifier, hookCustomPropertyImpl, hookGesture, hookPriorityGesture, hookParallelGesture, hookDragPreviewOptions } from "#handwritten"
+import { AttributeModifier, DrawModifier, TouchTestInfo, TouchResult, extractors, GestureModifier, GestureType, Gesture, GestureGroup, hookDrawModifier, hookAllowDrop, hookStateStyleImpl, hookGestureModifier, hookCustomPropertyImpl, hookGesture, hookPriorityGesture, hookParallelGesture, hookDragPreviewOptions, hookCommonMethodModifierCustomProperty } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkCommonMethodPeer, LayoutPolicy, Rectangle, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, BorderImageOption, OutlineStyle, ClickEvent, HoverEvent, AccessibilityCallback, AccessibilityHoverEvent, MouseEvent, TouchEvent, KeyEvent, CrownEvent, FocusAxisEvent, AxisEvent, FocusMovement, AnimateParam, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, DragEvent, DragItemInfo, PreDragStatus, LinearGradientOptions, SweepGradientOptions, RadialGradientOptions, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, AccessibilitySamePageMode, AccessibilityRoleType, AccessibilityFocusCallback, AccessibilityActionInterceptCallback, AccessibilityAction, ReuseOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, CustomProperty, SafeAreaType, SafeAreaEdge, BackgroundOptions, BackgroundImageOptions, BlurStyle, BackgroundBlurStyleOptions, SystemAdaptiveOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, OnDragEventCallback, DropOptions, PreviewConfiguration, DragPreviewOptions, DragInteractionOptions, OverlayOptions, BlendMode, BlendApplyType, GeometryTransitionOptions, TipsMessageType, TipsOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, Bindable, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, VisibleAreaEventOptions, CommonMethod } from "./component/common"
@@ -2963,6 +2963,9 @@ export class CommonMethodModifier implements CommonMethod {
         if (flagArray[157] != 0) {
             switch (flagArray[157]) {
                 case 1: {
+                    // instructive change start
+                    hookCustomPropertyImpl(peer, (this._customProperty_0_0value as string), (this._customProperty_0_1value as CustomProperty), this);
+                    // instructive change end
                     flagArray[157] = 2;
                     break;
                 }
@@ -7677,6 +7680,9 @@ export class CommonMethodModifier implements CommonMethod {
         return this
     }
     customProperty(name: string, value: CustomProperty): this {
+        // instructive change start
+        hookCommonMethodModifierCustomProperty(this, name, value)
+        // instructive change end
         if (((this._flagArray[157]) == (0)) || ((this._customProperty_0_0value) !== (name)) || (true)) {
             this._flagArray[157] = 1
             this._customProperty_0_0value = name
