@@ -51,6 +51,11 @@ int32_t FormUtilsImpl::RouterEvent(
             child = child->GetNext();
         }
     }
+    auto flag = eventAction->GetValue("flag");
+    auto inputFlag = flag->GetInt();
+    if (inputFlag & Want::FLAG_INSTALL_ON_DEMAND) {
+        want.AddFlags(Want::FLAG_INSTALL_ON_DEMAND);
+    }
     want.SetParam("params", params->ToString());
     auto abilityName = eventAction->GetValue("abilityName");
     if (uri->IsValid() && !abilityName->IsValid()) {
