@@ -118,6 +118,8 @@ void SetMarkImpl(Ark_NativePointer node,
     }
     if (auto color = Converter::OptConvert<Color>(optValue->strokeColor); color) {
         CheckBoxGroupModelStatic::SetCheckMarkColor(frameNode, color);
+    } else {
+        CheckBoxGroupModelStatic::ResetCheckMarkColor(frameNode);
     }
     auto size = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Float64>(optValue->size, DimensionUnit::VP);
     if (!size.has_value() || (size.value().Unit() == DimensionUnit::PERCENT) || (size.value().IsNegative())) {
