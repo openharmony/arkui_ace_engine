@@ -599,12 +599,19 @@ void AssignArkValue(Ark_RichEditorImageSpanResult& dst, const ResultObject& src,
     bool isBuilderSpan = src.valueString == u" " && src.valuePixelMap == nullptr;
     dst.valuePixelMap = ArkValue<Opt_image_PixelMap>(image_PixelMapPeer::Create(src.valuePixelMap));
     dst.valueResourceStr = ArkUnion<Opt_ResourceStr, Ark_String>(src.valueString, ctx);
+    auto imageStyle = src.imageStyle;
+    auto verticalAlign = imageStyle.verticalAlign;
+    bool isVerticalAlignVaild = verticalAlign >= static_cast<int32_t>(VerticalAlign::TOP)
+        && verticalAlign <= static_cast<int32_t>(VerticalAlign::BASELINE);
+    if (!isVerticalAlignVaild) {
+        imageStyle.verticalAlign = static_cast<int32_t>(VerticalAlign::BOTTOM);
+    }
     ImageStyleResult builderStyle {
         .size = {src.imageStyle.size[0], src.imageStyle.size[1]},
         .verticalAlign = static_cast<int32_t>(VerticalAlign::BOTTOM)
     };
     dst.imageStyle = isBuilderSpan ? ArkValue<Ark_RichEditorImageSpanStyleResult>(builderStyle)
-        : ArkValue<Ark_RichEditorImageSpanStyleResult>(src.imageStyle);
+        : ArkValue<Ark_RichEditorImageSpanStyleResult>(imageStyle);
     dst.offsetInSpan.value0 = ArkValue<Ark_Int32>(src.offsetInSpan[0]);
     dst.offsetInSpan.value1 = ArkValue<Ark_Int32>(src.offsetInSpan[1]);
 }
