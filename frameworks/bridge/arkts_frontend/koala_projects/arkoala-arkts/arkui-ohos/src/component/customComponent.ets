@@ -34,6 +34,7 @@ import { RecordData } from "@ohos.base"
 import { UIContextImpl } from "arkui/base/UIContextImpl"
 import { UIContextUtil } from "arkui/base/UIContextUtil"
 import { ObserveSingleton } from '../stateManagement/base/observeSingleton';
+import { ArkThemeScopeManager } from '../theme/ArkThemeScopeManager';
 import { AccessibilityCallback, AccessibilityFocusCallback, TransitionFinishCallback, TipsMessageType, ShouldBuiltInRecognizerParallelWithCallback, OnDragEventCallback, GestureRecognizerJudgeBeginCallback, CustomProperty, MouseEvent, TouchEvent, DragEvent, ResponseType, AttributeModifier, LayoutPolicy, Length, ResourceColor, AccessibilityFocusCallback, AccessibilityOptions, AccessibilityRoleType, AccessibilitySamePageMode, Alignment, AlignRuleOption, AnimateParam, Area, AttributeModifier, Axis, AxisEvent, BackgroundBlurStyleOptions, BackgroundBrightnessOptions, BackgroundEffectOptions, BackgroundImageOptions, BackgroundOptions, BaseGestureEvent, Bindable, BlendApplyType, BlendMode, BlurOptions, BlurStyle, BorderImageOption, BorderOptions, BorderRadiuses, BorderStyle, ChainStyle, ChainWeightOptions, ClickEffect, ClickEvent, Color, ColoringStrategy, ComponentContent, ContentCoverOptions, ContextMenuOptions, CrownEvent, CustomBuilder, CustomPopupOptions, CustomProperty, Dimension, Direction, DragInteractionOptions, DragItemInfo, DragPreviewOptions, DrawModifier, DropOptions, EdgeColors, EdgeOutlineStyles, EdgeOutlineWidths, Edges, EdgeStyles, EdgeWidths, EffectType, FocusAxisEvent, FocusBoxStyle, FocusDrawLevel, FocusMovement, FocusPriority, ForegroundBlurStyleOptions, ForegroundEffectOptions, FunctionKey, GeometryTransitionOptions, GestureInfo, GestureJudgeResult, GestureMask, GestureModifier, GestureRecognizerJudgeBeginCallback, GestureType, HitTestMode, HoverEffect, HoverEvent, ImageRepeat, ImageSize, InvertOptions, ItemAlign, KeyEvent, LinearGradientBlurOptions, LinearGradientOptions, LocalizedAlignRuleOptions, LocalizedBorderRadiuses, LocalizedEdgeColors, LocalizedEdges, LocalizedEdgeWidths, LocalizedPadding, LocalizedPosition, MenuElement, MenuOptions, ModalTransition, ModifierKey, MotionBlurOptions, MotionPathOptions, ObscuredReasons, OnDragEventCallback, OutlineOptions, OutlineRadiuses, OutlineStyle, OverlayOptions, Padding, PixelRoundPolicy, PixelStretchEffectOptions, PopupOptions, Position, PreDragStatus, PreviewConfiguration, ProgressMask, RadialGradientOptions, Rectangle, RenderFit, ResizableOptions, ResourceColor, ResourceStr, ReuseOptions, RotateOptions, SafeAreaEdge, SafeAreaType, ScaleOptions, ShadowOptions, ShadowStyle, sharedTransitionOptions, SheetOptions, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, SizeOptions, StateStyles, SweepGradientOptions, SystemAdaptiveOptions, TipsMessageType, TipsOptions, TouchResult, TouchTestInfo, TransitionEffect, TransitionFinishCallback, TranslateOptions, Visibility, VisibleAreaChangeCallback, VisibleAreaEventOptions, VoidCallback } from '#generated';
 import { LengthMetrics } from 'arkui/Graphics';
 import { default as uiEffect } from '@ohos.graphics.uiEffect';
@@ -131,6 +132,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
         this.instance = instance;
         this.instance.__setDelegate__Internal(this);
         this.styles = styles;
+        ArkThemeScopeManager.getInstance().registerThemeScopeComponent(this);
     }
  
     /** @memo:intrinsic */
@@ -202,6 +204,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
     build(): void {
         const current = ExtendableComponent.current;
         ExtendableComponent.current = this.instance as object;
+        this.onWillApplyTheme(ArkThemeScopeManager.getInstance().getFinalTheme(this));
         this.instance.build();
         ExtendableComponent.current = current;
     }

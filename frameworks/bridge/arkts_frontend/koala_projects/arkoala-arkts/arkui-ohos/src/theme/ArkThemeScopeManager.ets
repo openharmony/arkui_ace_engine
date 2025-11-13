@@ -111,6 +111,59 @@ export class ArkThemeScopeManager {
     }
 
     /**
+     * Map to register themeScopeId and ArkCustomComponent array
+     */ 
+    private themeScopeComponentMap: Map<int32, Array<ArkCustomComponent>> = new Map<int32, Array<ArkCustomComponent>>();
+
+    /**
+     * Register a single ArkCustomComponent to the array mapped by the current themeScopeId.
+     *
+     * @param component ArkCustomComponent instance
+     */
+    public registerThemeScopeComponent(component: ArkCustomComponent): void {
+        const currentThemeOptions = this.currentThemeOptions();
+        if (!currentThemeOptions) {
+            return;
+        }
+        const themeScopeId = currentThemeOptions.themeScopeId as int32;
+        component.setThemeScopeId(themeScopeId);
+        let components = this.themeScopeComponentMap.get(themeScopeId);
+        if (!components) {
+            components = [];
+        }
+        components.push(component);
+        this.themeScopeComponentMap.set(themeScopeId, components);
+    }
+
+    /**
+     * Retrieves the theme instance associated with the given themeScopeId.
+     *
+     * @param themeScopeId The unique identifier of the theme scope to query.
+     * @returns The theme instance for the given themeScopeId, or the default/system theme if not found.
+     */
+    public getThemeByScopeId(themeScopeId: int32): ArkThemeBase {
+        const scope = this.themeScopes?.find((item) => item.getWithThemeId() === themeScopeId);
+        if (scope) {
+            return scope.getTheme();
+        }
+        return this.defaultTheme ?? ArkThemeScopeManager.systemTheme;
+    }
+
+    /**
+     * Returns the final theme instance to be applied for the given owner component.
+     *
+     * @param ownerComponent The ArkCustomComponent whose theme should be determined.
+     * @returns The ArkThemeBase instance to be used for the component.
+     */
+    public getFinalTheme(ownerComponent: ArkCustomComponent): ArkThemeBase {
+        const themeScopeId = ownerComponent.getThemeScopeId();
+        if (themeScopeId === undefined) {
+            return this.defaultTheme ?? ArkThemeScopeManager.systemTheme;
+        }
+        return this.getThemeByScopeId(themeScopeId);
+    }
+
+    /**
      * Obtain System Colors
      *
      * @returns System Colors
@@ -492,6 +545,20 @@ export class ArkThemeScopeManager {
                     // keep result in cache item for the next checks
                     item.isInWhiteList = isInWhiteList;
                 }
+            }
+        }
+        const currentThemeOptions = this.currentThemeOptions();
+        if (!currentThemeOptions) {
+            return;
+        }
+        const themeScopeId = currentThemeOptions.themeScopeId as int32;
+        const components = this.themeScopeComponentMap.get(themeScopeId);
+        if (!components) {
+            return;
+        }
+        for (const component of components) {
+            if (component) {
+                component.onWillApplyTheme(themeWillApply);
             }
         }
     }
