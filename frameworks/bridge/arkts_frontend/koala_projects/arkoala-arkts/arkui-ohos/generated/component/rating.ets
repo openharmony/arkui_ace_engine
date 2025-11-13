@@ -110,8 +110,8 @@ export interface RatingOptions {
     indicator?: boolean;
 }
 export interface StarStyleOptions {
-    backgroundUri: ResourceStr;
-    foregroundUri: ResourceStr;
+    backgroundUri: ResourceStr | undefined;
+    foregroundUri: ResourceStr | undefined;
     secondaryUri?: ResourceStr;
 }
 export interface RatingConfiguration extends CommonConfiguration<RatingConfiguration> {
@@ -358,24 +358,36 @@ export class StarStyleOptions_serializer {
     public static write(buffer: SerializerBase, value: StarStyleOptions): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForBackgroundUri  = value.backgroundUri
-        if (valueHolderForBackgroundUri instanceof string) {
-            valueSerializer.writeInt8((0).toByte())
-            const valueHolderForBackgroundUriForIdx0  = valueHolderForBackgroundUri as string
-            valueSerializer.writeString(valueHolderForBackgroundUriForIdx0)
-        } else if (valueHolderForBackgroundUri instanceof Resource) {
-            valueSerializer.writeInt8((1).toByte())
-            const valueHolderForBackgroundUriForIdx1  = valueHolderForBackgroundUri as Resource
-            Resource_serializer.write(valueSerializer, valueHolderForBackgroundUriForIdx1)
+        if (valueHolderForBackgroundUri !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForBackgroundUriTmpValue  = valueHolderForBackgroundUri!
+            if (valueHolderForBackgroundUriTmpValue instanceof string) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForBackgroundUriTmpValueForIdx0  = valueHolderForBackgroundUriTmpValue as string
+                valueSerializer.writeString(valueHolderForBackgroundUriTmpValueForIdx0)
+            } else if (valueHolderForBackgroundUriTmpValue instanceof Resource) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderForBackgroundUriTmpValueForIdx1  = valueHolderForBackgroundUriTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForBackgroundUriTmpValueForIdx1)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const valueHolderForForegroundUri  = value.foregroundUri
-        if (valueHolderForForegroundUri instanceof string) {
-            valueSerializer.writeInt8((0).toByte())
-            const valueHolderForForegroundUriForIdx0  = valueHolderForForegroundUri as string
-            valueSerializer.writeString(valueHolderForForegroundUriForIdx0)
-        } else if (valueHolderForForegroundUri instanceof Resource) {
-            valueSerializer.writeInt8((1).toByte())
-            const valueHolderForForegroundUriForIdx1  = valueHolderForForegroundUri as Resource
-            Resource_serializer.write(valueSerializer, valueHolderForForegroundUriForIdx1)
+        if (valueHolderForForegroundUri !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForForegroundUriTmpValue  = valueHolderForForegroundUri!
+            if (valueHolderForForegroundUriTmpValue instanceof string) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForForegroundUriTmpValueForIdx0  = valueHolderForForegroundUriTmpValue as string
+                valueSerializer.writeString(valueHolderForForegroundUriTmpValueForIdx0)
+            } else if (valueHolderForForegroundUriTmpValue instanceof Resource) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderForForegroundUriTmpValueForIdx1  = valueHolderForForegroundUriTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForForegroundUriTmpValueForIdx1)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const valueHolderForSecondaryUri  = value.secondaryUri
         if (valueHolderForSecondaryUri !== undefined) {
@@ -396,26 +408,36 @@ export class StarStyleOptions_serializer {
     }
     public static read(buffer: DeserializerBase): StarStyleOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const backgroundUriTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
-        let backgroundUriTmpBuf : string | Resource | undefined
-        if (backgroundUriTmpBufUnionSelector == (0).toChar()) {
-            backgroundUriTmpBuf = (valueDeserializer.readString() as string)
-        } else if (backgroundUriTmpBufUnionSelector == (1).toChar()) {
-            backgroundUriTmpBuf = Resource_serializer.read(valueDeserializer)
-        } else {
-            throw new Error("One of the branches for backgroundUriTmpBuf has to be chosen through deserialisation.")
+        const backgroundUriTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let backgroundUriTmpBuf : ResourceStr | undefined = undefined
+        if ((backgroundUriTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const backgroundUriTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let backgroundUriTmpBuf_ : string | Resource | undefined
+            if (backgroundUriTmpBuf_UnionSelector == (0).toChar()) {
+                backgroundUriTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (backgroundUriTmpBuf_UnionSelector == (1).toChar()) {
+                backgroundUriTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for backgroundUriTmpBuf_ has to be chosen through deserialisation.")
+            }
+            backgroundUriTmpBuf = (backgroundUriTmpBuf_ as string | Resource)
         }
-        const backgroundUriTmpResult : ResourceStr = (backgroundUriTmpBuf as string | Resource)
-        const foregroundUriTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
-        let foregroundUriTmpBuf : string | Resource | undefined
-        if (foregroundUriTmpBufUnionSelector == (0).toChar()) {
-            foregroundUriTmpBuf = (valueDeserializer.readString() as string)
-        } else if (foregroundUriTmpBufUnionSelector == (1).toChar()) {
-            foregroundUriTmpBuf = Resource_serializer.read(valueDeserializer)
-        } else {
-            throw new Error("One of the branches for foregroundUriTmpBuf has to be chosen through deserialisation.")
+        const backgroundUriTmpResult : ResourceStr | undefined = backgroundUriTmpBuf
+        const foregroundUriTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let foregroundUriTmpBuf : ResourceStr | undefined = undefined
+        if ((foregroundUriTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const foregroundUriTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let foregroundUriTmpBuf_ : string | Resource | undefined
+            if (foregroundUriTmpBuf_UnionSelector == (0).toChar()) {
+                foregroundUriTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (foregroundUriTmpBuf_UnionSelector == (1).toChar()) {
+                foregroundUriTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for foregroundUriTmpBuf_ has to be chosen through deserialisation.")
+            }
+            foregroundUriTmpBuf = (foregroundUriTmpBuf_ as string | Resource)
         }
-        const foregroundUriTmpResult : ResourceStr = (foregroundUriTmpBuf as string | Resource)
+        const foregroundUriTmpResult : ResourceStr | undefined = foregroundUriTmpBuf
         const secondaryUriTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let secondaryUriTmpBuf : ResourceStr | undefined = undefined
         if ((secondaryUriTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {

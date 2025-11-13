@@ -17943,8 +17943,8 @@ typedef struct Opt_SliderOptions {
 } Opt_SliderOptions;
 typedef struct Ark_StarStyleOptions {
     /* kind: Interface */
-    Ark_ResourceStr backgroundUri;
-    Ark_ResourceStr foregroundUri;
+    Opt_ResourceStr backgroundUri;
+    Opt_ResourceStr foregroundUri;
     Opt_ResourceStr secondaryUri;
 } Ark_StarStyleOptions;
 typedef struct Opt_StarStyleOptions {
