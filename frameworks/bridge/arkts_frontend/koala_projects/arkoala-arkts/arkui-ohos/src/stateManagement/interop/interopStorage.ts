@@ -142,7 +142,7 @@ export class InteropStorageBase extends StorageBase {
             this.checkClearDynamicValue_ = event;
         };
         bindFunc.invoke(
-            ESValue.wrap(dynamicLocalStorage),
+            dynamicLocalStorage,
             ESValue.wrap(getValue),
             ESValue.wrap(removeValue),
             ESValue.wrap(getSize),
