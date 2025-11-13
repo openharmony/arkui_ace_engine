@@ -149,6 +149,8 @@ void SetMarkImpl(Ark_NativePointer node,
     auto color = Converter::OptConvert<Color>(optValue->strokeColor);
     if (color) {
         CheckBoxModelStatic::SetCheckMarkColor(frameNode, color.value());
+    } else {
+        CheckBoxModelStatic::ResetCheckMarkColor(frameNode);
     }
 
     auto size = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Float64>(optValue->size, DimensionUnit::VP);

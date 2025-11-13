@@ -75,6 +75,14 @@ void CheckBoxGroupModelStatic::SetCheckMarkColor(FrameNode* frameNode, const std
     }
 }
 
+void CheckBoxGroupModelStatic::ResetCheckMarkColor(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(CheckBoxGroupPaintProperty, CheckBoxGroupCheckMarkColor,
+        PROPERTY_UPDATE_RENDER, frameNode);
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(CheckBoxGroupPaintProperty, CheckBoxGroupCheckMarkColorFlagByUser,
+        PROPERTY_UPDATE_RENDER, frameNode);
+}
+
 void CheckBoxGroupModelStatic::SetCheckMarkSize(FrameNode* frameNode, const std::optional<Dimension>& size)
 {
     if (size.has_value()) {
