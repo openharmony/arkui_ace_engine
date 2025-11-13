@@ -40,7 +40,7 @@ static bool IsMainThread()
 static void EnqueueUVPriorityTask(
     const TaskExecutor::Task& task, PriorityType priorityType, pthread_t targetThread)
 {
-    ACE_SCOPED_TRACE("EnqueueUVPriorityTask PriorityType [%d], targetThread[%lu]",
+    ACE_SCOPED_TRACE("EnqueueUVPriorityTask PriorityType [%d], targetThread[%" PRIu64 "]",
         static_cast<int32_t>(priorityType), static_cast<uint64_t>(targetThread));
     std::lock_guard<std::mutex> lock(queueMutex);
     globalTaskPriorityQueue_[targetThread][priorityType].push(task);
@@ -72,7 +72,7 @@ static void PostTaskToUV(uv_loop_t* loop)
     if (temp.empty()) {
         return;
     }
-    ACE_SCOPED_TRACE("PostTaskToUV curThread [%lu], curThreadSize [%zu]",
+    ACE_SCOPED_TRACE("PostTaskToUV curThread [%" PRIu64 "], curThreadSize [%zu]",
         static_cast<uint64_t>(curThread), temp.size());
     for (int32_t i = 0; i < static_cast<int32_t>(PriorityType::LOW); i++) {
         PriorityType priority = static_cast<PriorityType>(i);
