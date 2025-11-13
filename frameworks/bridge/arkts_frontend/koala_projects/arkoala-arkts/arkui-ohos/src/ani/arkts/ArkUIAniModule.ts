@@ -208,9 +208,9 @@ export class ArkUIAniModule {
     native static _DragController_createDragAction(customArray: Array<DragItemInfo>, builderArray: Array<KPointer>,
         destroyCallback: () => void, dragInfo: dragController.DragInfo): dragController.DragAction
     native static _DragController_startDrag(dragActionPtr: KPointer): Promise<void>
-    native static _DragController_on(type: string, callback: Callback<dragController.DragAndDropInfo>,
+    native static _DragController_on(callback: Callback<dragController.DragAndDropInfo>,
         dragActionPtr: KPointer): void
-    native static _DragController_off(type: string, callback: Callback<dragController.DragAndDropInfo> | undefined,
+    native static _DragController_off(callback: Callback<dragController.DragAndDropInfo> | undefined,
         dragActionPtr: KPointer): void
     native static _DragController_setDragEventStrictReportingEnabled(enable: boolean): void
     native static _DragController_cancelDataLoading(key: string): void
