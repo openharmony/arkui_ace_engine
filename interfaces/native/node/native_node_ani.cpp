@@ -283,8 +283,8 @@ ArkUI_ErrorCode OH_ArkUI_NativeModule_GetNavDestinationAniParam(ArkUI_NodeHandle
         return ARKUI_ERROR_CODE_GET_INFO_FAILED;
     }
     ani_static_method getParamMethod;
-    if ((status = env->Class_FindStaticMethod(
-        cls, GET_PARAM_WITH_NAVDESTINATION_ID_METHOD, nullptr, &getParamMethod)) != ANI_OK) {
+    if ((status = env->Class_FindStaticMethod(cls, GET_PARAM_WITH_NAVDESTINATION_ID_METHOD,
+             "C{std.core.String}:C{std.core.Object}", &getParamMethod)) != ANI_OK) {
         LOGE("AceNavigation failed to find %{public}s method, status:%{public}d",
             GET_PARAM_WITH_NAVDESTINATION_ID_METHOD, status);
         return ARKUI_ERROR_CODE_GET_INFO_FAILED;

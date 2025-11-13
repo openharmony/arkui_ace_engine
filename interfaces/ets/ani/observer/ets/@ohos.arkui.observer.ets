@@ -40,13 +40,21 @@ import hilog from '@ohos.hilog'
         options: NavDestinationSwitchObserverOptions,
         callback?: Callback<NavDestinationInfo>
     ): void;
-    export native function onNavDestinationSwitch(callback: Callback<NavDestinationSwitchInfo>): void;
-    export native function offNavDestinationSwitch(callback?: Callback<NavDestinationSwitchInfo>): void;
     export native function onNavDestinationSwitch(
+        context: UIAbilityContext | UIContext,
+        callback: Callback<NavDestinationSwitchInfo>
+    ): void;
+    export native function offNavDestinationSwitch(
+        context: UIAbilityContext | UIContext,
+        callback?: Callback<NavDestinationSwitchInfo>
+    ): void;
+    export native function onNavDestinationSwitch(
+        context: UIAbilityContext | UIContext,
         observerOptions: NavDestinationSwitchObserverOptions,
         callback: Callback<NavDestinationSwitchInfo>
     ): void;
     export native function offNavDestinationSwitch(
+        context: UIAbilityContext | UIContext,
         observerOptions: NavDestinationSwitchObserverOptions,
         callback?: Callback<NavDestinationSwitchInfo>
     ): void;
