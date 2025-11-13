@@ -53,7 +53,7 @@ public:
     uint64_t FineTuneTimeStampDuringTpFlushPeriod(uint64_t timeStamp);
     void FineTuneTimeStampWhenFirstFrameAfterTpFlushPeriod(const int32_t pointId,
         std::unordered_map<int32_t, std::vector<TouchEvent>>& historyPointsById);
-
+    void EndTpFlushVsyncPeriod();
 private:
     // RVS Dispatch funcs
     void RVSPointReset(const int32_t pointId, const int32_t info);

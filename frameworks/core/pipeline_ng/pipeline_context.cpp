@@ -3340,6 +3340,9 @@ void PipelineContext::OnTouchEvent(
     }
 
     if (scalePoint.type == TouchType::UP) {
+        if (touchOptimizer_) {
+            touchOptimizer_->EndTpFlushVsyncPeriod();
+        }
         lastTouchTime_ = GetTimeFromExternalTimer();
         CompensateTouchMoveEvent(scalePoint);
         PostTaskResponseRegion(DEFAULT_DELAY_THP);
