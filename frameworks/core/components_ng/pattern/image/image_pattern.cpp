@@ -2093,6 +2093,12 @@ void ImagePattern::OnConfigurationUpdate()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto src = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
+    /*
+     * Regenerate the cache key for the image source. This ensures that
+     * configuration changes (e.g., color mode, density, theme parameters)
+     * trigger correct cache matching or resource reloading.
+     */
+    src.GenerateCacheKey();
     UpdateInternalResource(src);
     bool needLayout = host->CheckNeedForceMeasureAndLayout() &&
                       imageLayoutProperty->GetVisibility().value_or(VisibleType::VISIBLE) != VisibleType::GONE;
@@ -2109,6 +2115,7 @@ void ImagePattern::OnConfigurationUpdate()
         if (altLoadingCtx_ && altLoadingCtx_->GetSourceInfo() == altImageSourceInfo) {
             altLoadingCtx_.Reset();
         }
+        altImageSourceInfo.GenerateCacheKey();
         LoadAltImage(altImageSourceInfo);
     }
     if (imageLayoutProperty->GetAltError()) {
@@ -2116,6 +2123,7 @@ void ImagePattern::OnConfigurationUpdate()
         if (altErrorCtx_ && altErrorCtx_->GetSourceInfo() == altImageSourceInfo) {
             altErrorCtx_.Reset();
         }
+        altImageSourceInfo.GenerateCacheKey();
         LoadAltErrorImage(altImageSourceInfo);
     }
 }
