@@ -2865,4 +2865,33 @@ HWTEST_F(ImagePatternTestNg, ImagePatternAltError005, TestSize.Level0)
 
     EXPECT_FALSE(imagePattern->isFullyInitializedFromTheme_);
 }
+
+/**
+ * @tc.name: ImageConfigurationChange001
+ * @tc.desc: Test function for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, ImageConfigurationChange001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    ImageModelNG image;
+    ImageInfoConfig imageInfoConfig;
+    image.Create(imageInfoConfig);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    /**
+     * @tc.steps: step2. check isFullyInitializedFromTheme_ is false.
+     * @tc.expected: isFullyInitializedFromTheme_ is false.
+     */
+    EXPECT_FALSE(imagePattern->isFullyInitializedFromTheme_);
+    imagePattern->InitFromThemeIfNeed();
+    EXPECT_TRUE(imagePattern->isFullyInitializedFromTheme_);
+    imagePattern->OnConfigurationUpdate();
+    EXPECT_FALSE(imagePattern->isFullyInitializedFromTheme_);
+}
 } // namespace OHOS::Ace::NG
