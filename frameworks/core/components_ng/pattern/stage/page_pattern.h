@@ -386,6 +386,8 @@ protected:
 
     void RecordPageEvent(bool isShow);
 
+    void SetPageIndexForStatic();
+
     RefPtr<PageInfo> pageInfo_;
     RefPtr<OverlayManager> overlayManager_;
 
