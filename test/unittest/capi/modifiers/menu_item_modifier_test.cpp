@@ -166,12 +166,10 @@ const std::vector<ArkFontWeightTest> FONT_WEIGHT_TEST_PLAN2 = {
 };
 
 static constexpr int TEST_RESOURCE_ID = 1000;
-static constexpr int32_t NODE_ID = 555;
 struct CheckEvent {
     int32_t resourceId;
     Ark_NativePointer parentNode;
 };
-static std::optional<RefPtr<UINode>> uiNode = std::nullopt;
 static std::optional<CheckEvent> checkEventIcon = std::nullopt;
 const std::string START_ICON_PROP = "startIcon";
 const std::string START_ICON_PATH = "startIconPath";
@@ -224,16 +222,13 @@ public:
  */
 HWTEST_F(MenuItemModifierTest, setMenuItemOptionsCustomBuilderTest, TestSize.Level1)
 {
-    checkEventIcon = std::nullopt;
-    uiNode = BlankModelNG::CreateFrameNode(NODE_ID);
-    auto builder = getBuilderCb();
-
-    auto optionsOpt = Converter::ArkUnion<Opt_Union_MenuItemOptions_CustomBuilder, CustomNodeBuilder>(builder);
+    auto optionsOpt = Converter::ArkUnion<Opt_Union_MenuItemOptions_CustomBuilder, CustomNodeBuilder>(getBuilderCb());
     modifier_->setMenuItemOptions(node_, &optionsOpt);
     ASSERT_EQ(checkEventIcon.has_value(), true);
     EXPECT_EQ(checkEventIcon->resourceId, TEST_RESOURCE_ID);
-    uiNode = std::nullopt;
-    checkEventIcon = std::nullopt;
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(checkEventIcon->parentNode, frameNode);
 }
 
 /*
@@ -245,9 +240,8 @@ HWTEST_F(MenuItemModifierTest, setMenuItemOptionsStartIconStringTest, TestSize.L
 {
     auto startIcon = GetAttrValue<std::string>(node_, START_ICON_PROP);
     EXPECT_EQ(startIcon, "");
-    auto pathStr = Converter::ArkValue<Ark_String>(START_ICON_PATH);
-    Ark_ResourceStr pathResStr = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(pathStr);
-    Ark_MenuItemOptions options = {.startIcon = Converter::ArkValue<Opt_ResourceStr>(pathResStr)};
+    Ark_MenuItemOptions options = { .startIcon =
+        Converter::ArkUnion<Opt_ResourceStr, Ark_String>(START_ICON_PATH, Converter::FC)};
     auto optionsOpt = Converter::ArkUnion<Opt_Union_MenuItemOptions_CustomBuilder, Ark_MenuItemOptions>(options);
     modifier_->setMenuItemOptions(node_, &optionsOpt);
     startIcon = GetAttrValue<std::string>(node_, START_ICON_PROP);
@@ -263,9 +257,8 @@ HWTEST_F(MenuItemModifierTest, setMenuItemOptionsStartIconResourceTest, TestSize
 {
     auto startIcon = GetAttrValue<std::string>(node_, START_ICON_PROP);
     EXPECT_EQ(startIcon, "");
-    Ark_Resource iconRes = CreateResource(START_ICON_RES.c_str(), ResourceType::STRING);
-    Ark_ResourceStr pathResStr = Converter::ArkUnion<Ark_ResourceStr, Ark_Resource>(iconRes);
-    Ark_MenuItemOptions options = {.startIcon = Converter::ArkValue<Opt_ResourceStr>(pathResStr)};
+    Ark_MenuItemOptions options = { .startIcon =
+        Converter::ArkUnion<Opt_ResourceStr, Ark_Resource>(CreateResource(START_ICON_RES, ResourceType::STRING))};
     auto optionsOpt = Converter::ArkUnion<Opt_Union_MenuItemOptions_CustomBuilder, Ark_MenuItemOptions>(options);
     modifier_->setMenuItemOptions(node_, &optionsOpt);
     startIcon = GetAttrValue<std::string>(node_, START_ICON_PROP);
@@ -281,9 +274,8 @@ HWTEST_F(MenuItemModifierTest, setMenuItemOptionsEndIconStringTest, TestSize.Lev
 {
     auto endIcon = GetAttrValue<std::string>(node_, END_ICON_PROP);
     EXPECT_EQ(endIcon, "");
-    auto pathStr = Converter::ArkValue<Ark_String>(END_ICON_PATH);
-    Ark_ResourceStr pathResStr = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(pathStr);
-    Ark_MenuItemOptions options = {.endIcon = Converter::ArkValue<Opt_ResourceStr>(pathResStr)};
+    Ark_MenuItemOptions options = { .endIcon =
+        Converter::ArkUnion<Opt_ResourceStr, Ark_String>(END_ICON_PATH, Converter::FC)};
     auto optionsOpt = Converter::ArkUnion<Opt_Union_MenuItemOptions_CustomBuilder, Ark_MenuItemOptions>(options);
     modifier_->setMenuItemOptions(node_, &optionsOpt);
     endIcon = GetAttrValue<std::string>(node_, END_ICON_PROP);
@@ -299,9 +291,8 @@ HWTEST_F(MenuItemModifierTest, setMenuItemOptionsEndIconResourceTest, TestSize.L
 {
     auto endIcon = GetAttrValue<std::string>(node_, END_ICON_PROP);
     EXPECT_EQ(endIcon, "");
-    Ark_Resource iconRes = CreateResource(END_ICON_RES.c_str(), ResourceType::STRING);
-    Ark_ResourceStr pathResStr = Converter::ArkUnion<Ark_ResourceStr, Ark_Resource>(iconRes);
-    Ark_MenuItemOptions options = {.endIcon = Converter::ArkValue<Opt_ResourceStr>(pathResStr)};
+    Ark_MenuItemOptions options = { .endIcon =
+        Converter::ArkUnion<Opt_ResourceStr, Ark_Resource>(CreateResource(END_ICON_RES, ResourceType::STRING))};
     auto optionsOpt = Converter::ArkUnion<Opt_Union_MenuItemOptions_CustomBuilder, Ark_MenuItemOptions>(options);
     modifier_->setMenuItemOptions(node_, &optionsOpt);
     endIcon = GetAttrValue<std::string>(node_, END_ICON_PROP);
@@ -317,9 +308,8 @@ HWTEST_F(MenuItemModifierTest, setMenuItemOptionsContentStringTest, TestSize.Lev
 {
     auto content = GetAttrValue<std::string>(node_, CONTENT_PROP);
     EXPECT_EQ(content, "");
-    auto contentStr = Converter::ArkValue<Ark_String>(CONTENT);
-    Ark_ResourceStr contentResStr = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(contentStr);
-    Ark_MenuItemOptions options = {.content = Converter::ArkValue<Opt_ResourceStr>(contentResStr)};
+    Ark_MenuItemOptions options = { .content =
+        Converter::ArkUnion<Opt_ResourceStr, Ark_String>(CONTENT, Converter::FC)};
     auto optionsOpt = Converter::ArkUnion<Opt_Union_MenuItemOptions_CustomBuilder, Ark_MenuItemOptions>(options);
     modifier_->setMenuItemOptions(node_, &optionsOpt);
     content = GetAttrValue<std::string>(node_, CONTENT_PROP);
@@ -335,9 +325,8 @@ HWTEST_F(MenuItemModifierTest, setMenuItemOptionsContentResourceTest, TestSize.L
 {
     auto content = GetAttrValue<std::string>(node_, CONTENT_PROP);
     EXPECT_EQ(content, "");
-    Ark_Resource contentRes = CreateResource(CONTENT_RES.c_str(), ResourceType::STRING);
-    Ark_ResourceStr contentResStr = Converter::ArkUnion<Ark_ResourceStr, Ark_Resource>(contentRes);
-    Ark_MenuItemOptions options = {.content = Converter::ArkValue<Opt_ResourceStr>(contentResStr)};
+    Ark_MenuItemOptions options = { .content =
+        Converter::ArkUnion<Opt_ResourceStr, Ark_Resource>(CreateResource(CONTENT_RES, ResourceType::STRING))};
     auto optionsOpt = Converter::ArkUnion<Opt_Union_MenuItemOptions_CustomBuilder, Ark_MenuItemOptions>(options);
     modifier_->setMenuItemOptions(node_, &optionsOpt);
     content = GetAttrValue<std::string>(node_, CONTENT_PROP);
@@ -353,9 +342,8 @@ HWTEST_F(MenuItemModifierTest, setMenuItemOptionsLabelInfoStringTest, TestSize.L
 {
     auto labelInfo = GetAttrValue<std::string>(node_, LABEL_INFO_PROP);
     EXPECT_EQ(labelInfo, "");
-    auto labelInfoStr = Converter::ArkValue<Ark_String>(LABEL_INFO);
-    Ark_ResourceStr labelInfoResStr = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(labelInfoStr);
-    Ark_MenuItemOptions options = {.labelInfo = Converter::ArkValue<Opt_ResourceStr>(labelInfoResStr)};
+    Ark_MenuItemOptions options = { .labelInfo =
+        Converter::ArkUnion<Opt_ResourceStr, Ark_String>(LABEL_INFO, Converter::FC)};
     auto optionsOpt = Converter::ArkUnion<Opt_Union_MenuItemOptions_CustomBuilder, Ark_MenuItemOptions>(options);
     modifier_->setMenuItemOptions(node_, &optionsOpt);
     labelInfo = GetAttrValue<std::string>(node_, LABEL_INFO_PROP);
@@ -371,9 +359,8 @@ HWTEST_F(MenuItemModifierTest, setMenuItemOptionsLabelInfoResourceTest, TestSize
 {
     auto labelInfo = GetAttrValue<std::string>(node_, LABEL_INFO_PROP);
     EXPECT_EQ(labelInfo, "");
-    Ark_Resource labelInfoRes = CreateResource(LABEL_INFO_RES.c_str(), ResourceType::STRING);
-    Ark_ResourceStr labelInfoResStr = Converter::ArkUnion<Ark_ResourceStr, Ark_Resource>(labelInfoRes);
-    Ark_MenuItemOptions options = {.labelInfo = Converter::ArkValue<Opt_ResourceStr>(labelInfoResStr)};
+    Ark_MenuItemOptions options = { .labelInfo =
+        Converter::ArkUnion<Opt_ResourceStr, Ark_Resource>(CreateResource(LABEL_INFO_RES, ResourceType::STRING))};
     auto optionsOpt = Converter::ArkUnion<Opt_Union_MenuItemOptions_CustomBuilder, Ark_MenuItemOptions>(options);
     modifier_->setMenuItemOptions(node_, &optionsOpt);
     labelInfo = GetAttrValue<std::string>(node_, LABEL_INFO_PROP);
@@ -439,7 +426,6 @@ HWTEST_F(MenuItemModifierTest, setMenuItemOptionsMenuItemOptionsCustomBuilderTes
     ASSERT_NE(pattern, nullptr);
     EXPECT_EQ(pattern->GetSubBuilder(), nullptr);
 
-    uiNode = BlankModelNG::CreateFrameNode(NODE_ID);
     auto builder = getBuilderCb();
     auto iconBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(builder);
     Ark_MenuItemOptions options = {.builder = iconBuilder};
