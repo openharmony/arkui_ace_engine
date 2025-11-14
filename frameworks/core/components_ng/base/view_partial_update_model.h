@@ -80,6 +80,11 @@ public:
     virtual void FinishUpdate(
         const WeakPtr<AceType>& viewNode, int32_t id, std::function<void(const UpdateTask&)>&& emplaceTaskFunc) = 0;
     virtual bool AllowReusableV2Descendant(const WeakPtr<AceType>& viewNode) = 0;
+    virtual bool RegisterUpdateInstanceForEnvFunc(
+        const WeakPtr<AceType>& node, std::function<void(int32_t)>&& updateInstanceForEnvValueFunc)
+    {
+        return false;
+    };
 };
 
 } // namespace OHOS::Ace

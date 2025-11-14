@@ -1312,6 +1312,8 @@ void JSViewPartialUpdate::JSBind(BindingTarget object)
         "queryRouterPageInfo", &JSViewPartialUpdate::JSGetRouterPageInfo);
     JSClass<JSViewPartialUpdate>::CustomMethod("getUIContext", &JSViewPartialUpdate::JSGetUIContext);
     JSClass<JSViewPartialUpdate>::Method("sendStateInfo", &JSViewPartialUpdate::JSSendStateInfo);
+    JSClass<JSViewPartialUpdate>::CustomMethod(
+        "registerUpdateInstanceForEnvFunc", &JSViewPartialUpdate::JSRegisterUpdateInstanceForEnvFunc);
     JSClass<JSViewPartialUpdate>::CustomMethod("getUniqueId", &JSViewPartialUpdate::JSGetUniqueId);
     JSClass<JSViewPartialUpdate>::Method("setIsV2", &JSViewPartialUpdate::JSSetIsV2);
     JSClass<JSViewPartialUpdate>::CustomMethod("getDialogController", &JSViewPartialUpdate::JSGetDialogController);
@@ -1348,6 +1350,8 @@ void JSViewPartialUpdate::ConstructorCallback(const JSCallbackInfo& info)
     auto context = info.GetExecutionContext();
     instance->SetContext(context);
     instance->SetJSViewName(viewName);
+    const int32_t instanceId = instance->GetInstanceId();
+    instance->SetLastestInstanceId(instanceId);
 
     //  The JS object owns the C++ object:
     // make sure the C++ is not destroyed when RefPtr thisObj goes out of scope
@@ -1355,6 +1359,43 @@ void JSViewPartialUpdate::ConstructorCallback(const JSCallbackInfo& info)
     instance->IncRefCount();
 
     info.SetReturnValue(instance);
+}
+
+void JSViewPartialUpdate::JSRegisterUpdateInstanceForEnvFunc(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsFunction()) {
+        LOGE("NativeViewPartialUpdate JSRegisterUpdateInstanceForEnvFunc argument invalid");
+        return;
+    }
+ 
+    auto updateInstanceForEnvValue = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(info[0]));
+    CHECK_NULL_VOID(updateInstanceForEnvValue);
+    auto updateInstanceForEnvValueFunc = [weak = WeakClaim(this), execCtx = info.GetExecutionContext(),
+        func = std::move(updateInstanceForEnvValue)](int32_t instanceId) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("updateInstanceForEnvValueFunc");
+        auto self = weak.Upgrade();
+        CHECK_NULL_VOID(self);
+        if (self->GetLastestInstanceId() == instanceId) {
+            return;
+        }
+        self->SetLastestInstanceId(instanceId);
+        JSRef<JSVal> newInstanceId = JSRef<JSVal>::Make(ToJSValue(instanceId));
+        JSRef<JSVal> param[1] = { newInstanceId };
+        func->ExecuteJS(1, param);
+    };
+    ViewPartialUpdateModel::GetInstance()->RegisterUpdateInstanceForEnvFunc(viewNode_,
+        std::move(updateInstanceForEnvValueFunc));
+}
+
+void JSViewPartialUpdate::SetLastestInstanceId(const int32_t instanceId)
+{
+    lastestInstanceId_ = instanceId;
+}
+
+int32_t JSViewPartialUpdate::GetLastestInstanceId() const
+{
+    return lastestInstanceId_;
 }
 
 void JSViewPartialUpdate::DestructorCallback(JSViewPartialUpdate* view)

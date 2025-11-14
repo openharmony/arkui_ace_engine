@@ -132,4 +132,14 @@ bool ViewPartialUpdateModelNG::AllowReusableV2Descendant(const WeakPtr<AceType>&
                    (node->IsAllowReusableV2Descendant()));
     return result;
 }
+
+bool ViewPartialUpdateModelNG::RegisterUpdateInstanceForEnvFunc(
+    const WeakPtr<AceType>& node, std::function<void(int32_t)>&& updateInstanceForEnvValueFunc)
+{
+    auto weakNode = AceType::DynamicCast<NG::CustomNode>(node);
+    auto customNode = weakNode.Upgrade();
+    CHECK_NULL_RETURN(customNode, false);
+    customNode->RegisterUpdateJSInstanceCallback(std::move(updateInstanceForEnvValueFunc));
+    return true;
+}
 } // namespace OHOS::Ace::NG
