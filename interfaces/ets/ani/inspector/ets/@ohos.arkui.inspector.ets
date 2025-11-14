@@ -33,27 +33,8 @@
     native function getInspectorTreeNative(): string;
     export native function getFilteredInspectorTree(filters?: Array<string>): string;
     export native function getFilteredInspectorTreeById(id: string, depth: int, filters?: Array<string>): string;
-    
-    export default interface ComponentObserver
-    {
-        on(type: string, callback: VoidCallback): void;
- 
-        off(type: string, callback?: VoidCallback): void;
-        
-        onLayout(callback: VoidCallback): void;
-        
-        offLayout(callback?: VoidCallback): void;
-        
-        onDraw(callback: VoidCallback): void;
-        
-        offDraw(callback?: VoidCallback): void;
 
-        onDrawChildren(callback: VoidCallback): void;
-        
-        offDrawChildren(callback?: VoidCallback): void;
-    }
-    
-    class ComponentObserverImpl implements ComponentObserver
+    export class ComponentObserver
     {
         private nativeComponentObserver:long = 0;
         

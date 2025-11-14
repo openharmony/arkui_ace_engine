@@ -1,7 +1,6 @@
-import { Callback } from '@ohos.base';
 import { VoidCallback } from 'arkui/component/units';
 declare namespace inspector {
-    export interface ComponentObserver {
+    export class ComponentObserver {
         on(type: 'layout' | 'draw' | 'drawChildren', callback: VoidCallback): void;
 
         off(type: 'layout' | 'draw' | 'drawChildren', callback?: VoidCallback): void;
