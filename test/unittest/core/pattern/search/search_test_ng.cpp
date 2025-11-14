@@ -19,6 +19,7 @@
 #include "ui/properties/color.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
+#include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "core/components_ng/pattern/search/search_layout_property.h"
 #include "core/components_ng/pattern/search/search_model_ng.h"
 #include "core/components_ng/pattern/search/search_node.h"
@@ -1592,6 +1593,34 @@ HWTEST_F(SearchTestNg, SetTextAlign001, TestSize.Level1)
     EXPECT_EQ(textFieldLayoutProperty->GetTextAlign(), OHOS::Ace::TextAlign::CENTER);
     searchModelInstance.SetTextAlign(OHOS::Ace::TextAlign::CENTER);
     EXPECT_EQ(textFieldLayoutProperty->GetTextAlign(), OHOS::Ace::TextAlign::CENTER);
+}
+
+/**
+ * @tc.name: SetDividerColor001
+ * @tc.desc: Set Separator Color
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, SetDividerColor001, TestSize.Level1)
+{
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(EMPTY_VALUE_U16, PLACEHOLDER_U16, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    searchModelInstance.SetDividerColor(Color::BLUE);
+    auto layoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto dividerColorSetByUser = layoutProperty->GetDividerColorSetByUser().value_or(false);
+    EXPECT_EQ(dividerColorSetByUser, true);
+
+    /*
+     * Get dividerNode. DIVIDER_INDEX is 5.
+     * Set DividerColor and DividerColorByUser, get two value and check.
+     */
+    auto dividerFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(5));
+    CHECK_NULL_VOID(dividerFrameNode);
+    auto dividerRenderProperty = dividerFrameNode->GetPaintProperty<DividerRenderProperty>();
+    CHECK_NULL_VOID(dividerRenderProperty);
+    EXPECT_EQ(dividerRenderProperty->GetDividerColor(), Color::BLUE);
 }
 
 /**

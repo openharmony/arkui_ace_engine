@@ -201,6 +201,10 @@ void SearchModelImpl::SetHeight(const Dimension& value)
     textFieldComponent->SetHeight(value);
 }
 
+void SearchModelImpl::SetDividerColor(const Color& color) {};
+
+void SearchModelImpl::ResetDividerColor() {};
+
 void SearchModelImpl::SetMinFontScale(const float value) {}
 
 void SearchModelImpl::SetMaxFontScale(const float value) {}

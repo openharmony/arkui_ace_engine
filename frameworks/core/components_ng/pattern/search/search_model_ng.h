@@ -100,6 +100,8 @@ public:
     void SetLetterSpacing(const Dimension& value) override;
     void SetLineHeight(const Dimension& value) override;
     void SetHalfLeading(bool value) override;
+    void SetDividerColor(const Color& color) override;
+    void ResetDividerColor() override;
     void SetAdaptMinFontSize(const Dimension& value) override;
     void SetAdaptMaxFontSize(const Dimension& value) override;
     void SetTextDecoration(Ace::TextDecoration value) override;
@@ -129,6 +131,8 @@ public:
     static void SetPlaceholder(FrameNode* frameNode, const std::optional<std::string>& placeholder);
     static void SetIcon(FrameNode* frameNode, const std::optional<std::string>& icon);
     static void SetCaretPosition(FrameNode* frameNode, const int32_t& value);
+    static void SetDividerColor(FrameNode* frameNode, const Color& color);
+    static void ResetDividerColor(FrameNode* frameNode);
     static void SetAdaptMinFontSize(FrameNode* frameNode, const Dimension& value);
     static void SetInputFilter(
         FrameNode* frameNode, const std::string& value, const std::function<void(const std::u16string&)>& onError);

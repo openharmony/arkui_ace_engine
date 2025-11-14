@@ -11085,6 +11085,22 @@ class SearchSearchButtonModifier extends ModifierWithKey {
   }
 }
 SearchSearchButtonModifier.identity = Symbol('searchSearchButton');
+class SearchDividerColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().search.resetSearchDividerColor(node);
+    } else {
+      getUINativeModule().search.setSearchDividerColor(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+SearchDividerColorModifier.identity = Symbol('dividerColor');
 class SearchFontColorModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -12002,6 +12018,10 @@ class ArkSearchComponent extends ArkComponent {
     searchButton.fontSize = option === null || option === void 0 ? void 0 : option.fontSize;
     searchButton.autoDisable = option === null || option === void 0 ? void 0 : option.autoDisable;
     modifierWithKey(this._modifiersWithKeys, SearchSearchButtonModifier.identity, SearchSearchButtonModifier, searchButton);
+    return this;
+  }
+  dividerColor(value) {
+    modifierWithKey(this._modifiersWithKeys, SearchDividerColorModifier.identity, SearchDividerColorModifier, value);
     return this;
   }
   selectionMenuHidden(value) {

@@ -1737,6 +1737,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetSearchButton));
     search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSearchButton"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetSearchButton));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSearchDividerColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetSearchDividerColor));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSearchDividerColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetSearchDividerColor));
     search->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontColor"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetFontColor));
     search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontColor"),
