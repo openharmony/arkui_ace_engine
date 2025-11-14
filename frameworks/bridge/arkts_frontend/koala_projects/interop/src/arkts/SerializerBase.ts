@@ -150,7 +150,7 @@ export class SerializerBase implements Disposable {
             return new SerializerBase()
         }
         if (SerializerBase.poolTop === SerializerBase.pool.length) {
-            throw new Error("Pool empty! Release one of taken serializers")
+            SerializerBase.pool.push(new SerializerBase())
         }
         return SerializerBase.pool[SerializerBase.poolTop++]
     }
