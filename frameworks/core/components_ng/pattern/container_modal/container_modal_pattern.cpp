@@ -667,8 +667,7 @@ void ContainerModalPattern::SetContainerModalTitleHeight(int32_t height)
 void ContainerModalPattern::SetControlButtonsRowHeight()
 {
     auto controlButtonsRowHeight = titleHeight_;
-    if (!isTitleShow_) {
-        CHECK_NULL_VOID(floatTitleMgr_);
+    if (!isTitleShow_ && floatTitleMgr_ != nullptr) {
         if (floatTitleMgr_->hasNavOrSideBarNodes_) {
             controlButtonsRowHeight = toolBarTitleHeight_;
         } else {
@@ -697,6 +696,17 @@ void ContainerModalPattern::SetToolbarTitleHeight()
         CHECK_NULL_VOID(floatingTitleRow);
         UpdateRowHeight(floatingTitleRow, toolBarTitleHeight_);
     }
+    int32_t height = 0;
+    auto controlButtonsRow = GetControlButtonRow();
+    CHECK_NULL_VOID(controlButtonsRow);
+    auto buttonsContext = controlButtonsRow->GetRenderContext();
+    CHECK_NULL_VOID(buttonsContext);
+    auto rect = buttonsContext->GetPaintRectWithoutTransform();
+    auto buttonPopupDistance =
+        floatTitleMgr_ ? 0.0f : ((titleHeight_.ConvertToPx() - CONTAINER_TITLE_HEIGHT.ConvertToPx()) / 2);
+    buttonsContext->OnTransformTranslateUpdate(
+        { 0.0f, static_cast<float>(height - buttonPopupDistance - rect.GetY()), 0.0f });
+
     if (titleMgr_ != nullptr) {
         titleMgr_->UpdateTargetNodesBarMargin();
     }
