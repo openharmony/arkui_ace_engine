@@ -178,6 +178,9 @@ template("ace_core_interfaces_native_node") {
       "ani/condition_scope_ani_modifier.cpp",
       "ani/uinode_ani_modifier.cpp",
     ]
+
+    sources += [ "drawable/drawable_modifier.cpp" ]
+
     if (build_ohos_sdk) {
       sources -= [
         "ani/ani_theme.cpp",
