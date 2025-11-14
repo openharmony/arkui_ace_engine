@@ -51,6 +51,12 @@ import hilog from '@ohos.hilog'
         observerOptions: NavDestinationSwitchObserverOptions,
         callback?: Callback<NavDestinationSwitchInfo>
     ): void;
+
+    export native function onTabChange(callback: Callback<ObserverOptions>): void;
+    export native function offTabChange(callback?: Callback<ObserverOptions>): void;
+    export native function onTabChange(options: ObserverOptions, callback: Callback<ObserverOptions>): void;
+    export native function offTabChange(options: ObserverOptions, callback?: Callback<ObserverOptions>): void;
+
     export class DensityInfo {
         density: number;
     }
@@ -96,10 +102,10 @@ import hilog from '@ohos.hilog'
             callback?: Callback<NavDestinationSwitchInfo>
           ): void;
 
-        public native onTabChange(callback: object): void;
-        public native offTabChange(callback?: object): void;
-        public native onTabChange(options: ObserverOptions, callback: object): void;
-        public native offTabChange(options: ObserverOptions, callback?: object): void;
+        public native onTabChange(callback: Callback<TabContentInfo>): void;
+        public native offTabChange(callback?: Callback<TabContentInfo>): void;
+        public native onTabChange(options: ObserverOptions, callback: Callback<TabContentInfo>): void;
+        public native offTabChange(options: ObserverOptions, callback?: Callback<TabContentInfo>): void;
 
         public native onTabContentUpdate(callback: Callback<TabContentInfo>): void;
         public native offTabContentUpdate(callback?: Callback<TabContentInfo>): void;
@@ -442,21 +448,21 @@ import hilog from '@ohos.hilog'
 
     export interface TabContentInfo {
         tabContentId: string;
-        tabContentUniqueId: number;
+        tabContentUniqueId: int;
         state: TabContentState;
-        index: number;
+        index: int;
         id: string;
-        uniqueId: number;
+        uniqueId: int;
         lastIndex?: int;
     }
 
     export class TabContentInfoImpl implements TabContentInfo {
         tabContentId: string;
-        tabContentUniqueId: number;
+        tabContentUniqueId: int;
         state: TabContentState;
-        index: number;
+        index: int;
         id: string;
-        uniqueId: number;
+        uniqueId: int;
         lastIndex?: int;
         static setTabContentInfoImplLastIndex(contentInfo: TabContentInfoImpl, value: int): void {
             contentInfo.lastIndex = value;

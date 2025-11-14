@@ -44,10 +44,10 @@ declare namespace uiObserver {
             callback?: Callback<NavDestinationSwitchInfo>
           ): void;
 
-        onTabChange(callback: object): void;
-        offTabChange(callback?: object): void;
-        onTabChange(options: ObserverOptions, callback: object): void;
-        offTabChange(options: ObserverOptions, callback?: object): void;
+        onTabChange(callback: Callback<TabContentInfo>): void;
+        offTabChange(callback?: Callback<TabContentInfo>): void;
+        onTabChange(options: ObserverOptions, callback: Callback<TabContentInfo>): void;
+        offTabChange(options: ObserverOptions, callback?: Callback<TabContentInfo>): void;
 
         onTabContentUpdate(callback: Callback<TabContentInfo>): void;
         offTabContentUpdate(callback?: Callback<TabContentInfo>): void;
@@ -129,11 +129,11 @@ declare namespace uiObserver {
 
     export interface TabContentInfo {
         tabContentId: string;
-        tabContentUniqueId: number;
+        tabContentUniqueId: int;
         state: TabContentState;
-        index: number;
+        index: int;
         id: string;
-        uniqueId: number;
+        uniqueId: int;
         lastIndex?: int;
     }
 

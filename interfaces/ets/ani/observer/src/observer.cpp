@@ -35,8 +35,8 @@ constexpr char NAVDESTINATION_PARAM_WITHID[] =
     "C{std.core.String}C{@ohos.arkui.observer.uiObserver.NavDestinationSwitchObserverOptions}C{std.core.Object}:";
 constexpr char ANI_TABCONTENT_INFO_CLS[] = "@ohos.arkui.observer.uiObserver.TabContentInfoImpl";
 constexpr char ANI_TABCONTENT_STATE_TYPE[] = "@ohos.arkui.observer.uiObserver.TabContentState";
-constexpr char TAB_CHANGE_PARAM[] = "C{std.core.Object}:";
-constexpr char TAB_CHANGE_PARAM_WITHID[] = "C{@ohos.arkui.observer.uiObserver.ObserverOptions}C{std.core.Object}:";
+constexpr char TAB_CHANGE_PARAM[] = "C{std.core.Function1}:";
+constexpr char TAB_CHANGE_PARAM_WITHID[] = "C{@ohos.arkui.observer.uiObserver.ObserverOptions}C{std.core.Function1}:";
 constexpr char ANI_TABCONTENT_WITH_OPTIONS_CLS[] =
     "C{@ohos.arkui.observer.uiObserver.ObserverOptions}C{std.core.Function1}:";
 constexpr char ANI_TABCONTENT_CLS[] = "C{std.core.Function1}:";
@@ -990,8 +990,8 @@ private:
         if (ANI_OK != env->Object_SetPropertyByName_Ref(res, "tabContentId", tabContentId)) {
             return;
         }
-        if (ANI_OK != env->Object_SetPropertyByName_Double(res, "tabContentUniqueId",
-            static_cast<ani_double>(info.tabContentUniqueId))) {
+        if (ANI_OK != env->Object_SetPropertyByName_Int(res, "tabContentUniqueId",
+            static_cast<ani_int>(info.tabContentUniqueId))) {
             return;
         }
         ani_enum state;
@@ -1005,7 +1005,7 @@ private:
         if (ANI_OK != env->Object_SetPropertyByName_Ref(res, "state", stateItem)) {
             return;
         }
-        if (ANI_OK != env->Object_SetPropertyByName_Double(res, "index", static_cast<ani_double>(info.index))) {
+        if (ANI_OK != env->Object_SetPropertyByName_Int(res, "index", static_cast<ani_int>(info.index))) {
             return;
         }
         ani_string id {};
@@ -1015,7 +1015,7 @@ private:
         if (ANI_OK != env->Object_SetPropertyByName_Ref(res, "id", id)) {
             return;
         }
-        if (ANI_OK != env->Object_SetPropertyByName_Double(res, "uniqueId", static_cast<ani_double>(info.uniqueId))) {
+        if (ANI_OK != env->Object_SetPropertyByName_Int(res, "uniqueId", static_cast<ani_int>(info.uniqueId))) {
             return;
         }
         SetLastIndexForTabContentInfo(env, info, cls, res);
