@@ -299,9 +299,15 @@ Rosen::WindowAnchorInfo SubwindowOhos::WindowAnchorInfoConverter(const NG::Offse
     return windowAnchorInfo;
 }
 
-void SubwindowOhos::SetSubWindowVsyncListener()
+void SubwindowOhos::SetSubWindowVsyncListener(RefPtr<PipelineBase> parentPipeline, RefPtr<PipelineBase> childPipeline)
 {
-    
+    CHECK_NULL_VOID(parentPipeline);
+    CHECK_NULL_VOID(childPipeline);
+    auto parentPipelineContext = AceType::DynamicCast<NG::PipelineContext>(parentPipeline);
+    CHECK_NULL_VOID(parentPipelineContext);
+    auto childPipelineContext = AceType::DynamicCast<NG::PipelineContext>(childPipeline);
+    CHECK_NULL_VOID(childPipelineContext);
+    childPipelineContext->SetVsyncListener(parentPipelineContext->GetVsyncListener());
 }
 
 void SubwindowOhos::InitContainer()
@@ -441,6 +447,7 @@ void SubwindowOhos::InitContainer()
     Ace::Platform::UIEnvCallback callback = nullptr;
     // set view
     Platform::AceContainer::SetView(aceView, density, width, height, window_, callback);
+    SetSubWindowVsyncListener(parentPipeline, container->GetPipelineContext());
     Platform::AceViewOhos::SurfaceChanged(aceView, width, height, config.Orientation());
 
     auto uiContentImpl = reinterpret_cast<UIContentImpl*>(window_->GetUIContent());
