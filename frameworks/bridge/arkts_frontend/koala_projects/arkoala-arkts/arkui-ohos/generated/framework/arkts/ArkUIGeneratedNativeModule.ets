@@ -1627,6 +1627,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _SaveButtonAttribute_setStateEffect(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _SaveButtonAttribute_setUserCancelEvent(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _Screen_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
     native static _ScreenInterface_setScreenOptions(ptr: KPointer, screenId: number): void
@@ -1842,6 +1844,8 @@ export class ArkUIGeneratedNativeModule {
     native static _SecurityComponentMethod_setHeightAdaptivePolicy(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _SecurityComponentMethod_setEnabled(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _SecurityComponentMethod_setFocusBox(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _Select_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct

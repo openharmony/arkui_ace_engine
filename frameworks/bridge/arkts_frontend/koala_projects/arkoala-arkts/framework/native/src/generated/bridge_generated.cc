@@ -13598,6 +13598,19 @@ void impl_SaveButtonAttribute_setStateEffect(Ark_NativePointer thisPtr, KSeriali
         GetNodeModifiers()->getSaveButtonModifier()->setStateEffect(self, static_cast<Opt_Boolean*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(SaveButtonAttribute_setStateEffect, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_SaveButtonAttribute_setUserCancelEvent(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Boolean valueValueTempTmpBuf = {};
+        valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            valueValueTempTmpBuf.value = thisDeserializer.readBoolean();
+        }
+        Opt_Boolean valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getSaveButtonModifier()->setUserCancelEvent(self, static_cast<Opt_Boolean*>(&valueValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(SaveButtonAttribute_setUserCancelEvent, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_Screen_construct(Ark_Int32 id, Ark_Int32 flags) {
         return GetNodeModifiers()->getScreenModifier()->construct(id, flags);
 }
@@ -15545,6 +15558,19 @@ void impl_SecurityComponentMethod_setEnabled(Ark_NativePointer thisPtr, KSeriali
         GetNodeModifiers()->getSecurityComponentMethodModifier()->setEnabled(self, static_cast<Opt_Boolean*>(&respondValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(SecurityComponentMethod_setEnabled, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_SecurityComponentMethod_setFocusBox(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto styleValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_FocusBoxStyle styleValueTempTmpBuf = {};
+        styleValueTempTmpBuf.tag = styleValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((styleValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            styleValueTempTmpBuf.value = FocusBoxStyle_serializer::read(thisDeserializer);
+        }
+        Opt_FocusBoxStyle styleValueTemp = styleValueTempTmpBuf;;
+        GetNodeModifiers()->getSecurityComponentMethodModifier()->setFocusBox(self, static_cast<Opt_FocusBoxStyle*>(&styleValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(SecurityComponentMethod_setFocusBox, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_Select_construct(Ark_Int32 id, Ark_Int32 flags) {
         return GetNodeModifiers()->getSelectModifier()->construct(id, flags);
 }

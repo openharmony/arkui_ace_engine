@@ -5974,6 +5974,7 @@ typedef struct Opt_SafeAreaType {
 typedef enum Ark_SaveButtonOnClickResult {
     ARK_SAVE_BUTTON_ON_CLICK_RESULT_SUCCESS = 0,
     ARK_SAVE_BUTTON_ON_CLICK_RESULT_TEMPORARY_AUTHORIZATION_FAILED = 1,
+    ARK_SAVE_BUTTON_ON_CLICK_RESULT_CANCELED_BY_USER = 2,
 } Ark_SaveButtonOnClickResult;
 typedef struct Opt_SaveButtonOnClickResult {
     Ark_Tag tag;
@@ -23329,6 +23330,8 @@ typedef struct GENERATED_ArkUISaveButtonModifier {
                                 const Opt_Union_Dimension_BorderRadiuses* value);
     void (*setStateEffect)(Ark_NativePointer node,
                            const Opt_Boolean* value);
+    void (*setUserCancelEvent)(Ark_NativePointer node,
+                               const Opt_Boolean* value);
 } GENERATED_ArkUISaveButtonModifier;
 
 typedef struct GENERATED_ArkUIScreenModifier {
@@ -23604,6 +23607,8 @@ typedef struct GENERATED_ArkUISecurityComponentMethodModifier {
                                     const Opt_TextHeightAdaptivePolicy* policy);
     void (*setEnabled)(Ark_NativePointer node,
                        const Opt_Boolean* respond);
+    void (*setFocusBox)(Ark_NativePointer node,
+                        const Opt_FocusBoxStyle* style);
 } GENERATED_ArkUISecurityComponentMethodModifier;
 
 typedef struct GENERATED_ArkUISelectModifier {

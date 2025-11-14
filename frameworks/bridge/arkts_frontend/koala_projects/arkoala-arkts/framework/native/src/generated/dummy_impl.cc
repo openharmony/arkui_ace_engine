@@ -11609,6 +11609,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SetUserCancelEventImpl(Ark_NativePointer node,
+                                const Opt_Boolean* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setUserCancelEvent(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     } // SaveButtonAttributeModifier
     namespace ScreenModifier {
     Ark_NativePointer ConstructImpl(Ark_Int32 id,
@@ -13177,6 +13189,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         string out("setEnabled(");
         WriteToString(&out, respond);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetFocusBoxImpl(Ark_NativePointer node,
+                         const Opt_FocusBoxStyle* style)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setFocusBox(");
+        WriteToString(&out, style);
         out.append(") \n");
         appendGroupedLog(1, out);
     }
@@ -22601,6 +22625,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             SaveButtonAttributeModifier::SetIconSizeImpl,
             SaveButtonAttributeModifier::SetIconBorderRadiusImpl,
             SaveButtonAttributeModifier::SetStateEffectImpl,
+            SaveButtonAttributeModifier::SetUserCancelEventImpl,
         };
         return &ArkUISaveButtonModifierImpl;
     }
@@ -22768,6 +22793,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             SecurityComponentMethodModifier::SetMaxFontSizeImpl,
             SecurityComponentMethodModifier::SetHeightAdaptivePolicyImpl,
             SecurityComponentMethodModifier::SetEnabledImpl,
+            SecurityComponentMethodModifier::SetFocusBoxImpl,
         };
         return &ArkUISecurityComponentMethodModifierImpl;
     }

@@ -2681,6 +2681,26 @@ HWTEST_F(SecurityComponentModelTestNg, SetQiangjiProperty001, TestSize.Level0)
         static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
     ASSERT_NE(frameNode, nullptr);
 
+    SecurityComponentModelNG::SetAlign(frameNode.GetRawPtr(), std::nullopt);
+    SecurityComponentModelNG::SetMaxFontScale(frameNode.GetRawPtr(), std::nullopt);
+    SecurityComponentModelNG::SetMinFontScale(frameNode.GetRawPtr(), std::nullopt);
+    SecurityComponentModelNG::SetMaxLines(frameNode.GetRawPtr(), std::nullopt);
+    SecurityComponentModelNG::SetAdaptMaxFontSize(frameNode.GetRawPtr(), std::nullopt);
+    SecurityComponentModelNG::SetAdaptMinFontSize(frameNode.GetRawPtr(), std::nullopt);
+    SecurityComponentModelNG::SetHeightAdaptivePolicy(frameNode.GetRawPtr(), std::nullopt);
+    SecurityComponentModelNG::SetUserCancelEvent(frameNode.GetRawPtr(), std::nullopt);
+
+    auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    ASSERT_EQ(property->GetAlignment().has_value(), false);
+    ASSERT_EQ(property->GetMaxFontScale().has_value(), false);
+    ASSERT_EQ(property->GetMinFontScale().has_value(), false);
+    ASSERT_EQ(property->GetMaxLines().has_value(), false);
+    ASSERT_EQ(property->GetAdaptMaxFontSize().has_value(), false);
+    ASSERT_EQ(property->GetAdaptMinFontSize().has_value(), false);
+    ASSERT_EQ(property->GetHeightAdaptivePolicy().has_value(), false);
+    ASSERT_EQ(property->GetUserCancelEvent().has_value(), false);
+
     SecurityComponentModelNG::SetAlign(frameNode.GetRawPtr(), Alignment::CENTER_LEFT);
     SecurityComponentModelNG::SetMaxFontScale(frameNode.GetRawPtr(), 1.5);
     SecurityComponentModelNG::SetMinFontScale(frameNode.GetRawPtr(), 1.0);
@@ -2689,9 +2709,9 @@ HWTEST_F(SecurityComponentModelTestNg, SetQiangjiProperty001, TestSize.Level0)
     SecurityComponentModelNG::SetAdaptMinFontSize(frameNode.GetRawPtr(), Dimension(20.0));
     SecurityComponentModelNG::SetHeightAdaptivePolicy(
         frameNode.GetRawPtr(), TextHeightAdaptivePolicy::MAX_LINES_FIRST);
+    SecurityComponentModelNG::SetUserCancelEvent(frameNode.GetRawPtr(), true);
+    SecurityComponentModelNG::SetFocusBox(frameNode.GetRawPtr());
 
-    auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
-    ASSERT_NE(property, nullptr);
     ASSERT_EQ(property->GetAlignment().value_or(Alignment::CENTER_RIGHT), Alignment::CENTER_LEFT);
     ASSERT_EQ(property->GetMaxFontScale().value_or(0.0), 1.5);
     ASSERT_EQ(property->GetMinFontScale().value_or(0.0), 1.0);
@@ -2700,6 +2720,8 @@ HWTEST_F(SecurityComponentModelTestNg, SetQiangjiProperty001, TestSize.Level0)
     ASSERT_EQ(property->GetAdaptMinFontSize().value_or(Dimension(0.0)).ConvertToVp(), 20.0);
     ASSERT_EQ(property->GetHeightAdaptivePolicy().value_or(
         TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST), TextHeightAdaptivePolicy::MAX_LINES_FIRST);
+    ASSERT_EQ(property->GetUserCancelEvent().value_or(false), true);
+    ASSERT_EQ(property->GetFocusBoxFlag().value_or(false), true);
 }
 
 /**
