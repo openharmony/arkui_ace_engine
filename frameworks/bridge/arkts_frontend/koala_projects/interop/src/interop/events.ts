@@ -1,7 +1,7 @@
 import { int32 } from '@koalaui/common'
 import { DeserializerBase } from './DeserializerBase'
 import { InteropNativeModule } from './InteropNativeModule'
-import { ResourceHolder } from '../arkts/ResourceManager'
+import { ResourceHolder } from './ResourceManager'
 import { wrapSystemCallback } from './InteropOps'
 import { KSerializerBuffer } from './InteropTypes'
 

@@ -13,7 +13,7 @@
  * limitations under the License.
 */
 
-const nativeModuleLibraries: Map<string, string> = new Map<string, string>()
+const nativeModuleLibraries = new containers.ConcurrentHashMap<string, string>();
 
 export function loadNativeLibrary(library: string) {
     console.log(`[loadLibraries] Loading ${library} [${library}]`)

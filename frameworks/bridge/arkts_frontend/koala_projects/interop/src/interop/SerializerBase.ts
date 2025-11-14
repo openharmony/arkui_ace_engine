@@ -16,7 +16,7 @@ import { float32, float64, int32, int64 } from '@koalaui/common'
 import { pointer, KPointer, KSerializerBuffer } from './InteropTypes'
 import { wrapCallback } from './InteropOps'
 import { InteropNativeModule } from './InteropNativeModule'
-import { ResourceHolder, ResourceId } from '../arkts/ResourceManager'
+import { ResourceHolder, ResourceId } from './ResourceManager'
 import { MaterializedBase } from './MaterializedBase'
 import { nullptr } from './Wrapper'
 

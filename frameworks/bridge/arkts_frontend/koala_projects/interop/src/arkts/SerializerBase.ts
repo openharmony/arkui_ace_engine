@@ -133,7 +133,9 @@ export class SerializerBase implements Disposable {
     private _length: int32
     private _last: int64
 
-    private static pool: SerializerBase[] = [
+    private static stackLock = new Mutex()
+    private static serializersInUse = 0
+    private static stack = [
         new SerializerBase(),
         new SerializerBase(),
         new SerializerBase(),
@@ -143,13 +145,41 @@ export class SerializerBase implements Disposable {
         new SerializerBase(),
         new SerializerBase(),
     ]
-    private static poolTop = 0
+    private static headLock = InteropNativeModule._AllocAtomic(0)
+    private static head: SerializerBase|undefined  = new SerializerBase()
+    private static readonly headReadyToUse = 0
+    private static readonly headDisconnecting = 1
+    private static readonly headMissed = 2
+    private static readonly headJoining = 3
 
     static hold(): SerializerBase {
-        if (SerializerBase.poolTop === SerializerBase.pool.length) {
-            SerializerBase.pool.push(new SerializerBase())
+        if (InteropNativeModule._CompareAndSwapAtomic(SerializerBase.headLock, SerializerBase.headReadyToUse, SerializerBase.headDisconnecting)) {
+            // Need to avoid using from `release` while it will be not set to `undefined`
+
+            const result = SerializerBase.head
+            SerializerBase.head = undefined
+
+            InteropNativeModule._CompareAndSwapAtomic(SerializerBase.headLock,SerializerBase.headDisconnecting, SerializerBase.headMissed)
+
+            return result!
         }
-        return SerializerBase.pool[SerializerBase.poolTop++]
+
+        SerializerBase.stackLock.lock()
+        ++SerializerBase.serializersInUse
+
+        if (SerializerBase.stack.length === 0) {
+            if (SerializerBase.serializersInUse > 128){
+                SerializerBase.stackLock.unlock()
+                throw new Error("Too many Serializers in use, possibly leak")
+            }
+
+            SerializerBase.stackLock.unlock()
+            return new SerializerBase()
+        }
+
+        const result = SerializerBase.stack.pop()!
+        SerializerBase.stackLock.unlock()
+        return result
     }
 
     private static customSerializers: CustomSerializer | undefined = new DateSerializer()
@@ -176,10 +206,26 @@ export class SerializerBase implements Disposable {
     public release() {
         this.releaseResources()
         this._position = this._buffer
-        if (this !== SerializerBase.pool[SerializerBase.poolTop - 1]) {
-            throw new Error("Serializers should be release in LIFO order")
+        if (InteropNativeModule._CompareAndSwapAtomic(SerializerBase.headLock, SerializerBase.headMissed, SerializerBase.headJoining)) {
+            // Need to avoid using from `hold` while it will be not set to `this`
+
+            SerializerBase.head = this
+
+            InteropNativeModule._CompareAndSwapAtomic(SerializerBase.headLock, SerializerBase.headJoining, SerializerBase.headReadyToUse)
+
+            return
         }
-        SerializerBase.poolTop--
+
+        SerializerBase.stackLock.lock()
+        --SerializerBase.serializersInUse
+
+        if (SerializerBase.serializersInUse < 0) {
+            SerializerBase.stackLock.unlock()
+            throw new Error("BUFFER WAS RELEASE TWICE!")
+        }
+
+        SerializerBase.stack.push(this)
+        SerializerBase.stackLock.unlock()
     }
     public final dispose() {
         InteropNativeModule._Free(this._buffer)
@@ -193,9 +239,9 @@ export class SerializerBase implements Disposable {
         return (this._position - this._buffer).toInt()
     }
 
-    final toArray(): byte[] {
+    final toArray(): FixedArray<byte> {
         const len = this.length()
-        let result = new byte[len]
+        let result: FixedArray<byte> = new byte[len]
         for (let i = 0; i < len; i++) {
             result[i] = unsafeMemory.readInt8(this._buffer + i)
         }
