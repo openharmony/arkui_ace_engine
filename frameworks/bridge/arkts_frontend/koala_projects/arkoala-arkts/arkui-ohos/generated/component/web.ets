@@ -4577,6 +4577,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         if (this.checkPriority("setWebOptions")) {
             const value_casted = value as (WebOptions)
             this.getPeer()?.setWebOptionsAttribute(value_casted)
+            this.applyOptionsFinish('WebAttribute');
             return this
         }
         return this
@@ -5694,6 +5695,9 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

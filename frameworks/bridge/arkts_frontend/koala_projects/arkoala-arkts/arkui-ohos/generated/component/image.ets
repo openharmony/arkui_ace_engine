@@ -782,6 +782,7 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements Image
     public setImageOptions(src: image.PixelMap | ResourceStr | DrawableDescriptor | ImageContent, imageAIOptions?: ImageAIOptions): this {
         if (this.checkPriority("setImageOptions")) {
             hookImageSetImageOptions(this, src, imageAIOptions)
+            this.applyOptionsFinish('ImageAttribute');
             return this
         }
         return this
@@ -1009,6 +1010,9 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements Image
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

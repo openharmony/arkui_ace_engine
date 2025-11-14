@@ -395,6 +395,7 @@ export class ArkSymbolGlyphComponent extends ArkCommonMethodComponent implements
         if (this.checkPriority("setSymbolGlyphOptions")) {
             const value_casted = value as (Resource | undefined)
             this.getPeer()?.setSymbolGlyphOptionsAttribute(value_casted)
+            this.applyOptionsFinish('SymbolGlyphAttribute');
             return this
         }
         return this
@@ -488,6 +489,9 @@ export class ArkSymbolGlyphComponent extends ArkCommonMethodComponent implements
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

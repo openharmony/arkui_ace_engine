@@ -141,6 +141,7 @@ export class ArkPolylineComponent extends ArkCommonShapeMethodComponent implemen
         if (this.checkPriority("setPolylineOptions")) {
             const options_casted = options as (PolylineOptions | undefined)
             this.getPeer()?.setPolylineOptionsAttribute(options_casted)
+            this.applyOptionsFinish('PolylineAttribute');
             return this
         }
         return this
@@ -160,6 +161,9 @@ export class ArkPolylineComponent extends ArkCommonShapeMethodComponent implemen
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

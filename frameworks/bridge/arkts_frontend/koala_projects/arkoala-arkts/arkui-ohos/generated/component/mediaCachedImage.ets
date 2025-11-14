@@ -111,6 +111,7 @@ export class ArkMediaCachedImageComponent extends ArkImageComponent implements M
         if (this.checkPriority("setMediaCachedImageOptions")) {
             const src_casted = src as (image.PixelMap | ResourceStr | DrawableDescriptor | ASTCResource)
             this.getPeer()?.setMediaCachedImageOptionsAttribute(src_casted)
+            this.applyOptionsFinish('MediaCachedImageAttribute');
             return this
         }
         return this
@@ -122,6 +123,9 @@ export class ArkMediaCachedImageComponent extends ArkImageComponent implements M
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

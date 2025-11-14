@@ -91,6 +91,7 @@ export class ArkMenuItemGroupComponent extends ArkCommonMethodComponent implemen
         if (this.checkPriority("setMenuItemGroupOptions")) {
             const value_casted = value as (MenuItemGroupOptions | undefined)
             this.getPeer()?.setMenuItemGroupOptionsAttribute(value_casted)
+            this.applyOptionsFinish('MenuItemGroupAttribute');
             return this
         }
         return this
@@ -102,6 +103,9 @@ export class ArkMenuItemGroupComponent extends ArkCommonMethodComponent implemen
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

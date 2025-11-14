@@ -297,6 +297,7 @@ export class ArkUIExtensionComponentComponent extends ArkCommonMethodComponent i
             const want_casted = want as (Want)
             const options_casted = options as (UIExtensionOptions | undefined)
             this.getPeer()?.setUIExtensionComponentOptionsAttribute(want_casted, options_casted)
+            this.applyOptionsFinish('UIExtensionComponentAttribute');
             return this
         }
         return this
@@ -348,6 +349,9 @@ export class ArkUIExtensionComponentComponent extends ArkCommonMethodComponent i
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

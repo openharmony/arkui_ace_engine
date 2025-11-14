@@ -341,6 +341,7 @@ export class ArkFormComponentComponent extends ArkCommonMethodComponent implemen
         if (this.checkPriority("setFormComponentOptions")) {
             const value_casted = value as (FormInfo)
             this.getPeer()?.setFormComponentOptionsAttribute(value_casted)
+            this.applyOptionsFinish('FormComponentAttribute');
             return this
         }
         return this
@@ -440,6 +441,9 @@ export class ArkFormComponentComponent extends ArkCommonMethodComponent implemen
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

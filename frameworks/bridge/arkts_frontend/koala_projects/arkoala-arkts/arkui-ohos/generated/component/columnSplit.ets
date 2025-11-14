@@ -118,6 +118,7 @@ export class ArkColumnSplitComponent extends ArkCommonMethodComponent implements
     public setColumnSplitOptions(): this {
         if (this.checkPriority("setColumnSplitOptions")) {
             this.getPeer()?.setColumnSplitOptionsAttribute()
+            this.applyOptionsFinish('ColumnSplitAttribute');
             return this
         }
         return this
@@ -145,6 +146,9 @@ export class ArkColumnSplitComponent extends ArkCommonMethodComponent implements
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

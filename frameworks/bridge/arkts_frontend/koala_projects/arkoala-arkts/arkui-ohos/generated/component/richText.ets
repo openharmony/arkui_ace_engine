@@ -125,6 +125,7 @@ export class ArkRichTextComponent extends ArkCommonMethodComponent implements Ri
         if (this.checkPriority("setRichTextOptions")) {
             const content_casted = content as (string | Resource)
             this.getPeer()?.setRichTextOptionsAttribute(content_casted)
+            this.applyOptionsFinish('RichTextAttribute');
             return this
         }
         return this
@@ -152,6 +153,9 @@ export class ArkRichTextComponent extends ArkCommonMethodComponent implements Ri
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

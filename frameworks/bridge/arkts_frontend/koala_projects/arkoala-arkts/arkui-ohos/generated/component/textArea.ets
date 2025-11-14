@@ -1445,6 +1445,7 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements Te
         if (this.checkPriority("setTextAreaOptions")) {
             const value_casted = value as (TextAreaOptions | undefined)
             this.getPeer()?.setTextAreaOptionsAttribute(value_casted)
+            this.applyOptionsFinish('TextAreaAttribute');
             return this
         }
         return this
@@ -1939,6 +1940,9 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements Te
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

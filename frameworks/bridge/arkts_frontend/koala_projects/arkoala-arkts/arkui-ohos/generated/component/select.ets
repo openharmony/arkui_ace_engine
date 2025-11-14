@@ -844,6 +844,7 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements Sele
         if (this.checkPriority("setSelectOptions")) {
             const options_casted = options as (Array<SelectOption>)
             this.getPeer()?.setSelectOptionsAttribute(options_casted)
+            this.applyOptionsFinish('SelectAttribute');
             return this
         }
         return this
@@ -1084,6 +1085,9 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements Sele
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

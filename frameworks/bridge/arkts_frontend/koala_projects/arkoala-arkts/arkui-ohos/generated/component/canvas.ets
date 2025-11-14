@@ -822,6 +822,7 @@ export class ArkCanvasComponent extends ArkCommonMethodComponent implements Canv
             const context_casted = context as (CanvasRenderingContext2D | DrawingRenderingContext | undefined)
             const imageAIOptions_casted = imageAIOptions as (ImageAIOptions | undefined)
             this.getPeer()?.setCanvasOptionsAttribute(context_casted, imageAIOptions_casted)
+            this.applyOptionsFinish('CanvasAttribute');
             return this
         }
         return this
@@ -849,6 +850,9 @@ export class ArkCanvasComponent extends ArkCommonMethodComponent implements Canv
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

@@ -287,6 +287,7 @@ export class ArkTabContentComponent extends ArkCommonMethodComponent implements 
     public setTabContentOptions(): this {
         if (this.checkPriority("setTabContentOptions")) {
             this.getPeer()?.setTabContentOptionsAttribute()
+            this.applyOptionsFinish('TabContentAttribute');
             return this
         }
         return this
@@ -322,6 +323,9 @@ export class ArkTabContentComponent extends ArkCommonMethodComponent implements 
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 export class SubTabBarStyle {

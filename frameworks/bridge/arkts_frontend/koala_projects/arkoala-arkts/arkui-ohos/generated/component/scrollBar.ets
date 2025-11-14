@@ -109,6 +109,7 @@ export class ArkScrollBarComponent extends ArkCommonMethodComponent implements S
         if (this.checkPriority("setScrollBarOptions")) {
             const value_casted = value as (ScrollBarOptions)
             this.getPeer()?.setScrollBarOptionsAttribute(value_casted)
+            this.applyOptionsFinish('ScrollBarAttribute');
             return this
         }
         return this
@@ -128,6 +129,9 @@ export class ArkScrollBarComponent extends ArkCommonMethodComponent implements S
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

@@ -307,6 +307,7 @@ export class ArkMarqueeComponent extends ArkCommonMethodComponent implements Mar
         if (this.checkPriority("setMarqueeOptions")) {
             const options_casted = options as (MarqueeOptions)
             this.getPeer()?.setMarqueeOptionsAttribute(options_casted)
+            this.applyOptionsFinish('MarqueeAttribute');
             return this
         }
         return this
@@ -390,6 +391,9 @@ export class ArkMarqueeComponent extends ArkCommonMethodComponent implements Mar
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

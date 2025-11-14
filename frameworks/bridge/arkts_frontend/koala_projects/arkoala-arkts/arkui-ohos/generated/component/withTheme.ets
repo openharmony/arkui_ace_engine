@@ -83,6 +83,7 @@ export class ArkWithThemeComponent extends ComponentBase implements WithThemeAtt
     public setWithThemeOptions(options: WithThemeOptions | undefined): this {
         if (this.checkPriority("setWithThemeOptions")) {
             hookWithThemeOptions(this, options);
+            this.applyOptionsFinish('WithThemeAttribute');
             return this
         }
         return this
@@ -95,6 +96,9 @@ export class ArkWithThemeComponent extends ComponentBase implements WithThemeAtt
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
         ArkThemeScopeManager.getInstance().themeOptionsStack.pop();
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

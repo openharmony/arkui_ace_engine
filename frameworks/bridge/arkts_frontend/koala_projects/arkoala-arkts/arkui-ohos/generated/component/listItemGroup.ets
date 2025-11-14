@@ -136,6 +136,7 @@ export class ArkListItemGroupComponent extends ArkCommonMethodComponent implemen
         if (this.checkPriority("setListItemGroupOptions")) {
             const options_casted = options as (ListItemGroupOptions | undefined)
             this.getPeer()?.setListItemGroupOptionsAttribute(options_casted)
+            this.applyOptionsFinish('ListItemGroupAttribute');
             return this
         }
         return this
@@ -163,6 +164,9 @@ export class ArkListItemGroupComponent extends ArkCommonMethodComponent implemen
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

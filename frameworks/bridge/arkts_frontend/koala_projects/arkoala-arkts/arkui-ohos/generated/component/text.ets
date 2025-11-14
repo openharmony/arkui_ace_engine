@@ -1222,6 +1222,7 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements TextAt
             const content_casted = content as (string | Resource | undefined)
             const value_casted = value as (TextOptions | undefined)
             this.getPeer()?.setTextOptionsAttribute(content_casted, value_casted)
+            this.applyOptionsFinish('TextAttribute');
             return this
         }
         return this
@@ -1583,6 +1584,9 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements TextAt
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

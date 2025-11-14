@@ -92,6 +92,7 @@ export class ArkRowSplitComponent extends ArkCommonMethodComponent implements Ro
     public setRowSplitOptions(): this {
         if (this.checkPriority("setRowSplitOptions")) {
             this.getPeer()?.setRowSplitOptionsAttribute()
+            this.applyOptionsFinish('RowSplitAttribute');
             return this
         }
         return this
@@ -111,6 +112,9 @@ export class ArkRowSplitComponent extends ArkCommonMethodComponent implements Ro
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

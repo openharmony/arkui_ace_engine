@@ -666,6 +666,7 @@ export class ArkScrollComponent extends ArkScrollableCommonMethodComponent imple
         if (this.checkPriority("setScrollOptions")) {
             const scroller_casted = scroller as (Scroller | undefined)
             this.getPeer()?.setScrollOptionsAttribute(scroller_casted)
+            this.applyOptionsFinish('ScrollAttribute');
             return this
         }
         return this
@@ -814,6 +815,9 @@ export class ArkScrollComponent extends ArkScrollableCommonMethodComponent imple
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

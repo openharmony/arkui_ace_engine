@@ -575,6 +575,7 @@ export class ArkVideoComponent extends ArkCommonMethodComponent implements Video
             hookSetVideoOptions(this, value)
             const value_casted = value as (VideoOptions)
             this.getPeer()?.setVideoOptionsAttribute(value_casted)
+            this.applyOptionsFinish('VideoAttribute');
             return this
         }
         return this
@@ -736,6 +737,9 @@ export class ArkVideoComponent extends ArkCommonMethodComponent implements Video
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

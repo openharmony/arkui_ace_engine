@@ -214,6 +214,7 @@ export class ArkRefreshComponent extends ArkCommonMethodComponent implements Ref
         if (this.checkPriority("setRefreshOptions")) {
             const value_casted = value as (RefreshOptions)
             this.getPeer()?.setRefreshOptionsAttribute(value_casted)
+            this.applyOptionsFinish('RefreshAttribute');
             return this
         }
         return this
@@ -273,6 +274,9 @@ export class ArkRefreshComponent extends ArkCommonMethodComponent implements Ref
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 

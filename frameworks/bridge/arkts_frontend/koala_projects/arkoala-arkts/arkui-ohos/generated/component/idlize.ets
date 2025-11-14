@@ -5093,6 +5093,9 @@ export class ArkRootComponent extends ComponentBase implements Root {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
     }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
+    }
 }
 export class ArkComponentRootComponent extends ComponentBase implements ComponentRoot {
     getPeer(): ArkComponentRootPeer {
@@ -5109,6 +5112,9 @@ export class ArkComponentRootComponent extends ComponentBase implements Componen
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
     }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
+    }
 }
 export class ArkCustomBuilderRootComponent extends ComponentBase implements CustomBuilderRoot {
     getPeer(): ArkCustomBuilderRootPeer {
@@ -5124,6 +5130,9 @@ export class ArkCustomBuilderRootComponent extends ComponentBase implements Cust
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 export class ArkCustomLayoutRootComponent extends ComponentBase implements CustomLayoutRoot {
@@ -5156,6 +5165,9 @@ export class ArkCustomLayoutRootComponent extends ComponentBase implements Custo
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 export function getRectangleById(id: string): ComponentInfo {

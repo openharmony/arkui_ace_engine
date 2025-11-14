@@ -941,6 +941,7 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements TabsAt
         if (this.checkPriority("setTabsOptions")) {
             const options_casted = options as (TabsOptions | undefined)
             this.getPeer()?.setTabsOptionsAttribute(options_casted)
+            this.applyOptionsFinish('TabsAttribute');
             return this
         }
         return this
@@ -1197,6 +1198,9 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements TabsAt
         // we call this function outside of class, so need to make it public
         hookTabsApplyAttributesFinish(this)
         super.applyAttributesFinish()
+    }
+    public applyOptionsFinish(traceName: string): void {
+        super.applyOptionsFinish(traceName)
     }
 }
 
