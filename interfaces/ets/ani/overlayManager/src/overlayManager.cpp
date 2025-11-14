@@ -237,7 +237,7 @@ static void AddComponentContentWithOrder(ani_env* env, ani_long aniNode, ani_obj
         }
 
         ani_method getOrderMethod;
-        status = env->Class_FindMethod(levelOrderCls, "getOrder", ":d", &getOrderMethod);
+        status = env->Class_FindMethod(levelOrderCls, "getOrder", nullptr, &getOrderMethod);
         if (status != ANI_OK) {
             TAG_LOGE(AceLogTag::ACE_OVERLAY, "Find getOrder failed(%{public}d)", status);
             return;
