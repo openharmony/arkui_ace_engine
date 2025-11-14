@@ -79,7 +79,7 @@ ani_method GetOrCreateToDoubleMethod(ani_env* env)
     }
 
     ani_method result;
-    if (ANI_OK != env->Class_FindMethod(doubleClass, "toDouble", nullptr, &result)) {
+    if (ANI_OK != env->Class_FindMethod(doubleClass, "toDouble", ":d", &result)) {
         return nullptr;
     }
 
@@ -100,7 +100,7 @@ ani_method GetOrCreateToIntMethod(ani_env* env)
     }
 
     ani_method result;
-    if (ANI_OK != env->Class_FindMethod(intClass, "unboxed", nullptr, &result)) {
+    if (ANI_OK != env->Class_FindMethod(intClass, "unboxed", ":i", &result)) {
         return nullptr;
     }
 
@@ -121,7 +121,7 @@ ani_method GetOrCreateCtorMethod(ani_env* env)
     }
 
     ani_method result;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &result)) {
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "l:", &result)) {
         return nullptr;
     }
 
@@ -589,8 +589,10 @@ ani_status BindMatrix(ani_env* env)
         return ANI_ERROR;
     }
     std::array methods = {
-        ani_native_function { "identity", nullptr, reinterpret_cast<void*>(Matrix4_Identity) },
-        ani_native_function { "init", nullptr, reinterpret_cast<void*>(Matrix4_Init) },
+        ani_native_function {
+            "identity", ":@ohos.matrix4.matrix4.Matrix4Transit", reinterpret_cast<void*>(Matrix4_Identity) },
+        ani_native_function {
+            "init", "A{d}:@ohos.matrix4.matrix4.Matrix4Transit", reinterpret_cast<void*>(Matrix4_Init) },
     };
     if (ANI_OK != env->Namespace_BindNativeFunctions(cls, methods.data(), methods.size())) {
         return ANI_ERROR;
@@ -633,23 +635,30 @@ ani_status BindMatrixTransit(ani_env* env)
     }
 
     std::array methods = {
-        ani_native_function { "copy", nullptr, reinterpret_cast<void*>(Matrix4_Copy) },
-        ani_native_function { "scale", nullptr, reinterpret_cast<void*>(Matrix4_Scale) },
-        ani_native_function { "rotate", nullptr, reinterpret_cast<void*>(Matrix4_Rotate) },
-        ani_native_function { "translate", nullptr, reinterpret_cast<void*>(Matrix4_Translate) },
-        ani_native_function { "invert", nullptr, reinterpret_cast<void*>(Matrix4_Invert) },
-        ani_native_function { "combine", nullptr, reinterpret_cast<void*>(Matrix4_Combine) },
-        ani_native_function { "skew", nullptr, reinterpret_cast<void*>(Matrix4_Skew) },
-        ani_native_function { "setPolyToPoly", nullptr, reinterpret_cast<void*>(Matrix4_SetPolyToPoly) },
-        ani_native_function { "transformPoint", nullptr, reinterpret_cast<void*>(Matrix4_TransformPoint) },
+        ani_native_function { "copy", ":@ohos.matrix4.matrix4.Matrix4Transit", reinterpret_cast<void*>(Matrix4_Copy) },
+        ani_native_function { "scale", "@ohos.matrix4.matrix4.ScaleOption:@ohos.matrix4.matrix4.Matrix4Transit",
+            reinterpret_cast<void*>(Matrix4_Scale) },
+        ani_native_function { "rotate", "@ohos.matrix4.matrix4.RotateOption:@ohos.matrix4.matrix4.Matrix4Transit",
+            reinterpret_cast<void*>(Matrix4_Rotate) },
+        ani_native_function { "translate", "@ohos.matrix4.matrix4.TranslateOption:@ohos.matrix4.matrix4.Matrix4Transit",
+            reinterpret_cast<void*>(Matrix4_Translate) },
+        ani_native_function {
+            "invert", ":@ohos.matrix4.matrix4.Matrix4Transit", reinterpret_cast<void*>(Matrix4_Invert) },
+        ani_native_function { "combine", "@ohos.matrix4.matrix4.Matrix4Transit:@ohos.matrix4.matrix4.Matrix4Transit",
+            reinterpret_cast<void*>(Matrix4_Combine) },
+        ani_native_function {
+            "skew", "dd:@ohos.matrix4.matrix4.Matrix4Transit", reinterpret_cast<void*>(Matrix4_Skew) },
+        ani_native_function { "setPolyToPoly",
+            "@ohos.matrix4.matrix4.PolyToPolyOptions:@ohos.matrix4.matrix4.Matrix4Transit",
+            reinterpret_cast<void*>(Matrix4_SetPolyToPoly) },
+        ani_native_function { "transformPoint", "A{d}:A{d}", reinterpret_cast<void*>(Matrix4_TransformPoint) },
     };
     if (ANI_OK != env->Class_BindNativeMethods(cls, methods.data(), methods.size())) {
         return ANI_ERROR;
     };
 
-    std::array staticMethod = {
-        ani_native_function  { "nativeTransferStatic", nullptr, reinterpret_cast<void*>(MatrixTransferStatic) }
-    };
+    std::array staticMethod = { ani_native_function { "nativeTransferStatic", "C{std.core.Object}:C{std.core.Object}",
+        reinterpret_cast<void*>(MatrixTransferStatic) } };
     if (ANI_OK != env->Class_BindStaticNativeMethods(cls, staticMethod.data(), staticMethod.size())) {
         return ANI_ERROR;
     };

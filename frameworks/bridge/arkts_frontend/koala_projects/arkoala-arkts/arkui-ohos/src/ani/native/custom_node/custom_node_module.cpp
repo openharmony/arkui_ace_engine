@@ -207,7 +207,7 @@ ani_object QueryNavigationInfo(ani_env* env, [[maybe_unused]] ani_object, ani_lo
     ani_class cls;
     env->FindClass(className, &cls);
     ani_method navInfoCtor;
-    env->Class_FindMethod(cls, "<ctor>", nullptr, &navInfoCtor);
+    env->Class_FindMethod(cls, "<ctor>", ":", &navInfoCtor);
     env->Object_New(cls, navInfoCtor, &res);
 
     // set navigationId
@@ -220,7 +220,8 @@ ani_object QueryNavigationInfo(ani_env* env, [[maybe_unused]] ani_object, ani_lo
     ani_class interCls;
     env->FindClass("arkui.component.navigation.NavPathStackInternal", &interCls);
     ani_ref pathStack;
-    env->Class_CallStaticMethodByName_Ref(interCls, "fromPtr", nullptr, &pathStack, info.navPathStack);
+    env->Class_CallStaticMethodByName_Ref(interCls, "fromPtr",
+        "C{std.core.Object}:arkui.component.navigation.NavPathStack", &pathStack, info.navPathStack);
     env->Object_SetPropertyByName_Ref(res, "pathStack", static_cast<ani_object>(pathStack));
     return res;
 }
@@ -239,7 +240,7 @@ ani_object QueryNavDestinationInfo(ani_env* env, [[maybe_unused]] ani_object, an
     ani_class cls;
     env->FindClass(className, &cls);
     ani_method routerInfoCtor;
-    env->Class_FindMethod(cls, "<ctor>", nullptr, &routerInfoCtor);
+    env->Class_FindMethod(cls, "<ctor>", ":", &routerInfoCtor);
     env->Object_New(cls, routerInfoCtor, &res);
 
     ani_object uniqueId_obj = CreateInt(env, info.uniqueId);
@@ -289,7 +290,7 @@ ani_object QueryNavDestinationInfo0(ani_env* env, [[maybe_unused]] ani_object, a
     ani_class cls;
     env->FindClass(className, &cls);
     ani_method routerInfoCtor;
-    env->Class_FindMethod(cls, "<ctor>", nullptr, &routerInfoCtor);
+    env->Class_FindMethod(cls, "<ctor>", ":", &routerInfoCtor);
     env->Object_New(cls, routerInfoCtor, &res);
 
     ani_object uniqueId_obj = CreateInt(env, info.uniqueId);
@@ -341,7 +342,7 @@ ani_object QueryNavDestinationInfo1(ani_env* env, [[maybe_unused]] ani_object, a
     ani_class cls;
     env->FindClass(className, &cls);
     ani_method routerInfoCtor;
-    env->Class_FindMethod(cls, "<ctor>", nullptr, &routerInfoCtor);
+    env->Class_FindMethod(cls, "<ctor>", ":", &routerInfoCtor);
     env->Object_New(cls, routerInfoCtor, &res);
     ani_object uniqueId_obj = CreateInt(env, info.uniqueId);
     env->Object_SetPropertyByName_Ref(res, "uniqueId", uniqueId_obj);
@@ -387,7 +388,7 @@ ani_object QueryRouterPageInfo1(ani_env* env, [[maybe_unused]] ani_object, ani_i
     ani_class cls;
     env->FindClass(className, &cls);
     ani_method routerInfoCtor;
-    env->Class_FindMethod(cls, "<ctor>", nullptr, &routerInfoCtor);
+    env->Class_FindMethod(cls, "<ctor>", ":", &routerInfoCtor);
     env->Object_New(cls, routerInfoCtor, &res);
 
     env->Object_SetPropertyByName_Double(res, "index", static_cast<ani_double>(info.index));
@@ -427,7 +428,7 @@ ani_object QueryRouterPageInfo(ani_env* env, [[maybe_unused]] ani_object, ani_lo
     ani_class cls;
     env->FindClass(className, &cls);
     ani_method routerInfoCtor;
-    env->Class_FindMethod(cls, "<ctor>", nullptr, &routerInfoCtor);
+    env->Class_FindMethod(cls, "<ctor>", ":", &routerInfoCtor);
     env->Object_New(cls, routerInfoCtor, &res);
 
     env->Object_SetPropertyByName_Double(res, "index", static_cast<ani_double>(info.index));

@@ -25,17 +25,6 @@ ani_long GetPropertyName(ani_env* env, ani_object obj, const char* name)
     ANI_CALL(env, Object_GetFieldByName_Long(obj, name, &propertyValue), return 0L);
     return propertyValue;
 }
-
-ani_object CallFromPtrMethod(ani_env* env, const char* methodName, ani_long ptr)
-{
-    ani_static_method method;
-    ani_class myClass;
-    ani_ref resultRef;
-    ANI_CALL(env, FindClass("@ohos.arkui.shape.__ShapeInnerMethods__", &myClass), return nullptr);
-    ANI_CALL(env, Class_FindStaticMethod(myClass, methodName, nullptr, &method), return nullptr);
-    ANI_CALL(env, Class_CallStaticMethod_Ref(myClass, method, &resultRef, ptr), return nullptr);
-    return static_cast<ani_object>(resultRef);
-}
 }
 ani_long ExtractorsToRectShapePtr(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_object obj)
 {
@@ -44,7 +33,15 @@ ani_long ExtractorsToRectShapePtr(ani_env* env, [[maybe_unused]] ani_object aniC
 
 ani_object ExtractorsFromRectShapePtr(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr)
 {
-    return CallFromPtrMethod(env, "RectFromPtr", ptr);
+    ani_static_method method;
+    ani_class myClass;
+    ani_ref resultRef;
+    ANI_CALL(env, FindClass("@ohos.arkui.shape.__ShapeInnerMethods__", &myClass), return nullptr);
+    ANI_CALL(env,
+        Class_FindStaticMethod(myClass, "RectFromPtr", "l:@ohos.arkui.shape.RectShape", &method),
+        return nullptr);
+    ANI_CALL(env, Class_CallStaticMethod_Ref(myClass, method, &resultRef, ptr), return nullptr);
+    return static_cast<ani_object>(resultRef);
 }
 
 ani_long ExtractorsToCircleShapePtr(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_object obj)
@@ -54,7 +51,15 @@ ani_long ExtractorsToCircleShapePtr(ani_env* env, [[maybe_unused]] ani_object an
 
 ani_object ExtractorsFromCircleShapePtr(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr)
 {
-    return CallFromPtrMethod(env, "CircleFromPtr", ptr);
+    ani_static_method method;
+    ani_class myClass;
+    ani_ref resultRef;
+    ANI_CALL(env, FindClass("@ohos.arkui.shape.__ShapeInnerMethods__", &myClass), return nullptr);
+    ANI_CALL(env,
+        Class_FindStaticMethod(myClass, "CircleFromPtr", "l:@ohos.arkui.shape.CircleShape", &method),
+        return nullptr);
+    ANI_CALL(env, Class_CallStaticMethod_Ref(myClass, method, &resultRef, ptr), return nullptr);
+    return static_cast<ani_object>(resultRef);
 }
 
 ani_long ExtractorsToEllipseShapePtr(ani_env* env, ani_object aniClass, ani_object obj)
@@ -63,7 +68,15 @@ ani_long ExtractorsToEllipseShapePtr(ani_env* env, ani_object aniClass, ani_obje
 }
 ani_object ExtractorsFromEllipseShapePtr(ani_env* env, ani_object aniClass, ani_long ptr)
 {
-    return CallFromPtrMethod(env, "EllipseFromPtr", ptr);
+    ani_static_method method;
+    ani_class myClass;
+    ani_ref resultRef;
+    ANI_CALL(env, FindClass("@ohos.arkui.shape.__ShapeInnerMethods__", &myClass), return nullptr);
+    ANI_CALL(env,
+        Class_FindStaticMethod(myClass, "EllipseFromPtr", "l:@ohos.arkui.shape.EllipseShape", &method),
+        return nullptr);
+    ANI_CALL(env, Class_CallStaticMethod_Ref(myClass, method, &resultRef, ptr), return nullptr);
+    return static_cast<ani_object>(resultRef);
 }
 ani_long ExtractorsToPathShapePtr(ani_env* env, ani_object aniClass, ani_object obj)
 {
@@ -71,7 +84,15 @@ ani_long ExtractorsToPathShapePtr(ani_env* env, ani_object aniClass, ani_object 
 }
 ani_object ExtractorsFromPathShapePtr(ani_env* env, ani_object aniClass, ani_long ptr)
 {
-    return CallFromPtrMethod(env, "PathFromPtr", ptr);
+    ani_static_method method;
+    ani_class myClass;
+    ani_ref resultRef;
+    ANI_CALL(env, FindClass("@ohos.arkui.shape.__ShapeInnerMethods__", &myClass), return nullptr);
+    ANI_CALL(env,
+        Class_FindStaticMethod(myClass, "PathFromPtr", "l:@ohos.arkui.shape.PathShape", &method),
+        return nullptr);
+    ANI_CALL(env, Class_CallStaticMethod_Ref(myClass, method, &resultRef, ptr), return nullptr);
+    return static_cast<ani_object>(resultRef);
 }
 ani_long ExtractorsToICurvePtr(ani_env* env, ani_object aniClass, ani_object obj)
 {
