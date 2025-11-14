@@ -5184,7 +5184,8 @@ void SetOverlayImpl(Ark_NativePointer node,
             LOGE("OverlayImpl() Ark_ComponentContent.ComponentContentStub not implemented");
         },
         [frameNode]() {
-            ViewAbstractModelStatic::ResetOverlay(frameNode);
+            OverlayOptions overlay;
+            ViewAbstract::SetOverlayNode(frameNode, nullptr, overlay);
         });
 }
 void SetBlendModeImpl(Ark_NativePointer node,
