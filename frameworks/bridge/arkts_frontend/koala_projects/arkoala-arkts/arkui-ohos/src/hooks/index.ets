@@ -60,7 +60,9 @@ import { NavigationOpsHandWritten } from "./NavigationOpsHandWritten";
 import { int32 } from "@koalaui/common"
 import { ArkImageComponent, ResourceStr, ImageContent, ImageAIOptions, ArkTabsComponent } from "#generated";
 import { ArkWaterFlowComponent, WaterFlowOptions } from '#generated';
+import { ArkListItemGroupComponent, ListItemGroupOptions } from '#generated';
 import { ImageOpsHandWritten } from "./ImageOpsHandWritten";
+import { ListItemGroupHandWritten } from './ListItemGroupHandWritten';
 import { TabsOpsHandWritten } from "./TabsOpsHandWritten";
 import { WaterFlowHandWritten } from './WaterFlowHandWritten';
 import { XComponentOpsHandWritten } from "./XComponentOpsHandWritten";
@@ -564,6 +566,9 @@ export function unregisterDetach(peerPtr: CanvasRenderingContext2D, callback?: V
 }
 export function hookWaterFlowOptionsImpl(node: ArkWaterFlowComponent, options: WaterFlowOptions | undefined): void {
     WaterFlowHandWritten.hookWaterFlowOptionsImpl(node, options)
+}
+export function hookListItemGroupOptionsImpl(node: ArkListItemGroupComponent, options: ListItemGroupOptions | undefined): void {
+    ListItemGroupHandWritten.hookListItemGroupOptionsImpl(node, options)
 }
 export function hookTextPickerDivider(receiver: ArkTextPickerComponent | ArkTextPickerPeer,
   value: DividerOptions | null | undefined): void {
