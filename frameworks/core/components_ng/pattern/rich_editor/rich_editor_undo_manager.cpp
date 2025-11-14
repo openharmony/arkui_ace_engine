@@ -409,7 +409,7 @@ void RichEditorUndoManager::ProcessStringUndo(const UndoRedoRecord& record)
 }
 
 void RichEditorUndoManager::ProcessStringRedo(const UndoRedoRecord& record)
-{
+{   
     auto pattern = pattern_.Upgrade();
     CHECK_NULL_VOID(pattern);
     auto host = pattern->GetHost();
@@ -535,30 +535,37 @@ void StyledStringUndoManager::UpdateRecordAfterChange(int32_t start, int32_t len
     record.SetOperationAfter(rangeAfter, styledString);
 }
 
-void StringUndoManager::ApplyRecord(const UndoRedoRecord& record, bool isUndo)
+void StyledStringUndoManager::ApplyRecord(const UndoRedoRecord& record, bool isUndo)
 {
     auto pattern = pattern_.Upgrade();
     CHECK_NULL_VOID(pattern);
+    CHECK_NULL_VOID(pattern->IsStyledStringModeEnabled());
+    auto start = record.rangeBefore.start;
+    auto length = record.rangeBefore.GetLength();
+    auto styledString = record.styledStringAfter;
+    auto startBefore = record.rangeAfter.start;
+    auto lengthBefore = record.rangeAfter.GetLength();
+    auto curStyledString = pattern->GetStyledString();
     pattern->CloseSelectOverlay();
     pattern->ResetSelection();
-    if (record.restoreBuilderSpan) {
-        // Handle undo drag
-        isUndo ? ProcessDragUndo(record) : ProcessDragRedo(record);
-        return;
+    if (record.isOnlyStyleChange) {
+        std::vector<RefPtr<SpanBase>> updateSpans;
+        for (const auto& spanType : record.updateSpanTypes) {
+            curStyledString->RemoveSpan(start, length, spanType);
+            auto spansBefore = styledString->GetSpans(0, lengthBefore, spanType);
+            for (auto& span : spansBefore) {
+                CHECK_NULL_CONTINUE(span);
+                auto spanStart = span->GetStartIndex() + startBefore;
+                auto spanEnd = span->GetEndIndex() + startBefore;
+                updateSpans.push_back(span->GetSubSpan(spanStart, spanEnd));
+            }
+        }
+        pattern->paragraphCache_.Clear();
+        curStyledString->BindWithSpans(updateSpans);
+        curStyledString->NotifySpanWatcher();
+    } else {
+        curStyledString->ReplaceSpanString(start, length, styledString);
     }
-    auto delLength = record.rangeBefore.GetLength();
-    auto insertLength = record.rangeAfter.GetLength();
-    bool hasSelection = record.selectionBefore.GetLength() > 0;
-    bool isOnlyDelete = delLength > 0 && insertLength == 0;
-    // Historical Operation Specifications: process delete forward when redo delete forward without selection
-    bool isDeleteForward =
-        !isUndo && !hasSelection && isOnlyDelete && record.deleteDirection == RichEditorDeleteDirection::FORWARD;
-    pattern->SetCaretPosition(isDeleteForward ? record.rangeBefore.start : record.rangeBefore.end);
-    if (delLength > 0) {
-        isDeleteForward ? pattern->DeleteForwardOperation(delLength, false)
-            : pattern->DeleteBackwardOperation(delLength, false);
-    }
-    IF_TRUE(record.rangeAfter.GetLength() > 0, pattern->InsertValueOperation(record.GetStringAfter()));
 }
 
 // =============================================================================
@@ -750,18 +757,24 @@ void StringUndoManager::ApplyRecord(const UndoRedoRecord& record, bool isUndo)
     CHECK_NULL_VOID(pattern);
     pattern->CloseSelectOverlay();
     pattern->ResetSelection();
-    pattern->StopTwinkling();
     if (record.restoreBuilderSpan) {
+        // Handle undo drag
         isUndo ? ProcessDragUndo(record) : ProcessDragRedo(record);
         return;
     }
-    if (record.rangeBefore.GetLength() > 0) {
-        pattern->DeleteForward(record.rangeBefore.start, record.rangeBefore.GetLength());
-        auto eventHub = pattern->GetEventHub<RichEditorEventHub>();
-        IF_PRESENT(eventHub, FireOnDeleteComplete());
+    auto delLength = record.rangeBefore.GetLength();
+    auto insertLength = record.rangeAfter.GetLength();
+    bool hasSelection = record.selectionBefore.GetLength() > 0;
+    bool isOnlyDelete = delLength > 0 && insertLength == 0;
+    // Historical Operation Specifications: process delete forward when redo delete forward without selection
+    bool isDeleteForward =
+        !isUndo && !hasSelection && isOnlyDelete && record.deleteDirection == RichEditorDeleteDirection::FORWARD;
+    pattern->SetCaretPosition(isDeleteForward ? record.rangeBefore.start : record.rangeBefore.end);
+    if (delLength > 0) {
+        isDeleteForward ? pattern->DeleteForwardOperation(delLength, false)
+            : pattern->DeleteBackwardOperation(delLength, false);
     }
-    pattern->caretPosition_ = record.rangeBefore.start;
-    pattern->InsertValueOperation(record.GetStringAfter());
+    IF_TRUE(record.rangeAfter.GetLength() > 0, pattern->InsertValueOperation(record.GetStringAfter()));
 }
 
 void StringUndoManager::ProcessDragUndo(const UndoRedoRecord& record)
