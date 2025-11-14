@@ -62,6 +62,10 @@ namespace OHOS::Ace::Kit {
 class FrameNode;
 }
 
+namespace OHOS::Ace {
+class CalcDimensionRect;
+}
+
 namespace OHOS::Ace::Recorder {
 class ExposureProcessor;
 }

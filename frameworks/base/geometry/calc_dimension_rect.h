@@ -21,7 +21,6 @@
 
 #include "base/geometry/calc_dimension.h"
 #include "base/geometry/dimension_rect.h"
-#include "base/json/json_util.h"
 
 namespace OHOS::Ace {
 
@@ -83,29 +82,9 @@ public:
         y_ = y;
     }
 
-    std::string ToString() const
-    {
-        static const int32_t precision = 2;
-        std::stringstream ss;
-        ss << "Rect (" << std::fixed << std::setprecision(precision) << x_.ToString() << ", "
-           << y_.ToString() << ") - [";
-        ss << width_.ToString();
-        ss << " x ";
-        ss << height_.ToString();
-        ss << "]";
-        std::string output = ss.str();
-        return output;
-    }
+    std::string ToString() const;
 
-    std::string ToJsonString() const
-    {
-        auto jsonValue = JsonUtil::Create(true);
-        jsonValue->Put("x", x_.ToString().c_str());
-        jsonValue->Put("y", y_.ToString().c_str());
-        jsonValue->Put("width", width_.ToString().c_str());
-        jsonValue->Put("height", height_.ToString().c_str());
-        return jsonValue->ToString();
-    }
+    std::string ToJsonString() const;
 
     CalcDimensionRect& operator=(const DimensionRect& newDimension)
     {

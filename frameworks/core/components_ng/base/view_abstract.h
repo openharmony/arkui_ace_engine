@@ -67,6 +67,7 @@ namespace OHOS::Ace {
 class ImageSourceInfo;
 class BasicShape;
 class SpanString;
+class CalcDimensionRect;
 }
 
 namespace OHOS::Ace::NG {

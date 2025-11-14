@@ -16,6 +16,7 @@
 #include "core/components_ng/event/drag_event.h"
 
 #include "base/log/ace_trace.h"
+#include "base/geometry/calc_dimension_rect.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "core/common/container.h"
 #include "core/common/interaction/interaction_data.h"
@@ -98,6 +99,8 @@ DragEventActuator::DragEventActuator(const WeakPtr<GestureEventHub>& gestureEven
 {
     isNotInPreviewState_ = false;
 }
+
+DragEventActuator::~DragEventActuator() = default;
 
 void DragEventActuator::StartDragTaskForWeb(const GestureEvent& info)
 {

@@ -17,6 +17,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/time_util.h"
+#include "base/geometry/calc_dimension_rect.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/click_event.h"
 #include "core/components_ng/event/event_hub.h"
@@ -92,6 +93,8 @@ bool IsSystemRecognizerCollected(const RefPtr<NGGestureRecognizer>& current)
 }
 
 GestureEventHub::GestureEventHub(const WeakPtr<EventHub>& eventHub) : eventHub_(eventHub) {}
+
+GestureEventHub::~GestureEventHub() = default;
 
 RefPtr<FrameNode> GestureEventHub::GetFrameNode() const
 {

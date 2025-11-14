@@ -26,6 +26,10 @@
 #include "core/gestures/drag_event.h"
 #include "core/components/common/properties/decoration.h"
 
+namespace OHOS::Ace {
+class CalcDimensionRect;
+}
+
 namespace OHOS::Ace::NG {
 
 class GestureEventHub;
@@ -100,7 +104,7 @@ class ACE_EXPORT DragEventActuator : public GestureEventActuator {
 public:
     DragEventActuator(
         const WeakPtr<GestureEventHub>& gestureEventHub, PanDirection direction, int32_t fingers, float distance);
-    ~DragEventActuator() override = default;
+    ~DragEventActuator() override;
 
     void ReplaceDragEvent(const RefPtr<DragEvent>& dragEvent)
     {

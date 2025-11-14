@@ -24,6 +24,7 @@
 #include "ui/base/ace_type.h"
 
 #include "base/error/error_code.h"
+#include "base/geometry/calc_dimension_rect.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/multi_thread.h"
 #include "base/utils/system_properties.h"

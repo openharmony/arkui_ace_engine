@@ -27,6 +27,7 @@
 #include <unordered_map>
 
 #include "base/geometry/calc_dimension.h"
+#include "base/geometry/calc_dimension_rect.h"
 #include "base/geometry/dimension.h"
 #include "base/geometry/matrix4.h"
 #include "base/geometry/ng/offset_t.h"

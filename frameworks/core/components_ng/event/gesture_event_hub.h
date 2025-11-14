@@ -44,6 +44,7 @@ struct DragNotifyMsg;
 struct KeyEvent;
 class UnifiedData;
 class Subwindow;
+class CalcDimensionRect;
 }
 
 namespace OHOS::Ace::NG {
@@ -169,7 +170,7 @@ class PipelineContext;
 class ACE_FORCE_EXPORT GestureEventHub : public Referenced {
 public:
     explicit GestureEventHub(const WeakPtr<EventHub>& eventHub);
-    ~GestureEventHub() override = default;
+    ~GestureEventHub() override;
     void AddGesture(const RefPtr<NG::Gesture>& gesture);
     // call by CAPI do distinguish with AddGesture called by ARKUI;
     void ClearGesture();

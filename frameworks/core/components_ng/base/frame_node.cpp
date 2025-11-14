@@ -32,6 +32,7 @@
 #include "ui/view/pattern.h"
 
 #include "base/geometry/axis.h"
+#include "base/geometry/calc_dimension_rect.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/point_t.h"
 #include "base/log/ace_performance_monitor.h"

@@ -45,6 +45,7 @@
 
 namespace OHOS::Ace {
 class SpanString;
+class CalcDimensionRect;
 }
 namespace OHOS::Ace::NG {
 constexpr int32_t MAT4_ZERO = 0;

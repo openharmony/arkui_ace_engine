@@ -44,6 +44,10 @@
 #include "core/components_ng/property/transition_property.h"
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
 
+namespace OHOS::Ace {
+class CalcDimensionRect;
+}
+
 namespace OHOS::Ace::Framework {
 
 constexpr int32_t DEFAULT_TAP_FINGERS = 1;

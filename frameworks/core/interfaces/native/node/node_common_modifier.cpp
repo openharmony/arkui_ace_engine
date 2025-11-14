@@ -18,6 +18,7 @@
 
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
+#include "base/geometry/calc_dimension_rect.h"
 #include "bridge/common/utils/utils.h"
 #include "core/animation/animation_pub.h"
 #include "core/animation/curves.h"
