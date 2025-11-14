@@ -83,7 +83,8 @@ export class EmbeddedComponentModifier extends CommonMethodModifier implements E
         }
     }
     mergeModifier(modifier: EmbeddedComponentModifier): void {
-        super.mergeModifier(modifier)
+       super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._onTerminated_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._onTerminated_0_flag) {

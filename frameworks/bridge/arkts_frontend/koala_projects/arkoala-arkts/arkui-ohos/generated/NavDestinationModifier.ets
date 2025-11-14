@@ -678,7 +678,8 @@ export class NavDestinationModifier extends CommonMethodModifier implements NavD
         }
     }
     mergeModifier(modifier: NavDestinationModifier): void {
-        super.mergeModifier(modifier)
+       super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._hideTitleBar_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._hideTitleBar_0_flag) {

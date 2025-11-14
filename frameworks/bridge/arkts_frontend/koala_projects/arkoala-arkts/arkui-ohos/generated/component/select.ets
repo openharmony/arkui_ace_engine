@@ -39,6 +39,7 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { SelectModifier } from "./../SelectModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ModifierStateManager } from '../CommonModifier';
 export interface MenuItemConfiguration {
     value: ResourceStr
     icon?: ResourceStr | undefined
@@ -1339,7 +1340,9 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements Sele
         return this
     }
     public attributeModifier(value: AttributeModifier<SelectAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookSelectAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookSelectAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

@@ -673,7 +673,8 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
         }
     }
     mergeModifier(modifier: SwiperModifier): void {
-        super.mergeModifier(modifier)
+       super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._index_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._index_0_flag) {

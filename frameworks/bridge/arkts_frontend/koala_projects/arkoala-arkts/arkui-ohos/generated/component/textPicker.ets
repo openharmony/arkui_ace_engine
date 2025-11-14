@@ -36,6 +36,7 @@ import { DialogAlignment } from "./alertDialog"
 import { TextPickerModifier } from "./../TextPickerModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { LengthMetrics_serializer } from "./../Graphics"
+import { ModifierStateManager } from '../CommonModifier';
 export class TextPickerDialogInternal {
     public static fromPtr(ptr: KPointer): TextPickerDialog {
         return new TextPickerDialog(ptr)
@@ -619,7 +620,9 @@ export class ArkTextPickerComponent extends ArkCommonMethodComponent implements 
         return this
     }
     public attributeModifier(value: AttributeModifier<TextPickerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookTextPickerAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookTextPickerAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

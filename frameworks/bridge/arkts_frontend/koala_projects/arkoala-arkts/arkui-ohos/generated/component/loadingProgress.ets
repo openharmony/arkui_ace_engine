@@ -33,6 +33,7 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { LoadingProgressModifier } from "./../LoadingProgressModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ModifierStateManager } from '../CommonModifier';
 export class ArkLoadingProgressPeer extends ArkCommonMethodPeer {
     attributeSet?: LoadingProgressModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -177,7 +178,9 @@ export class ArkLoadingProgressComponent extends ArkCommonMethodComponent implem
         return this
     }
     public attributeModifier(value: AttributeModifier<LoadingProgressAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookLoadingProgressAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookLoadingProgressAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

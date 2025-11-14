@@ -264,7 +264,8 @@ export class SideBarContainerModifier extends CommonMethodModifier implements Si
         }
     }
     mergeModifier(modifier: SideBarContainerModifier): void {
-        super.mergeModifier(modifier)
+       super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._showSideBar_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._showSideBar_0_flag) {

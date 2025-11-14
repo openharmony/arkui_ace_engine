@@ -64,7 +64,8 @@ export class WindowSceneModifier extends CommonMethodModifier implements WindowS
         }
     }
     mergeModifier(modifier: WindowSceneModifier): void {
-        super.mergeModifier(modifier)
+       super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._attractionEffect_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._attractionEffect_0_flag) {

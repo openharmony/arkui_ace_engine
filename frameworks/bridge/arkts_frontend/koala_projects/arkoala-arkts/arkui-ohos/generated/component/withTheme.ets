@@ -33,6 +33,7 @@ import { NodeAttach, remember } from "@koalaui/runtime"
 import { CustomTheme_serializer } from "./../framework/ohos.arkui.theme"
 import { ArkThemeScopeManager } from 'arkui/theme/ArkThemeScopeManager';
 import { GlobalStateManager } from '@koalaui/runtime';
+import { ModifierStateManager } from '../CommonModifier';
 export class ArkWithThemePeer extends PeerNode {
     attributeSet?: WithThemeModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -88,7 +89,9 @@ export class ArkWithThemeComponent extends ComponentBase implements WithThemeAtt
         return this
     }
     public attributeModifier(value: AttributeModifier<WithThemeAttribute> | undefined): this {
-        hookWithThemeAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookWithThemeAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

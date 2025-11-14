@@ -36,6 +36,7 @@ import { DatePickerModifier } from "./../DatePickerModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Resource_serializer } from "./../framework/resource"
 import { intl_DateTimeOptions_serializer } from "./../framework/ohos.intl"
+import { ModifierStateManager } from '../CommonModifier';
 export class DatePickerDialogInternal {
     public static fromPtr(ptr: KPointer): DatePickerDialog {
         return new DatePickerDialog(ptr)
@@ -361,7 +362,9 @@ export class ArkDatePickerComponent extends ArkCommonMethodComponent implements 
         return this
     }
     public attributeModifier(value: AttributeModifier<DatePickerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookDatePickerAttributeModifier(this, value);
+         ModifierStateManager.INSTANCE.scope(() => {
+            hookDatePickerAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

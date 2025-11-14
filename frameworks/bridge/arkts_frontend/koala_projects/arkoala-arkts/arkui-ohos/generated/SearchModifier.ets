@@ -31,8 +31,10 @@ import { CaretStyle, EditableTextOnChangeCallback, PreviewText, TextChangeOption
 import { EnterKeyType, SubmitEvent, OnTextSelectionChangeCallback, OnContentScrollCallback, OnPasteCallback } from "./component/textInput"
 import { PasteEvent, KeyboardOptions } from "./component/richEditor"
 import { CustomBuilder } from "./component/builder"
+import { ModifierState } from "./CommonModifier"
 export class SearchModifier extends CommonMethodModifier implements SearchAttribute,AttributeModifier<SearchAttribute> {
     _instanceId: number = -1;
+     _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -140,6 +142,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
     _customKeyboard_0_0value?: CustomBuilder | undefined
     _customKeyboard_0_1value?: KeyboardOptions | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkSearchPeer;
         if (this._fontColor_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -990,7 +993,8 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         }
     }
     mergeModifier(modifier: SearchModifier): void {
-        super.mergeModifier(modifier)
+       super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._fontColor_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._fontColor_0_flag) {

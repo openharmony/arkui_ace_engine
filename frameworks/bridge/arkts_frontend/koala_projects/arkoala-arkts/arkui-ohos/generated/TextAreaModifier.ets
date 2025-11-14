@@ -31,8 +31,10 @@ import { CaretStyle, EditableTextOnChangeCallback, PreviewText, TextChangeOption
 import { PasteEvent, KeyboardOptions } from "./component/richEditor"
 import { LengthMetrics } from "arkui.Graphics"
 import { CustomBuilder } from "./component/builder"
+import { ModifierState } from "./CommonModifier"
 export class TextAreaModifier extends CommonMethodModifier implements TextAreaAttribute,AttributeModifier<TextAreaAttribute> {
     _instanceId: number = -1;
+     _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -166,6 +168,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
     _customKeyboard_0_0value?: CustomBuilder | undefined
     _customKeyboard_0_1value?: KeyboardOptions | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkTextAreaPeer;
         if (this._placeholderColor_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -1250,7 +1253,8 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         }
     }
     mergeModifier(modifier: TextAreaModifier): void {
-        super.mergeModifier(modifier)
+       super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._placeholderColor_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._placeholderColor_0_flag) {

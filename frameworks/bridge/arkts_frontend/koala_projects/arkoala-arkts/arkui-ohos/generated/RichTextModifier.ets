@@ -82,7 +82,8 @@ export class RichTextModifier extends CommonMethodModifier implements RichTextAt
         }
     }
     mergeModifier(modifier: RichTextModifier): void {
-        super.mergeModifier(modifier)
+       super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._onStart_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._onStart_0_flag) {

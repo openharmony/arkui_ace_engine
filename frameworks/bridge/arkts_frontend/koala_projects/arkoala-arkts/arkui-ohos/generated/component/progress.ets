@@ -35,6 +35,7 @@ import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { LengthMetrics } from "arkui.Graphics"
 import { ProgressModifier } from "./../ProgressModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ModifierStateManager } from '../CommonModifier';
 import { LengthMetrics_serializer } from "./../Graphics"
 export class ArkProgressPeer extends ArkCommonMethodPeer {
     attributeSet?: ProgressModifier;
@@ -326,7 +327,9 @@ export class ArkProgressComponent extends ArkCommonMethodComponent implements Pr
         return this
     }
     public attributeModifier(value: AttributeModifier<ProgressAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookProgressAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookProgressAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

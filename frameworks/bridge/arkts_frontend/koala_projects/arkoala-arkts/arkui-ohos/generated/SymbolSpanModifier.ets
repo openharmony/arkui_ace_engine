@@ -27,6 +27,7 @@ import { ResourceColor } from "./component/units"
 import { Color, FontWeight } from "./component/enums"
 import { SymbolEffectStrategy, SymbolRenderingStrategy } from "./component/symbolglyph"
 import { RuntimeType, runtimeType } from "@koalaui/interop"
+import { ModifierState } from "./CommonModifier"
 export class SymbolSpanModifier implements SymbolSpanAttribute,AttributeModifier<SymbolSpanAttribute> {
     constructor(src?: Resource) {
         super()
@@ -37,6 +38,7 @@ export class SymbolSpanModifier implements SymbolSpanAttribute,AttributeModifier
         }
     }
     _instanceId: number = -1;
+     _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }

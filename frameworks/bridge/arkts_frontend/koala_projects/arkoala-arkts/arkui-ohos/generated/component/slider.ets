@@ -36,6 +36,7 @@ import { CircleShape, EllipseShape, PathShape, RectShape } from "@ohos.arkui.sha
 import { SliderModifier } from "./../SliderModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { CircleShape_serializer, EllipseShape_serializer, PathShape_serializer, RectShape_serializer } from "./../framework/ohos.arkui.shape"
+import { ModifierStateManager } from '../CommonModifier';
 export class ArkSliderPeer extends ArkCommonMethodPeer {
     attributeSet?: SliderModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -873,7 +874,9 @@ export class ArkSliderComponent extends ArkCommonMethodComponent implements Slid
         return this
     }
     public attributeModifier(value: AttributeModifier<SliderAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookSliderAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookSliderAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

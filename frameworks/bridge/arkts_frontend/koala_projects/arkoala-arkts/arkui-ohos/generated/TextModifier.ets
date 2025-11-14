@@ -35,8 +35,10 @@ import { TextModifier } from "arkui.TextModifier"
 import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, runtimeType, toPeerPtr, nullptr, KPointer, NativeBuffer, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { TypeChecker } from "#components"
 import { CallbackTransformer } from "./CallbackTransformer"
+import { ModifierState } from "./CommonModifier"
 export class TextModifier extends CommonMethodModifier implements TextAttribute,AttributeModifier<TextAttribute> {
     _instanceId: number = -1;
+     _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -139,6 +141,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
     _bindSelectionMenu_0_2value?: TextResponseType | undefined
     _bindSelectionMenu_0_3value?: SelectionMenuOptions | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkTextPeer;
         if (this._fontColor_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -917,7 +920,8 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         }
     }
     mergeModifier(modifier: TextModifier): void {
-        super.mergeModifier(modifier)
+       super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._fontColor_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._fontColor_0_flag) {

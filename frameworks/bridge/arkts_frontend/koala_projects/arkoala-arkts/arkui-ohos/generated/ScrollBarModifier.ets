@@ -26,7 +26,7 @@ import { ModifierState } from "./CommonModifier"
 import { CommonMethod } from "./component/common"
 export class ScrollBarModifier extends CommonMethodModifier implements ScrollBarAttribute,AttributeModifier<ScrollBarAttribute> {
     _instanceId: number = -1;
-    _state: ModifierState = new ModifierState
+     _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -62,7 +62,8 @@ export class ScrollBarModifier extends CommonMethodModifier implements ScrollBar
         }
     }
     mergeModifier(modifier: ScrollBarModifier): void {
-        super.mergeModifier(modifier)
+       super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._enableNestedScroll_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._enableNestedScroll_0_flag) {

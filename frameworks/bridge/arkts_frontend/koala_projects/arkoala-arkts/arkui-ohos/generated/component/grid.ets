@@ -35,6 +35,7 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { GridModifier } from "./../GridModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ModifierStateManager } from '../CommonModifier';
 export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
     attributeSet?: GridModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -1018,7 +1019,9 @@ export class ArkGridComponent extends ArkScrollableCommonMethodComponent impleme
         return this
     }
     public attributeModifier(value: AttributeModifier<GridAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        hookGridAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookGridAttributeModifier(this, value); 
+        })
         return this
     }
     public applyAttributesFinish(): void {

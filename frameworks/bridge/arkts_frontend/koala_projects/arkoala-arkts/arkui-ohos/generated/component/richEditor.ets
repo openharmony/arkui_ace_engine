@@ -45,6 +45,7 @@ import { NodeAttach, remember } from "@koalaui/runtime"
 import { ColorMetrics_serializer } from "./../Graphics"
 import { image_PixelMap_serializer } from "./../framework/ohos.multimedia.image"
 import { CustomNodeBuilder } from "./idlize"
+import { ModifierStateManager } from '../CommonModifier';
 export class RichEditorBaseControllerInternal {
     public static fromPtr(ptr: KPointer): RichEditorBaseController {
         return new RichEditorBaseController(ptr)
@@ -1568,7 +1569,9 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
         return this
     }
     public attributeModifier(value: AttributeModifier<RichEditorAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookRichEditorAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookRichEditorAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

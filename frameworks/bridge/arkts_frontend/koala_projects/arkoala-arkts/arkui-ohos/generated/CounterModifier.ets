@@ -123,7 +123,8 @@ export class CounterModifier extends CommonMethodModifier implements CounterAttr
         }
     }
     mergeModifier(modifier: CounterModifier): void {
-        super.mergeModifier(modifier)
+       super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._onInc_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._onInc_0_flag) {

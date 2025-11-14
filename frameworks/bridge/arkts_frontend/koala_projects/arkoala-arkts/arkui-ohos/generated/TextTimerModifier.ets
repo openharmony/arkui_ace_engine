@@ -225,7 +225,8 @@ export class TextTimerModifier extends CommonMethodModifier implements TextTimer
         }
     }
     mergeModifier(modifier: TextTimerModifier): void {
-        super.mergeModifier(modifier)
+       super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._format_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._format_0_flag) {

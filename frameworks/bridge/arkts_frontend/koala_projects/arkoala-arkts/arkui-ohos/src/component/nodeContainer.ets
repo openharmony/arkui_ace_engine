@@ -31,11 +31,14 @@ import { FrameNode } from 'arkui/FrameNode';
 import { Size } from '../Graphics';
 import { StateManager } from '@koalaui/runtime';
 import { __context } from '@koalaui/runtime';
-import { extractors } from '#handwritten';
+import { extractors, AttributeModifier, hookNodeContainerAttributeModifier } from '#handwritten';
 import { NodeContainerOps } from './../framework';
+import { ModifierStateManager } from '../CommonModifier';
+import { NodeContainerModifier } from './../NodeContainerModifier';
 
 export type NodeContainer_AboutToResizeCallback = (size: Size) => void;
 export class ArkNodeContainerPeer extends ArkCommonMethodPeer {
+    attributeSet?: NodeContainerModifier;
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -82,6 +85,9 @@ export type NodeContainerInterface = (controller: NodeController) => NodeContain
 export interface NodeContainerAttribute extends CommonMethod {
     setNodeContainerOptions(controller: NodeController): this {
         return this
+    }
+    attributeModifier(value: AttributeModifier<NodeContainerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        return this;
     }
 }
 export class ArkNodeContainerStyle extends ArkCommonMethodStyle implements NodeContainerAttribute {
@@ -156,6 +162,12 @@ export class ArkNodeContainerComponent extends ArkCommonMethodComponent implemen
             const child = makeNodeFunc(this.uiContext)
             this.getPeer().addNodeContainerRootNode(child)
         }
+    }
+    public attributeModifier(value: AttributeModifier<NodeContainerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+         ModifierStateManager.INSTANCE.scope(() => {
+            hookNodeContainerAttributeModifier(this, value);
+        })
+        return this;
     }
 }
 /** @memo */

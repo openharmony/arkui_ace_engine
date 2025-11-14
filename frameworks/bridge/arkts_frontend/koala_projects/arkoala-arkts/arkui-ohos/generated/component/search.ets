@@ -39,6 +39,7 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { SearchModifier } from "./../SearchModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ModifierStateManager } from '../CommonModifier';
 export class ArkSearchPeer extends ArkCommonMethodPeer {
     attributeSet?: SearchModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -1575,7 +1576,9 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements Sear
         return this
     }
     public attributeModifier(value: AttributeModifier<SearchAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookSearchAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookSearchAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

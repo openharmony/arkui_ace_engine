@@ -35,6 +35,7 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { TextClockModifier } from "./../TextClockModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ModifierStateManager } from '../CommonModifier';
 export class TextClockControllerInternal {
     public static fromPtr(ptr: KPointer): TextClockController {
         return new TextClockController(ptr)
@@ -493,7 +494,9 @@ export class ArkTextClockComponent extends ArkCommonMethodComponent implements T
         return this
     }
     public attributeModifier(value: AttributeModifier<TextClockAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookTextClockAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookTextClockAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

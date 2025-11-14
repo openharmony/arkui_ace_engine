@@ -30,6 +30,7 @@ import { SymbolGlyphModifier } from "arkui.SymbolGlyphModifier"
 import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, runtimeType, toPeerPtr, nullptr, KPointer, NativeBuffer, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { TypeChecker } from "#components"
 import { CallbackTransformer } from "./CallbackTransformer"
+import { ModifierState } from "./CommonModifier"
 export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolGlyphAttribute,AttributeModifier<SymbolGlyphAttribute> {
     constructor(src?: Resource) {
         super()
@@ -40,6 +41,7 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
         }
     }
     _instanceId: number = -1;
+     _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -75,6 +77,7 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
     _symbolEffect_2_0value?: SymbolEffect | undefined
     _symbolEffect_2_1value?: int32 | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkSymbolGlyphPeer;
         if (this._setSymbolGlyphOptions_flag !== AttributeUpdaterFlag.INITIAL) {

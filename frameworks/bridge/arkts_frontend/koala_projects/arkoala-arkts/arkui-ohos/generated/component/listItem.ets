@@ -35,6 +35,7 @@ import { ListItemModifier } from "./../ListItemModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ComponentContent_serializer } from "./../ComponentContent"
 import { Resource_serializer } from "./../framework/resource"
+import { ModifierStateManager } from '../CommonModifier';
 export class ArkListItemPeer extends ArkCommonMethodPeer {
     attributeSet?: ListItemModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -244,7 +245,9 @@ export class ArkListItemComponent extends ArkCommonMethodComponent implements Li
         return this
     }
     public attributeModifier(value: AttributeModifier<ListItemAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookListItemAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookListItemAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

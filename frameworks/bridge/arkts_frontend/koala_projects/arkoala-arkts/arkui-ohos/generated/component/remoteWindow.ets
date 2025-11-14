@@ -29,6 +29,7 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { RemoteWindowModifier } from "./../RemoteWindowModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ModifierStateManager } from '../CommonModifier';
 export class ArkRemoteWindowPeer extends ArkCommonMethodPeer {
     attributeSet?: RemoteWindowModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -96,7 +97,9 @@ export class ArkRemoteWindowComponent extends ArkCommonMethodComponent implement
         return this
     }
     public attributeModifier(value: AttributeModifier<RemoteWindowAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookRemoteWindowAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookRemoteWindowAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

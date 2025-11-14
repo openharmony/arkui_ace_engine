@@ -29,6 +29,7 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { FlowItemModifier } from "./../FlowItemModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ModifierStateManager } from '../CommonModifier';
 export class ArkFlowItemPeer extends ArkCommonMethodPeer {
     attributeSet?: FlowItemModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -79,7 +80,9 @@ export class ArkFlowItemComponent extends ArkCommonMethodComponent implements Fl
         return this
     }
     public attributeModifier(value: AttributeModifier<FlowItemAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookFlowItemAttributeModifier(this, value);
+         ModifierStateManager.INSTANCE.scope(() => {
+            hookFlowItemAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

@@ -30,8 +30,10 @@ import { ControlSize } from "./component/button"
 import { DividerOptions } from "./component/textPicker"
 import { TextModifier } from "arkui.TextModifier"
 import { SymbolGlyphModifier } from "arkui.SymbolGlyphModifier"
+import { ModifierState } from "./CommonModifier"
 export class SelectModifier extends CommonMethodModifier implements SelectAttribute,AttributeModifier<SelectAttribute> {
     _instanceId: number = -1;
+     _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -99,6 +101,7 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
     _menuAlign_0_0value?: MenuAlignType | undefined
     _menuAlign_0_1value?: Offset | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkSelectPeer;
         if (this._selected_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -607,7 +610,8 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
         }
     }
     mergeModifier(modifier: SelectModifier): void {
-        super.mergeModifier(modifier)
+       super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._selected_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._selected_0_flag) {

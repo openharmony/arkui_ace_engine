@@ -34,6 +34,7 @@ import { ComponentContentBase } from 'arkui.ComponentContent'
 import { ListItemGroupModifier } from "./../ListItemGroupModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ComponentContent_serializer } from "./../ComponentContent"
+import { ModifierStateManager } from '../CommonModifier';
 export class ArkListItemGroupPeer extends ArkCommonMethodPeer {
     attributeSet?: ListItemGroupModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -160,7 +161,9 @@ export class ArkListItemGroupComponent extends ArkCommonMethodComponent implemen
         return this
     }
     public attributeModifier(value: AttributeModifier<ListItemGroupAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookListItemGroupAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookListItemGroupAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

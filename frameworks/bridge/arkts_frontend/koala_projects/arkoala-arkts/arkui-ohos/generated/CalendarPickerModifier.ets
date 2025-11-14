@@ -124,7 +124,8 @@ export class CalendarPickerModifier extends CommonMethodModifier implements Cale
         }
     }
     mergeModifier(modifier: CalendarPickerModifier): void {
-        super.mergeModifier(modifier)
+       super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._textStyle_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._textStyle_0_flag) {

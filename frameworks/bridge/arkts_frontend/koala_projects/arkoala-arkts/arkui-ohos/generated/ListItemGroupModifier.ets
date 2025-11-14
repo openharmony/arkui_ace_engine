@@ -83,7 +83,8 @@ export class ListItemGroupModifier extends CommonMethodModifier implements ListI
         }
     }
     mergeModifier(modifier: ListItemGroupModifier): void {
-        super.mergeModifier(modifier)
+       super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._divider_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._divider_0_flag) {

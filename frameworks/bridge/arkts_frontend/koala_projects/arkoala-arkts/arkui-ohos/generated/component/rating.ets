@@ -32,6 +32,7 @@ import { Resource } from "global.resource"
 import { RatingModifier } from "./../RatingModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Resource_serializer } from "./../framework/resource"
+import { ModifierStateManager } from '../CommonModifier';
 export class ArkRatingPeer extends ArkCommonMethodPeer {
     attributeSet?: RatingModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -230,7 +231,9 @@ export class ArkRatingComponent extends ArkCommonMethodComponent implements Rati
         return this
     }
     public attributeModifier(value: AttributeModifier<RatingAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookRatingAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookRatingAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

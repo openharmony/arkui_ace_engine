@@ -33,6 +33,7 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { MarqueeModifier } from "./../MarqueeModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ModifierStateManager } from '../CommonModifier';
 export class ArkMarqueePeer extends ArkCommonMethodPeer {
     attributeSet?: MarqueeModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -385,7 +386,9 @@ export class ArkMarqueeComponent extends ArkCommonMethodComponent implements Mar
         return this
     }
     public attributeModifier(value: AttributeModifier<MarqueeAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookMarqueeAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookMarqueeAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

@@ -305,7 +305,8 @@ export class ButtonModifier extends CommonMethodModifier implements ButtonAttrib
         }
     }
     mergeModifier(modifier: ButtonModifier): void {
-        super.mergeModifier(modifier)
+       super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._type_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._type_0_flag) {

@@ -592,7 +592,8 @@ export class MediaCachedImageModifier extends CommonMethodModifier implements Me
         }
     }
     mergeModifier(modifier: MediaCachedImageModifier): void {
-        super.mergeModifier(modifier)
+       super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._alt_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._alt_0_flag) {

@@ -64,7 +64,8 @@ export class PasteButtonModifier extends SecurityComponentMethodModifier impleme
         }
     }
     mergeModifier(modifier: PasteButtonModifier): void {
-        super.mergeModifier(modifier)
+       super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._onClick_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._onClick_0_flag) {

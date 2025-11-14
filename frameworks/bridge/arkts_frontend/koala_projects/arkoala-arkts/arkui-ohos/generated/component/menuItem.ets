@@ -36,6 +36,7 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { MenuItemModifier } from "./../MenuItemModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ModifierStateManager } from '../CommonModifier';
 export class ArkMenuItemPeer extends ArkCommonMethodPeer {
     attributeSet?: MenuItemModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -362,7 +363,9 @@ export class ArkMenuItemComponent extends ArkCommonMethodComponent implements Me
         return this
     }
     public attributeModifier(value: AttributeModifier<MenuItemAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookMenuItemAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookMenuItemAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

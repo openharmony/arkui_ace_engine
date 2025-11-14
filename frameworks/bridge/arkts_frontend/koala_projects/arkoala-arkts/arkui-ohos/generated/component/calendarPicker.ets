@@ -33,6 +33,7 @@ import { Color } from "./enums"
 import { CalendarPickerModifier } from "./../CalendarPickerModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Resource_serializer } from "./../framework/resource"
+import { ModifierStateManager } from '../CommonModifier';
 export class CalendarPickerDialogInternal {
     public static fromPtr(ptr: KPointer): CalendarPickerDialog {
         return new CalendarPickerDialog(ptr)
@@ -280,7 +281,9 @@ export class ArkCalendarPickerComponent extends ArkCommonMethodComponent impleme
         return this
     }
     public attributeModifier(value: AttributeModifier<CalendarPickerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookCalendarPickerAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookCalendarPickerAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

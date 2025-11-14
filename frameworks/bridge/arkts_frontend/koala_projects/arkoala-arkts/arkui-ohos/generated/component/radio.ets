@@ -34,6 +34,7 @@ import { Resource } from "global.resource"
 import { RadioModifier } from "./../RadioModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Resource_serializer } from "./../framework/resource"
+import { ModifierStateManager } from '../CommonModifier';
 export class ArkRadioPeer extends ArkCommonMethodPeer {
     attributeSet?: RadioModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -212,7 +213,9 @@ export class ArkRadioComponent extends ArkCommonMethodComponent implements Radio
         return this
     }
     public attributeModifier(value: AttributeModifier<RadioAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookRadioAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookRadioAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

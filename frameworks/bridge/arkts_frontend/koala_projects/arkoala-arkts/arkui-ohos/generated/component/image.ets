@@ -46,6 +46,7 @@ import { BusinessError } from "@ohos.base"
 import { ImageModifier } from "./../ImageModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { BusinessError_serializer } from "./../framework/ohos.base"
+import { ModifierStateManager } from '../CommonModifier';
 export class ColorContentInternal {
     public static fromPtr(ptr: KPointer): ColorContent {
         return new ColorContent(ptr)
@@ -1006,7 +1007,9 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements Image
         return this
     }
     public attributeModifier(value: AttributeModifier<ImageAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookImageAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookImageAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

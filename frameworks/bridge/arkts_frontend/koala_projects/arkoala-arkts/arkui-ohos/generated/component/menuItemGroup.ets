@@ -33,6 +33,7 @@ import { CustomBuilder } from "./builder"
 import { MenuItemGroupModifier } from "./../MenuItemGroupModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Resource_serializer } from "./../framework/resource"
+import { ModifierStateManager } from '../CommonModifier';
 export class ArkMenuItemGroupPeer extends ArkCommonMethodPeer {
     attributeSet?: MenuItemGroupModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -97,7 +98,9 @@ export class ArkMenuItemGroupComponent extends ArkCommonMethodComponent implemen
         return this
     }
     public attributeModifier(value: AttributeModifier<MenuItemGroupAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookMenuItemGroupAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookMenuItemGroupAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

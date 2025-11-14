@@ -31,6 +31,7 @@ import { LengthMetrics, ColorMetrics } from "arkui.Graphics"
 import { LinearIndicatorModifier } from "./../LinearIndicatorModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { LengthMetrics_serializer, ColorMetrics_serializer } from "./../Graphics"
+import { ModifierStateManager } from '../CommonModifier';
 export class LinearIndicatorControllerInternal {
     public static fromPtr(ptr: KPointer): LinearIndicatorController {
         return new LinearIndicatorController(ptr)
@@ -256,7 +257,10 @@ export class ArkLinearIndicatorComponent extends ArkCommonMethodComponent implem
         return this
     }
     public attributeModifier(value: AttributeModifier<LinearIndicatorAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookLinearIndicatorAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookLinearIndicatorAttributeModifier(this, value);
+        })
+        
         return this
     }
     public applyAttributesFinish(): void {

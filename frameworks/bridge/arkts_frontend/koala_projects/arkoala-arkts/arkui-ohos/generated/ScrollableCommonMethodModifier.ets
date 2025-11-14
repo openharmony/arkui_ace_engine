@@ -366,7 +366,8 @@ export class ScrollableCommonMethodModifier extends CommonMethodModifier impleme
         }
     }
     mergeModifier(modifier: ScrollableCommonMethodModifier): void {
-        super.mergeModifier(modifier)
+       super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._scrollBar_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._scrollBar_0_flag) {

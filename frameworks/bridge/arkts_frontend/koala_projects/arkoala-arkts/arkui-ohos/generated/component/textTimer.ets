@@ -33,6 +33,7 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { TextTimerModifier } from "./../TextTimerModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ModifierStateManager } from '../CommonModifier';
 export class TextTimerControllerInternal {
     public static fromPtr(ptr: KPointer): TextTimerController {
         return new TextTimerController(ptr)
@@ -447,7 +448,9 @@ export class ArkTextTimerComponent extends ArkCommonMethodComponent implements T
         return this
     }
     public attributeModifier(value: AttributeModifier<TextTimerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookTextTimerAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookTextTimerAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

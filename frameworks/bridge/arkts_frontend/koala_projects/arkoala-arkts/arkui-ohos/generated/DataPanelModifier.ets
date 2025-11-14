@@ -165,7 +165,8 @@ export class DataPanelModifier extends CommonMethodModifier implements DataPanel
         }
     }
     mergeModifier(modifier: DataPanelModifier): void {
-        super.mergeModifier(modifier)
+       super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._closeEffect_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._closeEffect_0_flag) {

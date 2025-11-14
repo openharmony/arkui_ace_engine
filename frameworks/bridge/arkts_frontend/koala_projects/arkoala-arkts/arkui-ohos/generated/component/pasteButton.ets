@@ -32,6 +32,7 @@ import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { ButtonType } from "./button"
 import { PasteButtonModifier } from "./../PasteButtonModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ModifierStateManager } from '../CommonModifier';
 export class ArkPasteButtonPeer extends ArkSecurityComponentMethodPeer {
     attributeSet?: PasteButtonModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -134,7 +135,9 @@ export class ArkPasteButtonComponent extends ArkSecurityComponentMethodComponent
         return this
     }
     public attributeModifier(value: AttributeModifier<PasteButtonAttribute> | AttributeModifier<SecurityComponentMethod> | undefined): this {
-        hookPasteButtonAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookPasteButtonAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

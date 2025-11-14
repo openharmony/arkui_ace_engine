@@ -183,7 +183,8 @@ export class DatePickerModifier extends CommonMethodModifier implements DatePick
         }
     }
     mergeModifier(modifier: DatePickerModifier): void {
-        super.mergeModifier(modifier)
+       super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._lunar_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._lunar_0_flag) {

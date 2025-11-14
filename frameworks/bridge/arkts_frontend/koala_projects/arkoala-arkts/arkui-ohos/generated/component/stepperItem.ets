@@ -29,6 +29,7 @@ import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { hookStepperItemAttributeModifier, AttributeModifier, AttributeUpdater } from "#handwritten"
 import { StepperItemModifier } from "./../StepperItemModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ModifierStateManager } from '../CommonModifier';
 export class ArkStepperItemPeer extends ArkCommonMethodPeer {
     attributeSet?: StepperItemModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -169,7 +170,9 @@ export class ArkStepperItemComponent extends ArkCommonMethodComponent implements
         return this
     }
     public attributeModifier(value: AttributeModifier<StepperItemAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookStepperItemAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookStepperItemAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

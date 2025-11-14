@@ -165,7 +165,8 @@ export class MenuModifier extends CommonMethodModifier implements MenuAttribute,
         }
     }
     mergeModifier(modifier: MenuModifier): void {
-        super.mergeModifier(modifier)
+       super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._font_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._font_0_flag) {

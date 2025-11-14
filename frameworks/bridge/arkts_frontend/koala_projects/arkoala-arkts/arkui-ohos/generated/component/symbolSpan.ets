@@ -33,6 +33,7 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { SymbolSpanModifier } from "./../SymbolSpanModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ModifierStateManager } from '../CommonModifier';
 export class ArkSymbolSpanPeer extends PeerNode {
     attributeSet?: SymbolSpanModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -320,7 +321,9 @@ export class ArkSymbolSpanComponent extends ComponentBase implements SymbolSpanA
         return this
     }
     public attributeModifier(value: AttributeModifier<SymbolSpanAttribute> | undefined): this {
-        hookSymbolSpanAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookSymbolSpanAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

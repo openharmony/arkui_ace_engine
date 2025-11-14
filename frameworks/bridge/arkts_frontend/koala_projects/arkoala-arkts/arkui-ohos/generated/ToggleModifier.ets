@@ -125,7 +125,8 @@ export class ToggleModifier extends CommonMethodModifier implements ToggleAttrib
         }
     }
     mergeModifier(modifier: ToggleModifier): void {
-        super.mergeModifier(modifier)
+       super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._onChange_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._onChange_0_flag) {

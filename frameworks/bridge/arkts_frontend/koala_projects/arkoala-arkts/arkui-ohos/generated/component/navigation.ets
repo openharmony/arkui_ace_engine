@@ -49,6 +49,7 @@ import { NavigationModifier } from "./../NavigationModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { LengthMetrics_serializer } from "./../Graphics"
 import { TextModifier_serializer } from "./../TextModifier"
+import { ModifierStateManager } from '../CommonModifier';
 export interface NavigationTransitionProxy {
     from: NavContentInfo
     to: NavContentInfo
@@ -2225,7 +2226,9 @@ export class ArkNavigationComponent extends ArkCommonMethodComponent implements 
         return this
     }
     public attributeModifier(value: AttributeModifier<NavigationAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookNavigationAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookNavigationAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

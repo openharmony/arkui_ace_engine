@@ -324,7 +324,8 @@ export class AnimatorModifier extends CommonMethodModifier implements AnimatorAt
         }
     }
     mergeModifier(modifier: AnimatorModifier): void {
-        super.mergeModifier(modifier)
+       super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._state_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._state_0_flag) {

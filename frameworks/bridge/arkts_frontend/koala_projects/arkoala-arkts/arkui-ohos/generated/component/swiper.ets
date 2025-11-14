@@ -38,6 +38,7 @@ import { SwiperModifier } from "./../SwiperModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { LengthMetrics } from "arkui.Graphics"
 import { LengthMetrics_serializer } from "./../Graphics"
+import { ModifierStateManager } from '../CommonModifier';
 export interface SwiperContentTransitionProxy {
     selectedIndex: int32
     index: int32
@@ -1340,7 +1341,9 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements Swip
         return this
     }
     public attributeModifier(value: AttributeModifier<SwiperAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookSwiperAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookSwiperAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

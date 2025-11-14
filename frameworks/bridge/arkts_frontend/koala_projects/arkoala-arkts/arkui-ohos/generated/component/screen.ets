@@ -29,6 +29,7 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { ScreenModifier } from "./../ScreenModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ModifierStateManager } from '../CommonModifier';
 export class ArkScreenPeer extends ArkCommonMethodPeer {
     attributeSet?: ScreenModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -80,7 +81,9 @@ export class ArkScreenComponent extends ArkCommonMethodComponent implements Scre
         return this
     }
     public attributeModifier(value: AttributeModifier<ScreenAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookScreenAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookScreenAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

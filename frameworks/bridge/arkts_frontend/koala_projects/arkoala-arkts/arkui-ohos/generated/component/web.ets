@@ -40,6 +40,7 @@ import { WebModifier } from "./../WebModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { image_PixelMap_serializer } from "./../framework/ohos.multimedia.image"
 import { webview_WebviewController_serializer } from "./../framework/ohos.web.webview"
+import { ModifierStateManager } from '../CommonModifier';
 export class ClientAuthenticationHandlerInternal {
     public static fromPtr(ptr: KPointer): ClientAuthenticationHandler {
         return new ClientAuthenticationHandler(ptr)
@@ -5087,7 +5088,9 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public attributeModifier(value: AttributeModifier<WebAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookWebAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookWebAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

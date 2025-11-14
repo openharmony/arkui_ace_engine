@@ -345,7 +345,8 @@ export class TextPickerModifier extends CommonMethodModifier implements TextPick
         }
     }
     mergeModifier(modifier: TextPickerModifier): void {
-        super.mergeModifier(modifier)
+       super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._defaultPickerItemHeight_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._defaultPickerItemHeight_0_flag) {

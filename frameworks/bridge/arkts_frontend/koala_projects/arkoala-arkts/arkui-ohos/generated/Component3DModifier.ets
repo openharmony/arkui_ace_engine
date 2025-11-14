@@ -185,7 +185,8 @@ export class Component3DModifier extends CommonMethodModifier implements Compone
         }
     }
     mergeModifier(modifier: Component3DModifier): void {
-        super.mergeModifier(modifier)
+       super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._environment_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._environment_0_flag) {

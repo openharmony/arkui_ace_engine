@@ -37,6 +37,7 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { TextInputModifier } from "./../TextInputModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ModifierStateManager } from '../CommonModifier';
 export interface SubmitEvent {
     text: string
     keepEditableState(): void
@@ -2426,7 +2427,9 @@ export class ArkTextInputComponent extends ArkCommonMethodComponent implements T
         return this
     }
     public attributeModifier(value: AttributeModifier<TextInputAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookTextInputAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookTextInputAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

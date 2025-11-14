@@ -593,7 +593,8 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
         }
     }
     mergeModifier(modifier: ImageModifier): void {
-        super.mergeModifier(modifier)
+       super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._alt_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._alt_0_flag) {

@@ -210,7 +210,8 @@ export class ImageSpanModifier extends CommonMethodModifier implements ImageSpan
         }
     }
     mergeModifier(modifier: ImageSpanModifier): void {
-        super.mergeModifier(modifier)
+       super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._verticalAlign_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._verticalAlign_0_flag) {

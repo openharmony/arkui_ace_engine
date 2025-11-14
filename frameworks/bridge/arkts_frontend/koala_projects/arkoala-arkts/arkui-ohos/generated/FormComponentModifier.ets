@@ -264,7 +264,8 @@ export class FormComponentModifier extends CommonMethodModifier implements FormC
         }
     }
     mergeModifier(modifier: FormComponentModifier): void {
-        super.mergeModifier(modifier)
+       super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._size_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._size_0_flag) {

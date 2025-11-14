@@ -36,6 +36,7 @@ import { Resource } from "global.resource"
 import { TimePickerModifier } from "./../TimePickerModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Resource_serializer } from "./../framework/resource"
+import { ModifierStateManager } from '../CommonModifier';
 export class TimePickerDialogInternal {
     public static fromPtr(ptr: KPointer): TimePickerDialog {
         return new TimePickerDialog(ptr)
@@ -462,7 +463,9 @@ export class ArkTimePickerComponent extends ArkCommonMethodComponent implements 
         return this
     }
     public attributeModifier(value: AttributeModifier<TimePickerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookTimePickerAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookTimePickerAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

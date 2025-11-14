@@ -34,6 +34,7 @@ import { default as image } from "@ohos.multimedia.image"
 import { SideBarContainerModifier } from "./../SideBarContainerModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { image_PixelMap_serializer } from "./../framework/ohos.multimedia.image"
+import { ModifierStateManager } from '../CommonModifier';
 export class ArkSideBarContainerPeer extends ArkCommonMethodPeer {
     attributeSet?: SideBarContainerModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -479,7 +480,9 @@ export class ArkSideBarContainerComponent extends ArkCommonMethodComponent imple
         return this
     }
     public attributeModifier(value: AttributeModifier<SideBarContainerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookSideBarContainerAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookSideBarContainerAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

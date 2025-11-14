@@ -102,7 +102,8 @@ export class RadioModifier extends CommonMethodModifier implements RadioAttribut
         }
     }
     mergeModifier(modifier: RadioModifier): void {
-        super.mergeModifier(modifier)
+       super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._checked_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._checked_0_flag) {

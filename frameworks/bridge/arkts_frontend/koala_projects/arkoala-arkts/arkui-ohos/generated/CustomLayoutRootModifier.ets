@@ -23,8 +23,10 @@ import { ArkCustomLayoutRootPeer, Callback_onMeasureSize_SizeResult, Callback_on
 import { int32 } from "@koalaui/common"
 import { GeometryInfo, Measurable, Layoutable } from "./component/common"
 import { ConstraintSizeOptions } from "./component/units"
+import { ModifierState } from "./CommonModifier"
 export class CustomLayoutRootModifier implements CustomLayoutRoot,AttributeModifier<CustomLayoutRoot> {
     _instanceId: number = -1;
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }

@@ -34,6 +34,7 @@ import { ImageAnimatorModifier } from "./../ImageAnimatorModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Resource_serializer } from "./../framework/resource"
 import { image_PixelMap_serializer } from "./../framework/ohos.multimedia.image"
+import { ModifierStateManager } from '../CommonModifier';
 export class ArkImageAnimatorPeer extends ArkCommonMethodPeer {
     attributeSet?: ImageAnimatorModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -447,7 +448,9 @@ export class ArkImageAnimatorComponent extends ArkCommonMethodComponent implemen
         return this
     }
     public attributeModifier(value: AttributeModifier<ImageAnimatorAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookImageAnimatorAttributeModifier(this, value);
+         ModifierStateManager.INSTANCE.scope(() => {
+            hookImageAnimatorAttributeModifier(this, value); 
+        })
         return this
     }
     public applyAttributesFinish(): void {
