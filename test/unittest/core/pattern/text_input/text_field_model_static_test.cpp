@@ -1013,6 +1013,12 @@ HWTEST_F(TextFieldModelStaticTest, SetDefaultCancelIcon, TestSize.Level1)
     TextFieldModelStatic::SetDefaultCancelIcon(nullptr);
     // No assertion needed, just ensure no crash
 
+    // Test case 3: frameNode is not null and all components are valid, should set default cancel icon properties
+    TextFieldModelStatic::SetDefaultCancelIcon(node);
+    // No assertion needed
+    TextFieldModelStatic::SetDefaultCancelIcon(nullptr);
+    // just ensure no crash
+
     // All test cases executed without crash
     textFieldLayoutProperty->UpdateTextInputType(TextInputType::NUMBER);
     EXPECT_TRUE(textFieldLayoutProperty->HasTextInputType());
