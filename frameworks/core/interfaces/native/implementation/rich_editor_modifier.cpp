@@ -132,8 +132,10 @@ void AssignArkValue(Ark_RichEditorImageSpanResult& dst, const RichEditorAbstract
     dst.imageStyle.size.value0 = Converter::ArkValue<Ark_Int32>(src.GetSizeWidth());
     dst.imageStyle.size.value1 = Converter::ArkValue<Ark_Int32>(src.GetSizeHeight());
     dst.imageStyle.objectFit = Converter::ArkValue<Ark_ImageFit>(src.GetObjectFit());
-    bool isBuilderSpan = (valueResourceStr.empty() && src.GetValuePixelMap() == nullptr);
-    auto imageVerticalAlign = isBuilderSpan ? VerticalAlign::BOTTOM : src.GetVerticalAlign();
+    auto verticalAlign = static_cast<int32_t>(src.GetVerticalAlign());
+    bool isVerticalAlignVaild = verticalAlign >= static_cast<int32_t>(VerticalAlign::TOP)
+        && verticalAlign <= static_cast<int32_t>(VerticalAlign::BASELINE);
+    auto imageVerticalAlign = isVerticalAlignVaild ? src.GetVerticalAlign() : VerticalAlign::BOTTOM;
     dst.imageStyle.verticalAlign = Converter::ArkValue<Ark_ImageSpanAlignment>(imageVerticalAlign);
     ImageStyleResult imageStyleResult {
         .borderRadius = src.GetBorderRadius(),
