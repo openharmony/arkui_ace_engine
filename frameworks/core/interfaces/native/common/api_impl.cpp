@@ -237,7 +237,9 @@ void ApplyModifierFinish(Ark_NodeHandle nodePtr)
     auto* frameNode = AceType::DynamicCast<FrameNode>(uiNode);
     if (frameNode) {
         frameNode->MarkModifyDone();
-        frameNode->MarkDirtyNode();
+        if (frameNode->IsOnMainTree() || frameNode->GetTag() != V2::TAB_CONTENT_ITEM_ETS_TAG) {
+            frameNode->MarkDirtyNode();
+        }
     }
 }
 
