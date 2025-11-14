@@ -16,7 +16,7 @@
 
 import { AttributeUpdater } from '../../AttributeUpdater';
 import { CommonModifier } from '../../CommonModifier';
-import {CommonMethod, ArkCommonMethodComponent, AttributeModifier, ArkCommonMethodPeer } from  '#generated';
+import {CommonMethod, ArkCommonMethodComponent, AttributeModifier, ModifierEventType , ArkCommonMethodPeer } from  '#generated';
 import { int32} from "@koalaui/common"
 import { PeerNode } from '../../PeerNode';
 import { CommonMethodModifier } from '../../CommonMethodModifier';
@@ -70,9 +70,13 @@ export function applyAttributeModifierNoCommonMethod<T, MethodSet extends T, Met
     (modifier: AttributeModifier<T>, attributeSet: () => MethodSet, func: (component: MethodComponent, ...params: FixedArray<Object>) => void, updaterReceiver: () => MethodComponent, node: PeerNode,
     isStateStyle: boolean = true): MethodSet {
     let attributeSet_ = attributeSet();
+    let isInit: boolean = true;
+    let attributeUpdater : AttributeUpdater<T> | undefined = undefined;
     let isAttributeUpdater: boolean = (modifier instanceof AttributeUpdater);
     if (isAttributeUpdater) {
-        let attributeUpdater = modifier as object as AttributeUpdater<T>
+        attributeUpdater = modifier as object as AttributeUpdater<T>
+        isInit = attributeUpdater!.isInit;
+        attributeUpdater!.isInit = false;
         let needUpdate: boolean = false;
         if (!attributeUpdater.peerNode_) {
             attributeUpdater.initializeModifier(attributeSet_ as Object as T);
@@ -94,19 +98,14 @@ export function applyAttributeModifierNoCommonMethod<T, MethodSet extends T, Met
             };
         }
     }
-    let isInit: boolean = true;
     let stateValue = 0;
     let currentState = node.getStateStyleMutable();
-    if (currentState === undefined) {
-        if (isStateStyle) {
-            currentState = node.getOrCreateStateStyleMutable()!;
-            stateValue = currentState.value
-        } else {
-            stateValue = 0
+    let isNormal: boolean = ModifierEventType.UI_STATE_NORMAL === modifier.monitorEventType();
+    if (!isNormal) {
+        if (currentState === undefined) {
+            currentState = node.getOrCreateStateStyleMutable(Number.toInt(modifier.monitorEventType()))!;
         }
-    } else {
-        stateValue = currentState.value
-        isInit = false;
+        stateValue = currentState.value;
     }
     if (isAttributeUpdater) {
         applyUIAttributesUpdate(modifier, attributeSet_, stateValue, isInit);

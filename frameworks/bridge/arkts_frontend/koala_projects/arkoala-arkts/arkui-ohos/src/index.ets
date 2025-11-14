@@ -15,6 +15,7 @@
 
 export {
   AttributeModifier,
+  ModifierEventType,
   ContentModifier,
   CustomStyles,
   GestureModifier,

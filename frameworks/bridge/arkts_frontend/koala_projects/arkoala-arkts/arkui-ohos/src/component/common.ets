@@ -9,12 +9,22 @@ import { DrawContext } from "arkui.Graphics"
 import { KeyEventInternal, DragEventInternal } from "arkui/component/common"
 import { TypeChecker } from "#components"
 
+export enum ModifierEventType {
+    UI_STATE_NORMAL = 0,
+    UI_STATE_PRESSED = 1,
+    UI_STATE_FOCUSED = 1 << 1,
+    UI_STATE_DISABLED = 1 << 2,
+    UI_STATE_SELECTED = 1 << 3,
+    ALL = (1<<4)-1
+}
+
 export interface AttributeModifier<T> {
     applyNormalAttribute(instance: T): void {}
     applyPressedAttribute(instance: T): void {}
     applyFocusedAttribute(instance: T): void {}
     applyDisabledAttribute(instance: T): void {}
     applySelectedAttribute(instance: T): void {}
+    monitorEventType(): number { return ModifierEventType.UI_STATE_NORMAL; }
 }
 
 export interface AnimatableArithmetic<T> {
