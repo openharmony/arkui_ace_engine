@@ -1025,6 +1025,10 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _ImageAttribute_setOrientation(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _ImageAttribute_setSupportSvg2(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ImageAttribute_setContentTransition(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _ImageAnimator_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
     native static _ImageAnimatorInterface_setImageAnimatorOptions(ptr: KPointer): void
@@ -1436,6 +1440,20 @@ export class ArkUIGeneratedNativeModule {
     native static _PatternLockAttribute_setActivateCircleStyle(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _PatternLockAttribute_setSkipUnselectedPoint(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _Picker_construct(id: KInt, flags: KInt): KPointer
+    @ani.unsafe.Direct
+    native static _PickerInterface_setPickerOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _PickerAttribute_setOnChange(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _PickerAttribute_setOnScrollStop(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _PickerAttribute_setCanLoop(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _PickerAttribute_setEnableHapticFeedback(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _PickerAttribute_setSelectionIndicator(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _PluginComponent_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
@@ -3862,6 +3880,18 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _ContentModifierHelper_resetContentModifierCheckBoxGroup(node: KPointer): void
     @ani.unsafe.Direct
+    native static _ContentTransitionEffect_construct(): KPointer
+    @ani.unsafe.Direct
+    native static _ContentTransitionEffect_getFinalizer(): KPointer
+    @ani.unsafe.Direct
+    native static _ContentTransitionEffect_getIDENTITY(): KPointer
+    @ani.unsafe.Direct
+    native static _ContentTransitionEffect_setIDENTITY(IDENTITY: KPointer): void
+    @ani.unsafe.Direct
+    native static _ContentTransitionEffect_getOPACITY(): KPointer
+    @ani.unsafe.Direct
+    native static _ContentTransitionEffect_setOPACITY(OPACITY: KPointer): void
+    @ani.unsafe.Direct
     native static _ControllerHandler_construct(): KPointer
     @ani.unsafe.Direct
     native static _ControllerHandler_getFinalizer(): KPointer
@@ -5235,6 +5265,10 @@ export class ArkUIGeneratedNativeModule {
     native static _PersistentStorageBackend_set(key: KStringPtr, value: KStringPtr): void
     @ani.unsafe.Direct
     native static _PersistentStorageBackend_clear(): void
+    @ani.unsafe.Direct
+    native static _PickerModifier_construct(): KPointer
+    @ani.unsafe.Direct
+    native static _PickerModifier_getFinalizer(): KPointer
     @ani.unsafe.Direct
     native static _PinchGestureEvent_construct(): KPointer
     @ani.unsafe.Direct

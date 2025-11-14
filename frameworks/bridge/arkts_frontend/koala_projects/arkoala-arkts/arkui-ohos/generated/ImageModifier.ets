@@ -21,9 +21,9 @@ import { ModifierState } from './CommonModifier'
 import { AttributeModifier, extractors } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
-import { ArkImagePeer, ColorContent, ImageRenderMode, DynamicRangeMode, ImageInterpolation, ImageSourceSize, ImageOnCompleteCallback, ImageCompleteEvent, ImageErrorCallback, ImageError, ResizableOptions, ImageRotateOrientation, ImageAttribute } from "./component/image"
+import { ArkImagePeer, ImageAlt, ColorContent, ImageRenderMode, DynamicRangeMode, ImageInterpolation, ImageSourceSize, ImageOnCompleteCallback, ImageCompleteEvent, ImageErrorCallback, ImageError, ResizableOptions, ImageRotateOrientation, ImageAttribute } from "./component/image"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
-import { CommonMethod, PointLightStyle } from "./component/common"
+import { CommonMethod, PointLightStyle, ContentTransitionEffect } from "./component/common"
 import { Resource } from "global.resource"
 import { default as image } from "@ohos.multimedia.image"
 import { ResourceColor, ColorFilter } from "./component/units"
@@ -48,7 +48,7 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
     applyDisabledAttribute(instance: ImageAttribute): void { }
     applySelectedAttribute(instance: ImageAttribute): void { }
     _alt_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _alt_0_0value?: string | Resource | image.PixelMap | undefined
+    _alt_0_0value?: string | Resource | image.PixelMap | ImageAlt | undefined
     _matchTextDirection_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _matchTextDirection_0_0value?: boolean | undefined
     _fitOriginalSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -101,6 +101,10 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
     _enhancedImageQuality_0_0value?: image.ResolutionQuality | undefined
     _orientation_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _orientation_0_0value?: ImageRotateOrientation | undefined
+    _supportSvg2_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _supportSvg2_0_0value?: boolean | undefined
+    _contentTransition_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _contentTransition_0_0value?: ContentTransitionEffect | undefined
     applyModifierPatch(node: PeerNode): void {
         this._state.addRef()
         super.applyModifierPatch(node)
@@ -109,7 +113,7 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
         {
             switch (this._alt_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setAltAttribute((this._alt_0_0value as string | Resource | image.PixelMap | undefined));
+                    peer.setAltAttribute((this._alt_0_0value as string | Resource | image.PixelMap | ImageAlt | undefined));
                     this._alt_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -119,7 +123,7 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
                 }
                 default: {
                     this._alt_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setAltAttribute((undefined as string | Resource | image.PixelMap | undefined));
+                    peer.setAltAttribute((undefined as string | Resource | image.PixelMap | ImageAlt | undefined));
                 }
             }
         }
@@ -591,6 +595,42 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
                 }
             }
         }
+        if (this._supportSvg2_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._supportSvg2_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setSupportSvg2Attribute((this._supportSvg2_0_0value as boolean | undefined));
+                    this._supportSvg2_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._supportSvg2_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._supportSvg2_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setSupportSvg2Attribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._contentTransition_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._contentTransition_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setContentTransitionAttribute((this._contentTransition_0_0value as ContentTransitionEffect | undefined));
+                    this._contentTransition_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._contentTransition_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._contentTransition_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setContentTransitionAttribute((undefined as ContentTransitionEffect | undefined));
+                }
+            }
+        }
     }
     mergeModifier(modifier: ImageModifier): void {
         super.mergeModifier(modifier)
@@ -604,7 +644,7 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
                     break;
                 }
                 default: {
-                    this.alt((undefined as string | Resource | image.PixelMap | undefined));
+                    this.alt((undefined as string | Resource | image.PixelMap | ImageAlt | undefined));
                 }
             }
         }
@@ -946,8 +986,34 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
                 }
             }
         }
+        if (modifier._supportSvg2_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._supportSvg2_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.supportSvg2(modifier._supportSvg2_0_0value);
+                    break;
+                }
+                default: {
+                    this.supportSvg2((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._contentTransition_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._contentTransition_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.contentTransition(modifier._contentTransition_0_0value);
+                    break;
+                }
+                default: {
+                    this.contentTransition((undefined as ContentTransitionEffect | undefined));
+                }
+            }
+        }
     }
-    alt(value: string | Resource | image.PixelMap | undefined): this {
+    alt(value: string | Resource | image.PixelMap | ImageAlt | undefined): this {
         if (((this._alt_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._alt_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1241,6 +1307,28 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
         } else
         {
             this._orientation_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    supportSvg2(value: boolean | undefined): this {
+        if (((this._supportSvg2_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._supportSvg2_0_0value) !== (value)))
+        {
+            this._supportSvg2_0_flag = AttributeUpdaterFlag.UPDATE
+            this._supportSvg2_0_0value = value
+        } else
+        {
+            this._supportSvg2_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    contentTransition(value: ContentTransitionEffect | undefined): this {
+        if (((this._contentTransition_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._contentTransition_0_flag = AttributeUpdaterFlag.UPDATE
+            this._contentTransition_0_0value = value
+        } else
+        {
+            this._contentTransition_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

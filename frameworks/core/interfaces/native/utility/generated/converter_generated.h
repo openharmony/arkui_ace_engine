@@ -2333,6 +2333,23 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_String_Resource_PixelMap_ImageAlt& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
+        case SELECTOR_ID_3: AssignTo(dst, src.value3); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Union_TitleHeight_Length& src)
 {
     switch (src.selector) {
@@ -3449,6 +3466,7 @@ ASSIGN_OPT(Opt_ConfigurationConstant_ScreenDensity)
 ASSIGN_OPT(Opt_ConsoleMessage)
 ASSIGN_OPT(Opt_ConsoleMessageSource)
 ASSIGN_OPT(Opt_ContentClipMode)
+ASSIGN_OPT(Opt_ContentTransitionEffect)
 ASSIGN_OPT(Opt_ContentType)
 ASSIGN_OPT(Opt_contextConstant_AreaMode)
 ASSIGN_OPT(Opt_ContextMenuDataMediaType)
@@ -3691,6 +3709,8 @@ ASSIGN_OPT(Opt_PdfLoadResult)
 ASSIGN_OPT(Opt_PerfMonitorActionType)
 ASSIGN_OPT(Opt_PerfMonitorSourceType)
 ASSIGN_OPT(Opt_PermissionRequest)
+ASSIGN_OPT(Opt_PickerIndicatorType)
+ASSIGN_OPT(Opt_PickerModifier)
 ASSIGN_OPT(Opt_PinchRecognizer)
 ASSIGN_OPT(Opt_PixelMapMock)
 ASSIGN_OPT(Opt_PixelRoundCalcPolicy)
@@ -4319,6 +4339,7 @@ ASSIGN_OPT(Opt_OnNavigationEntryCommittedCallback)
 ASSIGN_OPT(Opt_OnOverrideErrorPageCallback)
 ASSIGN_OPT(Opt_OnOverrideUrlLoadingCallback)
 ASSIGN_OPT(Opt_OnPasteCallback)
+ASSIGN_OPT(Opt_OnPickerCallback)
 ASSIGN_OPT(Opt_OnRadioChangeCallback)
 ASSIGN_OPT(Opt_OnRatingChangeCallback)
 ASSIGN_OPT(Opt_OnRenderProcessNotRespondingCallback)
@@ -4603,6 +4624,7 @@ ASSIGN_OPT(Opt_OverlayOffset)
 ASSIGN_OPT(Opt_PanGestureHandlerOptions)
 ASSIGN_OPT(Opt_PasteButtonOptions)
 ASSIGN_OPT(Opt_PathOptions)
+ASSIGN_OPT(Opt_PickerOptions)
 ASSIGN_OPT(Opt_PixelRoundPolicy)
 ASSIGN_OPT(Opt_PluginComponentTemplate)
 ASSIGN_OPT(Opt_PluginErrorData)
@@ -4834,6 +4856,7 @@ ASSIGN_OPT(Opt_FormInfo)
 ASSIGN_OPT(Opt_GaugeShadowOptions)
 ASSIGN_OPT(Opt_GridColOptions)
 ASSIGN_OPT(Opt_HistoricalPoint)
+ASSIGN_OPT(Opt_ImageAlt)
 ASSIGN_OPT(Opt_ImageError)
 ASSIGN_OPT(Opt_ImageFrameInfo)
 ASSIGN_OPT(Opt_KeyframeAnimateParam)
@@ -4947,6 +4970,7 @@ ASSIGN_OPT(Opt_Union_ShadowOptions_Array_ShadowOptions)
 ASSIGN_OPT(Opt_Union_ShadowOptions_ShadowStyle)
 ASSIGN_OPT(Opt_Union_SheetSize_Length)
 ASSIGN_OPT(Opt_Union_SheetTitleOptions_CustomBuilder)
+ASSIGN_OPT(Opt_Union_String_Resource_PixelMap_ImageAlt)
 ASSIGN_OPT(Opt_Union_TitleHeight_Length)
 ASSIGN_OPT(Opt_VideoOptions)
 ASSIGN_OPT(Opt_WithThemeOptions)
@@ -5101,6 +5125,7 @@ ASSIGN_OPT(Opt_PanGestureEvent)
 ASSIGN_OPT(Opt_ParagraphStyle)
 ASSIGN_OPT(Opt_ParagraphStyleInterface)
 ASSIGN_OPT(Opt_PickerDialogButtonStyle)
+ASSIGN_OPT(Opt_PickerIndicatorStyle)
 ASSIGN_OPT(Opt_PickerTextStyle)
 ASSIGN_OPT(Opt_PinchGestureEvent)
 ASSIGN_OPT(Opt_PlaceholderStyle)

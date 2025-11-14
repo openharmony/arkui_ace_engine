@@ -29,7 +29,7 @@ import { ColorMetrics_serializer } from "./../Graphics"
 import { matrix4_Matrix4Transit_serializer } from "./../framework/ohos.matrix4"
 import { ColorFilter_serializer, ResourceColor, ColorFilter, ResourceStr, EdgeWidths, EdgeWidths_serializer } from "./units"
 import { drawing_ColorFilter_serializer, drawing_Lattice_serializer } from "./../framework/ohos.graphics.drawing"
-import { PointLightStyle_serializer, ArkCommonMethodPeer, CommonMethod, PointLightStyle, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { PointLightStyle_serializer, ContentTransitionEffect_serializer, ArkCommonMethodPeer, CommonMethod, PointLightStyle, ContentTransitionEffect, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { Resource } from "global.resource"
@@ -131,7 +131,7 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._ImageInterface_setImageOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setAltAttribute(value: string | Resource | image.PixelMap | undefined): void {
+    setAltAttribute(value: string | Resource | image.PixelMap | ImageAlt | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -148,7 +148,11 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as image.PixelMap
                 image_PixelMap_serializer.write(thisSerializer, valueTmpValueForIdx2)
-            }
+            } else if (valueTmpValue instanceof ImageAlt) {
+                thisSerializer.writeInt8((3).toByte())
+                const valueTmpValueForIdx3  = valueTmpValue as ImageAlt
+                ImageAlt_serializer.write(thisSerializer, valueTmpValueForIdx3)
+             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -503,6 +507,30 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._ImageAttribute_setOrientation(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setSupportSvg2Attribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ImageAttribute_setSupportSvg2(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setContentTransitionAttribute(value: ContentTransitionEffect | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            ContentTransitionEffect_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ImageAttribute_setContentTransition(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export type DrawingColorFilter = drawing.ColorFilter;
 export type ResolutionQuality = image.ResolutionQuality;
@@ -558,11 +586,15 @@ export interface ImageSourceSize {
     width: double;
     height: double;
 }
+export interface ImageAlt {
+    placeholder?: ResourceStr | image.PixelMap;
+    error?: ResourceStr | image.PixelMap;
+}
 export interface ImageAttribute extends CommonMethod {
     setImageOptions(src: image.PixelMap | ResourceStr | DrawableDescriptor | ImageContent, imageAIOptions?: ImageAIOptions): this {
         throw new Error("Unimplemented method setImageOptions")
     }
-    alt(value: string | Resource | image.PixelMap | undefined): this {
+    alt(value: string | Resource | image.PixelMap | ImageAlt | undefined): this {
         throw new Error("Unimplemented method alt")
     }
     matchTextDirection(value: boolean | undefined): this {
@@ -641,12 +673,18 @@ export interface ImageAttribute extends CommonMethod {
     orientation(value: ImageRotateOrientation | undefined): this {
         throw new Error("Unimplemented method orientation")
     }
+    supportSvg2(value: boolean | undefined): this {
+        throw new Error("Unimplemented method supportSvg2")
+    }
+    contentTransition(value: ContentTransitionEffect | undefined): this {
+        throw new Error("Unimplemented method contentTransition")
+    }
     attributeModifier(value: AttributeModifier<ImageAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Unimplemented method attributeModifier")
     }
 }
 export class ArkImageStyle extends ArkCommonMethodStyle implements ImageAttribute {
-    alt_value?: string | Resource | image.PixelMap | undefined
+    alt_value?: string | Resource | image.PixelMap | ImageAlt | undefined
     matchTextDirection_value?: boolean | undefined
     fitOriginalSize_value?: boolean | undefined
     fillColor_value?: ResourceColor | ColorContent | ColorMetrics | undefined
@@ -673,11 +711,13 @@ export class ArkImageStyle extends ArkCommonMethodStyle implements ImageAttribut
     privacySensitive_value?: boolean | undefined
     enhancedImageQuality_value?: image.ResolutionQuality | undefined
     orientation_value?: ImageRotateOrientation | undefined
+    supportSvg2_value?: boolean | undefined
+    contentTransition_value?: ContentTransitionEffect | undefined
     attributeModifier_value?: AttributeModifier<ImageAttribute> | AttributeModifier<CommonMethod> | undefined
     setImageOptions(src: image.PixelMap | ResourceStr | DrawableDescriptor | ImageContent, imageAIOptions?: ImageAIOptions): this {
         return this
     }
-    alt(value: string | Resource | image.PixelMap | undefined): this {
+    alt(value: string | Resource | image.PixelMap | ImageAlt | undefined): this {
         return this
     }
     matchTextDirection(value: boolean | undefined): this {
@@ -758,6 +798,12 @@ export class ArkImageStyle extends ArkCommonMethodStyle implements ImageAttribut
     orientation(value: ImageRotateOrientation | undefined): this {
         return this
     }
+    supportSvg2(value: boolean | undefined): this {
+        return this
+    }
+    contentTransition(value: ContentTransitionEffect | undefined): this {
+        return this
+    }
     public attributeModifier(value: AttributeModifier<ImageAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
     }
@@ -792,9 +838,9 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements Image
         }
         return this
     }
-    public alt(value: string | Resource | image.PixelMap | undefined): this {
+    public alt(value: string | Resource | image.PixelMap | ImageAlt | undefined): this {
         if (this.checkPriority("alt")) {
-            const value_casted = value as (string | Resource | image.PixelMap | undefined)
+            const value_casted = value as (string | Resource | image.PixelMap | ImageAlt | undefined)
             this.getPeer()?.setAltAttribute(value_casted)
             return this
         }
@@ -1008,6 +1054,22 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements Image
         }
         return this
     }
+    public supportSvg2(value: boolean | undefined): this {
+        if (this.checkPriority("supportSvg2")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setSupportSvg2Attribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public contentTransition(value: ContentTransitionEffect | undefined): this {
+        if (this.checkPriority("contentTransition")) {
+            const value_casted = value as (ContentTransitionEffect | undefined)
+            this.getPeer()?.setContentTransitionAttribute(value_casted)
+            return this
+        }
+        return this
+    }
     public attributeModifier(value: AttributeModifier<ImageAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         ModifierStateManager.INSTANCE.scope(() => {
           hookImageAttributeModifier(this, value);
@@ -1102,6 +1164,112 @@ export class ImageCompleteEvent_serializer {
         const contentOffsetXTmpResult : int32 = valueDeserializer.readInt32()
         const contentOffsetYTmpResult : int32 = valueDeserializer.readInt32()
         let value : ImageCompleteEvent = ({width: widthTmpResult, height: heightTmpResult, componentWidth: componentWidthTmpResult, componentHeight: componentHeightTmpResult, loadingStatus: loadingStatusTmpResult, contentWidth: contentWidthTmpResult, contentHeight: contentHeightTmpResult, contentOffsetX: contentOffsetXTmpResult, contentOffsetY: contentOffsetYTmpResult} as ImageCompleteEvent)
+        return value
+    }
+}
+export class ImageAlt_serializer {
+    public static write(buffer: SerializerBase, value: ImageAlt): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForPlaceholder  = value.placeholder
+        if (valueHolderForPlaceholder !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForPlaceholderTmpValue  = valueHolderForPlaceholder!
+            if (valueHolderForPlaceholderTmpValue instanceof ResourceStr) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForPlaceholderTmpValueForIdx0  = valueHolderForPlaceholderTmpValue as ResourceStr
+                if (valueHolderForPlaceholderTmpValueForIdx0 instanceof string) {
+                    valueSerializer.writeInt8((0).toByte())
+                    const valueHolderForPlaceholderTmpValueForIdx0ForIdx0  = valueHolderForPlaceholderTmpValueForIdx0 as string
+                    valueSerializer.writeString(valueHolderForPlaceholderTmpValueForIdx0ForIdx0)
+                } else if (valueHolderForPlaceholderTmpValueForIdx0 instanceof Resource) {
+                    valueSerializer.writeInt8((1).toByte())
+                    const valueHolderForPlaceholderTmpValueForIdx0ForIdx1  = valueHolderForPlaceholderTmpValueForIdx0 as Resource
+                    Resource_serializer.write(valueSerializer, valueHolderForPlaceholderTmpValueForIdx0ForIdx1)
+                }
+            } else if (valueHolderForPlaceholderTmpValue instanceof image.PixelMap) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderForPlaceholderTmpValueForIdx1  = valueHolderForPlaceholderTmpValue as image.PixelMap
+                image_PixelMap_serializer.write(valueSerializer, valueHolderForPlaceholderTmpValueForIdx1)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForError  = value.error
+        if (valueHolderForError !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForErrorTmpValue  = valueHolderForError!
+            if (valueHolderForErrorTmpValue instanceof ResourceStr) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForErrorTmpValueForIdx0  = valueHolderForErrorTmpValue as ResourceStr
+                if (valueHolderForErrorTmpValueForIdx0 instanceof string) {
+                    valueSerializer.writeInt8((0).toByte())
+                    const valueHolderForErrorTmpValueForIdx0ForIdx0  = valueHolderForErrorTmpValueForIdx0 as string
+                    valueSerializer.writeString(valueHolderForErrorTmpValueForIdx0ForIdx0)
+                } else if (valueHolderForErrorTmpValueForIdx0 instanceof Resource) {
+                    valueSerializer.writeInt8((1).toByte())
+                    const valueHolderForErrorTmpValueForIdx0ForIdx1  = valueHolderForErrorTmpValueForIdx0 as Resource
+                    Resource_serializer.write(valueSerializer, valueHolderForErrorTmpValueForIdx0ForIdx1)
+                }
+            } else if (valueHolderForErrorTmpValue instanceof image.PixelMap) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderForErrorTmpValueForIdx1  = valueHolderForErrorTmpValue as image.PixelMap
+                image_PixelMap_serializer.write(valueSerializer, valueHolderForErrorTmpValueForIdx1)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): ImageAlt {
+        let valueDeserializer : DeserializerBase = buffer
+        const placeholderTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let placeholderTmpBuf : ResourceStr | image.PixelMap | undefined = undefined
+        if ((placeholderTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const placeholderTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let placeholderTmpBuf_ : ResourceStr | image.PixelMap | undefined
+            if (placeholderTmpBuf_UnionSelector == (0).toChar()) {
+                const placeholderTmpBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
+                let placeholderTmpBuf_BufU : string | Resource | undefined
+                if (placeholderTmpBuf_BufUUnionSelector == (0).toChar()) {
+                    placeholderTmpBuf_BufU = (valueDeserializer.readString() as string)
+                } else if (placeholderTmpBuf_BufUUnionSelector == (1).toChar()) {
+                    placeholderTmpBuf_BufU = Resource_serializer.read(valueDeserializer)
+                } else {
+                    throw new Error("One of the branches for placeholderTmpBuf_BufU has to be chosen through deserialisation.")
+                }
+                placeholderTmpBuf_ = (placeholderTmpBuf_BufU as string | Resource)
+            } else if (placeholderTmpBuf_UnionSelector == (1).toChar()) {
+                placeholderTmpBuf_ = (image_PixelMap_serializer.read(valueDeserializer) as image.PixelMap)
+            } else {
+                throw new Error("One of the branches for placeholderTmpBuf_ has to be chosen through deserialisation.")
+            }
+            placeholderTmpBuf = (placeholderTmpBuf_ as ResourceStr | image.PixelMap)
+        }
+        const placeholderTmpResult : ResourceStr | image.PixelMap | undefined = placeholderTmpBuf
+        const errorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let errorTmpBuf : ResourceStr | image.PixelMap | undefined = undefined
+        if ((errorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const errorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let errorTmpBuf_ : ResourceStr | image.PixelMap | undefined
+            if (errorTmpBuf_UnionSelector == (0).toChar()) {
+                const errorTmpBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
+                let errorTmpBuf_BufU : string | Resource | undefined
+                if (errorTmpBuf_BufUUnionSelector == (0).toChar()) {
+                    errorTmpBuf_BufU = (valueDeserializer.readString() as string)
+                } else if (errorTmpBuf_BufUUnionSelector == (1).toChar()) {
+                    errorTmpBuf_BufU = Resource_serializer.read(valueDeserializer)
+                } else {
+                    throw new Error("One of the branches for errorTmpBuf_BufU has to be chosen through deserialisation.")
+                }
+                errorTmpBuf_ = (errorTmpBuf_BufU as string | Resource)
+            } else if (errorTmpBuf_UnionSelector == (1).toChar()) {
+                errorTmpBuf_ = (image_PixelMap_serializer.read(valueDeserializer) as image.PixelMap)
+            } else {
+                throw new Error("One of the branches for errorTmpBuf_ has to be chosen through deserialisation.")
+            }
+            errorTmpBuf = (errorTmpBuf_ as ResourceStr | image.PixelMap)
+        }
+        const errorTmpResult : ResourceStr | image.PixelMap | undefined = errorTmpBuf
+        let value : ImageAlt = ({placeholder: placeholderTmpResult, error: errorTmpResult} as ImageAlt)
         return value
     }
 }

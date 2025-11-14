@@ -141,6 +141,7 @@ const GENERATED_ArkUINodeContainerModifier* GetNodeContainerModifier();
 const GENERATED_ArkUIPasteButtonModifier* GetPasteButtonModifier();
 const GENERATED_ArkUIPathModifier* GetPathModifier();
 const GENERATED_ArkUIPatternLockModifier* GetPatternLockModifier();
+const GENERATED_ArkUIPickerModifier* GetPickerModifier();
 const GENERATED_ArkUIPluginComponentModifier* GetPluginComponentModifier();
 const GENERATED_ArkUIPolygonModifier* GetPolygonModifier();
 const GENERATED_ArkUIPolylineModifier* GetPolylineModifier();
@@ -225,6 +226,7 @@ const GENERATED_ArkUIColorFilterAccessor* GetColorFilterAccessor();
 const GENERATED_ArkUICommonShapeAccessor* GetCommonShapeAccessor();
 const GENERATED_ArkUIConsoleMessageAccessor* GetConsoleMessageAccessor();
 const GENERATED_ArkUIContentModifierHelperAccessor* GetContentModifierHelperAccessor();
+const GENERATED_ArkUIContentTransitionEffectAccessor* GetContentTransitionEffectAccessor();
 const GENERATED_ArkUIControllerHandlerAccessor* GetControllerHandlerAccessor();
 const GENERATED_ArkUICopyEventAccessor* GetCopyEventAccessor();
 const GENERATED_ArkUICustomDialogControllerAccessor* GetCustomDialogControllerAccessor();
@@ -313,6 +315,7 @@ const GENERATED_ArkUIPath2DAccessor* GetPath2DAccessor();
 const GENERATED_ArkUIPatternLockControllerAccessor* GetPatternLockControllerAccessor();
 const GENERATED_ArkUIPermissionRequestAccessor* GetPermissionRequestAccessor();
 const GENERATED_ArkUIPersistentStorageBackendAccessor* GetPersistentStorageBackendAccessor();
+const GENERATED_ArkUIPickerModifierAccessor* GetPickerModifierAccessor();
 const GENERATED_ArkUIPinchGestureEventAccessor* GetPinchGestureEventAccessor();
 const GENERATED_ArkUIPinchRecognizerAccessor* GetPinchRecognizerAccessor();
 const GENERATED_ArkUIPixelMapMockAccessor* GetPixelMapMockAccessor();
@@ -457,6 +460,7 @@ const GENERATED_ArkUINodeModifiers* GENERATED_GetArkUINodeModifiers()
         GetPasteButtonModifier,
         GetPathModifier,
         GetPatternLockModifier,
+        GetPickerModifier,
         GetPluginComponentModifier,
         GetPolygonModifier,
         GetPolylineModifier,
@@ -547,6 +551,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetCommonShapeAccessor,
         GetConsoleMessageAccessor,
         GetContentModifierHelperAccessor,
+        GetContentTransitionEffectAccessor,
         GetControllerHandlerAccessor,
         GetCopyEventAccessor,
         GetCustomDialogControllerAccessor,
@@ -635,6 +640,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetPatternLockControllerAccessor,
         GetPermissionRequestAccessor,
         GetPersistentStorageBackendAccessor,
+        GetPickerModifierAccessor,
         GetPinchGestureEventAccessor,
         GetPinchRecognizerAccessor,
         GetPixelMapMockAccessor,

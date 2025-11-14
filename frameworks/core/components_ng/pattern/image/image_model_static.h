@@ -40,6 +40,10 @@ public:
     static void SetImageSourceSize(FrameNode* frameNode, const std::optional<std::pair<Dimension, Dimension>>& size);
     static void SetImageFill(FrameNode* frameNode, const std::optional<Color>& color);
     static void SetAlt(FrameNode* frameNode, const std::optional<ImageSourceInfo>& src);
+    static void SetAltError(FrameNode* frameNode, const std::optional<ImageSourceInfo>& src);
+    static void SetAltPlaceholder(FrameNode* frameNode, const std::optional<ImageSourceInfo>& src);
+    static void SetSupportSvg2(FrameNode* frameNode, bool enable);
+    static void SetContentTransition(FrameNode* frameNode, ContentTransitionType contentTransition);
     static void SetImageInterpolation(FrameNode* frameNode, const std::optional<ImageInterpolation>& interpolation);
     static void SetDynamicRangeMode(FrameNode* frameNode, const std::optional<DynamicRangeMode>& dynamicRangeMode);
     static void SetOrientation(FrameNode* frameNode, const std::optional<ImageRotateOrientation>& orientation);

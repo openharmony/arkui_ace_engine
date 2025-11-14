@@ -77,6 +77,7 @@ import { AsyncCallback, ErrorCallback, BusinessError } from "@ohos.base"
 import { GetItemMainSizeByIndex } from "./../../component/waterFlow"
 import { OnAlphabetIndexerPopupSelectCallback, OnAlphabetIndexerRequestPopupDataCallback, OnAlphabetIndexerSelectCallback } from "./../../component/alphabetIndexer"
 import { OnLinearIndicatorChangeCallback } from "./../../component/linearindicator"
+import { OnPickerCallback } from "./../../component/picker"
 import { PageTransitionCallback, RouteType } from "./../../component/pageTransition"
 import { PasteButtonCallback, PasteButtonOnClickResult } from "./../../component/pasteButton"
 import { SaveButtonCallback, SaveButtonOnClickResult } from "./../../component/saveButton"
@@ -2652,6 +2653,12 @@ export function deserializeAndCallOnPasteCallback(thisDeserializer: Deserializer
     let event : PasteEvent = PasteEvent_serializer.read(thisDeserializer)
     _call(content, event)
 }
+export function deserializeAndCallOnPickerCallback(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as OnPickerCallback)
+    let selectedIndex : int32 = thisDeserializer.readInt32()
+    _call(selectedIndex)
+}
 export function deserializeAndCallOnRadioChangeCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as OnRadioChangeCallback)
@@ -3822,6 +3829,7 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.Kind_OnOverrideErrorPageCallback: return deserializeAndCallOnOverrideErrorPageCallback(thisDeserializer);
         case CallbackKind.Kind_OnOverrideUrlLoadingCallback: return deserializeAndCallOnOverrideUrlLoadingCallback(thisDeserializer);
         case CallbackKind.Kind_OnPasteCallback: return deserializeAndCallOnPasteCallback(thisDeserializer);
+        case CallbackKind.Kind_OnPickerCallback: return deserializeAndCallOnPickerCallback(thisDeserializer);
         case CallbackKind.Kind_OnRadioChangeCallback: return deserializeAndCallOnRadioChangeCallback(thisDeserializer);
         case CallbackKind.Kind_OnRatingChangeCallback: return deserializeAndCallOnRatingChangeCallback(thisDeserializer);
         case CallbackKind.Kind_OnRenderProcessNotRespondingCallback: return deserializeAndCallOnRenderProcessNotRespondingCallback(thisDeserializer);

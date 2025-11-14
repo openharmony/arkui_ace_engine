@@ -103,6 +103,7 @@ build_component_ng("pattern_ng") {
     "container_picker/container_picker_accessibility_property.cpp",
     "container_picker/container_picker_layout_algorithm.cpp",
     "container_picker/container_picker_model.cpp",
+    "container_picker/container_picker_model_static.cpp",
     "container_picker/container_picker_paint_method.cpp",
     "container_picker/container_picker_pattern.cpp",
     "counter/counter_layout_algorithm.cpp",
