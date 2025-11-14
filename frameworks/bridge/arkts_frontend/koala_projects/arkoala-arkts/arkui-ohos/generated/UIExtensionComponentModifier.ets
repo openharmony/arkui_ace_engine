@@ -145,7 +145,8 @@ export class UIExtensionComponentModifier extends CommonMethodModifier implement
         }
     }
     mergeModifier(modifier: UIExtensionComponentModifier): void {
-        super.mergeModifier(modifier)
+       super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._onRemoteReady_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._onRemoteReady_0_flag) {

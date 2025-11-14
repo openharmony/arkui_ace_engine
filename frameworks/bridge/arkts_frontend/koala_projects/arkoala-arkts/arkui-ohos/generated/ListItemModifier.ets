@@ -122,7 +122,8 @@ export class ListItemModifier extends CommonMethodModifier implements ListItemAt
         }
     }
     mergeModifier(modifier: ListItemModifier): void {
-        super.mergeModifier(modifier)
+       super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._selectable_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._selectable_0_flag) {

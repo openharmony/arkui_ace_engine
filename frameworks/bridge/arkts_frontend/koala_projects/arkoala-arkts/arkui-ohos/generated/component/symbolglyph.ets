@@ -33,6 +33,7 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { SymbolGlyphModifier } from "./../SymbolGlyphModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ModifierStateManager } from '../CommonModifier';
 export class SymbolEffectInternal {
     public static fromPtr(ptr: KPointer): SymbolEffect {
         return new SymbolEffect(ptr)
@@ -483,7 +484,9 @@ export class ArkSymbolGlyphComponent extends ArkCommonMethodComponent implements
         return this
     }
     public attributeModifier(value: AttributeModifier<SymbolGlyphAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookSymbolGlyphAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookSymbolGlyphAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

@@ -29,8 +29,10 @@ import { PageMapBuilder, CustomBuilder } from "./component/builder"
 import { default as window } from "@ohos.window"
 import { default as image } from "@ohos.multimedia.image"
 import { SymbolGlyphModifier } from "arkui.SymbolGlyphModifier"
+import { ModifierState } from "./CommonModifier"
 export class NavigationModifier extends CommonMethodModifier implements NavigationAttribute,AttributeModifier<NavigationAttribute> {
     _instanceId: number = -1;
+     _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -100,6 +102,7 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
     _ignoreLayoutSafeArea_0_0value?: Array<LayoutSafeAreaType> | undefined
     _ignoreLayoutSafeArea_0_1value?: Array<LayoutSafeAreaEdge> | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkNavigationPeer;
         if (this._navBarWidth_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -572,7 +575,8 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
         }
     }
     mergeModifier(modifier: NavigationModifier): void {
-        super.mergeModifier(modifier)
+       super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._navBarWidth_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._navBarWidth_0_flag) {

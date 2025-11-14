@@ -37,6 +37,7 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { MediaCachedImageModifier } from "./../MediaCachedImageModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ModifierStateManager } from '../CommonModifier';
 export class ArkMediaCachedImagePeer extends ArkImagePeer {
     attributeSet?: MediaCachedImageModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -117,7 +118,9 @@ export class ArkMediaCachedImageComponent extends ArkImageComponent implements M
         return this
     }
     public attributeModifier(value: AttributeModifier<MediaCachedImageAttribute> | AttributeModifier<ImageAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookMediaCachedImageAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookMediaCachedImageAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

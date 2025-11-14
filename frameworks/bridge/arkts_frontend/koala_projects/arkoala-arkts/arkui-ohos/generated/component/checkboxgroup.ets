@@ -33,6 +33,7 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { CheckboxGroupModifier } from "./../CheckboxGroupModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ModifierStateManager } from '../CommonModifier';
 export class ArkCheckboxGroupPeer extends ArkCommonMethodPeer {
     attributeSet?: CheckboxGroupModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -311,7 +312,9 @@ export class ArkCheckboxGroupComponent extends ArkCommonMethodComponent implemen
         return this
     }
     public attributeModifier(value: AttributeModifier<CheckboxGroupAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookCheckboxGroupAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookCheckboxGroupAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

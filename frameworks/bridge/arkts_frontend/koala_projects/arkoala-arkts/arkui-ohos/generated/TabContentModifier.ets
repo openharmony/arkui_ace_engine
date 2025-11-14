@@ -106,7 +106,8 @@ export class TabContentModifier extends CommonMethodModifier implements TabConte
         }
     }
     mergeModifier(modifier: TabContentModifier): void {
-        super.mergeModifier(modifier)
+       super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._tabBar_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._tabBar_0_flag) {

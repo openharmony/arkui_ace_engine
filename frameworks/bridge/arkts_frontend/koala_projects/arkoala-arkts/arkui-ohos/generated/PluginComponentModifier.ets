@@ -83,7 +83,8 @@ export class PluginComponentModifier extends CommonMethodModifier implements Plu
         }
     }
     mergeModifier(modifier: PluginComponentModifier): void {
-        super.mergeModifier(modifier)
+       super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._onComplete_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._onComplete_0_flag) {

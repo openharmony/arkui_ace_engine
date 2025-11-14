@@ -264,7 +264,8 @@ export class TimePickerModifier extends CommonMethodModifier implements TimePick
         }
     }
     mergeModifier(modifier: TimePickerModifier): void {
-        super.mergeModifier(modifier)
+       super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._useMilitaryTime_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._useMilitaryTime_0_flag) {

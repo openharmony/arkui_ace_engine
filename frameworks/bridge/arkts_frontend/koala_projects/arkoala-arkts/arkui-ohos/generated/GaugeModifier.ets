@@ -247,7 +247,8 @@ export class GaugeModifier extends CommonMethodModifier implements GaugeAttribut
         }
     }
     mergeModifier(modifier: GaugeModifier): void {
-        super.mergeModifier(modifier)
+       super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._value_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._value_0_flag) {

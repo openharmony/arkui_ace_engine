@@ -33,6 +33,7 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { ButtonModifier } from "./../ButtonModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ModifierStateManager } from '../CommonModifier';
 export class ArkButtonPeer extends ArkCommonMethodPeer {
     attributeSet?: ButtonModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -601,7 +602,9 @@ export class ArkButtonComponent extends ArkCommonMethodComponent implements Butt
         return this
     }
     public attributeModifier(value: AttributeModifier<ButtonAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookButtonAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookButtonAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

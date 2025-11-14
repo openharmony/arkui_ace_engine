@@ -102,7 +102,8 @@ export class LinearIndicatorModifier extends CommonMethodModifier implements Lin
         }
     }
     mergeModifier(modifier: LinearIndicatorModifier): void {
-        super.mergeModifier(modifier)
+       super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._indicatorStyle_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._indicatorStyle_0_flag) {

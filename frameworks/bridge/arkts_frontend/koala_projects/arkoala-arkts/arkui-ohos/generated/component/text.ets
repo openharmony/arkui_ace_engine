@@ -40,6 +40,7 @@ import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { TextModifier } from "./../TextModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ArkThemeScopeManager } from "arkui/theme/ArkThemeScopeManager.ets";
+import { ModifierStateManager } from '../CommonModifier';
 export class TextControllerInternal {
     public static fromPtr(ptr: KPointer): TextController {
         return new TextController(ptr)
@@ -1584,7 +1585,9 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements TextAt
         return this
     }
     public attributeModifier(value: AttributeModifier<TextAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookTextAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookTextAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

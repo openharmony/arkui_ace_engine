@@ -32,8 +32,9 @@ import { Length } from "./units"
 import { Resource } from "global.resource"
 import { GridRowModifier } from "./../GridRowModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { ModifierStateManager } from '../CommonModifier';
 import { Resource_serializer } from "./../framework/resource"
+import { ModifierStateManager } from '../CommonModifier';
+
 export class ArkGridRowPeer extends ArkCommonMethodPeer {
     attributeSet?: GridRowModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {

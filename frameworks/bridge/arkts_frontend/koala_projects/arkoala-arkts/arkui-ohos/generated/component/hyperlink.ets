@@ -32,6 +32,7 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { HyperlinkModifier } from "./../HyperlinkModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ModifierStateManager } from '../CommonModifier';
 export class ArkHyperlinkPeer extends ArkCommonMethodPeer {
     attributeSet?: HyperlinkModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -159,7 +160,9 @@ export class ArkHyperlinkComponent extends ArkCommonMethodComponent implements H
         return this
     }
     public attributeModifier(value: AttributeModifier<HyperlinkAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookHyperlinkAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookHyperlinkAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

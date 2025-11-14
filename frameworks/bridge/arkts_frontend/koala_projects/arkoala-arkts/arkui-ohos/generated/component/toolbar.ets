@@ -28,6 +28,7 @@ import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { hookToolBarItemAttributeModifier, AttributeModifier, AttributeUpdater } from "#handwritten"
 import { ToolBarItemModifier } from "./../ToolBarItemModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ModifierStateManager } from '../CommonModifier';
 export class ArkToolBarItemPeer extends PeerNode {
     attributeSet?: ToolBarItemModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -94,7 +95,9 @@ export class ArkToolBarItemComponent extends ComponentBase implements ToolBarIte
         return this
     }
     public attributeModifier(value: AttributeModifier<ToolBarItemAttribute> | undefined): this {
-        hookToolBarItemAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookToolBarItemAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

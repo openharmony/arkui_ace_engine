@@ -34,6 +34,7 @@ import { ComponentContent } from "arkui.ComponentContent"
 import { UIExtensionComponentModifier } from "./../UIExtensionComponentModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ComponentContent_serializer } from "./../ComponentContent"
+import { ModifierStateManager } from '../CommonModifier';
 export interface UIExtensionProxy {
     send(data: Map<string, RecordData>): void
     sendSync(data: Map<string, RecordData>): Map<string, RecordData>
@@ -409,7 +410,9 @@ export class ArkUIExtensionComponentComponent extends ArkCommonMethodComponent i
         return this
     }
     public attributeModifier(value: AttributeModifier<UIExtensionComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookUIExtensionComponentAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookUIExtensionComponentAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

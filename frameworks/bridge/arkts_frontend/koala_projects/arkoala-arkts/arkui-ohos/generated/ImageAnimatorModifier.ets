@@ -303,7 +303,8 @@ export class ImageAnimatorModifier extends CommonMethodModifier implements Image
         }
     }
     mergeModifier(modifier: ImageAnimatorModifier): void {
-        super.mergeModifier(modifier)
+       super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._images_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._images_0_flag) {

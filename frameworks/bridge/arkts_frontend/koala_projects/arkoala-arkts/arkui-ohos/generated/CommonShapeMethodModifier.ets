@@ -264,7 +264,8 @@ export class CommonShapeMethodModifier extends CommonMethodModifier implements C
         }
     }
     mergeModifier(modifier: CommonShapeMethodModifier): void {
-        super.mergeModifier(modifier)
+       super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._stroke_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._stroke_0_flag) {

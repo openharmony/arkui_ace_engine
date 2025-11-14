@@ -34,6 +34,7 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { SecurityComponentMethodModifier } from "./../SecurityComponentMethodModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ModifierStateManager } from '../CommonModifier';
 export class ArkSecurityComponentMethodPeer extends PeerNode {
     attributeSet?: SecurityComponentMethodModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -1229,7 +1230,9 @@ export class ArkSecurityComponentMethodComponent extends ComponentBase implement
         return this
     }
     public attributeModifier(value: AttributeModifier<SecurityComponentMethod> | undefined): this {
-        hookSecurityComponentMethodAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookSecurityComponentMethodAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

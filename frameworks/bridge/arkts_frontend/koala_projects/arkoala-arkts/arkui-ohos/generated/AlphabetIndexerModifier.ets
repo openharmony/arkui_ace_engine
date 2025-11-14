@@ -566,7 +566,8 @@ export class AlphabetIndexerModifier extends CommonMethodModifier implements Alp
         }
     }
     mergeModifier(modifier: AlphabetIndexerModifier): void {
-        super.mergeModifier(modifier)
+       super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._color_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._color_0_flag) {

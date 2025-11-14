@@ -39,6 +39,7 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { TextAreaModifier } from "./../TextAreaModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ModifierStateManager } from '../CommonModifier';
 export class ArkTextAreaPeer extends ArkCommonMethodPeer {
     attributeSet?: TextAreaModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -1934,7 +1935,9 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements Te
         return this
     }
     public attributeModifier(value: AttributeModifier<TextAreaAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookTextAreaAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookTextAreaAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

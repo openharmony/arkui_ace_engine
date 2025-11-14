@@ -260,6 +260,7 @@ import { DrawableDescriptor } from "../../framework/ohos.arkui.drawableDescripto
 import { ImageAIOptions, DataPanelOptions, GaugeOptions, PatternLockController, TextTimerOptions, TextClockOptions } from "../../framework"
 import { ArkUIAniModule } from 'arkui.ani';
 import { KPointer } from '@koalaui/interop';
+import { UIContextUtil } from '../../base/UIContextUtil';
 
 export function hookAlphabetIndexerAttributeModifier(component: ArkAlphabetIndexerComponent, modifier: AttributeModifier<AlphabetIndexerAttribute> | AttributeModifier<CommonMethod> | undefined):void {
      if (modifier === undefined) {
@@ -567,7 +568,37 @@ export function hookNavigationAttributeModifier(component: ArkNavigationComponen
     applyAttributeModifierBase(modifier as Object as AttributeModifier<NavigationAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
 }
 
-export function hookNodeContainerAttributeModifier(componenet: ArkNodeContainerComponent, value: AttributeModifier<NodeContainerAttribute> | AttributeModifier<CommonMethod> | undefined):void {}
+export function hookNodeContainerAttributeModifier(component: ArkNodeContainerComponent, modifier: AttributeModifier<NodeContainerAttribute> | AttributeModifier<CommonMethod> | undefined):void {
+    if (modifier === undefined) {
+        return;
+    }
+    let isCommonModifier: boolean = modifier instanceof CommonModifier;
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
+        return;
+    }
+    let attributeSet = (): NodeContainerModifier => {
+        let isNodeContainerModifier: boolean = modifier instanceof NodeContainerModifier;
+        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new NodeContainerModifier();
+        if (isNodeContainerModifier) {
+            let nodeContainerModifier = modifier as object as NodeContainerModifier;
+            initModifier.mergeModifier(nodeContainerModifier);
+            component.getPeer().attributeSet = initModifier;
+            return initModifier;
+        } else {
+            component.getPeer().attributeSet = initModifier;
+            return initModifier;
+        }
+    }
+    let constructParam = (component: ArkNodeContainerComponent, ...params: FixedArray<Object>): void => {
+    };
+    let updaterReceiver = (): ArkNodeContainerComponent => {
+        let componentNew: ArkNodeContainerComponent = new ArkNodeContainerComponent(UIContextUtil.getOrCreateCurrentUIContext());
+        componentNew.setPeer(component.getPeer());
+        return componentNew;
+    };
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<NodeContainerAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
+}
 
 export function hookPathAttributeModifier(component: ArkPathComponent, modifier: AttributeModifier<PathAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined):void {
         if (modifier === undefined) {

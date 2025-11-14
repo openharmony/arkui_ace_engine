@@ -852,7 +852,8 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         }
     }
     mergeModifier(modifier: GridModifier): void {
-        super.mergeModifier(modifier)
+       super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._columnsTemplate_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._columnsTemplate_0_flag) {

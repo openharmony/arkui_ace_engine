@@ -82,6 +82,7 @@ import { common2D_Rect_serializer } from "./../framework/ohos.graphics.common2D"
 import { TimePickerDialogOptions_serializer, TimePickerDialogOptions } from "./timePicker"
 import { TextPickerDialogOptions_serializer, TextPickerDialogOptions } from "./textPicker"
 import { DatePickerDialogOptions_serializer, DatePickerDialogOptions } from "./datePicker"
+import { ModifierStateManager } from '../CommonModifier';
 export class ActionSheet {
     static show_serialize(options: ActionSheetOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
@@ -4275,7 +4276,9 @@ export class ArkRootComponent extends ComponentBase implements Root {
         return (this.peer as ArkRootPeer)
     }
     public attributeModifier(value: AttributeModifier<Root> | undefined): this {
-        hookRootAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+             hookRootAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
@@ -4294,7 +4297,9 @@ export class ArkComponentRootComponent extends ComponentBase implements Componen
         return (this.peer as ArkComponentRootPeer)
     }
     public attributeModifier(value: AttributeModifier<ComponentRoot> | undefined): this {
-        hookComponentRootAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+             hookComponentRootAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
@@ -4313,7 +4318,9 @@ export class ArkCustomBuilderRootComponent extends ComponentBase implements Cust
         return (this.peer as ArkCustomBuilderRootPeer)
     }
     public attributeModifier(value: AttributeModifier<CustomBuilderRoot> | undefined): this {
-        hookCustomBuilderRootAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookCustomBuilderRootAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
@@ -4348,7 +4355,9 @@ export class ArkCustomLayoutRootComponent extends ComponentBase implements Custo
         return this
     }
     public attributeModifier(value: AttributeModifier<CustomLayoutRoot> | undefined): this {
-        hookCustomLayoutRootAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+             hookCustomLayoutRootAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

@@ -37,6 +37,7 @@ import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { BaseSpanModifier } from "./../BaseSpanModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { SpanModifier } from "./../SpanModifier"
+import { ModifierStateManager } from '../CommonModifier';
 export class ArkBaseSpanPeer extends ArkCommonMethodPeer {
     attributeSet?: BaseSpanModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -599,7 +600,9 @@ export class ArkBaseSpanComponent extends ArkCommonMethodComponent implements Ba
         return this
     }
     public attributeModifier(value: AttributeModifier<BaseSpan> | AttributeModifier<CommonMethod> | undefined): this {
-        hookBaseSpanAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookBaseSpanAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
@@ -772,7 +775,9 @@ export class ArkSpanComponent extends ComponentBase implements SpanAttribute {
         return this
     }
     public attributeModifier(value: AttributeModifier<SpanAttribute> | undefined): this {
-        hookSpanAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookSpanAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

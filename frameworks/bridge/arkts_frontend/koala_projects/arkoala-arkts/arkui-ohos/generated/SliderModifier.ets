@@ -27,8 +27,10 @@ import { ResourceColor, Length, Dimension, SizeOptions, ResourceStr } from "./co
 import { Color, CrownSensitivity } from "./component/enums"
 import { Resource } from "global.resource"
 import { LinearGradient } from "./component/dataPanel"
+import { ModifierState } from "./CommonModifier"
 export class SliderModifier extends CommonMethodModifier implements SliderAttribute,AttributeModifier<SliderAttribute> {
     _instanceId: number = -1;
+     _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -80,6 +82,7 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
     _showTips_0_0value?: boolean | undefined
     _showTips_0_1value?: ResourceStr | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkSliderPeer;
         if (this._blockColor_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -444,7 +447,8 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
         }
     }
     mergeModifier(modifier: SliderModifier): void {
-        super.mergeModifier(modifier)
+       super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._blockColor_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._blockColor_0_flag) {

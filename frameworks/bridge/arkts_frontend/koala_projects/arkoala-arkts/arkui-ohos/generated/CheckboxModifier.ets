@@ -165,7 +165,8 @@ export class CheckboxModifier extends CommonMethodModifier implements CheckboxAt
         }
     }
     mergeModifier(modifier: CheckboxModifier): void {
-        super.mergeModifier(modifier)
+       super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._select_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._select_0_flag) {

@@ -38,6 +38,7 @@ import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { Color, TextOverflow, TextHeightAdaptivePolicy, VerticalAlign } from "./enums"
 import { TabContentModifier } from "./../TabContentModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ModifierStateManager } from '../CommonModifier';
 export class TabBarSymbolInternal {
     public static fromPtr(ptr: KPointer): TabBarSymbol {
         return new TabBarSymbol(ptr)
@@ -318,7 +319,9 @@ export class ArkTabContentComponent extends ArkCommonMethodComponent implements 
         return this
     }
     public attributeModifier(value: AttributeModifier<TabContentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookTabContentAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookTabContentAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

@@ -34,6 +34,7 @@ import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { CustomBuilder } from "./builder"
 import { CheckboxModifier } from "./../CheckboxModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ModifierStateManager } from '../CommonModifier';
 export class ArkCheckboxPeer extends ArkCommonMethodPeer {
     attributeSet?: CheckboxModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -320,7 +321,9 @@ export class ArkCheckboxComponent extends ArkCommonMethodComponent implements Ch
         return this
     }
     public attributeModifier(value: AttributeModifier<CheckboxAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookCheckboxAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookCheckboxAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

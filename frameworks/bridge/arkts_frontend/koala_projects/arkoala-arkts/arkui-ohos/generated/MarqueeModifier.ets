@@ -225,7 +225,8 @@ export class MarqueeModifier extends CommonMethodModifier implements MarqueeAttr
         }
     }
     mergeModifier(modifier: MarqueeModifier): void {
-        super.mergeModifier(modifier)
+       super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._fontColor_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._fontColor_0_flag) {

@@ -34,6 +34,7 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { ListModifier } from "./../ListModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ModifierStateManager } from '../CommonModifier';
 export class ArkListPeer extends ArkScrollableCommonMethodPeer {
     attributeSet?: ListModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -927,7 +928,9 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
         return this
     }
     public attributeModifier(value: AttributeModifier<ListAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        hookListAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookListAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

@@ -2449,7 +2449,8 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         }
     }
     mergeModifier(modifier: WebModifier): void {
-        super.mergeModifier(modifier)
+       super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._javaScriptAccess_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._javaScriptAccess_0_flag) {

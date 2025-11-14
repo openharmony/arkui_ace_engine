@@ -31,6 +31,7 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { RichTextModifier } from "./../RichTextModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ModifierStateManager } from '../CommonModifier';
 export class ArkRichTextPeer extends ArkCommonMethodPeer {
     attributeSet?: RichTextModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -147,7 +148,9 @@ export class ArkRichTextComponent extends ArkCommonMethodComponent implements Ri
         return this
     }
     public attributeModifier(value: AttributeModifier<RichTextAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookRichTextAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookRichTextAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

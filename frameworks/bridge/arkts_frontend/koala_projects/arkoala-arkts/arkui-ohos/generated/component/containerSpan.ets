@@ -29,6 +29,7 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { ContainerSpanModifier } from "./../ContainerSpanModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ModifierStateManager } from '../CommonModifier';
 export class ArkContainerSpanPeer extends PeerNode {
     attributeSet?: ContainerSpanModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -106,7 +107,9 @@ export class ArkContainerSpanComponent extends ComponentBase implements Containe
         return this
     }
     public attributeModifier(value: AttributeModifier<ContainerSpanAttribute> | undefined): this {
-        hookContainerSpanAttributeModifier(this, value);
+          ModifierStateManager.INSTANCE.scope(() => {
+            hookContainerSpanAttributeModifier(this, value);
+        }) 
         return this
     }
     public applyAttributesFinish(): void {

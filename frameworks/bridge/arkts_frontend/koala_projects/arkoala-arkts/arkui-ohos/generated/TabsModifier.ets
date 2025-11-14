@@ -608,7 +608,8 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
         }
     }
     mergeModifier(modifier: TabsModifier): void {
-        super.mergeModifier(modifier)
+       super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._vertical_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._vertical_0_flag) {

@@ -33,6 +33,7 @@ import { Resource } from "global.resource"
 import { BadgeModifier } from "./../BadgeModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Resource_serializer } from "./../framework/resource"
+import { ModifierStateManager } from '../CommonModifier';
 export class ArkBadgePeer extends ArkCommonMethodPeer {
     attributeSet?: BadgeModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -123,7 +124,9 @@ export class ArkBadgeComponent extends ArkCommonMethodComponent implements Badge
         return this
     }
     public attributeModifier(value: AttributeModifier<BadgeAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookBadgeAttributeModifier(this, value);
+          ModifierStateManager.INSTANCE.scope(() => {
+            hookBadgeAttributeModifier(this, value); 
+          })
         return this
     }
     public applyAttributesFinish(): void {

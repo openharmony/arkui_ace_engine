@@ -35,6 +35,7 @@ import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { TabsModifier } from "./../TabsModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { KInt32ArrayPtr } from "@koalaui/interop"
+import { ModifierStateManager } from '../CommonModifier';
 export interface TabContentTransitionProxy {
     from: int32
     to: int32
@@ -1119,7 +1120,9 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements TabsAt
         return this
     }
     public attributeModifier(value: AttributeModifier<TabsAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookTabsAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookTabsAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

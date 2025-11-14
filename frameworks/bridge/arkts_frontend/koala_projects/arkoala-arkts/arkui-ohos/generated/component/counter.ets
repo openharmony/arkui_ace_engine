@@ -30,6 +30,7 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { CounterModifier } from "./../CounterModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ModifierStateManager } from '../CommonModifier';
 export class ArkCounterPeer extends ArkCommonMethodPeer {
     attributeSet?: CounterModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -188,7 +189,9 @@ export class ArkCounterComponent extends ArkCommonMethodComponent implements Cou
         return this
     }
     public attributeModifier(value: AttributeModifier<CounterAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookCounterAttributeModifier(this, value);
+          ModifierStateManager.INSTANCE.scope(() => {
+            hookCounterAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

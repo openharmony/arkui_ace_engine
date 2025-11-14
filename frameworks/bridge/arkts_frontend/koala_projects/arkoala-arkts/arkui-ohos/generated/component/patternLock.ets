@@ -35,6 +35,7 @@ import { LengthMetrics } from "arkui.Graphics"
 import { PatternLockModifier } from "./../PatternLockModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { LengthMetrics_serializer } from "./../Graphics"
+import { ModifierStateManager } from '../CommonModifier';
 export class PatternLockControllerInternal {
     public static fromPtr(ptr: KPointer): PatternLockController {
         return new PatternLockController(ptr)
@@ -605,7 +606,9 @@ export class ArkPatternLockComponent extends ArkCommonMethodComponent implements
         return this
     }
     public attributeModifier(value: AttributeModifier<PatternLockAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookPatternLockAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookPatternLockAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

@@ -33,6 +33,7 @@ import { default as Want } from "@ohos.app.ability.Want"
 import { FormComponentModifier } from "./../FormComponentModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Want_serializer } from "./../framework/ohos.app.ability.Want"
+import { ModifierStateManager } from '../CommonModifier';
 export class ArkFormComponentPeer extends ArkCommonMethodPeer {
     attributeSet?: FormComponentModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -426,7 +427,9 @@ export class ArkFormComponentComponent extends ArkCommonMethodComponent implemen
         return this
     }
     public attributeModifier(value: AttributeModifier<FormComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookFormComponentAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookFormComponentAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

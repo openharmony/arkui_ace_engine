@@ -29,6 +29,7 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { RootSceneModifier } from "./../RootSceneModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ModifierStateManager } from '../CommonModifier';
 export class ArkRootScenePeer extends ArkCommonMethodPeer {
     attributeSet?: RootSceneModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -85,7 +86,9 @@ export class ArkRootSceneComponent extends ArkCommonMethodComponent implements R
         return this
     }
     public attributeModifier(value: AttributeModifier<RootSceneAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookRootSceneAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookRootSceneAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

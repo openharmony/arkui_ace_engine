@@ -912,7 +912,8 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         }
     }
     mergeModifier(modifier: ListModifier): void {
-        super.mergeModifier(modifier)
+       super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._alignListItem_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._alignListItem_0_flag) {

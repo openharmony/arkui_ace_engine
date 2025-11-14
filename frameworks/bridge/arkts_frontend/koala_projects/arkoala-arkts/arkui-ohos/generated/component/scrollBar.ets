@@ -31,6 +31,7 @@ import { Scroller, Scroller_serializer } from "./scroll"
 import { BarState } from "./enums"
 import { ScrollBarModifier } from "./../ScrollBarModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ModifierStateManager } from '../CommonModifier';
 export class ArkScrollBarPeer extends ArkCommonMethodPeer {
     attributeSet?: ScrollBarModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -123,7 +124,9 @@ export class ArkScrollBarComponent extends ArkCommonMethodComponent implements S
         return this
     }
     public attributeModifier(value: AttributeModifier<ScrollBarAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookScrollBarAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookScrollBarAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

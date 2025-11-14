@@ -34,6 +34,7 @@ import { Scene } from "graphics3d.Scene"
 import { Component3DModifier } from "./../Component3DModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Scene_serializer } from "./../framework/Scene"
+import { ModifierStateManager } from '../CommonModifier';
 export class ArkComponent3DPeer extends ArkCommonMethodPeer {
     attributeSet?: Component3DModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -358,7 +359,9 @@ export class ArkComponent3DComponent extends ArkCommonMethodComponent implements
         return this
     }
     public attributeModifier(value: AttributeModifier<Component3DAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookComponent3DAttributeModifier(this, value);
+          ModifierStateManager.INSTANCE.scope(() => {
+             hookComponent3DAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

@@ -29,6 +29,7 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { EffectComponentModifier } from "./../EffectComponentModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ModifierStateManager } from '../CommonModifier';
 export class ArkEffectComponentPeer extends ArkCommonMethodPeer {
     attributeSet?: EffectComponentModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -79,7 +80,9 @@ export class ArkEffectComponentComponent extends ArkCommonMethodComponent implem
         return this
     }
     public attributeModifier(value: AttributeModifier<EffectComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookEffectComponentAttributeModifier(this, value);
+         ModifierStateManager.INSTANCE.scope(() => {
+           hookEffectComponentAttributeModifier(this, value);  
+        })
         return this
     }
     public applyAttributesFinish(): void {

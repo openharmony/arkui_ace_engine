@@ -30,6 +30,7 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { PluginComponentModifier } from "./../PluginComponentModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ModifierStateManager } from '../CommonModifier';
 export class ArkPluginComponentPeer extends ArkCommonMethodPeer {
     attributeSet?: PluginComponentModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -152,7 +153,9 @@ export class ArkPluginComponentComponent extends ArkCommonMethodComponent implem
         return this
     }
     public attributeModifier(value: AttributeModifier<PluginComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookPluginComponentAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookPluginComponentAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

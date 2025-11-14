@@ -35,6 +35,7 @@ import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { ButtonType } from "./button"
 import { SaveButtonModifier } from "./../SaveButtonModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ModifierStateManager } from '../CommonModifier';
 export class ArkSaveButtonPeer extends ArkSecurityComponentMethodPeer {
     attributeSet?: SaveButtonModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -334,7 +335,9 @@ export class ArkSaveButtonComponent extends ArkSecurityComponentMethodComponent 
         return this
     }
     public attributeModifier(value: AttributeModifier<SaveButtonAttribute> | AttributeModifier<SecurityComponentMethod> | undefined): this {
-        hookSaveButtonAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookSaveButtonAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

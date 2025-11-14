@@ -142,7 +142,8 @@ export class StepperModifier extends CommonMethodModifier implements StepperAttr
         }
     }
     mergeModifier(modifier: StepperModifier): void {
-        super.mergeModifier(modifier)
+       super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._onFinish_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._onFinish_0_flag) {

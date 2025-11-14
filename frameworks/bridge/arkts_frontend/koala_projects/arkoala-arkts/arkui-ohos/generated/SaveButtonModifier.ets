@@ -166,7 +166,8 @@ export class SaveButtonModifier extends SecurityComponentMethodModifier implemen
         }
     }
     mergeModifier(modifier: SaveButtonModifier): void {
-        super.mergeModifier(modifier)
+       super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._onClick_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._onClick_0_flag) {

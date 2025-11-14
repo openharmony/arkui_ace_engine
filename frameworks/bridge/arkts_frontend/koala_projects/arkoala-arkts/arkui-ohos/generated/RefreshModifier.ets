@@ -162,7 +162,8 @@ export class RefreshModifier extends CommonMethodModifier implements RefreshAttr
         }
     }
     mergeModifier(modifier: RefreshModifier): void {
-        super.mergeModifier(modifier)
+       super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._onStateChange_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._onStateChange_0_flag) {

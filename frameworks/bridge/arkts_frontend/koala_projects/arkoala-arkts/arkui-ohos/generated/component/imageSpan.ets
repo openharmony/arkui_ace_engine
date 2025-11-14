@@ -39,6 +39,7 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { ImageSpanModifier } from "./../ImageSpanModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ModifierStateManager } from '../CommonModifier';
 export class ArkImageSpanPeer extends ArkBaseSpanPeer {
     attributeSet?: ImageSpanModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -291,7 +292,9 @@ export class ArkImageSpanComponent extends ArkBaseSpanComponent implements Image
         return this
     }
     public attributeModifier(value: AttributeModifier<ImageSpanAttribute> | AttributeModifier<BaseSpan> | AttributeModifier<CommonMethod> | undefined): this {
-        hookImageSpanAttributeModifier(this, value);
+         ModifierStateManager.INSTANCE.scope(() => {
+            hookImageSpanAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

@@ -35,6 +35,7 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { GaugeModifier } from "./../GaugeModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ModifierStateManager } from '../CommonModifier';
 export class ArkGaugePeer extends ArkCommonMethodPeer {
     attributeSet?: GaugeModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -432,7 +433,9 @@ export class ArkGaugeComponent extends ArkCommonMethodComponent implements Gauge
         return this
     }
     public attributeModifier(value: AttributeModifier<GaugeAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookGaugeAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookGaugeAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

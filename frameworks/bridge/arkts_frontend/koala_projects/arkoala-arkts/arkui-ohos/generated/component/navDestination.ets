@@ -49,6 +49,7 @@ import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { default as curves } from "@ohos.curves"
 import { NavDestinationModifier } from "./../NavDestinationModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ModifierStateManager } from '../CommonModifier';
 export interface NavDestinationContext {
     pathInfo: NavPathInfo
     pathStack: NavPathStack
@@ -1251,7 +1252,9 @@ export class ArkNavDestinationComponent extends ArkCommonMethodComponent impleme
         return this
     }
     public attributeModifier(value: AttributeModifier<NavDestinationAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookNavDestinationAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookNavDestinationAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

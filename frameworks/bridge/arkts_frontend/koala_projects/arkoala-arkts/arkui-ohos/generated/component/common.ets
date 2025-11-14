@@ -81,6 +81,7 @@ import { unifiedDataChannel_UnifiedData_serializer, unifiedDataChannel_Summary_s
 // instructive change start
 import { _animateTo, _animationStart, _animationStop } from "arkui/base/ArkAnimation"
 import { AnimationExtender } from '#generated';
+import { ModifierStateManager } from '../CommonModifier';
 // instructive change end
 export interface BaseEvent {
     target: EventTarget
@@ -10509,7 +10510,9 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         return this
     }
     public attributeModifier(value: AttributeModifier<CommonMethod> | undefined): this {
-        hookCommonMethodAttributeModifier(this, value);
+          ModifierStateManager.INSTANCE.scope(() => {
+            hookCommonMethodAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
@@ -10616,7 +10619,9 @@ export class ArkCommonShapeMethodComponent extends ArkCommonMethodComponent impl
         return this
     }
     public attributeModifier(value: AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        hookCommonShapeMethodAttributeModifier(this, value);
+          ModifierStateManager.INSTANCE.scope(() => {
+            hookCommonShapeMethodAttributeModifier(this, value); 
+        })
         return this
     }
     public applyAttributesFinish(): void {
@@ -10765,7 +10770,9 @@ export class ArkScrollableCommonMethodComponent extends ArkCommonMethodComponent
         return this
     }
     public attributeModifier(value: AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        hookScrollableCommonMethodAttributeModifier(this, value);
+          ModifierStateManager.INSTANCE.scope(() => {
+            hookScrollableCommonMethodAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

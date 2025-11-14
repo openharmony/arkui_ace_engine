@@ -146,7 +146,8 @@ export class ProgressModifier extends CommonMethodModifier implements ProgressAt
         }
     }
     mergeModifier(modifier: ProgressModifier): void {
-        super.mergeModifier(modifier)
+       super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._value_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._value_0_flag) {

@@ -31,6 +31,7 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { WindowSceneModifier } from "./../WindowSceneModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ModifierStateManager } from '../CommonModifier';
 export class ArkWindowScenePeer extends ArkCommonMethodPeer {
     attributeSet?: WindowSceneModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -116,7 +117,9 @@ export class ArkWindowSceneComponent extends ArkCommonMethodComponent implements
         return this
     }
     public attributeModifier(value: AttributeModifier<WindowSceneAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookWindowSceneAttributeModifier(this, value);
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookWindowSceneAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

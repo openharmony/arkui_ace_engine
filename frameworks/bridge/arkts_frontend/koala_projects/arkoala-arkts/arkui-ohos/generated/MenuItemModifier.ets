@@ -186,7 +186,8 @@ export class MenuItemModifier extends CommonMethodModifier implements MenuItemAt
         }
     }
     mergeModifier(modifier: MenuItemModifier): void {
-        super.mergeModifier(modifier)
+       super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._selected_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._selected_0_flag) {

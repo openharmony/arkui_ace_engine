@@ -122,7 +122,8 @@ export class RatingModifier extends CommonMethodModifier implements RatingAttrib
         }
     }
     mergeModifier(modifier: RatingModifier): void {
-        super.mergeModifier(modifier)
+       super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._stars_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._stars_0_flag) {

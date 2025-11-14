@@ -29,8 +29,10 @@ import { CopyOptions, Color, BarState, ResponseType } from "./component/enums"
 import { Resource } from "global.resource"
 import { EnterKeyType, SubmitEvent } from "./component/textInput"
 import { CustomBuilder } from "./component/builder"
+import { ModifierState } from "./CommonModifier"
 export class RichEditorModifier extends CommonMethodModifier implements RichEditorAttribute,AttributeModifier<RichEditorAttribute> {
     _instanceId: number = -1;
+     _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -112,6 +114,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
     _placeholder_0_0value?: ResourceStr | undefined
     _placeholder_0_1value?: PlaceholderStyle | undefined
     applyModifierPatch(node: PeerNode): void {
+        this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkRichEditorPeer;
         if (this._onReady_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -710,7 +713,8 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
         }
     }
     mergeModifier(modifier: RichEditorModifier): void {
-        super.mergeModifier(modifier)
+       super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._onReady_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._onReady_0_flag) {

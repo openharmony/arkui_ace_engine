@@ -30,6 +30,7 @@ import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { hookIndicatorComponentAttributeModifier, AttributeModifier, AttributeUpdater } from "#handwritten"
 import { IndicatorComponentModifier } from "./../IndicatorComponentModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ModifierStateManager } from '../CommonModifier';
 export class IndicatorComponentControllerInternal {
     public static fromPtr(ptr: KPointer): IndicatorComponentController {
         return new IndicatorComponentController(ptr)
@@ -322,7 +323,9 @@ export class ArkIndicatorComponentComponent extends ArkCommonMethodComponent imp
         return this
     }
     public attributeModifier(value: AttributeModifier<IndicatorComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        hookIndicatorComponentAttributeModifier(this, value);
+         ModifierStateManager.INSTANCE.scope(() => {
+            hookIndicatorComponentAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {

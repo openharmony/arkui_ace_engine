@@ -182,7 +182,8 @@ export class GridItemModifier extends CommonMethodModifier implements GridItemAt
         }
     }
     mergeModifier(modifier: GridItemModifier): void {
-        super.mergeModifier(modifier)
+       super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._rowStart_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._rowStart_0_flag) {

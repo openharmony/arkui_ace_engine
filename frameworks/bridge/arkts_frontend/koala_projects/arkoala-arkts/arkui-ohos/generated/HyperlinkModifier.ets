@@ -64,7 +64,8 @@ export class HyperlinkModifier extends CommonMethodModifier implements Hyperlink
         }
     }
     mergeModifier(modifier: HyperlinkModifier): void {
-        super.mergeModifier(modifier)
+       super.mergeModifier(modifier)
+        this._state = modifier._state;
         if (modifier._color_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._color_0_flag) {

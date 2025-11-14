@@ -33,6 +33,7 @@ import { ColumnSplitModifier } from "./../ColumnSplitModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ModifierStateManager } from '../CommonModifier'
 import { Resource_serializer } from "./../framework/resource"
+import { ModifierStateManager } from '../CommonModifier';
 export class ArkColumnSplitPeer extends ArkCommonMethodPeer {
     attributeSet?: ColumnSplitModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
