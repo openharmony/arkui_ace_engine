@@ -76,7 +76,7 @@ ace_unittest("capi_all_accessors_test") {
     "letter_spacing_style_accessor_test.cpp",
     "line_height_style_accessor_test.cpp",
     "linear_gradient_accessor_test.cpp",
-    #"list_scroller_accessor_test.cpp",
+    "list_scroller_accessor_test.cpp",
     # "loadingprogress_content_modifier_accessor_test.cpp",
     "long_press_gesture_event_accessor_test.cpp",
     "long_press_recognizer_accessor_test.cpp",

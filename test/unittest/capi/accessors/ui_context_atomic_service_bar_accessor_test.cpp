@@ -27,7 +27,6 @@ class UIContextAtomicServiceBarAccessorTest :
     &GENERATED_ArkUIAccessors::getUIContextAtomicServiceBarAccessor> {
 };
 
-
 /**
  * @tc.name: getBarRect
  * @tc.desc: Test GetAppBarRect
@@ -36,6 +35,14 @@ class UIContextAtomicServiceBarAccessorTest :
 HWTEST_F(UIContextAtomicServiceBarAccessorTest, getBarRect, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getBarRect, nullptr);
+
+    // Convert frame check
+    Ark_Frame src = {100.0, 200.0, 300.0, 400.0};
+    RectF result = Converter::Convert<RectF>(src);
+    ASSERT_EQ(result.GetX(), 100.0);
+    ASSERT_EQ(result.GetY(), 200.0);
+    ASSERT_EQ(result.Width(), 300.0);
+    ASSERT_EQ(result.Height(), 400.0);
 
     auto appBar = AceType::MakeRefPtr<AppBarView>();
     auto container = Container::Current();
