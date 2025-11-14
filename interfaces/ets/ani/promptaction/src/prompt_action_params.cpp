@@ -1064,13 +1064,11 @@ bool GetLengthParam(ani_env *env, ani_object object, const char *name, OHOS::Ace
     return GetLengthParam(env, resultRef, result);
 }
 
-bool GetColorParam(ani_env* env, ani_object object, PromptActionColor& result)
+bool GetColorParam(ani_env* env, ani_object object, std::string& result)
 {
-    int32_t resultInt;
-    if (!GetEnumInt(env, object, "arkui.component.enums.Color", resultInt)) {
+    if (!GetEnumString(env, object, "arkui.component.enums.Color", result)) {
         return false;
     }
-    result = static_cast<PromptActionColor>(resultInt);
     return true;
 }
 
@@ -1081,16 +1079,14 @@ bool GetResourceColorParam(ani_env *env, ani_ref ref, OHOS::Ace::Color& result)
     }
     std::string resultStr;
     if (GetStringParam(env, ref, resultStr)) {
-        OHOS::Ace::Color::ParseColorString(resultStr, result);
-        return true;
+        if (OHOS::Ace::Color::ParseColorString(resultStr, result)) {
+            return true;
+        }
     }
 
-    PromptActionColor resultColor;
     ani_object object = static_cast<ani_object>(ref);
-    if (GetColorParam(env, object, resultColor)) {
-        auto iter = colorMap.find(resultColor);
-        if (iter != colorMap.end()) {
-            result = OHOS::Ace::Color(iter->second);
+    if (GetColorParam(env, object, resultStr)) {
+        if (OHOS::Ace::Color::ParseColorString(resultStr, result)) {
             return true;
         }
     }
