@@ -1721,7 +1721,7 @@ bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t c
             }
             return true;
         }
-#ifdef FORM_SUPPORTED
+#ifndef FORM_SUPPORTED
         if (!delegate->GetAssetContent(FORM_ES_MODULE_CARD_PATH, content)) {
             return false;
         }
@@ -1753,7 +1753,7 @@ bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t c
             std::shared_ptr<AbilityBase::Extractor> extractor =
                 AbilityBase::ExtractorUtil::GetExtractor(hapFilePath, flag, false);
             if (extractor == nullptr) {
-                TAG_LOGE(AceLogTag::ACE_FORM, "hapFilePath %{private}s GetExtractor failed", hapFilePath.c_str());
+                TAG_LOGE(AceLogTag::ACE_FORM, "GetExtractor failed");
                 return false;
             }
             auto data = extractor->GetSafeData(FORM_ES_MODULE_CARD_PATH);
