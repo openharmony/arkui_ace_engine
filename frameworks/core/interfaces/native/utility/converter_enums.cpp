@@ -1880,6 +1880,20 @@ void AssignCast(std::optional<HitTestMode>& dst, const Ark_HitTestMode& src)
 }
 
 template<>
+void AssignCast(std::optional<ResponseRegionSupportedTool>& dst, const Ark_ResponseRegionSupportedTool& src)
+{
+    switch (src) {
+        case ARK_RESPONSE_REGION_SUPPORTED_TOOL_ALL: dst = ResponseRegionSupportedTool::ALL; break;
+        case ARK_RESPONSE_REGION_SUPPORTED_TOOL_FINGER: dst = ResponseRegionSupportedTool::FINGER; break;
+        case ARK_RESPONSE_REGION_SUPPORTED_TOOL_PEN: dst = ResponseRegionSupportedTool::PEN; break;
+        case ARK_RESPONSE_REGION_SUPPORTED_TOOL_MOUSE: dst = ResponseRegionSupportedTool::MOUSE; break;
+        default: {
+            LOGE("Unexpected enum value in Ark_ResponseRegionSupportedTool: %{public}d", src);
+        }
+    }
+}
+
+template<>
 void AssignCast(std::optional<DragBehavior>& dst, const Ark_DragBehavior& src)
 {
     switch (src) {

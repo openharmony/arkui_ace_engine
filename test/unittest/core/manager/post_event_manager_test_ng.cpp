@@ -92,7 +92,7 @@ HWTEST_F(PostEventManagerTestNg, PostEventManagerTest001, TestSize.Level1)
     responseRegion.emplace_back(responseRect);
     gestureEventHub->SetResponseRegion(responseRegion);
     auto paintRect = root_->renderContext_->GetPaintRectWithoutTransform();
-    root_->GetResponseRegionList(paintRect, 1);
+    root_->GetResponseRegionList(paintRect, 1, 0);
     EXPECT_FALSE(gestureEventHub->GetResponseRegion().empty());
 
     /**
@@ -160,7 +160,7 @@ HWTEST_F(PostEventManagerTestNg, PostEventManagerTest002, TestSize.Level1)
     responseRegion.emplace_back(responseRect);
     gestureEventHub->SetResponseRegion(responseRegion);
     auto paintRect = root_->renderContext_->GetPaintRectWithoutTransform();
-    root_->GetResponseRegionList(paintRect, 1);
+    root_->GetResponseRegionList(paintRect, 1, 0);
     EXPECT_FALSE(gestureEventHub->GetResponseRegion().empty());
 
     /**
@@ -235,7 +235,7 @@ HWTEST_F(PostEventManagerTestNg, PostEventManagerTest004, TestSize.Level1)
     responseRegion.emplace_back(responseRect);
     gestureEventHub->SetResponseRegion(responseRegion);
     auto paintRect = root_->renderContext_->GetPaintRectWithoutTransform();
-    root_->GetResponseRegionList(paintRect, 1);
+    root_->GetResponseRegionList(paintRect, 1, 0);
     EXPECT_FALSE(gestureEventHub->GetResponseRegion().empty());
 
     /**
@@ -269,7 +269,7 @@ HWTEST_F(PostEventManagerTestNg, PostEventManagerTest005, TestSize.Level1)
     responseRegion.emplace_back(responseRect);
     gestureEventHub->SetResponseRegion(responseRegion);
     auto paintRect = root_->renderContext_->GetPaintRectWithoutTransform();
-    root_->GetResponseRegionList(paintRect, 1);
+    root_->GetResponseRegionList(paintRect, 1, 0);
     EXPECT_FALSE(gestureEventHub->GetResponseRegion().empty());
 
     /**

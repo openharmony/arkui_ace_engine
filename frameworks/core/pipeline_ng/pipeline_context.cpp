@@ -992,6 +992,7 @@ void PipelineContext::FlushMouseEventVoluntarily()
     touchRestrict.sourceType = event.sourceType;
     touchRestrict.hitTestType = SourceType::MOUSE;
     touchRestrict.inputEventType = InputEventType::MOUSE_BUTTON;
+    touchRestrict.sourceTool = event.sourceTool;
 
     eventManager_->MouseTest(scaleEvent, rootNode_, touchRestrict);
     eventManager_->DispatchMouseEventNG(scaleEvent);
@@ -3198,6 +3199,7 @@ void PipelineContext::OnTouchEvent(
         touchRestrict.sourceType = point.sourceType;
         touchRestrict.touchEvent = point;
         touchRestrict.inputEventType = InputEventType::TOUCH_SCREEN;
+        touchRestrict.sourceTool = point.sourceTool;
 
         eventManager_->TouchTest(scalePoint, node, touchRestrict, GetPluginEventOffset(), viewScale_, isSubPipe);
         if (!touchRestrict.childTouchTestList.empty()) {
@@ -4096,6 +4098,7 @@ void PipelineContext::OnAccessibilityHoverEvent(const TouchEvent& point, const R
     }
     TouchRestrict touchRestrict { TouchRestrict::NONE };
     touchRestrict.sourceType = scaleEvent.sourceType;
+    touchRestrict.sourceTool = scaleEvent.sourceTool;
     // use mouse to collect accessibility hover target
     touchRestrict.hitTestType = SourceType::MOUSE;
     touchRestrict.inputEventType = InputEventType::TOUCH_SCREEN;
@@ -4122,6 +4125,7 @@ void PipelineContext::OnPenHoverEvent(const TouchEvent& point, const RefPtr<NG::
     TouchRestrict touchRestrict { TouchRestrict::NONE };
     touchRestrict.sourceType = scaleEvent.sourceType;
     touchRestrict.touchEvent.sourceTool = scaleEvent.sourceTool;
+    touchRestrict.sourceTool = scaleEvent.sourceTool;
     touchRestrict.touchEvent.type = scaleEvent.type;
     touchRestrict.touchEvent.force = scaleEvent.force;
 
@@ -4265,6 +4269,7 @@ void PipelineContext::CompensateMouseMoveEvent(const MouseEvent& event, const Re
         if (static_cast<uint64_t>(mouseEvent.time.time_since_epoch().count()) > iter->second) {
             TouchRestrict touchRestrict { TouchRestrict::NONE };
             touchRestrict.sourceType = event.sourceType;
+            touchRestrict.sourceTool = event.sourceTool;
             touchRestrict.hitTestType = SourceType::MOUSE;
             touchRestrict.inputEventType = InputEventType::MOUSE_BUTTON;
             eventManager_->MouseTest(mouseEvent, node, touchRestrict);
@@ -4305,6 +4310,7 @@ bool PipelineContext::CompensateMouseMoveEventFromUnhandledEvents(
     lastMoveEvent.history.swap(history);
     TouchRestrict touchRestrict { TouchRestrict::NONE };
     touchRestrict.sourceType = event.sourceType;
+    touchRestrict.sourceTool = event.sourceTool;
     touchRestrict.hitTestType = SourceType::MOUSE;
     touchRestrict.inputEventType = InputEventType::MOUSE_BUTTON;
     eventManager_->MouseTest(lastMoveEvent, node, touchRestrict);
@@ -4325,6 +4331,7 @@ void PipelineContext::DispatchMouseEvent(const MouseEvent& event, const RefPtr<F
 
     TouchRestrict touchRestrict { TouchRestrict::NONE };
     touchRestrict.sourceType = event.sourceType;
+    touchRestrict.sourceTool = event.sourceTool;
     touchRestrict.hitTestType = SourceType::MOUSE;
     touchRestrict.mouseAction = event.action;
     touchRestrict.inputEventType = InputEventType::MOUSE_BUTTON;
@@ -4359,6 +4366,7 @@ void PipelineContext::FlushMouseEvent()
     auto scaleEvent = event.CreateScaleEvent(viewScale_);
     TouchRestrict touchRestrict { TouchRestrict::NONE };
     touchRestrict.sourceType = event.sourceType;
+    touchRestrict.sourceTool = event.sourceTool;
     touchRestrict.hitTestType = SourceType::MOUSE;
     touchRestrict.inputEventType = InputEventType::MOUSE_BUTTON;
     OnFlushMouseEvent(touchRestrict);
@@ -4611,6 +4619,7 @@ void PipelineContext::DispatchAxisEventToDragDropManager(const AxisEvent& event,
         isBeforeDragHandleAxis_ = true;
         TouchRestrict touchRestrict { TouchRestrict::NONE };
         touchRestrict.sourceType = event.sourceType;
+        touchRestrict.sourceTool = event.sourceTool;
         touchRestrict.hitTestType = SourceType::TOUCH;
         touchRestrict.inputEventType = InputEventType::AXIS;
         // If received rotate event, no need to touchtest.
@@ -4653,6 +4662,7 @@ void PipelineContext::OnMouseMoveEventForAxisEvent(const MouseEvent& event, cons
     auto scaleEvent = event.CreateScaleEvent(viewScale_);
     TouchRestrict touchRestrict { TouchRestrict::NONE };
     touchRestrict.sourceType = event.sourceType;
+    touchRestrict.sourceTool = event.sourceTool;
     touchRestrict.hitTestType = SourceType::MOUSE;
     touchRestrict.inputEventType = InputEventType::MOUSE_BUTTON;
     eventManager_->MouseTest(scaleEvent, node, touchRestrict);
@@ -6658,6 +6668,7 @@ bool PipelineContext::OnTouchTargetHitTest(const TouchEvent& point, bool isSubPi
     if (scalePoint.type == TouchType::DOWN) {
         TouchRestrict touchRestrict { TouchRestrict::NONE };
         touchRestrict.sourceType = point.sourceType;
+        touchRestrict.sourceTool = point.sourceTool;
         touchRestrict.touchEvent = point;
         bool isTouchTarget = eventManager_->TouchTargetHitTest(
             scalePoint, rootNode_, touchRestrict, GetPluginEventOffset(), viewScale_, isSubPipe, target);
@@ -6854,6 +6865,7 @@ void PipelineContext::FlushMouseEventForHover()
         "the mock mouse event action: %{public}d x: %{public}f y: %{public}f", event.action, event.x, event.y);
     TouchRestrict touchRestrict { TouchRestrict::NONE };
     touchRestrict.sourceType = event.sourceType;
+    touchRestrict.sourceTool = event.sourceTool;
     touchRestrict.hitTestType = SourceType::MOUSE;
     touchRestrict.inputEventType = InputEventType::MOUSE_BUTTON;
     if (container->IsSceneBoardWindow()) {

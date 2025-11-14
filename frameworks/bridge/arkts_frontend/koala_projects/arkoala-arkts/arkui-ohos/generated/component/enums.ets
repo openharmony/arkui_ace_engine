@@ -507,6 +507,12 @@ export enum CopyOptions {
     LOCAL_DEVICE = 2,
     LocalDevice = 2
 }
+export enum ResponseRegionSupportedTool {
+    ALL = 0,
+    FINGER = 1,
+    PEN = 2,
+    MOUSE = 3
+}
 export enum HitTestMode {
     DEFAULT = 0,
     Default = 0,

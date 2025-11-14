@@ -62,7 +62,8 @@ const RefPtr<TouchEventImpl>& StateStyleManager::GetPressedListener()
         if ((type == TouchType::MOVE) &&
             (stateStyleMgr->IsCurrentStateOn(UI_STATE_PRESSED) || stateStyleMgr->IsPressedStatePending())) {
             int32_t sourceType = static_cast<int32_t>(touches.front().GetSourceDevice());
-            if (stateStyleMgr->IsOutOfPressedRegion(sourceType, lastPoint.GetGlobalLocation())) {
+            int32_t sourceTool = static_cast<int32_t>(touches.front().GetSourceTool());
+            if (stateStyleMgr->IsOutOfPressedRegion(sourceType, sourceTool, lastPoint.GetGlobalLocation())) {
                 auto frameNode = stateStyleMgr->GetFrameNode();
                 CHECK_NULL_VOID(frameNode);
                 TAG_LOGI(AceLogTag::ACE_STATE_STYLE, "Move out of node pressed region: %{public}s",
@@ -461,11 +462,11 @@ void StateStyleManager::Transform(PointF& localPointF, const WeakPtr<FrameNode>&
     localPointF.SetY(temp.GetY());
 }
 
-bool StateStyleManager::IsOutOfPressedRegion(int32_t sourceType, const Offset& location) const
+bool StateStyleManager::IsOutOfPressedRegion(int32_t sourceType, int32_t sourceTool, const Offset& location) const
 {
     auto node = GetFrameNode();
     CHECK_NULL_RETURN(node, false);
-    if (IsOutOfPressedRegionWithoutClip(node, sourceType, location)) {
+    if (IsOutOfPressedRegionWithoutClip(node, sourceType, sourceTool, location)) {
         return true;
     }
     auto parent = node->GetAncestorNodeOfFrame(true);
@@ -477,7 +478,7 @@ bool StateStyleManager::IsOutOfPressedRegion(int32_t sourceType, const Offset& l
         }
         // If the parent node has a "clip" attribute, the press region should be re-evaluated.
         auto clip = renderContext->GetClipEdge().value_or(false);
-        if (clip && IsOutOfPressedRegionWithoutClip(parent, sourceType, location)) {
+        if (clip && IsOutOfPressedRegionWithoutClip(parent, sourceType, sourceTool, location)) {
             return true;
         }
         parent = parent->GetAncestorNodeOfFrame(true);
@@ -485,7 +486,7 @@ bool StateStyleManager::IsOutOfPressedRegion(int32_t sourceType, const Offset& l
     return false;
 }
 
-bool StateStyleManager::IsOutOfPressedRegionWithoutClip(RefPtr<FrameNode> node, int32_t sourceType,
+bool StateStyleManager::IsOutOfPressedRegionWithoutClip(RefPtr<FrameNode> node, int32_t sourceType, int32_t sourceTool,
     const Offset& location) const
 {
     CHECK_NULL_RETURN(node, false);
@@ -493,7 +494,7 @@ bool StateStyleManager::IsOutOfPressedRegionWithoutClip(RefPtr<FrameNode> node, 
     CHECK_NULL_RETURN(renderContext, false);
 
     auto paintRect = renderContext->GetPaintRectWithoutTransform();
-    auto responseRegionList = node->GetResponseRegionList(paintRect, sourceType);
+    auto responseRegionList = node->GetResponseRegionList(paintRect, sourceType, sourceTool);
     Offset offset = { paintRect.GetOffset().GetX(), paintRect.GetOffset().GetY() };
     PointF current = { location.GetX(), location.GetY() };
     NGGestureRecognizer::Transform(current, node);

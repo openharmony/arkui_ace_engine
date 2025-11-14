@@ -1583,6 +1583,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                     const Opt_Union_Array_Rectangle_Rectangle* value)
     {
     }
+    void SetResponseRegionListImpl(Ark_NativePointer node,
+                                   const Opt_Array_ResponseRegion* value)
+    {
+    }
     void SetSizeImpl(Ark_NativePointer node,
                      const Opt_SizeOptions* value)
     {
@@ -8358,6 +8362,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetHeightImpl,
             CommonMethodModifier::SetResponseRegionImpl,
             CommonMethodModifier::SetMouseResponseRegionImpl,
+            CommonMethodModifier::SetResponseRegionListImpl,
             CommonMethodModifier::SetSizeImpl,
             CommonMethodModifier::SetConstraintSizeImpl,
             CommonMethodModifier::SetHitTestBehaviorImpl,

@@ -23,6 +23,7 @@
 
 #include "base/geometry/dimension_offset.h"
 #include "base/geometry/dimension_rect.h"
+#include "base/geometry/calc_dimension_rect.h"
 #include "base/memory/type_info_base.h"
 #include "base/utils/type_definition.h"
 #include "core/components_ng/event/event_constants.h"

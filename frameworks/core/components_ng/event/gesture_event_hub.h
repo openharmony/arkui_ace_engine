@@ -279,6 +279,10 @@ public:
         const PointF& globalPoint, const PointF& localPoint, TouchTestResult& result, int32_t touchId);
     const std::vector<DimensionRect>& GetResponseRegion() const;
     const std::vector<DimensionRect>& GetMouseResponseRegion() const;
+    std::vector<CalcDimensionRect> GetFingerResponseRegionFromMap();
+    const std::unordered_map<ResponseRegionSupportedTool, std::vector<CalcDimensionRect>>& GetResponseRegionMap();
+    void SetResponseRegionMap(
+        const std::unordered_map<ResponseRegionSupportedTool, std::vector<CalcDimensionRect>>& responseRegionMap);
     void SetResponseRegionFunc(const OnReponseRegionFunc& func);
     void SetResponseRegion(const std::vector<DimensionRect>& responseRegion);
     void SetOnTouchTestFunc(OnChildTouchTestFunc&& callback);
@@ -493,6 +497,7 @@ private:
     bool isResponseRegion_ = false;
     std::vector<DimensionRect> responseRegion_;
     std::vector<DimensionRect> mouseResponseRegion_;
+    std::unordered_map<ResponseRegionSupportedTool, std::vector<CalcDimensionRect>> responseRegionMap_;
     bool touchable_ = true;
     RefPtr<PixelMap> pixelMap_;
 

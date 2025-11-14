@@ -1112,7 +1112,7 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest034, TestSize.Lev
     auto gestureEventHub = host->GetEventHub<EventHub>()->GetOrCreateGestureEventHub();
     gestureEventHub->SetResponseRegion(responseRegion);
     auto paintRect = host->renderContext_->GetPaintRectWithoutTransform();
-    auto responseRegionList = host->GetResponseRegionList(paintRect, 2);
+    auto responseRegionList = host->GetResponseRegionList(paintRect, 2, 0);
     EXPECT_FALSE(responseRegionList.size() != 1);
 
     auto rect = responseRegionList.back();
@@ -1144,7 +1144,7 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest035, TestSize.Lev
     auto gestureEventHub = host->GetEventHub<EventHub>()->GetOrCreateGestureEventHub();
     gestureEventHub->SetResponseRegion(responseRegion);
 
-    auto responseRegionList = host->GetResponseRegionList(paintRect, 2);
+    auto responseRegionList = host->GetResponseRegionList(paintRect, 2, 0);
     EXPECT_FALSE(responseRegionList.size() != 1);
 
     auto rect = responseRegionList.back();
@@ -1273,7 +1273,7 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest042, TestSize.Lev
         V2::BUTTON_ETS_TAG, 1, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     host->isActive_ = true;
     auto paintRect = host->GetTransformRectRelativeToWindow();
-    auto responseRegionList = host->GetResponseRegionList(paintRect, 2);
+    auto responseRegionList = host->GetResponseRegionList(paintRect, 2, 0);
     EXPECT_FALSE(responseRegionList.size() != 1);
 
     auto rect = responseRegionList.back();

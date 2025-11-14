@@ -1399,6 +1399,13 @@ public:
         ViewAbstract::SetOnDrop(std::move(onDrop));
     }
 
+    void SetResponseRegionList(
+        const std::unordered_map<ResponseRegionSupportedTool, std::vector<CalcDimensionRect>>& responseRegionMap)
+        override
+    {
+        ViewAbstract::SetResponseRegionList(responseRegionMap);
+    }
+
     void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) override
     {
         ViewAbstract::SetResponseRegion(responseRegion);

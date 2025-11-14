@@ -400,6 +400,9 @@ public:
 #endif
 
     // interact
+    virtual void SetResponseRegionList(
+        const std::unordered_map<NG::ResponseRegionSupportedTool, std::vector<CalcDimensionRect>>&
+            responseRegionMap) = 0;
     virtual void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) = 0;
     virtual void SetMouseResponseRegion(const std::vector<DimensionRect>& responseRegion) {}
     virtual void SetEnabled(bool enabled) = 0;

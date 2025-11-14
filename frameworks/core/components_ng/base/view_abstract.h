@@ -26,6 +26,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/vector.h"
+#include "base/geometry/response_region.h"
 #include "base/memory/referenced.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/grid_layout_info.h"
@@ -428,6 +429,9 @@ public:
     static void SetOnVisibleChange(std::function<void(bool, double)> &&onVisibleChange,
         const std::vector<double> &ratioList, bool measureFromViewport = false);
     static void SetOnSizeChanged(std::function<void(const RectF &oldRect, const RectF &rect)> &&onSizeChanged);
+    static void SetResponseRegionList(
+        const std::unordered_map<ResponseRegionSupportedTool, std::vector<CalcDimensionRect>>& responseRegionMap,
+        bool isResponseRegionSupported = false);
     static void SetResponseRegion(const std::vector<DimensionRect> &responseRegion);
     static void SetMouseResponseRegion(const std::vector<DimensionRect> &mouseResponseRegion);
     static void SetTouchable(bool touchable);
@@ -833,6 +837,9 @@ public:
     static void SetFgDynamicBrightness(FrameNode* frameNode, const BrightnessOption& brightnessOption);
     static void SetDragPreviewOptions(FrameNode* frameNode, const DragPreviewOption& previewOption);
     static void SetDragPreview(FrameNode* frameNode, const DragDropInfo& dragDropInfo);
+    static void SetResponseRegionList(FrameNode* frameNode,
+        const std::unordered_map<ResponseRegionSupportedTool, std::vector<CalcDimensionRect>>& responseRegionMap);
+    static void SetResponseRegionList(FrameNode* frameNode, const std::vector<ResponseRegion>& responseRegionMap);
     static void SetResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& responseRegion);
     static void SetMouseResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& mouseResponseRegion);
     static void SetSharedTransition(
@@ -910,6 +917,8 @@ public:
     static bool GetFocusable(FrameNode* frameNode);
     static bool GetTabStop(FrameNode* frameNode);
     static bool GetDefaultFocus(FrameNode* frameNode);
+    static std::unordered_map<ResponseRegionSupportedTool, std::vector<CalcDimensionRect>> GetResponseRegionList(
+        FrameNode* frameNode);
     static std::vector<DimensionRect> GetResponseRegion(FrameNode* frameNode);
     static NG::OverlayOptions GetOverlay(FrameNode* frameNode);
     static void SetNeedFocus(FrameNode* frameNode, bool value);

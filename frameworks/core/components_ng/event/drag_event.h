@@ -297,6 +297,8 @@ public:
 
     inline static void FlushSyncGeometryNodeTasks();
 
+    void SetResponseRegionMapFull();
+    void ResetResponseRegionMap();
     void SetResponseRegionFull();
     void ResetResponseRegion();
     static void ResetDragStatus();
@@ -372,6 +374,7 @@ private:
     bool isNotInPreviewState_ = false;
     std::vector<GatherNodeChildInfo> gatherNodeChildrenInfo_;
     std::vector<DimensionRect> responseRegion_;
+    std::unordered_map<ResponseRegionSupportedTool, std::vector<CalcDimensionRect>> responseRegionMap_;
     bool isSelectedItemNode_ = false;
     bool isOnBeforeLiftingAnimation_ = false;
     bool isDragPrepareFinish_ = false;

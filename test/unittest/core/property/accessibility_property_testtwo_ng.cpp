@@ -170,7 +170,7 @@ HWTEST_F(AccessibilityPropertyTestTwoNg, AccessibilityPropertyTestTwoNg004, Test
     auto gestureEventHub = host->GetEventHub<EventHub>()->GetOrCreateGestureEventHub();
     gestureEventHub->SetResponseRegion(responseRegion);
     auto paintRect = host->renderContext_->GetPaintRectWithoutTransform();
-    auto responseRegionList = host->GetResponseRegionList(paintRect, 2);
+    auto responseRegionList = host->GetResponseRegionList(paintRect, 2, 0);
     EXPECT_FALSE(responseRegionList.size() != 1);
 
     auto rect = responseRegionList.back();

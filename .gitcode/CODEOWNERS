@@ -293,6 +293,7 @@ frameworks/base/geometry/dimension.cpp @arkui_framework_resource
 frameworks/base/geometry/dimension.h @arkui_framework_resource
 frameworks/base/geometry/dimension_offset.h @arkui_framework_resource
 frameworks/base/geometry/dimension_rect.h @arkui_framework_resource
+frameworks/base/geometry/calc_dimension_rect.h @arkui_framework_resource
 frameworks/base/geometry/dimension_size.h @arkui_framework_resource
 frameworks/base/geometry/least_square_impl.cpp @arkui_framework_resource
 frameworks/base/geometry/least_square_impl.h @arkui_framework_resource

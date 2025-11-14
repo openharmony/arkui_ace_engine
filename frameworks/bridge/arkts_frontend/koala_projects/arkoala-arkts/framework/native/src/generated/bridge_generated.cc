@@ -1871,6 +1871,26 @@ void impl_CommonMethod_setMouseResponseRegion(Ark_NativePointer thisPtr, KSerial
         GetNodeModifiers()->getCommonMethodModifier()->setMouseResponseRegion(self, static_cast<Opt_Union_Array_Rectangle_Rectangle*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(CommonMethod_setMouseResponseRegion, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_CommonMethod_setResponseRegionList(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Array_ResponseRegion valueValueTempTmpBuf = {};
+        valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            const Ark_Int32 valueValueTempTmpBuf_Length = thisDeserializer.readInt32();
+            Array_ResponseRegion valueValueTempTmpBuf_ = {};
+            thisDeserializer.resizeArray<std::decay<decltype(valueValueTempTmpBuf_)>::type,
+        std::decay<decltype(*valueValueTempTmpBuf_.array)>::type>(&valueValueTempTmpBuf_, valueValueTempTmpBuf_Length);
+            for (int valueValueTempTmpBuf_BufCounterI = 0; valueValueTempTmpBuf_BufCounterI < valueValueTempTmpBuf_Length; valueValueTempTmpBuf_BufCounterI++) {
+                valueValueTempTmpBuf_.array[valueValueTempTmpBuf_BufCounterI] = ResponseRegion_serializer::read(thisDeserializer);
+            }
+            valueValueTempTmpBuf.value = valueValueTempTmpBuf_;
+        }
+        Opt_Array_ResponseRegion valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getCommonMethodModifier()->setResponseRegionList(self, static_cast<Opt_Array_ResponseRegion*>(&valueValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(CommonMethod_setResponseRegionList, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_CommonMethod_setSize(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);

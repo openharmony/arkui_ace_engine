@@ -23,7 +23,7 @@ import { CallbackTransformer } from "./../CallbackTransformer"
 import { extractors, DrawModifier, GestureModifier, WrappedBuilder, hookId, hookStateStyleImpl, hookGesture, hookPriorityGesture, hookParallelGesture, hookGestureModifier, hookCustomPropertyImpl, hookDrawModifier, CustomStyles, ContentModifier, hookCommonMethodAttributeModifier, AttributeModifier, AttributeUpdater, hookCommonShapeMethodAttributeModifier, hookScrollableCommonMethodAttributeModifier, hookAllowDrop, hookDragPreviewOptions, hookDragEventStartDataLoading, hookDragEventGetSummary } from "#handwritten"
 import { default as unifiedDataChannel } from "@ohos.data.unifiedDataChannel"
 import { DrawContext, LengthMetrics, ColorMetrics } from "arkui.Graphics"
-import { KeyType, KeySource, Color, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, InteractionHand, GradientDirection, SharedTransitionEffectType, ArrowPointPosition, Placement, LineCapStyle, LineJoinStyle, BarState, CrownSensitivity, EdgeEffect, TextDecorationType, TextDecorationStyle, PlayMode, VerticalAlign, HorizontalAlign, FontWeight, FontStyle, TouchType, CrownAction, ClickEffectLevel, NestedScrollMode, PixelRoundCalcPolicy, ScrollSource, IlluminatedType, AccessibilityHoverType, AxisAction, AxisType, AxisModel, MouseButton, MouseAction } from "./enums"
+import { KeyType, KeySource, Color, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, InteractionHand, GradientDirection, SharedTransitionEffectType, ArrowPointPosition, Placement, LineCapStyle, LineJoinStyle, BarState, CrownSensitivity, EdgeEffect, TextDecorationType, TextDecorationStyle, PlayMode, VerticalAlign, HorizontalAlign, FontWeight, FontStyle, TouchType, CrownAction, ClickEffectLevel, NestedScrollMode, ResponseRegionSupportedTool, PixelRoundCalcPolicy, ScrollSource, IlluminatedType, AccessibilityHoverType, AxisAction, AxisType, AxisModel, MouseButton, MouseAction } from "./enums"
 import { IntentionCode } from "@ohos.multimodalInput.intentionCode"
 import { Position_serializer, DirectionalEdgesT_serializer, Position, DirectionalEdgesT, ConstraintSizeOptions_serializer, ConstraintSizeOptions, ResourceColor, SizeOptions, SizeOptions_serializer, ChainWeightOptions_serializer, Padding_serializer, LocalizedPadding_serializer, BorderOptions_serializer, EdgeStyles_serializer, EdgeWidths_serializer, LocalizedEdgeWidths_serializer, EdgeColors_serializer, LocalizedEdgeColors_serializer, BorderRadiuses_serializer, LocalizedBorderRadiuses_serializer, OutlineOptions_serializer, EdgeOutlineStyles_serializer, EdgeOutlineWidths_serializer, OutlineRadiuses_serializer, Edges_serializer, LocalizedEdges_serializer, LocalizedPosition_serializer, AccessibilityOptions_serializer, Length, ChainWeightOptions, Padding, LocalizedPadding, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, VoidCallback, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, Bias, Font, Bias_serializer, Area_serializer, Font_serializer } from "./units"
 import { Resource_serializer } from "./../framework/resource"
@@ -2417,6 +2417,22 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._CommonMethod_setMouseResponseRegion(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setResponseRegionListAttribute(value: Array<ResponseRegion> | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeInt32((valueTmpValue.length).toInt())
+            for (let valueTmpValueCounterI = 0; valueTmpValueCounterI < valueTmpValue.length; valueTmpValueCounterI++) {
+                const valueTmpValueTmpElement : ResponseRegion = valueTmpValue[valueTmpValueCounterI]
+                ResponseRegion_serializer.write(thisSerializer, valueTmpValueTmpElement)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setResponseRegionList(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setSizeAttribute(value: SizeOptions | undefined): void {
@@ -7139,6 +7155,13 @@ export interface BackgroundImageOptions {
 export interface BackgroundOptions {
     align?: Alignment;
 }
+export interface ResponseRegion {
+    tool?: ResponseRegionSupportedTool;
+    x?: LengthMetrics;
+    y?: LengthMetrics;
+    width?: LengthMetrics | string;
+    height?: LengthMetrics | string;
+}
 // instructive change start
 export type CustomProperty = undefined | null | Object | Record<string, CustomProperty> | Array<CustomProperty>;
 // instructive change end
@@ -7157,6 +7180,9 @@ export interface CommonMethod {
     }
     mouseResponseRegion(value: Array<Rectangle> | Rectangle | undefined): this {
         throw new Error("Unimplemented method mouseResponseRegion")
+    }
+    responseRegionList(value: Array<ResponseRegion> | undefined): this {
+        throw new Error("Unimplemented method responseRegionList")
     }
     size(value: SizeOptions | undefined): this {
         throw new Error("Unimplemented method size")
@@ -8949,6 +8975,14 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         if (this.checkPriority("mouseResponseRegion")) {
             const value_casted = value as (Array<Rectangle> | Rectangle | undefined)
             this.getPeer()?.setMouseResponseRegionAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public responseRegionList(value: Array<ResponseRegion> | undefined): this {
+        if (this.checkPriority("responseRegionList")) {
+            const value_casted = value as (Array<ResponseRegion> | undefined)
+            this.getPeer()?.setResponseRegionListAttribute(value_casted)
             return this
         }
         return this
@@ -15295,6 +15329,120 @@ export class PopupMaskType_serializer {
         }
         const colorTmpResult : ResourceColor = (colorTmpBuf as Color | number | string | Resource)
         let value : PopupMaskType = ({color: colorTmpResult} as PopupMaskType)
+        return value
+    }
+}
+export class ResponseRegion_serializer {
+    public static write(buffer: SerializerBase, value: ResponseRegion): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForTool  = value.tool
+        if (valueHolderForTool !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForToolTmpValue  = (valueHolderForTool as ResponseRegionSupportedTool)
+            valueSerializer.writeInt32(valueHolderForToolTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForX  = value.x
+        if (valueHolderForX !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForXTmpValue  = valueHolderForX!
+            LengthMetrics_serializer.write(valueSerializer, valueHolderForXTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForY  = value.y
+        if (valueHolderForY !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForYTmpValue  = valueHolderForY!
+            LengthMetrics_serializer.write(valueSerializer, valueHolderForYTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForWidth  = value.width
+        if (valueHolderForWidth !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForWidthTmpValue  = valueHolderForWidth!
+            if (valueHolderForWidthTmpValue instanceof LengthMetrics) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForWidthTmpValueForIdx0  = valueHolderForWidthTmpValue as LengthMetrics
+                LengthMetrics_serializer.write(valueSerializer, valueHolderForWidthTmpValueForIdx0)
+            } else if (valueHolderForWidthTmpValue instanceof string) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderForWidthTmpValueForIdx1  = valueHolderForWidthTmpValue as string
+                valueSerializer.writeString(valueHolderForWidthTmpValueForIdx1)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForHeight  = value.height
+        if (valueHolderForHeight !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForHeightTmpValue  = valueHolderForHeight!
+            if (valueHolderForHeightTmpValue instanceof LengthMetrics) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForHeightTmpValueForIdx0  = valueHolderForHeightTmpValue as LengthMetrics
+                LengthMetrics_serializer.write(valueSerializer, valueHolderForHeightTmpValueForIdx0)
+            } else if (valueHolderForHeightTmpValue instanceof string) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderForHeightTmpValueForIdx1  = valueHolderForHeightTmpValue as string
+                valueSerializer.writeString(valueHolderForHeightTmpValueForIdx1)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): ResponseRegion {
+        let valueDeserializer : DeserializerBase = buffer
+        const toolTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let toolTmpBuf : ResponseRegionSupportedTool | undefined = undefined
+        if ((toolTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            toolTmpBuf = ResponseRegionSupportedTool.fromValue(valueDeserializer.readInt32())
+        }
+        const toolTmpResult : ResponseRegionSupportedTool | undefined = toolTmpBuf
+        const xTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let xTmpBuf : LengthMetrics | undefined = undefined
+        if ((xTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            xTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
+        }
+        const xTmpResult : LengthMetrics | undefined = xTmpBuf
+        const yTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let yTmpBuf : LengthMetrics | undefined = undefined
+        if ((yTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            yTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
+        }
+        const yTmpResult : LengthMetrics | undefined = yTmpBuf
+        const widthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let widthTmpBuf : LengthMetrics | string | undefined = undefined
+        if ((widthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const widthTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let widthTmpBuf_ : LengthMetrics | string | undefined
+            if (widthTmpBuf_UnionSelector == (0).toChar()) {
+                widthTmpBuf_ = LengthMetrics_serializer.read(valueDeserializer)
+            } else if (widthTmpBuf_UnionSelector == (1).toChar()) {
+                widthTmpBuf_ = (valueDeserializer.readString() as string)
+            } else {
+                throw new Error("One of the branches for widthTmpBuf_ has to be chosen through deserialisation.")
+            }
+            widthTmpBuf = (widthTmpBuf_ as LengthMetrics | string)
+        }
+        const widthTmpResult : LengthMetrics | string | undefined = widthTmpBuf
+        const heightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let heightTmpBuf : LengthMetrics | string | undefined = undefined
+        if ((heightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const heightTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let heightTmpBuf_ : LengthMetrics | string | undefined
+            if (heightTmpBuf_UnionSelector == (0).toChar()) {
+                heightTmpBuf_ = LengthMetrics_serializer.read(valueDeserializer)
+            } else if (heightTmpBuf_UnionSelector == (1).toChar()) {
+                heightTmpBuf_ = (valueDeserializer.readString() as string)
+            } else {
+                throw new Error("One of the branches for heightTmpBuf_ has to be chosen through deserialisation.")
+            }
+            heightTmpBuf = (heightTmpBuf_ as LengthMetrics | string)
+        }
+        const heightTmpResult : LengthMetrics | string | undefined = heightTmpBuf
+        let value : ResponseRegion = ({tool: toolTmpResult, x: xTmpResult, y: yTmpResult, width: widthTmpResult, height: heightTmpResult} as ResponseRegion)
         return value
     }
 }

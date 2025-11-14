@@ -207,6 +207,7 @@ bool PostEventManager::PostDownEvent(const RefPtr<NG::UINode>& targetNode, const
     touchRestrict.touchEvent = touchEvent;
     touchRestrict.inputEventType = InputEventType::TOUCH_SCREEN;
     touchRestrict.touchTestType = EventTreeType::POST_EVENT;
+    touchRestrict.sourceTool = touchEvent.sourceTool;
     auto result = eventManager->PostEventTouchTest(scalePoint, targetNode, touchRestrict);
     if (!result) {
         TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "PostDownEvent id: %{public}d touch test result is empty", touchEvent.id);

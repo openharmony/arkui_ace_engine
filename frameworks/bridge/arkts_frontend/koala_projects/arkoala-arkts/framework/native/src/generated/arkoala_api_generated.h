@@ -1021,6 +1021,8 @@ typedef struct Array_ResourceColor Array_ResourceColor;
 typedef struct Opt_Array_ResourceColor Opt_Array_ResourceColor;
 typedef struct Array_ResourceStr Array_ResourceStr;
 typedef struct Opt_Array_ResourceStr Opt_Array_ResourceStr;
+typedef struct Array_ResponseRegion Array_ResponseRegion;
+typedef struct Opt_Array_ResponseRegion Opt_Array_ResponseRegion;
 typedef struct Array_RichEditorImageSpanResult Array_RichEditorImageSpanResult;
 typedef struct Opt_Array_RichEditorImageSpanResult Opt_Array_RichEditorImageSpanResult;
 typedef struct Array_RichEditorParagraphResult Array_RichEditorParagraphResult;
@@ -2757,6 +2759,8 @@ typedef struct Ark_RatingOptions Ark_RatingOptions;
 typedef struct Opt_RatingOptions Opt_RatingOptions;
 typedef struct Ark_RefreshOptions Ark_RefreshOptions;
 typedef struct Opt_RefreshOptions Opt_RefreshOptions;
+typedef struct Ark_ResponseRegion Ark_ResponseRegion;
+typedef struct Opt_ResponseRegion Opt_ResponseRegion;
 typedef struct RestrictedWorkerPeer RestrictedWorkerPeer;
 typedef struct RestrictedWorkerPeer* Ark_RestrictedWorker;
 typedef struct Opt_RestrictedWorker Opt_RestrictedWorker;
@@ -5898,6 +5902,16 @@ typedef struct Opt_RepeatMode {
     Ark_Tag tag;
     Ark_RepeatMode value;
 } Opt_RepeatMode;
+typedef enum Ark_ResponseRegionSupportedTool {
+    ARK_RESPONSE_REGION_SUPPORTED_TOOL_ALL = 0,
+    ARK_RESPONSE_REGION_SUPPORTED_TOOL_FINGER = 1,
+    ARK_RESPONSE_REGION_SUPPORTED_TOOL_PEN = 2,
+    ARK_RESPONSE_REGION_SUPPORTED_TOOL_MOUSE = 3,
+} Ark_ResponseRegionSupportedTool;
+typedef struct Opt_ResponseRegionSupportedTool {
+    Ark_Tag tag;
+    Ark_ResponseRegionSupportedTool value;
+} Opt_ResponseRegionSupportedTool;
 typedef enum Ark_ResponseType {
     ARK_RESPONSE_TYPE_RIGHT_CLICK = 0,
     ARK_RESPONSE_TYPE_LONG_PRESS = 1,
@@ -9345,6 +9359,15 @@ typedef struct Opt_Array_ResourceStr {
     Ark_Tag tag;
     Array_ResourceStr value;
 } Opt_Array_ResourceStr;
+typedef struct Array_ResponseRegion {
+    /* kind: ContainerType */
+    Ark_ResponseRegion* array;
+    Ark_Int32 length;
+} Array_ResponseRegion;
+typedef struct Opt_Array_ResponseRegion {
+    Ark_Tag tag;
+    Array_ResponseRegion value;
+} Opt_Array_ResponseRegion;
 typedef struct Array_RichEditorImageSpanResult {
     /* kind: ContainerType */
     Ark_RichEditorImageSpanResult* array;
@@ -17744,6 +17767,18 @@ typedef struct Opt_RefreshOptions {
     Ark_Tag tag;
     Ark_RefreshOptions value;
 } Opt_RefreshOptions;
+typedef struct Ark_ResponseRegion {
+    /* kind: Interface */
+    Opt_ResponseRegionSupportedTool tool;
+    Opt_LengthMetrics x;
+    Opt_LengthMetrics y;
+    Opt_Union_LengthMetrics_String width;
+    Opt_Union_LengthMetrics_String height;
+} Ark_ResponseRegion;
+typedef struct Opt_ResponseRegion {
+    Ark_Tag tag;
+    Ark_ResponseRegion value;
+} Opt_ResponseRegion;
 typedef struct Opt_RestrictedWorker {
     Ark_Tag tag;
     Ark_RestrictedWorker value;
@@ -21705,6 +21740,8 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                               const Opt_Union_Array_Rectangle_Rectangle* value);
     void (*setMouseResponseRegion)(Ark_NativePointer node,
                                    const Opt_Union_Array_Rectangle_Rectangle* value);
+    void (*setResponseRegionList)(Ark_NativePointer node,
+                                  const Opt_Array_ResponseRegion* value);
     void (*setSize)(Ark_NativePointer node,
                     const Opt_SizeOptions* value);
     void (*setConstraintSize)(Ark_NativePointer node,

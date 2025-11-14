@@ -1035,7 +1035,11 @@ public:
         return nullptr;
     }
 
-    virtual std::vector<RectF> GetResponseRegionList(const RectF& rect, int32_t sourceType);
+    void ParseRegionAndAdd(const CalcDimensionRect& region, const ScaleProperty& scaleProperty,
+        const RectF& rect, std::vector<RectF>& responseRegionResult);
+    virtual std::vector<RectF> GetResponseRegionList(const RectF& rect, int32_t sourceType, int32_t sourceTool);
+
+    virtual std::vector<RectF> GetResponseRegionListRaw(const RectF& rect, int32_t sourceType);
 
     bool IsFirstBuilding() const
     {
@@ -1079,7 +1083,7 @@ public:
         int64_t elementId, int32_t direction, int64_t offset, Accessibility::AccessibilityElementInfo& output);
     bool TransferExecuteAction(
         int64_t elementId, const std::map<std::string, std::string>& actionArguments, int32_t action, int64_t offset);
-    std::vector<RectF> GetResponseRegionListForRecognizer(int32_t sourceType);
+    std::vector<RectF> GetResponseRegionListForRecognizer(int32_t sourceType, int32_t sourceTool);
 
     std::vector<RectF> GetResponseRegionListForTouch(const RectF& windowRect);
 

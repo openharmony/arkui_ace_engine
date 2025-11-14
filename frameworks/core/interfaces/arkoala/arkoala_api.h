@@ -2706,6 +2706,9 @@ struct ArkUICommonModifier {
     void (*resetTabIndex)(ArkUINodeHandle node);
     void (*setObscured)(ArkUINodeHandle node, const ArkUI_Int32* reasons, ArkUI_Int32 length);
     void (*resetObscured)(ArkUINodeHandle node);
+    void (*setResponseRegionList)(ArkUINodeHandle node, const ArkUI_Int32* tools,
+        const ArkUI_Float32* values, ArkUI_CharPtr* calcValues, const ArkUI_Int32* units, ArkUI_Int32 length);
+    void (*resetResponseRegionList)(ArkUINodeHandle node);
     void (*setResponseRegion)(
         ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 length);
     void (*resetResponseRegion)(ArkUINodeHandle node);

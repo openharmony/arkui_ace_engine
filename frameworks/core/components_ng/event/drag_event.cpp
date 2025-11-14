@@ -260,6 +260,7 @@ void DragEventActuator::GetThumbnailPixelMap(bool isSync)
         DragAnimationHelper::PlayGatherAnimationBeforeLifting(actuator);
         DragAnimationHelper::PlayNodeAnimationBeforeLifting(frameNode);
         SetResponseRegionFull();
+        SetResponseRegionMapFull();
     } else {
         isOnBeforeLiftingAnimation_ = false;
     }
@@ -322,6 +323,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         auto dragDropManager = pipeline->GetDragDropManager();
         CHECK_NULL_VOID(dragDropManager);
         actuator->ResetResponseRegion();
+        actuator->ResetResponseRegionMap();
         actuator->SetGatherNode(nullptr);
         actuator->isDragPrepareFinish_ = false;
         if (dragDropManager->IsDragging() || dragDropManager->IsMSDPDragging()) {
@@ -512,6 +514,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
             return;
         }
         actuator->ResetResponseRegion();
+        actuator->ResetResponseRegionMap();
         actuator->SetGatherNode(nullptr);
         bool isMenuShow = DragDropGlobalController::GetInstance().IsMenuShowing();
         if (!isMenuShow && actuator->GetIsNotInPreviewState() && !gestureHub->GetTextDraggable()) {
@@ -575,6 +578,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         auto gestureHub = actuator->gestureEventHub_.Upgrade();
         CHECK_NULL_VOID(gestureHub);
         actuator->ResetResponseRegion();
+        actuator->ResetResponseRegionMap();
         auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipelineContext);
         auto manager = pipelineContext->GetOverlayManager();
@@ -2100,6 +2104,7 @@ void DragEventActuator::HandleTouchUpEvent()
 {
     DragAnimationHelper::PlayNodeResetAnimation(Claim(this));
     ResetResponseRegion();
+    ResetResponseRegionMap();
     auto gestureHub = gestureEventHub_.Upgrade();
     CHECK_NULL_VOID(gestureHub);
     auto frameNode = gestureHub->GetFrameNode();
@@ -2118,6 +2123,7 @@ void DragEventActuator::HandleTouchUpEvent()
 void DragEventActuator::HandleTouchCancelEvent()
 {
     ResetResponseRegion();
+    ResetResponseRegionMap();
 }
 
 void DragEventActuator::HandleTouchMoveEvent()
@@ -2133,6 +2139,7 @@ void DragEventActuator::HandleTouchMoveEvent()
         manager->RemoveGatherNode();
         isOnBeforeLiftingAnimation_ = false;
         ResetResponseRegion();
+        ResetResponseRegionMap();
     }
 }
 
@@ -2263,6 +2270,48 @@ std::optional<BorderRadiusProperty> DragEventActuator::GetDefaultBorderRadius()
     BorderRadiusProperty borderRadius;
     borderRadius.SetRadius(PREVIEW_BORDER_RADIUS);
     return borderRadius;
+}
+
+void DragEventActuator::SetResponseRegionMapFull()
+{
+    if (!IsNeedGather() || isResponseRegionFull_) {
+        return;
+    }
+    auto gestureHub = gestureEventHub_.Upgrade();
+    CHECK_NULL_VOID(gestureHub);
+    
+    responseRegionMap_ = gestureHub->GetResponseRegionMap();
+
+    auto frameNode = gestureHub->GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto paintRect = renderContext->GetPaintRectWithoutTransform();
+    
+    auto pipelineContext = frameNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipelineContext);
+    auto rootNode = pipelineContext->GetRootElement();
+    CHECK_NULL_VOID(rootNode);
+    auto geometryNode = rootNode->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto width = geometryNode->GetFrameSize().Width();
+    auto height = geometryNode->GetFrameSize().Height();
+    auto toolType = ResponseRegionSupportedTool::ALL;
+    CalcDimensionRect hotZoneRegion { Dimension(width), Dimension(height), Dimension(-paintRect.GetOffset().GetX()),
+        Dimension(-paintRect.GetOffset().GetY()) };
+    std::vector<CalcDimensionRect> regionVec { hotZoneRegion };
+    gestureHub->SetResponseRegionMap({{toolType, regionVec}});
+    isResponseRegionFull_ = true;
+}
+
+void DragEventActuator::ResetResponseRegionMap()
+{
+    if (isResponseRegionFull_) {
+        auto gestureHub = gestureEventHub_.Upgrade();
+        CHECK_NULL_VOID(gestureHub);
+        gestureHub->SetResponseRegionMap(responseRegionMap_);
+        isResponseRegionFull_ = false;
+    }
 }
 
 void DragEventActuator::SetResponseRegionFull()

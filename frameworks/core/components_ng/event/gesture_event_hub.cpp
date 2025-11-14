@@ -1066,6 +1066,33 @@ void GestureEventHub::SetFrameNodeCommonOnTouchEvent(TouchEventFunc&& touchEvent
     touchEventActuator_->SetFrameNodeCommonOnTouchEvent(std::move(touchEventFunc));
 }
 
+void GestureEventHub::SetResponseRegionMap(
+    const std::unordered_map<ResponseRegionSupportedTool, std::vector<CalcDimensionRect>>& responseRegionMap)
+{
+    responseRegionMap_ = responseRegionMap;
+    if (!responseRegionMap_.empty()) {
+        isResponseRegion_ = true;
+    }
+}
+
+const std::unordered_map<ResponseRegionSupportedTool, std::vector<CalcDimensionRect>>&
+GestureEventHub::GetResponseRegionMap()
+{
+    return responseRegionMap_;
+}
+
+std::vector<CalcDimensionRect> GestureEventHub::GetFingerResponseRegionFromMap()
+{
+    std::vector<CalcDimensionRect> rectResult;
+    auto responseRegionMap = GetResponseRegionMap();
+    for (const auto& [tool, rectVec] : responseRegionMap) {
+        if (tool == ResponseRegionSupportedTool::FINGER || tool == ResponseRegionSupportedTool::ALL) {
+            rectResult.insert(rectResult.end(), rectVec.begin(), rectVec.end());
+        }
+    }
+    return rectResult;
+}
+
 void GestureEventHub::SetResponseRegion(const std::vector<DimensionRect>& responseRegion)
 {
     responseRegion_ = responseRegion;
