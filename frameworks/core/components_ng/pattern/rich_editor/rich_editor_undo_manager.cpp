@@ -409,7 +409,7 @@ void RichEditorUndoManager::ProcessStringUndo(const UndoRedoRecord& record)
 }
 
 void RichEditorUndoManager::ProcessStringRedo(const UndoRedoRecord& record)
-{   
+{
     auto pattern = pattern_.Upgrade();
     CHECK_NULL_VOID(pattern);
     auto host = pattern->GetHost();
