@@ -84,7 +84,7 @@ static ani_status GetBoolFromAni(ani_env* env, ani_object obj, const char* name,
         return status;
     }
     ani_boolean boolValue = ANI_FALSE;
-    status = env->Object_CallMethodByName_Boolean(static_cast<ani_object>(refValue), "toBoolean", nullptr, &boolValue);
+    status = env->Object_CallMethodByName_Boolean(static_cast<ani_object>(refValue), "toBoolean", ":z", &boolValue);
     if (status != ANI_OK) {
         TAG_LOGE(AceLogTag::ACE_OVERLAY, "Unbox bool value failed");
         return status;
@@ -181,7 +181,7 @@ static ani_object GetOverlayManagerOptions(ani_env* env)
         return options;
     }
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", ":", &ctor)) {
         TAG_LOGE(AceLogTag::ACE_OVERLAY, "Cannot find OverlayManagerOptionsInner ctor");
         return options;
     }
