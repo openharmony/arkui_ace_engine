@@ -272,7 +272,8 @@ ani_object GenEdgesGlobalized(ani_env* env, const NG::PaddingPropertyT<float>& e
     }
 
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "dddd:", &ctor)) {
+        TAG_LOGW(AceLogTag::ACE_LAYOUT, "Class_FindMethod failed in GenEdgesGlobalized.");
         return AniUtils::GetUndefined(env);
     }
 
