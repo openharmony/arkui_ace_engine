@@ -672,6 +672,7 @@ bool JSNavigationStack::GetNavDestinationNodeInUINode(
 
 int32_t JSNavigationStack::GetReplaceValue() const
 {
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, 0);
     if (dataSourceObj_->IsEmpty()) {
         return false;
     }
@@ -800,6 +801,7 @@ void JSNavigationStack::ParseJsObject(
 
 bool JSNavigationStack::GetAnimatedValue() const
 {
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, true);
     if (dataSourceObj_->IsEmpty()) {
         return true;
     }
@@ -826,6 +828,7 @@ void JSNavigationStack::UpdateAnimatedValue(bool animated)
 
 bool JSNavigationStack::GetDisableAnimation() const
 {
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, false);
     if (dataSourceObj_->IsEmpty()) {
         return false;
     }

@@ -1246,7 +1246,9 @@ void JSSwiper::SetCurve(const JSCallbackInfo& info)
         if (onCallBack->IsFunction()) {
             RefPtr<JsFunction> jsFuncCallBack =
                 AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onCallBack));
-            customCallBack = [func = std::move(jsFuncCallBack), id = Container::CurrentId()](float time) -> float {
+            customCallBack = [executionContext = info.GetExecutionContext(), func = std::move(jsFuncCallBack),
+                                 id = Container::CurrentId()](float time) -> float {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext, 1.0f);
                 ContainerScope scope(id);
                 JSRef<JSVal> params[1];
                 params[0] = JSRef<JSVal>::Make(ToJSValue(time));
