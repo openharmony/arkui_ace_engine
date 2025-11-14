@@ -1515,7 +1515,7 @@ export class UIContextImpl extends UIContext {
 
     public animateTo(param: AnimateParam, event: (() => void)): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_)
-        _animateTo(param, event);
+        AnimationExtender.AnimateToImmediatelyImpl(param, event, false)
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 
