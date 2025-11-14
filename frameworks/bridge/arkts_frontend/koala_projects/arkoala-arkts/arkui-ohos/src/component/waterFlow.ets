@@ -30,7 +30,7 @@ export interface SectionChangeInfo {
 }
 
 export class WaterFlowSections implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined;
+    public peer?: Finalizable | undefined = undefined;
     public sectionArray: Array<SectionOptions> = [];
     public changeArray: Array<SectionChangeInfo> = [];
 
