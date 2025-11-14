@@ -146,9 +146,6 @@ export class SerializerBase implements Disposable {
     private static poolTop = 0
 
     static hold(): SerializerBase {
-        if (SerializerBase.isMultithread) {
-            return new SerializerBase()
-        }
         if (SerializerBase.poolTop === SerializerBase.pool.length) {
             SerializerBase.pool.push(new SerializerBase())
         }
@@ -167,14 +164,6 @@ export class SerializerBase implements Disposable {
             current!.next = serializer
         }
     }
-    private static isMultithread: boolean = false
-    static setMultithreadMode(): void {
-        if (SerializerBase.isMultithread) {
-            return
-        }
-        SerializerBase.isMultithread = true
-        SerializerBase.pool = []
-    }
 
     constructor() {
         let length = 96
@@ -186,9 +175,6 @@ export class SerializerBase implements Disposable {
 
     public release() {
         this.releaseResources()
-        if (SerializerBase.isMultithread) {
-            return
-        }
         this._position = this._buffer
         if (this !== SerializerBase.pool[SerializerBase.poolTop - 1]) {
             throw new Error("Serializers should be release in LIFO order")
