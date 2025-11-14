@@ -1921,6 +1921,10 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _SelectAttribute_setMenuOutline(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _SelectAttribute_setShowInSubWindow(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _SelectAttribute_setShowDefaultSelectedIcon(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _SelectAttribute_setBackgroundColor(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _SelectAttribute_setMenuAlign(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
@@ -1991,7 +1995,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _SliderAttribute_setSelectedColor(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _SliderAttribute_setShowSteps(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _SliderAttribute_setShowSteps0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _SliderAttribute_setTrackThickness(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
@@ -2022,6 +2026,8 @@ export class ArkUIGeneratedNativeModule {
     native static _SliderAttribute_setDigitalCrownSensitivity(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _SliderAttribute_setEnableHapticFeedback(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _SliderAttribute_setShowSteps1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _SliderAttribute_setShowTips(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
@@ -5533,6 +5539,10 @@ export class ArkUIGeneratedNativeModule {
     native static _SearchController_setTextSelection(ptr: KPointer, selectionStart: KInt, selectionEnd: KInt, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Quick
     native static _SearchOps_registerSearchValueCallback(node: KPointer, value: KStringPtr, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
+    native static _SliderExtender_setPrefix(node: KPointer, prefixNode: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _SliderExtender_setSuffix(node: KPointer, suffixNode: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _SelectExtender_setDivider(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct

@@ -43,7 +43,7 @@ import { ProgressConfiguration } from "./progress"
 import { RadioConfiguration } from "./radio"
 import { RatingConfiguration } from "./rating"
 import { MenuItemConfiguration, MenuItemConfigurationInternal } from "./select"
-import { SliderConfiguration } from "./slider"
+import { SliderConfiguration, SliderPrefixOptions_serializer, SliderSuffixOptions_serializer, SliderPrefixOptions, SliderSuffixOptions } from "./slider"
 import { TextClockConfiguration } from "./textClock"
 import { TextTimerConfiguration } from "./textTimer"
 import { ToggleConfiguration } from "./toggle"
@@ -4367,6 +4367,46 @@ export class SelectExtender {
         const node_casted = node as (KPointer)
         const options_casted = options as (DividerOptions | undefined)
         SelectExtender.setDivider_serialize(node_casted, options_casted)
+        return
+    }
+}
+export class SliderExtender {
+    static setPrefix_serialize(node: KPointer, prefixNode: KPointer, options?: SliderPrefixOptions): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue  = options!
+            SliderPrefixOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SliderExtender_setPrefix(node, prefixNode, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static setSuffix_serialize(node: KPointer, suffixNode: KPointer, options?: SliderSuffixOptions): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue  = options!
+            SliderSuffixOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SliderExtender_setSuffix(node, suffixNode, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    public static setPrefix(node: KPointer, prefixNode: KPointer, options?: SliderPrefixOptions): void {
+        const node_casted = node as (KPointer)
+        const prefixNode_casted = prefixNode as (KPointer)
+        const options_casted = options as (SliderPrefixOptions | undefined)
+        SliderExtender.setPrefix_serialize(node_casted, prefixNode_casted, options_casted)
+        return
+    }
+    public static setSuffix(node: KPointer, suffixNode: KPointer, options?: SliderSuffixOptions): void {
+        const node_casted = node as (KPointer)
+        const suffixNode_casted = suffixNode as (KPointer)
+        const options_casted = options as (SliderSuffixOptions | undefined)
+        SliderExtender.setSuffix_serialize(node_casted, suffixNode_casted, options_casted)
         return
     }
 }

@@ -544,7 +544,26 @@ void SetMenuOutlineImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto optConvert = Converter::OptConvertPtr<MenuParam>(value);
+    if (!optConvert.has_value()) {
+        optConvert = NG::MenuParam();
+        SelectModelStatic::SetDefaultMenuParam(frameNode, optConvert.value());
+    }
+    optConvert->placement = Placement::BOTTOM_LEFT;
     SelectModelStatic::SetMenuOutline(frameNode, optConvert);
+}
+void SetShowInSubWindowImpl(Ark_NativePointer node, const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optConvert = Converter::OptConvertPtr<bool>(value);
+    SelectModelStatic::SetShowInSubWindow(frameNode, optConvert);
+}
+void SetShowDefaultSelectedIconImpl(Ark_NativePointer node, const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optConvert = Converter::OptConvertPtr<bool>(value);
+    SelectModelStatic::SetShowDefaultSelectedIcon(frameNode, optConvert);
 }
 void SetBackgroundColorImpl(Ark_NativePointer node,
                             const Opt_ResourceColor* value)
@@ -601,6 +620,8 @@ const GENERATED_ArkUISelectModifier* GetSelectModifier()
         SelectAttributeModifier::SetDividerStyleImpl,
         SelectAttributeModifier::SetAvoidanceImpl,
         SelectAttributeModifier::SetMenuOutlineImpl,
+        SelectAttributeModifier::SetShowInSubWindowImpl,
+        SelectAttributeModifier::SetShowDefaultSelectedIconImpl,
         SelectAttributeModifier::SetBackgroundColorImpl,
         SelectAttributeModifier::SetMenuAlignImpl,
     };

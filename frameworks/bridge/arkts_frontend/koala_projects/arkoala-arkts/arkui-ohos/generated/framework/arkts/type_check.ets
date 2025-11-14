@@ -121,7 +121,7 @@ import { ScrollBarDirection, ScrollBarOptions } from "./../../component/scrollBa
 import { SecurityComponentLayoutDirection } from "./../../component/securityComponent"
 import { SelectStatus, CheckboxGroupOptions, CheckboxGroupResult } from "./../../component/checkboxgroup"
 import { SideBarContainerType, SideBarPosition, ButtonIconOptions, ButtonStyle } from "./../../component/sidebar"
-import { SliderBlockType, SliderChangeMode, SliderInteraction, SliderStyle, SlideRange, SliderConfiguration, SliderTriggerChangeCallback, SliderBlockStyle, SliderOptions } from "./../../component/slider"
+import { SliderBlockType, SliderChangeMode, SliderInteraction, SliderStyle, SlideRange, SliderConfiguration, SliderTriggerChangeCallback, SliderShowStepOptions, SliderStepItemAccessibility, SliderBlockStyle, SliderOptions, SliderPrefixOptions, SliderCustomContentOptions, SliderSuffixOptions } from "./../../component/slider"
 import { SubMenuExpandingMode } from "./../../component/menu"
 import { SwiperAnimationEvent, SwiperAnimationMode, SwiperContentTransitionProxy, SwiperContentWillScrollResult, SwiperController, SwiperDisplayMode, SwiperNestedScrollMode, AutoPlayOptions, SwiperAutoFill, SwiperContentAnimatedTransition, ArrowStyle, DotIndicator, Indicator, DigitIndicator } from "./../../component/swiper"
 import { SymbolGlyphModifier } from "arkui.SymbolGlyphModifier"
@@ -2858,8 +2858,20 @@ export class TypeChecker {
     static isSliderOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean): boolean {
         return value instanceof SliderOptions
     }
+    static isSliderPrefixOptions(value: Object | string | number | undefined): boolean {
+        return value instanceof SliderPrefixOptions
+    }
+    static isSliderShowStepOptions(value: Object | string | number | undefined, arg0: boolean): boolean {
+        return value instanceof SliderShowStepOptions
+    }
+    static isSliderStepItemAccessibility(value: Object | string | number | undefined, arg0: boolean): boolean {
+        return value instanceof SliderStepItemAccessibility
+    }
     static isSliderStyle(value: Object | string | number | undefined): boolean {
         return value instanceof SliderStyle
+    }
+    static isSliderSuffixOptions(value: Object | string | number | undefined): boolean {
+        return value instanceof SliderSuffixOptions
     }
     static isSnapshotOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
         return value instanceof SnapshotOptions
