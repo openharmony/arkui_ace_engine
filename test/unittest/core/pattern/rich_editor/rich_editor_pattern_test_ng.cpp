@@ -285,6 +285,9 @@ HWTEST_F(RichEditorPatternTestNg, FixMoveDownChange001, TestSize.Level1)
  */
 HWTEST_F(RichEditorPatternTestNg, OnBackPressed001, TestSize.Level1)
 {
+    /**
+     * @tc.step: step1. Get frameNode and pattern
+     */
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
@@ -314,6 +317,9 @@ HWTEST_F(RichEditorPatternTestNg, OnBackPressed001, TestSize.Level1)
  */
 HWTEST_F(RichEditorPatternTestNg, AddUdmfData001, TestSize.Level1)
 {
+    /**
+     * @tc.step: step1. Get frameNode and pattern
+     */
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
