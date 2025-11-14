@@ -18,9 +18,9 @@ import common from '@ohos.app.ability.common';
 import { ErrorCallback, Callback, BusinessError} from '@ohos.base';
 import AtomicServiceOptions from '@ohos.app.ability.AtomicServiceOptions';
 import commonEventManager from '@ohos.commonEventManager';
-import { State } from '@ohos.arkui.stateManagement'
+import { State, Memo } from '@ohos.arkui.stateManagement';
 import { $$ } from '@kit.ArkUI';
-import { ReceiveCallback, RecordData, Column, Text, Row, UIExtensionComponent, Component, BuilderParam, TerminationInfo, Builder, FlexAlign, ClickEvent, AlertDialogParamWithConfirm, memo, CustomBuilder, ContentCoverOptions } from '@ohos.arkui.component'
+import { ReceiveCallback, RecordData, Column, Text, Row, UIExtensionComponent, Component, BuilderParam, TerminationInfo, Builder, FlexAlign, ClickEvent, AlertDialogParamWithConfirm, CustomBuilder, ContentCoverOptions } from '@ohos.arkui.component';
 import bundleManager from "@ohos.bundle.bundleManager"
 
 const errCodeAbnormal: number = 100014;
@@ -177,7 +177,7 @@ export struct FullScreenLaunchComponent {
       (ev: ClickEvent) => {
         this.checkAbility();
       }
-    ).bindContentCover($$(this.isShow), (@memo () => {
+    ).bindContentCover($$(this.isShow), (@Memo () => {
       this.uiExtensionBuilder()
     }) as CustomBuilder, {} as ContentCoverOptions);
 
