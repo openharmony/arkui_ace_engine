@@ -16,6 +16,7 @@
 #include "core/components_ng/layout/layout_property.h"
 
 #include "base/utils/string_expression.h"
+#include "core/components_ng/event/error_reporter/general_interaction_error_reporter.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 #include "core/components_ng/property/grid_property.h"
@@ -1730,6 +1731,10 @@ void LayoutProperty::SetOverlayOffset(
     if ((!overlayOffsetY.has_value() && overlayOffsetY_.Value() == 0) ||
         (overlayOffsetY.has_value() && overlayOffsetY.value() == overlayOffsetY_)) {
         yChanged = false;
+    } else if (!xChanged) {
+        TAG_LOGW(AceLogTag::ACE_OVERLAY, "overlayOffset invalid");
+        GeneralInteractionErrorInfo errorInfo { GeneralInteractionErrorType::OVERLAY_ERROR, -1, -1, "invalid" };
+        NG::GeneralInteractionErrorReporter::GetInstance().Submit(errorInfo, Container::CurrentId());
     }
 
     if (!xChanged && !yChanged) {
