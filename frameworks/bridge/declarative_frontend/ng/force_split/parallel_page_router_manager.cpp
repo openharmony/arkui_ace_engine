@@ -46,9 +46,22 @@ public:
     ~PlaceholderPattern() override = default;
 
     void OnColorConfigurationUpdate() override;
+    void OnAttachToMainTree() override;
+    void RefreshBackgroundColor();
 };
 
 void PlaceholderPattern::OnColorConfigurationUpdate()
+{
+    RefreshBackgroundColor();
+}
+
+void PlaceholderPattern::OnAttachToMainTree()
+{
+    StackPattern::OnAttachToMainTree();
+    RefreshBackgroundColor();
+}
+
+void PlaceholderPattern::RefreshBackgroundColor()
 {
     auto host = AceType::DynamicCast<FrameNode>(GetHost());
     CHECK_NULL_VOID(host);
