@@ -47,6 +47,11 @@ int32_t UiReportStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             ReportSearchEvent(result);
             break;
         }
+        case REPORT_TEXT_CHANGE_EVENT: {
+            std::string result = data.ReadString();
+            ReportTextChangeEvent(result);
+            break;
+        }
         case REPORT_INSPECTOR_VALUE: {
             std::string result = data.ReadString();
             int32_t partNum = data.ReadInt32();
@@ -142,6 +147,13 @@ void UiReportStub::ReportComponentChangeEvent(const std::string& data)
     }
 }
 
+void UiReportStub::ReportTextChangeEvent(const std::string& data)
+{
+    if (textChangeEventCallback_ != nullptr) {
+        textChangeEventCallback_(data);
+    }
+}
+
 void UiReportStub::ReportSearchEvent(const std::string& data)
 {
     if (searchEventCallback_ != nullptr) {
@@ -210,6 +222,11 @@ void UiReportStub::RegisterSearchEventCallback(const EventCallback& eventCallbac
     searchEventCallback_ = std::move(eventCallback);
 }
 
+void UiReportStub::RegisterTextChangeEventCallback(const EventCallback& eventCallback)
+{
+    textChangeEventCallback_ = std::move(eventCallback);
+}
+
 void UiReportStub::RegisterComponentChangeEventCallback(const EventCallback& eventCallback)
 {
     ComponentChangeEventCallback_ = std::move(eventCallback);
@@ -254,6 +271,11 @@ void UiReportStub::UnregisterClickEventCallback()
 void UiReportStub::UnregisterSearchEventCallback()
 {
     searchEventCallback_ = nullptr;
+}
+
+void UiReportStub::UnregisterTextChangeEventCallback()
+{
+    textChangeEventCallback_ = nullptr;
 }
 
 void UiReportStub::UnregisterRouterChangeEventCallback()

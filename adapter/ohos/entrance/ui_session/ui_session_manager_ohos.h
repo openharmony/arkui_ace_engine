@@ -32,6 +32,7 @@ class UiSessionManagerOhos : public UiSessionManager {
 public:
     void ReportClickEvent(const std::string& data) override;
     void ReportSearchEvent(const std::string& data) override;
+    void ReportTextChangeEvent(const std::string& data) override;
     void ReportRouterChangeEvent(const std::string& data) override;
     void ReportComponentChangeEvent(const std::string& key, const std::string& value) override;
     void ReportComponentChangeEvent(
@@ -42,12 +43,14 @@ public:
     void ReportLifeCycleEvent(const std::string& data) override;
     void SetClickEventRegistered(bool status) override;
     void SetSearchEventRegistered(bool status) override;
+    void SetTextChangeEventRegistered(bool status) override;
     void SetRouterChangeEventRegistered(bool status) override;
     void SetComponentChangeEventRegistered(bool status) override;
     void SetScrollEventRegistered(bool status) override;
     void SetLifeCycleEventRegistered(bool status) override;
     bool GetClickEventRegistered() override;
     bool GetSearchEventRegistered() override;
+    bool GetTextChangeEventRegistered() override;
     bool GetRouterChangeEventRegistered() override;
     bool GetComponentChangeEventRegistered() override;
     bool GetScrollEventRegistered() override;

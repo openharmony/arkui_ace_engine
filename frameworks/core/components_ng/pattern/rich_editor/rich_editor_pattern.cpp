@@ -145,6 +145,9 @@ const std::u16string PLACEHOLDER_MARK = u"![id";
 const std::string SPACE_CHARS = "^\\s+|\\s+$";
 const std::string RICHEDITOR = "RichEditor.";
 const std::string EVENT = "event";
+const std::string EDITOR_TEXT_CHANGE_EVENT = "textChange";
+const std::string EDITOR_BLUR_EVENT = "blur";
+const std::string EDITOR_FOCUS_EVENT = "focus";
 const static std::regex REMOVE_SPACE_CHARS{SPACE_CHARS};
 const auto URL_SPAN_FILTER = [](const RefPtr<SpanItem>& span){ return (span->urlOnRelease); };
 } // namespace
@@ -573,6 +576,40 @@ void RichEditorPattern::ReportTextChange()
     auto inspectorId = host->GetInspectorId().value_or("");
     TextChangeEventInfo info = { inspectorId, uniqueId, currentContent };
     UIObserverHandler::GetInstance().NotifyTextChangeEvent(info);
+    ReportEditorEvent(EDITOR_TEXT_CHANGE_EVENT);
+}
+
+void RichEditorPattern::ReportEditorEvent(const std::string& eventType)
+{
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    std::string currentContent;
+    if (isSpanStringMode_) {
+        IF_TRUE(styledString_, currentContent = styledString_->GetString());
+    } else {
+        std::u16string u16Str;
+        GetContentBySpans(u16Str);
+        currentContent = UtfUtils::Str16DebugToStr8(u16Str);
+    }
+    CHECK_NULL_VOID(UiSessionManager::GetInstance()->GetTextChangeEventRegistered());
+    auto data = JsonUtil::Create();
+    data->Put("event", eventType.data());
+    data->Put("id", host->GetId());
+    data->Put("$type", "RichEditor");
+    data->Put("inputType", static_cast<int16_t>(keyboard_));
+    data->Put("text", currentContent.data());
+    auto rectObj = JsonUtil::Create();
+    auto hostGeometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(hostGeometryNode);
+    auto hostFrameRect = hostGeometryNode->GetFrameRect();
+    rectObj->Put("x", hostFrameRect.GetX());
+    rectObj->Put("y", hostFrameRect.GetY());
+    rectObj->Put("width", hostFrameRect.Width());
+    rectObj->Put("height", hostFrameRect.Height());
+    data->Put("rect", rectObj);
+    UiSessionManager::GetInstance()->ReportTextChangeEvent(data->ToString());
+#endif
 }
 
 void RichEditorPattern::AfterStyledStringChange(const UndoRedoRecord& record, bool isUndo)
@@ -3762,6 +3799,7 @@ void RichEditorPattern::HandleBlurEvent()
     }
     HandleOnEditChanged(false);
     ReportComponentChangeEvent();
+    ReportEditorEvent(EDITOR_BLUR_EVENT);
 }
 
 void RichEditorPattern::HandleFocusEvent(FocusReason focusReason)
@@ -3804,6 +3842,7 @@ void RichEditorPattern::HandleFocusEvent(FocusReason focusReason)
 
     IF_TRUE(!requestFocusBySingleClick_, RequestKeyboard(false, true, needShowSoftKeyboard));
     HandleOnEditChanged(true);
+    ReportEditorEvent(EDITOR_FOCUS_EVENT);
 }
 
 void RichEditorPattern::OnFocusNodeChange(FocusReason focusReason)

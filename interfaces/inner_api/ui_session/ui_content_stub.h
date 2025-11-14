@@ -33,6 +33,7 @@ private:
     int32_t RegisterClickEventCallbackInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t RegisterRouterChangeEventCallbackInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t RegisterSearchEventCallbackInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
+    int32_t RegisterTextChangeEventCallbackInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t RegisterComponentChangeEventCallbackInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t RegisterWebUnfocusEventCallbackInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t RegisterScrollEventCallbackInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
@@ -42,6 +43,7 @@ private:
     int32_t SendCommandKeyCodeInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t UnregisterClickEventCallbackInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t UnregisterSearchEventCallbackInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
+    int32_t UnregisterTextChangeEventCallbackInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t UnregisterRouterChangeEventCallbackInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t UnregisterComponentChangeEventCallbackInner(
         MessageParcel& data, MessageParcel& reply, MessageOption& option);
