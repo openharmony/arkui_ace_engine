@@ -50,7 +50,7 @@ static ani_object getSize([[maybe_unused]] ani_env* env, OHOS::Ace::NG::Rectangl
         return nullptr;
     }
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", ":", &ctor)) {
         return nullptr;
     }
     if (ANI_OK != env->Object_New(cls, ctor, &obj)) {
@@ -74,7 +74,7 @@ static ani_object getLocalOffset([[maybe_unused]] ani_env* env, OHOS::Ace::NG::R
         return nullptr;
     }
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", ":", &ctor)) {
         return nullptr;
     }
     if (ANI_OK != env->Object_New(cls, ctor, &obj)) {
@@ -98,7 +98,7 @@ static ani_object getWindowOffset([[maybe_unused]] ani_env* env, OHOS::Ace::NG::
         return nullptr;
     }
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", ":", &ctor)) {
         return nullptr;
     }
     if (ANI_OK != env->Object_New(cls, ctor, &obj)) {
@@ -122,7 +122,7 @@ static ani_object getScreenOffset([[maybe_unused]] ani_env* env, OHOS::Ace::NG::
         return nullptr;
     }
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", ":", &ctor)) {
         return nullptr;
     }
     if (ANI_OK != env->Object_New(cls, ctor, &obj)) {
@@ -148,7 +148,7 @@ static ani_object getTranslateResult([[maybe_unused]] ani_env* env, OHOS::Ace::N
         return nullptr;
     }
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", ":", &ctor)) {
         return nullptr;
     }
     if (ANI_OK != env->Object_New(cls, ctor, &obj)) {
@@ -175,7 +175,7 @@ static ani_object getScaleResult([[maybe_unused]] ani_env* env, OHOS::Ace::NG::R
         return nullptr;
     }
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", ":", &ctor)) {
         return nullptr;
     }
     if (ANI_OK != env->Object_New(cls, ctor, &obj)) {
@@ -208,7 +208,7 @@ static ani_object getRotateResult([[maybe_unused]] ani_env* env, OHOS::Ace::NG::
         return nullptr;
     }
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", ":", &ctor)) {
         return nullptr;
     }
     if (ANI_OK != env->Object_New(cls, ctor, &obj)) {
@@ -269,7 +269,7 @@ static ani_object getRectangleById([[maybe_unused]] ani_env* env, ani_string id)
         return nullptr;
     }
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", ":", &ctor)) {
         return nullptr;
     }
     if (ANI_OK != env->Object_New(cls, ctor, &rectangleObj)) {
