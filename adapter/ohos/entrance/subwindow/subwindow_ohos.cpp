@@ -299,6 +299,11 @@ Rosen::WindowAnchorInfo SubwindowOhos::WindowAnchorInfoConverter(const NG::Offse
     return windowAnchorInfo;
 }
 
+void SubwindowOhos::SetSubWindowVsyncListener()
+{
+    
+}
+
 void SubwindowOhos::InitContainer()
 {
     auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
