@@ -629,6 +629,12 @@ public:
     {
         return UIContentErrorCode::NO_ERRORS;
     }
+
+    virtual UIContentErrorCode InitializeByNameWithAniStorage(
+        OHOS::Rosen::Window* window, const std::string& name, ani_object storage, uint32_t focusWindowId)
+    {
+        return UIContentErrorCode::NO_ERRORS;
+    }
 };
 
 } // namespace OHOS::Ace

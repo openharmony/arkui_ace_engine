@@ -6133,6 +6133,41 @@ UIContentErrorCode UIContentImpl::InitializeByNameWithAniStorage(
     return errorCode;
 }
 
+UIContentErrorCode UIContentImpl::InitializeByNameWithAniStorage(
+    OHOS::Rosen::Window* window, const std::string& name, ani_object storage, uint32_t focusWindowId)
+{
+    auto errorCode = UIContentErrorCode::NO_ERRORS;
+    if (window == nullptr) {
+        LOGE("UIExtensionAbility [%{public}s][%{public}s][%{public}d][%{public}s] initialize ui instance failed, the"
+             "window is invalid",
+            bundleName_.c_str(), moduleName_.c_str(), instanceId_, startUrl_.c_str());
+        return errorCode;
+    }
+    StorageWrapper storageWrapper { .aniStorage_ = storage };
+    errorCode = CommonInitialize(window, name, storageWrapper, focusWindowId);
+    if (errorCode != UIContentErrorCode::NO_ERRORS) {
+        return errorCode;
+    }
+    AddWatchSystemParameter();
+
+    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "[%{public}s][%{public}s][%{public}d]: StartUIExtension: %{public}s",
+        bundleName_.c_str(), moduleName_.c_str(), instanceId_, startUrl_.c_str());
+    // run page.
+    Platform::AceContainer::RunPage(instanceId_, startUrl_, "", true);
+    auto distributedUI = std::make_shared<NG::DistributedUI>();
+    uiManager_ = std::make_unique<DistributedUIManager>(instanceId_, distributedUI);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_RETURN(container, errorCode);
+    container->SetDistributedUI(distributedUI);
+#if !defined(ACE_UNITTEST)
+    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, errorCode);
+    auto rootNode = pipelineContext->GetRootElement();
+    NG::TransparentNodeDetector::GetInstance().PostCheckNodeTransparentTask(rootNode, startUrl_);
+#endif
+    return errorCode;
+}
+
 void UIContentImpl::RegisterExeAppAIFunction(const WeakPtr<TaskExecutor>& taskExecutor)
 {
     auto exeAppAIFunctionCallback = [weakTaskExecutor = taskExecutor](

@@ -66,4 +66,18 @@ HWTEST_F(UiContentTest, GetUIContent002, TestSize.Level1)
     UIContent* ret = UIContent::GetUIContent(instanceId);
     EXPECT_TRUE(ret == nullptr);
 }
+
+/**
+ * @tc.name: GetUIContent003
+ * @tc.desc: test UIContent::Create
+ * @tc.type: FUNC
+ */
+HWTEST_F(UiContentTest, GetUIContent003, TestSize.Level1)
+{
+    std::shared_ptr<UIContent> ret = UIContent::Create(nullptr, nullptr);
+    EXPECT_TRUE(ret);
+    ani_object storage = nullptr;
+    UIContentErrorCode errorCode = ret->InitializeByNameWithAniStorage(nullptr, "", storage, 0);
+    EXPECT_TRUE(errorCode == UIContentErrorCode::NO_ERRORS);
+}
 } // namespace OHOS::Ace
