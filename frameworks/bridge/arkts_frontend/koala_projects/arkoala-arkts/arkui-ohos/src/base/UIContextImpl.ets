@@ -1592,7 +1592,7 @@ export class UIContextImpl extends UIContext {
         ArkUIAniModule._Common_Restore_InstanceId()
     }
     clearResourceCache(): void {
-        // ArkUIGeneratedNativeModule._SystemOps_resourceManagerReset()
+        ArkUIGeneratedNativeModule._SystemOps_resourceManagerReset()
     }
     postFrameCallback(frameCallback: FrameCallback): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_)
