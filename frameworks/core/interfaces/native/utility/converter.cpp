@@ -29,7 +29,6 @@
 #include "core/components_ng/pattern/text/text_model.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/interfaces/native/implementation/color_metrics_peer.h"
-#include "core/interfaces/native/implementation/pixel_map_peer.h"
 #include "core/interfaces/native/implementation/symbol_glyph_modifier_peer.h"
 #include "core/interfaces/native/implementation/transition_effect_peer_impl.h"
 #include "core/interfaces/native/implementation/i_curve_peer_impl.h"
@@ -1838,7 +1837,7 @@ Rect Convert(const Ark_RectResult& src)
 {
     return Rect(
         Converter::Convert<float>(src.x),
-        Converter::Convert<float>(src.x),
+        Converter::Convert<float>(src.y),
         Converter::Convert<float>(src.width),
         Converter::Convert<float>(src.height)
     );
@@ -1849,7 +1848,7 @@ RectF Convert(const Ark_Frame& src)
 {
     return RectF(
         Converter::Convert<float>(src.x),
-        Converter::Convert<float>(src.x),
+        Converter::Convert<float>(src.y),
         Converter::Convert<float>(src.width),
         Converter::Convert<float>(src.height)
     );
