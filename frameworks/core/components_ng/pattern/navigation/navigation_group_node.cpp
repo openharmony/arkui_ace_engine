@@ -1153,7 +1153,7 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
     CHECK_NULL_VOID(curNavDestination);
 #if !defined(ACE_UNITTEST)
     TransparentNodeDetector::GetInstance().PostCheckNodeTransparentTask(curNode,
-        curNavDestination->GetNavDestinationPathInfo());
+        curNavDestination->GetNavDestinationPathInfo(), true);
 #endif
     CHECK_NULL_VOID(preNode);
     preNode->AddToOcclusionMap(true);

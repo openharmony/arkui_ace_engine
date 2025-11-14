@@ -85,6 +85,10 @@ void EventReport::ReportUiExtensionTransparentEvent(const std::string& pageUrl, 
     const std::string& moduleName)
 {}
 
+void EventReport::ReportMainWindowTransparentEvent(const std::string& pageUrl, const std::string& bundleName,
+    const std::string& moduleName)
+{}
+
 void EventReport::ReportDragInfo(const DragInfo& dragInfo) {}
 
 void EventReport::ReportScrollableErrorEvent(
