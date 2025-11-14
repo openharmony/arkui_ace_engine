@@ -179,7 +179,7 @@ export class ArkUIAniModule {
     native static _DragEvent_Set_ExtraInfo(ptr: KLong, extraInfo: string) : void
     native static _DragEvent_Set_CustomNode(ptr: KLong, customNode: KPointer) : void
     native static _Drag_Set_AllowDrop_Null(ptr: KLong) : void
-    native static _Drag_Set_AllowDrop(ptr: KPointer, thisArray: Array<uniformTypeDescriptor.UniformDataType> | undefined): void
+    native static _Drag_Set_AllowDrop(ptr: KPointer, thisArray: Array<uniformTypeDescriptor.UniformDataType> | Array<string> | undefined): void
     native static _Drag_Set_DragPreview(ptr: KPointer, dragInfo: HookDragInfo): void
     native static _Drag_Set_DragPreviewOptions(ptr: KPointer, value: DragPreviewOptions | undefined, options?: DragInteractionOptions): void
     native static _Extractors_toUnifiedDataChannelUnifiedDataPtr(value: unifiedDataChannel.UnifiedData) : KPointer

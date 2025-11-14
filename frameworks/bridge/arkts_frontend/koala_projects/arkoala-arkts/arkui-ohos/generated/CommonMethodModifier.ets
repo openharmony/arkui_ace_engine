@@ -261,7 +261,7 @@ export class CommonMethodModifier implements CommonMethod {
     _onDragEnd_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onDragEnd_0_0value?: ((event: DragEvent,extraParams?: string) => void) | undefined
     _allowDrop_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _allowDrop_0_0value?: Array<uniformTypeDescriptor.UniformDataType> | null | undefined
+    _allowDrop_0_0value?: Array<uniformTypeDescriptor.UniformDataType> | null | Array<string> | undefined
     _draggable_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _draggable_0_0value?: boolean | undefined
     _dragPreview_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -2455,7 +2455,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (this._allowDrop_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    hookAllowDrop(peer, (this._allowDrop_0_0value as Array<uniformTypeDescriptor.UniformDataType> | null | undefined));
+                    hookAllowDrop(peer, (this._allowDrop_0_0value as Array<uniformTypeDescriptor.UniformDataType> | null | Array<string> | undefined));
                     this._allowDrop_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -2465,7 +2465,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     this._allowDrop_0_flag = AttributeUpdaterFlag.INITIAL;
-                    hookAllowDrop(peer, (undefined as Array<uniformTypeDescriptor.UniformDataType> | null | undefined));
+                    hookAllowDrop(peer, (undefined as Array<uniformTypeDescriptor.UniformDataType> | null | Array<string> | undefined));
                 }
             }
         }
@@ -5463,7 +5463,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.allowDrop((undefined as Array<uniformTypeDescriptor.UniformDataType> | null | undefined));
+                    this.allowDrop((undefined as Array<uniformTypeDescriptor.UniformDataType> | null | Array<string> | undefined));
                 }
             }
         }
@@ -7798,7 +7798,7 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    allowDrop(value: Array<uniformTypeDescriptor.UniformDataType> | null | undefined): this {
+    allowDrop(value: Array<uniformTypeDescriptor.UniformDataType> | null | Array<string> | undefined): this {
         if (((this._allowDrop_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._allowDrop_0_flag = AttributeUpdaterFlag.UPDATE
