@@ -785,11 +785,14 @@ void TextFieldModelStatic::SetDefaultCancelIcon(FrameNode* frameNode)
     CHECK_NULL_VOID(theme);
 
     CalcDimension iconSize = theme->GetCancelIconSize();
-    Color color = theme->GetCancelButtonIconColor();
     std::string srcStr = "";
 
     TextFieldModelNG::SetCancelIconSize(frameNode, iconSize);
-    TextFieldModelNG::SetCancelIconColor(frameNode, color);
+    if (Container::CurrentColorMode() == ColorMode::DARK) {
+        TextFieldModelNG::SetCancelIconColor(frameNode, theme->GetCancelButtonIconColor());
+    } else {
+        TextFieldModelNG::SetCancelIconColor(frameNode, Color());
+    }
     TextFieldModelNG::SetCanacelIconSrc(frameNode, srcStr);
 }
 

@@ -170,8 +170,16 @@ void SearchModelStatic::SetSearchImageIcon(FrameNode *frameNode, std::optional<I
 void SearchModelStatic::SetSearchButtonFontSize(FrameNode* frameNode, const std::optional<Dimension>& value)
 {
     CHECK_NULL_VOID(frameNode);
-    if (value.has_value()) {
-        SearchModelNG::SetSearchButtonFontSize(frameNode, value.value());
+    auto searchTheme = SearchModelStatic::GetTheme(frameNode);
+    if (searchTheme || value.has_value()) {
+        Dimension fontSize;
+        if (searchTheme) {
+            fontSize = searchTheme->GetButtonFontSize();
+        }
+        if (value.has_value()) {
+            fontSize = value.value();
+        }
+        SearchModelNG::SetSearchButtonFontSize(frameNode, fontSize);
         auto buttonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(BUTTON_INDEX));
         CHECK_NULL_VOID(buttonFrameNode);
         auto textNode = AceType::DynamicCast<FrameNode>(buttonFrameNode->GetFirstChild());

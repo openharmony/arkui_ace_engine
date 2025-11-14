@@ -249,6 +249,28 @@ HWTEST_F(TextFieldModelStaticTest, TextFieldModelStatic_CreateTextAreaNode_NoPla
 }
 
 /**
+ * @tc.name: TextFieldModelStatic_CreateTextAreaNodeTest
+ * @tc.desc: Test CreateTextAreaNode without any optional parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModelStaticTest, TextFieldModelStatic_CreateTextAreaNodeTest, TestSize.Level1)
+{
+    int32_t nodeId = 1006;
+    std::optional<std::u16string> placeholder = std::nullopt;
+    std::optional<std::u16string> value = std::nullopt;
+
+    auto frameNode = TextFieldModelNG::CreateTextAreaNode(nodeId, placeholder, value);
+    
+    EXPECT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::TEXTAREA_ETS_TAG);
+    
+    auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    EXPECT_NE(textFieldLayoutProperty, nullptr);
+    EXPECT_EQ(textFieldLayoutProperty->GetPlaceholderValue(), u"");
+    EXPECT_TRUE(textFieldLayoutProperty->GetPlaceholderMaxLinesValue(0) == Infinity<uint32_t>());
+}
+
+/**
  * @tc.name: TextFieldModelStatic_CreateTextAreaNode_NoValue
  * @tc.desc: Test CreateTextAreaNode without value
  * @tc.type: FUNC
