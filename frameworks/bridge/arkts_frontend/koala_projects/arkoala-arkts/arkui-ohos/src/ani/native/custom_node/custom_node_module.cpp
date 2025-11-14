@@ -154,7 +154,7 @@ ani_long ConstructCustomNode(ani_env* env, [[maybe_unused]] ani_object aniClass,
     };
 
     ani_method setActiveMethod;
-    env->Class_FindMethod(static_cast<ani_class>(type), "setActiveInternal", nullptr, &setActiveMethod);
+    env->Class_FindMethod(static_cast<ani_class>(type), "setActiveInternal", "zz:", &setActiveMethod);
     auto setActive = [vm, weakRef, setActiveMethod](bool a, bool b) {
         ani_env *env = nullptr;
         vm->GetEnv(ANI_VERSION_1, &env);
