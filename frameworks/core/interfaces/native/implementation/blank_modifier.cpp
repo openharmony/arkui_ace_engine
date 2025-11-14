@@ -39,9 +39,10 @@ void SetBlankOptionsImpl(Ark_NativePointer node,
     auto minDim = Converter::OptConvertPtr<Dimension>(min);
     Validator::ValidateNonNegative(minDim);
     Validator::ValidateNonPercent(minDim);
-    if (minDim) {
-        BlankModelNG::SetBlankMin(frameNode, *minDim);
+    if (!minDim) {
+        minDim = Dimension(0.0, DimensionUnit::VP);
     }
+    BlankModelNG::SetBlankMin(frameNode, *minDim);
 }
 } // BlankInterfaceModifier
 
