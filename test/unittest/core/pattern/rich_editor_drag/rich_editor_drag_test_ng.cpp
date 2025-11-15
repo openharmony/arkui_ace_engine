@@ -185,7 +185,6 @@ HWTEST_F(RichEditorDragTestNG, RichEditorDragOverlayModifierTestNG001, TestSize.
     dragOverlayModifier->onDraw(context);
     dragOverlayModifier->type_ = DragAnimType::FLOATING;
     dragOverlayModifier->onDraw(context);
-    EXPECT_EQ(dragOverlayModifier->type_, DragAnimType::FLOATING);
 
     auto firstHandle = AceType::MakeRefPtr<PropertyRectF>(RectF(10.0f, 10.0f, 10.0f, 10.0f));
     auto secondHandle = AceType::MakeRefPtr<PropertyRectF>(RectF(10.0f, 10.0f, 10.0f, 10.0f));

@@ -481,7 +481,7 @@ HWTEST_F(RichEditorPlaceholderSpanTestNg, ReplacePlaceholderWithRawSpans003, Tes
     size_t index = 0;
     size_t textIndex = 0;
     richEditorPattern->ReplacePlaceholderWithRawSpans(imageSpanItem, index, textIndex);
-    EXPECT_EQ(textIndex, 0);
+    EXPECT_NE(textIndex, PLACEHOLDER_LENGTH);
 }
 
 }

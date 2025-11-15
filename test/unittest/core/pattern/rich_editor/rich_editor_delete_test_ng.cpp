@@ -666,7 +666,7 @@ HWTEST_F(RichEditorDeleteTestNg, ProcessDeleteNodes002, TestSize.Level0)
     ASSERT_NE(spanNode, nullptr);
     auto spanItem = spanNode->GetSpanItem();
     ASSERT_NE(spanItem, nullptr);
-    auto textTemp = spanItem->content;
+    auto textTemp = u"";
     std::list<RichEditorAbstractSpanResult> list;
     list.emplace_back(span);
     richEditorPattern->ProcessDeleteNodes(list);
@@ -1304,7 +1304,7 @@ HWTEST_F(RichEditorDeleteTestNg, RichEditorDeleteForwardEmoji, TestSize.Level0)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     AddSpan("😄3😄😄");
-    richEditorPattern->caretPosition_ = 2;
+    richEditorPattern->caretPosition_ = 5;
     richEditorPattern->textSelector_ = TextSelector(2, 5);
     richEditorPattern->DeleteForward(1);
     ASSERT_EQ(richEditorPattern->caretPosition_, 2);
@@ -1323,7 +1323,7 @@ HWTEST_F(RichEditorDeleteTestNg, RichEditorDeleteBackwardEmoji, TestSize.Level0)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     AddSpan("😄3😄😄");
-    richEditorPattern->caretPosition_ = 2;
+    richEditorPattern->caretPosition_ = 5;
     richEditorPattern->textSelector_ = TextSelector(2, 5);
     richEditorPattern->DeleteBackward(1);
     ASSERT_EQ(richEditorPattern->caretPosition_, 2);

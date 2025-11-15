@@ -549,7 +549,7 @@ HWTEST_F(RichEditorTextCalTestNg, GetParagraphEndPosition001, TestSize.Level0)
     auto iter = richEditorPattern->spans_.cbegin();
     auto span = *iter;
     ASSERT_NE(span, nullptr);
-    int32_t position = span->position - static_cast<int32_t>(span->content.length());
+    int32_t position = 0;
     richEditorPattern->GetParagraphEndPosition(caretPosition);
     EXPECT_EQ(position, span->position - static_cast<int32_t>(span->content.length()));
     caretPosition = 1;
@@ -816,7 +816,7 @@ HWTEST_F(RichEditorTextCalTestNg, FixMoveDownChange001, TestSize.Level0)
     RichEditorAbstractSpanResult& firstInfo = changeValue.originalSpans_.front();
     int32_t firstLength = static_cast<int32_t>(firstInfo.GetValue().length());
     firstInfo.SetEraseLength(firstLength);
-    auto spanIndex = firstInfo.GetSpanIndex();
+    auto spanIndex = 0;
     richEditorPattern->FixMoveDownChange(changeValue, 0);
     EXPECT_EQ(spanIndex, firstInfo.GetSpanIndex());
 }

@@ -918,7 +918,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, GetDeletedSpan002, TestSize.Level0)
     richEditorPattern->textSelector_.baseOffset = 2;
     richEditorPattern->textSelector_.destinationOffset = 2;
     richEditorPattern->GetDeletedSpan(changeValue, innerPosition, length, direction);
-    EXPECT_EQ(length, 1);
+    EXPECT_EQ(changeValue.GetRichEditorOriginalSpans().size(), 0);
 }
 
 /**

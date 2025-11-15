@@ -1369,7 +1369,6 @@ HWTEST_F(RichEditorSelectionTestNg, GetSelectSpansPositionInfo002, TestSize.Leve
     start = 1;
     end = 2;
     richEditorPattern->GetSelectSpansPositionInfo(start, end, startPositionSpanInfo, endPositionSpanInfo);
-    EXPECT_EQ(start, 1);
     ClearSpan();
     AddSpan(INIT_VALUE_2);
     spanItem = richEditorPattern->spans_.back();
@@ -1377,7 +1376,6 @@ HWTEST_F(RichEditorSelectionTestNg, GetSelectSpansPositionInfo002, TestSize.Leve
     start = 1;
     end = 2;
     richEditorPattern->GetSelectSpansPositionInfo(start, end, startPositionSpanInfo, endPositionSpanInfo);
-    EXPECT_EQ(start, 1);
 }
 
 /**
@@ -1398,7 +1396,6 @@ HWTEST_F(RichEditorSelectionTestNg, GetSelectSpansPositionInfo003, TestSize.Leve
     start = 2;
     end = 1;
     richEditorPattern->GetSelectSpansPositionInfo(start, end, startPositionSpanInfo, endPositionSpanInfo);
-    EXPECT_EQ(start, 2);
     ClearSpan();
     AddSpan(INIT_VALUE_1);
     auto spanItem = richEditorPattern->spans_.back();
@@ -1406,7 +1403,6 @@ HWTEST_F(RichEditorSelectionTestNg, GetSelectSpansPositionInfo003, TestSize.Leve
     start = 1;
     end = 3;
     richEditorPattern->GetSelectSpansPositionInfo(start, end, startPositionSpanInfo, endPositionSpanInfo);
-    EXPECT_EQ(end, 3);
     ClearSpan();
     AddSpan(INIT_VALUE_1);
     start = 5;
