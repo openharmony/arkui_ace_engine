@@ -7717,7 +7717,7 @@ void RosenRenderContext::LinkKeyFrameNodeToRootNode(const RefPtr<FrameNode>& roo
         TAG_LOGD(AceLogTag::ACE_WINDOW, "SetLinkedRootNodeId");
         auto renderContext = rootNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
-        keyFrameNode_->SetLinkedRootNodeId(renderContext->GetNodeId());
+        keyFrameNode_->SetLinkedNodeId(renderContext->GetNodeId());
         FlushImplicitTransaction();
     }
 }
@@ -7725,7 +7725,7 @@ void RosenRenderContext::LinkKeyFrameNodeToRootNode(const RefPtr<FrameNode>& roo
 void RosenRenderContext::CreateKeyFrameNode()
 {
     if (!keyFrameNode_) {
-        TAG_LOGD(AceLogTag::ACE_WINDOW, "Create RSCanvasNode.");
+        TAG_LOGD(AceLogTag::ACE_WINDOW, "Create RSWindowKeyFrameNode.");
         if (!SystemProperties::GetMultiInstanceEnabled()) {
             keyFrameNode_ = Rosen::RSWindowKeyFrameNode::Create();
             Rosen::RSTransaction::FlushImplicitTransaction();

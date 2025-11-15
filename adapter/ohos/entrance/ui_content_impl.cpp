@@ -3357,7 +3357,7 @@ void UIContentImpl::LinkKeyFrameNode(std::shared_ptr<Rosen::RSWindowKeyFrameNode
     CHECK_NULL_VOID(rootElement);
     auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(rootElement->GetRenderContext());
     CHECK_NULL_VOID(rosenRenderContext);
-    rosenRenderContext->LinkKeyframeNodeToRootNode(context->GetRootElement());
+    rosenRenderContext->LinkKeyFrameNodeToRootNode(context->GetRootElement());
 }
 
 void UIContentImpl::CacheAnimateInfo(const ViewportConfig& config,
@@ -3459,8 +3459,8 @@ void UIContentImpl::KeyFrameDragStartPolicy(RefPtr<NG::PipelineContext> context)
         CloseSyncTransaction(transactionController, transactionHandler);
         return;
     }
-    rosenRenderContext->CreateKeyframeNode();
-    keyFrameNode_ = rosenRenderContext->GetKeyframeNode();
+    rosenRenderContext->CreateKeyFrameNode();
+    keyFrameNode_ = rosenRenderContext->GetKeyFrameNode();
     if (addNodeCallback_ && keyFrameNode_) {
         TAG_LOGI(AceLogTag::ACE_WINDOW, "rsTransaction addNodeCallback_.");
         addNodeCallback_(keyFrameNode_, rsTransaction);
@@ -3495,7 +3495,7 @@ bool UIContentImpl::KeyFrameActionPolicy(const ViewportConfig& config,
     switch (reason) {
         case OHOS::Rosen::WindowSizeChangeReason::DRAG_START:
             if (!rosenRenderContext->GetIsDraggingFlag()) {
-                if (rosenRenderContext->GetKeyframeNode()) {
+                if (rosenRenderContext->GetKeyFrameNode()) {
                     rosenRenderContext->SetReDraggingFlag(true);
                 }
                 rosenRenderContext->SetIsDraggingFlag(true);
@@ -3506,7 +3506,7 @@ bool UIContentImpl::KeyFrameActionPolicy(const ViewportConfig& config,
             rosenRenderContext->SetIsDraggingFlag(false);
             [[fallthrough]];
         case OHOS::Rosen::WindowSizeChangeReason::DRAG:
-            animateRes = rosenRenderContext->SetKeyframeNodeOpacityAnimation(
+            animateRes = rosenRenderContext->SetKeyFrameNodeOpacityAnimation(
                 config.GetKeyFrameConfig().animationDuration_,
                 config.GetKeyFrameConfig().animationDelay_,
                 reason == OHOS::Rosen::WindowSizeChangeReason::DRAG_END);
