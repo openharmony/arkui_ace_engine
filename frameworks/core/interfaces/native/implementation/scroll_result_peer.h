@@ -18,5 +18,5 @@
 #include "arkoala_api_generated.h"
 
 struct ScrollResultPeer {
-    int32_t offsetRemain = 0;
+    double offsetRemain = 0;
 };

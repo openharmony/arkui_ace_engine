@@ -87,6 +87,22 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_Color_I32_String& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Union_Color_Number_String& src)
 {
     switch (src.selector) {
@@ -1993,6 +2009,21 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_I32_LengthConstrain& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Union_Length_Array_RadiusItem& src)
 {
     switch (src.selector) {
@@ -2054,21 +2085,6 @@ void AssignUnionTo(std::optional<T>& dst,
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Union_NavDestinationContext_NavBar& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst,
-                   const Ark_Union_Number_LengthConstrain& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -3775,8 +3791,9 @@ ASSIGN_OPT(Opt_TransitionHierarchyStrategy)
 ASSIGN_OPT(Opt_TransitionType)
 ASSIGN_OPT(Opt_TranslateResult)
 ASSIGN_OPT(Opt_Tuple_F64_F64)
+ASSIGN_OPT(Opt_Tuple_I32_I32)
+ASSIGN_OPT(Opt_Tuple_I32_I32_I32_I32)
 ASSIGN_OPT(Opt_Tuple_Number_Number)
-ASSIGN_OPT(Opt_Tuple_Number_Number_Number_Number)
 ASSIGN_OPT(Opt_UICommonEvent)
 ASSIGN_OPT(Opt_UIContext)
 ASSIGN_OPT(Opt_uiEffect_Filter)
@@ -3791,6 +3808,7 @@ ASSIGN_OPT(Opt_unifiedDataChannel_UnifiedData)
 ASSIGN_OPT(Opt_uniformTypeDescriptor_UniformDataType)
 ASSIGN_OPT(Opt_Union_Boolean_I64)
 ASSIGN_OPT(Opt_Union_CircleShape_EllipseShape_PathShape_RectShape)
+ASSIGN_OPT(Opt_Union_Color_I32_String)
 ASSIGN_OPT(Opt_Union_Color_Number_String)
 ASSIGN_OPT(Opt_Union_ColorFilter_DrawingColorFilter)
 ASSIGN_OPT(Opt_Union_ContentClipMode_RectShape)
@@ -3992,6 +4010,7 @@ ASSIGN_OPT(Opt_Callback_Extender_OnFinish)
 ASSIGN_OPT(Opt_Callback_Extender_OnProgress)
 ASSIGN_OPT(Opt_Callback_F64_F64_Void)
 ASSIGN_OPT(Opt_Callback_F64_SliderChangeMode_Void)
+ASSIGN_OPT(Opt_Callback_F64_Void)
 ASSIGN_OPT(Opt_Callback_FocusAxisEvent_Void)
 ASSIGN_OPT(Opt_Callback_FormCallbackInfo_Void)
 ASSIGN_OPT(Opt_Callback_FullscreenInfo_Void)
@@ -4001,13 +4020,18 @@ ASSIGN_OPT(Opt_Callback_GestureJudgeResult_Void)
 ASSIGN_OPT(Opt_Callback_GestureRecognizer_Void)
 ASSIGN_OPT(Opt_Callback_HitTestMode_Void)
 ASSIGN_OPT(Opt_Callback_HoverEvent_Void)
+ASSIGN_OPT(Opt_Callback_I32_F64_ComputedBarAttribute)
+ASSIGN_OPT(Opt_Callback_I32_I32_Boolean)
+ASSIGN_OPT(Opt_Callback_I32_I32_I32_Void)
 ASSIGN_OPT(Opt_Callback_I32_I32_Void)
+ASSIGN_OPT(Opt_Callback_I32_Tuple_I32_I32)
+ASSIGN_OPT(Opt_Callback_I32_Tuple_I32_I32_I32_I32)
 ASSIGN_OPT(Opt_Callback_I32_Void)
 ASSIGN_OPT(Opt_Callback_InsertValue_Boolean)
 ASSIGN_OPT(Opt_Callback_InsertValue_Void)
-ASSIGN_OPT(Opt_Callback_ItemDragInfo_Number_Number_Boolean_Void)
-ASSIGN_OPT(Opt_Callback_ItemDragInfo_Number_Number_Void)
-ASSIGN_OPT(Opt_Callback_ItemDragInfo_Number_Void)
+ASSIGN_OPT(Opt_Callback_ItemDragInfo_I32_I32_Boolean_Void)
+ASSIGN_OPT(Opt_Callback_ItemDragInfo_I32_I32_Void)
+ASSIGN_OPT(Opt_Callback_ItemDragInfo_I32_Void)
 ASSIGN_OPT(Opt_Callback_ItemDragInfo_Void)
 ASSIGN_OPT(Opt_Callback_KeyEvent_Boolean)
 ASSIGN_OPT(Opt_Callback_KeyEvent_Void)
@@ -4022,12 +4046,7 @@ ASSIGN_OPT(Opt_Callback_NavDestinationContext_Void)
 ASSIGN_OPT(Opt_Callback_NavigationMode_Void)
 ASSIGN_OPT(Opt_Callback_NavigationTitleMode_Void)
 ASSIGN_OPT(Opt_Callback_NavigationTransitionProxy_Void)
-ASSIGN_OPT(Opt_Callback_Number_Number_Boolean)
-ASSIGN_OPT(Opt_Callback_Number_Number_ComputedBarAttribute)
-ASSIGN_OPT(Opt_Callback_Number_Number_Number_Void)
 ASSIGN_OPT(Opt_Callback_Number_Number_Void)
-ASSIGN_OPT(Opt_Callback_Number_Tuple_Number_Number)
-ASSIGN_OPT(Opt_Callback_Number_Tuple_Number_Number_Number_Number)
 ASSIGN_OPT(Opt_Callback_Number_Void)
 ASSIGN_OPT(Opt_Callback_Object_Void)
 ASSIGN_OPT(Opt_Callback_OnAlertEvent_Boolean)
@@ -4131,8 +4150,8 @@ ASSIGN_OPT(Opt_Callback_TimePickerResult_Void)
 ASSIGN_OPT(Opt_Callback_TouchEvent_HitTestMode)
 ASSIGN_OPT(Opt_Callback_TouchEvent_Void)
 ASSIGN_OPT(Opt_Callback_TouchResult_Void)
-ASSIGN_OPT(Opt_Callback_Tuple_Number_Number_Number_Number_Void)
-ASSIGN_OPT(Opt_Callback_Tuple_Number_Number_Void)
+ASSIGN_OPT(Opt_Callback_Tuple_I32_I32_I32_I32_Void)
+ASSIGN_OPT(Opt_Callback_Tuple_I32_I32_Void)
 ASSIGN_OPT(Opt_Callback_UIExtensionProxy_Void)
 ASSIGN_OPT(Opt_Callback_Union_CustomBuilder_DragItemInfo_Void)
 ASSIGN_OPT(Opt_Callback_Union_Object_Idlize_Stdlib_Null_Undefined_Void)
@@ -4795,12 +4814,12 @@ ASSIGN_OPT(Opt_Union_Dimension_Array_Dimension)
 ASSIGN_OPT(Opt_Union_Dimension_OptionWidthMode)
 ASSIGN_OPT(Opt_Union_EdgeColors_ResourceColor_LocalizedEdgeColors)
 ASSIGN_OPT(Opt_Union_I32_Resource_Bindable_Bindable)
+ASSIGN_OPT(Opt_Union_I32_LengthConstrain)
 ASSIGN_OPT(Opt_Union_Length_Array_RadiusItem)
 ASSIGN_OPT(Opt_Union_Length_LayoutPolicy)
 ASSIGN_OPT(Opt_Union_Length_Number)
 ASSIGN_OPT(Opt_Union_MenuItemOptions_CustomBuilder)
 ASSIGN_OPT(Opt_Union_NavDestinationContext_NavBar)
-ASSIGN_OPT(Opt_Union_Number_LengthConstrain)
 ASSIGN_OPT(Opt_Union_ResourceColor_EdgeColors)
 ASSIGN_OPT(Opt_Union_ResourceColor_EdgeColors_LocalizedEdgeColors)
 ASSIGN_OPT(Opt_Union_ResourceColor_UnderlineColor)

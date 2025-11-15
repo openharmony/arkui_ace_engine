@@ -206,20 +206,20 @@ void AssignArkValue(Ark_LengthMetrics& dst, const Dimension& src)
 
 void AssignArkValue(Ark_VisibleListContentInfo& dst, const ListItemIndex& src)
 {
-    dst.index = ArkValue<Ark_Number>(src.index);
+    dst.index = ArkValue<Ark_Int32>(src.index);
     dst.itemGroupArea = src.area < 0 ?
         ArkValue<Opt_ListItemGroupArea>(Ark_Empty{}) : ArkValue<Opt_ListItemGroupArea>(src.area);
     dst.itemIndexInGroup = src.indexInGroup < 0 ?
-        ArkValue<Opt_Number>(Ark_Empty{}) : ArkValue<Opt_Number>(src.indexInGroup);
+        ArkValue<Opt_Int32>(Ark_Empty{}) : ArkValue<Opt_Int32>(src.indexInGroup);
 }
 
 void AssignArkValue(Ark_VisibleListContentInfo& dst, const ListItemGroupIndex& src)
 {
-    dst.index = ArkValue<Ark_Number>(src.index);
+    dst.index = ArkValue<Ark_Int32>(src.index);
     dst.itemGroupArea = src.area < 0 ?
         ArkValue<Opt_ListItemGroupArea>(Ark_Empty{}) : ArkValue<Opt_ListItemGroupArea>(src.area);
     dst.itemIndexInGroup = src.indexInGroup < 0 ?
-        ArkValue<Opt_Number>(Ark_Empty{}) : ArkValue<Opt_Number>(src.indexInGroup);
+        ArkValue<Opt_Int32>(Ark_Empty{}) : ArkValue<Opt_Int32>(src.indexInGroup);
 }
 
 void AssignArkValue(Ark_RectResult& dst, const OHOS::Ace::Rect& src)
@@ -534,8 +534,8 @@ void AssignArkValue(Ark_Position& dst, const OffsetF& src, ConvContext *ctx)
 
 void AssignArkValue(Ark_OffsetResult& dst, const Offset& src, ConvContext *ctx)
 {
-    dst.xOffset = ArkValue<Ark_Number>(src.GetX(), ctx);
-    dst.yOffset = ArkValue<Ark_Number>(src.GetY(), ctx);
+    dst.xOffset = ArkValue<Ark_Float64>(src.GetX(), ctx);
+    dst.yOffset = ArkValue<Ark_Float64>(src.GetY(), ctx);
 }
 
 void AssignArkValue(Ark_RectResult& dst, const RectF& src)

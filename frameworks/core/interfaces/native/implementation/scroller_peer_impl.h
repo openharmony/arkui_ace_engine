@@ -30,18 +30,18 @@ public:
     ScrollerPeerImpl() = default;
     ~ScrollerPeerImpl() override = default;
 
-    void TriggerScrollTo(const Ark_ScrollOptions* options);
-    void TriggerScrollEdge(Ark_Edge value, const Opt_ScrollEdgeOptions* options);
-    void TriggerFling(const Ark_Number* velocity);
-    void TriggerScrollPage0(const Ark_ScrollPageOptions* value);
+    void TriggerScrollTo(Ark_VMContext vmContext, const Ark_ScrollOptions* options);
+    void TriggerScrollEdge(Ark_VMContext vmContext, Ark_Edge value, const Opt_ScrollEdgeOptions* options);
+    void TriggerFling(Ark_VMContext vmContext, const Ark_Float64 velocity);
+    void TriggerScrollPage0(Ark_VMContext vmContext, const Ark_ScrollPageOptions* value);
     void TriggerScrollPage1(bool next);
-    Ark_OffsetResult TriggerCurrentOffset();
-    void TriggerScrollToIndex(const Ark_Number* value, const Opt_Boolean* smooth,
+    Ark_OffsetResult TriggerCurrentOffset(Ark_VMContext vmContext);
+    void TriggerScrollToIndex(Ark_VMContext vmContext, const Ark_Int32 value, const Opt_Boolean* smooth,
         const Opt_ScrollAlign* align, const Opt_ScrollToIndexOptions* options);
-    void TriggerScrollBy(const Dimension& xOffset, const Dimension& yOffset);
-    Ark_Boolean TriggerIsAtEnd();
-    Ark_RectResult TriggerGetItemRect(const Ark_Number* index);
-    Ark_Int32 TriggerGetItemIndex(const Ark_Number* x, const Ark_Number* y);
+    void TriggerScrollBy(Ark_VMContext vmContext, const Dimension& xOffset, const Dimension& yOffset);
+    Ark_Boolean TriggerIsAtEnd(Ark_VMContext vmContext);
+    Ark_RectResult TriggerGetItemRect(Ark_VMContext vmContext, const Ark_Int32 index);
+    Ark_Int32 TriggerGetItemIndex(Ark_VMContext vmContext, const Ark_Float64 x, const Ark_Float64 y);
 
     const WeakPtr<ScrollControllerBase>& GetController() const
     {
@@ -82,6 +82,9 @@ public:
     {
         return instanceId_;
     }
+    static void ThrowParamsError(Ark_VMContext vmContext);
+    static void ThrowControllerError(Ark_VMContext vmContext);
+    static void ThrowError(Ark_VMContext vmContext, int32_t errCode, const std::string& errorMsg);
 
     void SetObserver(const ScrollerObserver& observer)
     {

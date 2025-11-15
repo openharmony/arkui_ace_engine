@@ -34,32 +34,32 @@ void SyncItemDragEvent(
         lazyNode->SetItemDragEvent(nullptr, nullptr, nullptr, nullptr);
         return;
     }
-    auto onLongPressOpt = Converter::OptConvert<Callback_Number_Void>(onMoveDragEventOpt->onLongPress);
-    auto onDragStartOpt = Converter::OptConvert<Callback_Number_Void>(onMoveDragEventOpt->onDragStart);
+    auto onLongPressOpt = Converter::OptConvert<Callback_I32_Void>(onMoveDragEventOpt->onLongPress);
+    auto onDragStartOpt = Converter::OptConvert<Callback_I32_Void>(onMoveDragEventOpt->onDragStart);
     auto onMoveThroughOpt = Converter::OptConvert<OnMoveHandler>(onMoveDragEventOpt->onMoveThrough);
-    auto onDropOpt = Converter::OptConvert<Callback_Number_Void>(onMoveDragEventOpt->onDrop);
+    auto onDropOpt = Converter::OptConvert<Callback_I32_Void>(onMoveDragEventOpt->onDrop);
     if (onLongPressOpt) {
         onLongPressCallback = [arkCallback = CallbackHelper(*onLongPressOpt)](int32_t index) {
-            auto arkIndex = Converter::ArkValue<Ark_Number>(index);
+            auto arkIndex = Converter::ArkValue<Ark_Int32>(index);
             arkCallback.Invoke(arkIndex);
         };
     }
     if (onDragStartOpt) {
         onDragStartCallback = [arkCallback = CallbackHelper(*onDragStartOpt)](int32_t index) {
-            auto arkIndex = Converter::ArkValue<Ark_Number>(index);
+            auto arkIndex = Converter::ArkValue<Ark_Int32>(index);
             arkCallback.Invoke(arkIndex);
         };
     }
     if (onMoveThroughOpt) {
         onMoveThroughCallback = [arkCallback = CallbackHelper(*onMoveThroughOpt)](int32_t from, int32_t to) {
-            auto arkFrom = Converter::ArkValue<Ark_Number>(from);
-            auto arkTo = Converter::ArkValue<Ark_Number>(to);
+            auto arkFrom = Converter::ArkValue<Ark_Int32>(from);
+            auto arkTo = Converter::ArkValue<Ark_Int32>(to);
             arkCallback.Invoke(arkFrom, arkTo);
         };
     }
     if (onDropOpt) {
         onDropCallback = [arkCallback = CallbackHelper(*onDropOpt)](int32_t index) {
-            auto arkIndex = Converter::ArkValue<Ark_Number>(index);
+            auto arkIndex = Converter::ArkValue<Ark_Int32>(index);
             arkCallback.Invoke(arkIndex);
         };
     }
@@ -112,8 +112,8 @@ void SyncOnMoveOpsImpl(Ark_NativePointer node,
         return;
     }
     lazyNode->SetOnMove([callback = CallbackHelper(*onMoveOpt)](int32_t from, int32_t to) {
-        auto arkFrom = Converter::ArkValue<Ark_Number>(from);
-        auto arkTo = Converter::ArkValue<Ark_Number>(to);
+        auto arkFrom = Converter::ArkValue<Ark_Int32>(from);
+        auto arkTo = Converter::ArkValue<Ark_Int32>(to);
         callback.InvokeSync(arkFrom, arkTo);
     });
     lazyNode->SetOnMoveFromTo([callback = CallbackHelper(*onMoveFromToOps)](int32_t from, int32_t to) {

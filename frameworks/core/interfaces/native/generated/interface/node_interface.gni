@@ -146,6 +146,8 @@ generated_sources = [
   "implementation/layoutable_accessor.cpp",
   "implementation/lazy_build_accessor.cpp",
   "implementation/lazy_for_each_ops_accessor.cpp",
+  "implementation/lazy_grid_layout_attribute_modifier.cpp",
+  "implementation/lazyv_grid_layout_modifier.cpp",
   "implementation/letter_spacing_style_accessor.cpp",
   "implementation/level_order_extender_accessor.cpp",
   "implementation/life_cycle_accessor.cpp",

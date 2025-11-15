@@ -153,6 +153,7 @@ ohos_shared_library("ArkoalaNative_ark") {
 
   sources = [
     "koala_projects/arkoala-arkts/framework/native/src/DeserializerBase.cc",
+    "koala_projects/arkoala-arkts/framework/native/src/error_helper.cc",
     "koala_projects/arkoala-arkts/framework/native/src/events.cc",
     "koala_projects/arkoala-arkts/framework/native/src/generated/bridge_custom.cc",
     "koala_projects/arkoala-arkts/framework/native/src/generated/bridge_generated.cc",
