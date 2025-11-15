@@ -34,7 +34,9 @@ export class WaterFlowHandWritten {
             options.footerContent = undefined;
         } else {
             if (options.footerContent !== undefined) {
-                ArkUIAniModule._SetWaterFlowFooterContent(node.getPeer().peer.ptr, options.footerContent!.getNodePtr()!);
+                const peerPtr = node.getPeer().peer.ptr;
+                const footerNodePtr = options.footerContent!.getNodePtr()!;
+                ArkUIAniModule._SetWaterFlowFooterContent(peerPtr, footerNodePtr);
                 options.footer = undefined;
             } else if (options.footer !== undefined) {
                 let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
