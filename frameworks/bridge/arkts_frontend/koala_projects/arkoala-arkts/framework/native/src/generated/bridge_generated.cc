@@ -28646,6 +28646,33 @@ void impl_DrawingRenderingContext_setSize(Ark_NativePointer thisPtr, KSerializer
         GetAccessors()->getDrawingRenderingContextAccessor()->setSize(self, static_cast<Ark_Size*>(&sizeValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(DrawingRenderingContext_setSize, Ark_NativePointer, KSerializerBuffer, int32_t)
+KInteropReturnBuffer impl_DrawingRenderingContext_getCanvas(Ark_NativePointer thisPtr) {
+        Ark_DrawingRenderingContext self = reinterpret_cast<Ark_DrawingRenderingContext>(thisPtr);
+        const auto &retValue = GetAccessors()->getDrawingRenderingContextAccessor()->getCanvas(self);
+        SerializerBase _retSerializer {};
+        if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+            const auto retValueTmpValue = retValue.value;
+            drawing_Canvas_serializer::write(_retSerializer, retValueTmpValue);
+        } else {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+        }
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(DrawingRenderingContext_getCanvas, KInteropReturnBuffer, Ark_NativePointer)
+void impl_DrawingRenderingContext_setCanvas(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_DrawingRenderingContext self = reinterpret_cast<Ark_DrawingRenderingContext>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto canvasValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_drawing_Canvas canvasValueTempTmpBuf = {};
+        canvasValueTempTmpBuf.tag = canvasValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((canvasValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            canvasValueTempTmpBuf.value = static_cast<Ark_drawing_Canvas>(drawing_Canvas_serializer::read(thisDeserializer));
+        }
+        Opt_drawing_Canvas canvasValueTemp = canvasValueTempTmpBuf;;
+        GetAccessors()->getDrawingRenderingContextAccessor()->setCanvas(self, static_cast<Opt_drawing_Canvas*>(&canvasValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(DrawingRenderingContext_setCanvas, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_Boolean impl_EnvironmentBackend_isAccessibilityEnabled() {
         return GetAccessors()->getEnvironmentBackendAccessor()->isAccessibilityEnabled();
 }
