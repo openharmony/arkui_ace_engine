@@ -1586,13 +1586,12 @@ export class UIContextImpl extends UIContext {
         return ArkUIAniModule._Common_getWindowName(this.instanceId_);
     }
     public getWindowWidthBreakpoint(): WidthBreakpoint {
-
-        return this.getWindowWidthBreakpoint_serialize() as WidthBreakpoint;
-
+        let ret = ArkUIAniModule._Common_getWindowWidthBreakpoint();
+        return ret as WidthBreakpoint;
     }
     public getWindowHeightBreakpoint(): HeightBreakpoint {
-      return this.getWindowHeightBreakpoint_serialize() as HeightBreakpoint;
-
+        let ret = ArkUIAniModule._Common_getWindowHeightBreakpoint();
+        return ret as HeightBreakpoint;
     }
     public vp2px(value: double): double {
          return ArkUIAniModule._Common_vp2px(value, this.instanceId_);
