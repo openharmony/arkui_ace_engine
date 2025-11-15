@@ -16,7 +16,10 @@ import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
 config("drawable_config") {
-  include_dirs = [ "${ace_root}/interfaces/inner_api/drawable" ]
+  include_dirs = [
+    "${ace_root}/interfaces/inner_api/drawable",
+    "${ace_root}/frameworks",
+  ]
 }
 
 ohos_shared_library("drawable_inner_ani") {
