@@ -620,6 +620,7 @@ public:
         JSClass<JSWebConsoleLog>::CustomMethod("getMessage", &JSWebConsoleLog::GetLog);
         JSClass<JSWebConsoleLog>::CustomMethod("getMessageLevel", &JSWebConsoleLog::GetLogLevel);
         JSClass<JSWebConsoleLog>::CustomMethod("getSourceId", &JSWebConsoleLog::GetSourceId);
+        JSClass<JSWebConsoleLog>::CustomMethod("getSource", &JSWebConsoleLog::GetSource);
         JSClass<JSWebConsoleLog>::Bind(globalObj, &JSWebConsoleLog::Constructor, &JSWebConsoleLog::Destructor);
     }
 
@@ -653,6 +654,13 @@ public:
     void GetSourceId(const JSCallbackInfo& args)
     {
         auto code = JSVal(ToJSValue(message_->GetSourceId()));
+        auto descriptionRef = JSRef<JSVal>::Make(code);
+        args.SetReturnValue(descriptionRef);
+    }
+
+    void GetSource(const JSCallbackInfo& args)
+    {
+        auto code = JSVal(ToJSValue(message_->GetSource()));
         auto descriptionRef = JSRef<JSVal>::Make(code);
         args.SetReturnValue(descriptionRef);
     }

@@ -100,6 +100,8 @@ public:
 
     std::string GetSourceId() override;
 
+    int GetSource() override;
+
 private:
     std::shared_ptr<OHOS::NWeb::NWebConsoleLog> message_;
 };
