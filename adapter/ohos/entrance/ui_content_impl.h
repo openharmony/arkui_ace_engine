@@ -431,11 +431,11 @@ public:
     void EnableContainerModalCustomGesture(bool enable) override;
 
     void AddKeyFrameAnimateEndCallback(const std::function<void()>& callback) override;
-    void AddKeyFrameCanvasNodeCallback(const std::function<
-        void(std::shared_ptr<Rosen::RSCanvasNode>& canvasNode,
+    void AddKeyFrameNodeCallback(const std::function<
+        void(std::shared_ptr<Rosen::RSWindowKeyFrameNode>& keyFrameNode,
             std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction)>& callback) override;
 
-    void LinkKeyFrameCanvasNode(std::shared_ptr<OHOS::Rosen::RSCanvasNode>& canvasNode) override;
+    void LinkKeyFrameNode(std::shared_ptr<Rosen::RSWindowKeyFrameNode>& keyFrameNode) override;
     void CacheAnimateInfo(const ViewportConfig& config,
         OHOS::Rosen::WindowSizeChangeReason reason,
         const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction,
@@ -571,9 +571,9 @@ protected:
     std::mutex setAppWindowIconMutex_;
     uint64_t listenedDisplayId_ = 0;
     OHOS::Rosen::WindowSizeChangeReason lastReason_ = OHOS::Rosen::WindowSizeChangeReason::UNDEFINED;
-    std::function<void(std::shared_ptr<Rosen::RSCanvasNode>& canvasNode,
+    std::function<void(std::shared_ptr<Rosen::RSWindowKeyFrameNode>& keyFrameNode,
         std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction)> addNodeCallback_ = nullptr;
-    std::shared_ptr<Rosen::RSCanvasNode> canvasNode_ = nullptr;
+    std::shared_ptr<Rosen::RSWindowKeyFrameNode>& keyFrameNode_ = nullptr;
     std::atomic<bool> cachedAnimateFlag_ = false;
     ViewportConfig cachedConfig_;
     OHOS::Rosen::WindowSizeChangeReason cachedReason_ = OHOS::Rosen::WindowSizeChangeReason::UNDEFINED;
