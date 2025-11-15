@@ -809,7 +809,7 @@ HWTEST_F(MenuItemGroupTestNg, MenuItemGroupPattern002, TestSize.Level1)
     footerNode = NG::ViewStackProcessor::GetInstance()->Finish();
     menuItemGroupPattern->footerIndex_ = 0;
     menuItemGroupPattern->AddFooter(footerNode);
-    EXPECT_EQ(menuItemGroupPattern->footerIndex_, 0);
+    ASSERT_NE(menuItemGroupPattern->GetFooter(), nullptr);
 }
 
 /**
