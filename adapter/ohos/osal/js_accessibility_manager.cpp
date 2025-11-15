@@ -6923,6 +6923,8 @@ void JsAccessibilityManager::SearchWebElementInfoByAccessibilityId(const int64_t
     }
 
     SearchWebElementInfoByAccessibilityIdNG(elementId, mode, infos, ngPipeline, webPattern);
+    TAG_LOGD(AceLogTag::ACE_WEB, "SearchWebElementInfo infos.size: %{public}zu",
+        infos.size());
     SetSearchElementInfoByAccessibilityIdResult(callback, std::move(infos), requestId, true);
 }
 
