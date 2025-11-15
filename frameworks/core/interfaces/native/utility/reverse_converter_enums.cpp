@@ -640,6 +640,7 @@ void AssignArkValue(Ark_StickyStyle& dst, const V2::StickyStyle& src)
         case V2::StickyStyle::NONE: dst = ARK_STICKY_STYLE_NONE; break;
         case V2::StickyStyle::HEADER: dst = ARK_STICKY_STYLE_HEADER; break;
         case V2::StickyStyle::FOOTER: dst = ARK_STICKY_STYLE_FOOTER; break;
+        case V2::StickyStyle::BOTH: dst = ARK_STICKY_STYLE_BOTH; break;
         default: dst = static_cast<Ark_StickyStyle>(-1);
             LOGE("Unexpected enum value in V2::StickyStyle: %{public}d", src);
     }

@@ -897,6 +897,7 @@ void AssignCast(std::optional<V2::StickyStyle>& dst, const Ark_StickyStyle& src)
         case ARK_STICKY_STYLE_NONE: dst = V2::StickyStyle::NONE; break;
         case ARK_STICKY_STYLE_HEADER: dst = V2::StickyStyle::HEADER; break;
         case ARK_STICKY_STYLE_FOOTER: dst = V2::StickyStyle::FOOTER; break;
+        case ARK_STICKY_STYLE_BOTH: dst = V2::StickyStyle::BOTH; break;
         default: LOGE("Unexpected enum value in Ark_StickyStyle: %{public}d", src);
     }
 }
